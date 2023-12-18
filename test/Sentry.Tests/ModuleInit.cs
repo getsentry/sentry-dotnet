@@ -2,8 +2,12 @@
 public static class ModuleInit
 {
     [ModuleInitializer]
+    [SuppressMessage("Usage", "CA2255:The \'ModuleInitializer\' attribute should not be used in libraries")]
     public static void Init()
     {
+        CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
+        CultureInfo.CurrentUICulture = new CultureInfo("en-US");
+
         VerifierSettings.IgnoreMembers<SentryException>(_ => _.Module, _ => _.ThreadId);
 
         VerifierSettings.MemberConverter<Breadcrumb, IReadOnlyDictionary<string, string>>(

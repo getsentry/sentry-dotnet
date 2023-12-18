@@ -24,6 +24,8 @@ public abstract class HttpTransportBase
     // Using string instead of SentryId here so that we can use Interlocked.Exchange(...).
     private string? _lastDiscardedSessionInitId;
 
+    private string _typeName;
+
     /// <summary>
     /// Constructor for this class.
     /// </summary>
@@ -37,6 +39,7 @@ public abstract class HttpTransportBase
         _options = options;
         _clock = clock ?? SystemClock.Clock;
         _getEnvironmentVariable = getEnvironmentVariable ?? options.SettingLocator.GetEnvironmentVariable;
+        _typeName = GetType().Name;
     }
 
     // Keep track of rate limits and their expiry dates.
@@ -66,20 +69,22 @@ public abstract class HttpTransportBase
         if (clientReport != null)
         {
             envelopeItems.Add(EnvelopeItem.FromClientReport(clientReport));
-            _options.LogDebug("Attached client report to envelope {0}.", eventId);
+            _options.LogDebug("{0}: Attached client report to envelope {1}.", _typeName, eventId);
         }
 
         if (envelopeItems.Count == 0)
         {
             if (_options.SendClientReports)
             {
-                _options.LogInfo("Envelope {0} was discarded because all contained items are rate-limited " +
+                _options.LogInfo("{0}: Envelope '{1}' was discarded because all contained items are rate-limited " +
                                  "and there are no client reports to send.",
+                    _typeName,
                     eventId);
             }
             else
             {
-                _options.LogInfo("Envelope {0} was discarded because all contained items are rate-limited.",
+                _options.LogInfo("{0}: Envelope '{1}' was discarded because all contained items are rate-limited.",
+                    _typeName,
                     eventId);
             }
         }
@@ -99,7 +104,8 @@ public abstract class HttpTransportBase
                 .RecordDiscardedEvent(DiscardReason.RateLimitBackoff, item.DataCategory);
 
             _options.LogDebug(
-                "Envelope item of type {0} was discarded because it's rate-limited.",
+                "{0}: Envelope item of type {1} was discarded because it's rate-limited.",
+                _typeName,
                 item.TryGetType());
 
             // Check if session update with init=true
@@ -111,7 +117,8 @@ public abstract class HttpTransportBase
                 _lastDiscardedSessionInitId = discardedSessionUpdate.Id.ToString();
 
                 _options.LogDebug(
-                    "Discarded envelope item containing initial session update (SID: {0}).",
+                    "{0}: Discarded envelope item containing initial session update (SID: {1}).",
+                    _typeName,
                     discardedSessionUpdate.Id);
             }
 
@@ -125,7 +132,8 @@ public abstract class HttpTransportBase
             // note: attachment drops are not currently counted in discarded events
 
             _options.LogWarning(
-                "Attachment '{0}' dropped because it's too large ({1} bytes).",
+                "{0}: Attachment '{1}' dropped because it's too large ({2} bytes).",
+                _typeName,
                 item.TryGetFileName(),
                 item.TryGetLength());
 
@@ -146,7 +154,8 @@ public abstract class HttpTransportBase
             items.Add(modifiedEnvelopeItem);
 
             _options.LogDebug(
-                "Promoted envelope item with session update to initial following a discarded update (SID: {0}).",
+                "{0}: Promoted envelope item with session update to initial following a discarded update (SID: {1}).",
+                _typeName,
                 sessionUpdate.Id);
 
             return;
@@ -162,7 +171,7 @@ public abstract class HttpTransportBase
     /// <param name="envelope">The envelope.</param>
     /// <returns>An HTTP request message, with the proper headers and body set.</returns>
     /// <exception cref="InvalidOperationException">Throws if the DSN is not set in the options.</exception>
-    protected internal HttpRequestMessage CreateRequest(Envelope envelope)
+    protected internal virtual HttpRequestMessage CreateRequest(Envelope envelope)
     {
         if (string.IsNullOrWhiteSpace(_options.Dsn))
         {
@@ -302,22 +311,22 @@ public abstract class HttpTransportBase
         {
             if (eventId == null)
             {
-                _options.LogInfo("Envelope successfully sent.", eventId);
+                _options.LogInfo("{0}: Envelope successfully sent.", _typeName);
             }
             else
             {
-                _options.LogInfo("Envelope '{0}' successfully sent.", eventId);
+                _options.LogInfo("{0}: Envelope '{1}' successfully sent.", _typeName, eventId);
             }
         }
         else
         {
             if (eventId == null)
             {
-                _options.LogDebug("Envelope successfully sent. Content: {1}", eventId, payload);
+                _options.LogDebug("{0}: Envelope successfully sent. Content: {1}", _typeName, payload);
             }
             else
             {
-                _options.LogDebug("Envelope '{0}' successfully sent. Content: {1}", eventId, payload);
+                _options.LogDebug("{0}: Envelope '{1}' successfully sent. Content: {2}", _typeName, eventId, payload);
             }
         }
     }
@@ -347,17 +356,17 @@ public abstract class HttpTransportBase
         if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Debug) is true)
         {
             var payload = envelope.SerializeToString(_options.DiagnosticLogger, _clock);
-            _options.LogDebug("Failed envelope '{0}' has payload:\n{1}\n", eventId, payload);
+            _options.LogDebug("{0}: Failed envelope '{1}' has payload:\n{2}\n", _typeName, eventId, payload);
 
             // SDK is in debug mode, and envelope was too large. To help troubleshoot:
             const string persistLargeEnvelopePathEnvVar = "SENTRY_KEEP_LARGE_ENVELOPE_PATH";
             if (response.StatusCode == HttpStatusCode.RequestEntityTooLarge
                 && _getEnvironmentVariable(persistLargeEnvelopePathEnvVar) is { } destinationDirectory)
             {
-                _options.DiagnosticLogger?
-                    .LogDebug("Environment variable '{0}' set. Writing envelope to {1}",
-                        persistLargeEnvelopePathEnvVar,
-                        destinationDirectory);
+                _options.LogDebug("{0}: Environment variable '{1}' set. Writing envelope to {2}",
+                    _typeName,
+                    persistLargeEnvelopePathEnvVar,
+                    destinationDirectory);
 
                 var destination = Path.Combine(destinationDirectory, "envelope_too_large",
                     (eventId ?? SentryId.Create()).ToString());
@@ -370,8 +379,8 @@ public abstract class HttpTransportBase
                 {
                     envelope.Serialize(envelopeFile, _options.DiagnosticLogger);
                     envelopeFile.Flush();
-                    _options.LogInfo("Envelope's {0} bytes written to: {1}",
-                        envelopeFile.Length, destination);
+                    _options.LogInfo("{0}: Envelope's {1} bytes written to: {2}",
+                        _typeName, envelopeFile.Length, destination);
                 }
             }
         }
@@ -403,17 +412,17 @@ public abstract class HttpTransportBase
         {
             var payload = await envelope
                 .SerializeToStringAsync(_options.DiagnosticLogger, _clock, cancellationToken).ConfigureAwait(false);
-            _options.LogDebug("Failed envelope '{0}' has payload:\n{1}\n", eventId, payload);
+            _options.LogDebug("{0}: Failed envelope '{1}' has payload:\n{2}\n", _typeName, eventId, payload);
 
             // SDK is in debug mode, and envelope was too large. To help troubleshoot:
             const string persistLargeEnvelopePathEnvVar = "SENTRY_KEEP_LARGE_ENVELOPE_PATH";
             if (response.StatusCode == HttpStatusCode.RequestEntityTooLarge
                 && _getEnvironmentVariable(persistLargeEnvelopePathEnvVar) is { } destinationDirectory)
             {
-                _options.DiagnosticLogger?
-                    .LogDebug("Environment variable '{0}' set. Writing envelope to {1}",
-                        persistLargeEnvelopePathEnvVar,
-                        destinationDirectory);
+                _options.LogDebug("{0}: Environment variable '{1}' set. Writing envelope to {2}",
+                    _typeName,
+                    persistLargeEnvelopePathEnvVar,
+                    destinationDirectory);
 
                 var destination = Path.Combine(destinationDirectory, "envelope_too_large",
                     (eventId ?? SentryId.Create()).ToString());
@@ -431,8 +440,8 @@ public abstract class HttpTransportBase
                         .SerializeAsync(envelopeFile, _options.DiagnosticLogger, cancellationToken)
                         .ConfigureAwait(false);
                     await envelopeFile.FlushAsync(cancellationToken).ConfigureAwait(false);
-                    _options.LogInfo("Envelope's {0} bytes written to: {1}",
-                        envelopeFile.Length, destination);
+                    _options.LogInfo("{0}: Envelope's {1} bytes written to: {2}",
+                        _typeName, envelopeFile.Length, destination);
                 }
             }
         }
@@ -460,9 +469,8 @@ public abstract class HttpTransportBase
 
     private void LogFailure(string responseString, HttpStatusCode responseStatusCode, SentryId? eventId)
     {
-        _options.Log(SentryLevel.Error,
-            "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}.",
-            null,
+        _options.LogError("{0}: Sentry rejected the envelope '{1}'. Status code: {2}. Error detail: {3}.",
+            _typeName,
             eventId,
             responseStatusCode,
             responseString);
@@ -478,9 +486,8 @@ public abstract class HttpTransportBase
             responseJson.GetPropertyOrNull("causes")?.EnumerateArray().Select(j => j.GetString()).ToArray()
             ?? Array.Empty<string>();
 
-        _options.Log(SentryLevel.Error,
-            "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}. Error causes: {3}.",
-            null,
+        _options.LogError("{0}: Sentry rejected the envelope '{1}'. Status code: {2}. Error detail: {3}. Error causes: {4}.",
+            _typeName,
             eventId,
             responseStatusCode,
             errorMessage,

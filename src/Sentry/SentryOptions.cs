@@ -59,12 +59,18 @@ public class SentryOptions
         }
     }
 #else
+    private bool? _isGlobalModeEnabled;
+
     /// <summary>
     /// Specifies whether to use global scope management mode.
     /// Should be <c>true</c> for client applications and <c>false</c> for server applications.
     /// The default is <c>false</c>. The default for Blazor WASM, MAUI, and Mobile apps is <c>true</c>.
     /// </summary>
-    public bool IsGlobalModeEnabled { get; set; } = Runtime.Current.IsBrowserWasm();
+    public bool IsGlobalModeEnabled
+    {
+        get => _isGlobalModeEnabled ??= Runtime.Current.IsBrowserWasm();
+        set => _isGlobalModeEnabled = value;
+    }
 #endif
 
     /// <summary>
@@ -88,16 +94,28 @@ public class SentryOptions
     /// </remarks>
     public ITransport? Transport { get; set; }
 
-    internal IClientReportRecorder ClientReportRecorder { get; set; }
+    private Lazy<IClientReportRecorder> _clientReportRecorder;
 
-    internal ISentryStackTraceFactory? SentryStackTraceFactory { get; set; }
+    internal IClientReportRecorder ClientReportRecorder
+    {
+        get => _clientReportRecorder.Value;
+        set => _clientReportRecorder = new Lazy<IClientReportRecorder>(() => value);
+    }
+
+    private Lazy<ISentryStackTraceFactory> _sentryStackTraceFactory;
+
+    internal ISentryStackTraceFactory SentryStackTraceFactory
+    {
+        get => _sentryStackTraceFactory.Value;
+        set => _sentryStackTraceFactory = new Lazy<ISentryStackTraceFactory>(() => value);
+    }
 
     internal int SentryVersion { get; } = ProtocolVersion;
 
     /// <summary>
     /// A list of exception processors
     /// </summary>
-    internal List<ISentryEventExceptionProcessor>? ExceptionProcessors { get; set; }
+    internal List<(Type Type, Lazy<ISentryEventExceptionProcessor> Lazy)> ExceptionProcessors { get; set; }
 
     /// <summary>
     /// A list of transaction processors
@@ -107,27 +125,80 @@ public class SentryOptions
     /// <summary>
     /// A list of event processors
     /// </summary>
-    internal List<ISentryEventProcessor>? EventProcessors { get; set; }
+    internal List<(Type Type, Lazy<ISentryEventProcessor> Lazy)> EventProcessors { get; set; }
 
     /// <summary>
     /// A list of providers of <see cref="ISentryEventProcessor"/>
     /// </summary>
-    internal List<Func<IEnumerable<ISentryEventProcessor>>>? EventProcessorsProviders { get; set; }
+    internal List<Func<IEnumerable<ISentryEventProcessor>>> EventProcessorsProviders { get; set; }
 
     /// <summary>
     /// A list of providers of <see cref="ISentryTransactionProcessor"/>
     /// </summary>
-    internal List<Func<IEnumerable<ISentryTransactionProcessor>>>? TransactionProcessorsProviders { get; set; }
+    internal List<Func<IEnumerable<ISentryTransactionProcessor>>> TransactionProcessorsProviders { get; set; }
 
     /// <summary>
     /// A list of providers of <see cref="ISentryEventExceptionProcessor"/>
     /// </summary>
-    internal List<Func<IEnumerable<ISentryEventExceptionProcessor>>>? ExceptionProcessorsProviders { get; set; }
+    internal List<Func<IEnumerable<ISentryEventExceptionProcessor>>> ExceptionProcessorsProviders { get; set; }
+
+    private DefaultIntegrations _defaultIntegrations;
 
     /// <summary>
     /// A list of integrations to be added when the SDK is initialized.
     /// </summary>
-    internal List<ISdkIntegration>? Integrations { get; set; }
+    internal IEnumerable<ISdkIntegration> Integrations
+    {
+        get
+        {
+            // Auto-session tracking to be the first to run
+            if ((_defaultIntegrations & DefaultIntegrations.AutoSessionTrackingIntegration) != 0)
+            {
+                yield return new AutoSessionTrackingIntegration();
+            }
+
+            if ((_defaultIntegrations & DefaultIntegrations.AppDomainUnhandledExceptionIntegration) != 0)
+            {
+                yield return new AppDomainUnhandledExceptionIntegration();
+            }
+
+            if ((_defaultIntegrations & DefaultIntegrations.AppDomainProcessExitIntegration) != 0)
+            {
+                yield return new AppDomainProcessExitIntegration();
+            }
+
+            if ((_defaultIntegrations & DefaultIntegrations.UnobservedTaskExceptionIntegration) != 0)
+            {
+                yield return new UnobservedTaskExceptionIntegration();
+            }
+
+#if NETFRAMEWORK
+            if ((_defaultIntegrations & DefaultIntegrations.NetFxInstallationsIntegration) != 0)
+            {
+                yield return new NetFxInstallationsIntegration();
+            }
+#endif
+
+#if HAS_DIAGNOSTIC_INTEGRATION
+            if ((_defaultIntegrations & DefaultIntegrations.SentryDiagnosticListenerIntegration) != 0)
+            {
+                yield return new SentryDiagnosticListenerIntegration();
+            }
+#endif
+
+#if NET5_0_OR_GREATER && !__MOBILE__
+            if ((_defaultIntegrations & DefaultIntegrations.WinUiUnhandledExceptionIntegration) != 0)
+            {
+                yield return new WinUIUnhandledExceptionIntegration();
+            }
+#endif
+
+            foreach (var integration in _integrations)
+            {
+                yield return integration;
+            }
+        }
+    }
 
     internal List<IExceptionFilter>? ExceptionFilters { get; set; } = new();
 
@@ -142,6 +213,12 @@ public class SentryOptions
     public IBackgroundWorker? BackgroundWorker { get; set; }
 
     internal ISentryHttpClientFactory? SentryHttpClientFactory { get; set; }
+
+    internal HttpClient GetHttpClient()
+    {
+        var factory = SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
+        return factory.Create(this);
+    }
 
     /// <summary>
     /// Scope state processor.
@@ -226,6 +303,7 @@ public class SentryOptions
     public int MaxBreadcrumbs { get; set; } = DefaultMaxBreadcrumbs;
 
     private float? _sampleRate;
+
     /// <summary>
     /// The rate to sample error and crash events.
     /// </summary>
@@ -244,8 +322,10 @@ public class SentryOptions
         {
             if (value is > 1 or <= 0)
             {
-                throw new InvalidOperationException($"The value {value} is not valid. Use null to disable or values between 0.01 (inclusive) and 1.0 (exclusive) ");
+                throw new InvalidOperationException(
+                    $"The value {value} is not valid. Use null to disable or values between 0.01 (inclusive) and 1.0 (exclusive) ");
             }
+
             _sampleRate = value;
         }
     }
@@ -302,10 +382,12 @@ public class SentryOptions
     public string? Environment { get; set; }
 
     private string? _dsn;
+
     /// <summary>
     /// The Data Source Name of a given project in Sentry.
     /// </summary>
-    public string? Dsn {
+    public string? Dsn
+    {
         get => _dsn;
         set
         {
@@ -319,7 +401,7 @@ public class SentryOptions
 
     private readonly Lazy<string> _sentryBaseUrl;
 
-    internal bool IsSentryRequest(string? requestUri)=>
+    internal bool IsSentryRequest(string? requestUri) =>
         !string.IsNullOrEmpty(requestUri) && IsSentryRequest(new Uri(requestUri));
 
     internal bool IsSentryRequest(Uri? requestUri)
@@ -336,17 +418,6 @@ public class SentryOptions
     private Func<SentryEvent, Hint, SentryEvent?>? _beforeSend;
 
     internal Func<SentryEvent, Hint, SentryEvent?>? BeforeSendInternal => _beforeSend;
-
-    /// <summary>
-    /// Configures a callback to invoke before sending an event to Sentry
-    /// </summary>
-    /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
-    [Obsolete("This property will be removed in a future version. Use SetBeforeSend instead.")]
-    public Func<SentryEvent, SentryEvent?>? BeforeSend
-    {
-        get => null;
-        set => _beforeSend = value is null ? null : (e, _) => value(e);
-    }
 
     /// <summary>
     /// Configures a callback function to be invoked before sending an event to Sentry
@@ -379,20 +450,6 @@ public class SentryOptions
     internal Func<Transaction, Hint, Transaction?>? BeforeSendTransactionInternal => _beforeSendTransaction;
 
     /// <summary>
-    /// A callback to invoke before sending a transaction to Sentry
-    /// </summary>
-    /// <remarks>
-    /// The return of this transaction will be sent to Sentry. This allows the application
-    /// a chance to inspect and/or modify the transaction before it's sent. If the transaction
-    /// should not be sent at all, return null from the callback.
-    /// </remarks>
-    [Obsolete("This property will be removed in a future version. Use SetBeforeSendTransaction instead.")]
-    public Func<Transaction, Transaction?>? BeforeSendTransaction {
-        get => null;
-        set => _beforeSendTransaction = value is null ? null : (e, _) => value(e);
-    }
-
-    /// <summary>
     /// Configures a callback to invoke before sending a transaction to Sentry
     /// </summary>
     /// <param name="beforeSendTransaction">The callback</param>
@@ -413,16 +470,6 @@ public class SentryOptions
     private Func<Breadcrumb, Hint, Breadcrumb?>? _beforeBreadcrumb;
 
     internal Func<Breadcrumb, Hint, Breadcrumb?>? BeforeBreadcrumbInternal => _beforeBreadcrumb;
-
-    /// <summary>
-    /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
-    /// </summary>
-    /// <see cref="SetBeforeBreadcrumb(Func{Breadcrumb, Hint, Breadcrumb?})"/>
-    [Obsolete("This property will be removed in a future version. Use SetBeforeBreadcrumb instead.")]
-    public Func<Breadcrumb, Breadcrumb?>? BeforeBreadcrumb {
-        get => null;
-        set => _beforeBreadcrumb = value is null ? null : (e, _) => value(e);
-    }
 
     /// <summary>
     /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
@@ -460,8 +507,10 @@ public class SentryOptions
         {
             if (value < 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(value), value, "At least 1 item must be allowed in the queue.");
+                throw new ArgumentOutOfRangeException(nameof(value), value,
+                    "At least 1 item must be allowed in the queue.");
             }
+
             _maxQueueItems = value;
         }
     }
@@ -479,7 +528,8 @@ public class SentryOptions
         {
             if (value < 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(value), value, "At least 1 item must be allowed in the cache.");
+                throw new ArgumentOutOfRangeException(nameof(value), value,
+                    "At least 1 item must be allowed in the cache.");
             }
 
             _maxCacheItems = value;
@@ -515,7 +565,7 @@ public class SentryOptions
     /// By default accepts all available compression methods supported by the platform
     /// </remarks>
     public DecompressionMethods DecompressionMethods { get; set; }
-        // Note the ~ enabling all bits
+    // Note the ~ enabling all bits
         = ~DecompressionMethods.None;
 
     /// <summary>
@@ -547,26 +597,6 @@ public class SentryOptions
     /// An optional web proxy
     /// </summary>
     public IWebProxy? HttpProxy { get; set; }
-
-    /// <summary>
-    /// private field to hold the <see cref="CreateHttpClientHandler"/>, since a typecheck or cast won't work here.
-    /// </summary>
-    private Func<HttpClientHandler>? _createClientHandler = null;
-
-    /// <summary>
-    /// Creates the inner most <see cref="HttpClientHandler"/>.
-    /// Deprecated in favor of <see cref="CreateHttpMessageHandler"/>.
-    /// </summary>
-    [Obsolete("Use CreateHttpMessageHandler instead")]
-    public Func<HttpClientHandler>? CreateHttpClientHandler
-    {
-        get => _createClientHandler;
-        set
-        {
-            CreateHttpMessageHandler = value;
-            _createClientHandler = value;
-        }
-    }
 
     /// <summary>
     /// Creates the inner most <see cref="HttpMessageHandler"/>.
@@ -617,7 +647,8 @@ public class SentryOptions
         {
             if (value is null)
             {
-                _diagnosticLogger?.LogDebug("Sentry will not emit SDK debug messages because debug mode has been turned off.");
+                _diagnosticLogger?.LogDebug(
+                    "Sentry will not emit SDK debug messages because debug mode has been turned off.");
             }
             else
             {
@@ -626,17 +657,6 @@ public class SentryOptions
 
             _diagnosticLogger = value;
         }
-    }
-
-    /// <summary>
-    /// Whether or not to include referenced assemblies in each event sent to sentry. Defaults to <see langword="true"/>.
-    /// </summary>
-    [Obsolete("Use ReportAssembliesMode instead", error: false)]
-    public bool ReportAssemblies
-    {
-        // Note: note marking this as error to prevent breaking changes, but this is now a wrapper around ReportAssembliesMode
-        get => ReportAssembliesMode != ReportAssembliesMode.None;
-        set => ReportAssembliesMode = value ? ReportAssembliesMode.Version : ReportAssembliesMode.None;
     }
 
     /// <summary>
@@ -662,28 +682,33 @@ public class SentryOptions
     /// <para>The SDK will only capture HTTP Client errors if it is enabled.</para>
     /// <para><see cref="FailedRequestStatusCodes"/> can be used to configure which requests will be treated as failed.</para>
     /// <para>Also <see cref="FailedRequestTargets"/> can be used to filter to match only certain request URLs.</para>
-    /// <para>Defaults to false due to PII reasons.</para>
+    /// <para>Defaults to true.</para>
     /// </summary>
-    public bool CaptureFailedRequests { get; set; }
+    public bool CaptureFailedRequests { get; set; } = true;
 
     /// <summary>
     /// <para>The SDK will only capture HTTP Client errors if the HTTP Response status code is within these defined ranges.</para>
     /// <para>Defaults to 500-599 (Server error responses only).</para>
     /// </summary>
-    public IList<HttpStatusCodeRange> FailedRequestStatusCodes { get; set; } = new List<HttpStatusCodeRange> { (500, 599) };
+    public IList<HttpStatusCodeRange> FailedRequestStatusCodes { get; set; } = new List<HttpStatusCodeRange>
+    {
+        (500, 599)
+    };
 
     // The default failed request target list will match anything, but adding to the list should clear that.
-    private IList<SubstringOrRegexPattern> _failedRequestTargets = new AutoClearingList<SubstringOrRegexPattern>(
-        new[] {new SubstringOrRegexPattern(".*")}, clearOnNextAdd: true);
+    private Lazy<IList<SubstringOrRegexPattern>> _failedRequestTargets = new(() =>
+        new AutoClearingList<SubstringOrRegexPattern>(
+            new[] { new SubstringOrRegexPattern(".*") }, clearOnNextAdd: true));
 
     /// <summary>
     /// <para>The SDK will only capture HTTP Client errors if the HTTP Request URL is a match for any of the failedRequestsTargets.</para>
     /// <para>Targets may be URLs or Regular expressions.</para>
     /// <para>Matches "*." by default.</para>
     /// </summary>
-    public IList<SubstringOrRegexPattern> FailedRequestTargets {
-        get => _failedRequestTargets;
-        set => _failedRequestTargets = value.SetWithConfigBinding();
+    public IList<SubstringOrRegexPattern> FailedRequestTargets
+    {
+        get => _failedRequestTargets.Value;
+        set => _failedRequestTargets = new(value.SetWithConfigBinding);
     }
 
     /// <summary>
@@ -710,7 +735,11 @@ public class SentryOptions
     /// <remarks>
     /// If the key already exists in the event, it will not be overwritten by a default tag.
     /// </remarks>
-    public Dictionary<string, string> DefaultTags => _defaultTags ??= new Dictionary<string, string>();
+    public Dictionary<string, string> DefaultTags
+    {
+        get => _defaultTags ??= new Dictionary<string, string>();
+        internal set => _defaultTags = value;
+    }
 
     /// <summary>
     /// Indicates whether the performance feature is enabled, via any combination of
@@ -722,6 +751,12 @@ public class SentryOptions
         null => TracesSampler is not null || TracesSampleRate is > 0.0,
         true => TracesSampler is not null || TracesSampleRate is > 0.0 or null
     };
+
+    /// <summary>
+    /// Indicates whether profiling is enabled, via any combination of
+    /// <see cref="EnableTracing"/>, <see cref="TracesSampleRate"/>, or <see cref="TracesSampler"/>.
+    /// </summary>
+    internal bool IsProfilingEnabled => IsPerformanceMonitoringEnabled && ProfilesSampleRate > 0.0;
 
     /// <summary>
     /// Simplified option for enabling or disabling tracing.
@@ -801,6 +836,47 @@ public class SentryOptions
         }
     }
 
+    private double? _profilesSampleRate;
+
+    /// <summary>
+    /// The sampling rate for profiling is relative to <see cref="TracesSampleRate"/>.
+    /// Setting to 1.0 will profile 100% of sampled transactions.
+    /// <list type="table">
+    ///   <listheader>
+    ///     <term>Value</term>
+    ///     <description>Effect</description>
+    ///   </listheader>
+    ///   <item>
+    ///     <term><c>&gt;= 0.0 and &lt;=1.0</c></term>
+    ///     <description>
+    ///       A custom sample rate is. Values outside of this range are invalid.
+    ///       Setting to 0.0 will disable profiling.
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <term><c>null</c></term>
+    ///     <description>
+    ///       <b>The default setting.</b>
+    ///       At this time, this is equivalent to 0.0, i.e. disabling profiling, but that may change in the future.
+    ///     </description>
+    ///   </item>
+    /// </list>
+    /// </summary>
+    public double? ProfilesSampleRate
+    {
+        get => _profilesSampleRate;
+        set
+        {
+            if (value is < 0.0 or > 1.0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value,
+                    "The profiles sample rate must be between 0.0 and 1.0, inclusive.");
+            }
+
+            _profilesSampleRate = value;
+        }
+    }
+
     /// <summary>
     /// Custom delegate that returns sample rate dynamically for a specific transaction context.
     /// </summary>
@@ -814,11 +890,11 @@ public class SentryOptions
     public Func<TransactionSamplingContext, double?>? TracesSampler { get; set; }
 
     // The default propagation list will match anything, but adding to the list should clear that.
-    private IList<TracePropagationTarget> _tracePropagationTargets = new AutoClearingList<TracePropagationTarget>
-        (new[] { new TracePropagationTarget(".*") }, clearOnNextAdd: true);
+    private IList<SubstringOrRegexPattern> _tracePropagationTargets = new AutoClearingList<SubstringOrRegexPattern>
+        (new[] { new SubstringOrRegexPattern(".*") }, clearOnNextAdd: true);
 
     /// <summary>
-    /// A customizable list of <see cref="TracePropagationTarget"/> objects, each containing either a
+    /// A customizable list of <see cref="SubstringOrRegexPattern"/> objects, each containing either a
     /// substring or regular expression pattern that can be used to control which outgoing HTTP requests
     /// will have the <c>sentry-trace</c> and <c>baggage</c> headers propagated, for purposes of distributed tracing.
     /// The default value contains a single value of <c>.*</c>, which matches everything.
@@ -828,7 +904,7 @@ public class SentryOptions
     /// <remarks>
     /// Adding an item to the default list will clear the <c>.*</c> value automatically.
     /// </remarks>
-    public IList<TracePropagationTarget> TracePropagationTargets
+    public IList<SubstringOrRegexPattern> TracePropagationTargets
     {
         // NOTE: During configuration binding, .NET 6 and lower used to just call Add on the existing item.
         //       .NET 7 changed this to call the setter with an array that already starts with the old value.
@@ -840,6 +916,7 @@ public class SentryOptions
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
 
     private StackTraceMode? _stackTraceMode;
+    private readonly List<ISdkIntegration> _integrations = new();
 
     /// <summary>
     /// ATTENTION: This option will change how issues are grouped in Sentry!
@@ -868,7 +945,7 @@ public class SentryOptions
             catch (Exception ex)
             {
                 _stackTraceMode = StackTraceMode.Enhanced;
-                DiagnosticLogger?.LogError("Failed to get runtime, setting {0} to {1} ", ex, nameof(StackTraceMode), _stackTraceMode);
+                DiagnosticLogger?.LogError(ex, "Failed to get runtime, setting {0} to {1} ", nameof(StackTraceMode), _stackTraceMode);
             }
 
             return _stackTraceMode.Value;
@@ -954,17 +1031,6 @@ public class SentryOptions
     internal Instrumenter Instrumenter { get; set; } = Instrumenter.Sentry;
 
     /// <summary>
-    /// This property is no longer used.  It will be removed in a future version.
-    /// </summary>
-    /// <remarks>
-    /// All exceptions are now sent to Sentry, including <see cref="AggregateException"/>s.
-    /// The issue grouping rules in Sentry have been updated to accomodate "exception groups",
-    /// such as <see cref="AggregateException"/> in .NET.
-    /// </remarks>
-    [Obsolete("This property is no longer used.  It will be removed in a future version.")]
-    public bool KeepAggregateException { get; set; }
-
-    /// <summary>
     /// Adds a <see cref="JsonConverter"/> to be used when serializing or deserializing
     /// objects to JSON with this SDK.  For example, when custom context data might use
     /// a data type that requires custom serialization logic.
@@ -984,6 +1050,30 @@ public class SentryOptions
         }
 
         JsonExtensions.AddJsonConverter(converter);
+    }
+
+    /// <summary>
+    /// Configures a custom <see cref="JsonSerializerContext"/> to be used when serializing or deserializing
+    /// objects to JSON with this SDK.
+    /// </summary>
+    /// <param name="contextBuilder">
+    /// A builder that takes <see cref="JsonSerializerOptions"/> and returns a <see cref="JsonSerializerContext"/>
+    /// </param>
+    /// <remarks>
+    /// This currently modifies a static list, so will affect any instance of the Sentry SDK.
+    /// If that becomes problematic, we will have to refactor all serialization code to be
+    /// able to accept an instance of <see cref="SentryOptions"/>.
+    /// </remarks>
+    public void AddJsonSerializerContext<T>(Func<JsonSerializerOptions, T> contextBuilder)
+        where T : JsonSerializerContext
+    {
+        // protect against null because user may not have nullability annotations enabled
+        if (contextBuilder == null!)
+        {
+            throw new ArgumentNullException(nameof(contextBuilder));
+        }
+
+        JsonExtensions.AddJsonSerializerContext(contextBuilder);
     }
 
     /// <summary>
@@ -1027,6 +1117,23 @@ public class SentryOptions
     [EditorBrowsable(EditorBrowsableState.Never)]
     public Func<string, PEReader?>? AssemblyReader { get; set; }
 
+    /// <summary>
+    /// The Spotlight URL. Defaults to http://localhost:8969/stream
+    /// </summary>
+    /// <see cref="EnableSpotlight"/>
+    /// <see href="https://spotlightjs.com/"/>
+    public string SpotlightUrl { get; set; } = "http://localhost:8969/stream";
+
+    /// <summary>
+    /// Whether to enable Spotlight for local development.
+    /// </summary>
+    /// <remarks>
+    /// Only set this option to `true` while developing, not in production!
+    /// </remarks>
+    /// <see cref="SpotlightUrl"/>
+    /// <see href="https://spotlightjs.com/"/>
+    public bool EnableSpotlight { get; set; }
+
     internal SettingLocator SettingLocator { get; set; }
 
     /// <summary>
@@ -1037,69 +1144,73 @@ public class SentryOptions
     internal bool InitNativeSdks { get; set; } = true;
 
     /// <summary>
+    /// These callbacks are Called after Hub init and may be used, for example, to synchronize native contexts.
+    /// This list is cleared after init to avoid duplicate invocations when the same Options object is used again.
+    /// </summary>
+    internal List<Action<IHub>> PostInitCallbacks { get; set; } = new();
+
+    /// <summary>
     /// Creates a new instance of <see cref="SentryOptions"/>
     /// </summary>
     public SentryOptions()
     {
         SettingLocator = new SettingLocator(this);
 
-        EventProcessorsProviders = new() {
-            () => EventProcessors ?? Enumerable.Empty<ISentryEventProcessor>()
-        };
-
         TransactionProcessorsProviders = new() {
             () => TransactionProcessors ?? Enumerable.Empty<ISentryTransactionProcessor>()
         };
 
-        ExceptionProcessorsProviders = new() {
-            () => ExceptionProcessors ?? Enumerable.Empty<ISentryEventExceptionProcessor>()
-        };
+        _clientReportRecorder = new Lazy<IClientReportRecorder>(() => new ClientReportRecorder(this));
 
-        ClientReportRecorder = new ClientReportRecorder(this);
-
-        SentryStackTraceFactory = new SentryStackTraceFactory(this);
+        _sentryStackTraceFactory = new(() => new SentryStackTraceFactory(this));
 
         ISentryStackTraceFactory SentryStackTraceFactoryAccessor() => SentryStackTraceFactory;
 
         EventProcessors = new(){
             // De-dupe to be the first to run
-            new DuplicateEventDetectionEventProcessor(this),
-            new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor)
+            (typeof(DuplicateEventDetectionEventProcessor), new(() => new DuplicateEventDetectionEventProcessor(this))),
+            (typeof(MainSentryEventProcessor), new(() => new MainSentryEventProcessor(this, SentryStackTraceFactoryAccessor))),
+        };
+
+        EventProcessorsProviders = new() {
+            () => EventProcessors.Select(x => x.Item2.Value)
         };
 
         ExceptionProcessors = new(){
-            new MainExceptionProcessor(this, SentryStackTraceFactoryAccessor)
+            ( typeof(MainExceptionProcessor), new(() => new MainExceptionProcessor(this, SentryStackTraceFactoryAccessor)) )
         };
 
-        Integrations = new() {
-            // Auto-session tracking to be the first to run
-            new AutoSessionTrackingIntegration(),
-            new AppDomainUnhandledExceptionIntegration(),
-            new AppDomainProcessExitIntegration(),
-            new UnobservedTaskExceptionIntegration(),
+        ExceptionProcessorsProviders = new() {
+            () => ExceptionProcessors.Select(x => x.Item2.Value)
+        };
+
+        _integrations = new();
+
+        _defaultIntegrations = DefaultIntegrations.AutoSessionTrackingIntegration |
+                               DefaultIntegrations.AppDomainUnhandledExceptionIntegration |
+                               DefaultIntegrations.AppDomainProcessExitIntegration |
+                               DefaultIntegrations.AutoSessionTrackingIntegration |
+                               DefaultIntegrations.UnobservedTaskExceptionIntegration
 #if NETFRAMEWORK
-            new NetFxInstallationsIntegration(),
+                               | DefaultIntegrations.NetFxInstallationsIntegration
 #endif
 #if HAS_DIAGNOSTIC_INTEGRATION
-            new SentryDiagnosticListenerIntegration(),
+                               | DefaultIntegrations.SentryDiagnosticListenerIntegration
 #endif
-        };
-
-#if NET5_0_OR_GREATER
-        if (WinUIUnhandledExceptionIntegration.IsApplicable)
-        {
-            this.AddIntegration(new WinUIUnhandledExceptionIntegration());
-        }
+#if NET5_0_OR_GREATER && !__MOBILE__
+                               | DefaultIntegrations.WinUiUnhandledExceptionIntegration
 #endif
+                               ;
 
 #if ANDROID
-        Android = new AndroidOptions(this);
+        Android = new AndroidOptions();
+        Native = new NativeOptions(this);
 
         var reader = new Lazy<IAndroidAssemblyReader?>(() => AndroidHelpers.GetAndroidAssemblyReader(DiagnosticLogger));
         AssemblyReader = name => reader.Value?.TryReadAssembly(name);
 
 #elif __IOS__
-        iOS = new IosOptions(this);
+        Native = new NativeOptions(this);
 #endif
 
         InAppExclude = new() {
@@ -1156,5 +1267,38 @@ public class SentryOptions
                 UriComponents.SchemeAndServer,
                 UriFormat.Unescaped)
         );
+    }
+
+    internal void AddIntegration(ISdkIntegration integration)
+    {
+        _integrations.Add(integration);
+    }
+
+    internal void RemoveIntegration<TIntegration>()
+    {
+        // Note: Not removing default integrations
+        _integrations.RemoveAll(integration => integration is TIntegration);
+    }
+
+    internal bool HasIntegration<TIntegration>() => _integrations.Any(integration => integration is TIntegration);
+
+    internal void RemoveDefaultIntegration(DefaultIntegrations defaultIntegrations) => _defaultIntegrations &= ~defaultIntegrations;
+
+    [Flags]
+    internal enum DefaultIntegrations
+    {
+        AutoSessionTrackingIntegration = 1 << 0,
+        AppDomainUnhandledExceptionIntegration = 1 << 1,
+        AppDomainProcessExitIntegration = 1 << 2,
+        UnobservedTaskExceptionIntegration = 1 << 3,
+#if NETFRAMEWORK
+        NetFxInstallationsIntegration = 1 << 4,
+#endif
+#if HAS_DIAGNOSTIC_INTEGRATION
+        SentryDiagnosticListenerIntegration = 1 << 5,
+#endif
+#if NET5_0_OR_GREATER && !__MOBILE__
+        WinUiUnhandledExceptionIntegration = 1 << 6,
+#endif
     }
 }

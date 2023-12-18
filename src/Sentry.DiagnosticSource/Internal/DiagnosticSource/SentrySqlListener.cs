@@ -124,7 +124,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         }
     }
 
-    private static ISpan? TryGetConnectionSpan(ITransaction transaction, Guid? connectionId) =>
+    private static ISpan? TryGetConnectionSpan(ITransactionTracer transaction, Guid? connectionId) =>
         connectionId == null
             ? null
             : transaction.Spans
@@ -132,7 +132,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
                     span is {IsFinished: false, Operation: "db.connection"} &&
                     TryGetConnectionId(span) == connectionId);
 
-    private static ISpan? TryGetQuerySpan(ITransaction transaction, Guid? operationId) =>
+    private static ISpan? TryGetQuerySpan(ITransactionTracer transaction, Guid? operationId) =>
         operationId == null
             ? null
             : transaction.Spans.FirstOrDefault(span => TryGetOperationId(span) == operationId);
@@ -244,7 +244,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         }
         catch (Exception ex)
         {
-            _options.LogError("Failed to intercept SQL event.", ex);
+            _options.LogError(ex, "Failed to intercept SQL event.");
         }
     }
 

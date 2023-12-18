@@ -49,4 +49,11 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// The default is <c>false</c> (exclude).
     /// </summary>
     public bool IncludeBackgroundingStateInBreadcrumbs { get; set; }
+
+    /// <summary>
+    /// Gets or sets whether the SDK automatically binds to common <see cref=" Microsoft.Maui.Controls.Element"/> events
+    /// like 'ChildAdded', 'ChildRemoved', 'ParentChanged' and 'BindingContextChanged'.
+    /// Use caution when enabling, as depending on your application this might incur a performance overhead.
+    /// </summary>
+    public bool CreateElementEventsBreadcrumbs { get; set; } = false;
 }

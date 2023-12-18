@@ -76,7 +76,7 @@ public class SentryPropagatorTests
         {
             carrier.Should().ContainKey("baggage");
             var baggageDictionary = (BaggageHeader.TryParse(carrier["baggage"])?.Members is {} members)
-                ? members.ToDictionary()
+                ? members.ToDict()
                 : new Dictionary<string, string>();
             baggageDictionary.Should().Equal(new Dictionary<string, string>()
             {
@@ -112,7 +112,7 @@ public class SentryPropagatorTests
         var options = new SentryOptions(){Dsn = "https://123@o456.ingest.sentry.io/789"};
         SentryClientExtensions.SentryOptionsForTestingOnly = options;
 
-        var hub = Substitute.For<IHubEx>();
+        var hub = Substitute.For<IHub>();
 
         var setter = Substitute.For<Action<HttpRequestMessage, string, string>>();
 

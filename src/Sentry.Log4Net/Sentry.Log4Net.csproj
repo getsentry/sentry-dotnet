@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;netstandard2.0;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net462</TargetFrameworks>
     <PackageTags>$(PackageTags);Logging;log4net</PackageTags>
     <Description>Official log4net integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <CLSCompliant>true</CLSCompliant>

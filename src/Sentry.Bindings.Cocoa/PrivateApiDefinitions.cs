@@ -4,7 +4,7 @@ using ObjCRuntime;
 
 namespace Sentry.CocoaSdk;
 
-// SentryScope.ApplyToEvent was made private in 8.x, but we use it in our IosEventProcessor class.
+// SentryScope.ApplyToEvent was made private in 8.x, but we use it in our CocoaEventProcessor class.
 // TODO: Find a better way than using the private API.
 partial interface SentryScope
 {

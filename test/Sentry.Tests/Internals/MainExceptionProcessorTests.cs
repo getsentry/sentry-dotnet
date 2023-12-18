@@ -117,6 +117,8 @@ public partial class MainExceptionProcessorTests
         sut.Process(BuildAggregateException(), evt);
 
         var last = evt.SentryExceptions!.Last();
+// TODO: Create integration test to test this behaviour when publishing AOT apps
+// See https://github.com/getsentry/sentry-dotnet/issues/2772
         Assert.NotNull(last.Stacktrace);
         var mechanism = last.Mechanism;
         Assert.NotNull(mechanism);
@@ -130,7 +132,7 @@ public partial class MainExceptionProcessorTests
         try
         {
             // Throwing will put a stack trace on the exception
-            throw new AggregateException(
+            throw new AggregateException("One or more errors occurred.",
                 new Exception("Inner message1"),
                 new Exception("Inner message2"));
         }

@@ -12,17 +12,12 @@ public sealed class SystemClock : ISystemClock
     /// <remarks>
     /// This constructor should have been private originally.  It will be removed in a future major version.
     /// </remarks>
-    [Obsolete("This constructor will become private in a future major version. Use the `SystemClock.Clock` singleton instead.")]
-    public SystemClock()
-    {
-    }
+    private SystemClock() {}
 
     /// <summary>
     /// System clock singleton.
     /// </summary>
-#pragma warning disable CS0618
     public static readonly SystemClock Clock = new();
-#pragma warning restore CS0618
 
     /// <summary>
     /// Gets the current time in UTC.

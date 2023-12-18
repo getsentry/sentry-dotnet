@@ -7,11 +7,8 @@
     <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-  </PropertyGroup>
-
-  <!-- Never use Sentry CLI for test projects. -->
-  <PropertyGroup>
-    <UseSentryCLI>false</UseSentryCLI>
+    <!-- Ignore warnings for JSON generated code -->
+    <NoWarn>$(NoWarn);SYSLIB0005;SYSLIB0012</NoWarn>
   </PropertyGroup>
 
   <!--
@@ -72,5 +69,4 @@
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
   </ItemGroup>
-
 </Project>

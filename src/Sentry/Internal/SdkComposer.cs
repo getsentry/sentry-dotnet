@@ -1,4 +1,6 @@
 using Sentry.Extensibility;
+using Sentry.Http;
+using Sentry.Infrastructure;
 using Sentry.Internal.Http;
 
 namespace Sentry.Internal;
@@ -27,25 +29,46 @@ internal class SdkComposer
             transport = CachingTransport.Create(transport, _options);
         }
 
+        // Wrap the transport with the Spotlight one that double sends the envelope: Sentry + Spotlight
+        if (_options.EnableSpotlight)
+        {
+            var environment = _options.SettingLocator.GetEnvironment(true);
+            if (string.Equals(environment, Constants.ProductionEnvironmentSetting, StringComparison.OrdinalIgnoreCase))
+            {
+                _options.LogWarning("""
+                                    [Spotlight] It seems you're not in dev mode because environment is set to 'production'.
+                                    Do you really want to have Spotlight enabled?
+                                    You can set a different environment via SENTRY_ENVIRONMENT env var or programatically during Init.
+                                    Docs on Environment: https://docs.sentry.io/platforms/dotnet/configuration/environments/
+                                    """);
+            }
+            else
+            {
+                _options.LogInfo("Connecting to Spotlight at {0}", _options.SpotlightUrl);
+            }
+            if (!Uri.TryCreate(_options.SpotlightUrl,  UriKind.Absolute, out var spotlightUrl))
+            {
+                throw new InvalidOperationException("Invalid option for SpotlightUrl: " + _options.SpotlightUrl);
+            }
+            transport = new SpotlightHttpTransport(transport, _options, _options.GetHttpClient(), spotlightUrl, SystemClock.Clock);
+        }
+
         // Always persist the transport on the options, so other places can pick it up where necessary.
         _options.Transport = transport;
 
         return transport;
     }
 
-    private HttpTransport CreateHttpTransport()
+    private LazyHttpTransport CreateHttpTransport()
     {
-        if (_options.SentryHttpClientFactory is { })
+        if (_options.SentryHttpClientFactory is not null)
         {
             _options.LogDebug(
                 "Using ISentryHttpClientFactory set through options: {0}.",
                 _options.SentryHttpClientFactory.GetType().Name);
         }
 
-        var httpClientFactory = _options.SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
-        var httpClient = httpClientFactory.Create(_options);
-
-        return new HttpTransport(_options, httpClient);
+        return new LazyHttpTransport(_options);
     }
 
     public IBackgroundWorker CreateBackgroundWorker()

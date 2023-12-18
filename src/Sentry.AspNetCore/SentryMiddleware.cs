@@ -1,10 +1,6 @@
 using Sentry.Ben.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics;
-#if NETSTANDARD2_0
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#else
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
-#endif
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

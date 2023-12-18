@@ -10,7 +10,7 @@ internal interface ITransactionProfilerFactory
     /// <summary>
     /// Called during transaction start to start a new profiler, if applicable.
     /// </summary>
-    ITransactionProfiler? Start(ITransaction transaction, CancellationToken cancellationToken);
+    ITransactionProfiler? Start(ITransactionTracer transaction, CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -23,8 +23,7 @@ internal interface ITransactionProfiler
     /// </summary>
     void Finish();
 
-    /// <summary>
-    /// Process and collect the profile.
-    /// </summary>
-    Task<ProfileInfo> CollectAsync(Transaction transaction);
+    /// <summary>Process and collect the profile.</summary>
+    /// <returns>The collected profile.</returns>
+    ISerializable? Collect(Transaction transaction);
 }

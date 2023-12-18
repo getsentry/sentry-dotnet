@@ -3,7 +3,12 @@
 # the *.slnf solution filters for the Sentry solution.
 ################################################################
 
-solution: Sentry.sln
+coreSolution: Sentry.sln
+# We don't maintain the buildSolutions manually... these are just
+# copies of Sentry.sln that are used to set certain build
+# properties when using solution filters that are based on these
+buildSolutions:
+  - Sentry.NoMobile.sln
 
 groupConfigs:
   allProjects:
@@ -78,6 +83,7 @@ filterConfigs:
         - "test/**/*.csproj"
 
   - outputPath: SentryAspNetCore.slnf
+    solution: Sentry.NoMobile.sln
     include:
       patterns:
         - "**/*AspNetCore*.csproj"
@@ -101,6 +107,7 @@ filterConfigs:
         - "**/Sentry.Tests.csproj"
 
   - outputPath: SentryCore.slnf
+    solution: Sentry.NoMobile.sln
     include:
       patterns:
         - "**/Sentry.Benchmarks.csproj"
@@ -114,6 +121,7 @@ filterConfigs:
         - "**/Sentry.Tests.csproj"
 
   - outputPath: SentryDiagnosticSource.slnf
+    solution: Sentry.NoMobile.sln
     include:
       patterns:
         - "**/*DiagnosticSource*.csproj"
@@ -132,7 +140,8 @@ filterConfigs:
         - "samples/**/*Maui.csproj"
         - "src/**/Sentry.csproj"
         - "src/**/*Android*.csproj"
-        - "src/**/*Bindings*.csproj"
+        - "src/**/*Bindings.Android.csproj"
+        - "src/**/*Bindings.Cocoa.csproj"
         - "src/**/Sentry.Extensions.Logging.csproj"
         - "src/**/Sentry.Maui.csproj"
         - "test/**/Sentry.Android.AssemblyReader.Tests.csproj"
@@ -144,6 +153,7 @@ filterConfigs:
         - "test/MauiTestUtils/**/*.csproj"
 
   - outputPath: SentryNoMobile.slnf
+    solution: Sentry.NoMobile.sln
     include:
       groups:
         - "allProjects"

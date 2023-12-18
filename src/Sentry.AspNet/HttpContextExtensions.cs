@@ -26,7 +26,7 @@ public static class HttpContextExtensions
         }
         catch (Exception ex)
         {
-            options?.LogError("Invalid Sentry trace header '{0}'.", ex, value);
+            options?.LogError(ex, "Invalid Sentry trace header '{0}'.", value);
             return null;
         }
     }
@@ -50,7 +50,7 @@ public static class HttpContextExtensions
         }
         catch (Exception ex)
         {
-            options?.LogError("Invalid baggage header '{0}'.", ex, value);
+            options?.LogError(ex, "Invalid baggage header '{0}'.", value);
             return null;
         }
     }
@@ -77,7 +77,7 @@ public static class HttpContextExtensions
     /// <summary>
     /// Starts a new Sentry transaction that encompasses the currently executing HTTP request.
     /// </summary>
-    public static ITransaction StartSentryTransaction(this HttpContext httpContext)
+    public static ITransactionTracer StartSentryTransaction(this HttpContext httpContext)
     {
         var method = httpContext.Request.HttpMethod;
         var path = httpContext.Request.Path;

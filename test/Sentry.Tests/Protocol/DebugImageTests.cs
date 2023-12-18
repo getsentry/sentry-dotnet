@@ -15,7 +15,7 @@ public class DebugImageTests
         var sut = new DebugImage
         {
             Type = "elf",
-            ImageAddress = "0xffffffff",
+            ImageAddress = 5,
             ImageSize = 1234,
             DebugId = "900f7d1b868432939de4457478f34720",
             DebugFile = "libc.debug",
@@ -28,7 +28,7 @@ public class DebugImageTests
         Assert.Equal("""
             {
               "type": "elf",
-              "image_addr": "0xffffffff",
+              "image_addr": "0x5",
               "image_size": 1234,
               "debug_id": "900f7d1b868432939de4457478f34720",
               "debug_file": "libc.debug",

@@ -14,7 +14,7 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "page"
         };
-        _fixture.Binder.BindPageEvents(page);
+        _fixture.Binder.HandlePageEvents(page);
 
         // Act
         page.RaiseEvent(eventName, EventArgs.Empty);
@@ -28,61 +28,29 @@ public partial class MauiEventsBinderTests
         crumb.Data.Should().Contain($"{nameof(Page)}.Name", "page");
     }
 
-    [Fact]
-    public void Page_NavigatingFrom_AddsBreadcrumb()
+    [Theory]
+    [InlineData(nameof(Page.Appearing))]
+    [InlineData(nameof(Page.Disappearing))]
+    public void Page_UnbindLifecycleEvents_DoesNotAddBreadcrumb(string eventName)
     {
         // Arrange
         var page = new Page
         {
             StyleId = "page"
         };
-        _fixture.Binder.BindPageEvents(page);
+        _fixture.Binder.HandlePageEvents(page);
+
+        page.RaiseEvent(eventName, EventArgs.Empty);
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+
+        _fixture.Binder.HandlePageEvents(page, bind: false);
 
         // Act
-        page.RaiseEvent(nameof(Page.NavigatingFrom), new NavigatingFromEventArgs());
+        page.RaiseEvent(eventName, EventArgs.Empty);
 
         // Assert
-        var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
-        Assert.Equal($"{nameof(Page)}.{nameof(Page.NavigatingFrom)}", crumb.Message);
-        Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEventsBinder.NavigationType, crumb.Type);
-        Assert.Equal(MauiEventsBinder.NavigationCategory, crumb.Category);
-        crumb.Data.Should().Contain($"{nameof(Page)}.Name", "page");
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
     }
-
-    [Fact]
-    public void Page_NavigatedFrom_AddsBreadcrumb()
-    {
-        // Arrange
-        var page = new Page
-        {
-            StyleId = "page"
-        };
-        _fixture.Binder.BindPageEvents(page);
-
-        var otherPage = new Page
-        {
-            StyleId = "otherPage"
-        };
-        var navigatedFromEventArgs = (NavigatedFromEventArgs)
-            typeof(NavigatedFromEventArgs)
-                .GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, new[] {typeof(Page)})!
-                .Invoke(new object[] {otherPage});
-
-        // Act
-        page.RaiseEvent(nameof(Page.NavigatedFrom), navigatedFromEventArgs);
-
-        // Assert
-        var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
-        Assert.Equal($"{nameof(Page)}.{nameof(Page.NavigatedFrom)}", crumb.Message);
-        Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEventsBinder.NavigationType, crumb.Type);
-        Assert.Equal(MauiEventsBinder.NavigationCategory, crumb.Category);
-        crumb.Data.Should().Contain($"{nameof(Page)}.Name", "page");
-        crumb.Data.Should().Contain("DestinationPage", nameof(Page));
-        crumb.Data.Should().Contain("DestinationPage.Name", "otherPage");
-    }
-
 
     [Fact]
     public void Page_NavigatedTo_AddsBreadcrumb()
@@ -92,7 +60,7 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "page"
         };
-        _fixture.Binder.BindPageEvents(page);
+        _fixture.Binder.HandlePageEvents(page);
 
         var otherPage = new Page
         {
@@ -118,6 +86,37 @@ public partial class MauiEventsBinderTests
     }
 
     [Fact]
+    public void Page_UnbindNavigatedTo_AddsBreadcrumb()
+    {
+        // Arrange
+        var page = new Page
+        {
+            StyleId = "page"
+        };
+        _fixture.Binder.HandlePageEvents(page);
+
+        var otherPage = new Page
+        {
+            StyleId = "otherPage"
+        };
+        var navigatedToEventArgs = (NavigatedToEventArgs)
+            typeof(NavigatedToEventArgs)
+                .GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, new[] {typeof(Page)})!
+                .Invoke(new object[] {otherPage});
+
+        page.RaiseEvent(nameof(Page.NavigatedTo), navigatedToEventArgs);
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+
+        _fixture.Binder.HandlePageEvents(page, bind: false);
+
+        // Act
+        page.RaiseEvent(nameof(Page.NavigatedTo), navigatedToEventArgs);
+
+        // Assert
+        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+    }
+
+    [Fact]
     public void Page_LayoutChanged_AddsBreadcrumb()
     {
         // Arrange
@@ -125,7 +124,7 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "page"
         };
-        _fixture.Binder.BindPageEvents(page);
+        _fixture.Binder.HandlePageEvents(page);
 
         // Act
         page.RaiseEvent(nameof(Page.LayoutChanged), EventArgs.Empty);

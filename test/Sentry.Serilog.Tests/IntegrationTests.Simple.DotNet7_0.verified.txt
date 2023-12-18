@@ -200,19 +200,18 @@
                       FileName: IntegrationTests.verify.cs,
                       Function: Task IntegrationTests.Simple(),
                       Module: null,
-                      LineNumber: 47,
+                      LineNumber: 48,
                       ColumnNumber: 17,
                       AbsolutePath: {ProjectDirectory}IntegrationTests.verify.cs,
                       ContextLine: null,
                       InApp: false,
                       Package: Sentry.Serilog.Tests, Version=SCRUBBED, Culture=SCRUBBED, PublicKeyToken=SCRUBBED,
                       Platform: null,
-                      ImageAddress: 0,
+                      ImageAddress: null,
                       SymbolAddress: null,
-                      InstructionAddress: ____,
-                      InstructionOffset: null,
+                      InstructionAddress: 2,
                       AddressMode: rel:0,
-                      FunctionId: ____
+                      FunctionId: 1
                     }
                   ]
                 },

@@ -27,11 +27,9 @@ public class SentryWebHostBuilderExtensionsIntegrationTests : AspNetSentrySdkTes
     }
 
     [Fact]
-    public void UseSentry_NoDsnProvided_DisabledSdk()
+    public void UseSentry_NoDsnProvided_ThrowsException()
     {
-        _ = _webHostBuilder.UseSentry().Build();
-
-        Assert.False(SentrySdk.IsEnabled);
+        Assert.Throws<ArgumentNullException>(() => _webHostBuilder.UseSentry().Build());
     }
 
     [Fact]

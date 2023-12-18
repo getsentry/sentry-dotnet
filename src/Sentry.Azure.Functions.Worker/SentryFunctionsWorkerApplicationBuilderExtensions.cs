@@ -37,8 +37,15 @@ public static class SentryFunctionsWorkerApplicationBuilderExtensions
         builder.UseMiddleware<SentryFunctionsWorkerMiddleware>();
 
         var services = builder.Services;
+        var section = context.Configuration.GetSection("Sentry");
+#if NET8_0_OR_GREATER
+        services.AddSingleton<IConfigureOptions<SentryAzureFunctionsOptions>>(_ =>
+            new SentryAzureFunctionsOptionsSetup(section)
+        );
+#else
         services.Configure<SentryAzureFunctionsOptions>(options =>
-            context.Configuration.GetSection("Sentry").Bind(options));
+            section.Bind(options));
+#endif
 
         if (optionsConfiguration != null)
         {

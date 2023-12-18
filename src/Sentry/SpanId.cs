@@ -48,7 +48,7 @@ public readonly struct SpanId : IEquatable<SpanId>, IJsonSerializable
     /// </summary>
     public static SpanId Create()
     {
-#if NETSTANDARD2_0 || NET461
+#if NETSTANDARD2_0 || NET462
         byte[] buf = new byte[8];
 #else
         Span<byte> buf = stackalloc byte[8];
@@ -57,7 +57,7 @@ public readonly struct SpanId : IEquatable<SpanId>, IJsonSerializable
         Random.NextBytes(buf);
 
         var random = BitConverter.ToInt64(buf
-#if NETSTANDARD2_0 || NET461
+#if NETSTANDARD2_0 || NET462
             , 0);
 #else
             );

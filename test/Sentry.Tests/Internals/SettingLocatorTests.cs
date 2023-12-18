@@ -153,14 +153,11 @@ public class SettingLocatorTests
     }
 
     [Fact]
-    public void GetDsn_WithNoValueAnywhere_ReturnsAndSetsDisabledDsn()
+    public void GetDsn_WithNoValueAnywhere_ThrowsException()
     {
         var options = new SentryOptions();
 
-        var dsn = options.SettingLocator.GetDsn();
-
-        Assert.Equal(DisableSdkDsnValue, dsn);
-        Assert.Equal(DisableSdkDsnValue, options.Dsn);
+        Assert.Throws<ArgumentNullException>(() => options.SettingLocator.GetDsn());
     }
 
     [Fact]

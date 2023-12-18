@@ -15,7 +15,7 @@ public static class SentryOptionsExtensions
     /// <param name="sentryOptions">The sentry options.</param>
     public static SentryOptions AddEntityFramework(this SentryOptions sentryOptions)
     {
-        if (sentryOptions.ExceptionProcessors?.OfType<DbEntityValidationExceptionProcessor>().Any() is true)
+        if (sentryOptions.ExceptionProcessors.Any(processor => processor.Type == typeof(DbEntityValidationExceptionProcessor)))
         {
             sentryOptions.LogWarning($"{nameof(AddEntityFramework)} has already been called. Subsequent call will be ignored.");
             return sentryOptions;
@@ -28,7 +28,7 @@ public static class SentryOptionsExtensions
         catch (Exception e)
         {
             sentryOptions.DiagnosticLogger?
-                .LogError("Failed to configure EF breadcrumbs. Make sure to init Sentry before EF.", e);
+                .LogError(e, "Failed to configure EF breadcrumbs. Make sure to init Sentry before EF.");
         }
 
         dbIntegration = new DbInterceptionIntegration();

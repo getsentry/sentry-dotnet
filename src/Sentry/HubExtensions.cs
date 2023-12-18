@@ -14,13 +14,13 @@ public static class HubExtensions
     /// <summary>
     /// Starts a transaction.
     /// </summary>
-    public static ITransaction StartTransaction(this IHub hub, ITransactionContext context) =>
+    public static ITransactionTracer StartTransaction(this IHub hub, ITransactionContext context) =>
         hub.StartTransaction(context, new Dictionary<string, object?>());
 
     /// <summary>
     /// Starts a transaction.
     /// </summary>
-    public static ITransaction StartTransaction(
+    public static ITransactionTracer StartTransaction(
         this IHub hub,
         string name,
         string operation) =>
@@ -29,7 +29,7 @@ public static class HubExtensions
     /// <summary>
     /// Starts a transaction.
     /// </summary>
-    public static ITransaction StartTransaction(
+    public static ITransactionTracer StartTransaction(
         this IHub hub,
         string name,
         string operation,
@@ -44,7 +44,7 @@ public static class HubExtensions
     /// <summary>
     /// Starts a transaction from the specified trace header.
     /// </summary>
-    public static ITransaction StartTransaction(
+    public static ITransactionTracer StartTransaction(
         this IHub hub,
         string name,
         string operation,
@@ -184,10 +184,7 @@ public static class HubExtensions
     }
 
     internal static SentryId CaptureExceptionInternal(this IHub hub, Exception ex) =>
-        hub.CaptureEventInternal(new SentryEvent(ex));
-
-    internal static SentryId CaptureEventInternal(this IHub hub, SentryEvent evt) =>
-        hub is IHubEx hubEx ? hubEx.CaptureEventInternal(evt, null, null) : hub.CaptureEvent(evt);
+        hub.CaptureEvent(new SentryEvent(ex));
 
     /// <summary>
     /// Captures the exception with a configurable scope callback.
@@ -224,7 +221,7 @@ public static class HubExtensions
         return hub.CaptureEvent(sentryEvent, configureScope);
     }
 
-    internal static ITransaction StartTransaction(
+    internal static ITransactionTracer StartTransaction(
         this IHub hub,
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext,
@@ -235,14 +232,14 @@ public static class HubExtensions
             _ => hub.StartTransaction(context, customSamplingContext)
         };
 
-    internal static ITransaction? GetTransaction(this IHub hub)
+    internal static ITransactionTracer? GetTransaction(this IHub hub)
     {
-        ITransaction? transaction = null;
+        ITransactionTracer? transaction = null;
         hub.ConfigureScope(scope => transaction = scope.Transaction);
         return transaction;
     }
 
-    internal static ITransaction? GetTransactionIfSampled(this IHub hub)
+    internal static ITransactionTracer? GetTransactionIfSampled(this IHub hub)
     {
         var transaction = hub.GetTransaction();
         return transaction?.IsSampled == true ? transaction : null;

@@ -7,3 +7,6 @@
 [submodule "modules/perfview"]
 	path = modules/perfview
 	url = https://github.com/getsentry/perfview.git
+[submodule "modules/sentry-native"]
+	path = modules/sentry-native
+	url = https://github.com/getsentry/sentry-native.git

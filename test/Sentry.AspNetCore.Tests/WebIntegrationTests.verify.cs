@@ -65,7 +65,8 @@ public class WebIntegrationTests
 
         await Verify(new {result, transport.Payloads})
             .IgnoreStandardSentryMembers()
-            .ScrubAspMembers();
+            .ScrubAspMembers()
+            .UniqueForTargetFrameworkAndVersion();
     }
 
     [ApiController]

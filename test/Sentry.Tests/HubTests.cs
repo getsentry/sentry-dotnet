@@ -11,7 +11,7 @@ public partial class HubTests
     {
         public SentryOptions Options { get; }
 
-        public ISentryClient Client { get; set;  }
+        public ISentryClient Client { get; set; }
 
         public ISessionManager SessionManager { get; set; }
 
@@ -128,8 +128,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == transaction.TraceId &&
                 evt.Contexts.Trace.SpanId == transaction.SpanId),
-            Arg.Any<Hint>(),
-            Arg.Any<Scope>());
+            Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -151,8 +150,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == transaction.TraceId &&
                 evt.Contexts.Trace.SpanId == transaction.SpanId),
-            Arg.Any<Hint>(),
-            Arg.Any<Scope>());
+            Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -191,8 +189,7 @@ public partial class HubTests
         _fixture.Client.Received(1).CaptureEvent(
             Arg.Is<SentryEvent>(evt =>
                 evt.DynamicSamplingContext == dsc),
-            Arg.Any<Hint>(),
-            Arg.Any<Scope>());
+            Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -214,8 +211,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == default &&
                 evt.Contexts.Trace.SpanId == default),
-            Arg.Any<Hint>(),
-            Arg.Any<Scope>());
+            Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -234,8 +230,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == scope.PropagationContext.TraceId &&
                 evt.Contexts.Trace.SpanId == scope.PropagationContext.SpanId),
-            Arg.Any<Hint>(),
-            Arg.Any<Scope>());
+            Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -275,7 +270,7 @@ public partial class HubTests
         Assert.Equal(child.ParentSpanId, evt.Contexts.Trace.ParentSpanId);
     }
 
-    private class EvilContext
+    internal class EvilContext
     {
         // This property will throw an exception during serialization.
         // ReSharper disable once UnusedMember.Local
@@ -300,6 +295,9 @@ public partial class HubTests
 
     private async Task CapturesEventWithContextKey_Implementation(bool offlineCaching)
     {
+#if NET6_0_OR_GREATER
+        JsonExtensions.AddJsonSerializerContext(o => new HubTestsJsonContext(o));
+#endif
         var tcs = new TaskCompletionSource<bool>();
         var expectedMessage = Guid.NewGuid().ToString();
 
@@ -442,14 +440,12 @@ public partial class HubTests
         var hub = _fixture.GetSut();
 
         // Act
-        hub.CaptureEvent(@event, hint);
+        hub.CaptureEvent(@event, hint: hint);
 
         // Assert
         _fixture.Client.Received(1).CaptureEvent(
             Arg.Any<SentryEvent>(),
-            Arg.Is<Hint>(h => h == hint),
-            Arg.Any<Scope>()
-            );
+            Arg.Any<Scope>(), Arg.Is<Hint>(h => h == hint));
     }
 
     [Fact]
@@ -952,7 +948,7 @@ public partial class HubTests
             SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1000000000000000"));
         hub.ConfigureScope(scope => scope.PropagationContext = propagationContext);
         var traceHeader = "5bd5f6d346b442dd9177dce9302fd737-2000000000000000";
-        var baggageHeader ="sentry-trace_id=5bd5f6d346b442dd9177dce9302fd737, sentry-public_key=49d0f7386ad645858ae85020e393bef3, sentry-sample_rate=1.0";
+        var baggageHeader = "sentry-trace_id=5bd5f6d346b442dd9177dce9302fd737, sentry-public_key=49d0f7386ad645858ae85020e393bef3, sentry-sample_rate=1.0";
 
         hub.ConfigureScope(scope => scope.PropagationContext.TraceId.Should().Be("43365712692146d08ee11a729dfbcaca")); // Sanity check
 
@@ -985,6 +981,150 @@ public partial class HubTests
 
         // Assert
         hub.ConfigureScope(scope => scope.Transaction.Should().BeNull());
+    }
+
+#nullable enable
+    private class ThrowingProfilerFactory : ITransactionProfilerFactory
+    {
+        public ITransactionProfiler? Start(ITransactionTracer _, CancellationToken __) => new ThrowingProfiler();
+    }
+
+    internal class ThrowingProfiler : ITransactionProfiler
+    {
+        public void Finish() { }
+
+        public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction _) => throw new Exception("test");
+    }
+
+    private class AsyncThrowingProfilerFactory : ITransactionProfilerFactory
+    {
+        public ITransactionProfiler? Start(ITransactionTracer _, CancellationToken __) => new AsyncThrowingProfiler();
+    }
+
+    internal class AsyncThrowingProfiler : ITransactionProfiler
+    {
+        public void Finish() { }
+
+        public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction transaction)
+            => AsyncJsonSerializable.CreateFrom(CollectAsync(transaction));
+
+        private async Task<ProfileInfo> CollectAsync(Transaction transaction)
+        {
+            await Task.Delay(1);
+            throw new Exception("test");
+        }
+    }
+    private class TestProfilerFactory : ITransactionProfilerFactory
+    {
+        public ITransactionProfiler? Start(ITransactionTracer _, CancellationToken __) => new TestProfiler();
+    }
+
+    internal class TestProfiler : ITransactionProfiler
+    {
+        public void Finish() { }
+
+        public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction _) => new JsonSerializable(new ProfileInfo());
+    }
+
+#nullable disable
+
+    [Fact]
+    public async Task CaptureTransaction_WithSyncThrowingTransactionProfiler_DoesntSendTransaction()
+    {
+        // Arrange
+        var transport = new FakeTransport();
+        using var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            AutoSessionTracking = false,
+            TracesSampleRate = 1.0,
+            ProfilesSampleRate = 1.0,
+            Transport = transport,
+            TransactionProfilerFactory = new ThrowingProfilerFactory()
+        });
+
+        // Act
+        hub.StartTransaction("foo", "bar").Finish();
+        await hub.FlushAsync();
+
+        // Assert
+        transport.GetSentEnvelopes().Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task CaptureTransaction_WithAsyncThrowingTransactionProfiler_SendsTransactionWithoutProfile()
+    {
+        // Arrange
+        var transport = new FakeTransport();
+        var logger = new TestOutputDiagnosticLogger(_output);
+        using var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            AutoSessionTracking = false,
+            TracesSampleRate = 1.0,
+            ProfilesSampleRate = 1.0,
+            Transport = transport,
+            TransactionProfilerFactory = new AsyncThrowingProfilerFactory(),
+            DiagnosticLogger = logger,
+        });
+
+        // Act
+        hub.StartTransaction("foo", "bar").Finish();
+        await hub.FlushAsync();
+
+        // Assert
+        transport.GetSentEnvelopes().Should().HaveCount(1);
+        var envelope = transport.GetSentEnvelopes().Single();
+
+        using var stream = new MemoryStream();
+        envelope.Serialize(stream, logger);
+        stream.Flush();
+        var envelopeStr = Encoding.UTF8.GetString(stream.ToArray());
+        var lines = envelopeStr.Split('\n');
+        lines.Should().HaveCount(4);
+        lines[0].Should().StartWith("{\"sdk\"");
+        lines[1].Should().StartWith("{\"type\":\"transaction\",\"length\":");
+        lines[2].Should().StartWith("{\"type\":\"transaction\"");
+        lines[3].Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task CaptureTransaction_WithTransactionProfiler_SendsTransactionWithProfile()
+    {
+        // Arrange
+        var transport = new FakeTransport();
+        var logger = new TestOutputDiagnosticLogger(_output);
+        using var hub = new Hub(new SentryOptions
+        {
+            Dsn = ValidDsn,
+            AutoSessionTracking = false,
+            TracesSampleRate = 1.0,
+            ProfilesSampleRate = 1.0,
+            Transport = transport,
+            TransactionProfilerFactory = new TestProfilerFactory(),
+            DiagnosticLogger = logger,
+        });
+
+        // Act
+        hub.StartTransaction("foo", "bar").Finish();
+        await hub.FlushAsync();
+
+        // Assert
+        transport.GetSentEnvelopes().Should().HaveCount(1);
+        var envelope = transport.GetSentEnvelopes().Single();
+
+        using var stream = new MemoryStream();
+        envelope.Serialize(stream, logger);
+        stream.Flush();
+        var envelopeStr = Encoding.UTF8.GetString(stream.ToArray());
+        var lines = envelopeStr.Split('\n');
+        lines.Should().HaveCount(6);
+        lines[0].Should().StartWith("{\"sdk\"");
+        lines[1].Should().StartWith("{\"type\":\"transaction\",\"length\":");
+        lines[2].Should().StartWith("{\"type\":\"transaction\"");
+        lines[3].Should().StartWith("{\"type\":\"profile\",\"length\":");
+        lines[4].Should().Contain("\"profile\":{");
+        lines[5].Should().BeEmpty();
     }
 
     [Fact]
@@ -1252,7 +1392,7 @@ public partial class HubTests
         hub.CaptureEvent(evt);
 
         // Assert
-        _fixture.Client.Received(enabled ? 1 : 0).CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Hint>(), Arg.Any<Scope>());
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Theory]
@@ -1313,7 +1453,7 @@ public partial class HubTests
         transaction.Finish();
 
         // Assert
-        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled), Arg.Any<Hint>());
+        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled), Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -1327,74 +1467,7 @@ public partial class HubTests
         transaction.Finish();
 
         // Assert
-        _fixture.Client.Received().CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Hint>());
-    }
-
-    [Fact]
-    public void CaptureTransaction_Client_Gets_ScopeAttachments()
-    {
-        // Arrange
-        var hub = _fixture.GetSut();
-        var attachments = new List<Attachment> {
-            AttachmentHelper.FakeAttachment("foo"),
-            AttachmentHelper.FakeAttachment("bar")
-        };
-        hub.ConfigureScope(s => {
-            s.AddAttachment(attachments[0]);
-            s.AddAttachment(attachments[1]);
-            });
-
-        // Act
-        Hint hint = null;
-        _fixture.Client.CaptureTransaction(
-            Arg.Any<Transaction>(),
-            Arg.Do<Hint>(h => hint = h)
-            );
-        var transaction = hub.StartTransaction("test", "test");
-        transaction.Finish();
-
-        // Assert
-        hint.Should().NotBeNull();
-        hint.Attachments.Should().Contain(attachments);
-    }
-
-    [Fact]
-    public void CaptureTransaction_EventProcessor_Gets_Hint()
-    {
-        // Arrange
-        var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
-        processor.Process(Arg.Any<Transaction>(), Arg.Any<Hint>()).Returns(new Transaction("name", "operation"));
-        _fixture.Options.AddTransactionProcessor(processor);
-
-        // Act
-        var hub = _fixture.GetSut();
-        var transaction = hub.StartTransaction("test", "test");
-        transaction.Finish();
-
-        // Assert
-        processor.Received(1).Process(Arg.Any<Transaction>(), Arg.Any<Hint>());
-    }
-
-    [Fact]
-    public void CaptureTransaction_EventProcessor_Gets_ScopeAttachments()
-    {
-        // Arrange
-        var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
-        Hint hint = null;
-        processor.Process(Arg.Any<Transaction>(), Arg.Do<Hint>(h => hint = h)).Returns(new Transaction("name", "operation"));
-        _fixture.Options.AddTransactionProcessor(processor);
-
-        var attachments = new List<Attachment> { AttachmentHelper.FakeAttachment("foo.txt") };
-        var hub = _fixture.GetSut();
-        hub.ConfigureScope(s => s.AddAttachment(attachments[0]));
-
-        // Act
-        var transaction = hub.StartTransaction("test", "test");
-        transaction.Finish();
-
-        // Assert
-        hint.Should().NotBeNull();
-        hint.Attachments.Should().Contain(attachments);
+        _fixture.Client.Received().CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Theory]
@@ -1435,91 +1508,12 @@ public partial class HubTests
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
     }
 
-    [Obsolete]
-    [Fact]
-    public void WithScope_Works()
-    {
-        _fixture.Options.IsGlobalModeEnabled = false;
-        var hub = _fixture.GetSut();
-        var originalScope = GetCurrentScope(hub);
-
-        hub.WithScope(scope =>
-        {
-            var newScope = GetCurrentScope(hub);
-            Assert.Same(newScope, scope);
-            Assert.NotSame(originalScope, scope);
-        });
-
-        var finalScope = GetCurrentScope(hub);
-        Assert.Same(originalScope, finalScope);
-    }
-
-    [Obsolete]
-    [Fact]
-    public void WithScopeT_Works()
-    {
-        _fixture.Options.IsGlobalModeEnabled = false;
-        var hub = _fixture.GetSut();
-        var originalScope = GetCurrentScope(hub);
-
-        var result = hub.WithScope(scope =>
-        {
-            var newScope = GetCurrentScope(hub);
-            Assert.Same(newScope, scope);
-            Assert.NotSame(originalScope, scope);
-
-            return true;
-        });
-
-        Assert.True(result);
-
-        var finalScope = GetCurrentScope(hub);
-        Assert.Same(originalScope, finalScope);
-    }
-
-    [Obsolete]
-    [Fact]
-    public async Task WithScopeAsync_Works()
-    {
-        _fixture.Options.IsGlobalModeEnabled = false;
-        var hub = _fixture.GetSut();
-        var originalScope = GetCurrentScope(hub);
-
-        await hub.WithScopeAsync(scope =>
-        {
-            var newScope = GetCurrentScope(hub);
-            Assert.Same(newScope, scope);
-            Assert.NotSame(originalScope, scope);
-
-            return Task.CompletedTask;
-        });
-
-        var finalScope = GetCurrentScope(hub);
-        Assert.Same(originalScope, finalScope);
-    }
-
-    [Obsolete]
-    [Fact]
-    public async Task WithScopeAsyncT_Works()
-    {
-        _fixture.Options.IsGlobalModeEnabled = false;
-        var hub = _fixture.GetSut();
-        var originalScope = GetCurrentScope(hub);
-
-        var result = await hub.WithScopeAsync(scope =>
-        {
-            var newScope = GetCurrentScope(hub);
-            Assert.Same(newScope, scope);
-            Assert.NotSame(originalScope, scope);
-
-            return Task.FromResult(true);
-        });
-
-        Assert.True(result);
-
-        var finalScope = GetCurrentScope(hub);
-        Assert.Same(originalScope, finalScope);
-    }
-
     private static Scope GetCurrentScope(Hub hub) => hub.ScopeManager.GetCurrent().Key;
 }
+
+#if NET6_0_OR_GREATER
+[JsonSerializable(typeof(HubTests.EvilContext))]
+internal partial class HubTestsJsonContext : JsonSerializerContext
+{
+}
+#endif

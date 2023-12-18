@@ -1,9 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-      <TargetFrameworks>net6.0;netstandard2.0</TargetFrameworks>
+      <TargetFrameworks>net8.0;net6.0;netstandard2.0</TargetFrameworks>
       <PackageTags>$(PackageTags);Azure;Functions;Worker</PackageTags>
       <Description>Official Azure Functions Worker SDK integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(FrameworkSupportsAot)' == 'true'">
+      <IsAotCompatible>true</IsAotCompatible>
+      <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     </PropertyGroup>
 
     <ItemGroup>

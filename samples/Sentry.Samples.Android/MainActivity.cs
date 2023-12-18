@@ -1,4 +1,5 @@
-#pragma warning disable CS0618
+using Sentry.Android;
+
 namespace Sentry.Samples.Android;
 
 [Activity(Label = "@string/app_name", MainLauncher = true)]
@@ -10,6 +11,8 @@ public class MainActivity : Activity
         {
             o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
             o.SendDefaultPii = true; // adds the user's IP address automatically
+            o.Android.LogCatIntegration = LogCatIntegrationType.Errors; // Get logcat logs for both handled and unhandled errors; default is unhandled only
+            o.Android.LogCatMaxLines = 1000; // Defaults to 1000
         });
 
         // Here's an example of adding custom scope information.
@@ -50,12 +53,18 @@ public class MainActivity : Activity
         throwUnhandledException.Click += (s, a) => throw new Exception("Unhandled");
 
         var throwJavaException = (Button)base.FindViewById(Resource.Id.throwJavaException)!;
+#pragma warning disable CS0618
         throwJavaException.Click += (s, a) => SentrySdk.CauseCrash(CrashType.Java);
+#pragma warning restore CS0618
 
         var throwJavaExceptionBackgroundThread = (Button)base.FindViewById(Resource.Id.throwJavaExceptionBackgroundThread)!;
+#pragma warning disable CS0618
         throwJavaExceptionBackgroundThread.Click += (s, a) => SentrySdk.CauseCrash(CrashType.JavaBackgroundThread);
+#pragma warning restore CS0618
 
         var crashInC = (Button)base.FindViewById(Resource.Id.crashInC)!;
+#pragma warning disable CS0618
         crashInC.Click += (s, a) => SentrySdk.CauseCrash(CrashType.Native);
+#pragma warning restore CS0618
     }
 }

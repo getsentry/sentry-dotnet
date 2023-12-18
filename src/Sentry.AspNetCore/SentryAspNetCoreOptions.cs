@@ -1,13 +1,9 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
-
-#if NETSTANDARD2_0
-using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#else
 using Microsoft.Extensions.Hosting;
-#endif
 
 namespace Sentry.AspNetCore;
 
@@ -76,6 +72,21 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     /// to have its environment setting be all lower case.
     /// </remarks>
     public bool AdjustStandardEnvironmentNameCasing { get; set; } = true;
+
+    /// <summary>
+    /// <para>
+    /// When true (by default) Sentry automatically registers its tracing middleware immediately after
+    /// `EndpointRoutingApplicationBuilderExtensions.UseRouting`.
+    /// </para>
+    /// <para>
+    /// If you need to control when Sentry's tracing middleware is registered, you can set
+    /// <see cref="AutoRegisterTracing"/> to false and call
+    /// <see cref="SentryTracingMiddlewareExtensions.UseSentryTracing"/> yourself, sometime after calling
+    /// `EndpointRoutingApplicationBuilderExtensions.UseRouting` and before calling
+    /// `EndpointRoutingApplicationBuilderExtensions.UseEndpoints`.
+    /// </para>
+    /// </summary>
+    public bool AutoRegisterTracing { get; set; } = true;
 
     /// <summary>
     /// Creates a new instance of <see cref="SentryAspNetCoreOptions"/>.

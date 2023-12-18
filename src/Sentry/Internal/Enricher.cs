@@ -36,7 +36,16 @@ internal class Enricher
             // RuntimeInformation.OSDescription is throwing on Mono 5.12
             if (!PlatformAbstractions.Runtime.Current.IsMono())
             {
+#if NETFRAMEWORK
+                // RuntimeInformation.* throws on .NET Framework on macOS/Linux
+                try {
+                    eventLike.Contexts.OperatingSystem.RawDescription = RuntimeInformation.OSDescription;
+                } catch {
+                    eventLike.Contexts.OperatingSystem.RawDescription = Environment.OSVersion.VersionString;
+                }
+#else
                 eventLike.Contexts.OperatingSystem.RawDescription = RuntimeInformation.OSDescription;
+#endif
             }
         }
 
@@ -54,14 +63,11 @@ internal class Enricher
             eventLike.Sdk.AddPackage("nuget:" + SdkVersion.Instance.Name, SdkVersion.Instance.Version);
         }
 
-        // Platform
-        eventLike.Platform ??= Sentry.Constants.Platform;
-
         // Release
         eventLike.Release ??= _options.SettingLocator.GetRelease();
 
         // Distribution
-        eventLike.WithDistribution(_ => _.Distribution ??= _options.Distribution);
+        eventLike.Distribution ??= _options.Distribution;
 
         // Environment
         eventLike.Environment ??= _options.SettingLocator.GetEnvironment();

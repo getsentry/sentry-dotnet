@@ -269,7 +269,7 @@ public sealed class Envelope : ISerializable, IDisposable
                 }
                 catch (Exception exception)
                 {
-                    logger?.LogError("Failed to add attachment: {0}.", exception, attachment.FileName);
+                    logger?.LogError(exception, "Failed to add attachment: {0}.", attachment.FileName);
                 }
             }
         }
@@ -313,8 +313,13 @@ public sealed class Envelope : ISerializable, IDisposable
 
         if (transaction.TransactionProfiler is { } profiler)
         {
-            // Profiler.CollectAsync() may throw in which case the EnvelopeItem won't serialize.
-            items.Add(EnvelopeItem.FromProfileInfo(profiler.CollectAsync(transaction)));
+            // Profiler.Collect() returns an ISerializable which may also throw asynchronously, which is handled down
+            // the road in AsyncJsonSerializable and the EnvelopeItem won't serialize and is omitted.
+            // However, it mustn't throw synchronously because that would prevent the whole transaction being sent.
+            if (profiler.Collect(transaction) is {} profileInfo)
+            {
+                items.Add(EnvelopeItem.FromProfileInfo(profileInfo));
+            }
         }
 
         return new Envelope(eventId, header, items);

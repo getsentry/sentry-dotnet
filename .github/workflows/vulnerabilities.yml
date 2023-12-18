@@ -2,19 +2,15 @@ name: List vulnerable packages
 
 on:
   workflow_dispatch:
-  schedule:
-    # once a day
-    - cron: '0 0 * * *'
+  # Currently broken on .net 8, see https://github.com/NuGet/Home/issues/12954
+  # schedule:
+  #   - cron: "0 0 * * *" # once a day
+  # pull_request:
 
 jobs:
-  List-vulnerable-packages:
-    name: ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+  list-vulnerable-packages:
+    name: List vulnerable packages
+    runs-on: macos-latest
 
     steps:
       - name: Checkout
@@ -27,12 +23,13 @@ jobs:
 
       # We only need to restore to check for vulnerable packages
       - name: Restore .NET Dependencies
-        run: dotnet restore --nologo
+        run: dotnet restore Sentry.sln --nologo
 
       # The dotnet list package command doesn't change its exit code on detection, so tee to a file and scan it
       # See https://github.com/NuGet/Home/issues/11315#issuecomment-1243055173
       - name: List vulnerable packages
         shell: bash
         run: |
-          dotnet list package --vulnerable --include-transitive | tee vulnerable.txt
-          sh -c "! grep 'has the following vulnerable packages' vulnerable.txt"
+          dotnet list Sentry.sln package --vulnerable --include-transitive | tee vulnerable.txt
+          # https://github.com/getsentry/sentry-dotnet/issues/2814
+          # ! grep 'has the following vulnerable packages' vulnerable.txt

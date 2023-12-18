@@ -1,12 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0;net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.Profiling\Sentry.Profiling.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProfilingDependency Include="..\..\modules\perfview\src\FastSerialization\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.FastSerialization.dll" />
+    <ProfilingDependency Include="..\..\modules\perfview\src\TraceEvent\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.Tracing.TraceEvent.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="@(ProfilingDependency)" />
   </ItemGroup>
 
 </Project>

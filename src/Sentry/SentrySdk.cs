@@ -12,11 +12,7 @@ namespace Sentry;
 /// It allows safe static access to a client and scope management.
 /// When the SDK is uninitialized, calls to this class result in no-op so no callbacks are invoked.
 /// </remarks>
-#if __MOBILE__
 public static partial class SentrySdk
-#else
-    public static class SentrySdk
-#endif
 {
     internal static IHub CurrentHub = DisabledHub.Instance;
 
@@ -40,7 +36,7 @@ public static partial class SentrySdk
         // from anywhere else, return a disabled hub.
         if (Dsn.IsDisabled(dsnString))
         {
-            options.LogWarning("Init was called but no DSN was provided nor located. Sentry SDK will be disabled.");
+            options.LogWarning("Init called with an empty string as the DSN. Sentry SDK will be disabled.");
             return DisabledHub.Instance;
         }
 
@@ -52,17 +48,31 @@ public static partial class SentrySdk
         }
 
         // Initialize native platform SDKs here
-#if __MOBILE__
         if (options.InitNativeSdks)
         {
 #if __IOS__
             InitSentryCocoaSdk(options);
 #elif ANDROID
             InitSentryAndroidSdk(options);
+#elif NET8_0_OR_GREATER
+            if (AotHelper.IsNativeAot)
+            {
+                InitNativeSdk(options);
+            }
 #endif
         }
-#endif
-        return new Hub(options);
+
+        // We init the hub after native SDK in case the native init needs to adapt some options.
+        var hub = new Hub(options);
+
+        // Run all post-init callbacks set up by native integrations.
+        foreach (var callback in options.PostInitCallbacks)
+        {
+            callback.Invoke(hub);
+        }
+        options.PostInitCallbacks.Clear();
+
+        return hub;
     }
 
     /// <summary>
@@ -219,7 +229,6 @@ public static partial class SentrySdk
         {
             _ = Interlocked.CompareExchange(ref CurrentHub, DisabledHub.Instance, _localHub);
             (_localHub as IDisposable)?.Dispose();
-
             _localHub = null!;
         }
     }
@@ -322,75 +331,6 @@ public static partial class SentrySdk
         => CurrentHub.AddBreadcrumb(breadcrumb, hint);
 
     /// <summary>
-    /// Runs the callback within a new scope.
-    /// </summary>
-    /// <remarks>
-    /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
-    /// perform within an isolated scope.  If you just need to configure scope for a single event, use the overloads
-    /// of CaptureEvent, CaptureMessage and CaptureException that provide a callback to a configurable scope.
-    /// </remarks>
-    /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
-    /// <param name="scopeCallback">The callback to run with the one time scope.</param>
-    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
-              "that provide a callback to a configurable scope.")]
-    [DebuggerStepThrough]
-    public static void WithScope(Action<Scope> scopeCallback)
-        => CurrentHub.WithScope(scopeCallback);
-
-    /// <summary>
-    /// Runs the callback within a new scope.
-    /// </summary>
-    /// <remarks>
-    /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
-    /// perform within an isolated scope.  If you just need to configure scope for a single event, use the overloads
-    /// of CaptureEvent, CaptureMessage and CaptureException that provide a callback to a configurable scope.
-    /// </remarks>
-    /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
-    /// <param name="scopeCallback">The callback to run with the one time scope.</param>
-    /// <returns>The result from the callback.</returns>
-    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
-              "that provide a callback to a configurable scope.")]
-    [DebuggerStepThrough]
-    public static T? WithScope<T>(Func<Scope, T?> scopeCallback)
-        => CurrentHub is IHubEx hub ? hub.WithScope(scopeCallback) : default;
-
-    /// <summary>
-    /// Runs the asynchronous callback within a new scope.
-    /// </summary>
-    /// <remarks>
-    /// Asynchronous version of <see cref="ISentryScopeManager.WithScope"/>.
-    /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
-    /// perform within an isolated scope.  If you just need to configure scope for a single event, use the overloads
-    /// of CaptureEvent, CaptureMessage and CaptureException that provide a callback to a configurable scope.
-    /// </remarks>
-    /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
-    /// <param name="scopeCallback">The callback to run with the one time scope.</param>
-    /// <returns>An async task to await the callback.</returns>
-    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
-              "that provide a callback to a configurable scope.")]
-    [DebuggerStepThrough]
-    public static Task WithScopeAsync(Func<Scope, Task> scopeCallback)
-        => CurrentHub is IHubEx hub ? hub.WithScopeAsync(scopeCallback) : Task.CompletedTask;
-
-    /// <summary>
-    /// Runs the asynchronous callback within a new scope.
-    /// </summary>
-    /// <remarks>
-    /// Asynchronous version of <see cref="ISentryScopeManager.WithScope"/>.
-    /// Pushes a new scope, runs the callback, then pops the scope. Use this when you have significant work to
-    /// perform within an isolated scope.  If you just need to configure scope for a single event, use the overloads
-    /// of CaptureEvent, CaptureMessage and CaptureException that provide a callback to a configurable scope.
-    /// </remarks>
-    /// <see href="https://docs.sentry.io/platforms/dotnet/enriching-events/scopes/#local-scopes"/>
-    /// <param name="scopeCallback">The callback to run with the one time scope.</param>
-    /// <returns>An async task to await the result of the callback.</returns>
-    [Obsolete("This method is deprecated in favor of overloads of CaptureEvent, CaptureMessage and CaptureException " +
-              "that provide a callback to a configurable scope.")]
-    [DebuggerStepThrough]
-    public static Task<T?> WithScopeAsync<T>(Func<Scope, Task<T?>> scopeCallback)
-        => CurrentHub is IHubEx hub ? hub.WithScopeAsync(scopeCallback) : Task.FromResult(default(T));
-
-    /// <summary>
     /// Configures the scope through the callback.
     /// </summary>
     /// <param name="configureScope">The configure scope callback.</param>
@@ -408,41 +348,16 @@ public static partial class SentrySdk
         => CurrentHub.ConfigureScopeAsync(configureScope);
 
     /// <summary>
-    /// Captures the event.
-    /// </summary>
-    /// <param name="evt">The event.</param>
-    /// <returns>The Id of the event.</returns>
-    [DebuggerStepThrough]
-    public static SentryId CaptureEvent(SentryEvent evt)
-        => CurrentHub.CaptureEvent(evt);
-
-    /// <summary>
-    /// Captures the event using the specified scope.
-    /// </summary>
-    /// <param name="evt">The event.</param>
-    /// <param name="scope">The scope.</param>
-    /// <returns>The Id of the event.</returns>
-    [DebuggerStepThrough]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public static SentryId CaptureEvent(SentryEvent evt, Scope? scope)
-        => CurrentHub.CaptureEvent(evt, scope);
-
-    /// <summary>
     /// Captures the event, passing a hint, using the specified scope.
     /// </summary>
     /// <param name="evt">The event.</param>
-    /// <param name="hint">a hint for the event.</param>
     /// <param name="scope">The scope.</param>
+    /// <param name="hint">a hint for the event.</param>
     /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static SentryId CaptureEvent(SentryEvent evt, Hint? hint, Scope? scope)
-        => CurrentHub.CaptureEvent(evt, hint, scope);
-
-    internal static SentryId CaptureEventInternal(SentryEvent evt, Hint? hint, Scope? scope)
-        => CurrentHub is IHubEx hub
-            ? hub.CaptureEventInternal(evt, hint, scope)
-            : CurrentHub.CaptureEvent(evt, hint, scope);
+    public static SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Hint? hint = null)
+        => CurrentHub.CaptureEvent(evt, scope, hint);
 
     /// <summary>
     /// Captures an event with a configurable scope.
@@ -456,7 +371,22 @@ public static partial class SentrySdk
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
-        => CurrentHub.CaptureEvent(evt, configureScope);
+        => CurrentHub.CaptureEvent(evt, null, configureScope);
+
+    /// <summary>
+    /// Captures an event with a configurable scope.
+    /// </summary>
+    /// <remarks>
+    /// This allows modifying a scope without affecting other events.
+    /// </remarks>
+    /// <param name="evt">The event.</param>
+    /// <param name="hint">An optional hint to be provided with the event</param>
+    /// <param name="configureScope">The callback to configure the scope.</param>
+    /// <returns>The Id of the event.</returns>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope)
+        => CurrentHub.CaptureEvent(evt, hint, configureScope);
 
     /// <summary>
     /// Captures the exception.
@@ -544,8 +474,8 @@ public static partial class SentrySdk
     /// </remarks>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static void CaptureTransaction(Transaction transaction, Hint? hint)
-        => CurrentHub.CaptureTransaction(transaction, hint);
+    public static void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
+        => CurrentHub.CaptureTransaction(transaction, scope, hint);
 
     /// <summary>
     /// Captures a session update.
@@ -558,7 +488,7 @@ public static partial class SentrySdk
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    public static ITransaction StartTransaction(
+    public static ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext)
         => CurrentHub.StartTransaction(context, customSamplingContext);
@@ -567,7 +497,7 @@ public static partial class SentrySdk
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    internal static ITransaction StartTransaction(
+    internal static ITransactionTracer StartTransaction(
         ITransactionContext context,
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
@@ -577,28 +507,28 @@ public static partial class SentrySdk
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    public static ITransaction StartTransaction(ITransactionContext context)
+    public static ITransactionTracer StartTransaction(ITransactionContext context)
         => CurrentHub.StartTransaction(context);
 
     /// <summary>
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    public static ITransaction StartTransaction(string name, string operation)
+    public static ITransactionTracer StartTransaction(string name, string operation)
         => CurrentHub.StartTransaction(name, operation);
 
     /// <summary>
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    public static ITransaction StartTransaction(string name, string operation, string? description)
+    public static ITransactionTracer StartTransaction(string name, string operation, string? description)
         => CurrentHub.StartTransaction(name, operation, description);
 
     /// <summary>
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
-    public static ITransaction StartTransaction(string name, string operation, SentryTraceHeader traceHeader)
+    public static ITransactionTracer StartTransaction(string name, string operation, SentryTraceHeader traceHeader)
         => CurrentHub.StartTransaction(name, operation, traceHeader);
 
     /// <summary>
@@ -690,9 +620,9 @@ public static partial class SentrySdk
     [Obsolete("WARNING: This method deliberately causes a crash, and should not be used in a real application.")]
     public static void CauseCrash(CrashType crashType)
     {
-        var msg =
-            "This exception was caused deliberately by " +
-            $"{nameof(SentrySdk)}.{nameof(CauseCrash)}({nameof(CrashType)}.{crashType}).";
+        var info = $"{nameof(SentrySdk)}.{nameof(CauseCrash)}({nameof(CrashType)}.{crashType})";
+        var msg = $"This exception was caused deliberately by {info}.";
+        CurrentOptions?.LogDebug("Triggering a deliberate exception because {0} was called", info);
 
         switch (crashType)
         {
@@ -705,29 +635,47 @@ public static partial class SentrySdk
                 break;
 
 #if ANDROID
-                case CrashType.Java:
-                    JavaSdk.Android.Supplemental.Buggy.ThrowRuntimeException(msg);
-                    break;
+            case CrashType.Java:
+                JavaSdk.Android.Supplemental.Buggy.ThrowRuntimeException(msg);
+                break;
 
-                case CrashType.JavaBackgroundThread:
-                    JavaSdk.Android.Supplemental.Buggy.ThrowRuntimeExceptionOnBackgroundThread(msg);
-                    break;
+            case CrashType.JavaBackgroundThread:
+                JavaSdk.Android.Supplemental.Buggy.ThrowRuntimeExceptionOnBackgroundThread(msg);
+                break;
 
-                case CrashType.Native:
-                    NativeCrash();
-                    break;
+            case CrashType.Native:
+                NativeCrash();
+                break;
 #elif __IOS__
             case CrashType.Native:
                 SentryCocoaSdk.Crash();
+                break;
+#elif NET8_0_OR_GREATER
+            case CrashType.Native:
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    NativeStrlenMSVCRT(IntPtr.Zero);
+                }
+                else
+                {
+                    NativeStrlenLibC(IntPtr.Zero);
+                }
                 break;
 #endif
             default:
                 throw new ArgumentOutOfRangeException(nameof(crashType), crashType, null);
         }
+        CurrentOptions?.LogWarning("Something went wrong in {0}, execution should never reach this.", info);
     }
 
 #if ANDROID
     [System.Runtime.InteropServices.DllImport("libsentrysupplemental.so", EntryPoint = "crash")]
     private static extern void NativeCrash();
+#elif NET8_0_OR_GREATER
+    [DllImport("msvcrt", EntryPoint = "strlen")]
+    private static extern IntPtr NativeStrlenMSVCRT(IntPtr str);
+
+    [DllImport("libc", EntryPoint = "strlen")]
+    private static extern IntPtr NativeStrlenLibC(IntPtr strt);
 #endif
 }

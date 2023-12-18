@@ -49,13 +49,16 @@ internal class SentryTracingBuilder : IApplicationBuilder
         {
             var options = InnerBuilder.ApplicationServices.GetService<IOptions<SentryAspNetCoreOptions>>();
             var instrumenter = options?.Value.Instrumenter ?? Instrumenter.Sentry;
-            if (instrumenter == Instrumenter.Sentry)
+            var autoRegisterTracing = options?.Value.AutoRegisterTracing ?? true;
+            if (instrumenter == Instrumenter.Sentry && autoRegisterTracing)
             {
-                return InnerBuilder.Use(middleware).UseSentryTracing();
+                InnerBuilder.Use(middleware).UseSentryTracingInternal();
+                return this; // Make sure we return the same builder (not the inner builder), for chaining
             }
-            this.StoreInstrumenter(instrumenter); // Saves us from having to resolve the options to make this check again
+            this.StoreRegistrationDecision(false); // Saves us from having to resolve the options to make this check again
         }
 
-        return InnerBuilder.Use(middleware);
+        InnerBuilder.Use(middleware);
+        return this; // Make sure we return the same builder (not the inner builder), for chaining
     }
 }

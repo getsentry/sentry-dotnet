@@ -82,12 +82,13 @@ public partial class HttpTransportTests
         // Assert
         logger.Entries.Any(e =>
             e.Level == SentryLevel.Error &&
-            e.Message == "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}. Error causes: {3}." &&
+            e.Message == "{0}: Sentry rejected the envelope '{1}'. Status code: {2}. Error detail: {3}. Error causes: {4}." &&
             e.Exception == null &&
-            e.Args[0].ToString() == envelope.TryGetEventId().ToString() &&
-            e.Args[1].ToString() == expectedCode.ToString() &&
-            e.Args[2].ToString() == expectedMessage &&
-            e.Args[3].ToString() == expectedCausesFormatted
+            e.Args[0].ToString() == "HttpTransport" &&
+            e.Args[1].ToString() == envelope.TryGetEventId().ToString() &&
+            e.Args[2].ToString() == expectedCode.ToString() &&
+            e.Args[3].ToString() == expectedMessage &&
+            e.Args[4].ToString() == expectedCausesFormatted
         ).Should().BeTrue();
     }
 
@@ -125,28 +126,29 @@ public partial class HttpTransportTests
         // Assert
         logger.Entries.Any(e =>
                 e.Level == SentryLevel.Debug &&
-                e.Message == "Environment variable '{0}' set. Writing envelope to {1}" &&
+                e.Message == "{0}: Environment variable '{1}' set. Writing envelope to {2}" &&
                 e.Exception == null &&
-                e.Args[0].ToString() == expectedEnvVar &&
-                e.Args[1].ToString() == path)
+                e.Args[0].ToString() == "HttpTransport" &&
+                e.Args[1].ToString() == expectedEnvVar &&
+                e.Args[2].ToString() == path)
             .Should()
             .BeTrue();
 
         var fileStoredLogEntry = logger.Entries.FirstOrDefault(e =>
             e.Level == SentryLevel.Info &&
-            e.Message == "Envelope's {0} bytes written to: {1}");
+            e.Message == "{0}: Envelope's {1} bytes written to: {2}");
 
         Assert.NotNull(fileStoredLogEntry);
-        var expectedFile = new FileInfo(fileStoredLogEntry.Args[1].ToString()!);
+        var expectedFile = new FileInfo(fileStoredLogEntry.Args[2].ToString()!);
         Assert.True(expectedFile.Exists);
         try
         {
             Assert.Null(fileStoredLogEntry.Exception);
             // // Path is based on the provided path:
-            Assert.Contains(path, fileStoredLogEntry.Args[1] as string);
+            Assert.Contains(path, fileStoredLogEntry.Args[2] as string);
             // // Path contains the envelope id in its name:
-            Assert.Contains(envelope.TryGetEventId().ToString(), fileStoredLogEntry.Args[1] as string);
-            Assert.Equal(expectedFile.Length, (long)fileStoredLogEntry.Args[0]);
+            Assert.Contains(envelope.TryGetEventId().ToString(), fileStoredLogEntry.Args[2] as string);
+            Assert.Equal(expectedFile.Length, (long)fileStoredLogEntry.Args[1]);
         }
         finally
         {
@@ -224,11 +226,12 @@ public partial class HttpTransportTests
         // Assert
         _ = logger.Entries.Any(e =>
             e.Level == SentryLevel.Error &&
-            e.Message == "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}." &&
+            e.Message == "{0}: Sentry rejected the envelope '{1}'. Status code: {2}. Error detail: {3}." &&
             e.Exception == null &&
-            e.Args[0].ToString() == envelope.TryGetEventId().ToString() &&
-            e.Args[1].ToString() == expectedCode.ToString() &&
-            e.Args[2].ToString() == expectedMessage
+            e.Args[0].ToString() == "HttpTransport" &&
+            e.Args[1].ToString() == envelope.TryGetEventId().ToString() &&
+            e.Args[2].ToString() == expectedCode.ToString() &&
+            e.Args[3].ToString() == expectedMessage
         ).Should().BeTrue();
     }
 
@@ -262,12 +265,14 @@ public partial class HttpTransportTests
         // Assert
         logger.Entries.Any(e =>
             e.Level == SentryLevel.Error &&
-            e.Message == "Sentry rejected the envelope {0}. Status code: {1}. Error detail: {2}. Error causes: {3}." &&
+            e.Message == "{0}: Sentry rejected the envelope '{1}'. Status code: {2}. Error detail: {3}. Error causes: {4}." &&
             e.Exception == null &&
-            e.Args[0].ToString() == envelope.TryGetEventId().ToString() &&
-            e.Args[1].ToString() == expectedCode.ToString() &&
-            e.Args[2].ToString() == HttpTransportBase.DefaultErrorMessage &&
-            e.Args[3].ToString() == string.Empty
+            e.Args[0].ToString() == "HttpTransport" &&
+            e.Args[1].ToString() == envelope.TryGetEventId().ToString() &&
+            e.Args[2].ToString() == expectedCode.ToString() &&
+            e.Args[3].ToString() == HttpTransportBase.DefaultErrorMessage &&
+            e.Args[4].ToString() == string.Empty
+
         ).Should().BeTrue();
     }
 
@@ -588,7 +593,7 @@ public partial class HttpTransportTests
         // (the envelope should have only one item)
 
         logger.Entries.Should().Contain(e =>
-            string.Format(e.Message, e.Args) == "Attachment 'test2.txt' dropped because it's too large (5 bytes).");
+            string.Format(e.Message, e.Args) == "HttpTransport: Attachment 'test2.txt' dropped because it's too large (5 bytes).");
 
         actualEnvelopeSerialized.Should().NotContain("test2.txt");
     }

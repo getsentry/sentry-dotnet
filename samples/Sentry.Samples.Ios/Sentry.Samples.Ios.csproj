@@ -1,11 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0-ios</TargetFramework>
+    <TargetFramework>net8.0-ios</TargetFramework>
     <OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
-    <SupportedOSPlatformVersion>10.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion>11.0</SupportedOSPlatformVersion>
+    <SelfContained>true</SelfContained>
+    <PublishAot>true</PublishAot>
   </PropertyGroup>
 
   <!--
@@ -19,12 +21,10 @@
   </ItemGroup>
 
   <!--
-    Use the arm64 runtime when building on arm64 Macs.
-    See https://github.com/xamarin/xamarin-macios/issues/17841
+    To run on a device, you need to set the CodesignEntitlements property.
   -->
-  <PropertyGroup>
-    <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
-    <RuntimeIdentifier Condition="'$(OSArchitecture)' == 'Arm64' And ('$(_iOSRuntimeIdentifier)' == 'iossimulator-x64' Or ('$(_iOSRuntimeIdentifier)' == '' And '$(RuntimeIdentifier)' == ''))">iossimulator-arm64</RuntimeIdentifier>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <CodesignKey>iPhone Developer</CodesignKey>
   </PropertyGroup>
 
   <!--
@@ -35,5 +35,4 @@
     <SentryUploadSources>true</SentryUploadSources>
     <SentryUploadSymbols>true</SentryUploadSymbols>
   </PropertyGroup>
-
 </Project>

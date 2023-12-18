@@ -56,13 +56,11 @@ internal class ProcessInfo
             // ArgumentOutOfRangeException: The added or subtracted value results in an un-representable DateTime.
             // https://github.com/getsentry/sentry-unity/issues/233
 
-            options.LogError(
+            options.LogError(e,
                 "Failed to find BootTime: Now {0}, GetTimestamp {1}, Frequency {2}, TicksPerSecond: {3}",
-                e,
                 now,
                 timestamp,
-                Stopwatch.Frequency,
-                TimeSpan.TicksPerSecond);
+                Stopwatch.Frequency, TimeSpan.TicksPerSecond);
         }
 
         // An opt-out to the more precise approach (mainly due to IL2CPP):
@@ -85,7 +83,7 @@ internal class ProcessInfo
                 }
                 catch (Exception e)
                 {
-                    options.LogError("Failure getting precise App startup time.", e);
+                    options.LogError(e, "Failure getting precise App startup time.");
                     //Ignore any exception and stay with the less-precise DateTime.UtcNow value.
                 }
             }).ContinueWith(_ =>

@@ -171,8 +171,8 @@ public sealed class Mechanism : IJsonSerializable
             IsExceptionGroup = isExceptionGroup,
             ExceptionId = exceptionId,
             ParentId = parentId,
-            InternalData = data?.WhereNotNullValue().ToDictionary(),
-            InternalMeta = meta?.WhereNotNullValue().ToDictionary()
+            InternalData = data?.WhereNotNullValue().ToDict(),
+            InternalMeta = meta?.WhereNotNullValue().ToDict()
         };
     }
 

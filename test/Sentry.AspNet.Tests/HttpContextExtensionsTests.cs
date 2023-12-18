@@ -16,7 +16,7 @@ public class HttpContextExtensionsTests
         // Assert
         transaction.Name.Should().Be("GET /the/path");
         transaction.Operation.Should().Be("http.server");
-        ((IHasTransactionNameSource)transaction).NameSource.Should().Be(TransactionNameSource.Url);
+        transaction.NameSource.Should().Be(TransactionNameSource.Url);
     }
 
     [Fact]

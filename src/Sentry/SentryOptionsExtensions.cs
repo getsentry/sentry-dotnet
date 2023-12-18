@@ -37,7 +37,7 @@ public static class SentryOptionsExtensions
     /// </summary>
     /// <param name="options">The SentryOptions to remove the integration from.</param>
     public static void DisableAppDomainUnhandledExceptionCapture(this SentryOptions options) =>
-        options.RemoveIntegration<AppDomainUnhandledExceptionIntegration>();
+        options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.AppDomainUnhandledExceptionIntegration);
 
 #if HAS_DIAGNOSTIC_INTEGRATION
     /// <summary>
@@ -45,23 +45,15 @@ public static class SentryOptionsExtensions
     /// </summary>
     /// <param name="options">The SentryOptions to remove the integration from.</param>
     public static void DisableDiagnosticSourceIntegration(this SentryOptions options)
-        => options.RemoveIntegration<SentryDiagnosticListenerIntegration>();
+        => options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.SentryDiagnosticListenerIntegration);
 #endif
 
     /// <summary>
     /// Disables the capture of errors through <see cref="TaskScheduler.UnobservedTaskException"/>.
     /// </summary>
     /// <param name="options">The SentryOptions to remove the integration from.</param>
-    [Obsolete("Method has been renamed to DisableUnobservedTaskExceptionCapture.  Please update usage.")]
-    public static void DisableTaskUnobservedTaskExceptionCapture(this SentryOptions options) =>
-        options.DisableUnobservedTaskExceptionCapture();
-
-    /// <summary>
-    /// Disables the capture of errors through <see cref="TaskScheduler.UnobservedTaskException"/>.
-    /// </summary>
-    /// <param name="options">The SentryOptions to remove the integration from.</param>
     public static void DisableUnobservedTaskExceptionCapture(this SentryOptions options) =>
-        options.RemoveIntegration<UnobservedTaskExceptionIntegration>();
+        options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.UnobservedTaskExceptionIntegration);
 
 #if NETFRAMEWORK
     /// <summary>
@@ -71,7 +63,7 @@ public static class SentryOptionsExtensions
     public static void DisableNetFxInstallationsIntegration(this SentryOptions options)
     {
         options.RemoveEventProcessor<NetFxInstallationsEventProcessor>();
-        options.RemoveIntegration<NetFxInstallationsIntegration>();
+        options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.NetFxInstallationsIntegration);
     }
 #endif
 
@@ -81,7 +73,16 @@ public static class SentryOptionsExtensions
     /// </summary>
     /// <param name="options">The SentryOptions to remove the integration from.</param>
     public static void DisableAppDomainProcessExitFlush(this SentryOptions options) =>
-        options.RemoveIntegration<AppDomainProcessExitIntegration>();
+        options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.AppDomainProcessExitIntegration);
+
+#if NET5_0_OR_GREATER && !__MOBILE__
+    /// <summary>
+    /// Disables WinUI exception handler
+    /// </summary>
+    /// <param name="options">The SentryOptions to remove the integration from.</param>
+    public static void DisableWinUiUnhandledExceptionIntegration(this SentryOptions options)
+        => options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.WinUiUnhandledExceptionIntegration);
+#endif
 
     /// <summary>
     /// Add an integration
@@ -89,16 +90,7 @@ public static class SentryOptionsExtensions
     /// <param name="options">The SentryOptions to hold the processor.</param>
     /// <param name="integration">The integration.</param>
     public static void AddIntegration(this SentryOptions options, ISdkIntegration integration)
-    {
-        if (options.Integrations == null)
-        {
-            options.Integrations = new() {integration};
-        }
-        else
-        {
-            options.Integrations.Add(integration);
-        }
-    }
+        => options.AddIntegration(integration);
 
     /// <summary>
     /// Removes all integrations of type <typeparamref name="TIntegration"/>.
@@ -107,7 +99,7 @@ public static class SentryOptionsExtensions
     /// <param name="options">The SentryOptions to remove the integration(s) from.</param>
     public static void RemoveIntegration<TIntegration>(this SentryOptions options)
         where TIntegration : ISdkIntegration
-        => options.Integrations?.RemoveAll(integration => integration is TIntegration);
+        => options.RemoveIntegration<TIntegration>();
 
     /// <summary>
     /// Add an exception filter.
@@ -201,14 +193,7 @@ public static class SentryOptionsExtensions
     /// <param name="processor">The exception processor.</param>
     public static void AddExceptionProcessor(this SentryOptions options, ISentryEventExceptionProcessor processor)
     {
-        if (options.ExceptionProcessors == null)
-        {
-            options.ExceptionProcessors = new() {processor};
-        }
-        else
-        {
-            options.ExceptionProcessors.Add(processor);
-        }
+        options.ExceptionProcessors.Add((processor.GetType(), new Lazy<ISentryEventExceptionProcessor>(() => processor)));
     }
 
     /// <summary>
@@ -218,13 +203,9 @@ public static class SentryOptionsExtensions
     /// <param name="processors">The exception processors.</param>
     public static void AddExceptionProcessors(this SentryOptions options, IEnumerable<ISentryEventExceptionProcessor> processors)
     {
-        if (options.ExceptionProcessors == null)
+        foreach (var processor in processors)
         {
-            options.ExceptionProcessors = processors.ToList();
-        }
-        else
-        {
-            options.ExceptionProcessors.AddRange(processors);
+            AddExceptionProcessor(options, processor);
         }
     }
 
@@ -235,14 +216,7 @@ public static class SentryOptionsExtensions
     /// <param name="processor">The event processor.</param>
     public static void AddEventProcessor(this SentryOptions options, ISentryEventProcessor processor)
     {
-        if (options.EventProcessors == null)
-        {
-            options.EventProcessors = new() {processor};
-        }
-        else
-        {
-            options.EventProcessors.Add(processor);
-        }
+        options.EventProcessors.Add((processor.GetType(), new Lazy<ISentryEventProcessor>(() => processor)));
     }
 
     /// <summary>
@@ -252,13 +226,9 @@ public static class SentryOptionsExtensions
     /// <param name="processors">The event processors.</param>
     public static void AddEventProcessors(this SentryOptions options, IEnumerable<ISentryEventProcessor> processors)
     {
-        if (options.EventProcessors == null)
+        foreach (var processor in processors)
         {
-            options.EventProcessors = processors.ToList();
-        }
-        else
-        {
-            options.EventProcessors.AddRange(processors);
+            AddEventProcessor(options, processor);
         }
     }
 
@@ -269,7 +239,7 @@ public static class SentryOptionsExtensions
     /// <param name="options">The SentryOptions to remove the processor(s) from.</param>
     public static void RemoveEventProcessor<TProcessor>(this SentryOptions options)
         where TProcessor : ISentryEventProcessor
-        => options.EventProcessors?.RemoveAll(processor => processor is TProcessor);
+        => options.EventProcessors.RemoveAll(processor => processor.Type == typeof(TProcessor));
 
     /// <summary>
     /// Adds an event processor provider which is invoked when creating a <see cref="SentryEvent"/>.
@@ -278,14 +248,7 @@ public static class SentryOptionsExtensions
     /// <param name="processorProvider">The event processor provider.</param>
     public static void AddEventProcessorProvider(this SentryOptions options, Func<IEnumerable<ISentryEventProcessor>> processorProvider)
     {
-        if (options.EventProcessorsProviders == null)
-        {
-            options.EventProcessorsProviders = new() {processorProvider};
-        }
-        else
-        {
-            options.EventProcessorsProviders.Add(processorProvider);
-        }
+        options.EventProcessorsProviders.Add(processorProvider);
     }
 
     /// <summary>
@@ -337,9 +300,7 @@ public static class SentryOptionsExtensions
     /// <param name="options">The SentryOptions to hold the processor provider.</param>
     /// <param name="processorProvider">The transaction processor provider.</param>
     public static void AddTransactionProcessorProvider(this SentryOptions options, Func<IEnumerable<ISentryTransactionProcessor>> processorProvider)
-        => options.TransactionProcessorsProviders = options.TransactionProcessorsProviders != null
-            ? options.TransactionProcessorsProviders.Concat(new[] { processorProvider }).ToList()
-            : new() { processorProvider };
+        => options.TransactionProcessorsProviders = options.TransactionProcessorsProviders.Concat(new[] { processorProvider }).ToList();
 
     /// <summary>
     /// Add the exception processor provider.
@@ -349,14 +310,7 @@ public static class SentryOptionsExtensions
     public static void AddExceptionProcessorProvider(this SentryOptions options,
         Func<IEnumerable<ISentryEventExceptionProcessor>> processorProvider)
     {
-        if (options.ExceptionProcessorsProviders == null)
-        {
-            options.ExceptionProcessorsProviders = new() {processorProvider};
-        }
-        else
-        {
-            options.ExceptionProcessorsProviders.Add(processorProvider);
-        }
+        options.ExceptionProcessorsProviders.Add(processorProvider);
     }
 
     /// <summary>
@@ -364,21 +318,21 @@ public static class SentryOptionsExtensions
     /// </summary>
     /// <param name="options">The SentryOptions which holds the processor providers.</param>
     public static IEnumerable<ISentryEventProcessor> GetAllEventProcessors(this SentryOptions options)
-        => options.EventProcessorsProviders?.SelectMany(p => p()) ?? Enumerable.Empty<ISentryEventProcessor>();
+        => options.EventProcessorsProviders.SelectMany(p => p());
 
     /// <summary>
     /// Invokes all transaction processor providers available.
     /// </summary>
     /// <param name="options">The SentryOptions which holds the processor providers.</param>
     public static IEnumerable<ISentryTransactionProcessor> GetAllTransactionProcessors(this SentryOptions options)
-        => options.TransactionProcessorsProviders?.SelectMany(p => p()) ?? Enumerable.Empty<ISentryTransactionProcessor>();
+        => options.TransactionProcessorsProviders.SelectMany(p => p());
 
     /// <summary>
     /// Invokes all exception processor providers available.
     /// </summary>
     /// <param name="options">The SentryOptions which holds the processor providers.</param>
     public static IEnumerable<ISentryEventExceptionProcessor> GetAllExceptionProcessors(this SentryOptions options)
-        => options.ExceptionProcessorsProviders?.SelectMany(p => p()) ?? Enumerable.Empty<ISentryEventExceptionProcessor>();
+        => options.ExceptionProcessorsProviders.SelectMany(p => p());
 
     /// <summary>
     /// Use custom <see cref="ISentryStackTraceFactory" />.
