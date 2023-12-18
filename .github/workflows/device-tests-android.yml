@@ -41,7 +41,7 @@ jobs:
         run: pwsh ./scripts/device-test.ps1 android -Build
 
       - name: Upload Android Test App
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: device-test-android
           if-no-files-found: error
@@ -126,7 +126,7 @@ jobs:
 
       - name: Upload results
         if: success() || failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: device-test-android-${{ matrix.api-level }}-results
           path: test_output

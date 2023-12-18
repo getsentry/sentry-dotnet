@@ -117,7 +117,7 @@ jobs:
 
       - name: Upload build and test outputs
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: verify-test-results
           path: "**/*.received.*"
@@ -130,7 +130,7 @@ jobs:
 
       - name: Archive Nuget Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ github.sha }}
           if-no-files-found: error
