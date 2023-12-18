@@ -398,7 +398,7 @@ internal class MetricAggregator : IMetricAggregator
         lastClearedStaleLocations = today;
     }
 
-    /// <inheritdoc />
+    /// <inheritdoc cref="IAsyncDisposable.DisposeAsync"/>
     public async ValueTask DisposeAsync()
     {
         _options.LogDebug("Disposing MetricAggregator.");
@@ -436,5 +436,10 @@ internal class MetricAggregator : IMetricAggregator
             _shutdownSource.Dispose();
             LoopTask.Dispose();
         }
+    }
+
+    public void Dispose()
+    {
+        DisposeAsync().GetAwaiter().GetResult();
     }
 }

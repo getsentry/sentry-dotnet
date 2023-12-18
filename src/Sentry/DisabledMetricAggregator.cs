@@ -38,9 +38,8 @@ internal class DisabledMetricAggregator : IMetricAggregator
         return Task.CompletedTask;
     }
 
-    public ValueTask DisposeAsync()
+    public void Dispose()
     {
         // No Op
-        return default;
     }
 }

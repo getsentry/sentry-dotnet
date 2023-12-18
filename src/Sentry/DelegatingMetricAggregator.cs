@@ -22,5 +22,5 @@ internal class DelegatingMetricAggregator(IMetricAggregator innerAggregator) : I
     public Task FlushAsync(bool force = true, CancellationToken cancellationToken = default) =>
         innerAggregator.FlushAsync(force, cancellationToken);
 
-    public ValueTask DisposeAsync() => innerAggregator.DisposeAsync();
+    public void Dispose() => innerAggregator.Dispose();
 }
