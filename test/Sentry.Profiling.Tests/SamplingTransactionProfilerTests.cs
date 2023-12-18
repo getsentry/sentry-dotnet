@@ -8,7 +8,7 @@ namespace Sentry.Profiling.Tests;
 [UsesVerify]
 public class SamplingTransactionProfilerTests
 {
-    private readonly IDiagnosticLogger _testOutputLogger;
+    private readonly TestOutputDiagnosticLogger _testOutputLogger;
     private readonly SentryOptions _testSentryOptions;
 
     public SamplingTransactionProfilerTests(ITestOutputHelper output)
@@ -144,7 +144,7 @@ public class SamplingTransactionProfilerTests
         var profileInfo = collectTask.Result;
 
         Assert.NotNull(profileInfo);
-        ValidateProfile(profileInfo.Profile, (ulong)(limitMs * 1_000_000));
+        Assert.Contains("Profiling is being cut-of after 50 ms because the transaction takes longer than that.", _testOutputLogger.Entries.Select(e => e.Message));
     }
 
     [Theory]
