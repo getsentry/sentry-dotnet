@@ -17,15 +17,14 @@ internal class SampleProfileBuilder
     // Output profile being built.
     public readonly SampleProfile Profile = new();
 
-    // TODO reevaluate the use of SparseArray after setting up continous profiling. Dictionary might be better.
     // A sparse array that maps from StackSourceFrameIndex to an index in the output Profile.frames.
-    private readonly SparseScalarArray<int> _frameIndexes = new(-1, 1000);
+    private readonly Dictionary<int, int> _frameIndexes = new();
 
     // A dictionary from a CallStackIndex to an index in the output Profile.stacks.
-    private readonly SparseScalarArray<int> _stackIndexes = new(100);
+    private readonly Dictionary<int, int> _stackIndexes = new();
 
     // A sparse array mapping from a ThreadIndex to an index in Profile.Threads.
-    private readonly SparseScalarArray<int> _threadIndexes = new(-1, 10);
+    private readonly Dictionary<int, int> _threadIndexes = new();
 
     // TODO make downsampling conditional once this is available: https://github.com/dotnet/runtime/issues/82939
     private readonly Downsampler _downsampler = new();
