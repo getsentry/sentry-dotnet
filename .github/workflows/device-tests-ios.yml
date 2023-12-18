@@ -38,7 +38,7 @@ jobs:
         run: pwsh ./scripts/device-test.ps1 ios -Build
 
       - name: Upload iOS Test App
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: device-test-ios
           if-no-files-found: error
@@ -58,7 +58,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download test app artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: device-test-ios
           path: bin/Sentry.Maui.Device.TestApp.app
@@ -74,7 +74,7 @@ jobs:
 
       - name: Upload results
         if: success() || failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: device-test-ios-results
           path: test_output
