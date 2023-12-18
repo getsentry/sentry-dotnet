@@ -754,6 +754,7 @@ namespace Sentry
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, string? description) { }
     }
+    [System.Diagnostics.DebuggerDisplay("{Function}")]
     public sealed class SentryStackFrame : Sentry.IJsonSerializable
     {
         public SentryStackFrame() { }

@@ -55,7 +55,7 @@
                 }
               }
             ],
-            SentryThreads: [
+e            SentryThreads: [
               {
                 Crashed: false,
                 Current: true
