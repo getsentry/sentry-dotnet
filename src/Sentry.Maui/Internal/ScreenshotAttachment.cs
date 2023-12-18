@@ -48,14 +48,14 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
                 }
                 else
                 {
-                    _options.DiagnosticLogger?.Log(SentryLevel.Warning, "Capturing screenshot not supported");
+                    _options.LogWarning("Capturing screenshot not supported");
                     return Stream.Null;
                 }
             }
             //In some cases screen capture can throw, for example on Android if the activity is marked as secure.
             catch (Exception ex)
             {
-                _options.DiagnosticLogger?.Log(SentryLevel.Error, "Error capturing screenshot", ex);
+                _options.LogError(ex, "Error capturing screenshot");
                 return Stream.Null;
             }
         }).ConfigureAwait(false).GetAwaiter().GetResult();
