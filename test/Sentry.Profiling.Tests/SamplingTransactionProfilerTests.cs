@@ -11,6 +11,8 @@ public class SamplingTransactionProfilerTests
     private readonly TestOutputDiagnosticLogger _testOutputLogger;
     private readonly SentryOptions _testSentryOptions;
 
+    private int RuntimeMs => TestEnvironment.IsGitHubActions ? 20_000 : 300;
+
     public SamplingTransactionProfilerTests(ITestOutputHelper output)
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
@@ -74,7 +76,7 @@ public class SamplingTransactionProfilerTests
         var sut = factory.Start(transactionTracer, CancellationToken.None) as SamplingTransactionProfiler;
         Assert.NotNull(sut);
         transactionTracer.TransactionProfiler = sut;
-        RunForMs(200);
+        RunForMs(RuntimeMs);
         sut.Finish();
         var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
 
@@ -136,7 +138,7 @@ public class SamplingTransactionProfilerTests
         await session.WaitForFirstEventAsync(CancellationToken.None);
         var limitMs = 50;
         var sut = new SamplingTransactionProfiler(_testSentryOptions, session, limitMs, CancellationToken.None);
-        RunForMs(limitMs * 4);
+        RunForMs(limitMs * 10);
         sut.Finish();
 
         var collectTask = sut.CollectAsync(new Transaction("foo", "bar"));
@@ -201,7 +203,7 @@ public class SamplingTransactionProfilerTests
 
             var clock = SentryStopwatch.StartNew();
             var tx = hub.StartTransaction("name", "op");
-            RunForMs(300);
+            RunForMs(RuntimeMs);
             tx.Finish();
             var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
 
