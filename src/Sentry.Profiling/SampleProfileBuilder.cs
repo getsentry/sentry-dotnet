@@ -39,7 +39,7 @@ internal class SampleProfileBuilder
     internal void AddSample(TraceEvent data, double timestampMs)
     {
         var thread = data.Thread();
-        if (thread.ThreadIndex == ThreadIndex.Invalid)
+        if (thread is null || thread.ThreadIndex == ThreadIndex.Invalid)
         {
             _options.DiagnosticLogger?.LogDebug("Encountered a Profiler Sample without a correct thread. Skipping.");
             return;

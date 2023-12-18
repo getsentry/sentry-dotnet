@@ -11,7 +11,7 @@ public class SamplingTransactionProfilerTests
     private readonly TestOutputDiagnosticLogger _testOutputLogger;
     private readonly SentryOptions _testSentryOptions;
 
-    private int RuntimeMs => TestEnvironment.IsGitHubActions ? 20_000 : 300;
+    private int RuntimeMs => TestEnvironment.IsGitHubActions ? 5_000 : 300;
 
     public SamplingTransactionProfilerTests(ITestOutputHelper output)
     {
@@ -95,34 +95,34 @@ public class SamplingTransactionProfilerTests
         using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.Zero);
         var profiler = factory.Start(new TransactionTracer(Substitute.For<IHub>(), "test", ""), CancellationToken.None);
         Assert.Null(profiler);
-        factory._sessionTask.Wait(60_1000);
+        factory._sessionTask.Wait(60_000);
         CaptureAndValidate(factory);
     }
 
     [Theory]
     [InlineData(0)]
-    [InlineData(60)]
+    [InlineData(10)]
     public void Profiler_SingleProfile_Works(int startTimeoutSeconds)
     {
         using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(startTimeoutSeconds));
         // in the async startup case, we need to wait before collecting
         if (startTimeoutSeconds == 0)
         {
-            factory._sessionTask.Wait(60_1000);
+            factory._sessionTask.Wait(60_000);
         }
         var profile = CaptureAndValidate(factory);
     }
 
     [Theory]
     [InlineData(0)]
-    [InlineData(60)]
+    [InlineData(10)]
     public void Profiler_MultipleProfiles_Works(int startTimeoutSeconds)
     {
         using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(startTimeoutSeconds));
         // in the async startup case, we need to wait before collecting
         if (startTimeoutSeconds == 0)
         {
-            factory._sessionTask.Wait(60_1000);
+            factory._sessionTask.Wait(60_000);
         }
         CaptureAndValidate(factory);
         Thread.Sleep(100);
@@ -195,7 +195,7 @@ public class SamplingTransactionProfilerTests
         // Disable process exit flush to resolve "There is no currently active test." errors.
         options.DisableAppDomainProcessExitFlush();
 
-        options.AddIntegration(new ProfilingIntegration(TimeSpan.FromSeconds(60)));
+        options.AddIntegration(new ProfilingIntegration(TimeSpan.FromSeconds(10)));
 
         try
         {
