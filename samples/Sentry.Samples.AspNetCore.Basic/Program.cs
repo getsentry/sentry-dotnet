@@ -15,7 +15,7 @@ public class Program
             .UseSentry(o =>
             {
                 // A DSN is required.  You can set it here, or in configuration, or in an environment variable.
-                o.Dsn = "https://b887218a80114d26a9b1a51c5f88e0b4@o447951.ingest.sentry.io/6601807";
+                o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
 
                 // Enable Sentry performance monitoring
                 o.EnableTracing = true;
