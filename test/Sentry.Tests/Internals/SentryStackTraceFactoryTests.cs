@@ -191,7 +191,7 @@ public partial class SentryStackTraceFactoryTests
         var path = Path.Combine("Internals", "SentryStackTraceFactoryTests.cs");
         Assert.Equal(path, frame.FileName);
 
-        var fullPath = GetThisFilePath();
+        var fullPath = "test/Sentry.Tests/Internals/SentryStackTraceFactoryTests.cs";
         Assert.Equal(fullPath, frame.AbsolutePath);
     }
 

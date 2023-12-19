@@ -12,11 +12,16 @@
           Outputs="$(IntermediateOutputPath)$(SentryAttributesFile)">
     <PropertyGroup>
       <SentryAttributesFilePath>$(IntermediateOutputPath)$(SentryAttributesFile)</SentryAttributesFilePath>
+      <RepoRoot>$([System.IO.Path]::GetDirectoryName($([MSBuild]::GetPathOfFileAbove('.gitignore', '$(ProjectDir)'))))</RepoRoot>
     </PropertyGroup>
     <ItemGroup>
       <SentryAttributes Include="System.Reflection.AssemblyMetadata">
         <_Parameter1>Sentry.ProjectDirectory</_Parameter1>
         <_Parameter2>$(ProjectDir)</_Parameter2>
+      </SentryAttributes>
+      <SentryAttributes Include="System.Reflection.AssemblyMetadata">
+        <_Parameter1>Sentry.RepositoryRoot</_Parameter1>
+        <_Parameter2>$(RepoRoot)</_Parameter2>
       </SentryAttributes>
       <!-- Ensure not part of Compile, as a workaround for https://github.com/dotnet/sdk/issues/114 -->
       <Compile Remove="$(SentryAttributesFilePath)" />

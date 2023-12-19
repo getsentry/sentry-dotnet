@@ -42,7 +42,7 @@
                       Module: null,
                       LineNumber: 48,
                       ColumnNumber: 17,
-                      AbsolutePath: {ProjectDirectory}IntegrationTests.verify.cs,
+                      AbsolutePath: test/Sentry.NLog.Tests/IntegrationTests.verify.cs,
                       ContextLine: null,
                       InApp: false,
                       Package: Sentry.NLog.Tests, Version=SCRUBBED, Culture=SCRUBBED, PublicKeyToken=SCRUBBED,

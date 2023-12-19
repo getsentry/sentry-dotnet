@@ -349,7 +349,7 @@ internal class DebugStackTrace : SentryStackTrace
             if (AttributeReader.TryGetProjectDirectory(method.Module.Assembly) is { } projectPath
                 && frameFileName.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase))
             {
-                frame.AbsolutePath = GetRepositoryRelativePath(method.Module.Assembly, frameFileName);
+                frame.AbsolutePath = GetRepositoryRelativePath(method.Module.Assembly, frameFileName, _options);
                 frameFileName = frameFileName[projectPath.Length..];
             }
             frame.FileName = frameFileName;
@@ -358,15 +358,21 @@ internal class DebugStackTrace : SentryStackTrace
         return frame;
     }
 
-    internal static string GetRepositoryRelativePath(Assembly moduleAssembly, string frameFileName)
+    internal static string GetRepositoryRelativePath(Assembly moduleAssembly, string frameFileName,
+        SentryOptions options)
     {
-        if (AttributeReader.TryGetProjectDirectory(moduleAssembly) is { } projectDirectory && frameFileName.StartsWith(projectDirectory))
+        if (AttributeReader.TryGetRepositoryRoot(moduleAssembly) is not { } repoRoot ||
+            !frameFileName.StartsWith(repoRoot))
         {
-            frameFileName = frameFileName.Substring(projectDirectory.Length);
-            if (frameFileName.StartsWith("/"))
-            {
-                frameFileName = frameFileName.Substring(1);
-            }
+            options.LogDebug("No repository root found. Using absolute file path.");
+            return frameFileName;
+        }
+
+        options.LogDebug($"Filenames relative to repository root: {repoRoot}");
+        frameFileName = frameFileName.Substring(repoRoot.Length);
+        if (frameFileName.StartsWith("/"))
+        {
+            frameFileName = frameFileName.Substring(1);
         }
         return frameFileName;
     }
