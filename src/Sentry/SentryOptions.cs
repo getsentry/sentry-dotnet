@@ -1316,7 +1316,7 @@ public class SentryOptions
 }
 
 /// <summary>
-/// Settings to the experimental Metrics feature. This feature is preview only and will very likely change in the future
+/// Settings for the experimental Metrics feature. This feature is preview only and will very likely change in the future
 /// without a major version bump... so use at your own risk.
 /// </summary>
 public class ExperimentalMetricsOptions

@@ -158,9 +158,14 @@ internal class MetricAggregator : IMetricAggregator
             {
                 // This prevents multiple threads from trying to mutate the metric at the same time. The only other
                 // operations performed against metrics are adding one to the bucket (guaranteed to be atomic due to
-                // the use of a ConcurrentDictionary for the timeBucket) and removing buckets entirely. Technically,
-                // with a very small flushShift (e.g. 0.0) it might be possible to get a metric emitted to a bucket that
-                // is being removed after a flush...
+                // the use of a ConcurrentDictionary for the timeBucket) and removing buckets entirely.
+                //
+                // With a very small flushShift (e.g. 0.0) it might be possible for a metric to be emitted to a bucket
+                // that was removed after a flush, in which case that metric.Add(value) would never make it to Sentry.
+                // We've never seen this happen in unit testing (where we always set the flushShift to 0.0) so this
+                // remains only a theoretical possibility of data loss (not confirmed). If this becomes a real problem
+                // and we need to guarantee delivery of every metric.Add, we'll need to build a more complex mechanism
+                // to coordinate flushing with emission.
                 lock(metric)
                 {
                     metric.Add(value);
