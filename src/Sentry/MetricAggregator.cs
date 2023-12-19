@@ -151,17 +151,22 @@ internal class MetricAggregator : IMetricAggregator
             _ => new ConcurrentDictionary<string, Metric>()
         );
 
-        lock (_emitLock)
-        {
-            timeBucket.AddOrUpdate(
-                GetMetricBucketKey(type, key, unit.Value, tags),
-                addValuesFactory,
-                (_, metric) =>
+        timeBucket.AddOrUpdate(
+            GetMetricBucketKey(type, key, unit.Value, tags),
+            addValuesFactory,
+            (_, metric) =>
+            {
+                // This prevents multiple threads from trying to mutate the metric at the same time. The only other
+                // operations performed against metrics are adding one to the bucket (guaranteed to be atomic due to
+                // the use of a ConcurrentDictionary for the timeBucket) and removing buckets entirely. Technically,
+                // with a very small flushShift (e.g. 0.0) it might be possible to get a metric emitted to a bucket that
+                // is being removed after a flush...
+                lock(metric)
                 {
                     metric.Add(value);
-                    return metric;
-                });
-        }
+                }
+                return metric;
+            });
 
         if (_options.ExperimentalMetrics is { EnableCodeLocations: true })
         {
