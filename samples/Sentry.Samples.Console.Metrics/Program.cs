@@ -26,10 +26,35 @@ internal static class Program
                    };
                }))
         {
-            System.Console.WriteLine("Measure, Yeah, Measure");
-            PlaySetBingo(10);
-            // CreateRevenueGauge(1000);
-            // MeasureShrimp(1000);
+            System.Console.WriteLine("Measure, Yeah, Measure!");
+            while (true)
+            {
+                // Perform your task here
+                switch (Roll.Next(1,3))
+                {
+                    case 1:
+                        PlaySetBingo(10);
+                        break;
+                    case 2:
+                        CreateRevenueGauge(100);
+                        break;
+                    case 3:
+                        MeasureShrimp(30);
+                        break;
+                }
+
+
+                // Optional: Delay to prevent tight looping
+                var sleepTime = Roll.Next(1, 10);
+                System.Console.WriteLine($"Sleeping for {sleepTime} second(s).");
+                System.Console.WriteLine("Press any key to stop...");
+                Thread.Sleep(TimeSpan.FromSeconds(sleepTime));
+                // Check if a key has been pressed
+                if (System.Console.KeyAvailable)
+                {
+                    break;
+                }
+            }
             System.Console.WriteLine("Measure up");
         }
     }
