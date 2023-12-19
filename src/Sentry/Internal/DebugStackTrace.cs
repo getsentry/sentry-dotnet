@@ -349,13 +349,26 @@ internal class DebugStackTrace : SentryStackTrace
             if (AttributeReader.TryGetProjectDirectory(method.Module.Assembly) is { } projectPath
                 && frameFileName.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase))
             {
-                frame.AbsolutePath = frameFileName;
+                frame.AbsolutePath = GetRepositoryRelativePath(method.Module.Assembly, frameFileName);
                 frameFileName = frameFileName[projectPath.Length..];
             }
             frame.FileName = frameFileName;
         }
 
         return frame;
+    }
+
+    internal static string GetRepositoryRelativePath(Assembly moduleAssembly, string frameFileName)
+    {
+        if (AttributeReader.TryGetProjectDirectory(moduleAssembly) is { } projectDirectory && frameFileName.StartsWith(projectDirectory))
+        {
+            frameFileName = frameFileName.Substring(projectDirectory.Length);
+            if (frameFileName.StartsWith("/"))
+            {
+                frameFileName = frameFileName.Substring(1);
+            }
+        }
+        return frameFileName;
     }
 
     /// <summary>
