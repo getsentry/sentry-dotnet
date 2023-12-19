@@ -211,7 +211,7 @@ internal class MetricAggregator : IMetricAggregator
 
     internal SentryStackFrame? GetCodeLocation(int stackLevel)
     {
-        var stackTrace = new StackTrace(false);
+        var stackTrace = new StackTrace(true);
         var frames = DebugStackTrace.Create(_options, stackTrace, false).Frames;
          return (frames.Count >= stackLevel)
             ? frames[^(stackLevel + 1)]
