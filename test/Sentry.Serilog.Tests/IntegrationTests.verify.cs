@@ -58,6 +58,8 @@ public class IntegrationTests
 
         return Verify(transport.Envelopes)
             .UniqueForRuntimeAndVersion()
+            .AddScrubber(x => x.Replace(@"/test/Sentry.Serilog.Tests/", @"{TestDir}"))
+            .AddScrubber(x => x.Replace(@"\test\Sentry.Serilog.Tests\", @"{TestDir}"))
             .IgnoreStandardSentryMembers();
     }
 
