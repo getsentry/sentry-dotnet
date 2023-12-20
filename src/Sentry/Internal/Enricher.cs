@@ -6,6 +6,8 @@ namespace Sentry.Internal;
 
 internal class Enricher
 {
+    internal const string DefaultIpAddress = "{{auto}}";
+
     private readonly SentryOptions _options;
 
     private readonly Lazy<Runtime> _runtimeLazy = new(() =>
@@ -74,15 +76,11 @@ internal class Enricher
 
         // User
         // Report local user if opt-in PII, no user was already set to event and feature not opted-out:
-        if (_options.SendDefaultPii)
+        if (_options is { SendDefaultPii: true, IsEnvironmentUser: true } && !eventLike.HasUser())
         {
-            if (_options.IsEnvironmentUser && !eventLike.HasUser())
-            {
-                eventLike.User.Username = Environment.UserName;
-            }
-
-            eventLike.User.IpAddress ??= "{{auto}}";
+            eventLike.User.Username = Environment.UserName;
         }
+        eventLike.User.IpAddress ??= DefaultIpAddress;
 
         //Apply App startup and Boot time
         eventLike.Contexts.App.StartTime ??= ProcessInfo.Instance?.StartupTime;
