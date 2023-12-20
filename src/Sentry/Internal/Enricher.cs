@@ -95,8 +95,6 @@ internal class Enricher
                 } catch {
                     eventLike.Contexts.OperatingSystem.RawDescription = Environment.OSVersion.VersionString;
                 }
-        //If we are running in NETFRAMEWORK, it's definitely Windows.
-        eventLike.Contexts.App.InForeground = ProcessInfo.Instance?.ApplicationIsActivated(_options);
 #else
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
