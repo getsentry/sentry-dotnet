@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add In Foreground to App context that tells if the app is in the background or foreground. ([#2983](https://github.com/getsentry/sentry-dotnet/pull/2983))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.17.1 to v8.17.2 ([#2972](https://github.com/getsentry/sentry-dotnet/pull/2972))
