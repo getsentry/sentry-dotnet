@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### API breaking Changes
+
+- Filenames in stack traces are now stored as full paths relative to the repository root, when Git is being used for source control ([#2980](https://github.com/getsentry/sentry-dotnet/pull/2980))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.17.1 to v8.17.2 ([#2972](https://github.com/getsentry/sentry-dotnet/pull/2972))
