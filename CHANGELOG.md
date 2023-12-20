@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### API breaking Changes
+
+- The User.IpAddress is now set to {{auto}} by default, even when sendDefaultPII is disabled ([#2981](https://github.com/getsentry/sentry-dotnet/pull/2981))
+  - The "Prevent Storing of IP Addresses" option in the "Security & Privacy" project settings on sentry.io can be used to control this instead
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.17.1 to v8.17.2 ([#2972](https://github.com/getsentry/sentry-dotnet/pull/2972))
