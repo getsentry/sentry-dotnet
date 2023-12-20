@@ -47,14 +47,14 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
         {
             if (!_sessionTask.IsCompleted)
             {
-                _options.LogDebug("Cannot start a sampling profiler, the session hasn't started yet.");
+                _options.LogWarning("Cannot start a sampling profiler, the session hasn't started yet.");
                 _inProgress = FALSE;
                 return null;
             }
 
             if (!_sessionTask.IsCompletedSuccessfully)
             {
-                _options.LogDebug("Cannot start a sampling profiler, the session startup has not been successful.");
+                _options.LogWarning("Cannot start a sampling profiler, the session startup has not been successful.");
                 _inProgress = FALSE;
                 return null;
             }
