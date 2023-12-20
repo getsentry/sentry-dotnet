@@ -333,8 +333,7 @@ public sealed class Envelope : ISerializable, IDisposable
     {
         var header = DefaultHeader;
 
-        List<EnvelopeItem> items = new();
-        items.Add(EnvelopeItem.FromCodeLocations(codeLocations));
+        List<EnvelopeItem> items = [ EnvelopeItem.FromCodeLocations(codeLocations) ];
 
         return new Envelope(header, items);
     }
