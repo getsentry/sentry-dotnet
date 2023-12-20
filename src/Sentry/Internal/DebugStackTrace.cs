@@ -360,7 +360,7 @@ internal class DebugStackTrace : SentryStackTrace
         return frame;
     }
 
-    internal static string? TryGetRoot(Assembly moduleAssembly, string fileName, Func<Assembly, string?> resolveRoot)
+    private static string? TryGetRoot(Assembly moduleAssembly, string fileName, Func<Assembly, string?> resolveRoot)
     {
         var root = resolveRoot(moduleAssembly);
         return !string.IsNullOrEmpty(root) && fileName.StartsWith(root, StringComparison.OrdinalIgnoreCase)

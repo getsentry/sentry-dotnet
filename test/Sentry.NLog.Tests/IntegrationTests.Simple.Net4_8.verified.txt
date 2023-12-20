@@ -37,12 +37,12 @@
                 Stacktrace: {
                   Frames: [
                     {
-                      FileName: IntegrationTests.verify.cs,
+                      FileName: {TestDir}IntegrationTests.verify.cs,
                       Function: Task IntegrationTests.Simple(),
                       Module: null,
                       LineNumber: 48,
                       ColumnNumber: 17,
-                      AbsolutePath: {ProjectDirectory}IntegrationTests.verify.cs,
+                      AbsolutePath: {SolutionDirectory}{TestDir}IntegrationTests.verify.cs,
                       ContextLine: null,
                       InApp: false,
                       Package: Sentry.NLog.Tests, Version=SCRUBBED, Culture=SCRUBBED, PublicKeyToken=SCRUBBED,

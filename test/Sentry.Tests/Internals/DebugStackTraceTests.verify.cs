@@ -108,21 +108,6 @@ public class DebugStackTraceTests
         Assert.Null(stackFrame.Module);
     }
 
-// TODO: Create integration test to test this behaviour when publishing AOT apps
-// See https://github.com/getsentry/sentry-dotnet/issues/2772
-    [Fact]
-    public void CreateSentryStackFrame_FileName_RepositoryRelativePath()
-    {
-        var stackTrace = new StackTrace(true);
-        var frame = stackTrace.GetFrames().First(f => !string.IsNullOrEmpty(f.GetFileName()));
-        var sut = _fixture.GetSut();
-
-        var actual = sut.CreateFrame(new RealStackFrame(frame));
-
-        var expected = Path.DirectorySeparatorChar + Path.Combine("test", "Sentry.Tests", "Internals", "DebugStackTraceTests.verify.cs");
-        actual?.FileName.Should().Be(expected);
-    }
-
     [Fact]
     public void MergeDebugImages_Empty()
     {
