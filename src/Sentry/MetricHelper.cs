@@ -35,6 +35,6 @@ internal static class MetricHelper
         .Subtract(TimeSpan.FromSeconds(RollupInSeconds))
         .Subtract(TimeSpan.FromMilliseconds(FlushShift));
 
-    internal static string SanitizeKey(string input) => Regex.Replace(input, @"[^a-zA-Z0-9_/.-]+", "_");
-    internal static string SanitizeValue(string input) => Regex.Replace(input, @"[^\w\d_:/@\.\{\}\[\]$-]+", "_");
+    internal static string SanitizeKey(string input) => Regex.Replace(input, @"[^a-zA-Z0-9_/.-]+", "_", RegexOptions.Compiled);
+    internal static string SanitizeValue(string input) => Regex.Replace(input, @"[^\w\d_:/@\.\{\}\[\]$-]+", "_", RegexOptions.Compiled);
 }

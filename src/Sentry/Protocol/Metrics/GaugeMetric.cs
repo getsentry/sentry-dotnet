@@ -30,7 +30,7 @@ internal class GaugeMetric : Metric
     }
 
     public double Value { get; private set; }
-    public double First { get; private set; }
+    public double First { get; }
     public double Min { get; private set; }
     public double Max { get; private set; }
     public double Sum { get; private set; }

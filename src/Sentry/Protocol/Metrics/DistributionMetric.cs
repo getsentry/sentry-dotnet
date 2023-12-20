@@ -10,26 +10,28 @@ internal class DistributionMetric : Metric
 {
     public DistributionMetric()
     {
-        Value = new List<double>();
+        _value = new List<double>();
     }
 
     public DistributionMetric(string key, double value, MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null, DateTime? timestamp = null)
         : base(key, unit, tags, timestamp)
     {
-        Value = new List<double>() { value };
+        _value = new List<double>() { value };
     }
 
-    public IList<double> Value { get; set; }
+    private readonly List<double> _value;
+
+    public IReadOnlyList<double> Value => _value;
 
     public override void Add(double value)
     {
-        Value.Add(value);
+        _value.Add(value);
     }
 
     protected override void WriteValues(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
-        writer.WriteArrayIfNotEmpty<double>("value", Value, logger);
+        writer.WriteArrayIfNotEmpty<double>("value", _value, logger);
 
     protected override IEnumerable<IConvertible> SerializedStatsdValues()
-        => Value.Select(v => (IConvertible)v);
+        => _value.Cast<IConvertible>();
 }

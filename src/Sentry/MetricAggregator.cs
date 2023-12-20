@@ -438,7 +438,7 @@ internal class MetricAggregator : IMetricAggregator
         }
         catch (Exception exception)
         {
-            _options.LogError(exception, "Stopping the Metric Aggregator threw an exception.");
+            _options.LogError(exception, "Async Disposing the Metric Aggregator threw an exception.");
         }
         finally
         {
@@ -450,6 +450,17 @@ internal class MetricAggregator : IMetricAggregator
 
     public void Dispose()
     {
-        DisposeAsync().GetAwaiter().GetResult();
+        try
+        {
+            DisposeAsync().AsTask().GetAwaiter().GetResult();
+        }
+        catch (OperationCanceledException)
+        {
+            // Ignore
+        }
+        catch (Exception exception)
+        {
+            _options.LogError(exception, "Disposing the Metric Aggregator threw an exception.");
+        }
     }
 }

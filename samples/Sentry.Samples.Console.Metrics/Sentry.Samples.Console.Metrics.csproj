@@ -5,11 +5,6 @@
         <TargetFramework>net8.0</TargetFramework>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-      <DebugType>full</DebugType>
-      <DebugSymbols>true</DebugSymbols>
-    </PropertyGroup>
-
     <ItemGroup>
       <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     </ItemGroup>
