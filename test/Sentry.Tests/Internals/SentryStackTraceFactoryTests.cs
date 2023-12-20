@@ -188,11 +188,12 @@ public partial class SentryStackTraceFactoryTests
         Skip.If(string.IsNullOrEmpty(frame.FileName));
 #endif
 
-        var path = Path.Combine("Internals", "SentryStackTraceFactoryTests.cs");
+        var path = Path.DirectorySeparatorChar + Path.Combine("test", "Sentry.Tests", "Internals", "SentryStackTraceFactoryTests.cs");
         Assert.Equal(path, frame.FileName);
 
-        var fullPath = "test/Sentry.Tests/Internals/SentryStackTraceFactoryTests.cs";
+        var fullPath = GetThisFilePath();
         Assert.Equal(fullPath, frame.AbsolutePath);
+        return;
     }
 
     private static string GetThisFilePath([CallerFilePath] string path = null) => path;

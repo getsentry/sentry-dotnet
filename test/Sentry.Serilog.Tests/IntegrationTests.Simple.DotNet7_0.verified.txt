@@ -197,12 +197,12 @@
                 Stacktrace: {
                   Frames: [
                     {
-                      FileName: IntegrationTests.verify.cs,
+                      FileName: /test/Sentry.Serilog.Tests/IntegrationTests.verify.cs,
                       Function: Task IntegrationTests.Simple(),
                       Module: null,
                       LineNumber: 48,
                       ColumnNumber: 17,
-                      AbsolutePath: test/Sentry.Serilog.Tests/IntegrationTests.verify.cs,
+                      AbsolutePath: {ProjectDirectory}IntegrationTests.verify.cs,
                       ContextLine: null,
                       InApp: false,
                       Package: Sentry.Serilog.Tests, Version=SCRUBBED, Culture=SCRUBBED, PublicKeyToken=SCRUBBED,

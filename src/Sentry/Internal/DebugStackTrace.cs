@@ -346,11 +346,13 @@ internal class DebugStackTrace : SentryStackTrace
 
         if (stackFrame.GetFileName() is { } frameFileName)
         {
-            if (AttributeReader.TryGetProjectDirectory(method.Module.Assembly) is { } projectPath
-                && frameFileName.StartsWith(projectPath, StringComparison.OrdinalIgnoreCase))
+            var assembly = method.Module.Assembly;
+            var root = TryGetRoot(assembly, frameFileName, AttributeReader.TryGetRepositoryRoot)
+                ?? TryGetRoot(assembly, frameFileName, AttributeReader.TryGetProjectDirectory);
+            if (root is not null)
             {
-                frame.AbsolutePath = GetRepositoryRelativePath(method.Module.Assembly, frameFileName, _options);
-                frameFileName = frameFileName[projectPath.Length..];
+                frame.AbsolutePath = frameFileName;
+                frameFileName = frameFileName[root.Length..];
             }
             frame.FileName = frameFileName;
         }
@@ -358,23 +360,12 @@ internal class DebugStackTrace : SentryStackTrace
         return frame;
     }
 
-    internal static string GetRepositoryRelativePath(Assembly moduleAssembly, string frameFileName,
-        SentryOptions options)
+    internal static string? TryGetRoot(Assembly moduleAssembly, string fileName, Func<Assembly, string?> resolveRoot)
     {
-        if (AttributeReader.TryGetRepositoryRoot(moduleAssembly) is not { } repoRoot ||
-            !frameFileName.StartsWith(repoRoot))
-        {
-            options.LogDebug("No repository root found. Using absolute file path.");
-            return frameFileName;
-        }
-
-        options.LogDebug($"Filenames relative to repository root: {repoRoot}");
-        frameFileName = frameFileName.Substring(repoRoot.Length);
-        if (frameFileName.StartsWith("/"))
-        {
-            frameFileName = frameFileName.Substring(1);
-        }
-        return frameFileName;
+        var root = resolveRoot(moduleAssembly);
+        return !string.IsNullOrEmpty(root) && fileName.StartsWith(root, StringComparison.OrdinalIgnoreCase)
+            ? root
+            : null;
     }
 
     /// <summary>
