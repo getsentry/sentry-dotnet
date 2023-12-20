@@ -75,7 +75,7 @@ public static partial class SentrySdk
         // Platform specific check for profiler misconfiguration.
 #if __IOS__
         // No user-facing warning necessary - the integration is part of InitSentryCocoaSdk().
-        Debug.Assert(options.IsProfilingEnabled == (options.TransactionProfilerFactory is not null))
+        Debug.Assert(options.IsProfilingEnabled == (options.TransactionProfilerFactory is not null));
 #elif ANDROID
         LogWarningIfProfilingMisconfigured(options, " on Android");
 #else
