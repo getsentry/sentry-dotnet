@@ -162,8 +162,7 @@ internal class SampleProfileBuilder
         {
             frame.Function = method.FullMethodName;
 
-            TraceModuleFile moduleFile = method.MethodModuleFile;
-            if (moduleFile is not null)
+            if (method.MethodModuleFile is { } moduleFile)
             {
                 frame.Module = moduleFile.Name;
             }
@@ -172,15 +171,20 @@ internal class SampleProfileBuilder
         }
         else
         {
-            // native frame
-            frame.InApp = false;
-        }
+            // Fall back if the method info is unknown, see more info on Symbol resolution in
+            // https://github.com/microsoft/perfview/blob/031250ffb4f9fcadb9263525d6c9f274be19ca51/src/PerfView/SupportFiles/UsersGuide.htm#L7745-L7784
+            frame.InstructionAddress = (long?)_traceLog.CodeAddresses.Address(codeAddressIndex);
 
-        // TODO enable this once we implement symbolication (we will need to send debug_meta too), see StackTraceFactory.
-        // if (_traceLog.CodeAddresses.Address(codeAddressIndex) is { } address)
-        // {
-        //     frame.InstructionAddress = $"0x{address:x}";
-        // }
+            if (_traceLog.CodeAddresses.ModuleFile(codeAddressIndex) is { } moduleFile)
+            {
+                frame.Module = moduleFile.Name;
+                frame.ConfigureAppFrame(_options);
+            }
+            else
+            {
+                frame.InApp = false;
+            }
+        }
 
         return frame;
     }
