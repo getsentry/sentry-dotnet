@@ -21,7 +21,9 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
           Operation: 
         }
       },
-      User: {},
+      User: {
+        IpAddress: {{auto}}
+      },
       Breadcrumbs: [
         {
           Message: Entity Framework Core  initialized 'TestDbContext' using provider 'Microsoft.EntityFrameworkCore.SqlServer:' with options: NoTracking ,
@@ -66,7 +68,9 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
           IsSampled: true
         }
       },
-      User: {},
+      User: {
+        IpAddress: {{auto}}
+      },
       Spans: [
         {
           IsFinished: true,
