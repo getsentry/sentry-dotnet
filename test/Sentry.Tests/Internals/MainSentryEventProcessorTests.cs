@@ -109,7 +109,7 @@ public class MainSentryEventProcessorTests
         _ = sut.Process(evt);
 
         //Assert
-        Assert.Equal("{{auto}}", evt.User.IpAddress);
+        evt.User.IpAddress.Should().Be(Enricher.DefaultIpAddress);
     }
 
     [Fact]
@@ -132,7 +132,7 @@ public class MainSentryEventProcessorTests
     }
 
     [Fact]
-    public void Process_SendDefaultPiiFalse_UserIpNotSet()
+    public void Process_SendDefaultPiiFalse_UserIpAuto()
     {
         //Arrange
         var evt = new SentryEvent();
@@ -143,7 +143,7 @@ public class MainSentryEventProcessorTests
         _ = sut.Process(evt);
 
         //Assert
-        Assert.Null(evt.User.IpAddress);
+        evt.User.IpAddress.Should().Be(Enricher.DefaultIpAddress);
     }
 
     [Fact]

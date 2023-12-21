@@ -17,7 +17,9 @@
           IsSampled: true
         }
       },
-      User: {},
+      User: {
+        IpAddress: {{auto}}
+      },
       Spans: [
         {
           IsFinished: true,

@@ -85,7 +85,7 @@
   -->
   <remove-node path="/api/package[@name='io.sentry']/interface[@name='BackfillingEventProcessor']" />
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AnrV2EventProcessor']" />
-    
+
   <!--
     SentryEvent.serialize() expects an parameter which implements ObjectWriter.
     JsonObjectWriter implements ObjectWriter in Java, but somehow this is not reflected in the generated binding.
@@ -106,6 +106,7 @@
   <remove-node path="/api/package[@name='io.sentry.android.core.cache']/class[@name='AndroidEnvelopeCache']" />
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='TempSensorBreadcrumbsIntegration']" />
   <remove-node path="/api/package[@name='io.sentry.android.core.internal.gestures']" />
+  <remove-node path="/api/package[@name='io.sentry.android.core.performance']" />
 
   <remove-node path="/api/package[starts-with(@name,'io.sentry')]/*/method[@name='clone' and count(parameter)=0]" />
   <remove-node path="/api/package[starts-with(@name,'io.sentry')]/class/implements[@name='io.sentry.JsonDeserializer']" />

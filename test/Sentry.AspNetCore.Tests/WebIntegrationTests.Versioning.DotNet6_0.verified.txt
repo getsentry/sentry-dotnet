@@ -23,7 +23,9 @@
             IsSampled: true
           }
         },
-        User: {},
+        User: {
+          IpAddress: {{auto}}
+        },
         Environment: production,
         Breadcrumbs: [
           {
