@@ -26,9 +26,9 @@ internal class ProcessInfo
         private set => _preciseAppStartupTask = value;
     }
 
-    public int? Id => _id ??= GetCurrentProcessId();
+    public int? GetId(SentryOptions options) => _id ??= GetCurrentProcessId(options);
 
-    private int? GetCurrentProcessId()
+    private int? GetCurrentProcessId(SentryOptions options)
     {
 #if NET6_0_OR_GREATER
         return Environment.ProcessId;
@@ -37,8 +37,9 @@ internal class ProcessInfo
         {
             return Process.GetCurrentProcess().Id;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            options.LogError(ex, "Error getting current process Id");
             return null;
         }
 #endif
@@ -93,7 +94,7 @@ internal class ProcessInfo
             // That's computationally cheap but not very precise.
             // This method will give a better precision to the StartupTime at a cost
             // of calling Process.GetCurrentProcess, on a thread pool thread.
-            var preciseStartupTimeFunc = findPreciseStartupTime ??  GetStartupTime;
+            var preciseStartupTimeFunc = findPreciseStartupTime ?? GetStartupTime;
             PreciseAppStartupTask = Task.Run(() =>
             {
                 try
@@ -124,22 +125,25 @@ internal class ProcessInfo
     {
         try
         {
-            var activatedHandle = GetForegroundWindow();
-            if (activatedHandle == IntPtr.Zero)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return false;       // No window is currently activated
+                var activatedHandle = GetForegroundWindow();
+                if (activatedHandle == IntPtr.Zero)
+                {
+                    return false;       // No window is currently activated
+                }
+
+                var currentProcessId = ProcessInfo.Instance?.GetId(options);
+                GetWindowThreadProcessId(activatedHandle, out var activeProcessId);
+
+                return activeProcessId == currentProcessId;
             }
-
-            var currentProcessId = ProcessInfo.Instance?.Id;
-            GetWindowThreadProcessId(activatedHandle, out var activeProcessId);
-
-            return activeProcessId == currentProcessId;
         }
         catch (Exception e)
         {
             options.LogError(e, "Error getting foreground window state.");
-            return null;
         }
+        return null;
     }
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
