@@ -30,6 +30,10 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
 {
     private readonly SentryMauiOptions _options;
 
+#if DEBUG //Used only in test to make it green if capture fails on Android
+    public static bool CaptureFailed { get; set; }
+#endif
+
     public ScreenshotAttachmentContent(SentryMauiOptions options)
     {
         _options = options;
@@ -49,16 +53,18 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
 
                     var stream = await screen.OpenReadAsync(ScreenshotFormat.Jpeg).ConfigureAwait(true);
 
-#if __ANDROID__
-                    Log.Warn("Sentry", "Got screenshot stream with length: " + stream.Length);
+#if __ANDROID__ && DEBUG
+                    Log.Info("Sentry", "Got screenshot stream with length: " + stream.Length);
 #endif
 
                     return stream;
                 }
                 else
                 {
-#if __ANDROID__
+#if __ANDROID__ && DEBUG
+                    //On Android screen capture fails sometimes: https://github.com/dotnet/maui/issues/19450
                     Log.Warn("Sentry", "Capturing screenshot not supported");
+                    CaptureFailed = true;
 #endif
                     _options.LogWarning("Capturing screenshot not supported");
                     return Stream.Null;
@@ -67,8 +73,9 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
             //In some cases screen capture can throw, for example on Android if the activity is marked as secure.
             catch (Exception ex)
             {
-#if __ANDROID__
+#if __ANDROID__ && DEBUG
                 Log.Warn("Sentry", ex.ToString());
+                CaptureFailed = true;
 #endif
                 _options.LogError(ex, "Error capturing screenshot");
                 return Stream.Null;

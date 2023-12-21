@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using Sentry.Internal.Http;
+using Sentry.Maui.Internal;
 
 namespace Sentry.Maui.Tests;
 
@@ -46,13 +47,20 @@ public class SentryMauiScreenshotTests
 
         var envelope = transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
         envelope.Should().NotBeNull();
-
+        
         var envelopeItem = envelope!.Items.FirstOrDefault(item => item.TryGetType() == "attachment");
 
         // Assert
 #if __MOBILE__
-        envelopeItem.Should().NotBeNull();
-        envelopeItem!.TryGetFileName().Should().Be("screenshot.jpg"); 
+        if (ScreenshotAttachmentContent.CaptureFailed)
+        {
+            envelopeItem.Should().BeNull();
+        }
+        else
+        {
+            envelopeItem.Should().NotBeNull();
+            envelopeItem!.TryGetFileName().Should().Be("screenshot.jpg");
+        }
 #endif
     }
 

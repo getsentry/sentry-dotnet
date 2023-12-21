@@ -21,6 +21,10 @@ internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
         _config.Bind(bindable);
         bindable.ApplyTo(options);
 
+#if __ANDROID__ || __IOS__
+        options.Native.AttachScreenshot = options.AttachScreenshot;
+#endif
+
         // NOTE: Anything set here will overwrite options set by the user.
         //       For option defaults that can be changed, use the constructor in SentryMauiOptions instead.
 
