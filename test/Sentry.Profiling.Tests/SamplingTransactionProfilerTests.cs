@@ -263,7 +263,7 @@ public class SamplingTransactionProfilerTests
             var payload = await message.Content!.ReadAsStringAsync();
             if (payload.Contains("\"type\":\"transaction\""))
             {
-                tcs.TrySetResult(payload);
+                tcs!.TrySetResult(payload);
             }
         }
 
