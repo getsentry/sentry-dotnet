@@ -51,11 +51,23 @@ internal class SampleProfilerSession : IDisposable
 
     public TraceLog TraceLog => _eventSource.TraceLog;
 
+#if DEBUG
+    internal static bool ThrowOnNextStartupForTests = false;
+#endif
+
     public static SampleProfilerSession StartNew(IDiagnosticLogger? logger = null)
     {
         try
         {
             var client = new DiagnosticsClient(Process.GetCurrentProcess().Id);
+
+#if DEBUG
+            if (ThrowOnNextStartupForTests)
+            {
+                ThrowOnNextStartupForTests = false;
+                throw new Exception("Test exception");
+            }
+#endif
 
             // Note: StartEventPipeSession() can time out after 30 seconds on resource constrained systems.
             // See https://github.com/dotnet/diagnostics/blob/991c78895323a953008e15fe34b736c03706afda/src/Microsoft.Diagnostics.NETCore.Client/DiagnosticsIpc/IpcClient.cs#L40C52-L40C52

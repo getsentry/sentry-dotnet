@@ -248,6 +248,67 @@ public class SamplingTransactionProfilerTests
         }
     }
 
+    [SkippableFact]
+    public async Task Profiler_ThrowingOnSessionStartup_DoesntBreakSentryInit()
+    {
+#if DEBUG
+        SampleProfilerSession.ThrowOnNextStartupForTests = true;
+#else
+        Skip.If(true, "This test only works in DEBUG mode.");
+#endif
+
+        var tcs = new TaskCompletionSource<string>();
+        async Task VerifyAsync(HttpRequestMessage message)
+        {
+            var payload = await message.Content!.ReadAsStringAsync();
+            if (payload.Contains("\"type\":\"transaction\""))
+            {
+                tcs.TrySetResult(payload);
+            }
+        }
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            // So we don't need to deal with gzip'ed payload
+            RequestBodyCompressionLevel = CompressionLevel.NoCompression,
+            CreateHttpMessageHandler = () => new CallbackHttpClientHandler(VerifyAsync),
+            // Not to send some session envelope
+            AutoSessionTracking = false,
+            Debug = true,
+            DiagnosticLogger = _testOutputLogger,
+            TracesSampleRate = 1.0,
+            ProfilesSampleRate = 1.0,
+        };
+
+        options.AddIntegration(new ProfilingIntegration(TimeSpan.FromSeconds(10)));
+
+        try
+        {
+            using var hub = (SentrySdk.InitHub(options) as Hub)!;
+            options.TransactionProfilerFactory.Should().BeNull();
+
+            var clock = SentryStopwatch.StartNew();
+            var tx = hub.StartTransaction("name", "op");
+            RunForMs(100);
+            tx.Finish();
+            await hub.FlushAsync();
+
+            // Asserts
+            var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(1_000)).ConfigureAwait(false);
+            completedTask.Should().Be(tcs.Task);
+            var envelopeLines = tcs.Task.Result.Split('\n');
+            envelopeLines.Length.Should().Be(4);
+            envelopeLines[1].Should().StartWith("{\"type\":\"transaction\"");
+        }
+        finally
+        {
+            // Ensure the task is complete before leaving the test so there's no async code left running in next tests.
+            tcs.TrySetResult("");
+            await tcs.Task;
+        }
+    }
+
     [Fact]
     public void ProfilerIntegration_WithProfilingDisabled_LeavesFactoryNull()
     {

@@ -1,4 +1,5 @@
 using Sentry.Integrations;
+using Sentry.Extensibility;
 
 namespace Sentry.Profiling;
 
@@ -32,7 +33,14 @@ public class ProfilingIntegration : ISdkIntegration
     {
         if (options.IsProfilingEnabled)
         {
-            options.TransactionProfilerFactory ??= new SamplingTransactionProfilerFactory(options, _startupTimeout);
+            try
+            {
+                options.TransactionProfilerFactory ??= new SamplingTransactionProfilerFactory(options, _startupTimeout);
+            }
+            catch (Exception e)
+            {
+                options.LogError(e, "Failed to initialize the profiler: {0}");
+            }
         }
     }
 }
