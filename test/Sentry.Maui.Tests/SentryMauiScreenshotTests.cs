@@ -18,7 +18,7 @@ public class SentryMauiScreenshotTests
             {
                 options.Transport = new FakeTransport();
                 options.Dsn = ValidDsn;
-                options.AttachScreenshots = true;
+                options.AttachScreenshot = true;
                 options.AutoSessionTracking = false; //Get rid of session envelope for easier Assert
                 options.CacheDirectoryPath = null;   //Do not wrap our FakeTransport with a caching transport
             });

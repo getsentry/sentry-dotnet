@@ -33,7 +33,7 @@ internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
         // We'll use an event processor to set things like SDK name
         options.AddEventProcessor(new SentryMauiEventProcessor(options));
 
-        if (options.AttachScreenshots)
+        if (options.AttachScreenshot)
         {
             options.AddEventProcessor(new SentryMauiScreenshotProcessor(options));
         }

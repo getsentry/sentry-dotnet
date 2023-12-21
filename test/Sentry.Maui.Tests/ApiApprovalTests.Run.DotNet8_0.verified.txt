@@ -12,7 +12,7 @@ namespace Sentry.Maui
     public class SentryMauiOptions : Sentry.Extensions.Logging.SentryLoggingOptions
     {
         public SentryMauiOptions() { }
-        public bool AttachScreenshots { get; set; }
+        public bool AttachScreenshot { get; set; }
         public bool CreateElementEventsBreadcrumbs { get; set; }
         public bool IncludeBackgroundingStateInBreadcrumbs { get; set; }
         public bool IncludeTextInBreadcrumbs { get; set; }

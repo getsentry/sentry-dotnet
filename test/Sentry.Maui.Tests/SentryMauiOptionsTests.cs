@@ -54,6 +54,6 @@ public class SentryMauiOptionsTests
     public void AttachScreenshots_Default()
     {
         var options = new SentryMauiOptions();
-        Assert.False(options.AttachScreenshots);
+        Assert.False(options.AttachScreenshot);
     }
 }

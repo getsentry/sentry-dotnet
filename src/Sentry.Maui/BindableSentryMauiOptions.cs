@@ -9,7 +9,7 @@ internal class BindableSentryMauiOptions : BindableSentryLoggingOptions
     public bool? IncludeTitleInBreadcrumbs { get; set; }
     public bool? IncludeBackgroundingStateInBreadcrumbs { get; set; }
     public bool? CreateElementEventsBreadcrumbs { get; set; } = false;
-    public bool? AttachScreenshots { get; set; }
+    public bool? AttachScreenshot { get; set; }
 
     public void ApplyTo(SentryMauiOptions options)
     {
@@ -18,6 +18,6 @@ internal class BindableSentryMauiOptions : BindableSentryLoggingOptions
         options.IncludeTitleInBreadcrumbs = IncludeTitleInBreadcrumbs ?? options.IncludeTitleInBreadcrumbs;
         options.IncludeBackgroundingStateInBreadcrumbs = IncludeBackgroundingStateInBreadcrumbs?? options.IncludeBackgroundingStateInBreadcrumbs;
         options.CreateElementEventsBreadcrumbs = CreateElementEventsBreadcrumbs ?? options.CreateElementEventsBreadcrumbs;
-        options.AttachScreenshots = AttachScreenshots ?? options.AttachScreenshots;
+        options.AttachScreenshot = AttachScreenshot ?? options.AttachScreenshot;
     }
 }

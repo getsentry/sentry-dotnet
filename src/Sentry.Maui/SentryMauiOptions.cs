@@ -63,5 +63,5 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// <remarks>
     /// Be aware PII might be included by activating this feature.
     /// </remarks>
-    public bool AttachScreenshots { get; set; }
+    public bool AttachScreenshot { get; set; }
 }
