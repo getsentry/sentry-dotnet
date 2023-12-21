@@ -3,7 +3,7 @@ name: API Docs
 on:
   create:
     tags:
-      - '*'
+      - "*"
 
 jobs:
   docs:
@@ -22,7 +22,7 @@ jobs:
           publish_dir: docs/_site
           force_orphan: true
       - name: Archive Docs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: docs
           path: docs/_site

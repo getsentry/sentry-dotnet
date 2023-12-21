@@ -23,7 +23,7 @@ For big feature it's advised to raise an issue to discuss it first.
 
 * You'll need `CMake` somewhere on your PATH. If you don't already have this, one way to get it is to install the [C++ CMake tools for Windows](https://learn.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-170#installation)
 
-* You'll need [`pwsh`](https://github.com/PowerShell/PowerShell#get-powershell) on PATH.
+* You'll need [`pwsh`](https://github.com/PowerShell/PowerShell#get-powershell) Core version 6 or later on PATH.
 
 * On Windows:
   - [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework) 4.6.2 or higher.

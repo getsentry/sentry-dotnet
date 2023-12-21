@@ -111,7 +111,9 @@
                 Operation: 
               }
             },
-            User: {},
+            User: {
+              IpAddress: {{auto}}
+            },
             Environment: production
           }
         }
@@ -173,7 +175,9 @@
                 IsSampled: true
               }
             },
-            User: {},
+            User: {
+              IpAddress: {{auto}}
+            },
             Environment: production,
             IsFinished: true
           }
