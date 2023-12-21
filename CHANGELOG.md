@@ -2,8 +2,9 @@
 
 ## Unreleased
 
-- Add In Foreground to App context that tells if the app is in the background or foreground. ([#2983](https://github.com/getsentry/sentry-dotnet/pull/2983))
-=======
+### Features
+
+- MAUI: App context has `in_foreground` indicating whether app was on the background or foreground. ([#2983](https://github.com/getsentry/sentry-dotnet/pull/2983))
 
 ### Significant change in behavior
 
