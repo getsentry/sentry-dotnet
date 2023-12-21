@@ -27,9 +27,6 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
 {
     private readonly SentryMauiOptions _options;
 
-    //Used only in test to make it green if capture fails on Android
-    internal static bool CaptureFailed { get; set; }
-
     public ScreenshotAttachmentContent(SentryMauiOptions options)
     {
         _options = options;
@@ -37,40 +34,51 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
 
     public Stream GetStream()
     {
+        var stream = Stream.Null;
         // Not including this on Windows specific build because on WinUI this can deadlock.
-#if !WINDOWS
-        var stream = MainThread.InvokeOnMainThreadAsync(async () =>
+#if __ANDROID__ || __IOS__
+        Stream CaptureScreenBlocking()
         {
-            try
+            // This actually runs synchronously (returning Task.FromResult) on the following platforms:
+            // Android: https://github.com/dotnet/maui/blob/3c7b65264d2f341a48db32263a271fd8718cfd23/src/Essentials/src/Screenshot/Screenshot.android.cs#L49
+            // iOS: https://github.com/dotnet/maui/blob/3c7b65264d2f341a48db32263a271fd8718cfd23/src/Essentials/src/Screenshot/Screenshot.ios.cs#L49
+            var screen = Screenshot.Default.CaptureAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+            return screen.OpenReadAsync(ScreenshotFormat.Jpeg).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+
+        if (!Screenshot.Default.IsCaptureSupported)
+        {
+            _options.LogDebug("Capturing screenshot not supported");
+            return stream;
+        }
+
+        if (MainThread.IsMainThread)
+        {
+            stream = CaptureScreenBlocking();
+        }
+        else
+        {
+#if __ANDROID__ //Android does not require UI thread to capture screen but iOS does.
+            stream = CaptureScreenBlocking();
+#else
+            stream = MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                if (Screenshot.Default.IsCaptureSupported)
+                try
                 {
                     var screen = await Screenshot.Default.CaptureAsync().ConfigureAwait(true);
-
-                    var stream = await screen.OpenReadAsync(ScreenshotFormat.Jpeg).ConfigureAwait(true);
-
-                    CaptureFailed = false;
-                    return stream;
+    
+                    return await screen.OpenReadAsync(ScreenshotFormat.Jpeg).ConfigureAwait(true);
                 }
-                else
+                //In some cases screen capture can throw, for example on Android if the activity is marked as secure.
+                catch (Exception ex)
                 {
-                    CaptureFailed = true;
-                    _options.LogDebug("Capturing screenshot not supported");
+                    _options.LogError(ex, "Error capturing screenshot");
                     return Stream.Null;
                 }
-            }
-            //In some cases screen capture can throw, for example on Android if the activity is marked as secure.
-            catch (Exception ex)
-            {
-                CaptureFailed = true;
-                _options.LogError(ex, "Error capturing screenshot");
-                return Stream.Null;
-            }
-        }).ConfigureAwait(false).GetAwaiter().GetResult();
-
-        return stream;
-#else
-        return Stream.Null;
+            }).ConfigureAwait(false).GetAwaiter().GetResult();
 #endif
+        }
+#endif
+        return stream;
     }
 }

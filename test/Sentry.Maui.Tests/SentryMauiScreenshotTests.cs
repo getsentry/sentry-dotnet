@@ -9,6 +9,8 @@ public class SentryMauiScreenshotTests
     private class Fixture
     {
         public MauiAppBuilder Builder { get; }
+        public FakeTransport Transport { get; private set; } = new FakeTransport();
+        public InMemoryDiagnosticLogger Logger { get; private set; } = new InMemoryDiagnosticLogger();
 
         public Fixture()
         {
@@ -17,9 +19,10 @@ public class SentryMauiScreenshotTests
 
             builder.Services.Configure<SentryMauiOptions>(options =>
             {
-                options.Transport = new FakeTransport();
+                options.Transport = Transport;
                 options.Dsn = ValidDsn;
                 options.AttachScreenshot = true;
+                options.DiagnosticLogger = Logger;
                 options.AutoSessionTracking = false; //Get rid of session envelope for easier Assert
                 options.CacheDirectoryPath = null;   //Do not wrap our FakeTransport with a caching transport
             });
@@ -43,16 +46,15 @@ public class SentryMauiScreenshotTests
         await client.FlushAsync();
 
         var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
-        var transport = options.Transport as FakeTransport;
-
-        var envelope = transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
-        envelope.Should().NotBeNull();
         
+        var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
+        envelope.Should().NotBeNull();
+
         var envelopeItem = envelope!.Items.FirstOrDefault(item => item.TryGetType() == "attachment");
 
         // Assert
 #if __MOBILE__
-        if (ScreenshotAttachmentContent.CaptureFailed)
+        if (_fixture.Logger.Entries.Any(entry => entry.Level == SentryLevel.Error && entry.Exception is NullReferenceException))
         {
             envelopeItem.Should().BeNull();
         }
@@ -82,9 +84,8 @@ public class SentryMauiScreenshotTests
         await client.FlushAsync();
 
         var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
-        var transport = options.Transport as FakeTransport;
 
-        var envelope = transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
+        var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
         envelope.Should().NotBeNull();
 
         var envelopeItem = envelope!.Items.FirstOrDefault(item => item.TryGetType() == "attachment");
