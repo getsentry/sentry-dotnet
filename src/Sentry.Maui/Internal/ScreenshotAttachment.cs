@@ -72,7 +72,7 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
             //In some cases screen capture can throw, for example on Android if the activity is marked as secure.
             catch (Exception ex)
             {
-#if __ANDROID__ && DEBUG &&
+#if __ANDROID__ && DEBUG
                 Log.Warn("Sentry", ex.ToString());
 #endif
                 CaptureFailed = true;
