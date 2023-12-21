@@ -15,7 +15,10 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     private const int TIME_LIMIT_MS = 30_000;
 
     private readonly SentryOptions _options;
+
     internal Task<SampleProfilerSession> _sessionTask;
+
+    private bool _errorLogged = false;
 
     public SamplingTransactionProfilerFactory(SentryOptions options, TimeSpan startupTimeout)
     {
@@ -43,7 +46,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     public ITransactionProfiler? Start(ITransactionTracer _, CancellationToken cancellationToken)
     {
         // Start a profiler if one wasn't running yet.
-        if (Interlocked.Exchange(ref _inProgress, TRUE) == FALSE)
+        if (!_errorLogged && Interlocked.Exchange(ref _inProgress, TRUE) == FALSE)
         {
             if (!_sessionTask.IsCompleted)
             {
@@ -54,7 +57,8 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
             if (!_sessionTask.IsCompletedSuccessfully)
             {
-                _options.LogWarning("Cannot start a sampling profiler, the session startup has not been successful.");
+                _options.LogWarning("Cannot start a sampling profiler because the session startup has failed. This is a permanent error and no future transactions will be sampled.");
+                _errorLogged = true;
                 _inProgress = FALSE;
                 return null;
             }
