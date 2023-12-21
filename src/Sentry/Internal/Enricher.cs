@@ -86,9 +86,17 @@ internal class Enricher
         eventLike.Contexts.App.StartTime ??= ProcessInfo.Instance?.StartupTime;
         eventLike.Contexts.Device.BootTime ??= ProcessInfo.Instance?.BootTime;
 
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        try
         {
-            eventLike.Contexts.App.InForeground = ProcessInfo.Instance?.ApplicationIsActivated(_options);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                eventLike.Contexts.App.InForeground = ProcessInfo.Instance?.ApplicationIsActivated(_options);
+            }
+        }
+        catch
+        {
+            //If RuntimeInformation.IsOSPlatform(OSPlatform.Windows) throws we are not on Windows.
+            eventLike.Contexts.App.InForeground = null;
         }
 
         // Default tags
