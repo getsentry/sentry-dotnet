@@ -86,19 +86,10 @@ internal class Enricher
         eventLike.Contexts.App.StartTime ??= ProcessInfo.Instance?.StartupTime;
         eventLike.Contexts.Device.BootTime ??= ProcessInfo.Instance?.BootTime;
 
-#if NETFRAMEWORK
-                // RuntimeInformation.* throws on .NET Framework on macOS/Linux
-                try {
-                    eventLike.Contexts.OperatingSystem.RawDescription = RuntimeInformation.OSDescription;
-                } catch {
-                    eventLike.Contexts.OperatingSystem.RawDescription = Environment.OSVersion.VersionString;
-                }
-#else
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             eventLike.Contexts.App.InForeground = ProcessInfo.Instance?.ApplicationIsActivated(_options);
         }
-#endif
 
         // Default tags
         _options.ApplyDefaultTags(eventLike);
