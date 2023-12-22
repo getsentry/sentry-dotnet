@@ -9,6 +9,8 @@
     <IsTestProject>true</IsTestProject>
     <!-- Ignore warnings for JSON generated code -->
     <NoWarn>$(NoWarn);SYSLIB0005;SYSLIB0012</NoWarn>
+    <!-- Ignore "Naming rule violation: Missing suffix: 'Async'" -->
+    <NoWarn>$(NoWarn);IDE1006</NoWarn>
   </PropertyGroup>
 
   <!--
