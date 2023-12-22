@@ -4,20 +4,10 @@ using Sentry.Protocol;
 // Namespace starting with Sentry makes sure the SDK cuts frames off before reporting
 namespace Sentry.Ben.Diagnostics
 {
-    internal class BlockingMonitor
+    internal class BlockingMonitor(Func<IHub> getHub, SentryOptions options)
     {
-        private readonly Func<IHub> _getHub;
-        private readonly SentryOptions _options;
-
         [ThreadStatic]
         private static int t_recursionCount;
-
-        public BlockingMonitor(Func<IHub> getHub, SentryOptions options)
-        {
-            _getHub = getHub;
-            _options = options;
-        }
-
 
         public void BlockingStart(DetectionSource detectionSource)
         {
@@ -41,7 +31,7 @@ namespace Sentry.Ben.Diagnostics
                             {
                                 Type = "Blocking call detected",
                                 Stacktrace = DebugStackTrace.Create(
-                                    _options,
+                                    options,
                                     new StackTrace(),
                                     true,
                                     // Skip frames once the Sentry frames are already removed
@@ -56,7 +46,7 @@ namespace Sentry.Ben.Diagnostics
                         "suggestion",
                         "Analyzer to warn you from blocking calls on async flows; https://www.nuget.org/packages/Microsoft.VisualStudio.Threading.Analyzers/");
 
-                    _getHub().CaptureEvent(evt);
+                    getHub().CaptureEvent(evt);
                 }
             }
             catch

@@ -55,54 +55,6 @@
                 }
               }
             ],
-             SentryThreads: [
-              {
-                Crashed: false,
-                Current: true
-              }
-            ],
-            DebugImages: [
-              {
-                Type: pe_dotnet,
-                ImageAddress: null,
-                ImageSize: null,
-                DebugId: ________-____-____-____-____________-________,
-                DebugChecksum: ______:________________________________________________________________,
-                DebugFile: .../System.Private.CoreLib.pdb,
-                CodeId: ______________,
-                CodeFile: .../System.Private.CoreLib.dll
-              },
-              {
-                Type: pe_dotnet,
-                ImageAddress: null,
-                ImageSize: null,
-                DebugId: ________-____-____-____-____________-________,
-                DebugChecksum: ______:________________________________________________________________,
-                DebugFile: .../Sentry.Tests.pdb,
-                CodeId: _____________,
-                CodeFile: .../Sentry.Tests.dll
-              },
-              {
-                Type: pe_dotnet,
-                ImageAddress: null,
-                ImageSize: null,
-                DebugId: ________-____-____-____-____________-________,
-                DebugChecksum: ______:________________________________________________________________,
-                DebugFile: xunit.execution.dotnet.pdb,
-                CodeId: _____________,
-                CodeFile: .../xunit.execution.dotnet.dll
-              },
-              {
-                Type: pe_dotnet,
-                ImageAddress: null,
-                ImageSize: null,
-                DebugId: ________-____-____-____-____________-________,
-                DebugChecksum: ______:________________________________________________________________,
-                DebugFile: xunit.core.pdb,
-                CodeId: _____________,
-                CodeFile: .../xunit.core.dll
-              }
-            ],
             Level: error,
             TransactionName: my transaction,
             Request: {},
