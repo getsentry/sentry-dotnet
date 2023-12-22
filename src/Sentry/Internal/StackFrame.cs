@@ -114,7 +114,13 @@ internal class RealStackFrame : IStackFrame
 
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
     public MethodBase? GetMethod() => AotHelper.IsNativeAot
+#if !NET8_0_OR_GREATER
+#pragma warning disable CS0162 // Unreachable code detected
+        // Only unreachable outside NET8_0_OR_GREATER
+        // ReSharper disable once HeuristicUnreachableCode
         ? null
+#pragma warning restore CS0162 // Unreachable code detected
+#endif
         : _frame.GetMethod();
 
 #if NET5_0_OR_GREATER

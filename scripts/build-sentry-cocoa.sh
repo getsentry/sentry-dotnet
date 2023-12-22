@@ -12,7 +12,7 @@ ios_sdk=$(echo "$sdks" | awk '/iOS SDKs/{getline; print $NF}')
 ios_simulator_sdk=$(echo "$sdks" | awk '/iOS Simulator SDKs/{getline; print $NF}')
 
 # Note - We keep the build output in separate directories so that .NET
-# bundles iOS with net6.0-ios and Mac Catalyst with net6.0-maccatalyst.
+# bundles iOS with netX.0-ios and Mac Catalyst with netX.0-maccatalyst.
 # The lack of symlinks in the ios builds, means we should also be able
 # to use the package on Windows with "Pair to Mac".
 

@@ -497,14 +497,17 @@ internal class DebugStackTrace : SentryStackTrace
     [UnconditionalSuppressMessage("SingleFile", "IL3002:Avoid calling members marked with 'RequiresAssemblyFilesAttribute' when publishing as a single-file", Justification = AotHelper.SuppressionJustification)]
     private static PEReader? TryReadAssemblyFromDisk(Module module, SentryOptions options, out string? assemblyName)
     {
+#if !NET8_0_OR_GREATER
+#pragma warning disable 0162
         if (AotHelper.IsNativeAot)
         {
-            #pragma warning disable 0162 // Unreachable code on old .NET frameworks
+            // Only unreachable outside NET8_0_OR_GREATER
+            // ReSharper disable once HeuristicUnreachableCode
             assemblyName = null;
             return null;
-            #pragma warning restore 0162
         }
-
+#pragma warning restore 0162
+#endif
         assemblyName = module.FullyQualifiedName;
         if (options.AssemblyReader is { } reader)
         {
