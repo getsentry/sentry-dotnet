@@ -55,6 +55,11 @@ public sealed class App : IJsonSerializable, ICloneable<App>, IUpdatable<App>
     public string? Build { get; set; }
 
     /// <summary>
+    /// A flag indicating whether the app is in foreground or not. An app is in foreground when it's visible to the user.
+    /// </summary>
+    public bool? InForeground { get; set; }
+
+    /// <summary>
     /// Clones this instance.
     /// </summary>
     internal App Clone() => ((ICloneable<App>)this).Clone();
@@ -68,7 +73,8 @@ public sealed class App : IJsonSerializable, ICloneable<App>, IUpdatable<App>
             BuildType = BuildType,
             Name = Name,
             Version = Version,
-            Build = Build
+            Build = Build,
+            InForeground = InForeground
         };
 
     /// <summary>
@@ -94,6 +100,7 @@ public sealed class App : IJsonSerializable, ICloneable<App>, IUpdatable<App>
         Name ??= source.Name;
         Version ??= source.Version;
         Build ??= source.Build;
+        InForeground ??= source.InForeground;
     }
 
     /// <inheritdoc />
@@ -109,6 +116,7 @@ public sealed class App : IJsonSerializable, ICloneable<App>, IUpdatable<App>
         writer.WriteStringIfNotWhiteSpace("app_name", Name);
         writer.WriteStringIfNotWhiteSpace("app_version", Version);
         writer.WriteStringIfNotWhiteSpace("app_build", Build);
+        writer.WriteBooleanIfNotNull("in_foreground", InForeground);
 
         writer.WriteEndObject();
     }
@@ -125,6 +133,7 @@ public sealed class App : IJsonSerializable, ICloneable<App>, IUpdatable<App>
         var name = json.GetPropertyOrNull("app_name")?.GetString();
         var version = json.GetPropertyOrNull("app_version")?.GetString();
         var build = json.GetPropertyOrNull("app_build")?.GetString();
+        var inForeground = json.GetPropertyOrNull("in_foreground")?.GetBoolean();
 
         return new App
         {
@@ -134,7 +143,8 @@ public sealed class App : IJsonSerializable, ICloneable<App>, IUpdatable<App>
             BuildType = buildType,
             Name = name,
             Version = version,
-            Build = build
+            Build = build,
+            InForeground = inForeground
         };
     }
 }
