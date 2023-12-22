@@ -248,15 +248,11 @@ public class SamplingTransactionProfilerTests
         }
     }
 
-    [SkippableFact]
+    [Fact]
     public async Task Profiler_ThrowingOnSessionStartup_DoesntBreakSentryInit()
     {
-#if DEBUG
         SampleProfilerSession.ThrowOnNextStartupForTests = true;
-#else
-        Skip.If(true, "This test only works in DEBUG mode.");
-#endif
-
+        
         var tcs = new TaskCompletionSource<string>();
         async Task VerifyAsync(HttpRequestMessage message)
         {

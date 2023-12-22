@@ -39,7 +39,7 @@ public class ProfilingIntegration : ISdkIntegration
             }
             catch (Exception e)
             {
-                options.LogError(e, "Failed to initialize the profiler: {0}");
+                options.LogError(e, "Failed to initialize the profiler");
             }
         }
     }
