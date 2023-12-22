@@ -12,6 +12,7 @@
 
 - The User.IpAddress is now set to {{auto}} by default, even when sendDefaultPII is disabled ([#2981](https://github.com/getsentry/sentry-dotnet/pull/2981))
   - The "Prevent Storing of IP Addresses" option in the "Security & Privacy" project settings on sentry.io can be used to control this instead
+- The `DiagnosticLogger` signature for `LogWarning` changed to take the `exception` as the first parameter. That way it does no longer get mixed up with the TArgs. ([#2987](https://github.com/getsentry/sentry-dotnet/pull/2987))
 
 ### Dependencies
 

@@ -1171,7 +1171,8 @@ namespace Sentry.Extensibility
         public static void LogInfo<TArg>(this Sentry.Extensibility.IDiagnosticLogger logger, string message, TArg arg) { }
         public static void LogInfo<TArg, TArg2>(this Sentry.Extensibility.IDiagnosticLogger logger, string message, TArg arg, TArg2 arg2) { }
         public static void LogInfo<TArg, TArg2, TArg3>(this Sentry.Extensibility.IDiagnosticLogger logger, string message, TArg arg, TArg2 arg2, TArg3 arg3) { }
-        public static void LogWarning(this Sentry.Extensibility.IDiagnosticLogger logger, string message, System.Exception? exception = null) { }
+        public static void LogWarning(this Sentry.Extensibility.IDiagnosticLogger logger, string message) { }
+        public static void LogWarning(this Sentry.Extensibility.IDiagnosticLogger logger, System.Exception exception, string message) { }
         public static void LogWarning<TArg>(this Sentry.Extensibility.IDiagnosticLogger logger, string message, TArg arg) { }
         public static void LogWarning<TArg, TArg2>(this Sentry.Extensibility.IDiagnosticLogger logger, string message, TArg arg, TArg2 arg2) { }
     }
