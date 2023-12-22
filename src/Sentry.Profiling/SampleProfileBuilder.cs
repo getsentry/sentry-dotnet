@@ -172,7 +172,7 @@ internal class SampleProfileBuilder
         else
         {
             // Fall back if the method info is unknown, see more info on Symbol resolution in
-            // https://github.com/microsoft/perfview/blob/031250ffb4f9fcadb9263525d6c9f274be19ca51/src/PerfView/SupportFiles/UsersGuide.htm#L7745-L7784
+            // https://github.com/getsentry/perfview/blob/031250ffb4f9fcadb9263525d6c9f274be19ca51/src/PerfView/SupportFiles/UsersGuide.htm#L7745-L7784
             frame.InstructionAddress = (long?)_traceLog.CodeAddresses.Address(codeAddressIndex);
 
             if (_traceLog.CodeAddresses.ModuleFile(codeAddressIndex) is { } moduleFile)
