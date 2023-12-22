@@ -1,7 +1,5 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Integrations;
-using Sentry.Internal.ScopeStack;
 
 namespace Sentry.Internal;
 

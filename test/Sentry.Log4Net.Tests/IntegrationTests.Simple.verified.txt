@@ -31,7 +31,9 @@
                 Operation: 
               }
             },
-            User: {},
+            User: {
+              IpAddress: {{auto}}
+            },
             Environment: production
           }
         }

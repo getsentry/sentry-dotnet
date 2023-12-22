@@ -48,6 +48,8 @@ internal partial class BindableSentryOptions
     public bool? AutoSessionTracking { get; set; }
     public bool? UseAsyncFileIO { get; set; }
     public bool? JsonPreserveReferences { get; set; }
+    public bool? EnableSpotlight { get; set; }
+    public string? SpotlightUrl { get; set; }
 
     public void ApplyTo(SentryOptions options)
     {
@@ -92,6 +94,8 @@ internal partial class BindableSentryOptions
         options.AutoSessionTracking = AutoSessionTracking ?? options.AutoSessionTracking;
         options.UseAsyncFileIO = UseAsyncFileIO ?? options.UseAsyncFileIO;
         options.JsonPreserveReferences = JsonPreserveReferences ?? options.JsonPreserveReferences;
+        options.EnableSpotlight = EnableSpotlight ?? options.EnableSpotlight;
+        options.SpotlightUrl = SpotlightUrl ?? options.SpotlightUrl;
 
 #if ANDROID
         Android.ApplyTo(options.Android);
