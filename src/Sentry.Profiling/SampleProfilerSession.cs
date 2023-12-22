@@ -57,7 +57,7 @@ internal class SampleProfilerSession : IDisposable
     {
         try
         {
-            var client = new DiagnosticsClient(Process.GetCurrentProcess().Id);
+            var client = new DiagnosticsClient(Environment.ProcessId);
 
             if (ThrowOnNextStartupForTests)
             {
