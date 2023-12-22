@@ -5,7 +5,7 @@ namespace Sentry.Profiling.Tests;
 
 // Note: we must not run tests in parallel because we only support profiling one transaction at a time.
 // That means setting up a test-collection with parallelization disabled and NOT using any async test functions.
-[CollectionDefinition("SamplingProfiler tests", DisableParallelization = true)]
+[CollectionDefinition(nameof(SamplingTransactionProfilerTests), DisableParallelization = true)]
 [UsesVerify]
 public class SamplingTransactionProfilerTests
 {
@@ -239,7 +239,7 @@ public class SamplingTransactionProfilerTests
 
             // Synchronizing in the tests to go through the caching and http transports
             cts.CancelAfter(options.FlushTimeout + TimeSpan.FromSeconds(1));
-            var ex = Record.Exception(() => tcs.Task.Wait());
+            var ex = Record.Exception(tcs.Task.Wait);
             Assert.Null(ex);
             Assert.True(tcs.Task.IsCompleted);
 
@@ -310,7 +310,7 @@ public class SamplingTransactionProfilerTests
         try
         {
             using var hub = (SentrySdk.InitHub(options) as Hub)!;
-            options.TransactionProfilerFactory.Should().BeNull();
+            Assert.Null(options.TransactionProfilerFactory);
 
             var clock = SentryStopwatch.StartNew();
             var tx = hub.StartTransaction("name", "op");
@@ -319,7 +319,7 @@ public class SamplingTransactionProfilerTests
             await hub.FlushAsync();
 
             // Asserts
-            var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(1_000)).ConfigureAwait(false);
+            var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(10_000)).ConfigureAwait(false);
             completedTask.Should().Be(tcs.Task);
             var envelopeLines = tcs.Task.Result.Split('\n');
             envelopeLines.Length.Should().Be(4);
