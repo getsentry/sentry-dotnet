@@ -166,8 +166,24 @@ public static class DiagnosticLoggerExtensions
     /// </summary>
     public static void LogWarning(
         this IDiagnosticLogger logger,
-        string message,
-        Exception? exception = null)
+        string message)
+        => logger.LogIfEnabled(SentryLevel.Warning, null, message);
+
+    /// <summary>
+    /// Log a warning message.
+    /// </summary>
+    internal static void LogWarning(
+        this SentryOptions options,
+        string message)
+        => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Warning, null, message);
+
+    /// <summary>
+    /// Log a warning message.
+    /// </summary>
+    public static void LogWarning(
+        this IDiagnosticLogger logger,
+        Exception exception,
+        string message)
         => logger.LogIfEnabled(SentryLevel.Warning, exception, message);
 
     /// <summary>
@@ -175,8 +191,8 @@ public static class DiagnosticLoggerExtensions
     /// </summary>
     internal static void LogWarning(
         this SentryOptions options,
-        string message,
-        Exception? exception = null)
+        Exception exception,
+        string message)
         => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Warning, exception, message);
 
     /// <summary>
