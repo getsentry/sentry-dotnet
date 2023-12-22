@@ -34,6 +34,7 @@ public class SentryMauiScreenshotTests
 
     private readonly Fixture _fixture = new();
 
+#if __MOBILE__
     [Fact]
     public async Task CaptureException_WhenAttachScreenshots_ContainsScreenshotAttachmentAsync()
     {
@@ -54,7 +55,7 @@ public class SentryMauiScreenshotTests
         var envelopeItem = envelope!.Items.FirstOrDefault(item => item.TryGetType() == "attachment");
 
         // Assert
-#if __MOBILE__
+        // On Android this can fail due to MAUI not being able to detect current Activity, see issue https://github.com/dotnet/maui/issues/19450
         if (_fixture.Logger.Entries.Any(entry => entry.Level == SentryLevel.Error && entry.Exception is NullReferenceException))
         {
             envelopeItem.Should().BeNull();
@@ -64,8 +65,8 @@ public class SentryMauiScreenshotTests
             envelopeItem.Should().NotBeNull();
             envelopeItem!.TryGetFileName().Should().Be("screenshot.jpg");
         }
-#endif
     }
+#endif
 
     [Fact]
     public async Task CaptureException_RemoveScreenshot_NotContainsScreenshotAttachmentAsync()

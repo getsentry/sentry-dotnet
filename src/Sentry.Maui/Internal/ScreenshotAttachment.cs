@@ -63,18 +63,9 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
 #else
             stream = MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                try
-                {
-                    var screen = await Screenshot.Default.CaptureAsync().ConfigureAwait(true);
-    
-                    return await screen.OpenReadAsync(ScreenshotFormat.Jpeg).ConfigureAwait(true);
-                }
-                //In some cases screen capture can throw, for example on Android if the activity is marked as secure.
-                catch (Exception ex)
-                {
-                    _options.LogError(ex, "Error capturing screenshot");
-                    return Stream.Null;
-                }
+                var screen = await Screenshot.Default.CaptureAsync().ConfigureAwait(true);
+
+                return await screen.OpenReadAsync(ScreenshotFormat.Jpeg).ConfigureAwait(true);
             }).ConfigureAwait(false).GetAwaiter().GetResult();
 #endif
         }
