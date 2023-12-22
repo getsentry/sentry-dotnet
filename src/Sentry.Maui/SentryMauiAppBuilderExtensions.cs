@@ -100,6 +100,8 @@ public static class SentryMauiAppBuilderExtensions
                     var platformApplication = application.Delegate as IPlatformApplication;
                     platformApplication?.HandleMauiEvents(bind: false);
 
+                    //According to https://developer.apple.com/documentation/uikit/uiapplicationdelegate/1623111-applicationwillterminate#discussion
+                    //WillTerminate is called: in situations where the app is running in the background (not suspended) and the system needs to terminate it for some reason. 
                     SentryMauiEventProcessor.InForeground = false;
                 });
 
