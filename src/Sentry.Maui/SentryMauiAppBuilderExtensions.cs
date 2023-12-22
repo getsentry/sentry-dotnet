@@ -99,13 +99,28 @@ public static class SentryMauiAppBuilderExtensions
 
                     var platformApplication = application.Delegate as IPlatformApplication;
                     platformApplication?.HandleMauiEvents(bind: false);
+
+                    //According to https://developer.apple.com/documentation/uikit/uiapplicationdelegate/1623111-applicationwillterminate#discussion
+                    //WillTerminate is called: in situations where the app is running in the background (not suspended) and the system needs to terminate it for some reason. 
+                    SentryMauiEventProcessor.InForeground = false;
                 });
+
+                lifecycle.OnActivated(application => SentryMauiEventProcessor.InForeground = true);
+
+                lifecycle.DidEnterBackground(application => SentryMauiEventProcessor.InForeground = false);
+                lifecycle.OnResignActivation(application => SentryMauiEventProcessor.InForeground = false);
             });
 #elif ANDROID
             events.AddAndroid(lifecycle =>
             {
                 lifecycle.OnApplicationCreating(application => (application as IPlatformApplication)?.HandleMauiEvents());
                 lifecycle.OnDestroy(application => (application as IPlatformApplication)?.HandleMauiEvents(bind: false));
+
+                lifecycle.OnResume(activity => SentryMauiEventProcessor.InForeground = true);
+                lifecycle.OnStart(activity => SentryMauiEventProcessor.InForeground = true);
+
+                lifecycle.OnStop(activity => SentryMauiEventProcessor.InForeground = false);
+                lifecycle.OnPause(activity => SentryMauiEventProcessor.InForeground = false);
             });
 #elif WINDOWS
             events.AddWindows(lifecycle =>

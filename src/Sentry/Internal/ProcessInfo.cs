@@ -17,12 +17,32 @@ internal class ProcessInfo
     internal DateTimeOffset? BootTime { get; }
 
     private volatile Task _preciseAppStartupTask = Task.CompletedTask;
+    private int? _id;
 
     // For testability
     internal Task PreciseAppStartupTask
     {
         get => _preciseAppStartupTask;
         private set => _preciseAppStartupTask = value;
+    }
+
+    public int? GetId(SentryOptions options) => _id ??= GetCurrentProcessId(options);
+
+    private int? GetCurrentProcessId(SentryOptions options)
+    {
+#if NET6_0_OR_GREATER
+        return Environment.ProcessId;
+#else
+        try
+        {
+            return Process.GetCurrentProcess().Id;
+        }
+        catch (Exception ex)
+        {
+            options.LogError(ex, "Error getting current process Id");
+            return null;
+        }
+#endif
     }
 
     internal ProcessInfo(
@@ -68,13 +88,13 @@ internal class ProcessInfo
         if (options.DetectStartupTime == StartupTimeDetectionMode.Best)
         {
 #if __MOBILE__
-                options.LogWarning("StartupTimeDetectionMode.Best is not available on this platform.  Using 'Fast' mode.");
+            options.LogWarning("StartupTimeDetectionMode.Best is not available on this platform.  Using 'Fast' mode.");
 #else
             // StartupTime is set to UtcNow in this constructor.
             // That's computationally cheap but not very precise.
             // This method will give a better precision to the StartupTime at a cost
             // of calling Process.GetCurrentProcess, on a thread pool thread.
-            var preciseStartupTimeFunc = findPreciseStartupTime ??  GetStartupTime;
+            var preciseStartupTimeFunc = findPreciseStartupTime ?? GetStartupTime;
             PreciseAppStartupTask = Task.Run(() =>
             {
                 try
@@ -100,4 +120,35 @@ internal class ProcessInfo
         return proc.StartTime.ToUniversalTime();
     }
 #endif
+
+    public bool? ApplicationIsActivated(SentryOptions options)
+    {
+        try
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                var activatedHandle = GetForegroundWindow();
+                if (activatedHandle == IntPtr.Zero)
+                {
+                    return false;       // No window is currently activated
+                }
+
+                var currentProcessId = ProcessInfo.Instance?.GetId(options);
+                GetWindowThreadProcessId(activatedHandle, out var activeProcessId);
+
+                return activeProcessId == currentProcessId;
+            }
+        }
+        catch (Exception e)
+        {
+            options.LogError(e, "Error getting foreground window state.");
+        }
+        return null;
+    }
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+    private static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    private static extern int GetWindowThreadProcessId(IntPtr handle, out int processId);
 }
