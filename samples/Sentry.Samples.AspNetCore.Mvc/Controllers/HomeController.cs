@@ -22,14 +22,27 @@ public class HomeController : Controller
         return View();
     }
 
-    [HttpGet]
-    public string Block()
+    // GET /home/block/true or /home/block/false to observe events
+    [HttpGet("[controller]/block/{block?}")]
+    public async Task<string> Block([FromRoute]bool block)
     {
-        _logger.LogInformation("\ud83d\ude31 Calling a blocking API on an async method \ud83d\ude31");
 
-        Task.Delay(0);
+        if (block)
+        {
+            _logger.LogInformation("\ud83d\ude31 Calling a blocking API on an async method \ud83d\ude31");
 
-        return "Blocking call that could cause ThreadPool starvation";
+            // This will result in an event in Sentry
+            Task.Delay(10).Wait(); // This is a blocking call. Same with '.Result'
+        }
+        else
+        {
+            _logger.LogInformation("\ud83d\ude31 No blocking call made \ud83d\ude31");
+
+            // Non-blocking, no event captured
+            await Task.Delay(10);
+        }
+
+        return "Was blocking? " + block;
     }
 
     // Example: An exception that goes unhandled by the app will be captured by Sentry:

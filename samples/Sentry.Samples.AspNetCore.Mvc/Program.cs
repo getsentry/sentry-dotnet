@@ -31,7 +31,7 @@ public static class Program
 
                 options.EnableTracing = true;
 
-                // Call GET /home/block to see this in action
+                // Call GET /home/block/true to see this in action
                 options.CaptureBlockingCalls = true;
 
                 // Set a proxy for outgoing HTTP connections
