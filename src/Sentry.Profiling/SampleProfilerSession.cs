@@ -78,7 +78,7 @@ internal class SampleProfilerSession : IDisposable
                 {
                     if (_.Exception?.InnerException is { } e)
                     {
-                        logger?.LogWarning("Error during sampler profiler EventPipeSession processing.", e);
+                        logger?.LogWarning(e, "Error during sampler profiler EventPipeSession processing.");
                     }
                 }, TaskContinuationOptions.OnlyOnFaulted);
 
@@ -86,7 +86,7 @@ internal class SampleProfilerSession : IDisposable
         }
         catch (Exception ex)
         {
-            logger?.LogWarning("Error during sampler profiler EventPipeSession startup.", ex);
+            logger?.LogWarning(ex, "Error during sampler profiler EventPipeSession startup.");
             throw;
         }
     }
@@ -120,7 +120,7 @@ internal class SampleProfilerSession : IDisposable
             }
             catch (Exception ex)
             {
-                _logger?.LogWarning("Error during sampler profiler session shutdown.", ex);
+                _logger?.LogWarning(ex, "Error during sampler profiler session shutdown.");
             }
         }
     }

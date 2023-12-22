@@ -27,7 +27,7 @@ public class SamplingTransactionProfilerTests
             }
             catch (Exception e)
             {
-                _testOutputLogger.LogWarning("Caught an exception in a test block that is allowed to fail when in CI.", e);
+                _testOutputLogger.LogWarning(e, "Caught an exception in a test block that is allowed to fail when in CI.");
                 Skip.If(true, "Caught an exception in a test block that is allowed to fail when in CI.");
             }
         }
