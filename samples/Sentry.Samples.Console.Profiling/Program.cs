@@ -18,10 +18,13 @@ internal static class Program
             options.IsGlobalModeEnabled = true;
             options.EnableTracing = true;
 
+            // Make sure to reduce the sampling rate in production.
+            options.ProfilesSampleRate = 1.0;
+
             // Debugging
             options.ShutdownTimeout = TimeSpan.FromMinutes(5);
 
-            options.AddIntegration(new ProfilingIntegration());
+            options.AddIntegration(new ProfilingIntegration(TimeSpan.FromMilliseconds(500)));
         }))
         {
             var tx = SentrySdk.StartTransaction("app", "run");

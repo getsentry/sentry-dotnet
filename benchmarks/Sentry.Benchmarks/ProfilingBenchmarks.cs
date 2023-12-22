@@ -18,7 +18,7 @@ public class ProfilingBenchmarks
     [GlobalSetup(Targets = new string[] { nameof(Transaction), nameof(DoHardWorkWhileProfiling) })]
     public void StartProfiler()
     {
-        _factory = SamplingTransactionProfilerFactory.Create(new());
+        _factory = new SamplingTransactionProfilerFactory(new(), TimeSpan.FromSeconds(5));
     }
 
     [GlobalCleanup(Targets = new string[] { nameof(Transaction), nameof(DoHardWorkWhileProfiling) })]

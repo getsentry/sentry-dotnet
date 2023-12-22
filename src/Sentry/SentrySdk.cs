@@ -72,7 +72,35 @@ public static partial class SentrySdk
         }
         options.PostInitCallbacks.Clear();
 
+        // Platform specific check for profiler misconfiguration.
+#if __IOS__
+        // No user-facing warning necessary - the integration is part of InitSentryCocoaSdk().
+        Debug.Assert(options.IsProfilingEnabled == (options.TransactionProfilerFactory is not null));
+#elif ANDROID
+        LogWarningIfProfilingMisconfigured(options, " on Android");
+#else
+#if NET8_0_OR_GREATER
+        if (AotHelper.IsNativeAot)
+        {
+            LogWarningIfProfilingMisconfigured(options, " for NativeAOT");
+        }
+        else
+#endif
+        {
+            LogWarningIfProfilingMisconfigured(options, ", because ProfilingIntegration from package Sentry.Profiling" +
+            " hasn't been registered. You can do that by calling 'options.AddIntegration(new ProfilingIntegration())'");
+        }
+#endif
+
         return hub;
+    }
+
+    private static void LogWarningIfProfilingMisconfigured(SentryOptions options, string info)
+    {
+        if (options.IsProfilingEnabled && (options.TransactionProfilerFactory is null))
+        {
+            options.LogWarning("You've tried to enable profiling in options, but it is not available{0}.", info);
+        }
     }
 
     /// <summary>
