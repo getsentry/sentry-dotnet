@@ -116,9 +116,11 @@ internal class RealStackFrame : IStackFrame
     public MethodBase? GetMethod() => AotHelper.IsNativeAot
 #if !NET8_0_OR_GREATER
 #pragma warning disable CS0162 // Unreachable code detected
+#endif
         // Only unreachable outside NET8_0_OR_GREATER
         // ReSharper disable once HeuristicUnreachableCode
         ? null
+#if !NET8_0_OR_GREATER
 #pragma warning restore CS0162 // Unreachable code detected
 #endif
         : _frame.GetMethod();

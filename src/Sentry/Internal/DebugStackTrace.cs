@@ -499,6 +499,7 @@ internal class DebugStackTrace : SentryStackTrace
     {
 #if !NET8_0_OR_GREATER
 #pragma warning disable 0162
+#endif
         if (AotHelper.IsNativeAot)
         {
             // Only unreachable outside NET8_0_OR_GREATER
@@ -506,6 +507,7 @@ internal class DebugStackTrace : SentryStackTrace
             assemblyName = null;
             return null;
         }
+#if !NET8_0_OR_GREATER
 #pragma warning restore 0162
 #endif
         assemblyName = module.FullyQualifiedName;
