@@ -2,11 +2,28 @@
 
 ## Unreleased
 
+### Features
+
+- MAUI Screenshot support. You can opt-in via `SentryMauiOptions.AttachScreenshots` ([#2965](https://github.com/getsentry/sentry-dotnet/pull/2965))
+   - Supports Android and iOS only. Windows is not supported.
+- MAUI: App context has `in_foreground` indicating whether app was on the background or foreground. ([#2983](https://github.com/getsentry/sentry-dotnet/pull/2983))
+
+### Significant change in behavior
+
+- The User.IpAddress is now set to {{auto}} by default, even when sendDefaultPII is disabled ([#2981](https://github.com/getsentry/sentry-dotnet/pull/2981))
+  - The "Prevent Storing of IP Addresses" option in the "Security & Privacy" project settings on sentry.io can be used to control this instead
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.17.1 to v8.17.2 ([#2972](https://github.com/getsentry/sentry-dotnet/pull/2972))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8172)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.17.1...8.17.2)
+- Bump Java SDK from v7.0.0 to v7.1.0 ([#2979](https://github.com/getsentry/sentry-dotnet/pull/2979))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#710)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.0.0...7.1.0)
+- Bump CLI from v2.23.0 to v2.23.1 ([#2985](https://github.com/getsentry/sentry-dotnet/pull/2985))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2231)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.23.0...2.23.1)
 
 ## 4.0.0-beta.6
 

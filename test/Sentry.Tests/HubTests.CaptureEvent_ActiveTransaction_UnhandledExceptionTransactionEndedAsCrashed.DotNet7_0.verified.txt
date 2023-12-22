@@ -111,7 +111,9 @@ e            SentryThreads: [
                 Operation: 
               }
             },
-            User: {},
+            User: {
+              IpAddress: {{auto}}
+            },
             Environment: production
           }
         }
@@ -173,7 +175,9 @@ e            SentryThreads: [
                 IsSampled: true
               }
             },
-            User: {},
+            User: {
+              IpAddress: {{auto}}
+            },
             Environment: production,
             IsFinished: true
           }
