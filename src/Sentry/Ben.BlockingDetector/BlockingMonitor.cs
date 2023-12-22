@@ -29,6 +29,15 @@ namespace Sentry.Ben.Diagnostics
                         {
                             new SentryException
                             {
+                                Mechanism = new Mechanism
+                                {
+                                    Type = "BlockingCallDetector",
+                                    Handled = false,
+                                    Description = "Blocking calls can cause ThreadPool starvation. Learn more about it: " +
+                                                  "https://learn.microsoft.com/en-us/aspnet/core/fundamentals/best-practices#avoid-blocking-calls " +
+                                                  "and consider an analyzer to warn you from blocking calls on async flows; " +
+                                                  "https://www.nuget.org/packages/Microsoft.VisualStudio.Threading.Analyzers/"
+                                },
                                 Type = "Blocking call detected",
                                 Stacktrace = DebugStackTrace.Create(
                                     options,
