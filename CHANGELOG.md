@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- MAUI: App context has `in_foreground` indicating whether app was on the background or foreground. ([#2983](https://github.com/getsentry/sentry-dotnet/pull/2983))
+
 ### Significant change in behavior
 
 - The User.IpAddress is now set to {{auto}} by default, even when sendDefaultPII is disabled ([#2981](https://github.com/getsentry/sentry-dotnet/pull/2981))
