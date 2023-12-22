@@ -17,6 +17,7 @@ public class SamplingTransactionProfilerTests
     // Note: these tests are flaky in CI. Mostly it's because the profiler sometimes takes very long time to start
     // or it won't start at all in a given timeout. To avoid failing the CI under these expected circumstances, we
     // skip the test if it fails on a particular check.
+    // Don't use xUnit asserts in the given callback, only standard exceptions.
     private void SkipIfFailsInCI(Action checks)
     {
         if (TestEnvironment.IsGitHubActions)
@@ -98,7 +99,7 @@ public class SamplingTransactionProfilerTests
         var hub = Substitute.For<IHub>();
         var transactionTracer = new TransactionTracer(hub, "test", "");
         var sut = factory.Start(transactionTracer, CancellationToken.None) as SamplingTransactionProfiler;
-        SkipIfFailsInCI(() => Assert.NotNull(sut));
+        SkipIfFailsInCI(() => ArgumentNullException.ThrowIfNull(sut));
         transactionTracer.TransactionProfiler = sut;
         RunForMs(RuntimeMs);
         sut!.Finish();
@@ -244,7 +245,13 @@ public class SamplingTransactionProfilerTests
             Assert.True(tcs.Task.IsCompleted);
 
             var envelopeLines = tcs.Task.Result.Split('\n');
-            SkipIfFailsInCI(() => envelopeLines.Length.Should().Be(6));
+            SkipIfFailsInCI(() =>
+            {
+                if (envelopeLines.Length != 6)
+                {
+                    throw new ArgumentOutOfRangeException("envelopeLines", "Invalid number of envelope lines.");
+                }
+            });
 
             // header rows before payloads
             envelopeLines[1].Should().StartWith("{\"type\":\"transaction\"");
@@ -309,8 +316,10 @@ public class SamplingTransactionProfilerTests
 
         try
         {
+            SampleProfilerSession.ThrowOnNextStartupForTests.Should().BeTrue();
             using var hub = (SentrySdk.InitHub(options) as Hub)!;
-            Assert.Null(options.TransactionProfilerFactory);
+            SampleProfilerSession.ThrowOnNextStartupForTests.Should().BeFalse();
+            options.TransactionProfilerFactory.Should().BeNull();
 
             var clock = SentryStopwatch.StartNew();
             var tx = hub.StartTransaction("name", "op");
