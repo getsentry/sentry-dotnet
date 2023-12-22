@@ -4,6 +4,8 @@
 
 ### Features
 
+- MAUI Screenshot support. You can opt-in via `SentryMauiOptions.AttachScreenshots` ([#2965](https://github.com/getsentry/sentry-dotnet/pull/2965))
+   - Supports Android and iOS only. Windows is not supported.
 - MAUI: App context has `in_foreground` indicating whether app was on the background or foreground. ([#2983](https://github.com/getsentry/sentry-dotnet/pull/2983))
 
 ### Significant change in behavior
