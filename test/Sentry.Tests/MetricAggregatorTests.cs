@@ -45,13 +45,13 @@ public class MetricAggregatorTests
         var sut = _fixture.GetSut();
 
         // Act
-        DateTime firstTime = new(1970, 1, 1, 0, 0, 31, 0, DateTimeKind.Utc);
+        DateTimeOffset firstTime = new(1970, 1, 1, 0, 0, 31, 0, TimeSpan.Zero);
         sut.Increment(key, 3, unit, tags, firstTime);
 
-        DateTime secondTime = new(1970, 1, 1, 0, 0, 38, 0, DateTimeKind.Utc);
+        DateTimeOffset secondTime = new(1970, 1, 1, 0, 0, 38, 0, TimeSpan.Zero);
         sut.Increment(key, 5, unit, tags, secondTime);
 
-        DateTime thirdTime = new(1970, 1, 1, 0, 0, 40, 0, DateTimeKind.Utc);
+        DateTimeOffset thirdTime = new(1970, 1, 1, 0, 0, 40, 0, TimeSpan.Zero);
         sut.Increment(key, 13, unit, tags, thirdTime);
 
         // Assert
@@ -75,13 +75,13 @@ public class MetricAggregatorTests
         var sut = _fixture.GetSut();
 
         // Act
-        DateTime time1 = new(1970, 1, 1, 0, 0, 31, 0, DateTimeKind.Utc);
+        DateTimeOffset time1 = new(1970, 1, 1, 0, 0, 31, 0, TimeSpan.Zero);
         sut.Gauge(key, 3, unit, tags, time1);
 
-        DateTime time2 = new(1970, 1, 1, 0, 0, 38, 0, DateTimeKind.Utc);
+        DateTimeOffset time2 = new(1970, 1, 1, 0, 0, 38, 0, TimeSpan.Zero);
         sut.Gauge(key, 5, unit, tags, time2);
 
-        DateTime time3 = new(1970, 1, 1, 0, 0, 40, 0, DateTimeKind.Utc);
+        DateTimeOffset time3 = new(1970, 1, 1, 0, 0, 40, 0, TimeSpan.Zero);
         sut.Gauge(key, 13, unit, tags, time3);
 
         // Assert
@@ -115,13 +115,13 @@ public class MetricAggregatorTests
         var sut = _fixture.GetSut();
 
         // Act
-        DateTime time1 = new(1970, 1, 1, 0, 0, 31, 0, DateTimeKind.Utc);
+        DateTimeOffset time1 = new(1970, 1, 1, 0, 0, 31, 0, TimeSpan.Zero);
         sut.Distribution(key, 3, unit, tags, time1);
 
-        DateTime time2 = new(1970, 1, 1, 0, 0, 38, 0, DateTimeKind.Utc);
+        DateTimeOffset time2 = new(1970, 1, 1, 0, 0, 38, 0, TimeSpan.Zero);
         sut.Distribution(key, 5, unit, tags, time2);
 
-        DateTime time3 = new(1970, 1, 1, 0, 0, 40, 0, DateTimeKind.Utc);
+        DateTimeOffset time3 = new(1970, 1, 1, 0, 0, 40, 0, TimeSpan.Zero);
         sut.Distribution(key, 13, unit, tags, time3);
 
         // Assert
@@ -145,16 +145,16 @@ public class MetricAggregatorTests
         var sut = _fixture.GetSut();
 
         // Act
-        DateTime time1 = new(1970, 1, 1, 0, 0, 31, 0, DateTimeKind.Utc);
+        DateTimeOffset time1 = new(1970, 1, 1, 0, 0, 31, 0, TimeSpan.Zero);
         sut.Set(key, 3, unit, tags, time1);
 
-        DateTime time2 = new(1970, 1, 1, 0, 0, 38, 0, DateTimeKind.Utc);
+        DateTimeOffset time2 = new(1970, 1, 1, 0, 0, 38, 0, TimeSpan.Zero);
         sut.Set(key, 5, unit, tags, time2);
 
-        DateTime time3 = new(1970, 1, 1, 0, 0, 40, 0, DateTimeKind.Utc);
+        DateTimeOffset time3 = new(1970, 1, 1, 0, 0, 40, 0, TimeSpan.Zero);
         sut.Set(key, 13, unit, tags, time3);
 
-        DateTime time4 = new(1970, 1, 1, 0, 0, 42, 0, DateTimeKind.Utc);
+        DateTimeOffset time4 = new(1970, 1, 1, 0, 0, 42, 0, TimeSpan.Zero);
         sut.Set(key, 13, unit, tags, time3);
 
         // Assert
@@ -214,7 +214,8 @@ public class MetricAggregatorTests
     }
 
     [Fact]
-    public void TestGetCodeLocation() {
+    public void TestGetCodeLocation()
+    {
         // Arrange
         _fixture.Options.StackTraceMode = StackTraceMode.Enhanced;
         var sut = _fixture.GetSut();

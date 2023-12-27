@@ -8,13 +8,15 @@ namespace Sentry.Protocol.Metrics;
 /// </summary>
 internal class SetMetric : Metric
 {
+    private readonly HashSet<int> _value;
+
     public SetMetric()
     {
         _value = new HashSet<int>();
     }
 
     public SetMetric(string key, int value, MeasurementUnit? unit = null, IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null)
+        DateTimeOffset? timestamp = null)
         : base(key, unit, tags, timestamp)
     {
         _value = new HashSet<int>() { value };
@@ -22,12 +24,7 @@ internal class SetMetric : Metric
 
     public IReadOnlyCollection<int> Value => _value;
 
-    private readonly HashSet<int> _value;
-
-    public override void Add(double value)
-    {
-        _value.Add((int)value);
-    }
+    public override void Add(double value) => _value.Add((int)value);
 
     protected override void WriteValues(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
         writer.WriteArrayIfNotEmpty("value", _value, logger);

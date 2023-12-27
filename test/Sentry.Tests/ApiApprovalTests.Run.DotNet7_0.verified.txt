@@ -244,12 +244,12 @@ namespace Sentry
     }
     public interface IMetricAggregator : System.IDisposable
     {
-        void Distribution(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTime? timestamp = default, int stackLevel = 1);
+        void Distribution(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
         System.Threading.Tasks.Task FlushAsync(bool force = true, System.Threading.CancellationToken cancellationToken = default);
-        void Gauge(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTime? timestamp = default, int stackLevel = 1);
-        void Increment(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTime? timestamp = default, int stackLevel = 1);
-        void Set(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTime? timestamp = default, int stackLevel = 1);
-        void Timing(string key, double value, Sentry.MeasurementUnit.Duration unit = 3, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTime? timestamp = default, int stackLevel = 1);
+        void Gauge(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
+        void Increment(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
+        void Set(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
+        void Timing(string key, double value, Sentry.MeasurementUnit.Duration unit = 3, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
     }
     public interface IScopeObserver
     {

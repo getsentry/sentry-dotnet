@@ -18,7 +18,7 @@ internal class GaugeMetric : Metric
     }
 
     public GaugeMetric(string key, double value, MeasurementUnit? unit = null, IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null)
+        DateTimeOffset? timestamp = null)
         : base(key, unit, tags, timestamp)
     {
         Value = value;

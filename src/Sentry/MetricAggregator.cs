@@ -1,3 +1,4 @@
+using System;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
@@ -23,7 +24,7 @@ internal class MetricAggregator : IMetricAggregator
     private readonly Lazy<ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>>> _buckets
         = new(() => new ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>>());
 
-    private long lastClearedStaleLocations = DateTime.UtcNow.GetDayBucketKey();
+    private long lastClearedStaleLocations = DateTimeOffset.UtcNow.GetDayBucketKey();
     private readonly ConcurrentDictionary<long, HashSet<MetricResourceIdentifier>> _seenLocations = new();
     private Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>> _pendingLocations = new();
 
@@ -73,54 +74,44 @@ internal class MetricAggregator : IMetricAggregator
     }
 
     /// <inheritdoc cref="IMetricAggregator.Increment"/>
-    public void Increment(
-        string key,
+    public void Increment(string key,
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null,
-        int stackLevel = 1
-    ) => Emit(MetricType.Counter, key, value, unit, tags, timestamp, stackLevel + 1);
+        DateTimeOffset? timestamp = null,
+        int stackLevel = 1) => Emit(MetricType.Counter, key, value, unit, tags, timestamp, stackLevel + 1);
 
     /// <inheritdoc cref="IMetricAggregator.Gauge"/>
-    public void Gauge(
-        string key,
+    public void Gauge(string key,
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null,
-        int stackLevel = 1
-    ) => Emit(MetricType.Gauge, key, value, unit, tags, timestamp, stackLevel + 1);
+        DateTimeOffset? timestamp = null,
+        int stackLevel = 1) => Emit(MetricType.Gauge, key, value, unit, tags, timestamp, stackLevel + 1);
 
     /// <inheritdoc cref="IMetricAggregator.Distribution"/>
-    public void Distribution(
-        string key,
+    public void Distribution(string key,
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null,
-        int stackLevel = 1
-    ) => Emit(MetricType.Distribution, key, value, unit, tags, timestamp, stackLevel + 1);
+        DateTimeOffset? timestamp = null,
+        int stackLevel = 1) => Emit(MetricType.Distribution, key, value, unit, tags, timestamp, stackLevel + 1);
 
     /// <inheritdoc cref="IMetricAggregator.Set"/>
-    public void Set(
-        string key,
+    public void Set(string key,
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null,
-        int stackLevel = 1
-    ) => Emit(MetricType.Set, key, value, unit, tags, timestamp, stackLevel + 1);
+        DateTimeOffset? timestamp = null,
+        int stackLevel = 1) => Emit(MetricType.Set, key, value, unit, tags, timestamp, stackLevel + 1);
 
     /// <inheritdoc cref="IMetricAggregator.Timing"/>
-    public void Timing(
-        string key,
+    public void Timing(string key,
         double value,
         MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null,
-        int stackLevel = 1
-    ) => Emit(MetricType.Distribution, key, value, unit, tags, timestamp, stackLevel + 1);
+        DateTimeOffset? timestamp = null,
+        int stackLevel = 1) => Emit(MetricType.Distribution, key, value, unit, tags, timestamp, stackLevel + 1);
 
     private readonly object _emitLock = new object();
 
@@ -130,11 +121,11 @@ internal class MetricAggregator : IMetricAggregator
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null,
+        DateTimeOffset? timestamp = null,
         int stackLevel = 1
     )
     {
-        timestamp ??= DateTime.UtcNow;
+        timestamp ??= DateTimeOffset.UtcNow;
         unit ??= MeasurementUnit.None;
 
         Func<string, Metric> addValuesFactory = type switch
@@ -186,7 +177,7 @@ internal class MetricAggregator : IMetricAggregator
         string key,
         MeasurementUnit unit,
         int stackLevel,
-        DateTime timestamp
+        DateTimeOffset timestamp
     )
     {
         var startOfDay = timestamp.GetDayBucketKey();
@@ -207,11 +198,13 @@ internal class MetricAggregator : IMetricAggregator
                 return;
             }
 
-            if (!_pendingLocations.ContainsKey(startOfDay))
+            if (!_pendingLocations.TryGetValue(startOfDay, out var todaysLocations))
             {
-                _pendingLocations[startOfDay] = new Dictionary<MetricResourceIdentifier, SentryStackFrame>();
+                todaysLocations = new Dictionary<MetricResourceIdentifier, SentryStackFrame>();
+                _pendingLocations[startOfDay] = todaysLocations;
             }
-            _pendingLocations[startOfDay][metaKey] = location;
+
+            todaysLocations[metaKey] = location;
         }
         finally
         {
@@ -385,7 +378,7 @@ internal class MetricAggregator : IMetricAggregator
     /// </summary>
     private void ClearStaleLocations()
     {
-        var now = DateTime.UtcNow;
+        var now = DateTimeOffset.UtcNow;
         var today = now.GetDayBucketKey();
         if (lastClearedStaleLocations == today)
         {

@@ -12,8 +12,7 @@ public class MetricBucketHelperTests
     {
         // Arrange
         // Returns the number of seconds that have elapsed since 1970-01-01T00:00:00Z
-        // var timestamp = new DateTime(2023, 1, 15, 17, 42, 31, DateTimeKind.Utc);
-        var timestamp = new DateTime(1970, 1, 1, 1, 1, seconds, DateTimeKind.Utc);
+        var timestamp = new DateTimeOffset(1970, 1, 1, 1, 1, seconds, TimeSpan.Zero);
 
         // Act
         var result = timestamp.GetTimeBucketKey();
@@ -28,7 +27,7 @@ public class MetricBucketHelperTests
     public void GetDayBucketKey_RoundsStartOfDay(int year, int month, int day, int hour, int minute, int second, int expectedDays)
     {
         // Arrange
-        var timestamp = new DateTime(year, month, day, hour, minute, second, DateTimeKind.Utc);
+        var timestamp = new DateTimeOffset(year, month, day, hour, minute, second, TimeSpan.Zero);
 
         // Act
         var result = timestamp.GetDayBucketKey();

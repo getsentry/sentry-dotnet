@@ -96,7 +96,7 @@ public class Timing: IDisposable
             };
             _hub.Metrics.Timing(_key, value, _unit, _tags, _startTime);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             _hub.GetSentryOptions()?.LogError(e, "Error capturing timing");
         }

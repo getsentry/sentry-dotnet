@@ -14,17 +14,15 @@ public interface IMetricAggregator: IDisposable
     /// <param name="unit">An optional <see cref="MeasurementUnit"/></param>
     /// <param name="tags">Optional Tags to associate with the metric</param>
     /// <param name="timestamp">
-    /// The time when the metric was emitted. Defaults to the time at which the metric is emitted, if no value is provided.
+    ///     The time when the metric was emitted. Defaults to the time at which the metric is emitted, if no value is provided.
     /// </param>
     /// <param name="stackLevel">Optional number of stacks levels to ignore when determining the code location</param>
-    void Increment(
-        string key,
+    void Increment(string key,
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null,
-        int stackLevel = 1
-    );
+        DateTimeOffset? timestamp = null,
+        int stackLevel = 1);
 
     /// <summary>
     /// Emits a Gauge metric
@@ -34,17 +32,15 @@ public interface IMetricAggregator: IDisposable
     /// <param name="unit">An optional <see cref="MeasurementUnit"/></param>
     /// <param name="tags">Optional Tags to associate with the metric</param>
     /// <param name="timestamp">
-    /// The time when the metric was emitted. Defaults to the time at which the metric is emitted, if no value is provided.
+    ///     The time when the metric was emitted. Defaults to the time at which the metric is emitted, if no value is provided.
     /// </param>
     /// <param name="stackLevel">Optional number of stacks levels to ignore when determining the code location</param>
-    void Gauge(
-        string key,
+    void Gauge(string key,
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null,
-        int stackLevel = 1
-    );
+        DateTimeOffset? timestamp = null,
+        int stackLevel = 1);
 
     /// <summary>
     /// Emits a Distribution metric
@@ -54,17 +50,15 @@ public interface IMetricAggregator: IDisposable
     /// <param name="unit">An optional <see cref="MeasurementUnit"/></param>
     /// <param name="tags">Optional Tags to associate with the metric</param>
     /// <param name="timestamp">
-    /// The time when the metric was emitted. Defaults to the time at which the metric is emitted, if no value is provided.
+    ///     The time when the metric was emitted. Defaults to the time at which the metric is emitted, if no value is provided.
     /// </param>
     /// <param name="stackLevel">Optional number of stacks levels to ignore when determining the code location</param>
-    void Distribution(
-        string key,
+    void Distribution(string key,
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null,
-        int stackLevel = 1
-    );
+        DateTimeOffset? timestamp = null,
+        int stackLevel = 1);
 
     /// <summary>
     /// Emits a Set metric
@@ -74,17 +68,15 @@ public interface IMetricAggregator: IDisposable
     /// <param name="unit">An optional <see cref="MeasurementUnit"/></param>
     /// <param name="tags">Optional Tags to associate with the metric</param>
     /// <param name="timestamp">
-    /// The time when the metric was emitted. Defaults to the time at which the metric is emitted, if no value is provided.
+    ///     The time when the metric was emitted. Defaults to the time at which the metric is emitted, if no value is provided.
     /// </param>
     /// <param name="stackLevel">Optional number of stacks levels to ignore when determining the code location</param>
-    void Set(
-        string key,
+    void Set(string key,
         double value = 1.0,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null,
-        int stackLevel = 1
-    );
+        DateTimeOffset? timestamp = null,
+        int stackLevel = 1);
 
     /// <summary>
     /// Emits a distribution with the time it takes to run a given code block.
@@ -92,19 +84,17 @@ public interface IMetricAggregator: IDisposable
     /// <param name="key">A unique key identifying the metric</param>
     /// <param name="value">The value to be added</param>
     /// <param name="unit">
-    /// An optional <see cref="MeasurementUnit.Duration"/>. Defaults to <see cref="MeasurementUnit.Duration.Second"/>
+    ///     An optional <see cref="MeasurementUnit.Duration"/>. Defaults to <see cref="MeasurementUnit.Duration.Second"/>
     /// </param>
     /// <param name="tags">Optional Tags to associate with the metric</param>
     /// <param name="timestamp">The time when the metric was emitted</param>
     /// <param name="stackLevel">Optional number of stacks levels to ignore when determining the code location</param>
-    void Timing(
-        string key,
+    void Timing(string key,
         double value,
         MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
         IDictionary<string, string>? tags = null,
-        DateTime? timestamp = null,
-        int stackLevel = 1
-    );
+        DateTimeOffset? timestamp = null,
+        int stackLevel = 1);
 
     /// <summary>
     /// Flushes any flushable metrics and/or code locations.

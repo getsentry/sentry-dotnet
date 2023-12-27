@@ -13,7 +13,7 @@ internal class CounterMetric : Metric
     }
 
     public CounterMetric(string key, double value, MeasurementUnit? unit = null, IDictionary<string,
-        string>? tags = null, DateTime? timestamp = null)
+        string>? tags = null, DateTimeOffset? timestamp = null)
         : base(key, unit, tags, timestamp)
     {
         Value = value;
