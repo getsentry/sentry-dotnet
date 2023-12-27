@@ -154,7 +154,7 @@ public sealed class Envelope : ISerializable, IDisposable
             }
             catch (Exception e)
             {
-                logger?.LogWarning("Failed to serialize envelope item", e);
+                logger?.LogWarning(e, "Failed to serialize envelope item");
             }
         }
     }
@@ -179,7 +179,7 @@ public sealed class Envelope : ISerializable, IDisposable
             }
             catch (Exception e)
             {
-                logger?.LogWarning("Failed to serialize envelope item", e);
+                logger?.LogWarning(e, "Failed to serialize envelope item");
             }
         }
     }

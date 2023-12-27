@@ -7,7 +7,6 @@ using Microsoft.Diagnostics.Tracing.EventPipe;
 internal class Downsampler
 {
     private static double _samplingRateMs = (double)1_000 / 101; // 101 Hz
-    private double _samplingGapMs = _samplingRateMs * 0.9;
 
     // Maps from ThreadIndex to the last sample timestamp for that thread.
     private GrowableArray<double> _prevThreadSamples = new(10);
@@ -17,7 +16,7 @@ internal class Downsampler
         if (threadIndex >= _prevThreadSamples.Count)
         {
             _prevThreadSamples.Count = threadIndex + 1;
-            _prevThreadSamples[threadIndex] = Double.MinValue;
+            _prevThreadSamples[threadIndex] = double.MinValue;
         }
     }
 

@@ -15,36 +15,58 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     private const int TIME_LIMIT_MS = 30_000;
 
     private readonly SentryOptions _options;
-    private SampleProfilerSession _session;
 
-    public static SamplingTransactionProfilerFactory Create(SentryOptions options)
-    {
-        var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
-        return new SamplingTransactionProfilerFactory(options, session);
-    }
+    internal Task<SampleProfilerSession> _sessionTask;
 
-    public static async Task<SamplingTransactionProfilerFactory> CreateAsync(SentryOptions options)
-    {
-        var session = await Task.Run(() => SampleProfilerSession.StartNew(options.DiagnosticLogger)).ConfigureAwait(false);
-        return new SamplingTransactionProfilerFactory(options, session);
-    }
+    private bool _errorLogged = false;
 
-    private SamplingTransactionProfilerFactory(SentryOptions options, SampleProfilerSession session)
+    public SamplingTransactionProfilerFactory(SentryOptions options, TimeSpan startupTimeout)
     {
         _options = options;
-        _session = session;
+
+        _sessionTask = Task.Run(async () =>
+        {
+            // This can block up to 30 seconds. The timeout is out of our hands.
+            var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
+
+            // This can block indefinitely.
+            await session.WaitForFirstEventAsync().ConfigureAwait(false);
+
+            return session;
+        });
+
+        Debug.Assert(TimeSpan.FromSeconds(0) == TimeSpan.Zero);
+        if (startupTimeout != TimeSpan.Zero && !_sessionTask.Wait(startupTimeout))
+        {
+            options.LogWarning("Profiler session startup took longer then the given timeout {0:c}. Profilling will start once the first event is received.", startupTimeout);
+        }
     }
 
     /// <inheritdoc />
     public ITransactionProfiler? Start(ITransactionTracer _, CancellationToken cancellationToken)
     {
         // Start a profiler if one wasn't running yet.
-        if (Interlocked.Exchange(ref _inProgress, TRUE) == FALSE)
+        if (!_errorLogged && Interlocked.Exchange(ref _inProgress, TRUE) == FALSE)
         {
+            if (!_sessionTask.IsCompleted)
+            {
+                _options.LogWarning("Cannot start a sampling profiler, the session hasn't started yet.");
+                _inProgress = FALSE;
+                return null;
+            }
+
+            if (!_sessionTask.IsCompletedSuccessfully)
+            {
+                _options.LogWarning("Cannot start a sampling profiler because the session startup has failed. This is a permanent error and no future transactions will be sampled.");
+                _errorLogged = true;
+                _inProgress = FALSE;
+                return null;
+            }
+
             _options.LogDebug("Starting a sampling profiler.");
             try
             {
-                return new SamplingTransactionProfiler(_options, _session, TIME_LIMIT_MS, cancellationToken)
+                return new SamplingTransactionProfiler(_options, _sessionTask.Result, TIME_LIMIT_MS, cancellationToken)
                 {
                     OnFinish = () => _inProgress = FALSE
                 };
@@ -60,6 +82,6 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
 
     public void Dispose()
     {
-        _session.Dispose();
+        _sessionTask.ContinueWith(session => session.Dispose());
     }
 }
