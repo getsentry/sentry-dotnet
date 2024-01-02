@@ -1,3 +1,6 @@
+#!/bin/bash
+set -euo pipefail
+
 export COYOTE_CLI_TELEMETRY_OPTOUT=1
 export configuration=Debug
 export outputPath=bin/$configuration/coyote
