@@ -59,7 +59,7 @@ internal class Hub : IHub, IDisposable
             PushScope();
         }
 
-        Metrics = new DelegatingMetricAggregator(_ownedClient.Metrics);
+        Metrics = _ownedClient.Metrics;
 
         foreach (var integration in options.Integrations)
         {

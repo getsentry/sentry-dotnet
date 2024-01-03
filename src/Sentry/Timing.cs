@@ -64,12 +64,7 @@ public class Timing: IDisposable
         }
 
         // Report code locations here for better accuracy
-        var aggregator = hub.Metrics;
-        while (aggregator is DelegatingMetricAggregator metricsWrapper)
-        {
-            aggregator = metricsWrapper.InnerAggregator;
-        }
-        if (aggregator is MetricAggregator metrics)
+        if (hub.Metrics is MetricAggregator metrics)
         {
             metrics.RecordCodeLocation(MetricType.Distribution, key, unit, stackLevel + 1, _startTime);
         }

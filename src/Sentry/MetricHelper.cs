@@ -1,7 +1,11 @@
+using Sentry.Internal;
+
 namespace Sentry;
 
 internal static partial class MetricHelper
 {
+    private static readonly RandomValuesFactory Random = new SynchronizedRandomValuesFactory();
+
     private const int RollupInSeconds = 10;
 
 #if NET6_0_OR_GREATER
@@ -30,7 +34,7 @@ internal static partial class MetricHelper
     /// also apply independent jittering.
     /// </summary>
     /// <remarks>Internal for testing</remarks>
-    internal static double FlushShift = new Random().Next(0, 1000) * RollupInSeconds;
+    internal static double FlushShift = Random.NextInt(0, 1000) * RollupInSeconds;
     internal static DateTimeOffset GetCutoff() => DateTimeOffset.UtcNow
         .Subtract(TimeSpan.FromSeconds(RollupInSeconds))
         .Subtract(TimeSpan.FromMilliseconds(FlushShift));

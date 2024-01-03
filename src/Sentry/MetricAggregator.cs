@@ -13,6 +13,8 @@ internal class MetricAggregator : IMetricAggregator
     private readonly Action<CodeLocations> _captureCodeLocations;
     private readonly TimeSpan _flushInterval;
 
+    private readonly SemaphoreSlim _codeLocationLock = new(1,1);
+
     private readonly CancellationTokenSource _shutdownSource;
     private volatile bool _disposed;
 
@@ -24,7 +26,7 @@ internal class MetricAggregator : IMetricAggregator
     private readonly Lazy<ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>>> _buckets
         = new(() => new ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>>());
 
-    private long lastClearedStaleLocations = DateTimeOffset.UtcNow.GetDayBucketKey();
+    private long _lastClearedStaleLocations = DateTimeOffset.UtcNow.GetDayBucketKey();
     private readonly ConcurrentDictionary<long, HashSet<MetricResourceIdentifier>> _seenLocations = new();
     private Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>> _pendingLocations = new();
 
@@ -170,8 +172,6 @@ internal class MetricAggregator : IMetricAggregator
         }
     }
 
-    private readonly SemaphoreSlim _codeLocationLock = new(1,1);
-
     internal void RecordCodeLocation(
         MetricType type,
         string key,
@@ -182,17 +182,20 @@ internal class MetricAggregator : IMetricAggregator
     {
         var startOfDay = timestamp.GetDayBucketKey();
         var metaKey = new MetricResourceIdentifier(type, key, unit);
-
         var seenToday = _seenLocations.GetOrAdd(startOfDay,_ => []);
-        if (seenToday.Contains(metaKey))
-        {
-            return;
-        }
+
         _codeLocationLock.Wait();
         try
         {
             // Group metadata by day to make flushing more efficient.
-            seenToday.Add(metaKey);
+            if (!seenToday.Add(metaKey))
+            {
+                // If we've seen the location, we don't want to create a stack trace etc. again. It could be a different
+                // location with the same metaKey but the alternative would be to generate the stack trace every time a
+                // metric is recorded, which would impact performance too much.
+                return;
+            }
+
             if (GetCodeLocation(stackLevel + 1) is not { } location)
             {
                 return;
@@ -380,7 +383,7 @@ internal class MetricAggregator : IMetricAggregator
     {
         var now = DateTimeOffset.UtcNow;
         var today = now.GetDayBucketKey();
-        if (lastClearedStaleLocations == today)
+        if (_lastClearedStaleLocations == today)
         {
             return;
         }
@@ -398,7 +401,7 @@ internal class MetricAggregator : IMetricAggregator
                 _seenLocations.TryRemove(dailyValues, out _);
             }
         }
-        lastClearedStaleLocations = today;
+        _lastClearedStaleLocations = today;
     }
 
     /// <inheritdoc cref="IAsyncDisposable.DisposeAsync"/>
@@ -423,7 +426,7 @@ internal class MetricAggregator : IMetricAggregator
             // NOTE: While non-intuitive, do not pass a timeout or cancellation token here.  We are waiting for
             // the _continuation_ of the method, not its _execution_.  If we stop waiting prematurely, this may cause
             // unexpected behavior in client applications.
-            LoopTask.Wait();
+            await LoopTask.ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
