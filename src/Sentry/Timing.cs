@@ -57,10 +57,7 @@ public class Timing: IDisposable
             : hub.StartTransaction("metric.timing", key);
         if (tags is not null)
         {
-            foreach (var (k, v) in tags)
-            {
-                _span.SetTag(k, v);
-            }
+            _span.SetTags(tags);
         }
 
         // Report code locations here for better accuracy
@@ -93,7 +90,7 @@ public class Timing: IDisposable
         }
         catch (Exception e)
         {
-            _hub.GetSentryOptions()?.LogError(e, "Error capturing timing");
+            _hub.GetSentryOptions()?.LogError(e, "Error capturing timing '{0}'", _key);
         }
         finally
         {

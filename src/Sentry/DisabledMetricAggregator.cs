@@ -23,7 +23,7 @@ internal class DisabledMetricAggregator : IMetricAggregator
         // No Op
     }
 
-    public void Set(string key, double value = 1.0, MeasurementUnit? unit = null,
+    public void Set(string key, int value, MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
         DateTimeOffset? timestamp = null, int stackLevel = 1)
     {

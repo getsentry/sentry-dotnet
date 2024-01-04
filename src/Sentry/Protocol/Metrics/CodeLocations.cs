@@ -3,7 +3,6 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol.Metrics;
 
-
 internal class CodeLocations(long timestamp, IReadOnlyDictionary<MetricResourceIdentifier, SentryStackFrame> locations)
     : IJsonSerializable
 {

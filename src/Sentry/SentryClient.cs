@@ -246,7 +246,7 @@ public class SentryClient : ISentryClient, IDisposable
     /// </summary>
     internal void CaptureMetrics(IEnumerable<Metric> metrics)
     {
-        _options.LogDebug($"Capturing metrics");
+        _options.LogDebug("Capturing metrics.");
         CaptureEnvelope(Envelope.FromMetrics(metrics));
     }
 

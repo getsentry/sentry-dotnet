@@ -72,7 +72,7 @@ public interface IMetricAggregator: IDisposable
     /// </param>
     /// <param name="stackLevel">Optional number of stacks levels to ignore when determining the code location</param>
     void Set(string key,
-        double value = 1.0,
+        int value,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
         DateTimeOffset? timestamp = null,

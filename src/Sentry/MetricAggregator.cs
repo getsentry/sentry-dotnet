@@ -43,7 +43,7 @@ internal class MetricAggregator : IMetricAggregator
     /// A boolean value indicating whether the Loop to flush metrics should run, for testing only.
     /// </param>
     /// <param name="flushInterval">An optional flushInterval, for testing only</param>
-    public MetricAggregator(SentryOptions options, Action<IEnumerable<Metric>> captureMetrics,
+    internal MetricAggregator(SentryOptions options, Action<IEnumerable<Metric>> captureMetrics,
         Action<CodeLocations> captureCodeLocations, CancellationTokenSource? shutdownSource = null,
         bool disableLoopTask = false, TimeSpan? flushInterval = null)
     {
@@ -147,7 +147,7 @@ internal class MetricAggregator : IMetricAggregator
 
     /// <inheritdoc cref="IMetricAggregator.Set"/>
     public void Set(string key,
-        double value = 1.0,
+        int value,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
         DateTimeOffset? timestamp = null,
