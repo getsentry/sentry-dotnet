@@ -31,7 +31,7 @@ public class MetricAggregatorTests
         var result = MetricAggregator.GetMetricBucketKey(type, metricKey, unit, tags);
 
         // Assert
-        result.Should().Be("c_quibbles_none_{\"tag1\":\"value1\"}");
+        result.Should().Be("c_quibbles_none_tag1=value1");
     }
 
     [Fact]
@@ -226,5 +226,43 @@ public class MetricAggregatorTests
         // Assert
         result.Should().NotBeNull();
         result!.Function.Should().Be($"void {nameof(MetricAggregatorTests)}.{nameof(TestGetCodeLocation)}()");
+    }
+
+    [Fact]
+    public void GetTagsKey_ReturnsEmpty_WhenTagsIsNull()
+    {
+        var result = MetricAggregator.GetTagsKey(null);
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void GetTagsKey_ReturnsEmpty_WhenTagsIsEmpty()
+    {
+        var result = MetricAggregator.GetTagsKey(new Dictionary<string, string>());
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void GetTagsKey_ReturnsValidString_WhenTagsHasOneEntry()
+    {
+        var tags = new Dictionary<string, string> { { "tag1", "value1" } };
+        var result = MetricAggregator.GetTagsKey(tags);
+        result.Should().Be("tag1=value1");
+    }
+
+    [Fact]
+    public void GetTagsKey_ReturnsCorrectString_WhenTagsHasMultipleEntries()
+    {
+        var tags = new Dictionary<string, string> { { "tag1", "value1" }, { "tag2", "value2" } };
+        var result = MetricAggregator.GetTagsKey(tags);
+        result.Should().Be("tag1=value1,tag2=value2");
+    }
+
+    [Fact]
+    public void GetTagsKey_EscapesCharacters_WhenTagsContainDelimiters()
+    {
+        var tags = new Dictionary<string, string> { { "tag1\\", "value1\\" }, { "tag2,", "value2," }, { "tag3=", "value3=" } };
+        var result = MetricAggregator.GetTagsKey(tags);
+        result.Should().Be(@"tag1\\=value1\\,tag2\,=value2\,,tag3\==value3\=");
     }
 }
