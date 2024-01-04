@@ -113,7 +113,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         // Make a dictionary of the attributes (aka "tags") for faster lookup when used throughout the processor.
         var attributes = data.TagObjects.ToDict();
 
-        if (attributes.TryGetTypedValue("url.full", out string? url) && (_options?.IsSentryRequest(url) ?? false))
+        var url =
+            attributes.TryGetTypedValue(OtelSemanticConventions.AttributeUrlFull, out string? tempUrl) ? tempUrl
+            : attributes.TryGetTypedValue("http.url", out string? fallbackUrl) ? fallbackUrl    // Falling back to a convention from pre-1.5.0
+            : null;
+
+        if (!string.IsNullOrEmpty(url) && (_options?.IsSentryRequest(url) ?? false))
         {
             _options?.DiagnosticLogger?.LogDebug($"Ignoring Activity {data.SpanId} for Sentry request.");
 
