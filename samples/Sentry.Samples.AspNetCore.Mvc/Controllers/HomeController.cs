@@ -26,7 +26,6 @@ public class HomeController : Controller
     [HttpGet("[controller]/block/{block?}")]
     public async Task<string> Block([FromRoute]bool block)
     {
-
         if (block)
         {
             _logger.LogInformation("\ud83d\ude31 Calling a blocking API on an async method \ud83d\ude31");
