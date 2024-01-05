@@ -64,6 +64,9 @@
     <DeterministicReport>true</DeterministicReport>
     <Exclude>[Sentry.Protocol.Test*]*,[xunit.*]*,[System.*]*,[Microsoft.*]*,[Sentry.Test*]*</Exclude>
     <CoverletOutput>./coverage/</CoverletOutput>
+    <CoverletOutputFormat>opencover</CoverletOutputFormat>
+    <!-- Deterministic report not supported by openCover reporter -->
+    <DeterministicReport>false</DeterministicReport>
   </PropertyGroup>
 
   <!-- only non-platform-specific projects should include these packages -->
