@@ -8,6 +8,10 @@
    - Supports Android and iOS only. Windows is not supported.
 - MAUI: App context has `in_foreground` indicating whether app was on the background or foreground. ([#2983](https://github.com/getsentry/sentry-dotnet/pull/2983))
 
+### Fixes
+
+- Fixed an issue when using the SDK together with Open Telemetry `1.5.0` and newer where the SDK would create transactions for itself. The fix is backwards compatible. ([#3001](https://github.com/getsentry/sentry-dotnet/pull/3001))
+
 ### Significant change in behavior
 
 - The User.IpAddress is now set to {{auto}} by default, even when sendDefaultPII is disabled ([#2981](https://github.com/getsentry/sentry-dotnet/pull/2981))
