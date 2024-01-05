@@ -115,8 +115,8 @@ jobs:
       - name: Test
         run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" /p:CollectCoverage=true
 
-     - name: Upload code coverage
-       uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d
+      - name: Upload code coverage
+        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d
 
       - name: Upload build and test outputs
         if: failure()
