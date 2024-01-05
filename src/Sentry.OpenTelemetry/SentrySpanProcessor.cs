@@ -115,7 +115,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         var url =
             attributes.TryGetTypedValue(OtelSemanticConventions.AttributeUrlFull, out string? tempUrl) ? tempUrl
-            : attributes.TryGetTypedValue("http.url", out string? fallbackUrl) ? fallbackUrl // Falling back to a convention from pre-1.5.0
+            : attributes.TryGetTypedValue(OtelSemanticConventions.AttributeHttpUrl, out string? fallbackUrl) ? fallbackUrl // Falling back to pre-1.5.0
             : null;
 
         if (!string.IsNullOrEmpty(url) && (_options?.IsSentryRequest(url) ?? false))
