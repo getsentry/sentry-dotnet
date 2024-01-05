@@ -113,7 +113,7 @@ jobs:
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
 
       - name: Test
-        run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
+        run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" /p:CollectCoverage=true
 
       - name: Upload build and test outputs
         if: failure()
