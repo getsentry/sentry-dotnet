@@ -340,7 +340,8 @@
         in_app: true
       },
       {
-        in_app: false
+        in_app: false,
+        instruction_addr: 0x7ff947fd8378
       },
       {
         function: System.Threading.LowLevelLifoSemaphore.WaitForSignal(int32),
@@ -508,7 +509,8 @@
         in_app: true
       },
       {
-        in_app: false
+        in_app: false,
+        instruction_addr: 0x7ff94be7aed3
       },
       {
         function: System.MulticastDelegate.CombineImpl(class System.Delegate),
@@ -736,7 +738,8 @@
         in_app: true
       },
       {
-        in_app: false
+        in_app: false,
+        instruction_addr: 0x7ffa0d468281
       },
       {
         function: Avalonia.Win32.Win32Platform.CreateMessageWindow(),

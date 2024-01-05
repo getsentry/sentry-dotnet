@@ -75,11 +75,12 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                 }
                 catch (Exception e)
                 {
-                    _options.LogWarning("Failed to process a profile sample.", e);
+                    _options.LogWarning(e, "Failed to process a profile sample.");
                 }
             }
             else
             {
+                _options.LogDebug("Profiler has been stopped and has received all the samples up to the end time.");
                 _session.SampleEventParser.ThreadSample -= OnThreadSample;
                 _completionSource.TrySetResult();
             }
