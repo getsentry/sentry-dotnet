@@ -116,6 +116,7 @@ filterConfigs:
         - "**/Sentry.Profiling.csproj"
         - "**/Sentry.csproj"
         - "**/Sentry.Profiling.Tests.csproj"
+        - "**/Sentry.Coyote.Tests.csproj"
         - "**/Sentry.Testing.csproj"
         - "**/Sentry.Testing.CrashableApp.csproj"
         - "**/Sentry.Tests.csproj"

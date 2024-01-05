@@ -7,6 +7,7 @@
       "samples\\Sentry.Samples.Console.Profiling\\Sentry.Samples.Console.Profiling.csproj",
       "src\\Sentry.Profiling\\Sentry.Profiling.csproj",
       "src\\Sentry\\Sentry.csproj",
+      "test\\Sentry.Coyote.Tests\\Sentry.Coyote.Tests.csproj",
       "test\\Sentry.Profiling.Tests\\Sentry.Profiling.Tests.csproj",
       "test\\Sentry.Testing.CrashableApp\\Sentry.Testing.CrashableApp.csproj",
       "test\\Sentry.Testing\\Sentry.Testing.csproj",
