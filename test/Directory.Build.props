@@ -50,7 +50,19 @@
     <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
     <PackageReference Include="GitHubActionsTestLogger" Version="2.3.2" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="19.2.29" />
+    <PackageReference Include="coverlet.msbuild" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
+
+
+  <!-- Configuration for Coverlet code coverage -->
+  <PropertyGroup Condition="'$(CollectCoverage)' == 'true'">
+    <DeterministicReport>true</DeterministicReport>
+    <Exclude>[Sentry.Protocol.Test*]*,[xunit.*]*,[System.*]*,[Microsoft.*]*,[Sentry.Test*]*</Exclude>
+    <CoverletOutput>./coverage/</CoverletOutput>
+  </PropertyGroup>
 
   <!-- only non-platform-specific projects should include these packages -->
   <ItemGroup Condition="'$(TargetPlatformIdentifier)'==''">

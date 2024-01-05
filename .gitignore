@@ -9,6 +9,7 @@ codecov.sh
 lcov.info
 bin/
 obj/
+**/coverage/*.json
 .DS_Store
 Thumbs.db
 **/BenchmarkDotNet.Artifacts/*.log

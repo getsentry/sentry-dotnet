@@ -6,13 +6,6 @@
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios;net8.0-ios</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst;net8.0-maccatalyst</TargetFrameworks>
   </PropertyGroup>
-  
-  <PropertyGroup>
-    <CollectCoverage>true</CollectCoverage>
-    <DeterministicReport>true</DeterministicReport>
-    <Exclude>[Sentry.Protocol.Test*]*,[xunit.*]*,[System.*]*,[Microsoft.*]*,[Sentry.Test*]*</Exclude>
-    <CoverletOutput>./coverage/</CoverletOutput>
-  </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
@@ -49,13 +42,6 @@
   <ItemGroup Condition="'$(TargetFramework)' != 'net48'">
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="coverlet.msbuild" Version="6.0.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
   </ItemGroup>
 
 </Project>
