@@ -525,11 +525,16 @@ internal class Hub : IHub, IDisposable
             return;
         }
 
-        var disposeTasks = new List<Task> {
-            _ownedClient.Metrics.FlushAsync(),
-            _ownedClient.FlushAsync(_options.ShutdownTimeout)
-        };
-        Task.WhenAll(disposeTasks).GetAwaiter().GetResult();
+        try
+        {
+            _ownedClient.Metrics.FlushAsync().ContinueWith(_ =>
+                _ownedClient.FlushAsync(_options.ShutdownTimeout).Wait()
+            ).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failed to wait on disposing tasks to flush.");
+        }
         //Dont dispose of ScopeManager since we want dangling transactions to still be able to access tags.
 
 #if __IOS__

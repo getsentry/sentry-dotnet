@@ -100,10 +100,10 @@ internal abstract class Metric : IJsonSerializable, ISentrySerializable
                 await Write($"{key}:SanitizeValue(value)");
             }
         }
-#pragma warning restore CA2007
 
-        await Write($"|T{Timestamp.GetTimeBucketKey().ToString(CultureInfo.InvariantCulture)}\n").ConfigureAwait(false);
+        await Write($"|T{Timestamp.GetTimeBucketKey().ToString(CultureInfo.InvariantCulture)}\n");
         return;
+#pragma warning restore CA2007
 
         async Task Write(string content)
         {

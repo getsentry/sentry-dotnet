@@ -72,11 +72,8 @@ internal static class Program
                 // This demonstrates the use of a set metric.
                 SentrySdk.Metrics.Gauge("guesses", guess);
 
-                if (solution.Contains(guess))
-                {
-                    // And this is a counter
-                    SentrySdk.Metrics.Increment("correct_answers");
-                }
+                // And this is a counter
+                SentrySdk.Metrics.Increment(solution.Contains(guess) ? "correct_answers" : "incorrect_answers");
             }
         }
     }

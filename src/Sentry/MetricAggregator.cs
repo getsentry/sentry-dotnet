@@ -30,7 +30,7 @@ internal class MetricAggregator : IMetricAggregator
     private readonly ConcurrentDictionary<long, HashSet<MetricResourceIdentifier>> _seenLocations = new();
     private Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>> _pendingLocations = new();
 
-    private Task LoopTask { get; }
+    private readonly Task _loopTask;
 
     /// <summary>
     /// MetricAggregator constructor.
@@ -57,12 +57,12 @@ internal class MetricAggregator : IMetricAggregator
         {
             // We can stop the loop from running during testing
             _options.LogDebug("LoopTask disabled.");
-            LoopTask = Task.CompletedTask;
+            _loopTask = Task.CompletedTask;
         }
         else
         {
             options.LogDebug("Starting MetricsAggregator.");
-            LoopTask = Task.Run(RunLoopAsync);
+            _loopTask = Task.Run(RunLoopAsync);
         }
     }
 
@@ -472,7 +472,7 @@ internal class MetricAggregator : IMetricAggregator
             // NOTE: While non-intuitive, do not pass a timeout or cancellation token here.  We are waiting for
             // the _continuation_ of the method, not its _execution_.  If we stop waiting prematurely, this may cause
             // unexpected behavior in client applications.
-            await LoopTask.ConfigureAwait(false);
+            await _loopTask.ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
@@ -486,7 +486,7 @@ internal class MetricAggregator : IMetricAggregator
         {
             _flushLock.Dispose();
             _shutdownSource.Dispose();
-            LoopTask.Dispose();
+            _loopTask.Dispose();
         }
     }
 

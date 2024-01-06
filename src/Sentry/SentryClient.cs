@@ -255,7 +255,7 @@ public class SentryClient : ISentryClient, IDisposable
     /// </summary>
     internal void CaptureCodeLocations(CodeLocations codeLocations)
     {
-        _options.LogDebug($"Capturing code locations for period: {codeLocations.Timestamp}");
+        _options.LogDebug("Capturing code locations for period: {0}", codeLocations.Timestamp);
         CaptureEnvelope(Envelope.FromCodeLocations(codeLocations));
     }
 
@@ -469,9 +469,16 @@ public class SentryClient : ISentryClient, IDisposable
     {
         _options.LogDebug("Flushing SentryClient.");
 
-        Metrics.FlushAsync().GetAwaiter().GetResult();
-
-        // Worker should empty it's queue until SentryOptions.ShutdownTimeout
-        Worker.FlushAsync(_options.ShutdownTimeout).GetAwaiter().GetResult();
+        try
+        {
+            Metrics.FlushAsync().ContinueWith(_ =>
+                // Worker should empty it's queue until SentryOptions.ShutdownTimeout
+                Worker.FlushAsync(_options.ShutdownTimeout)
+            ).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        catch
+        {
+            _options.LogDebug("Failed to wait on metrics/worker to flush");
+        }
     }
 }
