@@ -161,8 +161,6 @@ internal class MetricAggregator : IMetricAggregator
         DateTimeOffset? timestamp = null,
         int stackLevel = 1) => Emit(MetricType.Distribution, key, value, unit, tags, timestamp, stackLevel + 1);
 
-    private readonly object _emitLock = new object();
-
     private void Emit(
         MetricType type,
         string key,
