@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Significant change in behavior
+
+- Transactions spans are no longer automatically finished with the transaction. This is now handled by the relay. 
+  - Customers self hosting Sentry must use verion 22.12.0 or later ([#3013](https://github.com/getsentry/sentry-dotnet/pull/3013))
+
 ### Dependencies
 
 - Bump CLI from v2.23.2 to v2.24.1 ([#3012](https://github.com/getsentry/sentry-dotnet/pull/3012))
