@@ -370,15 +370,6 @@ public class TransactionTracer : ITransactionTracer
         EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
         _options?.LogDebug("Finished Transaction {0}.", SpanId);
 
-        foreach (var span in _spans)
-        {
-            if (!span.IsFinished)
-            {
-                _options?.LogDebug("Deadline exceeded for Transaction {0} -> Span {1}.", SpanId, span.SpanId);
-                span.Finish(SpanStatus.DeadlineExceeded);
-            }
-        }
-
         // Clear the transaction from the scope
         _hub.ConfigureScope(scope => scope.ResetTransaction(this));
 
