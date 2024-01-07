@@ -18,7 +18,7 @@
 
 ### Fixes
 
-- Fixed an issue when using the SDK together with Open Telemetry `1.5.0` and newer where the SDK would create transactions for itself. The fix is backwards compatible. ([#3001](https://github.com/getsentry/sentry-dotnet/pull/3001))
+- Fixed an issue when using the SDK together with OpenTelemetry `1.5.0` and newer where the SDK would create transactions for itself. The fix is backwards compatible. ([#3001](https://github.com/getsentry/sentry-dotnet/pull/3001))
 
 ### Significant change in behavior
 
@@ -515,7 +515,7 @@ There are some functional differences when publishing Native AOT:
 
 ### Features
 
-- Open Telemetry Support ([#2453](https://github.com/getsentry/sentry-dotnet/pull/2453))
+- OpenTelemetry Support ([#2453](https://github.com/getsentry/sentry-dotnet/pull/2453))
 - Added a MSBuild property `SentryUploadAndroidProguardMapping` to automatically upload the Proguard mapping file when targeting Android ([#2455](https://github.com/getsentry/sentry-dotnet/pull/2455))
 - Symbolication for Single File Apps ([#2425](https://github.com/getsentry/sentry-dotnet/pull/2425))
 - Add binding to `SwiftAsyncStacktraces` on iOS ([#2436](https://github.com/getsentry/sentry-dotnet/pull/2436))
