@@ -7,6 +7,7 @@
 #### Changed APIs
 
 - Renamed `Sentry.User` to `SentryUser` ([#3015](https://github.com/getsentry/sentry-dotnet/pull/3015))
+- Renamed `Sentry.Runtime` to `SentryRuntime` ([#3016](https://github.com/getsentry/sentry-dotnet/pull/3016))
 
 ### Dependencies
 
