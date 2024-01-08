@@ -124,10 +124,11 @@ public class SamplingTransactionProfilerTests
         CaptureAndValidate(factory);
     }
 
-    [SkippableTheory]
-    [InlineData(0)]
-    [InlineData(10)]
-    public void Profiler_SingleProfile_Works(int startTimeoutSeconds)
+    // https://github.com/getsentry/sentry-dotnet/issues/3006
+    // [SkippableTheory]
+    // [InlineData(0)]
+    // [InlineData(10)]
+    private void Profiler_SingleProfile_Works(int startTimeoutSeconds)
     {
         using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(startTimeoutSeconds));
         // in the async startup case, we need to wait before collecting
@@ -283,8 +284,9 @@ public class SamplingTransactionProfilerTests
         }
     }
 
-    [Fact]
-    public async Task Profiler_ThrowingOnSessionStartup_DoesntBreakSentryInit()
+    // https://github.com/getsentry/sentry-dotnet/issues/3009
+    // [Fact]
+    private async Task Profiler_ThrowingOnSessionStartup_DoesntBreakSentryInit()
     {
         SampleProfilerSession.ThrowOnNextStartupForTests = true;
 

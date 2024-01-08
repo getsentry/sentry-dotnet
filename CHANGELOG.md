@@ -2,11 +2,23 @@
 
 ## Unreleased
 
+### Dependencies
+
+- Bump CLI from v2.23.2 to v2.24.1 ([#3012](https://github.com/getsentry/sentry-dotnet/pull/3012))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2241)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.23.2...2.24.1)
+
+## 4.0.0-beta.7
+
 ### Features
 
 - MAUI Screenshot support. You can opt-in via `SentryMauiOptions.AttachScreenshots` ([#2965](https://github.com/getsentry/sentry-dotnet/pull/2965))
    - Supports Android and iOS only. Windows is not supported.
 - MAUI: App context has `in_foreground` indicating whether app was on the background or foreground. ([#2983](https://github.com/getsentry/sentry-dotnet/pull/2983))
+
+### Fixes
+
+- Fixed an issue when using the SDK together with OpenTelemetry `1.5.0` and newer where the SDK would create transactions for itself. The fix is backwards compatible. ([#3001](https://github.com/getsentry/sentry-dotnet/pull/3001))
 
 ### Significant change in behavior
 
@@ -16,15 +28,15 @@
 
 ### Dependencies
 
-- Bump Cocoa SDK from v8.17.1 to v8.17.2 ([#2972](https://github.com/getsentry/sentry-dotnet/pull/2972))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8172)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.17.1...8.17.2)
+- Bump Cocoa SDK from v8.17.1 to v8.18.0 ([#2972](https://github.com/getsentry/sentry-dotnet/pull/2972), [#3005](https://github.com/getsentry/sentry-dotnet/pull/3005))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8180)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.17.1...8.18.0)
 - Bump Java SDK from v7.0.0 to v7.1.0 ([#2979](https://github.com/getsentry/sentry-dotnet/pull/2979))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#710)
   - [diff](https://github.com/getsentry/sentry-java/compare/7.0.0...7.1.0)
-- Bump CLI from v2.23.0 to v2.23.1 ([#2985](https://github.com/getsentry/sentry-dotnet/pull/2985))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2231)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.23.0...2.23.1)
+- Bump CLI from v2.23.0 to v2.23.2 ([#2985](https://github.com/getsentry/sentry-dotnet/pull/2985), [#2999](https://github.com/getsentry/sentry-dotnet/pull/2999))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2232)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.23.0...2.23.2)
 
 ## 4.0.0-beta.6
 
@@ -503,7 +515,7 @@ There are some functional differences when publishing Native AOT:
 
 ### Features
 
-- Open Telemetry Support ([#2453](https://github.com/getsentry/sentry-dotnet/pull/2453))
+- OpenTelemetry Support ([#2453](https://github.com/getsentry/sentry-dotnet/pull/2453))
 - Added a MSBuild property `SentryUploadAndroidProguardMapping` to automatically upload the Proguard mapping file when targeting Android ([#2455](https://github.com/getsentry/sentry-dotnet/pull/2455))
 - Symbolication for Single File Apps ([#2425](https://github.com/getsentry/sentry-dotnet/pull/2425))
 - Add binding to `SwiftAsyncStacktraces` on iOS ([#2436](https://github.com/getsentry/sentry-dotnet/pull/2436))
