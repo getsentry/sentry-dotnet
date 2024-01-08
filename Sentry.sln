@@ -163,6 +163,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastSerialization", "module
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Console.Native", "samples\Sentry.Samples.Console.Native\Sentry.Samples.Console.Native.csproj", "{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Console.Metrics", "samples\Sentry.Samples.Console.Metrics\Sentry.Samples.Console.Metrics.csproj", "{BD2D08FC-8675-4157-A73C-D75F6A3856D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -465,6 +467,10 @@ Global
 		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD2D08FC-8675-4157-A73C-D75F6A3856D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD2D08FC-8675-4157-A73C-D75F6A3856D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD2D08FC-8675-4157-A73C-D75F6A3856D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD2D08FC-8675-4157-A73C-D75F6A3856D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -545,5 +551,6 @@ Global
 		{67269916-C417-4CEE-BD7D-CA66C3830AEE} = {A3CCA27E-4DF8-479D-833C-CAA0950715AA}
 		{8032310D-3C06-442C-A318-F365BCC4C804} = {A3CCA27E-4DF8-479D-833C-CAA0950715AA}
 		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
+		{BD2D08FC-8675-4157-A73C-D75F6A3856D3} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
 	EndGlobalSection
 EndGlobal
