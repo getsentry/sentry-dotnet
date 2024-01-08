@@ -1,5 +1,4 @@
 using Sentry.PlatformAbstractions;
-using Runtime = Sentry.PlatformAbstractions.Runtime;
 
 namespace Sentry.Tests.PlatformAbstractions;
 
@@ -16,7 +15,7 @@ public class RuntimeExtensionsTests
     [InlineData("Mono Foo", false)]
     public void IsNetFx(string name, bool shouldMatch)
     {
-        var runtime = new Runtime(name);
+        var runtime = new SentryRuntime(name);
         var result = runtime.IsNetFx();
         Assert.Equal(shouldMatch, result);
     }
@@ -32,7 +31,7 @@ public class RuntimeExtensionsTests
     [InlineData("Mono Foo", false)]
     public void IsNetCore(string name, bool shouldMatch)
     {
-        var runtime = new Runtime(name);
+        var runtime = new SentryRuntime(name);
         var result = runtime.IsNetCore();
         Assert.Equal(shouldMatch, result);
     }
@@ -48,7 +47,7 @@ public class RuntimeExtensionsTests
     [InlineData("Mono Foo", true)]
     public void IsMono(string name, bool shouldMatch)
     {
-        var runtime = new Runtime(name);
+        var runtime = new SentryRuntime(name);
         var result = runtime.IsMono();
         Assert.Equal(shouldMatch, result);
     }
