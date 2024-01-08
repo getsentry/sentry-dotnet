@@ -3,9 +3,9 @@ namespace Sentry.PlatformAbstractions;
 /// <summary>
 /// Details of the runtime
 /// </summary>
-public class Runtime : IEquatable<Runtime>
+public class SentryRuntime : IEquatable<SentryRuntime>
 {
-    private static Lazy<Runtime> _currentRuntime = new(RuntimeInfo.GetRuntime);
+    private static Lazy<SentryRuntime> _currentRuntime = new(RuntimeInfo.GetRuntime);
 
     /// <summary>
     /// Gets the current runtime
@@ -13,7 +13,7 @@ public class Runtime : IEquatable<Runtime>
     /// <value>
     /// The current runtime.
     /// </value>
-    public static Runtime Current => _currentRuntime.Value;
+    public static SentryRuntime Current => _currentRuntime.Value;
 
     /// <summary>
     /// The name of the runtime
@@ -62,7 +62,7 @@ public class Runtime : IEquatable<Runtime>
     /// Creates a new Runtime instance
     /// </summary>
 #if NETFRAMEWORK
-        public Runtime(
+        public SentryRuntime(
             string? name = null,
             string? version = null,
             FrameworkInstallation? frameworkInstallation = null,
@@ -75,7 +75,7 @@ public class Runtime : IEquatable<Runtime>
             Identifier = null;
         }
 #else
-    public Runtime(
+    public SentryRuntime(
         string? name = null,
         string? version = null,
         string? raw = null,
@@ -113,7 +113,7 @@ public class Runtime : IEquatable<Runtime>
     /// </summary>
     /// <param name="other">The instance to compare against.</param>
     /// <returns>True if the instances are equal by reference or its state.</returns>
-    public bool Equals(Runtime? other)
+    public bool Equals(SentryRuntime? other)
     {
         if (other is null)
         {
@@ -157,7 +157,7 @@ public class Runtime : IEquatable<Runtime>
             return false;
         }
 
-        return Equals((Runtime)obj);
+        return Equals((SentryRuntime)obj);
     }
 
     /// <summary>

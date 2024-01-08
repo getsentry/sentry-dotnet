@@ -2,7 +2,7 @@ using Sentry.PlatformAbstractions;
 
 namespace Sentry.Tests.PlatformAbstractions;
 
-public class RuntimeExtensionsTests
+public class SentryRuntimeExtensionsTests
 {
     [Theory]
     [InlineData(".NET Framework", true)]

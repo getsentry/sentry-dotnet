@@ -1,6 +1,5 @@
 #if NETFRAMEWORK
 using Sentry.PlatformAbstractions;
-using Runtime = Sentry.PlatformAbstractions.Runtime;
 
 namespace Sentry.Tests.PlatformAbstractions;
 
@@ -18,7 +17,7 @@ public class NetFxInstallationsEventProcessorTests
     [SkippableFact]
     public void Process_SentryEventWithNetFxList()
     {
-        Skip.If(Runtime.Current.IsMono(), "Mono not supported.");
+        Skip.If(SentryRuntime.Current.IsMono(), "Mono not supported.");
 
         //Arrange
         var @event = new SentryEvent();
@@ -34,7 +33,7 @@ public class NetFxInstallationsEventProcessorTests
     [SkippableFact]
     public void Process_ContextWithGetInstallationsData()
     {
-        Skip.If(Runtime.Current.IsMono(), "Mono not supported.");
+        Skip.If(SentryRuntime.Current.IsMono(), "Mono not supported.");
 
         //Arrange
         var @event = new SentryEvent();
@@ -54,7 +53,7 @@ public class NetFxInstallationsEventProcessorTests
     [SkippableFact]
     public void Process_NetFxInstallationsKeyExist_UnchangedSentryEvent()
     {
-        Skip.If(Runtime.Current.IsMono(), "Mono not supported.");
+        Skip.If(SentryRuntime.Current.IsMono(), "Mono not supported.");
 
         //Arrange
         var @event = new SentryEvent();
