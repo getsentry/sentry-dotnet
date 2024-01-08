@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Significant change in behavior
+
+- Transactions' spans are no longer automatically finished with status `deadline_exceeded` by the transaction. This is now handled by the [Relay](https://github.com/getsentry/relay). 
+  - Customers self hosting Sentry must use verion 22.12.0 or later ([#3013](https://github.com/getsentry/sentry-dotnet/pull/3013))
+
 ### API breaking Changes
 
 #### Changed APIs
