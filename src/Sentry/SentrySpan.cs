@@ -9,7 +9,7 @@ namespace Sentry;
 /// <summary>
 /// Transaction span.
 /// </summary>
-public class Span : ISpanData, IJsonSerializable
+public class SentrySpan : ISpanData, IJsonSerializable
 {
     /// <inheritdoc />
     public SpanId SpanId { get; private set; }
@@ -75,9 +75,9 @@ public class Span : ISpanData, IJsonSerializable
         (_extra ??= new Dictionary<string, object?>())[key] = value;
 
     /// <summary>
-    /// Initializes an instance of <see cref="Span"/>.
+    /// Initializes an instance of <see cref="SentrySpan"/>.
     /// </summary>
-    public Span(SpanId? parentSpanId, string operation)
+    public SentrySpan(SpanId? parentSpanId, string operation)
     {
         SpanId = SpanId.Create();
         ParentSpanId = parentSpanId;
@@ -86,9 +86,9 @@ public class Span : ISpanData, IJsonSerializable
     }
 
     /// <summary>
-    /// Initializes an instance of <see cref="Span"/>.
+    /// Initializes an instance of <see cref="SentrySpan"/>.
     /// </summary>
-    public Span(ISpan tracer)
+    public SentrySpan(ISpan tracer)
         : this(tracer.ParentSpanId, tracer.Operation)
     {
         SpanId = tracer.SpanId;
@@ -141,7 +141,7 @@ public class Span : ISpanData, IJsonSerializable
     /// <summary>
     /// Parses a span from JSON.
     /// </summary>
-    public static Span FromJson(JsonElement json)
+    public static SentrySpan FromJson(JsonElement json)
     {
         var spanId = json.GetPropertyOrNull("span_id")?.Pipe(SpanId.FromJson) ?? SpanId.Empty;
         var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);
@@ -156,7 +156,7 @@ public class Span : ISpanData, IJsonSerializable
         var measurements = json.GetPropertyOrNull("measurements")?.GetDictionaryOrNull(Measurement.FromJson);
         var data = json.GetPropertyOrNull("data")?.GetDictionaryOrNull()?.ToDict();
 
-        return new Span(parentSpanId, operation)
+        return new SentrySpan(parentSpanId, operation)
         {
             SpanId = spanId,
             TraceId = traceId,

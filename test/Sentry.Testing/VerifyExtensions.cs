@@ -41,9 +41,9 @@ public static class VerifyExtensions
             .IgnoreStackTrace();
     }
 
-    private class SpansConverter : WriteOnlyJsonConverter<IReadOnlyCollection<Span>>
+    private class SpansConverter : WriteOnlyJsonConverter<IReadOnlyCollection<SentrySpan>>
     {
-        public override void Write(VerifyJsonWriter writer, IReadOnlyCollection<Span> spans)
+        public override void Write(VerifyJsonWriter writer, IReadOnlyCollection<SentrySpan> spans)
         {
             var ordered = spans
                 .OrderBy(x => x.StartTimestamp)
