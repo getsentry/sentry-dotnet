@@ -6,7 +6,7 @@
 
 #### Changed APIs
 
-- Renamed `Sentry.User` to `SentryUser` ([#3015](https://github.com/getsentry/sentry-dotnet/pull/3015))
+- Class renamed `Sentry.User` to `Sentry.SentryUser` ([#3015](https://github.com/getsentry/sentry-dotnet/pull/3015))
 
 ### Dependencies
 
