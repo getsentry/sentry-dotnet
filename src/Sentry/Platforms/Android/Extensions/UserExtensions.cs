@@ -5,7 +5,7 @@ internal static class UserExtensions
     private static readonly IDictionary<string, string> EmptyDictionary =
         new ReadOnlyDictionary<string, string>(new Dictionary<string, string>());
 
-    public static User ToUser(this JavaSdk.Protocol.User user) =>
+    public static SentryUser ToUser(this JavaSdk.Protocol.User user) =>
         new()
         {
             Email = user.Email,
@@ -16,7 +16,7 @@ internal static class UserExtensions
             Other = user.Data ?? EmptyDictionary
         };
 
-    public static JavaSdk.Protocol.User ToJavaUser(this User user) =>
+    public static JavaSdk.Protocol.User ToJavaUser(this SentryUser user) =>
         new()
         {
             Email = user.Email,

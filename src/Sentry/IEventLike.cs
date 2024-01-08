@@ -48,7 +48,7 @@ public interface IEventLike : IHasTags, IHasExtra
     /// <value>
     /// The user.
     /// </value>
-    User User { get; set; }
+    SentryUser User { get; set; }
 
     /// <summary>
     /// The release version of the application.
@@ -194,7 +194,7 @@ public static class EventLikeExtensions
     }
 
     /// <summary>
-    /// Whether a <see cref="User"/> has been set to the object with any of its fields non null.
+    /// Whether a <see cref="SentryUser"/> has been set to the object with any of its fields non null.
     /// </summary>
     public static bool HasUser(this IEventLike eventLike) => eventLike.User.HasAnyData();
 

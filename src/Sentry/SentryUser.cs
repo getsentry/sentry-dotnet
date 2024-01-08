@@ -7,9 +7,9 @@ namespace Sentry;
 /// An interface which describes the authenticated User for a request.
 /// </summary>
 /// <see href="https://develop.sentry.dev/sdk/event-payloads/user/"/>
-public sealed class User : IJsonSerializable
+public sealed class SentryUser : IJsonSerializable
 {
-    internal Action<User>? PropertyChanged { get; set; }
+    internal Action<SentryUser>? PropertyChanged { get; set; }
 
     private string? _id;
     private string? _username;
@@ -115,17 +115,17 @@ public sealed class User : IJsonSerializable
     }
 
     /// <summary>
-    /// Clones the current <see cref="User"/> instance.
+    /// Clones the current <see cref="SentryUser"/> instance.
     /// </summary>
     /// <returns>The cloned user.</returns>
-    public User Clone()
+    public SentryUser Clone()
     {
-        var user = new User();
+        var user = new SentryUser();
         CopyTo(user);
         return user;
     }
 
-    internal void CopyTo(User? user)
+    internal void CopyTo(SentryUser? user)
     {
         if (user == null)
         {
@@ -169,7 +169,7 @@ public sealed class User : IJsonSerializable
     /// <summary>
     /// Parses from JSON.
     /// </summary>
-    public static User FromJson(JsonElement json)
+    public static SentryUser FromJson(JsonElement json)
     {
         var id = json.GetPropertyOrNull("id")?.GetString();
         var username = json.GetPropertyOrNull("username")?.GetString();
@@ -178,7 +178,7 @@ public sealed class User : IJsonSerializable
         var segment = json.GetPropertyOrNull("segment")?.GetString();
         var other = json.GetPropertyOrNull("other")?.GetStringDictionaryOrNull();
 
-        return new User
+        return new SentryUser
         {
             Id = id,
             Username = username,

@@ -12,7 +12,7 @@ public class UserTests
     [Fact]
     public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
-        var sut = new User
+        var sut = new SentryUser
         {
             Id = "user-id",
             Username = "user-name",
@@ -42,7 +42,7 @@ public class UserTests
     [Fact]
     public void Clone_CopyValues()
     {
-        var sut = new User
+        var sut = new SentryUser
         {
             Id = "id",
             Email = "emal@sentry.io",
@@ -67,7 +67,7 @@ public class UserTests
 
     [Theory]
     [MemberData(nameof(TestCases))]
-    public void SerializeObject_TestCase_SerializesAsExpected((User user, string serialized) @case)
+    public void SerializeObject_TestCase_SerializesAsExpected((SentryUser user, string serialized) @case)
     {
         var actual = @case.user.ToJsonString(_testOutputLogger);
         Assert.Equal(@case.serialized, actual);
@@ -75,14 +75,14 @@ public class UserTests
 
     public static IEnumerable<object[]> TestCases()
     {
-        yield return new object[] { (new User(), "{}") };
-        yield return new object[] { (new User { Id = "some id" }, """{"id":"some id"}""") };
-        yield return new object[] { (new User { Username = "some username" }, """{"username":"some username"}""") };
-        yield return new object[] { (new User { Email = "some email" }, """{"email":"some email"}""") };
-        yield return new object[] { (new User { IpAddress = "some ipAddress" }, """{"ip_address":"some ipAddress"}""") };
-        yield return new object[] { (new User { Segment = "some segment" }, """{"segment":"some segment"}""") };
+        yield return new object[] { (new SentryUser(), "{}") };
+        yield return new object[] { (new SentryUser { Id = "some id" }, """{"id":"some id"}""") };
+        yield return new object[] { (new SentryUser { Username = "some username" }, """{"username":"some username"}""") };
+        yield return new object[] { (new SentryUser { Email = "some email" }, """{"email":"some email"}""") };
+        yield return new object[] { (new SentryUser { IpAddress = "some ipAddress" }, """{"ip_address":"some ipAddress"}""") };
+        yield return new object[] { (new SentryUser { Segment = "some segment" }, """{"segment":"some segment"}""") };
 
         var other = new Dictionary<string, string> {{"testCustomValueKey", "testCustomValue"}};
-        yield return new object[] { (new User { Other = other }, """{"other":{"testCustomValueKey":"testCustomValue"}}""")};
+        yield return new object[] { (new SentryUser { Other = other }, """{"other":{"testCustomValueKey":"testCustomValue"}}""")};
     }
 }

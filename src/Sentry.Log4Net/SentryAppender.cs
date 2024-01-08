@@ -125,7 +125,7 @@ public class SentryAppender : AppenderSkeleton
 
         if (SendIdentity && !string.IsNullOrEmpty(loggingEvent.Identity))
         {
-            evt.User = new User
+            evt.User = new SentryUser
             {
                 Id = loggingEvent.Identity
             };
