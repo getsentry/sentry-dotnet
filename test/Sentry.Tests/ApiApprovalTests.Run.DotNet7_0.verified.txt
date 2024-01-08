@@ -1416,24 +1416,24 @@ namespace Sentry.PlatformAbstractions
         Client = 0,
         Full = 1,
     }
-    public class Runtime : System.IEquatable<Sentry.PlatformAbstractions.Runtime>
+    public class SentryRuntime : System.IEquatable<Sentry.PlatformAbstractions.SentryRuntime>
     {
-        public Runtime(string? name = null, string? version = null, string? raw = null, string? identifier = null) { }
+        public SentryRuntime(string? name = null, string? version = null, string? raw = null, string? identifier = null) { }
         public string? Identifier { get; }
         public string? Name { get; }
         public string? Raw { get; }
         public string? Version { get; }
-        public static Sentry.PlatformAbstractions.Runtime Current { get; }
-        public bool Equals(Sentry.PlatformAbstractions.Runtime? other) { }
+        public static Sentry.PlatformAbstractions.SentryRuntime Current { get; }
+        public bool Equals(Sentry.PlatformAbstractions.SentryRuntime? other) { }
         public override bool Equals(object? obj) { }
         public override int GetHashCode() { }
         public override string? ToString() { }
     }
-    public static class RuntimeExtensions
+    public static class SentryRuntimeExtensions
     {
-        public static bool IsMono(this Sentry.PlatformAbstractions.Runtime runtime) { }
-        public static bool IsNetCore(this Sentry.PlatformAbstractions.Runtime runtime) { }
-        public static bool IsNetFx(this Sentry.PlatformAbstractions.Runtime runtime) { }
+        public static bool IsMono(this Sentry.PlatformAbstractions.SentryRuntime runtime) { }
+        public static bool IsNetCore(this Sentry.PlatformAbstractions.SentryRuntime runtime) { }
+        public static bool IsNetFx(this Sentry.PlatformAbstractions.SentryRuntime runtime) { }
     }
 }
 namespace Sentry.Protocol
