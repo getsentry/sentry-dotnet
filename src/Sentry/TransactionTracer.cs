@@ -119,12 +119,12 @@ public class TransactionTracer : ITransactionTracer
         set => _contexts.ReplaceWith(value);
     }
 
-    private User? _user;
+    private SentryUser? _user;
 
     /// <inheritdoc />
-    public User User
+    public SentryUser User
     {
-        get => _user ??= new User();
+        get => _user ??= new SentryUser();
         set => _user = value;
     }
 

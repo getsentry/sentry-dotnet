@@ -90,7 +90,7 @@ public class TransactionTests
             // We don't redact the User or the Request since, if SendDefaultPii is false, we don't add these to the
             // transaction in the SDK anyway (by default they don't get sent... but the user can always override this
             // behavior if they need)
-            User = new User { Id = "user-id", Username = "username", Email = "bob@foo.com", IpAddress = "127.0.0.1" },
+            User = new SentryUser { Id = "user-id", Username = "username", Email = "bob@foo.com", IpAddress = "127.0.0.1" },
             Request = new Request { Method = "POST", Url = "https://user@not.redacted"},
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
             Environment = environment,
@@ -175,7 +175,7 @@ public class TransactionTests
         {
             Description = "desc123",
             Status = SpanStatus.Aborted,
-            User = new User { Id = "user-id" },
+            User = new SentryUser { Id = "user-id" },
             Request = new Request { Method = "POST" },
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
             Environment = "environment",

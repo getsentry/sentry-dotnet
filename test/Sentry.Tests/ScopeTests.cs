@@ -474,9 +474,9 @@ public class ScopeTests
         }
 
         // Assert
-        observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Email == expectedEmail));
-        observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Id == expectedId));
-        observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Username == expectedUsername));
+        observer.Received(expectedCount).SetUser(Arg.Is<SentryUser>(user => user.Email == expectedEmail));
+        observer.Received(expectedCount).SetUser(Arg.Is<SentryUser>(user => user.Id == expectedId));
+        observer.Received(expectedCount).SetUser(Arg.Is<SentryUser>(user => user.Username == expectedUsername));
     }
 
     [Theory]
@@ -623,7 +623,7 @@ public static class ScopeTestExtensions
     {
         scope.Request = new() { Data = $"{salt} request" };
         scope.Contexts.Add($"{salt} context", "{}");
-        scope.User = new User() { Username = $"{salt} username" };
+        scope.User = new SentryUser() { Username = $"{salt} username" };
         scope.Release = $"{salt} release";
         scope.Distribution = $"{salt} distribution";
         scope.Environment = $"{salt} environment";

@@ -87,7 +87,7 @@ internal sealed class AndroidScopeObserver : IScopeObserver
         }
     }
 
-    public void SetUser(User? user)
+    public void SetUser(SentryUser? user)
     {
         try
         {

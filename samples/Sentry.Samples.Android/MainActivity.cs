@@ -21,7 +21,7 @@ public class MainActivity : Activity
         {
             scope.AddBreadcrumb("Custom Breadcrumb");
             scope.SetExtra("Test", "Custom Extra Data");
-            scope.User = new User
+            scope.User = new SentryUser
             {
                 Username = "SomeUser",
                 Email = "test@example.com",

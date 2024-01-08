@@ -30,7 +30,7 @@ internal class NativeScopeObserver : ScopeObserver
 
     public override void UnsetTagImpl(string key) => C.sentry_remove_tag(key);
 
-    public override void SetUserImpl(User user)
+    public override void SetUserImpl(SentryUser user)
     {
         // see https://develop.sentry.dev/sdk/event-payloads/user/
         var cUser = C.sentry_value_new_object();
