@@ -15,11 +15,13 @@
       "src\\Sentry.DiagnosticSource\\Sentry.DiagnosticSource.csproj",
       "src\\Sentry.Extensions.Logging\\Sentry.Extensions.Logging.csproj",
       "src\\Sentry.OpenTelemetry\\Sentry.OpenTelemetry.csproj",
+      "src\\Sentry.Serilog\\Sentry.Serilog.csproj",
       "src\\Sentry\\Sentry.csproj",
       "test\\Sentry.AspNetCore.Grpc.Tests\\Sentry.AspNetCore.Grpc.Tests.csproj",
       "test\\Sentry.AspNetCore.Tests\\Sentry.AspNetCore.Tests.csproj",
       "test\\Sentry.AspNetCore.TestUtils\\Sentry.AspNetCore.TestUtils.csproj",
       "test\\Sentry.Extensions.Logging.Tests\\Sentry.Extensions.Logging.Tests.csproj",
+      "test\\Sentry.Testing.CrashableApp\\Sentry.Testing.CrashableApp.csproj",
       "test\\Sentry.Testing\\Sentry.Testing.csproj",
       "test\\Sentry.Tests\\Sentry.Tests.csproj"
     ]
