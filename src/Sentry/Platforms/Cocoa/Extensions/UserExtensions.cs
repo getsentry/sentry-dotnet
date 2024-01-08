@@ -4,7 +4,7 @@ namespace Sentry.Cocoa.Extensions;
 
 internal static class UserExtensions
 {
-    public static User ToUser(this CocoaSdk.SentryUser user, IDiagnosticLogger? logger = null) =>
+    public static SentryUser ToUser(this CocoaSdk.SentryUser user, IDiagnosticLogger? logger = null) =>
         new()
         {
             Email = user.Email,
@@ -15,7 +15,7 @@ internal static class UserExtensions
             Other = user.Data.ToStringDictionary(logger)
         };
 
-    public static CocoaSdk.SentryUser ToCocoaUser(this User user)
+    public static CocoaSdk.SentryUser ToCocoaUser(this SentryUser user)
     {
         var cocoaUser = new CocoaSdk.SentryUser
         {

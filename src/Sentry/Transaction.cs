@@ -134,12 +134,12 @@ public class Transaction : ITransactionData, IJsonSerializable
         set => _contexts.ReplaceWith(value);
     }
 
-    private User? _user;
+    private SentryUser? _user;
 
     /// <inheritdoc />
-    public User User
+    public SentryUser User
     {
-        get => _user ??= new User();
+        get => _user ??= new SentryUser();
         set => _user = value;
     }
 
@@ -369,7 +369,7 @@ public class Transaction : ITransactionData, IJsonSerializable
         var distribution = json.GetPropertyOrNull("dist")?.GetString();
         var request = json.GetPropertyOrNull("request")?.Pipe(Request.FromJson);
         var contexts = json.GetPropertyOrNull("contexts")?.Pipe(Contexts.FromJson) ?? new();
-        var user = json.GetPropertyOrNull("user")?.Pipe(User.FromJson);
+        var user = json.GetPropertyOrNull("user")?.Pipe(SentryUser.FromJson);
         var environment = json.GetPropertyOrNull("environment")?.GetString();
         var sdk = json.GetPropertyOrNull("sdk")?.Pipe(SdkVersion.FromJson) ?? new SdkVersion();
         var fingerprint = json.GetPropertyOrNull("fingerprint")?

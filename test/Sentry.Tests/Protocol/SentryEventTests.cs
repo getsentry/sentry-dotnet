@@ -119,7 +119,7 @@ public partial class SentryEventTests
                 Method = "GET",
                 Url = requestUrl
             },
-            User = new User
+            User = new SentryUser
             {
                 Username = username,
                 Email = email,

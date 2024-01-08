@@ -51,7 +51,7 @@ internal class NoOpTransaction : NoOpSpan, ITransactionTracer
         set { }
     }
 
-    public User User
+    public SentryUser User
     {
         get => new();
         set { }

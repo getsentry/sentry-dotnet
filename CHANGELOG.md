@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### API breaking Changes
+
+#### Changed APIs
+
+- Class renamed `Sentry.User` to `Sentry.SentryUser` ([#3015](https://github.com/getsentry/sentry-dotnet/pull/3015))
+
 ### Dependencies
 
 - Bump CLI from v2.23.2 to v2.24.1 ([#3012](https://github.com/getsentry/sentry-dotnet/pull/3012))
