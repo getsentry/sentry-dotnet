@@ -111,7 +111,7 @@ jobs:
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
       - name: Install Android SDK
-        run: dotnet build -t:InstallAndroidDependencies -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
+        run: dotnet build -t:InstallAndroidDependencies -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath=${{ env.ANDROID_SDK_ROOT }}
         working-directory: samples/Sentry.Samples.Android
 
       - name: Build

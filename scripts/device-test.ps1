@@ -35,7 +35,7 @@ try
 
         if ($Build -and $CI)
         {
-            dotnet build -f $tfm -t:InstallAndroidDependencies -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/" test/Sentry.Maui.Device.TestApp
+            dotnet build -f $tfm -t:InstallAndroidDependencies -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath=$env:ANDROID_SDK_ROOT test/Sentry.Maui.Device.TestApp
             if ($LASTEXITCODE -ne 0)
             {
                 throw 'Failed to build Sentry.Maui.Device.TestApp'
