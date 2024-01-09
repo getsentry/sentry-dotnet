@@ -36,7 +36,7 @@ internal class CocoaProfiler : ITransactionProfiler
 
     public ISerializable? Collect(Transaction transaction)
     {
-        var payload = SentryCocoaHybridSdk.CollectProfileBetween(_startTimeNs, _endTimeNs, _cocoaTraceId) as NSMutableDictionary;
+        var payload = SentryCocoaHybridSdk.CollectProfileBetween(_startTimeNs, _endTimeNs, _cocoaTraceId);
         if (payload is null)
         {
             _options.LogWarning("Trace {0} collected profile payload is null", _traceId);
