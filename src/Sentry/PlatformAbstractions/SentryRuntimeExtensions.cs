@@ -4,7 +4,7 @@ namespace Sentry.PlatformAbstractions;
 /// Extension method to the <see cref="SentryRuntime"/> class.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
-public static class RuntimeExtensions
+public static class SentryRuntimeExtensions
 {
     /// <summary>
     /// Is the runtime instance .NET Framework.
