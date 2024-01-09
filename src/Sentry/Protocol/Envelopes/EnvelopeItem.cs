@@ -211,7 +211,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     /// <summary>
     /// Creates an <see cref="EnvelopeItem"/> from <paramref name="transaction"/>.
     /// </summary>
-    public static EnvelopeItem FromTransaction(Transaction transaction)
+    public static EnvelopeItem FromTransaction(SentryTransaction transaction)
     {
         var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
         {
@@ -342,7 +342,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         {
             var bufferLength = (int)(payloadLength ?? stream.Length);
             var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
-            var transaction = Json.Parse(buffer, Transaction.FromJson);
+            var transaction = Json.Parse(buffer, SentryTransaction.FromJson);
 
             return new JsonSerializable(transaction);
         }

@@ -455,9 +455,9 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null, null);
+    public void CaptureTransaction(SentryTransaction transaction) => CaptureTransaction(transaction, null, null);
 
-    public void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
+    public void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint)
     {
         // Note: The hub should capture transactions even if it is disabled.
         // This allows transactions to be reported as failed when they encountered an unhandled exception,

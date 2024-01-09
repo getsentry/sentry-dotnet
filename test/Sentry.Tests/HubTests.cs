@@ -993,7 +993,7 @@ public partial class HubTests
     {
         public void Finish() { }
 
-        public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction _) => throw new Exception("test");
+        public Sentry.Protocol.Envelopes.ISerializable Collect(SentryTransaction _) => throw new Exception("test");
     }
 
     private class AsyncThrowingProfilerFactory : ITransactionProfilerFactory
@@ -1005,10 +1005,10 @@ public partial class HubTests
     {
         public void Finish() { }
 
-        public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction transaction)
+        public Sentry.Protocol.Envelopes.ISerializable Collect(SentryTransaction transaction)
             => AsyncJsonSerializable.CreateFrom(CollectAsync(transaction));
 
-        private async Task<ProfileInfo> CollectAsync(Transaction transaction)
+        private async Task<ProfileInfo> CollectAsync(SentryTransaction transaction)
         {
             await Task.Delay(1);
             throw new Exception("test");
@@ -1023,7 +1023,7 @@ public partial class HubTests
     {
         public void Finish() { }
 
-        public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction _) => new JsonSerializable(new ProfileInfo());
+        public Sentry.Protocol.Envelopes.ISerializable Collect(SentryTransaction _) => new JsonSerializable(new ProfileInfo());
     }
 
 #nullable disable
@@ -1453,7 +1453,7 @@ public partial class HubTests
         transaction.Finish();
 
         // Assert
-        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled), Arg.Any<Scope>(), Arg.Any<Hint>());
+        _fixture.Client.Received().CaptureTransaction(Arg.Is<SentryTransaction>(t => t.IsSampled == enabled), Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]
@@ -1467,7 +1467,7 @@ public partial class HubTests
         transaction.Finish();
 
         // Assert
-        _fixture.Client.Received().CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Scope>(), Arg.Any<Hint>());
+        _fixture.Client.Received().CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Theory]

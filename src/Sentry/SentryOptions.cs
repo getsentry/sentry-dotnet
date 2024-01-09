@@ -445,15 +445,15 @@ public class SentryOptions
         _beforeSend = (@event, _) => beforeSend(@event);
     }
 
-    private Func<Transaction, Hint, Transaction?>? _beforeSendTransaction;
+    private Func<SentryTransaction, Hint, SentryTransaction?>? _beforeSendTransaction;
 
-    internal Func<Transaction, Hint, Transaction?>? BeforeSendTransactionInternal => _beforeSendTransaction;
+    internal Func<SentryTransaction, Hint, SentryTransaction?>? BeforeSendTransactionInternal => _beforeSendTransaction;
 
     /// <summary>
     /// Configures a callback to invoke before sending a transaction to Sentry
     /// </summary>
     /// <param name="beforeSendTransaction">The callback</param>
-    public void SetBeforeSendTransaction(Func<Transaction, Hint, Transaction?> beforeSendTransaction)
+    public void SetBeforeSendTransaction(Func<SentryTransaction, Hint, SentryTransaction?> beforeSendTransaction)
     {
         _beforeSendTransaction = beforeSendTransaction;
     }
@@ -462,7 +462,7 @@ public class SentryOptions
     /// Configures a callback to invoke before sending a transaction to Sentry
     /// </summary>
     /// <param name="beforeSendTransaction">The callback</param>
-    public void SetBeforeSendTransaction(Func<Transaction, Transaction?> beforeSendTransaction)
+    public void SetBeforeSendTransaction(Func<SentryTransaction, SentryTransaction?> beforeSendTransaction)
     {
         _beforeSendTransaction = (transaction, _) => beforeSendTransaction(transaction);
     }

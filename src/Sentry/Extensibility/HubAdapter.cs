@@ -244,7 +244,7 @@ public sealed class HubAdapter : IHub
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public void CaptureTransaction(Transaction transaction)
+    public void CaptureTransaction(SentryTransaction transaction)
         => SentrySdk.CaptureTransaction(transaction);
 
     /// <summary>
@@ -252,7 +252,7 @@ public sealed class HubAdapter : IHub
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
+    public void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint)
         => SentrySdk.CaptureTransaction(transaction, scope, hint);
 
     /// <summary>

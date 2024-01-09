@@ -1,10 +1,10 @@
 namespace Sentry.Tests.Protocol;
 
-public class TransactionTests
+public class SentryTransactionTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
 
-    public TransactionTests(ITestOutputHelper output)
+    public SentryTransactionTests(ITestOutputHelper output)
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
     }
@@ -133,7 +133,7 @@ public class TransactionTests
         txTracer.Finish(SpanStatus.Aborted);
 
         // Act
-        var transaction = new Transaction(txTracer);
+        var transaction = new SentryTransaction(txTracer);
         transaction.Redact();
 
         // Assert
@@ -228,9 +228,9 @@ public class TransactionTests
         transaction.Finish(SpanStatus.Aborted);
 
         // Act
-        var finalTransaction = new Transaction(transaction);
+        var finalTransaction = new SentryTransaction(transaction);
         var actualString = finalTransaction.ToJsonString(_testOutputLogger);
-        var actual = Json.Parse(actualString, Transaction.FromJson);
+        var actual = Json.Parse(actualString, SentryTransaction.FromJson);
 
         // Assert
         actual.Should().BeEquivalentTo(finalTransaction, o =>
@@ -413,8 +413,8 @@ public class TransactionTests
         var sentryRequest = (SpanTracer)transactionTracer.StartChild("sentryRequest");
         sentryRequest.IsSentryRequest = true;
 
-        Transaction transaction = null;
-        hub.CaptureTransaction(Arg.Do<Sentry.Transaction>(t => transaction = t));
+        SentryTransaction transaction = null;
+        hub.CaptureTransaction(Arg.Do<Sentry.SentryTransaction>(t => transaction = t));
 
         // Act
         transactionTracer.Finish();
@@ -472,7 +472,7 @@ public class TransactionTests
         transaction.Finish();
 
         // Assert
-        client.Received(1).CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Scope>(), Arg.Any<Hint>());
+        client.Received(1).CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]

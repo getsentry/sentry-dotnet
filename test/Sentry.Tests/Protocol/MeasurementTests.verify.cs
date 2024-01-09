@@ -6,7 +6,7 @@ public partial class MeasurementTests
     [Fact]
     public Task Transaction_Serializes_Measurements()
     {
-        var transaction = new Transaction("name", "operation");
+        var transaction = new SentryTransaction("name", "operation");
         transaction.Contexts.Trace.SpanId = SpanId.Empty;
 
         transaction.SetMeasurement("_", 0, MeasurementUnit.None);

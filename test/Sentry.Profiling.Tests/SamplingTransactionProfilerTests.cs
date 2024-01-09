@@ -105,7 +105,7 @@ public class SamplingTransactionProfilerTests
         sut!.Finish();
         var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
 
-        var transaction = new Transaction(transactionTracer);
+        var transaction = new SentryTransaction(transactionTracer);
         var collectTask = sut.CollectAsync(transaction);
         collectTask.Wait();
         var profileInfo = collectTask.Result;
@@ -170,7 +170,7 @@ public class SamplingTransactionProfilerTests
             RunForMs(limitMs * 10);
             sut.Finish();
 
-            var collectTask = sut.CollectAsync(new Transaction("foo", "bar"));
+            var collectTask = sut.CollectAsync(new SentryTransaction("foo", "bar"));
             collectTask.Wait();
             var profileInfo = collectTask.Result;
 
@@ -258,7 +258,7 @@ public class SamplingTransactionProfilerTests
             envelopeLines[1].Should().StartWith("{\"type\":\"transaction\"");
             envelopeLines[3].Should().StartWith("{\"type\":\"profile\"");
 
-            var transaction = Json.Parse(envelopeLines[2], Transaction.FromJson);
+            var transaction = Json.Parse(envelopeLines[2], SentryTransaction.FromJson);
 
             // TODO do we want to bother with JSON parsing just to do this? Doing at least simple checks for now...
             // var profileInfo = Json.Parse(envelopeLines[4], ProfileInfo.FromJson);

@@ -198,7 +198,7 @@ public class TransactionTracer : ITransactionTracer
     }
 
     /// <summary>
-    /// Initializes an instance of <see cref="Transaction"/>.
+    /// Initializes an instance of <see cref="SentryTransaction"/>.
     /// </summary>
     internal TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource = TransactionNameSource.Custom)
     {
@@ -383,7 +383,7 @@ public class TransactionTracer : ITransactionTracer
         _hub.ConfigureScope(scope => scope.ResetTransaction(this));
 
         // Client decides whether to discard this transaction based on sampling
-        _hub.CaptureTransaction(new Transaction(this));
+        _hub.CaptureTransaction(new SentryTransaction(this));
     }
 
     /// <inheritdoc />

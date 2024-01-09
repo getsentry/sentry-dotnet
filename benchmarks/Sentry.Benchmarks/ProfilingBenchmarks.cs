@@ -25,7 +25,7 @@ public class ProfilingBenchmarks
     public void StopProfiler()
     {
         _profiler?.Finish();
-        (_profiler as SamplingTransactionProfiler)?.CollectAsync(new Transaction("", "")).Wait();
+        (_profiler as SamplingTransactionProfiler)?.CollectAsync(new SentryTransaction("", "")).Wait();
         _profiler = null;
         _factory.Dispose();
         _factory = null;
@@ -52,7 +52,7 @@ public class ProfilingBenchmarks
         tt.TransactionProfiler = _factory.Start(tt, CancellationToken.None);
         var result = RunForMs(runtimeMs);
         tt.TransactionProfiler.Finish();
-        var transaction = new Transaction(tt);
+        var transaction = new SentryTransaction(tt);
         if (collect)
         {
             var collectTask = (tt.TransactionProfiler as SamplingTransactionProfiler).CollectAsync(transaction);

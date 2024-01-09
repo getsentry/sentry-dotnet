@@ -78,7 +78,7 @@ public class TraceLogProcessorTests
     [Fact]
     public Task ProfileInfo_Serialization_Works()
     {
-        var transaction = new Transaction("name", "op");
+        var transaction = new SentryTransaction("name", "op");
         transaction.Contexts.Device.Architecture = "arch";
         transaction.Contexts.Device.Model = "device model";
         transaction.Contexts.Device.Manufacturer = "device make";
