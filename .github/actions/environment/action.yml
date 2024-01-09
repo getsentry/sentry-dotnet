@@ -11,8 +11,8 @@ runs:
         echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" >> $GITHUB_ENV
         echo "DOTNET_NOLOGO=1" >> $GITHUB_ENV
 
-    - name: Set Java Version
-      uses: actions/setup-java@v3
+    # Needed for Android SDK setup step
+    - uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
         java-version: '17'
