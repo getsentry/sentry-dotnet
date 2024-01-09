@@ -11,6 +11,9 @@ runs:
         echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" >> $GITHUB_ENV
         echo "DOTNET_NOLOGO=1" >> $GITHUB_ENV
 
+    - name: Install Android SDK
+      uses: android-actions/setup-android@v3
+
     - name: Set Java Version
       uses: actions/setup-java@v3
       with:

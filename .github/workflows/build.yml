@@ -110,10 +110,6 @@ jobs:
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
-      - name: Install Android SDK
-        run: dotnet build -t:InstallAndroidDependencies -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath=${{ env.ANDROID_SDK_ROOT }}
-        working-directory: samples/Sentry.Samples.Android
-
       - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
 

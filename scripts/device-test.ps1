@@ -32,16 +32,6 @@ try
             '--app', "$buildDir/io.sentry.dotnet.maui.device.testapp-Signed.apk",
             '--package-name', 'io.sentry.dotnet.maui.device.testapp'
         )
-
-        if ($Build -and $CI)
-        {
-            dotnet build -f $tfm -t:InstallAndroidDependencies -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath=$env:ANDROID_SDK_ROOT test/Sentry.Maui.Device.TestApp
-            if ($LASTEXITCODE -ne 0)
-            {
-                throw 'Failed to build Sentry.Maui.Device.TestApp'
-            }
-        }
-
     }
     elseif ($Platform -eq 'ios')
     {
@@ -81,19 +71,29 @@ try
             if ($LASTEXITCODE -ne 0)
             {
                 throw 'xharness run failed with non-zero exit code'
-            }
-        }
-        finally
-        {
-            if ($CI)
-            {
-                scripts/parse-xunit2-xml.ps1 (Get-Item ./test_output/*.xml).FullName | Out-File $env:GITHUB_STEP_SUMMARY
+                Pop-Location
             }
 
+            Remove-Item -Recurse -Force test_output -ErrorAction SilentlyContinue
+            try
+            {
+                xharness $group test $arguments --output-directory=test_output
+                if ($LASTEXITCODE -ne 0)
+                {
+                    throw 'xharness run failed with non-zero exit code'
+                }
+            }
+            finally
+            {
+                if ($CI)
+                {
+                    scripts/parse-xunit2-xml.ps1 (Get-Item ./test_output/*.xml).FullName | Out-File $env:GITHUB_STEP_SUMMARY
+                }
+
+            }
         }
     }
-}
-finally
-{
-    Pop-Location
-}
+    finally
+    {
+        Pop-Location
+    }
