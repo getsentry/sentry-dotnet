@@ -73,27 +73,18 @@ try
                 throw 'xharness run failed with non-zero exit code'
                 Pop-Location
             }
-
-            Remove-Item -Recurse -Force test_output -ErrorAction SilentlyContinue
-            try
+        }
+        finally
+        {
+            if ($CI)
             {
-                xharness $group test $arguments --output-directory=test_output
-                if ($LASTEXITCODE -ne 0)
-                {
-                    throw 'xharness run failed with non-zero exit code'
-                }
+                scripts/parse-xunit2-xml.ps1 (Get-Item ./test_output/*.xml).FullName | Out-File $env:GITHUB_STEP_SUMMARY
             }
-            finally
-            {
-                if ($CI)
-                {
-                    scripts/parse-xunit2-xml.ps1 (Get-Item ./test_output/*.xml).FullName | Out-File $env:GITHUB_STEP_SUMMARY
-                }
 
-            }
         }
     }
-    finally
-    {
-        Pop-Location
-    }
+}
+finally
+{
+    Pop-Location
+}
