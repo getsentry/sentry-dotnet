@@ -9,7 +9,7 @@ param(
 )
 
 Set-StrictMode -Version latest
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = 'Stop'
 
 if (!$Build -and !$Run)
 {
@@ -32,6 +32,16 @@ try
             '--app', "$buildDir/io.sentry.dotnet.maui.device.testapp-Signed.apk",
             '--package-name', 'io.sentry.dotnet.maui.device.testapp'
         )
+
+        if ($Build -and $CI)
+        {
+            dotnet build -f $tfm -t:InstallAndroidDependencies -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/" test/Sentry.Maui.Device.TestApp
+            if ($LASTEXITCODE -ne 0)
+            {
+                throw 'Failed to build Sentry.Maui.Device.TestApp'
+            }
+        }
+
     }
     elseif ($Platform -eq 'ios')
     {
@@ -50,7 +60,7 @@ try
         dotnet build -f $tfm -c Release test/Sentry.Maui.Device.TestApp
         if ($LASTEXITCODE -ne 0)
         {
-            throw "Failed to build Sentry.Maui.Device.TestApp"
+            throw 'Failed to build Sentry.Maui.Device.TestApp'
         }
     }
 
@@ -59,7 +69,7 @@ try
         if (!(Get-Command xharness -ErrorAction SilentlyContinue))
         {
             Push-Location ($CI ? $env:RUNNER_TEMP : $IsWindows ? $env:TMP : $IsMacos ? $env:TMPDIR : '/temp')
-            dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version "1.*-*" `
+            dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '1.*-*' `
                 --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
             Pop-Location
         }
@@ -70,7 +80,7 @@ try
             xharness $group test $arguments --output-directory=test_output
             if ($LASTEXITCODE -ne 0)
             {
-                throw "xharness run failed with non-zero exit code"
+                throw 'xharness run failed with non-zero exit code'
             }
         }
         finally
