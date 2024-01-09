@@ -71,7 +71,6 @@ try
             if ($LASTEXITCODE -ne 0)
             {
                 throw 'xharness run failed with non-zero exit code'
-                Pop-Location
             }
         }
         finally
