@@ -27,6 +27,7 @@ public static class ApiExtensions
         return Verify(apiText, null, filePath)
             .AutoVerify(includeBuildServer: false)
             .UniqueForTargetFrameworkAndVersion()
+            .ScrubLinesContaining("AltCover.Recorder.Instrumentation")
             .ScrubEmptyLines();
     }
 }
