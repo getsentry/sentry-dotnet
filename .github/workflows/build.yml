@@ -180,6 +180,15 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      # Needed for Android SDK setup step
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@07976c6290703d34c16d382cb36445f98bb43b1f # v3.2.0
+
       - run: dotnet workload install android maui-android
 
       - name: Test
