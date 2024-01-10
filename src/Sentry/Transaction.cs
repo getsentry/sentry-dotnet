@@ -184,12 +184,12 @@ public class Transaction : ITransactionData, IJsonSerializable
     public IReadOnlyDictionary<string, string> Tags => _tags;
 
     // Not readonly because of deserialization
-    private Span[] _spans = Array.Empty<Span>();
+    private SentrySpan[] _spans = Array.Empty<SentrySpan>();
 
     /// <summary>
     /// Flat list of spans within this transaction.
     /// </summary>
-    public IReadOnlyCollection<Span> Spans => _spans;
+    public IReadOnlyCollection<SentrySpan> Spans => _spans;
 
     /// <inheritdoc />
     public bool IsFinished => EndTimestamp is not null;
@@ -265,7 +265,7 @@ public class Transaction : ITransactionData, IJsonSerializable
         _tags = tracer.Tags.ToDict();
         _spans = tracer.Spans
             .Where(s => s is not SpanTracer { IsSentryRequest: true }) // Filter sentry requests created by Sentry.OpenTelemetry.SentrySpanProcessor
-            .Select(s => new Span(s)).ToArray();
+            .Select(s => new SentrySpan(s)).ToArray();
         _measurements = tracer.Measurements.ToDict();
 
         // Some items are not on the interface, but we only ever pass in a TransactionTracer anyway.
@@ -383,7 +383,7 @@ public class Transaction : ITransactionData, IJsonSerializable
         var measurements = json.GetPropertyOrNull("measurements")?
             .GetDictionaryOrNull(Measurement.FromJson) ?? new();
         var spans = json.GetPropertyOrNull("spans")?
-            .EnumerateArray().Select(Span.FromJson).ToArray() ?? Array.Empty<Span>();
+            .EnumerateArray().Select(SentrySpan.FromJson).ToArray() ?? Array.Empty<SentrySpan>();
 
         return new Transaction(name, nameSource)
         {
