@@ -1,0 +1,1 @@
+﻿my.gauge@gauges:7:5:7:12:2|g|#tag1:SanitizeValue(value),tag2:SanitizeValue(value)|T1577836800

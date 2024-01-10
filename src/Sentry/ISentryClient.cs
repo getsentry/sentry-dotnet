@@ -68,4 +68,9 @@ public interface ISentryClient
     /// <param name="timeout">The amount of time allowed for flushing.</param>
     /// <returns>A task to await for the flush operation.</returns>
     Task FlushAsync(TimeSpan timeout);
+
+    /// <summary>
+    /// <inheritdoc cref="IMetricAggregator"/>
+    /// </summary>
+    IMetricAggregator Metrics { get; }
 }

@@ -381,29 +381,6 @@ public class SentryTransactionTests
     }
 
     [Fact]
-    public void Finish_UnfinishedSpansGetsFinishedWithDeadlineStatus()
-    {
-        // Arrange
-        var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op");
-        transaction.StartChild("children1");
-        transaction.StartChild("children2");
-        transaction.StartChild("children3.finished").Finish(SpanStatus.Ok);
-        transaction.StartChild("children4");
-
-        // Act
-        transaction.Finish();
-
-        // Assert
-
-        Assert.All(transaction.Spans.Where(span => !span.Operation.EndsWith("finished")), span =>
-        {
-            Assert.True(span.IsFinished);
-            Assert.Equal(SpanStatus.DeadlineExceeded, span.Status);
-        });
-        Assert.Single(transaction.Spans.Where(span => span.Operation.EndsWith("finished") && span.Status == SpanStatus.Ok));
-    }
-
-    [Fact]
     public void Finish_SentryRequestSpansGetIgnored()
     {
         // Arrange

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Significant change in behavior
+
+- Transactions' spans are no longer automatically finished with status `deadline_exceeded` by the transaction. This is now handled by the [Relay](https://github.com/getsentry/relay). 
+  - Customers self hosting Sentry must use verion 22.12.0 or later ([#3013](https://github.com/getsentry/sentry-dotnet/pull/3013))
+
 ### API breaking Changes
 
 #### Changed APIs
@@ -13,14 +18,18 @@
 
 ### Dependencies
 
-- Bump CLI from v2.23.2 to v2.24.1 ([#3012](https://github.com/getsentry/sentry-dotnet/pull/3012))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2241)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.23.2...2.24.1)
+- Bump CLI from v2.23.2 to v2.25.0 ([#3012](https://github.com/getsentry/sentry-dotnet/pull/3012), [#3030](https://github.com/getsentry/sentry-dotnet/pull/3030))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2250)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.23.2...2.25.0)
+- Bump Native SDK from v0.6.7 to v0.7.0 ([#3029](https://github.com/getsentry/sentry-dotnet/pull/3029))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#070)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.6.7...0.7.0)
 
 ## 4.0.0-beta.7
 
 ### Features
 
+- Experimental pre-release availability of Metrics. We're exploring the use of Metrics in Sentry. The API will very likely change and we don't yet have any documentation. ([#2949](https://github.com/getsentry/sentry-dotnet/pull/2949))
 - MAUI Screenshot support. You can opt-in via `SentryMauiOptions.AttachScreenshots` ([#2965](https://github.com/getsentry/sentry-dotnet/pull/2965))
    - Supports Android and iOS only. Windows is not supported.
 - MAUI: App context has `in_foreground` indicating whether app was on the background or foreground. ([#2983](https://github.com/getsentry/sentry-dotnet/pull/2983))
