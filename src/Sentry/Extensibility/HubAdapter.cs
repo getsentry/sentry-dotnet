@@ -271,6 +271,10 @@ public sealed class HubAdapter : IHub
     public Task FlushAsync(TimeSpan timeout)
         => SentrySdk.FlushAsync(timeout);
 
+    /// <inheritdoc cref="IMetricAggregator"/>
+    public IMetricAggregator Metrics
+        => SentrySdk.Metrics;
+
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>
     /// </summary>
