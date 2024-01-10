@@ -126,6 +126,11 @@ namespace Sentry
         public static void SetFingerprint(this Sentry.IEventLike eventLike, System.Collections.Generic.IEnumerable<string> fingerprint) { }
         public static void SetFingerprint(this Sentry.IEventLike eventLike, params string[] fingerprint) { }
     }
+    public class ExperimentalMetricsOptions
+    {
+        public ExperimentalMetricsOptions() { }
+        public bool EnableCodeLocations { get; set; }
+    }
     public class FileAttachmentContent : Sentry.IAttachmentContent
     {
         public FileAttachmentContent(string filePath) { }
@@ -237,6 +242,15 @@ namespace Sentry
     {
         void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger);
     }
+    public interface IMetricAggregator : System.IDisposable
+    {
+        void Distribution(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
+        System.Threading.Tasks.Task FlushAsync(bool force = true, System.Threading.CancellationToken cancellationToken = default);
+        void Gauge(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
+        void Increment(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
+        void Set(string key, int value, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
+        void Timing(string key, double value, Sentry.MeasurementUnit.Duration unit = 3, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
+    }
     public interface IScopeObserver
     {
         void AddBreadcrumb(Sentry.Breadcrumb breadcrumb);
@@ -248,6 +262,7 @@ namespace Sentry
     public interface ISentryClient
     {
         bool IsEnabled { get; }
+        Sentry.IMetricAggregator Metrics { get; }
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.Hint? hint = null);
         void CaptureSession(Sentry.SessionUpdate sessionUpdate);
         void CaptureTransaction(Sentry.Transaction transaction);
@@ -475,6 +490,7 @@ namespace Sentry
     {
         public SentryClient(Sentry.SentryOptions options) { }
         public bool IsEnabled { get; }
+        public Sentry.IMetricAggregator Metrics { get; }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent? @event, Sentry.Scope? scope = null, Sentry.Hint? hint = null) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.Transaction transaction) { }
@@ -621,6 +637,7 @@ namespace Sentry
         public bool EnableSpotlight { get; set; }
         public bool? EnableTracing { get; set; }
         public string? Environment { get; set; }
+        public Sentry.ExperimentalMetricsOptions? ExperimentalMetrics { get; set; }
         public System.Collections.Generic.IList<Sentry.HttpStatusCodeRange> FailedRequestStatusCodes { get; set; }
         public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> FailedRequestTargets { get; set; }
         public System.TimeSpan FlushTimeout { get; set; }
@@ -705,6 +722,7 @@ namespace Sentry
     {
         public static bool IsEnabled { get; }
         public static Sentry.SentryId LastEventId { get; }
+        public static Sentry.IMetricAggregator Metrics { get; }
         public static void AddBreadcrumb(Sentry.Breadcrumb breadcrumb, Sentry.Hint? hint = null) { }
         public static void AddBreadcrumb(string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void AddBreadcrumb(Sentry.Infrastructure.ISystemClock? clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
@@ -1001,6 +1019,12 @@ namespace Sentry
         public override string ToString() { }
         public static Sentry.SubstringOrRegexPattern op_Implicit(string substringOrRegexPattern) { }
     }
+    public class Timing : System.IDisposable
+    {
+        public Timing(string key, Sentry.MeasurementUnit.Duration unit = 3, System.Collections.Generic.IDictionary<string, string>? tags = null) { }
+        public Timing(Sentry.IHub hub, string key, Sentry.MeasurementUnit.Duration unit = 3, System.Collections.Generic.IDictionary<string, string>? tags = null) { }
+        public void Dispose() { }
+    }
     public class Transaction : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IJsonSerializable, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
         public Transaction(Sentry.ITransactionTracer tracer) { }
@@ -1184,6 +1208,7 @@ namespace Sentry.Extensibility
         public static readonly Sentry.Extensibility.DisabledHub Instance;
         public bool IsEnabled { get; }
         public Sentry.SentryId LastEventId { get; }
+        public Sentry.IMetricAggregator Metrics { get; }
         public void BindClient(Sentry.ISentryClient client) { }
         public void BindException(System.Exception exception, Sentry.ISpan span) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
@@ -1221,6 +1246,7 @@ namespace Sentry.Extensibility
         public static readonly Sentry.Extensibility.HubAdapter Instance;
         public bool IsEnabled { get; }
         public Sentry.SentryId LastEventId { get; }
+        public Sentry.IMetricAggregator Metrics { get; }
         public void AddBreadcrumb(string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public void AddBreadcrumb(Sentry.Infrastructure.ISystemClock clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public void BindClient(Sentry.ISentryClient client) { }
