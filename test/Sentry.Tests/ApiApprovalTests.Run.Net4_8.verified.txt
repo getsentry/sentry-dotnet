@@ -1066,6 +1066,50 @@ namespace Sentry
         public Timing(Sentry.IHub hub, string key, Sentry.MeasurementUnit.Duration unit = 3, System.Collections.Generic.IDictionary<string, string>? tags = null) { }
         public void Dispose() { }
     }
+    public class Transaction : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IJsonSerializable, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
+    {
+        public Transaction(Sentry.ITransactionTracer tracer) { }
+        public Transaction(string name, string operation) { }
+        public Transaction(string name, string operation, Sentry.TransactionNameSource nameSource) { }
+        public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
+        public Sentry.Contexts Contexts { get; set; }
+        public string? Description { get; set; }
+        public string? Distribution { get; set; }
+        public System.DateTimeOffset? EndTimestamp { get; }
+        public string? Environment { get; set; }
+        public Sentry.SentryId EventId { get; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
+        public System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
+        public bool IsFinished { get; }
+        public bool? IsParentSampled { get; set; }
+        public bool? IsSampled { get; }
+        public Sentry.SentryLevel? Level { get; set; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, Sentry.Protocol.Measurement> Measurements { get; }
+        public string Name { get; }
+        public Sentry.TransactionNameSource NameSource { get; }
+        public string Operation { get; }
+        public Sentry.SpanId? ParentSpanId { get; }
+        public string? Platform { get; set; }
+        public string? Release { get; set; }
+        public Sentry.Request Request { get; set; }
+        public double? SampleRate { get; }
+        public Sentry.SdkVersion Sdk { get; }
+        public Sentry.SpanId SpanId { get; }
+        public System.Collections.Generic.IReadOnlyCollection<Sentry.SentrySpan> Spans { get; }
+        public System.DateTimeOffset StartTimestamp { get; }
+        public Sentry.SpanStatus? Status { get; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, string> Tags { get; }
+        public Sentry.SentryId TraceId { get; }
+        public Sentry.SentryUser User { get; set; }
+        public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb) { }
+        public Sentry.SentryTraceHeader GetTraceHeader() { }
+        public void SetExtra(string key, object? value) { }
+        public void SetMeasurement(string name, Sentry.Protocol.Measurement measurement) { }
+        public void SetTag(string key, string value) { }
+        public void UnsetTag(string key) { }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+        public static Sentry.Transaction FromJson(System.Text.Json.JsonElement json) { }
+    }
     public class TransactionContext : Sentry.SpanContext, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext
     {
         public TransactionContext(string name, string operation, Sentry.SpanId? spanId = default, Sentry.SpanId? parentSpanId = default, Sentry.SentryId? traceId = default, string? description = "", Sentry.SpanStatus? status = default, bool? isSampled = default, bool? isParentSampled = default, Sentry.TransactionNameSource nameSource = 0) { }
