@@ -346,7 +346,7 @@ public sealed class SentryTarget : TargetWithContext
                 Level = logEvent.Level.ToSentryLevel(),
                 Release = Options.Release,
                 Environment = Options.Environment,
-                User = GetUser(logEvent) ?? new User(),
+                User = GetUser(logEvent) ?? new SentryUser(),
             };
 
             if (evt.Sdk is { } sdk)
@@ -439,14 +439,14 @@ public sealed class SentryTarget : TargetWithContext
         }
     }
 
-    private User? GetUser(LogEventInfo logEvent)
+    private SentryUser? GetUser(LogEventInfo logEvent)
     {
         if (User is null)
         {
             return null;
         }
 
-        var user = new User
+        var user = new SentryUser
         {
             Id = User.Id?.Render(logEvent),
             Username = User.Username?.Render(logEvent),

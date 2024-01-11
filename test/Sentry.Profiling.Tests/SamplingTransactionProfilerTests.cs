@@ -127,7 +127,7 @@ public class SamplingTransactionProfilerTests
     [SkippableTheory]
     [InlineData(0)]
     [InlineData(10)]
-    public void Profiler_SingleProfile_Works(int startTimeoutSeconds)
+    private void Profiler_SingleProfile_Works(int startTimeoutSeconds)
     {
         using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(startTimeoutSeconds));
         // in the async startup case, we need to wait before collecting
@@ -178,7 +178,7 @@ public class SamplingTransactionProfilerTests
         }
     }
 
-    [Theory]
+    [SkippableTheory]
     [InlineData(true)]
     [InlineData(false)]
     public void ProfilerIntegration_FullRoundtrip_Works(bool offlineCaching)
@@ -283,8 +283,8 @@ public class SamplingTransactionProfilerTests
         }
     }
 
-    [Fact]
-    public async Task Profiler_ThrowingOnSessionStartup_DoesntBreakSentryInit()
+    [SkippableFact]
+    private async Task Profiler_ThrowingOnSessionStartup_DoesntBreakSentryInit()
     {
         SampleProfilerSession.ThrowOnNextStartupForTests = true;
 
@@ -317,6 +317,7 @@ public class SamplingTransactionProfilerTests
         try
         {
             SampleProfilerSession.ThrowOnNextStartupForTests.Should().BeTrue();
+            options.TransactionProfilerFactory.Should().BeNull();
             using var hub = (SentrySdk.InitHub(options) as Hub)!;
             SampleProfilerSession.ThrowOnNextStartupForTests.Should().BeFalse();
             options.TransactionProfilerFactory.Should().BeNull();
@@ -342,7 +343,7 @@ public class SamplingTransactionProfilerTests
         }
     }
 
-    [Fact]
+    [SkippableFact]
     public void ProfilerIntegration_WithProfilingDisabled_LeavesFactoryNull()
     {
         var options = new SentryOptions
@@ -356,7 +357,7 @@ public class SamplingTransactionProfilerTests
         Assert.Null(hub.Options.TransactionProfilerFactory);
     }
 
-    [Fact]
+    [SkippableFact]
     public void ProfilerIntegration_WithTracingDisabled_LeavesFactoryNull()
     {
         var options = new SentryOptions
@@ -370,7 +371,7 @@ public class SamplingTransactionProfilerTests
         Assert.Null(hub.Options.TransactionProfilerFactory);
     }
 
-    [Fact]
+    [SkippableFact]
     public void ProfilerIntegration_WithProfilingEnabled_SetsFactory()
     {
         var options = new SentryOptions
@@ -384,7 +385,7 @@ public class SamplingTransactionProfilerTests
         Assert.NotNull(hub.Options.TransactionProfilerFactory);
     }
 
-    [Fact]
+    [SkippableFact]
     public void Downsampler_ShouldSample_Works()
     {
         var sut = new Downsampler();

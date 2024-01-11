@@ -5,6 +5,10 @@ namespace Sentry.Azure.Functions.Worker.Tests;
 
 public class BindableSentryAzureFunctionsOptionsTests: BindableTests<SentryAzureFunctionsOptions>
 {
+    public BindableSentryAzureFunctionsOptionsTests() : base(nameof(SentryAzureFunctionsOptions.ExperimentalMetrics))
+    {
+    }
+
     [Fact]
     public void BindableProperties_MatchOptionsProperties()
     {

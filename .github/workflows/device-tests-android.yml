@@ -25,12 +25,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set Java Version
-        uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "11"
-
       - name: Setup Environment
         uses: ./.github/actions/environment
 

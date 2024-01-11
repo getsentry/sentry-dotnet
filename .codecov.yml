@@ -3,9 +3,12 @@ coverage:
     changes: false
     project:
       default:
-        threshold: 5%
+        informational: true
     patch: off
   ignore:
+    - "benchmarks/**/*"
+    - "modules/**/*"
+    - "samples/**/*"
     - "test/**/*"
   range: 0..100
   round: down

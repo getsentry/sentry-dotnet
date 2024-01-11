@@ -1,6 +1,5 @@
 #if !NETCOREAPP // Test runner fails when running on netcoreapp
 using Sentry.PlatformAbstractions;
-using Runtime = Sentry.PlatformAbstractions.Runtime;
 
 namespace Sentry.Tests.Integrations;
 
@@ -10,7 +9,7 @@ public class AppDomainAdapterTests
     public void UnhandledException_FiredOnExceptionUnhandledInThread()
     {
         // Test flaky on Mono
-        Skip.If(Runtime.Current.IsMono());
+        Skip.If(SentryRuntime.Current.IsMono());
 
         var evt = new ManualResetEventSlim(false);
         AppDomainAdapter.Instance.UnhandledException += (_, _) => evt.Set();

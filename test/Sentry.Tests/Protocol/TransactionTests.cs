@@ -90,7 +90,7 @@ public class TransactionTests
             // We don't redact the User or the Request since, if SendDefaultPii is false, we don't add these to the
             // transaction in the SDK anyway (by default they don't get sent... but the user can always override this
             // behavior if they need)
-            User = new User { Id = "user-id", Username = "username", Email = "bob@foo.com", IpAddress = "127.0.0.1" },
+            User = new SentryUser { Id = "user-id", Username = "username", Email = "bob@foo.com", IpAddress = "127.0.0.1" },
             Request = new Request { Method = "POST", Url = "https://user@not.redacted"},
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
             Environment = environment,
@@ -175,7 +175,7 @@ public class TransactionTests
         {
             Description = "desc123",
             Status = SpanStatus.Aborted,
-            User = new User { Id = "user-id" },
+            User = new SentryUser { Id = "user-id" },
             Request = new Request { Method = "POST" },
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
             Environment = "environment",
@@ -378,29 +378,6 @@ public class TransactionTests
         // Assert
         transaction.EndTimestamp.Should().NotBeNull();
         (transaction.EndTimestamp - transaction.StartTimestamp).Should().BeGreaterOrEqualTo(TimeSpan.Zero);
-    }
-
-    [Fact]
-    public void Finish_UnfinishedSpansGetsFinishedWithDeadlineStatus()
-    {
-        // Arrange
-        var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op");
-        transaction.StartChild("children1");
-        transaction.StartChild("children2");
-        transaction.StartChild("children3.finished").Finish(SpanStatus.Ok);
-        transaction.StartChild("children4");
-
-        // Act
-        transaction.Finish();
-
-        // Assert
-
-        Assert.All(transaction.Spans.Where(span => !span.Operation.EndsWith("finished")), span =>
-        {
-            Assert.True(span.IsFinished);
-            Assert.Equal(SpanStatus.DeadlineExceeded, span.Status);
-        });
-        Assert.Single(transaction.Spans.Where(span => span.Operation.EndsWith("finished") && span.Status == SpanStatus.Ok));
     }
 
     [Fact]

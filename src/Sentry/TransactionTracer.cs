@@ -119,12 +119,12 @@ public class TransactionTracer : ITransactionTracer
         set => _contexts.ReplaceWith(value);
     }
 
-    private User? _user;
+    private SentryUser? _user;
 
     /// <inheritdoc />
-    public User User
+    public SentryUser User
     {
-        get => _user ??= new User();
+        get => _user ??= new SentryUser();
         set => _user = value;
     }
 
@@ -369,15 +369,6 @@ public class TransactionTracer : ITransactionTracer
         Status ??= SpanStatus.Ok;
         EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
         _options?.LogDebug("Finished Transaction {0}.", SpanId);
-
-        foreach (var span in _spans)
-        {
-            if (!span.IsFinished)
-            {
-                _options?.LogDebug("Deadline exceeded for Transaction {0} -> Span {1}.", SpanId, span.SpanId);
-                span.Finish(SpanStatus.DeadlineExceeded);
-            }
-        }
 
         // Clear the transaction from the scope
         _hub.ConfigureScope(scope => scope.ResetTransaction(this));
