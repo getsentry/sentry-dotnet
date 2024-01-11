@@ -6,7 +6,7 @@ public class TracePropagationTargetTests
     public void SentryOptions_TracePropagationTargets_DefaultAll()
     {
         var options = new SentryOptions();
-        Assert.Equal(1, options.TracePropagationTargets.Count);
+        Assert.Single(options.TracePropagationTargets);
         Assert.Equal(".*", options.TracePropagationTargets[0].ToString());
     }
 

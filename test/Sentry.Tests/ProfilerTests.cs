@@ -53,9 +53,9 @@ public class ProfilerTests
             await hub.FlushAsync();
 
             // Asserts
-            var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(1_000)).ConfigureAwait(false);
+            var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(1_000));
             completedTask.Should().Be(tcs.Task);
-            var envelopeLines = tcs.Task.Result.Split('\n');
+            var envelopeLines = (await tcs.Task).Split('\n');
             envelopeLines.Length.Should().Be(6);
 
             // header rows before payloads

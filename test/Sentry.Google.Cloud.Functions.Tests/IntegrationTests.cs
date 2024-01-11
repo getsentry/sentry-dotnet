@@ -67,7 +67,7 @@ public class IntegrationTests
                 "Expected SDK name to be in the payload");
             return; // pass
         }
-        Assert.False(true, "Exception should bubble from Middleware");
+        Assert.Fail("Exception should bubble from Middleware");
     }
 
     public class FailingFunction : IHttpFunction
