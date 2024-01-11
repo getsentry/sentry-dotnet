@@ -3,6 +3,7 @@ param(
     [ValidateNotNullOrEmpty()]
     [ValidateSet('android', 'ios')] # TODO , 'maccatalyst'
     [String] $Platform,
+    [String] $Configuration = 'Release',
 
     [Switch] $Build,
     [Switch] $Run,
@@ -28,7 +29,7 @@ try
     {
         $tfm += 'android'
         $group = 'android'
-        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/android-$arch"
+        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/$Configuration/$tfm/android-$arch"
         $arguments = @(
             '--app', "$buildDir/io.sentry.dotnet.maui.device.testapp-Signed.apk",
             '--package-name', 'io.sentry.dotnet.maui.device.testapp'
@@ -38,7 +39,7 @@ try
     {
         $tfm += 'ios'
         $group = 'apple'
-        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/iossimulator-$arch"
+        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/$Configuration/$tfm/iossimulator-$arch"
         $arguments = @(
             '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
             '--target', 'ios-simulator-64',
@@ -49,7 +50,7 @@ try
     # {
     #     $tfm += 'maccatalyst'
     #     $group = 'apple'
-    #     $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/iossimulator-$arch"
+    #     $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/$Configuration/$tfm/iossimulator-$arch"
     #     $arguments = @(
     #         '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
     #         '--launch-timeout', '00:10:00'
@@ -58,7 +59,7 @@ try
 
     if ($Build)
     {
-        dotnet build -f $tfm -c Release test/Sentry.Maui.Device.TestApp -p:TestNativeAot=$NativeAot
+        dotnet build -f $tfm -c $Configuration test/Sentry.Maui.Device.TestApp -p:TestNativeAot=$NativeAot
         if ($LASTEXITCODE -ne 0)
         {
             throw 'Failed to build Sentry.Maui.Device.TestApp'
