@@ -14,6 +14,7 @@ internal class MetricAggregator : IMetricAggregator
     private readonly TimeSpan _flushInterval;
 
     private readonly SemaphoreSlim _codeLocationLock = new(1,1);
+    private readonly ReaderWriterLockSlim _bucketsLock = new ReaderWriterLockSlim();
 
     private readonly CancellationTokenSource _shutdownSource;
     private volatile bool _disposed;
@@ -21,10 +22,10 @@ internal class MetricAggregator : IMetricAggregator
     // The key for this dictionary is the Timestamp for the bucket, rounded down to the nearest RollupInSeconds... so it
     // aggregates all of the metrics data for a particular time period. The Value is a dictionary for the metrics,
     // each of which has a key that uniquely identifies it within the time period
-    internal ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>> Buckets => _buckets.Value;
+    internal Dictionary<long, ConcurrentDictionary<string, Metric>> Buckets => _buckets.Value;
 
-    private readonly Lazy<ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>>> _buckets
-        = new(() => new ConcurrentDictionary<long, ConcurrentDictionary<string, Metric>>());
+    private readonly Lazy<Dictionary<long, ConcurrentDictionary<string, Metric>>> _buckets
+        = new(() => new Dictionary<long, ConcurrentDictionary<string, Metric>>());
 
     private long _lastClearedStaleLocations = DateTimeOffset.UtcNow.GetDayBucketKey();
     private readonly ConcurrentDictionary<long, HashSet<MetricResourceIdentifier>> _seenLocations = new();
@@ -183,10 +184,7 @@ internal class MetricAggregator : IMetricAggregator
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown MetricType")
         };
 
-        var timeBucket = Buckets.GetOrAdd(
-            timestamp.Value.GetTimeBucketKey(),
-            _ => new ConcurrentDictionary<string, Metric>()
-        );
+        var timeBucket = GetOrAddTimeBucket(timestamp.Value.GetTimeBucketKey());
 
         timeBucket.AddOrUpdate(
             GetMetricBucketKey(type, key, unit.Value, tags),
@@ -213,6 +211,40 @@ internal class MetricAggregator : IMetricAggregator
         if (_options.ExperimentalMetrics is { EnableCodeLocations: true })
         {
             RecordCodeLocation(type, key, unit.Value, stackLevel + 1, timestamp.Value);
+        }
+    }
+
+    private ConcurrentDictionary<string, Metric> GetOrAddTimeBucket(long bucketKey)
+    {
+        _bucketsLock.EnterUpgradeableReadLock();
+        try
+        {
+            if (Buckets.TryGetValue(bucketKey, out var existingBucket))
+            {
+                return existingBucket;
+            }
+
+            _bucketsLock.EnterWriteLock();
+            try
+            {
+                // Check again in case another thread added the bucket while we were waiting for the write lock
+                if (Buckets.TryGetValue(bucketKey, out existingBucket))
+                {
+                    return existingBucket;
+                }
+                
+                var timeBucket = new ConcurrentDictionary<string, Metric>();
+                Buckets[bucketKey] = timeBucket;
+                return timeBucket;
+            }
+            finally
+            {
+                _bucketsLock.ExitWriteLock();
+            }
+        }
+        finally
+        {
+            _bucketsLock.ExitUpgradeableReadLock();
         }
     }
 
@@ -334,9 +366,20 @@ internal class MetricAggregator : IMetricAggregator
                 cancellationToken.ThrowIfCancellationRequested();
 
                 _options.LogDebug("Flushing metrics for bucket {0}", key);
-                if (!Buckets.TryRemove(key, out var bucket))
+                ConcurrentDictionary<string, Metric>? bucket;
+                _bucketsLock.EnterWriteLock();
+                try
                 {
-                    continue;
+                    if (!Buckets.ContainsKey(key))
+                    {
+                        continue;
+                    }
+                    bucket = Buckets[key];
+                    Buckets.Remove(key);
+                }
+                finally
+                {
+                    _bucketsLock.ExitWriteLock();
                 }
 
                 _captureMetrics(bucket.Values);
@@ -383,10 +426,20 @@ internal class MetricAggregator : IMetricAggregator
             yield break;
         }
 
+        long[] keys;
+        _bucketsLock.EnterReadLock();
+        try
+        {
+            keys = Buckets.Keys.ToArray();
+        }
+        finally
+        {
+            _bucketsLock.ExitReadLock();
+        }
         if (force)
         {
             // Return all the buckets in this case
-            foreach (var key in Buckets.Keys)
+            foreach (var key in keys)
             {
                 yield return key;
             }
@@ -394,7 +447,7 @@ internal class MetricAggregator : IMetricAggregator
         else
         {
             var cutoff = MetricHelper.GetCutoff();
-            foreach (var key in Buckets.Keys)
+            foreach (var key in keys)
             {
                 var bucketTime = DateTimeOffset.FromUnixTimeSeconds(key);
                 if (bucketTime < cutoff)
