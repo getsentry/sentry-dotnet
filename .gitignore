@@ -5,12 +5,11 @@
 *.userprefs
 *.user
 *opencover.xml
+*cobertura.xml
 codecov.sh
 lcov.info
 bin/
 obj/
-**/coverage/*.xml
-**/coverage/*.json
 .DS_Store
 Thumbs.db
 **/BenchmarkDotNet.Artifacts/*.log
