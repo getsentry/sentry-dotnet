@@ -121,10 +121,10 @@ public class SentryClient : ISentryClient, IDisposable
     }
 
     /// <inheritdoc />
-    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null, null);
+    public void CaptureTransaction(SentryTransaction transaction) => CaptureTransaction(transaction, null, null);
 
     /// <inheritdoc />
-    public void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
+    public void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint)
     {
         if (transaction.SpanId.Equals(SpanId.Empty))
         {
@@ -198,7 +198,7 @@ public class SentryClient : ISentryClient, IDisposable
         CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
     }
 
-    private Transaction? BeforeSendTransaction(Transaction transaction, Hint hint)
+    private SentryTransaction? BeforeSendTransaction(SentryTransaction transaction, Hint hint)
     {
         if (_options.BeforeSendTransactionInternal is null)
         {

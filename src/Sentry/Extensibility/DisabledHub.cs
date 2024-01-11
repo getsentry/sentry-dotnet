@@ -151,14 +151,14 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
-    public void CaptureTransaction(Transaction transaction)
+    public void CaptureTransaction(SentryTransaction transaction)
     {
     }
 
     /// <summary>
     /// No-Op.
     /// </summary>
-    public void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
+    public void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint)
     {
     }
 

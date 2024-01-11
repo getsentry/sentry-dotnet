@@ -4,7 +4,7 @@ namespace Sentry.OpenTelemetry;
 
 internal class OpenTelemetryTransactionProcessor : ISentryTransactionProcessor
 {
-    public Transaction Process(Transaction transaction)
+    public SentryTransaction Process(SentryTransaction transaction)
     {
         var activity = Activity.Current;
         if (activity != null)

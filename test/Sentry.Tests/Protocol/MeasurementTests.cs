@@ -183,7 +183,7 @@ public partial class MeasurementTests
 
         // Assert
         client.Received(1).CaptureTransaction(
-            Arg.Is<Transaction>(t =>
+            Arg.Is<SentryTransaction>(t =>
                 t.Measurements.Count == 1 &&
                 t.Measurements["foo"].Value.As<int>() == int.MaxValue &&
                 t.Measurements["foo"].Unit == EmptyUnit),
@@ -211,7 +211,7 @@ public partial class MeasurementTests
 
         // Assert
         client.Received(1).CaptureTransaction(
-            Arg.Is<Transaction>(t =>
+            Arg.Is<SentryTransaction>(t =>
                 t.Measurements.Count == 1 &&
                 t.Measurements["foo"].Value.As<long>() == long.MaxValue &&
                 t.Measurements["foo"].Unit == EmptyUnit),
@@ -239,7 +239,7 @@ public partial class MeasurementTests
 
         // Assert
         client.Received(1).CaptureTransaction(
-            Arg.Is<Transaction>(t =>
+            Arg.Is<SentryTransaction>(t =>
                 t.Measurements.Count == 1 &&
                 t.Measurements["foo"].Value.As<ulong>() == ulong.MaxValue &&
                 t.Measurements["foo"].Unit == EmptyUnit),
@@ -267,7 +267,7 @@ public partial class MeasurementTests
 
         // Assert
         client.Received(1).CaptureTransaction(
-            Arg.Is<Transaction>(t =>
+            Arg.Is<SentryTransaction>(t =>
                 t.Measurements.Count == 1 &&
                 Math.Abs(t.Measurements["foo"].Value.As<double>() - double.MaxValue) < double.Epsilon &&
                 t.Measurements["foo"].Unit == EmptyUnit),
@@ -295,7 +295,7 @@ public partial class MeasurementTests
 
         // Assert
         client.Received(1).CaptureTransaction(
-            Arg.Is<Transaction>(t =>
+            Arg.Is<SentryTransaction>(t =>
                 t.Measurements.Count == 1 &&
                 t.Measurements["foo"].Value.As<int>() == int.MaxValue &&
                 t.Measurements["foo"].Unit == MeasurementUnit.Duration.Nanosecond),
@@ -323,7 +323,7 @@ public partial class MeasurementTests
 
         // Assert
         client.Received(1).CaptureTransaction(
-            Arg.Is<Transaction>(t =>
+            Arg.Is<SentryTransaction>(t =>
                 t.Measurements.Count == 1 &&
                 t.Measurements["foo"].Value.As<long>() == long.MaxValue &&
                 t.Measurements["foo"].Unit == MeasurementUnit.Duration.Nanosecond),
@@ -351,7 +351,7 @@ public partial class MeasurementTests
 
         // Assert
         client.Received(1).CaptureTransaction(
-            Arg.Is<Transaction>(t =>
+            Arg.Is<SentryTransaction>(t =>
                 t.Measurements.Count == 1 &&
                 t.Measurements["foo"].Value.As<ulong>() == ulong.MaxValue &&
                 t.Measurements["foo"].Unit == MeasurementUnit.Duration.Nanosecond),
@@ -379,7 +379,7 @@ public partial class MeasurementTests
 
         // Assert
         client.Received(1).CaptureTransaction(
-            Arg.Is<Transaction>(t =>
+            Arg.Is<SentryTransaction>(t =>
                 t.Measurements.Count == 1 &&
                 Math.Abs(t.Measurements["foo"].Value.As<double>() - double.MaxValue) < double.Epsilon &&
                 t.Measurements["foo"].Unit == MeasurementUnit.Duration.Nanosecond),

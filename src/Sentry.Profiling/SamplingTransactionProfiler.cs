@@ -97,10 +97,10 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     }
 
     /// <inheritdoc />
-    public Protocol.Envelopes.ISerializable? Collect(Transaction transaction)
+    public Protocol.Envelopes.ISerializable? Collect(SentryTransaction transaction)
         => Protocol.Envelopes.AsyncJsonSerializable.CreateFrom(CollectAsync(transaction));
 
-    internal async Task<ProfileInfo> CollectAsync(Transaction transaction)
+    internal async Task<ProfileInfo> CollectAsync(SentryTransaction transaction)
     {
         if (!_stopped)
         {
@@ -118,7 +118,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         return CreateProfileInfo(transaction, _processor.Profile);
     }
 
-    internal static ProfileInfo CreateProfileInfo(Transaction transaction, SampleProfile profile)
+    internal static ProfileInfo CreateProfileInfo(SentryTransaction transaction, SampleProfile profile)
     {
         return new()
         {

@@ -302,7 +302,7 @@ public sealed class Envelope : ISerializable, IDisposable
     /// <summary>
     /// Creates an envelope that contains a single transaction.
     /// </summary>
-    public static Envelope FromTransaction(Transaction transaction)
+    public static Envelope FromTransaction(SentryTransaction transaction)
     {
         var eventId = transaction.EventId;
         var header = CreateHeader(eventId, transaction.DynamicSamplingContext);

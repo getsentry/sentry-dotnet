@@ -490,7 +490,7 @@ public static partial class SentrySdk
     /// </remarks>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static void CaptureTransaction(Transaction transaction)
+    public static void CaptureTransaction(SentryTransaction transaction)
         => CurrentHub.CaptureTransaction(transaction);
 
     /// <summary>
@@ -502,7 +502,7 @@ public static partial class SentrySdk
     /// </remarks>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
+    public static void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint)
         => CurrentHub.CaptureTransaction(transaction, scope, hint);
 
     /// <summary>

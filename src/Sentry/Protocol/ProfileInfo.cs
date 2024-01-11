@@ -35,7 +35,7 @@ internal sealed class ProfileInfo : IJsonSerializable
 
     public string? Release { get; set; }
 
-    public Transaction? Transaction { get; set; }
+    public SentryTransaction? Transaction { get; set; }
 
 
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
