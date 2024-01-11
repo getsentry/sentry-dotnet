@@ -68,7 +68,7 @@ public class SentryOptions
     /// </summary>
     public bool IsGlobalModeEnabled
     {
-        get => _isGlobalModeEnabled ??= Runtime.Current.IsBrowserWasm();
+        get => _isGlobalModeEnabled ??= SentryRuntime.Current.IsBrowserWasm();
         set => _isGlobalModeEnabled = value;
     }
 #endif
@@ -938,7 +938,7 @@ public class SentryOptions
             {
                 // from 3.0.0 uses Enhanced (Ben.Demystifier) by default which is a breaking change
                 // unless you are using .NET Native which isn't compatible with Ben.Demystifier.
-                _stackTraceMode = Runtime.Current.Name == ".NET Native"
+                _stackTraceMode = SentryRuntime.Current.Name == ".NET Native"
                     ? StackTraceMode.Original
                     : StackTraceMode.Enhanced;
             }

@@ -771,6 +771,31 @@ namespace Sentry
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, string? description) { }
     }
+    public class SentrySpan : Sentry.IHasExtra, Sentry.IHasTags, Sentry.IJsonSerializable, Sentry.ISpanData, Sentry.Protocol.ITraceContext
+    {
+        public SentrySpan(Sentry.ISpan tracer) { }
+        public SentrySpan(Sentry.SpanId? parentSpanId, string operation) { }
+        public string? Description { get; set; }
+        public System.DateTimeOffset? EndTimestamp { get; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
+        public bool IsFinished { get; }
+        public bool? IsSampled { get; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, Sentry.Protocol.Measurement> Measurements { get; }
+        public string Operation { get; set; }
+        public Sentry.SpanId? ParentSpanId { get; }
+        public Sentry.SpanId SpanId { get; }
+        public System.DateTimeOffset StartTimestamp { get; }
+        public Sentry.SpanStatus? Status { get; set; }
+        public System.Collections.Generic.IReadOnlyDictionary<string, string> Tags { get; }
+        public Sentry.SentryId TraceId { get; }
+        public Sentry.SentryTraceHeader GetTraceHeader() { }
+        public void SetExtra(string key, object? value) { }
+        public void SetMeasurement(string name, Sentry.Protocol.Measurement measurement) { }
+        public void SetTag(string key, string value) { }
+        public void UnsetTag(string key) { }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+        public static Sentry.SentrySpan FromJson(System.Text.Json.JsonElement json) { }
+    }
     public sealed class SentryStackFrame : Sentry.IJsonSerializable
     {
         public SentryStackFrame() { }
@@ -878,31 +903,6 @@ namespace Sentry
         public string? UserAgent { get; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SessionUpdate FromJson(System.Text.Json.JsonElement json) { }
-    }
-    public class Span : Sentry.IHasExtra, Sentry.IHasTags, Sentry.IJsonSerializable, Sentry.ISpanData, Sentry.Protocol.ITraceContext
-    {
-        public Span(Sentry.ISpan tracer) { }
-        public Span(Sentry.SpanId? parentSpanId, string operation) { }
-        public string? Description { get; set; }
-        public System.DateTimeOffset? EndTimestamp { get; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
-        public bool IsFinished { get; }
-        public bool? IsSampled { get; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, Sentry.Protocol.Measurement> Measurements { get; }
-        public string Operation { get; set; }
-        public Sentry.SpanId? ParentSpanId { get; }
-        public Sentry.SpanId SpanId { get; }
-        public System.DateTimeOffset StartTimestamp { get; }
-        public Sentry.SpanStatus? Status { get; set; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, string> Tags { get; }
-        public Sentry.SentryId TraceId { get; }
-        public Sentry.SentryTraceHeader GetTraceHeader() { }
-        public void SetExtra(string key, object? value) { }
-        public void SetMeasurement(string name, Sentry.Protocol.Measurement measurement) { }
-        public void SetTag(string key, string value) { }
-        public void UnsetTag(string key) { }
-        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
-        public static Sentry.Span FromJson(System.Text.Json.JsonElement json) { }
     }
     public class SpanContext : Sentry.Protocol.ITraceContext
     {
@@ -1054,7 +1054,7 @@ namespace Sentry
         public double? SampleRate { get; }
         public Sentry.SdkVersion Sdk { get; }
         public Sentry.SpanId SpanId { get; }
-        public System.Collections.Generic.IReadOnlyCollection<Sentry.Span> Spans { get; }
+        public System.Collections.Generic.IReadOnlyCollection<Sentry.SentrySpan> Spans { get; }
         public System.DateTimeOffset StartTimestamp { get; }
         public Sentry.SpanStatus? Status { get; }
         public System.Collections.Generic.IReadOnlyDictionary<string, string> Tags { get; }
@@ -1442,24 +1442,24 @@ namespace Sentry.PlatformAbstractions
         Client = 0,
         Full = 1,
     }
-    public class Runtime : System.IEquatable<Sentry.PlatformAbstractions.Runtime>
+    public class SentryRuntime : System.IEquatable<Sentry.PlatformAbstractions.SentryRuntime>
     {
-        public Runtime(string? name = null, string? version = null, string? raw = null, string? identifier = null) { }
+        public SentryRuntime(string? name = null, string? version = null, string? raw = null, string? identifier = null) { }
         public string? Identifier { get; }
         public string? Name { get; }
         public string? Raw { get; }
         public string? Version { get; }
-        public static Sentry.PlatformAbstractions.Runtime Current { get; }
-        public bool Equals(Sentry.PlatformAbstractions.Runtime? other) { }
+        public static Sentry.PlatformAbstractions.SentryRuntime Current { get; }
+        public bool Equals(Sentry.PlatformAbstractions.SentryRuntime? other) { }
         public override bool Equals(object? obj) { }
         public override int GetHashCode() { }
         public override string? ToString() { }
     }
-    public static class RuntimeExtensions
+    public static class SentryRuntimeExtensions
     {
-        public static bool IsMono(this Sentry.PlatformAbstractions.Runtime runtime) { }
-        public static bool IsNetCore(this Sentry.PlatformAbstractions.Runtime runtime) { }
-        public static bool IsNetFx(this Sentry.PlatformAbstractions.Runtime runtime) { }
+        public static bool IsMono(this Sentry.PlatformAbstractions.SentryRuntime runtime) { }
+        public static bool IsNetCore(this Sentry.PlatformAbstractions.SentryRuntime runtime) { }
+        public static bool IsNetFx(this Sentry.PlatformAbstractions.SentryRuntime runtime) { }
     }
 }
 namespace Sentry.Protocol

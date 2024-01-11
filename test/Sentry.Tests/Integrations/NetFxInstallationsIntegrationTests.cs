@@ -1,6 +1,5 @@
 #if NETFRAMEWORK
 using Sentry.PlatformAbstractions;
-using Runtime = Sentry.PlatformAbstractions.Runtime;
 
 namespace Sentry.Tests.Integrations;
 
@@ -9,7 +8,7 @@ public class NetFxInstallationsIntegrationTests
     [SkippableFact]
     public void Register_CurrentRuntimeIsMono_NetFxInstallationsEventProcessorNotAdded()
     {
-        Skip.If(!Runtime.Current.IsMono());
+        Skip.If(!SentryRuntime.Current.IsMono());
 
         //Arrange
         var options = new SentryOptions();
@@ -25,7 +24,7 @@ public class NetFxInstallationsIntegrationTests
     [SkippableFact]
     public void Register_CurrentRuntimeIsNotMono_NetFxInstallationsEventProcessorAdded()
     {
-        Skip.If(Runtime.Current.IsMono());
+        Skip.If(SentryRuntime.Current.IsMono());
 
         //Arrange
         var options = new SentryOptions();

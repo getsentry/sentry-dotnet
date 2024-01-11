@@ -12,7 +12,7 @@ internal class Enricher
 
     private readonly Lazy<Runtime> _runtimeLazy = new(() =>
     {
-        var current = PlatformAbstractions.Runtime.Current;
+        var current = PlatformAbstractions.SentryRuntime.Current;
         return new Runtime
         {
             Name = current.Name,
@@ -36,7 +36,7 @@ internal class Enricher
         if (!eventLike.Contexts.ContainsKey(OperatingSystem.Type))
         {
             // RuntimeInformation.OSDescription is throwing on Mono 5.12
-            if (!PlatformAbstractions.Runtime.Current.IsMono())
+            if (!PlatformAbstractions.SentryRuntime.Current.IsMono())
             {
 #if NETFRAMEWORK
                 // RuntimeInformation.* throws on .NET Framework on macOS/Linux

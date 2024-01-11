@@ -10,7 +10,7 @@ internal class NetFxInstallationsIntegration : ISdkIntegration
     {
         try
         {
-            if (!Runtime.Current.IsMono())
+            if (!SentryRuntime.Current.IsMono())
             {
                 options.AddEventProcessor(new NetFxInstallationsEventProcessor(options));
             }
