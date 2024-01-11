@@ -843,7 +843,7 @@ public partial class SentryClientTests
         var client = _fixture.GetSut();
 
         // Act
-        client.CaptureTransaction(new Transaction(
+        client.CaptureTransaction(new SentryTransaction(
             "test name",
             "test operation"
         )
@@ -864,7 +864,7 @@ public partial class SentryClientTests
 
         // Act
         client.CaptureTransaction(
-            new Transaction(
+            new SentryTransaction(
                 "test name",
                 "test operation"
             )
@@ -883,7 +883,7 @@ public partial class SentryClientTests
         // Arrange
         var client = _fixture.GetSut();
 
-        var transaction = new Transaction(
+        var transaction = new SentryTransaction(
             "test name",
             "test operation"
         )
@@ -909,7 +909,7 @@ public partial class SentryClientTests
 
         // Act
         client.CaptureTransaction(
-            new Transaction(
+            new SentryTransaction(
                 null!,
                 "test operation"
             )
@@ -930,7 +930,7 @@ public partial class SentryClientTests
 
         // Act
         client.CaptureTransaction(
-            new Transaction(
+            new SentryTransaction(
                 "test name",
                 null!
             )
@@ -951,7 +951,7 @@ public partial class SentryClientTests
 
         // Act
         client.CaptureTransaction(
-            new Transaction(
+            new SentryTransaction(
                 "test name",
                 "test operation"
             )
@@ -970,7 +970,7 @@ public partial class SentryClientTests
         var sut = _fixture.GetSut();
         sut.Dispose();
         sut.CaptureTransaction(
-            new Transaction(
+            new SentryTransaction(
                 "test name",
                 "test operation")
             {
@@ -985,7 +985,7 @@ public partial class SentryClientTests
         // Arrange
         _fixture.SentryOptions.SendDefaultPii = false;
         var client = _fixture.GetSut();
-        var original = new Transaction(
+        var original = new SentryTransaction(
             "test name",
             "test operation"
         )
@@ -1003,7 +1003,7 @@ public partial class SentryClientTests
         // Assert
         envelope.Should().NotBeNull();
         envelope.Items.Count.Should().Be(1);
-        var actual = (envelope.Items[0].Payload as JsonSerializable)?.Source as Transaction;
+        var actual = (envelope.Items[0].Payload as JsonSerializable)?.Source as SentryTransaction;
         actual?.Name.Should().Be(original.Name);
         actual?.Operation.Should().Be(original.Operation);
         actual?.Description.Should().Be(original.Description.RedactUrl()); // Should be redacted
@@ -1016,7 +1016,7 @@ public partial class SentryClientTests
 
         var sut = _fixture.GetSut();
         sut.CaptureTransaction(
-            new Transaction("test name", "test operation")
+            new SentryTransaction("test name", "test operation")
             {
                 IsSampled = true,
                 EndTimestamp = DateTimeOffset.Now // finished
@@ -1029,7 +1029,7 @@ public partial class SentryClientTests
     public void CaptureTransaction_ScopeContainsAttachments_GetAppliedToHint()
     {
         // Arrange
-        var transaction = new Transaction("name", "operation")
+        var transaction = new SentryTransaction("name", "operation")
         {
             IsSampled = true,
             EndTimestamp = DateTimeOffset.Now // finished
@@ -1061,10 +1061,10 @@ public partial class SentryClientTests
     {
         // Arrange
         var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
-        processor.Process(Arg.Any<Transaction>(), Arg.Any<Hint>()).Returns(new Transaction("name", "operation"));
+        processor.Process(Arg.Any<SentryTransaction>(), Arg.Any<Hint>()).Returns(new SentryTransaction("name", "operation"));
         _fixture.SentryOptions.AddTransactionProcessor(processor);
 
-        var transaction = new Transaction("name", "operation")
+        var transaction = new SentryTransaction("name", "operation")
         {
             IsSampled = true,
             EndTimestamp = DateTimeOffset.Now // finished
@@ -1074,14 +1074,14 @@ public partial class SentryClientTests
         _fixture.GetSut().CaptureTransaction(transaction);
 
         // Assert
-        processor.Received(1).Process(Arg.Any<Transaction>(), Arg.Any<Hint>());
+        processor.Received(1).Process(Arg.Any<SentryTransaction>(), Arg.Any<Hint>());
     }
 
     [Fact]
     public void CaptureTransaction_TransactionProcessor_ReceivesScopeAttachments()
     {
         // Arrange
-        var transaction = new Transaction("name", "operation")
+        var transaction = new SentryTransaction("name", "operation")
         {
             IsSampled = true,
             EndTimestamp = DateTimeOffset.Now // finished
@@ -1090,9 +1090,9 @@ public partial class SentryClientTests
         var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
         Hint hint = null;
         processor.Process(
-            Arg.Any<Transaction>(),
+            Arg.Any<SentryTransaction>(),
             Arg.Do<Hint>(h => hint = h))
-            .Returns(new Transaction("name", "operation"));
+            .Returns(new SentryTransaction("name", "operation"));
         _fixture.SentryOptions.AddTransactionProcessor(processor);
 
         var attachments = new List<Attachment> { AttachmentHelper.FakeAttachment("foo.txt") };
@@ -1118,7 +1118,7 @@ public partial class SentryClientTests
             return tx;
         });
 
-        var transaction = new Transaction("test name", "test operation")
+        var transaction = new SentryTransaction("test name", "test operation")
         {
             IsSampled = true,
             EndTimestamp = DateTimeOffset.Now // finished
@@ -1134,10 +1134,10 @@ public partial class SentryClientTests
     [Fact]
     public void CaptureTransaction_BeforeSendTransaction_ModifyEvent()
     {
-        Transaction received = null;
+        SentryTransaction received = null;
         _fixture.SentryOptions.SetBeforeSendTransaction((tx, _) => received = tx);
 
-        var transaction = new Transaction("test name", "test operation")
+        var transaction = new SentryTransaction("test name", "test operation")
         {
             IsSampled = true,
             EndTimestamp = DateTimeOffset.Now // finished
@@ -1152,10 +1152,10 @@ public partial class SentryClientTests
     [Fact]
     public void CaptureTransaction_BeforeSendTransaction_replaced_transaction_captured()
     {
-        Transaction received = null;
+        SentryTransaction received = null;
         _fixture.SentryOptions.SetBeforeSendTransaction((_, _) =>
         {
-            received = new Transaction("name2", "operation2")
+            received = new SentryTransaction("name2", "operation2")
             {
                 IsSampled = true,
                 EndTimestamp = DateTimeOffset.Now,
@@ -1165,7 +1165,7 @@ public partial class SentryClientTests
             return received;
         });
 
-        var transaction = new Transaction("name", "operation")
+        var transaction = new SentryTransaction("name", "operation")
         {
             IsSampled = true,
             EndTimestamp = DateTimeOffset.Now // finished
@@ -1179,7 +1179,7 @@ public partial class SentryClientTests
 
         Assert.NotSame(transaction, received);
 
-        var capturedEnvelopedTransaction = captured.Items[0].Payload.As<JsonSerializable>().Source.As<Transaction>();
+        var capturedEnvelopedTransaction = captured.Items[0].Payload.As<JsonSerializable>().Source.As<SentryTransaction>();
         Assert.Same(received.Description, capturedEnvelopedTransaction.Description);
     }
 
@@ -1188,10 +1188,10 @@ public partial class SentryClientTests
     {
         _fixture.SentryOptions.SampleRate = null;
 
-        Transaction received = null;
+        SentryTransaction received = null;
         _fixture.SentryOptions.SetBeforeSendTransaction((e, _) => received = e);
 
-        var transaction = new Transaction("test name", "test operation")
+        var transaction = new SentryTransaction("test name", "test operation")
         {
             IsSampled = true,
             EndTimestamp = DateTimeOffset.Now // finished
@@ -1210,7 +1210,7 @@ public partial class SentryClientTests
         _fixture.SentryOptions.SetBeforeSendTransaction((_, _) => null);
 
         var sut = _fixture.GetSut();
-        sut.CaptureTransaction( new Transaction("test name", "test operation")
+        sut.CaptureTransaction( new SentryTransaction("test name", "test operation")
         {
             IsSampled = true,
             EndTimestamp = DateTimeOffset.Now // finished

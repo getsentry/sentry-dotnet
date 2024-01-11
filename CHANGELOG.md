@@ -14,6 +14,7 @@
 - Class renamed `Sentry.User` to `Sentry.SentryUser` ([#3015](https://github.com/getsentry/sentry-dotnet/pull/3015))
 - Class renamed `Sentry.Runtime` to `Sentry.SentryRuntime` ([#3016](https://github.com/getsentry/sentry-dotnet/pull/3016))
 - Class renamed `Sentry.Span` to `Sentry.SentrySpan` ([#3021](https://github.com/getsentry/sentry-dotnet/pull/3021))
+- Class renamed `Sentry.Transaction` to `Sentry.SentryTransaction` ([#3023](https://github.com/getsentry/sentry-dotnet/pull/3023))
 
 ### Dependencies
 

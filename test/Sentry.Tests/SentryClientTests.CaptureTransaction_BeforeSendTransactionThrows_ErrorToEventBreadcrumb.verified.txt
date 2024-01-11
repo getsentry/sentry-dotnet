@@ -6,7 +6,7 @@
       message: Exception message!,
       stackTrace:
 at Task Sentry.Tests.SentryClientTests.CaptureTransaction_BeforeSendTransactionThrows_ErrorToEventBreadcrumb()
-at Transaction Sentry.SentryClient.BeforeSendTransaction(...)
+at SentryTransaction Sentry.SentryClient.BeforeSendTransaction(...)
     },
     Category: SentryClient,
     Level: error

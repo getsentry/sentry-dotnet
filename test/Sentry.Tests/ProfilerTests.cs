@@ -62,7 +62,7 @@ public class ProfilerTests
             envelopeLines[1].Should().StartWith("{\"type\":\"transaction\"");
             envelopeLines[3].Should().StartWith("{\"type\":\"profile\"");
 
-            var transaction = Json.Parse(envelopeLines[2], Transaction.FromJson);
+            var transaction = Json.Parse(envelopeLines[2], SentryTransaction.FromJson);
 
             // TODO do we want to bother with JSON parsing just to do this? Doing at least simple checks for now...
             // var profileInfo = Json.Parse(envelopeLines[4], ProfileInfo.FromJson);

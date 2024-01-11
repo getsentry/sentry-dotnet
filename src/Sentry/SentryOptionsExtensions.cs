@@ -252,7 +252,7 @@ public static class SentryOptionsExtensions
     }
 
     /// <summary>
-    /// Adds an transaction processor which is invoked when creating a <see cref="Transaction"/>.
+    /// Adds an transaction processor which is invoked when creating a <see cref="SentryTransaction"/>.
     /// </summary>
     /// <param name="options">The SentryOptions to hold the processor.</param>
     /// <param name="processor">The transaction processor.</param>
@@ -269,7 +269,7 @@ public static class SentryOptionsExtensions
     }
 
     /// <summary>
-    /// Adds transaction processors which are invoked when creating a <see cref="Transaction"/>.
+    /// Adds transaction processors which are invoked when creating a <see cref="SentryTransaction"/>.
     /// </summary>
     /// <param name="options">The SentryOptions to hold the processor.</param>
     /// <param name="processors">The transaction processors.</param>
@@ -295,7 +295,7 @@ public static class SentryOptionsExtensions
         => options.TransactionProcessors?.RemoveAll(processor => processor is TProcessor);
 
     /// <summary>
-    /// Adds an transaction processor provider which is invoked when creating a <see cref="Transaction"/>.
+    /// Adds an transaction processor provider which is invoked when creating a <see cref="SentryTransaction"/>.
     /// </summary>
     /// <param name="options">The SentryOptions to hold the processor provider.</param>
     /// <param name="processorProvider">The transaction processor provider.</param>

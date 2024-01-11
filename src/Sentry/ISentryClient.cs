@@ -34,7 +34,7 @@ public interface ISentryClient
     /// </remarks>
     /// <param name="transaction">The transaction.</param>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    void CaptureTransaction(Transaction transaction);
+    void CaptureTransaction(SentryTransaction transaction);
 
     /// <summary>
     /// Captures a transaction.
@@ -50,7 +50,7 @@ public interface ISentryClient
     /// This will be available in callbacks prior to processing the transaction.
     /// </param>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint);
+    void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint);
 
     /// <summary>
     /// Captures a session update.
