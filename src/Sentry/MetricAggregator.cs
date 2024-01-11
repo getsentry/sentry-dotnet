@@ -223,27 +223,23 @@ internal class MetricAggregator : IMetricAggregator
             {
                 return existingBucket;
             }
-            else
+
+            _bucketsLock.EnterWriteLock();
+            try
             {
-                _bucketsLock.EnterWriteLock();
-                try
+                // Check again in case another thread added the bucket while we were waiting for the write lock
+                if (Buckets.TryGetValue(bucketKey, out existingBucket))
                 {
-                    // Check again in case another thread added the bucket while we were waiting for the write lock
-                    if (Buckets.TryGetValue(bucketKey, out existingBucket))
-                    {
-                        return existingBucket;
-                    }
-                    else
-                    {
-                        var timeBucket = new ConcurrentDictionary<string, Metric>();
-                        Buckets[bucketKey] = timeBucket;
-                        return timeBucket;
-                    }
+                    return existingBucket;
                 }
-                finally
-                {
-                    _bucketsLock.ExitWriteLock();
-                }
+                
+                var timeBucket = new ConcurrentDictionary<string, Metric>();
+                Buckets[bucketKey] = timeBucket;
+                return timeBucket;
+            }
+            finally
+            {
+                _bucketsLock.ExitWriteLock();
             }
         }
         finally
@@ -374,19 +370,12 @@ internal class MetricAggregator : IMetricAggregator
                 _bucketsLock.EnterWriteLock();
                 try
                 {
-#if NETSTANDARD2_1_OR_GREATER
-                    if (!Buckets.Remove(key, out bucket))
-                    {
-                        continue;
-                    }
-#else
                     if (!Buckets.ContainsKey(key))
                     {
                         continue;
                     }
                     bucket = Buckets[key];
                     Buckets.Remove(key);
-#endif
                 }
                 finally
                 {
