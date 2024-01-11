@@ -8,7 +8,7 @@ coreSolution: Sentry.sln
 # copies of Sentry.sln that are used to set certain build
 # properties when using solution filters that are based on these
 buildSolutions:
-  - Sentry.NoMobile.sln
+  - .generated.NoMobile.sln
 
 groupConfigs:
   allProjects:
@@ -83,7 +83,7 @@ filterConfigs:
         - "test/**/*.csproj"
 
   - outputPath: SentryAspNetCore.slnf
-    solution: Sentry.NoMobile.sln
+    solution: .generated.NoMobile.sln
     include:
       patterns:
         - "**/*AspNetCore*.csproj"
@@ -109,7 +109,7 @@ filterConfigs:
         - "**/Sentry.Tests.csproj"
 
   - outputPath: SentryCore.slnf
-    solution: Sentry.NoMobile.sln
+    solution: .generated.NoMobile.sln
     include:
       patterns:
         - "**/Sentry.Benchmarks.csproj"
@@ -123,7 +123,7 @@ filterConfigs:
         - "**/Sentry.Tests.csproj"
 
   - outputPath: SentryDiagnosticSource.slnf
-    solution: Sentry.NoMobile.sln
+    solution: .generated.NoMobile.sln
     include:
       patterns:
         - "**/*DiagnosticSource*.csproj"
@@ -155,7 +155,7 @@ filterConfigs:
         - "test/MauiTestUtils/**/*.csproj"
 
   - outputPath: SentryNoMobile.slnf
-    solution: Sentry.NoMobile.sln
+    solution: .generated.NoMobile.sln
     include:
       groups:
         - "allProjects"
