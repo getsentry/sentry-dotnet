@@ -41,7 +41,7 @@ public partial class MauiEventsBinderTests
 
         var element = Substitute.For<Element>();
         application.RaiseEvent(eventName, new ElementEventArgs(element));
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandleApplicationEvents(application, bind: false);
 
@@ -50,7 +50,7 @@ public partial class MauiEventsBinderTests
 
         // Assert
         application.RaiseEvent(eventName, new ElementEventArgs(element));
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 
     [Theory]
@@ -93,7 +93,7 @@ public partial class MauiEventsBinderTests
         };
 
         application.RaiseEvent(eventName, page);
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandleApplicationEvents(application, bind: false);
 
@@ -101,7 +101,7 @@ public partial class MauiEventsBinderTests
         application.RaiseEvent(eventName, page);
 
         // Assert
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 
     [Theory]
@@ -134,7 +134,7 @@ public partial class MauiEventsBinderTests
         _fixture.Binder.HandleApplicationEvents(application);
 
         application.RaiseEvent(eventName, eventArgs);
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandleApplicationEvents(application, bind: false);
 
@@ -142,7 +142,7 @@ public partial class MauiEventsBinderTests
         application.RaiseEvent(eventName, eventArgs);
 
         // Assert
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 
     public static IEnumerable<object[]> ApplicationModalEventsData
@@ -192,7 +192,7 @@ public partial class MauiEventsBinderTests
         _fixture.Binder.HandleApplicationEvents(application);
 
         application.UserAppTheme = AppTheme.Dark;
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandleApplicationEvents(application, bind: false);
 
@@ -200,6 +200,6 @@ public partial class MauiEventsBinderTests
         application.UserAppTheme = AppTheme.Light;
 
         // Assert
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 }

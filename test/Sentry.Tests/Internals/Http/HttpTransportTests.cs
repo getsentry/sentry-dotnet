@@ -792,7 +792,7 @@ public partial class HttpTransportTests
         var processedEnvelope = httpTransport.ProcessEnvelope(envelope);
 
         // There should only be the one event in the envelope
-        Assert.Equal(1, processedEnvelope.Items.Count);
+        Assert.Single(processedEnvelope.Items);
         Assert.Equal("event", processedEnvelope.Items[0].TryGetType());
     }
 }
