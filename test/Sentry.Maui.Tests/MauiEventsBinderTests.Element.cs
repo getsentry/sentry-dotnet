@@ -42,7 +42,7 @@ public partial class MauiEventsBinderTests
         var child = new MockElement("child");
 
         parent.RaiseEvent(eventName, new ElementEventArgs(child));
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandleElementEvents(parent, bind: false);
 
@@ -50,7 +50,7 @@ public partial class MauiEventsBinderTests
         parent.RaiseEvent(eventName, new ElementEventArgs(child));
 
         // Assert
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 
     [Fact]
@@ -88,7 +88,7 @@ public partial class MauiEventsBinderTests
         _fixture.Binder.HandleElementEvents(element);
 
         element.RaiseEvent(nameof(Application.ParentChanged), EventArgs.Empty);
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandleElementEvents(element, bind: false);
 
@@ -96,7 +96,7 @@ public partial class MauiEventsBinderTests
         element.RaiseEvent(nameof(Application.ParentChanged), EventArgs.Empty);
 
         // Assert
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 
     [Fact]
@@ -132,7 +132,7 @@ public partial class MauiEventsBinderTests
         var otherBindingContext = Substitute.For<object>();
 
         element.BindingContext = bindingContext;
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandleElementEvents(element, bind: false);
 
@@ -140,6 +140,6 @@ public partial class MauiEventsBinderTests
         element.BindingContext = otherBindingContext;
 
         // Assert
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 }
