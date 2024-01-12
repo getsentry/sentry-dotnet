@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.Entity;
-using Sentry;
 
 using var _ = SentrySdk.Init(o =>
 {

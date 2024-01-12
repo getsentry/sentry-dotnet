@@ -1,5 +1,4 @@
 using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 #if NETFRAMEWORK

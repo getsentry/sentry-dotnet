@@ -1,4 +1,3 @@
-using Sentry;
 using Sentry.Extensibility;
 
 namespace Samples.AspNetCore.Mvc;

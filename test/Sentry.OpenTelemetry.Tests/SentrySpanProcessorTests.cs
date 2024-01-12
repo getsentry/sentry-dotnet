@@ -1,7 +1,4 @@
-using OpenTelemetry;
-using OpenTelemetry.Trace;
 using Sentry.Internal.OpenTelemetry;
-using Sentry.PlatformAbstractions;
 
 namespace Sentry.OpenTelemetry.Tests;
 

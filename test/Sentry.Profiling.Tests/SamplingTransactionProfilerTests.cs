@@ -1,5 +1,4 @@
 using Sentry.Internal.Http;
-using Xunit.Sdk;
 
 namespace Sentry.Profiling.Tests;
 

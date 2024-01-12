@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
-using Sentry.AspNetCore.Extensions;
 
 #if NETCOREAPP3_1_OR_GREATER
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;

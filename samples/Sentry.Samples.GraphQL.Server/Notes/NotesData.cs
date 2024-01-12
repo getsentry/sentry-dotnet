@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-
 namespace Sentry.Samples.GraphQL.Server.Notes;
 
 public class NotesData
