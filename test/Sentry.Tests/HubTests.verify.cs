@@ -1,5 +1,3 @@
-using Sentry.PlatformAbstractions;
-
 namespace Sentry.Tests;
 
 [UsesVerify]

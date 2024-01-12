@@ -1,5 +1,3 @@
-using Sentry.Protocol.Metrics;
-
 namespace Sentry.Tests;
 
 public class MetricBucketHelperTests

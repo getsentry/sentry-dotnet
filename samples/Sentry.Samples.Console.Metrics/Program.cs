@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace Sentry.Samples.Console.Metrics;
+﻿namespace Sentry.Samples.Console.Metrics;
 
 internal static class Program
 {
