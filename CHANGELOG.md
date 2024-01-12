@@ -7,9 +7,9 @@
 - Added `Sentry` namespace to global usings when `ImplicitUsings` is enabled ([#3043](https://github.com/getsentry/sentry-dotnet/pull/3043))
 If you have conflicts, you can opt-out by adding the following to your `csproj`:
 ```
-<ItemGroup>
-  <Using Remove="Sentry" />
-</ItemGroup>
+<PropertyGroup>
+  <SentryImplicitUsings>false</SentryImplicitUsings>
+</PropertyGroup>
 ```
 
 ## 4.0.0-beta.8

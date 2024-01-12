@@ -8,11 +8,8 @@
     <ImplicitUsings>true</ImplicitUsings>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
+    <SentryImplicitUsings>false</SentryImplicitUsings>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Using Remove="Sentry" />
-  </ItemGroup>
 
   <PropertyGroup>
     <_OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</_OSArchitecture>
