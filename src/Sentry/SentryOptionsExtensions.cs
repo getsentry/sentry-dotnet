@@ -370,6 +370,15 @@ public static class SentryOptionsExtensions
                 options.DiagnosticLogger.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}",
                     options.DiagnosticLevel);
             }
+
+            if (options.SettingLocator.GetEnvironment().Equals("production", StringComparison.OrdinalIgnoreCase))
+            {
+                options.DiagnosticLogger.LogWarning("The DiagnosticLogger, specifically on the diagnostic level " +
+                                                    "`debug` (default) can cause performance degradations. " +
+                                                    "Many allocations, and printing to console can slow down your app." +
+                                                    "See https://docs.sentry.io/platforms/dotnet/configuration/diagnostic-logger " +
+                                                    "for more information");
+            }
         }
         else
         {
