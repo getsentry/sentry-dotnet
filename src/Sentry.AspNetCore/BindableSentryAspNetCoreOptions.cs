@@ -3,7 +3,6 @@ using Sentry.Extensions.Logging;
 
 #if NETSTANDARD2_0
 using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#else
 #endif
 
 namespace Sentry.AspNetCore;
