@@ -34,6 +34,8 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
 
+      - run: sudo xcode-select -s /Applications/Xcode_15.0.1.app
+
       - name: Build iOS Test App
         run: pwsh ./scripts/device-test.ps1 ios -Build
 
