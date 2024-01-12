@@ -1,6 +1,4 @@
 using Microsoft.Extensions.Options;
-using Sentry.Internal.Http;
-using Sentry.Maui.Internal;
 
 namespace Sentry.Maui.Tests;
 

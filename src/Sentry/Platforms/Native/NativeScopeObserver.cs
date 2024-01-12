@@ -1,6 +1,3 @@
-using System;
-using System.Runtime.InteropServices;
-using Sentry.Extensibility;
 using Sentry.Internal;
 
 namespace Sentry.Native;

@@ -8,7 +8,7 @@
  * For more advanced features of the SDK, see Sentry.Samples.Console.Customized.
  */
 
-using Sentry;
+
 
 // Initialize the Sentry SDK.  (It is not necessary to dispose it.)
 SentrySdk.Init(options =>

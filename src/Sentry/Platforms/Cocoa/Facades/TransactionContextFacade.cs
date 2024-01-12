@@ -1,5 +1,3 @@
-using Sentry.Cocoa.Extensions;
-
 namespace Sentry.Cocoa.Facades;
 
 internal class TransactionContextFacade : ITransactionContext

@@ -1,6 +1,5 @@
 using Sentry.Extensibility;
 using Sentry.Integrations;
-using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 

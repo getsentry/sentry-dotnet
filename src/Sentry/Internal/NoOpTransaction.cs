@@ -1,5 +1,3 @@
-using Sentry.Protocol;
-
 namespace Sentry.Internal;
 
 /// <summary>

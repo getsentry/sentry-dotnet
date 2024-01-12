@@ -3,8 +3,6 @@ using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Options;
 using Sentry.Extensions.Logging;
 
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
-
 namespace Sentry.AspNetCore;
 
 /// <summary>

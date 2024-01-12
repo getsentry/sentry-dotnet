@@ -1,5 +1,4 @@
 using BenchmarkDotNet.Attributes;
-using Perfolizer.Mathematics.Randomization;
 
 namespace Sentry.Benchmarks;
 

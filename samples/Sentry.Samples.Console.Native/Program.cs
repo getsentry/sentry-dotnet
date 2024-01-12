@@ -1,7 +1,8 @@
 /*
  * This sample demonstrates a native crash handling in a NativeAOT published application.
  */
-using Sentry;
+
+
 
 // Initialize the Sentry SDK.  (It is not necessary to dispose it.)
 SentrySdk.Init(options =>

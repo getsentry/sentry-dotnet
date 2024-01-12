@@ -1,6 +1,4 @@
-using System.Reflection;
 using System.Xml.Xsl;
-using Sentry;
 using Sentry.Extensibility;
 
 internal static class Program
