@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
 namespace Sentry.Cocoa;
