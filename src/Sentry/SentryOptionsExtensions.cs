@@ -373,9 +373,8 @@ public static class SentryOptionsExtensions
 
             if (options.SettingLocator.GetEnvironment().Equals("production", StringComparison.OrdinalIgnoreCase))
             {
-                options.DiagnosticLogger.LogWarning("The DiagnosticLogger, specifically on the diagnostic level " +
-                                                    "`debug` (default) can cause performance degradations. " +
-                                                    "Many allocations, and printing to console can slow down your app." +
+                options.DiagnosticLogger.LogWarning("Sentry option 'Debug' is set to true while Environment is production. " +
+                                                    "Be aware this can cause performance degradation and is not advised. " +
                                                     "See https://docs.sentry.io/platforms/dotnet/configuration/diagnostic-logger " +
                                                     "for more information");
             }
