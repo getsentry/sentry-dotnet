@@ -6,8 +6,19 @@ namespace Sentry.Integrations;
 
 internal class SystemDiagnosticsMetricsIntegration : ISdkIntegration
 {
-    private static MeterListener? SentryMeterListener;
+    private static MeterListener? SentryMeterListener = null;
     private static readonly object InitLock = new();
+
+    private static MeterListener SentryListener
+    {
+        get
+        {
+            lock (InitLock)
+            {
+                return SentryMeterListener ??= new MeterListener();
+            }
+        }
+    }
 
     public void Register(IHub hub, SentryOptions options)
     {
@@ -18,32 +29,16 @@ internal class SystemDiagnosticsMetricsIntegration : ISdkIntegration
             return;
         }
 
-        if (SentryMeterListener is not null)
+        SentryListener.InstrumentPublished = (instrument, listener) =>
         {
-            options.LogInfo("System.Diagnostics.Metrics Integration has already been registered.");
-            return;
-        }
-
-        lock (InitLock)
-        {
-            if (SentryMeterListener is not null)
+            if (listeners!.Any(x => x.IsMatch(instrument.Meter.Name)))
             {
-                options.LogInfo("System.Diagnostics.Metrics Integration has already been registered.");
-                return;
+                listener.EnableMeasurementEvents(instrument);
             }
-
-            SentryMeterListener = new MeterListener();
-            SentryMeterListener.InstrumentPublished = (instrument, listener) =>
-            {
-                if (listeners!.Any(x => x.IsMatch(instrument.Meter.Name)))
-                {
-                    listener.EnableMeasurementEvents(instrument);
-                }
-            };
-            SentryMeterListener.SetMeasurementEventCallback<int>(RecordIntMeasurement);
-            SentryMeterListener.SetMeasurementEventCallback<double>(RecordDoubleMeasurement);
-            SentryMeterListener.Start();
-        }
+        };
+        SentryListener.SetMeasurementEventCallback<int>(RecordIntMeasurement);
+        SentryListener.SetMeasurementEventCallback<double>(RecordDoubleMeasurement);
+        SentryListener.Start();
     }
 
     private static void RecordIntMeasurement(
