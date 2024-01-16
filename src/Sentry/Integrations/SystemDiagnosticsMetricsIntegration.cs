@@ -6,19 +6,7 @@ namespace Sentry.Integrations;
 
 internal class SystemDiagnosticsMetricsIntegration : ISdkIntegration
 {
-    private static MeterListener? SentryMeterListener = null;
-    private static readonly object InitLock = new();
-
-    private static MeterListener SentryListener
-    {
-        get
-        {
-            lock (InitLock)
-            {
-                return SentryMeterListener ??= new MeterListener();
-            }
-        }
-    }
+    private static readonly Lazy<MeterListener> SentryMeterListener = new(() => new MeterListener());
 
     public void Register(IHub hub, SentryOptions options)
     {
@@ -29,16 +17,17 @@ internal class SystemDiagnosticsMetricsIntegration : ISdkIntegration
             return;
         }
 
-        SentryListener.InstrumentPublished = (instrument, listener) =>
+        var sentryListener = SentryMeterListener.Value;
+        sentryListener.InstrumentPublished = (instrument, listener) =>
         {
             if (listeners!.Any(x => x.IsMatch(instrument.Meter.Name)))
             {
                 listener.EnableMeasurementEvents(instrument);
             }
         };
-        SentryListener.SetMeasurementEventCallback<int>(RecordIntMeasurement);
-        SentryListener.SetMeasurementEventCallback<double>(RecordDoubleMeasurement);
-        SentryListener.Start();
+        sentryListener.SetMeasurementEventCallback<int>(RecordIntMeasurement);
+        sentryListener.SetMeasurementEventCallback<double>(RecordDoubleMeasurement);
+        sentryListener.Start();
     }
 
     private static void RecordIntMeasurement(
