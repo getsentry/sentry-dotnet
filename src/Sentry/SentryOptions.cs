@@ -193,6 +193,13 @@ public class SentryOptions
             }
 #endif
 
+#if NET8_0_OR_GREATER
+            if ((_defaultIntegrations & DefaultIntegrations.SystemDiagnosticsMetricsIntegration) != 0)
+            {
+                yield return new SystemDiagnosticsMetricsIntegration();
+            }
+#endif
+
             foreach (var integration in _integrations)
             {
                 yield return integration;
@@ -1212,6 +1219,9 @@ public class SentryOptions
 #if NET5_0_OR_GREATER && !__MOBILE__
                                | DefaultIntegrations.WinUiUnhandledExceptionIntegration
 #endif
+#if NET8_0_OR_GREATER
+                               | DefaultIntegrations.SystemDiagnosticsMetricsIntegration
+#endif
                                ;
 
 #if ANDROID
@@ -1312,6 +1322,9 @@ public class SentryOptions
 #if NET5_0_OR_GREATER && !__MOBILE__
         WinUiUnhandledExceptionIntegration = 1 << 6,
 #endif
+#if NET8_0_OR_GREATER
+        SystemDiagnosticsMetricsIntegration = 1 << 7,
+#endif
     }
 }
 
@@ -1322,8 +1335,23 @@ public class SentryOptions
 public class ExperimentalMetricsOptions
 {
     /// <summary>
-    /// Determines the sample rate for metrics. 0.0 means no metrics will be sent (metrics disabled). 1.0 implies all
-    /// metrics will be sent.
+    /// Determines whether code locations should be recorded for Metrics
     /// </summary>
     public bool EnableCodeLocations { get; set; } = true;
+
+    private IList<SubstringOrRegexPattern> _systemDiagnosticsMetricsListeners = new List<SubstringOrRegexPattern>();
+
+    /// <summary>
+    /// A customizable list of <see cref="SubstringOrRegexPattern"/> objects, each containing either a
+    /// substring or regular expression pattern that can be used to control which System.Diagnostics.Metrics should be
+    /// collected and reported to Sentry.
+    /// </summary>
+    public IList<SubstringOrRegexPattern> SystemDiagnosticsMetricsListeners
+    {
+        // NOTE: During configuration binding, .NET 6 and lower used to just call Add on the existing item.
+        //       .NET 7 changed this to call the setter with an array that already starts with the old value.
+        //       We have to handle both cases.
+        get => _systemDiagnosticsMetricsListeners;
+        set => _systemDiagnosticsMetricsListeners = value.SetWithConfigBinding();
+    }
 }

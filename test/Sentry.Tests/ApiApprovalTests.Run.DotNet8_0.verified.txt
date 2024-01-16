@@ -131,6 +131,7 @@ namespace Sentry
     {
         public ExperimentalMetricsOptions() { }
         public bool EnableCodeLocations { get; set; }
+        public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> SystemDiagnosticsMetricsListeners { get; set; }
     }
     public class FileAttachmentContent : Sentry.IAttachmentContent
     {
@@ -704,6 +705,7 @@ namespace Sentry
         public static void DisableAppDomainUnhandledExceptionCapture(this Sentry.SentryOptions options) { }
         public static void DisableDiagnosticSourceIntegration(this Sentry.SentryOptions options) { }
         public static void DisableDuplicateEventDetection(this Sentry.SentryOptions options) { }
+        public static void DisableSystemDiagnosticsMetricsIntegration(this Sentry.SentryOptions options) { }
         public static void DisableUnobservedTaskExceptionCapture(this Sentry.SentryOptions options) { }
         public static void DisableWinUiUnhandledExceptionIntegration(this Sentry.SentryOptions options) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors(this Sentry.SentryOptions options) { }

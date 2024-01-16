@@ -130,6 +130,7 @@ namespace Sentry
     {
         public ExperimentalMetricsOptions() { }
         public bool EnableCodeLocations { get; set; }
+        public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> SystemDiagnosticsMetricsListeners { get; set; }
     }
     public class FileAttachmentContent : Sentry.IAttachmentContent
     {

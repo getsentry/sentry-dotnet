@@ -1,8 +1,17 @@
-﻿namespace Sentry.Samples.Console.Metrics;
+﻿using System.Diagnostics.Metrics;
+
+namespace Sentry.Samples.Console.Metrics;
 
 internal static class Program
 {
-    private static readonly Random Roll = new();
+    private static readonly Random Roll = Random.Shared;
+
+    // Sentry also supports capturing System.Diagnostics.Metrics
+    private static readonly Meter HatsMeter = new("HatCo.HatStore", "1.0.0");
+    private static readonly Counter<int> HatsSold = HatsMeter.CreateCounter<int>(
+        name: "hats-sold",
+        unit: "Hats",
+        description: "The number of hats sold in our store");
 
     private static void Main()
     {
@@ -18,8 +27,8 @@ internal static class Program
                    // Initialize some (non null) ExperimentalMetricsOptions to enable Sentry Metrics,
                    options.ExperimentalMetrics = new ExperimentalMetricsOptions
                    {
-                       EnableCodeLocations =
-                           true // Set this to false if you don't want to track code locations for some reason
+                        EnableCodeLocations = true, // Set this to false if you don't want to track code locations for some reason
+                        SystemDiagnosticsMetricsListeners = ["HatCo.HatStore"] // Capture System.Diagnostics.Metrics matching the name "HatCo.HatStore"
                    };
                }))
         {
@@ -27,7 +36,7 @@ internal static class Program
             while (true)
             {
                 // Perform your task here
-                switch (Roll.Next(1,3))
+                switch (Roll.Next(4,4))
                 {
                     case 1:
                         PlaySetBingo(10);
@@ -38,8 +47,16 @@ internal static class Program
                     case 3:
                         MeasureShrimp(30);
                         break;
+                    case 4:
+                        // Here we're emitting the metric using System.Diagnostics.Metrics instead of SentrySdk.Metrics.
+                        // We won't see accurate code locations for these, so Sentry.Metrics are preferable but support
+                        // for System.Diagnostics.Metrics means Sentry can collect a bunch built in metrics without you
+                        // having to instrument anything.
+                        //
+                        // See https://learn.microsoft.com/en-us/dotnet/core/diagnostics/built-in-metrics to learn more.
+                        HatsSold.Add(Roll.Next(0, 1000));
+                        break;
                 }
-
 
                 // Optional: Delay to prevent tight looping
                 var sleepTime = Roll.Next(1, 10);
