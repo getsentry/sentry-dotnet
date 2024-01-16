@@ -18,6 +18,9 @@ public partial class SentryOptionsTests
         };
         Hub _ = new(options, Substitute.For<ISentryClient>());
 
-        return Verify(logger.Entries).UniqueForRuntime().AutoVerify(includeBuildServer: false);
+        return Verify(logger.Entries)
+            .UniqueForRuntime()
+            .UniqueForTargetFrameworkAndVersion()
+            .AutoVerify(includeBuildServer: false);
     }
 }

@@ -14,15 +14,13 @@ internal class SystemDiagnosticsMetricsIntegration : ISdkIntegration
         var listeners = options.ExperimentalMetrics?.SystemDiagnosticsMetricsListeners;
         if (listeners is not { Count: > 0 })
         {
-            options.Log(SentryLevel.Info,
-                "System.Diagnostics.Metrics Integration is disabled because no listeners configured.");
+            options.LogInfo("System.Diagnostics.Metrics Integration is disabled because no listeners configured.");
             return;
         }
 
         if (SentryMeterListener is not null)
         {
-            options.Log(SentryLevel.Info,
-                "System.Diagnostics.Metrics Integration has already been registered.");
+            options.LogInfo("System.Diagnostics.Metrics Integration has already been registered.");
             return;
         }
 
@@ -30,8 +28,7 @@ internal class SystemDiagnosticsMetricsIntegration : ISdkIntegration
         {
             if (SentryMeterListener is not null)
             {
-                options.Log(SentryLevel.Info,
-                    "System.Diagnostics.Metrics Integration has already been registered.");
+                options.LogInfo("System.Diagnostics.Metrics Integration has already been registered.");
                 return;
             }
 
