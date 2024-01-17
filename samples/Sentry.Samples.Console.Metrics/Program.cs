@@ -28,7 +28,12 @@ internal static class Program
                    options.ExperimentalMetrics = new ExperimentalMetricsOptions
                    {
                         EnableCodeLocations = true, // Set this to false if you don't want to track code locations for some reason
-                        SystemDiagnosticsMetricsListeners = ["HatCo.HatStore"] // Capture System.Diagnostics.Metrics matching the name "HatCo.HatStore"
+                        CaptureInstruments = new List<SubstringOrRegexPattern>(){
+                            // Capture System.Diagnostics.Metrics matching the name "HatCo.HatStore", which is the name
+                            // of the custom HatsMeter defined above
+                            "hats-sold",
+                            "http.client.request.duration"
+                        }
                    };
                }))
         {
@@ -36,7 +41,7 @@ internal static class Program
             while (true)
             {
                 // Perform your task here
-                switch (Roll.Next(4,4))
+                switch (Roll.Next(5,5))
                 {
                     case 1:
                         PlaySetBingo(10);
@@ -55,6 +60,20 @@ internal static class Program
                         //
                         // See https://learn.microsoft.com/en-us/dotnet/core/diagnostics/built-in-metrics to learn more.
                         HatsSold.Add(Roll.Next(0, 1000));
+                        break;
+                    case 5:
+                        // Here we demonstrate collecting some built in metrics for HTTP requests... note that no
+                        // instrumentation is required here - just matching listeners configured in
+                        // ExperimentalMetricsOptions.SystemDiagnosticsMetricsListeners when initialising the SDK.
+                        //
+                        // See https://learn.microsoft.com/en-us/dotnet/core/diagnostics/built-in-metrics-system-net#systemnethttp
+                        var httpClient = new HttpClient();
+                        var url = "https://api.sampleapis.com/coffee/hot";
+                        var result = httpClient
+                            .GetAsync(url)
+                            .GetAwaiter()
+                            .GetResult();
+                        System.Console.WriteLine($"GET {url} {result.StatusCode}");
                         break;
                 }
 
