@@ -34,11 +34,5 @@
     Args: [
       SentryDiagnosticListenerIntegration
     ]
-  },
-  {
-    Message: Registering integration: '{0}'.,
-    Args: [
-      WinUIUnhandledExceptionIntegration
-    ]
   }
 ]
