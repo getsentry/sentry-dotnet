@@ -9,6 +9,9 @@ on:
     paths-ignore:
       - "**.md"
 
+env:
+  XCODE_VERSION: 15.1
+
 jobs:
   build-sentry-native:
     name: sentry-native (${{ matrix.os }})
@@ -104,7 +107,7 @@ jobs:
         uses: ./.github/actions/buildcocoasdk
 
       # Only switch to newer xcode after building the Cocoa SDK so that it can keep IPHONEOS_DEPLOYMENT_TARGET=11.0
-      - run: sudo xcode-select -s /Applications/Xcode_15.1.app
+      - run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
         if: runner.os == 'macOS'
 
       - name: Restore .NET Dependencies
@@ -160,7 +163,6 @@ jobs:
           sparse-checkout: |
             Directory.Build.props
             integration-test
-
       - name: Fetch Nuget Packages
         uses: actions/download-artifact@v4
         with:
@@ -173,7 +175,7 @@ jobs:
           sudo apt update
           sudo apt install libcurl4-openssl-dev
 
-      - run: sudo xcode-select -s /Applications/Xcode_15.1.app
+      - run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
         if: runner.os == 'macOS'
 
       - uses: actions/setup-dotnet@v4
