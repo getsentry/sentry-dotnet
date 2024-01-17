@@ -130,8 +130,8 @@ namespace Sentry
     public class ExperimentalMetricsOptions
     {
         public ExperimentalMetricsOptions() { }
+        public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> CaptureInstruments { get; set; }
         public bool EnableCodeLocations { get; set; }
-        public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> SystemDiagnosticsMetricsListeners { get; set; }
     }
     public class FileAttachmentContent : Sentry.IAttachmentContent
     {
@@ -1065,6 +1065,7 @@ namespace Sentry
         public override int GetHashCode() { }
         public override string ToString() { }
         public static Sentry.SubstringOrRegexPattern op_Implicit(string substringOrRegexPattern) { }
+        public static Sentry.SubstringOrRegexPattern op_Implicit(System.Text.RegularExpressions.Regex regex) { }
     }
     public class Timing : System.IDisposable
     {
