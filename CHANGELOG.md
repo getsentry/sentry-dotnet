@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Added support for capturing built in metrics from the System.Diagnostics.Metrics API ([#3052](https://github.com/getsentry/sentry-dotnet/pull/3052))
+
 ### Significant change in behavior
 
 - Added `Sentry` namespace to global usings when `ImplicitUsings` is enabled ([#3043](https://github.com/getsentry/sentry-dotnet/pull/3043))

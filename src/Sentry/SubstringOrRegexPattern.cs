@@ -47,6 +47,15 @@ public class SubstringOrRegexPattern
         return new SubstringOrRegexPattern(substringOrRegexPattern);
     }
 
+    /// <summary>
+    /// Implicitly converts a <see cref="Regex"/> to a <see cref="SubstringOrRegexPattern"/>.
+    /// </summary>
+    /// <param name="regex"></param>
+    public static implicit operator SubstringOrRegexPattern(Regex regex)
+    {
+        return new SubstringOrRegexPattern(regex);
+    }
+
     /// <inheritdoc />
     public override string ToString() => _substring ?? _regex?.ToString() ?? "";
 

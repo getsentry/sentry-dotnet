@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.Metrics;
+using System.Text.RegularExpressions;
 
 namespace Sentry.Samples.Console.Metrics;
 
@@ -32,7 +33,8 @@ internal static class Program
                             // Capture System.Diagnostics.Metrics matching the name "HatCo.HatStore", which is the name
                             // of the custom HatsMeter defined above
                             "hats-sold",
-                            "http.client.request.duration"
+                            // Capture built in http.client metrics
+                             new Regex(@"^http\.client\..*"),
                         }
                    };
                }))
@@ -41,30 +43,24 @@ internal static class Program
             while (true)
             {
                 // Perform your task here
-                switch (Roll.Next(5,5))
+                switch (Roll.Next(1,4))
                 {
                     case 1:
                         PlaySetBingo(10);
                         break;
                     case 2:
-                        CreateRevenueGauge(100);
-                        break;
-                    case 3:
                         MeasureShrimp(30);
                         break;
-                    case 4:
+                    case 3:
                         // Here we're emitting the metric using System.Diagnostics.Metrics instead of SentrySdk.Metrics.
                         // We won't see accurate code locations for these, so Sentry.Metrics are preferable but support
                         // for System.Diagnostics.Metrics means Sentry can collect a bunch built in metrics without you
-                        // having to instrument anything.
-                        //
-                        // See https://learn.microsoft.com/en-us/dotnet/core/diagnostics/built-in-metrics to learn more.
+                        // having to instrument anything... see case 4 below
                         HatsSold.Add(Roll.Next(0, 1000));
                         break;
-                    case 5:
-                        // Here we demonstrate collecting some built in metrics for HTTP requests... note that no
-                        // instrumentation is required here - just matching listeners configured in
-                        // ExperimentalMetricsOptions.SystemDiagnosticsMetricsListeners when initialising the SDK.
+                    case 4:
+                        // Here we demonstrate collecting some built in metrics for HTTP requests... this works because
+                        // we've configured ExperimentalMetricsOptions.CaptureInstruments to match "http.client.*"
                         //
                         // See https://learn.microsoft.com/en-us/dotnet/core/diagnostics/built-in-metrics-system-net#systemnethttp
                         var httpClient = new HttpClient();
@@ -78,7 +74,7 @@ internal static class Program
                 }
 
                 // Optional: Delay to prevent tight looping
-                var sleepTime = Roll.Next(1, 10);
+                var sleepTime = Roll.Next(1, 5);
                 System.Console.WriteLine($"Sleeping for {sleepTime} second(s).");
                 System.Console.WriteLine("Press any key to stop...");
                 Thread.Sleep(TimeSpan.FromSeconds(sleepTime));
@@ -108,20 +104,6 @@ internal static class Program
 
                 // And this is a counter
                 SentrySdk.Metrics.Increment(solution.Contains(guess) ? "correct_answers" : "incorrect_answers");
-            }
-        }
-    }
-
-    private static void CreateRevenueGauge(int sampleCount)
-    {
-        using (new Timing(nameof(CreateRevenueGauge), MeasurementUnit.Duration.Millisecond))
-        {
-            for (var i = 0; i < sampleCount; i++)
-            {
-                var movement = Roll.NextDouble() * 30 - Roll.NextDouble() * 10;
-                // This demonstrates measuring something in your app using a gauge... we're also using a custom
-                // measurement unit here (which is optional - by default the unit will be "None")
-                SentrySdk.Metrics.Gauge("revenue", movement, MeasurementUnit.Custom("$"));
             }
         }
     }
