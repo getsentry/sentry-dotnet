@@ -12,6 +12,12 @@ If you have conflicts, you can opt-out by adding the following to your `csproj`:
 </PropertyGroup>
 ```
 
+### Dependencies
+
+- Bump Java SDK from v7.1.0 to v7.2.0 ([#3049](https://github.com/getsentry/sentry-dotnet/pull/3049))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#720)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.1.0...7.2.0)
+
 ## 4.0.0-beta.8
 
 ### Features
