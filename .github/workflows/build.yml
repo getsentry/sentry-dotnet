@@ -104,7 +104,7 @@ jobs:
         uses: ./.github/actions/buildcocoasdk
 
       # Only switch to newer xcode after building the Cocoa SDK so that it can keep IPHONEOS_DEPLOYMENT_TARGET=11.0
-      - run: sudo xcode-select -s /Applications/Xcode_15.0.1.app
+      - run: sudo xcode-select -s /Applications/Xcode_15.1.app
         if: runner.os == 'macOS'
 
       - name: Restore .NET Dependencies
