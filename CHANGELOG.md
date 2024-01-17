@@ -14,7 +14,7 @@ If you have conflicts, you can opt-out by adding the following to your `csproj`:
 
 ### Fixes
 
-- The SDK no longer adds the `WinUIUnhandledExceptionIntegration` on non Windows platforms ([#3043](https://github.com/getsentry/sentry-dotnet/pull/3043))
+- The SDK no longer adds the `WinUIUnhandledExceptionIntegration` on non Windows platforms ([#3055](https://github.com/getsentry/sentry-dotnet/pull/3055))
 
 ### Dependencies
 
