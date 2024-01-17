@@ -163,7 +163,6 @@ jobs:
           sparse-checkout: |
             Directory.Build.props
             integration-test
-            
       - name: Fetch Nuget Packages
         uses: actions/download-artifact@v4
         with:
