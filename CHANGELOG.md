@@ -12,6 +12,10 @@ If you have conflicts, you can opt-out by adding the following to your `csproj`:
 </PropertyGroup>
 ```
 
+### Fixes
+
+- The SDK no longer adds the `WinUIUnhandledExceptionIntegration` on non Windows platforms ([#3043](https://github.com/getsentry/sentry-dotnet/pull/3043))
+
 ### Dependencies
 
 - Bump Java SDK from v7.1.0 to v7.2.0 ([#3049](https://github.com/getsentry/sentry-dotnet/pull/3049))
