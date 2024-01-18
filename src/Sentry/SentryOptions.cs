@@ -186,8 +186,9 @@ public class SentryOptions
             }
 #endif
 
-#if NET5_0_OR_GREATER && WINDOWS
-            if ((_defaultIntegrations & DefaultIntegrations.WinUiUnhandledExceptionIntegration) != 0)
+#if NET5_0_OR_GREATER && !__MOBILE__
+            if ((_defaultIntegrations & DefaultIntegrations.WinUiUnhandledExceptionIntegration) != 0
+                && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 yield return new WinUIUnhandledExceptionIntegration();
             }
