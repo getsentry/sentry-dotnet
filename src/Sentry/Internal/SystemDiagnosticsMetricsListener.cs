@@ -5,22 +5,23 @@ namespace Sentry.Internal;
 
 internal class SystemDiagnosticsMetricsListener : IDisposable
 {
-    private readonly IMetricAggregator _metricsAggregator;
+    private readonly Lazy<IMetricAggregator> _metricsAggregator;
+    private IMetricAggregator MetricsAggregator => _metricsAggregator.Value;
     internal static SystemDiagnosticsMetricsListener? DefaultListener;
 
     internal readonly MeterListener _sentryListener = new ();
 
     public SystemDiagnosticsMetricsListener(IEnumerable<SubstringOrRegexPattern> captureInstruments)
-        : this(captureInstruments, SentrySdk.Metrics)
+        : this(captureInstruments, () => SentrySdk.Metrics)
     {
     }
 
     /// <summary>
     /// Overload for testing purposes - allows us to supply a mock IMetricAggregator
     /// </summary>
-    internal SystemDiagnosticsMetricsListener(IEnumerable<SubstringOrRegexPattern> captureInstruments, IMetricAggregator metricsAggregator)
+    internal SystemDiagnosticsMetricsListener(IEnumerable<SubstringOrRegexPattern> captureInstruments, Func<IMetricAggregator> metricsAggregatorResolver)
     {
-        _metricsAggregator = metricsAggregator;
+        _metricsAggregator = new Lazy<IMetricAggregator>(metricsAggregatorResolver);
         _sentryListener.InstrumentPublished = (instrument, listener) =>
         {
             if (captureInstruments!.Any(x => x.IsMatch(instrument.Name)))
@@ -66,13 +67,13 @@ internal class SystemDiagnosticsMetricsListener : IDisposable
             case UpDownCounter<T>:
             case ObservableCounter<T>:
             case ObservableUpDownCounter<T>:
-                _metricsAggregator.Increment(instrument.Name, doubleMeasurement, unit, tagDict);
+                MetricsAggregator.Increment(instrument.Name, doubleMeasurement, unit, tagDict);
                 break;
             case Histogram<T>:
-                _metricsAggregator.Distribution(instrument.Name, doubleMeasurement, unit, tagDict);
+                MetricsAggregator.Distribution(instrument.Name, doubleMeasurement, unit, tagDict);
                 break;
             case ObservableGauge<T>:
-                _metricsAggregator.Gauge(instrument.Name, doubleMeasurement, unit, tagDict);
+                MetricsAggregator.Gauge(instrument.Name, doubleMeasurement, unit, tagDict);
                 break;
         }
     }

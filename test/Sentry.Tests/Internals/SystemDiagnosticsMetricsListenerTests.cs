@@ -12,7 +12,7 @@ public class SystemDiagnosticsMetricsListenerTests
 
         public SystemDiagnosticsMetricsListener GetSut()
         {
-            return new SystemDiagnosticsMetricsListener(CaptureInstruments, MockAggregator);
+            return new SystemDiagnosticsMetricsListener(CaptureInstruments, () => MockAggregator);
         }
     }
 
