@@ -715,7 +715,7 @@ public class SentryOptions
     public IList<SubstringOrRegexPattern> FailedRequestTargets
     {
         get => _failedRequestTargets.Value;
-        set => _failedRequestTargets = new(value.SetWithConfigBinding);
+        set => _failedRequestTargets = new(value.WIthConfigBinding);
     }
 
     /// <summary>
@@ -917,7 +917,7 @@ public class SentryOptions
         //       .NET 7 changed this to call the setter with an array that already starts with the old value.
         //       We have to handle both cases.
         get => _tracePropagationTargets;
-        set => _tracePropagationTargets = value.SetWithConfigBinding();
+        set => _tracePropagationTargets = value.WIthConfigBinding();
     }
 
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
