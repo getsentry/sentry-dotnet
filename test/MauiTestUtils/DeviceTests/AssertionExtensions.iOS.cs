@@ -269,7 +269,7 @@ public static partial class AssertionExtensions
             }
         }
 
-        Assert.True(false, CreateColorError(bitmap, $"Color {expectedColor} not found."));
+        Assert.Fail(CreateColorError(bitmap, $"Color {expectedColor} not found."));
         return bitmap;
     }
 
