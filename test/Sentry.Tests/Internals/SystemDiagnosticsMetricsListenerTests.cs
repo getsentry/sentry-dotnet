@@ -54,7 +54,7 @@ public class SystemDiagnosticsMetricsListenerTests
     {
         // Arrange
         var testMeter = new Meter("TestMeter", "1.0.0");
-        var instrument = testMeter.CreateUpDownCounter<int>("test.counter", "unit");
+        var instrument = testMeter.CreateUpDownCounter<int>("test.updowncounter", "unit");
         const int measurement = -2;
         ReadOnlySpan<KeyValuePair<string, object>> tags = [
             new KeyValuePair<string, object>("tag1", "value1"),
@@ -116,7 +116,7 @@ public class SystemDiagnosticsMetricsListenerTests
     {
         // Arrange
         var testMeter = new Meter("TestMeter", "1.0.0");
-        var instrument = testMeter.CreateObservableGauge<int>("test.gauge", () => new [] { new Measurement<int>(2) }, "unit");
+        var instrument = testMeter.CreateObservableGauge<int>("test.observable.gauge", () => new [] { new Measurement<int>(2) }, "unit");
         const int measurement = 2;
         ReadOnlySpan<KeyValuePair<string, object>> tags = [
             new KeyValuePair<string, object>("tag1", "value1"),
@@ -177,7 +177,7 @@ public class SystemDiagnosticsMetricsListenerTests
         // Arrange
         var testMeter = new Meter("TestMeter", "1.0.0");
         List<Measurement<int>> observedValues = [ new Measurement<int>(2), new Measurement<int>(3) ];
-        var instrument = testMeter.CreateObservableCounter("test.counter",
+        var instrument = testMeter.CreateObservableCounter("test.observable.counter",
             () => observedValues);
         _fixture.CaptureInstruments.Add(instrument.Name);
         var total = 0d;
@@ -207,7 +207,7 @@ public class SystemDiagnosticsMetricsListenerTests
         // Arrange
         var testMeter = new Meter("TestMeter", "1.0.0");
         List<Measurement<int>> observedValues = [ new Measurement<int>(12), new Measurement<int>(-5) ];
-        var instrument = testMeter.CreateObservableUpDownCounter("test.counter",
+        var instrument = testMeter.CreateObservableUpDownCounter("test.observable.updowncounter",
             () => observedValues);
         _fixture.CaptureInstruments.Add(instrument.Name);
         var total = 0d;
