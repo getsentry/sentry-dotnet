@@ -14,7 +14,7 @@ internal static class Program
         unit: "Hats",
         description: "The number of hats sold in our store");
 
-    private static void Main()
+    private static async Task Main()
     {
         // Enable the SDK
         using (SentrySdk.Init(options =>
@@ -40,7 +40,7 @@ internal static class Program
                }))
         {
             System.Console.WriteLine("Measure, Yeah, Measure!");
-            while (true)
+            do
             {
                 // Perform your task here
                 switch (Roll.Next(1,4))
@@ -65,10 +65,7 @@ internal static class Program
                         // See https://learn.microsoft.com/en-us/dotnet/core/diagnostics/built-in-metrics-system-net#systemnethttp
                         var httpClient = new HttpClient();
                         var url = "https://api.sampleapis.com/coffee/hot";
-                        var result = httpClient
-                            .GetAsync(url)
-                            .GetAwaiter()
-                            .GetResult();
+                        var result = await httpClient.GetAsync(url);
                         System.Console.WriteLine($"GET {url} {result.StatusCode}");
                         break;
                 }
@@ -78,12 +75,8 @@ internal static class Program
                 System.Console.WriteLine($"Sleeping for {sleepTime} second(s).");
                 System.Console.WriteLine("Press any key to stop...");
                 Thread.Sleep(TimeSpan.FromSeconds(sleepTime));
-                // Check if a key has been pressed
-                if (System.Console.KeyAvailable)
-                {
-                    break;
-                }
             }
+            while (!System.Console.KeyAvailable);
             System.Console.WriteLine("Measure up");
         }
     }
