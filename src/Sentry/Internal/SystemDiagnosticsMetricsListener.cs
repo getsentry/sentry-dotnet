@@ -8,7 +8,7 @@ internal class SystemDiagnosticsMetricsListener : IDisposable
     private readonly IMetricAggregator _metricsAggregator;
     internal static SystemDiagnosticsMetricsListener? DefaultListener;
 
-    private readonly MeterListener _sentryListener = new ();
+    internal readonly MeterListener _sentryListener = new ();
 
     public SystemDiagnosticsMetricsListener(IEnumerable<SubstringOrRegexPattern> captureInstruments)
         : this(captureInstruments, SentrySdk.Metrics)
@@ -62,6 +62,7 @@ internal class SystemDiagnosticsMetricsListener : IDisposable
         var doubleMeasurement = Convert.ToDouble(measurement);
         switch (instrument)
         {
+            case ObservableCounter<T>:
             case Counter<T>:
                 _metricsAggregator.Increment(instrument.Name, doubleMeasurement, unit, tagDict);
                 break;
