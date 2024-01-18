@@ -62,8 +62,10 @@ internal class SystemDiagnosticsMetricsListener : IDisposable
         var doubleMeasurement = Convert.ToDouble(measurement);
         switch (instrument)
         {
-            case ObservableCounter<T>:
             case Counter<T>:
+            case UpDownCounter<T>:
+            case ObservableCounter<T>:
+            case ObservableUpDownCounter<T>:
                 _metricsAggregator.Increment(instrument.Name, doubleMeasurement, unit, tagDict);
                 break;
             case Histogram<T>:

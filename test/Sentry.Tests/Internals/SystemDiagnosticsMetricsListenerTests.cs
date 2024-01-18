@@ -50,6 +50,37 @@ public class SystemDiagnosticsMetricsListenerTests
     }
 
     [Fact]
+    public void RecordMeasurement_UpDownCounterInstrument_CallsIncrement()
+    {
+        // Arrange
+        var testMeter = new Meter("TestMeter", "1.0.0");
+        var instrument = testMeter.CreateUpDownCounter<int>("test.counter", "unit");
+        const int measurement = -2;
+        ReadOnlySpan<KeyValuePair<string, object>> tags = [
+            new KeyValuePair<string, object>("tag1", "value1"),
+            new KeyValuePair<string, object>("tag2", 2),
+        ];
+        var expectedTags = tags.ToImmutableArray().ToImmutableDictionary(
+            kvp => kvp.Key,
+            kvp => kvp.Value?.ToString() ?? string.Empty
+        );
+
+        // Act
+        var sut = _fixture.GetSut();
+        sut.RecordMeasurement(instrument, measurement, tags, null);
+
+        // Assert
+        _fixture.MockAggregator.Received().Increment(
+            instrument.Name,
+            measurement,
+            MeasurementUnit.Custom(instrument.Unit!),
+            Arg.Is<ImmutableDictionary<string, string>>(arg =>
+                    expectedTags.All(tag => arg.ContainsKey(tag.Key) && arg[tag.Key] == tag.Value)
+                )
+            );
+    }
+
+    [Fact]
     public void RecordMeasurement_HistogramInstrument_CallsDistribution()
     {
         // Arrange
@@ -146,7 +177,7 @@ public class SystemDiagnosticsMetricsListenerTests
         // Arrange
         var testMeter = new Meter("TestMeter", "1.0.0");
         List<Measurement<int>> observedValues = [ new Measurement<int>(2), new Measurement<int>(3) ];
-        var instrument = testMeter.CreateObservableCounter<int>("test.counter",
+        var instrument = testMeter.CreateObservableCounter("test.counter",
             () => observedValues);
         _fixture.CaptureInstruments.Add(instrument.Name);
         var total = 0d;
@@ -168,6 +199,36 @@ public class SystemDiagnosticsMetricsListenerTests
             Arg.Any<ImmutableDictionary<string, string>>()
         );
         total.Should().Be(5);
+    }
+
+    [Fact]
+    public void SystemDiagnosticsMetricsListener_ObservableUpDownCounter_AggregatesCorrectly()
+    {
+        // Arrange
+        var testMeter = new Meter("TestMeter", "1.0.0");
+        List<Measurement<int>> observedValues = [ new Measurement<int>(12), new Measurement<int>(-5) ];
+        var instrument = testMeter.CreateObservableUpDownCounter("test.counter",
+            () => observedValues);
+        _fixture.CaptureInstruments.Add(instrument.Name);
+        var total = 0d;
+        _fixture.MockAggregator.Increment(
+            instrument.Name,
+            Arg.Do<double>(x => total += x),
+            Arg.Any<MeasurementUnit>(),
+            Arg.Any<ImmutableDictionary<string, string>>());
+
+        // Act
+        var sut = _fixture.GetSut();
+        sut._sentryListener.RecordObservableInstruments();
+
+        // Assert
+        _fixture.MockAggregator.Received(2).Increment(
+            instrument.Name,
+            Arg.Any<double>(),
+            Arg.Any<MeasurementUnit>(),
+            Arg.Any<ImmutableDictionary<string, string>>()
+        );
+        total.Should().Be(7);
     }
 }
 #endif
