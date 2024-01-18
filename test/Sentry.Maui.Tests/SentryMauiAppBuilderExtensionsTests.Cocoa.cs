@@ -27,7 +27,7 @@ public partial class SentryMauiAppBuilderExtensionsTests
 
         // Act
         var lifecycleEventService = app.Services.GetRequiredService<ILifecycleEventService>();
-        lifecycleEventService.InvokeEvents<iOSLifecycle.WillFinishLaunching>
+        lifecycleEventService.InvokeEvents<iOSLifecycle.FinishedLaunching>
             (nameof(iOSLifecycle.FinishedLaunching), del =>
                 del.Invoke(null!, launchOptions));
 
