@@ -6,11 +6,11 @@ namespace Sentry.Internal;
 internal class SystemDiagnosticsMetricsListener : IDisposable
 {
     private readonly IMetricAggregator _metricsAggregator;
-    private static SystemDiagnosticsMetricsListener? DefaultListener;
+    internal static SystemDiagnosticsMetricsListener? DefaultListener;
 
     private readonly MeterListener _sentryListener = new ();
 
-    public SystemDiagnosticsMetricsListener(IList<SubstringOrRegexPattern> captureInstruments)
+    public SystemDiagnosticsMetricsListener(IEnumerable<SubstringOrRegexPattern> captureInstruments)
         : this(captureInstruments, SentrySdk.Metrics)
     {
     }
@@ -18,7 +18,7 @@ internal class SystemDiagnosticsMetricsListener : IDisposable
     /// <summary>
     /// Overload for testing purposes - allows us to supply a mock IMetricAggregator
     /// </summary>
-    internal SystemDiagnosticsMetricsListener(IList<SubstringOrRegexPattern> captureInstruments, IMetricAggregator metricsAggregator)
+    internal SystemDiagnosticsMetricsListener(IEnumerable<SubstringOrRegexPattern> captureInstruments, IMetricAggregator metricsAggregator)
     {
         _metricsAggregator = metricsAggregator;
         _sentryListener.InstrumentPublished = (instrument, listener) =>
@@ -38,7 +38,7 @@ internal class SystemDiagnosticsMetricsListener : IDisposable
         _sentryListener.Start();
     }
 
-    internal static void InitializeDefaultListener(IList<SubstringOrRegexPattern> captureInstruments)
+    internal static void InitializeDefaultListener(IEnumerable<SubstringOrRegexPattern> captureInstruments)
     {
         var oldListener = Interlocked.Exchange(
             ref DefaultListener,
