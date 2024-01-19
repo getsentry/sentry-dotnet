@@ -13,8 +13,7 @@ public class ExperimentalMetricsOptions
     /// </summary>
     public bool EnableCodeLocations { get; set; } = true;
 
-    private IList<SubstringOrRegexPattern> _captureInstruments = new AutoClearingList<SubstringOrRegexPattern>
-        (new[] { new SubstringOrRegexPattern(".*") }, clearOnNextAdd: true);
+    private IList<SubstringOrRegexPattern> _captureInstruments = new List<SubstringOrRegexPattern>();
 
     /// <summary>
     /// <para>
@@ -35,6 +34,6 @@ public class ExperimentalMetricsOptions
         //       .NET 7 changed this to call the setter with an array that already starts with the old value.
         //       We have to handle both cases.
         get => _captureInstruments;
-        set => _captureInstruments = value.WIthConfigBinding();
+        set => _captureInstruments = value.WithConfigBinding();
     }
 }
