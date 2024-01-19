@@ -18,12 +18,15 @@ public class SystemDiagnosticsMetricsListenerTests
 
     private readonly Fixture _fixture = new();
 
+    private static Meter GetMeter() => new Meter(UniqueName(), "1.0.0");
+    private static string UniqueName() => Guid.NewGuid().ToString();
+
     [Fact]
     public void RecordMeasurement_CounterInstrument_CallsIncrement()
     {
         // Arrange
-        var testMeter = new Meter("TestMeter", "1.0.0");
-        var instrument = testMeter.CreateCounter<int>("test.counter", "unit");
+        var testMeter = GetMeter();
+        var instrument = testMeter.CreateCounter<int>(UniqueName(), "unit");
         const int measurement = 2;
         ReadOnlySpan<KeyValuePair<string, object>> tags = [
             new KeyValuePair<string, object>("tag1", "value1"),
@@ -53,8 +56,8 @@ public class SystemDiagnosticsMetricsListenerTests
     public void RecordMeasurement_UpDownCounterInstrument_CallsIncrement()
     {
         // Arrange
-        var testMeter = new Meter("TestMeter", "1.0.0");
-        var instrument = testMeter.CreateUpDownCounter<int>("test.updowncounter", "unit");
+        var testMeter = GetMeter();
+        var instrument = testMeter.CreateUpDownCounter<int>(UniqueName(), "unit");
         const int measurement = -2;
         ReadOnlySpan<KeyValuePair<string, object>> tags = [
             new KeyValuePair<string, object>("tag1", "value1"),
@@ -84,8 +87,8 @@ public class SystemDiagnosticsMetricsListenerTests
     public void RecordMeasurement_HistogramInstrument_CallsDistribution()
     {
         // Arrange
-        var testMeter = new Meter("TestMeter", "1.0.0");
-        var instrument = testMeter.CreateHistogram<int>("test.histogram", "unit");
+        var testMeter = GetMeter();
+        var instrument = testMeter.CreateHistogram<int>(UniqueName(), "unit");
         const int measurement = 2;
         ReadOnlySpan<KeyValuePair<string, object>> tags = [
             new KeyValuePair<string, object>("tag1", "value1"),
@@ -115,8 +118,8 @@ public class SystemDiagnosticsMetricsListenerTests
     public void RecordMeasurement_ObservableGaugeInstrument_CallsGauge()
     {
         // Arrange
-        var testMeter = new Meter("TestMeter", "1.0.0");
-        var instrument = testMeter.CreateObservableGauge<int>("test.observable.gauge", () => new [] { new Measurement<int>(2) }, "unit");
+        var testMeter = GetMeter();
+        var instrument = testMeter.CreateObservableGauge<int>(UniqueName(), () => new [] { new Measurement<int>(2) }, "unit");
         const int measurement = 2;
         ReadOnlySpan<KeyValuePair<string, object>> tags = [
             new KeyValuePair<string, object>("tag1", "value1"),
@@ -146,8 +149,8 @@ public class SystemDiagnosticsMetricsListenerTests
     public void SystemDiagnosticsMetricsListener_Counter_AggregatesCorrectly()
     {
         // Arrange
-        var testMeter = new Meter("TestMeter", "1.0.0");
-        var instrument = testMeter.CreateCounter<int>("test.counter", "unit");
+        var testMeter = GetMeter();
+        var instrument = testMeter.CreateCounter<int>(UniqueName(), "unit");
         _fixture.MetricsOptions.CaptureSystemDiagnosticsInstruments.Add(instrument.Name);
         var total = 0d;
         _fixture.MockAggregator.Increment(
@@ -175,9 +178,9 @@ public class SystemDiagnosticsMetricsListenerTests
     public void SystemDiagnosticsMetricsListener_ObservableCounter_AggregatesCorrectly()
     {
         // Arrange
-        var testMeter = new Meter("TestMeter", "1.0.0");
+        var testMeter = GetMeter();
         List<Measurement<int>> observedValues = [ new Measurement<int>(2), new Measurement<int>(3) ];
-        var instrument = testMeter.CreateObservableCounter("test.observable.counter",
+        var instrument = testMeter.CreateObservableCounter(UniqueName(),
             () => observedValues);
         _fixture.MetricsOptions.CaptureSystemDiagnosticsInstruments.Add(instrument.Name);
         var total = 0d;
@@ -205,9 +208,9 @@ public class SystemDiagnosticsMetricsListenerTests
     public void SystemDiagnosticsMetricsListener_ObservableUpDownCounter_AggregatesCorrectly()
     {
         // Arrange
-        var testMeter = new Meter("TestMeter", "1.0.0");
+        var testMeter = GetMeter();
         List<Measurement<int>> observedValues = [ new Measurement<int>(12), new Measurement<int>(-5) ];
-        var instrument = testMeter.CreateObservableUpDownCounter("test.observable.updowncounter",
+        var instrument = testMeter.CreateObservableUpDownCounter(UniqueName(),
             () => observedValues);
         _fixture.MetricsOptions.CaptureSystemDiagnosticsInstruments.Add(instrument.Name);
         var total = 0d;
@@ -235,9 +238,9 @@ public class SystemDiagnosticsMetricsListenerTests
     public void SystemDiagnosticsMetricsListener_OnlyListensToMatchingInstruments()
     {
         // Arrange
-        var testMeter = new Meter("TestMeter", "1.0.0");
-        var match = testMeter.CreateCounter<int>("OnlyListensToMatchingInstruments.match");
-        var noMatch = testMeter.CreateCounter<int>("OnlyListensToMatchingInstruments.noMatch");
+        var testMeter = GetMeter();
+        var match = testMeter.CreateCounter<int>(UniqueName());
+        var noMatch = testMeter.CreateCounter<int>(UniqueName());
         _fixture.MetricsOptions.CaptureSystemDiagnosticsInstruments.Add(match.Name);
         var total = 0d;
         _fixture.MockAggregator.Increment(
@@ -265,11 +268,11 @@ public class SystemDiagnosticsMetricsListenerTests
     public void SystemDiagnosticsMetricsListener_OnlyListensToMatchingMeters()
     {
         // Arrange
-        var matchingMeter = new Meter("OnlyListensToMatchingMeters.Matching", "1.0.0");
-        var matching1 = matchingMeter.CreateCounter<int>("OnlyListensToMatchingInstruments.matching1");
-        var matching2 = matchingMeter.CreateCounter<int>("OnlyListensToMatchingInstruments.matching2");
-        var nonMatchingMeter = new Meter("OnlyListensToMatchingMeters.NonMatching", "1.0.0");
-        var nonMatching1 = nonMatchingMeter.CreateCounter<int>("OnlyListensToMatchingInstruments.nonMatching1");
+        var matchingMeter = GetMeter();
+        var matching1 = matchingMeter.CreateCounter<int>(UniqueName());
+        var matching2 = matchingMeter.CreateCounter<int>(UniqueName());
+        var nonMatchingMeter = GetMeter();
+        var nonMatching1 = nonMatchingMeter.CreateCounter<int>(UniqueName());
         _fixture.MetricsOptions.CaptureSystemDiagnosticsMeters.Add(matchingMeter.Name);
         var total = 0d;
         _fixture.MockAggregator.Increment(
