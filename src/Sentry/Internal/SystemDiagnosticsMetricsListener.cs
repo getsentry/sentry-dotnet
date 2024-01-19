@@ -7,24 +7,25 @@ internal class SystemDiagnosticsMetricsListener : IDisposable
 {
     private readonly Lazy<IMetricAggregator> _metricsAggregator;
     private IMetricAggregator MetricsAggregator => _metricsAggregator.Value;
-    internal static SystemDiagnosticsMetricsListener? DefaultListener;
+    private static SystemDiagnosticsMetricsListener? DefaultListener;
 
     internal readonly MeterListener _sentryListener = new ();
 
-    public SystemDiagnosticsMetricsListener(IEnumerable<SubstringOrRegexPattern> captureInstruments)
-        : this(captureInstruments, () => SentrySdk.Metrics)
+    private SystemDiagnosticsMetricsListener(ExperimentalMetricsOptions metricsOptions)
+        : this(metricsOptions, () => SentrySdk.Metrics)
     {
     }
 
     /// <summary>
     /// Overload for testing purposes - allows us to supply a mock IMetricAggregator
     /// </summary>
-    internal SystemDiagnosticsMetricsListener(IEnumerable<SubstringOrRegexPattern> captureInstruments, Func<IMetricAggregator> metricsAggregatorResolver)
+    internal SystemDiagnosticsMetricsListener(ExperimentalMetricsOptions metricsOptions, Func<IMetricAggregator> metricsAggregatorResolver)
     {
         _metricsAggregator = new Lazy<IMetricAggregator>(metricsAggregatorResolver);
         _sentryListener.InstrumentPublished = (instrument, listener) =>
         {
-            if (captureInstruments!.Any(x => x.IsMatch(instrument.Name)))
+            if (metricsOptions.CaptureSystemDiagnosticsMeters.ContainsMatch(instrument.Meter.Name)
+                || metricsOptions.CaptureSystemDiagnosticsInstruments.ContainsMatch(instrument.Name))
             {
                 listener.EnableMeasurementEvents(instrument);
             }
@@ -39,11 +40,11 @@ internal class SystemDiagnosticsMetricsListener : IDisposable
         _sentryListener.Start();
     }
 
-    internal static void InitializeDefaultListener(IEnumerable<SubstringOrRegexPattern> captureInstruments)
+    internal static void InitializeDefaultListener(ExperimentalMetricsOptions metricsOptions)
     {
         var oldListener = Interlocked.Exchange(
             ref DefaultListener,
-            new SystemDiagnosticsMetricsListener(captureInstruments)
+            new SystemDiagnosticsMetricsListener(metricsOptions)
             );
         oldListener?.Dispose();
     }

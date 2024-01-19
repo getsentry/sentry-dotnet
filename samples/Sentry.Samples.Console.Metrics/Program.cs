@@ -29,7 +29,7 @@ internal static class Program
                    options.ExperimentalMetrics = new ExperimentalMetricsOptions
                    {
                         EnableCodeLocations = true, // Set this to false if you don't want to track code locations for some reason
-                        CaptureInstruments = new List<SubstringOrRegexPattern>(){
+                        CaptureSystemDiagnosticsInstruments = new List<SubstringOrRegexPattern>(){
                             // Capture System.Diagnostics.Metrics matching the name "HatCo.HatStore", which is the name
                             // of the custom HatsMeter defined above
                             "hats-sold",

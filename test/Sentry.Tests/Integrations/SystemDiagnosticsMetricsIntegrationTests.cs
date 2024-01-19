@@ -4,7 +4,7 @@ namespace Sentry.Tests.Integrations;
 public class SystemDiagnosticsMetricsIntegrationTests
 {
     [Fact]
-    public void Register_CaptureInstrumentsNotConfigured_LogsDisabledMessage()
+    public void Register_NoListenersConfigured_LogsDisabledMessage()
     {
         // Arrange
         var logger = Substitute.For<IDiagnosticLogger>();
@@ -25,7 +25,7 @@ public class SystemDiagnosticsMetricsIntegrationTests
     }
 
     [Fact]
-    public void Register_Net8OrGreater_LogsDisabledMessage()
+    public void Register_CaptureSystemDiagnosticsInstruments_Succeeds()
     {
         // Arrange
         var logger = Substitute.For<IDiagnosticLogger>();
@@ -34,17 +34,40 @@ public class SystemDiagnosticsMetricsIntegrationTests
             DiagnosticLogger = logger,
             ExperimentalMetrics = new ExperimentalMetricsOptions()
             {
-                CaptureInstruments = [".*"]
+                CaptureSystemDiagnosticsInstruments = [".*"]
             }
         };
-        var initializeDefaultListener = Substitute.For<Action<IEnumerable<SubstringOrRegexPattern>>>();
+        var initializeDefaultListener = Substitute.For<Action<ExperimentalMetricsOptions>>();
         var integration = new SystemDiagnosticsMetricsIntegration(initializeDefaultListener);
 
         // Act
         integration.Register(null!, options);
 
         // Assert
-        initializeDefaultListener.Received(1)(options.ExperimentalMetrics.CaptureInstruments);
+        initializeDefaultListener.Received(1)(options.ExperimentalMetrics);
+    }
+
+    [Fact]
+    public void Register_CaptureSystemDiagnosticsMeters_Succeeds()
+    {
+        // Arrange
+        var logger = Substitute.For<IDiagnosticLogger>();
+        var options = new SentryOptions
+        {
+            DiagnosticLogger = logger,
+            ExperimentalMetrics = new ExperimentalMetricsOptions()
+            {
+                CaptureSystemDiagnosticsMeters = [".*"]
+            }
+        };
+        var initializeDefaultListener = Substitute.For<Action<ExperimentalMetricsOptions>>();
+        var integration = new SystemDiagnosticsMetricsIntegration(initializeDefaultListener);
+
+        // Act
+        integration.Register(null!, options);
+
+        // Assert
+        initializeDefaultListener.Received(1)(options.ExperimentalMetrics);
     }
 }
 #endif
