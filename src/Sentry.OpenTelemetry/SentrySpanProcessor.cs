@@ -103,6 +103,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 transactionContext, new Dictionary<string, object?>(), dynamicSamplingContext
                 );
             transaction.StartTimestamp = data.StartTimeUtc;
+            _hub.ConfigureScope(scope => scope.Transaction = transaction);
             _map[data.SpanId] = transaction;
         }
     }
