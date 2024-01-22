@@ -38,12 +38,6 @@
   {
     Message: Registering integration: '{0}'.,
     Args: [
-      WinUIUnhandledExceptionIntegration
-    ]
-  },
-  {
-    Message: Registering integration: '{0}'.,
-    Args: [
       SystemDiagnosticsMetricsIntegration
     ]
   },

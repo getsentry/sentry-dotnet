@@ -16,11 +16,19 @@ If you have conflicts, you can opt-out by adding the following to your `csproj`:
 </PropertyGroup>
 ```
 
+### Fixes
+
+- Moved the binding to MAUI events for breadcrumb creation from `WillFinishLaunching` to `FinishedLaunching`. This delays the initial instantiation of `app`. ([#3057](https://github.com/getsentry/sentry-dotnet/pull/3057))
+- The SDK no longer adds the `WinUIUnhandledExceptionIntegration` on non Windows platforms ([#3055](https://github.com/getsentry/sentry-dotnet/pull/3055))
+
 ### Dependencies
 
 - Bump Java SDK from v7.1.0 to v7.2.0 ([#3049](https://github.com/getsentry/sentry-dotnet/pull/3049))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#720)
   - [diff](https://github.com/getsentry/sentry-java/compare/7.1.0...7.2.0)
+- Bump CLI from v2.25.0 to v2.25.3 ([#3059](https://github.com/getsentry/sentry-dotnet/pull/3059), [#3062](https://github.com/getsentry/sentry-dotnet/pull/3062))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2253)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.25.0...2.25.3)
 
 ## 4.0.0-beta.8
 

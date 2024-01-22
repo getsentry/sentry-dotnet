@@ -285,9 +285,15 @@ public class DeviceRunner : ITestListener, ITestRunner
 
         var deviceExecSink = new DeviceExecutionSink(xunitTestCases, this, context);
 
-        IExecutionSink resultsSink = new DelegatingExecutionSummarySink(deviceExecSink, () => cancelled);
+        var resultsSink = new ExecutionSink(deviceExecSink, new ExecutionSinkOptions { CancelThunk = () => cancelled });
         if (longRunningSeconds > 0)
-            resultsSink = new DelegatingLongRunningTestDetectionSink(resultsSink, TimeSpan.FromSeconds(longRunningSeconds), diagSink);
+        {
+            resultsSink = new ExecutionSink(resultsSink, new ExecutionSinkOptions
+            {
+                LongRunningTestTime = TimeSpan.FromSeconds(longRunningSeconds),
+                DiagnosticMessageSink = diagSink
+            });
+        }
 
         var assm = new XunitProjectAssembly() { AssemblyFilename = runInfo.AssemblyFileName };
         deviceExecSink.OnMessage(new TestAssemblyExecutionStarting(assm, executionOptions));

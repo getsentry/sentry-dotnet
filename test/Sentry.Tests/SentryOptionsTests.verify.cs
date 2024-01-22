@@ -3,9 +3,12 @@ namespace Sentry.Tests;
 [UsesVerify]
 public partial class SentryOptionsTests
 {
-    [Fact]
+    [SkippableFact]
     public Task Integrations_default_ones_are_properly_registered()
     {
+        // Windows additionally adds `WinUIUnhandledExceptionIntegration`
+        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+
         InMemoryDiagnosticLogger logger = new();
         SentryOptions options = new()
         {
