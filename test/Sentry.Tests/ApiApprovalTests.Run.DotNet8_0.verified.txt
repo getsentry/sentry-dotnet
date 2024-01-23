@@ -49,6 +49,21 @@ namespace Sentry
         [System.Runtime.Serialization.EnumMember(Value="critical")]
         Critical = 3,
     }
+    public static class BuiltInSystemDiagnosticsMeters
+    {
+        public static System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> All;
+        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreDiagnostics;
+        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreHeaderParsing;
+        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreHosting;
+        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreHttpConnections;
+        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreRateLimiting;
+        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreRouting;
+        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreServerKestrel;
+        public static readonly Sentry.SubstringOrRegexPattern MicrosoftExtensionsDiagnosticsHealthChecks;
+        public static readonly Sentry.SubstringOrRegexPattern MicrosoftExtensionsDiagnosticsResourceMonitoring;
+        public static readonly Sentry.SubstringOrRegexPattern SystemNetHttp;
+        public static readonly Sentry.SubstringOrRegexPattern SystemNetNameResolution;
+    }
     public class ByteAttachmentContent : Sentry.IAttachmentContent
     {
         public ByteAttachmentContent(byte[] bytes) { }

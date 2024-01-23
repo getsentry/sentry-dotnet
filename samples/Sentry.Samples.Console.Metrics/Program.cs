@@ -28,14 +28,15 @@ internal static class Program
                    // Initialize some (non null) ExperimentalMetricsOptions to enable Sentry Metrics,
                    options.ExperimentalMetrics = new ExperimentalMetricsOptions
                    {
-                        EnableCodeLocations = true, // Set this to false if you don't want to track code locations for some reason
-                        CaptureSystemDiagnosticsInstruments = new List<SubstringOrRegexPattern>(){
+                        EnableCodeLocations = true, // Set this to false if you don't want to track code locations
+                        CaptureSystemDiagnosticsInstruments = [
                             // Capture System.Diagnostics.Metrics matching the name "HatCo.HatStore", which is the name
                             // of the custom HatsMeter defined above
-                            "hats-sold",
-                            // Capture built in http.client metrics
-                             new Regex(@"^http\.client\..*"),
-                        }
+                            "hats-sold"
+                        ],
+                        // Capture all built in metrics (this is the default - you can override this to capture some or
+                        // none of these if you prefer)
+                        CaptureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All
                    };
                }))
         {
