@@ -275,14 +275,6 @@ public class TransactionTracer : ITransactionTracer
     internal ISpan StartChild(SpanId? spanId, SpanId parentSpanId, string operation,
         Instrumenter instrumenter = Instrumenter.Sentry)
     {
-        if (instrumenter != _instrumenter)
-        {
-            _options?.LogWarning(
-                "Attempted to create a span via {0} instrumentation to a span or transaction" +
-                " originating from {1} instrumentation. The span will not be created.", instrumenter, _instrumenter);
-            return NoOpSpan.Instance;
-        }
-
         var span = new SpanTracer(_hub, this, parentSpanId, TraceId, operation);
         if (spanId is { } id)
         {
