@@ -26,6 +26,7 @@
       "samples\\Sentry.Samples.Ios\\Sentry.Samples.Ios.csproj",
       "samples\\Sentry.Samples.Log4Net\\Sentry.Samples.Log4Net.csproj",
       "samples\\Sentry.Samples.MacCatalyst\\Sentry.Samples.MacCatalyst.csproj",
+      "samples\\Sentry.Samples.macOS\\Sentry.Samples.macOS.csproj",
       "samples\\Sentry.Samples.Maui\\Sentry.Samples.Maui.csproj",
       "samples\\Sentry.Samples.ME.Logging\\Sentry.Samples.ME.Logging.csproj",
       "samples\\Sentry.Samples.NLog\\Sentry.Samples.NLog.csproj",
