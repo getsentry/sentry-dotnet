@@ -4,8 +4,7 @@ using Sentry.Protocol.Metrics;
 namespace Sentry;
 
 /// <summary>
-/// Measures the time it takes to run a given code block and emits this as a metric. The <see cref="Timing"/> class is
-/// designed to be used in a <c>using</c> statement.
+/// Measures the time it takes to run a given code block and emits this as a metric.
 /// </summary>
 /// <example>
 /// using (var timing = new Timing("my-operation"))

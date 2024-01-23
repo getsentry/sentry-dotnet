@@ -105,3 +105,23 @@ public interface IMetricAggregator: IDisposable
     /// <returns>False if a shutdown is requested during flush, true otherwise</returns>
     Task FlushAsync(bool force = true, CancellationToken cancellationToken = default);
 }
+
+/// <summary>
+/// Extension methods for <see cref="IMetricAggregator"/>.
+/// </summary>
+public static class MetricsAggregatorExtensions
+{
+    /// <summary>
+    /// Measures the time it takes to run a given code block and emits this as a metric.
+    /// </summary>
+    /// <example>
+    /// using (SentrySdk.Metrics.StartTimer("my-operation"))
+    /// {
+    ///     ...
+    /// }
+    /// </example>
+    public static IDisposable StartTimer(this IMetricAggregator aggregator, string key,
+        MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second, IDictionary<string, string>? tags = null,
+        int stackLevel = 1)
+        => new Timing(SentrySdk.CurrentHub, key, unit, tags, stackLevel + 1);
+}
