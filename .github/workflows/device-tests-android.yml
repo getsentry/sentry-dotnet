@@ -23,12 +23,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set Java Version
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '11'
-
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
 
