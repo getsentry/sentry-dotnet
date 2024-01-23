@@ -392,6 +392,10 @@ namespace Sentry
             Exbibyte = 13,
         }
     }
+    public static class MetricsAggregatorExtensions
+    {
+        public static System.IDisposable StartTimer(this Sentry.IMetricAggregator aggregator, string key, Sentry.MeasurementUnit.Duration unit = 3, System.Collections.Generic.IDictionary<string, string>? tags = null, int stackLevel = 1) { }
+    }
     public sealed class Package : Sentry.IJsonSerializable
     {
         public Package(string name, string version) { }
