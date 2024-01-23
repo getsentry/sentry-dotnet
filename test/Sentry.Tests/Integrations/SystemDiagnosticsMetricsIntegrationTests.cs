@@ -14,6 +14,10 @@ public class SystemDiagnosticsMetricsIntegrationTests
             Debug = true,
             DiagnosticLogger = logger,
             ExperimentalMetrics = new ExperimentalMetricsOptions()
+            {
+                CaptureSystemDiagnosticsInstruments = [],
+                CaptureSystemDiagnosticsMeters = []
+            }
         };
         var integration = new SystemDiagnosticsMetricsIntegration();
 
@@ -34,7 +38,8 @@ public class SystemDiagnosticsMetricsIntegrationTests
             DiagnosticLogger = logger,
             ExperimentalMetrics = new ExperimentalMetricsOptions()
             {
-                CaptureSystemDiagnosticsInstruments = [".*"]
+                CaptureSystemDiagnosticsInstruments = [".*"],
+                CaptureSystemDiagnosticsMeters = []
             }
         };
         var initializeDefaultListener = Substitute.For<Action<ExperimentalMetricsOptions>>();
@@ -57,6 +62,7 @@ public class SystemDiagnosticsMetricsIntegrationTests
             DiagnosticLogger = logger,
             ExperimentalMetrics = new ExperimentalMetricsOptions()
             {
+                CaptureSystemDiagnosticsInstruments = [],
                 CaptureSystemDiagnosticsMeters = [".*"]
             }
         };
