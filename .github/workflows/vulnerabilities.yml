@@ -2,9 +2,10 @@ name: List vulnerable packages
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 0 * * *" # once a day
-  pull_request:
+    # Currently broken on .net 8, see https://github.com/NuGet/Home/issues/12954
+    # schedule:
+    #   - cron: "0 0 * * *" # once a day
+    # pull_request:
 
 jobs:
   list-vulnerable-packages:
