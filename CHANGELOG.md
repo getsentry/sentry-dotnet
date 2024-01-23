@@ -16,6 +16,7 @@ If you have conflicts, you can opt-out by adding the following to your `csproj`:
 
 - Moved the binding to MAUI events for breadcrumb creation from `WillFinishLaunching` to `FinishedLaunching`. This delays the initial instantiation of `app`. ([#3057](https://github.com/getsentry/sentry-dotnet/pull/3057))
 - The SDK no longer adds the `WinUIUnhandledExceptionIntegration` on non Windows platforms ([#3055](https://github.com/getsentry/sentry-dotnet/pull/3055))
+- The scope transaction is now correctly set for Otel transactions ([#3072](https://github.com/getsentry/sentry-dotnet/pull/3072))
 
 ### Dependencies
 
