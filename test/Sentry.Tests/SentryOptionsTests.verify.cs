@@ -25,10 +25,5 @@ public partial class SentryOptionsTests
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             settingsTask = settingsTask.UniqueForOSPlatform();
         return settingsTask;
-        // return Verify(logger.Entries)
-        //     .UniqueForTargetFrameworkAndVersion()
-        //     .UniqueForOSPlatform()
-        //     .UniqueForRuntime()
-        //     .AutoVerify(includeBuildServer: false);
     }
 }
