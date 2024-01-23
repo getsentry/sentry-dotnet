@@ -23,6 +23,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
 
