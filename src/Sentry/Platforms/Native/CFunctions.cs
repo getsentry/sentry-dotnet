@@ -81,6 +81,7 @@ internal static class C
 
     public static bool Init(SentryOptions options)
     {
+        _isWindows = System.OperatingSystem.IsWindows();
         var cOptions = sentry_options_new();
 
         // Note: DSN is not null because options.IsValid() must have returned true for this to be called.
@@ -112,7 +113,7 @@ internal static class C
         sentry_options_set_auto_session_tracking(cOptions, 0);
 
         var dir = GetCacheDirectory(options);
-        if (System.OperatingSystem.IsWindows())
+        if (_isWindows)
         {
             options.DiagnosticLogger?.LogDebug("Setting native CacheDirectoryPath on Windows: {0}", dir);
             sentry_options_set_database_pathw(cOptions, dir);
@@ -123,7 +124,6 @@ internal static class C
             sentry_options_set_database_path(cOptions, dir);
         }
 
-        _isLinux = System.OperatingSystem.IsLinux();
         if (options.DiagnosticLogger is null)
         {
             _logger?.LogDebug("Unsetting the current native logger");
@@ -363,7 +363,7 @@ internal static class C
 
     // The logger we should forward native messages to. This is referenced by nativeLog() which in turn for.
     private static IDiagnosticLogger? _logger;
-    private static bool _isLinux = false;
+    private static bool _isWindows = false;
 
     // This method is called from the C library and forwards incoming messages to the currently set _logger.
     // [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]  //  error CS3016: Arrays as attribute arguments is not CLS-complian
@@ -408,9 +408,18 @@ internal static class C
         try
         {
             // We cannot access C var-arg (va_list) in c# thus we pass it back to vsnprintf to do the formatting.
-            // For Linux, we must make a copy of the VaList to be able to pass it back...
-            if (_isLinux)
+            if (_isWindows)
             {
+                var formattedLength = 1 + vsnprintf_windows(IntPtr.Zero, UIntPtr.Zero, format, args);
+                WithAllocatedPtr(formattedLength, buffer =>
+                {
+                    vsnprintf_windows(buffer, (UIntPtr)formattedLength, format, args);
+                    message = Marshal.PtrToStringAnsi(buffer);
+                });
+            }
+            else
+            {
+                // For Linux/macOS, we must make a copy of the VaList to be able to pass it back...
                 var argsStruct = Marshal.PtrToStructure<VaListLinux64>(args);
                 var formattedLength = 0;
                 WithMarshalledStruct(argsStruct, argsPtr =>
@@ -423,15 +432,6 @@ internal static class C
                     vsnprintf_linux(buffer, (UIntPtr)formattedLength, format, argsPtr);
                     message = Marshal.PtrToStringAnsi(buffer);
                 }));
-            }
-            else
-            {
-                var formattedLength = 1 + vsnprintf_windows(IntPtr.Zero, UIntPtr.Zero, format, args);
-                WithAllocatedPtr(formattedLength, buffer =>
-                {
-                    vsnprintf_windows(buffer, (UIntPtr)formattedLength, format, args);
-                    message = Marshal.PtrToStringAnsi(buffer);
-                });
             }
         }
         catch (Exception err)
