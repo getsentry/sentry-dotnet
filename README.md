@@ -12,6 +12,7 @@ Sentry SDK for .NET
 ===========
 
 [![build](https://github.com/getsentry/sentry-dotnet/workflows/build/badge.svg?branch=main)](https://github.com/getsentry/sentry-dotnet/actions?query=branch%3Amain)
+[![codecov](https://codecov.io/gh/getsentry/sentry-dotnet/branch/main/graph/badge.svg)](https://codecov.io/gh/getsentry/sentry-dotnet)
 [![Discord Chat](https://img.shields.io/discord/621778831602221064?logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/PXa5Apfe7K)
 
 
@@ -49,8 +50,6 @@ Sentry has extensive documentation for its SDKs on [https://docs.sentry.io](http
 ### Samples
 
 **Consider taking a look at the _[samples](https://github.com/getsentry/sentry-dotnet/tree/main/samples)_ directory for different types of apps and example usages of the SDK.**
-
-Looking for more samples? Check out [this repository](https://github.com/getsentry/examples).
 
 ### Talks
 

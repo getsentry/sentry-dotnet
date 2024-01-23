@@ -37,7 +37,7 @@ public class BaseScopeTests
     [Fact]
     public void User_Settable()
     {
-        var expected = new User();
+        var expected = new SentryUser();
         _sut.User = expected;
         Assert.Same(expected, _sut.User);
     }

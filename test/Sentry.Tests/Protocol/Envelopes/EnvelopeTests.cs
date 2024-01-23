@@ -628,7 +628,7 @@ public class EnvelopeTests
         var id = Guid.Parse("4b780f4c-ec03-42a7-8ef8-a41c9d5621f8");
         var @event = new SentryEvent(ex, timestamp, id)
         {
-            User = new User { Id = "user-id" },
+            User = new SentryUser { Id = "user-id" },
             Request = new Request { Method = "POST" },
             Contexts = new Contexts
             {

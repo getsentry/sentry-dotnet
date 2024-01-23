@@ -6,8 +6,8 @@ namespace Sentry;
 public interface ISentryUserFactory
 {
     /// <summary>
-    /// Creates a Sentry <see cref="User"/> representing the current principal.
+    /// Creates a Sentry <see cref="SentryUser"/> representing the current principal.
     /// </summary>
     /// <returns>The protocol user</returns>
-    public User? Create();
+    public SentryUser? Create();
 }

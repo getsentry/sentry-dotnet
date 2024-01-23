@@ -1,5 +1,4 @@
 using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 #if NETFRAMEWORK
@@ -30,7 +29,7 @@ internal sealed class SampleProfile : IJsonSerializable
         writer.WriteEndObject();
 
 #if NETFRAMEWORK
-        if (PlatformAbstractions.Runtime.Current.IsMono())
+        if (PlatformAbstractions.SentryRuntime.Current.IsMono())
         {
             // STJ doesn't like HashableGrowableArray on Mono, failing with:
             //   Invalid IL code in (wrapper dynamic-method) object:.ctor (): IL_0005: ret

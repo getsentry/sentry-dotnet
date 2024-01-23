@@ -252,7 +252,7 @@ public static class SentryOptionsExtensions
     }
 
     /// <summary>
-    /// Adds an transaction processor which is invoked when creating a <see cref="Transaction"/>.
+    /// Adds an transaction processor which is invoked when creating a <see cref="SentryTransaction"/>.
     /// </summary>
     /// <param name="options">The SentryOptions to hold the processor.</param>
     /// <param name="processor">The transaction processor.</param>
@@ -269,7 +269,7 @@ public static class SentryOptionsExtensions
     }
 
     /// <summary>
-    /// Adds transaction processors which are invoked when creating a <see cref="Transaction"/>.
+    /// Adds transaction processors which are invoked when creating a <see cref="SentryTransaction"/>.
     /// </summary>
     /// <param name="options">The SentryOptions to hold the processor.</param>
     /// <param name="processors">The transaction processors.</param>
@@ -295,7 +295,7 @@ public static class SentryOptionsExtensions
         => options.TransactionProcessors?.RemoveAll(processor => processor is TProcessor);
 
     /// <summary>
-    /// Adds an transaction processor provider which is invoked when creating a <see cref="Transaction"/>.
+    /// Adds an transaction processor provider which is invoked when creating a <see cref="SentryTransaction"/>.
     /// </summary>
     /// <param name="options">The SentryOptions to hold the processor provider.</param>
     /// <param name="processorProvider">The transaction processor provider.</param>
@@ -369,6 +369,14 @@ public static class SentryOptionsExtensions
                 options.DiagnosticLogger = new ConsoleDiagnosticLogger(options.DiagnosticLevel);
                 options.DiagnosticLogger.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}",
                     options.DiagnosticLevel);
+            }
+
+            if (options.SettingLocator.GetEnvironment().Equals("production", StringComparison.OrdinalIgnoreCase))
+            {
+                options.DiagnosticLogger.LogWarning("Sentry option 'Debug' is set to true while Environment is production. " +
+                                                    "Be aware this can cause performance degradation and is not advised. " +
+                                                    "See https://docs.sentry.io/platforms/dotnet/configuration/diagnostic-logger " +
+                                                    "for more information");
             }
         }
         else

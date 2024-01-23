@@ -1,9 +1,6 @@
-using System.Diagnostics.Tracing;
-using Microsoft.Diagnostics.NETCore.Client;
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
 using Microsoft.Diagnostics.Tracing.EventPipe;
-using Microsoft.Diagnostics.Tracing.Parsers;
 
 namespace Sentry.Profiling.Tests;
 
@@ -78,7 +75,7 @@ public class TraceLogProcessorTests
     [Fact]
     public Task ProfileInfo_Serialization_Works()
     {
-        var transaction = new Transaction("name", "op");
+        var transaction = new SentryTransaction("name", "op");
         transaction.Contexts.Device.Architecture = "arch";
         transaction.Contexts.Device.Model = "device model";
         transaction.Contexts.Device.Manufacturer = "device make";

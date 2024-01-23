@@ -8,6 +8,7 @@
     <ImplicitUsings>true</ImplicitUsings>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
+    <SentryImplicitUsings>false</SentryImplicitUsings>
   </PropertyGroup>
 
   <PropertyGroup>

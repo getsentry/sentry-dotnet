@@ -1,10 +1,10 @@
 namespace Sentry.Tests.Protocol.Context;
 
-public class RuntimeTests
+public class SentryRuntimeTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
 
-    public RuntimeTests(ITestOutputHelper output)
+    public SentryRuntimeTests(ITestOutputHelper output)
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
     }

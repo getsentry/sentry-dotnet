@@ -1,4 +1,3 @@
-using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Internal;
@@ -65,7 +64,7 @@ internal abstract class ScopeObserver : Sentry.IScopeObserver
 
     public abstract void UnsetTagImpl(string key);
 
-    public void SetUser(User? user)
+    public void SetUser(SentryUser? user)
     {
         if (user is null)
         {
@@ -82,7 +81,7 @@ internal abstract class ScopeObserver : Sentry.IScopeObserver
         }
     }
 
-    public abstract void SetUserImpl(User user);
+    public abstract void SetUserImpl(SentryUser user);
 
     public abstract void UnsetUserImpl();
 }

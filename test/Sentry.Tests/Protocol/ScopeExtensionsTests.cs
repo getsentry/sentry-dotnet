@@ -30,7 +30,7 @@ public class ScopeExtensionsTests
     public void HasUser_EmptyUser_ReturnsFalse()
     {
         var sut = _fixture.GetSut();
-        sut.User = new User();
+        sut.User = new SentryUser();
         Assert.False(sut.HasUser());
     }
 
@@ -1088,7 +1088,7 @@ public class ScopeExtensionsTests
         var sut = _fixture.GetSut();
         var target = _fixture.GetSut();
 
-        sut.User = new User();
+        sut.User = new SentryUser();
         sut.Apply(target);
 
         Assert.NotSame(sut.User, target.User);
@@ -1280,7 +1280,7 @@ public class ScopeExtensionsTests
         source.Apply(target);
 
         // Assert
-        Assert.Equal(1, target.Attachments.Count);
+        Assert.Single(target.Attachments);
     }
 
     [Fact]
@@ -1296,6 +1296,6 @@ public class ScopeExtensionsTests
         source.Apply(target);
 
         // Assert
-        Assert.Equal(1, target.Attachments.Count);
+        Assert.Single(target.Attachments);
     }
 }

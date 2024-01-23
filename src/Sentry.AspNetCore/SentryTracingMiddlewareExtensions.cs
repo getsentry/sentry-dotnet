@@ -1,8 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Sentry;
 using Sentry.AspNetCore;
-using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 // ReSharper disable once CheckNamespace

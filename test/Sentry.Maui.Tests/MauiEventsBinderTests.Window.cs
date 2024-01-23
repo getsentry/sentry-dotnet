@@ -49,7 +49,7 @@ public partial class MauiEventsBinderTests
         _fixture.Binder.HandleWindowEvents(window);
 
         window.RaiseEvent(eventName, EventArgs.Empty);
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandleWindowEvents(window, bind: false);
 
@@ -57,7 +57,7 @@ public partial class MauiEventsBinderTests
         window.RaiseEvent(eventName, EventArgs.Empty);
 
         // Assert
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 
     [Theory]
@@ -122,7 +122,7 @@ public partial class MauiEventsBinderTests
         };
 
         window.RaiseEvent(nameof(Window.Backgrounding), new BackgroundingEventArgs(state));
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandleWindowEvents(window, bind: false);
 
@@ -130,7 +130,7 @@ public partial class MauiEventsBinderTests
         window.RaiseEvent(nameof(Window.Backgrounding), new BackgroundingEventArgs(state));
 
         // Assert
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 
     [Fact]
@@ -167,7 +167,7 @@ public partial class MauiEventsBinderTests
         _fixture.Binder.HandleWindowEvents(window);
 
         window.RaiseEvent(nameof(Window.DisplayDensityChanged), new DisplayDensityChangedEventArgs(1.25f));
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandleWindowEvents(window, bind: false);
 
@@ -175,7 +175,7 @@ public partial class MauiEventsBinderTests
         window.RaiseEvent(nameof(Window.DisplayDensityChanged), new DisplayDensityChangedEventArgs(1.0f));
 
         // Assert
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 
     [Fact]
@@ -211,7 +211,7 @@ public partial class MauiEventsBinderTests
         _fixture.Binder.HandleWindowEvents(window);
 
         window.RaiseEvent(nameof(Window.PopCanceled), EventArgs.Empty);
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandleWindowEvents(window, bind: false);
 
@@ -219,7 +219,7 @@ public partial class MauiEventsBinderTests
         window.RaiseEvent(nameof(Window.PopCanceled), EventArgs.Empty);
 
         // Assert
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 
     [Theory]
@@ -259,7 +259,7 @@ public partial class MauiEventsBinderTests
         _fixture.Binder.HandleWindowEvents(window);
 
         window.RaiseEvent(eventName, eventArgs);
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandleWindowEvents(window, bind: false);
 
@@ -267,7 +267,7 @@ public partial class MauiEventsBinderTests
         window.RaiseEvent(eventName, eventArgs);
 
         // Assert
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 
     public static IEnumerable<object[]> WindowModalEventsData

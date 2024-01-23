@@ -1,5 +1,4 @@
 using Sentry.Extensibility;
-using Sentry.Internal.Extensions;
 using Sentry.Reflection;
 
 namespace Sentry.Internal;

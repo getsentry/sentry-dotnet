@@ -151,14 +151,14 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
-    public void CaptureTransaction(Transaction transaction)
+    public void CaptureTransaction(SentryTransaction transaction)
     {
     }
 
     /// <summary>
     /// No-Op.
     /// </summary>
-    public void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
+    public void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint)
     {
     }
 
@@ -173,6 +173,11 @@ public class DisabledHub : IHub, IDisposable
     /// No-Op.
     /// </summary>
     public Task FlushAsync(TimeSpan timeout) => Task.CompletedTask;
+
+    /// <summary>
+    /// Disabled Metrics Aggregator (all methods are no-op).
+    /// </summary>
+    public IMetricAggregator Metrics { get; } = new DisabledMetricAggregator();
 
     /// <summary>
     /// No-Op.

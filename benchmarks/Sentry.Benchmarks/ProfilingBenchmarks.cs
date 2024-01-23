@@ -18,14 +18,14 @@ public class ProfilingBenchmarks
     [GlobalSetup(Targets = new string[] { nameof(Transaction), nameof(DoHardWorkWhileProfiling) })]
     public void StartProfiler()
     {
-        _factory = SamplingTransactionProfilerFactory.Create(new());
+        _factory = new SamplingTransactionProfilerFactory(new(), TimeSpan.FromSeconds(5));
     }
 
     [GlobalCleanup(Targets = new string[] { nameof(Transaction), nameof(DoHardWorkWhileProfiling) })]
     public void StopProfiler()
     {
         _profiler?.Finish();
-        (_profiler as SamplingTransactionProfiler)?.CollectAsync(new Transaction("", "")).Wait();
+        (_profiler as SamplingTransactionProfiler)?.CollectAsync(new SentryTransaction("", "")).Wait();
         _profiler = null;
         _factory.Dispose();
         _factory = null;
@@ -52,7 +52,7 @@ public class ProfilingBenchmarks
         tt.TransactionProfiler = _factory.Start(tt, CancellationToken.None);
         var result = RunForMs(runtimeMs);
         tt.TransactionProfiler.Finish();
-        var transaction = new Transaction(tt);
+        var transaction = new SentryTransaction(tt);
         if (collect)
         {
             var collectTask = (tt.TransactionProfiler as SamplingTransactionProfiler).CollectAsync(transaction);

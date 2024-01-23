@@ -23,7 +23,7 @@ public partial class SentryClientTests
         var error = new Exception("Exception message!");
         _fixture.SentryOptions.SetBeforeSendTransaction((_, _) => throw error);
 
-        var transaction = new Transaction("name", "operation")
+        var transaction = new SentryTransaction("name", "operation")
         {
             IsSampled = true
         };

@@ -49,4 +49,11 @@ public class SentryMauiOptionsTests
         Assert.Equal(expected, options.CacheDirectoryPath);
 #endif
     }
+
+    [Fact]
+    public void AttachScreenshots_Default()
+    {
+        var options = new SentryMauiOptions();
+        Assert.False(options.AttachScreenshot);
+    }
 }

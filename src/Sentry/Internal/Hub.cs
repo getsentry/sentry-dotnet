@@ -20,6 +20,9 @@ internal class Hub : IHub, IDisposable
 
     internal IInternalScopeManager ScopeManager { get; }
 
+    /// <inheritdoc cref="IMetricAggregator"/>
+    public IMetricAggregator Metrics { get; }
+
     private int _isEnabled = 1;
     public bool IsEnabled => _isEnabled == 1;
 
@@ -55,6 +58,8 @@ internal class Hub : IHub, IDisposable
             // Push the first scope so the async local starts from here
             PushScope();
         }
+
+        Metrics = _ownedClient.Metrics;
 
         foreach (var integration in options.Integrations)
         {
@@ -455,9 +460,9 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null, null);
+    public void CaptureTransaction(SentryTransaction transaction) => CaptureTransaction(transaction, null, null);
 
-    public void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
+    public void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint)
     {
         // Note: The hub should capture transactions even if it is disabled.
         // This allows transactions to be reported as failed when they encountered an unhandled exception,
@@ -520,7 +525,16 @@ internal class Hub : IHub, IDisposable
             return;
         }
 
-        _ownedClient.Flush(_options.ShutdownTimeout);
+        try
+        {
+            _ownedClient.Metrics.FlushAsync().ContinueWith(_ =>
+                _ownedClient.FlushAsync(_options.ShutdownTimeout).Wait()
+            ).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failed to wait on disposing tasks to flush.");
+        }
         //Dont dispose of ScopeManager since we want dangling transactions to still be able to access tags.
 
 #if __IOS__

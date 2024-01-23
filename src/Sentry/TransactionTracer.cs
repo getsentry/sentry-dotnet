@@ -1,6 +1,5 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Internal.ScopeStack;
 using Sentry.Protocol;
 
 namespace Sentry;
@@ -119,12 +118,12 @@ public class TransactionTracer : ITransactionTracer
         set => _contexts.ReplaceWith(value);
     }
 
-    private User? _user;
+    private SentryUser? _user;
 
     /// <inheritdoc />
-    public User User
+    public SentryUser User
     {
-        get => _user ??= new User();
+        get => _user ??= new SentryUser();
         set => _user = value;
     }
 
@@ -198,7 +197,7 @@ public class TransactionTracer : ITransactionTracer
     }
 
     /// <summary>
-    /// Initializes an instance of <see cref="Transaction"/>.
+    /// Initializes an instance of <see cref="SentryTransaction"/>.
     /// </summary>
     internal TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource = TransactionNameSource.Custom)
     {
@@ -362,20 +361,11 @@ public class TransactionTracer : ITransactionTracer
         EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
         _options?.LogDebug("Finished Transaction {0}.", SpanId);
 
-        foreach (var span in _spans)
-        {
-            if (!span.IsFinished)
-            {
-                _options?.LogDebug("Deadline exceeded for Transaction {0} -> Span {1}.", SpanId, span.SpanId);
-                span.Finish(SpanStatus.DeadlineExceeded);
-            }
-        }
-
         // Clear the transaction from the scope
         _hub.ConfigureScope(scope => scope.ResetTransaction(this));
 
         // Client decides whether to discard this transaction based on sampling
-        _hub.CaptureTransaction(new Transaction(this));
+        _hub.CaptureTransaction(new SentryTransaction(this));
     }
 
     /// <inheritdoc />

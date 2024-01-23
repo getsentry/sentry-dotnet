@@ -1,10 +1,10 @@
 namespace Sentry.Tests.Protocol;
 
-public class TransactionTests
+public class SentryTransactionTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
 
-    public TransactionTests(ITestOutputHelper output)
+    public SentryTransactionTests(ITestOutputHelper output)
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
     }
@@ -90,7 +90,7 @@ public class TransactionTests
             // We don't redact the User or the Request since, if SendDefaultPii is false, we don't add these to the
             // transaction in the SDK anyway (by default they don't get sent... but the user can always override this
             // behavior if they need)
-            User = new User { Id = "user-id", Username = "username", Email = "bob@foo.com", IpAddress = "127.0.0.1" },
+            User = new SentryUser { Id = "user-id", Username = "username", Email = "bob@foo.com", IpAddress = "127.0.0.1" },
             Request = new Request { Method = "POST", Url = "https://user@not.redacted"},
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
             Environment = environment,
@@ -133,7 +133,7 @@ public class TransactionTests
         txTracer.Finish(SpanStatus.Aborted);
 
         // Act
-        var transaction = new Transaction(txTracer);
+        var transaction = new SentryTransaction(txTracer);
         transaction.Redact();
 
         // Assert
@@ -175,7 +175,7 @@ public class TransactionTests
         {
             Description = "desc123",
             Status = SpanStatus.Aborted,
-            User = new User { Id = "user-id" },
+            User = new SentryUser { Id = "user-id" },
             Request = new Request { Method = "POST" },
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
             Environment = "environment",
@@ -228,9 +228,9 @@ public class TransactionTests
         transaction.Finish(SpanStatus.Aborted);
 
         // Act
-        var finalTransaction = new Transaction(transaction);
+        var finalTransaction = new SentryTransaction(transaction);
         var actualString = finalTransaction.ToJsonString(_testOutputLogger);
-        var actual = Json.Parse(actualString, Transaction.FromJson);
+        var actual = Json.Parse(actualString, SentryTransaction.FromJson);
 
         // Assert
         actual.Should().BeEquivalentTo(finalTransaction, o =>
@@ -381,29 +381,6 @@ public class TransactionTests
     }
 
     [Fact]
-    public void Finish_UnfinishedSpansGetsFinishedWithDeadlineStatus()
-    {
-        // Arrange
-        var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op");
-        transaction.StartChild("children1");
-        transaction.StartChild("children2");
-        transaction.StartChild("children3.finished").Finish(SpanStatus.Ok);
-        transaction.StartChild("children4");
-
-        // Act
-        transaction.Finish();
-
-        // Assert
-
-        Assert.All(transaction.Spans.Where(span => !span.Operation.EndsWith("finished")), span =>
-        {
-            Assert.True(span.IsFinished);
-            Assert.Equal(SpanStatus.DeadlineExceeded, span.Status);
-        });
-        Assert.Single(transaction.Spans.Where(span => span.Operation.EndsWith("finished") && span.Status == SpanStatus.Ok));
-    }
-
-    [Fact]
     public void Finish_SentryRequestSpansGetIgnored()
     {
         // Arrange
@@ -413,8 +390,8 @@ public class TransactionTests
         var sentryRequest = (SpanTracer)transactionTracer.StartChild("sentryRequest");
         sentryRequest.IsSentryRequest = true;
 
-        Transaction transaction = null;
-        hub.CaptureTransaction(Arg.Do<Sentry.Transaction>(t => transaction = t));
+        SentryTransaction transaction = null;
+        hub.CaptureTransaction(Arg.Do<Sentry.SentryTransaction>(t => transaction = t));
 
         // Act
         transactionTracer.Finish();
@@ -472,7 +449,7 @@ public class TransactionTests
         transaction.Finish();
 
         // Assert
-        client.Received(1).CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Scope>(), Arg.Any<Hint>());
+        client.Received(1).CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<Hint>());
     }
 
     [Fact]

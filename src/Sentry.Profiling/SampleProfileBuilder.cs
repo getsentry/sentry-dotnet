@@ -1,7 +1,6 @@
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
 using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Protocol;
 
 namespace Sentry.Profiling;
@@ -17,15 +16,14 @@ internal class SampleProfileBuilder
     // Output profile being built.
     public readonly SampleProfile Profile = new();
 
-    // TODO reevaluate the use of SparseArray after setting up continous profiling. Dictionary might be better.
     // A sparse array that maps from StackSourceFrameIndex to an index in the output Profile.frames.
-    private readonly SparseScalarArray<int> _frameIndexes = new(-1, 1000);
+    private readonly Dictionary<int, int> _frameIndexes = new();
 
     // A dictionary from a CallStackIndex to an index in the output Profile.stacks.
-    private readonly SparseScalarArray<int> _stackIndexes = new(100);
+    private readonly Dictionary<int, int> _stackIndexes = new();
 
     // A sparse array mapping from a ThreadIndex to an index in Profile.Threads.
-    private readonly SparseScalarArray<int> _threadIndexes = new(-1, 10);
+    private readonly Dictionary<int, int> _threadIndexes = new();
 
     // TODO make downsampling conditional once this is available: https://github.com/dotnet/runtime/issues/82939
     private readonly Downsampler _downsampler = new();
@@ -39,7 +37,7 @@ internal class SampleProfileBuilder
     internal void AddSample(TraceEvent data, double timestampMs)
     {
         var thread = data.Thread();
-        if (thread.ThreadIndex == ThreadIndex.Invalid)
+        if (thread is null || thread.ThreadIndex == ThreadIndex.Invalid)
         {
             _options.DiagnosticLogger?.LogDebug("Encountered a Profiler Sample without a correct thread. Skipping.");
             return;
@@ -163,8 +161,7 @@ internal class SampleProfileBuilder
         {
             frame.Function = method.FullMethodName;
 
-            TraceModuleFile moduleFile = method.MethodModuleFile;
-            if (moduleFile is not null)
+            if (method.MethodModuleFile is { } moduleFile)
             {
                 frame.Module = moduleFile.Name;
             }
@@ -173,15 +170,20 @@ internal class SampleProfileBuilder
         }
         else
         {
-            // native frame
-            frame.InApp = false;
-        }
+            // Fall back if the method info is unknown, see more info on Symbol resolution in
+            // https://github.com/getsentry/perfview/blob/031250ffb4f9fcadb9263525d6c9f274be19ca51/src/PerfView/SupportFiles/UsersGuide.htm#L7745-L7784
+            frame.InstructionAddress = (long?)_traceLog.CodeAddresses.Address(codeAddressIndex);
 
-        // TODO enable this once we implement symbolication (we will need to send debug_meta too), see StackTraceFactory.
-        // if (_traceLog.CodeAddresses.Address(codeAddressIndex) is { } address)
-        // {
-        //     frame.InstructionAddress = $"0x{address:x}";
-        // }
+            if (_traceLog.CodeAddresses.ModuleFile(codeAddressIndex) is { } moduleFile)
+            {
+                frame.Module = moduleFile.Name;
+                frame.ConfigureAppFrame(_options);
+            }
+            else
+            {
+                frame.InApp = false;
+            }
+        }
 
         return frame;
     }

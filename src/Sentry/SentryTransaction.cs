@@ -9,7 +9,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry performance transaction.
 /// </summary>
-public class Transaction : ITransactionData, IJsonSerializable
+public class SentryTransaction : ITransactionData, IJsonSerializable
 {
     /// <summary>
     /// Transaction's event ID.
@@ -134,12 +134,12 @@ public class Transaction : ITransactionData, IJsonSerializable
         set => _contexts.ReplaceWith(value);
     }
 
-    private User? _user;
+    private SentryUser? _user;
 
     /// <inheritdoc />
-    public User User
+    public SentryUser User
     {
-        get => _user ??= new User();
+        get => _user ??= new SentryUser();
         set => _user = value;
     }
 
@@ -184,12 +184,12 @@ public class Transaction : ITransactionData, IJsonSerializable
     public IReadOnlyDictionary<string, string> Tags => _tags;
 
     // Not readonly because of deserialization
-    private Span[] _spans = Array.Empty<Span>();
+    private SentrySpan[] _spans = Array.Empty<SentrySpan>();
 
     /// <summary>
     /// Flat list of spans within this transaction.
     /// </summary>
-    public IReadOnlyCollection<Span> Spans => _spans;
+    public IReadOnlyCollection<SentrySpan> Spans => _spans;
 
     /// <inheritdoc />
     public bool IsFinished => EndTimestamp is not null;
@@ -204,7 +204,7 @@ public class Transaction : ITransactionData, IJsonSerializable
     // instead just parse the trace context and resolve them later.
     // Hence why we need a constructor that doesn't take the operation to avoid
     // overwriting it.
-    private Transaction(string name, TransactionNameSource nameSource)
+    private SentryTransaction(string name, TransactionNameSource nameSource)
     {
         EventId = SentryId.Create();
         Name = name;
@@ -212,9 +212,9 @@ public class Transaction : ITransactionData, IJsonSerializable
     }
 
     /// <summary>
-    /// Initializes an instance of <see cref="Transaction"/>.
+    /// Initializes an instance of <see cref="SentryTransaction"/>.
     /// </summary>
-    public Transaction(string name, string operation)
+    public SentryTransaction(string name, string operation)
         : this(name, TransactionNameSource.Custom)
     {
         SpanId = SpanId.Create();
@@ -223,9 +223,9 @@ public class Transaction : ITransactionData, IJsonSerializable
     }
 
     /// <summary>
-    /// Initializes an instance of <see cref="Transaction"/>.
+    /// Initializes an instance of <see cref="SentryTransaction"/>.
     /// </summary>
-    public Transaction(string name, string operation, TransactionNameSource nameSource)
+    public SentryTransaction(string name, string operation, TransactionNameSource nameSource)
         : this(name, nameSource)
     {
         SpanId = SpanId.Create();
@@ -234,9 +234,9 @@ public class Transaction : ITransactionData, IJsonSerializable
     }
 
     /// <summary>
-    /// Initializes an instance of <see cref="Transaction"/>.
+    /// Initializes an instance of <see cref="SentryTransaction"/>.
     /// </summary>
-    public Transaction(ITransactionTracer tracer)
+    public SentryTransaction(ITransactionTracer tracer)
         : this(tracer.Name, tracer.NameSource)
     {
         // Contexts have to be set first because other fields use that
@@ -265,7 +265,7 @@ public class Transaction : ITransactionData, IJsonSerializable
         _tags = tracer.Tags.ToDict();
         _spans = tracer.Spans
             .Where(s => s is not SpanTracer { IsSentryRequest: true }) // Filter sentry requests created by Sentry.OpenTelemetry.SentrySpanProcessor
-            .Select(s => new Span(s)).ToArray();
+            .Select(s => new SentrySpan(s)).ToArray();
         _measurements = tracer.Measurements.ToDict();
 
         // Some items are not on the interface, but we only ever pass in a TransactionTracer anyway.
@@ -355,7 +355,7 @@ public class Transaction : ITransactionData, IJsonSerializable
     /// <summary>
     /// Parses transaction from JSON.
     /// </summary>
-    public static Transaction FromJson(JsonElement json)
+    public static SentryTransaction FromJson(JsonElement json)
     {
         var eventId = json.GetPropertyOrNull("event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
         var name = json.GetProperty("transaction").GetStringOrThrow();
@@ -369,7 +369,7 @@ public class Transaction : ITransactionData, IJsonSerializable
         var distribution = json.GetPropertyOrNull("dist")?.GetString();
         var request = json.GetPropertyOrNull("request")?.Pipe(Request.FromJson);
         var contexts = json.GetPropertyOrNull("contexts")?.Pipe(Contexts.FromJson) ?? new();
-        var user = json.GetPropertyOrNull("user")?.Pipe(User.FromJson);
+        var user = json.GetPropertyOrNull("user")?.Pipe(SentryUser.FromJson);
         var environment = json.GetPropertyOrNull("environment")?.GetString();
         var sdk = json.GetPropertyOrNull("sdk")?.Pipe(SdkVersion.FromJson) ?? new SdkVersion();
         var fingerprint = json.GetPropertyOrNull("fingerprint")?
@@ -383,9 +383,9 @@ public class Transaction : ITransactionData, IJsonSerializable
         var measurements = json.GetPropertyOrNull("measurements")?
             .GetDictionaryOrNull(Measurement.FromJson) ?? new();
         var spans = json.GetPropertyOrNull("spans")?
-            .EnumerateArray().Select(Span.FromJson).ToArray() ?? Array.Empty<Span>();
+            .EnumerateArray().Select(SentrySpan.FromJson).ToArray() ?? Array.Empty<SentrySpan>();
 
-        return new Transaction(name, nameSource)
+        return new SentryTransaction(name, nameSource)
         {
             EventId = eventId,
             StartTimestamp = startTimestamp,

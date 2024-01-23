@@ -1,8 +1,5 @@
 using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Internal.Extensions;
-using Sentry.Internal.OpenTelemetry;
-using Sentry.Protocol;
 
 namespace Sentry;
 
@@ -107,7 +104,7 @@ public class Scope : IEventLike
     }
 
     // Internal for testing.
-    internal Action<User?> UserChanged => user =>
+    internal Action<SentryUser?> UserChanged => user =>
     {
         if (Options.EnableScopeSync &&
             Options.ScopeObserver is { } observer)
@@ -116,12 +113,12 @@ public class Scope : IEventLike
         }
     };
 
-    private User? _user;
+    private SentryUser? _user;
 
     /// <inheritdoc />
-    public User User
+    public SentryUser User
     {
-        get => _user ??= new User
+        get => _user ??= new SentryUser
         {
             PropertyChanged = UserChanged
         };

@@ -1,5 +1,4 @@
 using Sentry.Infrastructure;
-using Sentry.Internal;
 
 namespace Sentry.Extensibility;
 
@@ -244,7 +243,7 @@ public sealed class HubAdapter : IHub
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public void CaptureTransaction(Transaction transaction)
+    public void CaptureTransaction(SentryTransaction transaction)
         => SentrySdk.CaptureTransaction(transaction);
 
     /// <summary>
@@ -252,7 +251,7 @@ public sealed class HubAdapter : IHub
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
+    public void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint)
         => SentrySdk.CaptureTransaction(transaction, scope, hint);
 
     /// <summary>
@@ -270,6 +269,10 @@ public sealed class HubAdapter : IHub
     [EditorBrowsable(EditorBrowsableState.Never)]
     public Task FlushAsync(TimeSpan timeout)
         => SentrySdk.FlushAsync(timeout);
+
+    /// <inheritdoc cref="IMetricAggregator"/>
+    public IMetricAggregator Metrics
+        => SentrySdk.Metrics;
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>

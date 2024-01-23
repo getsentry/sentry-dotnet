@@ -68,7 +68,7 @@ public class SentryOptions
     /// </summary>
     public bool IsGlobalModeEnabled
     {
-        get => _isGlobalModeEnabled ??= Runtime.Current.IsBrowserWasm();
+        get => _isGlobalModeEnabled ??= SentryRuntime.Current.IsBrowserWasm();
         set => _isGlobalModeEnabled = value;
     }
 #endif
@@ -187,7 +187,8 @@ public class SentryOptions
 #endif
 
 #if NET5_0_OR_GREATER && !__MOBILE__
-            if ((_defaultIntegrations & DefaultIntegrations.WinUiUnhandledExceptionIntegration) != 0)
+            if ((_defaultIntegrations & DefaultIntegrations.WinUiUnhandledExceptionIntegration) != 0
+                && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 yield return new WinUIUnhandledExceptionIntegration();
             }
@@ -445,15 +446,15 @@ public class SentryOptions
         _beforeSend = (@event, _) => beforeSend(@event);
     }
 
-    private Func<Transaction, Hint, Transaction?>? _beforeSendTransaction;
+    private Func<SentryTransaction, Hint, SentryTransaction?>? _beforeSendTransaction;
 
-    internal Func<Transaction, Hint, Transaction?>? BeforeSendTransactionInternal => _beforeSendTransaction;
+    internal Func<SentryTransaction, Hint, SentryTransaction?>? BeforeSendTransactionInternal => _beforeSendTransaction;
 
     /// <summary>
     /// Configures a callback to invoke before sending a transaction to Sentry
     /// </summary>
     /// <param name="beforeSendTransaction">The callback</param>
-    public void SetBeforeSendTransaction(Func<Transaction, Hint, Transaction?> beforeSendTransaction)
+    public void SetBeforeSendTransaction(Func<SentryTransaction, Hint, SentryTransaction?> beforeSendTransaction)
     {
         _beforeSendTransaction = beforeSendTransaction;
     }
@@ -462,7 +463,7 @@ public class SentryOptions
     /// Configures a callback to invoke before sending a transaction to Sentry
     /// </summary>
     /// <param name="beforeSendTransaction">The callback</param>
-    public void SetBeforeSendTransaction(Func<Transaction, Transaction?> beforeSendTransaction)
+    public void SetBeforeSendTransaction(Func<SentryTransaction, SentryTransaction?> beforeSendTransaction)
     {
         _beforeSendTransaction = (transaction, _) => beforeSendTransaction(transaction);
     }
@@ -938,7 +939,7 @@ public class SentryOptions
             {
                 // from 3.0.0 uses Enhanced (Ben.Demystifier) by default which is a breaking change
                 // unless you are using .NET Native which isn't compatible with Ben.Demystifier.
-                _stackTraceMode = Runtime.Current.Name == ".NET Native"
+                _stackTraceMode = SentryRuntime.Current.Name == ".NET Native"
                     ? StackTraceMode.Original
                     : StackTraceMode.Enhanced;
             }
@@ -1118,10 +1119,22 @@ public class SentryOptions
     public Func<string, PEReader?>? AssemblyReader { get; set; }
 
     /// <summary>
-    /// The Spotlight URL. Defaults to http://localhost:8969/stream
+    /// <para>
+    /// Settings for the EXPERIMENTAL metrics feature. This feature is preview only and subject to change without a
+    /// major version bump. Currently it's recommended for noodling only - DON'T USE IN PRODUCTION!
+    /// </para>
+    /// <para>
+    /// By default the ExperimentalMetrics Options is null, which means the feature is disabled. If you want to enable
+    /// Experimental metrics, you must set this property to a non-null value.
+    /// </para>
     /// </summary>
+    public ExperimentalMetricsOptions? ExperimentalMetrics { get; set; }
+
+    /// <summary>
+    /// The Spotlight URL. Defaults to http://localhost:8969/stream
     /// <see cref="EnableSpotlight"/>
     /// <see href="https://spotlightjs.com/"/>
+    /// </summary>
     public string SpotlightUrl { get; set; } = "http://localhost:8969/stream";
 
     /// <summary>
@@ -1301,4 +1314,17 @@ public class SentryOptions
         WinUiUnhandledExceptionIntegration = 1 << 6,
 #endif
     }
+}
+
+/// <summary>
+/// Settings for the experimental Metrics feature. This feature is preview only and will very likely change in the future
+/// without a major version bump... so use at your own risk.
+/// </summary>
+public class ExperimentalMetricsOptions
+{
+    /// <summary>
+    /// Determines the sample rate for metrics. 0.0 means no metrics will be sent (metrics disabled). 1.0 implies all
+    /// metrics will be sent.
+    /// </summary>
+    public bool EnableCodeLocations { get; set; } = true;
 }

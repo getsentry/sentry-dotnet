@@ -36,7 +36,7 @@ public partial class MauiEventsBinderTests
         _fixture.Binder.HandleVisualElementEvents(element);
 
         element.RaiseEvent(eventName, new FocusEventArgs(element, isFocused));
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandleVisualElementEvents(element, bind: false);
 
@@ -44,6 +44,6 @@ public partial class MauiEventsBinderTests
         element.RaiseEvent(eventName, new FocusEventArgs(element, isFocused));
 
         // Assert
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 }

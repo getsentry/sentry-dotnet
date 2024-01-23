@@ -1,6 +1,4 @@
-using Microsoft.EntityFrameworkCore.Storage;
 using Sentry.Internal.DiagnosticSource;
-using Sentry.Internal.Extensions;
 using static Sentry.Internal.DiagnosticSource.SentrySqlListener;
 
 namespace Sentry.DiagnosticSource.Tests;

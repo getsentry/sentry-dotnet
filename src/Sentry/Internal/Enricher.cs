@@ -6,11 +6,13 @@ namespace Sentry.Internal;
 
 internal class Enricher
 {
+    internal const string DefaultIpAddress = "{{auto}}";
+
     private readonly SentryOptions _options;
 
     private readonly Lazy<Runtime> _runtimeLazy = new(() =>
     {
-        var current = PlatformAbstractions.Runtime.Current;
+        var current = PlatformAbstractions.SentryRuntime.Current;
         return new Runtime
         {
             Name = current.Name,
@@ -34,7 +36,7 @@ internal class Enricher
         if (!eventLike.Contexts.ContainsKey(OperatingSystem.Type))
         {
             // RuntimeInformation.OSDescription is throwing on Mono 5.12
-            if (!PlatformAbstractions.Runtime.Current.IsMono())
+            if (!PlatformAbstractions.SentryRuntime.Current.IsMono())
             {
 #if NETFRAMEWORK
                 // RuntimeInformation.* throws on .NET Framework on macOS/Linux
@@ -74,19 +76,17 @@ internal class Enricher
 
         // User
         // Report local user if opt-in PII, no user was already set to event and feature not opted-out:
-        if (_options.SendDefaultPii)
+        if (_options is { SendDefaultPii: true, IsEnvironmentUser: true } && !eventLike.HasUser())
         {
-            if (_options.IsEnvironmentUser && !eventLike.HasUser())
-            {
-                eventLike.User.Username = Environment.UserName;
-            }
-
-            eventLike.User.IpAddress ??= "{{auto}}";
+            eventLike.User.Username = Environment.UserName;
         }
+        eventLike.User.IpAddress ??= DefaultIpAddress;
 
         //Apply App startup and Boot time
         eventLike.Contexts.App.StartTime ??= ProcessInfo.Instance?.StartupTime;
         eventLike.Contexts.Device.BootTime ??= ProcessInfo.Instance?.BootTime;
+        
+        eventLike.Contexts.App.InForeground = ProcessInfo.Instance?.ApplicationIsActivated(_options);
 
         // Default tags
         _options.ApplyDefaultTags(eventLike);

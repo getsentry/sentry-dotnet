@@ -18,6 +18,13 @@ public sealed class SentryStackFrame : IJsonSerializable
     internal List<int>? InternalFramesOmitted { get; private set; }
 
     /// <summary>
+    /// When serializing a stack frame as part of the Code Location metadata for Metrics, we need to include an
+    /// additional "type" property in the serialized payload. This flag indicates whether the stack frame is for
+    /// a code location or not.
+    /// </summary>
+    internal bool IsCodeLocation { get; set; } = false;
+
+    /// <summary>
     /// The relative file path to the call.
     /// </summary>
     public string? FileName { get; set; }
@@ -138,6 +145,12 @@ public sealed class SentryStackFrame : IJsonSerializable
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         writer.WriteStartObject();
+
+        if (IsCodeLocation)
+        {
+            // See https://develop.sentry.dev/sdk/metrics/#meta-data
+            writer.WriteString("type", "location");
+        }
 
         writer.WriteStringArrayIfNotEmpty("pre_context", InternalPreContext);
         writer.WriteStringArrayIfNotEmpty("post_context", InternalPostContext);

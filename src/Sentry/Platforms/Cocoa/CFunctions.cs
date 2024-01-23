@@ -31,7 +31,7 @@ internal static class C
         }
         catch (Exception e)
         {
-            logger?.LogWarning("Error loading the list of debug images", e);
+            logger?.LogWarning(e, "Error loading the list of debug images");
         }
         return result;
     }

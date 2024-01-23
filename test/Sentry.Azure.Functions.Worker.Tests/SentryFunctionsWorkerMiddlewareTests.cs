@@ -9,7 +9,7 @@ public class SentryFunctionsWorkerMiddlewareTests
     {
         public IHub Hub { get; set; }
         public IInternalScopeManager ScopeManager { get; }
-        public Transaction Transaction { get; set; }
+        public SentryTransaction Transaction { get; set; }
 
         public Fixture()
         {
@@ -22,8 +22,8 @@ public class SentryFunctionsWorkerMiddlewareTests
             var client = Substitute.For<ISentryClient>();
             var sessionManager = Substitute.For<ISessionManager>();
 
-            client.When(x => x.CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Scope>(), Arg.Any<Hint>()))
-                .Do(callback => Transaction = callback.Arg<Transaction>());
+            client.When(x => x.CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<Hint>()))
+                .Do(callback => Transaction = callback.Arg<SentryTransaction>());
 
             ScopeManager = new SentryScopeManager(options, client);
             Hub = new Hub(options, client, sessionManager, new MockClock(), ScopeManager);

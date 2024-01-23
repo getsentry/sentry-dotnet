@@ -4,12 +4,38 @@ namespace Sentry.Profiling.Tests;
 
 // Note: we must not run tests in parallel because we only support profiling one transaction at a time.
 // That means setting up a test-collection with parallelization disabled and NOT using any async test functions.
-[CollectionDefinition("SamplingProfiler tests", DisableParallelization = true)]
+[CollectionDefinition(nameof(SamplingTransactionProfilerTests), DisableParallelization = true)]
 [UsesVerify]
 public class SamplingTransactionProfilerTests
 {
-    private readonly IDiagnosticLogger _testOutputLogger;
+    private readonly TestOutputDiagnosticLogger _testOutputLogger;
     private readonly SentryOptions _testSentryOptions;
+
+    private int RuntimeMs => TestEnvironment.IsGitHubActions ? 5_000 : 300;
+
+    // Note: these tests are flaky in CI. Mostly it's because the profiler sometimes takes very long time to start
+    // or it won't start at all in a given timeout. To avoid failing the CI under these expected circumstances, we
+    // skip the test if it fails on a particular check.
+    // Don't use xUnit asserts in the given callback, only standard exceptions.
+    private void SkipIfFailsInCI(Action checks)
+    {
+        if (TestEnvironment.IsGitHubActions)
+        {
+            try
+            {
+                checks.Invoke();
+            }
+            catch (Exception e)
+            {
+                _testOutputLogger.LogWarning(e, "Caught an exception in a test block that is allowed to fail when in CI.");
+                Skip.If(true, "Caught an exception in a test block that is allowed to fail when in CI.");
+            }
+        }
+        else
+        {
+            checks.Invoke();
+        }
+    }
 
     public SamplingTransactionProfilerTests(ITestOutputHelper output)
     {
@@ -71,14 +97,15 @@ public class SamplingTransactionProfilerTests
         var clock = SentryStopwatch.StartNew();
         var hub = Substitute.For<IHub>();
         var transactionTracer = new TransactionTracer(hub, "test", "");
-        var sut = factory.Start(transactionTracer, CancellationToken.None);
+        var sut = factory.Start(transactionTracer, CancellationToken.None) as SamplingTransactionProfiler;
+        SkipIfFailsInCI(() => ArgumentNullException.ThrowIfNull(sut));
         transactionTracer.TransactionProfiler = sut;
-        RunForMs(100);
-        sut.Finish();
+        RunForMs(RuntimeMs);
+        sut!.Finish();
         var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
 
-        var transaction = new Transaction(transactionTracer);
-        var collectTask = (sut as SamplingTransactionProfiler).CollectAsync(transaction);
+        var transaction = new SentryTransaction(transactionTracer);
+        var collectTask = sut.CollectAsync(transaction);
         collectTask.Wait();
         var profileInfo = collectTask.Result;
         Assert.NotNull(profileInfo);
@@ -86,29 +113,41 @@ public class SamplingTransactionProfilerTests
         return profileInfo.Profile;
     }
 
-    [Fact(Skip = "This test is flaky. TODO: rework")]
-    public Task Profiler_SingleProfile_Works()
+    [SkippableFact]
+    public void Profiler_WithZeroStartupTimeout_CapturesAfterStartingAsynchronously()
     {
-        using var factory = SamplingTransactionProfilerFactory.Create(_testSentryOptions);
-        var profile = CaptureAndValidate(factory);
-
-        // We "Verify" part of a profile that seems to be stable.
-        var profileToVerify = new SampleProfile();
-        profileToVerify.Stacks.Add(profile.Stacks[0]);
-        for (var i = 0; i < profileToVerify.Stacks[0].Count; i++)
-        {
-            var frame = profile.Frames[profileToVerify.Stacks[0][i]];
-            frame.Module = frame.Module.Replace("System.Private.CoreLib.il", "System.Private.CoreLib");
-            profileToVerify.Frames.Add(frame);
-        }
-        var json = profileToVerify.ToJsonString(_testOutputLogger);
-        return VerifyJson(json).UniqueForRuntimeAndVersion();
+        using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.Zero);
+        var profiler = factory.Start(new TransactionTracer(Substitute.For<IHub>(), "test", ""), CancellationToken.None);
+        Assert.Null(profiler);
+        SkipIfFailsInCI(() => factory._sessionTask.Wait(60_000));
+        CaptureAndValidate(factory);
     }
 
-    [Fact(Skip = "This test is flaky. TODO: rework")]
-    public void Profiler_MultipleProfiles_Works()
+    [SkippableTheory]
+    [InlineData(0)]
+    [InlineData(10)]
+    private void Profiler_SingleProfile_Works(int startTimeoutSeconds)
     {
-        using var factory = SamplingTransactionProfilerFactory.Create(_testSentryOptions);
+        using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(startTimeoutSeconds));
+        // in the async startup case, we need to wait before collecting
+        if (startTimeoutSeconds == 0)
+        {
+            factory._sessionTask.Wait(60_000);
+        }
+        var profile = CaptureAndValidate(factory);
+    }
+
+    [SkippableTheory]
+    [InlineData(0)]
+    [InlineData(10)]
+    public void Profiler_MultipleProfiles_Works(int startTimeoutSeconds)
+    {
+        using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(startTimeoutSeconds));
+        // in the async startup case, we need to wait before collecting
+        if (startTimeoutSeconds == 0)
+        {
+            SkipIfFailsInCI(() => factory._sessionTask.Wait(60_000));
+        }
         CaptureAndValidate(factory);
         Thread.Sleep(100);
         CaptureAndValidate(factory);
@@ -116,24 +155,29 @@ public class SamplingTransactionProfilerTests
         CaptureAndValidate(factory);
     }
 
-    [Fact(Skip = "This test is flaky. TODO: rework")]
-    public void Profiler_AfterTimeout_Stops()
+    [SkippableFact]
+    public async Task Profiler_AfterTimeout_Stops()
     {
-        using var session = SampleProfilerSession.StartNew(_testOutputLogger);
-        var limitMs = 50;
-        var sut = new SamplingTransactionProfiler(_testSentryOptions, session, limitMs, CancellationToken.None);
-        RunForMs(limitMs * 4);
-        sut.Finish();
+        SampleProfilerSession? session = null;
+        SkipIfFailsInCI(() => session = SampleProfilerSession.StartNew(_testOutputLogger));
+        using (session)
+        {
+            await session!.WaitForFirstEventAsync(CancellationToken.None);
+            var limitMs = 50;
+            var sut = new SamplingTransactionProfiler(_testSentryOptions, session, limitMs, CancellationToken.None);
+            RunForMs(limitMs * 10);
+            sut.Finish();
 
-        var collectTask = sut.CollectAsync(new Transaction("foo", "bar"));
-        collectTask.Wait();
-        var profileInfo = collectTask.Result;
+            var collectTask = sut.CollectAsync(new SentryTransaction("foo", "bar"));
+            collectTask.Wait();
+            var profileInfo = collectTask.Result;
 
-        Assert.NotNull(profileInfo);
-        ValidateProfile(profileInfo.Profile, (ulong)(limitMs * 1_000_000));
+            Assert.NotNull(profileInfo);
+            Assert.Contains("Profiling is being cut-of after 50 ms because the transaction takes longer than that.", _testOutputLogger.Entries.Select(e => e.Message));
+        }
     }
 
-    [Theory(Skip = "This test is flaky. TODO: rework")]
+    [SkippableTheory]
     [InlineData(true)]
     [InlineData(false)]
     public void ProfilerIntegration_FullRoundtrip_Works(bool offlineCaching)
@@ -173,12 +217,13 @@ public class SamplingTransactionProfilerTests
             Debug = true,
             DiagnosticLogger = _testOutputLogger,
             TracesSampleRate = 1.0,
+            ProfilesSampleRate = 1.0,
         };
 
         // Disable process exit flush to resolve "There is no currently active test." errors.
         options.DisableAppDomainProcessExitFlush();
 
-        options.AddIntegration(new ProfilingIntegration());
+        options.AddIntegration(new ProfilingIntegration(TimeSpan.FromSeconds(10)));
 
         try
         {
@@ -186,7 +231,7 @@ public class SamplingTransactionProfilerTests
 
             var clock = SentryStopwatch.StartNew();
             var tx = hub.StartTransaction("name", "op");
-            RunForMs(100);
+            RunForMs(RuntimeMs);
             tx.Finish();
             var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
 
@@ -194,18 +239,24 @@ public class SamplingTransactionProfilerTests
 
             // Synchronizing in the tests to go through the caching and http transports
             cts.CancelAfter(options.FlushTimeout + TimeSpan.FromSeconds(1));
-            var ex = Record.Exception(() => tcs.Task.Wait());
+            var ex = Record.Exception(tcs.Task.Wait);
             Assert.Null(ex);
             Assert.True(tcs.Task.IsCompleted);
 
             var envelopeLines = tcs.Task.Result.Split('\n');
-            envelopeLines.Length.Should().Be(6);
+            SkipIfFailsInCI(() =>
+            {
+                if (envelopeLines.Length != 6)
+                {
+                    throw new ArgumentOutOfRangeException("envelopeLines", "Invalid number of envelope lines.");
+                }
+            });
 
             // header rows before payloads
             envelopeLines[1].Should().StartWith("{\"type\":\"transaction\"");
             envelopeLines[3].Should().StartWith("{\"type\":\"profile\"");
 
-            var transaction = Json.Parse(envelopeLines[2], Transaction.FromJson);
+            var transaction = Json.Parse(envelopeLines[2], SentryTransaction.FromJson);
 
             // TODO do we want to bother with JSON parsing just to do this? Doing at least simple checks for now...
             // var profileInfo = Json.Parse(envelopeLines[4], ProfileInfo.FromJson);
@@ -231,7 +282,67 @@ public class SamplingTransactionProfilerTests
         }
     }
 
-    [Fact]
+    [SkippableFact]
+    private async Task Profiler_ThrowingOnSessionStartup_DoesntBreakSentryInit()
+    {
+        SampleProfilerSession.ThrowOnNextStartupForTests = true;
+
+        var tcs = new TaskCompletionSource<string>();
+        async Task VerifyAsync(HttpRequestMessage message)
+        {
+            var payload = await message.Content!.ReadAsStringAsync();
+            if (payload.Contains("\"type\":\"transaction\""))
+            {
+                tcs!.TrySetResult(payload);
+            }
+        }
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            // So we don't need to deal with gzip'ed payload
+            RequestBodyCompressionLevel = CompressionLevel.NoCompression,
+            CreateHttpMessageHandler = () => new CallbackHttpClientHandler(VerifyAsync),
+            // Not to send some session envelope
+            AutoSessionTracking = false,
+            Debug = true,
+            DiagnosticLogger = _testOutputLogger,
+            TracesSampleRate = 1.0,
+            ProfilesSampleRate = 1.0,
+        };
+
+        options.AddIntegration(new ProfilingIntegration(TimeSpan.FromSeconds(10)));
+
+        try
+        {
+            SampleProfilerSession.ThrowOnNextStartupForTests.Should().BeTrue();
+            options.TransactionProfilerFactory.Should().BeNull();
+            using var hub = (SentrySdk.InitHub(options) as Hub)!;
+            SampleProfilerSession.ThrowOnNextStartupForTests.Should().BeFalse();
+            options.TransactionProfilerFactory.Should().BeNull();
+
+            var clock = SentryStopwatch.StartNew();
+            var tx = hub.StartTransaction("name", "op");
+            RunForMs(100);
+            tx.Finish();
+            await hub.FlushAsync();
+
+            // Asserts
+            var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(10_000)).ConfigureAwait(false);
+            completedTask.Should().Be(tcs.Task);
+            var envelopeLines = tcs.Task.Result.Split('\n');
+            envelopeLines.Length.Should().Be(4);
+            envelopeLines[1].Should().StartWith("{\"type\":\"transaction\"");
+        }
+        finally
+        {
+            // Ensure the task is complete before leaving the test so there's no async code left running in next tests.
+            tcs.TrySetResult("");
+            await tcs.Task;
+        }
+    }
+
+    [SkippableFact]
     public void ProfilerIntegration_WithProfilingDisabled_LeavesFactoryNull()
     {
         var options = new SentryOptions
@@ -245,7 +356,7 @@ public class SamplingTransactionProfilerTests
         Assert.Null(hub.Options.TransactionProfilerFactory);
     }
 
-    [Fact]
+    [SkippableFact]
     public void ProfilerIntegration_WithTracingDisabled_LeavesFactoryNull()
     {
         var options = new SentryOptions
@@ -259,7 +370,7 @@ public class SamplingTransactionProfilerTests
         Assert.Null(hub.Options.TransactionProfilerFactory);
     }
 
-    [Fact]
+    [SkippableFact]
     public void ProfilerIntegration_WithProfilingEnabled_SetsFactory()
     {
         var options = new SentryOptions
@@ -273,7 +384,7 @@ public class SamplingTransactionProfilerTests
         Assert.NotNull(hub.Options.TransactionProfilerFactory);
     }
 
-    [Fact]
+    [SkippableFact]
     public void Downsampler_ShouldSample_Works()
     {
         var sut = new Downsampler();

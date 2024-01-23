@@ -9,6 +9,9 @@ on:
     paths-ignore:
       - "**.md"
 
+env:
+  XCODE_VERSION: 15.1
+
 jobs:
   build-sentry-native:
     name: sentry-native (${{ matrix.os }})
@@ -24,7 +27,7 @@ jobs:
 
       - run: git submodule update --init modules/sentry-native
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         id: cache
         with:
           path: src/Sentry/Platforms/Native/sentry-native
@@ -61,6 +64,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 2 # default is 1 and codecov needs > 1
 
       # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
@@ -69,7 +73,7 @@ jobs:
 
       - name: Download sentry-native (Linux)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Linux') }}
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-Linux-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -77,7 +81,7 @@ jobs:
 
       - name: Download sentry-native (macOS)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'macOS') }}
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-macOS-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -85,7 +89,7 @@ jobs:
 
       - name: Download sentry-native (Windows)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Windows') }}
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-Windows-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -103,7 +107,7 @@ jobs:
         uses: ./.github/actions/buildcocoasdk
 
       # Only switch to newer xcode after building the Cocoa SDK so that it can keep IPHONEOS_DEPLOYMENT_TARGET=11.0
-      - run: sudo xcode-select -s /Applications/Xcode_15.0.1.app
+      - run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
         if: runner.os == 'macOS'
 
       - name: Restore .NET Dependencies
@@ -113,11 +117,14 @@ jobs:
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
 
       - name: Test
-        run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}"
+        run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
+
+      - name: Upload code coverage
+        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d
 
       - name: Upload build and test outputs
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: verify-test-results
           path: "**/*.received.*"
@@ -130,7 +137,7 @@ jobs:
 
       - name: Archive Nuget Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ github.sha }}
           if-no-files-found: error
@@ -156,9 +163,8 @@ jobs:
           sparse-checkout: |
             Directory.Build.props
             integration-test
-
       - name: Fetch Nuget Packages
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ${{ github.sha }}
           path: src
@@ -169,12 +175,21 @@ jobs:
           sudo apt update
           sudo apt install libcurl4-openssl-dev
 
-      - run: sudo xcode-select -s /Applications/Xcode_15.0.1.app
+      - run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
         if: runner.os == 'macOS'
 
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
+      # Needed for Android SDK setup step
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@07976c6290703d34c16d382cb36445f98bb43b1f # v3.2.0
 
       - run: dotnet workload install android maui-android
 

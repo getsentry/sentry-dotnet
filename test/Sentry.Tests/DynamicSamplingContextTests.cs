@@ -1,5 +1,3 @@
-using Xunit.Sdk;
-
 namespace Sentry.Tests;
 
 public class DynamicSamplingContextTests
