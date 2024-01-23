@@ -17,6 +17,7 @@ If you have conflicts, you can opt-out by adding the following to your `csproj`:
 - Moved the binding to MAUI events for breadcrumb creation from `WillFinishLaunching` to `FinishedLaunching`. This delays the initial instantiation of `app`. ([#3057](https://github.com/getsentry/sentry-dotnet/pull/3057))
 - The SDK no longer adds the `WinUIUnhandledExceptionIntegration` on non Windows platforms ([#3055](https://github.com/getsentry/sentry-dotnet/pull/3055))
 - The scope transaction is now correctly set for Otel transactions ([#3072](https://github.com/getsentry/sentry-dotnet/pull/3072))
+- Native integration logging on macOS ([#3079](https://github.com/getsentry/sentry-dotnet/pull/3079))
 
 ### Dependencies
 
@@ -35,7 +36,7 @@ If you have conflicts, you can opt-out by adding the following to your `csproj`:
 
 ### Significant change in behavior
 
-- Transactions' spans are no longer automatically finished with status `deadline_exceeded` by the transaction. This is now handled by the [Relay](https://github.com/getsentry/relay). 
+- Transactions' spans are no longer automatically finished with status `deadline_exceeded` by the transaction. This is now handled by the [Relay](https://github.com/getsentry/relay).
   - Customers self hosting Sentry must use verion 22.12.0 or later ([#3013](https://github.com/getsentry/sentry-dotnet/pull/3013))
 
 ### API breaking Changes
