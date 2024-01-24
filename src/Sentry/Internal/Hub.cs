@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Protocol.Metrics;
 
 namespace Sentry.Internal;
 
@@ -59,7 +60,14 @@ internal class Hub : IHub, IDisposable
             PushScope();
         }
 
-        Metrics = _ownedClient.Metrics;
+        if (options.ExperimentalMetrics is not null)
+        {
+            Metrics = new MetricAggregator(options, this);
+        }
+        else
+        {
+            Metrics = new DisabledMetricAggregator();
+        }
 
         foreach (var integration in options.Integrations)
         {
@@ -486,6 +494,52 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    public void CaptureMetrics(IEnumerable<Metric> metrics)
+    {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        Metric[]? enumerable = null;
+        try
+        {
+            enumerable = metrics as Metric[] ?? metrics.ToArray();
+            _ownedClient.CaptureMetrics(enumerable);
+        }
+        catch (Exception e)
+        {
+            if (enumerable is null)
+            {
+                _options.LogError(e, "Failure to enumerate metrics for capture");
+            }
+            else
+            {
+                foreach (var metric in enumerable)
+                {
+                    _options.LogError(e, "Failure to capture metric: {0}", metric.EventId);
+                }
+            }
+        }
+    }
+
+    public void CaptureCodeLocations(CodeLocations codeLocations)
+    {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        try
+        {
+            _ownedClient.CaptureCodeLocations(codeLocations);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to capture code locations: {0}", codeLocations.Timestamp);
+        }
+    }
+
     public void CaptureSession(SessionUpdate sessionUpdate)
     {
         if (!IsEnabled)
@@ -527,7 +581,7 @@ internal class Hub : IHub, IDisposable
 
         try
         {
-            _ownedClient.Metrics.FlushAsync().ContinueWith(_ =>
+            Metrics.FlushAsync().ContinueWith(_ =>
                 _ownedClient.FlushAsync(_options.ShutdownTimeout).Wait()
             ).ConfigureAwait(false).GetAwaiter().GetResult();
         }

@@ -225,6 +225,7 @@ namespace Sentry
     public interface IHub : Sentry.ISentryClient, Sentry.ISentryScopeManager
     {
         Sentry.SentryId LastEventId { get; }
+        Sentry.IMetricAggregator Metrics { get; }
         void BindException(System.Exception exception, Sentry.ISpan span);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, System.Action<Sentry.Scope> configureScope);
@@ -250,6 +251,7 @@ namespace Sentry
         void Gauge(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
         void Increment(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
         void Set(string key, int value, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
+        System.IDisposable StartTimer(string key, Sentry.MeasurementUnit.Duration unit = 3, System.Collections.Generic.IDictionary<string, string>? tags = null, int stackLevel = 1);
         void Timing(string key, double value, Sentry.MeasurementUnit.Duration unit = 3, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
     }
     public interface IScopeObserver
@@ -263,8 +265,9 @@ namespace Sentry
     public interface ISentryClient
     {
         bool IsEnabled { get; }
-        Sentry.IMetricAggregator Metrics { get; }
+        void CaptureCodeLocations(Sentry.Protocol.Metrics.CodeLocations codeLocations);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.Hint? hint = null);
+        void CaptureMetrics(System.Collections.Generic.IEnumerable<Sentry.Protocol.Metrics.Metric> metrics);
         void CaptureSession(Sentry.SessionUpdate sessionUpdate);
         void CaptureTransaction(Sentry.SentryTransaction transaction);
         void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.Hint? hint);
@@ -394,10 +397,6 @@ namespace Sentry
             Exbibyte = 13,
         }
     }
-    public static class MetricsAggregatorExtensions
-    {
-        public static System.IDisposable StartTimer(this Sentry.IMetricAggregator aggregator, string key, Sentry.MeasurementUnit.Duration unit = 3, System.Collections.Generic.IDictionary<string, string>? tags = null, int stackLevel = 1) { }
-    }
     public sealed class Package : Sentry.IJsonSerializable
     {
         public Package(string name, string version) { }
@@ -495,8 +494,9 @@ namespace Sentry
     {
         public SentryClient(Sentry.SentryOptions options) { }
         public bool IsEnabled { get; }
-        public Sentry.IMetricAggregator Metrics { get; }
+        public void CaptureCodeLocations(Sentry.Protocol.Metrics.CodeLocations codeLocations) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent? @event, Sentry.Scope? scope = null, Sentry.Hint? hint = null) { }
+        public void CaptureMetrics(System.Collections.Generic.IEnumerable<Sentry.Protocol.Metrics.Metric> metrics) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.Hint? hint) { }
@@ -733,6 +733,7 @@ namespace Sentry
         public static void AddBreadcrumb(Sentry.Infrastructure.ISystemClock? clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void BindClient(Sentry.ISentryClient client) { }
         public static void BindException(System.Exception exception, Sentry.ISpan span) { }
+        public static void CaptureCodeLocations(Sentry.Protocol.Metrics.CodeLocations codeLocations) { }
         public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
         public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, System.Action<Sentry.Scope> configureScope) { }
         public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.Hint? hint = null) { }
@@ -740,6 +741,7 @@ namespace Sentry
         public static Sentry.SentryId CaptureException(System.Exception exception, System.Action<Sentry.Scope> configureScope) { }
         public static Sentry.SentryId CaptureMessage(string message, Sentry.SentryLevel level = 1) { }
         public static Sentry.SentryId CaptureMessage(string message, System.Action<Sentry.Scope> configureScope, Sentry.SentryLevel level = 1) { }
+        public static void CaptureMetrics(System.Collections.Generic.IEnumerable<Sentry.Protocol.Metrics.Metric> metrics) { }
         public static void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public static void CaptureTransaction(Sentry.SentryTransaction transaction) { }
         public static void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.Hint? hint) { }
@@ -1216,9 +1218,11 @@ namespace Sentry.Extensibility
         public Sentry.IMetricAggregator Metrics { get; }
         public void BindClient(Sentry.ISentryClient client) { }
         public void BindException(System.Exception exception, Sentry.ISpan span) { }
+        public void CaptureCodeLocations(Sentry.Protocol.Metrics.CodeLocations codeLocations) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, System.Action<Sentry.Scope> configureScope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.Hint? hint = null) { }
+        public void CaptureMetrics(System.Collections.Generic.IEnumerable<Sentry.Protocol.Metrics.Metric> metrics) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.Hint? hint) { }
@@ -1256,12 +1260,14 @@ namespace Sentry.Extensibility
         public void AddBreadcrumb(Sentry.Infrastructure.ISystemClock clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public void BindClient(Sentry.ISentryClient client) { }
         public void BindException(System.Exception exception, Sentry.ISpan span) { }
+        public void CaptureCodeLocations(Sentry.Protocol.Metrics.CodeLocations codeLocations) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, System.Action<Sentry.Scope> configureScope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope, Sentry.Hint? hint = null) { }
         public Sentry.SentryId CaptureException(System.Exception exception) { }
+        public void CaptureMetrics(System.Collections.Generic.IEnumerable<Sentry.Protocol.Metrics.Metric> metrics) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.Hint? hint) { }
@@ -1722,6 +1728,46 @@ namespace Sentry.Protocol.Envelopes
     {
         void Serialize(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger);
         System.Threading.Tasks.Task SerializeAsync(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger, System.Threading.CancellationToken cancellationToken = default);
+    }
+}
+namespace Sentry.Protocol.Metrics
+{
+    public class CodeLocations : Sentry.IJsonSerializable
+    {
+        public CodeLocations(long timestamp, System.Collections.Generic.IReadOnlyDictionary<Sentry.Protocol.Metrics.MetricResourceIdentifier, Sentry.SentryStackFrame> locations) { }
+        public long Timestamp { get; }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+    }
+    public abstract class Metric : Sentry.IJsonSerializable, Sentry.Protocol.Envelopes.ISerializable
+    {
+        protected Metric() { }
+        protected Metric(string key, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default) { }
+        public Sentry.SentryId EventId { get; }
+        public string Key { get; }
+        public System.Collections.Generic.IDictionary<string, string> Tags { get; }
+        public System.DateTimeOffset Timestamp { get; }
+        public Sentry.MeasurementUnit? Unit { get; }
+        public abstract void Add(double value);
+        public void Serialize(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+        public System.Threading.Tasks.Task SerializeAsync(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger, System.Threading.CancellationToken cancellationToken = default) { }
+        protected abstract System.Collections.Generic.IEnumerable<object> SerializedStatsdValues();
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+        protected abstract void WriteValues(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger);
+    }
+    public struct MetricResourceIdentifier : System.IEquatable<Sentry.Protocol.Metrics.MetricResourceIdentifier>
+    {
+        public MetricResourceIdentifier(Sentry.Protocol.Metrics.MetricType MetricType, string Key, Sentry.MeasurementUnit Unit) { }
+        public string Key { get; set; }
+        public Sentry.Protocol.Metrics.MetricType MetricType { get; set; }
+        public Sentry.MeasurementUnit Unit { get; set; }
+        public override string ToString() { }
+    }
+    public enum MetricType : byte
+    {
+        Counter = 0,
+        Gauge = 1,
+        Distribution = 2,
+        Set = 3,
     }
 }
 namespace Sentry.Reflection

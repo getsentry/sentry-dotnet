@@ -29,6 +29,6 @@ internal class SetMetric : Metric
     protected override void WriteValues(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
         writer.WriteArrayIfNotEmpty("value", _value, logger);
 
-    protected override IEnumerable<IConvertible> SerializedStatsdValues()
-        => _value.Select(v => (IConvertible)v);
+    protected override IEnumerable<object> SerializedStatsdValues()
+        => _value.Cast<object>();
 }

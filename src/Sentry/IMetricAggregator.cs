@@ -97,21 +97,6 @@ public interface IMetricAggregator: IDisposable
         int stackLevel = 1);
 
     /// <summary>
-    /// Flushes any flushable metrics and/or code locations.
-    /// If <paramref name="force"/> is true then the cutoff is ignored and all metrics are flushed.
-    /// </summary>
-    /// <param name="force">Forces all buckets to be flushed, ignoring the cutoff</param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
-    /// <returns>False if a shutdown is requested during flush, true otherwise</returns>
-    Task FlushAsync(bool force = true, CancellationToken cancellationToken = default);
-}
-
-/// <summary>
-/// Extension methods for <see cref="IMetricAggregator"/>.
-/// </summary>
-public static class MetricsAggregatorExtensions
-{
-    /// <summary>
     /// Measures the time it takes to run a given code block and emits this as a metric.
     /// </summary>
     /// <example>
@@ -120,8 +105,15 @@ public static class MetricsAggregatorExtensions
     ///     ...
     /// }
     /// </example>
-    public static IDisposable StartTimer(this IMetricAggregator aggregator, string key,
-        MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second, IDictionary<string, string>? tags = null,
-        int stackLevel = 1)
-        => new Timing(SentrySdk.CurrentHub, key, unit, tags, stackLevel + 1);
+    IDisposable StartTimer(string key, MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
+        IDictionary<string, string>? tags = null, int stackLevel = 1);
+
+    /// <summary>
+    /// Flushes any flushable metrics and/or code locations.
+    /// If <paramref name="force"/> is true then the cutoff is ignored and all metrics are flushed.
+    /// </summary>
+    /// <param name="force">Forces all buckets to be flushed, ignoring the cutoff</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/></param>
+    /// <returns>False if a shutdown is requested during flush, true otherwise</returns>
+    Task FlushAsync(bool force = true, CancellationToken cancellationToken = default);
 }

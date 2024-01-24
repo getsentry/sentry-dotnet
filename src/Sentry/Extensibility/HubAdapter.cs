@@ -1,4 +1,5 @@
 using Sentry.Infrastructure;
+using Sentry.Protocol.Metrics;
 
 namespace Sentry.Extensibility;
 
@@ -253,6 +254,22 @@ public sealed class HubAdapter : IHub
     [EditorBrowsable(EditorBrowsableState.Never)]
     public void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint)
         => SentrySdk.CaptureTransaction(transaction, scope, hint);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void CaptureMetrics(IEnumerable<Metric> metrics)
+        => SentrySdk.CaptureMetrics(metrics);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void CaptureCodeLocations(CodeLocations codeLocations)
+        => SentrySdk.CaptureCodeLocations(codeLocations);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.

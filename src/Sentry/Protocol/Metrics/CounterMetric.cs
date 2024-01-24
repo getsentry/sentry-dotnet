@@ -26,7 +26,7 @@ internal class CounterMetric : Metric
     protected override void WriteValues(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
         writer.WriteNumber("value", Value);
 
-    protected override IEnumerable<IConvertible> SerializedStatsdValues()
+    protected override IEnumerable<object> SerializedStatsdValues()
     {
         yield return Value;
     }

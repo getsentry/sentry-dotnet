@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Protocol.Metrics;
 
 namespace Sentry;
 
@@ -504,6 +505,17 @@ public static partial class SentrySdk
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint)
         => CurrentHub.CaptureTransaction(transaction, scope, hint);
+
+    /// <inheritdoc cref="ISentryClient.CaptureMetrics"/>
+    [DebuggerStepThrough]
+    public static void CaptureMetrics(IEnumerable<Metric> metrics)
+        => CurrentHub.CaptureMetrics(metrics);
+
+    /// <inheritdoc cref="ISentryClient.CaptureCodeLocations"/>
+    [DebuggerStepThrough]
+    public static void CaptureCodeLocations(CodeLocations codeLocations)
+        => CurrentHub.CaptureCodeLocations(codeLocations);
+
 
     /// <summary>
     /// Captures a session update.

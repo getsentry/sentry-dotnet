@@ -23,11 +23,6 @@ public class SentryClient : ISentryClient, IDisposable
 
     internal IBackgroundWorker Worker { get; }
 
-    /// <summary>
-    /// <inheritdoc cref="IMetricAggregator"/>
-    /// </summary>
-    public IMetricAggregator Metrics { get; }
-
     internal SentryOptions Options => _options;
 
     /// <summary>
@@ -76,15 +71,6 @@ public class SentryClient : ISentryClient, IDisposable
         {
             options.LogDebug("Worker of type {0} was provided via Options.", worker.GetType().Name);
             Worker = worker;
-        }
-
-        if (options.ExperimentalMetrics is not null)
-        {
-            Metrics = new MetricAggregator(options, CaptureMetrics, CaptureCodeLocations);
-        }
-        else
-        {
-            Metrics = new DisabledMetricAggregator();
         }
     }
 
@@ -241,19 +227,15 @@ public class SentryClient : ISentryClient, IDisposable
         return transaction;
     }
 
-    /// <summary>
-    /// Captures one or more metrics to be sent to Sentry.
-    /// </summary>
-    internal void CaptureMetrics(IEnumerable<Metric> metrics)
+    /// <inheritdoc cref="ISentryClient.CaptureMetrics"/>
+    public void CaptureMetrics(IEnumerable<Metric> metrics)
     {
         _options.LogDebug("Capturing metrics.");
         CaptureEnvelope(Envelope.FromMetrics(metrics));
     }
 
-    /// <summary>
-    /// Captures one or more <see cref="CodeLocations"/> to be sent to Sentry.
-    /// </summary>
-    internal void CaptureCodeLocations(CodeLocations codeLocations)
+    /// <inheritdoc cref="ISentryClient.CaptureCodeLocations"/>
+    public void CaptureCodeLocations(CodeLocations codeLocations)
     {
         _options.LogDebug("Capturing code locations for period: {0}", codeLocations.Timestamp);
         CaptureEnvelope(Envelope.FromCodeLocations(codeLocations));
@@ -471,14 +453,12 @@ public class SentryClient : ISentryClient, IDisposable
 
         try
         {
-            Metrics.FlushAsync().ContinueWith(_ =>
-                // Worker should empty it's queue until SentryOptions.ShutdownTimeout
-                Worker.FlushAsync(_options.ShutdownTimeout)
-            ).ConfigureAwait(false).GetAwaiter().GetResult();
+            // Worker should empty it's queue until SentryOptions.ShutdownTimeout
+            Worker.FlushAsync(_options.ShutdownTimeout).ConfigureAwait(false).GetAwaiter().GetResult();
         }
         catch
         {
-            _options.LogDebug("Failed to wait on metrics/worker to flush");
+            _options.LogDebug("Failed to wait on worker to flush");
         }
     }
 }

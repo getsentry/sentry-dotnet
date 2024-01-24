@@ -15,6 +15,8 @@ internal static class Program
 
                    options.Debug = true;
                    options.StackTraceMode = StackTraceMode.Enhanced;
+                   options.SampleRate = 1.0f; // Not recommended in production - may adversely impact quota
+                   options.TracesSampleRate = 1.0f; // Not recommended in production - may adversely impact quota
                    // Initialize some (non null) ExperimentalMetricsOptions to enable Sentry Metrics,
                    options.ExperimentalMetrics = new ExperimentalMetricsOptions
                    {
@@ -24,22 +26,17 @@ internal static class Program
                }))
         {
             System.Console.WriteLine("Measure, Yeah, Measure!");
+            Action[] actions =
+            [
+                () => PlaySetBingo(10),
+                () => CreateRevenueGauge(100),
+                () => MeasureShrimp(30),
+            ];
             while (true)
             {
                 // Perform your task here
-                switch (Roll.Next(1,3))
-                {
-                    case 1:
-                        PlaySetBingo(10);
-                        break;
-                    case 2:
-                        CreateRevenueGauge(100);
-                        break;
-                    case 3:
-                        MeasureShrimp(30);
-                        break;
-                }
-
+                var actionIdx = Roll.Next(0, actions.Length);
+                actions[actionIdx]();
 
                 // Optional: Delay to prevent tight looping
                 var sleepTime = Roll.Next(1, 10);

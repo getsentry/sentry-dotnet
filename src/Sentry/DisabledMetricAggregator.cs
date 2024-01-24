@@ -37,6 +37,22 @@ internal class DisabledMetricAggregator : IMetricAggregator
         // No Op
     }
 
+    private class NoOpDisposable : IDisposable
+    {
+        public void Dispose()
+        {
+            // No Op
+        }
+    }
+
+    public IDisposable StartTimer(string key, MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
+        IDictionary<string, string>? tags = null,
+        int stackLevel = 1)
+    {
+        // No Op
+        return new NoOpDisposable();
+    }
+
     public Task FlushAsync(bool force = true, CancellationToken cancellationToken = default)
     {
         // No Op

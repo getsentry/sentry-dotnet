@@ -1,3 +1,5 @@
+using Sentry.Protocol.Metrics;
+
 namespace Sentry;
 
 /// <summary>
@@ -53,6 +55,16 @@ public interface ISentryClient
     void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint);
 
     /// <summary>
+    /// Captures one or more metrics to be sent to Sentry.
+    /// </summary>
+    void CaptureMetrics(IEnumerable<Metric> metrics);
+
+    /// <summary>
+    /// Captures one or more <see cref="CodeLocations"/> to be sent to Sentry.
+    /// </summary>
+    void CaptureCodeLocations(CodeLocations codeLocations);
+
+    /// <summary>
     /// Captures a session update.
     /// </summary>
     /// <remarks>
@@ -68,9 +80,4 @@ public interface ISentryClient
     /// <param name="timeout">The amount of time allowed for flushing.</param>
     /// <returns>A task to await for the flush operation.</returns>
     Task FlushAsync(TimeSpan timeout);
-
-    /// <summary>
-    /// <inheritdoc cref="IMetricAggregator"/>
-    /// </summary>
-    IMetricAggregator Metrics { get; }
 }

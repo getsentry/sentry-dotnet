@@ -97,6 +97,11 @@ public interface IHub :
     void EndSession(SessionEndStatus status = SessionEndStatus.Exited);
 
     /// <summary>
+    /// <inheritdoc cref="IMetricAggregator"/>
+    /// </summary>
+    IMetricAggregator Metrics { get; }
+
+    /// <summary>
     /// Captures an event with a configurable scope.
     /// </summary>
     /// <remarks>

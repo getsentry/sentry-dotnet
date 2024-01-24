@@ -1,3 +1,5 @@
+using Sentry.Protocol.Metrics;
+
 namespace Sentry.Extensibility;
 
 /// <summary>
@@ -159,6 +161,20 @@ public class DisabledHub : IHub, IDisposable
     /// No-Op.
     /// </summary>
     public void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint)
+    {
+    }
+
+    /// <summary>
+    /// No-Op.
+    /// </summary>
+    public void CaptureMetrics(IEnumerable<Metric> metrics)
+    {
+    }
+
+    /// <summary>
+    /// No-Op.
+    /// </summary>
+    public void CaptureCodeLocations(CodeLocations codeLocations)
     {
     }
 
