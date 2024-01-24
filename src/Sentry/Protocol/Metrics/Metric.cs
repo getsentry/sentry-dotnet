@@ -97,7 +97,7 @@ internal abstract class Metric : IJsonSerializable, ISentrySerializable
                 {
                     await Write(",");
                 }
-                await Write($"{key}:SanitizeValue(value)");
+                await Write($"{key}:{MetricHelper.SanitizeValue(value)}");
             }
         }
 
