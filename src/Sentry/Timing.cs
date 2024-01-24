@@ -12,7 +12,7 @@ namespace Sentry;
 ///     ...
 /// }
 /// </example>
-public class Timing: IDisposable
+internal class Timing: IDisposable
 {
     private readonly IHub _hub;
     private readonly string _key;
