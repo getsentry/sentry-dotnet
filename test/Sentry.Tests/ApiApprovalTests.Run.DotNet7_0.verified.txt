@@ -1069,12 +1069,6 @@ namespace Sentry
         public override string ToString() { }
         public static Sentry.SubstringOrRegexPattern op_Implicit(string substringOrRegexPattern) { }
     }
-    public class Timing : System.IDisposable
-    {
-        public Timing(string key, Sentry.MeasurementUnit.Duration unit = 3, System.Collections.Generic.IDictionary<string, string>? tags = null) { }
-        public Timing(Sentry.IHub hub, string key, Sentry.MeasurementUnit.Duration unit = 3, System.Collections.Generic.IDictionary<string, string>? tags = null) { }
-        public void Dispose() { }
-    }
     public class TransactionContext : Sentry.SpanContext, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext
     {
         public TransactionContext(string name, string operation, Sentry.SpanId? spanId = default, Sentry.SpanId? parentSpanId = default, Sentry.SentryId? traceId = default, string? description = "", Sentry.SpanStatus? status = default, bool? isSampled = default, bool? isParentSampled = default, Sentry.TransactionNameSource nameSource = 0) { }
