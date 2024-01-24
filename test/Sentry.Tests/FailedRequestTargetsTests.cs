@@ -6,7 +6,7 @@ public class FailedRequestTargetsTests
     public void SentryOptions_FailedRequestTargets_DefaultAll()
     {
         var options = new SentryOptions();
-        Assert.Equal(1, options.FailedRequestTargets.Count);
+        Assert.Single(options.FailedRequestTargets);
         Assert.Equal(".*", options.FailedRequestTargets[0].ToString());
     }
 

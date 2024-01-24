@@ -48,7 +48,7 @@ public partial class MauiEventsBinderTests
         const ShellNavigationSource source = ShellNavigationSource.Push;
 
         shell.RaiseEvent(nameof(Shell.Navigating), new ShellNavigatingEventArgs(current, target, source, false));
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandleShellEvents(shell, bind: false);
 
@@ -56,7 +56,7 @@ public partial class MauiEventsBinderTests
         shell.RaiseEvent(nameof(Shell.Navigating), new ShellNavigatingEventArgs(target, current, source, false));
 
         // Assert
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 
     [Fact]
@@ -103,7 +103,7 @@ public partial class MauiEventsBinderTests
         const ShellNavigationSource source = ShellNavigationSource.Push;
 
         shell.RaiseEvent(nameof(Shell.Navigated), new ShellNavigatedEventArgs(previous, current, source));
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandleShellEvents(shell, bind: false);
 
@@ -111,6 +111,6 @@ public partial class MauiEventsBinderTests
         shell.RaiseEvent(nameof(Shell.Navigated), new ShellNavigatedEventArgs(current, previous, source));
 
         // Assert
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 }

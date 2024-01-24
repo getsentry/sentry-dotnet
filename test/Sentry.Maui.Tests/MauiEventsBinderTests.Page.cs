@@ -41,7 +41,7 @@ public partial class MauiEventsBinderTests
         _fixture.Binder.HandlePageEvents(page);
 
         page.RaiseEvent(eventName, EventArgs.Empty);
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandlePageEvents(page, bind: false);
 
@@ -49,7 +49,7 @@ public partial class MauiEventsBinderTests
         page.RaiseEvent(eventName, EventArgs.Empty);
 
         // Assert
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 
     [Fact]
@@ -105,7 +105,7 @@ public partial class MauiEventsBinderTests
                 .Invoke(new object[] {otherPage});
 
         page.RaiseEvent(nameof(Page.NavigatedTo), navigatedToEventArgs);
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandlePageEvents(page, bind: false);
 
@@ -113,7 +113,7 @@ public partial class MauiEventsBinderTests
         page.RaiseEvent(nameof(Page.NavigatedTo), navigatedToEventArgs);
 
         // Assert
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 
     [Fact]

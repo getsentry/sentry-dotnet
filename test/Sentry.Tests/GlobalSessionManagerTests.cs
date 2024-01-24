@@ -496,8 +496,7 @@ public class GlobalSessionManagerTests : IDisposable
         persistedSessionUpdate.Should().BeNull();
     }
 
-    [Fact]
-    public SessionUpdate TryRecoverPersistedSession_HasRecoveredUpdateAndCrashedLastRunFailed_RecoveredSessionCaptured()
+    public SessionUpdate TryRecoverPersistedSessionWithExceptionOnLastRun()
     {
         // Arrange
         var expectedCrashMessage = "Invoking CrashedLastRun failed.";
@@ -520,7 +519,11 @@ public class GlobalSessionManagerTests : IDisposable
         return persistedSessionUpdate;
     }
 
-    public SessionUpdate TryRecoverPersistedSessionWithExceptionOnLastRun() => TryRecoverPersistedSession_HasRecoveredUpdateAndCrashedLastRunFailed_RecoveredSessionCaptured();
+    [Fact]
+    public void TryRecoverPersistedSession_HasRecoveredUpdateAndCrashedLastRunFailed_RecoveredSessionCaptured()
+    {
+        TryRecoverPersistedSessionWithExceptionOnLastRun();
+    }
 
     // A session update (of which the state doesn't matter for the test):
     private static SessionUpdate AnySessionUpdate()

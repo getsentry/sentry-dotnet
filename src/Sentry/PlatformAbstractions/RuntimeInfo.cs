@@ -1,5 +1,3 @@
-using System;
-
 namespace Sentry.PlatformAbstractions;
 
 // https://github.com/dotnet/corefx/issues/17452

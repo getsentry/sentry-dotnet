@@ -1,13 +1,14 @@
-using Sentry.PlatformAbstractions;
-
 namespace Sentry.Tests;
 
 [UsesVerify]
 public partial class HubTests
 {
-    [Fact]
+    [SkippableFact]
     public async Task CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed()
     {
+        // Flaky on Mono. See https://github.com/getsentry/sentry-dotnet/issues/2751#issuecomment-1863385480
+        Skip.If(RuntimeInformation.FrameworkDescription.StartsWith("Mono", StringComparison.OrdinalIgnoreCase));
+
         // Arrange
         var worker = new FakeBackgroundWorker();
 

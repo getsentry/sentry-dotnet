@@ -6,10 +6,11 @@
     <RootNamespace>Microsoft.Maui.TestUtils</RootNamespace>
     <AssemblyName>Microsoft.Maui.TestUtils.DeviceTests.Runners.SourceGen</AssemblyName>
     <IsPackable>false</IsPackable>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,5 +1,4 @@
 using Sentry.Extensibility;
-using Sentry.Internal;
 
 namespace Sentry.Cocoa.Facades;
 

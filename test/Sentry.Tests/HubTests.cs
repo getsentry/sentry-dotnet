@@ -1,5 +1,4 @@
 using Sentry.Internal.Http;
-using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry.Tests;
 

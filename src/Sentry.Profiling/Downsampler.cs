@@ -1,6 +1,3 @@
-using Microsoft.Diagnostics.Tracing;
-using Microsoft.Diagnostics.Tracing.EventPipe;
-
 /// <summary>
 /// Reduce sampling rate from 1 Hz that is the default for the provider to the configured SamplingRateMs.
 /// </summary>

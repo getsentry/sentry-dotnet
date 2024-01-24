@@ -51,8 +51,6 @@ Sentry has extensive documentation for its SDKs on [https://docs.sentry.io](http
 
 **Consider taking a look at the _[samples](https://github.com/getsentry/sentry-dotnet/tree/main/samples)_ directory for different types of apps and example usages of the SDK.**
 
-Looking for more samples? Check out [this repository](https://github.com/getsentry/examples).
-
 ### Talks
 
 * On.NET [Error monitoring with Sentry for .NET MAUI](https://www.youtube.com/watch?v=8YmEC4iKD2I)
