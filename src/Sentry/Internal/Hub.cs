@@ -510,7 +510,7 @@ internal class Hub : IHub, IDisposable
         catch (Exception e)
         {
             var metricEventIds = enumerable?.Select(m => m.EventId).ToArray() ?? [];
-            _options.LogError(e, "Failure to capture metrics: {0}", string.Join(',', metricEventIds));
+            _options.LogError(e, "Failure to capture metrics: {0}", string.Join(",", metricEventIds));
         }
     }
 
