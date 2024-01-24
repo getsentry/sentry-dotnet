@@ -20,6 +20,11 @@ public interface IHub :
     SentryId LastEventId { get; }
 
     /// <summary>
+    /// <inheritdoc cref="IMetricAggregator"/>
+    /// </summary>
+    IMetricAggregator Metrics { get; }
+
+    /// <summary>
     /// Starts a transaction.
     /// </summary>
     ITransactionTracer StartTransaction(
@@ -95,11 +100,6 @@ public interface IHub :
     /// Ends the currently active session.
     /// </summary>
     void EndSession(SessionEndStatus status = SessionEndStatus.Exited);
-
-    /// <summary>
-    /// <inheritdoc cref="IMetricAggregator"/>
-    /// </summary>
-    IMetricAggregator Metrics { get; }
 
     /// <summary>
     /// Captures an event with a configurable scope.

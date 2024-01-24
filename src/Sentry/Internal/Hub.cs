@@ -509,17 +509,8 @@ internal class Hub : IHub, IDisposable
         }
         catch (Exception e)
         {
-            if (enumerable is null)
-            {
-                _options.LogError(e, "Failure to enumerate metrics for capture");
-            }
-            else
-            {
-                foreach (var metric in enumerable)
-                {
-                    _options.LogError(e, "Failure to capture metric: {0}", metric.EventId);
-                }
-            }
+            var metricEventIds = enumerable?.Select(m => m.EventId).ToArray() ?? [];
+            _options.LogError(e, "Failure to capture metrics: {0}", string.Join(',', metricEventIds));
         }
     }
 
@@ -536,7 +527,7 @@ internal class Hub : IHub, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError(e, "Failure to capture code locations: {0}", codeLocations.Timestamp);
+            _options.LogError(e, "Failure to capture code locations");
         }
     }
 

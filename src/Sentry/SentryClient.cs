@@ -453,7 +453,7 @@ public class SentryClient : ISentryClient, IDisposable
 
         try
         {
-            // Worker should empty it's queue until SentryOptions.ShutdownTimeout
+            // Worker should empty its queue until SentryOptions.ShutdownTimeout
             Worker.FlushAsync(_options.ShutdownTimeout).ConfigureAwait(false).GetAwaiter().GetResult();
         }
         catch

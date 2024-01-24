@@ -14,7 +14,7 @@ If you have conflicts, you can opt-out by adding the following to your `csproj`:
 
 ### Features
 
-- Added StartTimer extension method to IMetricAggregator ([#3075](https://github.com/getsentry/sentry-dotnet/pull/3075))
+- Timing metrics can now be captured with `SentrySdk.Metrics.StartTimer` ([#3075](https://github.com/getsentry/sentry-dotnet/pull/3075))
 
 ### Fixes
 
