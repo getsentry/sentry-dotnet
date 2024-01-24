@@ -378,14 +378,16 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         }
     }
 
-    [Fact]
-    public void OnEnd_IsSentryRequest_DoesNotFinishTransaction()
+    [Theory]
+    [InlineData(OtelSemanticConventions.AttributeUrlFull)]
+    [InlineData(OtelSemanticConventions.AttributeHttpUrl)]
+    public void OnEnd_IsSentryRequest_DoesNotFinishTransaction(string urlKey)
     {
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         var sut = _fixture.GetSut();
 
-        var tags = new Dictionary<string, object> { { "foo", "bar" }, { "http.url", _fixture.Options.Dsn } };
+        var tags = new Dictionary<string, object> { { "foo", "bar" }, { urlKey, _fixture.Options.Dsn } };
         var data = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal, parentContext: default, tags)!;
         data.DisplayName = "test display name";
         sut.OnStart(data);
