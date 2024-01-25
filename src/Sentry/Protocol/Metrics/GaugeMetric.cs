@@ -55,7 +55,7 @@ internal class GaugeMetric : Metric
         writer.WriteNumber("count", Count);
     }
 
-    protected override IEnumerable<object> SerializedStatsdValues()
+    protected override IEnumerable<IConvertible> SerializedStatsdValues()
     {
         yield return Value;
         yield return Min;

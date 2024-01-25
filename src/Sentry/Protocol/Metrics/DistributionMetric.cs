@@ -29,6 +29,6 @@ internal class DistributionMetric : Metric
     protected override void WriteValues(Utf8JsonWriter writer, IDiagnosticLogger? logger) =>
         writer.WriteArrayIfNotEmpty<double>("value", _value, logger);
 
-    protected override IEnumerable<object> SerializedStatsdValues()
-        => _value.Cast<object>();
+    protected override IEnumerable<IConvertible> SerializedStatsdValues()
+        => _value.Cast<IConvertible>();
 }

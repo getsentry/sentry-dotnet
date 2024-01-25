@@ -7,7 +7,7 @@ namespace Sentry.Protocol.Metrics;
 /// <summary>
 /// Base class for metric instruments
 /// </summary>
-public abstract class Metric : IJsonSerializable, ISentrySerializable
+internal abstract class Metric : IJsonSerializable, ISentrySerializable
 {
     /// <summary>
     /// Creates a new instance of <see cref="Metric"/>.
@@ -95,7 +95,7 @@ public abstract class Metric : IJsonSerializable, ISentrySerializable
     /// <summary>
     /// Concrete classes should implement this to return a list of values that should be serialized to statsd
     /// </summary>
-    protected abstract IEnumerable<object> SerializedStatsdValues();
+    protected abstract IEnumerable<IConvertible> SerializedStatsdValues();
 
     /// <summary>
     /// Serializes the metric asynchrounously in statsd format to the provided stream
@@ -114,7 +114,7 @@ public abstract class Metric : IJsonSerializable, ISentrySerializable
 
         foreach (var value in SerializedStatsdValues())
         {
-            await Write($":{((IConvertible)value).ToString(CultureInfo.InvariantCulture)}");
+            await Write($":{value.ToString(CultureInfo.InvariantCulture)}");
         }
 
         await Write($"|{StatsdType}");

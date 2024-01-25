@@ -3,7 +3,7 @@ namespace Sentry.Protocol.Metrics;
 /// <summary>
 /// The metric instrument type
 /// </summary>
-public enum MetricType : byte
+internal enum MetricType : byte
 {
     /// <inheritdoc cref="CounterMetric"/>
     Counter,

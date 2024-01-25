@@ -167,20 +167,6 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
-    public void CaptureMetrics(IEnumerable<Metric> metrics)
-    {
-    }
-
-    /// <summary>
-    /// No-Op.
-    /// </summary>
-    public void CaptureCodeLocations(CodeLocations codeLocations)
-    {
-    }
-
-    /// <summary>
-    /// No-Op.
-    /// </summary>
     public void CaptureSession(SessionUpdate sessionUpdate)
     {
     }

@@ -227,20 +227,6 @@ public class SentryClient : ISentryClient, IDisposable
         return transaction;
     }
 
-    /// <inheritdoc cref="ISentryClient.CaptureMetrics"/>
-    public void CaptureMetrics(IEnumerable<Metric> metrics)
-    {
-        _options.LogDebug("Capturing metrics.");
-        CaptureEnvelope(Envelope.FromMetrics(metrics));
-    }
-
-    /// <inheritdoc cref="ISentryClient.CaptureCodeLocations"/>
-    public void CaptureCodeLocations(CodeLocations codeLocations)
-    {
-        _options.LogDebug("Capturing code locations for period: {0}", codeLocations.Timestamp);
-        CaptureEnvelope(Envelope.FromCodeLocations(codeLocations));
-    }
-
     /// <inheritdoc />
     public void CaptureSession(SessionUpdate sessionUpdate)
     {
@@ -390,7 +376,7 @@ public class SentryClient : ISentryClient, IDisposable
     /// </summary>
     /// <param name="envelope">The envelope.</param>
     /// <returns>true if the enveloped was queued, false otherwise.</returns>
-    private bool CaptureEnvelope(Envelope envelope)
+    internal bool CaptureEnvelope(Envelope envelope)
     {
         if (Worker.EnqueueEnvelope(envelope))
         {

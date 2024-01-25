@@ -6,7 +6,7 @@ namespace Sentry.Protocol.Metrics;
 /// <summary>
 /// Represents a collection of code locations.
 /// </summary>
-public class CodeLocations(long timestamp, IReadOnlyDictionary<MetricResourceIdentifier, SentryStackFrame> locations)
+internal class CodeLocations(long timestamp, IReadOnlyDictionary<MetricResourceIdentifier, SentryStackFrame> locations)
     : IJsonSerializable
 {
     /// <summary>

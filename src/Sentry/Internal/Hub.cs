@@ -1,10 +1,11 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Protocol.Envelopes;
 using Sentry.Protocol.Metrics;
 
 namespace Sentry.Internal;
 
-internal class Hub : IHub, IDisposable
+internal class Hub : IHub, IMetricCollector, IDisposable
 {
     private readonly object _sessionPauseLock = new();
 
@@ -62,7 +63,7 @@ internal class Hub : IHub, IDisposable
 
         if (options.ExperimentalMetrics is not null)
         {
-            Metrics = new MetricAggregator(options, this);
+            Metrics = new MetricAggregator(options, this, this);
         }
         else
         {
@@ -494,6 +495,9 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    /// <summary>
+    /// Captures one or more metrics to be sent to Sentry.
+    /// </summary>
     public void CaptureMetrics(IEnumerable<Metric> metrics)
     {
         if (!IsEnabled)
@@ -501,11 +505,18 @@ internal class Hub : IHub, IDisposable
             return;
         }
 
+        if (_ownedClient is not SentryClient sentryClient)
+        {
+            _options.LogDebug("Capturing envelopes not supported by this client.");
+            return;
+        }
+
         Metric[]? enumerable = null;
         try
         {
             enumerable = metrics as Metric[] ?? metrics.ToArray();
-            _ownedClient.CaptureMetrics(enumerable);
+            _options.LogDebug("Capturing metrics.");
+            sentryClient.CaptureEnvelope(Envelope.FromMetrics(metrics));
         }
         catch (Exception e)
         {
@@ -514,6 +525,9 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    /// <summary>
+    /// Captures one or more <see cref="CodeLocations"/> to be sent to Sentry.
+    /// </summary>
     public void CaptureCodeLocations(CodeLocations codeLocations)
     {
         if (!IsEnabled)
@@ -521,9 +535,16 @@ internal class Hub : IHub, IDisposable
             return;
         }
 
+        if (_ownedClient is not SentryClient sentryClient)
+        {
+            _options.LogDebug("Capturing envelopes not supported by this client.");
+            return;
+        }
+
         try
         {
-            _ownedClient.CaptureCodeLocations(codeLocations);
+            _options.LogDebug("Capturing code locations for period: {0}", codeLocations.Timestamp);
+            sentryClient.CaptureEnvelope(Envelope.FromCodeLocations(codeLocations));
         }
         catch (Exception e)
         {

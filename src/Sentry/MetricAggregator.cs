@@ -9,6 +9,7 @@ internal class MetricAggregator : IMetricAggregator
 {
     private readonly SentryOptions _options;
     private readonly IHub _hub;
+    private readonly IMetricCollector _metricCollector;
     private readonly TimeSpan _flushInterval;
 
     private readonly SemaphoreSlim _codeLocationLock = new(1,1);
@@ -31,21 +32,12 @@ internal class MetricAggregator : IMetricAggregator
 
     private readonly Task _loopTask;
 
-    /// <summary>
-    /// MetricAggregator constructor.
-    /// </summary>
-    /// <param name="options">The <see cref="SentryOptions"/></param>
-    /// <param name="hub">The hub that should be used to create transactions and send data to Sentry</param>
-    /// <param name="shutdownSource">A <see cref="CancellationTokenSource"/></param>
-    /// <param name="disableLoopTask">
-    /// A boolean value indicating whether the Loop to flush metrics should run, for testing only.
-    /// </param>
-    /// <param name="flushInterval">An optional flushInterval, for testing only</param>
-    internal MetricAggregator(SentryOptions options, IHub hub, CancellationTokenSource? shutdownSource = null,
+    internal MetricAggregator(SentryOptions options, IHub hub, IMetricCollector metricCollector, CancellationTokenSource? shutdownSource = null,
         bool disableLoopTask = false, TimeSpan? flushInterval = null)
     {
         _options = options;
         _hub = hub;
+        _metricCollector = metricCollector;
         _shutdownSource = shutdownSource ?? new CancellationTokenSource();
         _flushInterval = flushInterval ?? TimeSpan.FromSeconds(5);
 
@@ -382,7 +374,7 @@ internal class MetricAggregator : IMetricAggregator
                     _bucketsLock.ExitWriteLock();
                 }
 
-                _hub.CaptureMetrics(bucket.Values);
+                _metricCollector.CaptureMetrics(bucket.Values);
                 _options.LogDebug("Metric flushed for bucket {0}", key);
             }
 
@@ -392,7 +384,7 @@ internal class MetricAggregator : IMetricAggregator
 
                 _options.LogDebug("Flushing code locations: ", timestamp);
                 var codeLocations = new CodeLocations(timestamp, locations);
-                _hub.CaptureCodeLocations(codeLocations);
+                _metricCollector.CaptureCodeLocations(codeLocations);
                 _options.LogDebug("Code locations flushed: ", timestamp);
             }
 

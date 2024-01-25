@@ -6,7 +6,7 @@ namespace Sentry.Protocol.Metrics;
 /// <param name="MetricType"></param>
 /// <param name="Key"></param>
 /// <param name="Unit"></param>
-public record struct MetricResourceIdentifier(MetricType MetricType, string Key, MeasurementUnit Unit)
+internal record struct MetricResourceIdentifier(MetricType MetricType, string Key, MeasurementUnit Unit)
 {
     /// <summary>
     /// Returns a string representation of the metric resource identifier.

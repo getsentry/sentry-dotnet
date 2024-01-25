@@ -1,3 +1,4 @@
+using Sentry.Protocol.Envelopes;
 using Sentry.Protocol.Metrics;
 
 namespace Sentry;
@@ -53,16 +54,6 @@ public interface ISentryClient
     /// </param>
     [EditorBrowsable(EditorBrowsableState.Never)]
     void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint);
-
-    /// <summary>
-    /// Captures one or more metrics to be sent to Sentry.
-    /// </summary>
-    void CaptureMetrics(IEnumerable<Metric> metrics);
-
-    /// <summary>
-    /// Captures one or more <see cref="CodeLocations"/> to be sent to Sentry.
-    /// </summary>
-    void CaptureCodeLocations(CodeLocations codeLocations);
 
     /// <summary>
     /// Captures a session update.

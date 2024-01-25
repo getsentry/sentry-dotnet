@@ -25,21 +25,6 @@ internal class Timing : IDisposable
     /// <summary>
     /// Creates a new <see cref="Timing"/> instance.
     /// </summary>
-    public Timing(string key, MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
-        IDictionary<string, string>? tags = null)
-        : this(SentrySdk.CurrentHub, key, unit, tags, stackLevel: 2 /* one for each constructor */)
-    {
-    }
-
-    /// <summary>
-    /// Creates a new <see cref="Timing"/> instance.
-    /// </summary>
-    public Timing(IHub hub, string key, MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
-        IDictionary<string, string>? tags = null)
-    : this(hub, key, unit, tags, stackLevel: 2 /* one for each constructor */)
-    {
-    }
-
     internal Timing(IHub hub, string key, MeasurementUnit.Duration unit, IDictionary<string, string>? tags,
         int stackLevel)
     {

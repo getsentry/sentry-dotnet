@@ -506,17 +506,6 @@ public static partial class SentrySdk
     public static void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint)
         => CurrentHub.CaptureTransaction(transaction, scope, hint);
 
-    /// <inheritdoc cref="ISentryClient.CaptureMetrics"/>
-    [DebuggerStepThrough]
-    public static void CaptureMetrics(IEnumerable<Metric> metrics)
-        => CurrentHub.CaptureMetrics(metrics);
-
-    /// <inheritdoc cref="ISentryClient.CaptureCodeLocations"/>
-    [DebuggerStepThrough]
-    public static void CaptureCodeLocations(CodeLocations codeLocations)
-        => CurrentHub.CaptureCodeLocations(codeLocations);
-
-
     /// <summary>
     /// Captures a session update.
     /// </summary>

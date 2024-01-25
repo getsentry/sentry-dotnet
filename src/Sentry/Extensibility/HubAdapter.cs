@@ -260,22 +260,6 @@ public sealed class HubAdapter : IHub
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public void CaptureMetrics(IEnumerable<Metric> metrics)
-        => SentrySdk.CaptureMetrics(metrics);
-
-    /// <summary>
-    /// Forwards the call to <see cref="SentrySdk"/>.
-    /// </summary>
-    [DebuggerStepThrough]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public void CaptureCodeLocations(CodeLocations codeLocations)
-        => SentrySdk.CaptureCodeLocations(codeLocations);
-
-    /// <summary>
-    /// Forwards the call to <see cref="SentrySdk"/>.
-    /// </summary>
-    [DebuggerStepThrough]
-    [EditorBrowsable(EditorBrowsableState.Never)]
     public void CaptureSession(SessionUpdate sessionUpdate)
         => SentrySdk.CaptureSession(sessionUpdate);
 
