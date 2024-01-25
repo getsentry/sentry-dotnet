@@ -17,7 +17,7 @@ groupConfigs:
       - "test/**/*.csproj"
       - "samples/**/*.csproj"
   macOnly:
-    - "**/*macOS.csproj"
+    - "**/*MacOS.csproj"
     - "**/*Ios.csproj"
     - "**/*Cocoa*.csproj"
     - "**/*MacCatalyst.csproj"
