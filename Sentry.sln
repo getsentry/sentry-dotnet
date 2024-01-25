@@ -165,7 +165,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Console.Nati
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Console.Metrics", "samples\Sentry.Samples.Console.Metrics\Sentry.Samples.Console.Metrics.csproj", "{BD2D08FC-8675-4157-A73C-D75F6A3856D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.macOS", "samples\Sentry.Samples.macOS\Sentry.Samples.macOS.csproj", "{5B100CC0-1A78-407E-A5A5-94BC06D67461}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.MacOS", "samples\Sentry.Samples.MacOS\Sentry.Samples.MacOS.csproj", "{5B100CC0-1A78-407E-A5A5-94BC06D67461}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
