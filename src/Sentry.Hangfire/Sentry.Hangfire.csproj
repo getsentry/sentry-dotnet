@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Official OpenTelemetry integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+    <PackageTags>$(PackageTags);OpenTelemetry</PackageTags>
+    <TargetFrameworks>net8.0;net6.0;netstandard2.1;netstandard2.0;net462</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(FrameworkSupportsAot)' == 'true'">
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sentry\Sentry.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hangfire.Core" Version="1.8.7" />
+    <PackageReference Include="Hangfire.MemoryStorage" Version="1.8.0" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.7" />
+  </ItemGroup>
+
+</Project>

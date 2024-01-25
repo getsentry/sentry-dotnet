@@ -93,6 +93,7 @@ filterConfigs:
         - "**/Sentry.OpenTelemetry.csproj"
         - "**/Sentry.Serilog.csproj"
         - "**/Sentry.csproj"
+        - "**/Sentry.Samples.Hangfire.csproj"
         - "**/Sentry.Testing.csproj"
         - "**/Sentry.Testing.CrashableApp.csproj"
         - "**/Sentry.Tests.csproj"

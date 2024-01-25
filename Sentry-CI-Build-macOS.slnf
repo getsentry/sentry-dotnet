@@ -23,6 +23,7 @@
       "samples\\Sentry.Samples.Google.Cloud.Functions\\Sentry.Samples.Google.Cloud.Functions.csproj",
       "samples\\Sentry.Samples.GraphQL.Client.Http\\Sentry.Samples.GraphQL.Client.Http.csproj",
       "samples\\Sentry.Samples.GraphQL.Server\\Sentry.Samples.GraphQL.Server.csproj",
+      "samples\\Sentry.Samples.Hangfire\\Sentry.Samples.Hangfire.csproj",
       "samples\\Sentry.Samples.Ios\\Sentry.Samples.Ios.csproj",
       "samples\\Sentry.Samples.Log4Net\\Sentry.Samples.Log4Net.csproj",
       "samples\\Sentry.Samples.MacCatalyst\\Sentry.Samples.MacCatalyst.csproj",
