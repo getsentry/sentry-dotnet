@@ -28,6 +28,9 @@ If you have conflicts, you can opt-out by adding the following to your `csproj`:
 - Bump CLI from v2.25.0 to v2.26.0 ([#3059](https://github.com/getsentry/sentry-dotnet/pull/3059), [#3062](https://github.com/getsentry/sentry-dotnet/pull/3062), [#3073](https://github.com/getsentry/sentry-dotnet/pull/3073))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2260)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.25.0...2.26.0)
+- Bump Cocoa SDK from v8.18.0 to v8.19.0 ([#3084](https://github.com/getsentry/sentry-dotnet/pull/3084))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8190)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.18.0...8.19.0)
 
 ## 4.0.0-beta.8
 
