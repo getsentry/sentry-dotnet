@@ -14,7 +14,9 @@ namespace Sentry;
 /// </example>
 internal class Timing : IDisposable
 {
-    private readonly IHub _hub;
+    private readonly IMetricHub _metricHub;
+    private readonly SentryOptions _options;
+    private readonly MetricAggregator _metricAggregator;
     private readonly string _key;
     private readonly MeasurementUnit.Duration _unit;
     private readonly IDictionary<string, string>? _tags;
@@ -25,30 +27,26 @@ internal class Timing : IDisposable
     /// <summary>
     /// Creates a new <see cref="Timing"/> instance.
     /// </summary>
-    internal Timing(IHub hub, string key, MeasurementUnit.Duration unit, IDictionary<string, string>? tags,
-        int stackLevel)
+    internal Timing(MetricAggregator metricAggregator, IMetricHub metricHub, SentryOptions options,
+        string key, MeasurementUnit.Duration unit, IDictionary<string, string>? tags, int stackLevel)
     {
-        _hub = hub;
+        _metricHub = metricHub;
+        _options = options;
+        _metricAggregator = metricAggregator;
         _key = key;
         _unit = unit;
         _tags = tags;
         _stopwatch.Start();
 
-        ITransactionTracer? currentTransaction = null;
-        hub.ConfigureScope(s => currentTransaction = s.Transaction);
-        _span = currentTransaction is {} transaction
-            ? transaction.StartChild("metric.timing", key)
-            : hub.StartTransaction("metric.timing", key);
+
+        _span = metricHub.StartSpan("metric.timing", key);
         if (tags is not null)
         {
             _span.SetTags(tags);
         }
 
         // Report code locations here for better accuracy
-        if (hub.Metrics is MetricAggregator metrics)
-        {
-            metrics.RecordCodeLocation(MetricType.Distribution, key, unit, stackLevel + 1, _startTime);
-        }
+        _metricAggregator.RecordCodeLocation(MetricType.Distribution, key, unit, stackLevel + 1, _startTime);
     }
 
     /// <inheritdoc cref="IDisposable"/>
@@ -70,11 +68,11 @@ internal class Timing : IDisposable
                 MeasurementUnit.Duration.Nanosecond => _stopwatch.Elapsed.TotalMilliseconds * 1000000,
                 _ => throw new ArgumentOutOfRangeException(nameof(_unit), _unit, null)
             };
-            _hub.Metrics.Timing(_key, value, _unit, _tags, _startTime);
+            _metricAggregator.Timing(_key, value, _unit, _tags, _startTime);
         }
         catch (Exception e)
         {
-            _hub.GetSentryOptions()?.LogError(e, "Error capturing timing '{0}'", _key);
+            _options.LogError(e, "Error capturing timing '{0}'", _key);
         }
         finally
         {

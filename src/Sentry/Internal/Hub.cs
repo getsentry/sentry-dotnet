@@ -5,7 +5,7 @@ using Sentry.Protocol.Metrics;
 
 namespace Sentry.Internal;
 
-internal class Hub : IHub, IMetricCollector, IDisposable
+internal class Hub : IHub, IMetricHub, IDisposable
 {
     private readonly object _sessionPauseLock = new();
 
@@ -63,7 +63,7 @@ internal class Hub : IHub, IMetricCollector, IDisposable
 
         if (options.ExperimentalMetrics is not null)
         {
-            Metrics = new MetricAggregator(options, this, this);
+            Metrics = new MetricAggregator(options, this);
         }
         else
         {
@@ -495,9 +495,7 @@ internal class Hub : IHub, IMetricCollector, IDisposable
         }
     }
 
-    /// <summary>
-    /// Captures one or more metrics to be sent to Sentry.
-    /// </summary>
+    /// <inheritdoc cref="IMetricHub.CaptureMetrics"/>
     public void CaptureMetrics(IEnumerable<Metric> metrics)
     {
         if (!IsEnabled)
@@ -525,9 +523,7 @@ internal class Hub : IHub, IMetricCollector, IDisposable
         }
     }
 
-    /// <summary>
-    /// Captures one or more <see cref="CodeLocations"/> to be sent to Sentry.
-    /// </summary>
+    /// <inheritdoc cref="IMetricHub.CaptureCodeLocations"/>
     public void CaptureCodeLocations(CodeLocations codeLocations)
     {
         if (!IsEnabled)
@@ -550,6 +546,16 @@ internal class Hub : IHub, IMetricCollector, IDisposable
         {
             _options.LogError(e, "Failure to capture code locations");
         }
+    }
+
+    /// <inheritdoc cref="IMetricHub.StartSpan"/>
+    public ISpan StartSpan(string operation, string description)
+    {
+        ITransactionTracer? currentTransaction = null;
+        ConfigureScope(s => currentTransaction = s.Transaction);
+        return currentTransaction is {} transaction
+            ? transaction.StartChild(operation, description)
+            : this.StartTransaction(operation, description);
     }
 
     public void CaptureSession(SessionUpdate sessionUpdate)

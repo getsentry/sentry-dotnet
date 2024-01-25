@@ -8,11 +8,11 @@ public class MetricAggregatorTests
     {
         public SentryOptions Options { get; set; } = new();
         public IHub Hub { get; set; } = Substitute.For<IHub>();
-        public IMetricCollector MetricCollector { get; set; } = Substitute.For<IMetricCollector>();
+        public IMetricHub MetricHub { get; set; } = Substitute.For<IMetricHub>();
         public bool DisableFlushLoop { get; set; } = true;
         public TimeSpan? FlushInterval { get; set; }
         public MetricAggregator GetSut()
-            => new(Options, Hub, MetricCollector, disableLoopTask: DisableFlushLoop, flushInterval: FlushInterval);
+            => new(Options, MetricHub, disableLoopTask: DisableFlushLoop, flushInterval: FlushInterval);
     }
 
     // private readonly Fixture _fixture = new();
@@ -177,7 +177,7 @@ public class MetricAggregatorTests
         MetricHelper.FlushShift = 0.0;
         _fixture.DisableFlushLoop = false;
         _fixture.FlushInterval = TimeSpan.FromMilliseconds(100);
-        _fixture.MetricCollector.CaptureMetrics(Arg.Do<IEnumerable<Metric>>(metrics =>
+        _fixture.MetricHub.CaptureMetrics(Arg.Do<IEnumerable<Metric>>(metrics =>
             {
                 foreach (var metric in metrics)
                 {
