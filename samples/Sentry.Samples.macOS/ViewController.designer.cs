@@ -5,7 +5,7 @@
 // Manual changes to this file may not be handled correctly.
 //
 
-namespace macos_nativeaot_test;
+namespace Sentry.Samples.MacOS;
 
 [Register ("ViewController")]
 partial class ViewController {
