@@ -63,6 +63,12 @@ public interface ISentryClient
     void CaptureSession(SessionUpdate sessionUpdate);
 
     /// <summary>
+    /// Captures a Checkin.
+    /// </summary>
+    /// <param name="checkin">The Checkin to send to Sentry</param>
+    void CaptureCheckin(Checkin checkin);
+
+    /// <summary>
     /// Flushes the queue of captured events until the timeout is reached.
     /// </summary>
     /// <param name="timeout">The amount of time allowed for flushing.</param>

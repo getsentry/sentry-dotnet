@@ -265,6 +265,12 @@ public class SentryClient : ISentryClient, IDisposable
         CaptureEnvelope(Envelope.FromSession(sessionUpdate));
     }
 
+    /// <inheritdoc />
+    public void CaptureCheckin(Checkin checkin)
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>
     /// Flushes events asynchronously.
     /// </summary>

@@ -46,17 +46,17 @@ public class MyJobStarter : IHostedService
         var jobId = BackgroundJob.Enqueue<MyBackgroundJob>(x => x.Execute());
         Console.WriteLine($"Job Enqueued. JobId: {jobId}");
 
-        RecurringJob.AddOrUpdate<MyBackgroundJob>(
-            "my_recurring_job",
-            x => x.Execute(),
-            Cron.Minutely);
-
-        for (var i = 0; i < 100; i++)
-        {
-            var job = BackgroundJob.Schedule<MyBackgroundJob>(
-                x => x.Execute(),
-                TimeSpan.FromSeconds(new Random().Next(1, 100)));
-        }
+        // RecurringJob.AddOrUpdate<MyBackgroundJob>(
+        //     "my_recurring_job",
+        //     x => x.Execute(),
+        //     Cron.Minutely);
+        //
+        // for (var i = 0; i < 100; i++)
+        // {
+        //     var job = BackgroundJob.Schedule<MyBackgroundJob>(
+        //         x => x.Execute(),
+        //         TimeSpan.FromSeconds(new Random().Next(1, 100)));
+        // }
 
         return Task.CompletedTask;
     }

@@ -170,6 +170,13 @@ public class DisabledHub : IHub, IDisposable
     }
 
     /// <summary>
+    /// No-Op
+    /// </summary>
+    public void CaptureCheckin(Checkin checkin)
+    {
+    }
+
+    /// <summary>
     /// No-Op.
     /// </summary>
     public Task FlushAsync(TimeSpan timeout) => Task.CompletedTask;

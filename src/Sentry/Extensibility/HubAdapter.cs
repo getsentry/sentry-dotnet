@@ -263,6 +263,12 @@ public sealed class HubAdapter : IHub
         => SentrySdk.CaptureSession(sessionUpdate);
 
     /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    public void CaptureCheckin(Checkin checkin)
+        => SentrySdk.CaptureCheckin(checkin);
+
+    /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>
     /// </summary>
     [DebuggerStepThrough]

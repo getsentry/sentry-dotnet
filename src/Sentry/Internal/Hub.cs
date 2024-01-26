@@ -503,6 +503,11 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    public void CaptureCheckin(Checkin checkin)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task FlushAsync(TimeSpan timeout)
     {
         try
