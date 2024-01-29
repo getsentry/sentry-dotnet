@@ -135,7 +135,7 @@ public class MetricAggregatorTests
     }
 
     [Fact]
-    public void Set_AggregatesMetrics()
+    public void Set_Int_AggregatesMetrics()
     {
         // Arrange
         var metricType = MetricType.Set;
@@ -155,7 +155,7 @@ public class MetricAggregatorTests
         sut.Set(key, 13, unit, tags, time3);
 
         DateTimeOffset time4 = new(1970, 1, 1, 0, 0, 42, 0, TimeSpan.Zero);
-        sut.Set(key, 13, unit, tags, time3);
+        sut.Set(key, 13, unit, tags, time4);
 
         // Assert
         var bucket1 = sut.Buckets[time1.GetTimeBucketKey()];
@@ -165,6 +165,39 @@ public class MetricAggregatorTests
         var bucket2 = sut.Buckets[time3.GetTimeBucketKey()];
         var data2 = (SetMetric)bucket2[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
         data2.Value.Should().BeEquivalentTo(new[] {13});
+    }
+
+    [Fact]
+    public void Set_String_AggregatesMetrics()
+    {
+        // Arrange
+        var metricType = MetricType.Set;
+        var key = "set_key";
+        var unit = MeasurementUnit.None;
+        var tags = new Dictionary<string, string> { ["tag1"] = "value1" };
+        var sut = _fixture.GetSut();
+
+        // Act
+        DateTimeOffset time1 = new(1970, 1, 1, 0, 0, 31, 0, TimeSpan.Zero);
+        sut.Set(key, "test_1", unit, tags, time1);
+
+        DateTimeOffset time2 = new(1970, 1, 1, 0, 0, 38, 0, TimeSpan.Zero);
+        sut.Set(key, "test_2", unit, tags, time2);
+
+        DateTimeOffset time3 = new(1970, 1, 1, 0, 0, 40, 0, TimeSpan.Zero);
+        sut.Set(key, "test_3", unit, tags, time3);
+
+        DateTimeOffset time4 = new(1970, 1, 1, 0, 0, 42, 0, TimeSpan.Zero);
+        sut.Set(key, "test_3", unit, tags, time4);
+
+        // Assert
+        var bucket1 = sut.Buckets[time1.GetTimeBucketKey()];
+        var data1 = (SetMetric)bucket1[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
+        data1.Value.Should().HaveCount(2);
+
+        var bucket2 = sut.Buckets[time3.GetTimeBucketKey()];
+        var data2 = (SetMetric)bucket2[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
+        data2.Value.Should().HaveCount(1);
     }
 
     [Fact]
