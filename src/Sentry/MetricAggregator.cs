@@ -162,8 +162,11 @@ internal class MetricAggregator : IMetricAggregator
         DateTimeOffset? timestamp = null,
         int stackLevel = 1)
     {
-        var hashed = Crc32Algorithm.Compute(Encoding.UTF8.GetBytes(value));
-        Emit(MetricType.Set, key, (int)(hashed & 0xFFFFFFFF), unit, tags, timestamp, stackLevel + 1);
+        // Compute the CRC32 hash of the value as byte array and cast it to a 32-bit signed integer
+        // Mask the lower 32 bits to ensure the result fits within the 32-bit integer range
+        var hash = (int)(Crc32Algorithm.Compute(Encoding.UTF8.GetBytes(value)) & 0xFFFFFFFF);
+
+        Emit(MetricType.Set, key, hash, unit, tags, timestamp, stackLevel + 1);
     }
 
     /// <inheritdoc cref="IMetricAggregator.Timing"/>
