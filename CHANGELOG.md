@@ -12,6 +12,10 @@ If you have conflicts, you can opt-out by adding the following to your `csproj`:
 </PropertyGroup>
 ```
 
+### Features
+
+- Timing metrics can now be captured with `SentrySdk.Metrics.StartTimer` ([#3075](https://github.com/getsentry/sentry-dotnet/pull/3075))
+
 ### Fixes
 
 - Fixed an issue with tag values in metrics not being properly serialized ([#3065](https://github.com/getsentry/sentry-dotnet/pull/3065))

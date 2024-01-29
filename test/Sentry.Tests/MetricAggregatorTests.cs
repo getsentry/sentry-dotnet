@@ -7,12 +7,12 @@ public class MetricAggregatorTests
     class Fixture
     {
         public SentryOptions Options { get; set; } = new();
-        public Action<IEnumerable<Metric>> CaptureMetrics { get; set; } = (_ => { });
-        public Action<CodeLocations> CaptureCodeLocations { get; set; } = (_ => { });
+        public IHub Hub { get; set; } = Substitute.For<IHub>();
+        public IMetricHub MetricHub { get; set; } = Substitute.For<IMetricHub>();
         public bool DisableFlushLoop { get; set; } = true;
         public TimeSpan? FlushInterval { get; set; }
         public MetricAggregator GetSut()
-            => new(Options, CaptureMetrics, CaptureCodeLocations, disableLoopTask: DisableFlushLoop, flushInterval: FlushInterval);
+            => new(Options, MetricHub, disableLoopTask: DisableFlushLoop, flushInterval: FlushInterval);
     }
 
     // private readonly Fixture _fixture = new();
@@ -177,13 +177,14 @@ public class MetricAggregatorTests
         MetricHelper.FlushShift = 0.0;
         _fixture.DisableFlushLoop = false;
         _fixture.FlushInterval = TimeSpan.FromMilliseconds(100);
-        _fixture.CaptureMetrics = metrics =>
-        {
-            foreach (var metric in metrics)
+        _fixture.MetricHub.CaptureMetrics(Arg.Do<IEnumerable<Metric>>(metrics =>
             {
-                Interlocked.Add(ref sent, (int)((CounterMetric)metric).Value);
+                foreach (var metric in metrics)
+                {
+                    Interlocked.Add(ref sent, (int)((CounterMetric)metric).Value);
+                }
             }
-        };
+        ));
         var sut = _fixture.GetSut();
 
         // Act... spawn some threads that add loads of metrics

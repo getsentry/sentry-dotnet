@@ -30,5 +30,5 @@ internal class SetMetric : Metric
         writer.WriteArrayIfNotEmpty("value", _value, logger);
 
     protected override IEnumerable<IConvertible> SerializedStatsdValues()
-        => _value.Select(v => (IConvertible)v);
+        => _value.Cast<IConvertible>();
 }
