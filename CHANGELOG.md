@@ -12,6 +12,10 @@ If you have conflicts, you can opt-out by adding the following to your `csproj`:
 </PropertyGroup>
 ```
 
+### Features
+
+- `SentrySdk.Metrics.Set` now additionally accepts `string` as value ([#3092](https://github.com/getsentry/sentry-dotnet/pull/3092))
+
 ### Fixes
 
 - Fixed an issue with tag values in metrics not being properly serialized ([#3065](https://github.com/getsentry/sentry-dotnet/pull/3065))
