@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Protocol.Envelopes;
 using Sentry.Protocol.Metrics;
 
 namespace Sentry;
@@ -375,6 +376,12 @@ public static partial class SentrySdk
     [DebuggerStepThrough]
     public static Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
         => CurrentHub.ConfigureScopeAsync(configureScope);
+
+    /// <inheritdoc cref="ISentryClient.CaptureEnvelope"/>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static bool CaptureEnvelope(Envelope envelope)
+        => CurrentHub.CaptureEnvelope(envelope);
 
     /// <summary>
     /// Captures the event, passing a hint, using the specified scope.

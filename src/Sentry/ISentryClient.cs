@@ -14,6 +14,13 @@ public interface ISentryClient
     bool IsEnabled { get; }
 
     /// <summary>
+    /// Capture an envelope and queue it.
+    /// </summary>
+    /// <param name="envelope">The envelope.</param>
+    /// <returns>true if the enveloped was queued, false otherwise.</returns>
+    bool CaptureEnvelope(Envelope envelope);
+
+    /// <summary>
     /// Capture the event
     /// </summary>
     /// <param name="evt">The event to be captured.</param>

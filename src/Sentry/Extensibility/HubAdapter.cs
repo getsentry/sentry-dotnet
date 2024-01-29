@@ -1,4 +1,5 @@
 using Sentry.Infrastructure;
+using Sentry.Protocol.Envelopes;
 using Sentry.Protocol.Metrics;
 
 namespace Sentry.Extensibility;
@@ -209,6 +210,9 @@ public sealed class HubAdapter : IHub
     [EditorBrowsable(EditorBrowsableState.Never)]
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope)
         => SentrySdk.CaptureEvent(evt, scope, null);
+
+    /// <inheritdoc cref="ISentryClient.CaptureEnvelope"/>
+    public bool CaptureEnvelope(Envelope envelope) => SentrySdk.CurrentHub.CaptureEnvelope(envelope);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.

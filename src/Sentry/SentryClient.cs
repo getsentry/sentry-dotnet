@@ -371,12 +371,8 @@ public class SentryClient : ISentryClient, IDisposable
         return null;
     }
 
-    /// <summary>
-    /// Capture an envelope and queue it.
-    /// </summary>
-    /// <param name="envelope">The envelope.</param>
-    /// <returns>true if the enveloped was queued, false otherwise.</returns>
-    internal bool CaptureEnvelope(Envelope envelope)
+    /// <inheritdoc cref="ISentryClient.CaptureEnvelope"/>
+    public bool CaptureEnvelope(Envelope envelope)
     {
         if (Worker.EnqueueEnvelope(envelope))
         {

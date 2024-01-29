@@ -1,3 +1,4 @@
+using Sentry.Protocol.Envelopes;
 using Sentry.Protocol.Metrics;
 
 namespace Sentry.Extensibility;
@@ -133,6 +134,14 @@ public class DisabledHub : IHub, IDisposable
     /// </summary>
     public void BindClient(ISentryClient client)
     {
+    }
+
+    /// <summary>
+    /// No-Op.
+    /// </summary>
+    public bool CaptureEnvelope(Envelope envelope)
+    {
+        return false;
     }
 
     /// <summary>

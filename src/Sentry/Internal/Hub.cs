@@ -403,6 +403,8 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
+    public bool CaptureEnvelope(Envelope envelope) => _ownedClient.CaptureEnvelope(envelope);
+
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Hint? hint = null)
     {
         if (!IsEnabled)
@@ -503,18 +505,12 @@ internal class Hub : IHub, IMetricHub, IDisposable
             return;
         }
 
-        if (_ownedClient is not SentryClient sentryClient)
-        {
-            _options.LogDebug("Capturing envelopes not supported by this client.");
-            return;
-        }
-
         Metric[]? enumerable = null;
         try
         {
             enumerable = metrics as Metric[] ?? metrics.ToArray();
             _options.LogDebug("Capturing metrics.");
-            sentryClient.CaptureEnvelope(Envelope.FromMetrics(metrics));
+            _ownedClient.CaptureEnvelope(Envelope.FromMetrics(metrics));
         }
         catch (Exception e)
         {
@@ -531,16 +527,10 @@ internal class Hub : IHub, IMetricHub, IDisposable
             return;
         }
 
-        if (_ownedClient is not SentryClient sentryClient)
-        {
-            _options.LogDebug("Capturing envelopes not supported by this client.");
-            return;
-        }
-
         try
         {
             _options.LogDebug("Capturing code locations for period: {0}", codeLocations.Timestamp);
-            sentryClient.CaptureEnvelope(Envelope.FromCodeLocations(codeLocations));
+            _ownedClient.CaptureEnvelope(Envelope.FromCodeLocations(codeLocations));
         }
         catch (Exception e)
         {
