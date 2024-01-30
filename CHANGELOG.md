@@ -141,6 +141,9 @@ If you have compilation errors you can find the affected types or overloads that
 
 ### Features
 
+- `SentrySdk.Metrics.Set` now additionally accepts `string` as value ([#3092](https://github.com/getsentry/sentry-dotnet/pull/3092))
+- Timing metrics can now be captured with `SentrySdk.Metrics.StartTimer` ([#3075](https://github.com/getsentry/sentry-dotnet/pull/3075))
+- Added support for capturing built in metrics from the System.Diagnostics.Metrics API ([#3052](https://github.com/getsentry/sentry-dotnet/pull/3052))
 - `Sentry.Profiling` is now available as a package on [nuget](nuget.org). Be aware that profiling is in alpha and on servers the overhead could be high. Improving the experience for ASP.NET Core is tracked on [this issue](
 https://github.com/getsentry/sentry-dotnet/issues/2316) ([#2800](https://github.com/getsentry/sentry-dotnet/pull/2800))
 - iOS profiling support (alpha). ([#2930](https://github.com/getsentry/sentry-dotnet/pull/2930))
@@ -178,6 +181,9 @@ There are some functional differences when publishing Native AOT:
 
 ### Fixes
 
+- Native integration logging on macOS ([#3079](https://github.com/getsentry/sentry-dotnet/pull/3079))
+- The scope transaction is now correctly set for Otel transactions ([#3072](https://github.com/getsentry/sentry-dotnet/pull/3072))
+- Fixed an issue with tag values in metrics not being properly serialized ([#3065](https://github.com/getsentry/sentry-dotnet/pull/3065))
 - Moved the binding to MAUI events for breadcrumb creation from `WillFinishLaunching` to `FinishedLaunching`. This delays the initial instantiation of `app`. ([#3057](https://github.com/getsentry/sentry-dotnet/pull/3057))
 - The SDK no longer adds the `WinUIUnhandledExceptionIntegration` on non Windows platforms ([#3055](https://github.com/getsentry/sentry-dotnet/pull/3055))
 - Stop Sentry for MacCatalyst from creating `default.profraw` in the app bundle using xcodebuild archive to build sentry-cocoa ([#2960](https://github.com/getsentry/sentry-dotnet/pull/2960))
@@ -199,18 +205,24 @@ There are some functional differences when publishing Native AOT:
 - Integrate `sentry-native` as a static library in Native AOT builds to enable symbolication. ([#2704](https://github.com/getsentry/sentry-dotnet/pull/2704))
 
 
-- Bump Cocoa SDK from v8.16.1 to v8.18.0 ([#2910](https://github.com/getsentry/sentry-dotnet/pull/2910), [#2936](https://github.com/getsentry/sentry-dotnet/pull/2936), [#2972](https://github.com/getsentry/sentry-dotnet/pull/2972), [#3005](https://github.com/getsentry/sentry-dotnet/pull/3005))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8180)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.16.1...8.18.0)
+- Bump Cocoa SDK from v8.16.1 to v8.19.0 ([#2910](https://github.com/getsentry/sentry-dotnet/pull/2910), [#2936](https://github.com/getsentry/sentry-dotnet/pull/2936), [#2972](https://github.com/getsentry/sentry-dotnet/pull/2972), [#3005](https://github.com/getsentry/sentry-dotnet/pull/3005), [#3084](https://github.com/getsentry/sentry-dotnet/pull/3084))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8190)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.16.1...8.19.0)
 - Bump Java SDK from v6.34.0 to v7.2.0 ([#2932](https://github.com/getsentry/sentry-dotnet/pull/2932), [#2979](https://github.com/getsentry/sentry-dotnet/pull/2979), [#3049](https://github.com/getsentry/sentry-dotnet/pull/3049))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#720)
   - [diff](https://github.com/getsentry/sentry-java/compare/6.34.0...7.2.0)
 - Bump Native SDK from v0.6.5 to v0.6.7 ([#2914](https://github.com/getsentry/sentry-dotnet/pull/2914), [#3029](https://github.com/getsentry/sentry-dotnet/pull/3029))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#070)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.6.5...0.7.0)
-- Bump CLI from v2.21.5 to v2.25.3 ([#2901](https://github.com/getsentry/sentry-dotnet/pull/2901), [#2915](https://github.com/getsentry/sentry-dotnet/pull/2915), [#2956](https://github.com/getsentry/sentry-dotnet/pull/2956), [#2985](https://github.com/getsentry/sentry-dotnet/pull/2985), [#2999](https://github.com/getsentry/sentry-dotnet/pull/2999), [#3012](https://github.com/getsentry/sentry-dotnet/pull/3012), [#3030](https://github.com/getsentry/sentry-dotnet/pull/3030), [#3059](https://github.com/getsentry/sentry-dotnet/pull/3059), [#3062](https://github.com/getsentry/sentry-dotnet/pull/3062))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2253)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.5...2.25.3)
+- Bump CLI from v2.21.5 to v2.26.0 ([#2901](https://github.com/getsentry/sentry-dotnet/pull/2901), [#2915](https://github.com/getsentry/sentry-dotnet/pull/2915), [#2956](https://github.com/getsentry/sentry-dotnet/pull/2956), [#2985](https://github.com/getsentry/sentry-dotnet/pull/2985), [#2999](https://github.com/getsentry/sentry-dotnet/pull/2999), [#3012](https://github.com/getsentry/sentry-dotnet/pull/3012), [#3030](https://github.com/getsentry/sentry-dotnet/pull/3030), [#3059](https://github.com/getsentry/sentry-dotnet/pull/3059), [#3062](https://github.com/getsentry/sentry-dotnet/pull/3062), [#3073](https://github.com/getsentry/sentry-dotnet/pull/3073))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2250)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.5...2.26.0)
+
+## 3.41.4
+
+### Fixes
+
+- Fixed an issue when using the SDK together with Open Telemetry `1.5.0` and newer where the SDK would create transactions for itself. The fix is backwards compatible. ([#3001](https://github.com/getsentry/sentry-dotnet/pull/3001))
 
 ## 3.41.3
 
