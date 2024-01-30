@@ -43,6 +43,6 @@
   },
   {
     Level: info,
-    Message: System.Diagnostics.Metrics Integration is disabled because no listeners configured.
+    Message: System.Diagnostics.Metrics Integration is disabled because no listeners are configured.
   }
 ]

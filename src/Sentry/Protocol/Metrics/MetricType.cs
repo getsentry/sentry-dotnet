@@ -1,6 +1,19 @@
 namespace Sentry.Protocol.Metrics;
 
-internal enum MetricType : byte { Counter, Gauge, Distribution, Set }
+/// <summary>
+/// The metric instrument type
+/// </summary>
+internal enum MetricType : byte
+{
+    /// <inheritdoc cref="CounterMetric"/>
+    Counter,
+    /// <inheritdoc cref="GaugeMetric"/>
+    Gauge,
+    /// <inheritdoc cref="DistributionMetric"/>
+    Distribution,
+    /// <inheritdoc cref="SetMetric"/>
+    Set
+}
 
 internal static class MetricTypeExtensions
 {

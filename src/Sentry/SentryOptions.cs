@@ -194,6 +194,13 @@ public class SentryOptions
             }
 #endif
 
+#if NET8_0_OR_GREATER
+            if ((_defaultIntegrations & DefaultIntegrations.SystemDiagnosticsMetricsIntegration) != 0)
+            {
+                yield return new SystemDiagnosticsMetricsIntegration();
+            }
+#endif
+
             foreach (var integration in _integrations)
             {
                 yield return integration;
@@ -709,7 +716,7 @@ public class SentryOptions
     public IList<SubstringOrRegexPattern> FailedRequestTargets
     {
         get => _failedRequestTargets.Value;
-        set => _failedRequestTargets = new(value.SetWithConfigBinding);
+        set => _failedRequestTargets = new(value.WithConfigBinding);
     }
 
     /// <summary>
@@ -911,7 +918,7 @@ public class SentryOptions
         //       .NET 7 changed this to call the setter with an array that already starts with the old value.
         //       We have to handle both cases.
         get => _tracePropagationTargets;
-        set => _tracePropagationTargets = value.SetWithConfigBinding();
+        set => _tracePropagationTargets = value.WithConfigBinding();
     }
 
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
@@ -1213,6 +1220,9 @@ public class SentryOptions
 #if NET5_0_OR_GREATER && !__MOBILE__
                                | DefaultIntegrations.WinUiUnhandledExceptionIntegration
 #endif
+#if NET8_0_OR_GREATER
+                               | DefaultIntegrations.SystemDiagnosticsMetricsIntegration
+#endif
                                ;
 
 #if ANDROID
@@ -1313,18 +1323,8 @@ public class SentryOptions
 #if NET5_0_OR_GREATER && !__MOBILE__
         WinUiUnhandledExceptionIntegration = 1 << 6,
 #endif
+#if NET8_0_OR_GREATER
+        SystemDiagnosticsMetricsIntegration = 1 << 7,
+#endif
     }
-}
-
-/// <summary>
-/// Settings for the experimental Metrics feature. This feature is preview only and will very likely change in the future
-/// without a major version bump... so use at your own risk.
-/// </summary>
-public class ExperimentalMetricsOptions
-{
-    /// <summary>
-    /// Determines the sample rate for metrics. 0.0 means no metrics will be sent (metrics disabled). 1.0 implies all
-    /// metrics will be sent.
-    /// </summary>
-    public bool EnableCodeLocations { get; set; } = true;
 }

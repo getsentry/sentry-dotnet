@@ -44,11 +44,30 @@ internal class DisabledMetricAggregator : IMetricAggregator
         // No Op
     }
 
+    public IDisposable StartTimer(string key, MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
+        IDictionary<string, string>? tags = null,
+        int stackLevel = 1)
+    {
+        // No Op
+        return NoOpDisposable.Instance;
+    }
+
     public Task FlushAsync(bool force = true, CancellationToken cancellationToken = default)
     {
         // No Op
         return Task.CompletedTask;
     }
+
+    public void Dispose()
+    {
+        // No Op
+    }
+}
+
+internal class NoOpDisposable : IDisposable
+{
+    private static readonly Lazy<NoOpDisposable> LazyInstance = new();
+    internal static NoOpDisposable Instance => LazyInstance.Value;
 
     public void Dispose()
     {

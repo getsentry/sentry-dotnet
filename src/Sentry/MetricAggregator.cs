@@ -9,8 +9,7 @@ namespace Sentry;
 internal class MetricAggregator : IMetricAggregator
 {
     private readonly SentryOptions _options;
-    private readonly Action<IEnumerable<Metric>> _captureMetrics;
-    private readonly Action<CodeLocations> _captureCodeLocations;
+    private readonly IMetricHub _metricHub;
     private readonly TimeSpan _flushInterval;
 
     private readonly SemaphoreSlim _codeLocationLock = new(1,1);
@@ -33,24 +32,12 @@ internal class MetricAggregator : IMetricAggregator
 
     private readonly Task _loopTask;
 
-    /// <summary>
-    /// MetricAggregator constructor.
-    /// </summary>
-    /// <param name="options">The <see cref="SentryOptions"/></param>
-    /// <param name="captureMetrics">The callback to be called to transmit aggregated metrics</param>
-    /// <param name="captureCodeLocations">The callback to be called to transmit new code locations</param>
-    /// <param name="shutdownSource">A <see cref="CancellationTokenSource"/></param>
-    /// <param name="disableLoopTask">
-    /// A boolean value indicating whether the Loop to flush metrics should run, for testing only.
-    /// </param>
-    /// <param name="flushInterval">An optional flushInterval, for testing only</param>
-    internal MetricAggregator(SentryOptions options, Action<IEnumerable<Metric>> captureMetrics,
-        Action<CodeLocations> captureCodeLocations, CancellationTokenSource? shutdownSource = null,
+    internal MetricAggregator(SentryOptions options, IMetricHub metricHub,
+        CancellationTokenSource? shutdownSource = null,
         bool disableLoopTask = false, TimeSpan? flushInterval = null)
     {
         _options = options;
-        _captureMetrics = captureMetrics;
-        _captureCodeLocations = captureCodeLocations;
+        _metricHub = metricHub;
         _shutdownSource = shutdownSource ?? new CancellationTokenSource();
         _flushInterval = flushInterval ?? TimeSpan.FromSeconds(5);
 
@@ -177,6 +164,11 @@ internal class MetricAggregator : IMetricAggregator
         DateTimeOffset? timestamp = null,
         int stackLevel = 1) => Emit(MetricType.Distribution, key, value, unit, tags, timestamp, stackLevel + 1);
 
+    /// <inheritdoc cref="IMetricAggregator.StartTimer"/>
+    public IDisposable StartTimer(string key, MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
+        IDictionary<string, string>? tags = null, int stackLevel = 1)
+        => new Timing(this, _metricHub, _options, key, unit, tags, stackLevel + 1);
+
     private void Emit(
         MetricType type,
         string key,
@@ -263,7 +255,7 @@ internal class MetricAggregator : IMetricAggregator
         }
     }
 
-    internal void RecordCodeLocation(
+    internal virtual void RecordCodeLocation(
         MetricType type,
         string key,
         MeasurementUnit unit,
@@ -397,7 +389,7 @@ internal class MetricAggregator : IMetricAggregator
                     _bucketsLock.ExitWriteLock();
                 }
 
-                _captureMetrics(bucket.Values);
+                _metricHub.CaptureMetrics(bucket.Values);
                 _options.LogDebug("Metric flushed for bucket {0}", key);
             }
 
@@ -407,7 +399,7 @@ internal class MetricAggregator : IMetricAggregator
 
                 _options.LogDebug("Flushing code locations: ", timestamp);
                 var codeLocations = new CodeLocations(timestamp, locations);
-                _captureCodeLocations(codeLocations);
+                _metricHub.CaptureCodeLocations(codeLocations);
                 _options.LogDebug("Code locations flushed: ", timestamp);
             }
 
