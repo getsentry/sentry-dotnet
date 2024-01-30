@@ -7,9 +7,15 @@ namespace Sentry;
 
 internal class MetricAggregator : IMetricAggregator
 {
+    internal const string DisposingMessage = "Disposing MetricAggregator.";
+    internal const string AlreadyDisposedMessage = "Already disposed MetricAggregator.";
+    internal const string CancelledMessage = "Stopping the Metric Aggregator due to a cancellation.";
+    internal const string ShutdownScheduledMessage = "Shutdown scheduled. Stopping by: {0}.";
+    internal const string ShutdownImmediatelyMessage = "Exiting immediately due to 0 shutdown timeout.";
+    internal const string FlushShutdownMessage = "Shutdown token triggered. Exiting metric aggregator.";
+
     private readonly SentryOptions _options;
     private readonly IMetricHub _metricHub;
-    private readonly TimeSpan _flushInterval;
 
     private readonly SemaphoreSlim _codeLocationLock = new(1,1);
     private readonly ReaderWriterLockSlim _bucketsLock = new ReaderWriterLockSlim();
@@ -29,16 +35,14 @@ internal class MetricAggregator : IMetricAggregator
     internal readonly ConcurrentDictionary<long, HashSet<MetricResourceIdentifier>> _seenLocations = new();
     internal Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>> _pendingLocations = new();
 
-    private readonly Task _loopTask;
+    internal readonly Task _loopTask;
 
     internal MetricAggregator(SentryOptions options, IMetricHub metricHub,
-        CancellationTokenSource? shutdownSource = null,
-        bool disableLoopTask = false, TimeSpan? flushInterval = null)
+        CancellationTokenSource? shutdownSource = null, bool disableLoopTask = false)
     {
         _options = options;
         _metricHub = metricHub;
         _shutdownSource = shutdownSource ?? new CancellationTokenSource();
-        _flushInterval = flushInterval ?? TimeSpan.FromSeconds(5);
 
         if (disableLoopTask)
         {
@@ -305,12 +309,12 @@ internal class MetricAggregator : IMetricAggregator
                 // If the cancellation was signaled, run until the end of the queue or shutdownTimeout
                 try
                 {
-                    await Task.Delay(_flushInterval, _shutdownSource.Token).ConfigureAwait(false);
+                    await Task.Delay(_options.ShutdownTimeout, _shutdownSource.Token).ConfigureAwait(false);
                 }
                 // Cancellation requested and no timeout allowed, so exit even if there are more items
                 catch (OperationCanceledException) when (_options.ShutdownTimeout == TimeSpan.Zero)
                 {
-                    _options.LogDebug("Exiting immediately due to 0 shutdown timeout.");
+                    _options.LogDebug(ShutdownImmediatelyMessage);
 
                     await shutdownTimeout.CancelAsync().ConfigureAwait(false);
 
@@ -319,9 +323,7 @@ internal class MetricAggregator : IMetricAggregator
                 // Cancellation requested, scheduled shutdown
                 catch (OperationCanceledException)
                 {
-                    _options.LogDebug(
-                        "Shutdown scheduled. Stopping by: {0}.",
-                        _options.ShutdownTimeout);
+                    _options.LogDebug(ShutdownScheduledMessage, _options.ShutdownTimeout);
 
                     shutdownTimeout.CancelAfterSafe(_options.ShutdownTimeout);
 
@@ -391,7 +393,7 @@ internal class MetricAggregator : IMetricAggregator
         }
         catch (OperationCanceledException)
         {
-            _options.LogInfo("Shutdown token triggered. Exiting metric aggregator.");
+            _options.LogInfo(FlushShutdownMessage);
         }
         catch (Exception exception)
         {
@@ -399,7 +401,12 @@ internal class MetricAggregator : IMetricAggregator
         }
         finally
         {
-            _flushLock.Release();
+            // If the shutdown token was cancelled before we start this method, we can get here
+            // without the _flushLock.CurrentCount (i.e. available threads) having been decremented
+            if (_flushLock.CurrentCount < 1)
+            {
+                _flushLock.Release();
+            }
         }
     }
 
@@ -495,11 +502,11 @@ internal class MetricAggregator : IMetricAggregator
     /// <inheritdoc cref="IAsyncDisposable.DisposeAsync"/>
     public async ValueTask DisposeAsync()
     {
-        _options.LogDebug("Disposing MetricAggregator.");
+        _options.LogDebug(DisposingMessage);
 
         if (_disposed)
         {
-            _options.LogDebug("Already disposed MetricAggregator.");
+            _options.LogDebug(AlreadyDisposedMessage);
             return;
         }
 
@@ -518,7 +525,7 @@ internal class MetricAggregator : IMetricAggregator
         }
         catch (OperationCanceledException)
         {
-            _options.LogDebug("Stopping the Metric Aggregator due to a cancellation.");
+            _options.LogDebug(CancelledMessage);
         }
         catch (Exception exception)
         {
