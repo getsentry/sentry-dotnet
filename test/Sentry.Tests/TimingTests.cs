@@ -28,7 +28,7 @@ public class TimingTests
                 Debug = true,
                 DiagnosticLogger = Logger
             };
-            MetricAggregator = Substitute.For<MetricAggregator>(Options, MetricHub, null, true, null);
+            MetricAggregator = Substitute.For<MetricAggregator>(Options, MetricHub, null, true);
         }
 
         public Timing GetSut() => new(MetricAggregator, MetricHub, Options, Key, Unit, Tags, 1);
