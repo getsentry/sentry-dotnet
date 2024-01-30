@@ -14,7 +14,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+        with:
+          submodules: recursive
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry.sln --nologo
 
