@@ -15,11 +15,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
+      - name: Restore .NET Dependencies
+        run: dotnet restore Sentry.sln --nologo
+
       - name: Install dotnet format
         run: dotnet tool install -g dotnet-format
 
       - name: Format Code
-        run: dotnet format Sentry.sln --exclude modules
+        run: dotnet format Sentry.sln --no-restore --exclude modules
 
       # actions/checkout fetches only a single commit in a detached HEAD state. Therefore
       # we need to pass the current branch, otherwise we can't commit the changes.
