@@ -26,8 +26,8 @@ internal class MetricAggregator : IMetricAggregator
         = new(() => new Dictionary<long, ConcurrentDictionary<string, Metric>>());
 
     private long _lastClearedStaleLocations = DateTimeOffset.UtcNow.GetDayBucketKey();
-    private readonly ConcurrentDictionary<long, HashSet<MetricResourceIdentifier>> _seenLocations = new();
-    private Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>> _pendingLocations = new();
+    internal readonly ConcurrentDictionary<long, HashSet<MetricResourceIdentifier>> _seenLocations = new();
+    internal Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>> _pendingLocations = new();
 
     private readonly Task _loopTask;
 

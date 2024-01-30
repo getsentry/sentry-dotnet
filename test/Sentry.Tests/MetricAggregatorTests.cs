@@ -266,4 +266,77 @@ public class MetricAggregatorTests
         var result = MetricAggregator.GetTagsKey(tags);
         result.Should().Be(@"tag1\\=value1\\,tag2\,=value2\,,tag3\==value3\=");
     }
+
+    [Fact]
+    public void RecordCodeLocation_AddsMetricToSeenAndPendingLocations()
+    {
+        // Arrange
+        var type = MetricType.Counter;
+        var key = "counter_key";
+        var unit = MeasurementUnit.None;
+        var stackLevel = 1;
+        var timestamp = DateTimeOffset.Now;
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.RecordCodeLocation(type, key, unit, stackLevel, timestamp);
+
+        // Assert
+        var startOfDay = timestamp.GetDayBucketKey();
+        sut._seenLocations.Keys.Should().Contain(startOfDay);
+
+        var metaKey = new MetricResourceIdentifier(type, key, unit);
+        sut._seenLocations[startOfDay].Should().Contain(metaKey);
+
+        sut._pendingLocations.Keys.Should().Contain(startOfDay);
+        sut._pendingLocations[startOfDay].Should().NotBeNull();
+        sut._pendingLocations[startOfDay].Keys.Should().Contain(metaKey);
+        sut._pendingLocations[startOfDay][metaKey].Should().NotBeNull();
+        sut._pendingLocations[startOfDay][metaKey].Function.Should().Be(
+            $"void {nameof(MetricAggregatorTests)}.{nameof(RecordCodeLocation_AddsMetricToSeenAndPendingLocations)}()"
+            );
+    }
+
+    [Fact]
+    public void RecordCodeLocation_RecordsLocationOnlyOnce()
+    {
+        // Arrange
+        var type = MetricType.Counter;
+        var key = "counter_key";
+        var unit = MeasurementUnit.None;
+        var stackLevel = 1;
+        var timestamp = DateTimeOffset.Now;
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.RecordCodeLocation(type, key, unit, stackLevel, timestamp);
+        sut.RecordCodeLocation(type, key, unit, stackLevel, timestamp);
+
+        // Assert
+        sut._pendingLocations.SelectMany(x => x.Value).Count().Should().Be(1);
+    }
+
+    [Fact]
+    public void RecordCodeLocation_BadStackLevel_AddsToSeenButNotPending()
+    {
+        // Arrange
+        var type = MetricType.Counter;
+        var key = "counter_key";
+        var unit = MeasurementUnit.None;
+        var stackLevel = short.MaxValue;
+        var timestamp = DateTimeOffset.Now;
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.RecordCodeLocation(type, key, unit, stackLevel, timestamp);
+
+        // Assert
+        var startOfDay = timestamp.GetDayBucketKey();
+        sut._seenLocations.Keys.Should().Contain(startOfDay);
+
+        var metaKey = new MetricResourceIdentifier(type, key, unit);
+        sut._seenLocations[startOfDay].Should().Contain(metaKey);
+
+        sut._pendingLocations.SelectMany(x => x.Value).Should().BeEmpty();
+    }
 }
