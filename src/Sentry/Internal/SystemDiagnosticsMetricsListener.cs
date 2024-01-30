@@ -54,7 +54,7 @@ internal class SystemDiagnosticsMetricsListener : IDisposable
         T measurement,
         ReadOnlySpan<KeyValuePair<string, object?>> tags,
         object? _)
-        where T: struct
+        where T: struct, IConvertible
     {
         var unit = MeasurementUnit.Parse(instrument.Unit);
         var tagDict = tags.ToImmutableArray().ToImmutableDictionary(

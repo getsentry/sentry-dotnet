@@ -51,7 +51,6 @@ namespace Sentry
     }
     public static class BuiltInSystemDiagnosticsMeters
     {
-        public static System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> All;
         public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreDiagnostics;
         public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreHeaderParsing;
         public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreHosting;
@@ -63,6 +62,7 @@ namespace Sentry
         public static readonly Sentry.SubstringOrRegexPattern MicrosoftExtensionsDiagnosticsResourceMonitoring;
         public static readonly Sentry.SubstringOrRegexPattern SystemNetHttp;
         public static readonly Sentry.SubstringOrRegexPattern SystemNetNameResolution;
+        public static System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> All { get; }
     }
     public class ByteAttachmentContent : Sentry.IAttachmentContent
     {

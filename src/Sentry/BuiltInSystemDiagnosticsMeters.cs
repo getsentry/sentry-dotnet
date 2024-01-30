@@ -150,11 +150,8 @@ public static partial class BuiltInSystemDiagnosticsMeters
     public static readonly SubstringOrRegexPattern SystemNetHttp = new Regex(SystemNetHttpPattern, RegexOptions.Compiled);
 #endif
 
-    /// <summary>
-    /// Matches all built in metrics
-    /// </summary>
-    /// <returns></returns>
-    public static IList<SubstringOrRegexPattern> All = [
+    private static readonly Lazy<IList<SubstringOrRegexPattern>> LazyAll = new(() => new List<SubstringOrRegexPattern>
+    {
         MicrosoftAspNetCoreHosting,
         MicrosoftAspNetCoreRouting,
         MicrosoftAspNetCoreDiagnostics,
@@ -166,5 +163,11 @@ public static partial class BuiltInSystemDiagnosticsMeters
         SystemNetHttp,
         MicrosoftExtensionsDiagnosticsHealthChecks,
         MicrosoftExtensionsDiagnosticsResourceMonitoring
-    ];
+    });
+
+    /// <summary>
+    /// Matches all built in metrics
+    /// </summary>
+    /// <returns></returns>
+    public static IList<SubstringOrRegexPattern> All => LazyAll.Value;
 }
