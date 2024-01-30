@@ -417,7 +417,9 @@ public class MetricAggregatorTests
 
         // Act
         await _fixture.CancellationTokenSource.CancelAsync();
-        await Task.Delay(1000);
+#pragma warning disable xUnit1031
+        sut._loopTask.Wait(10000);
+#pragma warning restore xUnit1031
 
         // Assert
         _fixture.Logger.Received(1).Log(SentryLevel.Debug, MetricAggregator.ShutdownScheduledMessage, null, Arg.Any<TimeSpan>());
@@ -434,7 +436,9 @@ public class MetricAggregatorTests
 
         // Act
         await _fixture.CancellationTokenSource.CancelAsync();
-        await Task.Delay(1000);
+#pragma warning disable xUnit1031
+        sut._loopTask.Wait(10000);
+#pragma warning restore xUnit1031
 
         // Assert
         _fixture.Logger.Received(1).Log(SentryLevel.Debug, MetricAggregator.ShutdownImmediatelyMessage, null);
@@ -471,9 +475,77 @@ public class MetricAggregatorTests
 
         // Act
         await sut.FlushAsync(true, cancellationTokenSource.Token);
-        // await Task.Delay(1000);
 
         // Assert
         _fixture.Logger.Received(1).Log(SentryLevel.Info, MetricAggregator.FlushShutdownMessage, null);
+    }
+
+    [Fact]
+    public void ClearStaleLocations_SameDay_NoClear()
+    {
+        // Arrange
+        var time = new DateTimeOffset(2000, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+        var sut = _fixture.GetSut();
+        sut._lastClearedStaleLocations = time.GetDayBucketKey();
+
+        var type = MetricType.Counter;
+        var key = "counter_key";
+        var unit = MeasurementUnit.None;
+        var stackLevel = 1;
+        sut.RecordCodeLocation(type, key, unit, stackLevel, time.Subtract(TimeSpan.FromDays(1)));
+
+        // Act
+        sut.ClearStaleLocations(time);
+
+        // Assert
+        // (You need some way to check that "_seenLocations" are not modified. This is stubbed in as "SeenLocations")
+        sut._seenLocations.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public void ClearStaleLocations_GraceTime_NoClear()
+    {
+        // Arrange
+        var time = new DateTimeOffset(2000, 1, 1, 0, 0, 30, TimeSpan.Zero);
+
+        var sut = _fixture.GetSut();
+        sut._lastClearedStaleLocations = time.GetDayBucketKey() - 1;
+
+        var type = MetricType.Counter;
+        var key = "counter_key";
+        var unit = MeasurementUnit.None;
+        var stackLevel = 1;
+        sut.RecordCodeLocation(type, key, unit, stackLevel, time.Subtract(TimeSpan.FromDays(1)));
+
+        // Act
+        sut.ClearStaleLocations(time);
+
+        // Assert
+        // (You need some way to check that "_seenLocations" are not modified. This is stubbed in as "SeenLocations")
+        sut._seenLocations.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public void ClearStaleLocations_AfterGraceTime_Clear()
+    {
+        // Arrange
+        var time = new DateTimeOffset(2000, 1, 1, 0, 1, 30, TimeSpan.Zero);
+
+        var sut = _fixture.GetSut();
+        sut._lastClearedStaleLocations = time.GetDayBucketKey() - 1;
+
+        var type = MetricType.Counter;
+        var key = "counter_key";
+        var unit = MeasurementUnit.None;
+        var stackLevel = 1;
+        sut.RecordCodeLocation(type, key, unit, stackLevel, time.Subtract(TimeSpan.FromDays(1)));
+
+        // Act
+        sut.ClearStaleLocations(time);
+
+        // Assert
+        // (You need some way to check that "_seenLocations" are not modified. This is stubbed in as "SeenLocations")
+        sut._seenLocations.Should().BeEmpty();
     }
 }

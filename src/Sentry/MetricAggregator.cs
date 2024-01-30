@@ -31,7 +31,7 @@ internal class MetricAggregator : IMetricAggregator
     private readonly Lazy<Dictionary<long, ConcurrentDictionary<string, Metric>>> _buckets
         = new(() => new Dictionary<long, ConcurrentDictionary<string, Metric>>());
 
-    private long _lastClearedStaleLocations = DateTimeOffset.UtcNow.GetDayBucketKey();
+    internal long _lastClearedStaleLocations = DateTimeOffset.UtcNow.GetDayBucketKey();
     internal readonly ConcurrentDictionary<long, HashSet<MetricResourceIdentifier>> _seenLocations = new();
     internal Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>> _pendingLocations = new();
 
@@ -474,9 +474,9 @@ internal class MetricAggregator : IMetricAggregator
     /// <summary>
     /// Clear out stale seen locations once a day
     /// </summary>
-    private void ClearStaleLocations()
+    internal void ClearStaleLocations(DateTimeOffset? testNow = null)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = testNow ?? DateTimeOffset.UtcNow;
         var today = now.GetDayBucketKey();
         if (_lastClearedStaleLocations == today)
         {
