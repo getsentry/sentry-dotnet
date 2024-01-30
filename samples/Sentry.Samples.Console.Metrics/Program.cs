@@ -1,10 +1,20 @@
-﻿namespace Sentry.Samples.Console.Metrics;
+﻿using System.Diagnostics.Metrics;
+using System.Text.RegularExpressions;
+
+namespace Sentry.Samples.Console.Metrics;
 
 internal static class Program
 {
-    private static readonly Random Roll = new();
+    private static readonly Random Roll = Random.Shared;
 
-    private static void Main()
+    // Sentry also supports capturing System.Diagnostics.Metrics
+    private static readonly Meter HatsMeter = new("HatCo.HatStore", "1.0.0");
+    private static readonly Counter<int> HatsSold = HatsMeter.CreateCounter<int>(
+        name: "hats-sold",
+        unit: "Hats",
+        description: "The number of hats sold in our store");
+
+    private static async Task Main()
     {
         // Enable the SDK
         using (SentrySdk.Init(options =>
@@ -20,41 +30,44 @@ internal static class Program
                    // Initialize some (non null) ExperimentalMetricsOptions to enable Sentry Metrics,
                    options.ExperimentalMetrics = new ExperimentalMetricsOptions
                    {
-                       EnableCodeLocations =
-                           true // Set this to false if you don't want to track code locations for some reason
+                        EnableCodeLocations = true, // Set this to false if you don't want to track code locations
+                        CaptureSystemDiagnosticsInstruments = [
+                            // Capture System.Diagnostics.Metrics matching the name "HatCo.HatStore", which is the name
+                            // of the custom HatsMeter defined above
+                            "hats-sold"
+                        ],
+                        // Capture all built in metrics (this is the default - you can override this to capture some or
+                        // none of these if you prefer)
+                        CaptureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All
                    };
                }))
         {
             System.Console.WriteLine("Measure, Yeah, Measure!");
-            Action[] actions =
-            [
-                () => PlaySetBingo(10),
-                () => CreateRevenueGauge(100),
-                () => MeasureShrimp(30),
-            ];
-            while (true)
+
+            Action[] actions = [PlaySetBingo, CreateRevenueGauge, MeasureShrimp, SellHats];
+            do
             {
-                // Perform your task here
-                var actionIdx = Roll.Next(0, actions.Length);
-                actions[actionIdx]();
+                // Run a random action
+                var idx = Roll.Next(0, actions.Length);
+                actions[idx]();
+
+                // Make an API call
+                await CallSampleApiAsync();
 
                 // Optional: Delay to prevent tight looping
-                var sleepTime = Roll.Next(1, 10);
+                var sleepTime = Roll.Next(1, 5);
                 System.Console.WriteLine($"Sleeping for {sleepTime} second(s).");
                 System.Console.WriteLine("Press any key to stop...");
                 Thread.Sleep(TimeSpan.FromSeconds(sleepTime));
-                // Check if a key has been pressed
-                if (System.Console.KeyAvailable)
-                {
-                    break;
-                }
             }
+            while (!System.Console.KeyAvailable);
             System.Console.WriteLine("Measure up");
         }
     }
 
-    private static void PlaySetBingo(int attempts)
+    private static void PlaySetBingo()
     {
+        const int attempts = 10;
         var solution = new[] { 3, 5, 7, 11, 13, 17 };
 
         // StartTimer creates a distribution that is designed to measure the amount of time it takes to run code
@@ -74,8 +87,9 @@ internal static class Program
         }
     }
 
-    private static void CreateRevenueGauge(int sampleCount)
+    private static void CreateRevenueGauge()
     {
+        const int sampleCount = 100;
         using (SentrySdk.Metrics.StartTimer(nameof(CreateRevenueGauge), MeasurementUnit.Duration.Millisecond))
         {
             for (var i = 0; i < sampleCount; i++)
@@ -88,8 +102,9 @@ internal static class Program
         }
     }
 
-    private static void MeasureShrimp(int sampleCount)
+    private static void MeasureShrimp()
     {
+        const int sampleCount = 30;
         using (SentrySdk.Metrics.StartTimer(nameof(MeasureShrimp), MeasurementUnit.Duration.Millisecond))
         {
             for (var i = 0; i < sampleCount; i++)
@@ -99,5 +114,26 @@ internal static class Program
                 SentrySdk.Metrics.Distribution("shrimp.size", sizeOfShrimp, MeasurementUnit.Custom("cm"));
             }
         }
+    }
+
+    private static void SellHats()
+    {
+        // Here we're emitting the metric using System.Diagnostics.Metrics instead of SentrySdk.Metrics.
+        // We won't see accurate code locations for these, so Sentry.Metrics are preferable but support
+        // for System.Diagnostics.Metrics means Sentry can collect a bunch built in metrics without you
+        // having to instrument anything... see case 4 below
+        HatsSold.Add(Roll.Next(0, 1000));
+    }
+
+    private static async Task CallSampleApiAsync()
+    {
+        // Here we demonstrate collecting some built in metrics for HTTP requests... this works because
+        // we've configured ExperimentalMetricsOptions.CaptureInstruments to match "http.client.*"
+        //
+        // See https://learn.microsoft.com/en-us/dotnet/core/diagnostics/built-in-metrics-system-net#systemnethttp
+        var httpClient = new HttpClient();
+        var url = "https://api.sampleapis.com/coffee/hot";
+        var result = await httpClient.GetAsync(url);
+        System.Console.WriteLine($"GET {url} {result.StatusCode}");
     }
 }
