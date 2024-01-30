@@ -28,6 +28,7 @@ If you have conflicts, you can opt-out by adding the following to your `csproj`:
 - The SDK no longer adds the `WinUIUnhandledExceptionIntegration` on non Windows platforms ([#3055](https://github.com/getsentry/sentry-dotnet/pull/3055))
 - The scope transaction is now correctly set for Otel transactions ([#3072](https://github.com/getsentry/sentry-dotnet/pull/3072))
 - Native integration logging on macOS ([#3079](https://github.com/getsentry/sentry-dotnet/pull/3079))
+- Native linking of cURL library when targeting platform-specific TFMs (e.g. `net8.0-macos`) ([#3080](https://github.com/getsentry/sentry-dotnet/pull/3080))
 
 ### Dependencies
 
