@@ -44,12 +44,15 @@ internal static class Program
         {
             System.Console.WriteLine("Measure, Yeah, Measure!");
 
-            Action[] actions = [ PlaySetBingo, CreateRevenueGauge, MeasureShrimp, SellHats, async () => await CallSampleApi()];
+            Action[] actions = [PlaySetBingo, CreateRevenueGauge, MeasureShrimp, SellHats];
             do
             {
-                // Perform your task here
+                // Run a random action
                 var idx = Roll.Next(0, actions.Length);
                 actions[idx]();
+
+                // Make an API call
+                await CallSampleApiAsync();
 
                 // Optional: Delay to prevent tight looping
                 var sleepTime = Roll.Next(1, 5);
@@ -122,7 +125,7 @@ internal static class Program
         HatsSold.Add(Roll.Next(0, 1000));
     }
 
-    private static async Task CallSampleApi()
+    private static async Task CallSampleApiAsync()
     {
         // Here we demonstrate collecting some built in metrics for HTTP requests... this works because
         // we've configured ExperimentalMetricsOptions.CaptureInstruments to match "http.client.*"
