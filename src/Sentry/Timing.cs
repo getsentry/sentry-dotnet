@@ -14,15 +14,16 @@ namespace Sentry;
 /// </example>
 internal class Timing : IDisposable
 {
-    private readonly IMetricHub _metricHub;
+    internal const string OperationName = "metric.timing";
+
     private readonly SentryOptions _options;
     private readonly MetricAggregator _metricAggregator;
     private readonly string _key;
     private readonly MeasurementUnit.Duration _unit;
     private readonly IDictionary<string, string>? _tags;
-    private readonly Stopwatch _stopwatch = new();
+    internal readonly Stopwatch _stopwatch = new();
     private readonly ISpan _span;
-    private readonly DateTime _startTime = DateTime.UtcNow;
+    internal readonly DateTime _startTime = DateTime.UtcNow;
 
     /// <summary>
     /// Creates a new <see cref="Timing"/> instance.
@@ -30,7 +31,6 @@ internal class Timing : IDisposable
     internal Timing(MetricAggregator metricAggregator, IMetricHub metricHub, SentryOptions options,
         string key, MeasurementUnit.Duration unit, IDictionary<string, string>? tags, int stackLevel)
     {
-        _metricHub = metricHub;
         _options = options;
         _metricAggregator = metricAggregator;
         _key = key;
@@ -38,8 +38,7 @@ internal class Timing : IDisposable
         _tags = tags;
         _stopwatch.Start();
 
-
-        _span = metricHub.StartSpan("metric.timing", key);
+        _span = metricHub.StartSpan(OperationName, key);
         if (tags is not null)
         {
             _span.SetTags(tags);
@@ -53,19 +52,23 @@ internal class Timing : IDisposable
     public void Dispose()
     {
         _stopwatch.Stop();
+        DisposeInternal(_stopwatch.Elapsed);
+    }
 
+    internal void DisposeInternal(TimeSpan elapsed)
+    {
         try
         {
             var value = _unit switch
             {
-                MeasurementUnit.Duration.Week => _stopwatch.Elapsed.TotalDays / 7,
-                MeasurementUnit.Duration.Day => _stopwatch.Elapsed.TotalDays,
-                MeasurementUnit.Duration.Hour => _stopwatch.Elapsed.TotalHours,
-                MeasurementUnit.Duration.Minute => _stopwatch.Elapsed.TotalMinutes,
-                MeasurementUnit.Duration.Second => _stopwatch.Elapsed.TotalSeconds,
-                MeasurementUnit.Duration.Millisecond => _stopwatch.Elapsed.TotalMilliseconds,
-                MeasurementUnit.Duration.Microsecond => _stopwatch.Elapsed.TotalMilliseconds * 1000,
-                MeasurementUnit.Duration.Nanosecond => _stopwatch.Elapsed.TotalMilliseconds * 1000000,
+                MeasurementUnit.Duration.Week => elapsed.TotalDays / 7,
+                MeasurementUnit.Duration.Day => elapsed.TotalDays,
+                MeasurementUnit.Duration.Hour => elapsed.TotalHours,
+                MeasurementUnit.Duration.Minute => elapsed.TotalMinutes,
+                MeasurementUnit.Duration.Second => elapsed.TotalSeconds,
+                MeasurementUnit.Duration.Millisecond => elapsed.TotalMilliseconds,
+                MeasurementUnit.Duration.Microsecond => elapsed.TotalMilliseconds * 1000,
+                MeasurementUnit.Duration.Nanosecond => elapsed.TotalMilliseconds * 1000000,
                 _ => throw new ArgumentOutOfRangeException(nameof(_unit), _unit, null)
             };
             _metricAggregator.Timing(_key, value, _unit, _tags, _startTime);

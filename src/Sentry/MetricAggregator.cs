@@ -141,7 +141,7 @@ internal class MetricAggregator : IMetricAggregator
         int stackLevel = 1) => Emit(MetricType.Set, key, value, unit, tags, timestamp, stackLevel + 1);
 
     /// <inheritdoc cref="IMetricAggregator.Timing"/>
-    public void Timing(string key,
+    public virtual void Timing(string key,
         double value,
         MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
         IDictionary<string, string>? tags = null,
