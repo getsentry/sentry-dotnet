@@ -1,0 +1,28 @@
+name: format code
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'samples/**'
+      - '.github/workflows/format-code.yml'
+
+jobs:
+  format-code:
+    name: Format Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Install dotnet format
+        run: dotnet tool install -g dotnet-format
+
+      - name: Format Code
+        run: dotnet format Sentry.sln --exclude modules
+
+      # actions/checkout fetches only a single commit in a detached HEAD state. Therefore
+      # we need to pass the current branch, otherwise we can't commit the changes.
+      # GITHUB_HEAD_REF is the name of the head branch. GitHub Actions only sets this for PRs.
+      - name: Commit Formatted Code
+        run: ./scripts/commit-formatted-code.sh $GITHUB_HEAD_REF
