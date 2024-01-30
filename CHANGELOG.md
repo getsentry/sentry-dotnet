@@ -18,6 +18,7 @@ If you have conflicts, you can opt-out by adding the following to your `csproj`:
 
 ### Features
 
+- `SentrySdk.Metrics.Set` now additionally accepts `string` as value ([#3092](https://github.com/getsentry/sentry-dotnet/pull/3092))
 - Timing metrics can now be captured with `SentrySdk.Metrics.StartTimer` ([#3075](https://github.com/getsentry/sentry-dotnet/pull/3075))
 
 ### Fixes

@@ -79,6 +79,24 @@ public interface IMetricAggregator: IDisposable
         int stackLevel = 1);
 
     /// <summary>
+    /// Emits a Set metric a
+    /// </summary>
+    /// <param name="key">A unique key identifying the metric</param>
+    /// <param name="value">The value to be added</param>
+    /// <param name="unit">An optional <see cref="MeasurementUnit"/></param>
+    /// <param name="tags">Optional Tags to associate with the metric</param>
+    /// <param name="timestamp">
+    ///     The time when the metric was emitted. Defaults to the time at which the metric is emitted, if no value is provided.
+    /// </param>
+    /// <param name="stackLevel">Optional number of stacks levels to ignore when determining the code location</param>
+    void Set(string key,
+        string value,
+        MeasurementUnit? unit = null,
+        IDictionary<string, string>? tags = null,
+        DateTimeOffset? timestamp = null,
+        int stackLevel = 1);
+
+    /// <summary>
     /// Emits a distribution with the time it takes to run a given code block.
     /// </summary>
     /// <param name="key">A unique key identifying the metric</param>

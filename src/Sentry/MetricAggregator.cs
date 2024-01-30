@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Force.Crc32;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol.Metrics;
@@ -132,13 +133,28 @@ internal class MetricAggregator : IMetricAggregator
         DateTimeOffset? timestamp = null,
         int stackLevel = 1) => Emit(MetricType.Distribution, key, value, unit, tags, timestamp, stackLevel + 1);
 
-    /// <inheritdoc cref="IMetricAggregator.Set"/>
+    /// <inheritdoc cref="IMetricAggregator.Set(string,int,MeasurementUnit?,System.Collections.Generic.IDictionary{string,string},DateTimeOffset?,int)"/>
     public void Set(string key,
         int value,
         MeasurementUnit? unit = null,
         IDictionary<string, string>? tags = null,
         DateTimeOffset? timestamp = null,
         int stackLevel = 1) => Emit(MetricType.Set, key, value, unit, tags, timestamp, stackLevel + 1);
+
+    /// <inheritdoc cref="IMetricAggregator.Set(string,string,MeasurementUnit?,System.Collections.Generic.IDictionary{string,string},DateTimeOffset?,int)"/>
+    public void Set(string key,
+        string value,
+        MeasurementUnit? unit = null,
+        IDictionary<string, string>? tags = null,
+        DateTimeOffset? timestamp = null,
+        int stackLevel = 1)
+    {
+        // Compute the CRC32 hash of the value as byte array and cast it to a 32-bit signed integer
+        // Mask the lower 32 bits to ensure the result fits within the 32-bit integer range
+        var hash = (int)(Crc32Algorithm.Compute(Encoding.UTF8.GetBytes(value)) & 0xFFFFFFFF);
+
+        Emit(MetricType.Set, key, hash, unit, tags, timestamp, stackLevel + 1);
+    }
 
     /// <inheritdoc cref="IMetricAggregator.Timing"/>
     public void Timing(string key,
