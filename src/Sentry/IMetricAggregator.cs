@@ -97,6 +97,18 @@ public interface IMetricAggregator: IDisposable
         int stackLevel = 1);
 
     /// <summary>
+    /// Measures the time it takes to run a given code block and emits this as a metric.
+    /// </summary>
+    /// <example>
+    /// using (SentrySdk.Metrics.StartTimer("my-operation"))
+    /// {
+    ///     ...
+    /// }
+    /// </example>
+    IDisposable StartTimer(string key, MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
+        IDictionary<string, string>? tags = null, int stackLevel = 1);
+
+    /// <summary>
     /// Flushes any flushable metrics and/or code locations.
     /// If <paramref name="force"/> is true then the cutoff is ignored and all metrics are flushed.
     /// </summary>

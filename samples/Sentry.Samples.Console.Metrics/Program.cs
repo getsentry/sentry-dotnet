@@ -25,6 +25,8 @@ internal static class Program
 
                    options.Debug = true;
                    options.StackTraceMode = StackTraceMode.Enhanced;
+                   options.SampleRate = 1.0f; // Not recommended in production - may adversely impact quota
+                   options.TracesSampleRate = 1.0f; // Not recommended in production - may adversely impact quota
                    // Initialize some (non null) ExperimentalMetricsOptions to enable Sentry Metrics,
                    options.ExperimentalMetrics = new ExperimentalMetricsOptions
                    {
@@ -41,35 +43,13 @@ internal static class Program
                }))
         {
             System.Console.WriteLine("Measure, Yeah, Measure!");
+
+            Action[] actions = [ PlaySetBingo, CreateRevenueGauge, MeasureShrimp, SellHats, async () => await CallSampleApi()];
             do
             {
                 // Perform your task here
-                switch (Roll.Next(1,4))
-                {
-                    case 1:
-                        PlaySetBingo(10);
-                        break;
-                    case 2:
-                        MeasureShrimp(30);
-                        break;
-                    case 3:
-                        // Here we're emitting the metric using System.Diagnostics.Metrics instead of SentrySdk.Metrics.
-                        // We won't see accurate code locations for these, so Sentry.Metrics are preferable but support
-                        // for System.Diagnostics.Metrics means Sentry can collect a bunch built in metrics without you
-                        // having to instrument anything... see case 4 below
-                        HatsSold.Add(Roll.Next(0, 1000));
-                        break;
-                    case 4:
-                        // Here we demonstrate collecting some built in metrics for HTTP requests... this works because
-                        // we've configured ExperimentalMetricsOptions.CaptureInstruments to match "http.client.*"
-                        //
-                        // See https://learn.microsoft.com/en-us/dotnet/core/diagnostics/built-in-metrics-system-net#systemnethttp
-                        var httpClient = new HttpClient();
-                        var url = "https://api.sampleapis.com/coffee/hot";
-                        var result = await httpClient.GetAsync(url);
-                        System.Console.WriteLine($"GET {url} {result.StatusCode}");
-                        break;
-                }
+                var idx = Roll.Next(0, actions.Length);
+                actions[idx]();
 
                 // Optional: Delay to prevent tight looping
                 var sleepTime = Roll.Next(1, 5);
@@ -82,13 +62,15 @@ internal static class Program
         }
     }
 
-    private static void PlaySetBingo(int attempts)
+    private static void PlaySetBingo()
     {
+        const int attempts = 10;
         var solution = new[] { 3, 5, 7, 11, 13, 17 };
 
-        // The Timing class creates a distribution that is designed to measure the amount of time it takes to run code
+        // StartTimer creates a distribution that is designed to measure the amount of time it takes to run code
         // blocks. By default it will use a unit of Seconds - we're configuring it to use milliseconds here though.
-        using (new Timing("bingo", MeasurementUnit.Duration.Millisecond))
+        // The return value is an IDisposable and the timer will stop when the timer is disposed of.
+        using (SentrySdk.Metrics.StartTimer("bingo", MeasurementUnit.Duration.Millisecond))
         {
             for (var i = 0; i < attempts; i++)
             {
@@ -102,9 +84,25 @@ internal static class Program
         }
     }
 
-    private static void MeasureShrimp(int sampleCount)
+    private static void CreateRevenueGauge()
     {
-        using (new Timing(nameof(MeasureShrimp), MeasurementUnit.Duration.Millisecond))
+        const int sampleCount = 100;
+        using (SentrySdk.Metrics.StartTimer(nameof(CreateRevenueGauge), MeasurementUnit.Duration.Millisecond))
+        {
+            for (var i = 0; i < sampleCount; i++)
+            {
+                var movement = Roll.NextDouble() * 30 - Roll.NextDouble() * 10;
+                // This demonstrates measuring something in your app using a gauge... we're also using a custom
+                // measurement unit here (which is optional - by default the unit will be "None")
+                SentrySdk.Metrics.Gauge("revenue", movement, MeasurementUnit.Custom("$"));
+            }
+        }
+    }
+
+    private static void MeasureShrimp()
+    {
+        const int sampleCount = 30;
+        using (SentrySdk.Metrics.StartTimer(nameof(MeasureShrimp), MeasurementUnit.Duration.Millisecond))
         {
             for (var i = 0; i < sampleCount; i++)
             {
@@ -113,5 +111,26 @@ internal static class Program
                 SentrySdk.Metrics.Distribution("shrimp.size", sizeOfShrimp, MeasurementUnit.Custom("cm"));
             }
         }
+    }
+
+    private static void SellHats()
+    {
+        // Here we're emitting the metric using System.Diagnostics.Metrics instead of SentrySdk.Metrics.
+        // We won't see accurate code locations for these, so Sentry.Metrics are preferable but support
+        // for System.Diagnostics.Metrics means Sentry can collect a bunch built in metrics without you
+        // having to instrument anything... see case 4 below
+        HatsSold.Add(Roll.Next(0, 1000));
+    }
+
+    private static async Task CallSampleApi()
+    {
+        // Here we demonstrate collecting some built in metrics for HTTP requests... this works because
+        // we've configured ExperimentalMetricsOptions.CaptureInstruments to match "http.client.*"
+        //
+        // See https://learn.microsoft.com/en-us/dotnet/core/diagnostics/built-in-metrics-system-net#systemnethttp
+        var httpClient = new HttpClient();
+        var url = "https://api.sampleapis.com/coffee/hot";
+        var result = await httpClient.GetAsync(url);
+        System.Console.WriteLine($"GET {url} {result.StatusCode}");
     }
 }

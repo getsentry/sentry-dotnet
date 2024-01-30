@@ -3,6 +3,9 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol.Metrics;
 
+/// <summary>
+/// Represents a collection of code locations.
+/// </summary>
 internal class CodeLocations(long timestamp, IReadOnlyDictionary<MetricResourceIdentifier, SentryStackFrame> locations)
     : IJsonSerializable
 {
@@ -12,6 +15,7 @@ internal class CodeLocations(long timestamp, IReadOnlyDictionary<MetricResourceI
     /// </summary>
     public long Timestamp => timestamp;
 
+    /// <inheritdoc cref="IJsonSerializable.WriteTo"/>
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         writer.WriteStartObject();

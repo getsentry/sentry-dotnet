@@ -1,9 +1,11 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Protocol.Envelopes;
+using Sentry.Protocol.Metrics;
 
 namespace Sentry.Internal;
 
-internal class Hub : IHub, IDisposable
+internal class Hub : IHub, IMetricHub, IDisposable
 {
     private readonly object _sessionPauseLock = new();
 
@@ -59,7 +61,14 @@ internal class Hub : IHub, IDisposable
             PushScope();
         }
 
-        Metrics = _ownedClient.Metrics;
+        if (options.ExperimentalMetrics is not null)
+        {
+            Metrics = new MetricAggregator(options, this);
+        }
+        else
+        {
+            Metrics = new DisabledMetricAggregator();
+        }
 
         foreach (var integration in options.Integrations)
         {
@@ -394,6 +403,8 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    public bool CaptureEnvelope(Envelope envelope) => _ownedClient.CaptureEnvelope(envelope);
+
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Hint? hint = null)
     {
         if (!IsEnabled)
@@ -486,6 +497,57 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    /// <inheritdoc cref="IMetricHub.CaptureMetrics"/>
+    public void CaptureMetrics(IEnumerable<Metric> metrics)
+    {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        Metric[]? enumerable = null;
+        try
+        {
+            enumerable = metrics as Metric[] ?? metrics.ToArray();
+            _options.LogDebug("Capturing metrics.");
+            _ownedClient.CaptureEnvelope(Envelope.FromMetrics(metrics));
+        }
+        catch (Exception e)
+        {
+            var metricEventIds = enumerable?.Select(m => m.EventId).ToArray() ?? [];
+            _options.LogError(e, "Failure to capture metrics: {0}", string.Join(",", metricEventIds));
+        }
+    }
+
+    /// <inheritdoc cref="IMetricHub.CaptureCodeLocations"/>
+    public void CaptureCodeLocations(CodeLocations codeLocations)
+    {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        try
+        {
+            _options.LogDebug("Capturing code locations for period: {0}", codeLocations.Timestamp);
+            _ownedClient.CaptureEnvelope(Envelope.FromCodeLocations(codeLocations));
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to capture code locations");
+        }
+    }
+
+    /// <inheritdoc cref="IMetricHub.StartSpan"/>
+    public ISpan StartSpan(string operation, string description)
+    {
+        ITransactionTracer? currentTransaction = null;
+        ConfigureScope(s => currentTransaction = s.Transaction);
+        return currentTransaction is {} transaction
+            ? transaction.StartChild(operation, description)
+            : this.StartTransaction(operation, description);
+    }
+
     public void CaptureSession(SessionUpdate sessionUpdate)
     {
         if (!IsEnabled)
@@ -527,7 +589,7 @@ internal class Hub : IHub, IDisposable
 
         try
         {
-            _ownedClient.Metrics.FlushAsync().ContinueWith(_ =>
+            Metrics.FlushAsync().ContinueWith(_ =>
                 _ownedClient.FlushAsync(_options.ShutdownTimeout).Wait()
             ).ConfigureAwait(false).GetAwaiter().GetResult();
         }

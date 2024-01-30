@@ -16,19 +16,29 @@ If you have conflicts, you can opt-out by adding the following to your `csproj`:
 </PropertyGroup>
 ```
 
+### Features
+
+- Timing metrics can now be captured with `SentrySdk.Metrics.StartTimer` ([#3075](https://github.com/getsentry/sentry-dotnet/pull/3075))
+
 ### Fixes
 
+- Fixed an issue with tag values in metrics not being properly serialized ([#3065](https://github.com/getsentry/sentry-dotnet/pull/3065))
 - Moved the binding to MAUI events for breadcrumb creation from `WillFinishLaunching` to `FinishedLaunching`. This delays the initial instantiation of `app`. ([#3057](https://github.com/getsentry/sentry-dotnet/pull/3057))
 - The SDK no longer adds the `WinUIUnhandledExceptionIntegration` on non Windows platforms ([#3055](https://github.com/getsentry/sentry-dotnet/pull/3055))
+- The scope transaction is now correctly set for Otel transactions ([#3072](https://github.com/getsentry/sentry-dotnet/pull/3072))
+- Native integration logging on macOS ([#3079](https://github.com/getsentry/sentry-dotnet/pull/3079))
 
 ### Dependencies
 
 - Bump Java SDK from v7.1.0 to v7.2.0 ([#3049](https://github.com/getsentry/sentry-dotnet/pull/3049))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#720)
   - [diff](https://github.com/getsentry/sentry-java/compare/7.1.0...7.2.0)
-- Bump CLI from v2.25.0 to v2.25.3 ([#3059](https://github.com/getsentry/sentry-dotnet/pull/3059), [#3062](https://github.com/getsentry/sentry-dotnet/pull/3062))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2253)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.25.0...2.25.3)
+- Bump CLI from v2.25.0 to v2.26.0 ([#3059](https://github.com/getsentry/sentry-dotnet/pull/3059), [#3062](https://github.com/getsentry/sentry-dotnet/pull/3062), [#3073](https://github.com/getsentry/sentry-dotnet/pull/3073))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2260)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.25.0...2.26.0)
+- Bump Cocoa SDK from v8.18.0 to v8.19.0 ([#3084](https://github.com/getsentry/sentry-dotnet/pull/3084))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8190)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.18.0...8.19.0)
 
 ## 4.0.0-beta.8
 
@@ -38,7 +48,7 @@ If you have conflicts, you can opt-out by adding the following to your `csproj`:
 
 ### Significant change in behavior
 
-- Transactions' spans are no longer automatically finished with status `deadline_exceeded` by the transaction. This is now handled by the [Relay](https://github.com/getsentry/relay). 
+- Transactions' spans are no longer automatically finished with status `deadline_exceeded` by the transaction. This is now handled by the [Relay](https://github.com/getsentry/relay).
   - Customers self hosting Sentry must use verion 22.12.0 or later ([#3013](https://github.com/getsentry/sentry-dotnet/pull/3013))
 
 ### API breaking Changes
