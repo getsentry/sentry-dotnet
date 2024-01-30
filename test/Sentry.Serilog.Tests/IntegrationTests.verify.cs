@@ -1,4 +1,4 @@
-﻿#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
 namespace Sentry.Serilog.Tests;
 
 [UsesVerify]

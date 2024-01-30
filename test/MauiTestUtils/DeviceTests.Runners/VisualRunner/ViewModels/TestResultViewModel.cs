@@ -6,9 +6,9 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
 
 public class TestResultViewModel : ViewModelBase
 {
-    TimeSpan _duration;
-    string? _errorMessage;
-    string? _errorStackTrace;
+    private TimeSpan _duration;
+    private string? _errorMessage;
+    private string? _errorStackTrace;
 
     public TestResultViewModel(TestCaseViewModel testCase, ITestResultMessage? testResult)
     {

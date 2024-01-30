@@ -1,4 +1,4 @@
-﻿namespace Sentry.NLog.Tests;
+namespace Sentry.NLog.Tests;
 
 [UsesVerify]
 public class IntegrationTests

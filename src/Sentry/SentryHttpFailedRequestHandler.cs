@@ -11,7 +11,7 @@ internal class SentryHttpFailedRequestHandler : SentryFailedRequestHandler
     {
     }
 
-    protected internal override void DoEnsureSuccessfulResponse([NotNull]HttpRequestMessage request, [NotNull]HttpResponseMessage response)
+    protected internal override void DoEnsureSuccessfulResponse([NotNull] HttpRequestMessage request, [NotNull] HttpResponseMessage response)
     {
         // Don't capture events for successful requests
         if (!Options.FailedRequestStatusCodes.Any(range => range.Contains(response.StatusCode)))
@@ -51,7 +51,8 @@ internal class SentryHttpFailedRequestHandler : SentryFailedRequestHandler
                 Method = response.RequestMessage?.Method.Method.ToUpperInvariant()
             };
 
-            var responseContext = new Response {
+            var responseContext = new Response
+            {
                 StatusCode = (short)response.StatusCode,
                 BodySize = bodySize
             };

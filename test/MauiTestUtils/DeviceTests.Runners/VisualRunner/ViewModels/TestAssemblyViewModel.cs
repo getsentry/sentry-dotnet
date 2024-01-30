@@ -13,26 +13,23 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
 
 public class TestAssemblyViewModel : ViewModelBase
 {
-    readonly ObservableCollection<TestCaseViewModel> _allTests;
-    readonly FilteredCollectionView<TestCaseViewModel, (string, TestState)> _filteredTests;
-    readonly ITestNavigation _navigation;
-    readonly ITestRunner _runner;
-    readonly List<TestCaseViewModel> _results;
-
-    CancellationTokenSource? _filterCancellationTokenSource;
-    TestState _result;
-    TestState _resultFilter;
-    RunStatus _runStatus;
-    string? _searchQuery;
-
-    string? _detailText;
-    string? _displayName;
-
-    bool _isBusy;
-    int _notRun;
-    int _passed;
-    int _failed;
-    int _skipped;
+    private readonly ObservableCollection<TestCaseViewModel> _allTests;
+    private readonly FilteredCollectionView<TestCaseViewModel, (string, TestState)> _filteredTests;
+    private readonly ITestNavigation _navigation;
+    private readonly ITestRunner _runner;
+    private readonly List<TestCaseViewModel> _results;
+    private CancellationTokenSource? _filterCancellationTokenSource;
+    private TestState _result;
+    private TestState _resultFilter;
+    private RunStatus _runStatus;
+    private string? _searchQuery;
+    private string? _detailText;
+    private string? _displayName;
+    private bool _isBusy;
+    private int _notRun;
+    private int _passed;
+    private int _failed;
+    private int _skipped;
 
     internal TestAssemblyViewModel(AssemblyRunInfo runInfo, ITestNavigation navigation, ITestRunner runner)
     {
@@ -168,7 +165,7 @@ public class TestAssemblyViewModel : ViewModelBase
         set => Set(ref _skipped, value);
     }
 
-    void FilterAfterDelay()
+    private void FilterAfterDelay()
     {
         _filterCancellationTokenSource?.Cancel();
         _filterCancellationTokenSource = new CancellationTokenSource();
@@ -183,7 +180,7 @@ public class TestAssemblyViewModel : ViewModelBase
                 TaskScheduler.FromCurrentSynchronizationContext());
     }
 
-    static bool IsTestFilterMatch(TestCaseViewModel test, (string SearchQuery, TestState ResultFilter) query)
+    private static bool IsTestFilterMatch(TestCaseViewModel test, (string SearchQuery, TestState ResultFilter) query)
     {
         if (test == null)
             throw new ArgumentNullException(nameof(test));
@@ -208,7 +205,7 @@ public class TestAssemblyViewModel : ViewModelBase
             test.DisplayName.IndexOf(pattern.Trim(), StringComparison.OrdinalIgnoreCase) >= 0;
     }
 
-    async void RunAllTestsExecute()
+    private async void RunAllTestsExecute()
     {
         try
         {
@@ -221,7 +218,7 @@ public class TestAssemblyViewModel : ViewModelBase
         }
     }
 
-    async void RunFilteredTestsExecute()
+    private async void RunFilteredTestsExecute()
     {
         try
         {
@@ -234,7 +231,7 @@ public class TestAssemblyViewModel : ViewModelBase
         }
     }
 
-    async void NavigateToResultExecute(TestCaseViewModel? testCase)
+    private async void NavigateToResultExecute(TestCaseViewModel? testCase)
     {
         if (testCase == null)
             return;
@@ -244,7 +241,7 @@ public class TestAssemblyViewModel : ViewModelBase
         await _navigation.NavigateTo(PageType.TestResult, testCase.TestResult);
     }
 
-    void UpdateCaption()
+    private void UpdateCaption()
     {
         var count = _allTests.Count;
 
@@ -328,7 +325,7 @@ public class TestAssemblyViewModel : ViewModelBase
         }
     }
 
-    class TestComparer : IComparer<TestCaseViewModel>
+    private class TestComparer : IComparer<TestCaseViewModel>
     {
         public int Compare(TestCaseViewModel? x, TestCaseViewModel? y) =>
             string.Compare(x?.DisplayName, y?.DisplayName, StringComparison.OrdinalIgnoreCase);

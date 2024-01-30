@@ -6,7 +6,7 @@ using Microsoft.Maui.Graphics;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
 
-class RunStatusToColorConverter : IValueConverter
+internal class RunStatusToColorConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {

@@ -7,7 +7,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner;
 
 public class MauiTestViewController : UIViewController
 {
-    Task? _task;
+    private Task? _task;
 
     public MauiTestViewController()
     {

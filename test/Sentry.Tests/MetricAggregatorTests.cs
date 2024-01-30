@@ -4,7 +4,7 @@ namespace Sentry.Tests;
 
 public class MetricAggregatorTests
 {
-    class Fixture
+    private class Fixture
     {
         public SentryOptions Options { get; set; } = new();
         public IHub Hub { get; set; } = Substitute.For<IHub>();
@@ -127,11 +127,11 @@ public class MetricAggregatorTests
         // Assert
         var bucket1 = sut.Buckets[time1.GetTimeBucketKey()];
         var data1 = (DistributionMetric)bucket1[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
-        data1.Value.Should().BeEquivalentTo(new[] {3, 5});
+        data1.Value.Should().BeEquivalentTo(new[] { 3, 5 });
 
         var bucket2 = sut.Buckets[time3.GetTimeBucketKey()];
         var data2 = (DistributionMetric)bucket2[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
-        data2.Value.Should().BeEquivalentTo(new[] {13});
+        data2.Value.Should().BeEquivalentTo(new[] { 13 });
     }
 
     [Fact]
@@ -160,11 +160,11 @@ public class MetricAggregatorTests
         // Assert
         var bucket1 = sut.Buckets[time1.GetTimeBucketKey()];
         var data1 = (SetMetric)bucket1[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
-        data1.Value.Should().BeEquivalentTo(new[] {3, 5});
+        data1.Value.Should().BeEquivalentTo(new[] { 3, 5 });
 
         var bucket2 = sut.Buckets[time3.GetTimeBucketKey()];
         var data2 = (SetMetric)bucket2[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
-        data2.Value.Should().BeEquivalentTo(new[] {13});
+        data2.Value.Should().BeEquivalentTo(new[] { 13 });
     }
 
     [Fact]
@@ -223,11 +223,11 @@ public class MetricAggregatorTests
         // Act... spawn some threads that add loads of metrics
         var resetEvent = new ManualResetEvent(false);
         var toProcess = numThreads;
-        for(var i = 0; i < numThreads; i++)
+        for (var i = 0; i < numThreads; i++)
         {
-            new Thread(delegate()
+            new Thread(delegate ()
             {
-                for(var i = 0; i < numThreadIterations; i++)
+                for (var i = 0; i < numThreadIterations; i++)
                 {
                     sut.Increment("counter");
                 }

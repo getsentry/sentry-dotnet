@@ -5,10 +5,10 @@ using System.Collections.Generic;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
 
-class SortedList<T> : IList<T>
+internal class SortedList<T> : IList<T>
 {
-    readonly IComparer<T> _comparer;
-    readonly List<T> _list;
+    private readonly IComparer<T> _comparer;
+    private readonly List<T> _list;
 
     public SortedList(IComparer<T> comparer)
     {

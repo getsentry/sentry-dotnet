@@ -1,7 +1,7 @@
-using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Cocoa.Extensions;
 using Sentry.Cocoa.Facades;
+using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry.Cocoa;
 

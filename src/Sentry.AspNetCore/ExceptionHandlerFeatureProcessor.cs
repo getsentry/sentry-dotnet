@@ -34,7 +34,7 @@ internal class ExceptionHandlerFeatureProcessor : ISentryEventExceptionProcessor
             evt.SetTag("ActionName", actionName);
         }
 
-        if (_exceptionHandlerFeature.RouteValues is {} routeValues)
+        if (_exceptionHandlerFeature.RouteValues is { } routeValues)
         {
             if (routeValues.TryGetValue("controller", out var controller))
             {

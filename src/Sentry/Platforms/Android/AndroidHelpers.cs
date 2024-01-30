@@ -19,7 +19,7 @@ internal static class AndroidHelpers
         var abi = AndroidBuild.CpuAbi;
 #pragma warning restore CS0618
 
-        return abi != null ? new[] {abi} : Array.Empty<string>();
+        return abi != null ? new[] { abi } : Array.Empty<string>();
     }
 
     public static IAndroidAssemblyReader? GetAndroidAssemblyReader(IDiagnosticLogger? logger)

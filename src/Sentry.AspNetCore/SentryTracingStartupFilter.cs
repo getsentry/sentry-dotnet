@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace Sentry.AspNetCore;
 
-internal class SentryTracingStartupFilter: IStartupFilter
+internal class SentryTracingStartupFilter : IStartupFilter
 {
     public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
     {

@@ -1,5 +1,5 @@
-using Sentry.Internal.Extensions;
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 using Sentry.Internal.ILSpy;
 using Sentry.Protocol;
 

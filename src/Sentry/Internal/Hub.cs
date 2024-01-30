@@ -543,7 +543,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
     {
         ITransactionTracer? currentTransaction = null;
         ConfigureScope(s => currentTransaction = s.Transaction);
-        return currentTransaction is {} transaction
+        return currentTransaction is { } transaction
             ? transaction.StartChild(operation, description)
             : this.StartTransaction(operation, description);
     }

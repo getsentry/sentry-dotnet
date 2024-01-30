@@ -7,13 +7,12 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
 
 public class TestCaseViewModel : ViewModelBase
 {
-    string? _message;
-    string? _output;
-    TestState _result;
-    RunStatus _runStatus;
-    string? _stackTrace;
-
-    TestResultViewModel _testResult;
+    private string? _message;
+    private string? _output;
+    private TestState _result;
+    private RunStatus _runStatus;
+    private string? _stackTrace;
+    private TestResultViewModel _testResult;
 
     internal TestCaseViewModel(string assemblyFileName, ITestCase testCase)
     {

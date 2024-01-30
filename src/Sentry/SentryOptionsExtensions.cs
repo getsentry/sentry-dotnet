@@ -119,7 +119,7 @@ public static class SentryOptionsExtensions
     {
         if (options.ExceptionFilters == null)
         {
-            options.ExceptionFilters = new () {exceptionFilter};
+            options.ExceptionFilters = new() { exceptionFilter };
         }
         else
         {
@@ -162,7 +162,7 @@ public static class SentryOptionsExtensions
     {
         if (options.InAppExclude == null)
         {
-            options.InAppExclude = new () {prefix};
+            options.InAppExclude = new() { prefix };
         }
         else
         {
@@ -187,7 +187,7 @@ public static class SentryOptionsExtensions
     {
         if (options.InAppInclude == null)
         {
-            options.InAppInclude = new () {prefix};
+            options.InAppInclude = new() { prefix };
         }
         else
         {
@@ -269,7 +269,7 @@ public static class SentryOptionsExtensions
     {
         if (options.TransactionProcessors == null)
         {
-            options.TransactionProcessors = new() {processor};
+            options.TransactionProcessors = new() { processor };
         }
         else
         {

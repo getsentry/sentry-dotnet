@@ -229,7 +229,8 @@ public partial class SentryOptions
         /// <example>
         /// 'java.util.customcode.', 'io.sentry.samples.'
         /// </example>
-        public void AddInAppInclude(string prefix){
+        public void AddInAppInclude(string prefix)
+        {
             InAppIncludes ??= new List<string>();
             InAppIncludes.Add(prefix);
         }

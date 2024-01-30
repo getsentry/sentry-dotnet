@@ -42,7 +42,7 @@ public class AndroidDiagnosticLoggerTests
     public void Log_Simple()
     {
         var androidLogger = _fixture.GetSut();
-        androidLogger.Log(JavaSdk.SentryLevel.Debug, "test", args:null);
+        androidLogger.Log(JavaSdk.SentryLevel.Debug, "test", args: null);
         Assert.Contains("Debug: Android: test", _fixture.TestLogger.Messages);
     }
 
@@ -51,7 +51,7 @@ public class AndroidDiagnosticLoggerTests
     {
         var androidLogger = _fixture.GetSut();
         androidLogger.Log(JavaSdk.SentryLevel.Debug, "test %d, %d, %s, %tQ",
-            new Java.Lang.Object[] {1, 2, "foo", new Java.Util.Date(12345)});
+            new Java.Lang.Object[] { 1, 2, "foo", new Java.Util.Date(12345) });
         Assert.Contains("Debug: Android: test 1, 2, foo, 12345", _fixture.TestLogger.Messages);
     }
 
@@ -59,7 +59,7 @@ public class AndroidDiagnosticLoggerTests
     public void Log_WithObjectArgs()
     {
         var androidLogger = _fixture.GetSut();
-        androidLogger.Log(JavaSdk.SentryLevel.Debug, "test {value:%d}", new Java.Lang.Object[] {123});
+        androidLogger.Log(JavaSdk.SentryLevel.Debug, "test {value:%d}", new Java.Lang.Object[] { 123 });
         Assert.Contains("Debug: Android: test {value:123}", _fixture.TestLogger.Messages);
     }
 }

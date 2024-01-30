@@ -66,7 +66,7 @@ public static partial class AssertionExtensions
         return result;
     }
 
-    static UIView FindContentView()
+    private static UIView FindContentView()
     {
         if (GetKeyWindow(UIApplication.SharedApplication) is not UIWindow window)
         {
@@ -378,14 +378,14 @@ public static partial class AssertionExtensions
         Assert.Equal((double)expected.M44, (double)actual.M44, precision);
     }
 
-    static UIWindow? GetKeyWindow(UIApplication application)
+    private static UIWindow? GetKeyWindow(UIApplication application)
     {
         if (OperatingSystem.IsIOSVersionAtLeast(13) || OperatingSystem.IsMacCatalystVersionAtLeast(13, 1))
         {
 #pragma warning disable CA1416
             foreach (var scene in application.ConnectedScenes)
             {
-                if (scene is not UIWindowScene {ActivationState: UISceneActivationState.ForegroundActive} windowScene)
+                if (scene is not UIWindowScene { ActivationState: UISceneActivationState.ForegroundActive } windowScene)
                 {
                     continue;
                 }

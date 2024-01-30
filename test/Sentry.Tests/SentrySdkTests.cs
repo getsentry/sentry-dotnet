@@ -668,14 +668,14 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void InitHub_NoDsn_DisposeDoesNotThrow()
     {
-        var sut = SentrySdk.InitHub(new SentryOptions(){Dsn = Constants.DisableSdkDsnValue}) as IDisposable;
+        var sut = SentrySdk.InitHub(new SentryOptions() { Dsn = Constants.DisableSdkDsnValue }) as IDisposable;
         sut?.Dispose();
     }
 
     [Fact]
     public async Task InitHub_NoDsn_FlushAsyncDoesNotThrow()
     {
-        var sut = SentrySdk.InitHub(new SentryOptions(){Dsn = Constants.DisableSdkDsnValue});
+        var sut = SentrySdk.InitHub(new SentryOptions() { Dsn = Constants.DisableSdkDsnValue });
         await sut.FlushAsync();
     }
 

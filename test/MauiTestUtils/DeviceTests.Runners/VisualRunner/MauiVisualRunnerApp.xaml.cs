@@ -5,10 +5,10 @@ using Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
 
-partial class MauiVisualRunnerApp : Application
+public partial class MauiVisualRunnerApp : Application
 {
-    readonly TestOptions _options;
-    readonly ILogger _logger;
+    private readonly TestOptions _options;
+    private readonly ILogger _logger;
 
     public MauiVisualRunnerApp(TestOptions options, ILogger logger)
     {

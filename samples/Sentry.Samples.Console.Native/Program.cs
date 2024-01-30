@@ -28,7 +28,7 @@ async Task FirstFunctionAsync()
 async Task SecondFunctionAsync()
 {
     await Task.Delay(100);
-    #pragma warning disable CS0618
+#pragma warning disable CS0618
     SentrySdk.CauseCrash(CrashType.Native);
-    #pragma warning restore CS0618
+#pragma warning restore CS0618
 }

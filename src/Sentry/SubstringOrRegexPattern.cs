@@ -125,7 +125,7 @@ internal static class SubstringOrRegexPatternExtensions
     /// <param name="value">The set of values to be assigned</param>
     /// <returns>A IList of type T that will be consistent even if it has been set via Config</returns>
     public static IList<T> WithConfigBinding<T>(this IList<T> value)
-        where T: SubstringOrRegexPattern
+        where T : SubstringOrRegexPattern
     {
         switch (value.Count)
         {

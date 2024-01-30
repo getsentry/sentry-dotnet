@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners;
 
 public class HeadlessRunnerOptions

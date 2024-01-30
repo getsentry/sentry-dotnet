@@ -9,10 +9,10 @@ using UIKit;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner;
 
-class HeadlessTestRunner : iOSApplicationEntryPoint
+internal class HeadlessTestRunner : iOSApplicationEntryPoint
 {
-    readonly HeadlessRunnerOptions _runnerOptions;
-    readonly TestOptions _options;
+    private readonly HeadlessRunnerOptions _runnerOptions;
+    private readonly TestOptions _options;
 
     public HeadlessTestRunner(HeadlessRunnerOptions runnerOptions, TestOptions options)
     {

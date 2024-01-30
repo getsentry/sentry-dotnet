@@ -9,11 +9,11 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
 
-class DeviceExecutionSink : TestMessageSink
+internal class DeviceExecutionSink : TestMessageSink
 {
-    readonly SynchronizationContext _context;
-    readonly ITestListener _listener;
-    readonly Dictionary<ITestCase, TestCaseViewModel> _testCases;
+    private readonly SynchronizationContext _context;
+    private readonly ITestListener _listener;
+    private readonly Dictionary<ITestCase, TestCaseViewModel> _testCases;
 
     public DeviceExecutionSink(
         Dictionary<ITestCase, TestCaseViewModel> testCases,
@@ -29,22 +29,22 @@ class DeviceExecutionSink : TestMessageSink
         Execution.TestSkippedEvent += HandleTestSkipped;
     }
 
-    void HandleTestFailed(MessageHandlerArgs<ITestFailed> args)
+    private void HandleTestFailed(MessageHandlerArgs<ITestFailed> args)
     {
         MakeTestResultViewModel(args.Message, TestState.Failed);
     }
 
-    void HandleTestPassed(MessageHandlerArgs<ITestPassed> args)
+    private void HandleTestPassed(MessageHandlerArgs<ITestPassed> args)
     {
         MakeTestResultViewModel(args.Message, TestState.Passed);
     }
 
-    void HandleTestSkipped(MessageHandlerArgs<ITestSkipped> args)
+    private void HandleTestSkipped(MessageHandlerArgs<ITestSkipped> args)
     {
         MakeTestResultViewModel(args.Message, TestState.Skipped);
     }
 
-    async void MakeTestResultViewModel(ITestResultMessage testResult, TestState outcome)
+    private async void MakeTestResultViewModel(ITestResultMessage testResult, TestState outcome)
     {
         var tcs = new TaskCompletionSource<TestResultViewModel>(TaskCreationOptions.RunContinuationsAsynchronously);
 

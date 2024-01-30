@@ -99,7 +99,7 @@ public static partial class AssertionExtensions
     // Android doesn't handle adding and removing views in parallel very well
     // If a view is removed while a different test triggers a layout then you hit
     // a NRE exception
-    static SemaphoreSlim _attachAndRunSemaphore = new SemaphoreSlim(1);
+    private static SemaphoreSlim _attachAndRunSemaphore = new SemaphoreSlim(1);
     public static async Task<T> AttachAndRun<T>(this AView view, Func<Task<T>> action)
     {
         if (view.Parent is WrapperView wrapper)

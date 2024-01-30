@@ -9,7 +9,7 @@ internal class SystemDiagnosticsMetricsListener : IDisposable
     private IMetricAggregator MetricsAggregator => _metricsAggregator.Value;
     private static SystemDiagnosticsMetricsListener? DefaultListener;
 
-    internal readonly MeterListener _sentryListener = new ();
+    internal readonly MeterListener _sentryListener = new();
 
     private SystemDiagnosticsMetricsListener(ExperimentalMetricsOptions metricsOptions)
         : this(metricsOptions, () => SentrySdk.Metrics)
@@ -54,7 +54,7 @@ internal class SystemDiagnosticsMetricsListener : IDisposable
         T measurement,
         ReadOnlySpan<KeyValuePair<string, object?>> tags,
         object? _)
-        where T: struct, IConvertible
+        where T : struct, IConvertible
     {
         var unit = MeasurementUnit.Parse(instrument.Unit);
         var tagDict = tags.ToImmutableArray().ToImmutableDictionary(

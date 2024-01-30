@@ -8,13 +8,12 @@ using System.Linq;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
 
-class FilteredCollectionView<T, TFilterArg> : IList<T>, IList, INotifyCollectionChanged, IDisposable
+internal class FilteredCollectionView<T, TFilterArg> : IList<T>, IList, INotifyCollectionChanged, IDisposable
 {
-    readonly ObservableCollection<T> dataSource;
-    readonly Func<T, TFilterArg, bool> filter;
-    readonly SortedList<T> filteredList;
-
-    TFilterArg filterArgument;
+    private readonly ObservableCollection<T> dataSource;
+    private readonly Func<T, TFilterArg, bool> filter;
+    private readonly SortedList<T> filteredList;
+    private TFilterArg filterArgument;
 
     public FilteredCollectionView(ObservableCollection<T> dataSource, Func<T, TFilterArg, bool> filter, TFilterArg filterArgument, IComparer<T> sort)
     {
@@ -190,7 +189,7 @@ class FilteredCollectionView<T, TFilterArg> : IList<T>, IList, INotifyCollection
         itemChanged?.Invoke(sender, args);
     }
 
-    void DataSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+    private void DataSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
     {
         switch (e.Action)
         {
@@ -225,7 +224,7 @@ class FilteredCollectionView<T, TFilterArg> : IList<T>, IList, INotifyCollection
         }
     }
 
-    void DataSource_ItemChanged(object sender, PropertyChangedEventArgs e)
+    private void DataSource_ItemChanged(object sender, PropertyChangedEventArgs e)
     {
         var item = (T)sender;
         var index = filteredList.IndexOf(item);
@@ -246,7 +245,7 @@ class FilteredCollectionView<T, TFilterArg> : IList<T>, IList, INotifyCollection
         OnItemChanged(item, e);
     }
 
-    void OnAdded(T item)
+    private void OnAdded(T item)
     {
         if (filter(item, filterArgument))
         {
@@ -264,7 +263,7 @@ class FilteredCollectionView<T, TFilterArg> : IList<T>, IList, INotifyCollection
         }
     }
 
-    void OnRemoved(T item)
+    private void OnRemoved(T item)
     {
         if (item is INotifyPropertyChanged observable)
         {
@@ -279,7 +278,7 @@ class FilteredCollectionView<T, TFilterArg> : IList<T>, IList, INotifyCollection
         }
     }
 
-    void RefreshFilter()
+    private void RefreshFilter()
     {
         filteredList.Clear();
 

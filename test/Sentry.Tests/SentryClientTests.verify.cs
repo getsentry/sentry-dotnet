@@ -7,7 +7,7 @@ public partial class SentryClientTests
     public Task CaptureEvent_BeforeEventThrows_ErrorToEventBreadcrumb()
     {
         var error = new Exception("Exception message!");
-        _fixture.SentryOptions.SetBeforeSend((_,_) => throw error);
+        _fixture.SentryOptions.SetBeforeSend((_, _) => throw error);
 
         var @event = new SentryEvent();
 

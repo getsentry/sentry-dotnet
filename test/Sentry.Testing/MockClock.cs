@@ -1,4 +1,4 @@
-﻿namespace Sentry.Testing;
+namespace Sentry.Testing;
 
 public class MockClock : ISystemClock
 {

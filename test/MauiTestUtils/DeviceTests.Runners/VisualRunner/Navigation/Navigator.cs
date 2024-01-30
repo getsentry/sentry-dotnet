@@ -6,9 +6,9 @@ using Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
 
-class TestNavigator : ITestNavigation
+internal class TestNavigator : ITestNavigation
 {
-    readonly INavigation _navigation;
+    private readonly INavigation _navigation;
 
     public TestNavigator(INavigation navigation)
     {

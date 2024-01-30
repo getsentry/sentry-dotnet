@@ -6,7 +6,7 @@ using Microsoft.Maui.Controls.Xaml;
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
 
 [ContentProperty(nameof(Name))]
-class EmbeddedResourceExtension : IMarkupExtension
+internal class EmbeddedResourceExtension : IMarkupExtension
 {
     public string? Name { get; set; }
 

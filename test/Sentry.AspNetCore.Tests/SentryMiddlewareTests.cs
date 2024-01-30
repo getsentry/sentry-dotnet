@@ -597,7 +597,7 @@ public class SentryMiddlewareTests
         var firstHub = _fixture.Hub;
         var expectedExceptionMessage = "Expected Exception";
         _fixture.RequestDelegate = _ => throw new Exception(expectedExceptionMessage);
-        _fixture.Options.ConfigureScope(_=> count++);
+        _fixture.Options.ConfigureScope(_ => count++);
         var sut = _fixture.GetSut();
 
         // Act
@@ -707,7 +707,7 @@ public class SentryMiddlewareTests
 
         await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
-        _fixture.Hub.Received().ContinueTrace(Arg.Any<SentryTraceHeader>(),Arg.Any<BaggageHeader>());
+        _fixture.Hub.Received().ContinueTrace(Arg.Any<SentryTraceHeader>(), Arg.Any<BaggageHeader>());
 
         Assert.NotNull(capturedTraceHeader);
         Assert.Equal("4b4d2878507b43d3af7dd8c4ab7a96d9", capturedTraceHeader.TraceId.ToString());
