@@ -46,6 +46,16 @@ public class SentryOptionsExtensionsTests
             p => p is UnobservedTaskExceptionIntegration);
     }
 
+#if NET8_0_OR_GREATER
+    [Fact]
+    public void DisableSystemDiagnosticsMetricsIntegration_RemovesSystemDiagnosticsMetricsIntegration()
+    {
+        Sut.DisableSystemDiagnosticsMetricsIntegration();
+        Assert.DoesNotContain(Sut.Integrations,
+            p => p.GetType() == typeof(SystemDiagnosticsMetricsIntegration));
+    }
+#endif
+
     [Fact]
     public void AddIntegration_StoredInOptions()
     {

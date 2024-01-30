@@ -84,6 +84,15 @@ public static class SentryOptionsExtensions
         => options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.WinUiUnhandledExceptionIntegration);
 #endif
 
+#if NET8_0_OR_GREATER
+    /// <summary>
+    /// Disables the System.Diagnostics.Metrics integration.
+    /// </summary>
+    /// <param name="options">The SentryOptions to remove the integration from.</param>
+    public static void DisableSystemDiagnosticsMetricsIntegration(this SentryOptions options)
+        => options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.SystemDiagnosticsMetricsIntegration);
+#endif
+
     /// <summary>
     /// Add an integration
     /// </summary>

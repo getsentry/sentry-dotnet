@@ -1,3 +1,5 @@
+using Sentry.Protocol.Metrics;
+
 namespace Sentry;
 
 /// <summary>
@@ -18,6 +20,11 @@ public interface IHub :
     /// Last event id recorded in the current scope.
     /// </summary>
     SentryId LastEventId { get; }
+
+    /// <summary>
+    /// <inheritdoc cref="IMetricAggregator"/>
+    /// </summary>
+    IMetricAggregator Metrics { get; }
 
     /// <summary>
     /// Starts a transaction.

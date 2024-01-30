@@ -1,3 +1,6 @@
+using Sentry.Protocol.Envelopes;
+using Sentry.Protocol.Metrics;
+
 namespace Sentry;
 
 /// <summary>
@@ -9,6 +12,13 @@ public interface ISentryClient
     /// Whether the client is enabled or not.
     /// </summary>
     bool IsEnabled { get; }
+
+    /// <summary>
+    /// Capture an envelope and queue it.
+    /// </summary>
+    /// <param name="envelope">The envelope.</param>
+    /// <returns>true if the enveloped was queued, false otherwise.</returns>
+    bool CaptureEnvelope(Envelope envelope);
 
     /// <summary>
     /// Capture the event
@@ -68,9 +78,4 @@ public interface ISentryClient
     /// <param name="timeout">The amount of time allowed for flushing.</param>
     /// <returns>A task to await for the flush operation.</returns>
     Task FlushAsync(TimeSpan timeout);
-
-    /// <summary>
-    /// <inheritdoc cref="IMetricAggregator"/>
-    /// </summary>
-    IMetricAggregator Metrics { get; }
 }

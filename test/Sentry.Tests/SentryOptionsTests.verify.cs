@@ -3,12 +3,9 @@ namespace Sentry.Tests;
 [UsesVerify]
 public partial class SentryOptionsTests
 {
-    [SkippableFact]
+    [Fact]
     public Task Integrations_default_ones_are_properly_registered()
     {
-        // Windows additionally adds `WinUIUnhandledExceptionIntegration`
-        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
-
         InMemoryDiagnosticLogger logger = new();
         SentryOptions options = new()
         {
@@ -21,6 +18,12 @@ public partial class SentryOptionsTests
         };
         Hub _ = new(options, Substitute.For<ISentryClient>());
 
-        return Verify(logger.Entries).UniqueForRuntime().AutoVerify(includeBuildServer: false);
+        var settingsTask = Verify(logger.Entries)
+            .UniqueForTargetFrameworkAndVersion()
+            .UniqueForRuntime()
+            .AutoVerify(includeBuildServer: false);
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            settingsTask = settingsTask.UniqueForOSPlatform();
+        return settingsTask;
     }
 }

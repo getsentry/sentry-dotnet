@@ -1,21 +1,12 @@
+using System.Data;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Samples.AspNetCore.Mvc.Models;
+using Sentry.Samples.AspNetCore.Mvc.Models;
 
 namespace Samples.AspNetCore.Mvc.Controllers;
 
-public class HomeController : Controller
+public class HomeController(ILogger<HomeController> logger) : Controller
 {
-    private readonly IGameService _gameService;
-    private readonly ILogger<HomeController> _logger;
-
-    public HomeController(IGameService gameService, ILogger<HomeController> logger)
-    {
-        _gameService = gameService;
-        _logger = logger;
-    }
-
-    [HttpGet]
     public IActionResult Index()
     {
         return View();
@@ -23,60 +14,84 @@ public class HomeController : Controller
 
     // Example: An exception that goes unhandled by the app will be captured by Sentry:
     [HttpPost]
-    public async Task PostIndex(string @params)
+    public async Task PostIndex(string? @params)
     {
         try
         {
             if (@params == null)
             {
-                _logger.LogWarning("Param {param} is null!", @params);
+                // This will get captured in Sentry as an event (MinimumEventLevel is Warning in appsettings.json)
+                logger.LogWarning("Param is null!");
             }
 
-            await _gameService.FetchNextPhaseDataAsync();
+            // This will get captured as a Breadcrumb (MinimumBreadcrumbLevel is Information in appsettings.json)
+            logger.LogInformation("Completing some tasks in parallel");
+
+            var firstTask = Task.Run(new Func<int>(() => throw new HttpRequestException("Failed to complete task 1")));
+            var secondTask = Task.Run(new Func<int>(() => throw new DataException("Invalid data for task 2")));
+
+            var whenAll = Task.WhenAll(firstTask, secondTask);
+            try
+            {
+                var ids = await whenAll;
+                logger.LogInformation("Completed tasks: {DungeonId}, {ManaId}", ids[0], ids[1]);
+            }
+            catch when (whenAll.Exception is { InnerExceptions.Count: > 1 } ae)
+            {
+                // await unwraps AggregateException and throws the first one by default. Here we make sure to throw the
+                // original AggregateException to ensure all errors are captured
+                throw ae;
+            }
         }
         catch (Exception e)
         {
-            var ioe = new InvalidOperationException("Bad POST! See Inner exception for details.", e);
+            var ioe = new InvalidOperationException("Bad POST! See Inner exception for details", e);
 
-            ioe.Data.Add("inventory",
-                // The following anonymous object gets serialized:
+            ioe.Data.Add("thoughts",
+                // This is an example of sending some additional information with the exception... The following
+                // anonymous object will be serialized and sent with the exception to Sentry as additional context.
                 new
                 {
-                    SmallPotion = 3,
-                    BigPotion = 0,
-                    CheeseWheels = 512
+                    Question = "What is the meaning of life?",
+                    Answer = 42
                 });
 
             throw ioe;
         }
     }
 
-    // Example: The view rendering throws: see about.cshtml
-    public IActionResult About(string who = null)
+    // Example: The view rendering throws: see /Views/Home/Razor.cshtml
+    public IActionResult Razor(string? who)
     {
         if (who == null)
         {
             // Exemplifies using the logger to raise a warning which will be sent as an event because MinimumEventLevel was configured to Warning
             // ALso, the stack trace of this location will be sent (even though there was no exception) because of the configuration AttachStackTrace
-            _logger.LogWarning("A {route} '{value}' was requested.",
+            logger.LogWarning("A {route} '{value}' was requested.",
                 // example structured logging where keys (in the template above) go as tag keys and values below:
-                "/about",
+                "/razor",
                 "null");
         }
 
         return View();
     }
 
-    // Example: To take the Sentry Hub and submit errors directly:
-    public IActionResult Contact(
-        // Hub holds a Client and Scope management
-        // Errors sent with the hub will include all context collected in the current scope
+    public IActionResult Capture(
+        // IHub holds a Client and Scope management. Errors sent via IHub will include any context from the current scope
         [FromServices] IHub sentry)
     {
+        // Anything we change on the scope here will be sent with any subsequent events to Sentry
+        sentry.ConfigureScope(scope =>
+        {
+            // This will show up under "Additional data" in the event details on Sentry
+            scope.SetExtra("Some additional data", "Be good to your mother");
+            // You can add tags too
+            scope.SetTag("Tag", "You're it!");
+        });
         try
         {
             // Some code block that could throw
-            throw null;
+            throw null!;
         }
         catch (Exception e)
         {
@@ -94,11 +109,12 @@ public class HomeController : Controller
         return View();
     }
 
-    public IActionResult Test()
+    public IActionResult Action()
     {
-        throw new Exception("Test exception thrown in controller!");
+        throw new Exception("Test exception thrown from a controller action method");
     }
 
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
