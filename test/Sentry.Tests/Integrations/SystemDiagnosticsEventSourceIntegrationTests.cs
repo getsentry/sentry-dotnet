@@ -1,3 +1,4 @@
+#if !__MOBILE__
 using Sentry.PlatformAbstractions;
 
 namespace Sentry.Tests.Integrations;
@@ -82,3 +83,4 @@ public class SystemDiagnosticsEventSourceIntegrationTests
         initializeDefaultListener.Received(1)(options.ExperimentalMetrics);
     }
 }
+#endif

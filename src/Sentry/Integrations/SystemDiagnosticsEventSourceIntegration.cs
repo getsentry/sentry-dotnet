@@ -1,3 +1,4 @@
+#if !__MOBILE__
 using Sentry.Extensibility;
 using Sentry.Internal;
 #if NETFRAMEWORK
@@ -45,3 +46,4 @@ internal class SystemDiagnosticsEventSourceIntegration : ISdkIntegration
         _initializeListener(options.ExperimentalMetrics!);
     }
 }
+#endif

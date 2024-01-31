@@ -49,12 +49,12 @@ internal static class Program
             {
                 IterationEventCounterSource.Log.AddLoopCount();
 
-                // // Run a random action
-                // var idx = Roll.Next(0, actions.Length);
-                // actions[idx]();
-                //
-                // // Make an API call
-                // await CallSampleApiAsync();
+                // Run a random action
+                var idx = Roll.Next(0, actions.Length);
+                actions[idx]();
+
+                // Make an API call
+                await CallSampleApiAsync();
 
                 // Optional: Delay to prevent tight looping
                 var sleepTime = Roll.Next(1, 5);

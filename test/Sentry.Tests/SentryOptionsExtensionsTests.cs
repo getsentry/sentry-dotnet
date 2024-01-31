@@ -56,6 +56,7 @@ public class SentryOptionsExtensionsTests
     }
 #endif
 
+#if !__MOBILE__
     [Fact]
     public void DisableSystemDiagnosticsEventSourceIntegration_RemovesSystemDiagnosticsEventSourceIntegration()
     {
@@ -63,6 +64,7 @@ public class SentryOptionsExtensionsTests
         Assert.DoesNotContain(Sut.Integrations,
             p => p.GetType() == typeof(SystemDiagnosticsEventSourceIntegration));
     }
+#endif
 
     [Fact]
     public void AddIntegration_StoredInOptions()

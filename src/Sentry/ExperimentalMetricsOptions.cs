@@ -6,8 +6,9 @@ namespace Sentry;
 /// </summary>
 public class ExperimentalMetricsOptions
 {
-
+#if !__MOBILE__
     private IList<SubstringOrRegexPattern> _captureSystemDiagnosticsEventSourceNames = new List<SubstringOrRegexPattern>();
+#endif
     private IList<SubstringOrRegexPattern> _captureSystemDiagnosticsInstruments = new List<SubstringOrRegexPattern>();
     private IList<SubstringOrRegexPattern> _captureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All;
 
@@ -16,6 +17,7 @@ public class ExperimentalMetricsOptions
     /// </summary>
     public bool EnableCodeLocations { get; set; } = true;
 
+#if !__MOBILE__
     /// <summary>
     /// Metrics for any EventSource whose name matches one of the items in this list will be reported to Sentry.
     /// </summary>
@@ -27,6 +29,7 @@ public class ExperimentalMetricsOptions
         get => _captureSystemDiagnosticsEventSourceNames;
         set => _captureSystemDiagnosticsEventSourceNames = value.WithConfigBinding();
     }
+#endif
 
     /// <summary>
     /// <para>

@@ -1,3 +1,4 @@
+#if !__MOBILE__
 using System.Diagnostics.Tracing;
 using Sentry.PlatformAbstractions;
 
@@ -144,3 +145,4 @@ public class SystemDiagnosticsEventSourceListenerTests
         total7.Should().Be(0);
     }
 }
+#endif

@@ -1,3 +1,4 @@
+#if !__MOBILE__
 using System.Diagnostics.Tracing;
 
 namespace Sentry.Internal;
@@ -66,3 +67,4 @@ internal class SystemDiagnosticsEventSourceListener : EventListener
         MetricsAggregator.Increment(name, 1, MeasurementUnit.None, tags, eventTime);
     }
 }
+#endif

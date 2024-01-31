@@ -182,10 +182,6 @@ internal class MetricAggregator : IMetricAggregator
         timestamp ??= DateTimeOffset.UtcNow;
         unit ??= MeasurementUnit.None;
 
-        // Our metrics don't appear to show on Sentry unless the key is lowercase. Checking here though:
-        // https://discord.com/channels/621778831602221064/1181544736545325107/1202086407032811590
-        key = key.ToLowerInvariant();
-
         Func<string, Metric> addValuesFactory = type switch
         {
             MetricType.Counter => _ => new CounterMetric(key, value, unit.Value, tags, timestamp),

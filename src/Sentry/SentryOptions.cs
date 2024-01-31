@@ -201,10 +201,12 @@ public class SentryOptions
             }
 #endif
 
+#if !__MOBILE__
             if ((_defaultIntegrations & DefaultIntegrations.SystemDiagnosticsEventSourceIntegration) != 0)
             {
                 yield return new SystemDiagnosticsEventSourceIntegration();
             }
+#endif
 
             foreach (var integration in _integrations)
             {
