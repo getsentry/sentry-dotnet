@@ -40,5 +40,15 @@
     Args: [
       WinUIUnhandledExceptionIntegration
     ]
+  },
+  {
+    Message: Registering integration: '{0}'.,
+    Args: [
+      SystemDiagnosticsEventSourceIntegration
+    ]
+  },
+  {
+    Level: info,
+    Message: SystemDiagnosticsEventSourceIntegration is disabled because no listeners are configured.
   }
 ]
