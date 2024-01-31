@@ -3,18 +3,6 @@
 ## Unreleased
 
 This major release includes many exciting new features including preview support for [Profiling](https://docs.sentry.io/platforms/dotnet/profiling/) and Metrics(LINK), [AOT](https://sentry.engineering/blog/should-you-could-you-aot) with [Native Crash Reporting](https://github.com/getsentry/sentry-dotnet/issues/2770), [Spotlight](https://spotlightjs.com/), Screenshots on MAUI and much more. Details about these features and other changes below.
-### Dependencies
-
-- Bump Java SDK from v7.2.0 to v7.3.0 ([#3098](https://github.com/getsentry/sentry-dotnet/pull/3098))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#730)
-  - [diff](https://github.com/getsentry/sentry-java/compare/7.2.0...7.3.0)
-- Bump CLI from v2.26.0 to v2.27.0 ([#3099](https://github.com/getsentry/sentry-dotnet/pull/3099))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2270)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.26.0...2.27.0)
-
-## 4.0.0-beta.9
-
-### Features
 
 ### .NET target frameworks changes
 
@@ -56,42 +44,6 @@ If you have conflicts, you can opt-out by adding the following to your `csproj`:
 </PropertyGroup>
 ```
 - Transactions' spans are no longer automatically finished with status `deadline_exceeded` by the transaction. This is now handled by the [Relay](https://github.com/getsentry/relay). 
-
-### Features
-
-- `SentrySdk.Metrics.Set` now additionally accepts `string` as value ([#3092](https://github.com/getsentry/sentry-dotnet/pull/3092))
-- Timing metrics can now be captured with `SentrySdk.Metrics.StartTimer` ([#3075](https://github.com/getsentry/sentry-dotnet/pull/3075))
-
-### Fixes
-
-- Fixed an issue with tag values in metrics not being properly serialized ([#3065](https://github.com/getsentry/sentry-dotnet/pull/3065))
-- Moved the binding to MAUI events for breadcrumb creation from `WillFinishLaunching` to `FinishedLaunching`. This delays the initial instantiation of `app`. ([#3057](https://github.com/getsentry/sentry-dotnet/pull/3057))
-- The SDK no longer adds the `WinUIUnhandledExceptionIntegration` on non Windows platforms ([#3055](https://github.com/getsentry/sentry-dotnet/pull/3055))
-- The scope transaction is now correctly set for Otel transactions ([#3072](https://github.com/getsentry/sentry-dotnet/pull/3072))
-- Native integration logging on macOS ([#3079](https://github.com/getsentry/sentry-dotnet/pull/3079))
-- Native linking of cURL library when targeting platform-specific TFMs (e.g. `net8.0-macos`) ([#3080](https://github.com/getsentry/sentry-dotnet/pull/3080))
-
-### Dependencies
-
-- Bump Java SDK from v7.1.0 to v7.2.0 ([#3049](https://github.com/getsentry/sentry-dotnet/pull/3049))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#720)
-  - [diff](https://github.com/getsentry/sentry-java/compare/7.1.0...7.2.0)
-- Bump CLI from v2.25.0 to v2.26.0 ([#3059](https://github.com/getsentry/sentry-dotnet/pull/3059), [#3062](https://github.com/getsentry/sentry-dotnet/pull/3062), [#3073](https://github.com/getsentry/sentry-dotnet/pull/3073))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2260)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.25.0...2.26.0)
-- Bump Cocoa SDK from v8.18.0 to v8.19.0 ([#3084](https://github.com/getsentry/sentry-dotnet/pull/3084))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8190)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.18.0...8.19.0)
-
-## 4.0.0-beta.8
-
-### Features
-
-- Experimental pre-release availability of Metrics. We're exploring the use of Metrics in Sentry. The API will very likely change and we don't yet have any documentation. ([#2949](https://github.com/getsentry/sentry-dotnet/pull/2949))
-
-### Significant change in behavior
-
-- Transactions' spans are no longer automatically finished with status `deadline_exceeded` by the transaction. This is now handled by the [Relay](https://github.com/getsentry/relay).
   - Customers self hosting Sentry must use verion 22.12.0 or later ([#3013](https://github.com/getsentry/sentry-dotnet/pull/3013))
 - The User.IpAddress is now set to {{auto}} by default, even when sendDefaultPII is disabled ([#2981](https://github.com/getsentry/sentry-dotnet/pull/2981))
   - The "Prevent Storing of IP Addresses" option in the "Security & Privacy" project settings on sentry.io can be used to control this instead
@@ -256,15 +208,15 @@ There are some functional differences when publishing Native AOT:
 - Bump Cocoa SDK from v8.16.1 to v8.19.0 ([#2910](https://github.com/getsentry/sentry-dotnet/pull/2910), [#2936](https://github.com/getsentry/sentry-dotnet/pull/2936), [#2972](https://github.com/getsentry/sentry-dotnet/pull/2972), [#3005](https://github.com/getsentry/sentry-dotnet/pull/3005), [#3084](https://github.com/getsentry/sentry-dotnet/pull/3084))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8190)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.16.1...8.19.0)
-- Bump Java SDK from v6.34.0 to v7.2.0 ([#2932](https://github.com/getsentry/sentry-dotnet/pull/2932), [#2979](https://github.com/getsentry/sentry-dotnet/pull/2979), [#3049](https://github.com/getsentry/sentry-dotnet/pull/3049))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#720)
-  - [diff](https://github.com/getsentry/sentry-java/compare/6.34.0...7.2.0)
+- Bump Java SDK from v6.34.0 to v7.3.0 ([#2932](https://github.com/getsentry/sentry-dotnet/pull/2932), [#2979](https://github.com/getsentry/sentry-dotnet/pull/2979), [#3049](https://github.com/getsentry/sentry-dotnet/pull/3049), (https://github.com/getsentry/sentry-dotnet/pull/3098))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#730)
+  - [diff](https://github.com/getsentry/sentry-java/compare/6.34.0...7.3.0)
 - Bump Native SDK from v0.6.5 to v0.6.7 ([#2914](https://github.com/getsentry/sentry-dotnet/pull/2914), [#3029](https://github.com/getsentry/sentry-dotnet/pull/3029))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#070)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.6.5...0.7.0)
-- Bump CLI from v2.21.5 to v2.26.0 ([#2901](https://github.com/getsentry/sentry-dotnet/pull/2901), [#2915](https://github.com/getsentry/sentry-dotnet/pull/2915), [#2956](https://github.com/getsentry/sentry-dotnet/pull/2956), [#2985](https://github.com/getsentry/sentry-dotnet/pull/2985), [#2999](https://github.com/getsentry/sentry-dotnet/pull/2999), [#3012](https://github.com/getsentry/sentry-dotnet/pull/3012), [#3030](https://github.com/getsentry/sentry-dotnet/pull/3030), [#3059](https://github.com/getsentry/sentry-dotnet/pull/3059), [#3062](https://github.com/getsentry/sentry-dotnet/pull/3062), [#3073](https://github.com/getsentry/sentry-dotnet/pull/3073))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2250)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.5...2.26.0)
+- Bump CLI from v2.21.5 to v2.27.0 ([#2901](https://github.com/getsentry/sentry-dotnet/pull/2901), [#2915](https://github.com/getsentry/sentry-dotnet/pull/2915), [#2956](https://github.com/getsentry/sentry-dotnet/pull/2956), [#2985](https://github.com/getsentry/sentry-dotnet/pull/2985), [#2999](https://github.com/getsentry/sentry-dotnet/pull/2999), [#3012](https://github.com/getsentry/sentry-dotnet/pull/3012), [#3030](https://github.com/getsentry/sentry-dotnet/pull/3030), [#3059](https://github.com/getsentry/sentry-dotnet/pull/3059), [#3062](https://github.com/getsentry/sentry-dotnet/pull/3062), [#3073](https://github.com/getsentry/sentry-dotnet/pull/3073), [#3099](https://github.com/getsentry/sentry-dotnet/pull/3099))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2270)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.21.5...2.27.0)
 
 ## 3.41.4
 
