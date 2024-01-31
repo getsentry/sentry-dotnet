@@ -56,8 +56,6 @@ public class SentryAspNetCoreOptionsSetup : IConfigureOptions<SentryAspNetCoreOp
     /// <summary>
     /// Configures the <see cref="SentryAspNetCoreOptions"/>.
     /// </summary>
-    [RequiresDynamicCode()]
-    [RequiresUnreferencedCode()]
     public void Configure(SentryAspNetCoreOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
