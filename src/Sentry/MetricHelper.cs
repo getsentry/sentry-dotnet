@@ -5,8 +5,9 @@ namespace Sentry;
 internal static partial class MetricHelper
 {
     private static readonly RandomValuesFactory Random = new SynchronizedRandomValuesFactory();
-
     private const int RollupInSeconds = 10;
+    private const string InvalidKeyCharactersPattern = @"[^a-zA-Z0-9_/.-]+";
+    private const string InvalidValueCharactersPattern = @"[^\w\d_:/@\.\{\}\[\]$-]+";
 
 #if NET6_0_OR_GREATER
     private static readonly DateTimeOffset UnixEpoch = DateTimeOffset.UnixEpoch;
@@ -40,17 +41,17 @@ internal static partial class MetricHelper
         .Subtract(TimeSpan.FromMilliseconds(FlushShift));
 
 #if NET7_0_OR_GREATER
-    [GeneratedRegex(@"[^a-zA-Z0-9_/.-]+", RegexOptions.Compiled)]
+    [GeneratedRegex(InvalidKeyCharactersPattern, RegexOptions.Compiled)]
     private static partial Regex InvalidKeyCharacters();
     internal static string SanitizeKey(string input) => InvalidKeyCharacters().Replace(input, "_");
 
-    [GeneratedRegex(@"[^\w\d_:/@\.\{\}\[\]$-]+", RegexOptions.Compiled)]
+    [GeneratedRegex(InvalidValueCharactersPattern, RegexOptions.Compiled)]
     private static partial Regex InvalidValueCharacters();
     internal static string SanitizeValue(string input) => InvalidValueCharacters().Replace(input, "_");
 #else
-    private static readonly Regex InvalidKeyCharacters = new(@"[^a-zA-Z0-9_/.-]+", RegexOptions.Compiled);
+    private static readonly Regex InvalidKeyCharacters = new(InvalidKeyCharactersPattern, RegexOptions.Compiled);
     internal static string SanitizeKey(string input) => InvalidKeyCharacters.Replace(input, "_");
-    private static readonly Regex InvalidValueCharacters = new(@"[^\w\d_:/@\.\{\}\[\]$-]+", RegexOptions.Compiled);
+    private static readonly Regex InvalidValueCharacters = new(InvalidValueCharactersPattern, RegexOptions.Compiled);
     internal static string SanitizeValue(string input) => InvalidValueCharacters.Replace(input, "_");
 #endif
 }
