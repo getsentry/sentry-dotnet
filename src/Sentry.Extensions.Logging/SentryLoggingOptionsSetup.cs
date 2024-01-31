@@ -17,11 +17,11 @@ internal class SentryLoggingOptionsSetup : IConfigureOptions<SentryLoggingOption
 
     public void Configure(SentryLoggingOptions options)
     {
-        // ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(options);
 
-        // var bindable = new BindableSentryLoggingOptions();
-        // _config.Bind(bindable);
-        // bindable.ApplyTo(options);
+        var bindable = new BindableSentryLoggingOptions();
+        _config.Bind(bindable);
+        bindable.ApplyTo(options);
     }
 }
 #else
