@@ -15,7 +15,7 @@ internal class DefaultUserFactory : ISentryUserFactory
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public SentryUser? Create() => _httpContextAccessor?.HttpContext is {} httpContext ? Create(httpContext) : null;
+    public SentryUser? Create() => _httpContextAccessor?.HttpContext is { } httpContext ? Create(httpContext) : null;
 
     public SentryUser? Create(HttpContext context)
     {

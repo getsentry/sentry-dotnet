@@ -1,5 +1,7 @@
+using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using Microsoft.Maui.Networking;
 
 namespace Sentry.Maui.Internal;
 

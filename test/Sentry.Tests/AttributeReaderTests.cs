@@ -1,4 +1,4 @@
-﻿namespace Sentry.Tests;
+namespace Sentry.Tests;
 
 public class AttributeReaderTests
 {

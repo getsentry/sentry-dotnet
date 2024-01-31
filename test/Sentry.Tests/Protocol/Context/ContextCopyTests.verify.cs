@@ -10,9 +10,9 @@ public class ContextCopyTests
 
         var source = new Contexts
         {
-            App = {Name = "Test", Version = "1.2.3"},
-            OperatingSystem = {Name = "Android", Version = "999"},
-            ["Custom"] = new Dictionary<string, object> {["A"] = "Foo", ["B"] = "Bar", ["C"] = "Baz"}
+            App = { Name = "Test", Version = "1.2.3" },
+            OperatingSystem = { Name = "Android", Version = "999" },
+            ["Custom"] = new Dictionary<string, object> { ["A"] = "Foo", ["B"] = "Bar", ["C"] = "Baz" }
         };
 
         source.CopyTo(target);
@@ -25,14 +25,14 @@ public class ContextCopyTests
     {
         var target = new Contexts
         {
-            App = {Name = "Test", Version = "1.2.3"},
-            ["Custom1"] = new Dictionary<string, object> {["A"] = "Foo1", ["B"] = "Bar1", ["C"] = "Baz1"}
+            App = { Name = "Test", Version = "1.2.3" },
+            ["Custom1"] = new Dictionary<string, object> { ["A"] = "Foo1", ["B"] = "Bar1", ["C"] = "Baz1" }
         };
 
         var source = new Contexts
         {
-            OperatingSystem = {Name = "Android", Version = "999"},
-            ["Custom2"] = new Dictionary<string, object> {["A"] = "Foo2", ["B"] = "Bar2", ["C"] = "Baz2"}
+            OperatingSystem = { Name = "Android", Version = "999" },
+            ["Custom2"] = new Dictionary<string, object> { ["A"] = "Foo2", ["B"] = "Bar2", ["C"] = "Baz2" }
         };
 
         source.CopyTo(target);
@@ -45,14 +45,14 @@ public class ContextCopyTests
     {
         var target = new Contexts
         {
-            App = {Name = "Test", Version = "1.2.3"},
-            ["Custom"] = new Dictionary<string, object> {["A"] = "Foo1", ["B"] = "Bar1"}
+            App = { Name = "Test", Version = "1.2.3" },
+            ["Custom"] = new Dictionary<string, object> { ["A"] = "Foo1", ["B"] = "Bar1" }
         };
 
         var source = new Contexts
         {
-            App = {Name = "Something Else"},
-            ["Custom"] = new Dictionary<string, object> {["A"] = "Foo2", ["B"] = "Bar2", ["C"] = "Baz2"}
+            App = { Name = "Something Else" },
+            ["Custom"] = new Dictionary<string, object> { ["A"] = "Foo2", ["B"] = "Bar2", ["C"] = "Baz2" }
         };
 
         source.CopyTo(target);
@@ -65,15 +65,15 @@ public class ContextCopyTests
     {
         var target = new Contexts
         {
-            App = {Name = "Test", Version = "1.2.3"},
-            OperatingSystem = {Name = "Android", Version = "999"},
-            ["Custom"] = new Dictionary<string, object> {["A"] = "Foo1", ["B"] = "Bar1"}
+            App = { Name = "Test", Version = "1.2.3" },
+            OperatingSystem = { Name = "Android", Version = "999" },
+            ["Custom"] = new Dictionary<string, object> { ["A"] = "Foo1", ["B"] = "Bar1" }
         };
 
         var source = new Contexts
         {
-            App = {Name = "Something Else"},
-            ["Custom"] = new Dictionary<string, object> {["A"] = "Foo2"}
+            App = { Name = "Something Else" },
+            ["Custom"] = new Dictionary<string, object> { ["A"] = "Foo2" }
         };
 
         source.CopyTo(target);

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.Metrics;
+using System.Diagnostics.Metrics;
 
 namespace Sentry.Samples.Console.Metrics;
 
@@ -29,8 +29,8 @@ internal static class Program
                    // Initialize some (non null) ExperimentalMetricsOptions to enable Sentry Metrics,
                    options.ExperimentalMetrics = new ExperimentalMetricsOptions
                    {
-                        EnableCodeLocations = true, // Set this to false if you don't want to track code locations
-                        CaptureSystemDiagnosticsInstruments = [
+                       EnableCodeLocations = true, // Set this to false if you don't want to track code locations
+                       CaptureSystemDiagnosticsInstruments = [
                             // Capture System.Diagnostics.Metrics matching the name "HatCo.HatStore", which is the name
                             // of the custom HatsMeter defined above
                             "hats-sold"
@@ -38,6 +38,9 @@ internal static class Program
                         // Capture all built in metrics (this is the default - you can override this to capture some or
                         // none of these if you prefer)
                         CaptureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All,
+                        // Here we're capturing a custom EventSource that we've defined. Lots of Well Known Counters can
+                        // be captured using the same mechanism.
+                        // See: https://learn.microsoft.com/en-us/dotnet/core/diagnostics/available-counters
                         CaptureSystemDiagnosticsEventSourceNames = [ IterationEventCounterSource.EventSourceName ]
                    };
                }))

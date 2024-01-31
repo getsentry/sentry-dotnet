@@ -82,7 +82,7 @@ public class UserTests
         yield return new object[] { (new SentryUser { IpAddress = "some ipAddress" }, """{"ip_address":"some ipAddress"}""") };
         yield return new object[] { (new SentryUser { Segment = "some segment" }, """{"segment":"some segment"}""") };
 
-        var other = new Dictionary<string, string> {{"testCustomValueKey", "testCustomValue"}};
-        yield return new object[] { (new SentryUser { Other = other }, """{"other":{"testCustomValueKey":"testCustomValue"}}""")};
+        var other = new Dictionary<string, string> { { "testCustomValueKey", "testCustomValue" } };
+        yield return new object[] { (new SentryUser { Other = other }, """{"other":{"testCustomValueKey":"testCustomValue"}}""") };
     }
 }

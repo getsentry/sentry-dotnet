@@ -19,16 +19,16 @@ public class MetricTests
 
         var set = new SetMetric("my.set", 5, MeasurementUnit.Custom("sets"), tags, timestamp);
         set.Add(7);
-        yield return new object[]{ set };
+        yield return new object[] { set };
 
         var distribution = new DistributionMetric("my.distribution", 5, MeasurementUnit.Custom("distributions"), tags, timestamp);
         distribution.Add(7);
         distribution.Add(13);
-        yield return new object[]{ distribution };
+        yield return new object[] { distribution };
 
         var gauge = new GaugeMetric("my.gauge", 5, MeasurementUnit.Custom("gauges"), tags, timestamp);
         gauge.Add(7);
-        yield return new object[]{ gauge };
+        yield return new object[] { gauge };
     }
 
     [Theory]

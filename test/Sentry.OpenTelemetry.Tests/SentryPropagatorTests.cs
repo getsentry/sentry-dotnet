@@ -12,7 +12,8 @@ public class SentryPropagatorTests
 
     private static ActivityContext ValidContext
     {
-        get {
+        get
+        {
             var sentryTraceHeader = new SentryTraceHeader(
                 SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"),
                 SpanId.Parse("b0d83d6cfec87606"),
@@ -75,7 +76,7 @@ public class SentryPropagatorTests
         using (new AssertionScope())
         {
             carrier.Should().ContainKey("baggage");
-            var baggageDictionary = (BaggageHeader.TryParse(carrier["baggage"])?.Members is {} members)
+            var baggageDictionary = (BaggageHeader.TryParse(carrier["baggage"])?.Members is { } members)
                 ? members.ToDict()
                 : new Dictionary<string, string>();
             baggageDictionary.Should().Equal(new Dictionary<string, string>()
@@ -93,7 +94,7 @@ public class SentryPropagatorTests
         var carrier = new Dictionary<string, string>();
         var sut = new SentryPropagator();
 
-        var setter = Substitute.For<Action<Dictionary<string,string>, string, string>>();
+        var setter = Substitute.For<Action<Dictionary<string, string>, string, string>>();
 
         // Act
         sut.Inject(contextIn, carrier, setter);
@@ -109,7 +110,7 @@ public class SentryPropagatorTests
         var contextIn = new PropagationContext(ValidContext, EmptyBaggage);
         var carrier = new HttpRequestMessage(HttpMethod.Get, "https://123@o456.ingest.sentry.io/789/foo");
 
-        var options = new SentryOptions(){Dsn = "https://123@o456.ingest.sentry.io/789"};
+        var options = new SentryOptions() { Dsn = "https://123@o456.ingest.sentry.io/789" };
         SentryClientExtensions.SentryOptionsForTestingOnly = options;
 
         var hub = Substitute.For<IHub>();

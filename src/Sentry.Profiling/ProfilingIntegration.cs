@@ -1,5 +1,5 @@
-using Sentry.Integrations;
 using Sentry.Extensibility;
+using Sentry.Integrations;
 
 namespace Sentry.Profiling;
 

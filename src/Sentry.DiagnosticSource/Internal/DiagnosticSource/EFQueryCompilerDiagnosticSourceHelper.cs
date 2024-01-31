@@ -14,7 +14,7 @@ internal class EFQueryCompilerDiagnosticSourceHelper : EFDiagnosticSourceHelper
     /// We don't have a correlation id for compiled query events. We just return the first unfinished query compile span.
     /// </summary>
     protected override ISpan? GetSpanReference(ITransactionTracer transaction, object? diagnosticSourceValue) =>
-        transaction.Spans .FirstOrDefault(span => !span.IsFinished && span.Operation == Operation);
+        transaction.Spans.FirstOrDefault(span => !span.IsFinished && span.Operation == Operation);
 
     protected override void SetSpanReference(ISpan span, object? diagnosticSourceValue)
     {

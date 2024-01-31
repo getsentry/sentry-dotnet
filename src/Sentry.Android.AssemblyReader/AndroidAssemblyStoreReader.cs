@@ -258,7 +258,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
             // Each subsequent line consists of fields separated with any number of spaces (for the pleasure of a human being reading the manifest)
             while (!reader.EndOfStream)
             {
-                var fields = reader.ReadLine()?.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
+                var fields = reader.ReadLine()?.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 if (fields == null)
                 {
                     continue;

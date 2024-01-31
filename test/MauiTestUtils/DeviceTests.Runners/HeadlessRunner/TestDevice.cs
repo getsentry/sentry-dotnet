@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Globalization;
 using Microsoft.DotNet.XHarness.TestRunners.Common;
@@ -7,7 +7,7 @@ using Microsoft.Maui.Devices;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner;
 
-class TestDevice : IDevice
+internal class TestDevice : IDevice
 {
     public string BundleIdentifier => AppInfo.PackageName;
 

@@ -1,9 +1,9 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.SourceGen;
 
-static class GeneratorDiagnostics
+internal static class GeneratorDiagnostics
 {
     public static readonly DiagnosticDescriptor LoggingMessage = new DiagnosticDescriptor(
         id: "TST1001",

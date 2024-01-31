@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This sample demonstrates using Sentry to capture traces and exceptions from a GraphQL over HTTP client.
  * It assumes the Sentry.Samples.GraphQL.Server is running on http://localhost:5051
  * (see `/Samples/Sentry.Samples.GraphQL.Server/Properties/launchSettings.json`)
@@ -64,7 +64,8 @@ transaction.Finish(SpanStatus.Ok);
 async Task CreateError()
 {
     // var query = new GraphQLRequest(@"{ test { id } }");
-    var query = new GraphQLRequest{
+    var query = new GraphQLRequest
+    {
         Query = @"mutation fakeMutation($note:NoteInput!) { playNote(note: $note) { id } }",
         OperationName = "fakeMutation",
         Variables = new
@@ -84,7 +85,8 @@ async Task CreateNewNote()
 {
     Console.WriteLine("What do you want the note to  say?");
     var message = Console.ReadLine();
-    var mutation = new GraphQLRequest{
+    var mutation = new GraphQLRequest
+    {
         Query = @"mutation addANote($note:NoteInput!) { createNote(note: $note) {id message } }",
         OperationName = "addANote",
         Variables = new
@@ -125,5 +127,5 @@ public class NotesResult
 
 public class CreateNoteResult
 {
-    public Note CreateNote { get; set; } = new ();
+    public Note CreateNote { get; set; } = new();
 }

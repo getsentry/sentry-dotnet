@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -13,8 +13,8 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner;
 
 public abstract class MauiTestInstrumentation : Instrumentation
 {
-    readonly TaskCompletionSource<Application> _waitForApplication = new();
-    Java.Lang.Class _activityClass = null!;
+    private readonly TaskCompletionSource<Application> _waitForApplication = new();
+    private Java.Lang.Class _activityClass = null!;
 
     protected MauiTestInstrumentation(IntPtr handle, JniHandleOwnership ownership)
         : base(handle, ownership)
@@ -75,7 +75,7 @@ public abstract class MauiTestInstrumentation : Instrumentation
         Finish(Result.Ok, bundle);
     }
 
-    void CopyFile(Bundle bundle)
+    private void CopyFile(Bundle bundle)
     {
         var resultsFile = bundle.GetString("test-results-path");
         if (resultsFile == null)
@@ -121,7 +121,7 @@ public abstract class MauiTestInstrumentation : Instrumentation
         bundle.PutString("test-results-path", finalPath);
     }
 
-    Task<Bundle> RunTestsAsync()
+    private Task<Bundle> RunTestsAsync()
     {
         if (RunnerOptions.RequiresUIContext)
         {

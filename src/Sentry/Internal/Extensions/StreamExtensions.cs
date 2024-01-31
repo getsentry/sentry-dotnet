@@ -77,7 +77,7 @@ internal static class StreamExtensions
     }
 
     // pre-creating this buffer leads to an optimized path when writing
-    private static readonly byte[] NewlineBuffer = {(byte)'\n'};
+    private static readonly byte[] NewlineBuffer = { (byte)'\n' };
 
     public static Task WriteNewlineAsync(this Stream stream, CancellationToken cancellationToken = default) =>
 #pragma warning disable CA1835 // the byte-array implementation of WriteAsync is more direct than using ReadOnlyMemory<byte>

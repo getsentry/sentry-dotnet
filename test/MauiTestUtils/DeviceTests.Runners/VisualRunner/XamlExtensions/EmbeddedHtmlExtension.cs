@@ -1,11 +1,11 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.IO;
 using Microsoft.Maui.Controls;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
 
-class EmbeddedHtmlExtension : EmbeddedResourceExtension
+internal class EmbeddedHtmlExtension : EmbeddedResourceExtension
 {
     public override object? ProvideValue(IServiceProvider serviceProvider)
     {

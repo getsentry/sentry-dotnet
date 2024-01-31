@@ -7,8 +7,8 @@ namespace Sentry.Internal;
 internal static class PiiExtensions
 {
     internal const string RedactedText = "[Filtered]";
-    private static readonly Regex AuthRegex = new (@"(?i)\b(https?://.*@.*)\b", RegexOptions.Compiled);
-    private static readonly Regex UserInfoMatcher = new (@"^(?i)(https?://)(.*@)(.*)$", RegexOptions.Compiled);
+    private static readonly Regex AuthRegex = new(@"(?i)\b(https?://.*@.*)\b", RegexOptions.Compiled);
+    private static readonly Regex UserInfoMatcher = new(@"^(?i)(https?://)(.*@)(.*)$", RegexOptions.Compiled);
 
     /// <summary>
     /// Searches for URLs in text data and redacts any PII data from these, as required.

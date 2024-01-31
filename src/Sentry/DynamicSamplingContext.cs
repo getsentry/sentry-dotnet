@@ -157,7 +157,7 @@ internal class DynamicSamplingContext
             publicKey,
             null,
             release: release,
-            environment:environment);
+            environment: environment);
     }
 }
 

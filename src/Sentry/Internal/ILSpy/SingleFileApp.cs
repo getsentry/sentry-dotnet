@@ -73,7 +73,7 @@ internal sealed class SingleFileApp
         }
         catch (Exception ex)
         {
-            SentrySdk.CurrentOptions?.LogDebug("Error loading Module from bundle {0}: {1}", fileName,  ex.Message);
+            SentrySdk.CurrentOptions?.LogDebug("Error loading Module from bundle {0}: {1}", fileName, ex.Message);
             return null;
         }
     }
@@ -124,7 +124,7 @@ internal sealed class SingleFileApp
         }
     }
 
-    private sealed class BundleEntries: List<KeyValuePair<string,PEDebugImageData>>
+    private sealed class BundleEntries : List<KeyValuePair<string, PEDebugImageData>>
     {
     }
 }
