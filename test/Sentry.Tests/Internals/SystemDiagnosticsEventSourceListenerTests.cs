@@ -9,7 +9,7 @@ public class SystemDiagnosticsEventSourceListenerTests
     private class Fixture
     {
         public readonly IMetricAggregator MockAggregator = Substitute.For<IMetricAggregator>();
-        public readonly ExperimentalMetricsOptions MetricsOptions = new ();
+        public readonly ExperimentalMetricsOptions MetricsOptions = new();
 
         public SystemDiagnosticsEventSourceListener GetSut() =>
             new(MetricsOptions, () => MockAggregator);
