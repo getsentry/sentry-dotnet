@@ -201,6 +201,11 @@ public class SentryOptions
             }
 #endif
 
+            if ((_defaultIntegrations & DefaultIntegrations.SystemDiagnosticsEventSourceIntegration) != 0)
+            {
+                yield return new SystemDiagnosticsEventSourceIntegration();
+            }
+
             foreach (var integration in _integrations)
             {
                 yield return integration;
@@ -1223,6 +1228,7 @@ public class SentryOptions
 #if NET8_0_OR_GREATER
                                | DefaultIntegrations.SystemDiagnosticsMetricsIntegration
 #endif
+                               | DefaultIntegrations.SystemDiagnosticsEventSourceIntegration
                                ;
 
 #if ANDROID
@@ -1326,5 +1332,6 @@ public class SentryOptions
 #if NET8_0_OR_GREATER
         SystemDiagnosticsMetricsIntegration = 1 << 7,
 #endif
+        SystemDiagnosticsEventSourceIntegration = 1 << 8,
     }
 }

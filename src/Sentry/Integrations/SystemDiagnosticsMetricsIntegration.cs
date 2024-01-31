@@ -7,7 +7,7 @@ namespace Sentry.Integrations;
 internal class SystemDiagnosticsMetricsIntegration : ISdkIntegration
 {
     private readonly Action<ExperimentalMetricsOptions> _initializeListener;
-    internal const string NoListenersAreConfiguredMessage = "System.Diagnostics.Metrics Integration is disabled because no listeners are configured.";
+    internal const string NoListenersAreConfiguredMessage = "SystemDiagnosticsMetricsIntegration is disabled because no listeners are configured.";
 
     public SystemDiagnosticsMetricsIntegration()
     {

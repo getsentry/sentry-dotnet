@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.Metrics;
-using System.Text.RegularExpressions;
 
 namespace Sentry.Samples.Console.Metrics;
 
@@ -38,7 +37,8 @@ internal static class Program
                         ],
                         // Capture all built in metrics (this is the default - you can override this to capture some or
                         // none of these if you prefer)
-                        CaptureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All
+                        CaptureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All,
+                        CaptureEventSourceNames = [ IterationEventCounterSource.EventSourceName ]
                    };
                }))
         {
@@ -47,18 +47,20 @@ internal static class Program
             Action[] actions = [PlaySetBingo, CreateRevenueGauge, MeasureShrimp, SellHats];
             do
             {
-                // Run a random action
-                var idx = Roll.Next(0, actions.Length);
-                actions[idx]();
+                IterationEventCounterSource.Log.AddLoopCount();
 
-                // Make an API call
-                await CallSampleApiAsync();
+                // // Run a random action
+                // var idx = Roll.Next(0, actions.Length);
+                // actions[idx]();
+                //
+                // // Make an API call
+                // await CallSampleApiAsync();
 
                 // Optional: Delay to prevent tight looping
                 var sleepTime = Roll.Next(1, 5);
                 System.Console.WriteLine($"Sleeping for {sleepTime} second(s).");
                 System.Console.WriteLine("Press any key to stop...");
-                Thread.Sleep(TimeSpan.FromSeconds(sleepTime));
+                await Task.Delay(TimeSpan.FromSeconds(sleepTime));
             }
             while (!System.Console.KeyAvailable);
             System.Console.WriteLine("Measure up");
@@ -127,8 +129,8 @@ internal static class Program
 
     private static async Task CallSampleApiAsync()
     {
-        // Here we demonstrate collecting some built in metrics for HTTP requests... this works because
-        // we've configured ExperimentalMetricsOptions.CaptureInstruments to match "http.client.*"
+        // Here we demonstrate collecting some built in metrics for HTTP requests... this works because we have:
+        // `ExperimentalMetricsOptions.CaptureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All`
         //
         // See https://learn.microsoft.com/en-us/dotnet/core/diagnostics/built-in-metrics-system-net#systemnethttp
         var httpClient = new HttpClient();

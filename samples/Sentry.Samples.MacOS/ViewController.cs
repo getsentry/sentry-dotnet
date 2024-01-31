@@ -1,3 +1,7 @@
+using ObjCRuntime;
+
+namespace Sentry.Samples.MacOS;
+
 public partial class ViewController : NSViewController
 {
     protected ViewController (NativeHandle handle) : base (handle)

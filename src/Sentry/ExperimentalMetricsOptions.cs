@@ -10,8 +10,21 @@ public class ExperimentalMetricsOptions
     /// Determines whether code locations should be recorded for Metrics
     /// </summary>
     public bool EnableCodeLocations { get; set; } = true;
-
+    private IList<SubstringOrRegexPattern> _captureEventSourceNames = new List<SubstringOrRegexPattern>();
     private IList<SubstringOrRegexPattern> _captureSystemDiagnosticsInstruments = new List<SubstringOrRegexPattern>();
+    private IList<SubstringOrRegexPattern> _captureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All;
+
+    /// <summary>
+    /// Metrics for any EventSource whose name matches one of the items in this list will be reported to Sentry.
+    /// </summary>
+    public IList<SubstringOrRegexPattern> CaptureEventSourceNames
+    {
+        // NOTE: During configuration binding, .NET 6 and lower used to just call Add on the existing item.
+        //       .NET 7 changed this to call the setter with an array that already starts with the old value.
+        //       We have to handle both cases.
+        get => _captureEventSourceNames;
+        set => _captureEventSourceNames = value.WithConfigBinding();
+    }
 
     /// <summary>
     /// <para>
@@ -33,8 +46,6 @@ public class ExperimentalMetricsOptions
         get => _captureSystemDiagnosticsInstruments;
         set => _captureSystemDiagnosticsInstruments = value.WithConfigBinding();
     }
-
-    private IList<SubstringOrRegexPattern> _captureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All;
 
     /// <summary>
     /// <para>
