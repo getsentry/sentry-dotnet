@@ -49,6 +49,6 @@
   },
   {
     Level: info,
-    Message: SystemDiagnosticsEventSourceIntegration is disabled because no listeners are configured.
+    Message: SystemDiagnosticsEventSourceIntegration is disabled because no listeners are configured
   }
 ]
