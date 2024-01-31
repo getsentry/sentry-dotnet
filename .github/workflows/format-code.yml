@@ -27,7 +27,9 @@ jobs:
         run: dotnet tool install -g dotnet-format
 
       - name: Format Code
-        run: dotnet format Sentry.sln --no-restore --exclude modules
+        # We're excluding `./**/*OptionsSetup.cs` from the format because the tool struggles with 
+        # source generators
+        run: dotnet format Sentry.sln --no-restore --exclude ./modules --exclude ./**/*OptionsSetup.cs
 
       # actions/checkout fetches only a single commit in a detached HEAD state. Therefore
       # we need to pass the current branch, otherwise we can't commit the changes.
