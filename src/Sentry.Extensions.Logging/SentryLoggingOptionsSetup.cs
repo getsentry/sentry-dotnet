@@ -15,6 +15,8 @@ internal class SentryLoggingOptionsSetup : IConfigureOptions<SentryLoggingOption
         _config = config.Configuration;
     }
 
+    [RequiresDynamicCode("Calls Microsoft.Extensions.Configuration.ConfigurationBinder.Bind(Object)")]
+    [RequiresUnreferencedCode("Calls Microsoft.Extensions.Configuration.ConfigurationBinder.Bind(Object)")]
     public void Configure(SentryLoggingOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);

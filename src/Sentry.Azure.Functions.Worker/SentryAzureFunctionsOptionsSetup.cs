@@ -14,6 +14,8 @@ internal class SentryAzureFunctionsOptionsSetup : IConfigureOptions<SentryAzureF
         _config = config;
     }
 
+    [RequiresDynamicCode("Calls Microsoft.Extensions.Configuration.ConfigurationBinder.Bind(Object)")]
+    [RequiresUnreferencedCode("Calls Microsoft.Extensions.Configuration.ConfigurationBinder.Bind(Object)")]
     public void Configure(SentryAzureFunctionsOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
