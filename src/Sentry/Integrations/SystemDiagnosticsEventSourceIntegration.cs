@@ -1,12 +1,16 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
+#if NETFRAMEWORK
+using Sentry.PlatformAbstractions;
+#endif
 
 namespace Sentry.Integrations;
 
 internal class SystemDiagnosticsEventSourceIntegration : ISdkIntegration
 {
     private readonly Action<ExperimentalMetricsOptions> _initializeListener;
-    internal const string NoListenersAreConfiguredMessage = "SystemDiagnosticsEventSourceIntegration is disabled because no listeners are configured.";
+    internal const string NoListenersAreConfiguredMessage = "SystemDiagnosticsEventSourceIntegration is disabled because no listeners are configured";
+    internal const string MonoNotSupportedMessage = "SystemDiagnosticsEventSourceIntegration is disabled on Mono";
 
     public SystemDiagnosticsEventSourceIntegration()
     {
@@ -23,6 +27,14 @@ internal class SystemDiagnosticsEventSourceIntegration : ISdkIntegration
 
     public void Register(IHub hub, SentryOptions options)
     {
+#if NETFRAMEWORK
+        if (RuntimeInfo.GetRuntime().IsMono())
+        {
+            options.LogInfo(MonoNotSupportedMessage);
+            return;
+        }
+#endif
+
         var captureEventSources = options.ExperimentalMetrics?.CaptureSystemDiagnosticsEventSourceNames;
         if (captureEventSources is not { Count: > 0 })
         {
