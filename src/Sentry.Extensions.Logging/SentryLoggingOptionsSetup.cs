@@ -19,11 +19,11 @@ internal class SentryLoggingOptionsSetup : IConfigureOptions<SentryLoggingOption
     [RequiresUnreferencedCode("Calls Microsoft.Extensions.Configuration.ConfigurationBinder.Bind(Object)")]
     public void Configure(SentryLoggingOptions options)
     {
-        ArgumentNullException.ThrowIfNull(options);
+        // ArgumentNullException.ThrowIfNull(options);
 
-        var bindable = new BindableSentryLoggingOptions();
-        _config.Bind(bindable);
-        bindable.ApplyTo(options);
+        // var bindable = new BindableSentryLoggingOptions();
+        // _config.Bind(bindable);
+        // bindable.ApplyTo(options);
     }
 }
 #else

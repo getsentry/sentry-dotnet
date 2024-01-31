@@ -13,24 +13,6 @@ internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
         _config = config;
     }
 
-
-/* Unmerged change from project 'Sentry.Maui(net8.0-ios)'
-Before:
-    public void Configure(SentryMauiOptions options)
-After:
-    [RequiresDynamicCode("Calls Microsoft.Extensions.Configuration.ConfigurationBinder.Bind(Object)")]
-    public void Configure(SentryMauiOptions options)
-*/
-
-/* Unmerged change from project 'Sentry.Maui(net8.0-maccatalyst)'
-Before:
-    public void Configure(SentryMauiOptions options)
-After:
-    [RequiresDynamicCode("Calls Microsoft.Extensions.Configuration.ConfigurationBinder.Bind(Object)")]
-    public void Configure(SentryMauiOptions options)
-*/
-    [RequiresDynamicCode("Calls Microsoft.Extensions.Configuration.ConfigurationBinder.Bind(Object)")]
-    [RequiresUnreferencedCode("Calls Microsoft.Extensions.Configuration.ConfigurationBinder.Bind(Object)")]
     public void Configure(SentryMauiOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
