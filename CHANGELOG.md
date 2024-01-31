@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump Java SDK from v7.2.0 to v7.3.0 ([#3098](https://github.com/getsentry/sentry-dotnet/pull/3098))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#730)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.2.0...7.3.0)
+
 ## 4.0.0-beta.9
 
 ### Features
