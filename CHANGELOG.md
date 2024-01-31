@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 4.0.0
 
 This major release includes many exciting new features including support for [Profiling](https://docs.sentry.io/platforms/dotnet/profiling/) and [Metrics](https://docs.sentry.io/platforms/dotnet/metrics/)(preview), [AOT](https://sentry.engineering/blog/should-you-could-you-aot) with [Native Crash Reporting](https://github.com/getsentry/sentry-dotnet/issues/2770), [Spotlight](https://spotlightjs.com/), Screenshots on MAUI and much more. Details about these features and other changes are below.
 
