@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump CLI from v2.26.0 to v2.27.0 ([#3099](https://github.com/getsentry/sentry-dotnet/pull/3099))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2270)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.26.0...2.27.0)
+
 ## 4.0.0-beta.9
 
 ### Features
