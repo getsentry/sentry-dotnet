@@ -6,17 +6,31 @@ public class MetricAggregatorTests
 {
     private class Fixture
     {
-        public SentryOptions Options { get; set; } = new();
-        public IHub Hub { get; set; } = Substitute.For<IHub>();
-        public IMetricHub MetricHub { get; set; } = Substitute.For<IMetricHub>();
-        public bool DisableFlushLoop { get; set; } = true;
-        public TimeSpan? FlushInterval { get; set; }
-        public MetricAggregator GetSut()
-            => new(Options, MetricHub, disableLoopTask: DisableFlushLoop, flushInterval: FlushInterval);
+        public readonly IDiagnosticLogger Logger;
+        public readonly SentryOptions Options;
+
+        public readonly IMetricHub MetricHub;
+        public bool DisableFlushLoop;
+        public readonly CancellationTokenSource CancellationTokenSource;
+
+        public Fixture()
+        {
+            Logger = Substitute.For<IDiagnosticLogger>();
+            Options = new SentryOptions
+            {
+                Debug = true,
+                DiagnosticLogger = Logger
+            };
+            MetricHub = Substitute.For<IMetricHub>();
+            DisableFlushLoop = true;
+            CancellationTokenSource = new CancellationTokenSource();
+        }
+
+        public MetricAggregator GetSut() => new(Options, MetricHub, CancellationTokenSource, DisableFlushLoop);
     }
 
     // private readonly Fixture _fixture = new();
-    private static readonly Fixture _fixture = new();
+    private readonly Fixture _fixture = new();
 
     [Fact]
     public void GetMetricBucketKey_GeneratesExpectedKey()
@@ -209,7 +223,8 @@ public class MetricAggregatorTests
         var sent = 0;
         MetricHelper.FlushShift = 0.0;
         _fixture.DisableFlushLoop = false;
-        _fixture.FlushInterval = TimeSpan.FromMilliseconds(100);
+        // TODO: Remove
+        // _fixture.FlushInterval = TimeSpan.FromMilliseconds(100);
         _fixture.MetricHub.CaptureMetrics(Arg.Do<IEnumerable<Metric>>(metrics =>
             {
                 foreach (var metric in metrics)
@@ -298,5 +313,272 @@ public class MetricAggregatorTests
         var tags = new Dictionary<string, string> { { "tag1\\", "value1\\" }, { "tag2,", "value2," }, { "tag3=", "value3=" } };
         var result = MetricAggregator.GetTagsKey(tags);
         result.Should().Be(@"tag1\\=value1\\,tag2\,=value2\,,tag3\==value3\=");
+    }
+
+    [Fact]
+    public void RecordCodeLocation_AddsMetricToSeenAndPendingLocations()
+    {
+        // Arrange
+        var type = MetricType.Counter;
+        var key = "counter_key";
+        var unit = MeasurementUnit.None;
+        var stackLevel = 1;
+        var timestamp = DateTimeOffset.Now;
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.RecordCodeLocation(type, key, unit, stackLevel, timestamp);
+
+        // Assert
+        var startOfDay = timestamp.GetDayBucketKey();
+        sut._seenLocations.Keys.Should().Contain(startOfDay);
+
+        var metaKey = new MetricResourceIdentifier(type, key, unit);
+        sut._seenLocations[startOfDay].Should().Contain(metaKey);
+
+        sut._pendingLocations.Keys.Should().Contain(startOfDay);
+        sut._pendingLocations[startOfDay].Should().NotBeNull();
+        sut._pendingLocations[startOfDay].Keys.Should().Contain(metaKey);
+        sut._pendingLocations[startOfDay][metaKey].Should().NotBeNull();
+        sut._pendingLocations[startOfDay][metaKey].Function.Should().Be(
+            $"void {nameof(MetricAggregatorTests)}.{nameof(RecordCodeLocation_AddsMetricToSeenAndPendingLocations)}()"
+            );
+    }
+
+    [Fact]
+    public void RecordCodeLocation_RecordsLocationOnlyOnce()
+    {
+        // Arrange
+        var type = MetricType.Counter;
+        var key = "counter_key";
+        var unit = MeasurementUnit.None;
+        var stackLevel = 1;
+        var timestamp = DateTimeOffset.Now;
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.RecordCodeLocation(type, key, unit, stackLevel, timestamp);
+        sut.RecordCodeLocation(type, key, unit, stackLevel, timestamp);
+
+        // Assert
+        sut._pendingLocations.SelectMany(x => x.Value).Count().Should().Be(1);
+    }
+
+    [Fact]
+    public void RecordCodeLocation_BadStackLevel_AddsToSeenButNotPending()
+    {
+        // Arrange
+        var type = MetricType.Counter;
+        var key = "counter_key";
+        var unit = MeasurementUnit.None;
+        var stackLevel = short.MaxValue;
+        var timestamp = DateTimeOffset.Now;
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.RecordCodeLocation(type, key, unit, stackLevel, timestamp);
+
+        // Assert
+        var startOfDay = timestamp.GetDayBucketKey();
+        sut._seenLocations.Keys.Should().Contain(startOfDay);
+
+        var metaKey = new MetricResourceIdentifier(type, key, unit);
+        sut._seenLocations[startOfDay].Should().Contain(metaKey);
+
+        sut._pendingLocations.SelectMany(x => x.Value).Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Dispose_OnlyExecutesOnce()
+    {
+        // Arrange
+        _fixture.Logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.Dispose();
+        sut.Dispose();
+        sut.Dispose();
+
+        // Assert
+        _fixture.Logger.Received(2).Log(SentryLevel.Debug, MetricAggregator.AlreadyDisposedMessage, null);
+    }
+
+    [Fact]
+    public void Dispose_StopsLoopTask()
+    {
+        // Arrange
+        _fixture.Logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        _fixture.DisableFlushLoop = false;
+        _fixture.Options.ShutdownTimeout = TimeSpan.Zero;
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.Dispose();
+
+        // Assert
+        _fixture.Logger.Received(1).Log(SentryLevel.Debug, MetricAggregator.DisposingMessage, null);
+        sut._loopTask.Status.Should().BeOneOf(TaskStatus.RanToCompletion, TaskStatus.Faulted);
+    }
+
+    [Fact]
+    public async Task Dispose_SwallowsException()
+    {
+        // Arrange
+        _fixture.CancellationTokenSource.Dispose();
+        _fixture.DisableFlushLoop = false;
+        var sut = _fixture.GetSut();
+
+        // We expect an exception here, because we disposed the cancellation token source
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => sut._loopTask);
+
+        // Act
+        await sut.DisposeAsync();
+
+        // Assert
+        sut._loopTask.Status.Should().Be(TaskStatus.Faulted);
+    }
+
+    [Fact]
+    public async Task Cancel_NonZeroTimeout_SchedulesShutdown()
+    {
+        // Arrange
+        _fixture.Logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        _fixture.DisableFlushLoop = false;
+        _fixture.Options.ShutdownTimeout = TimeSpan.FromSeconds(1);
+        var sut = _fixture.GetSut();
+
+        // Act
+        await _fixture.CancellationTokenSource.CancelAsync();
+#pragma warning disable xUnit1031
+        sut._loopTask.Wait(10000);
+#pragma warning restore xUnit1031
+
+        // Assert
+        _fixture.Logger.Received(1).Log(SentryLevel.Debug, MetricAggregator.ShutdownScheduledMessage, null, Arg.Any<TimeSpan>());
+    }
+
+    [Fact]
+    public async Task Cancel_ZeroTimeout_ShutdownImmediately()
+    {
+        // Arrange
+        _fixture.Logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        _fixture.DisableFlushLoop = false;
+        _fixture.Options.ShutdownTimeout = TimeSpan.Zero;
+        var sut = _fixture.GetSut();
+
+        // Act
+        await _fixture.CancellationTokenSource.CancelAsync();
+#pragma warning disable xUnit1031
+        sut._loopTask.Wait(10000);
+#pragma warning restore xUnit1031
+
+        // Assert
+        _fixture.Logger.Received(1).Log(SentryLevel.Debug, MetricAggregator.ShutdownImmediatelyMessage, null);
+    }
+
+    [Fact]
+    public async Task FlushAsync_FlushesPendingLocations()
+    {
+        // Arrange
+        var type = MetricType.Counter;
+        var key = "counter_key";
+        var unit = MeasurementUnit.None;
+        var stackLevel = 1;
+        var timestamp = DateTimeOffset.Now.Subtract(TimeSpan.FromSeconds(20));
+        var sut = _fixture.GetSut();
+        sut.RecordCodeLocation(type, key, unit, stackLevel, timestamp);
+
+        // Act
+        await sut.FlushAsync();
+
+        // Assert
+        _fixture.MetricHub.Received(1).CaptureCodeLocations(Arg.Any<CodeLocations>());
+    }
+
+    [Fact]
+    public async Task FlushAsync_Cancel_Exists()
+    {
+        // Arrange
+        _fixture.DisableFlushLoop = false;
+        _fixture.Logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        var cancellationTokenSource = new CancellationTokenSource();
+        await cancellationTokenSource.CancelAsync();
+        var sut = _fixture.GetSut();
+
+        // Act
+        await sut.FlushAsync(true, cancellationTokenSource.Token);
+
+        // Assert
+        _fixture.Logger.Received(1).Log(SentryLevel.Info, MetricAggregator.FlushShutdownMessage, null);
+    }
+
+    [Fact]
+    public void ClearStaleLocations_SameDay_NoClear()
+    {
+        // Arrange
+        var time = new DateTimeOffset(2000, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+        var sut = _fixture.GetSut();
+        sut._lastClearedStaleLocations = time.GetDayBucketKey();
+
+        var type = MetricType.Counter;
+        var key = "counter_key";
+        var unit = MeasurementUnit.None;
+        var stackLevel = 1;
+        sut.RecordCodeLocation(type, key, unit, stackLevel, time.Subtract(TimeSpan.FromDays(1)));
+
+        // Act
+        sut.ClearStaleLocations(time);
+
+        // Assert
+        // (You need some way to check that "_seenLocations" are not modified. This is stubbed in as "SeenLocations")
+        sut._seenLocations.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public void ClearStaleLocations_GraceTime_NoClear()
+    {
+        // Arrange
+        var time = new DateTimeOffset(2000, 1, 1, 0, 0, 30, TimeSpan.Zero);
+
+        var sut = _fixture.GetSut();
+        sut._lastClearedStaleLocations = time.GetDayBucketKey() - 1;
+
+        var type = MetricType.Counter;
+        var key = "counter_key";
+        var unit = MeasurementUnit.None;
+        var stackLevel = 1;
+        sut.RecordCodeLocation(type, key, unit, stackLevel, time.Subtract(TimeSpan.FromDays(1)));
+
+        // Act
+        sut.ClearStaleLocations(time);
+
+        // Assert
+        // (You need some way to check that "_seenLocations" are not modified. This is stubbed in as "SeenLocations")
+        sut._seenLocations.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public void ClearStaleLocations_AfterGraceTime_Clear()
+    {
+        // Arrange
+        var time = new DateTimeOffset(2000, 1, 1, 0, 1, 30, TimeSpan.Zero);
+
+        var sut = _fixture.GetSut();
+        sut._lastClearedStaleLocations = time.GetDayBucketKey() - 1;
+
+        var type = MetricType.Counter;
+        var key = "counter_key";
+        var unit = MeasurementUnit.None;
+        var stackLevel = 1;
+        sut.RecordCodeLocation(type, key, unit, stackLevel, time.Subtract(TimeSpan.FromDays(1)));
+
+        // Act
+        sut.ClearStaleLocations(time);
+
+        // Assert
+        // (You need some way to check that "_seenLocations" are not modified. This is stubbed in as "SeenLocations")
+        sut._seenLocations.Should().BeEmpty();
     }
 }
