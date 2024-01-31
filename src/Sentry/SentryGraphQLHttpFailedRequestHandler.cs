@@ -18,7 +18,7 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
         _httpFailedRequestHandler = new SentryHttpFailedRequestHandler(hub, options);
     }
 
-    protected internal override void DoEnsureSuccessfulResponse([NotNull]HttpRequestMessage request, [NotNull]HttpResponseMessage response)
+    protected internal override void DoEnsureSuccessfulResponse([NotNull] HttpRequestMessage request, [NotNull] HttpResponseMessage response)
     {
         JsonElement? json = null;
         try

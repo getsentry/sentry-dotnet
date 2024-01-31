@@ -22,7 +22,7 @@ internal static class SentryGraphQlTestHelpers
         return GetRequest(content, url);
     }
 
-    public static HttpRequestMessage GetRequest(HttpContent content, string url = "http://foo") => new (HttpMethod.Post, url)
+    public static HttpRequestMessage GetRequest(HttpContent content, string url = "http://foo") => new(HttpMethod.Post, url)
     {
         Content = content
     };
@@ -30,7 +30,7 @@ internal static class SentryGraphQlTestHelpers
     public static StringContent JsonContent(dynamic json)
     {
         var serialised = JsonSerializer.Serialize(json);
-        return new (serialised, Encoding.UTF8,
+        return new(serialised, Encoding.UTF8,
             "application/json")
         {
             Headers = { ContentLength = serialised.Length }

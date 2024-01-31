@@ -1,7 +1,7 @@
 namespace Sentry.Internal;
 
 internal interface IUpdatable<in T> : IUpdatable
-    where T: IUpdatable<T>
+    where T : IUpdatable<T>
 {
     void UpdateFrom(T source);
 }

@@ -441,7 +441,7 @@ public partial class HttpTransportTests
         var httpTransport = new HttpTransport(options, new HttpClient(httpHandler));
 
         // some arbitrary discarded events ahead of time
-        var recorder = (ClientReportRecorder) options.ClientReportRecorder;
+        var recorder = (ClientReportRecorder)options.ClientReportRecorder;
         recorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Attachment);
         recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
         recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
@@ -485,7 +485,7 @@ public partial class HttpTransportTests
         var httpTransport = new HttpTransport(options, new HttpClient(httpHandler));
 
         // some arbitrary discarded events ahead of time
-        var recorder = (ClientReportRecorder) options.ClientReportRecorder;
+        var recorder = (ClientReportRecorder)options.ClientReportRecorder;
         recorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Attachment);
         recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
         recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);

@@ -70,7 +70,7 @@ public class HttpContextExtensionsTests
         // Arrange
         var expectedName = "abc";
         var httpContext = Fixture.GetSut();
-        httpContext.Features.Set((TransactionNameProvider) (_ => expectedName));
+        httpContext.Features.Set((TransactionNameProvider)(_ => expectedName));
 
         // Act
         var filteredRoute = httpContext.TryGetCustomTransactionName();

@@ -12,7 +12,7 @@ public sealed class SystemClock : ISystemClock
     /// <remarks>
     /// This constructor should have been private originally.  It will be removed in a future major version.
     /// </remarks>
-    private SystemClock() {}
+    private SystemClock() { }
 
     /// <summary>
     /// System clock singleton.

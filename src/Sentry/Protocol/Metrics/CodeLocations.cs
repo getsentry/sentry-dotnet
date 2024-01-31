@@ -37,7 +37,7 @@ internal class CodeLocations(long timestamp, IReadOnlyDictionary<MetricResourceI
             // The protocol supports multiple locations per MRI but currently the Sentry Relay will discard all but the
             // first, so even though we only capture a single location we send it through as an array.
             // See: https://discord.com/channels/621778831602221064/1184350202774163556/1185010167369170974
-            writer.WriteArray(mri, new[]{loc}, logger);
+            writer.WriteArray(mri, new[] { loc }, logger);
         }
         writer.WriteEndObject();
         writer.WriteEndObject();

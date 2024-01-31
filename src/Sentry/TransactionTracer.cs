@@ -229,7 +229,7 @@ public class TransactionTracer : ITransactionTracer
         IsSampled = context.IsSampled;
         StartTimestamp = _stopwatch.StartDateTimeOffset;
 
-		if (context is TransactionContext transactionContext)
+        if (context is TransactionContext transactionContext)
         {
             _instrumenter = transactionContext.Instrumenter;
         }
@@ -307,7 +307,7 @@ public class TransactionTracer : ITransactionTracer
 
         public void Push(ISpan span)
         {
-            lock(_lock)
+            lock (_lock)
             {
                 TrackedSpans.Push(span);
             }
@@ -315,7 +315,7 @@ public class TransactionTracer : ITransactionTracer
 
         public ISpan? PeekActive()
         {
-            lock(_lock)
+            lock (_lock)
             {
                 while (TrackedSpans.Count > 0)
                 {

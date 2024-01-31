@@ -1,5 +1,5 @@
-using Sentry.Internal;
 using Sentry.Cocoa.Extensions;
+using Sentry.Internal;
 
 namespace Sentry.Cocoa;
 

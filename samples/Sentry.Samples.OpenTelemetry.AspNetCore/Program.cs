@@ -56,7 +56,7 @@ app.MapGet("/hello", async context =>
 
 app.MapGet("/echo/{name}", (string name) => $"Hi {name}!");
 
-app.MapGet("/private", async context  =>
+app.MapGet("/private", async context =>
 {
     var user = context.User;
     var result = $"Hello {user.Identity?.Name}";

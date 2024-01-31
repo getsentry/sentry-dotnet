@@ -108,7 +108,7 @@ internal abstract class Metric : IJsonSerializable, ISentrySerializable
         var metricName = MetricHelper.SanitizeKey(Key);
         await Write($"{metricName}@").ConfigureAwait(false);
         var unit = Unit ?? MeasurementUnit.None;
-// We don't need ConfigureAwait(false) here as ConfigureAwait on metricName above avoids capturing the ExecutionContext.
+        // We don't need ConfigureAwait(false) here as ConfigureAwait on metricName above avoids capturing the ExecutionContext.
 #pragma warning disable CA2007
         await Write(unit.ToString());
 

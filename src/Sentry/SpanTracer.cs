@@ -119,7 +119,7 @@ public class SpanTracer : ISpan
     }
 
     /// <inheritdoc />
-    public ISpan StartChild(string operation) => Transaction.StartChild(null, parentSpanId:SpanId, operation: operation);
+    public ISpan StartChild(string operation) => Transaction.StartChild(null, parentSpanId: SpanId, operation: operation);
 
     /// <summary>
     /// Used to mark a span as unfinished when it was previously marked as finished. This allows us to reuse spans for

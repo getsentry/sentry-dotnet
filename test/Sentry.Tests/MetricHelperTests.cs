@@ -1,6 +1,6 @@
 namespace Sentry.Tests;
 
-public class MetricBucketHelperTests
+public class MetricHelperTests
 {
     [Theory]
     [InlineData(30)]
@@ -33,5 +33,18 @@ public class MetricBucketHelperTests
         // Assert
         const int secondsInADay = 60 * 60 * 24;
         result.Should().Be(expectedDays * secondsInADay);
+    }
+
+    [Theory]
+    [InlineData("Test123_:/@.{}[]$-", "Test123_:/@.{}[]$-")] // Valid characters
+    [InlineData("test&value", "test_value")]
+    [InlineData("test\"value", "test_value")]
+    public void SanitizeValue_ShouldReplaceInvalidCharactersWithUnderscore(string input, string expected)
+    {
+        // Act
+        var result = MetricHelper.SanitizeValue(input);
+
+        // Assert
+        result.Should().Be(expected);
     }
 }

@@ -502,7 +502,7 @@ public class CachingTransportTests
             FileSystem = _fileSystem
         };
 
-        var recorder = (ClientReportRecorder) options.ClientReportRecorder;
+        var recorder = (ClientReportRecorder)options.ClientReportRecorder;
         var innerTransport = new FakeTransportWithRecorder(recorder);
         await using var transport = CachingTransport.Create(innerTransport, options,
             startWorker: false, failStorage: true);

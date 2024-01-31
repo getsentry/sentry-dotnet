@@ -283,7 +283,7 @@ public class DynamicSamplingContextTests
     [Fact]
     public void CreateFromPropagationContext_Valid_Complete()
     {
-        var options = new SentryOptions { Dsn = "https://a@sentry.io/1", Release = "test-release", Environment = "test-environment"};
+        var options = new SentryOptions { Dsn = "https://a@sentry.io/1", Release = "test-release", Environment = "test-environment" };
         var propagationContext = new SentryPropagationContext(
             SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1234"));
 

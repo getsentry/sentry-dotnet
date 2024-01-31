@@ -1,9 +1,9 @@
-﻿#nullable enable
+#nullable enable
 using Microsoft.Maui.Controls;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages;
 
-partial class TestAssemblyPage : ContentPage
+public partial class TestAssemblyPage : ContentPage
 {
     public TestAssemblyPage()
     {

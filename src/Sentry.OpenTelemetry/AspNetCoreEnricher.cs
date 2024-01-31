@@ -1,4 +1,4 @@
-﻿namespace Sentry.OpenTelemetry;
+namespace Sentry.OpenTelemetry;
 
 internal class AspNetCoreEnricher : IOpenTelemetryEnricher
 {
@@ -12,7 +12,7 @@ internal class AspNetCoreEnricher : IOpenTelemetryEnricher
         {
             hub.ConfigureScope(scope =>
             {
-                if (!scope.HasUser() && _userFactory.Create() is {} user)
+                if (!scope.HasUser() && _userFactory.Create() is { } user)
                 {
                     scope.User = user;
                 }

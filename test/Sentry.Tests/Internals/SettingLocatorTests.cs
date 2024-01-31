@@ -128,7 +128,7 @@ public class SettingLocatorTests
         const string validDsn1 = ValidDsn + "1";
         const string validDsn2 = ValidDsn + "2";
 
-        var options = new SentryOptions {Dsn = validDsn1};
+        var options = new SentryOptions { Dsn = validDsn1 };
         options.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = validDsn2;
 
         var dsn = options.SettingLocator.GetDsn();
@@ -143,7 +143,7 @@ public class SettingLocatorTests
         const string validDsn1 = ValidDsn + "1";
         const string validDsn2 = ValidDsn + "2";
 
-        var options = new SentryOptions {Dsn = validDsn1};
+        var options = new SentryOptions { Dsn = validDsn1 };
         options.FakeSettings().AssemblyForAttributes = GetAssemblyWithDsn(validDsn2);
 
         var dsn = options.SettingLocator.GetDsn();
@@ -212,7 +212,7 @@ public class SettingLocatorTests
     [Fact]
     public void GetEnvironment_WithOptionAlreadySet_IgnoresEnvironmentVariable()
     {
-        var options = new SentryOptions {Environment = "Foo"};
+        var options = new SentryOptions { Environment = "Foo" };
         options.FakeSettings().EnvironmentVariables[EnvironmentEnvironmentVariable] = "Bar";
 
         var environment = options.SettingLocator.GetEnvironment();
@@ -262,7 +262,7 @@ public class SettingLocatorTests
     [Fact]
     public void GetRelease_WithOptionAlreadySet_IgnoresEnvironmentVariable()
     {
-        var options = new SentryOptions {Release = "1.2.3"};
+        var options = new SentryOptions { Release = "1.2.3" };
         options.FakeSettings().EnvironmentVariables[ReleaseEnvironmentVariable] = "4.5.6";
 
         var release = options.SettingLocator.GetRelease();

@@ -36,7 +36,7 @@ public static partial class AssertionExtensions
 
     public static void CloseEnough(double expected, double actual, double epsilon = 0.2, string? message = null)
     {
-        if (!String.IsNullOrWhiteSpace(message))
+        if (!string.IsNullOrWhiteSpace(message))
             message = " " + message;
 
         var diff = Math.Abs(expected - actual);

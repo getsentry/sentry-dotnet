@@ -54,7 +54,7 @@ internal static class JsonExtensions
     };
 
     internal static void AddJsonSerializerContext<T>(Func<JsonSerializerOptions, T> jsonSerializerContextBuilder)
-        where T: JsonSerializerContext
+        where T : JsonSerializerContext
     {
         JsonSerializerContextBuilders.Add(jsonSerializerContextBuilder);
         ResetSerializerOptions();

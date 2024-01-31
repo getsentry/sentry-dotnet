@@ -129,7 +129,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
             ? null
             : transaction.Spans
                 .FirstOrDefault(span =>
-                    span is {IsFinished: false, Operation: "db.connection"} &&
+                    span is { IsFinished: false, Operation: "db.connection" } &&
                     TryGetConnectionId(span) == connectionId);
 
     private static ISpan? TryGetQuerySpan(ITransactionTracer transaction, Guid? operationId) =>
