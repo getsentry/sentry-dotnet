@@ -33,7 +33,7 @@ This SDK version is compatible with a self-hosted version of Sentry `22.12.0` or
 
 ### Significant change in behavior
 
-- Transaction names for ASP.NET Core are now consistently named `HTTP-VERB /path` (e.g. `GET /home`). Previously the leading forward slash was missing for some endpoints. ([#2808](https://github.com/getsentry/sentry-dotnet/pull/2808))
+- Transaction names for ASP.NET Core are now consistently named `HTTP-VERB /path` (e.g. `GET /home`). Previously, the leading forward slash was missing for some endpoints. ([#2808](https://github.com/getsentry/sentry-dotnet/pull/2808))
 - Setting `SentryOptions.Dsn` to `null` now throws `ArgumentNullException` during initialization. ([#2655](https://github.com/getsentry/sentry-dotnet/pull/2655))
 - Enable `CaptureFailedRequests` by default ([#2688](https://github.com/getsentry/sentry-dotnet/pull/2688))
 - Added `Sentry` namespace to global usings when `ImplicitUsings` is enabled ([#3043](https://github.com/getsentry/sentry-dotnet/pull/3043))
@@ -45,7 +45,7 @@ If you have conflicts, you can opt out by adding the following to your `csproj`:
 ```
 - Transactions' spans are no longer automatically finished with the status `deadline_exceeded` by the transaction. This is now handled by the [Relay](https://github.com/getsentry/relay). 
   - Customers self hosting Sentry must use verion 22.12.0 or later ([#3013](https://github.com/getsentry/sentry-dotnet/pull/3013))
-- The User.IpAddress is now set to {{auto}} by default, even when sendDefaultPII is disabled ([#2981](https://github.com/getsentry/sentry-dotnet/pull/2981))
+- The `User.IpAddress` is now set to `{{auto}}` by default, even when sendDefaultPII is disabled ([#2981](https://github.com/getsentry/sentry-dotnet/pull/2981))
   - The "Prevent Storing of IP Addresses" option in the "Security & Privacy" project settings on sentry.io can be used to control this instead
 - The `DiagnosticLogger` signature for `LogWarning` changed to take the `exception` as the first parameter. That way it no longer gets mixed up with the TArgs. ([#2987](https://github.com/getsentry/sentry-dotnet/pull/2987))
 
@@ -110,12 +110,12 @@ If you have compilation errors you can find the affected types or overloads miss
 - `ISpanContext` has been removed, use `ITraceContext` instead. ([#2668](https://github.com/getsentry/sentry-dotnet/pull/2668))
 - `IHasTransactionNameSource` has been removed, use `ITransactionContext` instead. ([#2654](https://github.com/getsentry/sentry-dotnet/pull/2654))
 - ([#2694](https://github.com/getsentry/sentry-dotnet/pull/2694))
-- Unused `StackFrame.InstructionOffset` has been removed. ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
-The unused `Scope.Platform` property has been removed. ([#2695](https://github.com/getsentry/sentry-dotnet/pull/2695))
-- Obsolete setter `Sentry.PlatformAbstractions.Runtime.Identifier` has been removed ([2764](https://github.com/getsentry/sentry-dotnet/pull/2764))
+- The unused `StackFrame.InstructionOffset` has been removed. ([#2691](https://github.com/getsentry/sentry-dotnet/pull/2691))
+- The unused `Scope.Platform` property has been removed. ([#2695](https://github.com/getsentry/sentry-dotnet/pull/2695))
+- The obsolete setter `Sentry.PlatformAbstractions.Runtime.Identifier` has been removed ([2764](https://github.com/getsentry/sentry-dotnet/pull/2764))
 - `Sentry.Values<T>` is now internal as it is never exposed in the public API ([#2771](https://github.com/getsentry/sentry-dotnet/pull/2771))
-- `TracePropagationTarget` class has been removed, use the `SubstringOrRegexPattern` class instead. ([#2763](https://github.com/getsentry/sentry-dotnet/pull/2763))
-- `WithScope` and `WithScopeAsync` methods have been removed. We have discovered that these methods didn't work correctly in certain desktop contexts, especially when using a global scope. ([#2717](https://github.com/getsentry/sentry-dotnet/pull/2717))
+- The `TracePropagationTarget` class has been removed, use the `SubstringOrRegexPattern` class instead. ([#2763](https://github.com/getsentry/sentry-dotnet/pull/2763))
+- The `WithScope` and `WithScopeAsync` methods have been removed. We have discovered that these methods didn't work correctly in certain desktop contexts, especially when using a global scope. ([#2717](https://github.com/getsentry/sentry-dotnet/pull/2717))
 
   Replace your usage of `WithScope` with overloads of `Capture*` methods:
 
@@ -141,25 +141,25 @@ The unused `Scope.Platform` property has been removed. ([#2695](https://github.c
 
 ### Features
 
-- `SentrySdk.Metrics.Set` now additionally accepts `string` as value ([#3092](https://github.com/getsentry/sentry-dotnet/pull/3092))
-- Timing metrics can now be captured with `SentrySdk.Metrics.StartTimer` ([#3075](https://github.com/getsentry/sentry-dotnet/pull/3075))
-- Added support for capturing built-in metrics from the `System.Diagnostics.Metrics` API ([#3052](https://github.com/getsentry/sentry-dotnet/pull/3052))
+- Experimental pre-release availability of Metrics. We're exploring the use of Metrics in Sentry. The API will very likely change and we don't yet have any documentation. ([#2949](https://github.com/getsentry/sentry-dotnet/pull/2949))
+  - `SentrySdk.Metrics.Set` now additionally accepts `string` as value ([#3092](https://github.com/getsentry/sentry-dotnet/pull/3092))
+  - Timing metrics can now be captured with `SentrySdk.Metrics.StartTimer` ([#3075](https://github.com/getsentry/sentry-dotnet/pull/3075))
+  - Added support for capturing built-in metrics from the `System.Diagnostics.Metrics` API ([#3052](https://github.com/getsentry/sentry-dotnet/pull/3052))
 - `Sentry.Profiling` is now available as a package on [nuget](nuget.org). Be aware that profiling is in alpha and on servers the overhead could be high. Improving the experience for ASP.NET Core is tracked on [this issue](
 https://github.com/getsentry/sentry-dotnet/issues/2316) ([#2800](https://github.com/getsentry/sentry-dotnet/pull/2800))
-- iOS profiling support (alpha). ([#2930](https://github.com/getsentry/sentry-dotnet/pull/2930))
-- Experimental pre-release availability of Metrics. We're exploring the use of Metrics in Sentry. The API will very likely change and we don't yet have any documentation. ([#2949](https://github.com/getsentry/sentry-dotnet/pull/2949))
-github.com/getsentry/sentry-dotnet/pull/2983))
+  - iOS profiling support (alpha). ([#2930](https://github.com/getsentry/sentry-dotnet/pull/2930))
+- Native crash reporting on NativeAOT published apps (Windows, Linux, macOS). ([#2887](https://github.com/getsentry/sentry-dotnet/pull/2887))
 - Support for [Spotlight](https://spotlightjs.com/), a debug tool for local development. ([#2961](https://github.com/getsentry/sentry-dotnet/pull/2961))
   - Enable it with the option `EnableSpotlight`
   - Optionally configure the URL to connect via `SpotlightUrl`. Defaults to `http://localhost:8969/stream`.
-- Native crash reporting on NativeAOT published apps (Windows, Linux, macOS). ([#2887](https://github.com/getsentry/sentry-dotnet/pull/2887))
 
 ### MAUI
 
-- MAUI Screenshot support. You can opt-in via `SentryMauiOptions.AttachScreenshots` ([#2965](https://github.com/getsentry/sentry-dotnet/pull/2965))
-   - Supports Android and iOS only. Windows is not supported.
-- MAUI: App context has `in_foreground` indicating whether the app was in the background or foreground. ([#2983](https://
-- Android: By default attaches LogCat logs to unhandled exceptions. Configurable via `SentryOptions.Android.LogCatIntegration` and `SentryOptions.Android.LogCatMaxLines`. Available when targeting `net7.0-android` or later, on API level 23 or later. ([#2926](https://github.com/getsentry/sentry-dotnet/pull/2926))
+- Added screenshot capture support for errors. You can opt-in via `SentryMauiOptions.AttachScreenshots` ([#2965](https://github.com/getsentry/sentry-dotnet/pull/2965))
+  - Supports Android and iOS only. Windows is not supported.
+- App context now has `in_foreground`, indicating whether the app was in the foreground or the background. ([#2983](https://github.com/getsentry/sentry-dotnet/pull/2983))
+- Android: When capturing unhandled exceptions, the SDK now can automatically attach `LogCat` to the event. You can opt-in via `SentryOptions.Android.LogCatIntegration` and configure `SentryOptions.Android.LogCatMaxLines`. ([#2926](https://github.com/getsentry/sentry-dotnet/pull/2926))
+  - Available when targeting `net7.0-android` or later, on API level 23 or later.
 
 #### Native AOT
 
@@ -176,7 +176,7 @@ There are some functional differences when publishing Native AOT:
 - `StackTraceMode.Enhanced` is ignored because it's not available when publishing Native AOT. The mechanism to generate these enhanced stack traces relies heavily on reflection which isn't compatible with trimming.
 - Reflection cannot be leveraged for JSON Serialization and you may need to use `SentryOptions.AddJsonSerializerContext` to supply a serialization context for types that you'd like to send to Sentry (e.g. in the `Span.Context`). ([#2732](https://github.com/getsentry/sentry-dotnet/pull/2732), [#2793](https://github.com/getsentry/sentry-dotnet/pull/2793))
 - `Ben.Demystifier` is not available as it only runs in JIT mode.
-- WinUI applications: when publishing Native AOT, Sentry isn't able to automatically register an unhandled exception handler  because that relies on reflection. You'll need to [register the unhandled event handler manually](https://github.com/getsentry/sentry-dotnet/issues/2778) instead.
+- WinUI applications: When publishing Native AOT, Sentry isn't able to automatically register an unhandled exception handler because that relies on reflection. You'll need to [register the unhandled event handler manually](https://github.com/getsentry/sentry-dotnet/issues/2778) instead.
 - For Azure Functions Workers, when AOT/Trimming is enabled we can't use reflection to read route data from the HttpTrigger so the route name will always be `/api/<FUNCTION_NAME>` ([#2920](https://github.com/getsentry/sentry-dotnet/pull/2920))
 
 ### Fixes
