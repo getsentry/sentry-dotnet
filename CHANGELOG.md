@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Well known EventSource counters can be captured as metrics ([#3100](https://github.com/getsentry/sentry-dotnet/pull/3100))
+ 
 ## 4.0.0-beta.9
 
 ### Features
