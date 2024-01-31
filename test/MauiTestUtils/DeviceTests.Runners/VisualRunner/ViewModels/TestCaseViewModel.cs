@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using Xunit.Abstractions;
 using Xunit.Sdk;
