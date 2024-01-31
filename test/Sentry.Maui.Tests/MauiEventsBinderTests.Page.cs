@@ -68,8 +68,8 @@ public partial class MauiEventsBinderTests
         };
         var navigatedToEventArgs = (NavigatedToEventArgs)
             typeof(NavigatedToEventArgs)
-                .GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, new[] {typeof(Page)})!
-                .Invoke(new object[] {otherPage});
+                .GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, new[] { typeof(Page) })!
+                .Invoke(new object[] { otherPage });
 
         // Act
         page.RaiseEvent(nameof(Page.NavigatedTo), navigatedToEventArgs);
@@ -101,8 +101,8 @@ public partial class MauiEventsBinderTests
         };
         var navigatedToEventArgs = (NavigatedToEventArgs)
             typeof(NavigatedToEventArgs)
-                .GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, new[] {typeof(Page)})!
-                .Invoke(new object[] {otherPage});
+                .GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, new[] { typeof(Page) })!
+                .Invoke(new object[] { otherPage });
 
         page.RaiseEvent(nameof(Page.NavigatedTo), navigatedToEventArgs);
         Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check

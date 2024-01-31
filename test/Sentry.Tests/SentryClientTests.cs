@@ -327,7 +327,8 @@ public partial class SentryClientTests
     public void CaptureEvent_BeforeSend_GetsHint()
     {
         Hint received = null;
-        _fixture.SentryOptions.SetBeforeSend((e, h) => {
+        _fixture.SentryOptions.SetBeforeSend((e, h) =>
+        {
             received = h;
             return e;
         });
@@ -346,7 +347,8 @@ public partial class SentryClientTests
     {
         // Arrange
         Hint hint = null;
-        _fixture.SentryOptions.SetBeforeSend((e, h) => {
+        _fixture.SentryOptions.SetBeforeSend((e, h) =>
+        {
             hint = h;
             return e;
         });
@@ -448,7 +450,8 @@ public partial class SentryClientTests
     {
         // Arrange
         var scope = new Scope(_fixture.SentryOptions);
-        _fixture.SentryOptions.SetBeforeSend((e, h) => {
+        _fixture.SentryOptions.SetBeforeSend((e, h) =>
+        {
             h.Attachments.Add(AttachmentHelper.FakeAttachment("foo.txt"));
             h.Attachments.Add(AttachmentHelper.FakeAttachment("bar.txt"));
             return e;
@@ -470,7 +473,8 @@ public partial class SentryClientTests
         // Arrange
         var scope = new Scope(_fixture.SentryOptions);
         scope.AddAttachment(AttachmentHelper.FakeAttachment("foo.txt"));
-        _fixture.SentryOptions.SetBeforeSend((e, h) => {
+        _fixture.SentryOptions.SetBeforeSend((e, h) =>
+        {
             h.Attachments.Add(AttachmentHelper.FakeAttachment("bar.txt"));
             return e;
         });
@@ -1043,7 +1047,8 @@ public partial class SentryClientTests
         scope.AddAttachment(attachments[1]);
 
         Hint hint = null;
-        _fixture.SentryOptions.SetBeforeSendTransaction((e, h) => {
+        _fixture.SentryOptions.SetBeforeSendTransaction((e, h) =>
+        {
             hint = h;
             return e;
         });
@@ -1210,7 +1215,7 @@ public partial class SentryClientTests
         _fixture.SentryOptions.SetBeforeSendTransaction((_, _) => null);
 
         var sut = _fixture.GetSut();
-        sut.CaptureTransaction( new SentryTransaction("test name", "test operation")
+        sut.CaptureTransaction(new SentryTransaction("test name", "test operation")
         {
             IsSampled = true,
             EndTimestamp = DateTimeOffset.Now // finished

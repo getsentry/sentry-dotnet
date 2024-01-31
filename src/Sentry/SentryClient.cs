@@ -57,7 +57,9 @@ public class SentryClient : ISentryClient, IDisposable
 #pragma warning disable 0162 // Unreachable code on old .NET frameworks
             options.LogDebug("This looks like a NativeAOT application build.");
 #pragma warning restore 0162
-        } else {
+        }
+        else
+        {
 #pragma warning restore CS0162 // Unreachable code detected
             options.LogDebug("This looks like a standard JIT/AOT application build.");
         }

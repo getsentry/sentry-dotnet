@@ -6,7 +6,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners;
 
 public static class TestServices
 {
-    static IServiceProvider? s_services = null;
+    private static IServiceProvider? s_services = null;
 
     public static IServiceProvider Services
     {
@@ -15,7 +15,7 @@ public static class TestServices
             if (s_services is null)
             {
 #if __ANDROID__
-                    s_services = MauiTestInstrumentation.Current?.Services ?? MauiApplication.Current.Services;
+                s_services = MauiTestInstrumentation.Current?.Services ?? MauiApplication.Current.Services;
 #elif __IOS__
                 s_services = MauiTestApplicationDelegate.Current?.Services ?? MauiUIApplicationDelegate.Current.Services;
 #elif WINDOWS

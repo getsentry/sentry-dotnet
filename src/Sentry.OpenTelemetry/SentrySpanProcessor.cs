@@ -193,7 +193,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     {
         while (activity is not null)
         {
-            if (activity.GetFused<Scope>() is {} savedScope)
+            if (activity.GetFused<Scope>() is { } savedScope)
             {
                 return savedScope;
             }
@@ -211,7 +211,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         {
             return GetErrorSpanStatus(attributes);
         }
-        return status switch {
+        return status switch
+        {
             ActivityStatusCode.Unset => SpanStatus.Ok,
             ActivityStatusCode.Ok => SpanStatus.Ok,
             ActivityStatusCode.Error => GetErrorSpanStatus(attributes),

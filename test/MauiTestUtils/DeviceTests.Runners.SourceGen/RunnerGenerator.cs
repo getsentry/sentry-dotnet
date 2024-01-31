@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -83,7 +83,7 @@ public class RunnerGenerator
         Context.AddSource(filename, SourceText.From(contents, Encoding.UTF8));
     }
 
-    string GenerateAndroidSource()
+    private string GenerateAndroidSource()
     {
         var mauiProgramName = "MauiProgram";
         var mauiProgramFullName = @"global::" + RootNamespace + "." + mauiProgramName;
@@ -164,7 +164,7 @@ namespace " + RootNamespace + @"
 ";
     }
 
-    string GenerateIosSource()
+    private string GenerateIosSource()
     {
         var mauiProgramName = "MauiProgram";
         var mauiProgramFullName = @"global::" + RootNamespace + "." + mauiProgramName;

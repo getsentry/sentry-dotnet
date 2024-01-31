@@ -17,8 +17,8 @@ public class DebugStackTraceTests
     private readonly Fixture _fixture = new();
     private static readonly string ThisNamespace = typeof(SentryStackTraceFactoryTests).Namespace!;
 
-// TODO: Create integration test to test this behaviour when publishing AOT apps
-// See https://github.com/getsentry/sentry-dotnet/issues/2772
+    // TODO: Create integration test to test this behaviour when publishing AOT apps
+    // See https://github.com/getsentry/sentry-dotnet/issues/2772
     [Fact]
     public void CreateSentryStackFrame_AppNamespace_InAppFrame()
     {
@@ -30,8 +30,8 @@ public class DebugStackTraceTests
         Assert.True(actual?.InApp);
     }
 
-// TODO: Create integration test to test this behaviour when publishing AOT apps
-// See https://github.com/getsentry/sentry-dotnet/issues/2772
+    // TODO: Create integration test to test this behaviour when publishing AOT apps
+    // See https://github.com/getsentry/sentry-dotnet/issues/2772
     [Fact]
     public void CreateSentryStackFrame_AppNamespaceExcluded_NotInAppFrame()
     {
@@ -44,8 +44,8 @@ public class DebugStackTraceTests
         Assert.False(actual?.InApp);
     }
 
-// TODO: Create integration test to test this behaviour when publishing AOT apps
-// See https://github.com/getsentry/sentry-dotnet/issues/2772
+    // TODO: Create integration test to test this behaviour when publishing AOT apps
+    // See https://github.com/getsentry/sentry-dotnet/issues/2772
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -68,8 +68,8 @@ public class DebugStackTraceTests
         Assert.False(actual?.InApp);
     }
 
-// TODO: Create integration test to test this behaviour when publishing AOT apps
-// See https://github.com/getsentry/sentry-dotnet/issues/2772
+    // TODO: Create integration test to test this behaviour when publishing AOT apps
+    // See https://github.com/getsentry/sentry-dotnet/issues/2772
     [Fact]
     public void CreateSentryStackFrame_NamespaceIncludedAndExcluded_IncludesTakesPrecedence()
     {

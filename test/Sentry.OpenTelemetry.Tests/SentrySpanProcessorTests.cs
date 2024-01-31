@@ -130,7 +130,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
             Assert.Fail("Span is not a transaction tracer");
             return;
         }
-        if (transaction.DynamicSamplingContext is not {} actual)
+        if (transaction.DynamicSamplingContext is not { } actual)
         {
             Assert.Fail("Transaction does not have a dynamic sampling context");
             return;

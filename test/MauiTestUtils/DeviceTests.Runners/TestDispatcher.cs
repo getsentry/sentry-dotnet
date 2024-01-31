@@ -7,8 +7,8 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners;
 
 public static class TestDispatcher
 {
-    static IDispatcher? s_dispatcher;
-    static IDispatcherProvider? s_provider;
+    private static IDispatcher? s_dispatcher;
+    private static IDispatcherProvider? s_provider;
 
     public static IDispatcherProvider Provider
     {

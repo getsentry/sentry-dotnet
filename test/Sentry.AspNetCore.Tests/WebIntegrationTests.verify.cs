@@ -63,7 +63,7 @@ public class WebIntegrationTests
         // dispose will ultimately trigger the background worker to flush
         server.Dispose();
 
-        await Verify(new {result, transport.Payloads})
+        await Verify(new { result, transport.Payloads })
             .IgnoreStandardSentryMembers()
             .ScrubAspMembers()
             .UniqueForTargetFrameworkAndVersion();
@@ -135,7 +135,7 @@ public class WebIntegrationTests
         // dispose will ultimately trigger the background worker to flush
         server.Dispose();
 
-        await Verify(new {result, transport.Payloads})
+        await Verify(new { result, transport.Payloads })
             .IgnoreStandardSentryMembers()
             .ScrubAspMembers();
     }

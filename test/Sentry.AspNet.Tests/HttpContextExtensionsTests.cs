@@ -68,7 +68,7 @@ public class HttpContextExtensionsTests
     public void StartSentryTransaction_SendDefaultPii_set_to_true_sets_cookies()
     {
         // Arrange
-        var context = HttpContextBuilder.BuildWithCookies(new []{ new HttpCookie("foo", "bar") });
+        var context = HttpContextBuilder.BuildWithCookies(new[] { new HttpCookie("foo", "bar") });
 
         SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions
         {
@@ -104,7 +104,7 @@ public class HttpContextExtensionsTests
     public void StartSentryTransaction_SendDefaultPii_set_to_false_does_not_set_cookies()
     {
         // Arrange
-        var context = HttpContextBuilder.BuildWithCookies(new []{ new HttpCookie("foo", "bar") });
+        var context = HttpContextBuilder.BuildWithCookies(new[] { new HttpCookie("foo", "bar") });
 
         SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions
         {
@@ -122,7 +122,7 @@ public class HttpContextExtensionsTests
     public void StartSentryTransaction_missing_options_does_not_set_cookies()
     {
         // Arrange
-        var context = HttpContextBuilder.BuildWithCookies(new []{ new HttpCookie("foo", "bar") });
+        var context = HttpContextBuilder.BuildWithCookies(new[] { new HttpCookie("foo", "bar") });
 
         // Act
         var transaction = context.StartSentryTransaction();

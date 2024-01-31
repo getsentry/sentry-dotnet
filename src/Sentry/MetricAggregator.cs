@@ -18,7 +18,7 @@ internal class MetricAggregator : IMetricAggregator
     private readonly SentryOptions _options;
     private readonly IMetricHub _metricHub;
 
-    private readonly SemaphoreSlim _codeLocationLock = new(1,1);
+    private readonly SemaphoreSlim _codeLocationLock = new(1, 1);
     private readonly ReaderWriterLockSlim _bucketsLock = new ReaderWriterLockSlim();
 
     private readonly CancellationTokenSource _shutdownSource;
@@ -212,7 +212,7 @@ internal class MetricAggregator : IMetricAggregator
                 // remains only a theoretical possibility of data loss (not confirmed). If this becomes a real problem
                 // and we need to guarantee delivery of every metric.Add, we'll need to build a more complex mechanism
                 // to coordinate flushing with emission.
-                lock(metric)
+                lock (metric)
                 {
                     metric.Add(value);
                 }
@@ -269,7 +269,7 @@ internal class MetricAggregator : IMetricAggregator
     {
         var startOfDay = timestamp.GetDayBucketKey();
         var metaKey = new MetricResourceIdentifier(type, key, unit);
-        var seenToday = _seenLocations.GetOrAdd(startOfDay,_ => []);
+        var seenToday = _seenLocations.GetOrAdd(startOfDay, _ => []);
 
         _codeLocationLock.Wait();
         try
@@ -306,9 +306,9 @@ internal class MetricAggregator : IMetricAggregator
     {
         var stackTrace = new StackTrace(true);
         var frames = DebugStackTrace.Create(_options, stackTrace, false).Frames;
-         return (frames.Count >= stackLevel)
-            ? frames[^(stackLevel + 1)]
-            : null;
+        return (frames.Count >= stackLevel)
+           ? frames[^(stackLevel + 1)]
+           : null;
     }
 
     private async Task RunLoopAsync()

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
-using Microsoft.Extensions.Hosting;
 
 namespace Sentry.AspNetCore;
 

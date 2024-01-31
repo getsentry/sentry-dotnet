@@ -39,16 +39,16 @@ internal class SentryDiagnosticSubscriber : IObserver<DiagnosticListener>
         switch (listener.Name)
         {
             case "Microsoft.EntityFrameworkCore":
-            {
-                listener.Subscribe(_efListener.Value);
-                break;
-            }
+                {
+                    listener.Subscribe(_efListener.Value);
+                    break;
+                }
 
             case "SqlClientDiagnosticListener":
-            {
-                listener.Subscribe(_sqlListener.Value);
-                break;
-            }
+                {
+                    listener.Subscribe(_sqlListener.Value);
+                    break;
+                }
         }
 
         // By default, the EF listener will duplicate spans already given by the SQL Client listener.

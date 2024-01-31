@@ -8,7 +8,7 @@ public class SystemDiagnosticsMetricsListenerTests
     private class Fixture
     {
         public readonly IMetricAggregator MockAggregator = Substitute.For<IMetricAggregator>();
-        public readonly ExperimentalMetricsOptions MetricsOptions = new ();
+        public readonly ExperimentalMetricsOptions MetricsOptions = new();
 
         public SystemDiagnosticsMetricsListener GetSut()
         {
@@ -119,7 +119,7 @@ public class SystemDiagnosticsMetricsListenerTests
     {
         // Arrange
         var testMeter = GetMeter();
-        var instrument = testMeter.CreateObservableGauge<int>(UniqueName(), () => new [] { new Measurement<int>(2) }, "unit");
+        var instrument = testMeter.CreateObservableGauge<int>(UniqueName(), () => new[] { new Measurement<int>(2) }, "unit");
         const int measurement = 2;
         ReadOnlySpan<KeyValuePair<string, object>> tags = [
             new KeyValuePair<string, object>("tag1", "value1"),
@@ -179,7 +179,7 @@ public class SystemDiagnosticsMetricsListenerTests
     {
         // Arrange
         var testMeter = GetMeter();
-        List<Measurement<int>> observedValues = [ new Measurement<int>(2), new Measurement<int>(3) ];
+        List<Measurement<int>> observedValues = [new Measurement<int>(2), new Measurement<int>(3)];
         var instrument = testMeter.CreateObservableCounter(UniqueName(),
             () => observedValues);
         _fixture.MetricsOptions.CaptureSystemDiagnosticsInstruments.Add(instrument.Name);
@@ -209,7 +209,7 @@ public class SystemDiagnosticsMetricsListenerTests
     {
         // Arrange
         var testMeter = GetMeter();
-        List<Measurement<int>> observedValues = [ new Measurement<int>(12), new Measurement<int>(-5) ];
+        List<Measurement<int>> observedValues = [new Measurement<int>(12), new Measurement<int>(-5)];
         var instrument = testMeter.CreateObservableUpDownCounter(UniqueName(),
             () => observedValues);
         _fixture.MetricsOptions.CaptureSystemDiagnosticsInstruments.Add(instrument.Name);

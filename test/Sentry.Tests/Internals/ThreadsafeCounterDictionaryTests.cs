@@ -145,7 +145,7 @@ public class ThreadsafeCounterDictionaryTests
         var actual1 = counters.ToDict();
         var actual2 = counters.ToDict();
 
-        var expected = new Dictionary<string, int> {{"foo", 1}, {"bar", 2}};
+        var expected = new Dictionary<string, int> { { "foo", 1 }, { "bar", 2 } };
         Assert.Equal(expected, actual1);
         Assert.Equal(expected, actual2);
     }
@@ -161,8 +161,8 @@ public class ThreadsafeCounterDictionaryTests
         var actual1 = counters.ReadAllAndReset();
         var actual2 = counters.ToDict();
 
-        var expected1 = new Dictionary<string, int> {{"foo", 1}, {"bar", 2}};
-        var expected2 = new Dictionary<string, int> {{"foo", 0}, {"bar", 0}};
+        var expected1 = new Dictionary<string, int> { { "foo", 1 }, { "bar", 2 } };
+        var expected2 = new Dictionary<string, int> { { "foo", 0 }, { "bar", 0 } };
 
         Assert.Equal(expected1, actual1);
         Assert.Equal(expected2, actual2);
@@ -193,7 +193,7 @@ public class ThreadsafeCounterDictionaryTests
 
         var actual = counters.Keys.OrderBy(x => x);
 
-        Assert.Equal(new[] {"a", "b", "c"}, actual);
+        Assert.Equal(new[] { "a", "b", "c" }, actual);
     }
 
     [Fact]
@@ -209,7 +209,7 @@ public class ThreadsafeCounterDictionaryTests
 
         var actual = counters.Values.OrderBy(x => x);
 
-        Assert.Equal(new[] {1, 2, 3}, actual);
+        Assert.Equal(new[] { 1, 2, 3 }, actual);
     }
 
     [Fact]

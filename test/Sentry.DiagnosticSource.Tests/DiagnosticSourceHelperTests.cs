@@ -4,7 +4,7 @@ namespace Sentry.DiagnosticSource.Tests;
 
 public class DiagnosticSourceHelperTests
 {
-  [Fact]
+    [Fact]
     public void FilterNewLineValue_StringWithNewLine_SubStringAfterNewLine()
     {
         // Arrange

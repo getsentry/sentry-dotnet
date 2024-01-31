@@ -4,7 +4,7 @@ namespace Sentry;
 /// Exposes EXPERIMENTAL capability to emit metrics. This API is subject to change without major version bumps so use
 /// with caution. We advise disabling in production at the moment.
 /// </summary>
-public interface IMetricAggregator: IDisposable
+public interface IMetricAggregator : IDisposable
 {
     /// <summary>
     /// Emits a Counter metric

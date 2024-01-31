@@ -1,4 +1,4 @@
-﻿[UsesVerify]
+[UsesVerify]
 public class IntegrationTests
 {
     [Fact]
@@ -89,7 +89,7 @@ public class IntegrationTests
 
     private static Hierarchy SetupLogging(IHub hub)
     {
-        var hierarchy = (Hierarchy) LogManager.GetRepository(typeof(IntegrationTests).Assembly);
+        var hierarchy = (Hierarchy)LogManager.GetRepository(typeof(IntegrationTests).Assembly);
         var layout = new PatternLayout
         {
             ConversionPattern = "%message%"

@@ -91,7 +91,7 @@ public class SentryTransactionTests
             // transaction in the SDK anyway (by default they don't get sent... but the user can always override this
             // behavior if they need)
             User = new SentryUser { Id = "user-id", Username = "username", Email = "bob@foo.com", IpAddress = "127.0.0.1" },
-            Request = new Request { Method = "POST", Url = "https://user@not.redacted"},
+            Request = new Request { Method = "POST", Url = "https://user@not.redacted" },
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
             Environment = environment,
             Level = SentryLevel.Fatal,
@@ -167,7 +167,7 @@ public class SentryTransactionTests
             SpanId.Create(),
             SpanId.Create(),
             SentryId.Create(), // sampling isn't serialized and getting FluentAssertions
-                  // to ignore that on Spans and contexts isn't really straight forward
+                               // to ignore that on Spans and contexts isn't really straight forward
             "desc",
             SpanStatus.AlreadyExists, null, true, TransactionNameSource.Component);
 

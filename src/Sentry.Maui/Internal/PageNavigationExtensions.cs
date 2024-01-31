@@ -4,7 +4,7 @@ internal static class PageNavigationExtensions
 {
     private static readonly PropertyInfo? DestinationPageProperty =
         typeof(NavigatedFromEventArgs).GetProperty("DestinationPage", BindingFlags.Instance | BindingFlags.NonPublic);
-    
+
     private static readonly PropertyInfo? PreviousPageProperty =
         typeof(NavigatedToEventArgs).GetProperty("PreviousPage", BindingFlags.Instance | BindingFlags.NonPublic);
 

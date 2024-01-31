@@ -264,7 +264,8 @@ public sealed class SentryTarget : TargetWithContext
             .FlushAsync(Options.FlushTimeout)
             .ContinueWith(t => asyncContinuation(t.Exception));
     }
-    static AsyncLocal<bool> isReentrant = new();
+
+    private static AsyncLocal<bool> isReentrant = new();
     /// <summary>
     /// <para>
     /// If the event level &gt;= the <see cref="MinimumEventLevel"/>, the

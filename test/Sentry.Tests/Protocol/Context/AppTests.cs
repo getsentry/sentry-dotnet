@@ -75,6 +75,6 @@ public class AppTests
         yield return new object[] { (new App { StartTime = DateTimeOffset.MaxValue }, """{"type":"app","app_start_time":"9999-12-31T23:59:59.9999999+00:00"}""") };
         yield return new object[] { (new App { Version = "some version" }, """{"type":"app","app_version":"some version"}""") };
         yield return new object[] { (new App { Identifier = "some identifier" }, """{"type":"app","app_identifier":"some identifier"}""") };
-        yield return new object[] { (new App { InForeground = true}, """{"type":"app","in_foreground":true}""") };
+        yield return new object[] { (new App { InForeground = true }, """{"type":"app","in_foreground":true}""") };
     }
 }

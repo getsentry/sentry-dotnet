@@ -10,7 +10,7 @@ namespace Sentry.AspNetCore.Tests;
 
 public class SentryTracingBuilderTests
 {
-    class Fixture
+    private class Fixture
     {
         public Action<IServiceCollection> ConfigureServices { get; set; }
         public Action<IApplicationBuilder> Configure { get; set; }

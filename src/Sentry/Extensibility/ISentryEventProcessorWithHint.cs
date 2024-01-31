@@ -3,7 +3,7 @@ namespace Sentry.Extensibility;
 /// <summary>
 /// Process a SentryEvent during the prepare phase.
 /// </summary>
-public interface ISentryEventProcessorWithHint: ISentryEventProcessor
+public interface ISentryEventProcessorWithHint : ISentryEventProcessor
 {
     /// <summary>
     /// Process the <see cref="SentryEvent"/>

@@ -317,7 +317,7 @@ public sealed class Envelope : ISerializable, IDisposable
             // Profiler.Collect() returns an ISerializable which may also throw asynchronously, which is handled down
             // the road in AsyncJsonSerializable and the EnvelopeItem won't serialize and is omitted.
             // However, it mustn't throw synchronously because that would prevent the whole transaction being sent.
-            if (profiler.Collect(transaction) is {} profileInfo)
+            if (profiler.Collect(transaction) is { } profileInfo)
             {
                 items.Add(EnvelopeItem.FromProfileInfo(profileInfo));
             }
