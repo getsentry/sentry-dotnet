@@ -38,7 +38,7 @@ internal class SystemDiagnosticsEventSourceListener : EventListener
     {
         // In a multi-threaded application, it's possible for this method to be called before constructor initialization
         // completes, which is why we check _initialized... otherwise _metricsOptions might be null
-        if (_initialized && _metricsOptions.CaptureEventSourceNames.ContainsMatch(eventSource.Name))
+        if (_initialized && _metricsOptions.CaptureSystemDiagnosticsEventSourceNames.ContainsMatch(eventSource.Name))
         {
             EnableEvents(eventSource, EventLevel.LogAlways);
         }
@@ -47,23 +47,10 @@ internal class SystemDiagnosticsEventSourceListener : EventListener
     protected override void OnEventWritten(EventWrittenEventArgs eventData)
     {
 #if NET5_0_OR_GREATER
-        var eventTime = eventData.TimeStamp.ToUniversalTime();
+        DateTimeOffset eventTime = eventData.TimeStamp.ToUniversalTime();
 #else
-        var eventTime = DateTime.UtcNow;
+        DateTimeOffset eventTime = DateTime.UtcNow;
 #endif
-        var sb = new StringBuilder().Append($"{eventTime:HH:mm:ss.fffffff}  {eventData.ActivityId}.{eventData.RelatedActivityId}  {eventData.EventSource.Name}.{eventData.EventName}(");
-        for (var i = 0; i < eventData.Payload?.Count; i++)
-        {
-            sb.Append(eventData.PayloadNames?[i]).Append(": ").Append(eventData.Payload[i]);
-            if (i < eventData.Payload?.Count - 1)
-            {
-                sb.Append(", ");
-            }
-        }
-
-        sb.Append(")");
-        Console.WriteLine(sb.ToString());
-
         var name = eventData.EventName ?? eventData.EventSource.Name + eventData.EventId.ToString();
         Dictionary<string, string> tags = new()
         {
@@ -76,6 +63,6 @@ internal class SystemDiagnosticsEventSourceListener : EventListener
         {
             tags.Add("Message", message);
         }
-        MetricsAggregator.Increment(name, tags: tags, timestamp: eventTime);
+        MetricsAggregator.Increment(name, 1, MeasurementUnit.None, tags, eventTime);
     }
 }

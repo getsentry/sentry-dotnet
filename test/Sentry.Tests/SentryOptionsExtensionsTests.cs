@@ -57,6 +57,14 @@ public class SentryOptionsExtensionsTests
 #endif
 
     [Fact]
+    public void DisableSystemDiagnosticsEventSourceIntegration_RemovesSystemDiagnosticsEventSourceIntegration()
+    {
+        Sut.DisableSystemDiagnosticsEventSourceIntegration();
+        Assert.DoesNotContain(Sut.Integrations,
+            p => p.GetType() == typeof(SystemDiagnosticsEventSourceIntegration));
+    }
+
+    [Fact]
     public void AddIntegration_StoredInOptions()
     {
         var expected = Substitute.For<ISdkIntegration>();

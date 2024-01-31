@@ -38,7 +38,7 @@ internal static class Program
                         // Capture all built in metrics (this is the default - you can override this to capture some or
                         // none of these if you prefer)
                         CaptureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All,
-                        CaptureEventSourceNames = [ IterationEventCounterSource.EventSourceName ]
+                        CaptureSystemDiagnosticsEventSourceNames = [ IterationEventCounterSource.EventSourceName ]
                    };
                }))
         {

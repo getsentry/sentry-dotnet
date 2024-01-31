@@ -145,7 +145,7 @@ namespace Sentry
     public class ExperimentalMetricsOptions
     {
         public ExperimentalMetricsOptions() { }
-        public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> CaptureEventSourceNames { get; set; }
+        public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> CaptureSystemDiagnosticsEventSourceNames { get; set; }
         public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> CaptureSystemDiagnosticsInstruments { get; set; }
         public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> CaptureSystemDiagnosticsMeters { get; set; }
         public bool EnableCodeLocations { get; set; }
@@ -725,6 +725,7 @@ namespace Sentry
         public static void DisableAppDomainUnhandledExceptionCapture(this Sentry.SentryOptions options) { }
         public static void DisableDiagnosticSourceIntegration(this Sentry.SentryOptions options) { }
         public static void DisableDuplicateEventDetection(this Sentry.SentryOptions options) { }
+        public static void DisableSystemDiagnosticsEventSourceIntegration(this Sentry.SentryOptions options) { }
         public static void DisableSystemDiagnosticsMetricsIntegration(this Sentry.SentryOptions options) { }
         public static void DisableUnobservedTaskExceptionCapture(this Sentry.SentryOptions options) { }
         public static void DisableWinUiUnhandledExceptionIntegration(this Sentry.SentryOptions options) { }

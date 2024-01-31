@@ -94,6 +94,13 @@ public static class SentryOptionsExtensions
 #endif
 
     /// <summary>
+    /// Disables the System.Diagnostics.Metrics integration.
+    /// </summary>
+    /// <param name="options">The SentryOptions to remove the integration from.</param>
+    public static void DisableSystemDiagnosticsEventSourceIntegration(this SentryOptions options)
+        => options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.SystemDiagnosticsEventSourceIntegration);
+
+    /// <summary>
     /// Add an integration
     /// </summary>
     /// <param name="options">The SentryOptions to hold the processor.</param>

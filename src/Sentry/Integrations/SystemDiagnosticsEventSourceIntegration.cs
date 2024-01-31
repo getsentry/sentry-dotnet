@@ -23,7 +23,7 @@ internal class SystemDiagnosticsEventSourceIntegration : ISdkIntegration
 
     public void Register(IHub hub, SentryOptions options)
     {
-        var captureEventSources = options.ExperimentalMetrics?.CaptureEventSourceNames;
+        var captureEventSources = options.ExperimentalMetrics?.CaptureSystemDiagnosticsEventSourceNames;
         if (captureEventSources is not { Count: > 0 })
         {
             options.LogInfo(NoListenersAreConfiguredMessage);
