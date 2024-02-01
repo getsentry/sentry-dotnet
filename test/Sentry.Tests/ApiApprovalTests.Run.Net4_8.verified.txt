@@ -142,7 +142,8 @@ namespace Sentry
     }
     public sealed class EventSourceMatcher : System.IEquatable<Sentry.EventSourceMatcher>
     {
-        public EventSourceMatcher(Sentry.SubstringOrRegexPattern Pattern, System.Diagnostics.Tracing.EventLevel Level = 0) { }
+        public EventSourceMatcher(Sentry.SubstringOrRegexPattern Pattern, System.Diagnostics.Tracing.EventLevel Level = 0, System.Diagnostics.Tracing.EventKeywords Keywords = -1) { }
+        public System.Diagnostics.Tracing.EventKeywords Keywords { get; init; }
         public System.Diagnostics.Tracing.EventLevel Level { get; init; }
         public Sentry.SubstringOrRegexPattern Pattern { get; init; }
         public static Sentry.EventSourceMatcher op_Implicit(Sentry.SubstringOrRegexPattern pattern) { }
@@ -153,6 +154,14 @@ namespace Sentry
         public static Sentry.EventSourceMatcher op_Implicit([System.Runtime.CompilerServices.TupleElementNames(new string[] {
                 "pattern",
                 "level"})] System.ValueTuple<string, System.Diagnostics.Tracing.EventLevel> matcher) { }
+        public static Sentry.EventSourceMatcher op_Implicit([System.Runtime.CompilerServices.TupleElementNames(new string[] {
+                "pattern",
+                "level",
+                "keywords"})] System.ValueTuple<Sentry.SubstringOrRegexPattern, System.Diagnostics.Tracing.EventLevel, System.Diagnostics.Tracing.EventKeywords> matcher) { }
+        public static Sentry.EventSourceMatcher op_Implicit([System.Runtime.CompilerServices.TupleElementNames(new string[] {
+                "pattern",
+                "level",
+                "keywords"})] System.ValueTuple<string, System.Diagnostics.Tracing.EventLevel, System.Diagnostics.Tracing.EventKeywords> matcher) { }
     }
     public class ExperimentalMetricsOptions
     {

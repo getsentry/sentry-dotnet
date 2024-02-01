@@ -5,7 +5,7 @@ namespace Sentry;
 internal static partial class MetricHelper
 {
     private static readonly RandomValuesFactory Random = new SynchronizedRandomValuesFactory();
-    private const int RollupInSeconds = 10;
+    internal const int RollupInSeconds = 10;
     private const string InvalidKeyCharactersPattern = @"[^a-zA-Z0-9_/.-]+";
     private const string InvalidValueCharactersPattern = @"[^\w\d_:/@\.\{\}\[\]$-]+";
 

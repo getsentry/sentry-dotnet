@@ -44,7 +44,7 @@ internal static class Program
                            (IterationEventCounterSource.EventSourceName, EventLevel.Informational),
                            // Here we're capturing some Well Known EventCounters
                            // See: https://learn.microsoft.com/en-us/dotnet/core/diagnostics/available-counters
-                           (WellKnownEventCounters.SystemNetSockets, EventLevel.LogAlways)
+                           (WellKnownEventCounters.SystemRuntime, EventLevel.LogAlways, EventKeywords.All)
                        ]
                    };
                }))

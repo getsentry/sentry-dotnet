@@ -37,6 +37,12 @@ internal class SystemDiagnosticsEventSourceListener : EventListener
 
     private readonly ConcurrentQueue<EventSource> _preInitializationEventSources = new();
 
+    private static readonly Lazy<Dictionary<string, string?>> Arguments = new(() => new Dictionary<string, string?>
+    {
+        // Configure Counter updates to align with our bucketing strategy, so that aggregates are preserved correctly
+        { "EventCounterIntervalSec", $"{MetricHelper.RollupInSeconds}" }
+    });
+
     protected override void OnEventSourceCreated(EventSource eventSource)
     {
         // In a multi-threaded application, it's possible for this method to be called before constructor initialization
@@ -52,7 +58,7 @@ internal class SystemDiagnosticsEventSourceListener : EventListener
             if (_metricsOptions.CaptureSystemDiagnosticsEventSources
                     .FirstOrDefault(matcher => matcher.IsMatch(candidateSource)) is { } match)
             {
-                EnableEvents(candidateSource, match.Level);
+                EnableEvents(candidateSource, match.Level, match.Keywords, Arguments.Value);
             }
         }
 
