@@ -45,7 +45,7 @@ internal class SystemDiagnosticsEventSourceListener : EventListener
         }
 
         if (_metricsOptions.CaptureSystemDiagnosticsEventSources.FirstOrDefault(matcher => matcher.IsMatch(eventSource))
-            is {} match)
+            is { } match)
         {
             EnableEvents(eventSource, match.Level);
         }
