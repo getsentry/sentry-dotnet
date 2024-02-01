@@ -39,11 +39,12 @@ internal static class Program
                        // Capture all built in metrics (this is the default - you can override this to capture some or
                        // none of these if you prefer)
                        CaptureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All,
-                       // Here we're capturing a custom EventSource that we've defined. Lots of Well Known Counters can
-                       // be captured using the same mechanism.
-                       // See: https://learn.microsoft.com/en-us/dotnet/core/diagnostics/available-counters
                        CaptureSystemDiagnosticsEventSources = [
-                           (IterationEventCounterSource.EventSourceName, EventLevel.Informational)
+                           // Here we're capturing a custom EventSource that we've defined.
+                           (IterationEventCounterSource.EventSourceName, EventLevel.Informational),
+                           // Here we're capturing some Well Known EventCounters
+                           // See: https://learn.microsoft.com/en-us/dotnet/core/diagnostics/available-counters
+                           (WellKnownEventCounters.SystemNetSockets, EventLevel.LogAlways)
                        ]
                    };
                }))

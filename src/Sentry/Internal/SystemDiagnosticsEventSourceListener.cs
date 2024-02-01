@@ -35,19 +35,35 @@ internal class SystemDiagnosticsEventSourceListener : EventListener
         oldListener?.Dispose();
     }
 
+    private readonly ConcurrentQueue<EventSource> _preInitializationEventSources = new();
+
     protected override void OnEventSourceCreated(EventSource eventSource)
     {
         // In a multi-threaded application, it's possible for this method to be called before constructor initialization
-        // completes, which is why we check _initialized... otherwise _metricsOptions might be null
+        // completes, in which case we queue possible EventSource candidates for evaluation after initialization
         if (!_initialized)
         {
+            _preInitializationEventSources.Enqueue(eventSource);
             return;
         }
 
-        if (_metricsOptions.CaptureSystemDiagnosticsEventSources.FirstOrDefault(matcher => matcher.IsMatch(eventSource))
-            is { } match)
+        foreach (var candidateSource in GetEventSources())
         {
-            EnableEvents(eventSource, match.Level);
+            if (_metricsOptions.CaptureSystemDiagnosticsEventSources
+                    .FirstOrDefault(matcher => matcher.IsMatch(candidateSource)) is { } match)
+            {
+                EnableEvents(candidateSource, match.Level);
+            }
+        }
+
+        return;
+        IEnumerable<EventSource> GetEventSources()
+        {
+            yield return eventSource;
+            while (_preInitializationEventSources.TryDequeue(out var preInitEventSource))
+            {
+                yield return preInitEventSource;
+            }
         }
     }
 
