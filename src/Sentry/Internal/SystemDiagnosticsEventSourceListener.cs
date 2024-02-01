@@ -39,9 +39,15 @@ internal class SystemDiagnosticsEventSourceListener : EventListener
     {
         // In a multi-threaded application, it's possible for this method to be called before constructor initialization
         // completes, which is why we check _initialized... otherwise _metricsOptions might be null
-        if (_initialized && _metricsOptions.CaptureSystemDiagnosticsEventSourceNames.ContainsMatch(eventSource.Name))
+        if (!_initialized)
         {
-            EnableEvents(eventSource, EventLevel.LogAlways);
+            return;
+        }
+
+        if (_metricsOptions.CaptureSystemDiagnosticsEventSources.FirstOrDefault(matcher => matcher.IsMatch(eventSource))
+            is {} match)
+        {
+            EnableEvents(eventSource, match.Level);
         }
     }
 
@@ -67,4 +73,5 @@ internal class SystemDiagnosticsEventSourceListener : EventListener
         MetricsAggregator.Increment(name, 1, MeasurementUnit.None, tags, eventTime);
     }
 }
+
 #endif

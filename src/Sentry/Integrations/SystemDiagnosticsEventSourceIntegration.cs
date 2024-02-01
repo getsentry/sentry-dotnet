@@ -36,7 +36,7 @@ internal class SystemDiagnosticsEventSourceIntegration : ISdkIntegration
         }
 #endif
 
-        var captureEventSources = options.ExperimentalMetrics?.CaptureSystemDiagnosticsEventSourceNames;
+        var captureEventSources = options.ExperimentalMetrics?.CaptureSystemDiagnosticsEventSources;
         if (captureEventSources is not { Count: > 0 })
         {
             options.LogInfo(NoListenersAreConfiguredMessage);

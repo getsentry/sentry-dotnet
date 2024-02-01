@@ -33,7 +33,7 @@ public class SystemDiagnosticsEventSourceListenerTests
         Skip.If(RuntimeInfo.GetRuntime().IsMono());
 
         // Arrange
-        _fixture.MetricsOptions.CaptureSystemDiagnosticsEventSourceNames.Add(nameof(Source1));
+        _fixture.MetricsOptions.CaptureSystemDiagnosticsEventSources.Add(nameof(Source1));
         var total = 0;
         var counterName = nameof(Source1.One);
         _fixture.MockAggregator.Increment(
@@ -93,7 +93,7 @@ public class SystemDiagnosticsEventSourceListenerTests
         Skip.If(RuntimeInfo.GetRuntime().IsMono());
 
         // Arrange
-        _fixture.MetricsOptions.CaptureSystemDiagnosticsEventSourceNames.Add(nameof(Source3));
+        _fixture.MetricsOptions.CaptureSystemDiagnosticsEventSources.Add(nameof(Source3));
         var total3 = 0;
         var counter3 = nameof(Source3.Three);
         _fixture.MockAggregator.Increment(

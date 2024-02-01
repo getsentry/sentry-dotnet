@@ -1,4 +1,5 @@
 using System.Diagnostics.Metrics;
+using System.Diagnostics.Tracing;
 
 namespace Sentry.Samples.Console.Metrics;
 
@@ -41,7 +42,9 @@ internal static class Program
                        // Here we're capturing a custom EventSource that we've defined. Lots of Well Known Counters can
                        // be captured using the same mechanism.
                        // See: https://learn.microsoft.com/en-us/dotnet/core/diagnostics/available-counters
-                       CaptureSystemDiagnosticsEventSourceNames = [IterationEventCounterSource.EventSourceName]
+                       CaptureSystemDiagnosticsEventSources = [
+                           (IterationEventCounterSource.EventSourceName, EventLevel.Informational)
+                       ]
                    };
                }))
         {

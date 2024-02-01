@@ -6,9 +6,6 @@ namespace Sentry;
 /// </summary>
 public class ExperimentalMetricsOptions
 {
-#if !__MOBILE__
-    private IList<SubstringOrRegexPattern> _captureSystemDiagnosticsEventSourceNames = new List<SubstringOrRegexPattern>();
-#endif
     private IList<SubstringOrRegexPattern> _captureSystemDiagnosticsInstruments = new List<SubstringOrRegexPattern>();
     private IList<SubstringOrRegexPattern> _captureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All;
 
@@ -19,16 +16,22 @@ public class ExperimentalMetricsOptions
 
 #if !__MOBILE__
     /// <summary>
-    /// Metrics for any EventSource whose name matches one of the items in this list will be reported to Sentry.
+    /// Configures EventSources whose Counters should be reported to Sentry.
     /// </summary>
-    public IList<SubstringOrRegexPattern> CaptureSystemDiagnosticsEventSourceNames
-    {
-        // NOTE: During configuration binding, .NET 6 and lower used to just call Add on the existing item.
-        //       .NET 7 changed this to call the setter with an array that already starts with the old value.
-        //       We have to handle both cases.
-        get => _captureSystemDiagnosticsEventSourceNames;
-        set => _captureSystemDiagnosticsEventSourceNames = value.WithConfigBinding();
-    }
+    public IList<EventSourceMatcher> CaptureSystemDiagnosticsEventSources { get; set; } = new List<EventSourceMatcher>();
+
+    // private Func<EventWrittenEventArgs, bool>? _beforeIncrementCounter;
+    //
+    // internal Func<EventWrittenEventArgs, bool>? BeforeIncrementCounterInternal => _beforeIncrementCounter;
+    //
+    // /// <summary>
+    // /// Sets a callback function to be invoked when an EventSource Counter is about to be incremented. This allows
+    // /// fine grained control over which counters are reported to Sentry.
+    // /// </summary>
+    // public void SetBeforeIncrementCounter(Func<EventWrittenEventArgs, bool> beforeIncrementCounter)
+    // {
+    //     _beforeIncrementCounter = beforeIncrementCounter;
+    // }
 #endif
 
     /// <summary>

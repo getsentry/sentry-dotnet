@@ -19,7 +19,7 @@ public class SystemDiagnosticsEventSourceIntegrationTests
             DiagnosticLogger = logger,
             ExperimentalMetrics = new ExperimentalMetricsOptions()
             {
-                CaptureSystemDiagnosticsEventSourceNames = []
+                CaptureSystemDiagnosticsEventSources = []
             }
         };
         var integration = new SystemDiagnosticsEventSourceIntegration();
@@ -45,7 +45,7 @@ public class SystemDiagnosticsEventSourceIntegrationTests
             DiagnosticLogger = logger,
             ExperimentalMetrics = new ExperimentalMetricsOptions()
             {
-                CaptureSystemDiagnosticsEventSourceNames = [".*"]
+                CaptureSystemDiagnosticsEventSources = [".*"]
             }
         };
         var initializeDefaultListener = Substitute.For<Action<ExperimentalMetricsOptions>>();
@@ -70,7 +70,7 @@ public class SystemDiagnosticsEventSourceIntegrationTests
             DiagnosticLogger = logger,
             ExperimentalMetrics = new ExperimentalMetricsOptions()
             {
-                CaptureSystemDiagnosticsEventSourceNames = [".*"]
+                CaptureSystemDiagnosticsEventSources = [".*"]
             }
         };
         var initializeDefaultListener = Substitute.For<Action<ExperimentalMetricsOptions>>();
