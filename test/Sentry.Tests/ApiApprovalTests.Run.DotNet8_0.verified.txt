@@ -1199,6 +1199,17 @@ namespace Sentry
         protected abstract void WriteAdditionalProperties(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger);
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
     }
+    public static class WellKnownEventCounters
+    {
+        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreHosting;
+        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreHttpConnections;
+        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreServerKestrel;
+        public static readonly Sentry.SubstringOrRegexPattern SystemNetHttp;
+        public static readonly Sentry.SubstringOrRegexPattern SystemNetNameResolution;
+        public static readonly Sentry.SubstringOrRegexPattern SystemNetSecurity;
+        public static readonly Sentry.SubstringOrRegexPattern SystemNetSockets;
+        public static readonly Sentry.SubstringOrRegexPattern SystemRuntime;
+    }
 }
 namespace Sentry.Extensibility
 {
