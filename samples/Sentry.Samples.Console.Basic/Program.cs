@@ -9,6 +9,9 @@
  */
 
 // Initialize the Sentry SDK.  (It is not necessary to dispose it.)
+
+using Sentry;
+
 SentrySdk.Init(options =>
 {
     // A Sentry Data Source Name (DSN) is required.

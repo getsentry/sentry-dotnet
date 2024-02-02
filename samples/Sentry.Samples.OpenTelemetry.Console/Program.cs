@@ -8,6 +8,7 @@
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Sentry;
 using Sentry.OpenTelemetry;
 
 var serviceName = "Sentry.Samples.OpenTelemetry.Console";

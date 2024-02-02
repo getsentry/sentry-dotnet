@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Sentry;
 using Sentry.Samples.AspNetCore.Blazor.Wasm;
 
 // Capture blazor bootstrapping errors

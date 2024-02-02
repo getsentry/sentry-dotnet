@@ -1,6 +1,7 @@
 using System.Data;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Sentry;
 using Sentry.Samples.AspNetCore.Mvc.Models;
 
 namespace Samples.AspNetCore.Mvc.Controllers;
