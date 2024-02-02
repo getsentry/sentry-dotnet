@@ -4,7 +4,7 @@ namespace Sentry;
 /// Sentry session.
 /// </summary>
 // https://develop.sentry.dev/sdk/sessions
-public class Session : ISession
+public class Session : ISentrySession
 {
     /// <inheritdoc />
     public SentryId Id { get; }
