@@ -769,7 +769,7 @@ public class EnvelopeTests
             "file.txt",
             null);
 
-        var sessionUpdate = new Session("foo", "bar", "baz").CreateUpdate(false, DateTimeOffset.Now);
+        var sessionUpdate = new SentrySession("foo", "bar", "baz").CreateUpdate(false, DateTimeOffset.Now);
 
         using var envelope = Envelope.FromEvent(@event, null, new[] { attachment }, sessionUpdate);
 
@@ -821,7 +821,7 @@ public class EnvelopeTests
     public async Task Roundtrip_WithSession_Success()
     {
         // Arrange
-        var sessionUpdate = new Session("foo", "bar", "baz").CreateUpdate(true, DateTimeOffset.Now);
+        var sessionUpdate = new SentrySession("foo", "bar", "baz").CreateUpdate(true, DateTimeOffset.Now);
 
         using var envelope = Envelope.FromSession(sessionUpdate);
 

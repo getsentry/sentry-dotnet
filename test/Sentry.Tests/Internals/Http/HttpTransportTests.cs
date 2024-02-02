@@ -614,7 +614,7 @@ public partial class HttpTransportTests
             },
             new HttpClient(httpHandler));
 
-        var session = new Session("foo", "bar", "baz");
+        var session = new SentrySession("foo", "bar", "baz");
 
         // First request always goes through
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
@@ -656,7 +656,7 @@ public partial class HttpTransportTests
             },
             new HttpClient(httpHandler));
 
-        var session = new Session("foo", "bar", "baz");
+        var session = new SentrySession("foo", "bar", "baz");
 
         // First request always goes through
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
@@ -673,7 +673,7 @@ public partial class HttpTransportTests
         // Act
 
         // Send an update for different session with init=false (should NOT get promoted)
-        var nextSession = new Session("foo2", "bar2", "baz2");
+        var nextSession = new SentrySession("foo2", "bar2", "baz2");
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, null, nextSession.CreateUpdate(false, DateTimeOffset.Now)));
 
         var lastRequest = httpHandler.GetRequests().Last();
