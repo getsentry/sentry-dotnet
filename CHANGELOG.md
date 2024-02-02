@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- The SDK no longer adds `Sentry` to the global usings ([#3109](https://github.com/getsentry/sentry-dotnet/pull/3109))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.19.0 to v8.20.0 ([#3107](https://github.com/getsentry/sentry-dotnet/pull/3107))
