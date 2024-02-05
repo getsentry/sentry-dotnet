@@ -4,7 +4,7 @@ namespace Sentry;
 /// Sentry session.
 /// </summary>
 // https://develop.sentry.dev/sdk/sessions
-public class Session : ISession
+public class SentrySession : ISentrySession
 {
     /// <inheritdoc />
     public SentryId Id { get; }
@@ -36,7 +36,7 @@ public class Session : ISession
     // Start at -1 so that the first increment puts it at 0
     private int _sequenceNumber = -1;
 
-    internal Session(
+    internal SentrySession(
         SentryId id,
         string? distinctId,
         DateTimeOffset startTimestamp,
@@ -55,9 +55,9 @@ public class Session : ISession
     }
 
     /// <summary>
-    /// Initializes a new instance of <see cref="Session"/>.
+    /// Initializes a new instance of <see cref="SentrySession"/>.
     /// </summary>
-    public Session(string? distinctId, string release, string? environment)
+    public SentrySession(string? distinctId, string release, string? environment)
         : this(
             SentryId.Create(),
             distinctId,

@@ -303,11 +303,7 @@ namespace Sentry
     {
         void Apply(Sentry.Scope scope, object state);
     }
-    public interface ISentryUserFactory
-    {
-        Sentry.SentryUser? Create();
-    }
-    public interface ISession
+    public interface ISentrySession
     {
         string? DistinctId { get; }
         string? Environment { get; }
@@ -317,6 +313,10 @@ namespace Sentry
         string Release { get; }
         System.DateTimeOffset StartTimestamp { get; }
         string? UserAgent { get; }
+    }
+    public interface ISentryUserFactory
+    {
+        Sentry.SentryUser? Create();
     }
     public interface ISpan : Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpanData, Sentry.Protocol.ITraceContext
     {
@@ -794,6 +794,19 @@ namespace Sentry
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, string? description) { }
     }
+    public class SentrySession : Sentry.ISentrySession
+    {
+        public SentrySession(string? distinctId, string release, string? environment) { }
+        public string? DistinctId { get; }
+        public string? Environment { get; }
+        public int ErrorCount { get; }
+        public Sentry.SentryId Id { get; }
+        public string? IpAddress { get; }
+        public string Release { get; }
+        public System.DateTimeOffset StartTimestamp { get; }
+        public string? UserAgent { get; }
+        public void ReportError() { }
+    }
     public class SentrySpan : Sentry.IHasExtra, Sentry.IHasTags, Sentry.IJsonSerializable, Sentry.ISpanData, Sentry.Protocol.ITraceContext
     {
         public SentrySpan(Sentry.ISpan tracer) { }
@@ -930,30 +943,17 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
         public static Sentry.SentryUser FromJson(System.Text.Json.JsonElement json) { }
     }
-    public class Session : Sentry.ISession
-    {
-        public Session(string? distinctId, string release, string? environment) { }
-        public string? DistinctId { get; }
-        public string? Environment { get; }
-        public int ErrorCount { get; }
-        public Sentry.SentryId Id { get; }
-        public string? IpAddress { get; }
-        public string Release { get; }
-        public System.DateTimeOffset StartTimestamp { get; }
-        public string? UserAgent { get; }
-        public void ReportError() { }
-    }
     public enum SessionEndStatus
     {
         Exited = 0,
         Crashed = 1,
         Abnormal = 2,
     }
-    public class SessionUpdate : Sentry.IJsonSerializable, Sentry.ISession
+    public class SessionUpdate : Sentry.IJsonSerializable, Sentry.ISentrySession
     {
         public SessionUpdate(Sentry.SessionUpdate sessionUpdate, bool isInitial) { }
         public SessionUpdate(Sentry.SessionUpdate sessionUpdate, bool isInitial, Sentry.SessionEndStatus? endStatus) { }
-        public SessionUpdate(Sentry.ISession session, bool isInitial, System.DateTimeOffset timestamp, int sequenceNumber, Sentry.SessionEndStatus? endStatus) { }
+        public SessionUpdate(Sentry.ISentrySession session, bool isInitial, System.DateTimeOffset timestamp, int sequenceNumber, Sentry.SessionEndStatus? endStatus) { }
         public SessionUpdate(Sentry.SentryId id, string? distinctId, System.DateTimeOffset startTimestamp, string release, string? environment, string? ipAddress, string? userAgent, int errorCount, bool isInitial, System.DateTimeOffset timestamp, int sequenceNumber, Sentry.SessionEndStatus? endStatus) { }
         public string? DistinctId { get; }
         public System.TimeSpan Duration { get; }

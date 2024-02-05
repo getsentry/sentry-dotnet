@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Fixes 
+
+- To resolve conflicting types due to the SDK adding itself to the global usings: 
+ - The interface `Sentry.ISession` has been renamed to `Sentry.ISentrySession`
+ - The class `Sentry.Session` has been renamed to `Sentry.SentrySession` ([#3110](https://github.com/getsentry/sentry-dotnet/pull/3110))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.19.0 to v8.20.0 ([#3107](https://github.com/getsentry/sentry-dotnet/pull/3107))

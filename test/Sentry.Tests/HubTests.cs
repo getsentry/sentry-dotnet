@@ -1172,7 +1172,7 @@ public partial class HubTests
     {
         // Arrange
         var sessionUpdate = new GlobalSessionManagerTests().TryRecoverPersistedSessionWithExceptionOnLastRun();
-        var newSession = new SessionUpdate(Substitute.For<ISession>(), false, default, 0, null);
+        var newSession = new SessionUpdate(Substitute.For<ISentrySession>(), false, default, 0, null);
 
         var sessionManager = Substitute.For<ISessionManager>();
         sessionManager.TryRecoverPersistedSession().Returns(sessionUpdate);
