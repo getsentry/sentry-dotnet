@@ -24,7 +24,7 @@ namespace Sentry
         public override string ToString() { }
     }
     [System.Diagnostics.DebuggerDisplay("Message: {Message}, Type: {Type}")]
-    public sealed class Breadcrumb : Sentry.IJsonSerializable
+    public sealed class Breadcrumb : Sentry.ISentryJsonSerializable
     {
         public Breadcrumb(string message, string type, System.Collections.Generic.IReadOnlyDictionary<string, string>? data = null, string? category = null, Sentry.BreadcrumbLevel level = 0) { }
         public string? Category { get; }
@@ -76,7 +76,7 @@ namespace Sentry
         public const string Platform = "csharp";
         public const int ProtocolVersion = 7;
     }
-    public sealed class Contexts : Sentry.IJsonSerializable, System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<string, object>>, System.Collections.Generic.IDictionary<string, object>, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>, System.Collections.IEnumerable
+    public sealed class Contexts : Sentry.ISentryJsonSerializable, System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<string, object>>, System.Collections.Generic.IDictionary<string, object>, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>, System.Collections.IEnumerable
     {
         public Contexts() { }
         public Sentry.Protocol.App App { get; }
@@ -257,10 +257,6 @@ namespace Sentry
         void StartSession();
         Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext);
     }
-    public interface IJsonSerializable
-    {
-        void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger);
-    }
     public interface IMetricAggregator : System.IDisposable
     {
         void Distribution(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
@@ -290,6 +286,10 @@ namespace Sentry
         void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.Hint? hint);
         void CaptureUserFeedback(Sentry.UserFeedback userFeedback);
         System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout);
+    }
+    public interface ISentryJsonSerializable
+    {
+        void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger);
     }
     public interface ISentryScopeManager
     {
@@ -414,7 +414,7 @@ namespace Sentry
             Exbibyte = 13,
         }
     }
-    public sealed class Package : Sentry.IJsonSerializable
+    public sealed class Package : Sentry.ISentryJsonSerializable
     {
         public Package(string name, string version) { }
         public string Name { get; }
@@ -430,7 +430,7 @@ namespace Sentry
         Version = 1,
         InformationalVersion = 2,
     }
-    public sealed class Request : Sentry.IJsonSerializable
+    public sealed class Request : Sentry.ISentryJsonSerializable
     {
         public Request() { }
         public string? ApiTarget { get; set; }
@@ -496,7 +496,7 @@ namespace Sentry
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> GetAllExceptionProcessors(this Sentry.Scope scope) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> GetAllTransactionProcessors(this Sentry.Scope scope) { }
     }
-    public sealed class SdkVersion : Sentry.IJsonSerializable
+    public sealed class SdkVersion : Sentry.ISentryJsonSerializable
     {
         public SdkVersion() { }
         public string? Name { get; set; }
@@ -530,7 +530,7 @@ namespace Sentry
         public static System.Threading.Tasks.Task FlushAsync(this Sentry.ISentryClient client) { }
     }
     [System.Diagnostics.DebuggerDisplay("{GetType().Name,nq}: {EventId,nq}")]
-    public sealed class SentryEvent : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IJsonSerializable
+    public sealed class SentryEvent : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISentryJsonSerializable
     {
         public SentryEvent() { }
         public SentryEvent(System.Exception? exception) { }
@@ -580,7 +580,7 @@ namespace Sentry
         protected override void HandleResponse(System.Net.Http.HttpResponseMessage response, Sentry.ISpan? span, string method, string url) { }
         protected override Sentry.ISpan? ProcessRequest(System.Net.Http.HttpRequestMessage request, string method, string url) { }
     }
-    public readonly struct SentryId : Sentry.IJsonSerializable, System.IEquatable<Sentry.SentryId>
+    public readonly struct SentryId : Sentry.ISentryJsonSerializable, System.IEquatable<Sentry.SentryId>
     {
         public static readonly Sentry.SentryId Empty;
         public SentryId(System.Guid guid) { }
@@ -610,7 +610,7 @@ namespace Sentry
         [System.Runtime.Serialization.EnumMember(Value="fatal")]
         Fatal = 4,
     }
-    public sealed class SentryMessage : Sentry.IJsonSerializable
+    public sealed class SentryMessage : Sentry.ISentryJsonSerializable
     {
         public SentryMessage() { }
         public string? Formatted { get; set; }
@@ -807,7 +807,7 @@ namespace Sentry
         public string? UserAgent { get; }
         public void ReportError() { }
     }
-    public class SentrySpan : Sentry.IHasExtra, Sentry.IHasTags, Sentry.IJsonSerializable, Sentry.ISpanData, Sentry.Protocol.ITraceContext
+    public class SentrySpan : Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISentryJsonSerializable, Sentry.ISpanData, Sentry.Protocol.ITraceContext
     {
         public SentrySpan(Sentry.ISpan tracer) { }
         public SentrySpan(Sentry.SpanId? parentSpanId, string operation) { }
@@ -832,7 +832,7 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentrySpan FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class SentryStackFrame : Sentry.IJsonSerializable
+    public sealed class SentryStackFrame : Sentry.ISentryJsonSerializable
     {
         public SentryStackFrame() { }
         public string? AbsolutePath { get; set; }
@@ -858,7 +858,7 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryStackFrame FromJson(System.Text.Json.JsonElement json) { }
     }
-    public class SentryStackTrace : Sentry.IJsonSerializable
+    public class SentryStackTrace : Sentry.ISentryJsonSerializable
     {
         public SentryStackTrace() { }
         public Sentry.InstructionAddressAdjustment? AddressAdjustment { get; set; }
@@ -866,7 +866,7 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryStackTrace FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class SentryThread : Sentry.IJsonSerializable
+    public sealed class SentryThread : Sentry.ISentryJsonSerializable
     {
         public SentryThread() { }
         public bool? Crashed { get; set; }
@@ -886,7 +886,7 @@ namespace Sentry
         public override string ToString() { }
         public static Sentry.SentryTraceHeader Parse(string value) { }
     }
-    public class SentryTransaction : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IJsonSerializable, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
+    public class SentryTransaction : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISentryJsonSerializable, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
         public SentryTransaction(Sentry.ITransactionTracer tracer) { }
         public SentryTransaction(string name, string operation) { }
@@ -930,7 +930,7 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryTransaction FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class SentryUser : Sentry.IJsonSerializable
+    public sealed class SentryUser : Sentry.ISentryJsonSerializable
     {
         public SentryUser() { }
         public string? Email { get; set; }
@@ -949,7 +949,7 @@ namespace Sentry
         Crashed = 1,
         Abnormal = 2,
     }
-    public class SessionUpdate : Sentry.IJsonSerializable, Sentry.ISentrySession
+    public class SessionUpdate : Sentry.ISentryJsonSerializable, Sentry.ISentrySession
     {
         public SessionUpdate(Sentry.SessionUpdate sessionUpdate, bool isInitial) { }
         public SessionUpdate(Sentry.SessionUpdate sessionUpdate, bool isInitial, Sentry.SessionEndStatus? endStatus) { }
@@ -996,7 +996,7 @@ namespace Sentry
         public static Sentry.ITransactionTracer GetTransaction(this Sentry.ISpan span) { }
         public static Sentry.ISpan StartChild(this Sentry.ISpan span, string operation, string? description) { }
     }
-    public readonly struct SpanId : Sentry.IJsonSerializable, System.IEquatable<Sentry.SpanId>
+    public readonly struct SpanId : Sentry.ISentryJsonSerializable, System.IEquatable<Sentry.SpanId>
     {
         public static readonly Sentry.SpanId Empty;
         public SpanId(long value) { }
@@ -1154,7 +1154,7 @@ namespace Sentry
         public Sentry.ISpan StartChild(string operation) { }
         public void UnsetTag(string key) { }
     }
-    public sealed class UserFeedback : Sentry.IJsonSerializable
+    public sealed class UserFeedback : Sentry.ISentryJsonSerializable
     {
         public UserFeedback(Sentry.SentryId eventId, string? name, string? email, string? comments) { }
         public string? Comments { get; }
@@ -1164,7 +1164,7 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.UserFeedback FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class ViewHierarchy : Sentry.IJsonSerializable
+    public sealed class ViewHierarchy : Sentry.ISentryJsonSerializable
     {
         public ViewHierarchy(string renderingSystem) { }
         public string RenderingSystem { get; set; }
@@ -1175,7 +1175,7 @@ namespace Sentry
     {
         public ViewHierarchyAttachment(Sentry.IAttachmentContent content) { }
     }
-    public abstract class ViewHierarchyNode : Sentry.IJsonSerializable
+    public abstract class ViewHierarchyNode : Sentry.ISentryJsonSerializable
     {
         protected ViewHierarchyNode(string type) { }
         public System.Collections.Generic.List<Sentry.ViewHierarchyNode> Children { get; set; }
@@ -1484,7 +1484,7 @@ namespace Sentry.PlatformAbstractions
 }
 namespace Sentry.Protocol
 {
-    public sealed class App : Sentry.IJsonSerializable
+    public sealed class App : Sentry.ISentryJsonSerializable
     {
         public const string Type = "app";
         public App() { }
@@ -1499,7 +1499,7 @@ namespace Sentry.Protocol
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
         public static Sentry.Protocol.App FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class Browser : Sentry.IJsonSerializable
+    public sealed class Browser : Sentry.ISentryJsonSerializable
     {
         public const string Type = "browser";
         public Browser() { }
@@ -1508,7 +1508,7 @@ namespace Sentry.Protocol
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
         public static Sentry.Protocol.Browser FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class DebugImage : Sentry.IJsonSerializable
+    public sealed class DebugImage : Sentry.ISentryJsonSerializable
     {
         public DebugImage() { }
         public string? CodeFile { get; set; }
@@ -1522,7 +1522,7 @@ namespace Sentry.Protocol
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Protocol.DebugImage FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class Device : Sentry.IJsonSerializable
+    public sealed class Device : Sentry.ISentryJsonSerializable
     {
         public const string Type = "device";
         public Device() { }
@@ -1572,7 +1572,7 @@ namespace Sentry.Protocol
         [System.Runtime.Serialization.EnumMember(Value="landscape")]
         Landscape = 1,
     }
-    public sealed class Gpu : Sentry.IJsonSerializable
+    public sealed class Gpu : Sentry.ISentryJsonSerializable
     {
         public const string Type = "gpu";
         public Gpu() { }
@@ -1604,14 +1604,14 @@ namespace Sentry.Protocol
         Sentry.SpanStatus? Status { get; }
         Sentry.SentryId TraceId { get; }
     }
-    public sealed class Measurement : Sentry.IJsonSerializable
+    public sealed class Measurement : Sentry.ISentryJsonSerializable
     {
         public Sentry.MeasurementUnit Unit { get; }
         public object Value { get; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Protocol.Measurement FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class Mechanism : Sentry.IJsonSerializable
+    public sealed class Mechanism : Sentry.ISentryJsonSerializable
     {
         public static readonly string DescriptionKey;
         public static readonly string HandledKey;
@@ -1631,7 +1631,7 @@ namespace Sentry.Protocol
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Protocol.Mechanism FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class OperatingSystem : Sentry.IJsonSerializable
+    public sealed class OperatingSystem : Sentry.ISentryJsonSerializable
     {
         public const string Type = "os";
         public OperatingSystem() { }
@@ -1644,7 +1644,7 @@ namespace Sentry.Protocol
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
         public static Sentry.Protocol.OperatingSystem FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class Response : Sentry.IJsonSerializable
+    public sealed class Response : Sentry.ISentryJsonSerializable
     {
         public const string Type = "response";
         public Response() { }
@@ -1659,7 +1659,7 @@ namespace Sentry.Protocol
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Protocol.Response FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class Runtime : Sentry.IJsonSerializable
+    public sealed class Runtime : Sentry.ISentryJsonSerializable
     {
         public const string Type = "runtime";
         public Runtime() { }
@@ -1671,7 +1671,7 @@ namespace Sentry.Protocol
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
         public static Sentry.Protocol.Runtime FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class SentryException : Sentry.IJsonSerializable
+    public sealed class SentryException : Sentry.ISentryJsonSerializable
     {
         public SentryException() { }
         public Sentry.Protocol.Mechanism? Mechanism { get; set; }
@@ -1683,7 +1683,7 @@ namespace Sentry.Protocol
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Protocol.SentryException FromJson(System.Text.Json.JsonElement json) { }
     }
-    public class Trace : Sentry.IJsonSerializable, Sentry.Protocol.ITraceContext
+    public class Trace : Sentry.ISentryJsonSerializable, Sentry.Protocol.ITraceContext
     {
         public const string Type = "trace";
         public Trace() { }
