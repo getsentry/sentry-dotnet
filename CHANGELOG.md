@@ -6,7 +6,7 @@
 
 - To resolve conflicting types due to the SDK adding itself to the global usings: 
  - The interface `Sentry.ISession` has been renamed to `Sentry.ISentrySession`
- - The class `Sentry.Session` has been renamed to `Sentry.SentrySession` ([#3015](https://github.com/getsentry/sentry-dotnet/pull/3015))
+ - The class `Sentry.Session` has been renamed to `Sentry.SentrySession` ([#3110](https://github.com/getsentry/sentry-dotnet/pull/3110))
 
 ### Dependencies
 
