@@ -20,7 +20,7 @@ public interface ISentryEventProcessor
 
 internal static class ISentryEventProcessorExtensions
 {
-    internal static SentryEvent? DoProcessEvent(this ISentryEventProcessor processor, SentryEvent @event, Hint hint)
+    internal static SentryEvent? DoProcessEvent(this ISentryEventProcessor processor, SentryEvent @event, SentryHint hint)
     {
         return (processor is ISentryEventProcessorWithHint contextualProcessor)
             ? contextualProcessor.Process(@event, hint)

@@ -77,7 +77,7 @@ public class SentryClient : ISentryClient, IDisposable
     }
 
     /// <inheritdoc />
-    public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null, Hint? hint = null)
+    public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null, SentryHint? hint = null)
     {
         if (@event == null)
         {
@@ -112,7 +112,7 @@ public class SentryClient : ISentryClient, IDisposable
     public void CaptureTransaction(SentryTransaction transaction) => CaptureTransaction(transaction, null, null);
 
     /// <inheritdoc />
-    public void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint)
+    public void CaptureTransaction(SentryTransaction transaction, Scope? scope, SentryHint? hint)
     {
         if (transaction.SpanId.Equals(SpanId.Empty))
         {
@@ -148,7 +148,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
 
         scope ??= new Scope(_options);
-        hint ??= new Hint();
+        hint ??= new SentryHint();
         hint.AddAttachmentsFromScope(scope);
 
         _options.LogInfo("Capturing transaction.");
@@ -186,7 +186,7 @@ public class SentryClient : ISentryClient, IDisposable
         CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
     }
 
-    private SentryTransaction? BeforeSendTransaction(SentryTransaction transaction, Hint hint)
+    private SentryTransaction? BeforeSendTransaction(SentryTransaction transaction, SentryHint hint)
     {
         if (_options.BeforeSendTransactionInternal is null)
         {
@@ -243,7 +243,7 @@ public class SentryClient : ISentryClient, IDisposable
     public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
     // TODO: this method needs to be refactored, it's really hard to analyze nullability
-    private SentryId DoSendEvent(SentryEvent @event, Hint? hint, Scope? scope)
+    private SentryId DoSendEvent(SentryEvent @event, SentryHint? hint, Scope? scope)
     {
         var filteredExceptions = ApplyExceptionFilters(@event.Exception);
         if (filteredExceptions?.Count > 0)
@@ -255,7 +255,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
 
         scope ??= new Scope(_options);
-        hint ??= new Hint();
+        hint ??= new SentryHint();
         hint.AddAttachmentsFromScope(scope);
 
         _options.LogInfo("Capturing event.");
@@ -389,7 +389,7 @@ public class SentryClient : ISentryClient, IDisposable
         return false;
     }
 
-    private SentryEvent? BeforeSend(SentryEvent? @event, Hint hint)
+    private SentryEvent? BeforeSend(SentryEvent? @event, SentryHint hint)
     {
         if (_options.BeforeSendInternal == null)
         {

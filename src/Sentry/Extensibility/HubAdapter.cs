@@ -219,7 +219,7 @@ public sealed class HubAdapter : IHub
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public SentryId CaptureEvent(SentryEvent evt, Scope? scope, Hint? hint = null)
+    public SentryId CaptureEvent(SentryEvent evt, Scope? scope, SentryHint? hint = null)
         => SentrySdk.CaptureEvent(evt, scope, hint);
 
     /// <summary>
@@ -233,7 +233,7 @@ public sealed class HubAdapter : IHub
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
-    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope)
+    public SentryId CaptureEvent(SentryEvent evt, SentryHint? hint, Action<Scope> configureScope)
         => SentrySdk.CaptureEvent(evt, hint, configureScope);
 
     /// <summary>
@@ -256,7 +256,7 @@ public sealed class HubAdapter : IHub
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint)
+    public void CaptureTransaction(SentryTransaction transaction, Scope? scope, SentryHint? hint)
         => SentrySdk.CaptureTransaction(transaction, scope, hint);
 
     /// <summary>

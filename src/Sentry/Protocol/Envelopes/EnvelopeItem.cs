@@ -281,13 +281,13 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     /// <summary>
     /// Creates an <see cref="EnvelopeItem"/> from <paramref name="attachment"/>.
     /// </summary>
-    public static EnvelopeItem FromAttachment(Attachment attachment)
+    public static EnvelopeItem FromAttachment(SentryAttachment attachment)
     {
         var stream = attachment.Content.GetStream();
         return FromAttachment(attachment, stream);
     }
 
-    internal static EnvelopeItem FromAttachment(Attachment attachment, Stream stream)
+    internal static EnvelopeItem FromAttachment(SentryAttachment attachment, Stream stream)
     {
         var attachmentType = attachment.Type switch
         {

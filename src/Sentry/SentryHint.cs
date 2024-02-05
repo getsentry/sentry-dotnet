@@ -4,20 +4,20 @@ namespace Sentry;
 /// A hint that can be provided when capturing a <see cref="SentryEvent"/> or when adding a <see cref="Breadcrumb"/>.
 /// Hints can be used to filter or modify events, transactions, or breadcrumbs before they are sent to Sentry.
 /// </summary>
-public class Hint
+public class SentryHint
 {
     private readonly SentryOptions? _options;
-    private readonly List<Attachment> _attachments = new();
+    private readonly List<SentryAttachment> _attachments = new();
     private Dictionary<string, object?>? _items;
 
     /// <summary>
-    /// Creates a new instance of <see cref="Hint"/>.
+    /// Creates a new instance of <see cref="SentryHint"/>.
     /// </summary>
-    public Hint() : this(SentrySdk.CurrentHub.GetSentryOptions())
+    public SentryHint() : this(SentrySdk.CurrentHub.GetSentryOptions())
     {
     }
 
-    internal Hint(SentryOptions? options)
+    internal SentryHint(SentryOptions? options)
     {
         _options = options;
     }
@@ -27,7 +27,7 @@ public class Hint
     /// </summary>
     /// <param name="key">The key of the hint item.</param>
     /// <param name="value">The value of the hint item.</param>
-    public Hint(string key, object? value)
+    public SentryHint(string key, object? value)
         : this()
     {
         Items[key] = value;
@@ -40,7 +40,7 @@ public class Hint
     /// This collection represents all of the attachments that will be sent to Sentry with the corresponding event.
     /// You can add or remove attachments from this collection as needed.
     /// </remarks>
-    public ICollection<Attachment> Attachments => _attachments;
+    public ICollection<SentryAttachment> Attachments => _attachments;
 
     /// <summary>
     /// A dictionary of arbitrary items provided with the Hint.
@@ -72,7 +72,7 @@ public class Hint
         if (_options is not null)
         {
             _attachments.Add(
-                new Attachment(
+                new SentryAttachment(
                     type,
                     new FileAttachmentContent(filePath, _options.UseAsyncFileIO),
                     Path.GetFileName(filePath),
@@ -85,16 +85,16 @@ public class Hint
     /// </summary>
     /// <param name="attachments">The attachment(s) to add.</param>
     /// <returns>A Hint having the attachment(s).</returns>
-    public static Hint WithAttachments(params Attachment[] attachments) => WithAttachments(attachments.AsEnumerable());
+    public static SentryHint WithAttachments(params SentryAttachment[] attachments) => WithAttachments(attachments.AsEnumerable());
 
     /// <summary>
     /// Creates a new Hint with attachments.
     /// </summary>
     /// <param name="attachments">The attachments to add.</param>
     /// <returns>A Hint having the attachments.</returns>
-    public static Hint WithAttachments(IEnumerable<Attachment> attachments)
+    public static SentryHint WithAttachments(IEnumerable<SentryAttachment> attachments)
     {
-        var hint = new Hint();
+        var hint = new SentryHint();
         hint._attachments.AddRange(attachments);
         return hint;
     }
