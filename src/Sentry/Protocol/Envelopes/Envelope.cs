@@ -226,7 +226,7 @@ public sealed class Envelope : ISerializable, IDisposable
     public static Envelope FromEvent(
         SentryEvent @event,
         IDiagnosticLogger? logger = null,
-        IReadOnlyCollection<Attachment>? attachments = null,
+        IReadOnlyCollection<SentryAttachment>? attachments = null,
         SessionUpdate? sessionUpdate = null)
     {
         var eventId = @event.EventId;

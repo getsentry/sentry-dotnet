@@ -6,7 +6,7 @@ namespace Sentry.Protocol;
 /// <summary>
 /// Profiling context information.
 /// </summary>
-internal sealed class ProfileInfo : IJsonSerializable
+internal sealed class ProfileInfo : ISentryJsonSerializable
 {
     /// <summary>
     /// Profile's event ID.

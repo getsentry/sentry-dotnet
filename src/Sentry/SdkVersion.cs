@@ -8,7 +8,7 @@ namespace Sentry;
 /// Information about the SDK to be sent with the SentryEvent.
 /// </summary>
 /// <remarks>Requires Sentry version 8.4 or higher.</remarks>
-public sealed class SdkVersion : IJsonSerializable
+public sealed class SdkVersion : ISentryJsonSerializable
 {
     private static readonly Lazy<SdkVersion> InstanceLazy = new(
         () => new SdkVersion

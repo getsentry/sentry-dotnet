@@ -5,7 +5,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry JsonSerializable.
 /// </summary>
-public interface IJsonSerializable
+public interface ISentryJsonSerializable
 {
     /// <summary>
     /// Writes the object as JSON.
@@ -19,7 +19,7 @@ public interface IJsonSerializable
 
 internal static class JsonSerializableExtensions
 {
-    public static void WriteToFile(this IJsonSerializable serializable, string filePath, IDiagnosticLogger? logger)
+    public static void WriteToFile(this ISentryJsonSerializable serializable, string filePath, IDiagnosticLogger? logger)
     {
         using var file = File.Create(filePath);
         using var writer = new Utf8JsonWriter(file);

@@ -4,12 +4,12 @@ namespace Sentry.Android.Callbacks;
 
 internal class BeforeSendCallback : JavaObject, JavaSdk.SentryOptions.IBeforeSendCallback
 {
-    private readonly Func<SentryEvent, Hint, SentryEvent?> _beforeSend;
+    private readonly Func<SentryEvent, SentryHint, SentryEvent?> _beforeSend;
     private readonly SentryOptions _options;
     private readonly JavaSdk.SentryOptions _javaOptions;
 
     public BeforeSendCallback(
-        Func<SentryEvent, Hint, SentryEvent?> beforeSend,
+        Func<SentryEvent, SentryHint, SentryEvent?> beforeSend,
         SentryOptions options,
         JavaSdk.SentryOptions javaOptions)
     {

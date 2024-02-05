@@ -382,7 +382,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
         => CaptureEvent(evt, null, configureScope);
 
-    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope)
+    public SentryId CaptureEvent(SentryEvent evt, SentryHint? hint, Action<Scope> configureScope)
     {
         if (!IsEnabled)
         {
@@ -405,7 +405,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
     public bool CaptureEnvelope(Envelope envelope) => _ownedClient.CaptureEnvelope(envelope);
 
-    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Hint? hint = null)
+    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, SentryHint? hint = null)
     {
         if (!IsEnabled)
         {
@@ -473,7 +473,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
     public void CaptureTransaction(SentryTransaction transaction) => CaptureTransaction(transaction, null, null);
 
-    public void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint)
+    public void CaptureTransaction(SentryTransaction transaction, Scope? scope, SentryHint? hint)
     {
         // Note: The hub should capture transactions even if it is disabled.
         // This allows transactions to be reported as failed when they encountered an unhandled exception,

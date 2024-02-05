@@ -7,7 +7,7 @@ namespace Sentry.Protocol.Metrics;
 /// <summary>
 /// Base class for metric instruments
 /// </summary>
-internal abstract class Metric : IJsonSerializable, ISentrySerializable
+internal abstract class Metric : ISentryJsonSerializable, ISentrySerializable
 {
     /// <summary>
     /// Creates a new instance of <see cref="Metric"/>.
@@ -75,7 +75,7 @@ internal abstract class Metric : IJsonSerializable, ISentrySerializable
     /// </summary>
     protected abstract void WriteValues(Utf8JsonWriter writer, IDiagnosticLogger? logger);
 
-    /// <inheritdoc cref="IJsonSerializable.WriteTo"/>
+    /// <inheritdoc cref="ISentryJsonSerializable.WriteTo"/>
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         writer.WriteStartObject();

@@ -23,7 +23,7 @@ namespace Sentry.Protocol;
 ///}
 /// </example>
 /// <see href="https://develop.sentry.dev/sdk/event-payloads/types/#responsecontext"/>
-public sealed class Response : IJsonSerializable, ICloneable<Response>, IUpdatable<Response>
+public sealed class Response : ISentryJsonSerializable, ICloneable<Response>, IUpdatable<Response>
 {
     /// <summary>
     /// Tells Sentry which type of context this is.

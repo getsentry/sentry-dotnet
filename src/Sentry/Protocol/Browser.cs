@@ -10,7 +10,7 @@ namespace Sentry.Protocol;
 /// web request that triggered the event.
 /// </summary>
 /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
-public sealed class Browser : IJsonSerializable, ICloneable<Browser>, IUpdatable<Browser>
+public sealed class Browser : ISentryJsonSerializable, ICloneable<Browser>, IUpdatable<Browser>
 {
     /// <summary>
     /// Tells Sentry which type of context this is.

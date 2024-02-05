@@ -8,7 +8,7 @@ namespace Sentry;
 /// Series of application events.
 /// </summary>
 [DebuggerDisplay("Message: {" + nameof(Message) + "}, Type: {" + nameof(Type) + "}")]
-public sealed class Breadcrumb : IJsonSerializable
+public sealed class Breadcrumb : ISentryJsonSerializable
 {
     private readonly IReadOnlyDictionary<string, string>? _data;
     private readonly string? _message;
