@@ -520,7 +520,7 @@ public partial class HttpTransportTests
             },
             new HttpClient(httpHandler));
 
-        var attachment = new Attachment(
+        var attachment = new SentryAttachment(
             AttachmentType.Default,
             new FileAttachmentContent("test1.txt"),
             "test1.txt",
@@ -566,13 +566,13 @@ public partial class HttpTransportTests
             },
             new HttpClient(httpHandler));
 
-        var attachmentNormal = new Attachment(
+        var attachmentNormal = new SentryAttachment(
             AttachmentType.Default,
             new StreamAttachmentContent(new MemoryStream(new byte[] { 1 })),
             "test1.txt",
             null);
 
-        var attachmentTooBig = new Attachment(
+        var attachmentTooBig = new SentryAttachment(
             AttachmentType.Default,
             new StreamAttachmentContent(new MemoryStream(new byte[] { 1, 2, 3, 4, 5 })),
             "test2.txt",

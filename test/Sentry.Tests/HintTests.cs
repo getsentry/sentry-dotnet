@@ -19,7 +19,7 @@ public class HintTests : IDisposable
         File.Create(attachmentPath1);
         File.Create(attachmentPath2);
 
-        var hint = new Hint(new SentryOptions());
+        var hint = new SentryHint(new SentryOptions());
 
         // Act
         hint.AddAttachment(attachmentPath1);
@@ -33,7 +33,7 @@ public class HintTests : IDisposable
     public void Clear_WithEntries_ClearsHintEntries()
     {
         // Arrange
-        var hint = new Hint("key", "value");
+        var hint = new SentryHint("key", "value");
 
         // Act
         hint.Items.Clear();
@@ -46,7 +46,7 @@ public class HintTests : IDisposable
     public void ClearAttachments_WithAttachments_ClearsHintAttachments()
     {
         // Arrange
-        var hint = new Hint();
+        var hint = new SentryHint();
         var attachment1 = Path.Combine(_testDirectory, Path.GetTempFileName());
         hint.AddAttachment(attachment1);
 
@@ -61,7 +61,7 @@ public class HintTests : IDisposable
     public void ContainsKey_ExistingKey_ReturnsTrue()
     {
         // Arrange
-        var hint = new Hint("key", "value");
+        var hint = new SentryHint("key", "value");
 
         // Act
         var containsKey = hint.Items.ContainsKey("key");
@@ -74,7 +74,7 @@ public class HintTests : IDisposable
     public void ContainsKey_NonExistingKey_ReturnsFalse()
     {
         // Arrange
-        var hint = new Hint("key", "value");
+        var hint = new SentryHint("key", "value");
 
         // Act
         var containsKey = hint.Items.ContainsKey("nonExistingKey");
@@ -87,7 +87,7 @@ public class HintTests : IDisposable
     public void Count_ReturnsZero_WhenHintIsEmpty()
     {
         // Arrange
-        var hint = new Hint();
+        var hint = new SentryHint();
 
         // Act
         var count = hint.Items.Count;
@@ -100,7 +100,7 @@ public class HintTests : IDisposable
     public void Count_ReturnsCorrectValue_WhenHintHasItems()
     {
         // Arrange
-        var hint = new Hint();
+        var hint = new SentryHint();
         hint.Items["key1"] = "value1";
         hint.Items["key2"] = "value2";
 
@@ -115,7 +115,7 @@ public class HintTests : IDisposable
     public void Remove_WithExistingKey_RemovesEntry()
     {
         // Arrange
-        var hint = new Hint("key", "value");
+        var hint = new SentryHint("key", "value");
 
         // Act
         hint.Items.Remove("key");
@@ -132,7 +132,7 @@ public class HintTests : IDisposable
         var attachment2 = AttachmentHelper.FakeAttachment("attachment2");
 
         // Act
-        var hint = Hint.WithAttachments(attachment1, attachment2);
+        var hint = SentryHint.WithAttachments(attachment1, attachment2);
 
         // Assert
         hint.Attachments.Count.Should().Be(2);
@@ -146,10 +146,10 @@ public class HintTests : IDisposable
         // Arrange
         var attachment1 = AttachmentHelper.FakeAttachment("attachment1");
         var attachment2 = AttachmentHelper.FakeAttachment("attachment2");
-        var attachments = new List<Attachment> { attachment1, attachment2 };
+        var attachments = new List<SentryAttachment> { attachment1, attachment2 };
 
         // Act
-        var hint = Hint.WithAttachments(attachments);
+        var hint = SentryHint.WithAttachments(attachments);
 
         // Assert
         hint.Attachments.Count.Should().Be(2);

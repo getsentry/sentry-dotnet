@@ -449,7 +449,7 @@ public class SentryTransactionTests
         transaction.Finish();
 
         // Assert
-        client.Received(1).CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<Hint>());
+        client.Received(1).CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
     [Fact]
@@ -478,7 +478,7 @@ public class SentryTransactionTests
                 e.Contexts.Trace.SpanId == transaction.SpanId &&
                 e.Contexts.Trace.ParentSpanId == transaction.ParentSpanId
             ),
-            Arg.Any<Scope>(), Arg.Any<Hint>());
+            Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
     [Fact]

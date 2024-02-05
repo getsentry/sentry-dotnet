@@ -53,7 +53,7 @@ public class CachingTransportTests
 
         try
         {
-            var attachment = new Attachment(AttachmentType.Default, new FileAttachmentContent(tempFile), "Attachment.txt", null);
+            var attachment = new SentryAttachment(AttachmentType.Default, new FileAttachmentContent(tempFile), "Attachment.txt", null);
             using var envelope = Envelope.FromEvent(new SentryEvent(), attachments: new[] { attachment });
 
             // Act
