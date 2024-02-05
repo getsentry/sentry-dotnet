@@ -59,8 +59,10 @@ internal class SampleProfilerSession : IDisposable
         get { return Interlocked.CompareExchange(ref _throwOnNextStartupForTests, 1, 1) == 1; }
         set
         {
-            if (value) Interlocked.CompareExchange(ref _throwOnNextStartupForTests, 1, 0);
-            else Interlocked.CompareExchange(ref _throwOnNextStartupForTests, 0, 1);
+            if (value)
+                Interlocked.CompareExchange(ref _throwOnNextStartupForTests, 1, 0);
+            else
+                Interlocked.CompareExchange(ref _throwOnNextStartupForTests, 0, 1);
         }
     }
 
