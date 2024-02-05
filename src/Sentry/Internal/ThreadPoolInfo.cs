@@ -2,7 +2,7 @@ using Sentry.Extensibility;
 
 namespace Sentry.Internal;
 
-internal sealed class ThreadPoolInfo : IJsonSerializable
+internal sealed class ThreadPoolInfo : ISentryJsonSerializable
 {
     public ThreadPoolInfo(
         int minWorkerThreads,

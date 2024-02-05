@@ -10,7 +10,7 @@ namespace Sentry.Protocol;
 /// <summary>
 /// Sentry sampling profiler output profile
 /// </summary>
-internal sealed class SampleProfile : IJsonSerializable
+internal sealed class SampleProfile : ISentryJsonSerializable
 {
     // Note: changing these to properties would break because GrowableArray is a struct.
     internal Internal.GrowableArray<Sample> Samples = new(10000);
@@ -52,7 +52,7 @@ internal sealed class SampleProfile : IJsonSerializable
         writer.WriteEndObject();
     }
 
-    public class Sample : IJsonSerializable
+    public class Sample : ISentryJsonSerializable
     {
         /// <summary>
         /// Timestamp in nanoseconds relative to the profile start.

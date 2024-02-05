@@ -7,7 +7,7 @@ namespace Sentry;
 /// Session update.
 /// </summary>
 // https://develop.sentry.dev/sdk/sessions/#session-update-payload
-public class SessionUpdate : ISentrySession, IJsonSerializable
+public class SessionUpdate : ISentrySession, ISentryJsonSerializable
 {
     /// <inheritdoc />
     public SentryId Id { get; }

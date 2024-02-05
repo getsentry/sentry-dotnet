@@ -1093,7 +1093,7 @@ public class SentryOptions
     /// </summary>
     /// <remarks>
     /// This option applies only to complex objects being added to Sentry events as contexts or extras, which do not
-    /// implement <see cref="IJsonSerializable"/>.
+    /// implement <see cref="ISentryJsonSerializable"/>.
     /// </remarks>
     public bool JsonPreserveReferences
     {

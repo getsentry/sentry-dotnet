@@ -6,7 +6,7 @@ namespace Sentry;
 /// <summary>
 /// Represents a package used to compose the SDK.
 /// </summary>
-public sealed class Package : IJsonSerializable
+public sealed class Package : ISentryJsonSerializable
 {
     /// <summary>
     /// The name of the package.

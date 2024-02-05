@@ -6,7 +6,7 @@ namespace Sentry
     /// <summary>
     /// Sentry View Hierarchy.
     /// </summary>
-    public sealed class ViewHierarchy : IJsonSerializable
+    public sealed class ViewHierarchy : ISentryJsonSerializable
     {
         /// <summary>
         /// The rendering system this view hierarchy is capturing.

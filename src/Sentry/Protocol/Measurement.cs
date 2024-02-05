@@ -6,7 +6,7 @@ namespace Sentry.Protocol;
 /// <summary>
 /// A measurement, containing a numeric value and a unit.
 /// </summary>
-public sealed class Measurement : IJsonSerializable
+public sealed class Measurement : ISentryJsonSerializable
 {
     /// <summary>
     /// The numeric value of the measurement.

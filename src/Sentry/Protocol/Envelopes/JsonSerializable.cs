@@ -10,12 +10,12 @@ internal sealed class JsonSerializable : ISerializable
     /// <summary>
     /// Source object.
     /// </summary>
-    public IJsonSerializable Source { get; }
+    public ISentryJsonSerializable Source { get; }
 
     /// <summary>
     /// Initializes an instance of <see cref="JsonSerializable"/>.
     /// </summary>
-    public JsonSerializable(IJsonSerializable source) => Source = source;
+    public JsonSerializable(ISentryJsonSerializable source) => Source = source;
 
     /// <inheritdoc />
     public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)

@@ -7,7 +7,7 @@ namespace Sentry.Protocol.Metrics;
 /// Represents a collection of code locations.
 /// </summary>
 internal class CodeLocations(long timestamp, IReadOnlyDictionary<MetricResourceIdentifier, SentryStackFrame> locations)
-    : IJsonSerializable
+    : ISentryJsonSerializable
 {
     /// <summary>
     /// Uniquely identifies a code location using the number of seconds since the UnixEpoch, as measured at the start
@@ -15,7 +15,7 @@ internal class CodeLocations(long timestamp, IReadOnlyDictionary<MetricResourceI
     /// </summary>
     public long Timestamp => timestamp;
 
-    /// <inheritdoc cref="IJsonSerializable.WriteTo"/>
+    /// <inheritdoc cref="ISentryJsonSerializable.WriteTo"/>
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         writer.WriteStartObject();

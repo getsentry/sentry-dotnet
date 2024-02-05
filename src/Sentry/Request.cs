@@ -25,7 +25,7 @@ namespace Sentry;
 /// }
 /// </example>
 /// <see href="https://develop.sentry.dev/sdk/event-payloads/request/"/>
-public sealed class Request : IJsonSerializable
+public sealed class Request : ISentryJsonSerializable
 {
     internal Dictionary<string, string>? InternalEnv { get; private set; }
 
