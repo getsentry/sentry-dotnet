@@ -535,7 +535,7 @@ public class EnvelopeTests
             """);
     }
 
-    private class ThrowingSerializable : IJsonSerializable
+    private class ThrowingSerializable : ISentryJsonSerializable
     {
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger logger)
         {
