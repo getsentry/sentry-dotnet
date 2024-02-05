@@ -85,7 +85,7 @@ public class ProfilerTests
         while (clock.ElapsedMilliseconds < milliseconds)
         {
             _testOutputLogger.LogDebug("Sleeping... time remaining: {0} ms", milliseconds - clock.ElapsedMilliseconds);
-            Thread.Sleep((int)Math.Min(milliseconds / 5, milliseconds - clock.ElapsedMilliseconds));
+            Thread.Sleep((int)Math.Max(0, Math.Min(milliseconds / 5, milliseconds - clock.ElapsedMilliseconds)));
         }
     }
 }
