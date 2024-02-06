@@ -11,7 +11,7 @@ namespace Sentry;
 /// Represents Sentry's structured Context.
 /// </summary>
 /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/" />
-public sealed class Contexts : IDictionary<string, object>, IJsonSerializable
+public sealed class Contexts : IDictionary<string, object>, ISentryJsonSerializable
 {
     private readonly ConcurrentDictionary<string, object> _innerDictionary = new(StringComparer.Ordinal);
 

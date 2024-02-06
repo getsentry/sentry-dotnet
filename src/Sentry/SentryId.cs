@@ -5,7 +5,7 @@ namespace Sentry;
 /// <summary>
 /// The identifier of an event in Sentry.
 /// </summary>
-public readonly struct SentryId : IEquatable<SentryId>, IJsonSerializable
+public readonly struct SentryId : IEquatable<SentryId>, ISentryJsonSerializable
 {
     private readonly Guid _guid;
 

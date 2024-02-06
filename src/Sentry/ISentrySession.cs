@@ -3,7 +3,7 @@ namespace Sentry;
 /// <summary>
 /// Session metadata.
 /// </summary>
-public interface ISession
+public interface ISentrySession
 {
     /// <summary>
     /// Session auto-generated ID.

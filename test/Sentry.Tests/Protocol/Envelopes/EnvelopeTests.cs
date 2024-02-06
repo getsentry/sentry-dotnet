@@ -535,7 +535,7 @@ public class EnvelopeTests
             """);
     }
 
-    private class ThrowingSerializable : IJsonSerializable
+    private class ThrowingSerializable : ISentryJsonSerializable
     {
         public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger logger)
         {
@@ -726,7 +726,7 @@ public class EnvelopeTests
 
         using var attachmentStream = new MemoryStream(new byte[] { 1, 2, 3 });
 
-        var attachment = new Attachment(
+        var attachment = new SentryAttachment(
             AttachmentType.Default,
             new StreamAttachmentContent(attachmentStream),
             "file.txt",
@@ -763,13 +763,13 @@ public class EnvelopeTests
 
         using var attachmentStream = new MemoryStream(new byte[] { 1, 2, 3 });
 
-        var attachment = new Attachment(
+        var attachment = new SentryAttachment(
             AttachmentType.Default,
             new StreamAttachmentContent(attachmentStream),
             "file.txt",
             null);
 
-        var sessionUpdate = new Session("foo", "bar", "baz").CreateUpdate(false, DateTimeOffset.Now);
+        var sessionUpdate = new SentrySession("foo", "bar", "baz").CreateUpdate(false, DateTimeOffset.Now);
 
         using var envelope = Envelope.FromEvent(@event, null, new[] { attachment }, sessionUpdate);
 
@@ -821,7 +821,7 @@ public class EnvelopeTests
     public async Task Roundtrip_WithSession_Success()
     {
         // Arrange
-        var sessionUpdate = new Session("foo", "bar", "baz").CreateUpdate(true, DateTimeOffset.Now);
+        var sessionUpdate = new SentrySession("foo", "bar", "baz").CreateUpdate(true, DateTimeOffset.Now);
 
         using var envelope = Envelope.FromSession(sessionUpdate);
 
@@ -893,14 +893,14 @@ public class EnvelopeTests
     public void FromEvent_EmptyAttachmentStream_DoesNotIncludeAttachment()
     {
         // Arrange
-        var attachment = new Attachment(
+        var attachment = new SentryAttachment(
             default,
             new StreamAttachmentContent(Stream.Null),
             "Screenshot.jpg",
             "image/jpg");
 
         // Act
-        var envelope = Envelope.FromEvent(new SentryEvent(), attachments: new List<Attachment> { attachment });
+        var envelope = Envelope.FromEvent(new SentryEvent(), attachments: new List<SentryAttachment> { attachment });
 
         // Assert
         envelope.Items.Should().HaveCount(1);
@@ -912,14 +912,14 @@ public class EnvelopeTests
         // Arrange
         var path = Path.GetTempFileName();
         using var stream = File.OpenRead(path);
-        var attachment = new Attachment(
+        var attachment = new SentryAttachment(
             default,
             new StreamAttachmentContent(stream),
             "Screenshot.jpg",
             "image/jpg");
 
         // Act
-        _ = Envelope.FromEvent(new SentryEvent(), attachments: new List<Attachment> { attachment });
+        _ = Envelope.FromEvent(new SentryEvent(), attachments: new List<SentryAttachment> { attachment });
 
         // Assert
         Assert.Throws<ObjectDisposedException>(() => stream.ReadByte());

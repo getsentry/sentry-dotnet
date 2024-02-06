@@ -188,7 +188,7 @@ public partial class MeasurementTests
                 t.Measurements["foo"].Value.As<int>() == int.MaxValue &&
                 t.Measurements["foo"].Unit == EmptyUnit),
             Arg.Any<Scope>(),
-            Arg.Any<Hint>()
+            Arg.Any<SentryHint>()
             );
     }
 
@@ -216,7 +216,7 @@ public partial class MeasurementTests
                 t.Measurements["foo"].Value.As<long>() == long.MaxValue &&
                 t.Measurements["foo"].Unit == EmptyUnit),
             Arg.Any<Scope>(),
-            Arg.Any<Hint>()
+            Arg.Any<SentryHint>()
             );
     }
 
@@ -244,7 +244,7 @@ public partial class MeasurementTests
                 t.Measurements["foo"].Value.As<ulong>() == ulong.MaxValue &&
                 t.Measurements["foo"].Unit == EmptyUnit),
             Arg.Any<Scope>(),
-            Arg.Any<Hint>()
+            Arg.Any<SentryHint>()
             );
     }
 
@@ -272,7 +272,7 @@ public partial class MeasurementTests
                 Math.Abs(t.Measurements["foo"].Value.As<double>() - double.MaxValue) < double.Epsilon &&
                 t.Measurements["foo"].Unit == EmptyUnit),
             Arg.Any<Scope>(),
-            Arg.Any<Hint>()
+            Arg.Any<SentryHint>()
         );
     }
 
@@ -300,7 +300,7 @@ public partial class MeasurementTests
                 t.Measurements["foo"].Value.As<int>() == int.MaxValue &&
                 t.Measurements["foo"].Unit == MeasurementUnit.Duration.Nanosecond),
             Arg.Any<Scope>(),
-            Arg.Any<Hint>()
+            Arg.Any<SentryHint>()
             );
     }
 
@@ -328,7 +328,7 @@ public partial class MeasurementTests
                 t.Measurements["foo"].Value.As<long>() == long.MaxValue &&
                 t.Measurements["foo"].Unit == MeasurementUnit.Duration.Nanosecond),
             Arg.Any<Scope>(),
-            Arg.Any<Hint>()
+            Arg.Any<SentryHint>()
             );
     }
 
@@ -356,7 +356,7 @@ public partial class MeasurementTests
                 t.Measurements["foo"].Value.As<ulong>() == ulong.MaxValue &&
                 t.Measurements["foo"].Unit == MeasurementUnit.Duration.Nanosecond),
             Arg.Any<Scope>(),
-            Arg.Any<Hint>()
+            Arg.Any<SentryHint>()
             );
     }
 
@@ -384,7 +384,7 @@ public partial class MeasurementTests
                 Math.Abs(t.Measurements["foo"].Value.As<double>() - double.MaxValue) < double.Epsilon &&
                 t.Measurements["foo"].Unit == MeasurementUnit.Duration.Nanosecond),
             Arg.Any<Scope>(),
-            Arg.Any<Hint>()
+            Arg.Any<SentryHint>()
             );
     }
 }

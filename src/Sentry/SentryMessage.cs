@@ -16,7 +16,7 @@ namespace Sentry;
 /// }
 /// </example>
 /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/message/"/>
-public sealed class SentryMessage : IJsonSerializable
+public sealed class SentryMessage : ISentryJsonSerializable
 {
     /// <summary>
     /// The raw message string (un-interpolated).

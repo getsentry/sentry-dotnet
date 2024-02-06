@@ -220,15 +220,15 @@ public class Scope : IEventLike
     public IReadOnlyDictionary<string, string> Tags => _tags;
 
 #if NETSTANDARD2_0 || NETFRAMEWORK
-    private ConcurrentBag<Attachment> _attachments = new();
+    private ConcurrentBag<SentryAttachment> _attachments = new();
 #else
-    private readonly ConcurrentBag<Attachment> _attachments = new();
+    private readonly ConcurrentBag<SentryAttachment> _attachments = new();
 #endif
 
     /// <summary>
     /// Attachments.
     /// </summary>
-    public IReadOnlyCollection<Attachment> Attachments => _attachments;
+    public IReadOnlyCollection<SentryAttachment> Attachments => _attachments;
 
     /// <summary>
     /// Creates a scope with the specified options.
@@ -251,14 +251,14 @@ public class Scope : IEventLike
     }
 
     /// <inheritdoc />
-    public void AddBreadcrumb(Breadcrumb breadcrumb) => AddBreadcrumb(breadcrumb, new Hint());
+    public void AddBreadcrumb(Breadcrumb breadcrumb) => AddBreadcrumb(breadcrumb, new SentryHint());
 
     /// <summary>
     /// Adds a breadcrumb with a hint.
     /// </summary>
     /// <param name="breadcrumb">The breadcrumb</param>
     /// <param name="hint">A hint for use in the BeforeBreadcrumb callback</param>
-    public void AddBreadcrumb(Breadcrumb breadcrumb, Hint hint)
+    public void AddBreadcrumb(Breadcrumb breadcrumb, SentryHint hint)
     {
         if (Options.BeforeBreadcrumbInternal is { } beforeBreadcrumb)
         {
@@ -331,7 +331,7 @@ public class Scope : IEventLike
     /// <summary>
     /// Adds an attachment.
     /// </summary>
-    public void AddAttachment(Attachment attachment) => _attachments.Add(attachment);
+    public void AddAttachment(SentryAttachment attachment) => _attachments.Add(attachment);
 
     /// <summary>
     /// Resets all the properties and collections within the scope to their default values.

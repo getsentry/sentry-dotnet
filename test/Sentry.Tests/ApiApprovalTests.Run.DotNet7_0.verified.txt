@@ -1,15 +1,6 @@
 ﻿[assembly: System.CLSCompliant(true)]
 namespace Sentry
 {
-    [System.Diagnostics.DebuggerDisplay("{FileName}")]
-    public class Attachment
-    {
-        public Attachment(Sentry.AttachmentType type, Sentry.IAttachmentContent content, string fileName, string? contentType) { }
-        public Sentry.IAttachmentContent Content { get; }
-        public string? ContentType { get; }
-        public string FileName { get; }
-        public Sentry.AttachmentType Type { get; }
-    }
     public enum AttachmentType
     {
         Default = 0,
@@ -24,7 +15,7 @@ namespace Sentry
         public override string ToString() { }
     }
     [System.Diagnostics.DebuggerDisplay("Message: {Message}, Type: {Type}")]
-    public sealed class Breadcrumb : Sentry.IJsonSerializable
+    public sealed class Breadcrumb : Sentry.ISentryJsonSerializable
     {
         public Breadcrumb(string message, string type, System.Collections.Generic.IReadOnlyDictionary<string, string>? data = null, string? category = null, Sentry.BreadcrumbLevel level = 0) { }
         public string? Category { get; }
@@ -76,7 +67,7 @@ namespace Sentry
         public const string Platform = "csharp";
         public const int ProtocolVersion = 7;
     }
-    public sealed class Contexts : Sentry.IJsonSerializable, System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<string, object>>, System.Collections.Generic.IDictionary<string, object>, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>, System.Collections.IEnumerable
+    public sealed class Contexts : Sentry.ISentryJsonSerializable, System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<string, object>>, System.Collections.Generic.IDictionary<string, object>, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>, System.Collections.IEnumerable
     {
         public Contexts() { }
         public Sentry.Protocol.App App { get; }
@@ -162,16 +153,6 @@ namespace Sentry
     {
         public static void SetTags(this Sentry.IHasTags hasTags, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> tags) { }
     }
-    public class Hint
-    {
-        public Hint() { }
-        public Hint(string key, object? value) { }
-        public System.Collections.Generic.ICollection<Sentry.Attachment> Attachments { get; }
-        public System.Collections.Generic.IDictionary<string, object?> Items { get; }
-        public void AddAttachment(string filePath, Sentry.AttachmentType type = 0, string? contentType = null) { }
-        public static Sentry.Hint WithAttachments(params Sentry.Attachment[] attachments) { }
-        public static Sentry.Hint WithAttachments(System.Collections.Generic.IEnumerable<Sentry.Attachment> attachments) { }
-    }
     public static class HintTypes
     {
         public const string HttpResponseMessage = "http-response-message";
@@ -195,7 +176,7 @@ namespace Sentry
     }
     public static class HubExtensions
     {
-        public static void AddBreadcrumb(this Sentry.IHub hub, Sentry.Breadcrumb breadcrumb, Sentry.Hint? hint = null) { }
+        public static void AddBreadcrumb(this Sentry.IHub hub, Sentry.Breadcrumb breadcrumb, Sentry.SentryHint? hint = null) { }
         public static void AddBreadcrumb(this Sentry.IHub hub, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void AddBreadcrumb(this Sentry.IHub hub, Sentry.Infrastructure.ISystemClock? clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static Sentry.SentryId CaptureException(this Sentry.IHub hub, System.Exception ex, System.Action<Sentry.Scope> configureScope) { }
@@ -244,7 +225,7 @@ namespace Sentry
         Sentry.IMetricAggregator Metrics { get; }
         void BindException(System.Exception exception, Sentry.ISpan span);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope);
-        Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, System.Action<Sentry.Scope> configureScope);
+        Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.SentryHint? hint, System.Action<Sentry.Scope> configureScope);
         Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null);
         Sentry.TransactionContext ContinueTrace(string? traceHeader, string? baggageHeader, string? name = null, string? operation = null);
         void EndSession(Sentry.SessionEndStatus status = 0);
@@ -255,10 +236,6 @@ namespace Sentry
         void ResumeSession();
         void StartSession();
         Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext);
-    }
-    public interface IJsonSerializable
-    {
-        void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger);
     }
     public interface IMetricAggregator : System.IDisposable
     {
@@ -283,12 +260,16 @@ namespace Sentry
     {
         bool IsEnabled { get; }
         bool CaptureEnvelope(Sentry.Protocol.Envelopes.Envelope envelope);
-        Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.Hint? hint = null);
+        Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null);
         void CaptureSession(Sentry.SessionUpdate sessionUpdate);
         void CaptureTransaction(Sentry.SentryTransaction transaction);
-        void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.Hint? hint);
+        void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.SentryHint? hint);
         void CaptureUserFeedback(Sentry.UserFeedback userFeedback);
         System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout);
+    }
+    public interface ISentryJsonSerializable
+    {
+        void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger);
     }
     public interface ISentryScopeManager
     {
@@ -302,11 +283,7 @@ namespace Sentry
     {
         void Apply(Sentry.Scope scope, object state);
     }
-    public interface ISentryUserFactory
-    {
-        Sentry.SentryUser? Create();
-    }
-    public interface ISession
+    public interface ISentrySession
     {
         string? DistinctId { get; }
         string? Environment { get; }
@@ -316,6 +293,10 @@ namespace Sentry
         string Release { get; }
         System.DateTimeOffset StartTimestamp { get; }
         string? UserAgent { get; }
+    }
+    public interface ISentryUserFactory
+    {
+        Sentry.SentryUser? Create();
     }
     public interface ISpan : Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpanData, Sentry.Protocol.ITraceContext
     {
@@ -413,7 +394,7 @@ namespace Sentry
             Exbibyte = 13,
         }
     }
-    public sealed class Package : Sentry.IJsonSerializable
+    public sealed class Package : Sentry.ISentryJsonSerializable
     {
         public Package(string name, string version) { }
         public string Name { get; }
@@ -429,7 +410,7 @@ namespace Sentry
         Version = 1,
         InformationalVersion = 2,
     }
-    public sealed class Request : Sentry.IJsonSerializable
+    public sealed class Request : Sentry.ISentryJsonSerializable
     {
         public Request() { }
         public string? ApiTarget { get; set; }
@@ -448,7 +429,7 @@ namespace Sentry
     public class Scope : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags
     {
         public Scope(Sentry.SentryOptions? options) { }
-        public System.Collections.Generic.IReadOnlyCollection<Sentry.Attachment> Attachments { get; }
+        public System.Collections.Generic.IReadOnlyCollection<Sentry.SentryAttachment> Attachments { get; }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
         public Sentry.Contexts Contexts { get; set; }
         public string? Distribution { get; set; }
@@ -464,9 +445,9 @@ namespace Sentry
         public Sentry.ITransactionTracer? Transaction { get; set; }
         public string? TransactionName { get; set; }
         public Sentry.SentryUser User { get; set; }
-        public void AddAttachment(Sentry.Attachment attachment) { }
+        public void AddAttachment(Sentry.SentryAttachment attachment) { }
         public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb) { }
-        public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb, Sentry.Hint hint) { }
+        public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb, Sentry.SentryHint hint) { }
         public void Apply(Sentry.IEventLike other) { }
         public void Apply(Sentry.Scope other) { }
         public void Apply(object state) { }
@@ -495,7 +476,7 @@ namespace Sentry
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> GetAllExceptionProcessors(this Sentry.Scope scope) { }
         public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> GetAllTransactionProcessors(this Sentry.Scope scope) { }
     }
-    public sealed class SdkVersion : Sentry.IJsonSerializable
+    public sealed class SdkVersion : Sentry.ISentryJsonSerializable
     {
         public SdkVersion() { }
         public string? Name { get; set; }
@@ -506,15 +487,24 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SdkVersion FromJson(System.Text.Json.JsonElement json) { }
     }
+    [System.Diagnostics.DebuggerDisplay("{FileName}")]
+    public class SentryAttachment
+    {
+        public SentryAttachment(Sentry.AttachmentType type, Sentry.IAttachmentContent content, string fileName, string? contentType) { }
+        public Sentry.IAttachmentContent Content { get; }
+        public string? ContentType { get; }
+        public string FileName { get; }
+        public Sentry.AttachmentType Type { get; }
+    }
     public class SentryClient : Sentry.ISentryClient, System.IDisposable
     {
         public SentryClient(Sentry.SentryOptions options) { }
         public bool IsEnabled { get; }
         public bool CaptureEnvelope(Sentry.Protocol.Envelopes.Envelope envelope) { }
-        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent? @event, Sentry.Scope? scope = null, Sentry.Hint? hint = null) { }
+        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent? @event, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction) { }
-        public void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.Hint? hint) { }
+        public void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.SentryHint? hint) { }
         public void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
         public void Dispose() { }
         public System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout) { }
@@ -529,7 +519,7 @@ namespace Sentry
         public static System.Threading.Tasks.Task FlushAsync(this Sentry.ISentryClient client) { }
     }
     [System.Diagnostics.DebuggerDisplay("{GetType().Name,nq}: {EventId,nq}")]
-    public sealed class SentryEvent : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IJsonSerializable
+    public sealed class SentryEvent : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISentryJsonSerializable
     {
         public SentryEvent() { }
         public SentryEvent(System.Exception? exception) { }
@@ -570,6 +560,16 @@ namespace Sentry
         protected override void HandleResponse(System.Net.Http.HttpResponseMessage response, Sentry.ISpan? span, string method, string url) { }
         protected override Sentry.ISpan? ProcessRequest(System.Net.Http.HttpRequestMessage request, string method, string url) { }
     }
+    public class SentryHint
+    {
+        public SentryHint() { }
+        public SentryHint(string key, object? value) { }
+        public System.Collections.Generic.ICollection<Sentry.SentryAttachment> Attachments { get; }
+        public System.Collections.Generic.IDictionary<string, object?> Items { get; }
+        public void AddAttachment(string filePath, Sentry.AttachmentType type = 0, string? contentType = null) { }
+        public static Sentry.SentryHint WithAttachments(params Sentry.SentryAttachment[] attachments) { }
+        public static Sentry.SentryHint WithAttachments(System.Collections.Generic.IEnumerable<Sentry.SentryAttachment> attachments) { }
+    }
     public class SentryHttpMessageHandler : Sentry.SentryMessageHandler
     {
         public SentryHttpMessageHandler() { }
@@ -579,7 +579,7 @@ namespace Sentry
         protected override void HandleResponse(System.Net.Http.HttpResponseMessage response, Sentry.ISpan? span, string method, string url) { }
         protected override Sentry.ISpan? ProcessRequest(System.Net.Http.HttpRequestMessage request, string method, string url) { }
     }
-    public readonly struct SentryId : Sentry.IJsonSerializable, System.IEquatable<Sentry.SentryId>
+    public readonly struct SentryId : Sentry.ISentryJsonSerializable, System.IEquatable<Sentry.SentryId>
     {
         public static readonly Sentry.SentryId Empty;
         public SentryId(System.Guid guid) { }
@@ -609,7 +609,7 @@ namespace Sentry
         [System.Runtime.Serialization.EnumMember(Value="fatal")]
         Fatal = 4,
     }
-    public sealed class SentryMessage : Sentry.IJsonSerializable
+    public sealed class SentryMessage : Sentry.ISentryJsonSerializable
     {
         public SentryMessage() { }
         public string? Formatted { get; set; }
@@ -695,11 +695,11 @@ namespace Sentry
         public void AddJsonSerializerContext<T>(System.Func<System.Text.Json.JsonSerializerOptions, T> contextBuilder)
             where T : System.Text.Json.Serialization.JsonSerializerContext { }
         public void SetBeforeBreadcrumb(System.Func<Sentry.Breadcrumb, Sentry.Breadcrumb?> beforeBreadcrumb) { }
-        public void SetBeforeBreadcrumb(System.Func<Sentry.Breadcrumb, Sentry.Hint, Sentry.Breadcrumb?> beforeBreadcrumb) { }
+        public void SetBeforeBreadcrumb(System.Func<Sentry.Breadcrumb, Sentry.SentryHint, Sentry.Breadcrumb?> beforeBreadcrumb) { }
         public void SetBeforeSend(System.Func<Sentry.SentryEvent, Sentry.SentryEvent?> beforeSend) { }
-        public void SetBeforeSend(System.Func<Sentry.SentryEvent, Sentry.Hint, Sentry.SentryEvent?> beforeSend) { }
+        public void SetBeforeSend(System.Func<Sentry.SentryEvent, Sentry.SentryHint, Sentry.SentryEvent?> beforeSend) { }
         public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryTransaction?> beforeSendTransaction) { }
-        public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.Hint, Sentry.SentryTransaction?> beforeSendTransaction) { }
+        public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryHint, Sentry.SentryTransaction?> beforeSendTransaction) { }
     }
     public static class SentryOptionsExtensions
     {
@@ -743,22 +743,22 @@ namespace Sentry
         public static bool IsEnabled { get; }
         public static Sentry.SentryId LastEventId { get; }
         public static Sentry.IMetricAggregator Metrics { get; }
-        public static void AddBreadcrumb(Sentry.Breadcrumb breadcrumb, Sentry.Hint? hint = null) { }
+        public static void AddBreadcrumb(Sentry.Breadcrumb breadcrumb, Sentry.SentryHint? hint = null) { }
         public static void AddBreadcrumb(string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void AddBreadcrumb(Sentry.Infrastructure.ISystemClock? clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void BindClient(Sentry.ISentryClient client) { }
         public static void BindException(System.Exception exception, Sentry.ISpan span) { }
         public static bool CaptureEnvelope(Sentry.Protocol.Envelopes.Envelope envelope) { }
         public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
-        public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, System.Action<Sentry.Scope> configureScope) { }
-        public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.Hint? hint = null) { }
+        public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
+        public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.SentryHint? hint, System.Action<Sentry.Scope> configureScope) { }
         public static Sentry.SentryId CaptureException(System.Exception exception) { }
         public static Sentry.SentryId CaptureException(System.Exception exception, System.Action<Sentry.Scope> configureScope) { }
         public static Sentry.SentryId CaptureMessage(string message, Sentry.SentryLevel level = 1) { }
         public static Sentry.SentryId CaptureMessage(string message, System.Action<Sentry.Scope> configureScope, Sentry.SentryLevel level = 1) { }
         public static void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public static void CaptureTransaction(Sentry.SentryTransaction transaction) { }
-        public static void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.Hint? hint) { }
+        public static void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.SentryHint? hint) { }
         public static void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
         public static void CaptureUserFeedback(Sentry.SentryId eventId, string email, string comments, string? name = null) { }
         [System.Obsolete("WARNING: This method deliberately causes a crash, and should not be used in a rea" +
@@ -792,7 +792,20 @@ namespace Sentry
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, string? description) { }
     }
-    public class SentrySpan : Sentry.IHasExtra, Sentry.IHasTags, Sentry.IJsonSerializable, Sentry.ISpanData, Sentry.Protocol.ITraceContext
+    public class SentrySession : Sentry.ISentrySession
+    {
+        public SentrySession(string? distinctId, string release, string? environment) { }
+        public string? DistinctId { get; }
+        public string? Environment { get; }
+        public int ErrorCount { get; }
+        public Sentry.SentryId Id { get; }
+        public string? IpAddress { get; }
+        public string Release { get; }
+        public System.DateTimeOffset StartTimestamp { get; }
+        public string? UserAgent { get; }
+        public void ReportError() { }
+    }
+    public class SentrySpan : Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISentryJsonSerializable, Sentry.ISpanData, Sentry.Protocol.ITraceContext
     {
         public SentrySpan(Sentry.ISpan tracer) { }
         public SentrySpan(Sentry.SpanId? parentSpanId, string operation) { }
@@ -817,7 +830,7 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentrySpan FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class SentryStackFrame : Sentry.IJsonSerializable
+    public sealed class SentryStackFrame : Sentry.ISentryJsonSerializable
     {
         public SentryStackFrame() { }
         public string? AbsolutePath { get; set; }
@@ -843,7 +856,7 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryStackFrame FromJson(System.Text.Json.JsonElement json) { }
     }
-    public class SentryStackTrace : Sentry.IJsonSerializable
+    public class SentryStackTrace : Sentry.ISentryJsonSerializable
     {
         public SentryStackTrace() { }
         public Sentry.InstructionAddressAdjustment? AddressAdjustment { get; set; }
@@ -851,7 +864,7 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryStackTrace FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class SentryThread : Sentry.IJsonSerializable
+    public sealed class SentryThread : Sentry.ISentryJsonSerializable
     {
         public SentryThread() { }
         public bool? Crashed { get; set; }
@@ -871,7 +884,7 @@ namespace Sentry
         public override string ToString() { }
         public static Sentry.SentryTraceHeader Parse(string value) { }
     }
-    public class SentryTransaction : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.IJsonSerializable, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
+    public class SentryTransaction : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISentryJsonSerializable, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
         public SentryTransaction(Sentry.ITransactionTracer tracer) { }
         public SentryTransaction(string name, string operation) { }
@@ -915,7 +928,7 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryTransaction FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class SentryUser : Sentry.IJsonSerializable
+    public sealed class SentryUser : Sentry.ISentryJsonSerializable
     {
         public SentryUser() { }
         public string? Email { get; set; }
@@ -928,30 +941,17 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
         public static Sentry.SentryUser FromJson(System.Text.Json.JsonElement json) { }
     }
-    public class Session : Sentry.ISession
-    {
-        public Session(string? distinctId, string release, string? environment) { }
-        public string? DistinctId { get; }
-        public string? Environment { get; }
-        public int ErrorCount { get; }
-        public Sentry.SentryId Id { get; }
-        public string? IpAddress { get; }
-        public string Release { get; }
-        public System.DateTimeOffset StartTimestamp { get; }
-        public string? UserAgent { get; }
-        public void ReportError() { }
-    }
     public enum SessionEndStatus
     {
         Exited = 0,
         Crashed = 1,
         Abnormal = 2,
     }
-    public class SessionUpdate : Sentry.IJsonSerializable, Sentry.ISession
+    public class SessionUpdate : Sentry.ISentryJsonSerializable, Sentry.ISentrySession
     {
         public SessionUpdate(Sentry.SessionUpdate sessionUpdate, bool isInitial) { }
         public SessionUpdate(Sentry.SessionUpdate sessionUpdate, bool isInitial, Sentry.SessionEndStatus? endStatus) { }
-        public SessionUpdate(Sentry.ISession session, bool isInitial, System.DateTimeOffset timestamp, int sequenceNumber, Sentry.SessionEndStatus? endStatus) { }
+        public SessionUpdate(Sentry.ISentrySession session, bool isInitial, System.DateTimeOffset timestamp, int sequenceNumber, Sentry.SessionEndStatus? endStatus) { }
         public SessionUpdate(Sentry.SentryId id, string? distinctId, System.DateTimeOffset startTimestamp, string release, string? environment, string? ipAddress, string? userAgent, int errorCount, bool isInitial, System.DateTimeOffset timestamp, int sequenceNumber, Sentry.SessionEndStatus? endStatus) { }
         public string? DistinctId { get; }
         public System.TimeSpan Duration { get; }
@@ -994,7 +994,7 @@ namespace Sentry
         public static Sentry.ITransactionTracer GetTransaction(this Sentry.ISpan span) { }
         public static Sentry.ISpan StartChild(this Sentry.ISpan span, string operation, string? description) { }
     }
-    public readonly struct SpanId : Sentry.IJsonSerializable, System.IEquatable<Sentry.SpanId>
+    public readonly struct SpanId : Sentry.ISentryJsonSerializable, System.IEquatable<Sentry.SpanId>
     {
         public static readonly Sentry.SpanId Empty;
         public SpanId(long value) { }
@@ -1152,7 +1152,7 @@ namespace Sentry
         public Sentry.ISpan StartChild(string operation) { }
         public void UnsetTag(string key) { }
     }
-    public sealed class UserFeedback : Sentry.IJsonSerializable
+    public sealed class UserFeedback : Sentry.ISentryJsonSerializable
     {
         public UserFeedback(Sentry.SentryId eventId, string? name, string? email, string? comments) { }
         public string? Comments { get; }
@@ -1162,18 +1162,18 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.UserFeedback FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class ViewHierarchy : Sentry.IJsonSerializable
+    public sealed class ViewHierarchy : Sentry.ISentryJsonSerializable
     {
         public ViewHierarchy(string renderingSystem) { }
         public string RenderingSystem { get; set; }
         public System.Collections.Generic.List<Sentry.ViewHierarchyNode> Windows { get; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
     }
-    public class ViewHierarchyAttachment : Sentry.Attachment
+    public class ViewHierarchyAttachment : Sentry.SentryAttachment
     {
         public ViewHierarchyAttachment(Sentry.IAttachmentContent content) { }
     }
-    public abstract class ViewHierarchyNode : Sentry.IJsonSerializable
+    public abstract class ViewHierarchyNode : Sentry.ISentryJsonSerializable
     {
         protected ViewHierarchyNode(string type) { }
         public System.Collections.Generic.List<Sentry.ViewHierarchyNode> Children { get; set; }
@@ -1229,11 +1229,11 @@ namespace Sentry.Extensibility
         public void BindException(System.Exception exception, Sentry.ISpan span) { }
         public bool CaptureEnvelope(Sentry.Protocol.Envelopes.Envelope envelope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
-        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, System.Action<Sentry.Scope> configureScope) { }
-        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.Hint? hint = null) { }
+        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
+        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.SentryHint? hint, System.Action<Sentry.Scope> configureScope) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction) { }
-        public void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.Hint? hint) { }
+        public void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.SentryHint? hint) { }
         public void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
         public void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
@@ -1272,12 +1272,12 @@ namespace Sentry.Extensibility
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
-        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Hint? hint, System.Action<Sentry.Scope> configureScope) { }
-        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope, Sentry.Hint? hint = null) { }
+        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope, Sentry.SentryHint? hint = null) { }
+        public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.SentryHint? hint, System.Action<Sentry.Scope> configureScope) { }
         public Sentry.SentryId CaptureException(System.Exception exception) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction) { }
-        public void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.Hint? hint) { }
+        public void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.SentryHint? hint) { }
         public void CaptureUserFeedback(Sentry.UserFeedback sentryUserFeedback) { }
         public void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
@@ -1336,7 +1336,7 @@ namespace Sentry.Extensibility
     }
     public interface ISentryEventProcessorWithHint : Sentry.Extensibility.ISentryEventProcessor
     {
-        Sentry.SentryEvent? Process(Sentry.SentryEvent @event, Sentry.Hint hint);
+        Sentry.SentryEvent? Process(Sentry.SentryEvent @event, Sentry.SentryHint hint);
     }
     public interface ISentryStackTraceFactory
     {
@@ -1348,7 +1348,7 @@ namespace Sentry.Extensibility
     }
     public interface ISentryTransactionProcessorWithHint : Sentry.Extensibility.ISentryTransactionProcessor
     {
-        Sentry.SentryTransaction? Process(Sentry.SentryTransaction transaction, Sentry.Hint hint);
+        Sentry.SentryTransaction? Process(Sentry.SentryTransaction transaction, Sentry.SentryHint hint);
     }
     public interface ITransport
     {
@@ -1482,7 +1482,7 @@ namespace Sentry.PlatformAbstractions
 }
 namespace Sentry.Protocol
 {
-    public sealed class App : Sentry.IJsonSerializable
+    public sealed class App : Sentry.ISentryJsonSerializable
     {
         public const string Type = "app";
         public App() { }
@@ -1497,7 +1497,7 @@ namespace Sentry.Protocol
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
         public static Sentry.Protocol.App FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class Browser : Sentry.IJsonSerializable
+    public sealed class Browser : Sentry.ISentryJsonSerializable
     {
         public const string Type = "browser";
         public Browser() { }
@@ -1506,7 +1506,7 @@ namespace Sentry.Protocol
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
         public static Sentry.Protocol.Browser FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class DebugImage : Sentry.IJsonSerializable
+    public sealed class DebugImage : Sentry.ISentryJsonSerializable
     {
         public DebugImage() { }
         public string? CodeFile { get; set; }
@@ -1520,7 +1520,7 @@ namespace Sentry.Protocol
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Protocol.DebugImage FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class Device : Sentry.IJsonSerializable
+    public sealed class Device : Sentry.ISentryJsonSerializable
     {
         public const string Type = "device";
         public Device() { }
@@ -1570,7 +1570,7 @@ namespace Sentry.Protocol
         [System.Runtime.Serialization.EnumMember(Value="landscape")]
         Landscape = 1,
     }
-    public sealed class Gpu : Sentry.IJsonSerializable
+    public sealed class Gpu : Sentry.ISentryJsonSerializable
     {
         public const string Type = "gpu";
         public Gpu() { }
@@ -1602,14 +1602,14 @@ namespace Sentry.Protocol
         Sentry.SpanStatus? Status { get; }
         Sentry.SentryId TraceId { get; }
     }
-    public sealed class Measurement : Sentry.IJsonSerializable
+    public sealed class Measurement : Sentry.ISentryJsonSerializable
     {
         public Sentry.MeasurementUnit Unit { get; }
         public object Value { get; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Protocol.Measurement FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class Mechanism : Sentry.IJsonSerializable
+    public sealed class Mechanism : Sentry.ISentryJsonSerializable
     {
         public static readonly string DescriptionKey;
         public static readonly string HandledKey;
@@ -1629,7 +1629,7 @@ namespace Sentry.Protocol
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Protocol.Mechanism FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class OperatingSystem : Sentry.IJsonSerializable
+    public sealed class OperatingSystem : Sentry.ISentryJsonSerializable
     {
         public const string Type = "os";
         public OperatingSystem() { }
@@ -1642,7 +1642,7 @@ namespace Sentry.Protocol
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
         public static Sentry.Protocol.OperatingSystem FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class Response : Sentry.IJsonSerializable
+    public sealed class Response : Sentry.ISentryJsonSerializable
     {
         public const string Type = "response";
         public Response() { }
@@ -1657,7 +1657,7 @@ namespace Sentry.Protocol
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Protocol.Response FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class Runtime : Sentry.IJsonSerializable
+    public sealed class Runtime : Sentry.ISentryJsonSerializable
     {
         public const string Type = "runtime";
         public Runtime() { }
@@ -1669,7 +1669,7 @@ namespace Sentry.Protocol
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
         public static Sentry.Protocol.Runtime FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class SentryException : Sentry.IJsonSerializable
+    public sealed class SentryException : Sentry.ISentryJsonSerializable
     {
         public SentryException() { }
         public Sentry.Protocol.Mechanism? Mechanism { get; set; }
@@ -1681,7 +1681,7 @@ namespace Sentry.Protocol
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Protocol.SentryException FromJson(System.Text.Json.JsonElement json) { }
     }
-    public class Trace : Sentry.IJsonSerializable, Sentry.Protocol.ITraceContext
+    public class Trace : Sentry.ISentryJsonSerializable, Sentry.Protocol.ITraceContext
     {
         public const string Type = "trace";
         public Trace() { }
@@ -1708,7 +1708,7 @@ namespace Sentry.Protocol.Envelopes
         public System.Threading.Tasks.Task SerializeAsync(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger, System.Threading.CancellationToken cancellationToken = default) { }
         public Sentry.SentryId? TryGetEventId() { }
         public static System.Threading.Tasks.Task<Sentry.Protocol.Envelopes.Envelope> DeserializeAsync(System.IO.Stream stream, System.Threading.CancellationToken cancellationToken = default) { }
-        public static Sentry.Protocol.Envelopes.Envelope FromEvent(Sentry.SentryEvent @event, Sentry.Extensibility.IDiagnosticLogger? logger = null, System.Collections.Generic.IReadOnlyCollection<Sentry.Attachment>? attachments = null, Sentry.SessionUpdate? sessionUpdate = null) { }
+        public static Sentry.Protocol.Envelopes.Envelope FromEvent(Sentry.SentryEvent @event, Sentry.Extensibility.IDiagnosticLogger? logger = null, System.Collections.Generic.IReadOnlyCollection<Sentry.SentryAttachment>? attachments = null, Sentry.SessionUpdate? sessionUpdate = null) { }
         public static Sentry.Protocol.Envelopes.Envelope FromSession(Sentry.SessionUpdate sessionUpdate) { }
         public static Sentry.Protocol.Envelopes.Envelope FromTransaction(Sentry.SentryTransaction transaction) { }
         public static Sentry.Protocol.Envelopes.Envelope FromUserFeedback(Sentry.UserFeedback sentryUserFeedback) { }
@@ -1725,7 +1725,7 @@ namespace Sentry.Protocol.Envelopes
         public long? TryGetLength() { }
         public string? TryGetType() { }
         public static System.Threading.Tasks.Task<Sentry.Protocol.Envelopes.EnvelopeItem> DeserializeAsync(System.IO.Stream stream, System.Threading.CancellationToken cancellationToken = default) { }
-        public static Sentry.Protocol.Envelopes.EnvelopeItem FromAttachment(Sentry.Attachment attachment) { }
+        public static Sentry.Protocol.Envelopes.EnvelopeItem FromAttachment(Sentry.SentryAttachment attachment) { }
         public static Sentry.Protocol.Envelopes.EnvelopeItem FromEvent(Sentry.SentryEvent @event) { }
         public static Sentry.Protocol.Envelopes.EnvelopeItem FromSession(Sentry.SessionUpdate sessionUpdate) { }
         public static Sentry.Protocol.Envelopes.EnvelopeItem FromTransaction(Sentry.SentryTransaction transaction) { }

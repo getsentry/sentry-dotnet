@@ -27,7 +27,7 @@ public interface ISentryClient
     /// <param name="scope">An optional scope to be applied to the event.</param>
     /// <param name="hint">An optional hint providing high level context for the source of the event</param>
     /// <returns>The Id of the event.</returns>
-    SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Hint? hint = null);
+    SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, SentryHint? hint = null);
 
     /// <summary>
     /// Captures a user feedback.
@@ -60,7 +60,7 @@ public interface ISentryClient
     /// This will be available in callbacks prior to processing the transaction.
     /// </param>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint);
+    void CaptureTransaction(SentryTransaction transaction, Scope? scope, SentryHint? hint);
 
     /// <summary>
     /// Captures a session update.

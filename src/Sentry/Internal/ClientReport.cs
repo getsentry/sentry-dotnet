@@ -3,7 +3,7 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry.Internal;
 
-internal class ClientReport : IJsonSerializable
+internal class ClientReport : ISentryJsonSerializable
 {
     public DateTimeOffset Timestamp { get; }
     public IReadOnlyDictionary<DiscardReasonWithCategory, int> DiscardedEvents { get; }

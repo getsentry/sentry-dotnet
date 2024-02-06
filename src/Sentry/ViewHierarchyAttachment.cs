@@ -3,7 +3,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry View Hierarchy attachment.
 /// </summary>
-public class ViewHierarchyAttachment : Attachment
+public class ViewHierarchyAttachment : SentryAttachment
 {
     /// <summary>
     /// Initializes an instance of <see cref="ViewHierarchyAttachment"/>.

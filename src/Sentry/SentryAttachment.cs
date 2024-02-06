@@ -43,7 +43,7 @@ public enum AttachmentType
 /// Sentry attachment.
 /// </summary>
 [DebuggerDisplay("{" + nameof(FileName) + "}")]
-public class Attachment
+public class SentryAttachment
 {
     /// <summary>
     /// Attachment type.
@@ -66,9 +66,9 @@ public class Attachment
     public string? ContentType { get; }
 
     /// <summary>
-    /// Initializes an instance of <see cref="Attachment"/>.
+    /// Initializes an instance of <see cref="SentryAttachment"/>.
     /// </summary>
-    public Attachment(
+    public SentryAttachment(
         AttachmentType type,
         IAttachmentContent content,
         string fileName,

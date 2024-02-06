@@ -1,10 +1,10 @@
 namespace Sentry.Tests;
 
-public class SessionTests
+public class SentrySessionTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
 
-    public SessionTests(ITestOutputHelper output)
+    public SentrySessionTests(ITestOutputHelper output)
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
     }
@@ -13,7 +13,7 @@ public class SessionTests
     public void Serialization_Session_Success()
     {
         // Arrange
-        var session = new Session(
+        var session = new SentrySession(
             SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
             "bar",
             DateTimeOffset.Parse("2020-01-01T00:00:00+00:00", CultureInfo.InvariantCulture),
@@ -62,7 +62,7 @@ public class SessionTests
     public void CreateUpdate_IncrementsSequenceNumber()
     {
         // Arrange
-        var session = new Session(
+        var session = new SentrySession(
             SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
             "bar",
             DateTimeOffset.Parse("2020-01-01T00:00:00+00:00", CultureInfo.InvariantCulture),

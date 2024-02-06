@@ -4,6 +4,23 @@
 
 ### Dependencies
 
+- Bump CLI from v2.27.0 to v2.28.0 ([#3119](https://github.com/getsentry/sentry-dotnet/pull/3119))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2280)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.27.0...2.28.0)
+
+## 4.0.1
+
+### Fixes 
+
+- To resolve conflicting types due to the SDK adding itself to the global usings: 
+ - The interface `Sentry.ISession` has been renamed to `Sentry.ISentrySession` ([#3110](https://github.com/getsentry/sentry-dotnet/pull/3110))
+ - The interface `Sentry.IJsonSerializable` has been renamed to `Sentry.ISentryJsonSerializable` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
+ - The class `Sentry.Session` has been renamed to `Sentry.SentrySession` ([#3110](https://github.com/getsentry/sentry-dotnet/pull/3110))
+- The class `Sentry.Attachment` has been renamed to `Sentry.SentryAttachment` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
+- The class `Sentry.Hint` has been renamed to `Sentry.SentryHint` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
+
+### Dependencies
+
 - Bump Cocoa SDK from v8.19.0 to v8.20.0 ([#3107](https://github.com/getsentry/sentry-dotnet/pull/3107))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8200)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.19.0...8.20.0)

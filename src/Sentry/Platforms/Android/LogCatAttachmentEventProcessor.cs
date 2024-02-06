@@ -22,7 +22,7 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
         _maxLines = maxLines;
     }
 
-    public SentryEvent Process(SentryEvent @event, Hint hint)
+    public SentryEvent Process(SentryEvent @event, SentryHint hint)
     {
         // If sending has failed once, we have to disable this feature to prevent infinite loops and to allow the SDK to work otherwise
         if (!SendLogcatLogs)
@@ -81,7 +81,7 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
             output.Seek(0, SeekOrigin.Begin);
             var bytes = output.ToArray();
 
-            hint.Attachments.Add(new Attachment(AttachmentType.Default, new ByteAttachmentContent(bytes), "logcat.log", "text/logcat"));
+            hint.Attachments.Add(new SentryAttachment(AttachmentType.Default, new ByteAttachmentContent(bytes), "logcat.log", "text/logcat"));
 
             //hint.AddAttachment($"{filesDir.Path}/{fileName}", AttachmentType.Default, "text/logcat");
 
@@ -100,6 +100,6 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
 
     public SentryEvent Process(SentryEvent @event)
     {
-        return Process(@event, new Hint());
+        return Process(@event, new SentryHint());
     }
 }
