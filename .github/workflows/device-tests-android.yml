@@ -78,30 +78,30 @@ jobs:
 
       # Cached AVD setup per https://github.com/ReactiveCircus/android-emulator-runner/blob/main/README.md
 
-      - name: AVD cache
-        uses: actions/cache@v4
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: ${{ runner.os }}-avd-api${{ matrix.api-level }}
+      # - name: AVD cache
+      #   uses: actions/cache@v4
+      #   id: avd-cache
+      #   with:
+      #     path: |
+      #       ~/.android/avd/*
+      #       ~/.android/adb*
+      #     key: ${{ runner.os }}-avd-api${{ matrix.api-level }}
 
-      - name: Create AVD and generate snapshot for caching
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        timeout-minutes: 30
-        uses: reactivecircus/android-emulator-runner@6b0df4b0efb23bb0ec63d881db79aefbc976e4b2 # pin@v3
-        with:
-          api-level: ${{ matrix.api-level }}
-          # We don't need the Google APIs, but the default images are not available for 32+
-          target: ${{ matrix.api-level >= 32 && 'google_apis' || 'default' }}
-          force-avd-creation: false
-          ram-size: 2048M
-          arch: x86_64
-          disk-size: 4096M
-          emulator-options: -no-window -accel on -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: false
-          script: echo "Generated AVD snapshot for caching."
+      # - name: Create AVD and generate snapshot for caching
+      #   if: steps.avd-cache.outputs.cache-hit != 'true'
+      #   timeout-minutes: 30
+      #   uses: reactivecircus/android-emulator-runner@6b0df4b0efb23bb0ec63d881db79aefbc976e4b2 # pin@v3
+      #   with:
+      #     api-level: ${{ matrix.api-level }}
+      #     # We don't need the Google APIs, but the default images are not available for 32+
+      #     target: ${{ matrix.api-level >= 32 && 'google_apis' || 'default' }}
+      #     force-avd-creation: false
+      #     ram-size: 2048M
+      #     arch: x86_64
+      #     disk-size: 4096M
+      #     emulator-options: -no-window -accel on -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+      #     disable-animations: false
+      #     script: echo "Generated AVD snapshot for caching."
 
       - name: Run Tests
         timeout-minutes: 30
