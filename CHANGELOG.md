@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 4.0.2
 
 ### Fixes
 
