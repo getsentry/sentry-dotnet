@@ -91,7 +91,7 @@ public class SentryTransactionTests
             // transaction in the SDK anyway (by default they don't get sent... but the user can always override this
             // behavior if they need)
             User = new SentryUser { Id = "user-id", Username = "username", Email = "bob@foo.com", IpAddress = "127.0.0.1" },
-            Request = new Request { Method = "POST", Url = "https://user@not.redacted" },
+            Request = new SentryRequest { Method = "POST", Url = "https://user@not.redacted" },
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
             Environment = environment,
             Level = SentryLevel.Fatal,
@@ -107,7 +107,7 @@ public class SentryTransactionTests
             }
         };
 
-        txTracer.Sdk.AddPackage(new Package("name", "version"));
+        txTracer.Sdk.AddPackage(new SentryPackage("name", "version"));
         txTracer.AddBreadcrumb(new Breadcrumb(timestamp, breadcrumbMessage));
         txTracer.AddBreadcrumb(new Breadcrumb(
             timestamp,
@@ -176,7 +176,7 @@ public class SentryTransactionTests
             Description = "desc123",
             Status = SpanStatus.Aborted,
             User = new SentryUser { Id = "user-id" },
-            Request = new Request { Method = "POST" },
+            Request = new SentryRequest { Method = "POST" },
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
             Environment = "environment",
             Level = SentryLevel.Fatal,
@@ -195,7 +195,7 @@ public class SentryTransactionTests
         // Don't overwrite the contexts object as it contains trace data.
         // See https://github.com/getsentry/sentry-dotnet/issues/752
 
-        transaction.Sdk.AddPackage(new Package("name", "version"));
+        transaction.Sdk.AddPackage(new SentryPackage("name", "version"));
         transaction.AddBreadcrumb(new Breadcrumb(timestamp, "crumb"));
         transaction.AddBreadcrumb(new Breadcrumb(
             timestamp,

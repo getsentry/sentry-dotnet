@@ -26,7 +26,7 @@ public static class VerifyExtensions
             .IgnoreMembers<SentryEvent>(
                 _ => _.Modules,
                 _ => _.Release)
-            .IgnoreMembers<Request>(
+            .IgnoreMembers<SentryRequest>(
                 _ => _.Env,
                 _ => _.Url,
                 _ => _.Headers)
@@ -60,9 +60,9 @@ public static class VerifyExtensions
         }
     }
 
-    private class ContextsConverter : WriteOnlyJsonConverter<Contexts>
+    private class ContextsConverter : WriteOnlyJsonConverter<SentryContexts>
     {
-        public override void Write(VerifyJsonWriter writer, Contexts contexts)
+        public override void Write(VerifyJsonWriter writer, SentryContexts contexts)
         {
             var items = contexts
                 .Where(_ => _.Key != "os" &&

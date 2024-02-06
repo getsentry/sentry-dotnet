@@ -11,7 +11,7 @@ namespace Sentry;
 /// Represents Sentry's structured Context.
 /// </summary>
 /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/" />
-public sealed class Contexts : IDictionary<string, object>, ISentryJsonSerializable
+public sealed class SentryContexts : IDictionary<string, object>, ISentryJsonSerializable
 {
     private readonly ConcurrentDictionary<string, object> _innerDictionary = new(StringComparer.Ordinal);
 
@@ -59,16 +59,16 @@ public sealed class Contexts : IDictionary<string, object>, ISentryJsonSerializa
     public Trace Trace => _innerDictionary.GetOrCreate<Trace>(Trace.Type);
 
     /// <summary>
-    /// Initializes an instance of <see cref="Contexts"/>.
+    /// Initializes an instance of <see cref="SentryContexts"/>.
     /// </summary>
-    public Contexts() { }
+    public SentryContexts() { }
 
     /// <summary>
     /// Creates a deep clone of this context.
     /// </summary>
-    internal Contexts Clone()
+    internal SentryContexts Clone()
     {
-        var context = new Contexts();
+        var context = new SentryContexts();
 
         CopyTo(context);
 
@@ -78,7 +78,7 @@ public sealed class Contexts : IDictionary<string, object>, ISentryJsonSerializa
     /// <summary>
     /// Copies the items of the context while cloning the known types.
     /// </summary>
-    internal void CopyTo(Contexts to)
+    internal void CopyTo(SentryContexts to)
     {
         foreach (var kv in this)
         {
@@ -126,9 +126,9 @@ public sealed class Contexts : IDictionary<string, object>, ISentryJsonSerializa
     /// <summary>
     /// Parses from JSON.
     /// </summary>
-    public static Contexts FromJson(JsonElement json)
+    public static SentryContexts FromJson(JsonElement json)
     {
-        var result = new Contexts();
+        var result = new SentryContexts();
 
         foreach (var (name, value) in json.EnumerateObject())
         {
@@ -181,7 +181,7 @@ public sealed class Contexts : IDictionary<string, object>, ISentryJsonSerializa
         return result;
     }
 
-    internal void ReplaceWith(Contexts? contexts)
+    internal void ReplaceWith(SentryContexts? contexts)
     {
         Clear();
 
@@ -196,7 +196,7 @@ public sealed class Contexts : IDictionary<string, object>, ISentryJsonSerializa
         }
     }
 
-    internal Contexts? NullIfEmpty() => _innerDictionary.IsEmpty ? null : this;
+    internal SentryContexts? NullIfEmpty() => _innerDictionary.IsEmpty ? null : this;
 
     /// <inheritdoc/>
     public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => _innerDictionary.GetEnumerator();

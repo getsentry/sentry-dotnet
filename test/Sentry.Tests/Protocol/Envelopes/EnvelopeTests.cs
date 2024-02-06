@@ -629,8 +629,8 @@ public class EnvelopeTests
         var @event = new SentryEvent(ex, timestamp, id)
         {
             User = new SentryUser { Id = "user-id" },
-            Request = new Request { Method = "POST" },
-            Contexts = new Contexts
+            Request = new SentryRequest { Method = "POST" },
+            Contexts = new SentryContexts
             {
                 ["context_key"] = "context_value",
                 ["context_key_with_null_value"] = null

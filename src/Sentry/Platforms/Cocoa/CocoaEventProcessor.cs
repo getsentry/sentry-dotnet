@@ -16,7 +16,7 @@ internal class CocoaEventProcessor : ISentryEventProcessor, IDisposable
         if (json != null)
         {
             var jsonDoc = JsonDocument.Parse(json);
-            var contexts = Contexts.FromJson(jsonDoc.RootElement);
+            var contexts = SentryContexts.FromJson(jsonDoc.RootElement);
             contexts.CopyTo(@event.Contexts);
         }
 

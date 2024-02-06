@@ -6,7 +6,7 @@ namespace Sentry;
 /// <summary>
 /// Represents a package used to compose the SDK.
 /// </summary>
-public sealed class Package : ISentryJsonSerializable
+public sealed class SentryPackage : ISentryJsonSerializable
 {
     /// <summary>
     /// The name of the package.
@@ -26,11 +26,11 @@ public sealed class Package : ISentryJsonSerializable
     public string Version { get; }
 
     /// <summary>
-    /// Creates a new instance of a <see cref="Package"/>.
+    /// Creates a new instance of a <see cref="SentryPackage"/>.
     /// </summary>
     /// <param name="name">The package name.</param>
     /// <param name="version">The package version.</param>
-    public Package(string name, string version)
+    public SentryPackage(string name, string version)
     {
         Name = name;
         Version = version;
@@ -50,12 +50,12 @@ public sealed class Package : ISentryJsonSerializable
     /// <summary>
     /// Parses from JSON.
     /// </summary>
-    public static Package FromJson(JsonElement json)
+    public static SentryPackage FromJson(JsonElement json)
     {
         var name = json.GetProperty("name").GetStringOrThrow();
         var version = json.GetProperty("version").GetStringOrThrow();
 
-        return new Package(name, version);
+        return new SentryPackage(name, version);
     }
 
     /// <inheritdoc />
@@ -75,7 +75,7 @@ public sealed class Package : ISentryJsonSerializable
             return true;
         }
 
-        if (obj is Package package)
+        if (obj is SentryPackage package)
         {
             return Name == package.Name && Version == package.Version;
         }

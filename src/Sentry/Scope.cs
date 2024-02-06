@@ -85,19 +85,19 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public SentryLevel? Level { get; set; }
 
-    private Request? _request;
+    private SentryRequest? _request;
 
     /// <inheritdoc />
-    public Request Request
+    public SentryRequest Request
     {
-        get => _request ??= new Request();
+        get => _request ??= new SentryRequest();
         set => _request = value;
     }
 
-    private readonly Contexts _contexts = new();
+    private readonly SentryContexts _contexts = new();
 
     /// <inheritdoc />
-    public Contexts Contexts
+    public SentryContexts Contexts
     {
         get => _contexts;
         set => _contexts.ReplaceWith(value);
