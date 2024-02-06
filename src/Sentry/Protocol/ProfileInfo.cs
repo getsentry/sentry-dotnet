@@ -15,10 +15,10 @@ internal sealed class ProfileInfo : ISentryJsonSerializable
 
     public DebugMeta DebugMeta { get; set; } = new() { Images = new() };
 
-    private readonly Contexts _contexts = new();
+    private readonly SentryContexts _contexts = new();
 
     /// <inheritdoc />
-    public Contexts Contexts
+    public SentryContexts Contexts
     {
         get => _contexts;
         set => _contexts.ReplaceWith(value);

@@ -25,7 +25,7 @@ namespace Sentry;
 /// }
 /// </example>
 /// <see href="https://develop.sentry.dev/sdk/event-payloads/request/"/>
-public sealed class Request : ISentryJsonSerializable
+public sealed class SentryRequest : ISentryJsonSerializable
 {
     internal Dictionary<string, string>? InternalEnv { get; private set; }
 
@@ -113,16 +113,16 @@ public sealed class Request : ISentryJsonSerializable
     /// This is a shallow copy.
     /// References like <see cref="Data"/> could hold a mutable, non-thread-safe object.
     /// </remarks>
-    public Request Clone()
+    public SentryRequest Clone()
     {
-        var request = new Request();
+        var request = new SentryRequest();
 
         CopyTo(request);
 
         return request;
     }
 
-    internal void CopyTo(Request? request)
+    internal void CopyTo(SentryRequest? request)
     {
         if (request == null)
         {
@@ -161,7 +161,7 @@ public sealed class Request : ISentryJsonSerializable
     /// <summary>
     /// Parses from JSON.
     /// </summary>
-    public static Request FromJson(JsonElement json)
+    public static SentryRequest FromJson(JsonElement json)
     {
         var env = json.GetPropertyOrNull("env")?.GetStringDictionaryOrNull();
         var other = json.GetPropertyOrNull("other")?.GetStringDictionaryOrNull();
@@ -172,7 +172,7 @@ public sealed class Request : ISentryJsonSerializable
         var query = json.GetPropertyOrNull("query_string")?.GetString();
         var cookies = json.GetPropertyOrNull("cookies")?.GetString();
 
-        return new Request
+        return new SentryRequest
         {
             InternalEnv = env?.WhereNotNullValue().ToDict(),
             InternalOther = other?.WhereNotNullValue().ToDict(),

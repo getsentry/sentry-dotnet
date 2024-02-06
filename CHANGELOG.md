@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Fixes
+
+- To resolve conflicting types due to the SDK adding itself to the global usings: 
+ - The class `Sentry.Context` has been renamed to `Sentry.SentryContext` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
+ - The class `Sentry.Package` has been renamed to `Sentry.SentryPackage` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
+ - The class `Sentry.Request` has been renamed to `Sentry.SentryRequest` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
+
 ### Dependencies
 
 - Bump CLI from v2.27.0 to v2.28.0 ([#3119](https://github.com/getsentry/sentry-dotnet/pull/3119))
@@ -16,8 +23,8 @@
  - The interface `Sentry.ISession` has been renamed to `Sentry.ISentrySession` ([#3110](https://github.com/getsentry/sentry-dotnet/pull/3110))
  - The interface `Sentry.IJsonSerializable` has been renamed to `Sentry.ISentryJsonSerializable` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
  - The class `Sentry.Session` has been renamed to `Sentry.SentrySession` ([#3110](https://github.com/getsentry/sentry-dotnet/pull/3110))
-- The class `Sentry.Attachment` has been renamed to `Sentry.SentryAttachment` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
-- The class `Sentry.Hint` has been renamed to `Sentry.SentryHint` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
+ - The class `Sentry.Attachment` has been renamed to `Sentry.SentryAttachment` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
+ - The class `Sentry.Hint` has been renamed to `Sentry.SentryHint` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
 
 ### Dependencies
 

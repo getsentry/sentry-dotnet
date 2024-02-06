@@ -67,35 +67,6 @@ namespace Sentry
         public const string Platform = "csharp";
         public const int ProtocolVersion = 7;
     }
-    public sealed class Contexts : Sentry.ISentryJsonSerializable, System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<string, object>>, System.Collections.Generic.IDictionary<string, object>, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>, System.Collections.IEnumerable
-    {
-        public Contexts() { }
-        public Sentry.Protocol.App App { get; }
-        public Sentry.Protocol.Browser Browser { get; }
-        public int Count { get; }
-        public Sentry.Protocol.Device Device { get; }
-        public Sentry.Protocol.Gpu Gpu { get; }
-        public bool IsReadOnly { get; }
-        public object this[string key] { get; set; }
-        public System.Collections.Generic.ICollection<string> Keys { get; }
-        public Sentry.Protocol.OperatingSystem OperatingSystem { get; }
-        public Sentry.Protocol.Response Response { get; }
-        public Sentry.Protocol.Runtime Runtime { get; }
-        public Sentry.Protocol.Trace Trace { get; }
-        public System.Collections.Generic.ICollection<object> Values { get; }
-        public void Add(System.Collections.Generic.KeyValuePair<string, object> item) { }
-        public void Add(string key, object value) { }
-        public void Clear() { }
-        public bool Contains(System.Collections.Generic.KeyValuePair<string, object> item) { }
-        public bool ContainsKey(string key) { }
-        public void CopyTo(System.Collections.Generic.KeyValuePair<string, object>[] array, int arrayIndex) { }
-        public System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, object>> GetEnumerator() { }
-        public bool Remove(System.Collections.Generic.KeyValuePair<string, object> item) { }
-        public bool Remove(string key) { }
-        public bool TryGetValue(string key, out object value) { }
-        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
-        public static Sentry.Contexts FromJson(System.Text.Json.JsonElement json) { }
-    }
     [System.Obsolete("WARNING: This method deliberately causes a crash, and should not be used in a rea" +
         "l application.")]
     public enum CrashType
@@ -195,13 +166,13 @@ namespace Sentry
     public interface IEventLike : Sentry.IHasExtra, Sentry.IHasTags
     {
         System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
-        Sentry.Contexts Contexts { get; set; }
+        Sentry.SentryContexts Contexts { get; set; }
         string? Distribution { get; set; }
         string? Environment { get; set; }
         System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
         Sentry.SentryLevel? Level { get; set; }
         string? Release { get; set; }
-        Sentry.Request Request { get; set; }
+        Sentry.SentryRequest Request { get; set; }
         Sentry.SdkVersion Sdk { get; }
         string? TransactionName { get; set; }
         Sentry.SentryUser User { get; set; }
@@ -393,51 +364,25 @@ namespace Sentry
             Exbibyte = 13,
         }
     }
-    public sealed class Package : Sentry.ISentryJsonSerializable
-    {
-        public Package(string name, string version) { }
-        public string Name { get; }
-        public string Version { get; }
-        public override bool Equals(object? obj) { }
-        public override int GetHashCode() { }
-        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
-        public static Sentry.Package FromJson(System.Text.Json.JsonElement json) { }
-    }
     public enum ReportAssembliesMode
     {
         None = 0,
         Version = 1,
         InformationalVersion = 2,
     }
-    public sealed class Request : Sentry.ISentryJsonSerializable
-    {
-        public Request() { }
-        public string? ApiTarget { get; set; }
-        public string? Cookies { get; set; }
-        public object? Data { get; set; }
-        public System.Collections.Generic.IDictionary<string, string> Env { get; }
-        public System.Collections.Generic.IDictionary<string, string> Headers { get; }
-        public string? Method { get; set; }
-        public System.Collections.Generic.IDictionary<string, string> Other { get; }
-        public string? QueryString { get; set; }
-        public string? Url { get; set; }
-        public Sentry.Request Clone() { }
-        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
-        public static Sentry.Request FromJson(System.Text.Json.JsonElement json) { }
-    }
     public class Scope : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags
     {
         public Scope(Sentry.SentryOptions? options) { }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.SentryAttachment> Attachments { get; }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
-        public Sentry.Contexts Contexts { get; set; }
+        public Sentry.SentryContexts Contexts { get; set; }
         public string? Distribution { get; set; }
         public string? Environment { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
         public System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
         public Sentry.SentryLevel? Level { get; set; }
         public string? Release { get; set; }
-        public Sentry.Request Request { get; set; }
+        public Sentry.SentryRequest Request { get; set; }
         public Sentry.SdkVersion Sdk { get; }
         public Sentry.ISpan? Span { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, string> Tags { get; }
@@ -479,7 +424,7 @@ namespace Sentry
     {
         public SdkVersion() { }
         public string? Name { get; set; }
-        public System.Collections.Generic.IEnumerable<Sentry.Package> Packages { get; }
+        public System.Collections.Generic.IEnumerable<Sentry.SentryPackage> Packages { get; }
         public string? Version { get; set; }
         public void AddIntegration(string integration) { }
         public void AddPackage(string name, string version) { }
@@ -517,13 +462,42 @@ namespace Sentry
         public static void Flush(this Sentry.ISentryClient client, System.TimeSpan timeout) { }
         public static System.Threading.Tasks.Task FlushAsync(this Sentry.ISentryClient client) { }
     }
+    public sealed class SentryContexts : Sentry.ISentryJsonSerializable, System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<string, object>>, System.Collections.Generic.IDictionary<string, object>, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>, System.Collections.IEnumerable
+    {
+        public SentryContexts() { }
+        public Sentry.Protocol.App App { get; }
+        public Sentry.Protocol.Browser Browser { get; }
+        public int Count { get; }
+        public Sentry.Protocol.Device Device { get; }
+        public Sentry.Protocol.Gpu Gpu { get; }
+        public bool IsReadOnly { get; }
+        public object this[string key] { get; set; }
+        public System.Collections.Generic.ICollection<string> Keys { get; }
+        public Sentry.Protocol.OperatingSystem OperatingSystem { get; }
+        public Sentry.Protocol.Response Response { get; }
+        public Sentry.Protocol.Runtime Runtime { get; }
+        public Sentry.Protocol.Trace Trace { get; }
+        public System.Collections.Generic.ICollection<object> Values { get; }
+        public void Add(System.Collections.Generic.KeyValuePair<string, object> item) { }
+        public void Add(string key, object value) { }
+        public void Clear() { }
+        public bool Contains(System.Collections.Generic.KeyValuePair<string, object> item) { }
+        public bool ContainsKey(string key) { }
+        public void CopyTo(System.Collections.Generic.KeyValuePair<string, object>[] array, int arrayIndex) { }
+        public System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string, object>> GetEnumerator() { }
+        public bool Remove(System.Collections.Generic.KeyValuePair<string, object> item) { }
+        public bool Remove(string key) { }
+        public bool TryGetValue(string key, out object value) { }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+        public static Sentry.SentryContexts FromJson(System.Text.Json.JsonElement json) { }
+    }
     [System.Diagnostics.DebuggerDisplay("{GetType().Name,nq}: {EventId,nq}")]
     public sealed class SentryEvent : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISentryJsonSerializable
     {
         public SentryEvent() { }
         public SentryEvent(System.Exception? exception) { }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
-        public Sentry.Contexts Contexts { get; set; }
+        public Sentry.SentryContexts Contexts { get; set; }
         public System.Collections.Generic.List<Sentry.Protocol.DebugImage>? DebugImages { get; set; }
         public string? Distribution { get; set; }
         public string? Environment { get; set; }
@@ -537,7 +511,7 @@ namespace Sentry
         public System.Collections.Generic.IDictionary<string, string> Modules { get; }
         public string? Platform { get; set; }
         public string? Release { get; set; }
-        public Sentry.Request Request { get; set; }
+        public Sentry.SentryRequest Request { get; set; }
         public Sentry.SdkVersion Sdk { get; }
         public System.Collections.Generic.IEnumerable<Sentry.Protocol.SentryException>? SentryExceptions { get; set; }
         public System.Collections.Generic.IEnumerable<Sentry.SentryThread>? SentryThreads { get; set; }
@@ -735,6 +709,32 @@ namespace Sentry
             where TProcessor : Sentry.Extensibility.ISentryTransactionProcessor { }
         public static Sentry.SentryOptions UseStackTraceFactory(this Sentry.SentryOptions options, Sentry.Extensibility.ISentryStackTraceFactory sentryStackTraceFactory) { }
     }
+    public sealed class SentryPackage : Sentry.ISentryJsonSerializable
+    {
+        public SentryPackage(string name, string version) { }
+        public string Name { get; }
+        public string Version { get; }
+        public override bool Equals(object? obj) { }
+        public override int GetHashCode() { }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+        public static Sentry.SentryPackage FromJson(System.Text.Json.JsonElement json) { }
+    }
+    public sealed class SentryRequest : Sentry.ISentryJsonSerializable
+    {
+        public SentryRequest() { }
+        public string? ApiTarget { get; set; }
+        public string? Cookies { get; set; }
+        public object? Data { get; set; }
+        public System.Collections.Generic.IDictionary<string, string> Env { get; }
+        public System.Collections.Generic.IDictionary<string, string> Headers { get; }
+        public string? Method { get; set; }
+        public System.Collections.Generic.IDictionary<string, string> Other { get; }
+        public string? QueryString { get; set; }
+        public string? Url { get; set; }
+        public Sentry.SentryRequest Clone() { }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+        public static Sentry.SentryRequest FromJson(System.Text.Json.JsonElement json) { }
+    }
     public static class SentrySdk
     {
         public static bool IsEnabled { get; }
@@ -887,7 +887,7 @@ namespace Sentry
         public SentryTransaction(string name, string operation) { }
         public SentryTransaction(string name, string operation, Sentry.TransactionNameSource nameSource) { }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
-        public Sentry.Contexts Contexts { get; set; }
+        public Sentry.SentryContexts Contexts { get; set; }
         public string? Description { get; set; }
         public string? Distribution { get; set; }
         public System.DateTimeOffset? EndTimestamp { get; }
@@ -906,7 +906,7 @@ namespace Sentry
         public Sentry.SpanId? ParentSpanId { get; }
         public string? Platform { get; set; }
         public string? Release { get; set; }
-        public Sentry.Request Request { get; set; }
+        public Sentry.SentryRequest Request { get; set; }
         public double? SampleRate { get; }
         public Sentry.SdkVersion Sdk { get; }
         public Sentry.SpanId SpanId { get; }
@@ -1108,7 +1108,7 @@ namespace Sentry
     {
         public TransactionTracer(Sentry.IHub hub, Sentry.ITransactionContext context) { }
         public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
-        public Sentry.Contexts Contexts { get; set; }
+        public Sentry.SentryContexts Contexts { get; set; }
         public string? Description { get; set; }
         public string? Distribution { get; set; }
         public System.DateTimeOffset? EndTimestamp { get; }
@@ -1126,7 +1126,7 @@ namespace Sentry
         public Sentry.SpanId? ParentSpanId { get; }
         public string? Platform { get; set; }
         public string? Release { get; set; }
-        public Sentry.Request Request { get; set; }
+        public Sentry.SentryRequest Request { get; set; }
         public double? SampleRate { get; }
         public Sentry.SdkVersion Sdk { get; }
         public Sentry.SpanId SpanId { get; }

@@ -12,8 +12,8 @@ public partial class SentryEventTests
         var sut = new SentryEvent(ex, timestamp, id)
         {
             User = new SentryUser { Id = "user-id" },
-            Request = new Request { Method = "POST" },
-            Contexts = new Contexts
+            Request = new SentryRequest { Method = "POST" },
+            Contexts = new SentryContexts
             {
                 ["context_key"] = "context_value",
                 [".NET Framework"] = new Dictionary<string, string>
@@ -49,7 +49,7 @@ public partial class SentryEventTests
             },
         };
 
-        sut.Sdk.AddPackage(new Package("name", "version"));
+        sut.Sdk.AddPackage(new SentryPackage("name", "version"));
         sut.Sdk.AddIntegration("integration");
         sut.AddBreadcrumb(new Breadcrumb(timestamp, "crumb"));
         sut.AddBreadcrumb(new Breadcrumb(

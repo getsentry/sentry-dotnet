@@ -45,7 +45,7 @@ internal class SentryHttpFailedRequestHandler : SentryFailedRequestHandler
             var hint = new SentryHint(HintTypes.HttpResponseMessage, response);
 
             var uri = response.RequestMessage?.RequestUri;
-            var sentryRequest = new Request
+            var sentryRequest = new SentryRequest
             {
                 QueryString = uri?.Query,
                 Method = response.RequestMessage?.Method.Method.ToUpperInvariant()

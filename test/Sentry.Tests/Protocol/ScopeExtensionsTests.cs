@@ -1155,7 +1155,7 @@ public class ScopeExtensionsTests
         var target = _fixture.GetSut();
 
         var sut = _fixture.GetSut();
-        sut.Request = new Request
+        sut.Request = new SentryRequest
         {
             Method = "method"
         };
@@ -1173,7 +1173,7 @@ public class ScopeExtensionsTests
         target.Request.Other.Add("InternalOther", "Other");
 
         var sut = _fixture.GetSut();
-        sut.Request = new Request
+        sut.Request = new SentryRequest
         {
             Env = { { "sut: InternalEnv", "Env" } },
             Headers = { { "sut: InternalHeaders", "Headers" } },
@@ -1191,7 +1191,7 @@ public class ScopeExtensionsTests
     public void Apply_Request_NotOnTarget_SetFromSource()
     {
         var sut = _fixture.GetSut();
-        sut.Request = new Request
+        sut.Request = new SentryRequest
         {
             Env = { { "sut: InternalEnv", "Env" } },
             Headers = { { "sut: InternalHeaders", "Headers" } },
@@ -1221,7 +1221,7 @@ public class ScopeExtensionsTests
     {
         var targetData = new object();
         var target = _fixture.GetSut();
-        var request = new Request
+        var request = new SentryRequest
         {
             Cookies = "cookies",
             Data = targetData,
@@ -1232,7 +1232,7 @@ public class ScopeExtensionsTests
         target.Request = request;
 
         var sut = _fixture.GetSut();
-        sut.Request = new Request
+        sut.Request = new SentryRequest
         {
             Cookies = "sut: cookies",
             Data = new object(),

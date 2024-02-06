@@ -44,7 +44,7 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
             var @event = new SentryEvent(exception);
             var hint = new SentryHint(HintTypes.HttpResponseMessage, response);
 
-            var sentryRequest = new Request
+            var sentryRequest = new SentryRequest
             {
                 QueryString = request.RequestUri?.Query,
                 Method = request.Method.Method.ToUpperInvariant(),
