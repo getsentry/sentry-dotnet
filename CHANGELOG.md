@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- ASP.NET Core: Blocking call detection. An event with the stack trace of the blocking call will be captured as event. ([#2709](https://github.com/getsentry/sentry-dotnet/pull/2709))
+    - NOTE: Verify this in test/staging before prod! This could result in several events if you have many blocking calls in a high throughput endpoint.
+    - Opt-in via `options.CaptureBlockingCalls = true`
+
 ## 4.0.2
 
 ### Fixes
@@ -7,9 +15,6 @@
 - MAUI Screenshot support. You can opt-in via `SentryMauiOptions.AttachScreenshots` ([#2965](https://github.com/getsentry/sentry-dotnet/pull/2965))
    - Supports Android and iOS only. Windows is not supported.
 - MAUI: App context has `in_foreground` indicating whether app was on the background or foreground. ([#2983](https://github.com/getsentry/sentry-dotnet/pull/2983))
-- ASP.NET Core: Blocking call detection. An event with the stack trace of the blocking call will be captured as event. ([#2709](https://github.com/getsentry/sentry-dotnet/pull/2709))
-  - NOTE: Verify this in test/staging before prod! This could result in several events if you have many blocking calls in a high throughput endpoint.
-  - Opt-in via `options.CaptureBlockingCalls = true`
 - To resolve conflicting types due to the SDK adding itself to the global usings: 
  - The class `Sentry.Context` has been renamed to `Sentry.SentryContext` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
  - The class `Sentry.Package` has been renamed to `Sentry.SentryPackage` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
