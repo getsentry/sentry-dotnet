@@ -3,7 +3,7 @@ namespace Sentry;
 /// <summary>
 /// Constant values.
 /// </summary>
-public static class Constants
+public static class SentryConstants
 {
     /// <summary>
     /// Empty string disables the SDK.
