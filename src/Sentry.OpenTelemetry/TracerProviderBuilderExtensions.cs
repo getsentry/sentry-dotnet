@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Trace;
@@ -10,6 +11,9 @@ namespace Sentry.OpenTelemetry;
 /// </summary>
 public static class TracerProviderBuilderExtensions
 {
+    private const string SentryNotInitializedMessage =
+        "No IHub service registered and SentrySdk.CurrentHub is null. Sentry doesn't appear to have been initialized correctly.";
+
     /// <summary>
     /// Ensures OpenTelemetry trace information is sent to Sentry.
     /// </summary>
@@ -41,7 +45,12 @@ public static class TracerProviderBuilderExtensions
                 enrichers.Add(new AspNetCoreEnricher(userFactory));
             }
 
-            var hub = services.GetRequiredService<IHub>();
+            var hub = services.GetService<IHub>() ?? SentrySdk.CurrentHub;
+            if (hub.IsEnabled)
+            {
+                var logger = services.GetService<ILogger<TracerProviderBuilder>>();
+                logger?.LogWarning(SentryNotInitializedMessage);
+            }
             return new SentrySpanProcessor(hub, enrichers);
         });
     }
