@@ -91,4 +91,20 @@ public class SubstringOrRegexPatternTests
         var isMatch = target.IsMatch("aBcDeFgHi");
         Assert.False(isMatch);
     }
+
+    [Fact]
+    public void SubstringOrRegexPattern_ImplicitlyConvertsFromString()
+    {
+        SubstringOrRegexPattern target = "^abc.*ghi$";
+        var isMatch = target.IsMatch("abcdefghi");
+        Assert.True(isMatch);
+    }
+
+    [Fact]
+    public void SubstringOrRegexPattern_ImplicitlyConvertsFromRegex()
+    {
+        SubstringOrRegexPattern target = new Regex("^abc.*ghi$");
+        var isMatch = target.IsMatch("abcdefghi");
+        Assert.True(isMatch);
+    }
 }

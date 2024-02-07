@@ -12,7 +12,7 @@ public class PackageTests
     [Fact]
     public void SerializeObject_AllPropertiesSetToNonDefault_SerializesValidObject()
     {
-        var sut = new Package("nuget:Sentry", "1.0.0-preview");
+        var sut = new SentryPackage("nuget:Sentry", "1.0.0-preview");
 
         var actual = sut.ToJsonString(_testOutputLogger);
 
@@ -21,7 +21,7 @@ public class PackageTests
 
     [Theory]
     [MemberData(nameof(TestCases))]
-    public void SerializeObject_TestCase_SerializesAsExpected((Package msg, string serialized) @case)
+    public void SerializeObject_TestCase_SerializesAsExpected((SentryPackage msg, string serialized) @case)
     {
         var actual = @case.msg.ToJsonString(_testOutputLogger);
 
@@ -30,8 +30,8 @@ public class PackageTests
 
     public static IEnumerable<object[]> TestCases()
     {
-        yield return new object[] { (new Package(null, null), "{}") };
-        yield return new object[] { (new Package("nuget:Sentry", null), """{"name":"nuget:Sentry"}""") };
-        yield return new object[] { (new Package(null, "0.0.0-alpha"), """{"version":"0.0.0-alpha"}""") };
+        yield return new object[] { (new SentryPackage(null, null), "{}") };
+        yield return new object[] { (new SentryPackage("nuget:Sentry", null), """{"name":"nuget:Sentry"}""") };
+        yield return new object[] { (new SentryPackage(null, "0.0.0-alpha"), """{"version":"0.0.0-alpha"}""") };
     }
 }

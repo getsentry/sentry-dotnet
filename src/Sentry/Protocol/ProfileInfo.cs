@@ -1,5 +1,4 @@
 using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol;
@@ -7,7 +6,7 @@ namespace Sentry.Protocol;
 /// <summary>
 /// Profiling context information.
 /// </summary>
-internal sealed class ProfileInfo : IJsonSerializable
+internal sealed class ProfileInfo : ISentryJsonSerializable
 {
     /// <summary>
     /// Profile's event ID.
@@ -16,10 +15,10 @@ internal sealed class ProfileInfo : IJsonSerializable
 
     public DebugMeta DebugMeta { get; set; } = new() { Images = new() };
 
-    private readonly Contexts _contexts = new();
+    private readonly SentryContexts _contexts = new();
 
     /// <inheritdoc />
-    public Contexts Contexts
+    public SentryContexts Contexts
     {
         get => _contexts;
         set => _contexts.ReplaceWith(value);
@@ -35,7 +34,7 @@ internal sealed class ProfileInfo : IJsonSerializable
 
     public string? Release { get; set; }
 
-    public Transaction? Transaction { get; set; }
+    public SentryTransaction? Transaction { get; set; }
 
 
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)

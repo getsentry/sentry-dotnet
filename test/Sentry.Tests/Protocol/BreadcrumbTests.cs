@@ -27,12 +27,12 @@ public class BreadcrumbTests
         var level = BreadcrumbLevel.Error;
 
         var breadcrumb = new Breadcrumb(
-            timestamp : timestamp,
-            message : message,
-            type : type,
-            data : breadcrumbData,
-            category : category,
-            level : level
+            timestamp: timestamp,
+            message: message,
+            type: type,
+            data: breadcrumbData,
+            category: category,
+            level: level
         );
 
         // Act

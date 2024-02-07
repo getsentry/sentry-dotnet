@@ -103,6 +103,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 transactionContext, new Dictionary<string, object?>(), dynamicSamplingContext
                 );
             transaction.StartTimestamp = data.StartTimeUtc;
+            _hub.ConfigureScope(scope => scope.Transaction = transaction);
             _map[data.SpanId] = transaction;
         }
     }
@@ -113,7 +114,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         // Make a dictionary of the attributes (aka "tags") for faster lookup when used throughout the processor.
         var attributes = data.TagObjects.ToDict();
 
-        if (attributes.TryGetTypedValue("http.url", out string? url) && (_options?.IsSentryRequest(url) ?? false))
+        var url =
+            attributes.TryGetTypedValue(OtelSemanticConventions.AttributeUrlFull, out string? tempUrl) ? tempUrl
+            : attributes.TryGetTypedValue(OtelSemanticConventions.AttributeHttpUrl, out string? fallbackUrl) ? fallbackUrl // Falling back to pre-1.5.0
+            : null;
+
+        if (!string.IsNullOrEmpty(url) && (_options?.IsSentryRequest(url) ?? false))
         {
             _options?.DiagnosticLogger?.LogDebug($"Ignoring Activity {data.SpanId} for Sentry request.");
 
@@ -187,7 +193,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     {
         while (activity is not null)
         {
-            if (activity.GetFused<Scope>() is {} savedScope)
+            if (activity.GetFused<Scope>() is { } savedScope)
             {
                 return savedScope;
             }
@@ -205,7 +211,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         {
             return GetErrorSpanStatus(attributes);
         }
-        return status switch {
+        return status switch
+        {
             ActivityStatusCode.Unset => SpanStatus.Ok,
             ActivityStatusCode.Ok => SpanStatus.Ok,
             ActivityStatusCode.Error => GetErrorSpanStatus(attributes),

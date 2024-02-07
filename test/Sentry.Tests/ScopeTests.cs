@@ -295,8 +295,8 @@ public class ScopeTests
     {
         // Arrange
         var scope = new Scope();
-        var attachment = new Attachment(default, default, default, default);
-        var attachment2 = new Attachment(default, default, default, default);
+        var attachment = new SentryAttachment(default, default, default, default);
+        var attachment2 = new SentryAttachment(default, default, default, default);
 
         // Act
         scope.AddAttachment(attachment);
@@ -400,7 +400,7 @@ public class ScopeTests
     {
         // Arrange
         var options = new SentryOptions();
-        Hint receivedHint = null;
+        SentryHint receivedHint = null;
         options.SetBeforeBreadcrumb((breadcrumb, hint) =>
         {
             receivedHint = hint;
@@ -409,7 +409,7 @@ public class ScopeTests
         var scope = new Scope(options);
 
         // Act
-        var expectedHint = new Hint();
+        var expectedHint = new SentryHint();
         scope.AddBreadcrumb(new Breadcrumb(), expectedHint);
 
         // Assert
@@ -421,7 +421,7 @@ public class ScopeTests
     {
         // Arrange
         var options = new SentryOptions();
-        Hint hint = null;
+        SentryHint hint = null;
         options.SetBeforeBreadcrumb((b, h) =>
         {
             hint = h;
@@ -474,9 +474,9 @@ public class ScopeTests
         }
 
         // Assert
-        observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Email == expectedEmail));
-        observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Id == expectedId));
-        observer.Received(expectedCount).SetUser(Arg.Is<User>(user => user.Username == expectedUsername));
+        observer.Received(expectedCount).SetUser(Arg.Is<SentryUser>(user => user.Email == expectedEmail));
+        observer.Received(expectedCount).SetUser(Arg.Is<SentryUser>(user => user.Id == expectedId));
+        observer.Received(expectedCount).SetUser(Arg.Is<SentryUser>(user => user.Username == expectedUsername));
     }
 
     [Theory]
@@ -623,7 +623,7 @@ public static class ScopeTestExtensions
     {
         scope.Request = new() { Data = $"{salt} request" };
         scope.Contexts.Add($"{salt} context", "{}");
-        scope.User = new User() { Username = $"{salt} username" };
+        scope.User = new SentryUser() { Username = $"{salt} username" };
         scope.Release = $"{salt} release";
         scope.Distribution = $"{salt} distribution";
         scope.Environment = $"{salt} environment";
@@ -633,7 +633,7 @@ public static class ScopeTestExtensions
         scope.AddBreadcrumb(new(message: $"{salt} breadcrumb"));
         scope.SetExtra("extra", $"{salt} extra");
         scope.SetTag("tag", $"{salt} tag");
-        scope.AddAttachment(new Attachment(default, default, default, $"{salt} attachment"));
+        scope.AddAttachment(new SentryAttachment(default, default, default, $"{salt} attachment"));
     }
 
     public static void ShouldBeEquivalentTo(this Scope source, Scope target)

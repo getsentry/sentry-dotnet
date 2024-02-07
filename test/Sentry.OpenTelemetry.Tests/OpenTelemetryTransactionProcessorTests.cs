@@ -7,7 +7,7 @@ public class OpenTelemetryTransactionProcessorTests : ActivitySourceTests
     {
         // Arrange
         using var activity = Tracer.StartActivity("Parent");
-        var transaction = new Transaction("name", "operation");
+        var transaction = new SentryTransaction("name", "operation");
         var processor = new OpenTelemetryTransactionProcessor();
 
         // Act
@@ -22,7 +22,7 @@ public class OpenTelemetryTransactionProcessorTests : ActivitySourceTests
     public void Process_WithoutActivity_DoesNotModifyTransaction()
     {
         // Arrange
-        var transaction = new Transaction("name", "operation");
+        var transaction = new SentryTransaction("name", "operation");
         var previousTraceId = transaction.Contexts.Trace.TraceId;
         var previousSpanId = transaction.Contexts.Trace.SpanId;
         var processor = new OpenTelemetryTransactionProcessor();

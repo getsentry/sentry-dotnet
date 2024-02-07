@@ -68,7 +68,7 @@ public class SentryOptions
     /// </summary>
     public bool IsGlobalModeEnabled
     {
-        get => _isGlobalModeEnabled ??= Runtime.Current.IsBrowserWasm();
+        get => _isGlobalModeEnabled ??= SentryRuntime.Current.IsBrowserWasm();
         set => _isGlobalModeEnabled = value;
     }
 #endif
@@ -187,9 +187,17 @@ public class SentryOptions
 #endif
 
 #if NET5_0_OR_GREATER && !__MOBILE__
-            if ((_defaultIntegrations & DefaultIntegrations.WinUiUnhandledExceptionIntegration) != 0)
+            if ((_defaultIntegrations & DefaultIntegrations.WinUiUnhandledExceptionIntegration) != 0
+                && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 yield return new WinUIUnhandledExceptionIntegration();
+            }
+#endif
+
+#if NET8_0_OR_GREATER
+            if ((_defaultIntegrations & DefaultIntegrations.SystemDiagnosticsMetricsIntegration) != 0)
+            {
+                yield return new SystemDiagnosticsMetricsIntegration();
             }
 #endif
 
@@ -415,9 +423,9 @@ public class SentryOptions
         return string.Equals(requestBaseUrl, _sentryBaseUrl.Value, StringComparison.OrdinalIgnoreCase);
     }
 
-    private Func<SentryEvent, Hint, SentryEvent?>? _beforeSend;
+    private Func<SentryEvent, SentryHint, SentryEvent?>? _beforeSend;
 
-    internal Func<SentryEvent, Hint, SentryEvent?>? BeforeSendInternal => _beforeSend;
+    internal Func<SentryEvent, SentryHint, SentryEvent?>? BeforeSendInternal => _beforeSend;
 
     /// <summary>
     /// Configures a callback function to be invoked before sending an event to Sentry
@@ -427,7 +435,7 @@ public class SentryOptions
     /// application a chance to inspect and/or modify the event before it's sent. If the
     /// event should not be sent at all, return null from the callback.
     /// </remarks>
-    public void SetBeforeSend(Func<SentryEvent, Hint, SentryEvent?> beforeSend)
+    public void SetBeforeSend(Func<SentryEvent, SentryHint, SentryEvent?> beforeSend)
     {
         _beforeSend = beforeSend;
     }
@@ -445,15 +453,15 @@ public class SentryOptions
         _beforeSend = (@event, _) => beforeSend(@event);
     }
 
-    private Func<Transaction, Hint, Transaction?>? _beforeSendTransaction;
+    private Func<SentryTransaction, SentryHint, SentryTransaction?>? _beforeSendTransaction;
 
-    internal Func<Transaction, Hint, Transaction?>? BeforeSendTransactionInternal => _beforeSendTransaction;
+    internal Func<SentryTransaction, SentryHint, SentryTransaction?>? BeforeSendTransactionInternal => _beforeSendTransaction;
 
     /// <summary>
     /// Configures a callback to invoke before sending a transaction to Sentry
     /// </summary>
     /// <param name="beforeSendTransaction">The callback</param>
-    public void SetBeforeSendTransaction(Func<Transaction, Hint, Transaction?> beforeSendTransaction)
+    public void SetBeforeSendTransaction(Func<SentryTransaction, SentryHint, SentryTransaction?> beforeSendTransaction)
     {
         _beforeSendTransaction = beforeSendTransaction;
     }
@@ -462,14 +470,14 @@ public class SentryOptions
     /// Configures a callback to invoke before sending a transaction to Sentry
     /// </summary>
     /// <param name="beforeSendTransaction">The callback</param>
-    public void SetBeforeSendTransaction(Func<Transaction, Transaction?> beforeSendTransaction)
+    public void SetBeforeSendTransaction(Func<SentryTransaction, SentryTransaction?> beforeSendTransaction)
     {
         _beforeSendTransaction = (transaction, _) => beforeSendTransaction(transaction);
     }
 
-    private Func<Breadcrumb, Hint, Breadcrumb?>? _beforeBreadcrumb;
+    private Func<Breadcrumb, SentryHint, Breadcrumb?>? _beforeBreadcrumb;
 
-    internal Func<Breadcrumb, Hint, Breadcrumb?>? BeforeBreadcrumbInternal => _beforeBreadcrumb;
+    internal Func<Breadcrumb, SentryHint, Breadcrumb?>? BeforeBreadcrumbInternal => _beforeBreadcrumb;
 
     /// <summary>
     /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
@@ -478,7 +486,7 @@ public class SentryOptions
     /// Gives a chance to inspect and modify the breadcrumb. If null is returned, the
     /// breadcrumb will be discarded. Otherwise the result of the callback will be stored.
     /// </remarks>
-    public void SetBeforeBreadcrumb(Func<Breadcrumb, Hint, Breadcrumb?> beforeBreadcrumb)
+    public void SetBeforeBreadcrumb(Func<Breadcrumb, SentryHint, Breadcrumb?> beforeBreadcrumb)
     {
         _beforeBreadcrumb = beforeBreadcrumb;
     }
@@ -708,7 +716,7 @@ public class SentryOptions
     public IList<SubstringOrRegexPattern> FailedRequestTargets
     {
         get => _failedRequestTargets.Value;
-        set => _failedRequestTargets = new(value.SetWithConfigBinding);
+        set => _failedRequestTargets = new(value.WithConfigBinding);
     }
 
     /// <summary>
@@ -910,7 +918,7 @@ public class SentryOptions
         //       .NET 7 changed this to call the setter with an array that already starts with the old value.
         //       We have to handle both cases.
         get => _tracePropagationTargets;
-        set => _tracePropagationTargets = value.SetWithConfigBinding();
+        set => _tracePropagationTargets = value.WithConfigBinding();
     }
 
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
@@ -938,7 +946,7 @@ public class SentryOptions
             {
                 // from 3.0.0 uses Enhanced (Ben.Demystifier) by default which is a breaking change
                 // unless you are using .NET Native which isn't compatible with Ben.Demystifier.
-                _stackTraceMode = Runtime.Current.Name == ".NET Native"
+                _stackTraceMode = SentryRuntime.Current.Name == ".NET Native"
                     ? StackTraceMode.Original
                     : StackTraceMode.Enhanced;
             }
@@ -1085,7 +1093,7 @@ public class SentryOptions
     /// </summary>
     /// <remarks>
     /// This option applies only to complex objects being added to Sentry events as contexts or extras, which do not
-    /// implement <see cref="IJsonSerializable"/>.
+    /// implement <see cref="ISentryJsonSerializable"/>.
     /// </remarks>
     public bool JsonPreserveReferences
     {
@@ -1118,10 +1126,22 @@ public class SentryOptions
     public Func<string, PEReader?>? AssemblyReader { get; set; }
 
     /// <summary>
-    /// The Spotlight URL. Defaults to http://localhost:8969/stream
+    /// <para>
+    /// Settings for the EXPERIMENTAL metrics feature. This feature is preview only and subject to change without a
+    /// major version bump. Currently it's recommended for noodling only - DON'T USE IN PRODUCTION!
+    /// </para>
+    /// <para>
+    /// By default the ExperimentalMetrics Options is null, which means the feature is disabled. If you want to enable
+    /// Experimental metrics, you must set this property to a non-null value.
+    /// </para>
     /// </summary>
+    public ExperimentalMetricsOptions? ExperimentalMetrics { get; set; }
+
+    /// <summary>
+    /// The Spotlight URL. Defaults to http://localhost:8969/stream
     /// <see cref="EnableSpotlight"/>
     /// <see href="https://spotlightjs.com/"/>
+    /// </summary>
     public string SpotlightUrl { get; set; } = "http://localhost:8969/stream";
 
     /// <summary>
@@ -1199,6 +1219,9 @@ public class SentryOptions
 #endif
 #if NET5_0_OR_GREATER && !__MOBILE__
                                | DefaultIntegrations.WinUiUnhandledExceptionIntegration
+#endif
+#if NET8_0_OR_GREATER
+                               | DefaultIntegrations.SystemDiagnosticsMetricsIntegration
 #endif
                                ;
 
@@ -1299,6 +1322,9 @@ public class SentryOptions
 #endif
 #if NET5_0_OR_GREATER && !__MOBILE__
         WinUiUnhandledExceptionIntegration = 1 << 6,
+#endif
+#if NET8_0_OR_GREATER
+        SystemDiagnosticsMetricsIntegration = 1 << 7,
 #endif
     }
 }

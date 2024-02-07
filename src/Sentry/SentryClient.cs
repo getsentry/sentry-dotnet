@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol.Envelopes;
+using Sentry.Protocol.Metrics;
 
 namespace Sentry;
 
@@ -21,6 +22,7 @@ public class SentryClient : ISentryClient, IDisposable
     private readonly Enricher _enricher;
 
     internal IBackgroundWorker Worker { get; }
+
     internal SentryOptions Options => _options;
 
     /// <summary>
@@ -55,7 +57,9 @@ public class SentryClient : ISentryClient, IDisposable
 #pragma warning disable 0162 // Unreachable code on old .NET frameworks
             options.LogDebug("This looks like a NativeAOT application build.");
 #pragma warning restore 0162
-        } else {
+        }
+        else
+        {
 #pragma warning restore CS0162 // Unreachable code detected
             options.LogDebug("This looks like a standard JIT/AOT application build.");
         }
@@ -73,7 +77,7 @@ public class SentryClient : ISentryClient, IDisposable
     }
 
     /// <inheritdoc />
-    public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null, Hint? hint = null)
+    public SentryId CaptureEvent(SentryEvent? @event, Scope? scope = null, SentryHint? hint = null)
     {
         if (@event == null)
         {
@@ -105,10 +109,10 @@ public class SentryClient : ISentryClient, IDisposable
     }
 
     /// <inheritdoc />
-    public void CaptureTransaction(Transaction transaction) => CaptureTransaction(transaction, null, null);
+    public void CaptureTransaction(SentryTransaction transaction) => CaptureTransaction(transaction, null, null);
 
     /// <inheritdoc />
-    public void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
+    public void CaptureTransaction(SentryTransaction transaction, Scope? scope, SentryHint? hint)
     {
         if (transaction.SpanId.Equals(SpanId.Empty))
         {
@@ -144,7 +148,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
 
         scope ??= new Scope(_options);
-        hint ??= new Hint();
+        hint ??= new SentryHint();
         hint.AddAttachmentsFromScope(scope);
 
         _options.LogInfo("Capturing transaction.");
@@ -182,7 +186,7 @@ public class SentryClient : ISentryClient, IDisposable
         CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
     }
 
-    private Transaction? BeforeSendTransaction(Transaction transaction, Hint hint)
+    private SentryTransaction? BeforeSendTransaction(SentryTransaction transaction, SentryHint hint)
     {
         if (_options.BeforeSendTransactionInternal is null)
         {
@@ -239,7 +243,7 @@ public class SentryClient : ISentryClient, IDisposable
     public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
     // TODO: this method needs to be refactored, it's really hard to analyze nullability
-    private SentryId DoSendEvent(SentryEvent @event, Hint? hint, Scope? scope)
+    private SentryId DoSendEvent(SentryEvent @event, SentryHint? hint, Scope? scope)
     {
         var filteredExceptions = ApplyExceptionFilters(@event.Exception);
         if (filteredExceptions?.Count > 0)
@@ -251,7 +255,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
 
         scope ??= new Scope(_options);
-        hint ??= new Hint();
+        hint ??= new SentryHint();
         hint.AddAttachmentsFromScope(scope);
 
         _options.LogInfo("Capturing event.");
@@ -369,12 +373,8 @@ public class SentryClient : ISentryClient, IDisposable
         return null;
     }
 
-    /// <summary>
-    /// Capture an envelope and queue it.
-    /// </summary>
-    /// <param name="envelope">The envelope.</param>
-    /// <returns>true if the enveloped was queued, false otherwise.</returns>
-    private bool CaptureEnvelope(Envelope envelope)
+    /// <inheritdoc cref="ISentryClient.CaptureEnvelope"/>
+    public bool CaptureEnvelope(Envelope envelope)
     {
         if (Worker.EnqueueEnvelope(envelope))
         {
@@ -389,7 +389,7 @@ public class SentryClient : ISentryClient, IDisposable
         return false;
     }
 
-    private SentryEvent? BeforeSend(SentryEvent? @event, Hint hint)
+    private SentryEvent? BeforeSend(SentryEvent? @event, SentryHint hint)
     {
         if (_options.BeforeSendInternal == null)
         {
@@ -431,12 +431,18 @@ public class SentryClient : ISentryClient, IDisposable
     /// <summary>
     /// Disposes this client
     /// </summary>
-    /// <inheritdoc />
     public void Dispose()
     {
         _options.LogDebug("Flushing SentryClient.");
 
-        // Worker should empty it's queue until SentryOptions.ShutdownTimeout
-        Worker.FlushAsync(_options.ShutdownTimeout).GetAwaiter().GetResult();
+        try
+        {
+            // Worker should empty its queue until SentryOptions.ShutdownTimeout
+            Worker.FlushAsync(_options.ShutdownTimeout).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+        catch
+        {
+            _options.LogDebug("Failed to wait on worker to flush");
+        }
     }
 }

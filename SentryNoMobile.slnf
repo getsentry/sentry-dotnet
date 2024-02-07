@@ -1,6 +1,6 @@
 {
   "solution": {
-    "path": "Sentry.NoMobile.sln",
+    "path": ".generated.NoMobile.sln",
     "projects": [
       "benchmarks\\Sentry.Benchmarks\\Sentry.Benchmarks.csproj",
       "samples\\Sentry.Samples.AspNetCore.Basic\\Sentry.Samples.AspNetCore.Basic.csproj",
@@ -13,6 +13,7 @@
       "samples\\Sentry.Samples.Azure.Functions.Worker\\Sentry.Samples.Azure.Functions.Worker.csproj",
       "samples\\Sentry.Samples.Console.Basic\\Sentry.Samples.Console.Basic.csproj",
       "samples\\Sentry.Samples.Console.Customized\\Sentry.Samples.Console.Customized.csproj",
+      "samples\\Sentry.Samples.Console.Metrics\\Sentry.Samples.Console.Metrics.csproj",
       "samples\\Sentry.Samples.Console.Native\\Sentry.Samples.Console.Native.csproj",
       "samples\\Sentry.Samples.Console.Profiling\\Sentry.Samples.Console.Profiling.csproj",
       "samples\\Sentry.Samples.EntityFramework\\Sentry.Samples.EntityFramework.csproj",
@@ -22,6 +23,7 @@
       "samples\\Sentry.Samples.GraphQL.Server\\Sentry.Samples.GraphQL.Server.csproj",
       "samples\\Sentry.Samples.Log4Net\\Sentry.Samples.Log4Net.csproj",
       "samples\\Sentry.Samples.MacCatalyst\\Sentry.Samples.MacCatalyst.csproj",
+      "samples\\Sentry.Samples.MacOS\\Sentry.Samples.MacOS.csproj",
       "samples\\Sentry.Samples.ME.Logging\\Sentry.Samples.ME.Logging.csproj",
       "samples\\Sentry.Samples.NLog\\Sentry.Samples.NLog.csproj",
       "samples\\Sentry.Samples.OpenTelemetry.AspNetCore\\Sentry.Samples.OpenTelemetry.AspNetCore.csproj",

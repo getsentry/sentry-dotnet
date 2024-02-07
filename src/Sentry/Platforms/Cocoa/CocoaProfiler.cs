@@ -1,7 +1,7 @@
-using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Cocoa.Extensions;
 using Sentry.Cocoa.Facades;
+using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry.Cocoa;
 
@@ -34,10 +34,9 @@ internal class CocoaProfiler : ITransactionProfiler
         }
     }
 
-    public ISerializable? Collect(Transaction transaction)
+    public ISerializable? Collect(SentryTransaction transaction)
     {
-        // TODO change return type of CocoaSDKs CollectProfileBetween to NSMutableDictionary
-        var payload = SentryCocoaHybridSdk.CollectProfileBetween(_startTimeNs, _endTimeNs, _cocoaTraceId)?.MutableCopy() as NSMutableDictionary;
+        var payload = SentryCocoaHybridSdk.CollectProfileBetween(_startTimeNs, _endTimeNs, _cocoaTraceId);
         if (payload is null)
         {
             _options.LogWarning("Trace {0} collected profile payload is null", _traceId);

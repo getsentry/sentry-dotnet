@@ -1,6 +1,5 @@
 using Sentry.Ben.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics;
-using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -8,6 +7,7 @@ using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Reflection;
+using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 
 namespace Sentry.AspNetCore;
 
@@ -159,7 +159,7 @@ internal class SentryMiddleware : IMiddleware
                 {
                     await next(context).ConfigureAwait(false);
                 }
-                if (_options.Instrumenter == Instrumenter.OpenTelemetry && Activity.Current is {} activity)
+                if (_options.Instrumenter == Instrumenter.OpenTelemetry && Activity.Current is { } activity)
                 {
                     // The middleware pipeline finishes up before the Otel Activity.OnEnd callback is invoked so we need
                     // so save a copy of the scope that can be restored by our SentrySpanProcessor

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -16,11 +16,11 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
 
 public class DeviceRunner : ITestListener, ITestRunner
 {
-    readonly SynchronizationContext context = SynchronizationContext.Current;
-    readonly AsyncLock executionLock = new AsyncLock();
-    readonly ITestNavigation _navigation;
-    readonly TestRunLogger _logger;
-    volatile bool cancelled;
+    private readonly SynchronizationContext context = SynchronizationContext.Current;
+    private readonly AsyncLock executionLock = new AsyncLock();
+    private readonly ITestNavigation _navigation;
+    private readonly TestRunLogger _logger;
+    private volatile bool cancelled;
 
     public DeviceRunner(IReadOnlyCollection<Assembly> testAssemblies, ITestNavigation navigation, ILogger logger)
     {
@@ -102,7 +102,7 @@ public class DeviceRunner : ITestListener, ITestRunner
         return tcs.Task;
     }
 
-    IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
+    private IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
     {
         var result = new List<AssemblyRunInfo>();
 
@@ -157,7 +157,7 @@ public class DeviceRunner : ITestListener, ITestRunner
         return result;
     }
 
-    static TestAssemblyConfiguration GetConfiguration(string assemblyName)
+    private static TestAssemblyConfiguration GetConfiguration(string assemblyName)
     {
         var stream = GetConfigurationStreamForAssembly(assemblyName);
         if (stream != null)
@@ -171,17 +171,17 @@ public class DeviceRunner : ITestListener, ITestRunner
         return new TestAssemblyConfiguration();
     }
 
-    static Stream GetConfigurationStreamForAssembly(string assemblyName)
+    private static Stream GetConfigurationStreamForAssembly(string assemblyName)
     {
 #if __ANDROID__
-            var assets = Android.App.Application.Context.Assets;
-            var allAssets = assets.List(string.Empty);
+        var assets = Android.App.Application.Context.Assets;
+        var allAssets = assets.List(string.Empty);
 
-            if (allAssets.Contains($"{assemblyName}.xunit.runner.json"))
-                return assets.Open($"{assemblyName}.xunit.runner.json");
+        if (allAssets.Contains($"{assemblyName}.xunit.runner.json"))
+            return assets.Open($"{assemblyName}.xunit.runner.json");
 
-            if (allAssets.Contains("xunit.runner.json"))
-                return assets.Open("xunit.runner.json");
+        if (allAssets.Contains("xunit.runner.json"))
+            return assets.Open("xunit.runner.json");
 #else
 
         // See if there's a directory with the assm name. this might be the case for appx
@@ -215,7 +215,7 @@ public class DeviceRunner : ITestListener, ITestRunner
         return null;
     }
 
-    Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
+    private Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
     {
         var tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -260,7 +260,7 @@ public class DeviceRunner : ITestListener, ITestRunner
         return tcs.Task;
     }
 
-    void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+    private void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
     {
         if (cancelled)
             return;
@@ -285,9 +285,15 @@ public class DeviceRunner : ITestListener, ITestRunner
 
         var deviceExecSink = new DeviceExecutionSink(xunitTestCases, this, context);
 
-        IExecutionSink resultsSink = new DelegatingExecutionSummarySink(deviceExecSink, () => cancelled);
+        var resultsSink = new ExecutionSink(deviceExecSink, new ExecutionSinkOptions { CancelThunk = () => cancelled });
         if (longRunningSeconds > 0)
-            resultsSink = new DelegatingLongRunningTestDetectionSink(resultsSink, TimeSpan.FromSeconds(longRunningSeconds), diagSink);
+        {
+            resultsSink = new ExecutionSink(resultsSink, new ExecutionSinkOptions
+            {
+                LongRunningTestTime = TimeSpan.FromSeconds(longRunningSeconds),
+                DiagnosticMessageSink = diagSink
+            });
+        }
 
         var assm = new XunitProjectAssembly() { AssemblyFilename = runInfo.AssemblyFileName };
         deviceExecSink.OnMessage(new TestAssemblyExecutionStarting(assm, executionOptions));
@@ -298,7 +304,7 @@ public class DeviceRunner : ITestListener, ITestRunner
         deviceExecSink.OnMessage(new TestAssemblyExecutionFinished(assm, executionOptions, resultsSink.ExecutionSummary));
     }
 
-    ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+    private ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
     {
         var @event = new ManualResetEvent(false);
 
@@ -319,7 +325,7 @@ public class DeviceRunner : ITestListener, ITestRunner
         return @event;
     }
 
-    static async void RunAsync(Action action)
+    private static async void RunAsync(Action action)
     {
         var task = Task.Factory.StartNew(action, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 

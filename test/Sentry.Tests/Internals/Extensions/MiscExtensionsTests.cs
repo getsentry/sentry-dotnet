@@ -2,12 +2,14 @@ namespace Sentry.Tests.Internals.Extensions;
 
 public class MiscExtensionsTests
 {
-    public class MyClass {
+    public class MyClass
+    {
         public string SomeString { get; set; }
         public MySubclass Subclass { get; set; }
     }
 
-    public class MySubclass {
+    public class MySubclass
+    {
         public string AnotherString { get; set; }
     }
 

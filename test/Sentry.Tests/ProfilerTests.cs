@@ -53,16 +53,16 @@ public class ProfilerTests
             await hub.FlushAsync();
 
             // Asserts
-            var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(1_000)).ConfigureAwait(false);
+            var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(1_000));
             completedTask.Should().Be(tcs.Task);
-            var envelopeLines = tcs.Task.Result.Split('\n');
+            var envelopeLines = (await tcs.Task).Split('\n');
             envelopeLines.Length.Should().Be(6);
 
             // header rows before payloads
             envelopeLines[1].Should().StartWith("{\"type\":\"transaction\"");
             envelopeLines[3].Should().StartWith("{\"type\":\"profile\"");
 
-            var transaction = Json.Parse(envelopeLines[2], Transaction.FromJson);
+            var transaction = Json.Parse(envelopeLines[2], SentryTransaction.FromJson);
 
             // TODO do we want to bother with JSON parsing just to do this? Doing at least simple checks for now...
             // var profileInfo = Json.Parse(envelopeLines[4], ProfileInfo.FromJson);
@@ -85,7 +85,7 @@ public class ProfilerTests
         while (clock.ElapsedMilliseconds < milliseconds)
         {
             _testOutputLogger.LogDebug("Sleeping... time remaining: {0} ms", milliseconds - clock.ElapsedMilliseconds);
-            Thread.Sleep((int)Math.Min(milliseconds / 5, milliseconds - clock.ElapsedMilliseconds));
+            Thread.Sleep((int)Math.Max(0, Math.Min(milliseconds / 5, milliseconds - clock.ElapsedMilliseconds)));
         }
     }
 }

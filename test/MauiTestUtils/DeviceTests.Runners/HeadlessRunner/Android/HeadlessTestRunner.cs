@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,11 +10,11 @@ using Microsoft.DotNet.XHarness.TestRunners.Xunit;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner;
 
-class HeadlessTestRunner : AndroidApplicationEntryPoint
+internal class HeadlessTestRunner : AndroidApplicationEntryPoint
 {
-    readonly HeadlessRunnerOptions _runnerOptions;
-    readonly TestOptions _options;
-    readonly string _resultsPath;
+    private readonly HeadlessRunnerOptions _runnerOptions;
+    private readonly TestOptions _options;
+    private readonly string _resultsPath;
 
     public HeadlessTestRunner(HeadlessRunnerOptions runnerOptions, TestOptions options)
     {

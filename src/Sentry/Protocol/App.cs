@@ -12,7 +12,7 @@ namespace Sentry.Protocol;
 /// was running and carries meta data about the current session.
 /// </remarks>
 /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
-public sealed class App : IJsonSerializable, ICloneable<App>, IUpdatable<App>
+public sealed class App : ISentryJsonSerializable, ICloneable<App>, IUpdatable<App>
 {
     /// <summary>
     /// Tells Sentry which type of context this is.

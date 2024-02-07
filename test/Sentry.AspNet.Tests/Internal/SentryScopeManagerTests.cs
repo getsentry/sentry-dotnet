@@ -4,7 +4,7 @@ namespace Sentry.AspNet.Tests.Internal;
 
 public class SentryScopeManagerTests
 {
-    static SentryScopeManager GetSut() => new(
+    private static SentryScopeManager GetSut() => new(
         new SentryOptions
         {
             ScopeStackContainer = new HttpContextScopeStackContainer()

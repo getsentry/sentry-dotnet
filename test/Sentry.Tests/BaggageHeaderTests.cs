@@ -82,7 +82,7 @@ public partial class BaggageHeaderTests
             {"baz", "000"},
         });
 
-        var merged = BaggageHeader.Merge(new[] {header1, header2, header3});
+        var merged = BaggageHeader.Merge(new[] { header1, header2, header3 });
 
         var expected = new List<KeyValuePair<string, string>>
         {

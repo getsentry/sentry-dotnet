@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This sample demonstrates how to initialize and enable Open Telemetry with Sentry
  * in a console application.
  * For using Open Telemetry and Sentry in ASP.NET, see Sentry.Samples.OpenTelemetry.AspNet.
@@ -8,7 +8,6 @@
 using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
-using Sentry;
 using Sentry.OpenTelemetry;
 
 var serviceName = "Sentry.Samples.OpenTelemetry.Console";

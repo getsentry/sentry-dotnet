@@ -5,7 +5,7 @@ public class RequestTests
     [Fact]
     public void Clone_CopyValues()
     {
-        var sut = new Request
+        var sut = new SentryRequest
         {
             ApiTarget = "graphql",
             Url = "https://sentry.io",

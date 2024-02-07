@@ -44,7 +44,7 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
 
     protected IEnumerable<string> GetPropertyNames<T>() => typeof(T).GetProperties().Select(x => x.Name).ToList();
 
-    private static KeyValuePair<PropertyInfo,object> GetDummyBindableValue(PropertyInfo propertyInfo)
+    private static KeyValuePair<PropertyInfo, object> GetDummyBindableValue(PropertyInfo propertyInfo)
     {
         var propertyType = Nullable.GetUnderlyingType(propertyInfo.PropertyType) ?? propertyInfo.PropertyType;
         var value = propertyType switch
@@ -65,7 +65,7 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
                 },
             _ => throw new NotSupportedException($"Unsupported property type on property {propertyInfo.Name}")
         };
-        return new KeyValuePair<PropertyInfo,object>(propertyInfo, value);
+        return new KeyValuePair<PropertyInfo, object>(propertyInfo, value);
     }
 
     private static IEnumerable<KeyValuePair<string, string>> ToConfigValues(KeyValuePair<PropertyInfo, object> item)

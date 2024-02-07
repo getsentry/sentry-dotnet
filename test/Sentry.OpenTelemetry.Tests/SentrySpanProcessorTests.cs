@@ -1,7 +1,4 @@
-using OpenTelemetry;
-using OpenTelemetry.Trace;
 using Sentry.Internal.OpenTelemetry;
-using Sentry.PlatformAbstractions;
 
 namespace Sentry.OpenTelemetry.Tests;
 
@@ -133,7 +130,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
             Assert.Fail("Span is not a transaction tracer");
             return;
         }
-        if (transaction.DynamicSamplingContext is not {} actual)
+        if (transaction.DynamicSamplingContext is not { } actual)
         {
             Assert.Fail("Transaction does not have a dynamic sampling context");
             return;
@@ -191,6 +188,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     {
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
         var sut = _fixture.GetSut();
 
         var data = Tracer.StartActivity("test op");
@@ -215,6 +213,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
             transaction.Description.Should().Be(data.DisplayName);
             transaction.Status.Should().BeNull();
             transaction.StartTimestamp.Should().Be(data.StartTimeUtc);
+            _fixture.ScopeManager.Received(1).ConfigureScope(Arg.Any<Action<Scope>>());
         }
     }
 
@@ -378,14 +377,16 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         }
     }
 
-    [Fact]
-    public void OnEnd_IsSentryRequest_DoesNotFinishTransaction()
+    [Theory]
+    [InlineData(OtelSemanticConventions.AttributeUrlFull)]
+    [InlineData(OtelSemanticConventions.AttributeHttpUrl)]
+    public void OnEnd_IsSentryRequest_DoesNotFinishTransaction(string urlKey)
     {
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         var sut = _fixture.GetSut();
 
-        var tags = new Dictionary<string, object> { { "foo", "bar" }, { "http.url", _fixture.Options.Dsn } };
+        var tags = new Dictionary<string, object> { { "foo", "bar" }, { urlKey, _fixture.Options.Dsn } };
         var data = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal, parentContext: default, tags)!;
         data.DisplayName = "test display name";
         sut.OnStart(data);

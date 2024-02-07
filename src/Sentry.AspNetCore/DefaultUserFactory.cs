@@ -15,9 +15,9 @@ internal class DefaultUserFactory : ISentryUserFactory
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public User? Create() => _httpContextAccessor?.HttpContext is {} httpContext ? Create(httpContext) : null;
+    public SentryUser? Create() => _httpContextAccessor?.HttpContext is { } httpContext ? Create(httpContext) : null;
 
-    public User? Create(HttpContext context)
+    public SentryUser? Create(HttpContext context)
     {
         var principal = context.User;
         if (principal is null)
@@ -56,7 +56,7 @@ internal class DefaultUserFactory : ISentryUserFactory
 
         return email is null && id is null && username is null && ipAddress is null
             ? null
-            : new User
+            : new SentryUser
             {
                 Id = id,
                 Email = email,

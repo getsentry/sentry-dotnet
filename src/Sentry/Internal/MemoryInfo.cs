@@ -5,7 +5,7 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry.Internal;
 
-internal sealed class MemoryInfo : IJsonSerializable
+internal sealed class MemoryInfo : ISentryJsonSerializable
 {
     public long AllocatedBytes { get; }
     public long FragmentedBytes { get; }

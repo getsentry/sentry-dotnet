@@ -62,7 +62,7 @@ public class SentryPropagator : BaggagePropagator
             Options?.LogDebug(entry.ToString());
         }
 
-        if (TryGetSentryTraceHeader(carrier, getter) is not {} sentryTraceHeader)
+        if (TryGetSentryTraceHeader(carrier, getter) is not { } sentryTraceHeader)
         {
             Options?.LogDebug("No SentryTraceHeader present in carrier");
             return result;
@@ -75,7 +75,7 @@ public class SentryPropagator : BaggagePropagator
             sentryTraceHeader.SpanId.AsActivitySpanId(),
             // NOTE: Our Java and JavaScript SDKs set sentryTraceHeader.IsSampled = true if any trace header is present.
             sentryTraceHeader.IsSampled is true ? ActivityTraceFlags.Recorded : ActivityTraceFlags.None,
-            traceState:null, // See https://www.w3.org/TR/trace-context/#design-overview
+            traceState: null, // See https://www.w3.org/TR/trace-context/#design-overview
             isRemote: true
             );
         return new PropagationContext(activityContext, baggage);

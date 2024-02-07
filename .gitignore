@@ -5,6 +5,7 @@
 *.userprefs
 *.user
 *opencover.xml
+*cobertura.xml
 codecov.sh
 lcov.info
 bin/

@@ -11,6 +11,15 @@ runs:
         echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" >> $GITHUB_ENV
         echo "DOTNET_NOLOGO=1" >> $GITHUB_ENV
 
+    # Needed for Android SDK setup step
+    - uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@07976c6290703d34c16d382cb36445f98bb43b1f # v3.2.0
+
     - name: Set Java Version
       uses: actions/setup-java@v3
       with:
@@ -31,7 +40,7 @@ runs:
       run: >
         dotnet workload install \
           maui-android \
-          ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows' || '' }} \
+          ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows macos' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
           --temp-dir "${{ runner.temp }}" \
           --skip-sign-check

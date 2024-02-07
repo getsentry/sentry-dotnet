@@ -11,9 +11,9 @@ public partial class SentryEventTests
         var id = Guid.Parse("4b780f4c-ec03-42a7-8ef8-a41c9d5621f8");
         var sut = new SentryEvent(ex, timestamp, id)
         {
-            User = new User { Id = "user-id" },
-            Request = new Request { Method = "POST" },
-            Contexts = new Contexts
+            User = new SentryUser { Id = "user-id" },
+            Request = new SentryRequest { Method = "POST" },
+            Contexts = new SentryContexts
             {
                 ["context_key"] = "context_value",
                 [".NET Framework"] = new Dictionary<string, string>
@@ -49,7 +49,7 @@ public partial class SentryEventTests
             },
         };
 
-        sut.Sdk.AddPackage(new Package("name", "version"));
+        sut.Sdk.AddPackage(new SentryPackage("name", "version"));
         sut.Sdk.AddIntegration("integration");
         sut.AddBreadcrumb(new Breadcrumb(timestamp, "crumb"));
         sut.AddBreadcrumb(new Breadcrumb(

@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -117,7 +117,7 @@ public class TheoryAttribute : Xunit.TheoryAttribute
 public class DeviceTestCase : IXunitTestCase
 #pragma warning restore xUnit3000 // Test case classes must derive directly or indirectly from Xunit.LongLivedMarshalByRefObject
 {
-    readonly IXunitTestCase _inner = null!;
+    private readonly IXunitTestCase _inner = null!;
 
     public DeviceTestCase() { }
 
@@ -132,9 +132,9 @@ public class DeviceTestCase : IXunitTestCase
 
     public int Timeout => _inner.Timeout;
 
-    string? _categoryPrefix;
+    private string? _categoryPrefix;
 
-    string GetCategoryPrefix()
+    private string GetCategoryPrefix()
     {
         if (_categoryPrefix == null)
         {
@@ -151,7 +151,7 @@ public class DeviceTestCase : IXunitTestCase
         return _categoryPrefix;
     }
 
-    string? _displayName;
+    private string? _displayName;
 
     public string DisplayName
     {

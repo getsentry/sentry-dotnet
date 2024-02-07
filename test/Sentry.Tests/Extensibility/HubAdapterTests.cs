@@ -73,7 +73,8 @@ public class HubAdapterTests : IDisposable
     [Fact]
     public void ConfigureScope_MockInvoked()
     {
-        void Expected(Scope _) { }
+        void Expected(Scope _)
+        { }
         HubAdapter.Instance.ConfigureScope(Expected);
         Hub.Received(1).ConfigureScope(Expected);
     }

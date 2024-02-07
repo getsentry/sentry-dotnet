@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.SourceGen;
 

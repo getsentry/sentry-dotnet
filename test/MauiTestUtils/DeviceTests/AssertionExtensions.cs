@@ -7,7 +7,7 @@ namespace Microsoft.Maui.DeviceTests;
 
 public static partial class AssertionExtensions
 {
-    static readonly Random rnd = new Random();
+    static private readonly Random rnd = new Random();
 
     public static async Task<bool> Wait(Func<bool> exitCondition, int timeout = 1000)
     {
@@ -22,14 +22,6 @@ public static partial class AssertionExtensions
         return exitCondition.Invoke();
     }
 
-    public static void AssertHasFlag(this Enum self, Enum flag)
-    {
-        var hasFlag = self.HasFlag(flag);
-
-        if (!hasFlag)
-            throw new ContainsException(flag, self);
-    }
-
     public static void AssertWithMessage(Action assertion, string message)
     {
         try
@@ -38,13 +30,13 @@ public static partial class AssertionExtensions
         }
         catch (Exception e)
         {
-            Assert.True(false, $"Message: {message} Failure: {e}");
+            Assert.Fail($"Message: {message} Failure: {e}");
         }
     }
 
     public static void CloseEnough(double expected, double actual, double epsilon = 0.2, string? message = null)
     {
-        if (!String.IsNullOrWhiteSpace(message))
+        if (!string.IsNullOrWhiteSpace(message))
             message = " " + message;
 
         var diff = Math.Abs(expected - actual);

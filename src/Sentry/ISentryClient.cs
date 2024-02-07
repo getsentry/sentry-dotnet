@@ -1,3 +1,6 @@
+using Sentry.Protocol.Envelopes;
+using Sentry.Protocol.Metrics;
+
 namespace Sentry;
 
 /// <summary>
@@ -11,13 +14,20 @@ public interface ISentryClient
     bool IsEnabled { get; }
 
     /// <summary>
+    /// Capture an envelope and queue it.
+    /// </summary>
+    /// <param name="envelope">The envelope.</param>
+    /// <returns>true if the enveloped was queued, false otherwise.</returns>
+    bool CaptureEnvelope(Envelope envelope);
+
+    /// <summary>
     /// Capture the event
     /// </summary>
     /// <param name="evt">The event to be captured.</param>
     /// <param name="scope">An optional scope to be applied to the event.</param>
     /// <param name="hint">An optional hint providing high level context for the source of the event</param>
     /// <returns>The Id of the event.</returns>
-    SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Hint? hint = null);
+    SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, SentryHint? hint = null);
 
     /// <summary>
     /// Captures a user feedback.
@@ -34,7 +44,7 @@ public interface ISentryClient
     /// </remarks>
     /// <param name="transaction">The transaction.</param>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    void CaptureTransaction(Transaction transaction);
+    void CaptureTransaction(SentryTransaction transaction);
 
     /// <summary>
     /// Captures a transaction.
@@ -50,7 +60,7 @@ public interface ISentryClient
     /// This will be available in callbacks prior to processing the transaction.
     /// </param>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint);
+    void CaptureTransaction(SentryTransaction transaction, Scope? scope, SentryHint? hint);
 
     /// <summary>
     /// Captures a session update.

@@ -1,5 +1,3 @@
-using Sentry.Protocol;
-
 namespace Sentry.Internal;
 
 /// <summary>
@@ -25,5 +23,5 @@ internal interface ITransactionProfiler
 
     /// <summary>Process and collect the profile.</summary>
     /// <returns>The collected profile.</returns>
-    ISerializable? Collect(Transaction transaction);
+    ISerializable? Collect(SentryTransaction transaction);
 }

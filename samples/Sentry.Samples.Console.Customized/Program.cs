@@ -1,6 +1,4 @@
-using System.Reflection;
 using System.Xml.Xsl;
-using Sentry;
 using Sentry.Extensibility;
 
 internal static class Program
@@ -112,7 +110,7 @@ internal static class Program
 
             SentrySdk.AddBreadcrumb(
                 new Breadcrumb("A breadcrumb that will be replaced by the 'BeforeBreadcrumb callback because of the hint", null),
-                new Hint("don't trust this breadcrumb", "trust this instead")
+                new SentryHint("don't trust this breadcrumb", "trust this instead")
                 );
 
             // Data added to the root scope (no PushScope called up to this point)

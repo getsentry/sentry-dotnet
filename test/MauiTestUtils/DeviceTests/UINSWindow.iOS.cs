@@ -1,9 +1,9 @@
-using Foundation;
-using CoreGraphics;
-using Microsoft.Maui.Graphics;
-using ObjCRuntime;
 using System;
 using System.Runtime.InteropServices;
+using CoreGraphics;
+using Foundation;
+using Microsoft.Maui.Graphics;
+using ObjCRuntime;
 using UIKit;
 
 namespace Microsoft.Maui.DeviceTests;
@@ -25,29 +25,34 @@ public static class UIWindowExtensions
         return nsWindow is not null;
     }
 
-    class UINSWindow
+    private class UINSWindow
     {
         [DllImport("/usr/lib/libobjc.dylib", EntryPoint = "objc_msgSend")]
-        static extern void void_objc_msgSend_CGRect_bool_bool(IntPtr receiver, IntPtr selector, CGRect arg1, bool arg2, bool arg3);
+        private static extern void void_objc_msgSend_CGRect_bool_bool(IntPtr receiver, IntPtr selector, CGRect arg1, bool arg2, bool arg3);
 
-        static NativeHandle? nsApplicationHandle;
-        static NativeHandle NSApplicationHandle =>
+        private static NativeHandle? nsApplicationHandle;
+
+        private static NativeHandle NSApplicationHandle =>
             nsApplicationHandle ??= Class.GetHandle("NSApplication");
 
-        static Selector? sharedApplicationSelector;
-        static Selector SharedApplicationSelector =>
+        private static Selector? sharedApplicationSelector;
+
+        private static Selector SharedApplicationSelector =>
             sharedApplicationSelector ??= new Selector("sharedApplication");
 
-        static Selector? windowsSelector;
-        static Selector WindowsSelector =>
+        private static Selector? windowsSelector;
+
+        private static Selector WindowsSelector =>
             windowsSelector ??= new Selector("windows");
 
-        static Selector? uiWindowsSelector;
-        static Selector UIWindowsSelector =>
+        private static Selector? uiWindowsSelector;
+
+        private static Selector UIWindowsSelector =>
             uiWindowsSelector ??= new Selector("uiWindows");
 
-        Selector? setFrameSelector;
-        Selector SetFrameSelector =>
+        private Selector? setFrameSelector;
+
+        private Selector SetFrameSelector =>
             setFrameSelector ??= new Selector("setFrame:display:animate:");
 
         public UINSWindow(NativeHandle handle, UIWindow uiWindow)

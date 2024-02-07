@@ -1,5 +1,3 @@
-using System;
-
 namespace Sentry.PlatformAbstractions;
 
 // https://github.com/dotnet/corefx/issues/17452
@@ -13,7 +11,7 @@ internal static class RuntimeInfo
     /// Gets the current runtime.
     /// </summary>
     /// <returns>A new instance for the current runtime</returns>
-    internal static Runtime GetRuntime()
+    internal static SentryRuntime GetRuntime()
     {
         var runtime = GetFromRuntimeInformation();
         runtime ??= GetFromMonoRuntime();
@@ -21,45 +19,45 @@ internal static class RuntimeInfo
         return runtime.WithAdditionalProperties();
     }
 
-    internal static Runtime WithAdditionalProperties(this Runtime runtime)
+    internal static SentryRuntime WithAdditionalProperties(this SentryRuntime runtime)
     {
 #if NETFRAMEWORK
             GetNetFxInstallationAndVersion(runtime, out var inst, out var ver);
             var version = runtime.Version ?? ver;
             var installation = runtime.FrameworkInstallation ?? inst;
-            return new Runtime(runtime.Name, version, installation, runtime.Raw);
+            return new SentryRuntime(runtime.Name, version, installation, runtime.Raw);
 #elif NET5_0_OR_GREATER
-            var version = runtime.Version ?? GetNetCoreVersion(runtime);
-            var identifier = runtime.Identifier ?? GetRuntimeIdentifier(runtime);
-            return new Runtime(runtime.Name, version, runtime.Raw, identifier);
+        var version = runtime.Version ?? GetNetCoreVersion(runtime);
+        var identifier = runtime.Identifier ?? GetRuntimeIdentifier(runtime);
+        return new SentryRuntime(runtime.Name, version, runtime.Raw, identifier);
 #else
         var version = runtime.Version ?? GetNetCoreVersion(runtime);
-        return new Runtime(runtime.Name, version, runtime.Raw);
+        return new SentryRuntime(runtime.Name, version, runtime.Raw);
 #endif
     }
 
-    internal static Runtime? Parse(string? rawRuntimeDescription, string? name = null)
+    internal static SentryRuntime? Parse(string? rawRuntimeDescription, string? name = null)
     {
         if (rawRuntimeDescription == null)
         {
-            return name == null ? null : new Runtime(name);
+            return name == null ? null : new SentryRuntime(name);
         }
 
         var match = RuntimeParseRegex.Match(rawRuntimeDescription);
         if (match.Success)
         {
-            return new Runtime(
+            return new SentryRuntime(
                 name ?? (match.Groups["name"].Value == string.Empty ? null : match.Groups["name"].Value.Trim()),
                 match.Groups["version"].Value == string.Empty ? null : match.Groups["version"].Value.Trim(),
                 raw: rawRuntimeDescription);
         }
 
-        return new Runtime(name, raw: rawRuntimeDescription);
+        return new SentryRuntime(name, raw: rawRuntimeDescription);
     }
 
 #if NETFRAMEWORK
         internal static void GetNetFxInstallationAndVersion(
-            Runtime runtime,
+            SentryRuntime runtime,
             out FrameworkInstallation? frameworkInstallation,
             out string? version)
         {
@@ -85,7 +83,7 @@ internal static class RuntimeInfo
             }
         }
 #else
-    private static string? GetNetCoreVersion(Runtime runtime)
+    private static string? GetNetCoreVersion(SentryRuntime runtime)
     {
         var description = RuntimeInformation.FrameworkDescription;
         return RemovePrefixOrNull(description, ".NET Core")
@@ -101,20 +99,20 @@ internal static class RuntimeInfo
 #endif
 
 #if NET5_0_OR_GREATER
-        internal static string? GetRuntimeIdentifier(Runtime runtime)
+    internal static string? GetRuntimeIdentifier(SentryRuntime runtime)
+    {
+        try
         {
-            try
-            {
-                return RuntimeInformation.RuntimeIdentifier;
-            }
-            catch
-            {
-                return null;
-            }
+            return RuntimeInformation.RuntimeIdentifier;
         }
+        catch
+        {
+            return null;
+        }
+    }
 #endif
 
-    private static Runtime? GetFromRuntimeInformation()
+    private static SentryRuntime? GetFromRuntimeInformation()
     {
         try
         {
@@ -132,7 +130,7 @@ internal static class RuntimeInfo
         }
     }
 
-    private static Runtime? GetFromMonoRuntime()
+    private static SentryRuntime? GetFromMonoRuntime()
         => Type.GetType("Mono.Runtime", false)
             ?.GetMethod("GetDisplayName", BindingFlags.NonPublic | BindingFlags.Static)
             ?.Invoke(null, null) is string monoVersion
@@ -146,7 +144,7 @@ internal static class RuntimeInfo
             : null;
 
     // This should really only be used on .NET 1.0, 1.1, 2.0, 3.0, 3.5 and 4.0
-    private static Runtime GetFromEnvironmentVariable()
+    private static SentryRuntime GetFromEnvironmentVariable()
     {
         // Environment.Version: NET Framework 4, 4.5, 4.5.1, 4.5.2 = 4.0.30319.xxxxx
         // .NET Framework 4.6, 4.6.1, 4.6.2, 4.7, 4.7.1 =  4.0.30319.42000
@@ -158,6 +156,6 @@ internal static class RuntimeInfo
             1 => "",
             _ => version.ToString()
         };
-        return new Runtime(".NET Framework", friendlyVersion, raw: "Environment.Version=" + version);
+        return new SentryRuntime(".NET Framework", friendlyVersion, raw: "Environment.Version=" + version);
     }
 }

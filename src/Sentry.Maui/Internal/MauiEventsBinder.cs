@@ -17,7 +17,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
     internal const string NavigationType = "navigation";
     internal const string SystemType = "system";
     internal const string UserType = "user";
-    internal const string LifecycleCategory =  "ui.lifecycle";
+    internal const string LifecycleCategory = "ui.lifecycle";
     internal const string NavigationCategory = "navigation";
     internal const string RenderingCategory = "ui.rendering";
     internal const string UserActionCategory = "ui.useraction";
@@ -100,7 +100,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
                 HandleButtonEvents(button);
                 break;
 
-            // TODO: Attach to specific events on more control types
+                // TODO: Attach to specific events on more control types
         }
     }
 
@@ -135,7 +135,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     internal void HandleWindowEvents(Window window, bool bind = true)
     {
-        if(bind)
+        if (bind)
         {
             // Lifecycle Events
             // https://docs.microsoft.com/dotnet/maui/fundamentals/windows

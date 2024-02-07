@@ -8,7 +8,7 @@ namespace Sentry.Protocol;
 /// Describes the device that caused the event. This is most appropriate for mobile applications.
 /// </summary>
 /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/"/>
-public sealed class Device : IJsonSerializable, ICloneable<Device>, IUpdatable<Device>
+public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdatable<Device>
 {
     /// <summary>
     /// Tells Sentry which type of context this is.

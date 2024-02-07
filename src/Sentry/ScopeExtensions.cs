@@ -112,7 +112,7 @@ public static class ScopeExtensions
     }
 
     /// <summary>
-    /// Adds an transaction processor which is invoked when creating a <see cref="Transaction"/>.
+    /// Adds an transaction processor which is invoked when creating a <see cref="SentryTransaction"/>.
     /// </summary>
     /// <param name="scope">The Scope to hold the processor.</param>
     /// <param name="processor">The transaction processor.</param>
@@ -120,15 +120,15 @@ public static class ScopeExtensions
         => scope.TransactionProcessors.Add(processor);
 
     /// <summary>
-    /// Adds an transaction processor which is invoked when creating a <see cref="Transaction"/>.
+    /// Adds an transaction processor which is invoked when creating a <see cref="SentryTransaction"/>.
     /// </summary>
     /// <param name="scope">The Scope to hold the processor.</param>
     /// <param name="processor">The transaction processor.</param>
-    public static void AddTransactionProcessor(this Scope scope, Func<Transaction, Transaction?> processor)
+    public static void AddTransactionProcessor(this Scope scope, Func<SentryTransaction, SentryTransaction?> processor)
         => scope.AddTransactionProcessor(new DelegateTransactionProcessor(processor));
 
     /// <summary>
-    /// Adds transaction processors which are invoked when creating a <see cref="Transaction"/>.
+    /// Adds transaction processors which are invoked when creating a <see cref="SentryTransaction"/>.
     /// </summary>
     /// <param name="scope">The Scope to hold the processor.</param>
     /// <param name="processors">The transaction processors.</param>
@@ -166,7 +166,7 @@ public static class ScopeExtensions
         // TODO: Envelope spec allows the last item to not have a length.
         // So if we make sure there's only 1 item without length, we can support it.
         scope.AddAttachment(
-            new Attachment(
+            new SentryAttachment(
                 type,
                 new StreamAttachmentContent(stream),
                 fileName,
@@ -183,7 +183,7 @@ public static class ScopeExtensions
         AttachmentType type = AttachmentType.Default,
         string? contentType = null) =>
         scope.AddAttachment(
-            new Attachment(
+            new SentryAttachment(
                 type,
                 new ByteAttachmentContent(data),
                 fileName,
@@ -198,7 +198,7 @@ public static class ScopeExtensions
         AttachmentType type = AttachmentType.Default,
         string? contentType = null) =>
         scope.AddAttachment(
-            new Attachment(
+            new SentryAttachment(
                 type,
                 new FileAttachmentContent(filePath, scope.Options.UseAsyncFileIO),
                 Path.GetFileName(filePath),
