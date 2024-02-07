@@ -41,7 +41,7 @@ public static class TracerProviderBuilderExtensions
                 enrichers.Add(new AspNetCoreEnricher(userFactory));
             }
 
-            var hub = services.GetRequiredService<IHub>();
+            var hub = services.GetService<IHub>() ?? SentrySdk.CurrentHub;
             return new SentrySpanProcessor(hub, enrichers);
         });
     }

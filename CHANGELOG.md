@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- "No service for type 'Sentry.IHub' has been registered" exception when using OpenTelemetry and initializing Sentry via `SentrySdk.Init` ([#3129](https://github.com/getsentry/sentry-dotnet/pull/3129))
+
 ## 4.0.3
 
 ### Fixes
