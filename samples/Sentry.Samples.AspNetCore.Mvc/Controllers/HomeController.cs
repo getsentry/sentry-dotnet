@@ -14,7 +14,7 @@ public class HomeController(ILogger<HomeController> logger) : Controller
 
     // GET /home/block/true or /home/block/false to observe events
     [HttpGet("[controller]/block/{block?}")]
-    public async Task<string> Block([FromRoute]bool block)
+    public async Task<string> Block([FromRoute] bool block)
     {
         if (block)
         {
