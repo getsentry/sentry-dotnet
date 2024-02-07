@@ -39,12 +39,14 @@ internal class NoOpTransaction : NoOpSpan, ITransactionTracer
         set { }
     }
 
-    public Request Request{
+    public SentryRequest Request
+    {
         get => new();
         set { }
     }
 
-    public Contexts Contexts{
+    public SentryContexts Contexts
+    {
         get => new();
         set { }
     }

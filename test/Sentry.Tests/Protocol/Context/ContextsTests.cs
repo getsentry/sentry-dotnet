@@ -14,11 +14,11 @@ public class ContextsTests
     [Fact]
     public void SerializeObject_NoPropertyFilled_SerializesEmptyObject()
     {
-        var sut = new Contexts();
+        var sut = new SentryContexts();
 
         var actualString = sut.ToJsonString(_testOutputLogger);
 
-        var actual = Json.Parse(actualString, Contexts.FromJson);
+        var actual = Json.Parse(actualString, SentryContexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
         Assert.Equal("{}", actualString);
@@ -29,14 +29,14 @@ public class ContextsTests
     {
         const string expectedKey = "server";
         var os = new OperatingSystem { Name = "Linux" };
-        var sut = new Contexts
+        var sut = new SentryContexts
         {
             [expectedKey] = os
         };
 
         var actualString = sut.ToJsonString(_testOutputLogger);
 
-        var actual = Json.Parse(actualString, Contexts.FromJson);
+        var actual = Json.Parse(actualString, SentryContexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
         Assert.Equal("""{"server":{"type":"os","name":"Linux"}}""", actualString);
@@ -45,7 +45,7 @@ public class ContextsTests
     [Fact]
     public void SerializeObject_SingleDevicePropertySet_SerializeSingleProperty()
     {
-        var sut = new Contexts
+        var sut = new SentryContexts
         {
             Device =
             {
@@ -55,7 +55,7 @@ public class ContextsTests
 
         var actualString = sut.ToJsonString(_testOutputLogger);
 
-        var actual = Json.Parse(actualString, Contexts.FromJson);
+        var actual = Json.Parse(actualString, SentryContexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
         Assert.Equal("""{"device":{"type":"device","arch":"x86"}}""", actualString);
@@ -64,7 +64,7 @@ public class ContextsTests
     [Fact]
     public void SerializeObject_SingleAppPropertySet_SerializeSingleProperty()
     {
-        var sut = new Contexts
+        var sut = new SentryContexts
         {
             App =
             {
@@ -74,7 +74,7 @@ public class ContextsTests
 
         var actualString = sut.ToJsonString(_testOutputLogger);
 
-        var actual = Json.Parse(actualString, Contexts.FromJson);
+        var actual = Json.Parse(actualString, SentryContexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
         Assert.Equal("""{"app":{"type":"app","app_name":"My.App"}}""", actualString);
@@ -83,7 +83,7 @@ public class ContextsTests
     [Fact]
     public void SerializeObject_SingleGpuPropertySet_SerializeSingleProperty()
     {
-        var sut = new Contexts
+        var sut = new SentryContexts
         {
             Gpu =
             {
@@ -93,7 +93,7 @@ public class ContextsTests
 
         var actualString = sut.ToJsonString(_testOutputLogger);
 
-        var actual = Json.Parse(actualString, Contexts.FromJson);
+        var actual = Json.Parse(actualString, SentryContexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
         Assert.Equal("""{"gpu":{"type":"gpu","name":"My.Gpu"}}""", actualString);
@@ -102,7 +102,7 @@ public class ContextsTests
     [Fact]
     public void SerializeObject_SingleResponsePropertySet_SerializeSingleProperty()
     {
-        var sut = new Contexts
+        var sut = new SentryContexts
         {
             Response =
             {
@@ -112,7 +112,7 @@ public class ContextsTests
 
         var actualString = sut.ToJsonString(_testOutputLogger);
 
-        var actual = Json.Parse(actualString, Contexts.FromJson);
+        var actual = Json.Parse(actualString, SentryContexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
         Assert.Equal("""{"response":{"type":"response","status_code":200}}""", actualString);
@@ -121,7 +121,7 @@ public class ContextsTests
     [Fact]
     public void SerializeObject_SingleRuntimePropertySet_SerializeSingleProperty()
     {
-        var sut = new Contexts
+        var sut = new SentryContexts
         {
             Runtime =
             {
@@ -131,7 +131,7 @@ public class ContextsTests
 
         var actualString = sut.ToJsonString(_testOutputLogger);
 
-        var actual = Json.Parse(actualString, Contexts.FromJson);
+        var actual = Json.Parse(actualString, SentryContexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
         Assert.Equal("""{"runtime":{"type":"runtime","version":"2.1.1.100"}}""", actualString);
@@ -141,14 +141,14 @@ public class ContextsTests
     public void SerializeObject_AnonymousObject_SerializedCorrectly()
     {
         // Arrange
-        var contexts = new Contexts
+        var contexts = new SentryContexts
         {
             ["foo"] = new { Bar = 42, Baz = "kek" }
         };
 
         // Act
         var json = contexts.ToJsonString(_testOutputLogger);
-        var roundtrip = Json.Parse(json, Contexts.FromJson);
+        var roundtrip = Json.Parse(json, SentryContexts.FromJson);
 
         // Assert
         json.Should().Be("""{"foo":{"Bar":42,"Baz":"kek"}}""");
@@ -163,7 +163,7 @@ public class ContextsTests
     [Fact]
     public void SerializeObject_SortsContextKeys()
     {
-        var sut = new Contexts
+        var sut = new SentryContexts
         {
             ["c"] = "3",
             ["a"] = "1",
@@ -178,14 +178,14 @@ public class ContextsTests
     public void SerializeObject_Null_Should_Be_Ignored()
     {
         // Arrange
-        var contexts = new Contexts
+        var contexts = new SentryContexts
         {
             ["key"] = null
         };
 
         // Act
         var json = contexts.ToJsonString(_testOutputLogger);
-        var roundtrip = Json.Parse(json, Contexts.FromJson);
+        var roundtrip = Json.Parse(json, SentryContexts.FromJson);
 
         // Assert
         json.Should().Be("{}");
@@ -196,7 +196,7 @@ public class ContextsTests
     [Fact]
     public void Ctor_SingleBrowserPropertySet_SerializeSingleProperty()
     {
-        var sut = new Contexts
+        var sut = new SentryContexts
         {
             Browser =
             {
@@ -206,7 +206,7 @@ public class ContextsTests
 
         var actualString = sut.ToJsonString(_testOutputLogger);
 
-        var actual = Json.Parse(actualString, Contexts.FromJson);
+        var actual = Json.Parse(actualString, SentryContexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
         Assert.Equal("""{"browser":{"type":"browser","name":"Netscape 1"}}""", actualString);
@@ -215,7 +215,7 @@ public class ContextsTests
     [Fact]
     public void Ctor_SingleOperatingSystemPropertySet_SerializeSingleProperty()
     {
-        var sut = new Contexts
+        var sut = new SentryContexts
         {
             OperatingSystem =
             {
@@ -225,7 +225,7 @@ public class ContextsTests
 
         var actualString = sut.ToJsonString(_testOutputLogger);
 
-        var actual = Json.Parse(actualString, Contexts.FromJson);
+        var actual = Json.Parse(actualString, SentryContexts.FromJson);
         actual.Should().BeEquivalentTo(sut);
 
         Assert.Equal("""{"os":{"type":"os","name":"BeOS 1"}}""", actualString);
@@ -234,7 +234,7 @@ public class ContextsTests
     [Fact]
     public void Clone_CopyValues()
     {
-        var sut = new Contexts
+        var sut = new SentryContexts
         {
             App =
             {

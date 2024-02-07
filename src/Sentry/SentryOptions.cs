@@ -194,6 +194,13 @@ public class SentryOptions
             }
 #endif
 
+#if NET8_0_OR_GREATER
+            if ((_defaultIntegrations & DefaultIntegrations.SystemDiagnosticsMetricsIntegration) != 0)
+            {
+                yield return new SystemDiagnosticsMetricsIntegration();
+            }
+#endif
+
             foreach (var integration in _integrations)
             {
                 yield return integration;
@@ -416,9 +423,9 @@ public class SentryOptions
         return string.Equals(requestBaseUrl, _sentryBaseUrl.Value, StringComparison.OrdinalIgnoreCase);
     }
 
-    private Func<SentryEvent, Hint, SentryEvent?>? _beforeSend;
+    private Func<SentryEvent, SentryHint, SentryEvent?>? _beforeSend;
 
-    internal Func<SentryEvent, Hint, SentryEvent?>? BeforeSendInternal => _beforeSend;
+    internal Func<SentryEvent, SentryHint, SentryEvent?>? BeforeSendInternal => _beforeSend;
 
     /// <summary>
     /// Configures a callback function to be invoked before sending an event to Sentry
@@ -428,7 +435,7 @@ public class SentryOptions
     /// application a chance to inspect and/or modify the event before it's sent. If the
     /// event should not be sent at all, return null from the callback.
     /// </remarks>
-    public void SetBeforeSend(Func<SentryEvent, Hint, SentryEvent?> beforeSend)
+    public void SetBeforeSend(Func<SentryEvent, SentryHint, SentryEvent?> beforeSend)
     {
         _beforeSend = beforeSend;
     }
@@ -446,15 +453,15 @@ public class SentryOptions
         _beforeSend = (@event, _) => beforeSend(@event);
     }
 
-    private Func<SentryTransaction, Hint, SentryTransaction?>? _beforeSendTransaction;
+    private Func<SentryTransaction, SentryHint, SentryTransaction?>? _beforeSendTransaction;
 
-    internal Func<SentryTransaction, Hint, SentryTransaction?>? BeforeSendTransactionInternal => _beforeSendTransaction;
+    internal Func<SentryTransaction, SentryHint, SentryTransaction?>? BeforeSendTransactionInternal => _beforeSendTransaction;
 
     /// <summary>
     /// Configures a callback to invoke before sending a transaction to Sentry
     /// </summary>
     /// <param name="beforeSendTransaction">The callback</param>
-    public void SetBeforeSendTransaction(Func<SentryTransaction, Hint, SentryTransaction?> beforeSendTransaction)
+    public void SetBeforeSendTransaction(Func<SentryTransaction, SentryHint, SentryTransaction?> beforeSendTransaction)
     {
         _beforeSendTransaction = beforeSendTransaction;
     }
@@ -468,9 +475,9 @@ public class SentryOptions
         _beforeSendTransaction = (transaction, _) => beforeSendTransaction(transaction);
     }
 
-    private Func<Breadcrumb, Hint, Breadcrumb?>? _beforeBreadcrumb;
+    private Func<Breadcrumb, SentryHint, Breadcrumb?>? _beforeBreadcrumb;
 
-    internal Func<Breadcrumb, Hint, Breadcrumb?>? BeforeBreadcrumbInternal => _beforeBreadcrumb;
+    internal Func<Breadcrumb, SentryHint, Breadcrumb?>? BeforeBreadcrumbInternal => _beforeBreadcrumb;
 
     /// <summary>
     /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
@@ -479,7 +486,7 @@ public class SentryOptions
     /// Gives a chance to inspect and modify the breadcrumb. If null is returned, the
     /// breadcrumb will be discarded. Otherwise the result of the callback will be stored.
     /// </remarks>
-    public void SetBeforeBreadcrumb(Func<Breadcrumb, Hint, Breadcrumb?> beforeBreadcrumb)
+    public void SetBeforeBreadcrumb(Func<Breadcrumb, SentryHint, Breadcrumb?> beforeBreadcrumb)
     {
         _beforeBreadcrumb = beforeBreadcrumb;
     }
@@ -709,7 +716,7 @@ public class SentryOptions
     public IList<SubstringOrRegexPattern> FailedRequestTargets
     {
         get => _failedRequestTargets.Value;
-        set => _failedRequestTargets = new(value.SetWithConfigBinding);
+        set => _failedRequestTargets = new(value.WithConfigBinding);
     }
 
     /// <summary>
@@ -911,7 +918,7 @@ public class SentryOptions
         //       .NET 7 changed this to call the setter with an array that already starts with the old value.
         //       We have to handle both cases.
         get => _tracePropagationTargets;
-        set => _tracePropagationTargets = value.SetWithConfigBinding();
+        set => _tracePropagationTargets = value.WithConfigBinding();
     }
 
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
@@ -1086,7 +1093,7 @@ public class SentryOptions
     /// </summary>
     /// <remarks>
     /// This option applies only to complex objects being added to Sentry events as contexts or extras, which do not
-    /// implement <see cref="IJsonSerializable"/>.
+    /// implement <see cref="ISentryJsonSerializable"/>.
     /// </remarks>
     public bool JsonPreserveReferences
     {
@@ -1213,6 +1220,9 @@ public class SentryOptions
 #if NET5_0_OR_GREATER && !__MOBILE__
                                | DefaultIntegrations.WinUiUnhandledExceptionIntegration
 #endif
+#if NET8_0_OR_GREATER
+                               | DefaultIntegrations.SystemDiagnosticsMetricsIntegration
+#endif
                                ;
 
 #if ANDROID
@@ -1313,18 +1323,8 @@ public class SentryOptions
 #if NET5_0_OR_GREATER && !__MOBILE__
         WinUiUnhandledExceptionIntegration = 1 << 6,
 #endif
+#if NET8_0_OR_GREATER
+        SystemDiagnosticsMetricsIntegration = 1 << 7,
+#endif
     }
-}
-
-/// <summary>
-/// Settings for the experimental Metrics feature. This feature is preview only and will very likely change in the future
-/// without a major version bump... so use at your own risk.
-/// </summary>
-public class ExperimentalMetricsOptions
-{
-    /// <summary>
-    /// Determines the sample rate for metrics. 0.0 means no metrics will be sent (metrics disabled). 1.0 implies all
-    /// metrics will be sent.
-    /// </summary>
-    public bool EnableCodeLocations { get; set; } = true;
 }

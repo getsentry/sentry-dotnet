@@ -154,7 +154,7 @@ public class SentryLoggerTests
         var b = _fixture.Scope.Breadcrumbs.First();
         Assert.Equal(expectedEventId.ToString(), b.Data![EventIdExtensions.DataKey]);
         Assert.Equal(DateTimeOffset.MaxValue, b.Timestamp);
-        Assert.Equal(_fixture.CategoryName,  b.Category);
+        Assert.Equal(_fixture.CategoryName, b.Category);
         Assert.Equal(expectedLevel, b.Level);
         Assert.Equal(BreadcrumbType, b.Type);
         Assert.Null(b.Message);
@@ -305,7 +305,7 @@ public class SentryLoggerTests
         Assert.Equal(DateTimeOffset.MaxValue, b.Timestamp);
         Assert.Equal(_fixture.CategoryName, b.Category);
         Assert.Equal(expectedLevel, b.Level);
-        Assert.Equal(BreadcrumbType, b.Type );
+        Assert.Equal(BreadcrumbType, b.Type);
         Assert.Null(b.Data);
     }
 

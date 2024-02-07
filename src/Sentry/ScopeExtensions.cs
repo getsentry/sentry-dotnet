@@ -166,7 +166,7 @@ public static class ScopeExtensions
         // TODO: Envelope spec allows the last item to not have a length.
         // So if we make sure there's only 1 item without length, we can support it.
         scope.AddAttachment(
-            new Attachment(
+            new SentryAttachment(
                 type,
                 new StreamAttachmentContent(stream),
                 fileName,
@@ -183,7 +183,7 @@ public static class ScopeExtensions
         AttachmentType type = AttachmentType.Default,
         string? contentType = null) =>
         scope.AddAttachment(
-            new Attachment(
+            new SentryAttachment(
                 type,
                 new ByteAttachmentContent(data),
                 fileName,
@@ -198,7 +198,7 @@ public static class ScopeExtensions
         AttachmentType type = AttachmentType.Default,
         string? contentType = null) =>
         scope.AddAttachment(
-            new Attachment(
+            new SentryAttachment(
                 type,
                 new FileAttachmentContent(filePath, scope.Options.UseAsyncFileIO),
                 Path.GetFileName(filePath),

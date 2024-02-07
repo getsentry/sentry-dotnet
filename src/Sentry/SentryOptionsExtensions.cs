@@ -84,6 +84,15 @@ public static class SentryOptionsExtensions
         => options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.WinUiUnhandledExceptionIntegration);
 #endif
 
+#if NET8_0_OR_GREATER
+    /// <summary>
+    /// Disables the System.Diagnostics.Metrics integration.
+    /// </summary>
+    /// <param name="options">The SentryOptions to remove the integration from.</param>
+    public static void DisableSystemDiagnosticsMetricsIntegration(this SentryOptions options)
+        => options.RemoveDefaultIntegration(SentryOptions.DefaultIntegrations.SystemDiagnosticsMetricsIntegration);
+#endif
+
     /// <summary>
     /// Add an integration
     /// </summary>
@@ -110,7 +119,7 @@ public static class SentryOptionsExtensions
     {
         if (options.ExceptionFilters == null)
         {
-            options.ExceptionFilters = new () {exceptionFilter};
+            options.ExceptionFilters = new() { exceptionFilter };
         }
         else
         {
@@ -153,7 +162,7 @@ public static class SentryOptionsExtensions
     {
         if (options.InAppExclude == null)
         {
-            options.InAppExclude = new () {prefix};
+            options.InAppExclude = new() { prefix };
         }
         else
         {
@@ -178,7 +187,7 @@ public static class SentryOptionsExtensions
     {
         if (options.InAppInclude == null)
         {
-            options.InAppInclude = new () {prefix};
+            options.InAppInclude = new() { prefix };
         }
         else
         {
@@ -260,7 +269,7 @@ public static class SentryOptionsExtensions
     {
         if (options.TransactionProcessors == null)
         {
-            options.TransactionProcessors = new() {processor};
+            options.TransactionProcessors = new() { processor };
         }
         else
         {

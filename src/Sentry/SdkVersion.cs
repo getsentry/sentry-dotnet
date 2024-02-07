@@ -8,7 +8,7 @@ namespace Sentry;
 /// Information about the SDK to be sent with the SentryEvent.
 /// </summary>
 /// <remarks>Requires Sentry version 8.4 or higher.</remarks>
-public sealed class SdkVersion : IJsonSerializable
+public sealed class SdkVersion : ISentryJsonSerializable
 {
     private static readonly Lazy<SdkVersion> InstanceLazy = new(
         () => new SdkVersion
@@ -19,14 +19,14 @@ public sealed class SdkVersion : IJsonSerializable
 
     internal static SdkVersion Instance => InstanceLazy.Value;
 
-    internal ConcurrentBag<Package> InternalPackages { get; set; } = new();
+    internal ConcurrentBag<SentryPackage> InternalPackages { get; set; } = new();
     internal ConcurrentBag<string> Integrations { get; set; } = new();
 
     /// <summary>
     /// SDK packages.
     /// </summary>
     /// <remarks>This property is not required.</remarks>
-    public IEnumerable<Package> Packages => InternalPackages;
+    public IEnumerable<SentryPackage> Packages => InternalPackages;
 
     /// <summary>
     /// SDK name.
@@ -56,9 +56,9 @@ public sealed class SdkVersion : IJsonSerializable
     /// <param name="name">The package name.</param>
     /// <param name="version">The package version.</param>
     public void AddPackage(string name, string version)
-        => AddPackage(new Package(name, version));
+        => AddPackage(new SentryPackage(name, version));
 
-    internal void AddPackage(Package package)
+    internal void AddPackage(SentryPackage package)
         => InternalPackages.Add(package);
 
     /// <summary>
@@ -88,8 +88,8 @@ public sealed class SdkVersion : IJsonSerializable
     {
         // Packages
         var packages =
-            json.GetPropertyOrNull("packages")?.EnumerateArray().Select(Package.FromJson).ToArray()
-            ?? Array.Empty<Package>();
+            json.GetPropertyOrNull("packages")?.EnumerateArray().Select(SentryPackage.FromJson).ToArray()
+            ?? Array.Empty<SentryPackage>();
 
         // Integrations
         var integrations =
@@ -104,7 +104,7 @@ public sealed class SdkVersion : IJsonSerializable
 
         return new SdkVersion
         {
-            InternalPackages = new ConcurrentBag<Package>(packages),
+            InternalPackages = new ConcurrentBag<SentryPackage>(packages),
             Integrations = new ConcurrentBag<string>(integrations),
             Name = name,
             Version = version

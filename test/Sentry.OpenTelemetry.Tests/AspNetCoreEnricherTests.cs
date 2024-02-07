@@ -11,7 +11,7 @@ public class AspNetCoreEnricherTests
         var hub = Substitute.For<IHub>();
         hub.ConfigureScope(Arg.Do<Action<Scope>>(action => action(scope)));
 
-        var user = new SentryUser{ Id = "foo" };
+        var user = new SentryUser { Id = "foo" };
         var userFactory = Substitute.For<ISentryUserFactory>();
         userFactory.Create().Returns(user);
 

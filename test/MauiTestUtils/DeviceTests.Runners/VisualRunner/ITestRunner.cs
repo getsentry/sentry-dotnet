@@ -1,11 +1,11 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
 
-interface ITestRunner
+internal interface ITestRunner
 {
     Task<IReadOnlyList<TestAssemblyViewModel>> DiscoverAsync();
 

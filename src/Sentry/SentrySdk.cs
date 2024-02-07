@@ -1,6 +1,8 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Protocol.Envelopes;
+using Sentry.Protocol.Metrics;
 
 namespace Sentry;
 
@@ -355,7 +357,7 @@ public static partial class SentrySdk
     /// <param name="hint">A hint providing additional context that can be used in the BeforeBreadcrumb callback</param>
     /// <see cref="AddBreadcrumb(string, string?, string?, IDictionary{string, string}?, BreadcrumbLevel)"/>
     [DebuggerStepThrough]
-    public static void AddBreadcrumb(Breadcrumb breadcrumb, Hint? hint = null)
+    public static void AddBreadcrumb(Breadcrumb breadcrumb, SentryHint? hint = null)
         => CurrentHub.AddBreadcrumb(breadcrumb, hint);
 
     /// <summary>
@@ -375,6 +377,12 @@ public static partial class SentrySdk
     public static Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
         => CurrentHub.ConfigureScopeAsync(configureScope);
 
+    /// <inheritdoc cref="ISentryClient.CaptureEnvelope"/>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static bool CaptureEnvelope(Envelope envelope)
+        => CurrentHub.CaptureEnvelope(envelope);
+
     /// <summary>
     /// Captures the event, passing a hint, using the specified scope.
     /// </summary>
@@ -384,7 +392,7 @@ public static partial class SentrySdk
     /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Hint? hint = null)
+    public static SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, SentryHint? hint = null)
         => CurrentHub.CaptureEvent(evt, scope, hint);
 
     /// <summary>
@@ -413,7 +421,7 @@ public static partial class SentrySdk
     /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope)
+    public static SentryId CaptureEvent(SentryEvent evt, SentryHint? hint, Action<Scope> configureScope)
         => CurrentHub.CaptureEvent(evt, hint, configureScope);
 
     /// <summary>
@@ -502,7 +510,7 @@ public static partial class SentrySdk
     /// </remarks>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint)
+    public static void CaptureTransaction(SentryTransaction transaction, Scope? scope, SentryHint? hint)
         => CurrentHub.CaptureTransaction(transaction, scope, hint);
 
     /// <summary>

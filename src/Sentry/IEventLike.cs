@@ -32,7 +32,7 @@ public interface IEventLike : IHasTags, IHasExtra
     /// <value>
     /// The HTTP.
     /// </value>
-    Request Request { get; set; }
+    SentryRequest Request { get; set; }
 
     /// <summary>
     /// Gets the structured Sentry context.
@@ -40,7 +40,7 @@ public interface IEventLike : IHasTags, IHasExtra
     /// <value>
     /// The contexts.
     /// </value>
-    Contexts Contexts { get; set; }
+    SentryContexts Contexts { get; set; }
 
     /// <summary>
     /// Gets the user information.

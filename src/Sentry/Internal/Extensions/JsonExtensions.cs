@@ -54,7 +54,7 @@ internal static class JsonExtensions
     };
 
     internal static void AddJsonSerializerContext<T>(Func<JsonSerializerOptions, T> jsonSerializerContextBuilder)
-        where T: JsonSerializerContext
+        where T : JsonSerializerContext
     {
         JsonSerializerContextBuilders.Add(jsonSerializerContextBuilder);
         ResetSerializerOptions();
@@ -128,7 +128,7 @@ internal static class JsonExtensions
     public static Dictionary<string, TValue>? GetDictionaryOrNull<TValue>(
         this JsonElement json,
         Func<JsonElement, TValue> factory)
-        where TValue : IJsonSerializable?
+        where TValue : ISentryJsonSerializable?
     {
         if (json.ValueKind != JsonValueKind.Object)
         {
@@ -283,7 +283,7 @@ internal static class JsonExtensions
         IEnumerable<KeyValuePair<string, TValue>>? dic,
         IDiagnosticLogger? logger,
         bool includeNullValues = true)
-        where TValue : IJsonSerializable?
+        where TValue : ISentryJsonSerializable?
     {
         if (dic is not null)
         {
@@ -345,7 +345,7 @@ internal static class JsonExtensions
         string propertyName,
         IEnumerable<KeyValuePair<string, TValue>>? dic,
         IDiagnosticLogger? logger)
-        where TValue : IJsonSerializable?
+        where TValue : ISentryJsonSerializable?
     {
         writer.WritePropertyName(propertyName);
         writer.WriteDictionaryValue(dic, logger);
@@ -424,7 +424,7 @@ internal static class JsonExtensions
 
     public static void WriteSerializableValue(
         this Utf8JsonWriter writer,
-        IJsonSerializable value,
+        ISentryJsonSerializable value,
         IDiagnosticLogger? logger)
     {
         value.WriteTo(writer, logger);
@@ -433,7 +433,7 @@ internal static class JsonExtensions
     public static void WriteSerializable(
         this Utf8JsonWriter writer,
         string propertyName,
-        IJsonSerializable value,
+        ISentryJsonSerializable value,
         IDiagnosticLogger? logger)
     {
         writer.WritePropertyName(propertyName);
@@ -449,7 +449,7 @@ internal static class JsonExtensions
         {
             writer.WriteNullValue();
         }
-        else if (value is IJsonSerializable serializable)
+        else if (value is ISentryJsonSerializable serializable)
         {
             writer.WriteSerializableValue(serializable, logger);
         }
@@ -784,7 +784,7 @@ internal static class JsonExtensions
     public static void WriteSerializableIfNotNull(
         this Utf8JsonWriter writer,
         string propertyName,
-        IJsonSerializable? value,
+        ISentryJsonSerializable? value,
         IDiagnosticLogger? logger)
     {
         if (value is not null)
@@ -811,7 +811,7 @@ internal static class JsonExtensions
         string propertyName,
         IEnumerable<KeyValuePair<string, TValue>>? dic,
         IDiagnosticLogger? logger)
-        where TValue : IJsonSerializable?
+        where TValue : ISentryJsonSerializable?
     {
         var dictionary = dic as IReadOnlyDictionary<string, TValue> ?? dic?.ToDict();
         if (dictionary is not null && dictionary.Count > 0)

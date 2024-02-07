@@ -53,7 +53,7 @@ public class BaseScopeTests
     {
         _sut.Contexts.App.Name = "Foo";
 
-        var expected = new Contexts
+        var expected = new SentryContexts
         {
             App =
             {
@@ -76,7 +76,7 @@ public class BaseScopeTests
     [Fact]
     public void Request_Settable()
     {
-        var expected = new Request();
+        var expected = new SentryRequest();
         _sut.Request = expected;
         Assert.Same(expected, _sut.Request);
     }

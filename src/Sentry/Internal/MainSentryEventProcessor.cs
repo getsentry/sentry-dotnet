@@ -158,7 +158,7 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
         return @event;
     }
 
-    private static void AddMemoryInfo(Contexts contexts)
+    private static void AddMemoryInfo(SentryContexts contexts)
     {
 #if NETCOREAPP3_0_OR_GREATER
         var memory = GC.GetGCMemoryInfo();
@@ -192,7 +192,7 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
 #endif
     }
 
-    private static void AddThreadPoolInfo(Contexts contexts)
+    private static void AddThreadPoolInfo(SentryContexts contexts)
     {
         ThreadPool.GetMinThreads(out var minWorkerThreads, out var minCompletionPortThreads);
         ThreadPool.GetMaxThreads(out var maxWorkerThreads, out var maxCompletionPortThreads);

@@ -1,0 +1,38 @@
+name: format code
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'samples/**'
+      - '.github/workflows/format-code.yml'
+
+jobs:
+  format-code:
+    name: Format Code
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
+      - name: Restore .NET Dependencies
+        run: dotnet restore Sentry.sln --nologo
+
+      - name: Install dotnet format
+        run: dotnet tool install -g dotnet-format
+
+      - name: Format Code
+        # We're excluding `./**/*OptionsSetup.cs` from the format because the tool struggles with 
+        # source generators
+        run: dotnet format Sentry.sln --no-restore --exclude ./modules --exclude ./**/*OptionsSetup.cs
+
+      # actions/checkout fetches only a single commit in a detached HEAD state. Therefore
+      # we need to pass the current branch, otherwise we can't commit the changes.
+      # GITHUB_HEAD_REF is the name of the head branch. GitHub Actions only sets this for PRs.
+      - name: Commit Formatted Code
+        run: ./scripts/commit-formatted-code.sh $GITHUB_HEAD_REF

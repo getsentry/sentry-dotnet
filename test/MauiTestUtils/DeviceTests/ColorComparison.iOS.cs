@@ -24,7 +24,7 @@ public class ColorComparison : IEqualityComparer<UIColor>
                && Equal(alpha1, alpha2, tolerance);
     }
 
-    static bool Equal(nfloat v1, nfloat v2, double tolerance)
+    private static bool Equal(nfloat v1, nfloat v2, double tolerance)
     {
         return Math.Abs(v1 - v2) <= tolerance;
     }

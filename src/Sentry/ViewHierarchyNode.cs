@@ -5,7 +5,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry View Hierarchy Node
 /// </summary>
-public abstract class ViewHierarchyNode : IJsonSerializable
+public abstract class ViewHierarchyNode : ISentryJsonSerializable
 {
     private List<ViewHierarchyNode>? _children;
 

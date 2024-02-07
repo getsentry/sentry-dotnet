@@ -26,7 +26,7 @@ public class TracePropagationTargetTests
     public void SentryOptions_TracePropagationTargets_SetRemovesDefault()
     {
         var options = new SentryOptions();
-        var targets = new []
+        var targets = new[]
         {
             new SubstringOrRegexPattern(".*"),
             new SubstringOrRegexPattern("foo"),

@@ -100,19 +100,19 @@ public class TransactionTracer : ITransactionTracer
     /// <inheritdoc />
     public SentryLevel? Level { get; set; }
 
-    private Request? _request;
+    private SentryRequest? _request;
 
     /// <inheritdoc />
-    public Request Request
+    public SentryRequest Request
     {
-        get => _request ??= new Request();
+        get => _request ??= new SentryRequest();
         set => _request = value;
     }
 
-    private readonly Contexts _contexts = new();
+    private readonly SentryContexts _contexts = new();
 
     /// <inheritdoc />
-    public Contexts Contexts
+    public SentryContexts Contexts
     {
         get => _contexts;
         set => _contexts.ReplaceWith(value);
@@ -229,7 +229,7 @@ public class TransactionTracer : ITransactionTracer
         IsSampled = context.IsSampled;
         StartTimestamp = _stopwatch.StartDateTimeOffset;
 
-		if (context is TransactionContext transactionContext)
+        if (context is TransactionContext transactionContext)
         {
             _instrumenter = transactionContext.Instrumenter;
         }
@@ -307,7 +307,7 @@ public class TransactionTracer : ITransactionTracer
 
         public void Push(ISpan span)
         {
-            lock(_lock)
+            lock (_lock)
             {
                 TrackedSpans.Push(span);
             }
@@ -315,7 +315,7 @@ public class TransactionTracer : ITransactionTracer
 
         public ISpan? PeekActive()
         {
-            lock(_lock)
+            lock (_lock)
             {
                 while (TrackedSpans.Count > 0)
                 {

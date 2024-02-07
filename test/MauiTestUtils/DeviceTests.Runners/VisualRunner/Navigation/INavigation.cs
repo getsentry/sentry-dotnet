@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Threading.Tasks;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;

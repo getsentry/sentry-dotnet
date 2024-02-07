@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
 
-class AsyncLock
+internal class AsyncLock
 {
-    readonly SemaphoreSlim semaphore;
-    readonly Task<Releaser> releaser;
+    private readonly SemaphoreSlim semaphore;
+    private readonly Task<Releaser> releaser;
 
     public AsyncLock()
     {
@@ -19,7 +19,7 @@ class AsyncLock
 
     public struct Releaser : IDisposable
     {
-        readonly AsyncLock toRelease;
+        private readonly AsyncLock toRelease;
 
         internal Releaser(AsyncLock toRelease)
         {

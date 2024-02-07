@@ -111,7 +111,7 @@ public abstract class HttpTransportBase
             // Check if session update with init=true
             if (item.Payload is JsonSerializable
                 {
-                    Source: SessionUpdate {IsInitial: true} discardedSessionUpdate
+                    Source: SessionUpdate { IsInitial: true } discardedSessionUpdate
                 })
             {
                 _lastDiscardedSessionInitId = discardedSessionUpdate.Id.ToString();
@@ -142,7 +142,7 @@ public abstract class HttpTransportBase
 
         // If it's a session update (not discarded) with init=false, check if it continues
         // a session with previously dropped init and, if so, promote this update to init=true.
-        if (item.Payload is JsonSerializable {Source: SessionUpdate {IsInitial: false} sessionUpdate} &&
+        if (item.Payload is JsonSerializable { Source: SessionUpdate { IsInitial: false } sessionUpdate } &&
             string.Equals(sessionUpdate.Id.ToString(),
                 Interlocked.Exchange(ref _lastDiscardedSessionInitId, null),
                 StringComparison.Ordinal))
@@ -189,7 +189,7 @@ public abstract class HttpTransportBase
         {
             RequestUri = dsn.GetEnvelopeEndpointUri(),
             Method = HttpMethod.Post,
-            Headers = {{"X-Sentry-Auth", authHeader}},
+            Headers = { { "X-Sentry-Auth", authHeader } },
             Content = new EnvelopeHttpContent(envelope, _options.DiagnosticLogger, _clock)
         };
     }

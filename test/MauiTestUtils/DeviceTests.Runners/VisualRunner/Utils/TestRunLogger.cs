@@ -1,21 +1,19 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Text;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
 
-class TestRunLogger
+internal class TestRunLogger
 {
-    static readonly char[] NewLineCharacters = { '\r', '\n' };
-
-    readonly object _locker = new();
-    readonly ILogger _logger;
-    readonly StringBuilder _builder;
-
-    int _failed;
-    int _passed;
-    int _skipped;
+    private static readonly char[] NewLineCharacters = { '\r', '\n' };
+    private readonly object _locker = new();
+    private readonly ILogger _logger;
+    private readonly StringBuilder _builder;
+    private int _failed;
+    private int _passed;
+    private int _skipped;
 
     public TestRunLogger(ILogger logger)
     {

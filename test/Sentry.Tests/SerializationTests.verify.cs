@@ -9,7 +9,7 @@ public class SerializationTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
 
-    public SerializationTests (ITestOutputHelper output)
+    public SerializationTests(ITestOutputHelper output)
     {
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
     }
@@ -39,20 +39,20 @@ public class SerializationTests
 
         JsonExtensions.ResetSerializerOptions();
         JsonExtensions.AddJsonSerializerContext(options => new SerializationTestsJsonContext(options));
-        yield return new object[] { "nested string", new NestedStringClass { Value= "string value" } };
-        yield return new object[] { "nested int", new NestedIntClass { Value= 5 } };
-        yield return new object[] { "nested nint", new NestedNIntClass { Value= 5 } };
-        yield return new object[] { "nested nuint", new NestedNuIntClass { Value= 5 } };
-        yield return new object[] { "nested IntPtr", new NestedIntPtrClass { Value= (IntPtr)3 } };
-        yield return new object[] { "nested nullable IntPtr", new NestedNullableIntPtrClass { Value= (IntPtr?)3 } };
-        yield return new object[] { "nested UIntPtr", new NestedUIntPtrClass { Value= (UIntPtr)3 } };
-        yield return new object[] { "nested nullable UIntPtr", new NestedNullableUIntPtrClass { Value= (UIntPtr?)3 } };
+        yield return new object[] { "nested string", new NestedStringClass { Value = "string value" } };
+        yield return new object[] { "nested int", new NestedIntClass { Value = 5 } };
+        yield return new object[] { "nested nint", new NestedNIntClass { Value = 5 } };
+        yield return new object[] { "nested nuint", new NestedNuIntClass { Value = 5 } };
+        yield return new object[] { "nested IntPtr", new NestedIntPtrClass { Value = (IntPtr)3 } };
+        yield return new object[] { "nested nullable IntPtr", new NestedNullableIntPtrClass { Value = (IntPtr?)3 } };
+        yield return new object[] { "nested UIntPtr", new NestedUIntPtrClass { Value = (UIntPtr)3 } };
+        yield return new object[] { "nested nullable UIntPtr", new NestedNullableUIntPtrClass { Value = (UIntPtr?)3 } };
 
         JsonExtensions.ResetSerializerOptions();
         JsonExtensions.AddJsonConverter(new CustomObjectConverter());
         JsonExtensions.AddJsonSerializerContext(options => new SerializationTestsJsonContext(options));
-        yield return new object[] {"custom object with value", new CustomObject("test")};
-        yield return new object[] {"custom object with null", new CustomObject(null)};
+        yield return new object[] { "custom object with value", new CustomObject("test") };
+        yield return new object[] { "custom object with null", new CustomObject(null) };
     }
 #else
     public static IEnumerable<object[]> GetData()

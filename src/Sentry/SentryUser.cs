@@ -7,7 +7,7 @@ namespace Sentry;
 /// An interface which describes the authenticated User for a request.
 /// </summary>
 /// <see href="https://develop.sentry.dev/sdk/event-payloads/user/"/>
-public sealed class SentryUser : IJsonSerializable
+public sealed class SentryUser : ISentryJsonSerializable
 {
     internal Action<SentryUser>? PropertyChanged { get; set; }
 

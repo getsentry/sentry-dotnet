@@ -5,7 +5,7 @@ public class MainSentryEventProcessorTests
     private class Fixture
     {
         public ISentryStackTraceFactory SentryStackTraceFactory { get; set; } = Substitute.For<ISentryStackTraceFactory>();
-        public SentryOptions SentryOptions { get; set; } = new() { Release = "release-123", Distribution = "dist-123"};
+        public SentryOptions SentryOptions { get; set; } = new() { Release = "release-123", Distribution = "dist-123" };
         public MainSentryEventProcessor GetSut() => new(SentryOptions, () => SentryStackTraceFactory);
     }
 

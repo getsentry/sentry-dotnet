@@ -1,4 +1,4 @@
-﻿namespace Sentry.Internal.JsonConverters;
+namespace Sentry.Internal.JsonConverters;
 
 internal class IntPtrNullableJsonConverter : JsonConverter<IntPtr?>
 {

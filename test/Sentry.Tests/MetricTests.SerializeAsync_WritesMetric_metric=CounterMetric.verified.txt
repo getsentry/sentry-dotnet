@@ -1,1 +1,1 @@
-﻿my.counter@counters:5|c|#tag1:SanitizeValue(value),tag2:SanitizeValue(value)|T1577836800
+﻿my.counter@counters:5|c|#tag1:value1,tag2:value2|T1577836800

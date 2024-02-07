@@ -46,7 +46,7 @@ internal class SdkComposer
             {
                 _options.LogInfo("Connecting to Spotlight at {0}", _options.SpotlightUrl);
             }
-            if (!Uri.TryCreate(_options.SpotlightUrl,  UriKind.Absolute, out var spotlightUrl))
+            if (!Uri.TryCreate(_options.SpotlightUrl, UriKind.Absolute, out var spotlightUrl))
             {
                 throw new InvalidOperationException("Invalid option for SpotlightUrl: " + _options.SpotlightUrl);
             }

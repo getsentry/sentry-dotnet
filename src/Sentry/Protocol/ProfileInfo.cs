@@ -6,7 +6,7 @@ namespace Sentry.Protocol;
 /// <summary>
 /// Profiling context information.
 /// </summary>
-internal sealed class ProfileInfo : IJsonSerializable
+internal sealed class ProfileInfo : ISentryJsonSerializable
 {
     /// <summary>
     /// Profile's event ID.
@@ -15,10 +15,10 @@ internal sealed class ProfileInfo : IJsonSerializable
 
     public DebugMeta DebugMeta { get; set; } = new() { Images = new() };
 
-    private readonly Contexts _contexts = new();
+    private readonly SentryContexts _contexts = new();
 
     /// <inheritdoc />
-    public Contexts Contexts
+    public SentryContexts Contexts
     {
         get => _contexts;
         set => _contexts.ReplaceWith(value);

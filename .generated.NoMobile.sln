@@ -165,9 +165,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Console.Nati
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Console.Metrics", "samples\Sentry.Samples.Console.Metrics\Sentry.Samples.Console.Metrics.csproj", "{BD2D08FC-8675-4157-A73C-D75F6A3856D3}"
 EndProject
+<<<<<<< HEAD
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Hangfire", "samples\Sentry.Samples.Hangfire\Sentry.Samples.Hangfire.csproj", "{D3BF5652-29A2-4E21-83BB-758D02B45636}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Hangfire", "src\Sentry.Hangfire\Sentry.Hangfire.csproj", "{CD21EE61-C4D9-4128-A6D2-B08A19E65538}"
+=======
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.MacOS", "samples\Sentry.Samples.MacOS\Sentry.Samples.MacOS.csproj", "{5B100CC0-1A78-407E-A5A5-94BC06D67461}"
+>>>>>>> main
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -475,6 +479,7 @@ Global
 		{BD2D08FC-8675-4157-A73C-D75F6A3856D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD2D08FC-8675-4157-A73C-D75F6A3856D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD2D08FC-8675-4157-A73C-D75F6A3856D3}.Release|Any CPU.Build.0 = Release|Any CPU
+<<<<<<< HEAD
 		{D3BF5652-29A2-4E21-83BB-758D02B45636}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D3BF5652-29A2-4E21-83BB-758D02B45636}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3BF5652-29A2-4E21-83BB-758D02B45636}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -483,6 +488,12 @@ Global
 		{CD21EE61-C4D9-4128-A6D2-B08A19E65538}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD21EE61-C4D9-4128-A6D2-B08A19E65538}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD21EE61-C4D9-4128-A6D2-B08A19E65538}.Release|Any CPU.Build.0 = Release|Any CPU
+=======
+		{5B100CC0-1A78-407E-A5A5-94BC06D67461}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B100CC0-1A78-407E-A5A5-94BC06D67461}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B100CC0-1A78-407E-A5A5-94BC06D67461}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B100CC0-1A78-407E-A5A5-94BC06D67461}.Release|Any CPU.Build.0 = Release|Any CPU
+>>>>>>> main
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -564,7 +575,11 @@ Global
 		{8032310D-3C06-442C-A318-F365BCC4C804} = {A3CCA27E-4DF8-479D-833C-CAA0950715AA}
 		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
 		{BD2D08FC-8675-4157-A73C-D75F6A3856D3} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
+<<<<<<< HEAD
 		{D3BF5652-29A2-4E21-83BB-758D02B45636} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
 		{CD21EE61-C4D9-4128-A6D2-B08A19E65538} = {230B9384-90FD-4551-A5DE-1A5C197F25B6}
+=======
+		{5B100CC0-1A78-407E-A5A5-94BC06D67461} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
+>>>>>>> main
 	EndGlobalSection
 EndGlobal

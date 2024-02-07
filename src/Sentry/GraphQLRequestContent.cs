@@ -8,7 +8,7 @@ internal class GraphQLRequestContent
 {
     private static JsonSerializerOptions SerializerOptions => new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
-    private static readonly Regex Expression = new (
+    private static readonly Regex Expression = new(
         @"\s*(?<operationType>\bquery\b|\bmutation\b|\bsubscription\b)\s*(?<operationName>\w+)?\s*(?<query>{.*})\s*",
         RegexOptions.IgnorePatternWhitespace | RegexOptions.Multiline | RegexOptions.IgnoreCase
         );

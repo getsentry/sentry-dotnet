@@ -13,7 +13,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner;
 public abstract class MauiTestApplicationDelegate : UIApplicationDelegate
 {
     // TODO: https://github.com/xamarin/xamarin-macios/issues/12555
-    readonly static string[] EnvVarNames = {
+    private static readonly string[] EnvVarNames = {
         "NUNIT_AUTOSTART",
         "NUNIT_AUTOEXIT",
         "NUNIT_ENABLE_NETWORK",
@@ -32,8 +32,7 @@ public abstract class MauiTestApplicationDelegate : UIApplicationDelegate
         "NUNIT_SKIPPED_METHODS",
         "NUNIT_SKIPPED_CLASSES",
     };
-
-    readonly static Dictionary<string, string?> EnvVars = new();
+    private static readonly Dictionary<string, string?> EnvVars = new();
 
     static MauiTestApplicationDelegate()
     {
@@ -44,7 +43,7 @@ public abstract class MauiTestApplicationDelegate : UIApplicationDelegate
         }
     }
 
-    static void SetEnvironmentVariables()
+    private static void SetEnvironmentVariables()
     {
         // read from dictionary
         foreach (var envvar in EnvVars)

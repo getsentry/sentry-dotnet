@@ -47,6 +47,15 @@ public class SubstringOrRegexPattern
         return new SubstringOrRegexPattern(substringOrRegexPattern);
     }
 
+    /// <summary>
+    /// Implicitly converts a <see cref="Regex"/> to a <see cref="SubstringOrRegexPattern"/>.
+    /// </summary>
+    /// <param name="regex"></param>
+    public static implicit operator SubstringOrRegexPattern(Regex regex)
+    {
+        return new SubstringOrRegexPattern(regex);
+    }
+
     /// <inheritdoc />
     public override string ToString() => _substring ?? _regex?.ToString() ?? "";
 
@@ -115,8 +124,8 @@ internal static class SubstringOrRegexPatternExtensions
     /// <typeparam name="T">The List Type</typeparam>
     /// <param name="value">The set of values to be assigned</param>
     /// <returns>A IList of type T that will be consistent even if it has been set via Config</returns>
-    public static IList<T> SetWithConfigBinding<T>(this IList<T> value)
-        where T: SubstringOrRegexPattern
+    public static IList<T> WithConfigBinding<T>(this IList<T> value)
+        where T : SubstringOrRegexPattern
     {
         switch (value.Count)
         {

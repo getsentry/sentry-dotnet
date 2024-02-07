@@ -19,11 +19,11 @@ internal class GlobalSessionManager : ISessionManager
     private readonly string? _persistenceDirectoryPath;
 
     private string? _resolvedInstallationId;
-    private Session? _currentSession;
+    private SentrySession? _currentSession;
     private DateTimeOffset? _lastPauseTimestamp;
 
     // Internal for testing
-    internal Session? CurrentSession => _currentSession;
+    internal SentrySession? CurrentSession => _currentSession;
 
     public bool IsSessionActive => _currentSession is not null;
 
@@ -308,7 +308,7 @@ internal class GlobalSessionManager : ISessionManager
         var distinctId = TryGetInstallationId();
 
         // Create new session
-        var session = new Session(distinctId, release, environment);
+        var session = new SentrySession(distinctId, release, environment);
 
         // Set new session and check whether we ended up overwriting an active one in the process
         var previousSession = Interlocked.Exchange(ref _currentSession, session);
@@ -329,7 +329,7 @@ internal class GlobalSessionManager : ISessionManager
         return update;
     }
 
-    private SessionUpdate EndSession(Session session, DateTimeOffset timestamp, SessionEndStatus status)
+    private SessionUpdate EndSession(SentrySession session, DateTimeOffset timestamp, SessionEndStatus status)
     {
         if (status == SessionEndStatus.Crashed)
         {

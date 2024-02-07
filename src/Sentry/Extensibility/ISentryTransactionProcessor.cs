@@ -19,7 +19,7 @@ public interface ISentryTransactionProcessor
 
 internal static class ISentryTransactionProcessorExtensions
 {
-    internal static SentryTransaction? DoProcessTransaction(this ISentryTransactionProcessor processor, SentryTransaction transaction, Hint hint)
+    internal static SentryTransaction? DoProcessTransaction(this ISentryTransactionProcessor processor, SentryTransaction transaction, SentryHint hint)
     {
         return (processor is ISentryTransactionProcessorWithHint contextualProcessor)
             ? contextualProcessor.Process(transaction, hint)

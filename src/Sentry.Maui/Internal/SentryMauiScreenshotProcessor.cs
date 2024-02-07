@@ -16,7 +16,7 @@ internal class SentryMauiScreenshotProcessor : ISentryEventProcessorWithHint
         return @event;
     }
 
-    public SentryEvent? Process(SentryEvent @event, Hint hint)
+    public SentryEvent? Process(SentryEvent @event, SentryHint hint)
     {
         hint.Attachments.Add(new ScreenshotAttachment(_options));
         return @event;

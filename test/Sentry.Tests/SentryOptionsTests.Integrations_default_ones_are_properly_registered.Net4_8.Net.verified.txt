@@ -1,0 +1,38 @@
+﻿[
+  {
+    Message: Initializing Hub for Dsn: '{0}'.,
+    Args: [
+      https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647
+    ]
+  },
+  {
+    Message: Registering integration: '{0}'.,
+    Args: [
+      AutoSessionTrackingIntegration
+    ]
+  },
+  {
+    Message: Registering integration: '{0}'.,
+    Args: [
+      AppDomainUnhandledExceptionIntegration
+    ]
+  },
+  {
+    Message: Registering integration: '{0}'.,
+    Args: [
+      AppDomainProcessExitIntegration
+    ]
+  },
+  {
+    Message: Registering integration: '{0}'.,
+    Args: [
+      UnobservedTaskExceptionIntegration
+    ]
+  },
+  {
+    Message: Registering integration: '{0}'.,
+    Args: [
+      NetFxInstallationsIntegration
+    ]
+  }
+]

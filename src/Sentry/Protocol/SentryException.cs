@@ -7,7 +7,7 @@ namespace Sentry.Protocol;
 /// Sentry Exception interface.
 /// </summary>
 /// <see href="https://develop.sentry.dev/sdk/event-payloads/exception"/>
-public sealed class SentryException : IJsonSerializable
+public sealed class SentryException : ISentryJsonSerializable
 {
     /// <summary>
     /// Exception Type.

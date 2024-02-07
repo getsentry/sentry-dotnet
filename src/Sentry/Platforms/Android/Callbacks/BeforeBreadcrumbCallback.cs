@@ -4,9 +4,9 @@ namespace Sentry.Android.Callbacks;
 
 internal class BeforeBreadcrumbCallback : JavaObject, JavaSdk.SentryOptions.IBeforeBreadcrumbCallback
 {
-    private readonly Func<Breadcrumb, Hint, Breadcrumb?> _beforeBreadcrumb;
+    private readonly Func<Breadcrumb, SentryHint, Breadcrumb?> _beforeBreadcrumb;
 
-    public BeforeBreadcrumbCallback(Func<Breadcrumb, Hint, Breadcrumb?> beforeBreadcrumb)
+    public BeforeBreadcrumbCallback(Func<Breadcrumb, SentryHint, Breadcrumb?> beforeBreadcrumb)
     {
         _beforeBreadcrumb = beforeBreadcrumb;
     }

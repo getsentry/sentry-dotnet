@@ -87,7 +87,7 @@ public class SentryGraphQlHttpMessageHandlerTests
 
         var query = ValidQuery;
         var request = SentryGraphQlTestHelpers.GetRequestQuery(query, url);
-        var response = new HttpResponseMessage { Content = ValidResponseContent, StatusCode = HttpStatusCode.OK, RequestMessage = request};
+        var response = new HttpResponseMessage { Content = ValidResponseContent, StatusCode = HttpStatusCode.OK, RequestMessage = request };
         var wrappedQuery = SentryGraphQlTestHelpers.WrapRequestContent(query);
         request.SetFused(new GraphQLRequestContent(wrappedQuery));
 
