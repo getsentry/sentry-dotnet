@@ -46,7 +46,7 @@ public static class TracerProviderBuilderExtensions
             }
 
             var hub = services.GetService<IHub>() ?? SentrySdk.CurrentHub;
-            if (hub.IsEnabled)
+            if (hub.IsEnabled is not true)
             {
                 var logger = services.GetService<ILogger<TracerProviderBuilder>>();
                 logger?.LogWarning(SentryNotInitializedMessage);
