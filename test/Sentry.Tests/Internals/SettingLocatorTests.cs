@@ -4,7 +4,7 @@ namespace Sentry.Tests.Internals;
 
 public class SettingLocatorTests
 {
-    private const string DisableSdkDsnValue = Constants.DisableSdkDsnValue;
+    private const string DisableSdkDsnValue = SentryConstants.DisableSdkDsnValue;
     private const string DsnEnvironmentVariable = Internal.Constants.DsnEnvironmentVariable;
     private const string EnvironmentEnvironmentVariable = Internal.Constants.EnvironmentEnvironmentVariable;
     private const string ReleaseEnvironmentVariable = Internal.Constants.ReleaseEnvironmentVariable;

@@ -349,12 +349,12 @@ public class ScopeExtensionsTests
         _fixture.ScopeOptions = null;
         var sut = _fixture.GetSut();
 
-        for (var i = 0; i < Constants.DefaultMaxBreadcrumbs + 1; i++)
+        for (var i = 0; i < SentryConstants.DefaultMaxBreadcrumbs + 1; i++)
         {
             sut.AddBreadcrumb(i.ToString());
         }
 
-        Assert.Equal(Constants.DefaultMaxBreadcrumbs, sut.Breadcrumbs.Count);
+        Assert.Equal(SentryConstants.DefaultMaxBreadcrumbs, sut.Breadcrumbs.Count);
     }
 
     [Theory]

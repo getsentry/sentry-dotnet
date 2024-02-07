@@ -6,14 +6,21 @@
 
 - "No service for type 'Sentry.IHub' has been registered" exception when using OpenTelemetry and initializing Sentry via `SentrySdk.Init` ([#3129](https://github.com/getsentry/sentry-dotnet/pull/3129))
 
+## 4.0.3
+
+### Fixes
+
+- To resolve conflicting types due to the SDK adding itself to the global usings: 
+  - The class `Sentry.Constants` has been renamed to `Sentry.SentryConstants` ([#3125](https://github.com/getsentry/sentry-dotnet/pull/3125))
+
 ## 4.0.2
 
 ### Fixes
 
 - To resolve conflicting types due to the SDK adding itself to the global usings: 
- - The class `Sentry.Context` has been renamed to `Sentry.SentryContext` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
- - The class `Sentry.Package` has been renamed to `Sentry.SentryPackage` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
- - The class `Sentry.Request` has been renamed to `Sentry.SentryRequest` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
+  - The class `Sentry.Context` has been renamed to `Sentry.SentryContext` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
+  - The class `Sentry.Package` has been renamed to `Sentry.SentryPackage` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
+  - The class `Sentry.Request` has been renamed to `Sentry.SentryRequest` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
 
 ### Dependencies
 
@@ -26,11 +33,11 @@
 ### Fixes 
 
 - To resolve conflicting types due to the SDK adding itself to the global usings: 
- - The interface `Sentry.ISession` has been renamed to `Sentry.ISentrySession` ([#3110](https://github.com/getsentry/sentry-dotnet/pull/3110))
- - The interface `Sentry.IJsonSerializable` has been renamed to `Sentry.ISentryJsonSerializable` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
- - The class `Sentry.Session` has been renamed to `Sentry.SentrySession` ([#3110](https://github.com/getsentry/sentry-dotnet/pull/3110))
- - The class `Sentry.Attachment` has been renamed to `Sentry.SentryAttachment` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
- - The class `Sentry.Hint` has been renamed to `Sentry.SentryHint` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
+  - The interface `Sentry.ISession` has been renamed to `Sentry.ISentrySession` ([#3110](https://github.com/getsentry/sentry-dotnet/pull/3110))
+  - The interface `Sentry.IJsonSerializable` has been renamed to `Sentry.ISentryJsonSerializable` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
+  - The class `Sentry.Session` has been renamed to `Sentry.SentrySession` ([#3110](https://github.com/getsentry/sentry-dotnet/pull/3110))
+  - The class `Sentry.Attachment` has been renamed to `Sentry.SentryAttachment` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
+  - The class `Sentry.Hint` has been renamed to `Sentry.SentryHint` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
 
 ### Dependencies
 
