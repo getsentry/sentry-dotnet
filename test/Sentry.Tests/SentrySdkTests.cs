@@ -106,7 +106,7 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void Init_DisableDsnEnvironmentVariable_DisablesSdk()
     {
-        using var _ = SentrySdk.Init(o => o.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = Constants.DisableSdkDsnValue);
+        using var _ = SentrySdk.Init(o => o.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = SentryConstants.DisableSdkDsnValue);
 
         Assert.False(SentrySdk.IsEnabled);
     }
@@ -125,7 +125,7 @@ public class SentrySdkTests : IDisposable
     {
         var options = new SentryOptions
         {
-            Dsn = Constants.DisableSdkDsnValue,
+            Dsn = SentryConstants.DisableSdkDsnValue,
             DiagnosticLogger = _logger,
             Debug = true,
             InitNativeSdks = false
@@ -161,7 +161,7 @@ public class SentrySdkTests : IDisposable
     {
         var options = new SentryOptions
         {
-            Dsn = Constants.DisableSdkDsnValue,
+            Dsn = SentryConstants.DisableSdkDsnValue,
             DiagnosticLogger = _logger,
             Debug = false,
             InitNativeSdks = false,
@@ -668,14 +668,14 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void InitHub_NoDsn_DisposeDoesNotThrow()
     {
-        var sut = SentrySdk.InitHub(new SentryOptions() { Dsn = Constants.DisableSdkDsnValue }) as IDisposable;
+        var sut = SentrySdk.InitHub(new SentryOptions() { Dsn = SentryConstants.DisableSdkDsnValue }) as IDisposable;
         sut?.Dispose();
     }
 
     [Fact]
     public async Task InitHub_NoDsn_FlushAsyncDoesNotThrow()
     {
-        var sut = SentrySdk.InitHub(new SentryOptions() { Dsn = Constants.DisableSdkDsnValue });
+        var sut = SentrySdk.InitHub(new SentryOptions() { Dsn = SentryConstants.DisableSdkDsnValue });
         await sut.FlushAsync();
     }
 
