@@ -183,7 +183,7 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op
     /// </summary>
-    public void CaptureCheckin(Checkin checkin)
+    public void CaptureCheckIn(SentryCheckIn checkIn)
     {
     }
 

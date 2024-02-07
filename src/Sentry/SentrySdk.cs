@@ -524,8 +524,8 @@ public static partial class SentrySdk
     /// Captures a Checkin.
     /// </summary>
     [DebuggerStepThrough]
-    public static void CaptureCheckin(Checkin checkin)
-        => CurrentHub.CaptureCheckin(checkin);
+    public static void CaptureCheckin(SentryCheckIn checkIn)
+        => CurrentHub.CaptureCheckIn(checkIn);
 
     /// <summary>
     /// Starts a transaction.

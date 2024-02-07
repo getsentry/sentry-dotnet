@@ -46,7 +46,7 @@ public enum CheckinStatus
 /// Sentry Checkin
 /// </summary>
 // https://develop.sentry.dev/sdk/check-ins/
-public class Checkin : ICheckin
+public class SentryCheckIn : ICheckin
 {
     /// <inheritdoc />
     public SentryId Id { get; }
@@ -58,12 +58,12 @@ public class Checkin : ICheckin
     public CheckinStatus Status { get; }
 
     /// <summary>
-    /// Initializes a new instance of <see cref="Checkin"/>.
+    /// Initializes a new instance of <see cref="SentryCheckIn"/>.
     /// </summary>
     /// <param name="id"></param>
     /// <param name="monitorSlug"></param>
     /// <param name="status"></param>
-    public Checkin(SentryId id, string monitorSlug, CheckinStatus status)
+    public SentryCheckIn(SentryId id, string monitorSlug, CheckinStatus status)
     {
         Id = id;
         MonitorSlug = monitorSlug;

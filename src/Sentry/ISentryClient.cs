@@ -75,8 +75,8 @@ public interface ISentryClient
     /// <summary>
     /// Captures a Checkin.
     /// </summary>
-    /// <param name="checkin">The Checkin to send to Sentry</param>
-    void CaptureCheckin(Checkin checkin);
+    /// <param name="checkIn">The Checkin to send to Sentry</param>
+    void CaptureCheckIn(SentryCheckIn checkIn);
 
     /// <summary>
     /// Flushes the queue of captured events until the timeout is reached.

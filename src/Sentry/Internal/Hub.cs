@@ -565,7 +565,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
-    public void CaptureCheckin(Checkin checkin)
+    public void CaptureCheckIn(SentryCheckIn checkIn)
     {
         throw new NotImplementedException();
     }
