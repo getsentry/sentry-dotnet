@@ -18,14 +18,14 @@ public class HomeController(ILogger<HomeController> logger) : Controller
     {
         if (block)
         {
-            _logger.LogInformation("\ud83d\ude31 Calling a blocking API on an async method \ud83d\ude31");
+            logger.LogInformation("\ud83d\ude31 Calling a blocking API on an async method \ud83d\ude31");
 
             // This will result in an event in Sentry
             Task.Delay(10).Wait(); // This is a blocking call. Same with '.Result'
         }
         else
         {
-            _logger.LogInformation("\ud83d\ude31 No blocking call made \ud83d\ude31");
+            logger.LogInformation("\ud83d\ude31 No blocking call made \ud83d\ude31");
 
             // Non-blocking, no event captured
             await Task.Delay(10);
