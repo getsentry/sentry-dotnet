@@ -1,9 +1,9 @@
-using Sentry.Ben.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
+using Sentry.Ben.Diagnostics;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Reflection;

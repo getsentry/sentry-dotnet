@@ -21,7 +21,7 @@ namespace Sentry.Ben.Diagnostics
             if (eventSource.Guid == s_tplGuid)
             {
                 // 3 == Task|TaskTransfer
-                EnableEvents(eventSource, EventLevel.Verbose, (EventKeywords) 3);
+                EnableEvents(eventSource, EventLevel.Verbose, (EventKeywords)3);
             }
         }
 
