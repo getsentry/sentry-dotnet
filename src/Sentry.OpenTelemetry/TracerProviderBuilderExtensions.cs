@@ -11,9 +11,6 @@ namespace Sentry.OpenTelemetry;
 /// </summary>
 public static class TracerProviderBuilderExtensions
 {
-    private const string SentryNotInitializedMessage =
-        "No IHub service registered and SentrySdk.CurrentHub is null. Sentry doesn't appear to have been initialized correctly.";
-
     /// <summary>
     /// Ensures OpenTelemetry trace information is sent to Sentry.
     /// </summary>
@@ -46,11 +43,6 @@ public static class TracerProviderBuilderExtensions
             }
 
             var hub = services.GetService<IHub>() ?? SentrySdk.CurrentHub;
-            if (!hub.IsEnabled)
-            {
-                var logger = services.GetService<ILogger<TracerProviderBuilder>>();
-                logger?.LogWarning(SentryNotInitializedMessage);
-            }
             return new SentrySpanProcessor(hub, enrichers);
         });
     }
