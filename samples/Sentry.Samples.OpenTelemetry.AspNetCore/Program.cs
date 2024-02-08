@@ -15,7 +15,7 @@ builder.Services.AddOpenTelemetry()
     {
         metrics
             .AddRuntimeInstrumentation() // <-- Requires the OpenTelemetry.Instrumentation.Runtime package
-            // Collect some of the built-in ASP.NET Core metrics
+                                         // Collect some of the built-in ASP.NET Core metrics
             .AddMeter(
                 "Microsoft.AspNetCore.Hosting",
                 "Microsoft.AspNetCore.Server.Kestrel",
