@@ -14,7 +14,8 @@ builder.Services.AddOpenTelemetry()
     .WithMetrics(metrics =>
     {
         metrics
-            .AddRuntimeInstrumentation()
+            .AddRuntimeInstrumentation() // <-- Requires the OpenTelemetry.Instrumentation.Runtime package
+            // Collect some of the built-in ASP.NET Core metrics
             .AddMeter(
                 "Microsoft.AspNetCore.Hosting",
                 "Microsoft.AspNetCore.Server.Kestrel",
@@ -35,6 +36,7 @@ builder.WebHost.UseSentry(options =>
     options.Debug = builder.Environment.IsDevelopment();
     options.SendDefaultPii = true;
     options.TracesSampleRate = 1.0;
+    // This shows experimental support for capturing OpenTelemetry metrics with Sentry
     options.ExperimentalMetrics = new ExperimentalMetricsOptions()
     {
         CaptureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All
