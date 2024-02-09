@@ -4,7 +4,7 @@
 
 ### Features
 
-- Added OpenTelemetry.Instrumentation.Runtime to built in metrics ([#3133](https://github.com/getsentry/sentry-dotnet/pull/3133))
+- The SDK now automatically collects metrics coming from `OpenTelemetry.Instrumentation.Runtime` ([#3133](https://github.com/getsentry/sentry-dotnet/pull/3133))
 
 ### Fixes
 
