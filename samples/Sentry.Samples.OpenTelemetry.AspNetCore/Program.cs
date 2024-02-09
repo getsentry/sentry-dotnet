@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authentication;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Sentry.OpenTelemetry;
@@ -10,6 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 // OpenTelemetry Configuration
 // See https://opentelemetry.io/docs/instrumentation/net/getting-started/
 builder.Services.AddOpenTelemetry()
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddRuntimeInstrumentation() // <-- Requires the OpenTelemetry.Instrumentation.Runtime package
+                                         // Collect some of the built-in ASP.NET Core metrics
+            .AddMeter(
+                "Microsoft.AspNetCore.Hosting",
+                "Microsoft.AspNetCore.Server.Kestrel",
+                "System.Net.Http");
+    })
     .WithTracing(tracerProviderBuilder =>
         tracerProviderBuilder
             .AddSource(Telemetry.ActivitySource.Name)
@@ -21,10 +32,15 @@ builder.Services.AddOpenTelemetry()
 
 builder.WebHost.UseSentry(options =>
 {
-    //options.Dsn = "...Your DSN...";
+    // options.Dsn = "...Your DSN...";
     options.Debug = builder.Environment.IsDevelopment();
     options.SendDefaultPii = true;
     options.TracesSampleRate = 1.0;
+    // This shows experimental support for capturing OpenTelemetry metrics with Sentry
+    options.ExperimentalMetrics = new ExperimentalMetricsOptions()
+    {
+        CaptureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All
+    };
     options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
 });
 

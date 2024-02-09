@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- The SDK now automatically collects metrics coming from `OpenTelemetry.Instrumentation.Runtime` ([#3133](https://github.com/getsentry/sentry-dotnet/pull/3133))
+
 ### Fixes
 
 - "No service for type 'Sentry.IHub' has been registered" exception when using OpenTelemetry and initializing Sentry via `SentrySdk.Init` ([#3129](https://github.com/getsentry/sentry-dotnet/pull/3129))

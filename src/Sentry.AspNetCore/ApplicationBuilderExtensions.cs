@@ -39,7 +39,6 @@ internal static class ApplicationBuilderExtensions
             {
                 o.UseStackTraceFactory(stackTraceFactory);
             }
-
         }
 
         var lifetime = app.ApplicationServices.GetService<IHostApplicationLifetime>();

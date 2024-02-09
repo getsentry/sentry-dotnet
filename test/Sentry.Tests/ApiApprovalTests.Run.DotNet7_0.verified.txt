@@ -51,6 +51,7 @@ namespace Sentry
         public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreServerKestrel;
         public static readonly Sentry.SubstringOrRegexPattern MicrosoftExtensionsDiagnosticsHealthChecks;
         public static readonly Sentry.SubstringOrRegexPattern MicrosoftExtensionsDiagnosticsResourceMonitoring;
+        public static readonly Sentry.SubstringOrRegexPattern OpenTelemetryInstrumentationRuntime;
         public static readonly Sentry.SubstringOrRegexPattern SystemNetHttp;
         public static readonly Sentry.SubstringOrRegexPattern SystemNetNameResolution;
         public static System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> All { get; }
