@@ -1,3 +1,4 @@
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Internal;
@@ -35,14 +36,31 @@ internal class SettingLocator
         // For DSN only
         // An empty string set on the option should NOT be converted to null because it is used
         // to indicate the the SDK is disabled.
-        _options.Dsn ??= GetEnvironmentVariable(Constants.DsnEnvironmentVariable)
-                         ?? AssemblyForAttributes?.GetCustomAttribute<DsnAttribute>()?.Dsn;
+
+        // If the DSN has not been set
         if (_options.Dsn is null)
         {
-            throw new ArgumentNullException("You must supply a DSN to use Sentry." +
-                                            "To disable Sentry, pass an empty string: \"\"." +
-                                            "See https://docs.sentry.io/platforms/dotnet/configuration/options/#dsn");
+            _options.Dsn = GetEnvironmentVariable(Constants.DsnEnvironmentVariable)
+                           ?? AssemblyForAttributes?.GetCustomAttribute<DsnAttribute>()?.Dsn;
+
+            if (_options.Dsn is null)
+            {
+                throw new ArgumentNullException("You must supply a DSN to use Sentry." +
+                                                "To disable Sentry, pass an empty string: \"\"." +
+                                                "See https://docs.sentry.io/platforms/dotnet/configuration/options/#dsn");
+            }
         }
+        else if (_options.Dsn.Equals(string.Empty))
+        {
+            var dsn = GetEnvironmentVariable(Constants.DsnEnvironmentVariable)
+                           ?? AssemblyForAttributes?.GetCustomAttribute<DsnAttribute>()?.Dsn;
+
+            if (dsn is not null)
+            {
+                _options.Dsn = dsn;
+            }
+        }
+
         return _options.Dsn;
     }
 
