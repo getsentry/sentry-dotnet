@@ -34,34 +34,31 @@ internal class SettingLocator
     {
         // For DSN only
 
-        // If the DSN has not been set at all require it to be on either the environment or an AssemblyAttribute. If
-        // neither can be found: throw
-        if (_options.Dsn is null)
+        if (!string.IsNullOrEmpty(_options.Dsn))
         {
-            _options.Dsn = GetEnvironmentVariable(Constants.DsnEnvironmentVariable)
-                           ?? AssemblyForAttributes?.GetCustomAttribute<DsnAttribute>()?.Dsn;
-
-            if (_options.Dsn is null)
-            {
-                throw new ArgumentNullException("You must supply a DSN to use Sentry." +
-                                                "To disable Sentry, pass an empty string: \"\"." +
-                                                "See https://docs.sentry.io/platforms/dotnet/configuration/options/#dsn");
-            }
-        }
-        // The SDK has been disabled by the user explicitly setting the DSN to `string.Empty`.
-        // By convention, the DSN can be overwritten in the environment
-        else if (_options.Dsn.Equals(string.Empty))
-        {
-            var dsn = GetEnvironmentVariable(Constants.DsnEnvironmentVariable)
-                           ?? AssemblyForAttributes?.GetCustomAttribute<DsnAttribute>()?.Dsn;
-
-            if (dsn is not null)
-            {
-                _options.Dsn = dsn;
-            }
+            return _options.Dsn;
         }
 
-        return _options.Dsn;
+        var dsn = GetEnvironmentVariable(Constants.DsnEnvironmentVariable)
+                  ?? AssemblyForAttributes?.GetCustomAttribute<DsnAttribute>()?.Dsn;
+
+        // If there has been no DSN provided (`null`) and none has been found in the environment we consider this a
+        // failed configuration and throw
+        // By conventions, skip this if the DSN is not `null` i.e. `string.Empty`
+        if (_options.Dsn is null && dsn is null)
+        {
+            throw new ArgumentNullException("You must supply a DSN to use Sentry." +
+                                            "To disable Sentry, pass an empty string: \"\"." +
+                                            "See https://docs.sentry.io/platforms/dotnet/configuration/options/#dsn");
+        }
+
+        // Overwriting the `string.Empty` with the DSN found in the environment
+        if (dsn is not null)
+        {
+            _options.Dsn = dsn;
+        }
+
+        return _options.Dsn!;
     }
 
     public string GetEnvironment() => GetEnvironment(true)!;
