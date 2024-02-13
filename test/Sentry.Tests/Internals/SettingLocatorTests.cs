@@ -85,7 +85,7 @@ public class SettingLocatorTests
     [Fact]
     public void GetDsn_WithEmptyString_DoesNotThrow()
     {
-        var options = new SentryOptions{ Dsn = DisableSdkDsnValue };
+        var options = new SentryOptions { Dsn = DisableSdkDsnValue };
 
         var dsn = options.SettingLocator.GetDsn();
 
