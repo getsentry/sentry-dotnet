@@ -27,7 +27,7 @@ public class DsnTests
     [Fact]
     public void Ctor_DisableSdk_ThrowsUriFormatException()
     {
-        var ex = Assert.Throws<UriFormatException>(() => Dsn.Parse(Constants.DisableSdkDsnValue));
+        var ex = Assert.Throws<UriFormatException>(() => Dsn.Parse(SentryConstants.DisableSdkDsnValue));
         ex.Message.Should().BeOneOf("net_uri_EmptyUri", "Invalid URI: The URI is empty.");
     }
 
@@ -146,7 +146,7 @@ public class DsnTests
     [Fact]
     public void TryParse_DisabledSdk_Fails()
     {
-        Assert.Null(Dsn.TryParse(Constants.DisableSdkDsnValue));
+        Assert.Null(Dsn.TryParse(SentryConstants.DisableSdkDsnValue));
     }
 
     [Fact]
@@ -250,7 +250,7 @@ public class DsnTests
     public void IsDisabled_NullDsn_False() => Assert.False(Dsn.IsDisabled(null));
 
     [Fact]
-    public void IsDisabled_DisabledDsn_True() => Assert.True(Dsn.IsDisabled(Constants.DisableSdkDsnValue));
+    public void IsDisabled_DisabledDsn_True() => Assert.True(Dsn.IsDisabled(SentryConstants.DisableSdkDsnValue));
 
     [Fact]
     public void IsDisabled_EmptyStringDsn_True() => Assert.True(Dsn.IsDisabled(string.Empty));

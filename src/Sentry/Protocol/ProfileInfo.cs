@@ -30,7 +30,7 @@ internal sealed class ProfileInfo : ISentryJsonSerializable
 
     public string? Environment { get; set; }
 
-    public string? Platform { get; set; } = Constants.Platform;
+    public string? Platform { get; set; } = SentryConstants.Platform;
 
     public string? Release { get; set; }
 

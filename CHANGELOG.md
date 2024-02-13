@@ -7,6 +7,28 @@
 - ASP.NET Core: Blocking call detection. An event with the stack trace of the blocking call will be captured as event. ([#2709](https://github.com/getsentry/sentry-dotnet/pull/2709))
     - NOTE: Verify this in test/staging before prod! This could result in several events if you have many blocking calls in a high throughput endpoint.
     - Opt-in via `options.CaptureBlockingCalls = true`
+### Dependencies
+
+- Bump CLI from v2.28.0 to v2.28.5 ([#3145](https://github.com/getsentry/sentry-dotnet/pull/3145))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2285)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.28.0...2.28.5)
+
+## 4.1.0
+
+### Features
+
+- The SDK now automatically collects metrics coming from `OpenTelemetry.Instrumentation.Runtime` ([#3133](https://github.com/getsentry/sentry-dotnet/pull/3133))
+
+### Fixes
+
+- "No service for type 'Sentry.IHub' has been registered" exception when using OpenTelemetry and initializing Sentry via `SentrySdk.Init` ([#3129](https://github.com/getsentry/sentry-dotnet/pull/3129))
+
+## 4.0.3
+
+### Fixes
+
+- To resolve conflicting types due to the SDK adding itself to the global usings: 
+  - The class `Sentry.Constants` has been renamed to `Sentry.SentryConstants` ([#3125](https://github.com/getsentry/sentry-dotnet/pull/3125))
 
 ## 4.0.2
 
@@ -16,9 +38,9 @@
    - Supports Android and iOS only. Windows is not supported.
 - MAUI: App context has `in_foreground` indicating whether app was on the background or foreground. ([#2983](https://github.com/getsentry/sentry-dotnet/pull/2983))
 - To resolve conflicting types due to the SDK adding itself to the global usings: 
- - The class `Sentry.Context` has been renamed to `Sentry.SentryContext` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
- - The class `Sentry.Package` has been renamed to `Sentry.SentryPackage` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
- - The class `Sentry.Request` has been renamed to `Sentry.SentryRequest` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
+  - The class `Sentry.Context` has been renamed to `Sentry.SentryContext` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
+  - The class `Sentry.Package` has been renamed to `Sentry.SentryPackage` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
+  - The class `Sentry.Request` has been renamed to `Sentry.SentryRequest` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
 
 ### Dependencies
 
@@ -31,11 +53,11 @@
 ### Fixes 
 
 - To resolve conflicting types due to the SDK adding itself to the global usings: 
- - The interface `Sentry.ISession` has been renamed to `Sentry.ISentrySession` ([#3110](https://github.com/getsentry/sentry-dotnet/pull/3110))
- - The interface `Sentry.IJsonSerializable` has been renamed to `Sentry.ISentryJsonSerializable` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
- - The class `Sentry.Session` has been renamed to `Sentry.SentrySession` ([#3110](https://github.com/getsentry/sentry-dotnet/pull/3110))
- - The class `Sentry.Attachment` has been renamed to `Sentry.SentryAttachment` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
- - The class `Sentry.Hint` has been renamed to `Sentry.SentryHint` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
+  - The interface `Sentry.ISession` has been renamed to `Sentry.ISentrySession` ([#3110](https://github.com/getsentry/sentry-dotnet/pull/3110))
+  - The interface `Sentry.IJsonSerializable` has been renamed to `Sentry.ISentryJsonSerializable` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
+  - The class `Sentry.Session` has been renamed to `Sentry.SentrySession` ([#3110](https://github.com/getsentry/sentry-dotnet/pull/3110))
+  - The class `Sentry.Attachment` has been renamed to `Sentry.SentryAttachment` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
+  - The class `Sentry.Hint` has been renamed to `Sentry.SentryHint` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
 
 ### Dependencies
 

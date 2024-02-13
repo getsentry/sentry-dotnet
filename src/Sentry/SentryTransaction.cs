@@ -54,7 +54,7 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
     public bool? IsParentSampled { get; set; }
 
     /// <inheritdoc />
-    public string? Platform { get; set; } = Constants.Platform;
+    public string? Platform { get; set; } = SentryConstants.Platform;
 
     /// <inheritdoc />
     public string? Release { get; set; }
