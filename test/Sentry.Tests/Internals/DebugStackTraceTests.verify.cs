@@ -118,15 +118,28 @@ public class DebugStackTraceTests
     }
 
     [Fact]
-    public void MergeDebugImages_ThrowsOnSecondRun()
+    public void MergeDebugImages_MultipleCalls_LogsWarning()
     {
+        var logger = Substitute.For<IDiagnosticLogger>();
+        logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        _fixture.SentryOptions.DiagnosticLogger = logger;
+        _fixture.SentryOptions.Debug = true;
         var sut = _fixture.GetSut();
         sut.Inject(1);
 
         var e = new SentryEvent();
         sut.MergeDebugImagesInto(e);
         Assert.NotNull(e.DebugImages);
-        Assert.Throws<InvalidOperationException>(() => sut.MergeDebugImagesInto(e));
+
+        // Second call should log a warning
+        sut.MergeDebugImagesInto(e);
+
+        logger.Received(1).Log(
+            SentryLevel.Warning,
+            "Cannot call MergeDebugImagesInto multiple times. Event: {0}",
+            null,
+            Arg.Any<SentryId>()
+            );
     }
 
     [Fact]

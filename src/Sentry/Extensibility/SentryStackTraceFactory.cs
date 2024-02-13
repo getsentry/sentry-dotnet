@@ -31,7 +31,9 @@ public sealed class SentryStackTraceFactory : ISentryStackTraceFactory
         _options.LogDebug("Creating SentryStackTrace. isCurrentStackTrace: {0}.", isCurrentStackTrace);
 
         var stackTrace = exception is null ? new StackTrace(true) : new StackTrace(exception, true);
-        var result = DebugStackTrace.Create(_options, stackTrace, isCurrentStackTrace, 3);
+        var result = DebugStackTrace.Create(_options, stackTrace, isCurrentStackTrace);
+        // TODO: Reintroduce Bruno's code once our tests are passing
+        // var result = DebugStackTrace.Create(_options, stackTrace, isCurrentStackTrace, 3);
         _options.LogDebug("Created {0} with {1} frames.", nameof(DebugStackTrace), result.Frames.Count);
         return result.Frames.Count != 0 ? result : null;
     }

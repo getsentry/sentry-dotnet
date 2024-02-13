@@ -141,21 +141,22 @@ internal class SentryMiddleware : IMiddleware
             try
             {
                 var originalMethod = context.Request.Method;
-                if (_options.CaptureBlockingCalls && _monitor is not null)
-                {
-                    var syncCtx = SynchronizationContext.Current;
-                    SynchronizationContext.SetSynchronizationContext(syncCtx == null ? _detectBlockingSyncCtx : new DetectBlockingSynchronizationContext(_monitor, syncCtx));
-                    try
-                    {
-                        // For detection to work we need ConfigureAwait=true
-                        await next(context).ConfigureAwait(true);
-                    }
-                    finally
-                    {
-                        SynchronizationContext.SetSynchronizationContext(syncCtx);
-                    }
-                }
-                else
+                // TODO: Reintroduce Bruno's code once our tests are passing
+                // if (_options.CaptureBlockingCalls && _monitor is not null)
+                // {
+                //     var syncCtx = SynchronizationContext.Current;
+                //     SynchronizationContext.SetSynchronizationContext(syncCtx == null ? _detectBlockingSyncCtx : new DetectBlockingSynchronizationContext(_monitor, syncCtx));
+                //     try
+                //     {
+                //         // For detection to work we need ConfigureAwait=true
+                //         await next(context).ConfigureAwait(true);
+                //     }
+                //     finally
+                //     {
+                //         SynchronizationContext.SetSynchronizationContext(syncCtx);
+                //     }
+                // }
+                // else
                 {
                     await next(context).ConfigureAwait(false);
                 }
