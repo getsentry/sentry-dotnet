@@ -34,10 +34,9 @@ internal class SettingLocator
     public string GetDsn()
     {
         // For DSN only
-        // An empty string set on the option should NOT be converted to null because it is used
-        // to indicate the the SDK is disabled.
 
-        // If the DSN has not been set
+        // If the DSN has not been set at all require it to be on either the environment or an AssemblyAttribute. If
+        // neither can be found: throw
         if (_options.Dsn is null)
         {
             _options.Dsn = GetEnvironmentVariable(Constants.DsnEnvironmentVariable)
@@ -50,6 +49,8 @@ internal class SettingLocator
                                                 "See https://docs.sentry.io/platforms/dotnet/configuration/options/#dsn");
             }
         }
+        // The SDK has been disabled by the user explicitly setting the DSN to `string.Empty`.
+        // By convention, the DSN can be overwritten in the environment
         else if (_options.Dsn.Equals(string.Empty))
         {
             var dsn = GetEnvironmentVariable(Constants.DsnEnvironmentVariable)
