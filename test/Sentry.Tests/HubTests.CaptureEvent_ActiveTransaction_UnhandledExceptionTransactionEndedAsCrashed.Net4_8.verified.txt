@@ -55,54 +55,6 @@
                 }
               }
             ],
-            SentryThreads: [
-              {
-                Crashed: false,
-                Current: true
-              }
-            ],
-            DebugImages: [
-              {
-                Type: pe_dotnet,
-                ImageAddress: null,
-                ImageSize: null,
-                DebugId: ________-____-____-____-____________-_,
-                DebugChecksum: null,
-                DebugFile: mscorlib.pdb,
-                CodeId: ______________,
-                CodeFile: .../mscorlib.dll
-              },
-              {
-                Type: pe_dotnet,
-                ImageAddress: null,
-                ImageSize: null,
-                DebugId: ________-____-____-____-____________-________,
-                DebugChecksum: ______:________________________________________________________________,
-                DebugFile: .../Sentry.Tests.pdb,
-                CodeId: _____________,
-                CodeFile: .../Sentry.Tests.dll
-              },
-              {
-                Type: pe_dotnet,
-                ImageAddress: null,
-                ImageSize: null,
-                DebugId: ________-____-____-____-____________-________,
-                DebugChecksum: ______:________________________________________________________________,
-                DebugFile: xunit.execution.desktop.pdb,
-                CodeId: _____________,
-                CodeFile: .../xunit.execution.desktop.dll
-              },
-              {
-                Type: pe_dotnet,
-                ImageAddress: null,
-                ImageSize: null,
-                DebugId: ________-____-____-____-____________-________,
-                DebugChecksum: ______:________________________________________________________________,
-                DebugFile: xunit.core.pdb,
-                CodeId: _____________,
-                CodeFile: .../xunit.core.dll
-              }
-            ],
             Level: error,
             TransactionName: my transaction,
             Request: {},
