@@ -357,7 +357,7 @@ public class MainSentryEventProcessorTests
         var evt = new SentryEvent();
         _ = sut.Process(evt);
 
-        Assert.Equal(Constants.Platform, evt.Platform);
+        Assert.Equal(SentryConstants.Platform, evt.Platform);
     }
 
     [Fact]

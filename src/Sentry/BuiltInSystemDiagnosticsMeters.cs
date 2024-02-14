@@ -15,6 +15,7 @@ public static partial class BuiltInSystemDiagnosticsMeters
     private const string MicrosoftAspNetCoreHttpConnectionsPattern = @"^Microsoft\.AspNetCore\.Http\.Connections$";
     private const string MicrosoftExtensionsDiagnosticsHealthChecksPattern = @"^Microsoft\.Extensions\.Diagnostics\.HealthChecks$";
     private const string MicrosoftExtensionsDiagnosticsResourceMonitoringPattern = @"^Microsoft\.Extensions\.Diagnostics\.ResourceMonitoring$";
+    private const string OpenTelemetryInstrumentationRuntimePattern = @"^OpenTelemetry\.Instrumentation\.Runtime$";
     private const string SystemNetNameResolutionPattern = @"^System\.Net\.NameResolution$";
     private const string SystemNetHttpPattern = @"^System\.Net\.Http$";
 
@@ -130,6 +131,18 @@ public static partial class BuiltInSystemDiagnosticsMeters
     /// Matches the built in System.Net.NameResolution metrics
     /// </summary>
 #if NET8_0_OR_GREATER
+    public static readonly SubstringOrRegexPattern OpenTelemetryInstrumentationRuntime = OpenTelemetryInstrumentationRuntimeRegex();
+
+    [GeneratedRegex(OpenTelemetryInstrumentationRuntimePattern, RegexOptions.Compiled)]
+    private static partial Regex OpenTelemetryInstrumentationRuntimeRegex();
+#else
+    public static readonly SubstringOrRegexPattern OpenTelemetryInstrumentationRuntime = new Regex(OpenTelemetryInstrumentationRuntimePattern, RegexOptions.Compiled);
+#endif
+
+    /// <summary>
+    /// Matches the built in System.Net.NameResolution metrics
+    /// </summary>
+#if NET8_0_OR_GREATER
     public static readonly SubstringOrRegexPattern SystemNetNameResolution = SystemNetNameResolutionRegex();
 
     [GeneratedRegex(SystemNetNameResolutionPattern, RegexOptions.Compiled)]
@@ -159,10 +172,11 @@ public static partial class BuiltInSystemDiagnosticsMeters
         MicrosoftAspNetCoreHeaderParsing,
         MicrosoftAspNetCoreServerKestrel,
         MicrosoftAspNetCoreHttpConnections,
+        MicrosoftExtensionsDiagnosticsHealthChecks,
+        MicrosoftExtensionsDiagnosticsResourceMonitoring,
+        OpenTelemetryInstrumentationRuntime,
         SystemNetNameResolution,
         SystemNetHttp,
-        MicrosoftExtensionsDiagnosticsHealthChecks,
-        MicrosoftExtensionsDiagnosticsResourceMonitoring
     });
 
     /// <summary>

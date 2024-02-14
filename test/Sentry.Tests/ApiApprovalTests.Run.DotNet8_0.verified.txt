@@ -51,6 +51,7 @@ namespace Sentry
         public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreServerKestrel;
         public static readonly Sentry.SubstringOrRegexPattern MicrosoftExtensionsDiagnosticsHealthChecks;
         public static readonly Sentry.SubstringOrRegexPattern MicrosoftExtensionsDiagnosticsResourceMonitoring;
+        public static readonly Sentry.SubstringOrRegexPattern OpenTelemetryInstrumentationRuntime;
         public static readonly Sentry.SubstringOrRegexPattern SystemNetHttp;
         public static readonly Sentry.SubstringOrRegexPattern SystemNetNameResolution;
         public static System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> All { get; }
@@ -59,13 +60,6 @@ namespace Sentry
     {
         public ByteAttachmentContent(byte[] bytes) { }
         public System.IO.Stream GetStream() { }
-    }
-    public static class Constants
-    {
-        public const int DefaultMaxBreadcrumbs = 100;
-        public const string DisableSdkDsnValue = "";
-        public const string Platform = "csharp";
-        public const int ProtocolVersion = 7;
     }
     [System.Obsolete("WARNING: This method deliberately causes a crash, and should not be used in a rea" +
         "l application.")]
@@ -463,6 +457,13 @@ namespace Sentry
         public static void Flush(this Sentry.ISentryClient client) { }
         public static void Flush(this Sentry.ISentryClient client, System.TimeSpan timeout) { }
         public static System.Threading.Tasks.Task FlushAsync(this Sentry.ISentryClient client) { }
+    }
+    public static class SentryConstants
+    {
+        public const int DefaultMaxBreadcrumbs = 100;
+        public const string DisableSdkDsnValue = "";
+        public const string Platform = "csharp";
+        public const int ProtocolVersion = 7;
     }
     public sealed class SentryContexts : Sentry.ISentryJsonSerializable, System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<string, object>>, System.Collections.Generic.IDictionary<string, object>, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>, System.Collections.IEnumerable
     {

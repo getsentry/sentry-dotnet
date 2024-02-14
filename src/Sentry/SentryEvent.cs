@@ -222,7 +222,7 @@ public sealed class SentryEvent : IEventLike, ISentryJsonSerializable
         Exception = exception;
         Timestamp = timestamp ?? DateTimeOffset.UtcNow;
         EventId = eventId != default ? eventId : SentryId.Create();
-        Platform = Constants.Platform;
+        Platform = SentryConstants.Platform;
     }
 
     /// <inheritdoc />
