@@ -1,4 +1,4 @@
-﻿using Hangfire;
+using Hangfire;
 using Hangfire.Server;
 
 namespace Sentry.Hangfire;
