@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- The SDK can be disabled by setting `options.Dsn = "";` By convention, the SDK allows the DSN set to `string.Empty` to be overwritten by the environment. ([#3147](https://github.com/getsentry/sentry-dotnet/pull/3147))
+
 ### Dependencies
 
 - Bump CLI from v2.28.0 to v2.28.6 ([#3145](https://github.com/getsentry/sentry-dotnet/pull/3145), [#3148](https://github.com/getsentry/sentry-dotnet/pull/3148))
