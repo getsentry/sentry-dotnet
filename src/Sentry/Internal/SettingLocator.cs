@@ -58,6 +58,7 @@ internal class SettingLocator
             _options.Dsn = dsn;
         }
 
+        Debug.Assert(_options.Dsn != null, "Dsn can't be null at this point based on the rules above");
         return _options.Dsn!;
     }
 
