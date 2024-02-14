@@ -567,7 +567,19 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
     public void CaptureCheckIn(SentryCheckIn checkIn)
     {
-        throw new NotImplementedException();
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        try
+        {
+            _ownedClient.CaptureCheckIn(checkIn);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failed to capture check in: {0}", checkIn.Id);
+        }
     }
 
     public async Task FlushAsync(TimeSpan timeout)

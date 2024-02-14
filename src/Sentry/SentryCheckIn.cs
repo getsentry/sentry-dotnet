@@ -1,3 +1,6 @@
+using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
+
 namespace Sentry;
 
 /// <summary>
@@ -46,7 +49,7 @@ public enum CheckinStatus
 /// Sentry Checkin
 /// </summary>
 // https://develop.sentry.dev/sdk/check-ins/
-public class SentryCheckIn : ICheckin
+public class SentryCheckIn : ICheckin, ISentryJsonSerializable
 {
     /// <inheritdoc />
     public SentryId Id { get; }
@@ -68,5 +71,17 @@ public class SentryCheckIn : ICheckin
         Id = id;
         MonitorSlug = monitorSlug;
         Status = status;
+    }
+
+    /// <inheritdoc />
+    public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
+    {
+        writer.WriteStartObject();
+
+        writer.WriteSerializable("check_in_id", Id, logger);
+        writer.WriteString("monitor_slug", MonitorSlug);
+        writer.WriteString("status", Status.ToString().ToSnakeCase());
+
+        writer.WriteEndObject();
     }
 }

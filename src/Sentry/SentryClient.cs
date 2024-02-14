@@ -238,7 +238,7 @@ public class SentryClient : ISentryClient, IDisposable
     /// <inheritdoc />
     public void CaptureCheckIn(SentryCheckIn checkIn)
     {
-        throw new NotImplementedException();
+        CaptureEnvelope(Envelope.FromCheckIn(checkIn));
     }
 
     /// <summary>
