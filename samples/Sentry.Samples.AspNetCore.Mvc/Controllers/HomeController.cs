@@ -1,6 +1,7 @@
 using System.Data;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Sentry.Ben.BlockingDetector;
 using Sentry.Samples.AspNetCore.Mvc.Models;
 
 namespace Samples.AspNetCore.Mvc.Controllers;
@@ -32,6 +33,31 @@ public class HomeController(ILogger<HomeController> logger) : Controller
         }
 
         return "Was blocking? " + block;
+    }
+
+    // GET /home/suppress/true or /home/suppress/false to observe events
+    [HttpGet("[controller]/suppress/{suppress?}")]
+    public async Task<string> Suppress([FromRoute] bool suppress)
+    {
+        if (suppress)
+        {
+            logger.LogInformation("Blocking suppression enabled");
+            using (new SuppressBlockingDetection())
+            {
+                Task.Delay(10).Wait(); // This is blocking but won't trigger an event, due to suppression
+            }
+            logger.LogInformation("Blocking suppression disabled");
+        }
+        else
+        {
+            logger.LogInformation("\ud83d\ude31 Unsuppressed blocking call on an async method \ud83d\ude31");
+            Task.Delay(10).Wait(); // This is blocking but won't trigger an event, due to suppression
+        }
+
+        // Non-blocking, no event captured
+        await Task.Delay(10);
+
+        return "Was suppressed? " + suppress;
     }
 
     // Example: An exception that goes unhandled by the app will be captured by Sentry:

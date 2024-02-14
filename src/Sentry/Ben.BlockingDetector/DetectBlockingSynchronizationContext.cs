@@ -1,11 +1,17 @@
 // Namespace starting with Sentry makes sure the SDK cuts frames off before reporting
-namespace Sentry.Ben.Diagnostics
+
+namespace Sentry.Ben.BlockingDetector
 {
     // Tips of the Toub
     internal sealed class DetectBlockingSynchronizationContext : SynchronizationContext
     {
         private readonly BlockingMonitor _monitor;
         private readonly SynchronizationContext? _syncCtx;
+
+        private int _isSuppressed;
+
+        internal void Suppress() => Interlocked.Exchange(ref _isSuppressed, _isSuppressed + 1);
+        internal void Restore() => Interlocked.Exchange(ref _isSuppressed, _isSuppressed - 1);
 
         public DetectBlockingSynchronizationContext(BlockingMonitor monitor)
         {
@@ -25,7 +31,9 @@ namespace Sentry.Ben.Diagnostics
                 return WaitInternal(waitHandles, waitAll, millisecondsTimeout);
             }
 
-            _monitor.BlockingStart(DetectionSource.SynchronizationContext);
+            IBlockingMonitor monitor = _isSuppressed > 0 ? DisabledBlockingMonitor.Instance : _monitor;
+
+            monitor.BlockingStart(DetectionSource.SynchronizationContext);
 
             try
             {
@@ -33,7 +41,7 @@ namespace Sentry.Ben.Diagnostics
             }
             finally
             {
-                _monitor.BlockingEnd();
+                monitor.BlockingEnd();
             }
         }
 

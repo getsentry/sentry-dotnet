@@ -1,7 +1,7 @@
 using System.Diagnostics.Tracing;
 
 // Namespace starting with Sentry makes sure the SDK cuts frames off before reporting
-namespace Sentry.Ben.Diagnostics
+namespace Sentry.Ben.BlockingDetector
 {
     // Tips of the Toub
     internal sealed class TaskBlockingListener : EventListener
@@ -9,12 +9,16 @@ namespace Sentry.Ben.Diagnostics
         // https://github.com/dotnet/runtime/blob/94f212275b2f51ca67025d677d7d5c5bc75f670f/src/libraries/System.Private.CoreLib/src/System/Threading/Tasks/TplEventSource.cs#L13
         private static readonly Guid s_tplGuid = new Guid("2e5dba47-a3d2-4d16-8ee0-6671ffdcd7b5");
 
-        [ThreadStatic]
-        private static int t_recursionCount;
+        [ThreadStatic] private static int t_suppressionCount;
+
+        [ThreadStatic] private static int t_recursionCount;
 
         private readonly BlockingMonitor _monitor;
 
         public TaskBlockingListener(BlockingMonitor monitor) => _monitor = monitor;
+
+        internal static void Suppress() => t_suppressionCount++;
+        internal static void Restore() => t_suppressionCount--;
 
         protected override void OnEventSourceCreated(EventSource eventSource)
         {
@@ -32,6 +36,8 @@ namespace Sentry.Ben.Diagnostics
                 return;
             }
 
+            IBlockingMonitor monitor = t_suppressionCount > 0 ? DisabledBlockingMonitor.Instance : _monitor;
+
             if (eventData.EventId == 10 && // TASKWAITBEGIN_ID
                 eventData.Payload != null &&
                 eventData.Payload.Count > 3 &&
@@ -39,13 +45,13 @@ namespace Sentry.Ben.Diagnostics
                 value == 1) // TaskWaitBehavior.Synchronous
             {
                 t_recursionCount++;
-                _monitor.BlockingStart(DetectionSource.EventListener);
+                monitor.BlockingStart(DetectionSource.EventListener);
             }
             else if (eventData.EventId == 11 // TASKWAITEND_ID
                      && t_recursionCount > 0)
             {
                 t_recursionCount--;
-                _monitor.BlockingEnd();
+                monitor.BlockingEnd();
             }
         }
     }

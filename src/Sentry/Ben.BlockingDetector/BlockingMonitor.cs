@@ -2,9 +2,9 @@ using Sentry.Internal;
 using Sentry.Protocol;
 
 // Namespace starting with Sentry makes sure the SDK cuts frames off before reporting
-namespace Sentry.Ben.Diagnostics
+namespace Sentry.Ben.BlockingDetector
 {
-    internal class BlockingMonitor(Func<IHub> getHub, SentryOptions options)
+    internal class BlockingMonitor(Func<IHub> getHub, SentryOptions options) : IBlockingMonitor
     {
         [ThreadStatic]
         private static int t_recursionCount;

@@ -1181,6 +1181,14 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
     }
 }
+namespace Sentry.Ben.BlockingDetector
+{
+    public class SuppressBlockingDetection : System.IDisposable
+    {
+        public SuppressBlockingDetection() { }
+        public void Dispose() { }
+    }
+}
 namespace Sentry.Extensibility
 {
     public abstract class BaseRequestPayloadExtractor : Sentry.Extensibility.IRequestPayloadExtractor
