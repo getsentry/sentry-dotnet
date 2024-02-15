@@ -8,6 +8,8 @@ internal static partial class MetricHelper
     private const int RollupInSeconds = 10;
     private const string InvalidKeyCharactersPattern = @"[^a-zA-Z0-9_/.-]+";
     private const string InvalidValueCharactersPattern = @"[^\w\d_:/@\.\{\}\[\]$-]+";
+    // See https://docs.sysdig.com/en/docs/sysdig-monitor/integrations/working-with-integrations/custom-integrations/integrate-statsd-metrics/#characters-allowed-for-statsd-metric-names
+    private const string InvalidMetricUnitCharactersPattern = @"[^a-zA-Z0-9_/.]+";
 
 #if NET6_0_OR_GREATER
     private static readonly DateTimeOffset UnixEpoch = DateTimeOffset.UnixEpoch;
@@ -48,10 +50,18 @@ internal static partial class MetricHelper
     [GeneratedRegex(InvalidValueCharactersPattern, RegexOptions.Compiled)]
     private static partial Regex InvalidValueCharacters();
     internal static string SanitizeValue(string input) => InvalidValueCharacters().Replace(input, "_");
+
+    [GeneratedRegex(InvalidMetricUnitCharactersPattern, RegexOptions.Compiled)]
+    private static partial Regex InvalidMetricUnitCharacters();
+    internal static string SanitizeMetricUnit(string input) => InvalidMetricUnitCharacters().Replace(input, "_");
 #else
     private static readonly Regex InvalidKeyCharacters = new(InvalidKeyCharactersPattern, RegexOptions.Compiled);
     internal static string SanitizeKey(string input) => InvalidKeyCharacters.Replace(input, "_");
+
     private static readonly Regex InvalidValueCharacters = new(InvalidValueCharactersPattern, RegexOptions.Compiled);
     internal static string SanitizeValue(string input) => InvalidValueCharacters.Replace(input, "_");
+
+    private static readonly Regex InvalidMetricUnitCharacters = new(InvalidMetricUnitCharactersPattern, RegexOptions.Compiled);
+    internal static string SanitizeMetricUnit(string input) => InvalidMetricUnitCharacters.Replace(input, "_");
 #endif
 }
