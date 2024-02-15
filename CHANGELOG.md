@@ -7,6 +7,7 @@
 - ASP.NET Core: Blocking call detection. An event with the stack trace of the blocking call will be captured as event. ([#2709](https://github.com/getsentry/sentry-dotnet/pull/2709))
     - NOTE: Verify this in test/staging before prod! This could result in several events if you have many blocking calls in a high throughput endpoint.
     - Opt-in via `options.CaptureBlockingCalls = true`
+
 ### Fixes
 
 - Metric unit names are now sanitized correctly. This was preventing some built in metrics from showing in the Sentry dashboard ([#3151](https://github.com/getsentry/sentry-dotnet/pull/3151))
