@@ -521,10 +521,10 @@ public static partial class SentrySdk
         => CurrentHub.CaptureSession(sessionUpdate);
 
     /// <summary>
-    /// Captures a Checkin.
+    /// Captures a CheckIn.
     /// </summary>
     [DebuggerStepThrough]
-    public static void CaptureCheckin(SentryCheckIn checkIn)
+    public static SentryId CaptureCheckIn(SentryCheckIn checkIn)
         => CurrentHub.CaptureCheckIn(checkIn);
 
     /// <summary>

@@ -69,6 +69,7 @@ public class MyJobStarter : IHostedService
 
 public class MyBackgroundJob
 {
+    [SentryMonitorSlug("my-monitor-slug")]
     public void Execute()
     {
         Console.WriteLine($"Background task executed at: {DateTime.Now}");

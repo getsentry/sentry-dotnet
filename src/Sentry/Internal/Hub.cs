@@ -565,21 +565,23 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
-    public void CaptureCheckIn(SentryCheckIn checkIn)
+    public SentryId CaptureCheckIn(SentryCheckIn checkIn)
     {
         if (!IsEnabled)
         {
-            return;
+            return SentryId.Empty;
         }
 
         try
         {
-            _ownedClient.CaptureCheckIn(checkIn);
+            return _ownedClient.CaptureCheckIn(checkIn);
         }
         catch (Exception e)
         {
-            _options.LogError(e, "Failed to capture check in: {0}", checkIn.Id);
+            _options.LogError(e, "Failed to capture check in for: {0}", checkIn.MonitorSlug);
         }
+
+        return SentryId.Empty;
     }
 
     public async Task FlushAsync(TimeSpan timeout)
