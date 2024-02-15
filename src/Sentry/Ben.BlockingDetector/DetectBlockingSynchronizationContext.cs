@@ -31,9 +31,9 @@ namespace Sentry.Ben.BlockingDetector
                 return WaitInternal(waitHandles, waitAll, millisecondsTimeout);
             }
 
-            IBlockingMonitor monitor = _isSuppressed > 0 ? DisabledBlockingMonitor.Instance : _monitor;
+            var monitor = _isSuppressed > 0 ? null : _monitor;
 
-            monitor.BlockingStart(DetectionSource.SynchronizationContext);
+            monitor?.BlockingStart(DetectionSource.SynchronizationContext);
 
             try
             {
@@ -41,7 +41,7 @@ namespace Sentry.Ben.BlockingDetector
             }
             finally
             {
-                monitor.BlockingEnd();
+                monitor?.BlockingEnd();
             }
         }
 

@@ -4,10 +4,17 @@ using Sentry.Protocol;
 // Namespace starting with Sentry makes sure the SDK cuts frames off before reporting
 namespace Sentry.Ben.BlockingDetector
 {
-    internal class BlockingMonitor(Func<IHub> getHub, SentryOptions options) : IBlockingMonitor
+    internal class BlockingMonitor(Func<IHub> getHub, SentryOptions options)
     {
         [ThreadStatic]
         private static int t_recursionCount;
+
+        private static bool ShouldSkipFrame(string? frameInfo) =>
+            frameInfo?.StartsWith("Sentry.Ben") == true
+            // Skip frames relating to the TaskBlockingListener
+            || frameInfo?.StartsWith("System.Diagnostics") == true
+            // Skip frames relating to the async state machine
+            || frameInfo?.StartsWith("System.Threading") == true;
 
         public void BlockingStart(DetectionSource detectionSource)
         {
@@ -48,14 +55,12 @@ namespace Sentry.Ben.BlockingDetector
                                     options,
                                     new StackTrace(true),
                                     true,
-                                    // Skip frames once the Sentry frames are already removed
-                                    // Originally this skipped 3 more frames (context ? 3 : 6) but since Sentry hides the System frames
-                                    // by default, this will focus on the App frame but allow the user to see a bit deeper
-                                    // into what .NET does for blocking.
-                                    detectionSource == DetectionSource.SynchronizationContext ? 0 : 3),
+                                    ShouldSkipFrame
+                                    ),
                             }
                         },
                     };
+                    evt.SetTag("DetectionSource", detectionSource.ToString());
 
                     // TODO: How to render in the UI a better "suggested fix"?
                     evt.SetExtra(

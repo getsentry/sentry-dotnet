@@ -47,11 +47,25 @@ internal class DebugStackTrace : SentryStackTrace
 
     protected List<DebugImage> DebugImages { get; } = new();
 
-    internal static DebugStackTrace Create(SentryOptions options, StackTrace stackTrace, bool isCurrentStackTrace, int skipFrames = 0)
+    internal static DebugStackTrace Create(SentryOptions options, StackTrace stackTrace, bool isCurrentStackTrace,
+        int skipFrames = 0) =>
+        Create(options, stackTrace, isCurrentStackTrace, frameInfo =>
+        {
+            // We don't want to apply this logic to Blocking detection... otherwise we wouldn't detect blocking calls
+            // in the Sentry SDK and Samples
+            if (frameInfo?.StartsWith("Sentry") is true)
+            {
+                options.LogDebug("Skipping initial stack frame '{0}'", frameInfo);
+                return true;
+            }
+            return skipFrames-- > 0;
+        });
+
+    internal static DebugStackTrace Create(SentryOptions options, StackTrace stackTrace, bool isCurrentStackTrace, Func<string?, bool> skipFrame)
     {
         var result = new DebugStackTrace(options);
 
-        var frames = result.CreateFrames(stackTrace, isCurrentStackTrace, skipFrames)
+        var frames = result.CreateFrames(stackTrace, isCurrentStackTrace, skipFrame)
             .Reverse(); // Sentry expects the frames to be sent in reversed order
 
         foreach (var frame in frames)
@@ -160,7 +174,7 @@ internal class DebugStackTrace : SentryStackTrace
     /// Creates an enumerator of <see cref="SentryStackFrame"/> from a <see cref="StackTrace"/>.
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
-    private IEnumerable<SentryStackFrame> CreateFrames(StackTrace stackTrace, bool isCurrentStackTrace, int skipFrames)
+    private IEnumerable<SentryStackFrame> CreateFrames(StackTrace stackTrace, bool isCurrentStackTrace, Func<string?, bool> skipFrame)
     {
         var frames = (!AotHelper.IsNativeAot && _options.StackTraceMode == StackTraceMode.Enhanced)
             ? EnhancedStackTrace.GetFrames(stackTrace).Select(p => new RealStackFrame(p))
@@ -203,15 +217,8 @@ internal class DebugStackTrace : SentryStackTrace
                     frameInfo = stackFrame.ToString();
                 }
 
-                if (frameInfo?.StartsWith("Sentry") is true)
+                if (skipFrame(frameInfo))
                 {
-                    _options.LogDebug("Skipping initial stack frame '{0}'", frameInfo);
-                    continue;
-                }
-
-                if (skipFrames > 0)
-                {
-                    skipFrames--;
                     continue;
                 }
             }

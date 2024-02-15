@@ -36,7 +36,7 @@ namespace Sentry.Ben.BlockingDetector
                 return;
             }
 
-            IBlockingMonitor monitor = t_suppressionCount > 0 ? DisabledBlockingMonitor.Instance : _monitor;
+            var monitor = t_suppressionCount > 0 ? null : _monitor;
 
             if (eventData.EventId == 10 && // TASKWAITBEGIN_ID
                 eventData.Payload != null &&
@@ -45,13 +45,13 @@ namespace Sentry.Ben.BlockingDetector
                 value == 1) // TaskWaitBehavior.Synchronous
             {
                 t_recursionCount++;
-                monitor.BlockingStart(DetectionSource.EventListener);
+                monitor?.BlockingStart(DetectionSource.EventListener);
             }
             else if (eventData.EventId == 11 // TASKWAITEND_ID
                      && t_recursionCount > 0)
             {
                 t_recursionCount--;
-                monitor.BlockingEnd();
+                monitor?.BlockingEnd();
             }
         }
     }
