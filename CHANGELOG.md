@@ -7,11 +7,22 @@
 - ASP.NET Core: Blocking call detection. An event with the stack trace of the blocking call will be captured as event. ([#2709](https://github.com/getsentry/sentry-dotnet/pull/2709))
     - NOTE: Verify this in test/staging before prod! This could result in several events if you have many blocking calls in a high throughput endpoint.
     - Opt-in via `options.CaptureBlockingCalls = true`
+
+### Fixes
+
+- Metric unit names are now sanitized correctly. This was preventing some built in metrics from showing in the Sentry dashboard ([#3151](https://github.com/getsentry/sentry-dotnet/pull/3151))
+
+## 4.1.1
+
+### Fixes
+
+- The SDK can be disabled by setting `options.Dsn = "";` By convention, the SDK allows the DSN set to `string.Empty` to be overwritten by the environment. ([#3147](https://github.com/getsentry/sentry-dotnet/pull/3147))
+
 ### Dependencies
 
-- Bump CLI from v2.28.0 to v2.28.5 ([#3145](https://github.com/getsentry/sentry-dotnet/pull/3145))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2285)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.28.0...2.28.5)
+- Bump CLI from v2.28.0 to v2.28.6 ([#3145](https://github.com/getsentry/sentry-dotnet/pull/3145), [#3148](https://github.com/getsentry/sentry-dotnet/pull/3148))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2286)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.28.0...2.28.6)
 
 ## 4.1.0
 

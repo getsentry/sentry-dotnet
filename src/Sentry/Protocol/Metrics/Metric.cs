@@ -108,9 +108,10 @@ internal abstract class Metric : ISentryJsonSerializable, ISentrySerializable
         var metricName = MetricHelper.SanitizeKey(Key);
         await Write($"{metricName}@").ConfigureAwait(false);
         var unit = Unit ?? MeasurementUnit.None;
+        var sanitizedUnit = MetricHelper.SanitizeMetricUnit(unit.ToString());
         // We don't need ConfigureAwait(false) here as ConfigureAwait on metricName above avoids capturing the ExecutionContext.
 #pragma warning disable CA2007
-        await Write(unit.ToString());
+        await Write(sanitizedUnit);
 
         foreach (var value in SerializedStatsdValues())
         {
