@@ -2,7 +2,7 @@ namespace Sentry.OpenTelemetry.Tests;
 
 public class TracerProviderBuilderExtensionsTests
 {
-    class Fixture
+    private class Fixture
     {
         public IServiceProvider ServiceProvider { get; } = Substitute.For<IServiceProvider>();
         public IHub Hub { get; } = Substitute.For<IHub>();
