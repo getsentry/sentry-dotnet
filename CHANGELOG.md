@@ -5,7 +5,7 @@
 ### Fixes
 
 - Metric unit names are now sanitized correctly. This was preventing some built in metrics from showing in the Sentry dashboard ([#3151](https://github.com/getsentry/sentry-dotnet/pull/3151))
-- The Sentry OpenTelemetry integration threw an exception when Sentry was disabled ([#3156](https://github.com/getsentry/sentry-dotnet/pull/3156))
+- The Sentry OpenTelemetry integration no longer throws an exception with the SDK disabled ([#3156](https://github.com/getsentry/sentry-dotnet/pull/3156))
 
 ## 4.1.1
 
