@@ -39,11 +39,11 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         _enrichers = enrichers ?? Enumerable.Empty<IOpenTelemetryEnricher>();
         _options = hub.GetSentryOptions();
 
-        if (_options is not { })
+        if (_options is null)
         {
             throw new InvalidOperationException(
-                "The Sentry SDK has not been initialised. To use Sentry with OpenTelemetry tracing you need to " +
-                "initialize the Sentry SDK.");
+                "The Sentry SDK is disabled or has not been initialised. To use Sentry with OpenTelemetry " +
+                "tracing you need to initialize the Sentry SDK.");
         }
 
         if (_options.Instrumenter != Instrumenter.OpenTelemetry)

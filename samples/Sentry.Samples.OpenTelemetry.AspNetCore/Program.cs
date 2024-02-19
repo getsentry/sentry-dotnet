@@ -39,6 +39,8 @@ builder.Services.AddOpenTelemetry()
 builder.WebHost.UseSentry(options =>
 {
     // options.Dsn = "...Your DSN...";
+    options.Dsn = SentryConstants.DisableSdkDsnValue;
+    // options.Dsn = "https://b887218a80114d26a9b1a51c5f88e0b4@o447951.ingest.sentry.io/6601807";
     options.Debug = builder.Environment.IsDevelopment();
     options.SendDefaultPii = true;
     options.TracesSampleRate = 1.0;

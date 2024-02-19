@@ -42,7 +42,9 @@ public static class TracerProviderBuilderExtensions
             }
 
             var hub = services.GetService<IHub>() ?? SentrySdk.CurrentHub;
-            return new SentrySpanProcessor(hub, enrichers);
+            return hub.IsEnabled
+                ? new SentrySpanProcessor(hub, enrichers)
+                : DisabledSpanProcessor.Instance;
         });
     }
 }

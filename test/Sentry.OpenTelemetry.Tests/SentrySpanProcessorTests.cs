@@ -66,6 +66,16 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     }
 
     [Fact]
+    public void Ctor_SentryDisabled_Throws()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.Sentry;
+
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => new SentrySpanProcessor(DisabledHub.Instance));
+    }
+
+    [Fact]
     public void GetSpanStatus()
     {
         using (new AssertionScope())
