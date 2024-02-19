@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Trace;
+using Sentry.Extensibility;
 
 namespace Sentry.OpenTelemetry;
 
@@ -45,8 +46,13 @@ public static class TracerProviderBuilderExtensions
         }
 
         var hub = services.GetService<IHub>() ?? SentrySdk.CurrentHub;
-        return hub.IsEnabled
-            ? new SentrySpanProcessor(hub, enrichers)
-            : DisabledSpanProcessor.Instance;
+        if (hub.IsEnabled)
+        {
+            return new SentrySpanProcessor(hub, enrichers);
+        }
+
+        var logger = services.GetService<IDiagnosticLogger>();
+        logger?.LogWarning("Sentry is disabled so no OpenTelemetry spans will be sent to Sentry.");
+        return DisabledSpanProcessor.Instance;
     }
 }
