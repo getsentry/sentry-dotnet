@@ -30,21 +30,23 @@ public static class TracerProviderBuilderExtensions
     {
         defaultTextMapPropagator ??= new SentryPropagator();
         Sdk.SetDefaultTextMapPropagator(defaultTextMapPropagator);
-        return tracerProviderBuilder.AddProcessor(services =>
+        return tracerProviderBuilder.AddProcessor(ImplementationFactory);
+    }
+
+    internal static BaseProcessor<Activity> ImplementationFactory(IServiceProvider services)
+    {
+        List<IOpenTelemetryEnricher> enrichers = new();
+
+        // AspNetCoreEnricher
+        var userFactory = services.GetService<ISentryUserFactory>();
+        if (userFactory is not null)
         {
-            List<IOpenTelemetryEnricher> enrichers = new();
+            enrichers.Add(new AspNetCoreEnricher(userFactory));
+        }
 
-            // AspNetCoreEnricher
-            var userFactory = services.GetService<ISentryUserFactory>();
-            if (userFactory is not null)
-            {
-                enrichers.Add(new AspNetCoreEnricher(userFactory));
-            }
-
-            var hub = services.GetService<IHub>() ?? SentrySdk.CurrentHub;
-            return hub.IsEnabled
-                ? new SentrySpanProcessor(hub, enrichers)
-                : DisabledSpanProcessor.Instance;
-        });
+        var hub = services.GetService<IHub>() ?? SentrySdk.CurrentHub;
+        return hub.IsEnabled
+            ? new SentrySpanProcessor(hub, enrichers)
+            : DisabledSpanProcessor.Instance;
     }
 }

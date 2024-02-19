@@ -12,7 +12,7 @@ namespace Sentry.OpenTelemetry;
 public class SentrySpanProcessor : BaseProcessor<Activity>
 {
     private readonly IHub _hub;
-    private readonly IEnumerable<IOpenTelemetryEnricher> _enrichers;
+    internal readonly IEnumerable<IOpenTelemetryEnricher> _enrichers;
 
     // ReSharper disable once MemberCanBePrivate.Global - Used by tests
     internal readonly ConcurrentDictionary<ActivitySpanId, ISpan> _map = new();
@@ -36,13 +36,22 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     internal SentrySpanProcessor(IHub hub, IEnumerable<IOpenTelemetryEnricher>? enrichers)
     {
         _hub = hub;
+
+        if (_hub is DisabledHub)
+        {
+            // This would only happen if someone tried to create a SentrySpanProcessor manually
+            throw new InvalidOperationException(
+                "Attempted to creates a SentrySpanProcessor for a Disabled hub. " +
+                "You should use the TracerProviderBuilderExtensions to configure Sentry with OpenTelemetry");
+        }
+
         _enrichers = enrichers ?? Enumerable.Empty<IOpenTelemetryEnricher>();
         _options = hub.GetSentryOptions();
 
         if (_options is null)
         {
             throw new InvalidOperationException(
-                "The Sentry SDK is disabled or has not been initialised. To use Sentry with OpenTelemetry " +
+                "The Sentry SDK has not been initialised. To use Sentry with OpenTelemetry " +
                 "tracing you need to initialize the Sentry SDK.");
         }
 
