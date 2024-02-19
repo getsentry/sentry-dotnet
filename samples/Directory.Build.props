@@ -22,6 +22,11 @@
     Note - The below works because SentryAttributes is already being converted to
            actual attributes in src/Sentry/buildTransitive/Sentry.targets.
   -->
+  <ItemGroup>
+    <SentryAttributes Include="Sentry.DsnAttribute">
+      <_Parameter1>https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537</_Parameter1>
+    </SentryAttributes>
+  </ItemGroup>
 
   <!-- Workaround for hang on compile issue.  See https://github.com/xamarin/xamarin-macios/issues/17825#issuecomment-1478568270. -->
   <PropertyGroup Condition="'$(Configuration)' == 'Release' And '$(TargetFramework)' == 'net7.0-ios' And '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">
