@@ -2,7 +2,7 @@ using OpenTelemetry;
 
 namespace Sentry.OpenTelemetry;
 
-class DisabledSpanProcessor : BaseProcessor<Activity>
+internal class DisabledSpanProcessor : BaseProcessor<Activity>
 {
     private static readonly Lazy<DisabledSpanProcessor> LazyInstance = new();
     internal static DisabledSpanProcessor Instance => LazyInstance.Value;
