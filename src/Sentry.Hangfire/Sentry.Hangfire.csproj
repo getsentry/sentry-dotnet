@@ -13,10 +13,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
+    <PackageReference Include="Hangfire.Core" Version="1.8.7" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Hangfire.Core" Version="1.8.7" />
+    <InternalsVisibleTo Include="Sentry.Hangfire.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
 </Project>

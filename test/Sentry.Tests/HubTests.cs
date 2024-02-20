@@ -1435,6 +1435,33 @@ public partial class HubTests
         _fixture.Client.Received(enabled ? 1 : 0).CaptureSession(Arg.Any<SessionUpdate>());
     }
 
+    [Fact]
+    public void CaptureCheckIn_HubEnabled_ClientGetsCheckIn()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+
+        // Act
+        var checkInId = hub.CaptureCheckIn(new SentryCheckIn("test-slug", CheckInStatus.InProgress));
+
+        // Assert
+        _fixture.Client.Received().CaptureCheckIn(Arg.Is<SentryCheckIn>(c => c.Id == checkInId));
+    }
+
+    [Fact]
+    public void CaptureCheckIn_HubDisabled_ReturnsEmptySentryId()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        hub.Dispose();
+
+        // Act
+        var checkInId = hub.CaptureCheckIn(new SentryCheckIn("test-slug", CheckInStatus.InProgress));
+
+        // Assert
+        Assert.Equal(checkInId, SentryId.Empty);
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]

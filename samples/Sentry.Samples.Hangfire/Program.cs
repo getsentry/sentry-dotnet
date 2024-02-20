@@ -14,10 +14,9 @@ public static class Program
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()
             .UseMemoryStorage(new MemoryStorageOptions())
-            .UseSentry()
+            .UseSentry() // <- Add Sentry to automatically send check-ins
         );
 
-        builder.Services.AddSingleton<IHostedService, MyJobStarter>();
         builder.Services.AddHangfireServer();
 
         var app = builder.Build();
@@ -28,6 +27,26 @@ public static class Program
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapHangfireDashboard();
+            endpoints.MapGet("/first", async context =>
+            {
+                BackgroundJob.Enqueue<FirstJob>(job => job.Execute());
+                await context.Response.WriteAsync("Started the first background job!");
+            });
+            endpoints.MapGet("/second", async context =>
+            {
+                BackgroundJob.Schedule<SecondJob>(
+                    secondJob => secondJob.ExecuteWithException(),
+                    TimeSpan.FromSeconds(1));
+                await context.Response.WriteAsync("Starting the delayed background job that will throw an exception.");
+            });
+            endpoints.MapGet("/third", async context =>
+            {
+                RecurringJob.AddOrUpdate<ThirdJob>(
+                    "my_recurring_job",
+                    thirdJob => thirdJob.Execute(),
+                    Cron.Minutely);
+                await context.Response.WriteAsync("Started a recurring background job.");
+            });
         });
 #pragma warning restore ASP0014
 
@@ -37,43 +56,36 @@ public static class Program
     }
 }
 
-public class MyJobStarter : IHostedService
+public class FirstJob
 {
-    public Task StartAsync(CancellationToken cancellationToken)
+    // [SentryMonitorSlug("first-job")]
+    public void Execute()
     {
-        Console.WriteLine("MyJobStarter is starting...");
-
-        var jobId = BackgroundJob.Enqueue<MyBackgroundJob>(x => x.Execute());
-        Console.WriteLine($"Job Enqueued. JobId: {jobId}");
-
-        // RecurringJob.AddOrUpdate<MyBackgroundJob>(
-        //     "my_recurring_job",
-        //     x => x.Execute(),
-        //     Cron.Minutely);
-        //
-        // for (var i = 0; i < 100; i++)
-        // {
-        //     var job = BackgroundJob.Schedule<MyBackgroundJob>(
-        //         x => x.Execute(),
-        //         TimeSpan.FromSeconds(new Random().Next(1, 100)));
-        // }
-
-        return Task.CompletedTask;
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
+        Console.WriteLine($"Starting to do some heavy work at: {DateTime.Now}");
+        Task.Delay(1000).Wait();
+        Console.WriteLine($"Finished doing some heavy work at: {DateTime.Now}");
     }
 }
 
-public class MyBackgroundJob
+public class SecondJob
 {
-    [SentryMonitorSlug("my-monitor-slug")]
+    [SentryMonitorSlug("job-that-throws")]
+    public void ExecuteWithException()
+    {
+        Console.WriteLine($"Starting to do some heavy work at: {DateTime.Now}");
+        Task.Delay(1000).Wait();
+        Console.WriteLine($"Finished doing some heavy work at: {DateTime.Now}");
+        throw new Exception();
+    }
+}
+
+[SentryMonitorSlug("RecurringBackgroundJob")]
+public class ThirdJob
+{
     public void Execute()
     {
-        Console.WriteLine($"Background task executed at: {DateTime.Now}");
-        Task.Delay(2000).Wait();
-        Console.WriteLine($"Background task finished at: {DateTime.Now}");
+        Console.WriteLine($"Starting to do some heavy work at: {DateTime.Now}");
+        Task.Delay(1000).Wait();
+        Console.WriteLine($"Finished doing some heavy work at: {DateTime.Now}");
     }
 }

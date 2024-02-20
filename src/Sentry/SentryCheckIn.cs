@@ -6,7 +6,7 @@ namespace Sentry;
 /// <summary>
 /// The Checkin Status
 /// </summary>
-public enum CheckinStatus
+public enum CheckInStatus
 {
     /// <summary>
     /// The Checkin is in progress
@@ -43,7 +43,7 @@ public class SentryCheckIn : ISentryJsonSerializable
     /// <summary>
     /// The status of the Checkin
     /// </summary>
-    public CheckinStatus Status { get; }
+    public CheckInStatus Status { get; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="SentryCheckIn"/>.
@@ -51,7 +51,7 @@ public class SentryCheckIn : ISentryJsonSerializable
     /// <param name="monitorSlug"></param>
     /// <param name="status"></param>
     /// <param name="sentryId"></param>
-    public SentryCheckIn(string monitorSlug, CheckinStatus status, SentryId? sentryId = null)
+    public SentryCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null)
     {
         MonitorSlug = monitorSlug;
         Status = status;

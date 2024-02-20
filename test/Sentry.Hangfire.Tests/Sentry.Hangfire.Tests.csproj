@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net7.0;net6.0;net48</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hangfire.Core" Version="1.8.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sentry.Hangfire\Sentry.Hangfire.csproj" />
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
+  </ItemGroup>
+
+</Project>
