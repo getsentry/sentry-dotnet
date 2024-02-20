@@ -61,6 +61,12 @@ namespace Sentry
         public ByteAttachmentContent(byte[] bytes) { }
         public System.IO.Stream GetStream() { }
     }
+    public enum CheckInStatus
+    {
+        InProgress = 0,
+        Ok = 1,
+        Error = 2,
+    }
     [System.Obsolete("WARNING: This method deliberately causes a crash, and should not be used in a rea" +
         "l application.")]
     public enum CrashType
@@ -223,6 +229,7 @@ namespace Sentry
     public interface ISentryClient
     {
         bool IsEnabled { get; }
+        Sentry.SentryId CaptureCheckIn(Sentry.SentryCheckIn checkIn);
         bool CaptureEnvelope(Sentry.Protocol.Envelopes.Envelope envelope);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null);
         void CaptureSession(Sentry.SessionUpdate sessionUpdate);
@@ -434,10 +441,19 @@ namespace Sentry
         public string FileName { get; }
         public Sentry.AttachmentType Type { get; }
     }
+    public class SentryCheckIn : Sentry.ISentryJsonSerializable
+    {
+        public SentryCheckIn(string monitorSlug, Sentry.CheckInStatus status, Sentry.SentryId? sentryId = default) { }
+        public Sentry.SentryId Id { get; }
+        public string MonitorSlug { get; }
+        public Sentry.CheckInStatus Status { get; }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+    }
     public class SentryClient : Sentry.ISentryClient, System.IDisposable
     {
         public SentryClient(Sentry.SentryOptions options) { }
         public bool IsEnabled { get; }
+        public Sentry.SentryId CaptureCheckIn(Sentry.SentryCheckIn checkIn) { }
         public bool CaptureEnvelope(Sentry.Protocol.Envelopes.Envelope envelope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent? @event, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
@@ -746,6 +762,7 @@ namespace Sentry
         public static void AddBreadcrumb(Sentry.Infrastructure.ISystemClock? clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void BindClient(Sentry.ISentryClient client) { }
         public static void BindException(System.Exception exception, Sentry.ISpan span) { }
+        public static Sentry.SentryId CaptureCheckIn(Sentry.SentryCheckIn checkIn) { }
         public static bool CaptureEnvelope(Sentry.Protocol.Envelopes.Envelope envelope) { }
         public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
         public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
@@ -1225,6 +1242,7 @@ namespace Sentry.Extensibility
         public Sentry.IMetricAggregator Metrics { get; }
         public void BindClient(Sentry.ISentryClient client) { }
         public void BindException(System.Exception exception, Sentry.ISpan span) { }
+        public Sentry.SentryId CaptureCheckIn(Sentry.SentryCheckIn checkIn) { }
         public bool CaptureEnvelope(Sentry.Protocol.Envelopes.Envelope envelope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
@@ -1266,6 +1284,7 @@ namespace Sentry.Extensibility
         public void AddBreadcrumb(Sentry.Infrastructure.ISystemClock clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public void BindClient(Sentry.ISentryClient client) { }
         public void BindException(System.Exception exception, Sentry.ISpan span) { }
+        public Sentry.SentryId CaptureCheckIn(Sentry.SentryCheckIn checkIn) { }
         public bool CaptureEnvelope(Sentry.Protocol.Envelopes.Envelope envelope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope) { }
@@ -1707,6 +1726,7 @@ namespace Sentry.Protocol.Envelopes
         public System.Threading.Tasks.Task SerializeAsync(System.IO.Stream stream, Sentry.Extensibility.IDiagnosticLogger? logger, System.Threading.CancellationToken cancellationToken = default) { }
         public Sentry.SentryId? TryGetEventId() { }
         public static System.Threading.Tasks.Task<Sentry.Protocol.Envelopes.Envelope> DeserializeAsync(System.IO.Stream stream, System.Threading.CancellationToken cancellationToken = default) { }
+        public static Sentry.Protocol.Envelopes.Envelope FromCheckIn(Sentry.SentryCheckIn checkIn) { }
         public static Sentry.Protocol.Envelopes.Envelope FromEvent(Sentry.SentryEvent @event, Sentry.Extensibility.IDiagnosticLogger? logger = null, System.Collections.Generic.IReadOnlyCollection<Sentry.SentryAttachment>? attachments = null, Sentry.SessionUpdate? sessionUpdate = null) { }
         public static Sentry.Protocol.Envelopes.Envelope FromSession(Sentry.SessionUpdate sessionUpdate) { }
         public static Sentry.Protocol.Envelopes.Envelope FromTransaction(Sentry.SentryTransaction transaction) { }
@@ -1725,6 +1745,7 @@ namespace Sentry.Protocol.Envelopes
         public string? TryGetType() { }
         public static System.Threading.Tasks.Task<Sentry.Protocol.Envelopes.EnvelopeItem> DeserializeAsync(System.IO.Stream stream, System.Threading.CancellationToken cancellationToken = default) { }
         public static Sentry.Protocol.Envelopes.EnvelopeItem FromAttachment(Sentry.SentryAttachment attachment) { }
+        public static Sentry.Protocol.Envelopes.EnvelopeItem FromCheckIn(Sentry.SentryCheckIn checkIn) { }
         public static Sentry.Protocol.Envelopes.EnvelopeItem FromEvent(Sentry.SentryEvent @event) { }
         public static Sentry.Protocol.Envelopes.EnvelopeItem FromSession(Sentry.SessionUpdate sessionUpdate) { }
         public static Sentry.Protocol.Envelopes.EnvelopeItem FromTransaction(Sentry.SentryTransaction transaction) { }
