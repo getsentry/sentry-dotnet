@@ -65,8 +65,19 @@ public class SentryCheckIn : ISentryJsonSerializable
 
         writer.WriteSerializable("check_in_id", Id, logger);
         writer.WriteString("monitor_slug", MonitorSlug);
-        writer.WriteString("status", Status.ToString().ToSnakeCase());
+        writer.WriteString("status", ToSnakeCase(Status));
 
         writer.WriteEndObject();
+    }
+
+    private static string ToSnakeCase(CheckInStatus status)
+    {
+        return status switch
+        {
+            CheckInStatus.InProgress => "in_progress",
+            CheckInStatus.Ok => "ok",
+            CheckInStatus.Error => "error",
+            _ => throw new ArgumentException($"Unsupported CheckInStatus: '{status}'.")
+        };
     }
 }
