@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Crons support via `SentrySdk.CaptureCheckIn` and Hangfire integration ([#3128](https://github.com/getsentry/sentry-dotnet/pull/3128))
+
 ## 4.1.2
 
 ### Fixes
