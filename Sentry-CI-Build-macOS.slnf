@@ -64,6 +64,7 @@
       "test\\Sentry.EntityFramework.Tests\\Sentry.EntityFramework.Tests.csproj",
       "test\\Sentry.Extensions.Logging.Tests\\Sentry.Extensions.Logging.Tests.csproj",
       "test\\Sentry.Google.Cloud.Functions.Tests\\Sentry.Google.Cloud.Functions.Tests.csproj",
+      "test\\Sentry.Hangfire.Tests\\Sentry.Hangfire.Tests.csproj",
       "test\\Sentry.Log4Net.Tests\\Sentry.Log4Net.Tests.csproj",
       "test\\Sentry.Maui.Tests\\Sentry.Maui.Tests.csproj",
       "test\\Sentry.NLog.Tests\\Sentry.NLog.Tests.csproj",
