@@ -1435,17 +1435,23 @@ public partial class HubTests
         _fixture.Client.Received(enabled ? 1 : 0).CaptureSession(Arg.Any<SessionUpdate>());
     }
 
-    [Fact]
-    public void CaptureCheckIn_HubEnabled_ClientGetsCheckIn()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CaptureCheckIn_HubEnabled(bool enabled)
     {
         // Arrange
         var hub = _fixture.GetSut();
+        if (!enabled)
+        {
+            hub.Dispose();
+        }
 
         // Act
-        var checkInId = hub.CaptureCheckIn(new SentryCheckIn("test-slug", CheckInStatus.InProgress));
+        _ = hub.CaptureCheckIn(new SentryCheckIn("test-slug", CheckInStatus.InProgress));
 
         // Assert
-        _fixture.Client.Received().CaptureCheckIn(Arg.Is<SentryCheckIn>(c => c.Id == checkInId));
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureCheckIn(Arg.Any<SentryCheckIn>());
     }
 
     [Fact]
