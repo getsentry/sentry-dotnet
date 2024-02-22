@@ -11,12 +11,12 @@ internal class SentryJobFilter : IServerFilter
     private readonly IHub _hub;
     private readonly IDiagnosticLogger? _logger;
 
-    public SentryJobFilter() : this(() => HubAdapter.Instance)
+    public SentryJobFilter() : this(HubAdapter.Instance)
     { }
 
-    internal SentryJobFilter(Func<IHub> hubAccessor)
+    internal SentryJobFilter(IHub hub)
     {
-        _hub = hubAccessor.Invoke();
+        _hub = hub;
         _logger = _hub.GetSentryOptions()?.DiagnosticLogger;
     }
 
