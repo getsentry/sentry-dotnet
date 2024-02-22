@@ -1,13 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net6.0;net48</TargetFrameworks>
+    <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
-    <AssemblyOriginatorKeyFile></AssemblyOriginatorKeyFile>
-  </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.Hangfire\Sentry.Hangfire.csproj" />
