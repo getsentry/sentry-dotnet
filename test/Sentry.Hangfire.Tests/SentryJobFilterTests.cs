@@ -7,15 +7,17 @@ public class SentryJobFilterTests
     private class Fixture
     {
         public IHub Hub { get; set; } = Substitute.For<IHub>();
-        public Func<IHub> HubAccessor { get; set; }
+        public Func<PerformContext?, string, string?> GetMonitorSlug = (_, _) => string.Empty;
+        public Func<PerformContext?, string, SentryId?> GetCheckInId = (_, _) => SentryId.Empty;
+        public Action<PerformContext?, string, SentryId> SetCheckInId = (_, _, _) => { };
+        public Func<PerformedContext?, bool> HasException = _ => false;
 
         public Fixture()
         {
             Hub.IsEnabled.Returns(true);
-            HubAccessor = () => Hub;
         }
 
-        public SentryJobFilter GetSut() => new(HubAccessor);
+        public SentryJobFilter GetSut() => new(Hub, GetMonitorSlug, GetCheckInId, SetCheckInId, HasException);
     }
 
     private readonly Fixture _fixture = new();
@@ -23,11 +25,15 @@ public class SentryJobFilterTests
     [Fact]
     public void OnPerforming_MonitorSlugPresentOnContext_CapturesCheckIn()
     {
-        var filter = _fixture.GetSut();
+        // Arrange
         const string monitorSlug = "test-slug";
+        _fixture.GetMonitorSlug = (_, _) => monitorSlug;
+        var filter = _fixture.GetSut();
 
-        filter.OnPerformingInternal(null, (_, _) => monitorSlug, (_, _, _) => { });
+        // Act
+        filter.OnPerforming(null);
 
+        // Assert
         _fixture.Hub.Received(1).CaptureCheckIn(Arg.Is<SentryCheckIn>(checkIn =>
             checkIn.MonitorSlug == monitorSlug &&
             checkIn.Status == CheckInStatus.InProgress));
@@ -36,12 +42,18 @@ public class SentryJobFilterTests
     [Fact]
     public void OnPerforming_MonitorSlugPresentOnContext_SetsCheckInIdOnContext()
     {
+        // Arrange
+        const string monitorSlug = "test-slug";
+        _fixture.GetMonitorSlug = (_, _) => monitorSlug;
+        var checkInId = SentryId.Empty;
+        _fixture.SetCheckInId = (_, _, id) => checkInId = id;
         _fixture.Hub.CaptureCheckIn(Arg.Any<SentryCheckIn>()).Returns(SentryId.Create());
         var filter = _fixture.GetSut();
-        var checkInId = SentryId.Empty;
 
-        filter.OnPerformingInternal(null, (_, _) => "test-slug", (_, _, id) => checkInId = id);
+        // Act
+        filter.OnPerforming(null);
 
+        // Assert
         Assert.NotEqual(SentryId.Empty, checkInId);
     }
 
@@ -50,26 +62,17 @@ public class SentryJobFilterTests
     [InlineData(false)]
     public void OnPerformed_MonitorSlugAndCheckInIdPresentOnContext_CapturesCheckIn(bool hasException)
     {
-        var filter = _fixture.GetSut();
+        // Arrange
         const string monitorSlug = "test-slug";
+        _fixture.GetMonitorSlug = (_, _) => monitorSlug;
+        _fixture.GetCheckInId = (_, _) => SentryId.Create();
+        _fixture.HasException = _ => hasException;
+        var filter = _fixture.GetSut();
 
-        object GetJobParameter(PerformContext context, string key)
-        {
-            return key switch
-            {
-                SentryJobFilter.SentryMonitorSlugKey => monitorSlug,
-                SentryJobFilter.SentryCheckInIdKey => SentryId.Create(),
-                _ => null
-            };
-        }
+        // Act
+        filter.OnPerformed(null);
 
-        bool HasException(PerformedContext context)
-        {
-            return hasException;
-        }
-
-        filter.OnPerformedInternal(null, GetJobParameter, HasException);
-
+        // Assert
         _fixture.Hub.Received(1).CaptureCheckIn(Arg.Is<SentryCheckIn>(checkIn =>
             checkIn.MonitorSlug == monitorSlug &&
             checkIn.Status == (hasException ? CheckInStatus.Error : CheckInStatus.Ok)));
