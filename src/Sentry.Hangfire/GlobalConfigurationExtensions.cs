@@ -1,4 +1,5 @@
 using Hangfire;
+using Sentry.Extensibility;
 
 namespace Sentry.Hangfire;
 
@@ -14,7 +15,20 @@ public static class GlobalConfigurationExtensions
     /// <returns></returns>
     public static IGlobalConfiguration UseSentry(this IGlobalConfiguration configuration)
     {
-        configuration.UseFilter(new SentryJobFilter());
+        configuration.UseFilter(new SentryServerFilter());
+        return configuration;
+    }
+
+    /// <summary>
+    /// For testing
+    /// </summary>
+    /// <param name="configuration"></param>
+    /// <param name="hub"></param>
+    /// <param name="logger"></param>
+    /// <returns></returns>
+    internal static IGlobalConfiguration UseSentry(this IGlobalConfiguration configuration, IHub hub, IDiagnosticLogger logger)
+    {
+        configuration.UseFilter(new SentryServerFilter(hub, logger));
         return configuration;
     }
 }

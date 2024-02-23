@@ -14,7 +14,7 @@ public class SentryMonitorSlugAttribute(string monitorSlug) : JobFilterAttribute
     /// <inheritdoc />
     public void OnCreating(CreatingContext context)
     {
-        context.SetJobParameter(SentryJobFilter.SentryMonitorSlugKey, _monitorSlug);
+        context.SetJobParameter(SentryServerFilter.SentryMonitorSlugKey, _monitorSlug);
     }
 
     /// <inheritdoc />
