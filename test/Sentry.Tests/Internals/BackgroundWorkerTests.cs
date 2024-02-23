@@ -53,8 +53,8 @@ public class BackgroundWorkerTests
             => new(
                 Transport,
                 SentryOptions,
-                CancellationTokenSource,
-                Queue);
+                shutdownSource: CancellationTokenSource,
+                queue: Queue);
 
         public void UseDefaultShutdownTimeout()
         {
