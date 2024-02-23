@@ -59,7 +59,12 @@ public static class Program
 public class FirstJob
 {
     [SentryMonitorSlug("first-job")]
-    public void Execute() { /* do something */ }
+    public void Execute()
+    {
+        Console.WriteLine($"Starting to do some heavy work at: {DateTime.Now}");
+        Task.Delay(1000).Wait();
+        Console.WriteLine($"Finished doing some heavy work at: {DateTime.Now}");
+    }
 }
 
 public class SecondJob
