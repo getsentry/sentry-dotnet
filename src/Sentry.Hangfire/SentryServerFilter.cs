@@ -25,36 +25,32 @@ internal class SentryServerFilter : IServerFilter
         var monitorSlug = context.GetJobParameter<string>(SentryMonitorSlugKey);
         if(monitorSlug is null)
         {
-            var jobName = context.BackgroundJob.Job.ToString();
-            _logger?.LogWarning("Skipping creating a check-in for '{0}'. " +
+            var jobType = context.BackgroundJob.Job.Type;
+            var jobMethod = context.BackgroundJob.Job.Method;
+            _logger?.LogWarning("Skipping creating a check-in for '{0}.{1}'. " +
                                 "Failed to find Monitor Slug the job. You can set the monitor slug " +
-                                "by setting the 'SentryMonitorSlug' attribute.", jobName);
+                                "by setting the 'SentryMonitorSlug' attribute.", jobType, jobMethod);
             return;
         }
 
         var checkInId = _hub.CaptureCheckIn(new SentryCheckIn(monitorSlug, CheckInStatus.InProgress));
-        // context.SetJobParameter(SentryCheckInIdKey, checkInId);
+        context.Items.Add(SentryCheckInIdKey, checkInId);
     }
 
     public void OnPerformed(PerformedContext context)
     {
         var monitorSlug = context.GetJobParameter<string>(SentryMonitorSlugKey);
-        if(monitorSlug is null)
+        if (monitorSlug is null)
         {
             return;
         }
 
-        var checkInId = context.GetJobParameter<SentryId>(SentryCheckInIdKey);
-        if (checkInId.Equals(SentryId.Empty))
+        if (!context.Items.TryGetValue(SentryCheckInIdKey, out var checkInIdObject) || checkInIdObject is not SentryId checkInId)
         {
             return;
         }
 
-        var status = CheckInStatus.Ok;
-        if (context.Exception is not null)
-        {
-            status = CheckInStatus.Error;
-        }
+        var status = context.Exception is null ? CheckInStatus.Ok : CheckInStatus.Error;
 
         _ = _hub.CaptureCheckIn(new SentryCheckIn(monitorSlug, status, checkInId));
     }

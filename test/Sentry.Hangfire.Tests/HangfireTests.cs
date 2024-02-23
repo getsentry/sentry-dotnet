@@ -3,32 +3,21 @@ using Hangfire.MemoryStorage;
 
 namespace Sentry.Hangfire.Tests;
 
-public class HangfireTests
+public class HangfireTests : IClassFixture<HangfireFixture>
 {
-    private class Fixture
+    private readonly HangfireFixture _fixture;
+
+    public HangfireTests(HangfireFixture hangfireFixture)
     {
-        public IHub Hub { get; set; } = Substitute.For<IHub>();
-        public IDiagnosticLogger Logger { get; }
-        public BackgroundJobServer Server { get; }
-
-        public Fixture()
-        {
-            Logger = Substitute.For<IDiagnosticLogger>();
-            Logger.IsEnabled(SentryLevel.Warning).Returns(true);
-            Hub.IsEnabled.Returns(true);
-
-            GlobalConfiguration.Configuration
-                .UseMemoryStorage()
-                .UseSentry(Hub, Logger);
-            Server = new BackgroundJobServer();
-        }
+        _fixture = hangfireFixture;
     }
-
-    private readonly Fixture _fixture = new();
 
     [Fact]
     public async void ExecuteJobWithAttribute_CapturesCheckInInProgressAndOk()
     {
+        var sentryId = SentryId.Create();
+        _fixture.Hub.CaptureCheckIn(Arg.Any<SentryCheckIn>()).Returns(sentryId);
+
         BackgroundJob.Enqueue<TestJob>(job => job.ExecuteJobWithAttribute());
 
         await Task.Delay(100);
@@ -38,35 +27,41 @@ public class HangfireTests
             checkIn.Status == CheckInStatus.InProgress));
         _fixture.Hub.Received(1).CaptureCheckIn(Arg.Is<SentryCheckIn>(checkIn =>
             checkIn.MonitorSlug == "test-job" &&
+            checkIn.Id.Equals(sentryId) &&
             checkIn.Status == CheckInStatus.Ok));
     }
 
     [Fact]
     public async void ExecuteJobWithException_CapturesCheckInInProgressAndError()
     {
+        var sentryId = SentryId.Create();
+        _fixture.Hub.CaptureCheckIn(Arg.Any<SentryCheckIn>()).Returns(sentryId);
+
         BackgroundJob.Enqueue<TestJob>(job => job.ExecuteJobWithException());
 
-        await Task.Delay(100);
+        await Task.Delay(1000);
 
         _fixture.Hub.Received(1).CaptureCheckIn(Arg.Is<SentryCheckIn>(checkIn =>
             checkIn.MonitorSlug == "test-job-with-exception" &&
             checkIn.Status == CheckInStatus.InProgress));
         _fixture.Hub.Received(1).CaptureCheckIn(Arg.Is<SentryCheckIn>(checkIn =>
             checkIn.MonitorSlug == "test-job-with-exception" &&
+            checkIn.Id.Equals(sentryId) &&
             checkIn.Status == CheckInStatus.Error));
     }
 
     [Fact]
     public async void ExecuteJobWithoutAttribute_DoesNotCapturesCheckInButLogs()
     {
+        var sentryId = SentryId.Create();
+        _fixture.Hub.CaptureCheckIn(Arg.Any<SentryCheckIn>()).Returns(sentryId);
         BackgroundJob.Enqueue<TestJob>(job => job.ExecuteJobWithoutAttribute());
 
         await Task.Delay(100);
 
-        _fixture.Hub.DidNotReceiveWithAnyArgs().CaptureCheckIn(Arg.Any<SentryCheckIn>());
-        _fixture.Logger.Received(1).Log(SentryLevel.Warning, Arg.Any<string>(), null, Arg.Any<string>());
+        _fixture.Hub.DidNotReceive().CaptureCheckIn(Arg.Is<SentryCheckIn>(checkIn => checkIn.Id.Equals(sentryId)));
+        _fixture.Logger.Received(1).Log(SentryLevel.Warning, Arg.Is<string>(message => message.Contains("Skipping creating a check-in for")), null, Arg.Any<Type>(), Arg.Any<MethodInfo>());
     }
-
 }
 
 

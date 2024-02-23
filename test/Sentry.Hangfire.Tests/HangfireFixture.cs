@@ -6,18 +6,21 @@ namespace Sentry.Hangfire.Tests;
 
 public class HangfireFixture : IDisposable
 {
-    public HangfireFixture()
-    {
-        GlobalConfiguration.Configuration
-            .UseMemoryStorage()
-            .UseSentry();
-        Server = new BackgroundJobServer();
-        MonitoringApi = JobStorage.Current.GetMonitoringApi();
-    }
-
+    public IHub Hub { get; set; } = Substitute.For<IHub>();
+    public IDiagnosticLogger Logger { get; }
     public BackgroundJobServer Server { get; }
 
-    public IMonitoringApi MonitoringApi { get; }
+    public HangfireFixture()
+    {
+        Logger = Substitute.For<IDiagnosticLogger>();
+        Logger.IsEnabled(SentryLevel.Warning).Returns(true);
+        Hub.IsEnabled.Returns(true);
+
+        GlobalConfiguration.Configuration
+            .UseMemoryStorage()
+            .UseSentry(Hub, Logger);
+        Server = new BackgroundJobServer();
+    }
 
     public void Dispose()
     {
