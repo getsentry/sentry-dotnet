@@ -25,10 +25,19 @@ builder.WebHost.UseSentry(options =>
         // Example: Disabling support to compressed responses:
         options.DecompressionMethods = DecompressionMethods.None;
 
-        options.MaxQueueItems = 100;
+        options.MaxQueueItems = 30;
         options.ShutdownTimeout = TimeSpan.FromSeconds(5);
 
+        options.Debug = true;
+        options.DiagnosticLevel = SentryLevel.Info;
+
         options.TracesSampleRate = 1.0; // For production you may want to lower this to stay inside your quota
+
+        options.ExperimentalMetrics = new ExperimentalMetricsOptions()
+        {
+            EnableCodeLocations = false,
+            CaptureSystemDiagnosticsMeters = SentryMeters.All
+        };
 
         // Configures the root scope
         options.ConfigureScope(s => s.SetTag("Always sent", "this tag"));

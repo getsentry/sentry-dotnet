@@ -1,3 +1,6 @@
+#if NET8_0_OR_GREATER
+using System.Diagnostics.Metrics;
+#endif
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 using Sentry.Internal.Http;
@@ -7,6 +10,13 @@ namespace Sentry.Internal;
 
 internal class BackgroundWorker : IBackgroundWorker, IDisposable
 {
+#if NET8_0_OR_GREATER
+    private const string MeterName = "Sentry.Internal.Backgroundworker";
+    private readonly Histogram<int> _openQueueSlots;
+    private readonly Histogram<int> _envelopesInQueue;
+    private readonly Counter<int> _envelopesDiscarded;
+#endif
+
     private readonly ITransport _transport;
     private readonly SentryOptions _options;
     private readonly ConcurrentQueue<Envelope> _queue;
@@ -26,11 +36,21 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
     public BackgroundWorker(
         ITransport transport,
         SentryOptions options,
+#if NET8_0_OR_GREATER
+        IMeterFactory? meterFactory = null,
+#endif
         CancellationTokenSource? shutdownSource = null,
-        ConcurrentQueue<Envelope>? queue = null)
+        ConcurrentQueue<Envelope>? queue = null
+        )
     {
         _transport = transport;
         _options = options;
+#if NET8_0_OR_GREATER
+        var meter = (meterFactory ?? SentryMeterFactory.Instance).Create(new MeterOptions(MeterName));
+        _openQueueSlots = meter.CreateHistogram<int>($"sentry.open_queue_slots");
+        _envelopesInQueue = meter.CreateHistogram<int>($"sentry.envelopes_in_queue");
+        _envelopesDiscarded = meter.CreateCounter<int>($"sentry.envelopes_discarded");
+#endif
         _queue = queue ?? new ConcurrentQueue<Envelope>();
         _maxItems = options.MaxQueueItems;
         _shutdownSource = shutdownSource ?? new CancellationTokenSource();
@@ -67,6 +87,9 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
         if (Interlocked.Increment(ref _currentItems) > _maxItems)
         {
             Interlocked.Decrement(ref _currentItems);
+#if NET8_0_OR_GREATER
+            _envelopesDiscarded.Add(1);
+#endif
             _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.QueueOverflow, envelope);
             _options.LogInfo("Discarding envelope {0} because the queue is full.", eventId);
             return false;
@@ -74,6 +97,10 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
 
         _options.LogDebug("Enqueuing envelope {0}", eventId);
         _queue.Enqueue(envelope);
+#if NET8_0_OR_GREATER
+        _envelopesInQueue.Record(_currentItems);
+        _openQueueSlots.Record(_maxItems - _currentItems);
+#endif
 
         if (process)
         {
@@ -176,6 +203,10 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
                         _options.LogDebug("De-queueing event {0}", eventId);
                         _queue.TryDequeue(out _);
                         Interlocked.Decrement(ref _currentItems);
+#if NET8_0_OR_GREATER
+                        _envelopesInQueue.Record(_currentItems);
+                        _openQueueSlots.Record(_maxItems - _currentItems);
+#endif
                         OnFlushObjectReceived?.Invoke(envelope, EventArgs.Empty);
                     }
                 }
