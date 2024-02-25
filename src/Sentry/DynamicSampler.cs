@@ -7,7 +7,7 @@ namespace Sentry;
 /// <summary>
 /// Custom sampler that adjusts the sample rate based on the number of discarded envelopes and open queue slots.
 /// </summary>
-public class DynamicSampler: IDisposable
+public class DynamicSampler : IDisposable
 {
     private readonly SentryOptions _options;
     private readonly int _envelopesDiscardedThreshold;
