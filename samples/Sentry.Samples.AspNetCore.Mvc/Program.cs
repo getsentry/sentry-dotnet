@@ -29,9 +29,12 @@ builder.WebHost.UseSentry(options =>
         options.ShutdownTimeout = TimeSpan.FromSeconds(5);
 
         options.Debug = true;
-        options.DiagnosticLevel = SentryLevel.Info;
+        options.DiagnosticLevel = SentryLevel.Debug;
 
         options.TracesSampleRate = 1.0; // For production you may want to lower this to stay inside your quota
+
+        var sampler = new DynamicSampler(options);
+        options.TracesSampler = sampler.SampleRate;
 
         options.ExperimentalMetrics = new ExperimentalMetricsOptions()
         {
