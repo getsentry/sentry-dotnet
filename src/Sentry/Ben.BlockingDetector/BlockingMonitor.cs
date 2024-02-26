@@ -1,6 +1,3 @@
-#if NET8_0_OR_GREATER
-using System.Diagnostics.Metrics;
-#endif
 using Sentry.Internal;
 using Sentry.Protocol;
 
@@ -9,29 +6,16 @@ namespace Sentry.Ben.BlockingDetector
 {
     internal class BlockingMonitor
     {
-#if NET8_0_OR_GREATER
-        private static readonly Lazy<Counter<int>> LazyBlockingCallsDetected = new(() =>
-            SentryMeters.BlockingDetectorMeter.CreateCounter<int>("sentry.blocking_calls_detected"));
-        private static Counter<int> BlockingCallsDetected => LazyBlockingCallsDetected.Value;
-#endif
-
         [ThreadStatic]
         internal static int RecursionCount;
 
         private readonly Func<IHub> _getHub;
         private readonly SentryOptions _options;
-        private readonly TimeSpan _cooldown;
 
-        private static readonly Lazy<Dictionary<string, DateTimeOffset>> LazyLastReported = new();
-        private static Dictionary<string, DateTimeOffset> LastReported => LazyLastReported.Value;
-        private static Lazy<ConcurrentDictionary<string, ReaderWriterLockSlim>> LazyLastReportedLocks => new();
-        private static ConcurrentDictionary<string, ReaderWriterLockSlim> LastReportedLocks => LazyLastReportedLocks.Value;
-
-        public BlockingMonitor(Func<IHub> getHub, SentryOptions options, TimeSpan? cooldown = null)
+        public BlockingMonitor(Func<IHub> getHub, SentryOptions options)
         {
             _getHub = getHub;
             _options = options;
-            _cooldown = cooldown ?? TimeSpan.FromDays(1);
         }
 
         private static bool ShouldSkipFrame(string? frameInfo) =>
@@ -63,38 +47,6 @@ namespace Sentry.Ben.BlockingDetector
                     true,
                     ShouldSkipFrame
                 );
-
-                var lastFrame = stackTrace.Frames.Last();
-                var locationId = $"{lastFrame.Module}::{lastFrame.Function}::{lastFrame.LineNumber}::{lastFrame.ColumnNumber}";
-
-#if NET8_0_OR_GREATER
-                BlockingCallsDetected.Add(1, new KeyValuePair<string, object?>("location", locationId));
-#endif
-
-                // Check if we've seen this code location in the cooldown period
-                var readWriteLock = LastReportedLocks.GetOrAdd(locationId, _ => new ReaderWriterLockSlim());
-                readWriteLock.EnterUpgradeableReadLock();
-                try
-                {
-                    if (LastReported.TryGetValue(locationId, out var lastReported) && DateTimeOffset.UtcNow - lastReported < _cooldown)
-                    {
-                        return;
-                    }
-                    readWriteLock.EnterWriteLock();
-                    try
-                    {
-                        LastReported[locationId] = DateTimeOffset.UtcNow;
-                    }
-                    finally
-                    {
-                        readWriteLock.ExitWriteLock();
-                    }
-                }
-                finally
-                {
-                    readWriteLock.ExitUpgradeableReadLock();
-                }
-
                 var evt = new SentryEvent
                 {
                     Level = SentryLevel.Warning,
