@@ -8,9 +8,18 @@
     - NOTE: Verify this in test/staging before prod! This could result in several events if you have many blocking calls in a high throughput endpoint.
     - Opt-in via `options.CaptureBlockingCalls = true`
 
+### Dependencies
+
+- Bump Java SDK from v7.3.0 to v7.4.0 ([#3164](https://github.com/getsentry/sentry-dotnet/pull/3164))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#740)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.3.0...7.4.0)
+
+## 4.1.2
+
 ### Fixes
 
 - Metric unit names are now sanitized correctly. This was preventing some built in metrics from showing in the Sentry dashboard ([#3151](https://github.com/getsentry/sentry-dotnet/pull/3151))
+- The Sentry OpenTelemetry integration no longer throws an exception with the SDK disabled ([#3156](https://github.com/getsentry/sentry-dotnet/pull/3156))
 
 ## 4.1.1
 
