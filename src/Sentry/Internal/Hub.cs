@@ -584,6 +584,9 @@ internal class Hub : IHub, IMetricHub, IDisposable
         return SentryId.Empty;
     }
 
+    public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null)
+        => CaptureCheckIn(new SentryCheckIn(monitorSlug, status, sentryId));
+
     public async Task FlushAsync(TimeSpan timeout)
     {
         try

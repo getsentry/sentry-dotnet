@@ -1,5 +1,3 @@
-using Sentry.Protocol.Metrics;
-
 namespace Sentry;
 
 /// <summary>
@@ -125,4 +123,12 @@ public interface IHub :
     /// <param name="configureScope">The callback to configure the scope.</param>
     /// <returns></returns>
     public SentryId CaptureEvent(SentryEvent evt, SentryHint? hint, Action<Scope> configureScope);
+
+    /// <summary>
+    /// Captures a Checkin.
+    /// </summary>
+    /// <param name="monitorSlug"></param>
+    /// <param name="status"></param>
+    /// <param name="sentryId"></param>
+    SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null);
 }
