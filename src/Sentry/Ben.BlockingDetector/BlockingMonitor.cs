@@ -1,4 +1,6 @@
-using Sentry.Extensibility;
+#if NET8_0_OR_GREATER
+using System.Diagnostics.Metrics;
+#endif
 using Sentry.Internal;
 using Sentry.Protocol;
 
@@ -7,17 +9,23 @@ namespace Sentry.Ben.BlockingDetector
 {
     internal class BlockingMonitor
     {
+#if NET8_0_OR_GREATER
+        private static readonly Lazy<Counter<int>> LazyBlockingCallsDetected = new(() =>
+            SentryMeters.BlockingDetectorMeter.CreateCounter<int>("sentry.blocking_calls_detected"));
+        private static Counter<int> BlockingCallsDetected => LazyBlockingCallsDetected.Value;
+#endif
+
         [ThreadStatic]
-        internal static int t_recursionCount;
+        internal static int RecursionCount;
 
         private readonly Func<IHub> _getHub;
         private readonly SentryOptions _options;
         private readonly TimeSpan _cooldown;
 
-        private static Lazy<Dictionary<string, DateTimeOffset>> _lazyLastReported = new();
-        private static Dictionary<string, DateTimeOffset> LastReported => _lazyLastReported.Value;
-        private static Lazy<ConcurrentDictionary<string, ReaderWriterLockSlim>> _lazyLastReportedLocks => new();
-        private static ConcurrentDictionary<string, ReaderWriterLockSlim> LastReportedLocks => _lazyLastReportedLocks.Value;
+        private static readonly Lazy<Dictionary<string, DateTimeOffset>> LazyLastReported = new();
+        private static Dictionary<string, DateTimeOffset> LastReported => LazyLastReported.Value;
+        private static Lazy<ConcurrentDictionary<string, ReaderWriterLockSlim>> LazyLastReportedLocks => new();
+        private static ConcurrentDictionary<string, ReaderWriterLockSlim> LastReportedLocks => LazyLastReportedLocks.Value;
 
         public BlockingMonitor(Func<IHub> getHub, SentryOptions options, TimeSpan? cooldown = null)
         {
@@ -40,11 +48,11 @@ namespace Sentry.Ben.BlockingDetector
                 return;
             }
 
-            t_recursionCount++;
+            RecursionCount++;
 
             try
             {
-                if (t_recursionCount != 1)
+                if (RecursionCount != 1)
                 {
                     return;
                 }
@@ -56,22 +64,26 @@ namespace Sentry.Ben.BlockingDetector
                     ShouldSkipFrame
                 );
 
-                // Check if we've seen this code location in the cooldown period
                 var lastFrame = stackTrace.Frames.Last();
-                var key = $"{lastFrame.Module}::{lastFrame.Function}::{lastFrame.LineNumber}";
+                var locationId = $"{lastFrame.Module}::{lastFrame.Function}::{lastFrame.LineNumber}::{lastFrame.ColumnNumber}";
 
-                var readWriteLock = LastReportedLocks.GetOrAdd(key, _ => new ReaderWriterLockSlim());
+#if NET8_0_OR_GREATER
+                BlockingCallsDetected.Add(1, new KeyValuePair<string, object?>("location", locationId));
+#endif
+
+                // Check if we've seen this code location in the cooldown period
+                var readWriteLock = LastReportedLocks.GetOrAdd(locationId, _ => new ReaderWriterLockSlim());
                 readWriteLock.EnterUpgradeableReadLock();
                 try
                 {
-                    if (LastReported.TryGetValue(key, out var lastReported) && DateTimeOffset.UtcNow - lastReported < _cooldown)
+                    if (LastReported.TryGetValue(locationId, out var lastReported) && DateTimeOffset.UtcNow - lastReported < _cooldown)
                     {
                         return;
                     }
                     readWriteLock.EnterWriteLock();
                     try
                     {
-                        LastReported[key] = DateTimeOffset.UtcNow;
+                        LastReported[locationId] = DateTimeOffset.UtcNow;
                     }
                     finally
                     {
@@ -89,10 +101,6 @@ namespace Sentry.Ben.BlockingDetector
                     Message =
                         "Blocking method has been invoked and blocked, this can lead to ThreadPool starvation. Learn more about it: " +
                         "https://learn.microsoft.com/en-us/aspnet/core/fundamentals/best-practices#avoid-blocking-calls ",
-                    // SentryThreads = new []{new SentryThread
-                    //     {
-                    //         Id = Environment.CurrentManagedThreadId,
-                    //     }},
                     SentryExceptions = new[]
                     {
                         new SentryException
@@ -115,6 +123,7 @@ namespace Sentry.Ben.BlockingDetector
             }
             catch
             {
+                // ignored
             }
         }
 
@@ -125,7 +134,7 @@ namespace Sentry.Ben.BlockingDetector
                 return;
             }
 
-            t_recursionCount--;
+            RecursionCount--;
         }
     }
 

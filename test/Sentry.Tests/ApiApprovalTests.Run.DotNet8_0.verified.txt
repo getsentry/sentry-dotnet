@@ -606,6 +606,11 @@ namespace Sentry
         protected override System.Net.Http.HttpResponseMessage Send(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { }
         protected override System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { }
     }
+    public static class SentryMeters
+    {
+        public static readonly Sentry.SubstringOrRegexPattern BlockingDetector;
+        public static System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> All { get; }
+    }
     public class SentryOptions
     {
         public SentryOptions() { }

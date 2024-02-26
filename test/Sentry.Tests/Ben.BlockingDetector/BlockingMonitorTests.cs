@@ -39,7 +39,7 @@ public class BlockingMonitorTests
         var thread = new Thread(() =>
         {
             monitor.BlockingEnd();
-            BlockingMonitor.t_recursionCount.Should().Be(0);
+            BlockingMonitor.RecursionCount.Should().Be(0);
         });
         thread.Start();
         thread.Join();
@@ -111,7 +111,7 @@ public class BlockingMonitorTests
             monitor.BlockingEnd();
 
             // Assert
-            BlockingMonitor.t_recursionCount.Should().Be(0);
+            BlockingMonitor.RecursionCount.Should().Be(0);
 
             resetEvent.Set();
         });
