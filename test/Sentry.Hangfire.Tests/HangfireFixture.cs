@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Hangfire;
 using Hangfire.MemoryStorage;
 using Hangfire.Storage;
@@ -8,7 +9,9 @@ public class HangfireFixture : IDisposable
 {
     public IHub Hub { get; set; } = Substitute.For<IHub>();
     public IDiagnosticLogger Logger { get; }
-    public BackgroundJobServer Server { get; }
+    private readonly BackgroundJobServer _server;
+    private readonly IMonitoringApi _monitoringApi;
+    public TimeSpan Timeout { get; } = TimeSpan.FromSeconds(3);
 
     public HangfireFixture()
     {
@@ -19,11 +22,36 @@ public class HangfireFixture : IDisposable
         GlobalConfiguration.Configuration
             .UseMemoryStorage()
             .UseSentry(Hub, Logger);
-        Server = new BackgroundJobServer();
+        _server = new BackgroundJobServer();
+        _monitoringApi = JobStorage.Current.GetMonitoringApi();
     }
 
-    public void Dispose()
+    public Task Enqueue<T>(Expression<Action<T>> methodCall)
     {
-        Server.Dispose();
+        var jobId = BackgroundJob.Enqueue(methodCall);
+        var checkJobState = Task.Run(() =>
+        {
+            while (true)
+            {
+                var jobDetails = _monitoringApi.JobDetails(jobId);
+                var currentState = jobDetails.History[^1].StateName;
+
+                if (currentState != "Enqueued" && currentState != "Processing")
+                {
+                    break;
+                }
+
+                if (DateTime.UtcNow - jobDetails.CreatedAt > Timeout)
+                {
+                    throw new TimeoutException("Timed out waiting for the job to finish.");
+                }
+
+                Thread.Sleep(100);
+            }
+        });
+
+        return checkJobState;
     }
+
+    public void Dispose() => _server.Dispose();
 }
