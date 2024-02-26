@@ -23,7 +23,7 @@ internal class SentryServerFilter : IServerFilter
     public void OnPerforming(PerformingContext context)
     {
         var monitorSlug = context.GetJobParameter<string>(SentryMonitorSlugKey);
-        if(monitorSlug is null)
+        if (monitorSlug is null)
         {
             var jobType = context.BackgroundJob.Job.Type;
             var jobMethod = context.BackgroundJob.Job.Method;
