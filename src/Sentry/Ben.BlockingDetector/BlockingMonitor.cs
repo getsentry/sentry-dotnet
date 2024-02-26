@@ -62,11 +62,6 @@ namespace Sentry.Ben.BlockingDetector
                     };
                     evt.SetTag("DetectionSource", detectionSource.ToString());
 
-                    // TODO: How to render in the UI a better "suggested fix"?
-                    evt.SetExtra(
-                        "suggestion",
-                        "Analyzer to warn you from blocking calls on async flows; https://www.nuget.org/packages/Microsoft.VisualStudio.Threading.Analyzers/");
-
                     getHub().CaptureEvent(evt);
                 }
             }
