@@ -6,6 +6,12 @@
 
 - Crons support via `SentrySdk.CaptureCheckIn` and Hangfire integration ([#3128](https://github.com/getsentry/sentry-dotnet/pull/3128))
 
+### Dependencies
+
+- Bump Java SDK from v7.3.0 to v7.4.0 ([#3164](https://github.com/getsentry/sentry-dotnet/pull/3164))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#740)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.3.0...7.4.0)
+
 ## 4.1.2
 
 ### Fixes
