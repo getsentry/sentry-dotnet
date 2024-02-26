@@ -5,10 +5,26 @@ using Sentry.Protocol;
 // Namespace starting with Sentry makes sure the SDK cuts frames off before reporting
 namespace Sentry.Ben.BlockingDetector
 {
-    internal class BlockingMonitor(Func<IHub> getHub, SentryOptions options)
+    internal class BlockingMonitor
     {
         [ThreadStatic]
         internal static int t_recursionCount;
+
+        private readonly Func<IHub> _getHub;
+        private readonly SentryOptions _options;
+        private readonly TimeSpan _cooldown;
+
+        private static Lazy<Dictionary<string, DateTimeOffset>> _lazyLastReported = new();
+        private static Dictionary<string, DateTimeOffset> LastReported => _lazyLastReported.Value;
+        private static Lazy<ConcurrentDictionary<string, ReaderWriterLockSlim>> _lazyLastReportedLocks => new();
+        private static ConcurrentDictionary<string, ReaderWriterLockSlim> LastReportedLocks => _lazyLastReportedLocks.Value;
+
+        public BlockingMonitor(Func<IHub> getHub, SentryOptions options, TimeSpan? cooldown = null)
+        {
+            _getHub = getHub;
+            _options = options;
+            _cooldown = cooldown ?? TimeSpan.FromDays(1);
+        }
 
         private static bool ShouldSkipFrame(string? frameInfo) =>
             frameInfo?.StartsWith("Sentry.Ben") == true
@@ -19,10 +35,8 @@ namespace Sentry.Ben.BlockingDetector
 
         public void BlockingStart(DetectionSource detectionSource)
         {
-            options.LogDebug("BlockingStart: Recursion count: {0}", t_recursionCount);
             if (!Thread.CurrentThread.IsThreadPoolThread)
             {
-                options.LogDebug("BlockingStart: !IsThreadPoolThread");
                 return;
             }
 
@@ -36,11 +50,39 @@ namespace Sentry.Ben.BlockingDetector
                 }
 
                 var stackTrace = DebugStackTrace.Create(
-                    options,
+                    _options,
                     new StackTrace(true),
                     true,
                     ShouldSkipFrame
                 );
+
+                // Check if we've seen this code location in the cooldown period
+                var lastFrame = stackTrace.Frames.Last();
+                var key = $"{lastFrame.Module}::{lastFrame.Function}::{lastFrame.LineNumber}";
+
+                var readWriteLock = LastReportedLocks.GetOrAdd(key, _ => new ReaderWriterLockSlim());
+                readWriteLock.EnterUpgradeableReadLock();
+                try
+                {
+                    if (LastReported.TryGetValue(key, out var lastReported) && DateTimeOffset.UtcNow - lastReported < _cooldown)
+                    {
+                        return;
+                    }
+                    readWriteLock.EnterWriteLock();
+                    try
+                    {
+                        LastReported[key] = DateTimeOffset.UtcNow;
+                    }
+                    finally
+                    {
+                        readWriteLock.ExitWriteLock();
+                    }
+                }
+                finally
+                {
+                    readWriteLock.ExitUpgradeableReadLock();
+                }
+
                 var evt = new SentryEvent
                 {
                     Level = SentryLevel.Warning,
@@ -69,7 +111,7 @@ namespace Sentry.Ben.BlockingDetector
                 };
                 evt.SetTag("DetectionSource", detectionSource.ToString());
 
-                getHub().CaptureEvent(evt);
+                _getHub().CaptureEvent(evt);
             }
             catch
             {
@@ -78,10 +120,8 @@ namespace Sentry.Ben.BlockingDetector
 
         public void BlockingEnd()
         {
-            options.LogDebug("BlockingStart: Recursion count: {0}", t_recursionCount);
             if (!Thread.CurrentThread.IsThreadPoolThread)
             {
-                options.LogDebug("BlockingStart: !IsThreadPoolThread");
                 return;
             }
 
