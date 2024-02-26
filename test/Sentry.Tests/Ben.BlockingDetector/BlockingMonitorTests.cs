@@ -2,8 +2,8 @@ using Sentry.Ben.BlockingDetector;
 
 namespace Sentry.Tests.Ben.BlockingDetector;
 
-using Xunit;
 using NSubstitute;
+using Xunit;
 
 public class BlockingMonitorTests
 {
