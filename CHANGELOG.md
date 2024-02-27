@@ -5,8 +5,10 @@
 ### Features
 
 - ASP.NET Core: Blocking call detection. An event with the stack trace of the blocking call will be captured as event. ([#2709](https://github.com/getsentry/sentry-dotnet/pull/2709))
-    - NOTE: Verify this in test/staging before prod! This could result in several events if you have many blocking calls in a high throughput endpoint.
+    - IMPORTANT: Verify this in test/staging before prod! Blocking calls in hot paths could create a lot of events for your Sentry project.
     - Opt-in via `options.CaptureBlockingCalls = true`
+    - Disabled for specific code blocks with `using (new SuppressBlockingDetection())`
+    - Doesn't detect everything. See original [Caveats described by Ben Adams](https://github.com/benaadams/Ben.BlockingDetector?tab=readme-ov-file#caveats).
 
 ### Dependencies
 
