@@ -51,7 +51,7 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     /// Additionally, detects blocking calls over CLR waits such as lock, ReaderWriterLock, etc.
     /// Blocking calls through system calls are also not captured.
     /// </remarks>
-    /// <seealso href="https://github.com/benaadams/Ben.BlockingDetector/"/>
+    /// <seealso href="https://github.com/getsentry/Ben.BlockingDetector/"/>
     public bool CaptureBlockingCalls { get; set; }
 
     /// <summary>
