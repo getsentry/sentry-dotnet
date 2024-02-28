@@ -4,7 +4,11 @@
 
 ### Features
 
-- Crons support via `SentrySdk.CaptureCheckIn` and Hangfire integration ([#3128](https://github.com/getsentry/sentry-dotnet/pull/3128))
+- Added Crons support via `SentrySdk.CaptureCheckIn` and an integration with Hangfire ([#3128](https://github.com/getsentry/sentry-dotnet/pull/3128))
+
+### Fixes
+
+- Empty strings are used instead of underscores to replace invalid metric tag values ([#3176](https://github.com/getsentry/sentry-dotnet/pull/3176))
 
 ### Dependencies
 
