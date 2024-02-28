@@ -16,7 +16,7 @@ public class HangfireFixture : IDisposable
     public HangfireFixture()
     {
         Logger = Substitute.For<IDiagnosticLogger>();
-        Logger.IsEnabled(SentryLevel.Warning).Returns(true);
+        Logger.IsEnabled(SentryLevel.Debug).Returns(true);
         Hub.IsEnabled.Returns(true);
 
         GlobalConfiguration.Configuration
