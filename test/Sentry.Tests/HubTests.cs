@@ -1438,6 +1438,39 @@ public partial class HubTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
+    public void CaptureCheckIn_HubEnabled(bool enabled)
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        if (!enabled)
+        {
+            hub.Dispose();
+        }
+
+        // Act
+        _ = hub.CaptureCheckIn("test-slug", CheckInStatus.InProgress);
+
+        // Assert
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureCheckIn(Arg.Any<string>(), Arg.Any<CheckInStatus>());
+    }
+
+    [Fact]
+    public void CaptureCheckIn_HubDisabled_ReturnsEmptySentryId()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        hub.Dispose();
+
+        // Act
+        var checkInId = hub.CaptureCheckIn("test-slug", CheckInStatus.InProgress);
+
+        // Assert
+        Assert.Equal(checkInId, SentryId.Empty);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
     public void CaptureTransaction_HubEnabled(bool enabled)
     {
         // Arrange

@@ -9,6 +9,7 @@
     - Opt-in via `options.CaptureBlockingCalls = true`
     - Disabled for specific code blocks with `using (new SuppressBlockingDetection())`
     - Doesn't detect everything. See original [Caveats described by Ben Adams](https://github.com/benaadams/Ben.BlockingDetector?tab=readme-ov-file#caveats).
+- Added Crons support via `SentrySdk.CaptureCheckIn` and an integration with Hangfire ([#3128](https://github.com/getsentry/sentry-dotnet/pull/3128))
 
 ### Fixes
 

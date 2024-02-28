@@ -61,6 +61,9 @@ filterConfigs:
     include:
       groups:
         - "allProjects"
+      patterns:
+        - "modules/perfview/**/TraceEvent.csproj"
+        - "modules/perfview/**/FastSerialization.csproj"
     exclude:
       groups:
         - "macOnly"
@@ -94,6 +97,8 @@ filterConfigs:
         - "**/Sentry.OpenTelemetry.csproj"
         - "**/Sentry.Serilog.csproj"
         - "**/Sentry.csproj"
+        - "**/Sentry.Hangfire.csproj"
+        - "**/Sentry.Samples.Hangfire.csproj"
         - "**/Sentry.Testing.csproj"
         - "**/Sentry.Testing.CrashableApp.csproj"
         - "**/Sentry.Tests.csproj"

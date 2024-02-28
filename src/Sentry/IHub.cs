@@ -1,5 +1,3 @@
-using Sentry.Protocol.Metrics;
-
 namespace Sentry;
 
 /// <summary>
@@ -12,9 +10,7 @@ namespace Sentry;
 /// </remarks>
 /// <inheritdoc cref="ISentryClient" />
 /// <inheritdoc cref="ISentryScopeManager" />
-public interface IHub :
-    ISentryClient,
-    ISentryScopeManager
+public interface IHub : ISentryClient, ISentryScopeManager
 {
     /// <summary>
     /// Last event id recorded in the current scope.

@@ -16,6 +16,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     private const string TypeValueUserReport = "user_report";
     private const string TypeValueTransaction = "transaction";
     private const string TypeValueSession = "session";
+    private const string TypeValueCheckIn = "check_in";
     private const string TypeValueAttachment = "attachment";
     private const string TypeValueClientReport = "client_report";
     private const string TypeValueProfile = "profile";
@@ -276,6 +277,19 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         };
 
         return new EnvelopeItem(header, new JsonSerializable(sessionUpdate));
+    }
+
+    /// <summary>
+    /// Creates an <see cref="EnvelopeItem"/> from <paramref name="checkIn"/>.
+    /// </summary>
+    public static EnvelopeItem FromCheckIn(SentryCheckIn checkIn)
+    {
+        var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
+        {
+            [TypeKey] = TypeValueCheckIn
+        };
+
+        return new EnvelopeItem(header, new JsonSerializable(checkIn));
     }
 
     /// <summary>
