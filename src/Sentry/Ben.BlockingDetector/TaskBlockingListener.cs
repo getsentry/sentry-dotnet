@@ -4,21 +4,30 @@ using System.Diagnostics.Tracing;
 namespace Sentry.Ben.BlockingDetector
 {
     // Tips of the Toub
-    internal sealed class TaskBlockingListener : EventListener
+    internal class TaskBlockingListener : EventListener
     {
         // https://github.com/dotnet/runtime/blob/94f212275b2f51ca67025d677d7d5c5bc75f670f/src/libraries/System.Private.CoreLib/src/System/Threading/Tasks/TplEventSource.cs#L13
-        private static readonly Guid s_tplGuid = new Guid("2e5dba47-a3d2-4d16-8ee0-6671ffdcd7b5");
+        internal static readonly Guid s_tplGuid = new Guid("2e5dba47-a3d2-4d16-8ee0-6671ffdcd7b5");
 
-        [ThreadStatic] private static int t_suppressionCount;
+        private readonly IBlockingMonitor _monitor;
+        private readonly ITaskBlockingListenerState _state;
 
-        [ThreadStatic] private static int t_recursionCount;
+        private static Lazy<StaticTaskBlockingListenerState> LazyDefaultState => new ();
+        internal static StaticTaskBlockingListenerState DefaultState => LazyDefaultState.Value;
 
-        private readonly BlockingMonitor _monitor;
+        public TaskBlockingListener(IBlockingMonitor monitor)
+            : this(monitor, null)
+        {
+        }
 
-        public TaskBlockingListener(BlockingMonitor monitor) => _monitor = monitor;
-
-        internal static void Suppress() => t_suppressionCount++;
-        internal static void Restore() => t_suppressionCount--;
+        /// <summary>
+        /// For testing only
+        /// </summary>
+        internal TaskBlockingListener(IBlockingMonitor monitor, ITaskBlockingListenerState? state)
+        {
+            _monitor = monitor;
+            _state = state ?? DefaultState;
+        }
 
         protected override void OnEventSourceCreated(EventSource eventSource)
         {
@@ -36,21 +45,26 @@ namespace Sentry.Ben.BlockingDetector
                 return;
             }
 
-            var monitor = t_suppressionCount > 0 ? null : _monitor;
+            DoHandleEvent(eventData.EventId, eventData.Payload);
+        }
 
-            if (eventData.EventId == 10 && // TASKWAITBEGIN_ID
-                eventData.Payload != null &&
-                eventData.Payload.Count > 3 &&
-                eventData.Payload[3] is int value && // Behavior
+        internal void DoHandleEvent(int eventId, ReadOnlyCollection<object?>? payload)
+        {
+            var monitor = _state.IsSuppressed() ? null : _monitor;
+
+            if (eventId == 10 && // TASKWAITBEGIN_ID
+                payload != null &&
+                payload.Count > 3 &&
+                payload[3] is int value && // Behavior
                 value == 1) // TaskWaitBehavior.Synchronous
             {
-                t_recursionCount++;
+                _state.Recurse();
                 monitor?.BlockingStart(DetectionSource.EventListener);
             }
-            else if (eventData.EventId == 11 // TASKWAITEND_ID
-                     && t_recursionCount > 0)
+            else if (eventId == 11 // TASKWAITEND_ID
+                     && _state.IsRecursive())
             {
-                t_recursionCount--;
+                _state.Backtrack();
                 monitor?.BlockingEnd();
             }
         }

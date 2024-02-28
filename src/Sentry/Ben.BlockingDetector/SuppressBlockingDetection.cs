@@ -7,7 +7,8 @@ namespace Sentry.Ben.BlockingDetector;
 /// </summary>
 public class SuppressBlockingDetection : IDisposable
 {
-    private readonly DetectBlockingSynchronizationContext? _context;
+    internal readonly ITaskBlockingListenerState _listener;
+    internal readonly DetectBlockingSynchronizationContext? _context;
 
     /// <summary>
     /// Suppresses blocking detection for a particular code block
@@ -19,11 +20,17 @@ public class SuppressBlockingDetection : IDisposable
     /// }
     /// </example>
     public SuppressBlockingDetection()
+        : this(SynchronizationContext.Current as DetectBlockingSynchronizationContext, TaskBlockingListener.DefaultState)
     {
-        _context = SynchronizationContext.Current as DetectBlockingSynchronizationContext;
-        _context?.Suppress();
+    }
 
-        TaskBlockingListener.Suppress();
+    internal SuppressBlockingDetection(DetectBlockingSynchronizationContext? context, ITaskBlockingListenerState listener)
+    {
+        _context = context;
+        _listener = listener;
+
+        _context?.Suppress();
+        _listener.Suppress();
     }
 
     /// <summary>
@@ -31,8 +38,7 @@ public class SuppressBlockingDetection : IDisposable
     /// </summary>
     public void Dispose()
     {
-        TaskBlockingListener.Restore();
-
+        _listener.Restore();
         _context?.Restore();
     }
 }

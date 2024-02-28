@@ -4,18 +4,28 @@ using Sentry.Protocol;
 // Namespace starting with Sentry makes sure the SDK cuts frames off before reporting
 namespace Sentry.Ben.BlockingDetector
 {
-    internal class BlockingMonitor
+    internal interface IBlockingMonitor
     {
-        [ThreadStatic]
-        internal static int RecursionCount;
+        void BlockingStart(DetectionSource detectionSource);
+        void BlockingEnd();
+    }
 
+    internal class BlockingMonitor : IBlockingMonitor
+    {
         private readonly Func<IHub> _getHub;
         private readonly SentryOptions _options;
+        internal readonly IRecursionTracker _recursionTracker;
 
         public BlockingMonitor(Func<IHub> getHub, SentryOptions options)
+            : this(getHub, options, new StaticRecursionTracker())
+        {
+        }
+
+        internal BlockingMonitor(Func<IHub> getHub, SentryOptions options, IRecursionTracker recursionTracker)
         {
             _getHub = getHub;
             _options = options;
+            _recursionTracker = recursionTracker;
         }
 
         private static bool ShouldSkipFrame(string? frameInfo) =>
@@ -27,16 +37,21 @@ namespace Sentry.Ben.BlockingDetector
 
         public void BlockingStart(DetectionSource detectionSource)
         {
+            // From Stephen Cleary:
+            // "The default SynchronizationContext queues its asynchronous delegates to the ThreadPool but executes its
+            // synchronous delegates directly on the calling thread."
+            //
+            // Implicitly then, if we're not on a ThreadPool thread, we're not in an async context.
             if (!Thread.CurrentThread.IsThreadPoolThread)
             {
                 return;
             }
 
-            RecursionCount++;
+            _recursionTracker.Recurse();
 
             try
             {
-                if (RecursionCount != 1)
+                if (!_recursionTracker.IsFirstRecursion())
                 {
                     return;
                 }
@@ -86,7 +101,7 @@ namespace Sentry.Ben.BlockingDetector
                 return;
             }
 
-            RecursionCount--;
+            _recursionTracker.Backtrack();
         }
     }
 

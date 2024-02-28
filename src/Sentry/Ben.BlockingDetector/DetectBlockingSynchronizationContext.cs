@@ -5,22 +5,22 @@ namespace Sentry.Ben.BlockingDetector
     // Tips of the Toub
     internal sealed class DetectBlockingSynchronizationContext : SynchronizationContext
     {
-        private readonly BlockingMonitor _monitor;
+        private readonly IBlockingMonitor _monitor;
         private readonly SynchronizationContext? _syncCtx;
 
-        private int _isSuppressed;
+        internal int _isSuppressed;
 
         internal void Suppress() => Interlocked.Exchange(ref _isSuppressed, _isSuppressed + 1);
         internal void Restore() => Interlocked.Exchange(ref _isSuppressed, _isSuppressed - 1);
 
-        public DetectBlockingSynchronizationContext(BlockingMonitor monitor)
+        public DetectBlockingSynchronizationContext(IBlockingMonitor monitor)
         {
             _monitor = monitor;
 
             SetWaitNotificationRequired();
         }
 
-        public DetectBlockingSynchronizationContext(BlockingMonitor monitor, SynchronizationContext? syncCtx)
+        public DetectBlockingSynchronizationContext(IBlockingMonitor monitor, SynchronizationContext? syncCtx)
             : this(monitor)
             => _syncCtx = syncCtx;
 
