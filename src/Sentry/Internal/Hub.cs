@@ -574,6 +574,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
         try
         {
+            _options.LogDebug("Capturing '{0}' check-in for '{1}'", status, monitorSlug);
             return _ownedClient.CaptureCheckIn(monitorSlug, status, sentryId);
         }
         catch (Exception e)

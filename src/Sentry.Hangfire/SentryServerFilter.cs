@@ -27,8 +27,8 @@ internal class SentryServerFilter : IServerFilter
         {
             var jobType = context.BackgroundJob.Job.Type;
             var jobMethod = context.BackgroundJob.Job.Method;
-            _logger?.LogWarning("Skipping creating a check-in for '{0}.{1}'. " +
-                                "Failed to find Monitor Slug the job. You can set the monitor slug " +
+            _logger?.LogDebug("Skipping creating a check-in for '{0}.{1}'. " +
+                                "Failed to find Monitor Slug for the job. You can set the monitor slug " +
                                 "by setting the 'SentryMonitorSlug' attribute.", jobType, jobMethod);
             return;
         }
