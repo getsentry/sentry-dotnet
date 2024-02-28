@@ -4,12 +4,6 @@ using Sentry.Protocol;
 // Namespace starting with Sentry makes sure the SDK cuts frames off before reporting
 namespace Sentry.Ben.BlockingDetector
 {
-    internal interface IBlockingMonitor
-    {
-        void BlockingStart(DetectionSource detectionSource);
-        void BlockingEnd();
-    }
-
     internal class BlockingMonitor : IBlockingMonitor
     {
         private readonly Func<IHub> _getHub;
