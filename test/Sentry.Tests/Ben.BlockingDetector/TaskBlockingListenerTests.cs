@@ -12,7 +12,7 @@ public class TaskBlockingListenerTests
         state.IsSuppressed().Returns(false);
         var listener = new TaskBlockingListener(monitor, state);
 
-        listener.DoHandleEvent(10, new List<object> {0, 0, 0, 1}.AsReadOnly());
+        listener.DoHandleEvent(10, new List<object> { 0, 0, 0, 1 }.AsReadOnly());
 
         state.Received(1).Recurse();
         monitor.Received(1).BlockingStart(DetectionSource.EventListener);
@@ -26,7 +26,7 @@ public class TaskBlockingListenerTests
         state.IsSuppressed().Returns(true);
         var listener = new TaskBlockingListener(monitor, state);
 
-        listener.DoHandleEvent(10, new List<object> {0, 0, 0, 1}.AsReadOnly());
+        listener.DoHandleEvent(10, new List<object> { 0, 0, 0, 1 }.AsReadOnly());
 
         monitor.DidNotReceive().BlockingStart(Arg.Any<DetectionSource>());
     }

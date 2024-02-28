@@ -12,7 +12,7 @@ namespace Sentry.Ben.BlockingDetector
         private readonly IBlockingMonitor _monitor;
         private readonly ITaskBlockingListenerState _state;
 
-        private static Lazy<StaticTaskBlockingListenerState> LazyDefaultState => new ();
+        private static Lazy<StaticTaskBlockingListenerState> LazyDefaultState => new();
         internal static StaticTaskBlockingListenerState DefaultState => LazyDefaultState.Value;
 
         public TaskBlockingListener(IBlockingMonitor monitor)

@@ -81,7 +81,7 @@ public class DetectBlockingSynchronizationContextTests
         Assert.Equal(0, result);
     }
 
-    class FakeSyncContext : SynchronizationContext
+    private class FakeSyncContext : SynchronizationContext
     {
         private readonly Func<IntPtr[], bool, int, int> _waitCallback;
 
