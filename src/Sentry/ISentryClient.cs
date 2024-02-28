@@ -1,5 +1,4 @@
 using Sentry.Protocol.Envelopes;
-using Sentry.Protocol.Metrics;
 
 namespace Sentry;
 
@@ -71,6 +70,14 @@ public interface ISentryClient
     /// </remarks>
     /// <param name="sessionUpdate">The update to send to Sentry.</param>
     void CaptureSession(SessionUpdate sessionUpdate);
+
+    /// <summary>
+    /// Captures a Checkin.
+    /// </summary>
+    /// <param name="monitorSlug"></param>
+    /// <param name="status"></param>
+    /// <param name="sentryId"></param>
+    SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null);
 
     /// <summary>
     /// Flushes the queue of captured events until the timeout is reached.

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- We're skipping testing on net48 due to Hangfire not supporting strong names signing of its assemblies.
+    Read more here: https://github.com/HangfireIO/Hangfire/issues/1076 -->
+    <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sentry.Hangfire\Sentry.Hangfire.csproj" />
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hangfire.MemoryStorage" Version="1.8.0" />
+  </ItemGroup>
+
+</Project>

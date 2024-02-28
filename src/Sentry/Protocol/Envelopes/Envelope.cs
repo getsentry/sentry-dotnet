@@ -371,6 +371,18 @@ public sealed class Envelope : ISerializable, IDisposable
     }
 
     /// <summary>
+    /// Creates an envelope that contains a check in.
+    /// </summary>
+    public static Envelope FromCheckIn(SentryCheckIn checkIn)
+    {
+        var header = DefaultHeader;
+
+        var items = new[] { EnvelopeItem.FromCheckIn(checkIn) };
+
+        return new Envelope(header, items);
+    }
+
+    /// <summary>
     /// Creates an envelope that contains a client report.
     /// </summary>
     internal static Envelope FromClientReport(ClientReport clientReport)

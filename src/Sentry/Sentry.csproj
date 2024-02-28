@@ -160,6 +160,8 @@
     <InternalsVisibleTo Include="Sentry.GraphQL.Client.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Google.Cloud.Functions" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Google.Cloud.Functions.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Hangfire" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Hangfire.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Log4Net" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Log4Net.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Maui" PublicKey="$(SentryPublicKey)" />

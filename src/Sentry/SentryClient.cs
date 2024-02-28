@@ -1,7 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Protocol.Envelopes;
-using Sentry.Protocol.Metrics;
 
 namespace Sentry;
 
@@ -231,8 +230,15 @@ public class SentryClient : ISentryClient, IDisposable
 
     /// <inheritdoc />
     public void CaptureSession(SessionUpdate sessionUpdate)
+        => CaptureEnvelope(Envelope.FromSession(sessionUpdate));
+
+    /// <inheritdoc />
+    public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null)
     {
-        CaptureEnvelope(Envelope.FromSession(sessionUpdate));
+        var checkIn = new SentryCheckIn(monitorSlug, status, sentryId);
+        return CaptureEnvelope(Envelope.FromCheckIn(checkIn))
+            ? checkIn.Id
+            : SentryId.Empty;
     }
 
     /// <summary>
