@@ -11,12 +11,12 @@ internal class SentryServerFilter : IServerFilter
     private readonly IHub _hub;
     private readonly IDiagnosticLogger? _logger;
 
-    public SentryServerFilter() : this(HubAdapter.Instance)
+    public SentryServerFilter() : this(null, null)
     { }
 
-    internal SentryServerFilter(IHub hub, IDiagnosticLogger? logger = null)
+    internal SentryServerFilter(IHub? hub, IDiagnosticLogger? logger)
     {
-        _hub = hub;
+        _hub = hub ?? HubAdapter.Instance;
         _logger = logger ?? _hub.GetSentryOptions()?.DiagnosticLogger;
     }
 
