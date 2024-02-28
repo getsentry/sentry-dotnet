@@ -49,7 +49,7 @@ internal static partial class MetricHelper
 
     [GeneratedRegex(InvalidValueCharactersPattern, RegexOptions.Compiled)]
     private static partial Regex InvalidValueCharacters();
-    internal static string SanitizeValue(string input) => InvalidValueCharacters().Replace(input, "_");
+    internal static string SanitizeValue(string input) => InvalidValueCharacters().Replace(input, "");
 
     [GeneratedRegex(InvalidMetricUnitCharactersPattern, RegexOptions.Compiled)]
     private static partial Regex InvalidMetricUnitCharacters();
@@ -59,7 +59,7 @@ internal static partial class MetricHelper
     internal static string SanitizeKey(string input) => InvalidKeyCharacters.Replace(input, "_");
 
     private static readonly Regex InvalidValueCharacters = new(InvalidValueCharactersPattern, RegexOptions.Compiled);
-    internal static string SanitizeValue(string input) => InvalidValueCharacters.Replace(input, "_");
+    internal static string SanitizeValue(string input) => InvalidValueCharacters.Replace(input, "");
 
     private static readonly Regex InvalidMetricUnitCharacters = new(InvalidMetricUnitCharactersPattern, RegexOptions.Compiled);
     internal static string SanitizeMetricUnit(string input) => InvalidMetricUnitCharacters.Replace(input, "_");

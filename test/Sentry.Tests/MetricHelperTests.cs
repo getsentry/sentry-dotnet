@@ -37,9 +37,9 @@ public class MetricHelperTests
 
     [Theory]
     [InlineData("Test123_:/@.{}[]$-", "Test123_:/@.{}[]$-")] // Valid characters
-    [InlineData("test&value", "test_value")]
-    [InlineData("test\"value", "test_value")]
-    public void SanitizeValue_ShouldReplaceInvalidCharactersWithUnderscore(string input, string expected)
+    [InlineData("test&value", "testvalue")]
+    [InlineData("test\"value", "testvalue")]
+    public void SanitizeValue_ShouldRemoveInvalidCharacters(string input, string expected)
     {
         // Act
         var result = MetricHelper.SanitizeValue(input);
