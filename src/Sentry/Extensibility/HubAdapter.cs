@@ -270,12 +270,6 @@ public sealed class HubAdapter : IHub
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
-    public SentryId CaptureCheckIn(SentryCheckIn checkIn)
-        => SentrySdk.CaptureCheckIn(checkIn);
-
-    /// <summary>
-    /// Forwards the call to <see cref="SentrySdk"/>.
-    /// </summary>
     public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null)
         => SentrySdk.CaptureCheckIn(monitorSlug, status, sentryId);
 

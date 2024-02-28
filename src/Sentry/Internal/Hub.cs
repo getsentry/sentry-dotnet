@@ -565,7 +565,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
-    public SentryId CaptureCheckIn(SentryCheckIn checkIn)
+    public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null)
     {
         if (!IsEnabled)
         {
@@ -574,18 +574,15 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
         try
         {
-            return _ownedClient.CaptureCheckIn(checkIn);
+            return _ownedClient.CaptureCheckIn(monitorSlug, status, sentryId);
         }
         catch (Exception e)
         {
-            _options.LogError(e, "Failed to capture check in for: {0}", checkIn.MonitorSlug);
+            _options.LogError(e, "Failed to capture check in for: {0}", monitorSlug);
         }
 
         return SentryId.Empty;
     }
-
-    public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null)
-        => CaptureCheckIn(new SentryCheckIn(monitorSlug, status, sentryId));
 
     public async Task FlushAsync(TimeSpan timeout)
     {

@@ -33,7 +33,7 @@ internal class SentryServerFilter : IServerFilter
             return;
         }
 
-        var checkInId = _hub.CaptureCheckIn(new SentryCheckIn(monitorSlug, CheckInStatus.InProgress));
+        var checkInId = _hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress);
         context.Items.Add(SentryCheckInIdKey, checkInId);
     }
 
@@ -52,6 +52,6 @@ internal class SentryServerFilter : IServerFilter
 
         var status = context.Exception is null ? CheckInStatus.Ok : CheckInStatus.Error;
 
-        _ = _hub.CaptureCheckIn(new SentryCheckIn(monitorSlug, status, checkInId));
+        _ = _hub.CaptureCheckIn(monitorSlug, status, checkInId);
     }
 }

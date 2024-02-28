@@ -74,8 +74,10 @@ public interface ISentryClient
     /// <summary>
     /// Captures a Checkin.
     /// </summary>
-    /// <param name="checkIn">The Checkin to send to Sentry</param>
-    SentryId CaptureCheckIn(SentryCheckIn checkIn);
+    /// <param name="monitorSlug"></param>
+    /// <param name="status"></param>
+    /// <param name="sentryId"></param>
+    SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null);
 
     /// <summary>
     /// Flushes the queue of captured events until the timeout is reached.

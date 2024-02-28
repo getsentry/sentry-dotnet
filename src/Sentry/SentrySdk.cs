@@ -527,19 +527,6 @@ public static partial class SentrySdk
     /// Capturing a check-in returns an ID. The ID can be used to update the status. I.e. to update a check-in you
     /// captured from `CheckInStatus.InProgress` to `CheckInStatus.Ok`.
     /// </remarks>
-    /// /// <param name="checkIn">The optional <see cref="SentryCheckIn"/>.</param>
-    /// <returns>The Id of the check-in.</returns>
-    [DebuggerStepThrough]
-    public static SentryId CaptureCheckIn(SentryCheckIn checkIn)
-        => CurrentHub.CaptureCheckIn(checkIn);
-
-    /// <summary>
-    /// Captures a check-in.
-    /// </summary>
-    /// <remarks>
-    /// Capturing a check-in returns an ID. The ID can be used to update the status. I.e. to update a check-in you
-    /// captured from `CheckInStatus.InProgress` to `CheckInStatus.Ok`.
-    /// </remarks>
     /// <param name="monitorSlug">The monitor slug of the check-in.</param>
     /// <param name="status">The status of the check-in.</param>
     /// <param name="sentryId">The optional <see cref="SentryId"/>.</param>

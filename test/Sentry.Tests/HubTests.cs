@@ -1448,10 +1448,10 @@ public partial class HubTests
         }
 
         // Act
-        _ = hub.CaptureCheckIn(new SentryCheckIn("test-slug", CheckInStatus.InProgress));
+        _ = hub.CaptureCheckIn("test-slug", CheckInStatus.InProgress);
 
         // Assert
-        _fixture.Client.Received(enabled ? 1 : 0).CaptureCheckIn(Arg.Any<SentryCheckIn>());
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureCheckIn(Arg.Any<string>(), Arg.Any<CheckInStatus>());
     }
 
     [Fact]
@@ -1462,7 +1462,7 @@ public partial class HubTests
         hub.Dispose();
 
         // Act
-        var checkInId = hub.CaptureCheckIn(new SentryCheckIn("test-slug", CheckInStatus.InProgress));
+        var checkInId = hub.CaptureCheckIn("test-slug", CheckInStatus.InProgress);
 
         // Assert
         Assert.Equal(checkInId, SentryId.Empty);
