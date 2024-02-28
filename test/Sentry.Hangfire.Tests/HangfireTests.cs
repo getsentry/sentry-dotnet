@@ -56,7 +56,7 @@ public class HangfireTests : IClassFixture<HangfireFixture>
         await _fixture.Enqueue<TestJob>(job => job.ExecuteJobWithoutAttribute());
 
         _fixture.Hub.DidNotReceive().CaptureCheckIn(Arg.Any<string>(), Arg.Any<CheckInStatus>(), Arg.Is<SentryId>(id => id == sentryId));
-        _fixture.Logger.Received(1).Log(SentryLevel.Warning, Arg.Is<string>(message => message.Contains("Skipping creating a check-in for")), null, Arg.Any<Type>(), Arg.Any<MethodInfo>());
+        _fixture.Logger.Received(1).Log(SentryLevel.Debug, Arg.Is<string>(message => message.Contains("Skipping creating a check-in for")), null, Arg.Any<Type>(), Arg.Any<MethodInfo>());
     }
 }
 
