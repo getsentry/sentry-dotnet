@@ -28,6 +28,7 @@ For big feature it's advised to raise an issue to discuss it first.
 * On Windows:
   - [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework) 4.6.2 or higher.
   - `Sentry.DiagnosticSource.IntegrationTests.csproj` uses [SQL LocalDb](https://docs.microsoft.com/sql/database-engine/configure-windows/sql-server-express-localdb) - [download SQL LocalDB 2019](https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi). To avoid running these tests, unload `Sentry.DiagnosticSource.IntegrationTests.csproj` from the solution.
+  - Building Sentry with the Android bindings requires Java. If you're building Sentry using an IDE, typically you provide the path to your Java installation via the IDE settings (open the settings for Visual Studio or Rider and search for "android"). If you want to build Sentry from the command line (using `dotnet build`) then you will need to ensure the `JAVA_HOME` environment variable is set correctly.
 * On macOS/Linux
   - [Mono 6 or higher](https://www.mono-project.com/download/stable) to run the unit tests on the `net4x` targets.
   - Install `CMake` using your favourite package manager (e.g. `brew install cmake`)
