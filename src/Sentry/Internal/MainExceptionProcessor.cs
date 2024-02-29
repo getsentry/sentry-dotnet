@@ -36,7 +36,7 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
     {
         var exceptions = WalkExceptions(exception).Reverse().ToList();
 
-        // In the case of only one exception, ExceptionId and ParentId are useless./
+        // In the case of only one exception, ExceptionId and ParentId are useless.
         if (exceptions.Count == 1 && exceptions[0].Mechanism is { } mechanism)
         {
             mechanism.ExceptionId = null;
