@@ -6,6 +6,10 @@
 
 - Added Crons support via `SentrySdk.CaptureCheckIn` and an integration with Hangfire ([#3128](https://github.com/getsentry/sentry-dotnet/pull/3128))
 
+### API changes
+
+- Removed `ScopeExtensions` class - all the public methods moved directly to `Scope` ([#3186](https://github.com/getsentry/sentry-dotnet/pull/3186))
+
 ### Fixes
 
 - Empty strings are used instead of underscores to replace invalid metric tag values ([#3176](https://github.com/getsentry/sentry-dotnet/pull/3176))
@@ -49,14 +53,14 @@
 
 ### Fixes
 
-- To resolve conflicting types due to the SDK adding itself to the global usings: 
+- To resolve conflicting types due to the SDK adding itself to the global usings:
   - The class `Sentry.Constants` has been renamed to `Sentry.SentryConstants` ([#3125](https://github.com/getsentry/sentry-dotnet/pull/3125))
 
 ## 4.0.2
 
 ### Fixes
 
-- To resolve conflicting types due to the SDK adding itself to the global usings: 
+- To resolve conflicting types due to the SDK adding itself to the global usings:
   - The class `Sentry.Context` has been renamed to `Sentry.SentryContext` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
   - The class `Sentry.Package` has been renamed to `Sentry.SentryPackage` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
   - The class `Sentry.Request` has been renamed to `Sentry.SentryRequest` ([#3121](https://github.com/getsentry/sentry-dotnet/pull/3121))
@@ -69,9 +73,9 @@
 
 ## 4.0.1
 
-### Fixes 
+### Fixes
 
-- To resolve conflicting types due to the SDK adding itself to the global usings: 
+- To resolve conflicting types due to the SDK adding itself to the global usings:
   - The interface `Sentry.ISession` has been renamed to `Sentry.ISentrySession` ([#3110](https://github.com/getsentry/sentry-dotnet/pull/3110))
   - The interface `Sentry.IJsonSerializable` has been renamed to `Sentry.ISentryJsonSerializable` ([#3116](https://github.com/getsentry/sentry-dotnet/pull/3116))
   - The class `Sentry.Session` has been renamed to `Sentry.SentrySession` ([#3110](https://github.com/getsentry/sentry-dotnet/pull/3110))
@@ -113,7 +117,7 @@ We're dropping support for some of the old target frameworks, please check this 
 ### Sentry Self-hosted Compatibility
 
 If you're using `sentry.io` this change does not affect you.
-This SDK version is compatible with a self-hosted version of Sentry `22.12.0` or higher. If you are using an older version of [self-hosted Sentry](https://develop.sentry.dev/self-hosted/) (aka on-premise), you will need to [upgrade](https://develop.sentry.dev/self-hosted/releases/). 
+This SDK version is compatible with a self-hosted version of Sentry `22.12.0` or higher. If you are using an older version of [self-hosted Sentry](https://develop.sentry.dev/self-hosted/) (aka on-premise), you will need to [upgrade](https://develop.sentry.dev/self-hosted/releases/).
 
 ### Significant change in behavior
 
@@ -127,7 +131,7 @@ If you have conflicts, you can opt out by adding the following to your `csproj`:
   <SentryImplicitUsings>false</SentryImplicitUsings>
 </PropertyGroup>
 ```
-- Transactions' spans are no longer automatically finished with the status `deadline_exceeded` by the transaction. This is now handled by the [Relay](https://github.com/getsentry/relay). 
+- Transactions' spans are no longer automatically finished with the status `deadline_exceeded` by the transaction. This is now handled by the [Relay](https://github.com/getsentry/relay).
   - Customers self hosting Sentry must use verion 22.12.0 or later ([#3013](https://github.com/getsentry/sentry-dotnet/pull/3013))
 - The `User.IpAddress` is now set to `{{auto}}` by default, even when sendDefaultPII is disabled ([#2981](https://github.com/getsentry/sentry-dotnet/pull/2981))
   - The "Prevent Storing of IP Addresses" option in the "Security & Privacy" project settings on sentry.io can be used to control this instead
