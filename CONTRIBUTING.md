@@ -55,6 +55,18 @@ These `*.props` files are used to add platform-specific files, such as reference
 
 Also note `/Directory.Build.targets` contains some [convention based rules](https://github.com/getsentry/sentry-dotnet/blob/b1bfe1efc04eb4c911a85f1cf4cd2e5a176d7c8a/Directory.Build.targets#L17-L35) to exclude code that is not relevant for the target platform. Developers using Visual Studio will need to enable `Show All Files` in order to be able to see these files, when working with the solution.
 
+## Legacy ASP.NET solutions
+
+When debugging a legacy ASP.NET application with project references to `Sentry.AspNet`, you may need the following workarounds to tooling issues:
+
+#### Microsoft.WebApplication.targets not found
+
+* [Disable Microsoft.WebApplication.targets in Rider](https://youtrack.jetbrains.com/issue/RIDER-87113/Cannot-build-.NET-Framework-projects-with-legacy-style-csproj-after-upgrading-to-2022.3.1)
+
+#### CodeTaskFactory not supported
+
+* [Disable CodeTaskFactory in Roslyn](https://github.com/aspnet/RoslynCodeDomProvider/issues/51#issuecomment-396329427)
+
 ## Solution Filters
 
 _TLDR;_ when working with the the Sentry codebase, you should use the solution filters (not the solutions).
