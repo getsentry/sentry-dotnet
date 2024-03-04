@@ -13,9 +13,4 @@ internal interface IMetricHub
     /// Captures one or more <see cref="CodeLocations"/> to be sent to Sentry.
     /// </summary>
     void CaptureCodeLocations(CodeLocations codeLocations);
-
-    /// <summary>
-    /// Starts a child span for the current transaction or, if there is no active transaction, starts a new transaction.
-    /// </summary>
-    ISpan StartSpan(string operation, string description);
 }

@@ -171,7 +171,7 @@ internal class MetricAggregator : IMetricAggregator
     /// <inheritdoc cref="IMetricAggregator.StartTimer"/>
     public IDisposable StartTimer(string key, MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
         IDictionary<string, string>? tags = null, int stackLevel = 1)
-        => new Timing(this, _metricHub, _options, key, unit, tags, stackLevel + 1);
+        => new Timing(this, _options, key, unit, tags, stackLevel + 1);
 
     private void Emit(
         MetricType type,
