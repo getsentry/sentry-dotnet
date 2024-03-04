@@ -13,4 +13,7 @@ internal interface IMetricHub
     /// Captures one or more <see cref="CodeLocations"/> to be sent to Sentry.
     /// </summary>
     void CaptureCodeLocations(CodeLocations codeLocations);
+
+    /// <inheritdoc cref="IHub.GetSpan"/>
+    ISpan? GetSpan();
 }

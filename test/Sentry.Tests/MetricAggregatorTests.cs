@@ -52,6 +52,9 @@ public class MetricAggregatorTests
     public void Increment_AggregatesMetrics()
     {
         // Arrange
+        var tx = Substitute.For<ITransactionTracer>();
+        _fixture.MetricHub.GetSpan().Returns(tx);
+
         var metricType = MetricType.Counter;
         var key = "counter_key";
         var unit = MeasurementUnit.None;
@@ -82,6 +85,9 @@ public class MetricAggregatorTests
     public void Gauge_AggregatesMetrics()
     {
         // Arrange
+        var tx = Substitute.For<ITransactionTracer>();
+        _fixture.MetricHub.GetSpan().Returns(tx);
+
         var metricType = MetricType.Gauge;
         var key = "gauge_key";
         var unit = MeasurementUnit.None;
@@ -122,6 +128,9 @@ public class MetricAggregatorTests
     public void Distribution_AggregatesMetrics()
     {
         // Arrange
+        var tx = Substitute.For<ITransactionTracer>();
+        _fixture.MetricHub.GetSpan().Returns(tx);
+
         var metricType = MetricType.Distribution;
         var key = "distribution_key";
         var unit = MeasurementUnit.None;
@@ -152,6 +161,9 @@ public class MetricAggregatorTests
     public void Set_Int_AggregatesMetrics()
     {
         // Arrange
+        var tx = Substitute.For<ITransactionTracer>();
+        _fixture.MetricHub.GetSpan().Returns(tx);
+
         var metricType = MetricType.Set;
         var key = "set_key";
         var unit = MeasurementUnit.None;
@@ -185,6 +197,9 @@ public class MetricAggregatorTests
     public void Set_String_AggregatesMetrics()
     {
         // Arrange
+        var tx = Substitute.For<ITransactionTracer>();
+        _fixture.MetricHub.GetSpan().Returns(tx);
+
         var metricType = MetricType.Set;
         var key = "set_key";
         var unit = MeasurementUnit.None;
@@ -218,13 +233,14 @@ public class MetricAggregatorTests
     public async Task GetFlushableBuckets_IsThreadsafe()
     {
         // Arrange
+        var tx = Substitute.For<ITransactionTracer>();
+        _fixture.MetricHub.GetSpan().Returns(tx);
+
         const int numThreads = 100;
         const int numThreadIterations = 1000;
         var sent = 0;
         MetricHelper.FlushShift = 0.0;
         _fixture.DisableFlushLoop = false;
-        // TODO: Remove
-        // _fixture.FlushInterval = TimeSpan.FromMilliseconds(100);
         _fixture.MetricHub.CaptureMetrics(Arg.Do<IEnumerable<Metric>>(metrics =>
             {
                 foreach (var metric in metrics)
@@ -475,6 +491,33 @@ public class MetricAggregatorTests
 
         // Assert
         _fixture.Logger.Received(1).Log(SentryLevel.Debug, MetricAggregator.ShutdownImmediatelyMessage, null);
+    }
+
+    [Fact]
+    public void Emit_ActiveSpan_AppliesSpanTags()
+    {
+        // Arrange
+        var tx = Substitute.For<ITransactionTracer>();
+        tx.Release = "test_release";
+        tx.Environment = "test_env";
+        tx.TransactionName = "test_name";
+
+        _fixture.DisableFlushLoop = false;
+        _fixture.MetricHub.GetSpan().Returns(tx);
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.Increment("test_key");
+
+        // Assert
+        var bucket = sut.Buckets.SingleOrDefault().Value;
+        var metric = bucket.SingleOrDefault().Value;
+        metric.Should().BeOfType<CounterMetric>();
+        var counter = (metric as CounterMetric)!;
+        counter.Key.Should().Be("test_key");
+        counter.Tags["release"].Should().Be("test_release");
+        counter.Tags["environment"].Should().Be("test_env");
+        counter.Tags["transaction"].Should().Be("test_name");
     }
 
     [Fact]

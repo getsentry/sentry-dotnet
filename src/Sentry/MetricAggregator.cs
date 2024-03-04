@@ -186,19 +186,27 @@ internal class MetricAggregator : IMetricAggregator
         timestamp ??= DateTimeOffset.UtcNow;
         unit ??= MeasurementUnit.None;
 
+        var updatedTags = tags != null ? new Dictionary<string, string>(tags) : new Dictionary<string, string>();
+        if (_metricHub.GetSpan()?.GetTransaction() is { } transaction)
+        {
+            updatedTags.AddIfNotNullOrEmpty("release", transaction.Release);
+            updatedTags.AddIfNotNullOrEmpty("environment", transaction.Environment);
+            updatedTags.AddIfNotNullOrEmpty("transaction", transaction.TransactionName);
+        }
+
         Func<string, Metric> addValuesFactory = type switch
         {
-            MetricType.Counter => _ => new CounterMetric(key, value, unit.Value, tags, timestamp),
-            MetricType.Gauge => _ => new GaugeMetric(key, value, unit.Value, tags, timestamp),
-            MetricType.Distribution => _ => new DistributionMetric(key, value, unit.Value, tags, timestamp),
-            MetricType.Set => _ => new SetMetric(key, (int)value, unit.Value, tags, timestamp),
+            MetricType.Counter => _ => new CounterMetric(key, value, unit.Value, updatedTags, timestamp),
+            MetricType.Gauge => _ => new GaugeMetric(key, value, unit.Value, updatedTags, timestamp),
+            MetricType.Distribution => _ => new DistributionMetric(key, value, unit.Value, updatedTags, timestamp),
+            MetricType.Set => _ => new SetMetric(key, (int)value, unit.Value, updatedTags, timestamp),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown MetricType")
         };
 
         var timeBucket = GetOrAddTimeBucket(timestamp.Value.GetTimeBucketKey());
 
         timeBucket.AddOrUpdate(
-            GetMetricBucketKey(type, key, unit.Value, tags),
+            GetMetricBucketKey(type, key, unit.Value, updatedTags),
             addValuesFactory,
             (_, metric) =>
             {
