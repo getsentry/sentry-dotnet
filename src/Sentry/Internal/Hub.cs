@@ -538,6 +538,16 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
+    /// <inheritdoc cref="IMetricHub.StartSpan"/>
+    public ISpan StartSpan(string operation, string description)
+    {
+        ITransactionTracer? currentTransaction = null;
+        ConfigureScope(s => currentTransaction = s.Transaction);
+        return currentTransaction is { } transaction
+            ? transaction.StartChild(operation, description)
+            : this.StartTransaction(operation, description);
+    }
+
     public void CaptureSession(SessionUpdate sessionUpdate)
     {
         if (!IsEnabled)

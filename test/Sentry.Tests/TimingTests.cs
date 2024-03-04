@@ -31,9 +31,26 @@ public class TimingTests
             MetricAggregator = Substitute.For<MetricAggregator>(Options, MetricHub, null, true);
         }
 
-        public Timing GetSut() => new(MetricAggregator, Options, Key, Unit, Tags, 1);
+        public Timing GetSut() => new(MetricAggregator, MetricHub, Options, Key, Unit, Tags, 1);
     }
     private readonly Fixture _fixture = new();
+
+    [Fact]
+    public void Constructor_CreatesSpan()
+    {
+        // Arrange
+        _fixture.Tags = new Dictionary<string, string> { { "tag1", "value1" } };
+
+        var span = new TransactionTracer(_fixture.Hub, Timing.OperationName, _fixture.Key);
+        _fixture.MetricHub.StartSpan(Timing.OperationName, _fixture.Key).Returns(span);
+
+        // Act
+        _ = _fixture.GetSut();
+
+        // Assert
+        _fixture.MetricHub.Received(1).StartSpan(Timing.OperationName, _fixture.Key);
+        span.Tags.Should().BeEquivalentTo(_fixture.Tags);
+    }
 
     [Fact]
     public void Constructor_RecordsCodeLocation()

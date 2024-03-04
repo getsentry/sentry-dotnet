@@ -22,12 +22,13 @@ internal class Timing : IDisposable
     private readonly MeasurementUnit.Duration _unit;
     private readonly IDictionary<string, string>? _tags;
     internal readonly Stopwatch _stopwatch = new();
+    private readonly ISpan _span;
     internal readonly DateTime _startTime = DateTime.UtcNow;
 
     /// <summary>
     /// Creates a new <see cref="Timing"/> instance.
     /// </summary>
-    internal Timing(MetricAggregator metricAggregator, SentryOptions options,
+    internal Timing(MetricAggregator metricAggregator, IMetricHub metricHub, SentryOptions options,
         string key, MeasurementUnit.Duration unit, IDictionary<string, string>? tags, int stackLevel)
     {
         _options = options;
@@ -36,6 +37,12 @@ internal class Timing : IDisposable
         _unit = unit;
         _tags = tags;
         _stopwatch.Start();
+
+        _span = metricHub.StartSpan(OperationName, key);
+        if (tags is not null)
+        {
+            _span.SetTags(tags);
+        }
 
         // Report code locations here for better accuracy
         _metricAggregator.RecordCodeLocation(MetricType.Distribution, key, unit, stackLevel + 1, _startTime);
@@ -69,6 +76,10 @@ internal class Timing : IDisposable
         catch (Exception e)
         {
             _options.LogError(e, "Error capturing timing '{0}'", _key);
+        }
+        finally
+        {
+            _span?.Finish();
         }
     }
 }
