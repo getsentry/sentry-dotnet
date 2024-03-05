@@ -118,7 +118,7 @@ public static partial class SentrySdk
     /// sense to dispose:
     /// <list type="bullet">
     /// <item>You have additional work to perform that you don't want Sentry to monitor.</item>
-    /// <item>You have used <see cref="SentryOptionsExtensions.DisableAppDomainProcessExitFlush"/>.</item>
+    /// <item>You have used <see cref="SentryOptions.DisableAppDomainProcessExitFlush"/>.</item>
     /// <item>You are integrating Sentry into an environment that has custom application lifetime events.</item>
     /// </list>
     /// </remarks>
@@ -139,7 +139,7 @@ public static partial class SentrySdk
     /// sense to dispose:
     /// <list type="bullet">
     /// <item>You have additional work to perform that you don't want Sentry to monitor.</item>
-    /// <item>You have used <see cref="SentryOptionsExtensions.DisableAppDomainProcessExitFlush"/>.</item>
+    /// <item>You have used <see cref="SentryOptions.DisableAppDomainProcessExitFlush"/>.</item>
     /// <item>You are integrating Sentry into an environment that has custom application lifetime events.</item>
     /// </list>
     /// </remarks>
@@ -158,7 +158,7 @@ public static partial class SentrySdk
     /// sense to dispose:
     /// <list type="bullet">
     /// <item>You have additional work to perform that you don't want Sentry to monitor.</item>
-    /// <item>You have used <see cref="SentryOptionsExtensions.DisableAppDomainProcessExitFlush"/>.</item>
+    /// <item>You have used <see cref="SentryOptions.DisableAppDomainProcessExitFlush"/>.</item>
     /// <item>You are integrating Sentry into an environment that has custom application lifetime events.</item>
     /// </list>
     /// </remarks>
@@ -184,7 +184,7 @@ public static partial class SentrySdk
     /// sense to dispose:
     /// <list type="bullet">
     /// <item>You have additional work to perform that you don't want Sentry to monitor.</item>
-    /// <item>You have used <see cref="SentryOptionsExtensions.DisableAppDomainProcessExitFlush"/>.</item>
+    /// <item>You have used <see cref="SentryOptions.DisableAppDomainProcessExitFlush"/>.</item>
     /// <item>You are integrating Sentry into an environment that has custom application lifetime events.</item>
     /// </list>
     /// </remarks>
