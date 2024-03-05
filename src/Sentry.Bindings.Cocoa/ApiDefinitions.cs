@@ -828,6 +828,10 @@ interface SentryOptions
     [Export ("enableCoreDataTracing")]
     bool EnableCoreDataTracing { get; set; }
 
+    // @property (assign, nonatomic) BOOL enableAppLaunchProfiling;
+    [Export ("enableAppLaunchProfiling")]
+    bool EnableAppLaunchProfiling { get; set; }
+
     // @property (nonatomic, strong) NSNumber * _Nullable profilesSampleRate;
     [NullAllowed, Export ("profilesSampleRate", ArgumentSemantic.Strong)]
     NSNumber ProfilesSampleRate { get; set; }
@@ -890,6 +894,14 @@ interface SentryOptions
     // @property (copy, nonatomic) NSString * _Nonnull cacheDirectoryPath;
     [Export ("cacheDirectoryPath")]
     string CacheDirectoryPath { get; set; }
+
+    // @property (assign, nonatomic) BOOL enableSpotlight;
+    [Export ("enableSpotlight")]
+    bool EnableSpotlight { get; set; }
+
+    // @property (copy, nonatomic) NSString * _Nonnull spotlightUrl;
+    [Export ("spotlightUrl")]
+    string SpotlightUrl { get; set; }
 }
 
 // @protocol SentryIntegrationProtocol <NSObject>
@@ -1672,6 +1684,11 @@ interface SentrySDK
     [Export ("crashedLastRun")]
     bool CrashedLastRun { get; }
 
+    // @property (readonly, nonatomic, class) BOOL detectedStartUpCrash;
+    [Static]
+    [Export ("detectedStartUpCrash")]
+    bool DetectedStartUpCrash { get; }
+
     // +(void)setUser:(SentryUser * _Nullable)user;
     [Static]
     [Export ("setUser:")]
@@ -1738,6 +1755,10 @@ partial interface SentryScope : SentrySerializable
     // @property (nonatomic, strong) id<SentrySpan> _Nullable span;
     [NullAllowed, Export ("span", ArgumentSemantic.Strong)]
     SentrySpan Span { get; set; }
+
+    // @property (readonly, copy, nonatomic) NSDictionary<NSString *,NSString *> * _Nonnull tags;
+    [Export ("tags", ArgumentSemantic.Copy)]
+    NSDictionary<NSString, NSString> Tags { get; }
 
     // -(instancetype _Nonnull)initWithMaxBreadcrumbs:(NSInteger)maxBreadcrumbs __attribute__((objc_designated_initializer));
     [Export ("initWithMaxBreadcrumbs:")]
@@ -1970,6 +1991,10 @@ interface SentryTransactionContext
     // @property (nonatomic, strong) NSNumber * _Nullable sampleRate;
     [NullAllowed, Export ("sampleRate", ArgumentSemantic.Strong)]
     NSNumber SampleRate { get; set; }
+
+    // @property (assign, nonatomic) BOOL forNextAppLaunch;
+    [Export ("forNextAppLaunch")]
+    bool ForNextAppLaunch { get; set; }
 
     // -(instancetype _Nonnull)initWithName:(NSString * _Nonnull)name operation:(NSString * _Nonnull)operation;
     [Export ("initWithName:operation:")]
