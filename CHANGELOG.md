@@ -8,6 +8,7 @@
 
 ### Fixes
 
+- The Sentry Middleware on ASP.NET Core no longer throws an exception after having been initialized multiple times ([#3185](https://github.com/getsentry/sentry-dotnet/pull/3185))
 - Empty strings are used instead of underscores to replace invalid metric tag values ([#3176](https://github.com/getsentry/sentry-dotnet/pull/3176))
 
 ### Dependencies
