@@ -10,14 +10,14 @@ public class LocalAggregatorTests
     {
         // Arrange
         var sut = new LocalAggregator();
-        sut.Add(MetricType.Distribution, "processor.process_batch",421.0, MeasurementUnit.Duration.Millisecond);
+        sut.Add(MetricType.Distribution, "processor.process_batch", 421.0, MeasurementUnit.Duration.Millisecond);
         var success = new Dictionary<string, string>
         {
             { "success", "true" }
         };
         for (int i = 0; i < 3; i++)
         {
-            sut.Add(MetricType.Counter, "processor.item_processed",tags: success);
+            sut.Add(MetricType.Counter, "processor.item_processed", tags: success);
         }
         var failure = new Dictionary<string, string>
         {
@@ -25,7 +25,7 @@ public class LocalAggregatorTests
         };
         for (int i = 0; i < 2; i++)
         {
-            sut.Add(MetricType.Counter, "processor.item_processed",tags: failure);
+            sut.Add(MetricType.Counter, "processor.item_processed", tags: failure);
         }
         sut.Add(MetricType.Gauge, "processor.peak_memory_usage", 421, MeasurementUnit.Information.Megabyte);
 
