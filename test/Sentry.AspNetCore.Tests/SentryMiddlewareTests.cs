@@ -750,6 +750,31 @@ public class SentryMiddlewareTests
     }
 
     [Fact]
+    public async Task InvokeAsync_InvokingWithTheSameContextTwice_DoesNotThrow()
+    {
+        var sut = _fixture.GetSut();
+        var request = Substitute.For<HttpRequest>();
+        var fakeHeaders = new HeaderDictionary
+        {
+            { "Sentry-Trace", "4b4d2878507b43d3af7dd8c4ab7a96d9-3cc6fd1337d243de"},
+            { "Baggage", "sentry-trace_id=4b4d2878507b43d3af7dd8c4ab7a96d9, sentry-public_key=eb18e953812b41c3aeb042e666fd3b5c"},
+        };
+        var contextItems = new Dictionary<object, object>();
+        _fixture.HttpContext.Items.When(items => items.Add(Arg.Any<object>(), Arg.Any<object>()))
+            .Do(info => contextItems.TryAdd(info.Args()[0], info.Args()[1]));
+        _ = request.Headers.Returns(fakeHeaders);
+        _ = _fixture.HttpContext.Request.Returns(request);
+        _ = request.HttpContext.Returns(_fixture.HttpContext);
+
+        // Faking having added the middleware twice by invoking the request with the same context twice
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
+        await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
+
+        _fixture.HttpContext.Items.Received(3); // Sanity check
+        Assert.Equal(3, contextItems.Count);
+    }
+
+    [Fact]
     public void PopulateScope_AddEventProcessors()
     {
         var customProcessor = Substitute.For<ISentryEventProcessor>();

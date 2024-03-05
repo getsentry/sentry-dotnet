@@ -97,9 +97,13 @@ internal class SentryMiddleware : IMiddleware
             var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader);
 
             // Adding the headers and the TransactionContext to the context to be picked up by the Sentry tracing middleware
-            context.Items.Add(TraceHeaderItemKey, traceHeader);
-            context.Items.Add(BaggageHeaderItemKey, baggageHeader);
-            context.Items.Add(TransactionContextItemKey, transactionContext);
+            var didAdd = context.Items.TryAdd(TraceHeaderItemKey, traceHeader);
+            if (!didAdd)
+            {
+                _options.LogWarning("Sentry trace was already added. Did you initialize Sentry twice?");
+            }
+            context.Items.TryAdd(BaggageHeaderItemKey, baggageHeader);
+            context.Items.TryAdd(TransactionContextItemKey, transactionContext);
 
             hub.ConfigureScope(scope =>
             {
