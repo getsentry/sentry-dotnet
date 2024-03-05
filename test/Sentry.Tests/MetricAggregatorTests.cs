@@ -1,4 +1,13 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using FluentAssertions;
+using NSubstitute;
+using Sentry.Extensibility;
 using Sentry.Protocol.Metrics;
+using Xunit;
 
 namespace Sentry.Tests;
 
@@ -443,9 +452,10 @@ public class MetricAggregatorTests
     public void Emit_ActiveSpan_AppliesSpanTags()
     {
         // Arrange
+        _fixture.Options.Release = "test_release";
+        _fixture.Options.Environment = "test_env";
+
         var tx = Substitute.For<ITransactionTracer>();
-        tx.Release = "test_release";
-        tx.Environment = "test_env";
         tx.TransactionName = "test_name";
 
         _fixture.DisableFlushLoop = false;

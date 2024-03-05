@@ -4,7 +4,7 @@ namespace Sentry.Protocol.Metrics;
 
 internal class MetricsSummary : ISentryJsonSerializable
 {
-    internal IDictionary<string, List<SpanMetric>> Measurements { get; }
+    private readonly IDictionary<string, List<SpanMetric>> _measurements;
 
     public MetricsSummary(MetricsSummaryAggregator aggregator)
     {
@@ -24,14 +24,14 @@ internal class MetricsSummary : ISentryJsonSerializable
 #endif
             measurements[exportKey].Add(value);
         }
-        Measurements = measurements.ToImmutableSortedDictionary();
+        _measurements = measurements.ToImmutableSortedDictionary();
     }
 
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         writer.WriteStartObject();
 
-        foreach (var (exportKey, value) in Measurements)
+        foreach (var (exportKey, value) in _measurements)
         {
             writer.WritePropertyName(exportKey);
             writer.WriteStartArray();

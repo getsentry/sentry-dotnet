@@ -132,11 +132,11 @@ internal class MetricAggregator : IMetricAggregator
         unit ??= MeasurementUnit.None;
 
         var updatedTags = tags != null ? new Dictionary<string, string>(tags) : new Dictionary<string, string>();
+        updatedTags.AddIfNotNullOrEmpty("release", _options.Release);
+        updatedTags.AddIfNotNullOrEmpty("environment", _options.Environment);
         var span = _metricHub.GetSpan();
         if (span?.GetTransaction() is { } transaction)
         {
-            updatedTags.AddIfNotNullOrEmpty("release", transaction.Release);
-            updatedTags.AddIfNotNullOrEmpty("environment", transaction.Environment);
             updatedTags.AddIfNotNullOrEmpty("transaction", transaction.TransactionName);
         }
 
