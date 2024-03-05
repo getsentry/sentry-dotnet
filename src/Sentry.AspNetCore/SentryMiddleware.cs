@@ -100,7 +100,7 @@ internal class SentryMiddleware : IMiddleware
             var didAdd = context.Items.TryAdd(TraceHeaderItemKey, traceHeader);
             if (!didAdd)
             {
-                _options.LogDebug("Sentry trace was already added. Did you initialize Sentry twice?");
+                _options.LogWarning("Sentry trace was already added. Did you initialize Sentry twice?");
             }
             context.Items.TryAdd(BaggageHeaderItemKey, baggageHeader);
             context.Items.TryAdd(TransactionContextItemKey, transactionContext);
