@@ -761,10 +761,7 @@ public class SentryMiddlewareTests
         };
         var contextItems = new Dictionary<object, object>();
         _fixture.HttpContext.Items.When(items => items.Add(Arg.Any<object>(), Arg.Any<object>()))
-            .Do(info =>
-            {
-                contextItems.Add(info.Args()[0], info.Args()[1]);
-            });
+            .Do(info => contextItems.TryAdd(info.Args()[0], info.Args()[1]));
         _ = request.Headers.Returns(fakeHeaders);
         _ = _fixture.HttpContext.Request.Returns(request);
         _ = request.HttpContext.Returns(_fixture.HttpContext);
