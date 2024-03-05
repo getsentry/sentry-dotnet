@@ -1,3 +1,5 @@
+using VerifyTests;
+
 namespace Sentry.Tests.Protocol;
 
 [UsesVerify]

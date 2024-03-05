@@ -3,32 +3,32 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry.Protocol.Metrics;
 
-/// <summary>
-/// Gauges track a value that can go up and down.
-/// </summary>
-internal class LocalAggregate
+internal record SpanMetric
 {
-    public LocalAggregate(MetricType metricType, string key, double value, MeasurementUnit unit,
+    public SpanMetric(MetricType MetricType,
+        string key,
+        double value,
+        MeasurementUnit unit,
         IDictionary<string, string>? tags = null)
     {
-        MetricType = metricType;
+        this.MetricType = MetricType;
         Key = key;
         Unit = unit;
+        Tags = tags;
         Min = value;
         Max = value;
         Sum = value;
-        Count = 1;
-        Tags = tags;
     }
 
-    public MetricType MetricType { get; }
-    public string Key { get; }
-    public MeasurementUnit Unit { get; }
+    public MetricType MetricType { get; init; }
+    public string Key { get; init; }
+    public MeasurementUnit Unit { get; init; }
+    public IDictionary<string, string>? Tags { get; init; }
+
     public double Min { get; private set; }
     public double Max { get; private set; }
     public double Sum { get; private set; }
-    public double Count { get; private set; }
-    public IDictionary<string, string>? Tags { get; }
+    public double Count { get; private set; } = 1;
 
     public string ExportKey => $"{MetricType.ToStatsdType()}:{Key}@{Unit}";
 
