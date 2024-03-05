@@ -1,4 +1,5 @@
 using Sentry.Internal;
+using Sentry.Protocol.Metrics;
 
 namespace Sentry;
 
@@ -64,4 +65,59 @@ internal static partial class MetricHelper
     private static readonly Regex InvalidMetricUnitCharacters = new(InvalidMetricUnitCharactersPattern, RegexOptions.Compiled);
     internal static string SanitizeMetricUnit(string input) => InvalidMetricUnitCharacters.Replace(input, "_");
 #endif
+
+    public static string GetMetricBucketKey(MetricType type, string metricKey, MeasurementUnit unit,
+        IDictionary<string, string>? tags)
+    {
+        var typePrefix = type.ToStatsdType();
+        var serializedTags = GetTagsKey(tags);
+
+        return $"{typePrefix}_{metricKey}_{unit}_{serializedTags}";
+    }
+
+    internal static string GetTagsKey(IDictionary<string, string>? tags)
+    {
+        if (tags == null || tags.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        const char pairDelimiter = ',';  // Delimiter between key-value pairs
+        const char keyValueDelimiter = '=';  // Delimiter between key and value
+        const char escapeChar = '\\';
+
+        var builder = new StringBuilder();
+
+        foreach (var tag in tags)
+        {
+            // Escape delimiters in key and value
+            var key = EscapeString(tag.Key, pairDelimiter, keyValueDelimiter, escapeChar);
+            var value = EscapeString(tag.Value, pairDelimiter, keyValueDelimiter, escapeChar);
+
+            if (builder.Length > 0)
+            {
+                builder.Append(pairDelimiter);
+            }
+
+            builder.Append(key).Append(keyValueDelimiter).Append(value);
+        }
+
+        return builder.ToString();
+
+        static string EscapeString(string input, params char[] charsToEscape)
+        {
+            var escapedString = new StringBuilder(input.Length);
+
+            foreach (var ch in input)
+            {
+                if (charsToEscape.Contains(ch))
+                {
+                    escapedString.Append(escapeChar);  // Prefix with escape character
+                }
+                escapedString.Append(ch);
+            }
+
+            return escapedString.ToString();
+        }
+    }
 }

@@ -58,61 +58,6 @@ internal class MetricAggregator : IMetricAggregator
         }
     }
 
-    internal static string GetMetricBucketKey(MetricType type, string metricKey, MeasurementUnit unit,
-        IDictionary<string, string>? tags)
-    {
-        var typePrefix = type.ToStatsdType();
-        var serializedTags = GetTagsKey(tags);
-
-        return $"{typePrefix}_{metricKey}_{unit}_{serializedTags}";
-    }
-
-    internal static string GetTagsKey(IDictionary<string, string>? tags)
-    {
-        if (tags == null || tags.Count == 0)
-        {
-            return string.Empty;
-        }
-
-        const char pairDelimiter = ',';  // Delimiter between key-value pairs
-        const char keyValueDelimiter = '=';  // Delimiter between key and value
-        const char escapeChar = '\\';
-
-        var builder = new StringBuilder();
-
-        foreach (var tag in tags)
-        {
-            // Escape delimiters in key and value
-            var key = EscapeString(tag.Key, pairDelimiter, keyValueDelimiter, escapeChar);
-            var value = EscapeString(tag.Value, pairDelimiter, keyValueDelimiter, escapeChar);
-
-            if (builder.Length > 0)
-            {
-                builder.Append(pairDelimiter);
-            }
-
-            builder.Append(key).Append(keyValueDelimiter).Append(value);
-        }
-
-        return builder.ToString();
-
-        static string EscapeString(string input, params char[] charsToEscape)
-        {
-            var escapedString = new StringBuilder(input.Length);
-
-            foreach (var ch in input)
-            {
-                if (charsToEscape.Contains(ch))
-                {
-                    escapedString.Append(escapeChar);  // Prefix with escape character
-                }
-                escapedString.Append(ch);
-            }
-
-            return escapedString.ToString();
-        }
-    }
-
     /// <inheritdoc cref="IMetricAggregator.Increment"/>
     public void Increment(string key,
         double value = 1.0,
@@ -187,7 +132,8 @@ internal class MetricAggregator : IMetricAggregator
         unit ??= MeasurementUnit.None;
 
         var updatedTags = tags != null ? new Dictionary<string, string>(tags) : new Dictionary<string, string>();
-        if (_metricHub.GetSpan()?.GetTransaction() is { } transaction)
+        var span = _metricHub.GetSpan();
+        if (span?.GetTransaction() is { } transaction)
         {
             updatedTags.AddIfNotNullOrEmpty("release", transaction.Release);
             updatedTags.AddIfNotNullOrEmpty("environment", transaction.Environment);
@@ -206,7 +152,7 @@ internal class MetricAggregator : IMetricAggregator
         var timeBucket = GetOrAddTimeBucket(timestamp.Value.GetTimeBucketKey());
 
         timeBucket.AddOrUpdate(
-            GetMetricBucketKey(type, key, unit.Value, updatedTags),
+            MetricHelper.GetMetricBucketKey(type, key, unit.Value, updatedTags),
             addValuesFactory,
             (_, metric) =>
             {
@@ -230,6 +176,16 @@ internal class MetricAggregator : IMetricAggregator
         if (_options.ExperimentalMetrics is { EnableCodeLocations: true })
         {
             RecordCodeLocation(type, key, unit.Value, stackLevel + 1, timestamp.Value);
+        }
+
+        switch (span)
+        {
+            case TransactionTracer transactionTracer:
+                transactionTracer.Aggregator.Add(type, key, value, unit, tags, timestamp);
+                break;
+            case SpanTracer spanTracer:
+                spanTracer.Aggregator.Add(type, key, value, unit, tags, timestamp);
+                break;
         }
     }
 

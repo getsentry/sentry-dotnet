@@ -33,22 +33,6 @@ public class MetricAggregatorTests
     private readonly Fixture _fixture = new();
 
     [Fact]
-    public void GetMetricBucketKey_GeneratesExpectedKey()
-    {
-        // Arrange
-        var type = MetricType.Counter;
-        var metricKey = "quibbles";
-        var unit = MeasurementUnit.None;
-        var tags = new Dictionary<string, string> { ["tag1"] = "value1" };
-
-        // Act
-        var result = MetricAggregator.GetMetricBucketKey(type, metricKey, unit, tags);
-
-        // Assert
-        result.Should().Be("c_quibbles_none_tag1=value1");
-    }
-
-    [Fact]
     public void Increment_AggregatesMetrics()
     {
         // Arrange
@@ -73,11 +57,11 @@ public class MetricAggregatorTests
 
         // Assert
         var bucket1 = sut.Buckets[firstTime.GetTimeBucketKey()];
-        var data1 = (CounterMetric)bucket1[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
+        var data1 = (CounterMetric)bucket1[MetricHelper.GetMetricBucketKey(metricType, key, unit, tags)];
         data1.Value.Should().Be(8); // First two emits are in the same bucket
 
         var bucket2 = sut.Buckets[thirdTime.GetTimeBucketKey()];
-        var data2 = (CounterMetric)bucket2[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
+        var data2 = (CounterMetric)bucket2[MetricHelper.GetMetricBucketKey(metricType, key, unit, tags)];
         data2.Value.Should().Be(13); // First two emits are in the same bucket
     }
 
@@ -106,7 +90,7 @@ public class MetricAggregatorTests
 
         // Assert
         var bucket1 = sut.Buckets[time1.GetTimeBucketKey()];
-        var data1 = (GaugeMetric)bucket1[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
+        var data1 = (GaugeMetric)bucket1[MetricHelper.GetMetricBucketKey(metricType, key, unit, tags)];
         data1.Value.Should().Be(5);
         data1.First.Should().Be(3);
         data1.Min.Should().Be(3);
@@ -115,7 +99,7 @@ public class MetricAggregatorTests
         data1.Count.Should().Be(2);
 
         var bucket2 = sut.Buckets[time3.GetTimeBucketKey()];
-        var data2 = (GaugeMetric)bucket2[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
+        var data2 = (GaugeMetric)bucket2[MetricHelper.GetMetricBucketKey(metricType, key, unit, tags)];
         data2.Value.Should().Be(13);
         data2.First.Should().Be(13);
         data2.Min.Should().Be(13);
@@ -149,11 +133,11 @@ public class MetricAggregatorTests
 
         // Assert
         var bucket1 = sut.Buckets[time1.GetTimeBucketKey()];
-        var data1 = (DistributionMetric)bucket1[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
+        var data1 = (DistributionMetric)bucket1[MetricHelper.GetMetricBucketKey(metricType, key, unit, tags)];
         data1.Value.Should().BeEquivalentTo(new[] { 3, 5 });
 
         var bucket2 = sut.Buckets[time3.GetTimeBucketKey()];
-        var data2 = (DistributionMetric)bucket2[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
+        var data2 = (DistributionMetric)bucket2[MetricHelper.GetMetricBucketKey(metricType, key, unit, tags)];
         data2.Value.Should().BeEquivalentTo(new[] { 13 });
     }
 
@@ -185,11 +169,11 @@ public class MetricAggregatorTests
 
         // Assert
         var bucket1 = sut.Buckets[time1.GetTimeBucketKey()];
-        var data1 = (SetMetric)bucket1[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
+        var data1 = (SetMetric)bucket1[MetricHelper.GetMetricBucketKey(metricType, key, unit, tags)];
         data1.Value.Should().BeEquivalentTo(new[] { 3, 5 });
 
         var bucket2 = sut.Buckets[time3.GetTimeBucketKey()];
-        var data2 = (SetMetric)bucket2[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
+        var data2 = (SetMetric)bucket2[MetricHelper.GetMetricBucketKey(metricType, key, unit, tags)];
         data2.Value.Should().BeEquivalentTo(new[] { 13 });
     }
 
@@ -221,11 +205,11 @@ public class MetricAggregatorTests
 
         // Assert
         var bucket1 = sut.Buckets[time1.GetTimeBucketKey()];
-        var data1 = (SetMetric)bucket1[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
+        var data1 = (SetMetric)bucket1[MetricHelper.GetMetricBucketKey(metricType, key, unit, tags)];
         data1.Value.Should().HaveCount(2);
 
         var bucket2 = sut.Buckets[time3.GetTimeBucketKey()];
-        var data2 = (SetMetric)bucket2[MetricAggregator.GetMetricBucketKey(metricType, key, unit, tags)];
+        var data2 = (SetMetric)bucket2[MetricHelper.GetMetricBucketKey(metricType, key, unit, tags)];
         data2.Value.Should().HaveCount(1);
     }
 
@@ -291,44 +275,6 @@ public class MetricAggregatorTests
         // Assert
         result.Should().NotBeNull();
         result!.Function.Should().Be($"void {nameof(MetricAggregatorTests)}.{nameof(TestGetCodeLocation)}()");
-    }
-
-    [Fact]
-    public void GetTagsKey_ReturnsEmpty_WhenTagsIsNull()
-    {
-        var result = MetricAggregator.GetTagsKey(null);
-        result.Should().BeEmpty();
-    }
-
-    [Fact]
-    public void GetTagsKey_ReturnsEmpty_WhenTagsIsEmpty()
-    {
-        var result = MetricAggregator.GetTagsKey(new Dictionary<string, string>());
-        result.Should().BeEmpty();
-    }
-
-    [Fact]
-    public void GetTagsKey_ReturnsValidString_WhenTagsHasOneEntry()
-    {
-        var tags = new Dictionary<string, string> { { "tag1", "value1" } };
-        var result = MetricAggregator.GetTagsKey(tags);
-        result.Should().Be("tag1=value1");
-    }
-
-    [Fact]
-    public void GetTagsKey_ReturnsCorrectString_WhenTagsHasMultipleEntries()
-    {
-        var tags = new Dictionary<string, string> { { "tag1", "value1" }, { "tag2", "value2" } };
-        var result = MetricAggregator.GetTagsKey(tags);
-        result.Should().Be("tag1=value1,tag2=value2");
-    }
-
-    [Fact]
-    public void GetTagsKey_EscapesCharacters_WhenTagsContainDelimiters()
-    {
-        var tags = new Dictionary<string, string> { { "tag1\\", "value1\\" }, { "tag2,", "value2," }, { "tag3=", "value3=" } };
-        var result = MetricAggregator.GetTagsKey(tags);
-        result.Should().Be(@"tag1\\=value1\\,tag2\,=value2\,,tag3\==value3\=");
     }
 
     [Fact]
@@ -518,6 +464,64 @@ public class MetricAggregatorTests
         counter.Tags["release"].Should().Be("test_release");
         counter.Tags["environment"].Should().Be("test_env");
         counter.Tags["transaction"].Should().Be("test_name");
+    }
+
+    [Fact]
+    public void Emit_ActiveSpan_SpanAggregates()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var tx = new TransactionTracer(hub, "test_name", "test_op");
+        tx.Release = "test_release";
+        tx.Environment = "test_env";
+
+        var span = new SpanTracer(hub, tx, null, SentryId.Create(), "test_op");
+
+        _fixture.DisableFlushLoop = false;
+        _fixture.MetricHub.GetSpan().Returns(span);
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.Increment("test_key", 3);
+        sut.Increment("test_key", 5);
+
+        // Assert
+        tx.Aggregator.Measurements.Should().BeEmpty();
+
+        var bucketKey = MetricHelper.GetMetricBucketKey(MetricType.Counter, "test_key", MeasurementUnit.None, null);
+        span.Aggregator.Measurements.Should().ContainKey(bucketKey);
+        var metric = span.Aggregator.Measurements[bucketKey];
+        metric.Min.Should().Be(3);
+        metric.Max.Should().Be(5);
+        metric.Sum.Should().Be(8);
+        metric.Count.Should().Be(2);
+    }
+
+    [Fact]
+    public void Emit_ActiveSpan_TransactionAggregates()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var tx = new TransactionTracer(hub, "test_name", "test_op");
+        tx.Release = "test_release";
+        tx.Environment = "test_env";
+
+        _fixture.DisableFlushLoop = false;
+        _fixture.MetricHub.GetSpan().Returns(tx);
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.Increment("test_key", 3);
+        sut.Increment("test_key", 5);
+
+        // Assert
+        var bucketKey = MetricHelper.GetMetricBucketKey(MetricType.Counter, "test_key", MeasurementUnit.None, null);
+        tx.Aggregator.Measurements.Should().ContainKey(bucketKey);
+        var metric = tx.Aggregator.Measurements[bucketKey];
+        metric.Min.Should().Be(3);
+        metric.Max.Should().Be(5);
+        metric.Sum.Should().Be(8);
+        metric.Count.Should().Be(2);
     }
 
     [Fact]
