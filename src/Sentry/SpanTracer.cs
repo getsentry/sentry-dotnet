@@ -13,8 +13,9 @@ public class SpanTracer : ISpan
 
     internal TransactionTracer Transaction { get; }
 
-    private readonly Lazy<LocalAggregator> _aggregator = new();
-    internal LocalAggregator Aggregator => _aggregator.Value;
+    private readonly Lazy<LocalAggregator> _metricsSummary = new();
+    internal LocalAggregator MetricsSummary => _metricsSummary.Value;
+    internal bool HasMetrics => _metricsSummary.IsValueCreated;
 
     /// <inheritdoc />
     public SpanId SpanId { get; internal set; }

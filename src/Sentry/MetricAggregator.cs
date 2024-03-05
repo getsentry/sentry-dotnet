@@ -181,10 +181,10 @@ internal class MetricAggregator : IMetricAggregator
         switch (span)
         {
             case TransactionTracer transactionTracer:
-                transactionTracer.Aggregator.Add(type, key, value, unit, tags, timestamp);
+                transactionTracer.MetricsSummary.Add(type, key, value, unit, tags);
                 break;
             case SpanTracer spanTracer:
-                spanTracer.Aggregator.Add(type, key, value, unit, tags, timestamp);
+                spanTracer.MetricsSummary.Add(type, key, value, unit, tags);
                 break;
         }
     }

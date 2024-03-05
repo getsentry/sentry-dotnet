@@ -174,8 +174,9 @@ public class TransactionTracer : ITransactionTracer
     /// <inheritdoc />
     public IReadOnlyDictionary<string, Measurement> Measurements => _measurements;
 
-    private readonly Lazy<LocalAggregator> _aggregator = new();
-    internal LocalAggregator Aggregator => _aggregator.Value;
+    private readonly Lazy<LocalAggregator> _metricsSummary = new();
+    internal LocalAggregator MetricsSummary => _metricsSummary.Value;
+    internal bool HasMetrics => _metricsSummary.IsValueCreated;
 
     /// <inheritdoc />
     public bool IsFinished => EndTimestamp is not null;

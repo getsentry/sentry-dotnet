@@ -66,6 +66,7 @@ public class SentrySpan : ISpanData, ISentryJsonSerializable
 
     // Aka 'data'
     private Dictionary<string, object?>? _extra;
+    private readonly LocalAggregator? _metricsSummary = null;
 
     /// <inheritdoc />
     public IReadOnlyDictionary<string, object?> Extra => _extra ??= new Dictionary<string, object?>();
@@ -104,6 +105,10 @@ public class SentrySpan : ISpanData, ISentryJsonSerializable
         {
             _measurements = spanTracer.InternalMeasurements?.ToDict();
             _tags = spanTracer.InternalTags?.ToDict();
+            if (spanTracer.HasMetrics)
+            {
+                _metricsSummary = spanTracer.MetricsSummary;
+            }
         }
         else
         {
@@ -134,6 +139,7 @@ public class SentrySpan : ISpanData, ISentryJsonSerializable
         writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
         writer.WriteDictionaryIfNotEmpty("data", _extra!, logger);
         writer.WriteDictionaryIfNotEmpty("measurements", _measurements, logger);
+        writer.WriteSerializableIfNotNull("_metrics_summary", _metricsSummary, logger);
 
         writer.WriteEndObject();
     }

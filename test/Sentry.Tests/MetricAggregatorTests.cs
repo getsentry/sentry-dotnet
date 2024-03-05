@@ -486,11 +486,11 @@ public class MetricAggregatorTests
         sut.Increment("test_key", 5);
 
         // Assert
-        tx.Aggregator.Measurements.Should().BeEmpty();
+        tx.MetricsSummary.Measurements.Should().BeEmpty();
 
         var bucketKey = MetricHelper.GetMetricBucketKey(MetricType.Counter, "test_key", MeasurementUnit.None, null);
-        span.Aggregator.Measurements.Should().ContainKey(bucketKey);
-        var metric = span.Aggregator.Measurements[bucketKey];
+        span.MetricsSummary.Measurements.Should().ContainKey(bucketKey);
+        var metric = span.MetricsSummary.Measurements[bucketKey];
         metric.Min.Should().Be(3);
         metric.Max.Should().Be(5);
         metric.Sum.Should().Be(8);
@@ -516,8 +516,8 @@ public class MetricAggregatorTests
 
         // Assert
         var bucketKey = MetricHelper.GetMetricBucketKey(MetricType.Counter, "test_key", MeasurementUnit.None, null);
-        tx.Aggregator.Measurements.Should().ContainKey(bucketKey);
-        var metric = tx.Aggregator.Measurements[bucketKey];
+        tx.MetricsSummary.Measurements.Should().ContainKey(bucketKey);
+        var metric = tx.MetricsSummary.Measurements[bucketKey];
         metric.Min.Should().Be(3);
         metric.Max.Should().Be(5);
         metric.Sum.Should().Be(8);
