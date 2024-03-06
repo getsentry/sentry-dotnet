@@ -263,9 +263,8 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
         _breadcrumbs = tracer.Breadcrumbs.ToList();
         _extra = tracer.Extra.ToDict();
         _tags = tracer.Tags.ToDict();
-        _spans = tracer.Spans
-            .Where(s => s is not SpanTracer { IsSentryRequest: true }) // Filter sentry requests created by Sentry.OpenTelemetry.SentrySpanProcessor
-            .Select(s => new SentrySpan(s)).ToArray();
+
+        _spans = FromTracerSpans(tracer);
         _measurements = tracer.Measurements.ToDict();
 
         // Some items are not on the interface, but we only ever pass in a TransactionTracer anyway.
@@ -275,6 +274,51 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
             DynamicSamplingContext = transactionTracer.DynamicSamplingContext;
             TransactionProfiler = transactionTracer.TransactionProfiler;
         }
+    }
+
+    internal static SentrySpan[] FromTracerSpans(ITransactionTracer tracer)
+    {
+        // Filter sentry requests created by Sentry.OpenTelemetry.SentrySpanProcessor
+        var nonSentrySpans = tracer.Spans
+            .Where(s => s is not SpanTracer { IsSentryRequest: true });
+
+        if (tracer is not TransactionTracer { IsOtelInstrumenter: true })
+        {
+            return nonSentrySpans.Select(s => new SentrySpan(s)).ToArray();
+        }
+
+        Dictionary<SpanId, SpanId?> reHome = new();
+        var spans = nonSentrySpans.ToList();
+        foreach (var value in spans.ToArray())
+        {
+            if (value is not SpanTracer child)
+            {
+                continue;
+            }
+
+            // Remove any filtered spans
+            if (child.IsFiltered?.Invoke() == true)
+            {
+                reHome.Add(child.SpanId, child.ParentSpanId);
+                spans.Remove(child);
+            }
+        }
+
+        // Re-home any children of filtered spans
+        foreach (var value in spans)
+        {
+            if (value is not SpanTracer child)
+            {
+                continue;
+            }
+
+            while (child.ParentSpanId.HasValue && reHome.TryGetValue(child.ParentSpanId.Value, out var newParentId))
+            {
+                child.ParentSpanId = newParentId;
+            }
+        }
+
+        return spans.Select(s => new SentrySpan(s)).ToArray();
     }
 
     /// <inheritdoc />

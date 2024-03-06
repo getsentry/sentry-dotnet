@@ -88,6 +88,9 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
             var span = (SpanTracer)parentSpan.StartChild(context);
             span.StartTimestamp = data.StartTimeUtc;
+            // Used to filter out spans that are not recorded when finishing a transaction.
+            span.SetFused(data);
+            span.IsFiltered = () => span.GetFused<Activity>() is { IsAllDataRequested: false, Recorded: false };
             _map[data.SpanId] = span;
         }
         else
@@ -113,7 +116,19 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 );
             transaction.StartTimestamp = data.StartTimeUtc;
             _hub.ConfigureScope(scope => scope.Transaction = transaction);
+            transaction.SetFused(data);
             _map[data.SpanId] = transaction;
+        }
+
+        // Clean up items that may have been filtered out (OnEnd never gets called for these but IsRecorded flips)
+        foreach (var mappedItem in _map)
+        {
+            var (spanId, span) = mappedItem;
+            var activity = span.GetFused<Activity>();
+            if (activity is { Recorded: false, IsAllDataRequested: false })
+            {
+                _map.TryRemove(spanId, out _);
+            }
         }
     }
 
