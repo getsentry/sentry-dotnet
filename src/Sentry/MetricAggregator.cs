@@ -58,61 +58,6 @@ internal class MetricAggregator : IMetricAggregator
         }
     }
 
-    internal static string GetMetricBucketKey(MetricType type, string metricKey, MeasurementUnit unit,
-        IDictionary<string, string>? tags)
-    {
-        var typePrefix = type.ToStatsdType();
-        var serializedTags = GetTagsKey(tags);
-
-        return $"{typePrefix}_{metricKey}_{unit}_{serializedTags}";
-    }
-
-    internal static string GetTagsKey(IDictionary<string, string>? tags)
-    {
-        if (tags == null || tags.Count == 0)
-        {
-            return string.Empty;
-        }
-
-        const char pairDelimiter = ',';  // Delimiter between key-value pairs
-        const char keyValueDelimiter = '=';  // Delimiter between key and value
-        const char escapeChar = '\\';
-
-        var builder = new StringBuilder();
-
-        foreach (var tag in tags)
-        {
-            // Escape delimiters in key and value
-            var key = EscapeString(tag.Key, pairDelimiter, keyValueDelimiter, escapeChar);
-            var value = EscapeString(tag.Value, pairDelimiter, keyValueDelimiter, escapeChar);
-
-            if (builder.Length > 0)
-            {
-                builder.Append(pairDelimiter);
-            }
-
-            builder.Append(key).Append(keyValueDelimiter).Append(value);
-        }
-
-        return builder.ToString();
-
-        static string EscapeString(string input, params char[] charsToEscape)
-        {
-            var escapedString = new StringBuilder(input.Length);
-
-            foreach (var ch in input)
-            {
-                if (charsToEscape.Contains(ch))
-                {
-                    escapedString.Append(escapeChar);  // Prefix with escape character
-                }
-                escapedString.Append(ch);
-            }
-
-            return escapedString.ToString();
-        }
-    }
-
     /// <inheritdoc cref="IMetricAggregator.Increment"/>
     public void Increment(string key,
         double value = 1.0,
@@ -186,19 +131,28 @@ internal class MetricAggregator : IMetricAggregator
         timestamp ??= DateTimeOffset.UtcNow;
         unit ??= MeasurementUnit.None;
 
+        var updatedTags = tags != null ? new Dictionary<string, string>(tags) : new Dictionary<string, string>();
+        updatedTags.AddIfNotNullOrEmpty("release", _options.Release);
+        updatedTags.AddIfNotNullOrEmpty("environment", _options.Environment);
+        var span = _metricHub.GetSpan();
+        if (span?.GetTransaction() is { } transaction)
+        {
+            updatedTags.AddIfNotNullOrEmpty("transaction", transaction.TransactionName);
+        }
+
         Func<string, Metric> addValuesFactory = type switch
         {
-            MetricType.Counter => _ => new CounterMetric(key, value, unit.Value, tags, timestamp),
-            MetricType.Gauge => _ => new GaugeMetric(key, value, unit.Value, tags, timestamp),
-            MetricType.Distribution => _ => new DistributionMetric(key, value, unit.Value, tags, timestamp),
-            MetricType.Set => _ => new SetMetric(key, (int)value, unit.Value, tags, timestamp),
+            MetricType.Counter => _ => new CounterMetric(key, value, unit.Value, updatedTags, timestamp),
+            MetricType.Gauge => _ => new GaugeMetric(key, value, unit.Value, updatedTags, timestamp),
+            MetricType.Distribution => _ => new DistributionMetric(key, value, unit.Value, updatedTags, timestamp),
+            MetricType.Set => _ => new SetMetric(key, (int)value, unit.Value, updatedTags, timestamp),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown MetricType")
         };
 
         var timeBucket = GetOrAddTimeBucket(timestamp.Value.GetTimeBucketKey());
 
         timeBucket.AddOrUpdate(
-            GetMetricBucketKey(type, key, unit.Value, tags),
+            MetricHelper.GetMetricBucketKey(type, key, unit.Value, updatedTags),
             addValuesFactory,
             (_, metric) =>
             {
@@ -222,6 +176,16 @@ internal class MetricAggregator : IMetricAggregator
         if (_options.ExperimentalMetrics is { EnableCodeLocations: true })
         {
             RecordCodeLocation(type, key, unit.Value, stackLevel + 1, timestamp.Value);
+        }
+
+        switch (span)
+        {
+            case TransactionTracer transactionTracer:
+                transactionTracer.MetricsSummary.Add(type, key, value, unit, tags);
+                break;
+            case SpanTracer spanTracer:
+                spanTracer.MetricsSummary.Add(type, key, value, unit, tags);
+                break;
         }
     }
 

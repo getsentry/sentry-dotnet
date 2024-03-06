@@ -5,6 +5,7 @@
 ### Features
 
 - Added Crons support via `SentrySdk.CaptureCheckIn` and an integration with Hangfire ([#3128](https://github.com/getsentry/sentry-dotnet/pull/3128))
+- Common tags set automatically for metrics and metrics summaries are attached to Spans ([#3191](https://github.com/getsentry/sentry-dotnet/pull/3191))
 
 ### Fixes
 

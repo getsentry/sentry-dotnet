@@ -18,4 +18,7 @@ internal interface IMetricHub
     /// Starts a child span for the current transaction or, if there is no active transaction, starts a new transaction.
     /// </summary>
     ISpan StartSpan(string operation, string description);
+
+    /// <inheritdoc cref="IHub.GetSpan"/>
+    ISpan? GetSpan();
 }

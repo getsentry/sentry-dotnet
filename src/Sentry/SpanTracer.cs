@@ -13,6 +13,10 @@ public class SpanTracer : ISpan
 
     internal TransactionTracer Transaction { get; }
 
+    private readonly Lazy<MetricsSummaryAggregator> _metricsSummary = new();
+    internal MetricsSummaryAggregator MetricsSummary => _metricsSummary.Value;
+    internal bool HasMetrics => _metricsSummary.IsValueCreated;
+
     /// <inheritdoc />
     public SpanId SpanId { get; internal set; }
 

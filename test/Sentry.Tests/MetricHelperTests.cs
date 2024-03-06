@@ -1,7 +1,63 @@
+using Sentry.Protocol.Metrics;
+
 namespace Sentry.Tests;
 
 public class MetricHelperTests
 {
+    [Fact]
+    public void GetMetricBucketKey_GeneratesExpectedKey()
+    {
+        // Arrange
+        var type = MetricType.Counter;
+        var metricKey = "quibbles";
+        var unit = MeasurementUnit.None;
+        var tags = new Dictionary<string, string> { ["tag1"] = "value1" };
+
+        // Act
+        var result = MetricHelper.GetMetricBucketKey(type, metricKey, unit, tags);
+
+        // Assert
+        result.Should().Be("c_quibbles_none_tag1=value1");
+    }
+
+    [Fact]
+    public void GetTagsKey_ReturnsEmpty_WhenTagsIsNull()
+    {
+        var result = MetricHelper.GetTagsKey(null);
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void GetTagsKey_ReturnsEmpty_WhenTagsIsEmpty()
+    {
+        var result = MetricHelper.GetTagsKey(new Dictionary<string, string>());
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void GetTagsKey_ReturnsValidString_WhenTagsHasOneEntry()
+    {
+        var tags = new Dictionary<string, string> { { "tag1", "value1" } };
+        var result = MetricHelper.GetTagsKey(tags);
+        result.Should().Be("tag1=value1");
+    }
+
+    [Fact]
+    public void GetTagsKey_ReturnsCorrectString_WhenTagsHasMultipleEntries()
+    {
+        var tags = new Dictionary<string, string> { { "tag1", "value1" }, { "tag2", "value2" } };
+        var result = MetricHelper.GetTagsKey(tags);
+        result.Should().Be("tag1=value1,tag2=value2");
+    }
+
+    [Fact]
+    public void GetTagsKey_EscapesCharacters_WhenTagsContainDelimiters()
+    {
+        var tags = new Dictionary<string, string> { { "tag1\\", "value1\\" }, { "tag2,", "value2," }, { "tag3=", "value3=" } };
+        var result = MetricHelper.GetTagsKey(tags);
+        result.Should().Be(@"tag1\\=value1\\,tag2\,=value2\,,tag3\==value3\=");
+    }
+
     [Theory]
     [InlineData(30)]
     [InlineData(31)]
