@@ -532,7 +532,7 @@ public static partial class SentrySdk
     /// <param name="sentryId">The optional <see cref="SentryId"/>.</param>
     /// <returns>The Id of the check-in.</returns>
     [DebuggerStepThrough]
-    public static SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId)
+    public static SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null)
         => CurrentHub.CaptureCheckIn(monitorSlug, status, sentryId);
 
     /// <summary>
