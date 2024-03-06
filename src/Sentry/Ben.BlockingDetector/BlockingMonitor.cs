@@ -71,14 +71,14 @@ namespace Sentry.Ben.BlockingDetector
                             {
                                 Type = "BlockingCallDetector",
                                 Handled = false,
-                                Description = "Blocking calls can cause ThreadPool starvation."
+                                Description = "Blocking calls can cause ThreadPool starvation.",
+                                Source = detectionSource.ToString()
                             },
                             Type = "Blocking call detected",
                             Stacktrace = stackTrace,
                         }
                     },
                 };
-                evt.SetTag("DetectionSource", detectionSource.ToString());
 
                 _getHub().CaptureEvent(evt);
             }
