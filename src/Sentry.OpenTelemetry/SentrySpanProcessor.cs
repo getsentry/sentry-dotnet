@@ -19,6 +19,10 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     private readonly SentryOptions? _options;
     private readonly Lazy<IDictionary<string, object>> _resourceAttributes;
 
+    private static readonly TimeSpan PruningInterval = TimeSpan.FromSeconds(5);
+    internal DateTimeOffset _lastPruned = DateTimeOffset.MinValue;
+    private readonly object _pruningLock = new();
+
     /// <summary>
     /// Constructs a <see cref="SentrySpanProcessor"/>.
     /// </summary>
@@ -120,16 +124,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             _map[data.SpanId] = transaction;
         }
 
-        // Clean up items that may have been filtered out (OnEnd never gets called for these but IsRecorded flips)
-        foreach (var mappedItem in _map)
-        {
-            var (spanId, span) = mappedItem;
-            var activity = span.GetFused<Activity>();
-            if (activity is { Recorded: false, IsAllDataRequested: false })
-            {
-                _map.TryRemove(spanId, out _);
-            }
-        }
+        // Housekeeping
+        PruneFilteredSpans();
     }
 
     /// <inheritdoc />
@@ -211,6 +207,44 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         span.Finish(status);
 
         _map.TryRemove(data.SpanId, out _);
+
+        // Housekeeping
+        PruneFilteredSpans();
+    }
+
+    /// <summary>
+    /// Clean up items that may have been filtered out.
+    /// See https://github.com/getsentry/sentry-dotnet/pull/3198
+    /// </summary>
+    internal void PruneFilteredSpans(bool force = false)
+    {
+        if (!force && !NeedsPruning())
+        {
+            return;
+        }
+
+        foreach (var mappedItem in _map)
+        {
+            var (spanId, span) = mappedItem;
+            var activity = span.GetFused<Activity>();
+            if (activity is { Recorded: false, IsAllDataRequested: false })
+            {
+                _map.TryRemove(spanId, out _);
+            }
+        }
+    }
+
+    private bool NeedsPruning()
+    {
+        lock (_pruningLock)
+        {
+            if (DateTimeOffset.UtcNow - _lastPruned < PruningInterval)
+            {
+                return false;
+            }
+            _lastPruned = DateTimeOffset.UtcNow;
+            return true;
+        }
     }
 
     private static Scope? GetSavedScope(Activity? activity)
