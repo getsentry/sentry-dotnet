@@ -434,7 +434,8 @@ internal class GlobalSessionManager : ISessionManager
     {
         if (_currentSession is not { } session)
         {
-            _options.LogDebug("Failed to report an error on a session because there is none active.");
+            _options.LogDebug("There is no session active. Skipping updating the session as errored. " +
+                              "Consider setting 'AutoSessionTracking = true' to enable Release Health and crash free rate.");
             return null;
         }
 
