@@ -19,9 +19,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     private readonly SentryOptions? _options;
     private readonly Lazy<IDictionary<string, object>> _resourceAttributes;
 
-    private static readonly TimeSpan PruningInterval = TimeSpan.FromSeconds(5);
-    internal DateTimeOffset _lastPruned = DateTimeOffset.MinValue;
-    private readonly object _pruningLock = new();
+    private static readonly long PruningInterval = TimeSpan.FromSeconds(5).Ticks;
+    internal long _lastPruned = 0;
 
     /// <summary>
     /// Constructs a <see cref="SentrySpanProcessor"/>.
@@ -236,15 +235,16 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
     private bool NeedsPruning()
     {
-        lock (_pruningLock)
+        var lastPruned = Interlocked.Read(ref _lastPruned);
+        if (lastPruned > DateTime.UtcNow.Ticks - PruningInterval)
         {
-            if (DateTimeOffset.UtcNow - _lastPruned < PruningInterval)
-            {
-                return false;
-            }
-            _lastPruned = DateTimeOffset.UtcNow;
-            return true;
+            return false;
         }
+
+        var thisPruned = DateTime.UtcNow.Ticks;
+        Interlocked.CompareExchange(ref _lastPruned, thisPruned, lastPruned);
+        // May be false if another thread gets there first
+        return Interlocked.Read(ref _lastPruned) == thisPruned;
     }
 
     private static Scope? GetSavedScope(Activity? activity)

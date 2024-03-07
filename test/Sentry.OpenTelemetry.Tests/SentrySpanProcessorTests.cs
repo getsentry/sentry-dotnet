@@ -482,7 +482,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         var sut = _fixture.GetSut();
 
-        sut._lastPruned = DateTimeOffset.MaxValue; // fake a recent prune
+        sut._lastPruned = DateTimeOffset.MaxValue.Ticks; // fake a recent prune
 
         using var parent = Tracer.StartActivity();
         sut.OnStart(parent!);
