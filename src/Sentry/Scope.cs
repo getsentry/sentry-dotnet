@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry;
@@ -559,6 +560,183 @@ public class Scope : IEventLike
         }
         set => _span = value;
     }
+
+    /// <summary>
+    /// Invokes all event processor providers available.
+    /// </summary>
+    public IEnumerable<ISentryEventProcessor> GetAllEventProcessors()
+    {
+        foreach (var processor in Options.GetAllEventProcessors())
+        {
+            yield return processor;
+        }
+
+        foreach (var processor in EventProcessors)
+        {
+            yield return processor;
+        }
+    }
+
+    /// <summary>
+    /// Invokes all transaction processor providers available.
+    /// </summary>
+    public IEnumerable<ISentryTransactionProcessor> GetAllTransactionProcessors()
+    {
+        foreach (var processor in Options.GetAllTransactionProcessors())
+        {
+            yield return processor;
+        }
+
+        foreach (var processor in TransactionProcessors)
+        {
+            yield return processor;
+        }
+    }
+
+    /// <summary>
+    /// Invokes all exception processor providers available.
+    /// </summary>
+    public IEnumerable<ISentryEventExceptionProcessor> GetAllExceptionProcessors()
+    {
+        foreach (var processor in Options.GetAllExceptionProcessors())
+        {
+            yield return processor;
+        }
+
+        foreach (var processor in ExceptionProcessors)
+        {
+            yield return processor;
+        }
+    }
+
+    /// <summary>
+    /// Add an exception processor.
+    /// </summary>
+    /// <param name="processor">The exception processor.</param>
+    public void AddExceptionProcessor(ISentryEventExceptionProcessor processor)
+        => ExceptionProcessors.Add(processor);
+
+    /// <summary>
+    /// Add the exception processors.
+    /// </summary>
+    /// <param name="processors">The exception processors.</param>
+    public void AddExceptionProcessors(IEnumerable<ISentryEventExceptionProcessor> processors)
+    {
+        foreach (var processor in processors)
+        {
+            ExceptionProcessors.Add(processor);
+        }
+    }
+
+    /// <summary>
+    /// Adds an event processor which is invoked when creating a <see cref="SentryEvent"/>.
+    /// </summary>
+    /// <param name="processor">The event processor.</param>
+    public void AddEventProcessor(ISentryEventProcessor processor)
+        => EventProcessors.Add(processor);
+
+    /// <summary>
+    /// Adds an event processor which is invoked when creating a <see cref="SentryEvent"/>.
+    /// </summary>
+    /// <param name="processor">The event processor.</param>
+    public void AddEventProcessor(Func<SentryEvent, SentryEvent> processor)
+        => AddEventProcessor(new DelegateEventProcessor(processor));
+
+    /// <summary>
+    /// Adds event processors which are invoked when creating a <see cref="SentryEvent"/>.
+    /// </summary>
+    /// <param name="processors">The event processors.</param>
+    public void AddEventProcessors(IEnumerable<ISentryEventProcessor> processors)
+    {
+        foreach (var processor in processors)
+        {
+            EventProcessors.Add(processor);
+        }
+    }
+
+    /// <summary>
+    /// Adds an transaction processor which is invoked when creating a <see cref="SentryTransaction"/>.
+    /// </summary>
+    /// <param name="processor">The transaction processor.</param>
+    public void AddTransactionProcessor(ISentryTransactionProcessor processor)
+        => TransactionProcessors.Add(processor);
+
+    /// <summary>
+    /// Adds an transaction processor which is invoked when creating a <see cref="SentryTransaction"/>.
+    /// </summary>
+    /// <param name="processor">The transaction processor.</param>
+    public void AddTransactionProcessor(Func<SentryTransaction, SentryTransaction?> processor)
+        => AddTransactionProcessor(new DelegateTransactionProcessor(processor));
+
+    /// <summary>
+    /// Adds transaction processors which are invoked when creating a <see cref="SentryTransaction"/>.
+    /// </summary>
+    /// <param name="processors">The transaction processors.</param>
+    public void AddTransactionProcessors(IEnumerable<ISentryTransactionProcessor> processors)
+    {
+        foreach (var processor in processors)
+        {
+            TransactionProcessors.Add(processor);
+        }
+    }
+
+    /// <summary>
+    /// Adds an attachment.
+    /// </summary>
+    /// <remarks>
+    /// Note: the stream must be seekable.
+    /// </remarks>
+    public void AddAttachment(
+        Stream stream,
+        string fileName,
+        AttachmentType type = AttachmentType.Default,
+        string? contentType = null)
+    {
+        var length = stream.TryGetLength();
+        if (length is null)
+        {
+            Options.LogWarning(
+                "Cannot evaluate the size of attachment '{0}' because the stream is not seekable.",
+                fileName);
+
+            return;
+        }
+
+        // TODO: Envelope spec allows the last item to not have a length.
+        // So if we make sure there's only 1 item without length, we can support it.
+        AddAttachment(
+            new SentryAttachment(
+                type,
+                new StreamAttachmentContent(stream),
+                fileName,
+                contentType));
+    }
+
+    /// <summary>
+    /// Adds an attachment.
+    /// </summary>
+    public void AddAttachment(
+        byte[] data,
+        string fileName,
+        AttachmentType type = AttachmentType.Default,
+        string? contentType = null) =>
+        AddAttachment(
+            new SentryAttachment(
+                type,
+                new ByteAttachmentContent(data),
+                fileName,
+                contentType));
+
+    /// <summary>
+    /// Adds an attachment.
+    /// </summary>
+    public void AddAttachment(string filePath, AttachmentType type = AttachmentType.Default, string? contentType = null)
+        => AddAttachment(
+            new SentryAttachment(
+                type,
+                new FileAttachmentContent(filePath, Options.UseAsyncFileIO),
+                Path.GetFileName(filePath),
+                contentType));
 
     internal void ResetTransaction(ITransactionTracer? expectedCurrentTransaction) =>
         Interlocked.CompareExchange(ref _transaction, null, expectedCurrentTransaction);
