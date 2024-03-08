@@ -4,6 +4,11 @@
 
 ### Features
 
+- ASP.NET Core: Blocking call detection. An event with the stack trace of the blocking call will be captured as event. ([#2709](https://github.com/getsentry/sentry-dotnet/pull/2709))
+    - IMPORTANT: Verify this in test/staging before prod! Blocking calls in hot paths could create a lot of events for your Sentry project.
+    - Opt-in via `options.CaptureBlockingCalls = true`
+    - Disabled for specific code blocks with `using (new SuppressBlockingDetection())`
+    - Doesn't detect everything. See original [Caveats described by Ben Adams](https://github.com/benaadams/Ben.BlockingDetector?tab=readme-ov-file#caveats).
 - Added Crons support via `SentrySdk.CaptureCheckIn` and an integration with Hangfire ([#3128](https://github.com/getsentry/sentry-dotnet/pull/3128))
 - Common tags set automatically for metrics and metrics summaries are attached to Spans ([#3191](https://github.com/getsentry/sentry-dotnet/pull/3191))
 

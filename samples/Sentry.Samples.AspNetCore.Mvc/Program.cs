@@ -25,6 +25,9 @@ builder.WebHost.UseSentry(options =>
         // Example: Disabling support to compressed responses:
         options.DecompressionMethods = DecompressionMethods.None;
 
+        // Call GET /home/block/true to see this in action
+        options.CaptureBlockingCalls = true;
+
         options.MaxQueueItems = 100;
         options.ShutdownTimeout = TimeSpan.FromSeconds(5);
 

@@ -7,6 +7,7 @@ namespace Sentry;
 /// A frame of a stacktrace.
 /// </summary>
 /// <see href="https://develop.sentry.dev/sdk/event-payloads/stacktrace/"/>
+[DebuggerDisplay("{Function}")]
 public sealed class SentryStackFrame : ISentryJsonSerializable
 {
     internal List<string>? InternalPreContext { get; private set; }

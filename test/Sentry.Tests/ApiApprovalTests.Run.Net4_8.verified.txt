@@ -842,6 +842,7 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentrySpan FromJson(System.Text.Json.JsonElement json) { }
     }
+    [System.Diagnostics.DebuggerDisplay("{Function}")]
     public sealed class SentryStackFrame : Sentry.ISentryJsonSerializable
     {
         public SentryStackFrame() { }
@@ -1192,6 +1193,14 @@ namespace Sentry
         public string Type { get; set; }
         protected abstract void WriteAdditionalProperties(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger);
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+    }
+}
+namespace Sentry.Ben.BlockingDetector
+{
+    public class SuppressBlockingDetection : System.IDisposable
+    {
+        public SuppressBlockingDetection() { }
+        public void Dispose() { }
     }
 }
 namespace Sentry.Extensibility
