@@ -21,7 +21,7 @@ public class SpanTracer : ISpan
     public SpanId SpanId { get; internal set; }
 
     /// <inheritdoc />
-    public SpanId? ParentSpanId { get; }
+    public SpanId? ParentSpanId { get; internal set; }
 
     /// <inheritdoc />
     public SentryId TraceId { get; }
@@ -85,6 +85,8 @@ public class SpanTracer : ISpan
 
     /// <inheritdoc />
     public void SetExtra(string key, object? value) => _data[key] = value;
+
+    internal Func<bool>? IsFiltered { get; set; }
 
     /// <summary>
     /// Initializes an instance of <see cref="SpanTracer"/>.

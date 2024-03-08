@@ -16,6 +16,8 @@ public class TransactionTracer : ITransactionTracer
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
     private readonly Instrumenter _instrumenter = Instrumenter.Sentry;
 
+    internal bool IsOtelInstrumenter => _instrumenter == Instrumenter.OpenTelemetry;
+
     /// <inheritdoc />
     public SpanId SpanId
     {
