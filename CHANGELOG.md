@@ -24,9 +24,9 @@
 
 ### Dependencies
 
-- Bump Java SDK from v7.3.0 to v7.4.0 ([#3164](https://github.com/getsentry/sentry-dotnet/pull/3164))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#740)
-  - [diff](https://github.com/getsentry/sentry-java/compare/7.3.0...7.4.0)
+- Bump Java SDK from v7.3.0 to v7.6.0 ([#3164](https://github.com/getsentry/sentry-dotnet/pull/3164), [#3204](https://github.com/getsentry/sentry-dotnet/pull/3204))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#760)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.3.0...7.6.0)
 - Bump Cocoa SDK from v8.20.0 to v8.21.0 ([#3194](https://github.com/getsentry/sentry-dotnet/pull/3194))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8210)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.20.0...8.21.0)
