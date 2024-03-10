@@ -1,6 +1,6 @@
 namespace Sentry.Ben.BlockingDetector;
 
-internal interface ITaskBlockingListenerState : IRecursionTracker
+internal interface ITaskBlockingListenerState
 {
     void Suppress();
     bool IsSuppressed();

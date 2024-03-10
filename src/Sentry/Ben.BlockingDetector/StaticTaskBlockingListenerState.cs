@@ -1,6 +1,6 @@
 namespace Sentry.Ben.BlockingDetector;
 
-internal class StaticTaskBlockingListenerState : StaticRecursionTracker, ITaskBlockingListenerState
+internal class StaticTaskBlockingListenerState : ITaskBlockingListenerState
 {
     [ThreadStatic] private static int SuppressionCount;
 
