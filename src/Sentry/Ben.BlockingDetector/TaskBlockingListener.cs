@@ -58,13 +58,10 @@ namespace Sentry.Ben.BlockingDetector
                 payload[3] is int value && // Behavior
                 value == 1) // TaskWaitBehavior.Synchronous
             {
-                _state.Recurse();
                 monitor?.BlockingStart(DetectionSource.EventListener);
             }
-            else if (eventId == 11 // TASKWAITEND_ID
-                     && _state.IsRecursive())
+            else if (eventId == 11) // TASKWAITEND_ID
             {
-                _state.Backtrack();
                 monitor?.BlockingEnd();
             }
         }
