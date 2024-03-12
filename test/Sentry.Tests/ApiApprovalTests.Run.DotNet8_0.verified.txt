@@ -1049,26 +1049,45 @@ namespace Sentry
         OutOfRange = 15,
         DataLoss = 16,
     }
-    public class SpanTracer : Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpan, Sentry.ISpanData, Sentry.Protocol.ITraceContext
+    public class SpanTracer : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpan, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.ITransactionTracer, Sentry.Protocol.ITraceContext
     {
-        public SpanTracer(Sentry.IHub hub, Sentry.TransactionTracer transaction, Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string operation) { }
+        public SpanTracer(Sentry.IHub hub, Sentry.ITransactionContext context) { }
+        public SpanTracer(Sentry.IHub hub, Sentry.TransactionTracer rootSpan, Sentry.SpanId? parentSpanId, Sentry.SentryId traceId, string operation) { }
+        public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
+        public Sentry.SentryContexts Contexts { get; set; }
         public string? Description { get; set; }
+        public string? Distribution { get; set; }
         public System.DateTimeOffset? EndTimestamp { get; }
+        public string? Environment { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
+        public System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
         public bool IsFinished { get; }
+        public bool? IsParentSampled { get; set; }
         public bool? IsSampled { get; }
+        public Sentry.SentryLevel? Level { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, Sentry.Protocol.Measurement> Measurements { get; }
+        public string Name { get; set; }
+        public Sentry.TransactionNameSource NameSource { get; set; }
         public string Operation { get; set; }
         public Sentry.SpanId? ParentSpanId { get; }
+        public string? Platform { get; set; }
+        public string? Release { get; set; }
+        public Sentry.SentryRequest Request { get; set; }
+        public double? SampleRate { get; }
+        public Sentry.SdkVersion Sdk { get; }
         public Sentry.SpanId SpanId { get; }
+        public System.Collections.Generic.IReadOnlyCollection<Sentry.ISpan> Spans { get; }
         public System.DateTimeOffset StartTimestamp { get; }
         public Sentry.SpanStatus? Status { get; set; }
         public System.Collections.Generic.IReadOnlyDictionary<string, string> Tags { get; }
         public Sentry.SentryId TraceId { get; }
+        public Sentry.SentryUser User { get; set; }
+        public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb) { }
         public void Finish() { }
         public void Finish(Sentry.SpanStatus status) { }
         public void Finish(System.Exception exception) { }
         public void Finish(System.Exception exception, Sentry.SpanStatus status) { }
+        public Sentry.ISpan? GetLastActiveSpan() { }
         public Sentry.SentryTraceHeader GetTraceHeader() { }
         public void SetExtra(string key, object? value) { }
         public void SetMeasurement(string name, Sentry.Protocol.Measurement measurement) { }
@@ -1125,50 +1144,9 @@ namespace Sentry
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> CustomSamplingContext { get; }
         public Sentry.ITransactionContext TransactionContext { get; }
     }
-    public class TransactionTracer : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISpan, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.ITransactionTracer, Sentry.Protocol.ITraceContext
+    public class TransactionTracer : Sentry.SpanTracer
     {
         public TransactionTracer(Sentry.IHub hub, Sentry.ITransactionContext context) { }
-        public System.Collections.Generic.IReadOnlyCollection<Sentry.Breadcrumb> Breadcrumbs { get; }
-        public Sentry.SentryContexts Contexts { get; set; }
-        public string? Description { get; set; }
-        public string? Distribution { get; set; }
-        public System.DateTimeOffset? EndTimestamp { get; }
-        public string? Environment { get; set; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
-        public System.Collections.Generic.IReadOnlyList<string> Fingerprint { get; set; }
-        public bool IsFinished { get; }
-        public bool? IsParentSampled { get; set; }
-        public bool? IsSampled { get; }
-        public Sentry.SentryLevel? Level { get; set; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, Sentry.Protocol.Measurement> Measurements { get; }
-        public string Name { get; set; }
-        public Sentry.TransactionNameSource NameSource { get; set; }
-        public string Operation { get; set; }
-        public Sentry.SpanId? ParentSpanId { get; }
-        public string? Platform { get; set; }
-        public string? Release { get; set; }
-        public Sentry.SentryRequest Request { get; set; }
-        public double? SampleRate { get; }
-        public Sentry.SdkVersion Sdk { get; }
-        public Sentry.SpanId SpanId { get; }
-        public System.Collections.Generic.IReadOnlyCollection<Sentry.ISpan> Spans { get; }
-        public System.DateTimeOffset StartTimestamp { get; }
-        public Sentry.SpanStatus? Status { get; set; }
-        public System.Collections.Generic.IReadOnlyDictionary<string, string> Tags { get; }
-        public Sentry.SentryId TraceId { get; }
-        public Sentry.SentryUser User { get; set; }
-        public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb) { }
-        public void Finish() { }
-        public void Finish(Sentry.SpanStatus status) { }
-        public void Finish(System.Exception exception) { }
-        public void Finish(System.Exception exception, Sentry.SpanStatus status) { }
-        public Sentry.ISpan? GetLastActiveSpan() { }
-        public Sentry.SentryTraceHeader GetTraceHeader() { }
-        public void SetExtra(string key, object? value) { }
-        public void SetMeasurement(string name, Sentry.Protocol.Measurement measurement) { }
-        public void SetTag(string key, string value) { }
-        public Sentry.ISpan StartChild(string operation) { }
-        public void UnsetTag(string key) { }
     }
     public sealed class UserFeedback : Sentry.ISentryJsonSerializable
     {

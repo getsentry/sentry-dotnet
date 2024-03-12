@@ -5,12 +5,12 @@ public class SpanTracerTests
     [Fact]
     public async Task SetExtra_DataInserted_NoDataLoss()
     {
-        // Run 20 times to avoid flacky tests scapping.
+        // Run 20 times to avoid flaky tests scapping.
         for (var amount = 0; amount < 20; amount++)
         {
             // Arrange
             var hub = Substitute.For<IHub>();
-            var transaction = new SpanTracer(hub, null, null, SentryId.Empty, "");
+            var transaction = new SpanTracer(hub, "test_name", "test_op");
             var evt = new ManualResetEvent(false);
             var ready = new ManualResetEvent(false);
             var counter = 0;

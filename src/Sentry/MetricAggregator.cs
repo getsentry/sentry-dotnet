@@ -178,9 +178,9 @@ internal class MetricAggregator : IMetricAggregator
             RecordCodeLocation(type, key, unit.Value, stackLevel + 1, timestamp.Value);
         }
 
-        if (span is TransactionTracer transactionTracer)
+        if (span is SpanTracer tracer)
         {
-            transactionTracer.MetricsSummary.Add(type, key, value, unit, tags);
+            tracer.MetricsSummary.Add(type, key, value, unit, tags);
         }
     }
 
