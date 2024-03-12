@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Dynamic Sampling Context not propagated correctly for HttpClient spans ([#3208](https://github.com/getsentry/sentry-dotnet/pull/3208))
+
 ## 4.2.0
 
 ### Features

@@ -214,7 +214,8 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
     public BaggageHeader GetBaggage()
     {
-        if (GetSpan() is TransactionTracer { DynamicSamplingContext: { IsEmpty: false } dsc })
+        var span = GetSpan();
+        if (span?.GetTransaction() is TransactionTracer { DynamicSamplingContext: { IsEmpty: false } dsc })
         {
             return dsc.ToBaggageHeader();
         }
