@@ -33,7 +33,7 @@ public class TransactionTracer : ITransactionTracer
     // transaction as the parent.
 
     /// <inheritdoc />
-    public SpanId? ParentSpanId { get; }
+    public SpanId? ParentSpanId { get; internal set; }
 
     /// <inheritdoc />
     public SentryId TraceId
@@ -180,6 +180,12 @@ public class TransactionTracer : ITransactionTracer
     internal MetricsSummaryAggregator MetricsSummary => _metricsSummary.Value;
     internal bool HasMetrics => _metricsSummary.IsValueCreated;
 
+    internal Func<bool>? IsFiltered { get; set; }
+
+    internal TransactionTracer? ParentSpan { get; }
+
+    internal TransactionTracer RootSpan => ParentSpan?.RootSpan ?? this;
+
     /// <inheritdoc />
     public bool IsFinished => EndTimestamp is not null;
 
@@ -260,6 +266,64 @@ public class TransactionTracer : ITransactionTracer
         }
     }
 
+    /// <summary>
+    /// Creates a child span
+    /// </summary>
+    /// <param name="hub">An <see cref="IHub"/> instance</param>
+    /// <param name="rootSpan">The root span that will be used to send captured traces to Sentry</param>
+    /// <param name="parentSpanId">The ID of the immediate parent of this child span</param>
+    /// <param name="traceId">
+    /// The traceId that the span will be associated with.
+    /// This argument exists to retain backward compatibility for this API, but it should always be rootSpan.TraceId.
+    /// </param>
+    /// <param name="operation">The name of the operation this child span tracks.</param>
+    public TransactionTracer(
+        IHub hub,
+        TransactionTracer rootSpan,
+        SpanId? parentSpanId,
+        SentryId traceId,
+        string operation)
+        : this(hub, rootSpan, null, parentSpanId, traceId, operation)
+    {
+    }
+
+    internal TransactionTracer(
+        IHub hub,
+        // This is a bit counter-intuitive... it'd be easier to pass in the parent span and infer the root span from
+        // this but our previous API assumed a "Transaction" (i.e. root span) would be passed in so we're doing it this
+        // way to preserve backward compatibility
+        TransactionTracer rootSpan,
+        SpanId? spanId,
+        SpanId? parentSpanId,
+        SentryId traceId,
+        string operation)
+    {
+        _hub = hub;
+        _options = _hub.GetSentryOptions();
+        _instrumenter = rootSpan._instrumenter;
+        SpanId = spanId ?? SpanId.Create();
+        ParentSpanId = parentSpanId;
+        if (parentSpanId.HasValue)
+        {
+            foreach (var ancestor in rootSpan.Spans)
+            {
+                if (ancestor is TransactionTracer ancestorTracer && ancestorTracer.SpanId == parentSpanId)
+                {
+                    ParentSpan = ancestorTracer;
+                    break;
+                }
+            }
+        }
+        TraceId = traceId;
+        Operation = operation;
+
+        Name = rootSpan.Name;
+        NameSource = rootSpan.NameSource;
+        Description = rootSpan.Description;
+        IsSampled = rootSpan.IsSampled;
+        StartTimestamp = _stopwatch.StartDateTimeOffset;
+    }
+
     /// <inheritdoc />
     public void AddBreadcrumb(Breadcrumb breadcrumb) => _breadcrumbs.Add(breadcrumb);
 
@@ -281,13 +345,8 @@ public class TransactionTracer : ITransactionTracer
     internal ISpan StartChild(SpanId? spanId, SpanId parentSpanId, string operation,
         Instrumenter instrumenter = Instrumenter.Sentry)
     {
-        var span = new SpanTracer(_hub, this, parentSpanId, TraceId, operation);
-        if (spanId is { } id)
-        {
-            span.SpanId = id;
-        }
-
-        AddChildSpan(span);
+        var span = new SpanTracer(_hub, RootSpan, spanId, parentSpanId, TraceId, operation);
+        RootSpan.AddChildSpan(span);
         return span;
     }
 
@@ -367,11 +426,15 @@ public class TransactionTracer : ITransactionTracer
         EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
         _options?.LogDebug("Finished Transaction {0}.", SpanId);
 
-        // Clear the transaction from the scope
-        _hub.ConfigureScope(scope => scope.ResetTransaction(this));
+        // Only capture the transaction (and it's children) if this is the root span
+        if (RootSpan == this)
+        {
+            // Clear the transaction from the scope
+            _hub.ConfigureScope(scope => scope.ResetTransaction(this));
 
-        // Client decides whether to discard this transaction based on sampling
-        _hub.CaptureTransaction(new SentryTransaction(this));
+            // Client decides whether to discard this transaction based on sampling
+            _hub.CaptureTransaction(new SentryTransaction(this));
+        }
     }
 
     /// <inheritdoc />
@@ -391,6 +454,16 @@ public class TransactionTracer : ITransactionTracer
     /// <inheritdoc />
     public void Finish(Exception exception) =>
         Finish(exception, SpanStatusConverter.FromException(exception));
+
+    /// <summary>
+    /// Used to mark a span as unfinished when it was previously marked as finished. This allows us to reuse spans for
+    /// DB Connections that get reused by the underlying connection pool
+    /// </summary>
+    internal void Unfinish()
+    {
+        Status = null;
+        EndTimestamp = null;
+    }
 
     /// <inheritdoc />
     public SentryTraceHeader GetTraceHeader() => new(TraceId, SpanId, IsSampled);

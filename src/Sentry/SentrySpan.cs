@@ -101,20 +101,12 @@ public class SentrySpan : ISpanData, ISentryJsonSerializable
         Status = tracer.Status;
         IsSampled = tracer.IsSampled;
         _extra = tracer.Extra.ToDict();
+        _measurements = tracer.Measurements.ToDict();
+        _tags = tracer.Tags.ToDict();
 
-        if (tracer is SpanTracer spanTracer)
+        if (tracer is SpanTracer { HasMetrics: true } transactionTracer)
         {
-            _measurements = spanTracer.InternalMeasurements?.ToDict();
-            _tags = spanTracer.InternalTags?.ToDict();
-            if (spanTracer.HasMetrics)
-            {
-                _metricsSummary = new MetricsSummary(spanTracer.MetricsSummary);
-            }
-        }
-        else
-        {
-            _measurements = tracer.Measurements.ToDict();
-            _tags = tracer.Tags.ToDict();
+            _metricsSummary = new MetricsSummary(transactionTracer.MetricsSummary);
         }
     }
 

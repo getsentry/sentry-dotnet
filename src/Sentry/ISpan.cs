@@ -87,8 +87,8 @@ public static class SpanExtensions
     public static ITransactionTracer GetTransaction(this ISpan span) =>
         span switch
         {
+            TransactionTracer tracer => tracer.RootSpan,
             ITransactionTracer transaction => transaction,
-            SpanTracer tracer => tracer.Transaction,
             _ => throw new ArgumentOutOfRangeException(nameof(span), span, null)
         };
 
