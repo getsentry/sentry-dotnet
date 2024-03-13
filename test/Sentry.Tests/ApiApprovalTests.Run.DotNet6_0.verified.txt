@@ -702,7 +702,6 @@ namespace Sentry
         public void DisableAppDomainUnhandledExceptionCapture() { }
         public void DisableDiagnosticSourceIntegration() { }
         public void DisableDuplicateEventDetection() { }
-        public void DisableSystemDiagnosticsMetricsIntegration() { }
         public void DisableUnobservedTaskExceptionCapture() { }
         public void DisableWinUiUnhandledExceptionIntegration() { }
         public System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors() { }
