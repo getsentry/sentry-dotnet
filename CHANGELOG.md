@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fix missing exception StackTraces in some situations ([#3215](https://github.com/getsentry/sentry-dotnet/pull/3215))
+
 ### API changes
 
 - Removed `SentryOptionsExtensions` class - all the public methods moved directly to `SentryOptions` ([#3195](https://github.com/getsentry/sentry-dotnet/pull/3195))
