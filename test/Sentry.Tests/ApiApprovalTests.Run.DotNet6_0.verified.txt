@@ -679,52 +679,49 @@ namespace Sentry
         public System.Func<Sentry.TransactionSamplingContext, double?>? TracesSampler { get; set; }
         public Sentry.Extensibility.ITransport? Transport { get; set; }
         public bool UseAsyncFileIO { get; set; }
+        public void AddEventProcessor(Sentry.Extensibility.ISentryEventProcessor processor) { }
+        public void AddEventProcessorProvider(System.Func<System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor>> processorProvider) { }
+        public void AddEventProcessors(System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> processors) { }
+        public void AddExceptionFilter(Sentry.Extensibility.IExceptionFilter exceptionFilter) { }
+        public void AddExceptionFilterForType<TException>()
+            where TException : System.Exception { }
+        public void AddExceptionProcessor(Sentry.Extensibility.ISentryEventExceptionProcessor processor) { }
+        public void AddExceptionProcessorProvider(System.Func<System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor>> processorProvider) { }
+        public void AddExceptionProcessors(System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> processors) { }
+        public void AddInAppExclude(string prefix) { }
+        public void AddInAppInclude(string prefix) { }
+        public void AddIntegration(Sentry.Integrations.ISdkIntegration integration) { }
         public void AddJsonConverter(System.Text.Json.Serialization.JsonConverter converter) { }
         public void AddJsonSerializerContext<T>(System.Func<System.Text.Json.JsonSerializerOptions, T> contextBuilder)
             where T : System.Text.Json.Serialization.JsonSerializerContext { }
+        public void AddTransactionProcessor(Sentry.Extensibility.ISentryTransactionProcessor processor) { }
+        public void AddTransactionProcessorProvider(System.Func<System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor>> processorProvider) { }
+        public void AddTransactionProcessors(System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> processors) { }
+        public void ApplyDefaultTags(Sentry.IHasTags hasTags) { }
+        public void DisableAppDomainProcessExitFlush() { }
+        public void DisableAppDomainUnhandledExceptionCapture() { }
+        public void DisableDiagnosticSourceIntegration() { }
+        public void DisableDuplicateEventDetection() { }
+        public void DisableUnobservedTaskExceptionCapture() { }
+        public void DisableWinUiUnhandledExceptionIntegration() { }
+        public System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors() { }
+        public System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> GetAllExceptionProcessors() { }
+        public System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> GetAllTransactionProcessors() { }
+        public void RemoveEventProcessor<TProcessor>()
+            where TProcessor : Sentry.Extensibility.ISentryEventProcessor { }
+        public void RemoveExceptionFilter<TFilter>()
+            where TFilter : Sentry.Extensibility.IExceptionFilter { }
+        public void RemoveIntegration<TIntegration>()
+            where TIntegration : Sentry.Integrations.ISdkIntegration { }
+        public void RemoveTransactionProcessor<TProcessor>()
+            where TProcessor : Sentry.Extensibility.ISentryTransactionProcessor { }
         public void SetBeforeBreadcrumb(System.Func<Sentry.Breadcrumb, Sentry.Breadcrumb?> beforeBreadcrumb) { }
         public void SetBeforeBreadcrumb(System.Func<Sentry.Breadcrumb, Sentry.SentryHint, Sentry.Breadcrumb?> beforeBreadcrumb) { }
         public void SetBeforeSend(System.Func<Sentry.SentryEvent, Sentry.SentryEvent?> beforeSend) { }
         public void SetBeforeSend(System.Func<Sentry.SentryEvent, Sentry.SentryHint, Sentry.SentryEvent?> beforeSend) { }
         public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryTransaction?> beforeSendTransaction) { }
         public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryHint, Sentry.SentryTransaction?> beforeSendTransaction) { }
-    }
-    public static class SentryOptionsExtensions
-    {
-        public static void AddEventProcessor(this Sentry.SentryOptions options, Sentry.Extensibility.ISentryEventProcessor processor) { }
-        public static void AddEventProcessorProvider(this Sentry.SentryOptions options, System.Func<System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor>> processorProvider) { }
-        public static void AddEventProcessors(this Sentry.SentryOptions options, System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> processors) { }
-        public static void AddExceptionFilter(this Sentry.SentryOptions options, Sentry.Extensibility.IExceptionFilter exceptionFilter) { }
-        public static void AddExceptionFilterForType<TException>(this Sentry.SentryOptions options)
-            where TException : System.Exception { }
-        public static void AddExceptionProcessor(this Sentry.SentryOptions options, Sentry.Extensibility.ISentryEventExceptionProcessor processor) { }
-        public static void AddExceptionProcessorProvider(this Sentry.SentryOptions options, System.Func<System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor>> processorProvider) { }
-        public static void AddExceptionProcessors(this Sentry.SentryOptions options, System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> processors) { }
-        public static void AddInAppExclude(this Sentry.SentryOptions options, string prefix) { }
-        public static void AddInAppInclude(this Sentry.SentryOptions options, string prefix) { }
-        public static void AddIntegration(this Sentry.SentryOptions options, Sentry.Integrations.ISdkIntegration integration) { }
-        public static void AddTransactionProcessor(this Sentry.SentryOptions options, Sentry.Extensibility.ISentryTransactionProcessor processor) { }
-        public static void AddTransactionProcessorProvider(this Sentry.SentryOptions options, System.Func<System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor>> processorProvider) { }
-        public static void AddTransactionProcessors(this Sentry.SentryOptions options, System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> processors) { }
-        public static void ApplyDefaultTags(this Sentry.SentryOptions options, Sentry.IHasTags hasTags) { }
-        public static void DisableAppDomainProcessExitFlush(this Sentry.SentryOptions options) { }
-        public static void DisableAppDomainUnhandledExceptionCapture(this Sentry.SentryOptions options) { }
-        public static void DisableDiagnosticSourceIntegration(this Sentry.SentryOptions options) { }
-        public static void DisableDuplicateEventDetection(this Sentry.SentryOptions options) { }
-        public static void DisableUnobservedTaskExceptionCapture(this Sentry.SentryOptions options) { }
-        public static void DisableWinUiUnhandledExceptionIntegration(this Sentry.SentryOptions options) { }
-        public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors(this Sentry.SentryOptions options) { }
-        public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> GetAllExceptionProcessors(this Sentry.SentryOptions options) { }
-        public static System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> GetAllTransactionProcessors(this Sentry.SentryOptions options) { }
-        public static void RemoveEventProcessor<TProcessor>(this Sentry.SentryOptions options)
-            where TProcessor : Sentry.Extensibility.ISentryEventProcessor { }
-        public static void RemoveExceptionFilter<TFilter>(this Sentry.SentryOptions options)
-            where TFilter : Sentry.Extensibility.IExceptionFilter { }
-        public static void RemoveIntegration<TIntegration>(this Sentry.SentryOptions options)
-            where TIntegration : Sentry.Integrations.ISdkIntegration { }
-        public static void RemoveTransactionProcessor<TProcessor>(this Sentry.SentryOptions options)
-            where TProcessor : Sentry.Extensibility.ISentryTransactionProcessor { }
-        public static Sentry.SentryOptions UseStackTraceFactory(this Sentry.SentryOptions options, Sentry.Extensibility.ISentryStackTraceFactory sentryStackTraceFactory) { }
+        public Sentry.SentryOptions UseStackTraceFactory(Sentry.Extensibility.ISentryStackTraceFactory sentryStackTraceFactory) { }
     }
     public sealed class SentryPackage : Sentry.ISentryJsonSerializable
     {
