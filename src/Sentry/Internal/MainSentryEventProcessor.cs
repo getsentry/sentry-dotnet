@@ -86,9 +86,8 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
         // if there's no exception with a stack trace, then get the current stack trace
         if (@event.Exception?.StackTrace is null)
         {
-            var stackTrace = @event.SentryExceptions?.FirstOrDefault() is { } sentryEx
-                ? sentryEx.Stacktrace
-                : SentryStackTraceFactoryAccessor().Create();
+            var stackTrace = @event.SentryExceptions?.FirstOrDefault()?.Stacktrace
+                            ?? SentryStackTraceFactoryAccessor().Create();
             if (stackTrace != null)
             {
                 var currentThread = Thread.CurrentThread;
