@@ -6,6 +6,12 @@
 
 - Removed `SentryOptionsExtensions` class - all the public methods moved directly to `SentryOptions` ([#3195](https://github.com/getsentry/sentry-dotnet/pull/3195))
 
+### Dependencies
+
+- Bump CLI from v2.30.0 to v2.30.1 ([#3214](https://github.com/getsentry/sentry-dotnet/pull/3214))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2301)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.30.0...2.30.1)
+
 ## 4.2.1
 
 ### Fixes
