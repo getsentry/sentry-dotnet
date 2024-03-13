@@ -701,9 +701,11 @@ namespace Sentry
         public void ApplyDefaultTags(Sentry.IHasTags hasTags) { }
         public void DisableAppDomainProcessExitFlush() { }
         public void DisableAppDomainUnhandledExceptionCapture() { }
+        public void DisableDiagnosticSourceIntegration() { }
         public void DisableDuplicateEventDetection() { }
-        public void DisableNetFxInstallationsIntegration() { }
+        public void DisableSystemDiagnosticsMetricsIntegration() { }
         public void DisableUnobservedTaskExceptionCapture() { }
+        public void DisableWinUiUnhandledExceptionIntegration() { }
         public System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors() { }
         public System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> GetAllExceptionProcessors() { }
         public System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> GetAllTransactionProcessors() { }
