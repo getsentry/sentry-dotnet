@@ -5,6 +5,7 @@
 ### Fixes
 
 - Fix missing exception StackTraces in some situations ([#3215](https://github.com/getsentry/sentry-dotnet/pull/3215))
+- Scopes now get applied to OTEL spans in ASP.NET Core ([#3221](https://github.com/getsentry/sentry-dotnet/pull/3221))
 
 ### API changes
 
