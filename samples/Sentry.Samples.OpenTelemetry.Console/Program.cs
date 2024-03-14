@@ -7,13 +7,10 @@
 
 using System.Diagnostics;
 using OpenTelemetry;
-using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Sentry.OpenTelemetry;
 
-var serviceName = "Sentry.Samples.OpenTelemetry.Console";
-var serviceVersion = "1.0.0";
-var activitySource = new ActivitySource(serviceName);
+var activitySource = new ActivitySource("Sentry.Samples.OpenTelemetry.Console");
 
 SentrySdk.Init(options =>
 {
@@ -25,10 +22,6 @@ SentrySdk.Init(options =>
 
 using var tracerProvider = Sdk.CreateTracerProviderBuilder()
     .AddSource(activitySource.Name)
-    .ConfigureResource(resource =>
-        resource.AddService(
-            serviceName: serviceName,
-            serviceVersion: serviceVersion))
     .AddSentry() // <-- Configure OpenTelemetry to send traces to Sentry
     .Build();
 
