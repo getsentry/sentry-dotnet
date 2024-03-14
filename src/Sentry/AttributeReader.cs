@@ -1,4 +1,4 @@
-﻿namespace Sentry;
+namespace Sentry;
 
 internal static class AttributeReader
 {

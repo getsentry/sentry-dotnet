@@ -62,7 +62,7 @@ public static partial class SentrySdk
             {
                 // Note: The Cocoa SDK doesn't yet support hints.
                 // See https://github.com/getsentry/sentry-cocoa/issues/2325
-                var hint = new Hint();
+                var hint = new SentryHint();
                 var breadcrumb = b.ToBreadcrumb(options.DiagnosticLogger);
                 var result = beforeBreadcrumb(breadcrumb, hint)?.ToCocoaBreadcrumb();
 

@@ -1,12 +1,13 @@
 using Sentry.Extensibility;
 using Sentry.Http;
+using Sentry.Infrastructure;
 using Sentry.Integrations;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
 using Sentry.PlatformAbstractions;
-using static Sentry.Constants;
+using static Sentry.SentryConstants;
 
 #if HAS_DIAGNOSTIC_INTEGRATION
 using Sentry.Internal.DiagnosticSource;
@@ -187,9 +188,17 @@ public class SentryOptions
 #endif
 
 #if NET5_0_OR_GREATER && !__MOBILE__
-            if ((_defaultIntegrations & DefaultIntegrations.WinUiUnhandledExceptionIntegration) != 0)
+            if ((_defaultIntegrations & DefaultIntegrations.WinUiUnhandledExceptionIntegration) != 0
+                && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 yield return new WinUIUnhandledExceptionIntegration();
+            }
+#endif
+
+#if NET8_0_OR_GREATER
+            if ((_defaultIntegrations & DefaultIntegrations.SystemDiagnosticsMetricsIntegration) != 0)
+            {
+                yield return new SystemDiagnosticsMetricsIntegration();
             }
 #endif
 
@@ -415,9 +424,9 @@ public class SentryOptions
         return string.Equals(requestBaseUrl, _sentryBaseUrl.Value, StringComparison.OrdinalIgnoreCase);
     }
 
-    private Func<SentryEvent, Hint, SentryEvent?>? _beforeSend;
+    private Func<SentryEvent, SentryHint, SentryEvent?>? _beforeSend;
 
-    internal Func<SentryEvent, Hint, SentryEvent?>? BeforeSendInternal => _beforeSend;
+    internal Func<SentryEvent, SentryHint, SentryEvent?>? BeforeSendInternal => _beforeSend;
 
     /// <summary>
     /// Configures a callback function to be invoked before sending an event to Sentry
@@ -427,7 +436,7 @@ public class SentryOptions
     /// application a chance to inspect and/or modify the event before it's sent. If the
     /// event should not be sent at all, return null from the callback.
     /// </remarks>
-    public void SetBeforeSend(Func<SentryEvent, Hint, SentryEvent?> beforeSend)
+    public void SetBeforeSend(Func<SentryEvent, SentryHint, SentryEvent?> beforeSend)
     {
         _beforeSend = beforeSend;
     }
@@ -445,15 +454,15 @@ public class SentryOptions
         _beforeSend = (@event, _) => beforeSend(@event);
     }
 
-    private Func<SentryTransaction, Hint, SentryTransaction?>? _beforeSendTransaction;
+    private Func<SentryTransaction, SentryHint, SentryTransaction?>? _beforeSendTransaction;
 
-    internal Func<SentryTransaction, Hint, SentryTransaction?>? BeforeSendTransactionInternal => _beforeSendTransaction;
+    internal Func<SentryTransaction, SentryHint, SentryTransaction?>? BeforeSendTransactionInternal => _beforeSendTransaction;
 
     /// <summary>
     /// Configures a callback to invoke before sending a transaction to Sentry
     /// </summary>
     /// <param name="beforeSendTransaction">The callback</param>
-    public void SetBeforeSendTransaction(Func<SentryTransaction, Hint, SentryTransaction?> beforeSendTransaction)
+    public void SetBeforeSendTransaction(Func<SentryTransaction, SentryHint, SentryTransaction?> beforeSendTransaction)
     {
         _beforeSendTransaction = beforeSendTransaction;
     }
@@ -467,9 +476,9 @@ public class SentryOptions
         _beforeSendTransaction = (transaction, _) => beforeSendTransaction(transaction);
     }
 
-    private Func<Breadcrumb, Hint, Breadcrumb?>? _beforeBreadcrumb;
+    private Func<Breadcrumb, SentryHint, Breadcrumb?>? _beforeBreadcrumb;
 
-    internal Func<Breadcrumb, Hint, Breadcrumb?>? BeforeBreadcrumbInternal => _beforeBreadcrumb;
+    internal Func<Breadcrumb, SentryHint, Breadcrumb?>? BeforeBreadcrumbInternal => _beforeBreadcrumb;
 
     /// <summary>
     /// Sets a callback function to be invoked when a breadcrumb is about to be stored.
@@ -478,7 +487,7 @@ public class SentryOptions
     /// Gives a chance to inspect and modify the breadcrumb. If null is returned, the
     /// breadcrumb will be discarded. Otherwise the result of the callback will be stored.
     /// </remarks>
-    public void SetBeforeBreadcrumb(Func<Breadcrumb, Hint, Breadcrumb?> beforeBreadcrumb)
+    public void SetBeforeBreadcrumb(Func<Breadcrumb, SentryHint, Breadcrumb?> beforeBreadcrumb)
     {
         _beforeBreadcrumb = beforeBreadcrumb;
     }
@@ -708,7 +717,7 @@ public class SentryOptions
     public IList<SubstringOrRegexPattern> FailedRequestTargets
     {
         get => _failedRequestTargets.Value;
-        set => _failedRequestTargets = new(value.SetWithConfigBinding);
+        set => _failedRequestTargets = new(value.WithConfigBinding);
     }
 
     /// <summary>
@@ -910,7 +919,7 @@ public class SentryOptions
         //       .NET 7 changed this to call the setter with an array that already starts with the old value.
         //       We have to handle both cases.
         get => _tracePropagationTargets;
-        set => _tracePropagationTargets = value.SetWithConfigBinding();
+        set => _tracePropagationTargets = value.WithConfigBinding();
     }
 
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
@@ -1085,7 +1094,7 @@ public class SentryOptions
     /// </summary>
     /// <remarks>
     /// This option applies only to complex objects being added to Sentry events as contexts or extras, which do not
-    /// implement <see cref="IJsonSerializable"/>.
+    /// implement <see cref="ISentryJsonSerializable"/>.
     /// </remarks>
     public bool JsonPreserveReferences
     {
@@ -1212,6 +1221,9 @@ public class SentryOptions
 #if NET5_0_OR_GREATER && !__MOBILE__
                                | DefaultIntegrations.WinUiUnhandledExceptionIntegration
 #endif
+#if NET8_0_OR_GREATER
+                               | DefaultIntegrations.SystemDiagnosticsMetricsIntegration
+#endif
                                ;
 
 #if ANDROID
@@ -1281,16 +1293,320 @@ public class SentryOptions
         );
     }
 
-    internal void AddIntegration(ISdkIntegration integration)
+    /// <summary>
+    /// Add an integration
+    /// </summary>
+    /// <param name="integration">The integration.</param>
+    public void AddIntegration(ISdkIntegration integration)
     {
         _integrations.Add(integration);
     }
 
-    internal void RemoveIntegration<TIntegration>()
+    /// <summary>
+    /// Removes all integrations of type <typeparamref name="TIntegration"/>.
+    /// </summary>
+    /// <typeparam name="TIntegration">The type of the integration(s) to remove.</typeparam>
+    public void RemoveIntegration<TIntegration>() where TIntegration : ISdkIntegration
     {
         // Note: Not removing default integrations
         _integrations.RemoveAll(integration => integration is TIntegration);
     }
+
+    /// <summary>
+    /// Add an exception filter.
+    /// </summary>
+    /// <param name="exceptionFilter">The exception filter to add.</param>
+    public void AddExceptionFilter(IExceptionFilter exceptionFilter)
+    {
+        if (ExceptionFilters == null)
+        {
+            ExceptionFilters = new() { exceptionFilter };
+        }
+        else
+        {
+            ExceptionFilters.Add(exceptionFilter);
+        }
+    }
+
+    /// <summary>
+    /// Removes all filters of type <typeparamref name="TFilter"/>
+    /// </summary>
+    /// <typeparam name="TFilter">The type of filter(s) to remove.</typeparam>
+    public void RemoveExceptionFilter<TFilter>() where TFilter : IExceptionFilter
+        => ExceptionFilters?.RemoveAll(filter => filter is TFilter);
+
+    /// <summary>
+    /// Ignore exception of type <typeparamref name="TException"/> or derived.
+    /// </summary>
+    /// <typeparam name="TException">The type of the exception to ignore.</typeparam>
+    public void AddExceptionFilterForType<TException>() where TException : Exception
+        => AddExceptionFilter(new ExceptionTypeFilter<TException>());
+
+    /// <summary>
+    /// Add prefix to exclude from 'InApp' stacktrace list.
+    /// </summary>
+    /// <param name="prefix">The string used to filter the stacktrace to be excluded from InApp.</param>
+    /// <remarks>
+    /// Sentry by default filters the stacktrace to display only application code.
+    /// A user can optionally click to see all which will include framework and libraries.
+    /// A <see cref="string.StartsWith(string)"/> is executed
+    /// </remarks>
+    /// <example>
+    /// 'System.', 'Microsoft.'
+    /// </example>
+    public void AddInAppExclude(string prefix)
+    {
+        if (InAppExclude == null)
+        {
+            InAppExclude = new() { prefix };
+        }
+        else
+        {
+            InAppExclude.Add(prefix);
+        }
+    }
+
+    /// <summary>
+    /// Add prefix to include as in 'InApp' stacktrace.
+    /// </summary>
+    /// <param name="prefix">The string used to filter the stacktrace to be included in InApp.</param>
+    /// <remarks>
+    /// Sentry by default filters the stacktrace to display only application code.
+    /// A user can optionally click to see all which will include framework and libraries.
+    /// A <see cref="string.StartsWith(string)"/> is executed
+    /// </remarks>
+    /// <example>
+    /// 'System.CustomNamespace', 'Microsoft.Azure.App'
+    /// </example>
+    public void AddInAppInclude(string prefix)
+    {
+        if (InAppInclude == null)
+        {
+            InAppInclude = new() { prefix };
+        }
+        else
+        {
+            InAppInclude.Add(prefix);
+        }
+    }
+
+    /// <summary>
+    /// Add an exception processor.
+    /// </summary>
+    /// <param name="processor">The exception processor.</param>
+    public void AddExceptionProcessor(ISentryEventExceptionProcessor processor)
+    {
+        ExceptionProcessors.Add((processor.GetType(), new Lazy<ISentryEventExceptionProcessor>(() => processor)));
+    }
+
+    /// <summary>
+    /// Add the exception processors.
+    /// </summary>
+    /// <param name="processors">The exception processors.</param>
+    public void AddExceptionProcessors(IEnumerable<ISentryEventExceptionProcessor> processors)
+    {
+        foreach (var processor in processors)
+        {
+            AddExceptionProcessor(processor);
+        }
+    }
+
+    /// <summary>
+    /// Adds an event processor which is invoked when creating a <see cref="SentryEvent"/>.
+    /// </summary>
+    /// <param name="processor">The event processor.</param>
+    public void AddEventProcessor(ISentryEventProcessor processor)
+    {
+        EventProcessors.Add((processor.GetType(), new Lazy<ISentryEventProcessor>(() => processor)));
+    }
+
+    /// <summary>
+    /// Adds event processors which are invoked when creating a <see cref="SentryEvent"/>.
+    /// </summary>
+    /// <param name="processors">The event processors.</param>
+    public void AddEventProcessors(IEnumerable<ISentryEventProcessor> processors)
+    {
+        foreach (var processor in processors)
+        {
+            AddEventProcessor(processor);
+        }
+    }
+
+    /// <summary>
+    /// Removes all event processors of type <typeparamref name="TProcessor"/>
+    /// </summary>
+    /// <typeparam name="TProcessor">The type of processor(s) to remove.</typeparam>
+    public void RemoveEventProcessor<TProcessor>() where TProcessor : ISentryEventProcessor
+        => EventProcessors.RemoveAll(processor => processor.Type == typeof(TProcessor));
+
+    /// <summary>
+    /// Adds an event processor provider which is invoked when creating a <see cref="SentryEvent"/>.
+    /// </summary>
+    /// <param name="processorProvider">The event processor provider.</param>
+    public void AddEventProcessorProvider(Func<IEnumerable<ISentryEventProcessor>> processorProvider)
+    {
+        EventProcessorsProviders.Add(processorProvider);
+    }
+
+    /// <summary>
+    /// Adds an transaction processor which is invoked when creating a <see cref="SentryTransaction"/>.
+    /// </summary>
+    /// <param name="processor">The transaction processor.</param>
+    public void AddTransactionProcessor(ISentryTransactionProcessor processor)
+    {
+        if (TransactionProcessors == null)
+        {
+            TransactionProcessors = new() { processor };
+        }
+        else
+        {
+            TransactionProcessors.Add(processor);
+        }
+    }
+
+    /// <summary>
+    /// Adds transaction processors which are invoked when creating a <see cref="SentryTransaction"/>.
+    /// </summary>
+    /// <param name="processors">The transaction processors.</param>
+    public void AddTransactionProcessors(IEnumerable<ISentryTransactionProcessor> processors)
+    {
+        if (TransactionProcessors == null)
+        {
+            TransactionProcessors = processors.ToList();
+        }
+        else
+        {
+            TransactionProcessors.AddRange(processors);
+        }
+    }
+
+    /// <summary>
+    /// Removes all transaction processors of type <typeparamref name="TProcessor"/>
+    /// </summary>
+    /// <typeparam name="TProcessor">The type of processor(s) to remove.</typeparam>
+    public void RemoveTransactionProcessor<TProcessor>() where TProcessor : ISentryTransactionProcessor
+        => TransactionProcessors?.RemoveAll(processor => processor is TProcessor);
+
+    /// <summary>
+    /// Adds an transaction processor provider which is invoked when creating a <see cref="SentryTransaction"/>.
+    /// </summary>
+    /// <param name="processorProvider">The transaction processor provider.</param>
+    public void AddTransactionProcessorProvider(Func<IEnumerable<ISentryTransactionProcessor>> processorProvider)
+        => TransactionProcessorsProviders = TransactionProcessorsProviders.Concat(new[] { processorProvider }).ToList();
+
+    /// <summary>
+    /// Add the exception processor provider.
+    /// </summary>
+    /// <param name="processorProvider">The exception processor provider.</param>
+    public void AddExceptionProcessorProvider(Func<IEnumerable<ISentryEventExceptionProcessor>> processorProvider)
+    {
+        ExceptionProcessorsProviders.Add(processorProvider);
+    }
+
+    /// <summary>
+    /// Invokes all event processor providers available.
+    /// </summary>
+    public IEnumerable<ISentryEventProcessor> GetAllEventProcessors()
+        => EventProcessorsProviders.SelectMany(p => p());
+
+    /// <summary>
+    /// Invokes all transaction processor providers available.
+    /// </summary>
+    public IEnumerable<ISentryTransactionProcessor> GetAllTransactionProcessors()
+        => TransactionProcessorsProviders.SelectMany(p => p());
+
+    /// <summary>
+    /// Invokes all exception processor providers available.
+    /// </summary>
+    public IEnumerable<ISentryEventExceptionProcessor> GetAllExceptionProcessors()
+        => ExceptionProcessorsProviders.SelectMany(p => p());
+
+    /// <summary>
+    /// Use custom <see cref="ISentryStackTraceFactory" />.
+    /// </summary>
+    /// <param name="sentryStackTraceFactory">The stack trace factory.</param>
+    public SentryOptions UseStackTraceFactory(ISentryStackTraceFactory sentryStackTraceFactory)
+    {
+        SentryStackTraceFactory = sentryStackTraceFactory ?? throw new ArgumentNullException(nameof(sentryStackTraceFactory));
+        return this;
+    }
+
+    /// <summary>
+    /// Applies the default tags to an event without resetting existing tags.
+    /// </summary>
+    /// <param name="hasTags">The event to apply the tags to.</param>
+    public void ApplyDefaultTags(IHasTags hasTags)
+    {
+        foreach (var defaultTag in DefaultTags.Where(t => !hasTags.Tags.TryGetValue(t.Key, out _)))
+        {
+            hasTags.SetTag(defaultTag.Key, defaultTag.Value);
+        }
+    }
+
+    /// <summary>
+    /// Disables the strategy to detect duplicate events.
+    /// </summary>
+    /// <remarks>
+    /// In case a second event is being sent out from the same exception, that event will be discarded.
+    /// It is possible the second event had in fact more data. In which case it'd be ideal to avoid the first
+    /// event going out in the first place.
+    /// </remarks>
+    public void DisableDuplicateEventDetection()
+        => RemoveEventProcessor<DuplicateEventDetectionEventProcessor>();
+
+    /// <summary>
+    /// Disables the capture of errors through <see cref="AppDomain.UnhandledException"/>.
+    /// </summary>
+    public void DisableAppDomainUnhandledExceptionCapture() =>
+        RemoveDefaultIntegration(DefaultIntegrations.AppDomainUnhandledExceptionIntegration);
+
+#if HAS_DIAGNOSTIC_INTEGRATION
+    /// <summary>
+    /// Disables the integrations with Diagnostic source.
+    /// </summary>
+    public void DisableDiagnosticSourceIntegration()
+        => RemoveDefaultIntegration(DefaultIntegrations.SentryDiagnosticListenerIntegration);
+#endif
+
+    /// <summary>
+    /// Disables the capture of errors through <see cref="TaskScheduler.UnobservedTaskException"/>.
+    /// </summary>
+    public void DisableUnobservedTaskExceptionCapture() =>
+        RemoveDefaultIntegration(DefaultIntegrations.UnobservedTaskExceptionIntegration);
+
+#if NETFRAMEWORK
+    /// <summary>
+    /// Disables the list addition of .Net Frameworks into events.
+    /// </summary>
+    public void DisableNetFxInstallationsIntegration()
+    {
+        RemoveEventProcessor<NetFxInstallationsEventProcessor>();
+        RemoveDefaultIntegration(DefaultIntegrations.NetFxInstallationsIntegration);
+    }
+#endif
+
+    /// <summary>
+    /// By default, any queued events (i.e: captures errors) are flushed on <see cref="AppDomain.ProcessExit"/>.
+    /// This method disables that behaviour.
+    /// </summary>
+    public void DisableAppDomainProcessExitFlush() =>
+        RemoveDefaultIntegration(DefaultIntegrations.AppDomainProcessExitIntegration);
+
+#if NET5_0_OR_GREATER && !__MOBILE__
+    /// <summary>
+    /// Disables WinUI exception handler
+    /// </summary>
+    public void DisableWinUiUnhandledExceptionIntegration()
+        => RemoveDefaultIntegration(DefaultIntegrations.WinUiUnhandledExceptionIntegration);
+#endif
+
+#if NET8_0_OR_GREATER
+    /// <summary>
+    /// Disables the System.Diagnostics.Metrics integration.
+    /// </summary>
+    public void DisableSystemDiagnosticsMetricsIntegration()
+        => RemoveDefaultIntegration(DefaultIntegrations.SystemDiagnosticsMetricsIntegration);
+#endif
 
     internal bool HasIntegration<TIntegration>() => _integrations.Any(integration => integration is TIntegration);
 
@@ -1312,18 +1628,55 @@ public class SentryOptions
 #if NET5_0_OR_GREATER && !__MOBILE__
         WinUiUnhandledExceptionIntegration = 1 << 6,
 #endif
+#if NET8_0_OR_GREATER
+        SystemDiagnosticsMetricsIntegration = 1 << 7,
+#endif
     }
-}
 
-/// <summary>
-/// Settings for the experimental Metrics feature. This feature is preview only and will very likely change in the future
-/// without a major version bump... so use at your own risk.
-/// </summary>
-public class ExperimentalMetricsOptions
-{
-    /// <summary>
-    /// Determines the sample rate for metrics. 0.0 means no metrics will be sent (metrics disabled). 1.0 implies all
-    /// metrics will be sent.
-    /// </summary>
-    public bool EnableCodeLocations { get; set; } = true;
+    internal void SetupLogging()
+    {
+        if (Debug)
+        {
+            if (DiagnosticLogger == null)
+            {
+                DiagnosticLogger = new ConsoleDiagnosticLogger(DiagnosticLevel);
+                DiagnosticLogger.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}",
+                    DiagnosticLevel);
+            }
+
+            if (SettingLocator.GetEnvironment().Equals("production", StringComparison.OrdinalIgnoreCase))
+            {
+                DiagnosticLogger.LogWarning("Sentry option 'Debug' is set to true while Environment is production. " +
+                                            "Be aware this can cause performance degradation and is not advised. " +
+                                            "See https://docs.sentry.io/platforms/dotnet/configuration/diagnostic-logger " +
+                                            "for more information");
+            }
+        }
+        else
+        {
+            DiagnosticLogger = null;
+        }
+    }
+
+    internal string? TryGetDsnSpecificCacheDirectoryPath()
+    {
+        if (string.IsNullOrWhiteSpace(CacheDirectoryPath))
+        {
+            return null;
+        }
+
+        // DSN must be set to use caching
+        if (string.IsNullOrWhiteSpace(Dsn))
+        {
+            return null;
+        }
+
+        return Path.Combine(CacheDirectoryPath, "Sentry", Dsn.GetHashString());
+    }
+
+    internal string? TryGetProcessSpecificCacheDirectoryPath()
+    {
+        // In the future, this will most likely contain process ID
+        return TryGetDsnSpecificCacheDirectoryPath();
+    }
 }

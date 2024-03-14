@@ -135,7 +135,7 @@ public static class HubExtensions
     public static void AddBreadcrumb(
         this IHub hub,
         Breadcrumb breadcrumb,
-        Hint? hint = null
+        SentryHint? hint = null
         )
     {
         // Not to throw on code that ignores nullability warnings.
@@ -145,7 +145,7 @@ public static class HubExtensions
         }
 
         hub.ConfigureScope(
-            s => s.AddBreadcrumb(breadcrumb, hint ?? new Hint())
+            s => s.AddBreadcrumb(breadcrumb, hint ?? new SentryHint())
             );
     }
 

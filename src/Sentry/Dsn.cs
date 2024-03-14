@@ -61,7 +61,7 @@ internal sealed class Dsn
     public override string ToString() => Source;
 
     public static bool IsDisabled(string? dsn) =>
-        Constants.DisableSdkDsnValue.Equals(dsn, StringComparison.OrdinalIgnoreCase);
+        SentryConstants.DisableSdkDsnValue.Equals(dsn, StringComparison.OrdinalIgnoreCase);
 
     public static Dsn Parse(string dsn)
     {

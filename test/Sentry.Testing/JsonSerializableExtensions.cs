@@ -4,7 +4,7 @@ internal static class JsonSerializableExtensions
 {
     private static readonly bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
-    public static string ToJsonString(this IJsonSerializable serializable, IDiagnosticLogger logger = null, bool indented = false) =>
+    public static string ToJsonString(this ISentryJsonSerializable serializable, IDiagnosticLogger logger = null, bool indented = false) =>
         WriteToJsonString(writer => writer.WriteSerializableValue(serializable, logger), indented);
 
     public static string ToJsonString(this object @object, IDiagnosticLogger logger = null, bool indented = false) =>

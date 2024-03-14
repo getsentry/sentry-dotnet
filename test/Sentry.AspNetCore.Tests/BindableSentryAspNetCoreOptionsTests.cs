@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Sentry.AspNetCore.Tests;
 
-public class BindableSentryAspNetCoreOptionsTests: BindableTests<SentryAspNetCoreOptions>
+public class BindableSentryAspNetCoreOptionsTests : BindableTests<SentryAspNetCoreOptions>
 {
     public BindableSentryAspNetCoreOptionsTests() : base(nameof(SentryAspNetCoreOptions.ExperimentalMetrics))
     {

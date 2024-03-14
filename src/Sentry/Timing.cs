@@ -4,8 +4,7 @@ using Sentry.Protocol.Metrics;
 namespace Sentry;
 
 /// <summary>
-/// Measures the time it takes to run a given code block and emits this as a metric. The <see cref="Timing"/> class is
-/// designed to be used in a <c>using</c> statement.
+/// Measures the time it takes to run a given code block and emits this as a metric.
 /// </summary>
 /// <example>
 /// using (var timing = new Timing("my-operation"))
@@ -13,84 +12,70 @@ namespace Sentry;
 ///     ...
 /// }
 /// </example>
-public class Timing: IDisposable
+internal class Timing : IDisposable
 {
-    private readonly IHub _hub;
+    internal const string OperationName = "metric.timing";
+
+    private readonly SentryOptions _options;
+    private readonly MetricAggregator _metricAggregator;
     private readonly string _key;
     private readonly MeasurementUnit.Duration _unit;
     private readonly IDictionary<string, string>? _tags;
-    private readonly Stopwatch _stopwatch = new();
+    internal readonly Stopwatch _stopwatch = new();
     private readonly ISpan _span;
-    private readonly DateTime _startTime = DateTime.UtcNow;
+    internal readonly DateTime _startTime = DateTime.UtcNow;
 
     /// <summary>
     /// Creates a new <see cref="Timing"/> instance.
     /// </summary>
-    public Timing(string key, MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
-        IDictionary<string, string>? tags = null)
-        : this(SentrySdk.CurrentHub, key, unit, tags, stackLevel: 2 /* one for each constructor */)
+    internal Timing(MetricAggregator metricAggregator, IMetricHub metricHub, SentryOptions options,
+        string key, MeasurementUnit.Duration unit, IDictionary<string, string>? tags, int stackLevel)
     {
-    }
-
-    /// <summary>
-    /// Creates a new <see cref="Timing"/> instance.
-    /// </summary>
-    public Timing(IHub hub, string key, MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
-        IDictionary<string, string>? tags = null)
-    : this(hub, key, unit, tags, stackLevel: 2 /* one for each constructor */)
-    {
-    }
-
-    internal Timing(IHub hub, string key, MeasurementUnit.Duration unit, IDictionary<string, string>? tags,
-        int stackLevel)
-    {
-        _hub = hub;
+        _options = options;
+        _metricAggregator = metricAggregator;
         _key = key;
         _unit = unit;
         _tags = tags;
         _stopwatch.Start();
 
-        ITransactionTracer? currentTransaction = null;
-        hub.ConfigureScope(s => currentTransaction = s.Transaction);
-        _span = currentTransaction is {} transaction
-            ? transaction.StartChild("metric.timing", key)
-            : hub.StartTransaction("metric.timing", key);
+        _span = metricHub.StartSpan(OperationName, key);
         if (tags is not null)
         {
             _span.SetTags(tags);
         }
 
         // Report code locations here for better accuracy
-        if (hub.Metrics is MetricAggregator metrics)
-        {
-            metrics.RecordCodeLocation(MetricType.Distribution, key, unit, stackLevel + 1, _startTime);
-        }
+        _metricAggregator.RecordCodeLocation(MetricType.Distribution, key, unit, stackLevel + 1, _startTime);
     }
 
     /// <inheritdoc cref="IDisposable"/>
     public void Dispose()
     {
         _stopwatch.Stop();
+        DisposeInternal(_stopwatch.Elapsed);
+    }
 
+    internal void DisposeInternal(TimeSpan elapsed)
+    {
         try
         {
             var value = _unit switch
             {
-                MeasurementUnit.Duration.Week => _stopwatch.Elapsed.TotalDays / 7,
-                MeasurementUnit.Duration.Day => _stopwatch.Elapsed.TotalDays,
-                MeasurementUnit.Duration.Hour => _stopwatch.Elapsed.TotalHours,
-                MeasurementUnit.Duration.Minute => _stopwatch.Elapsed.TotalMinutes,
-                MeasurementUnit.Duration.Second => _stopwatch.Elapsed.TotalSeconds,
-                MeasurementUnit.Duration.Millisecond => _stopwatch.Elapsed.TotalMilliseconds,
-                MeasurementUnit.Duration.Microsecond => _stopwatch.Elapsed.TotalMilliseconds * 1000,
-                MeasurementUnit.Duration.Nanosecond => _stopwatch.Elapsed.TotalMilliseconds * 1000000,
+                MeasurementUnit.Duration.Week => elapsed.TotalDays / 7,
+                MeasurementUnit.Duration.Day => elapsed.TotalDays,
+                MeasurementUnit.Duration.Hour => elapsed.TotalHours,
+                MeasurementUnit.Duration.Minute => elapsed.TotalMinutes,
+                MeasurementUnit.Duration.Second => elapsed.TotalSeconds,
+                MeasurementUnit.Duration.Millisecond => elapsed.TotalMilliseconds,
+                MeasurementUnit.Duration.Microsecond => elapsed.TotalMilliseconds * 1000,
+                MeasurementUnit.Duration.Nanosecond => elapsed.TotalMilliseconds * 1000000,
                 _ => throw new ArgumentOutOfRangeException(nameof(_unit), _unit, null)
             };
-            _hub.Metrics.Timing(_key, value, _unit, _tags, _startTime);
+            _metricAggregator.Timing(_key, value, _unit, _tags, _startTime);
         }
         catch (Exception e)
         {
-            _hub.GetSentryOptions()?.LogError(e, "Error capturing timing '{0}'", _key);
+            _options.LogError(e, "Error capturing timing '{0}'", _key);
         }
         finally
         {

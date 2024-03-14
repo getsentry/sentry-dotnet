@@ -226,7 +226,7 @@ public sealed class Envelope : ISerializable, IDisposable
     public static Envelope FromEvent(
         SentryEvent @event,
         IDiagnosticLogger? logger = null,
-        IReadOnlyCollection<Attachment>? attachments = null,
+        IReadOnlyCollection<SentryAttachment>? attachments = null,
         SessionUpdate? sessionUpdate = null)
     {
         var eventId = @event.EventId;
@@ -317,7 +317,7 @@ public sealed class Envelope : ISerializable, IDisposable
             // Profiler.Collect() returns an ISerializable which may also throw asynchronously, which is handled down
             // the road in AsyncJsonSerializable and the EnvelopeItem won't serialize and is omitted.
             // However, it mustn't throw synchronously because that would prevent the whole transaction being sent.
-            if (profiler.Collect(transaction) is {} profileInfo)
+            if (profiler.Collect(transaction) is { } profileInfo)
             {
                 items.Add(EnvelopeItem.FromProfileInfo(profileInfo));
             }
@@ -366,6 +366,18 @@ public sealed class Envelope : ISerializable, IDisposable
         {
             EnvelopeItem.FromSession(sessionUpdate)
         };
+
+        return new Envelope(header, items);
+    }
+
+    /// <summary>
+    /// Creates an envelope that contains a check in.
+    /// </summary>
+    public static Envelope FromCheckIn(SentryCheckIn checkIn)
+    {
+        var header = DefaultHeader;
+
+        var items = new[] { EnvelopeItem.FromCheckIn(checkIn) };
 
         return new Envelope(header, items);
     }

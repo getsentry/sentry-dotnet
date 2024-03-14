@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Force.Crc32;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol.Metrics;
@@ -7,12 +8,17 @@ namespace Sentry;
 
 internal class MetricAggregator : IMetricAggregator
 {
-    private readonly SentryOptions _options;
-    private readonly Action<IEnumerable<Metric>> _captureMetrics;
-    private readonly Action<CodeLocations> _captureCodeLocations;
-    private readonly TimeSpan _flushInterval;
+    internal const string DisposingMessage = "Disposing MetricAggregator.";
+    internal const string AlreadyDisposedMessage = "Already disposed MetricAggregator.";
+    internal const string CancelledMessage = "Stopping the Metric Aggregator due to a cancellation.";
+    internal const string ShutdownScheduledMessage = "Shutdown scheduled. Stopping by: {0}.";
+    internal const string ShutdownImmediatelyMessage = "Exiting immediately due to 0 shutdown timeout.";
+    internal const string FlushShutdownMessage = "Shutdown token triggered. Exiting metric aggregator.";
 
-    private readonly SemaphoreSlim _codeLocationLock = new(1,1);
+    private readonly SentryOptions _options;
+    private readonly IMetricHub _metricHub;
+
+    private readonly SemaphoreSlim _codeLocationLock = new(1, 1);
     private readonly ReaderWriterLockSlim _bucketsLock = new ReaderWriterLockSlim();
 
     private readonly CancellationTokenSource _shutdownSource;
@@ -26,32 +32,18 @@ internal class MetricAggregator : IMetricAggregator
     private readonly Lazy<Dictionary<long, ConcurrentDictionary<string, Metric>>> _buckets
         = new(() => new Dictionary<long, ConcurrentDictionary<string, Metric>>());
 
-    private long _lastClearedStaleLocations = DateTimeOffset.UtcNow.GetDayBucketKey();
-    private readonly ConcurrentDictionary<long, HashSet<MetricResourceIdentifier>> _seenLocations = new();
-    private Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>> _pendingLocations = new();
+    internal long _lastClearedStaleLocations = DateTimeOffset.UtcNow.GetDayBucketKey();
+    internal readonly ConcurrentDictionary<long, HashSet<MetricResourceIdentifier>> _seenLocations = new();
+    internal Dictionary<long, Dictionary<MetricResourceIdentifier, SentryStackFrame>> _pendingLocations = new();
 
-    private readonly Task _loopTask;
+    internal readonly Task _loopTask;
 
-    /// <summary>
-    /// MetricAggregator constructor.
-    /// </summary>
-    /// <param name="options">The <see cref="SentryOptions"/></param>
-    /// <param name="captureMetrics">The callback to be called to transmit aggregated metrics</param>
-    /// <param name="captureCodeLocations">The callback to be called to transmit new code locations</param>
-    /// <param name="shutdownSource">A <see cref="CancellationTokenSource"/></param>
-    /// <param name="disableLoopTask">
-    /// A boolean value indicating whether the Loop to flush metrics should run, for testing only.
-    /// </param>
-    /// <param name="flushInterval">An optional flushInterval, for testing only</param>
-    internal MetricAggregator(SentryOptions options, Action<IEnumerable<Metric>> captureMetrics,
-        Action<CodeLocations> captureCodeLocations, CancellationTokenSource? shutdownSource = null,
-        bool disableLoopTask = false, TimeSpan? flushInterval = null)
+    internal MetricAggregator(SentryOptions options, IMetricHub metricHub,
+        CancellationTokenSource? shutdownSource = null, bool disableLoopTask = false)
     {
         _options = options;
-        _captureMetrics = captureMetrics;
-        _captureCodeLocations = captureCodeLocations;
+        _metricHub = metricHub;
         _shutdownSource = shutdownSource ?? new CancellationTokenSource();
-        _flushInterval = flushInterval ?? TimeSpan.FromSeconds(5);
 
         if (disableLoopTask)
         {
@@ -63,61 +55,6 @@ internal class MetricAggregator : IMetricAggregator
         {
             options.LogDebug("Starting MetricsAggregator.");
             _loopTask = Task.Run(RunLoopAsync);
-        }
-    }
-
-    internal static string GetMetricBucketKey(MetricType type, string metricKey, MeasurementUnit unit,
-        IDictionary<string, string>? tags)
-    {
-        var typePrefix = type.ToStatsdType();
-        var serializedTags = GetTagsKey(tags);
-
-        return $"{typePrefix}_{metricKey}_{unit}_{serializedTags}";
-    }
-
-    internal static string GetTagsKey(IDictionary<string, string>? tags)
-    {
-        if (tags == null || tags.Count == 0)
-        {
-            return string.Empty;
-        }
-
-        const char pairDelimiter = ',';  // Delimiter between key-value pairs
-        const char keyValueDelimiter = '=';  // Delimiter between key and value
-        const char escapeChar = '\\';
-
-        var builder = new StringBuilder();
-
-        foreach (var tag in tags)
-        {
-            // Escape delimiters in key and value
-            var key = EscapeString(tag.Key, pairDelimiter, keyValueDelimiter, escapeChar);
-            var value = EscapeString(tag.Value, pairDelimiter, keyValueDelimiter, escapeChar);
-
-            if (builder.Length > 0)
-            {
-                builder.Append(pairDelimiter);
-            }
-
-            builder.Append(key).Append(keyValueDelimiter).Append(value);
-        }
-
-        return builder.ToString();
-
-        static string EscapeString(string input, params char[] charsToEscape)
-        {
-            var escapedString = new StringBuilder(input.Length);
-
-            foreach (var ch in input)
-            {
-                if (charsToEscape.Contains(ch))
-                {
-                    escapedString.Append(escapeChar);  // Prefix with escape character
-                }
-                escapedString.Append(ch);
-            }
-
-            return escapedString.ToString();
         }
     }
 
@@ -145,7 +82,7 @@ internal class MetricAggregator : IMetricAggregator
         DateTimeOffset? timestamp = null,
         int stackLevel = 1) => Emit(MetricType.Distribution, key, value, unit, tags, timestamp, stackLevel + 1);
 
-    /// <inheritdoc cref="IMetricAggregator.Set"/>
+    /// <inheritdoc cref="IMetricAggregator.Set(string,int,MeasurementUnit?,System.Collections.Generic.IDictionary{string,string},DateTimeOffset?,int)"/>
     public void Set(string key,
         int value,
         MeasurementUnit? unit = null,
@@ -153,13 +90,33 @@ internal class MetricAggregator : IMetricAggregator
         DateTimeOffset? timestamp = null,
         int stackLevel = 1) => Emit(MetricType.Set, key, value, unit, tags, timestamp, stackLevel + 1);
 
+    /// <inheritdoc cref="IMetricAggregator.Set(string,string,MeasurementUnit?,System.Collections.Generic.IDictionary{string,string},DateTimeOffset?,int)"/>
+    public void Set(string key,
+        string value,
+        MeasurementUnit? unit = null,
+        IDictionary<string, string>? tags = null,
+        DateTimeOffset? timestamp = null,
+        int stackLevel = 1)
+    {
+        // Compute the CRC32 hash of the value as byte array and cast it to a 32-bit signed integer
+        // Mask the lower 32 bits to ensure the result fits within the 32-bit integer range
+        var hash = (int)(Crc32Algorithm.Compute(Encoding.UTF8.GetBytes(value)) & 0xFFFFFFFF);
+
+        Emit(MetricType.Set, key, hash, unit, tags, timestamp, stackLevel + 1);
+    }
+
     /// <inheritdoc cref="IMetricAggregator.Timing"/>
-    public void Timing(string key,
+    public virtual void Timing(string key,
         double value,
         MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
         IDictionary<string, string>? tags = null,
         DateTimeOffset? timestamp = null,
         int stackLevel = 1) => Emit(MetricType.Distribution, key, value, unit, tags, timestamp, stackLevel + 1);
+
+    /// <inheritdoc cref="IMetricAggregator.StartTimer"/>
+    public IDisposable StartTimer(string key, MeasurementUnit.Duration unit = MeasurementUnit.Duration.Second,
+        IDictionary<string, string>? tags = null, int stackLevel = 1)
+        => new Timing(this, _metricHub, _options, key, unit, tags, stackLevel + 1);
 
     private void Emit(
         MetricType type,
@@ -174,19 +131,28 @@ internal class MetricAggregator : IMetricAggregator
         timestamp ??= DateTimeOffset.UtcNow;
         unit ??= MeasurementUnit.None;
 
+        var updatedTags = tags != null ? new Dictionary<string, string>(tags) : new Dictionary<string, string>();
+        updatedTags.AddIfNotNullOrEmpty("release", _options.Release);
+        updatedTags.AddIfNotNullOrEmpty("environment", _options.Environment);
+        var span = _metricHub.GetSpan();
+        if (span?.GetTransaction() is { } transaction)
+        {
+            updatedTags.AddIfNotNullOrEmpty("transaction", transaction.TransactionName);
+        }
+
         Func<string, Metric> addValuesFactory = type switch
         {
-            MetricType.Counter => _ => new CounterMetric(key, value, unit.Value, tags, timestamp),
-            MetricType.Gauge => _ => new GaugeMetric(key, value, unit.Value, tags, timestamp),
-            MetricType.Distribution => _ => new DistributionMetric(key, value, unit.Value, tags, timestamp),
-            MetricType.Set => _ => new SetMetric(key, (int)value, unit.Value, tags, timestamp),
+            MetricType.Counter => _ => new CounterMetric(key, value, unit.Value, updatedTags, timestamp),
+            MetricType.Gauge => _ => new GaugeMetric(key, value, unit.Value, updatedTags, timestamp),
+            MetricType.Distribution => _ => new DistributionMetric(key, value, unit.Value, updatedTags, timestamp),
+            MetricType.Set => _ => new SetMetric(key, (int)value, unit.Value, updatedTags, timestamp),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown MetricType")
         };
 
         var timeBucket = GetOrAddTimeBucket(timestamp.Value.GetTimeBucketKey());
 
         timeBucket.AddOrUpdate(
-            GetMetricBucketKey(type, key, unit.Value, tags),
+            MetricHelper.GetMetricBucketKey(type, key, unit.Value, updatedTags),
             addValuesFactory,
             (_, metric) =>
             {
@@ -200,7 +166,7 @@ internal class MetricAggregator : IMetricAggregator
                 // remains only a theoretical possibility of data loss (not confirmed). If this becomes a real problem
                 // and we need to guarantee delivery of every metric.Add, we'll need to build a more complex mechanism
                 // to coordinate flushing with emission.
-                lock(metric)
+                lock (metric)
                 {
                     metric.Add(value);
                 }
@@ -210,6 +176,16 @@ internal class MetricAggregator : IMetricAggregator
         if (_options.ExperimentalMetrics is { EnableCodeLocations: true })
         {
             RecordCodeLocation(type, key, unit.Value, stackLevel + 1, timestamp.Value);
+        }
+
+        switch (span)
+        {
+            case TransactionTracer transactionTracer:
+                transactionTracer.MetricsSummary.Add(type, key, value, unit, tags);
+                break;
+            case SpanTracer spanTracer:
+                spanTracer.MetricsSummary.Add(type, key, value, unit, tags);
+                break;
         }
     }
 
@@ -231,7 +207,7 @@ internal class MetricAggregator : IMetricAggregator
                 {
                     return existingBucket;
                 }
-                
+
                 var timeBucket = new ConcurrentDictionary<string, Metric>();
                 Buckets[bucketKey] = timeBucket;
                 return timeBucket;
@@ -247,7 +223,7 @@ internal class MetricAggregator : IMetricAggregator
         }
     }
 
-    internal void RecordCodeLocation(
+    internal virtual void RecordCodeLocation(
         MetricType type,
         string key,
         MeasurementUnit unit,
@@ -257,7 +233,7 @@ internal class MetricAggregator : IMetricAggregator
     {
         var startOfDay = timestamp.GetDayBucketKey();
         var metaKey = new MetricResourceIdentifier(type, key, unit);
-        var seenToday = _seenLocations.GetOrAdd(startOfDay,_ => []);
+        var seenToday = _seenLocations.GetOrAdd(startOfDay, _ => []);
 
         _codeLocationLock.Wait();
         try
@@ -294,9 +270,9 @@ internal class MetricAggregator : IMetricAggregator
     {
         var stackTrace = new StackTrace(true);
         var frames = DebugStackTrace.Create(_options, stackTrace, false).Frames;
-         return (frames.Count >= stackLevel)
-            ? frames[^(stackLevel + 1)]
-            : null;
+        return (frames.Count >= stackLevel)
+           ? frames[^(stackLevel + 1)]
+           : null;
     }
 
     private async Task RunLoopAsync()
@@ -313,12 +289,12 @@ internal class MetricAggregator : IMetricAggregator
                 // If the cancellation was signaled, run until the end of the queue or shutdownTimeout
                 try
                 {
-                    await Task.Delay(_flushInterval, _shutdownSource.Token).ConfigureAwait(false);
+                    await Task.Delay(_options.ShutdownTimeout, _shutdownSource.Token).ConfigureAwait(false);
                 }
                 // Cancellation requested and no timeout allowed, so exit even if there are more items
                 catch (OperationCanceledException) when (_options.ShutdownTimeout == TimeSpan.Zero)
                 {
-                    _options.LogDebug("Exiting immediately due to 0 shutdown timeout.");
+                    _options.LogDebug(ShutdownImmediatelyMessage);
 
                     await shutdownTimeout.CancelAsync().ConfigureAwait(false);
 
@@ -327,9 +303,7 @@ internal class MetricAggregator : IMetricAggregator
                 // Cancellation requested, scheduled shutdown
                 catch (OperationCanceledException)
                 {
-                    _options.LogDebug(
-                        "Shutdown scheduled. Stopping by: {0}.",
-                        _options.ShutdownTimeout);
+                    _options.LogDebug(ShutdownScheduledMessage, _options.ShutdownTimeout);
 
                     shutdownTimeout.CancelAfterSafe(_options.ShutdownTimeout);
 
@@ -381,7 +355,7 @@ internal class MetricAggregator : IMetricAggregator
                     _bucketsLock.ExitWriteLock();
                 }
 
-                _captureMetrics(bucket.Values);
+                _metricHub.CaptureMetrics(bucket.Values);
                 _options.LogDebug("Metric flushed for bucket {0}", key);
             }
 
@@ -391,7 +365,7 @@ internal class MetricAggregator : IMetricAggregator
 
                 _options.LogDebug("Flushing code locations: ", timestamp);
                 var codeLocations = new CodeLocations(timestamp, locations);
-                _captureCodeLocations(codeLocations);
+                _metricHub.CaptureCodeLocations(codeLocations);
                 _options.LogDebug("Code locations flushed: ", timestamp);
             }
 
@@ -399,7 +373,7 @@ internal class MetricAggregator : IMetricAggregator
         }
         catch (OperationCanceledException)
         {
-            _options.LogInfo("Shutdown token triggered. Exiting metric aggregator.");
+            _options.LogInfo(FlushShutdownMessage);
         }
         catch (Exception exception)
         {
@@ -407,7 +381,12 @@ internal class MetricAggregator : IMetricAggregator
         }
         finally
         {
-            _flushLock.Release();
+            // If the shutdown token was cancelled before we start this method, we can get here
+            // without the _flushLock.CurrentCount (i.e. available threads) having been decremented
+            if (_flushLock.CurrentCount < 1)
+            {
+                _flushLock.Release();
+            }
         }
     }
 
@@ -475,9 +454,9 @@ internal class MetricAggregator : IMetricAggregator
     /// <summary>
     /// Clear out stale seen locations once a day
     /// </summary>
-    private void ClearStaleLocations()
+    internal void ClearStaleLocations(DateTimeOffset? testNow = null)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = testNow ?? DateTimeOffset.UtcNow;
         var today = now.GetDayBucketKey();
         if (_lastClearedStaleLocations == today)
         {
@@ -503,11 +482,11 @@ internal class MetricAggregator : IMetricAggregator
     /// <inheritdoc cref="IAsyncDisposable.DisposeAsync"/>
     public async ValueTask DisposeAsync()
     {
-        _options.LogDebug("Disposing MetricAggregator.");
+        _options.LogDebug(DisposingMessage);
 
         if (_disposed)
         {
-            _options.LogDebug("Already disposed MetricAggregator.");
+            _options.LogDebug(AlreadyDisposedMessage);
             return;
         }
 
@@ -526,7 +505,7 @@ internal class MetricAggregator : IMetricAggregator
         }
         catch (OperationCanceledException)
         {
-            _options.LogDebug("Stopping the Metric Aggregator due to a cancellation.");
+            _options.LogDebug(CancelledMessage);
         }
         catch (Exception exception)
         {

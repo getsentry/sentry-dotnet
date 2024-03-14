@@ -28,6 +28,7 @@ For big feature it's advised to raise an issue to discuss it first.
 * On Windows:
   - [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework) 4.6.2 or higher.
   - `Sentry.DiagnosticSource.IntegrationTests.csproj` uses [SQL LocalDb](https://docs.microsoft.com/sql/database-engine/configure-windows/sql-server-express-localdb) - [download SQL LocalDB 2019](https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi). To avoid running these tests, unload `Sentry.DiagnosticSource.IntegrationTests.csproj` from the solution.
+  - Building Sentry with the Android bindings requires Java. If you're building Sentry using an IDE, typically you provide the path to your Java installation via the IDE settings (open the settings for Visual Studio or Rider and search for "android"). If you want to build Sentry from the command line (using `dotnet build`) then you will need to ensure the `JAVA_HOME` environment variable is set correctly.
 * On macOS/Linux
   - [Mono 6 or higher](https://www.mono-project.com/download/stable) to run the unit tests on the `net4x` targets.
   - Install `CMake` using your favourite package manager (e.g. `brew install cmake`)
@@ -54,6 +55,18 @@ Although the files in `/src/Sentry/Platforms/` are part of the `Sentry` project,
 These `*.props` files are used to add platform-specific files, such as references to the binding projects for each native SDK (which provide .NET wrappers around native Android or Cocoa functions).
 
 Also note `/Directory.Build.targets` contains some [convention based rules](https://github.com/getsentry/sentry-dotnet/blob/b1bfe1efc04eb4c911a85f1cf4cd2e5a176d7c8a/Directory.Build.targets#L17-L35) to exclude code that is not relevant for the target platform. Developers using Visual Studio will need to enable `Show All Files` in order to be able to see these files, when working with the solution.
+
+## Legacy ASP.NET solutions
+
+When debugging a legacy ASP.NET application with project references to `Sentry.AspNet`, you may need the following workarounds to tooling issues:
+
+#### Microsoft.WebApplication.targets not found
+
+* [Disable Microsoft.WebApplication.targets in Rider](https://youtrack.jetbrains.com/issue/RIDER-87113/Cannot-build-.NET-Framework-projects-with-legacy-style-csproj-after-upgrading-to-2022.3.1)
+
+#### CodeTaskFactory not supported
+
+* [Disable CodeTaskFactory in Roslyn](https://github.com/aspnet/RoslynCodeDomProvider/issues/51#issuecomment-396329427)
 
 ## Solution Filters
 

@@ -8,7 +8,7 @@ namespace Sentry.Protocol;
 /// Graphics device unit.
 /// </summary>
 /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/contexts/#gpu-context"/>
-public sealed class Gpu : IJsonSerializable, ICloneable<Gpu>, IUpdatable<Gpu>
+public sealed class Gpu : ISentryJsonSerializable, ICloneable<Gpu>, IUpdatable<Gpu>
 {
     /// <summary>
     /// Tells Sentry which type of context this is.

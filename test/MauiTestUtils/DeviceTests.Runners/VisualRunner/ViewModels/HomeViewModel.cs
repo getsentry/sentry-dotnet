@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -9,12 +9,11 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
 
 public class HomeViewModel : ViewModelBase
 {
-    readonly ITestNavigation _navigation;
-    readonly ITestRunner _runner;
-
-    string _diagnosticMessages = string.Empty;
-    bool _loaded;
-    bool _isBusy;
+    private readonly ITestNavigation _navigation;
+    private readonly ITestRunner _runner;
+    private string _diagnosticMessages = string.Empty;
+    private bool _loaded;
+    private bool _isBusy;
 
     internal HomeViewModel(ITestNavigation navigation, ITestRunner runner)
     {
@@ -78,12 +77,12 @@ public class HomeViewModel : ViewModelBase
         }
     }
 
-    async void CreditsExecute()
+    private async void CreditsExecute()
     {
         await _navigation.NavigateTo(PageType.Credits);
     }
 
-    async void RunEverythingExecute()
+    private async void RunEverythingExecute()
     {
         try
         {
@@ -100,7 +99,7 @@ public class HomeViewModel : ViewModelBase
         }
     }
 
-    async void NavigateToTestAssemblyExecute(TestAssemblyViewModel? vm)
+    private async void NavigateToTestAssemblyExecute(TestAssemblyViewModel? vm)
     {
         if (vm == null)
             return;
@@ -108,7 +107,7 @@ public class HomeViewModel : ViewModelBase
         await _navigation.NavigateTo(PageType.AssemblyTestList, vm);
     }
 
-    void RunnerOnOnDiagnosticMessage(string s)
+    private void RunnerOnOnDiagnosticMessage(string s)
     {
         DiagnosticMessages += $"{s}{Environment.NewLine}{Environment.NewLine}";
     }

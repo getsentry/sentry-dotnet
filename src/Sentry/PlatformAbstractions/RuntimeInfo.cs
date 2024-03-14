@@ -27,9 +27,9 @@ internal static class RuntimeInfo
             var installation = runtime.FrameworkInstallation ?? inst;
             return new SentryRuntime(runtime.Name, version, installation, runtime.Raw);
 #elif NET5_0_OR_GREATER
-            var version = runtime.Version ?? GetNetCoreVersion(runtime);
-            var identifier = runtime.Identifier ?? GetRuntimeIdentifier(runtime);
-            return new SentryRuntime(runtime.Name, version, runtime.Raw, identifier);
+        var version = runtime.Version ?? GetNetCoreVersion(runtime);
+        var identifier = runtime.Identifier ?? GetRuntimeIdentifier(runtime);
+        return new SentryRuntime(runtime.Name, version, runtime.Raw, identifier);
 #else
         var version = runtime.Version ?? GetNetCoreVersion(runtime);
         return new SentryRuntime(runtime.Name, version, runtime.Raw);
@@ -99,17 +99,17 @@ internal static class RuntimeInfo
 #endif
 
 #if NET5_0_OR_GREATER
-        internal static string? GetRuntimeIdentifier(SentryRuntime runtime)
+    internal static string? GetRuntimeIdentifier(SentryRuntime runtime)
+    {
+        try
         {
-            try
-            {
-                return RuntimeInformation.RuntimeIdentifier;
-            }
-            catch
-            {
-                return null;
-            }
+            return RuntimeInformation.RuntimeIdentifier;
         }
+        catch
+        {
+            return null;
+        }
+    }
 #endif
 
     private static SentryRuntime? GetFromRuntimeInformation()

@@ -6,7 +6,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry User Feedback.
 /// </summary>
-public sealed class UserFeedback : IJsonSerializable
+public sealed class UserFeedback : ISentryJsonSerializable
 {
     /// <summary>
     /// The eventId of the event to which the user feedback is associated.

@@ -1,4 +1,4 @@
-﻿namespace Sentry.AspNetCore.Tests;
+namespace Sentry.AspNetCore.Tests;
 
 internal static class VerifyHelper
 {
@@ -6,6 +6,6 @@ internal static class VerifyHelper
     {
         return settings
             .IgnoreMembers("ConnectionId", "RequestId")
-            .ScrubLinesWithReplace(_ => _.Split(new[] {" (Sentry.AspNetCore.Tests) "}, StringSplitOptions.None)[0]);
+            .ScrubLinesWithReplace(_ => _.Split(new[] { " (Sentry.AspNetCore.Tests) " }, StringSplitOptions.None)[0]);
     }
 }

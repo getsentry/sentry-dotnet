@@ -91,7 +91,7 @@ public class SentryTransactionTests
             // transaction in the SDK anyway (by default they don't get sent... but the user can always override this
             // behavior if they need)
             User = new SentryUser { Id = "user-id", Username = "username", Email = "bob@foo.com", IpAddress = "127.0.0.1" },
-            Request = new Request { Method = "POST", Url = "https://user@not.redacted"},
+            Request = new SentryRequest { Method = "POST", Url = "https://user@not.redacted" },
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
             Environment = environment,
             Level = SentryLevel.Fatal,
@@ -107,7 +107,7 @@ public class SentryTransactionTests
             }
         };
 
-        txTracer.Sdk.AddPackage(new Package("name", "version"));
+        txTracer.Sdk.AddPackage(new SentryPackage("name", "version"));
         txTracer.AddBreadcrumb(new Breadcrumb(timestamp, breadcrumbMessage));
         txTracer.AddBreadcrumb(new Breadcrumb(
             timestamp,
@@ -167,7 +167,7 @@ public class SentryTransactionTests
             SpanId.Create(),
             SpanId.Create(),
             SentryId.Create(), // sampling isn't serialized and getting FluentAssertions
-                  // to ignore that on Spans and contexts isn't really straight forward
+                               // to ignore that on Spans and contexts isn't really straight forward
             "desc",
             SpanStatus.AlreadyExists, null, true, TransactionNameSource.Component);
 
@@ -176,7 +176,7 @@ public class SentryTransactionTests
             Description = "desc123",
             Status = SpanStatus.Aborted,
             User = new SentryUser { Id = "user-id" },
-            Request = new Request { Method = "POST" },
+            Request = new SentryRequest { Method = "POST" },
             Sdk = new SdkVersion { Name = "SDK-test", Version = "1.1.1" },
             Environment = "environment",
             Level = SentryLevel.Fatal,
@@ -195,7 +195,7 @@ public class SentryTransactionTests
         // Don't overwrite the contexts object as it contains trace data.
         // See https://github.com/getsentry/sentry-dotnet/issues/752
 
-        transaction.Sdk.AddPackage(new Package("name", "version"));
+        transaction.Sdk.AddPackage(new SentryPackage("name", "version"));
         transaction.AddBreadcrumb(new Breadcrumb(timestamp, "crumb"));
         transaction.AddBreadcrumb(new Breadcrumb(
             timestamp,
@@ -449,7 +449,7 @@ public class SentryTransactionTests
         transaction.Finish();
 
         // Assert
-        client.Received(1).CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<Hint>());
+        client.Received(1).CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
     [Fact]
@@ -478,7 +478,7 @@ public class SentryTransactionTests
                 e.Contexts.Trace.SpanId == transaction.SpanId &&
                 e.Contexts.Trace.ParentSpanId == transaction.ParentSpanId
             ),
-            Arg.Any<Scope>(), Arg.Any<Hint>());
+            Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
     [Fact]
@@ -570,5 +570,83 @@ public class SentryTransactionTests
 
         // Assert
         Assert.Same(transaction, result);
+    }
+
+    [Fact]
+    public void FromTracerSpans_Filters_SentryRequests()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var context = new TransactionContext("name", "op")
+        {
+            Instrumenter = Instrumenter.OpenTelemetry
+        };
+        var tracer = new TransactionTracer(hub, context);
+        var span1 = (SpanTracer)tracer.StartChild(null, tracer.SpanId, "span1", Instrumenter.OpenTelemetry);
+        var span2 = (SpanTracer)tracer.StartChild(null, span1.SpanId, "span2", Instrumenter.OpenTelemetry);
+        span2.IsSentryRequest = true;
+        var span3 = (SpanTracer)tracer.StartChild(null, span2.SpanId, "span3", Instrumenter.OpenTelemetry);
+
+        // Act
+        var transaction = new SentryTransaction(tracer);
+
+        // Assert
+        var spans = transaction.Spans.ToArray();
+        spans.Length.Should().Be(2);
+        spans.Should().Contain(x => x.SpanId == span1.SpanId);
+        spans.Should().Contain(x => x.SpanId == span3.SpanId);
+    }
+
+    [Fact]
+    public void FromTracerSpans_OtelInstrumentation_FilteredSpansRemoved()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var context = new TransactionContext("name", "op")
+        {
+            Instrumenter = Instrumenter.OpenTelemetry
+        };
+        var tracer = new TransactionTracer(hub, context);
+        var span1 = (SpanTracer)tracer.StartChild(null, tracer.SpanId, "span1", Instrumenter.OpenTelemetry);
+        var span2 = (SpanTracer)tracer.StartChild(null, span1.SpanId, "span2", Instrumenter.OpenTelemetry);
+        span2.IsFiltered = () => true;
+        var span3 = (SpanTracer)tracer.StartChild(null, span2.SpanId, "span3", Instrumenter.OpenTelemetry);
+        span3.IsFiltered = () => true;
+        var span4 = (SpanTracer)tracer.StartChild(null, span3.SpanId, "span4", Instrumenter.OpenTelemetry);
+
+        // Act
+        var transaction = new SentryTransaction(tracer);
+
+        // Assert
+        var spans = transaction.Spans.ToArray();
+        spans.Length.Should().Be(2);
+        spans.Should().Contain(x => x.SpanId == span1.SpanId);
+        var lastSpan = spans.SingleOrDefault(x => x.SpanId == span4.SpanId);
+        lastSpan.Should().NotBeNull();
+        lastSpan!.ParentSpanId.Should().Be(span1.SpanId);
+    }
+
+    [Fact]
+    public void FromTracerSpans_SentryInstrumentation_FilteredSpansRemain()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var context = new TransactionContext("name", "op")
+        {
+            Instrumenter = Instrumenter.Sentry
+        };
+        var tracer = new TransactionTracer(hub, context);
+        var span1 = (SpanTracer)tracer.StartChild(null, tracer.SpanId, "span1", Instrumenter.OpenTelemetry);
+        var span2 = (SpanTracer)tracer.StartChild(null, span1.SpanId, "span2", Instrumenter.OpenTelemetry);
+        span2.IsFiltered = () => true;
+        var span3 = (SpanTracer)tracer.StartChild(null, span2.SpanId, "span3", Instrumenter.OpenTelemetry);
+        span3.IsFiltered = () => true;
+        tracer.StartChild(null, span3.SpanId, "span4", Instrumenter.OpenTelemetry);
+
+        // Act
+        var transaction = new SentryTransaction(tracer);
+
+        // Assert
+        transaction.Spans.Count.Should().Be(4);
     }
 }

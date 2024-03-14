@@ -189,7 +189,7 @@ public class SentryEFCoreListenerTests
     {
         public FakeDiagnosticEventData(string value) { _value = value; }
         private readonly string _value;
-        public override string ToString()=> _value;
+        public override string ToString() => _value;
 
         public class ConnectionInfo
         {
@@ -265,7 +265,7 @@ public class SentryEFCoreListenerTests
         });
 
         // Assert span descriptions
-        Assert.Equal(expectedDbName,connectionSpan.Description);
+        Assert.Equal(expectedDbName, connectionSpan.Description);
         Assert.Equal(expectedSql, compilerSpan.Description);
         Assert.Equal(expectedSql, commandSpan.Description);
 
@@ -456,17 +456,17 @@ public class SentryEFCoreListenerTests
 
         interceptor.OnNext(new(EFConnectionOpening, connectionA));
 
-            // These are for Connection B... interleaved somewhat
-            interceptor.OnNext(new(EFConnectionOpening, connectionB));
-            Pause();
-            interceptor.OnNext(new(EFCommandExecuting, commandB));
-            interceptor.OnNext(new(EFCommandExecuted, commandB));
+        // These are for Connection B... interleaved somewhat
+        interceptor.OnNext(new(EFConnectionOpening, connectionB));
+        Pause();
+        interceptor.OnNext(new(EFCommandExecuting, commandB));
+        interceptor.OnNext(new(EFCommandExecuted, commandB));
 
         interceptor.OnNext(new(EFCommandExecuting, commandC));
 
-            // These are for Connection B... interleaved somewhat
-            Pause();
-            interceptor.OnNext(new(EFConnectionClosed, connectionB));
+        // These are for Connection B... interleaved somewhat
+        Pause();
+        interceptor.OnNext(new(EFConnectionClosed, connectionB));
 
         interceptor.OnNext(new(EFCommandExecuted, commandC));
         Pause();

@@ -24,7 +24,7 @@ public class AndroidAssemblyReaderTests
         _output.WriteLine($"Checking if APK exists: {apkPath}");
         File.Exists(apkPath).Should().BeTrue();
 
-        string[] supportedAbis = {"x86_64"};
+        string[] supportedAbis = { "x86_64" };
         return AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis,
             logger: (message, args) => _output.WriteLine(message, args));
 #endif

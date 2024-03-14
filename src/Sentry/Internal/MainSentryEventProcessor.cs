@@ -86,7 +86,8 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
         // if there's no exception with a stack trace, then get the current stack trace
         if (@event.Exception?.StackTrace is null)
         {
-            var stackTrace = SentryStackTraceFactoryAccessor().Create();
+            var stackTrace = @event.SentryExceptions?.FirstOrDefault()?.Stacktrace
+                            ?? SentryStackTraceFactoryAccessor().Create();
             if (stackTrace != null)
             {
                 var currentThread = Thread.CurrentThread;
@@ -158,7 +159,7 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
         return @event;
     }
 
-    private static void AddMemoryInfo(Contexts contexts)
+    private static void AddMemoryInfo(SentryContexts contexts)
     {
 #if NETCOREAPP3_0_OR_GREATER
         var memory = GC.GetGCMemoryInfo();
@@ -192,7 +193,7 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
 #endif
     }
 
-    private static void AddThreadPoolInfo(Contexts contexts)
+    private static void AddThreadPoolInfo(SentryContexts contexts)
     {
         ThreadPool.GetMinThreads(out var minWorkerThreads, out var minCompletionPortThreads);
         ThreadPool.GetMaxThreads(out var maxWorkerThreads, out var maxCompletionPortThreads);

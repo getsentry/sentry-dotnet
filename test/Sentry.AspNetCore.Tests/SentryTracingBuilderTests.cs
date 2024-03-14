@@ -10,7 +10,7 @@ namespace Sentry.AspNetCore.Tests;
 
 public class SentryTracingBuilderTests
 {
-    class Fixture
+    private class Fixture
     {
         public Action<IServiceCollection> ConfigureServices { get; set; }
         public Action<IApplicationBuilder> Configure { get; set; }
@@ -47,7 +47,7 @@ public class SentryTracingBuilderTests
         _fixture.Configure = applicationBuilder => applicationBuilder.UseRouting();
         _fixture.ConfigureOptions = options =>
         {
-            options.Dsn = Sentry.Constants.DisableSdkDsnValue;
+            options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
             options.AutoRegisterTracing = false;
         };
 
@@ -66,7 +66,7 @@ public class SentryTracingBuilderTests
         _fixture.Configure = applicationBuilder => applicationBuilder.UseRouting();
         _fixture.ConfigureOptions = options =>
         {
-            options.Dsn = Sentry.Constants.DisableSdkDsnValue;
+            options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
             options.Instrumenter = Instrumenter.OpenTelemetry;
         };
 
@@ -92,7 +92,7 @@ public class SentryTracingBuilderTests
         _fixture.Configure = applicationBuilder => applicationBuilder.UseRouting();
         _fixture.ConfigureOptions = options =>
         {
-            options.Dsn = Sentry.Constants.DisableSdkDsnValue;
+            options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
         };
 
         // Act
@@ -121,7 +121,7 @@ public class SentryTracingBuilderTests
         };
         _fixture.ConfigureOptions = options =>
         {
-            options.Dsn = Sentry.Constants.DisableSdkDsnValue;
+            options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
         };
 
         // Act

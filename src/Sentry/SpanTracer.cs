@@ -13,11 +13,15 @@ public class SpanTracer : ISpan
 
     internal TransactionTracer Transaction { get; }
 
+    private readonly Lazy<MetricsSummaryAggregator> _metricsSummary = new();
+    internal MetricsSummaryAggregator MetricsSummary => _metricsSummary.Value;
+    internal bool HasMetrics => _metricsSummary.IsValueCreated;
+
     /// <inheritdoc />
     public SpanId SpanId { get; internal set; }
 
     /// <inheritdoc />
-    public SpanId? ParentSpanId { get; }
+    public SpanId? ParentSpanId { get; internal set; }
 
     /// <inheritdoc />
     public SentryId TraceId { get; }
@@ -82,6 +86,8 @@ public class SpanTracer : ISpan
     /// <inheritdoc />
     public void SetExtra(string key, object? value) => _data[key] = value;
 
+    internal Func<bool>? IsFiltered { get; set; }
+
     /// <summary>
     /// Initializes an instance of <see cref="SpanTracer"/>.
     /// </summary>
@@ -119,7 +125,7 @@ public class SpanTracer : ISpan
     }
 
     /// <inheritdoc />
-    public ISpan StartChild(string operation) => Transaction.StartChild(null, parentSpanId:SpanId, operation: operation);
+    public ISpan StartChild(string operation) => Transaction.StartChild(null, parentSpanId: SpanId, operation: operation);
 
     /// <summary>
     /// Used to mark a span as unfinished when it was previously marked as finished. This allows us to reuse spans for

@@ -82,10 +82,10 @@ public abstract class SentryMessageHandler : DelegatingHandler
         var method = request.Method.Method.ToUpperInvariant();
         var url = request.RequestUri?.ToString() ?? string.Empty;
 
-        PropagateTraceHeaders(request, url);
         var span = ProcessRequest(request, method, url);
         try
         {
+            PropagateTraceHeaders(request, url);
             var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
             HandleResponse(response, span, method, url);
             return response;
@@ -104,10 +104,10 @@ public abstract class SentryMessageHandler : DelegatingHandler
         var method = request.Method.Method.ToUpperInvariant();
         var url = request.RequestUri?.ToString() ?? string.Empty;
 
-        PropagateTraceHeaders(request, url);
         var span = ProcessRequest(request, method, url);
         try
         {
+            PropagateTraceHeaders(request, url);
             var response = base.Send(request, cancellationToken);
             HandleResponse(response, span, method, url);
             return response;

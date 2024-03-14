@@ -1,9 +1,11 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Protocol.Envelopes;
+using Sentry.Protocol.Metrics;
 
 namespace Sentry.Internal;
 
-internal class Hub : IHub, IDisposable
+internal class Hub : IHub, IMetricHub, IDisposable
 {
     private readonly object _sessionPauseLock = new();
 
@@ -59,7 +61,14 @@ internal class Hub : IHub, IDisposable
             PushScope();
         }
 
-        Metrics = _ownedClient.Metrics;
+        if (options.ExperimentalMetrics is not null)
+        {
+            Metrics = new MetricAggregator(options, this);
+        }
+        else
+        {
+            Metrics = new DisabledMetricAggregator();
+        }
 
         foreach (var integration in options.Integrations)
         {
@@ -205,7 +214,8 @@ internal class Hub : IHub, IDisposable
 
     public BaggageHeader GetBaggage()
     {
-        if (GetSpan() is TransactionTracer { DynamicSamplingContext: { IsEmpty: false } dsc })
+        var span = GetSpan();
+        if (span?.GetTransaction() is TransactionTracer { DynamicSamplingContext: { IsEmpty: false } dsc })
         {
             return dsc.ToBaggageHeader();
         }
@@ -373,7 +383,7 @@ internal class Hub : IHub, IDisposable
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
         => CaptureEvent(evt, null, configureScope);
 
-    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope)
+    public SentryId CaptureEvent(SentryEvent evt, SentryHint? hint, Action<Scope> configureScope)
     {
         if (!IsEnabled)
         {
@@ -394,7 +404,9 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Hint? hint = null)
+    public bool CaptureEnvelope(Envelope envelope) => _ownedClient.CaptureEnvelope(envelope);
+
+    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, SentryHint? hint = null)
     {
         if (!IsEnabled)
         {
@@ -462,7 +474,7 @@ internal class Hub : IHub, IDisposable
 
     public void CaptureTransaction(SentryTransaction transaction) => CaptureTransaction(transaction, null, null);
 
-    public void CaptureTransaction(SentryTransaction transaction, Scope? scope, Hint? hint)
+    public void CaptureTransaction(SentryTransaction transaction, Scope? scope, SentryHint? hint)
     {
         // Note: The hub should capture transactions even if it is disabled.
         // This allows transactions to be reported as failed when they encountered an unhandled exception,
@@ -486,6 +498,57 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    /// <inheritdoc cref="IMetricHub.CaptureMetrics"/>
+    public void CaptureMetrics(IEnumerable<Metric> metrics)
+    {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        Metric[]? enumerable = null;
+        try
+        {
+            enumerable = metrics as Metric[] ?? metrics.ToArray();
+            _options.LogDebug("Capturing metrics.");
+            _ownedClient.CaptureEnvelope(Envelope.FromMetrics(metrics));
+        }
+        catch (Exception e)
+        {
+            var metricEventIds = enumerable?.Select(m => m.EventId).ToArray() ?? [];
+            _options.LogError(e, "Failure to capture metrics: {0}", string.Join(",", metricEventIds));
+        }
+    }
+
+    /// <inheritdoc cref="IMetricHub.CaptureCodeLocations"/>
+    public void CaptureCodeLocations(CodeLocations codeLocations)
+    {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        try
+        {
+            _options.LogDebug("Capturing code locations for period: {0}", codeLocations.Timestamp);
+            _ownedClient.CaptureEnvelope(Envelope.FromCodeLocations(codeLocations));
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to capture code locations");
+        }
+    }
+
+    /// <inheritdoc cref="IMetricHub.StartSpan"/>
+    public ISpan StartSpan(string operation, string description)
+    {
+        ITransactionTracer? currentTransaction = null;
+        ConfigureScope(s => currentTransaction = s.Transaction);
+        return currentTransaction is { } transaction
+            ? transaction.StartChild(operation, description)
+            : this.StartTransaction(operation, description);
+    }
+
     public void CaptureSession(SessionUpdate sessionUpdate)
     {
         if (!IsEnabled)
@@ -501,6 +564,26 @@ internal class Hub : IHub, IDisposable
         {
             _options.LogError(e, "Failure to capture session update: {0}", sessionUpdate.Id);
         }
+    }
+
+    public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null)
+    {
+        if (!IsEnabled)
+        {
+            return SentryId.Empty;
+        }
+
+        try
+        {
+            _options.LogDebug("Capturing '{0}' check-in for '{1}'", status, monitorSlug);
+            return _ownedClient.CaptureCheckIn(monitorSlug, status, sentryId);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failed to capture check in for: {0}", monitorSlug);
+        }
+
+        return SentryId.Empty;
     }
 
     public async Task FlushAsync(TimeSpan timeout)
@@ -527,7 +610,7 @@ internal class Hub : IHub, IDisposable
 
         try
         {
-            _ownedClient.Metrics.FlushAsync().ContinueWith(_ =>
+            Metrics.FlushAsync().ContinueWith(_ =>
                 _ownedClient.FlushAsync(_options.ShutdownTimeout).Wait()
             ).ConfigureAwait(false).GetAwaiter().GetResult();
         }

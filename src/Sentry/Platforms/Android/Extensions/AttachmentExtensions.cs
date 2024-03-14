@@ -2,7 +2,7 @@ namespace Sentry.Android.Extensions;
 
 internal static class AttachmentExtensions
 {
-    public static Attachment ToAttachment(this JavaSdk.Attachment attachment)
+    public static SentryAttachment ToAttachment(this JavaSdk.Attachment attachment)
     {
         // TODO: Convert JavaSdk.Attachment to Sentry.Attachment.
         // One way to do this might be to serialise the JavaSdk.Attachment as
@@ -14,7 +14,7 @@ internal static class AttachmentExtensions
         throw new NotImplementedException();
     }
 
-    public static JavaSdk.Attachment ToJavaAttachment(this Attachment attachment)
+    public static JavaSdk.Attachment ToJavaAttachment(this SentryAttachment attachment)
     {
         // TODO: Convert Sentry.Attachment to JavaSdk.Attachment.
         // Same problem as ToAttachment() above but in reverse.

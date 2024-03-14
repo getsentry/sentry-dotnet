@@ -16,6 +16,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     private const string TypeValueUserReport = "user_report";
     private const string TypeValueTransaction = "transaction";
     private const string TypeValueSession = "session";
+    private const string TypeValueCheckIn = "check_in";
     private const string TypeValueAttachment = "attachment";
     private const string TypeValueClientReport = "client_report";
     private const string TypeValueProfile = "profile";
@@ -279,15 +280,28 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     }
 
     /// <summary>
+    /// Creates an <see cref="EnvelopeItem"/> from <paramref name="checkIn"/>.
+    /// </summary>
+    public static EnvelopeItem FromCheckIn(SentryCheckIn checkIn)
+    {
+        var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
+        {
+            [TypeKey] = TypeValueCheckIn
+        };
+
+        return new EnvelopeItem(header, new JsonSerializable(checkIn));
+    }
+
+    /// <summary>
     /// Creates an <see cref="EnvelopeItem"/> from <paramref name="attachment"/>.
     /// </summary>
-    public static EnvelopeItem FromAttachment(Attachment attachment)
+    public static EnvelopeItem FromAttachment(SentryAttachment attachment)
     {
         var stream = attachment.Content.GetStream();
         return FromAttachment(attachment, stream);
     }
 
-    internal static EnvelopeItem FromAttachment(Attachment attachment, Stream stream)
+    internal static EnvelopeItem FromAttachment(SentryAttachment attachment, Stream stream)
     {
         var attachmentType = attachment.Type switch
         {

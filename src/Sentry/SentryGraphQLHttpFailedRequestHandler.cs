@@ -18,7 +18,7 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
         _httpFailedRequestHandler = new SentryHttpFailedRequestHandler(hub, options);
     }
 
-    protected internal override void DoEnsureSuccessfulResponse([NotNull]HttpRequestMessage request, [NotNull]HttpResponseMessage response)
+    protected internal override void DoEnsureSuccessfulResponse([NotNull] HttpRequestMessage request, [NotNull] HttpResponseMessage response)
     {
         JsonElement? json = null;
         try
@@ -42,9 +42,9 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
             exception.SetSentryMechanism(MechanismType, "GraphQL Failed Request Handler", false);
 
             var @event = new SentryEvent(exception);
-            var hint = new Hint(HintTypes.HttpResponseMessage, response);
+            var hint = new SentryHint(HintTypes.HttpResponseMessage, response);
 
-            var sentryRequest = new Request
+            var sentryRequest = new SentryRequest
             {
                 QueryString = request.RequestUri?.Query,
                 Method = request.Method.Method.ToUpperInvariant(),

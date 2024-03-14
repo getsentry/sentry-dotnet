@@ -130,7 +130,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
             Assert.Fail("Span is not a transaction tracer");
             return;
         }
-        if (transaction.DynamicSamplingContext is not {} actual)
+        if (transaction.DynamicSamplingContext is not { } actual)
         {
             Assert.Fail("Transaction does not have a dynamic sampling context");
             return;
@@ -188,6 +188,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     {
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
         var sut = _fixture.GetSut();
 
         var data = Tracer.StartActivity("test op");
@@ -212,6 +213,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
             transaction.Description.Should().Be(data.DisplayName);
             transaction.Status.Should().BeNull();
             transaction.StartTimestamp.Should().Be(data.StartTimeUtc);
+            _fixture.ScopeManager.Received(1).ConfigureScope(Arg.Any<Action<Scope>>());
         }
     }
 
@@ -402,5 +404,102 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         }
 
         transaction.IsSentryRequest.Should().BeTrue();
+    }
+
+    private static void FilterActivity(Activity activity)
+    {
+        // Simulates filtering an activity - see https://github.com/getsentry/sentry-dotnet/pull/3198
+        activity.IsAllDataRequested = false;
+        activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+    }
+
+    [Fact]
+    public void PruneFilteredSpans_FilteredTransactions_Pruned()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        using var parent = Tracer.StartActivity();
+        sut.OnStart(parent!);
+
+        FilterActivity(parent);
+
+        // Act
+        sut.PruneFilteredSpans(true);
+
+        // Assert
+        Assert.False(sut._map.TryGetValue(parent.SpanId, out var _));
+    }
+
+    [Fact]
+    public void PruneFilteredSpans_UnFilteredTransactions_NotPruned()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        using var parent = Tracer.StartActivity();
+        sut.OnStart(parent!);
+
+        // Act
+        sut.PruneFilteredSpans(true);
+
+        // Assert
+        Assert.True(sut._map.TryGetValue(parent.SpanId, out var _));
+    }
+
+    [Fact]
+    public void PruneFilteredSpans_FilteredSpans_Pruned()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        using var parent = Tracer.StartActivity();
+        sut.OnStart(parent!);
+
+        using var activity1 = Tracer.StartActivity();
+        sut.OnStart(activity1!);
+
+        using var activity2 = Tracer.StartActivity();
+        sut.OnStart(activity2!);
+
+        FilterActivity(activity2);
+
+        // Act
+        sut.PruneFilteredSpans(true);
+
+        // Assert
+        Assert.True(sut._map.TryGetValue(activity1.SpanId, out var _));
+        Assert.False(sut._map.TryGetValue(activity2.SpanId, out var _));
+    }
+
+    [Fact]
+    public void PruneFilteredSpans_RecentlyPruned_DoesNothing()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        sut._lastPruned = DateTimeOffset.MaxValue.Ticks; // fake a recent prune
+
+        using var parent = Tracer.StartActivity();
+        sut.OnStart(parent!);
+
+        using var activity1 = Tracer.StartActivity();
+        sut.OnStart(activity1!);
+
+        using var activity2 = Tracer.StartActivity();
+        sut.OnStart(activity2!);
+
+        FilterActivity(activity2);
+
+        // Act
+        sut.PruneFilteredSpans();
+
+        // Assert
+        Assert.True(sut._map.TryGetValue(activity1.SpanId, out var _));
+        Assert.True(sut._map.TryGetValue(activity2.SpanId, out var _));
     }
 }

@@ -4,12 +4,25 @@ using ISentrySerializable = Sentry.Protocol.Envelopes.ISerializable;
 
 namespace Sentry.Protocol.Metrics;
 
-internal abstract class Metric : IJsonSerializable, ISentrySerializable
+/// <summary>
+/// Base class for metric instruments
+/// </summary>
+internal abstract class Metric : ISentryJsonSerializable, ISentrySerializable
 {
+    /// <summary>
+    /// Creates a new instance of <see cref="Metric"/>.
+    /// </summary>
     protected Metric() : this(string.Empty)
     {
     }
 
+    /// <summary>
+    /// Creates a new instance of <see cref="Metric"/>.
+    /// </summary>
+    /// <param name="key">The text key to be used to identify the metric</param>
+    /// <param name="unit">An optional <see cref="MeasurementUnit"/> that describes the values being tracked</param>
+    /// <param name="tags">An optional set of key/value paris that can be used to add dimensionality to metrics</param>
+    /// <param name="timestamp">An optional time when the metric was emitted. Defaults to DateTimeOffset.UtcNow</param>
     protected Metric(string key, MeasurementUnit? unit = null, IDictionary<string, string>? tags = null, DateTimeOffset? timestamp = null)
     {
         Key = key;
@@ -18,16 +31,31 @@ internal abstract class Metric : IJsonSerializable, ISentrySerializable
         Timestamp = timestamp ?? DateTimeOffset.UtcNow;
     }
 
-    public SentryId EventId { get; private set; } = SentryId.Create();
+    /// <summary>
+    /// <see cref="SentryEvent.EventId"/>
+    /// </summary>
+    public SentryId EventId { get; } = SentryId.Create();
 
-    public string Key { get; private set; }
+    /// <summary>
+    /// A text key identifying the metric
+    /// </summary>
+    public string Key { get; }
 
-    public DateTimeOffset Timestamp { get; private set; }
+    /// <summary>
+    /// The time when the metric was emitted.
+    /// </summary>
+    public DateTimeOffset Timestamp { get; }
 
-    public MeasurementUnit? Unit { get; private set; }
+    /// <summary>
+    /// A <see cref="MeasurementUnit"/> that describes the values being tracked
+    /// </summary>
+    public MeasurementUnit? Unit { get; }
 
     private IDictionary<string, string>? _tags;
 
+    /// <summary>
+    /// A set of key/value paris providing dimensionality for the metric
+    /// </summary>
     public IDictionary<string, string> Tags
     {
         get
@@ -37,10 +65,17 @@ internal abstract class Metric : IJsonSerializable, ISentrySerializable
         }
     }
 
+    /// <summary>
+    /// Adds a value to the metric
+    /// </summary>
     public abstract void Add(double value);
 
+    /// <summary>
+    /// Serializes metric values to JSON
+    /// </summary>
     protected abstract void WriteValues(Utf8JsonWriter writer, IDiagnosticLogger? logger);
 
+    /// <inheritdoc cref="ISentryJsonSerializable.WriteTo"/>
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         writer.WriteStartObject();
@@ -57,8 +92,14 @@ internal abstract class Metric : IJsonSerializable, ISentrySerializable
         writer.WriteEndObject();
     }
 
+    /// <summary>
+    /// Concrete classes should implement this to return a list of values that should be serialized to statsd
+    /// </summary>
     protected abstract IEnumerable<IConvertible> SerializedStatsdValues();
 
+    /// <summary>
+    /// Serializes the metric asynchrounously in statsd format to the provided stream
+    /// </summary>
     public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)
     {
         /*
@@ -67,9 +108,10 @@ internal abstract class Metric : IJsonSerializable, ISentrySerializable
         var metricName = MetricHelper.SanitizeKey(Key);
         await Write($"{metricName}@").ConfigureAwait(false);
         var unit = Unit ?? MeasurementUnit.None;
-// We don't need ConfigureAwait(false) here as ConfigureAwait on metricName above avoids capturing the ExecutionContext.
+        var sanitizedUnit = MetricHelper.SanitizeMetricUnit(unit.ToString());
+        // We don't need ConfigureAwait(false) here as ConfigureAwait on metricName above avoids capturing the ExecutionContext.
 #pragma warning disable CA2007
-        await Write(unit.ToString());
+        await Write(sanitizedUnit);
 
         foreach (var value in SerializedStatsdValues())
         {
@@ -97,7 +139,7 @@ internal abstract class Metric : IJsonSerializable, ISentrySerializable
                 {
                     await Write(",");
                 }
-                await Write($"{key}:SanitizeValue(value)");
+                await Write($"{key}:{MetricHelper.SanitizeValue(value)}");
             }
         }
 
@@ -111,6 +153,7 @@ internal abstract class Metric : IJsonSerializable, ISentrySerializable
         }
     }
 
+    /// <inheritdoc cref="ISerializable.Serialize"/>
     public void Serialize(Stream stream, IDiagnosticLogger? logger)
     {
         SerializeAsync(stream, logger).GetAwaiter().GetResult();

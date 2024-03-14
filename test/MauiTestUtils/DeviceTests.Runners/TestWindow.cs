@@ -18,7 +18,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners;
 
 public static class TestWindow
 {
-    static PlatformView? s_platformWindow;
+    private static PlatformView? s_platformWindow;
 
     public static PlatformView PlatformWindow
     {

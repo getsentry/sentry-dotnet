@@ -13,7 +13,7 @@ public partial class SentryEventTests
     public void Ctor_Platform_CSharp()
     {
         var evt = new SentryEvent();
-        Assert.Equal(Constants.Platform, evt.Platform);
+        Assert.Equal(SentryConstants.Platform, evt.Platform);
     }
 
     [Fact]
@@ -114,7 +114,7 @@ public partial class SentryEventTests
             Release = release,
             Distribution = distribution,
             TransactionName = transactionName,
-            Request = new Request
+            Request = new SentryRequest
             {
                 Method = "GET",
                 Url = requestUrl

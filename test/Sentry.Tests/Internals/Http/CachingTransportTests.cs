@@ -53,7 +53,7 @@ public class CachingTransportTests
 
         try
         {
-            var attachment = new Attachment(AttachmentType.Default, new FileAttachmentContent(tempFile), "Attachment.txt", null);
+            var attachment = new SentryAttachment(AttachmentType.Default, new FileAttachmentContent(tempFile), "Attachment.txt", null);
             using var envelope = Envelope.FromEvent(new SentryEvent(), attachments: new[] { attachment });
 
             // Act
@@ -502,7 +502,7 @@ public class CachingTransportTests
             FileSystem = _fileSystem
         };
 
-        var recorder = (ClientReportRecorder) options.ClientReportRecorder;
+        var recorder = (ClientReportRecorder)options.ClientReportRecorder;
         var innerTransport = new FakeTransportWithRecorder(recorder);
         await using var transport = CachingTransport.Create(innerTransport, options,
             startWorker: false, failStorage: true);

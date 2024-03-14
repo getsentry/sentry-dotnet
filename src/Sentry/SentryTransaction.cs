@@ -2,6 +2,7 @@ using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
+using Sentry.Protocol.Metrics;
 
 namespace Sentry;
 
@@ -9,7 +10,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry performance transaction.
 /// </summary>
-public class SentryTransaction : ITransactionData, IJsonSerializable
+public class SentryTransaction : ITransactionData, ISentryJsonSerializable
 {
     /// <summary>
     /// Transaction's event ID.
@@ -54,7 +55,7 @@ public class SentryTransaction : ITransactionData, IJsonSerializable
     public bool? IsParentSampled { get; set; }
 
     /// <inheritdoc />
-    public string? Platform { get; set; } = Constants.Platform;
+    public string? Platform { get; set; } = SentryConstants.Platform;
 
     /// <inheritdoc />
     public string? Release { get; set; }
@@ -116,19 +117,19 @@ public class SentryTransaction : ITransactionData, IJsonSerializable
     /// <inheritdoc />
     public SentryLevel? Level { get; set; }
 
-    private Request? _request;
+    private SentryRequest? _request;
 
     /// <inheritdoc />
-    public Request Request
+    public SentryRequest Request
     {
-        get => _request ??= new Request();
+        get => _request ??= new SentryRequest();
         set => _request = value;
     }
 
-    private readonly Contexts _contexts = new();
+    private readonly SentryContexts _contexts = new();
 
     /// <inheritdoc />
-    public Contexts Contexts
+    public SentryContexts Contexts
     {
         get => _contexts;
         set => _contexts.ReplaceWith(value);
@@ -185,6 +186,7 @@ public class SentryTransaction : ITransactionData, IJsonSerializable
 
     // Not readonly because of deserialization
     private SentrySpan[] _spans = Array.Empty<SentrySpan>();
+    private readonly MetricsSummary? _metricsSummary;
 
     /// <summary>
     /// Flat list of spans within this transaction.
@@ -263,9 +265,8 @@ public class SentryTransaction : ITransactionData, IJsonSerializable
         _breadcrumbs = tracer.Breadcrumbs.ToList();
         _extra = tracer.Extra.ToDict();
         _tags = tracer.Tags.ToDict();
-        _spans = tracer.Spans
-            .Where(s => s is not SpanTracer { IsSentryRequest: true }) // Filter sentry requests created by Sentry.OpenTelemetry.SentrySpanProcessor
-            .Select(s => new SentrySpan(s)).ToArray();
+
+        _spans = FromTracerSpans(tracer);
         _measurements = tracer.Measurements.ToDict();
 
         // Some items are not on the interface, but we only ever pass in a TransactionTracer anyway.
@@ -274,7 +275,56 @@ public class SentryTransaction : ITransactionData, IJsonSerializable
             SampleRate = transactionTracer.SampleRate;
             DynamicSamplingContext = transactionTracer.DynamicSamplingContext;
             TransactionProfiler = transactionTracer.TransactionProfiler;
+            if (transactionTracer.HasMetrics)
+            {
+                _metricsSummary = new MetricsSummary(transactionTracer.MetricsSummary);
+            }
         }
+    }
+
+    internal static SentrySpan[] FromTracerSpans(ITransactionTracer tracer)
+    {
+        // Filter sentry requests created by Sentry.OpenTelemetry.SentrySpanProcessor
+        var nonSentrySpans = tracer.Spans
+            .Where(s => s is not SpanTracer { IsSentryRequest: true });
+
+        if (tracer is not TransactionTracer { IsOtelInstrumenter: true })
+        {
+            return nonSentrySpans.Select(s => new SentrySpan(s)).ToArray();
+        }
+
+        Dictionary<SpanId, SpanId?> reHome = new();
+        var spans = nonSentrySpans.ToList();
+        foreach (var value in spans.ToArray())
+        {
+            if (value is not SpanTracer child)
+            {
+                continue;
+            }
+
+            // Remove any filtered spans
+            if (child.IsFiltered?.Invoke() == true)
+            {
+                reHome.Add(child.SpanId, child.ParentSpanId);
+                spans.Remove(child);
+            }
+        }
+
+        // Re-home any children of filtered spans
+        foreach (var value in spans)
+        {
+            if (value is not SpanTracer child)
+            {
+                continue;
+            }
+
+            while (child.ParentSpanId.HasValue && reHome.TryGetValue(child.ParentSpanId.Value, out var newParentId))
+            {
+                child.ParentSpanId = newParentId;
+            }
+        }
+
+        return spans.Select(s => new SentrySpan(s)).ToArray();
     }
 
     /// <inheritdoc />
@@ -348,6 +398,7 @@ public class SentryTransaction : ITransactionData, IJsonSerializable
         writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
         writer.WriteArrayIfNotEmpty("spans", _spans, logger);
         writer.WriteDictionaryIfNotEmpty("measurements", _measurements, logger);
+        writer.WriteSerializableIfNotNull("_metrics_summary", _metricsSummary, logger);
 
         writer.WriteEndObject();
     }
@@ -367,8 +418,8 @@ public class SentryTransaction : ITransactionData, IJsonSerializable
         var platform = json.GetPropertyOrNull("platform")?.GetString();
         var release = json.GetPropertyOrNull("release")?.GetString();
         var distribution = json.GetPropertyOrNull("dist")?.GetString();
-        var request = json.GetPropertyOrNull("request")?.Pipe(Request.FromJson);
-        var contexts = json.GetPropertyOrNull("contexts")?.Pipe(Contexts.FromJson) ?? new();
+        var request = json.GetPropertyOrNull("request")?.Pipe(SentryRequest.FromJson);
+        var contexts = json.GetPropertyOrNull("contexts")?.Pipe(SentryContexts.FromJson) ?? new();
         var user = json.GetPropertyOrNull("user")?.Pipe(SentryUser.FromJson);
         var environment = json.GetPropertyOrNull("environment")?.GetString();
         var sdk = json.GetPropertyOrNull("sdk")?.Pipe(SdkVersion.FromJson) ?? new SdkVersion();

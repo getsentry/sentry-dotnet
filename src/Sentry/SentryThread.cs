@@ -7,7 +7,7 @@ namespace Sentry;
 /// A thread running at the time of an event.
 /// </summary>
 /// <see href="https://develop.sentry.dev/sdk/event-payloads/threads/"/>
-public sealed class SentryThread : IJsonSerializable
+public sealed class SentryThread : ISentryJsonSerializable
 {
     /// <summary>
     /// The Id of the thread.

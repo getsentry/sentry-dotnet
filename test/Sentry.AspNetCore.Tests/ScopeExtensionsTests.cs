@@ -352,7 +352,7 @@ public partial class ScopeExtensionsTests
     {
         yield return new object[] { "" };
         yield return new object[] { null };
-        yield return new object[] {new Exception()};
+        yield return new object[] { new Exception() };
 #if NET5_0_OR_GREATER
         yield return new object[] { new BadHttpRequestException("Unexpected end of request content.") };
 #endif

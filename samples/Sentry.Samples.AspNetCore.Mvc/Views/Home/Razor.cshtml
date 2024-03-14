@@ -1,0 +1,12 @@
+﻿@using Samples.AspNetCore.Mvc
+@{
+    ViewData["Title"] = "Razor Can Crash Too :-) ";
+}
+<h1>@ViewData["Title"]</h1>
+
+<p>Bara</p>
+
+@{
+    // Note that we configured a SpecialExceptionProcessor in Program.cs that will do special stuff to this
+    throw new SpecialException("This is super special!");
+}

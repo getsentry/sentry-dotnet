@@ -18,6 +18,12 @@ public partial class SentryOptionsTests
         };
         Hub _ = new(options, Substitute.For<ISentryClient>());
 
-        return Verify(logger.Entries).UniqueForRuntime().AutoVerify(includeBuildServer: false);
+        var settingsTask = Verify(logger.Entries)
+            .UniqueForTargetFrameworkAndVersion()
+            .UniqueForRuntime()
+            .AutoVerify(includeBuildServer: false);
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            settingsTask = settingsTask.UniqueForOSPlatform();
+        return settingsTask;
     }
 }

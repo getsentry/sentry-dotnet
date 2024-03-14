@@ -10,7 +10,7 @@ namespace Sentry;
 /// </summary>
 /// <seealso href="https://develop.sentry.dev/sdk/event-payloads/" />
 [DebuggerDisplay("{GetType().Name,nq}: {" + nameof(EventId) + ",nq}")]
-public sealed class SentryEvent : IEventLike, IJsonSerializable
+public sealed class SentryEvent : IEventLike, ISentryJsonSerializable
 {
     private IDictionary<string, string>? _modules;
 
@@ -120,19 +120,19 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable
     /// <inheritdoc />
     public string? TransactionName { get; set; }
 
-    private Request? _request;
+    private SentryRequest? _request;
 
     /// <inheritdoc />
-    public Request Request
+    public SentryRequest Request
     {
-        get => _request ??= new Request();
+        get => _request ??= new SentryRequest();
         set => _request = value;
     }
 
-    private readonly Contexts _contexts = new();
+    private readonly SentryContexts _contexts = new();
 
     /// <inheritdoc />
-    public Contexts Contexts
+    public SentryContexts Contexts
     {
         get => _contexts;
         set => _contexts.ReplaceWith(value);
@@ -222,7 +222,7 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable
         Exception = exception;
         Timestamp = timestamp ?? DateTimeOffset.UtcNow;
         EventId = eventId != default ? eventId : SentryId.Create();
-        Platform = Constants.Platform;
+        Platform = SentryConstants.Platform;
     }
 
     /// <inheritdoc />
@@ -301,8 +301,8 @@ public sealed class SentryEvent : IEventLike, IJsonSerializable
         var threadValues = json.GetPropertyOrNull("threads")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryThread.FromJson).ToList().Pipe(v => new SentryValues<SentryThread>(v));
         var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<SentryLevel>();
         var transaction = json.GetPropertyOrNull("transaction")?.GetString();
-        var request = json.GetPropertyOrNull("request")?.Pipe(Request.FromJson);
-        var contexts = json.GetPropertyOrNull("contexts")?.Pipe(Contexts.FromJson);
+        var request = json.GetPropertyOrNull("request")?.Pipe(SentryRequest.FromJson);
+        var contexts = json.GetPropertyOrNull("contexts")?.Pipe(SentryContexts.FromJson);
         var user = json.GetPropertyOrNull("user")?.Pipe(SentryUser.FromJson);
         var environment = json.GetPropertyOrNull("environment")?.GetString();
         var sdk = json.GetPropertyOrNull("sdk")?.Pipe(SdkVersion.FromJson) ?? new SdkVersion();

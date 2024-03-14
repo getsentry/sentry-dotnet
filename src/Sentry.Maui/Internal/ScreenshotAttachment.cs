@@ -2,7 +2,7 @@ using Sentry.Extensibility;
 
 namespace Sentry.Maui.Internal;
 
-internal class ScreenshotAttachment : Attachment
+internal class ScreenshotAttachment : SentryAttachment
 {
     public ScreenshotAttachment(SentryMauiOptions options)
         : this(

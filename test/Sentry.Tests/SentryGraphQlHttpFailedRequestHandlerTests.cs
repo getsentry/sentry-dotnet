@@ -100,7 +100,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         // Assert
         hub.Received(1).CaptureEvent(
             Arg.Any<SentryEvent>(),
-            Arg.Any<Scope>(), Arg.Any<Hint>());
+            Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         // Assert
         hub.Received(1).CaptureEvent(
             Arg.Any<SentryEvent>(),
-            Arg.Any<Scope>(), Arg.Any<Hint>());
+            Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
     [Fact]
@@ -143,7 +143,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
 
         // Act
         SentryEvent @event = null;
-        hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<Hint>());
+        hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
         sut.HandleResponse(response);
 
         // Assert
@@ -177,7 +177,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         SentryEvent @event = null;
         hub.CaptureEvent(
             Arg.Do<SentryEvent>(e => @event = e),
-            hint: Arg.Any<Hint>()
+            hint: Arg.Any<SentryHint>()
             );
 
         // Act
@@ -233,10 +233,10 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         response.RequestMessage = SentryGraphQlTestHelpers.GetRequestQuery(ValidQuery);
 
         // Act
-        Hint hint = null;
+        SentryHint hint = null;
         hub.CaptureEvent(
             Arg.Any<SentryEvent>(),
-            hint: Arg.Do<Hint>(h => hint = h)
+            hint: Arg.Do<SentryHint>(h => hint = h)
             );
         sut.HandleResponse(response);
 

@@ -122,7 +122,8 @@ public class SentrySqlListenerTests
         var spans = _fixture.Spans.Where(s => s.Operation != "abc");
         Assert.NotEmpty(spans);
 
-        Assert.True(GetValidator(key)(_fixture.Spans.First()));
+        var firstSpan = _fixture.Spans.OrderByDescending(x => x.StartTimestamp).First();
+        Assert.True(GetValidator(key)(firstSpan));
     }
 
     [Theory]

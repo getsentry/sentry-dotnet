@@ -125,13 +125,13 @@ internal sealed class SentryLogger : ILogger
                         break;
 
                     default:
-                    {
-                        if (property.Value?.GetType().IsPrimitive == true)
                         {
-                            @event.SetTag(property.Key, Convert.ToString(property.Value, CultureInfo.InvariantCulture)!);
+                            if (property.Value?.GetType().IsPrimitive == true)
+                            {
+                                @event.SetTag(property.Key, Convert.ToString(property.Value, CultureInfo.InvariantCulture)!);
+                            }
+                            break;
                         }
-                        break;
-                    }
                 }
             }
         }

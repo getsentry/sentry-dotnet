@@ -16,6 +16,8 @@ public class TransactionTracer : ITransactionTracer
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
     private readonly Instrumenter _instrumenter = Instrumenter.Sentry;
 
+    internal bool IsOtelInstrumenter => _instrumenter == Instrumenter.OpenTelemetry;
+
     /// <inheritdoc />
     public SpanId SpanId
     {
@@ -50,7 +52,7 @@ public class TransactionTracer : ITransactionTracer
     public bool? IsParentSampled { get; set; }
 
     /// <inheritdoc />
-    public string? Platform { get; set; } = Constants.Platform;
+    public string? Platform { get; set; } = SentryConstants.Platform;
 
     /// <inheritdoc />
     public string? Release { get; set; }
@@ -100,19 +102,19 @@ public class TransactionTracer : ITransactionTracer
     /// <inheritdoc />
     public SentryLevel? Level { get; set; }
 
-    private Request? _request;
+    private SentryRequest? _request;
 
     /// <inheritdoc />
-    public Request Request
+    public SentryRequest Request
     {
-        get => _request ??= new Request();
+        get => _request ??= new SentryRequest();
         set => _request = value;
     }
 
-    private readonly Contexts _contexts = new();
+    private readonly SentryContexts _contexts = new();
 
     /// <inheritdoc />
-    public Contexts Contexts
+    public SentryContexts Contexts
     {
         get => _contexts;
         set => _contexts.ReplaceWith(value);
@@ -174,6 +176,10 @@ public class TransactionTracer : ITransactionTracer
     /// <inheritdoc />
     public IReadOnlyDictionary<string, Measurement> Measurements => _measurements;
 
+    private readonly Lazy<MetricsSummaryAggregator> _metricsSummary = new();
+    internal MetricsSummaryAggregator MetricsSummary => _metricsSummary.Value;
+    internal bool HasMetrics => _metricsSummary.IsValueCreated;
+
     /// <inheritdoc />
     public bool IsFinished => EndTimestamp is not null;
 
@@ -229,7 +235,7 @@ public class TransactionTracer : ITransactionTracer
         IsSampled = context.IsSampled;
         StartTimestamp = _stopwatch.StartDateTimeOffset;
 
-		if (context is TransactionContext transactionContext)
+        if (context is TransactionContext transactionContext)
         {
             _instrumenter = transactionContext.Instrumenter;
         }
@@ -275,14 +281,6 @@ public class TransactionTracer : ITransactionTracer
     internal ISpan StartChild(SpanId? spanId, SpanId parentSpanId, string operation,
         Instrumenter instrumenter = Instrumenter.Sentry)
     {
-        if (instrumenter != _instrumenter)
-        {
-            _options?.LogWarning(
-                "Attempted to create a span via {0} instrumentation to a span or transaction" +
-                " originating from {1} instrumentation. The span will not be created.", instrumenter, _instrumenter);
-            return NoOpSpan.Instance;
-        }
-
         var span = new SpanTracer(_hub, this, parentSpanId, TraceId, operation);
         if (spanId is { } id)
         {
@@ -315,7 +313,7 @@ public class TransactionTracer : ITransactionTracer
 
         public void Push(ISpan span)
         {
-            lock(_lock)
+            lock (_lock)
             {
                 TrackedSpans.Push(span);
             }
@@ -323,7 +321,7 @@ public class TransactionTracer : ITransactionTracer
 
         public ISpan? PeekActive()
         {
-            lock(_lock)
+            lock (_lock)
             {
                 while (TrackedSpans.Count > 0)
                 {
