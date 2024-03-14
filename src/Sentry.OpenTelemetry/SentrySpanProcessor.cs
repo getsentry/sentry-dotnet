@@ -190,11 +190,13 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             span.SetExtra("otel.kind", data.Kind);
         }
 
-        // Events are received/processed in a different AsyncLocal context. Restoring the scope that started it.
+        // In ASP.NET Core the middleware finishes up (and the scope gets popped) before the activity is ended.  So we
+        // need to restore the scope here (it's saved by our middleware when the request starts)
         var activityScope = GetSavedScope(data);
-        if (activityScope is { } savedScope && _hub is Hub hub)
+        if (activityScope is { } savedScope)
         {
-            hub.RestoreScope(savedScope);
+            var hub = GetRealHub();
+            hub?.RestoreScope(savedScope);
         }
         GenerateSentryErrorsFromOtelSpan(data, attributes);
 
@@ -209,6 +211,21 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         // Housekeeping
         PruneFilteredSpans();
+    }
+
+    private Hub? GetRealHub()
+    {
+        if (_hub is Hub hub)
+        {
+            return hub;
+        }
+
+        if (_hub is HubAdapter && SentrySdk.CurrentHub is Hub sdkHub)
+        {
+            return sdkHub;
+        }
+
+        return null;
     }
 
     /// <summary>
