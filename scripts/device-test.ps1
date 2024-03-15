@@ -42,7 +42,7 @@ try
         $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/$Configuration/$tfm/iossimulator-$arch"
         $arguments = @(
             '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
-            '--target', 'ios-simulator-64',
+            '--target', 'ios-simulator-64_17.4',
             '--launch-timeout', '00:10:00'
         )
     }
