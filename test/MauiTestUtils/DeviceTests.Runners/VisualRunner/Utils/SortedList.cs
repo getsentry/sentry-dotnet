@@ -5,87 +5,105 @@ using System.Collections.Generic;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
-	class SortedList<T> : IList<T>
-	{
+    internal class SortedList<T> : IList<T>
+
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+Before:
 		readonly IComparer<T> _comparer;
 		readonly List<T> _list;
+After:
+        private readonly IComparer<T> _comparer;
+        private readonly List<T> _list;
+*/
 
-		public SortedList(IComparer<T> comparer)
-		{
-			_comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
-			_list = new List<T>();
-		}
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
+		readonly IComparer<T> _comparer;
+		readonly List<T> _list;
+After:
+        private readonly IComparer<T> _comparer;
+        private readonly List<T> _list;
+*/
+    {
+        private readonly IComparer<T> _comparer;
+        private readonly List<T> _list;
 
-		public int IndexOf(T item)
-		{
-			if (Count == 0)
-				return ~0;
+        public SortedList(IComparer<T> comparer)
+        {
+            _comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
+            _list = new List<T>();
+        }
 
-			return _list.BinarySearch(item, _comparer);
-		}
+        public int IndexOf(T item)
+        {
+            if (Count == 0)
+                return ~0;
 
-		public void Insert(int index, T item)
-		{
-			// We trust our caller to be passing in a sorted index.
-			_list.Insert(index, item);
-		}
+            return _list.BinarySearch(item, _comparer);
+        }
 
-		public void RemoveAt(int index)
-		{
-			_list.RemoveAt(index);
-		}
+        public void Insert(int index, T item)
+        {
+            // We trust our caller to be passing in a sorted index.
+            _list.Insert(index, item);
+        }
 
-		public T this[int index]
-		{
-			get => _list[index];
-			set => throw new NotSupportedException();
-		}
+        public void RemoveAt(int index)
+        {
+            _list.RemoveAt(index);
+        }
 
-		public void Add(T item)
-		{
-			var index = IndexOf(item);
-			if (index < 0)
-			{
-				index = ~index;
-			}
+        public T this[int index]
+        {
+            get => _list[index];
+            set => throw new NotSupportedException();
+        }
 
-			_list.Insert(index, item);
-		}
+        public void Add(T item)
+        {
+            var index = IndexOf(item);
+            if (index < 0)
+            {
+                index = ~index;
+            }
 
-		public void Clear()
-		{
-			_list.Clear();
-		}
+            _list.Insert(index, item);
+        }
 
-		public bool Contains(T item)
-		{
-			return IndexOf(item) >= 0;
-		}
+        public void Clear()
+        {
+            _list.Clear();
+        }
 
-		public void CopyTo(T[] array, int arrayIndex)
-		{
-			_list.CopyTo(array, arrayIndex);
-		}
+        public bool Contains(T item)
+        {
+            return IndexOf(item) >= 0;
+        }
 
-		public int Count => _list.Count;
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            _list.CopyTo(array, arrayIndex);
+        }
 
-		public bool IsReadOnly => false;
+        public int Count => _list.Count;
 
-		public bool Remove(T item)
-		{
-			var index = IndexOf(item);
-			if (index < 0)
-			{
-				return false;
-			}
+        public bool IsReadOnly => false;
 
-			RemoveAt(index);
+        public bool Remove(T item)
+        {
+            var index = IndexOf(item);
+            if (index < 0)
+            {
+                return false;
+            }
 
-			return true;
-		}
+            RemoveAt(index);
 
-		public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
+            return true;
+        }
 
-		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-	}
+        public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
 }

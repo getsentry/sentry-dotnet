@@ -4,18 +4,32 @@ using Microsoft.Maui.Controls;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages
 {
-	partial class CreditsPage : ContentPage
-	{
-		public CreditsPage()
-		{
-			InitializeComponent();
-		}
+    public partial class CreditsPage : ContentPage
+    {
+        public CreditsPage()
+        {
+            InitializeComponent();
 
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+Before:
 		void OnNavigating(object? sender, WebNavigatingEventArgs e)
-		{
-			Browser.OpenAsync(e.Url);
+After:
+        private void OnNavigating(object? sender, WebNavigatingEventArgs e)
+*/
 
-			e.Cancel = true;
-		}
-	}
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
+		void OnNavigating(object? sender, WebNavigatingEventArgs e)
+After:
+        private void OnNavigating(object? sender, WebNavigatingEventArgs e)
+*/
+        }
+
+        private void OnNavigating(object? sender, WebNavigatingEventArgs e)
+        {
+            Browser.OpenAsync(e.Url);
+
+            e.Cancel = true;
+        }
+    }
 }

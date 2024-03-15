@@ -6,29 +6,36 @@ using UIKit;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner
 {
-	public class MauiTestViewController : UIViewController
-	{
+    public class MauiTestViewController : UIViewController
+
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
 		Task? _task;
+After:
+        private Task? _task;
+*/
+    {
+        private Task? _task;
 
-		public MauiTestViewController()
-		{
-		}
+        public MauiTestViewController()
+        {
+        }
 
-		public MauiTestViewController(Task task)
-		{
-			_task = task;
-		}
+        public MauiTestViewController(Task task)
+        {
+            _task = task;
+        }
 
-		public override async void ViewDidLoad()
-		{
-			base.ViewDidLoad();
+        public override async void ViewDidLoad()
+        {
+            base.ViewDidLoad();
 
-			if (_task is not null)
-				await _task;
+            if (_task is not null)
+                await _task;
 
-			var runner = MauiTestApplicationDelegate.Current.Services.GetRequiredService<HeadlessTestRunner>();
+            var runner = MauiTestApplicationDelegate.Current.Services.GetRequiredService<HeadlessTestRunner>();
 
-			await runner.RunTestsAsync();
-		}
-	}
+            await runner.RunTestsAsync();
+        }
+    }
 }

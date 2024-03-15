@@ -8,20 +8,48 @@ using Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages
 {
-	partial class HomePage : ContentPage
-	{
-		public HomePage()
-		{
-			InitializeComponent();
+    public partial class HomePage : ContentPage
+    {
+        public HomePage()
+        {
+            InitializeComponent();
 
+
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+Before:
 			this.Loaded += HomePage_Loaded;
-		}
+After:
+			Loaded += HomePage_Loaded;
+*/
 
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
+			this.Loaded += HomePage_Loaded;
+After:
+			Loaded += HomePage_Loaded;
+*/
+            Loaded += HomePage_Loaded;
+
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+Before:
 		bool hasRunHeadless = false;
+After:
+        private bool hasRunHeadless = false;
+*/
 
-		private async void HomePage_Loaded(object? sender, EventArgs e)
-		{
-			string? testResultsFile = null;
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
+		bool hasRunHeadless = false;
+After:
+        private bool hasRunHeadless = false;
+*/
+        }
+
+        private bool hasRunHeadless = false;
+
+        private async void HomePage_Loaded(object? sender, EventArgs e)
+        {
+            string? testResultsFile = null;
 
 #if WINDOWS
 			var cliArgs = Environment.GetCommandLineArgs();
@@ -32,14 +60,14 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages
 			}
 #endif
 
-			if (!string.IsNullOrEmpty(testResultsFile) && !hasRunHeadless)
-			{
-				hasRunHeadless = true;
+            if (!string.IsNullOrEmpty(testResultsFile) && !hasRunHeadless)
+            {
+                hasRunHeadless = true;
 
 #if !WINDOWS
-				var headlessRunner = Handler!.MauiContext!.Services.GetRequiredService<HeadlessTestRunner>();
+                var headlessRunner = Handler!.MauiContext!.Services.GetRequiredService<HeadlessTestRunner>();
 
-				await headlessRunner.RunTestsAsync();
+                await headlessRunner.RunTestsAsync();
 #else
 				if (cliArgs.Length >= 3)
 				{
@@ -53,18 +81,18 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages
 				}
 #endif
 
-				Process.GetCurrentProcess().Kill();
-			}
-		}
+                Process.GetCurrentProcess().Kill();
+            }
+        }
 
-		protected override void OnAppearing()
-		{
-			base.OnAppearing();
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
 
-			assemblyList.SelectedItem = null;
+            assemblyList.SelectedItem = null;
 
-			if (BindingContext is ViewModelBase vm)
-				vm.OnAppearing();
-		}
-	}
+            if (BindingContext is ViewModelBase vm)
+                vm.OnAppearing();
+        }
+    }
 }

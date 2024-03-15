@@ -6,29 +6,43 @@ using Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
-	class TestNavigator : ITestNavigation
-	{
+    internal class TestNavigator : ITestNavigation
+
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+Before:
 		readonly INavigation _navigation;
+After:
+        private readonly INavigation _navigation;
+*/
 
-		public TestNavigator(INavigation navigation)
-		{
-			_navigation = navigation;
-		}
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
+		readonly INavigation _navigation;
+After:
+        private readonly INavigation _navigation;
+*/
+    {
+        private readonly INavigation _navigation;
 
-		public Task NavigateTo(PageType page, object? dataContext = null)
-		{
-			ContentPage p = page switch
-			{
-				PageType.Home => new HomePage(),
-				PageType.AssemblyTestList => new TestAssemblyPage(),
-				PageType.TestResult => new TestResultPage(),
-				PageType.Credits => new CreditsPage(),
-				_ => throw new ArgumentOutOfRangeException(nameof(page)),
-			};
+        public TestNavigator(INavigation navigation)
+        {
+            _navigation = navigation;
+        }
 
-			p.BindingContext = dataContext;
+        public Task NavigateTo(PageType page, object? dataContext = null)
+        {
+            ContentPage p = page switch
+            {
+                PageType.Home => new HomePage(),
+                PageType.AssemblyTestList => new TestAssemblyPage(),
+                PageType.TestResult => new TestResultPage(),
+                PageType.Credits => new CreditsPage(),
+                _ => throw new ArgumentOutOfRangeException(nameof(page)),
+            };
 
-			return _navigation.PushAsync(p);
-		}
-	}
+            p.BindingContext = dataContext;
+
+            return _navigation.PushAsync(p);
+        }
+    }
 }

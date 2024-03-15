@@ -15,174 +15,246 @@ using Xunit;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
-	public class DeviceRunner : ITestListener, ITestRunner
-	{
+    public class DeviceRunner : ITestListener, ITestRunner
+
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+Before:
 		readonly SynchronizationContext context = SynchronizationContext.Current;
 		readonly AsyncLock executionLock = new AsyncLock();
 		readonly ITestNavigation _navigation;
 		readonly TestRunLogger _logger;
 		volatile bool cancelled;
+After:
+        private readonly SynchronizationContext context = SynchronizationContext.Current;
+        private readonly AsyncLock executionLock = new AsyncLock();
+        private readonly ITestNavigation _navigation;
+        private readonly TestRunLogger _logger;
+        private volatile bool cancelled;
+*/
 
-		public DeviceRunner(IReadOnlyCollection<Assembly> testAssemblies, ITestNavigation navigation, ILogger logger)
-		{
-			TestAssemblies = testAssemblies;
-			_navigation = navigation;
-			_logger = new TestRunLogger(logger);
-		}
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
+		readonly SynchronizationContext context = SynchronizationContext.Current;
+		readonly AsyncLock executionLock = new AsyncLock();
+		readonly ITestNavigation _navigation;
+		readonly TestRunLogger _logger;
+		volatile bool cancelled;
+After:
+        private readonly SynchronizationContext context = SynchronizationContext.Current;
+        private readonly AsyncLock executionLock = new AsyncLock();
+        private readonly ITestNavigation _navigation;
+        private readonly TestRunLogger _logger;
+        private volatile bool cancelled;
+*/
+    {
+        private readonly SynchronizationContext context = SynchronizationContext.Current;
+        private readonly AsyncLock executionLock = new AsyncLock();
+        private readonly ITestNavigation _navigation;
+        private readonly TestRunLogger _logger;
+        private volatile bool cancelled;
 
-		public IReadOnlyCollection<Assembly> TestAssemblies { get; }
+        public DeviceRunner(IReadOnlyCollection<Assembly> testAssemblies, ITestNavigation navigation, ILogger logger)
+        {
+            TestAssemblies = testAssemblies;
+            _navigation = navigation;
+            _logger = new TestRunLogger(logger);
+        }
 
-		public void RecordResult(TestResultViewModel result)
-		{
-			_logger.LogTestResult(result);
-		}
+        public IReadOnlyCollection<Assembly> TestAssemblies { get; }
 
-		public Task RunAsync(TestCaseViewModel test)
-		{
-			return RunAsync(new[] { test });
-		}
+        public void RecordResult(TestResultViewModel result)
+        {
+            _logger.LogTestResult(result);
+        }
 
-		public Task RunAsync(IEnumerable<TestCaseViewModel> tests, string message = null)
-		{
-			var groups = tests
-				.GroupBy(t => t.AssemblyFileName)
-				.Select(g => new AssemblyRunInfo(
-					g.Key,
-					GetConfiguration(Path.GetFileNameWithoutExtension(g.Key)),
-					g.ToList()))
-				.ToList();
+        public Task RunAsync(TestCaseViewModel test)
+        {
+            return RunAsync(new[] { test });
+        }
 
-			return RunAsync(groups, message);
-		}
+        public Task RunAsync(IEnumerable<TestCaseViewModel> tests, string message = null)
+        {
+            var groups = tests
+                .GroupBy(t => t.AssemblyFileName)
+                .Select(g => new AssemblyRunInfo(
+                    g.Key,
+                    GetConfiguration(Path.GetFileNameWithoutExtension(g.Key)),
+                    g.ToList()))
+                .ToList();
 
-		public async Task RunAsync(IReadOnlyList<AssemblyRunInfo> runInfos, string message = null)
-		{
-			using (await executionLock.LockAsync())
-			{
-				if (message == null)
-				{
-					message = runInfos.Count > 1 || runInfos.FirstOrDefault()?.TestCases.Count > 1
-						? "Run Multiple Tests"
-						: runInfos.FirstOrDefault()?.TestCases.FirstOrDefault()?.DisplayName;
-				}
+            return RunAsync(groups, message);
+        }
 
-				_logger.LogTestStart(message);
+        public async Task RunAsync(IReadOnlyList<AssemblyRunInfo> runInfos, string message = null)
+        {
+            using (await executionLock.LockAsync())
+            {
+                if (message == null)
+                {
+                    message = runInfos.Count > 1 || runInfos.FirstOrDefault()?.TestCases.Count > 1
+                        ? "Run Multiple Tests"
+                        : runInfos.FirstOrDefault()?.TestCases.FirstOrDefault()?.DisplayName;
+                }
 
-				try
-				{
-					await RunTests(() => runInfos);
-				}
-				finally
-				{
-					_logger.LogTestComplete();
-				}
-			}
-		}
+                _logger.LogTestStart(message);
 
-		public event Action<string> OnDiagnosticMessage;
+                try
+                {
+                    await RunTests(() => runInfos);
+                }
+                finally
+                {
+                    _logger.LogTestComplete();
+                }
+            }
+        }
 
-		public Task<IReadOnlyList<TestAssemblyViewModel>> DiscoverAsync()
-		{
-			var tcs = new TaskCompletionSource<IReadOnlyList<TestAssemblyViewModel>>();
+        public event Action<string> OnDiagnosticMessage;
 
-			RunAsync(() =>
-			{
-				try
-				{
-					var runInfos = DiscoverTestsInAssemblies();
-					var list = runInfos.Select(ri => new TestAssemblyViewModel(ri, _navigation, this)).ToList();
+        public Task<IReadOnlyList<TestAssemblyViewModel>> DiscoverAsync()
+        {
+            var tcs = new TaskCompletionSource<IReadOnlyList<TestAssemblyViewModel>>();
 
-					tcs.SetResult(list);
-				}
-				catch (Exception e)
-				{
-					tcs.SetException(e);
-				}
-			});
+            RunAsync(() =>
+            {
+                try
+                {
+                    var runInfos = DiscoverTestsInAssemblies();
+                    var list = runInfos.Select(ri => new TestAssemblyViewModel(ri, _navigation, this)).ToList();
 
-			return tcs.Task;
-		}
+                    tcs.SetResult(list);
+                }
+                catch (Exception e)
+                {
+                    tcs.SetException(e);
+                }
+            });
 
+            return tcs.Task;
+
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+Before:
 		IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
-		{
-			var result = new List<AssemblyRunInfo>();
+After:
+        private IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
+*/
 
-			try
-			{
-				foreach (var assm in TestAssemblies)
-				{
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
+		IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
+After:
+        private IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
+*/
+        }
+
+        private IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
+        {
+            var result = new List<AssemblyRunInfo>();
+
+            try
+            {
+                foreach (var assm in TestAssemblies)
+                {
 #if WINDOWS
 					var nameWithoutExt = assm.GetName().Name;
 					var assemblyFileName = FileSystemUtils.PlatformGetFullAppPackageFilePath($"{nameWithoutExt}.dll");
 #elif ANDROID
-					// this is required to exist, but is not used
-					var assemblyFileName = assm.GetName().Name + ".dll";
-					assemblyFileName = Path.Combine(Android.App.Application.Context.CacheDir.AbsolutePath, assemblyFileName);
-					if (!File.Exists(assemblyFileName))
-						File.Create(assemblyFileName).Close();
+                    // this is required to exist, but is not used
+                    var assemblyFileName = assm.GetName().Name + ".dll";
+                    assemblyFileName = Path.Combine(Android.App.Application.Context.CacheDir.AbsolutePath, assemblyFileName);
+                    if (!File.Exists(assemblyFileName))
+                        File.Create(assemblyFileName).Close();
 #else
 					var assemblyFileName = assm.Location;
 #endif
 
-					var configuration = GetConfiguration(assemblyFileName);
-					var discoveryOptions = TestFrameworkOptions.ForDiscovery(configuration);
+                    var configuration = GetConfiguration(assemblyFileName);
+                    var discoveryOptions = TestFrameworkOptions.ForDiscovery(configuration);
 
-					try
-					{
-						if (cancelled)
-							break;
+                    try
+                    {
+                        if (cancelled)
+                            break;
 
-						using (var framework = new XunitFrontController(AppDomainSupport.Denied, assemblyFileName, null, false))
-						using (var sink = new TestDiscoverySink(() => cancelled))
-						{
-							framework.Find(false, sink, discoveryOptions);
-							sink.Finished.WaitOne();
+                        using (var framework = new XunitFrontController(AppDomainSupport.Denied, assemblyFileName, null, false))
+                        using (var sink = new TestDiscoverySink(() => cancelled))
+                        {
+                            framework.Find(false, sink, discoveryOptions);
+                            sink.Finished.WaitOne();
 
-							result.Add(new AssemblyRunInfo(
-								assemblyFileName,
-								configuration,
-								sink.TestCases.Select(tc => new TestCaseViewModel(assemblyFileName, tc)).ToList()));
-						}
-					}
-					catch (Exception e)
-					{
-						Debug.WriteLine(e);
-					}
-				}
-			}
-			catch (Exception e)
-			{
-				Debug.WriteLine(e);
-			}
+                            result.Add(new AssemblyRunInfo(
+                                assemblyFileName,
+                                configuration,
+                                sink.TestCases.Select(tc => new TestCaseViewModel(assemblyFileName, tc)).ToList()));
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.WriteLine(e);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+            }
 
-			return result;
-		}
+            return result;
 
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+Before:
 		static TestAssemblyConfiguration GetConfiguration(string assemblyName)
-		{
-			var stream = GetConfigurationStreamForAssembly(assemblyName);
-			if (stream != null)
-			{
-				using (stream)
-				{
-					return ConfigReader.Load(stream);
-				}
-			}
+After:
+        private static TestAssemblyConfiguration GetConfiguration(string assemblyName)
+*/
 
-			return new TestAssemblyConfiguration();
-		}
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
+		static TestAssemblyConfiguration GetConfiguration(string assemblyName)
+After:
+        private static TestAssemblyConfiguration GetConfiguration(string assemblyName)
+*/
+        }
 
+        private static TestAssemblyConfiguration GetConfiguration(string assemblyName)
+        {
+            var stream = GetConfigurationStreamForAssembly(assemblyName);
+            if (stream != null)
+            {
+                using (stream)
+                {
+                    return ConfigReader.Load(stream);
+                }
+            }
+
+            return new TestAssemblyConfiguration();
+
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+Before:
 		static Stream GetConfigurationStreamForAssembly(string assemblyName)
-		{
+After:
+        private static Stream GetConfigurationStreamForAssembly(string assemblyName)
+*/
+
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
+		static Stream GetConfigurationStreamForAssembly(string assemblyName)
+After:
+        private static Stream GetConfigurationStreamForAssembly(string assemblyName)
+*/
+        }
+
+        private static Stream GetConfigurationStreamForAssembly(string assemblyName)
+        {
 #if __ANDROID__
-			var assets = Android.App.Application.Context.Assets;
-			var allAssets = assets.List(string.Empty);
+            var assets = Android.App.Application.Context.Assets;
+            var allAssets = assets.List(string.Empty);
 
-			if (allAssets.Contains($"{assemblyName}.xunit.runner.json"))
-				return assets.Open($"{assemblyName}.xunit.runner.json");
+            if (allAssets.Contains($"{assemblyName}.xunit.runner.json"))
+                return assets.Open($"{assemblyName}.xunit.runner.json");
 
-			if (allAssets.Contains("xunit.runner.json"))
-				return assets.Open("xunit.runner.json");
+            if (allAssets.Contains("xunit.runner.json"))
+                return assets.Open("xunit.runner.json");
 #else
 
 			// See if there's a directory with the assm name. this might be the case for appx
@@ -213,129 +285,185 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 			}
 #endif
 
-			return null;
-		}
+            return null;
 
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+Before:
 		Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
-		{
-			var tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+After:
+        private Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
+*/
 
-			void Handler()
-			{
-				var toDispose = new List<IDisposable>();
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
+		Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
+After:
+        private Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
+*/
+        }
 
-				try
-				{
-					cancelled = false;
-					var assemblies = testCaseAccessor();
-					var parallelizeAssemblies = assemblies.All(runInfo => runInfo.Configuration.ParallelizeAssemblyOrDefault);
+        private Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
+        {
+            var tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-					if (parallelizeAssemblies)
-					{
-						assemblies
-							.Select(runInfo => RunTestsInAssemblyAsync(toDispose, runInfo))
-							.ToList()
-							.ForEach(@event => @event.WaitOne());
-					}
-					else
-					{
-						foreach (var runInfo in assemblies)
-						{
-							RunTestsInAssembly(toDispose, runInfo);
-						}
-					}
-				}
-				catch (Exception e)
-				{
-					tcs.SetException(e);
-				}
-				finally
-				{
-					toDispose.ForEach(disposable => disposable.Dispose());
-					tcs.TrySetResult(null);
-				}
-			}
+            void Handler()
+            {
+                var toDispose = new List<IDisposable>();
 
-			RunAsync(Handler);
+                try
+                {
+                    cancelled = false;
+                    var assemblies = testCaseAccessor();
+                    var parallelizeAssemblies = assemblies.All(runInfo => runInfo.Configuration.ParallelizeAssemblyOrDefault);
 
-			return tcs.Task;
-		}
+                    if (parallelizeAssemblies)
+                    {
+                        assemblies
+                            .Select(runInfo => RunTestsInAssemblyAsync(toDispose, runInfo))
+                            .ToList()
+                            .ForEach(@event => @event.WaitOne());
+                    }
+                    else
+                    {
+                        foreach (var runInfo in assemblies)
+                        {
+                            RunTestsInAssembly(toDispose, runInfo);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    tcs.SetException(e);
+                }
+                finally
+                {
+                    toDispose.ForEach(disposable => disposable.Dispose());
+                    tcs.TrySetResult(null);
+                }
+            }
 
+            RunAsync(Handler);
+
+            return tcs.Task;
+
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+Before:
 		void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
-		{
-			if (cancelled)
-				return;
+After:
+        private void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+*/
 
-			var assemblyFileName = runInfo.AssemblyFileName;
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
+		void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+After:
+        private void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+*/
+        }
 
-			var longRunningSeconds = runInfo.Configuration.LongRunningTestSecondsOrDefault;
+        private void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+        {
+            if (cancelled)
+                return;
 
-			var controller = new XunitFrontController(AppDomainSupport.Denied, assemblyFileName);
+            var assemblyFileName = runInfo.AssemblyFileName;
 
-			lock (toDispose)
-				toDispose.Add(controller);
+            var longRunningSeconds = runInfo.Configuration.LongRunningTestSecondsOrDefault;
 
-			var xunitTestCases = runInfo.TestCases
-				.Select(tc => new { vm = tc, tc = tc.TestCase })
-				.Where(tc => tc.tc.UniqueID != null)
-				.ToDictionary(tc => tc.tc, tc => tc.vm);
+            var controller = new XunitFrontController(AppDomainSupport.Denied, assemblyFileName);
 
-			var executionOptions = TestFrameworkOptions.ForExecution(runInfo.Configuration);
+            lock (toDispose)
+                toDispose.Add(controller);
 
-			var diagSink = new DiagnosticMessageSink(d => context.Post(_ => OnDiagnosticMessage?.Invoke(d), null), runInfo.AssemblyFileName, executionOptions.GetDiagnosticMessagesOrDefault());
+            var xunitTestCases = runInfo.TestCases
+                .Select(tc => new { vm = tc, tc = tc.TestCase })
+                .Where(tc => tc.tc.UniqueID != null)
+                .ToDictionary(tc => tc.tc, tc => tc.vm);
 
-			var deviceExecSink = new DeviceExecutionSink(xunitTestCases, this, context);
+            var executionOptions = TestFrameworkOptions.ForExecution(runInfo.Configuration);
 
-			IExecutionSink resultsSink = new DelegatingExecutionSummarySink(deviceExecSink, () => cancelled);
-			if (longRunningSeconds > 0)
-				resultsSink = new DelegatingLongRunningTestDetectionSink(resultsSink, TimeSpan.FromSeconds(longRunningSeconds), diagSink);
+            var diagSink = new DiagnosticMessageSink(d => context.Post(_ => OnDiagnosticMessage?.Invoke(d), null), runInfo.AssemblyFileName, executionOptions.GetDiagnosticMessagesOrDefault());
 
-			var assm = new XunitProjectAssembly() { AssemblyFilename = runInfo.AssemblyFileName };
-			deviceExecSink.OnMessage(new TestAssemblyExecutionStarting(assm, executionOptions));
+            var deviceExecSink = new DeviceExecutionSink(xunitTestCases, this, context);
 
-			controller.RunTests(xunitTestCases.Select(tc => tc.Value.TestCase).ToList(), resultsSink, executionOptions);
-			resultsSink.Finished.WaitOne();
+            IExecutionSink resultsSink = new DelegatingExecutionSummarySink(deviceExecSink, () => cancelled);
+            if (longRunningSeconds > 0)
+                resultsSink = new DelegatingLongRunningTestDetectionSink(resultsSink, TimeSpan.FromSeconds(longRunningSeconds), diagSink);
 
-			deviceExecSink.OnMessage(new TestAssemblyExecutionFinished(assm, executionOptions, resultsSink.ExecutionSummary));
-		}
+            var assm = new XunitProjectAssembly() { AssemblyFilename = runInfo.AssemblyFileName };
+            deviceExecSink.OnMessage(new TestAssemblyExecutionStarting(assm, executionOptions));
 
+            controller.RunTests(xunitTestCases.Select(tc => tc.Value.TestCase).ToList(), resultsSink, executionOptions);
+            resultsSink.Finished.WaitOne();
+
+            deviceExecSink.OnMessage(new TestAssemblyExecutionFinished(assm, executionOptions, resultsSink.ExecutionSummary));
+
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+Before:
 		ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
-		{
-			var @event = new ManualResetEvent(false);
+After:
+        private ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+*/
 
-			void Handler()
-			{
-				try
-				{
-					RunTestsInAssembly(toDispose, runInfo);
-				}
-				finally
-				{
-					@event.Set();
-				}
-			}
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
+		ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+After:
+        private ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+*/
+        }
 
-			RunAsync(Handler);
+        private ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+        {
+            var @event = new ManualResetEvent(false);
 
-			return @event;
-		}
+            void Handler()
+            {
+                try
+                {
+                    RunTestsInAssembly(toDispose, runInfo);
+                }
+                finally
+                {
+                    @event.Set();
+                }
+            }
 
+            RunAsync(Handler);
+
+            return @event;
+
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+Before:
 		static async void RunAsync(Action action)
-		{
-			var task = Task.Factory.StartNew(action, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+After:
+        private static async void RunAsync(Action action)
+*/
 
-			try
-			{
-				await task;
-			}
-			catch (Exception e)
-			{
-				if (Debugger.IsAttached)
-				{
-					Debugger.Break();
-					Debug.WriteLine(e);
-				}
-			}
-		}
-	}
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
+		static async void RunAsync(Action action)
+After:
+        private static async void RunAsync(Action action)
+*/
+        }
+
+        private static async void RunAsync(Action action)
+        {
+            var task = Task.Factory.StartNew(action, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+            try
+            {
+                await task;
+            }
+            catch (Exception e)
+            {
+                if (Debugger.IsAttached)
+                {
+                    Debugger.Break();
+                    Debug.WriteLine(e);
+                }
+            }
+        }
+    }
 }

@@ -5,96 +5,120 @@ using Microsoft.Extensions.Logging;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
-	class TestRunLogger
-	{
+    internal class TestRunLogger
+
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+Before:
 		static readonly char[] NewLineCharacters = { '\r', '\n' };
+After:
+        private static readonly char[] NewLineCharacters = { '\r', '\n' };
+*/
 
-		readonly object _locker = new();
-		readonly ILogger _logger;
-		readonly StringBuilder _builder;
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
+		static readonly char[] NewLineCharacters = { '\r', '\n' };
+After:
+        private static readonly char[] NewLineCharacters = { '\r', '\n' };
+*/
+    {
+        private static readonly char[] NewLineCharacters = { '\r', '\n' };
+        private readonly object _locker = new();
+        private readonly ILogger _logger;
+        private readonly StringBuilder _builder;
+        private int _failed;
 
-		int _failed;
-		int _passed;
-		int _skipped;
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+Added:
+        private int _passed;
+        private int _skipped;
+*/
 
-		public TestRunLogger(ILogger logger)
-		{
-			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_builder = new StringBuilder();
-		}
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Added:
+        private int _passed;
+        private int _skipped;
+*/
+        private int _passed;
+        private int _skipped;
 
-		public void LogTestResult(TestResultViewModel result)
-		{
-			lock (_locker)
-			{
-				_builder.Clear();
+        public TestRunLogger(ILogger logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _builder = new StringBuilder();
+        }
 
-				if (result.TestCase.Result == TestState.Passed)
-				{
-					_builder.Append("\t[PASS] ");
-					_passed++;
-				}
-				else if (result.TestCase.Result == TestState.Skipped)
-				{
-					_builder.Append("\t[SKIPPED] ");
-					_skipped++;
-				}
-				else if (result.TestCase.Result == TestState.Failed)
-				{
-					_builder.Append("\t[FAIL] ");
-					_failed++;
-				}
-				else
-				{
-					_builder.Append("\t[INFO] ");
-				}
-				_builder.Append(result.TestCase.DisplayName);
+        public void LogTestResult(TestResultViewModel result)
+        {
+            lock (_locker)
+            {
+                _builder.Clear();
 
-				var message = result.ErrorMessage;
-				if (!string.IsNullOrEmpty(message))
-				{
-					_builder.Append(" : ");
-					_builder.Append(message.Replace("\r", "\\r", StringComparison.Ordinal).Replace("\n", "\\n", StringComparison.Ordinal));
-				}
+                if (result.TestCase.Result == TestState.Passed)
+                {
+                    _builder.Append("\t[PASS] ");
+                    _passed++;
+                }
+                else if (result.TestCase.Result == TestState.Skipped)
+                {
+                    _builder.Append("\t[SKIPPED] ");
+                    _skipped++;
+                }
+                else if (result.TestCase.Result == TestState.Failed)
+                {
+                    _builder.Append("\t[FAIL] ");
+                    _failed++;
+                }
+                else
+                {
+                    _builder.Append("\t[INFO] ");
+                }
+                _builder.Append(result.TestCase.DisplayName);
 
-				_builder.AppendLine();
+                var message = result.ErrorMessage;
+                if (!string.IsNullOrEmpty(message))
+                {
+                    _builder.Append(" : ");
+                    _builder.Append(message.Replace("\r", "\\r", StringComparison.Ordinal).Replace("\n", "\\n", StringComparison.Ordinal));
+                }
 
-				var stacktrace = result.ErrorStackTrace;
-				if (!string.IsNullOrEmpty(stacktrace))
-				{
-					var lines = stacktrace.Split(NewLineCharacters, StringSplitOptions.RemoveEmptyEntries);
-					foreach (var line in lines)
-					{
-						_builder.Append("\t\t");
-						_builder.AppendLine(line);
-					}
-				}
+                _builder.AppendLine();
 
-				_logger.LogInformation(_builder.ToString());
-			}
-		}
+                var stacktrace = result.ErrorStackTrace;
+                if (!string.IsNullOrEmpty(stacktrace))
+                {
+                    var lines = stacktrace.Split(NewLineCharacters, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var line in lines)
+                    {
+                        _builder.Append("\t\t");
+                        _builder.AppendLine(line);
+                    }
+                }
 
-		public void LogTestStart(string? message = null)
-		{
-			lock (_locker)
-			{
-				_failed = _passed = _skipped = 0;
+                _logger.LogInformation(_builder.ToString());
+            }
+        }
 
-				if (string.IsNullOrEmpty(message))
-					_logger.LogInformation("[Runner executing]");
-				else
-					_logger.LogInformation("[Runner executing: {0}]", message);
-			}
-		}
+        public void LogTestStart(string? message = null)
+        {
+            lock (_locker)
+            {
+                _failed = _passed = _skipped = 0;
 
-		public void LogTestComplete()
-		{
-			lock (_locker)
-			{
-				var total = _passed + _failed; // ignored are *not* run
+                if (string.IsNullOrEmpty(message))
+                    _logger.LogInformation("[Runner executing]");
+                else
+                    _logger.LogInformation("[Runner executing: {0}]", message);
+            }
+        }
 
-				_logger.LogInformation("Tests run: {0} Passed: {1} Failed: {2} Skipped: {3}", total, _passed, _failed, _skipped);
-			}
-		}
-	}
+        public void LogTestComplete()
+        {
+            lock (_locker)
+            {
+                var total = _passed + _failed; // ignored are *not* run
+
+                _logger.LogInformation("Tests run: {0} Passed: {1} Failed: {2} Skipped: {3}", total, _passed, _failed, _skipped);
+            }
+        }
+    }
 }

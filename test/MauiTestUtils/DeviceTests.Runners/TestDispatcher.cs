@@ -5,37 +5,55 @@ using Microsoft.Maui.Dispatching;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners
 {
-	public static class TestDispatcher
-	{
+    public static class TestDispatcher
+
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+Before:
 		static IDispatcher? s_dispatcher;
 		static IDispatcherProvider? s_provider;
+After:
+        private static IDispatcher? s_dispatcher;
+        private static IDispatcherProvider? s_provider;
+*/
 
-		public static IDispatcherProvider Provider
-		{
-			get
-			{
-				if (s_provider is null)
-					s_provider = TestServices.Services.GetService<IDispatcherProvider>();
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
+		static IDispatcher? s_dispatcher;
+		static IDispatcherProvider? s_provider;
+After:
+        private static IDispatcher? s_dispatcher;
+        private static IDispatcherProvider? s_provider;
+*/
+    {
+        private static IDispatcher? s_dispatcher;
+        private static IDispatcherProvider? s_provider;
 
-				if (s_provider is null)
-					throw new InvalidOperationException($"Test app did not provide a dispatcher.");
+        public static IDispatcherProvider Provider
+        {
+            get
+            {
+                if (s_provider is null)
+                    s_provider = TestServices.Services.GetService<IDispatcherProvider>();
 
-				return s_provider;
-			}
-		}
+                if (s_provider is null)
+                    throw new InvalidOperationException($"Test app did not provide a dispatcher.");
 
-		public static IDispatcher Current
-		{
-			get
-			{
-				if (s_dispatcher is null)
-					s_dispatcher = TestServices.Services.GetService<ApplicationDispatcher>()?.Dispatcher;
+                return s_provider;
+            }
+        }
 
-				if (s_dispatcher is null)
-					throw new InvalidOperationException($"Test app did not provide a dispatcher.");
+        public static IDispatcher Current
+        {
+            get
+            {
+                if (s_dispatcher is null)
+                    s_dispatcher = TestServices.Services.GetService<ApplicationDispatcher>()?.Dispatcher;
 
-				return s_dispatcher;
-			}
-		}
-	}
+                if (s_dispatcher is null)
+                    throw new InvalidOperationException($"Test app did not provide a dispatcher.");
+
+                return s_dispatcher;
+            }
+        }
+    }
 }

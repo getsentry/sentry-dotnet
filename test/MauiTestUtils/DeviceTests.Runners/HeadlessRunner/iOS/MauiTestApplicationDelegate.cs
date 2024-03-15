@@ -12,8 +12,10 @@ using UIKit;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner
 {
-	public abstract class MauiTestApplicationDelegate : UIApplicationDelegate
-	{
+    public abstract class MauiTestApplicationDelegate : UIApplicationDelegate
+
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
 		// TODO: https://github.com/xamarin/xamarin-macios/issues/12555
 		readonly static string[] EnvVarNames = {
 			"NUNIT_AUTOSTART",
@@ -36,95 +38,147 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner
 		};
 
 		readonly static Dictionary<string, string?> EnvVars = new();
+After:
+        // TODO: https://github.com/xamarin/xamarin-macios/issues/12555
+        private static readonly string[] EnvVarNames = {
+			"NUNIT_AUTOSTART",
+			"NUNIT_AUTOEXIT",
+			"NUNIT_ENABLE_NETWORK",
+			"DISABLE_SYSTEM_PERMISSION_TESTS",
+			"NUNIT_HOSTNAME",
+			"NUNIT_TRANSPORT",
+			"NUNIT_LOG_FILE",
+			"NUNIT_HOSTPORT",
+			"USE_TCP_TUNNEL",
+			"RUN_END_TAG",
+			"NUNIT_ENABLE_XML_OUTPUT",
+			"NUNIT_ENABLE_XML_MODE",
+			"NUNIT_XML_VERSION",
+			"NUNIT_SORTNAMES",
+			"NUNIT_RUN_ALL",
+			"NUNIT_SKIPPED_METHODS",
+			"NUNIT_SKIPPED_CLASSES",
+		};
+        private static readonly Dictionary<string, string?> EnvVars = new();
+*/
+    {
+        // TODO: https://github.com/xamarin/xamarin-macios/issues/12555
+        private static readonly string[] EnvVarNames = {
+            "NUNIT_AUTOSTART",
+            "NUNIT_AUTOEXIT",
+            "NUNIT_ENABLE_NETWORK",
+            "DISABLE_SYSTEM_PERMISSION_TESTS",
+            "NUNIT_HOSTNAME",
+            "NUNIT_TRANSPORT",
+            "NUNIT_LOG_FILE",
+            "NUNIT_HOSTPORT",
+            "USE_TCP_TUNNEL",
+            "RUN_END_TAG",
+            "NUNIT_ENABLE_XML_OUTPUT",
+            "NUNIT_ENABLE_XML_MODE",
+            "NUNIT_XML_VERSION",
+            "NUNIT_SORTNAMES",
+            "NUNIT_RUN_ALL",
+            "NUNIT_SKIPPED_METHODS",
+            "NUNIT_SKIPPED_CLASSES",
+        };
+        private static readonly Dictionary<string, string?> EnvVars = new();
 
-		static MauiTestApplicationDelegate()
-		{
-			// copy into dictionary for later
-			foreach (var envvar in EnvVarNames)
-			{
-				EnvVars[envvar] = Environment.GetEnvironmentVariable(envvar);
-			}
+        static MauiTestApplicationDelegate()
+        {
+            // copy into dictionary for later
+            foreach (var envvar in EnvVarNames)
+            {
+                EnvVars[envvar] = Environment.GetEnvironmentVariable(envvar);
+            }
 
-			// Add entry to indicate we're running headless
-			EnvVars.Add("headlessrunner", "true");
-		}
+            // Add entry to indicate we're running headless
+            EnvVars.Add("headlessrunner", "true");
 
+/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+Before:
 		static void SetEnvironmentVariables()
-		{
-			// read from dictionary
-			foreach (var envvar in EnvVars)
-			{
-				Console.WriteLine($"  {envvar.Key} = '{envvar.Value}'");
-				Environment.SetEnvironmentVariable(envvar.Key, envvar.Value);
-			}
-		}
+After:
+        private static void SetEnvironmentVariables()
+*/
+        }
 
-		public static bool IsHeadlessRunner(string[] args)
-		{
-			// usually means this is from xharness
-			return args?.Length > 0 || Environment.GetEnvironmentVariable("NUNIT_AUTOEXIT")?.Length > 0;
-		}
+        private static void SetEnvironmentVariables()
+        {
+            // read from dictionary
+            foreach (var envvar in EnvVars)
+            {
+                Console.WriteLine($"  {envvar.Key} = '{envvar.Value}'");
+                Environment.SetEnvironmentVariable(envvar.Key, envvar.Value);
+            }
+        }
 
-		protected MauiTestApplicationDelegate()
-		{
-			Current = this;
-		}
+        public static bool IsHeadlessRunner(string[] args)
+        {
+            // usually means this is from xharness
+            return args?.Length > 0 || Environment.GetEnvironmentVariable("NUNIT_AUTOEXIT")?.Length > 0;
+        }
 
-		public static MauiTestApplicationDelegate Current { get; private set; } = null!;
+        protected MauiTestApplicationDelegate()
+        {
+            Current = this;
+        }
 
-		public IServiceProvider Services { get; private set; } = null!;
+        public static MauiTestApplicationDelegate Current { get; private set; } = null!;
 
-		public TestOptions Options { get; private set; } = null!;
+        public IServiceProvider Services { get; private set; } = null!;
 
-		public HeadlessRunnerOptions RunnerOptions { get; private set; } = null!;
+        public TestOptions Options { get; private set; } = null!;
 
-		public override UIWindow? Window { get; set; }
+        public HeadlessRunnerOptions RunnerOptions { get; private set; } = null!;
 
-		protected abstract MauiApp CreateMauiApp();
+        public override UIWindow? Window { get; set; }
 
-		public override bool WillFinishLaunching(UIApplication application, NSDictionary launchOptions)
-		{
-			Runtime.MarshalManagedException += (object sender, MarshalManagedExceptionEventArgs args) =>
-			{
-				Console.WriteLine("Marshaling managed exception");
-				Console.WriteLine("    Exception: {0}", args.Exception);
-				Console.WriteLine("    Mode: {0}", args.ExceptionMode);
+        protected abstract MauiApp CreateMauiApp();
 
-			};
+        public override bool WillFinishLaunching(UIApplication application, NSDictionary launchOptions)
+        {
+            Runtime.MarshalManagedException += (object sender, MarshalManagedExceptionEventArgs args) =>
+            {
+                Console.WriteLine("Marshaling managed exception");
+                Console.WriteLine("    Exception: {0}", args.Exception);
+                Console.WriteLine("    Mode: {0}", args.ExceptionMode);
 
-			Runtime.MarshalObjectiveCException += (object sender, MarshalObjectiveCExceptionEventArgs args) =>
-			{
-				Console.WriteLine("Marshaling Objective-C exception");
-				Console.WriteLine("    Exception: {0}", args.Exception);
-				Console.WriteLine("    Mode: {0}", args.ExceptionMode);
-			};
+            };
 
-			var mauiApp = CreateMauiApp();
-			Services = mauiApp.Services;
+            Runtime.MarshalObjectiveCException += (object sender, MarshalObjectiveCExceptionEventArgs args) =>
+            {
+                Console.WriteLine("Marshaling Objective-C exception");
+                Console.WriteLine("    Exception: {0}", args.Exception);
+                Console.WriteLine("    Mode: {0}", args.ExceptionMode);
+            };
 
-			SetEnvironmentVariables();
+            var mauiApp = CreateMauiApp();
+            Services = mauiApp.Services;
 
-			Options = Services.GetRequiredService<TestOptions>();
-			RunnerOptions = Services.GetRequiredService<HeadlessRunnerOptions>();
+            SetEnvironmentVariables();
 
-			return true;
-		}
+            Options = Services.GetRequiredService<TestOptions>();
+            RunnerOptions = Services.GetRequiredService<HeadlessRunnerOptions>();
 
-		public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
-		{
-			var tcs = new TaskCompletionSource();
+            return true;
+        }
 
-			Window = new UIWindow(UIScreen.MainScreen.Bounds)
-			{
-				RootViewController = new MauiTestViewController(tcs.Task)
-			};
+        public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
+        {
+            var tcs = new TaskCompletionSource();
 
-			Window.MakeKeyAndVisible();
+            Window = new UIWindow(UIScreen.MainScreen.Bounds)
+            {
+                RootViewController = new MauiTestViewController(tcs.Task)
+            };
 
-			tcs.TrySetResult();
+            Window.MakeKeyAndVisible();
 
-			return true;
-		}
+            tcs.TrySetResult();
 
-	}
+            return true;
+        }
+
+    }
 }
