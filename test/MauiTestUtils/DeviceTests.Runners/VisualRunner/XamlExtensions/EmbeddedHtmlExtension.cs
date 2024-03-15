@@ -1,15 +1,9 @@
-#nullable enable
+﻿#nullable enable
 using System;
 using System.IO;
 using Microsoft.Maui.Controls;
 
-<<<<<<< HEAD
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
-=======
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
-
-internal class EmbeddedHtmlExtension : EmbeddedResourceExtension
->>>>>>> chore/net8-devicetests
 {
 	class EmbeddedHtmlExtension : EmbeddedResourceExtension
 	{
@@ -21,13 +15,7 @@ internal class EmbeddedHtmlExtension : EmbeddedResourceExtension
 				return new HtmlWebViewSource { Html = reader.ReadToEnd() };
 			}
 
-<<<<<<< HEAD
 			return null;
 		}
 	}
 }
-=======
-        return null;
-    }
-}
->>>>>>> chore/net8-devicetests

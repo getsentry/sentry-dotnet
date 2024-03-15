@@ -1,4 +1,4 @@
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
+﻿namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
 	public enum RunStatus
 	{

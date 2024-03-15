@@ -1,16 +1,9 @@
-#nullable enable
+﻿#nullable enable
 using System;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Controls.Xaml;
 
-<<<<<<< HEAD
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
-=======
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
-
-[ContentProperty(nameof(Name))]
-internal class EmbeddedResourceExtension : IMarkupExtension
->>>>>>> chore/net8-devicetests
 {
 	[ContentProperty(nameof(Name))]
 	class EmbeddedResourceExtension : IMarkupExtension
@@ -31,13 +24,7 @@ internal class EmbeddedResourceExtension : IMarkupExtension
 					return assembly.GetManifestResourceStream(name);
 			}
 
-<<<<<<< HEAD
 			return null;
 		}
 	}
 }
-=======
-        return null;
-    }
-}
->>>>>>> chore/net8-devicetests

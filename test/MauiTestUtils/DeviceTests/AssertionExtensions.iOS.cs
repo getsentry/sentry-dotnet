@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using CoreAnimation;
@@ -9,6 +9,7 @@ using Microsoft.Maui.Platform;
 using UIKit;
 using Xunit;
 using Xunit.Sdk;
+using static Microsoft.Maui.DeviceTests.AssertHelpers;
 
 namespace Microsoft.Maui.DeviceTests
 {
@@ -16,14 +17,12 @@ namespace Microsoft.Maui.DeviceTests
 	{
 		public static async Task WaitForKeyboardToShow(this UIView view, int timeout = 1000)
 		{
-			var result = await Wait(() => KeyboardAutoManagerScroll.IsKeyboardShowing, timeout);
-			Assert.True(result);
+			await AssertEventually(() => KeyboardAutoManagerScroll.IsKeyboardShowing, timeout: timeout, message: $"Timed out waiting for {view} to show keyboard");
 		}
 
 		public static async Task WaitForKeyboardToHide(this UIView view, int timeout = 1000)
 		{
-			var result = await Wait(() => !KeyboardAutoManagerScroll.IsKeyboardShowing, timeout);
-			Assert.True(result);
+			await AssertEventually(() => !KeyboardAutoManagerScroll.IsKeyboardShowing, timeout: timeout, message: $"Timed out waiting for {view} to hide keyboard");
 		}
 
 		public static Task SendValueToKeyboard(this UIView view, char value, int timeout = 1000)
@@ -38,22 +37,12 @@ namespace Microsoft.Maui.DeviceTests
 
 		public static async Task WaitForFocused(this UIView view, int timeout = 1000)
 		{
-			if (!view.IsFocused())
-			{
-				await Wait(() => view.IsFocused(), timeout);
-			}
-
-			Assert.True(view.IsFocused());
+			await AssertEventually(view.IsFocused, timeout: timeout, message: $"Timed out waiting for {view} to become focused");
 		}
 
 		public static async Task WaitForUnFocused(this UIView view, int timeout = 1000)
 		{
-			if (view.IsFocused())
-			{
-				await Wait(() => view.IsFocused(), timeout);
-			}
-
-			Assert.False(view.IsFocused());
+			await AssertEventually(() => !view.IsFocused(), timeout: timeout, message: $"Timed out waiting for {view} to become unfocused");
 		}
 
 		static bool IsFocused(this UIView view) => view.Focused || view.IsFirstResponder;
@@ -119,7 +108,28 @@ namespace Microsoft.Maui.DeviceTests
 		public static async Task<T> AttachAndRun<T>(this UIView view, Func<Task<T>> action)
 		{
 			var currentView = FindContentView();
-			currentView.AddSubview(view);
+
+			// MauiView has optimization code that won't fire a remeasure of the child view
+			// Check LayoutSubviews inside Mauiveiw.cs for more details. 
+			// If the parent is a MauiView, the expectation is that the parent will call
+			// measure on all the children. But this view that we're "attaching" is unknown to MauiView
+			// so the optimization code causes the attached view to not remeasure when it actually should. 
+			// So we add a UIView in the middle to force our attached view to not optimize itself and actually
+			// remeasure when requested
+			// This middle view is also helpful so we can make sure the attached view isn't inside the safe area
+			// which can have some unexpected results
+			var safeAreaInsets = currentView.SafeAreaInsets;
+			var attachedView = new UIView()
+			{
+				Frame = new CGRect(
+					safeAreaInsets.Right,
+					safeAreaInsets.Top,
+					currentView.Frame.Width - safeAreaInsets.Right,
+					currentView.Frame.Height - safeAreaInsets.Top)
+			};
+
+			attachedView.AddSubview(view);	
+			currentView.AddSubview(attachedView);
 
 			// Give the UI time to refresh
 			await Task.Delay(100);
@@ -133,6 +143,7 @@ namespace Microsoft.Maui.DeviceTests
 			finally
 			{
 				view.RemoveFromSuperview();
+				attachedView.RemoveFromSuperview();
 
 				// Give the UI time to refresh
 				await Task.Delay(100);
@@ -391,9 +402,29 @@ namespace Microsoft.Maui.DeviceTests
 				}
 			}
 
-        Assert.True(false, CreateColorError(bitmap, $"Color {expectedColor} not found."));
-        return bitmap;
-    }
+			throw new XunitException(CreateColorError(bitmap, $"Color {expectedColor} not found."));
+		}
+
+		public static UIImage AssertDoesNotContainColor(this UIImage bitmap, UIColor unexpectedColor, Func<Graphics.RectF, Graphics.RectF>? withinRectModifier = null)
+		{
+			var imageRect = new Graphics.RectF(0, 0, (float)bitmap.Size.Width.Value, (float)bitmap.Size.Height.Value);
+
+			if (withinRectModifier is not null)
+				imageRect = withinRectModifier.Invoke(imageRect);
+
+			for (int x = (int)imageRect.X; x < (int)imageRect.Width; x++)
+			{
+				for (int y = (int)imageRect.Y; y < (int)imageRect.Height; y++)
+				{
+					if (ColorComparison.ARGBEquivalent(bitmap.ColorAtPoint(x, y), unexpectedColor))
+					{
+						throw new XunitException(CreateColorError(bitmap, $"Color {unexpectedColor} was found at point {x}, {y}."));
+					}
+				}
+			}
+
+			return bitmap;
+		}
 
 
 		public static Task AssertEqualAsync(this UIImage bitmap, UIImage other)
@@ -564,27 +595,32 @@ namespace Microsoft.Maui.DeviceTests
 			Assert.Equal((double)expected.M44, (double)actual.M44, precision);
 		}
 
-    static UIWindow? GetKeyWindow(UIApplication application)
-    {
-        if (OperatingSystem.IsIOSVersionAtLeast(13) || OperatingSystem.IsMacCatalystVersionAtLeast(13, 1))
-        {
-#pragma warning disable CA1416
-            foreach (var scene in application.ConnectedScenes)
-            {
-                if (scene is not UIWindowScene {ActivationState: UISceneActivationState.ForegroundActive} windowScene)
-                {
-                    continue;
-                }
-
-                foreach (var window in windowScene.Windows)
-                {
-                    if (window.IsKeyWindow)
-                    {
-                        return window;
-                    }
-                }
-            }
-#pragma warning restore CA1416
+		static UIWindow? GetKeyWindow(UIApplication application)
+		{
+			if (OperatingSystem.IsIOSVersionAtLeast(15))
+			{
+				foreach (var scene in application.ConnectedScenes)
+				{
+					if (scene is UIWindowScene windowScene
+						&& windowScene.ActivationState == UISceneActivationState.ForegroundActive)
+					{
+						foreach (var window in windowScene.Windows)
+						{
+#if MACCATALYST
+							// When running headless (on CI or local) Mac Catalyst has trouble finding the window through the method below.
+							// Added an env variable to accommodate for this and just return the first window found.
+							if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("headlessrunner")))
+							{	
+								return window;
+							}
+#endif
+							if (window.IsKeyWindow)
+							{
+								return window;
+							}
+						}
+					}
+				}
 
 				return null;
 			}
@@ -629,7 +665,7 @@ namespace Microsoft.Maui.DeviceTests
 				// AFAICT on iOS when you read IsAccessibilityElement it's always false
 				// unless you have VoiceOver turned on.
 				// So, though not ideal, the main think we test on iOS is that elements
-				// that should stay false remain false.
+				// that should stay false remain false. 
 				// According to the Apple docs anything that inherits from UIControl
 				// has isAccessibilityElement set to true by default so we're just
 				// validating that everything that doesn't inherit from UIControl isn't

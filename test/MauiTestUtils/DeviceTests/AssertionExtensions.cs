@@ -1,5 +1,6 @@
 using System;
 using System.Reflection.Metadata;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,50 +8,70 @@ using Microsoft.Maui.Dispatching;
 using Microsoft.Maui.Platform;
 using Xunit;
 using Xunit.Sdk;
+using static Microsoft.Maui.DeviceTests.AssertHelpers;
 
 namespace Microsoft.Maui.DeviceTests
 {
 	public static partial class AssertionExtensions
 	{
-		static readonly Random rnd = new Random();
-
-		public static async Task<bool> Wait(Func<bool> exitCondition, int timeout = 1000)
+		public static async Task WaitForGC(params WeakReference[] references)
 		{
-			while ((timeout -= 100) > 0)
+			Assert.NotEmpty(references);
+
+			bool referencesCollected()
 			{
-				if (!exitCondition.Invoke())
-					await Task.Delay(rnd.Next(100, 200));
-				else
-					break;
+				GC.Collect();
+				GC.WaitForPendingFinalizers();
+
+				foreach (var reference in references)
+				{
+					Assert.NotNull(reference);
+					if (reference.IsAlive)
+					{
+						return false;
+					}
+				}
+
+				return true;
 			}
 
-        return exitCondition.Invoke();
-    }
+			try
+			{
+				await AssertEventually(referencesCollected, timeout: 10000);
+			}
+			catch (XunitException ex)
+			{
+				throw new XunitException(ListLivingReferences(references), ex);
+			}
+		}
 
-    public static void AssertHasFlag(this Enum self, Enum flag)
-    {
-        var hasFlag = self.HasFlag(flag);
+		static string ListLivingReferences(WeakReference[] references)
+		{
+			StringBuilder stringBuilder = new StringBuilder();
 
-        if (!hasFlag)
-            throw new ContainsException(flag, self);
-    }
+			foreach (var weakReference in references)
+			{
+				if (weakReference.IsAlive && weakReference.Target is object x)
+				{
+					stringBuilder.Append($"Reference to {x} (type {x.GetType()} is still alive.\n");
+				}
+			}
 
-    public static void AssertWithMessage(Action assertion, string message)
-    {
-        try
-        {
-            assertion();
-        }
-        catch (Exception e)
-        {
-            Assert.True(false, $"Message: {message} Failure: {e}");
-        }
-    }
+			return stringBuilder.ToString();
+		}
 
-    public static void CloseEnough(double expected, double actual, double epsilon = 0.2, string? message = null)
-    {
-        if (!String.IsNullOrWhiteSpace(message))
-            message = " " + message;
+		public static void AssertHasFlag(this Enum self, Enum flag)
+		{
+			var hasFlag = self.HasFlag(flag);
+
+			if (!hasFlag)
+				throw ContainsException.ForSetItemNotFound(flag.ToString(), self.ToString());
+		}
+
+		public static void CloseEnough(double expected, double actual, double epsilon = 0.2, string? message = null)
+		{
+			if (!String.IsNullOrWhiteSpace(message))
+				message = " " + message;
 
 			var diff = Math.Abs(expected - actual);
 			Assert.True(diff <= epsilon, $"Expected: {expected}. Actual: {actual}. Diff: {diff} Epsilon: {epsilon}.{message}");

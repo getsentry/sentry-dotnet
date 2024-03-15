@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 

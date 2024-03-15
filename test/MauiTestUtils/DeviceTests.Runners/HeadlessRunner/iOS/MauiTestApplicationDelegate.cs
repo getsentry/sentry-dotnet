@@ -49,15 +49,15 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner
 			EnvVars.Add("headlessrunner", "true");
 		}
 
-    static void SetEnvironmentVariables()
-    {
-        // read from dictionary
-        foreach (var envvar in EnvVars)
-        {
-            Console.WriteLine($"  {envvar.Key} = '{envvar.Value}'");
-            Environment.SetEnvironmentVariable(envvar.Key, envvar.Value);
-        }
-    }
+		static void SetEnvironmentVariables()
+		{
+			// read from dictionary
+			foreach (var envvar in EnvVars)
+			{
+				Console.WriteLine($"  {envvar.Key} = '{envvar.Value}'");
+				Environment.SetEnvironmentVariable(envvar.Key, envvar.Value);
+			}
+		}
 
 		public static bool IsHeadlessRunner(string[] args)
 		{

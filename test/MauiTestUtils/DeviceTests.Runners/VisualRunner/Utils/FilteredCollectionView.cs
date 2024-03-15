@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -195,15 +195,15 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 			itemChanged?.Invoke(sender, args);
 		}
 
-    void DataSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-    {
-        switch (e.Action)
-        {
-            case NotifyCollectionChangedAction.Add:
-                foreach (T item in e.NewItems)
-                {
-                    OnAdded(item);
-                }
+		void DataSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			switch (e.Action)
+			{
+				case NotifyCollectionChangedAction.Add:
+					foreach (T item in e.NewItems)
+					{
+						OnAdded(item);
+					}
 
 					break;
 				case NotifyCollectionChangedAction.Remove:
@@ -230,38 +230,38 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 			}
 		}
 
-    void DataSource_ItemChanged(object sender, PropertyChangedEventArgs e)
-    {
-        var item = (T)sender;
-        var index = filteredList.IndexOf(item);
-        if (filter(item, FilterArgument))
-        {
-            if (index < 0)
-            {
-                filteredList.Insert(~index, item);
-                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, ~index));
-            }
-        }
-        else if (index >= 0)
-        {
-            filteredList.RemoveAt(index);
-            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
-        }
+		void DataSource_ItemChanged(object sender, PropertyChangedEventArgs e)
+		{
+			var item = (T)sender;
+			var index = filteredList.IndexOf(item);
+			if (filter(item, FilterArgument))
+			{
+				if (index < 0)
+				{
+					filteredList.Insert(~index, item);
+					OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, ~index));
+				}
+			}
+			else if (index >= 0)
+			{
+				filteredList.RemoveAt(index);
+				OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
+			}
 
 			OnItemChanged(item, e);
 		}
 
-    void OnAdded(T item)
-    {
-        if (filter(item, filterArgument))
-        {
-            var index = filteredList.IndexOf(item);
-            if (index < 0)
-            {
-                filteredList.Insert(~index, item);
-                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, ~index));
-            }
-        }
+		void OnAdded(T item)
+		{
+			if (filter(item, filterArgument))
+			{
+				var index = filteredList.IndexOf(item);
+				if (index < 0)
+				{
+					filteredList.Insert(~index, item);
+					OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, ~index));
+				}
+			}
 
 			if (item is INotifyPropertyChanged observable)
 			{
@@ -269,12 +269,12 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 			}
 		}
 
-    void OnRemoved(T item)
-    {
-        if (item is INotifyPropertyChanged observable)
-        {
-            observable.PropertyChanged -= DataSource_ItemChanged;
-        }
+		void OnRemoved(T item)
+		{
+			if (item is INotifyPropertyChanged observable)
+			{
+				observable.PropertyChanged -= DataSource_ItemChanged;
+			}
 
 			var index = filteredList.IndexOf(item);
 			if (index >= 0)
@@ -284,9 +284,9 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 			}
 		}
 
-    void RefreshFilter()
-    {
-        filteredList.Clear();
+		void RefreshFilter()
+		{
+			filteredList.Clear();
 
 			foreach (var item in dataSource)
 			{

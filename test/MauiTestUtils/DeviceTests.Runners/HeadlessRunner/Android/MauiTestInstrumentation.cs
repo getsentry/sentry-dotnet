@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -75,11 +75,11 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner
 			Finish(Result.Ok, bundle);
 		}
 
-    void CopyFile(Bundle bundle)
-    {
-        var resultsFile = bundle.GetString("test-results-path");
-        if (resultsFile == null)
-            return;
+		void CopyFile(Bundle bundle)
+		{
+			var resultsFile = bundle.GetString("test-results-path");
+			if (resultsFile == null)
+				return;
 
 			var guid = Guid.NewGuid().ToString("N");
 			var name = Path.GetFileName(resultsFile);

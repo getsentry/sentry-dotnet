@@ -5,15 +5,10 @@ using Microsoft.Maui.Dispatching;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners
 {
-<<<<<<< HEAD
 	public static class TestDispatcher
 	{
 		static IDispatcher? s_dispatcher;
 		static IDispatcherProvider? s_provider;
-=======
-    private static IDispatcher? s_dispatcher;
-    private static IDispatcherProvider? s_provider;
->>>>>>> chore/net8-devicetests
 
 		public static IDispatcherProvider Provider
 		{
@@ -34,7 +29,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners
 			get
 			{
 				if (s_dispatcher is null)
-					s_dispatcher = TestServices.Services.GetService<IDispatcher>();
+					s_dispatcher = TestServices.Services.GetService<ApplicationDispatcher>()?.Dispatcher;
 
 				if (s_dispatcher is null)
 					throw new InvalidOperationException($"Test app did not provide a dispatcher.");

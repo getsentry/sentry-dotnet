@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -83,19 +83,11 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.SourceGen
 			Context.AddSource(filename, SourceText.From(contents, Encoding.UTF8));
 		}
 
-<<<<<<< HEAD
 		string GenerateAndroidSource()
 		{
 			var mauiProgramName = "MauiProgram";
 			var mauiProgramFullName = @"global::" + RootNamespace + "." + mauiProgramName;
 			var splash = ContainsSplashScreen ? @"Theme = ""@style/Maui.SplashTheme""," : "";
-=======
-    private string GenerateAndroidSource()
-    {
-        var mauiProgramName = "MauiProgram";
-        var mauiProgramFullName = @"global::" + RootNamespace + "." + mauiProgramName;
-        var splash = ContainsSplashScreen ? @"Theme = ""@style/Maui.SplashTheme""," : "";
->>>>>>> chore/net8-devicetests
 
 			var appName = "MainApplication";
 			var visualActivityName = "MainActivity";
@@ -172,21 +164,12 @@ namespace " + RootNamespace + @"
 ";
 		}
 
-<<<<<<< HEAD
 		string GenerateIosSource()
 		{
 			var mauiProgramName = "MauiProgram";
 			var mauiProgramFullName = @"global::" + RootNamespace + "." + mauiProgramName;
 			var visualDelegateName = "VisualRunnerAppDelegate";
 			var headlessDelegateName = "HeadlessRunnerAppDelegate";
-=======
-    private string GenerateIosSource()
-    {
-        var mauiProgramName = "MauiProgram";
-        var mauiProgramFullName = @"global::" + RootNamespace + "." + mauiProgramName;
-        var visualDelegateName = "VisualRunnerAppDelegate";
-        var headlessDelegateName = "HeadlessRunnerAppDelegate";
->>>>>>> chore/net8-devicetests
 
 			return @"
 #if !SKIP_RUNNER_ENTRYPOINT_GENERATION && !SKIP_VISUAL_RUNNER_ENTRYPOINT_GENERATION && !SKIP_RUNNER_PROGRAM_GENERATION
@@ -236,11 +219,6 @@ namespace " + RootNamespace + @"
 }
 #endif
 ";
-<<<<<<< HEAD
 		}
 	}
 }
-=======
-    }
-}
->>>>>>> chore/net8-devicetests

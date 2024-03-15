@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,24 +29,24 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 			Execution.TestSkippedEvent += HandleTestSkipped;
 		}
 
-    void HandleTestFailed(MessageHandlerArgs<ITestFailed> args)
-    {
-        MakeTestResultViewModel(args.Message, TestState.Failed);
-    }
+		void HandleTestFailed(MessageHandlerArgs<ITestFailed> args)
+		{
+			MakeTestResultViewModel(args.Message, TestState.Failed);
+		}
 
-    void HandleTestPassed(MessageHandlerArgs<ITestPassed> args)
-    {
-        MakeTestResultViewModel(args.Message, TestState.Passed);
-    }
+		void HandleTestPassed(MessageHandlerArgs<ITestPassed> args)
+		{
+			MakeTestResultViewModel(args.Message, TestState.Passed);
+		}
 
-    void HandleTestSkipped(MessageHandlerArgs<ITestSkipped> args)
-    {
-        MakeTestResultViewModel(args.Message, TestState.Skipped);
-    }
+		void HandleTestSkipped(MessageHandlerArgs<ITestSkipped> args)
+		{
+			MakeTestResultViewModel(args.Message, TestState.Skipped);
+		}
 
-    async void MakeTestResultViewModel(ITestResultMessage testResult, TestState outcome)
-    {
-        var tcs = new TaskCompletionSource<TestResultViewModel>(TaskCreationOptions.RunContinuationsAsynchronously);
+		async void MakeTestResultViewModel(ITestResultMessage testResult, TestState outcome)
+		{
+			var tcs = new TaskCompletionSource<TestResultViewModel>(TaskCreationOptions.RunContinuationsAsynchronously);
 
 			if (!_testCases.TryGetValue(testResult.TestCase, out TestCaseViewModel? testCase))
 			{
