@@ -1,5 +1,4 @@
 using Sentry.Internal.Http;
-using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry.Tests;
 
@@ -128,7 +127,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == transaction.TraceId &&
                 evt.Contexts.Trace.SpanId == transaction.SpanId),
-            Arg.Any<Scope>(), Arg.Any<Hint>());
+            Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
     [Fact]
@@ -150,7 +149,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == transaction.TraceId &&
                 evt.Contexts.Trace.SpanId == transaction.SpanId),
-            Arg.Any<Scope>(), Arg.Any<Hint>());
+            Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
     [Fact]
@@ -189,7 +188,7 @@ public partial class HubTests
         _fixture.Client.Received(1).CaptureEvent(
             Arg.Is<SentryEvent>(evt =>
                 evt.DynamicSamplingContext == dsc),
-            Arg.Any<Scope>(), Arg.Any<Hint>());
+            Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
     [Fact]
@@ -211,7 +210,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == default &&
                 evt.Contexts.Trace.SpanId == default),
-            Arg.Any<Scope>(), Arg.Any<Hint>());
+            Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
     [Fact]
@@ -230,7 +229,7 @@ public partial class HubTests
             Arg.Is<SentryEvent>(evt =>
                 evt.Contexts.Trace.TraceId == scope.PropagationContext.TraceId &&
                 evt.Contexts.Trace.SpanId == scope.PropagationContext.SpanId),
-            Arg.Any<Scope>(), Arg.Any<Hint>());
+            Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
     [Fact]
@@ -436,7 +435,7 @@ public partial class HubTests
     {
         // Arrange
         var @event = new SentryEvent();
-        var hint = new Hint();
+        var hint = new SentryHint();
         var hub = _fixture.GetSut();
 
         // Act
@@ -445,7 +444,7 @@ public partial class HubTests
         // Assert
         _fixture.Client.Received(1).CaptureEvent(
             Arg.Any<SentryEvent>(),
-            Arg.Any<Scope>(), Arg.Is<Hint>(h => h == hint));
+            Arg.Any<Scope>(), Arg.Is<SentryHint>(h => h == hint));
     }
 
     [Fact]
@@ -993,7 +992,7 @@ public partial class HubTests
     {
         public void Finish() { }
 
-        public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction _) => throw new Exception("test");
+        public Sentry.Protocol.Envelopes.ISerializable Collect(SentryTransaction _) => throw new Exception("test");
     }
 
     private class AsyncThrowingProfilerFactory : ITransactionProfilerFactory
@@ -1005,10 +1004,10 @@ public partial class HubTests
     {
         public void Finish() { }
 
-        public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction transaction)
+        public Sentry.Protocol.Envelopes.ISerializable Collect(SentryTransaction transaction)
             => AsyncJsonSerializable.CreateFrom(CollectAsync(transaction));
 
-        private async Task<ProfileInfo> CollectAsync(Transaction transaction)
+        private async Task<ProfileInfo> CollectAsync(SentryTransaction transaction)
         {
             await Task.Delay(1);
             throw new Exception("test");
@@ -1023,7 +1022,7 @@ public partial class HubTests
     {
         public void Finish() { }
 
-        public Sentry.Protocol.Envelopes.ISerializable Collect(Transaction _) => new JsonSerializable(new ProfileInfo());
+        public Sentry.Protocol.Envelopes.ISerializable Collect(SentryTransaction _) => new JsonSerializable(new ProfileInfo());
     }
 
 #nullable disable
@@ -1173,7 +1172,7 @@ public partial class HubTests
     {
         // Arrange
         var sessionUpdate = new GlobalSessionManagerTests().TryRecoverPersistedSessionWithExceptionOnLastRun();
-        var newSession = new SessionUpdate(Substitute.For<ISession>(), false, default, 0, null);
+        var newSession = new SessionUpdate(Substitute.For<ISentrySession>(), false, default, 0, null);
 
         var sessionManager = Substitute.For<ISessionManager>();
         sessionManager.TryRecoverPersistedSession().Returns(sessionUpdate);
@@ -1392,7 +1391,7 @@ public partial class HubTests
         hub.CaptureEvent(evt);
 
         // Assert
-        _fixture.Client.Received(enabled ? 1 : 0).CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>(), Arg.Any<Hint>());
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
     [Theory]
@@ -1439,6 +1438,39 @@ public partial class HubTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
+    public void CaptureCheckIn_HubEnabled(bool enabled)
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        if (!enabled)
+        {
+            hub.Dispose();
+        }
+
+        // Act
+        _ = hub.CaptureCheckIn("test-slug", CheckInStatus.InProgress);
+
+        // Assert
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureCheckIn(Arg.Any<string>(), Arg.Any<CheckInStatus>());
+    }
+
+    [Fact]
+    public void CaptureCheckIn_HubDisabled_ReturnsEmptySentryId()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        hub.Dispose();
+
+        // Act
+        var checkInId = hub.CaptureCheckIn("test-slug", CheckInStatus.InProgress);
+
+        // Assert
+        Assert.Equal(checkInId, SentryId.Empty);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
     public void CaptureTransaction_HubEnabled(bool enabled)
     {
         // Arrange
@@ -1453,7 +1485,7 @@ public partial class HubTests
         transaction.Finish();
 
         // Assert
-        _fixture.Client.Received().CaptureTransaction(Arg.Is<Transaction>(t => t.IsSampled == enabled), Arg.Any<Scope>(), Arg.Any<Hint>());
+        _fixture.Client.Received().CaptureTransaction(Arg.Is<SentryTransaction>(t => t.IsSampled == enabled), Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
     [Fact]
@@ -1467,7 +1499,7 @@ public partial class HubTests
         transaction.Finish();
 
         // Assert
-        _fixture.Client.Received().CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Scope>(), Arg.Any<Hint>());
+        _fixture.Client.Received().CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
     [Theory]

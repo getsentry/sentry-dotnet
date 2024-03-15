@@ -1,12 +1,8 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
 
 #if NETSTANDARD2_0
 using IWebHostEnvironment = Microsoft.AspNetCore.Hosting.IHostingEnvironment;
-#else
-using Microsoft.Extensions.Hosting;
 #endif
 
 namespace Sentry.AspNetCore;
@@ -20,6 +16,7 @@ internal class BindableSentryAspNetCoreOptions : BindableSentryLoggingOptions
     public bool? FlushBeforeRequestCompleted { get; set; }
     public bool? AdjustStandardEnvironmentNameCasing { get; set; }
     public bool? AutoRegisterTracing { get; set; }
+    public bool? CaptureBlockingCalls { get; set; }
 
     public void ApplyTo(SentryAspNetCoreOptions options)
     {
@@ -30,5 +27,6 @@ internal class BindableSentryAspNetCoreOptions : BindableSentryLoggingOptions
         options.FlushBeforeRequestCompleted = FlushBeforeRequestCompleted ?? options.FlushBeforeRequestCompleted;
         options.AdjustStandardEnvironmentNameCasing = AdjustStandardEnvironmentNameCasing ?? options.AdjustStandardEnvironmentNameCasing;
         options.AutoRegisterTracing = AutoRegisterTracing ?? options.AutoRegisterTracing;
+        options.CaptureBlockingCalls = CaptureBlockingCalls ?? options.CaptureBlockingCalls;
     }
 }

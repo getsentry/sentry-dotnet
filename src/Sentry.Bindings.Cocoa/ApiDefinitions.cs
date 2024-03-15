@@ -740,6 +740,10 @@ interface SentryOptions
     [Export ("enableAutoPerformanceTracing")]
     bool EnableAutoPerformanceTracing { get; set; }
 
+    // @property (assign, nonatomic) BOOL enablePerformanceV2;
+    [Export ("enablePerformanceV2")]
+    bool EnablePerformanceV2 { get; set; }
+
     // @property (nonatomic) SentryScope * _Nonnull (^ _Nonnull)(SentryScope * _Nonnull) initialScope;
     [Export ("initialScope", ArgumentSemantic.Assign)]
     Func<SentryScope, SentryScope> InitialScope { get; set; }
@@ -824,6 +828,10 @@ interface SentryOptions
     [Export ("enableCoreDataTracing")]
     bool EnableCoreDataTracing { get; set; }
 
+    // @property (assign, nonatomic) BOOL enableAppLaunchProfiling;
+    [Export ("enableAppLaunchProfiling")]
+    bool EnableAppLaunchProfiling { get; set; }
+
     // @property (nonatomic, strong) NSNumber * _Nullable profilesSampleRate;
     [NullAllowed, Export ("profilesSampleRate", ArgumentSemantic.Strong)]
     NSNumber ProfilesSampleRate { get; set; }
@@ -886,6 +894,14 @@ interface SentryOptions
     // @property (copy, nonatomic) NSString * _Nonnull cacheDirectoryPath;
     [Export ("cacheDirectoryPath")]
     string CacheDirectoryPath { get; set; }
+
+    // @property (assign, nonatomic) BOOL enableSpotlight;
+    [Export ("enableSpotlight")]
+    bool EnableSpotlight { get; set; }
+
+    // @property (copy, nonatomic) NSString * _Nonnull spotlightUrl;
+    [Export ("spotlightUrl")]
+    string SpotlightUrl { get; set; }
 }
 
 // @protocol SentryIntegrationProtocol <NSObject>
@@ -1668,6 +1684,11 @@ interface SentrySDK
     [Export ("crashedLastRun")]
     bool CrashedLastRun { get; }
 
+    // @property (readonly, nonatomic, class) BOOL detectedStartUpCrash;
+    [Static]
+    [Export ("detectedStartUpCrash")]
+    bool DetectedStartUpCrash { get; }
+
     // +(void)setUser:(SentryUser * _Nullable)user;
     [Static]
     [Export ("setUser:")]
@@ -1734,6 +1755,10 @@ partial interface SentryScope : SentrySerializable
     // @property (nonatomic, strong) id<SentrySpan> _Nullable span;
     [NullAllowed, Export ("span", ArgumentSemantic.Strong)]
     SentrySpan Span { get; set; }
+
+    // @property (readonly, copy, nonatomic) NSDictionary<NSString *,NSString *> * _Nonnull tags;
+    [Export ("tags", ArgumentSemantic.Copy)]
+    NSDictionary<NSString, NSString> Tags { get; }
 
     // -(instancetype _Nonnull)initWithMaxBreadcrumbs:(NSInteger)maxBreadcrumbs __attribute__((objc_designated_initializer));
     [Export ("initWithMaxBreadcrumbs:")]
@@ -1967,6 +1992,10 @@ interface SentryTransactionContext
     [NullAllowed, Export ("sampleRate", ArgumentSemantic.Strong)]
     NSNumber SampleRate { get; set; }
 
+    // @property (assign, nonatomic) BOOL forNextAppLaunch;
+    [Export ("forNextAppLaunch")]
+    bool ForNextAppLaunch { get; set; }
+
     // -(instancetype _Nonnull)initWithName:(NSString * _Nonnull)name operation:(NSString * _Nonnull)operation;
     [Export ("initWithName:operation:")]
     NativeHandle Constructor (string name, string operation);
@@ -2063,13 +2092,9 @@ interface SentryUserFeedback : SentrySerializable
 [Internal]
 interface SentryAppStartMeasurement
 {
-    // -(instancetype _Nonnull)initWithType:(SentryAppStartType)type appStartTimestamp:(NSDate * _Nonnull)appStartTimestamp duration:(NSTimeInterval)duration runtimeInitTimestamp:(NSDate * _Nonnull)runtimeInitTimestamp didFinishLaunchingTimestamp:(NSDate * _Nonnull)didFinishLaunchingTimestamp __attribute__((deprecated("Use initWithType:appStartTimestamp:duration:mainTimestamp:runtimeInitTimestamp:didFinishLaunchingTimestamp instead.")));
-    [Export ("initWithType:appStartTimestamp:duration:runtimeInitTimestamp:didFinishLaunchingTimestamp:")]
-    NativeHandle Constructor (SentryAppStartType type, NSDate appStartTimestamp, double duration, NSDate runtimeInitTimestamp, NSDate didFinishLaunchingTimestamp);
-
-    // -(instancetype _Nonnull)initWithType:(SentryAppStartType)type isPreWarmed:(BOOL)isPreWarmed appStartTimestamp:(NSDate * _Nonnull)appStartTimestamp duration:(NSTimeInterval)duration runtimeInitTimestamp:(NSDate * _Nonnull)runtimeInitTimestamp moduleInitializationTimestamp:(NSDate * _Nonnull)moduleInitializationTimestamp didFinishLaunchingTimestamp:(NSDate * _Nonnull)didFinishLaunchingTimestamp;
-    [Export ("initWithType:isPreWarmed:appStartTimestamp:duration:runtimeInitTimestamp:moduleInitializationTimestamp:didFinishLaunchingTimestamp:")]
-    NativeHandle Constructor (SentryAppStartType type, bool isPreWarmed, NSDate appStartTimestamp, double duration, NSDate runtimeInitTimestamp, NSDate moduleInitializationTimestamp, NSDate didFinishLaunchingTimestamp);
+    // -(instancetype _Nonnull)initWithType:(SentryAppStartType)type isPreWarmed:(BOOL)isPreWarmed appStartTimestamp:(NSDate * _Nonnull)appStartTimestamp duration:(NSTimeInterval)duration runtimeInitTimestamp:(NSDate * _Nonnull)runtimeInitTimestamp moduleInitializationTimestamp:(NSDate * _Nonnull)moduleInitializationTimestamp sdkStartTimestamp:(NSDate * _Nonnull)sdkStartTimestamp didFinishLaunchingTimestamp:(NSDate * _Nonnull)didFinishLaunchingTimestamp;
+    [Export ("initWithType:isPreWarmed:appStartTimestamp:duration:runtimeInitTimestamp:moduleInitializationTimestamp:sdkStartTimestamp:didFinishLaunchingTimestamp:")]
+    NativeHandle Constructor (SentryAppStartType type, bool isPreWarmed, NSDate appStartTimestamp, double duration, NSDate runtimeInitTimestamp, NSDate moduleInitializationTimestamp, NSDate sdkStartTimestamp, NSDate didFinishLaunchingTimestamp);
 
     // @property (readonly, assign, nonatomic) SentryAppStartType type;
     [Export ("type", ArgumentSemantic.Assign)]
@@ -2094,6 +2119,10 @@ interface SentryAppStartMeasurement
     // @property (readonly, nonatomic, strong) NSDate * _Nonnull moduleInitializationTimestamp;
     [Export ("moduleInitializationTimestamp", ArgumentSemantic.Strong)]
     NSDate ModuleInitializationTimestamp { get; }
+
+    // @property (readonly, nonatomic, strong) NSDate * _Nonnull sdkStartTimestamp;
+    [Export ("sdkStartTimestamp", ArgumentSemantic.Strong)]
+    NSDate SdkStartTimestamp { get; }
 
     // @property (readonly, nonatomic, strong) NSDate * _Nonnull didFinishLaunchingTimestamp;
     [Export ("didFinishLaunchingTimestamp", ArgumentSemantic.Strong)]
@@ -2414,11 +2443,11 @@ interface PrivateSentrySDKOnly
     [Export ("startProfilerForTrace:")]
     ulong StartProfilerForTrace (SentryId traceId);
 
-    // +(NSDictionary<NSString *,id> * _Nullable)collectProfileBetween:(uint64_t)startSystemTime and:(uint64_t)endSystemTime forTrace:(SentryId * _Nonnull)traceId;
+    // +(NSMutableDictionary<NSString *,id> * _Nullable)collectProfileBetween:(uint64_t)startSystemTime and:(uint64_t)endSystemTime forTrace:(SentryId * _Nonnull)traceId;
     [Static]
     [Export ("collectProfileBetween:and:forTrace:")]
     [return: NullAllowed]
-    NSDictionary<NSString, NSObject> CollectProfileBetween (ulong startSystemTime, ulong endSystemTime, SentryId traceId);
+    NSMutableDictionary<NSString, NSObject> CollectProfileBetween (ulong startSystemTime, ulong endSystemTime, SentryId traceId);
 
     // +(void)discardProfilerForTrace:(SentryId * _Nonnull)traceId;
     [Static]

@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
+using Sentry.Protocol.Metrics;
 
 namespace Sentry.Protocol.Envelopes;
 
@@ -15,9 +16,12 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     private const string TypeValueUserReport = "user_report";
     private const string TypeValueTransaction = "transaction";
     private const string TypeValueSession = "session";
+    private const string TypeValueCheckIn = "check_in";
     private const string TypeValueAttachment = "attachment";
     private const string TypeValueClientReport = "client_report";
     private const string TypeValueProfile = "profile";
+    private const string TypeValueMetric = "statsd";
+    private const string TypeValueCodeLocations = "metric_meta";
 
     private const string LengthKey = "length";
     private const string FileNameKey = "filename";
@@ -211,7 +215,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     /// <summary>
     /// Creates an <see cref="EnvelopeItem"/> from <paramref name="transaction"/>.
     /// </summary>
-    public static EnvelopeItem FromTransaction(Transaction transaction)
+    public static EnvelopeItem FromTransaction(SentryTransaction transaction)
     {
         var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
         {
@@ -219,6 +223,34 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         };
 
         return new EnvelopeItem(header, new JsonSerializable(transaction));
+    }
+
+    /// <summary>
+    /// Creates an <see cref="EnvelopeItem"/> from one or more <paramref name="codeLocations"/>.
+    /// </summary>
+    internal static EnvelopeItem FromCodeLocations(CodeLocations codeLocations)
+    {
+        var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
+        {
+            [TypeKey] = TypeValueCodeLocations
+        };
+
+        // Note that metrics are serialized using statsd encoding (not JSON)
+        return new EnvelopeItem(header, new JsonSerializable(codeLocations));
+    }
+
+    /// <summary>
+    /// Creates an <see cref="EnvelopeItem"/> from <paramref name="metric"/>.
+    /// </summary>
+    internal static EnvelopeItem FromMetric(Metric metric)
+    {
+        var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
+        {
+            [TypeKey] = TypeValueMetric
+        };
+
+        // Note that metrics are serialized using statsd encoding (not JSON)
+        return new EnvelopeItem(header, metric);
     }
 
     /// <summary>
@@ -248,15 +280,28 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     }
 
     /// <summary>
+    /// Creates an <see cref="EnvelopeItem"/> from <paramref name="checkIn"/>.
+    /// </summary>
+    public static EnvelopeItem FromCheckIn(SentryCheckIn checkIn)
+    {
+        var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
+        {
+            [TypeKey] = TypeValueCheckIn
+        };
+
+        return new EnvelopeItem(header, new JsonSerializable(checkIn));
+    }
+
+    /// <summary>
     /// Creates an <see cref="EnvelopeItem"/> from <paramref name="attachment"/>.
     /// </summary>
-    public static EnvelopeItem FromAttachment(Attachment attachment)
+    public static EnvelopeItem FromAttachment(SentryAttachment attachment)
     {
         var stream = attachment.Content.GetStream();
         return FromAttachment(attachment, stream);
     }
 
-    internal static EnvelopeItem FromAttachment(Attachment attachment, Stream stream)
+    internal static EnvelopeItem FromAttachment(SentryAttachment attachment, Stream stream)
     {
         var attachmentType = attachment.Type switch
         {
@@ -342,7 +387,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         {
             var bufferLength = (int)(payloadLength ?? stream.Length);
             var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
-            var transaction = Json.Parse(buffer, Transaction.FromJson);
+            var transaction = Json.Parse(buffer, SentryTransaction.FromJson);
 
             return new JsonSerializable(transaction);
         }

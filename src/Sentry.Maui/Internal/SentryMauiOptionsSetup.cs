@@ -1,5 +1,7 @@
+using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using Microsoft.Maui.Networking;
 
 namespace Sentry.Maui.Internal;
 
@@ -21,6 +23,10 @@ internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
         _config.Bind(bindable);
         bindable.ApplyTo(options);
 
+#if __ANDROID__ || __IOS__
+        options.Native.AttachScreenshot = options.AttachScreenshot;
+#endif
+
         // NOTE: Anything set here will overwrite options set by the user.
         //       For option defaults that can be changed, use the constructor in SentryMauiOptions instead.
 
@@ -32,6 +38,11 @@ internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
 
         // We'll use an event processor to set things like SDK name
         options.AddEventProcessor(new SentryMauiEventProcessor(options));
+
+        if (options.AttachScreenshot)
+        {
+            options.AddEventProcessor(new SentryMauiScreenshotProcessor(options));
+        }
 
 #if !PLATFORM_NEUTRAL
         // We can use MAUI's network connectivity information to inform the CachingTransport when we're offline.

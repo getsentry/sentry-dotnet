@@ -5,10 +5,15 @@ using Microsoft.Maui.Dispatching;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners
 {
+<<<<<<< HEAD
 	public static class TestDispatcher
 	{
 		static IDispatcher? s_dispatcher;
 		static IDispatcherProvider? s_provider;
+=======
+    private static IDispatcher? s_dispatcher;
+    private static IDispatcherProvider? s_provider;
+>>>>>>> chore/net8-devicetests
 
 		public static IDispatcherProvider Provider
 		{

@@ -19,7 +19,8 @@ public class AppTests
             BuildType = "nightly",
             Hash = "93fd0e9a",
             Name = "Sentry.Test.App",
-            StartTime = DateTimeOffset.MaxValue
+            StartTime = DateTimeOffset.MaxValue,
+            InForeground = true
         };
 
         var actualString = sut.ToJsonString(_testOutputLogger);
@@ -39,7 +40,8 @@ public class AppTests
             Identifier = "identifier",
             Name = "name",
             StartTime = DateTimeOffset.UtcNow,
-            Version = "version"
+            Version = "version",
+            InForeground = false
         };
 
         var clone = sut.Clone();
@@ -51,6 +53,7 @@ public class AppTests
         Assert.Equal(sut.Name, clone.Name);
         Assert.Equal(sut.StartTime, clone.StartTime);
         Assert.Equal(sut.Version, clone.Version);
+        Assert.Equal(sut.InForeground, clone.InForeground);
     }
 
     [Theory]
@@ -72,5 +75,6 @@ public class AppTests
         yield return new object[] { (new App { StartTime = DateTimeOffset.MaxValue }, """{"type":"app","app_start_time":"9999-12-31T23:59:59.9999999+00:00"}""") };
         yield return new object[] { (new App { Version = "some version" }, """{"type":"app","app_version":"some version"}""") };
         yield return new object[] { (new App { Identifier = "some identifier" }, """{"type":"app","app_identifier":"some identifier"}""") };
+        yield return new object[] { (new App { InForeground = true }, """{"type":"app","in_foreground":true}""") };
     }
 }

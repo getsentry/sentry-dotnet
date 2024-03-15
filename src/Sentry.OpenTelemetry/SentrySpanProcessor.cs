@@ -12,12 +12,15 @@ namespace Sentry.OpenTelemetry;
 public class SentrySpanProcessor : BaseProcessor<Activity>
 {
     private readonly IHub _hub;
-    private readonly IEnumerable<IOpenTelemetryEnricher> _enrichers;
+    internal readonly IEnumerable<IOpenTelemetryEnricher> _enrichers;
 
     // ReSharper disable once MemberCanBePrivate.Global - Used by tests
     internal readonly ConcurrentDictionary<ActivitySpanId, ISpan> _map = new();
     private readonly SentryOptions? _options;
     private readonly Lazy<IDictionary<string, object>> _resourceAttributes;
+
+    private static readonly long PruningInterval = TimeSpan.FromSeconds(5).Ticks;
+    internal long _lastPruned = 0;
 
     /// <summary>
     /// Constructs a <see cref="SentrySpanProcessor"/>.
@@ -36,14 +39,23 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     internal SentrySpanProcessor(IHub hub, IEnumerable<IOpenTelemetryEnricher>? enrichers)
     {
         _hub = hub;
+
+        if (_hub is DisabledHub)
+        {
+            // This would only happen if someone tried to create a SentrySpanProcessor manually
+            throw new InvalidOperationException(
+                "Attempted to creates a SentrySpanProcessor for a Disabled hub. " +
+                "You should use the TracerProviderBuilderExtensions to configure Sentry with OpenTelemetry");
+        }
+
         _enrichers = enrichers ?? Enumerable.Empty<IOpenTelemetryEnricher>();
         _options = hub.GetSentryOptions();
 
-        if (_options is not { })
+        if (_options is null)
         {
             throw new InvalidOperationException(
-                "The Sentry SDK has not been initialised. To use Sentry with OpenTelemetry tracing you need to " +
-                "initialize the Sentry SDK.");
+                "The Sentry SDK has not been initialised. To use Sentry with OpenTelemetry " +
+                "tracing you need to initialize the Sentry SDK.");
         }
 
         if (_options.Instrumenter != Instrumenter.OpenTelemetry)
@@ -79,6 +91,9 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
             var span = (SpanTracer)parentSpan.StartChild(context);
             span.StartTimestamp = data.StartTimeUtc;
+            // Used to filter out spans that are not recorded when finishing a transaction.
+            span.SetFused(data);
+            span.IsFiltered = () => span.GetFused<Activity>() is { IsAllDataRequested: false, Recorded: false };
             _map[data.SpanId] = span;
         }
         else
@@ -103,8 +118,13 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 transactionContext, new Dictionary<string, object?>(), dynamicSamplingContext
                 );
             transaction.StartTimestamp = data.StartTimeUtc;
+            _hub.ConfigureScope(scope => scope.Transaction = transaction);
+            transaction.SetFused(data);
             _map[data.SpanId] = transaction;
         }
+
+        // Housekeeping
+        PruneFilteredSpans();
     }
 
     /// <inheritdoc />
@@ -113,7 +133,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         // Make a dictionary of the attributes (aka "tags") for faster lookup when used throughout the processor.
         var attributes = data.TagObjects.ToDict();
 
-        if (attributes.TryGetTypedValue("http.url", out string? url) && (_options?.IsSentryRequest(url) ?? false))
+        var url =
+            attributes.TryGetTypedValue(OtelSemanticConventions.AttributeUrlFull, out string? tempUrl) ? tempUrl
+            : attributes.TryGetTypedValue(OtelSemanticConventions.AttributeHttpUrl, out string? fallbackUrl) ? fallbackUrl // Falling back to pre-1.5.0
+            : null;
+
+        if (!string.IsNullOrEmpty(url) && (_options?.IsSentryRequest(url) ?? false))
         {
             _options?.DiagnosticLogger?.LogDebug($"Ignoring Activity {data.SpanId} for Sentry request.");
 
@@ -181,13 +206,52 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         span.Finish(status);
 
         _map.TryRemove(data.SpanId, out _);
+
+        // Housekeeping
+        PruneFilteredSpans();
+    }
+
+    /// <summary>
+    /// Clean up items that may have been filtered out.
+    /// See https://github.com/getsentry/sentry-dotnet/pull/3198
+    /// </summary>
+    internal void PruneFilteredSpans(bool force = false)
+    {
+        if (!force && !NeedsPruning())
+        {
+            return;
+        }
+
+        foreach (var mappedItem in _map)
+        {
+            var (spanId, span) = mappedItem;
+            var activity = span.GetFused<Activity>();
+            if (activity is { Recorded: false, IsAllDataRequested: false })
+            {
+                _map.TryRemove(spanId, out _);
+            }
+        }
+    }
+
+    private bool NeedsPruning()
+    {
+        var lastPruned = Interlocked.Read(ref _lastPruned);
+        if (lastPruned > DateTime.UtcNow.Ticks - PruningInterval)
+        {
+            return false;
+        }
+
+        var thisPruned = DateTime.UtcNow.Ticks;
+        Interlocked.CompareExchange(ref _lastPruned, thisPruned, lastPruned);
+        // May be false if another thread gets there first
+        return Interlocked.Read(ref _lastPruned) == thisPruned;
     }
 
     private static Scope? GetSavedScope(Activity? activity)
     {
         while (activity is not null)
         {
-            if (activity.GetFused<Scope>() is {} savedScope)
+            if (activity.GetFused<Scope>() is { } savedScope)
             {
                 return savedScope;
             }
@@ -205,7 +269,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         {
             return GetErrorSpanStatus(attributes);
         }
-        return status switch {
+        return status switch
+        {
             ActivityStatusCode.Unset => SpanStatus.Ok,
             ActivityStatusCode.Ok => SpanStatus.Ok,
             ActivityStatusCode.Error => GetErrorSpanStatus(attributes),

@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -80,7 +80,7 @@ namespace Microsoft.Maui
 	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
 	public class CategoryAttribute : Attribute, ITraitAttribute
 	{
-		// Yes, it looks like the cateory parameter is not used. Don't worry, CategoryDiscoverer uses it. 
+		// Yes, it looks like the cateory parameter is not used. Don't worry, CategoryDiscoverer uses it.
 		public CategoryAttribute(params string[] categories) { }
 	}
 
@@ -111,8 +111,8 @@ namespace Microsoft.Maui
 	}
 
 #pragma warning disable xUnit3000 // Test case classes must derive directly or indirectly from Xunit.LongLivedMarshalByRefObject
-	// If we try to actually subclass Xunit.LongLivedMarshalByRefObject here, we get a version conflict between the XUnit and 
-	// the runner. LLMBRO is only a concern if we're worried about app domains, and for the moment we aren't. If we have to 
+	// If we try to actually subclass Xunit.LongLivedMarshalByRefObject here, we get a version conflict between the XUnit and
+	// the runner. LLMBRO is only a concern if we're worried about app domains, and for the moment we aren't. If we have to
 	// worry about that later, we can work out the conflict issues.
 	public class DeviceTestCase : IXunitTestCase
 #pragma warning restore xUnit3000 // Test case classes must derive directly or indirectly from Xunit.LongLivedMarshalByRefObject
@@ -132,26 +132,26 @@ namespace Microsoft.Maui
 
 		public int Timeout => _inner.Timeout;
 
-		string? _categoryPrefix;
+    string? _categoryPrefix;
 
-		string GetCategoryPrefix()
-		{
-			if (_categoryPrefix == null)
-			{
-				if (!Traits.ContainsKey(CategoryDiscoverer.Category))
-				{
-					_categoryPrefix = string.Empty;
-				}
-				else
-				{
-					_categoryPrefix = $"[{string.Join(", ", Traits[CategoryDiscoverer.Category])}] ";
-				}
-			}
+    string GetCategoryPrefix()
+    {
+        if (_categoryPrefix == null)
+        {
+            if (!Traits.ContainsKey(CategoryDiscoverer.Category))
+            {
+                _categoryPrefix = string.Empty;
+            }
+            else
+            {
+                _categoryPrefix = $"[{string.Join(", ", Traits[CategoryDiscoverer.Category])}] ";
+            }
+        }
 
 			return _categoryPrefix;
 		}
 
-		string? _displayName;
+    string? _displayName;
 
 		public string DisplayName
 		{

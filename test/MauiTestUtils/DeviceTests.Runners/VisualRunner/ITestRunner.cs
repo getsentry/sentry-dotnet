@@ -1,9 +1,15 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+<<<<<<< HEAD
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
+=======
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
+
+internal interface ITestRunner
+>>>>>>> chore/net8-devicetests
 {
 	interface ITestRunner
 	{

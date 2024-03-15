@@ -1,6 +1,6 @@
 {
   "solution": {
-    "path": "Sentry.NoMobile.sln",
+    "path": ".generated.NoMobile.sln",
     "projects": [
       "samples\\Sentry.Samples.AspNetCore.Basic\\Sentry.Samples.AspNetCore.Basic.csproj",
       "samples\\Sentry.Samples.AspNetCore.Blazor.Server\\Sentry.Samples.AspNetCore.Blazor.Server.csproj",
@@ -9,17 +9,21 @@
       "samples\\Sentry.Samples.AspNetCore.Mvc\\Sentry.Samples.AspNetCore.Mvc.csproj",
       "samples\\Sentry.Samples.AspNetCore.Serilog\\Sentry.Samples.AspNetCore.Serilog.csproj",
       "samples\\Sentry.Samples.Aws.Lambda.AspNetCoreServer\\Sentry.Samples.Aws.Lambda.AspNetCoreServer.csproj",
+      "samples\\Sentry.Samples.Hangfire\\Sentry.Samples.Hangfire.csproj",
       "samples\\Sentry.Samples.OpenTelemetry.AspNetCore\\Sentry.Samples.OpenTelemetry.AspNetCore.csproj",
       "src\\Sentry.AspNetCore.Grpc\\Sentry.AspNetCore.Grpc.csproj",
       "src\\Sentry.AspNetCore\\Sentry.AspNetCore.csproj",
       "src\\Sentry.DiagnosticSource\\Sentry.DiagnosticSource.csproj",
       "src\\Sentry.Extensions.Logging\\Sentry.Extensions.Logging.csproj",
+      "src\\Sentry.Hangfire\\Sentry.Hangfire.csproj",
       "src\\Sentry.OpenTelemetry\\Sentry.OpenTelemetry.csproj",
+      "src\\Sentry.Serilog\\Sentry.Serilog.csproj",
       "src\\Sentry\\Sentry.csproj",
       "test\\Sentry.AspNetCore.Grpc.Tests\\Sentry.AspNetCore.Grpc.Tests.csproj",
       "test\\Sentry.AspNetCore.Tests\\Sentry.AspNetCore.Tests.csproj",
       "test\\Sentry.AspNetCore.TestUtils\\Sentry.AspNetCore.TestUtils.csproj",
       "test\\Sentry.Extensions.Logging.Tests\\Sentry.Extensions.Logging.Tests.csproj",
+      "test\\Sentry.Testing.CrashableApp\\Sentry.Testing.CrashableApp.csproj",
       "test\\Sentry.Testing\\Sentry.Testing.csproj",
       "test\\Sentry.Tests\\Sentry.Tests.csproj"
     ]

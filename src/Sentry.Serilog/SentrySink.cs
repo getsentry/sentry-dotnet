@@ -46,7 +46,7 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
         _sdkDisposable = sdkDisposable;
     }
 
-    static AsyncLocal<bool> isReentrant = new();
+    private static AsyncLocal<bool> isReentrant = new();
 
     public void Emit(LogEvent logEvent)
     {

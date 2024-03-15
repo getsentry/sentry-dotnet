@@ -21,8 +21,13 @@
   </ItemGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
     <PackageReference Include="xunit" Version="2.5.1" />
     <PackageReference Include="xunit.runner.utility" Version="2.5.1" />
+=======
+    <PackageReference Include="xunit" Version="2.6.5" />
+    <PackageReference Include="xunit.runner.utility" Version="2.6.5" />
+>>>>>>> chore/net8-devicetests
     <PackageReference Include="Microsoft.DotNet.XHarness.TestRunners.Xunit" Version="1.0.0-prerelease.23252.4" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
   </ItemGroup>

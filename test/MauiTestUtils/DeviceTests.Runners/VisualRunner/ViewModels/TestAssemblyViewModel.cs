@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -170,10 +170,10 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 			set => Set(ref _skipped, value);
 		}
 
-		void FilterAfterDelay()
-		{
-			_filterCancellationTokenSource?.Cancel();
-			_filterCancellationTokenSource = new CancellationTokenSource();
+    void FilterAfterDelay()
+    {
+        _filterCancellationTokenSource?.Cancel();
+        _filterCancellationTokenSource = new CancellationTokenSource();
 
 			var token = _filterCancellationTokenSource.Token;
 
@@ -185,10 +185,10 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 					TaskScheduler.FromCurrentSynchronizationContext());
 		}
 
-		static bool IsTestFilterMatch(TestCaseViewModel test, FilterArgs query)
-		{
-			if (test == null)
-				throw new ArgumentNullException(nameof(test));
+    static bool IsTestFilterMatch(TestCaseViewModel test, (string SearchQuery, TestState ResultFilter) query)
+    {
+        if (test == null)
+            throw new ArgumentNullException(nameof(test));
 
 			var state = query.State;
 			var pattern = query.Query;
@@ -211,45 +211,45 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 				test.DisplayName.IndexOf(pattern.Trim(), StringComparison.OrdinalIgnoreCase) >= 0;
 		}
 
-		async void RunAllTestsExecute()
-		{
-			try
-			{
-				IsBusy = true;
-				await _runner.RunAsync(new[] { RunInfo });
-			}
-			finally
-			{
-				IsBusy = false;
-			}
-		}
+    async void RunAllTestsExecute()
+    {
+        try
+        {
+            IsBusy = true;
+            await _runner.RunAsync(new[] { RunInfo });
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
 
-		async void RunFilteredTestsExecute()
-		{
-			try
-			{
-				IsBusy = true;
-				await _runner.RunAsync(_filteredTests);
-			}
-			finally
-			{
-				IsBusy = false;
-			}
-		}
+    async void RunFilteredTestsExecute()
+    {
+        try
+        {
+            IsBusy = true;
+            await _runner.RunAsync(_filteredTests);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
 
-		async void NavigateToResultExecute(TestCaseViewModel? testCase)
-		{
-			if (testCase == null)
-				return;
+    async void NavigateToResultExecute(TestCaseViewModel? testCase)
+    {
+        if (testCase == null)
+            return;
 
 			await _runner.RunAsync(testCase);
 
 			await _navigation.NavigateTo(PageType.TestResult, testCase.TestResult);
 		}
 
-		void UpdateCaption()
-		{
-			var count = _allTests.Count;
+    void UpdateCaption()
+    {
+        var count = _allTests.Count;
 
 			if (count == 0)
 			{
@@ -331,37 +331,9 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 			}
 		}
 
-		class TestComparer : IComparer<TestCaseViewModel>
-		{
-			public int Compare(TestCaseViewModel? x, TestCaseViewModel? y) =>
-				string.Compare(x?.DisplayName, y?.DisplayName, StringComparison.OrdinalIgnoreCase);
-		}
-	}
-
-	struct FilterArgs
-	{
-		public string Query { get; set; }
-		public TestState State { get; set; }
-
-		public FilterArgs(string query, TestState state)
-		{
-			Query = query;
-			State = state;
-		}
-
-		public override bool Equals([NotNullWhen(true)] object? obj)
-		{
-			if (obj is FilterArgs args)
-			{
-				return args.State == State && args.Query == Query;
-			}
-
-			return base.Equals(obj);
-		}
-
-		public override int GetHashCode()
-		{
-			return Query.GetHashCode(StringComparison.InvariantCulture) ^ State.GetHashCode();
-		}
-	}
+    class TestComparer : IComparer<TestCaseViewModel>
+    {
+        public int Compare(TestCaseViewModel? x, TestCaseViewModel? y) =>
+            string.Compare(x?.DisplayName, y?.DisplayName, StringComparison.OrdinalIgnoreCase);
+    }
 }

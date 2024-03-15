@@ -10,19 +10,19 @@ internal sealed class AsyncJsonSerializable : ISerializable
     /// <summary>
     /// Source object.
     /// </summary>
-    public Task<IJsonSerializable> Source { get; }
+    public Task<ISentryJsonSerializable> Source { get; }
 
     /// <summary>
     /// Initializes an instance of <see cref="AsyncJsonSerializable"/>.
     /// </summary>
     public static AsyncJsonSerializable CreateFrom<T>(Task<T> source)
-        where T : IJsonSerializable
+        where T : ISentryJsonSerializable
     {
-        var task = source.ContinueWith(t => t.Result as IJsonSerializable);
+        var task = source.ContinueWith(t => t.Result as ISentryJsonSerializable);
         return new AsyncJsonSerializable(task);
     }
 
-    private AsyncJsonSerializable(Task<IJsonSerializable> source) => Source = source;
+    private AsyncJsonSerializable(Task<ISentryJsonSerializable> source) => Source = source;
 
     /// <inheritdoc />
     public async Task SerializeAsync(Stream stream, IDiagnosticLogger? logger, CancellationToken cancellationToken = default)

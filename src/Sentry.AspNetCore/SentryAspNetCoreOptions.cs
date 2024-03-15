@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
-using Microsoft.Extensions.Hosting;
 
 namespace Sentry.AspNetCore;
 
@@ -41,6 +41,18 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
     /// Flush before the request gets completed.
     /// </summary>
     internal bool FlushBeforeRequestCompleted { get; set; }
+
+    /// <summary>
+    /// Will capture an event if a blocking call is detected.
+    /// </summary>
+    /// <remarks>
+    /// Get a Sentry event for a sync over async call such as (await SomeTask).Result
+    /// Note that when ConfigureAwait(false) is used, blocking won't be detected.
+    /// Additionally, detects blocking calls over CLR waits such as lock, ReaderWriterLock, etc.
+    /// Blocking calls through system calls are also not captured.
+    /// </remarks>
+    /// <seealso href="https://github.com/getsentry/Ben.BlockingDetector/"/>
+    public bool CaptureBlockingCalls { get; set; }
 
     /// <summary>
     /// The strategy to define the name of a transaction based on the <see cref="HttpContext"/>.

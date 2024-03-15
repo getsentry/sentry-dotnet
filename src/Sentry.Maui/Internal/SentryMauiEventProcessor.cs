@@ -4,6 +4,8 @@ namespace Sentry.Maui.Internal;
 
 internal class SentryMauiEventProcessor : ISentryEventProcessor
 {
+    public static bool? InForeground { get; set; }
+
     private readonly SentryMauiOptions _options;
 
     public SentryMauiEventProcessor(SentryMauiOptions options)
@@ -17,6 +19,7 @@ internal class SentryMauiEventProcessor : ISentryEventProcessor
         @event.Sdk.Version = Constants.SdkVersion;
         @event.Contexts.Device.ApplyMauiDeviceData(_options.DiagnosticLogger);
         @event.Contexts.OperatingSystem.ApplyMauiOsData(_options.DiagnosticLogger);
+        @event.Contexts.App.InForeground = InForeground;
 
         return @event;
     }

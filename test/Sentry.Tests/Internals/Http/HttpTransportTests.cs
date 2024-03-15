@@ -441,7 +441,7 @@ public partial class HttpTransportTests
         var httpTransport = new HttpTransport(options, new HttpClient(httpHandler));
 
         // some arbitrary discarded events ahead of time
-        var recorder = (ClientReportRecorder) options.ClientReportRecorder;
+        var recorder = (ClientReportRecorder)options.ClientReportRecorder;
         recorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Attachment);
         recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
         recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
@@ -485,7 +485,7 @@ public partial class HttpTransportTests
         var httpTransport = new HttpTransport(options, new HttpClient(httpHandler));
 
         // some arbitrary discarded events ahead of time
-        var recorder = (ClientReportRecorder) options.ClientReportRecorder;
+        var recorder = (ClientReportRecorder)options.ClientReportRecorder;
         recorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Attachment);
         recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
         recorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
@@ -520,7 +520,7 @@ public partial class HttpTransportTests
             },
             new HttpClient(httpHandler));
 
-        var attachment = new Attachment(
+        var attachment = new SentryAttachment(
             AttachmentType.Default,
             new FileAttachmentContent("test1.txt"),
             "test1.txt",
@@ -566,13 +566,13 @@ public partial class HttpTransportTests
             },
             new HttpClient(httpHandler));
 
-        var attachmentNormal = new Attachment(
+        var attachmentNormal = new SentryAttachment(
             AttachmentType.Default,
             new StreamAttachmentContent(new MemoryStream(new byte[] { 1 })),
             "test1.txt",
             null);
 
-        var attachmentTooBig = new Attachment(
+        var attachmentTooBig = new SentryAttachment(
             AttachmentType.Default,
             new StreamAttachmentContent(new MemoryStream(new byte[] { 1, 2, 3, 4, 5 })),
             "test2.txt",
@@ -614,7 +614,7 @@ public partial class HttpTransportTests
             },
             new HttpClient(httpHandler));
 
-        var session = new Session("foo", "bar", "baz");
+        var session = new SentrySession("foo", "bar", "baz");
 
         // First request always goes through
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
@@ -656,7 +656,7 @@ public partial class HttpTransportTests
             },
             new HttpClient(httpHandler));
 
-        var session = new Session("foo", "bar", "baz");
+        var session = new SentrySession("foo", "bar", "baz");
 
         // First request always goes through
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
@@ -673,7 +673,7 @@ public partial class HttpTransportTests
         // Act
 
         // Send an update for different session with init=false (should NOT get promoted)
-        var nextSession = new Session("foo2", "bar2", "baz2");
+        var nextSession = new SentrySession("foo2", "bar2", "baz2");
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent(), null, null, nextSession.CreateUpdate(false, DateTimeOffset.Now)));
 
         var lastRequest = httpHandler.GetRequests().Last();
@@ -792,7 +792,7 @@ public partial class HttpTransportTests
         var processedEnvelope = httpTransport.ProcessEnvelope(envelope);
 
         // There should only be the one event in the envelope
-        Assert.Equal(1, processedEnvelope.Items.Count);
+        Assert.Single(processedEnvelope.Items);
         Assert.Equal("event", processedEnvelope.Items[0].TryGetType());
     }
 }

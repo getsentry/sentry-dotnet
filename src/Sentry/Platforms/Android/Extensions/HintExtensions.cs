@@ -2,14 +2,14 @@ namespace Sentry.Android.Extensions;
 
 internal static class HintExtensions
 {
-    public static Hint ToHint(this JavaSdk.Hint javaHint)
+    public static SentryHint ToHint(this JavaSdk.Hint javaHint)
     {
         // Note the JavaSDK doesn't expose the internal hint storage in any way that is iterable,
         // so unless you know the key, you can't get the value. This prevents us from converting
         // anything in the JavaSdk.Hint except the explicitly named properties:
         //  Attachments, Screenshot and ViewHierarchy
 
-        var dotnetHint = new Hint();
+        var dotnetHint = new SentryHint();
         // TODO: Implement ToAttachment
         //dotnetHint.Screenshot = (javaHint.Screenshot is { } screenshot) ? screenshot.ToAttachment() : null;
         //dotnetHint.ViewHierarchy = (javaHint.ViewHierarchy is { } viewhierarchy) ? viewhierarchy.ToAttachment() : null;
@@ -18,7 +18,7 @@ internal static class HintExtensions
         return dotnetHint;
     }
 
-    public static JavaSdk.Hint ToJavaHint(this Hint dotnetHint)
+    public static JavaSdk.Hint ToJavaHint(this SentryHint dotnetHint)
     {
         var javaHint = new JavaSdk.Hint();
         // TODO: Implement ToJavaAttachment

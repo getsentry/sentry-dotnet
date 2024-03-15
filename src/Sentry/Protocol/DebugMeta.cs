@@ -7,7 +7,7 @@ namespace Sentry.Protocol;
 /// The Sentry Debug Meta interface.
 /// </summary>
 /// <see href="https://develop.sentry.dev/sdk/event-payloads/debugmeta"/>
-internal sealed class DebugMeta : IJsonSerializable
+internal sealed class DebugMeta : ISentryJsonSerializable
 {
     public List<DebugImage>? Images { get; set; }
 

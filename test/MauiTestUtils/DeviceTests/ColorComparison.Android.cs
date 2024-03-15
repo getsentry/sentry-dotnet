@@ -13,7 +13,6 @@ namespace Microsoft.Maui.DeviceTests
 			var blue = actualColor.B <= expectedColor.B + precision && actualColor.B >= expectedColor.B - precision;
 			var alpha = actualColor.A <= expectedColor.A + precision && actualColor.A >= expectedColor.A - precision;
 
-			return red && green && blue && alpha;
-		}
-	}
+        return red && green && blue && alpha;
+    }
 }

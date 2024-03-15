@@ -2,6 +2,7 @@ using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
+using Sentry.Protocol.Metrics;
 
 namespace Sentry.Protocol.Envelopes;
 
@@ -153,7 +154,7 @@ public sealed class Envelope : ISerializable, IDisposable
             }
             catch (Exception e)
             {
-                logger?.LogWarning("Failed to serialize envelope item", e);
+                logger?.LogWarning(e, "Failed to serialize envelope item");
             }
         }
     }
@@ -178,7 +179,7 @@ public sealed class Envelope : ISerializable, IDisposable
             }
             catch (Exception e)
             {
-                logger?.LogWarning("Failed to serialize envelope item", e);
+                logger?.LogWarning(e, "Failed to serialize envelope item");
             }
         }
     }
@@ -225,7 +226,7 @@ public sealed class Envelope : ISerializable, IDisposable
     public static Envelope FromEvent(
         SentryEvent @event,
         IDiagnosticLogger? logger = null,
-        IReadOnlyCollection<Attachment>? attachments = null,
+        IReadOnlyCollection<SentryAttachment>? attachments = null,
         SessionUpdate? sessionUpdate = null)
     {
         var eventId = @event.EventId;
@@ -301,7 +302,7 @@ public sealed class Envelope : ISerializable, IDisposable
     /// <summary>
     /// Creates an envelope that contains a single transaction.
     /// </summary>
-    public static Envelope FromTransaction(Transaction transaction)
+    public static Envelope FromTransaction(SentryTransaction transaction)
     {
         var eventId = transaction.EventId;
         var header = CreateHeader(eventId, transaction.DynamicSamplingContext);
@@ -316,13 +317,42 @@ public sealed class Envelope : ISerializable, IDisposable
             // Profiler.Collect() returns an ISerializable which may also throw asynchronously, which is handled down
             // the road in AsyncJsonSerializable and the EnvelopeItem won't serialize and is omitted.
             // However, it mustn't throw synchronously because that would prevent the whole transaction being sent.
-            if (profiler.Collect(transaction) is {} profileInfo)
+            if (profiler.Collect(transaction) is { } profileInfo)
             {
                 items.Add(EnvelopeItem.FromProfileInfo(profileInfo));
             }
         }
 
         return new Envelope(eventId, header, items);
+    }
+
+    /// <summary>
+    /// Creates an envelope that contains one or more <see cref="CodeLocations"/>
+    /// </summary>
+    internal static Envelope FromCodeLocations(CodeLocations codeLocations)
+    {
+        var header = DefaultHeader;
+
+        var items = new List<EnvelopeItem>(1);
+        items.Add(EnvelopeItem.FromCodeLocations(codeLocations));
+
+        return new Envelope(header, items);
+    }
+
+    /// <summary>
+    /// Creates an envelope that contains one or more Metrics
+    /// </summary>
+    internal static Envelope FromMetrics(IEnumerable<Metric> metrics)
+    {
+        var header = DefaultHeader;
+
+        List<EnvelopeItem> items = new();
+        foreach (var metric in metrics)
+        {
+            items.Add(EnvelopeItem.FromMetric(metric));
+        }
+
+        return new Envelope(header, items);
     }
 
     /// <summary>
@@ -336,6 +366,18 @@ public sealed class Envelope : ISerializable, IDisposable
         {
             EnvelopeItem.FromSession(sessionUpdate)
         };
+
+        return new Envelope(header, items);
+    }
+
+    /// <summary>
+    /// Creates an envelope that contains a check in.
+    /// </summary>
+    public static Envelope FromCheckIn(SentryCheckIn checkIn)
+    {
+        var header = DefaultHeader;
+
+        var items = new[] { EnvelopeItem.FromCheckIn(checkIn) };
 
         return new Envelope(header, items);
     }

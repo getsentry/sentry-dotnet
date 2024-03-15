@@ -12,7 +12,7 @@ namespace Sentry.AspNetCore.Tests;
 
 public class SentryAspNetCoreOptionsSetupTests
 {
-    class Fixture
+    private class Fixture
     {
         public Dictionary<string, string> Configuration { get; set; } = new();
 

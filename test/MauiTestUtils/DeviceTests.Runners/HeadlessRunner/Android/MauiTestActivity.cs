@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Threading.Tasks;
 using Android.OS;
@@ -31,8 +31,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner
 					TaskCompletionSource.TrySetException(ex);
 				}
 
-				Finish();
-			});
-		}
-	}
+            Finish();
+        });
+    }
 }

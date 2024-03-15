@@ -106,7 +106,7 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void Init_DisableDsnEnvironmentVariable_DisablesSdk()
     {
-        using var _ = SentrySdk.Init(o => o.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = Constants.DisableSdkDsnValue);
+        using var _ = SentrySdk.Init(o => o.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = SentryConstants.DisableSdkDsnValue);
 
         Assert.False(SentrySdk.IsEnabled);
     }
@@ -125,7 +125,7 @@ public class SentrySdkTests : IDisposable
     {
         var options = new SentryOptions
         {
-            Dsn = Constants.DisableSdkDsnValue,
+            Dsn = SentryConstants.DisableSdkDsnValue,
             DiagnosticLogger = _logger,
             Debug = true,
             InitNativeSdks = false
@@ -161,7 +161,7 @@ public class SentrySdkTests : IDisposable
     {
         var options = new SentryOptions
         {
-            Dsn = Constants.DisableSdkDsnValue,
+            Dsn = SentryConstants.DisableSdkDsnValue,
             DiagnosticLogger = _logger,
             Debug = false,
             InitNativeSdks = false,
@@ -668,14 +668,14 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void InitHub_NoDsn_DisposeDoesNotThrow()
     {
-        var sut = SentrySdk.InitHub(new SentryOptions(){Dsn = Constants.DisableSdkDsnValue}) as IDisposable;
+        var sut = SentrySdk.InitHub(new SentryOptions() { Dsn = SentryConstants.DisableSdkDsnValue }) as IDisposable;
         sut?.Dispose();
     }
 
     [Fact]
     public async Task InitHub_NoDsn_FlushAsyncDoesNotThrow()
     {
-        var sut = SentrySdk.InitHub(new SentryOptions(){Dsn = Constants.DisableSdkDsnValue});
+        var sut = SentrySdk.InitHub(new SentryOptions() { Dsn = SentryConstants.DisableSdkDsnValue });
         await sut.FlushAsync();
     }
 
@@ -721,6 +721,33 @@ public class SentrySdkTests : IDisposable
         hub.ScopeManager.ScopeStackContainer.Should().BeOfType<GlobalScopeStackContainer>();
     }
 
+    [Fact]
+    public void InitHub_DebugInProductionEnvironment_LogsWarning()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _logger,
+            IsGlobalModeEnabled = true,
+            AutoSessionTracking = false,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>(),
+            InitNativeSdks = false,
+            Debug = true,
+            Environment = "production"
+        };
+
+        SentrySdk.InitHub(options);
+
+        _logger.Received().Log(
+            SentryLevel.Warning,
+            "Sentry option 'Debug' is set to true while Environment is production. " +
+            "Be aware this can cause performance degradation and is not advised. " +
+            "See https://docs.sentry.io/platforms/dotnet/configuration/diagnostic-logger " +
+            "for more information",
+            Arg.Any<Exception>(),
+            Arg.Any<object[]>());
+    }
+
 #if !__MOBILE__ // On mobile, we'll always have logs from the Android/iOS SDK, so we can't reliably test for silence.
     [Fact]
     public void InitHub_GlobalModeOn_NoWarningOrErrorLogged()
@@ -730,7 +757,6 @@ public class SentrySdkTests : IDisposable
             Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             IsGlobalModeEnabled = true,
-            Debug = true,
             AutoSessionTracking = false,
             BackgroundWorker = Substitute.For<IBackgroundWorker>(),
             InitNativeSdks = false
@@ -759,7 +785,6 @@ public class SentrySdkTests : IDisposable
             Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             IsGlobalModeEnabled = false,
-            Debug = true,
             AutoSessionTracking = false,
             BackgroundWorker = Substitute.For<IBackgroundWorker>(),
             InitNativeSdks = false

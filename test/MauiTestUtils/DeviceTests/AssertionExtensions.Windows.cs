@@ -156,7 +156,7 @@ namespace Microsoft.Maui.DeviceTests
 
 		// Windows does ok running these tests in parallel but there's definitely
 		// a limit where it'll eventually be too many windows.
-		// So, for now we're limiting this to 10 parallel windows which seems 
+		// So, for now we're limiting this to 10 parallel windows which seems
 		// to work fine.
 		static SemaphoreSlim _attachAndRunSemaphore = new SemaphoreSlim(10);
 

@@ -24,45 +24,33 @@ namespace Microsoft.Maui.DeviceTests
 					break;
 			}
 
-			return exitCondition.Invoke();
-		}
+        return exitCondition.Invoke();
+    }
 
-		public static Task<bool> WaitForGC(params WeakReference[] references)
-		{
-			// Check all the WeakReference values are non-null
-			Assert.NotEmpty(references);
-			foreach (var reference in references)
-			{
-				Assert.NotNull(reference);
-			}
+    public static void AssertHasFlag(this Enum self, Enum flag)
+    {
+        var hasFlag = self.HasFlag(flag);
 
-			return Wait(() =>
-			{
-				GC.Collect();
-				GC.WaitForPendingFinalizers();
+        if (!hasFlag)
+            throw new ContainsException(flag, self);
+    }
 
-				foreach (var reference in references)
-				{
-					if (reference.IsAlive)
-						return false;
-				}
+    public static void AssertWithMessage(Action assertion, string message)
+    {
+        try
+        {
+            assertion();
+        }
+        catch (Exception e)
+        {
+            Assert.True(false, $"Message: {message} Failure: {e}");
+        }
+    }
 
-				return true; // No references alive
-			}, timeout: 10000);
-		}
-
-		public static void AssertHasFlag(this Enum self, Enum flag)
-		{
-			var hasFlag = self.HasFlag(flag);
-
-			if (!hasFlag)
-				throw ContainsException.ForSetItemNotFound(flag.ToString(), self.ToString());
-		}
-
-		public static void CloseEnough(double expected, double actual, double epsilon = 0.2, string? message = null)
-		{
-			if (!String.IsNullOrWhiteSpace(message))
-				message = " " + message;
+    public static void CloseEnough(double expected, double actual, double epsilon = 0.2, string? message = null)
+    {
+        if (!String.IsNullOrWhiteSpace(message))
+            message = " " + message;
 
 			var diff = Math.Abs(expected - actual);
 			Assert.True(diff <= epsilon, $"Expected: {expected}. Actual: {actual}. Diff: {diff} Epsilon: {epsilon}.{message}");

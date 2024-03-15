@@ -56,4 +56,13 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// Use caution when enabling, as depending on your application this might incur a performance overhead.
     /// </summary>
     public bool CreateElementEventsBreadcrumbs { get; set; } = false;
+
+    /// <summary>
+    /// Automatically attaches a screenshot of the app at the time of the event capture.
+    /// </summary>
+    /// <remarks>
+    /// Make sure to only enable this feature if no sensitive data, such as PII, can be visible on the screen.
+    /// Screenshots can be removed from some specific events during BeforeSend through the Hint.
+    /// </remarks>
+    public bool AttachScreenshot { get; set; }
 }

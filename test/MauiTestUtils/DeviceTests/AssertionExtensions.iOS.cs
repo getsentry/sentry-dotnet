@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using CoreAnimation;
@@ -391,29 +391,9 @@ namespace Microsoft.Maui.DeviceTests
 				}
 			}
 
-			throw new XunitException(CreateColorError(bitmap, $"Color {expectedColor} not found."));
-		}
-
-		public static UIImage AssertDoesNotContainColor(this UIImage bitmap, UIColor unexpectedColor, Func<Graphics.RectF, Graphics.RectF>? withinRectModifier = null)
-		{
-			var imageRect = new Graphics.RectF(0, 0, (float)bitmap.Size.Width.Value, (float)bitmap.Size.Height.Value);
-
-			if (withinRectModifier is not null)
-				imageRect = withinRectModifier.Invoke(imageRect);
-
-			for (int x = (int)imageRect.X; x < (int)imageRect.Width; x++)
-			{
-				for (int y = (int)imageRect.Y; y < (int)imageRect.Height; y++)
-				{
-					if (ColorComparison.ARGBEquivalent(bitmap.ColorAtPoint(x, y), unexpectedColor))
-					{
-						throw new XunitException(CreateColorError(bitmap, $"Color {unexpectedColor} was found at point {x}, {y}."));
-					}
-				}
-			}
-
-			return bitmap;
-		}
+        Assert.True(false, CreateColorError(bitmap, $"Color {expectedColor} not found."));
+        return bitmap;
+    }
 
 
 		public static Task AssertEqualAsync(this UIImage bitmap, UIImage other)
@@ -584,32 +564,27 @@ namespace Microsoft.Maui.DeviceTests
 			Assert.Equal((double)expected.M44, (double)actual.M44, precision);
 		}
 
-		static UIWindow? GetKeyWindow(UIApplication application)
-		{
-			if (OperatingSystem.IsIOSVersionAtLeast(15))
-			{
-				foreach (var scene in application.ConnectedScenes)
-				{
-					if (scene is UIWindowScene windowScene
-						&& windowScene.ActivationState == UISceneActivationState.ForegroundActive)
-					{
-						foreach (var window in windowScene.Windows)
-						{
-#if MACCATALYST
-							// When running headless (on CI or local) Mac Catalyst has trouble finding the window through the method below.
-							// Added an env variable to accommodate for this and just return the first window found.
-							if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("headlessrunner")))
-							{	
-								return window;
-							}
-#endif
-							if (window.IsKeyWindow)
-							{
-								return window;
-							}
-						}
-					}
-				}
+    static UIWindow? GetKeyWindow(UIApplication application)
+    {
+        if (OperatingSystem.IsIOSVersionAtLeast(13) || OperatingSystem.IsMacCatalystVersionAtLeast(13, 1))
+        {
+#pragma warning disable CA1416
+            foreach (var scene in application.ConnectedScenes)
+            {
+                if (scene is not UIWindowScene {ActivationState: UISceneActivationState.ForegroundActive} windowScene)
+                {
+                    continue;
+                }
+
+                foreach (var window in windowScene.Windows)
+                {
+                    if (window.IsKeyWindow)
+                    {
+                        return window;
+                    }
+                }
+            }
+#pragma warning restore CA1416
 
 				return null;
 			}
@@ -654,7 +629,7 @@ namespace Microsoft.Maui.DeviceTests
 				// AFAICT on iOS when you read IsAccessibilityElement it's always false
 				// unless you have VoiceOver turned on.
 				// So, though not ideal, the main think we test on iOS is that elements
-				// that should stay false remain false. 
+				// that should stay false remain false.
 				// According to the Apple docs anything that inherits from UIControl
 				// has isAccessibilityElement set to true by default so we're just
 				// validating that everything that doesn't inherit from UIControl isn't

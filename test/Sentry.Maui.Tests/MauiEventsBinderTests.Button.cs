@@ -42,7 +42,7 @@ public partial class MauiEventsBinderTests
         };
         _fixture.Binder.HandleButtonEvents(button);
         button.RaiseEvent(eventName, EventArgs.Empty);
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count); // Sanity check
+        Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
         _fixture.Binder.HandleButtonEvents(button, bind: false);
 
@@ -50,6 +50,6 @@ public partial class MauiEventsBinderTests
         button.RaiseEvent(eventName, EventArgs.Empty);
 
         // Assert
-        Assert.Equal(1, _fixture.Scope.Breadcrumbs.Count);
+        Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 }

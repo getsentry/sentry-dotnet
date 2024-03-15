@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Trace;
+using Sentry.Extensibility;
 
 namespace Sentry.OpenTelemetry;
 
@@ -30,19 +31,28 @@ public static class TracerProviderBuilderExtensions
     {
         defaultTextMapPropagator ??= new SentryPropagator();
         Sdk.SetDefaultTextMapPropagator(defaultTextMapPropagator);
-        return tracerProviderBuilder.AddProcessor(services =>
+        return tracerProviderBuilder.AddProcessor(ImplementationFactory);
+    }
+
+    internal static BaseProcessor<Activity> ImplementationFactory(IServiceProvider services)
+    {
+        List<IOpenTelemetryEnricher> enrichers = new();
+
+        // AspNetCoreEnricher
+        var userFactory = services.GetService<ISentryUserFactory>();
+        if (userFactory is not null)
         {
-            List<IOpenTelemetryEnricher> enrichers = new();
+            enrichers.Add(new AspNetCoreEnricher(userFactory));
+        }
 
-            // AspNetCoreEnricher
-            var userFactory = services.GetService<ISentryUserFactory>();
-            if (userFactory is not null)
-            {
-                enrichers.Add(new AspNetCoreEnricher(userFactory));
-            }
-
-            var hub = services.GetRequiredService<IHub>();
+        var hub = services.GetService<IHub>() ?? SentrySdk.CurrentHub;
+        if (hub.IsEnabled)
+        {
             return new SentrySpanProcessor(hub, enrichers);
-        });
+        }
+
+        var logger = services.GetService<IDiagnosticLogger>();
+        logger?.LogWarning("Sentry is disabled so no OpenTelemetry spans will be sent to Sentry.");
+        return DisabledSpanProcessor.Instance;
     }
 }

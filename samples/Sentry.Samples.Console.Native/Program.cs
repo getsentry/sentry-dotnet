@@ -1,7 +1,6 @@
 /*
  * This sample demonstrates a native crash handling in a NativeAOT published application.
  */
-using Sentry;
 
 // Initialize the Sentry SDK.  (It is not necessary to dispose it.)
 SentrySdk.Init(options =>
@@ -29,7 +28,7 @@ async Task FirstFunctionAsync()
 async Task SecondFunctionAsync()
 {
     await Task.Delay(100);
-    #pragma warning disable CS0618
+#pragma warning disable CS0618
     SentrySdk.CauseCrash(CrashType.Native);
-    #pragma warning restore CS0618
+#pragma warning restore CS0618
 }

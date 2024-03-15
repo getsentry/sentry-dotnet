@@ -8,7 +8,7 @@ coreSolution: Sentry.sln
 # copies of Sentry.sln that are used to set certain build
 # properties when using solution filters that are based on these
 buildSolutions:
-  - Sentry.NoMobile.sln
+  - .generated.NoMobile.sln
 
 groupConfigs:
   allProjects:
@@ -17,6 +17,7 @@ groupConfigs:
       - "test/**/*.csproj"
       - "samples/**/*.csproj"
   macOnly:
+    - "**/*MacOS.csproj"
     - "**/*Ios.csproj"
     - "**/*Cocoa*.csproj"
     - "**/*MacCatalyst.csproj"
@@ -60,6 +61,9 @@ filterConfigs:
     include:
       groups:
         - "allProjects"
+      patterns:
+        - "modules/perfview/**/TraceEvent.csproj"
+        - "modules/perfview/**/FastSerialization.csproj"
     exclude:
       groups:
         - "macOnly"
@@ -83,7 +87,7 @@ filterConfigs:
         - "test/**/*.csproj"
 
   - outputPath: SentryAspNetCore.slnf
-    solution: Sentry.NoMobile.sln
+    solution: .generated.NoMobile.sln
     include:
       patterns:
         - "**/*AspNetCore*.csproj"
@@ -91,8 +95,12 @@ filterConfigs:
         - "**/Sentry.Extensions.Logging.csproj"
         - "**/Sentry.Extensions.Logging.Tests.csproj"
         - "**/Sentry.OpenTelemetry.csproj"
+        - "**/Sentry.Serilog.csproj"
         - "**/Sentry.csproj"
+        - "**/Sentry.Hangfire.csproj"
+        - "**/Sentry.Samples.Hangfire.csproj"
         - "**/Sentry.Testing.csproj"
+        - "**/Sentry.Testing.CrashableApp.csproj"
         - "**/Sentry.Tests.csproj"
 
   - outputPath: Sentry.Azure.Functions.slnf
@@ -107,7 +115,7 @@ filterConfigs:
         - "**/Sentry.Tests.csproj"
 
   - outputPath: SentryCore.slnf
-    solution: Sentry.NoMobile.sln
+    solution: .generated.NoMobile.sln
     include:
       patterns:
         - "**/Sentry.Benchmarks.csproj"
@@ -121,7 +129,7 @@ filterConfigs:
         - "**/Sentry.Tests.csproj"
 
   - outputPath: SentryDiagnosticSource.slnf
-    solution: Sentry.NoMobile.sln
+    solution: .generated.NoMobile.sln
     include:
       patterns:
         - "**/*DiagnosticSource*.csproj"
@@ -153,7 +161,7 @@ filterConfigs:
         - "test/MauiTestUtils/**/*.csproj"
 
   - outputPath: SentryNoMobile.slnf
-    solution: Sentry.NoMobile.sln
+    solution: .generated.NoMobile.sln
     include:
       groups:
         - "allProjects"

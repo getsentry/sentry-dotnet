@@ -4,10 +4,10 @@ namespace Sentry.Tests.Internals;
 
 public class SettingLocatorTests
 {
-    private const string DisableSdkDsnValue = Constants.DisableSdkDsnValue;
-    private const string DsnEnvironmentVariable = Internal.Constants.DsnEnvironmentVariable;
-    private const string EnvironmentEnvironmentVariable = Internal.Constants.EnvironmentEnvironmentVariable;
-    private const string ReleaseEnvironmentVariable = Internal.Constants.ReleaseEnvironmentVariable;
+    private const string DisableSdkDsnValue = SentryConstants.DisableSdkDsnValue;
+    private const string DsnEnvironmentVariable = Constants.DsnEnvironmentVariable;
+    private const string EnvironmentEnvironmentVariable = Constants.EnvironmentEnvironmentVariable;
+    private const string ReleaseEnvironmentVariable = Constants.ReleaseEnvironmentVariable;
 
     private static Assembly GetAssemblyWithDsn(string dsn) =>
         AssemblyCreationHelper.CreateAssemblyWithDsnAttribute(dsn);
@@ -83,6 +83,17 @@ public class SettingLocatorTests
     }
 
     [Fact]
+    public void GetDsn_WithEmptyString_DoesNotThrow()
+    {
+        var options = new SentryOptions { Dsn = DisableSdkDsnValue };
+
+        var dsn = options.SettingLocator.GetDsn();
+
+        Assert.Equal(DisableSdkDsnValue, dsn);
+        Assert.Equal(DisableSdkDsnValue, options.Dsn);
+    }
+
+    [Fact]
     public void GetDsn_WithDsnInEnvironmentVariable_ReturnsAndSetsDsn()
     {
         var options = new SentryOptions();
@@ -123,12 +134,12 @@ public class SettingLocatorTests
     }
 
     [Fact]
-    public void GetDsn_WithOptionAlreadySet_IgnoresEnvironmentVariable()
+    public void GetDsn_DsnIsNonEmptyString_IgnoresEnvironmentVariable()
     {
         const string validDsn1 = ValidDsn + "1";
         const string validDsn2 = ValidDsn + "2";
 
-        var options = new SentryOptions {Dsn = validDsn1};
+        var options = new SentryOptions { Dsn = validDsn1 };
         options.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = validDsn2;
 
         var dsn = options.SettingLocator.GetDsn();
@@ -138,12 +149,12 @@ public class SettingLocatorTests
     }
 
     [Fact]
-    public void GetDsn_WithOptionAlreadySet_IgnoresAttribute()
+    public void GetDsn_DsnIsNonEmptyString_IgnoresAttribute()
     {
         const string validDsn1 = ValidDsn + "1";
         const string validDsn2 = ValidDsn + "2";
 
-        var options = new SentryOptions {Dsn = validDsn1};
+        var options = new SentryOptions { Dsn = validDsn1 };
         options.FakeSettings().AssemblyForAttributes = GetAssemblyWithDsn(validDsn2);
 
         var dsn = options.SettingLocator.GetDsn();
@@ -198,6 +209,46 @@ public class SettingLocatorTests
     }
 
     [Fact]
+    public void GetDsn_DsnIsStringEmptyButEnvironmentValid_ReturnsAndSetsEnvironmentDsn()
+    {
+        var options = new SentryOptions { Dsn = string.Empty };
+        options.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = ValidDsn;
+
+        var dsn = options.SettingLocator.GetDsn();
+
+        Assert.Equal(ValidDsn, dsn);
+        Assert.Equal(ValidDsn, options.Dsn);
+    }
+
+    [Fact]
+    public void GetDsn_DsnIsStringEmptyButAttributeValid_ReturnsAndSetsAttributeDsn()
+    {
+        var options = new SentryOptions { Dsn = string.Empty };
+        options.FakeSettings().AssemblyForAttributes = GetAssemblyWithDsn(ValidDsn);
+
+        var dsn = options.SettingLocator.GetDsn();
+
+        Assert.Equal(ValidDsn, dsn);
+        Assert.Equal(ValidDsn, options.Dsn);
+    }
+
+    [Fact]
+    public void GetDsn_DsnIsStringEmptyButEnvironmentAndAttributeValid_ReturnsAndSetsEnvironmentDsn()
+    {
+        const string validDsn1 = ValidDsn + "1";
+        const string validDsn2 = ValidDsn + "2";
+
+        var options = new SentryOptions { Dsn = string.Empty };
+        options.FakeSettings().EnvironmentVariables[DsnEnvironmentVariable] = validDsn1;
+        options.FakeSettings().AssemblyForAttributes = GetAssemblyWithDsn(validDsn2);
+
+        var dsn = options.SettingLocator.GetDsn();
+
+        Assert.Equal(validDsn1, dsn);
+        Assert.Equal(validDsn1, options.Dsn);
+    }
+
+    [Fact]
     public void GetEnvironment_WithEnvironmentInEnvironmentVariable_ReturnsAndSetsEnvironment()
     {
         var options = new SentryOptions();
@@ -212,7 +263,7 @@ public class SettingLocatorTests
     [Fact]
     public void GetEnvironment_WithOptionAlreadySet_IgnoresEnvironmentVariable()
     {
-        var options = new SentryOptions {Environment = "Foo"};
+        var options = new SentryOptions { Environment = "Foo" };
         options.FakeSettings().EnvironmentVariables[EnvironmentEnvironmentVariable] = "Bar";
 
         var environment = options.SettingLocator.GetEnvironment();
@@ -262,7 +313,7 @@ public class SettingLocatorTests
     [Fact]
     public void GetRelease_WithOptionAlreadySet_IgnoresEnvironmentVariable()
     {
-        var options = new SentryOptions {Release = "1.2.3"};
+        var options = new SentryOptions { Release = "1.2.3" };
         options.FakeSettings().EnvironmentVariables[ReleaseEnvironmentVariable] = "4.5.6";
 
         var release = options.SettingLocator.GetRelease();

@@ -159,7 +159,7 @@ public class GlobalSessionManagerTests : IDisposable
 
         // Assert
         _fixture.Logger.Entries.Should().Contain(e =>
-            e.Message == "Failed to report an error on a session because there is none active." &&
+            e.Message == "There is no session active. Skipping updating the session as errored. Consider setting 'AutoSessionTracking = true' to enable Release Health and crash free rate." &&
             e.Level == SentryLevel.Debug);
     }
 
@@ -496,8 +496,7 @@ public class GlobalSessionManagerTests : IDisposable
         persistedSessionUpdate.Should().BeNull();
     }
 
-    [Fact]
-    public SessionUpdate TryRecoverPersistedSession_HasRecoveredUpdateAndCrashedLastRunFailed_RecoveredSessionCaptured()
+    public SessionUpdate TryRecoverPersistedSessionWithExceptionOnLastRun()
     {
         // Arrange
         var expectedCrashMessage = "Invoking CrashedLastRun failed.";
@@ -520,7 +519,11 @@ public class GlobalSessionManagerTests : IDisposable
         return persistedSessionUpdate;
     }
 
-    public SessionUpdate TryRecoverPersistedSessionWithExceptionOnLastRun() => TryRecoverPersistedSession_HasRecoveredUpdateAndCrashedLastRunFailed_RecoveredSessionCaptured();
+    [Fact]
+    public void TryRecoverPersistedSession_HasRecoveredUpdateAndCrashedLastRunFailed_RecoveredSessionCaptured()
+    {
+        TryRecoverPersistedSessionWithExceptionOnLastRun();
+    }
 
     // A session update (of which the state doesn't matter for the test):
     private static SessionUpdate AnySessionUpdate()

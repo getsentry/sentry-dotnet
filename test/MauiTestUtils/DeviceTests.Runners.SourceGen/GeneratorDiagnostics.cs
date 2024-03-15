@@ -1,7 +1,13 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 
+<<<<<<< HEAD
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.SourceGen
+=======
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.SourceGen;
+
+internal static class GeneratorDiagnostics
+>>>>>>> chore/net8-devicetests
 {
 	static class GeneratorDiagnostics
 	{
@@ -13,8 +19,15 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.SourceGen
 			DiagnosticSeverity.Info,
 			isEnabledByDefault: true);
 
+<<<<<<< HEAD
 		[Conditional("DEBUG")]
 		public static void Log(this GeneratorExecutionContext context, string message) =>
 			context.ReportDiagnostic(Diagnostic.Create(LoggingMessage, Location.None, message));
 	}
 }
+=======
+    [Conditional("DEBUG")]
+    public static void Log(this GeneratorExecutionContext context, string message) =>
+        context.ReportDiagnostic(Diagnostic.Create(LoggingMessage, Location.None, message));
+}
+>>>>>>> chore/net8-devicetests

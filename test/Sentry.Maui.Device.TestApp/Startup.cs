@@ -1,3 +1,4 @@
+using Microsoft.Maui.LifecycleEvents;
 using Microsoft.Maui.TestUtils.DeviceTests.Runners;
 
 namespace Sentry.Maui.Device.TestApp;
@@ -7,6 +8,16 @@ public static class MauiProgram
     public static MauiApp CreateMauiApp()
     {
         var appBuilder = MauiApp.CreateBuilder()
+            .ConfigureLifecycleEvents(life =>
+            {
+#if __ANDROID__
+                life.AddAndroid(android =>
+                {
+                    android.OnCreate((activity, bundle) =>
+                        Platform.Init(activity, bundle));
+                });
+#endif
+            })
             .ConfigureTests(new TestOptions
             {
                 // This is the list of assemblies containing tests that will be run

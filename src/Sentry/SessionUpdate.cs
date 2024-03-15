@@ -7,7 +7,7 @@ namespace Sentry;
 /// Session update.
 /// </summary>
 // https://develop.sentry.dev/sdk/sessions/#session-update-payload
-public class SessionUpdate : ISession, IJsonSerializable
+public class SessionUpdate : ISentrySession, ISentryJsonSerializable
 {
     /// <inheritdoc />
     public SentryId Id { get; }
@@ -93,7 +93,7 @@ public class SessionUpdate : ISession, IJsonSerializable
     /// Initializes a new instance of <see cref="SessionUpdate"/>.
     /// </summary>
     public SessionUpdate(
-        ISession session,
+        ISentrySession session,
         bool isInitial,
         DateTimeOffset timestamp,
         int sequenceNumber,

@@ -3,7 +3,7 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry;
 
-internal class PersistedSessionUpdate : IJsonSerializable
+internal class PersistedSessionUpdate : ISentryJsonSerializable
 {
     public SessionUpdate Update { get; }
 

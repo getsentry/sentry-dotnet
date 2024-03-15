@@ -6,7 +6,7 @@ public class SentryPropagationContextTests
     public void CopyConstructor_CreatesCopy()
     {
         var original = new SentryPropagationContext();
-        original.GetOrCreateDynamicSamplingContext(new SentryOptions {Dsn = ValidDsn});
+        original.GetOrCreateDynamicSamplingContext(new SentryOptions { Dsn = ValidDsn });
 
         var copy = new SentryPropagationContext(original);
 

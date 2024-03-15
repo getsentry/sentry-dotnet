@@ -1,14 +1,23 @@
-﻿#nullable enable
+#nullable enable
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages;
 
+<<<<<<< HEAD
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
 	partial class MauiVisualRunnerApp : Application
 	{
 		readonly TestOptions _options;
 		readonly ILogger _logger;
+=======
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
+
+public partial class MauiVisualRunnerApp : Application
+{
+    private readonly TestOptions _options;
+    private readonly ILogger _logger;
+>>>>>>> chore/net8-devicetests
 
 		public MauiVisualRunnerApp(TestOptions options, ILogger logger)
 		{
@@ -32,7 +41,13 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 
 			var navPage = new NavigationPage(hp);
 
+<<<<<<< HEAD
 			return new Window(navPage);
 		}
 	}
 }
+=======
+        return new Window(navPage);
+    }
+}
+>>>>>>> chore/net8-devicetests

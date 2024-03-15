@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    # Pinning `macos-13` because Microsoft.iOS 16.4 requires Xcode 14.3 which is only built-in in 13
+    # Pinning `macos-13` because of the XCode version we need.
     runs-on: macos-13
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Cancel Previous Runs
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
-        uses: styfle/cancel-workflow-action@01ce38bf961b4e243a6342cbade0dbc8ba3f0432 # Tag: 0.12.0
+        uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,11 +34,13 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
 
+      - run: sudo xcode-select -s /Applications/Xcode_15.1.0.app
+
       - name: Build iOS Test App
         run: pwsh ./scripts/device-test.ps1 ios -Build
 
       - name: Upload iOS Test App
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: device-test-ios
           if-no-files-found: error
@@ -58,7 +60,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download test app artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: device-test-ios
           path: bin/Sentry.Maui.Device.TestApp.app
@@ -74,7 +76,7 @@ jobs:
 
       - name: Upload results
         if: success() || failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: device-test-ios-results
           path: test_output

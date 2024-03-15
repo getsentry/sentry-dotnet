@@ -16,7 +16,7 @@ public partial class TransactionProcessorTests
         var options = Options(transport);
         var processor = new TrackingProcessor();
         options.AddTransactionProcessor(processor);
-        var transaction = new Transaction("name", "operation")
+        var transaction = new SentryTransaction("name", "operation")
         {
             IsSampled = false
         };
@@ -29,7 +29,7 @@ public partial class TransactionProcessorTests
 
     public class TheProcessor : ISentryTransactionProcessor
     {
-        public Transaction Process(Transaction transaction)
+        public SentryTransaction Process(SentryTransaction transaction)
         {
             transaction.Contexts["key"] = "value";
             return transaction;
@@ -40,7 +40,7 @@ public partial class TransactionProcessorTests
     {
         public bool Called { get; private set; }
 
-        public Transaction Process(Transaction transaction)
+        public SentryTransaction Process(SentryTransaction transaction)
         {
             Called = true;
             return transaction;
@@ -49,7 +49,7 @@ public partial class TransactionProcessorTests
 
     public class DiscardProcessor : ISentryTransactionProcessor
     {
-        public Transaction Process(Transaction transaction) =>
+        public SentryTransaction Process(SentryTransaction transaction) =>
             null;
     }
 

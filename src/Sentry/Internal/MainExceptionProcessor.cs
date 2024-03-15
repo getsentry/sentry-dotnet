@@ -155,7 +155,7 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
             sentryEx.Mechanism = mechanism;
         }
 
-        sentryEx.Stacktrace = SentryStackTraceFactoryAccessor().Create(exception);
+        sentryEx.Stacktrace ??= SentryStackTraceFactoryAccessor().Create(exception);
         return sentryEx;
     }
 

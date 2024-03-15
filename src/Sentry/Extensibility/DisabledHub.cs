@@ -1,3 +1,6 @@
+using Sentry.Protocol.Envelopes;
+using Sentry.Protocol.Metrics;
+
 namespace Sentry.Extensibility;
 
 /// <summary>
@@ -82,7 +85,7 @@ public class DisabledHub : IHub, IDisposable
         string? operation = null)
     {
         // Transactions from DisabledHub are always sampled out
-        return new TransactionContext( name ?? string.Empty, operation ?? string.Empty, isSampled: false);
+        return new TransactionContext(name ?? string.Empty, operation ?? string.Empty, isSampled: false);
     }
 
     /// <summary>
@@ -95,7 +98,7 @@ public class DisabledHub : IHub, IDisposable
         string? operation = null)
     {
         // Transactions from DisabledHub are always sampled out
-        return new TransactionContext( name ?? string.Empty, operation ?? string.Empty, isSampled: false);
+        return new TransactionContext(name ?? string.Empty, operation ?? string.Empty, isSampled: false);
     }
 
     /// <summary>
@@ -136,7 +139,15 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
-    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Hint? hint = null) => SentryId.Empty;
+    public bool CaptureEnvelope(Envelope envelope)
+    {
+        return false;
+    }
+
+    /// <summary>
+    /// No-Op.
+    /// </summary>
+    public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, SentryHint? hint = null) => SentryId.Empty;
 
     /// <summary>
     /// No-Op.
@@ -146,19 +157,19 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
-    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope) => SentryId.Empty;
+    public SentryId CaptureEvent(SentryEvent evt, SentryHint? hint, Action<Scope> configureScope) => SentryId.Empty;
 
     /// <summary>
     /// No-Op.
     /// </summary>
-    public void CaptureTransaction(Transaction transaction)
+    public void CaptureTransaction(SentryTransaction transaction)
     {
     }
 
     /// <summary>
     /// No-Op.
     /// </summary>
-    public void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
+    public void CaptureTransaction(SentryTransaction transaction, Scope? scope, SentryHint? hint)
     {
     }
 
@@ -170,9 +181,20 @@ public class DisabledHub : IHub, IDisposable
     }
 
     /// <summary>
+    /// No-Op
+    /// </summary>
+    public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null)
+        => SentryId.Empty;
+
+    /// <summary>
     /// No-Op.
     /// </summary>
     public Task FlushAsync(TimeSpan timeout) => Task.CompletedTask;
+
+    /// <summary>
+    /// Disabled Metrics Aggregator (all methods are no-op).
+    /// </summary>
+    public IMetricAggregator Metrics { get; } = new DisabledMetricAggregator();
 
     /// <summary>
     /// No-Op.

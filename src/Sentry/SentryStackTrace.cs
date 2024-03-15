@@ -40,7 +40,7 @@ public enum InstructionAddressAdjustment
 /// Frames should be sorted from oldest to newest.
 /// </remarks>
 /// <see href="https://develop.sentry.dev/sdk/event-payloads/stacktrace/"/>
-public class SentryStackTrace : IJsonSerializable
+public class SentryStackTrace : ISentryJsonSerializable
 {
     internal IList<SentryStackFrame>? InternalFrames { get; private set; }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -15,6 +15,7 @@ using Xunit;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
+<<<<<<< HEAD
 	public class DeviceRunner : ITestListener, ITestRunner
 	{
 		readonly SynchronizationContext context = SynchronizationContext.Current;
@@ -22,6 +23,13 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 		readonly ITestNavigation _navigation;
 		readonly TestRunLogger _logger;
 		volatile bool cancelled;
+=======
+    private readonly SynchronizationContext context = SynchronizationContext.Current;
+    private readonly AsyncLock executionLock = new AsyncLock();
+    private readonly ITestNavigation _navigation;
+    private readonly TestRunLogger _logger;
+    private volatile bool cancelled;
+>>>>>>> chore/net8-devicetests
 
 		public DeviceRunner(IReadOnlyCollection<Assembly> testAssemblies, ITestNavigation navigation, ILogger logger)
 		{
@@ -103,9 +111,15 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 			return tcs.Task;
 		}
 
+<<<<<<< HEAD
 		IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
 		{
 			var result = new List<AssemblyRunInfo>();
+=======
+    private IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
+    {
+        var result = new List<AssemblyRunInfo>();
+>>>>>>> chore/net8-devicetests
 
 			try
 			{
@@ -158,6 +172,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 			return result;
 		}
 
+<<<<<<< HEAD
 		static TestAssemblyConfiguration GetConfiguration(string assemblyName)
 		{
 			var stream = GetConfigurationStreamForAssembly(assemblyName);
@@ -168,10 +183,23 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 					return ConfigReader.Load(stream);
 				}
 			}
+=======
+    private static TestAssemblyConfiguration GetConfiguration(string assemblyName)
+    {
+        var stream = GetConfigurationStreamForAssembly(assemblyName);
+        if (stream != null)
+        {
+            using (stream)
+            {
+                return ConfigReader.Load(stream);
+            }
+        }
+>>>>>>> chore/net8-devicetests
 
 			return new TestAssemblyConfiguration();
 		}
 
+<<<<<<< HEAD
 		static Stream GetConfigurationStreamForAssembly(string assemblyName)
 		{
 #if __ANDROID__
@@ -183,6 +211,19 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 
 			if (allAssets.Contains("xunit.runner.json"))
 				return assets.Open("xunit.runner.json");
+=======
+    private static Stream GetConfigurationStreamForAssembly(string assemblyName)
+    {
+#if __ANDROID__
+        var assets = Android.App.Application.Context.Assets;
+        var allAssets = assets.List(string.Empty);
+
+        if (allAssets.Contains($"{assemblyName}.xunit.runner.json"))
+            return assets.Open($"{assemblyName}.xunit.runner.json");
+
+        if (allAssets.Contains("xunit.runner.json"))
+            return assets.Open("xunit.runner.json");
+>>>>>>> chore/net8-devicetests
 #else
 
 			// See if there's a directory with the assm name. this might be the case for appx
@@ -216,9 +257,15 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 			return null;
 		}
 
+<<<<<<< HEAD
 		Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
 		{
 			var tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+=======
+    private Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
+    {
+        var tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+>>>>>>> chore/net8-devicetests
 
 			void Handler()
 			{
@@ -261,10 +308,17 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 			return tcs.Task;
 		}
 
+<<<<<<< HEAD
 		void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
 		{
 			if (cancelled)
 				return;
+=======
+    private void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+    {
+        if (cancelled)
+            return;
+>>>>>>> chore/net8-devicetests
 
 			var assemblyFileName = runInfo.AssemblyFileName;
 
@@ -286,9 +340,21 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 
 			var deviceExecSink = new DeviceExecutionSink(xunitTestCases, this, context);
 
+<<<<<<< HEAD
 			IExecutionSink resultsSink = new DelegatingExecutionSummarySink(deviceExecSink, () => cancelled);
 			if (longRunningSeconds > 0)
 				resultsSink = new DelegatingLongRunningTestDetectionSink(resultsSink, TimeSpan.FromSeconds(longRunningSeconds), diagSink);
+=======
+        var resultsSink = new ExecutionSink(deviceExecSink, new ExecutionSinkOptions { CancelThunk = () => cancelled });
+        if (longRunningSeconds > 0)
+        {
+            resultsSink = new ExecutionSink(resultsSink, new ExecutionSinkOptions
+            {
+                LongRunningTestTime = TimeSpan.FromSeconds(longRunningSeconds),
+                DiagnosticMessageSink = diagSink
+            });
+        }
+>>>>>>> chore/net8-devicetests
 
 			var assm = new XunitProjectAssembly() { AssemblyFilename = runInfo.AssemblyFileName };
 			deviceExecSink.OnMessage(new TestAssemblyExecutionStarting(assm, executionOptions));
@@ -299,9 +365,15 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 			deviceExecSink.OnMessage(new TestAssemblyExecutionFinished(assm, executionOptions, resultsSink.ExecutionSummary));
 		}
 
+<<<<<<< HEAD
 		ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
 		{
 			var @event = new ManualResetEvent(false);
+=======
+    private ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+    {
+        var @event = new ManualResetEvent(false);
+>>>>>>> chore/net8-devicetests
 
 			void Handler()
 			{
@@ -320,9 +392,15 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 			return @event;
 		}
 
+<<<<<<< HEAD
 		static async void RunAsync(Action action)
 		{
 			var task = Task.Factory.StartNew(action, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+=======
+    private static async void RunAsync(Action action)
+    {
+        var task = Task.Factory.StartNew(action, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+>>>>>>> chore/net8-devicetests
 
 			try
 			{

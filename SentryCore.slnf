@@ -1,6 +1,6 @@
 {
   "solution": {
-    "path": "Sentry.NoMobile.sln",
+    "path": ".generated.NoMobile.sln",
     "projects": [
       "benchmarks\\Sentry.Benchmarks\\Sentry.Benchmarks.csproj",
       "samples\\Sentry.Samples.Console.Basic\\Sentry.Samples.Console.Basic.csproj",

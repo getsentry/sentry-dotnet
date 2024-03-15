@@ -26,13 +26,13 @@ public static class VerifyExtensions
             .IgnoreMembers<SentryEvent>(
                 _ => _.Modules,
                 _ => _.Release)
-            .IgnoreMembers<Request>(
+            .IgnoreMembers<SentryRequest>(
                 _ => _.Env,
                 _ => _.Url,
                 _ => _.Headers)
             .IgnoreMembers<SessionUpdate>(
                 _ => _.Duration)
-            .IgnoreMembers<Transaction>(
+            .IgnoreMembers<SentryTransaction>(
                 _ => _.Release)
             .IgnoreMembers<SentryException>(
                 _ => _.Module,
@@ -41,9 +41,9 @@ public static class VerifyExtensions
             .IgnoreStackTrace();
     }
 
-    private class SpansConverter : WriteOnlyJsonConverter<IReadOnlyCollection<Span>>
+    private class SpansConverter : WriteOnlyJsonConverter<IReadOnlyCollection<SentrySpan>>
     {
-        public override void Write(VerifyJsonWriter writer, IReadOnlyCollection<Span> spans)
+        public override void Write(VerifyJsonWriter writer, IReadOnlyCollection<SentrySpan> spans)
         {
             var ordered = spans
                 .OrderBy(x => x.StartTimestamp)
@@ -60,9 +60,9 @@ public static class VerifyExtensions
         }
     }
 
-    private class ContextsConverter : WriteOnlyJsonConverter<Contexts>
+    private class ContextsConverter : WriteOnlyJsonConverter<SentryContexts>
     {
-        public override void Write(VerifyJsonWriter writer, Contexts contexts)
+        public override void Write(VerifyJsonWriter writer, SentryContexts contexts)
         {
             var items = contexts
                 .Where(_ => _.Key != "os" &&

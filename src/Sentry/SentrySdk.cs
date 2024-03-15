@@ -1,6 +1,8 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Protocol.Envelopes;
+using Sentry.Protocol.Metrics;
 
 namespace Sentry;
 
@@ -72,7 +74,35 @@ public static partial class SentrySdk
         }
         options.PostInitCallbacks.Clear();
 
+        // Platform specific check for profiler misconfiguration.
+#if __IOS__
+        // No user-facing warning necessary - the integration is part of InitSentryCocoaSdk().
+        Debug.Assert(options.IsProfilingEnabled == (options.TransactionProfilerFactory is not null));
+#elif ANDROID
+        LogWarningIfProfilingMisconfigured(options, " on Android");
+#else
+#if NET8_0_OR_GREATER
+        if (AotHelper.IsNativeAot)
+        {
+            LogWarningIfProfilingMisconfigured(options, " for NativeAOT");
+        }
+        else
+#endif
+        {
+            LogWarningIfProfilingMisconfigured(options, ", because ProfilingIntegration from package Sentry.Profiling" +
+            " hasn't been registered. You can do that by calling 'options.AddIntegration(new ProfilingIntegration())'");
+        }
+#endif
+
         return hub;
+    }
+
+    private static void LogWarningIfProfilingMisconfigured(SentryOptions options, string info)
+    {
+        if (options.IsProfilingEnabled && (options.TransactionProfilerFactory is null))
+        {
+            options.LogWarning("You've tried to enable profiling in options, but it is not available{0}.", info);
+        }
     }
 
     /// <summary>
@@ -88,7 +118,7 @@ public static partial class SentrySdk
     /// sense to dispose:
     /// <list type="bullet">
     /// <item>You have additional work to perform that you don't want Sentry to monitor.</item>
-    /// <item>You have used <see cref="SentryOptionsExtensions.DisableAppDomainProcessExitFlush"/>.</item>
+    /// <item>You have used <see cref="SentryOptions.DisableAppDomainProcessExitFlush"/>.</item>
     /// <item>You are integrating Sentry into an environment that has custom application lifetime events.</item>
     /// </list>
     /// </remarks>
@@ -109,7 +139,7 @@ public static partial class SentrySdk
     /// sense to dispose:
     /// <list type="bullet">
     /// <item>You have additional work to perform that you don't want Sentry to monitor.</item>
-    /// <item>You have used <see cref="SentryOptionsExtensions.DisableAppDomainProcessExitFlush"/>.</item>
+    /// <item>You have used <see cref="SentryOptions.DisableAppDomainProcessExitFlush"/>.</item>
     /// <item>You are integrating Sentry into an environment that has custom application lifetime events.</item>
     /// </list>
     /// </remarks>
@@ -128,7 +158,7 @@ public static partial class SentrySdk
     /// sense to dispose:
     /// <list type="bullet">
     /// <item>You have additional work to perform that you don't want Sentry to monitor.</item>
-    /// <item>You have used <see cref="SentryOptionsExtensions.DisableAppDomainProcessExitFlush"/>.</item>
+    /// <item>You have used <see cref="SentryOptions.DisableAppDomainProcessExitFlush"/>.</item>
     /// <item>You are integrating Sentry into an environment that has custom application lifetime events.</item>
     /// </list>
     /// </remarks>
@@ -154,7 +184,7 @@ public static partial class SentrySdk
     /// sense to dispose:
     /// <list type="bullet">
     /// <item>You have additional work to perform that you don't want Sentry to monitor.</item>
-    /// <item>You have used <see cref="SentryOptionsExtensions.DisableAppDomainProcessExitFlush"/>.</item>
+    /// <item>You have used <see cref="SentryOptions.DisableAppDomainProcessExitFlush"/>.</item>
     /// <item>You are integrating Sentry into an environment that has custom application lifetime events.</item>
     /// </list>
     /// </remarks>
@@ -327,7 +357,7 @@ public static partial class SentrySdk
     /// <param name="hint">A hint providing additional context that can be used in the BeforeBreadcrumb callback</param>
     /// <see cref="AddBreadcrumb(string, string?, string?, IDictionary{string, string}?, BreadcrumbLevel)"/>
     [DebuggerStepThrough]
-    public static void AddBreadcrumb(Breadcrumb breadcrumb, Hint? hint = null)
+    public static void AddBreadcrumb(Breadcrumb breadcrumb, SentryHint? hint = null)
         => CurrentHub.AddBreadcrumb(breadcrumb, hint);
 
     /// <summary>
@@ -347,6 +377,12 @@ public static partial class SentrySdk
     public static Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
         => CurrentHub.ConfigureScopeAsync(configureScope);
 
+    /// <inheritdoc cref="ISentryClient.CaptureEnvelope"/>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public static bool CaptureEnvelope(Envelope envelope)
+        => CurrentHub.CaptureEnvelope(envelope);
+
     /// <summary>
     /// Captures the event, passing a hint, using the specified scope.
     /// </summary>
@@ -356,7 +392,7 @@ public static partial class SentrySdk
     /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, Hint? hint = null)
+    public static SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, SentryHint? hint = null)
         => CurrentHub.CaptureEvent(evt, scope, hint);
 
     /// <summary>
@@ -385,7 +421,7 @@ public static partial class SentrySdk
     /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope)
+    public static SentryId CaptureEvent(SentryEvent evt, SentryHint? hint, Action<Scope> configureScope)
         => CurrentHub.CaptureEvent(evt, hint, configureScope);
 
     /// <summary>
@@ -462,7 +498,7 @@ public static partial class SentrySdk
     /// </remarks>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static void CaptureTransaction(Transaction transaction)
+    public static void CaptureTransaction(SentryTransaction transaction)
         => CurrentHub.CaptureTransaction(transaction);
 
     /// <summary>
@@ -474,7 +510,7 @@ public static partial class SentrySdk
     /// </remarks>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static void CaptureTransaction(Transaction transaction, Scope? scope, Hint? hint)
+    public static void CaptureTransaction(SentryTransaction transaction, Scope? scope, SentryHint? hint)
         => CurrentHub.CaptureTransaction(transaction, scope, hint);
 
     /// <summary>
@@ -483,6 +519,21 @@ public static partial class SentrySdk
     [DebuggerStepThrough]
     public static void CaptureSession(SessionUpdate sessionUpdate)
         => CurrentHub.CaptureSession(sessionUpdate);
+
+    /// <summary>
+    /// Captures a check-in.
+    /// </summary>
+    /// <remarks>
+    /// Capturing a check-in returns an ID. The ID can be used to update the status. I.e. to update a check-in you
+    /// captured from `CheckInStatus.InProgress` to `CheckInStatus.Ok`.
+    /// </remarks>
+    /// <param name="monitorSlug">The monitor slug of the check-in.</param>
+    /// <param name="status">The status of the check-in.</param>
+    /// <param name="sentryId">The optional <see cref="SentryId"/>.</param>
+    /// <returns>The Id of the check-in.</returns>
+    [DebuggerStepThrough]
+    public static SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null)
+        => CurrentHub.CaptureCheckIn(monitorSlug, status, sentryId);
 
     /// <summary>
     /// Starts a transaction.
@@ -589,6 +640,10 @@ public static partial class SentrySdk
         string? name = null,
         string? operation = null)
         => CurrentHub.ContinueTrace(traceHeader, baggageHeader, name, operation);
+
+    /// <inheritdoc cref="IMetricAggregator"/>
+    public static IMetricAggregator Metrics
+        => CurrentHub.Metrics;
 
     /// <inheritdoc cref="IHub.StartSession"/>
     [DebuggerStepThrough]

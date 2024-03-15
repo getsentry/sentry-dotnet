@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -78,16 +78,16 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 			}
 		}
 
-		async void CreditsExecute()
-		{
-			await _navigation.NavigateTo(PageType.Credits);
-		}
+    async void CreditsExecute()
+    {
+        await _navigation.NavigateTo(PageType.Credits);
+    }
 
-		async void RunEverythingExecute()
-		{
-			try
-			{
-				IsBusy = true;
+    async void RunEverythingExecute()
+    {
+        try
+        {
+            IsBusy = true;
 
 				if (!string.IsNullOrWhiteSpace(DiagnosticMessages))
 					DiagnosticMessages += $"----------{Environment.NewLine}";
@@ -100,17 +100,16 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 			}
 		}
 
-		async void NavigateToTestAssemblyExecute(TestAssemblyViewModel? vm)
-		{
-			if (vm == null)
-				return;
+    async void NavigateToTestAssemblyExecute(TestAssemblyViewModel? vm)
+    {
+        if (vm == null)
+            return;
 
 			await _navigation.NavigateTo(PageType.AssemblyTestList, vm);
 		}
 
-		void RunnerOnOnDiagnosticMessage(string s)
-		{
-			DiagnosticMessages += $"{s}{Environment.NewLine}{Environment.NewLine}";
-		}
-	}
+    void RunnerOnOnDiagnosticMessage(string s)
+    {
+        DiagnosticMessages += $"{s}{Environment.NewLine}{Environment.NewLine}";
+    }
 }

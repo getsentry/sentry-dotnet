@@ -35,7 +35,7 @@ public class SentryWebHostBuilderExtensionsIntegrationTests : AspNetSentrySdkTes
     [Fact]
     public void UseSentry_DisableDsnString_DisabledSdk()
     {
-        _ = _webHostBuilder.UseSentry(Sentry.Constants.DisableSdkDsnValue)
+        _ = _webHostBuilder.UseSentry(Sentry.SentryConstants.DisableSdkDsnValue)
             .Build();
 
         Assert.False(SentrySdk.IsEnabled);

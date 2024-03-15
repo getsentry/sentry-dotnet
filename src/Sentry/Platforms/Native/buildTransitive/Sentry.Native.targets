@@ -17,12 +17,13 @@
   <ItemGroup Condition="$(TargetFramework.StartsWith('net8')) and '$(OutputType)' == 'Exe' And '$(RuntimeIdentifier)' == 'linux-x64'">
     <DirectPInvoke Include="sentry-native" />
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\linux-x64\libsentry-native.a" />
-    <LinkerArg Include="-lcurl"/>
+    <!-- See: https://github.com/dotnet/runtime/issues/97414 -->
+    <NativeSystemLibrary Include="curl" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework.StartsWith('net8')) and '$(OutputType)' == 'Exe' And ('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64')">
     <DirectPInvoke Include="sentry-native" />
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\osx\libsentry-native.a" />
-    <LinkerArg Include="-lcurl"/>
+    <NativeSystemLibrary Include="curl" />
   </ItemGroup>
 </Project>

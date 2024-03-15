@@ -17,6 +17,9 @@ public static class MauiProgram
                 // If you want to see everything we can capture from MAUI, you may wish to use a larger value.
                 options.MaxBreadcrumbs = 1000;
 
+                // Be aware that screenshots may contain PII
+                options.AttachScreenshot = true;
+
                 options.Debug = true;
             })
 

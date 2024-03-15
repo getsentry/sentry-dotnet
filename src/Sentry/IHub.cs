@@ -10,14 +10,17 @@ namespace Sentry;
 /// </remarks>
 /// <inheritdoc cref="ISentryClient" />
 /// <inheritdoc cref="ISentryScopeManager" />
-public interface IHub :
-    ISentryClient,
-    ISentryScopeManager
+public interface IHub : ISentryClient, ISentryScopeManager
 {
     /// <summary>
     /// Last event id recorded in the current scope.
     /// </summary>
     SentryId LastEventId { get; }
+
+    /// <summary>
+    /// <inheritdoc cref="IMetricAggregator"/>
+    /// </summary>
+    IMetricAggregator Metrics { get; }
 
     /// <summary>
     /// Starts a transaction.
@@ -117,5 +120,5 @@ public interface IHub :
     /// <param name="hint">An optional hint to be provided with the event</param>
     /// <param name="configureScope">The callback to configure the scope.</param>
     /// <returns></returns>
-    public SentryId CaptureEvent(SentryEvent evt, Hint? hint, Action<Scope> configureScope);
+    public SentryId CaptureEvent(SentryEvent evt, SentryHint? hint, Action<Scope> configureScope);
 }

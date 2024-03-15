@@ -454,7 +454,7 @@ public class SentryTargetTests
     [Fact]
     public void InitializeTarget_InitializesSdk()
     {
-        _fixture.Options.Dsn = Sentry.Constants.DisableSdkDsnValue;
+        _fixture.Options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
         _fixture.SdkDisposeHandle = null;
         _fixture.Options.InitializeSdk = true;
 

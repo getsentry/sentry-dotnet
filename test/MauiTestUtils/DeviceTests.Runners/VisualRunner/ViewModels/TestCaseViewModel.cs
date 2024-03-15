@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using Microsoft.DotNet.XHarness.TestRunners.Common;
@@ -7,6 +7,7 @@ using Xunit.Sdk;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
+<<<<<<< HEAD
 	public class TestCaseViewModel : ViewModelBase
 	{
 		string? _message;
@@ -16,6 +17,14 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 		string? _stackTrace;
 
 		TestResultViewModel _testResult;
+=======
+    private string? _message;
+    private string? _output;
+    private TestState _result;
+    private RunStatus _runStatus;
+    private string? _stackTrace;
+    private TestResultViewModel _testResult;
+>>>>>>> chore/net8-devicetests
 
 		internal TestCaseViewModel(string assemblyFileName, ITestCase testCase)
 		{

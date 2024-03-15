@@ -17,9 +17,9 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 			releaser = Task.FromResult(new Releaser(this));
 		}
 
-		public struct Releaser : IDisposable
-		{
-			readonly AsyncLock toRelease;
+    public struct Releaser : IDisposable
+    {
+        readonly AsyncLock toRelease;
 
 			internal Releaser(AsyncLock toRelease)
 			{

@@ -1,0 +1,1 @@
+﻿my.counter@counters:5|c|#tag1:value1,tag2:value2|T1577836800

@@ -479,29 +479,9 @@ namespace Microsoft.Maui.DeviceTests
 				}
 			}
 
-			throw new XunitException(CreateColorError(bitmap, $"Color {expectedColor} not found."));
-		}
-
-		public static Bitmap AssertDoesNotContainColor(this Bitmap bitmap, AColor unexpectedColor, Func<Maui.Graphics.RectF, Maui.Graphics.RectF>? withinRectModifier = null)
-		{
-			var imageRect = new Graphics.RectF(0, 0, bitmap.Width, bitmap.Height);
-
-			if (withinRectModifier is not null)
-				imageRect = withinRectModifier.Invoke(imageRect);
-
-			for (int x = (int)imageRect.X; x < (int)imageRect.Width; x++)
-			{
-				for (int y = (int)imageRect.Y; y < (int)imageRect.Height; y++)
-				{
-					if (bitmap.ColorAtPoint(x, y, true).IsEquivalent(unexpectedColor))
-					{
-						throw new XunitException(CreateColorError(bitmap, $"Color {unexpectedColor} was found at point {x}, {y}."));
-					}
-				}
-			}
-
-			return bitmap;
-		}
+        Assert.True(false, CreateColorError(bitmap, $"Color {expectedColor} not found."));
+        return bitmap;
+    }
 
 		public static Task<Bitmap> AssertContainsColor(this AView view, Graphics.Color expectedColor, IMauiContext mauiContext, double? tolerance = null) =>
 			AssertContainsColor(view, expectedColor.ToPlatform(), mauiContext, tolerance: tolerance);

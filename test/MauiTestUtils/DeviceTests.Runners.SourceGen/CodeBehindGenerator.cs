@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.SourceGen
 {
@@ -22,7 +22,13 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.SourceGen
 
 			var generator = new RunnerGenerator(context, targetFramework);
 
+<<<<<<< HEAD
 			generator?.Generate();
 		}
 	}
 }
+=======
+        generator?.Generate();
+    }
+}
+>>>>>>> chore/net8-devicetests

@@ -16,9 +16,13 @@ using PlatformView = System.Object;
 
 namespace Microsoft.Maui.TestUtils.DeviceTests.Runners
 {
+<<<<<<< HEAD
 	public static class TestWindow
 	{
 		static PlatformView? s_platformWindow;
+=======
+    private static PlatformView? s_platformWindow;
+>>>>>>> chore/net8-devicetests
 
 		public static PlatformView PlatformWindow
 		{

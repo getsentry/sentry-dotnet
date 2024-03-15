@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Controls.Hosting;
@@ -36,6 +36,7 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners
 					svc.GetRequiredService<TestOptions>()));
 #endif
 
+<<<<<<< HEAD
 			return appHostBuilder;
 		}
 
@@ -53,3 +54,8 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners
 #endif
 	}
 }
+=======
+        return appHostBuilder;
+    }
+}
+>>>>>>> chore/net8-devicetests

@@ -23,11 +23,12 @@ For big feature it's advised to raise an issue to discuss it first.
 
 * You'll need `CMake` somewhere on your PATH. If you don't already have this, one way to get it is to install the [C++ CMake tools for Windows](https://learn.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-170#installation)
 
-* You'll need [`pwsh`](https://github.com/PowerShell/PowerShell#get-powershell) on PATH.
+* You'll need [`pwsh`](https://github.com/PowerShell/PowerShell#get-powershell) Core version 6 or later on PATH.
 
 * On Windows:
   - [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework) 4.6.2 or higher.
   - `Sentry.DiagnosticSource.IntegrationTests.csproj` uses [SQL LocalDb](https://docs.microsoft.com/sql/database-engine/configure-windows/sql-server-express-localdb) - [download SQL LocalDB 2019](https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi). To avoid running these tests, unload `Sentry.DiagnosticSource.IntegrationTests.csproj` from the solution.
+  - Building Sentry with the Android bindings requires Java. If you're building Sentry using an IDE, typically you provide the path to your Java installation via the IDE settings (open the settings for Visual Studio or Rider and search for "android"). If you want to build Sentry from the command line (using `dotnet build`) then you will need to ensure the `JAVA_HOME` environment variable is set correctly.
 * On macOS/Linux
   - [Mono 6 or higher](https://www.mono-project.com/download/stable) to run the unit tests on the `net4x` targets.
   - Install `CMake` using your favourite package manager (e.g. `brew install cmake`)
@@ -55,11 +56,29 @@ These `*.props` files are used to add platform-specific files, such as reference
 
 Also note `/Directory.Build.targets` contains some [convention based rules](https://github.com/getsentry/sentry-dotnet/blob/b1bfe1efc04eb4c911a85f1cf4cd2e5a176d7c8a/Directory.Build.targets#L17-L35) to exclude code that is not relevant for the target platform. Developers using Visual Studio will need to enable `Show All Files` in order to be able to see these files, when working with the solution.
 
+## Legacy ASP.NET solutions
+
+When debugging a legacy ASP.NET application with project references to `Sentry.AspNet`, you may need the following workarounds to tooling issues:
+
+#### Microsoft.WebApplication.targets not found
+
+* [Disable Microsoft.WebApplication.targets in Rider](https://youtrack.jetbrains.com/issue/RIDER-87113/Cannot-build-.NET-Framework-projects-with-legacy-style-csproj-after-upgrading-to-2022.3.1)
+
+#### CodeTaskFactory not supported
+
+* [Disable CodeTaskFactory in Roslyn](https://github.com/aspnet/RoslynCodeDomProvider/issues/51#issuecomment-396329427)
+
 ## Solution Filters
 
-Most contributors will rarely need to load Sentry.sln. The repository contains various solution filters that will be more practical for day to day tasks.
+_TLDR;_ when working with the the Sentry codebase, you should use the solution filters (not the solutions).
+
+_Full explanation:_ 
+
+The `Sentry.sln` solution contains all of the projects required to build Sentry, it's integrations and samples for every platform. However the repository contains various solution filters that will be more practical for day to day tasks.
 
 These solution filters get generated automatically by `/scripts/generate-solution-filters.ps1` so, although you can certainly create your own solution filters and manage these how you wish, don't try to modify any of the `*.slnf` files that are committed to source control. Instead, changes to these can be made by modifying `/scripts/generate-solution-filters-config.yml` and re-running the script that generates these.
+
+Also note that script generates a `.generated.NoMobile.sln` solution, which is an identical copy of `Sentry.sln`. Again, we don't recommend opening this directly. It exists as a round about way to conditionally set build properties in certain solution filters. You should instead use those solution filters (e.g. `SentryNoMobile.slnf`) when working in the Sentry codebase.
 
 ## API changes approval process
 

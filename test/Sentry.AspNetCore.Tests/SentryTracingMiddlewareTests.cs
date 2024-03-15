@@ -53,11 +53,11 @@ public class SentryTracingMiddlewareTests
 
         // Assert
         sentryClient.Received(2).CaptureTransaction(
-            Arg.Is<Transaction>(transaction =>
+            Arg.Is<SentryTransaction>(transaction =>
                 transaction.Name == "GET /person/{id}" &&
                 transaction.NameSource == TransactionNameSource.Route),
             Arg.Any<Scope>(),
-            Arg.Any<Hint>()
+            Arg.Any<SentryHint>()
             );
     }
 
@@ -89,7 +89,7 @@ public class SentryTracingMiddlewareTests
                 {
                     routes.Map("/person/{id}", _ =>
                     {
-                        transaction = (ITransactionData) hub.GetSpan();
+                        transaction = (ITransactionData)hub.GetSpan();
                         return Task.CompletedTask;
                     });
                 });
@@ -145,7 +145,7 @@ public class SentryTracingMiddlewareTests
         await client.SendAsync(request);
 
         // Assert
-        sentryClient.Received(1).CaptureTransaction(Arg.Is<Transaction>(t =>
+        sentryClient.Received(1).CaptureTransaction(Arg.Is<SentryTransaction>(t =>
             t.Name == "GET /person/{id}" &&
             t.NameSource == TransactionNameSource.Route &&
             t.TraceId == SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8") &&
@@ -153,7 +153,7 @@ public class SentryTracingMiddlewareTests
             t.IsSampled == false
         ),
         Arg.Any<Scope>(),
-        Arg.Any<Hint>()
+        Arg.Any<SentryHint>()
         );
     }
 
@@ -183,11 +183,11 @@ public class SentryTracingMiddlewareTests
             }));
 
         var client = server.CreateClient();
-        Transaction transaction = null;
+        SentryTransaction transaction = null;
         sentryClient.CaptureTransaction(
-            Arg.Do<Transaction>(t => transaction = t),
+            Arg.Do<SentryTransaction>(t => transaction = t),
             Arg.Any<Scope>(),
-            Arg.Any<Hint>()
+            Arg.Any<SentryHint>()
             );
 
         // Act
@@ -409,7 +409,7 @@ public class SentryTracingMiddlewareTests
                 {
                     routes.Map("/person/{id}", _ =>
                     {
-                        transaction = (TransactionTracer) hub.GetSpan();
+                        transaction = (TransactionTracer)hub.GetSpan();
                         return Task.CompletedTask;
                     });
                 });
@@ -460,7 +460,7 @@ public class SentryTracingMiddlewareTests
                 {
                     routes.Map("/person/{id}", _ =>
                     {
-                        transaction = (ITransactionData) hub.GetSpan();
+                        transaction = (ITransactionData)hub.GetSpan();
                         return Task.CompletedTask;
                     });
                 });
@@ -594,13 +594,13 @@ public class SentryTracingMiddlewareTests
     public async Task Transaction_TransactionNameProviderSetSet_TransactionNameSet()
     {
         // Arrange
-        Transaction transaction = null;
+        SentryTransaction transaction = null;
 
         var expectedName = "My custom name";
 
         var sentryClient = Substitute.For<ISentryClient>();
-        sentryClient.When(x => x.CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Scope>(), Arg.Any<Hint>()))
-            .Do(callback => transaction = callback.Arg<Transaction>());
+        sentryClient.When(x => x.CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<SentryHint>()))
+            .Do(callback => transaction = callback.Arg<SentryTransaction>());
         var options = new SentryAspNetCoreOptions
         {
             Dsn = ValidDsn,
@@ -638,11 +638,11 @@ public class SentryTracingMiddlewareTests
     public async Task Transaction_TransactionNameProviderSetUnset_TransactionNameSetToUrlPath()
     {
         // Arrange
-        Transaction transaction = null;
+        SentryTransaction transaction = null;
 
         var sentryClient = Substitute.For<ISentryClient>();
-        sentryClient.When(x => x.CaptureTransaction(Arg.Any<Transaction>(), Arg.Any<Scope>(), Arg.Any<Hint>()))
-            .Do(callback => transaction = callback.Arg<Transaction>());
+        sentryClient.When(x => x.CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<SentryHint>()))
+            .Do(callback => transaction = callback.Arg<SentryTransaction>());
         var options = new SentryAspNetCoreOptions
         {
             Dsn = ValidDsn,

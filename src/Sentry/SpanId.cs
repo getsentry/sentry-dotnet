@@ -6,7 +6,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry span ID.
 /// </summary>
-public readonly struct SpanId : IEquatable<SpanId>, IJsonSerializable
+public readonly struct SpanId : IEquatable<SpanId>, ISentryJsonSerializable
 {
     private static readonly char[] HexChars = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
     private static readonly RandomValuesFactory Random = new SynchronizedRandomValuesFactory();
