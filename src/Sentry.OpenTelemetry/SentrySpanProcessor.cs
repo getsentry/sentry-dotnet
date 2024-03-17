@@ -21,6 +21,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
     private static readonly long PruningInterval = TimeSpan.FromSeconds(5).Ticks;
     internal long _lastPruned = 0;
+    private readonly Lazy<Hub?> _realHub;
 
     /// <summary>
     /// Constructs a <see cref="SentrySpanProcessor"/>.
@@ -39,6 +40,13 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     internal SentrySpanProcessor(IHub hub, IEnumerable<IOpenTelemetryEnricher>? enrichers)
     {
         _hub = hub;
+        _realHub = new Lazy<Hub?>(() =>
+            _hub switch
+            {
+                Hub thisHub => thisHub,
+                HubAdapter when SentrySdk.CurrentHub is Hub sdkHub => sdkHub,
+                _ => null
+            });
 
         if (_hub is DisabledHub)
         {
@@ -195,7 +203,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         var activityScope = GetSavedScope(data);
         if (activityScope is { } savedScope)
         {
-            var hub = GetRealHub();
+            var hub = _realHub.Value;
             hub?.RestoreScope(savedScope);
         }
         GenerateSentryErrorsFromOtelSpan(data, attributes);
@@ -211,21 +219,6 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         // Housekeeping
         PruneFilteredSpans();
-    }
-
-    private Hub? GetRealHub()
-    {
-        if (_hub is Hub hub)
-        {
-            return hub;
-        }
-
-        if (_hub is HubAdapter && SentrySdk.CurrentHub is Hub sdkHub)
-        {
-            return sdkHub;
-        }
-
-        return null;
     }
 
     /// <summary>
