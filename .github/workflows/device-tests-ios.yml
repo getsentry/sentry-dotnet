@@ -49,7 +49,7 @@ jobs:
   ios:
     needs: [build]
     name: Run iOS Tests
-    runs-on: macos-latest
+    runs-on: macos-13
     strategy:
       fail-fast: false
     env:
