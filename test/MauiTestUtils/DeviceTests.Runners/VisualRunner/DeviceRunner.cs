@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -17,35 +17,35 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
     public class DeviceRunner : ITestListener, ITestRunner
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		readonly SynchronizationContext context = SynchronizationContext.Current;
-		readonly AsyncLock executionLock = new AsyncLock();
-		readonly ITestNavigation _navigation;
-		readonly TestRunLogger _logger;
-		volatile bool cancelled;
-After:
-        private readonly SynchronizationContext context = SynchronizationContext.Current;
-        private readonly AsyncLock executionLock = new AsyncLock();
-        private readonly ITestNavigation _navigation;
-        private readonly TestRunLogger _logger;
-        private volatile bool cancelled;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+    Before:
+            readonly SynchronizationContext context = SynchronizationContext.Current;
+            readonly AsyncLock executionLock = new AsyncLock();
+            readonly ITestNavigation _navigation;
+            readonly TestRunLogger _logger;
+            volatile bool cancelled;
+    After:
+            private readonly SynchronizationContext context = SynchronizationContext.Current;
+            private readonly AsyncLock executionLock = new AsyncLock();
+            private readonly ITestNavigation _navigation;
+            private readonly TestRunLogger _logger;
+            private volatile bool cancelled;
+    */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		readonly SynchronizationContext context = SynchronizationContext.Current;
-		readonly AsyncLock executionLock = new AsyncLock();
-		readonly ITestNavigation _navigation;
-		readonly TestRunLogger _logger;
-		volatile bool cancelled;
-After:
-        private readonly SynchronizationContext context = SynchronizationContext.Current;
-        private readonly AsyncLock executionLock = new AsyncLock();
-        private readonly ITestNavigation _navigation;
-        private readonly TestRunLogger _logger;
-        private volatile bool cancelled;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            readonly SynchronizationContext context = SynchronizationContext.Current;
+            readonly AsyncLock executionLock = new AsyncLock();
+            readonly ITestNavigation _navigation;
+            readonly TestRunLogger _logger;
+            volatile bool cancelled;
+    After:
+            private readonly SynchronizationContext context = SynchronizationContext.Current;
+            private readonly AsyncLock executionLock = new AsyncLock();
+            private readonly ITestNavigation _navigation;
+            private readonly TestRunLogger _logger;
+            private volatile bool cancelled;
+    */
     {
         private readonly SynchronizationContext context = SynchronizationContext.Current;
         private readonly AsyncLock executionLock = new AsyncLock();
@@ -132,19 +132,19 @@ After:
 
             return tcs.Task;
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
-After:
-        private IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+            Before:
+                    IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
+            After:
+                    private IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
+            */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
-After:
-        private IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+            Before:
+                    IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
+            After:
+                    private IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
+            */
         }
 
         private IEnumerable<AssemblyRunInfo> DiscoverTestsInAssemblies()
@@ -201,19 +201,19 @@ After:
 
             return result;
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		static TestAssemblyConfiguration GetConfiguration(string assemblyName)
-After:
-        private static TestAssemblyConfiguration GetConfiguration(string assemblyName)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+            Before:
+                    static TestAssemblyConfiguration GetConfiguration(string assemblyName)
+            After:
+                    private static TestAssemblyConfiguration GetConfiguration(string assemblyName)
+            */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		static TestAssemblyConfiguration GetConfiguration(string assemblyName)
-After:
-        private static TestAssemblyConfiguration GetConfiguration(string assemblyName)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+            Before:
+                    static TestAssemblyConfiguration GetConfiguration(string assemblyName)
+            After:
+                    private static TestAssemblyConfiguration GetConfiguration(string assemblyName)
+            */
         }
 
         private static TestAssemblyConfiguration GetConfiguration(string assemblyName)
@@ -229,19 +229,19 @@ After:
 
             return new TestAssemblyConfiguration();
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		static Stream GetConfigurationStreamForAssembly(string assemblyName)
-After:
-        private static Stream GetConfigurationStreamForAssembly(string assemblyName)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+            Before:
+                    static Stream GetConfigurationStreamForAssembly(string assemblyName)
+            After:
+                    private static Stream GetConfigurationStreamForAssembly(string assemblyName)
+            */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		static Stream GetConfigurationStreamForAssembly(string assemblyName)
-After:
-        private static Stream GetConfigurationStreamForAssembly(string assemblyName)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+            Before:
+                    static Stream GetConfigurationStreamForAssembly(string assemblyName)
+            After:
+                    private static Stream GetConfigurationStreamForAssembly(string assemblyName)
+            */
         }
 
         private static Stream GetConfigurationStreamForAssembly(string assemblyName)
@@ -287,19 +287,19 @@ After:
 
             return null;
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
-After:
-        private Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+            Before:
+                    Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
+            After:
+                    private Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
+            */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
-After:
-        private Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+            Before:
+                    Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
+            After:
+                    private Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
+            */
         }
 
         private Task RunTests(Func<IReadOnlyList<AssemblyRunInfo>> testCaseAccessor)
@@ -346,19 +346,19 @@ After:
 
             return tcs.Task;
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
-After:
-        private void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+            Before:
+                    void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+            After:
+                    private void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+            */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
-After:
-        private void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+            Before:
+                    void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+            After:
+                    private void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+            */
         }
 
         private void RunTestsInAssembly(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
@@ -398,19 +398,19 @@ After:
 
             deviceExecSink.OnMessage(new TestAssemblyExecutionFinished(assm, executionOptions, resultsSink.ExecutionSummary));
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
-After:
-        private ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+            Before:
+                    ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+            After:
+                    private ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+            */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
-After:
-        private ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+            Before:
+                    ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+            After:
+                    private ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
+            */
         }
 
         private ManualResetEvent RunTestsInAssemblyAsync(List<IDisposable> toDispose, AssemblyRunInfo runInfo)
@@ -433,19 +433,19 @@ After:
 
             return @event;
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		static async void RunAsync(Action action)
-After:
-        private static async void RunAsync(Action action)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+            Before:
+                    static async void RunAsync(Action action)
+            After:
+                    private static async void RunAsync(Action action)
+            */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		static async void RunAsync(Action action)
-After:
-        private static async void RunAsync(Action action)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+            Before:
+                    static async void RunAsync(Action action)
+            After:
+                    private static async void RunAsync(Action action)
+            */
         }
 
         private static async void RunAsync(Action action)

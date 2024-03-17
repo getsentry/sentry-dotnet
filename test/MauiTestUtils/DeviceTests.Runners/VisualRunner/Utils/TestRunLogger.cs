@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Text;
 using Microsoft.Extensions.Logging;
@@ -7,19 +7,19 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
     internal class TestRunLogger
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		static readonly char[] NewLineCharacters = { '\r', '\n' };
-After:
-        private static readonly char[] NewLineCharacters = { '\r', '\n' };
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+    Before:
+            static readonly char[] NewLineCharacters = { '\r', '\n' };
+    After:
+            private static readonly char[] NewLineCharacters = { '\r', '\n' };
+    */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		static readonly char[] NewLineCharacters = { '\r', '\n' };
-After:
-        private static readonly char[] NewLineCharacters = { '\r', '\n' };
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            static readonly char[] NewLineCharacters = { '\r', '\n' };
+    After:
+            private static readonly char[] NewLineCharacters = { '\r', '\n' };
+    */
     {
         private static readonly char[] NewLineCharacters = { '\r', '\n' };
         private readonly object _locker = new();
@@ -27,17 +27,17 @@ After:
         private readonly StringBuilder _builder;
         private int _failed;
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Added:
-        private int _passed;
-        private int _skipped;
-*/
+        /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+        Added:
+                private int _passed;
+                private int _skipped;
+        */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Added:
-        private int _passed;
-        private int _skipped;
-*/
+        /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+        Added:
+                private int _passed;
+                private int _skipped;
+        */
         private int _passed;
         private int _skipped;
 

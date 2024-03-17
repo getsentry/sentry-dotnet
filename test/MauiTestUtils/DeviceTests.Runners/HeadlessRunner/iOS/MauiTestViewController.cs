@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using ObjCRuntime;
@@ -8,12 +8,12 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner
 {
     public class MauiTestViewController : UIViewController
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		Task? _task;
-After:
-        private Task? _task;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            Task? _task;
+    After:
+            private Task? _task;
+    */
     {
         private Task? _task;
 

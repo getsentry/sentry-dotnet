@@ -14,53 +14,53 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner
 {
     public abstract class MauiTestApplicationDelegate : UIApplicationDelegate
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		// TODO: https://github.com/xamarin/xamarin-macios/issues/12555
-		readonly static string[] EnvVarNames = {
-			"NUNIT_AUTOSTART",
-			"NUNIT_AUTOEXIT",
-			"NUNIT_ENABLE_NETWORK",
-			"DISABLE_SYSTEM_PERMISSION_TESTS",
-			"NUNIT_HOSTNAME",
-			"NUNIT_TRANSPORT",
-			"NUNIT_LOG_FILE",
-			"NUNIT_HOSTPORT",
-			"USE_TCP_TUNNEL",
-			"RUN_END_TAG",
-			"NUNIT_ENABLE_XML_OUTPUT",
-			"NUNIT_ENABLE_XML_MODE",
-			"NUNIT_XML_VERSION",
-			"NUNIT_SORTNAMES",
-			"NUNIT_RUN_ALL",
-			"NUNIT_SKIPPED_METHODS",
-			"NUNIT_SKIPPED_CLASSES",
-		};
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            // TODO: https://github.com/xamarin/xamarin-macios/issues/12555
+            readonly static string[] EnvVarNames = {
+                "NUNIT_AUTOSTART",
+                "NUNIT_AUTOEXIT",
+                "NUNIT_ENABLE_NETWORK",
+                "DISABLE_SYSTEM_PERMISSION_TESTS",
+                "NUNIT_HOSTNAME",
+                "NUNIT_TRANSPORT",
+                "NUNIT_LOG_FILE",
+                "NUNIT_HOSTPORT",
+                "USE_TCP_TUNNEL",
+                "RUN_END_TAG",
+                "NUNIT_ENABLE_XML_OUTPUT",
+                "NUNIT_ENABLE_XML_MODE",
+                "NUNIT_XML_VERSION",
+                "NUNIT_SORTNAMES",
+                "NUNIT_RUN_ALL",
+                "NUNIT_SKIPPED_METHODS",
+                "NUNIT_SKIPPED_CLASSES",
+            };
 
-		readonly static Dictionary<string, string?> EnvVars = new();
-After:
-        // TODO: https://github.com/xamarin/xamarin-macios/issues/12555
-        private static readonly string[] EnvVarNames = {
-			"NUNIT_AUTOSTART",
-			"NUNIT_AUTOEXIT",
-			"NUNIT_ENABLE_NETWORK",
-			"DISABLE_SYSTEM_PERMISSION_TESTS",
-			"NUNIT_HOSTNAME",
-			"NUNIT_TRANSPORT",
-			"NUNIT_LOG_FILE",
-			"NUNIT_HOSTPORT",
-			"USE_TCP_TUNNEL",
-			"RUN_END_TAG",
-			"NUNIT_ENABLE_XML_OUTPUT",
-			"NUNIT_ENABLE_XML_MODE",
-			"NUNIT_XML_VERSION",
-			"NUNIT_SORTNAMES",
-			"NUNIT_RUN_ALL",
-			"NUNIT_SKIPPED_METHODS",
-			"NUNIT_SKIPPED_CLASSES",
-		};
-        private static readonly Dictionary<string, string?> EnvVars = new();
-*/
+            readonly static Dictionary<string, string?> EnvVars = new();
+    After:
+            // TODO: https://github.com/xamarin/xamarin-macios/issues/12555
+            private static readonly string[] EnvVarNames = {
+                "NUNIT_AUTOSTART",
+                "NUNIT_AUTOEXIT",
+                "NUNIT_ENABLE_NETWORK",
+                "DISABLE_SYSTEM_PERMISSION_TESTS",
+                "NUNIT_HOSTNAME",
+                "NUNIT_TRANSPORT",
+                "NUNIT_LOG_FILE",
+                "NUNIT_HOSTPORT",
+                "USE_TCP_TUNNEL",
+                "RUN_END_TAG",
+                "NUNIT_ENABLE_XML_OUTPUT",
+                "NUNIT_ENABLE_XML_MODE",
+                "NUNIT_XML_VERSION",
+                "NUNIT_SORTNAMES",
+                "NUNIT_RUN_ALL",
+                "NUNIT_SKIPPED_METHODS",
+                "NUNIT_SKIPPED_CLASSES",
+            };
+            private static readonly Dictionary<string, string?> EnvVars = new();
+    */
     {
         // TODO: https://github.com/xamarin/xamarin-macios/issues/12555
         private static readonly string[] EnvVarNames = {
@@ -95,12 +95,12 @@ After:
             // Add entry to indicate we're running headless
             EnvVars.Add("headlessrunner", "true");
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		static void SetEnvironmentVariables()
-After:
-        private static void SetEnvironmentVariables()
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+            Before:
+                    static void SetEnvironmentVariables()
+            After:
+                    private static void SetEnvironmentVariables()
+            */
         }
 
         private static void SetEnvironmentVariables()

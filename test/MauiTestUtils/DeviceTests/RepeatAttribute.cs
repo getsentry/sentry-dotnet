@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -14,37 +14,37 @@ namespace Microsoft.Maui.DeviceTests
     /// </summary>
     public sealed class RepeatAttribute : DataAttribute
 
-/* Unmerged change from project 'TestUtils.DeviceTests(net8.0-ios)'
-Before:
-		readonly int _count;
-After:
-        private readonly int _count;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests(net8.0-ios)'
+    Before:
+            readonly int _count;
+    After:
+            private readonly int _count;
+    */
 
-/* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
-Before:
-		readonly int _count;
-After:
-        private readonly int _count;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
+    Before:
+            readonly int _count;
+    After:
+            private readonly int _count;
+    */
     {
         private readonly int _count;
 
         public RepeatAttribute(int count)
 
-/* Unmerged change from project 'TestUtils.DeviceTests(net8.0-ios)'
-Before:
-			this._count = count;
-After:
-			_count = count;
-*/
+        /* Unmerged change from project 'TestUtils.DeviceTests(net8.0-ios)'
+        Before:
+                    this._count = count;
+        After:
+                    _count = count;
+        */
 
-/* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
-Before:
-			this._count = count;
-After:
-			_count = count;
-*/
+        /* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
+        Before:
+                    this._count = count;
+        After:
+                    _count = count;
+        */
         {
             _count = count;
         }

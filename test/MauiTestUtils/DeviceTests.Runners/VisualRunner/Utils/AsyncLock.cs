@@ -8,23 +8,23 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
     internal class AsyncLock
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		readonly SemaphoreSlim semaphore;
-		readonly Task<Releaser> releaser;
-After:
-        private readonly SemaphoreSlim semaphore;
-        private readonly Task<Releaser> releaser;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+    Before:
+            readonly SemaphoreSlim semaphore;
+            readonly Task<Releaser> releaser;
+    After:
+            private readonly SemaphoreSlim semaphore;
+            private readonly Task<Releaser> releaser;
+    */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		readonly SemaphoreSlim semaphore;
-		readonly Task<Releaser> releaser;
-After:
-        private readonly SemaphoreSlim semaphore;
-        private readonly Task<Releaser> releaser;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            readonly SemaphoreSlim semaphore;
+            readonly Task<Releaser> releaser;
+    After:
+            private readonly SemaphoreSlim semaphore;
+            private readonly Task<Releaser> releaser;
+    */
     {
         private readonly SemaphoreSlim semaphore;
         private readonly Task<Releaser> releaser;
@@ -37,19 +37,19 @@ After:
 
         public struct Releaser : IDisposable
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-			readonly AsyncLock toRelease;
-After:
-            private readonly AsyncLock toRelease;
-*/
+        /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+        Before:
+                    readonly AsyncLock toRelease;
+        After:
+                    private readonly AsyncLock toRelease;
+        */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-			readonly AsyncLock toRelease;
-After:
-            private readonly AsyncLock toRelease;
-*/
+        /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+        Before:
+                    readonly AsyncLock toRelease;
+        After:
+                    private readonly AsyncLock toRelease;
+        */
         {
             private readonly AsyncLock toRelease;
 

@@ -6,19 +6,19 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners
 {
     public static class TestServices
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		static IServiceProvider? s_services = null;
-After:
-        private static IServiceProvider? s_services = null;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+    Before:
+            static IServiceProvider? s_services = null;
+    After:
+            private static IServiceProvider? s_services = null;
+    */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		static IServiceProvider? s_services = null;
-After:
-        private static IServiceProvider? s_services = null;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            static IServiceProvider? s_services = null;
+    After:
+            private static IServiceProvider? s_services = null;
+    */
     {
         private static IServiceProvider? s_services = null;
 

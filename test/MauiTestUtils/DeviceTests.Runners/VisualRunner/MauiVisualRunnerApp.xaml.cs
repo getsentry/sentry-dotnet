@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages;
@@ -7,23 +7,23 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
     public partial class MauiVisualRunnerApp : Application
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		readonly TestOptions _options;
-		readonly ILogger _logger;
-After:
-        private readonly TestOptions _options;
-        private readonly ILogger _logger;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+    Before:
+            readonly TestOptions _options;
+            readonly ILogger _logger;
+    After:
+            private readonly TestOptions _options;
+            private readonly ILogger _logger;
+    */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		readonly TestOptions _options;
-		readonly ILogger _logger;
-After:
-        private readonly TestOptions _options;
-        private readonly ILogger _logger;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            readonly TestOptions _options;
+            readonly ILogger _logger;
+    After:
+            private readonly TestOptions _options;
+            private readonly ILogger _logger;
+    */
     {
         private readonly TestOptions _options;
         private readonly ILogger _logger;

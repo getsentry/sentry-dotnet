@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,14 +12,14 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner
 {
     internal class HeadlessTestRunner : iOSApplicationEntryPoint
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		readonly HeadlessRunnerOptions _runnerOptions;
-		readonly TestOptions _options;
-After:
-        private readonly HeadlessRunnerOptions _runnerOptions;
-        private readonly TestOptions _options;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            readonly HeadlessRunnerOptions _runnerOptions;
+            readonly TestOptions _options;
+    After:
+            private readonly HeadlessRunnerOptions _runnerOptions;
+            private readonly TestOptions _options;
+    */
     {
         private readonly HeadlessRunnerOptions _runnerOptions;
         private readonly TestOptions _options;

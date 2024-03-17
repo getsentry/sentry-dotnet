@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using CoreAnimation;
@@ -44,12 +44,12 @@ namespace Microsoft.Maui.DeviceTests
         {
             await AssertEventually(() => !view.IsFocused(), timeout: timeout, message: $"Timed out waiting for {view} to become unfocused");
 
-/* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
-Before:
-		static bool IsFocused(this UIView view) => view.Focused || view.IsFirstResponder;
-After:
-        private static bool IsFocused(this UIView view) => view.Focused || view.IsFirstResponder;
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
+            Before:
+                    static bool IsFocused(this UIView view) => view.Focused || view.IsFirstResponder;
+            After:
+                    private static bool IsFocused(this UIView view) => view.Focused || view.IsFirstResponder;
+            */
         }
 
         private static bool IsFocused(this UIView view) => view.Focused || view.IsFirstResponder;
@@ -601,12 +601,12 @@ After:
             Assert.Equal((double)expected.M43, (double)actual.M43, precision);
             Assert.Equal((double)expected.M44, (double)actual.M44, precision);
 
-/* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
-Before:
-		static UIWindow? GetKeyWindow(UIApplication application)
-After:
-        private static UIWindow? GetKeyWindow(UIApplication application)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
+            Before:
+                    static UIWindow? GetKeyWindow(UIApplication application)
+            After:
+                    private static UIWindow? GetKeyWindow(UIApplication application)
+            */
         }
 
         private static UIWindow? GetKeyWindow(UIApplication application)
@@ -807,54 +807,54 @@ After:
             IMauiContext mauiContext) => AssertTabItemTextColor(navigationView, tabText, expectedColor, true, mauiContext);
 
 
-/* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
-Before:
-		static async Task AssertTabItemTextColor(
-			this UITabBar navigationView,
-			string tabText,
-			Color expectedColor,
-			bool hasColor,
-			IMauiContext mauiContext)
-		{
-			var tabBarItemView = GetTabItemView(navigationView, tabText).FindDescendantView<UILabel>();
-			if (tabBarItemView is null)
-				throw new Exception($"Unable to locate Tab Item Icon Container: {tabText}");
+        /* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
+        Before:
+                static async Task AssertTabItemTextColor(
+                    this UITabBar navigationView,
+                    string tabText,
+                    Color expectedColor,
+                    bool hasColor,
+                    IMauiContext mauiContext)
+                {
+                    var tabBarItemView = GetTabItemView(navigationView, tabText).FindDescendantView<UILabel>();
+                    if (tabBarItemView is null)
+                        throw new Exception($"Unable to locate Tab Item Icon Container: {tabText}");
 
-			if (hasColor)
-			{
-				await tabBarItemView.AssertContainsColor(expectedColor, mauiContext, 0.1);
-			}
-			else
-			{
-				await tabBarItemView.AssertDoesNotContainColor(expectedColor, mauiContext);
-			}
-		}
+                    if (hasColor)
+                    {
+                        await tabBarItemView.AssertContainsColor(expectedColor, mauiContext, 0.1);
+                    }
+                    else
+                    {
+                        await tabBarItemView.AssertDoesNotContainColor(expectedColor, mauiContext);
+                    }
+                }
 
-		static async Task AssertTabItemIconColor(
-After:
-        private static async Task AssertTabItemTextColor(
-			this UITabBar navigationView,
-			string tabText,
-			Color expectedColor,
-			bool hasColor,
-			IMauiContext mauiContext)
-		{
-			var tabBarItemView = GetTabItemView(navigationView, tabText).FindDescendantView<UILabel>();
-			if (tabBarItemView is null)
-				throw new Exception($"Unable to locate Tab Item Icon Container: {tabText}");
+                static async Task AssertTabItemIconColor(
+        After:
+                private static async Task AssertTabItemTextColor(
+                    this UITabBar navigationView,
+                    string tabText,
+                    Color expectedColor,
+                    bool hasColor,
+                    IMauiContext mauiContext)
+                {
+                    var tabBarItemView = GetTabItemView(navigationView, tabText).FindDescendantView<UILabel>();
+                    if (tabBarItemView is null)
+                        throw new Exception($"Unable to locate Tab Item Icon Container: {tabText}");
 
-			if (hasColor)
-			{
-				await tabBarItemView.AssertContainsColor(expectedColor, mauiContext, 0.1);
-			}
-			else
-			{
-				await tabBarItemView.AssertDoesNotContainColor(expectedColor, mauiContext);
-			}
-		}
+                    if (hasColor)
+                    {
+                        await tabBarItemView.AssertContainsColor(expectedColor, mauiContext, 0.1);
+                    }
+                    else
+                    {
+                        await tabBarItemView.AssertDoesNotContainColor(expectedColor, mauiContext);
+                    }
+                }
 
-        private static async Task AssertTabItemIconColor(
-*/
+                private static async Task AssertTabItemIconColor(
+        */
         private static async Task AssertTabItemTextColor(
             this UITabBar navigationView,
             string tabText,

@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -117,19 +117,19 @@ namespace Microsoft.Maui
     public class DeviceTestCase : IXunitTestCase
 #pragma warning restore xUnit3000 // Test case classes must derive directly or indirectly from Xunit.LongLivedMarshalByRefObject
 
-/* Unmerged change from project 'TestUtils.DeviceTests(net8.0-ios)'
-Before:
-		readonly IXunitTestCase _inner = null!;
-After:
-        private readonly IXunitTestCase _inner = null!;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests(net8.0-ios)'
+    Before:
+            readonly IXunitTestCase _inner = null!;
+    After:
+            private readonly IXunitTestCase _inner = null!;
+    */
 
-/* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
-Before:
-		readonly IXunitTestCase _inner = null!;
-After:
-        private readonly IXunitTestCase _inner = null!;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
+    Before:
+            readonly IXunitTestCase _inner = null!;
+    After:
+            private readonly IXunitTestCase _inner = null!;
+    */
     {
         private readonly IXunitTestCase _inner = null!;
 
@@ -164,19 +164,19 @@ After:
 
             return _categoryPrefix;
 
-/* Unmerged change from project 'TestUtils.DeviceTests(net8.0-ios)'
-Before:
-		string? _displayName;
-After:
-        private string? _displayName;
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests(net8.0-ios)'
+            Before:
+                    string? _displayName;
+            After:
+                    private string? _displayName;
+            */
 
-/* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
-Before:
-		string? _displayName;
-After:
-        private string? _displayName;
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
+            Before:
+                    string? _displayName;
+            After:
+                    private string? _displayName;
+            */
         }
 
         private string? _displayName;

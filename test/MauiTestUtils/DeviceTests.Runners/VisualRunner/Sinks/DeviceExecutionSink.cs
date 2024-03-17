@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,27 +11,27 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
     internal class DeviceExecutionSink : TestMessageSink
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		readonly SynchronizationContext _context;
-		readonly ITestListener _listener;
-		readonly Dictionary<ITestCase, TestCaseViewModel> _testCases;
-After:
-        private readonly SynchronizationContext _context;
-        private readonly ITestListener _listener;
-        private readonly Dictionary<ITestCase, TestCaseViewModel> _testCases;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+    Before:
+            readonly SynchronizationContext _context;
+            readonly ITestListener _listener;
+            readonly Dictionary<ITestCase, TestCaseViewModel> _testCases;
+    After:
+            private readonly SynchronizationContext _context;
+            private readonly ITestListener _listener;
+            private readonly Dictionary<ITestCase, TestCaseViewModel> _testCases;
+    */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		readonly SynchronizationContext _context;
-		readonly ITestListener _listener;
-		readonly Dictionary<ITestCase, TestCaseViewModel> _testCases;
-After:
-        private readonly SynchronizationContext _context;
-        private readonly ITestListener _listener;
-        private readonly Dictionary<ITestCase, TestCaseViewModel> _testCases;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            readonly SynchronizationContext _context;
+            readonly ITestListener _listener;
+            readonly Dictionary<ITestCase, TestCaseViewModel> _testCases;
+    After:
+            private readonly SynchronizationContext _context;
+            private readonly ITestListener _listener;
+            private readonly Dictionary<ITestCase, TestCaseViewModel> _testCases;
+    */
     {
         private readonly SynchronizationContext _context;
         private readonly ITestListener _listener;
@@ -50,76 +50,76 @@ After:
             Execution.TestPassedEvent += HandleTestPassed;
             Execution.TestSkippedEvent += HandleTestSkipped;
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		void HandleTestFailed(MessageHandlerArgs<ITestFailed> args)
-After:
-        private void HandleTestFailed(MessageHandlerArgs<ITestFailed> args)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+            Before:
+                    void HandleTestFailed(MessageHandlerArgs<ITestFailed> args)
+            After:
+                    private void HandleTestFailed(MessageHandlerArgs<ITestFailed> args)
+            */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		void HandleTestFailed(MessageHandlerArgs<ITestFailed> args)
-After:
-        private void HandleTestFailed(MessageHandlerArgs<ITestFailed> args)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+            Before:
+                    void HandleTestFailed(MessageHandlerArgs<ITestFailed> args)
+            After:
+                    private void HandleTestFailed(MessageHandlerArgs<ITestFailed> args)
+            */
         }
 
         private void HandleTestFailed(MessageHandlerArgs<ITestFailed> args)
         {
             MakeTestResultViewModel(args.Message, TestState.Failed);
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		void HandleTestPassed(MessageHandlerArgs<ITestPassed> args)
-After:
-        private void HandleTestPassed(MessageHandlerArgs<ITestPassed> args)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+            Before:
+                    void HandleTestPassed(MessageHandlerArgs<ITestPassed> args)
+            After:
+                    private void HandleTestPassed(MessageHandlerArgs<ITestPassed> args)
+            */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		void HandleTestPassed(MessageHandlerArgs<ITestPassed> args)
-After:
-        private void HandleTestPassed(MessageHandlerArgs<ITestPassed> args)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+            Before:
+                    void HandleTestPassed(MessageHandlerArgs<ITestPassed> args)
+            After:
+                    private void HandleTestPassed(MessageHandlerArgs<ITestPassed> args)
+            */
         }
 
         private void HandleTestPassed(MessageHandlerArgs<ITestPassed> args)
         {
             MakeTestResultViewModel(args.Message, TestState.Passed);
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		void HandleTestSkipped(MessageHandlerArgs<ITestSkipped> args)
-After:
-        private void HandleTestSkipped(MessageHandlerArgs<ITestSkipped> args)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+            Before:
+                    void HandleTestSkipped(MessageHandlerArgs<ITestSkipped> args)
+            After:
+                    private void HandleTestSkipped(MessageHandlerArgs<ITestSkipped> args)
+            */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		void HandleTestSkipped(MessageHandlerArgs<ITestSkipped> args)
-After:
-        private void HandleTestSkipped(MessageHandlerArgs<ITestSkipped> args)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+            Before:
+                    void HandleTestSkipped(MessageHandlerArgs<ITestSkipped> args)
+            After:
+                    private void HandleTestSkipped(MessageHandlerArgs<ITestSkipped> args)
+            */
         }
 
         private void HandleTestSkipped(MessageHandlerArgs<ITestSkipped> args)
         {
             MakeTestResultViewModel(args.Message, TestState.Skipped);
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		async void MakeTestResultViewModel(ITestResultMessage testResult, TestState outcome)
-After:
-        private async void MakeTestResultViewModel(ITestResultMessage testResult, TestState outcome)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+            Before:
+                    async void MakeTestResultViewModel(ITestResultMessage testResult, TestState outcome)
+            After:
+                    private async void MakeTestResultViewModel(ITestResultMessage testResult, TestState outcome)
+            */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		async void MakeTestResultViewModel(ITestResultMessage testResult, TestState outcome)
-After:
-        private async void MakeTestResultViewModel(ITestResultMessage testResult, TestState outcome)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+            Before:
+                    async void MakeTestResultViewModel(ITestResultMessage testResult, TestState outcome)
+            After:
+                    private async void MakeTestResultViewModel(ITestResultMessage testResult, TestState outcome)
+            */
         }
 
         private async void MakeTestResultViewModel(ITestResultMessage testResult, TestState outcome)

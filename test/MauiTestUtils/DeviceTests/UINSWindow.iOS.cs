@@ -24,12 +24,12 @@ public static class UIWindowExtensions
         var nsWindow = UINSWindow.From(window);
         return nsWindow is not null;
 
-/* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
-Before:
-	class UINSWindow
-After:
-    private class UINSWindow
-*/
+        /* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
+        Before:
+            class UINSWindow
+        After:
+            private class UINSWindow
+        */
     }
 
     private class UINSWindow

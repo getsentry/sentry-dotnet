@@ -27,12 +27,12 @@ namespace Microsoft.Maui.DeviceTests
                 && Equal(blue1, blue2, tolerance.Value)
                 && Equal(alpha1, alpha2, tolerance.Value);
 
-/* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
-Before:
-		static bool Equal(nfloat v1, nfloat v2, double tolerance)
-After:
-        private static bool Equal(nfloat v1, nfloat v2, double tolerance)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
+            Before:
+                    static bool Equal(nfloat v1, nfloat v2, double tolerance)
+            After:
+                    private static bool Equal(nfloat v1, nfloat v2, double tolerance)
+            */
         }
 
         private static bool Equal(nfloat v1, nfloat v2, double tolerance)

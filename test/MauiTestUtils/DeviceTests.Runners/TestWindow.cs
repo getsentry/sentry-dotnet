@@ -18,19 +18,19 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners
 {
     public static class TestWindow
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		static PlatformView? s_platformWindow;
-After:
-        private static PlatformView? s_platformWindow;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+    Before:
+            static PlatformView? s_platformWindow;
+    After:
+            private static PlatformView? s_platformWindow;
+    */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		static PlatformView? s_platformWindow;
-After:
-        private static PlatformView? s_platformWindow;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            static PlatformView? s_platformWindow;
+    After:
+            private static PlatformView? s_platformWindow;
+    */
     {
         private static PlatformView? s_platformWindow;
 

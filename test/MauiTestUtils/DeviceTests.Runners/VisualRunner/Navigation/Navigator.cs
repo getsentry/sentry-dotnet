@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
@@ -8,19 +8,19 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
     internal class TestNavigator : ITestNavigation
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		readonly INavigation _navigation;
-After:
-        private readonly INavigation _navigation;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+    Before:
+            readonly INavigation _navigation;
+    After:
+            private readonly INavigation _navigation;
+    */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		readonly INavigation _navigation;
-After:
-        private readonly INavigation _navigation;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            readonly INavigation _navigation;
+    After:
+            private readonly INavigation _navigation;
+    */
     {
         private readonly INavigation _navigation;
 

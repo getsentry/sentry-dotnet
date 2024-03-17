@@ -9,31 +9,31 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
     public class TestResultViewModel : ViewModelBase
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		TimeSpan _duration;
-		string? _errorMessage;
-		string? _errorStackTrace;
-		ImageSource? _errorImage;
-After:
-        private TimeSpan _duration;
-        private string? _errorMessage;
-        private string? _errorStackTrace;
-        private ImageSource? _errorImage;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+    Before:
+            TimeSpan _duration;
+            string? _errorMessage;
+            string? _errorStackTrace;
+            ImageSource? _errorImage;
+    After:
+            private TimeSpan _duration;
+            private string? _errorMessage;
+            private string? _errorStackTrace;
+            private ImageSource? _errorImage;
+    */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		TimeSpan _duration;
-		string? _errorMessage;
-		string? _errorStackTrace;
-		ImageSource? _errorImage;
-After:
-        private TimeSpan _duration;
-        private string? _errorMessage;
-        private string? _errorStackTrace;
-        private ImageSource? _errorImage;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            TimeSpan _duration;
+            string? _errorMessage;
+            string? _errorStackTrace;
+            ImageSource? _errorImage;
+    After:
+            private TimeSpan _duration;
+            private string? _errorMessage;
+            private string? _errorStackTrace;
+            private ImageSource? _errorImage;
+    */
     {
         private TimeSpan _duration;
         private string? _errorMessage;

@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,23 +7,23 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
     internal class SortedList<T> : IList<T>
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		readonly IComparer<T> _comparer;
-		readonly List<T> _list;
-After:
-        private readonly IComparer<T> _comparer;
-        private readonly List<T> _list;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+    Before:
+            readonly IComparer<T> _comparer;
+            readonly List<T> _list;
+    After:
+            private readonly IComparer<T> _comparer;
+            private readonly List<T> _list;
+    */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		readonly IComparer<T> _comparer;
-		readonly List<T> _list;
-After:
-        private readonly IComparer<T> _comparer;
-        private readonly List<T> _list;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            readonly IComparer<T> _comparer;
+            readonly List<T> _list;
+    After:
+            private readonly IComparer<T> _comparer;
+            private readonly List<T> _list;
+    */
     {
         private readonly IComparer<T> _comparer;
         private readonly List<T> _list;

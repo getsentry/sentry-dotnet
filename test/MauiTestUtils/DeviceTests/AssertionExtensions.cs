@@ -43,19 +43,19 @@ namespace Microsoft.Maui.DeviceTests
             {
                 throw new XunitException(ListLivingReferences(references), ex);
 
-/* Unmerged change from project 'TestUtils.DeviceTests(net8.0-ios)'
-Before:
-		static string ListLivingReferences(WeakReference[] references)
-After:
-        private static string ListLivingReferences(WeakReference[] references)
-*/
+                /* Unmerged change from project 'TestUtils.DeviceTests(net8.0-ios)'
+                Before:
+                        static string ListLivingReferences(WeakReference[] references)
+                After:
+                        private static string ListLivingReferences(WeakReference[] references)
+                */
 
-/* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
-Before:
-		static string ListLivingReferences(WeakReference[] references)
-After:
-        private static string ListLivingReferences(WeakReference[] references)
-*/
+                /* Unmerged change from project 'TestUtils.DeviceTests(net8.0-maccatalyst)'
+                Before:
+                        static string ListLivingReferences(WeakReference[] references)
+                After:
+                        private static string ListLivingReferences(WeakReference[] references)
+                */
             }
         }
 

@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -9,38 +9,38 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
     public class HomeViewModel : ViewModelBase
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		readonly ITestNavigation _navigation;
-		readonly ITestRunner _runner;
-After:
-        private readonly ITestNavigation _navigation;
-        private readonly ITestRunner _runner;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+    Before:
+            readonly ITestNavigation _navigation;
+            readonly ITestRunner _runner;
+    After:
+            private readonly ITestNavigation _navigation;
+            private readonly ITestRunner _runner;
+    */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		readonly ITestNavigation _navigation;
-		readonly ITestRunner _runner;
-After:
-        private readonly ITestNavigation _navigation;
-        private readonly ITestRunner _runner;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            readonly ITestNavigation _navigation;
+            readonly ITestRunner _runner;
+    After:
+            private readonly ITestNavigation _navigation;
+            private readonly ITestRunner _runner;
+    */
     {
         private readonly ITestNavigation _navigation;
         private readonly ITestRunner _runner;
         private string _diagnosticMessages = string.Empty;
         private bool _loaded;
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Added:
-        private bool _isBusy;
-*/
+        /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+        Added:
+                private bool _isBusy;
+        */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Added:
-        private bool _isBusy;
-*/
+        /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+        Added:
+                private bool _isBusy;
+        */
         private bool _isBusy;
 
         internal HomeViewModel(ITestNavigation navigation, ITestRunner runner)
@@ -103,107 +103,107 @@ Added:
                 IsBusy = false;
                 _loaded = true;
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		async void CreditsExecute()
-		{
-			await _navigation.NavigateTo(PageType.Credits);
-		}
+                /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+                Before:
+                        async void CreditsExecute()
+                        {
+                            await _navigation.NavigateTo(PageType.Credits);
+                        }
 
-		async void RunEverythingExecute()
-		{
-			try
-			{
-				IsBusy = true;
+                        async void RunEverythingExecute()
+                        {
+                            try
+                            {
+                                IsBusy = true;
 
-				if (!string.IsNullOrWhiteSpace(DiagnosticMessages))
-					DiagnosticMessages += $"----------{Environment.NewLine}";
+                                if (!string.IsNullOrWhiteSpace(DiagnosticMessages))
+                                    DiagnosticMessages += $"----------{Environment.NewLine}";
 
-				await _runner.RunAsync(TestAssemblies.Select(t => t.RunInfo).ToList(), "Run Everything");
-			}
-			finally
-			{
-				IsBusy = false;
-			}
-		}
+                                await _runner.RunAsync(TestAssemblies.Select(t => t.RunInfo).ToList(), "Run Everything");
+                            }
+                            finally
+                            {
+                                IsBusy = false;
+                            }
+                        }
 
-		async void NavigateToTestAssemblyExecute(TestAssemblyViewModel? vm)
-After:
-        private async void CreditsExecute()
-		{
-			await _navigation.NavigateTo(PageType.Credits);
-		}
+                        async void NavigateToTestAssemblyExecute(TestAssemblyViewModel? vm)
+                After:
+                        private async void CreditsExecute()
+                        {
+                            await _navigation.NavigateTo(PageType.Credits);
+                        }
 
-        private async void RunEverythingExecute()
-		{
-			try
-			{
-				IsBusy = true;
+                        private async void RunEverythingExecute()
+                        {
+                            try
+                            {
+                                IsBusy = true;
 
-				if (!string.IsNullOrWhiteSpace(DiagnosticMessages))
-					DiagnosticMessages += $"----------{Environment.NewLine}";
+                                if (!string.IsNullOrWhiteSpace(DiagnosticMessages))
+                                    DiagnosticMessages += $"----------{Environment.NewLine}";
 
-				await _runner.RunAsync(TestAssemblies.Select(t => t.RunInfo).ToList(), "Run Everything");
-			}
-			finally
-			{
-				IsBusy = false;
-			}
-		}
+                                await _runner.RunAsync(TestAssemblies.Select(t => t.RunInfo).ToList(), "Run Everything");
+                            }
+                            finally
+                            {
+                                IsBusy = false;
+                            }
+                        }
 
-        private async void NavigateToTestAssemblyExecute(TestAssemblyViewModel? vm)
-*/
+                        private async void NavigateToTestAssemblyExecute(TestAssemblyViewModel? vm)
+                */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		async void CreditsExecute()
-		{
-			await _navigation.NavigateTo(PageType.Credits);
-		}
+                /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+                Before:
+                        async void CreditsExecute()
+                        {
+                            await _navigation.NavigateTo(PageType.Credits);
+                        }
 
-		async void RunEverythingExecute()
-		{
-			try
-			{
-				IsBusy = true;
+                        async void RunEverythingExecute()
+                        {
+                            try
+                            {
+                                IsBusy = true;
 
-				if (!string.IsNullOrWhiteSpace(DiagnosticMessages))
-					DiagnosticMessages += $"----------{Environment.NewLine}";
+                                if (!string.IsNullOrWhiteSpace(DiagnosticMessages))
+                                    DiagnosticMessages += $"----------{Environment.NewLine}";
 
-				await _runner.RunAsync(TestAssemblies.Select(t => t.RunInfo).ToList(), "Run Everything");
-			}
-			finally
-			{
-				IsBusy = false;
-			}
-		}
+                                await _runner.RunAsync(TestAssemblies.Select(t => t.RunInfo).ToList(), "Run Everything");
+                            }
+                            finally
+                            {
+                                IsBusy = false;
+                            }
+                        }
 
-		async void NavigateToTestAssemblyExecute(TestAssemblyViewModel? vm)
-After:
-        private async void CreditsExecute()
-		{
-			await _navigation.NavigateTo(PageType.Credits);
-		}
+                        async void NavigateToTestAssemblyExecute(TestAssemblyViewModel? vm)
+                After:
+                        private async void CreditsExecute()
+                        {
+                            await _navigation.NavigateTo(PageType.Credits);
+                        }
 
-        private async void RunEverythingExecute()
-		{
-			try
-			{
-				IsBusy = true;
+                        private async void RunEverythingExecute()
+                        {
+                            try
+                            {
+                                IsBusy = true;
 
-				if (!string.IsNullOrWhiteSpace(DiagnosticMessages))
-					DiagnosticMessages += $"----------{Environment.NewLine}";
+                                if (!string.IsNullOrWhiteSpace(DiagnosticMessages))
+                                    DiagnosticMessages += $"----------{Environment.NewLine}";
 
-				await _runner.RunAsync(TestAssemblies.Select(t => t.RunInfo).ToList(), "Run Everything");
-			}
-			finally
-			{
-				IsBusy = false;
-			}
-		}
+                                await _runner.RunAsync(TestAssemblies.Select(t => t.RunInfo).ToList(), "Run Everything");
+                            }
+                            finally
+                            {
+                                IsBusy = false;
+                            }
+                        }
 
-        private async void NavigateToTestAssemblyExecute(TestAssemblyViewModel? vm)
-*/
+                        private async void NavigateToTestAssemblyExecute(TestAssemblyViewModel? vm)
+                */
             }
         }
 
@@ -236,19 +236,19 @@ After:
 
             await _navigation.NavigateTo(PageType.AssemblyTestList, vm);
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		void RunnerOnOnDiagnosticMessage(string s)
-After:
-        private void RunnerOnOnDiagnosticMessage(string s)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+            Before:
+                    void RunnerOnOnDiagnosticMessage(string s)
+            After:
+                    private void RunnerOnOnDiagnosticMessage(string s)
+            */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		void RunnerOnOnDiagnosticMessage(string s)
-After:
-        private void RunnerOnOnDiagnosticMessage(string s)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+            Before:
+                    void RunnerOnOnDiagnosticMessage(string s)
+            After:
+                    private void RunnerOnOnDiagnosticMessage(string s)
+            */
         }
 
         private void RunnerOnOnDiagnosticMessage(string s)

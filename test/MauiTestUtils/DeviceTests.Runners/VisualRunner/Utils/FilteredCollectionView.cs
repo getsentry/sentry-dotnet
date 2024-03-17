@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,39 +10,39 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
     internal class FilteredCollectionView<T, TFilterArg> : IList<T>, IList, INotifyCollectionChanged, IDisposable
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		readonly ObservableCollection<T> dataSource;
-		readonly Func<T, TFilterArg, bool> filter;
-		readonly SortedList<T> filteredList;
-After:
-        private readonly ObservableCollection<T> dataSource;
-        private readonly Func<T> filteredList;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+    Before:
+            readonly ObservableCollection<T> dataSource;
+            readonly Func<T, TFilterArg, bool> filter;
+            readonly SortedList<T> filteredList;
+    After:
+            private readonly ObservableCollection<T> dataSource;
+            private readonly Func<T> filteredList;
+    */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		readonly ObservableCollection<T> dataSource;
-		readonly Func<T, TFilterArg, bool> filter;
-		readonly SortedList<T> filteredList;
-After:
-        private readonly ObservableCollection<T> dataSource;
-        private readonly Func<T> filteredList;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            readonly ObservableCollection<T> dataSource;
+            readonly Func<T, TFilterArg, bool> filter;
+            readonly SortedList<T> filteredList;
+    After:
+            private readonly ObservableCollection<T> dataSource;
+            private readonly Func<T> filteredList;
+    */
     {
         private readonly ObservableCollection<T> dataSource;
         private readonly Func<T, TFilterArg, bool> filter;
         private readonly SortedList<T> filteredList;
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Added:
-        private TFilterArg filterArgument;
-*/
+        /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+        Added:
+                private TFilterArg filterArgument;
+        */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Added:
-        private TFilterArg filterArgument;
-*/
+        /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+        Added:
+                private TFilterArg filterArgument;
+        */
         private TFilterArg filterArgument;
 
         public FilteredCollectionView(ObservableCollection<T> dataSource, Func<T, TFilterArg, bool> filter, TFilterArg filterArgument, IComparer<T> sort)
@@ -223,19 +223,19 @@ Added:
             var itemChanged = ItemChanged;
             itemChanged?.Invoke(sender, args);
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		void DataSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-After:
-        private void DataSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+            Before:
+                    void DataSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+            After:
+                    private void DataSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+            */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		void DataSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-After:
-        private void DataSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+            Before:
+                    void DataSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+            After:
+                    private void DataSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+            */
         }
 
         private void DataSource_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -271,19 +271,19 @@ After:
                 case NotifyCollectionChangedAction.Reset:
                     throw new NotSupportedException();
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		void DataSource_ItemChanged(object sender, PropertyChangedEventArgs e)
-After:
-        private void DataSource_ItemChanged(object sender, PropertyChangedEventArgs e)
-*/
+                    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+                    Before:
+                            void DataSource_ItemChanged(object sender, PropertyChangedEventArgs e)
+                    After:
+                            private void DataSource_ItemChanged(object sender, PropertyChangedEventArgs e)
+                    */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		void DataSource_ItemChanged(object sender, PropertyChangedEventArgs e)
-After:
-        private void DataSource_ItemChanged(object sender, PropertyChangedEventArgs e)
-*/
+                    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+                    Before:
+                            void DataSource_ItemChanged(object sender, PropertyChangedEventArgs e)
+                    After:
+                            private void DataSource_ItemChanged(object sender, PropertyChangedEventArgs e)
+                    */
             }
         }
 
@@ -307,19 +307,19 @@ After:
 
             OnItemChanged(item, e);
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		void OnAdded(T item)
-After:
-        private void OnAdded(T item)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+            Before:
+                    void OnAdded(T item)
+            After:
+                    private void OnAdded(T item)
+            */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		void OnAdded(T item)
-After:
-        private void OnAdded(T item)
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+            Before:
+                    void OnAdded(T item)
+            After:
+                    private void OnAdded(T item)
+            */
         }
 
         private void OnAdded(T item)
@@ -338,19 +338,19 @@ After:
             {
                 observable.PropertyChanged += DataSource_ItemChanged;
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		void OnRemoved(T item)
-After:
-        private void OnRemoved(T item)
-*/
+                /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+                Before:
+                        void OnRemoved(T item)
+                After:
+                        private void OnRemoved(T item)
+                */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		void OnRemoved(T item)
-After:
-        private void OnRemoved(T item)
-*/
+                /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+                Before:
+                        void OnRemoved(T item)
+                After:
+                        private void OnRemoved(T item)
+                */
             }
         }
 
@@ -367,19 +367,19 @@ After:
                 filteredList.RemoveAt(index);
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, index));
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		void RefreshFilter()
-After:
-        private void RefreshFilter()
-*/
+                /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+                Before:
+                        void RefreshFilter()
+                After:
+                        private void RefreshFilter()
+                */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		void RefreshFilter()
-After:
-        private void RefreshFilter()
-*/
+                /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+                Before:
+                        void RefreshFilter()
+                After:
+                        private void RefreshFilter()
+                */
             }
         }
 

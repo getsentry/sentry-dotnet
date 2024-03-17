@@ -7,23 +7,23 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners
 {
     public static class TestDispatcher
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		static IDispatcher? s_dispatcher;
-		static IDispatcherProvider? s_provider;
-After:
-        private static IDispatcher? s_dispatcher;
-        private static IDispatcherProvider? s_provider;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+    Before:
+            static IDispatcher? s_dispatcher;
+            static IDispatcherProvider? s_provider;
+    After:
+            private static IDispatcher? s_dispatcher;
+            private static IDispatcherProvider? s_provider;
+    */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		static IDispatcher? s_dispatcher;
-		static IDispatcherProvider? s_provider;
-After:
-        private static IDispatcher? s_dispatcher;
-        private static IDispatcherProvider? s_provider;
-*/
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            static IDispatcher? s_dispatcher;
+            static IDispatcherProvider? s_provider;
+    After:
+            private static IDispatcher? s_dispatcher;
+            private static IDispatcherProvider? s_provider;
+    */
     {
         private static IDispatcher? s_dispatcher;
         private static IDispatcherProvider? s_provider;

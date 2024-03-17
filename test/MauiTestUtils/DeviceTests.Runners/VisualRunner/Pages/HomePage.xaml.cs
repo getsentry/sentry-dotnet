@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -15,34 +15,34 @@ namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages
             InitializeComponent();
 
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-			this.Loaded += HomePage_Loaded;
-After:
-			Loaded += HomePage_Loaded;
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+            Before:
+                        this.Loaded += HomePage_Loaded;
+            After:
+                        Loaded += HomePage_Loaded;
+            */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-			this.Loaded += HomePage_Loaded;
-After:
-			Loaded += HomePage_Loaded;
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+            Before:
+                        this.Loaded += HomePage_Loaded;
+            After:
+                        Loaded += HomePage_Loaded;
+            */
             Loaded += HomePage_Loaded;
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
-Before:
-		bool hasRunHeadless = false;
-After:
-        private bool hasRunHeadless = false;
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+            Before:
+                    bool hasRunHeadless = false;
+            After:
+                    private bool hasRunHeadless = false;
+            */
 
-/* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
-Before:
-		bool hasRunHeadless = false;
-After:
-        private bool hasRunHeadless = false;
-*/
+            /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+            Before:
+                    bool hasRunHeadless = false;
+            After:
+                    private bool hasRunHeadless = false;
+            */
         }
 
         private bool hasRunHeadless = false;
