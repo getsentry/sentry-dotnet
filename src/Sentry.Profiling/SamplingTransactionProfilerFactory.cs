@@ -8,6 +8,9 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     // We only allow a single profile so let's keep track of the current status.
     internal int _inProgress = FALSE;
 
+    // Whether the session startup took longer than the given timeout.
+    internal bool StartupTimedOut { get; }
+
     private const int TRUE = 1;
     private const int FALSE = 0;
 
@@ -39,6 +42,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
         if (startupTimeout != TimeSpan.Zero && !_sessionTask.Wait(startupTimeout))
         {
             options.LogWarning("Profiler session startup took longer then the given timeout {0:c}. Profilling will start once the first event is received.", startupTimeout);
+            StartupTimedOut = true;
         }
     }
 
