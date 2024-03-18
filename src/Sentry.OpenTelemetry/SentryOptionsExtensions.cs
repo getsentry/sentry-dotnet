@@ -1,5 +1,7 @@
+using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Trace;
+using Sentry.Extensibility;
 
 namespace Sentry.OpenTelemetry;
 
@@ -53,5 +55,6 @@ public static class SentryOptionsExtensions
         options.AddTransactionProcessor(
             new OpenTelemetryTransactionProcessor()
             );
+        options.InitializeFallbackTracerProvider();
     }
 }

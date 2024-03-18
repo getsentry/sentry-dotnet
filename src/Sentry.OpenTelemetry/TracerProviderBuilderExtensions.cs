@@ -12,6 +12,11 @@ namespace Sentry.OpenTelemetry;
 public static class TracerProviderBuilderExtensions
 {
     /// <summary>
+    /// The default <see cref="ActivitySource"/> for spans created by Sentry's instrumentation
+    /// </summary>
+    public static readonly ActivitySource DefaultActivitySource = new ("Sentry");
+
+    /// <summary>
     /// Ensures OpenTelemetry trace information is sent to Sentry.
     /// </summary>
     /// <param name="tracerProviderBuilder"><see cref="TracerProviderBuilder"/>.</param>
@@ -29,6 +34,22 @@ public static class TracerProviderBuilderExtensions
     /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
     public static TracerProviderBuilder AddSentry(this TracerProviderBuilder tracerProviderBuilder, TextMapPropagator? defaultTextMapPropagator = null)
     {
+        return tracerProviderBuilder.AddSentryInternal(false, defaultTextMapPropagator);
+    }
+
+    internal static TracerProviderBuilder AddSentryInternal(this TracerProviderBuilder tracerProviderBuilder, bool autoInitialized = false, TextMapPropagator? defaultTextMapPropagator = null)
+    {
+        // Don't automatically initialize if the user has already initialized
+        if (autoInitialized && InternalTracerProvider.InitializedExternally)
+        {
+            InternalTracerProvider.CancelInitialization();
+        }
+        if (!autoInitialized)
+        {
+            InternalTracerProvider.InitializedExternally = true;
+        }
+        tracerProviderBuilder.AddSource(DefaultActivitySource.Name);
+
         defaultTextMapPropagator ??= new SentryPropagator();
         Sdk.SetDefaultTextMapPropagator(defaultTextMapPropagator);
         return tracerProviderBuilder.AddProcessor(ImplementationFactory);
@@ -45,7 +66,7 @@ public static class TracerProviderBuilderExtensions
             enrichers.Add(new AspNetCoreEnricher(userFactory));
         }
 
-        var hub = services.GetService<IHub>() ?? SentrySdk.CurrentHub;
+        var hub = services.GetService<IHub>() ?? InternalTracerProvider.FallbackHub ?? SentrySdk.CurrentHub;
         if (hub.IsEnabled)
         {
             return new SentrySpanProcessor(hub, enrichers);
