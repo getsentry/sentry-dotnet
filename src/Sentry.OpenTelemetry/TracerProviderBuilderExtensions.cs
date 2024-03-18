@@ -14,7 +14,7 @@ public static class TracerProviderBuilderExtensions
     /// <summary>
     /// The default <see cref="ActivitySource"/> for spans created by Sentry's instrumentation
     /// </summary>
-    public static readonly ActivitySource DefaultActivitySource = new ("Sentry");
+    public static readonly ActivitySource DefaultActivitySource = new("Sentry");
 
     /// <summary>
     /// Ensures OpenTelemetry trace information is sent to Sentry.
