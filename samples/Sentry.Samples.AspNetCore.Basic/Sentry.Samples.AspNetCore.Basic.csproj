@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Profiling\Sentry.Profiling.csproj" />
   </ItemGroup>
 
 </Project>

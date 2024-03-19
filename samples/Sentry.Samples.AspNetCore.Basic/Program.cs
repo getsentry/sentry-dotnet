@@ -1,4 +1,6 @@
+using System.Text;
 using Microsoft.AspNetCore;
+using Sentry.Profiling;
 
 namespace Sentry.Samples.AspNetCore.Basic;
 
@@ -20,6 +22,10 @@ public class Program
                 // Enable Sentry performance monitoring
                 o.EnableTracing = true;
 
+                // Make sure to reduce the sampling rate in production.
+                o.ProfilesSampleRate = 1.0;
+
+                o.AddIntegration(new ProfilingIntegration(TimeSpan.FromMilliseconds(5000)));
 #if DEBUG
                 // Log debug information about the Sentry SDK
                 o.Debug = true;
@@ -62,7 +68,44 @@ public class Program
                         throw new Exception(
                             exceptionMessage ?? "An exception thrown from the ASP.NET Core pipeline");
                     });
+
+                    // Reported events will be grouped by route pattern
+                    endpoints.MapGet("/", context =>
+                    {
+                        var sb = new StringBuilder();
+                        for (var i = 0; i < 10; i++)
+                        {
+                            sb.AppendLine(FindPrimeNumber(10000).ToString());
+                        }
+                        return Task.FromResult(sb.ToString());
+                    });
                 });
             })
             .Build();
+
+    private static long FindPrimeNumber(int n)
+    {
+        int count = 0;
+        long a = 2;
+        while (count < n)
+        {
+            long b = 2;
+            int prime = 1;// to check if found a prime
+            while (b * b <= a)
+            {
+                if (a % b == 0)
+                {
+                    prime = 0;
+                    break;
+                }
+                b++;
+            }
+            if (prime > 0)
+            {
+                count++;
+            }
+            a++;
+        }
+        return (--a);
+    }
 }
