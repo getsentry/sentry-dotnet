@@ -16,6 +16,9 @@
 - Bump CLI from v2.30.0 to v2.30.2 ([#3214](https://github.com/getsentry/sentry-dotnet/pull/3214), [#3218](https://github.com/getsentry/sentry-dotnet/pull/3218))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2302)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.30.0...2.30.2)
+- Bump Native SDK from v0.7.0 to v0.7.1 ([#3237](https://github.com/getsentry/sentry-dotnet/pull/3237))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#071)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.0...0.7.1)
 
 ## 4.2.1
 
