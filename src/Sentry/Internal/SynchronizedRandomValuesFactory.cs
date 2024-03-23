@@ -17,7 +17,7 @@ internal class SynchronizedRandomValuesFactory : RandomValuesFactory
     public override double NextDouble() => Random.NextDouble();
     public override void NextBytes(byte[] bytes) => Random.NextBytes(bytes);
 
-#if !(NETSTANDARD2_0 || NET462)
+#if !(NETSTANDARD2_0 || NETFRAMEWORK)
     public override void NextBytes(Span<byte> bytes) => Random.NextBytes(bytes);
 #endif
 
