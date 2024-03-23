@@ -71,7 +71,7 @@
     On .NET Framework, we need a package reference to System.Runtime.InteropServices.RuntimeInformation.
     This is used in Sentry.PlatformAbstractions.RuntimeInfo.  It's already built-in for all other targets.
   -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net462'))">
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
   </ItemGroup>
 
