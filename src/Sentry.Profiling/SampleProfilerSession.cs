@@ -1,5 +1,6 @@
 using System.Diagnostics.Tracing;
 using Microsoft.Diagnostics.NETCore.Client;
+using Microsoft.Diagnostics.Symbols;
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
 using Microsoft.Diagnostics.Tracing.EventPipe;
@@ -14,6 +15,8 @@ internal class SampleProfilerSession : IDisposable
     private readonly EventPipeSession _session;
     private readonly TraceLogEventSource _eventSource;
     private readonly SampleProfilerTraceEventParser _sampleEventParser;
+    private readonly SymbolReader _symboReader;
+    private readonly ActivityComputer _activityComputer;
     private readonly IDiagnosticLogger? _logger;
     private readonly SentryStopwatch _stopwatch;
     private bool _stopped = false;
@@ -24,6 +27,8 @@ internal class SampleProfilerSession : IDisposable
         _logger = logger;
         _eventSource = eventSource;
         _sampleEventParser = new SampleProfilerTraceEventParser(_eventSource);
+        _symboReader = new SymbolReader(TextWriter.Null);
+        _activityComputer = new ActivityComputer(eventSource, _symboReader);
         _stopwatch = stopwatch;
     }
 
@@ -38,7 +43,7 @@ internal class SampleProfilerSession : IDisposable
         //                | ThreadTransfer | GCHeapAndTypeNames | Codesymbols | Compilation,
         new EventPipeProvider(ClrTraceEventParser.ProviderName, EventLevel.Informational, (long) ClrTraceEventParser.Keywords.Default),
         new EventPipeProvider(SampleProfilerTraceEventParser.ProviderName, EventLevel.Informational),
-        // new EventPipeProvider(TplEtwProviderTraceEventParser.ProviderName, EventLevel.Informational, (long) TplEtwProviderTraceEventParser.Keywords.Default)
+        new EventPipeProvider(TplEtwProviderTraceEventParser.ProviderName, EventLevel.Informational, (long) TplEtwProviderTraceEventParser.Keywords.Default)
     };
 
     // Exposed only for benchmarks.
@@ -46,6 +51,8 @@ internal class SampleProfilerSession : IDisposable
     internal static int CircularBufferMB = 256;
 
     public SampleProfilerTraceEventParser SampleEventParser => _sampleEventParser;
+
+    public ActivityComputer ActivityComputer => _activityComputer;
 
     public TimeSpan Elapsed => _stopwatch.Elapsed;
 
@@ -128,6 +135,7 @@ internal class SampleProfilerSession : IDisposable
                 _stopped = true;
                 _session.Stop();
                 _session.Dispose();
+                _symboReader.Dispose();
                 _eventSource.Dispose();
             }
             catch (Exception ex)

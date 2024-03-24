@@ -1,3 +1,4 @@
+using Microsoft.Diagnostics.Symbols;
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
 using Microsoft.Diagnostics.Tracing.EventPipe;
@@ -33,17 +34,6 @@ public class TraceLogProcessorTests
     //     var json = profile.ToJsonString(_testOutputLogger);
     // }
 
-    private SampleProfile BuilProfile(TraceLogEventSource eventSource)
-    {
-        var builder = new SampleProfileBuilder(new() { DiagnosticLogger = _testOutputLogger }, eventSource.TraceLog);
-        new SampleProfilerTraceEventParser(eventSource).ThreadSample += delegate (ClrThreadSampleTraceData data)
-                {
-                    builder.AddSample(data, data.TimeStampRelativeMSec);
-                };
-        eventSource.Process();
-        return builder.Profile;
-    }
-
     private SampleProfile GetProfile()
     {
         var etlxFilePath = Path.Combine(_resourcesPath, "sample.etlx");
@@ -62,7 +52,15 @@ public class TraceLogProcessorTests
 
         using var traceLog = new TraceLog(etlxFilePath);
         using var eventSource = traceLog.Events.GetSource();
-        return BuilProfile(eventSource);
+        using var symboReader = new SymbolReader(TextWriter.Null);
+        var activityComputer = new ActivityComputer(eventSource, symboReader);
+        var builder = new SampleProfileBuilder(new() { DiagnosticLogger = _testOutputLogger }, eventSource.TraceLog, activityComputer);
+        new SampleProfilerTraceEventParser(eventSource).ThreadSample += (ClrThreadSampleTraceData data) =>
+        {
+            builder.AddSample(data, data.TimeStampRelativeMSec);
+        };
+        eventSource.Process();
+        return builder.Profile;
     }
 
     [Fact]

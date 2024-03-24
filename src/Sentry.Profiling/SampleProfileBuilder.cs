@@ -12,6 +12,7 @@ internal class SampleProfileBuilder
 {
     private readonly SentryOptions _options;
     private readonly TraceLog _traceLog;
+    private readonly ActivityComputer _activityComputer;
 
     // Output profile being built.
     public readonly SampleProfile Profile = new();
@@ -28,10 +29,11 @@ internal class SampleProfileBuilder
     // TODO make downsampling conditional once this is available: https://github.com/dotnet/runtime/issues/82939
     private readonly Downsampler _downsampler = new();
 
-    public SampleProfileBuilder(SentryOptions options, TraceLog traceLog)
+    public SampleProfileBuilder(SentryOptions options, TraceLog traceLog, ActivityComputer activityComputer)
     {
         _options = options;
         _traceLog = traceLog;
+        _activityComputer = activityComputer;
     }
 
     internal void AddSample(TraceEvent data, double timestampMs)
@@ -50,6 +52,7 @@ internal class SampleProfileBuilder
             return;
         }
 
+        var activity = _activityComputer.GetCurrentActivity(thread); // XXX
         var threadIndex = AddThread(thread);
         if (threadIndex < 0)
         {
@@ -57,6 +60,7 @@ internal class SampleProfileBuilder
             return;
         }
 
+        // We need custom sampling because the TraceLog dispatches events from a queue with a delay of about 2 seconds.
         if (!_downsampler.ShouldSample(threadIndex, timestampMs))
         {
             return;
