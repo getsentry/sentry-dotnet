@@ -26,7 +26,7 @@ internal class ActivityWrapper(System.Diagnostics.Activity activity) : ISentrySp
         activity.SetStatus(ActivityStatusCode.Error, errorMessage);
     }
 
-    public void Stop () => activity.Stop();
+    public void Stop() => activity.Stop();
 
     public void Dispose() => activity.Dispose();
 }
