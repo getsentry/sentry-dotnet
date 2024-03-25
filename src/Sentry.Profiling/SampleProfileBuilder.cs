@@ -26,6 +26,9 @@ internal class SampleProfileBuilder
     // A sparse array mapping from a ThreadIndex to an index in Profile.Threads.
     private readonly Dictionary<int, int> _threadIndexes = new();
 
+    // A sparse array mapping from an ActivityIndex to an index in Profile.Threads.
+    private readonly Dictionary<int, int> _activityIndexes = new();
+
     // TODO make downsampling conditional once this is available: https://github.com/dotnet/runtime/issues/82939
     private readonly Downsampler _downsampler = new();
 
@@ -52,8 +55,23 @@ internal class SampleProfileBuilder
             return;
         }
 
-        var activity = _activityComputer.GetCurrentActivity(thread); // XXX
-        var threadIndex = AddThread(thread);
+        var activity = _activityComputer.GetCurrentActivity(thread);
+        if (activity is null)
+        {
+            _options.DiagnosticLogger?.LogDebug("Failed to get activity for a profiler sample. Skipping.");
+            return;
+        }
+
+        var threadIndex = -1;
+        if (activity.IsThreadActivity)
+        {
+            threadIndex = AddThread(thread);
+        }
+        else
+        {
+            threadIndex = AddActivity(activity);
+        }
+
         if (threadIndex < 0)
         {
             _options.DiagnosticLogger?.LogDebug("Profiler Sample threadIndex is invalid. Skipping.");
@@ -138,24 +156,45 @@ internal class SampleProfileBuilder
     }
 
     /// <summary>
-    /// Check if the thread is already stored in the output Profile, or adds it.
+    /// Ensures the thread is stored in the output Profile.
     /// </summary>
-    /// <returns>The index to the output Profile frames array.</returns>
+    /// <returns>The index to the output Profile thread array.</returns>
     private int AddThread(TraceThread thread)
     {
         var key = (int)thread.ThreadIndex;
 
-        if (!_threadIndexes.ContainsKey(key))
+        if (!_threadIndexes.TryGetValue(key, out var value))
         {
-            Profile.Threads.Add(new()
-            {
-                Name = thread.ThreadInfo ?? $"Thread {thread.ThreadID}",
-            });
-            _threadIndexes[key] = Profile.Threads.Count - 1;
-            _downsampler.NewThreadAdded(_threadIndexes[key]);
+            value = AddSampleProfileThread(thread.ThreadInfo ?? $"Thread {thread.ThreadID}");
+            _threadIndexes[key] = value;
         }
 
-        return _threadIndexes[key];
+        return value;
+    }
+
+    /// <summary>
+    /// Ensures the activity is stored in the output Profile as a Thread.
+    /// </summary>
+    /// <returns>The index to the output Profile thread array.</returns>
+    private int AddActivity(TraceActivity activity)
+    {
+        var key = (int)activity.Index;
+
+        if (!_activityIndexes.TryGetValue(key, out var value))
+        {
+            value = AddSampleProfileThread(activity.Name ?? $"Activity {activity.Path}");
+            _activityIndexes[key] = value;
+        }
+
+        return value;
+    }
+
+    private int AddSampleProfileThread(string name)
+    {
+        Profile.Threads.Add(new() { Name = name });
+        var value = Profile.Threads.Count - 1;
+        _downsampler.NewThreadAdded(value);
+        return value;
     }
 
     private SentryStackFrame CreateStackFrame(CodeAddressIndex codeAddressIndex)
