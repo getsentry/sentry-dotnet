@@ -3,9 +3,11 @@ param(
     [ValidateNotNullOrEmpty()]
     [ValidateSet('android', 'ios')] # TODO , 'maccatalyst'
     [String] $Platform,
+    [String] $Configuration = 'Release',
 
     [Switch] $Build,
-    [Switch] $Run
+    [Switch] $Run,
+    [Switch] $NativeAot
 )
 
 Set-StrictMode -Version latest
@@ -21,13 +23,13 @@ $CI = Test-Path env:CI
 Push-Location $PSScriptRoot/..
 try
 {
-    $tfm = 'net7.0-'
+    $tfm = 'net8.0-'
     $arch = (!$IsWindows -and $(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
     if ($Platform -eq 'android')
     {
         $tfm += 'android'
         $group = 'android'
-        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/android-$arch"
+        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/$Configuration/$tfm/android-$arch"
         $arguments = @(
             '--app', "$buildDir/io.sentry.dotnet.maui.device.testapp-Signed.apk",
             '--package-name', 'io.sentry.dotnet.maui.device.testapp'
@@ -37,17 +39,27 @@ try
     {
         $tfm += 'ios'
         $group = 'apple'
-        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/iossimulator-$arch"
+        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/$Configuration/$tfm/iossimulator-$arch"
         $arguments = @(
             '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
-            '--target', 'ios-simulator-64',
+            '--target', 'ios-simulator-64_17.2',
             '--launch-timeout', '00:10:00'
         )
     }
+    # elseif ($Platform -eq 'maccatalyst')
+    # {
+    #     $tfm += 'maccatalyst'
+    #     $group = 'apple'
+    #     $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/$Configuration/$tfm/iossimulator-$arch"
+    #     $arguments = @(
+    #         '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
+    #         '--launch-timeout', '00:10:00'
+    #     )
+    # }
 
     if ($Build)
     {
-        dotnet build -f $tfm -c Release test/Sentry.Maui.Device.TestApp
+        dotnet build -f $tfm -c $Configuration test/Sentry.Maui.Device.TestApp -p:TestNativeAot=$NativeAot
         if ($LASTEXITCODE -ne 0)
         {
             throw 'Failed to build Sentry.Maui.Device.TestApp'
@@ -59,7 +71,7 @@ try
         if (!(Get-Command xharness -ErrorAction SilentlyContinue))
         {
             Push-Location ($CI ? $env:RUNNER_TEMP : $IsWindows ? $env:TMP : $IsMacos ? $env:TMPDIR : '/temp')
-            dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '1.*-*' `
+            dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '9.*-*' `
                 --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
             Pop-Location
         }
