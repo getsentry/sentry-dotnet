@@ -5,6 +5,7 @@ using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
 using Microsoft.Diagnostics.Tracing.EventPipe;
 using Microsoft.Diagnostics.Tracing.Parsers;
+using Microsoft.Diagnostics.Tracing.Stacks;
 using Sentry.Extensibility;
 using Sentry.Internal;
 
@@ -14,9 +15,11 @@ internal class SampleProfilerSession : IDisposable
 {
     private readonly EventPipeSession _session;
     private readonly TraceLogEventSource _eventSource;
+    private readonly MutableTraceEventStackSource _stackSource;
     private readonly SampleProfilerTraceEventParser _sampleEventParser;
     private readonly SymbolReader _symboReader;
     private readonly ActivityComputer _activityComputer;
+    // private readonly StartStopActivityComputer _startStopActivityComputer;
     private readonly IDiagnosticLogger? _logger;
     private readonly SentryStopwatch _stopwatch;
     private bool _stopped = false;
@@ -29,7 +32,12 @@ internal class SampleProfilerSession : IDisposable
         _sampleEventParser = new SampleProfilerTraceEventParser(_eventSource);
         _symboReader = new SymbolReader(TextWriter.Null);
         _activityComputer = new ActivityComputer(eventSource, _symboReader);
+        // _startStopActivityComputer = new StartStopActivityComputer(eventSource, _activityComputer);
         _stopwatch = stopwatch;
+        _stackSource = new MutableTraceEventStackSource(eventSource.TraceLog)
+        {
+            OnlyManagedCodeStacks = true // EventPipe only has managed stacks.
+        };
     }
 
     // Exposed only for benchmarks.
@@ -51,8 +59,6 @@ internal class SampleProfilerSession : IDisposable
     internal static int CircularBufferMB = 256;
 
     public SampleProfilerTraceEventParser SampleEventParser => _sampleEventParser;
-
-    public ActivityComputer ActivityComputer => _activityComputer;
 
     public TimeSpan Elapsed => _stopwatch.Elapsed;
 
@@ -146,4 +152,7 @@ internal class SampleProfilerSession : IDisposable
     }
 
     public void Dispose() => Stop();
+
+    public SampleProfileBuilder CreateProfileBuilder(SentryOptions options)
+        => new(options, _eventSource.TraceLog, _stackSource, _activityComputer);
 }

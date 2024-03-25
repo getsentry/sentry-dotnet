@@ -1,5 +1,6 @@
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
+using Microsoft.Diagnostics.Tracing.Stacks;
 using Sentry.Extensibility;
 using Sentry.Protocol;
 
@@ -13,6 +14,8 @@ internal class SampleProfileBuilder
     private readonly SentryOptions _options;
     private readonly TraceLog _traceLog;
     private readonly ActivityComputer _activityComputer;
+    // private readonly StartStopActivityComputer _startStopActivityComputer;
+    private readonly MutableTraceEventStackSource _stackSource;
 
     // Output profile being built.
     public readonly SampleProfile Profile = new();
@@ -23,6 +26,9 @@ internal class SampleProfileBuilder
     // A dictionary from a CallStackIndex to an index in the output Profile.stacks.
     private readonly Dictionary<int, int> _stackIndexes = new();
 
+    // A dictionary from a StackSourceCallStackIndex to an index in the output Profile.stacks.
+    private readonly Dictionary<int, int> _stackSourceStackIndexes = new();
+
     // A sparse array mapping from a ThreadIndex to an index in Profile.Threads.
     private readonly Dictionary<int, int> _threadIndexes = new();
 
@@ -32,11 +38,16 @@ internal class SampleProfileBuilder
     // TODO make downsampling conditional once this is available: https://github.com/dotnet/runtime/issues/82939
     private readonly Downsampler _downsampler = new();
 
-    public SampleProfileBuilder(SentryOptions options, TraceLog traceLog, ActivityComputer activityComputer)
+    public SampleProfileBuilder(
+        SentryOptions options,
+        TraceLog traceLog,
+        MutableTraceEventStackSource stackSource,
+        ActivityComputer activityComputer)
     {
         _options = options;
         _traceLog = traceLog;
         _activityComputer = activityComputer;
+        _stackSource = stackSource;
     }
 
     internal void AddSample(TraceEvent data, double timestampMs)
@@ -48,13 +59,6 @@ internal class SampleProfileBuilder
             return;
         }
 
-        var callStackIndex = data.CallStackIndex();
-        if (callStackIndex == CallStackIndex.Invalid)
-        {
-            _options.DiagnosticLogger?.LogDebug("Encountered a Profiler Sample without an associated call stack. Skipping.");
-            return;
-        }
-
         var activity = _activityComputer.GetCurrentActivity(thread);
         if (activity is null)
         {
@@ -62,7 +66,7 @@ internal class SampleProfileBuilder
             return;
         }
 
-        var threadIndex = -1;
+        int threadIndex;
         if (activity.IsThreadActivity)
         {
             threadIndex = AddThread(thread);
@@ -84,10 +88,19 @@ internal class SampleProfileBuilder
             return;
         }
 
-        var stackIndex = AddStackTrace(callStackIndex);
+        int stackIndex;
+        if (activity.IsThreadActivity)
+        {
+            stackIndex = AddThreadStackTrace(data);
+        }
+        else
+        {
+            stackIndex = AddActivityStackTrace(thread, data);
+        }
+
         if (stackIndex < 0)
         {
-            _options.DiagnosticLogger?.LogDebug("Invalid stackIndex for Profiler Sample. Skipping.");
+            _options.DiagnosticLogger?.LogDebug("Encountered a Profiler Sample without an associated call stack. Skipping.");
             return;
         }
 
@@ -103,17 +116,50 @@ internal class SampleProfileBuilder
     /// Adds stack trace and frames, if missing.
     /// </summary>
     /// <returns>The index into the Profile's stacks list</returns>
-    private int AddStackTrace(CallStackIndex callstackIndex)
+    private int AddThreadStackTrace(TraceEvent data)
     {
-        var key = (int)callstackIndex;
-
-        if (!_stackIndexes.ContainsKey(key))
+        var callStackIndex = data.CallStackIndex();
+        if (callStackIndex == CallStackIndex.Invalid)
         {
-            Profile.Stacks.Add(CreateStackTrace(callstackIndex));
-            _stackIndexes[key] = Profile.Stacks.Count - 1;
+            return -1;
         }
 
-        return _stackIndexes[key];
+        var key = (int)callStackIndex;
+        if (!_stackIndexes.TryGetValue(key, out var value))
+        {
+            Profile.Stacks.Add(CreateStackTrace(callStackIndex));
+            value = Profile.Stacks.Count - 1;
+            _stackIndexes[key] = value;
+        }
+        return value;
+    }
+
+    /// <summary>
+    /// Adds stack trace and frames, if missing.
+    /// </summary>
+    /// <returns>The index into the Profile's stacks list</returns>
+    private int AddActivityStackTrace(TraceThread thread, TraceEvent data)
+    {
+        var stackSourceCallStackIndex = StackSourceCallStackIndex.Invalid;
+        lock (_stackSource)
+        {
+            stackSourceCallStackIndex = _activityComputer.GetCallStack(_stackSource, data,
+                null // TODO topThread => _startStopActivityComputer.GetCurrentStartStopActivityStack(_stackSource, thread, topThread)
+            );
+        }
+        if (stackSourceCallStackIndex == StackSourceCallStackIndex.Invalid)
+        {
+            return -1;
+        }
+
+        var key = (int)stackSourceCallStackIndex;
+        if (!_stackSourceStackIndexes.TryGetValue(key, out var value))
+        {
+            Profile.Stacks.Add(CreateStackTrace(stackSourceCallStackIndex));
+            value = Profile.Stacks.Count - 1;
+            _stackIndexes[key] = value;
+        }
+        return value;
     }
 
     private Internal.GrowableArray<int> CreateStackTrace(CallStackIndex callstackIndex)
@@ -122,16 +168,42 @@ internal class SampleProfileBuilder
         while (callstackIndex != CallStackIndex.Invalid)
         {
             var codeAddressIndex = _traceLog.CallStacks.CodeAddressIndex(callstackIndex);
-            if (codeAddressIndex != CodeAddressIndex.Invalid)
-            {
-                stackTrace.Add(AddStackFrame(codeAddressIndex));
-                callstackIndex = _traceLog.CallStacks.Caller(callstackIndex);
-            }
-            else
+            if (codeAddressIndex == CodeAddressIndex.Invalid)
             {
                 // No need to traverse further up the stack when we're on the thread/process.
                 break;
             }
+
+            stackTrace.Add(AddStackFrame(codeAddressIndex));
+            callstackIndex = _traceLog.CallStacks.Caller(callstackIndex);
+        }
+
+        stackTrace.Trim(10);
+        return stackTrace;
+    }
+
+    private Internal.GrowableArray<int> CreateStackTrace(StackSourceCallStackIndex callstackIndex)
+    {
+        var stackTrace = new Internal.GrowableArray<int>(10);
+        CodeAddressIndex codeAddressIndex;
+        while (callstackIndex != StackSourceCallStackIndex.Invalid
+            // GetFrameIndex() throws... seems to be happening on top thread frames for some reason...
+            && (callstackIndex - _stackSource.Interner.CallStackStartIndex) < _stackSource.Interner.CallStackCount)
+        {
+            lock (_stackSource)
+            {
+                var frameIndex = _stackSource.GetFrameIndex(callstackIndex);
+                codeAddressIndex = _stackSource.GetFrameCodeAddress(frameIndex);
+                if (codeAddressIndex == CodeAddressIndex.Invalid)
+                {
+                    // No need to traverse further up the stack when we're on the thread/process.
+                    break;
+                }
+
+                callstackIndex = _stackSource.GetCallerIndex(callstackIndex);
+            }
+
+            stackTrace.Add(AddStackFrame(codeAddressIndex));
         }
 
         stackTrace.Trim(10);
@@ -146,13 +218,14 @@ internal class SampleProfileBuilder
     {
         var key = (int)codeAddressIndex;
 
-        if (!_frameIndexes.ContainsKey(key))
+        if (!_frameIndexes.TryGetValue(key, out var value))
         {
             Profile.Frames.Add(CreateStackFrame(codeAddressIndex));
-            _frameIndexes[key] = Profile.Frames.Count - 1;
+            value = Profile.Frames.Count - 1;
+            _frameIndexes[key] = value;
         }
 
-        return _frameIndexes[key];
+        return value;
     }
 
     /// <summary>
@@ -182,7 +255,9 @@ internal class SampleProfileBuilder
 
         if (!_activityIndexes.TryGetValue(key, out var value))
         {
-            value = AddSampleProfileThread(activity.Name ?? $"Activity {activity.Path}");
+            // Note: there's also activity.Name but it's rather verbose:
+            // '<Activity (continuation) Index="8" Thread="Thread (1652)" Create="216.744" Start="216.938" kind="TaskScheduled" RawID="0x2072a40000000004"/>'
+            value = AddSampleProfileThread($"Activity {activity.Path}");
             _activityIndexes[key] = value;
         }
 

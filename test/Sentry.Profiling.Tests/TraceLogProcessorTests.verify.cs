@@ -2,6 +2,7 @@ using Microsoft.Diagnostics.Symbols;
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
 using Microsoft.Diagnostics.Tracing.EventPipe;
+using Microsoft.Diagnostics.Tracing.Stacks;
 
 namespace Sentry.Profiling.Tests;
 
@@ -53,8 +54,13 @@ public class TraceLogProcessorTests
         using var traceLog = new TraceLog(etlxFilePath);
         using var eventSource = traceLog.Events.GetSource();
         using var symboReader = new SymbolReader(TextWriter.Null);
+        var options = new SentryOptions() { DiagnosticLogger = _testOutputLogger };
         var activityComputer = new ActivityComputer(eventSource, symboReader);
-        var builder = new SampleProfileBuilder(new() { DiagnosticLogger = _testOutputLogger }, eventSource.TraceLog, activityComputer);
+        var stackSource = new MutableTraceEventStackSource(eventSource.TraceLog)
+        {
+            OnlyManagedCodeStacks = true
+        };
+        var builder = new SampleProfileBuilder(options, traceLog, stackSource, activityComputer);
         new SampleProfilerTraceEventParser(eventSource).ThreadSample += (ClrThreadSampleTraceData data) =>
         {
             builder.AddSample(data, data.TimeStampRelativeMSec);
