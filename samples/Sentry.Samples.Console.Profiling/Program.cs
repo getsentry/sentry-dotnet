@@ -38,11 +38,16 @@ internal static class Program
             Console.WriteLine("Sequential computation finished in " + sw.Elapsed);
             SentrySdk.Flush(TimeSpan.FromMinutes(5));
             Console.WriteLine("Flushed in " + sw.Elapsed);
-            Thread.Sleep(500);
+            await Task.Delay(500);
 
             sw.Restart();
             tx = SentrySdk.StartTransaction("FindPrimeNumber", "Parallel");
-            var tasks = Enumerable.Range(1, count).ToList().Select(_ => Task.Run(() => FindPrimeNumber(100000)));
+            var tasks = Enumerable.Range(1, count).ToList().Select(_ => Task.Run(async () =>
+            {
+                FindPrimeNumber(100000);
+                await Task.Delay(500);
+                FindPrimeNumber(100000);
+            }));
             await Task.WhenAll(tasks).ConfigureAwait(false);
             tx.Finish();
             Console.WriteLine("Parallel computation finished in " + sw.Elapsed);
