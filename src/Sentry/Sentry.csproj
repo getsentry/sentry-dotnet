@@ -52,6 +52,7 @@
   <!-- Sentry.DiagnosticSource is compiled directly into Sentry for .NET Core and .NET targets only. -->
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4'))">
     <DefineConstants>$(DefineConstants);HAS_DIAGNOSTIC_INTEGRATION</DefineConstants>
+    <DefineConstants>$(DefineConstants);HAS_TRACING_INTEGRATION</DefineConstants>
   </PropertyGroup>
   <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4'))">
     <Compile Include="..\Sentry.DiagnosticSource\Internal\**\*.cs">
