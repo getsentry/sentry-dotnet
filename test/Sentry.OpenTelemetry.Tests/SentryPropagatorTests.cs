@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Primitives;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
+using Sentry.Internal.Tracing;
 
 namespace Sentry.OpenTelemetry.Tests;
 

@@ -1713,9 +1713,3 @@ public class SentryOptions
         return TryGetDsnSpecificCacheDirectoryPath();
     }
 }
-
-internal static class SentryOptionsExtensions
-{
-    public static bool Includes(this SentryOptions.DefaultIntegrations integrations, SentryOptions.DefaultIntegrations value)
-        => (integrations & value) != 0;
-}

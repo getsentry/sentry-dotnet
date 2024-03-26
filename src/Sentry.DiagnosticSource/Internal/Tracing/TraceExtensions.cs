@@ -1,6 +1,6 @@
-namespace Sentry.OpenTelemetry;
+namespace Sentry.Internal.Tracing;
 
-internal static class OpenTelemetryExtensions
+internal static class TraceExtensions
 {
     public static SpanId AsSentrySpanId(this ActivitySpanId id) => SpanId.Parse(id.ToHexString());
 

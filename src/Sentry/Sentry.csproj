@@ -55,10 +55,16 @@
     <DefineConstants>$(DefineConstants);HAS_TRACING_INTEGRATION</DefineConstants>
   </PropertyGroup>
   <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4'))">
-    <Compile Include="..\Sentry.DiagnosticSource\Internal\**\*.cs">
-      <Link>Internal\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    <Compile Include="..\Sentry.DiagnosticSource\Internal\DiagnosticSource\**\*.cs">
+      <Link>Internal\DiagnosticSource\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+    <Compile Include="..\Sentry.DiagnosticSource\Internal\Tracing\**\*.cs">
+      <Link>Internal\Tracing\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Compile>
   </ItemGroup>
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4')) and !$(TargetFramework.StartsWith('net6'))">
+    <DefineConstants>$(DefineConstants);HAS_DIAGNOSTICS_7_OR_GREATER</DefineConstants>
+  </PropertyGroup>
 
   <!--
     We use Simon Cropp's Polyfill source-only package to access APIs in lower targets.

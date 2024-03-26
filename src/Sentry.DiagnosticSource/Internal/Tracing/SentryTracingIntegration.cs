@@ -5,6 +5,15 @@ namespace Sentry.Internal.Tracing;
 
 internal class SentryTracingIntegration : ISdkIntegration
 {
+    /*
+     TODO: Think about where to put this... would be good if it sat on an IDisposable but also something internal.
+     We could possibly put it on the Hub - add an ITracingHub interface that was internal and held both this and
+     the SentryTraceProvider. Alternatively we could rename IMetricHub to IInternalHub and put it there... metrics
+     should probably be using this mechanism for tracing anyway (as it's all internal) but that would complicate
+     things like code locations... which we could maybe store as custom properties on the Activity.
+    */
+    private SentryActivityListener? _listener;
+
     public void Register(IHub hub, SentryOptions options)
     {
         if (!options.IsPerformanceMonitoringEnabled)
@@ -14,6 +23,6 @@ internal class SentryTracingIntegration : ISdkIntegration
         }
 
         options.SentryTraceProvider = new SentryTraceProvider();
-        // TODO: Also configure a listener : https://learn.microsoft.com/en-us/dotnet/core/diagnostics/distributed-tracing-collection-walkthroughs#collect-traces-using-custom-logic
+        _listener = new SentryActivityListener();
     }
 }
