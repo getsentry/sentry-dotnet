@@ -2,9 +2,16 @@ namespace Sentry.Internal.Tracing;
 
 internal class SentryActivityListener : IDisposable
 {
+    private readonly ActivitySpanProcessor _activitySpanProcessor;
     private readonly ActivityListener? _listener;
-    public SentryActivityListener()
+
+    public SentryActivityListener(IHub hub) : this(new ActivitySpanProcessor(hub))
     {
+    }
+
+    public SentryActivityListener(ActivitySpanProcessor activitySpanProcessor)
+    {
+        _activitySpanProcessor = activitySpanProcessor;
         _listener = new ActivityListener()
         {
             // This is only for internal Sentry events
@@ -22,12 +29,12 @@ internal class SentryActivityListener : IDisposable
 
     public void OnActivityStarted(System.Diagnostics.Activity activity)
     {
-        Console.WriteLine("Started: {0,-15} {1,-60}", activity.OperationName, activity.Id);
+        _activitySpanProcessor.OnStart(activity);
     }
 
     public void OnActivityStopped(System.Diagnostics.Activity activity)
     {
-        Console.WriteLine("Stopped: {0,-15} {1,-60} {2,-15}", activity.OperationName, activity.Id, activity.Duration);
+        _activitySpanProcessor.OnEnd(activity);
     }
 
     public void Dispose()

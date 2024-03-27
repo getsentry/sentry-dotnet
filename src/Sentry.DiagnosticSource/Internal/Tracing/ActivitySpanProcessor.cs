@@ -12,6 +12,7 @@ internal class ActivitySpanProcessor
     private readonly IHub _hub;
 
     private Action<ISpan, System.Diagnostics.Activity>? _beforeFinish;
+    private readonly Instrumenter _instrumenter;
 
     // ReSharper disable once MemberCanBePrivate.Global - Used by tests
     internal readonly ConcurrentDictionary<ActivitySpanId, ISpan> _map = new();
@@ -22,11 +23,23 @@ internal class ActivitySpanProcessor
     internal long _lastPruned = 0;
     private readonly Lazy<Hub?> _realHub;
 
+    internal ActivitySpanProcessor(IHub hub)
+        : this(hub, null, null, Instrumenter.Sentry)
+    {
+    }
+
     internal ActivitySpanProcessor(IHub hub, Action<ISpan, System.Diagnostics.Activity>? beforeFinish = null,
         Func<IDictionary<string, object>>? resourceAttributeResolver = null)
+        : this(hub, beforeFinish, resourceAttributeResolver, Instrumenter.OpenTelemetry)
+    {
+    }
+
+    private ActivitySpanProcessor(IHub hub, Action<ISpan, System.Diagnostics.Activity>? beforeFinish,
+        Func<IDictionary<string, object>>? resourceAttributeResolver, Instrumenter instrumenter)
     {
         _hub = hub;
         _beforeFinish = beforeFinish;
+        _instrumenter = instrumenter;
         _realHub = new Lazy<Hub?>(() =>
             _hub switch
             {
@@ -66,7 +79,7 @@ internal class ActivitySpanProcessor
                 null,
                 null)
             {
-                Instrumenter = Instrumenter.OpenTelemetry
+                Instrumenter = _instrumenter
             };
 
             var span = (SpanTracer)parentSpan.StartChild(context);
@@ -94,7 +107,7 @@ internal class ActivitySpanProcessor
                 data.TraceId.AsSentryId(),
                 data.DisplayName, null, isSampled, isSampled)
             {
-                Instrumenter = Instrumenter.OpenTelemetry
+                Instrumenter = _instrumenter
             };
 
             var baggageHeader = data.Baggage.AsBaggageHeader();

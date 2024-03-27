@@ -22,7 +22,8 @@ internal class SentryTracingIntegration : ISdkIntegration
             return;
         }
 
+        // TODO: Should we be registering this if OpenTelemetry is enabled?
         options.SentryTraceProvider = new SentryTraceProvider();
-        _listener = new SentryActivityListener();
+        _listener = new SentryActivityListener(hub);
     }
 }

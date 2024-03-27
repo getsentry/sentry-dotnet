@@ -5,7 +5,8 @@ namespace Sentry.DiagnosticSource.Tests.Internal.Tracing;
 
 public class ActivitySpanProcessorTests
 {
-    private readonly ActivitySource Tracer = new ActivitySource("Sentry.DiagnosticSource.Tests.Internal.Tracing");
+    private static readonly ActivitySource Tracer = new("Sentry.DiagnosticSource.Tests.Internal.Tracing");
+
     private class Fixture
     {
         public SentryOptions Options { get; }
@@ -18,6 +19,8 @@ public class ActivitySpanProcessorTests
 
         public ISystemClock Clock { get; set; }
 
+        private SentryActivityListener Listener { get; set; }
+
         public Fixture()
         {
             Options = new SentryOptions
@@ -26,6 +29,9 @@ public class ActivitySpanProcessorTests
                 EnableTracing = true,
                 AutoSessionTracking = false
             };
+#if NET5_0_OR_GREATER
+            Options.DisableSentryTracingIntegration(); // We'll create our own for these tests...
+#endif
 
             Client = Substitute.For<ISentryClient>();
         }
@@ -36,7 +42,9 @@ public class ActivitySpanProcessorTests
 
         public ActivitySpanProcessor GetSut()
         {
-            return new ActivitySpanProcessor(GetHub());
+            var processor = new ActivitySpanProcessor(GetHub());
+            Listener = new SentryActivityListener(processor);
+            return processor;
         }
     }
 
@@ -91,13 +99,13 @@ public class ActivitySpanProcessorTests
             { "public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff" },
             { "sample_rate", "0.5" },
         };
-        var data = Tracer.StartActivity("test op")!;
+        var data = Tracer.CreateActivity("test op", ActivityKind.Internal)!;
         data.AddBaggage($"{BaggageHeader.SentryKeyPrefix}trace_id", expected["trace_id"]);
         data.AddBaggage($"{BaggageHeader.SentryKeyPrefix}public_key", expected["public_key"]);
         data.AddBaggage($"{BaggageHeader.SentryKeyPrefix}sample_rate", expected["sample_rate"]);
 
         // Act
-        sut.OnStart(data!);
+        data.Start();
 
         // Assert
         var span = sut.GetMappedSpan(data.SpanId);
@@ -127,12 +135,10 @@ public class ActivitySpanProcessorTests
         var sut = _fixture.GetSut();
 
         using var parent = Tracer.StartActivity("Parent");
-        sut.OnStart(parent);
 
-        using var data = Tracer.StartActivity("TestActivity");
 
         // Act
-        sut.OnStart(data!);
+        using var data = Tracer.StartActivity("TestActivity");
 
         // Assert
         var span = sut.GetMappedSpan(data.SpanId);
@@ -167,10 +173,9 @@ public class ActivitySpanProcessorTests
         _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
         var sut = _fixture.GetSut();
 
-        var data = Tracer.StartActivity("test op");
 
         // Act
-        sut.OnStart(data!);
+        var data = Tracer.StartActivity("test op");
 
         // Assert
         var span = sut.GetMappedSpan(data.SpanId);
@@ -200,20 +205,20 @@ public class ActivitySpanProcessorTests
         // Arrange
         var sut = _fixture.GetSut();
 
-        var parent = Tracer.StartActivity(name: "transaction")!;
-        sut.OnStart(parent);
+        var parent = Tracer.CreateActivity(name: "transaction", ActivityKind.Internal)!;
+        parent.Start();
 
         var tags = new Dictionary<string, object> {
             { "foo", "bar" }
         };
-        var data = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal, parentContext: default, tags)!;
+        var data = Tracer.CreateActivity(name: "test operation", kind: ActivityKind.Internal, parentContext: default, tags)!;
         data.DisplayName = "test display name";
-        sut.OnStart(data);
+        data.Start();
 
         var span = sut.GetMappedSpan(data.SpanId);
 
         // Act
-        sut.OnEnd(data);
+        data.Stop();
 
         // Assert
         if (span is not SpanTracer spanTracer)
@@ -246,12 +251,12 @@ public class ActivitySpanProcessorTests
         var sut = _fixture.GetSut();
 
         var scope = new Scope();
-        var data = Tracer.StartActivity("transaction")!;
+        var data = Tracer.CreateActivity("transaction", ActivityKind.Internal)!;
         data.SetFused(scope);
-        sut.OnStart(data);
+        data.Start();
 
         // Act
-        sut.OnEnd(data);
+        data.Stop();
 
         // Assert
         _fixture.ScopeManager.Received(1).RestoreScope(scope);
@@ -265,16 +270,16 @@ public class ActivitySpanProcessorTests
         var sut = _fixture.GetSut();
 
         var scope = new Scope();
-        var parent = Tracer.StartActivity("transaction")!;
+        var parent = Tracer.CreateActivity("transaction", ActivityKind.Internal)!;
         parent.SetFused(scope);
-        sut.OnStart(parent);
+        parent.Start();
 
-        var data = Tracer.StartActivity("test operation")!;
+        var data = Tracer.CreateActivity("test operation", ActivityKind.Internal)!;
         data.DisplayName = "test display name";
-        sut.OnStart(data);
+        data.Start();
 
         // Act
-        sut.OnEnd(data);
+        data.Stop();
 
         // Assert
         _fixture.ScopeManager.Received(1).RestoreScope(scope);
@@ -383,7 +388,6 @@ public class ActivitySpanProcessorTests
     public void OnEnd_FinishesTransaction()
     {
         // Arrange
-        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         var sut = _fixture.GetSut();
 
         var tags = new Dictionary<string, object> {
@@ -427,11 +431,10 @@ public class ActivitySpanProcessorTests
     public void OnEnd_IsSentryRequest_DoesNotFinishTransaction(string urlKey)
     {
         // Arrange
-        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         var sut = _fixture.GetSut();
 
         var tags = new Dictionary<string, object> { { "foo", "bar" }, { urlKey, _fixture.Options.Dsn } };
-        var data = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal, parentContext: default, tags)!;
+         var data = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal, parentContext: default, tags)!;
         data.DisplayName = "test display name";
         sut.OnStart(data);
 
