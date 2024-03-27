@@ -23,6 +23,17 @@ internal class ActivitySpanProcessor
     internal long _lastPruned = 0;
     private readonly Lazy<Hub?> _realHub;
 
+    static ActivitySpanProcessor()
+    {
+#if !NET5_0_OR_GREATER
+        // TODO: Could customers potentially be relying on the Hierarchical format? If so, this will get us in trouble.
+        // Activity.SpanId gets a non-zero value only if the activity ID format is W3C. The default is W3C since .NET 5,
+        // but even in new versions of the System.Diagnostics.DiagnosticSource package, the new defaults only apply when
+        // your app is running on modern .NET, and it keeps using the older Hierarchical format on .NET Framework.
+        Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+#endif
+    }
+
     internal ActivitySpanProcessor(IHub hub)
         : this(hub, null, null, Instrumenter.Sentry)
     {
