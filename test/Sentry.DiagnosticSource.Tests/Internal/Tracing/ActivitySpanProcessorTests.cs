@@ -434,7 +434,7 @@ public class ActivitySpanProcessorTests
         var sut = _fixture.GetSut();
 
         var tags = new Dictionary<string, object> { { "foo", "bar" }, { urlKey, _fixture.Options.Dsn } };
-         var data = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal, parentContext: default, tags)!;
+        var data = Tracer.StartActivity(name: "test operation", kind: ActivityKind.Internal, parentContext: default, tags)!;
         data.DisplayName = "test display name";
         sut.OnStart(data);
 
