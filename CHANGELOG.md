@@ -10,7 +10,7 @@
 ### API changes
 
 - Removed `SentryOptionsExtensions` class - all the public methods moved directly to `SentryOptions` ([#3195](https://github.com/getsentry/sentry-dotnet/pull/3195))
-- Sentry now uses System.Diagnostics.DiagnosticSource internally for tracing. Any traces created by Sentry can now be captured via OpenTelemetry. If you are using .NET Core 3.1 or earlier, you will need to add the `Sentry.DiagnosticSource` package to your solution to enable tracing. ([#3238](https://github.com/getsentry/sentry-dotnet/pull/3238))
+- Sentry now uses System.Diagnostics.DiagnosticSource internally for tracing by default when targeting .NET 6 or later, meaning any traces created by Sentry can be captured via OpenTelemetry. If you are using .NET Core 3.1 or earlier, you can opt into this via the `Sentry.DiagnosticSource` package. ([#3238](https://github.com/getsentry/sentry-dotnet/pull/3238))
  
 ### Dependencies
 
