@@ -7,7 +7,7 @@ internal class SentryTracer(IHub hub) : ITracer
         hub.StartSpan(operationName, operationName)
         );
 
-    public ITraceSpan? CurrentSpan => hub.GetSpan() is {} span
+    public ITraceSpan? CurrentSpan => hub.GetSpan() is { } span
         ? new SentryTraceSpan(hub, span)
         : null;
 }
