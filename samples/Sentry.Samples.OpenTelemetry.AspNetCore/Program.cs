@@ -44,7 +44,7 @@ builder.WebHost.UseSentry(options =>
     options.TracesSampleRate = 1.0;
     options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
     // This shows experimental support for capturing OpenTelemetry metrics with Sentry
-    options.ExperimentalMetrics = new ExperimentalMetricsOptions()
+    options.EnableMetrics(metrics =>
     {
         // Here we're telling Sentry to capture all built-in metrics. This includes all the metrics we configured
         // OpenTelemetry to emit when we called `builder.Services.AddOpenTelemetry()` above:
@@ -52,8 +52,8 @@ builder.WebHost.UseSentry(options =>
         // - "Microsoft.AspNetCore.Hosting",
         // - "Microsoft.AspNetCore.Server.Kestrel",
         // - "System.Net.Http"
-        CaptureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All
-    };
+        metrics.CaptureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All;
+    });
 });
 
 builder.Services

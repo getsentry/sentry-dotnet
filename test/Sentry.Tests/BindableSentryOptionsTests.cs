@@ -5,7 +5,9 @@ namespace Sentry.Tests;
 
 public class BindableSentryOptionsTests : BindableTests<SentryOptions>
 {
-    public BindableSentryOptionsTests() : base(nameof(SentryOptions.ExperimentalMetrics))
+#pragma warning disable CS0618 // Type or member is obsolete
+    public BindableSentryOptionsTests() : base(nameof(SentryOptions.ExperimentalMetrics), nameof(SentryOptions.Metrics))
+#pragma warning restore CS0618 // Type or member is obsolete
     {
     }
 

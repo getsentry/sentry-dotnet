@@ -2,7 +2,7 @@ namespace Sentry;
 
 /// <summary>
 /// Well known values for built in metrics that can be configured for
-/// <see cref="ExperimentalMetricsOptions.CaptureSystemDiagnosticsMeters"/>
+/// <see cref="MetricsOptions.CaptureSystemDiagnosticsMeters"/>
 /// </summary>
 public static partial class BuiltInSystemDiagnosticsMeters
 {

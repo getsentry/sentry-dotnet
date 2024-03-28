@@ -5,7 +5,9 @@ namespace Sentry.AspNetCore.Tests;
 
 public class BindableSentryAspNetCoreOptionsTests : BindableTests<SentryAspNetCoreOptions>
 {
-    public BindableSentryAspNetCoreOptionsTests() : base(nameof(SentryAspNetCoreOptions.ExperimentalMetrics))
+#pragma warning disable CS0618 // Type or member is obsolete
+    public BindableSentryAspNetCoreOptionsTests() : base(nameof(SentryAspNetCoreOptions.ExperimentalMetrics), nameof(SentryAspNetCoreOptions.Metrics))
+#pragma warning restore CS0618 // Type or member is obsolete
     {
     }
 

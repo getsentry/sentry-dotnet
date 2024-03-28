@@ -11,7 +11,7 @@ internal class SystemDiagnosticsMetricsListener : IDisposable
 
     internal readonly MeterListener _sentryListener = new();
 
-    private SystemDiagnosticsMetricsListener(ExperimentalMetricsOptions metricsOptions)
+    private SystemDiagnosticsMetricsListener(MetricsOptions metricsOptions)
         : this(metricsOptions, () => SentrySdk.Metrics)
     {
     }
@@ -19,7 +19,7 @@ internal class SystemDiagnosticsMetricsListener : IDisposable
     /// <summary>
     /// Overload for testing purposes - allows us to supply a mock IMetricAggregator
     /// </summary>
-    internal SystemDiagnosticsMetricsListener(ExperimentalMetricsOptions metricsOptions, Func<IMetricAggregator> metricsAggregatorResolver)
+    internal SystemDiagnosticsMetricsListener(MetricsOptions metricsOptions, Func<IMetricAggregator> metricsAggregatorResolver)
     {
         _metricsAggregator = new Lazy<IMetricAggregator>(metricsAggregatorResolver);
         _sentryListener.InstrumentPublished = (instrument, listener) =>
@@ -40,7 +40,7 @@ internal class SystemDiagnosticsMetricsListener : IDisposable
         _sentryListener.Start();
     }
 
-    internal static void InitializeDefaultListener(ExperimentalMetricsOptions metricsOptions)
+    internal static void InitializeDefaultListener(MetricsOptions metricsOptions)
     {
         var oldListener = Interlocked.Exchange(
             ref DefaultListener,
