@@ -5,7 +5,9 @@ namespace Sentry.Azure.Functions.Worker.Tests;
 
 public class BindableSentryAzureFunctionsOptionsTests : BindableTests<SentryAzureFunctionsOptions>
 {
-    public BindableSentryAzureFunctionsOptionsTests() : base(nameof(SentryAzureFunctionsOptions.ExperimentalMetrics))
+#pragma warning disable CS0618 // Type or member is obsolete
+    public BindableSentryAzureFunctionsOptionsTests() : base(nameof(SentryAzureFunctionsOptions.ExperimentalMetrics), nameof(SentryAzureFunctionsOptions.Metrics))
+#pragma warning restore CS0618 // Type or member is obsolete
     {
     }
 

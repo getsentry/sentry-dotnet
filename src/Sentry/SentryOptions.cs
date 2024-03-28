@@ -1126,17 +1126,33 @@ public class SentryOptions
     [EditorBrowsable(EditorBrowsableState.Never)]
     public Func<string, PEReader?>? AssemblyReader { get; set; }
 
+    internal MetricsOptions? Metrics { get; set; }
+
     /// <summary>
-    /// <para>
-    /// Settings for the EXPERIMENTAL metrics feature. This feature is preview only and subject to change without a
-    /// major version bump. Currently it's recommended for noodling only - DON'T USE IN PRODUCTION!
-    /// </para>
-    /// <para>
-    /// By default the ExperimentalMetrics Options is null, which means the feature is disabled. If you want to enable
-    /// Experimental metrics, you must set this property to a non-null value.
-    /// </para>
+    /// Enables the Sentry Metrics feature.
     /// </summary>
-    public ExperimentalMetricsOptions? ExperimentalMetrics { get; set; }
+    /// <example>
+    /// <code>
+    /// options.EnableMetrics(metrics =>
+    /// {
+    ///     metrics.EnableCodeLocations = true;
+    ///     metrics.CaptureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All;
+    /// });
+    /// </code>
+    /// </example>
+    public void EnableMetrics(Action<MetricsOptions>? configureOptions = null)
+    {
+        Metrics = new MetricsOptions();
+        configureOptions?.Invoke(Metrics);
+    }
+
+    /// <inheritdoc cref="Metrics"/>
+    [Obsolete("Obsolete")]
+    public ExperimentalMetricsOptions? ExperimentalMetrics
+    {
+        get => Metrics is ExperimentalMetricsOptions metrics ? metrics : null;
+        set => Metrics = value;
+    }
 
     /// <summary>
     /// The Spotlight URL. Defaults to http://localhost:8969/stream

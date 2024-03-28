@@ -173,7 +173,7 @@ internal class MetricAggregator : IMetricAggregator
                 return metric;
             });
 
-        if (_options.ExperimentalMetrics is { EnableCodeLocations: true })
+        if (_options.Metrics is { EnableCodeLocations: true })
         {
             RecordCodeLocation(type, key, unit.Value, stackLevel + 1, timestamp.Value);
         }

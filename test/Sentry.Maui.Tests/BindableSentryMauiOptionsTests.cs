@@ -5,7 +5,9 @@ namespace Sentry.Maui.Tests;
 
 public class BindableSentryMauiOptionsTests : BindableTests<SentryMauiOptions>
 {
-    public BindableSentryMauiOptionsTests() : base(nameof(SentryMauiOptions.ExperimentalMetrics))
+#pragma warning disable CS0618 // Type or member is obsolete
+    public BindableSentryMauiOptionsTests() : base(nameof(SentryMauiOptions.ExperimentalMetrics), nameof(SentryMauiOptions.Metrics))
+#pragma warning restore CS0618 // Type or member is obsolete
     {
     }
 

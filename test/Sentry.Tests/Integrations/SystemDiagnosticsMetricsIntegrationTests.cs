@@ -13,12 +13,12 @@ public class SystemDiagnosticsMetricsIntegrationTests
         {
             Debug = true,
             DiagnosticLogger = logger,
-            ExperimentalMetrics = new ExperimentalMetricsOptions()
-            {
-                CaptureSystemDiagnosticsInstruments = [],
-                CaptureSystemDiagnosticsMeters = []
-            }
         };
+        options.EnableMetrics(metrics =>
+        {
+            metrics.CaptureSystemDiagnosticsInstruments = [];
+            metrics.CaptureSystemDiagnosticsMeters = [];
+        });
         var integration = new SystemDiagnosticsMetricsIntegration();
 
         // Act
@@ -36,20 +36,20 @@ public class SystemDiagnosticsMetricsIntegrationTests
         var options = new SentryOptions
         {
             DiagnosticLogger = logger,
-            ExperimentalMetrics = new ExperimentalMetricsOptions()
-            {
-                CaptureSystemDiagnosticsInstruments = [".*"],
-                CaptureSystemDiagnosticsMeters = []
-            }
         };
-        var initializeDefaultListener = Substitute.For<Action<ExperimentalMetricsOptions>>();
+        options.EnableMetrics(metrics =>
+        {
+            metrics.CaptureSystemDiagnosticsInstruments = [".*"];
+            metrics.CaptureSystemDiagnosticsMeters = [];
+        });
+        var initializeDefaultListener = Substitute.For<Action<MetricsOptions>>();
         var integration = new SystemDiagnosticsMetricsIntegration(initializeDefaultListener);
 
         // Act
         integration.Register(null!, options);
 
         // Assert
-        initializeDefaultListener.Received(1)(options.ExperimentalMetrics);
+        initializeDefaultListener.Received(1)(options.Metrics);
     }
 
     [Fact]
@@ -59,21 +59,21 @@ public class SystemDiagnosticsMetricsIntegrationTests
         var logger = Substitute.For<IDiagnosticLogger>();
         var options = new SentryOptions
         {
-            DiagnosticLogger = logger,
-            ExperimentalMetrics = new ExperimentalMetricsOptions()
-            {
-                CaptureSystemDiagnosticsInstruments = [],
-                CaptureSystemDiagnosticsMeters = [".*"]
-            }
+            DiagnosticLogger = logger
         };
-        var initializeDefaultListener = Substitute.For<Action<ExperimentalMetricsOptions>>();
+        options.EnableMetrics(metrics =>
+        {
+            metrics.CaptureSystemDiagnosticsInstruments = [];
+            metrics.CaptureSystemDiagnosticsMeters = [".*"];
+        });
+        var initializeDefaultListener = Substitute.For<Action<MetricsOptions>>();
         var integration = new SystemDiagnosticsMetricsIntegration(initializeDefaultListener);
 
         // Act
         integration.Register(null!, options);
 
         // Assert
-        initializeDefaultListener.Received(1)(options.ExperimentalMetrics);
+        initializeDefaultListener.Received(1)(options.Metrics);
     }
 }
 #endif

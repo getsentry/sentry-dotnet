@@ -28,18 +28,19 @@ internal static class Program
                    options.SampleRate = 1.0f; // Not recommended in production - may adversely impact quota
                    options.TracesSampleRate = 1.0f; // Not recommended in production - may adversely impact quota
                    // Initialize some (non null) ExperimentalMetricsOptions to enable Sentry Metrics,
-                   options.ExperimentalMetrics = new ExperimentalMetricsOptions
+                   options.EnableMetrics(metrics =>
                    {
-                       EnableCodeLocations = true, // Set this to false if you don't want to track code locations
-                       CaptureSystemDiagnosticsInstruments = [
-                            // Capture System.Diagnostics.Metrics matching the name "HatCo.HatStore", which is the name
-                            // of the custom HatsMeter defined above
-                            "hats-sold"
-                        ],
+                       metrics.EnableCodeLocations = true; // Set this to false if you don't want to track code locations
+                       metrics.CaptureSystemDiagnosticsInstruments =
+                       [
+                           // Capture System.Diagnostics.Metrics matching the name "HatCo.HatStore", which is the name
+                           // of the custom HatsMeter defined above
+                           "hats-sold"
+                       ];
                        // Capture all built in metrics (this is the default - you can override this to capture some or
                        // none of these if you prefer)
-                       CaptureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All
-                   };
+                       metrics.CaptureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All;
+                   });
                }))
         {
             System.Console.WriteLine("Measure, Yeah, Measure!");

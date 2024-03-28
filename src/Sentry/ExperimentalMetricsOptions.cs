@@ -1,10 +1,15 @@
 namespace Sentry;
 
+/// <inheritdoc cref="MetricsOptions"/>
+[Obsolete("Metrics are no longer experimental. Use MetricsOptions instead. This class will be removed in a future version.")]
+public class ExperimentalMetricsOptions : MetricsOptions
+{
+}
+
 /// <summary>
-/// Settings for the experimental Metrics feature. This feature is preview only and will very likely change in the future
-/// without a major version bump... so use at your own risk.
+/// Settings for Sentry Metrics.
 /// </summary>
-public class ExperimentalMetricsOptions
+public class MetricsOptions
 {
     /// <summary>
     /// Determines whether code locations should be recorded for Metrics
