@@ -11,6 +11,11 @@ public enum Instrumenter
     Sentry,
 
     /// <summary>
+    /// Spans are instrumented with Sentry using ActivitySource.
+    /// </summary>
+    ActivitySource,
+
+    /// <summary>
     /// Spans are instrumented via OpenTelemetry.
     /// </summary>
     OpenTelemetry

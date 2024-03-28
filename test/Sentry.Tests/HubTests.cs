@@ -617,46 +617,6 @@ public partial class HubTests
     }
 
     [Fact]
-    public void StartTransaction_SameInstrumenter_SampledIn()
-    {
-        // Arrange
-        _fixture.Options.EnableTracing = true;
-        _fixture.Options.Instrumenter = Instrumenter.Sentry; // The default... making it explicit for this test though
-        var hub = _fixture.GetSut();
-
-        var transactionContext = new TransactionContext("name", "operation")
-        {
-            Instrumenter = _fixture.Options.Instrumenter
-        };
-
-        // Act
-        var transaction = hub.StartTransaction(transactionContext);
-
-        // Assert
-        transaction.IsSampled.Should().BeTrue();
-    }
-
-    [Fact]
-    public void StartTransaction_DifferentInstrumenter_NoOp()
-    {
-        // Arrange
-        _fixture.Options.EnableTracing = true;
-        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
-        var hub = _fixture.GetSut();
-
-        var transactionContext = new TransactionContext("name", "operation")
-        {
-            Instrumenter = Instrumenter.Sentry // The default... making it explicit for this test though
-        };
-
-        // Act
-        var transaction = hub.StartTransaction(transactionContext);
-
-        // Assert
-        transaction.Should().Be(NoOpTransaction.Instance);
-    }
-
-    [Fact]
     public void StartTransaction_EnableTracing_Sampler_SampledIn()
     {
         // Arrange

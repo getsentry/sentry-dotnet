@@ -25,4 +25,22 @@
     <InternalsVisibleTo Include="Sentry.Benchmarks" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <!-- OpenTelemetry depends on System.Diagnostics.DiagnosticSource 8.0.0 or later -->
+    <DefineConstants>$(DefineConstants);HAS_DIAGNOSTICS_7_OR_GREATER</DefineConstants>
+  </PropertyGroup>
+
+  <!--
+    Include these here if they haven't been included in the core Sentry package already. The only reason they don't
+    always get included in the Sentry package is that they depend on System.Diagnostics.DiagnosticSource 7.0.0 or later,
+    which is only available for certain targets. However, OpenTelemetry depends on System.Diagnostics.DiagnosticSource
+    8.0.0 so we're safe to include these here.
+  -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4'))">
+    <Compile Include="..\Sentry.DiagnosticSource\Internal\Tracing\**\*.cs">
+      <Link>Internal\Tracing\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+  </ItemGroup>
+
+
 </Project>

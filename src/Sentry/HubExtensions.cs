@@ -12,6 +12,18 @@ namespace Sentry;
 public static class HubExtensions
 {
     /// <summary>
+    /// Starts a child span for the current transaction or, if there is no active transaction, starts a new transaction.
+    /// </summary>
+    internal static ISpan StartSpan(this IHub hub, string operation, string description)
+    {
+        ITransactionTracer? currentTransaction = null;
+        hub.ConfigureScope(s => currentTransaction = s.Transaction);
+        return currentTransaction is { } transaction
+            ? transaction.StartChild(operation, description)
+            : hub.StartTransaction(operation, description);
+    }
+
+    /// <summary>
     /// Starts a transaction.
     /// </summary>
     public static ITransactionTracer StartTransaction(this IHub hub, ITransactionContext context) =>

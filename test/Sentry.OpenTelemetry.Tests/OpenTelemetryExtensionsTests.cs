@@ -1,3 +1,5 @@
+using Sentry.Internal.Tracing;
+
 namespace Sentry.OpenTelemetry.Tests;
 
 public class OpenTelemetryExtensionsTests

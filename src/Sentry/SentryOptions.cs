@@ -13,6 +13,8 @@ using static Sentry.SentryConstants;
 using Sentry.Internal.DiagnosticSource;
 #endif
 
+using Sentry.Internal.Tracing;
+
 #if ANDROID
 using Sentry.Android;
 using Sentry.Android.AssemblyReader;
@@ -153,42 +155,42 @@ public class SentryOptions
         get
         {
             // Auto-session tracking to be the first to run
-            if ((_defaultIntegrations & DefaultIntegrations.AutoSessionTrackingIntegration) != 0)
+            if (_defaultIntegrations.Includes(DefaultIntegrations.AutoSessionTrackingIntegration))
             {
                 yield return new AutoSessionTrackingIntegration();
             }
 
-            if ((_defaultIntegrations & DefaultIntegrations.AppDomainUnhandledExceptionIntegration) != 0)
+            if (_defaultIntegrations.Includes(DefaultIntegrations.AppDomainUnhandledExceptionIntegration))
             {
                 yield return new AppDomainUnhandledExceptionIntegration();
             }
 
-            if ((_defaultIntegrations & DefaultIntegrations.AppDomainProcessExitIntegration) != 0)
+            if (_defaultIntegrations.Includes(DefaultIntegrations.AppDomainProcessExitIntegration))
             {
                 yield return new AppDomainProcessExitIntegration();
             }
 
-            if ((_defaultIntegrations & DefaultIntegrations.UnobservedTaskExceptionIntegration) != 0)
+            if (_defaultIntegrations.Includes(DefaultIntegrations.UnobservedTaskExceptionIntegration))
             {
                 yield return new UnobservedTaskExceptionIntegration();
             }
 
 #if NETFRAMEWORK
-            if ((_defaultIntegrations & DefaultIntegrations.NetFxInstallationsIntegration) != 0)
+            if (_defaultIntegrations.Includes(DefaultIntegrations.NetFxInstallationsIntegration))
             {
                 yield return new NetFxInstallationsIntegration();
             }
 #endif
 
 #if HAS_DIAGNOSTIC_INTEGRATION
-            if ((_defaultIntegrations & DefaultIntegrations.SentryDiagnosticListenerIntegration) != 0)
+            if (_defaultIntegrations.Includes(DefaultIntegrations.SentryDiagnosticListenerIntegration))
             {
                 yield return new SentryDiagnosticListenerIntegration();
             }
 #endif
 
 #if NET5_0_OR_GREATER && !__MOBILE__
-            if ((_defaultIntegrations & DefaultIntegrations.WinUiUnhandledExceptionIntegration) != 0
+            if (_defaultIntegrations.Includes(DefaultIntegrations.WinUiUnhandledExceptionIntegration)
                 && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 yield return new WinUIUnhandledExceptionIntegration();
@@ -196,9 +198,16 @@ public class SentryOptions
 #endif
 
 #if NET8_0_OR_GREATER
-            if ((_defaultIntegrations & DefaultIntegrations.SystemDiagnosticsMetricsIntegration) != 0)
+            if (_defaultIntegrations.Includes(DefaultIntegrations.SystemDiagnosticsMetricsIntegration))
             {
                 yield return new SystemDiagnosticsMetricsIntegration();
+            }
+#endif
+
+#if HAS_ACTIVITY_TRACING_INTEGRATION
+            if (_defaultIntegrations.Includes(DefaultIntegrations.ActivityTracingIntegration))
+            {
+                yield return new ActivityTracingIntegration();
             }
 #endif
 
@@ -222,6 +231,14 @@ public class SentryOptions
     public IBackgroundWorker? BackgroundWorker { get; set; }
 
     internal ISentryHttpClientFactory? SentryHttpClientFactory { get; set; }
+
+    /// <summary>
+    /// The trace provider to be used by the Sentry SDK and it's integrations when creating spans. For net5.0 and later
+    /// the ActivityTraceProvider is used by default. Earlier versions of .NET (including .NET Framework) default to the
+    /// SentryTraceProvider. Users of those earlier versions of .NET can manually override that behaviour by registering
+    /// the ActivityTraceProvider via our Sentry.DiagnosticSource integration.
+    /// </summary>
+    internal ITraceProvider? InternalTraceProvider { get; set; }
 
     internal HttpClient GetHttpClient()
     {
@@ -1224,6 +1241,9 @@ public class SentryOptions
 #if NET8_0_OR_GREATER
                                | DefaultIntegrations.SystemDiagnosticsMetricsIntegration
 #endif
+#if HAS_ACTIVITY_TRACING_INTEGRATION
+                               | DefaultIntegrations.ActivityTracingIntegration
+#endif
                                ;
 
 #if ANDROID
@@ -1608,6 +1628,14 @@ public class SentryOptions
         => RemoveDefaultIntegration(DefaultIntegrations.SystemDiagnosticsMetricsIntegration);
 #endif
 
+#if HAS_ACTIVITY_TRACING_INTEGRATION
+    /// <summary>
+    /// Disables the Sentry Tracing integration.
+    /// </summary>
+    public void DisableActivityTracingIntegration()
+        => RemoveDefaultIntegration(DefaultIntegrations.ActivityTracingIntegration);
+#endif
+
     internal bool HasIntegration<TIntegration>() => _integrations.Any(integration => integration is TIntegration);
 
     internal void RemoveDefaultIntegration(DefaultIntegrations defaultIntegrations) => _defaultIntegrations &= ~defaultIntegrations;
@@ -1630,6 +1658,9 @@ public class SentryOptions
 #endif
 #if NET8_0_OR_GREATER
         SystemDiagnosticsMetricsIntegration = 1 << 7,
+#endif
+#if HAS_ACTIVITY_TRACING_INTEGRATION
+        ActivityTracingIntegration = 1 << 8,
 #endif
     }
 

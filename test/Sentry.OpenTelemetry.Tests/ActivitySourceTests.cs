@@ -11,7 +11,7 @@ public abstract class ActivitySourceTests : IDisposable
 
     protected ActivitySourceTests()
     {
-        var activitySourceName = "SentrySpanProcessorTests";
+        var activitySourceName = "ActivitySourceTests";
         var testSampler = new TestSampler();
         Tracer = new ActivitySource(activitySourceName);
         _traceProvider = Sdk.CreateTracerProviderBuilder()
