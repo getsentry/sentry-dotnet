@@ -26,21 +26,29 @@ internal class ActivitySpanProcessor
     static ActivitySpanProcessor()
     {
 #if !NET5_0_OR_GREATER
+        if (Activity.DefaultIdFormat == ActivityIdFormat.W3C)
+        {
+            return;
+        }
+
         // TODO: Could customers potentially be relying on the Hierarchical format? If so, this will get us in trouble.
-        // Activity.SpanId gets a non-zero value only if the activity ID format is W3C. The default is W3C since .NET 5,
-        // but even in new versions of the System.Diagnostics.DiagnosticSource package, the new defaults only apply when
-        // your app is running on modern .NET, and it keeps using the older Hierarchical format on .NET Framework.
+        //
+        // Another option would be to warn customers and have them set this themselves (that would be more deliberate).
+        //
+        // Activity.SpanId only gets a non-zero value if the activity ID format is W3C (the default since net5.0). The
+        // default is Hierarchical on .NET Framework, .NET Core 3.1 and below, which won't work with Sentry tracing.
+        Debug.WriteLine("Setting Activity.DefaultIdFormat to W3C.");
         Activity.DefaultIdFormat = ActivityIdFormat.W3C;
 #endif
     }
 
-    internal ActivitySpanProcessor(IHub hub)
-        : this(hub, null, null, Instrumenter.Sentry)
+    internal ActivitySpanProcessor(IHub hub, Instrumenter instrumenter)
+        : this(hub, null, null, instrumenter)
     {
     }
 
-    internal ActivitySpanProcessor(IHub hub, Action<ISpan, System.Diagnostics.Activity>? beforeFinish = null,
-        Func<IDictionary<string, object>>? resourceAttributeResolver = null)
+    internal ActivitySpanProcessor(IHub hub, Action<ISpan, System.Diagnostics.Activity>? beforeFinish,
+        Func<IDictionary<string, object>>? resourceAttributeResolver)
         : this(hub, beforeFinish, resourceAttributeResolver, Instrumenter.OpenTelemetry)
     {
     }

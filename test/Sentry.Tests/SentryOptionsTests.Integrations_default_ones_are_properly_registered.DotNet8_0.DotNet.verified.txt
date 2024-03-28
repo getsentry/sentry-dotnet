@@ -48,7 +48,7 @@
   {
     Message: Registering integration: '{0}'.,
     Args: [
-      SentryTracingIntegration
+      ActivityTracingIntegration
     ]
   }
 ]

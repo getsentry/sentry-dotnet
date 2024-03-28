@@ -316,7 +316,8 @@ namespace Sentry
     public enum Instrumenter
     {
         Sentry = 0,
-        OpenTelemetry = 1,
+        ActivitySource = 1,
+        OpenTelemetry = 2,
     }
     public readonly struct MeasurementUnit : System.IEquatable<Sentry.MeasurementUnit>
     {

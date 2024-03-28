@@ -1,6 +1,6 @@
-namespace Sentry.Internal;
+namespace Sentry.Internal.Tracing;
 
-internal interface ISentrySpan : IDisposable
+internal interface ITraceSpan : IDisposable
 {
     void SetAttribute(string key, object value);
     void AddEvent(string message);

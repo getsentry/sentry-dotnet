@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Internal.Tracing;
 using Sentry.Protocol.Envelopes;
 using Sentry.Protocol.Metrics;
 
@@ -20,7 +21,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
     // Internal for testability
     internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
 
-    internal IInternalScopeManager ScopeManager { get; }
+    public IInternalScopeManager ScopeManager { get; }
 
     /// <inheritdoc cref="IMetricAggregator"/>
     public IMetricAggregator Metrics { get; }
@@ -75,6 +76,9 @@ internal class Hub : IHub, IMetricHub, IDisposable
             options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
             integration.Register(this, options);
         }
+
+        // If no tracing integration was registered, fall back to Sentry tracing
+        options.InternalTraceProvider ??= new SentryTraceProvider(this);
     }
 
     public void ConfigureScope(Action<Scope> configureScope)
@@ -119,16 +123,6 @@ internal class Hub : IHub, IMetricHub, IDisposable
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
     {
-        var instrumenter = (context as SpanContext)?.Instrumenter;
-        if (instrumenter != _options.Instrumenter)
-        {
-            _options.LogWarning(
-                $"Attempted to start a transaction via {instrumenter} instrumentation when the SDK is" +
-                $" configured for {_options.Instrumenter} instrumentation.  The transaction will not be created.");
-
-            return NoOpTransaction.Instance;
-        }
-
         var transaction = new TransactionTracer(this, context);
 
         // If the hub is disabled, we will always sample out.  In other words, starting a transaction
@@ -539,14 +533,10 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
-    /// <inheritdoc cref="IMetricHub.StartSpan"/>
+    /// <inheritdoc cref="HubExtensions.StartSpan"/>
     public ISpan StartSpan(string operation, string description)
     {
-        ITransactionTracer? currentTransaction = null;
-        ConfigureScope(s => currentTransaction = s.Transaction);
-        return currentTransaction is { } transaction
-            ? transaction.StartChild(operation, description)
-            : this.StartTransaction(operation, description);
+        return HubExtensions.StartSpan(this, operation, description);
     }
 
     public void CaptureSession(SessionUpdate sessionUpdate)

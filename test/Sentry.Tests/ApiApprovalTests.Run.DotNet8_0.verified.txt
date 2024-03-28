@@ -318,7 +318,8 @@ namespace Sentry
     public enum Instrumenter
     {
         Sentry = 0,
-        OpenTelemetry = 1,
+        ActivitySource = 1,
+        OpenTelemetry = 2,
     }
     public readonly struct MeasurementUnit : System.IEquatable<Sentry.MeasurementUnit>
     {
@@ -699,11 +700,11 @@ namespace Sentry
         public void AddTransactionProcessorProvider(System.Func<System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor>> processorProvider) { }
         public void AddTransactionProcessors(System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> processors) { }
         public void ApplyDefaultTags(Sentry.IHasTags hasTags) { }
+        public void DisableActivityTracingIntegration() { }
         public void DisableAppDomainProcessExitFlush() { }
         public void DisableAppDomainUnhandledExceptionCapture() { }
         public void DisableDiagnosticSourceIntegration() { }
         public void DisableDuplicateEventDetection() { }
-        public void DisableSentryTracingIntegration() { }
         public void DisableSystemDiagnosticsMetricsIntegration() { }
         public void DisableUnobservedTaskExceptionCapture() { }
         public void DisableWinUiUnhandledExceptionIntegration() { }

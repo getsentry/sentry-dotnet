@@ -5,7 +5,7 @@ internal class SentryActivityListener : IDisposable
     private readonly ActivitySpanProcessor _activitySpanProcessor;
     private readonly ActivityListener? _listener;
 
-    public SentryActivityListener(IHub hub) : this(new ActivitySpanProcessor(hub))
+    public SentryActivityListener(IHub hub, Instrumenter instrumenter) : this(new ActivitySpanProcessor(hub, instrumenter))
     {
     }
 

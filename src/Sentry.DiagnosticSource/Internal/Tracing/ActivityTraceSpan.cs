@@ -9,7 +9,7 @@ using System.Diagnostics;
 /// access this from our integrations without taking a hard dependency on
 /// System.Diagnostics.Activity (which is only available in .NET 5.0 and later)
 /// </summary>
-internal class ActivityWrapper(System.Diagnostics.Activity activity) : ISentrySpan
+internal class ActivityTraceSpan(System.Diagnostics.Activity activity) : ITraceSpan
 {
     public void SetAttribute(string key, object value) => activity.SetTag(key, value);
 

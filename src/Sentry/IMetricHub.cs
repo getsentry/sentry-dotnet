@@ -14,9 +14,7 @@ internal interface IMetricHub
     /// </summary>
     void CaptureCodeLocations(CodeLocations codeLocations);
 
-    /// <summary>
-    /// Starts a child span for the current transaction or, if there is no active transaction, starts a new transaction.
-    /// </summary>
+    /// <inheritdoc cref="HubExtensions.StartSpan"/>
     ISpan StartSpan(string operation, string description);
 
     /// <inheritdoc cref="IHub.GetSpan"/>

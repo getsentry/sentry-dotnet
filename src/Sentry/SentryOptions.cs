@@ -13,9 +13,7 @@ using static Sentry.SentryConstants;
 using Sentry.Internal.DiagnosticSource;
 #endif
 
-#if HAS_TRACING_INTEGRATION
 using Sentry.Internal.Tracing;
-#endif
 
 #if ANDROID
 using Sentry.Android;
@@ -206,10 +204,10 @@ public class SentryOptions
             }
 #endif
 
-#if HAS_TRACING_INTEGRATION
-            if (_defaultIntegrations.Includes(DefaultIntegrations.SentryTracingIntegration))
+#if HAS_ACTIVITY_TRACING_INTEGRATION
+            if (_defaultIntegrations.Includes(DefaultIntegrations.ActivityTracingIntegration))
             {
-                yield return new SentryTracingIntegration();
+                yield return new ActivityTracingIntegration();
             }
 #endif
 
@@ -234,13 +232,13 @@ public class SentryOptions
 
     internal ISentryHttpClientFactory? SentryHttpClientFactory { get; set; }
 
-    private ISentryTraceProvider? _sentryTraceProvider;
-
-    internal ISentryTraceProvider SentryTraceProvider
-    {
-        get => _sentryTraceProvider ?? DisabledTraceProvider.Instance;
-        set => _sentryTraceProvider = value;
-    }
+    /// <summary>
+    /// The trace provider to be used by the Sentry SDK and it's integrations when creating spans. For net5.0 and later
+    /// the ActivityTraceProvider is used by default. Earlier versions of .NET (including .NET Framework) default to the
+    /// SentryTraceProvider. Users of those earlier versions of .NET can manually override that behaviour by registering
+    /// the ActivityTraceProvider via our Sentry.DiagnosticSource integration.
+    /// </summary>
+    internal ITraceProvider? InternalTraceProvider { get; set; }
 
     internal HttpClient GetHttpClient()
     {
@@ -1243,8 +1241,8 @@ public class SentryOptions
 #if NET8_0_OR_GREATER
                                | DefaultIntegrations.SystemDiagnosticsMetricsIntegration
 #endif
-#if HAS_TRACING_INTEGRATION
-                               | DefaultIntegrations.SentryTracingIntegration
+#if HAS_ACTIVITY_TRACING_INTEGRATION
+                               | DefaultIntegrations.ActivityTracingIntegration
 #endif
                                ;
 
@@ -1630,12 +1628,12 @@ public class SentryOptions
         => RemoveDefaultIntegration(DefaultIntegrations.SystemDiagnosticsMetricsIntegration);
 #endif
 
-#if HAS_TRACING_INTEGRATION
+#if HAS_ACTIVITY_TRACING_INTEGRATION
     /// <summary>
     /// Disables the Sentry Tracing integration.
     /// </summary>
-    public void DisableSentryTracingIntegration()
-        => RemoveDefaultIntegration(DefaultIntegrations.SentryTracingIntegration);
+    public void DisableActivityTracingIntegration()
+        => RemoveDefaultIntegration(DefaultIntegrations.ActivityTracingIntegration);
 #endif
 
     internal bool HasIntegration<TIntegration>() => _integrations.Any(integration => integration is TIntegration);
@@ -1661,8 +1659,8 @@ public class SentryOptions
 #if NET8_0_OR_GREATER
         SystemDiagnosticsMetricsIntegration = 1 << 7,
 #endif
-#if HAS_TRACING_INTEGRATION
-        SentryTracingIntegration = 1 << 8,
+#if HAS_ACTIVITY_TRACING_INTEGRATION
+        ActivityTracingIntegration = 1 << 8,
 #endif
     }
 

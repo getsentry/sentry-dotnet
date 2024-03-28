@@ -3,7 +3,7 @@ using Sentry.Integrations;
 
 namespace Sentry.Internal.Tracing;
 
-internal class SentryTracingIntegration : ISdkIntegration
+internal class ActivityTracingIntegration : ISdkIntegration
 {
     /*
      TODO: Think about where to put this... would be good if it sat on an IDisposable but also something internal.
@@ -23,7 +23,7 @@ internal class SentryTracingIntegration : ISdkIntegration
         }
 
         // TODO: Should we be registering this if OpenTelemetry is enabled?
-        options.SentryTraceProvider = new SentryTraceProvider();
-        _listener = new SentryActivityListener(hub);
+        options.InternalTraceProvider = new ActivityTraceProvider();
+        _listener = new SentryActivityListener(hub, Instrumenter.ActivitySource);
     }
 }

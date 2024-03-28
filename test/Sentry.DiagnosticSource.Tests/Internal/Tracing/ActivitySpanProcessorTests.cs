@@ -30,7 +30,7 @@ public class ActivitySpanProcessorTests
                 AutoSessionTracking = false
             };
 #if NET5_0_OR_GREATER
-            Options.DisableSentryTracingIntegration(); // We'll create our own for these tests...
+            Options.DisableActivityTracingIntegration(); // We'll create our own for these tests...
 #endif
 
             Client = Substitute.For<ISentryClient>();
@@ -42,7 +42,7 @@ public class ActivitySpanProcessorTests
 
         public ActivitySpanProcessor GetSut()
         {
-            var processor = new ActivitySpanProcessor(GetHub());
+            var processor = new ActivitySpanProcessor(GetHub(), Instrumenter.ActivitySource);
             Listener = new SentryActivityListener(processor);
             return processor;
         }
