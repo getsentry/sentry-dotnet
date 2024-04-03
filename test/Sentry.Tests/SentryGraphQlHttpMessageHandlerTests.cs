@@ -23,6 +23,7 @@ public class SentryGraphQlHttpMessageHandlerTests
     private StringContent ValidResponseContent => SentryGraphQlTestHelpers.ResponesContent(ValidResponse);
 
     [Fact]
+    [Obsolete("Obsolete")]
     public void ProcessRequest_ExtractsGraphQlRequestContent()
     {
         // Arrange
@@ -44,6 +45,7 @@ public class SentryGraphQlHttpMessageHandlerTests
     }
 
     [Fact]
+    [Obsolete("Obsolete")]
     public void ProcessRequest_SetsSpanData()
     {
         // Arrange
@@ -74,6 +76,7 @@ public class SentryGraphQlHttpMessageHandlerTests
     // [Theory]
     // [InlineData(ValidQuery)]
     [Fact]
+    [Obsolete("Obsolete")]
     public void HandleResponse_AddsBreadcrumb()
     {
         // Arrange
@@ -115,6 +118,7 @@ public class SentryGraphQlHttpMessageHandlerTests
     }
 
     [Fact]
+    [Obsolete("Obsolete")]
     public void HandleResponse_SetsSpanData()
     {
         // Arrange

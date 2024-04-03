@@ -35,6 +35,10 @@ internal class ActivitySpanProcessor
         //
         // Another option would be to warn customers and have them set this themselves (that would be more deliberate).
         //
+        // Finally, we can override the ActivityIdFormat for each trace by using ActivitySource.CreateActivity instead
+        // of ActivitySource.StartActivity. That's a bit more fragile and will only work for spans created by the SDK
+        // (not for anything users instrument themselves).
+        //
         // Activity.SpanId only gets a non-zero value if the activity ID format is W3C (the default since net5.0). The
         // default is Hierarchical on .NET Framework, .NET Core 3.1 and below, which won't work with Sentry tracing.
         Debug.WriteLine("Setting Activity.DefaultIdFormat to W3C.");
@@ -104,8 +108,8 @@ internal class ActivitySpanProcessor
             var span = (SpanTracer)parentSpan.StartChild(context);
             span.StartTimestamp = data.StartTimeUtc;
             // Used to filter out spans that are not recorded when finishing a transaction.
-            span.SetFused(data);
-            span.IsFiltered = () => span.GetFused<System.Diagnostics.Activity>()
+            data.BindSentrySpan(span);
+            span.IsFiltered = () => span.GetActivity()
                 is { IsAllDataRequested: false, Recorded: false };
             _map[data.SpanId] = span;
         }
@@ -136,7 +140,7 @@ internal class ActivitySpanProcessor
                 );
             transaction.StartTimestamp = data.StartTimeUtc;
             _hub.ConfigureScope(scope => scope.Transaction = transaction);
-            transaction.SetFused(data);
+            data.BindSentrySpan(transaction);
             _map[data.SpanId] = transaction;
         }
 
@@ -215,10 +219,20 @@ internal class ActivitySpanProcessor
             hub?.RestoreScope(savedScope);
         }
         GenerateSentryErrorsFromOtelSpan(data, attributes);
-
-        var status = GetSpanStatus(data.Status, attributes);
         _beforeFinish?.Invoke(span, data);
-        span.Finish(status);
+        if (data.GetException() is { } exception)
+        {
+            span.Finish(exception);
+        }
+        else
+        {
+            // TODO: Does this override a status that we might be setting manually? This logic worked for OTel spans but
+            // might need to be more sophisticated for ActivityTraceSpans... alternatively we need to be more
+            // sophisticated about how we set status in the first place (leveraging attributes that will be applied
+            // appropriately by this GetSpanStatus method).
+            var status = GetSpanStatus(data.Status, attributes);
+            span.Finish(status);
+        }
 
         _map.TryRemove(data.SpanId, out _);
 
@@ -240,8 +254,7 @@ internal class ActivitySpanProcessor
         foreach (var mappedItem in _map)
         {
             var (spanId, span) = mappedItem;
-            var activity = span.GetFused<System.Diagnostics.Activity>();
-            if (activity is { Recorded: false, IsAllDataRequested: false })
+            if (span.GetActivity() is { Recorded: false, IsAllDataRequested: false })
             {
                 _map.TryRemove(spanId, out _);
             }

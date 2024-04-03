@@ -240,6 +240,7 @@ public class SentryHttpMessageHandlerTests
     }
 
     [Fact]
+    [Obsolete("Obsolete")]
     public void ProcessRequest_SetsSpanData()
     {
         // Arrange
@@ -267,6 +268,7 @@ public class SentryHttpMessageHandlerTests
     }
 
     [Fact]
+    [Obsolete("Obsolete")]
     public void HandleResponse_SetsSpanData()
     {
         // Arrange

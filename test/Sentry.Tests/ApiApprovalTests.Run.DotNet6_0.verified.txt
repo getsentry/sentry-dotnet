@@ -546,7 +546,9 @@ namespace Sentry
     public class SentryGraphQLHttpMessageHandler : Sentry.SentryMessageHandler
     {
         public SentryGraphQLHttpMessageHandler(System.Net.Http.HttpMessageHandler? innerHandler = null, Sentry.IHub? hub = null) { }
+        [System.Obsolete("This method is obsolete and will be removed in a future version.")]
         protected override void HandleResponse(System.Net.Http.HttpResponseMessage response, Sentry.ISpan? span, string method, string url) { }
+        [System.Obsolete("This method is obsolete and will be removed in a future version.")]
         protected override Sentry.ISpan? ProcessRequest(System.Net.Http.HttpRequestMessage request, string method, string url) { }
     }
     public class SentryHint
@@ -565,7 +567,9 @@ namespace Sentry
         public SentryHttpMessageHandler(Sentry.IHub hub) { }
         public SentryHttpMessageHandler(System.Net.Http.HttpMessageHandler innerHandler) { }
         public SentryHttpMessageHandler(System.Net.Http.HttpMessageHandler innerHandler, Sentry.IHub hub) { }
+        [System.Obsolete("This method will be removed in future versions.")]
         protected override void HandleResponse(System.Net.Http.HttpResponseMessage response, Sentry.ISpan? span, string method, string url) { }
+        [System.Obsolete("This method will be removed in future versions.")]
         protected override Sentry.ISpan? ProcessRequest(System.Net.Http.HttpRequestMessage request, string method, string url) { }
     }
     public readonly struct SentryId : Sentry.ISentryJsonSerializable, System.IEquatable<Sentry.SentryId>
@@ -614,7 +618,9 @@ namespace Sentry
         protected SentryMessageHandler(Sentry.IHub hub) { }
         protected SentryMessageHandler(System.Net.Http.HttpMessageHandler innerHandler) { }
         protected SentryMessageHandler(System.Net.Http.HttpMessageHandler innerHandler, Sentry.IHub hub) { }
+        [System.Obsolete("This method will be removed in future versions.")]
         protected abstract void HandleResponse(System.Net.Http.HttpResponseMessage response, Sentry.ISpan? span, string method, string url);
+        [System.Obsolete("This method will be removed in future versions.")]
         protected abstract Sentry.ISpan? ProcessRequest(System.Net.Http.HttpRequestMessage request, string method, string url);
         protected override System.Net.Http.HttpResponseMessage Send(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { }
         protected override System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { }

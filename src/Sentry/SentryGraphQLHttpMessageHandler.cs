@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.OpenTelemetry;
+using Sentry.Internal.Tracing;
 
 namespace Sentry;
 
@@ -12,6 +13,8 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
     private readonly ISentryFailedRequestHandler? _failedRequestHandler;
+    private readonly Lazy<ITracer?> _lazyTracer;
+    private ITracer? Tracer => _lazyTracer.Value;
 
     /// <summary>
     /// Constructs an instance of <see cref="SentryGraphQLHttpMessageHandler"/>.
@@ -24,12 +27,13 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
     }
 
     internal SentryGraphQLHttpMessageHandler(IHub? hub, SentryOptions? options,
-        HttpMessageHandler? innerHandler = default,
-        ISentryFailedRequestHandler? failedRequestHandler = null)
-    : base(hub, options, innerHandler)
+        HttpMessageHandler? innerHandler = default, ISentryFailedRequestHandler? failedRequestHandler = null,
+        bool useNewTracing = false)
+    : base(hub, options, innerHandler, useNewTracing)
     {
         _hub = hub ?? HubAdapter.Instance;
         _options = options ?? _hub.GetSentryOptions();
+        _lazyTracer = new(() => options?.InternalTraceProvider?.GetTracer(nameof(Sentry)));
         _failedRequestHandler = failedRequestHandler;
         if (_options != null)
         {
@@ -38,15 +42,13 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
     }
 
     /// <inheritdoc />
+    [Obsolete("This method is obsolete and will be removed in a future version.")]
     protected internal override ISpan? ProcessRequest(HttpRequestMessage request, string method, string url)
     {
-        var content = GraphQLContentExtractor.ExtractRequestContentAsync(request, _options).Result;
-        if (content is not { } graphQlRequestContent)
+        if (!BindContent(request))
         {
-            _options?.LogDebug("Unable to process non GraphQL request content");
             return null;
         }
-        request.SetFused(graphQlRequestContent);
 
         // Start a span that tracks this request
         // (may be null if transaction is not set on the scope)
@@ -58,10 +60,56 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
         return span;
     }
 
+    private protected override ITraceSpan? OnRequest(HttpRequestMessage request, string method, string url)
+    {
+        if (!BindContent(request))
+        {
+            return null;
+        }
+
+        // Start a span that tracks this request
+        // (may be null if transaction is not set on the scope)
+        return Tracer?.StartSpan(
+            "http.client",
+            $"{method} {url}" // e.g. "GET https://example.com"
+            )
+            ?.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
+    }
+
+    private bool BindContent(HttpRequestMessage request)
+    {
+        var content = GraphQLContentExtractor.ExtractRequestContentAsync(request, _options).Result;
+        if (content is not { } graphQlRequestContent)
+        {
+            _options?.LogDebug("Unable to process non GraphQL request content");
+            return false;
+        }
+        request.SetFused(graphQlRequestContent);
+        return true;
+    }
+
     /// <inheritdoc />
+    [Obsolete("This method is obsolete and will be removed in a future version.")]
     protected internal override void HandleResponse(HttpResponseMessage response, ISpan? span, string method, string url)
     {
         var graphqlInfo = response.RequestMessage?.GetFused<GraphQLRequestContent>();
+
+        HandleResponseInternal(response, method, url, graphqlInfo);
+
+        if (span is null)
+        {
+            return;
+        }
+
+        span.SetExtra(OtelSemanticConventions.AttributeHttpResponseStatusCode, (int)response.StatusCode);
+        span.Description = GetSpanDescriptionOrDefault(graphqlInfo, response.StatusCode) ?? span.Description;
+        // TODO: See how we can determine the span status for a GraphQL request...
+        var status = SpanStatusConverter.FromHttpStatusCode(response.StatusCode);  // TODO: Don't do this if the span is errored
+        span.Finish(status);
+    }
+
+    private void HandleResponseInternal(HttpResponseMessage response, string method, string url, GraphQLRequestContent? graphqlInfo)
+    {
         var breadcrumbData = new Dictionary<string, string>
         {
             {"url", url},
@@ -82,20 +130,29 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
             graphqlInfo?.OperationType ?? "graphql.operation",
             "graphql",
             breadcrumbData
-            );
+        );
 
         // Create events for failed requests
         _failedRequestHandler?.HandleResponse(response);
+    }
+
+    private protected override void OnResponse(HttpResponseMessage response, ITraceSpan? span, string method, string url)
+    {
+        var graphqlInfo = response.RequestMessage?.GetFused<GraphQLRequestContent>();
+
+        HandleResponseInternal(response, method, url, graphqlInfo);
 
         // This will handle unsuccessful status codes as well
-        if (span is not null)
+        if (span is null)
         {
-            span.SetExtra(OtelSemanticConventions.AttributeHttpResponseStatusCode, (int)response.StatusCode);
-            span.Description = GetSpanDescriptionOrDefault(graphqlInfo, response.StatusCode) ?? span.Description;
-            // TODO: See how we can determine the span status for a GraphQL request...
-            var status = SpanStatusConverter.FromHttpStatusCode(response.StatusCode);  // TODO: Don't do this if the span is errored
-            span.Finish(status);
+            return;
         }
+
+        // TODO: See how we can determine the span status for a GraphQL request...
+        var status = SpanStatusConverter.FromHttpStatusCode(response.StatusCode);  // TODO: Don't do this if the span is errored
+        span.SetExtra(OtelSemanticConventions.AttributeHttpResponseStatusCode, (int)response.StatusCode)
+            .SetStatus(status, GetSpanDescriptionOrDefault(graphqlInfo, response.StatusCode) ?? span.Description)
+            .Stop();
     }
 
     private string? GetSpanDescriptionOrDefault(GraphQLRequestContent? graphqlInfo, HttpStatusCode statusCode) =>

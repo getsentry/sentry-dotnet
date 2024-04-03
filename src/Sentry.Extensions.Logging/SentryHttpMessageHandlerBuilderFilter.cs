@@ -17,7 +17,7 @@ internal class SentryHttpMessageHandlerBuilderFilter : IHttpMessageHandlerBuilde
             if (!handlerBuilder.AdditionalHandlers.Any(h => h is SentryHttpMessageHandler))
             {
                 handlerBuilder.AdditionalHandlers.Add(
-                    new SentryHttpMessageHandler(hub)
+                    new SentryHttpMessageHandler(hub, default, default, null, true)
                 );
             }
 

@@ -5,6 +5,8 @@ internal class SentryTraceSpan : ITraceSpan
     private readonly ISpan _span;
     private Scope? _scope;
 
+    public string? Description => _span.Description;
+
     public SentryTraceSpan(IHub hub, ISpan span)
     {
         _span = span;
@@ -16,33 +18,57 @@ internal class SentryTraceSpan : ITraceSpan
         // ISpan doesn't implement IDisposable
     }
 
-    public void SetAttribute(string key, object value)
+    public ITraceSpan AddEvent(string message)
+    {
+        _scope?.AddBreadcrumb(message);
+        return this;
+    }
+
+    public ITraceSpan SetAttribute(string key, object value)
     {
         var stringValue = $"{value}";
         if (string.IsNullOrWhiteSpace(stringValue))
         {
             _span.UnsetTag(key);
-            return;
         }
-        _span.SetTag(key, stringValue);
+        else
+        {
+            _span.SetTag(key, stringValue);
+        }
+        return this;
     }
 
-    public void AddEvent(string message)
+    public ITraceSpan SetDescription(string? description)
     {
-        _scope?.AddBreadcrumb(message);
+        _span.Description = description;
+        return this;
     }
 
-    public void SetStatus(SpanStatus status, string? description = default)
+    public ITraceSpan SetStatus(SpanStatus status, string? description = default)
     {
         _span.Status = status;
         if (_span.Status != SpanStatus.Ok)
         {
             _span.Description = description;
         }
+        return this;
     }
 
-    public void Stop()
+    public ITraceSpan Stop()
     {
         _span.Finish();
+        return this;
+    }
+
+    public ITraceSpan SetExtra(string key, object? value)
+    {
+        _span.SetExtra(key, value);
+        return this;
+    }
+
+    public ITraceSpan Finish(Exception exception)
+    {
+        _span.Finish(exception);
+        return this;
     }
 }

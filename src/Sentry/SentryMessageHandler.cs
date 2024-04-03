@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
+using Sentry.Internal.Tracing;
 
 namespace Sentry;
 
@@ -10,6 +11,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
+    private Func<HttpRequestMessage, string, string, RequestTracer> CreateRequestTracer { get; }
 
     /// <summary>
     /// Constructs an instance of <see cref="SentryMessageHandler"/>.
@@ -43,8 +45,23 @@ public abstract class SentryMessageHandler : DelegatingHandler
     {
     }
 
-    internal SentryMessageHandler(IHub? hub, SentryOptions? options, HttpMessageHandler? innerHandler = default)
+    /// <summary>
+    /// Internal constructor for testing.
+    /// </summary>
+    /// <remarks>
+    /// Potentially SDK users have inherited from this class and overriden either the <see cref="ProcessRequest"/> or
+    /// <see cref="HandleResponse"/> methods. Those really should have been private internal but we can't change that
+    /// without breaking changes. They've been marked as obsolete but, for the time being, this class defaults to using
+    /// those obsolete overrides for tracing operations. This can be changed by setting <paramref name="useNewTracing"/>
+    /// to true, which we do whenever creating an instance of this class internally. Eventually, in a future major
+    /// release, this should be changed to be the default and the obsolete methods should be removed.
+    /// </remarks>
+    internal SentryMessageHandler(IHub? hub, SentryOptions? options, HttpMessageHandler? innerHandler = default,
+        bool useNewTracing = false)
     {
+        CreateRequestTracer = (useNewTracing)
+            ? (request, method, url) => new AutoRequestTracer(this, request, method, url)
+            : (request, method, url) => new SentryRequestTracer(this, request, method, url);
         _hub = hub ?? HubAdapter.Instance;
         _options = options ?? _hub.GetSentryOptions();
 
@@ -63,7 +80,10 @@ public abstract class SentryMessageHandler : DelegatingHandler
     /// <param name="method">The request method (e.g. "GET")</param>
     /// <param name="url">The request URL</param>
     /// <returns>An <see cref="ISpan"/></returns>
+    [Obsolete("This method will be removed in future versions.")]
     protected internal abstract ISpan? ProcessRequest(HttpRequestMessage request, string method, string url);
+
+    private protected abstract ITraceSpan? OnRequest(HttpRequestMessage request, string method, string url);
 
     /// <summary>
     /// Provides an opportunity for further processing of the span once a response is received.
@@ -72,7 +92,53 @@ public abstract class SentryMessageHandler : DelegatingHandler
     /// <param name="span">The <see cref="ISpan"/> created in <see cref="ProcessRequest"/></param>
     /// <param name="method">The request method (e.g. "GET")</param>
     /// <param name="url">The request URL</param>
+    [Obsolete("This method will be removed in future versions.")]
     protected internal abstract void HandleResponse(HttpResponseMessage response, ISpan? span, string method, string url);
+
+    private protected abstract void OnResponse(HttpResponseMessage response, ITraceSpan? span, string method, string url);
+
+    private abstract class RequestTracer
+    {
+        protected internal abstract void Finish(HttpResponseMessage response, string method, string url);
+        protected internal abstract void Finish(Exception exception);
+    }
+
+
+#pragma warning disable CS0618 // Type or member is obsolete
+    private class SentryRequestTracer : RequestTracer
+    {
+        private readonly SentryMessageHandler _handler;
+        private readonly ISpan? _span;
+
+        public SentryRequestTracer(SentryMessageHandler handler, HttpRequestMessage request, string method, string url)
+        {
+            _handler = handler;
+            _span = _handler.ProcessRequest(request, method, url);
+        }
+
+        protected internal override void Finish(HttpResponseMessage response, string method, string url)
+            => _handler.HandleResponse(response, _span, method, url);
+
+        protected internal override void Finish(Exception exception) => _span?.Finish(exception);
+    }
+#pragma warning restore CS0618 // Type or member is obsolete
+
+    private class AutoRequestTracer : RequestTracer
+    {
+        private readonly SentryMessageHandler _handler;
+        private readonly ITraceSpan? _span;
+
+        public AutoRequestTracer(SentryMessageHandler handler, HttpRequestMessage request, string method, string url)
+        {
+            _handler = handler;
+            _span = _handler.OnRequest(request, method, url);
+        }
+
+        protected internal override void Finish(HttpResponseMessage response, string method, string url)
+            => _handler.OnResponse(response, _span, method, url);
+
+        protected internal override void Finish(Exception exception) => _span?.Finish(exception);
+    }
 
     /// <inheritdoc />
     protected override async Task<HttpResponseMessage> SendAsync(
@@ -82,17 +148,17 @@ public abstract class SentryMessageHandler : DelegatingHandler
         var method = request.Method.Method.ToUpperInvariant();
         var url = request.RequestUri?.ToString() ?? string.Empty;
 
-        var span = ProcessRequest(request, method, url);
+        var requestTracer = CreateRequestTracer(request, method, url);
         try
         {
             PropagateTraceHeaders(request, url);
             var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
-            HandleResponse(response, span, method, url);
+            requestTracer.Finish(response, method, url);
             return response;
         }
         catch (Exception ex)
         {
-            span?.Finish(ex);
+            requestTracer.Finish(ex);
             throw;
         }
     }
@@ -104,17 +170,17 @@ public abstract class SentryMessageHandler : DelegatingHandler
         var method = request.Method.Method.ToUpperInvariant();
         var url = request.RequestUri?.ToString() ?? string.Empty;
 
-        var span = ProcessRequest(request, method, url);
+        var requestTracer = CreateRequestTracer(request, method, url);
         try
         {
             PropagateTraceHeaders(request, url);
             var response = base.Send(request, cancellationToken);
-            HandleResponse(response, span, method, url);
+            requestTracer.Finish(response, method, url);
             return response;
         }
         catch (Exception ex)
         {
-            span?.Finish(ex);
+            requestTracer?.Finish(ex);
             throw;
         }
     }
