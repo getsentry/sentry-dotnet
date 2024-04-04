@@ -48,6 +48,118 @@ public static partial class SentrySdk
         return Init(options);
     }
 
+    internal static void ApplySentryOptions(this SentryOptions options, SentryAndroidOptions o)
+    {
+        // TODO: Should we set the DistinctId to match the one used by GlobalSessionManager?
+        //o.DistinctId = ?
+
+        // These options are copied over from our SentryOptions
+        o.AttachStacktrace = options.AttachStacktrace;
+        o.Debug = options.Debug;
+        o.DiagnosticLevel = options.DiagnosticLevel.ToJavaSentryLevel();
+        o.Dist = options.Distribution;
+        o.Dsn = options.Dsn;
+        o.EnableAutoSessionTracking = options.AutoSessionTracking;
+        o.Environment = options.Environment;
+        o.FlushTimeoutMillis = (long)options.InitCacheFlushTimeout.TotalMilliseconds;
+        o.MaxAttachmentSize = options.MaxAttachmentSize;
+        o.MaxBreadcrumbs = options.MaxBreadcrumbs;
+        o.MaxCacheItems = options.MaxCacheItems;
+        o.MaxQueueSize = options.MaxQueueItems;
+        o.Release = options.Release;
+        o.SampleRate = options.SampleRate.HasValue ? (JavaDouble)Convert.ToDouble(options.SampleRate.Value) : null;
+        o.SendClientReports = options.SendClientReports;
+        o.SendDefaultPii = options.SendDefaultPii;
+        o.ServerName = options.ServerName;
+        o.SessionTrackingIntervalMillis = (long)options.AutoSessionTrackingInterval.TotalMilliseconds;
+        o.ShutdownTimeoutMillis = (long)options.ShutdownTimeout.TotalMilliseconds;
+
+        if (options.CacheDirectoryPath is { } cacheDirectoryPath)
+        {
+            // Set a separate cache path for the Android SDK so we don't step on the managed one
+            o.CacheDirPath = Path.Combine(cacheDirectoryPath, "android");
+        }
+
+        // NOTE: Tags in options.DefaultTags should not be passed down, because we already call SetTag on each
+        //       one when sending events, which is relayed through the scope observer.
+
+        if (options.HttpProxy is System.Net.WebProxy proxy)
+        {
+            var creds = proxy.Credentials as System.Net.NetworkCredential;
+            o.SetProxy(new JavaSdk.SentryOptions.Proxy
+            {
+                Host = proxy.Address?.Host,
+                Port = proxy.Address?.Port.ToString(CultureInfo.InvariantCulture),
+                User = creds?.UserName,
+                Pass = creds?.Password
+            });
+        }
+
+        if (options.BeforeBreadcrumbInternal is { } beforeBreadcrumb)
+        {
+            o.BeforeBreadcrumb = new BeforeBreadcrumbCallback(beforeBreadcrumb);
+        }
+
+        // These options we have behind feature flags
+        if (options is { IsPerformanceMonitoringEnabled: true, Native.EnableTracing: true })
+        {
+            o.EnableTracing = (JavaBoolean?)options.EnableTracing;
+            o.TracesSampleRate = (JavaDouble?)options.TracesSampleRate;
+
+            if (options.TracesSampler is { } tracesSampler)
+            {
+                o.TracesSampler = new TracesSamplerCallback(tracesSampler);
+            }
+        }
+
+        if (options.Native.EnableBeforeSend && options.BeforeSendInternal is { } beforeSend)
+        {
+            o.BeforeSend = new BeforeSendCallback(beforeSend, options, o);
+        }
+
+        // These options are from SentryAndroidOptions
+        o.AttachScreenshot = options.Native.AttachScreenshot;
+        o.AnrEnabled = options.Native.AnrEnabled;
+        o.AnrReportInDebug = options.Native.AnrReportInDebug;
+        o.AnrTimeoutIntervalMillis = (long)options.Native.AnrTimeoutInterval.TotalMilliseconds;
+        o.EnableActivityLifecycleBreadcrumbs = options.Native.EnableActivityLifecycleBreadcrumbs;
+        o.EnableAutoActivityLifecycleTracing = options.Native.EnableAutoActivityLifecycleTracing;
+        o.EnableActivityLifecycleTracingAutoFinish = options.Native.EnableActivityLifecycleTracingAutoFinish;
+        o.EnableAppComponentBreadcrumbs = options.Native.EnableAppComponentBreadcrumbs;
+        o.EnableAppLifecycleBreadcrumbs = options.Native.EnableAppLifecycleBreadcrumbs;
+        o.EnableRootCheck = options.Native.EnableRootCheck;
+        o.EnableSystemEventBreadcrumbs = options.Native.EnableSystemEventBreadcrumbs;
+        o.EnableUserInteractionBreadcrumbs = options.Native.EnableUserInteractionBreadcrumbs;
+        o.EnableUserInteractionTracing = options.Native.EnableUserInteractionTracing;
+
+        // These options are in Java.SentryOptions but not ours
+        o.AttachThreads = options.Native.AttachThreads;
+        o.ConnectionTimeoutMillis = (int)options.Native.ConnectionTimeout.TotalMilliseconds;
+        o.EnableNdk = options.Native.EnableNdk;
+        o.EnableShutdownHook = options.Native.EnableShutdownHook;
+        o.EnableUncaughtExceptionHandler = options.Native.EnableUncaughtExceptionHandler;
+        o.ProfilesSampleRate = (JavaDouble?)options.Native.ProfilesSampleRate;
+        o.PrintUncaughtStackTrace = options.Native.PrintUncaughtStackTrace;
+        o.ReadTimeoutMillis = (int)options.Native.ReadTimeout.TotalMilliseconds;
+
+        // In-App Excludes and Includes to be passed to the Android SDK
+        options.Native.InAppExcludes?.ForEach(o.AddInAppExclude);
+        options.Native.InAppIncludes?.ForEach(o.AddInAppInclude);
+
+        // These options are intentionally set and not exposed for modification
+        o.EnableExternalConfiguration = false;
+        o.EnableDeduplication = false;
+        o.AttachServerName = false;
+        o.NativeSdkName = "sentry.native.dotnet";
+
+        // These options are intentionally not expose or modified
+        //o.MaxRequestBodySize   // N/A for Android apps
+        //o.MaxSpans             // See https://github.com/getsentry/sentry-dotnet/discussions/1698
+
+        // Don't capture managed exceptions in the native SDK, since we already capture them in the managed SDK
+        o.AddIgnoredExceptionForType(JavaClass.ForName("android.runtime.JavaProxyThrowable"));
+    }
+
     private static void InitSentryAndroidSdk(SentryOptions options)
     {
         // Set default release and distribution
@@ -64,114 +176,8 @@ public static partial class SentrySdk
             // Capture the android options reference on the outer scope
             nativeOptions = o;
 
-            // TODO: Should we set the DistinctId to match the one used by GlobalSessionManager?
-            //o.DistinctId = ?
-
-            // These options are copied over from our SentryOptions
-            o.AttachStacktrace = options.AttachStacktrace;
-            o.Debug = options.Debug;
-            o.DiagnosticLevel = options.DiagnosticLevel.ToJavaSentryLevel();
-            o.Dist = options.Distribution;
-            o.Dsn = options.Dsn;
-            o.EnableAutoSessionTracking = options.AutoSessionTracking;
-            o.Environment = options.Environment;
-            o.FlushTimeoutMillis = (long)options.InitCacheFlushTimeout.TotalMilliseconds;
-            o.MaxAttachmentSize = options.MaxAttachmentSize;
-            o.MaxBreadcrumbs = options.MaxBreadcrumbs;
-            o.MaxCacheItems = options.MaxCacheItems;
-            o.MaxQueueSize = options.MaxQueueItems;
-            o.Release = options.Release;
-            o.SampleRate = (JavaDouble?)options.SampleRate;
-            o.SendClientReports = options.SendClientReports;
-            o.SendDefaultPii = options.SendDefaultPii;
-            o.ServerName = options.ServerName;
-            o.SessionTrackingIntervalMillis = (long)options.AutoSessionTrackingInterval.TotalMilliseconds;
-            o.ShutdownTimeoutMillis = (long)options.ShutdownTimeout.TotalMilliseconds;
-
-            if (options.CacheDirectoryPath is { } cacheDirectoryPath)
-            {
-                // Set a separate cache path for the Android SDK so we don't step on the managed one
-                o.CacheDirPath = Path.Combine(cacheDirectoryPath, "android");
-            }
-
-            // NOTE: Tags in options.DefaultTags should not be passed down, because we already call SetTag on each
-            //       one when sending events, which is relayed through the scope observer.
-
-            if (options.HttpProxy is System.Net.WebProxy proxy)
-            {
-                var creds = proxy.Credentials as System.Net.NetworkCredential;
-                o.SetProxy(new JavaSdk.SentryOptions.Proxy
-                {
-                    Host = proxy.Address?.Host,
-                    Port = proxy.Address?.Port.ToString(CultureInfo.InvariantCulture),
-                    User = creds?.UserName,
-                    Pass = creds?.Password
-                });
-            }
-
-            if (options.BeforeBreadcrumbInternal is { } beforeBreadcrumb)
-            {
-                o.BeforeBreadcrumb = new BeforeBreadcrumbCallback(beforeBreadcrumb);
-            }
-
-            // These options we have behind feature flags
-            if (options is { IsPerformanceMonitoringEnabled: true, Native.EnableTracing: true })
-            {
-                o.EnableTracing = (JavaBoolean?)options.EnableTracing;
-                o.TracesSampleRate = (JavaDouble?)options.TracesSampleRate;
-
-                if (options.TracesSampler is { } tracesSampler)
-                {
-                    o.TracesSampler = new TracesSamplerCallback(tracesSampler);
-                }
-            }
-
-            if (options.Native.EnableBeforeSend && options.BeforeSendInternal is { } beforeSend)
-            {
-                o.BeforeSend = new BeforeSendCallback(beforeSend, options, o);
-            }
-
-            // These options are from SentryAndroidOptions
-            o.AttachScreenshot = options.Native.AttachScreenshot;
-            o.AnrEnabled = options.Native.AnrEnabled;
-            o.AnrReportInDebug = options.Native.AnrReportInDebug;
-            o.AnrTimeoutIntervalMillis = (long)options.Native.AnrTimeoutInterval.TotalMilliseconds;
-            o.EnableActivityLifecycleBreadcrumbs = options.Native.EnableActivityLifecycleBreadcrumbs;
-            o.EnableAutoActivityLifecycleTracing = options.Native.EnableAutoActivityLifecycleTracing;
-            o.EnableActivityLifecycleTracingAutoFinish = options.Native.EnableActivityLifecycleTracingAutoFinish;
-            o.EnableAppComponentBreadcrumbs = options.Native.EnableAppComponentBreadcrumbs;
-            o.EnableAppLifecycleBreadcrumbs = options.Native.EnableAppLifecycleBreadcrumbs;
-            o.EnableRootCheck = options.Native.EnableRootCheck;
-            o.EnableSystemEventBreadcrumbs = options.Native.EnableSystemEventBreadcrumbs;
-            o.EnableUserInteractionBreadcrumbs = options.Native.EnableUserInteractionBreadcrumbs;
-            o.EnableUserInteractionTracing = options.Native.EnableUserInteractionTracing;
-
-            // These options are in Java.SentryOptions but not ours
-            o.AttachThreads = options.Native.AttachThreads;
-            o.ConnectionTimeoutMillis = (int)options.Native.ConnectionTimeout.TotalMilliseconds;
-            o.EnableNdk = options.Native.EnableNdk;
-            o.EnableShutdownHook = options.Native.EnableShutdownHook;
-            o.EnableUncaughtExceptionHandler = options.Native.EnableUncaughtExceptionHandler;
-            o.ProfilesSampleRate = (JavaDouble?)options.Native.ProfilesSampleRate;
-            o.PrintUncaughtStackTrace = options.Native.PrintUncaughtStackTrace;
-            o.ReadTimeoutMillis = (int)options.Native.ReadTimeout.TotalMilliseconds;
-
-            // In-App Excludes and Includes to be passed to the Android SDK
-            options.Native.InAppExcludes?.ForEach(o.AddInAppExclude);
-            options.Native.InAppIncludes?.ForEach(o.AddInAppInclude);
-
-            // These options are intentionally set and not exposed for modification
-            o.EnableExternalConfiguration = false;
-            o.EnableDeduplication = false;
-            o.AttachServerName = false;
-            o.NativeSdkName = "sentry.native.dotnet";
-
-            // These options are intentionally not expose or modified
-            //o.MaxRequestBodySize   // N/A for Android apps
-            //o.MaxSpans             // See https://github.com/getsentry/sentry-dotnet/discussions/1698
-
-            // Don't capture managed exceptions in the native SDK, since we already capture them in the managed SDK
-            o.AddIgnoredExceptionForType(JavaClass.ForName("android.runtime.JavaProxyThrowable"));
+            // Apply the options from the managed SDK to the Android SDK
+            options.ApplySentryOptions(o);
         });
 
         // Now initialize the Android SDK (with a logger only if we're debugging)
