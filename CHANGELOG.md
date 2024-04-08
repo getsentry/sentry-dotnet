@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- EnableNetworkEventBreadcrumbs can now be set on the Native Android options ([#3267](https://github.com/getsentry/sentry-dotnet/pull/3267))
+
 ### Fixes
 
 - Fix missing exception StackTraces in some situations ([#3215](https://github.com/getsentry/sentry-dotnet/pull/3215))
