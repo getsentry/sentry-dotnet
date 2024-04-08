@@ -143,6 +143,7 @@ public static partial class SentrySdk
             o.EnableAppLifecycleBreadcrumbs = options.Native.EnableAppLifecycleBreadcrumbs;
             o.EnableRootCheck = options.Native.EnableRootCheck;
             o.EnableSystemEventBreadcrumbs = options.Native.EnableSystemEventBreadcrumbs;
+            o.EnableNetworkEventBreadcrumbs = options.Native.EnableNetworkEventBreadcrumbs;
             o.EnableUserInteractionBreadcrumbs = options.Native.EnableUserInteractionBreadcrumbs;
             o.EnableUserInteractionTracing = options.Native.EnableUserInteractionTracing;
 

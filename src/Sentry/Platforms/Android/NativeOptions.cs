@@ -95,6 +95,15 @@ public partial class SentryOptions
         public bool EnableRootCheck { get; set; } = true;
 
         /// <summary>
+        /// Gets or sets a value that indicates if automatic breadcrumbs for network events are enabled.
+        /// The default value is <c>true</c> (enabled).
+        /// </summary>
+        /// <remarks>
+        /// See https://docs.sentry.io/platforms/android/enriching-events/breadcrumbs/
+        /// </remarks>
+        public bool EnableNetworkEventBreadcrumbs { get; set; } = true;
+
+        /// <summary>
         /// Gets or sets a value that indicates if automatic breadcrumbs for system events are enabled.
         /// The default value is <c>true</c> (enabled).
         /// </summary>
