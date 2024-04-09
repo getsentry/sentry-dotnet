@@ -7,7 +7,7 @@ internal static partial class MetricHelper
 {
     private static readonly RandomValuesFactory Random = new SynchronizedRandomValuesFactory();
     private const int RollupInSeconds = 10;
-    private const string InvalidKeyCharactersPattern = @"[^a-zA-Z0-9_/.-]+";
+    private const string InvalidKeyCharactersPattern = @"[^\w\-.\/]+";
     // See https://docs.sysdig.com/en/docs/sysdig-monitor/integrations/working-with-integrations/custom-integrations/integrate-statsd-metrics/#characters-allowed-for-statsd-metric-names
     private const string InvalidMetricUnitCharactersPattern = @"[^a-zA-Z0-9_/.]+";
 
@@ -45,14 +45,14 @@ internal static partial class MetricHelper
 #if NET7_0_OR_GREATER
     [GeneratedRegex(InvalidKeyCharactersPattern, RegexOptions.Compiled)]
     private static partial Regex InvalidKeyCharacters();
-    internal static string SanitizeKey(string input) => InvalidKeyCharacters().Replace(input, "_");
+    internal static string SanitizeKey(string input) => InvalidKeyCharacters().Replace(input, "");
 
     [GeneratedRegex(InvalidMetricUnitCharactersPattern, RegexOptions.Compiled)]
     private static partial Regex InvalidMetricUnitCharacters();
     internal static string SanitizeMetricUnit(string input) => InvalidMetricUnitCharacters().Replace(input, "_");
 #else
     private static readonly Regex InvalidKeyCharacters = new(InvalidKeyCharactersPattern, RegexOptions.Compiled);
-    internal static string SanitizeKey(string input) => InvalidKeyCharacters.Replace(input, "_");
+    internal static string SanitizeKey(string input) => InvalidKeyCharacters.Replace(input, "");
 
     private static readonly Regex InvalidMetricUnitCharacters = new(InvalidMetricUnitCharactersPattern, RegexOptions.Compiled);
     internal static string SanitizeMetricUnit(string input) => InvalidMetricUnitCharacters.Replace(input, "_");

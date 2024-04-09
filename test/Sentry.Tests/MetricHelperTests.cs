@@ -92,6 +92,23 @@ public class MetricHelperTests
     }
 
     [Theory]
+    [InlineData("Test123_-./", "Test123_-./")] // Valid characters
+    [InlineData("test\nvalue", "testvalue")]
+    [InlineData("test\rvalue", "testvalue")]
+    [InlineData("test\tvalue", "testvalue")]
+    [InlineData(@"test\value", @"testvalue")]
+    [InlineData("test|value", "testvalue")]
+    [InlineData("test,value", "testvalue")]
+    public void SanitizeKey_RemovesInvalidCharacters(string input, string expected)
+    {
+        // Act
+        var result = MetricHelper.SanitizeKey(input);
+
+        // Assert
+        result.Should().Be(expected);
+    }
+
+    [Theory]
     [InlineData("Test123_:/@.{}[]$-", "Test123_:/@.{}[]$-")] // Valid characters
     [InlineData("test\nvalue", "test<LF>value")]
     [InlineData("test\rvalue", "test<CR>value")]
