@@ -9,7 +9,7 @@ internal static partial class MetricHelper
     private const int RollupInSeconds = 10;
     private const string InvalidKeyCharactersPattern = @"[^\w\-.\/]+";
     // See https://docs.sysdig.com/en/docs/sysdig-monitor/integrations/working-with-integrations/custom-integrations/integrate-statsd-metrics/#characters-allowed-for-statsd-metric-names
-    private const string InvalidMetricUnitCharactersPattern = @"[^a-zA-Z0-9_/.]+";
+    private const string InvalidMetricUnitCharactersPattern = @"[^\w]+";
 
 #if NET6_0_OR_GREATER
     private static readonly DateTimeOffset UnixEpoch = DateTimeOffset.UnixEpoch;
@@ -49,13 +49,13 @@ internal static partial class MetricHelper
 
     [GeneratedRegex(InvalidMetricUnitCharactersPattern, RegexOptions.Compiled)]
     private static partial Regex InvalidMetricUnitCharacters();
-    internal static string SanitizeMetricUnit(string input) => InvalidMetricUnitCharacters().Replace(input, "_");
+    internal static string SanitizeMetricUnit(string input) => InvalidMetricUnitCharacters().Replace(input, "");
 #else
     private static readonly Regex InvalidKeyCharacters = new(InvalidKeyCharactersPattern, RegexOptions.Compiled);
     internal static string SanitizeKey(string input) => InvalidKeyCharacters.Replace(input, "");
 
     private static readonly Regex InvalidMetricUnitCharacters = new(InvalidMetricUnitCharactersPattern, RegexOptions.Compiled);
-    internal static string SanitizeMetricUnit(string input) => InvalidMetricUnitCharacters.Replace(input, "_");
+    internal static string SanitizeMetricUnit(string input) => InvalidMetricUnitCharacters.Replace(input, "");
 #endif
 
     private static readonly Lazy<ReadOnlyDictionary<string, string>> LazyTagValueReplacements = new(() =>
