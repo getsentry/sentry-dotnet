@@ -99,10 +99,28 @@ public class MetricHelperTests
     [InlineData(@"test\value", @"testvalue")]
     [InlineData("test|value", "testvalue")]
     [InlineData("test,value", "testvalue")]
-    public void SanitizeKey_RemovesInvalidCharacters(string input, string expected)
+    public void SanitizeTagKey_RemovesInvalidCharacters(string input, string expected)
     {
         // Act
-        var result = MetricHelper.SanitizeKey(input);
+        var result = MetricHelper.SanitizeTagKey(input);
+
+        // Assert
+        result.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("Test123_-.", "Test123_-.")] // Valid characters
+    [InlineData("test/value", "test_value")]
+    [InlineData("test\nvalue", "test_value")]
+    [InlineData("test\rvalue", "test_value")]
+    [InlineData("test\tvalue", "test_value")]
+    [InlineData(@"test\value", @"test_value")]
+    [InlineData("test|value", "test_value")]
+    [InlineData("test,value", "test_value")]
+    public void SanitizeMetricKeyOrName_ReplacesInvalidCharactersWithUnderscore(string input, string expected)
+    {
+        // Act
+        var result = MetricHelper.SanitizeMetricKeyOrName(input);
 
         // Assert
         result.Should().Be(expected);
@@ -119,7 +137,7 @@ public class MetricHelperTests
     public void SanitizeValue_ShouldReplaceReservedCharacters(string input, string expected)
     {
         // Act
-        var result = MetricHelper.SanitizeValue(input);
+        var result = MetricHelper.SanitizeTagValue(input);
 
         // Assert
         result.Should().Be(expected);

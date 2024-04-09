@@ -105,7 +105,7 @@ internal abstract class Metric : ISentryJsonSerializable, ISentrySerializable
         /*
          * We're serializing using the statsd format here: https://github.com/b/statsd_spec
          */
-        var metricName = MetricHelper.SanitizeKey(Key);
+        var metricName = MetricHelper.SanitizeMetricKeyOrName(Key);
         await Write($"{metricName}@").ConfigureAwait(false);
         var unit = Unit ?? MeasurementUnit.None;
         var sanitizedUnit = MetricHelper.SanitizeMetricUnit(unit.ToString());
@@ -126,7 +126,7 @@ internal abstract class Metric : ISentryJsonSerializable, ISentrySerializable
             var first = true;
             foreach (var (key, value) in tags)
             {
-                var tagKey = MetricHelper.SanitizeKey(key);
+                var tagKey = MetricHelper.SanitizeTagKey(key);
                 if (string.IsNullOrWhiteSpace(tagKey))
                 {
                     continue;
@@ -139,7 +139,9 @@ internal abstract class Metric : ISentryJsonSerializable, ISentrySerializable
                 {
                     await Write(",");
                 }
-                await Write($"{key}:{MetricHelper.SanitizeValue(value)}");
+
+                var tagValue = MetricHelper.SanitizeTagValue(value);
+                await Write($"{key}:{tagValue}");
             }
         }
 

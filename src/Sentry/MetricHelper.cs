@@ -7,7 +7,8 @@ internal static partial class MetricHelper
 {
     private static readonly RandomValuesFactory Random = new SynchronizedRandomValuesFactory();
     private const int RollupInSeconds = 10;
-    private const string InvalidKeyCharactersPattern = @"[^\w\-.\/]+";
+    private const string InvalidMetricKeyOrNameCharactersPattern = @"[^\w\-.]+";
+    private const string InvalidTagKeyCharactersPattern = @"[^\w\-.\/]+";
     // See https://docs.sysdig.com/en/docs/sysdig-monitor/integrations/working-with-integrations/custom-integrations/integrate-statsd-metrics/#characters-allowed-for-statsd-metric-names
     private const string InvalidMetricUnitCharactersPattern = @"[^\w]+";
 
@@ -43,16 +44,23 @@ internal static partial class MetricHelper
         .Subtract(TimeSpan.FromMilliseconds(FlushShift));
 
 #if NET7_0_OR_GREATER
-    [GeneratedRegex(InvalidKeyCharactersPattern, RegexOptions.Compiled)]
-    private static partial Regex InvalidKeyCharacters();
-    internal static string SanitizeKey(string input) => InvalidKeyCharacters().Replace(input, "");
+    [GeneratedRegex(InvalidMetricKeyOrNameCharactersPattern, RegexOptions.Compiled)]
+    private static partial Regex InvalidMetricKeyOrNameCharacters();
+    internal static string SanitizeMetricKeyOrName(string input) => InvalidMetricKeyOrNameCharacters().Replace(input, "_");
+
+    [GeneratedRegex(InvalidTagKeyCharactersPattern, RegexOptions.Compiled)]
+    private static partial Regex InvalidTagKeyCharacters();
+    internal static string SanitizeTagKey(string input) => InvalidTagKeyCharacters().Replace(input, "");
 
     [GeneratedRegex(InvalidMetricUnitCharactersPattern, RegexOptions.Compiled)]
     private static partial Regex InvalidMetricUnitCharacters();
     internal static string SanitizeMetricUnit(string input) => InvalidMetricUnitCharacters().Replace(input, "");
 #else
-    private static readonly Regex InvalidKeyCharacters = new(InvalidKeyCharactersPattern, RegexOptions.Compiled);
-    internal static string SanitizeKey(string input) => InvalidKeyCharacters.Replace(input, "");
+    private static readonly Regex InvalidMetricKeyOrNameCharacters = new(InvalidMetricKeyOrNameCharactersPattern, RegexOptions.Compiled);
+    internal static string SanitizeMetricKeyOrName(string input) => InvalidMetricKeyOrNameCharacters.Replace(input, "_");
+
+    private static readonly Regex InvalidTagKeyCharacters = new(InvalidTagKeyCharactersPattern, RegexOptions.Compiled);
+    internal static string SanitizeTagKey(string input) => InvalidTagKeyCharacters.Replace(input, "");
 
     private static readonly Regex InvalidMetricUnitCharacters = new(InvalidMetricUnitCharactersPattern, RegexOptions.Compiled);
     internal static string SanitizeMetricUnit(string input) => InvalidMetricUnitCharacters.Replace(input, "");
@@ -72,7 +80,7 @@ internal static partial class MetricHelper
         return new ReadOnlyDictionary<string, string>(replacements);
     });
     private static ReadOnlyDictionary<string, string> TagValueReplacements => LazyTagValueReplacements.Value;
-    internal static string SanitizeValue(string input)
+    internal static string SanitizeTagValue(string input)
     {
         foreach (var (reservedCharacter, replacementValue) in TagValueReplacements)
         {
