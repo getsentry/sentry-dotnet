@@ -66,20 +66,16 @@ internal static partial class MetricHelper
     internal static string SanitizeMetricUnit(string input) => InvalidMetricUnitCharacters.Replace(input, "");
 #endif
 
-    private static readonly Lazy<ReadOnlyDictionary<string, string>> LazyTagValueReplacements = new(() =>
-    {
-        var replacements = new Dictionary<string, string>
-        {
-            { "\n", "<LF>" },
-            { "\r", "<CR>" },
-            { "\t", "<HT>" },
-            { @"\", @"\\" },
-            { "|", "\u007c" },
-            { ",", "\u002c" }
-        };
-        return new ReadOnlyDictionary<string, string>(replacements);
-    });
-    private static ReadOnlyDictionary<string, string> TagValueReplacements => LazyTagValueReplacements.Value;
+    private static readonly Lazy<KeyValuePair<string, string>[]> LazyTagValueReplacements = new(() =>
+    [
+        new KeyValuePair<string, string>( "\n", "<LF>" ),
+        new KeyValuePair<string, string>( "\r", "<CR>" ),
+        new KeyValuePair<string, string>( "\t", "<HT>" ),
+        new KeyValuePair<string, string>( @"\", @"\\" ),
+        new KeyValuePair<string, string>( "|", "\u007c" ),
+        new KeyValuePair<string, string>( ",", "\u002c")
+    ]);
+    private static KeyValuePair<string, string>[] TagValueReplacements => LazyTagValueReplacements.Value;
     internal static string SanitizeTagValue(string input)
     {
         foreach (var (reservedCharacter, replacementValue) in TagValueReplacements)
