@@ -17,13 +17,18 @@ internal class RateLimitCategory : IEquatable<RateLimitCategory>
             return true;
         }
 
-        var type = item.TryGetType();
+        var type = item.TryGetType()?.ToLower();
         if (string.IsNullOrWhiteSpace(type))
         {
             return false;
         }
 
-        return string.Equals(Name, type, StringComparison.OrdinalIgnoreCase);
+        // The envelope item type for metrics is `statsd`, but the client report category is `metric_bucket`
+        var reportCategory = EnvelopeItem.TypeValueMetric == type
+            ? "metric_bucket"
+            : type;
+
+        return string.Equals(Name, reportCategory, StringComparison.OrdinalIgnoreCase);
     }
 
     public bool Equals(RateLimitCategory? other)

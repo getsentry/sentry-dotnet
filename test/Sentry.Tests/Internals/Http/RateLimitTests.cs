@@ -14,10 +14,7 @@ public class RateLimitTests
         var rateLimit = RateLimit.Parse(value);
 
         // Assert
-        rateLimit.Should().BeEquivalentTo(new RateLimit(
-            new[] { new RateLimitCategory("transaction") },
-            TimeSpan.FromSeconds(60)
-        ));
+        rateLimit.Should().BeEquivalentTo(new RateLimit(TimeSpan.FromSeconds(60), new[] { new RateLimitCategory("transaction") }));
     }
 
     [Fact]
@@ -30,10 +27,7 @@ public class RateLimitTests
         var rateLimit = RateLimit.Parse(value);
 
         // Assert
-        rateLimit.Should().BeEquivalentTo(new RateLimit(
-            new[] { new RateLimitCategory("") },
-            TimeSpan.FromSeconds(60)
-        ));
+        rateLimit.Should().BeEquivalentTo(new RateLimit(TimeSpan.FromSeconds(60), new[] { new RateLimitCategory("") }));
     }
 
     [Fact]
@@ -46,10 +40,7 @@ public class RateLimitTests
         var rateLimit = RateLimit.Parse(value);
 
         // Assert
-        rateLimit.Should().BeEquivalentTo(new RateLimit(
-            new[] { new RateLimitCategory("") },
-            TimeSpan.FromSeconds(60)
-        ));
+        rateLimit.Should().BeEquivalentTo(new RateLimit(TimeSpan.FromSeconds(60), new[] { new RateLimitCategory("") }));
     }
 
     [Fact]
@@ -62,10 +53,7 @@ public class RateLimitTests
         var rateLimit = RateLimit.Parse(value);
 
         // Assert
-        rateLimit.Should().BeEquivalentTo(new RateLimit(
-            new[] { new RateLimitCategory("transaction") },
-            TimeSpan.FromSeconds(60)
-        ));
+        rateLimit.Should().BeEquivalentTo(new RateLimit(TimeSpan.FromSeconds(60), new[] { new RateLimitCategory("transaction") }));
     }
 
     [Fact]
@@ -78,14 +66,61 @@ public class RateLimitTests
         var rateLimit = RateLimit.Parse(value);
 
         // Assert
+        rateLimit.Should().BeEquivalentTo(new RateLimit(TimeSpan.FromSeconds(2700), new[]
+        {
+            new RateLimitCategory("default"),
+            new RateLimitCategory("error"),
+            new RateLimitCategory("security")
+        }));
+    }
+
+    [Fact]
+    public void Parse_SingleNamespace_Works()
+    {
+        // Arrange
+        const string value = "2700:metric_bucket:organization:quota_exceeded:custom";
+
+        // Act
+        var rateLimit = RateLimit.Parse(value);
+
+        // Assert
         rateLimit.Should().BeEquivalentTo(new RateLimit(
-            new[]
-            {
-                new RateLimitCategory("default"),
-                new RateLimitCategory("error"),
-                new RateLimitCategory("security")
-            },
-            TimeSpan.FromSeconds(2700)
+            TimeSpan.FromSeconds(2700),
+            [new RateLimitCategory("metric_bucket")],
+            ["custom"]
+        ));
+    }
+
+    [Fact]
+    public void Parse_MultipleNamespaces_Works()
+    {
+        // Arrange
+        const string value = "2700:metric_bucket:organization:quota_exceeded:apples;oranges;pears";
+
+        // Act
+        var rateLimit = RateLimit.Parse(value);
+
+        // Assert
+        rateLimit.Should().BeEquivalentTo(new RateLimit(
+            TimeSpan.FromSeconds(2700),
+            [new RateLimitCategory("metric_bucket")],
+            ["apples", "oranges", "pears"]
+        ));
+    }
+
+    [Fact]
+    public void Parse_NotMetricBucket_NamespacesIgnored()
+    {
+        // Arrange
+        const string value = "2700:default:organization:quota_exceeded:custom";
+
+        // Act
+        var rateLimit = RateLimit.Parse(value);
+
+        // Assert
+        rateLimit.Should().BeEquivalentTo(new RateLimit(
+            TimeSpan.FromSeconds(2700),
+            [new RateLimitCategory("default")]
         ));
     }
 }

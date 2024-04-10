@@ -276,13 +276,16 @@ public partial class HttpTransportTests
         ).Should().BeTrue();
     }
 
-    [Fact]
-    public async Task SendEnvelopeAsync_ItemRateLimit_DropsItem()
+    [Theory]
+    [InlineData("2700:metric_bucket:organization:quota_exceeded:custom", true)] // Default namespace... we back off
+    [InlineData("2700:metric_bucket:organization:quota_exceeded", true)] // No namespace... we back off
+    [InlineData("2700:metric_bucket:organization:quota_exceeded:foo", false)] // Specific namespace... we don't back off for these yet
+    public async Task SendEnvelopeAsync_ItemRateLimit_DropsItem(string metricNamespace, bool shouldDropMetricEnvelope)
     {
         // Arrange
         using var httpHandler = new RecordingHttpMessageHandler(
             new FakeHttpMessageHandler(
-                () => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
+                () => SentryResponses.GetRateLimitResponse($"1234:event, 897:transaction, {metricNamespace}")
             ));
 
         var httpTransport = new HttpTransport(
@@ -305,29 +308,43 @@ public partial class HttpTransportTests
             {
                 // Should be dropped
                 new EnvelopeItem(
-                    new Dictionary<string, object> {["type"] = "event"},
+                    new Dictionary<string, object> {["type"] = EnvelopeItem.TypeValueEvent},
                     new EmptySerializable()),
                 new EnvelopeItem(
-                    new Dictionary<string, object> {["type"] = "event"},
+                    new Dictionary<string, object> {["type"] = EnvelopeItem.TypeValueEvent},
                     new EmptySerializable()),
                 new EnvelopeItem(
-                    new Dictionary<string, object> {["type"] = "transaction"},
+                    new Dictionary<string, object> {["type"] = EnvelopeItem.TypeValueTransaction},
                     new EmptySerializable()),
 
                 // Should stay
                 new EnvelopeItem(
                     new Dictionary<string, object> {["type"] = "other"},
-                    new EmptySerializable())
+                    new EmptySerializable()),
+
+                // Dropped if metricNamespace is "custom" or empty
+                new EnvelopeItem(
+                    new Dictionary<string, object> {["type"] = EnvelopeItem.TypeValueMetric},
+                    new EmptySerializable()),
             });
 
+        var expectedItems = new List<EnvelopeItem>
+        {
+            new EnvelopeItem(
+                new Dictionary<string, object> {["type"] = "other"},
+                new EmptySerializable())
+        };
+        if (!shouldDropMetricEnvelope)
+        {
+            expectedItems.Add(
+                new EnvelopeItem(
+                    new Dictionary<string, object> {["type"] = EnvelopeItem.TypeValueMetric},
+                    new EmptySerializable()));
+        }
         var expectedEnvelope = new Envelope(
             new Dictionary<string, object>(),
-            new[]
-            {
-                new EnvelopeItem(
-                    new Dictionary<string, object> {["type"] = "other"},
-                    new EmptySerializable())
-            });
+            expectedItems
+        );
 
         var expectedEnvelopeSerialized = await expectedEnvelope.SerializeToStringAsync(_testOutputLogger, _fakeClock);
 
