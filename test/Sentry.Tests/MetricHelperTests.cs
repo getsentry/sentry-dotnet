@@ -92,23 +92,69 @@ public class MetricHelperTests
     }
 
     [Theory]
-    [InlineData("Test123_:/@.{}[]$-", "Test123_:/@.{}[]$-")] // Valid characters
-    [InlineData("test&value", "testvalue")]
-    [InlineData("test\"value", "testvalue")]
-    public void SanitizeValue_ShouldRemoveInvalidCharacters(string input, string expected)
+    [InlineData("Test123_-./", "Test123_-./")] // Valid characters
+    [InlineData("test\nvalue", "testvalue")]
+    [InlineData("test\rvalue", "testvalue")]
+    [InlineData("test\tvalue", "testvalue")]
+    [InlineData(@"test\value", @"testvalue")]
+    [InlineData("test|value", "testvalue")]
+    [InlineData("test,value", "testvalue")]
+    public void SanitizeTagKey_RemovesInvalidCharacters(string input, string expected)
     {
         // Act
-        var result = MetricHelper.SanitizeValue(input);
+        var result = MetricHelper.SanitizeTagKey(input);
 
         // Assert
         result.Should().Be(expected);
     }
 
     [Theory]
-    [InlineData("Test123_.", "Test123_.")] // Valid characters
-    [InlineData("test{value}", "test_value_")]
-    [InlineData("test-value", "test_value")]
-    public void SanitizeMetricUnit_ShouldReplaceInvalidCharactersWithUnderscore(string input, string expected)
+    [InlineData("Test123_-.", "Test123_-.")] // Valid characters
+    [InlineData("test/value", "test_value")]
+    [InlineData("test\nvalue", "test_value")]
+    [InlineData("test\rvalue", "test_value")]
+    [InlineData("test\tvalue", "test_value")]
+    [InlineData(@"test\value", @"test_value")]
+    [InlineData("test|value", "test_value")]
+    [InlineData("test,value", "test_value")]
+    public void SanitizeMetricKeyOrName_ReplacesInvalidCharactersWithUnderscore(string input, string expected)
+    {
+        // Act
+        var result = MetricHelper.SanitizeMetricKeyOrName(input);
+
+        // Assert
+        result.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("Test123_:/@.{}[]$-", "Test123_:/@.{}[]$-")] // Valid characters
+    [InlineData("test\nvalue", "test<LF>value")]
+    [InlineData("test\rvalue", "test<CR>value")]
+    [InlineData("test\tvalue", "test<HT>value")]
+    [InlineData(@"test\value", @"test\\value")]
+    [InlineData("test|value", "test\u007cvalue")]
+    [InlineData("test,value", "test\u002cvalue")]
+    public void SanitizeValue_ShouldReplaceReservedCharacters(string input, string expected)
+    {
+        // Act
+        var result = MetricHelper.SanitizeTagValue(input);
+
+        // Assert
+        result.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("Test123_", "Test123_")] // Valid characters
+    [InlineData("Test123-", "Test123")]
+    [InlineData("Test123.", "Test123")]
+    [InlineData("Test123/", "Test123")]
+    [InlineData("test\nvalue", "testvalue")]
+    [InlineData("test\rvalue", "testvalue")]
+    [InlineData("test\tvalue", "testvalue")]
+    [InlineData(@"test\value", @"testvalue")]
+    [InlineData("test|value", "testvalue")]
+    [InlineData("test,value", "testvalue")]
+    public void SanitizeMetricUnit_ShouldRemoveInvalidCharacters(string input, string expected)
     {
         // Act
         var result = MetricHelper.SanitizeMetricUnit(input);

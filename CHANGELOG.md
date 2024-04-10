@@ -5,6 +5,7 @@
 ### Features
 
 - EnableNetworkEventBreadcrumbs can now be set on the Native Android options ([#3267](https://github.com/getsentry/sentry-dotnet/pull/3267))
+- Update normalization of metrics keys, tags and values ([#3271](https://github.com/getsentry/sentry-dotnet/pull/3271))
 
 ### Fixes
 
