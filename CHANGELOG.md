@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fixed normalization for metric tag values for carriage return, line feed and tab characters ([#3281](https://github.com/getsentry/sentry-dotnet/pull/3281))
+
 ## 4.3.0
 
 ### Features
