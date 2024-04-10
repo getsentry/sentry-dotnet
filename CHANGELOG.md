@@ -1,4 +1,9 @@
 # Changelog
+## Unreleased
+
+### API Changes
+
+- `SentryOptions.ExperimentalMetrics` has been marked obsolete. Now that Metrics are generally available, Metrics should be configured instead using the `SentryOptions.EnableMetrics(Action<MetricsOptions>? configureOptions = null)` callback ([#3246](https://github.com/getsentry/sentry-dotnet/pull/3246))
 
 ## 4.3.0
 
