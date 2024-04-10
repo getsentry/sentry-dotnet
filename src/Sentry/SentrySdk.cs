@@ -707,6 +707,12 @@ public static partial class SentrySdk
                 break;
 #elif NET8_0_OR_GREATER
             case CrashType.Native:
+                if (!AotHelper.IsNativeAot)
+                {
+                    CurrentOptions?.LogError("The support for capturing native crashes is limited to AOT compilation.");
+                    return;
+                }
+
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     NativeStrlenMSVCRT(IntPtr.Zero);

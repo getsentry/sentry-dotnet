@@ -12,5 +12,5 @@ internal record struct MetricResourceIdentifier(MetricType MetricType, string Ke
     /// Returns a string representation of the metric resource identifier.
     /// </summary>
     public override string ToString()
-        => $"{MetricType.ToStatsdType()}:{MetricHelper.SanitizeKey(Key)}@{Unit}";
+        => $"{MetricType.ToStatsdType()}:{MetricHelper.SanitizeTagKey(Key)}@{Unit}";
 }
