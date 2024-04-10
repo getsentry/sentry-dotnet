@@ -128,9 +128,9 @@ public class MetricHelperTests
 
     [Theory]
     [InlineData("Test123_:/@.{}[]$-", "Test123_:/@.{}[]$-")] // Valid characters
-    [InlineData("test\nvalue", "test<LF>value")]
-    [InlineData("test\rvalue", "test<CR>value")]
-    [InlineData("test\tvalue", "test<HT>value")]
+    [InlineData("test<LF>value", "test\nvalue")]
+    [InlineData("test<CR>value", "test\rvalue")]
+    [InlineData("test<HT>value", "test\tvalue")]
     [InlineData(@"test\value", @"test\\value")]
     [InlineData("test|value", "test\u007cvalue")]
     [InlineData("test,value", "test\u002cvalue")]

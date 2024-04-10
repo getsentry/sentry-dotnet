@@ -68,9 +68,9 @@ internal static partial class MetricHelper
 
     private static readonly Lazy<KeyValuePair<string, string>[]> LazyTagValueReplacements = new(() =>
     [
-        new KeyValuePair<string, string>("\n", "<LF>"),
-        new KeyValuePair<string, string>("\r", "<CR>"),
-        new KeyValuePair<string, string>("\t", "<HT>"),
+        new KeyValuePair<string, string>("<LF>", "\n"),
+        new KeyValuePair<string, string>("<CR>", "\r"),
+        new KeyValuePair<string, string>("<HT>", "\t"),
         new KeyValuePair<string, string>(@"\", @"\\"),
         new KeyValuePair<string, string>("|", "\u007c"),
         new KeyValuePair<string, string>(",", "\u002c")
