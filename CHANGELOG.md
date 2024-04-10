@@ -5,6 +5,7 @@
 ### Features
 
 - EnableNetworkEventBreadcrumbs can now be set on the Native Android options ([#3267](https://github.com/getsentry/sentry-dotnet/pull/3267))
+- Metrics now honor any Rate Limits set in HTTP headers returned by Sentry ([#3276](https://github.com/getsentry/sentry-dotnet/pull/3276))
 
 ### Fixes
 
