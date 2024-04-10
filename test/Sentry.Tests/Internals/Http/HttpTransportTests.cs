@@ -279,6 +279,7 @@ public partial class HttpTransportTests
     [Theory]
     [InlineData("2700:metric_bucket:organization:quota_exceeded:custom", true)] // Default namespace... we back off
     [InlineData("2700:metric_bucket:organization:quota_exceeded", true)] // No namespace... we back off
+    [InlineData("2700:metric_bucket:organization:", true)] // Empty namespace... we back off
     [InlineData("2700:metric_bucket:organization:quota_exceeded:foo", false)] // Specific namespace... we don't back off for these yet
     public async Task SendEnvelopeAsync_ItemRateLimit_DropsItem(string metricNamespace, bool shouldDropMetricEnvelope)
     {
