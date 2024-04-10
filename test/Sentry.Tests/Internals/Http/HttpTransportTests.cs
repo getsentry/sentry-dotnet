@@ -338,7 +338,7 @@ public partial class HttpTransportTests
         {
             expectedItems.Add(
                 new EnvelopeItem(
-                    new Dictionary<string, object> {["type"] = EnvelopeItem.TypeValueMetric},
+                    new Dictionary<string, object> { ["type"] = EnvelopeItem.TypeValueMetric },
                     new EmptySerializable()));
         }
         var expectedEnvelope = new Envelope(
