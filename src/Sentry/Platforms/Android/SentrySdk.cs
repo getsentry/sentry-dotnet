@@ -81,7 +81,7 @@ public static partial class SentrySdk
             o.MaxCacheItems = options.MaxCacheItems;
             o.MaxQueueSize = options.MaxQueueItems;
             o.Release = options.Release;
-            o.SampleRate = (JavaDouble?)options.SampleRate;
+            o.SampleRate = options.SampleRate.HasValue ? (JavaDouble)Convert.ToDouble(options.SampleRate.Value) : null;
             o.SendClientReports = options.SendClientReports;
             o.SendDefaultPii = options.SendDefaultPii;
             o.ServerName = options.ServerName;
@@ -143,6 +143,7 @@ public static partial class SentrySdk
             o.EnableAppLifecycleBreadcrumbs = options.Native.EnableAppLifecycleBreadcrumbs;
             o.EnableRootCheck = options.Native.EnableRootCheck;
             o.EnableSystemEventBreadcrumbs = options.Native.EnableSystemEventBreadcrumbs;
+            o.EnableNetworkEventBreadcrumbs = options.Native.EnableNetworkEventBreadcrumbs;
             o.EnableUserInteractionBreadcrumbs = options.Native.EnableUserInteractionBreadcrumbs;
             o.EnableUserInteractionTracing = options.Native.EnableUserInteractionTracing;
 

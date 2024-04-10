@@ -1,11 +1,18 @@
 # Changelog
 
-## Unreleased
+## 4.3.0
+
+### Features
+
+- EnableNetworkEventBreadcrumbs can now be set on the Native Android options ([#3267](https://github.com/getsentry/sentry-dotnet/pull/3267))
+- Update normalization of metrics keys, tags and values ([#3271](https://github.com/getsentry/sentry-dotnet/pull/3271))
 
 ### Fixes
 
 - Fix missing exception StackTraces in some situations ([#3215](https://github.com/getsentry/sentry-dotnet/pull/3215))
 - Scopes now get applied to OTEL spans in ASP.NET Core ([#3221](https://github.com/getsentry/sentry-dotnet/pull/3221))
+- Fixed InvalidCastException when setting the SampleRate on Android ([#3258](https://github.com/getsentry/sentry-dotnet/pull/3258))
+- Fixed MAUI iOS build issue related to `SentryVersionNumber` and `SentryVersionString` ([#3278](https://github.com/getsentry/sentry-dotnet/pull/3278))
 
 ### API changes
 
@@ -13,12 +20,15 @@
 
 ### Dependencies
 
-- Bump CLI from v2.30.0 to v2.30.4 ([#3214](https://github.com/getsentry/sentry-dotnet/pull/3214), [#3218](https://github.com/getsentry/sentry-dotnet/pull/3218), [#3242](https://github.com/getsentry/sentry-dotnet/pull/3242))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2304)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.30.0...2.30.4)
-- Bump Native SDK from v0.7.0 to v0.7.1 ([#3237](https://github.com/getsentry/sentry-dotnet/pull/3237))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#071)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.0...0.7.1)
+- Bump CLI from v2.30.0 to v2.31.0 ([#3214](https://github.com/getsentry/sentry-dotnet/pull/3214), [#3218](https://github.com/getsentry/sentry-dotnet/pull/3218), [#3242](https://github.com/getsentry/sentry-dotnet/pull/3242), [#3247](https://github.com/getsentry/sentry-dotnet/pull/3247))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2310)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.30.0...2.31.0)
+- Bump Native SDK from v0.7.0 to v0.7.2 ([#3237](https://github.com/getsentry/sentry-dotnet/pull/3237), [#3256](https://github.com/getsentry/sentry-dotnet/pull/3256))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#072)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.0...0.7.2)
+- Bump Java SDK from v7.6.0 to v7.7.0 ([#3268](https://github.com/getsentry/sentry-dotnet/pull/3268))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#770)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.6.0...7.7.0)
 
 ## 4.2.1
 

@@ -18,6 +18,7 @@ internal partial class BindableSentryOptions
         public bool? EnableAppComponentBreadcrumbs { get; set; }
         public bool? EnableAppLifecycleBreadcrumbs { get; set; }
         public bool? EnableRootCheck { get; set; }
+        public bool? EnableNetworkEventBreadcrumbs { get; set; }
         public bool? EnableSystemEventBreadcrumbs { get; set; }
         public bool? EnableUserInteractionBreadcrumbs { get; set; }
         public bool? EnableAutoActivityLifecycleTracing { get; set; }
@@ -44,6 +45,7 @@ internal partial class BindableSentryOptions
             options.EnableAppComponentBreadcrumbs = EnableAppComponentBreadcrumbs ?? options.EnableAppComponentBreadcrumbs;
             options.EnableAppLifecycleBreadcrumbs = EnableAppLifecycleBreadcrumbs ?? options.EnableAppLifecycleBreadcrumbs;
             options.EnableRootCheck = EnableRootCheck ?? options.EnableRootCheck;
+            options.EnableNetworkEventBreadcrumbs = EnableNetworkEventBreadcrumbs ?? options.EnableNetworkEventBreadcrumbs;
             options.EnableSystemEventBreadcrumbs = EnableSystemEventBreadcrumbs ?? options.EnableSystemEventBreadcrumbs;
             options.EnableUserInteractionBreadcrumbs = EnableUserInteractionBreadcrumbs ?? options.EnableUserInteractionBreadcrumbs;
             options.EnableAutoActivityLifecycleTracing = EnableAutoActivityLifecycleTracing ?? options.EnableAutoActivityLifecycleTracing;

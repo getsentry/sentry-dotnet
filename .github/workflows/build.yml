@@ -120,7 +120,7 @@ jobs:
         run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
 
       - name: Upload code coverage
-        uses: codecov/codecov-action@54bcd8715eee62d40e33596ef5e8f0f48dbbccab
+        uses: codecov/codecov-action@7afa10ed9b269c561c2336fd862446844e0cbf71
 
       - name: Upload build and test outputs
         if: failure()
@@ -189,7 +189,7 @@ jobs:
           java-version: '17'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@07976c6290703d34c16d382cb36445f98bb43b1f # v3.2.0
+        uses: android-actions/setup-android@00854ea68c109d98c75d956347303bf7c45b0277 # v3.2.1
 
       - run: dotnet workload install android maui-android
 
