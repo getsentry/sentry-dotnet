@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 4.3.0
 
 ### Features
 
@@ -13,6 +13,7 @@
 - Fix missing exception StackTraces in some situations ([#3215](https://github.com/getsentry/sentry-dotnet/pull/3215))
 - Scopes now get applied to OTEL spans in ASP.NET Core ([#3221](https://github.com/getsentry/sentry-dotnet/pull/3221))
 - Fixed InvalidCastException when setting the SampleRate on Android ([#3258](https://github.com/getsentry/sentry-dotnet/pull/3258))
+- Fixed MAUI iOS build issue related to `SentryVersionNumber` and `SentryVersionString` ([#3278](https://github.com/getsentry/sentry-dotnet/pull/3278))
 
 ### API changes
 
