@@ -38,8 +38,7 @@ if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/
 }
 
 # Get iPhone SDK version
-# $iPhoneSdkVersion = sharpie xcode -sdks | grep -o -m 1 'iphoneos\S*'
-$iPhoneSdkVersion = "iphoneos17.2"
+$iPhoneSdkVersion = sharpie xcode -sdks | grep -o -m 1 'iphoneos\S*'
 Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
 
 # Generate bindings
