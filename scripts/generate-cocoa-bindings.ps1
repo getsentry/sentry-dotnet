@@ -156,6 +156,7 @@ $t = $Text -split $s, 2
 $t[1] = $t[1] -replace "\[Static\]\n\[Internal\]\n$s", $s
 $Text = $t -join $s
 
+# Remove empty Constants block
 $Text = $Text -replace '\[Static\]\s*\[Internal\]\s*partial\s+interface\s+Constants\s\{[\s\n]*\}\n\n', ''
 
 # Update MethodToProperty translations
