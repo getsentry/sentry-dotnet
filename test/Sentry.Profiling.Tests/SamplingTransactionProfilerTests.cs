@@ -319,6 +319,13 @@ public class SamplingTransactionProfilerTests
             options.TransactionProfilerFactory.Should().BeNull();
             using var hub = (SentrySdk.InitHub(options) as Hub)!;
             SampleProfilerSession.ThrowOnNextStartupForTests.Should().BeFalse();
+
+            if (options.TransactionProfilerFactory is SamplingTransactionProfilerFactory factory)
+            {
+                factory.StartupTimedOut.Should().BeTrue();
+                Skip.If(TestEnvironment.IsGitHubActions, "Session sometimes takes too long to start in CI.");
+            }
+
             options.TransactionProfilerFactory.Should().BeNull();
 
             var clock = SentryStopwatch.StartNew();

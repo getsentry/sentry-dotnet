@@ -21,6 +21,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
     private static readonly long PruningInterval = TimeSpan.FromSeconds(5).Ticks;
     internal long _lastPruned = 0;
+    private readonly Lazy<Hub?> _realHub;
 
     /// <summary>
     /// Constructs a <see cref="SentrySpanProcessor"/>.
@@ -39,6 +40,13 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     internal SentrySpanProcessor(IHub hub, IEnumerable<IOpenTelemetryEnricher>? enrichers)
     {
         _hub = hub;
+        _realHub = new Lazy<Hub?>(() =>
+            _hub switch
+            {
+                Hub thisHub => thisHub,
+                HubAdapter when SentrySdk.CurrentHub is Hub sdkHub => sdkHub,
+                _ => null
+            });
 
         if (_hub is DisabledHub)
         {
@@ -190,11 +198,13 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             span.SetExtra("otel.kind", data.Kind);
         }
 
-        // Events are received/processed in a different AsyncLocal context. Restoring the scope that started it.
+        // In ASP.NET Core the middleware finishes up (and the scope gets popped) before the activity is ended.  So we
+        // need to restore the scope here (it's saved by our middleware when the request starts)
         var activityScope = GetSavedScope(data);
-        if (activityScope is { } savedScope && _hub is Hub hub)
+        if (activityScope is { } savedScope)
         {
-            hub.RestoreScope(savedScope);
+            var hub = _realHub.Value;
+            hub?.RestoreScope(savedScope);
         }
         GenerateSentryErrorsFromOtelSpan(data, attributes);
 

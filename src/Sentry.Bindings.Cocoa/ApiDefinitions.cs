@@ -10,20 +10,6 @@ using ObjCRuntime;
 
 namespace Sentry.CocoaSdk;
 
-[Static]
-[Internal]
-partial interface Constants
-{
-    // extern double SentryVersionNumber;
-    [Field ("SentryVersionNumber", "__Internal")]
-    double SentryVersionNumber { get; }
-
-    // extern const unsigned char[] SentryVersionString;
-    [Field ("SentryVersionString", "__Internal")]
-    [PlainString]
-    NSString SentryVersionString { get; }
-}
-
 // typedef void (^SentryRequestFinished)(NSError * _Nullable);
 [Internal]
 delegate void SentryRequestFinished ([NullAllowed] NSError error);
