@@ -34,6 +34,7 @@ internal class RateLimit
                 continue;
             }
 
+            // Response header looking like this: X-Sentry-Rate-Limits: 2700:metric_bucket:organization:quota_exceeded:custom
             namespaces = components.Length > 4 ? components[4].Split(';') : null;
             break;
         }
