@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+## Fixes
+
+- Fix BackgroundWorker exiting when OperationCanceledException is not from shutdown request ([3284](https://github.com/getsentry/sentry-dotnet/pull/3284))
+
 ## 4.3.0
 
 ### Features

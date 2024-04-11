@@ -157,7 +157,7 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
 
                         await task.ConfigureAwait(false);
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException) when (shutdownTimeout.IsCancellationRequested)
                     {
                         _options.LogInfo(
                             "Shutdown token triggered. Time to exit. {0} items in queue.",
