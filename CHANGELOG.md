@@ -6,6 +6,12 @@
 
 - Fixed normalization for metric tag values for carriage return, line feed and tab characters ([#3281](https://github.com/getsentry/sentry-dotnet/pull/3281))
 
+### Dependencies
+
+- Bump Java SDK from v7.7.0 to v7.8.0 ([#3275](https://github.com/getsentry/sentry-dotnet/pull/3275))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#780)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.7.0...7.8.0)
+
 ## 4.3.0
 
 ### Features
