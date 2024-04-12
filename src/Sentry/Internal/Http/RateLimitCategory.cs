@@ -17,7 +17,7 @@ internal class RateLimitCategory : IEquatable<RateLimitCategory>
             return true;
         }
 
-        var type = item.TryGetType()?.ToLower();
+        var type = item.TryGetType();
         if (string.IsNullOrWhiteSpace(type))
         {
             return false;
