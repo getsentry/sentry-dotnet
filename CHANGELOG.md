@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Features
+
+## Unreleased
+
+- Sentry Transactions now work with OpenTelemetry child spans ([#3288](https://github.com/getsentry/sentry-dotnet/pull/3288))
+
 ### Dependencies
 
 - Bump Java SDK from v7.7.0 to v7.8.0 ([#3275](https://github.com/getsentry/sentry-dotnet/pull/3275))
