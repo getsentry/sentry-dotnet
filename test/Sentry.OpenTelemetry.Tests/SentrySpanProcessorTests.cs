@@ -189,6 +189,9 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
+        var scope = new Scope();
+        var clientScope = new KeyValuePair<Scope, ISentryClient>(scope, _fixture.Client);
+        _fixture.ScopeManager.GetCurrent().Returns(clientScope);
         var sut = _fixture.GetSut();
 
         var data = Tracer.StartActivity("test op");
@@ -268,6 +271,9 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
+        var dummyScope = new Scope();
+        var clientScope = new KeyValuePair<Scope, ISentryClient>(dummyScope, _fixture.Client);
+        _fixture.ScopeManager.GetCurrent().Returns(clientScope);
         var sut = _fixture.GetSut();
 
         var scope = new Scope();
@@ -288,6 +294,9 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
+        var dummyScope = new Scope();
+        var clientScope = new KeyValuePair<Scope, ISentryClient>(dummyScope, _fixture.Client);
+        _fixture.ScopeManager.GetCurrent().Returns(clientScope);
         var sut = _fixture.GetSut();
 
         var scope = new Scope();
