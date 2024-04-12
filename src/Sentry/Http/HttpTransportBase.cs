@@ -271,6 +271,12 @@ public abstract class HttpTransportBase
         {
             foreach (var rateLimitCategory in rateLimit.Categories)
             {
+                if (string.Equals(rateLimitCategory.Name, "metric_bucket", StringComparison.OrdinalIgnoreCase)
+                    && !rateLimit.IsDefaultNamespace)
+                {
+                    // Currently we only back off for default/empty namespaces
+                    continue;
+                }
                 CategoryLimitResets[rateLimitCategory] = now + rateLimit.RetryAfter;
             }
         }
