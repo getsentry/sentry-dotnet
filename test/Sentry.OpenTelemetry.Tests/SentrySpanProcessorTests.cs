@@ -164,7 +164,6 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         {
             span.Should().BeOfType<SpanTracer>();
             span.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
-            span.ParentSpanId.Should().Be(data.ParentSpanId.AsSentrySpanId());
             if (span is not SpanTracer spanTracer)
             {
                 Assert.Fail("Span is not a span tracer");
@@ -175,6 +174,47 @@ public class SentrySpanProcessorTests : ActivitySourceTests
                 spanTracer.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
                 spanTracer.ParentSpanId.Should().Be(data.ParentSpanId.AsSentrySpanId());
                 spanTracer.TraceId.Should().Be(data.TraceId.AsSentryId());
+                spanTracer.Operation.Should().Be(data.OperationName);
+                spanTracer.Description.Should().Be(data.DisplayName);
+                spanTracer.Status.Should().BeNull();
+                spanTracer.StartTimestamp.Should().Be(data.StartTimeUtc);
+            }
+        }
+    }
+
+    [Fact]
+    public void OnStart_WithSentryParentSpanId_StartsChildSpan()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var parent = _fixture.Hub.StartTransaction("Program", "Main");
+        _fixture.Hub.ConfigureScope(scope => scope.Transaction = parent);
+
+        using var data = Tracer.StartActivity("TestActivity");
+
+        // Act
+        sut.OnStart(data!);
+
+        // Assert
+        ((IBaseTracer)parent).IsOtelInstrumenter.Should().BeFalse();
+        Assert.True(sut._map.TryGetValue(data.SpanId, out var span));
+        using (new AssertionScope())
+        {
+            span.Should().BeOfType<SpanTracer>();
+            span.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
+            if (span is not SpanTracer spanTracer)
+            {
+                Assert.Fail("Span is not a span tracer");
+                return;
+            }
+            using (new AssertionScope())
+            {
+                ((IBaseTracer)spanTracer).IsOtelInstrumenter.Should().BeTrue();
+                spanTracer.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
+                spanTracer.ParentSpanId.Should().Be(parent.SpanId);
+                spanTracer.TraceId.Should().Be(parent.TraceId);
                 spanTracer.Operation.Should().Be(data.OperationName);
                 spanTracer.Description.Should().Be(data.DisplayName);
                 spanTracer.Status.Should().BeNull();
