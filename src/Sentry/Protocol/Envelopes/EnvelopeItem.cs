@@ -12,16 +12,16 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
 {
     private const string TypeKey = "type";
 
-    private const string TypeValueEvent = "event";
-    private const string TypeValueUserReport = "user_report";
-    private const string TypeValueTransaction = "transaction";
-    private const string TypeValueSession = "session";
-    private const string TypeValueCheckIn = "check_in";
-    private const string TypeValueAttachment = "attachment";
-    private const string TypeValueClientReport = "client_report";
-    private const string TypeValueProfile = "profile";
-    private const string TypeValueMetric = "statsd";
-    private const string TypeValueCodeLocations = "metric_meta";
+    internal const string TypeValueEvent = "event";
+    internal const string TypeValueUserReport = "user_report";
+    internal const string TypeValueTransaction = "transaction";
+    internal const string TypeValueSession = "session";
+    internal const string TypeValueCheckIn = "check_in";
+    internal const string TypeValueAttachment = "attachment";
+    internal const string TypeValueClientReport = "client_report";
+    internal const string TypeValueProfile = "profile";
+    internal const string TypeValueMetric = "statsd";
+    internal const string TypeValueCodeLocations = "metric_meta";
 
     private const string LengthKey = "length";
     private const string FileNameKey = "filename";

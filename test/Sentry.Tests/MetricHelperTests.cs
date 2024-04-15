@@ -128,13 +128,13 @@ public class MetricHelperTests
 
     [Theory]
     [InlineData("Test123_:/@.{}[]$-", "Test123_:/@.{}[]$-")] // Valid characters
-    [InlineData("test\nvalue", "test<LF>value")]
-    [InlineData("test\rvalue", "test<CR>value")]
-    [InlineData("test\tvalue", "test<HT>value")]
+    [InlineData("test\nvalue", @"test\nvalue")]
+    [InlineData("test\rvalue", @"test\rvalue")]
+    [InlineData("test\tvalue", @"test\tvalue")]
     [InlineData(@"test\value", @"test\\value")]
     [InlineData("test|value", "test\u007cvalue")]
     [InlineData("test,value", "test\u002cvalue")]
-    public void SanitizeValue_ShouldReplaceReservedCharacters(string input, string expected)
+    public void SanitizeTagValue_ShouldReplaceReservedCharacters(string input, string expected)
     {
         // Act
         var result = MetricHelper.SanitizeTagValue(input);

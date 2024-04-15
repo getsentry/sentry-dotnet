@@ -68,16 +68,17 @@ internal static partial class MetricHelper
 
     private static readonly Lazy<KeyValuePair<string, string>[]> LazyTagValueReplacements = new(() =>
     [
-        new KeyValuePair<string, string>("\n", "<LF>"),
-        new KeyValuePair<string, string>("\r", "<CR>"),
-        new KeyValuePair<string, string>("\t", "<HT>"),
-        new KeyValuePair<string, string>(@"\", @"\\"),
+        new KeyValuePair<string, string>("\n", @"\n"),
+        new KeyValuePair<string, string>("\r", @"\r"),
+        new KeyValuePair<string, string>("\t", @"\t"),
         new KeyValuePair<string, string>("|", "\u007c"),
         new KeyValuePair<string, string>(",", "\u002c")
     ]);
     private static KeyValuePair<string, string>[] TagValueReplacements => LazyTagValueReplacements.Value;
     internal static string SanitizeTagValue(string input)
     {
+        // Replace back slashes before we add any of these ourselves when substituting "\n" for other control characters
+        input = input.Replace(@"\", @"\\");
         foreach (var (reservedCharacter, replacementValue) in TagValueReplacements)
         {
             input = input.Replace(reservedCharacter, replacementValue);
