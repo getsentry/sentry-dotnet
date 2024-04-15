@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Sentry Transactions now work with OpenTelemetry child spans ([#3288](https://github.com/getsentry/sentry-dotnet/pull/3288))
+
 ## 4.4.0
 
 ### Features
@@ -9,12 +15,6 @@
 ### Fixes
 
 - Fixed normalization for metric tag values for carriage return, line feed and tab characters ([#3281](https://github.com/getsentry/sentry-dotnet/pull/3281))
-
-### Features
-
-## Unreleased
-
-- Sentry Transactions now work with OpenTelemetry child spans ([#3288](https://github.com/getsentry/sentry-dotnet/pull/3288))
 
 ### Dependencies
 
