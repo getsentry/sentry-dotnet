@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fixed: SentryHttpFailedRequestHandler disposes Content on .net framework ([#3306](https://github.com/getsentry/sentry-dotnet/pull/3306))
+
 ## 4.4.0
 
 ### Features
