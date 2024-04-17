@@ -2,6 +2,9 @@ namespace Sentry.Internal;
 
 internal static class ModuleExtensions
 {
+    // See https://learn.microsoft.com/en-us/dotnet/api/system.reflection.module.fullyqualifiedname?view=net-8.0#remarks
+    internal const string UnknownLocation = "<Unknown>";
+
     /// <summary>
     /// The Module.Name for Modules that are embedded in SingleFileApps will be null
     /// or &lt;Unknown&gt;, in that case we can use Module.ScopeName instead
@@ -11,7 +14,7 @@ internal static class ModuleExtensions
     [UnconditionalSuppressMessage("SingleFile", "IL3002:Avoid calling members marked with 'RequiresAssemblyFilesAttribute' when publishing as a single-file", Justification = AotHelper.SuppressionJustification)]
     public static string? GetNameOrScopeName(this Module module)
     {
-        return (AotHelper.IsNativeAot || module?.Name is null || module.Name.Equals("<Unknown>"))
+        return (AotHelper.IsNativeAot || module?.Name is null || module.Name.Equals(UnknownLocation))
             ? module?.ScopeName
             : module?.Name;
     }

@@ -515,7 +515,7 @@ internal class DebugStackTrace : SentryStackTrace
         {
             assemblyName = module.FullyQualifiedName;
             // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-            if (assemblyName is null or "<unknown>")
+            if (assemblyName is null or ModuleExtensions.UnknownLocation)
             {
                 // When publishing as a single file or compiling AOT FullyQualifiedName will be null. This logic
                 // compensates for the UnconditionalSuppressMessage attribute applied to this method.
