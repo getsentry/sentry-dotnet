@@ -87,6 +87,10 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             // Explicit ParentSpanId of another activity that we have already mapped
             CreateChildSpan(data, mappedParent, data.ParentSpanId);
         }
+        // Note if the current span on the hub is OTel instrumented and is not the parent of `data` then this may be
+        // intentional (see https://opentelemetry.io/docs/languages/net/instrumentation/#creating-new-root-activities)
+        // so we explicitly exclude OTel instrumented spans from the following check.
+        // of Sentry
         else if (_hub.GetSpan() is IBaseTracer { IsOtelInstrumenter: false } inferredParent)
         {
             // When mixing Sentry and OTel instrumentation and we infer that the currently active span is the parent.

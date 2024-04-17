@@ -223,6 +223,37 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         }
     }
 
+
+    [Fact]
+    public void StartSpan_UsingSentryTracing_StartsChildSpan()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        using var parent = Tracer.StartActivity("Parent");
+        sut.OnStart(parent);
+
+        // Act
+        var span = _fixture.Hub.StartSpan("foo", "bar");
+
+        // Assert
+        Assert.True(sut._map.TryGetValue(parent.SpanId, out var transaction));
+        using (new AssertionScope())
+        {
+            if (span is not SpanTracer spanTracer)
+            {
+                Assert.Fail("Span is not a span tracer");
+                return;
+            }
+            spanTracer.ParentSpanId.Should().Be(transaction.SpanId);
+            spanTracer.TraceId.Should().Be(transaction.TraceId);
+            spanTracer.Operation.Should().Be("foo");
+            spanTracer.Description.Should().Be("bar");
+            spanTracer.Status.Should().BeNull();
+        }
+    }
+
     [Fact]
     public void OnStart_WithoutParentSpanId_StartsNewTransaction()
     {
