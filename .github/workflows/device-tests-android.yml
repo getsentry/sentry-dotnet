@@ -74,7 +74,7 @@ jobs:
           path: bin
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@fe59895742b4f984530980e4f693943577526b61 # pin@v3
+        uses: gradle/actions/setup-gradle@6cec5d49d4d6d4bb982fbed7047db31ea6d38f11 # pin@v3
 
       # Cached AVD setup per https://github.com/ReactiveCircus/android-emulator-runner/blob/main/README.md
 
