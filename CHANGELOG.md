@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+-  `HttpResponse.Content` is no longer disposed by when using `SentryHttpFailedRequestHandler` on .NET Framework, which was causing an ObjectDisposedException when using Sentry with NSwag ([#3306](https://github.com/getsentry/sentry-dotnet/pull/3306))
+
 ## 4.4.0
 
 ### Features
