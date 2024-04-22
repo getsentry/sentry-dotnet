@@ -508,30 +508,30 @@ internal class DebugStackTrace : SentryStackTrace
         }
     }
 
-    [UnconditionalSuppressMessage("SingleFile", "IL3002:Avoid calling members marked with 'RequiresAssemblyFilesAttribute' when publishing as a single-file", Justification = AotHelper.SuppressionJustification)]
+    [UnconditionalSuppressMessage("SingleFile", "IL3002:Avoid calling members marked with 'RequiresAssemblyFilesAttribute' when publishing as a single-file", Justification = "Code is avoided at runtime.")]
     private static PEReader? TryReadAssemblyFromDisk(Module module, SentryOptions options, out string? assemblyName)
     {
-#pragma warning disable 0162 // Unreachable code on old .NET frameworks
-        if (AotHelper.IsNativeAot)
-        {
-            assemblyName = null;
-            return null;
-        }
-#pragma warning restore 0162
-
-        assemblyName = module.FullyQualifiedName;
-        if (options.AssemblyReader is { } reader)
-        {
-            return reader.Invoke(assemblyName);
-        }
-
         try
         {
+            assemblyName = module.FullyQualifiedName;
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (assemblyName is null or ModuleExtensions.UnknownLocation)
+            {
+                // When publishing as a single file or compiling AOT FullyQualifiedName will be null. This logic
+                // compensates for the UnconditionalSuppressMessage attribute applied to this method.
+                assemblyName = null;
+                return null;
+            }
+            if (options.AssemblyReader is { } reader)
+            {
+                return reader.Invoke(assemblyName);
+            }
             var assembly = File.OpenRead(assemblyName);
             return new PEReader(assembly);
         }
         catch (Exception)
         {
+            assemblyName = null;
             return null;
         }
     }
