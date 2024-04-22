@@ -40,10 +40,31 @@ public class SentryCheckIn : ISentryJsonSerializable
     /// </summary>
     public string MonitorSlug { get; }
 
+
     /// <summary>
     /// The status of the Checkin
     /// </summary>
     public CheckInStatus Status { get; }
+
+    /// <summary>
+    /// The duration of the check-in in seconds. Will only take effect if the status is ok or error.
+    /// </summary>
+    public long? Duration { get; set; }
+
+    /// <summary>
+    /// The release.
+    /// </summary>
+    public string? Release { get; set; }
+
+    /// <summary>
+    /// The environment.
+    /// </summary>
+    public string? Environment { get; set; }
+
+    /// <summary>
+    /// A dictionary of contextual information about the environment running the check-in.
+    /// </summary>
+    internal Dictionary<string, string?>? Contexts { get; set; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="SentryCheckIn"/>.
@@ -66,6 +87,12 @@ public class SentryCheckIn : ISentryJsonSerializable
         writer.WriteSerializable("check_in_id", Id, logger);
         writer.WriteString("monitor_slug", MonitorSlug);
         writer.WriteString("status", ToSnakeCase(Status));
+
+        writer.WriteNumberIfNotNull("duration", Duration);
+        writer.WriteStringIfNotWhiteSpace("release", Release);
+        writer.WriteStringIfNotWhiteSpace("environment", Environment);
+
+        writer.WriteStringDictionaryIfNotEmpty("contexts", Contexts);
 
         writer.WriteEndObject();
     }
