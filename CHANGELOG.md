@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+-  InApp includes/excludes can now be configured using regular expressions ([#3321](https://github.com/getsentry/sentry-dotnet/pull/3321))
+
 ### Fixes
 
 -  `HttpResponse.Content` is no longer disposed by when using `SentryHttpFailedRequestHandler` on .NET Framework, which was causing an ObjectDisposedException when using Sentry with NSwag ([#3306](https://github.com/getsentry/sentry-dotnet/pull/3306))
