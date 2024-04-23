@@ -2,10 +2,20 @@
 
 ## Unreleased
 
-## Fixes
+### Fixes
 
+- `HttpResponse.Content` is no longer disposed by when using `SentryHttpFailedRequestHandler` on .NET Framework, which was causing an ObjectDisposedException when using Sentry with NSwag ([#3306](https://github.com/getsentry/sentry-dotnet/pull/3306))
 - Fix BackgroundWorker exiting when OperationCanceledException is not from shutdown request ([3284](https://github.com/getsentry/sentry-dotnet/pull/3284))
 
+## 4.4.0
+
+### Features
+
+- Metrics now honor any Rate Limits set in HTTP headers returned by Sentry ([#3276](https://github.com/getsentry/sentry-dotnet/pull/3276))
+
+### Fixes
+
+- Fixed normalization for metric tag values for carriage return, line feed and tab characters ([#3281](https://github.com/getsentry/sentry-dotnet/pull/3281))
 
 ### Dependencies
 

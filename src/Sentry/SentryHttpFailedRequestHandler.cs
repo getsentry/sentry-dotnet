@@ -1,3 +1,4 @@
+using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
 namespace Sentry;
@@ -19,23 +20,17 @@ internal class SentryHttpFailedRequestHandler : SentryFailedRequestHandler
             return;
         }
 
-#if NET5_0_OR_GREATER
-        // Starting with .NET 5, the content and headers are guaranteed to not be null.
-        var bodySize = response.Content.Headers.ContentLength;
-#else
-        // We have to get the content body size before calling EnsureSuccessStatusCode,
-        // because older implementations of EnsureSuccessStatusCode disposes the content.
-        // See https://github.com/dotnet/runtime/issues/24845
-
-        // The ContentLength might be null (but that's ok).
-        // See https://github.com/dotnet/runtime/issues/16162
-        var bodySize = response.Content?.Headers?.ContentLength;
-#endif
-
         // Capture the event
         try
         {
+#if NET5_0_OR_GREATER
             response.EnsureSuccessStatusCode();
+#else
+            // Use our own implementation of EnsureSuccessStatusCode because older implementations of
+            // EnsureSuccessStatusCode disposes the content.
+            // See https://github.com/dotnet/runtime/issues/24845
+            response.StatusCode.EnsureSuccessStatusCode();
+#endif
         }
         catch (HttpRequestException exception)
         {
@@ -54,7 +49,14 @@ internal class SentryHttpFailedRequestHandler : SentryFailedRequestHandler
             var responseContext = new Response
             {
                 StatusCode = (short)response.StatusCode,
-                BodySize = bodySize
+#if NET5_0_OR_GREATER
+                // Starting with .NET 5, the content and headers are guaranteed to not be null.
+                BodySize = response.Content.Headers.ContentLength
+#else
+                // The ContentLength might be null (but that's ok).
+                // See https://github.com/dotnet/runtime/issues/16162
+                BodySize = response.Content?.Headers?.ContentLength
+#endif
             };
 
             if (!Options.SendDefaultPii)

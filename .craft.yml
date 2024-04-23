@@ -19,3 +19,4 @@ targets:
       nuget:Sentry.NLog:
       nuget:Sentry.OpenTelemetry:
       nuget:Sentry.Serilog:
+      nuget:Sentry.Profiling:
