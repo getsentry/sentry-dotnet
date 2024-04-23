@@ -2,6 +2,6 @@
   FileName: Internals/SentryStackTraceFactoryTests.cs,
   Function: void SentryStackTraceFactoryTests.GenericMethodThatThrows<T>(T value),
   AbsolutePath: {ProjectDirectory}Internals/SentryStackTraceFactoryTests.cs,
-  InApp: true,
+  InApp: false,
   AddressMode: rel:0
 }

@@ -204,19 +204,36 @@ public sealed class SentryStackFrame : ISentryJsonSerializable
 
     private void ConfigureAppFrame(SentryOptions options, string parameter, bool mustIncludeSeparator)
     {
-        var resolver = (string prefix) =>
+        var resolver = (string prefixOrPattern) =>
         {
-            if (parameter.StartsWith(prefix, StringComparison.Ordinal))
+            var substringOrRegex = new SubstringOrRegexPattern(prefixOrPattern, StringComparison.Ordinal);
+            if (!mustIncludeSeparator)
             {
-                if (mustIncludeSeparator)
-                {
-                    return parameter.Length > prefix.Length && parameter[prefix.Length] == '.';
-                }
-                return true;
+                return substringOrRegex.IsMatch(parameter);
             }
+
+            if (substringOrRegex.Regex is { } regex)
+            {
+                // Check for any regex match followed by a separator
+                foreach (Match match in regex.Matches(parameter))
+                {
+                    if (parameter.Length > match.Value.Length && parameter[match.Value.Length] == '.')
+                    {
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                // Check for a substring followed by a separator
+                return parameter.Length > prefixOrPattern.Length && parameter[prefixOrPattern.Length] == '.';
+            }
+
             return false;
         };
-        InApp = options.InAppInclude?.Any(resolver) == true || options.InAppExclude?.Any(resolver) != true;
+        var matchesInclude = options.InAppInclude?.Any(resolver) == true;
+        var matchesExclude = () => options.InAppExclude?.Any(resolver) ?? false;
+        InApp =  matchesInclude || !matchesExclude();
     }
 
     /// <summary>

@@ -234,6 +234,7 @@ public class SentryOptions
     /// </summary>
     public ISentryScopeStateProcessor SentryScopeStateProcessor { get; set; } = new DefaultSentryScopeStateProcessor();
 
+    // TODO: Change to List<StringOrRegex> in next major release
     /// <summary>
     /// A list of namespaces (or prefixes) considered not part of application code
     /// </summary>
@@ -247,6 +248,7 @@ public class SentryOptions
     /// </example>
     internal List<string>? InAppExclude { get; set; }
 
+    // TODO: Change to List<StringOrRegex> in next major release
     /// <summary>
     /// A list of namespaces (or prefixes) considered part of application code
     /// </summary>

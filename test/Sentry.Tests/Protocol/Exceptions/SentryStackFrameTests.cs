@@ -158,6 +158,34 @@ public class SentryStackFrameTests
         Assert.True(sut.InApp);
     }
 
+    [Theory]
+    [InlineData("Namespace", ".*", true)] // Substring + Regex
+    [InlineData("OtherNamespace", ".*", false)] // Substring + Regex
+    [InlineData("Name.*", ".*", true)] // Regex + Regex
+    [InlineData("OtherName.*", ".*", false)] // Regex + Regex
+    [InlineData(@"Namespace\..*", "Foo", true)] // Regex + Substring
+    [InlineData(@"OtherNamespace\..*", "Namespace", false)] // Regex + Substring
+    public void ConfigureAppFrame_InAppRuleExclude_MatchesRegex(string include, string exclude, bool shouldMatch)
+    {
+        // Arrange
+        var module = "Namespace.AppModule";
+        var sut = new SentryStackFrame
+        {
+            Module = module
+        };
+        var options = new SentryOptions
+        {
+            InAppInclude = [include],
+            InAppExclude = [exclude]
+        };
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        sut.InApp.Should().Be(shouldMatch);
+    }
+
     [Fact]
     public void ConfigureAppFrame_WithDefaultOptions_RecognizesInAppFrame()
     {

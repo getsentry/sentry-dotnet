@@ -73,6 +73,8 @@ public class SubstringOrRegexPattern
         return ToString().GetHashCode();
     }
 
+    internal Regex? Regex => _regex;
+
     internal bool IsMatch(string str) =>
         _substring == ".*" || // perf shortcut
         (_substring != null && str.Contains(_substring, _stringComparison)) ||
