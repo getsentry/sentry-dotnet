@@ -233,7 +233,7 @@ public sealed class SentryStackFrame : ISentryJsonSerializable
         };
         var matchesInclude = options.InAppInclude?.Any(resolver) == true;
         var matchesExclude = () => options.InAppExclude?.Any(resolver) ?? false;
-        InApp =  matchesInclude || !matchesExclude();
+        InApp = matchesInclude || !matchesExclude();
     }
 
     /// <summary>
