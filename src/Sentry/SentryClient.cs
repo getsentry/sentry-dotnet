@@ -233,12 +233,23 @@ public class SentryClient : ISentryClient, IDisposable
         => CaptureEnvelope(Envelope.FromSession(sessionUpdate));
 
     /// <inheritdoc />
-    public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null, TimeSpan? duration = null)
+    public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null, Scope? scope = null, TimeSpan? duration = null)
     {
+        scope ??= new Scope(_options);
+
+        var traceId = scope.PropagationContext.TraceId;
+        if (scope.Span is not null)
+        {
+            // Overwrite the traceId if there is a span active
+            traceId = scope.Span.TraceId;
+        }
+
         var checkIn = new SentryCheckIn(monitorSlug, status, sentryId)
         {
-            Duration = duration?.TotalSeconds
+            Duration = duration?.TotalSeconds,
+            Contexts = new Dictionary<string, string?> { { "trace_id", traceId.ToString() } }
         };
+
         _enricher.Apply(checkIn);
 
         return CaptureEnvelope(Envelope.FromCheckIn(checkIn))

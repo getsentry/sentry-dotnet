@@ -534,7 +534,7 @@ public static partial class SentrySdk
     /// <returns>The Id of the check-in.</returns>
     [DebuggerStepThrough]
     public static SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null, TimeSpan? duration = null)
-        => CurrentHub.CaptureCheckIn(monitorSlug, status, sentryId, duration);
+        => CurrentHub.CaptureCheckIn(monitorSlug, status, sentryId, duration: duration);
 
     /// <summary>
     /// Starts a transaction.

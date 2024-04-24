@@ -64,7 +64,7 @@ public class SentryCheckIn : ISentryJsonSerializable
     /// <summary>
     /// A dictionary of contextual information about the environment running the check-in.
     /// </summary>
-    internal Dictionary<string, string?>? Contexts { get; set; }
+    public Dictionary<string, string?>? Contexts { get; set; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="SentryCheckIn"/>.

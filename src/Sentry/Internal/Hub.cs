@@ -566,7 +566,8 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
-    public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null, TimeSpan? duration = null)
+    public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null,
+        Scope? scope = null, TimeSpan? duration = null)
     {
         if (!IsEnabled)
         {
@@ -576,7 +577,14 @@ internal class Hub : IHub, IMetricHub, IDisposable
         try
         {
             _options.LogDebug("Capturing '{0}' check-in for '{1}'", status, monitorSlug);
-            return _ownedClient.CaptureCheckIn(monitorSlug, status, sentryId, duration);
+
+            if (scope is null)
+            {
+                ScopeManager.GetCurrent().Deconstruct(out var currentScope, out _);
+                scope = currentScope;
+            }
+
+            return _ownedClient.CaptureCheckIn(monitorSlug, status, sentryId, scope, duration);
         }
         catch (Exception e)
         {
