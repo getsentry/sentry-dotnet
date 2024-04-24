@@ -62,9 +62,9 @@ public class SentryCheckIn : ISentryJsonSerializable
     public string? Environment { get; set; }
 
     /// <summary>
-    /// A dictionary of contextual information about the environment running the check-in.
+    /// The trace ID
     /// </summary>
-    public Dictionary<string, string?>? Contexts { get; set; }
+    internal SentryId? TraceId { get; set; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="SentryCheckIn"/>.
@@ -92,7 +92,16 @@ public class SentryCheckIn : ISentryJsonSerializable
         writer.WriteStringIfNotWhiteSpace("release", Release);
         writer.WriteStringIfNotWhiteSpace("environment", Environment);
 
-        writer.WriteStringDictionaryIfNotEmpty("contexts", Contexts);
+        if (TraceId is not null)
+        {
+            writer.WriteStartObject("contexts");
+            writer.WriteStartObject("trace");
+
+            writer.WriteStringIfNotWhiteSpace("trace_id", TraceId.ToString());
+
+            writer.WriteEndObject();
+            writer.WriteEndObject();
+        }
 
         writer.WriteEndObject();
     }

@@ -247,7 +247,7 @@ public class SentryClient : ISentryClient, IDisposable
         var checkIn = new SentryCheckIn(monitorSlug, status, sentryId)
         {
             Duration = duration?.TotalSeconds,
-            Contexts = new Dictionary<string, string?> { { "trace_id", traceId.ToString() } }
+            TraceId = traceId
         };
 
         _enricher.Apply(checkIn);
