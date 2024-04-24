@@ -1,3 +1,4 @@
+using System;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
@@ -206,27 +207,34 @@ public sealed class SentryStackFrame : ISentryJsonSerializable
     {
         var resolver = (string prefixOrPattern) =>
         {
-            var substringOrRegex = new SubstringOrRegexPattern(prefixOrPattern, StringComparison.Ordinal);
-            if (!mustIncludeSeparator)
+            try
             {
-                return substringOrRegex.IsMatch(parameter);
-            }
-
-            if (substringOrRegex.Regex is { } regex)
-            {
-                // Check for any regex match followed by a separator
-                foreach (Match match in regex.Matches(parameter))
+                var substringOrRegex = new SubstringOrRegexPattern(prefixOrPattern, StringComparison.Ordinal);
+                if (!mustIncludeSeparator)
                 {
-                    if (parameter.Length > match.Value.Length && parameter[match.Value.Length] == '.')
+                    return substringOrRegex.IsMatch(parameter);
+                }
+
+                if (substringOrRegex.Regex is { } regex)
+                {
+                    // Check for any regex match followed by a separator
+                    foreach (Match match in regex.Matches(parameter))
                     {
-                        return true;
+                        if (parameter.Length > match.Value.Length && parameter[match.Value.Length] == '.')
+                        {
+                            return true;
+                        }
                     }
                 }
+                else
+                {
+                    // Check for a substring followed by a separator
+                    return parameter.Length > prefixOrPattern.Length && parameter[prefixOrPattern.Length] == '.';
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // Check for a substring followed by a separator
-                return parameter.Length > prefixOrPattern.Length && parameter[prefixOrPattern.Length] == '.';
+                options.LogDebug("Error matching prefixOrPattern `{0}` with parameter `{1}`: {2}", prefixOrPattern, parameter, ex.Message);
             }
 
             return false;

@@ -85,6 +85,10 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
                 _completionSource.TrySetResult();
             }
         }
+        else
+        {
+            _options.LogDebug("Profiler sampling not yet started.");
+        }
     }
 
     /// <inheritdoc />

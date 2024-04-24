@@ -58,12 +58,14 @@ internal class SampleProfileBuilder
 
         if (!_downsampler.ShouldSample(threadIndex, timestampMs))
         {
+            _options.DiagnosticLogger?.LogDebug("Profiler Sample sampled out. Skipping.");
             return;
         }
 
         var stackIndex = AddStackTrace(callStackIndex);
         if (stackIndex < 0)
         {
+            _options.DiagnosticLogger?.LogDebug("Invalid stackIndex for Profiler Sample. Skipping.");
             return;
         }
 
