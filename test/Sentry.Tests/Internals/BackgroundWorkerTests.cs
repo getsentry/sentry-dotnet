@@ -295,6 +295,39 @@ public class BackgroundWorkerTests
     }
 
     [Fact]
+    public void SendEnvelopeAsync_ThrowsOperationCanceledException_WorkerDoesNotShutdown()
+    {
+        // Arrange
+        var envelope = Envelope.FromEvent(new SentryEvent());
+
+        var operationCanceledException = new OperationCanceledException();
+        _fixture.Transport
+            .When(e => e.SendEnvelopeAsync(envelope, Arg.Any<CancellationToken>()))
+            .Do(_ => throw operationCanceledException);
+
+        using var sut = _fixture.GetSut();
+        var envelopeSent = new ManualResetEvent(false);
+        sut.OnFlushObjectReceived += (sender, args) =>
+        {
+            if (sender == envelope)
+            {
+                envelopeSent.Set();
+            }
+        };
+
+        // Act
+        var queued = sut.EnqueueEnvelope(envelope);
+
+        // Assert
+        if (!envelopeSent.WaitOne(TimeSpan.FromMinutes(1)))
+        {
+            throw new TimeoutException("Timeout waiting for envelope to be sent.");
+        }
+        _fixture.Logger.DidNotReceive().Log(SentryLevel.Info, "Shutdown token triggered. Time to exit. {0} items in queue.", null, Arg.Any<object[]>());
+        _fixture.Logger.Received().Log(SentryLevel.Error, "Error while processing envelope (event ID: '{0}'). {1} items in queue.", operationCanceledException, Arg.Any<object[]>());
+    }
+
+    [Fact]
     public void QueuedItems_StartsEmpty()
     {
         using var sut = _fixture.GetSut();

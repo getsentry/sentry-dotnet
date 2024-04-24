@@ -7,7 +7,9 @@
 - The SDK's performance API now works in conjunction with OpenTelemetry's instrumentation. This means that SentrySpans and OTel spans now show up in the same span-tree. ([#3288](https://github.com/getsentry/sentry-dotnet/pull/3288))
 
 ### Fixes
--  `HttpResponse.Content` is no longer disposed by when using `SentryHttpFailedRequestHandler` on .NET Framework, which was causing an ObjectDisposedException when using Sentry with NSwag ([#3306](https://github.com/getsentry/sentry-dotnet/pull/3306))
+
+- `HttpResponse.Content` is no longer disposed by when using `SentryHttpFailedRequestHandler` on .NET Framework, which was causing an ObjectDisposedException when using Sentry with NSwag ([#3306](https://github.com/getsentry/sentry-dotnet/pull/3306))
+- Fix BackgroundWorker exiting when OperationCanceledException is not from shutdown request ([3284](https://github.com/getsentry/sentry-dotnet/pull/3284))
 
 ## 4.4.0
 
