@@ -49,7 +49,7 @@ public class SentryCheckIn : ISentryJsonSerializable
     /// <summary>
     /// The duration of the check-in in seconds. Will only take effect if the status is ok or error.
     /// </summary>
-    public long? Duration { get; set; }
+    public double? Duration { get; set; }
 
     /// <summary>
     /// The release.

@@ -183,7 +183,7 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op
     /// </summary>
-    public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null)
+    public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null, TimeSpan? duration = null)
         => SentryId.Empty;
 
     /// <summary>

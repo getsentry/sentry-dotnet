@@ -233,9 +233,14 @@ public class SentryClient : ISentryClient, IDisposable
         => CaptureEnvelope(Envelope.FromSession(sessionUpdate));
 
     /// <inheritdoc />
-    public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null)
+    public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null, TimeSpan? duration = null)
     {
-        var checkIn = new SentryCheckIn(monitorSlug, status, sentryId);
+        var checkIn = new SentryCheckIn(monitorSlug, status, sentryId)
+        {
+            Duration = duration?.TotalSeconds
+        };
+        _enricher.Apply(checkIn);
+
         return CaptureEnvelope(Envelope.FromCheckIn(checkIn))
             ? checkIn.Id
             : SentryId.Empty;
