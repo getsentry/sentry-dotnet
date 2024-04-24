@@ -53,6 +53,7 @@ internal class SampleProfileBuilder
         var threadIndex = AddThread(thread);
         if (threadIndex < 0)
         {
+            _options.DiagnosticLogger?.LogDebug("Profiler Sample threadIndex is invalid. Skipping.");
             return;
         }
 
@@ -69,6 +70,7 @@ internal class SampleProfileBuilder
             return;
         }
 
+        _options.DiagnosticLogger?.LogDebug("Adding profile sample.");
         Profile.Samples.Add(new()
         {
             Timestamp = (ulong)(timestampMs * 1_000_000),
