@@ -82,58 +82,81 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     /// <inheritdoc />
     public override void OnStart(Activity data)
     {
-        if (data.ParentSpanId != default && _map.TryGetValue(data.ParentSpanId, out var parentSpan))
+        if (data.ParentSpanId != default && _map.TryGetValue(data.ParentSpanId, out var mappedParent))
         {
-            // We can find the parent span - start a child span.
-            var context = new SpanContext(
-                data.OperationName,
-                data.SpanId.AsSentrySpanId(),
-                data.ParentSpanId.AsSentrySpanId(),
-                data.TraceId.AsSentryId(),
-                data.DisplayName,
-                null,
-                null)
-            {
-                Instrumenter = Instrumenter.OpenTelemetry
-            };
-
-            var span = (SpanTracer)parentSpan.StartChild(context);
-            span.StartTimestamp = data.StartTimeUtc;
-            // Used to filter out spans that are not recorded when finishing a transaction.
-            span.SetFused(data);
-            span.IsFiltered = () => span.GetFused<Activity>() is { IsAllDataRequested: false, Recorded: false };
-            _map[data.SpanId] = span;
+            // Explicit ParentSpanId of another activity that we have already mapped
+            CreateChildSpan(data, mappedParent, data.ParentSpanId);
+        }
+        // Note if the current span on the hub is OTel instrumented and is not the parent of `data` then this may be
+        // intentional (see https://opentelemetry.io/docs/languages/net/instrumentation/#creating-new-root-activities)
+        // so we explicitly exclude OTel instrumented spans from the following check.
+        // of Sentry
+        else if (_hub.GetSpan() is IBaseTracer { IsOtelInstrumenter: false } inferredParent)
+        {
+            // When mixing Sentry and OTel instrumentation and we infer that the currently active span is the parent.
+            var inferredParentSpan = (ISpan)inferredParent;
+            CreateChildSpan(data, inferredParentSpan, inferredParentSpan.SpanId);
         }
         else
         {
-            // If a parent exists at all, then copy its sampling decision.
-            bool? isSampled = data.HasRemoteParent ? data.Recorded : null;
-
-            // No parent span found - start a new transaction
-            var transactionContext = new TransactionContext(data.DisplayName,
-                data.OperationName,
-                data.SpanId.AsSentrySpanId(),
-                data.ParentSpanId.AsSentrySpanId(),
-                data.TraceId.AsSentryId(),
-                data.DisplayName, null, isSampled, isSampled)
-            {
-                Instrumenter = Instrumenter.OpenTelemetry
-            };
-
-            var baggageHeader = data.Baggage.AsBaggageHeader();
-            var dynamicSamplingContext = baggageHeader.CreateDynamicSamplingContext();
-            var transaction = (TransactionTracer)_hub.StartTransaction(
-                transactionContext, new Dictionary<string, object?>(), dynamicSamplingContext
-                );
-            transaction.StartTimestamp = data.StartTimeUtc;
-            _hub.ConfigureScope(scope => scope.Transaction = transaction);
-            transaction.SetFused(data);
-            _map[data.SpanId] = transaction;
+            CreateRootSpan(data);
         }
 
         // Housekeeping
         PruneFilteredSpans();
     }
+
+    private void CreateChildSpan(Activity data, ISpan parentSpan, ActivitySpanId? parentSpanId = null)
+        => CreateChildSpan(data, parentSpan, parentSpanId?.AsSentrySpanId());
+
+    private void CreateChildSpan(Activity data, ISpan parentSpan, SpanId? parentSpanId = null)
+    {
+        // We can find the parent span - start a child span.
+        var context = new SpanContext(
+            data.OperationName,
+            data.SpanId.AsSentrySpanId(),
+            parentSpanId,
+            description: data.DisplayName
+        )
+        {
+            Instrumenter = Instrumenter.OpenTelemetry
+        };
+
+        var span = (SpanTracer)parentSpan.StartChild(context);
+        span.StartTimestamp = data.StartTimeUtc;
+        // Used to filter out spans that are not recorded when finishing a transaction.
+        span.SetFused(data);
+        span.IsFiltered = () => span.GetFused<Activity>() is { IsAllDataRequested: false, Recorded: false };
+        _map[data.SpanId] = span;
+    }
+
+    private void CreateRootSpan(Activity data)
+    {
+        // If a parent exists at all, then copy its sampling decision.
+        bool? isSampled = data.HasRemoteParent ? data.Recorded : null;
+
+        // No parent span found - start a new transaction
+        var transactionContext = new TransactionContext(data.DisplayName,
+            data.OperationName,
+            data.SpanId.AsSentrySpanId(),
+            data.ParentSpanId.AsSentrySpanId(),
+            data.TraceId.AsSentryId(),
+            data.DisplayName, null, isSampled, isSampled)
+        {
+            Instrumenter = Instrumenter.OpenTelemetry
+        };
+
+        var baggageHeader = data.Baggage.AsBaggageHeader();
+        var dynamicSamplingContext = baggageHeader.CreateDynamicSamplingContext();
+        var transaction = (TransactionTracer)_hub.StartTransaction(
+            transactionContext, new Dictionary<string, object?>(), dynamicSamplingContext
+        );
+        transaction.StartTimestamp = data.StartTimeUtc;
+        _hub.ConfigureScope(scope => scope.Transaction = transaction);
+        transaction.SetFused(data);
+        _map[data.SpanId] = transaction;
+    }
+
 
     /// <inheritdoc />
     public override void OnEnd(Activity data)

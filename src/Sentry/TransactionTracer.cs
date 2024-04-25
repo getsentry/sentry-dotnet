@@ -7,16 +7,17 @@ namespace Sentry;
 /// <summary>
 /// Transaction tracer.
 /// </summary>
-public class TransactionTracer : ITransactionTracer
+public class TransactionTracer : IBaseTracer, ITransactionTracer
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
     private readonly Timer? _idleTimer;
     private long _cancelIdleTimeout;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
+
     private readonly Instrumenter _instrumenter = Instrumenter.Sentry;
 
-    internal bool IsOtelInstrumenter => _instrumenter == Instrumenter.OpenTelemetry;
+    bool IBaseTracer.IsOtelInstrumenter => _instrumenter == Instrumenter.OpenTelemetry;
 
     /// <inheritdoc />
     public SpanId SpanId
@@ -281,7 +282,7 @@ public class TransactionTracer : ITransactionTracer
     internal ISpan StartChild(SpanId? spanId, SpanId parentSpanId, string operation,
         Instrumenter instrumenter = Instrumenter.Sentry)
     {
-        var span = new SpanTracer(_hub, this, parentSpanId, TraceId, operation);
+        var span = new SpanTracer(_hub, this, SpanId.Create(), parentSpanId, TraceId, operation, instrumenter: instrumenter);
         if (spanId is { } id)
         {
             span.SpanId = id;
