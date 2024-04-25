@@ -288,7 +288,7 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
         var nonSentrySpans = tracer.Spans
             .Where(s => s is not SpanTracer { IsSentryRequest: true });
 
-        if (tracer is not TransactionTracer { IsOtelInstrumenter: true })
+        if (tracer is not IBaseTracer { IsOtelInstrumenter: true })
         {
             return nonSentrySpans.Select(s => new SentrySpan(s)).ToArray();
         }

@@ -17,7 +17,7 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
     private volatile bool _disposed;
     private int _currentItems;
 
-    private event EventHandler? OnFlushObjectReceived;
+    internal event EventHandler? OnFlushObjectReceived;
 
     internal Task WorkerTask { get; }
 
@@ -157,7 +157,7 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
 
                         await task.ConfigureAwait(false);
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException) when (shutdownTimeout.IsCancellationRequested)
                     {
                         _options.LogInfo(
                             "Shutdown token triggered. Time to exit. {0} items in queue.",

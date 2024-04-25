@@ -164,7 +164,6 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         {
             span.Should().BeOfType<SpanTracer>();
             span.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
-            span.ParentSpanId.Should().Be(data.ParentSpanId.AsSentrySpanId());
             if (span is not SpanTracer spanTracer)
             {
                 Assert.Fail("Span is not a span tracer");
@@ -184,11 +183,86 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     }
 
     [Fact]
+    public void OnStart_WithSentryParentSpanId_StartsChildSpan()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var parent = _fixture.Hub.StartTransaction("Program", "Main");
+        _fixture.Hub.ConfigureScope(scope => scope.Transaction = parent);
+
+        using var data = Tracer.StartActivity("TestActivity");
+
+        // Act
+        sut.OnStart(data!);
+
+        // Assert
+        ((IBaseTracer)parent).IsOtelInstrumenter.Should().BeFalse();
+        Assert.True(sut._map.TryGetValue(data.SpanId, out var span));
+        using (new AssertionScope())
+        {
+            span.Should().BeOfType<SpanTracer>();
+            span.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
+            if (span is not SpanTracer spanTracer)
+            {
+                Assert.Fail("Span is not a span tracer");
+                return;
+            }
+            using (new AssertionScope())
+            {
+                ((IBaseTracer)spanTracer).IsOtelInstrumenter.Should().BeTrue();
+                spanTracer.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
+                spanTracer.ParentSpanId.Should().Be(parent.SpanId);
+                spanTracer.TraceId.Should().Be(parent.TraceId);
+                spanTracer.Operation.Should().Be(data.OperationName);
+                spanTracer.Description.Should().Be(data.DisplayName);
+                spanTracer.Status.Should().BeNull();
+                spanTracer.StartTimestamp.Should().Be(data.StartTimeUtc);
+            }
+        }
+    }
+
+
+    [Fact]
+    public void StartSpan_UsingSentryTracing_StartsChildSpan()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        using var parent = Tracer.StartActivity("Parent");
+        sut.OnStart(parent);
+
+        // Act
+        var span = _fixture.Hub.StartSpan("foo", "bar");
+
+        // Assert
+        Assert.True(sut._map.TryGetValue(parent.SpanId, out var transaction));
+        using (new AssertionScope())
+        {
+            if (span is not SpanTracer spanTracer)
+            {
+                Assert.Fail("Span is not a span tracer");
+                return;
+            }
+            spanTracer.ParentSpanId.Should().Be(transaction.SpanId);
+            spanTracer.TraceId.Should().Be(transaction.TraceId);
+            spanTracer.Operation.Should().Be("foo");
+            spanTracer.Description.Should().Be("bar");
+            spanTracer.Status.Should().BeNull();
+        }
+    }
+
+    [Fact]
     public void OnStart_WithoutParentSpanId_StartsNewTransaction()
     {
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
+        var scope = new Scope();
+        var clientScope = new KeyValuePair<Scope, ISentryClient>(scope, _fixture.Client);
+        _fixture.ScopeManager.GetCurrent().Returns(clientScope);
         var sut = _fixture.GetSut();
 
         var data = Tracer.StartActivity("test op");
@@ -268,6 +342,9 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
+        var dummyScope = new Scope();
+        var clientScope = new KeyValuePair<Scope, ISentryClient>(dummyScope, _fixture.Client);
+        _fixture.ScopeManager.GetCurrent().Returns(clientScope);
         var sut = _fixture.GetSut();
 
         var scope = new Scope();
@@ -288,6 +365,9 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
+        var dummyScope = new Scope();
+        var clientScope = new KeyValuePair<Scope, ISentryClient>(dummyScope, _fixture.Client);
+        _fixture.ScopeManager.GetCurrent().Returns(clientScope);
         var sut = _fixture.GetSut();
 
         var scope = new Scope();
