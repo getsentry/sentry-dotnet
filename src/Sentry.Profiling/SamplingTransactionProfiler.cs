@@ -15,7 +15,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
     private SampleProfilerSession _session;
     private readonly double _startTimeMs;
     private double _endTimeMs;
-    private TaskCompletionSource _completionSource = new();
+    private TaskCompletionSource _completionSource = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     public SamplingTransactionProfiler(SentryOptions options, SampleProfilerSession session, int timeoutMs, CancellationToken cancellationToken)
     {
