@@ -119,16 +119,6 @@ internal class Hub : IHub, IMetricHub, IDisposable
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
     {
-        var instrumenter = (context as SpanContext)?.Instrumenter;
-        if (instrumenter != _options.Instrumenter)
-        {
-            _options.LogWarning(
-                $"Attempted to start a transaction via {instrumenter} instrumentation when the SDK is" +
-                $" configured for {_options.Instrumenter} instrumentation.  The transaction will not be created.");
-
-            return NoOpTransaction.Instance;
-        }
-
         var transaction = new TransactionTracer(this, context);
 
         // If the hub is disabled, we will always sample out.  In other words, starting a transaction
