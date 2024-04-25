@@ -49,7 +49,7 @@ public class SentryCheckIn : ISentryJsonSerializable
     /// <summary>
     /// The duration of the check-in in seconds. Will only take effect if the status is ok or error.
     /// </summary>
-    public double? Duration { get; set; }
+    public TimeSpan? Duration { get; set; }
 
     /// <summary>
     /// The release.
@@ -88,10 +88,11 @@ public class SentryCheckIn : ISentryJsonSerializable
         writer.WriteString("monitor_slug", MonitorSlug);
         writer.WriteString("status", ToSnakeCase(Status));
 
-        writer.WriteNumberIfNotNull("duration", Duration);
+        writer.WriteNumberIfNotNull("duration", Duration?.TotalSeconds);
         writer.WriteStringIfNotWhiteSpace("release", Release);
         writer.WriteStringIfNotWhiteSpace("environment", Environment);
 
+        // Check-Ins have their own context but that only support Trace ID
         if (TraceId is not null)
         {
             writer.WriteStartObject("contexts");

@@ -246,7 +246,7 @@ public class SentryClient : ISentryClient, IDisposable
 
         var checkIn = new SentryCheckIn(monitorSlug, status, sentryId)
         {
-            Duration = duration?.TotalSeconds,
+            Duration = duration,
             TraceId = traceId
         };
 
