@@ -7,8 +7,9 @@ For big feature it's advised to raise an issue to discuss it first.
 
 * Install the .NET SDKs
 * Install PowerShell
+* Install Xcode
 * Restore workloads with `dotnet workload restore` (needs `sudo` on a Mac)
-* To quickly get up and running, you can just run `dotnet build Sentry.sln`
+* To quickly get up and running, you can just run `dotnet build SentryNoMobile.slnf` (you're skipping the mobile targets)
 * To run a full build in Release mode and test, before pushing, run `./build.sh` or `./build.cmd`
 
 ## Dependencies
@@ -17,13 +18,13 @@ For big feature it's advised to raise an issue to discuss it first.
   - [.NET 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
   - [.NET 6.0](https://dotnet.microsoft.com/download/dotnet/6.0)
 
-  *Technically, you only need the full SDK install for the latest version (8.0).  If you like, you can install the smaller ASP.NET Core Runtime packages for .NET 6.0 .  However, installing the full SDKs will also give you the runtimes.*
+  *Technically, you only need the full SDK install for the latest version (8.0).  If you like, you can install the smaller ASP.NET Core Runtime packages for .NET 6.0. However, installing the full SDKs will also give you the runtimes.*
 
-  *If using an M1 ("Apple silicon") processor, read [the special instructions below](#special-instructions-for-apple-silicon-cpus).*
-
-* You'll need `CMake` somewhere on your PATH. If you don't already have this, one way to get it is to install the [C++ CMake tools for Windows](https://learn.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-170#installation)
+  *If using an "Apple silicon" processor (M1 or newer), read [the special instructions below](#special-instructions-for-apple-silicon-cpus).*
 
 * You'll need [`pwsh`](https://github.com/PowerShell/PowerShell#get-powershell) Core version 6 or later on PATH.
+
+* `CMake` needs to be on your PATH. On Windows you can install the [C++ CMake tools for Windows](https://learn.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-170#installation). On macOS you can use your favourite package manager (e.g. `brew install cmake`).
 
 * On Windows:
   - [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework) 4.6.2 or higher.
@@ -31,7 +32,6 @@ For big feature it's advised to raise an issue to discuss it first.
   - Building Sentry with the Android bindings requires Java. If you're building Sentry using an IDE, typically you provide the path to your Java installation via the IDE settings (open the settings for Visual Studio or Rider and search for "android"). If you want to build Sentry from the command line (using `dotnet build`) then you will need to ensure the `JAVA_HOME` environment variable is set correctly.
 * On macOS/Linux
   - [Mono 6 or higher](https://www.mono-project.com/download/stable) to run the unit tests on the `net4x` targets.
-  - Install `CMake` using your favourite package manager (e.g. `brew install cmake`)
 
 ## .NET MAUI Requirements
 
