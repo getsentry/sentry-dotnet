@@ -1468,6 +1468,8 @@ public partial class HubTests
         Assert.Equal(checkInId, SentryId.Empty);
     }
 
+
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
