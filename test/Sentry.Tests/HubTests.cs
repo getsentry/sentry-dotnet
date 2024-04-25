@@ -637,7 +637,7 @@ public partial class HubTests
     }
 
     [Fact]
-    public void StartTransaction_DifferentInstrumenter_NoOp()
+    public void StartTransaction_DifferentInstrumenter_SampledIn()
     {
         // Arrange
         _fixture.Options.EnableTracing = true;
@@ -653,7 +653,7 @@ public partial class HubTests
         var transaction = hub.StartTransaction(transactionContext);
 
         // Assert
-        transaction.Should().Be(NoOpTransaction.Instance);
+        transaction.IsSampled.Should().BeTrue();
     }
 
     [Fact]
