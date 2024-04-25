@@ -12,7 +12,7 @@ For big feature it's advised to raise an issue to discuss it first.
 * To quickly get up and running, you can just run `dotnet build SentryNoMobile.slnf` (you're skipping the mobile targets)
 * To run a full build in Release mode and test, before pushing, run `./build.sh` or `./build.cmd`
 
-## Dependencies
+## Minimal Dependencies
 
 * The latest versions of the following .NET SDKs:
   - [.NET 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
@@ -20,31 +20,31 @@ For big feature it's advised to raise an issue to discuss it first.
 
   *Technically, you only need the full SDK install for the latest version (8.0).  If you like, you can install the smaller ASP.NET Core Runtime packages for .NET 6.0. However, installing the full SDKs will also give you the runtimes.*
 
-  *If using an "Apple silicon" processor (M1 or newer), read [the special instructions below](#special-instructions-for-apple-silicon-cpus).*
+* [`pwsh`](https://github.com/PowerShell/PowerShell#get-powershell) Core version 6 or later on PATH.
 
-* You'll need [`pwsh`](https://github.com/PowerShell/PowerShell#get-powershell) Core version 6 or later on PATH.
-
-* `CMake` needs to be on your PATH. On Windows you can install the [C++ CMake tools for Windows](https://learn.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-170#installation). On macOS you can use your favourite package manager (e.g. `brew install cmake`).
+* `CMake` on PATH. On Windows you can install the [C++ CMake tools for Windows](https://learn.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-170#installation). On macOS you can use your favourite package manager (e.g. `brew install cmake`).
 
 * On Windows:
   - [.NET Framework](https://dotnet.microsoft.com/download/dotnet-framework) 4.6.2 or higher.
   - `Sentry.DiagnosticSource.IntegrationTests.csproj` uses [SQL LocalDb](https://docs.microsoft.com/sql/database-engine/configure-windows/sql-server-express-localdb) - [download SQL LocalDB 2019](https://download.microsoft.com/download/7/c/1/7c14e92e-bdcb-4f89-b7cf-93543e7112d1/SqlLocalDB.msi). To avoid running these tests, unload `Sentry.DiagnosticSource.IntegrationTests.csproj` from the solution.
-  - Building Sentry with the Android bindings requires Java. If you're building Sentry using an IDE, typically you provide the path to your Java installation via the IDE settings (open the settings for Visual Studio or Rider and search for "android"). If you want to build Sentry from the command line (using `dotnet build`) then you will need to ensure the `JAVA_HOME` environment variable is set correctly.
 * On macOS/Linux
   - [Mono 6 or higher](https://www.mono-project.com/download/stable) to run the unit tests on the `net4x` targets.
 
 ## .NET MAUI Requirements
 
-To build any of `Sentry.Maui`, `Sentry.Maui.Tests`, or `Sentry.Samples.Maui`, you'll need to have .NET SDK 7.0.400 or greater installed, and have installed the MAUI workloads installed, either through Visual Studio setup, or by running `dotnet workload restore` (or `dotnet workload install maui`) from the Sentry source code root directory.
-You may also need other platform dependencies.
+To build any of `Sentry.Maui`, `Sentry.Maui.Tests`, or `Sentry.Samples.Maui`, we recommend you have .NET SDK 8 and have the MAUI workloads installed. You can do so by running `dotnet workload restore` (or `dotnet workload install maui`) from the root of the SDK's repository.
 
 See https://docs.microsoft.com/dotnet/maui/ for details. JetBrains also have a great blog post if you're developing on a Mac: https://blog.jetbrains.com/dotnet/2022/05/25/macos-environment-setup-for-maui-development/
 
-Basically, if you can build and run the "MyMauiApp" example you should also be able to build and run the Sentry MAUI sample app.
+Basically, if you can build and run the `MyMauiApp` example you should also be able to build and run the Sentry MAUI sample app.
 
 ### Targeting Android, iOS and Mac Catalyst
 
-Although the files in `/src/Sentry/Platforms/` are part of the `Sentry` project, they are [conditionally targeted](https://github.com/getsentry/sentry-dotnet/blob/b1bfe1efc04eb4c911a85f1cf4cd2e5a176d7c8a/src/Sentry/Sentry.csproj#L19-L21) when the platform is Android, iOS or Mac Catalyst.  We build for Android on all platforms, but currently compile iOS and Mac Catalyst _only when building on a Mac_.
+* Targeting the mobile platforms requires aditional dependencies. 
+  - `Java` is required for building the Android bindings. If you're building Sentry using an IDE you provide the path to your Java installation via the IDE settings (open the settings for Visual Studio or Rider and search for "android"). Building Sentry from the command line (using `dotnet build`) requires `JAVA_HOME` to be available on the environment.
+  - Compiling for iOS and Mac Catalyst happens on macOS only.
+
+Although the files in `/src/Sentry/Platforms/` are part of the `Sentry` project, they are [conditionally targeted](https://github.com/getsentry/sentry-dotnet/blob/b1bfe1efc04eb4c911a85f1cf4cd2e5a176d7c8a/src/Sentry/Sentry.csproj#L19-L21) when the platform is Android, iOS, or Mac Catalyst. We build for Android on all platforms.
 
 ```xml
 <!-- Platform-specific props included here -->
@@ -52,7 +52,7 @@ Although the files in `/src/Sentry/Platforms/` are part of the `Sentry` project,
   <Import Project="Platforms\Cocoa\Sentry.Cocoa.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
 ```
 
-These `*.props` files are used to add platform-specific files, such as references to the binding projects for each native SDK (which provide .NET wrappers around native Android or Cocoa functions).
+These `*.props` files are used to add platform-specific files, such as references to the binding projects for each native SDK. These binding projects are .NET wrappers around native Android or Cocoa SDK functions.
 
 Also note `/Directory.Build.targets` contains some [convention based rules](https://github.com/getsentry/sentry-dotnet/blob/b1bfe1efc04eb4c911a85f1cf4cd2e5a176d7c8a/Directory.Build.targets#L17-L35) to exclude code that is not relevant for the target platform. Developers using Visual Studio will need to enable `Show All Files` in order to be able to see these files, when working with the solution.
 
@@ -78,38 +78,13 @@ The `Sentry.sln` solution contains all of the projects required to build Sentry,
 
 These solution filters get generated automatically by `/scripts/generate-solution-filters.ps1` so, although you can certainly create your own solution filters and manage these how you wish, don't try to modify any of the `*.slnf` files that are committed to source control. Instead, changes to these can be made by modifying `/scripts/generate-solution-filters-config.yml` and re-running the script that generates these.
 
-Also note that script generates a `.generated.NoMobile.sln` solution, which is an identical copy of `Sentry.sln`. Again, we don't recommend opening this directly. It exists as a round about way to conditionally set build properties in certain solution filters. You should instead use those solution filters (e.g. `SentryNoMobile.slnf`) when working in the Sentry codebase.
+Also note that script generates a `.generated.NoMobile.sln` solution, which is an identical copy of `Sentry.sln`. Again, we don't recommend opening this directly. It exists as a round about way to conditionally set build properties based on the solution name in certain solution filters. You should instead use those solution filters (e.g. `SentryNoMobile.slnf`) when working in the Sentry codebase.
 
 ## API changes approval process
 
-This repository uses [Verify](https://github.com/VerifyTests/Verify) to store the public API diffs in snapshot files.
-When a change involves modifying the public API area (by for example adding a public method),
-that change will need to be approved, otherwise the CI process will fail.
+This repository uses [Verify](https://github.com/VerifyTests/Verify) to store the public API diffs in snapshot files. When a change involves modifying the public API area (by for example adding a public method), that change will need to be approved, otherwise the CI process will fail.
 
-To do that, run the build locally (i.e: `./build.sh` or `build.cmd`)
-and commit the `verify` files that were changed.
-
-
-## Special Instructions for Apple Silicon CPUs
-
-Apple Silicon processors (such as the "M1") are arm64 processosr. While .NET 6 and higher run natively on this arm64 under macOS, previous versions are only built for x64. To get everything working correctly take the following steps:
-
-- Always install the arm64 release of .NET 6 and 7, through the normal process described above.
-
-If you are only running `dotnet test Sentry.sln` on the command line, you don't need to do anything else.
-
-If you are using JetBrains Rider as your IDE, you should install the arm64 version of Rider.  Within Rider, the .NET SDK used for build and tests is selected under `Preferences` -> `Build, Execution, Deployment` -> `Toolset and Build`.
-
-When the .NET Core CLI executable path is set to `/usr/local/share/dotnet/dotnet`, that's an arm64 version of the .NET SDK.
-- This should be your usual default setting.
-- You will be able to build for all versions of .NET installed, both arm64 and x64.
-- However, you will only be able to debug and run unit tests in Rider using the arm64 versions of the .NET runtimes you have installed.
-
-When the .NET Core CLI executable path is set to `/usr/local/share/dotnet/x64/dotnet`, that's an x64 version of the .NET SDK.
-- .NET Core 3.1 and older are only 64 bits but are **no longer supoported by this repository** as of version 4.0.0 of the SDK. You shouldn't need to have x64 version installed to contribute.
-- Keep in mind that x64 is always slower and consumes more battery, as it runs through emulation.
-
-Note that the MSBuild version should always be `17.0` but will change paths based on whether you have selected an arm64 or x64 SDK.  If Rider auto-detects an older MSBuild, change it manually to 17.0.
+To do that, run the build locally (i.e: `./build.sh` or `build.cmd`) and commit the `verify` files that were changed.
 
 ## Changelog
 
