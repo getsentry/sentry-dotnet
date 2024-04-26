@@ -6,10 +6,14 @@ namespace Sentry;
 /// <summary>
 /// Transaction span tracer.
 /// </summary>
-public class SpanTracer : ISpan
+public class SpanTracer : IBaseTracer, ISpan
 {
     private readonly IHub _hub;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
+
+    private readonly Instrumenter _instrumenter = Instrumenter.Sentry;
+
+    bool IBaseTracer.IsOtelInstrumenter => _instrumenter == Instrumenter.OpenTelemetry;
 
     internal TransactionTracer Transaction { get; }
 
@@ -113,9 +117,11 @@ public class SpanTracer : ISpan
         SpanId spanId,
         SpanId? parentSpanId,
         SentryId traceId,
-        string operation)
+        string operation,
+        Instrumenter instrumenter = Instrumenter.Sentry)
     {
         _hub = hub;
+        _instrumenter = instrumenter;
         Transaction = transaction;
         SpanId = spanId;
         ParentSpanId = parentSpanId;
