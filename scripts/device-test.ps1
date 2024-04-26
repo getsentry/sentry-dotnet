@@ -67,6 +67,7 @@ try
         Remove-Item -Recurse -Force test_output -ErrorAction SilentlyContinue
         try
         {
+            xharness help
             xharness $group test $arguments --output-directory=test_output
             if ($LASTEXITCODE -ne 0)
             {
