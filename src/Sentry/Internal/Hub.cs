@@ -63,11 +63,11 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
         if (options.ExperimentalMetrics is not null)
         {
+            options.LogDebug("Registering integration: Metrics");
             Metrics = new MetricAggregator(options, this);
         }
         else
         {
-            options.LogDebug("Metrics disabled in SentryOptions");
             Metrics = new DisabledMetricAggregator();
         }
 
