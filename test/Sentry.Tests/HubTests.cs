@@ -1451,7 +1451,7 @@ public partial class HubTests
         _ = hub.CaptureCheckIn("test-slug", CheckInStatus.InProgress);
 
         // Assert
-        _fixture.Client.Received(enabled ? 1 : 0).CaptureCheckIn(Arg.Any<string>(), Arg.Any<CheckInStatus>());
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureCheckIn(Arg.Any<string>(), Arg.Any<CheckInStatus>(), scope: Arg.Any<Scope>());
     }
 
     [Fact]
