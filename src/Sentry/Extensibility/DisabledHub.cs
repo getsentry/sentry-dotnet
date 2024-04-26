@@ -187,10 +187,10 @@ public class DisabledHub : IHub, IDisposable
         string monitorSlug,
         CheckInStatus status,
         SentryId? sentryId = null,
-        Scope? scope = null,
         TimeSpan? duration = null,
+        Scope? scope = null,
         SentryMonitorConfig? monitorConfig = null)
-        => SentryId.Empty;
+            => SentryId.Empty;
 
     /// <summary>
     /// No-Op.

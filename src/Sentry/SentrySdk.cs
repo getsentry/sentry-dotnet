@@ -531,6 +531,7 @@ public static partial class SentrySdk
     /// <param name="status">The status of the check-in.</param>
     /// <param name="sentryId">The optional <see cref="SentryId"/>.</param>
     /// <param name="duration">The optional duration of the check-in.</param>
+    /// <param name="scope">The optional duration of the check-in.</param>
     /// <param name="monitorConfig">The optional monitor config.</param>
     /// <returns>The ID of the check-in.</returns>
     [DebuggerStepThrough]
@@ -539,13 +540,15 @@ public static partial class SentrySdk
         CheckInStatus status,
         SentryId? sentryId = null,
         TimeSpan? duration = null,
+        Scope? scope = null,
         SentryMonitorConfig? monitorConfig = null)
             => CurrentHub.CaptureCheckIn(
                 monitorSlug,
                 status,
                 sentryId,
-                duration: duration,
-                monitorConfig: monitorConfig);
+                duration,
+                scope,
+                monitorConfig);
 
     /// <summary>
     /// Starts a transaction.
