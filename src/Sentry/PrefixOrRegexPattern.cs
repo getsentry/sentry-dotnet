@@ -71,7 +71,7 @@ internal class PrefixOrRegexPattern
 
     internal bool IsMatch(string str, char? requiredSeparator = null)
     {
-        if (requiredSeparator is not {} separator)
+        if (requiredSeparator is not { } separator)
         {
             return _prefix == ".*" || // perf shortcut
                    (_prefix != null && str.StartsWith(_prefix, _stringComparison)) ||

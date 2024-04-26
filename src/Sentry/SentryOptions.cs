@@ -1358,7 +1358,7 @@ public class SentryOptions
     {
         if (InAppExclude == null)
         {
-            InAppExclude = [ prefix ];
+            InAppExclude = [prefix];
         }
         else
         {
@@ -1382,7 +1382,7 @@ public class SentryOptions
         var regex = new Regex(pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant);
         if (InAppExclude == null)
         {
-            InAppExclude = [ regex ];
+            InAppExclude = [regex];
         }
         else
         {
@@ -1406,7 +1406,7 @@ public class SentryOptions
     {
         if (InAppInclude == null)
         {
-            InAppInclude = [ prefix ];
+            InAppInclude = [prefix];
         }
         else
         {
@@ -1428,7 +1428,7 @@ public class SentryOptions
         var regex = new Regex(pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant);
         if (InAppInclude == null)
         {
-            InAppInclude = [ regex ];
+            InAppInclude = [regex];
         }
         else
         {
