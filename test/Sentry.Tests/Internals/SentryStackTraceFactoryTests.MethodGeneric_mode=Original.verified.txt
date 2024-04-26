@@ -3,6 +3,6 @@
   Function: GenericMethodThatThrows,
   Module: Other.Tests.Internals.SentryStackTraceFactoryTests,
   AbsolutePath: {ProjectDirectory}Internals/SentryStackTraceFactoryTests.cs,
-  InApp: false,
+  InApp: true,
   AddressMode: rel:0
 }

@@ -175,8 +175,8 @@ public class SentryStackFrameTests
         };
         var options = new SentryOptions
         {
-            InAppInclude = [include],
-            InAppExclude = [exclude]
+            InAppInclude = [new Regex(include)],
+            InAppExclude = [new Regex(exclude)]
         };
 
         // Act

@@ -203,45 +203,17 @@ public sealed class SentryStackFrame : ISentryJsonSerializable
         }
     }
 
+
+    // private bool Resolver(PrefixOrRegexPattern prefixOrRegex, string parameter, char? separator) =>
+    //     prefixOrRegex.IsMatch(parameter, separator);
+
     private void ConfigureAppFrame(SentryOptions options, string parameter, bool mustIncludeSeparator)
     {
-        var resolver = (string prefixOrPattern) =>
-        {
-            try
-            {
-                var substringOrRegex = new SubstringOrRegexPattern(prefixOrPattern, StringComparison.Ordinal);
-                if (!mustIncludeSeparator)
-                {
-                    return substringOrRegex.IsMatch(parameter);
-                }
-
-                if (substringOrRegex.Regex is { } regex)
-                {
-                    // Check for any regex match followed by a separator
-                    foreach (Match match in regex.Matches(parameter))
-                    {
-                        if (parameter.Length > match.Value.Length && parameter[match.Value.Length] == '.')
-                        {
-                            return true;
-                        }
-                    }
-                }
-                else
-                {
-                    // Check for a substring followed by a separator
-                    return parameter.Length > prefixOrPattern.Length && parameter[prefixOrPattern.Length] == '.';
-                }
-            }
-            catch (Exception ex)
-            {
-                options.LogDebug("Error matching prefixOrPattern `{0}` with parameter `{1}`: {2}", prefixOrPattern, parameter, ex.Message);
-            }
-
-            return false;
-        };
+        char? separator = mustIncludeSeparator ? '.' : null;
+        var resolver = (PrefixOrRegexPattern prefixOrRegex) => prefixOrRegex.IsMatch(parameter, separator);
         var matchesInclude = options.InAppInclude?.Any(resolver) == true;
-        var matchesExclude = () => options.InAppExclude?.Any(resolver) ?? false;
-        InApp = matchesInclude || !matchesExclude();
+        bool MatchesExclude() => options.InAppExclude?.Any(resolver) ?? false;
+        InApp = matchesInclude || !MatchesExclude();
     }
 
     /// <summary>

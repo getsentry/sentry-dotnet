@@ -622,7 +622,7 @@
     {
       function: System.Reactive.Linq.Observable.Merge(class System.IObservable`1<!!0>[]),
       module: system.reactive,
-      in_app: true
+      in_app: false
     },
     {
       function: Avalonia.Controls.TextBlock..cctor(),
@@ -682,22 +682,22 @@
     {
       function: System.Drawing.SafeNativeMethods+Gdip..cctor(),
       module: system.drawing.common,
-      in_app: true
+      in_app: false
     },
     {
       function: System.Drawing.SafeNativeMethods+Gdip.GdipCreateBitmapFromScan0(int32,int32,int32,int32,value class System.Runtime.InteropServices.HandleRef,int&),
       module: system.drawing.common,
-      in_app: true
+      in_app: false
     },
     {
       function: System.Drawing.Bitmap..ctor(int32,int32,value class System.Drawing.Imaging.PixelFormat),
       module: system.drawing.common,
-      in_app: true
+      in_app: false
     },
     {
       function: System.Drawing.Bitmap..ctor(int32,int32),
       module: system.drawing.common,
-      in_app: true
+      in_app: false
     },
     {
       function: Avalonia.Win32.TrayIconImpl..cctor(),

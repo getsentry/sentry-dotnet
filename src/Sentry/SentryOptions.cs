@@ -234,7 +234,6 @@ public class SentryOptions
     /// </summary>
     public ISentryScopeStateProcessor SentryScopeStateProcessor { get; set; } = new DefaultSentryScopeStateProcessor();
 
-    // TODO: Change to List<StringOrRegex> in next major release
     /// <summary>
     /// A list of namespaces (or prefixes) considered not part of application code
     /// </summary>
@@ -246,9 +245,8 @@ public class SentryOptions
     /// <example>
     /// 'System.', 'Microsoft.'
     /// </example>
-    internal List<string>? InAppExclude { get; set; }
+    internal List<PrefixOrRegexPattern>? InAppExclude { get; set; }
 
-    // TODO: Change to List<StringOrRegex> in next major release
     /// <summary>
     /// A list of namespaces (or prefixes) considered part of application code
     /// </summary>
@@ -261,7 +259,7 @@ public class SentryOptions
     /// 'System.CustomNamespace', 'Microsoft.Azure.App'
     /// </example>
     /// <seealso href="https://docs.sentry.io/platforms/dotnet/guides/aspnet/configuration/options/#in-app-include"/>
-    internal List<string>? InAppInclude { get; set; }
+    internal List<PrefixOrRegexPattern>? InAppInclude { get; set; }
 
     /// <summary>
     /// Whether to include default Personal Identifiable information
@@ -1360,11 +1358,35 @@ public class SentryOptions
     {
         if (InAppExclude == null)
         {
-            InAppExclude = new() { prefix };
+            InAppExclude = [ prefix ];
         }
         else
         {
             InAppExclude.Add(prefix);
+        }
+    }
+
+    /// <summary>
+    /// Add a regex pattern used to identify frames that are not 'InApp' in stacktraces.
+    /// </summary>
+    /// <param name="pattern">The regular expression to use to match stacktrace frames</param>
+    /// <remarks>
+    /// Sentry by default filters the stacktrace to display only application code.
+    /// A user can optionally click to see all which will include framework and libraries.
+    /// If a frame has not already been determined to be InApp per any of the prefixes or
+    /// patterns configured in <see cref="InAppInclude"/>, it will be considered InApp only
+    /// if it does not match any of the prefixes or patterns in <see cref="InAppExclude"/>.
+    /// </remarks>
+    public void AddInAppExcludeRegex(string pattern)
+    {
+        var regex = new Regex(pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        if (InAppExclude == null)
+        {
+            InAppExclude = [ regex ];
+        }
+        else
+        {
+            InAppExclude.Add(regex);
         }
     }
 
@@ -1384,11 +1406,33 @@ public class SentryOptions
     {
         if (InAppInclude == null)
         {
-            InAppInclude = new() { prefix };
+            InAppInclude = [ prefix ];
         }
         else
         {
             InAppInclude.Add(prefix);
+        }
+    }
+
+    /// <summary>
+    /// Add a regex pattern used to identify 'InApp' frames in stacktraces.
+    /// </summary>
+    /// <param name="pattern">A regular expression to use to match stacktrace frames.</param>
+    /// <remarks>
+    /// Sentry by default filters the stacktrace to display only application code.
+    /// A user can optionally click to see all which will include framework and libraries.
+    /// Frames from namespaces matching this regular expression will be considered "InApp"
+    /// </remarks>
+    public void AddInAppIncludeRegex(string pattern)
+    {
+        var regex = new Regex(pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        if (InAppInclude == null)
+        {
+            InAppInclude = [ regex ];
+        }
+        else
+        {
+            InAppInclude.Add(regex);
         }
     }
 

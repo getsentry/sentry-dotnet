@@ -59,7 +59,6 @@ internal class SampleProfileBuilder
 
         if (!_downsampler.ShouldSample(threadIndex, timestampMs))
         {
-            _options.DiagnosticLogger?.LogDebug("Profiler Sample sampled out. Skipping.");
             return;
         }
 
