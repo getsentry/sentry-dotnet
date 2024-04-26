@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
@@ -203,16 +206,12 @@ public sealed class SentryStackFrame : ISentryJsonSerializable
         }
     }
 
-
-    // private bool Resolver(PrefixOrRegexPattern prefixOrRegex, string parameter, char? separator) =>
-    //     prefixOrRegex.IsMatch(parameter, separator);
-
     private void ConfigureAppFrame(SentryOptions options, string parameter, bool mustIncludeSeparator)
     {
         char? separator = mustIncludeSeparator ? '.' : null;
-        var resolver = (PrefixOrRegexPattern prefixOrRegex) => prefixOrRegex.IsMatch(parameter, separator);
-        var matchesInclude = options.InAppInclude?.Any(resolver) == true;
-        bool MatchesExclude() => options.InAppExclude?.Any(resolver) ?? false;
+        bool Resolver(PrefixOrRegexPattern prefixOrRegex) => prefixOrRegex.IsMatch(parameter, separator);
+        var matchesInclude = options.InAppInclude?.Any(Resolver) == true;
+        bool MatchesExclude() => options.InAppExclude?.Any(Resolver) ?? false;
         InApp = matchesInclude || !MatchesExclude();
     }
 
