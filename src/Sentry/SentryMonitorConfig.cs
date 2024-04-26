@@ -3,6 +3,12 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry;
 
+internal enum SentryMonitorScheduleType
+{
+    Crontab,
+    Interval
+}
+
 /// <summary>
 /// Sentry's config for monitors
 /// </summary>
