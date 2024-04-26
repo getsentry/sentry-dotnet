@@ -530,11 +530,12 @@ public static partial class SentrySdk
     /// <param name="monitorSlug">The monitor slug of the check-in.</param>
     /// <param name="status">The status of the check-in.</param>
     /// <param name="sentryId">The optional <see cref="SentryId"/>.</param>
+    /// <param name="scope">The optional <see cref="Scope"/>.</param>
     /// <param name="duration">The optional duratin of the check-in.</param>
     /// <returns>The Id of the check-in.</returns>
     [DebuggerStepThrough]
-    public static SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null, TimeSpan? duration = null)
-        => CurrentHub.CaptureCheckIn(monitorSlug, status, sentryId, duration: duration);
+    public static SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null, TimeSpan? duration = null, Scope? scope = null)
+        => CurrentHub.CaptureCheckIn(monitorSlug, status, sentryId, duration, scope);
 
     /// <summary>
     /// Starts a transaction.

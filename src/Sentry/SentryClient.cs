@@ -233,7 +233,7 @@ public class SentryClient : ISentryClient, IDisposable
         => CaptureEnvelope(Envelope.FromSession(sessionUpdate));
 
     /// <inheritdoc />
-    public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null, Scope? scope = null, TimeSpan? duration = null)
+    public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null, TimeSpan? duration = null, Scope? scope = null)
     {
         scope ??= new Scope(_options);
 

@@ -25,8 +25,7 @@ public class HangfireTests : IClassFixture<HangfireFixture>
             Arg.Is<string>("test-job"),
             Arg.Is<CheckInStatus>(status => status == CheckInStatus.Ok),
             Arg.Is<SentryId?>(id => id == sentryId),
-            Arg.Any<Scope>(),
-            Arg.Is<TimeSpan?>(duration => duration != null));
+            Arg.Is<TimeSpan?>(duration => duration != null), Arg.Any<Scope>());
     }
 
     [Fact]
@@ -47,8 +46,7 @@ public class HangfireTests : IClassFixture<HangfireFixture>
             Arg.Is<string>("test-job-with-exception"),
             Arg.Is<CheckInStatus>(status => status == CheckInStatus.Error),
             Arg.Is<SentryId?>(id => id == sentryId),
-            Arg.Any<Scope>(),
-            Arg.Is<TimeSpan?>(duration => duration != null));
+            Arg.Is<TimeSpan?>(duration => duration != null), Arg.Any<Scope>());
     }
 
     [Fact]
