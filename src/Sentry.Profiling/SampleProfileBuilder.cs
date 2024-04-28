@@ -69,7 +69,6 @@ internal class SampleProfileBuilder
             return;
         }
 
-        _options.DiagnosticLogger?.LogDebug("Adding profile sample.");
         Profile.Samples.Add(new()
         {
             Timestamp = (ulong)(timestampMs * 1_000_000),
