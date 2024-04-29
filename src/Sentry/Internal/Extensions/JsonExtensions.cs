@@ -704,6 +704,17 @@ internal static class JsonExtensions
         }
     }
 
+    public static void WriteNumberIfNotNull(
+        this Utf8JsonWriter writer,
+        string propertyName,
+        double? value)
+    {
+        if (value is not null)
+        {
+            writer.WriteNumber(propertyName, value.Value);
+        }
+    }
+
     public static void WriteNumberIfNotZero(
         this Utf8JsonWriter writer,
         string propertyName,

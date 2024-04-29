@@ -4,6 +4,7 @@
 
 ### Features
 
+- Extended the SDK's CheckIn support by adding Release, Environment and Trace ID to the event. CheckIns created via the Hangfire integration now also automatically report their duration ([#3320](https://github.com/getsentry/sentry-dotnet/pull/3320))
 - The SDK's performance API now works in conjunction with OpenTelemetry's instrumentation. This means that SentrySpans and OTel spans now show up in the same span-tree. ([#3288](https://github.com/getsentry/sentry-dotnet/pull/3288))
 
 ### Fixes

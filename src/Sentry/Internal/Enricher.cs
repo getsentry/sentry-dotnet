@@ -91,4 +91,10 @@ internal class Enricher
         // Default tags
         _options.ApplyDefaultTags(eventLike);
     }
+
+    public void Apply(SentryCheckIn checkIn)
+    {
+        checkIn.Release ??= _options.SettingLocator.GetRelease();
+        checkIn.Environment ??= _options.SettingLocator.GetEnvironment();
+    }
 }
