@@ -127,7 +127,7 @@ public abstract class HttpTransportBase
 
         // If attachment, needs to respect attachment size limit
         if (string.Equals(item.TryGetType(), "attachment", StringComparison.OrdinalIgnoreCase) &&
-            item.TryGetLength() > _options.MaxAttachmentSize)
+            item.TryGetOrRecalculateLength() > _options.MaxAttachmentSize)
         {
             // note: attachment drops are not currently counted in discarded events
 
