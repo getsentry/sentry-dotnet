@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry;
@@ -14,6 +15,10 @@ namespace Sentry;
 [DebuggerDisplay("{Function}")]
 public sealed class SentryStackFrame : ISentryJsonSerializable
 {
+
+    private static readonly Lazy<PrefixOrPatternMatcher> LazyModuleMatcher = new(() => new());
+    private static readonly Lazy<DelimitedPrefixOrPatternMatcher> LazyFunctionMatcher = new(() => new());
+
     internal List<string>? InternalPreContext { get; private set; }
 
     internal List<string>? InternalPostContext { get; private set; }
@@ -194,11 +199,11 @@ public sealed class SentryStackFrame : ISentryJsonSerializable
 
         if (!string.IsNullOrEmpty(Module))
         {
-            ConfigureAppFrame(options, Module, mustIncludeSeparator: false);
+            ConfigureAppFrame(options, Module, LazyModuleMatcher.Value);
         }
         else if (!string.IsNullOrEmpty(Function))
         {
-            ConfigureAppFrame(options, Function, mustIncludeSeparator: true);
+            ConfigureAppFrame(options, Function, LazyFunctionMatcher.Value);
         }
         else if (ImageAddress is null or 0 && InstructionAddress is null or 0) // Leave InApp=null on NativeAOT
         {
@@ -206,10 +211,12 @@ public sealed class SentryStackFrame : ISentryJsonSerializable
         }
     }
 
-    private void ConfigureAppFrame(SentryOptions options, string parameter, bool mustIncludeSeparator)
+    private void ConfigureAppFrame(SentryOptions options, string parameter, IStringOrRegexMatcher matcher)
     {
-        char? separator = mustIncludeSeparator ? '.' : null;
-        bool Resolver(PrefixOrRegexPattern prefixOrRegex) => prefixOrRegex.IsMatch(parameter, separator);
+        bool Resolver(StringOrRegex prefixOrRegex)
+        {
+            return matcher.IsMatch(prefixOrRegex, parameter);
+        }
         var matchesInclude = options.InAppInclude?.Any(Resolver) == true;
         bool MatchesExclude() => options.InAppExclude?.Any(Resolver) ?? false;
         InApp = matchesInclude || !MatchesExclude();

@@ -689,8 +689,10 @@ namespace Sentry
         public void AddExceptionProcessorProvider(System.Func<System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor>> processorProvider) { }
         public void AddExceptionProcessors(System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> processors) { }
         public void AddInAppExclude(string prefix) { }
+        public void AddInAppExclude(System.Text.RegularExpressions.Regex regex) { }
         public void AddInAppExcludeRegex(string pattern) { }
         public void AddInAppInclude(string prefix) { }
+        public void AddInAppInclude(System.Text.RegularExpressions.Regex regex) { }
         public void AddInAppIncludeRegex(string pattern) { }
         public void AddIntegration(Sentry.Integrations.ISdkIntegration integration) { }
         public void AddJsonConverter(System.Text.Json.Serialization.JsonConverter converter) { }
