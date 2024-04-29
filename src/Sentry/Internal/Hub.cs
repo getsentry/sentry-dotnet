@@ -572,7 +572,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
             if (scope is null)
             {
-                ScopeManager.GetCurrent().Deconstruct(out var currentScope, out _);
+                var (currentScope, _) = ScopeManager.GetCurrent();
                 scope = currentScope;
             }
 

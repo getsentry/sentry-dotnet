@@ -40,7 +40,6 @@ public class SentryCheckIn : ISentryJsonSerializable
     /// </summary>
     public string MonitorSlug { get; }
 
-
     /// <summary>
     /// The status of the Checkin
     /// </summary>
