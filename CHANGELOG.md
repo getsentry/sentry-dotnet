@@ -13,6 +13,12 @@
 - Fix BackgroundWorker exiting when OperationCanceledException is not from shutdown request ([3284](https://github.com/getsentry/sentry-dotnet/pull/3284))
 - Envelopes with large attachments no longer get stuck in the queue when using `CacheDirectoryPath` ([#3328](https://github.com/getsentry/sentry-dotnet/pull/3328))
 
+### Dependencies
+
+- Bump Cocoa SDK from v8.21.0 to v8.25.0 ([#3339](https://github.com/getsentry/sentry-dotnet/pull/3339))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8250)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.21.0...8.25.0)
+
 ## 4.4.0
 
 ### Features
