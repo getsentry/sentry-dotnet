@@ -1226,6 +1226,72 @@ public partial class SentryClientTests
     }
 
     [Fact]
+    public void CaptureCheckIn_CheckInHasReleaseAndEnvironment()
+    {
+        _fixture.SentryOptions.Release = "my-test-release";
+        _fixture.SentryOptions.Environment = "my-test-environment";
+        Envelope envelope = null;
+        var sut = _fixture.GetSut();
+        sut.Worker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        sut.CaptureCheckIn("my-monitor", CheckInStatus.InProgress);
+
+        var actualCheckIn = (SentryCheckIn)(envelope.Items[0].Payload as JsonSerializable)?.Source;
+        Assert.NotNull(actualCheckIn);
+        Assert.Equal(_fixture.SentryOptions.Release, actualCheckIn.Release);
+        Assert.Equal(_fixture.SentryOptions.Environment, actualCheckIn.Environment);
+    }
+
+    [Fact]
+    public void CaptureCheckIn_DurationProvided_CheckInHasDuration()
+    {
+        Envelope envelope = null;
+        var sut = _fixture.GetSut();
+        sut.Worker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+        var duration = TimeSpan.FromSeconds(5);
+
+        sut.CaptureCheckIn("my-monitor", CheckInStatus.InProgress, duration: duration);
+
+        var actualCheckIn = (SentryCheckIn)(envelope.Items[0].Payload as JsonSerializable)?.Source;
+        Assert.NotNull(actualCheckIn);
+        Assert.Equal(duration, actualCheckIn.Duration);
+    }
+
+    [Fact]
+    public void CaptureCheckIn_ScopeProvided_CheckInHasTraceIdFromScope()
+    {
+        var scope = new Scope(null, new SentryPropagationContext());
+        Envelope envelope = null;
+        var sut = _fixture.GetSut();
+        sut.Worker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        sut.CaptureCheckIn("my-monitor", CheckInStatus.InProgress, scope: scope);
+
+        var actualCheckIn = (SentryCheckIn)(envelope.Items[0].Payload as JsonSerializable)?.Source;
+        Assert.NotNull(actualCheckIn);
+        Assert.Equal(scope.PropagationContext.TraceId, actualCheckIn.TraceId);
+    }
+
+    [Fact]
+    public void CaptureCheckIn_ScopeHasSpan_CheckInHasTraceIdFromSpan()
+    {
+        var traceId = new SentryId();
+        var transaction = Substitute.For<ITransactionTracer>();
+        transaction.TraceId.Returns(traceId);
+        var scope = new Scope(null, new SentryPropagationContext()) { Transaction = transaction };
+
+        Envelope envelope = null;
+        var sut = _fixture.GetSut();
+        sut.Worker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        sut.CaptureCheckIn("my-monitor", CheckInStatus.InProgress, scope: scope);
+
+        var actualCheckIn = (SentryCheckIn)(envelope.Items[0].Payload as JsonSerializable)?.Source;
+        Assert.NotNull(actualCheckIn);
+        Assert.Equal(traceId, actualCheckIn.TraceId);
+    }
+
+    [Fact]
     public void Dispose_Worker_FlushCalled()
     {
         var client = _fixture.GetSut();

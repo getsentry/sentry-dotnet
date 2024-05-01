@@ -10,7 +10,7 @@ public class HangfireTests : IClassFixture<HangfireFixture>
     }
 
     [Fact]
-    public async void ExecuteJobWithAttribute_CapturesCheckInInProgressAndOk()
+    public async void ExecuteJobWithAttribute_CapturesCheckInInProgressAndOkWithDuration()
     {
         var sentryId = SentryId.Create();
         _fixture.Hub.CaptureCheckIn(Arg.Any<string>(), Arg.Any<CheckInStatus>()).Returns(sentryId);
@@ -24,11 +24,12 @@ public class HangfireTests : IClassFixture<HangfireFixture>
         _fixture.Hub.Received(1).CaptureCheckIn(
             Arg.Is<string>("test-job"),
             Arg.Is<CheckInStatus>(status => status == CheckInStatus.Ok),
-            Arg.Is<SentryId?>(id => id == sentryId));
+            Arg.Is<SentryId?>(id => id == sentryId),
+            Arg.Is<TimeSpan?>(duration => duration != null), Arg.Any<Scope>());
     }
 
     [Fact]
-    public async void ExecuteJobWithException_CapturesCheckInInProgressAndError()
+    public async void ExecuteJobWithException_CapturesCheckInInProgressAndErrorWithDuration()
     {
         var sentryId = SentryId.Create();
         _fixture.Hub.CaptureCheckIn(Arg.Any<string>(), Arg.Any<CheckInStatus>()).Returns(sentryId);
@@ -44,7 +45,8 @@ public class HangfireTests : IClassFixture<HangfireFixture>
         _fixture.Hub.Received(1).CaptureCheckIn(
             Arg.Is<string>("test-job-with-exception"),
             Arg.Is<CheckInStatus>(status => status == CheckInStatus.Error),
-            Arg.Is<SentryId?>(id => id == sentryId));
+            Arg.Is<SentryId?>(id => id == sentryId),
+            Arg.Is<TimeSpan?>(duration => duration != null), Arg.Any<Scope>());
     }
 
     [Fact]

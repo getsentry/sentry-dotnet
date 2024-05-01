@@ -76,6 +76,21 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
             var value => Convert.ToInt64(value) // can be int, long, or another numeric type
         };
 
+    internal long? TryGetOrRecalculateLength()
+    {
+        if (TryGetLength() is { } headerLength)
+        {
+            return headerLength;
+        }
+
+        if (Payload is StreamSerializable streamSerializable)
+        {
+            return streamSerializable.Source.TryGetLength();
+        }
+
+        return null;
+    }
+
     /// <summary>
     /// Returns the file name or null if no name exists.
     /// </summary>

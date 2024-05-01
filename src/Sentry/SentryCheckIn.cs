@@ -46,6 +46,26 @@ public class SentryCheckIn : ISentryJsonSerializable
     public CheckInStatus Status { get; }
 
     /// <summary>
+    /// The duration of the check-in in seconds. Will only take effect if the status is ok or error.
+    /// </summary>
+    public TimeSpan? Duration { get; set; }
+
+    /// <summary>
+    /// The release.
+    /// </summary>
+    public string? Release { get; set; }
+
+    /// <summary>
+    /// The environment.
+    /// </summary>
+    public string? Environment { get; set; }
+
+    /// <summary>
+    /// The trace ID
+    /// </summary>
+    internal SentryId? TraceId { get; set; }
+
+    /// <summary>
     /// Initializes a new instance of <see cref="SentryCheckIn"/>.
     /// </summary>
     /// <param name="monitorSlug"></param>
@@ -66,6 +86,22 @@ public class SentryCheckIn : ISentryJsonSerializable
         writer.WriteSerializable("check_in_id", Id, logger);
         writer.WriteString("monitor_slug", MonitorSlug);
         writer.WriteString("status", ToSnakeCase(Status));
+
+        writer.WriteNumberIfNotNull("duration", Duration?.TotalSeconds);
+        writer.WriteStringIfNotWhiteSpace("release", Release);
+        writer.WriteStringIfNotWhiteSpace("environment", Environment);
+
+        // Check-Ins have their own context but that only support Trace ID
+        if (TraceId is not null)
+        {
+            writer.WriteStartObject("contexts");
+            writer.WriteStartObject("trace");
+
+            writer.WriteStringIfNotWhiteSpace("trace_id", TraceId.ToString());
+
+            writer.WriteEndObject();
+            writer.WriteEndObject();
+        }
 
         writer.WriteEndObject();
     }

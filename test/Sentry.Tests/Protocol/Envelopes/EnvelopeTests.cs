@@ -749,6 +749,8 @@ public class EnvelopeTests
             .Which.Source.Should().BeEquivalentTo(@event);
 
         envelopeRoundtrip.Items[1].Payload.Should().BeOfType<StreamSerializable>();
+        envelopeRoundtrip.Items[1].TryGetLength().Should().BeNull();
+        envelopeRoundtrip.Items[1].TryGetOrRecalculateLength().Should().Be(attachment.Content.GetStream().Length);
     }
 
     [Fact]
