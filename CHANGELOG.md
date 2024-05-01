@@ -8,6 +8,10 @@
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2311)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.31.0...2.31.1)
 
+## Fixes
+
+- Added warning when attempting to use Sentry with UWP .NET Native ([#3343](https://github.com/getsentry/sentry-dotnet/pull/3343))
+
 ## 4.5.0
 
 ### Features
