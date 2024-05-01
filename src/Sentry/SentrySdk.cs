@@ -2,7 +2,6 @@ using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Protocol.Envelopes;
-using Sentry.Protocol.Metrics;
 
 namespace Sentry;
 
@@ -28,6 +27,14 @@ public static partial class SentrySdk
     internal static IHub InitHub(SentryOptions options)
     {
         options.SetupLogging();
+
+#if NETSTANDARD
+        if (AotHelper.IsDotNetNative)
+        {
+            options.LogWarning("Sentry doesn't yet support .NET Native compilation. The SDK will be disabled.");
+            return DisabledHub.Instance;
+        }
+#endif
 
         ProcessInfo.Instance ??= new ProcessInfo(options);
 
