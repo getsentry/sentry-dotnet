@@ -46,6 +46,7 @@ Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk $iPhoneSdkVersion `
     -scope "$CocoaSdkPath/Carthage/Headers" `
     "$CocoaSdkPath/Carthage/Headers/Sentry.h" `
+    "$CocoaSdkPath/Carthage/Headers/Sentry-Swift.h" `
     "$CocoaSdkPath/Carthage/Headers/PrivateSentrySDKOnly.h" `
     -o $BindingsPath `
     -c -Wno-objc-property-no-attribute
@@ -183,6 +184,47 @@ $Text = $Text -replace '(?m)^interface SentryScope', 'partial $&'
 
 # Prefix SentryBreadcrumb.Serialize and SentryScope.Serialize with new (since these hide the base method)
 $Text = $Text -replace '(?m)(^\s*\/\/[^\r\n]*$\s*\[Export \("serialize"\)\]$\s*)(NSDictionary)', '${1}new $2'
+
+$Text = $Text -replace '.*SentryEnvelope .*?[\s\S]*?\n\n', ''
+$Text = $Text -replace '.*typedef.*SentryOnAppStartMeasurementAvailable.*?[\s\S]*?\n\n', ''
+
+$protocolsToRemove = @(
+    'SentryMXManagerDelegate',
+    'SentryMetricsAPIDelegate',
+    'SentryRedactOptions'
+)
+
+foreach ($protocol in $protocolsToRemove) {
+    $Text = $Text -replace ".*protocol $protocol.*?[\s\S]*?[^ ]\}\n\n", ''
+}
+
+$interfacesToRemove = @(
+    'SentryMetricsAPI',
+    'SentryViewPhotographer',
+    'SentryMXManager',
+    'SentryMetricsClient',
+    'SentryReplayOptions',
+    'SentryExperimentalOption',
+    'SentryOnDemandReplay',
+    'SentryCurrentDateProvider',
+    'LocalMetricsAggregator'
+)
+
+foreach ($interface in $interfacesToRemove) {
+    $Text = $Text -replace ".*interface.*$interface.*?[\s\S]*?[^ ]\}\n\n", ''
+}
+
+$propertiesToRemove = @(
+    'SentryAppStartMeasurement',
+    'SentryOnAppStartMeasurementAvailable',
+    'SentryMetricsAPI',
+    'SentryExperimentalOptions',
+    'description'
+)
+
+foreach ($property in $propertiesToRemove) {
+    $Text = $Text -replace "\n.*property.*$property.*?[\s\S]*?\}\n", ''
+}
 
 # Add header and output file
 $Text = "$Header`n`n$Text"
