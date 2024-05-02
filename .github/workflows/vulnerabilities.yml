@@ -30,6 +30,6 @@ jobs:
       - name: List vulnerable packages
         shell: bash
         run: |
-          dotnet list Sentry.sln package --vulnerable --include-transitive | tee vulnerable.txt
+          dotnet list ${{ github.workspace }}/Sentry.sln package --vulnerable --include-transitive | tee vulnerable.txt
           # https://github.com/getsentry/sentry-dotnet/issues/2814
           # ! grep 'has the following vulnerable packages' vulnerable.txt
