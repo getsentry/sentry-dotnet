@@ -199,15 +199,22 @@ foreach ($protocol in $protocolsToRemove) {
 }
 
 $interfacesToRemove = @(
-    'SentryMetricsAPI',
-    'SentryViewPhotographer',
-    'SentryMXManager',
-    'SentryMetricsClient',
-    'SentryReplayOptions',
-    'SentryExperimentalOption',
-    'SentryOnDemandReplay',
+    'HTTPHeaderSanitizer',
+    'LocalMetricsAggregator',
     'SentryCurrentDateProvider',
-    'LocalMetricsAggregator'
+    'SentryExperimentalOptions',
+    'SentryMXCallStack',
+    'SentryMXCallStackTree',
+    'SentryMXFrame',
+    'SentryMXManager',
+    'SentryMetricsAPI',
+    'SentryMetricsClient',
+    'SentryOnDemandReplay',
+    'SentryReplayOptions',
+    'SentryVideoInfo',
+    'SentryViewPhotographer',
+    'SwiftDescriptor',
+    'UrlSanitized'
 )
 
 foreach ($interface in $interfacesToRemove) {
