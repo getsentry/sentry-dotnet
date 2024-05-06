@@ -69,7 +69,7 @@ public class SentryCheckIn : ISentryJsonSerializable
     /// <summary>
     /// The Monitor Config
     /// </summary>
-    internal SentryMonitorConfig? MonitorConfig { get; set; }
+    internal SentryMonitorOptions? MonitorConfig { get; set; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="SentryCheckIn"/>.

@@ -5,19 +5,44 @@ namespace Sentry;
 
 internal enum SentryMonitorScheduleType
 {
+    None,
     Crontab,
     Interval
 }
 
 /// <summary>
-/// Sentry's config for monitors
+/// Sentry's options for monitors
 /// </summary>
-public class SentryMonitorConfig : ISentryJsonSerializable
+public class SentryMonitorOptions : ISentryJsonSerializable
 {
-    private SentryMonitorScheduleType Type { get; }
-    private string? Crontab { get; }
-    private int? Interval { get; }
-    private MeasurementUnit.Duration? Unit { get; }
+    private SentryMonitorScheduleType _type = SentryMonitorScheduleType.None;
+    private string? _crontab;
+    private int? _interval;
+    private MeasurementUnit.Duration? _unit;
+
+    /// <summary>
+    /// Set Interval
+    /// </summary>
+    /// <param name="cronTab"></param>
+    public void Interval(string cronTab)
+    {
+        _type = SentryMonitorScheduleType.Crontab;
+        _crontab = cronTab;
+    }
+
+    /// <summary>
+    /// Set Interval
+    /// </summary>
+    /// <param name="interval"></param>
+    /// <param name="unit"></param>
+    public void Interval(int interval, MeasurementUnit.Duration unit)
+    {
+        _type = SentryMonitorScheduleType.Interval;
+        _interval = interval;
+
+        // TODO: Should we do some check here to clamp the supported units?
+        _unit = unit;
+    }
 
     /// <summary>
     /// The allowed margin of minutes after the expected check-in time that the monitor will not be considered missed for.
@@ -45,55 +70,39 @@ public class SentryMonitorConfig : ISentryJsonSerializable
     public TimeZoneInfo? Timezone { get; set; }
 
     /// <summary>
-    /// An actor identifier string.
+    /// An actor identifier string. This looks like 'user:john@example.com team:a-sentry-team'. IDs can also be used but will result in a poor DX.
     /// </summary>
     public string? Owner { get; set; }
 
-    internal SentryMonitorConfig(
-        SentryMonitorScheduleType type,
-        string? crontab = null,
-        int? interval = null,
-        MeasurementUnit.Duration? unit = null)
-    {
-        Type = type;
-        Crontab = crontab;
-        Interval = interval;
-        Unit = unit;
-    }
-
-    /// <summary>
-    /// Creates a new Monitor Config based on a crontab
-    /// </summary>
-    /// <param name="crontab"></param>
-    /// <returns></returns>
-    public static SentryMonitorConfig CreateCronMonitorConfig(string crontab)
-        => new(SentryMonitorScheduleType.Crontab, crontab: crontab);
-
-    /// <summary>
-    /// Creates a new Monitor Config based on an interval
-    /// </summary>
-    /// <param name="interval"></param>
-    /// <param name="unit"></param>
-    /// <returns></returns>
-    public static SentryMonitorConfig CreateIntervalMonitorConfig(int interval, MeasurementUnit.Duration unit)
-        => new(SentryMonitorScheduleType.Interval, interval: interval, unit: unit);
+    internal SentryMonitorOptions() { }
 
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
-        writer.WriteStartObject("monitor_config");
+        Debug.Assert(_type != SentryMonitorScheduleType.None, "The Monitor Options do not contain a valid interval." +
+                                                              "Please update your monitor options by setting the Interval.");
 
+        writer.WriteStartObject("monitor_config");
         writer.WriteStartObject("schedule");
 
-        writer.WriteString("type", TypeToString(Type));
-        switch (Type)
+        writer.WriteString("type", TypeToString(_type));
+        switch (_type)
         {
+            case SentryMonitorScheduleType.None:
+                // TODO: Throw here?
+                break;
             case SentryMonitorScheduleType.Crontab:
-                writer.WriteStringIfNotWhiteSpace("value", Crontab);
+                Debug.Assert(string.IsNullOrEmpty(_crontab), "The provided 'crontab' cannot be an empty string.");
+                writer.WriteStringIfNotWhiteSpace("value", _crontab);
                 break;
             case SentryMonitorScheduleType.Interval:
-                writer.WriteNumberIfNotNull("value", Interval);
-                writer.WriteStringIfNotWhiteSpace("unit", Unit.ToString()?.ToLower());
+                Debug.Assert(_interval != null, "The provided 'interval' cannot be null.");
+                writer.WriteNumberIfNotNull("value", _interval);
+                Debug.Assert(_unit != null, "The provided 'unit' cannot be null.");
+                writer.WriteStringIfNotWhiteSpace("unit", _unit.ToString()!.ToLower());
+                break;
+            default:
+                logger?.LogError("Invalid MonitorScheduleType: '{0}'", _type.ToString());
                 break;
         }
 

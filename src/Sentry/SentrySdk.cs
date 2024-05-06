@@ -529,26 +529,34 @@ public static partial class SentrySdk
     /// </remarks>
     /// <param name="monitorSlug">The monitor slug of the check-in.</param>
     /// <param name="status">The status of the check-in.</param>
-    /// <param name="sentryId">The optional <see cref="SentryId"/>.</param>
-    /// <param name="duration">The optional duration of the check-in.</param>
-    /// <param name="scope">The optional duration of the check-in.</param>
-    /// <param name="monitorConfig">The optional monitor config.</param>
+    /// <param name="sentryId">The <see cref="SentryId"/> associated with the check-in.</param>
+    /// <param name="duration">The duration of the check-in.</param>
+    /// <param name="scope">The scope of the check-in.</param>
+    /// <param name="configureMonitorOptions">The optional monitor config.</param>
     /// <returns>The ID of the check-in.</returns>
     [DebuggerStepThrough]
-    public static SentryId CaptureCheckIn(
-        string monitorSlug,
+    public static SentryId CaptureCheckIn(string monitorSlug,
         CheckInStatus status,
         SentryId? sentryId = null,
         TimeSpan? duration = null,
         Scope? scope = null,
-        SentryMonitorConfig? monitorConfig = null)
-            => CurrentHub.CaptureCheckIn(
-                monitorSlug,
-                status,
-                sentryId,
-                duration,
-                scope,
-                monitorConfig);
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+    {
+        SentryMonitorOptions? options = null;
+        if (configureMonitorOptions is not null)
+        {
+            options = new SentryMonitorOptions();
+            configureMonitorOptions.Invoke(options);
+        }
+
+        return CurrentHub.CaptureCheckIn(
+            monitorSlug,
+            status,
+            sentryId,
+            duration,
+            scope,
+            options);
+    }
 
     /// <summary>
     /// Starts a transaction.

@@ -79,14 +79,14 @@ public interface ISentryClient
     /// <param name="sentryId"></param>
     /// <param name="duration"></param>
     /// /// <param name="scope"></param>
-    /// /// <param name="monitorConfig"></param>
+    /// /// <param name="monitorOptions"></param>
     SentryId CaptureCheckIn(
         string monitorSlug,
         CheckInStatus status,
         SentryId? sentryId = null,
         TimeSpan? duration = null,
         Scope? scope = null,
-        SentryMonitorConfig? monitorConfig = null);
+        SentryMonitorOptions? monitorOptions = null);
 
     /// <summary>
     /// Flushes the queue of captured events until the timeout is reached.

@@ -562,7 +562,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
         SentryId? sentryId = null,
         TimeSpan? duration = null,
         Scope? scope = null,
-        SentryMonitorConfig? monitorConfig = null)
+        SentryMonitorOptions? monitorConfig = null)
     {
         if (!IsEnabled)
         {
