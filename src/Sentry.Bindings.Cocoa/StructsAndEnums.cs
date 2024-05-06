@@ -87,11 +87,3 @@ internal enum SentrySpanStatus : ulong
     OutOfRange,
     DataLoss
 }
-
-[Native]
-internal enum SentryAppStartType : ulong
-{
-    Warm,
-    Cold,
-    Unknown
-}
