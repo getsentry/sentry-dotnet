@@ -31,8 +31,11 @@ public static partial class SentrySdk
 #if NETSTANDARD
         if (AotHelper.IsDotNetNative)
         {
-            options.LogWarning("Sentry doesn't yet support .NET Native compilation. The SDK will be disabled.");
-            return DisabledHub.Instance;
+            throw new Exception(
+                "Sentry does not support .NET Native compilation. " +
+                "To use Sentry, you must disable the .NET Native toolchain. For further information see: " +
+                "https://learn.microsoft.com/en-us/windows/uwp/cpp-and-winrt-apis/use-csharp-component-from-cpp-winrt#building-for-net-native"
+            );
         }
 #endif
 
