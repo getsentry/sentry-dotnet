@@ -211,16 +211,9 @@ public sealed class SentryStackFrame : ISentryJsonSerializable
         }
     }
 
-    private void ConfigureAppFrame(SentryOptions options, string parameter, IStringOrRegexMatcher matcher)
-    {
-        bool Resolver(StringOrRegex prefixOrRegex)
-        {
-            return matcher.IsMatch(prefixOrRegex, parameter);
-        }
-        var matchesInclude = options.InAppInclude?.Any(Resolver) == true;
-        bool MatchesExclude() => options.InAppExclude?.Any(Resolver) ?? false;
-        InApp = matchesInclude || !MatchesExclude();
-    }
+    private void ConfigureAppFrame(SentryOptions options, string parameter, IStringOrRegexMatcher matcher) =>
+        InApp = parameter.MatchesAny(options.InAppInclude, matcher)
+                || !parameter.MatchesAny(options.InAppExclude, matcher);
 
     /// <summary>
     /// Parses from JSON.

@@ -61,3 +61,22 @@ internal class StringOrRegex
         return ToString().GetHashCode();
     }
 }
+
+internal static class StringOrRegexExtensions
+{
+    public static bool MatchesAny(this string parameter, List<StringOrRegex>? patterns, IStringOrRegexMatcher matcher)
+    {
+        if (patterns is null)
+        {
+            return false;
+        }
+        foreach (var stringOrRegex in patterns)
+        {
+            if (matcher.IsMatch(stringOrRegex, parameter))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+}
