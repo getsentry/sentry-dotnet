@@ -78,8 +78,8 @@ public interface ISentryClient
     /// <param name="status"></param>
     /// <param name="sentryId"></param>
     /// <param name="duration"></param>
-    /// /// <param name="scope"></param>
-    /// /// <param name="monitorOptions"></param>
+    /// <param name="scope"></param>
+    /// <param name="monitorOptions"></param>
     SentryId CaptureCheckIn(
         string monitorSlug,
         CheckInStatus status,

@@ -4,6 +4,18 @@
 
 ### Features
 
+- InApp includes/excludes can now be configured using regular expressions ([#3321](https://github.com/getsentry/sentry-dotnet/pull/3321))
+
+### Dependencies
+
+- Bump CLI from v2.31.0 to v2.31.2 ([#3342](https://github.com/getsentry/sentry-dotnet/pull/3342), [#3345](https://github.com/getsentry/sentry-dotnet/pull/3345))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2312)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.31.0...2.31.2)
+
+## 4.5.0
+
+### Features
+
 - Extended the SDK's CheckIn support by adding Release, Environment and Trace ID to the event. CheckIns created via the Hangfire integration now also automatically report their duration ([#3320](https://github.com/getsentry/sentry-dotnet/pull/3320))
 - The SDK's performance API now works in conjunction with OpenTelemetry's instrumentation. This means that SentrySpans and OTel spans now show up in the same span-tree. ([#3288](https://github.com/getsentry/sentry-dotnet/pull/3288))
 
@@ -11,6 +23,13 @@
 
 - `HttpResponse.Content` is no longer disposed by when using `SentryHttpFailedRequestHandler` on .NET Framework, which was causing an ObjectDisposedException when using Sentry with NSwag ([#3306](https://github.com/getsentry/sentry-dotnet/pull/3306))
 - Fix BackgroundWorker exiting when OperationCanceledException is not from shutdown request ([3284](https://github.com/getsentry/sentry-dotnet/pull/3284))
+- Envelopes with large attachments no longer get stuck in the queue when using `CacheDirectoryPath` ([#3328](https://github.com/getsentry/sentry-dotnet/pull/3328))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.21.0 to v8.25.0 ([#3339](https://github.com/getsentry/sentry-dotnet/pull/3339))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8250)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.21.0...8.25.0)
 
 ## 4.4.0
 

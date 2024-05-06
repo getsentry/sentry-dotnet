@@ -63,6 +63,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
         if (options.ExperimentalMetrics is not null)
         {
+            options.LogDebug("Registering integration: Metrics");
             Metrics = new MetricAggregator(options, this);
         }
         else
@@ -575,7 +576,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
             if (scope is null)
             {
-                ScopeManager.GetCurrent().Deconstruct(out var currentScope, out _);
+                var (currentScope, _) = ScopeManager.GetCurrent();
                 scope = currentScope;
             }
 

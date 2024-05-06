@@ -427,7 +427,16 @@ public partial class SentryOptionsTests
         var sut = new SentryOptions();
         const string expected = "test";
         sut.AddInAppExclude(expected);
-        Assert.Contains(sut.InAppExclude!, actual => actual == expected);
+        Assert.Contains(sut.InAppExclude!, actual => actual.ToString() == expected);
+    }
+
+    [Fact]
+    public void AddInAppExcludeRegex_StoredInOptions()
+    {
+        var sut = new SentryOptions();
+        const string expected = ".*";
+        sut.AddInAppExcludeRegex(expected);
+        Assert.Contains(sut.InAppExclude!, actual => actual.ToString() == expected);
     }
 
     [Fact]
@@ -436,7 +445,16 @@ public partial class SentryOptionsTests
         var sut = new SentryOptions();
         const string expected = "test";
         sut.AddInAppInclude(expected);
-        Assert.Contains(sut.InAppInclude!, actual => actual == expected);
+        Assert.Contains(sut.InAppInclude!, actual => actual.ToString() == expected);
+    }
+
+    [Fact]
+    public void AddInAppIncludeRegex_StoredInOptions()
+    {
+        var sut = new SentryOptions();
+        const string expected = ".*";
+        sut.AddInAppIncludeRegex(expected);
+        Assert.Contains(sut.InAppInclude!, actual => actual.ToString() == expected);
     }
 
     [Fact]
@@ -702,6 +720,6 @@ public partial class SentryOptionsTests
     public void Integrations_Includes_MajorSystemPrefixes(string expected)
     {
         var sut = new SentryOptions();
-        Assert.Contains(sut.InAppExclude!, e => e == expected);
+        Assert.Contains(sut.InAppExclude!, e => e.ToString() == expected);
     }
 }
