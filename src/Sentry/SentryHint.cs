@@ -59,7 +59,7 @@ public class SentryHint
     internal void AddAttachmentsFromScope(Scope scope) => _attachments.AddRange(scope.Attachments);
 
     /// <summary>
-    /// Creates a new Hint with one or more attachments.
+    /// Takes a path and adds the file as an attachment to the hint.
     /// </summary>
     /// <param name="filePath">The path to the file to attach.</param>
     /// <param name="type">The type of attachment.</param>
@@ -76,6 +76,30 @@ public class SentryHint
                     type,
                     new FileAttachmentContent(filePath, _options.UseAsyncFileIO),
                     Path.GetFileName(filePath),
+                    contentType));
+        }
+    }
+
+    /// <summary>
+    /// Adds a 'byte[]' as attachment to the hind.
+    /// </summary>
+    /// <param name="data">The byte array to be attached</param>
+    /// <param name="fileName">The filename for the attachment</param>
+    /// <param name="type">The type of attachment.</param>
+    /// <param name="contentType">The content type of the attachment.</param>
+    public void AddAttachment(
+        byte[] data,
+        string fileName,
+        AttachmentType type = AttachmentType.Default,
+        string? contentType = null)
+    {
+        if (_options is not null)
+        {
+            _attachments.Add(
+                new SentryAttachment(
+                    type,
+                    new ByteAttachmentContent(data),
+                    fileName,
                     contentType));
         }
     }
