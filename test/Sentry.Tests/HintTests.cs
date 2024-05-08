@@ -11,7 +11,7 @@ public class HintTests : IDisposable
     }
 
     [Fact]
-    public void AddAttachment_AddsToHint()
+    public void AddAttachment_Files_AddsToHint()
     {
         // Arrange
         var attachmentPath1 = Path.Combine(_testDirectory, Path.GetTempFileName());
@@ -24,6 +24,24 @@ public class HintTests : IDisposable
         // Act
         hint.AddAttachment(attachmentPath1);
         hint.AddAttachment(attachmentPath2);
+
+        // Assert
+        Assert.Equal(2, hint.Attachments.Count);
+    }
+
+    [Fact]
+    public void AddAttachment_ByteArray_AddsToHint()
+    {
+        // Arrange
+        var byteArray1 = new byte[5];
+        var byteArray2 = new byte[10];
+
+
+        var hint = new SentryHint(new SentryOptions());
+
+        // Act
+        hint.AddAttachment(byteArray1, "byteArray1");
+        hint.AddAttachment(byteArray2, "byteArray2");
 
         // Assert
         Assert.Equal(2, hint.Attachments.Count);

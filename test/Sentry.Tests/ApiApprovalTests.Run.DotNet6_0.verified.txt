@@ -558,6 +558,7 @@ namespace Sentry
         public System.Collections.Generic.ICollection<Sentry.SentryAttachment> Attachments { get; }
         public System.Collections.Generic.IDictionary<string, object?> Items { get; }
         public void AddAttachment(string filePath, Sentry.AttachmentType type = 0, string? contentType = null) { }
+        public void AddAttachment(byte[] data, string fileName, Sentry.AttachmentType type = 0, string? contentType = null) { }
         public static Sentry.SentryHint WithAttachments(params Sentry.SentryAttachment[] attachments) { }
         public static Sentry.SentryHint WithAttachments(System.Collections.Generic.IEnumerable<Sentry.SentryAttachment> attachments) { }
     }
