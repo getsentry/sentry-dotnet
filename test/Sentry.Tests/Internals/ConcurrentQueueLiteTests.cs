@@ -13,6 +13,15 @@ public class ConcurrentQueueLiteTests
 
         // Assert
         queue.Count.Should().Be(1);
+
+        // Act
+        queue.Enqueue(2);
+        queue.Enqueue(3);
+
+        // Assert
+        queue.Count.Should().Be(3);
+        var items = queue.ToArray();
+        items.Should().BeEquivalentTo([ 1, 2, 3 ]);
     }
 
     [Fact]
@@ -21,6 +30,8 @@ public class ConcurrentQueueLiteTests
         // Arrange
         var queue = new ConcurrentQueueLite<int>();
         queue.Enqueue(1);
+        queue.Enqueue(2);
+        queue.Enqueue(3);
 
         // Act
         var result = queue.TryDequeue(out var dequeuedItem);
@@ -28,7 +39,7 @@ public class ConcurrentQueueLiteTests
         // Assert
         result.Should().BeTrue();
         dequeuedItem.Should().Be(1);
-        queue.Count.Should().Be(0);
+        queue.Count.Should().Be(2);
     }
 
     [Fact]
@@ -63,6 +74,10 @@ public class ConcurrentQueueLiteTests
 
         // Act & Assert
         queue.IsEmpty.Should().BeTrue();
+        queue.Enqueue(1);
+        queue.IsEmpty.Should().BeFalse();
+        queue.TryDequeue(out var dequeuedItem);
+        queue.IsEmpty.Should().BeTrue();
     }
 
     [Fact]
@@ -71,12 +86,15 @@ public class ConcurrentQueueLiteTests
         // Arrange
         var queue = new ConcurrentQueueLite<int>();
         queue.Enqueue(1);
+        queue.Enqueue(2);
+        queue.Enqueue(3);
 
         // Act
         queue.Clear();
 
         // Assert
         queue.Count.Should().Be(0);
+        queue.IsEmpty.Should().BeTrue();
     }
 
     [Fact]
@@ -85,6 +103,8 @@ public class ConcurrentQueueLiteTests
         // Arrange
         var queue = new ConcurrentQueueLite<int>();
         queue.Enqueue(1);
+        queue.Enqueue(2);
+        queue.Enqueue(3);
 
         // Act
         var result = queue.TryPeek(out var peekedItem);
@@ -92,7 +112,8 @@ public class ConcurrentQueueLiteTests
         // Assert
         result.Should().BeTrue();
         peekedItem.Should().Be(1);
-        queue.Count.Should().Be(1);
+        var items = queue.ToArray();
+        items.Should().BeEquivalentTo([ 1, 2, 3 ]);
     }
 
     [Fact]

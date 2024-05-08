@@ -66,4 +66,12 @@ internal class ConcurrentQueueLite<T>
         item = default;
         return false;
     }
+
+    public T[] ToArray()
+    {
+        lock (_queue)
+        {
+            return _queue.ToArray();
+        }
+    }
 }
