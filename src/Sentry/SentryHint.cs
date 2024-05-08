@@ -93,15 +93,12 @@ public class SentryHint
         AttachmentType type = AttachmentType.Default,
         string? contentType = null)
     {
-        if (_options is not null)
-        {
-            _attachments.Add(
-                new SentryAttachment(
-                    type,
-                    new ByteAttachmentContent(data),
-                    fileName,
-                    contentType));
-        }
+        _attachments.Add(
+            new SentryAttachment(
+                type,
+                new ByteAttachmentContent(data),
+                fileName,
+                contentType));
     }
 
     /// <summary>
