@@ -21,7 +21,7 @@ public class ConcurrentQueueLiteTests
         // Assert
         queue.Count.Should().Be(3);
         var items = queue.ToArray();
-        items.Should().BeEquivalentTo([ 1, 2, 3 ]);
+        items.Should().BeEquivalentTo([1, 2, 3]);
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public class ConcurrentQueueLiteTests
         result.Should().BeTrue();
         peekedItem.Should().Be(1);
         var items = queue.ToArray();
-        items.Should().BeEquivalentTo([ 1, 2, 3 ]);
+        items.Should().BeEquivalentTo([1, 2, 3]);
     }
 
     [Fact]
