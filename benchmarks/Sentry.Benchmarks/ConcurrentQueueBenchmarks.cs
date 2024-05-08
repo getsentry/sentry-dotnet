@@ -22,7 +22,7 @@ public class ConcurrentQueueBenchmarks
             }));
             tasks.Add(Task.Run(() =>
             {
-                if (queue.TryPeek(out var item))
+                while (queue.TryPeek(out var item))
                 {
                     queue.TryDequeue(out _);
                 }
@@ -45,7 +45,7 @@ public class ConcurrentQueueBenchmarks
             }));
             tasks.Add(Task.Run(() =>
             {
-                if (queue.TryPeek(out var item))
+                while (queue.TryPeek(out var item))
                 {
                     queue.TryDequeue(out _);
                 }
