@@ -12,18 +12,21 @@ internal class ConcurrentQueueLite<T>
 
     public void Enqueue(T item)
     {
-        lock (_queue) {
-            _queue.Add (item);
+        lock (_queue)
+        {
+            _queue.Add(item);
             _listCounter++;
         }
     }
     public bool TryDequeue([NotNullWhen(true)] out T? item)
     {
         item = default;
-        lock (_queue) {
-            if (_listCounter > 0) {
-                item = _queue [0];
-                _queue.RemoveAt (0);
+        lock (_queue)
+        {
+            if (_listCounter > 0)
+            {
+                item = _queue[0];
+                _queue.RemoveAt(0);
                 _listCounter--;
             }
         }
@@ -36,8 +39,9 @@ internal class ConcurrentQueueLite<T>
 
     public void Clear()
     {
-        lock (_queue) {
-            _queue.Clear ();
+        lock (_queue)
+        {
+            _queue.Clear();
             _listCounter = 0;
         }
     }
@@ -45,9 +49,11 @@ internal class ConcurrentQueueLite<T>
     public bool TryPeek([NotNullWhen(true)] out T? item)
     {
         item = default;
-        lock (_queue) {
-            if (_listCounter > 0) {
-                item = _queue [0];
+        lock (_queue)
+        {
+            if (_listCounter > 0)
+            {
+                item = _queue[0];
             }
         }
         return item != null;
