@@ -15,7 +15,6 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
     private readonly SemaphoreSlim _queuedEnvelopeSemaphore;
 
     private volatile bool _disposed;
-    private volatile bool _fatalExceptionEncountered;
     private int _currentItems;
 
     internal event EventHandler? OnFlushObjectReceived;
@@ -62,12 +61,6 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
         if (_disposed)
         {
             throw new ObjectDisposedException(nameof(BackgroundWorker));
-        }
-
-        if (_fatalExceptionEncountered)
-        {
-            _options.LogDebug("Worker encountered a fatal exception. Discarding envelope.");
-            return false;
         }
 
         var eventId = envelope.TryGetEventId(_options.DiagnosticLogger);
@@ -198,7 +191,6 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
         }
         catch (Exception e)
         {
-            _fatalExceptionEncountered = true;
             _queue.Clear();
             _options.LogFatal(e, "Exception in the background worker.");
             throw;
