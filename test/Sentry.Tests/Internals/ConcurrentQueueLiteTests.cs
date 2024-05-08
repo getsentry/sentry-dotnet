@@ -3,7 +3,8 @@ namespace Sentry.Tests.Internals;
 public class ConcurrentQueueLiteTests
 {
     [Fact]
-    public void Enqueue_Test(){
+    public void Enqueue_Test()
+    {
         // Arrange
         var queue = new ConcurrentQueueLite<int>();
 
@@ -15,7 +16,8 @@ public class ConcurrentQueueLiteTests
     }
 
     [Fact]
-    public void TryDequeue_Test(){
+    public void TryDequeue_Test()
+    {
         // Arrange
         var queue = new ConcurrentQueueLite<int>();
         queue.Enqueue(1);
@@ -30,7 +32,8 @@ public class ConcurrentQueueLiteTests
     }
 
     [Fact]
-    public void TryDequeue_EmptyQueue_Test(){
+    public void TryDequeue_EmptyQueue_Test()
+    {
         // Arrange
         var queue = new ConcurrentQueueLite<int>();
 
@@ -43,7 +46,8 @@ public class ConcurrentQueueLiteTests
     }
 
     [Fact]
-    public void Count_EmptyQueue_Test(){
+    public void Count_EmptyQueue_Test()
+    {
         // Arrange
         var queue = new ConcurrentQueueLite<int>();
 
@@ -52,7 +56,8 @@ public class ConcurrentQueueLiteTests
     }
 
     [Fact]
-    public void IsEmpty_Test(){
+    public void IsEmpty_Test()
+    {
         // Arrange
         var queue = new ConcurrentQueueLite<int>();
 
@@ -61,7 +66,8 @@ public class ConcurrentQueueLiteTests
     }
 
     [Fact]
-    public void Clear_Test(){
+    public void Clear_Test()
+    {
         // Arrange
         var queue = new ConcurrentQueueLite<int>();
         queue.Enqueue(1);
@@ -74,7 +80,8 @@ public class ConcurrentQueueLiteTests
     }
 
     [Fact]
-    public void TryPeek_Test(){
+    public void TryPeek_Test()
+    {
         // Arrange
         var queue = new ConcurrentQueueLite<int>();
         queue.Enqueue(1);
@@ -89,7 +96,8 @@ public class ConcurrentQueueLiteTests
     }
 
     [Fact]
-    public void TryPeek_EmptyQueue_Test(){
+    public void TryPeek_EmptyQueue_Test()
+    {
         // Arrange
         var queue = new ConcurrentQueueLite<int>();
 
@@ -102,7 +110,8 @@ public class ConcurrentQueueLiteTests
     }
 
     [Fact]
-    public async Task TestConcurrency(){
+    public async Task TestConcurrency()
+    {
         // Arrange
         var queue = new ConcurrentQueueLite<int>();
         var count = 100;
@@ -118,7 +127,8 @@ public class ConcurrentQueueLiteTests
                 queue.Enqueue(toAdd);
                 Interlocked.Increment(ref received);
             });
-            tasks[i + count] = Task.Run(() => {
+            tasks[i + count] = Task.Run(() =>
+            {
                 queue.TryDequeue(out _);
                 Interlocked.Increment(ref received);
             });
