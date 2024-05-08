@@ -2,6 +2,7 @@ using Sentry.Internal;
 
 namespace Sentry;
 
+// TODO: This class can be replaced with an implementation of IStringOrRegexMatcher in the next major version bump.
 /// <summary>
 /// Provides a pattern that can be used to match against other strings as either a substring or regular expression.
 /// </summary>
@@ -72,6 +73,8 @@ public class SubstringOrRegexPattern
     {
         return ToString().GetHashCode();
     }
+
+    internal Regex? Regex => _regex;
 
     internal bool IsMatch(string str) =>
         _substring == ".*" || // perf shortcut

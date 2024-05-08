@@ -1,4 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry;
@@ -10,6 +15,10 @@ namespace Sentry;
 [DebuggerDisplay("{Function}")]
 public sealed class SentryStackFrame : ISentryJsonSerializable
 {
+
+    private static readonly Lazy<PrefixOrPatternMatcher> LazyModuleMatcher = new(() => new());
+    private static readonly Lazy<DelimitedPrefixOrPatternMatcher> LazyFunctionMatcher = new(() => new());
+
     internal List<string>? InternalPreContext { get; private set; }
 
     internal List<string>? InternalPostContext { get; private set; }
@@ -190,11 +199,11 @@ public sealed class SentryStackFrame : ISentryJsonSerializable
 
         if (!string.IsNullOrEmpty(Module))
         {
-            ConfigureAppFrame(options, Module, mustIncludeSeparator: false);
+            ConfigureAppFrame(options, Module, LazyModuleMatcher.Value);
         }
         else if (!string.IsNullOrEmpty(Function))
         {
-            ConfigureAppFrame(options, Function, mustIncludeSeparator: true);
+            ConfigureAppFrame(options, Function, LazyFunctionMatcher.Value);
         }
         else if (ImageAddress is null or 0 && InstructionAddress is null or 0) // Leave InApp=null on NativeAOT
         {
@@ -202,22 +211,9 @@ public sealed class SentryStackFrame : ISentryJsonSerializable
         }
     }
 
-    private void ConfigureAppFrame(SentryOptions options, string parameter, bool mustIncludeSeparator)
-    {
-        var resolver = (string prefix) =>
-        {
-            if (parameter.StartsWith(prefix, StringComparison.Ordinal))
-            {
-                if (mustIncludeSeparator)
-                {
-                    return parameter.Length > prefix.Length && parameter[prefix.Length] == '.';
-                }
-                return true;
-            }
-            return false;
-        };
-        InApp = options.InAppInclude?.Any(resolver) == true || options.InAppExclude?.Any(resolver) != true;
-    }
+    private void ConfigureAppFrame(SentryOptions options, string parameter, IStringOrRegexMatcher matcher) =>
+        InApp = parameter.MatchesAny(options.InAppInclude, matcher)
+                || !parameter.MatchesAny(options.InAppExclude, matcher);
 
     /// <summary>
     /// Parses from JSON.

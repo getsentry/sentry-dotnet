@@ -53,6 +53,7 @@ internal class SampleProfileBuilder
         var threadIndex = AddThread(thread);
         if (threadIndex < 0)
         {
+            _options.DiagnosticLogger?.LogDebug("Profiler Sample threadIndex is invalid. Skipping.");
             return;
         }
 
@@ -64,6 +65,7 @@ internal class SampleProfileBuilder
         var stackIndex = AddStackTrace(callStackIndex);
         if (stackIndex < 0)
         {
+            _options.DiagnosticLogger?.LogDebug("Invalid stackIndex for Profiler Sample. Skipping.");
             return;
         }
 
