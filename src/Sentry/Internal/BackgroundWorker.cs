@@ -191,7 +191,6 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
         }
         catch (Exception e)
         {
-            _queue.Clear();
             _options.LogFatal(e, "Exception in the background worker.");
             throw;
         }

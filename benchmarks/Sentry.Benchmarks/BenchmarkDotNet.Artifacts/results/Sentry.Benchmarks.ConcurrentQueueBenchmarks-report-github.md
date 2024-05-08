@@ -10,5 +10,5 @@ Apple M2 Max, 1 CPU, 12 logical and 12 physical cores
 ```
 | Method                   | N    | Mean     | Error     | StdDev    | Gen0      | Gen1     | Gen2     | Allocated |
 |------------------------- |----- |---------:|----------:|----------:|----------:|---------:|---------:|----------:|
-| ConcurrentQueueLiteAsync | 1000 | 3.377 ms | 0.0782 ms | 0.2305 ms | 1054.6875 | 476.5625 |  31.2500 |   2.18 MB |
-| ConcurrentQueueAsync     | 1000 | 3.574 ms | 0.0741 ms | 0.2172 ms | 1066.4063 | 519.5313 | 144.5313 |   2.21 MB |
+| ConcurrentQueueLiteAsync | 1000 | 3.370 ms | 0.0879 ms | 0.2493 ms | 1050.7813 | 464.8438 |  46.8750 |   2.18 MB |
+| ConcurrentQueueAsync     | 1000 | 3.920 ms | 0.0749 ms | 0.1597 ms | 1070.3125 | 523.4375 | 136.7188 |   2.21 MB |

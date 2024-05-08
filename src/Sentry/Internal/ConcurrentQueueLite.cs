@@ -9,25 +9,22 @@ namespace Sentry.Internal;
 internal class ConcurrentQueueLite<T>
 {
     private readonly List<T> _queue = new();
-    private int _listCounter = 0;
 
     public void Enqueue(T item)
     {
         lock (_queue)
         {
             _queue.Add(item);
-            _listCounter++;
         }
     }
     public bool TryDequeue([NotNullWhen(true)] out T? item)
     {
         lock (_queue)
         {
-            if (_listCounter > 0)
+            if (_queue.Count > 0)
             {
                 item = _queue[0]!;
                 _queue.RemoveAt(0);
-                _listCounter--;
                 return true;
             }
         }
@@ -35,16 +32,24 @@ internal class ConcurrentQueueLite<T>
         return false;
     }
 
-    public int Count => _listCounter;
+    public int Count
+    {
+        get
+        {
+            lock (_queue)
+            {
+                return _queue.Count;
+            }
+        }
+    }
 
-    public bool IsEmpty => _listCounter == 0;
+    public bool IsEmpty => Count == 0;
 
     public void Clear()
     {
         lock (_queue)
         {
             _queue.Clear();
-            _listCounter = 0;
         }
     }
 
@@ -52,7 +57,7 @@ internal class ConcurrentQueueLite<T>
     {
         lock (_queue)
         {
-            if (_listCounter > 0)
+            if (_queue.Count > 0)
             {
                 item = _queue[0]!;
                 return true;
