@@ -11,6 +11,9 @@
 - Bump CLI from v2.31.0 to v2.31.2 ([#3342](https://github.com/getsentry/sentry-dotnet/pull/3342), [#3345](https://github.com/getsentry/sentry-dotnet/pull/3345))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2312)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.31.0...2.31.2)
+- Bump Cocoa SDK from v8.25.0 to v8.25.2 ([#3356](https://github.com/getsentry/sentry-dotnet/pull/3356))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8252)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.25.0...8.25.2)
 
 ## 4.5.0
 
