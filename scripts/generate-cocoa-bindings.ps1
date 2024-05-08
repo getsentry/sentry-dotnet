@@ -191,6 +191,8 @@ $Text = $Text -replace '.*typedef.*SentryOnAppStartMeasurementAvailable.*?[\s\S]
 $protocolsToRemove = @(
     'SentryMXManagerDelegate',
     'SentryMetricsAPIDelegate',
+    'SentryReplayVideoMaker',
+    'SentryViewScreenshotProvider',
     'SentryRedactOptions'
 )
 
@@ -201,6 +203,7 @@ foreach ($protocol in $protocolsToRemove) {
 $interfacesToRemove = @(
     'HTTPHeaderSanitizer',
     'LocalMetricsAggregator',
+    'NSURLSessionTask',
     'SentryCurrentDateProvider',
     'SentryExperimentalOptions',
     'SentryMXCallStack',
