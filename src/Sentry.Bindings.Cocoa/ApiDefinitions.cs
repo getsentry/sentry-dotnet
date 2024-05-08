@@ -1274,6 +1274,10 @@ interface SentryOptions
     [Export ("enableAutoSessionTracking")]
     bool EnableAutoSessionTracking { get; set; }
 
+    // @property (assign, nonatomic) BOOL enableGraphQLOperationTracking;
+    [Export ("enableGraphQLOperationTracking")]
+    bool EnableGraphQLOperationTracking { get; set; }
+
     // @property (assign, nonatomic) BOOL enableWatchdogTerminationTracking;
     [Export ("enableWatchdogTerminationTracking")]
     bool EnableWatchdogTerminationTracking { get; set; }
@@ -1377,6 +1381,10 @@ interface SentryOptions
     // @property (nonatomic, weak) id<NSURLSessionDelegate> _Nullable urlSessionDelegate;
     [NullAllowed, Export ("urlSessionDelegate", ArgumentSemantic.Weak)]
     NSObject WeakUrlSessionDelegate { get; set; }
+
+    // @property (nonatomic, strong) NSURLSession * _Nullable urlSession;
+    [NullAllowed, Export ("urlSession", ArgumentSemantic.Strong)]
+    NSUrlSession UrlSession { get; set; }
 
     // @property (assign, nonatomic) BOOL enableSwizzling;
     [Export ("enableSwizzling")]
