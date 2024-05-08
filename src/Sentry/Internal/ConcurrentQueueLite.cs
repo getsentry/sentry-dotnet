@@ -1,9 +1,10 @@
 namespace Sentry.Internal;
 
 /// <summary>
-/// This class is purely for testing purposes. It's been hacked together in a short amount of time. Performance is no
-/// doubt terrible and it should in no way be used in production code. It does confirm we have a memory issue with the
-/// <see cref="ConcurrentQueue{T}"/> class however. See https://github.com/getsentry/sentry-dotnet/issues/2516
+/// A minimal replacement for <see cref="ConcurrentQueue{T}"/>
+///
+/// We're using this due to a memory leak that happens when using ConcurrentQueue in the BackgroundWorker.
+/// See https://github.com/getsentry/sentry-dotnet/issues/2516
 /// </summary>
 internal class ConcurrentQueueLite<T>
 {
@@ -19,15 +20,16 @@ internal class ConcurrentQueueLite<T>
     }
     public bool TryDequeue([NotNullWhen(true)] out T? item)
     {
-        item = default;
         lock (_queue) {
             if (_listCounter > 0) {
-                item = _queue [0];
+                item = _queue [0]!;
                 _queue.RemoveAt (0);
                 _listCounter--;
+                return true;
             }
         }
-        return item != null;
+        item = default;
+        return false;
     }
 
     public int Count => _listCounter;
@@ -44,12 +46,13 @@ internal class ConcurrentQueueLite<T>
 
     public bool TryPeek([NotNullWhen(true)] out T? item)
     {
-        item = default;
         lock (_queue) {
             if (_listCounter > 0) {
-                item = _queue [0];
+                item = _queue [0]!;
+                return true;
             }
         }
-        return item != null;
+        item = default;
+        return false;
     }
 }
