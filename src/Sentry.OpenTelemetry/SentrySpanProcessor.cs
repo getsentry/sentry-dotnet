@@ -333,12 +333,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         // HTTP span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/http/
-        if (attributes.HttpMethodAttribute() is {} httpMethod)
+        if (attributes.HttpMethodAttribute() is { } httpMethod)
         {
             if (activity.Kind == ActivityKind.Client)
             {
                 // Per OpenTelemetry spec, client spans use only the method.
-                var description = (attributes.UrlFullAttribute() is {} fullUrl)
+                var description = (attributes.UrlFullAttribute() is { } fullUrl)
                     ? $"{httpMethod} {fullUrl}"
                     : httpMethod;
                 return ("http.client", description, TransactionNameSource.Custom);
