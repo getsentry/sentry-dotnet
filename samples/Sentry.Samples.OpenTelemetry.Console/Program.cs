@@ -14,7 +14,9 @@ var activitySource = new ActivitySource("Sentry.Samples.OpenTelemetry.Console");
 
 SentrySdk.Init(options =>
 {
-    // options.Dsn = "... Your DSN ...";
+    // TODO: Replace the DSN below with your own. You can find this value in your Sentry project settings.
+    // https://docs.sentry.io/product/sentry-basics/concepts/dsn-explainer/#where-to-find-your-dsn
+    options.Dsn = "... Your DSN ...";
     options.TracesSampleRate = 1.0;
     options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
     options.Debug = true;
