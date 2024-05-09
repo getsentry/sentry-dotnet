@@ -6,6 +6,7 @@
 
 - Hints now accept `byte[]` as attachment ([#3352](https://github.com/getsentry/sentry-dotnet/pull/3352))
 - InApp includes/excludes can now be configured using regular expressions ([#3321](https://github.com/getsentry/sentry-dotnet/pull/3321))
+- HttpClient requests now show on the Requests dashboard in Sentry ([#3357](https://github.com/getsentry/sentry-dotnet/pull/3357))
 
 ### Dependencies
 

@@ -136,7 +136,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         bool? isSampled = data.HasRemoteParent ? data.Recorded : null;
 
         // No parent span found - start a new transaction
-        var transactionContext = new TransactionContext(data.DisplayName,
+        var transactionContext = new TransactionContext(
+            data.DisplayName,
             data.OperationName,
             data.SpanId.AsSentrySpanId(),
             data.ParentSpanId.AsSentrySpanId(),
@@ -164,11 +165,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         // Make a dictionary of the attributes (aka "tags") for faster lookup when used throughout the processor.
         var attributes = data.TagObjects.ToDict();
 
-        var url =
-            attributes.TryGetTypedValue(OtelSemanticConventions.AttributeUrlFull, out string? tempUrl) ? tempUrl
-            : attributes.TryGetTypedValue(OtelSemanticConventions.AttributeHttpUrl, out string? fallbackUrl) ? fallbackUrl // Falling back to pre-1.5.0
-            : null;
-
+        var url = attributes.UrlFullAttribute();
         if (!string.IsNullOrEmpty(url) && (_options?.IsSentryRequest(url) ?? false))
         {
             _options?.DiagnosticLogger?.LogDebug($"Ignoring Activity {data.SpanId} for Sentry request.");
@@ -326,9 +323,9 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         return SpanStatus.UnknownError;
     }
 
-    private static (string operation, string description, TransactionNameSource source) ParseOtelSpanDescription(
-         Activity activity,
-         IDictionary<string, object?> attributes)
+    internal static (string operation, string description, TransactionNameSource source) ParseOtelSpanDescription(
+        Activity activity,
+        IDictionary<string, object?> attributes)
     {
         // This function should loosely match the JavaScript implementation at:
         // https://github.com/getsentry/sentry-javascript/blob/3487fa3af7aa72ac7fdb0439047cb7367c591e77/packages/opentelemetry-node/src/utils/parseOtelSpanDescription.ts
@@ -336,12 +333,15 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         // HTTP span
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/http/
-        if (attributes.TryGetTypedValue(OtelSemanticConventions.AttributeHttpMethod, out string httpMethod))
+        if (attributes.HttpMethodAttribute() is {} httpMethod)
         {
             if (activity.Kind == ActivityKind.Client)
             {
                 // Per OpenTelemetry spec, client spans use only the method.
-                return ("http.client", httpMethod, TransactionNameSource.Custom);
+                var description = (attributes.UrlFullAttribute() is {} fullUrl)
+                    ? $"{httpMethod} {fullUrl}"
+                    : httpMethod;
+                return ("http.client", description, TransactionNameSource.Custom);
             }
 
             if (attributes.TryGetTypedValue(OtelSemanticConventions.AttributeHttpRoute, out string httpRoute))
