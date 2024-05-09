@@ -7,6 +7,10 @@
 - Hints now accept `byte[]` as attachment ([#3352](https://github.com/getsentry/sentry-dotnet/pull/3352))
 - InApp includes/excludes can now be configured using regular expressions ([#3321](https://github.com/getsentry/sentry-dotnet/pull/3321))
 
+### Fixes
+
+- Fixed memory leak in BackgroundWorker observed when using Sentry with Quartz and MySql ([#3355](https://github.com/getsentry/sentry-dotnet/pull/3355))
+
 ### Dependencies
 
 - Bump CLI from v2.31.0 to v2.31.2 ([#3342](https://github.com/getsentry/sentry-dotnet/pull/3342), [#3345](https://github.com/getsentry/sentry-dotnet/pull/3345))
