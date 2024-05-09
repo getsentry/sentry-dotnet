@@ -15,6 +15,9 @@
 - Bump Cocoa SDK from v8.25.0 to v8.25.2 ([#3356](https://github.com/getsentry/sentry-dotnet/pull/3356))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8252)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.25.0...8.25.2)
+- Bump Java SDK from v7.8.0 to v7.9.0 ([#3358](https://github.com/getsentry/sentry-dotnet/pull/3358))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#790)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.8.0...7.9.0)
 
 ## 4.5.0
 
