@@ -57,9 +57,10 @@ public class SentryGraphQlHttpMessageHandlerTests
         var sut = new SentryGraphQLHttpMessageHandler(hub, null);
 
         var method = "POST";
-        var url = "http://example.com/graphql";
+        var host = "example.com";
+        var url = $"https://{host}/graphql";
         var query = ValidQuery;
-        var request = SentryGraphQlTestHelpers.GetRequestQuery(query);
+        var request = SentryGraphQlTestHelpers.GetRequestQuery(query, url);
 
         // Act
         var returnedSpan = sut.ProcessRequest(request, method, url);
@@ -69,6 +70,7 @@ public class SentryGraphQlHttpMessageHandlerTests
         returnedSpan!.Operation.Should().Be("http.client");
         returnedSpan.Description.Should().Be($"{method} {url}");
         returnedSpan.Received(1).SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
+        returnedSpan.Received(1).SetExtra(OtelSemanticConventions.AttributeServerAddress, host);
     }
 
     // [Theory]
