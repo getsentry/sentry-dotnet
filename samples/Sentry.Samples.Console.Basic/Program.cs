@@ -54,7 +54,7 @@ async Task FirstFunction()
 {
     // This is an example of making an HttpRequest. A trace us automatically captured by Sentry for this.
     var messageHandler = new SentryHttpMessageHandler();
-    var httpClient = new  HttpClient(messageHandler, true);
+    var httpClient = new HttpClient(messageHandler, true);
     var html = await httpClient.GetStringAsync("https://example.com/");
     Console.WriteLine(html);
 }
