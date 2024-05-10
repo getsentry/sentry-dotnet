@@ -7,7 +7,7 @@ namespace Sentry.Tests;
  * TODO: Find a way to consolidate these tests cleanly.
  */
 
-public class SentryHttpMessageHandlerTests: SentryMessageHandlerTests
+public class SentryHttpMessageHandlerTests : SentryMessageHandlerTests
 {
     [Fact]
     public async Task SendAsync_SentryTraceHeaderNotSet_SetsHeader_ByDefault()

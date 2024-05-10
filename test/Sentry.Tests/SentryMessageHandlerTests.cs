@@ -27,5 +27,5 @@ public class SentryMessageHandlerTests
         }
     }
 
-    private  protected readonly Fixture _fixture = new();
+    private protected readonly Fixture _fixture = new();
 }
