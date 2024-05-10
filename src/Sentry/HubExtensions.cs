@@ -244,4 +244,11 @@ public static class HubExtensions
         var transaction = hub.GetTransaction();
         return transaction?.IsSampled == true ? transaction : null;
     }
+
+    internal static Hub? GetRealHub(this IHub hub) => hub switch
+    {
+        Hub thisHub => thisHub,
+        HubAdapter when SentrySdk.CurrentHub is Hub sdkHub => sdkHub,
+        _ => null
+    };
 }

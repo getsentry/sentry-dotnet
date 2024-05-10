@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry;
@@ -11,6 +12,7 @@ public class SentryHttpMessageHandler : SentryMessageHandler
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
     private readonly ISentryFailedRequestHandler? _failedRequestHandler;
+    private readonly Lazy<Hub?> _realHub;
 
     /// <summary>
     /// Constructs an instance of <see cref="SentryHttpMessageHandler"/>.
@@ -48,6 +50,7 @@ public class SentryHttpMessageHandler : SentryMessageHandler
         : base(hub, options, innerHandler)
     {
         _hub = hub ?? HubAdapter.Instance;
+        _realHub = new Lazy<Hub?>(() => _hub.GetRealHub());
         _options = options ?? _hub.GetSentryOptions();
         _failedRequestHandler = failedRequestHandler;
 
@@ -63,7 +66,7 @@ public class SentryHttpMessageHandler : SentryMessageHandler
     {
         // Start a span that tracks this request
         // (may be null if transaction is not set on the scope)
-        var span = _hub.GetSpan()?.StartChild(
+        var span = _realHub.Value?.StartSpan(
             "http.client",
             $"{method} {url}" // e.g. "GET https://example.com"
             );
