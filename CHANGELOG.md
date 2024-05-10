@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+- Fixed SentryHttpMessageHandler and SentryGraphQLHttpMessageHandler not creating spans when there is no active Transaction on the scope ([#3360](https://github.com/getsentry/sentry-dotnet/pull/3360))
+
 ## 4.6.0
 
 ### Features
