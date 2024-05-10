@@ -12,6 +12,7 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
     private readonly ISentryFailedRequestHandler? _failedRequestHandler;
+    private readonly Lazy<Hub?> _realHub;
 
     /// <summary>
     /// Constructs an instance of <see cref="SentryGraphQLHttpMessageHandler"/>.
@@ -29,6 +30,7 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
     : base(hub, options, innerHandler)
     {
         _hub = hub ?? HubAdapter.Instance;
+        _realHub = new Lazy<Hub?>(() => _hub.GetRealHub());
         _options = options ?? _hub.GetSentryOptions();
         _failedRequestHandler = failedRequestHandler;
         if (_options != null)
@@ -50,7 +52,7 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
 
         // Start a span that tracks this request
         // (may be null if transaction is not set on the scope)
-        var span = _hub.GetSpan()?.StartChild(
+        var span = _realHub.Value?.StartSpan(
             "http.client",
             $"{method} {url}" // e.g. "GET https://example.com"
         );
