@@ -251,4 +251,13 @@ public static class HubExtensions
         HubAdapter when SentrySdk.CurrentHub is Hub sdkHub => sdkHub,
         _ => null
     };
+
+    internal static ISpan StartSpan(this IHub hub, string operation, string description)
+    {
+        ITransactionTracer? currentTransaction = null;
+        hub.ConfigureScope(s => currentTransaction = s.Transaction);
+        return currentTransaction is { } transaction
+            ? transaction.StartChild(operation, description)
+            : hub.StartTransaction(description, operation, description);
+    }
 }
