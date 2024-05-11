@@ -245,13 +245,6 @@ public static class HubExtensions
         return transaction?.IsSampled == true ? transaction : null;
     }
 
-    internal static Hub? GetRealHub(this IHub hub) => hub switch
-    {
-        Hub thisHub => thisHub,
-        HubAdapter when SentrySdk.CurrentHub is Hub sdkHub => sdkHub,
-        _ => null
-    };
-
     internal static ISpan StartSpan(this IHub hub, string operation, string description)
     {
         ITransactionTracer? currentTransaction = null;

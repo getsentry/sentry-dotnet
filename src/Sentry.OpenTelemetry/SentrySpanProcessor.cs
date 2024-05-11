@@ -40,7 +40,13 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     internal SentrySpanProcessor(IHub hub, IEnumerable<IOpenTelemetryEnricher>? enrichers)
     {
         _hub = hub;
-        _realHub = new Lazy<Hub?>(() => _hub.GetRealHub());
+        _realHub = new Lazy<Hub?>(() =>
+            _hub switch
+            {
+                Hub thisHub => thisHub,
+                HubAdapter when SentrySdk.CurrentHub is Hub sdkHub => sdkHub,
+                _ => null
+            });
 
         if (_hub is DisabledHub)
         {
