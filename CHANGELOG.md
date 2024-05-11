@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump Hangfire ([#3361](https://github.com/getsentry/sentry-dotnet/pull/3361))
+
 ## 4.6.0
 
 ### Features
