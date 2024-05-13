@@ -6,6 +6,10 @@
 
 - Fixed SentryHttpMessageHandler and SentryGraphQLHttpMessageHandler not creating spans when there is no active Transaction on the scope ([#3360](https://github.com/getsentry/sentry-dotnet/pull/3360))
 
+### Dependencies
+
+- Bump Hangfire from v1.8.7 to v1.8.12 ([#3361](https://github.com/getsentry/sentry-dotnet/pull/3361))
+
 ## 4.6.0
 
 ### Features
