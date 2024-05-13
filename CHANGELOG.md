@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Remove SentryNative initialization from blazor WASM with `RunAOTCompilation` enabled. ([#3349](https://github.com/getsentry/sentry-dotnet/pull/3349))
+- Remove SentryNative initialization from blazor WASM with `RunAOTCompilation` enabled. ([#3363](https://github.com/getsentry/sentry-dotnet/pull/3363))
 
 ### Dependencies
 
