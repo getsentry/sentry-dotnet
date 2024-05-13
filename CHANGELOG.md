@@ -2,19 +2,36 @@
 
 ## Unreleased
 
-### Features
-
-- InApp includes/excludes can now be configured using regular expressions ([#3321](https://github.com/getsentry/sentry-dotnet/pull/3321))
-
 ### Fixes
 
 - Remove SentryNative initialization from blazor WASM with `RunAOTCompilation` enabled. ([#3349](https://github.com/getsentry/sentry-dotnet/pull/3349))
 
 ### Dependencies
 
+- Bump Hangfire ([#3361](https://github.com/getsentry/sentry-dotnet/pull/3361))
+
+## 4.6.0
+
+### Features
+
+- Hints now accept `byte[]` as attachment ([#3352](https://github.com/getsentry/sentry-dotnet/pull/3352))
+- InApp includes/excludes can now be configured using regular expressions ([#3321](https://github.com/getsentry/sentry-dotnet/pull/3321))
+
+### Fixes
+
+- Fixed memory leak in BackgroundWorker observed when using Sentry with Quartz and MySql ([#3355](https://github.com/getsentry/sentry-dotnet/pull/3355))
+
+### Dependencies
+
 - Bump CLI from v2.31.0 to v2.31.2 ([#3342](https://github.com/getsentry/sentry-dotnet/pull/3342), [#3345](https://github.com/getsentry/sentry-dotnet/pull/3345))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2312)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.31.0...2.31.2)
+- Bump Cocoa SDK from v8.25.0 to v8.25.2 ([#3356](https://github.com/getsentry/sentry-dotnet/pull/3356))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8252)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.25.0...8.25.2)
+- Bump Java SDK from v7.8.0 to v7.9.0 ([#3358](https://github.com/getsentry/sentry-dotnet/pull/3358))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#790)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.8.0...7.9.0)
 
 ## 4.5.0
 
