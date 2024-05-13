@@ -10,6 +10,7 @@ internal static class AotHelper
     }
 
 #if NET8_0_OR_GREATER
+    // TODO this probably more closely represents trimming rather than NativeAOT?
     internal static bool IsNativeAot { get; }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
