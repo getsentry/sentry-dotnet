@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- The SDK no longer (wrongly) initializes sentry-native on Blazor WASM builds with `RunAOTCompilation` enabled. ([#3363](https://github.com/getsentry/sentry-dotnet/pull/3363))
+
 ### Dependencies
 
 - Bump Hangfire ([#3361](https://github.com/getsentry/sentry-dotnet/pull/3361))
