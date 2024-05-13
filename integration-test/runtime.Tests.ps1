@@ -110,7 +110,7 @@ internal class FakeTransport : ITransport
     }
 
     It "'dotnet publish' produces an app that's recognized as AOT by Sentry" {
-        runConsoleApp | Should -AnyElementMatch 'This looks like a NativeAOT application build.'
+        runConsoleApp | Should -AnyElementMatch 'This looks like a Native AOT application build.'
     }
 
     It "'dotnet run' produces an app that's recognized as JIT by Sentry" {
