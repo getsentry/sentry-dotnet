@@ -114,7 +114,7 @@ internal class FakeTransport : ITransport
     }
 
     It "'dotnet run' produces an app that's recognized as JIT by Sentry" {
-        runConsoleApp $false | Should -AnyElementMatch 'This looks like a standard JIT/AOT application build.'
+        runConsoleApp $false | Should -AnyElementMatch 'This doesn''t look like a Native AOT application build.'
     }
 
     It 'Produces the expected exception (Managed, AOT=<_>)' -ForEach @($true, $false) {
