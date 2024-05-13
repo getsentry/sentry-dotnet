@@ -9,7 +9,7 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
 {
     private readonly ITransport _transport;
     private readonly SentryOptions _options;
-    private readonly ConcurrentQueue<Envelope> _queue;
+    private readonly ConcurrentQueueLite<Envelope> _queue;
     private readonly int _maxItems;
     private readonly CancellationTokenSource _shutdownSource;
     private readonly SemaphoreSlim _queuedEnvelopeSemaphore;
@@ -27,11 +27,11 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
         ITransport transport,
         SentryOptions options,
         CancellationTokenSource? shutdownSource = null,
-        ConcurrentQueue<Envelope>? queue = null)
+        ConcurrentQueueLite<Envelope>? queue = null)
     {
         _transport = transport;
         _options = options;
-        _queue = queue ?? new ConcurrentQueue<Envelope>();
+        _queue = queue ?? new ConcurrentQueueLite<Envelope>();
         _maxItems = options.MaxQueueItems;
         _shutdownSource = shutdownSource ?? new CancellationTokenSource();
         _queuedEnvelopeSemaphore = new SemaphoreSlim(0, _maxItems);

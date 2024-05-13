@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
-    <PackageReference Include="Hangfire.Core" Version="1.8.7" />
+    <PackageReference Include="Hangfire.Core" Version="1.8.12" />
   </ItemGroup>
 
   <ItemGroup>

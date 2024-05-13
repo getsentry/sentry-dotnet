@@ -244,4 +244,13 @@ public static class HubExtensions
         var transaction = hub.GetTransaction();
         return transaction?.IsSampled == true ? transaction : null;
     }
+
+    internal static ISpan StartSpan(this IHub hub, string operation, string description)
+    {
+        ITransactionTracer? currentTransaction = null;
+        hub.ConfigureScope(s => currentTransaction = s.Transaction);
+        return currentTransaction is { } transaction
+            ? transaction.StartChild(operation, description)
+            : hub.StartTransaction(description, operation, description);
+    }
 }

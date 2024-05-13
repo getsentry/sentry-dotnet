@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry;
@@ -63,7 +64,7 @@ public class SentryHttpMessageHandler : SentryMessageHandler
     {
         // Start a span that tracks this request
         // (may be null if transaction is not set on the scope)
-        var span = _hub.GetSpan()?.StartChild(
+        var span = _hub.StartSpan(
             "http.client",
             $"{method} {url}" // e.g. "GET https://example.com"
             );

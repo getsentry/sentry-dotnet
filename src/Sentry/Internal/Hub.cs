@@ -530,16 +530,6 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
-    /// <inheritdoc cref="IMetricHub.StartSpan"/>
-    public ISpan StartSpan(string operation, string description)
-    {
-        ITransactionTracer? currentTransaction = null;
-        ConfigureScope(s => currentTransaction = s.Transaction);
-        return currentTransaction is { } transaction
-            ? transaction.StartChild(operation, description)
-            : this.StartTransaction(operation, description);
-    }
-
     public void CaptureSession(SessionUpdate sessionUpdate)
     {
         if (!IsEnabled)
@@ -625,7 +615,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
 #elif ANDROID
             // TODO
 #elif NET8_0_OR_GREATER
-        if (AotHelper.IsNativeAot)
+        if (SentryNative.IsAvailable)
         {
             _options?.LogDebug("Closing native SDK");
             SentrySdk.CloseNativeSdk();
