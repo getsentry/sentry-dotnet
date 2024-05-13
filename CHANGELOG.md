@@ -6,6 +6,7 @@
 
 - Fixed SentryHttpMessageHandler and SentryGraphQLHttpMessageHandler not creating spans when there is no active Transaction on the scope ([#3360](https://github.com/getsentry/sentry-dotnet/pull/3360))
 - The SDK no longer (wrongly) initializes sentry-native on Blazor WASM builds with `RunAOTCompilation` enabled. ([#3363](https://github.com/getsentry/sentry-dotnet/pull/3363))
+- HttpClient requests now show on the Requests dashboard in Sentry ([#3357](https://github.com/getsentry/sentry-dotnet/pull/3357))
 
 ### Dependencies
 
@@ -17,7 +18,6 @@
 
 - Hints now accept `byte[]` as attachment ([#3352](https://github.com/getsentry/sentry-dotnet/pull/3352))
 - InApp includes/excludes can now be configured using regular expressions ([#3321](https://github.com/getsentry/sentry-dotnet/pull/3321))
-- HttpClient requests now show on the Requests dashboard in Sentry ([#3357](https://github.com/getsentry/sentry-dotnet/pull/3357))
 
 ### Fixes
 
