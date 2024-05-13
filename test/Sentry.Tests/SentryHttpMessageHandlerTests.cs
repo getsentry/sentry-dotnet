@@ -7,7 +7,7 @@ namespace Sentry.Tests;
  * TODO: Find a way to consolidate these tests cleanly.
  */
 
-public class SentryHttpMessageHandlerTests
+public class SentryHttpMessageHandlerTests : SentryMessageHandlerTests
 {
     [Fact]
     public async Task SendAsync_SentryTraceHeaderNotSet_SetsHeader_ByDefault()
@@ -122,17 +122,12 @@ public class SentryHttpMessageHandlerTests
     }
 
     [Fact]
-    public async Task SendAsync_TransactionOnScope_StartsNewSpan()
+    public async Task SendAsync_TransactionOnScope_StartsChildSpan()
     {
         // Arrange
-        var hub = Substitute.For<IHub>();
-
-        var transaction = new TransactionTracer(
-            hub,
-            "foo",
-            "bar");
-
-        hub.GetSpan().ReturnsForAnyArgs(transaction);
+        var hub = _fixture.GetHub();
+        var transaction = hub.StartTransaction("foo", "bar");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
 
         using var innerHandler = new FakeHttpMessageHandler();
         using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
@@ -149,17 +144,40 @@ public class SentryHttpMessageHandlerTests
     }
 
     [Fact]
+    public async Task SendAsync_NoTransactionOnScope_StartsTransaction()
+    {
+        // Arrange
+        SentryTransaction received = null;
+        _fixture.Client.CaptureTransaction(
+            Arg.Do<SentryTransaction>(t => received = t),
+            Arg.Any<Scope>(),
+            Arg.Any<SentryHint>()
+        );
+        var hub = _fixture.GetHub();
+
+        using var innerHandler = new FakeHttpMessageHandler();
+        using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
+        using var client = new HttpClient(sentryHandler);
+
+        // Act
+        await client.GetAsync("https://localhost/");
+
+        // Assert
+        received.Should().NotBeNull();
+        using (new AssertionScope())
+        {
+            received.Name.Should().Be("GET https://localhost/");
+            received.Operation.Should().Be("http.client");
+            received.Description.Should().Be("GET https://localhost/");
+            received.IsFinished.Should().BeTrue();
+        }
+    }
+
+    [Fact]
     public async Task SendAsync_ExceptionThrown_ExceptionLinkedToSpan()
     {
         // Arrange
-        var hub = Substitute.For<IHub>();
-
-        var transaction = new TransactionTracer(
-            hub,
-            "foo",
-            "bar");
-
-        hub.GetSpan().ReturnsForAnyArgs(transaction);
+        var hub = _fixture.GetHub();
 
         var exception = new Exception();
 
@@ -171,7 +189,8 @@ public class SentryHttpMessageHandlerTests
         await Assert.ThrowsAsync<Exception>(() => client.GetAsync("https://localhost/"));
 
         // Assert
-        hub.Received(1).BindException(exception, Arg.Any<ISpan>()); // second argument is an implicitly created span
+        hub.ExceptionToSpanMap.TryGetValue(exception, out var span).Should().BeTrue();
+        span.Should().NotBeNull();
     }
 
     [Fact]
@@ -243,14 +262,9 @@ public class SentryHttpMessageHandlerTests
     public void ProcessRequest_SetsSpanData()
     {
         // Arrange
-        var hub = Substitute.For<IHub>();
-        var parentSpan = Substitute.For<ISpan>();
-        hub.GetSpan().Returns(parentSpan);
-        var childSpan = Substitute.For<ISpan>();
-        parentSpan.When(p => p.StartChild(Arg.Any<string>()))
-            .Do(op => childSpan.Operation = op.Arg<string>());
-        parentSpan.StartChild(Arg.Any<string>()).Returns(childSpan);
-        var sut = new SentryHttpMessageHandler(hub, null);
+        var hub = _fixture.GetHub();
+        using var innerHandler = new FakeHttpMessageHandler();
+        var sut = new SentryHttpMessageHandler(hub, _fixture.Options, innerHandler);
 
         var method = "GET";
         var host = "example.com";
@@ -265,8 +279,14 @@ public class SentryHttpMessageHandlerTests
         returnedSpan.Should().NotBeNull();
         returnedSpan!.Operation.Should().Be("http.client");
         returnedSpan.Description.Should().Be($"{method} {url}");
-        returnedSpan.Received(1).SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
-        returnedSpan.Received(1).SetExtra(OtelSemanticConventions.AttributeServerAddress, host);
+        returnedSpan.Extra.Should().Contain(kvp =>
+            kvp.Key == OtelSemanticConventions.AttributeHttpRequestMethod &&
+            Equals(kvp.Value, method)
+        );
+        returnedSpan.Extra.Should().Contain(kvp =>
+            kvp.Key == OtelSemanticConventions.AttributeServerAddress &&
+            Equals(kvp.Value, host)
+        );
     }
 
     [Fact]
@@ -410,14 +430,9 @@ public class SentryHttpMessageHandlerTests
     public void Send_TransactionOnScope_StartsNewSpan()
     {
         // Arrange
-        var hub = Substitute.For<IHub>();
-
-        var transaction = new TransactionTracer(
-            hub,
-            "foo",
-            "bar");
-
-        hub.GetSpan().ReturnsForAnyArgs(transaction);
+        var hub = _fixture.GetHub();
+        var transaction = hub.StartTransaction("foo", "bar");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
 
         using var innerHandler = new FakeHttpMessageHandler();
         using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
@@ -437,14 +452,7 @@ public class SentryHttpMessageHandlerTests
     public void Send_ExceptionThrown_ExceptionLinkedToSpan()
     {
         // Arrange
-        var hub = Substitute.For<IHub>();
-
-        var transaction = new TransactionTracer(
-            hub,
-            "foo",
-            "bar");
-
-        hub.GetSpan().ReturnsForAnyArgs(transaction);
+        var hub = _fixture.GetHub();
 
         var exception = new Exception();
 
@@ -456,7 +464,8 @@ public class SentryHttpMessageHandlerTests
         Assert.Throws<Exception>(() => client.Get("https://localhost/"));
 
         // Assert
-        hub.Received(1).BindException(exception, Arg.Any<ISpan>()); // second argument is an implicitly created span
+        hub.ExceptionToSpanMap.TryGetValue(exception, out var span).Should().BeTrue();
+        span.Should().NotBeNull();
     }
 
     [Fact]

@@ -17,7 +17,7 @@ public class BackgroundWorkerTests
         public IClientReportRecorder ClientReportRecorder { get; private set; } = Substitute.For<IClientReportRecorder>();
         public ITransport Transport { get; set; } = Substitute.For<ITransport>();
         public IDiagnosticLogger Logger { get; set; }
-        public ConcurrentQueue<Envelope> Queue { get; set; } = new();
+        public ConcurrentQueueLite<Envelope> Queue { get; set; } = new();
         public CancellationTokenSource CancellationTokenSource { get; set; } = new();
         public SentryOptions SentryOptions { get; set; } = new();
 
@@ -157,7 +157,7 @@ public class BackgroundWorkerTests
         Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
 
         // Worker was stopped before queue could be emptied.
-        Assert.NotEmpty(_fixture.Queue);
+        _fixture.Queue.IsEmpty.Should().BeFalse();
     }
 
     [Fact]
@@ -182,7 +182,7 @@ public class BackgroundWorkerTests
         Assert.Equal(TaskStatus.RanToCompletion, sut.WorkerTask.Status);
 
         // Worker was given time to empty before it was stopped.
-        Assert.Empty(_fixture.Queue);
+        _fixture.Queue.IsEmpty.Should().BeTrue();
 
         // We should not have used the entire shutdown timeout period.
         sw.Elapsed.Should().BeLessThan(_fixture.SentryOptions.ShutdownTimeout,
@@ -362,7 +362,7 @@ public class BackgroundWorkerTests
         sut.EnqueueEnvelope(envelope, process: false);
 
         var flushTask = sut.FlushAsync(Timeout.InfiniteTimeSpan);
-        Assert.Single(_fixture.Queue); // Event being processed
+        _fixture.Queue.Count.Should().Be(1); // Event being processed
 
         // Release the item and flush
         sut.ProcessQueuedItems(1);
@@ -370,7 +370,7 @@ public class BackgroundWorkerTests
 
         // Assert
         _fixture.Logger.Received(1).Log(SentryLevel.Debug, "Successfully flushed all events up to call to FlushAsync.");
-        Assert.Empty(_fixture.Queue);
+        _fixture.Queue.IsEmpty.Should().BeTrue();
     }
 
     [Fact]
@@ -407,7 +407,7 @@ public class BackgroundWorkerTests
         sw.Stop();
 
         _fixture.Logger.Received(1).Log(SentryLevel.Debug, "Timeout when trying to flush queue.");
-        Assert.Single(_fixture.Queue); // Only the item being processed at the blocked callback
+        _fixture.Queue.Count.Should().Be(1); // Only the item being processed at the blocked callback
 
         // Test the timeout
         sw.Elapsed.Should().BeGreaterThan(flushTimeout);

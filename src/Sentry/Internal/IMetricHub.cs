@@ -1,8 +1,11 @@
 using Sentry.Protocol.Metrics;
 
-namespace Sentry;
+namespace Sentry.Internal;
 
-internal interface IMetricHub
+/// <summary>
+/// Specifies various internal methods required on the Hub for metrics to work.
+/// </summary>
+internal interface IMetricHub : IHub
 {
     /// <summary>
     /// Captures one or more metrics to be sent to Sentry.
@@ -13,12 +16,4 @@ internal interface IMetricHub
     /// Captures one or more <see cref="CodeLocations"/> to be sent to Sentry.
     /// </summary>
     void CaptureCodeLocations(CodeLocations codeLocations);
-
-    /// <summary>
-    /// Starts a child span for the current transaction or, if there is no active transaction, starts a new transaction.
-    /// </summary>
-    ISpan StartSpan(string operation, string description);
-
-    /// <inheritdoc cref="IHub.GetSpan"/>
-    ISpan? GetSpan();
 }
