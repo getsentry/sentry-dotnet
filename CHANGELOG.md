@@ -17,7 +17,6 @@
 ### Dependencies
 
 - Bump Hangfire from v1.8.7 to v1.8.12 ([#3361](https://github.com/getsentry/sentry-dotnet/pull/3361))
-- Bump Hangfire ([#3361](https://github.com/getsentry/sentry-dotnet/pull/3361))
 
 ## 4.6.0
 
