@@ -6,9 +6,11 @@
  */
 
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using OpenTelemetry;
 using OpenTelemetry.Trace;
 using Sentry.OpenTelemetry;
+using Sentry.Samples.OpenTelemetry.Console;
 
 var activitySource = new ActivitySource("Sentry.Samples.OpenTelemetry.Console");
 
@@ -24,22 +26,49 @@ using var tracerProvider = Sdk.CreateTracerProviderBuilder()
     .AddSentry() // <-- Configure OpenTelemetry to send traces to Sentry
     .Build();
 
+// Enable our event source listener
+var memoryMonitor = new MemoryMonitor(10);
+var memoryHog = new List<object>();
+
 // Finally we can use OpenTelemetry to instrument our code. These activities will be captured as a Sentry transaction.
 using var activity = activitySource.StartActivity("Main");
 Console.WriteLine("Hello World!");
-using (var task = activitySource.StartActivity("Task 1"))
-{
-    task?.SetTag("Answer", 42);
-    Thread.Sleep(100); // simulate some work
-    Console.WriteLine("Task 1 completed");
-    task?.SetStatus(Status.Ok);
-}
 
-using (var task = activitySource.StartActivity("Task 2"))
+ConsoleKeyInfo key = default;
+do
 {
-    task?.SetTag("Question", "???");
-    Thread.Sleep(100); // simulate some more work
-    Console.WriteLine("Task 2 unresolved");
-    task?.SetStatus(Status.Error);
+    Console.WriteLine("Select an option:");
+    Console.WriteLine("c - force garbage collection");
+    Console.WriteLine("d - create a memory dump");
+    Console.WriteLine("m - hog some more memory");
+    Console.WriteLine("q - quit");
+    key = Console.ReadKey();
+    Console.WriteLine("");
+    switch (key.KeyChar)
+    {
+        case 'c':
+            Console.WriteLine("Forcing garbage collection...");
+            GC.Collect();
+            break;
+        case 'd':
+            memoryMonitor.CaptureMemoryDump();
+            break;
+        case 'm':
+            Console.WriteLine("Hogging some more memory...");
+            for (var i = 0; i < 100000; i++)
+            {
+                var array = new byte[1024 * 80]; // 80KB
+                array.Initialize();
+                memoryHog.Add(array);
+            }
+
+            break;
+        case '\n':
+            break;
+    }
 }
+while (key.KeyChar != 'q');
+GC.KeepAlive(memoryHog);
+GC.KeepAlive(memoryMonitor);
+
 Console.WriteLine("Goodbye cruel world...");
