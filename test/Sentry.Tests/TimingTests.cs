@@ -41,16 +41,14 @@ public class TimingTests
         // Arrange
         _fixture.Tags = new Dictionary<string, string> { { "tag1", "value1" } };
 
-        var span = new TransactionTracer(_fixture.Hub, _fixture.Key, Timing.OperationName);
-        _fixture.MetricHub.StartTransaction(
-            Arg.Any<TransactionContext>(),
-            Arg.Any<IReadOnlyDictionary<string, object>>()
-            ).Returns(span);
+        var span = new TransactionTracer(_fixture.Hub, Timing.OperationName, _fixture.Key);
+        _fixture.MetricHub.StartSpan(Timing.OperationName, _fixture.Key).Returns(span);
 
         // Act
         _ = _fixture.GetSut();
 
         // Assert
+        _fixture.MetricHub.Received(1).StartSpan(Timing.OperationName, _fixture.Key);
         span.Tags.Should().BeEquivalentTo(_fixture.Tags);
     }
 
