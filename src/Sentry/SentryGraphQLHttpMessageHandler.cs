@@ -50,7 +50,7 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
 
         // Start a span that tracks this request
         // (may be null if transaction is not set on the scope)
-        var span = _hub.StartSpan(
+        var span = _hub.GetSpan()?.StartChild(
             "http.client",
             $"{method} {url}" // e.g. "GET https://example.com"
         );

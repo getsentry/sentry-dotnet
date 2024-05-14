@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Reverted changes to the SentryHttpMessageHandler and SentryGraphQLHttpMessageHandler to automatically create transactions for each request as this could negatively affect users' quota ([#3367](https://github.com/getsentry/sentry-dotnet/pull/3367))
+
 ## 4.6.1
 
 ### Fixes

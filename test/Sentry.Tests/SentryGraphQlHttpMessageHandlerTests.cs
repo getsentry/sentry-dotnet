@@ -7,7 +7,7 @@ namespace Sentry.Tests;
  * TODO: Find a way to consolidate these tests cleanly.
  */
 
-public class SentryGraphQlHttpMessageHandlerTests : SentryMessageHandlerTests
+public class SentryGraphQlHttpMessageHandlerTests
 {
     private const string ValidQuery = "query getAllNotes { notes { id } }";
     private const string ValidResponse = @"{
@@ -47,7 +47,13 @@ public class SentryGraphQlHttpMessageHandlerTests : SentryMessageHandlerTests
     public void ProcessRequest_SetsSpanData()
     {
         // Arrange
-        var hub = _fixture.GetHub();
+        var hub = Substitute.For<IHub>();
+        var parentSpan = Substitute.For<ISpan>();
+        hub.GetSpan().Returns(parentSpan);
+        var childSpan = Substitute.For<ISpan>();
+        parentSpan.When(p => p.StartChild(Arg.Any<string>()))
+                  .Do(op => childSpan.Operation = op.Arg<string>());
+        parentSpan.StartChild(Arg.Any<string>()).Returns(childSpan);
         var sut = new SentryGraphQLHttpMessageHandler(hub, null);
 
         var method = "POST";
@@ -61,19 +67,9 @@ public class SentryGraphQlHttpMessageHandlerTests : SentryMessageHandlerTests
 
         // Assert
         returnedSpan.Should().NotBeNull();
-        using (new AssertionScope())
-        {
-            returnedSpan!.Operation.Should().Be("http.client");
-            returnedSpan.Description.Should().Be($"{method} {url}");
-            returnedSpan.Extra.Should().Contain(kvp =>
-                kvp.Key == OtelSemanticConventions.AttributeHttpRequestMethod &&
-                kvp.Value.ToString() == method
-            );
-            returnedSpan.Extra.Should().Contain(kvp =>
-                kvp.Key == OtelSemanticConventions.AttributeServerAddress &&
-                kvp.Value.ToString() == host
-            );
-        }
+        returnedSpan!.Operation.Should().Be("http.client");
+        returnedSpan.Description.Should().Be($"{method} {url}");
+        returnedSpan.Received(1).SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
     }
 
     // [Theory]
@@ -123,13 +119,14 @@ public class SentryGraphQlHttpMessageHandlerTests : SentryMessageHandlerTests
     public void HandleResponse_SetsSpanData()
     {
         // Arrange
-        var hub = _fixture.GetHub();
+        var hub = Substitute.For<IHub>();
         var status = HttpStatusCode.OK;
         var response = new HttpResponseMessage(status);
         var method = "POST";
         var url = "http://example.com/graphql";
         var request = SentryGraphQlTestHelpers.GetRequestQuery(ValidQuery, url);
         response.RequestMessage = request;
+        hub.GetSpan().Returns(new TransactionTracer(hub, "test", "test"));
         var sut = new SentryGraphQLHttpMessageHandler(hub, null);
 
         // Act
