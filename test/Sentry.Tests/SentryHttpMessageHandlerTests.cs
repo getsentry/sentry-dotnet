@@ -266,9 +266,11 @@ public class SentryHttpMessageHandlerTests : SentryMessageHandlerTests
         using var innerHandler = new FakeHttpMessageHandler();
         var sut = new SentryHttpMessageHandler(hub, _fixture.Options, innerHandler);
 
-        const string method = "GET";
-        const string url = "https://example.com/graphql";
-        var request = new HttpRequestMessage(HttpMethod.Get, url);
+        var method = "GET";
+        var host = "example.com";
+        var url = $"https://{host}/graphql";
+        var uri = new Uri(url);
+        var request = new HttpRequestMessage(HttpMethod.Get, uri);
 
         // Act
         var returnedSpan = sut.ProcessRequest(request, method, url);
@@ -280,6 +282,10 @@ public class SentryHttpMessageHandlerTests : SentryMessageHandlerTests
         returnedSpan.Extra.Should().Contain(kvp =>
             kvp.Key == OtelSemanticConventions.AttributeHttpRequestMethod &&
             Equals(kvp.Value, method)
+        );
+        returnedSpan.Extra.Should().Contain(kvp =>
+            kvp.Key == OtelSemanticConventions.AttributeServerAddress &&
+            Equals(kvp.Value, host)
         );
     }
 

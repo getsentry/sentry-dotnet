@@ -51,9 +51,10 @@ public class SentryGraphQlHttpMessageHandlerTests : SentryMessageHandlerTests
         var sut = new SentryGraphQLHttpMessageHandler(hub, null);
 
         var method = "POST";
-        var url = "http://example.com/graphql";
+        var host = "example.com";
+        var url = $"https://{host}/graphql";
         var query = ValidQuery;
-        var request = SentryGraphQlTestHelpers.GetRequestQuery(query);
+        var request = SentryGraphQlTestHelpers.GetRequestQuery(query, url);
 
         // Act
         var returnedSpan = sut.ProcessRequest(request, method, url);
@@ -67,6 +68,10 @@ public class SentryGraphQlHttpMessageHandlerTests : SentryMessageHandlerTests
             returnedSpan.Extra.Should().Contain(kvp =>
                 kvp.Key == OtelSemanticConventions.AttributeHttpRequestMethod &&
                 kvp.Value.ToString() == method
+            );
+            returnedSpan.Extra.Should().Contain(kvp =>
+                kvp.Key == OtelSemanticConventions.AttributeServerAddress &&
+                kvp.Value.ToString() == host
             );
         }
     }
