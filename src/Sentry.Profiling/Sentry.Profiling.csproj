@@ -24,17 +24,22 @@
     <InternalsVisibleTo Include="Sentry.Profiling.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
+  <!-- Packaging -->
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)buildTransitive\Sentry.Profiling.targets" Pack="true" PackagePath="buildTransitive\Sentry.Profiling.targets" />
+    <None Include="$(MSBuildThisFileDirectory)buildTransitive\Sentry.Profiling.targets" Pack="true" PackagePath="build\Sentry.Profiling.targets" />
+  </ItemGroup>
   <ItemGroup>
     <ProfilingDependency Include="..\..\modules\perfview\src\FastSerialization\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.FastSerialization.dll" />
     <ProfilingDependency Include="..\..\modules\perfview\src\TraceEvent\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.Tracing.TraceEvent.dll" />
     <ProfilingDependency Include="..\..\modules\perfview\src\FastSerialization\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.FastSerialization.pdb" />
     <ProfilingDependency Include="..\..\modules\perfview\src\TraceEvent\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.Tracing.TraceEvent.pdb" />
   </ItemGroup>
-    <ItemGroup>
-      <!-- TODO: pdb's are getting packed on the nupkg (as well as the snupkg), figure out a way to exclude from nupkg-->
-      <TfmSpecificPackageFile Include="@(ProfilingDependency)">
-        <Pack>true</Pack>
-        <PackagePath>lib\$(TargetFramework)</PackagePath>
-      </TfmSpecificPackageFile>
-    </ItemGroup>
+  <ItemGroup>
+    <!-- TODO: pdb's are getting packed on the nupkg (as well as the snupkg), figure out a way to exclude from nupkg-->
+    <TfmSpecificPackageFile Include="@(ProfilingDependency)">
+      <Pack>true</Pack>
+      <PackagePath>lib\$(TargetFramework)</PackagePath>
+    </TfmSpecificPackageFile>
+  </ItemGroup>
 </Project>
