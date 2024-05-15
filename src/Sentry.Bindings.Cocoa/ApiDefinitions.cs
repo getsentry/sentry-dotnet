@@ -2066,6 +2066,17 @@ interface SentryUserFeedback : SentrySerializable
     string Comments { get; set; }
 }
 
+// @interface SentryEnabledFeaturesBuilder : NSObject
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry28SentryEnabledFeaturesBuilder")]
+[Internal]
+interface SentryEnabledFeaturesBuilder
+{
+    // +(NSArray<NSString *> * _Nonnull)getEnabledFeaturesWithOptions:(SentryOptions * _Nonnull)options __attribute__((warn_unused_result("")));
+    [Static]
+    [Export ("getEnabledFeaturesWithOptions:")]
+    string[] GetEnabledFeaturesWithOptions (SentryOptions options);
+}
+
 // @interface SentryId : NSObject
 [BaseType (typeof(NSObject), Name = "_TtC6Sentry8SentryId")]
 [Internal]
