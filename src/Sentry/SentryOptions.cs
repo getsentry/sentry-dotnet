@@ -1714,7 +1714,10 @@ public class SentryOptions
         {
             if (DiagnosticLogger == null)
             {
-                DiagnosticLogger = new ConsoleDiagnosticLogger(DiagnosticLevel);
+                var vsEdition = System.Environment.GetEnvironmentVariable("VisualStudioEdition");
+                DiagnosticLogger = !string.IsNullOrEmpty(vsEdition)
+                    ? new TraceDiagnosticLogger(DiagnosticLevel)
+                    : new ConsoleDiagnosticLogger(DiagnosticLevel);
                 DiagnosticLogger.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}",
                     DiagnosticLevel);
             }
