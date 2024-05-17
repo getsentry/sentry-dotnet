@@ -1435,6 +1435,11 @@ namespace Sentry.Infrastructure
         public ConsoleDiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
         protected override void LogMessage(string message) { }
     }
+    public class DebugDiagnosticLogger : Sentry.Infrastructure.DiagnosticLogger
+    {
+        public DebugDiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
+        protected override void LogMessage(string message) { }
+    }
     public abstract class DiagnosticLogger : Sentry.Extensibility.IDiagnosticLogger
     {
         protected DiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
