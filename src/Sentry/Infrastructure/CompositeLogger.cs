@@ -9,7 +9,7 @@ namespace Sentry.Infrastructure;
 /// If we want to make this class public, we have to have a think about how we want to handle multiple Diagnostic
 /// loggers with different levels. One solution would be to throw an ArgumentException in that case.
 /// </remarks>
-internal class CompositeLogger: IDiagnosticLogger
+internal class CompositeLogger : IDiagnosticLogger
 {
     private readonly DiagnosticLogger[] _loggers;
 
