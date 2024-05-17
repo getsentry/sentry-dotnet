@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Debug logs are now visible in Visual Studio when using Sentry's default DiagnosticLogger ([#3373](https://github.com/getsentry/sentry-dotnet/pull/3373))
+
 ## 4.6.2
 
 ### Fixes
