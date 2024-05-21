@@ -1292,6 +1292,55 @@ public partial class SentryClientTests
     }
 
     [Fact]
+    public void CaptureCheckIn_CheckInOptionsProvided_CheckInHasOptions()
+    {
+        Envelope envelope = null;
+        var sut = _fixture.GetSut();
+        sut.Worker.EnqueueEnvelope(Arg.Do<Envelope>(e => envelope = e));
+
+        var monitorOptions = new SentryMonitorOptions
+        {
+            CheckInMargin = TimeSpan.FromMinutes(1),
+            MaxRuntime = TimeSpan.FromMinutes(1),
+            FailureIssueThreshold = 1,
+            RecoveryThreshold = 1,
+            Timezone = TimeZoneInfo.Utc,
+            Owner = "test-owner"
+        };
+
+        sut.CaptureCheckIn("my-monitor", CheckInStatus.InProgress, configureMonitorOptions: options =>
+        {
+            options.CheckInMargin = monitorOptions.CheckInMargin;
+            options.MaxRuntime = monitorOptions.MaxRuntime;
+            options.FailureIssueThreshold = monitorOptions.FailureIssueThreshold;
+            options.RecoveryThreshold = monitorOptions.RecoveryThreshold;
+            options.Timezone = monitorOptions.Timezone;
+            options.Owner = monitorOptions.Owner;
+        });
+
+        var actualCheckIn = (SentryCheckIn)(envelope.Items[0].Payload as JsonSerializable)?.Source;
+        Assert.NotNull(actualCheckIn);
+        Assert.NotNull(actualCheckIn.MonitorOptions);
+        Assert.Equal(actualCheckIn.MonitorOptions.CheckInMargin, monitorOptions.CheckInMargin);
+        Assert.Equal(actualCheckIn.MonitorOptions.MaxRuntime, monitorOptions.MaxRuntime);
+        Assert.Equal(actualCheckIn.MonitorOptions.FailureIssueThreshold, monitorOptions.FailureIssueThreshold);
+        Assert.Equal(actualCheckIn.MonitorOptions.RecoveryThreshold, monitorOptions.RecoveryThreshold);
+        Assert.Equal(actualCheckIn.MonitorOptions.Timezone, monitorOptions.Timezone);
+        Assert.Equal(actualCheckIn.MonitorOptions.Owner, monitorOptions.Owner);
+    }
+
+    [Fact]
+    public void CaptureCheckIn_IntervalSetMoreThanOnce_Throws()
+    {
+        Assert.Throws<ArgumentException>(() => _fixture.GetSut().CaptureCheckIn("my-monitor", CheckInStatus.InProgress,
+            configureMonitorOptions: options =>
+            {
+                options.Interval(1, MeasurementUnit.Duration.Hour);
+                options.Interval(2, MeasurementUnit.Duration.Minute);
+            }));
+    }
+
+    [Fact]
     public void Dispose_Worker_FlushCalled()
     {
         var client = _fixture.GetSut();
