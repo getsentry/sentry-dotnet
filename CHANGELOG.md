@@ -4,7 +4,7 @@
 
 ### Features
 
-- The SDK now has Monitor upsert support. You can programmatically set up your monitors via the options callback in `SentrySdk.CaptureCheckIn` ([#3330](https://github.com/getsentry/sentry-dotnet/pull/3330))
+- The SDK now supports monitor upserting. You can programmatically set up your monitors via the options callback in `SentrySdk.CaptureCheckIn` ([#3330](https://github.com/getsentry/sentry-dotnet/pull/3330))
 
 ### Fixes
 
