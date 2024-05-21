@@ -1304,7 +1304,7 @@ public partial class SentryClientTests
             MaxRuntime = TimeSpan.FromMinutes(1),
             FailureIssueThreshold = 1,
             RecoveryThreshold = 1,
-            Timezone = TimeZoneInfo.Utc,
+            Timezone = "America/Los_Angeles",
             Owner = "test-owner"
         };
 
