@@ -975,14 +975,14 @@ public class SentryOptions
     /// </summary>
     /// <remarks>
     /// Note that the highest precision value relies on <see cref="System.Diagnostics.Process.GetCurrentProcess"/>
-    /// which might not be available. For example on Unity's IL2CPP.
+    /// which might not be available. For example on Unity's IL2CPP or WebAssembly.
     /// Additionally, "Best" mode is not available on mobile platforms.
     /// </remarks>
     public StartupTimeDetectionMode DetectStartupTime { get; set; } =
 #if __MOBILE__
         StartupTimeDetectionMode.Fast;
 #else
-        StartupTimeDetectionMode.Best;
+        SentryRuntime.Current.IsBrowserWasm() ? StartupTimeDetectionMode.Fast : StartupTimeDetectionMode.Best;
 #endif
 
     /// <summary>

@@ -9,12 +9,15 @@
  */
 
 // Initialize the Sentry SDK.  (It is not necessary to dispose it.)
+
+using System.Net.Http;
+
 SentrySdk.Init(options =>
 {
-    // A Sentry Data Source Name (DSN) is required.
+    // TODO: Configure a Sentry Data Source Name (DSN).
     // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
     // You can set it in the SENTRY_DSN environment variable, or you can set it in code here.
-    // options.Dsn = "... Your DSN ...";
+    options.Dsn = "... Your DSN ...";
 
     // When debug is enabled, the Sentry client will emit detailed debugging information to the console.
     // This might be helpful, or might interfere with the normal operation of your application.
@@ -38,30 +41,27 @@ var transaction = SentrySdk.StartTransaction("Program Main", "function");
 SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
 
 // Do some work. (This is where you'd have your own application logic.)
-await FirstFunctionAsync();
-await SecondFunctionAsync();
-await ThirdFunctionAsync();
+await FirstFunction();
+await SecondFunction();
+await ThirdFunction();
 
 // Always try to finish the transaction successfully.
 // Unhandled exceptions will fail the transaction automatically.
 // Optionally, you can try/catch the exception, and call transaction.Finish(exception) on failure.
 transaction.Finish();
 
-async Task FirstFunctionAsync()
+async Task FirstFunction()
 {
-    // This shows how you might instrument a particular function.
-    var span = transaction.StartChild("function", nameof(FirstFunctionAsync));
-
-    // Simulate doing some work
-    await Task.Delay(100);
-
-    // Finish the span successfully.
-    span.Finish();
+    // This is an example of making an HttpRequest. A trace us automatically captured by Sentry for this.
+    var messageHandler = new SentryHttpMessageHandler();
+    var httpClient = new HttpClient(messageHandler, true);
+    var html = await httpClient.GetStringAsync("https://example.com/");
+    Console.WriteLine(html);
 }
 
-async Task SecondFunctionAsync()
+async Task SecondFunction()
 {
-    var span = transaction.StartChild("function", nameof(SecondFunctionAsync));
+    var span = transaction.StartChild("function", nameof(SecondFunction));
 
     try
     {
@@ -81,16 +81,19 @@ async Task SecondFunctionAsync()
     span.Finish();
 }
 
-async Task ThirdFunctionAsync()
+async Task ThirdFunction()
 {
-    var span = transaction.StartChild("function", nameof(ThirdFunctionAsync));
+    var span = transaction.StartChild("function", nameof(ThirdFunction));
+    try
+    {
+        // Simulate doing some work
+        await Task.Delay(100);
 
-    // Simulate doing some work
-    await Task.Delay(100);
-
-    // This is an example of an unhandled exception.  It will be captured automatically.
-    throw new InvalidOperationException("Something happened that crashed the app!");
-
-    // In this case, we can't attempt to finish the span, due to the exception.
-    // span.Finish();
+        // This is an example of an unhandled exception.  It will be captured automatically.
+        throw new InvalidOperationException("Something happened that crashed the app!");
+    }
+    finally
+    {
+        span.Finish();
+    }
 }

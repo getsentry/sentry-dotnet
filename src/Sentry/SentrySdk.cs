@@ -2,7 +2,6 @@ using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Protocol.Envelopes;
-using Sentry.Protocol.Metrics;
 
 namespace Sentry;
 
@@ -49,6 +48,19 @@ public static partial class SentrySdk
             options.LogWarning("The provided DSN that contains a secret key. This is not required and will be ignored.");
         }
 
+        if (AotHelper.IsNativeAot)
+#pragma warning disable CS0162 // Unreachable code detected
+        {
+#pragma warning disable 0162 // Unreachable code on old .NET frameworks
+            options.LogDebug("This looks like a Native AOT application build.");
+#pragma warning restore 0162
+        }
+        else
+        {
+#pragma warning restore CS0162 // Unreachable code detected
+            options.LogDebug("This doesn't look like a Native AOT application build.");
+        }
+
         // Initialize native platform SDKs here
         if (options.InitNativeSdks)
         {
@@ -57,7 +69,7 @@ public static partial class SentrySdk
 #elif ANDROID
             InitSentryAndroidSdk(options);
 #elif NET8_0_OR_GREATER
-            if (AotHelper.IsNativeAot)
+            if (SentryNative.IsAvailable)
             {
                 InitNativeSdk(options);
             }
@@ -730,9 +742,9 @@ public static partial class SentrySdk
                 break;
 #elif NET8_0_OR_GREATER
             case CrashType.Native:
-                if (!AotHelper.IsNativeAot)
+                if (!SentryNative.IsAvailable)
                 {
-                    CurrentOptions?.LogError("The support for capturing native crashes is limited to AOT compilation.");
+                    CurrentOptions?.LogError("The support for capturing native crashes is limited to AOT compilation on platforms with SentryNative support.");
                     return;
                 }
 

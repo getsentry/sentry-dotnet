@@ -2,15 +2,50 @@
 
 ## Unreleased
 
+### Fixes
+
+- P/Invoke warning for GetWindowThreadProcessId no longer shows when using Sentry in UWP applications ([#3372](https://github.com/getsentry/sentry-dotnet/pull/3372))
+
+## 4.6.2
+
+### Fixes
+
+- Reverted changes to the SentryHttpMessageHandler and SentryGraphQLHttpMessageHandler to automatically create transactions for each request as this could negatively affect users' quota ([#3367](https://github.com/getsentry/sentry-dotnet/pull/3367))
+
+## 4.6.1
+
+### Fixes
+
+- Fixed SentryHttpMessageHandler and SentryGraphQLHttpMessageHandler not creating spans when there is no active Transaction on the scope ([#3360](https://github.com/getsentry/sentry-dotnet/pull/3360))
+- The SDK no longer (wrongly) initializes sentry-native on Blazor WASM builds with `RunAOTCompilation` enabled. ([#3363](https://github.com/getsentry/sentry-dotnet/pull/3363))
+- HttpClient requests now show on the Requests dashboard in Sentry ([#3357](https://github.com/getsentry/sentry-dotnet/pull/3357))
+
+### Dependencies
+
+- Bump Hangfire from v1.8.7 to v1.8.12 ([#3361](https://github.com/getsentry/sentry-dotnet/pull/3361))
+
+## 4.6.0
+
 ### Features
 
+- Hints now accept `byte[]` as attachment ([#3352](https://github.com/getsentry/sentry-dotnet/pull/3352))
 - InApp includes/excludes can now be configured using regular expressions ([#3321](https://github.com/getsentry/sentry-dotnet/pull/3321))
+
+### Fixes
+
+- Fixed memory leak in BackgroundWorker observed when using Sentry with Quartz and MySql ([#3355](https://github.com/getsentry/sentry-dotnet/pull/3355))
 
 ### Dependencies
 
 - Bump CLI from v2.31.0 to v2.31.2 ([#3342](https://github.com/getsentry/sentry-dotnet/pull/3342), [#3345](https://github.com/getsentry/sentry-dotnet/pull/3345))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2312)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.31.0...2.31.2)
+- Bump Cocoa SDK from v8.25.0 to v8.25.2 ([#3356](https://github.com/getsentry/sentry-dotnet/pull/3356))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8252)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.25.0...8.25.2)
+- Bump Java SDK from v7.8.0 to v7.9.0 ([#3358](https://github.com/getsentry/sentry-dotnet/pull/3358))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#790)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.8.0...7.9.0)
 
 ## 4.5.0
 

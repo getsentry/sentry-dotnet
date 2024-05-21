@@ -629,7 +629,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
 #elif ANDROID
             // TODO
 #elif NET8_0_OR_GREATER
-        if (AotHelper.IsNativeAot)
+        if (SentryNative.IsAvailable)
         {
             _options?.LogDebug("Closing native SDK");
             SentrySdk.CloseNativeSdk();

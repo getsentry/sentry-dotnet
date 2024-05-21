@@ -68,6 +68,10 @@ public class SentryHttpMessageHandler : SentryMessageHandler
             $"{method} {url}" // e.g. "GET https://example.com"
             );
         span?.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
+        if (request.RequestUri is not null && !string.IsNullOrWhiteSpace(request.RequestUri.Host))
+        {
+            span?.SetExtra(OtelSemanticConventions.AttributeServerAddress, request.RequestUri.Host);
+        }
         return span;
     }
 
