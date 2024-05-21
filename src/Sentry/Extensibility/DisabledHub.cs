@@ -189,8 +189,8 @@ public class DisabledHub : IHub, IDisposable
         SentryId? sentryId = null,
         TimeSpan? duration = null,
         Scope? scope = null,
-        SentryMonitorOptions? monitorConfig = null)
-            => SentryId.Empty;
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+        => SentryId.Empty;
 
     /// <summary>
     /// No-Op.

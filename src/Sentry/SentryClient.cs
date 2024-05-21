@@ -226,7 +226,7 @@ public class SentryClient : ISentryClient, IDisposable
         SentryId? sentryId = null,
         TimeSpan? duration = null,
         Scope? scope = null,
-        SentryMonitorOptions? monitorConfig = null)
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
     {
         scope ??= new Scope(_options);
 
@@ -241,8 +241,14 @@ public class SentryClient : ISentryClient, IDisposable
         {
             Duration = duration,
             TraceId = traceId,
-            MonitorConfig = monitorConfig
         };
+
+        if (configureMonitorOptions is not null)
+        {
+            var monitorOptions = new SentryMonitorOptions();
+            configureMonitorOptions.Invoke(monitorOptions);
+            checkIn.MonitorOptions = monitorOptions;
+        }
 
         _enricher.Apply(checkIn);
 

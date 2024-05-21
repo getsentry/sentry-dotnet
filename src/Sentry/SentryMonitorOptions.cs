@@ -26,6 +26,11 @@ public class SentryMonitorOptions : ISentryJsonSerializable
     /// <param name="cronTab"></param>
     public void Interval(string cronTab)
     {
+        if (_type is not SentryMonitorScheduleType.None)
+        {
+            throw new ArgumentException("You tried to set the interval twice. The Check-Ins interval is supposed to be set only once.");
+        }
+
         _type = SentryMonitorScheduleType.Crontab;
         _crontab = cronTab;
     }
@@ -37,6 +42,11 @@ public class SentryMonitorOptions : ISentryJsonSerializable
     /// <param name="unit"></param>
     public void Interval(int interval, MeasurementUnit.Duration unit)
     {
+        if (_type is not SentryMonitorScheduleType.None)
+        {
+            throw new ArgumentException("You tried to set the interval twice. The Check-Ins interval is supposed to be set only once.");
+        }
+
         _type = SentryMonitorScheduleType.Interval;
         _interval = interval;
 

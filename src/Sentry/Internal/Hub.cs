@@ -563,7 +563,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
         SentryId? sentryId = null,
         TimeSpan? duration = null,
         Scope? scope = null,
-        SentryMonitorOptions? monitorConfig = null)
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
     {
         if (!IsEnabled)
         {
@@ -580,7 +580,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
                 scope = currentScope;
             }
 
-            return _ownedClient.CaptureCheckIn(monitorSlug, status, sentryId, duration, scope, monitorConfig);
+            return _ownedClient.CaptureCheckIn(monitorSlug, status, sentryId, duration, scope, configureMonitorOptions);
         }
         catch (Exception e)
         {

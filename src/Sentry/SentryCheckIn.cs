@@ -69,7 +69,7 @@ public class SentryCheckIn : ISentryJsonSerializable
     /// <summary>
     /// The Monitor Config
     /// </summary>
-    internal SentryMonitorOptions? MonitorConfig { get; set; }
+    internal SentryMonitorOptions? MonitorOptions { get; set; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="SentryCheckIn"/>.
@@ -109,7 +109,7 @@ public class SentryCheckIn : ISentryJsonSerializable
             writer.WriteEndObject();
         }
 
-        MonitorConfig?.WriteTo(writer, logger);
+        MonitorOptions?.WriteTo(writer, logger);
 
         writer.WriteEndObject();
     }

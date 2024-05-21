@@ -276,14 +276,9 @@ public sealed class HubAdapter : IHub
         SentryId? sentryId = null,
         TimeSpan? duration = null,
         Scope? scope = null,
-        SentryMonitorOptions? monitorOptions = null)
-            => SentrySdk.CaptureCheckIn(monitorSlug, status, sentryId, duration, scope, options =>
-            {
-                if (monitorOptions is not null)
-                {
-                    options = monitorOptions;
-                }
-            });
+        Action<SentryMonitorOptions>? monitorOptions = null)
+        => SentrySdk.CaptureCheckIn(monitorSlug, status, sentryId, duration, scope, options
+            => monitorOptions?.Invoke(options));
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>

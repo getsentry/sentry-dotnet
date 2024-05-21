@@ -544,7 +544,7 @@ public static partial class SentrySdk
     /// <param name="sentryId">The <see cref="SentryId"/> associated with the check-in.</param>
     /// <param name="duration">The duration of the check-in.</param>
     /// <param name="scope">The scope of the check-in.</param>
-    /// <param name="configureMonitorOptions">The optional monitor config.</param>
+    /// <param name="configureMonitorOptions">The optional monitor config used to create a Check-In programmatically.</param>
     /// <returns>The ID of the check-in.</returns>
     [DebuggerStepThrough]
     public static SentryId CaptureCheckIn(string monitorSlug,
@@ -553,22 +553,13 @@ public static partial class SentrySdk
         TimeSpan? duration = null,
         Scope? scope = null,
         Action<SentryMonitorOptions>? configureMonitorOptions = null)
-    {
-        SentryMonitorOptions? options = null;
-        if (configureMonitorOptions is not null)
-        {
-            options = new SentryMonitorOptions();
-            configureMonitorOptions.Invoke(options);
-        }
-
-        return CurrentHub.CaptureCheckIn(
+        => CurrentHub.CaptureCheckIn(
             monitorSlug,
             status,
             sentryId,
             duration,
             scope,
-            options);
-    }
+            configureMonitorOptions);
 
     /// <summary>
     /// Starts a transaction.
