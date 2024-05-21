@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Added an `AsyncVoid` helper class that lets you capture exceptions from `async void` methods ([#3379](https://github.com/getsentry/sentry-dotnet/pull/3379))
+
 ### Fixes
 
 - P/Invoke warning for GetWindowThreadProcessId no longer shows when using Sentry in UWP applications ([#3372](https://github.com/getsentry/sentry-dotnet/pull/3372))
