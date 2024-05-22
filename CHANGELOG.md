@@ -4,7 +4,7 @@
 
 ### Features
 
-- Added an `AsyncVoid` helper class that lets you capture exceptions from `async void` methods ([#3379](https://github.com/getsentry/sentry-dotnet/pull/3379))
+- Added an `SentrySdk.RunAsyncVoid` helper method that lets you capture exceptions from `async void` methods ([#3379](https://github.com/getsentry/sentry-dotnet/pull/3379))
 
 ### Fixes
 
