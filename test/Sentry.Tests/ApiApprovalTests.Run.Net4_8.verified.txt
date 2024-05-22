@@ -1,6 +1,10 @@
 ﻿[assembly: System.CLSCompliant(true)]
 namespace Sentry
 {
+    public static class AsyncVoid
+    {
+        public static void RunSafely(System.Action task, System.Action<System.Exception>? handler = null) { }
+    }
     public enum AttachmentType
     {
         Default = 0,
