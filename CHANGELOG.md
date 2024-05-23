@@ -6,6 +6,10 @@
 
 - P/Invoke warning for GetWindowThreadProcessId no longer shows when using Sentry in UWP applications ([#3372](https://github.com/getsentry/sentry-dotnet/pull/3372))
 
+### Dependencies
+
+- Update Perfview/TraceEvent to v3.1.10 (patched) ([#3382](https://github.com/getsentry/sentry-dotnet/pull/3382))
+
 ## 4.6.2
 
 ### Fixes
