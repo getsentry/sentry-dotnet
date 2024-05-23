@@ -163,6 +163,7 @@ internal class CachingTransport : ITransport, IDisposable
                 {
                     // Wait a bit before retrying
                     await Task.Delay(500, _workerCts.Token).ConfigureAwait(false);
+                    _workerSignal.Release();
                 }
                 catch (OperationCanceledException)
                 {
