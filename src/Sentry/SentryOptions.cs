@@ -753,12 +753,14 @@ public class SentryOptions
     /// Indicates whether the performance feature is enabled, via any combination of
     /// <see cref="EnableTracing"/>, <see cref="TracesSampleRate"/>, or <see cref="TracesSampler"/>.
     /// </summary>
+#pragma warning disable CS0618 // Type or member is obsolete
     internal bool IsPerformanceMonitoringEnabled => EnableTracing switch
     {
         false => false,
         null => TracesSampler is not null || TracesSampleRate is > 0.0,
         true => TracesSampler is not null || TracesSampleRate is > 0.0 or null
     };
+#pragma warning restore CS0618 // Type or member is obsolete
 
     /// <summary>
     /// Indicates whether profiling is enabled, via any combination of
@@ -795,6 +797,7 @@ public class SentryOptions
     ///   </item>
     /// </list>
     /// </summary>
+    [Obsolete("Use TracesSampleRate or TracesSampler instead")]
     public bool? EnableTracing { get; set; }
 
     private double? _tracesSampleRate;

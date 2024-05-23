@@ -6,7 +6,7 @@ var host = new HostBuilder()
     {
         builder.UseSentry(host, options =>
         {
-            options.EnableTracing = true;
+            options.TracesSampleRate = 1.0;
             // options.Debug = true;
         });
     })

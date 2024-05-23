@@ -23,7 +23,7 @@ public partial class HubTests
             Options = new SentryOptions
             {
                 Dsn = ValidDsn,
-                EnableTracing = true,
+                TracesSampleRate = 1.0,
                 AutoSessionTracking = false
             };
 
@@ -591,7 +591,7 @@ public partial class HubTests
     public void StartTransaction_EnableTracing_SampledIn()
     {
         // Arrange
-        _fixture.Options.EnableTracing = true;
+        _fixture.Options.TracesSampleRate = 1.0;
         var hub = _fixture.GetSut();
 
         // Act
@@ -606,7 +606,9 @@ public partial class HubTests
     {
         // Arrange
         _fixture.Options.TracesSampleRate = 1.0;
+#pragma warning disable CS0618 // Type or member is obsolete
         _fixture.Options.EnableTracing = false;
+#pragma warning restore CS0618 // Type or member is obsolete
         var hub = _fixture.GetSut();
 
         // Act
@@ -620,7 +622,7 @@ public partial class HubTests
     public void StartTransaction_SameInstrumenter_SampledIn()
     {
         // Arrange
-        _fixture.Options.EnableTracing = true;
+        _fixture.Options.TracesSampleRate = 1.0;
         _fixture.Options.Instrumenter = Instrumenter.Sentry; // The default... making it explicit for this test though
         var hub = _fixture.GetSut();
 
@@ -640,7 +642,7 @@ public partial class HubTests
     public void StartTransaction_DifferentInstrumenter_SampledIn()
     {
         // Arrange
-        _fixture.Options.EnableTracing = true;
+        _fixture.Options.TracesSampleRate = 1.0;
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         var hub = _fixture.GetSut();
 
@@ -661,7 +663,7 @@ public partial class HubTests
     {
         // Arrange
         _fixture.Options.TracesSampler = _ => 1.0;
-        _fixture.Options.EnableTracing = true;
+        _fixture.Options.TracesSampleRate = 1.0;
         var hub = _fixture.GetSut();
 
         // Act
@@ -676,7 +678,9 @@ public partial class HubTests
     {
         // Arrange
         _fixture.Options.TracesSampler = _ => 1.0;
+#pragma warning disable CS0618 // Type or member is obsolete
         _fixture.Options.EnableTracing = false;
+#pragma warning restore CS0618 // Type or member is obsolete
         var hub = _fixture.GetSut();
 
         // Act

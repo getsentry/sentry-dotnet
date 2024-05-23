@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### API Changes
+
+- SentryOptions.EnableTracing has been marked as Obsolete ([#3381](https://github.com/getsentry/sentry-dotnet/pull/3381))
+
 ### Fixes
 
 - P/Invoke warning for GetWindowThreadProcessId no longer shows when using Sentry in UWP applications ([#3372](https://github.com/getsentry/sentry-dotnet/pull/3372))
