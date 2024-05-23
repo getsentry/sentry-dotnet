@@ -15,7 +15,6 @@ SentrySdk.Init(options =>
     options.CaptureFailedRequests = true;
     options.SendDefaultPii = true;
     options.TracesSampleRate = 1.0;
-    options.EnableTracing = true;
 });
 
 var transaction = SentrySdk.StartTransaction("Program Main", "function");

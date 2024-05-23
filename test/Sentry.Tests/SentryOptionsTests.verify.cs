@@ -13,7 +13,6 @@ public partial class SentryOptionsTests
             Debug = true,
             IsGlobalModeEnabled = true,
             DiagnosticLogger = logger,
-            EnableTracing = true,
             TracesSampleRate = 1.0
         };
         Hub _ = new(options, Substitute.For<ISentryClient>());
