@@ -32,8 +32,8 @@ SentrySdk.Init(options =>
     // If you are writing a background service of any kind, you should remove this.
     options.IsGlobalModeEnabled = true;
 
-    // This option will enable Sentry's tracing features. You still need to start transactions and spans.
-    options.EnableTracing = true;
+    // This option tells Sentry to capture 100% of traces. You still need to start transactions and spans.
+    options.TracesSampleRate = 1.0;
 });
 
 // This starts a new transaction and attaches it to the scope.
