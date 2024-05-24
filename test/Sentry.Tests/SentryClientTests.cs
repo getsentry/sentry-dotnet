@@ -1335,9 +1335,24 @@ public partial class SentryClientTests
         Assert.Throws<ArgumentException>(() => _fixture.GetSut().CaptureCheckIn("my-monitor", CheckInStatus.InProgress,
             configureMonitorOptions: options =>
             {
-                options.Interval(1, MeasurementUnit.Duration.Hour);
-                options.Interval(2, MeasurementUnit.Duration.Minute);
+                options.Interval(1, SentryMonitorInterval.Month);
+                options.Interval(2, SentryMonitorInterval.Day);
             }));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("not a crontab")]
+    [InlineData("* * a * *")]
+    [InlineData("60 * * * *")]
+    [InlineData("* 24 * * *")]
+    [InlineData("* * 32 * *")]
+    [InlineData("* * * 13 *")]
+    [InlineData("* * * * 8")]
+    public void CaptureCheckIn_InvalidCrontabSet_Throws(string crontab)
+    {
+        Assert.Throws<ArgumentException>(() => _fixture.GetSut().CaptureCheckIn("my-monitor", CheckInStatus.InProgress,
+            configureMonitorOptions: options => options.Interval(crontab)));
     }
 
     [Fact]

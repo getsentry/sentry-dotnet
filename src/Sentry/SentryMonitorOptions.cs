@@ -11,6 +11,42 @@ internal enum SentryMonitorScheduleType
 }
 
 /// <summary>
+/// Sentry's intervals for monitors
+/// </summary>
+public enum SentryMonitorInterval
+{
+    /// <summary>
+    /// Year
+    /// </summary>
+    Year,
+
+    /// <summary>
+    /// Month
+    /// </summary>
+    Month,
+
+    /// <summary>
+    /// Week
+    /// </summary>
+    Week,
+
+    /// <summary>
+    /// Day
+    /// </summary>
+    Day,
+
+    /// <summary>
+    /// Hour
+    /// </summary>
+    Hour,
+
+    /// <summary>
+    /// Minute
+    /// </summary>
+    Minute
+}
+
+/// <summary>
 /// Sentry's options for monitors
 /// </summary>
 public class SentryMonitorOptions : ISentryJsonSerializable
@@ -18,7 +54,18 @@ public class SentryMonitorOptions : ISentryJsonSerializable
     private SentryMonitorScheduleType _type = SentryMonitorScheduleType.None;
     private string? _crontab;
     private int? _interval;
-    private MeasurementUnit.Duration? _unit;
+    private SentryMonitorInterval? _unit;
+
+    // Breakdown of the validation
+    // ^(\*|([0-5]?\d))                 Minute  0 - 59:
+    // (\s+)(\*|([01]?\d|2[0-3]))       Hour    0 - 23
+    // (\s+)(\*|([1-9]|[12]\d|3[01]))   Day     1 - 31
+    // (\s+)(\*|([1-9]|1[0-2]))         Month   1 - 12
+    // (\s+)(\*|([0-7]))                Weekday 0 - 7
+    // $                                End of string
+    private readonly Regex _crontabValidation = new(
+        @"^(\*|([0-5]?\d))(\s+)(\*|([01]?\d|2[0-3]))(\s+)(\*|([1-9]|[12]\d|3[01]))(\s+)(\*|([1-9]|1[0-2]))(\s+)(\*|([0-7]))$",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     /// <summary>
     /// Set Interval
@@ -31,6 +78,12 @@ public class SentryMonitorOptions : ISentryJsonSerializable
             throw new ArgumentException("You tried to set the interval twice. The Check-Ins interval is supposed to be set only once.");
         }
 
+        if (!_crontabValidation.IsMatch(cronTab))
+        {
+            throw new ArgumentException("The provided crontab does not match the expected format of '* * * * *' " +
+                                        "translating to 'minute', 'hour', 'day of the month', 'month', and 'day of the week'.");
+        }
+
         _type = SentryMonitorScheduleType.Crontab;
         _crontab = cronTab;
     }
@@ -40,7 +93,7 @@ public class SentryMonitorOptions : ISentryJsonSerializable
     /// </summary>
     /// <param name="interval"></param>
     /// <param name="unit"></param>
-    public void Interval(int interval, MeasurementUnit.Duration unit)
+    public void Interval(int interval, SentryMonitorInterval unit)
     {
         if (_type is not SentryMonitorScheduleType.None)
         {
@@ -49,8 +102,6 @@ public class SentryMonitorOptions : ISentryJsonSerializable
 
         _type = SentryMonitorScheduleType.Interval;
         _interval = interval;
-
-        // TODO: Should we do some check here to clamp the supported units?
         _unit = unit;
     }
 
