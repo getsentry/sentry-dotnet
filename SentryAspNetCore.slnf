@@ -11,6 +11,7 @@
       "samples\\Sentry.Samples.Aws.Lambda.AspNetCoreServer\\Sentry.Samples.Aws.Lambda.AspNetCoreServer.csproj",
       "samples\\Sentry.Samples.Hangfire\\Sentry.Samples.Hangfire.csproj",
       "samples\\Sentry.Samples.OpenTelemetry.AspNetCore\\Sentry.Samples.OpenTelemetry.AspNetCore.csproj",
+      "src\\Sentry.AspNetCore.Blazor\\Sentry.AspNetCore.Blazor.csproj",
       "src\\Sentry.AspNetCore.Grpc\\Sentry.AspNetCore.Grpc.csproj",
       "src\\Sentry.AspNetCore\\Sentry.AspNetCore.csproj",
       "src\\Sentry.DiagnosticSource\\Sentry.DiagnosticSource.csproj",
