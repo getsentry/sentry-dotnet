@@ -23,7 +23,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
             Options = new SentryOptions
             {
                 Dsn = ValidDsn,
-                EnableTracing = true,
+                TracesSampleRate = 1.0,
                 AutoSessionTracking = false
             };
 

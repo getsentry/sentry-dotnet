@@ -15,7 +15,7 @@ internal static class Program
             options.Debug = true;
             // options.AutoSessionTracking = true;
             options.IsGlobalModeEnabled = true;
-            options.EnableTracing = true;
+            options.TracesSampleRate = 1.0;
 
             // Make sure to reduce the sampling rate in production.
             options.ProfilesSampleRate = 1.0;
