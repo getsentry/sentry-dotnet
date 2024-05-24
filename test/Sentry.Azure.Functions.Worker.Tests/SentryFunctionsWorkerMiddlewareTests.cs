@@ -16,7 +16,7 @@ public class SentryFunctionsWorkerMiddlewareTests
             var options = new SentryOptions
             {
                 Dsn = ValidDsn,
-                EnableTracing = true,
+                TracesSampleRate = 1.0,
             };
 
             var client = Substitute.For<ISentryClient>();

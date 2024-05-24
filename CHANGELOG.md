@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### API Changes
+
+- SentryOptions.EnableTracing has been marked as Obsolete ([#3381](https://github.com/getsentry/sentry-dotnet/pull/3381))
+
 ### Features
 
 - Added an `SentrySdk.RunAsyncVoid` helper method that lets you capture exceptions from `async void` methods ([#3379](https://github.com/getsentry/sentry-dotnet/pull/3379))
@@ -9,6 +13,13 @@
 ### Fixes
 
 - P/Invoke warning for GetWindowThreadProcessId no longer shows when using Sentry in UWP applications ([#3372](https://github.com/getsentry/sentry-dotnet/pull/3372))
+
+### Dependencies
+
+- Update Perfview/TraceEvent to v3.1.10 (patched) ([#3382](https://github.com/getsentry/sentry-dotnet/pull/3382))
+- Bump Native SDK from v0.7.2 to v0.7.4 ([#3385](https://github.com/getsentry/sentry-dotnet/pull/3385))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#074)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.2...0.7.4)
 
 ## 4.6.2
 

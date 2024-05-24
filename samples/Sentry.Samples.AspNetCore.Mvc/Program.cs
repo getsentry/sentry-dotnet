@@ -17,7 +17,7 @@ builder.WebHost.UseSentry(options =>
 
         options.MaxBreadcrumbs = 200;
 
-        options.EnableTracing = true;
+        options.TracesSampleRate = 1.0;
 
         // Set a proxy for outgoing HTTP connections
         options.HttpProxy = null; // new WebProxy("https://localhost:3128");
