@@ -620,6 +620,15 @@ namespace Sentry
         protected abstract Sentry.ISpan? ProcessRequest(System.Net.Http.HttpRequestMessage request, string method, string url);
         protected override System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { }
     }
+    public enum SentryMonitorInterval
+    {
+        Year = 0,
+        Month = 1,
+        Week = 2,
+        Day = 3,
+        Hour = 4,
+        Minute = 5,
+    }
     public class SentryMonitorOptions : Sentry.ISentryJsonSerializable
     {
         public System.TimeSpan? CheckInMargin { get; set; }
@@ -629,7 +638,7 @@ namespace Sentry
         public int RecoveryThreshold { get; set; }
         public string? Timezone { get; set; }
         public void Interval(string cronTab) { }
-        public void Interval(int interval, Sentry.MeasurementUnit.Duration unit) { }
+        public void Interval(int interval, Sentry.SentryMonitorInterval unit) { }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
     }
     public class SentryOptions
