@@ -23,7 +23,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
             Options = new SentryOptions
             {
                 Dsn = ValidDsn,
-                EnableTracing = true,
+                TracesSampleRate = 1.0,
                 AutoSessionTracking = false
             };
 
@@ -581,5 +581,25 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         // Assert
         Assert.True(sut._map.TryGetValue(activity1.SpanId, out var _));
         Assert.True(sut._map.TryGetValue(activity2.SpanId, out var _));
+    }
+
+    [Fact]
+    public void ParseOtelSpanDescription_HttpClient()
+    {
+        // Arrange
+        var data = Tracer.StartActivity("test op", ActivityKind.Client)!;
+        var attributes = new Dictionary<string, object>()
+        {
+            [OtelSemanticConventions.AttributeHttpRequestMethod] = "POST",
+            [OtelSemanticConventions.AttributeUrlFull] = "https://example.com/foo",
+        };
+
+        // Act
+        var (operation, description, source) = SentrySpanProcessor.ParseOtelSpanDescription(data, attributes);
+
+        // Assert
+        operation.Should().Be("http.client");
+        description.Should().Be("POST https://example.com/foo");
+        source.Should().Be(TransactionNameSource.Custom);
     }
 }

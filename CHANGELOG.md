@@ -2,10 +2,38 @@
 
 ## Unreleased
 
+### API Changes
+
+- SentryOptions.EnableTracing has been marked as Obsolete ([#3381](https://github.com/getsentry/sentry-dotnet/pull/3381))
+
+### Features
+
+- Added an `SentrySdk.RunAsyncVoid` helper method that lets you capture exceptions from `async void` methods ([#3379](https://github.com/getsentry/sentry-dotnet/pull/3379))
+
+### Fixes
+
+- P/Invoke warning for GetWindowThreadProcessId no longer shows when using Sentry in UWP applications ([#3372](https://github.com/getsentry/sentry-dotnet/pull/3372))
+
+### Dependencies
+
+- Update Perfview/TraceEvent to v3.1.10 (patched) ([#3382](https://github.com/getsentry/sentry-dotnet/pull/3382))
+- Bump Native SDK from v0.7.2 to v0.7.4 ([#3385](https://github.com/getsentry/sentry-dotnet/pull/3385))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#074)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.2...0.7.4)
+
+## 4.6.2
+
+### Fixes
+
+- Reverted changes to the SentryHttpMessageHandler and SentryGraphQLHttpMessageHandler to automatically create transactions for each request as this could negatively affect users' quota ([#3367](https://github.com/getsentry/sentry-dotnet/pull/3367))
+
+## 4.6.1
+
 ### Fixes
 
 - Fixed SentryHttpMessageHandler and SentryGraphQLHttpMessageHandler not creating spans when there is no active Transaction on the scope ([#3360](https://github.com/getsentry/sentry-dotnet/pull/3360))
 - The SDK no longer (wrongly) initializes sentry-native on Blazor WASM builds with `RunAOTCompilation` enabled. ([#3363](https://github.com/getsentry/sentry-dotnet/pull/3363))
+- HttpClient requests now show on the Requests dashboard in Sentry ([#3357](https://github.com/getsentry/sentry-dotnet/pull/3357))
 
 ### Dependencies
 

@@ -22,7 +22,7 @@ internal static class SentryGraphQlTestHelpers
         return GetRequest(content, url);
     }
 
-    public static HttpRequestMessage GetRequest(HttpContent content, string url = "http://foo") => new(HttpMethod.Post, url)
+    public static HttpRequestMessage GetRequest(HttpContent content, string url = "http://foo") => new(HttpMethod.Post, new Uri(url))
     {
         Content = content
     };

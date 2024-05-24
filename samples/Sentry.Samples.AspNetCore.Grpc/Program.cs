@@ -41,7 +41,7 @@ public static class Program
                     options.Release =
                         "e386dfd"; // Could also be any format, such as: 2.0, or however version of your app is
 
-                    options.EnableTracing = true;
+                    options.TracesSampleRate = 1.0;
 
                     options.MaxBreadcrumbs = 200;
 
