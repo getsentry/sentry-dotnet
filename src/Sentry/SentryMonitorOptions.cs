@@ -57,7 +57,7 @@ public class SentryMonitorOptions : ISentryJsonSerializable
     private SentryMonitorInterval? _unit;
 
     // Breakdown of the validation
-    // ^(\*|([0-5]?\d))                 Minute  0 - 59:
+    // ^(\*|([0-5]?\d))                 Minute  0 - 59
     // (\s+)(\*|([01]?\d|2[0-3]))       Hour    0 - 23
     // (\s+)(\*|([1-9]|[12]\d|3[01]))   Day     1 - 31
     // (\s+)(\*|([1-9]|1[0-2]))         Month   1 - 12
@@ -149,9 +149,6 @@ public class SentryMonitorOptions : ISentryJsonSerializable
         writer.WriteString("type", TypeToString(_type));
         switch (_type)
         {
-            case SentryMonitorScheduleType.None:
-                // TODO: Throw here?
-                break;
             case SentryMonitorScheduleType.Crontab:
                 Debug.Assert(string.IsNullOrEmpty(_crontab), "The provided 'crontab' cannot be an empty string.");
                 writer.WriteStringIfNotWhiteSpace("value", _crontab);
