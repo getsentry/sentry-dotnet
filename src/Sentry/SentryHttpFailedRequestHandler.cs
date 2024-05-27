@@ -61,7 +61,7 @@ internal class SentryHttpFailedRequestHandler : SentryFailedRequestHandler
 
             if (!Options.SendDefaultPii)
             {
-                sentryRequest.Url = uri?.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
+                sentryRequest.Url = uri?.HttpRequestUrl();
             }
             else
             {
