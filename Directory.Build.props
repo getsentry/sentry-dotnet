@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <Version>4.6.2</Version>
+    <Version>4.7.0</Version>
     <LangVersion>12</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
