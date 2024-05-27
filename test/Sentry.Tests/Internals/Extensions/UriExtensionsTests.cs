@@ -7,8 +7,8 @@ public class UriExtensionsTests
     public void HttpRequestUrl_ReturnsHttpRequestUrl()
     {
         // Arrange
-        var baseUri= new Uri("https://www.contoso.com");
-        var uri = new Uri(baseUri,"catalog/shownew.htm?date=today");
+        var baseUri = new Uri("https://www.contoso.com");
+        var uri = new Uri(baseUri, "catalog/shownew.htm?date=today");
         var expected = "https://www.contoso.com/catalog/shownew.htm?date=today";
 
         // Act
@@ -24,7 +24,7 @@ public class UriExtensionsTests
         // Arrange
         var options = new UriCreationOptions();
         options.DangerousDisablePathAndQueryCanonicalization = true;
-        var uri= new Uri("https://www.contoso.com", options);
+        var uri = new Uri("https://www.contoso.com", options);
         var expected = "https://www.contoso.com/";
 
         // Act
