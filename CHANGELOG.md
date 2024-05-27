@@ -13,6 +13,7 @@
 ### Fixes
 
 - P/Invoke warning for GetWindowThreadProcessId no longer shows when using Sentry in UWP applications ([#3372](https://github.com/getsentry/sentry-dotnet/pull/3372))
+- Fixed InvalidOperationException when pulling the HttpRequestUrl from Uri's with DangerousDisablePathAndQueryCanonicalization set to true ([#3393](https://github.com/getsentry/sentry-dotnet/pull/3393))
 
 ### Dependencies
 
