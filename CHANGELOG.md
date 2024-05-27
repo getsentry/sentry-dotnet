@@ -38,6 +38,9 @@
 ### Dependencies
 
 - Bump Hangfire from v1.8.7 to v1.8.12 ([#3361](https://github.com/getsentry/sentry-dotnet/pull/3361))
+- Bump Cocoa SDK from v8.25.2 to v8.26.0 ([#3364](https://github.com/getsentry/sentry-dotnet/pull/3364))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8260)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.25.2...8.26.0)
 
 ## 4.6.0
 

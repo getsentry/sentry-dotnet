@@ -205,6 +205,7 @@ $interfacesToRemove = @(
     'LocalMetricsAggregator',
     'NSURLSessionTask',
     'SentryCurrentDateProvider',
+    'SentryEnabledFeaturesBuilder',
     'SentryExperimentalOptions',
     'SentryMXCallStack',
     'SentryMXCallStackTree',
