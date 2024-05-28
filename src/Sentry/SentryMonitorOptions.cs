@@ -80,22 +80,22 @@ public partial class SentryMonitorOptions : ISentryJsonSerializable
     /// <summary>
     /// Set Interval
     /// </summary>
-    /// <param name="cronTab"></param>
-    public void Interval(string cronTab)
+    /// <param name="crontab"></param>
+    public void Interval(string crontab)
     {
         if (_type is not SentryMonitorScheduleType.None)
         {
             throw new ArgumentException("You tried to set the interval twice. The Check-Ins interval is supposed to be set only once.");
         }
 
-        if (!CrontabValidation().IsMatch(cronTab))
+        if (!CrontabValidation().IsMatch(crontab))
         {
             throw new ArgumentException("The provided crontab does not match the expected format of '* * * * *' " +
                                         "translating to 'minute', 'hour', 'day of the month', 'month', and 'day of the week'.");
         }
 
         _type = SentryMonitorScheduleType.Crontab;
-        _crontab = cronTab;
+        _crontab = crontab;
     }
 
     /// <summary>
@@ -125,15 +125,41 @@ public partial class SentryMonitorOptions : ISentryJsonSerializable
     /// </summary>
     public TimeSpan? MaxRuntime { get; set; }
 
+    private int? _failureIssueThreshold;
+
     /// <summary>
     /// The number of consecutive failed check-ins it takes before an issue is created.
     /// </summary>
-    public int? FailureIssueThreshold { get; set; }
+    public int? FailureIssueThreshold
+    {
+        get => _failureIssueThreshold;
+        set
+        {
+            if (value <= 0)
+            {
+                throw new ArgumentException("FailureIssueThreshold has to be set to a number greater than 0.");
+            }
+            _failureIssueThreshold = value;
+        }
+    }
+
+    private int? _recoveryThreshold;
 
     /// <summary>
     /// The number of consecutive OK check-ins it takes before an issue is resolved.
     /// </summary>
-    public int RecoveryThreshold { get; set; }
+    public int? RecoveryThreshold
+    {
+        get => _recoveryThreshold;
+        set
+        {
+            if (value <= 0)
+            {
+                throw new ArgumentException("RecoveryThreshold has to be set to a number greater than 0.");
+            }
+            _recoveryThreshold = value;
+        }
+    }
 
     /// <summary>
     /// A tz database string representing the timezone which the monitor's execution schedule is in (i.e. "America/Los_Angeles").
@@ -160,7 +186,7 @@ public partial class SentryMonitorOptions : ISentryJsonSerializable
         switch (_type)
         {
             case SentryMonitorScheduleType.Crontab:
-                Debug.Assert(string.IsNullOrEmpty(_crontab), "The provided 'crontab' cannot be an empty string.");
+                Debug.Assert(!string.IsNullOrEmpty(_crontab), "The provided 'crontab' cannot be an empty string.");
                 writer.WriteStringIfNotWhiteSpace("value", _crontab);
                 break;
             case SentryMonitorScheduleType.Interval:
