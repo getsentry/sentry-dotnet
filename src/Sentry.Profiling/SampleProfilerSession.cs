@@ -17,7 +17,7 @@ internal class SampleProfilerSession : IDisposable
     private readonly TraceLogEventSource _eventSource;
     private readonly MutableTraceEventStackSource _stackSource;
     private readonly SampleProfilerTraceEventParser _sampleEventParser;
-    private readonly SymbolReader _symboReader;
+    private readonly SymbolReader _symbolReader;
     private readonly ActivityComputer _activityComputer;
     // private readonly StartStopActivityComputer _startStopActivityComputer;
     private readonly IDiagnosticLogger? _logger;
@@ -30,8 +30,8 @@ internal class SampleProfilerSession : IDisposable
         _logger = logger;
         _eventSource = eventSource;
         _sampleEventParser = new SampleProfilerTraceEventParser(_eventSource);
-        _symboReader = new SymbolReader(TextWriter.Null);
-        _activityComputer = new ActivityComputer(eventSource, _symboReader);
+        _symbolReader = new SymbolReader(TextWriter.Null);
+        _activityComputer = new ActivityComputer(eventSource, _symbolReader);
         // _startStopActivityComputer = new StartStopActivityComputer(eventSource, _activityComputer);
         _stopwatch = stopwatch;
         _stackSource = new MutableTraceEventStackSource(eventSource.TraceLog)
@@ -141,7 +141,7 @@ internal class SampleProfilerSession : IDisposable
                 _stopped = true;
                 _session.Stop();
                 _session.Dispose();
-                _symboReader.Dispose();
+                _symbolReader.Dispose();
                 _eventSource.Dispose();
             }
             catch (Exception ex)
