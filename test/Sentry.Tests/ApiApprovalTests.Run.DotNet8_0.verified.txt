@@ -638,9 +638,9 @@ namespace Sentry
         public int? FailureIssueThreshold { get; set; }
         public System.TimeSpan? MaxRuntime { get; set; }
         public string? Owner { get; set; }
-        public int RecoveryThreshold { get; set; }
+        public int? RecoveryThreshold { get; set; }
         public string? Timezone { get; set; }
-        public void Interval(string cronTab) { }
+        public void Interval(string crontab) { }
         public void Interval(int interval, Sentry.SentryMonitorInterval unit) { }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
     }
