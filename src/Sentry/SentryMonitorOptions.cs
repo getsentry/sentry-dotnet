@@ -49,7 +49,7 @@ public enum SentryMonitorInterval
 /// <summary>
 /// Sentry's options for monitors
 /// </summary>
-public class SentryMonitorOptions : ISentryJsonSerializable
+public partial class SentryMonitorOptions : ISentryJsonSerializable
 {
     private SentryMonitorScheduleType _type = SentryMonitorScheduleType.None;
     private string? _crontab;
@@ -63,9 +63,19 @@ public class SentryMonitorOptions : ISentryJsonSerializable
     // (\s+)(\*|([1-9]|1[0-2]))         Month   1 - 12
     // (\s+)(\*|([0-7]))                Weekday 0 - 7
     // $                                End of string
-    private readonly Regex _crontabValidation = new(
-        @"^(\*|([0-5]?\d))(\s+)(\*|([01]?\d|2[0-3]))(\s+)(\*|([1-9]|[12]\d|3[01]))(\s+)(\*|([1-9]|1[0-2]))(\s+)(\*|([0-7]))$",
-        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+#if NET7_0_OR_GREATER
+    [GeneratedRegex(@"^(\*|([0-5]?\d))(\s+)(\*|([01]?\d|2[0-3]))(\s+)(\*|([1-9]|[12]\d|3[01]))(\s+)(\*|([1-9]|1[0-2]))(\s+)(\*|([0-7]))$", RegexOptions.IgnoreCase)]
+    private static partial Regex CrontabValidation();
+#else
+    private static Regex? CrontabValidationInstance;
+
+    private static Regex CrontabValidation()
+    {
+        return CrontabValidationInstance ??= new Regex(
+            @"^(\*|([0-5]?\d))(\s+)(\*|([01]?\d|2[0-3]))(\s+)(\*|([1-9]|[12]\d|3[01]))(\s+)(\*|([1-9]|1[0-2]))(\s+)(\*|([0-7]))$",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    }
+#endif
 
     /// <summary>
     /// Set Interval
@@ -78,7 +88,7 @@ public class SentryMonitorOptions : ISentryJsonSerializable
             throw new ArgumentException("You tried to set the interval twice. The Check-Ins interval is supposed to be set only once.");
         }
 
-        if (!_crontabValidation.IsMatch(cronTab))
+        if (!CrontabValidation().IsMatch(cronTab))
         {
             throw new ArgumentException("The provided crontab does not match the expected format of '* * * * *' " +
                                         "translating to 'minute', 'hour', 'day of the month', 'month', and 'day of the week'.");
