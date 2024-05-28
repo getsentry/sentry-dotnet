@@ -42,7 +42,19 @@
         name: Thread 7860
       },
       6: {
+        name: Activity //14/18
+      },
+      7: {
+        name: Activity //14/18/24/28/32
+      },
+      8: {
+        name: Activity //2/23
+      },
+      9: {
         name: Thread 12688
+      },
+      10: {
+        name: Activity //2/23/39
       }
     },
     stacks: [
@@ -107,95 +119,147 @@
         36
       ],
       [
+        0,
+        1,
         37
+      ],
+      [
+        38
       ],
       [
         0,
         1,
-        38,
+        37
+      ],
+      [
         39,
         40,
         41,
         42,
         43,
         44,
-        45,
-        46,
-        22
+        38
       ],
       [
+        0,
+        1,
+        37
+      ],
+      [
+        0,
+        1,
+        37
+      ],
+      [
+        45,
+        46,
         47,
         48,
         49,
+        38
+      ],
+      [
+        0,
+        1,
+        37
+      ],
+      [
         50,
         51,
         52,
+        53,
+        54
+      ],
+      [
+        0,
+        1,
         37
       ],
       [
-        53,
-        54,
         55,
         56,
         57,
-        37
-      ],
-      [
         58,
         59,
         60,
         61,
-        62
-      ],
-      [
+        62,
         63,
         64,
+        50,
+        51,
+        52,
+        53,
+        54
+      ],
+      [
+        0,
+        1,
+        37
+      ],
+      [
         65,
         66,
         67,
         68,
         69,
         70,
+        50,
+        51,
+        52,
+        53,
+        54
+      ],
+      [
+        0,
+        1,
+        37
+      ],
+      [
         71,
         72,
-        58,
-        59,
-        60,
-        61,
-        62
+        70,
+        50,
+        51,
+        52,
+        53,
+        54
+      ],
+      [
+        0,
+        1,
+        37
       ],
       [
         73,
+        51,
+        52,
+        53,
+        54
+      ],
+      [
+        0,
+        1,
+        37
+      ],
+      [
         74,
         75,
         76,
         77,
         78,
-        58,
-        59,
-        60,
-        61,
-        62
-      ],
-      [
         79,
         80,
-        78,
-        58,
-        59,
-        60,
-        61,
-        62
-      ],
-      [
         81,
-        59,
-        60,
-        61,
-        62
+        82,
+        54
       ],
       [
-        82,
+        0,
+        1,
+        37
+      ],
+      [
         83,
         84,
         85,
@@ -204,48 +268,38 @@
         88,
         89,
         90,
-        62
-      ],
-      [
         91,
         92,
-        93,
-        94,
-        95,
-        96,
-        97,
-        98,
-        99,
-        100,
-        84,
-        85,
-        86,
-        87,
-        88,
-        89,
-        90,
-        62
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        54
       ],
       [
-        0,
-        1,
-        38,
-        39,
-        40,
-        41,
-        42,
-        43,
-        44,
-        45,
-        46,
-        22
+        93,
+        94,
+        95
       ],
       [
         18,
         19,
         20,
-        101,
+        96,
         22
+      ],
+      [
+        0,
+        1,
+        37
+      ],
+      [
+        97,
+        98,
+        99
       ]
     ],
     frames: [
@@ -434,54 +488,14 @@
         in_app: false
       },
       {
-        function: Aura.UI.Gallery.NetCore.Program.Main(class System.String[]),
-        module: Aura.UI.Gallery.NetCore,
-        in_app: true
-      },
-      {
         function: System.IO.Stream+<>c.<BeginReadInternal>b__40_0(class System.Object),
         module: System.Private.CoreLib.il,
         in_app: false
       },
       {
-        function: System.Threading.Tasks.Task`1[System.Int32].InnerInvoke(),
-        module: System.Private.CoreLib.il,
-        in_app: false
-      },
-      {
-        function: System.Threading.Tasks.Task+<>c.<.cctor>b__272_0(class System.Object),
-        module: System.Private.CoreLib.il,
-        in_app: false
-      },
-      {
-        function: System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(class System.Threading.Thread,class System.Threading.ExecutionContext,class System.Threading.ContextCallback,class System.Object),
-        module: System.Private.CoreLib.il,
-        in_app: false
-      },
-      {
-        function: System.Threading.Tasks.Task.ExecuteWithThreadLocal(class System.Threading.Tasks.Task&,class System.Threading.Thread),
-        module: System.Private.CoreLib.il,
-        in_app: false
-      },
-      {
-        function: System.Threading.Tasks.Task.ExecuteEntryUnsafe(class System.Threading.Thread),
-        module: System.Private.CoreLib.il,
-        in_app: false
-      },
-      {
-        function: System.Threading.Tasks.Task.ExecuteFromThreadPool(class System.Threading.Thread),
-        module: System.Private.CoreLib.il,
-        in_app: false
-      },
-      {
-        function: System.Threading.ThreadPoolWorkQueue.Dispatch(),
-        module: System.Private.CoreLib.il,
-        in_app: false
-      },
-      {
-        function: System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart(),
-        module: System.Private.CoreLib.il,
-        in_app: false
+        function: Aura.UI.Gallery.NetCore.Program.Main(class System.String[]),
+        module: Aura.UI.Gallery.NetCore,
+        in_app: true
       },
       {
         function: System.Collections.Concurrent.ConcurrentDictionary`2[System.__Canon,System.IntPtr].TryAddInternal(!0,value class System.Nullable`1<int32>,!1,bool,bool,!1&),
@@ -752,7 +766,37 @@
         in_app: true
       },
       {
+        function: Aura.UI.Gallery.NetCore.Program+<>c__DisplayClass1_0.<Main>b__1(class System.Threading.Tasks.Task),
+        module: Aura.UI.Gallery.NetCore,
+        in_app: true
+      },
+      {
+        function: System.Threading.Tasks.ContinuationTaskFromTask.InnerInvoke(),
+        module: System.Private.CoreLib.il,
+        in_app: false
+      },
+      {
+        function: System.Threading.Tasks.Task+<>c.<.cctor>b__272_0(class System.Object),
+        module: System.Private.CoreLib.il,
+        in_app: false
+      },
+      {
         function: System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart(),
+        module: System.Private.CoreLib.il,
+        in_app: false
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncTaskMethodBuilder`1+AsyncStateMachineBox`1[System.__Canon,Microsoft.Diagnostics.NETCore.Client.IpcEndpointHelper+<ConnectAsync>d__1].MoveNext(),
+        module: System.Private.CoreLib.il,
+        in_app: false
+      },
+      {
+        function: System.Runtime.CompilerServices.TaskAwaiter+<>c.<OutputWaitEtwEvents>b__12_0(class System.Action,class System.Threading.Tasks.Task),
+        module: System.Private.CoreLib.il,
+        in_app: false
+      },
+      {
+        function: System.Runtime.CompilerServices.AsyncMethodBuilderCore+ContinuationWrapper.Invoke(),
         module: System.Private.CoreLib.il,
         in_app: false
       }
@@ -789,13 +833,13 @@
         stack_id: 5
       },
       {
-        elapsed_since_start_ns: 11253400,
-        thread_id: 0,
+        elapsed_since_start_ns: 9261600,
+        thread_id: 6,
         stack_id: 6
       },
       {
-        elapsed_since_start_ns: 11260100,
-        thread_id: 1,
+        elapsed_since_start_ns: 11253400,
+        thread_id: 0,
         stack_id: 7
       },
       {
@@ -814,14 +858,14 @@
         stack_id: 4
       },
       {
-        elapsed_since_start_ns: 21259900,
-        thread_id: 0,
+        elapsed_since_start_ns: 19314800,
+        thread_id: 6,
         stack_id: 8
       },
       {
-        elapsed_since_start_ns: 21267900,
-        thread_id: 1,
-        stack_id: 7
+        elapsed_since_start_ns: 21259900,
+        thread_id: 0,
+        stack_id: 9
       },
       {
         elapsed_since_start_ns: 21270000,
@@ -839,13 +883,13 @@
         stack_id: 4
       },
       {
-        elapsed_since_start_ns: 31243800,
-        thread_id: 0,
-        stack_id: 6
+        elapsed_since_start_ns: 29316000,
+        thread_id: 6,
+        stack_id: 10
       },
       {
-        elapsed_since_start_ns: 31248600,
-        thread_id: 1,
+        elapsed_since_start_ns: 31243800,
+        thread_id: 0,
         stack_id: 7
       },
       {
@@ -864,14 +908,14 @@
         stack_id: 4
       },
       {
-        elapsed_since_start_ns: 41251400,
-        thread_id: 0,
-        stack_id: 9
+        elapsed_since_start_ns: 39246300,
+        thread_id: 6,
+        stack_id: 11
       },
       {
-        elapsed_since_start_ns: 41261500,
-        thread_id: 1,
-        stack_id: 7
+        elapsed_since_start_ns: 41251400,
+        thread_id: 0,
+        stack_id: 12
       },
       {
         elapsed_since_start_ns: 41263200,
@@ -889,14 +933,14 @@
         stack_id: 4
       },
       {
-        elapsed_since_start_ns: 51268200,
-        thread_id: 0,
-        stack_id: 10
+        elapsed_since_start_ns: 49374000,
+        thread_id: 6,
+        stack_id: 13
       },
       {
-        elapsed_since_start_ns: 51291300,
-        thread_id: 1,
-        stack_id: 7
+        elapsed_since_start_ns: 51268200,
+        thread_id: 0,
+        stack_id: 14
       },
       {
         elapsed_since_start_ns: 51294700,
@@ -914,14 +958,14 @@
         stack_id: 4
       },
       {
-        elapsed_since_start_ns: 61258600,
-        thread_id: 0,
-        stack_id: 11
+        elapsed_since_start_ns: 59327100,
+        thread_id: 6,
+        stack_id: 15
       },
       {
-        elapsed_since_start_ns: 61269400,
-        thread_id: 1,
-        stack_id: 7
+        elapsed_since_start_ns: 61258600,
+        thread_id: 0,
+        stack_id: 16
       },
       {
         elapsed_since_start_ns: 61271800,
@@ -939,14 +983,14 @@
         stack_id: 4
       },
       {
-        elapsed_since_start_ns: 71256100,
-        thread_id: 0,
-        stack_id: 12
+        elapsed_since_start_ns: 69308800,
+        thread_id: 6,
+        stack_id: 17
       },
       {
-        elapsed_since_start_ns: 71268300,
-        thread_id: 1,
-        stack_id: 7
+        elapsed_since_start_ns: 71256100,
+        thread_id: 0,
+        stack_id: 18
       },
       {
         elapsed_since_start_ns: 71271900,
@@ -964,14 +1008,14 @@
         stack_id: 4
       },
       {
-        elapsed_since_start_ns: 81242100,
-        thread_id: 0,
-        stack_id: 13
+        elapsed_since_start_ns: 79267700,
+        thread_id: 6,
+        stack_id: 19
       },
       {
-        elapsed_since_start_ns: 81247700,
-        thread_id: 1,
-        stack_id: 7
+        elapsed_since_start_ns: 81242100,
+        thread_id: 0,
+        stack_id: 20
       },
       {
         elapsed_since_start_ns: 81248900,
@@ -989,14 +1033,14 @@
         stack_id: 4
       },
       {
-        elapsed_since_start_ns: 91316900,
-        thread_id: 0,
-        stack_id: 14
+        elapsed_since_start_ns: 89286500,
+        thread_id: 6,
+        stack_id: 21
       },
       {
-        elapsed_since_start_ns: 91324700,
-        thread_id: 1,
-        stack_id: 7
+        elapsed_since_start_ns: 91316900,
+        thread_id: 0,
+        stack_id: 22
       },
       {
         elapsed_since_start_ns: 91326400,
@@ -1014,14 +1058,14 @@
         stack_id: 4
       },
       {
-        elapsed_since_start_ns: 101264900,
-        thread_id: 0,
-        stack_id: 15
+        elapsed_since_start_ns: 99267900,
+        thread_id: 6,
+        stack_id: 23
       },
       {
-        elapsed_since_start_ns: 101272700,
-        thread_id: 1,
-        stack_id: 7
+        elapsed_since_start_ns: 101264900,
+        thread_id: 0,
+        stack_id: 24
       },
       {
         elapsed_since_start_ns: 101274300,
@@ -1039,14 +1083,19 @@
         stack_id: 4
       },
       {
-        elapsed_since_start_ns: 112828800,
-        thread_id: 0,
-        stack_id: 16
-      },
-      {
-        elapsed_since_start_ns: 112839000,
+        elapsed_since_start_ns: 108788100,
         thread_id: 1,
         stack_id: 1
+      },
+      {
+        elapsed_since_start_ns: 108797900,
+        thread_id: 7,
+        stack_id: 25
+      },
+      {
+        elapsed_since_start_ns: 112828800,
+        thread_id: 0,
+        stack_id: 26
       },
       {
         elapsed_since_start_ns: 112843800,
@@ -1059,14 +1108,24 @@
         stack_id: 3
       },
       {
-        elapsed_since_start_ns: 112863500,
-        thread_id: 4,
-        stack_id: 17
+        elapsed_since_start_ns: 114797500,
+        thread_id: 8,
+        stack_id: 27
       },
       {
         elapsed_since_start_ns: 114809100,
-        thread_id: 6,
-        stack_id: 18
+        thread_id: 9,
+        stack_id: 28
+      },
+      {
+        elapsed_since_start_ns: 118824700,
+        thread_id: 7,
+        stack_id: 29
+      },
+      {
+        elapsed_since_start_ns: 118832200,
+        thread_id: 10,
+        stack_id: 30
       }
     ]
   }
