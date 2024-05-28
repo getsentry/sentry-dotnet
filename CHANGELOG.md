@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 4.7.0
 
 ### API Changes
 
@@ -20,6 +20,9 @@
 - Bump Native SDK from v0.7.2 to v0.7.4 ([#3385](https://github.com/getsentry/sentry-dotnet/pull/3385))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#074)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.7.2...0.7.4)
+- Bump Cocoa SDK from v8.25.2 to v8.26.0 ([#3364](https://github.com/getsentry/sentry-dotnet/pull/3364))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8260)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.25.2...8.26.0)
 
 ## 4.6.2
 
