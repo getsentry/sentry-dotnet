@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Maui.LifecycleEvents;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
+using Sentry.Infrastructure;
 using Sentry.Maui;
 using Sentry.Maui.Internal;
 
@@ -49,7 +50,16 @@ public static class SentryMauiAppBuilderExtensions
 
         if (configureOptions != null)
         {
-            services.Configure(configureOptions);
+            void MauiOptions(SentryMauiOptions o)
+            {
+                configureOptions(o);
+                if (o is { Debug: true, DiagnosticLogger: null })
+                {
+                    o.DiagnosticLogger = new ConsoleAndTraceDiagnosticLogger(o.DiagnosticLevel);
+                }
+            }
+
+            services.Configure((Action<SentryMauiOptions>)MauiOptions);
         }
 
         services.AddLogging();

@@ -1714,8 +1714,8 @@ public class SentryOptions
         {
             if (DiagnosticLogger == null)
             {
-                DiagnosticLogger = new DebugDiagnosticLogger(DiagnosticLevel);
-                DiagnosticLogger.LogDebug("Logging enabled with DebugDiagnosticLogger and min level: {0}",
+                DiagnosticLogger = new ConsoleDiagnosticLogger(DiagnosticLevel);
+                DiagnosticLogger.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}",
                     DiagnosticLevel);
             }
 
