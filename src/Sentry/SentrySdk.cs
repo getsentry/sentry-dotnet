@@ -541,13 +541,25 @@ public static partial class SentrySdk
     /// </remarks>
     /// <param name="monitorSlug">The monitor slug of the check-in.</param>
     /// <param name="status">The status of the check-in.</param>
-    /// <param name="sentryId">The optional <see cref="SentryId"/>.</param>
-    /// <param name="scope">The optional <see cref="Scope"/>.</param>
-    /// <param name="duration">The optional duratin of the check-in.</param>
-    /// <returns>The Id of the check-in.</returns>
+    /// <param name="sentryId">The <see cref="SentryId"/> associated with the check-in.</param>
+    /// <param name="duration">The duration of the check-in.</param>
+    /// <param name="scope">The scope of the check-in.</param>
+    /// <param name="configureMonitorOptions">The optional monitor config used to create a Check-In programmatically.</param>
+    /// <returns>The ID of the check-in.</returns>
     [DebuggerStepThrough]
-    public static SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null, TimeSpan? duration = null, Scope? scope = null)
-        => CurrentHub.CaptureCheckIn(monitorSlug, status, sentryId, duration, scope);
+    public static SentryId CaptureCheckIn(string monitorSlug,
+        CheckInStatus status,
+        SentryId? sentryId = null,
+        TimeSpan? duration = null,
+        Scope? scope = null,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
+        => CurrentHub.CaptureCheckIn(
+            monitorSlug,
+            status,
+            sentryId,
+            duration,
+            scope,
+            configureMonitorOptions);
 
     /// <summary>
     /// Starts a transaction.
@@ -678,6 +690,37 @@ public static partial class SentrySdk
     [DebuggerStepThrough]
     public static void ResumeSession()
         => CurrentHub.ResumeSession();
+
+    /// <summary>
+    /// Runs an `async void` method safely.
+    /// </summary>
+    /// <param name="task">Typically either a method group or an async lambda that executes some async void code</param>
+    /// <param name="handler">
+    /// An optional callback that will be run if an exception is thrown. If no callback is provided then by default the
+    /// exception will be captured and sent to Sentry.
+    /// </param>
+    /// <example>
+    /// <code>
+    /// SentrySdk.RunAsyncVoid(async () => await MyAsyncMethod(), ex => Console.WriteLine(ex.Message));
+    /// </code>
+    /// </example>
+    public static void RunAsyncVoid(Action task, Action<Exception>? handler = null)
+    {
+        var syncCtx = SynchronizationContext.Current;
+        try
+        {
+            handler ??= DefaultExceptionHandler;
+            SynchronizationContext.SetSynchronizationContext(new ExceptionHandlingSynchronizationContext(handler, syncCtx));
+            task();
+        }
+        finally
+        {
+            SynchronizationContext.SetSynchronizationContext(syncCtx);
+        }
+        return;
+
+        void DefaultExceptionHandler(Exception ex) => CaptureException(ex);
+    }
 
     /// <summary>
     /// Deliberately crashes an application, which is useful for testing and demonstration purposes.

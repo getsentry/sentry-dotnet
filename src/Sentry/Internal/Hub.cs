@@ -127,7 +127,9 @@ internal class Hub : IHub, IMetricHub, IDisposable
         // Additionally, we will always sample out if tracing is explicitly disabled.
         // Do not invoke the TracesSampler, evaluate the TracesSampleRate, and override any sampling decision
         // that may have been already set (i.e.: from a sentry-trace header).
+#pragma warning disable CS0618 // Type or member is obsolete
         if (!IsEnabled || _options.EnableTracing is false)
+#pragma warning restore CS0618 // Type or member is obsolete
         {
             transaction.IsSampled = false;
             transaction.SampleRate = 0.0;
@@ -152,7 +154,9 @@ internal class Hub : IHub, IMetricHub, IDisposable
             // Random sampling runs only if the sampling decision hasn't been made already.
             if (transaction.IsSampled == null)
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 var sampleRate = _options.TracesSampleRate ?? (_options.EnableTracing is true ? 1.0 : 0.0);
+#pragma warning restore CS0618 // Type or member is obsolete
                 transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
                 transaction.SampleRate = sampleRate;
             }
@@ -557,9 +561,13 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
-    public SentryId CaptureCheckIn(string monitorSlug, CheckInStatus status, SentryId? sentryId = null,
+    public SentryId CaptureCheckIn(
+        string monitorSlug,
+        CheckInStatus status,
+        SentryId? sentryId = null,
         TimeSpan? duration = null,
-        Scope? scope = null)
+        Scope? scope = null,
+        Action<SentryMonitorOptions>? configureMonitorOptions = null)
     {
         if (!IsEnabled)
         {
@@ -576,7 +584,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
                 scope = currentScope;
             }
 
-            return _ownedClient.CaptureCheckIn(monitorSlug, status, sentryId, duration, scope);
+            return _ownedClient.CaptureCheckIn(monitorSlug, status, sentryId, duration, scope, configureMonitorOptions);
         }
         catch (Exception e)
         {

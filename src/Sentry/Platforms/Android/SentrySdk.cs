@@ -117,7 +117,9 @@ public static partial class SentrySdk
             // These options we have behind feature flags
             if (options is { IsPerformanceMonitoringEnabled: true, Native.EnableTracing: true })
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 o.EnableTracing = (JavaBoolean?)options.EnableTracing;
+#pragma warning restore CS0618 // Type or member is obsolete
                 o.TracesSampleRate = (JavaDouble?)options.TracesSampleRate;
 
                 if (options.TracesSampler is { } tracesSampler)

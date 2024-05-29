@@ -18,7 +18,7 @@ public class Program
                 o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
 
                 // Enable Sentry performance monitoring
-                o.EnableTracing = true;
+                o.TracesSampleRate = 1.0;
 
 #if DEBUG
                 // Log debug information about the Sentry SDK

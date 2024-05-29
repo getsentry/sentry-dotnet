@@ -230,7 +230,7 @@ namespace Sentry
     public interface ISentryClient
     {
         bool IsEnabled { get; }
-        Sentry.SentryId CaptureCheckIn(string monitorSlug, Sentry.CheckInStatus status, Sentry.SentryId? sentryId = default, System.TimeSpan? duration = default, Sentry.Scope? scope = null);
+        Sentry.SentryId CaptureCheckIn(string monitorSlug, Sentry.CheckInStatus status, Sentry.SentryId? sentryId = default, System.TimeSpan? duration = default, Sentry.Scope? scope = null, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null);
         bool CaptureEnvelope(Sentry.Protocol.Envelopes.Envelope envelope);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null);
         void CaptureSession(Sentry.SessionUpdate sessionUpdate);
@@ -454,7 +454,7 @@ namespace Sentry
     {
         public SentryClient(Sentry.SentryOptions options) { }
         public bool IsEnabled { get; }
-        public Sentry.SentryId CaptureCheckIn(string monitorSlug, Sentry.CheckInStatus status, Sentry.SentryId? sentryId = default, System.TimeSpan? duration = default, Sentry.Scope? scope = null) { }
+        public Sentry.SentryId CaptureCheckIn(string monitorSlug, Sentry.CheckInStatus status, Sentry.SentryId? sentryId = default, System.TimeSpan? duration = default, Sentry.Scope? scope = null, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
         public bool CaptureEnvelope(Sentry.Protocol.Envelopes.Envelope envelope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent? @event, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
@@ -622,6 +622,27 @@ namespace Sentry
         protected override System.Net.Http.HttpResponseMessage Send(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { }
         protected override System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { }
     }
+    public enum SentryMonitorInterval
+    {
+        Year = 0,
+        Month = 1,
+        Week = 2,
+        Day = 3,
+        Hour = 4,
+        Minute = 5,
+    }
+    public class SentryMonitorOptions : Sentry.ISentryJsonSerializable
+    {
+        public System.TimeSpan? CheckInMargin { get; set; }
+        public int? FailureIssueThreshold { get; set; }
+        public System.TimeSpan? MaxRuntime { get; set; }
+        public string? Owner { get; set; }
+        public int? RecoveryThreshold { get; set; }
+        public string? Timezone { get; set; }
+        public void Interval(string crontab) { }
+        public void Interval(int interval, Sentry.SentryMonitorInterval unit) { }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+    }
     public class SentryOptions
     {
         public SentryOptions() { }
@@ -647,6 +668,7 @@ namespace Sentry
         public string? Dsn { get; set; }
         public bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }
+        [System.Obsolete("Use TracesSampleRate or TracesSampler instead")]
         public bool? EnableTracing { get; set; }
         public string? Environment { get; set; }
         public Sentry.ExperimentalMetricsOptions? ExperimentalMetrics { get; set; }
@@ -767,7 +789,7 @@ namespace Sentry
         public static void AddBreadcrumb(Sentry.Infrastructure.ISystemClock? clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void BindClient(Sentry.ISentryClient client) { }
         public static void BindException(System.Exception exception, Sentry.ISpan span) { }
-        public static Sentry.SentryId CaptureCheckIn(string monitorSlug, Sentry.CheckInStatus status, Sentry.SentryId? sentryId = default, System.TimeSpan? duration = default, Sentry.Scope? scope = null) { }
+        public static Sentry.SentryId CaptureCheckIn(string monitorSlug, Sentry.CheckInStatus status, Sentry.SentryId? sentryId = default, System.TimeSpan? duration = default, Sentry.Scope? scope = null, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
         public static bool CaptureEnvelope(Sentry.Protocol.Envelopes.Envelope envelope) { }
         public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
         public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
@@ -805,6 +827,7 @@ namespace Sentry
         public static System.IDisposable PushScope() { }
         public static System.IDisposable PushScope<TState>(TState state) { }
         public static void ResumeSession() { }
+        public static void RunAsyncVoid(System.Action task, System.Action<System.Exception>? handler = null) { }
         public static void StartSession() { }
         public static Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context) { }
         public static Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext) { }
@@ -1233,6 +1256,7 @@ namespace Sentry.Extensibility
         public static void LogDebug<TArg, TArg2>(this Sentry.Extensibility.IDiagnosticLogger logger, string message, TArg arg, TArg2 arg2) { }
         public static void LogError(this Sentry.Extensibility.IDiagnosticLogger logger, string message) { }
         public static void LogError(this Sentry.Extensibility.IDiagnosticLogger logger, System.Exception exception, string message) { }
+        public static void LogError<TArg>(this Sentry.Extensibility.IDiagnosticLogger logger, string message, TArg arg) { }
         public static void LogError<TArg>(this Sentry.Extensibility.IDiagnosticLogger logger, System.Exception exception, string message, TArg arg) { }
         public static void LogError<TArg, TArg2>(this Sentry.Extensibility.IDiagnosticLogger logger, System.Exception exception, string message, TArg arg, TArg2 arg2) { }
         public static void LogError<TArg, TArg2, TArg3>(this Sentry.Extensibility.IDiagnosticLogger logger, System.Exception exception, string message, TArg arg, TArg2 arg2, TArg3 arg3) { }
@@ -1256,7 +1280,7 @@ namespace Sentry.Extensibility
         public Sentry.IMetricAggregator Metrics { get; }
         public void BindClient(Sentry.ISentryClient client) { }
         public void BindException(System.Exception exception, Sentry.ISpan span) { }
-        public Sentry.SentryId CaptureCheckIn(string monitorSlug, Sentry.CheckInStatus status, Sentry.SentryId? sentryId = default, System.TimeSpan? duration = default, Sentry.Scope? scope = null) { }
+        public Sentry.SentryId CaptureCheckIn(string monitorSlug, Sentry.CheckInStatus status, Sentry.SentryId? sentryId = default, System.TimeSpan? duration = default, Sentry.Scope? scope = null, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
         public bool CaptureEnvelope(Sentry.Protocol.Envelopes.Envelope envelope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
@@ -1298,7 +1322,7 @@ namespace Sentry.Extensibility
         public void AddBreadcrumb(Sentry.Infrastructure.ISystemClock clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public void BindClient(Sentry.ISentryClient client) { }
         public void BindException(System.Exception exception, Sentry.ISpan span) { }
-        public Sentry.SentryId CaptureCheckIn(string monitorSlug, Sentry.CheckInStatus status, Sentry.SentryId? sentryId = default, System.TimeSpan? duration = default, Sentry.Scope? scope = null) { }
+        public Sentry.SentryId CaptureCheckIn(string monitorSlug, Sentry.CheckInStatus status, Sentry.SentryId? sentryId = default, System.TimeSpan? duration = default, Sentry.Scope? scope = null, System.Action<Sentry.SentryMonitorOptions>? monitorOptions = null) { }
         public bool CaptureEnvelope(Sentry.Protocol.Envelopes.Envelope envelope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope) { }

@@ -2,10 +2,44 @@
 
 ## Unreleased
 
+## Fixes
+
+- Debug logs are now visible for MAUI apps in Visual Studio when using Sentry's default DiagnosticLogger ([#3373](https://github.com/getsentry/sentry-dotnet/pull/3373))
+
+### Dependencies
+
+- Bump CLI from v2.31.2 to v2.32.1 ([#3398](https://github.com/getsentry/sentry-dotnet/pull/3398))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2321)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.31.2...2.32.1)
+- Bump Native SDK from v0.7.4 to v0.7.5 ([#3399](https://github.com/getsentry/sentry-dotnet/pull/3399))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#075)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.4...0.7.5)
+
+## 4.7.0
+
+### API Changes
+
+- SentryOptions.EnableTracing has been marked as Obsolete ([#3381](https://github.com/getsentry/sentry-dotnet/pull/3381))
+
+### Features
+
+- The SDK now supports monitor upserting. You can programmatically set up your monitors via the options callback in `SentrySdk.CaptureCheckIn` ([#3330](https://github.com/getsentry/sentry-dotnet/pull/3330))
+- Added an `SentrySdk.RunAsyncVoid` helper method that lets you capture exceptions from `async void` methods ([#3379](https://github.com/getsentry/sentry-dotnet/pull/3379))
+
 ### Fixes
 
 - P/Invoke warning for GetWindowThreadProcessId no longer shows when using Sentry in UWP applications ([#3372](https://github.com/getsentry/sentry-dotnet/pull/3372))
-- Debug logs are now visible for MAUI apps in Visual Studio when using Sentry's default DiagnosticLogger ([#3373](https://github.com/getsentry/sentry-dotnet/pull/3373))
+- Fixed InvalidOperationException when pulling the HttpRequestUrl from Uri's with DangerousDisablePathAndQueryCanonicalization set to true ([#3393](https://github.com/getsentry/sentry-dotnet/pull/3393))
+
+### Dependencies
+
+- Update Perfview/TraceEvent to v3.1.10 (patched) ([#3382](https://github.com/getsentry/sentry-dotnet/pull/3382))
+- Bump Native SDK from v0.7.2 to v0.7.4 ([#3385](https://github.com/getsentry/sentry-dotnet/pull/3385))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#074)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.2...0.7.4)
+- Bump Cocoa SDK from v8.25.2 to v8.26.0 ([#3364](https://github.com/getsentry/sentry-dotnet/pull/3364))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8260)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.25.2...8.26.0)
 
 ## 4.6.2
 

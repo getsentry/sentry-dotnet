@@ -253,6 +253,15 @@ public static class DiagnosticLoggerExtensions
         => logger.LogIfEnabled(SentryLevel.Error, null, message);
 
     /// <summary>
+    /// Log an error message.
+    /// </summary>
+    public static void LogError<TArg>(
+        this IDiagnosticLogger logger,
+        string message,
+        TArg arg)
+        => logger.LogIfEnabled(SentryLevel.Error, null, message, arg);
+
+    /// <summary>
     /// Log an exception with an error message.
     /// </summary>
     public static void LogError(this IDiagnosticLogger logger,

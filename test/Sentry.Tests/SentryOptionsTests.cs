@@ -36,7 +36,9 @@ public partial class SentryOptionsTests
     public void EnableTracing_Default_Null()
     {
         var sut = new SentryOptions();
+#pragma warning disable CS0618 // Type or member is obsolete
         Assert.Null(sut.EnableTracing);
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Fact]
@@ -65,7 +67,9 @@ public partial class SentryOptionsTests
     {
         var sut = new SentryOptions
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             EnableTracing = true
+#pragma warning restore CS0618 // Type or member is obsolete
         };
 
         Assert.True(sut.IsPerformanceMonitoringEnabled);
@@ -76,7 +80,9 @@ public partial class SentryOptionsTests
     {
         var sut = new SentryOptions
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             EnableTracing = false
+#pragma warning restore CS0618 // Type or member is obsolete
         };
 
         Assert.False(sut.IsPerformanceMonitoringEnabled);
@@ -139,7 +145,9 @@ public partial class SentryOptionsTests
 
         var sut = new SentryOptions
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             EnableTracing = true,
+#pragma warning restore CS0618 // Type or member is obsolete
             TracesSampleRate = 0.0
         };
 
@@ -154,7 +162,9 @@ public partial class SentryOptionsTests
 
         var sut = new SentryOptions
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             EnableTracing = false,
+#pragma warning restore CS0618 // Type or member is obsolete
             TracesSampleRate = 1.0
         };
 
@@ -169,7 +179,9 @@ public partial class SentryOptionsTests
 
         var sut = new SentryOptions
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             EnableTracing = false,
+#pragma warning restore CS0618 // Type or member is obsolete
             TracesSampler = _ => null
         };
 
@@ -195,7 +207,9 @@ public partial class SentryOptionsTests
     {
         var sut = new SentryOptions
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             EnableTracing = true,
+#pragma warning restore CS0618 // Type or member is obsolete
             ProfilesSampleRate = double.Epsilon
         };
 
@@ -207,7 +221,9 @@ public partial class SentryOptionsTests
     {
         var sut = new SentryOptions
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             EnableTracing = false,
+#pragma warning restore CS0618 // Type or member is obsolete
             ProfilesSampleRate = double.Epsilon
         };
 

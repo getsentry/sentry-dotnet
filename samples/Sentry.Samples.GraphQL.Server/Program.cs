@@ -43,7 +43,7 @@ public static class Program
         {
             // A DSN is required.  You can set it here, or in configuration, or in an environment variable.
             // o.Dsn = "...Your DSN Here...";
-            o.EnableTracing = true;
+            o.TracesSampleRate = 1.0;
             o.Debug = true;
             o.SendDefaultPii = true;
             o.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
