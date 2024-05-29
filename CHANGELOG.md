@@ -1,8 +1,16 @@
 # Changelog
 
+## Unreleased
+
 ### Features
 
 - Added a new package `Sentry.AspNetCore.Blazor`. This packages provides you with an extension to `WebAssemblyHostBuilder` to allow SDK configuration via the builder pattern. This package gives us an entry point and the ability to extend the SDKs support and out-of-the-box offering. You can follow the progress and leave feedback either ([here](https://github.com/getsentry/sentry-dotnet/issues/2329)) for extending the support for Blazor Server or ([here](https://github.com/getsentry/sentry-dotnet/issues/2021)) for Blazor WebAssembly support ([#3386](https://github.com/getsentry/sentry-dotnet/pull/3386))
+
+### Dependencies
+
+- Bump Native SDK from v0.7.4 to v0.7.5 ([#3399](https://github.com/getsentry/sentry-dotnet/pull/3399))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#075)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.4...0.7.5)
 
 ## 4.7.0
 
@@ -17,6 +25,7 @@
 ### Fixes
 
 - P/Invoke warning for GetWindowThreadProcessId no longer shows when using Sentry in UWP applications ([#3372](https://github.com/getsentry/sentry-dotnet/pull/3372))
+- Fixed InvalidOperationException when pulling the HttpRequestUrl from Uri's with DangerousDisablePathAndQueryCanonicalization set to true ([#3393](https://github.com/getsentry/sentry-dotnet/pull/3393))
 
 ### Dependencies
 

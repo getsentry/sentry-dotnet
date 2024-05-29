@@ -1,4 +1,5 @@
 using Sentry.Internal;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 
 namespace Sentry;
@@ -65,7 +66,7 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
             var requestContent = request.GetFused<GraphQLRequestContent>();
             if (!_options.SendDefaultPii)
             {
-                sentryRequest.Url = request.RequestUri?.GetComponents(UriComponents.HttpRequestUrl, UriFormat.Unescaped);
+                sentryRequest.Url = request.RequestUri?.HttpRequestUrl();
             }
             else
             {
