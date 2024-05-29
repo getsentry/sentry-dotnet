@@ -5,7 +5,7 @@
 ### Fixes
 
 - P/Invoke warning for GetWindowThreadProcessId no longer shows when using Sentry in UWP applications ([#3372](https://github.com/getsentry/sentry-dotnet/pull/3372))
-- Debug logs are now visible in Visual Studio when using Sentry's default DiagnosticLogger ([#3373](https://github.com/getsentry/sentry-dotnet/pull/3373))
+- Debug logs are now visible for MAUI apps in Visual Studio when using Sentry's default DiagnosticLogger ([#3373](https://github.com/getsentry/sentry-dotnet/pull/3373))
 
 ## 4.6.2
 
