@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump Native SDK from v0.7.4 to v0.7.5 ([#3399](https://github.com/getsentry/sentry-dotnet/pull/3399))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#075)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.4...0.7.5)
+
 ## 4.7.0
 
 ### API Changes
