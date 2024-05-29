@@ -1695,6 +1695,12 @@ namespace Sentry.Protocol
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
         public static Sentry.Protocol.OperatingSystem FromJson(System.Text.Json.JsonElement json) { }
     }
+    public readonly struct Origin
+    {
+        public override bool Equals(object? obj) { }
+        public override int GetHashCode() { }
+        public override string ToString() { }
+    }
     public sealed class Response : Sentry.ISentryJsonSerializable
     {
         public const string Type = "response";
