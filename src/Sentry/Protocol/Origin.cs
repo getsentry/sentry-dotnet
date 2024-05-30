@@ -5,14 +5,40 @@ namespace Sentry.Protocol;
 /// </summary>
 public readonly struct Origin
 {
+    private static readonly Lazy<Origin> LazyManual = new();
+    internal static Origin Manual => LazyManual.Value;
+
     private readonly string? _category;
     private readonly string? _integrationName;
     private readonly string? _integrationPart;
 
     /// <summary>
-    ///  Can be either manual (user created the trace/span) or auto (created by SDK/integration)
+    /// Creates a new instance of <see cref="Origin"/>.
     /// </summary>
-    internal OriginType? Type { get; init; }
+    public Origin()
+    {
+        Type = OriginType.Manual;
+        _category = null;
+        _integrationName = null;
+        _integrationPart = null;
+    }
+
+    private Origin(string? category = null, string? integrationName = null, string? integrationPart = null)
+    {
+        Type = OriginType.Auto;
+        _category = category;
+        _integrationName = integrationName;
+        _integrationPart = integrationPart;
+    }
+
+    internal Origin Auto(string? category = null, string? integrationName = null, string? integrationPart = null)
+        => new(category, integrationName, integrationPart);
+
+    /// <summary>
+    /// Can be either manual (user created the trace/span) or auto (created by SDK/integration). The default is manual.
+    /// Traces created by the Sentry SDK and it's integrations should override the default and set this to auto.
+    /// </summary>
+    internal OriginType Type { get; init; }
 
     /// <summary>
     /// The category of the trace or span.
@@ -75,7 +101,7 @@ public readonly struct Origin
         char? separator = null;
         var builder = new StringBuilder();
         foreach (var part in new [] {
-             Type?.ToString()?.ToLower(),
+             Type.ToString()?.ToLower(),
              Category,
              IntegrationName,
              IntegrationPart

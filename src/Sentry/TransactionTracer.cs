@@ -395,4 +395,7 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
 
     /// <inheritdoc />
     public SentryTraceHeader GetTraceHeader() => new(TraceId, SpanId, IsSampled);
+
+    /// <inheritdoc />
+    public Origin? Origin { get; set; }
 }

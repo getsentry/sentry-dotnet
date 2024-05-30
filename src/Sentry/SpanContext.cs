@@ -5,7 +5,7 @@ namespace Sentry;
 /// <summary>
 /// Span metadata used for sampling.
 /// </summary>
-public class SpanContext : ITraceContext
+public class SpanContext : ITraceContext, ITraceContextInternal
 {
     /// <inheritdoc />
     public SpanId SpanId { get; }
@@ -32,6 +32,9 @@ public class SpanContext : ITraceContext
     /// Identifies which instrumentation is being used.
     /// </summary>
     public Instrumenter Instrumenter { get; internal set; } = Instrumenter.Sentry;
+
+    /// <inheritdoc/>
+    public Origin? Origin { get; set; }
 
     /// <summary>
     /// Initializes an instance of <see cref="SpanContext"/>.
