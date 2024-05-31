@@ -2,12 +2,14 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Protocol;
 
 namespace Sentry.Azure.Functions.Worker;
 
 internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 {
     private const string Operation = "function";
+    private static readonly Origin AzureFunctionsOrigin = Origin.Auto("function", "azure");
 
     private readonly IHub _hub;
     private readonly IDiagnosticLogger? _logger;
@@ -23,6 +25,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
     {
         var transactionContext = await StartOrContinueTraceAsync(context);
         var transaction = _hub.StartTransaction(transactionContext);
+        transaction.Contexts.Trace.Origin = AzureFunctionsOrigin;
         Exception? unhandledException = null;
 
         try
@@ -98,7 +101,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
         // Note that, when Trimming is enabled, we can't use reflection to read route data from the HttpTrigger
         // attribute. In that case the route name will always be /api/<FUNCTION_NAME>
         // If this is ever a problem for customers, we can potentially see if there are alternate ways to get this info
-        // from route tables or something. We're not even sure if anyone will use this functionality for now though. 
+        // from route tables or something. We're not even sure if anyone will use this functionality for now though.
         if (!AotHelper.IsNativeAot && !TransactionNameCache.TryGetValue(transactionNameKey, out transactionName))
         {
             // Find the HTTP Trigger attribute via reflection

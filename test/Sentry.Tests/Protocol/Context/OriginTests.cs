@@ -167,4 +167,41 @@ public class OriginTests
             };
         });
     }
+
+    [Theory]
+    [InlineData("auto", "auto")]
+    [InlineData("auto.http", "auto.http")]
+    [InlineData("auto.http.aspnetcore", "auto.http.aspnetcore")]
+    [InlineData("auto.http.aspnetcore.middleware", "auto.http.aspnetcore.middleware")]
+    [InlineData("", null)]
+    [InlineData("manual", "manual")]
+    [InlineData("manual.db", "manual.db")]
+    [InlineData("manual.db.redis", "manual.db.redis")]
+    [InlineData("manual.db.redis.cache", "manual.db.redis.cache")]
+    public void Parse_ValidInput_ParsedCorrectly(string input, string expected)
+    {
+        // Act
+        var origin = Origin.Parse(input);
+
+        // Assert
+        if (expected is null)
+        {
+            origin.Should().BeNull();
+        }
+        else
+        {
+            origin.ToString().Should().Be(expected);
+        }
+    }
+
+    [Theory]
+    [InlineData("invalid")]
+    [InlineData("auto.foo&")]
+    [InlineData("invalid.foo.b^ar")]
+    [InlineData("invalid.foo.bar.4*2")]
+    public void Parse_InvalidInput_Throws(string input)
+    {
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() => Origin.Parse(input));
+    }
 }

@@ -23,16 +23,16 @@ public readonly struct Origin
         _integrationPart = null;
     }
 
-    private Origin(string? category = null, string? integrationName = null, string? integrationPart = null)
+    private Origin(OriginType type, string? category = null, string? integrationName = null, string? integrationPart = null)
     {
-        Type = OriginType.Auto;
+        Type = type;
         _category = category;
         _integrationName = integrationName;
         _integrationPart = integrationPart;
     }
 
-    internal Origin Auto(string? category = null, string? integrationName = null, string? integrationPart = null)
-        => new(category, integrationName, integrationPart);
+    internal static Origin Auto(string? category = null, string? integrationName = null, string? integrationPart = null)
+        => new(OriginType.Auto, category, integrationName, integrationPart);
 
     /// <summary>
     /// Can be either manual (user created the trace/span) or auto (created by SDK/integration). The default is manual.
@@ -101,7 +101,7 @@ public readonly struct Origin
         char? separator = null;
         var builder = new StringBuilder();
         foreach (var part in new [] {
-             Type.ToString()?.ToLower(),
+             Type.ToString().ToLower(),
              Category,
              IntegrationName,
              IntegrationPart
@@ -123,6 +123,26 @@ public readonly struct Origin
         }
 
         return builder.ToString();
+    }
+
+    internal static Origin? Parse(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        var parts = value.Split('.');
+        var type = parts[0] switch
+        {
+            "auto" => OriginType.Auto,
+            "manual" => OriginType.Manual,
+            _ => throw new ArgumentException("Invalid origin type", nameof(value))
+        };
+        var category = parts.Length > 1 ? parts[1] : null;
+        var integrationName = parts.Length > 2 ? parts[2] : null;
+        var integrationPart = parts.Length > 3 ? parts[3] : null;
+        return new Origin(type, category, integrationName, integrationPart);
     }
 
     /// <inheritdoc />

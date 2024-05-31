@@ -3,6 +3,7 @@ using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Internal.OpenTelemetry;
+using Sentry.Protocol;
 
 namespace Sentry.OpenTelemetry;
 
@@ -13,6 +14,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 {
     private readonly IHub _hub;
     internal readonly IEnumerable<IOpenTelemetryEnricher> _enrichers;
+    private static readonly Origin OpenTelemetryOrigin = Origin.Auto("otel");
 
     // ReSharper disable once MemberCanBePrivate.Global - Used by tests
     internal readonly ConcurrentDictionary<ActivitySpanId, ISpan> _map = new();
@@ -152,6 +154,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         var transaction = (TransactionTracer)_hub.StartTransaction(
             transactionContext, new Dictionary<string, object?>(), dynamicSamplingContext
         );
+        transaction.Contexts.Trace.Origin = OpenTelemetryOrigin;
         transaction.StartTimestamp = data.StartTimeUtc;
         _hub.ConfigureScope(scope => scope.Transaction = transaction);
         transaction.SetFused(data);

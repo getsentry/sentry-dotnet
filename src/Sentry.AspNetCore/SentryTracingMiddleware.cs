@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
 using Sentry.Internal.OpenTelemetry;
+using Sentry.Protocol;
 
 namespace Sentry.AspNetCore;
 
@@ -12,6 +13,7 @@ namespace Sentry.AspNetCore;
 internal class SentryTracingMiddleware
 {
     private const string OperationName = "http.server";
+    private static readonly Origin AspNetCoreOrigin = Origin.Auto("http", "aspnetcore");
 
     private readonly RequestDelegate _next;
     private readonly Func<IHub> _getHub;
@@ -78,6 +80,7 @@ internal class SentryTracingMiddleware
             }
 
             var transaction = _getHub().StartTransaction(transactionContext, customSamplingContext, dynamicSamplingContext);
+            transaction.Contexts.Trace.Origin = AspNetCoreOrigin;
 
             _options.LogInfo(
                 "Started transaction with span ID '{0}' and trace ID '{1}'.",
