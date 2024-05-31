@@ -100,12 +100,12 @@ public readonly struct Origin
     {
         char? separator = null;
         var builder = new StringBuilder();
-        foreach (var part in new [] {
-             Type.ToString().ToLower(),
-             Category,
-             IntegrationName,
-             IntegrationPart
-        })
+        foreach (var part in new[] {
+                     Type.ToString().ToLower(),
+                     Category,
+                     IntegrationName,
+                     IntegrationPart
+                 })
         {
             if (string.IsNullOrEmpty(part))
             {

@@ -6,7 +6,8 @@ public class OriginTests
     public void ToString_AllParts_ReturnsConcatenatedString()
     {
         // Arrange
-        var origin = new Origin {
+        var origin = new Origin
+        {
             Type = OriginType.Manual,
             Category = "http",
             IntegrationName = "sentry_dotnet",
@@ -24,7 +25,7 @@ public class OriginTests
     public void ToString_MissingCategory_ReturnsOnlyTypePart()
     {
         // Arrange
-        var origin = new Origin{ Type = OriginType.Auto, Category = "", IntegrationPart = "opentelemetry" };
+        var origin = new Origin { Type = OriginType.Auto, Category = "", IntegrationPart = "opentelemetry" };
 
         // Act
         var result = origin.ToString();
@@ -37,7 +38,7 @@ public class OriginTests
     public void ToString_MissingIntegrationName_ReturnsFirstTwoParts()
     {
         // Arrange
-        var origin = new Origin{ Type = OriginType.Auto, Category = "category" };
+        var origin = new Origin { Type = OriginType.Auto, Category = "category" };
 
         // Act
         var result = origin.ToString();
@@ -50,7 +51,7 @@ public class OriginTests
     public void ToString_MissingIntegrationPart_ReturnsFirstThreeParts()
     {
         // Arrange
-        var origin = new Origin{ Type = OriginType.Auto, Category = "category", IntegrationName = "sentry_dotnet" };
+        var origin = new Origin { Type = OriginType.Auto, Category = "category", IntegrationName = "sentry_dotnet" };
 
         // Act
         var result = origin.ToString();
@@ -82,8 +83,8 @@ public class OriginTests
     [Fact]
     public void Equality_SameToString_ReturnsTrue()
     {
-        var origin1 = new Origin{Type = OriginType.Manual, Category = "cat", IntegrationPart = "part"};
-        var origin2 = new Origin{Type = OriginType.Manual, Category = "cat", IntegrationPart = "part"};
+        var origin1 = new Origin { Type = OriginType.Manual, Category = "cat", IntegrationPart = "part" };
+        var origin2 = new Origin { Type = OriginType.Manual, Category = "cat", IntegrationPart = "part" };
 
         Assert.True(origin1.Equals(origin2));
     }
@@ -91,8 +92,8 @@ public class OriginTests
     [Fact]
     public void Equality_DifferentToString_ReturnsFalse()
     {
-        var origin1 = new Origin{Type = OriginType.Manual, Category = "cat", IntegrationPart = "part1"};
-        var origin2 = new Origin{Type = OriginType.Manual, Category = "cat", IntegrationPart = "part2"};
+        var origin1 = new Origin { Type = OriginType.Manual, Category = "cat", IntegrationPart = "part1" };
+        var origin2 = new Origin { Type = OriginType.Manual, Category = "cat", IntegrationPart = "part2" };
 
         Assert.False(origin1.Equals(origin2));
     }
@@ -107,8 +108,8 @@ public class OriginTests
     [Fact]
     public void GetHashCode_EqualObjects_SameHashCode()
     {
-        var origin1 = new Origin{Type = OriginType.Auto, Category = "cat"};
-        var origin2 = new Origin{Type = OriginType.Auto, Category = "cat"};
+        var origin1 = new Origin { Type = OriginType.Auto, Category = "cat" };
+        var origin2 = new Origin { Type = OriginType.Auto, Category = "cat" };
 
         Assert.Equal(origin1.GetHashCode(), origin2.GetHashCode());
     }
