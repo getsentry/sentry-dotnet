@@ -20,8 +20,6 @@ SentrySdk.Init(options =>
 {
     options.Dsn = args[0];
     options.Debug = true;
-    // Some tests rely on the logs being on the console
-    options.DiagnosticLogger = new ConsoleDiagnosticLogger(SentryLevel.Debug);
     options.Transport = new FakeTransport();
 });
 
