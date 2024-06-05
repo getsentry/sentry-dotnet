@@ -125,6 +125,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         };
 
         var span = (SpanTracer)parentSpan.StartChild(context);
+        span.Origin = OpenTelemetryOrigin;
         span.StartTimestamp = data.StartTimeUtc;
         // Used to filter out spans that are not recorded when finishing a transaction.
         span.SetFused(data);

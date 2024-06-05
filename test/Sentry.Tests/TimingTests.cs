@@ -50,6 +50,7 @@ public class TimingTests
         // Assert
         _fixture.MetricHub.Received(1).StartSpan(Timing.OperationName, _fixture.Key);
         span.Tags.Should().BeEquivalentTo(_fixture.Tags);
+        span.Origin.Should().Be(Timing.MetricsOrigin);
     }
 
     [Fact]

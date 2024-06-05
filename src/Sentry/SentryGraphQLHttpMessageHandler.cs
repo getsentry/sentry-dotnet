@@ -13,6 +13,8 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
     private readonly SentryOptions? _options;
     private readonly ISentryFailedRequestHandler? _failedRequestHandler;
 
+    internal const string GraphQlOrigin = "auto.graphql";
+
     /// <summary>
     /// Constructs an instance of <see cref="SentryGraphQLHttpMessageHandler"/>.
     /// </summary>
@@ -54,6 +56,7 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
             "http.client",
             $"{method} {url}" // e.g. "GET https://example.com"
         );
+        span?.SetOrigin(GraphQlOrigin);
         span?.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
         if (!string.IsNullOrWhiteSpace(request.RequestUri?.Host))
         {

@@ -12,6 +12,8 @@ public class SentryHttpMessageHandler : SentryMessageHandler
     private readonly SentryOptions? _options;
     private readonly ISentryFailedRequestHandler? _failedRequestHandler;
 
+    internal const string HttpClientOrigin = "auto.http.client";
+
     /// <summary>
     /// Constructs an instance of <see cref="SentryHttpMessageHandler"/>.
     /// </summary>
@@ -67,6 +69,7 @@ public class SentryHttpMessageHandler : SentryMessageHandler
             "http.client",
             $"{method} {url}" // e.g. "GET https://example.com"
             );
+        span?.SetOrigin(HttpClientOrigin);
         span?.SetExtra(OtelSemanticConventions.AttributeHttpRequestMethod, method);
         if (request.RequestUri is not null && !string.IsNullOrWhiteSpace(request.RequestUri.Host))
         {
