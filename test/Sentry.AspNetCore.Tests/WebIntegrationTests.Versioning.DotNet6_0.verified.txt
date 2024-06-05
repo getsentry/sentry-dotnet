@@ -3,6 +3,7 @@
   Payloads: [
     {
       Source: {
+        Origin: auto.http.aspnetcore,
         Name: GET /v1.1/Target,
         NameSource: Route,
         Platform: csharp,
@@ -18,6 +19,7 @@
         Contexts: {
           trace: {
             Operation: http.server,
+            Origin: auto.http.aspnetcore,
             Description: ,
             Status: Ok,
             IsSampled: true

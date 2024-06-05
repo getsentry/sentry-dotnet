@@ -1,3 +1,5 @@
+using Sentry.Extensibility;
+
 namespace Sentry.Protocol;
 
 /// <summary>
@@ -10,8 +12,7 @@ public readonly struct Origin
 
     private readonly string _origin;
 
-    private static readonly Lazy<Origin> LazyManual = new();
-    internal static Origin Manual => LazyManual.Value;
+    internal static Origin Manual => "manual";
 
     /// <summary>
     /// Creates a new instance of <see cref="Origin"/>.

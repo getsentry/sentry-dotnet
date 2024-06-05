@@ -17,6 +17,7 @@ public static class VerifyExtensions
                 _.Converters.Add(new ContextsConverter());
                 _.Converters.Add(new DebugImageConverter());
                 _.Converters.Add(new StackFrameConverter());
+                _.Converters.Add(new OriginConverter());
             })
             .IgnoreMembers("version", "elapsed")
             .IgnoreMembersWithType<SdkVersion>()
@@ -120,6 +121,14 @@ public static class VerifyExtensions
             }
 
             writer.Serialize(JToken.FromObject(obj));
+        }
+    }
+
+    private class OriginConverter : WriteOnlyJsonConverter<Origin>
+    {
+        public override void Write(VerifyJsonWriter writer, Origin value)
+        {
+            writer.Serialize(value.ToString());
         }
     }
 

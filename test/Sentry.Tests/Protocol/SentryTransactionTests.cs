@@ -170,6 +170,7 @@ public class SentryTransactionTests
                                // to ignore that on Spans and contexts isn't really straight forward
             "desc",
             SpanStatus.AlreadyExists, null, true, TransactionNameSource.Component);
+        context.Origin = "auto.serialize.transaction";
 
         var transaction = new TransactionTracer(DisabledHub.Instance, context)
         {

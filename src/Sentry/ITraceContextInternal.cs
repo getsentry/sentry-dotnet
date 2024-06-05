@@ -17,5 +17,5 @@ internal interface ITraceContextInternal
     /// <remarks>
     /// See https://develop.sentry.dev/sdk/performance/trace-origin/ for more information.
     /// </remarks>
-    Origin? Origin { get; set; }
+    Origin? Origin { get; }
 }

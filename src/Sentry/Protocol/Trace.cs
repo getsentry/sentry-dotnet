@@ -88,7 +88,7 @@ public class Trace : ITraceContext, ITraceContextInternal, ISentryJsonSerializab
         writer.WriteSerializableIfNotNull("parent_span_id", ParentSpanId?.NullIfDefault(), logger);
         writer.WriteSerializableIfNotNull("trace_id", TraceId.NullIfDefault(), logger);
         writer.WriteStringIfNotWhiteSpace("op", Operation);
-        writer.WriteStringIfNotWhiteSpace("origin", (Origin ?? Protocol.Origin.Manual).ToString());
+        writer.WriteString("origin", Origin ?? Protocol.Origin.Manual);
         writer.WriteStringIfNotWhiteSpace("description", Description);
         writer.WriteStringIfNotWhiteSpace("status", Status?.ToString().ToSnakeCase());
 

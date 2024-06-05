@@ -10,7 +10,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry performance transaction.
 /// </summary>
-public class SentryTransaction : ITransactionData, ISentryJsonSerializable
+public class SentryTransaction : ITransactionData, ISentryJsonSerializable, ITraceContextInternal
 {
     /// <summary>
     /// Transaction's event ID.
@@ -22,6 +22,13 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
     {
         get => Contexts.Trace.SpanId;
         private set => Contexts.Trace.SpanId = value;
+    }
+
+    /// <inheritdoc />
+    public Origin? Origin
+    {
+        get => Contexts.Trace.Origin;
+        private set => Contexts.Trace.Origin = value;
     }
 
     // A transaction normally does not have a parent because it represents

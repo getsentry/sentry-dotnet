@@ -856,6 +856,7 @@ namespace Sentry
         public bool? IsSampled { get; }
         public System.Collections.Generic.IReadOnlyDictionary<string, Sentry.Protocol.Measurement> Measurements { get; }
         public string Operation { get; set; }
+        public Sentry.Protocol.Origin? Origin { get; }
         public Sentry.SpanId? ParentSpanId { get; }
         public Sentry.SpanId SpanId { get; }
         public System.DateTimeOffset StartTimestamp { get; }
@@ -947,6 +948,7 @@ namespace Sentry
         public string Name { get; }
         public Sentry.TransactionNameSource NameSource { get; }
         public string Operation { get; }
+        public Sentry.Protocol.Origin? Origin { get; }
         public Sentry.SpanId? ParentSpanId { get; }
         public string? Platform { get; set; }
         public string? Release { get; set; }
@@ -1017,6 +1019,7 @@ namespace Sentry
         public Sentry.Instrumenter Instrumenter { get; }
         public bool? IsSampled { get; }
         public string Operation { get; set; }
+        public Sentry.Protocol.Origin? Origin { get; set; }
         public Sentry.SpanId? ParentSpanId { get; }
         public Sentry.SpanId SpanId { get; }
         public Sentry.SpanStatus? Status { get; }
@@ -1082,6 +1085,7 @@ namespace Sentry
         public bool? IsSampled { get; }
         public System.Collections.Generic.IReadOnlyDictionary<string, Sentry.Protocol.Measurement> Measurements { get; }
         public string Operation { get; set; }
+        public Sentry.Protocol.Origin? Origin { get; set; }
         public Sentry.SpanId? ParentSpanId { get; }
         public Sentry.SpanId SpanId { get; }
         public System.DateTimeOffset StartTimestamp { get; }
@@ -1167,6 +1171,7 @@ namespace Sentry
         public string Name { get; set; }
         public Sentry.TransactionNameSource NameSource { get; set; }
         public string Operation { get; set; }
+        public Sentry.Protocol.Origin? Origin { get; }
         public Sentry.SpanId? ParentSpanId { get; }
         public string? Platform { get; set; }
         public string? Release { get; set; }
@@ -1697,9 +1702,12 @@ namespace Sentry.Protocol
     }
     public readonly struct Origin
     {
+        public Origin() { }
         public override bool Equals(object? obj) { }
         public override int GetHashCode() { }
         public override string ToString() { }
+        public static string op_Implicit(Sentry.Protocol.Origin origin) { }
+        public static Sentry.Protocol.Origin op_Implicit(string origin) { }
     }
     public sealed class Response : Sentry.ISentryJsonSerializable
     {
@@ -1747,6 +1755,7 @@ namespace Sentry.Protocol
         public string? Description { get; set; }
         public bool? IsSampled { get; }
         public string Operation { get; set; }
+        public Sentry.Protocol.Origin? Origin { get; set; }
         public Sentry.SpanId? ParentSpanId { get; set; }
         public Sentry.SpanId SpanId { get; set; }
         public Sentry.SpanStatus? Status { get; set; }

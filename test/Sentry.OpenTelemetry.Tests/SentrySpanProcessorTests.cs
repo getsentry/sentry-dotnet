@@ -453,6 +453,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
             {
                 { "attributes", tags }
             });
+            transaction.Contexts.Trace.Origin.Should().Be(SentrySpanProcessor.OpenTelemetryOrigin);
             transaction.Status.Should().Be(SpanStatus.Ok);
         }
     }
