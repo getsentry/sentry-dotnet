@@ -49,6 +49,7 @@ public class Trace : ITraceContext, ITraceContextInternal, ISentryJsonSerializab
         ParentSpanId = ParentSpanId,
         TraceId = TraceId,
         Operation = Operation,
+        Origin = Origin,
         Status = Status,
         IsSampled = IsSampled
     };
@@ -103,7 +104,7 @@ public class Trace : ITraceContext, ITraceContextInternal, ISentryJsonSerializab
         var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);
         var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
         var operation = json.GetPropertyOrNull("op")?.GetString() ?? "";
-        var origin = Protocol.Origin.Parse(json.GetPropertyOrNull("origin")?.GetString() ?? "");
+        var origin = Protocol.Origin.TryParse(json.GetPropertyOrNull("origin")?.GetString() ?? "");
         var description = json.GetPropertyOrNull("description")?.GetString();
         var status = json.GetPropertyOrNull("status")?.GetString()?.Replace("_", "").ParseEnum<SpanStatus>();
         var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean();

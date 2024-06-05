@@ -10,7 +10,7 @@ namespace Sentry.AspNet;
 public static class HttpContextExtensions
 {
     private const string HttpContextTransactionItemName = "__SentryTransaction";
-    private static readonly Origin AspNetOrigin = Origin.Auto("http", "aspnet");
+    private static readonly Origin AspNetOrigin = "auto.http.aspnet";
 
     private static SentryTraceHeader? TryGetSentryTraceHeader(HttpContext context, SentryOptions? options)
     {

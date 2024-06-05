@@ -12,8 +12,7 @@ namespace Sentry;
 internal interface ITraceContextInternal
 {
     /// <summary>
-    /// Specifies the origin of the trace. If no origin is set then the trace origin is assumed to be
-    /// <see cref="OriginType.Manual"/>
+    /// Specifies the origin of the trace. If no origin is set then the trace origin is assumed to be "manual".
     /// </summary>
     /// <remarks>
     /// See https://develop.sentry.dev/sdk/performance/trace-origin/ for more information.

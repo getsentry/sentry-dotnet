@@ -9,7 +9,7 @@ namespace Sentry.Azure.Functions.Worker;
 internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 {
     private const string Operation = "function";
-    private static readonly Origin AzureFunctionsOrigin = Origin.Auto("function", "azure");
+    private static readonly Origin AzureFunctionsOrigin = "auto.function.azure";
 
     private readonly IHub _hub;
     private readonly IDiagnosticLogger? _logger;

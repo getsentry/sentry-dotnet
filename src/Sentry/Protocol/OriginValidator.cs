@@ -2,15 +2,15 @@ namespace Sentry.Protocol;
 
 internal static partial class OriginValidator
 {
-    private const string ValidPartNamePattern = @"^[\w_-]*$";
+    private const string ValidOriginPattern = @"^(auto|manual)(\.[\w_-]+){0,3}$";
 
 #if NET8_0_OR_GREATER
-    [GeneratedRegex(ValidPartNamePattern, RegexOptions.Compiled)]
-    private static partial Regex ValidPartNameRegEx();
-    private static readonly Regex ValidPartName = ValidPartNameRegEx();
+    [GeneratedRegex(ValidOriginPattern, RegexOptions.Compiled)]
+    private static partial Regex ValidOriginRegEx();
+    private static readonly Regex ValidOrigin = ValidOriginRegEx();
 #else
-    private static readonly Regex ValidPartName = new (ValidPartNamePattern, RegexOptions.Compiled);
+    private static readonly Regex ValidOrigin = new (ValidOriginPattern, RegexOptions.Compiled);
 #endif
 
-    public static bool IsValidPartName(string? value) => !string.IsNullOrEmpty(value) && !ValidPartName.IsMatch(value);
+    public static bool IsValidOrigin(string? value) => !string.IsNullOrEmpty(value) && ValidOrigin.IsMatch(value);
 }
