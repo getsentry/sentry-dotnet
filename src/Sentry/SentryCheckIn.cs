@@ -4,7 +4,7 @@ using Sentry.Internal.Extensions;
 namespace Sentry;
 
 /// <summary>
-/// The Checkin Status
+/// The Check-In Status
 /// </summary>
 public enum CheckInStatus
 {
@@ -25,13 +25,13 @@ public enum CheckInStatus
 }
 
 /// <summary>
-/// Sentry Checkin
+/// Sentry Check-In
 /// </summary>
 // https://develop.sentry.dev/sdk/check-ins/
 public class SentryCheckIn : ISentryJsonSerializable
 {
     /// <summary>
-    /// CheckIn ID
+    /// Check-In ID
     /// </summary>
     public SentryId Id { get; }
 
@@ -40,13 +40,14 @@ public class SentryCheckIn : ISentryJsonSerializable
     /// </summary>
     public string MonitorSlug { get; }
 
+
     /// <summary>
-    /// The status of the Checkin
+    /// The status of the Check-In
     /// </summary>
     public CheckInStatus Status { get; }
 
     /// <summary>
-    /// The duration of the check-in in seconds. Will only take effect if the status is ok or error.
+    /// The duration of the Check-In in seconds. Will only take effect if the status is ok or error.
     /// </summary>
     public TimeSpan? Duration { get; set; }
 
@@ -64,6 +65,11 @@ public class SentryCheckIn : ISentryJsonSerializable
     /// The trace ID
     /// </summary>
     internal SentryId? TraceId { get; set; }
+
+    /// <summary>
+    /// The Monitor Config
+    /// </summary>
+    internal SentryMonitorOptions? MonitorOptions { get; set; }
 
     /// <summary>
     /// Initializes a new instance of <see cref="SentryCheckIn"/>.
@@ -102,6 +108,8 @@ public class SentryCheckIn : ISentryJsonSerializable
             writer.WriteEndObject();
             writer.WriteEndObject();
         }
+
+        MonitorOptions?.WriteTo(writer, logger);
 
         writer.WriteEndObject();
     }
