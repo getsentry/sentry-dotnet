@@ -36,7 +36,7 @@
       "samples\\Sentry.Samples.Serilog\\Sentry.Samples.Serilog.csproj",
       "src\\Sentry.Android.AssemblyReader\\Sentry.Android.AssemblyReader.csproj",
       "src\\Sentry.AspNet\\Sentry.AspNet.csproj",
-      "src\\Sentry.AspNetCore.Blazor\\Sentry.AspNetCore.Blazor.csproj",
+      "src\\Sentry.AspNetCore.Blazor.WebAssembly\\Sentry.AspNetCore.Blazor.WebAssembly.csproj",
       "src\\Sentry.AspNetCore.Grpc\\Sentry.AspNetCore.Grpc.csproj",
       "src\\Sentry.AspNetCore\\Sentry.AspNetCore.csproj",
       "src\\Sentry.Azure.Functions.Worker\\Sentry.Azure.Functions.Worker.csproj",
