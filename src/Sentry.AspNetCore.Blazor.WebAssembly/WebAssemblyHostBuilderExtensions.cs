@@ -26,7 +26,6 @@ public static class WebAssemblyHostBuilderExtensions
             blazorOptions.DetectStartupTime = StartupTimeDetectionMode.Fast;
             // Warning: No response compression supported by HttpClientHandler.
             blazorOptions.RequestBodyCompressionLevel = CompressionLevel.NoCompression;
-
             // Since the WebAssemblyHost is a client-side application
             blazorOptions.IsGlobalModeEnabled = true;
         });
