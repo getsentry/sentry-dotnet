@@ -1304,7 +1304,7 @@ public partial class SentryClientTests
             MaxRuntime = TimeSpan.FromMinutes(1),
             FailureIssueThreshold = 1,
             RecoveryThreshold = 1,
-            Timezone = "America/Los_Angeles",
+            TimeZone = "America/Los_Angeles",
             Owner = "test-owner"
         };
 
@@ -1314,7 +1314,7 @@ public partial class SentryClientTests
             options.MaxRuntime = monitorOptions.MaxRuntime;
             options.FailureIssueThreshold = monitorOptions.FailureIssueThreshold;
             options.RecoveryThreshold = monitorOptions.RecoveryThreshold;
-            options.Timezone = monitorOptions.Timezone;
+            options.TimeZone = monitorOptions.TimeZone;
             options.Owner = monitorOptions.Owner;
         });
 
@@ -1325,7 +1325,7 @@ public partial class SentryClientTests
         Assert.Equal(actualCheckIn.MonitorOptions.MaxRuntime, monitorOptions.MaxRuntime);
         Assert.Equal(actualCheckIn.MonitorOptions.FailureIssueThreshold, monitorOptions.FailureIssueThreshold);
         Assert.Equal(actualCheckIn.MonitorOptions.RecoveryThreshold, monitorOptions.RecoveryThreshold);
-        Assert.Equal(actualCheckIn.MonitorOptions.Timezone, monitorOptions.Timezone);
+        Assert.Equal(actualCheckIn.MonitorOptions.TimeZone, monitorOptions.TimeZone);
         Assert.Equal(actualCheckIn.MonitorOptions.Owner, monitorOptions.Owner);
     }
 

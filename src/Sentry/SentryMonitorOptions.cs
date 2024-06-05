@@ -164,7 +164,7 @@ public partial class SentryMonitorOptions : ISentryJsonSerializable
     /// <summary>
     /// A tz database string representing the timezone which the monitor's execution schedule is in (i.e. "America/Los_Angeles").
     /// </summary>
-    public string? Timezone { get; set; }
+    public string? TimeZone { get; set; }
 
     /// <summary>
     /// An actor identifier string. This looks like 'user:john@example.com team:a-sentry-team'. IDs can also be used but will result in a poor DX.
@@ -206,7 +206,7 @@ public partial class SentryMonitorOptions : ISentryJsonSerializable
         writer.WriteNumberIfNotNull("max_runtime", MaxRuntime?.TotalMinutes);
         writer.WriteNumberIfNotNull("failure_issue_threshold", FailureIssueThreshold);
         writer.WriteNumberIfNotNull("recovery_threshold", RecoveryThreshold);
-        writer.WriteStringIfNotWhiteSpace("timezone", Timezone);
+        writer.WriteStringIfNotWhiteSpace("timezone", TimeZone);
         writer.WriteStringIfNotWhiteSpace("owner", Owner);
 
         writer.WriteEndObject();

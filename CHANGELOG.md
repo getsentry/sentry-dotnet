@@ -6,6 +6,10 @@
 
 - Added trace origin to distinguish Sentry traces from custom instrumented traces ([#3400](https://github.com/getsentry/sentry-dotnet/pull/3400))
 
+### Fixes
+
+- Fixed null IServiceProvider in anonymous routes with OpenTelemetry ([#3401](https://github.com/getsentry/sentry-dotnet/pull/3401))
+
 ### Dependencies
 
 - Bump CLI from v2.31.2 to v2.32.1 ([#3398](https://github.com/getsentry/sentry-dotnet/pull/3398))
