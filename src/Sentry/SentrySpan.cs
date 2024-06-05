@@ -3,7 +3,6 @@ using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 using Sentry.Protocol.Metrics;
-using OriginHelper = Sentry.Internal.OriginHelper;
 
 namespace Sentry;
 

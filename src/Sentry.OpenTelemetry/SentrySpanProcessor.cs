@@ -3,7 +3,6 @@ using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Internal.OpenTelemetry;
-using Sentry.Protocol;
 
 namespace Sentry.OpenTelemetry;
 

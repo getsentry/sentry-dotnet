@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
 using Sentry.Internal.OpenTelemetry;
-using Sentry.Protocol;
 
 namespace Sentry.AspNetCore;
 

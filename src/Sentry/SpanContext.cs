@@ -1,5 +1,5 @@
+using Sentry.Internal;
 using Sentry.Protocol;
-using OriginHelper = Sentry.Internal.OriginHelper;
 
 namespace Sentry;
 
