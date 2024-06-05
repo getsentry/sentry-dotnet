@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Protocol;
 using Sentry.Protocol.Metrics;
 
@@ -16,7 +17,7 @@ namespace Sentry;
 internal class Timing : IDisposable
 {
     internal const string OperationName = "metric.timing";
-    public static readonly Origin MetricsOrigin = "auto.metrics";
+    public const string MetricsOrigin = "auto.metrics";
 
     private readonly SentryOptions _options;
     private readonly MetricAggregator _metricAggregator;

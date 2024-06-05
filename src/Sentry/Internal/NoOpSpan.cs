@@ -79,5 +79,5 @@ internal class NoOpSpan : ISpan, ITraceContextInternal
     {
     }
 
-    public Origin? Origin { get; set; }
+    public string? Origin { get; set; }
 }

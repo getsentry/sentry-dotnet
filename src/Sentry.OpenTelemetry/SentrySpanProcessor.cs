@@ -14,7 +14,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 {
     private readonly IHub _hub;
     internal readonly IEnumerable<IOpenTelemetryEnricher> _enrichers;
-    internal static readonly Origin OpenTelemetryOrigin = "auto.otel";
+    internal const string OpenTelemetryOrigin = "auto.otel";
 
     // ReSharper disable once MemberCanBePrivate.Global - Used by tests
     internal readonly ConcurrentDictionary<ActivitySpanId, ISpan> _map = new();

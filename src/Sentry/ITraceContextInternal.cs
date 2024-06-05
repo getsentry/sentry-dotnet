@@ -17,24 +17,5 @@ internal interface ITraceContextInternal
     /// <remarks>
     /// See https://develop.sentry.dev/sdk/performance/trace-origin/ for more information.
     /// </remarks>
-    Origin? Origin { get; }
-}
-
-/// <summary>
-/// Some internal extensions that we can remove once we deprecate the ITraceContextInternal interface.
-/// </summary>
-internal static class ITraceContextInternalExtensions
-{
-    public static void SetOrigin(this ISpan span, Origin origin)
-    {
-        switch (span)
-        {
-            case SpanTracer spanTracer:
-                spanTracer.Origin = origin;
-                break;
-            case TransactionTracer transactionTracer:
-                transactionTracer.Contexts.Trace.Origin = origin;
-                break;
-        }
-    }
+    string? Origin { get; }
 }

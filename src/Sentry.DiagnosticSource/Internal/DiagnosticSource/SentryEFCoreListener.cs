@@ -14,7 +14,7 @@ internal class SentryEFCoreListener : IObserver<KeyValuePair<string, object?>>
     internal const string EFCommandExecuted = "Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted";
     internal const string EFCommandFailed = "Microsoft.EntityFrameworkCore.Database.Command.CommandError";
 
-    internal static readonly Origin EFCoreListenerOrigin = "auto.db.ef-core-listener";
+    internal const string EFCoreListenerOrigin = "auto.db.ef-core-listener";
 
     /// <summary>
     /// Used for EF Core 2.X and 3.X.

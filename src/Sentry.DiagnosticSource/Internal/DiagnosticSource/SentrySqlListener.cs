@@ -12,7 +12,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         Execution
     };
 
-    internal static readonly Origin SqlListenerOrigin = "auto.db.sql-listener";
+    internal const string SqlListenerOrigin = "auto.db.sql-listener";
 
     internal const string SqlDataWriteConnectionOpenBeforeCommand = "System.Data.SqlClient.WriteConnectionOpenBefore";
     internal const string SqlMicrosoftWriteConnectionOpenBeforeCommand = "Microsoft.Data.SqlClient.WriteConnectionOpenBefore";

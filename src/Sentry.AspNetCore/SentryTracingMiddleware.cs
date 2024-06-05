@@ -13,7 +13,7 @@ namespace Sentry.AspNetCore;
 internal class SentryTracingMiddleware
 {
     private const string OperationName = "http.server";
-    internal static readonly Origin AspNetCoreOrigin = "auto.http.aspnetcore";
+    internal const string AspNetCoreOrigin = "auto.http.aspnetcore";
 
     private readonly RequestDelegate _next;
     private readonly Func<IHub> _getHub;

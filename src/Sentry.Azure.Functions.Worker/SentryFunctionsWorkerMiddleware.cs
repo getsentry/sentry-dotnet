@@ -2,14 +2,13 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Middleware;
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Protocol;
 
 namespace Sentry.Azure.Functions.Worker;
 
 internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
 {
     private const string Operation = "function";
-    private static readonly Origin AzureFunctionsOrigin = "auto.function.azure";
+    internal const string AzureFunctionsOrigin = "auto.function.azure";
 
     private readonly IHub _hub;
     private readonly IDiagnosticLogger? _logger;

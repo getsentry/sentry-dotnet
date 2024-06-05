@@ -1,5 +1,6 @@
 using Sentry.Internal;
 using Sentry.Protocol;
+using OriginHelper = Sentry.Internal.OriginHelper;
 
 namespace Sentry;
 
@@ -171,5 +172,17 @@ public class SpanTracer : IBaseTracer, ISpan
     public SentryTraceHeader GetTraceHeader() => new(TraceId, SpanId, IsSampled);
 
     /// <inheritdoc />
-    public Origin? Origin { get; set; }
+    public string? Origin
+    {
+        get => _origin;
+        internal set
+        {
+            if (!OriginHelper.IsValidOrigin(value))
+            {
+                throw new ArgumentException("Invalid origin");
+            }
+            _origin = value;
+        }
+    }
+    private string? _origin;
 }

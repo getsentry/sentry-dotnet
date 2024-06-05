@@ -25,7 +25,7 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable, ITra
     }
 
     /// <inheritdoc />
-    public Origin? Origin
+    public string? Origin
     {
         get => Contexts.Trace.Origin;
         private set => Contexts.Trace.Origin = value;

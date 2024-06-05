@@ -1,3 +1,5 @@
+using Sentry.Internal;
+
 namespace Sentry.EntityFramework;
 
 internal class SentryQueryPerformanceListener : IDbCommandInterceptor

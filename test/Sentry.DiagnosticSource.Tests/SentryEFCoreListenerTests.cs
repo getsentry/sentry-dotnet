@@ -292,9 +292,9 @@ public class SentryEFCoreListenerTests
                 null, Arg.Any<object[]>());
 
         // Check Origin
-        Assert.Equal(((SpanTracer)compilerSpan).Origin, SentryEFCoreListener.EFCoreListenerOrigin);
-        Assert.Equal(((SpanTracer)connectionSpan).Origin, SentryEFCoreListener.EFCoreListenerOrigin);
-        Assert.Equal(((SpanTracer)commandSpan).Origin, SentryEFCoreListener.EFCoreListenerOrigin);
+        ((SpanTracer)compilerSpan).Origin.Should().Be(SentryEFCoreListener.EFCoreListenerOrigin);
+        ((SpanTracer)connectionSpan).Origin.Should().Be(SentryEFCoreListener.EFCoreListenerOrigin);
+        ((SpanTracer)commandSpan).Origin.Should().Be(SentryEFCoreListener.EFCoreListenerOrigin);
     }
 
     [Fact]

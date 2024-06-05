@@ -1,4 +1,5 @@
 using Sentry.Protocol;
+using OriginHelper = Sentry.Internal.OriginHelper;
 
 namespace Sentry;
 
@@ -34,7 +35,19 @@ public class SpanContext : ITraceContext, ITraceContextInternal
     public Instrumenter Instrumenter { get; internal set; } = Instrumenter.Sentry;
 
     /// <inheritdoc/>
-    public Origin? Origin { get; set; }
+    public string? Origin
+    {
+        get => _origin;
+        internal set
+        {
+            if (!OriginHelper.IsValidOrigin(value))
+            {
+                throw new ArgumentException("Invalid origin");
+            }
+            _origin = value;
+        }
+    }
+    private string? _origin;
 
     /// <summary>
     /// Initializes an instance of <see cref="SpanContext"/>.

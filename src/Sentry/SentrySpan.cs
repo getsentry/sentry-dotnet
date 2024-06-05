@@ -3,6 +3,7 @@ using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
 using Sentry.Protocol.Metrics;
+using OriginHelper = Sentry.Internal.OriginHelper;
 
 namespace Sentry;
 
@@ -184,5 +185,17 @@ public class SentrySpan : ISpanData, ISentryJsonSerializable, ITraceContextInter
     }
 
     /// <inheritdoc />
-    public Origin? Origin { get; internal set; }
+    public string? Origin
+    {
+        get => _origin;
+        internal set
+        {
+            if (!OriginHelper.IsValidOrigin(value))
+            {
+                throw new ArgumentException("Invalid origin");
+            }
+            _origin = value;
+        }
+    }
+    private string? _origin;
 }
