@@ -5,9 +5,15 @@
 ### Features
 
 - Added a new package `Sentry.AspNetCore.Blazor`. This packages provides you with an extension to `WebAssemblyHostBuilder` to allow SDK configuration via the builder pattern. This package gives us an entry point and the ability to extend the SDKs support and out-of-the-box offering. You can follow the progress and leave feedback either ([here](https://github.com/getsentry/sentry-dotnet/issues/2329)) for extending the support for Blazor Server or ([here](https://github.com/getsentry/sentry-dotnet/issues/2021)) for Blazor WebAssembly support ([#3386](https://github.com/getsentry/sentry-dotnet/pull/3386))
+### Fixes
+
+- Fixed null IServiceProvider in anonymous routes with OpenTelemetry ([#3401](https://github.com/getsentry/sentry-dotnet/pull/3401))
 
 ### Dependencies
 
+- Bump CLI from v2.31.2 to v2.32.1 ([#3398](https://github.com/getsentry/sentry-dotnet/pull/3398))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2321)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.31.2...2.32.1)
 - Bump Native SDK from v0.7.4 to v0.7.5 ([#3399](https://github.com/getsentry/sentry-dotnet/pull/3399))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#075)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.7.4...0.7.5)
@@ -20,6 +26,7 @@
 
 ### Features
 
+- The SDK now supports monitor upserting. You can programmatically set up your monitors via the options callback in `SentrySdk.CaptureCheckIn` ([#3330](https://github.com/getsentry/sentry-dotnet/pull/3330))
 - Added an `SentrySdk.RunAsyncVoid` helper method that lets you capture exceptions from `async void` methods ([#3379](https://github.com/getsentry/sentry-dotnet/pull/3379))
 
 ### Fixes
