@@ -11,27 +11,22 @@ internal abstract class EFDiagnosticSourceHelper
 
     protected abstract string? GetDescription(object? diagnosticSourceValue);
 
-    protected static string? GetDatabaseName(object? diagnosticSourceValue) =>
-        diagnosticSourceValue?.GetStringProperty("Connection.Database");
+    protected string? GetDatabaseName(object? diagnosticSourceValue) =>
+        diagnosticSourceValue?.GetStringProperty("Connection.Database", Options.DiagnosticLogger);
 
-    protected static string? GetDatabaseSystem(object? diagnosticSourceValue)
+    protected string? GetDatabaseSystem(object? diagnosticSourceValue)
     {
-        var providerName = diagnosticSourceValue?.GetStringProperty("Context.Database.ProviderName");
+        var providerName = diagnosticSourceValue?.GetStringProperty("Context.Database.ProviderName", Options.DiagnosticLogger);
         if (providerName is null)
         {
             return null;
         }
 
-        if (DatabaseProviderSystems.ProviderSystems.TryGetValue(providerName, out var dbSystem))
-        {
-            return dbSystem;
-        }
-
-        return null;
+        return DatabaseProviderSystems.ProviderSystems.GetValueOrDefault(providerName);
     }
 
-    protected static string? GetDatabaseServerAddress(object? diagnosticSourceValue) =>
-        diagnosticSourceValue?.GetStringProperty("Connection.DataSource");
+    protected string? GetDatabaseServerAddress(object? diagnosticSourceValue) =>
+        diagnosticSourceValue?.GetStringProperty("Connection.DataSource", Options.DiagnosticLogger);
 
     internal EFDiagnosticSourceHelper(IHub hub, SentryOptions options)
     {
@@ -41,7 +36,7 @@ internal abstract class EFDiagnosticSourceHelper
 
     protected static Guid? TryGetConnectionId(ISpan span) => span.Extra.TryGetValue<string, Guid?>(EFKeys.DbConnectionId);
 
-    protected static Guid? GetConnectionId(object? diagnosticSourceValue) => diagnosticSourceValue?.GetGuidProperty("ConnectionId");
+    protected Guid? GetConnectionId(object? diagnosticSourceValue) => diagnosticSourceValue?.GetGuidProperty("ConnectionId", Options.DiagnosticLogger);
 
     protected static void SetConnectionId(ISpan span, Guid? connectionId)
     {

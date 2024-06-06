@@ -1,3 +1,5 @@
+using Sentry.Extensibility;
+
 namespace Sentry.Internal.DiagnosticSource;
 
 /// <summary>
@@ -11,11 +13,11 @@ namespace Sentry.Internal.DiagnosticSource;
 internal static class ReflectionHelper
 {
     [UnconditionalSuppressMessage("TrimAnalyzer", "IL2075", Justification = AotHelper.SuppressionJustification)]
-    public static object? GetProperty(this object obj, string name)
+    public static object? GetProperty(this object obj, string name, IDiagnosticLogger? logger = null)
     {
         if (AotHelper.IsTrimmed)
         {
-            Debug.WriteLine("ReflectionHelper.GetProperty should not be used when trimming is enabled");
+            logger?.LogInfo("ReflectionHelper.GetProperty should not be used when trimming is enabled");
             return null;
         }
 
@@ -36,9 +38,9 @@ internal static class ReflectionHelper
         return currentObj;
     }
 
-    public static Guid? GetGuidProperty(this object obj, string name) =>
-        obj.GetProperty(name) as Guid?;
+    public static Guid? GetGuidProperty(this object obj, string name, IDiagnosticLogger? logger = null) =>
+        obj.GetProperty(name, logger) as Guid?;
 
-    public static string? GetStringProperty(this object obj, string name) =>
-        obj.GetProperty(name) as string;
+    public static string? GetStringProperty(this object obj, string name, IDiagnosticLogger? logger = null) =>
+        obj.GetProperty(name, logger) as string;
 }
