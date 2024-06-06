@@ -38,7 +38,10 @@ public static class ScopeExtensions
 
         if (options.SendDefaultPii && !scope.HasUser())
         {
-            var userFactory = context.RequestServices.GetService<ISentryUserFactory>();
+            // Although the compiler suggests context.RequestServices cannot be null, in practice it can be, so we
+            // have a null check here.
+            // See: https://github.com/getsentry/sentry-dotnet/issues/3395
+            var userFactory = context.RequestServices?.GetService<ISentryUserFactory>();
             var user = userFactory?.Create();
 
             if (user != null)
