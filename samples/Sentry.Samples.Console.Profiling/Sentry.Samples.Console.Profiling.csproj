@@ -9,4 +9,7 @@
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     <ProjectReference Include="..\..\src\Sentry.Profiling\Sentry.Profiling.csproj" />
   </ItemGroup>
+
+  <!-- This is done automatically when used via NuGet: -->
+  <Import Project="..\..\src\Sentry.Profiling\buildTransitive\Sentry.Profiling.targets" />
 </Project>

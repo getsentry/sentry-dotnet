@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Sentry.Profiling;
 
 internal static class Program
 {
