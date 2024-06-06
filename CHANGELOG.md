@@ -5,6 +5,7 @@
 ### Fixes
 
 - Fixed null IServiceProvider in anonymous routes with OpenTelemetry ([#3401](https://github.com/getsentry/sentry-dotnet/pull/3401))
+- Fixed Trim warnings in Sentry.DiagnosticSource ([#3410](https://github.com/getsentry/sentry-dotnet/pull/3410))
 
 ### Dependencies
 
