@@ -1,5 +1,6 @@
 #if !NETFRAMEWORK
 using Microsoft.Extensions.Configuration;
+using Sentry.Internal.DiagnosticSource;
 
 namespace Sentry.Testing;
 
