@@ -2259,6 +2259,11 @@ interface PrivateSentrySDKOnly
     [Export ("captureViewHierarchy")]
     NSData CaptureViewHierarchy();
 
+    // +(NSDictionary<NSString *,id> * _Nullable)appStartMeasurementWithSpans;
+    [Static]
+    [NullAllowed, Export ("appStartMeasurementWithSpans")]
+    NSDictionary<NSString, NSObject> AppStartMeasurementWithSpans();
+
     // +(SentryUser * _Nonnull)userWithDictionary:(NSDictionary * _Nonnull)dictionary;
     [Static]
     [Export ("userWithDictionary:")]
