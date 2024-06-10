@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <VersionSuffix>-preview.1</VersionSuffix>
-    <RootNamespace>Sentry.AspNetCore.Blazo.WebAssembly</RootNamespace>
+    <RootNamespace>Sentry.AspNetCore.Blazor.WebAssembly</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
