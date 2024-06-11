@@ -88,11 +88,12 @@ internal sealed class SentryLogger : ILogger
         string? message,
         string category)
     {
+        exception?.SetSentryMechanism("SentryLogger", handled: !IsUnhandledWasmException(id));
         var @event = new SentryEvent(exception)
         {
             Logger = category,
             Message = message,
-            Level = logLevel.ToSentryLevel()
+            Level = logLevel.ToSentryLevel(),
         };
 
         if (state is IEnumerable<KeyValuePair<string, object>> pairs)
@@ -200,5 +201,12 @@ internal sealed class SentryLogger : ILogger
                 "Microsoft.EntityFrameworkCore.Query.QueryIterationFailed" or
                 "Microsoft.EntityFrameworkCore.Query.InvalidIncludePathError" or
                 "Microsoft.EntityFrameworkCore.Update.OptimisticConcurrencyException";
+    }
+
+    internal static bool IsUnhandledWasmException(EventId eventId)
+    {
+        return eventId.Name is
+                "ExceptionRenderingComponent" or
+                "NavigationFailed";
     }
 }
