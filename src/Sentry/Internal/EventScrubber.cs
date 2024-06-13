@@ -1,7 +1,7 @@
 namespace Sentry.Internal;
 
-using Sentry;
 using System.Collections.Generic;
+using Sentry;
 
 internal class EventScrubber
 {
@@ -10,14 +10,43 @@ internal class EventScrubber
     internal static readonly string[] DefaultDenylist =
     [
         // stolen from relay
-        "password", "passwd", "secret", "api_key", "apikey", "auth", "credentials",
-        "mysql_pwd", "privatekey", "private_key", "token", "ip_address", "session",
+        "password",
+        "passwd",
+        "secret",
+        "api_key",
+        "apikey",
+        "auth",
+        "credentials",
+        "mysql_pwd",
+        "privatekey",
+        "private_key",
+        "token",
+        "ip_address",
+        "session",
         // common names used in web frameworks
-        "csrftoken", "sessionid",
-        "remote_addr", "x_csrftoken", "x_forwarded_for", "set_cookie", "cookie",
-        "authorization", "x_api_key", "x_forwarded_for", "x_real_ip",
-        "aiohttp_session", "connect.sid", "csrf_token", "csrf", "_csrf", "_csrf_token",
-        "PHPSESSID", "_session", "symfony", "user_session", "_xsrf", "XSRF-TOKEN"
+        "csrftoken",
+        "sessionid",
+        "remote_addr",
+        "x_csrftoken",
+        "x_forwarded_for",
+        "set_cookie",
+        "cookie",
+        "authorization",
+        "x_api_key",
+        "x_forwarded_for",
+        "x_real_ip",
+        "aiohttp_session",
+        "connect.sid",
+        "csrf_token",
+        "csrf",
+        "_csrf",
+        "_csrf_token",
+        "PHPSESSID",
+        "_session",
+        "symfony",
+        "user_session",
+        "_xsrf",
+        "XSRF-TOKEN"
     ];
 
     public EventScrubber()

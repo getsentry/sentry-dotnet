@@ -14,7 +14,8 @@ public class EventScrubberTests
                             """;
         var ev = new SentryEvent
         {
-            Request = new SentryRequest(){
+            Request = new SentryRequest()
+            {
                 Url = "http://absolute.uri/foo",
                 Method = "POST",
                 ApiTarget = "apiType",
