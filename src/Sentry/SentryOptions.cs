@@ -1770,20 +1770,47 @@ public class SentryOptions
             _eventScrubber ??= new EventScrubber(_denyList);
             return _eventScrubber;
         }
+        set => _eventScrubber = value;
     }
 
     private IList<string> _denyList = EventScrubber.DefaultDenylist;
 
-    public void ScrubData(bool enableScrubbing)
+    /// <summary>
+    /// By default, sensitive data is scrubbed from events that get sent to Sentry. This option allows you to disable
+    /// this default behavior. Alternatively you can use <see cref="ScrubData(IEnumerable{string})"/> or
+    /// <see cref="ScrubData(Action{IList{string}})"/> to configure scrubbing behaviour.
+    /// </summary>
+    public void DisableScrubbing()
     {
-        _denyList = enableScrubbing ? EventScrubber.DefaultDenylist : [];
+        _denyList = [];
     }
 
+    /// <summary>
+    /// <para>
+    /// By default, sensitive data is scrubbed from events that get sent to Sentry using a "deny list" that contains
+    /// the names of various keys that are commonly used to store sensitive data. If items from the deny list are found
+    /// in Cookies, Headers, StackFrames etc. then the value for these items will be scrubbed and replaced with `*****`.
+    /// </para>
+    /// <para>
+    /// This method allows you to override the default deny list that Sentry uses with your own list of strings used to
+    /// identify potentially sensitive data.
+    /// </para>
+    /// </summary>
     public void ScrubData(IEnumerable<string> denyList)
     {
         _denyList = denyList.ToList();
     }
 
+    /// <summary>
+    /// <para>
+    /// By default, sensitive data is scrubbed from events that get sent to Sentry using a "deny list" that contains
+    /// the names of various keys that are commonly used to store sensitive data. If items from the deny list are found
+    /// in Cookies, Headers, StackFrames etc. then the value for these items will be scrubbed and replaced with `*****`.
+    /// </para>
+    /// <para>
+    /// This method allows you to modify the list of strings used to identify potentially sensitive data.
+    /// </para>
+    /// </summary>
     public void ScrubData(Action<IList<string>> configureDenyList)
     {
         configureDenyList(_denyList);

@@ -59,7 +59,7 @@ internal class EventScrubber(IList<string> denylist)
         }
     }
 
-    public void ScrubExtra(SentryEvent ev)
+    private void ScrubExtra(SentryEvent ev)
     {
         foreach (var key in ev.Extra.Keys.ToList())
         {
@@ -115,7 +115,7 @@ internal class EventScrubber(IList<string> denylist)
         }
     }
 
-    public void ScrubEvent(SentryEvent ev)
+    public virtual void ScrubEvent(SentryEvent ev)
     {
         ScrubRequest(ev);
         ScrubExtra(ev);
