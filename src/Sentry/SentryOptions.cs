@@ -1757,4 +1757,35 @@ public class SentryOptions
         // In the future, this will most likely contain process ID
         return TryGetDsnSpecificCacheDirectoryPath();
     }
+
+    private EventScrubber? _eventScrubber;
+    internal EventScrubber? EventScrubber
+    {
+        get
+        {
+            if (_denyList.Count == 0)
+            {
+                return null;
+            }
+            _eventScrubber ??= new EventScrubber(_denyList);
+            return _eventScrubber;
+        }
+    }
+
+    private IList<string> _denyList = EventScrubber.DefaultDenylist;
+
+    public void ScrubData(bool enableScrubbing)
+    {
+        _denyList = enableScrubbing ? EventScrubber.DefaultDenylist : [];
+    }
+
+    public void ScrubData(IEnumerable<string> denyList)
+    {
+        _denyList = denyList.ToList();
+    }
+
+    public void ScrubData(Action<IList<string>> configureDenyList)
+    {
+        configureDenyList(_denyList);
+    }
 }
