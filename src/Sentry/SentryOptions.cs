@@ -1767,13 +1767,13 @@ public class SentryOptions
             {
                 return null;
             }
-            _eventScrubber ??= new EventScrubber(_denyList);
+            _eventScrubber ??= new EventScrubber(_denyList); // Instantiate and cache the scrubber only if needed
             return _eventScrubber;
         }
         set => _eventScrubber = value;
     }
 
-    private IList<string> _denyList = EventScrubber.DefaultDenylist;
+    private List<string> _denyList = EventScrubber.DefaultDenylist.ToList();
 
     /// <summary>
     /// By default, sensitive data is scrubbed from events that get sent to Sentry. This option allows you to disable
@@ -1813,6 +1813,6 @@ public class SentryOptions
     /// </summary>
     public void ScrubData(Action<IList<string>> configureDenyList)
     {
-        configureDenyList(_denyList);
+        configureDenyList.Invoke(_denyList);
     }
 }

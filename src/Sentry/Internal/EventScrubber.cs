@@ -3,9 +3,9 @@ namespace Sentry.Internal;
 using Sentry;
 using System.Collections.Generic;
 
-internal class EventScrubber(IList<string> denylist)
+internal class EventScrubber(List<string>? denylist = null)
 {
-    private IList<string> Denylist { get; } = denylist;
+    internal List<string> Denylist { get; } = denylist ?? DefaultDenylist.ToList();
     internal const string ScrubbedText = "*****";
     internal static readonly string[] DefaultDenylist =
     [
@@ -19,10 +19,6 @@ internal class EventScrubber(IList<string> denylist)
         "aiohttp_session", "connect.sid", "csrf_token", "csrf", "_csrf", "_csrf_token",
         "PHPSESSID", "_session", "symfony", "user_session", "_xsrf", "XSRF-TOKEN"
     ];
-
-    public EventScrubber() : this(DefaultDenylist)
-    {
-    }
 
     private void ScrubStringDictionary(IDictionary<string, string> dict)
     {
