@@ -1,3 +1,4 @@
+#if !__MOBILE__
 namespace Sentry.Tests.Internals;
 
 [UsesVerify]
@@ -142,3 +143,4 @@ public class EventScrubberTests
         frame!.InternalVars!["password"].Should().Be(EventScrubber.ScrubbedText);
     }
 }
+#endif
