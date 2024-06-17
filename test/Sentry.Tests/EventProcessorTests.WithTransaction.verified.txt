@@ -36,6 +36,7 @@
               }
             },
             User: {
+              Id: Guid_3,
               IpAddress: {{auto}}
             },
             Environment: production

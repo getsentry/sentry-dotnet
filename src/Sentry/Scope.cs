@@ -19,7 +19,6 @@ public class Scope : IEventLike
 
     private readonly object _lastEventIdSync = new();
     private SentryId _lastEventId;
-    private readonly InstallationIdHelper _installationIdHelper;
 
     internal SentryId LastEventId
     {
@@ -122,8 +121,7 @@ public class Scope : IEventLike
     {
         get => _user ??= new SentryUser
         {
-            PropertyChanged = UserChanged,
-            Id = _installationIdHelper.TryGetInstallationId()
+            PropertyChanged = UserChanged
         };
         set
         {
@@ -133,7 +131,6 @@ public class Scope : IEventLike
                 if (_user is not null)
                 {
                     _user.PropertyChanged = UserChanged;
-                    _user.Id ??= _installationIdHelper.TryGetInstallationId();
                 }
 
                 UserChanged.Invoke(_user);
@@ -246,7 +243,6 @@ public class Scope : IEventLike
     {
         Options = options ?? new SentryOptions();
         PropagationContext = new SentryPropagationContext(propagationContext);
-        _installationIdHelper = new InstallationIdHelper(Options);
     }
 
     // For testing. Should explicitly require SentryOptions.

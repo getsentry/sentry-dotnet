@@ -10,6 +10,9 @@ internal class InstallationIdHelper
     private readonly SentryOptions _options;
     private readonly string? _persistenceDirectoryPath;
 
+    private Lazy<string?> LazyInstallationId => new(TryGetInstallationId);
+    public string?InstallationId => LazyInstallationId.Value;
+
     public InstallationIdHelper(SentryOptions options, string? persistenceDirectoryPath = null)
     {
         _options = options;
@@ -18,7 +21,7 @@ internal class InstallationIdHelper
         _persistenceDirectoryPath = persistenceDirectoryPath ?? options.TryGetDsnSpecificCacheDirectoryPath();
     }
 
-    public string? TryGetInstallationId()
+    private string? TryGetInstallationId()
     {
         // Installation ID could have already been resolved by this point
         if (!string.IsNullOrWhiteSpace(_installationId))

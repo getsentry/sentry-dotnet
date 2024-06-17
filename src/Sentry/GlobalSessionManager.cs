@@ -187,7 +187,7 @@ internal class GlobalSessionManager : ISessionManager
 
         // Extract other parameters
         var environment = _options.SettingLocator.GetEnvironment();
-        var distinctId = _installationIdHelper.TryGetInstallationId();
+        var distinctId = _installationIdHelper.InstallationId;
 
         // Create new session
         var session = new SentrySession(distinctId, release, environment);
