@@ -22,6 +22,7 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
         }
       },
       User: {
+        Id: Guid_1,
         IpAddress: {{auto}}
       },
       Breadcrumbs: [
@@ -69,6 +70,7 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
         }
       },
       User: {
+        Id: Guid_1,
         IpAddress: {{auto}}
       },
       Spans: [
@@ -80,9 +82,9 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
           IsSampled: true,
           Extra: {
             bytes_sent : 510,
-            db.connection_id: Guid_1,
+            db.connection_id: Guid_2,
             db.name: SqlListenerTests.verify_LoggingAsync,
-            db.operation_id: Guid_2,
+            db.operation_id: Guid_3,
             db.server: (LocalDb)\SqlListenerTests,
             db.system: sql,
             rows_sent: 0
@@ -103,9 +105,9 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
           Status: InternalError,
           IsSampled: true,
           Extra: {
-            db.connection_id: Guid_1,
+            db.connection_id: Guid_2,
             db.name: SqlListenerTests.verify_LoggingAsync,
-            db.operation_id: Guid_3,
+            db.operation_id: Guid_4,
             db.system: sql
           }
         }
