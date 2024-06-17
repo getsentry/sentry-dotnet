@@ -187,13 +187,15 @@ $Text = $Text -replace '(?m)(^\s*\/\/[^\r\n]*$\s*\[Export \("serialize"\)\]$\s*)
 
 $Text = $Text -replace '.*SentryEnvelope .*?[\s\S]*?\n\n', ''
 $Text = $Text -replace '.*typedef.*SentryOnAppStartMeasurementAvailable.*?[\s\S]*?\n\n', ''
+$Text = $Text -replace '\n.*SentryReplayBreadcrumbConverter.*?[\s\S]*?\);\n', ''
 
 $protocolsToRemove = @(
     'SentryMXManagerDelegate',
     'SentryMetricsAPIDelegate',
     'SentryReplayVideoMaker',
     'SentryViewScreenshotProvider',
-    'SentryRedactOptions'
+    'SentryRedactOptions',
+    'SentryReplayBreadcrumbConverter'
 )
 
 foreach ($protocol in $protocolsToRemove) {
@@ -224,6 +226,7 @@ $interfacesToRemove = @(
     'SentryRRWebVideoEvent',
     'SentryReplayBreadcrumbConverter',
     'SentryReplayRecording',
+    'SentryTouchTracker',
     'SentryVideoInfo',
     'SentryViewPhotographer',
     'SwiftDescriptor',
@@ -240,7 +243,8 @@ $propertiesToRemove = @(
     'SentryOnAppStartMeasurementAvailable',
     'SentryMetricsAPI',
     'SentryExperimentalOptions',
-    'description'
+    'description',
+    'enableMetricKitRawPayload'
 )
 
 foreach ($property in $propertiesToRemove) {
