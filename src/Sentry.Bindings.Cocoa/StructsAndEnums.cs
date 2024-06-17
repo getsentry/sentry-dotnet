@@ -81,6 +81,7 @@ internal enum SentryLevel : ulong
 internal enum SentryRRWebEventType : long
 {
     None = 0,
+    Touch = 3,
     Meta = 4,
     Custom = 5
 }
