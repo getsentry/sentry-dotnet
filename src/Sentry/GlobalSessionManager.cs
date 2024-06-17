@@ -10,17 +10,16 @@ internal class GlobalSessionManager : ISessionManager
 {
     private const string PersistedSessionFileName = ".session";
 
-    private readonly object _installationIdLock = new();
-
     private readonly ISystemClock _clock;
     private readonly Func<string, PersistedSessionUpdate> _persistedSessionProvider;
     private readonly SentryOptions _options;
 
     private readonly string? _persistenceDirectoryPath;
 
-    private string? _resolvedInstallationId;
     private SentrySession? _currentSession;
     private DateTimeOffset? _lastPauseTimestamp;
+
+    private readonly InstallationIdHelper _installationIdHelper;
 
     // Internal for testing
     internal SentrySession? CurrentSession => _currentSession;
@@ -40,124 +39,7 @@ internal class GlobalSessionManager : ISessionManager
         // TODO: session file should really be process-isolated, but we
         // don't have a proper mechanism for that right now.
         _persistenceDirectoryPath = options.TryGetDsnSpecificCacheDirectoryPath();
-    }
-
-    private string? TryGetPersistentInstallationId()
-    {
-        try
-        {
-            var directoryPath =
-                _persistenceDirectoryPath
-                ?? Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "Sentry",
-                    _options.Dsn!.GetHashString());
-
-            Directory.CreateDirectory(directoryPath);
-
-            _options.LogDebug("Created directory for installation ID file ({0}).", directoryPath);
-
-            var filePath = Path.Combine(directoryPath, ".installation");
-
-            // Read installation ID stored in a file
-            try
-            {
-                return File.ReadAllText(filePath);
-            }
-            catch (FileNotFoundException)
-            {
-                _options.LogDebug("File containing installation ID does not exist ({0}).", filePath);
-            }
-            catch (DirectoryNotFoundException)
-            {
-                // on PS4 we're seeing CreateDirectory work but ReadAllText throw DirectoryNotFoundException
-                _options.LogDebug("Directory containing installation ID does not exist ({0}).", filePath);
-            }
-
-            // Generate new installation ID and store it in a file
-            var id = Guid.NewGuid().ToString();
-            File.WriteAllText(filePath, id);
-
-            _options.LogDebug("Saved installation ID '{0}' to file '{1}'.", id, filePath);
-            return id;
-        }
-        // If there's no write permission or the platform doesn't support this, we handle
-        // and let the next installation id strategy kick in
-        catch (Exception ex)
-        {
-            _options.LogError(ex, "Failed to resolve persistent installation ID.");
-            return null;
-        }
-    }
-
-    private string? TryGetHardwareInstallationId()
-    {
-        try
-        {
-            // Get MAC address of the first network adapter
-            var installationId = NetworkInterface
-                .GetAllNetworkInterfaces()
-                .Where(nic =>
-                    nic.OperationalStatus == OperationalStatus.Up &&
-                    nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                .Select(nic => nic.GetPhysicalAddress().ToString())
-                .FirstOrDefault();
-
-            if (string.IsNullOrWhiteSpace(installationId))
-            {
-                _options.LogError("Failed to find an appropriate network interface for installation ID.");
-                return null;
-            }
-
-            return installationId;
-        }
-        catch (Exception ex)
-        {
-            _options.LogError(ex, "Failed to resolve hardware installation ID.");
-            return null;
-        }
-    }
-
-    // Internal for testing
-    internal static string GetMachineNameInstallationId() =>
-        // Never fails
-        Environment.MachineName.GetHashString();
-
-    private string? TryGetInstallationId()
-    {
-        // Installation ID could have already been resolved by this point
-        if (!string.IsNullOrWhiteSpace(_resolvedInstallationId))
-        {
-            return _resolvedInstallationId;
-        }
-
-        // Resolve installation ID in a locked manner to guarantee consistency because ID can be non-deterministic.
-        // Note: in the future, this probably has to be synchronized across multiple processes too.
-        lock (_installationIdLock)
-        {
-            // We may have acquired the lock after another thread has already resolved
-            // installation ID, so check the cache one more time before proceeding with I/O.
-            if (!string.IsNullOrWhiteSpace(_resolvedInstallationId))
-            {
-                return _resolvedInstallationId;
-            }
-
-            var id =
-                TryGetPersistentInstallationId() ??
-                TryGetHardwareInstallationId() ??
-                GetMachineNameInstallationId();
-
-            if (!string.IsNullOrWhiteSpace(id))
-            {
-                _options.LogDebug("Resolved installation ID '{0}'.", id);
-            }
-            else
-            {
-                _options.LogDebug("Failed to resolve installation ID.");
-            }
-
-            return _resolvedInstallationId = id;
-        }
+        _installationIdHelper = new InstallationIdHelper(options, _persistenceDirectoryPath);
     }
 
     // Take pause timestamp directly instead of referencing _lastPauseTimestamp to avoid
@@ -305,7 +187,7 @@ internal class GlobalSessionManager : ISessionManager
 
         // Extract other parameters
         var environment = _options.SettingLocator.GetEnvironment();
-        var distinctId = TryGetInstallationId();
+        var distinctId = _installationIdHelper.TryGetInstallationId();
 
         // Create new session
         var session = new SentrySession(distinctId, release, environment);

@@ -502,6 +502,29 @@ public class ScopeTests
         Assert.Null(exception);
     }
 
+    [Fact]
+    public void UserNotSet_DefaultUserId()
+    {
+        // Act
+        var scope = new Scope(new SentryOptions() );
+
+        // Assert
+        scope.User.Id.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void User_SetWithoutId_DefaultUserId()
+    {
+        // Arrange
+        var scope = new Scope(new SentryOptions() );
+
+        // Act
+        scope.User = new SentryUser();
+
+        // Assert
+        scope.User.Id.Should().NotBeNull();
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
