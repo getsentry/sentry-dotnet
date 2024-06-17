@@ -11,7 +11,7 @@ internal class InstallationIdHelper
     private readonly string? _persistenceDirectoryPath;
 
     private Lazy<string?> LazyInstallationId => new(TryGetInstallationId);
-    public string?InstallationId => LazyInstallationId.Value;
+    public string? InstallationId => LazyInstallationId.Value;
 
     public InstallationIdHelper(SentryOptions options, string? persistenceDirectoryPath = null)
     {
