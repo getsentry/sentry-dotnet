@@ -10,18 +10,13 @@ internal class InstallationIdHelper
     private readonly SentryOptions _options;
     private readonly string? _persistenceDirectoryPath;
 
-    private Lazy<string?> LazyInstallationId => new(TryGetInstallationId);
-    public string?InstallationId => LazyInstallationId.Value;
-
-    public InstallationIdHelper(SentryOptions options, string? persistenceDirectoryPath = null)
+    public InstallationIdHelper(SentryOptions options)
     {
         _options = options;
-        // TODO: session file should really be process-isolated, but we
-        // don't have a proper mechanism for that right now.
-        _persistenceDirectoryPath = persistenceDirectoryPath ?? options.TryGetDsnSpecificCacheDirectoryPath();
+        _persistenceDirectoryPath = options.CacheDirectoryPath ?? options.TryGetDsnSpecificCacheDirectoryPath();
     }
 
-    private string? TryGetInstallationId()
+    public string? TryGetInstallationId()
     {
         // Installation ID could have already been resolved by this point
         if (!string.IsNullOrWhiteSpace(_installationId))
@@ -62,12 +57,9 @@ internal class InstallationIdHelper
     {
         try
         {
-            var directoryPath =
-                _persistenceDirectoryPath
-                ?? Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "Sentry",
-                    _options.Dsn!.GetHashString());
+            var rootPath = _persistenceDirectoryPath ??
+                           Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var directoryPath = Path.Combine(rootPath, "Sentry", _options.Dsn!.GetHashString());
 
             Directory.CreateDirectory(directoryPath);
 

@@ -19,8 +19,6 @@ internal class GlobalSessionManager : ISessionManager
     private SentrySession? _currentSession;
     private DateTimeOffset? _lastPauseTimestamp;
 
-    private readonly InstallationIdHelper _installationIdHelper;
-
     // Internal for testing
     internal SentrySession? CurrentSession => _currentSession;
 
@@ -39,7 +37,6 @@ internal class GlobalSessionManager : ISessionManager
         // TODO: session file should really be process-isolated, but we
         // don't have a proper mechanism for that right now.
         _persistenceDirectoryPath = options.TryGetDsnSpecificCacheDirectoryPath();
-        _installationIdHelper = new InstallationIdHelper(options, _persistenceDirectoryPath);
     }
 
     // Take pause timestamp directly instead of referencing _lastPauseTimestamp to avoid
@@ -187,7 +184,7 @@ internal class GlobalSessionManager : ISessionManager
 
         // Extract other parameters
         var environment = _options.SettingLocator.GetEnvironment();
-        var distinctId = _installationIdHelper.InstallationId;
+        var distinctId = _options.InstallationId;
 
         // Create new session
         var session = new SentrySession(distinctId, release, environment);

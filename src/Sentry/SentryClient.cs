@@ -19,7 +19,6 @@ public class SentryClient : ISentryClient, IDisposable
     private readonly ISessionManager _sessionManager;
     private readonly RandomValuesFactory _randomValuesFactory;
     private readonly Enricher _enricher;
-    private readonly InstallationIdHelper _installationIdHelper;
 
     internal IBackgroundWorker Worker { get; }
 
@@ -48,7 +47,6 @@ public class SentryClient : ISentryClient, IDisposable
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
         _enricher = new Enricher(options);
-        _installationIdHelper = new InstallationIdHelper(_options);
 
         options.SetupLogging(); // Only relevant if this client wasn't created as a result of calling Init
 
@@ -159,7 +157,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
 
         // Set the user id to our fallback, if this hasn't already been set
-        transaction.User.Id ??= _installationIdHelper.InstallationId;
+        transaction.User.Id ??= _options.InstallationId;
 
         processedTransaction = BeforeSendTransaction(processedTransaction, hint);
         if (processedTransaction is null) // Rejected transaction
@@ -325,7 +323,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
 
         // Set the user id to our fallback, if this hasn't already been set
-        @event.User.Id ??= _installationIdHelper.InstallationId;
+        @event.User.Id ??= _options.InstallationId;
 
         processedEvent = BeforeSend(processedEvent, hint);
         if (processedEvent == null) // Rejected event

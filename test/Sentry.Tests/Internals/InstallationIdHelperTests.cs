@@ -30,8 +30,7 @@ public class InstallationIdHelperTests
             configureOptions?.Invoke(Options);
         }
 
-        public InstallationIdHelper GetSut() =>
-            new(Options, _cacheDirectory.Path);
+        public InstallationIdHelper GetSut() => new(Options);
 
         public void Dispose() => _cacheDirectory.Dispose();
     }
