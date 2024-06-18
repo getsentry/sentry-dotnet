@@ -1,25 +1,32 @@
 ﻿@using Microsoft.Extensions.Logging
 @inject ILogger<NavMenu> Logger
+@inject NavigationManager Navigation
 
-<div @onclick="ToggleNavMenu">
+<div>
     <ul>
         <li>
-            <NavLink href="thrower">
-                Throw, Catch and Capture
-            </NavLink>
+            <a @onclick="HandleThrowerClick" href="thrower">
+                Let me throw!
+            </a>
+        </li>
+        <li>
+            <a @onclick="HandleCatcherClick" href="catcher">
+                Let me also throw, but catch!
+            </a>
         </li>
     </ul>
 </div>
 
 @code {
-    private bool _collapseNavMenu = true;
-
-    private string NavMenuCssClass => _collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
+    private void HandleThrowerClick()
     {
-        Logger.LogInformation("ToggleNavMenu {_collapseNavMenu}", _collapseNavMenu);
-        _collapseNavMenu = !_collapseNavMenu;
+        Logger.LogInformation("Heading to 'thrower'.");
+        Navigation.NavigateTo("thrower");
     }
 
+    private void HandleCatcherClick()
+    {
+        Logger.LogInformation("Heading to 'catcher'.");
+        Navigation.NavigateTo("catcher");
+    }
 }

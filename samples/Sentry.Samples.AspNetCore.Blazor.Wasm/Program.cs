@@ -13,9 +13,6 @@ try
     builder.RootComponents.Add<App>("#app");
     builder.Logging.SetMinimumLevel(LogLevel.Debug);
 
-    // Captures logError and higher as events
-    builder.Logging.AddSentry(o => o.InitializeSdk = false);
-
     builder.Services.AddScoped(_ =>
         new HttpClient
         {
