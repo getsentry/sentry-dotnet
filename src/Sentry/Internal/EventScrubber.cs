@@ -74,29 +74,31 @@ internal class EventScrubber
     {
         ScrubStringDictionary(ev.Request.Headers);
 
-        if (ev.Request.Cookies != null)
+        if (ev.Request.Cookies == null)
         {
-            var cookies = ev.Request.Cookies.Split(';');
-            foreach (var cookie in cookies)
-            {
-                var parts = cookie.Split('=');
-                if (parts.Length != 2)
-                {
-                    continue;
-                }
+            return;
+        }
 
-                var name = parts[0].Trim();
-                if (Denylist.Contains(name, StringComparer.InvariantCultureIgnoreCase))
-                {
-                    ev.Request.Cookies = ev.Request.Cookies.Replace(cookie, $"{name}={ScrubbedText}");
-                }
+        var cookies = ev.Request.Cookies.Split(';');
+        foreach (var cookie in cookies)
+        {
+            var parts = cookie.Split('=');
+            if (parts.Length != 2)
+            {
+                continue;
+            }
+
+            var name = parts[0].Trim();
+            if (Denylist.Contains(name, StringComparer.InvariantCultureIgnoreCase))
+            {
+                ev.Request.Cookies = ev.Request.Cookies.Replace(cookie, $"{name}={ScrubbedText}");
             }
         }
     }
 
     private void ScrubExtra(SentryEvent ev)
     {
-        foreach (var key in ev.Extra.Keys.ToList())
+        foreach (var key in ev.Extra.Keys)
         {
             if (Denylist.Contains(key, StringComparer.InvariantCultureIgnoreCase))
             {
@@ -119,7 +121,7 @@ internal class EventScrubber
                 continue;
             }
 
-            foreach (var key in data.Keys.ToList())
+            foreach (var key in data.Keys)
             {
                 if (Denylist.Contains(key, StringComparer.InvariantCultureIgnoreCase))
                 {
