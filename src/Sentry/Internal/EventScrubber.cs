@@ -5,7 +5,7 @@ using Sentry;
 
 internal class EventScrubber
 {
-    internal List<string> Denylist { get; }
+    internal HashSet<string> Denylist { get; }
     internal const string ScrubbedText = "*****";
     internal static readonly string[] DefaultDenylist =
     [
@@ -51,19 +51,19 @@ internal class EventScrubber
 
     public EventScrubber()
     {
-        Denylist = DefaultDenylist.ToList();
+        Denylist = new(DefaultDenylist, StringComparer.InvariantCultureIgnoreCase);
     }
 
-    internal EventScrubber(List<string> denylist)
+    internal EventScrubber(IEnumerable<string> denylist)
     {
-        Denylist = denylist;
+        Denylist = new(denylist, StringComparer.InvariantCultureIgnoreCase);
     }
 
     private void ScrubStringDictionary(IDictionary<string, string> dict)
     {
         foreach (var key in dict.Keys.ToList())
         {
-            if (Denylist.Contains(key, StringComparer.InvariantCultureIgnoreCase))
+            if (Denylist.Contains(key))
             {
                 dict[key] = ScrubbedText;
             }
@@ -100,7 +100,7 @@ internal class EventScrubber
     {
         foreach (var key in ev.Extra.Keys)
         {
-            if (Denylist.Contains(key, StringComparer.InvariantCultureIgnoreCase))
+            if (Denylist.Contains(key))
             {
                 ev.SetExtra(key, ScrubbedText);
             }
@@ -123,7 +123,7 @@ internal class EventScrubber
 
             foreach (var key in data.Keys)
             {
-                if (Denylist.Contains(key, StringComparer.InvariantCultureIgnoreCase))
+                if (Denylist.Contains(key))
                 {
                     breadcrumb.ScrubData(key, ScrubbedText);
                 }
