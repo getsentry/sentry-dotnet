@@ -61,12 +61,17 @@ internal class EventScrubber
 
     private void ScrubStringDictionary(IDictionary<string, string> dict)
     {
-        foreach (var key in dict.Keys.ToList())
+        foreach (var key in dict.Keys)
         {
             if (Denylist.Contains(key))
             {
-                dict[key] = ScrubbedText;
+                ScrubItem(key);
             }
+        }
+
+        void ScrubItem(string key)
+        {
+            dict[key] = ScrubbedText;
         }
     }
 
@@ -89,7 +94,7 @@ internal class EventScrubber
             }
 
             var name = parts[0].Trim();
-            if (Denylist.Contains(name, StringComparer.InvariantCultureIgnoreCase))
+            if (Denylist.Contains(name))
             {
                 ev.Request.Cookies = ev.Request.Cookies.Replace(cookie, $"{name}={ScrubbedText}");
             }
