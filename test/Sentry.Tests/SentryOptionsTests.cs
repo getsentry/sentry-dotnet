@@ -738,4 +738,46 @@ public partial class SentryOptionsTests
         var sut = new SentryOptions();
         Assert.Contains(sut.InAppExclude!, e => e.ToString() == expected);
     }
+
+    [Fact]
+    public void DisableScrubbing_EventScrubberIsNull()
+    {
+        // Arrange
+        var sut = new SentryOptions();
+
+        // Act
+        sut.DisableScrubbing();
+
+        // Assert
+        Assert.Null(sut.EventScrubber);
+    }
+
+    [Fact]
+    public void ScrubData_CustomList()
+    {
+        // Arrange
+        var sut = new SentryOptions();
+        List<string> denyList = ["foo", "bar"];
+
+        // Act
+        sut.ScrubData(denyList);
+
+        // Assert
+        Assert.NotNull(sut.EventScrubber);
+        sut.EventScrubber.Denylist.Should().BeEquivalentTo(denyList);
+    }
+
+    [Fact]
+    public void ScrubData_RemoveItem()
+    {
+        // Arrange
+        var sut = new SentryOptions();
+
+        // Act
+        sut.ScrubData(denyList => denyList.Remove("password"));
+
+        // Assert
+        Assert.NotNull(sut.EventScrubber);
+        sut.EventScrubber.Denylist.Should().NotContain("password");
+    }
 }

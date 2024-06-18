@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Added an event scrubber to remove sensitive data from events before sending these to Sentry ([#3419](https://github.com/getsentry/sentry-dotnet/pull/3419))
+ 
 ### Fixes
 
 - Fixed Monitor duration calculation ([#3420]https://github.com/getsentry/sentry-dotnet/pull/3420)
