@@ -204,6 +204,7 @@ $interfacesToRemove = @(
     'HTTPHeaderSanitizer',
     'LocalMetricsAggregator',
     'NSURLSessionTask',
+    'SentryBaggageSerialization',
     'SentryCurrentDateProvider',
     'SentryEnabledFeaturesBuilder',
     'SentryExperimentalOptions',
@@ -215,10 +216,19 @@ $interfacesToRemove = @(
     'SentryMetricsClient',
     'SentryOnDemandReplay',
     'SentryReplayOptions',
+    'SentryRRWebEvent',
+    'SentryRRWebCustomEvent',
+    'SentryRRWebBreadcrumbEvent',
+    'SentryRRWebMetaEvent',
+    'SentryRRWebSpanEvent',
+    'SentryRRWebVideoEvent',
+    'SentryReplayBreadcrumbConverter',
+    'SentryReplayRecording',
     'SentryVideoInfo',
     'SentryViewPhotographer',
     'SwiftDescriptor',
-    'UrlSanitized'
+    'UrlSanitized',
+    'URLSessionTaskHelper'
 )
 
 foreach ($interface in $interfacesToRemove) {

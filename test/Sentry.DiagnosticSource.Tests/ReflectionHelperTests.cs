@@ -1,6 +1,8 @@
-namespace Sentry.Tests.Internals.Extensions;
+using Sentry.Internal.DiagnosticSource;
 
-public class MiscExtensionsTests
+namespace Sentry.DiagnosticSource.Tests;
+
+public class ReflectionHelperTests
 {
     public class MyClass
     {
