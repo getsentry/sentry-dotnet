@@ -61,17 +61,16 @@ internal class EventScrubber
 
     private void ScrubStringDictionary(IDictionary<string, string> dict)
     {
+#if NETFRAMEWORK
+        foreach (var key in dict.Keys.ToArray())
+#else
         foreach (var key in dict.Keys)
+#endif
         {
             if (Denylist.Contains(key))
             {
-                ScrubItem(key);
+                dict[key] = ScrubbedText;
             }
-        }
-
-        void ScrubItem(string key)
-        {
-            dict[key] = ScrubbedText;
         }
     }
 
@@ -103,7 +102,11 @@ internal class EventScrubber
 
     private void ScrubExtra(SentryEvent ev)
     {
+#if NETFRAMEWORK
+        foreach (var key in ev.Extra.Keys.ToArray())
+#else
         foreach (var key in ev.Extra.Keys)
+#endif
         {
             if (Denylist.Contains(key))
             {
@@ -126,7 +129,11 @@ internal class EventScrubber
                 continue;
             }
 
+#if NETFRAMEWORK
+            foreach (var key in data.Keys.ToArray())
+#else
             foreach (var key in data.Keys)
+#endif
             {
                 if (Denylist.Contains(key))
                 {
