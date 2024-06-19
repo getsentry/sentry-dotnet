@@ -2,7 +2,7 @@ using BenchmarkDotNet.Attributes;
 
 namespace Sentry.Benchmarks;
 
-[SimpleJob(launchCount:1, warmupCount: 1, invocationCount: 10, iterationCount: 10)]
+[SimpleJob(launchCount: 1, warmupCount: 1, invocationCount: 10, iterationCount: 10)]
 public class TransactionBenchmarks
 {
     private const string Operation = "Operation";
