@@ -2,20 +2,17 @@
 @inject ILogger<NavMenu> Logger
 @inject NavigationManager Navigation
 
-<div>
-    <ul>
-        <li>
-            <a @onclick="HandleThrowerClick" href="thrower">
-                Let me throw!
-            </a>
-        </li>
-        <li>
-            <a @onclick="HandleCatcherClick" href="catcher">
-                Let me also throw, but catch!
-            </a>
-        </li>
-    </ul>
-</div>
+<nav>
+    <a href="/">
+        Home
+    </a>
+    <a @onclick="HandleThrowerClick" href="thrower">
+        Let me throw!
+    </a>
+    <a @onclick="HandleCatcherClick" href="catcher">
+        Let me also throw, but catch!
+    </a>
+</nav>
 
 @code {
     private void HandleThrowerClick()
