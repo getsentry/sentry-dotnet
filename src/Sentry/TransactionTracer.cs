@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.Wcf;
 using Sentry.Protocol;
 
 namespace Sentry;
@@ -167,11 +168,12 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     /// <inheritdoc />
     public IReadOnlyDictionary<string, string> Tags => _tags;
 
-#if NETSTANDARD2_1_OR_GREATER
-    private readonly ConcurrentBag<ISpan> _spans = new();
-#else
-    private ConcurrentBag<ISpan> _spans = new();
-#endif
+    internal static bool UseConcurrentBag = false;
+
+    private readonly IReadOnlyCollection<ISpan> _spans = UseConcurrentBag
+        ? new ConcurrentBag<ISpan>()
+        : new SynchronizedCollection<ISpan>();
+    // private readonly SynchronizedCollection<ISpan> _spans = new();
 
     /// <inheritdoc />
     public IReadOnlyCollection<ISpan> Spans => _spans;
@@ -304,7 +306,18 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
 
         if (!isOutOfLimit)
         {
-            _spans.Add(span);
+            switch (_spans)
+            {
+                case ConcurrentBag<ISpan> spanBag:
+                    spanBag.Add(span);
+                    break;
+                case SynchronizedCollection<ISpan> synchronizedCollection:
+                    synchronizedCollection.Add(span);
+                    break;
+            }
+
+            // TODO: Reinstate
+            // _spans.Add(span);
             _activeSpanTracker.Push(span);
         }
     }
@@ -387,7 +400,7 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
         _hub.CaptureTransaction(new SentryTransaction(this));
 
         // Release tracked spans
-        ReleaseSpans();
+        _activeSpanTracker.Clear();
     }
 
     /// <inheritdoc />
@@ -410,14 +423,4 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
 
     /// <inheritdoc />
     public SentryTraceHeader GetTraceHeader() => new(TraceId, SpanId, IsSampled);
-
-    private void ReleaseSpans()
-    {
-#if NETSTANDARD2_1_OR_GREATER
-        _spans.Clear();
-#else
-        _spans = new ConcurrentBag<ISpan>();
-#endif
-        _activeSpanTracker.Clear();
-    }
 }
