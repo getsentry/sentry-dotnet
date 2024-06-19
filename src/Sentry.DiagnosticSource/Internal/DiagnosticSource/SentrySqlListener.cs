@@ -84,8 +84,8 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         var span = parent.StartChild(operation);
         span.SetOrigin(SqlListenerOrigin);
         span.SetExtra(OTelKeys.DbSystem, "sql");
-        SetOperationId(span, value?.GetGuidProperty("OperationId"));
-        SetConnectionId(span, value?.GetGuidProperty("ConnectionId"));
+        SetOperationId(span, value?.GetGuidProperty("OperationId", _options.DiagnosticLogger));
+        SetConnectionId(span, value?.GetGuidProperty("ConnectionId", _options.DiagnosticLogger));
     }
 
     private ISpan? GetSpan(SentrySqlSpanType type, object? value)
@@ -99,7 +99,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         switch (type)
         {
             case SentrySqlSpanType.Execution:
-                var operationId = value?.GetGuidProperty("OperationId");
+                var operationId = value?.GetGuidProperty("OperationId", _options.DiagnosticLogger);
                 if (TryGetQuerySpan(transaction, operationId) is { } querySpan)
                 {
                     return querySpan;
@@ -111,7 +111,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
                 return null;
 
             case SentrySqlSpanType.Connection:
-                var connectionId = value?.GetGuidProperty("ConnectionId");
+                var connectionId = value?.GetGuidProperty("ConnectionId", _options.DiagnosticLogger);
                 if (TryGetConnectionSpan(transaction, connectionId) is { } connectionSpan)
                 {
                     return connectionSpan;
@@ -153,7 +153,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
             return;
         }
 
-        var operationId = value.GetGuidProperty("OperationId");
+        var operationId = value.GetGuidProperty("OperationId", _options.DiagnosticLogger);
         if (operationId == null)
         {
             return;
@@ -162,18 +162,18 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         var spans = transaction.Spans.Where(span => span.Operation is "db.connection").ToList();
         if (spans.Find(span => !span.IsFinished && TryGetOperationId(span) == operationId) is { } connectionSpan)
         {
-            if (value.GetGuidProperty("ConnectionId") is { } connectionId)
+            if (value.GetGuidProperty("ConnectionId", _options.DiagnosticLogger) is { } connectionId)
             {
                 SetConnectionId(connectionSpan, connectionId);
             }
 
-            if (value.GetStringProperty("Connection.Database") is { } dbName)
+            if (value.GetStringProperty("Connection.Database", _options.DiagnosticLogger) is { } dbName)
             {
                 connectionSpan.Description = dbName;
                 SetDatabaseName(connectionSpan, dbName);
             }
 
-            if (value.GetStringProperty("Connection.DataSource") is { } dbSource)
+            if (value.GetStringProperty("Connection.DataSource", _options.DiagnosticLogger) is { } dbSource)
             {
                 SetDatabaseAddress(connectionSpan, dbSource);
             }
@@ -196,7 +196,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         // Try to lookup the associated connection span so that we can store the db.name in
         // the command span as well. This will be easier for users to read/identify than the
         // ConnectionId (which is a Guid)
-        var connectionId = value.GetGuidProperty("ConnectionId");
+        var connectionId = value.GetGuidProperty("ConnectionId", _options.DiagnosticLogger);
         var transaction = _hub.GetTransactionIfSampled();
         if (TryGetConnectionSpan(transaction!, connectionId) is { } connectionSpan)
         {
@@ -206,7 +206,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
             }
         }
 
-        commandSpan.Description = value.GetStringProperty("Command.CommandText");
+        commandSpan.Description = value.GetStringProperty("Command.CommandText", _options.DiagnosticLogger);
         commandSpan.Finish(spanStatus);
     }
 
@@ -251,9 +251,9 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         }
     }
 
-    private static void TrySetConnectionStatistics(ISpan span, object? value)
+    private void TrySetConnectionStatistics(ISpan span, object? value)
     {
-        if (value?.GetProperty("Statistics") is not Dictionary<object, object> statistics)
+        if (value?.GetProperty("Statistics", _options.DiagnosticLogger) is not Dictionary<object, object> statistics)
         {
             return;
         }

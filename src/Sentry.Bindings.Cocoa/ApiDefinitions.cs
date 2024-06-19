@@ -30,6 +30,10 @@ delegate SentryBreadcrumb SentryBeforeBreadcrumbCallback (SentryBreadcrumb bread
 [return: NullAllowed]
 delegate SentryEvent SentryBeforeSendEventCallback (SentryEvent @event);
 
+// typedef BOOL (^SentryBeforeCaptureScreenshotCallback)(SentryEvent * _Nonnull);
+[Internal]
+delegate bool SentryBeforeCaptureScreenshotCallback (SentryEvent @event);
+
 // typedef void (^SentryOnCrashedLastRunCallback)(SentryEvent * _Nonnull);
 [Internal]
 delegate void SentryOnCrashedLastRunCallback (SentryEvent @event);
@@ -1233,6 +1237,10 @@ interface SentryOptions
     [Export ("enableCrashHandler")]
     bool EnableCrashHandler { get; set; }
 
+    // @property (assign, nonatomic) BOOL enableSigtermReporting;
+    [Export ("enableSigtermReporting")]
+    bool EnableSigtermReporting { get; set; }
+
     // @property (assign, nonatomic) NSUInteger maxBreadcrumbs;
     [Export ("maxBreadcrumbs")]
     nuint MaxBreadcrumbs { get; set; }
@@ -1252,6 +1260,10 @@ interface SentryOptions
     // @property (copy, nonatomic) SentryBeforeBreadcrumbCallback _Nullable beforeBreadcrumb;
     [NullAllowed, Export ("beforeBreadcrumb", ArgumentSemantic.Copy)]
     SentryBeforeBreadcrumbCallback BeforeBreadcrumb { get; set; }
+
+    // @property (copy, nonatomic) SentryBeforeCaptureScreenshotCallback _Nullable beforeCaptureScreenshot;
+    [NullAllowed, Export ("beforeCaptureScreenshot", ArgumentSemantic.Copy)]
+    SentryBeforeCaptureScreenshotCallback BeforeCaptureScreenshot { get; set; }
 
     // @property (copy, nonatomic) SentryOnCrashedLastRunCallback _Nullable onCrashedLastRun;
     [NullAllowed, Export ("onCrashedLastRun", ArgumentSemantic.Copy)]
@@ -2246,6 +2258,11 @@ interface PrivateSentrySDKOnly
     [Static]
     [Export ("captureViewHierarchy")]
     NSData CaptureViewHierarchy();
+
+    // +(NSDictionary<NSString *,id> * _Nullable)appStartMeasurementWithSpans;
+    [Static]
+    [NullAllowed, Export ("appStartMeasurementWithSpans")]
+    NSDictionary<NSString, NSObject> AppStartMeasurementWithSpans();
 
     // +(SentryUser * _Nonnull)userWithDictionary:(NSDictionary * _Nonnull)dictionary;
     [Static]

@@ -319,6 +319,8 @@ public class SentryClient : ISentryClient, IDisposable
             }
         }
 
+        _options.EventScrubber?.ScrubEvent(processedEvent);
+
         processedEvent = BeforeSend(processedEvent, hint);
         if (processedEvent == null) // Rejected event
         {

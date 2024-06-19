@@ -68,31 +68,6 @@ internal static class MiscExtensions
     /// </remarks>
     public static bool IsNull(this object? o) => o is null;
 
-    public static object? GetProperty(this object obj, string name)
-    {
-        var propertyNames = name.Split('.');
-        var currentObj = obj;
-
-        foreach (var propertyName in propertyNames)
-        {
-            var property = currentObj?.GetType().GetProperty(propertyName);
-            if (property == null)
-            {
-                return null;
-            }
-
-            currentObj = property.GetValue(currentObj);
-        }
-
-        return currentObj;
-    }
-
-    public static Guid? GetGuidProperty(this object obj, string name) =>
-        obj.GetProperty(name) as Guid?;
-
-    public static string? GetStringProperty(this object obj, string name) =>
-        obj.GetProperty(name) as string;
-
     public static void Add<TKey, TValue>(
         this ICollection<KeyValuePair<TKey, TValue>> collection,
         TKey key,
