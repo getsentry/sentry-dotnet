@@ -4,14 +4,16 @@
 
 ### Features
 
+- Added a new package `Sentry.AspNetCore.Blazor.WebAssembly`. This packages provides you with an extension to `WebAssemblyHostBuilder` to allow SDK configuration via the builder pattern. This package gives us an entry point and the ability to extend the SDKs support and out-of-the-box offering. You can follow the progress and leave feedback either ([here](https://github.com/getsentry/sentry-dotnet/issues/2329)) for extending the support for Blazor Server or ([here](https://github.com/getsentry/sentry-dotnet/issues/2021)) for Blazor WebAssembly support ([#3386](https://github.com/getsentry/sentry-dotnet/pull/3386))
+- Added a new package `Sentry.AspNetCore.Blazor`. This packages provides you with an extension to `WebAssemblyHostBuilder` to allow SDK configuration via the builder pattern. This package gives us an entry point and the ability to extend the SDKs support and out-of-the-box offering. You can follow the progress and leave feedback either ([here](https://github.com/getsentry/sentry-dotnet/issues/2329)) for extending the support for Blazor Server or ([here](https://github.com/getsentry/sentry-dotnet/issues/2021)) for Blazor WebAssembly support ([#3386](https://github.com/getsentry/sentry-dotnet/pull/3386))
 - Added an event scrubber to remove sensitive data from events before sending these to Sentry ([#3419](https://github.com/getsentry/sentry-dotnet/pull/3419))
- 
+
 ### Fixes
 
 - Fixed Monitor duration calculation ([#3420]https://github.com/getsentry/sentry-dotnet/pull/3420)
 - Fixed null IServiceProvider in anonymous routes with OpenTelemetry ([#3401](https://github.com/getsentry/sentry-dotnet/pull/3401))
 - Fixed Trim warnings in Sentry.DiagnosticSource and WinUIUnhandledException integrations ([#3410](https://github.com/getsentry/sentry-dotnet/pull/3410))
-- Fix memory leak when tracing is enabled ([#3432](https://github.com/getsentry/sentry-dotnet/pull/3432))
+- Fixed memory leak when tracing is enabled ([#3432](https://github.com/getsentry/sentry-dotnet/pull/3432))
 
 ### Dependencies
 
