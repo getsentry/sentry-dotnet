@@ -13,7 +13,6 @@ Describe 'Console app NativeAOT (<framework>)' -ForEach @(
 using Sentry;
 using Sentry.Extensibility;
 using Sentry.Protocol.Envelopes;
-using Sentry.Infrastructure;
 
 // Initialize the Sentry SDK.  (It is not necessary to dispose it.)
 SentrySdk.Init(options =>
