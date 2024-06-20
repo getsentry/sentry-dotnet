@@ -80,6 +80,7 @@ internal class Enricher
         {
             eventLike.User.Username = Environment.UserName;
         }
+        eventLike.User.Id ??= _options.InstallationId;
         eventLike.User.IpAddress ??= DefaultIpAddress;
 
         //Apply App startup and Boot time

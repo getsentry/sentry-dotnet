@@ -33,6 +33,7 @@
                 }
               },
               User: {
+                Id: Guid_3,
                 IpAddress: {{auto}}
               },
               Environment: production
@@ -43,7 +44,7 @@
     },
     {
       Header: {
-        event_id: Guid_3,
+        event_id: Guid_4,
         sdk: {
           name: sentry.dotnet
         },
@@ -74,6 +75,7 @@
                 }
               },
               User: {
+                Id: Guid_3,
                 IpAddress: {{auto}}
               },
               Environment: production
