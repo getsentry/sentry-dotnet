@@ -187,13 +187,15 @@ $Text = $Text -replace '(?m)(^\s*\/\/[^\r\n]*$\s*\[Export \("serialize"\)\]$\s*)
 
 $Text = $Text -replace '.*SentryEnvelope .*?[\s\S]*?\n\n', ''
 $Text = $Text -replace '.*typedef.*SentryOnAppStartMeasurementAvailable.*?[\s\S]*?\n\n', ''
+$Text = $Text -replace '\n.*SentryReplayBreadcrumbConverter.*?[\s\S]*?\);\n', ''
 
 $protocolsToRemove = @(
     'SentryMXManagerDelegate',
     'SentryMetricsAPIDelegate',
     'SentryReplayVideoMaker',
     'SentryViewScreenshotProvider',
-    'SentryRedactOptions'
+    'SentryRedactOptions',
+    'SentryReplayBreadcrumbConverter'
 )
 
 foreach ($protocol in $protocolsToRemove) {
@@ -204,6 +206,7 @@ $interfacesToRemove = @(
     'HTTPHeaderSanitizer',
     'LocalMetricsAggregator',
     'NSURLSessionTask',
+    'SentryBaggageSerialization',
     'SentryCurrentDateProvider',
     'SentryEnabledFeaturesBuilder',
     'SentryExperimentalOptions',
@@ -215,10 +218,20 @@ $interfacesToRemove = @(
     'SentryMetricsClient',
     'SentryOnDemandReplay',
     'SentryReplayOptions',
+    'SentryRRWebEvent',
+    'SentryRRWebCustomEvent',
+    'SentryRRWebBreadcrumbEvent',
+    'SentryRRWebMetaEvent',
+    'SentryRRWebSpanEvent',
+    'SentryRRWebVideoEvent',
+    'SentryReplayBreadcrumbConverter',
+    'SentryReplayRecording',
+    'SentryTouchTracker',
     'SentryVideoInfo',
     'SentryViewPhotographer',
     'SwiftDescriptor',
-    'UrlSanitized'
+    'UrlSanitized',
+    'URLSessionTaskHelper'
 )
 
 foreach ($interface in $interfacesToRemove) {
@@ -230,7 +243,8 @@ $propertiesToRemove = @(
     'SentryOnAppStartMeasurementAvailable',
     'SentryMetricsAPI',
     'SentryExperimentalOptions',
-    'description'
+    'description',
+    'enableMetricKitRawPayload'
 )
 
 foreach ($property in $propertiesToRemove) {

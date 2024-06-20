@@ -34,9 +34,13 @@ public static class LoggingBuilderExtensions
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="optionsConfiguration">The options configuration.</param>
-    public static ILoggingBuilder AddSentry(
+    public static ILoggingBuilder AddSentry(this ILoggingBuilder builder, Action<SentryLoggingOptions>? optionsConfiguration)
+        => builder.AddSentry<SentryLoggingOptions>(optionsConfiguration);
+
+    internal static ILoggingBuilder AddSentry<TOptions>(
         this ILoggingBuilder builder,
-        Action<SentryLoggingOptions>? optionsConfiguration)
+        Action<TOptions>? optionsConfiguration)
+        where TOptions : SentryLoggingOptions, new()
     {
         builder.AddConfiguration();
 
@@ -45,11 +49,9 @@ public static class LoggingBuilderExtensions
             builder.Services.Configure(optionsConfiguration);
         }
 
-        builder.Services.AddSingleton<IConfigureOptions<SentryLoggingOptions>, SentryLoggingOptionsSetup>();
-
+        builder.Services.AddSingleton<IConfigureOptions<TOptions>, SentryLoggingOptionsSetup>();
         builder.Services.AddSingleton<ILoggerProvider, SentryLoggerProvider>();
-
-        builder.Services.AddSentry<SentryLoggingOptions>();
+        builder.Services.AddSentry<TOptions>();
 
         // All logs should flow to the SentryLogger, regardless of level.
         // Filtering of events is handled in SentryLogger, using SentryOptions.MinimumEventLevel

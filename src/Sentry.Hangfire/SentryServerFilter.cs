@@ -51,7 +51,7 @@ internal class SentryServerFilter : IServerFilter
         }
 
         var status = context.Exception is null ? CheckInStatus.Ok : CheckInStatus.Error;
-        var duration = context.BackgroundJob.CreatedAt - DateTime.Now;
+        var duration = DateTime.UtcNow - context.BackgroundJob.CreatedAt;
 
         _ = _hub.CaptureCheckIn(monitorSlug, status, checkInId, duration: duration);
     }

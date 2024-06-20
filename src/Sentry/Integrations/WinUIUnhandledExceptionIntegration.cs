@@ -19,7 +19,9 @@ namespace Sentry.Integrations;
 //   See: https://github.com/microsoft/microsoft-ui-xaml/issues/5221
 //
 // Note that we use reflection in this integration to get at WinUI code.
-// If we ever add a Windows platform target (net6.0-windows, etc.), we could refactor to avoid reflection.
+// If we ever add a Windows platform target (net6.0-windows, etc.), we could refactor
+// to avoid reflection (which would also allow us to support trimming with this
+// integration).
 //
 // This integration is for WinUI 3.  It does NOT work for UWP (WinUI 2).
 // For UWP, the calling application will need to hook the event handler.
@@ -42,6 +44,12 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
     {
         if (!IsApplicable)
         {
+            return;
+        }
+
+        if (AotHelper.IsTrimmed)
+        {
+            options.Log(SentryLevel.Info, "WinUIUnhandledExceptionIntegration Integration is disabled because trimming is enabled.");
             return;
         }
 
@@ -102,6 +110,7 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
         }
     }
 
+    [UnconditionalSuppressMessage("TrimAnalyzer", "IL2075", Justification = AotHelper.SuppressionJustification)]
     private void WinUIUnhandledExceptionHandler(object sender, object e)
     {
         bool handled;
