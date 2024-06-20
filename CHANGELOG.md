@@ -14,6 +14,7 @@
 - Fixed null IServiceProvider in anonymous routes with OpenTelemetry ([#3401](https://github.com/getsentry/sentry-dotnet/pull/3401))
 - Fixed Trim warnings in Sentry.DiagnosticSource and WinUIUnhandledException integrations ([#3410](https://github.com/getsentry/sentry-dotnet/pull/3410))
 - Fixed memory leak when tracing is enabled ([#3432](https://github.com/getsentry/sentry-dotnet/pull/3432))
+- Fixed envelopes getting stuck in processing when losing network connectivity ([#3438](https://github.com/getsentry/sentry-dotnet/pull/3438))
 
 ### Dependencies
 
