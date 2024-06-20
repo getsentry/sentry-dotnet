@@ -22,6 +22,7 @@
         }
       },
       User: {
+        Id: Guid_1,
         IpAddress: {{auto}}
       }
     }
@@ -45,6 +46,7 @@
         }
       },
       User: {
+        Id: Guid_1,
         IpAddress: {{auto}}
       },
       Spans: [
@@ -57,9 +59,9 @@
           Extra: {
             bytes_received: 225,
             bytes_sent : 570,
-            db.connection_id: Guid_1,
+            db.connection_id: Guid_2,
             db.name: SqlListenerTests.verify_RecordsEfAsync,
-            db.operation_id: Guid_2,
+            db.operation_id: Guid_3,
             db.server: (LocalDb)\SqlListenerTests,
             db.system: sql,
             rows_sent: 1
@@ -78,9 +80,9 @@ VALUES (@p0);
           Status: Ok,
           IsSampled: true,
           Extra: {
-            db.connection_id: Guid_1,
+            db.connection_id: Guid_2,
             db.name: SqlListenerTests.verify_RecordsEfAsync,
-            db.operation_id: Guid_3,
+            db.operation_id: Guid_4,
             db.system: sql
           }
         },
@@ -103,9 +105,9 @@ FROM [TestEntities] AS [t],
           Status: Ok,
           IsSampled: true,
           Extra: {
-            db.connection_id: Guid_1,
+            db.connection_id: Guid_2,
             db.name: SqlListenerTests.verify_RecordsEfAsync,
-            db.operation_id: Guid_4,
+            db.operation_id: Guid_5,
             db.system: sql
           }
         }

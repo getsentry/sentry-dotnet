@@ -112,6 +112,7 @@
               }
             },
             User: {
+              Id: Guid_1,
               IpAddress: {{auto}}
             },
             Environment: production
@@ -176,6 +177,7 @@
               }
             },
             User: {
+              Id: Guid_1,
               IpAddress: {{auto}}
             },
             Environment: production,

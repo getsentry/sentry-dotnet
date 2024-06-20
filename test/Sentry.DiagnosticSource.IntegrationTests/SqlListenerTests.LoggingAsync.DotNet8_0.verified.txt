@@ -18,6 +18,7 @@
         }
       },
       User: {
+        Id: Guid_1,
         IpAddress: {{auto}}
       },
       Spans: [
@@ -29,9 +30,9 @@
           IsSampled: true,
           Extra: {
             bytes_sent : 376,
-            db.connection_id: Guid_1,
+            db.connection_id: Guid_2,
             db.name: SqlListenerTests.verify_LoggingAsync,
-            db.operation_id: Guid_2,
+            db.operation_id: Guid_3,
             db.server: (LocalDb)\SqlListenerTests,
             db.system: sql,
             rows_sent: 0
@@ -50,9 +51,9 @@ VALUES (@p0);
           Status: Ok,
           IsSampled: true,
           Extra: {
-            db.connection_id: Guid_1,
+            db.connection_id: Guid_2,
             db.name: SqlListenerTests.verify_LoggingAsync,
-            db.operation_id: Guid_3,
+            db.operation_id: Guid_4,
             db.system: sql
           }
         }

@@ -15,6 +15,7 @@
 - Fixed Trim warnings in Sentry.DiagnosticSource and WinUIUnhandledException integrations ([#3410](https://github.com/getsentry/sentry-dotnet/pull/3410))
 - Fixed memory leak when tracing is enabled ([#3432](https://github.com/getsentry/sentry-dotnet/pull/3432))
 - Fixed envelopes getting stuck in processing when losing network connectivity ([#3438](https://github.com/getsentry/sentry-dotnet/pull/3438))
+- `Scope.User.Id` now correctly defaults to the InstallationId unless it has been set otherwise ([#3425](https://github.com/getsentry/sentry-dotnet/pull/3425))
 
 ### Dependencies
 

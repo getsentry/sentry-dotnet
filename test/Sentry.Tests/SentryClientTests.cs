@@ -248,6 +248,22 @@ public partial class SentryClientTests
     }
 
     [Fact]
+    public void CaptureEvent_UserIsNull_SetsFallbackUserId()
+    {
+        // Arrange
+        var scope = new Scope(_fixture.SentryOptions);
+        var @event = new SentryEvent();
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        _ = sut.CaptureEvent(@event, scope);
+
+        // Assert
+        @event.User.Id.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
     public void CaptureEvent_Redact_Breadcrumbs()
     {
         // Act
@@ -1061,6 +1077,24 @@ public partial class SentryClientTests
         // Assert
         hint.Should().NotBeNull();
         hint.Attachments.Should().Contain(attachments);
+    }
+
+    [Fact]
+    public void CaptureTransaction_UserIsNull_SetsFallbackUserId()
+    {
+        // Arrange
+        var transaction = new SentryTransaction("name", "operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+        var scope = new Scope(_fixture.SentryOptions);
+
+        // Act
+        _fixture.GetSut().CaptureTransaction(transaction, scope, null);
+
+        // Assert
+        transaction.User.Id.Should().NotBeNullOrWhiteSpace();
     }
 
     [Fact]
