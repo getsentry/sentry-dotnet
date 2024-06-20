@@ -568,6 +568,7 @@ public class CachingTransportTests
         using var envelope = Envelope.FromEvent(new SentryEvent());
         await transport.SendEnvelopeAsync(envelope);
 
+        bool failingWhenFailing = false, failingWhenRecovered;
         try
         {
             // Act
@@ -576,17 +577,25 @@ public class CachingTransportTests
         catch (Exception he)
         {
             receivedException = he;
+            failingWhenFailing = transport.TransportIsFailing;
         }
         finally
         {
             // (transport stops failing)
             innerTransport.ClearReceivedCalls();
             await transport.FlushAsync();
+            failingWhenRecovered = transport.TransportIsFailing;
         }
 
         // Assert
-        Assert.Equal(exception, receivedException);
-        Assert.True(_fileSystem.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any());
+        receivedException.Should().Be(exception);
+        // Make sure the envelope was cached for transport
+        var files = _fileSystem.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).ToArray();
+        files.Should().NotBeEmpty();
+        // Make sure the files were moved back out of processing once the transport recovered
+        files.Should().NotContain(file => file.Contains("__processing", StringComparison.OrdinalIgnoreCase));
+        failingWhenFailing.Should().BeTrue();
+        failingWhenRecovered.Should().BeFalse();
     }
 
     [Fact]

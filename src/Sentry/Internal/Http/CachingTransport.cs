@@ -24,6 +24,9 @@ internal class CachingTransport : ITransport, IDisposable
     private readonly string _isolatedCacheDirectoryPath;
     private readonly int _keepCount;
 
+    private long _transportIsFailing = 0;
+    internal bool TransportIsFailing => Interlocked.Read(ref _transportIsFailing) == 1;
+
     // When a file is getting processed, it's moved to a child directory
     // to avoid getting picked up by other threads.
     private readonly string _processingDirectoryPath;
@@ -278,8 +281,23 @@ internal class CachingTransport : ITransport, IDisposable
                 await InnerProcessCacheAsync(file, cancellation).ConfigureAwait(false);
             }
 
+            if (Interlocked.Exchange(ref _transportIsFailing, 0) == 1)
+            {
+                // Retry envelopes that got stuck in processing while the transport was failing
+                MoveUnprocessedFilesBackToCache();
+                _workerSignal.Release();
+            }
+
             // Signal that we can continue with initialization, if we're using _options.InitCacheFlushTimeout
             _initCacheResetEvent?.Set();
+        }
+        catch (Exception e)
+        {
+            if (Interlocked.Exchange(ref _transportIsFailing, 1) == 1) // Only log the first failure
+            {
+                _options.LogDebug($"Error flushing cached envelopes: {e.Message}");
+            }
+            throw;
         }
         finally
         {
