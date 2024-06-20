@@ -11,7 +11,9 @@ internal static class UserExtensions
             Id = user.UserId,
             IpAddress = user.IpAddress,
             Username = user.Username,
+#pragma warning disable CS0618 // Type or member is obsolete
             Segment = user.Segment,
+#pragma warning restore CS0618 // Type or member is obsolete
             Other = user.Data.ToStringDictionary(logger)
         };
 
@@ -23,7 +25,9 @@ internal static class UserExtensions
             UserId = user.Id,
             IpAddress = user.IpAddress,
             Username = user.Username,
+#pragma warning disable CS0618 // Type or member is obsolete
             Segment = user.Segment,
+#pragma warning restore CS0618 // Type or member is obsolete
             Data = user.Other.ToNullableNSDictionary()
         };
 

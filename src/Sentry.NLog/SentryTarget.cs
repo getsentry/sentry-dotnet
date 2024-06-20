@@ -453,7 +453,9 @@ public sealed class SentryTarget : TargetWithContext
             Username = User.Username?.Render(logEvent),
             Email = User.Email?.Render(logEvent),
             IpAddress = User.IpAddress?.Render(logEvent),
+#pragma warning disable CS0618 // Type or member is obsolete
             Segment = User.Segment?.Render(logEvent)
+#pragma warning restore CS0618 // Type or member is obsolete
         };
 
         if (User.Other?.Count > 0)
