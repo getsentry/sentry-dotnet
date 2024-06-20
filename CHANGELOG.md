@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Obsoletion
+
+- Marked SentryUser.Segment as deprecated ([#3437](https://github.com/getsentry/sentry-dotnet/pull/3437))
+
 ### Features
 
 - Added a new package `Sentry.AspNetCore.Blazor.WebAssembly`. This packages provides you with an extension to `WebAssemblyHostBuilder` to allow SDK configuration via the builder pattern. This package gives us an entry point and the ability to extend the SDKs support and out-of-the-box offering. You can follow the progress and leave feedback either ([here](https://github.com/getsentry/sentry-dotnet/issues/2329)) for extending the support for Blazor Server or ([here](https://github.com/getsentry/sentry-dotnet/issues/2021)) for Blazor WebAssembly support ([#3386](https://github.com/getsentry/sentry-dotnet/pull/3386))
@@ -14,7 +18,6 @@
 - Fixed null IServiceProvider in anonymous routes with OpenTelemetry ([#3401](https://github.com/getsentry/sentry-dotnet/pull/3401))
 - Fixed Trim warnings in Sentry.DiagnosticSource and WinUIUnhandledException integrations ([#3410](https://github.com/getsentry/sentry-dotnet/pull/3410))
 - Fixed memory leak when tracing is enabled ([#3432](https://github.com/getsentry/sentry-dotnet/pull/3432))
-- Marked SentryUser.Segment as deprecated ([#3437](https://github.com/getsentry/sentry-dotnet/pull/3437))
 - `Scope.User.Id` now correctly defaults to the InstallationId unless it has been set otherwise ([#3425](https://github.com/getsentry/sentry-dotnet/pull/3425))
 
 ### Dependencies
