@@ -10,7 +10,7 @@ namespace Sentry;
 [DebuggerDisplay("Message: {" + nameof(Message) + "}, Type: {" + nameof(Type) + "}")]
 public sealed class Breadcrumb : ISentryJsonSerializable
 {
-    private readonly Dictionary<string, string>? _data;
+    private readonly IReadOnlyDictionary<string, string>? _data;
     private readonly string? _message;
 
     private bool _sendDefaultPii = true;
@@ -59,9 +59,7 @@ public sealed class Breadcrumb : ISentryJsonSerializable
                 x => x.Value.RedactUrl()
             )
         ;
-        private init =>
-            _data = value as Dictionary<string, string>
-                    ?? value?.ToDictionary(v => v.Key, v => v.Value);
+        private init => _data = value;
     }
 
     /// <summary>
@@ -129,15 +127,6 @@ public sealed class Breadcrumb : ISentryJsonSerializable
         Data = data;
         Category = category;
         Level = level;
-    }
-
-    internal void ScrubData(string dataKey, string replacement)
-    {
-        if (_data is null)
-        {
-            return;
-        }
-        _data![dataKey] = replacement;
     }
 
     /// <inheritdoc />
