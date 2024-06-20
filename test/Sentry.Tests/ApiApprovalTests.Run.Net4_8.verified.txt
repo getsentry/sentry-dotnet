@@ -1452,6 +1452,11 @@ namespace Sentry.Http
 }
 namespace Sentry.Infrastructure
 {
+    public class ConsoleAndTraceDiagnosticLogger : Sentry.Infrastructure.DiagnosticLogger
+    {
+        public ConsoleAndTraceDiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
+        protected override void LogMessage(string message) { }
+    }
     public class ConsoleDiagnosticLogger : Sentry.Infrastructure.DiagnosticLogger
     {
         public ConsoleDiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
