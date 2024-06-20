@@ -156,9 +156,6 @@ public class SentryClient : ISentryClient, IDisposable
             }
         }
 
-        // Set the user id to our fallback, if this hasn't already been set
-        transaction.User.Id ??= _options.InstallationId;
-
         processedTransaction = BeforeSendTransaction(processedTransaction, hint);
         if (processedTransaction is null) // Rejected transaction
         {
@@ -321,9 +318,6 @@ public class SentryClient : ISentryClient, IDisposable
                 return SentryId.Empty;
             }
         }
-
-        // Set the user id to our fallback, if this hasn't already been set
-        @event.User.Id ??= _options.InstallationId;
 
         processedEvent = BeforeSend(processedEvent, hint);
         if (processedEvent == null) // Rejected event
