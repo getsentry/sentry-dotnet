@@ -1,0 +1,34 @@
+@page "/catcher"
+@using Microsoft.Extensions.Logging
+@inject ILogger<Catcher> Logger
+
+<h1>Throw and Catch an Exception!</h1>
+
+<button class="btn btn-primary" @onclick="ThrowAndCatch">Throw And Catch</button>
+
+@if (SentrySdk.LastEventId != SentryId.Empty)
+{
+    <p>Sentry Event Id: @SentrySdk.LastEventId</p>
+}
+
+@code {
+    private void ThrowAndCatch()
+    {
+        try
+        {
+            Logger.LogInformation("Throwing something... ");
+            OtherStuffThrower.DoSomething();
+        }
+        catch (Exception e)
+        {
+            Logger.LogInformation("And catching it... ");
+            SentrySdk.CaptureException(e);
+        }
+    }
+
+    private static class OtherStuffThrower
+    {
+        public static void DoSomething() => Thrower();
+        private static void Thrower() => throw null;
+    }
+}

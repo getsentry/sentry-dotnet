@@ -130,7 +130,8 @@ public class SentryTransactionTests
         child2.SetExtra("f222", "p111");
         child2.Finish(SpanStatus.OutOfRange);
 
-        txTracer.Finish(SpanStatus.Aborted);
+        // Don't finish the tracer - that would cause the spans to be released
+        // txTracer.Finish(SpanStatus.Aborted);
 
         // Act
         var transaction = new SentryTransaction(txTracer);

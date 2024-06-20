@@ -167,7 +167,11 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     /// <inheritdoc />
     public IReadOnlyDictionary<string, string> Tags => _tags;
 
+#if NETSTANDARD2_1_OR_GREATER
     private readonly ConcurrentBag<ISpan> _spans = new();
+#else
+    private ConcurrentBag<ISpan> _spans = new();
+#endif
 
     /// <inheritdoc />
     public IReadOnlyCollection<ISpan> Spans => _spans;
@@ -337,6 +341,14 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
                 return null;
             }
         }
+
+        public void Clear()
+        {
+            lock (_lock)
+            {
+                TrackedSpans.Clear();
+            }
+        }
     }
     private readonly LastActiveSpanTracker _activeSpanTracker = new LastActiveSpanTracker();
 
@@ -373,6 +385,9 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
 
         // Client decides whether to discard this transaction based on sampling
         _hub.CaptureTransaction(new SentryTransaction(this));
+
+        // Release tracked spans
+        ReleaseSpans();
     }
 
     /// <inheritdoc />
@@ -395,4 +410,14 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
 
     /// <inheritdoc />
     public SentryTraceHeader GetTraceHeader() => new(TraceId, SpanId, IsSampled);
+
+    private void ReleaseSpans()
+    {
+#if NETSTANDARD2_1_OR_GREATER
+        _spans.Clear();
+#else
+        _spans = new ConcurrentBag<ISpan>();
+#endif
+        _activeSpanTracker.Clear();
+    }
 }

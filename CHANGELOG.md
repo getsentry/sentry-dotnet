@@ -2,11 +2,18 @@
 
 ## Unreleased
 
+### Features
+
+- Added a new package `Sentry.AspNetCore.Blazor.WebAssembly`. This packages provides you with an extension to `WebAssemblyHostBuilder` to allow SDK configuration via the builder pattern. This package gives us an entry point and the ability to extend the SDKs support and out-of-the-box offering. You can follow the progress and leave feedback either ([here](https://github.com/getsentry/sentry-dotnet/issues/2329)) for extending the support for Blazor Server or ([here](https://github.com/getsentry/sentry-dotnet/issues/2021)) for Blazor WebAssembly support ([#3386](https://github.com/getsentry/sentry-dotnet/pull/3386))
+- Added a new package `Sentry.AspNetCore.Blazor`. This packages provides you with an extension to `WebAssemblyHostBuilder` to allow SDK configuration via the builder pattern. This package gives us an entry point and the ability to extend the SDKs support and out-of-the-box offering. You can follow the progress and leave feedback either ([here](https://github.com/getsentry/sentry-dotnet/issues/2329)) for extending the support for Blazor Server or ([here](https://github.com/getsentry/sentry-dotnet/issues/2021)) for Blazor WebAssembly support ([#3386](https://github.com/getsentry/sentry-dotnet/pull/3386))
+- Added an event scrubber to remove sensitive data from events before sending these to Sentry ([#3419](https://github.com/getsentry/sentry-dotnet/pull/3419))
+
 ### Fixes
 
 - Fixed Monitor duration calculation ([#3420]https://github.com/getsentry/sentry-dotnet/pull/3420)
 - Fixed null IServiceProvider in anonymous routes with OpenTelemetry ([#3401](https://github.com/getsentry/sentry-dotnet/pull/3401))
 - Fixed Trim warnings in Sentry.DiagnosticSource and WinUIUnhandledException integrations ([#3410](https://github.com/getsentry/sentry-dotnet/pull/3410))
+- Fixed memory leak when tracing is enabled ([#3432](https://github.com/getsentry/sentry-dotnet/pull/3432))
 - `Scope.User.Id` now correctly defaults to the InstallationId unless it has been set otherwise ([#3425](https://github.com/getsentry/sentry-dotnet/pull/3425))
 
 ### Dependencies
@@ -14,12 +21,12 @@
 - Bump CLI from v2.31.2 to v2.32.1 ([#3398](https://github.com/getsentry/sentry-dotnet/pull/3398))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2321)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.31.2...2.32.1)
-- Bump Native SDK from v0.7.4 to v0.7.5 ([#3399](https://github.com/getsentry/sentry-dotnet/pull/3399))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#075)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.4...0.7.5)
-- Bump Cocoa SDK from v8.26.0 to v8.28.0 ([#3408](https://github.com/getsentry/sentry-dotnet/pull/3408), [#3412](https://github.com/getsentry/sentry-dotnet/pull/3412))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8280)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.26.0...8.28.0)
+- Bump Native SDK from v0.7.4 to v0.7.6 ([#3399](https://github.com/getsentry/sentry-dotnet/pull/3399), [#3418](https://github.com/getsentry/sentry-dotnet/pull/3418))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#076)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.4...0.7.6)
+- Bump Cocoa SDK from v8.26.0 to v8.29.1 ([#3408](https://github.com/getsentry/sentry-dotnet/pull/3408), [#3412](https://github.com/getsentry/sentry-dotnet/pull/3412), [#3430](https://github.com/getsentry/sentry-dotnet/pull/3430))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8291)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.26.0...8.29.1)
 - Bump Java SDK from v7.9.0 to v7.10.0 ([#3413](https://github.com/getsentry/sentry-dotnet/pull/3413))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7100)
   - [diff](https://github.com/getsentry/sentry-java/compare/7.9.0...7.10.0)
