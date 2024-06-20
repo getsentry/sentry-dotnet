@@ -979,6 +979,7 @@ namespace Sentry
         public string? Id { get; set; }
         public string? IpAddress { get; set; }
         public System.Collections.Generic.IDictionary<string, string> Other { get; set; }
+        [System.Obsolete("This property is deprecated and will be removed in a future version.")]
         public string? Segment { get; set; }
         public string? Username { get; set; }
         public Sentry.SentryUser Clone() { }

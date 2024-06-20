@@ -87,7 +87,6 @@
               Username: ,
               Email: ,
               IpAddress: ,
-              Segment: ,
               Other: {
                 mood: joyous
               }
