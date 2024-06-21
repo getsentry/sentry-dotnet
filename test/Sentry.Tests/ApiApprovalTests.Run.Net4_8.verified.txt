@@ -730,7 +730,6 @@ namespace Sentry
         public void DisableAppDomainUnhandledExceptionCapture() { }
         public void DisableDuplicateEventDetection() { }
         public void DisableNetFxInstallationsIntegration() { }
-        public void DisableScrubbing() { }
         public void DisableUnobservedTaskExceptionCapture() { }
         public System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors() { }
         public System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> GetAllExceptionProcessors() { }
@@ -743,8 +742,6 @@ namespace Sentry
             where TIntegration : Sentry.Integrations.ISdkIntegration { }
         public void RemoveTransactionProcessor<TProcessor>()
             where TProcessor : Sentry.Extensibility.ISentryTransactionProcessor { }
-        public void ScrubData(System.Action<System.Collections.Generic.IList<string>> configureDenyList) { }
-        public void ScrubData(System.Collections.Generic.IEnumerable<string> denyList) { }
         public void SetBeforeBreadcrumb(System.Func<Sentry.Breadcrumb, Sentry.Breadcrumb?> beforeBreadcrumb) { }
         public void SetBeforeBreadcrumb(System.Func<Sentry.Breadcrumb, Sentry.SentryHint, Sentry.Breadcrumb?> beforeBreadcrumb) { }
         public void SetBeforeSend(System.Func<Sentry.SentryEvent, Sentry.SentryEvent?> beforeSend) { }

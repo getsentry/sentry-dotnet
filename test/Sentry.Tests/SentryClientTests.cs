@@ -17,12 +17,10 @@ public partial class SentryClientTests
         public IBackgroundWorker BackgroundWorker { get; set; } = Substitute.For<IBackgroundWorker, IDisposable>();
         public IClientReportRecorder ClientReportRecorder { get; } = Substitute.For<IClientReportRecorder>();
         public ISessionManager SessionManager { get; set; } = Substitute.For<ISessionManager>();
-        public EventScrubber EventScrubber { get; set; } = Substitute.For<EventScrubber>();
 
         public Fixture()
         {
             SentryOptions.ClientReportRecorder = ClientReportRecorder;
-            SentryOptions.EventScrubber = EventScrubber;
             BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
         }
 
@@ -1540,19 +1538,5 @@ public partial class SentryClientTests
 
         // Assert
         _fixture.SessionManager.Received().EndSession(SessionEndStatus.Crashed);
-    }
-
-    [Fact]
-    public void CaptureEvent_ScrubsData()
-    {
-        // Arrange
-        var sentryEvent = new SentryEvent();
-        var sut = _fixture.GetSut();
-
-        // Act
-        var actualId = sut.CaptureEvent(sentryEvent);
-
-        // Assert
-        _fixture.EventScrubber.Received(1).ScrubEvent(sentryEvent);
     }
 }
