@@ -255,7 +255,9 @@ public class DynamicSamplingContextTests
             SampleRate = 0.5,
             User =
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 Segment = "Group A"
+#pragma warning restore CS0618 // Type or member is obsolete
             },
         };
 

@@ -217,37 +217,7 @@ public class GlobalSessionManagerTests : IDisposable
     }
 
     [Fact]
-    public void GetMachineNameInstallationId_Hashed()
-    {
-        // Arrange
-        var sut = _fixture.GetSut();
-
-        // Act
-        var installationId = GlobalSessionManager.GetMachineNameInstallationId();
-
-        // Assert
-        installationId.Should().NotBeNullOrWhiteSpace();
-        installationId.Should().NotBeEquivalentTo(Environment.MachineName);
-    }
-
-    [Fact]
-    public void GetMachineNameInstallationId_Idempotent()
-    {
-        // Arrange
-        var sut = _fixture.GetSut();
-
-        // Act
-        var installationIds = Enumerable
-            .Range(0, 10)
-            .Select(_ => GlobalSessionManager.GetMachineNameInstallationId())
-            .ToArray();
-
-        // Assert
-        installationIds.Distinct().Should().ContainSingle();
-    }
-
-    [Fact]
-    public void TryGetPersistentInstallationId_SessionNotStarted_ReturnsNull()
+    public void TryRecoverPersistedSession_SessionNotStarted_ReturnsNull()
     {
         // Arrange
         var sut = _fixture.GetSut();
@@ -260,7 +230,7 @@ public class GlobalSessionManagerTests : IDisposable
     }
 
     [Fact]
-    public void TryGetPersistentInstallationId_FileNotFoundException_LogDebug()
+    public void TryRecoverPersistedSession_FileNotFoundException_LogDebug()
     {
         // Arrange
         var sut = _fixture.GetSut();
@@ -276,7 +246,7 @@ public class GlobalSessionManagerTests : IDisposable
     }
 
     [Fact]
-    public void TryGetPersistentInstallationId_DirectoryNotFoundException_LogDebug()
+    public void TryRecoverPersistedSession_DirectoryNotFoundException_LogDebug()
     {
         // Arrange
         var sut = _fixture.GetSut();
@@ -292,7 +262,7 @@ public class GlobalSessionManagerTests : IDisposable
     }
 
     [Fact]
-    public void TryGetPersistentInstallationId_EndOfStreamException_LogError()
+    public void TryRecoverPersistedSession_EndOfStreamException_LogError()
     {
         // Arrange
         var sut = _fixture.GetSut();
@@ -308,7 +278,7 @@ public class GlobalSessionManagerTests : IDisposable
     }
 
     [Fact]
-    public void TryGetPersistentInstallationId_SessionStarted_ReturnsLastSession()
+    public void TryRecoverPersistedSession_SessionStarted_ReturnsLastSession()
     {
         // Arrange
         var sut = _fixture.GetSut();
@@ -346,7 +316,7 @@ public class GlobalSessionManagerTests : IDisposable
     }
 
     [Fact]
-    public void TryGetPersistentInstallationId_SessionStarted_DidCrashDelegateNotProvided_EndsAsAbnormal()
+    public void TryRecoverPersistedSession_SessionStarted_DidCrashDelegateNotProvided_EndsAsAbnormal()
     {
         // Arrange
         var sut = _fixture.GetSut();
@@ -362,7 +332,7 @@ public class GlobalSessionManagerTests : IDisposable
     }
 
     [Fact]
-    public void TryGetPersistentInstallationId_SessionStarted_CrashDelegateReturnsFalse_EndsAsAbnormal()
+    public void TryRecoverPersistedSession_SessionStarted_CrashDelegateReturnsFalse_EndsAsAbnormal()
     {
         // Arrange
         _fixture.Options.CrashedLastRun = () => false;
@@ -379,7 +349,7 @@ public class GlobalSessionManagerTests : IDisposable
     }
 
     [Fact]
-    public void TryGetPersistentInstallationId_CrashDelegateReturnsTrueWithPauseTimestamp_EndsAsCrashed()
+    public void TryRecoverPersistedSession_CrashDelegateReturnsTrueWithPauseTimestamp_EndsAsCrashed()
     {
         // Arrange
         _fixture.Options.CrashedLastRun = () => true;
@@ -400,7 +370,7 @@ public class GlobalSessionManagerTests : IDisposable
     }
 
     [Fact]
-    public void TryGetPersistentInstallationId_CrashDelegateIsNullWithPauseTimestamp_EndsAsExited()
+    public void TryRecoverPersistedSession_CrashDelegateIsNullWithPauseTimestamp_EndsAsExited()
     {
         // Arrange
         _fixture.Options.CrashedLastRun = null;
@@ -421,7 +391,7 @@ public class GlobalSessionManagerTests : IDisposable
     }
 
     [Fact]
-    public void TryGetPersistentInstallationId_CrashDelegateIsNullWithoutPauseTimestamp_EndsAsAbnormal()
+    public void TryRecoverPersistedSession_CrashDelegateIsNullWithoutPauseTimestamp_EndsAsAbnormal()
     {
         // Arrange
         _fixture.Options.CrashedLastRun = null;
@@ -444,7 +414,7 @@ public class GlobalSessionManagerTests : IDisposable
     }
 
     [Fact]
-    public void TryGetPersistentInstallationId_SessionStarted_CrashDelegateReturnsTrue_EndsAsCrashed()
+    public void TryRecoverPersistedSession_SessionStarted_CrashDelegateReturnsTrue_EndsAsCrashed()
     {
         // Arrange
         _fixture.Options.CrashedLastRun = () => true;
@@ -464,7 +434,7 @@ public class GlobalSessionManagerTests : IDisposable
     }
 
     [Fact]
-    public void TryGetPersistentInstallationId_SessionPaused_EndsAsExited()
+    public void TryRecoverPersistedSession_SessionPaused_EndsAsExited()
     {
         // Arrange
         var sut = _fixture.GetSut();
@@ -481,7 +451,7 @@ public class GlobalSessionManagerTests : IDisposable
     }
 
     [Fact]
-    public void TryGetPersistentInstallationId_SessionEnded_ReturnsNull()
+    public void TryRecoverPersistedSession_SessionEnded_ReturnsNull()
     {
         // Arrange
         var sut = _fixture.GetSut();

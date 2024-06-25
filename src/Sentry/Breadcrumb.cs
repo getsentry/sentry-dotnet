@@ -57,8 +57,8 @@ public sealed class Breadcrumb : ISentryJsonSerializable
             : _data?.ToDictionary(
                 x => x.Key,
                 x => x.Value.RedactUrl()
-                )
-            ;
+            )
+        ;
         private init => _data = value;
     }
 

@@ -22,6 +22,7 @@
         }
       },
       User: {
+        Id: Guid_1,
         IpAddress: {{auto}}
       }
     }
@@ -45,6 +46,7 @@
         }
       },
       User: {
+        Id: Guid_1,
         IpAddress: {{auto}}
       },
       Spans: [
@@ -61,8 +63,8 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
           Status: Ok,
           IsSampled: true,
           Extra: {
-            db.command_id: Guid_1,
-            db.connection_id: Guid_2,
+            db.command_id: Guid_2,
+            db.connection_id: Guid_3,
             db.name: SqlListenerTests.verify_RecordsEfAsync,
             db.server: (LocalDb)\SqlListenerTests,
             db.system: mssql
@@ -77,8 +79,8 @@ FROM [TestEntities] AS [t],
           Status: Ok,
           IsSampled: true,
           Extra: {
-            db.command_id: Guid_3,
-            db.connection_id: Guid_4,
+            db.command_id: Guid_4,
+            db.connection_id: Guid_5,
             db.name: SqlListenerTests.verify_RecordsEfAsync,
             db.server: (LocalDb)\SqlListenerTests,
             db.system: mssql

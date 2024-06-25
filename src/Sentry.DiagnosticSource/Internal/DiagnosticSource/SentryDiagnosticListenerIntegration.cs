@@ -13,6 +13,12 @@ internal class SentryDiagnosticListenerIntegration : ISdkIntegration
             return;
         }
 
+        if (AotHelper.IsTrimmed)
+        {
+            options.Log(SentryLevel.Info, "DiagnosticSource Integration is disabled because trimming is enabled.");
+            return;
+        }
+
         var subscriber = new SentryDiagnosticSubscriber(hub, options);
         DiagnosticListener.AllListeners.Subscribe(subscriber);
     }
