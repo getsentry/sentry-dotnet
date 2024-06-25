@@ -60,7 +60,7 @@ BeforeAll {
 
     function GetSentryPackageVersion()
     {
-        (Select-Xml -Path "$PSScriptRoot/../Directory.Build.props" -XPath "/Project/PropertyGroup/Version").Node.InnerText
+        (Select-Xml -Path "$PSScriptRoot/../Directory.Build.props" -XPath "/Project/PropertyGroup/VersionPrefix").Node.InnerText
     }
 
     function RegisterLocalPackage([string] $name)
