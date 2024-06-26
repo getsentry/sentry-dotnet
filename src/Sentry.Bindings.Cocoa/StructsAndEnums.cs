@@ -66,33 +66,24 @@ internal enum SentrySpanStatus : ulong
     DataLoss
 }
 
-[Native]
-internal enum SentryLevel : ulong
-{
-    None = 0,
-    Debug = 1,
-    Info = 2,
-    Warning = 3,
-    Error = 4,
-    Fatal = 5
-}
+    [Native]
+    internal enum SentryLevel : ulong
+    {
+        None = 0,
+        Debug = 1,
+        Info = 2,
+        Warning = 3,
+        Error = 4,
+        Fatal = 5
+    }
 
-[Native]
-internal enum SentryRRWebEventType : long
-{
-    None = 0,
-    Touch = 3,
-    Meta = 4,
-    Custom = 5
-}
-
-[Native]
-internal enum SentryTransactionNameSource : long
-{
-    Custom = 0,
-    Url = 1,
-    Route = 2,
-    View = 3,
-    Component = 4,
-    Task = 5
-}
+    [Native]
+    internal enum SentryTransactionNameSource : long
+    {
+        Custom = 0,
+        Url = 1,
+        Route = 2,
+        View = 3,
+        Component = 4,
+        Task = 5
+    }

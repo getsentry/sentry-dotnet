@@ -46,7 +46,6 @@ Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk $iPhoneSdkVersion `
     -scope "$CocoaSdkPath/Carthage/Headers" `
     "$CocoaSdkPath/Carthage/Headers/Sentry.h" `
-    "$CocoaSdkPath/Carthage/Headers/Sentry-Swift.h" `
     "$CocoaSdkPath/Carthage/Headers/PrivateSentrySDKOnly.h" `
     -o $BindingsPath `
     -c -Wno-objc-property-no-attribute
@@ -89,6 +88,41 @@ $Text = $Text -replace '\bpublic\b', 'internal'
 
 # Remove static CFunctions class
 $Text = $Text -replace '(?ms)\nstatic class CFunctions.*?}\n', ''
+
+# This enum resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
+$SentryLevel = @'
+
+    [Native]
+    internal enum SentryLevel : ulong
+    {
+        None = 0,
+        Debug = 1,
+        Info = 2,
+        Warning = 3,
+        Error = 4,
+        Fatal = 5
+    }
+'@
+
+# This enum resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
+$SentryTransactionNameSource = @'
+
+    [Native]
+    internal enum SentryTransactionNameSource : long
+    {
+        Custom = 0,
+        Url = 1,
+        Route = 2,
+        View = 3,
+        Component = 4,
+        Task = 5
+    }
+'@
+
+$Text += "`r`n$SentryLevel"
+$Text += "`r`n$SentryTransactionNameSource"
 
 # Add header and output file
 $Text = "$Header`n`n$Text"
@@ -189,55 +223,6 @@ $Text = $Text -replace '.*SentryEnvelope .*?[\s\S]*?\n\n', ''
 $Text = $Text -replace '.*typedef.*SentryOnAppStartMeasurementAvailable.*?[\s\S]*?\n\n', ''
 $Text = $Text -replace '\n.*SentryReplayBreadcrumbConverter.*?[\s\S]*?\);\n', ''
 
-$protocolsToRemove = @(
-    'SentryMXManagerDelegate',
-    'SentryMetricsAPIDelegate',
-    'SentryReplayVideoMaker',
-    'SentryViewScreenshotProvider',
-    'SentryRedactOptions',
-    'SentryReplayBreadcrumbConverter'
-)
-
-foreach ($protocol in $protocolsToRemove) {
-    $Text = $Text -replace ".*protocol $protocol.*?[\s\S]*?[^ ]\}\n\n", ''
-}
-
-$interfacesToRemove = @(
-    'HTTPHeaderSanitizer',
-    'LocalMetricsAggregator',
-    'NSURLSessionTask',
-    'SentryBaggageSerialization',
-    'SentryCurrentDateProvider',
-    'SentryEnabledFeaturesBuilder',
-    'SentryExperimentalOptions',
-    'SentryMXCallStack',
-    'SentryMXCallStackTree',
-    'SentryMXFrame',
-    'SentryMXManager',
-    'SentryMetricsAPI',
-    'SentryMetricsClient',
-    'SentryOnDemandReplay',
-    'SentryReplayOptions',
-    'SentryRRWebEvent',
-    'SentryRRWebCustomEvent',
-    'SentryRRWebBreadcrumbEvent',
-    'SentryRRWebMetaEvent',
-    'SentryRRWebSpanEvent',
-    'SentryRRWebVideoEvent',
-    'SentryReplayBreadcrumbConverter',
-    'SentryReplayRecording',
-    'SentryTouchTracker',
-    'SentryVideoInfo',
-    'SentryViewPhotographer',
-    'SwiftDescriptor',
-    'UrlSanitized',
-    'URLSessionTaskHelper'
-)
-
-foreach ($interface in $interfacesToRemove) {
-    $Text = $Text -replace ".*interface.*$interface.*?[\s\S]*?[^ ]\}\n\n", ''
-}
-
 $propertiesToRemove = @(
     'SentryAppStartMeasurement',
     'SentryOnAppStartMeasurementAvailable',
@@ -250,6 +235,42 @@ $propertiesToRemove = @(
 foreach ($property in $propertiesToRemove) {
     $Text = $Text -replace "\n.*property.*$property.*?[\s\S]*?\}\n", ''
 }
+
+# This interface resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
+$SentryId = @'
+
+// @interface SentryId : NSObject
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry8SentryId")]
+[Internal]
+interface SentryId
+{
+    // @property (nonatomic, strong, class) SentryId * _Nonnull empty;
+    [Static]
+    [Export ("empty", ArgumentSemantic.Strong)]
+    SentryId Empty { get; set; }
+
+    // @property (readonly, copy, nonatomic) NSString * _Nonnull sentryIdString;
+    [Export ("sentryIdString")]
+    string SentryIdString { get; }
+
+    // -(instancetype _Nonnull)initWithUuid:(NSUUID * _Nonnull)uuid __attribute__((objc_designated_initializer));
+    [Export ("initWithUuid:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (NSUuid uuid);
+
+    // -(instancetype _Nonnull)initWithUUIDString:(NSString * _Nonnull)uuidString __attribute__((objc_designated_initializer));
+    [Export ("initWithUUIDString:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (string uuidString);
+
+    // @property (readonly, nonatomic) NSUInteger hash;
+    [Export ("hash")]
+    nuint Hash { get; }
+}
+'@
+
+$Text += "`r`n$SentryId"
 
 # Add header and output file
 $Text = "$Header`n`n$Text"
