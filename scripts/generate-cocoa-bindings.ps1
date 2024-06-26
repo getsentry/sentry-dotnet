@@ -93,32 +93,32 @@ $Text = $Text -replace '(?ms)\nstatic class CFunctions.*?}\n', ''
 # Appending it here so we don't need to import and create bindings for the entire header
 $SentryLevel = @'
 
-    [Native]
-    internal enum SentryLevel : ulong
-    {
-        None = 0,
-        Debug = 1,
-        Info = 2,
-        Warning = 3,
-        Error = 4,
-        Fatal = 5
-    }
+[Native]
+internal enum SentryLevel : ulong
+{
+    None = 0,
+    Debug = 1,
+    Info = 2,
+    Warning = 3,
+    Error = 4,
+    Fatal = 5
+}
 '@
 
 # This enum resides in the Sentry-Swift.h
 # Appending it here so we don't need to import and create bindings for the entire header
 $SentryTransactionNameSource = @'
 
-    [Native]
-    internal enum SentryTransactionNameSource : long
-    {
-        Custom = 0,
-        Url = 1,
-        Route = 2,
-        View = 3,
-        Component = 4,
-        Task = 5
-    }
+[Native]
+internal enum SentryTransactionNameSource : long
+{
+    Custom = 0,
+    Url = 1,
+    Route = 2,
+    View = 3,
+    Component = 4,
+    Task = 5
+}
 '@
 
 $Text += "`r`n$SentryLevel"
