@@ -254,8 +254,8 @@ internal class Hub : IHub, IMetricHub, IDisposable
         return new TransactionContext(
             name: name ?? string.Empty,
             operation: operation ?? string.Empty,
-            parentSpanId: propagationContext.ParentSpanId,
             spanId: propagationContext.SpanId,
+            parentSpanId: propagationContext.ParentSpanId,
             traceId: propagationContext.TraceId,
             isSampled: traceHeader?.IsSampled,
             isParentSampled: traceHeader?.IsSampled);
