@@ -42,8 +42,9 @@ internal class SampleProfilerSession : IDisposable
     };
 
     // Exposed only for benchmarks.
-    // The size of the runtime's buffer for collecting events in MB, same as the current default in StartEventPipeSession().
-    internal static int CircularBufferMB = 256;
+    // The size of the runtime's buffer for collecting events. The docs are sparse but it seems like we don't
+    // need a large buffer if we're connecting righ away. Leaving it too large increases app memory usage.
+    internal static int CircularBufferMB = 16;
 
     public SampleProfilerTraceEventParser SampleEventParser => _sampleEventParser;
 
@@ -82,7 +83,7 @@ internal class SampleProfilerSession : IDisposable
             var session = client.StartEventPipeSession(Providers, requestRundown: false, CircularBufferMB);
 
             var stopWatch = SentryStopwatch.StartNew();
-            var eventSource = TraceLog.CreateFromEventPipeSession(session, TraceLog.EventPipeRundownConfiguration.Enable(client));
+            var eventSource = TraceLog.CreateFromEventPipeSession(session);
 
             // Process() blocks until the session is stopped so we need to run it on a separate thread.
             Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning)
