@@ -251,12 +251,14 @@ internal class Hub : IHub, IMetricHub, IDisposable
         var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader);
         ConfigureScope(scope => scope.PropagationContext = propagationContext);
 
-        // If we have to create a new SentryTraceHeader we don't make a sampling decision
-        traceHeader ??= new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, null);
         return new TransactionContext(
-            name ?? string.Empty,
-            operation ?? string.Empty,
-            traceHeader);
+            name: name ?? string.Empty,
+            operation: operation ?? string.Empty,
+            spanId: propagationContext.SpanId,
+            parentSpanId: propagationContext.ParentSpanId,
+            traceId: propagationContext.TraceId,
+            isSampled: traceHeader?.IsSampled,
+            isParentSampled: traceHeader?.IsSampled);
     }
 
     public void StartSession()
