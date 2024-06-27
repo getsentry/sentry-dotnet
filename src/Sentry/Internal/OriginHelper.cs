@@ -3,7 +3,7 @@ namespace Sentry.Internal;
 internal static partial class OriginHelper
 {
     internal const string Manual = "manual";
-    private const string ValidOriginPattern = @"^(auto|manual)(\.[\w_-]+){0,3}$";
+    private const string ValidOriginPattern = @"^(auto|manual)(\.[\w]+){0,3}$";
 
 #if NET8_0_OR_GREATER
     [GeneratedRegex(ValidOriginPattern, RegexOptions.Compiled)]

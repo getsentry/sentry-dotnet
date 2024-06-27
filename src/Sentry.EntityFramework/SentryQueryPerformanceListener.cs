@@ -9,7 +9,7 @@ internal class SentryQueryPerformanceListener : IDbCommandInterceptor
     internal const string DbNonQueryKey = "db.execute";
     internal const string DbScalarKey = "db.query.scalar";
 
-    internal static readonly string EntityFrameworkOrigin = "auto.db.entity-framework";
+    internal static readonly string EntityFrameworkOrigin = "auto.db.entity_framework";
 
     private SentryOptions _options;
     private IHub _hub;

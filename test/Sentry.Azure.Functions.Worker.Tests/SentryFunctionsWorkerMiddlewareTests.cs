@@ -63,7 +63,7 @@ public class SentryFunctionsWorkerMiddlewareTests
     }
 
     [Fact]
-    public async Task Transaction_properties_set()
+    public async Task Transaction_PropertiesAreSet()
     {
         var functionContext = Substitute.For<FunctionContext>();
         var functionDefinition = Substitute.For<FunctionDefinition>();

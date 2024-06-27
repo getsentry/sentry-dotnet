@@ -19,6 +19,7 @@ public class OriginHelperTests
     [InlineData("manual.CATEGORY.INTEGRATION.PART.invalid_segment")]
     [InlineData("manual.forbidden_@#$_characters")]
     [InlineData("invalid")]
+    [InlineData("auto.invalid.some-integration")]
     [InlineData("auto.foo&")]
     [InlineData("invalid.foo.b^ar")]
     [InlineData("invalid.foo.bar.4*2")]
