@@ -17,12 +17,10 @@ public partial class SentryClientTests
         public IBackgroundWorker BackgroundWorker { get; set; } = Substitute.For<IBackgroundWorker, IDisposable>();
         public IClientReportRecorder ClientReportRecorder { get; } = Substitute.For<IClientReportRecorder>();
         public ISessionManager SessionManager { get; set; } = Substitute.For<ISessionManager>();
-        public EventScrubber EventScrubber { get; set; } = Substitute.For<EventScrubber>();
 
         public Fixture()
         {
             SentryOptions.ClientReportRecorder = ClientReportRecorder;
-            SentryOptions.EventScrubber = EventScrubber;
             BackgroundWorker.EnqueueEnvelope(Arg.Any<Envelope>()).Returns(true);
         }
 
@@ -245,6 +243,22 @@ public partial class SentryClientTests
         _ = sut.CaptureEvent(@event, scope);
 
         Assert.Equal(scope.Breadcrumbs, @event.Breadcrumbs);
+    }
+
+    [Fact]
+    public void CaptureEvent_UserIsNull_SetsFallbackUserId()
+    {
+        // Arrange
+        var scope = new Scope(_fixture.SentryOptions);
+        var @event = new SentryEvent();
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        _ = sut.CaptureEvent(@event, scope);
+
+        // Assert
+        @event.User.Id.Should().NotBeNullOrWhiteSpace();
     }
 
     [Fact]
@@ -1064,6 +1078,24 @@ public partial class SentryClientTests
     }
 
     [Fact]
+    public void CaptureTransaction_UserIsNull_SetsFallbackUserId()
+    {
+        // Arrange
+        var transaction = new SentryTransaction("name", "operation")
+        {
+            IsSampled = true,
+            EndTimestamp = DateTimeOffset.Now // finished
+        };
+        var scope = new Scope(_fixture.SentryOptions);
+
+        // Act
+        _fixture.GetSut().CaptureTransaction(transaction, scope, null);
+
+        // Assert
+        transaction.User.Id.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
     public void CaptureTransaction_AddedTransactionProcessor_ReceivesHint()
     {
         // Arrange
@@ -1506,19 +1538,5 @@ public partial class SentryClientTests
 
         // Assert
         _fixture.SessionManager.Received().EndSession(SessionEndStatus.Crashed);
-    }
-
-    [Fact]
-    public void CaptureEvent_ScrubsData()
-    {
-        // Arrange
-        var sentryEvent = new SentryEvent();
-        var sut = _fixture.GetSut();
-
-        // Act
-        var actualId = sut.CaptureEvent(sentryEvent);
-
-        // Assert
-        _fixture.EventScrubber.Received(1).ScrubEvent(sentryEvent);
     }
 }

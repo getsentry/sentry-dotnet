@@ -2,6 +2,7 @@ using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.Maui.Networking;
+using Sentry.Infrastructure;
 
 namespace Sentry.Maui.Internal;
 
@@ -35,6 +36,12 @@ internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
 
         // Global Mode makes sense for client apps
         options.IsGlobalModeEnabled = true;
+
+        // So debug logs are visible in both Rider and Visual Studio
+        if (options is { Debug: true, DiagnosticLogger: null })
+        {
+            options.DiagnosticLogger = new ConsoleAndTraceDiagnosticLogger(options.DiagnosticLevel);
+        }
 
         // We'll use an event processor to set things like SDK name
         options.AddEventProcessor(new SentryMauiEventProcessor(options));

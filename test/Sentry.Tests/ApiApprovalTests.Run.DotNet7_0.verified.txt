@@ -732,7 +732,6 @@ namespace Sentry
         public void DisableAppDomainUnhandledExceptionCapture() { }
         public void DisableDiagnosticSourceIntegration() { }
         public void DisableDuplicateEventDetection() { }
-        public void DisableScrubbing() { }
         public void DisableUnobservedTaskExceptionCapture() { }
         public void DisableWinUiUnhandledExceptionIntegration() { }
         public System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors() { }
@@ -746,8 +745,6 @@ namespace Sentry
             where TIntegration : Sentry.Integrations.ISdkIntegration { }
         public void RemoveTransactionProcessor<TProcessor>()
             where TProcessor : Sentry.Extensibility.ISentryTransactionProcessor { }
-        public void ScrubData(System.Action<System.Collections.Generic.IList<string>> configureDenyList) { }
-        public void ScrubData(System.Collections.Generic.IEnumerable<string> denyList) { }
         public void SetBeforeBreadcrumb(System.Func<Sentry.Breadcrumb, Sentry.Breadcrumb?> beforeBreadcrumb) { }
         public void SetBeforeBreadcrumb(System.Func<Sentry.Breadcrumb, Sentry.SentryHint, Sentry.Breadcrumb?> beforeBreadcrumb) { }
         public void SetBeforeSend(System.Func<Sentry.SentryEvent, Sentry.SentryEvent?> beforeSend) { }
@@ -984,6 +981,7 @@ namespace Sentry
         public string? Id { get; set; }
         public string? IpAddress { get; set; }
         public System.Collections.Generic.IDictionary<string, string> Other { get; set; }
+        [System.Obsolete("This property is deprecated and will be removed in a future version.")]
         public string? Segment { get; set; }
         public string? Username { get; set; }
         public Sentry.SentryUser Clone() { }
@@ -1460,6 +1458,11 @@ namespace Sentry.Http
 }
 namespace Sentry.Infrastructure
 {
+    public class ConsoleAndTraceDiagnosticLogger : Sentry.Infrastructure.DiagnosticLogger
+    {
+        public ConsoleAndTraceDiagnosticLogger(Sentry.SentryLevel minimalLevel) { }
+        protected override void LogMessage(string message) { }
+    }
     public class ConsoleDiagnosticLogger : Sentry.Infrastructure.DiagnosticLogger
     {
         public ConsoleDiagnosticLogger(Sentry.SentryLevel minimalLevel) { }

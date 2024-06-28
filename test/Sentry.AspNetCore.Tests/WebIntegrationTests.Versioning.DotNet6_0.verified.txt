@@ -26,6 +26,7 @@
           }
         },
         User: {
+          Id: Guid_1,
           IpAddress: {{auto}}
         },
         Environment: production,
@@ -78,7 +79,7 @@
           http.response.status_code: 200
         },
         Tags: {
-          ActionId: Guid_1,
+          ActionId: Guid_2,
           ActionName: Sentry.AspNetCore.Tests.WebIntegrationTests+VersionController.Method (Sentry.AspNetCore.Tests),
           route.action: Method,
           route.controller: Version,
