@@ -1,7 +1,8 @@
 #nullable enable
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
-
-public interface ITestListener
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
-    void RecordResult(TestResultViewModel result);
+    public interface ITestListener
+    {
+        void RecordResult(TestResultViewModel result);
+    }
 }

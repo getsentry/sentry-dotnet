@@ -1,30 +1,17 @@
 #nullable enable
 using System;
 using Xunit;
-using Xunit.Abstractions;
 
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
-
-internal class DiagnosticMessageSink : Xunit.Sdk.LongLivedMarshalByRefObject, IMessageSink
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
-    private Action<string> _logger;
-    private string _assemblyDisplayName;
-    private bool _showDiagnostics;
-
-    public DiagnosticMessageSink(Action<string> logger, string assemblyDisplayName, bool showDiagnostics)
+    internal class DiagnosticMessageSink : DiagnosticEventSink
     {
-        _logger = logger;
-        _assemblyDisplayName = assemblyDisplayName;
-        _showDiagnostics = showDiagnostics;
-    }
-
-    public bool OnMessage(IMessageSinkMessage message)
-    {
-        if (_showDiagnostics)
+        public DiagnosticMessageSink(Action<string> logger, string assemblyDisplayName, bool showDiagnostics)
         {
-            _logger($"{_assemblyDisplayName}: {message}");
+            if (showDiagnostics && logger != null)
+            {
+                DiagnosticMessageEvent += args => logger($"{assemblyDisplayName}: {args.Message.Message}");
+            }
         }
-
-        return true;
     }
 }

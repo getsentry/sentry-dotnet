@@ -1,32 +1,41 @@
 #nullable enable
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using ObjCRuntime;
 using UIKit;
 
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner;
-
-public class MauiTestViewController : UIViewController
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner
 {
-    private Task? _task;
+    public class MauiTestViewController : UIViewController
 
-    public MauiTestViewController()
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            Task? _task;
+    After:
+            private Task? _task;
+    */
     {
-    }
+        private Task? _task;
 
-    public MauiTestViewController(Task task)
-    {
-        _task = task;
-    }
+        public MauiTestViewController()
+        {
+        }
 
-    public override async void ViewDidLoad()
-    {
-        base.ViewDidLoad();
+        public MauiTestViewController(Task task)
+        {
+            _task = task;
+        }
 
-        if (_task is not null)
-            await _task;
+        public override async void ViewDidLoad()
+        {
+            base.ViewDidLoad();
 
-        var runner = MauiTestApplicationDelegate.Current.Services.GetRequiredService<HeadlessTestRunner>();
+            if (_task is not null)
+                await _task;
 
-        await runner.RunTestsAsync();
+            var runner = MauiTestApplicationDelegate.Current.Services.GetRequiredService<HeadlessTestRunner>();
+
+            await runner.RunTestsAsync();
+        }
     }
 }

@@ -2,12 +2,9 @@
 
   <PropertyGroup>
     <TargetFrameworks />
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios</TargetFrameworks>
-    <!-- Currently broken on .NET 7, see
-      - https://github.com/dotnet/maui/issues/18573
-      - https://developercommunity.visualstudio.com/t/MAUI0000:-SystemMissingMethodException:/10505327?sort=newest&ftype=problem
-      <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks> -->
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-maccatalyst</TargetFrameworks>
 
     <OutputType>Exe</OutputType>
     <SingleProject>true</SingleProject>
@@ -36,6 +33,7 @@
     <!-- https://github.com/xamarin/xamarin-android/issues/6809 -->
     <NoWarn>$(NoWarn);XA4218</NoWarn>
 
+    <PublishAot Condition="'$(TestNativeAot)' == 'true'">true</PublishAot>
   </PropertyGroup>
 
   <!--
@@ -74,7 +72,7 @@
     <ProjectReference Include="..\Sentry.Tests\Sentry.Tests.csproj" />
     <ProjectReference Include="..\Sentry.Extensions.Logging.Tests\Sentry.Extensions.Logging.Tests.csproj" />
     <ProjectReference Include="..\Sentry.Maui.Tests\Sentry.Maui.Tests.csproj" />
-    <PackageReference Condition="$(TargetFramework.StartsWith('net8'))" Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
   </ItemGroup>
 
   <!-- https://github.com/dotnet/maui/blob/main/.nuspec/Microsoft.Maui.TestUtils.DeviceTests.Runners.targets -->

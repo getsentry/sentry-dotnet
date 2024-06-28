@@ -2,31 +2,46 @@
 using System;
 using Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner;
 
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners;
-
-public static class TestServices
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners
 {
-    private static IServiceProvider? s_services = null;
+    public static class TestServices
 
-    public static IServiceProvider Services
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+    Before:
+            static IServiceProvider? s_services = null;
+    After:
+            private static IServiceProvider? s_services = null;
+    */
+
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            static IServiceProvider? s_services = null;
+    After:
+            private static IServiceProvider? s_services = null;
+    */
     {
-        get
+        private static IServiceProvider? s_services = null;
+
+        public static IServiceProvider Services
         {
-            if (s_services is null)
+            get
             {
+                if (s_services is null)
+                {
 #if __ANDROID__
-                s_services = MauiTestInstrumentation.Current?.Services ?? MauiApplication.Current.Services;
+                    s_services = MauiTestInstrumentation.Current?.Services ?? IPlatformApplication.Current?.Services;
 #elif __IOS__
-                s_services = MauiTestApplicationDelegate.Current?.Services ?? MauiUIApplicationDelegate.Current.Services;
+					s_services = MauiTestApplicationDelegate.Current?.Services ?? IPlatformApplication.Current?.Services;
 #elif WINDOWS
-                    s_services = MauiWinUIApplication.Current.Services;
+					s_services = IPlatformApplication.Current?.Services;
 #endif
+                }
+
+                if (s_services is null)
+                    throw new InvalidOperationException($"Test app could not find services.");
+
+                return s_services;
             }
-
-            if (s_services is null)
-                throw new InvalidOperationException($"Test app could not find services.");
-
-            return s_services;
         }
     }
 }

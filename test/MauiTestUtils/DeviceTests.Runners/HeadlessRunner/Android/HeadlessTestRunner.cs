@@ -8,86 +8,87 @@ using Android.OS;
 using Microsoft.DotNet.XHarness.TestRunners.Common;
 using Microsoft.DotNet.XHarness.TestRunners.Xunit;
 
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner;
-
-internal class HeadlessTestRunner : AndroidApplicationEntryPoint
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.HeadlessRunner
 {
-    private readonly HeadlessRunnerOptions _runnerOptions;
-    private readonly TestOptions _options;
-    private readonly string _resultsPath;
-
-    public HeadlessTestRunner(HeadlessRunnerOptions runnerOptions, TestOptions options)
+    internal class HeadlessTestRunner : AndroidApplicationEntryPoint
     {
-        _runnerOptions = runnerOptions;
-        _options = options;
+        private readonly HeadlessRunnerOptions _runnerOptions;
+        private readonly TestOptions _options;
+        private readonly string _resultsPath;
 
-        var cache = Application.Context.CacheDir!.AbsolutePath;
-        _resultsPath = Path.Combine(cache, _runnerOptions.TestResultsFilename);
-    }
-
-    protected override bool LogExcludedTests => true;
-
-    public override TextWriter? Logger => null;
-
-    public override string TestsResultsFinalPath => _resultsPath;
-
-    protected override int? MaxParallelThreads => System.Environment.ProcessorCount;
-
-    protected override IDevice Device { get; } = new TestDevice();
-
-    protected override IEnumerable<TestAssemblyInfo> GetTestAssemblies() =>
-        _options.Assemblies
-            .Distinct()
-            .Select(assembly =>
-            {
-                // Android needs this file to "exist" but it uses the assembly actually.
-                var path = Path.Combine(Application.Context.CacheDir!.AbsolutePath, assembly.GetName().Name + ".dll");
-                if (!File.Exists(path))
-                    File.Create(path).Close();
-
-                return new TestAssemblyInfo(assembly, path);
-            });
-
-    protected override void TerminateWithSuccess() { }
-
-    protected override TestRunner GetTestRunner(LogWriter logWriter)
-    {
-        var testRunner = base.GetTestRunner(logWriter);
-        if (_options.SkipCategories?.Count > 0)
-            testRunner.SkipCategories(_options.SkipCategories);
-        return testRunner;
-    }
-
-    public async Task<Bundle> RunTestsAsync()
-    {
-        var bundle = new Bundle();
-
-        TestsCompleted += OnTestsCompleted;
-
-        await RunAsync();
-
-        TestsCompleted -= OnTestsCompleted;
-
-        if (File.Exists(TestsResultsFinalPath))
-            bundle.PutString("test-results-path", TestsResultsFinalPath);
-
-        if (bundle.GetLong("return-code", -1) == -1)
-            bundle.PutLong("return-code", 1);
-
-        return bundle;
-
-        void OnTestsCompleted(object? sender, TestRunResult results)
+        public HeadlessTestRunner(HeadlessRunnerOptions runnerOptions, TestOptions options)
         {
-            var message =
-                $"Tests run: {results.ExecutedTests} " +
-                $"Passed: {results.PassedTests} " +
-                $"Inconclusive: {results.InconclusiveTests} " +
-                $"Failed: {results.FailedTests} " +
-                $"Ignored: {results.SkippedTests}";
+            _runnerOptions = runnerOptions;
+            _options = options;
 
-            bundle.PutString("test-execution-summary", message);
+            var cache = Application.Context.CacheDir!.AbsolutePath;
+            _resultsPath = Path.Combine(cache, _runnerOptions.TestResultsFilename);
+        }
 
-            bundle.PutLong("return-code", results.FailedTests == 0 ? 0 : 1);
+        protected override bool LogExcludedTests => true;
+
+        public override TextWriter? Logger => null;
+
+        public override string TestsResultsFinalPath => _resultsPath;
+
+        protected override int? MaxParallelThreads => System.Environment.ProcessorCount;
+
+        protected override IDevice Device { get; } = new TestDevice();
+
+        protected override IEnumerable<TestAssemblyInfo> GetTestAssemblies() =>
+            _options.Assemblies
+                .Distinct()
+                .Select(assembly =>
+                {
+                    // Android needs this file to "exist" but it uses the assembly actually.
+                    var path = Path.Combine(Application.Context.CacheDir!.AbsolutePath, assembly.GetName().Name + ".dll");
+                    if (!File.Exists(path))
+                        File.Create(path).Close();
+
+                    return new TestAssemblyInfo(assembly, path);
+                });
+
+        protected override void TerminateWithSuccess() { }
+
+        protected override TestRunner GetTestRunner(LogWriter logWriter)
+        {
+            var testRunner = base.GetTestRunner(logWriter);
+            if (_options.SkipCategories?.Count > 0)
+                testRunner.SkipCategories(_options.SkipCategories);
+            return testRunner;
+        }
+
+        public async Task<Bundle> RunTestsAsync()
+        {
+            var bundle = new Bundle();
+
+            TestsCompleted += OnTestsCompleted;
+
+            await RunAsync();
+
+            TestsCompleted -= OnTestsCompleted;
+
+            if (File.Exists(TestsResultsFinalPath))
+                bundle.PutString("test-results-path", TestsResultsFinalPath);
+
+            if (bundle.GetLong("return-code", -1) == -1)
+                bundle.PutLong("return-code", 1);
+
+            return bundle;
+
+            void OnTestsCompleted(object? sender, TestRunResult results)
+            {
+                var message =
+                    $"Tests run: {results.ExecutedTests} " +
+                    $"Passed: {results.PassedTests} " +
+                    $"Inconclusive: {results.InconclusiveTests} " +
+                    $"Failed: {results.FailedTests} " +
+                    $"Ignored: {results.SkippedTests}";
+
+                bundle.PutString("test-execution-summary", message);
+
+                bundle.PutLong("return-code", results.FailedTests == 0 ? 0 : 1);
+            }
         }
     }
 }
