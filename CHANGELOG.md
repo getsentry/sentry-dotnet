@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- The SDK no longer fails to create a trace root ([#3453](https://github.com/getsentry/sentry-dotnet/pull/3453))
+
 ## 4.8.0
 
 ### Obsoletion
@@ -12,7 +18,6 @@
 
 ### Fixes
 
-- The SDK no longer fails to create a trace root ([#3453](https://github.com/getsentry/sentry-dotnet/pull/3453))
 - Debug logs are now visible for MAUI apps in Visual Studio when using Sentry's default DiagnosticLogger ([#3373](https://github.com/getsentry/sentry-dotnet/pull/3373))
 - Fixed Monitor duration calculation ([#3420]https://github.com/getsentry/sentry-dotnet/pull/3420)
 - Fixed null IServiceProvider in anonymous routes with OpenTelemetry ([#3401](https://github.com/getsentry/sentry-dotnet/pull/3401))
