@@ -11,7 +11,7 @@ public class NetworkConnectivityMonitorTest
         var pingHost = Substitute.For<IPingHost>();
         pingHost
             .IsAvailableAsync(Arg.Any<CancellationToken>())
-            .Returns( Task.FromResult(true));
+            .Returns(Task.FromResult(true));
 
         using var backoff = new NetworkConnectivityMonitor(pingHost, Callback);
 
