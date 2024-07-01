@@ -17,6 +17,8 @@ namespace Sentry.Internal.Http;
 internal class CachingTransport : ITransport, IDisposable
 {
     private const string EnvelopeFileExt = "envelope";
+    private const string ProcessingFolder = "__processing";
+    private const string DeadLetterFolder = "__failed";
 
     private readonly ITransport _innerTransport;
     private readonly SentryOptions _options;
@@ -24,12 +26,15 @@ internal class CachingTransport : ITransport, IDisposable
     private readonly string _isolatedCacheDirectoryPath;
     private readonly int _keepCount;
 
-    private long _transportIsFailing = 0;
-    internal bool TransportIsFailing => Interlocked.Read(ref _transportIsFailing) == 1;
+    private long _networkIsUnavailable = 0;
+    internal bool NetworkIsUnavailable => Interlocked.Read(ref _networkIsUnavailable) == 1;
 
     // When a file is getting processed, it's moved to a child directory
     // to avoid getting picked up by other threads.
     private readonly string _processingDirectoryPath;
+
+    // If we encounter an irrecoverable error sending a file, we move it to a dead letter queue
+    private readonly string _deadLetterDirectoryPath;
 
     // Signal that tells the worker whether there's work it can do.
     // Pre-released because the directory might already have files from previous sessions.
@@ -80,7 +85,8 @@ internal class CachingTransport : ITransport, IDisposable
             options.TryGetProcessSpecificCacheDirectoryPath() ??
             throw new InvalidOperationException("Cache directory or DSN is not set.");
 
-        _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
+        _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, ProcessingFolder);
+        _deadLetterDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, DeadLetterFolder);
     }
 
     private void Initialize(bool startWorker)
@@ -266,6 +272,7 @@ internal class CachingTransport : ITransport, IDisposable
 
     private async Task ProcessCacheAsync(CancellationToken cancellation)
     {
+        string? fileBeingProcessed = null;
         try
         {
             // Make sure we're the only thread processing items
@@ -278,10 +285,11 @@ internal class CachingTransport : ITransport, IDisposable
             _options.LogDebug("Flushing cached envelopes.");
             while (await TryPrepareNextCacheFileAsync(cancellation).ConfigureAwait(false) is { } file)
             {
+                fileBeingProcessed = file;
                 await InnerProcessCacheAsync(file, cancellation).ConfigureAwait(false);
             }
 
-            if (Interlocked.Exchange(ref _transportIsFailing, 0) == 1)
+            if (Interlocked.Exchange(ref _networkIsUnavailable, 0) == 1)
             {
                 // Retry envelopes that got stuck in processing while the transport was failing
                 MoveUnprocessedFilesBackToCache();
@@ -291,12 +299,23 @@ internal class CachingTransport : ITransport, IDisposable
             // Signal that we can continue with initialization, if we're using _options.InitCacheFlushTimeout
             _initCacheResetEvent?.Set();
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception e) when (IsNetworkError(e))
+        {
+            if (Interlocked.Exchange(ref _networkIsUnavailable, 1) == 1) // Only log the first failure
+            {
+                _options.LogDebug("Network unavailable - paused cache processing.");
+            }
+
+            throw;
+        }
         catch (Exception e)
         {
-            if (Interlocked.Exchange(ref _transportIsFailing, 1) == 1) // Only log the first failure
-            {
-                _options.LogDebug($"Error flushing cached envelopes: {e.Message}");
-            }
+            _options.LogDebug($"Cache processing error: {e.Message}");
+            await MoveToDeadDetterQueueAsync(fileBeingProcessed, cancellation).ConfigureAwait(false);
             throw;
         }
         finally
@@ -305,6 +324,13 @@ internal class CachingTransport : ITransport, IDisposable
             _processingSignal.Release();
         }
     }
+
+    private static bool IsNetworkError(Exception exception) =>
+        exception switch
+        {
+            HttpRequestException or WebException or IOException or SocketException => true,
+            _ => false
+        };
 
     private async Task InnerProcessCacheAsync(string file, CancellationToken cancellation)
     {
@@ -345,8 +371,7 @@ internal class CachingTransport : ITransport, IDisposable
                         // Let the worker catch, log, wait a bit and retry.
                         throw;
                     }
-                    catch (Exception ex) when (ex is HttpRequestException or WebException or SocketException
-                                                   or IOException)
+                    catch (Exception ex) when (IsNetworkError(ex))
                     {
                         _options.LogError(ex, "Failed to send cached envelope: {0}, retrying after a delay.", file);
                         // Let the worker catch, log, wait a bit and retry.
@@ -422,6 +447,25 @@ internal class CachingTransport : ITransport, IDisposable
         _fileSystem.MoveFile(filePath, targetFilePath, overwrite: true);
 
         return targetFilePath;
+    }
+
+    // Moves a file to the dead letter queue
+    private async Task MoveToDeadDetterQueueAsync(string? filePath, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            _options.LogDebug("No file provided to move to the dead letter queue");
+            return;
+        }
+
+        using var lockClaim = await _cacheDirectoryLock.AcquireAsync(cancellationToken).ConfigureAwait(false);
+
+        var targetFilePath = Path.Combine(_deadLetterDirectoryPath, Path.GetFileName(filePath));
+
+        // Move the file to the dead letter queue.
+        // We move with overwrite just in case a file with the same name already exists in the output directory.
+        // That should never happen under normal workflows because the filenames have high variance.
+        _fileSystem.MoveFile(filePath, targetFilePath, overwrite: true);
     }
 
     private async Task StoreToCacheAsync(

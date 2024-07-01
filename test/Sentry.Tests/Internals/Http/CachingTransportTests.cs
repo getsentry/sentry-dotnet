@@ -577,14 +577,14 @@ public class CachingTransportTests
         catch (Exception he)
         {
             receivedException = he;
-            failingWhenFailing = transport.TransportIsFailing;
+            failingWhenFailing = transport.NetworkIsUnavailable;
         }
         finally
         {
             // (transport stops failing)
             innerTransport.ClearReceivedCalls();
             await transport.FlushAsync();
-            failingWhenRecovered = transport.TransportIsFailing;
+            failingWhenRecovered = transport.NetworkIsUnavailable;
         }
 
         // Assert
