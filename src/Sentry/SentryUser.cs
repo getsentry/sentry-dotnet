@@ -85,6 +85,7 @@ public sealed class SentryUser : ISentryJsonSerializable
     /// <summary>
     /// The segment the user belongs to.
     /// </summary>
+    [Obsolete("This property is deprecated and will be removed in a future version.")]
     public string? Segment
     {
         get => _segment;
@@ -136,7 +137,9 @@ public sealed class SentryUser : ISentryJsonSerializable
         user.Username ??= Username;
         user.Email ??= Email;
         user.IpAddress ??= IpAddress;
+#pragma warning disable CS0618 // Type or member is obsolete
         user.Segment ??= Segment;
+#pragma warning restore CS0618 // Type or member is obsolete
 
         user._other ??= _other?.ToDictionary(
             entry => entry.Key,
@@ -148,7 +151,9 @@ public sealed class SentryUser : ISentryJsonSerializable
         Username is not null ||
         Email is not null ||
         IpAddress is not null ||
+#pragma warning disable CS0618 // Type or member is obsolete
         Segment is not null ||
+#pragma warning restore CS0618 // Type or member is obsolete
         _other?.Count > 0;
 
     /// <inheritdoc />
@@ -160,7 +165,9 @@ public sealed class SentryUser : ISentryJsonSerializable
         writer.WriteStringIfNotWhiteSpace("username", Username);
         writer.WriteStringIfNotWhiteSpace("email", Email);
         writer.WriteStringIfNotWhiteSpace("ip_address", IpAddress);
+#pragma warning disable CS0618 // Type or member is obsolete
         writer.WriteStringIfNotWhiteSpace("segment", Segment);
+#pragma warning restore CS0618 // Type or member is obsolete
         writer.WriteStringDictionaryIfNotEmpty("other", _other!);
 
         writer.WriteEndObject();
@@ -184,7 +191,9 @@ public sealed class SentryUser : ISentryJsonSerializable
             Username = username,
             Email = email,
             IpAddress = ip,
+#pragma warning disable CS0618 // Type or member is obsolete
             Segment = segment,
+#pragma warning restore CS0618 // Type or member is obsolete
             _other = other?.WhereNotNullValue().ToDict()
         };
     }

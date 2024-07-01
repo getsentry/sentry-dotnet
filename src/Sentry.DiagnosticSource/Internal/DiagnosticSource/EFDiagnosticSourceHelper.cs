@@ -59,6 +59,7 @@ internal abstract class EFDiagnosticSourceHelper
         // 2. Sentry's performance errors functionality only works when all queries have the same parent span.
         var parent = Transaction.GetDbParentSpan();
         var child = parent.StartChild(Operation, GetDescription(diagnosticSourceValue));
+        child.SetOrigin(SentryEFCoreListener.EFCoreListenerOrigin);
 
         SetDbData(child, diagnosticSourceValue);
         SetSpanReference(child, diagnosticSourceValue);

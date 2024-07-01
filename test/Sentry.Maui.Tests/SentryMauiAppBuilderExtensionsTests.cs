@@ -251,4 +251,65 @@ public partial class SentryMauiAppBuilderExtensionsTests
         // Assert
         Assert.Equal(cachePath, options.CacheDirectoryPath);
     }
+
+    [Fact]
+    public void UseSentry_DebugFalse_LoggerLeftDefault()
+    {
+        // Arrange
+        var builder = _fixture.Builder;
+
+        // Act
+        builder.UseSentry(options =>
+        {
+            options.Debug = false;
+            options.Dsn = ValidDsn;
+        });
+
+        using var app = builder.Build();
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        // Assert
+        options.DiagnosticLogger.Should().BeNull();
+    }
+
+    [Fact]
+    public void UseSentry_DebugTrue_ConsoleAndTracingDiagnosticsLogger()
+    {
+        // Arrange
+        var builder = _fixture.Builder;
+
+        // Act
+        builder.UseSentry(options =>
+        {
+            options.Debug = true;
+            options.Dsn = ValidDsn;
+        });
+
+        using var app = builder.Build();
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        // Assert
+        options.DiagnosticLogger.Should().BeOfType<ConsoleAndTraceDiagnosticLogger>();
+    }
+
+    [Fact]
+    public void UseSentry_DebugTrue_CustomDiagnosticsLogger()
+    {
+        // Arrange
+        var builder = _fixture.Builder;
+
+        // Act
+        builder.UseSentry(options =>
+        {
+            options.Debug = true;
+            options.Dsn = ValidDsn;
+            options.DiagnosticLogger = new TraceDiagnosticLogger(SentryLevel.Fatal);
+        });
+
+        using var app = builder.Build();
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        // Assert
+        options.DiagnosticLogger.Should().BeOfType<TraceDiagnosticLogger>();
+    }
 }

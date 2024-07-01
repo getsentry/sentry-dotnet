@@ -9,7 +9,6 @@ internal class Hub : IHub, IMetricHub, IDisposable
 {
     private readonly object _sessionPauseLock = new();
 
-    private readonly ISentryClient _ownedClient;
     private readonly ISystemClock _clock;
     private readonly ISessionManager _sessionManager;
     private readonly SentryOptions _options;
@@ -29,6 +28,9 @@ internal class Hub : IHub, IMetricHub, IDisposable
     public bool IsEnabled => _isEnabled == 1;
 
     internal SentryOptions Options => _options;
+
+    private Scope CurrentScope => ScopeManager.GetCurrent().Key;
+    private ISentryClient CurrentClient => ScopeManager.GetCurrent().Value;
 
     internal Hub(
         SentryOptions options,
@@ -50,10 +52,10 @@ internal class Hub : IHub, IMetricHub, IDisposable
         _options = options;
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
-        _ownedClient = client ?? new SentryClient(options, randomValuesFactory: _randomValuesFactory, sessionManager: _sessionManager);
         _clock = clock ?? SystemClock.Clock;
+        client ??= new SentryClient(options, randomValuesFactory: _randomValuesFactory, sessionManager: _sessionManager);
 
-        ScopeManager = scopeManager ?? new SentryScopeManager(options, _ownedClient);
+        ScopeManager = scopeManager ?? new SentryScopeManager(options, client);
 
         if (!options.IsGlobalModeEnabled)
         {
@@ -192,7 +194,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
         _ = ExceptionToSpanMap.GetValue(exception, _ => span);
     }
 
-    public ISpan? GetSpan() => ScopeManager.GetCurrent().Key.Span;
+    public ISpan? GetSpan() => CurrentScope.Span;
 
     public SentryTraceHeader GetTraceHeader()
     {
@@ -202,7 +204,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
 
         // With either tracing disabled or no active span on the current scope we fall back to the propagation context
-        var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
+        var propagationContext = CurrentScope.PropagationContext;
         // In either case, we must not append a sampling decision.
         return new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, null);
     }
@@ -215,7 +217,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
             return dsc.ToBaggageHeader();
         }
 
-        var propagationContext = ScopeManager.GetCurrent().Key.PropagationContext;
+        var propagationContext = CurrentScope.PropagationContext;
         return propagationContext.GetOrCreateDynamicSamplingContext(_options).ToBaggageHeader();
     }
 
@@ -249,12 +251,14 @@ internal class Hub : IHub, IMetricHub, IDisposable
         var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader);
         ConfigureScope(scope => scope.PropagationContext = propagationContext);
 
-        // If we have to create a new SentryTraceHeader we don't make a sampling decision
-        traceHeader ??= new SentryTraceHeader(propagationContext.TraceId, propagationContext.SpanId, null);
         return new TransactionContext(
-            name ?? string.Empty,
-            operation ?? string.Empty,
-            traceHeader);
+            name: name ?? string.Empty,
+            operation: operation ?? string.Empty,
+            spanId: propagationContext.SpanId,
+            parentSpanId: propagationContext.ParentSpanId,
+            traceId: propagationContext.TraceId,
+            isSampled: traceHeader?.IsSampled,
+            isParentSampled: traceHeader?.IsSampled);
     }
 
     public void StartSession()
@@ -387,7 +391,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
         try
         {
-            var clonedScope = ScopeManager.GetCurrent().Key.Clone();
+            var clonedScope = CurrentScope.Clone();
             configureScope(clonedScope);
 
             return CaptureEvent(evt, clonedScope, hint);
@@ -399,7 +403,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
-    public bool CaptureEnvelope(Envelope envelope) => _ownedClient.CaptureEnvelope(envelope);
+    public bool CaptureEnvelope(Envelope envelope) => CurrentClient.CaptureEnvelope(envelope);
 
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, SentryHint? hint = null)
     {
@@ -410,11 +414,10 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
         try
         {
-            ScopeManager.GetCurrent().Deconstruct(out var currentScope, out var sentryClient);
-            var actualScope = scope ?? currentScope;
+            scope ??= CurrentScope;
 
             // We get the span linked to the event or fall back to the current span
-            var span = GetLinkedSpan(evt) ?? actualScope.Span;
+            var span = GetLinkedSpan(evt) ?? scope.Span;
             if (span is not null)
             {
                 if (span.IsSampled is not false)
@@ -425,15 +428,15 @@ internal class Hub : IHub, IMetricHub, IDisposable
             else
             {
                 // If there is no span on the scope (and not just no sampled one), fall back to the propagation context
-                ApplyTraceContextToEvent(evt, actualScope.PropagationContext);
+                ApplyTraceContextToEvent(evt, scope.PropagationContext);
             }
 
             // Now capture the event with the Sentry client on the current scope.
-            var id = sentryClient.CaptureEvent(evt, actualScope, hint);
-            actualScope.LastEventId = id;
-            actualScope.SessionUpdate = null;
+            var id = CurrentClient.CaptureEvent(evt, scope, hint);
+            scope.LastEventId = id;
+            scope.SessionUpdate = null;
 
-            if (evt.HasTerminalException() && actualScope.Transaction is { } transaction)
+            if (evt.HasTerminalException() && scope.Transaction is { } transaction)
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
@@ -459,7 +462,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
         try
         {
-            _ownedClient.CaptureUserFeedback(userFeedback);
+            CurrentClient.CaptureUserFeedback(userFeedback);
         }
         catch (Exception e)
         {
@@ -482,10 +485,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
         try
         {
-            var (currentScope, client) = ScopeManager.GetCurrent();
-            scope ??= currentScope;
-
-            client.CaptureTransaction(transaction, scope, hint);
+            CurrentClient.CaptureTransaction(transaction, scope ?? CurrentScope, hint);
         }
         catch (Exception e)
         {
@@ -506,7 +506,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
         {
             enumerable = metrics as Metric[] ?? metrics.ToArray();
             _options.LogDebug("Capturing metrics.");
-            _ownedClient.CaptureEnvelope(Envelope.FromMetrics(metrics));
+            CurrentClient.CaptureEnvelope(Envelope.FromMetrics(metrics));
         }
         catch (Exception e)
         {
@@ -526,7 +526,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
         try
         {
             _options.LogDebug("Capturing code locations for period: {0}", codeLocations.Timestamp);
-            _ownedClient.CaptureEnvelope(Envelope.FromCodeLocations(codeLocations));
+            CurrentClient.CaptureEnvelope(Envelope.FromCodeLocations(codeLocations));
         }
         catch (Exception e)
         {
@@ -553,7 +553,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
         try
         {
-            _ownedClient.CaptureSession(sessionUpdate);
+            CurrentClient.CaptureSession(sessionUpdate);
         }
         catch (Exception e)
         {
@@ -578,13 +578,8 @@ internal class Hub : IHub, IMetricHub, IDisposable
         {
             _options.LogDebug("Capturing '{0}' check-in for '{1}'", status, monitorSlug);
 
-            if (scope is null)
-            {
-                var (currentScope, _) = ScopeManager.GetCurrent();
-                scope = currentScope;
-            }
-
-            return _ownedClient.CaptureCheckIn(monitorSlug, status, sentryId, duration, scope, configureMonitorOptions);
+            scope ??= CurrentScope;
+            return CurrentClient.CaptureCheckIn(monitorSlug, status, sentryId, duration, scope, configureMonitorOptions);
         }
         catch (Exception e)
         {
@@ -598,8 +593,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
     {
         try
         {
-            var (_, client) = ScopeManager.GetCurrent();
-            await client.FlushAsync(timeout).ConfigureAwait(false);
+            await CurrentClient.FlushAsync(timeout).ConfigureAwait(false);
         }
         catch (Exception e)
         {
@@ -619,7 +613,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
         try
         {
             Metrics.FlushAsync().ContinueWith(_ =>
-                _ownedClient.FlushAsync(_options.ShutdownTimeout).Wait()
+                CurrentClient.FlushAsync(_options.ShutdownTimeout).Wait()
             ).ConfigureAwait(false).GetAwaiter().GetResult();
         }
         catch (Exception e)
@@ -641,12 +635,5 @@ internal class Hub : IHub, IMetricHub, IDisposable
 #endif
     }
 
-    public SentryId LastEventId
-    {
-        get
-        {
-            var currentScope = ScopeManager.GetCurrent();
-            return currentScope.Key.LastEventId;
-        }
-    }
+    public SentryId LastEventId => CurrentScope.LastEventId;
 }

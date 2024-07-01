@@ -290,6 +290,11 @@ public class SentryEFCoreListenerTests
         _fixture.Options.DiagnosticLogger.DidNotReceive()?
             .Log(Arg.Is(SentryLevel.Warning), Arg.Is("Trying to close a span that was already garbage collected. {0}"),
                 null, Arg.Any<object[]>());
+
+        // Check Origin
+        ((SpanTracer)compilerSpan).Origin.Should().Be(SentryEFCoreListener.EFCoreListenerOrigin);
+        ((SpanTracer)connectionSpan).Origin.Should().Be(SentryEFCoreListener.EFCoreListenerOrigin);
+        ((SpanTracer)commandSpan).Origin.Should().Be(SentryEFCoreListener.EFCoreListenerOrigin);
     }
 
     [Fact]
