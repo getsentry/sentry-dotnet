@@ -564,6 +564,10 @@ internal class CachingTransport : ITransport, IDisposable
         _cacheDirectoryLock.Dispose();
         _preInitCacheResetEvent?.Dispose();
         _initCacheResetEvent?.Dispose();
+        lock (_connectivityMonitorLock)
+        {
+            _connectivityMonitor?.Dispose();
+        }
 
         (_innerTransport as IDisposable)?.Dispose();
     }
