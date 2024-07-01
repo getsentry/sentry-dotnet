@@ -27,6 +27,8 @@ internal class CachingTransport : ITransport, IDisposable
 
     private long _networkIsUnavailable = 0;
     internal bool NetworkIsUnavailable => Interlocked.Read(ref _networkIsUnavailable) == 1;
+    private ProgressiveBackoff? _progressiveBackoff;
+    private object _progressiveBackoffLock = new();
 
     // When a file is getting processed, it's moved to a child directory
     // to avoid getting picked up by other threads.
@@ -282,13 +284,7 @@ internal class CachingTransport : ITransport, IDisposable
                 await InnerProcessCacheAsync(file, cancellation).ConfigureAwait(false);
             }
 
-            // If we reach this point, we've successfully sent an envelope so the network must be available
-            if (Interlocked.Exchange(ref _networkIsUnavailable, 0) == 1)
-            {
-                // Retry envelopes that got stuck in processing while the transport was failing
-                MoveUnprocessedFilesBackToCache();
-                _workerSignal.Release();
-            }
+            SendFilesQueuedWhileOffline();
 
             // Signal that we can continue with initialization, if we're using _options.InitCacheFlushTimeout
             _initCacheResetEvent?.Set();
@@ -348,7 +344,14 @@ internal class CachingTransport : ITransport, IDisposable
                     }
                     catch (Exception ex) when (IsNetworkError(ex))
                     {
-                        Interlocked.Exchange(ref _networkIsUnavailable, 1);
+                        if (Interlocked.Exchange(ref _networkIsUnavailable, 1) == 0)
+                        {
+                            // TODO: Initialize a progressive backoff to check when the network is back online
+                            lock (_progressiveBackoffLock)
+                            {
+                                _progressiveBackoff ??= new ProgressiveBackoff(CheckWhenNetworkIsAvailableAsync);
+                            }
+                        }
                         _options.LogError(ex, "Failed to send cached envelope: {0}, retrying after a delay.", file);
                         // Let the worker catch, log, wait a bit and retry.
                         throw;
@@ -376,6 +379,37 @@ internal class CachingTransport : ITransport, IDisposable
 
         // Delete the envelope file and move on to the next one
         _fileSystem.DeleteFile(file);
+    }
+
+    private async Task<bool> CheckWhenNetworkIsAvailableAsync(CancellationToken cancellationToken)
+    {
+        var ping = new Ping();
+        var host = new Uri(_options.Dsn!).DnsSafeHost;
+        var reply = await ping.SendPingAsync(host).ConfigureAwait(false);
+        if (reply.Status != IPStatus.Success)
+        {
+            return false;
+        }
+
+        SendFilesQueuedWhileOffline();
+        return true;
+    }
+
+    /// <summary>
+    /// Send any files that were stuck in processing while the network was unavailable
+    /// </summary>
+    private void SendFilesQueuedWhileOffline()
+    {
+        if (Interlocked.Exchange(ref _networkIsUnavailable, 0) == 1)
+        {
+            // Stop the progressive backoff task
+            _progressiveBackoff?.Dispose();
+            _progressiveBackoff = null;
+
+            // Retry envelopes that got stuck in processing while the transport was failing
+            MoveUnprocessedFilesBackToCache();
+            _workerSignal.Release();
+        }
     }
 
     private void LogFailureWithDiscard(string file, Exception ex)
