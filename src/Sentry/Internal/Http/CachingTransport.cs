@@ -27,8 +27,8 @@ internal class CachingTransport : ITransport, IDisposable
 
     private long _networkIsUnavailable = 0;
     internal bool NetworkIsUnavailable => Interlocked.Read(ref _networkIsUnavailable) == 1;
-    private ProgressiveBackoff? _progressiveBackoff;
-    private object _progressiveBackoffLock = new();
+    private NetworkConnectivityMonitor? _connectivityMonitor;
+    private readonly object _connectivityMonitorLock = new();
 
     // When a file is getting processed, it's moved to a child directory
     // to avoid getting picked up by other threads.
@@ -58,6 +58,8 @@ internal class CachingTransport : ITransport, IDisposable
     internal ITransport InnerTransport => _innerTransport;
 
     private readonly IFileSystem _fileSystem;
+
+    private Lazy<string> Host => new Lazy<string>(() => new Uri(_options.Dsn!).DnsSafeHost);
 
     public static CachingTransport Create(ITransport innerTransport, SentryOptions options,
         bool startWorker = true,
@@ -346,10 +348,10 @@ internal class CachingTransport : ITransport, IDisposable
                     {
                         if (Interlocked.Exchange(ref _networkIsUnavailable, 1) == 0)
                         {
-                            // TODO: Initialize a progressive backoff to check when the network is back online
-                            lock (_progressiveBackoffLock)
+                            // Initialize a monitor to check when the network comes back online
+                            lock (_connectivityMonitorLock)
                             {
-                                _progressiveBackoff ??= new ProgressiveBackoff(CheckWhenNetworkIsAvailableAsync);
+                                _connectivityMonitor ??= new NetworkConnectivityMonitor(Host.Value, SendFilesQueuedWhileOffline);
                             }
                         }
                         _options.LogError(ex, "Failed to send cached envelope: {0}, retrying after a delay.", file);
@@ -381,20 +383,6 @@ internal class CachingTransport : ITransport, IDisposable
         _fileSystem.DeleteFile(file);
     }
 
-    private async Task<bool> CheckWhenNetworkIsAvailableAsync(CancellationToken cancellationToken)
-    {
-        var ping = new Ping();
-        var host = new Uri(_options.Dsn!).DnsSafeHost;
-        var reply = await ping.SendPingAsync(host).ConfigureAwait(false);
-        if (reply.Status != IPStatus.Success)
-        {
-            return false;
-        }
-
-        SendFilesQueuedWhileOffline();
-        return true;
-    }
-
     /// <summary>
     /// Send any files that were stuck in processing while the network was unavailable
     /// </summary>
@@ -402,9 +390,12 @@ internal class CachingTransport : ITransport, IDisposable
     {
         if (Interlocked.Exchange(ref _networkIsUnavailable, 0) == 1)
         {
-            // Stop the progressive backoff task
-            _progressiveBackoff?.Dispose();
-            _progressiveBackoff = null;
+            // Stop any connectivity monitor that we might have started
+            lock (_connectivityMonitorLock)
+            {
+                _connectivityMonitor?.Dispose();
+                _connectivityMonitor = null;
+            }
 
             // Retry envelopes that got stuck in processing while the transport was failing
             MoveUnprocessedFilesBackToCache();

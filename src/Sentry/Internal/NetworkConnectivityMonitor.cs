@@ -1,18 +1,29 @@
 namespace Sentry.Internal;
 
-internal class ProgressiveBackoff : IDisposable
+internal class NetworkConnectivityMonitor : IDisposable
 {
-    private readonly Func<CancellationToken, Task<bool>> _check;
+    private readonly IPingHost _pingHost;
+    private readonly Action _callbackWhenHostOnline;
     private readonly CancellationTokenSource _workerCts = new();
     private readonly Task _worker;
     internal int _delayInMilliseconds;
     private readonly int _maxDelayInMilliseconds;
     private readonly Func<int, int> _backoffFunction;
 
-    public ProgressiveBackoff(Func<CancellationToken, Task<bool>> check, int initialDelayInMilliseconds = 500,
+    public NetworkConnectivityMonitor(string hostToCheck, Action callbackWhenHostOnline,
+        int initialDelayInMilliseconds = 500,
+        int maxDelayInMilliseconds = 32_000, Func<int, int>? backoffFunction = null)
+        : this(new PingHost(hostToCheck), callbackWhenHostOnline, initialDelayInMilliseconds, maxDelayInMilliseconds,
+            backoffFunction)
+    {
+    }
+
+    internal NetworkConnectivityMonitor(IPingHost pingHost, Action callbackWhenHostOnline,
+        int initialDelayInMilliseconds = 500,
         int maxDelayInMilliseconds = 32_000, Func<int, int>? backoffFunction = null)
     {
-        _check = check;
+        _pingHost = pingHost;
+        _callbackWhenHostOnline = callbackWhenHostOnline;
         _delayInMilliseconds = initialDelayInMilliseconds;
         _maxDelayInMilliseconds = maxDelayInMilliseconds;
         _backoffFunction = backoffFunction ?? (x => x * 2);
@@ -24,9 +35,10 @@ internal class ProgressiveBackoff : IDisposable
         while (!_workerCts.IsCancellationRequested)
         {
             await Task.Delay(_delayInMilliseconds, _workerCts.Token).ConfigureAwait(false);
-            var checkResult = await _check(_workerCts.Token).ConfigureAwait(false);
+            var checkResult = await IsNetworkAvailableAsync(_workerCts.Token).ConfigureAwait(false);
             if (checkResult)
             {
+                _callbackWhenHostOnline();
                 return;
             }
             if (_delayInMilliseconds < _maxDelayInMilliseconds)
@@ -35,6 +47,9 @@ internal class ProgressiveBackoff : IDisposable
             }
         }
     }
+
+    private async Task<bool> IsNetworkAvailableAsync(CancellationToken cancellationToken) => await
+        _pingHost.IsAvailableAsync(cancellationToken).ConfigureAwait(false);
 
     public void Dispose()
     {
