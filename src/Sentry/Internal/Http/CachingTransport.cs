@@ -17,12 +17,18 @@ namespace Sentry.Internal.Http;
 internal class CachingTransport : ITransport, IDisposable
 {
     private const string EnvelopeFileExt = "envelope";
+    private const string ProcessingFolder = "__processing";
 
     private readonly ITransport _innerTransport;
     private readonly SentryOptions _options;
     private readonly bool _failStorage;
     private readonly string _isolatedCacheDirectoryPath;
     private readonly int _keepCount;
+
+    private long _networkIsUnavailable = 0;
+    internal bool NetworkIsUnavailable => Interlocked.Read(ref _networkIsUnavailable) == 1;
+    private NetworkConnectivityMonitor? _connectivityMonitor;
+    private readonly object _connectivityMonitorLock = new();
 
     // When a file is getting processed, it's moved to a child directory
     // to avoid getting picked up by other threads.
@@ -53,6 +59,8 @@ internal class CachingTransport : ITransport, IDisposable
 
     private readonly IFileSystem _fileSystem;
 
+    private Lazy<string> Host => new Lazy<string>(() => new Uri(_options.Dsn!).DnsSafeHost);
+
     public static CachingTransport Create(ITransport innerTransport, SentryOptions options,
         bool startWorker = true,
         bool failStorage = false)
@@ -77,7 +85,7 @@ internal class CachingTransport : ITransport, IDisposable
             options.TryGetProcessSpecificCacheDirectoryPath() ??
             throw new InvalidOperationException("Cache directory or DSN is not set.");
 
-        _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
+        _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, ProcessingFolder);
     }
 
     private void Initialize(bool startWorker)
@@ -278,6 +286,8 @@ internal class CachingTransport : ITransport, IDisposable
                 await InnerProcessCacheAsync(file, cancellation).ConfigureAwait(false);
             }
 
+            SendFilesQueuedWhileOffline();
+
             // Signal that we can continue with initialization, if we're using _options.InitCacheFlushTimeout
             _initCacheResetEvent?.Set();
         }
@@ -287,6 +297,13 @@ internal class CachingTransport : ITransport, IDisposable
             _processingSignal.Release();
         }
     }
+
+    private static bool IsNetworkError(Exception exception) =>
+        exception switch
+        {
+            HttpRequestException or WebException or IOException or SocketException => true,
+            _ => false
+        };
 
     private async Task InnerProcessCacheAsync(string file, CancellationToken cancellation)
     {
@@ -327,9 +344,16 @@ internal class CachingTransport : ITransport, IDisposable
                         // Let the worker catch, log, wait a bit and retry.
                         throw;
                     }
-                    catch (Exception ex) when (ex is HttpRequestException or WebException or SocketException
-                                                   or IOException)
+                    catch (Exception ex) when (IsNetworkError(ex))
                     {
+                        if (Interlocked.Exchange(ref _networkIsUnavailable, 1) == 0)
+                        {
+                            // Initialize a monitor to check when the network comes back online
+                            lock (_connectivityMonitorLock)
+                            {
+                                _connectivityMonitor ??= new NetworkConnectivityMonitor(Host.Value, SendFilesQueuedWhileOffline);
+                            }
+                        }
                         _options.LogError(ex, "Failed to send cached envelope: {0}, retrying after a delay.", file);
                         // Let the worker catch, log, wait a bit and retry.
                         throw;
@@ -357,6 +381,26 @@ internal class CachingTransport : ITransport, IDisposable
 
         // Delete the envelope file and move on to the next one
         _fileSystem.DeleteFile(file);
+    }
+
+    /// <summary>
+    /// Send any files that were stuck in processing while the network was unavailable
+    /// </summary>
+    private void SendFilesQueuedWhileOffline()
+    {
+        if (Interlocked.Exchange(ref _networkIsUnavailable, 0) == 1)
+        {
+            // Stop any connectivity monitor that we might have started
+            lock (_connectivityMonitorLock)
+            {
+                _connectivityMonitor?.Dispose();
+                _connectivityMonitor = null;
+            }
+
+            // Retry envelopes that got stuck in processing while the transport was failing
+            MoveUnprocessedFilesBackToCache();
+            _workerSignal.Release();
+        }
     }
 
     private void LogFailureWithDiscard(string file, Exception ex)
@@ -520,6 +564,10 @@ internal class CachingTransport : ITransport, IDisposable
         _cacheDirectoryLock.Dispose();
         _preInitCacheResetEvent?.Dispose();
         _initCacheResetEvent?.Dispose();
+        lock (_connectivityMonitorLock)
+        {
+            _connectivityMonitor?.Dispose();
+        }
 
         (_innerTransport as IDisposable)?.Dispose();
     }

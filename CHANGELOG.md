@@ -5,6 +5,7 @@
 ### Fixes
 
 - The SDK no longer fails to create a trace root ([#3453](https://github.com/getsentry/sentry-dotnet/pull/3453))
+- Fixed envelopes getting stuck in processing when losing network connectivity ([#3438](https://github.com/getsentry/sentry-dotnet/pull/3438))
 
 ### Dependencies
 
