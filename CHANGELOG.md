@@ -5,6 +5,7 @@
 ### Fixes
 
 - The SDK no longer fails to create a trace root ([#3453](https://github.com/getsentry/sentry-dotnet/pull/3453))
+- Removed `FirstChanceException` workaround for WinUI ([#3411](https://github.com/getsentry/sentry-dotnet/pull/3411))
 
 ### Dependencies
 
@@ -30,9 +31,6 @@
 - Fixed Trim warnings in Sentry.DiagnosticSource and WinUIUnhandledException integrations ([#3410](https://github.com/getsentry/sentry-dotnet/pull/3410))
 - Fixed memory leak when tracing is enabled ([#3432](https://github.com/getsentry/sentry-dotnet/pull/3432))
 - `Scope.User.Id` now correctly defaults to the InstallationId unless it has been set otherwise ([#3425](https://github.com/getsentry/sentry-dotnet/pull/3425))
-
-### API Changes
-- Removed `FirstChanceException` workaround for WinUI ([#3411](https://github.com/getsentry/sentry-dotnet/pull/3411))
 
 ### Dependencies
 
