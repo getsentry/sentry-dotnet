@@ -6,6 +6,7 @@
       "samples\\Sentry.Samples.Ios\\Sentry.Samples.Ios.csproj",
       "samples\\Sentry.Samples.MacCatalyst\\Sentry.Samples.MacCatalyst.csproj",
       "samples\\Sentry.Samples.Maui\\Sentry.Samples.Maui.csproj",
+      "samples\\Sentry.Samples.MauiAppSegfault\\Sentry.Samples.MauiAppSegfault.csproj",
       "src\\Sentry.Android.AssemblyReader\\Sentry.Android.AssemblyReader.csproj",
       "src\\Sentry.Bindings.Android\\Sentry.Bindings.Android.csproj",
       "src\\Sentry.Bindings.Cocoa\\Sentry.Bindings.Cocoa.csproj",
