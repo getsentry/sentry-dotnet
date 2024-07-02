@@ -6,6 +6,12 @@
 
 - The SDK no longer fails to create a trace root ([#3453](https://github.com/getsentry/sentry-dotnet/pull/3453))
 
+### Dependencies
+
+- Bump Java SDK from v7.10.0 to v7.11.0 ([#3459](https://github.com/getsentry/sentry-dotnet/pull/3459))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7110)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.10.0...7.11.0)
+
 ## 4.8.0
 
 ### Obsoletion
