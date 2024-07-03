@@ -34,7 +34,6 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
     private static readonly byte[] WinUIPublicKeyToken = Convert.FromHexString("de31ebe4ad15742b");
     private static readonly Assembly? WinUIAssembly = GetWinUIAssembly();
 
-    private Exception? _lastFirstChanceException;
     private IHub _hub = null!;
     private SentryOptions _options = null!;
 
@@ -58,9 +57,6 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
 
         // Hook the main event handler
         AttachEventHandler();
-
-        // First part of workaround for https://github.com/microsoft/microsoft-ui-xaml/issues/7160
-        AppDomain.CurrentDomain.FirstChanceException += (_, e) => _lastFirstChanceException = e.Exception;
     }
 
     private static Assembly? GetWinUIAssembly()
@@ -125,12 +121,6 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
         {
             _options.LogError(ex, "Could not get exception details in WinUIUnhandledExceptionHandler.");
             return;
-        }
-
-        // Second part of workaround for https://github.com/microsoft/microsoft-ui-xaml/issues/7160
-        if (exception.StackTrace is null)
-        {
-            exception = _lastFirstChanceException!;
         }
 
         // Set some useful data and capture the exception
