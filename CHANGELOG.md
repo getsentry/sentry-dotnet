@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Added build properties to automatically create releases and associated commits ([#3462](https://github.com/getsentry/sentry-dotnet/pull/3462))
+
 ### Fixes
 
 - The SDK no longer fails to create a trace root ([#3453](https://github.com/getsentry/sentry-dotnet/pull/3453))
