@@ -334,6 +334,11 @@
       <SentryRelease>%(MainAssemblyIdentity.Name)@%(Version)</SentryRelease>
     </PropertyGroup>
 
+    <Exec ConsoleToMSBuild="true"  Condition="'$(SentryRelease)' == ''"
+          Command="sentry-cli releases propose-version">
+      <Output TaskParameter="ConsoleOutput" PropertyName="SentryRelease"/>
+    </Exec>
+
     <Message Importance="High" Text="Sentry Release: $(SentryRelease)" />
   </Target>
 
