@@ -37,8 +37,10 @@
       <!-- Set defaults for the Sentry properties. -->
       <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == ''">false</SentryUploadSymbols>
       <SentryUploadSources Condition="'$(SentryUploadSources)' == ''">false</SentryUploadSources>
-      <SentryCreateRelease Condition="'$(SentryCreateRelease)' == ''">false</SentryCreateRelease>
       <SentrySetCommits Condition="'$(SentrySetCommits)' == ''">false</SentrySetCommits>
+      <!-- SentryCreateRelease is implied if SentrySetCommits==true -->
+      <SentryCreateRelease Condition="'$(SentrySetCommits)' == 'true'">true</SentryCreateRelease>
+      <SentryCreateRelease Condition="'$(SentryCreateRelease)' == ''">false</SentryCreateRelease>
 
       <!-- This property controls if the Sentry CLI is to be used at all. Setting false will disable all Sentry CLI usage.
            We're explicitly skipping uploads for Sentry projects because they interfere with CLI integration test asserts. -->
@@ -95,6 +97,8 @@
       <SentryCLIBaseCommand Condition="'$(SentryCLIBaseOptions.Trim())' != ''">$(SentryCLIBaseCommand) $(SentryCLIBaseOptions.Trim())</SentryCLIBaseCommand>
 
       <SentryReleaseOptions Condition="'$(SentryProject)' != ''">$(SentryReleaseOptions) --project $(SentryProject)</SentryReleaseOptions>
+
+      <SentrySetCommitOptions Condition="'$(SentrySetCommitOptions)' == ''">--auto</SentrySetCommitOptions>
 
       <SentryCLIUploadOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIUploadOptions) --org $(SentryOrg)</SentryCLIUploadOptions>
       <SentryCLIUploadOptions Condition="'$(SentryProject)' != ''">$(SentryCLIUploadOptions) --project $(SentryProject)</SentryCLIUploadOptions>
@@ -344,7 +348,16 @@
     </Exec>
   </Target>
 
-<!--    TODO: send commit details to Sentry -->
+  <!-- Send commit details to Sentry -->
+  <Target Name="_SentrySetCommits" AfterTargets="Build" DependsOnTargets="_CreateSentryRelease"
+          Condition="'$(SentryCLI)' != '' and '$(SentrySetCommits)' == 'true'">
+    <Message Importance="High" Text="Setting Sentry commits" />
+    <Exec
+      Command="$(SentryCLIBaseCommand) releases set-commits $(SentrySetCommitOptions) '$(SentryRelease)' $(SentryReleaseOptions)"
+      IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
+      <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
+    </Exec>
+  </Target>
 
   <Import Condition="'$(MSBuildProjectName)' != 'Sentry' and !$(MSBuildProjectName.StartsWith('Sentry.')) and '$(IsSentryTestProject)' == ''" Project="$(MSBuildThisFileDirectory)Sentry.Native.targets"/>
 </Project>
