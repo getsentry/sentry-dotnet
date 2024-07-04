@@ -37,12 +37,14 @@
       <!-- Set defaults for the Sentry properties. -->
       <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == ''">false</SentryUploadSymbols>
       <SentryUploadSources Condition="'$(SentryUploadSources)' == ''">false</SentryUploadSources>
+      <SentryCreateRelease Condition="'$(SentryCreateRelease)' == ''">false</SentryCreateRelease>
+      <SentrySetCommits Condition="'$(SentrySetCommits)' == ''">false</SentrySetCommits>
 
       <!-- This property controls if the Sentry CLI is to be used at all. Setting false will disable all Sentry CLI usage.
            We're explicitly skipping uploads for Sentry projects because they interfere with CLI integration test asserts. -->
       <UseSentryCLI Condition="
         '$(UseSentryCLI)' == ''
-        and ('$(SentryUploadSymbols)' == 'true' or '$(SentryUploadSources)' == 'true' or $(SentryUploadAndroidProguardMapping) == 'true')
+        and ('$(SentryUploadSymbols)' == 'true' or '$(SentryUploadSources)' == 'true' or $(SentryUploadAndroidProguardMapping) == 'true' or $(SentryCreateRelease) == 'true' or $(SentrySetCommits) == 'true')
         and '$(MSBuildProjectName)' != 'Sentry'
         and !$(MSBuildProjectName.StartsWith('Sentry.'))">true</UseSentryCLI>
     </PropertyGroup>
@@ -91,6 +93,8 @@
       <SentryCLIBaseOptions Condition="'$(SentryUrl)' != ''">$(SentryCLIBaseOptions) --url $(SentryUrl)</SentryCLIBaseOptions>
       <SentryCLIBaseCommand>&quot;$(SentryCLI)&quot;</SentryCLIBaseCommand>
       <SentryCLIBaseCommand Condition="'$(SentryCLIBaseOptions.Trim())' != ''">$(SentryCLIBaseCommand) $(SentryCLIBaseOptions.Trim())</SentryCLIBaseCommand>
+
+      <SentryReleaseOptions Condition="'$(SentryProject)' != ''">$(SentryReleaseOptions) --project $(SentryProject)</SentryReleaseOptions>
 
       <SentryCLIUploadOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIUploadOptions) --org $(SentryOrg)</SentryCLIUploadOptions>
       <SentryCLIUploadOptions Condition="'$(SentryProject)' != ''">$(SentryCLIUploadOptions) --project $(SentryProject)</SentryCLIUploadOptions>
@@ -241,6 +245,106 @@
     </Exec>
     <Warning Condition="'$(_SentryCLIExitCode)' != '0'" Text="Sentry CLI could not upload proguard mapping." />
   </Target>
+
+  <UsingTask TaskName="SentryGetReleaseFromInformationalVersion" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <AssemblyPath Required="true" />
+      <Release Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System"/>
+      <Using Namespace="System.Reflection"/>
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+  try
+  {
+    var path = Path.GetFullPath(AssemblyPath);
+    var assembly = Assembly.LoadFile(path);
+
+    var assemblyName = assembly.GetName();
+    var name = assemblyName.Name;
+    var version = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+    if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(version))
+    {
+      Release = $"{name}@{version}";
+    }
+  }
+  catch
+  {
+  }
+  ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <UsingTask TaskName="SentryGetReleaseFromAppManifest" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"
+             Condition="$(TargetFramework.Contains('ios')) Or $(TargetFramework.Contains('maccatalyst'))">
+    <ParameterGroup>
+      <AppManifestPath Required="true" />
+      <Release Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Reference Include="$(_XamarinTaskAssembly)" />
+      <Using Namespace="Xamarin.MacDev"/>
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+  try
+  {
+    var plist = PDictionary.FromFile(AppManifestPath);
+
+    var packageName = plist.GetCFBundleIdentifier();
+    var packageVersion = plist.GetCFBundleShortVersionString();
+    var buildVersion = plist.GetCFBundleVersion();
+
+    Release = $"{packageName}@{packageVersion}+{buildVersion}";
+  }
+  catch
+  {
+  }
+  ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="_GetSentryRelease" AfterTargets="DispatchToInnerBuilds;AfterBuild" Condition="'$(SentryCreateRelease)' == 'true' And '$(UseSentryCLI)' == 'true'">
+
+    <Message Importance="High" Text="Getting Sentry Release..." />
+
+    <PropertyGroup Condition="'$(SentryRelease)' == '' And $(TargetFramework.Contains('android'))">
+      <SentryRelease>$(ApplicationId)@$(ApplicationDisplayVersion)+$(ApplicationVersion)</SentryRelease>
+    </PropertyGroup>
+
+    <SentryGetReleaseFromAppManifest AppManifestPath="$(_TemporaryAppManifest)"
+                                     Condition="'$(SentryRelease)' == '' And ($(TargetFramework.Contains('ios')) Or $(TargetFramework.Contains('maccatalyst')))">
+      <Output TaskParameter="Release" PropertyName="SentryRelease" />
+    </SentryGetReleaseFromAppManifest>
+
+    <SentryGetReleaseFromInformationalVersion Condition="'$(SentryRelease)' == ''" AssemblyPath="$(IntermediateOutputPath)$(TargetName)$(TargetExt)">
+      <Output TaskParameter="Release" PropertyName="SentryRelease" />
+    </SentryGetReleaseFromInformationalVersion>
+
+    <GetAssemblyIdentity Condition="'$(SentryRelease)' == '' And '$(TargetName)' != ''" AssemblyFiles="$(IntermediateOutputPath)$(TargetName)$(TargetExt)">
+      <Output TaskParameter="Assemblies" ItemName="MainAssemblyIdentity" />
+    </GetAssemblyIdentity>
+    <PropertyGroup Condition="'$(SentryRelease)' == '' And '@(MainAssemblyIdentity)' != ''">
+      <SentryRelease>%(MainAssemblyIdentity.Name)@%(Version)</SentryRelease>
+    </PropertyGroup>
+
+    <Message Importance="High" Text="Sentry Release: $(SentryRelease)" />
+  </Target>
+
+  <!-- Set release information after the build -->
+  <Target Name="_CreateSentryRelease" AfterTargets="Build" DependsOnTargets="_GetSentryRelease"
+          Condition="'$(SentryCLI)' != '' and '$(SentryCreateRelease)' == 'true'">
+    <Message Importance="High" Text="Creating Sentry Release: $(SentryRelease)" />
+    <Exec
+      Command="$(SentryCLIBaseCommand) releases new '$(SentryRelease)' $(SentryReleaseOptions)"
+      IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
+      <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
+    </Exec>
+  </Target>
+
+<!--    TODO: send commit details to Sentry -->
 
   <Import Condition="'$(MSBuildProjectName)' != 'Sentry' and !$(MSBuildProjectName.StartsWith('Sentry.')) and '$(IsSentryTestProject)' == ''" Project="$(MSBuildThisFileDirectory)Sentry.Native.targets"/>
 </Project>
