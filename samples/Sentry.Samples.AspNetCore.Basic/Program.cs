@@ -15,15 +15,23 @@ public class Program
             .UseSentry(o =>
             {
                 // A DSN is required.  You can set it here, or in configuration, or in an environment variable.
-                o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+                o.Dsn = "https://203a48de94faaff13796c2a1bb37e209@o447951.ingest.us.sentry.io/4507543651352576";
 
                 // Enable Sentry performance monitoring
                 o.TracesSampleRate = 1.0;
 
-#if DEBUG
-                // Log debug information about the Sentry SDK
                 o.Debug = true;
-#endif
+                o.DiagnosticLevel = SentryLevel.Debug;
+
+                o.SetBeforeSendTransaction(transaction =>
+                {
+                    if (transaction.Name.Contains("filterme"))
+                    {
+                        return null;
+                    }
+
+                    return transaction;
+                });
             })
 
             // The App:
@@ -61,6 +69,26 @@ public class Program
                         // as exemplified above.
                         throw new Exception(
                             exceptionMessage ?? "An exception thrown from the ASP.NET Core pipeline");
+                    });
+                    endpoints.MapGet("/some/endpoint", async context =>
+                    {
+                        context.Response.ContentType = "application/json";
+                        await context.Response.WriteAsync("{\"status\":\"Healthy\"}");
+                    });
+                    endpoints.MapGet("/filterme", async context =>
+                    {
+                        context.Response.ContentType = "application/json";
+                        await context.Response.WriteAsync("{\"filter status\":\"Healthy\"}");
+                    });
+                    endpoints.MapGet("/healthcheck", async context =>
+                    {
+                        context.Response.ContentType = "application/json";
+                        await context.Response.WriteAsync("{\"status\":\"Healthy\"}");
+                    });
+                    endpoints.MapGet("/healthcheck/database", async context =>
+                    {
+                        context.Response.ContentType = "application/json";
+                        await context.Response.WriteAsync("{\"database status\":\"Healthy\"}");
                     });
                 });
             })

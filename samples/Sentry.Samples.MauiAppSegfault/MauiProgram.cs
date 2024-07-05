@@ -1,6 +1,6 @@
 ﻿using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
-using Sentry;
+// using Sentry;
 
 namespace MauiAppSegfault
 {
@@ -11,13 +11,12 @@ namespace MauiAppSegfault
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
-            builder
-                .UseMauiApp<App>()
-                .UseSentry(options =>
-                {
-                    options.Dsn = Dsn;
-                    options.Debug = true;
-                });
+            builder.UseMauiApp<App>();
+                // .UseSentry(options =>
+                // {
+                //     options.Dsn = Dsn;
+                //     options.Debug = true;
+                // });
 
             return builder.Build();
         }
