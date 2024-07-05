@@ -112,6 +112,7 @@ public abstract class HttpTransportBase
             {
                 if (item.Payload is JsonSerializable { Source: SentryTransaction transaction })
                 {
+                    // Span count + 1 (transaction/root span)
                     _options.ClientReportRecorder.RecordDiscardedEvent(reason, DataCategory.Span, transaction.Spans.Count + 1);
                 }
             }

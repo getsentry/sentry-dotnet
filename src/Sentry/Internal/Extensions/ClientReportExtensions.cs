@@ -13,6 +13,7 @@ internal static class ClientReportExtensions
             {
                 if (item.Payload is JsonSerializable { Source: SentryTransaction transaction })
                 {
+                    // Span count + 1 (transaction/root span)
                     recorder.RecordDiscardedEvent(reason, DataCategory.Span, transaction.Spans.Count + 1);
                 }
             }
