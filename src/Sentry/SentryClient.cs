@@ -126,9 +126,11 @@ public class SentryClient : ISentryClient, IDisposable
         // Sampling decision MUST have been made at this point
         Debug.Assert(transaction.IsSampled is not null, "Attempt to capture transaction without sampling decision.");
 
+        var spanCount = transaction.Spans.Count + 1; // 1 for each span + 1 for the transaction itself
         if (transaction.IsSampled is false)
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Transaction);
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Span, spanCount);
             _options.LogDebug("Transaction dropped by sampling.");
             return;
         }
@@ -151,6 +153,7 @@ public class SentryClient : ISentryClient, IDisposable
             if (processedTransaction == null) // Rejected transaction
             {
                 _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Transaction);
+                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Span, spanCount);
                 _options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
                 return;
             }
@@ -160,6 +163,7 @@ public class SentryClient : ISentryClient, IDisposable
         if (processedTransaction is null) // Rejected transaction
         {
             _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
+            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Span, spanCount);
             _options.LogInfo("Transaction dropped by BeforeSendTransaction callback.");
             return;
         }
