@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Features
+- Client reports now include dropped spans ([#3463](https://github.com/getsentry/sentry-dotnet/pull/3463))
+
 ## 4.8.1
 
 ### Fixes
