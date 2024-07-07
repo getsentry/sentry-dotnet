@@ -1,21 +1,13 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Sentry.Samples.GenericHost;
 
-await Host.CreateDefaultBuilder()
-    .ConfigureHostConfiguration(c =>
-    {
-        c.SetBasePath(Directory.GetCurrentDirectory());
-        c.AddJsonFile("appsettings.json", optional: false);
-    })
-    .ConfigureServices((_, s) => s.AddHostedService<SampleHostedService>())
-    .ConfigureLogging((c, l) =>
-    {
-        l.AddConfiguration(c.Configuration);
-        l.AddConsole();
-        l.AddSentry();
-    })
-    .UseConsoleLifetime()
-    .Build()
-    .RunAsync();
+var builder = Host.CreateApplicationBuilder();
+
+builder.Logging.AddConfiguration(builder.Configuration);
+builder.Logging.AddSentry();
+
+builder.Services.AddHostedService<SampleHostedService>();
+
+await builder.Build().RunAsync();
