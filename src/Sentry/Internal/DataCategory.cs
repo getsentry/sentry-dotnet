@@ -9,6 +9,7 @@ internal readonly struct DataCategory : IEnumeration<DataCategory>
     public static DataCategory Internal = new("internal");
     public static DataCategory Security = new("security");
     public static DataCategory Session = new("session");
+    public static DataCategory Span = new("span");
     public static DataCategory Transaction = new("transaction");
     public static DataCategory Profile = new("profile");
 

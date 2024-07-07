@@ -6,8 +6,9 @@ internal interface IClientReportRecorder
     /// Records one count of a discarded event, with the given <paramref name="reason"/> and <paramref name="category"/>.
     /// </summary>
     /// <param name="reason">The reason for the event being discarded.</param>
-    /// <param name="category">The data category of the event being discarded.</param>
-    void RecordDiscardedEvent(DiscardReason reason, DataCategory category);
+    /// <param name="category">The data category of the event being discardedd.</param>
+    /// <param name="quantity">The number of items discarded (defaults to 1)</param>
+    void RecordDiscardedEvent(DiscardReason reason, DataCategory category, int quantity = 1);
 
     /// <summary>
     /// Generates a <see cref="ClientReport"/> containing counts of discarded events that have been recorded.
