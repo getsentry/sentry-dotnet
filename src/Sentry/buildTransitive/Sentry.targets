@@ -263,23 +263,42 @@
         <![CDATA[
   try
   {
+#nullable enable
+    Log.LogMessage($"Loading assembly: {AssemblyPath}");
     var path = Path.GetFullPath(AssemblyPath);
     var assembly = Assembly.LoadFile(path);
 
+    Log.LogMessage($"Getting assembly name...");
     var assemblyName = assembly.GetName();
     var name = assemblyName.Name;
+    Log.LogMessage($"Assembly name: {name}");
 
-    var infoVersionAttribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-    var version = infoVersionAttribute?.InformationalVersion ?? assemblyName.Version?.ToString();
+    Log.LogMessage($"Reading AssemblyInformationalVersionAttribute...");
+    string? version = null;
+    try
+    {
+      var infoVersionAttribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+      version = infoVersionAttribute?.InformationalVersion;
+    }
+    catch
+    {
+      Log.LogMessage($"Failed to read informational version attribute");
+    }
+    version ??= assemblyName.Version?.ToString();
+    Log.LogMessage($"Version: {version}");
+
+    Log.LogMessage($"Compiling release information...");
     if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(version))
     {
       Release = version.Contains('@')
             ? version   // Don't add name prefix if it's already set by the user
             : $"{name}@{version}";
     }
+#nullable disable
   }
   catch
   {
+    Log.LogWarning($"Failed to get version from {AssemblyPath}");
   }
   ]]>
       </Code>
