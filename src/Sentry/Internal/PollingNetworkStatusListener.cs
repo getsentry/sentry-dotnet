@@ -36,7 +36,8 @@ internal class PollingNetworkStatusListener : INetworkStatusListener
     private Lazy<IPingHost> LazyPingHost => new(() => _testPingHost ?? new PingHost(new Uri(_options!.Dsn!).DnsSafeHost));
     private IPingHost PingHost => LazyPingHost.Value;
 
-    public bool Online {
+    public bool Online
+    {
         get => Interlocked.Read(ref _networkIsUnavailable) == 0;
         set => Interlocked.Exchange(ref _networkIsUnavailable, value ? 0 : 1);
     }
