@@ -96,6 +96,7 @@
       <SentryCLIBaseCommand>&quot;$(SentryCLI)&quot;</SentryCLIBaseCommand>
       <SentryCLIBaseCommand Condition="'$(SentryCLIBaseOptions.Trim())' != ''">$(SentryCLIBaseCommand) $(SentryCLIBaseOptions.Trim())</SentryCLIBaseCommand>
 
+      <SentryRelease Condition="'$(SentryRelease)' == '' And '$(SENTRY_RELEASE)' != ''">$(SENTRY_RELEASE)</SentryRelease>
       <SentryReleaseOptions Condition="'$(SentryProject)' != ''">$(SentryReleaseOptions) --project $(SentryProject)</SentryReleaseOptions>
 
       <SentrySetCommitOptions Condition="'$(SentrySetCommitOptions)' == ''">--auto</SentrySetCommitOptions>
@@ -250,7 +251,7 @@
     <Warning Condition="'$(_SentryCLIExitCode)' != '0'" Text="Sentry CLI could not upload proguard mapping." />
   </Target>
 
-  <UsingTask TaskName="SentryGetReleaseFromInformationalVersion" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+  <UsingTask TaskName="SentryGetApplicationVersion" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
     <ParameterGroup>
       <AssemblyPath Required="true" />
       <Release Output="true" />
@@ -267,40 +268,15 @@
 
     var assemblyName = assembly.GetName();
     var name = assemblyName.Name;
-    var version = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-    if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(version))
+
+    var infoVersionAttribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+    var version = infoVersionAttribute?.InformationalVersion ?? assemblyName.Version?.ToString();
+    if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(version))
     {
-      Release = $"{name}@{version}";
+      Release = version.Contains('@')
+            ? version   // Don't add name prefix if it's already set by the user
+            : $"{name}@{version}";
     }
-  }
-  catch
-  {
-  }
-  ]]>
-      </Code>
-    </Task>
-  </UsingTask>
-
-  <UsingTask TaskName="SentryGetReleaseFromAppManifest" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"
-             Condition="$(TargetFramework.Contains('ios')) Or $(TargetFramework.Contains('maccatalyst'))">
-    <ParameterGroup>
-      <AppManifestPath Required="true" />
-      <Release Output="true" />
-    </ParameterGroup>
-    <Task>
-      <Reference Include="$(_XamarinTaskAssembly)" />
-      <Using Namespace="Xamarin.MacDev"/>
-      <Code Type="Fragment" Language="cs">
-        <![CDATA[
-  try
-  {
-    var plist = PDictionary.FromFile(AppManifestPath);
-
-    var packageName = plist.GetCFBundleIdentifier();
-    var packageVersion = plist.GetCFBundleShortVersionString();
-    var buildVersion = plist.GetCFBundleVersion();
-
-    Release = $"{packageName}@{packageVersion}+{buildVersion}";
   }
   catch
   {
@@ -314,25 +290,9 @@
 
     <Message Importance="High" Text="Getting Sentry Release..." />
 
-    <PropertyGroup Condition="'$(SentryRelease)' == '' And $(TargetFramework.Contains('android'))">
-      <SentryRelease>$(ApplicationId)@$(ApplicationDisplayVersion)+$(ApplicationVersion)</SentryRelease>
-    </PropertyGroup>
-
-    <SentryGetReleaseFromAppManifest AppManifestPath="$(_TemporaryAppManifest)"
-                                     Condition="'$(SentryRelease)' == '' And ($(TargetFramework.Contains('ios')) Or $(TargetFramework.Contains('maccatalyst')))">
+    <SentryGetApplicationVersion Condition="'$(SentryRelease)' == ''" AssemblyPath="$(IntermediateOutputPath)$(TargetName)$(TargetExt)">
       <Output TaskParameter="Release" PropertyName="SentryRelease" />
-    </SentryGetReleaseFromAppManifest>
-
-    <SentryGetReleaseFromInformationalVersion Condition="'$(SentryRelease)' == ''" AssemblyPath="$(IntermediateOutputPath)$(TargetName)$(TargetExt)">
-      <Output TaskParameter="Release" PropertyName="SentryRelease" />
-    </SentryGetReleaseFromInformationalVersion>
-
-    <GetAssemblyIdentity Condition="'$(SentryRelease)' == '' And '$(TargetName)' != ''" AssemblyFiles="$(IntermediateOutputPath)$(TargetName)$(TargetExt)">
-      <Output TaskParameter="Assemblies" ItemName="MainAssemblyIdentity" />
-    </GetAssemblyIdentity>
-    <PropertyGroup Condition="'$(SentryRelease)' == '' And '@(MainAssemblyIdentity)' != ''">
-      <SentryRelease>%(MainAssemblyIdentity.Name)@%(Version)</SentryRelease>
-    </PropertyGroup>
+    </SentryGetApplicationVersion>
 
     <Exec ConsoleToMSBuild="true"  Condition="'$(SentryRelease)' == ''"
           Command="sentry-cli releases propose-version">
