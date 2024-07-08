@@ -11,7 +11,14 @@ internal class PingHost(string hostToCheck) : IPingHost
 
     public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken)
     {
-        var reply = await _ping.SendPingAsync(hostToCheck).ConfigureAwait(false);
-        return reply.Status == IPStatus.Success;
+        try
+        {
+            var reply = await _ping.SendPingAsync(hostToCheck).ConfigureAwait(false);
+            return reply.Status == IPStatus.Success;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
