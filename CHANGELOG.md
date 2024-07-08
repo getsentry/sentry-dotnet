@@ -4,11 +4,21 @@
 
 ### Features
 
+- Client reports now include dropped spans ([#3463](https://github.com/getsentry/sentry-dotnet/pull/3463))
 - Added build properties to automatically create releases and associated commits ([#3462](https://github.com/getsentry/sentry-dotnet/pull/3462))
+
+## 4.8.1
 
 ### Fixes
 
 - The SDK no longer fails to create a trace root ([#3453](https://github.com/getsentry/sentry-dotnet/pull/3453))
+- Removed `FirstChanceException` workaround for WinUI ([#3411](https://github.com/getsentry/sentry-dotnet/pull/3411))
+
+### Dependencies
+
+- Bump Java SDK from v7.10.0 to v7.11.0 ([#3459](https://github.com/getsentry/sentry-dotnet/pull/3459))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7110)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.10.0...7.11.0)
 
 ## 4.8.0
 
@@ -28,9 +38,6 @@
 - Fixed Trim warnings in Sentry.DiagnosticSource and WinUIUnhandledException integrations ([#3410](https://github.com/getsentry/sentry-dotnet/pull/3410))
 - Fixed memory leak when tracing is enabled ([#3432](https://github.com/getsentry/sentry-dotnet/pull/3432))
 - `Scope.User.Id` now correctly defaults to the InstallationId unless it has been set otherwise ([#3425](https://github.com/getsentry/sentry-dotnet/pull/3425))
-
-### API Changes
-- Removed `FirstChanceException` workaround for WinUI ([#3411](https://github.com/getsentry/sentry-dotnet/pull/3411))
 
 ### Dependencies
 
