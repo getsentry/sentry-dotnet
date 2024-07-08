@@ -15,6 +15,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     internal const string TypeValueEvent = "event";
     internal const string TypeValueUserReport = "user_report";
     internal const string TypeValueTransaction = "transaction";
+    internal const string TypeValueSpan = "span";
     internal const string TypeValueSession = "session";
     internal const string TypeValueCheckIn = "check_in";
     internal const string TypeValueAttachment = "attachment";
@@ -43,6 +44,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
 
         // These ones are equivalent
         TypeValueTransaction => DataCategory.Transaction,
+        TypeValueSpan => DataCategory.Span,
         TypeValueSession => DataCategory.Session,
         TypeValueAttachment => DataCategory.Attachment,
         TypeValueProfile => DataCategory.Profile,
