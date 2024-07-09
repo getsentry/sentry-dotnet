@@ -7,7 +7,7 @@ internal class PollingNetworkStatusListener : INetworkStatusListener
     private long _networkIsUnavailable = 0;
 
     private readonly SentryOptions? _options;
-    private readonly IPingHost? _testPingHost;
+    private readonly IPing? _testPing;
     internal int _delayInMilliseconds;
     private readonly int _maxDelayInMilliseconds;
     private readonly Func<int, int> _backoffFunction;
@@ -24,17 +24,25 @@ internal class PollingNetworkStatusListener : INetworkStatusListener
     /// <summary>
     /// Overload for testing
     /// </summary>
-    internal PollingNetworkStatusListener(IPingHost testPingHost, int initialDelayInMilliseconds = 500,
+    internal PollingNetworkStatusListener(IPing testPing, int initialDelayInMilliseconds = 500,
         int maxDelayInMilliseconds = 32_000, Func<int, int>? backoffFunction = null)
     {
-        _testPingHost = testPingHost;
+        _testPing = testPing;
         _delayInMilliseconds = initialDelayInMilliseconds;
         _maxDelayInMilliseconds = maxDelayInMilliseconds;
         _backoffFunction = backoffFunction ?? (x => x * 2);
     }
 
-    private Lazy<IPingHost> LazyPingHost => new(() => _testPingHost ?? new PingHost(new Uri(_options!.Dsn!).DnsSafeHost));
-    private IPingHost PingHost => LazyPingHost.Value;
+    private Lazy<IPing> LazyPing => new(() =>
+    {
+        if (_testPing != null)
+        {
+            return _testPing;
+        }
+        var uri = new Uri(_options!.Dsn!);
+        return new TcpPing(uri.DnsSafeHost, uri.Port);
+    });
+    private IPing Ping => LazyPing.Value;
 
     public bool Online {
         get => Interlocked.Read(ref _networkIsUnavailable) == 0;
@@ -45,7 +53,7 @@ internal class PollingNetworkStatusListener : INetworkStatusListener
         while (!cancellationToken.IsCancellationRequested)
         {
             await Task.Delay(_delayInMilliseconds, cancellationToken).ConfigureAwait(false);
-            var checkResult = await PingHost.IsAvailableAsync(cancellationToken).ConfigureAwait(false);
+            var checkResult = await Ping.IsAvailableAsync().ConfigureAwait(false);
             if (checkResult)
             {
                 Online = true;
