@@ -70,13 +70,6 @@
                 Clicked="OnNativeCrashClicked"
                 HorizontalOptions="Center" />
 
-            <Button
-                x:Name="AsyncVoidCrashBtn"
-                Text="Capture an exception from an async void method"
-                SemanticProperties.Hint="Throws an exception in an async void event handler."
-                Clicked="OnAsyncVoidCrashClicked"
-                HorizontalOptions="Center" />
-
         </VerticalStackLayout>
     </ScrollView>
 

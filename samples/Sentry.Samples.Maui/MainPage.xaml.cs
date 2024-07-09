@@ -88,21 +88,6 @@ public partial class MainPage
 #endif
     }
 
-    private void OnAsyncVoidCrashClicked(object sender, EventArgs e)
-    {
-        var client = new HttpClient(new FlakyMessageHandler());
-
-        // You can use RunAsyncVoid to call async methods safely from within MAUI event handlers.
-        SentrySdk.RunAsyncVoid(
-            async () => await client.GetAsync("https://amostunreliablewebsite.net/"),
-            ex => _logger.LogWarning(ex, "Error fetching data")
-        );
-
-        // This is an example of the same, omitting any exception handler callback. In this case, the default exception
-        // handler will be used, which simply captures any exceptions and sends these to Sentry
-        SentrySdk.RunAsyncVoid(async () => await client.GetAsync("https://amostunreliablewebsite.net/"));
-    }
-
     private class FlakyMessageHandler : DelegatingHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(
