@@ -44,7 +44,8 @@ internal class PollingNetworkStatusListener : INetworkStatusListener
     });
     private IPing Ping => LazyPing.Value;
 
-    public bool Online {
+    public bool Online
+    {
         get => Interlocked.Read(ref _networkIsUnavailable) == 0;
         set => Interlocked.Exchange(ref _networkIsUnavailable, value ? 0 : 1);
     }
