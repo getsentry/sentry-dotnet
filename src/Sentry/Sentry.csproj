@@ -82,7 +82,12 @@
 
   <!-- Ensure at least version 6 of System.Text.Json so we have JsonSerializationContext available -->
   <ItemGroup Condition="!$(TargetFramework.StartsWith('net6')) and !$(TargetFramework.StartsWith('net7')) and !$(TargetFramework.StartsWith('net8'))">
-    <PackageReference Include="System.Text.Json" Version="6.0.8" />
+    <PackageReference Include="System.Text.Json" Version="6.0.8" >
+  <!--
+    Ignoring the vulnerability warning: https://github.com/advisories/GHSA-hh2w-p6rv-4g7w as the app controls the
+    version and not the SDK -->
+      <NoWarn>NU1903</NoWarn>
+    </PackageReference>
   </ItemGroup>
 
   <!--
