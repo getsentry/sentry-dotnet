@@ -79,7 +79,7 @@
                 DebugId: ________-____-____-____-____________-________,
                 DebugChecksum: ______:________________________________________________________________,
                 DebugFile: .../Sentry.Tests.pdb,
-                CodeId: _____________,
+                CodeId: ______________,
                 CodeFile: .../Sentry.Tests.dll
               },
               {
@@ -89,7 +89,7 @@
                 DebugId: ________-____-____-____-____________-________,
                 DebugChecksum: ______:________________________________________________________________,
                 DebugFile: xunit.execution.desktop.pdb,
-                CodeId: _____________,
+                CodeId: ______________,
                 CodeFile: .../xunit.execution.desktop.dll
               },
               {
@@ -99,7 +99,7 @@
                 DebugId: ________-____-____-____-____________-________,
                 DebugChecksum: ______:________________________________________________________________,
                 DebugFile: xunit.core.pdb,
-                CodeId: _____________,
+                CodeId: ______________,
                 CodeFile: .../xunit.core.dll
               }
             ],
