@@ -6,6 +6,10 @@
 
 - Client reports now include dropped spans ([#3463](https://github.com/getsentry/sentry-dotnet/pull/3463))
 
+### API Changes
+
+- Removed SentrySdk.RunAsyncVoid ([#3466](https://github.com/getsentry/sentry-dotnet/pull/3466))
+
 ## 4.8.1
 
 ### Fixes
