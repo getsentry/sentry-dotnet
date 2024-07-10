@@ -84,8 +84,9 @@
   <ItemGroup Condition="!$(TargetFramework.StartsWith('net6')) and !$(TargetFramework.StartsWith('net7')) and !$(TargetFramework.StartsWith('net8'))">
     <PackageReference Include="System.Text.Json" Version="6.0.8" >
   <!--
-    Ignoring the vulnerability warning: https://github.com/advisories/GHSA-hh2w-p6rv-4g7w as the app controls the
-    version and not the SDK -->
+    Ignoring the vulnerability warning: https://github.com/advisories/GHSA-hh2w-p6rv-4g7w
+    The app can/should pin to the latest version. We will bump once a patch on v6 (still LTS until Nov 24) is out
+  -->
       <NoWarn>NU1903</NoWarn>
     </PackageReference>
   </ItemGroup>
