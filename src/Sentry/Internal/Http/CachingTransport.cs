@@ -273,6 +273,7 @@ internal class CachingTransport : ITransport, IDisposable
             _preInitCacheResetEvent?.Set();
 
             // Make sure no files got stuck in the processing directory
+            // See https://github.com/getsentry/sentry-dotnet/pull/3438#discussion_r1672524426
             if (_options.NetworkStatusListener is { Online: false } listener)
             {
                 MoveUnprocessedFilesBackToCache();
