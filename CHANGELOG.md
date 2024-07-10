@@ -6,6 +6,12 @@
 
 - Client reports now include dropped spans ([#3463](https://github.com/getsentry/sentry-dotnet/pull/3463))
 
+### Dependencies
+
+- Bump Cocoa SDK from v8.30.0 to v8.30.1 ([#3472](https://github.com/getsentry/sentry-dotnet/pull/3472))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8301)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.30.0...8.30.1)
+
 ## 4.8.1
 
 ### Fixes
