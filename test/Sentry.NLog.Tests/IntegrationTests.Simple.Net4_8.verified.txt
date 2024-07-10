@@ -71,7 +71,7 @@
                 DebugId: ________-____-____-____-____________-________,
                 DebugChecksum: ______:________________________________________________________________,
                 DebugFile: .../Sentry.NLog.Tests.pdb,
-                CodeId: _____________,
+                CodeId: ______________,
                 CodeFile: .../Sentry.NLog.Tests.dll
               }
             ],
