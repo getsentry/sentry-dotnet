@@ -4,8 +4,6 @@ namespace Sentry.Internal;
 
 internal class PollingNetworkStatusListener : INetworkStatusListener
 {
-    private long _networkIsUnavailable = 0;
-
     private readonly SentryOptions? _options;
     private readonly IPing? _testPing;
     internal int _delayInMilliseconds;
@@ -44,11 +42,13 @@ internal class PollingNetworkStatusListener : INetworkStatusListener
     });
     private IPing Ping => LazyPing.Value;
 
+    private volatile bool _online = true;
     public bool Online
     {
-        get => Interlocked.Read(ref _networkIsUnavailable) == 0;
-        set => Interlocked.Exchange(ref _networkIsUnavailable, value ? 0 : 1);
+        get => _online;
+        set => _online = value;
     }
+
     public async Task WaitForNetworkOnlineAsync(CancellationToken cancellationToken = default)
     {
         while (!cancellationToken.IsCancellationRequested)
