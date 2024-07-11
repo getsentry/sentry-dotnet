@@ -17,6 +17,7 @@ namespace Sentry.Internal.Http;
 internal class CachingTransport : ITransport, IDisposable
 {
     private const string EnvelopeFileExt = "envelope";
+    private const string ProcessingFolder = "__processing";
 
     private readonly ITransport _innerTransport;
     private readonly SentryOptions _options;
@@ -77,7 +78,7 @@ internal class CachingTransport : ITransport, IDisposable
             options.TryGetProcessSpecificCacheDirectoryPath() ??
             throw new InvalidOperationException("Cache directory or DSN is not set.");
 
-        _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, "__processing");
+        _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, ProcessingFolder);
     }
 
     private void Initialize(bool startWorker)
@@ -271,6 +272,13 @@ internal class CachingTransport : ITransport, IDisposable
             // Signal that we can start waiting for _options.InitCacheFlushTimeout
             _preInitCacheResetEvent?.Set();
 
+            // Make sure no files got stuck in the processing directory
+            // See https://github.com/getsentry/sentry-dotnet/pull/3438#discussion_r1672524426
+            if (_options.NetworkStatusListener is { Online: false } listener)
+            {
+                MoveUnprocessedFilesBackToCache();
+            }
+
             // Process the cache
             _options.LogDebug("Flushing cached envelopes.");
             while (await TryPrepareNextCacheFileAsync(cancellation).ConfigureAwait(false) is { } file)
@@ -287,6 +295,13 @@ internal class CachingTransport : ITransport, IDisposable
             _processingSignal.Release();
         }
     }
+
+    private static bool IsNetworkError(Exception exception) =>
+        exception switch
+        {
+            HttpRequestException or WebException or IOException or SocketException => true,
+            _ => false
+        };
 
     private async Task InnerProcessCacheAsync(string file, CancellationToken cancellation)
     {
@@ -327,9 +342,12 @@ internal class CachingTransport : ITransport, IDisposable
                         // Let the worker catch, log, wait a bit and retry.
                         throw;
                     }
-                    catch (Exception ex) when (ex is HttpRequestException or WebException or SocketException
-                                                   or IOException)
+                    catch (Exception ex) when (IsNetworkError(ex))
                     {
+                        if (_options.NetworkStatusListener is PollingNetworkStatusListener pollingListener)
+                        {
+                            pollingListener.Online = false;
+                        }
                         _options.LogError(ex, "Failed to send cached envelope: {0}, retrying after a delay.", file);
                         // Let the worker catch, log, wait a bit and retry.
                         throw;

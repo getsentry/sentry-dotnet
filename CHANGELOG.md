@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fixed envelopes getting stuck in processing when losing network connectivity ([#3438](https://github.com/getsentry/sentry-dotnet/pull/3438))
+
 ### Features
 
 - Client reports now include dropped spans ([#3463](https://github.com/getsentry/sentry-dotnet/pull/3463))

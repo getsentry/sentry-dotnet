@@ -1297,6 +1297,10 @@ public class SentryOptions
                 UriComponents.SchemeAndServer,
                 UriFormat.Unescaped)
         );
+
+#if PLATFORM_NEUTRAL
+        NetworkStatusListener = new PollingNetworkStatusListener(this);
+#endif
     }
 
     /// <summary>
