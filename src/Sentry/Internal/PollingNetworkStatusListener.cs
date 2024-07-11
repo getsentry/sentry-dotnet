@@ -37,6 +37,7 @@ internal class PollingNetworkStatusListener : INetworkStatusListener
         {
             return _testPing;
         }
+        // If not running unit tests then _options will not be null and SDK init would fail without a Dsn
         var uri = new Uri(_options!.Dsn!);
         return new TcpPing(uri.DnsSafeHost, uri.Port);
     });
