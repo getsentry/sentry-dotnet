@@ -10,6 +10,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
+    private readonly object _lock = new();
 
     /// <summary>
     /// Constructs an instance of <see cref="SentryMessageHandler"/>.
@@ -124,7 +125,13 @@ public abstract class SentryMessageHandler : DelegatingHandler
     {
         // Assign a default inner handler for convenience the first time this is used.
         // We can't do this in a constructor, or it will throw when used with HttpMessageHandlerBuilderFilter.
-        InnerHandler ??= new HttpClientHandler();
+        if (InnerHandler is null)
+        {
+            lock (_lock)
+            {
+                InnerHandler ??= new HttpClientHandler();
+            }
+        }
 
         if (_options?.TracePropagationTargets.ContainsMatch(url) is true or null)
         {
