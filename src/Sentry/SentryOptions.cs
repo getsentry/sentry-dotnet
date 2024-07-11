@@ -1538,7 +1538,7 @@ public class SentryOptions
     {
         if (TransactionProcessors == null)
         {
-            TransactionProcessors = new() { processor };
+            TransactionProcessors = [processor];
         }
         else
         {

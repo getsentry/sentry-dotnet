@@ -239,6 +239,8 @@ internal class SentryMiddleware : IMiddleware
 
     internal void PopulateScope(HttpContext context, Scope scope)
     {
+        // Singleton and Transient processors might already have been registered in the ApplicationBuilderExtensions.
+        // Here we ensure any Scoped processors are also resolved
         scope.AddEventProcessors(_eventProcessors.Except(scope.GetAllEventProcessors()));
         scope.AddExceptionProcessors(_eventExceptionProcessors.Except(scope.GetAllExceptionProcessors()));
         scope.AddTransactionProcessors(_transactionProcessors.Except(scope.GetAllTransactionProcessors()));

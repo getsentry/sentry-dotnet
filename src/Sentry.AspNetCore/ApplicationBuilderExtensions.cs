@@ -39,6 +39,10 @@ internal static class ApplicationBuilderExtensions
             {
                 o.UseStackTraceFactory(stackTraceFactory);
             }
+
+            o.AddEventProcessorProvider(() => app.ApplicationServices.GetNonScoped<ISentryEventProcessor>());
+            o.AddExceptionProcessorProvider(() => app.ApplicationServices.GetNonScoped<ISentryEventExceptionProcessor>());
+            o.AddTransactionProcessorProvider(() => app.ApplicationServices.GetNonScoped<ISentryTransactionProcessor>());
         }
 
         var lifetime = app.ApplicationServices.GetService<IHostApplicationLifetime>();
