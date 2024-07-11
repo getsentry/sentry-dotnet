@@ -5,11 +5,11 @@ namespace Sentry.AspNetCore.Tests;
 
 public class LifetimeSpecificServiceResolversTests
 {
-    private interface IMyInterface {}
-    private class ServiceA : IMyInterface {}
-    private class ServiceB: IMyInterface {}
-    private class ServiceC : IMyInterface {}
-    private class ServiceD : IMyInterface {}
+    private interface IMyInterface { }
+    private class ServiceA : IMyInterface { }
+    private class ServiceB : IMyInterface { }
+    private class ServiceC : IMyInterface { }
+    private class ServiceD : IMyInterface { }
 
     private class ServiceE(Foo foo) : IMyInterface
     {

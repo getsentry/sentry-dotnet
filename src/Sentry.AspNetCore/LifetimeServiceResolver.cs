@@ -11,7 +11,7 @@ internal class LifetimeServiceResolver(IServiceCollection services)
             .Select(factory => factory(provider));
     }
 
-    private IEnumerable<Func<IServiceProvider,T>> Factories<T>(ServiceLifetime[] lifetimes)
+    private IEnumerable<Func<IServiceProvider, T>> Factories<T>(ServiceLifetime[] lifetimes)
     {
         foreach (var descriptor in services)
         {
