@@ -5,10 +5,9 @@
 // Initialize the Sentry SDK.  (It is not necessary to dispose it.)
 SentrySdk.Init(options =>
 {
-    // A Sentry Data Source Name (DSN) is required.
+    // You can set here in code, or you can set it in the SENTRY_DSN environment variable.
     // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
-    // You can set it in the SENTRY_DSN environment variable, or you can set it in code here.
-    // options.Dsn = "... Your DSN ...";
+    options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
 
     // When debug is enabled, the Sentry client will emit detailed debugging information to the console.
     // This might be helpful, or might interfere with the normal operation of your application.

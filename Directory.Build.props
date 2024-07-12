@@ -37,16 +37,7 @@
     There is also a a `SentryAuthToken` msbuild property, but it should be used sparingly.
     If using it, be careful that the auth token does not get committed to source control.
   -->
-  <PropertyGroup>
-    <SentryOrg>sentry-sdks</SentryOrg>
-    <SentryProject>sentry-dotnet</SentryProject>
-  </PropertyGroup>
 
-  <!-- By default we'll only upload with Sentry CLI in Release configuration. -->
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <SentryUploadSymbols>true</SentryUploadSymbols>
-    <SentryUploadSources>true</SentryUploadSources>
-  </PropertyGroup>
 
   <!--
     Note: The following platform-specific properties need to be set in both Directory.Build.props and DirectoryBuild.targets.
