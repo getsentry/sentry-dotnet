@@ -1,11 +1,19 @@
 # Changelog
 
-## Unreleased
+## 4.9.0
+
+### Fixes
+
+- Fixed envelopes getting stuck in processing when losing network connectivity ([#3438](https://github.com/getsentry/sentry-dotnet/pull/3438))
 
 ### Features
 
 - Client reports now include dropped spans ([#3463](https://github.com/getsentry/sentry-dotnet/pull/3463))
 - Added build properties to automatically create releases and associated commits ([#3462](https://github.com/getsentry/sentry-dotnet/pull/3462))
+
+### API Changes
+
+- Removed SentrySdk.RunAsyncVoid ([#3466](https://github.com/getsentry/sentry-dotnet/pull/3466))
 
 ## 4.8.1
 
@@ -47,9 +55,9 @@
 - Bump Native SDK from v0.7.4 to v0.7.6 ([#3399](https://github.com/getsentry/sentry-dotnet/pull/3399), [#3418](https://github.com/getsentry/sentry-dotnet/pull/3418))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#076)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.7.4...0.7.6)
-- Bump Cocoa SDK from v8.26.0 to v8.29.1 ([#3408](https://github.com/getsentry/sentry-dotnet/pull/3408), [#3412](https://github.com/getsentry/sentry-dotnet/pull/3412), [#3430](https://github.com/getsentry/sentry-dotnet/pull/3430))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8291)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.26.0...8.29.1)
+- Bump Cocoa SDK from v8.26.0 to v8.30.0 ([#3408](https://github.com/getsentry/sentry-dotnet/pull/3408), [#3412](https://github.com/getsentry/sentry-dotnet/pull/3412), [#3430](https://github.com/getsentry/sentry-dotnet/pull/3430), [#3450](https://github.com/getsentry/sentry-dotnet/pull/3450))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8300)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.26.0...8.30.0)
 - Bump Java SDK from v7.9.0 to v7.10.0 ([#3413](https://github.com/getsentry/sentry-dotnet/pull/3413))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7100)
   - [diff](https://github.com/getsentry/sentry-java/compare/7.9.0...7.10.0)

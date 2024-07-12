@@ -827,7 +827,6 @@ namespace Sentry
         public static System.IDisposable PushScope() { }
         public static System.IDisposable PushScope<TState>(TState state) { }
         public static void ResumeSession() { }
-        public static void RunAsyncVoid(System.Action task, System.Action<System.Exception>? handler = null) { }
         public static void StartSession() { }
         public static Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context) { }
         public static Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext) { }

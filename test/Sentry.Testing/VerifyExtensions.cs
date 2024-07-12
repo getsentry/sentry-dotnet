@@ -92,7 +92,7 @@ public static class VerifyExtensions
             obj.DebugChecksum = ScrubAlphaNum(obj.DebugChecksum);
             obj.DebugFile = ScrubPath(obj.DebugFile);
             obj.CodeFile = ScrubPath(obj.CodeFile);
-            obj.CodeId = ScrubAlphaNum(obj.CodeId);
+            obj.CodeId = obj.CodeId is null ? "null" : "______________";
             writer.Serialize(JToken.FromObject(obj));
         }
     }
