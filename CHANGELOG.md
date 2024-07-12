@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+- Race condition in `SentryMessageHandler` ([#3477](https://github.com/getsentry/sentry-dotnet/pull/3477))
+
 ## 4.9.0
 
 ### Fixes
