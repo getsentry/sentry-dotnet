@@ -96,9 +96,7 @@
       <SentryCLIBaseCommand>&quot;$(SentryCLI)&quot;</SentryCLIBaseCommand>
       <SentryCLIBaseCommand Condition="'$(SentryCLIBaseOptions.Trim())' != ''">$(SentryCLIBaseCommand) $(SentryCLIBaseOptions.Trim())</SentryCLIBaseCommand>
 
-      <SentryRelease Condition="'$(SentryRelease)' == '' And '$(SENTRY_RELEASE)' != ''">$(SENTRY_RELEASE)</SentryRelease>
       <SentryReleaseOptions Condition="'$(SentryProject)' != ''">$(SentryReleaseOptions) --project $(SentryProject)</SentryReleaseOptions>
-
       <SentrySetCommitOptions Condition="'$(SentrySetCommitOptions)' == ''">--auto</SentrySetCommitOptions>
 
       <SentryCLIUploadOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIUploadOptions) --org $(SentryOrg)</SentryCLIUploadOptions>
@@ -305,28 +303,33 @@
     </Task>
   </UsingTask>
 
+  <PropertyGroup>
+    <!-- Check if the release has been provided as an environment variable -->
+    <_SentryRelease Condition="'$(_SentryRelease)' == '' And '$(SENTRY_RELEASE)' != ''">$(SENTRY_RELEASE)</_SentryRelease>
+  </PropertyGroup>
+
   <Target Name="_GetSentryRelease" AfterTargets="DispatchToInnerBuilds;AfterBuild" Condition="'$(SentryCreateRelease)' == 'true' And '$(UseSentryCLI)' == 'true'">
 
     <Message Importance="High" Text="Getting Sentry Release..." />
 
-    <SentryGetApplicationVersion Condition="'$(SentryRelease)' == ''" AssemblyPath="$(IntermediateOutputPath)$(TargetName)$(TargetExt)">
-      <Output TaskParameter="Release" PropertyName="SentryRelease" />
+    <SentryGetApplicationVersion Condition="'$(_SentryRelease)' == ''" AssemblyPath="$(IntermediateOutputPath)$(TargetName)$(TargetExt)">
+      <Output TaskParameter="Release" PropertyName="_SentryRelease" />
     </SentryGetApplicationVersion>
 
-    <Exec ConsoleToMSBuild="true"  Condition="'$(SentryRelease)' == ''"
+    <Exec ConsoleToMSBuild="true"  Condition="'$(_SentryRelease)' == ''"
           Command="sentry-cli releases propose-version">
-      <Output TaskParameter="ConsoleOutput" PropertyName="SentryRelease"/>
+      <Output TaskParameter="ConsoleOutput" PropertyName="_SentryRelease"/>
     </Exec>
 
-    <Message Importance="High" Text="Sentry Release: $(SentryRelease)" />
+    <Message Importance="High" Text="Sentry Release: $(_SentryRelease)" />
   </Target>
 
   <!-- Set release information after the build -->
   <Target Name="_CreateSentryRelease" AfterTargets="Build" DependsOnTargets="_GetSentryRelease"
           Condition="'$(SentryCLI)' != '' and '$(SentryCreateRelease)' == 'true'">
-    <Message Importance="High" Text="Creating Sentry Release: $(SentryRelease)" />
+    <Message Importance="High" Text="Creating Sentry Release: $(_SentryRelease)" />
     <Exec
-      Command="$(SentryCLIBaseCommand) releases new '$(SentryRelease)' $(SentryReleaseOptions)"
+      Command="$(SentryCLIBaseCommand) releases new '$(_SentryRelease)' $(SentryReleaseOptions)"
       IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
     </Exec>
@@ -337,7 +340,7 @@
           Condition="'$(SentryCLI)' != '' and '$(SentrySetCommits)' == 'true'">
     <Message Importance="High" Text="Setting Sentry commits" />
     <Exec
-      Command="$(SentryCLIBaseCommand) releases set-commits $(SentrySetCommitOptions) '$(SentryRelease)' $(SentryReleaseOptions)"
+      Command="$(SentryCLIBaseCommand) releases set-commits $(SentrySetCommitOptions) '$(_SentryRelease)' $(SentryReleaseOptions)"
       IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
     </Exec>
