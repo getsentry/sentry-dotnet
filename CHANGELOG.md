@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Added build properties to automatically create releases and associated commits ([#3462](https://github.com/getsentry/sentry-dotnet/pull/3462))
+
 ## 4.9.0
 
 ### Fixes
@@ -9,7 +15,6 @@
 ### Features
 
 - Client reports now include dropped spans ([#3463](https://github.com/getsentry/sentry-dotnet/pull/3463))
-- Added build properties to automatically create releases and associated commits ([#3462](https://github.com/getsentry/sentry-dotnet/pull/3462))
 
 ### API Changes
 
