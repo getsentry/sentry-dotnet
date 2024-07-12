@@ -2,7 +2,12 @@
 
 ## Unreleased
 
+### Features
+
+- Users can now automatically create releases and associated commits via sentry-cli and MSBuild properties ([#3462](https://github.com/getsentry/sentry-dotnet/pull/3462))
+
 ### Fixes
+
 - Race condition in `SentryMessageHandler` ([#3477](https://github.com/getsentry/sentry-dotnet/pull/3477))
 
 ## 4.9.0
