@@ -9,7 +9,7 @@ namespace Sentry.Internal.Wcf;
 /// See https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.synchronizedcollection-1?view=net-8.0
 /// </para>
 /// </summary>
-internal class SynchronizedCollection<T> : IList<T>, IList, IReadOnlyCollection<T>
+internal class SynchronizedCollection<T>
 {
     private object _sync;
 
@@ -19,37 +19,14 @@ internal class SynchronizedCollection<T> : IList<T>, IList, IReadOnlyCollection<
         _sync = new object();
     }
 
-    public SynchronizedCollection(object syncRoot)
+    public IReadOnlyCollection<T> ToReadOnlyCollection()
     {
-        Items = new List<T>();
-        _sync = syncRoot ?? throw new ArgumentNullException(nameof(syncRoot));
-    }
-
-    public SynchronizedCollection(object syncRoot, IEnumerable<T> list)
-    {
-        if (list == null)
+        lock (_sync)
         {
-            throw new ArgumentNullException(nameof(list));
+            // This will be pig slow but ensures that the collection is thread-safe for IEnumerable operations.
+            // This is just to run an experiment - DO NOT MERGE THIS INTO THE MAIN BRANCH!!!
+            return new ReadOnlyCollection<T>(Items.ToArray());
         }
-
-        Items = new List<T>(list);
-        _sync = syncRoot ?? throw new ArgumentNullException(nameof(syncRoot));
-    }
-
-    public SynchronizedCollection(object syncRoot, params T[] list)
-    {
-        if (list == null)
-        {
-            throw new ArgumentNullException(nameof(list));
-        }
-
-        Items = new List<T>(list.Length);
-        for (int i = 0; i < list.Length; i++)
-        {
-            Items.Add(list[i]);
-        }
-
-        _sync = syncRoot ?? throw new ArgumentNullException(nameof(syncRoot));
     }
 
     public int Count
@@ -58,11 +35,6 @@ internal class SynchronizedCollection<T> : IList<T>, IList, IReadOnlyCollection<
     }
 
     protected List<T> Items { get; }
-
-    public object SyncRoot
-    {
-        get { return _sync; }
-    }
 
     public T this[int index]
     {
@@ -82,7 +54,7 @@ internal class SynchronizedCollection<T> : IList<T>, IList, IReadOnlyCollection<
                     throw new ArgumentOutOfRangeException();
                 }
 
-                SetItem(index, value);
+                Items[index] = value;
             }
         }
     }
@@ -92,7 +64,7 @@ internal class SynchronizedCollection<T> : IList<T>, IList, IReadOnlyCollection<
         lock (_sync)
         {
             int index = Items.Count;
-            InsertItem(index, item);
+            Items.Insert(index, item);
         }
     }
 
@@ -100,7 +72,7 @@ internal class SynchronizedCollection<T> : IList<T>, IList, IReadOnlyCollection<
     {
         lock (_sync)
         {
-            ClearItems();
+            Items.Clear();
         }
     }
 
@@ -145,7 +117,7 @@ internal class SynchronizedCollection<T> : IList<T>, IList, IReadOnlyCollection<
                 throw new ArgumentOutOfRangeException();
             }
 
-            InsertItem(index, item);
+            Items.Insert(index, item);
         }
     }
 
@@ -173,7 +145,7 @@ internal class SynchronizedCollection<T> : IList<T>, IList, IReadOnlyCollection<
                 return false;
             }
 
-            RemoveItem(index);
+            Items.RemoveAt(index);
             return true;
         }
     }
@@ -187,128 +159,7 @@ internal class SynchronizedCollection<T> : IList<T>, IList, IReadOnlyCollection<
                 throw new ArgumentOutOfRangeException();
             }
 
-            RemoveItem(index);
-        }
-    }
-
-    protected virtual void ClearItems()
-    {
-        Items.Clear();
-    }
-
-    protected virtual void InsertItem(int index, T item)
-    {
-        Items.Insert(index, item);
-    }
-
-    protected virtual void RemoveItem(int index)
-    {
-        Items.RemoveAt(index);
-    }
-
-    protected virtual void SetItem(int index, T item)
-    {
-        Items[index] = item;
-    }
-
-    bool ICollection<T>.IsReadOnly
-    {
-        get { return false; }
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return ((IList)Items).GetEnumerator();
-    }
-
-    bool ICollection.IsSynchronized
-    {
-        get { return true; }
-    }
-
-    object ICollection.SyncRoot
-    {
-        get { return _sync; }
-    }
-
-    void ICollection.CopyTo(Array array, int index)
-    {
-        lock (_sync)
-        {
-            ((IList)Items).CopyTo(array, index);
-        }
-    }
-
-    object? IList.this[int index]
-    {
-        get
-        {
-            return this[index]!;
-        }
-        set
-        {
-            VerifyValueType(value);
-            this[index] = (T)value!;
-        }
-    }
-
-    bool IList.IsReadOnly
-    {
-        get { return false; }
-    }
-
-    bool IList.IsFixedSize
-    {
-        get { return false; }
-    }
-
-    int IList.Add(object? value)
-    {
-        VerifyValueType(value);
-
-        lock (_sync)
-        {
-            Add((T)value!);
-            return Count - 1;
-        }
-    }
-
-    bool IList.Contains(object? value)
-    {
-        VerifyValueType(value);
-        return Contains((T)value!);
-    }
-
-    int IList.IndexOf(object? value)
-    {
-        VerifyValueType(value);
-        return IndexOf((T)value!);
-    }
-
-    void IList.Insert(int index, object? value)
-    {
-        VerifyValueType(value);
-        Insert(index, (T)value!);
-    }
-
-    void IList.Remove(object? value)
-    {
-        VerifyValueType(value);
-        Remove((T)value!);
-    }
-
-    private static void VerifyValueType(object? value)
-    {
-        if (value == null)
-        {
-            if (typeof(T).GetTypeInfo().IsValueType)
-            {
-                throw new ArgumentException("Null is not a valid value for value-typed collections.");
-            }
-        }
-        else if (!(value is T))
-        {
-            throw new ArgumentException("Value is of the wrong type.", nameof(value));
+            Items.RemoveAt(index);
         }
     }
 }

@@ -70,7 +70,6 @@ public class SentryDiagnosticListenerTests
         // Arrange
         var hub = _fixture.Hub;
         var transaction = hub.StartTransaction("test", "test");
-        var spans = transaction.Spans;
         var context = _fixture.NewContext();
         Exception exception = null;
 
@@ -86,6 +85,7 @@ public class SentryDiagnosticListenerTests
 
         // Assert
         Assert.NotNull(exception);
+        var spans = transaction.Spans;
 #if NETFRAMEWORK
         Assert.Single(spans); //1 command
 #else
@@ -104,13 +104,13 @@ public class SentryDiagnosticListenerTests
         // Arrange
         var hub = _fixture.Hub;
         var transaction = hub.StartTransaction("test", "test");
-        var spans = transaction.Spans;
         var context = _fixture.NewContext();
 
         // Act
         var result = context.Items.FromSqlRaw("SELECT * FROM Items").ToList();
 
         // Assert
+        var spans = transaction.Spans;
         Assert.Equal(3, result.Count);
 #if NETFRAMEWORK
         Assert.Single(spans); //1 command
@@ -146,7 +146,6 @@ public class SentryDiagnosticListenerTests
 
         var hub = _fixture.Hub;
         var transaction = hub.StartTransaction("test", "test");
-        var spans = transaction.Spans;
         var itemsList = new ConcurrentBag<List<Item>>();
 
         // Act
@@ -158,6 +157,7 @@ public class SentryDiagnosticListenerTests
         await Task.WhenAll(tasks);
 
         // Assert
+        var spans = transaction.Spans;
         Assert.Equal(totalCommands, itemsList.Count);
         Assert.Equal(totalCommands, spans.Count(s => s.Operation == "db.query"));
 #if NET5_0_OR_GREATER
@@ -180,7 +180,6 @@ public class SentryDiagnosticListenerTests
         var context = _fixture.NewContext();
         var hub = _fixture.Hub;
         var transaction = hub.StartTransaction("test", "test");
-        var spans = transaction.Spans;
 
         // Act
         var result = new[]
@@ -193,6 +192,7 @@ public class SentryDiagnosticListenerTests
         await Task.WhenAll(result);
 
         // Assert
+        var spans = transaction.Spans;
         Assert.Equal(3, result[0].Result.Count);
         Assert.Equal(4, spans.Count(s => s.Operation == "db.query"));
 #if NET5_0_OR_GREATER

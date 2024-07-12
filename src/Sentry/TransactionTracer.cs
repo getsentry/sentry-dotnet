@@ -1,3 +1,4 @@
+using System;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Wcf;
@@ -168,15 +169,10 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     /// <inheritdoc />
     public IReadOnlyDictionary<string, string> Tags => _tags;
 
-    internal static bool UseConcurrentBag = false;
-
-    private readonly IReadOnlyCollection<ISpan> _spans = UseConcurrentBag
-        ? new ConcurrentBag<ISpan>()
-        : new SynchronizedCollection<ISpan>();
-    // private readonly SynchronizedCollection<ISpan> _spans = new();
+    private readonly SynchronizedCollection<ISpan> _spans = new();
 
     /// <inheritdoc />
-    public IReadOnlyCollection<ISpan> Spans => _spans;
+    public IReadOnlyCollection<ISpan> Spans => _spans.ToReadOnlyCollection();
 
     private readonly ConcurrentDictionary<string, Measurement> _measurements = new();
 
@@ -307,18 +303,7 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
 
         if (!isOutOfLimit)
         {
-            switch (_spans)
-            {
-                case ConcurrentBag<ISpan> spanBag:
-                    spanBag.Add(span);
-                    break;
-                case SynchronizedCollection<ISpan> synchronizedCollection:
-                    synchronizedCollection.Add(span);
-                    break;
-            }
-
-            // TODO: Reinstate
-            // _spans.Add(span);
+            _spans.Add(span);
             _activeSpanTracker.Push(span);
         }
     }

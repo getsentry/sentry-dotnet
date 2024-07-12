@@ -23,27 +23,9 @@ public class TransactionBenchmarks
     [GlobalCleanup]
     public void DisableDsk() => _sdk.Dispose();
 
-    [Benchmark(Description = "ConcurrentBag")]
-    public void ConcurrentBag()
-    {
-        TransactionTracer.UseConcurrentBag = true;
-
-        var transaction = SentrySdk.StartTransaction(Name, Operation);
-
-        for (var i = 0; i < SpanCount; i++)
-        {
-            var span = transaction.StartChild(Operation);
-            span.Finish();
-        }
-
-        transaction.Finish();
-    }
-
-    [Benchmark(Description = "SyncCollection")]
+    [Benchmark]
     public void SynchronizedCollection()
     {
-        TransactionTracer.UseConcurrentBag = false;
-
         var transaction = SentrySdk.StartTransaction(Name, Operation);
 
         for (var i = 0; i < SpanCount; i++)
