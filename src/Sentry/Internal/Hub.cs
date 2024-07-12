@@ -63,7 +63,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
             PushScope();
         }
 
-        if (options.ExperimentalMetrics is not null)
+        if (options.Metrics is not null)
         {
             options.LogDebug("Registering integration: Metrics");
             Metrics = new MetricAggregator(options, this);

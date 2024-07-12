@@ -5,7 +5,9 @@ namespace Sentry.Extensions.Logging.Tests;
 
 public class SentryLoggingOptionsTests : BindableTests<SentryLoggingOptions>
 {
-    public SentryLoggingOptionsTests() : base(nameof(SentryLoggingOptions.ExperimentalMetrics))
+#pragma warning disable CS0618 // Type or member is obsolete
+    public SentryLoggingOptionsTests() : base(nameof(SentryLoggingOptions.ExperimentalMetrics), nameof(SentryLoggingOptions.Metrics))
+#pragma warning restore CS0618 // Type or member is obsolete
     {
     }
 
