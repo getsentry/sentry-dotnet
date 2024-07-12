@@ -10,7 +10,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
-    private readonly object _lock = new();
+    private readonly object _innerHandlerLock = new();
 
     /// <summary>
     /// Constructs an instance of <see cref="SentryMessageHandler"/>.
@@ -127,7 +127,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
         // We can't do this in a constructor, or it will throw when used with HttpMessageHandlerBuilderFilter.
         if (InnerHandler is null)
         {
-            lock (_lock)
+            lock (_innerHandlerLock)
             {
                 InnerHandler ??= new HttpClientHandler();
             }
