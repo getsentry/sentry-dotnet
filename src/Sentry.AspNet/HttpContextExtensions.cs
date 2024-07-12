@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Protocol;
 
 namespace Sentry.AspNet;
 
@@ -9,6 +10,7 @@ namespace Sentry.AspNet;
 public static class HttpContextExtensions
 {
     private const string HttpContextTransactionItemName = "__SentryTransaction";
+    internal const string AspNetOrigin = "auto.http.aspnet";
 
     private static SentryTraceHeader? TryGetSentryTraceHeader(HttpContext context, SentryOptions? options)
     {
@@ -114,6 +116,7 @@ public static class HttpContextExtensions
         }
 
         var transaction = SentrySdk.StartTransaction(transactionContext, customSamplingContext, dynamicSamplingContext);
+        transaction.Contexts.Trace.Origin = AspNetOrigin;
 
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
         httpContext.Items[HttpContextTransactionItemName] = transaction;

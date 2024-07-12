@@ -78,15 +78,6 @@ internal enum SentryLevel : ulong
 }
 
 [Native]
-internal enum SentryRRWebEventType : long
-{
-    None = 0,
-    Touch = 3,
-    Meta = 4,
-    Custom = 5
-}
-
-[Native]
 internal enum SentryTransactionNameSource : long
 {
     Custom = 0,

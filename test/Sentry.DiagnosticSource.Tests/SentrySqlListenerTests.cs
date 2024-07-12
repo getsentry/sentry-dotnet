@@ -245,6 +245,7 @@ public class SentrySqlListenerTests
         Assert.Equal(connectionId, commandSpan.Extra.TryGetValue<string, Guid>(SqlKeys.DbConnectionId));
         Assert.Equal(dbName, commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName));
         Assert.Equal("sql", commandSpan.Extra.TryGetValue<string, string>(OTelKeys.DbSystem));
+        ((SpanTracer)commandSpan).Origin.Should().Be(SentrySqlListener.SqlListenerOrigin);
 
         Assert.Equal(dbName, connectionSpan.Description);
         Assert.Equal(connectionOperationId, connectionSpan.Extra.TryGetValue<string, Guid>(SqlKeys.DbOperationId));
@@ -252,6 +253,7 @@ public class SentrySqlListenerTests
         Assert.Equal(dbName, connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbName));
         Assert.Equal(dbSource, connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbServer));
         Assert.Equal("sql", connectionSpan.Extra.TryGetValue<string, string>(OTelKeys.DbSystem));
+        ((SpanTracer)connectionSpan).Origin.Should().Be(SentrySqlListener.SqlListenerOrigin);
     }
 
     [Theory]

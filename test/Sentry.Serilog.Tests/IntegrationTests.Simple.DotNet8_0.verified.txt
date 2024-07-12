@@ -33,6 +33,7 @@
               }
             },
             User: {
+              Id: Guid_3,
               Username: TheUserName,
               IpAddress: {{auto}}
             },
@@ -48,7 +49,7 @@
   },
   {
     Header: {
-      event_id: Guid_3,
+      event_id: Guid_4,
       sdk: {
         name: sentry.dotnet
       },
@@ -80,6 +81,7 @@
               }
             },
             User: {
+              Id: Guid_3,
               Username: TheUserName,
               IpAddress: {{auto}}
             },
@@ -101,7 +103,7 @@
   },
   {
     Header: {
-      event_id: Guid_4,
+      event_id: Guid_5,
       sdk: {
         name: sentry.dotnet
       },
@@ -133,6 +135,7 @@
               }
             },
             User: {
+              Id: Guid_3,
               Username: TheUserName,
               IpAddress: {{auto}}
             },
@@ -158,7 +161,7 @@
   },
   {
     Header: {
-      event_id: Guid_5,
+      event_id: Guid_6,
       sdk: {
         name: sentry.dotnet
       },
@@ -234,7 +237,7 @@
                 DebugId: ________-____-____-____-____________-________,
                 DebugChecksum: ______:________________________________________________________________,
                 DebugFile: .../Sentry.Serilog.Tests.pdb,
-                CodeId: _____________,
+                CodeId: ______________,
                 CodeFile: .../Sentry.Serilog.Tests.dll
               }
             ],
@@ -246,6 +249,7 @@
               }
             },
             User: {
+              Id: Guid_3,
               Username: TheUserName,
               IpAddress: {{auto}}
             },

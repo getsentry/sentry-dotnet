@@ -7,7 +7,7 @@ namespace Sentry.Protocol;
 /// <summary>
 /// Trace context data.
 /// </summary>
-public class Trace : ITraceContext, ISentryJsonSerializable, ICloneable<Trace>, IUpdatable<Trace>
+public class Trace : ITraceContext, ITraceContextInternal, ISentryJsonSerializable, ICloneable<Trace>, IUpdatable<Trace>
 {
     /// <summary>
     /// Tells Sentry which type of context this is.
@@ -25,6 +25,21 @@ public class Trace : ITraceContext, ISentryJsonSerializable, ICloneable<Trace>, 
 
     /// <inheritdoc />
     public string Operation { get; set; } = "";
+
+    /// <inheritdoc />
+    public string? Origin
+    {
+        get => _origin;
+        internal set
+        {
+            if (!OriginHelper.IsValidOrigin(value))
+            {
+                throw new ArgumentException("Invalid origin");
+            }
+            _origin = value;
+        }
+    }
+    private string? _origin;
 
     /// <inheritdoc />
     public string? Description { get; set; }
@@ -46,6 +61,7 @@ public class Trace : ITraceContext, ISentryJsonSerializable, ICloneable<Trace>, 
         ParentSpanId = ParentSpanId,
         TraceId = TraceId,
         Operation = Operation,
+        Origin = Origin,
         Status = Status,
         IsSampled = IsSampled
     };
@@ -84,6 +100,7 @@ public class Trace : ITraceContext, ISentryJsonSerializable, ICloneable<Trace>, 
         writer.WriteSerializableIfNotNull("parent_span_id", ParentSpanId?.NullIfDefault(), logger);
         writer.WriteSerializableIfNotNull("trace_id", TraceId.NullIfDefault(), logger);
         writer.WriteStringIfNotWhiteSpace("op", Operation);
+        writer.WriteString("origin", Origin ?? Internal.OriginHelper.Manual);
         writer.WriteStringIfNotWhiteSpace("description", Description);
         writer.WriteStringIfNotWhiteSpace("status", Status?.ToString().ToSnakeCase());
 
@@ -99,6 +116,7 @@ public class Trace : ITraceContext, ISentryJsonSerializable, ICloneable<Trace>, 
         var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);
         var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
         var operation = json.GetPropertyOrNull("op")?.GetString() ?? "";
+        var origin = Internal.OriginHelper.TryParse(json.GetPropertyOrNull("origin")?.GetString() ?? "");
         var description = json.GetPropertyOrNull("description")?.GetString();
         var status = json.GetPropertyOrNull("status")?.GetString()?.Replace("_", "").ParseEnum<SpanStatus>();
         var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean();
@@ -109,6 +127,7 @@ public class Trace : ITraceContext, ISentryJsonSerializable, ICloneable<Trace>, 
             ParentSpanId = parentSpanId,
             TraceId = traceId,
             Operation = operation,
+            Origin = origin,
             Description = description,
             Status = status,
             IsSampled = isSampled

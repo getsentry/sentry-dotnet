@@ -180,6 +180,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{233D34AB-9
 		CONTRIBUTING.md = CONTRIBUTING.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AspNetCore.Blazor.WebAssembly", "src\Sentry.AspNetCore.Blazor.WebAssembly\Sentry.AspNetCore.Blazor.WebAssembly.csproj", "{8298202C-9983-4D0A-851D-805539EE481A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -502,6 +504,10 @@ Global
 		{46E40BE8-1AB0-4846-B0A2-A40AD0272C64}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46E40BE8-1AB0-4846-B0A2-A40AD0272C64}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46E40BE8-1AB0-4846-B0A2-A40AD0272C64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8298202C-9983-4D0A-851D-805539EE481A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8298202C-9983-4D0A-851D-805539EE481A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8298202C-9983-4D0A-851D-805539EE481A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8298202C-9983-4D0A-851D-805539EE481A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -587,5 +593,6 @@ Global
 		{407C477D-69C0-4B02-8A68-EE6B5A81C696} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
 		{EADF25F5-8D02-4747-AB54-5F2BAA648471} = {230B9384-90FD-4551-A5DE-1A5C197F25B6}
 		{46E40BE8-1AB0-4846-B0A2-A40AD0272C64} = {6987A1CC-608E-4868-A02C-09D30C8B7B2D}
+		{8298202C-9983-4D0A-851D-805539EE481A} = {230B9384-90FD-4551-A5DE-1A5C197F25B6}
 	EndGlobalSection
 EndGlobal

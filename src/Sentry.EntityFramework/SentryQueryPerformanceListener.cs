@@ -1,3 +1,5 @@
+using Sentry.Internal;
+
 namespace Sentry.EntityFramework;
 
 internal class SentryQueryPerformanceListener : IDbCommandInterceptor
@@ -6,6 +8,8 @@ internal class SentryQueryPerformanceListener : IDbCommandInterceptor
     internal const string DbReaderKey = "db.query";
     internal const string DbNonQueryKey = "db.execute";
     internal const string DbScalarKey = "db.query.scalar";
+
+    internal static readonly string EntityFrameworkOrigin = "auto.db.entity_framework";
 
     private SentryOptions _options;
     private IHub _hub;
@@ -39,6 +43,7 @@ internal class SentryQueryPerformanceListener : IDbCommandInterceptor
     {
         if (_hub.GetSpan()?.StartChild(key, command) is { } span)
         {
+            span.SetOrigin(EntityFrameworkOrigin);
             interceptionContext.AttachSpan(span);
         }
     }

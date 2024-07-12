@@ -10,7 +10,7 @@ namespace Sentry;
 /// <summary>
 /// Transaction span.
 /// </summary>
-public class SentrySpan : ISpanData, ISentryJsonSerializable
+public class SentrySpan : ISpanData, ISentryJsonSerializable, ITraceContextInternal
 {
     /// <inheritdoc />
     public SpanId SpanId { get; private set; }
@@ -182,4 +182,19 @@ public class SentrySpan : ISpanData, ISentryJsonSerializable
     {
         Description = Description?.RedactUrl();
     }
+
+    /// <inheritdoc />
+    public string? Origin
+    {
+        get => _origin;
+        internal set
+        {
+            if (!OriginHelper.IsValidOrigin(value))
+            {
+                throw new ArgumentException("Invalid origin");
+            }
+            _origin = value;
+        }
+    }
+    private string? _origin;
 }

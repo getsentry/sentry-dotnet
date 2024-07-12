@@ -545,14 +545,17 @@ public class CachingTransportTests
     [MemberData(nameof(NetworkTestData))]
     public async Task TestNetworkException(Exception exception)
     {
-        // Arrange
+        // Arrange - network unavailable
         using var cacheDirectory = new TempDirectory(_fileSystem);
+        var pingHost = Substitute.For<IPing>();
+        pingHost.IsAvailableAsync().Returns(Task.FromResult(true));
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path,
+            NetworkStatusListener = new PollingNetworkStatusListener(pingHost),
             FileSystem = _fileSystem
         };
 
@@ -577,16 +580,25 @@ public class CachingTransportTests
         {
             receivedException = he;
         }
-        finally
-        {
-            // (transport stops failing)
-            innerTransport.ClearReceivedCalls();
-            await transport.FlushAsync();
-        }
 
         // Assert
-        Assert.Equal(exception, receivedException);
-        Assert.True(_fileSystem.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).Any());
+        receivedException.Should().Be(exception);
+        var files = _fileSystem.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).ToArray();
+        files.Should().NotBeEmpty();
+
+        // Arrange - network recovery
+        innerTransport.ClearReceivedCalls();
+        innerTransport
+            .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
+            .Returns(_ => Task.CompletedTask);
+
+        // Act
+        await transport.FlushAsync();
+
+        // Assert
+        receivedException.Should().Be(exception);
+        files = _fileSystem.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).ToArray();
+        files.Should().NotContain(file => file.Contains("__processing", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]

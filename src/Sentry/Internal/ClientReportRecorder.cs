@@ -18,7 +18,7 @@ internal class ClientReportRecorder : IClientReportRecorder
         _clock = clock ?? SystemClock.Clock;
     }
 
-    public void RecordDiscardedEvent(DiscardReason reason, DataCategory category)
+    public void RecordDiscardedEvent(DiscardReason reason, DataCategory category, int quantity = 1)
     {
         // Don't count discarded events if we're not going to be sending them.
         if (!_options.SendClientReports)
@@ -27,7 +27,7 @@ internal class ClientReportRecorder : IClientReportRecorder
         }
 
         // Increment the counter for the discarded event.
-        _discardedEvents.Increment(reason.WithCategory(category));
+        _discardedEvents.Add(reason.WithCategory(category), quantity);
     }
 
     public ClientReport? GenerateClientReport()

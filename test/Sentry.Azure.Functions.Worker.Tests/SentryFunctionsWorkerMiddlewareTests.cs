@@ -63,7 +63,7 @@ public class SentryFunctionsWorkerMiddlewareTests
     }
 
     [Fact]
-    public async Task Transaction_name_and_operation_set()
+    public async Task Transaction_PropertiesAreSet()
     {
         var functionContext = Substitute.For<FunctionContext>();
         var functionDefinition = Substitute.For<FunctionDefinition>();
@@ -79,6 +79,7 @@ public class SentryFunctionsWorkerMiddlewareTests
         transaction.Should().NotBeNull();
         transaction.Name.Should().Be(functionDefinition.Name);
         transaction.Operation.Should().Be("function");
+        transaction.Origin.Should().Be(SentryFunctionsWorkerMiddleware.AzureFunctionsOrigin);
     }
 
     [Fact]

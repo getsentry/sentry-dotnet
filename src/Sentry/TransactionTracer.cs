@@ -245,6 +245,7 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
         if (context is TransactionContext transactionContext)
         {
             _instrumenter = transactionContext.Instrumenter;
+            Origin = transactionContext.Origin;
         }
 
         // Set idle timer only if an idle timeout has been provided directly
@@ -423,4 +424,11 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
 
     /// <inheritdoc />
     public SentryTraceHeader GetTraceHeader() => new(TraceId, SpanId, IsSampled);
+
+    /// <inheritdoc />
+    public string? Origin
+    {
+        get => Contexts.Trace.Origin;
+        internal set => Contexts.Trace.Origin = value;
+    }
 }

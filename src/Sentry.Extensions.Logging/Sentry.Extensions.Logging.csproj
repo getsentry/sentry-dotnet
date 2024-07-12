@@ -33,6 +33,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Sentry.AspNetCore" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.AspNetCore.Blazor.WebAssembly" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNetCore.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNetCore.Grpc" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNetCore.Grpc.Tests" PublicKey="$(SentryPublicKey)" />

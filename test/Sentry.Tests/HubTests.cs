@@ -971,6 +971,24 @@ public partial class HubTests
     }
 
     [Fact]
+    public void ContinueTrace_DoesNotReceiveHeaders_CreatesRootTrace()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transactionContext = hub.ContinueTrace((string)null, null, "test-name");
+
+        // Assert
+        transactionContext.Name.Should().Be("test-name");
+        transactionContext.SpanId.Should().NotBe(null);
+        transactionContext.ParentSpanId.Should().Be(null);
+        transactionContext.TraceId.Should().NotBe(null);
+        transactionContext.IsSampled.Should().Be(null);
+        transactionContext.IsParentSampled.Should().Be(null);
+    }
+
+    [Fact]
     public void CaptureTransaction_AfterTransactionFinishes_ResetsTransactionOnScope()
     {
         // Arrange

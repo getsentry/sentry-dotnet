@@ -21,7 +21,7 @@ public class TraceTests
         var actual = trace.ToJsonString(_testOutputLogger);
 
         // Assert
-        Assert.Equal("""{"type":"trace"}""", actual);
+        Assert.Equal("""{"type":"trace","origin":"manual"}""", actual);
     }
 
     [Fact]
@@ -31,6 +31,7 @@ public class TraceTests
         var trace = new Trace
         {
             Operation = "op123",
+            Origin = "auto.abc.def.ghi",
             Status = SpanStatus.Aborted,
             IsSampled = false,
             ParentSpanId = SpanId.Parse("1000000000000000"),
@@ -50,6 +51,7 @@ public class TraceTests
               "parent_span_id": "1000000000000000",
               "trace_id": "75302ac48a024bde9a3b3734a82e36c8",
               "op": "op123",
+              "origin": "auto.abc.def.ghi",
               "status": "aborted"
             }
             """,
@@ -63,6 +65,7 @@ public class TraceTests
         var trace = new Trace
         {
             Operation = "op123",
+            Origin = "auto.abc.def.ghi",
             Status = SpanStatus.Aborted,
             IsSampled = false,
             ParentSpanId = SpanId.Parse("1000000000000000"),
@@ -75,6 +78,7 @@ public class TraceTests
 
         // Assert
         Assert.Equal(trace.Operation, clone.Operation);
+        Assert.Equal(trace.Origin, clone.Origin);
         Assert.Equal(trace.Status, clone.Status);
         Assert.Equal(trace.IsSampled, clone.IsSampled);
         Assert.Equal(trace.ParentSpanId, clone.ParentSpanId);
