@@ -361,8 +361,6 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
         writer.WriteStringIfNotWhiteSpace("model", Model);
         writer.WriteStringIfNotWhiteSpace("model_id", ModelId);
         writer.WriteStringIfNotWhiteSpace("arch", Architecture);
-
-        Console.WriteLine($"HUEHUEHUEHUEHUEHUE: {BatteryLevel}");
         writer.WriteNumberIfNotNull("battery_level", BatteryLevel);
         writer.WriteBooleanIfNotNull("charging", IsCharging);
         writer.WriteBooleanIfNotNull("online", IsOnline);
