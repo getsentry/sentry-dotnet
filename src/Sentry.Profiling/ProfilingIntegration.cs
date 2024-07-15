@@ -33,6 +33,8 @@ public class ProfilingIntegration : ISdkIntegration
     {
         if (options.IsProfilingEnabled)
         {
+            options.LogWarning("The profiling feature is currently experimental and may result in increased CPU and memory usage.");
+
             try
             {
                 options.TransactionProfilerFactory ??= new SamplingTransactionProfilerFactory(options, _startupTimeout);
