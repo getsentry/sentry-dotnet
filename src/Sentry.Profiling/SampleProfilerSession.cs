@@ -83,7 +83,7 @@ internal class SampleProfilerSession : IDisposable
             var session = client.StartEventPipeSession(Providers, requestRundown: false, CircularBufferMB);
 
             var stopWatch = SentryStopwatch.StartNew();
-            var eventSource = TraceLog.CreateFromEventPipeSession(session);
+            var eventSource = TraceLog.CreateFromEventPipeSession(session, TraceLog.EventPipeRundownConfiguration.Enable(client));
 
             // Process() blocks until the session is stopped so we need to run it on a separate thread.
             Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning)
