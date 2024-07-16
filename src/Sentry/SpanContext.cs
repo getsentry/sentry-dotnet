@@ -1,3 +1,4 @@
+using Sentry.Internal;
 using Sentry.Protocol;
 
 namespace Sentry;
@@ -5,7 +6,7 @@ namespace Sentry;
 /// <summary>
 /// Span metadata used for sampling.
 /// </summary>
-public class SpanContext : ITraceContext
+public class SpanContext : ITraceContext, ITraceContextInternal
 {
     /// <inheritdoc />
     public SpanId SpanId { get; }
@@ -32,6 +33,21 @@ public class SpanContext : ITraceContext
     /// Identifies which instrumentation is being used.
     /// </summary>
     public Instrumenter Instrumenter { get; internal set; } = Instrumenter.Sentry;
+
+    /// <inheritdoc/>
+    public string? Origin
+    {
+        get => _origin;
+        internal set
+        {
+            if (!OriginHelper.IsValidOrigin(value))
+            {
+                throw new ArgumentException("Invalid origin");
+            }
+            _origin = value;
+        }
+    }
+    private string? _origin;
 
     /// <summary>
     /// Initializes an instance of <see cref="SpanContext"/>.

@@ -100,13 +100,22 @@ public abstract class HttpTransportBase
 
         if (isRateLimited)
         {
-            _options.ClientReportRecorder
-                .RecordDiscardedEvent(DiscardReason.RateLimitBackoff, item.DataCategory);
+            var reason = DiscardReason.RateLimitBackoff;
+            _options.ClientReportRecorder.RecordDiscardedEvent(reason, item.DataCategory);
 
             _options.LogDebug(
                 "{0}: Envelope item of type {1} was discarded because it's rate-limited.",
                 _typeName,
                 item.TryGetType());
+
+            if (item.DataCategory.Equals(DataCategory.Transaction))
+            {
+                if (item.Payload is JsonSerializable { Source: SentryTransaction transaction })
+                {
+                    // Span count + 1 (transaction/root span)
+                    _options.ClientReportRecorder.RecordDiscardedEvent(reason, DataCategory.Span, transaction.Spans.Count + 1);
+                }
+            }
 
             // Check if session update with init=true
             if (item.Payload is JsonSerializable

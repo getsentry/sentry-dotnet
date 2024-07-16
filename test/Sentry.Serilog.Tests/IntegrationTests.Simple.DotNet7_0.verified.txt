@@ -237,7 +237,7 @@
                 DebugId: ________-____-____-____-____________-________,
                 DebugChecksum: ______:________________________________________________________________,
                 DebugFile: .../Sentry.Serilog.Tests.pdb,
-                CodeId: _____________,
+                CodeId: ______________,
                 CodeFile: .../Sentry.Serilog.Tests.dll
               }
             ],

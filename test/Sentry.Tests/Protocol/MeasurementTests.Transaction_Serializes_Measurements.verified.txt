@@ -11,7 +11,8 @@
     trace: {
       type: trace,
       trace_id: Guid_2,
-      op: operation
+      op: operation,
+      origin: manual
     }
   },
   measurements: {

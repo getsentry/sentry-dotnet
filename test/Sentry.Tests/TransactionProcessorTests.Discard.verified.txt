@@ -58,6 +58,7 @@
         Payload: {
           Source: {
             DiscardedEvents: {
+              { Reason = "event_processor", Category = "span" }: 1,
               { Reason = "event_processor", Category = "transaction" }: 1
             }
           }
