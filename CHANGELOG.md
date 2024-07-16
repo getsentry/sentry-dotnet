@@ -10,6 +10,12 @@
 
 - Race condition in `SentryMessageHandler` ([#3477](https://github.com/getsentry/sentry-dotnet/pull/3477))
 
+### Dependencies
+
+- Bump CLI from v2.32.1 to v2.32.2 ([#3489](https://github.com/getsentry/sentry-dotnet/pull/3489))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2322)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.32.1...2.32.2)
+
 ## 4.9.0
 
 ### Fixes
