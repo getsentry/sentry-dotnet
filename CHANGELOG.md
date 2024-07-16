@@ -10,6 +10,10 @@
 
 - Race condition in `SentryMessageHandler` ([#3477](https://github.com/getsentry/sentry-dotnet/pull/3477))
 
+### Dependencies
+
+- Update Perfview/TraceEvent to 3ad5a8c ([#3492](https://github.com/getsentry/sentry-dotnet/pull/3492))
+
 ## 4.9.0
 
 ### Fixes
