@@ -13,6 +13,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 {
     private readonly IHub _hub;
     internal readonly IEnumerable<IOpenTelemetryEnricher> _enrichers;
+    internal const string OpenTelemetryOrigin = "auto.otel";
 
     // ReSharper disable once MemberCanBePrivate.Global - Used by tests
     internal readonly ConcurrentDictionary<ActivitySpanId, ISpan> _map = new();
@@ -123,6 +124,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         };
 
         var span = (SpanTracer)parentSpan.StartChild(context);
+        span.Origin = OpenTelemetryOrigin;
         span.StartTimestamp = data.StartTimeUtc;
         // Used to filter out spans that are not recorded when finishing a transaction.
         span.SetFused(data);
@@ -152,6 +154,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         var transaction = (TransactionTracer)_hub.StartTransaction(
             transactionContext, new Dictionary<string, object?>(), dynamicSamplingContext
         );
+        transaction.Contexts.Trace.Origin = OpenTelemetryOrigin;
         transaction.StartTimestamp = data.StartTimeUtc;
         _hub.ConfigureScope(scope => scope.Transaction = transaction);
         transaction.SetFused(data);

@@ -824,7 +824,6 @@ namespace Sentry
         public static System.IDisposable PushScope() { }
         public static System.IDisposable PushScope<TState>(TState state) { }
         public static void ResumeSession() { }
-        public static void RunAsyncVoid(System.Action task, System.Action<System.Exception>? handler = null) { }
         public static void StartSession() { }
         public static Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context) { }
         public static Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext) { }
@@ -856,6 +855,7 @@ namespace Sentry
         public bool? IsSampled { get; }
         public System.Collections.Generic.IReadOnlyDictionary<string, Sentry.Protocol.Measurement> Measurements { get; }
         public string Operation { get; set; }
+        public string? Origin { get; }
         public Sentry.SpanId? ParentSpanId { get; }
         public Sentry.SpanId SpanId { get; }
         public System.DateTimeOffset StartTimestamp { get; }
@@ -947,6 +947,7 @@ namespace Sentry
         public string Name { get; }
         public Sentry.TransactionNameSource NameSource { get; }
         public string Operation { get; }
+        public string? Origin { get; }
         public Sentry.SpanId? ParentSpanId { get; }
         public string? Platform { get; set; }
         public string? Release { get; set; }
@@ -1018,6 +1019,7 @@ namespace Sentry
         public Sentry.Instrumenter Instrumenter { get; }
         public bool? IsSampled { get; }
         public string Operation { get; set; }
+        public string? Origin { get; }
         public Sentry.SpanId? ParentSpanId { get; }
         public Sentry.SpanId SpanId { get; }
         public Sentry.SpanStatus? Status { get; }
@@ -1083,6 +1085,7 @@ namespace Sentry
         public bool? IsSampled { get; }
         public System.Collections.Generic.IReadOnlyDictionary<string, Sentry.Protocol.Measurement> Measurements { get; }
         public string Operation { get; set; }
+        public string? Origin { get; }
         public Sentry.SpanId? ParentSpanId { get; }
         public Sentry.SpanId SpanId { get; }
         public System.DateTimeOffset StartTimestamp { get; }
@@ -1168,6 +1171,7 @@ namespace Sentry
         public string Name { get; set; }
         public Sentry.TransactionNameSource NameSource { get; set; }
         public string Operation { get; set; }
+        public string? Origin { get; }
         public Sentry.SpanId? ParentSpanId { get; }
         public string? Platform { get; set; }
         public string? Release { get; set; }
@@ -1747,6 +1751,7 @@ namespace Sentry.Protocol
         public string? Description { get; set; }
         public bool? IsSampled { get; }
         public string Operation { get; set; }
+        public string? Origin { get; }
         public Sentry.SpanId? ParentSpanId { get; set; }
         public Sentry.SpanId SpanId { get; set; }
         public Sentry.SpanStatus? Status { get; set; }

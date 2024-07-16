@@ -17,6 +17,7 @@ public class HttpContextExtensionsTests
         transaction.Name.Should().Be("GET /the/path");
         transaction.Operation.Should().Be("http.server");
         transaction.NameSource.Should().Be(TransactionNameSource.Url);
+        transaction.Contexts.Trace.Origin.Should().Be(HttpContextExtensions.AspNetOrigin);
     }
 
     [Fact]

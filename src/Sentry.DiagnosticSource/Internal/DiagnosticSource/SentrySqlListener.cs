@@ -11,6 +11,8 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         Execution
     };
 
+    internal const string SqlListenerOrigin = "auto.db.sql_listener";
+
     internal const string SqlDataWriteConnectionOpenBeforeCommand = "System.Data.SqlClient.WriteConnectionOpenBefore";
     internal const string SqlMicrosoftWriteConnectionOpenBeforeCommand = "Microsoft.Data.SqlClient.WriteConnectionOpenBefore";
 
@@ -80,6 +82,7 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
 
         var parent = transaction.GetDbParentSpan();
         var span = parent.StartChild(operation);
+        span.SetOrigin(SqlListenerOrigin);
         span.SetExtra(OTelKeys.DbSystem, "sql");
         SetOperationId(span, value?.GetGuidProperty("OperationId", _options.DiagnosticLogger));
         SetConnectionId(span, value?.GetGuidProperty("ConnectionId", _options.DiagnosticLogger));

@@ -9,6 +9,14 @@ internal static class ClientReportExtensions
         foreach (var item in envelope.Items)
         {
             recorder.RecordDiscardedEvent(reason, item.DataCategory);
+            if (item.DataCategory.Equals(DataCategory.Transaction))
+            {
+                if (item.Payload is JsonSerializable { Source: SentryTransaction transaction })
+                {
+                    // Span count + 1 (transaction/root span)
+                    recorder.RecordDiscardedEvent(reason, DataCategory.Span, transaction.Spans.Count + 1);
+                }
+            }
         }
     }
 }
