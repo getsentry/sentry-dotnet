@@ -9,6 +9,7 @@
 ### Fixes
 
 - Race condition in `SentryMessageHandler` ([#3477](https://github.com/getsentry/sentry-dotnet/pull/3477))
+- Decrease runtime diagnostics circular buffer when profiling, reducing memory usage ([#3491](https://github.com/getsentry/sentry-dotnet/pull/3491))
 
 ### Dependencies
 
