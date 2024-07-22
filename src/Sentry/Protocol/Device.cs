@@ -426,7 +426,18 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
         var model = json.GetPropertyOrNull("model")?.GetString();
         var modelId = json.GetPropertyOrNull("model_id")?.GetString();
         var architecture = json.GetPropertyOrNull("arch")?.GetString();
-        var batteryLevel = json.GetPropertyOrNull("battery_level")?.GetInt16();
+
+        // TODO: For next major: Remove this and change batteryLevel from short to float
+        // The Java and Cocoa SDK report the battery as `float`
+        // Cocoa https://github.com/getsentry/sentry-cocoa/blob/e773cad622b86735f1673368414009475e4119fd/Sources/Sentry/include/SentryUIDeviceWrapper.h#L18
+        // Java  https://github.com/getsentry/sentry-java/blob/25f1ca4e1636a801c17c1662f0145f888550bce8/sentry/src/main/java/io/sentry/protocol/Device.java#L231-L233
+        short? batteryLevel = null;
+        var batteryProperty = json.GetPropertyOrNull("battery_level");
+        if (batteryProperty.HasValue)
+        {
+            batteryLevel = (short)batteryProperty.Value.GetDouble();
+        }
+
         var isCharging = json.GetPropertyOrNull("charging")?.GetBoolean();
         var isOnline = json.GetPropertyOrNull("online")?.GetBoolean();
         var orientation = json.GetPropertyOrNull("orientation")?.GetString()?.ParseEnum<DeviceOrientation>();

@@ -8,6 +8,7 @@
 
 ### Fixes
 
+- On mobile devices, the SDK no longer throws a `FormatException` when trying to report native events ([#3485](https://github.com/getsentry/sentry-dotnet/pull/3485))
 - Race condition in `SentryMessageHandler` ([#3477](https://github.com/getsentry/sentry-dotnet/pull/3477))
 - Decrease runtime diagnostics circular buffer when profiling, reducing memory usage ([#3491](https://github.com/getsentry/sentry-dotnet/pull/3491))
 
