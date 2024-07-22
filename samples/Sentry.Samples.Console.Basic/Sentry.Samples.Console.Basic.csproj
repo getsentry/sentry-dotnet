@@ -40,6 +40,13 @@
     To associate commits with releases
     See https://docs.sentry.io/cli/releases/#commit-integration
     -->
+    <SentrySetCommits>true</SentrySetCommits>
+    <SentrySetCommitOptions>--local</SentrySetCommitOptions>
+
+    <!--
+    To associate commits with releases
+    See https://docs.sentry.io/cli/releases/#commit-integration
+    -->
 <!--    <SentrySetCommits>true</SentrySetCommits>-->
 <!--    <SentrySetCommitOptions>&#45;&#45;local</SentrySetCommitOptions>-->
   </PropertyGroup>
