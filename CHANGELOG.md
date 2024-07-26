@@ -5,6 +5,7 @@
 ### Features
 
 - Users can now automatically create releases and associated commits via sentry-cli and MSBuild properties ([#3462](https://github.com/getsentry/sentry-dotnet/pull/3462))
+- `Sentry.AspNetCore.Blazor.WebAssembly` now targets .NET 8 specifically, allowing for proper dependency resolution ([#3501](https://github.com/getsentry/sentry-dotnet/pull/3501))
 
 ### Fixes
 
