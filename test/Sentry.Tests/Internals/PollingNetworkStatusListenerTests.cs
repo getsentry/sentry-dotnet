@@ -50,4 +50,31 @@ public class PollingNetworkStatusListenerTest
         await pingHost.Received().IsAvailableAsync();
         pollingListener._delayInMilliseconds.Should().BeGreaterThan(initialDelay);
     }
+
+    [Fact]
+    public async Task OperationCancelled_ShouldExitGracefully()
+    {
+        // Arrange
+        const int initialDelay = 10_000;
+        var pingHost = Substitute.For<IPing>();
+        pingHost
+            .IsAvailableAsync()
+            .Returns(Task.FromResult(false));
+
+        var pollingListener = new PollingNetworkStatusListener(pingHost, initialDelay)
+        {
+            Online = false
+        };
+
+        // Act
+        var cts = new CancellationTokenSource();
+        var waitForNetwork = pollingListener.WaitForNetworkOnlineAsync(cts.Token);
+        var timeout = Task.Delay(2000);
+        cts.CancelAfter(100);
+        var completedTask = await Task.WhenAny(waitForNetwork, timeout);
+
+        // Assert
+        completedTask.Should().Be(waitForNetwork);
+        pollingListener.Online.Should().Be(false);
+    }
 }
