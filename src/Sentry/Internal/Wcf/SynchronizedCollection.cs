@@ -11,13 +11,7 @@ namespace Sentry.Internal.Wcf;
 /// </summary>
 internal class SynchronizedCollection<T>
 {
-    private object _sync;
-
-    public SynchronizedCollection()
-    {
-        Items = new List<T>();
-        _sync = new object();
-    }
+    private readonly object _sync = new();
 
     public IReadOnlyCollection<T> ToReadOnlyCollection()
     {
@@ -34,7 +28,7 @@ internal class SynchronizedCollection<T>
         get { lock (_sync) { return Items.Count; } }
     }
 
-    protected List<T> Items { get; }
+    private List<T> Items { get; } = [];
 
     public T this[int index]
     {
@@ -63,7 +57,7 @@ internal class SynchronizedCollection<T>
     {
         lock (_sync)
         {
-            int index = Items.Count;
+            var index = Items.Count;
             Items.Insert(index, item);
         }
     }
@@ -92,14 +86,6 @@ internal class SynchronizedCollection<T>
         }
     }
 
-    public IEnumerator<T> GetEnumerator()
-    {
-        lock (_sync)
-        {
-            return Items.GetEnumerator();
-        }
-    }
-
     public int IndexOf(T item)
     {
         lock (_sync)
@@ -123,11 +109,11 @@ internal class SynchronizedCollection<T>
 
     private int InternalIndexOf(T item)
     {
-        int count = Items.Count;
+        var count = Items.Count;
 
-        for (int i = 0; i < count; i++)
+        for (var i = 0; i < count; i++)
         {
-            if (object.Equals(Items[i], item))
+            if (Equals(Items[i], item))
             {
                 return i;
             }
@@ -139,7 +125,7 @@ internal class SynchronizedCollection<T>
     {
         lock (_sync)
         {
-            int index = InternalIndexOf(item);
+            var index = InternalIndexOf(item);
             if (index < 0)
             {
                 return false;
