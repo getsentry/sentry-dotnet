@@ -61,8 +61,10 @@
   <!-- Fix visibility of some specific types as necessary. -->
   <attr path="/api/package[@name='io.sentry.android.core']/class[@name='DefaultAndroidEventProcessor']" name="visibility">internal</attr>
   <attr path="/api/package[@name='io.sentry.android.core']/class[@name='EmptySecureContentProvider']" name="visibility">internal</attr>
+  <attr path="/api/package[@name='io.sentry']/interface[@name='ObjectReader']/method[@name='dateOrNull']" name="visibility">internal</attr>
 
-  <!-- Fix missing compareTo(Object) methods on classes extending SentryDate. -->
+
+    <!-- Fix missing compareTo(Object) methods on classes extending SentryDate. -->
   <add-node path="/api/package[@name='io.sentry']/class[@extends='io.sentry.SentryDate']">
     <method name="compareTo" return="int" abstract="false" native="false" synchronized="false" static="false" final="false" deprecated="not deprecated" visibility="public">
         <parameter name="p0" type="java.lang.Object" />
