@@ -120,6 +120,7 @@ filterConfigs:
       patterns:
         - "**/Sentry.Benchmarks.csproj"
         - "**/Sentry.Samples.Console.Basic.csproj"
+        - "**/Sentry.Samples.Console.Metrics.csproj"
         - "**/Sentry.Samples.Console.Profiling.csproj"
         - "**/Sentry.Profiling.csproj"
         - "**/Sentry.csproj"
