@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## 4.9.0-sync.collection.2
+
+### Experimental
+- This release includes experimental use of a `SynchronizedCollection` instead of a ConcurrentBag to see if this has any impact on high memory usage experienced by some SDK users. 
 
 ### Fixes
 - Race condition in `SentryMessageHandler` ([#3477](https://github.com/getsentry/sentry-dotnet/pull/3477))
