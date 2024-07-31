@@ -12,10 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Sentry.AspNetCore.Grpc\Sentry.AspNetCore.Grpc.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Protobuf Include="Proto\sample.proto" GrpcServices="Server" />
   </ItemGroup>
 
@@ -23,6 +19,17 @@
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <SentryOrg>sentry-sdks</SentryOrg>
+    <SentryProject>sentry-dotnet</SentryProject>
+    <SentryUploadSymbols>true</SentryUploadSymbols>
+    <SentryUploadSources>true</SentryUploadSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sentry.AspNetCore.Grpc\Sentry.AspNetCore.Grpc.csproj" />
   </ItemGroup>
 
 </Project>

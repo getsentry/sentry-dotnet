@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFramework>net8.0-maccatalyst</TargetFramework>
     <OutputType>Exe</OutputType>
@@ -8,15 +9,12 @@
     <SelfContained>true</SelfContained>
   </PropertyGroup>
 
-  <!--
-    In a real project, use the PackageReference and set the version to the latest release.
-    Use that instead of the ProjectReference.
-  -->
-
-  <ItemGroup>
-    <!-- <PackageReference Include="Sentry" Version="..." /> -->
-    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
-  </ItemGroup>
+  <PropertyGroup>
+    <SentryOrg>sentry-sdks</SentryOrg>
+    <SentryProject>sentry-dotnet</SentryProject>
+    <SentryUploadSymbols>true</SentryUploadSymbols>
+    <SentryUploadSources>true</SentryUploadSources>
+  </PropertyGroup>
 
   <!--
     Use the arm64 runtime when building on arm64, and the x64 runtime when building on x64 Macs.
@@ -32,9 +30,20 @@
     For this demo app, let's upload sources and symbols to Sentry on every build, regardless of configuration.
     In a real app, you probably only want to do this on Release builds.
   -->
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <SentryOrg>sentry-sdks</SentryOrg>
+    <SentryProject>sentry-dotnet</SentryProject>
     <SentryUploadSources>true</SentryUploadSources>
     <SentryUploadSymbols>true</SentryUploadSymbols>
   </PropertyGroup>
+
+  <!--
+    In a real project, use the PackageReference and set the version to the latest release.
+    Use that instead of the ProjectReference.
+  -->
+  <ItemGroup>
+    <!-- <PackageReference Include="Sentry" Version="..." /> -->
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+  </ItemGroup>
 
 </Project>

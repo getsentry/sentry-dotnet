@@ -5,6 +5,15 @@
     <RunAOTCompilation>true</RunAOTCompilation>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <SentryOrg>sentry-sdks</SentryOrg>
+    <SentryProject>sentry-dotnet</SentryProject>
+    <SentryUploadSymbols>true</SentryUploadSymbols>
+    <SentryUploadSources>true</SentryUploadSources>
+    <SentryCreateRelease>true</SentryCreateRelease>
+    <SentrySetCommits>true</SentrySetCommits>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.3"/>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.3" PrivateAssets="all"/>
