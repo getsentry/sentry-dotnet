@@ -548,7 +548,7 @@ public class CachingTransportTests
         // Arrange - network unavailable
         using var cacheDirectory = new TempDirectory(_fileSystem);
         var pingHost = Substitute.For<IPing>();
-        pingHost.IsAvailableAsync().Returns(Task.FromResult(true));
+        pingHost.IsAvailableAsync(Arg.Any<CancellationToken>()).Returns(Task.FromResult(true));
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
