@@ -104,26 +104,26 @@ public static class Program
         // Other overloads exist, for example, configure the SDK with only the DSN or no parameters at all.
         var config = LogManager.Configuration = new LoggingConfiguration();
         _ = config
-            .AddSentry(o =>
+            .AddSentry(options =>
             {
-                o.Layout = "${message}";
-                o.BreadcrumbLayout = "${logger}: ${message}"; // Optionally specify a separate format for breadcrumbs
-
-                o.MinimumBreadcrumbLevel = LogLevel.Debug; // Debug and higher are stored as breadcrumbs (default is Info)
-                o.MinimumEventLevel = LogLevel.Error; // Error and higher is sent as event (default is Error)
-
                 // If DSN is not set, the SDK will look for an environment variable called SENTRY_DSN. If
                 // nothing is found, SDK is disabled.
-                o.Dsn = DsnSample;
+                options.Dsn = DsnSample;
 
-                o.AttachStacktrace = true;
-                o.SendDefaultPii = true; // Send Personal Identifiable information like the username of the user logged in to the device
+                options.Layout = "${message}";
+                options.BreadcrumbLayout = "${logger}: ${message}"; // Optionally specify a separate format for breadcrumbs
 
-                o.IncludeEventDataOnBreadcrumbs = true; // Optionally include event properties with breadcrumbs
-                o.ShutdownTimeoutSeconds = 5;
+                options.MinimumBreadcrumbLevel = LogLevel.Debug; // Debug and higher are stored as breadcrumbs (default is Info)
+                options.MinimumEventLevel = LogLevel.Error; // Error and higher is sent as event (default is Error)
+
+                options.AttachStacktrace = true;
+                options.SendDefaultPii = true; // Send Personal Identifiable information like the username of the user logged in to the device
+
+                options.IncludeEventDataOnBreadcrumbs = true; // Optionally include event properties with breadcrumbs
+                options.ShutdownTimeoutSeconds = 5;
 
                 //Optionally specify user properties via NLog (here using MappedDiagnosticsLogicalContext as an example)
-                o.User = new SentryNLogUser
+                options.User = new SentryNLogUser
                 {
                     Id = "${scopeproperty:item=id}",
                     Username = "${scopeproperty:item=username}",
@@ -135,7 +135,7 @@ public static class Program
                     },
                 };
 
-                o.AddTag("logger", "${logger}");  // Send the logger name as a tag
+                options.AddTag("logger", "${logger}");  // Send the logger name as a tag
 
                 // Other configuration
             });

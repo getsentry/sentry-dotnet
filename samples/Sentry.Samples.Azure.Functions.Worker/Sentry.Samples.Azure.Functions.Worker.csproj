@@ -21,7 +21,14 @@
         <Using Include="System.Threading.ExecutionContext" Alias="ExecutionContext" />
     </ItemGroup>
 
-    <ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <SentryOrg>sentry-sdks</SentryOrg>
+    <SentryProject>sentry-dotnet</SentryProject>
+    <SentryUploadSymbols>true</SentryUploadSymbols>
+    <SentryUploadSources>true</SentryUploadSources>
+  </PropertyGroup>
+
+  <ItemGroup>
       <!-- TODO: Replace with a package reference -->
       <ProjectReference Include="..\..\src\Sentry.Azure.Functions.Worker\Sentry.Azure.Functions.Worker.csproj" />
     </ItemGroup>

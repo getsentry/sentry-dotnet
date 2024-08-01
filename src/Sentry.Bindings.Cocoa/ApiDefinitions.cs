@@ -1360,7 +1360,7 @@ interface SentryOptions
     [Export ("enableFileIOTracing")]
     bool EnableFileIOTracing { get; set; }
 
-    // @property (nonatomic) BOOL enableTracing;
+    // @property (nonatomic) BOOL enableTracing __attribute__((deprecated("Use tracesSampleRate or tracesSampler instead")));
     [Export ("enableTracing")]
     bool EnableTracing { get; set; }
 

@@ -17,7 +17,7 @@ SentrySdk.Init(o =>
 {
     options.Dsn = "...Your DSN...";
     options.TracesSampleRate = 1.0;
-    o.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
+    options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
 });
 ```
 
