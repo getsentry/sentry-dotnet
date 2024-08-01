@@ -103,7 +103,7 @@
     Here we force using JsonObjectReader as otherwise we'd get the following error message:
       Argument 1: cannot convert from 'Sentry.JavaSdk.JsonObjectReader' to 'Sentry.JavaSdk.IObjectReader'
   -->
-  <attr path="/api/package[@name='io.sentry']/class[@name='SentryEvent']/method[@name='deserialize']/parameter[@name='reader']"
+  <attr path="/api/package[@name='io.sentry']/class[@name='SentryEvent.Deserializer']/method[@name='deserialize']/parameter[@name='reader']"
     name="managedType">Sentry.JavaSdk.JsonObjectReader</attr>
 
   <!--
