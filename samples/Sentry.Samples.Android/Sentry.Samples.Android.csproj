@@ -27,6 +27,8 @@
     In a real app, you probably only want to do this on Release builds.
   -->
   <PropertyGroup>
+    <SentryOrg>sentry-sdks</SentryOrg>
+    <SentryProject>sentry-dotnet</SentryProject>
     <SentryUploadSources>true</SentryUploadSources>
     <SentryUploadSymbols>true</SentryUploadSymbols>
     <!-- Use ProGuard (R8), and upload mapping to Sentry-->

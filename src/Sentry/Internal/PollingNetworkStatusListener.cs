@@ -54,16 +54,23 @@ internal class PollingNetworkStatusListener : INetworkStatusListener
     {
         while (!cancellationToken.IsCancellationRequested)
         {
-            await Task.Delay(_delayInMilliseconds, cancellationToken).ConfigureAwait(false);
-            var checkResult = await Ping.IsAvailableAsync().ConfigureAwait(false);
-            if (checkResult)
+            try
             {
-                Online = true;
-                return;
+                await Task.Delay(_delayInMilliseconds, cancellationToken).ConfigureAwait(false);
+                var checkResult = await Ping.IsAvailableAsync(cancellationToken).ConfigureAwait(false);
+                if (checkResult)
+                {
+                    Online = true;
+                    return;
+                }
+                if (_delayInMilliseconds < _maxDelayInMilliseconds)
+                {
+                    _delayInMilliseconds = _backoffFunction(_delayInMilliseconds);
+                }
             }
-            if (_delayInMilliseconds < _maxDelayInMilliseconds)
+            catch (OperationCanceledException)
             {
-                _delayInMilliseconds = _backoffFunction(_delayInMilliseconds);
+                break;
             }
         }
     }

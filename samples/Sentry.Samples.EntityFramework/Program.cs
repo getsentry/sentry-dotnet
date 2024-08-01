@@ -2,14 +2,17 @@ using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
 using System.Data.Entity;
 
-using var _ = SentrySdk.Init(o =>
+using var _ = SentrySdk.Init(options =>
 {
-    o.Debug = true; // To see SDK logs on the console
-    o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
-    o.TracesSampleRate = 1.0;
+    // You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+    // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+    options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+
+    options.Debug = true; // To see SDK logs on the console
+    options.TracesSampleRate = 1.0;
 
     // Add the EntityFramework integration to the SentryOptions of your app startup code:
-    o.AddEntityFramework();
+    options.AddEntityFramework();
 });
 
 var dbConnection = Effort.DbConnectionFactory.CreateTransient();
