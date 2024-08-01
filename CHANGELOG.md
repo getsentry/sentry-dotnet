@@ -9,6 +9,8 @@
 
 ### Fixes
 
+- When targeting `WPF`, `WinForms` or `Avalonia` with `PublishAot` enabled, the SDK no longers throws a `DllNotFoundException` trying to initialize `sentry-native` ([#3411](https://github.com/getsentry/sentry-dotnet/pull/3411))
+Unable to load DLL sentry-native or one of its dependencies
 - On mobile devices, the SDK no longer throws a `FormatException` when trying to report native events ([#3485](https://github.com/getsentry/sentry-dotnet/pull/3485))
 - Race condition in `SentryMessageHandler` ([#3477](https://github.com/getsentry/sentry-dotnet/pull/3477))
 - Decrease runtime diagnostics circular buffer when profiling, reducing memory usage ([#3491](https://github.com/getsentry/sentry-dotnet/pull/3491))
