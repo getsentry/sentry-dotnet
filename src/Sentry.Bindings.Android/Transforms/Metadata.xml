@@ -98,7 +98,7 @@
     name="managedType">Sentry.JavaSdk.JsonObjectWriter</attr>
 
   <!--
-    SentryEvent.deserialize() expects an parameter which implements IObjectReader.
+    SentryEvent.Deserializer.deserialize() expects an parameter which implements IObjectReader.
     JsonObjectReader implements IObjectWriter in Java, but somehow this is not reflected in the generated binding.
     Here we force using JsonObjectReader as otherwise we'd get the following error message:
       Argument 1: cannot convert from 'Sentry.JavaSdk.JsonObjectReader' to 'Sentry.JavaSdk.IObjectReader'
