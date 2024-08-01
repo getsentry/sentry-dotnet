@@ -6,28 +6,6 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <!--
-    This sets the default DSN for all sample projects.  Sentry employees and contractors
-    can view events at https://sentry-sdks.sentry.io/projects/sentry-dotnet.
-
-    The DSN can easily be overwritten in the sample application by the end-user.
-    The order of precedence is:
-      - SentryOptions.Dsn property set in code
-      - Sentry:Dsn set in appsettings.json or other config (where applicable)
-      - SENTRY_DSN environment variable
-      - This [Sentry.Dsn] attribute
-
-    Thus, this DSN is applied only if no other mechanism is used to set the DSN.
-
-    Note - The below works because SentryAttributes is already being converted to
-           actual attributes in src/Sentry/buildTransitive/Sentry.targets.
-  -->
-  <ItemGroup>
-    <SentryAttributes Include="Sentry.DsnAttribute">
-      <_Parameter1>https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537</_Parameter1>
-    </SentryAttributes>
-  </ItemGroup>
-
   <!-- Workaround for hang on compile issue.  See https://github.com/xamarin/xamarin-macios/issues/17825#issuecomment-1478568270. -->
   <PropertyGroup Condition="'$(Configuration)' == 'Release' And '$(TargetFramework)' == 'net7.0-ios' And '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">
     <MtouchUseLlvm>false</MtouchUseLlvm>

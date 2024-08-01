@@ -10,4 +10,4 @@ function Replace-TextInFile {
 }
 
 # Version of .NET assemblies:
-Replace-TextInFile "$PSScriptRoot/../Directory.Build.props" '(?<=<Version>)(.*?)(?=</Version>)' $newVersion
+Replace-TextInFile "$PSScriptRoot/../Directory.Build.props" '(?<=<VersionPrefix>)(.*?)(?=</VersionPrefix>)' $newVersion

@@ -39,14 +39,16 @@ public static class Program
                     .AddSentry() // <-- Ensure telemetry is sent to Sentry
                 );
 
-        builder.WebHost.UseSentry(o =>
+        builder.WebHost.UseSentry(options =>
         {
-            // A DSN is required.  You can set it here, or in configuration, or in an environment variable.
-            // o.Dsn = "...Your DSN Here...";
-            o.TracesSampleRate = 1.0;
-            o.Debug = true;
-            o.SendDefaultPii = true;
-            o.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
+            // You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+            // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+            options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+
+            options.TracesSampleRate = 1.0;
+            options.Debug = true;
+            options.SendDefaultPii = true;
+            options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
         });
 
         builder.Services

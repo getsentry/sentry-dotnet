@@ -1297,6 +1297,8 @@ public class SentryOptions
                 UriComponents.SchemeAndServer,
                 UriFormat.Unescaped)
         );
+
+        NetworkStatusListener = new PollingNetworkStatusListener(this);
     }
 
     /// <summary>

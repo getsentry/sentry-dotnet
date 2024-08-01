@@ -1,3 +1,4 @@
+using NSubstitute.ReceivedExtensions;
 using Sentry.Internal.Http;
 using BackgroundWorker = Sentry.Internal.BackgroundWorker;
 
@@ -862,18 +863,23 @@ public partial class SentryClientTests
         // Arrange
         var client = _fixture.GetSut();
 
+        var hub = Substitute.For<IHub>();
+        var transaction = new TransactionTracer(hub, "test name", "test operation");
+        transaction.StartChild("span1");
+        transaction.StartChild("span2");
+        transaction.IsSampled = false; // <-- *** Sampled out ***
+        transaction.EndTimestamp = DateTimeOffset.Now;
+
         // Act
-        client.CaptureTransaction(new SentryTransaction(
-            "test name",
-            "test operation"
-        )
-        {
-            IsSampled = false,
-            EndTimestamp = DateTimeOffset.Now // finished
-        });
+        client.CaptureTransaction(new SentryTransaction(transaction));
 
         // Assert
         _ = client.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+
+        var expectedReason = DiscardReason.SampleRate;
+        var expectedSpanCount = transaction.Spans.Count + 1; // 1 for each span + one for the root transaction / span
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(expectedReason, DataCategory.Transaction);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(expectedReason, DataCategory.Span, expectedSpanCount);
     }
 
     [Fact]
@@ -1147,6 +1153,33 @@ public partial class SentryClientTests
         hint.Attachments.Should().Contain(attachments);
     }
 
+
+    [Fact]
+    public void CaptureTransaction_TransactionProcessorRejectsEvent_RecordDiscardedEvent()
+    {
+        // Arrange
+        var processor = Substitute.For<ISentryTransactionProcessorWithHint>();
+        processor.Process(Arg.Any<SentryTransaction>(), Arg.Any<SentryHint>()).Returns((SentryTransaction)null);
+        _fixture.SentryOptions.AddTransactionProcessor(processor);
+
+        var hub = Substitute.For<IHub>();
+        var transaction = new TransactionTracer(hub, "test name", "test operation");
+        transaction.StartChild("span1");
+        transaction.StartChild("span2");
+        transaction.IsSampled = true;
+        transaction.EndTimestamp = DateTimeOffset.Now; // finished
+
+        // Act
+        _fixture.GetSut().CaptureTransaction(new SentryTransaction(transaction));
+
+        // Assert
+        var reason = DiscardReason.EventProcessor;
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(reason, DataCategory.Transaction);
+        // 1 for each span + one for the root transaction / span
+        var expectedDroppedSpanCount = transaction.Spans.Count + 1;
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(reason, DataCategory.Span, expectedDroppedSpanCount);
+    }
+
     [Fact]
     public void CaptureTransaction_BeforeSendTransaction_GetsHint()
     {
@@ -1246,17 +1279,24 @@ public partial class SentryClientTests
     [Fact]
     public void CaptureTransaction_BeforeSendTransaction_RejectEvent_RecordsDiscard()
     {
+        // Arrange
         _fixture.SentryOptions.SetBeforeSendTransaction((_, _) => null);
 
         var sut = _fixture.GetSut();
-        sut.CaptureTransaction(new SentryTransaction("test name", "test operation")
-        {
-            IsSampled = true,
-            EndTimestamp = DateTimeOffset.Now // finished
-        });
+        var hub = Substitute.For<IHub>();
+        var transaction = new TransactionTracer(hub, "test name", "test operation");
+        transaction.StartChild("span1");
+        transaction.StartChild("span2");
+        transaction.IsSampled = true;
+        transaction.EndTimestamp = DateTimeOffset.Now; // finished
 
-        _fixture.ClientReportRecorder.Received(1)
-            .RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
+        // Act
+        sut.CaptureTransaction(new SentryTransaction(transaction));
+
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Transaction);
+        // 1 for each span + one for the root transaction / span
+        var expectedDroppedSpanCount = transaction.Spans.Count + 1;
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Span, expectedDroppedSpanCount);
     }
 
     [Fact]

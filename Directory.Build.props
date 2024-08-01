@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <Version>4.7.0</Version>
+    <VersionPrefix>4.9.0</VersionPrefix>
     <LangVersion>12</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -25,27 +25,6 @@
     <NO_IOS>true</NO_IOS>
     <NO_MACCATALYST>true</NO_MACCATALYST>
     <NO_WINDOWS>true</NO_WINDOWS>
-  </PropertyGroup>
-
-  <!--
-    Configure Sentry CLI
-    NOTE: Authentication is not set here.  Instead:
-    - In CI, `SENTRY_AUTH_TOKEN` is set as an environment variable via a GitHub Actions secret.
-    - In dev, you can either set `SENTRY_AUTH_TOKEN` manually, or you can set an auth token
-      in your ~/.sentryclirc file.  See https://docs.sentry.io/product/cli/configuration/
-
-    There is also a a `SentryAuthToken` msbuild property, but it should be used sparingly.
-    If using it, be careful that the auth token does not get committed to source control.
-  -->
-  <PropertyGroup>
-    <SentryOrg>sentry-sdks</SentryOrg>
-    <SentryProject>sentry-dotnet</SentryProject>
-  </PropertyGroup>
-
-  <!-- By default we'll only upload with Sentry CLI in Release configuration. -->
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <SentryUploadSymbols>true</SentryUploadSymbols>
-    <SentryUploadSources>true</SentryUploadSources>
   </PropertyGroup>
 
   <!--
@@ -87,7 +66,7 @@
 
   <!-- Set the version and local path for Sentry CLI (downloaded in the restore phase of Sentry.csproj) -->
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
-    <SentryCLIVersion>2.32.1</SentryCLIVersion>
+    <SentryCLIVersion>2.33.0</SentryCLIVersion>
     <SentryCLIDirectory>$(MSBuildThisFileDirectory)tools\sentry-cli\$(SentryCLIVersion)\</SentryCLIDirectory>
   </PropertyGroup>
 

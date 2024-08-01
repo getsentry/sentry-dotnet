@@ -7,19 +7,19 @@ public class MainActivity : Activity
 {
     protected override void OnCreate(Bundle? savedInstanceState)
     {
-        SentrySdk.Init(o =>
+        SentrySdk.Init(options =>
         {
-            o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
-            o.SendDefaultPii = true; // adds the user's IP address automatically
+            options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+            options.SendDefaultPii = true; // adds the user's IP address automatically
 
             // Android specific .NET features are under the Android properties:
-            o.Android.LogCatIntegration = LogCatIntegrationType.Errors; // Get logcat logs for both handled and unhandled errors; default is unhandled only
-            o.Android.LogCatMaxLines = 1000; // Defaults to 1000
+            options.Android.LogCatIntegration = LogCatIntegrationType.Errors; // Get logcat logs for both handled and unhandled errors; default is unhandled only
+            options.Android.LogCatMaxLines = 1000; // Defaults to 1000
 
             // All the native Android SDK options are available below
             // https://docs.sentry.io/platforms/android/configuration/
             // Enable Native Android SDK ANR detection
-            o.Native.AnrEnabled = true;
+            options.Native.AnrEnabled = true;
         });
 
         // Here's an example of adding custom scope information.

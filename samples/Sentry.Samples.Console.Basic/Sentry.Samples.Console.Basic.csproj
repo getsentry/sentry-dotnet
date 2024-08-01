@@ -13,31 +13,49 @@
 
   <PropertyGroup>
     <!--
-    We set the SentryOrg and SentryProject globally in our root Directory.Build.props.
-    In your own project, uncomment the following block and set the values for your Sentry configuration.
-    Also note, these options do nothing if you are not authenticated.
-    See https://docs.sentry.io/platforms/dotnet/configuration/msbuild/
+    Note, these options do nothing if you are not authenticated.
+    See https://docs.sentry.io/platforms/dotnet/configuration/msbuild/#authentication
     -->
     <!--
     <SentryUrl>...your Sentry URL if self-hosted, or omit this line if using sentry.io...</SentryUrl>
-    <SentryOrg>...your org...</SentryOrg>
-    <SentryProject>...your project...</SentryProject>
     -->
+    <SentryOrg>sentry-sdks</SentryOrg>
+    <SentryProject>sentry-dotnet</SentryProject>
 
     <!--
     After the above properties are configured, you can use the following features.
-    Uploading sources to Sentry during the build will enable Source Context in the Sentry issue details page.
     Uploading symbols to Sentry will enable server-side symbolication (i.e. when the PDB is not present at runtime, or for AOT published programs).
+    Uploading sources to Sentry during the build will enable Source Context in the Sentry issue details page.
     -->
-    <SentryUploadSources>true</SentryUploadSources>
     <SentryUploadSymbols>true</SentryUploadSymbols>
-  </PropertyGroup>
+    <SentryUploadSources>true</SentryUploadSources>
 
+    <!--
+    You can automatically create releases via sentry-cli and control their creation via these properties
+    See https://docs.sentry.io/cli/releases/#creating-releases
+    -->
+    <SentryCreateRelease>true</SentryCreateRelease>
+
+    <!--
+    To associate commits with releases
+    See https://docs.sentry.io/cli/releases/#commit-integration
+    -->
+    <SentrySetCommits>true</SentrySetCommits>
+    <SentrySetCommitOptions>--local</SentrySetCommitOptions>
+
+    <!--
+    To associate commits with releases
+    See https://docs.sentry.io/cli/releases/#commit-integration
+    -->
+<!--    <SentrySetCommits>true</SentrySetCommits>-->
+<!--    <SentrySetCommitOptions>&#45;&#45;local</SentrySetCommitOptions>-->
+  </PropertyGroup>
 
   <!-- In your own project, this would be a PackageReference to the latest version of Sentry. -->
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
   </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>

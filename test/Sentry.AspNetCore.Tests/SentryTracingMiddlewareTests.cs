@@ -482,6 +482,7 @@ public class SentryTracingMiddlewareTests
         transaction.Extra[OtelSemanticConventions.AttributeHttpRequestMethod].Should().Be("GET");
         transaction.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpResponseStatusCode);
         transaction.Extra[OtelSemanticConventions.AttributeHttpResponseStatusCode].Should().Be(200);
+        transaction.Contexts.Trace.Origin.Should().Be(SentryTracingMiddleware.AspNetCoreOrigin);
     }
 
     [Fact]

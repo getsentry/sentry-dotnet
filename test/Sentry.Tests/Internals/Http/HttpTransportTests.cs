@@ -793,7 +793,7 @@ public partial class HttpTransportTests
     }
 
     [Fact]
-    public void ProcessEnvelope_ShouldNotAttachClientReportWhenOptionDisabled()
+    public void ProcessEnvelope_SendClientReportsDisabled_ShouldNotAttachClientReport()
     {
         var options = new SentryOptions
         {
@@ -812,5 +812,38 @@ public partial class HttpTransportTests
         // There should only be the one event in the envelope
         Assert.Single(processedEnvelope.Items);
         Assert.Equal("event", processedEnvelope.Items[0].TryGetType());
+    }
+
+    [Fact]
+    public void ProcessEnvelope_SendClientReportsEnabled_ShouldReportTransactionsAndSpans()
+    {
+        // Arrange
+        var options = new SentryOptions
+        {
+            SendClientReports = true,
+            ClientReportRecorder = Substitute.For<IClientReportRecorder>()
+        };
+
+        var httpTransport = Substitute.For<HttpTransportBase>(options, null, null);
+        var transactionCategory = new RateLimitCategory(EnvelopeItem.TypeValueTransaction);
+        httpTransport.CategoryLimitResets[transactionCategory] = DateTimeOffset.UtcNow.AddMonths(1);
+
+        var hub = Substitute.For<IHub>();
+        var tracer = new TransactionTracer(hub, "name", "op");
+        var span1 = (SpanTracer)tracer.StartChild(null, tracer.SpanId, "span1");
+        tracer.StartChild(null, span1.SpanId, "span2");
+        tracer.StartChild(null, tracer.SpanId, "span3");
+        var transaction = new SentryTransaction(tracer);
+        var envelope = Envelope.FromTransaction(transaction);
+
+        // Act
+        var processedEnvelope = httpTransport.ProcessEnvelope(envelope);
+
+        // Assert
+        processedEnvelope.Items.Should().BeEmpty();
+        options.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Transaction, 1);
+        // 1 for each span + 1 for the transaction root span
+        var expectedDiscardedSpanCount = transaction.Spans.Count + 1;
+        options.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Span, expectedDiscardedSpanCount);
     }
 }
