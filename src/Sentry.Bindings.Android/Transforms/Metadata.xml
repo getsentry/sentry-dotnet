@@ -89,13 +89,22 @@
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AnrV2EventProcessor']" />
 
   <!--
-    SentryEvent.serialize() expects an parameter which implements ObjectWriter.
-    JsonObjectWriter implements ObjectWriter in Java, but somehow this is not reflected in the generated binding.
+    SentryEvent.serialize() expects an parameter which implements IObjectWriter.
+    JsonObjectWriter implements IObjectWriter in Java, but somehow this is not reflected in the generated binding.
     Here we force using JsonObjectWriter as otherwise we'd get the following error message:
       Argument 1: cannot convert from 'Sentry.JavaSdk.JsonObjectWriter' to 'Sentry.JavaSdk.IObjectWriter'
   -->
   <attr path="/api/package[@name='io.sentry']/class[@name='SentryEvent']/method[@name='serialize']/parameter[@name='writer']"
     name="managedType">Sentry.JavaSdk.JsonObjectWriter</attr>
+
+  <!--
+    SentryEvent.deserialize() expects an parameter which implements IObjectReader.
+    JsonObjectReader implements IObjectWriter in Java, but somehow this is not reflected in the generated binding.
+    Here we force using JsonObjectReader as otherwise we'd get the following error message:
+      Argument 1: cannot convert from 'Sentry.JavaSdk.JsonObjectReader' to 'Sentry.JavaSdk.IObjectReader'
+  -->
+  <attr path="/api/package[@name='io.sentry']/class[@name='SentryEvent']/method[@name='deserialize']/parameter[@name='reader']"
+    name="managedType">Sentry.JavaSdk.JsonObjectReader</attr>
 
   <!--
     The remaining APIS are removed to prevent various errors/warnings.
