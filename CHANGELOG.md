@@ -17,9 +17,9 @@ Unable to load DLL sentry-native or one of its dependencies
 
 ### Dependencies
 
-- Bump CLI from v2.32.1 to v2.33.0 ([#3489](https://github.com/getsentry/sentry-dotnet/pull/3489), [#3497](https://github.com/getsentry/sentry-dotnet/pull/3497))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2330)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.32.1...2.33.0)
+- Bump CLI from v2.32.1 to v2.33.1 ([#3489](https://github.com/getsentry/sentry-dotnet/pull/3489), [#3497](https://github.com/getsentry/sentry-dotnet/pull/3497), [#3520](https://github.com/getsentry/sentry-dotnet/pull/3520))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2331)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.32.1...2.33.1)
 - Bump Java SDK from v7.11.0 to v7.12.1 ([#3503](https://github.com/getsentry/sentry-dotnet/pull/3503))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7121)
   - [diff](https://github.com/getsentry/sentry-java/compare/7.11.0...7.12.1)
