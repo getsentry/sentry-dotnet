@@ -64,23 +64,23 @@ internal static class MauiDeviceData
                 logger?.LogDebug("No permission to read network state from the device.");
             }
 
-            var resetEvent = new ManualResetEventSlim(false);
 #if MACCATALYST || IOS
             if (MainThread.IsMainThread)
             {
-                CaptureDisplayInfo(resetEvent);
+                CaptureDisplayInfo();
             }
             else
             {
                 // On iOS and Mac Catalyst, Accessing DeviceDisplay.Current must be done on the UI thread or else an
                 // exception will be thrown.
                 // See https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/device/display?view=net-maui-8.0&tabs=macios#platform-differences
+                var resetEvent = new ManualResetEventSlim(false);
                 MainThread.BeginInvokeOnMainThread(() =>CaptureDisplayInfo(resetEvent));
+                resetEvent.Wait();
             }
 #else
-            CaptureDisplayInfo(resetEvent);
+            CaptureDisplayInfo();
 #endif
-            resetEvent.Wait();
 
             // https://docs.microsoft.com/dotnet/maui/platform-integration/device/vibrate
             device.SupportsVibration ??= Vibration.Default.IsSupported;
@@ -119,7 +119,7 @@ internal static class MauiDeviceData
             logger?.LogError(ex, "Error getting MAUI device information.");
         }
 
-        void CaptureDisplayInfo(ManualResetEventSlim resetEvent)
+        void CaptureDisplayInfo(ManualResetEventSlim? resetEvent = null)
         {
             // https://docs.microsoft.com/dotnet/maui/platform-integration/device/display
             var display = DeviceDisplay.MainDisplayInfo;
@@ -134,7 +134,7 @@ internal static class MauiDeviceData
             // device.ScreenDpi ??= ?
             // ? = display.RefreshRate;
             // ? = display.Rotation;
-            resetEvent.Set();
+            resetEvent?.Set();
         }
     }
 }
