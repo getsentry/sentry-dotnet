@@ -64,19 +64,23 @@ internal static class MauiDeviceData
                 logger?.LogDebug("No permission to read network state from the device.");
             }
 
-            // https://docs.microsoft.com/dotnet/maui/platform-integration/device/display
-            var display = DeviceDisplay.MainDisplayInfo;
-            device.ScreenResolution ??= $"{(int)display.Width}x{(int)display.Height}";
-            device.ScreenDensity ??= (float)display.Density;
-            device.Orientation ??= display.Orientation switch
+            var resetEvent = new ManualResetEventSlim(false);
+#if MACCATALYST || IOS
+            if (MainThread.IsMainThread)
             {
-                DisplayOrientation.Portrait => DeviceOrientation.Portrait,
-                DisplayOrientation.Landscape => DeviceOrientation.Landscape,
-                _ => null
-            };
-            // device.ScreenDpi ??= ?
-            // ? = display.RefreshRate;
-            // ? = display.Rotation;
+                CaptureDisplayInfo(resetEvent);
+            }
+            else
+            {
+                // On iOS and Mac Catalyst, Accessing DeviceDisplay.Current must be done on the UI thread or else an
+                // exception will be thrown.
+                // See https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/device/display?view=net-maui-8.0&tabs=macios#platform-differences
+                MainThread.BeginInvokeOnMainThread(() =>CaptureDisplayInfo(resetEvent));
+            }
+#else
+            CaptureDisplayInfo(resetEvent);
+#endif
+            resetEvent.Wait();
 
             // https://docs.microsoft.com/dotnet/maui/platform-integration/device/vibrate
             device.SupportsVibration ??= Vibration.Default.IsSupported;
@@ -113,6 +117,24 @@ internal static class MauiDeviceData
         {
             // Log, but swallow the exception so we can continue sending events
             logger?.LogError(ex, "Error getting MAUI device information.");
+        }
+
+        void CaptureDisplayInfo(ManualResetEventSlim resetEvent)
+        {
+            // https://docs.microsoft.com/dotnet/maui/platform-integration/device/display
+            var display = DeviceDisplay.MainDisplayInfo;
+            device.ScreenResolution ??= $"{(int)display.Width}x{(int)display.Height}";
+            device.ScreenDensity ??= (float)display.Density;
+            device.Orientation ??= display.Orientation switch
+            {
+                DisplayOrientation.Portrait => DeviceOrientation.Portrait,
+                DisplayOrientation.Landscape => DeviceOrientation.Landscape,
+                _ => null
+            };
+            // device.ScreenDpi ??= ?
+            // ? = display.RefreshRate;
+            // ? = display.Rotation;
+            resetEvent.Set();
         }
     }
 }
