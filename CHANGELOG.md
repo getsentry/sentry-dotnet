@@ -14,7 +14,7 @@ Unable to load DLL sentry-native or one of its dependencies
 - On mobile devices, the SDK no longer throws a `FormatException` when trying to report native events ([#3485](https://github.com/getsentry/sentry-dotnet/pull/3485))
 - Race condition in `SentryMessageHandler` ([#3477](https://github.com/getsentry/sentry-dotnet/pull/3477))
 - Decrease runtime diagnostics circular buffer when profiling, reducing memory usage ([#3491](https://github.com/getsentry/sentry-dotnet/pull/3491))
-- DisplayInfo now captured correctly on iOS and Mac Catalyst ([#3521](https://github.com/getsentry/sentry-dotnet/pull/3521))
+- DisplayInfo now captured correctly on iOS and Mac Catalyst on non-UI threads ([#3521](https://github.com/getsentry/sentry-dotnet/pull/3521))
 
 ### Dependencies
 
