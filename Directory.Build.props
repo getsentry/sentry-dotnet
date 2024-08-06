@@ -15,6 +15,10 @@
     <NoWarn>$(NoWarn);CS8002</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' != 'Release'">
+    <VersionSuffix>dev</VersionSuffix>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(SolutionName)' == '.generated.NoMobile'">
     <NO_MOBILE>true</NO_MOBILE>
   </PropertyGroup>
