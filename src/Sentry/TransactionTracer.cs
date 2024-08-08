@@ -1,5 +1,7 @@
+using System;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.Wcf;
 using Sentry.Protocol;
 
 namespace Sentry;
@@ -167,14 +169,10 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     /// <inheritdoc />
     public IReadOnlyDictionary<string, string> Tags => _tags;
 
-#if NETSTANDARD2_1_OR_GREATER
-    private readonly ConcurrentBag<ISpan> _spans = new();
-#else
-    private ConcurrentBag<ISpan> _spans = new();
-#endif
+    private readonly SynchronizedCollection<ISpan> _spans = new();
 
     /// <inheritdoc />
-    public IReadOnlyCollection<ISpan> Spans => _spans;
+    public IReadOnlyCollection<ISpan> Spans => _spans.ToReadOnlyCollection();
 
     private readonly ConcurrentDictionary<string, Measurement> _measurements = new();
 
@@ -388,7 +386,7 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
         _hub.CaptureTransaction(new SentryTransaction(this));
 
         // Release tracked spans
-        ReleaseSpans();
+        _activeSpanTracker.Clear();
     }
 
     /// <inheritdoc />
@@ -417,15 +415,5 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     {
         get => Contexts.Trace.Origin;
         internal set => Contexts.Trace.Origin = value;
-    }
-
-    private void ReleaseSpans()
-    {
-#if NETSTANDARD2_1_OR_GREATER
-        _spans.Clear();
-#else
-        _spans = new ConcurrentBag<ISpan>();
-#endif
-        _activeSpanTracker.Clear();
     }
 }

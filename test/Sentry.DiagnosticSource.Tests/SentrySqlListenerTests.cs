@@ -119,10 +119,10 @@ public class SentrySqlListenerTests
                 }));
 
         // Assert
-        var spans = _fixture.Spans.Where(s => s.Operation != "abc");
+        var spans = _fixture.Spans.Where(s => s.Operation != "abc").ToList();
         Assert.NotEmpty(spans);
 
-        var firstSpan = _fixture.Spans.OrderByDescending(x => x.StartTimestamp).First();
+        var firstSpan = spans.OrderByDescending(x => x.StartTimestamp).First();
         Assert.True(GetValidator(key)(firstSpan));
     }
 
