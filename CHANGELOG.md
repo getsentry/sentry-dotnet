@@ -33,6 +33,10 @@ Unable to load DLL sentry-native or one of its dependencies
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7130)
   - [diff](https://github.com/getsentry/sentry-java/compare/7.11.0...7.13.0)
 
+### Dependencies
+
+- Update Perfview/TraceEvent to 3ad5a8c ([#3492](https://github.com/getsentry/sentry-dotnet/pull/3492))
+
 ## 4.9.0
 
 ### Fixes
