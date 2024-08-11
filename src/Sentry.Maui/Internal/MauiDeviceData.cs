@@ -74,8 +74,9 @@ internal static class MauiDeviceData
                 // On iOS and Mac Catalyst, Accessing DeviceDisplay.Current must be done on the UI thread or else an
                 // exception will be thrown.
                 // See https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/device/display?view=net-maui-8.0&tabs=macios#platform-differences
-                var resetEvent = new ManualResetEventSlim(false);
-                MainThread.BeginInvokeOnMainThread(() =>CaptureDisplayInfo(resetEvent));
+                using var resetEvent = new ManualResetEventSlim(false);
+                // ReSharper disable once AccessToDisposedClosure - not disposed until lambda completes
+                MainThread.BeginInvokeOnMainThread(() => CaptureDisplayInfo(resetEvent));
                 resetEvent.Wait();
             }
 #else
