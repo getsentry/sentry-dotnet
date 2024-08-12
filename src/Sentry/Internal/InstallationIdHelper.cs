@@ -77,7 +77,7 @@ internal class InstallationIdHelper(SentryOptions options)
         // and let the next installation id strategy kick in
         catch (Exception ex)
         {
-            options.LogError(ex, "Failed to resolve persistent installation ID.");
+            options.LogWarning(ex, "Failed to resolve persistent installation ID.");
             return null;
         }
     }
@@ -97,7 +97,7 @@ internal class InstallationIdHelper(SentryOptions options)
 
             if (string.IsNullOrWhiteSpace(installationId))
             {
-                options.LogError("Failed to find an appropriate network interface for installation ID.");
+                options.LogWarning("Failed to find an appropriate network interface for installation ID.");
                 return null;
             }
 
@@ -105,7 +105,7 @@ internal class InstallationIdHelper(SentryOptions options)
         }
         catch (Exception ex)
         {
-            options.LogError(ex, "Failed to resolve hardware installation ID.");
+            options.LogWarning(ex, "Failed to resolve hardware installation ID.");
             return null;
         }
     }
