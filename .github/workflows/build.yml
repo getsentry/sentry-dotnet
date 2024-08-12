@@ -148,7 +148,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - uses: actions/checkout@v4
@@ -169,9 +169,6 @@ jobs:
         run: |
           sudo apt update
           sudo apt install libcurl4-openssl-dev
-
-      - run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
-        if: runner.os == 'macOS'
 
       - uses: actions/setup-dotnet@v4
         with:
