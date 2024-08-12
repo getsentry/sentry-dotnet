@@ -7,7 +7,12 @@ runs:
 
     - name: Set Environment Variables
       shell: bash
-      run: echo "JAVA_HOME_11=$JAVA_HOME_11_X64" >> $GITHUB_ENV
+      run: |
+        if [[ "$RUNNER_OS" == "macOS" ]]; then
+          echo "JAVA_HOME_11=$JAVA_HOME_11_ARM64" >> $GITHUB_ENV
+        else
+          echo "JAVA_HOME_11=$JAVA_HOME_11_X64" >> $GITHUB_ENV
+        fi
 
     - uses: actions/cache@v3
       id: cache-c
