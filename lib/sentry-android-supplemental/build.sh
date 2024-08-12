@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # this should point at JDK 11 (required for Android)
-: ${JAVA_HOME_11:=/Library/Java/JavaVirtualMachines/microsoft-11.jdk/Contents/Home}
+if [ -z "${JAVA_HOME_11}" ]; then
+    echo "Error: 'JAVA_HOME_11' is not set. Please set 'JAVA_HOME_11' to the path of JDK 11 (required for Android)." >&2
+    exit 1
+fi
 
 echo "Starting Java Build"
 echo "Using Java SDK at $JAVA_HOME_11"
