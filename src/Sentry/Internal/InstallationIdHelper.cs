@@ -1,19 +1,17 @@
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
-namespace Sentry;
+namespace Sentry.Internal;
 
 internal class InstallationIdHelper
 {
     private readonly object _installationIdLock = new();
     private string? _installationId;
     private readonly SentryOptions _options;
-    private readonly string? _persistenceDirectoryPath;
 
     public InstallationIdHelper(SentryOptions options)
     {
         _options = options;
-        _persistenceDirectoryPath = options.CacheDirectoryPath ?? options.TryGetDsnSpecificCacheDirectoryPath();
     }
 
     public string? TryGetInstallationId()
@@ -57,7 +55,7 @@ internal class InstallationIdHelper
     {
         try
         {
-            var rootPath = _persistenceDirectoryPath ??
+            var rootPath = _options.CacheDirectoryPath ??
                            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var directoryPath = Path.Combine(rootPath, "Sentry", _options.Dsn!.GetHashString());
 

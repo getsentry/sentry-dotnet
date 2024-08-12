@@ -41,8 +41,8 @@ public class SentryOptions
     /// </remarks>
     internal IScopeStackContainer? ScopeStackContainer { get; set; }
 
-    private Lazy<string?> LazyInstallationId => new(()
-        => new InstallationIdHelper(this).TryGetInstallationId());
+    private Lazy<string?> LazyInstallationId => new(() =>
+        new InstallationIdHelper(this).TryGetInstallationId());
     internal string? InstallationId => LazyInstallationId.Value;
 
 #if __MOBILE__
