@@ -7,6 +7,7 @@
 using System;
 using Foundation;
 using ObjCRuntime;
+using UIKit;
 
 namespace Sentry.CocoaSdk;
 
@@ -35,6 +36,10 @@ delegate SentrySpan SentryBeforeSendSpanCallback (SentrySpan span);
 // typedef BOOL (^SentryBeforeCaptureScreenshotCallback)(SentryEvent * _Nonnull);
 [Internal]
 delegate bool SentryBeforeCaptureScreenshotCallback (SentryEvent @event);
+
+// typedef BOOL (^SentryBeforeCaptureViewHierarchyCallback)(SentryEvent * _Nonnull);
+[Internal]
+delegate bool SentryBeforeCaptureViewHierarchyCallback (SentryEvent @event);
 
 // typedef void (^SentryOnCrashedLastRunCallback)(SentryEvent * _Nonnull);
 [Internal]
@@ -1271,6 +1276,10 @@ interface SentryOptions
     [NullAllowed, Export ("beforeCaptureScreenshot", ArgumentSemantic.Copy)]
     SentryBeforeCaptureScreenshotCallback BeforeCaptureScreenshot { get; set; }
 
+    // @property (copy, nonatomic) SentryBeforeCaptureScreenshotCallback _Nullable beforeCaptureViewHierarchy;
+    [NullAllowed, Export ("beforeCaptureViewHierarchy", ArgumentSemantic.Copy)]
+    SentryBeforeCaptureScreenshotCallback BeforeCaptureViewHierarchy { get; set; }
+
     // @property (copy, nonatomic) SentryOnCrashedLastRunCallback _Nullable onCrashedLastRun;
     [NullAllowed, Export ("onCrashedLastRun", ArgumentSemantic.Copy)]
     SentryOnCrashedLastRunCallback OnCrashedLastRun { get; set; }
@@ -1339,6 +1348,10 @@ interface SentryOptions
     // @property (assign, nonatomic) BOOL attachViewHierarchy;
     [Export ("attachViewHierarchy")]
     bool AttachViewHierarchy { get; set; }
+
+    // @property (assign, nonatomic) BOOL reportAccessibilityIdentifier;
+    [Export ("reportAccessibilityIdentifier")]
+    bool ReportAccessibilityIdentifier { get; set; }
 
     // @property (assign, nonatomic) BOOL enableUserInteractionTracing;
     [Export ("enableUserInteractionTracing")]
@@ -1727,6 +1740,16 @@ interface SentrySDK
     [Static]
     [Export ("close")]
     void Close ();
+
+    // +(void)replayRedactView:(UIView * _Nonnull)view;
+    [Static]
+    [Export ("replayRedactView:")]
+    void ReplayRedactView (UIView view);
+
+    // +(void)replayIgnoreView:(UIView * _Nonnull)view;
+    [Static]
+    [Export ("replayIgnoreView:")]
+    void ReplayIgnoreView (UIView view);
 }
 
 // @interface SentrySamplingContext : NSObject

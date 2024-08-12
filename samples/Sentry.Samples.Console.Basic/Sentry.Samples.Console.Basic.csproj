@@ -55,9 +55,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <TrimmerRootAssembly Include="Sentry" />
-  </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
     <PackageReference Include="System.Net.Http" Version="4.3.4" />

@@ -15,6 +15,10 @@
     <NoWarn>$(NoWarn);CS8002</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' != 'Release'">
+    <VersionSuffix>dev</VersionSuffix>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(SolutionName)' == '.generated.NoMobile'">
     <NO_MOBILE>true</NO_MOBILE>
   </PropertyGroup>
@@ -66,7 +70,7 @@
 
   <!-- Set the version and local path for Sentry CLI (downloaded in the restore phase of Sentry.csproj) -->
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
-    <SentryCLIVersion>2.33.0</SentryCLIVersion>
+    <SentryCLIVersion>2.33.1</SentryCLIVersion>
     <SentryCLIDirectory>$(MSBuildThisFileDirectory)tools\sentry-cli\$(SentryCLIVersion)\</SentryCLIDirectory>
   </PropertyGroup>
 
