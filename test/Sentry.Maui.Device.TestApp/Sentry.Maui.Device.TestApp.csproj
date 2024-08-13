@@ -14,6 +14,7 @@
     <RootNamespace>Sentry.Maui.Device.TestApp</RootNamespace>
     <AssemblyName>Sentry.Maui.Device.TestApp</AssemblyName>
     <UseMaui>true</UseMaui>
+    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
     <SelfContained>true</SelfContained>
 
     <!-- Display name -->
@@ -56,6 +57,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Starting with .NET 8, <UseMaui>true</UseMaui> doesn't automatically include NuGet package references -->
+    <PackageReference Condition="$(TargetFramework.StartsWith('net8'))" Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+    <PackageReference Condition="$(TargetFramework.StartsWith('net9'))" Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+    <!-- https://github.com/advisories/GHSA-5f2m-466j-3848 -->
+    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <MauiIcon Include="Resources\appicon.svg" ForegroundFile="Resources\appiconfg.svg" Color="#512BD4" />
     <MauiSplashScreen Include="Resources\appiconfg.svg" Color="#512BD4" BaseSize="128,128" />
   </ItemGroup>
@@ -74,7 +83,6 @@
     <ProjectReference Include="..\Sentry.Tests\Sentry.Tests.csproj" />
     <ProjectReference Include="..\Sentry.Extensions.Logging.Tests\Sentry.Extensions.Logging.Tests.csproj" />
     <ProjectReference Include="..\Sentry.Maui.Tests\Sentry.Maui.Tests.csproj" />
-    <PackageReference Condition="$(TargetFramework.StartsWith('net8'))" Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
   </ItemGroup>
 
   <!-- https://github.com/dotnet/maui/blob/main/.nuspec/Microsoft.Maui.TestUtils.DeviceTests.Runners.targets -->
