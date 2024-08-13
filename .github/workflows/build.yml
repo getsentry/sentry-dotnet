@@ -112,7 +112,9 @@ jobs:
         uses: ./.github/actions/buildcocoasdk
 
       - name: Restore .NET Dependencies
-        run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
+        run: |
+          dotnet workload restore
+          dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
       - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:diagnostic -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
