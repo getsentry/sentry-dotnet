@@ -41,9 +41,8 @@ public class SentryOptions
     /// </remarks>
     internal IScopeStackContainer? ScopeStackContainer { get; set; }
 
-    private Lazy<string?> LazyInstallationId => new(()
-        => new InstallationIdHelper(this).TryGetInstallationId());
-    internal string? InstallationId => LazyInstallationId.Value;
+    private readonly Lazy<string?> _lazyInstallationId;
+    internal string? InstallationId => _lazyInstallationId.Value;
 
 #if __MOBILE__
     private bool _isGlobalModeEnabled = true;
@@ -1182,6 +1181,7 @@ public class SentryOptions
     public SentryOptions()
     {
         SettingLocator = new SettingLocator(this);
+        _lazyInstallationId = new(() => new InstallationIdHelper(this).TryGetInstallationId());
 
         TransactionProcessorsProviders = new() {
             () => TransactionProcessors ?? Enumerable.Empty<ISentryTransactionProcessor>()
