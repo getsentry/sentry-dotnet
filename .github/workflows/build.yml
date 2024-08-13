@@ -65,6 +65,12 @@ jobs:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
 
+      # Not yet included in GitHub runners
+      - name: Install net9.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.100-preview.6.24328.19
+
       # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
         if: startsWith(matrix.os, 'macos')
