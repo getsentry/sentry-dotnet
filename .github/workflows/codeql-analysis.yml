@@ -40,7 +40,9 @@ jobs:
           languages: csharp
 
       - name: Restore .NET Dependencies
-        run: dotnet restore Sentry-CI-CodeQL.slnf --nologo
+        run: |
+          dotnet workload restore
+          dotnet restore Sentry-CI-CodeQL.slnf --nologo
 
       - name: Build
         run: dotnet build Sentry-CI-CodeQL.slnf --no-restore --nologo
