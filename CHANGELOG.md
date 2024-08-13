@@ -15,6 +15,7 @@ Unable to load DLL sentry-native or one of its dependencies
 - Race condition in `SentryMessageHandler` ([#3477](https://github.com/getsentry/sentry-dotnet/pull/3477))
 - Decrease runtime diagnostics circular buffer when profiling, reducing memory usage ([#3491](https://github.com/getsentry/sentry-dotnet/pull/3491))
 - The InstallationId is now resolved only once per application execution and any issues are logged as warnings instead of errors ([#3529](https://github.com/getsentry/sentry-dotnet/pull/3529))
+- DisplayInfo now captured correctly on iOS and Mac Catalyst on non-UI threads ([#3521](https://github.com/getsentry/sentry-dotnet/pull/3521))
 
 ### Dependencies
 
@@ -24,6 +25,12 @@ Unable to load DLL sentry-native or one of its dependencies
 - Bump Java SDK from v7.11.0 to v7.12.1 ([#3503](https://github.com/getsentry/sentry-dotnet/pull/3503))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7121)
   - [diff](https://github.com/getsentry/sentry-java/compare/7.11.0...7.12.1)
+- Bump Cocoa SDK from v8.30.0 to v8.32.0 ([#3499](https://github.com/getsentry/sentry-dotnet/pull/3499))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8320)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.30.0...8.32.0)
+- Bump Native SDK from v0.7.6 to v0.7.8 ([#3502](https://github.com/getsentry/sentry-dotnet/pull/3502), [#3527](https://github.com/getsentry/sentry-dotnet/pull/3527))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#078)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.6...0.7.8)
 - Bump Cocoa SDK from v8.30.0 to v8.33.0 ([#3499](https://github.com/getsentry/sentry-dotnet/pull/3499), [#3528](https://github.com/getsentry/sentry-dotnet/pull/3528))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8330)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.30.0...8.33.0)
