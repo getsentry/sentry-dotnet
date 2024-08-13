@@ -34,6 +34,7 @@ runs:
           6.0.x
           7.0.x
           8.0.x
+          9.0.100-preview.6.24328.19
 
     - name: Install .NET Workloads
       shell: bash
