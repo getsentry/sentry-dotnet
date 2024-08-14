@@ -37,7 +37,7 @@ try
     {
         $tfm += 'ios'
         $group = 'apple'
-        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/iossimulator-$arch"
+        $buildDir = "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/iossimulator-$arch"
         $arguments = @(
             '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
             '--target', 'ios-simulator-64',

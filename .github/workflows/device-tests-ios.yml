@@ -10,7 +10,7 @@ on:
       - "**.md"
 
 jobs:
-  build:
+  ios-tests:
     # Pinning `macos-13` because Microsoft.iOS 16.4 requires Xcode 14.3 which is only built-in in 13
     runs-on: macos-13
     env:
@@ -36,32 +36,6 @@ jobs:
 
       - name: Build iOS Test App
         run: pwsh ./scripts/device-test.ps1 ios -Build
-
-      - name: Upload iOS Test App
-        uses: actions/upload-artifact@v4
-        with:
-          name: device-test-ios
-          if-no-files-found: error
-          path: test/Sentry.Maui.Device.TestApp/bin/Release/net8.0-ios/iossimulator-x64/Sentry.Maui.Device.TestApp.app
-
-  ios:
-    needs: [build]
-    name: Run iOS Tests
-    runs-on: macos-13
-    strategy:
-      fail-fast: false
-    env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      DOTNET_NOLOGO: 1
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Download test app artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: device-test-ios
-          path: bin/Sentry.Maui.Device.TestApp.app
 
       - name: Run Tests
         id: first-run
