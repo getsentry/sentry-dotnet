@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- When finishing a transaction, the SDK now properly sends unfinished spans ([#3533](https://github.com/getsentry/sentry-dotnet/pull/3533))
+
 ## 4.10.0
 
 ### Features
