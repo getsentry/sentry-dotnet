@@ -154,7 +154,7 @@ public class SentrySpan : ISpanData, ISentryJsonSerializable, ITraceContextInter
         var parentSpanId = json.GetPropertyOrNull("parent_span_id")?.Pipe(SpanId.FromJson);
         var traceId = json.GetPropertyOrNull("trace_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
         var startTimestamp = json.GetProperty("start_timestamp").GetDateTimeOffset();
-        var endTimestamp = json.GetProperty("timestamp").GetDateTimeOffset();
+        var endTimestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
         var operation = json.GetPropertyOrNull("op")?.GetString() ?? "unknown";
         var description = json.GetPropertyOrNull("description")?.GetString();
         var status = json.GetPropertyOrNull("status")?.GetString()?.Replace("_", "").ParseEnum<SpanStatus>();

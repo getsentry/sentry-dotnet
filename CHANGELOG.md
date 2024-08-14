@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Unfinished spans are now correctly stored and retrieved by the CachingTransport ([#3533](https://github.com/getsentry/sentry-dotnet/pull/3533))
+
 ## 4.10.0
 
 ### Features
