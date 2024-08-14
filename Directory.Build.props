@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <VersionPrefix>4.9.0</VersionPrefix>
+    <VersionSuffix>alpha</VersionSuffix>
     <LangVersion>12</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
