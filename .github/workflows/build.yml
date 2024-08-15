@@ -112,7 +112,7 @@ jobs:
           dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
       - name: Build
-        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:detailed -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
+        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:normal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
 
       - name: Test
         run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
