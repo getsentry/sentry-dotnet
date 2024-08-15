@@ -21,6 +21,7 @@ jobs:
         uses: ./.github/actions/environment
 
       - name: Restore .NET Dependencies
+        # We should be able to get rid of the restore here, if we install the correct workloads in actions/environment
         run: |
           dotnet workload restore
           dotnet restore Sentry.sln --nologo

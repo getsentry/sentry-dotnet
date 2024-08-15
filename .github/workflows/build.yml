@@ -106,6 +106,7 @@ jobs:
         uses: ./.github/actions/buildcocoasdk
 
       - name: Restore .NET Dependencies
+        # We should be able to get rid of the restore here, if we install the correct workloads in actions/environment
         run: |
           dotnet workload restore
           dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
