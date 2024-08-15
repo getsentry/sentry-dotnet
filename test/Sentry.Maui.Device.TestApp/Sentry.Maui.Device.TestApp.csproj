@@ -13,9 +13,8 @@
     <SingleProject>true</SingleProject>
     <RootNamespace>Sentry.Maui.Device.TestApp</RootNamespace>
     <AssemblyName>Sentry.Maui.Device.TestApp</AssemblyName>
-    <UseMaui>true</UseMaui>
-    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
     <SelfContained>true</SelfContained>
+    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
 
     <!-- Display name -->
     <ApplicationTitle>Sentry.Maui.Device.TestApp</ApplicationTitle>
@@ -57,10 +56,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Starting with .NET 8, <UseMaui>true</UseMaui> doesn't automatically include NuGet package references -->
-    <PackageReference Condition="$(TargetFramework.StartsWith('net8'))" Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-    <PackageReference Condition="$(TargetFramework.StartsWith('net8'))" Include="Microsoft.Maui.Core" Version="$(MauiVersion)" />
-    <PackageReference Condition="$(TargetFramework.StartsWith('net8'))" Include="Microsoft.Maui.Essentials" Version="$(MauiVersion)" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.72" />
+    <PackageReference Include="Microsoft.Maui.Core" Version="8.0.72" />
+    <PackageReference Include="Microsoft.Maui.Essentials" Version="8.0.72" />
 
     <!-- https://github.com/advisories/GHSA-5f2m-466j-3848 -->
     <PackageReference Include="System.Private.Uri" Version="4.3.2" />

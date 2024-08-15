@@ -19,10 +19,6 @@
 
   <ItemGroup  Condition="$(TargetFramework.StartsWith('net9'))">
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="$(MauiVersion)" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MauiVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MauiVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MauiVersion)" />
   </ItemGroup>
 
 </Project>
