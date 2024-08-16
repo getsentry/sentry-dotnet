@@ -30,7 +30,9 @@ public class SingleFileAppTests
         InValidBundleFile = Path.Combine(testRoot, invalidBundle);
     }
 
-#if NET8_0
+#if NET9_0
+    private static string TargetFramework => "net9.0";
+#elif NET8_0
     private static string TargetFramework => "net8.0";
 #elif NET7_0
     private static string TargetFramework => "net7.0";

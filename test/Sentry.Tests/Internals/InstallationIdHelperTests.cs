@@ -6,13 +6,13 @@ public class InstallationIdHelperTests
     {
         private readonly TempDirectory _cacheDirectory;
 
-        public InMemoryDiagnosticLogger Logger { get; }
+        public IDiagnosticLogger Logger { get; }
 
         public SentryOptions Options { get; }
 
         public Fixture(Action<SentryOptions> configureOptions = null)
         {
-            Logger = new InMemoryDiagnosticLogger();
+            Logger = Substitute.For<IDiagnosticLogger>();
 
             var fileSystem = new FakeFileSystem();
             _cacheDirectory = new TempDirectory(fileSystem);
@@ -40,9 +40,6 @@ public class InstallationIdHelperTests
     [Fact]
     public void GetMachineNameInstallationId_Hashed()
     {
-        // Arrange
-        var sut = _fixture.GetSut();
-
         // Act
         var installationId = InstallationIdHelper.GetMachineNameInstallationId();
 
@@ -54,9 +51,6 @@ public class InstallationIdHelperTests
     [Fact]
     public void GetMachineNameInstallationId_Idempotent()
     {
-        // Arrange
-        var sut = _fixture.GetSut();
-
         // Act
         var installationIds = Enumerable
             .Range(0, 10)
@@ -65,5 +59,30 @@ public class InstallationIdHelperTests
 
         // Assert
         installationIds.Distinct().Should().ContainSingle();
+    }
+
+    [Fact]
+    public void TryGetInstallationId_CachesInstallationId()
+    {
+        // Arrange
+        _fixture.Logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        var installationIdHelper = _fixture.GetSut();
+
+        // Act
+        var installationId1 = installationIdHelper.TryGetInstallationId();
+
+        // Assert
+        installationId1.Should().NotBeNullOrWhiteSpace();
+        _fixture.Logger.Received(1).Log(SentryLevel.Debug, "Resolved installation ID '{0}'.", null, Arg.Any<string>());
+
+        // Arrange
+        _fixture.Logger.ClearReceivedCalls();
+
+        // Act
+        var installationId2 = installationIdHelper.TryGetInstallationId();
+
+        // Assert
+        installationId2.Should().Be(installationId1);
+        _fixture.Logger.Received(0).Log(SentryLevel.Debug, "Resolved installation ID '{0}'.", null, Arg.Any<string>());
     }
 }

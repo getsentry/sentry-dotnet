@@ -21,7 +21,7 @@ $CI = Test-Path env:CI
 Push-Location $PSScriptRoot/..
 try
 {
-    $tfm = 'net7.0-'
+    $tfm = 'net8.0-'
     $arch = (!$IsWindows -and $(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
     if ($Platform -eq 'android')
     {
@@ -37,7 +37,7 @@ try
     {
         $tfm += 'ios'
         $group = 'apple'
-        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/iossimulator-$arch"
+        $buildDir = "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/iossimulator-$arch"
         $arguments = @(
             '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
             '--target', 'ios-simulator-64',
