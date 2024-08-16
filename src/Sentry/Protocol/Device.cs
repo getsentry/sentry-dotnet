@@ -427,7 +427,7 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
         var modelId = json.GetPropertyOrNull("model_id")?.GetString();
         var architecture = json.GetPropertyOrNull("arch")?.GetString();
 
-        // TODO: For next major: Remove this and change batteryLevel from short to float
+        // TODO: For next major: Remove this and change BatteryLevel from short to float
         // The Java and Cocoa SDK report the battery as `float`
         // Cocoa https://github.com/getsentry/sentry-cocoa/blob/e773cad622b86735f1673368414009475e4119fd/Sources/Sentry/include/SentryUIDeviceWrapper.h#L18
         // Java  https://github.com/getsentry/sentry-java/blob/25f1ca4e1636a801c17c1662f0145f888550bce8/sentry/src/main/java/io/sentry/protocol/Device.java#L231-L233
@@ -456,7 +456,17 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
         var bootTime = json.GetPropertyOrNull("boot_time")?.GetDateTimeOffset();
         var processorCount = json.GetPropertyOrNull("processor_count")?.GetInt32();
         var cpuDescription = json.GetPropertyOrNull("cpu_description")?.GetString();
-        var processorFrequency = json.GetPropertyOrNull("processor_frequency")?.GetInt32();
+
+        // TODO: For next major: Remove this and change ProcessorFrequency from int to float
+        // The Java SDK reports the processorFrequency as `double`
+        // Java https://github.com/getsentry/sentry-java/blob/9762f09afa51944b40a9b77e116a55e54636e6c5/sentry/src/main/java/io/sentry/protocol/Device.java#L130
+        int? processorFrequency = null;
+        var processorFrequencyProperty = json.GetPropertyOrNull("processor_frequency");
+        if (processorFrequencyProperty.HasValue)
+        {
+            processorFrequency = (int)processorFrequencyProperty.Value.GetDouble();
+        }
+
         var deviceType = json.GetPropertyOrNull("device_type")?.GetString();
         var batteryStatus = json.GetPropertyOrNull("battery_status")?.GetString();
         var deviceUniqueIdentifier = json.GetPropertyOrNull("device_unique_identifier")?.GetString();
