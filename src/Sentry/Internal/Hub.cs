@@ -613,11 +613,8 @@ internal class Hub : IHub, IMetricHub, IDisposable
         try
         {
             // Running this in sequence in its own task to avoid deadlocking in Unity games targeting WebGL
-            Task.Run(async () =>
-            {
-                await Metrics.FlushAsync().ConfigureAwait(false);
-                await CurrentClient.FlushAsync(_options.ShutdownTimeout).ConfigureAwait(false);
-            }).GetAwaiter().GetResult();
+            Metrics.FlushAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+            CurrentClient.FlushAsync(_options.ShutdownTimeout).ConfigureAwait(false).GetAwaiter().GetResult();
         }
         catch (Exception e)
         {
