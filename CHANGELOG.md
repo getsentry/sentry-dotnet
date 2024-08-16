@@ -4,11 +4,17 @@
 
 - Added support for `.NET 9` (preview) ([#3513](https://github.com/getsentry/sentry-dotnet/pull/3513))
 
-## Unreleased
+## 4.10.1
 
 ### Fixes
 
 - Unfinished spans are now correctly stored and retrieved by the CachingTransport ([#3533](https://github.com/getsentry/sentry-dotnet/pull/3533))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.33.0 to v8.34.0 ([#3535](https://github.com/getsentry/sentry-dotnet/pull/3535))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8340)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.33.0...8.34.0)
 
 ## 4.10.0
 
