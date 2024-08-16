@@ -612,15 +612,18 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
         try
         {
-            Metrics.FlushAsync().ContinueWith(_ =>
-                CurrentClient.FlushAsync(_options.ShutdownTimeout).Wait()
-            ).ConfigureAwait(false).GetAwaiter().GetResult();
+            // Running this in sequence in its own task to avoid deadlocking in Unity games targeting WebGL
+            Task.Run(async () =>
+            {
+                await Metrics.FlushAsync();
+                await CurrentClient.FlushAsync(_options.ShutdownTimeout);
+            }).GetAwaiter().GetResult();
         }
         catch (Exception e)
         {
             _options.LogError(e, "Failed to wait on disposing tasks to flush.");
         }
-        //Dont dispose of ScopeManager since we want dangling transactions to still be able to access tags.
+        //Don't dispose of ScopeManager since we want dangling transactions to still be able to access tags.
 
 #if __IOS__
             // TODO
