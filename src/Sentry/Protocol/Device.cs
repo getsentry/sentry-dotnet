@@ -431,7 +431,7 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
         // The Java and Cocoa SDK report the battery as `float`
         // Cocoa https://github.com/getsentry/sentry-cocoa/blob/e773cad622b86735f1673368414009475e4119fd/Sources/Sentry/include/SentryUIDeviceWrapper.h#L18
         // Java  https://github.com/getsentry/sentry-java/blob/25f1ca4e1636a801c17c1662f0145f888550bce8/sentry/src/main/java/io/sentry/protocol/Device.java#L231-L233
-        var batteryLevel = json.GetPropertyOrNull("battery_level")?.TryGetDouble(out var level) == true
+        var batteryLevel = json.GetPropertyOrNull("battery_level")?.TryGetDouble(out var level) is true
             ? (short)level
             : (short?)null;
 
@@ -457,7 +457,7 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
         // TODO: For next major: Remove this and change ProcessorFrequency from int to float
         // The Java SDK reports the processorFrequency as `double`
         // Java https://github.com/getsentry/sentry-java/blob/9762f09afa51944b40a9b77e116a55e54636e6c5/sentry/src/main/java/io/sentry/protocol/Device.java#L130
-        var processorFrequency = json.GetPropertyOrNull("processor_frequency")?.TryGetDouble(out var frequency) == true
+        var processorFrequency = json.GetPropertyOrNull("processor_frequency")?.TryGetDouble(out var frequency) is true
             ? (int)frequency
             : (int?)null;
 
