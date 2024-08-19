@@ -76,6 +76,17 @@ jobs:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
 
+      - name: Free Disk Space (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        uses: jlumbroso/free-disk-space@f68fdb76e2ea636224182cfb7377ff9a1708f9b8
+        with:
+          android: true
+          dotnet: false
+          haskell: true
+          large-packages: false
+          docker-images: false
+          swap-storage: true
+
       # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
         if: startsWith(matrix.os, 'macos')
