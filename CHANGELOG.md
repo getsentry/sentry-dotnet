@@ -4,6 +4,12 @@
 
 - Added support for `.NET 9` (preview) ([#3513](https://github.com/getsentry/sentry-dotnet/pull/3513))
 
+## Unreleased
+
+## Fixes
+
+- Resolved a potential deadlock during SDK shutdown ([#3539](https://github.com/getsentry/sentry-dotnet/pull/3539))
+
 ## 4.10.1
 
 ### Fixes
