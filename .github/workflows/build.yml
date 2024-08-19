@@ -35,6 +35,7 @@ jobs:
           enableCrossOsArchive: true
 
       - name: Free Disk Space (Ubuntu)
+        if: matrix.os == 'ubuntu'
         uses: jlumbroso/free-disk-space@f68fdb76e2ea636224182cfb7377ff9a1708f9b8
         with:
           android: true
@@ -42,8 +43,8 @@ jobs:
           haskell: true
           large-packages: false
           docker-images: false
-          swap-storage: true      
-  
+          swap-storage: true
+
       - name: Install build dependencies
         if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'Linux'
         run: |
