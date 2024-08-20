@@ -6,6 +6,9 @@
 
 - Resolved a potential deadlock during SDK shutdown ([#3539](https://github.com/getsentry/sentry-dotnet/pull/3539))
 
+### Dependencies
+- Bumped dependencies to resolve security vulnerabilities ([#3547])
+
 ## 4.10.1
 
 ### Fixes
