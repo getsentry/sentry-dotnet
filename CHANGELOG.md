@@ -1,6 +1,11 @@
 # Changelog
 
-## Unreleased
+## 4.10.2
+
+### Various fixes & improvements
+
+- fix: Prevent deadlock in `Hub.Dispose` (#3539) by @bitsandfoxes
+- build(deps): bump github/codeql-action from 3.26.0 to 3.26.2 (#3543) by @dependabot
 
 ## Fixes
 
