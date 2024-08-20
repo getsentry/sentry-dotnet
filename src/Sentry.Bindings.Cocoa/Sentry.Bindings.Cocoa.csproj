@@ -4,6 +4,7 @@
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == ''">net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == 'true'">net7.0-ios</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == 'true' And '$(NO_MACCATALYST)' == ''">net7.0-maccatalyst</TargetFrameworks>
+    <CheckEolWorkloads>false</CheckEolWorkloads>
     <IsBindingProject>true</IsBindingProject>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
