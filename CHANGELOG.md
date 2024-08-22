@@ -7,6 +7,12 @@
 - fix: Prevent deadlock in `Hub.Dispose` (#3539) by @bitsandfoxes
 - build(deps): bump github/codeql-action from 3.26.0 to 3.26.2 (#3543) by @dependabot
 
+### Dependencies
+
+- Bump Cocoa SDK from v8.34.0 to v8.35.0 ([#3548](https://github.com/getsentry/sentry-dotnet/pull/3548))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8350)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.34.0...8.35.0)
+
 ## Fixes
 
 - Resolved a potential deadlock during SDK shutdown ([#3539](https://github.com/getsentry/sentry-dotnet/pull/3539))
