@@ -29,6 +29,7 @@
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar" />
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-core-$(SentryAndroidSdkVersion).aar" />
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).aar" />
+    <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-replay-$(SentryAndroidSdkVersion).aar" />
     <AndroidLibrary Include="..\..\lib\sentry-android-supplemental\bin\sentry-android-supplemental.jar" />
     <AndroidNativeLibrary Include="..\..\lib\sentrysupplemental\bin\arm64-v8a\libsentrysupplemental.so" Abi="arm64-v8a" />
     <AndroidNativeLibrary Include="..\..\lib\sentrysupplemental\bin\armeabi-v7a\libsentrysupplemental.so" Abi="armeabi-v7a" />
@@ -47,6 +48,12 @@
       SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-ndk/$(SentryAndroidSdkVersion)/sentry-android-ndk-$(SentryAndroidSdkVersion).aar"
       DestinationFolder="$(SentryAndroidSdkDirectory)"
       Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).aar')"
+      Retries="3"
+    />
+    <DownloadFile
+      SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-replay/$(SentryAndroidSdkVersion)/sentry-android-replay-$(SentryAndroidSdkVersion).aar"
+      DestinationFolder="$(SentryAndroidSdkDirectory)"
+      Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-android-replay-$(SentryAndroidSdkVersion).aar')"
       Retries="3"
     />
     <DownloadFile

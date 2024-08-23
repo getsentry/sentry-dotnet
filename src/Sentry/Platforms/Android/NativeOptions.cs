@@ -1,4 +1,5 @@
 // ReSharper disable once CheckNamespace
+
 namespace Sentry;
 
 public partial class SentryOptions
@@ -260,5 +261,21 @@ public partial class SentryOptions
         /// be stripped away during the round-tripping between the two SDKs.  Use with caution.
         /// </remarks>
         public bool EnableBeforeSend { get; set; } = false;
+        public class NativeExperimentalOptions
+        {
+            public NativeSentryReplayOptions SessionReplay { get; set; } = new();
+        }
+
+        public class NativeSentryReplayOptions
+        {
+            public double? OnErrorSampleRate { get; set; }
+            public double? SessionSampleRate { get; set; }
+            public bool RedactAllImages { get; set; } = true;
+            public bool RedactAllText { get; set; } = true;
+        }
+        /// <summary>
+        /// ExperimentalOptions
+        /// </summary>
+        public NativeExperimentalOptions ExperimentalOptions { get; set; } = new();
     }
 }
