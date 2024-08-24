@@ -21,6 +21,7 @@
 
 ### Fixes
 
+- On mobile devices, the SDK no longer throws a `FormatException` for `ProcessorFrequency` when trying to report native events ([#3541](https://github.com/getsentry/sentry-dotnet/pull/3541))
 - Unfinished spans are now correctly stored and retrieved by the CachingTransport ([#3533](https://github.com/getsentry/sentry-dotnet/pull/3533))
 
 ### Dependencies
