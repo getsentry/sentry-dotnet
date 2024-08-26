@@ -1,5 +1,8 @@
 # Changelog
 
+### API Changes
+- You should no longer pass `AndroidContext` as an argument to `SentrySdk.Init` ([#3562](https://github.com/getsentry/sentry-dotnet/pull/3562))
+
 ## 4.10.2
 
 ### Various fixes & improvements
