@@ -1,9 +1,12 @@
-namespace Sentry.Internal;
+using Sentry.Internal;
+
+namespace Sentry;
 
 /// <summary>
 /// Stores either a plain string or a Regular Expression, typically to match against filters in the SentryOptions
 /// </summary>
-internal class StringOrRegex
+[TypeConverter(typeof(StringOrRegexTypeConverter))]
+public class StringOrRegex
 {
     internal readonly Regex? _regex;
     internal readonly string? _string;
@@ -15,7 +18,6 @@ internal class StringOrRegex
     public StringOrRegex(string stringOrRegex)
     {
         _string = stringOrRegex;
-        _regex = TryParseRegex(stringOrRegex);
     }
 
     /// <summary>
@@ -61,24 +63,11 @@ internal class StringOrRegex
     {
         return ToString().GetHashCode();
     }
-
-    private static Regex? TryParseRegex(string pattern)
-    {
-        try
-        {
-            return new Regex(pattern, RegexOptions.Compiled);
-        }
-        catch
-        {
-            // not a valid regex
-            return null;
-        }
-    }
 }
 
 internal static class StringOrRegexExtensions
 {
-    public static bool MatchesAny(this string parameter, List<StringOrRegex>? patterns, IStringOrRegexMatcher matcher)
+    public static bool MatchesAny(this string parameter, IEnumerable<StringOrRegex>? patterns, IStringOrRegexMatcher matcher)
     {
         if (patterns is null)
         {
@@ -93,6 +82,9 @@ internal static class StringOrRegexExtensions
         }
         return false;
     }
+
+    public static bool MatchesSubstringOrRegex(this IEnumerable<StringOrRegex>? patterns, string parameter)
+        => parameter.MatchesAny(patterns, SubstringOrPatternMatcher.Default);
 
      /// <summary>
      /// During configuration binding, .NET 6 and lower used to just call Add on the existing item.
