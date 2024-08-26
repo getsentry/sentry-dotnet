@@ -1,5 +1,10 @@
 # Changelog
 
+## Version Five
+
+### API Changes
+- The ITraceContext now includes an [Origin](https://develop.sentry.dev/sdk/telemetry/traces/trace-origin/), which is set automatically and is primarily used internally by the Sentry server ([#3564](https://github.com/getsentry/sentry-dotnet/pull/3564))
+
 ## 4.10.2
 
 ### Various fixes & improvements
