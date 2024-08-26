@@ -184,7 +184,7 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
     /// <example>
     /// 2500
     /// </example>
-    public int? ProcessorFrequency { get; set; }
+    public float? ProcessorFrequency { get; set; }
 
     /// <summary>
     /// Kind of device the application is running on.
@@ -447,14 +447,9 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
         var bootTime = json.GetPropertyOrNull("boot_time")?.GetDateTimeOffset();
         var processorCount = json.GetPropertyOrNull("processor_count")?.GetInt32();
         var cpuDescription = json.GetPropertyOrNull("cpu_description")?.GetString();
-
-        // TODO: For next major: Remove this and change ProcessorFrequency from int to float
-        // The Java SDK reports the processorFrequency as `double`
-        // Java https://github.com/getsentry/sentry-java/blob/9762f09afa51944b40a9b77e116a55e54636e6c5/sentry/src/main/java/io/sentry/protocol/Device.java#L130
         var processorFrequency = json.GetPropertyOrNull("processor_frequency")?.TryGetDouble(out var frequency) is true
-            ? (int)frequency
-            : (int?)null;
-
+            ? (float)frequency
+            : (float?)null;
         var deviceType = json.GetPropertyOrNull("device_type")?.GetString();
         var batteryStatus = json.GetPropertyOrNull("battery_status")?.GetString();
         var deviceUniqueIdentifier = json.GetPropertyOrNull("device_unique_identifier")?.GetString();

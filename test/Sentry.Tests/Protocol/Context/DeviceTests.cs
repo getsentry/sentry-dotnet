@@ -170,6 +170,20 @@ public class DeviceTests
         device.BatteryLevel?.Should().BeApproximately(1.5f, Delta);
     }
 
+    [Fact]
+    public void FromJson_ProcessorFrequencyFloat()
+    {
+        // Arrange
+        const string json = """{"type":"device","processor_frequency":2500.3}""";
+
+        // Act
+        var device = Json.Parse(json, Device.FromJson);
+
+        // Assert
+        device.ProcessorFrequency.Should().NotBeNull();
+        device.ProcessorFrequency?.Should().BeApproximately(2500.3f, Delta);
+    }
+
     [Theory]
     [MemberData(nameof(TestCases))]
     public void SerializeObject_TestCase_SerializesAsExpected((Device device, string serialized) @case)
@@ -212,6 +226,7 @@ public class DeviceTests
         yield return new object[] { (new Device { ProcessorCount = 8 }, """{"type":"device","processor_count":8}""") };
         yield return new object[] { (new Device { CpuDescription = "Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz" }, """{"type":"device","cpu_description":"Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz"}""") };
         yield return new object[] { (new Device { ProcessorFrequency = 2500 }, """{"type":"device","processor_frequency":2500}""") };
+        yield return new object[] { (new Device { ProcessorFrequency = 2500.3f }, """{"type":"device","processor_frequency":2500.3}""") };
         yield return new object[] { (new Device { DeviceType = "Handheld" }, """{"type":"device","device_type":"Handheld"}""") };
         yield return new object[] { (new Device { BatteryStatus = "Charging" }, """{"type":"device","battery_status":"Charging"}""") };
         yield return new object[] { (new Device { DeviceUniqueIdentifier = "d610540d-11d6-4daa-a98c-b71030acae4d" }, """{"type":"device","device_unique_identifier":"d610540d-11d6-4daa-a98c-b71030acae4d"}""") };
@@ -296,7 +311,7 @@ public class DeviceTests
             actual.LowMemory.Should().Be(expected.LowMemory);
             actual.ProcessorCount.Should().Be(expected.ProcessorCount);
             actual.CpuDescription.Should().Be(expected.CpuDescription);
-            actual.ProcessorFrequency.Should().Be(expected.ProcessorFrequency);
+            actual.ProcessorFrequency.Should().BeApproximately(expected.ProcessorFrequency, Delta);
             actual.SupportsVibration.Should().Be(expected.SupportsVibration);
             actual.DeviceType.Should().Be(expected.DeviceType);
             actual.BatteryStatus.Should().Be(expected.BatteryStatus);
