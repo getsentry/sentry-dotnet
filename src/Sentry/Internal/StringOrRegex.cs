@@ -6,7 +6,7 @@ namespace Sentry.Internal;
 internal class StringOrRegex
 {
     internal readonly Regex? _regex;
-    internal readonly string? _prefix;
+    internal readonly string? _string;
 
     /// <summary>
     /// Constructs a <see cref="StringOrRegex"/> instance.
@@ -14,7 +14,8 @@ internal class StringOrRegex
     /// <param name="stringOrRegex">The prefix or regular expression pattern to match on.</param>
     public StringOrRegex(string stringOrRegex)
     {
-        _prefix = stringOrRegex;
+        _string = stringOrRegex;
+        _regex = TryParseRegex(stringOrRegex);
     }
 
     /// <summary>
@@ -45,7 +46,7 @@ internal class StringOrRegex
     }
 
     /// <inheritdoc />
-    public override string ToString() => _prefix ?? _regex?.ToString() ?? "";
+    public override string ToString() => _string ?? _regex?.ToString() ?? "";
 
     /// <inheritdoc />
     public override bool Equals(object? obj)
@@ -59,6 +60,19 @@ internal class StringOrRegex
     public override int GetHashCode()
     {
         return ToString().GetHashCode();
+    }
+
+    private static Regex? TryParseRegex(string pattern)
+    {
+        try
+        {
+            return new Regex(pattern, RegexOptions.Compiled);
+        }
+        catch
+        {
+            // not a valid regex
+            return null;
+        }
     }
 }
 
@@ -79,4 +93,44 @@ internal static class StringOrRegexExtensions
         }
         return false;
     }
+
+     /// <summary>
+     /// During configuration binding, .NET 6 and lower used to just call Add on the existing item.
+     /// .NET 7 changed this to call the setter with an array that already starts with the old value.
+     /// We have to handle both cases.
+     /// </summary>
+     /// <typeparam name="T">The List Type</typeparam>
+     /// <param name="value">The set of values to be assigned</param>
+     /// <returns>A IList of type T that will be consistent even if it has been set via Config</returns>
+     public static IList<T> WithConfigBinding<T>(this IList<T> value)
+         where T : StringOrRegex
+     {
+         switch (value.Count)
+         {
+             case 1 when value[0].ToString() == ".*":
+                 // There's only one item in the list, and it's the wildcard, so reset to the initial state.
+                 return new AutoClearingList<T>(value, clearOnNextAdd: true);
+
+             case > 1:
+                 // There's more than one item in the list.  Remove the wildcard.
+                 var targets = value.ToList();
+                 targets.RemoveAll(t => t.ToString() == ".*");
+                 return targets;
+
+             default:
+                 return value;
+         }
+     }
+}
+
+/// <summary>
+/// This class allows the TracePropagationTargets option to be set from config, such as appSettings.json
+/// </summary>
+internal class StringOrRegexTypeConverter : TypeConverter
+{
+    public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType) =>
+        sourceType == typeof(string);
+
+    public override object ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value) =>
+        new StringOrRegex((string)value);
 }
