@@ -4,8 +4,8 @@ public class SubstringOrPatternMatcherTests
 {
     private static class Fixture
     {
-        public static SubstringOrPatternMatcher GetSut() => new ();
-        public static SubstringOrPatternMatcher GetSut(StringComparison comparison) => new (comparison);
+        public static SubstringOrPatternMatcher GetSut() => new();
+        public static SubstringOrPatternMatcher GetSut(StringComparison comparison) => new(comparison);
     }
 
     [Theory]
