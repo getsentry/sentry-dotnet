@@ -1662,6 +1662,7 @@ namespace Sentry.Protocol
         string? Description { get; }
         bool? IsSampled { get; }
         string Operation { get; }
+        string? Origin { get; }
         Sentry.SpanId? ParentSpanId { get; }
         Sentry.SpanId SpanId { get; }
         Sentry.SpanStatus? Status { get; }
