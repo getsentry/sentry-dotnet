@@ -40,7 +40,7 @@ public class SentryLoggingOptionsSetupTests
             CacheDirectoryPath = "~/test",
             CaptureFailedRequests = true,
             // FailedRequestStatusCodes = IList<HttpStatusCodeRange>,
-            FailedRequestTargets = [ "target1", "target2" ],
+            FailedRequestTargets = ["target1", "target2"],
             InitCacheFlushTimeout = TimeSpan.FromSeconds(27),
             // DefaultTags = Dictionary<string,string>,
 #pragma warning disable CS0618 // Type or member is obsolete

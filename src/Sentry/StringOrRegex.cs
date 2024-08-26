@@ -86,33 +86,33 @@ internal static class StringOrRegexExtensions
     public static bool MatchesSubstringOrRegex(this IEnumerable<StringOrRegex>? patterns, string parameter)
         => parameter.MatchesAny(patterns, SubstringOrPatternMatcher.Default);
 
-     /// <summary>
-     /// During configuration binding, .NET 6 and lower used to just call Add on the existing item.
-     /// .NET 7 changed this to call the setter with an array that already starts with the old value.
-     /// We have to handle both cases.
-     /// </summary>
-     /// <typeparam name="T">The List Type</typeparam>
-     /// <param name="value">The set of values to be assigned</param>
-     /// <returns>A IList of type T that will be consistent even if it has been set via Config</returns>
-     public static IList<T> WithConfigBinding<T>(this IList<T> value)
-         where T : StringOrRegex
-     {
-         switch (value.Count)
-         {
-             case 1 when value[0].ToString() == ".*":
-                 // There's only one item in the list, and it's the wildcard, so reset to the initial state.
-                 return new AutoClearingList<T>(value, clearOnNextAdd: true);
+    /// <summary>
+    /// During configuration binding, .NET 6 and lower used to just call Add on the existing item.
+    /// .NET 7 changed this to call the setter with an array that already starts with the old value.
+    /// We have to handle both cases.
+    /// </summary>
+    /// <typeparam name="T">The List Type</typeparam>
+    /// <param name="value">The set of values to be assigned</param>
+    /// <returns>A IList of type T that will be consistent even if it has been set via Config</returns>
+    public static IList<T> WithConfigBinding<T>(this IList<T> value)
+        where T : StringOrRegex
+    {
+        switch (value.Count)
+        {
+            case 1 when value[0].ToString() == ".*":
+                // There's only one item in the list, and it's the wildcard, so reset to the initial state.
+                return new AutoClearingList<T>(value, clearOnNextAdd: true);
 
-             case > 1:
-                 // There's more than one item in the list.  Remove the wildcard.
-                 var targets = value.ToList();
-                 targets.RemoveAll(t => t.ToString() == ".*");
-                 return targets;
+            case > 1:
+                // There's more than one item in the list.  Remove the wildcard.
+                var targets = value.ToList();
+                targets.RemoveAll(t => t.ToString() == ".*");
+                return targets;
 
-             default:
-                 return value;
-         }
-     }
+            default:
+                return value;
+        }
+    }
 }
 
 /// <summary>
