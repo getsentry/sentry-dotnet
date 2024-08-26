@@ -1,8 +1,5 @@
 namespace Sentry.Internal;
 
-/// <summary>
-/// Interface for class of comparers that can match against either a string or a regex.
-/// </summary>
 internal interface IStringOrRegexMatcher
 {
     /// <summary>
