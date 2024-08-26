@@ -1,5 +1,8 @@
 # Changelog
 
+### API Changes
+- The `SentryUser.Segment` property has been deprecated. Consider sending this as a tag or additional data instead ([#3563](https://github.com/getsentry/sentry-dotnet/pull/3563))
+ 
 ## 4.10.2
 
 ### Various fixes & improvements
