@@ -700,7 +700,7 @@ namespace Sentry
         public System.TimeSpan ShutdownTimeout { get; set; }
         public string SpotlightUrl { get; set; }
         public Sentry.StackTraceMode StackTraceMode { get; set; }
-        public System.Collections.Generic.ICollection<Sentry.StringOrRegex> TagFilters { get; set; }
+        public System.Collections.Generic.IList<Sentry.StringOrRegex> TagFilters { get; set; }
         public System.Collections.Generic.IList<Sentry.StringOrRegex> TracePropagationTargets { get; set; }
         public double? TracesSampleRate { get; set; }
         public System.Func<Sentry.TransactionSamplingContext, double?>? TracesSampler { get; set; }
@@ -1122,6 +1122,7 @@ namespace Sentry
         public StreamAttachmentContent(System.IO.Stream stream) { }
         public System.IO.Stream GetStream() { }
     }
+    [System.ComponentModel.TypeConverter(typeof(Sentry.StringOrRegexTypeConverter))]
     public class StringOrRegex
     {
         public StringOrRegex(string stringOrRegex) { }
