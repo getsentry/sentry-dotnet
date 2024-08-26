@@ -20,34 +20,6 @@ public static partial class SentrySdk
 {
     private static AndroidContext AppContext { get; set; } = Application.Context;
 
-    /// <summary>
-    /// Initializes the SDK for Android, with an optional configuration options callback.
-    /// </summary>
-    /// <param name="context">The Android application context.</param>
-    /// <param name="configureOptions">The configuration options callback.</param>
-    /// <returns>An object that should be disposed when the application terminates.</returns>
-    [Obsolete("It is no longer required to provide the application context when calling Init. " +
-              "This method may be removed in a future major release.")]
-    public static IDisposable Init(AndroidContext context, Action<SentryOptions>? configureOptions)
-    {
-        AppContext = context;
-        return Init(configureOptions);
-    }
-
-    /// <summary>
-    /// Initializes the SDK for Android, using a configuration options instance.
-    /// </summary>
-    /// <param name="context">The Android application context.</param>
-    /// <param name="options">The configuration options instance.</param>
-    /// <returns>An object that should be disposed when the application terminates.</returns>
-    [Obsolete("It is no longer required to provide the application context when calling Init. " +
-              "This method may be removed in a future major release.")]
-    public static IDisposable Init(AndroidContext context, SentryOptions options)
-    {
-        AppContext = context;
-        return Init(options);
-    }
-
     private static void InitSentryAndroidSdk(SentryOptions options)
     {
         // Set default release and distribution

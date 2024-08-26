@@ -980,8 +980,6 @@ namespace Sentry
         public string? Id { get; set; }
         public string? IpAddress { get; set; }
         public System.Collections.Generic.IDictionary<string, string> Other { get; set; }
-        [System.Obsolete("This property is deprecated and will be removed in a future version.")]
-        public string? Segment { get; set; }
         public string? Username { get; set; }
         public Sentry.SentryUser Clone() { }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
@@ -1661,6 +1659,7 @@ namespace Sentry.Protocol
         string? Description { get; }
         bool? IsSampled { get; }
         string Operation { get; }
+        string? Origin { get; }
         Sentry.SpanId? ParentSpanId { get; }
         Sentry.SpanId SpanId { get; }
         Sentry.SpanStatus? Status { get; }
