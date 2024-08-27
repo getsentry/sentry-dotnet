@@ -666,8 +666,6 @@ namespace Sentry
         public string? Dsn { get; set; }
         public bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }
-        [System.Obsolete("Use TracesSampleRate or TracesSampler instead")]
-        public bool? EnableTracing { get; set; }
         public string? Environment { get; set; }
         public Sentry.ExperimentalMetricsOptions? ExperimentalMetrics { get; set; }
         public System.Collections.Generic.IList<Sentry.HttpStatusCodeRange> FailedRequestStatusCodes { get; set; }
