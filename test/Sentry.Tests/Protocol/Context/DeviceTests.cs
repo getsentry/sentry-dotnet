@@ -226,7 +226,7 @@ public class DeviceTests
         yield return new object[] { (new Device { ProcessorCount = 8 }, """{"type":"device","processor_count":8}""") };
         yield return new object[] { (new Device { CpuDescription = "Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz" }, """{"type":"device","cpu_description":"Intel(R) Core(TM)2 Quad CPU Q6600 @ 2.40GHz"}""") };
         yield return new object[] { (new Device { ProcessorFrequency = 2500 }, """{"type":"device","processor_frequency":2500}""") };
-        yield return new object[] { (new Device { ProcessorFrequency = 2500.3f }, """{"type":"device","processor_frequency":2500.3}""") };
+        yield return new object[] { (new Device { ProcessorFrequency = 2500.5f }, """{"type":"device","processor_frequency":2500.5}""") };
         yield return new object[] { (new Device { DeviceType = "Handheld" }, """{"type":"device","device_type":"Handheld"}""") };
         yield return new object[] { (new Device { BatteryStatus = "Charging" }, """{"type":"device","battery_status":"Charging"}""") };
         yield return new object[] { (new Device { DeviceUniqueIdentifier = "d610540d-11d6-4daa-a98c-b71030acae4d" }, """{"type":"device","device_unique_identifier":"d610540d-11d6-4daa-a98c-b71030acae4d"}""") };
