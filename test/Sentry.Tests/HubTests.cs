@@ -602,23 +602,6 @@ public partial class HubTests
     }
 
     [Fact]
-    public void StartTransaction_DisableTracing_SampledOut()
-    {
-        // Arrange
-        _fixture.Options.TracesSampleRate = 1.0;
-#pragma warning disable CS0618 // Type or member is obsolete
-        _fixture.Options.EnableTracing = false;
-#pragma warning restore CS0618 // Type or member is obsolete
-        var hub = _fixture.GetSut();
-
-        // Act
-        var transaction = hub.StartTransaction("name", "operation");
-
-        // Assert
-        transaction.IsSampled.Should().BeFalse();
-    }
-
-    [Fact]
     public void StartTransaction_SameInstrumenter_SampledIn()
     {
         // Arrange
@@ -671,23 +654,6 @@ public partial class HubTests
 
         // Assert
         transaction.IsSampled.Should().BeTrue();
-    }
-
-    [Fact]
-    public void StartTransaction_DisableTracing_Sampler_SampledOut()
-    {
-        // Arrange
-        _fixture.Options.TracesSampler = _ => 1.0;
-#pragma warning disable CS0618 // Type or member is obsolete
-        _fixture.Options.EnableTracing = false;
-#pragma warning restore CS0618 // Type or member is obsolete
-        var hub = _fixture.GetSut();
-
-        // Act
-        var transaction = hub.StartTransaction("name", "operation");
-
-        // Assert
-        transaction.IsSampled.Should().BeFalse();
     }
 
     [Theory]

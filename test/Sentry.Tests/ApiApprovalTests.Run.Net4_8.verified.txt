@@ -666,8 +666,6 @@ namespace Sentry
         public string? Dsn { get; set; }
         public bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }
-        [System.Obsolete("Use TracesSampleRate or TracesSampler instead")]
-        public bool? EnableTracing { get; set; }
         public string? Environment { get; set; }
         public Sentry.ExperimentalMetricsOptions? ExperimentalMetrics { get; set; }
         public System.Collections.Generic.IList<Sentry.HttpStatusCodeRange> FailedRequestStatusCodes { get; set; }
@@ -1586,7 +1584,7 @@ namespace Sentry.Protocol
         public const string Type = "device";
         public Device() { }
         public string? Architecture { get; set; }
-        public short? BatteryLevel { get; set; }
+        public float? BatteryLevel { get; set; }
         public string? BatteryStatus { get; set; }
         public System.DateTimeOffset? BootTime { get; set; }
         public string? Brand { get; set; }
@@ -1608,7 +1606,7 @@ namespace Sentry.Protocol
         public string? Name { get; set; }
         public Sentry.Protocol.DeviceOrientation? Orientation { get; set; }
         public int? ProcessorCount { get; set; }
-        public int? ProcessorFrequency { get; set; }
+        public float? ProcessorFrequency { get; set; }
         public float? ScreenDensity { get; set; }
         public int? ScreenDpi { get; set; }
         public string? ScreenResolution { get; set; }
