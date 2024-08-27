@@ -200,7 +200,8 @@ public class DeviceTests
     public void TimeZone_Serialisation_Symmetric()
     {
         // Arrange
-        var device = new Device {
+        var device = new Device
+        {
             Timezone = TimeZoneInfo.CreateCustomTimeZone(
                 "tz_id",
                 TimeSpan.FromHours(3),
