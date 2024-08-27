@@ -83,9 +83,6 @@ internal partial class BindableSentryOptions
         options.FailedRequestTargets = FailedRequestTargets?.Select(s => new SubstringOrRegexPattern(s)).ToList() ?? options.FailedRequestTargets;
         options.InitCacheFlushTimeout = InitCacheFlushTimeout ?? options.InitCacheFlushTimeout;
         options.DefaultTags = DefaultTags ?? options.DefaultTags;
-#pragma warning disable CS0618 // Type or member is obsolete
-        options.EnableTracing = EnableTracing ?? options.EnableTracing;
-#pragma warning restore CS0618 // Type or member is obsolete
         options.TracesSampleRate = TracesSampleRate ?? options.TracesSampleRate;
         options.ProfilesSampleRate = ProfilesSampleRate ?? options.ProfilesSampleRate;
         options.TracePropagationTargets = TracePropagationTargets?.Select(s => new SubstringOrRegexPattern(s)).ToList() ?? options.TracePropagationTargets;
