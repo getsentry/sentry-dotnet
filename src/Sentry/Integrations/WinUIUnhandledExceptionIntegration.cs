@@ -56,7 +56,7 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
         _options = options;
 
         // Hook the main event handler
-        if (options.AttachWinUIUnhandledExceptionHandler is {} manualAttachmentCallback)
+        if (options.AttachWinUIUnhandledExceptionHandler is { } manualAttachmentCallback)
         {
             manualAttachmentCallback(WinUIUnhandledExceptionHandler);
         }
