@@ -1814,6 +1814,16 @@ interface SentrySDK
     [Static]
     [Export ("replayIgnoreView:")]
     void ReplayIgnoreView (UIView view);
+
+    // +(void)startProfiler;
+    [Static]
+    [Export ("startProfiler")]
+    void StartProfiler ();
+
+    // +(void)stopProfiler;
+    [Static]
+    [Export ("stopProfiler")]
+    void StopProfiler ();
 }
 
 // @interface SentrySamplingContext : NSObject
