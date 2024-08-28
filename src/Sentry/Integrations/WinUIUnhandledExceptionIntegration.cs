@@ -56,7 +56,14 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
         _options = options;
 
         // Hook the main event handler
-        AttachEventHandler();
+        if (options.AttachWinUIUnhandledExceptionHandler is {} manualAttachmentCallback)
+        {
+            manualAttachmentCallback(WinUIUnhandledExceptionHandler);
+        }
+        else
+        {
+            AttachEventHandlerViaReflection();
+        }
     }
 
     private static Assembly? GetWinUIAssembly()
@@ -84,7 +91,7 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
     /// </summary>
     [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
     [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.", Justification = AotHelper.SuppressionJustification)]
-    private void AttachEventHandler()
+    private void AttachEventHandlerViaReflection()
     {
         try
         {
@@ -142,5 +149,10 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
         }
     }
 }
+
+/// <summary>
+/// Delegate for Sentry's WinUI UnhandledException event handler.
+/// </summary>
+public delegate void SentryWinUIUnhandledExceptionEventHandler(object sender, object e);
 
 #endif

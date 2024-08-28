@@ -1682,6 +1682,31 @@ public class SentryOptions
     /// </summary>
     public void DisableWinUiUnhandledExceptionIntegration()
         => RemoveDefaultIntegration(DefaultIntegrations.WinUiUnhandledExceptionIntegration);
+
+    /// <summary>
+    /// <para>Callback action that can be used to attach Sentry's WinUI unhandled exception handler.</para>
+    /// <para>
+    /// When Trimming is enabled Sentry is unable to use reflection to automatically registering its unhandled
+    /// exception handler, in WinUI 3 applications. In such cases, you will need to manually attach Sentry's unhandled
+    /// exception handler when initializing the Sentry SDK (see sample code below).
+    /// </para>
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// public App()
+    /// {
+    ///     SentrySdk.Init(options =>
+    ///     {
+    ///         /* ...other Sentry options */
+    ///         options.AttachWinUIUnhandledExceptionHandler = (SentryWinUIUnhandledExceptionEventHandler handler)
+    ///             => this.UnhandledException += (o, e) => handler(o, e);
+    ///     });
+    ///
+    ///     this.InitializeComponent();
+    /// }
+    /// </code>
+    /// </example>
+    public Action<SentryWinUIUnhandledExceptionEventHandler>? AttachWinUIUnhandledExceptionHandler { get; set; }
 #endif
 
 #if NET8_0_OR_GREATER
