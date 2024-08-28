@@ -1,3 +1,4 @@
+using Sentry.Internal;
 using Sentry.Protocol.Envelopes;
 using Sentry.Protocol.Metrics;
 
@@ -47,11 +48,8 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// Returns a dummy transaction.
     /// </summary>
-    public ITransactionTracer StartTransaction(
-        ITransactionContext context,
-        IReadOnlyDictionary<string, object?> customSamplingContext) =>
-        // Transactions from DisabledHub are always sampled out
-        new TransactionTracer(this, context) { IsSampled = false };
+    public ITransactionTracer StartTransaction(ITransactionContext context,
+        IReadOnlyDictionary<string, object?> customSamplingContext) => NoOpTransaction.Instance;
 
     /// <summary>
     /// No-Op.
