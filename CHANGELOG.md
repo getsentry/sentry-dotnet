@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Fixes
+- On mobile devices, the SDK no longer throws a `FormatException` for `ProcessorFrequency` when trying to report native events ([#3541](https://github.com/getsentry/sentry-dotnet/pull/3541))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.35.0 to v8.36.0 ([#3570](https://github.com/getsentry/sentry-dotnet/pull/3570), [#3575](https://github.com/getsentry/sentry-dotnet/pull/3575))
@@ -29,7 +32,6 @@
 
 ### Fixes
 
-- On mobile devices, the SDK no longer throws a `FormatException` for `ProcessorFrequency` when trying to report native events ([#3541](https://github.com/getsentry/sentry-dotnet/pull/3541))
 - Unfinished spans are now correctly stored and retrieved by the CachingTransport ([#3533](https://github.com/getsentry/sentry-dotnet/pull/3533))
 
 ### Dependencies
