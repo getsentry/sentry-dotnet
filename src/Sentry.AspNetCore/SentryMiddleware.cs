@@ -6,6 +6,7 @@ using Sentry.AspNetCore.Extensions;
 using Sentry.Ben.BlockingDetector;
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Protocol;
 using Sentry.Reflection;
 using IHostingEnvironment = Microsoft.AspNetCore.Hosting.IWebHostEnvironment;
 
@@ -216,7 +217,9 @@ internal class SentryMiddleware : IMiddleware
 
             void CaptureException(Exception e, SentryId evtId, string mechanism, string description)
             {
-                e.SetSentryMechanism(mechanism, description, handled: false);
+                var userHandledSet = e.Data.Contains(Mechanism.HandledKey);
+                var userHandledValue = e.Data[Mechanism.HandledKey] as bool?;
+                e.SetSentryMechanism(mechanism, description, handled: userHandledSet ? userHandledValue : false);
 
                 var evt = new SentryEvent(e, eventId: evtId);
 
