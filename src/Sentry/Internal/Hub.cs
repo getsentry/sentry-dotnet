@@ -450,7 +450,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
             if (evt.Exception is { } exception)
             {
-                this.AddBreadcrumb(_clock, exception.Message, level: BreadcrumbLevel.Error);
+                breadcrumbScope.AddBreadcrumb(exception.Message, level: BreadcrumbLevel.Critical);
             }
 
             return id;

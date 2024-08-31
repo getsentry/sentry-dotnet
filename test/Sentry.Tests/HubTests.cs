@@ -296,7 +296,7 @@ public partial class HubTests
         using var assertionScope = new AssertionScope();
         var breadcrumb = scope.Breadcrumbs.Last();
         breadcrumb.Message.Should().Be(evt.Exception!.Message);
-        breadcrumb.Level.Should().Be(BreadcrumbLevel.Error);
+        breadcrumb.Level.Should().Be(BreadcrumbLevel.Critical);
     }
 
     internal class EvilContext
