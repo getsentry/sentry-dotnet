@@ -47,7 +47,6 @@ public class SentrySinkTests
     public void Emit_WithException_BreadcrumbFromException()
     {
         var expectedException = new Exception("expected message");
-        const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Critical;
 
         var sut = _fixture.GetSut();
 
@@ -56,13 +55,9 @@ public class SentrySinkTests
 
         sut.Emit(evt);
 
-        var b = _fixture.Scope.Breadcrumbs.First();
-        Assert.Equal(expectedException.Message, b.Message);
-        Assert.Equal(DateTimeOffset.MaxValue, b.Timestamp);
-        Assert.Null(b.Category);
-        Assert.Equal(expectedLevel, b.Level);
-        Assert.Null(b.Type);
-        Assert.Null(b.Data);
+        // Breadcrumbs get created automatically by the hub for captured exceptions... we don't want our sink
+        // to be creating these also
+        _fixture.Scope.Breadcrumbs.Should().BeEmpty();
     }
 
     [Fact]
