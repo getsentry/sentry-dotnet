@@ -379,6 +379,8 @@ internal class Hub : IHub, IMetricHub, IDisposable
         evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options);
     }
 
+    public bool CaptureEnvelope(Envelope envelope) => CurrentClient.CaptureEnvelope(envelope);
+
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
         => CaptureEvent(evt, null, configureScope);
 
@@ -394,7 +396,10 @@ internal class Hub : IHub, IMetricHub, IDisposable
             var clonedScope = CurrentScope.Clone();
             configureScope(clonedScope);
 
-            return CaptureEvent(evt, clonedScope, hint);
+            // Although we clone a temporary scope for the configureScope action, for the second scope
+            // argument (the breadcrumbScope) we pass in the current scope... this is because we want
+            // a breadcrumb to be left on the current scope for exception events
+            return CaptureEvent(evt, clonedScope, CurrentScope, hint);
         }
         catch (Exception e)
         {
@@ -403,9 +408,10 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
-    public bool CaptureEnvelope(Envelope envelope) => CurrentClient.CaptureEnvelope(envelope);
-
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, SentryHint? hint = null)
+        => CaptureEvent(evt, scope ?? CurrentScope, scope ?? CurrentScope, hint);
+
+    private SentryId CaptureEvent(SentryEvent evt, Scope eventScope, Scope breadcrumbScope, SentryHint? hint)
     {
         if (!IsEnabled)
         {
@@ -414,10 +420,8 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
         try
         {
-            scope ??= CurrentScope;
-
             // We get the span linked to the event or fall back to the current span
-            var span = GetLinkedSpan(evt) ?? scope.Span;
+            var span = GetLinkedSpan(evt) ?? eventScope.Span;
             if (span is not null)
             {
                 if (span.IsSampled is not false)
@@ -428,20 +432,25 @@ internal class Hub : IHub, IMetricHub, IDisposable
             else
             {
                 // If there is no span on the scope (and not just no sampled one), fall back to the propagation context
-                ApplyTraceContextToEvent(evt, scope.PropagationContext);
+                ApplyTraceContextToEvent(evt, eventScope.PropagationContext);
             }
 
             // Now capture the event with the Sentry client on the current scope.
-            var id = CurrentClient.CaptureEvent(evt, scope, hint);
-            scope.LastEventId = id;
-            scope.SessionUpdate = null;
+            var id = CurrentClient.CaptureEvent(evt, eventScope, hint);
+            eventScope.LastEventId = id;
+            eventScope.SessionUpdate = null;
 
-            if (evt.HasTerminalException() && scope.Transaction is { } transaction)
+            if (evt.HasTerminalException() && eventScope.Transaction is { } transaction)
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
                 _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
                 transaction.Finish(SpanStatus.Aborted);
+            }
+
+            if (evt.Exception is { } exception)
+            {
+                this.AddBreadcrumb(_clock, exception.Message, level: BreadcrumbLevel.Error);
             }
 
             return id;

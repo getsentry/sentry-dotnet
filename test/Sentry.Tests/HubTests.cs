@@ -269,6 +269,36 @@ public partial class HubTests
         Assert.Equal(child.ParentSpanId, evt.Contexts.Trace.ParentSpanId);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CaptureEvent_Exception_LeavesBreadcrumb(bool withScopeCallback)
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+        var evt = new SentryEvent(new Exception());
+        var scope = hub.ScopeManager.GetCurrent().Key;
+
+        // Act
+        if (withScopeCallback)
+        {
+            hub.CaptureEvent(evt, s => s.ClearBreadcrumbs());
+        }
+        else
+        {
+            scope.ClearBreadcrumbs();
+            hub.CaptureEvent(evt);
+        }
+
+        // Assert
+        scope.Breadcrumbs.Should().NotBeEmpty();
+        using var assertionScope = new AssertionScope();
+        var breadcrumb = scope.Breadcrumbs.Last();
+        breadcrumb.Message.Should().Be(evt.Exception!.Message);
+        breadcrumb.Level.Should().Be(BreadcrumbLevel.Error);
+    }
+
     internal class EvilContext
     {
         // This property will throw an exception during serialization.
