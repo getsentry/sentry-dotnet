@@ -55,6 +55,9 @@ internal sealed class SentryLogger : ILogger
             var @event = CreateEvent(logLevel, eventId, state, exception, message, CategoryName);
 
             _ = _hub.CaptureEvent(@event);
+
+            // Capturing exception events adds a breadcrumb automatically... we don't want to add another one
+            return;
         }
 
         // Even if it was sent as event, add breadcrumb so next event includes it

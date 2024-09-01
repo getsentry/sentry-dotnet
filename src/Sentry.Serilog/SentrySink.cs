@@ -115,7 +115,7 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
 
             hub.CaptureEvent(evt);
 
-            // Capturing exception events adds a breadcrumb automatically... we don't want our sink to add another one
+            // Capturing exception events adds a breadcrumb automatically... we don't want to add another one
             return;
         }
 

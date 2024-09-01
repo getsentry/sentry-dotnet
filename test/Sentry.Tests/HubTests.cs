@@ -281,15 +281,9 @@ public partial class HubTests
         var scope = hub.ScopeManager.GetCurrent().Key;
 
         // Act
-        if (withScopeCallback)
-        {
-            hub.CaptureEvent(evt, s => s.ClearBreadcrumbs());
-        }
-        else
-        {
-            scope.ClearBreadcrumbs();
-            hub.CaptureEvent(evt);
-        }
+        var id = withScopeCallback
+            ? hub.CaptureEvent(evt, s => s.ClearBreadcrumbs())
+            : hub.CaptureEvent(evt);
 
         // Assert
         scope.Breadcrumbs.Should().NotBeEmpty();

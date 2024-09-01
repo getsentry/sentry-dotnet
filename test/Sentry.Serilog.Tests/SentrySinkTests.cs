@@ -44,7 +44,7 @@ public class SentrySinkTests
     }
 
     [Fact]
-    public void Emit_WithException_BreadcrumbFromException()
+    public void Emit_WithException_NoBreadcrumbFromException()
     {
         var expectedException = new Exception("expected message");
 
@@ -55,8 +55,8 @@ public class SentrySinkTests
 
         sut.Emit(evt);
 
-        // Breadcrumbs get created automatically by the hub for captured exceptions... we don't want our sink
-        // to be creating these also
+        // Breadcrumbs get created automatically by the hub for captured exceptions... we don't want
+        // our logging integration to be creating these also
         _fixture.Scope.Breadcrumbs.Should().BeEmpty();
     }
 
