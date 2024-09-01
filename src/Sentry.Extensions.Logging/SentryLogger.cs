@@ -60,7 +60,6 @@ internal sealed class SentryLogger : ILogger
             return;
         }
 
-        // Even if it was sent as event, add breadcrumb so next event includes it
         if (ShouldAddBreadcrumb(logLevel, eventId, exception))
         {
             var data = eventId.ToDictionaryOrNull();
