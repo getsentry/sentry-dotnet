@@ -106,6 +106,9 @@ jobs:
         uses: ./.github/actions/buildcocoasdk
 
       - name: Restore .NET Dependencies
+        run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
+
+      - name: Build
         shell: pwsh
         run: |
           $RUNTIME_OPTION = ""
@@ -118,7 +121,7 @@ jobs:
               $RUNTIME_OPTION = "--runtime win-x64"
           }
       
-          dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo $RUNTIME_OPTION
+          dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true $RUNTIME_OPTION
       
       - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
