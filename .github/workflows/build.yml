@@ -111,7 +111,7 @@ jobs:
           $RUNTIME_OPTION = ""
 
           if ($env:RUNNER_OS -eq "macOS") {
-              $RUNTIME_OPTION = "--runtime osx-arm64"
+              $RUNTIME_OPTION = "-r:osx-arm64"
           } 
           
           dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo $RUNTIME_OPTION
