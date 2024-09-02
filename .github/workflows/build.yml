@@ -106,16 +106,17 @@ jobs:
         uses: ./.github/actions/buildcocoasdk
 
       - name: Restore .NET Dependencies
+        shell: pwsh
         run: |
-          RUNTIME_OPTION=""
-      
-          if [[ "${{ runner.os }}" == "Linux" ]]; then
-            RUNTIME_OPTION="--runtime linux-x64"
-          elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            RUNTIME_OPTION="--runtime osx-arm64"
-          elif [[ "${{ runner.os }}" == "Windows" ]]; then
-            RUNTIME_OPTION="--runtime win-x64"
-          fi
+          $RUNTIME_OPTION = ""
+
+          if ($env:RUNNER_OS -eq "Linux") {
+              $RUNTIME_OPTION = "--runtime linux-x64"
+          } elseif ($env:RUNNER_OS -eq "macOS") {
+              $RUNTIME_OPTION = "--runtime osx-arm64"
+          } elseif ($env:RUNNER_OS -eq "Windows") {
+              $RUNTIME_OPTION = "--runtime win-x64"
+          }
       
           dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo $RUNTIME_OPTION
       
