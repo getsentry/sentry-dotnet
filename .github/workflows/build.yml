@@ -106,22 +106,15 @@ jobs:
         uses: ./.github/actions/buildcocoasdk
 
       - name: Restore .NET Dependencies
-        run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
-
-      - name: Build
         shell: pwsh
         run: |
           $RUNTIME_OPTION = ""
 
-          if ($env:RUNNER_OS -eq "Linux") {
-              $RUNTIME_OPTION = "--runtime linux-x64"
-          } elseif ($env:RUNNER_OS -eq "macOS") {
+          if ($env:RUNNER_OS -eq "macOS") {
               $RUNTIME_OPTION = "--runtime osx-arm64"
-          } elseif ($env:RUNNER_OS -eq "Windows") {
-              $RUNTIME_OPTION = "--runtime win-x64"
-          }
-      
-          dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true $RUNTIME_OPTION
+          } 
+          
+          dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo $RUNTIME_OPTION
       
       - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
