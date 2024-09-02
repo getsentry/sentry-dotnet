@@ -106,10 +106,21 @@ jobs:
         uses: ./.github/actions/buildcocoasdk
 
       - name: Restore .NET Dependencies
-        run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
-
+        run: |
+          RUNTIME_OPTION=""
+      
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
+            RUNTIME_OPTION="--runtime linux-x64"
+          elif [[ "${{ runner.os }}" == "macOS" ]]; then
+            RUNTIME_OPTION="--runtime osx-arm64"
+          elif [[ "${{ runner.os }}" == "Windows" ]]; then
+            RUNTIME_OPTION="--runtime win-x64"
+          fi
+      
+          dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo $RUNTIME_OPTION
+      
       - name: Build
-        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:diagnostic -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
+        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
 
       - name: Test
         run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
