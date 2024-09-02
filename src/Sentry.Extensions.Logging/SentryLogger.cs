@@ -74,7 +74,7 @@ internal sealed class SentryLogger : ILogger
 
             _hub.AddBreadcrumb(
                 _clock,
-                message ?? exception?.Message!,
+                (message ?? exception?.Message)!,
                 CategoryName,
                 null,
                 data,

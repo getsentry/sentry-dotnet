@@ -281,7 +281,7 @@ public partial class HubTests
         var scope = hub.ScopeManager.GetCurrent().Key;
 
         // Act
-        var id = withScopeCallback
+        _ = withScopeCallback
             ? hub.CaptureEvent(evt, s => s.ClearBreadcrumbs())
             : hub.CaptureEvent(evt);
 
@@ -291,6 +291,40 @@ public partial class HubTests
         var breadcrumb = scope.Breadcrumbs.Last();
         breadcrumb.Message.Should().Be(evt.Exception!.Message);
         breadcrumb.Level.Should().Be(BreadcrumbLevel.Critical);
+        breadcrumb.Category.Should().Be("Exception");
+    }
+
+    [Fact]
+    public void CaptureEvent_WithMessageAndException_StoresExceptionMessageAsData()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+        var evt = new SentryEvent(new Exception())
+        {
+            Message = new SentryMessage
+            {
+                Formatted = "formatted",
+                Message = "message"
+            }
+        };
+        var scope = hub.ScopeManager.GetCurrent().Key;
+
+        // Act
+        hub.CaptureEvent(evt);
+
+        // Assert
+        scope.Breadcrumbs.Should().NotBeEmpty();
+        using var assertionScope = new AssertionScope();
+        var breadcrumb = scope.Breadcrumbs.Last();
+        breadcrumb.Message.Should().Be(evt.Message.Formatted);
+        breadcrumb.Data.Should().BeEquivalentTo(
+            new Dictionary<string, string>
+            {
+                ["exception_message"] = evt.Exception!.Message
+            });
+        breadcrumb.Level.Should().Be(BreadcrumbLevel.Critical);
+        breadcrumb.Category.Should().Be("Exception");
     }
 
     internal class EvilContext

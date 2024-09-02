@@ -450,7 +450,26 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
             if (evt.Exception is { } exception)
             {
-                breadcrumbScope.AddBreadcrumb(exception.Message, level: BreadcrumbLevel.Critical);
+                var exceptionMessage = exception.Message ?? "";
+                var formatted = evt.Message?.Formatted;
+
+                string breadcrumbMessage;
+                Dictionary<string, string>? data = null;
+                if (string.IsNullOrWhiteSpace(formatted))
+                {
+                    breadcrumbMessage = exceptionMessage;
+                }
+                else
+                {
+                    breadcrumbMessage = formatted;
+                    // Exception.Message won't be used as Breadcrumb message
+                    // Avoid losing it by adding as data:
+                    data = new Dictionary<string, string>
+                    {
+                        {"exception_message", exceptionMessage}
+                    };
+                }
+                breadcrumbScope.AddBreadcrumb(breadcrumbMessage, "Exception", data: data, level: BreadcrumbLevel.Critical);
             }
 
             return id;
