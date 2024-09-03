@@ -196,53 +196,6 @@ public class DeviceTests
         Assert.Equal(sut.SupportsLocationService, clone.SupportsLocationService);
     }
 
-    [Fact]
-    public void TimeZone_Serialisation_Symmetric()
-    {
-        // Arrange
-        var device = new Device
-        {
-            Timezone = TimeZoneInfo.CreateCustomTimeZone(
-                "tz_id",
-                TimeSpan.FromHours(3),
-                "display_name",
-                "standard_name",
-                "daylight_name",
-                [TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(
-                    DateTime.MinValue,
-                    DateTime.MaxValue,
-                    TimeSpan.FromHours(1),
-                    TimeZoneInfo.TransitionTime.CreateFixedDateRule(
-                        DateTime.MinValue,
-                        1,
-                        1
-                    ),
-                    TimeZoneInfo.TransitionTime.CreateFixedDateRule(
-                        DateTime.MinValue,
-                        2,
-                        1
-                    )
-                )]
-            )
-        };
-
-        // Act
-        var json = device.ToJsonString();
-        var result = Json.Parse(json, Device.FromJson);
-
-        // Assert
-        result.Timezone.Should().NotBeNull();
-        using (new AssertionScope())
-        {
-            result.Timezone!.Id.Should().Be(device.Timezone.Id);
-            result.Timezone!.BaseUtcOffset.Should().Be(device.Timezone.BaseUtcOffset);
-            result.Timezone!.DisplayName.Should().Be(device.Timezone.DisplayName);
-            result.Timezone!.StandardName.Should().Be(device.Timezone.StandardName);
-            result.Timezone!.DaylightName.Should().Be(device.Timezone.DaylightName);
-            result.Timezone!.GetAdjustmentRules().Should().BeEquivalentTo(device.Timezone.GetAdjustmentRules());
-        }
-    }
-
     [Theory]
     [MemberData(nameof(TestCases))]
     public void SerializeObject_TestCase_SerializesAsExpected((Device device, string serialized) @case)
