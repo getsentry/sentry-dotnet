@@ -34,6 +34,17 @@ jobs:
           key: sentry-native-${{ runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           enableCrossOsArchive: true
 
+      - name: Free Disk Space (Ubuntu)
+        if: matrix.os == 'ubuntu'
+        uses: jlumbroso/free-disk-space@f68fdb76e2ea636224182cfb7377ff9a1708f9b8
+        with:
+          android: true
+          dotnet: false
+          haskell: true
+          large-packages: false
+          docker-images: false
+          swap-storage: true
+
       - name: Install build dependencies
         if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'Linux'
         run: |
@@ -106,10 +117,12 @@ jobs:
         uses: ./.github/actions/buildcocoasdk
 
       - name: Restore .NET Dependencies
-        run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
+        run: |
+          dotnet workload restore
+          dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
       - name: Build
-        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
+        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
 
       - name: Test
         run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
