@@ -19,6 +19,8 @@ runs:
 
     - name: Setup Android SDK
       uses: android-actions/setup-android@07976c6290703d34c16d382cb36445f98bb43b1f # v3.2.0
+      with:
+        log-accepted-android-sdk-licenses: false
 
     - name: Set Java Version
       uses: actions/setup-java@v3
