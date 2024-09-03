@@ -70,14 +70,15 @@ jobs:
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
 
-      - name: Clean docker images
-        run: docker rmi `docker images -q`
-
       - name: Check disk space usage
         if: matrix.os == 'macos-latest'
         run: |
-          df -h
-          du -hd 1 / 2>/dev/null | sort -hr
+          du -hd 1 /System 2>/dev/null | sort -hr
+          du -hd 1 /Library 2>/dev/null | sort -hr
+          du -hd 1 /Users 2>/dev/null | sort -hr
+          du -hd 1 /Applications 2>/dev/null | sort -hr
+          du -hd 1 /opt 2>/dev/null | sort -hr
+          du -hd 1 /usr 2>/dev/null | sort -hr
 
       - name: Checkout
         uses: actions/checkout@v4
