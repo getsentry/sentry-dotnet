@@ -15,8 +15,6 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
     /// </summary>
     public const string Type = "device";
 
-    // TODO: remove this and replace with separate properties for 'timezone' and 'timezone_display_name'
-    // since we don't carry enough data to deterministically recreate a TimeZoneInfo instance.
     /// <summary>
     /// The timezone of the device.
     /// </summary>
