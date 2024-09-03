@@ -70,6 +70,24 @@ jobs:
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
 
+      - name: Free Disk Space Before
+        if: matrix.os == 'macos-latest'
+        run: df -h
+
+      # We can remove macOS versions prior to 15.4
+      - name: Remove unused applications
+        if: matrix.os == 'macos-latest'
+        run: |
+          sudo rm -rf /Applications/Xcode_14.3.1.app
+          sudo rm -rf /Applications/Xcode_15.0.1.app
+          sudo rm -rf /Applications/Xcode_15.1.app
+          sudo rm -rf /Applications/Xcode_15.2.app
+          sudo rm -rf /Applications/Xcode_15.3.app
+
+      - name: Free Disk Space After
+        if: matrix.os == 'macos-latest'
+        run: df -h
+
       - name: Check disk space usage
         if: matrix.os == 'macos-latest'
         run: |
