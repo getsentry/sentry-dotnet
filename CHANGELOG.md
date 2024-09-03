@@ -5,6 +5,9 @@
 ### Fixes
 - On mobile devices, the SDK no longer throws a `FormatException` for `ProcessorFrequency` when trying to report native events ([#3541](https://github.com/getsentry/sentry-dotnet/pull/3541))
 
+### API Changes
+- When the Sentry SDK is disabled, `SentrySdk.StartTransaction()` now returns a `NoOpTransaction`, which avoids unnecessary memory allocations ([#3581](https://github.com/getsentry/sentry-dotnet/pull/3581))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.35.0 to v8.36.0 ([#3570](https://github.com/getsentry/sentry-dotnet/pull/3570), [#3575](https://github.com/getsentry/sentry-dotnet/pull/3575))

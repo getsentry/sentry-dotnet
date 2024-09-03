@@ -8,6 +8,14 @@ public class HttpContextExtensionsTests
     public void StartSentryTransaction_CreatesValidTransaction()
     {
         // Arrange
+        using var _ = SentrySdk.UseHub(new Hub(
+            new SentryOptions
+            {
+                Dsn = ValidDsn
+            },
+            Substitute.For<ISentryClient>()
+        ));
+
         var context = HttpContextBuilder.Build();
 
         // Act
@@ -69,12 +77,15 @@ public class HttpContextExtensionsTests
     public void StartSentryTransaction_SendDefaultPii_set_to_true_sets_cookies()
     {
         // Arrange
+        using var _ = SentrySdk.UseHub(new Hub(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                SendDefaultPii = true
+            },
+            Substitute.For<ISentryClient>()
+        ));
         var context = HttpContextBuilder.BuildWithCookies(new[] { new HttpCookie("foo", "bar") });
-
-        SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions
-        {
-            SendDefaultPii = true
-        };
 
         // Act
         var transaction = context.StartSentryTransaction();
@@ -87,12 +98,15 @@ public class HttpContextExtensionsTests
     public void StartSentryTransaction_SendDefaultPii_set_to_true_does_not_set_cookies_if_none_found()
     {
         // Arrange
+        using var _ = SentrySdk.UseHub(new Hub(
+            new SentryOptions
+            {
+                Dsn = ValidDsn,
+                SendDefaultPii = true
+            },
+            Substitute.For<ISentryClient>()
+        ));
         var context = HttpContextBuilder.BuildWithCookies(new HttpCookie[] { });
-
-        SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions
-        {
-            SendDefaultPii = true
-        };
 
         // Act
         var transaction = context.StartSentryTransaction();
