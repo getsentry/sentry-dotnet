@@ -42,19 +42,19 @@ namespace Sentry
     }
     public static class BuiltInSystemDiagnosticsMeters
     {
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreDiagnostics;
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreHeaderParsing;
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreHosting;
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreHttpConnections;
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreRateLimiting;
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreRouting;
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreServerKestrel;
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftExtensionsDiagnosticsHealthChecks;
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftExtensionsDiagnosticsResourceMonitoring;
-        public static readonly Sentry.SubstringOrRegexPattern OpenTelemetryInstrumentationRuntime;
-        public static readonly Sentry.SubstringOrRegexPattern SystemNetHttp;
-        public static readonly Sentry.SubstringOrRegexPattern SystemNetNameResolution;
-        public static System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> All { get; }
+        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreDiagnostics;
+        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreHeaderParsing;
+        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreHosting;
+        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreHttpConnections;
+        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreRateLimiting;
+        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreRouting;
+        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreServerKestrel;
+        public static readonly Sentry.StringOrRegex MicrosoftExtensionsDiagnosticsHealthChecks;
+        public static readonly Sentry.StringOrRegex MicrosoftExtensionsDiagnosticsResourceMonitoring;
+        public static readonly Sentry.StringOrRegex OpenTelemetryInstrumentationRuntime;
+        public static readonly Sentry.StringOrRegex SystemNetHttp;
+        public static readonly Sentry.StringOrRegex SystemNetNameResolution;
+        public static System.Collections.Generic.IList<Sentry.StringOrRegex> All { get; }
     }
     public class ByteAttachmentContent : Sentry.IAttachmentContent
     {
@@ -106,8 +106,8 @@ namespace Sentry
     public class ExperimentalMetricsOptions
     {
         public ExperimentalMetricsOptions() { }
-        public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> CaptureSystemDiagnosticsInstruments { get; set; }
-        public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> CaptureSystemDiagnosticsMeters { get; set; }
+        public System.Collections.Generic.IList<Sentry.StringOrRegex> CaptureSystemDiagnosticsInstruments { get; set; }
+        public System.Collections.Generic.IList<Sentry.StringOrRegex> CaptureSystemDiagnosticsMeters { get; set; }
         public bool EnableCodeLocations { get; set; }
     }
     public class FileAttachmentContent : Sentry.IAttachmentContent
@@ -671,7 +671,7 @@ namespace Sentry
         public string? Environment { get; set; }
         public Sentry.ExperimentalMetricsOptions? ExperimentalMetrics { get; set; }
         public System.Collections.Generic.IList<Sentry.HttpStatusCodeRange> FailedRequestStatusCodes { get; set; }
-        public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> FailedRequestTargets { get; set; }
+        public System.Collections.Generic.IList<Sentry.StringOrRegex> FailedRequestTargets { get; set; }
         public System.TimeSpan FlushTimeout { get; set; }
         public System.Net.IWebProxy? HttpProxy { get; set; }
         public System.TimeSpan InitCacheFlushTimeout { get; set; }
@@ -697,8 +697,8 @@ namespace Sentry
         public System.TimeSpan ShutdownTimeout { get; set; }
         public string SpotlightUrl { get; set; }
         public Sentry.StackTraceMode StackTraceMode { get; set; }
-        public System.Collections.Generic.ICollection<Sentry.SubstringOrRegexPattern> TagFilters { get; set; }
-        public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> TracePropagationTargets { get; set; }
+        public System.Collections.Generic.IList<Sentry.StringOrRegex> TagFilters { get; set; }
+        public System.Collections.Generic.IList<Sentry.StringOrRegex> TracePropagationTargets { get; set; }
         public double? TracesSampleRate { get; set; }
         public System.Func<Sentry.TransactionSamplingContext, double?>? TracesSampler { get; set; }
         public Sentry.Extensibility.ITransport? Transport { get; set; }
@@ -1118,16 +1118,16 @@ namespace Sentry
         public StreamAttachmentContent(System.IO.Stream stream) { }
         public System.IO.Stream GetStream() { }
     }
-    [System.ComponentModel.TypeConverter(typeof(Sentry.SubstringOrRegexPatternTypeConverter))]
-    public class SubstringOrRegexPattern
+    [System.ComponentModel.TypeConverter(typeof(Sentry.StringOrRegexTypeConverter))]
+    public class StringOrRegex
     {
-        public SubstringOrRegexPattern(System.Text.RegularExpressions.Regex regex) { }
-        public SubstringOrRegexPattern(string substringOrRegexPattern, System.StringComparison comparison = 5) { }
+        public StringOrRegex(string stringOrRegex) { }
+        public StringOrRegex(System.Text.RegularExpressions.Regex regex) { }
         public override bool Equals(object? obj) { }
         public override int GetHashCode() { }
         public override string ToString() { }
-        public static Sentry.SubstringOrRegexPattern op_Implicit(string substringOrRegexPattern) { }
-        public static Sentry.SubstringOrRegexPattern op_Implicit(System.Text.RegularExpressions.Regex regex) { }
+        public static Sentry.StringOrRegex op_Implicit(string stringOrRegex) { }
+        public static Sentry.StringOrRegex op_Implicit(System.Text.RegularExpressions.Regex regex) { }
     }
     public class TransactionContext : Sentry.SpanContext, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext
     {

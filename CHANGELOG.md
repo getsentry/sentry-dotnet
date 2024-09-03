@@ -9,6 +9,7 @@
 - The ITraceContext now includes an [Origin](https://develop.sentry.dev/sdk/telemetry/traces/trace-origin/), which is set automatically and is primarily used internally by the Sentry server ([#3564](https://github.com/getsentry/sentry-dotnet/pull/3564))
 - `Device.BatteryLevel` and `Device.ProcessorFrequency` are now stored as floats rather than ints, to align with the Cocoa and Java SDKs ([#3567](https://github.com/getsentry/sentry-dotnet/pull/3567))
 - `SentryOptions.EnableTracing` has been removed. Instead, tracing should be enabled or disabled by setting the `SentryOptions.TracesSampleRate` or by using `SentryOptions.TracesSampler` to configure a sampling function ([#3569](https://github.com/getsentry/sentry-dotnet/pull/3569))
+- The `FailedRequestTargets`, `TagFilters` and `TracePropagationTargets` options have all been changed from `SubstringOrRegexPattern` to `IList<StringOrRegex>` ([#3566](https://github.com/getsentry/sentry-dotnet/pull/3566))
 
 ## 4.10.2
 
