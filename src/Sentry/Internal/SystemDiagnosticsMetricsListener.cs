@@ -24,8 +24,8 @@ internal class SystemDiagnosticsMetricsListener : IDisposable
         _metricsAggregator = new Lazy<IMetricAggregator>(metricsAggregatorResolver);
         _sentryListener.InstrumentPublished = (instrument, listener) =>
         {
-            if (metricsOptions.CaptureSystemDiagnosticsMeters.ContainsMatch(instrument.Meter.Name)
-                || metricsOptions.CaptureSystemDiagnosticsInstruments.ContainsMatch(instrument.Name))
+            if (metricsOptions.CaptureSystemDiagnosticsMeters.MatchesSubstringOrRegex(instrument.Meter.Name)
+                || metricsOptions.CaptureSystemDiagnosticsInstruments.MatchesSubstringOrRegex(instrument.Name))
             {
                 listener.EnableMeasurementEvents(instrument);
             }
