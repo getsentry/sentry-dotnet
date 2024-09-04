@@ -1,5 +1,6 @@
 using System.Net;
 using Samples.AspNetCore.Mvc;
+using Sentry.AspNetCore;
 using Sentry.Extensibility;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,8 +18,6 @@ builder.WebHost.UseSentry(options =>
 
         options.MaxBreadcrumbs = 200;
 
-        options.TracesSampleRate = 1.0;
-
         // Set a proxy for outgoing HTTP connections
         options.HttpProxy = null; // new WebProxy("https://localhost:3128");
 
@@ -31,7 +30,33 @@ builder.WebHost.UseSentry(options =>
         options.MaxQueueItems = 100;
         options.ShutdownTimeout = TimeSpan.FromSeconds(5);
 
-        options.TracesSampleRate = 1.0; // For production you may want to lower this to stay inside your quota
+        options.TracesSampleRate = 1.0; // For production, you may want to lower this to stay inside your quota
+
+        // In addition to (or instead of) setting the TracesSampleRate to a fixed value, you can also define a function
+        // that calculates the sample rate dynamically based on the current context.
+        options.TracesSampler = ctx =>
+        {
+            // In distributed tracing scenarios, we may want to respect upstream sampling decisions... for example, if
+            // the javascript frontend contains tracing instrumentation, a decision not to sample this request may
+            // already have been made. In that case, we don't want to sample this request since it would result in an
+            // incomplete trace.
+            if (ctx.TransactionContext.IsParentSampled == false)
+            {
+                // If the parent transaction is not sampled, don't sample this one either
+                return 0.0;
+            }
+
+            // Only sample 30% of the requests to this /home/sampler route
+            var httpPath = ctx.TryGetHttpPath();
+            if (string.Equals(httpPath, "/home/sampler", StringComparison.OrdinalIgnoreCase))
+            {
+                return 0.3;
+            }
+
+            // For all other routes, use the statically configured sample rate. Returning null here would achieve the
+            // same thing (if the TraceSampler function returns null, the SDK falls back to the TracesSampleRate)
+            return options.TracesSampleRate;
+        };
 
         // Configures the root scope
         options.ConfigureScope(s => s.SetTag("Always sent", "this tag"));
