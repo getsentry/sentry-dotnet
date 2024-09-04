@@ -13,6 +13,15 @@ public class HomeController(ILogger<HomeController> logger) : Controller
         return View();
     }
 
+    [HttpGet("[controller]/sampler")]
+    public Task<string> Sampler()
+    {
+        // The sampling for this route is determined by the TraceSampler function configured in Program.cs when
+        // initializing the Sentry SDK... here we just display the result of that sampling decision.
+        var transaction = SentrySdk.GetSpan()?.GetTransaction();
+        return Task.FromResult($"Sampled: {transaction?.IsSampled}");
+    }
+
     // GET /home/block/true or /home/block/false to observe events
     [HttpGet("[controller]/block/{block?}")]
     public async Task<string> Block([FromRoute] bool block)
