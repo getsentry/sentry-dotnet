@@ -381,6 +381,42 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
     public bool CaptureEnvelope(Envelope envelope) => CurrentClient.CaptureEnvelope(envelope);
 
+    private void AddBreadcrumbForException(SentryEvent evt, Scope scope)
+    {
+        try
+        {
+            if (!IsEnabled || evt.Exception is not { } exception)
+            {
+                return;
+            }
+
+            var exceptionMessage = exception.Message ?? "";
+            var formatted = evt.Message?.Formatted;
+
+            string breadcrumbMessage;
+            Dictionary<string, string>? data = null;
+            if (string.IsNullOrWhiteSpace(formatted))
+            {
+                breadcrumbMessage = exceptionMessage;
+            }
+            else
+            {
+                breadcrumbMessage = formatted;
+                // Exception.Message won't be used as Breadcrumb message
+                // Avoid losing it by adding as data:
+                data = new Dictionary<string, string>
+                {
+                    {"exception_message", exceptionMessage}
+                };
+            }
+            scope.AddBreadcrumb(breadcrumbMessage, "Exception", data: data, level: BreadcrumbLevel.Critical);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to store breadcrumb for exception event: {0}", evt.EventId);
+        }
+    }
+
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
         => CaptureEvent(evt, null, configureScope);
 
@@ -399,7 +435,9 @@ internal class Hub : IHub, IMetricHub, IDisposable
             // Although we clone a temporary scope for the configureScope action, for the second scope
             // argument (the breadcrumbScope) we pass in the current scope... this is because we want
             // a breadcrumb to be left on the current scope for exception events
-            return CaptureEvent(evt, clonedScope, CurrentScope, hint);
+            var eventId = CaptureEvent(evt, hint, clonedScope);
+            AddBreadcrumbForException(evt, CurrentScope);
+            return eventId;
         }
         catch (Exception e)
         {
@@ -409,9 +447,14 @@ internal class Hub : IHub, IMetricHub, IDisposable
     }
 
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, SentryHint? hint = null)
-        => CaptureEvent(evt, scope ?? CurrentScope, scope ?? CurrentScope, hint);
+    {
+        scope ??= CurrentScope;
+        var eventId = CaptureEvent(evt, hint, scope);
+        AddBreadcrumbForException(evt, scope);
+        return eventId;
+    }
 
-    private SentryId CaptureEvent(SentryEvent evt, Scope eventScope, Scope breadcrumbScope, SentryHint? hint)
+    private SentryId CaptureEvent(SentryEvent evt, SentryHint? hint, Scope eventScope)
     {
         if (!IsEnabled)
         {
@@ -446,30 +489,6 @@ internal class Hub : IHub, IMetricHub, IDisposable
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
                 _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
                 transaction.Finish(SpanStatus.Aborted);
-            }
-
-            if (evt.Exception is { } exception)
-            {
-                var exceptionMessage = exception.Message ?? "";
-                var formatted = evt.Message?.Formatted;
-
-                string breadcrumbMessage;
-                Dictionary<string, string>? data = null;
-                if (string.IsNullOrWhiteSpace(formatted))
-                {
-                    breadcrumbMessage = exceptionMessage;
-                }
-                else
-                {
-                    breadcrumbMessage = formatted;
-                    // Exception.Message won't be used as Breadcrumb message
-                    // Avoid losing it by adding as data:
-                    data = new Dictionary<string, string>
-                    {
-                        {"exception_message", exceptionMessage}
-                    };
-                }
-                breadcrumbScope.AddBreadcrumb(breadcrumbMessage, "Exception", data: data, level: BreadcrumbLevel.Critical);
             }
 
             return id;
