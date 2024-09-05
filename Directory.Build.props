@@ -1,7 +1,8 @@
 <Project>
 
   <PropertyGroup>
-    <VersionPrefix>4.10.1</VersionPrefix>
+    <VersionPrefix>4.10.2</VersionPrefix>
+    <!-- TODO: Remove Suffix for 5.0.0 release   -->
     <VersionSuffix>alpha</VersionSuffix>
     <LangVersion>12</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
@@ -75,7 +76,7 @@
 
   <!-- Set the version and local path for Sentry CLI (downloaded in the restore phase of Sentry.csproj) -->
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
-    <SentryCLIVersion>2.33.1</SentryCLIVersion>
+    <SentryCLIVersion>2.34.1</SentryCLIVersion>
     <SentryCLIDirectory>$(MSBuildThisFileDirectory)tools\sentry-cli\$(SentryCLIVersion)\</SentryCLIDirectory>
   </PropertyGroup>
 

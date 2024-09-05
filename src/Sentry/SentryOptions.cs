@@ -218,7 +218,7 @@ public class SentryOptions
     /// <summary>
     /// List of substrings or regular expression patterns to filter out tags
     /// </summary>
-    public ICollection<SubstringOrRegexPattern> TagFilters { get; set; } = new List<SubstringOrRegexPattern>();
+    public IList<StringOrRegex> TagFilters { get; set; } = new List<StringOrRegex>();
 
     /// <summary>
     /// The worker used by the client to pass envelopes.
@@ -707,16 +707,16 @@ public class SentryOptions
     };
 
     // The default failed request target list will match anything, but adding to the list should clear that.
-    private Lazy<IList<SubstringOrRegexPattern>> _failedRequestTargets = new(() =>
-        new AutoClearingList<SubstringOrRegexPattern>(
-            new[] { new SubstringOrRegexPattern(".*") }, clearOnNextAdd: true));
+    private Lazy<IList<StringOrRegex>> _failedRequestTargets = new(() =>
+        new AutoClearingList<StringOrRegex>(
+            new[] { new StringOrRegex(".*") }, clearOnNextAdd: true));
 
     /// <summary>
     /// <para>The SDK will only capture HTTP Client errors if the HTTP Request URL is a match for any of the failedRequestsTargets.</para>
     /// <para>Targets may be URLs or Regular expressions.</para>
     /// <para>Matches "*." by default.</para>
     /// </summary>
-    public IList<SubstringOrRegexPattern> FailedRequestTargets
+    public IList<StringOrRegex> FailedRequestTargets
     {
         get => _failedRequestTargets.Value;
         set => _failedRequestTargets = new(value.WithConfigBinding);
@@ -753,55 +753,15 @@ public class SentryOptions
     }
 
     /// <summary>
-    /// Indicates whether the performance feature is enabled, via any combination of
-    /// <see cref="EnableTracing"/>, <see cref="TracesSampleRate"/>, or <see cref="TracesSampler"/>.
+    /// Indicates whether the performance feature is enabled, via either <see cref="TracesSampleRate"/>
+    /// or <see cref="TracesSampler"/>.
     /// </summary>
-#pragma warning disable CS0618 // Type or member is obsolete
-    internal bool IsPerformanceMonitoringEnabled => EnableTracing switch
-    {
-        false => false,
-        null => TracesSampler is not null || TracesSampleRate is > 0.0,
-        true => TracesSampler is not null || TracesSampleRate is > 0.0 or null
-    };
-#pragma warning restore CS0618 // Type or member is obsolete
+    internal bool IsPerformanceMonitoringEnabled => TracesSampler is not null || TracesSampleRate is > 0.0;
 
     /// <summary>
-    /// Indicates whether profiling is enabled, via any combination of
-    /// <see cref="EnableTracing"/>, <see cref="TracesSampleRate"/>, or <see cref="TracesSampler"/>.
+    /// Indicates whether profiling is enabled, via <see cref="TracesSampleRate"/>, or <see cref="TracesSampler"/>
     /// </summary>
     internal bool IsProfilingEnabled => IsPerformanceMonitoringEnabled && ProfilesSampleRate > 0.0;
-
-    /// <summary>
-    /// Simplified option for enabling or disabling tracing.
-    /// <list type="table">
-    ///   <listheader>
-    ///     <term>Value</term>
-    ///     <description>Effect</description>
-    ///   </listheader>
-    ///   <item>
-    ///     <term><c>true</c></term>
-    ///     <description>
-    ///       Tracing is enabled. <see cref="TracesSampleRate"/> or <see cref="TracesSampler"/> will be used if set,
-    ///       or 100% sample rate will be used otherwise.
-    ///     </description>
-    ///   </item>
-    ///   <item>
-    ///     <term><c>false</c></term>
-    ///     <description>
-    ///       Tracing is disabled, regardless of <see cref="TracesSampleRate"/> or <see cref="TracesSampler"/>.
-    ///     </description>
-    ///   </item>
-    ///   <item>
-    ///     <term><c>null</c></term>
-    ///     <description>
-    ///       <b>The default setting.</b>
-    ///       Tracing is enabled only if <see cref="TracesSampleRate"/> or <see cref="TracesSampler"/> are set.
-    ///     </description>
-    ///   </item>
-    /// </list>
-    /// </summary>
-    [Obsolete("Use TracesSampleRate or TracesSampler instead")]
-    public bool? EnableTracing { get; set; }
 
     private double? _tracesSampleRate;
 
@@ -815,8 +775,7 @@ public class SentryOptions
     ///   <item>
     ///     <term><c>&gt;= 0.0 and &lt;=1.0</c></term>
     ///     <description>
-    ///       A custom sample rate is used unless <see cref="EnableTracing"/> is <c>false</c>,
-    ///       or unless overriden by a <see cref="TracesSampler"/> function.
+    ///       A custom sample rate is used unless overriden by a <see cref="TracesSampler"/> function.
     ///       Values outside of this range are invalid.
     ///     </description>
     ///   </item>
@@ -824,8 +783,7 @@ public class SentryOptions
     ///     <term><c>null</c></term>
     ///     <description>
     ///       <b>The default setting.</b>
-    ///       The tracing sample rate is determined by the <see cref="EnableTracing"/> property,
-    ///       unless overriden by a <see cref="TracesSampler"/> function.
+    ///       The tracing sample rate is determined by the <see cref="TracesSampler"/> function.
     ///     </description>
     ///   </item>
     /// </list>
@@ -904,11 +862,11 @@ public class SentryOptions
     public Func<TransactionSamplingContext, double?>? TracesSampler { get; set; }
 
     // The default propagation list will match anything, but adding to the list should clear that.
-    private IList<SubstringOrRegexPattern> _tracePropagationTargets = new AutoClearingList<SubstringOrRegexPattern>
-        (new[] { new SubstringOrRegexPattern(".*") }, clearOnNextAdd: true);
+    private IList<StringOrRegex> _tracePropagationTargets = new AutoClearingList<StringOrRegex>
+        (new[] { new StringOrRegex(".*") }, clearOnNextAdd: true);
 
     /// <summary>
-    /// A customizable list of <see cref="SubstringOrRegexPattern"/> objects, each containing either a
+    /// A customizable list of <see cref="StringOrRegex"/> objects, each containing either a
     /// substring or regular expression pattern that can be used to control which outgoing HTTP requests
     /// will have the <c>sentry-trace</c> and <c>baggage</c> headers propagated, for purposes of distributed tracing.
     /// The default value contains a single value of <c>.*</c>, which matches everything.
@@ -918,7 +876,7 @@ public class SentryOptions
     /// <remarks>
     /// Adding an item to the default list will clear the <c>.*</c> value automatically.
     /// </remarks>
-    public IList<SubstringOrRegexPattern> TracePropagationTargets
+    public IList<StringOrRegex> TracePropagationTargets
     {
         // NOTE: During configuration binding, .NET 6 and lower used to just call Add on the existing item.
         //       .NET 7 changed this to call the setter with an array that already starts with the old value.
@@ -930,7 +888,7 @@ public class SentryOptions
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
 
     private StackTraceMode? _stackTraceMode;
-    private readonly List<ISdkIntegration> _integrations = new();
+    private readonly List<ISdkIntegration> _integrations;
 
     /// <summary>
     /// ATTENTION: This option will change how issues are grouped in Sentry!

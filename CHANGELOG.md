@@ -4,7 +4,48 @@
 
 - Added support for `.NET 9` (preview) ([#3513](https://github.com/getsentry/sentry-dotnet/pull/3513))
 
+## Version Five
+
+### API Changes
+
+- You should no longer pass `AndroidContext` as an argument to `SentrySdk.Init` ([#3562](https://github.com/getsentry/sentry-dotnet/pull/3562))
+- The `SentryUser.Segment` property has been deprecated. Consider sending this as a tag or additional data instead ([#3563](https://github.com/getsentry/sentry-dotnet/pull/3563))
+- The ITraceContext now includes an [Origin](https://develop.sentry.dev/sdk/telemetry/traces/trace-origin/), which is set automatically and is primarily used internally by the Sentry server ([#3564](https://github.com/getsentry/sentry-dotnet/pull/3564))
+- `Device.BatteryLevel` and `Device.ProcessorFrequency` are now stored as floats rather than ints, to align with the Cocoa and Java SDKs ([#3567](https://github.com/getsentry/sentry-dotnet/pull/3567))
+- `SentryOptions.EnableTracing` has been removed. Instead, tracing should be enabled or disabled by setting the `SentryOptions.TracesSampleRate` or by using `SentryOptions.TracesSampler` to configure a sampling function ([#3569](https://github.com/getsentry/sentry-dotnet/pull/3569))
+- The `FailedRequestTargets`, `TagFilters` and `TracePropagationTargets` options have all been changed from `SubstringOrRegexPattern` to `IList<StringOrRegex>` ([#3566](https://github.com/getsentry/sentry-dotnet/pull/3566))
 ## Unreleased
+
+### Fixes
+- On mobile devices, the SDK no longer throws a `FormatException` for `ProcessorFrequency` when trying to report native events ([#3541](https://github.com/getsentry/sentry-dotnet/pull/3541))
+
+### API Changes
+- When the Sentry SDK is disabled, `SentrySdk.StartTransaction()` now returns a `NoOpTransaction`, which avoids unnecessary memory allocations ([#3581](https://github.com/getsentry/sentry-dotnet/pull/3581))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.35.0 to v8.36.0 ([#3570](https://github.com/getsentry/sentry-dotnet/pull/3570), [#3575](https://github.com/getsentry/sentry-dotnet/pull/3575))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8360)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.35.0...8.36.0)
+- Bump CLI from v2.33.1 to v2.34.1 ([#3578](https://github.com/getsentry/sentry-dotnet/pull/3578))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2341)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.33.1...2.34.1)
+- Bump Native SDK from v0.7.8 to v0.7.9 ([#3577](https://github.com/getsentry/sentry-dotnet/pull/3577))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#079)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.8...0.7.9)
+
+## 4.10.2
+
+### Various fixes & improvements
+
+- fix: Prevent deadlock in `Hub.Dispose` (#3539) by @bitsandfoxes
+- build(deps): bump github/codeql-action from 3.26.0 to 3.26.2 (#3543) by @dependabot
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.34.0 to v8.35.0 ([#3548](https://github.com/getsentry/sentry-dotnet/pull/3548))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8350)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.34.0...8.35.0)
 
 ## Fixes
 

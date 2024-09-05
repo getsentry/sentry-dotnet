@@ -6,7 +6,7 @@ namespace Sentry;
 /// <summary>
 /// Span metadata used for sampling.
 /// </summary>
-public class SpanContext : ITraceContext, ITraceContextInternal
+public class SpanContext : ITraceContext
 {
     /// <inheritdoc />
     public SpanId SpanId { get; }

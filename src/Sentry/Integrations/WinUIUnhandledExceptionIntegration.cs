@@ -101,7 +101,6 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
         catch (Exception ex)
         {
             // If we get an exception we should let the user know how they can manually wire up the event handler.
-            // TODO: We need to create a mechanism for users to wire this up manually and document this in a separate PR
             _options.LogError(ex, "Could not attach WinUIUnhandledExceptionHandler.");
         }
     }

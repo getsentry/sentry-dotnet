@@ -307,7 +307,7 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public void SetTag(string key, string value)
     {
-        if (Options.TagFilters.Any(x => x.IsMatch(key)))
+        if (Options.TagFilters.MatchesSubstringOrRegex(key))
         {
             return;
         }

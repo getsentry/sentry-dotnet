@@ -70,9 +70,9 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
     public string? Architecture { get; set; }
 
     /// <summary>
-    /// If the device has a battery an integer defining the battery level (in the range 0-100).
+    /// If the device has a battery a number defining the battery level (in the range 0-100).
     /// </summary>
-    public short? BatteryLevel { get; set; }
+    public float? BatteryLevel { get; set; }
 
     /// <summary>
     /// True if the device is charging.
@@ -184,7 +184,7 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
     /// <example>
     /// 2500
     /// </example>
-    public int? ProcessorFrequency { get; set; }
+    public float? ProcessorFrequency { get; set; }
 
     /// <summary>
     /// Kind of device the application is running on.
@@ -426,18 +426,9 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
         var model = json.GetPropertyOrNull("model")?.GetString();
         var modelId = json.GetPropertyOrNull("model_id")?.GetString();
         var architecture = json.GetPropertyOrNull("arch")?.GetString();
-
-        // TODO: For next major: Remove this and change batteryLevel from short to float
-        // The Java and Cocoa SDK report the battery as `float`
-        // Cocoa https://github.com/getsentry/sentry-cocoa/blob/e773cad622b86735f1673368414009475e4119fd/Sources/Sentry/include/SentryUIDeviceWrapper.h#L18
-        // Java  https://github.com/getsentry/sentry-java/blob/25f1ca4e1636a801c17c1662f0145f888550bce8/sentry/src/main/java/io/sentry/protocol/Device.java#L231-L233
-        short? batteryLevel = null;
-        var batteryProperty = json.GetPropertyOrNull("battery_level");
-        if (batteryProperty.HasValue)
-        {
-            batteryLevel = (short)batteryProperty.Value.GetDouble();
-        }
-
+        var batteryLevel = json.GetPropertyOrNull("battery_level")?.TryGetDouble(out var level) is true
+            ? (float)level
+            : (float?)null;
         var isCharging = json.GetPropertyOrNull("charging")?.GetBoolean();
         var isOnline = json.GetPropertyOrNull("online")?.GetBoolean();
         var orientation = json.GetPropertyOrNull("orientation")?.GetString()?.ParseEnum<DeviceOrientation>();
@@ -456,7 +447,9 @@ public sealed class Device : ISentryJsonSerializable, ICloneable<Device>, IUpdat
         var bootTime = json.GetPropertyOrNull("boot_time")?.GetDateTimeOffset();
         var processorCount = json.GetPropertyOrNull("processor_count")?.GetInt32();
         var cpuDescription = json.GetPropertyOrNull("cpu_description")?.GetString();
-        var processorFrequency = json.GetPropertyOrNull("processor_frequency")?.GetInt32();
+        var processorFrequency = json.GetPropertyOrNull("processor_frequency")?.TryGetDouble(out var frequency) is true
+            ? (float)frequency
+            : (float?)null;
         var deviceType = json.GetPropertyOrNull("device_type")?.GetString();
         var batteryStatus = json.GetPropertyOrNull("battery_status")?.GetString();
         var deviceUniqueIdentifier = json.GetPropertyOrNull("device_unique_identifier")?.GetString();

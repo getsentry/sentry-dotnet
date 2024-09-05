@@ -1,4 +1,4 @@
-namespace Sentry.Tests.Internals;
+namespace Sentry.Tests;
 
 public class StringOrRegexTests
 {
@@ -6,7 +6,7 @@ public class StringOrRegexTests
     public void StringOrRegex_ImplicitlyConvertsFromString()
     {
         StringOrRegex target = "abc";
-        target._prefix.Should().Be("abc");
+        target._string.Should().Be("abc");
         target._regex.Should().BeNull();
     }
 
@@ -14,7 +14,7 @@ public class StringOrRegexTests
     public void StringOrRegex_ImplicitlyConvertsFromRegex()
     {
         StringOrRegex target = new Regex("^abc.*ghi$");
-        target._prefix.Should().BeNull();
+        target._string.Should().BeNull();
         target._regex.Should().NotBeNull();
         target._regex?.ToString().Should().Be("^abc.*ghi$");
     }

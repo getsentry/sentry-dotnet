@@ -12,9 +12,6 @@ internal static class UserExtensions
             Id = user.Id,
             IpAddress = user.IpAddress,
             Username = user.Username,
-#pragma warning disable CS0618 // Type or member is obsolete
-            Segment = user.Segment,
-#pragma warning restore CS0618 // Type or member is obsolete
             Other = user.Data ?? EmptyDictionary
         };
 
@@ -25,9 +22,6 @@ internal static class UserExtensions
             Id = user.Id,
             IpAddress = user.IpAddress,
             Username = user.Username,
-#pragma warning disable CS0618 // Type or member is obsolete
-            Segment = user.Segment,
-#pragma warning restore CS0618 // Type or member is obsolete
             Data = user.Other.Count == 0 ? null : user.Other
         };
 }
