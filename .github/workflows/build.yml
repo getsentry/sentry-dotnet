@@ -37,7 +37,7 @@ jobs:
       - name: Check Disk Space (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
-          df -hI
+          df -h
           du -hd 1 / 2>/dev/null | sort -hr
 
       - name: Free Disk Space (Ubuntu)
