@@ -35,12 +35,12 @@ runs:
         sudo apt-get clean || echo "::warning::The command [sudo apt-get clean] failed to complete successfully. Proceeding..."
         df -h /dev/root
 
+    # We only use Xcode 15.4
     - name: Remove unused applications
       if: runner.os == 'macOS'
       shell: bash
       run: |
         df -hI /dev/disk3s1s1
-      # We only use Xcode 15.4
         sudo rm -rf /Applications/Xcode_14.3.1.app
         sudo rm -rf /Applications/Xcode_15.0.1.app
         sudo rm -rf /Applications/Xcode_15.1.app
