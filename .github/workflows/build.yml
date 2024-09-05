@@ -40,19 +40,10 @@ jobs:
         with:
           android: true
           dotnet: false
-          haskell: true
+          haskell: false
           large-packages: false
           docker-images: true
           swap-storage: true
-
-      - name: Check Disk Space (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          df -h /dev/root
-          du -hd 1 /usr 2>/dev/null | sort -hr
-          du -hd 1 /opt 2>/dev/null | sort -hr
-          du -hd 1 /mnt 2>/dev/null | sort -hr
-          du -hd 1 /home 2>/dev/null | sort -hr
 
       - name: Install build dependencies
         if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'Linux'
@@ -91,22 +82,37 @@ jobs:
           sudo rm -rf /Applications/Xcode_15.3.app
           df -hI /dev/disk3s1s1
 
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 2 # default is 1 and codecov needs > 1
-
       - name: Free Disk Space (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         uses: jlumbroso/free-disk-space@f68fdb76e2ea636224182cfb7377ff9a1708f9b8
         with:
           android: false
           dotnet: false
-          haskell: true
+          haskell: false
           large-packages: false
-          docker-images: false
+          docker-images: true
           swap-storage: true
+
+      - name: Check Disk Space (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          df -h /dev/root
+          du -hd 1 /usr/local 2>/dev/null | sort -hr
+          du -hd 1 /usr/lib 2>/dev/null | sort -hr
+          du -hd 1 /usr/share 2>/dev/null | sort -hr
+          du -hd 1 /usr/bin 2>/dev/null | sort -hr
+          du -hd 1 /opt/hostedtoolcache 2>/dev/null | sort -hr
+          du -hd 1 /opt/az 2>/dev/null | sort -hr
+          du -hd 1 /opt/microsoft 2>/dev/null | sort -hr
+          du -hd 1 /opt/pipx 2>/dev/null | sort -hr
+          du -hd 1 /home/runner 2>/dev/null | sort -hr
+          du -hd 1 /home/linuxbrew 2>/dev/null | sort -hr
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 2 # default is 1 and codecov needs > 1
 
       # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
