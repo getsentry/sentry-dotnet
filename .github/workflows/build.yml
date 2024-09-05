@@ -68,13 +68,6 @@ jobs:
       - name: Remove unused applications
         uses: ./.github/actions/freediskspace
 
-      - name: Check Disk Space (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          du -hd 1 /usr/local/lib 2>/dev/null | sort -hr
-          du -hd 1 /usr/local/share 2>/dev/null | sort -hr
-          du -hd 1 /usr/local/bin 2>/dev/null | sort -hr
-
       # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
         if: startsWith(matrix.os, 'macos')
