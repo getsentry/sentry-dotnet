@@ -34,12 +34,6 @@ jobs:
           key: sentry-native-${{ runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           enableCrossOsArchive: true
 
-      - name: Check Disk Space (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          df -h
-          du -hd 1 / 2>/dev/null | sort -hr
-
       - name: Free Disk Space (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         uses: jlumbroso/free-disk-space@f68fdb76e2ea636224182cfb7377ff9a1708f9b8
@@ -48,8 +42,17 @@ jobs:
           dotnet: false
           haskell: true
           large-packages: false
-          docker-images: false
+          docker-images: true
           swap-storage: true
+
+      - name: Check Disk Space (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          df -h /dev/root
+          du -hd 1 /usr 2>/dev/null | sort -hr
+          du -hd 1 /opt 2>/dev/null | sort -hr
+          du -hd 1 /mnt 2>/dev/null | sort -hr
+          du -hd 1 /home 2>/dev/null | sort -hr
 
       - name: Install build dependencies
         if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'Linux'
