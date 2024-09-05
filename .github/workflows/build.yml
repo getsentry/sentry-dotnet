@@ -34,17 +34,6 @@ jobs:
           key: sentry-native-${{ runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           enableCrossOsArchive: true
 
-      - name: Free Disk Space (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        uses: jlumbroso/free-disk-space@f68fdb76e2ea636224182cfb7377ff9a1708f9b8
-        with:
-          android: true
-          dotnet: false
-          haskell: false
-          large-packages: false
-          docker-images: true
-          swap-storage: true
-
       - name: Install build dependencies
         if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'Linux'
         run: |
@@ -70,43 +59,15 @@ jobs:
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
 
-      # We only use Xcode 15.4
       - name: Remove unused applications
-        if: matrix.os == 'macos-latest'
-        run: |
-          df -hI /dev/disk3s1s1
-          sudo rm -rf /Applications/Xcode_14.3.1.app
-          sudo rm -rf /Applications/Xcode_15.0.1.app
-          sudo rm -rf /Applications/Xcode_15.1.app
-          sudo rm -rf /Applications/Xcode_15.2.app
-          sudo rm -rf /Applications/Xcode_15.3.app
-          df -hI /dev/disk3s1s1
-
-      - name: Free Disk Space (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        uses: jlumbroso/free-disk-space@f68fdb76e2ea636224182cfb7377ff9a1708f9b8
-        with:
-          android: false
-          dotnet: false
-          haskell: false
-          large-packages: false
-          docker-images: true
-          swap-storage: true
+        uses: ./.github/actions/freediskspace
 
       - name: Check Disk Space (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
-          df -h /dev/root
-          du -hd 1 /usr/local 2>/dev/null | sort -hr
-          du -hd 1 /usr/lib 2>/dev/null | sort -hr
-          du -hd 1 /usr/share 2>/dev/null | sort -hr
-          du -hd 1 /usr/bin 2>/dev/null | sort -hr
-          du -hd 1 /opt/hostedtoolcache 2>/dev/null | sort -hr
-          du -hd 1 /opt/az 2>/dev/null | sort -hr
-          du -hd 1 /opt/microsoft 2>/dev/null | sort -hr
-          du -hd 1 /opt/pipx 2>/dev/null | sort -hr
-          du -hd 1 /home/runner 2>/dev/null | sort -hr
-          du -hd 1 /home/linuxbrew 2>/dev/null | sort -hr
+          du -hd 1 /usr/local/lib 2>/dev/null | sort -hr
+          du -hd 1 /usr/local/share 2>/dev/null | sort -hr
+          du -hd 1 /usr/local/bin 2>/dev/null | sort -hr
 
       - name: Checkout
         uses: actions/checkout@v4
