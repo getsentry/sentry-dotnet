@@ -59,6 +59,12 @@ jobs:
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
 
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 2 # default is 1 and codecov needs > 1
+
       - name: Remove unused applications
         uses: ./.github/actions/freediskspace
 
@@ -68,12 +74,6 @@ jobs:
           du -hd 1 /usr/local/lib 2>/dev/null | sort -hr
           du -hd 1 /usr/local/share 2>/dev/null | sort -hr
           du -hd 1 /usr/local/bin 2>/dev/null | sort -hr
-
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 2 # default is 1 and codecov needs > 1
 
       # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
