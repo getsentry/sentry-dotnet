@@ -4,6 +4,7 @@
 
 ### Fixes
 - On mobile devices, the SDK no longer throws a `FormatException` for `ProcessorFrequency` when trying to report native events ([#3541](https://github.com/getsentry/sentry-dotnet/pull/3541))
+- Add missing org parameter to the CLI release operations ([#3600](https://github.com/getsentry/sentry-dotnet/pull/3600))
 
 ### API Changes
 - When the Sentry SDK is disabled, `SentrySdk.StartTransaction()` now returns a `NoOpTransaction`, which avoids unnecessary memory allocations ([#3581](https://github.com/getsentry/sentry-dotnet/pull/3581))
