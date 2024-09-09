@@ -464,7 +464,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
         try
         {
             // We get the span linked to the event or fall back to the current span
-            var span = GetLinkedSpan(evt) ?? eventScope.Span;
+            var span = GetLinkedSpan(evt) ?? scope.Span;
             if (span is not null)
             {
                 if (span.IsSampled is not false)
@@ -475,15 +475,15 @@ internal class Hub : IHub, IMetricHub, IDisposable
             else
             {
                 // If there is no span on the scope (and not just no sampled one), fall back to the propagation context
-                ApplyTraceContextToEvent(evt, eventScope.PropagationContext);
+                ApplyTraceContextToEvent(evt, scope.PropagationContext);
             }
 
             // Now capture the event with the Sentry client on the current scope.
-            var id = CurrentClient.CaptureEvent(evt, eventScope, hint);
-            eventScope.LastEventId = id;
-            eventScope.SessionUpdate = null;
+            var id = CurrentClient.CaptureEvent(evt, scope, hint);
+            scope.LastEventId = id;
+            scope.SessionUpdate = null;
 
-            if (evt.HasTerminalException() && eventScope.Transaction is { } transaction)
+            if (evt.HasTerminalException() && scope.Transaction is { } transaction)
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
