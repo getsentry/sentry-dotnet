@@ -454,7 +454,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
         return eventId;
     }
 
-    private SentryId CaptureEvent(SentryEvent evt, SentryHint? hint, Scope eventScope)
+    private SentryId CaptureEvent(SentryEvent evt, SentryHint? hint, Scope scope)
     {
         if (!IsEnabled)
         {

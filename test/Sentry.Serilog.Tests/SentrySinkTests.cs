@@ -44,12 +44,13 @@ public class SentrySinkTests
     }
 
     [Fact]
-    public void Emit_WithException_NoBreadcrumbFromException()
+    public void EmitEvent_WithException_NoBreadcrumb()
     {
         var expectedException = new Exception("expected message");
 
         var sut = _fixture.GetSut();
 
+        // LogLevel.Fatal will create an event
         var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Fatal, expectedException, MessageTemplate.Empty,
             Enumerable.Empty<LogEventProperty>());
 
@@ -58,6 +59,20 @@ public class SentrySinkTests
         // Breadcrumbs get created automatically by the hub for captured exceptions... we don't want
         // our logging integration to be creating these also
         _fixture.Scope.Breadcrumbs.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void EmitEvent_WithoutException_LeavesBreadcrumb()
+    {
+        var sut = _fixture.GetSut();
+
+        // LogLevel.Fatal will create an event, but there's no exception so we do want a breadcrumb
+        var evt = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Fatal, null, MessageTemplate.Empty,
+            Enumerable.Empty<LogEventProperty>());
+
+        sut.Emit(evt);
+
+        _fixture.Scope.Breadcrumbs.Should().NotBeEmpty();
     }
 
     [Fact]
