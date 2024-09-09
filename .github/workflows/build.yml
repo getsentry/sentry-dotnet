@@ -36,7 +36,7 @@ jobs:
 
       - name: Free Disk Space (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
-        uses: jlumbroso/free-disk-space@f68fdb76e2ea636224182cfb7377ff9a1708f9b8
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
         with:
           android: true
           dotnet: false
