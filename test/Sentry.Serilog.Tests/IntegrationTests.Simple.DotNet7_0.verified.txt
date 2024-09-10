@@ -86,6 +86,12 @@
               IpAddress: {{auto}}
             },
             Environment: production,
+            Breadcrumbs: [
+              {
+                Message: [42] Debug message stored as breadcrumb.,
+                Level: debug
+              }
+            ],
             Extra: {
               inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
               MyTaskId: 65
@@ -134,6 +140,16 @@
               IpAddress: {{auto}}
             },
             Environment: production,
+            Breadcrumbs: [
+              {
+                Message: [42] Debug message stored as breadcrumb.,
+                Level: debug
+              },
+              {
+                Message: [65] Message with a different MyTaskId,
+                Level: debug
+              }
+            ],
             Extra: {
               inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
               MyTaskId: 42
@@ -238,6 +254,20 @@
               IpAddress: {{auto}}
             },
             Environment: production,
+            Breadcrumbs: [
+              {
+                Message: [42] Debug message stored as breadcrumb.,
+                Level: debug
+              },
+              {
+                Message: [65] Message with a different MyTaskId,
+                Level: debug
+              },
+              {
+                Message: [42] Some event that includes the previous breadcrumbs,
+                Level: error
+              }
+            ],
             Extra: {
               inventory: { SmallPotion = 3, BigPotion = 0, CheeseWheels = 512 },
               MyTaskId: 42
