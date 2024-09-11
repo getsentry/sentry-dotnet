@@ -10,10 +10,10 @@
     <SingleProject>true</SingleProject>
     <RootNamespace>Microsoft.Maui.TestUtils.DeviceTests</RootNamespace>
     <AssemblyName>Microsoft.Maui.TestUtils.DeviceTests</AssemblyName>
-    <Nullable>enable</Nullable>
     <UseMauiCore>true</UseMauiCore>
     <UseMauiEssentials>true</UseMauiEssentials>
     <IsTestProject>false</IsTestProject>
+    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
   </PropertyGroup>
 
   <ItemGroup>

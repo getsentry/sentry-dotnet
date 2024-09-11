@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <LangVersion>11</LangVersion>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <!-- these are needed because the versions that are brought in transitively have vulnerability warnings -->

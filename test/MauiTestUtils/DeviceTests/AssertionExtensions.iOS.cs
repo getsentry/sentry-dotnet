@@ -7,6 +7,7 @@ using Microsoft.Maui.Platform;
 using UIKit;
 using Xunit;
 using Xunit.Sdk;
+#nullable enable
 
 namespace Microsoft.Maui.DeviceTests;
 
@@ -21,10 +22,10 @@ public static partial class AssertionExtensions
     public static string CreateEqualError(this UIImage bitmap, UIImage other, string message) =>
         $"{message} This is what it looked like: <img>{bitmap.ToBase64String()}</img> and <img>{other.ToBase64String()}</img>";
 
-    public static string ToBase64String(this UIImage bitmap)
+    public static string? ToBase64String(this UIImage bitmap)
     {
         var data = bitmap.AsPNG();
-        return data.GetBase64EncodedString(NSDataBase64EncodingOptions.None);
+        return data?.GetBase64EncodedString(NSDataBase64EncodingOptions.None);
     }
 
     public static Task AttachAndRun(this UIView view, Action action) =>

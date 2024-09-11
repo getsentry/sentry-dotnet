@@ -17,7 +17,7 @@ public static class TestServices
 #if __ANDROID__
                 s_services = MauiTestInstrumentation.Current?.Services ?? MauiApplication.Current.Services;
 #elif __IOS__
-                s_services = MauiTestApplicationDelegate.Current?.Services ?? MauiUIApplicationDelegate.Current.Services;
+                s_services = MauiTestApplicationDelegate.Current?.Services ?? IPlatformApplication.Current?.Services;
 #elif WINDOWS
                     s_services = MauiWinUIApplication.Current.Services;
 #endif

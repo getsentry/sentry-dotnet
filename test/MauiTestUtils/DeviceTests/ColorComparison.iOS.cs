@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UIKit;
+#nullable enable
 
 namespace Microsoft.Maui.DeviceTests;
 

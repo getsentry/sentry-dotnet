@@ -5,6 +5,7 @@ using Foundation;
 using Microsoft.Maui.Graphics;
 using ObjCRuntime;
 using UIKit;
+#nullable enable
 
 namespace Microsoft.Maui.DeviceTests;
 

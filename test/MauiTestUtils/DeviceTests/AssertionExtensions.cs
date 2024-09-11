@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Sdk;
 
+#nullable enable
+
 namespace Microsoft.Maui.DeviceTests;
 
 public static partial class AssertionExtensions
