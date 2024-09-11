@@ -28,13 +28,6 @@ runs:
         distribution: 'temurin'
         java-version: '11'
 
-    - name: Set XCode Version
-      if: runner.os == 'macOS'
-      shell: bash
-      run: |
-        sudo xcode-select -s "/Applications/Xcode_15.4.app"
-        echo "MD_APPLE_SDK_ROOT=/Applications/Xcode_15.4.app" >> $GITHUB_ENV
-
     # .NET 6 and .NET 8 are not built-in with macos-13
     - name: Install .NET SDK
       uses: actions/setup-dotnet@v3
