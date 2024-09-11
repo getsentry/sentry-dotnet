@@ -15,7 +15,7 @@
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
     <PackageReference Include="Hangfire.Core" Version="1.8.12" />
     <!-- https://github.com/advisories/GHSA-5crp-9r3c-p9vr -->
-    <PackageReference Include="Newtonsoft.Json" Version="13.*" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
