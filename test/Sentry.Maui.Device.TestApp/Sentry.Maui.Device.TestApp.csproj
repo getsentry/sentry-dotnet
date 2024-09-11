@@ -56,9 +56,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.72" />
-    <PackageReference Include="Microsoft.Maui.Core" Version="8.0.72" />
-    <PackageReference Include="Microsoft.Maui.Essentials" Version="8.0.72" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.82" />
+    <PackageReference Include="Microsoft.Maui.Core" Version="8.0.82" />
+    <PackageReference Include="Microsoft.Maui.Essentials" Version="8.0.82" />
 
     <!-- https://github.com/advisories/GHSA-5f2m-466j-3848 -->
     <PackageReference Include="System.Private.Uri" Version="4.3.2" />
