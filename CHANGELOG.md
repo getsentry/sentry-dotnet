@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- All exceptions are now added as breadcrumbs on future events. Previously this was only the case for exceptions captured via the `Sentry.SeriLog` or `Sentry.Extensions.Logging` integrations. ([#3584](https://github.com/getsentry/sentry-dotnet/pull/3584))
+
 ### Fixes
 - On mobile devices, the SDK no longer throws a `FormatException` for `ProcessorFrequency` when trying to report native events ([#3541](https://github.com/getsentry/sentry-dotnet/pull/3541))
 - Add missing org parameter to the CLI release operations ([#3600](https://github.com/getsentry/sentry-dotnet/pull/3600))
