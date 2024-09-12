@@ -790,7 +790,7 @@ public class Scope : IEventLike
         _transactionLock.EnterWriteLock();
         try
         {
-            if (_transaction.Value == expectedCurrentTransaction)
+            if (ReferenceEquals(_transaction.Value, expectedCurrentTransaction))
             {
                 _transaction.Value = null;
             }
