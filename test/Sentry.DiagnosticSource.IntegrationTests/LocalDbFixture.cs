@@ -5,17 +5,17 @@ public sealed class LocalDbFixture : IDisposable
     public SqlInstance SqlInstance { get; }
 
     public static string InstanceName =>
-        #if NETFRAMEWORK
-            "SqlListenerTests4";
-        #elif NET6_0
-            "SqlListenerTests6";
-        #elif NET7_0
-            "SqlListenerTests7";
-        #elif NET8_0
-            "SqlListenerTests8";
-        #else
-            throw new NotImplementedException("Needs a version specific name to prevent the tests from tripping over one another when running in parallel.");
-        #endif
+#if NETFRAMEWORK
+        "SqlListenerTests4";
+#elif NET6_0
+        "SqlListenerTests6";
+#elif NET7_0
+        "SqlListenerTests7";
+#elif NET8_0
+        "SqlListenerTests8";
+#else
+        throw new NotImplementedException("Needs a version specific name to prevent the tests from tripping over one another when running in parallel.");
+#endif
 
     public LocalDbFixture()
     {
