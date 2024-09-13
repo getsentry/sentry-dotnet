@@ -18,7 +18,7 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
     <PackageReference Include="Newtonsoft.Json" Version="[5.0.1,)">
-      <!-- We get this dependency implicitly from Hangfire.Core -->
+      <!-- We can't add NU1903 to the project as this causes a CS8002 Referenced assembly does not have a strong name. -->
       <!-- https://github.com/advisories/GHSA-5crp-9r3c-p9vr -->
       <NoWarn>NU1903</NoWarn>
     </PackageReference>
@@ -26,7 +26,7 @@
 
   <ItemGroup Condition="'$(TargetFramework)' != 'net462'">
     <PackageReference Include="Newtonsoft.Json" Version="[11.0.1,)">
-      <!-- We get this dependency implicitly from Hangfire.Core -->
+      <!-- We can't add NU1903 to the project as this causes a CS8002 Referenced assembly does not have a strong name. -->
       <!-- https://github.com/advisories/GHSA-5crp-9r3c-p9vr -->
       <NoWarn>NU1903</NoWarn>
     </PackageReference>
