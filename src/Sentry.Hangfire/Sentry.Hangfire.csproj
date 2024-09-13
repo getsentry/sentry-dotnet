@@ -14,8 +14,22 @@
   <ItemGroup>
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
     <PackageReference Include="Hangfire.Core" Version="1.8.12" />
-    <!-- https://github.com/advisories/GHSA-5crp-9r3c-p9vr -->
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+    <PackageReference Include="Newtonsoft.Json" Version="[5.0.1,)">
+      <!-- We get this dependency implicitly from Hangfire.Core -->
+      <!-- https://github.com/advisories/GHSA-5crp-9r3c-p9vr -->
+      <NoWarn>NU1903</NoWarn>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net462'">
+    <PackageReference Include="Newtonsoft.Json" Version="[11.0.1,)">
+      <!-- We get this dependency implicitly from Hangfire.Core -->
+      <!-- https://github.com/advisories/GHSA-5crp-9r3c-p9vr -->
+      <NoWarn>NU1903</NoWarn>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
