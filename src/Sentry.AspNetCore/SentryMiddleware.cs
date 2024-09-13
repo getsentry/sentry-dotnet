@@ -217,9 +217,19 @@ internal class SentryMiddleware : IMiddleware
 
             void CaptureException(Exception e, SentryId evtId, string mechanism, string description)
             {
+                // Don't overwrite any values that the user explicitly set on the Exception:
                 var userHandledSet = e.Data.Contains(Mechanism.HandledKey);
                 var userHandledValue = e.Data[Mechanism.HandledKey] as bool?;
-                e.SetSentryMechanism(mechanism, description, handled: userHandledSet ? userHandledValue : false);
+                var handled = userHandledSet ? userHandledValue : false;
+                var userMechanismSet = e.Data.Contains(Mechanism.MechanismKey);
+                var userMechanismValue = e.Data[Mechanism.MechanismKey] as string;
+                // See Mechanism.Type setter re special handling of "" here:
+                var type = userMechanismSet ? userMechanismValue ?? "" : mechanism;
+                var userDescriptionSet = e.Data.Contains(Mechanism.DescriptionKey);
+                var userDescriptionValue = e.Data[Mechanism.DescriptionKey] as string;
+                var desc = userDescriptionSet ? userDescriptionValue : description;
+
+                e.SetSentryMechanism(type, desc, handled);
 
                 var evt = new SentryEvent(e, eventId: evtId);
 
