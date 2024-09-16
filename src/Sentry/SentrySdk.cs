@@ -440,7 +440,7 @@ public static partial class SentrySdk
     /// Captures the exception.
     /// </summary>
     /// <param name="exception">The exception.</param>
-    /// <returns>The Id of the even.t</returns>
+    /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
     public static SentryId CaptureException(Exception exception)
         => CurrentHub.CaptureException(exception);
@@ -453,7 +453,7 @@ public static partial class SentrySdk
     /// </remarks>
     /// <param name="exception">The exception.</param>
     /// <param name="configureScope">The callback to configure the scope.</param>
-    /// <returns>The Id of the even.t</returns>
+    /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
     public static SentryId CaptureException(Exception exception, Action<Scope> configureScope)
         => CurrentHub.CaptureException(exception, configureScope);
