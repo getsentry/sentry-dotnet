@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
@@ -180,15 +185,52 @@ public class Scope : IEventLike
         }
     }
 
-    private ITransactionTracer? _transaction;
+    /// <summary>
+    /// <para>
+    /// Most of the properties on the Scope should have the same affinity as the Scope... For example, when using a
+    /// GlobalScopeStackContainer, anything you store on the scope will be applied to all events that get sent to Sentry
+    /// (no matter which thread they are sent from).
+    /// </para>
+    /// <para>
+    /// Transactions are an exception, however. We don't want spans from threads created on the UI thread to be added as
+    /// children of Transactions/Spans that get created on the background thread, or vice versa. As such,
+    /// Scope.Transaction is always stored as an AsyncLocal, regardless of the ScopeStackContainer implementation.
+    /// </para>
+    /// <para>
+    /// See https://github.com/getsentry/sentry-dotnet/issues/3590 for more information.
+    /// </para>
+    /// </summary>
+    private readonly AsyncLocal<ITransactionTracer?> _transaction = new();
 
     /// <summary>
-    /// Transaction.
+    /// The current Transaction
     /// </summary>
     public ITransactionTracer? Transaction
     {
-        get => _transaction;
-        set => _transaction = value;
+        get
+        {
+            _transactionLock.EnterReadLock();
+            try
+            {
+                return _transaction.Value;
+            }
+            finally
+            {
+                _transactionLock.ExitReadLock();
+            }
+        }
+        set
+        {
+            _transactionLock.EnterWriteLock();
+            try
+            {
+                _transaction.Value = value;
+            }
+            finally
+            {
+                _transactionLock.ExitWriteLock();
+            }
+        }
     }
 
     internal SentryPropagationContext PropagationContext { get; set; }
@@ -738,6 +780,24 @@ public class Scope : IEventLike
                 Path.GetFileName(filePath),
                 contentType));
 
-    internal void ResetTransaction(ITransactionTracer? expectedCurrentTransaction) =>
-        Interlocked.CompareExchange(ref _transaction, null, expectedCurrentTransaction);
+    /// <summary>
+    /// We need this lock to prevent a potential race condition in <see cref="ResetTransaction"/>.
+    /// </summary>
+    private readonly ReaderWriterLockSlim _transactionLock = new();
+
+    internal void ResetTransaction(ITransactionTracer? expectedCurrentTransaction)
+    {
+        _transactionLock.EnterWriteLock();
+        try
+        {
+            if (ReferenceEquals(_transaction.Value, expectedCurrentTransaction))
+            {
+                _transaction.Value = null;
+            }
+        }
+        finally
+        {
+            _transactionLock.ExitWriteLock();
+        }
+    }
 }
