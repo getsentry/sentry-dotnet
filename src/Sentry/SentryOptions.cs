@@ -1012,10 +1012,9 @@ public class SentryOptions
     /// end the session when it's closed.
     /// </summary>
     /// <remarks>
-    /// Note: this is disabled by default in the current version (except for mobile targets and MAUI),
-    /// but will become enabled by default in the next major version.
-    /// Currently this only works for release health in client mode
-    /// (desktop, mobile applications, but not web servers).
+    /// Currently, this only works for release health in client mode (desktop, mobile applications, but not web servers)
+    /// as this feature requires access to the filesystem to sync sessions and multiple instances of the app will race
+    /// each other.
     /// </remarks>
     public bool AutoSessionTracking { get; set; } = false;
 #endif
