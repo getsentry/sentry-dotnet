@@ -5,8 +5,6 @@
     <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
     <PackageTags>$(PackageTags);Profiling;Diagnostic</PackageTags>
     <Description>Performance profiling support for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
-    <!-- https://github.com/advisories/GHSA-7jgj-8wvc-jh57 -->
-    <NoWarn>NU1903</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(FrameworkSupportsAot)' == 'true'">

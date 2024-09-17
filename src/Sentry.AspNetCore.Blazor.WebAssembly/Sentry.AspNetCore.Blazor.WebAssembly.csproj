@@ -4,8 +4,6 @@
     <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     <VersionSuffix>preview.1</VersionSuffix>
     <RootNamespace>Sentry.AspNetCore.Blazor.WebAssembly</RootNamespace>
-    <!-- https://github.com/advisories/GHSA-hh2w-p6rv-4g7w -->
-    <NoWarn>NU1903</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
