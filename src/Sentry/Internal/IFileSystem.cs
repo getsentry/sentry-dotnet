@@ -8,14 +8,15 @@ internal interface IFileSystem
     IEnumerable<string> EnumerateFiles(string path);
     IEnumerable<string> EnumerateFiles(string path, string searchPattern);
     IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption);
-    void CreateDirectory(string path);
-    void DeleteDirectory(string path, bool recursive = false);
+    bool CreateDirectory(string path);
+    bool DeleteDirectory(string path, bool recursive = false);
     bool DirectoryExists(string path);
     bool FileExists(string path);
-    void MoveFile(string sourceFileName, string destFileName, bool overwrite = false);
-    void DeleteFile(string path);
+    bool MoveFile(string sourceFileName, string destFileName, bool overwrite = false);
+    bool DeleteFile(string path);
     DateTimeOffset GetFileCreationTime(string path);
     string ReadAllTextFromFile(string file);
     Stream OpenFileForReading(string path);
     Stream CreateFileForWriting(string path);
+    bool WriteAllTextToFile(string path, string contents);
 }

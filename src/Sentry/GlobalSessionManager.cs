@@ -53,14 +53,20 @@ internal class GlobalSessionManager : ISessionManager
 
         try
         {
-            Directory.CreateDirectory(_persistenceDirectoryPath);
+            _options.LogDebug("Creating persistence directory for session file at '{0}'.", _persistenceDirectoryPath);
 
-            _options.LogDebug("Created persistence directory for session file '{0}'.", _persistenceDirectoryPath);
+            if (_options.FileSystem.CreateDirectory(_persistenceDirectoryPath))
+            {
+                _options.LogInfo("Failed to create persistent directory for session file.");
+                return;
+            }
+
+            _options.LogDebug("Created persistence directory for session file");
 
             var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
 
             var persistedSessionUpdate = new PersistedSessionUpdate(update, pauseTimestamp);
-            persistedSessionUpdate.WriteToFile(filePath, _options.DiagnosticLogger);
+            persistedSessionUpdate.WriteToFile(_options.FileSystem, filePath, _options.DiagnosticLogger);
 
             _options.LogDebug("Persisted session to a file '{0}'.", filePath);
         }

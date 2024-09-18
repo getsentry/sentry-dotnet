@@ -386,9 +386,18 @@ public abstract class HttpTransportBase
                 var destination = Path.Combine(destinationDirectory, "envelope_too_large",
                     (eventId ?? SentryId.Create()).ToString());
 
-                Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+                if (!_options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!))
+                {
+                    _options.LogError("Failed to create directory to store the envelope.");
+                    return;
+                }
 
-                var envelopeFile = File.Create(destination);
+                var envelopeFile = _options.FileSystem.CreateFileForWriting(destination);
+                if (envelopeFile == Stream.Null)
+                {
+                    _options.LogError("Failed to create envelope file.");
+                    return;
+                }
 
                 using (envelopeFile)
                 {
@@ -442,9 +451,19 @@ public abstract class HttpTransportBase
                 var destination = Path.Combine(destinationDirectory, "envelope_too_large",
                     (eventId ?? SentryId.Create()).ToString());
 
-                Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+                if (!_options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!))
+                {
+                    _options.LogError("Failed to create directory to store the envelope.");
+                    return;
+                }
 
-                var envelopeFile = File.Create(destination);
+                var envelopeFile = _options.FileSystem.CreateFileForWriting(destination);
+                if (envelopeFile == Stream.Null)
+                {
+                    _options.LogError("Failed to create envelope file.");
+                    return;
+                }
+
 #if NETFRAMEWORK || NETSTANDARD2_0
                 using (envelopeFile)
 #else

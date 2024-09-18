@@ -15,16 +15,23 @@ public class FakeFileSystem : IFileSystem
     public IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption) =>
         _mockFileSystem.Directory.EnumerateFiles(path, searchPattern, searchOption);
 
-    public void CreateDirectory(string path) => _mockFileSystem.Directory.CreateDirectory(path);
+    public bool CreateDirectory(string path)
+    {
+        _mockFileSystem.Directory.CreateDirectory(path);
+        return true;
+    }
 
-    public void DeleteDirectory(string path, bool recursive = false) =>
+    public bool DeleteDirectory(string path, bool recursive = false)
+    {
         _mockFileSystem.Directory.Delete(path, recursive);
+        return true;
+    }
 
     public bool DirectoryExists(string path) => _mockFileSystem.Directory.Exists(path);
 
     public bool FileExists(string path) => _mockFileSystem.File.Exists(path);
 
-    public void MoveFile(string sourceFileName, string destFileName, bool overwrite = false)
+    public bool MoveFile(string sourceFileName, string destFileName, bool overwrite = false)
     {
 #if NET5_0_OR_GREATER
         _mockFileSystem.File.Move(sourceFileName, destFileName, overwrite);
@@ -39,9 +46,15 @@ public class FakeFileSystem : IFileSystem
             _mockFileSystem.File.Move(sourceFileName, destFileName);
         }
 #endif
+
+        return true;
     }
 
-    public void DeleteFile(string path) => _mockFileSystem.File.Delete(path);
+    public bool DeleteFile(string path)
+    {
+        _mockFileSystem.File.Delete(path);
+        return true;
+    }
 
     public DateTimeOffset GetFileCreationTime(string path) =>
         _mockFileSystem.FileInfo.New(path).CreationTimeUtc;
@@ -50,5 +63,14 @@ public class FakeFileSystem : IFileSystem
 
     public Stream OpenFileForReading(string path) => _mockFileSystem.File.OpenRead(path);
 
-    public Stream CreateFileForWriting(string path) => _mockFileSystem.File.Create(path);
+    public Stream CreateFileForWriting(string path)
+    {
+        return _mockFileSystem.File.Create(path);
+    }
+
+    public bool WriteAllTextToFile(string path, string contents)
+    {
+        _mockFileSystem.File.WriteAllText(path, contents);
+        return true;
+    }
 }

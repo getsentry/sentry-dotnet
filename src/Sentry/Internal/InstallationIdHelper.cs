@@ -47,13 +47,24 @@ internal class InstallationIdHelper(SentryOptions options)
 
     private string? TryGetPersistentInstallationId()
     {
+        if (options.DisableFileWrite)
+        {
+            options.LogDebug("File write has been disabled via the options. Skipping trying to get persistent installation ID.");
+            return null;
+        }
+
         try
         {
             var rootPath = options.CacheDirectoryPath ??
                            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             var directoryPath = Path.Combine(rootPath, "Sentry", options.Dsn!.GetHashString());
+            var fileSystem = options.FileSystem;
 
-            Directory.CreateDirectory(directoryPath);
+            if (!fileSystem.CreateDirectory(directoryPath))
+            {
+                options.LogDebug("Failed to create a directory for installation ID file ({0}).", directoryPath);
+                return null;
+            }
 
             options.LogDebug("Created directory for installation ID file ({0}).", directoryPath);
 
@@ -68,7 +79,11 @@ internal class InstallationIdHelper(SentryOptions options)
 
             // Generate new installation ID and store it in a file
             var id = Guid.NewGuid().ToString();
-            File.WriteAllText(filePath, id);
+            if (!fileSystem.WriteAllTextToFile(filePath, id))
+            {
+                options.LogDebug("Failed to write Installation ID to file ({0}).", filePath);
+                return null;
+            }
 
             options.LogDebug("Saved installation ID '{0}' to file '{1}'.", id, filePath);
             return id;

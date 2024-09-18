@@ -1,11 +1,16 @@
+using Sentry.Extensibility;
+
 namespace Sentry.Internal;
 
 internal class FileSystem : IFileSystem
 {
-    public static IFileSystem Instance { get; } = new FileSystem();
+    public static IFileSystem Instance { get; } = new FileSystem(SentrySdk.CurrentOptions);
 
-    private FileSystem()
+    private readonly SentryOptions? _options;
+
+    private FileSystem(SentryOptions? options)
     {
+        _options = options;
     }
 
     public IEnumerable<string> EnumerateFiles(string path) => Directory.EnumerateFiles(path);
@@ -16,32 +21,69 @@ internal class FileSystem : IFileSystem
     public IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption) =>
         Directory.EnumerateFiles(path, searchPattern, searchOption);
 
-    public void CreateDirectory(string path) => Directory.CreateDirectory(path);
+    public bool CreateDirectory(string path)
+    {
+        if (_options?.DisableFileWrite is false)
+        {
+            _options?.LogWarning("Skipping creating directory. Writing to file system has been explicitly disabled.");
+            return false;
+        }
 
-    public void DeleteDirectory(string path, bool recursive = false) => Directory.Delete(path, recursive);
+        Directory.CreateDirectory(path);
+        return true;
+    }
+
+    public bool DeleteDirectory(string path, bool recursive = false)
+    {
+        if (_options?.DisableFileWrite is false)
+        {
+            _options?.LogWarning("Skipping deleting directory. Writing to file system has been explicitly disabled.");
+            return false;
+        }
+
+        Directory.Delete(path, recursive);
+        return true;
+    }
 
     public bool DirectoryExists(string path) => Directory.Exists(path);
 
     public bool FileExists(string path) => File.Exists(path);
 
-    public void MoveFile(string sourceFileName, string destFileName, bool overwrite = false)
+    public bool MoveFile(string sourceFileName, string destFileName, bool overwrite = false)
     {
+        if (_options?.DisableFileWrite is false)
+        {
+            _options?.LogWarning("Skipping moving file. Writing to file system has been explicitly disabled.");
+            return false;
+        }
+
 #if NETCOREAPP3_0_OR_GREATER
         File.Move(sourceFileName, destFileName, overwrite);
 #else
-            if (overwrite)
-            {
-                File.Copy(sourceFileName, destFileName, overwrite: true);
-                File.Delete(sourceFileName);
-            }
-            else
-            {
-                File.Move(sourceFileName, destFileName);
-            }
+        if (overwrite)
+        {
+            File.Copy(sourceFileName, destFileName, overwrite: true);
+            File.Delete(sourceFileName);
+        }
+        else
+        {
+            File.Move(sourceFileName, destFileName);
+        }
 #endif
+        return true;
     }
 
-    public void DeleteFile(string path) => File.Delete(path);
+    public bool DeleteFile(string path)
+    {
+        if (_options?.DisableFileWrite is false)
+        {
+            _options?.LogWarning("Skipping deleting file. Writing to file system has been explicitly disabled.");
+            return false;
+        }
+
+        File.Delete(path);
+        return true;
+    }
 
     public DateTimeOffset GetFileCreationTime(string path) => new FileInfo(path).CreationTimeUtc;
 
@@ -49,5 +91,26 @@ internal class FileSystem : IFileSystem
 
     public Stream OpenFileForReading(string path) => File.OpenRead(path);
 
-    public Stream CreateFileForWriting(string path) => File.Create(path);
+    public Stream CreateFileForWriting(string path)
+    {
+        if (_options?.DisableFileWrite is false)
+        {
+            _options?.LogWarning("Skipping file for writing. Writing to file system has been explicitly disabled.");
+            return Stream.Null;
+        }
+
+        return File.Create(path);
+    }
+
+    public bool WriteAllTextToFile(string path, string contents)
+    {
+        if (_options?.DisableFileWrite is false)
+        {
+            _options?.LogWarning("Skipping writing all text to file. Writing to file system has been explicitly disabled.");
+            return false;
+        }
+
+        File.WriteAllText(path, contents);
+        return true;
+    }
 }
