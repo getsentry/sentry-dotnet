@@ -1,97 +1,104 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks />
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios</TargetFrameworks>
-    <!-- Currently broken on .NET 7, see
-      - https://github.com/dotnet/maui/issues/18573
-      - https://developercommunity.visualstudio.com/t/MAUI0000:-SystemMissingMethodException:/10505327?sort=newest&ftype=problem
-      <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks> -->
+    <PropertyGroup>
+        <TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
+        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
+        <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
+        <!-- <TargetFrameworks>$(TargetFrameworks);net8.0-tizen</TargetFrameworks> -->
 
-    <OutputType>Exe</OutputType>
-    <SingleProject>true</SingleProject>
-    <RootNamespace>Sentry.Maui.Device.TestApp</RootNamespace>
-    <AssemblyName>Sentry.Maui.Device.TestApp</AssemblyName>
-    <SelfContained>true</SelfContained>
-    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+        <!-- Note for MacCatalyst:
+        The default runtime is maccatalyst-x64, except in Release config, in which case the default is maccatalyst-x64;maccatalyst-arm64.
+        When specifying both architectures, use the plural <RuntimeIdentifiers> instead of the singular <RuntimeIdentifier>.
+        The Mac App Store will NOT accept apps with ONLY maccatalyst-arm64 indicated;
+        either BOTH runtimes must be indicated or ONLY macatalyst-x64. -->
+        <!-- For example: <RuntimeIdentifiers>maccatalyst-x64;maccatalyst-arm64</RuntimeIdentifiers> -->
 
-    <!-- Display name -->
-    <ApplicationTitle>Sentry.Maui.Device.TestApp</ApplicationTitle>
+        <OutputType>Exe</OutputType>
+        <RootNamespace>Sentry.Maui.Device.TestApp</RootNamespace>
+        <UseMaui>true</UseMaui>
+        <SingleProject>true</SingleProject>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
 
-    <!-- App Identifier -->
-    <ApplicationId>io.sentry.dotnet.maui.device.testapp</ApplicationId>
-    <ApplicationIdGuid>4A534873-8D78-46AE-AE75-0F8F00152A2F</ApplicationIdGuid>
+        <!-- Display name -->
+        <ApplicationTitle>Sentry.Maui.Device.TestApp</ApplicationTitle>
 
-    <!-- Versions -->
-    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-    <ApplicationVersion>1</ApplicationVersion>
+        <!-- App Identifier -->
+        <ApplicationId>io.sentry.dotnet.maui.device.testapp</ApplicationId>
 
-    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+        <!-- Versions -->
+        <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+        <ApplicationVersion>1</ApplicationVersion>
 
-    <!-- Avoid errors of Sentry.Testing not being a self-contained executable, while including it in a self-contained executable (this).
-         https://docs.microsoft.com/en-us/dotnet/core/compatibility/sdk/5.0/referencing-executable-generates-error -->
-    <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+        <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+    </PropertyGroup>
 
-    <!-- https://github.com/xamarin/xamarin-android/issues/6809 -->
-    <NoWarn>$(NoWarn);XA4218</NoWarn>
+    <!--
+      Use the arm64 runtime when building on arm64 Macs.
+      See https://github.com/xamarin/xamarin-macios/issues/17841
+    -->
+    <PropertyGroup>
+        <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
+        <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
 
-  </PropertyGroup>
+        <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android'      And '$(OSArchitecture)' == 'Arm64'">android-arm64</RuntimeIdentifier>
+        <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(OSArchitecture)' == 'Arm64'">iossimulator-arm64</RuntimeIdentifier>
+        <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'  And '$(OSArchitecture)' == 'Arm64'">maccatalyst-arm64</RuntimeIdentifier>
 
-  <!--
-    Use the arm64 runtime when building on arm64 Macs.
-    See https://github.com/xamarin/xamarin-macios/issues/17841
-  -->
-  <PropertyGroup>
-    <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
-    <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
+        <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android'      And '$(OSArchitecture)' == 'x64'">android-x64</RuntimeIdentifier>
+        <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(OSArchitecture)' == 'x64'">iossimulator-x64</RuntimeIdentifier>
+        <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'  And '$(OSArchitecture)' == 'x64'">maccatalyst-x64</RuntimeIdentifier>
+    </PropertyGroup>
 
-    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android'      And '$(OSArchitecture)' == 'Arm64'">android-arm64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(OSArchitecture)' == 'Arm64'">iossimulator-arm64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'  And '$(OSArchitecture)' == 'Arm64'">maccatalyst-arm64</RuntimeIdentifier>
+    <ItemGroup>
+        <!-- App Icon -->
+        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4"/>
 
-    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android'      And '$(OSArchitecture)' == 'x64'">android-x64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(OSArchitecture)' == 'x64'">iossimulator-x64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'  And '$(OSArchitecture)' == 'x64'">maccatalyst-x64</RuntimeIdentifier>
-  </PropertyGroup>
+        <!-- Splash Screen -->
+        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128"/>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.82" />
-    <PackageReference Include="Microsoft.Maui.Core" Version="8.0.82" />
-    <PackageReference Include="Microsoft.Maui.Essentials" Version="8.0.82" />
+        <!-- Images -->
+        <MauiImage Include="Resources\Images\*"/>
+        <MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185"/>
 
-    <!-- https://github.com/advisories/GHSA-5f2m-466j-3848 -->
-    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
-  </ItemGroup>
+        <!-- Custom Fonts -->
+        <MauiFont Include="Resources\Fonts\*"/>
 
-  <ItemGroup>
-    <MauiIcon Include="Resources\appicon.svg" ForegroundFile="Resources\appiconfg.svg" Color="#512BD4" />
-    <MauiSplashScreen Include="Resources\appiconfg.svg" Color="#512BD4" BaseSize="128,128" />
-  </ItemGroup>
+        <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)"/>
+    </ItemGroup>
 
-  <!-- Configure XUnit -->
-  <ItemGroup>
-    <AndroidAsset Include="..\xunit.runner.json" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
-    <Content Include="..\xunit.runner.json" CopyToOutputDirectory="PreserveNewest" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="DeviceRunners.XHarness.Maui" Version="0.1.0-preview.2" />
+        <PackageReference Include="DeviceRunners.XHarness.Xunit" Version="0.1.0-preview.2" />
 
-  <ItemGroup>
-    <ProjectReference Include="..\MauiTestUtils\DeviceTests\TestUtils.DeviceTests.csproj" />
-    <ProjectReference Include="..\MauiTestUtils\DeviceTests.Runners\TestUtils.DeviceTests.Runners.csproj" />
-    <ProjectReference Include="..\MauiTestUtils\DeviceTests.Runners.SourceGen\TestUtils.DeviceTests.Runners.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="..\Sentry.Android.AssemblyReader.Tests\Sentry.Android.AssemblyReader.Tests.csproj" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
-    <ProjectReference Include="..\Sentry.Tests\Sentry.Tests.csproj" />
-    <ProjectReference Include="..\Sentry.Extensions.Logging.Tests\Sentry.Extensions.Logging.Tests.csproj" />
-    <ProjectReference Include="..\Sentry.Maui.Tests\Sentry.Maui.Tests.csproj" />
-  </ItemGroup>
+        <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/>
+        <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0"/>
 
-  <!-- https://github.com/dotnet/maui/blob/main/.nuspec/Microsoft.Maui.TestUtils.DeviceTests.Runners.targets -->
-  <ItemGroup>
-    <CompilerVisibleProperty Include="RootNamespace" />
-    <CompilerVisibleProperty Include="ApplicationId" />
-    <CompilerVisibleProperty Include="ApplicationTitle" />
-    <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="IsMauiSplashScreen" />
-    <AdditionalFiles Include="@(MauiSplashScreen)" IsMauiSplashScreen="True" />
-  </ItemGroup>
+        <PackageReference Include="System.Private.Uri" Version="4.3.2">
+            <!-- https://github.com/advisories/GHSA-5f2m-466j-3848 -->
+        </PackageReference>
 
+        <PackageReference Include="xunit" Version="2.9.0" />
+        <PackageReference Include="xunit.runner.utility" Version="2.9.0" />
+    </ItemGroup>
+
+    <!-- Configure XUnit -->
+    <ItemGroup>
+        <AndroidAsset Include="..\xunit.runner.json" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
+        <Content Include="..\xunit.runner.json" CopyToOutputDirectory="PreserveNewest" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Sentry.Android.AssemblyReader.Tests\Sentry.Android.AssemblyReader.Tests.csproj" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
+        <ProjectReference Include="..\Sentry.Tests\Sentry.Tests.csproj" />
+        <ProjectReference Include="..\Sentry.Extensions.Logging.Tests\Sentry.Extensions.Logging.Tests.csproj" />
+        <ProjectReference Include="..\Sentry.Maui.Tests\Sentry.Maui.Tests.csproj" />
+    </ItemGroup>
 </Project>

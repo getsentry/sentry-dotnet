@@ -5,11 +5,4 @@
   <PropertyGroup>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Using Include="Sentry"/>
-    <Using Include="Sentry.Extensibility"/>
-    <Using Include="Microsoft.Maui.FactAttribute" Alias="FactAttribute" />
-    <Using Include="Microsoft.Maui.TheoryAttribute" Alias="TheoryAttribute" />
-  </ItemGroup>
 </Project>
