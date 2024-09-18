@@ -42,7 +42,7 @@ jobs:
         with:
           name: device-test-ios
           if-no-files-found: error
-          path: test/Sentry.Maui.Device.TestApp/bin/Release/net7.0-ios/iossimulator-x64/Sentry.Maui.Device.TestApp.app
+          path: test/Sentry.Maui.Device.TestApp/bin/Release/net8.0-ios/iossimulator-x64/Sentry.Maui.Device.TestApp.app
 
   ios:
     needs: [build]
