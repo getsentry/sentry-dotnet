@@ -62,6 +62,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Serilog", "samples\Sentry.Samples.Serilog\Sentry.Samples.Serilog.csproj", "{AA98FD8D-1254-4B34-840C-06BB263933DE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{230B9384-90FD-4551-A5DE-1A5C197F25B6}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+		src\Directory.Build.targets = src\Directory.Build.targets
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Android.AssemblyReader", "src\Sentry.Android.AssemblyReader\Sentry.Android.AssemblyReader.csproj", "{20386BBE-1F55-4503-9F5F-F2C6B29DE865}"
 EndProject
@@ -178,6 +182,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{233D34AB-9
 		README.md = README.md
 		CHANGELOG.md = CHANGELOG.md
 		CONTRIBUTING.md = CONTRIBUTING.md
+		.codecov.yml = .codecov.yml
+		.gitignore = .gitignore
+		global.json = global.json
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AspNetCore.Blazor.WebAssembly", "src\Sentry.AspNetCore.Blazor.WebAssembly\Sentry.AspNetCore.Blazor.WebAssembly.csproj", "{8298202C-9983-4D0A-851D-805539EE481A}"
