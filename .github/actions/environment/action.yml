@@ -38,12 +38,17 @@ runs:
           8.0.x
           9.0.100-rc.1.24452.12
 
+    - name: Restore Workloads
+      shell: bash
+      run: dotnet workload restore \
+        --temp-dir "${{ runner.temp }}"
+
     - name: Install .NET Workloads
       shell: bash
       run: >
         dotnet workload install \
-          wasm-tools android maui-android \
-          ${{ runner.os == 'macOS' && 'ios maui-ios maui-maccatalyst maui-windows macos' || '' }} \
+          wasm-tools maui-android \
+          ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows macos' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
           --temp-dir "${{ runner.temp }}" \
           --skip-sign-check

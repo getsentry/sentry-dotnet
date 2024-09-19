@@ -31,9 +31,6 @@ jobs:
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
 
-      - name: Restore Workloads
-        run: dotnet workload restore test/Sentry.Maui.Device.TestApp/Sentry.Maui.Device.TestApp.csproj
-
       - name: Build Android Test App
         run: pwsh ./scripts/device-test.ps1 android -Build
 
