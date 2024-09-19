@@ -61,8 +61,6 @@ internal class GlobalSessionManager : ISessionManager
                 return;
             }
 
-            _options.LogDebug("Created persistence directory for session file");
-
             var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
 
             var persistedSessionUpdate = new PersistedSessionUpdate(update, pauseTimestamp);
