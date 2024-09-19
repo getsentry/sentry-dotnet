@@ -11,7 +11,6 @@ public static class MauiProgram
         builder
             .UseXHarnessTestRunner(conf => {
                 conf.AddTestAssemblies([
-                    // typeof(MauiProgram).Assembly,
                     typeof(Sentry.Tests.SentrySdkTests).Assembly,
                     typeof(Sentry.Extensions.Logging.Tests.LogLevelExtensionsTests).Assembly,
                     typeof(Sentry.Maui.Tests.SentryMauiOptionsTests).Assembly,
