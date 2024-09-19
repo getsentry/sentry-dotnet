@@ -14,19 +14,21 @@ public class GlobalSessionManagerTests : IDisposable
 
         public Func<string, PersistedSessionUpdate> PersistedSessionProvider { get; set; }
 
+        public FakeFileSystem FileSystem { get; }
+
         public Fixture(Action<SentryOptions> configureOptions = null)
         {
             Clock.GetUtcNow().Returns(DateTimeOffset.Now);
             Logger = new InMemoryDiagnosticLogger();
 
-            var fileSystem = new FakeFileSystem();
-            _cacheDirectory = new TempDirectory(fileSystem);
+            FileSystem = new FakeFileSystem();
+            _cacheDirectory = new TempDirectory(FileSystem);
 
             Options = new SentryOptions
             {
                 Dsn = ValidDsn,
                 CacheDirectoryPath = _cacheDirectory.Path,
-                FileSystem = fileSystem,
+                FileSystem = FileSystem,
                 Release = "test",
                 Debug = true,
                 DiagnosticLogger = Logger
@@ -77,7 +79,7 @@ public class GlobalSessionManagerTests : IDisposable
         sut.StartSession();
 
         // Assert
-        File.Exists(filePath).Should().BeTrue();
+        _fixture.FileSystem.MockFileSystem.FileExists(filePath).Should().BeTrue();
     }
 
     [Fact]
@@ -97,7 +99,7 @@ public class GlobalSessionManagerTests : IDisposable
         sut.StartSession();
 
         // Assert
-        File.Exists(filePath).Should().BeTrue();
+        _fixture.FileSystem.MockFileSystem.FileExists(filePath).Should().BeTrue();
     }
 
     [Fact]
