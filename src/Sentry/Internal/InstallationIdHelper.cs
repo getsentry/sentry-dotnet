@@ -71,9 +71,9 @@ internal class InstallationIdHelper(SentryOptions options)
             var filePath = Path.Combine(directoryPath, ".installation");
 
             // Read installation ID stored in a file
-            if (File.Exists(filePath))
+            if (fileSystem.FileExists(filePath))
             {
-                return File.ReadAllText(filePath);
+                return fileSystem.ReadAllTextFromFile(filePath);
             }
             options.LogDebug("File containing installation ID does not exist ({0}).", filePath);
 

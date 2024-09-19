@@ -32,7 +32,7 @@ internal class GlobalSessionManager : ISessionManager
         _options = options;
         _clock = clock ?? SystemClock.Clock;
         _persistedSessionProvider = persistedSessionProvider
-                                    ?? (filePath => Json.Load(filePath, PersistedSessionUpdate.FromJson));
+                                    ?? (filePath => Json.Load(_options.FileSystem, filePath, PersistedSessionUpdate.FromJson));
 
         // TODO: session file should really be process-isolated, but we
         // don't have a proper mechanism for that right now.
@@ -90,7 +90,7 @@ internal class GlobalSessionManager : ISessionManager
             {
                 try
                 {
-                    var contents = File.ReadAllText(filePath);
+                    var contents = _options.FileSystem.ReadAllTextFromFile(filePath);
                     _options.LogDebug("Deleting persisted session file with contents: {0}", contents);
                 }
                 catch (Exception ex)
@@ -99,7 +99,7 @@ internal class GlobalSessionManager : ISessionManager
                 }
             }
 
-            File.Delete(filePath);
+            _options.FileSystem.DeleteFile(filePath);
 
             _options.LogInfo("Deleted persisted session file '{0}'.", filePath);
         }
