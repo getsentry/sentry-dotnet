@@ -662,6 +662,7 @@ namespace Sentry
         public Sentry.StartupTimeDetectionMode DetectStartupTime { get; set; }
         public Sentry.SentryLevel DiagnosticLevel { get; set; }
         public Sentry.Extensibility.IDiagnosticLogger? DiagnosticLogger { get; set; }
+        public bool DisableFileWrite { get; set; }
         public string? Distribution { get; set; }
         public string? Dsn { get; set; }
         public bool EnableScopeSync { get; set; }
