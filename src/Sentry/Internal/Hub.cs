@@ -659,9 +659,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
         try
         {
-            Metrics.FlushAsync().ContinueWith(_ =>
-                CurrentClient.FlushAsync(_options.ShutdownTimeout).ConfigureAwait(false).GetAwaiter().GetResult()
-            ).ConfigureAwait(false).GetAwaiter().GetResult();
+            CurrentClient.FlushAsync(_options.ShutdownTimeout).ConfigureAwait(false).GetAwaiter().GetResult();
         }
         catch (Exception e)
         {
