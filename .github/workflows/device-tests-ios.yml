@@ -36,6 +36,9 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
 
+      - name: Restore Workloads
+        run: dotnet workload restore test/Sentry.Maui.Device.TestApp/Sentry.Maui.Device.TestApp.csproj
+
       - name: Build iOS Test App
         run: pwsh ./scripts/device-test.ps1 ios -Build
 
