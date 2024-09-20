@@ -60,7 +60,7 @@
   </ItemGroup>
 
   <!--
-    We use Simon TeestableIO to be able to mock the FileSystem for testing purposes
+    We use TestableIO to be able to mock the FileSystem during tests
     https://github.com/TestableIO/System.IO.Abstractions
   -->
   <ItemGroup>
