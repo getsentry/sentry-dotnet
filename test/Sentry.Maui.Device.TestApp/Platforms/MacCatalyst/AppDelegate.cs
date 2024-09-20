@@ -1,4 +1,4 @@
-﻿using Foundation;
+using Foundation;
 
 namespace Sentry.Maui.Device.TestApp;
 

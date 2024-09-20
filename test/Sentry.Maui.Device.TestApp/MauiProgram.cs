@@ -1,4 +1,4 @@
-﻿using DeviceRunners.XHarness;
+using DeviceRunners.XHarness;
 using Microsoft.Extensions.Logging;
 
 namespace Sentry.Maui.Device.TestApp;
@@ -9,7 +9,8 @@ public static class MauiProgram
     {
         var builder = MauiApp.CreateBuilder();
         builder
-            .UseXHarnessTestRunner(conf => {
+            .UseXHarnessTestRunner(conf =>
+            {
                 conf.AddTestAssemblies([
                     typeof(Sentry.Tests.SentrySdkTests).Assembly,
                     typeof(Sentry.Extensions.Logging.Tests.LogLevelExtensionsTests).Assembly,
