@@ -1,3 +1,5 @@
+using System.IO.Abstractions.TestingHelpers;
+
 namespace Sentry.Tests.Internals;
 
 public class InstallationIdHelperTests
@@ -14,20 +16,21 @@ public class InstallationIdHelperTests
         {
             Logger = Substitute.For<IDiagnosticLogger>();
 
-            var fileSystem = new FakeFileSystem();
-            _cacheDirectory = new TempDirectory(fileSystem);
+            _cacheDirectory = new TempDirectory();
 
             Options = new SentryOptions
             {
                 Dsn = ValidDsn,
                 CacheDirectoryPath = _cacheDirectory.Path,
-                FileSystem = fileSystem,
                 Release = "test",
                 Debug = true,
                 DiagnosticLogger = Logger
             };
 
             configureOptions?.Invoke(Options);
+
+            // This keeps all writing-to-file opterations in memory instead of actually writing to disk
+            Options.FileSystem = new SentryFileSystem(Options, new MockFileSystem());
         }
 
         public InstallationIdHelper GetSut() => new(Options);

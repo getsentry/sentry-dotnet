@@ -723,10 +723,10 @@ public class SentryOptions
     }
 
     /// <summary>
-    /// Sets the filesystem instance to use. Defaults to the actual <see cref="Sentry.Internal.FileSystem"/>.
+    /// Sets the filesystem instance to use. Defaults to the actual <see cref="SentryFileSystem"/>.
     /// Used for testing.
     /// </summary>
-    internal IFileSystem FileSystem { get; set; } = Internal.FileSystem.Instance;
+    internal ISentryFileSystem FileSystem { get; set; }
 
     /// <summary>
     /// Allows to disable the SDKs writing to disk operations
@@ -1184,6 +1184,7 @@ public class SentryOptions
     /// </summary>
     public SentryOptions()
     {
+        FileSystem = new SentryFileSystem(this);
         SettingLocator = new SettingLocator(this);
         _lazyInstallationId = new(() => new InstallationIdHelper(this).TryGetInstallationId());
 

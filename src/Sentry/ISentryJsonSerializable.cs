@@ -20,7 +20,7 @@ public interface ISentryJsonSerializable
 
 internal static class JsonSerializableExtensions
 {
-    public static void WriteToFile(this ISentryJsonSerializable serializable, IFileSystem fileSystem, string filePath, IDiagnosticLogger? logger)
+    public static void WriteToFile(this ISentryJsonSerializable serializable, ISentryFileSystem fileSystem, string filePath, IDiagnosticLogger? logger)
     {
         using var file = fileSystem.CreateFileForWriting(filePath);
         if (file == Stream.Null)

@@ -1,3 +1,4 @@
+using System.IO.Abstractions.TestingHelpers;
 using Sentry.Internal.Http;
 using BackgroundWorker = Sentry.Internal.BackgroundWorker;
 
@@ -498,11 +499,11 @@ public class BackgroundWorkerTests
     public async Task FlushAsync_Calls_CachingTransport_FlushAsync()
     {
         // Arrange
-        var fileSystem = new FakeFileSystem();
-        using var tempDir = new TempDirectory(fileSystem);
+        using var tempDir = new TempDirectory();
 
         var options = _fixture.SentryOptions;
-        options.FileSystem = fileSystem;
+        // This keeps all writing-to-file opterations in memory instead of actually writing to disk
+        options.FileSystem = new SentryFileSystem(options, new MockFileSystem());
         options.CacheDirectoryPath = tempDir.Path;
 
         var innerTransport = _fixture.Transport;

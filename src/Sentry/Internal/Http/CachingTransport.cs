@@ -52,7 +52,7 @@ internal class CachingTransport : ITransport, IDisposable
     // Inner transport exposed internally primarily for testing
     internal ITransport InnerTransport => _innerTransport;
 
-    private readonly IFileSystem _fileSystem;
+    private readonly ISentryFileSystem _fileSystem;
 
     public static CachingTransport Create(ITransport innerTransport, SentryOptions options,
         bool startWorker = true,

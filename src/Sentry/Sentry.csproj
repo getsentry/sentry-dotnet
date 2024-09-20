@@ -60,6 +60,14 @@
   </ItemGroup>
 
   <!--
+    We use Simon TeestableIO to be able to mock the FileSystem for testing purposes
+    https://github.com/TestableIO/System.IO.Abstractions
+  -->
+  <ItemGroup>
+    <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="20.0.4" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!--
     We use Simon Cropp's Polyfill source-only package to access APIs in lower targets.
     https://github.com/SimonCropp/Polyfill
   -->

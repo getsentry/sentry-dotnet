@@ -1,3 +1,4 @@
+using System.IO.Abstractions.TestingHelpers;
 using Sentry.Internal.Http;
 
 namespace Sentry.Profiling.Tests;
@@ -197,8 +198,7 @@ public class SamplingTransactionProfilerTests
         cts.Token.Register(() => tcs.TrySetCanceled());
 
         // envelope cache dir
-        var fileSystem = new FakeFileSystem();
-        using var cacheDirectory = offlineCaching ? new TempDirectory(fileSystem) : null;
+        using var cacheDirectory = offlineCaching ? new TempDirectory() : null;
 
         // profiler temp dir (doesn't support `FileSystem`)
         var tempDir = new TempDirectory();
@@ -208,7 +208,6 @@ public class SamplingTransactionProfilerTests
             Dsn = ValidDsn,
             // To go through a round trip serialization of cached envelope
             CacheDirectoryPath = cacheDirectory?.Path,
-            FileSystem = fileSystem,
             // So we don't need to deal with gzip'ed payload
             RequestBodyCompressionLevel = CompressionLevel.NoCompression,
             CreateHttpMessageHandler = () => new CallbackHttpClientHandler(VerifyAsync),
@@ -219,6 +218,9 @@ public class SamplingTransactionProfilerTests
             TracesSampleRate = 1.0,
             ProfilesSampleRate = 1.0,
         };
+
+        // This keeps all writing-to-file opterations in memory instead of actually writing to disk
+        options.FileSystem = new SentryFileSystem(options, new MockFileSystem());
 
         // Disable process exit flush to resolve "There is no currently active test." errors.
         options.DisableAppDomainProcessExitFlush();
