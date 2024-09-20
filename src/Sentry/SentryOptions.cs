@@ -41,9 +41,8 @@ public class SentryOptions
     /// </remarks>
     internal IScopeStackContainer? ScopeStackContainer { get; set; }
 
-    private Lazy<string?> LazyInstallationId => new(()
-        => new InstallationIdHelper(this).TryGetInstallationId());
-    internal string? InstallationId => LazyInstallationId.Value;
+    private readonly Lazy<string?> _lazyInstallationId;
+    internal string? InstallationId => _lazyInstallationId.Value;
 
 #if __MOBILE__
     private bool _isGlobalModeEnabled = true;
@@ -1013,10 +1012,9 @@ public class SentryOptions
     /// end the session when it's closed.
     /// </summary>
     /// <remarks>
-    /// Note: this is disabled by default in the current version (except for mobile targets and MAUI),
-    /// but will become enabled by default in the next major version.
-    /// Currently this only works for release health in client mode
-    /// (desktop, mobile applications, but not web servers).
+    /// Currently, this only works for release health in client mode (desktop, mobile applications, but not web servers)
+    /// as this feature requires access to the filesystem to sync sessions and multiple instances of the app will race
+    /// each other.
     /// </remarks>
     public bool AutoSessionTracking { get; set; } = false;
 #endif
@@ -1182,6 +1180,7 @@ public class SentryOptions
     public SentryOptions()
     {
         SettingLocator = new SettingLocator(this);
+        _lazyInstallationId = new(() => new InstallationIdHelper(this).TryGetInstallationId());
 
         TransactionProcessorsProviders = new() {
             () => TransactionProcessors ?? Enumerable.Empty<ISentryTransactionProcessor>()
@@ -1298,9 +1297,7 @@ public class SentryOptions
                 UriFormat.Unescaped)
         );
 
-#if PLATFORM_NEUTRAL
         NetworkStatusListener = new PollingNetworkStatusListener(this);
-#endif
     }
 
     /// <summary>

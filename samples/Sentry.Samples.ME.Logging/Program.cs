@@ -4,25 +4,26 @@ using Sentry.Extensions.Logging;
 using var loggerFactory = LoggerFactory.Create(builder =>
 {
     builder.AddConsole();
-    builder.AddSentry(o =>
+    builder.AddSentry(options =>
     {
-        // Set to true to SDK debugging to see the internal messages through the logging library.
-        o.Debug = false;
-        // Configure the level of Sentry internal logging
-        o.DiagnosticLevel = SentryLevel.Debug;
+        options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
 
-        o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
-        o.MaxBreadcrumbs = 150; // Increasing from default 100
-        o.Release = "e386dfd"; // If not set here, SDK looks for it on main assembly's AssemblyInformationalVersion and AssemblyVersion
+        // Set to true to SDK debugging to see the internal messages through the logging library.
+        options.Debug = false;
+        // Configure the level of Sentry internal logging
+        options.DiagnosticLevel = SentryLevel.Debug;
+
+        options.MaxBreadcrumbs = 150; // Increasing from default 100
+        options.Release = "e386dfd"; // If not set here, SDK looks for it on main assembly's AssemblyInformationalVersion and AssemblyVersion
 
         // Optionally configure options: The default values are:
-        o.MinimumBreadcrumbLevel = LogLevel.Information; // It requires at least this level to store breadcrumb
-        o.MinimumEventLevel = LogLevel.Error; // This level or above will result in event sent to Sentry
+        options.MinimumBreadcrumbLevel = LogLevel.Information; // It requires at least this level to store breadcrumb
+        options.MinimumEventLevel = LogLevel.Error; // This level or above will result in event sent to Sentry
 
         // Don't keep as a breadcrumb or send events for messages of level less than Critical with exception of type DivideByZeroException
-        o.AddLogEntryFilter((_, level, _, exception) => level < LogLevel.Critical && exception is DivideByZeroException);
+        options.AddLogEntryFilter((_, level, _, exception) => level < LogLevel.Critical && exception is DivideByZeroException);
 
-        o.ConfigureScope(s => s.SetTag("RootScope", "sent with all events"));
+        options.ConfigureScope(s => s.SetTag("RootScope", "sent with all events"));
     });
 });
 var logger = loggerFactory.CreateLogger<Program>();

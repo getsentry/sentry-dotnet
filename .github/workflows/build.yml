@@ -10,7 +10,7 @@ on:
       - "**.md"
 
 env:
-  XCODE_VERSION: 15.1
+  XCODE_VERSION: 15.4
 
 jobs:
   build-sentry-native:
@@ -34,6 +34,17 @@ jobs:
           key: sentry-native-${{ runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           enableCrossOsArchive: true
 
+      - name: Free Disk Space (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
+        with:
+          android: true
+          dotnet: false
+          haskell: true
+          large-packages: false
+          docker-images: false
+          swap-storage: true
+
       - name: Install build dependencies
         if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'Linux'
         run: |
@@ -52,13 +63,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Pinning `macos-13` because Microsoft.iOS 16.4 requires Xcode 14.3 which is only built-in in 13
-        os: [ubuntu-latest, windows-latest, macos-13]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - name: Cancel Previous Runs
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
+
+      # We only use Xcode 15.4
+      - name: Remove unused applications
+        if: matrix.os == 'macos-latest'
+        run: |
+          df -hI /dev/disk3s1s1
+          sudo rm -rf /Applications/Xcode_14.3.1.app
+          sudo rm -rf /Applications/Xcode_15.0.1.app
+          sudo rm -rf /Applications/Xcode_15.1.app
+          sudo rm -rf /Applications/Xcode_15.2.app
+          sudo rm -rf /Applications/Xcode_15.3.app
+          df -hI /dev/disk3s1s1
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -106,15 +128,11 @@ jobs:
         if: runner.os == 'macOS'
         uses: ./.github/actions/buildcocoasdk
 
-      # Only switch to newer xcode after building the Cocoa SDK so that it can keep IPHONEOS_DEPLOYMENT_TARGET=11.0
-      - run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
-        if: runner.os == 'macOS'
-
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
       - name: Build
-        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
+        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
 
       - name: Test
         run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
@@ -153,7 +171,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - uses: actions/checkout@v4
@@ -174,9 +192,6 @@ jobs:
         run: |
           sudo apt update
           sudo apt install libcurl4-openssl-dev
-
-      - run: sudo xcode-select -s /Applications/Xcode_${{ env.XCODE_VERSION }}.app
-        if: runner.os == 'macOS'
 
       - uses: actions/setup-dotnet@v4
         with:

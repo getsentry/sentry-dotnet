@@ -4,18 +4,96 @@
 
 ### Features
 
-- Users can now automatically create releases and associated commits via sentry-cli and MSBuild properties ([#3462](https://github.com/getsentry/sentry-dotnet/pull/3462))
+- All exceptions are now added as breadcrumbs on future events. Previously this was only the case for exceptions captured via the `Sentry.SeriLog` or `Sentry.Extensions.Logging` integrations. ([#3584](https://github.com/getsentry/sentry-dotnet/pull/3584))
 
 ### Fixes
+- On mobile devices, the SDK no longer throws a `FormatException` for `ProcessorFrequency` when trying to report native events ([#3541](https://github.com/getsentry/sentry-dotnet/pull/3541))
+- Add missing org parameter to the CLI release operations ([#3600](https://github.com/getsentry/sentry-dotnet/pull/3600))
 
-- Race condition in `SentryMessageHandler` ([#3477](https://github.com/getsentry/sentry-dotnet/pull/3477))
-- Decrease runtime diagnostics circular buffer when profiling, reducing memory usage ([#3491](https://github.com/getsentry/sentry-dotnet/pull/3491))
+### API Changes
+- When the Sentry SDK is disabled, `SentrySdk.StartTransaction()` now returns a `NoOpTransaction`, which avoids unnecessary memory allocations ([#3581](https://github.com/getsentry/sentry-dotnet/pull/3581))
 
 ### Dependencies
 
-- Bump CLI from v2.32.1 to v2.32.2 ([#3489](https://github.com/getsentry/sentry-dotnet/pull/3489))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2322)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.32.1...2.32.2)
+- Bump Cocoa SDK from v8.35.0 to v8.36.0 ([#3570](https://github.com/getsentry/sentry-dotnet/pull/3570), [#3575](https://github.com/getsentry/sentry-dotnet/pull/3575))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8360)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.35.0...8.36.0)
+- Bump CLI from v2.33.1 to v2.36.1 ([#3578](https://github.com/getsentry/sentry-dotnet/pull/3578), [#3599](https://github.com/getsentry/sentry-dotnet/pull/3599), [#3603](https://github.com/getsentry/sentry-dotnet/pull/3603), [#3606](https://github.com/getsentry/sentry-dotnet/pull/3606))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2361)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.33.1...2.36.1)
+- Bump Native SDK from v0.7.8 to v0.7.9 ([#3577](https://github.com/getsentry/sentry-dotnet/pull/3577))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#079)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.8...0.7.9)
+
+## 4.10.2
+
+### Various fixes & improvements
+
+- fix: Prevent deadlock in `Hub.Dispose` (#3539) by @bitsandfoxes
+- build(deps): bump github/codeql-action from 3.26.0 to 3.26.2 (#3543) by @dependabot
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.34.0 to v8.35.0 ([#3548](https://github.com/getsentry/sentry-dotnet/pull/3548))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8350)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.34.0...8.35.0)
+
+## Fixes
+
+- Resolved a potential deadlock during SDK shutdown ([#3539](https://github.com/getsentry/sentry-dotnet/pull/3539))
+
+## 4.10.1
+
+### Fixes
+
+- Unfinished spans are now correctly stored and retrieved by the CachingTransport ([#3533](https://github.com/getsentry/sentry-dotnet/pull/3533))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.33.0 to v8.34.0 ([#3535](https://github.com/getsentry/sentry-dotnet/pull/3535))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8340)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.33.0...8.34.0)
+
+## 4.10.0
+
+### Features
+
+- Users can now automatically create releases and associated commits via sentry-cli and MSBuild properties ([#3462](https://github.com/getsentry/sentry-dotnet/pull/3462))
+- `Sentry.AspNetCore.Blazor.WebAssembly` now targets .NET 8 specifically, allowing for proper dependency resolution ([#3501](https://github.com/getsentry/sentry-dotnet/pull/3501))
+
+### Fixes
+
+- When targeting `WPF`, `WinForms` or `Avalonia` with `PublishAot` enabled, the SDK no longers throws a `DllNotFoundException` trying to initialize `sentry-native` ([#3411](https://github.com/getsentry/sentry-dotnet/pull/3411))
+Unable to load DLL sentry-native or one of its dependencies
+- On mobile devices, the SDK no longer throws a `FormatException` when trying to report native events ([#3485](https://github.com/getsentry/sentry-dotnet/pull/3485))
+- Race condition in `SentryMessageHandler` ([#3477](https://github.com/getsentry/sentry-dotnet/pull/3477))
+- Decrease runtime diagnostics circular buffer when profiling, reducing memory usage ([#3491](https://github.com/getsentry/sentry-dotnet/pull/3491))
+- The InstallationId is now resolved only once per application execution and any issues are logged as warnings instead of errors ([#3529](https://github.com/getsentry/sentry-dotnet/pull/3529))
+- DisplayInfo now captured correctly on iOS and Mac Catalyst on non-UI threads ([#3521](https://github.com/getsentry/sentry-dotnet/pull/3521))
+
+### Dependencies
+
+- Bump CLI from v2.32.1 to v2.33.1 ([#3489](https://github.com/getsentry/sentry-dotnet/pull/3489), [#3497](https://github.com/getsentry/sentry-dotnet/pull/3497), [#3520](https://github.com/getsentry/sentry-dotnet/pull/3520))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2331)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.32.1...2.33.1)
+- Bump Java SDK from v7.11.0 to v7.14.0 ([#3503](https://github.com/getsentry/sentry-dotnet/pull/3503), [#3532](https://github.com/getsentry/sentry-dotnet/pull/3532))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7140)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.11.0...7.14.0)
+- Bump Cocoa SDK from v8.30.0 to v8.32.0 ([#3499](https://github.com/getsentry/sentry-dotnet/pull/3499))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8320)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.30.0...8.32.0)
+- Bump Native SDK from v0.7.6 to v0.7.8 ([#3502](https://github.com/getsentry/sentry-dotnet/pull/3502), [#3527](https://github.com/getsentry/sentry-dotnet/pull/3527))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#078)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.6...0.7.8)
+- Bump Cocoa SDK from v8.30.0 to v8.33.0 ([#3499](https://github.com/getsentry/sentry-dotnet/pull/3499), [#3528](https://github.com/getsentry/sentry-dotnet/pull/3528))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8330)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.30.0...8.33.0)
+- Bump Native SDK from v0.7.6 to v0.7.7 ([#3502](https://github.com/getsentry/sentry-dotnet/pull/3502))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#077)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.6...0.7.7)
+- Bump Java SDK from v7.11.0 to v7.13.0 ([#3515](https://github.com/getsentry/sentry-dotnet/pull/3515))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7130)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.11.0...7.13.0)
 
 ## 4.9.0
 

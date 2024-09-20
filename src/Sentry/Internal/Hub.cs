@@ -379,6 +379,44 @@ internal class Hub : IHub, IMetricHub, IDisposable
         evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options);
     }
 
+    public bool CaptureEnvelope(Envelope envelope) => CurrentClient.CaptureEnvelope(envelope);
+
+    private void AddBreadcrumbForException(SentryEvent evt, Scope scope)
+    {
+        try
+        {
+            if (!IsEnabled || evt.Exception is not { } exception)
+            {
+                return;
+            }
+
+            var exceptionMessage = exception.Message ?? "";
+            var formatted = evt.Message?.Formatted;
+
+            string breadcrumbMessage;
+            Dictionary<string, string>? data = null;
+            if (string.IsNullOrWhiteSpace(formatted))
+            {
+                breadcrumbMessage = exceptionMessage;
+            }
+            else
+            {
+                breadcrumbMessage = formatted;
+                // Exception.Message won't be used as Breadcrumb message
+                // Avoid losing it by adding as data:
+                data = new Dictionary<string, string>
+                {
+                    {"exception_message", exceptionMessage}
+                };
+            }
+            scope.AddBreadcrumb(breadcrumbMessage, "Exception", data: data, level: BreadcrumbLevel.Critical);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to store breadcrumb for exception event: {0}", evt.EventId);
+        }
+    }
+
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
         => CaptureEvent(evt, null, configureScope);
 
@@ -394,7 +432,12 @@ internal class Hub : IHub, IMetricHub, IDisposable
             var clonedScope = CurrentScope.Clone();
             configureScope(clonedScope);
 
-            return CaptureEvent(evt, clonedScope, hint);
+            // Although we clone a temporary scope for the configureScope action, for the second scope
+            // argument (the breadcrumbScope) we pass in the current scope... this is because we want
+            // a breadcrumb to be left on the current scope for exception events
+            var eventId = CaptureEvent(evt, hint, clonedScope);
+            AddBreadcrumbForException(evt, CurrentScope);
+            return eventId;
         }
         catch (Exception e)
         {
@@ -403,9 +446,15 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
-    public bool CaptureEnvelope(Envelope envelope) => CurrentClient.CaptureEnvelope(envelope);
-
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, SentryHint? hint = null)
+    {
+        scope ??= CurrentScope;
+        var eventId = CaptureEvent(evt, hint, scope);
+        AddBreadcrumbForException(evt, scope);
+        return eventId;
+    }
+
+    private SentryId CaptureEvent(SentryEvent evt, SentryHint? hint, Scope scope)
     {
         if (!IsEnabled)
         {
@@ -414,8 +463,6 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
         try
         {
-            scope ??= CurrentScope;
-
             // We get the span linked to the event or fall back to the current span
             var span = GetLinkedSpan(evt) ?? scope.Span;
             if (span is not null)
@@ -613,14 +660,14 @@ internal class Hub : IHub, IMetricHub, IDisposable
         try
         {
             Metrics.FlushAsync().ContinueWith(_ =>
-                CurrentClient.FlushAsync(_options.ShutdownTimeout).Wait()
+                CurrentClient.FlushAsync(_options.ShutdownTimeout).ConfigureAwait(false).GetAwaiter().GetResult()
             ).ConfigureAwait(false).GetAwaiter().GetResult();
         }
         catch (Exception e)
         {
             _options.LogError(e, "Failed to wait on disposing tasks to flush.");
         }
-        //Dont dispose of ScopeManager since we want dangling transactions to still be able to access tags.
+        //Don't dispose of ScopeManager since we want dangling transactions to still be able to access tags.
 
 #if __IOS__
             // TODO

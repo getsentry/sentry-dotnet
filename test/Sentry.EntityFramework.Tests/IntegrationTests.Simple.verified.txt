@@ -51,6 +51,13 @@
         IpAddress: {{auto}}
       },
       Environment: production,
+      Breadcrumbs: [
+        {
+          Message: my exception,
+          Category: Exception,
+          Level: critical
+        }
+      ],
       Spans: [
         {
           IsFinished: true,

@@ -61,8 +61,10 @@
   <!-- Fix visibility of some specific types as necessary. -->
   <attr path="/api/package[@name='io.sentry.android.core']/class[@name='DefaultAndroidEventProcessor']" name="visibility">internal</attr>
   <attr path="/api/package[@name='io.sentry.android.core']/class[@name='EmptySecureContentProvider']" name="visibility">internal</attr>
+  <attr path="/api/package[@name='io.sentry']/interface[@name='ObjectReader']/method[@name='dateOrNull']" name="visibility">internal</attr>
 
-  <!-- Fix missing compareTo(Object) methods on classes extending SentryDate. -->
+
+    <!-- Fix missing compareTo(Object) methods on classes extending SentryDate. -->
   <add-node path="/api/package[@name='io.sentry']/class[@extends='io.sentry.SentryDate']">
     <method name="compareTo" return="int" abstract="false" native="false" synchronized="false" static="false" final="false" deprecated="not deprecated" visibility="public">
         <parameter name="p0" type="java.lang.Object" />
@@ -87,13 +89,22 @@
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AnrV2EventProcessor']" />
 
   <!--
-    SentryEvent.serialize() expects an parameter which implements ObjectWriter.
-    JsonObjectWriter implements ObjectWriter in Java, but somehow this is not reflected in the generated binding.
+    SentryEvent.serialize() expects an parameter which implements IObjectWriter.
+    JsonObjectWriter implements IObjectWriter in Java, but somehow this is not reflected in the generated binding.
     Here we force using JsonObjectWriter as otherwise we'd get the following error message:
       Argument 1: cannot convert from 'Sentry.JavaSdk.JsonObjectWriter' to 'Sentry.JavaSdk.IObjectWriter'
   -->
   <attr path="/api/package[@name='io.sentry']/class[@name='SentryEvent']/method[@name='serialize']/parameter[@name='writer']"
     name="managedType">Sentry.JavaSdk.JsonObjectWriter</attr>
+
+  <!--
+    SentryEvent.Deserializer.deserialize() expects an parameter which implements IObjectReader.
+    JsonObjectReader implements IObjectWriter in Java, but somehow this is not reflected in the generated binding.
+    Here we force using JsonObjectReader as otherwise we'd get the following error message:
+      Argument 1: cannot convert from 'Sentry.JavaSdk.JsonObjectReader' to 'Sentry.JavaSdk.IObjectReader'
+  -->
+  <attr path="/api/package[@name='io.sentry']/class[@name='SentryEvent.Deserializer']/method[@name='deserialize']/parameter[@name='reader']"
+    name="managedType">Sentry.JavaSdk.JsonObjectReader</attr>
 
   <!--
     The remaining APIS are removed to prevent various errors/warnings.

@@ -12,17 +12,17 @@ public class AppDelegate : UIApplicationDelegate
     public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
     {
         // Init the Sentry SDK
-        SentrySdk.Init(o =>
+        SentrySdk.Init(options =>
         {
-            o.Debug = true;
-            o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
-            o.TracesSampleRate = 1.0;
-            o.ProfilesSampleRate = 1.0;
+            options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+            options.Debug = true;
+            options.TracesSampleRate = 1.0;
+            options.ProfilesSampleRate = 1.0;
 
             // All the native iOS SDK options are available below
             // https://docs.sentry.io/platforms/apple/guides/ios/configuration/
             // Enable Native iOS SDK App Hangs detection
-            o.Native.EnableAppHangTracking = true;
+            options.Native.EnableAppHangTracking = true;
         });
 
         // create a new window instance based on the screen size
