@@ -38,11 +38,6 @@ runs:
           8.0.x
           9.0.100-rc.1.24452.12
 
-    - name: Restore Workloads
-      shell: bash
-      run: dotnet workload restore \
-        --temp-dir "${{ runner.temp }}"
-
     - name: Install .NET Workloads
       shell: bash
       run: >
