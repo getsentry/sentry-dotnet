@@ -4,6 +4,7 @@
 
 ### Features
 
+- Added a flag to options `DisableFileWrite` to allow users to opt-out of all file writing operations. Note that toggling this will affect features such as offline caching and auto-session tracking and release health as these rely on some file persistency  ([#3614](https://github.com/getsentry/sentry-dotnet/pull/3614))
 - All exceptions are now added as breadcrumbs on future events. Previously this was only the case for exceptions captured via the `Sentry.SeriLog` or `Sentry.Extensions.Logging` integrations. ([#3584](https://github.com/getsentry/sentry-dotnet/pull/3584))
 
 ### Fixes
