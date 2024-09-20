@@ -1,4 +1,4 @@
-﻿using Android.App;
+using Android.App;
 using Android.Runtime;
 
 namespace Sentry.Maui.Device.TestApp;
