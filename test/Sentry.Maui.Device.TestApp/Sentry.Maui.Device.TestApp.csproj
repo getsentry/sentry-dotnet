@@ -1,9 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>$(TargetFrameworks);net8.0-android</TargetFrameworks>
-        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
-        <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
+        <TargetFrameworks>net8.0-android;net8.0-ios</TargetFrameworks>
 
         <OutputType>Exe</OutputType>
         <RootNamespace>Sentry.Maui.Device.TestApp</RootNamespace>
@@ -23,10 +21,7 @@
         <ApplicationVersion>1</ApplicationVersion>
 
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-        <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
     </PropertyGroup>
 
     <!--
@@ -39,11 +34,9 @@
 
         <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android'      And '$(OSArchitecture)' == 'Arm64'">android-arm64</RuntimeIdentifier>
         <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(OSArchitecture)' == 'Arm64'">iossimulator-arm64</RuntimeIdentifier>
-        <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'  And '$(OSArchitecture)' == 'Arm64'">maccatalyst-arm64</RuntimeIdentifier>
 
         <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android'      And '$(OSArchitecture)' == 'x64'">android-x64</RuntimeIdentifier>
         <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(OSArchitecture)' == 'x64'">iossimulator-x64</RuntimeIdentifier>
-        <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'  And '$(OSArchitecture)' == 'x64'">maccatalyst-x64</RuntimeIdentifier>
     </PropertyGroup>
 
     <ItemGroup>
@@ -68,8 +61,8 @@
         <PackageReference Include="DeviceRunners.XHarness.Maui" Version="0.1.0-preview.2" />
         <PackageReference Include="DeviceRunners.XHarness.Xunit" Version="0.1.0-preview.2" />
 
-        <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/>
-        <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)"/>
+        <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.90"/>
+        <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.90"/>
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0"/>
 
         <PackageReference Include="System.Private.Uri" Version="4.3.2">
