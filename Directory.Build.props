@@ -19,6 +19,9 @@
     <!-- We need to support old stuff. Applications should definitely address these advisory warnings though. -->
     <NoWarn>$(NoWarn);NU1903</NoWarn>
 
+    <!-- Remove when net9.0 is GA  -->
+    <NoWarn>$(NoWarn);NU1603</NoWarn>
+
     <!-- https://learn.microsoft.com/en-us/dotnet/core/compatibility/sdk/8.0/dotnet-restore-audit#version-introduced -->
     <WarningsNotAsErrors>NU1903</WarningsNotAsErrors>
   </PropertyGroup>
