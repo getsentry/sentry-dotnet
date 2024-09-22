@@ -28,6 +28,13 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
 
+      - name: Install additional Workloads
+        shell: bash
+        run: >
+          dotnet workload install maui-ios \
+          --temp-dir "${{ runner.temp }}" \
+          --skip-sign-check
+
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
 

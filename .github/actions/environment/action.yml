@@ -38,14 +38,10 @@ runs:
           8.0.x
           9.0.100-rc.1.24452.12
 
-    - name: Log the runner
-      shell: bash
-      run: >
-        echo "Runner OS: ${{ runner.os }}"
-
-    - name: Install latest .NET Workloads
+    - name: Install .NET Workloads
       shell: bash
       run: |
+        echo "Runner OS: ${{ runner.os }}"
         dotnet workload config --update-mode manifests
         dotnet workload install \
           wasm-tools android maui-android \
