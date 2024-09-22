@@ -38,14 +38,10 @@ runs:
           8.0.x
           9.0.100-rc.1.24452.12
 
-    - name: Install net8.0 workloads
-      if: runner.os == 'macOS'
+    - name: Log the runner
       shell: bash
       run: >
-        dotnet workload install ios maui-ios maccatalyst maui-maccatalyst macos \
-          --version 8.0.204 \
-          --temp-dir "${{ runner.temp }}" \
-          --skip-sign-check
+        echo "Runner OS: ${{ runner.os }}"
 
     - name: Install latest .NET Workloads
       shell: bash
