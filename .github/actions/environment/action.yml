@@ -38,9 +38,19 @@ runs:
           8.0.x
           9.0.100-rc.1.24452.12
 
-    - name: Install .NET Workloads
+    - name: Install net8.0 workloads
+      if: runner.os == 'macOS'
       shell: bash
       run: >
+        dotnet workload install ios maui-ios maccatalyst maui-maccatalyst macos \
+          --version 8.0.204 \
+          --temp-dir "${{ runner.temp }}" \
+          --skip-sign-check
+
+    - name: Install latest .NET Workloads
+      shell: bash
+      run: |
+        dotnet workload config --update-mode manifests
         dotnet workload install \
           wasm-tools android maui-android \
           ${{ runner.os == 'macOS' && 'ios maui-ios maccatalyst maui-maccatalyst maui-windows macos' || '' }} \
