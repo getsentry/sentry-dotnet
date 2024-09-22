@@ -42,8 +42,8 @@ runs:
       shell: bash
       run: >
         dotnet workload install \
-          wasm-tools maui-android \
-          ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows macos' || '' }} \
+          wasm-tools android maui-android \
+          ${{ runner.os == 'macOS' && 'ios maui-ios maccatalyst maui-maccatalyst maui-windows macos' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
           --temp-dir "${{ runner.temp }}" \
           --skip-sign-check
