@@ -19,19 +19,18 @@ internal class FileSystem : IFileSystem
     public IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption) =>
         Directory.EnumerateFiles(path, searchPattern, searchOption);
 
-    public bool CreateDirectory(string path)
+    public DirectoryInfo? CreateDirectory(string path)
     {
         if (!_options?.DisableFileWrite is false)
         {
             _options?.LogDebug("Skipping creating directory. Writing to file system has been explicitly disabled.");
-            return false;
+            return null;
         }
 
-        Directory.CreateDirectory(path);
-        return true;
+        return Directory.CreateDirectory(path);
     }
 
-    public bool DeleteDirectory(string path, bool recursive = false)
+    public bool? DeleteDirectory(string path, bool recursive = false)
     {
         if (!_options?.DisableFileWrite is false)
         {
@@ -40,19 +39,19 @@ internal class FileSystem : IFileSystem
         }
 
         Directory.Delete(path, recursive);
-        return true;
+        return !Directory.Exists(path);
     }
 
     public bool DirectoryExists(string path) => Directory.Exists(path);
 
     public bool FileExists(string path) => File.Exists(path);
 
-    public bool MoveFile(string sourceFileName, string destFileName, bool overwrite = false)
+    public bool? MoveFile(string sourceFileName, string destFileName, bool overwrite = false)
     {
         if (!_options?.DisableFileWrite is false)
         {
             _options?.LogDebug("Skipping moving file. Writing to file system has been explicitly disabled.");
-            return false;
+            return null;
         }
 
 #if NETCOREAPP3_0_OR_GREATER
@@ -68,19 +67,25 @@ internal class FileSystem : IFileSystem
             File.Move(sourceFileName, destFileName);
         }
 #endif
+
+        if (File.Exists(sourceFileName) || !File.Exists(destFileName))
+        {
+            return false;
+        }
+
         return true;
     }
 
-    public bool DeleteFile(string path)
+    public bool? DeleteFile(string path)
     {
         if (!_options?.DisableFileWrite is false)
         {
             _options?.LogDebug("Skipping deleting file. Writing to file system has been explicitly disabled.");
-            return false;
+            return null;
         }
 
         File.Delete(path);
-        return true;
+        return !File.Exists(path);
     }
 
     public DateTimeOffset GetFileCreationTime(string path) => new FileInfo(path).CreationTimeUtc;
@@ -89,26 +94,37 @@ internal class FileSystem : IFileSystem
 
     public Stream OpenFileForReading(string path) => File.OpenRead(path);
 
-    public Stream CreateFileForWriting(string path)
+    public Stream OpenFileForReading(string path, bool useAsync, FileMode fileMode = FileMode.Open, FileAccess fileAccess = FileAccess.Read, FileShare fileShare = FileShare.ReadWrite, int bufferSize = 4096)
+    {
+        return new FileStream(
+            path,
+            fileMode,
+            fileAccess,
+            fileShare,
+            bufferSize: bufferSize,
+            useAsync: useAsync);
+    }
+
+    public Stream? CreateFileForWriting(string path)
     {
         if (!_options?.DisableFileWrite is false)
         {
             _options?.LogDebug("Skipping file for writing. Writing to file system has been explicitly disabled.");
-            return Stream.Null;
+            return null;
         }
 
         return File.Create(path);
     }
 
-    public bool WriteAllTextToFile(string path, string contents)
+    public bool? WriteAllTextToFile(string path, string contents)
     {
         if (!_options?.DisableFileWrite is false)
         {
             _options?.LogDebug("Skipping writing all text to file. Writing to file system has been explicitly disabled.");
-            return false;
+            return null;
         }
 
         File.WriteAllText(path, contents);
-        return true;
+        return File.Exists(path);
     }
 }
