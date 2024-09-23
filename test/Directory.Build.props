@@ -67,9 +67,13 @@
   <!-- these are needed because the versions that are brought in transitively have vulnerability warnings -->
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+    <PackageReference Include="System.Private.Uri" Version="4.3.2">
+      <!-- https://github.com/advisories/GHSA-5f2m-466j-3848 -->
+    </PackageReference>
   </ItemGroup>
   <ItemGroup Condition="$(TargetFramework) != 'net48'">
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
   </ItemGroup>
+
 </Project>

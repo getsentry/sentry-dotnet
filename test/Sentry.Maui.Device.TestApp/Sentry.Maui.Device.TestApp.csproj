@@ -73,10 +73,6 @@
         <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="8.0.90"/>
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0"/>
 
-        <PackageReference Include="System.Private.Uri" Version="4.3.2">
-            <!-- https://github.com/advisories/GHSA-5f2m-466j-3848 -->
-        </PackageReference>
-
         <PackageReference Include="xunit" Version="2.9.0" />
         <PackageReference Include="xunit.runner.utility" Version="2.9.0" />
     </ItemGroup>
