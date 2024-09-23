@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <TargetFrameworks />
         <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android</TargetFrameworks>
         <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios</TargetFrameworks>
         <OutputType>Exe</OutputType>
@@ -38,6 +39,13 @@
         <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android'      And '$(OSArchitecture)' == 'x64'">android-x64</RuntimeIdentifier>
         <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(OSArchitecture)' == 'x64'">iossimulator-x64</RuntimeIdentifier>
     </PropertyGroup>
+
+    <!-- Log for debugging   -->
+    <Target Name="LogProperties" BeforeTargets="BeforeBuild">
+      <Message Text="OSArchitecture: $(OSArchitecture)" Importance="High" />
+      <Message Text="TargetPlatformIdentifier: $(TargetPlatformIdentifier)" Importance="High" />
+      <Message Text="RuntimeIdentifier: $(RuntimeIdentifier)" Importance="High" />
+    </Target>
 
     <ItemGroup>
         <!-- App Icon -->
