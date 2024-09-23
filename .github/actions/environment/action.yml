@@ -44,7 +44,7 @@ runs:
         echo "Runner OS: ${{ runner.os }}"
         dotnet workload config --update-mode manifests
         dotnet workload install \
-          wasm-tools android maui-android \
+          wasm-tools wasm-tools-net8 android maui-android \
           ${{ runner.os == 'macOS' && 'ios maui-ios maccatalyst maui-maccatalyst maui-windows macos' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
           --temp-dir "${{ runner.temp }}" \
