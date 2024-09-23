@@ -1,18 +1,17 @@
-using System.IO.Abstractions;
-using Sentry.Extensibility;
+using System.IO.Abstractions.TestingHelpers;
 
 namespace Sentry.Internal;
 
-internal class SentryFileSystem : ISentryFileSystem
+internal class FakeFileSystem : IFileSystem
 {
-    private readonly SentryOptions? _options;
+    private readonly SentryOptions _options;
 
-    private readonly IFileSystem _fileSystem;
+    private readonly MockFileSystem _fileSystem;
 
-    public SentryFileSystem(SentryOptions? options, IFileSystem? fileSystem = null)
+    public FakeFileSystem(SentryOptions options)
     {
         _options = options;
-        _fileSystem = fileSystem ?? new FileSystem();
+        _fileSystem = new MockFileSystem();
     }
 
     public IEnumerable<string> EnumerateFiles(string path) => _fileSystem.Directory.EnumerateFiles(path);

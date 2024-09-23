@@ -25,9 +25,6 @@ public class CachingTransportTests
             CacheDirectoryPath = cacheDirectory.Path
         };
 
-        // This keeps all writing-to-file opterations in memory instead of actually writing to disk
-        options.FileSystem = new SentryFileSystem(options, new MockFileSystem());
-
         string httpContent = null;
         Exception exception = null;
         var innerTransport = new HttpTransport(options, new HttpClient(new CallbackHttpClientHandler(async message =>
@@ -725,7 +722,7 @@ public class CachingTransportTests
             Debug = true,
             CacheDirectoryPath = cacheDirectory.Path
         };
-        options.FileSystem = new SentryFileSystem(options, new MockFileSystem());
+        options.FileSystem = new FakeFileSystem(options);
 
         var innerTransport = Substitute.For<ITransport>();
         await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);

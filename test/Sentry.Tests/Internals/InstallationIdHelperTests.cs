@@ -29,8 +29,8 @@ public class InstallationIdHelperTests
 
             configureOptions?.Invoke(Options);
 
-            // This keeps all writing-to-file opterations in memory instead of actually writing to disk
-            Options.FileSystem = new SentryFileSystem(Options, new MockFileSystem());
+            // This keeps all writing-to-file operations in memory instead of actually writing to disk
+            Options.FileSystem = new FakeFileSystem(Options);
         }
 
         public InstallationIdHelper GetSut() => new(Options);

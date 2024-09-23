@@ -502,8 +502,8 @@ public class BackgroundWorkerTests
         using var tempDir = new TempDirectory();
 
         var options = _fixture.SentryOptions;
-        // This keeps all writing-to-file opterations in memory instead of actually writing to disk
-        options.FileSystem = new SentryFileSystem(options, new MockFileSystem());
+        // This keeps all writing-to-file operations in memory instead of actually writing to disk
+        options.FileSystem = new FakeFileSystem(options);
         options.CacheDirectoryPath = tempDir.Path;
 
         var innerTransport = _fixture.Transport;

@@ -1,6 +1,6 @@
 namespace Sentry.Tests;
 
-public class SentryFileSystemTests
+public class FileSystemTests
 {
     private class Fixture
     {
@@ -8,7 +8,7 @@ public class SentryFileSystemTests
 
         public Fixture() => Options = new SentryOptions { Dsn = ValidDsn };
 
-        public SentryFileSystem GetSut() => new(Options);
+        public FileSystem GetSut() => new(Options);
     }
 
     private readonly Fixture _fixture = new();

@@ -1,6 +1,6 @@
 namespace Sentry.Internal;
 
-internal interface ISentryFileSystem
+internal interface IFileSystem
 {
     // Note: This is not comprehensive.  If you need other filesystem methods, add to this interface,
     // then implement in both Sentry.Internal.FileSystem and Sentry.Testing.FakeFileSystem.
