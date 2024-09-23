@@ -25,9 +25,10 @@ try
     $arch = (!$IsWindows -and $(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
     if ($Platform -eq 'android')
     {
+        $rid = "android-$arch"
         $tfm += 'android'
         $group = 'android'
-        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/android-$arch"
+        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/$rid"
         $arguments = @(
             '--app', "$buildDir/io.sentry.dotnet.maui.device.testapp-Signed.apk",
             '--package-name', 'io.sentry.dotnet.maui.device.testapp'
@@ -35,9 +36,10 @@ try
     }
     elseif ($Platform -eq 'ios')
     {
+        $rid = "iossimulator-$arch"
         $tfm += 'ios'
         $group = 'apple'
-        $buildDir = "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/iossimulator-$arch"
+        $buildDir = "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/$rid"
         $arguments = @(
             '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
             '--target', 'ios-simulator-64',
@@ -47,7 +49,15 @@ try
 
     if ($Build)
     {
-        dotnet build -f $tfm -c Release test/Sentry.Maui.Device.TestApp
+        # dotnet build -f $tfm -c Release -r $rid test/Sentry.Maui.Device.TestApp
+
+        # Log the command
+        $command = "dotnet build -f $tfm -c Release -r $rid test/Sentry.Maui.Device.TestApp"
+        Write-Output "Running command: $command"
+
+        # Execute the command
+        Invoke-Expression $command
+
         if ($LASTEXITCODE -ne 0)
         {
             throw 'Failed to build Sentry.Maui.Device.TestApp'
