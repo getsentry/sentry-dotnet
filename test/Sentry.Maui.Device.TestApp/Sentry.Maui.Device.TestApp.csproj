@@ -41,7 +41,7 @@
     </PropertyGroup>
 
     <!-- Log for debugging   -->
-    <Target Name="LogProperties" BeforeTargets="BeforeBuild">
+    <Target Name="LogProperties" BeforeTargets="BeforeBuild;Restore;CollectPackageReferences">
       <Message Text="OSArchitecture: $(OSArchitecture)" Importance="High" />
       <Message Text="TargetPlatformIdentifier: $(TargetPlatformIdentifier)" Importance="High" />
       <Message Text="RuntimeIdentifier: $(RuntimeIdentifier)" Importance="High" />
