@@ -8,6 +8,14 @@
   Sentry will reject all metrics sent after October 7, 2024.
   Learn more: https://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-to-Metrics  ([#3619](https://github.com/getsentry/sentry-dotnet/pull/3619))
 
+### Dependencies
+
+- Bump CLI from v2.36.1 to v2.36.2 ([#3624](https://github.com/getsentry/sentry-dotnet/pull/3624))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2362)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.36.1...2.36.2)
+
+## 4.11.0
+
 ### Features
 
 - All exceptions are now added as breadcrumbs on future events. Previously this was only the case for exceptions captured via the `Sentry.SeriLog` or `Sentry.Extensions.Logging` integrations. ([#3584](https://github.com/getsentry/sentry-dotnet/pull/3584))
