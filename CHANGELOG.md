@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### API Changes
+
+- The `SentrySdk.Metrics` module is deprecated and will be removed in the next major release. 
+  Sentry will reject all metrics sent after October 7, 2024.
+  Learn more: https://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-to-Metrics  ([#3619](https://github.com/getsentry/sentry-dotnet/pull/3619))
+
 ### Dependencies
 
 - Bump CLI from v2.36.1 to v2.36.2 ([#3624](https://github.com/getsentry/sentry-dotnet/pull/3624))
