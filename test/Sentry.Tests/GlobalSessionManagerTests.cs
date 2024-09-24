@@ -29,10 +29,9 @@ public class GlobalSessionManagerTests : IDisposable
                 Debug = true,
                 DiagnosticLogger = Logger,
                 CacheDirectoryPath = CacheDirectory.Path,
+                // This keeps all writing-to-file operations in memory instead of actually writing to disk
+                FileSystem = new FakeFileSystem()
             };
-
-            // This keeps all writing-to-file operations in memory instead of actually writing to disk
-            Options.FileSystem = new FakeFileSystem(Options);
 
             configureOptions?.Invoke(Options);
         }

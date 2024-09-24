@@ -723,7 +723,7 @@ public class SentryOptions
     }
 
     /// <summary>
-    /// Sets the filesystem instance to use. Defaults to the actual <see cref="Internal.FileSystem"/>.
+    /// Sets the filesystem instance to use. Defaults to the actual <see cref="ReadWriteFileSystem"/>.
     /// Used for testing.
     /// </summary>
     internal IFileSystem FileSystem { get; set; }
@@ -1184,7 +1184,7 @@ public class SentryOptions
     /// </summary>
     public SentryOptions()
     {
-        FileSystem = new FileSystem(this);
+        FileSystem = new ReadOnlyFileSystem();
         SettingLocator = new SettingLocator(this);
         _lazyInstallationId = new(() => new InstallationIdHelper(this).TryGetInstallationId());
 

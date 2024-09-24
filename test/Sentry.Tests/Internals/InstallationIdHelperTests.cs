@@ -24,13 +24,12 @@ public class InstallationIdHelperTests
                 CacheDirectoryPath = _cacheDirectory.Path,
                 Release = "test",
                 Debug = true,
-                DiagnosticLogger = Logger
+                DiagnosticLogger = Logger,
+                // This keeps all writing-to-file operations in memory instead of actually writing to disk
+                FileSystem = new FakeFileSystem()
             };
 
             configureOptions?.Invoke(Options);
-
-            // This keeps all writing-to-file operations in memory instead of actually writing to disk
-            Options.FileSystem = new FakeFileSystem(Options);
         }
 
         public InstallationIdHelper GetSut() => new(Options);

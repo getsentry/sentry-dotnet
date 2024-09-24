@@ -22,8 +22,8 @@ internal static class JsonSerializableExtensions
 {
     public static void WriteToFile(this ISentryJsonSerializable serializable, IFileSystem fileSystem, string filePath, IDiagnosticLogger? logger)
     {
-        using var file = fileSystem.CreateFileForWriting(filePath);
-        if (file == Stream.Null)
+        var (result, file) = fileSystem.CreateFileForWriting(filePath);
+        if (result is not FileOperationResult.Success)
         {
             return;
         }
@@ -32,5 +32,6 @@ internal static class JsonSerializableExtensions
 
         serializable.WriteTo(writer, logger);
         writer.Flush();
+        file.Dispose();
     }
 }

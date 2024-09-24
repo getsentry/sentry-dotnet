@@ -28,6 +28,14 @@ public static partial class SentrySdk
     {
         options.SetupLogging();
 
+        // For testing: Only overwrite the ReadOnlyFileSystem with a Read-Write one
+        if (options is { DisableFileWrite: true, FileSystem: ReadOnlyFileSystem })
+        {
+            options.LogDebug("File write has been disabled.");
+            options.FileSystem = new ReadWriteFileSystem();
+        }
+
+
         ProcessInfo.Instance ??= new ProcessInfo(options);
 
         // Locate the DSN

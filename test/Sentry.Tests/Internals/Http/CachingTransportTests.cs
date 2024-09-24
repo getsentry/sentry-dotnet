@@ -305,7 +305,8 @@ public class CachingTransportTests
         var filePath = Path.Combine(processingDirectoryPath, fileName);
 
         options.FileSystem.CreateDirectory(processingDirectoryPath);   // Create the processing directory
-        options.FileSystem.CreateFileForWriting(filePath).Dispose(); // Make a malformed envelope... just an empty file
+        var (result, file) = options.FileSystem.CreateFileForWriting(filePath);
+        file.Dispose(); // Make a malformed envelope... just an empty file
         options.FileSystem.FileExists(filePath).Should().BeTrue();
 
         // Act
@@ -720,9 +721,10 @@ public class CachingTransportTests
             Dsn = ValidDsn,
             DiagnosticLogger = _logger,
             Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path
+            CacheDirectoryPath = cacheDirectory.Path,
+            // This keeps all writing-to-file operations in memory instead of actually writing to disk
+            FileSystem = new FakeFileSystem()
         };
-        options.FileSystem = new FakeFileSystem(options);
 
         var innerTransport = Substitute.For<ITransport>();
         await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);

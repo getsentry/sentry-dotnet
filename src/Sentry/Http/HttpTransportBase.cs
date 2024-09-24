@@ -386,14 +386,14 @@ public abstract class HttpTransportBase
                 var destination = Path.Combine(destinationDirectory, "envelope_too_large",
                     (eventId ?? SentryId.Create()).ToString());
 
-                if (!_options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!))
+                if (_options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!) is not FileOperationResult.Success)
                 {
                     _options.LogError("Failed to create directory to store the envelope.");
                     return;
                 }
 
-                var envelopeFile = _options.FileSystem.CreateFileForWriting(destination);
-                if (envelopeFile == Stream.Null)
+                var (result, envelopeFile) = _options.FileSystem.CreateFileForWriting(destination);
+                if (result is not FileOperationResult.Success)
                 {
                     _options.LogError("Failed to create envelope file.");
                     return;
@@ -451,14 +451,14 @@ public abstract class HttpTransportBase
                 var destination = Path.Combine(destinationDirectory, "envelope_too_large",
                     (eventId ?? SentryId.Create()).ToString());
 
-                if (!_options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!))
+                if (_options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!) is not FileOperationResult.Success)
                 {
                     _options.LogError("Failed to create directory to store the envelope.");
                     return;
                 }
 
-                var envelopeFile = _options.FileSystem.CreateFileForWriting(destination);
-                if (envelopeFile == Stream.Null)
+                var (result, envelopeFile) = _options.FileSystem.CreateFileForWriting(destination);
+                if (result is not FileOperationResult.Success)
                 {
                     _options.LogError("Failed to create envelope file.");
                     return;

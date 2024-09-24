@@ -217,10 +217,9 @@ public class SamplingTransactionProfilerTests
             DiagnosticLogger = _testOutputLogger,
             TracesSampleRate = 1.0,
             ProfilesSampleRate = 1.0,
+            // This keeps all writing-to-file operations in memory instead of actually writing to disk
+            FileSystem = new FakeFileSystem()
         };
-
-        // This keeps all writing-to-file operations in memory instead of actually writing to disk
-        options.FileSystem = new FakeFileSystem(options);
 
         // Disable process exit flush to resolve "There is no currently active test." errors.
         options.DisableAppDomainProcessExitFlush();
