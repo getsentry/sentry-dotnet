@@ -23,7 +23,7 @@ internal class FakeFileSystem : IFileSystem
     public FileOperationResult DeleteDirectory(string path, bool recursive = false)
     {
         _fileSystem.Directory.Delete(path, recursive);
-        return _fileSystem.Directory.Exists(path)  ? FileOperationResult.Failure : FileOperationResult.Success;
+        return _fileSystem.Directory.Exists(path) ? FileOperationResult.Failure : FileOperationResult.Success;
     }
 
     public bool DirectoryExists(string path) => _fileSystem.Directory.Exists(path);
