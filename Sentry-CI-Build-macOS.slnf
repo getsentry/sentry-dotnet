@@ -67,6 +67,7 @@
       "test\\Sentry.Google.Cloud.Functions.Tests\\Sentry.Google.Cloud.Functions.Tests.csproj",
       "test\\Sentry.Hangfire.Tests\\Sentry.Hangfire.Tests.csproj",
       "test\\Sentry.Log4Net.Tests\\Sentry.Log4Net.Tests.csproj",
+      "test\\Sentry.Maui.Device.TestApp\\Sentry.Maui.Device.TestApp.csproj",
       "test\\Sentry.Maui.Tests\\Sentry.Maui.Tests.csproj",
       "test\\Sentry.NLog.Tests\\Sentry.NLog.Tests.csproj",
       "test\\Sentry.OpenTelemetry.Tests\\Sentry.OpenTelemetry.Tests.csproj",
