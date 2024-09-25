@@ -386,16 +386,17 @@ public abstract class HttpTransportBase
                 var destination = Path.Combine(destinationDirectory, "envelope_too_large",
                     (eventId ?? SentryId.Create()).ToString());
 
-                if (_options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!) is not FileOperationResult.Success)
+                var createDirectoryResult = _options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!);
+                if (createDirectoryResult is not FileOperationResult.Success)
                 {
-                    _options.LogError("Failed to create directory to store the envelope.");
+                    _options.DiagnosticLogger.LogError("Failed to create directory to store the envelope: {0}", createDirectoryResult);
                     return;
                 }
 
                 var result = _options.FileSystem.CreateFileForWriting(destination, out var envelopeFile);
                 if (result is not FileOperationResult.Success)
                 {
-                    _options.LogError("Failed to create envelope file.");
+                    _options.DiagnosticLogger.LogError("Failed to create envelope file: {0}", result);
                     return;
                 }
 
@@ -451,16 +452,17 @@ public abstract class HttpTransportBase
                 var destination = Path.Combine(destinationDirectory, "envelope_too_large",
                     (eventId ?? SentryId.Create()).ToString());
 
-                if (_options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!) is not FileOperationResult.Success)
+                var createDirectoryResult = _options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!);
+                if (createDirectoryResult is not FileOperationResult.Success)
                 {
-                    _options.LogError("Failed to create directory to store the envelope.");
+                    _options.DiagnosticLogger.LogError("Failed to create directory to store the envelope: {0}", createDirectoryResult);
                     return;
                 }
 
                 var result = _options.FileSystem.CreateFileForWriting(destination, out var envelopeFile);
                 if (result is not FileOperationResult.Success)
                 {
-                    _options.LogError("Failed to create envelope file.");
+                    _options.DiagnosticLogger.LogError("Failed to create envelope file: {0}", result);
                     return;
                 }
 

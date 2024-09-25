@@ -55,9 +55,18 @@ internal class GlobalSessionManager : ISessionManager
         {
             _options.LogDebug("Creating persistence directory for session file at '{0}'.", _persistenceDirectoryPath);
 
-            if (_options.FileSystem.CreateDirectory(_persistenceDirectoryPath) is not FileOperationResult.Success)
+            var result = _options.FileSystem.CreateDirectory(_persistenceDirectoryPath);
+            if (result is not FileOperationResult.Success)
             {
-                _options.LogError("Failed to create persistent directory for session file.");
+                if (result is FileOperationResult.Disabled)
+                {
+                    _options.LogInfo("Persistent directory for session file has not been created. File-write has been disabled via the options.");
+                }
+                else
+                {
+                    _options.LogError("Failed to create persistent directory for session file.");
+                }
+
                 return;
             }
 
