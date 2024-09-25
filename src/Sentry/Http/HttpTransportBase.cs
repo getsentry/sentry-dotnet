@@ -392,7 +392,7 @@ public abstract class HttpTransportBase
                     return;
                 }
 
-                var (result, envelopeFile) = _options.FileSystem.CreateFileForWriting(destination);
+                var result = _options.FileSystem.CreateFileForWriting(destination, out var envelopeFile);
                 if (result is not FileOperationResult.Success)
                 {
                     _options.LogError("Failed to create envelope file.");
@@ -457,7 +457,7 @@ public abstract class HttpTransportBase
                     return;
                 }
 
-                var (result, envelopeFile) = _options.FileSystem.CreateFileForWriting(destination);
+                var result = _options.FileSystem.CreateFileForWriting(destination, out var envelopeFile);
                 if (result is not FileOperationResult.Success)
                 {
                     _options.LogError("Failed to create envelope file.");

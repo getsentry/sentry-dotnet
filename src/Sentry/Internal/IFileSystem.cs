@@ -15,21 +15,16 @@ internal interface IFileSystem
     IEnumerable<string> EnumerateFiles(string path);
     IEnumerable<string> EnumerateFiles(string path, string searchPattern);
     IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption);
-    FileOperationResult CreateDirectory(string path);
-    FileOperationResult DeleteDirectory(string path, bool recursive = false);
     bool DirectoryExists(string path);
     bool FileExists(string path);
-    FileOperationResult MoveFile(string sourceFileName, string destFileName, bool overwrite = false);
-    FileOperationResult DeleteFile(string path);
     DateTimeOffset GetFileCreationTime(string path);
     string? ReadAllTextFromFile(string file);
     Stream OpenFileForReading(string path);
-    Stream OpenFileForReading(string path,
-        bool useAsync,
-        FileMode fileMode = FileMode.Open,
-        FileAccess fileAccess = FileAccess.Read,
-        FileShare fileShare = FileShare.ReadWrite,
-        int bufferSize = 4096);
-    (FileOperationResult, Stream) CreateFileForWriting(string path);
+
+    FileOperationResult CreateDirectory(string path);
+    FileOperationResult DeleteDirectory(string path, bool recursive = false);
+    FileOperationResult CreateFileForWriting(string path, out Stream fileStream);
     FileOperationResult WriteAllTextToFile(string path, string contents);
+    FileOperationResult MoveFile(string sourceFileName, string destFileName, bool overwrite = false);
+    FileOperationResult DeleteFile(string path);
 }

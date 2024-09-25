@@ -82,9 +82,10 @@ internal class FakeFileSystem : IFileSystem
             useAsync: useAsync);
     }
 
-    public (FileOperationResult, Stream) CreateFileForWriting(string path)
+    public FileOperationResult CreateFileForWriting(string path, out Stream stream)
     {
-        return (FileOperationResult.Success, _fileSystem.File.Create(path));
+        stream = _fileSystem.File.Create(path);
+        return FileOperationResult.Success;
     }
 
     public FileOperationResult WriteAllTextToFile(string path, string contents)

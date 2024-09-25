@@ -22,7 +22,7 @@ internal static class JsonSerializableExtensions
 {
     public static void WriteToFile(this ISentryJsonSerializable serializable, IFileSystem fileSystem, string filePath, IDiagnosticLogger? logger)
     {
-        var (result, file) = fileSystem.CreateFileForWriting(filePath);
+        var result = fileSystem.CreateFileForWriting(filePath, out var file);
         if (result is not FileOperationResult.Success)
         {
             return;

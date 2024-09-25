@@ -722,11 +722,16 @@ public class SentryOptions
         set => _failedRequestTargets = new(value.WithConfigBinding);
     }
 
+    private IFileSystem? _fileSystem;
     /// <summary>
     /// Sets the filesystem instance to use. Defaults to the actual <see cref="ReadWriteFileSystem"/>.
     /// Used for testing.
     /// </summary>
-    internal IFileSystem FileSystem { get; set; }
+    internal IFileSystem FileSystem
+    {
+        get => _fileSystem ??= DisableFileWrite ? new ReadOnlyFileSystem() : new ReadWriteFileSystem();
+        set => _fileSystem = value;
+    }
 
     /// <summary>
     /// Allows to disable the SDKs writing to disk operations
@@ -1184,7 +1189,6 @@ public class SentryOptions
     /// </summary>
     public SentryOptions()
     {
-        FileSystem = new ReadOnlyFileSystem();
         SettingLocator = new SettingLocator(this);
         _lazyInstallationId = new(() => new InstallationIdHelper(this).TryGetInstallationId());
 

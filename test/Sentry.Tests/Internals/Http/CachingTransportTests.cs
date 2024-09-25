@@ -305,7 +305,7 @@ public class CachingTransportTests
         var filePath = Path.Combine(processingDirectoryPath, fileName);
 
         options.FileSystem.CreateDirectory(processingDirectoryPath);   // Create the processing directory
-        var (result, file) = options.FileSystem.CreateFileForWriting(filePath);
+        options.FileSystem.CreateFileForWriting(filePath, out var file);
         file.Dispose(); // Make a malformed envelope... just an empty file
         options.FileSystem.FileExists(filePath).Should().BeTrue();
 
