@@ -276,7 +276,7 @@ public partial class HubTests
     {
         // Arrange
         _fixture.Options.TracesSampleRate = 1.0;
-        var hub = _fixture.GetSut();
+        using var hub = _fixture.GetSut();
         var evt = new SentryEvent(new Exception());
         var scope = hub.ScopeManager.GetCurrent().Key;
 
