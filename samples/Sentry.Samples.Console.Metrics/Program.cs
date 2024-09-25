@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Obsolete Warning
 using System.Diagnostics.Metrics;
 using System.Text.RegularExpressions;
 
@@ -137,3 +138,4 @@ internal static class Program
         System.Console.WriteLine($"GET {url} {result.StatusCode}");
     }
 }
+#pragma warning restore CS0618

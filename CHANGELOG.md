@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+### API Changes
+
+- The `SentrySdk.Metrics` module is deprecated and will be removed in the next major release. 
+  Sentry will reject all metrics sent after October 7, 2024.
+  Learn more: https://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-to-Metrics  ([#3619](https://github.com/getsentry/sentry-dotnet/pull/3619))
+
+### Dependencies
+
+- Bump Native SDK from v0.7.9 to v0.7.10 ([#3623](https://github.com/getsentry/sentry-dotnet/pull/3623))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0710)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.9...0.7.10)
+- Bump CLI from v2.36.1 to v2.36.2 ([#3624](https://github.com/getsentry/sentry-dotnet/pull/3624))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2362)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.36.1...2.36.2)
+
+## 4.11.0
+
 ### Features
 
 - Added a flag to options `DisableFileWrite` to allow users to opt-out of all file writing operations. Note that toggling this will affect features such as offline caching and auto-session tracking and release health as these rely on some file persistency  ([#3614](https://github.com/getsentry/sentry-dotnet/pull/3614))
