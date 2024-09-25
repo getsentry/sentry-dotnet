@@ -24,6 +24,7 @@ public class SentryMauiScreenshotTests
                 options.DiagnosticLogger = Logger;
                 options.AutoSessionTracking = false; //Get rid of session envelope for easier Assert
                 options.CacheDirectoryPath = null;   //Do not wrap our FakeTransport with a caching transport
+                options.FlushTimeout = TimeSpan.FromSeconds(10);
             });
 
             Builder = builder;
@@ -46,7 +47,7 @@ public class SentryMauiScreenshotTests
         await client.FlushAsync();
 
         var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
-        
+
         var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
         envelope.Should().NotBeNull();
 
