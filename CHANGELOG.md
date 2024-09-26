@@ -8,6 +8,10 @@
   Sentry will reject all metrics sent after October 7, 2024.
   Learn more: https://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-to-Metrics  ([#3619](https://github.com/getsentry/sentry-dotnet/pull/3619))
 
+## Fixes
+
+- Fixed duplicate key exception for Hangfire jobs with AutomaticRetry ([#3631](https://github.com/getsentry/sentry-dotnet/pull/3631))
+
 ### Dependencies
 
 - Bump Native SDK from v0.7.9 to v0.7.10 ([#3623](https://github.com/getsentry/sentry-dotnet/pull/3623))
