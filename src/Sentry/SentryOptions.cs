@@ -722,11 +722,21 @@ public class SentryOptions
         set => _failedRequestTargets = new(value.WithConfigBinding);
     }
 
+    private IFileSystem? _fileSystem;
     /// <summary>
-    /// Sets the filesystem instance to use. Defaults to the actual <see cref="Sentry.Internal.FileSystem"/>.
+    /// Sets the filesystem instance to use. Defaults to the actual <see cref="ReadWriteFileSystem"/>.
     /// Used for testing.
     /// </summary>
-    internal IFileSystem FileSystem { get; set; } = Internal.FileSystem.Instance;
+    internal IFileSystem FileSystem
+    {
+        get => _fileSystem ??= DisableFileWrite ? new ReadOnlyFileSystem() : new ReadWriteFileSystem();
+        set => _fileSystem = value;
+    }
+
+    /// <summary>
+    /// Allows to disable the SDKs writing to disk operations
+    /// </summary>
+    public bool DisableFileWrite { get; set; }
 
     /// <summary>
     /// If set to a positive value, Sentry will attempt to flush existing local event cache when initializing.

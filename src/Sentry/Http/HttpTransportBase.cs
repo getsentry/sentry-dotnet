@@ -386,9 +386,19 @@ public abstract class HttpTransportBase
                 var destination = Path.Combine(destinationDirectory, "envelope_too_large",
                     (eventId ?? SentryId.Create()).ToString());
 
-                Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+                var createDirectoryResult = _options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!);
+                if (createDirectoryResult is not FileOperationResult.Success)
+                {
+                    _options.DiagnosticLogger.LogError("Failed to create directory to store the envelope: {0}", createDirectoryResult);
+                    return;
+                }
 
-                var envelopeFile = File.Create(destination);
+                var result = _options.FileSystem.CreateFileForWriting(destination, out var envelopeFile);
+                if (result is not FileOperationResult.Success)
+                {
+                    _options.DiagnosticLogger.LogError("Failed to create envelope file: {0}", result);
+                    return;
+                }
 
                 using (envelopeFile)
                 {
@@ -442,9 +452,20 @@ public abstract class HttpTransportBase
                 var destination = Path.Combine(destinationDirectory, "envelope_too_large",
                     (eventId ?? SentryId.Create()).ToString());
 
-                Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+                var createDirectoryResult = _options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!);
+                if (createDirectoryResult is not FileOperationResult.Success)
+                {
+                    _options.DiagnosticLogger.LogError("Failed to create directory to store the envelope: {0}", createDirectoryResult);
+                    return;
+                }
 
-                var envelopeFile = File.Create(destination);
+                var result = _options.FileSystem.CreateFileForWriting(destination, out var envelopeFile);
+                if (result is not FileOperationResult.Success)
+                {
+                    _options.DiagnosticLogger.LogError("Failed to create envelope file: {0}", result);
+                    return;
+                }
+
 #if NETFRAMEWORK || NETSTANDARD2_0
                 using (envelopeFile)
 #else

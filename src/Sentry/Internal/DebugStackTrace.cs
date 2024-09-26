@@ -526,7 +526,8 @@ internal class DebugStackTrace : SentryStackTrace
             {
                 return reader.Invoke(assemblyName);
             }
-            var assembly = File.OpenRead(assemblyName);
+
+            var assembly = options.FileSystem.OpenFileForReading(assemblyName);
             return new PEReader(assembly);
         }
         catch (Exception)
