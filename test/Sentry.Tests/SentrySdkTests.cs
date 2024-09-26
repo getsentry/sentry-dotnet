@@ -439,12 +439,13 @@ public class SentrySdkTests : IDisposable
             o.InitNativeSdks = false;
         });
 
-        await ModifyScope();
+        await ModifyScope().FailFastOnException();
 
         string actual = null;
         SentrySdk.ConfigureScope(s => actual = s.Breadcrumbs.First().Message);
 
         Assert.Equal(expected, actual);
+        return;
 
         async Task ModifyScope()
         {
