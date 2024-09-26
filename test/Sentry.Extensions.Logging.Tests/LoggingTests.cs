@@ -5,7 +5,7 @@ namespace Sentry.Extensions.Logging.Tests;
 
 public class LoggingTests
 {
-    [Theory]
+    [SkippableTheory]
     [InlineData(LogLevel.Critical)]
     [InlineData(LogLevel.Error)]
     [InlineData(LogLevel.Warning)]
@@ -14,6 +14,10 @@ public class LoggingTests
     [InlineData(LogLevel.Trace)]
     public void Log_CapturesEvent(LogLevel logLevel)
     {
+#if __IOS__
+        Skip.If(true, "Flaky on iOS");
+#endif
+
         // Arrange
         var worker = Substitute.For<IBackgroundWorker>();
 

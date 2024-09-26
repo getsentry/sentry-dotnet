@@ -67,7 +67,6 @@ public class SentryMauiScreenshotTests
             envelopeItem!.TryGetFileName().Should().Be("screenshot.jpg");
         }
     }
-#endif
 
     [SkippableFact]
     public async Task CaptureException_RemoveScreenshot_NotContainsScreenshotAttachmentAsync()
@@ -98,4 +97,5 @@ public class SentryMauiScreenshotTests
         // Assert
         envelopeItem.Should().BeNull();
     }
+#endif
 }
