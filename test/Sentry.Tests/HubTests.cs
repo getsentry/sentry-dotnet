@@ -1,3 +1,4 @@
+using System.IO.Abstractions.TestingHelpers;
 using Sentry.Internal.Http;
 
 namespace Sentry.Tests;
@@ -372,8 +373,7 @@ public partial class HubTests
         var cts = new CancellationTokenSource();
         cts.Token.Register(() => tcs.TrySetCanceled());
 
-        var fileSystem = new FakeFileSystem();
-        using var tempDirectory = offlineCaching ? new TempDirectory(fileSystem) : null;
+        using var tempDirectory = offlineCaching ? new TempDirectory() : null;
 
         var logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(_output);
 
@@ -382,14 +382,15 @@ public partial class HubTests
             Dsn = ValidDsn,
             // To go through a round trip serialization of cached envelope
             CacheDirectoryPath = tempDirectory?.Path,
-            FileSystem = fileSystem,
             // So we don't need to deal with gzip payloads
             RequestBodyCompressionLevel = CompressionLevel.NoCompression,
             CreateHttpMessageHandler = () => new CallbackHttpClientHandler(Verify),
             // Not to send some session envelope
             AutoSessionTracking = false,
             Debug = true,
-            DiagnosticLogger = logger
+            DiagnosticLogger = logger,
+            // This keeps all writing-to-file operations in memory instead of actually writing to disk
+            FileSystem = new FakeFileSystem()
         };
 
         // Disable process exit flush to resolve "There is no currently active test." errors.
@@ -1588,8 +1589,7 @@ public partial class HubTests
     public async Task FlushOnDispose_SendsEnvelope(bool cachingEnabled)
     {
         // Arrange
-        var fileSystem = new FakeFileSystem();
-        using var cacheDirectory = new TempDirectory(fileSystem);
+        using var cacheDirectory = new TempDirectory();
         var transport = Substitute.For<ITransport>();
 
         var options = new SentryOptions
@@ -1603,7 +1603,6 @@ public partial class HubTests
         if (cachingEnabled)
         {
             options.CacheDirectoryPath = cacheDirectory.Path;
-            options.FileSystem = fileSystem;
         }
 
         // Act
