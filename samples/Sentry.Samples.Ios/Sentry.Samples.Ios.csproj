@@ -11,10 +11,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Optimize>false</Optimize>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <SentryOrg>sentry-sdks</SentryOrg>
     <SentryProject>sentry-dotnet</SentryProject>
     <SentryUploadSymbols>true</SentryUploadSymbols>
