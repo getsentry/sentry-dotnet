@@ -43,6 +43,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <Optimize>false</Optimize>
+    <PublishTrimmed>false</PublishTrimmed>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <SentryOrg>sentry-sdks</SentryOrg>
     <SentryProject>sentry-dotnet</SentryProject>
 

@@ -10,7 +10,7 @@ on:
       - "**.md"
 
 env:
-  XCODE_VERSION: 15.4
+  XCODE_VERSION: 16.0
 
 jobs:
   build-sentry-native:

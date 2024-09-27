@@ -10,6 +10,11 @@
     <RuntimeIdentifier>osx-arm64</RuntimeIdentifier>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <Optimize>false</Optimize>
+    <PublishTrimmed>false</PublishTrimmed>
+  </PropertyGroup>
+
   <!--
     For this demo app, let's upload sources and symbols to Sentry on every build, regardless of configuration.
     In a real app, you probably only want to do this on Release builds.
