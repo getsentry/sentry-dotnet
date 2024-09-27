@@ -12,7 +12,6 @@
 
   <PropertyGroup>
     <Optimize>false</Optimize>
-    <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
 
   <PropertyGroup>
