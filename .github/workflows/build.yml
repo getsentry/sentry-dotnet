@@ -70,11 +70,11 @@ jobs:
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
 
-      - name: Check Xcode version
-        run: xcodebuild -version
-
       - name: Set Xcode version to 16
         run: sudo xcode-select --switch /Applications/Xcode_16.app/Contents/Developer
+
+      - name: Check Xcode version
+        run: xcodebuild -version
   
       # We only use Xcode 15.4
       - name: Remove unused applications
