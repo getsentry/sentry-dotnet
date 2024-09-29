@@ -70,7 +70,6 @@ jobs:
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
 
-
       - name: Setup Xcode
         if: matrix.os == 'macos-latest'
         run: |
@@ -203,6 +202,12 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
+      - name: Setup Xcode
+        if: matrix.os == 'macos-latest'
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_${{env.XCODE_VERSION}}.app/Contents/Developer
+          xcodebuild -version
 
       # Needed for Android SDK setup step
       - uses: actions/setup-java@v4
