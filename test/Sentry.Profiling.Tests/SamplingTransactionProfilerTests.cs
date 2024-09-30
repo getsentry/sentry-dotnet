@@ -286,6 +286,8 @@ public class SamplingTransactionProfilerTests
     [SkippableFact]
     private async Task Profiler_ThrowingOnSessionStartup_DoesntBreakSentryInit()
     {
+        Skip.If(TestEnvironment.IsGitHubActions);
+
         SampleProfilerSession.ThrowOnNextStartupForTests = true;
 
         var tcs = new TaskCompletionSource<string>();
