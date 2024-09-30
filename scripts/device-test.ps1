@@ -30,7 +30,8 @@ try
         $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/android-$arch"
         $arguments = @(
             '--app', "$buildDir/io.sentry.dotnet.maui.device.testapp-Signed.apk",
-            '--package-name', 'io.sentry.dotnet.maui.device.testapp'
+            '--package-name', 'io.sentry.dotnet.maui.device.testapp',
+            '--launch-timeout', '00:10:00'
         )
     }
     elseif ($Platform -eq 'ios')
