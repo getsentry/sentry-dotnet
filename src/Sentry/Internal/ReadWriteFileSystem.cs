@@ -2,6 +2,11 @@ namespace Sentry.Internal;
 
 internal class ReadWriteFileSystem : FileSystemBase
 {
+    // Note: You are responsible for handling success/failure when attempting to write to disk.
+    // You are required to check for `Options.FileWriteDisabled` whether you are allowed to call any writing operations.
+    // The options will automatically pick between `ReadOnly` and `ReadAndWrite` to prevent accidental file writing that
+    // could cause crashes on restricted platforms like the Nintendo Switch.
+
     public override bool CreateDirectory(string path)
     {
         Directory.CreateDirectory(path);

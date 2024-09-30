@@ -2,6 +2,11 @@ namespace Sentry.Internal;
 
 internal interface IFileSystem
 {
+    // Note: You are responsible for handling success/failure when attempting to write to disk.
+    // You are required to check for `Options.FileWriteDisabled` whether you are allowed to call any writing operations.
+    // The options will automatically pick between `ReadOnly` and `ReadAndWrite` to prevent accidental file writing that
+    // could cause crashes on restricted platforms like the Nintendo Switch.
+
     // Note: This is not comprehensive.  If you need other filesystem methods, add to this interface,
     // then implement in both Sentry.Internal.FileSystem and Sentry.Testing.FakeFileSystem.
 
