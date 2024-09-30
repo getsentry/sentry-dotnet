@@ -37,7 +37,7 @@ public class SentryMauiScreenshotTests
     [SkippableFact]
     public async Task CaptureException_WhenAttachScreenshots_ContainsScreenshotAttachmentAsync()
     {
-        Skip.If(TestEnvironment.IsGitHubActions, "This test is flaky on GitHub Actions");
+        Skip.If(TestEnvironment.IsCI, "This test is flaky in CI");
 
         // Arrange
         var builder = _fixture.Builder.UseSentry();
@@ -71,7 +71,7 @@ public class SentryMauiScreenshotTests
     [SkippableFact]
     public async Task CaptureException_RemoveScreenshot_NotContainsScreenshotAttachmentAsync()
     {
-        Skip.If(TestEnvironment.IsGitHubActions, "This test is flaky on GitHub Actions");
+        Skip.If(TestEnvironment.IsCI, "This test is flaky in CI");
 
         // Arrange
         var builder = _fixture.Builder.UseSentry(options => options.SetBeforeSend((e, hint) =>

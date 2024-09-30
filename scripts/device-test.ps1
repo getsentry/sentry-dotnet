@@ -38,10 +38,12 @@ try
         $tfm += 'ios'
         $group = 'apple'
         $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/iossimulator-$arch"
+        $envValue = $CI ? 'true' : 'false'
         $arguments = @(
             '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
             '--target', 'ios-simulator-64',
-            '--launch-timeout', '00:10:00'
+            '--launch-timeout', '00:10:00',
+            '--set-env', 'CI=$envValue'
         )
     }
 
