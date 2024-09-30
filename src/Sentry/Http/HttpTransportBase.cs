@@ -383,20 +383,24 @@ public abstract class HttpTransportBase
                     persistLargeEnvelopePathEnvVar,
                     destinationDirectory);
 
-                var destination = Path.Combine(destinationDirectory, "envelope_too_large",
-                    (eventId ?? SentryId.Create()).ToString());
-
-                var createDirectoryResult = _options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!);
-                if (createDirectoryResult is not FileOperationResult.Success)
+                if (_options.DisableFileWrite)
                 {
-                    _options.LogError("Failed to create directory to store the envelope: {0}", createDirectoryResult);
+                    _options.LogInfo("File write has been disabled via the options. Skipping persisting envelope.");
                     return;
                 }
 
-                var result = _options.FileSystem.CreateFileForWriting(destination, out var envelopeFile);
-                if (result is not FileOperationResult.Success)
+                var destination = Path.Combine(destinationDirectory, "envelope_too_large",
+                    (eventId ?? SentryId.Create()).ToString());
+
+                if (_options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!) is not true)
                 {
-                    _options.LogError("Failed to create envelope file: {0}", result);
+                    _options.LogError("Failed to create directory to store the envelope.");
+                    return;
+                }
+
+                if (_options.FileSystem.CreateFileForWriting(destination, out var envelopeFile) is not true)
+                {
+                    _options.LogError("Failed to create envelope file.");
                     return;
                 }
 
@@ -449,20 +453,24 @@ public abstract class HttpTransportBase
                     persistLargeEnvelopePathEnvVar,
                     destinationDirectory);
 
-                var destination = Path.Combine(destinationDirectory, "envelope_too_large",
-                    (eventId ?? SentryId.Create()).ToString());
-
-                var createDirectoryResult = _options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!);
-                if (createDirectoryResult is not FileOperationResult.Success)
+                if (_options.DisableFileWrite)
                 {
-                    _options.LogError("Failed to create directory to store the envelope: {0}", createDirectoryResult);
+                    _options.LogInfo("File write has been disabled via the options. Skipping persisting envelope.");
                     return;
                 }
 
-                var result = _options.FileSystem.CreateFileForWriting(destination, out var envelopeFile);
-                if (result is not FileOperationResult.Success)
+                var destination = Path.Combine(destinationDirectory, "envelope_too_large",
+                    (eventId ?? SentryId.Create()).ToString());
+
+                if (_options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!) is not true)
                 {
-                    _options.LogError("Failed to create envelope file: {0}", result);
+                    _options.LogError("Failed to create directory to store the envelope.");
+                    return;
+                }
+
+                if (_options.FileSystem.CreateFileForWriting(destination, out var envelopeFile) is not true)
+                {
+                    _options.LogError("Failed to create envelope file.");
                     return;
                 }
 

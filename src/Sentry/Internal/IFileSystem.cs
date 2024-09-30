@@ -1,12 +1,5 @@
 namespace Sentry.Internal;
 
-internal enum FileOperationResult
-{
-    Success,
-    Failure,
-    Disabled
-}
-
 internal interface IFileSystem
 {
     // Note: This is not comprehensive.  If you need other filesystem methods, add to this interface,
@@ -21,10 +14,10 @@ internal interface IFileSystem
     string? ReadAllTextFromFile(string file);
     Stream OpenFileForReading(string path);
 
-    FileOperationResult CreateDirectory(string path);
-    FileOperationResult DeleteDirectory(string path, bool recursive = false);
-    FileOperationResult CreateFileForWriting(string path, out Stream fileStream);
-    FileOperationResult WriteAllTextToFile(string path, string contents);
-    FileOperationResult MoveFile(string sourceFileName, string destFileName, bool overwrite = false);
-    FileOperationResult DeleteFile(string path);
+    bool CreateDirectory(string path);
+    bool DeleteDirectory(string path, bool recursive = false);
+    bool CreateFileForWriting(string path, out Stream fileStream);
+    bool WriteAllTextToFile(string path, string contents);
+    bool MoveFile(string sourceFileName, string destFileName, bool overwrite = false);
+    bool DeleteFile(string path);
 }
