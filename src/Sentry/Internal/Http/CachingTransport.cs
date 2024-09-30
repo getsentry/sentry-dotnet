@@ -458,7 +458,7 @@ internal class CachingTransport : ITransport, IDisposable
 
         EnsureFreeSpaceInCache();
 
-        if (_options.FileSystem.CreateFileForWriting(envelopeFilePath, out var stream) is not true)
+        if (!_options.FileSystem.CreateFileForWriting(envelopeFilePath, out var stream))
         {
             _options.LogDebug("Failed to store to cache.");
             return;

@@ -392,13 +392,13 @@ public abstract class HttpTransportBase
                 var destination = Path.Combine(destinationDirectory, "envelope_too_large",
                     (eventId ?? SentryId.Create()).ToString());
 
-                if (_options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!) is not true)
+                if (!_options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!))
                 {
                     _options.LogError("Failed to create directory to store the envelope.");
                     return;
                 }
 
-                if (_options.FileSystem.CreateFileForWriting(destination, out var envelopeFile) is not true)
+                if (!_options.FileSystem.CreateFileForWriting(destination, out var envelopeFile))
                 {
                     _options.LogError("Failed to create envelope file.");
                     return;
@@ -462,13 +462,13 @@ public abstract class HttpTransportBase
                 var destination = Path.Combine(destinationDirectory, "envelope_too_large",
                     (eventId ?? SentryId.Create()).ToString());
 
-                if (_options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!) is not true)
+                if (!_options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!))
                 {
                     _options.LogError("Failed to create directory to store the envelope.");
                     return;
                 }
 
-                if (_options.FileSystem.CreateFileForWriting(destination, out var envelopeFile) is not true)
+                if (!_options.FileSystem.CreateFileForWriting(destination, out var envelopeFile))
                 {
                     _options.LogError("Failed to create envelope file.");
                     return;

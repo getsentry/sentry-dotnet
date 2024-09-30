@@ -61,7 +61,7 @@ internal class GlobalSessionManager : ISessionManager
         {
             _options.LogDebug("Creating persistence directory for session file at '{0}'.", _persistenceDirectoryPath);
 
-            if (_options.FileSystem.CreateDirectory(_persistenceDirectoryPath) is not true)
+            if (!_options.FileSystem.CreateDirectory(_persistenceDirectoryPath))
             {
                 _options.LogError("Failed to create persistent directory for session file.");
                 return;
@@ -70,7 +70,7 @@ internal class GlobalSessionManager : ISessionManager
             var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
 
             var persistedSessionUpdate = new PersistedSessionUpdate(update, pauseTimestamp);
-            if (_options.FileSystem.CreateFileForWriting(filePath, out var file) is not true)
+            if (!_options.FileSystem.CreateFileForWriting(filePath, out var file))
             {
                 _options.LogError("Failed to persist session file.");
                 return;
@@ -127,7 +127,7 @@ internal class GlobalSessionManager : ISessionManager
                 }
             }
 
-            if (_options.FileSystem.DeleteFile(filePath) is not true)
+            if (!_options.FileSystem.DeleteFile(filePath))
             {
                 _options.LogError("Failed to delete persisted session file.");
                 return;
