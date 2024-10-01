@@ -80,10 +80,7 @@ internal class CachingTransport : ITransport, IDisposable
 
         // Sanity check: This should never happen in the first place.
         // We check for `DisableFileWrite` before creating the CachingTransport.
-        if (_options.DisableFileWrite)
-        {
-            throw new InvalidOperationException("File write has been disabled via the options. Cannot create a Caching Transport.");
-        }
+        Debug.Assert(!_options.DisableFileWrite);
 
         _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, ProcessingFolder);
     }

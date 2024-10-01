@@ -106,7 +106,7 @@ internal class GlobalSessionManager : ISessionManager
 
         if (_options.DisableFileWrite)
         {
-            _options.LogInfo("File write has been disabled via the options. Skipping deleting persisted session.");
+            _options.LogInfo("File write has been disabled via the options. Skipping deletion of persisted session files.");
             return;
         }
 
