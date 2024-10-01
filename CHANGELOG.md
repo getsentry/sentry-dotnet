@@ -12,7 +12,7 @@
 
 ### Dependencies
 
-- Update Perfview/TraceEvent to 3ad5a8c ([#3492](https://github.com/getsentry/sentry-dotnet/pull/3492))
+- Update Perfview/TraceEvent to e343a0c ([#3492](https://github.com/getsentry/sentry-dotnet/pull/3492))
 
 ## 4.9.0
 
