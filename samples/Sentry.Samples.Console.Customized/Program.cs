@@ -15,32 +15,31 @@ internal static class Program
         });
 
         // Enable the SDK
-        using (SentrySdk.Init(o =>
+        using (SentrySdk.Init(options =>
         {
-            // A Sentry Data Source Name (DSN) is required.
+            // You can set here in code, or you can set it in the SENTRY_DSN environment variable.
             // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
-            // You can set it in the SENTRY_DSN environment variable, or you can set it in code here.
-            // o.Dsn = "... Your DSN ...";
+            options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
 
             // Send stack trace for events that were not created from an exception
             // e.g: CaptureMessage, log.LogDebug, log.LogInformation ...
-            o.AttachStacktrace = true;
+            options.AttachStacktrace = true;
 
             // Sentry won't consider code from namespace LibraryX.* as part of the app code and will hide it from the stacktrace by default
             // To see the lines from non `AppCode`, select `Full`. Will include non App code like System.*, Microsoft.* and LibraryX.*
-            o.AddInAppExclude("LibraryX.");
+            options.AddInAppExclude("LibraryX.");
 
             // Before excluding all prefixed 'LibraryX.', any stack trace from a type namespaced 'LibraryX.Core' will be considered InApp.
-            o.AddInAppInclude("LibraryX.Core");
+            options.AddInAppInclude("LibraryX.Core");
 
             // Send personal identifiable information like the username logged on to the computer and machine name
-            o.SendDefaultPii = true;
+            options.SendDefaultPii = true;
 
             // To enable event sampling, uncomment:
             // o.SampleRate = 0.5f; // Randomly drop (don't send to Sentry) half of events
 
             // Modifications to event before it goes out. Could replace the event altogether
-            o.SetBeforeSend((@event, _) =>
+            options.SetBeforeSend((@event, _) =>
                 {
                     // Drop an event altogether:
                     if (@event.Tags.ContainsKey("SomeTag"))
@@ -53,7 +52,7 @@ internal static class Program
             );
 
             // Allows inspecting and modifying, returning a new or simply rejecting (returning null)
-            o.SetBeforeBreadcrumb((crumb, hint) =>
+            options.SetBeforeBreadcrumb((crumb, hint) =>
             {
                 // Don't add breadcrumbs with message containing:
                 if (crumb.Message?.Contains("bad breadcrumb") == true)
@@ -72,34 +71,34 @@ internal static class Program
             });
 
             // Ignore exception by its type:
-            o.AddExceptionFilterForType<XsltCompileException>();
+            options.AddExceptionFilterForType<XsltCompileException>();
 
             // Configure the background worker which sends events to sentry:
             // Wait up to 5 seconds before shutdown while there are events to send.
-            o.ShutdownTimeout = TimeSpan.FromSeconds(5);
+            options.ShutdownTimeout = TimeSpan.FromSeconds(5);
 
             // Enable SDK logging with Debug level
-            o.Debug = true;
+            options.Debug = true;
             // To change the verbosity, use:
-            // o.DiagnosticLevel = SentryLevel.Info;
+            // options.DiagnosticLevel = SentryLevel.Info;
             // To use a custom logger:
-            // o.DiagnosticLogger = ...
+            // options.DiagnosticLogger = ...
 
             // Using a proxy:
-            o.HttpProxy = null; //new WebProxy("https://localhost:3128");
+            options.HttpProxy = null; //new WebProxy("https://localhost:3128");
 
             // Example customizing the HttpMessageHandlers created
-            o.CreateHttpMessageHandler = () => new HttpClientHandler
+            options.CreateHttpMessageHandler = () => new HttpClientHandler
             {
                 ServerCertificateCustomValidationCallback = (_, certificate, _, _) =>
                     !certificate.Archived
             };
 
             // Access to the HttpClient created to serve the SentryClint
-            o.ConfigureClient = client => client.DefaultRequestHeaders.TryAddWithoutValidation("CustomHeader", new[] { "my value" });
+            options.ConfigureClient = client => client.DefaultRequestHeaders.TryAddWithoutValidation("CustomHeader", new[] { "my value" });
 
             // Control/override how to apply the State object into the scope
-            o.SentryScopeStateProcessor = new MyCustomerScopeStateProcessor();
+            options.SentryScopeStateProcessor = new MyCustomerScopeStateProcessor();
         }))
         {
             // Ignored by its type due to the setting above

@@ -1,10 +1,12 @@
+using System.IO.Abstractions.TestingHelpers;
+
 namespace Sentry.Tests;
 
 public class GlobalSessionManagerTests : IDisposable
 {
     private class Fixture : IDisposable
     {
-        private readonly TempDirectory _cacheDirectory;
+        public TempDirectory CacheDirectory;
 
         public InMemoryDiagnosticLogger Logger { get; }
 
@@ -19,17 +21,16 @@ public class GlobalSessionManagerTests : IDisposable
             Clock.GetUtcNow().Returns(DateTimeOffset.Now);
             Logger = new InMemoryDiagnosticLogger();
 
-            var fileSystem = new FakeFileSystem();
-            _cacheDirectory = new TempDirectory(fileSystem);
-
+            CacheDirectory = new TempDirectory();
             Options = new SentryOptions
             {
                 Dsn = ValidDsn,
-                CacheDirectoryPath = _cacheDirectory.Path,
-                FileSystem = fileSystem,
                 Release = "test",
                 Debug = true,
-                DiagnosticLogger = Logger
+                DiagnosticLogger = Logger,
+                CacheDirectoryPath = CacheDirectory.Path,
+                // This keeps all writing-to-file operations in memory instead of actually writing to disk
+                FileSystem = new FakeFileSystem()
             };
 
             configureOptions?.Invoke(Options);
@@ -41,7 +42,7 @@ public class GlobalSessionManagerTests : IDisposable
                 Clock,
                 PersistedSessionProvider);
 
-        public void Dispose() => _cacheDirectory.Dispose();
+        public void Dispose() => CacheDirectory.Dispose();
     }
 
     private readonly Fixture _fixture = new();
@@ -77,18 +78,18 @@ public class GlobalSessionManagerTests : IDisposable
         sut.StartSession();
 
         // Assert
-        File.Exists(filePath).Should().BeTrue();
+        Assert.True(_fixture.Options.FileSystem.FileExists(filePath));
     }
 
     [Fact]
-    public void StartSession_CacheDirectoryNotProvided_InstallationIdFileCreated()
+    public void StartSession_CacheDirectoryProvidedButFileWriteDisabled_InstallationIdFileNotCreated()
     {
         // Arrange
-        _fixture.Options.CacheDirectoryPath = null;
+        _fixture.Options.DisableFileWrite = true;
         var sut = _fixture.GetSut();
 
         var filePath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            _fixture.Options.CacheDirectoryPath!,
             "Sentry",
             _fixture.Options.Dsn!.GetHashString(),
             ".installation");
@@ -97,7 +98,52 @@ public class GlobalSessionManagerTests : IDisposable
         sut.StartSession();
 
         // Assert
-        File.Exists(filePath).Should().BeTrue();
+        Assert.False(_fixture.Options.FileSystem.FileExists(filePath));
+    }
+
+    [Fact]
+    public void StartSession_CacheDirectoryNotProvided_InstallationIdFileCreated()
+    {
+        // Arrange
+        _fixture.Options.CacheDirectoryPath = null;
+        // Setting the test-cache directory to be properly disposed
+        _fixture.CacheDirectory = new TempDirectory(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Sentry",
+            _fixture.Options.Dsn!.GetHashString()));
+
+        var sut = _fixture.GetSut();
+
+        var filePath = Path.Combine(_fixture.CacheDirectory.Path, ".installation");
+
+        // Act
+        sut.StartSession();
+
+        // Assert
+        Assert.True(_fixture.Options.FileSystem.FileExists(filePath));
+    }
+
+    [Fact]
+    public void StartSession_CacheDirectoryNotProvidedAndFileWriteDisabled_InstallationIdFileNotCreated()
+    {
+        // Arrange
+        _fixture.Options.DisableFileWrite = true;
+        _fixture.Options.CacheDirectoryPath = null;
+        // Setting the test-cache directory to be properly disposed
+        _fixture.CacheDirectory = new TempDirectory(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Sentry",
+            _fixture.Options.Dsn!.GetHashString()));
+
+        var sut = _fixture.GetSut();
+
+        var filePath = Path.Combine(_fixture.CacheDirectory.Path, ".installation");
+
+        // Act
+        sut.StartSession();
+
+        // Assert
+        Assert.False(_fixture.Options.FileSystem.FileExists(filePath));
     }
 
     [Fact]

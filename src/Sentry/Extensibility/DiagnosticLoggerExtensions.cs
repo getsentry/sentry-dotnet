@@ -264,7 +264,8 @@ public static class DiagnosticLoggerExtensions
     /// <summary>
     /// Log an exception with an error message.
     /// </summary>
-    public static void LogError(this IDiagnosticLogger logger,
+    public static void LogError(
+        this IDiagnosticLogger logger,
         Exception exception,
         string message)
         => logger.LogIfEnabled(SentryLevel.Error, exception, message);
@@ -280,7 +281,8 @@ public static class DiagnosticLoggerExtensions
     /// <summary>
     /// Log a error message.
     /// </summary>
-    internal static void LogError(this SentryOptions options,
+    internal static void LogError(
+        this SentryOptions options,
         Exception exception,
         string message)
         => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Error, exception, message);
@@ -288,7 +290,8 @@ public static class DiagnosticLoggerExtensions
     /// <summary>
     /// Log a error message.
     /// </summary>
-    public static void LogError<TArg>(this IDiagnosticLogger logger,
+    public static void LogError<TArg>(
+        this IDiagnosticLogger logger,
         Exception exception,
         string message,
         TArg arg)
@@ -297,7 +300,8 @@ public static class DiagnosticLoggerExtensions
     /// <summary>
     /// Log a error message.
     /// </summary>
-    internal static void LogError<TArg>(this SentryOptions options,
+    internal static void LogError<TArg>(
+        this SentryOptions options,
         Exception exception,
         string message,
         TArg arg)
@@ -306,7 +310,17 @@ public static class DiagnosticLoggerExtensions
     /// <summary>
     /// Log a error message.
     /// </summary>
-    public static void LogError<TArg, TArg2>(this IDiagnosticLogger logger,
+    internal static void LogError<TArg>(
+        this SentryOptions options,
+        string message,
+        TArg arg)
+        => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Error, null, message, arg);
+
+    /// <summary>
+    /// Log a error message.
+    /// </summary>
+    public static void LogError<TArg, TArg2>(
+        this IDiagnosticLogger logger,
         Exception exception,
         string message,
         TArg arg,
@@ -316,7 +330,8 @@ public static class DiagnosticLoggerExtensions
     /// <summary>
     /// Log a error message.
     /// </summary>
-    internal static void LogError<TArg, TArg2>(this SentryOptions options,
+    internal static void LogError<TArg, TArg2>(
+        this SentryOptions options,
         Exception exception,
         string message,
         TArg arg,
@@ -326,49 +341,13 @@ public static class DiagnosticLoggerExtensions
     /// <summary>
     /// Log a error message.
     /// </summary>
-    public static void LogError<TArg, TArg2, TArg3, TArg4>(this IDiagnosticLogger logger,
-        Exception exception,
+    internal static void LogError<TArg, TArg2>(
+        this SentryOptions options,
         string message,
         TArg arg,
-        TArg2 arg2,
-        TArg3 arg3,
-        TArg4 arg4)
-        => logger.LogIfEnabled(SentryLevel.Error, exception, message, arg, arg2, arg3, arg4);
+        TArg2 arg2)
+        => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Error, null, message, arg, arg2);
 
-    /// <summary>
-    /// Log a error message.
-    /// </summary>
-    internal static void LogError<TArg, TArg2, TArg3, TArg4>(this SentryOptions options,
-        Exception exception,
-        string message,
-        TArg arg,
-        TArg2 arg2,
-        TArg3 arg3,
-        TArg4 arg4)
-        => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Error, exception, message, arg, arg2, arg3, arg4);
-
-    /// <summary>
-    /// Log a error message.
-    /// </summary>
-    internal static void LogError<TArg, TArg2, TArg3, TArg4, TArg5>(this SentryOptions options,
-        string message,
-        TArg arg,
-        TArg2 arg2,
-        TArg3 arg3,
-        TArg4 arg4,
-        TArg5 arg5)
-        => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Error, null, message, arg, arg2, arg3, arg4, arg5);
-
-    /// <summary>
-    /// Log a error message.
-    /// </summary>
-    internal static void LogError<TArg, TArg2, TArg3, TArg4>(this SentryOptions options,
-        string message,
-        TArg arg,
-        TArg2 arg2,
-        TArg3 arg3,
-        TArg4 arg4)
-        => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Error, null, message, arg, arg2, arg3, arg4);
 
     /// <summary>
     /// Log an error message.
@@ -393,6 +372,68 @@ public static class DiagnosticLoggerExtensions
         TArg2 arg2,
         TArg3 arg3)
         => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Error, exception, message, arg, arg2, arg3);
+
+    /// <summary>
+    /// Log an error message.
+    /// </summary>
+    internal static void LogError<TArg, TArg2, TArg3>(
+        this SentryOptions options,
+        string message,
+        TArg arg,
+        TArg2 arg2,
+        TArg3 arg3)
+        => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Error, null, message, arg, arg2, arg3);
+
+    /// <summary>
+    /// Log a error message.
+    /// </summary>
+    public static void LogError<TArg, TArg2, TArg3, TArg4>(
+        this IDiagnosticLogger logger,
+        Exception exception,
+        string message,
+        TArg arg,
+        TArg2 arg2,
+        TArg3 arg3,
+        TArg4 arg4)
+        => logger.LogIfEnabled(SentryLevel.Error, exception, message, arg, arg2, arg3, arg4);
+
+    /// <summary>
+    /// Log a error message.
+    /// </summary>
+    internal static void LogError<TArg, TArg2, TArg3, TArg4>(
+        this SentryOptions options,
+        Exception exception,
+        string message,
+        TArg arg,
+        TArg2 arg2,
+        TArg3 arg3,
+        TArg4 arg4)
+        => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Error, exception, message, arg, arg2, arg3, arg4);
+
+    /// <summary>
+    /// Log a error message.
+    /// </summary>
+    internal static void LogError<TArg, TArg2, TArg3, TArg4>(
+        this SentryOptions options,
+        string message,
+        TArg arg,
+        TArg2 arg2,
+        TArg3 arg3,
+        TArg4 arg4)
+        => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Error, null, message, arg, arg2, arg3, arg4);
+
+    /// <summary>
+    /// Log a error message.
+    /// </summary>
+    internal static void LogError<TArg, TArg2, TArg3, TArg4, TArg5>(
+        this SentryOptions options,
+        string message,
+        TArg arg,
+        TArg2 arg2,
+        TArg3 arg3,
+        TArg4 arg4,
+        TArg5 arg5)
+        => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Error, null, message, arg, arg2, arg3, arg4, arg5);
 
     /// <summary>
     /// Log a warning message.

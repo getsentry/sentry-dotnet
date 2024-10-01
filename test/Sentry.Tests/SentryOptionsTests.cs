@@ -738,4 +738,34 @@ public partial class SentryOptionsTests
         var sut = new SentryOptions();
         Assert.Contains(sut.InAppExclude!, e => e.ToString() == expected);
     }
+
+    [Fact]
+    public void CachesInstallationId()
+    {
+        // Arrange
+        var logger = Substitute.For<IDiagnosticLogger>();
+        logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        var sut = new SentryOptions
+        {
+            Debug = true,
+            DiagnosticLogger = logger
+        };
+
+        // Act
+        var installationId1 = sut.InstallationId;
+
+        // Assert
+        installationId1.Should().NotBeNullOrWhiteSpace();
+        logger.Received(1).Log(SentryLevel.Debug, "Resolved installation ID '{0}'.", null, Arg.Any<string>());
+
+        // Arrange
+        logger.ClearReceivedCalls();
+
+        // Act
+        var installationId2 = sut.InstallationId;
+
+        // Assert
+        installationId2.Should().Be(installationId1);
+        logger.Received(0).Log(SentryLevel.Debug, "Resolved installation ID '{0}'.", null, Arg.Any<string>());
+    }
 }

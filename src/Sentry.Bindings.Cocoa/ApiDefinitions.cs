@@ -7,6 +7,7 @@
 using System;
 using Foundation;
 using ObjCRuntime;
+using UIKit;
 
 namespace Sentry.CocoaSdk;
 
@@ -35,6 +36,10 @@ delegate SentrySpan SentryBeforeSendSpanCallback (SentrySpan span);
 // typedef BOOL (^SentryBeforeCaptureScreenshotCallback)(SentryEvent * _Nonnull);
 [Internal]
 delegate bool SentryBeforeCaptureScreenshotCallback (SentryEvent @event);
+
+// typedef BOOL (^SentryBeforeCaptureViewHierarchyCallback)(SentryEvent * _Nonnull);
+[Internal]
+delegate bool SentryBeforeCaptureViewHierarchyCallback (SentryEvent @event);
 
 // typedef void (^SentryOnCrashedLastRunCallback)(SentryEvent * _Nonnull);
 [Internal]
@@ -98,6 +103,60 @@ interface SentryAttachment
     // @property (readonly, copy, nonatomic) NSString * _Nullable contentType;
     [NullAllowed, Export ("contentType")]
     string ContentType { get; }
+}
+
+// @interface SentryBaggage : NSObject
+[BaseType (typeof(NSObject))]
+[Internal]
+interface SentryBaggage
+{
+    // @property (readonly, nonatomic) SentryId * _Nonnull traceId;
+    [Export ("traceId")]
+    SentryId TraceId { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nonnull publicKey;
+    [Export ("publicKey")]
+    string PublicKey { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nullable releaseName;
+    [NullAllowed, Export ("releaseName")]
+    string ReleaseName { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nullable environment;
+    [NullAllowed, Export ("environment")]
+    string Environment { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nullable transaction;
+    [NullAllowed, Export ("transaction")]
+    string Transaction { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nullable userId;
+    [NullAllowed, Export ("userId")]
+    string UserId { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nullable userSegment;
+    [NullAllowed, Export ("userSegment")]
+    string UserSegment { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nullable sampleRate;
+    [NullAllowed, Export ("sampleRate")]
+    string SampleRate { get; }
+
+    // @property (nonatomic, strong) NSString * _Nullable sampled;
+    [NullAllowed, Export ("sampled", ArgumentSemantic.Strong)]
+    string Sampled { get; set; }
+
+    // @property (nonatomic, strong) NSString * _Nullable replayId;
+    [NullAllowed, Export ("replayId", ArgumentSemantic.Strong)]
+    string ReplayId { get; set; }
+
+    // -(instancetype _Nonnull)initWithTraceId:(SentryId * _Nonnull)traceId publicKey:(NSString * _Nonnull)publicKey releaseName:(NSString * _Nullable)releaseName environment:(NSString * _Nullable)environment transaction:(NSString * _Nullable)transaction userSegment:(NSString * _Nullable)userSegment sampleRate:(NSString * _Nullable)sampleRate sampled:(NSString * _Nullable)sampled replayId:(NSString * _Nullable)replayId;
+    [Export ("initWithTraceId:publicKey:releaseName:environment:transaction:userSegment:sampleRate:sampled:replayId:")]
+    NativeHandle Constructor (SentryId traceId, string publicKey, [NullAllowed] string releaseName, [NullAllowed] string environment, [NullAllowed] string transaction, [NullAllowed] string userSegment, [NullAllowed] string sampleRate, [NullAllowed] string sampled, [NullAllowed] string replayId);
+
+    // -(NSString * _Nonnull)toHTTPHeaderWithOriginalBaggage:(NSDictionary * _Nullable)originalBaggage;
+    [Export ("toHTTPHeaderWithOriginalBaggage:")]
+    string ToHTTPHeaderWithOriginalBaggage ([NullAllowed] NSDictionary originalBaggage);
 }
 
 // @protocol SentrySerializable <NSObject>
@@ -746,6 +805,11 @@ interface SentrySpan : SentrySerializable
     [Export ("isFinished")]
     bool IsFinished { get; }
 
+    // @required @property (readonly, nonatomic) SentryTraceContext * _Nullable traceContext;
+    [Abstract]
+    [NullAllowed, Export ("traceContext")]
+    SentryTraceContext TraceContext { get; }
+
     // @required -(id<SentrySpan> _Nonnull)startChildWithOperation:(NSString * _Nonnull)operation __attribute__((swift_name("startChild(operation:)")));
     [Abstract]
     [Export ("startChildWithOperation:")]
@@ -805,6 +869,11 @@ interface SentrySpan : SentrySerializable
     [Abstract]
     [Export ("toTraceHeader")]
     SentryTraceHeader ToTraceHeader();
+
+    // @required -(NSString * _Nullable)baggageHttpHeader;
+    [Abstract]
+    [NullAllowed, Export ("baggageHttpHeader")]
+    string BaggageHttpHeader();
 }
 
 // @interface SentryHub : NSObject
@@ -1271,6 +1340,10 @@ interface SentryOptions
     [NullAllowed, Export ("beforeCaptureScreenshot", ArgumentSemantic.Copy)]
     SentryBeforeCaptureScreenshotCallback BeforeCaptureScreenshot { get; set; }
 
+    // @property (copy, nonatomic) SentryBeforeCaptureScreenshotCallback _Nullable beforeCaptureViewHierarchy;
+    [NullAllowed, Export ("beforeCaptureViewHierarchy", ArgumentSemantic.Copy)]
+    SentryBeforeCaptureScreenshotCallback BeforeCaptureViewHierarchy { get; set; }
+
     // @property (copy, nonatomic) SentryOnCrashedLastRunCallback _Nullable onCrashedLastRun;
     [NullAllowed, Export ("onCrashedLastRun", ArgumentSemantic.Copy)]
     SentryOnCrashedLastRunCallback OnCrashedLastRun { get; set; }
@@ -1340,6 +1413,10 @@ interface SentryOptions
     [Export ("attachViewHierarchy")]
     bool AttachViewHierarchy { get; set; }
 
+    // @property (assign, nonatomic) BOOL reportAccessibilityIdentifier;
+    [Export ("reportAccessibilityIdentifier")]
+    bool ReportAccessibilityIdentifier { get; set; }
+
     // @property (assign, nonatomic) BOOL enableUserInteractionTracing;
     [Export ("enableUserInteractionTracing")]
     bool EnableUserInteractionTracing { get; set; }
@@ -1360,7 +1437,7 @@ interface SentryOptions
     [Export ("enableFileIOTracing")]
     bool EnableFileIOTracing { get; set; }
 
-    // @property (nonatomic) BOOL enableTracing;
+    // @property (nonatomic) BOOL enableTracing __attribute__((deprecated("Use tracesSampleRate or tracesSampler instead")));
     [Export ("enableTracing")]
     bool EnableTracing { get; set; }
 
@@ -1727,6 +1804,26 @@ interface SentrySDK
     [Static]
     [Export ("close")]
     void Close ();
+
+    // +(void)replayRedactView:(UIView * _Nonnull)view;
+    [Static]
+    [Export ("replayRedactView:")]
+    void ReplayRedactView (UIView view);
+
+    // +(void)replayIgnoreView:(UIView * _Nonnull)view;
+    [Static]
+    [Export ("replayIgnoreView:")]
+    void ReplayIgnoreView (UIView view);
+
+    // +(void)startProfiler;
+    [Static]
+    [Export ("startProfiler")]
+    void StartProfiler ();
+
+    // +(void)stopProfiler;
+    [Static]
+    [Export ("stopProfiler")]
+    void StopProfiler ();
 }
 
 // @interface SentrySamplingContext : NSObject
@@ -1949,6 +2046,72 @@ interface SentryThread : SentrySerializable
     // -(instancetype _Nonnull)initWithThreadId:(NSNumber * _Nonnull)threadId;
     [Export ("initWithThreadId:")]
     NativeHandle Constructor (NSNumber threadId);
+}
+
+// @interface SentryTraceContext : NSObject <SentrySerializable>
+[BaseType (typeof(NSObject))]
+[Internal]
+interface SentryTraceContext : SentrySerializable
+{
+    // @property (readonly, nonatomic) SentryId * _Nonnull traceId;
+    [Export ("traceId")]
+    SentryId TraceId { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nonnull publicKey;
+    [Export ("publicKey")]
+    string PublicKey { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nullable releaseName;
+    [NullAllowed, Export ("releaseName")]
+    string ReleaseName { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nullable environment;
+    [NullAllowed, Export ("environment")]
+    string Environment { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nullable transaction;
+    [NullAllowed, Export ("transaction")]
+    string Transaction { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nullable userSegment;
+    [NullAllowed, Export ("userSegment")]
+    string UserSegment { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nullable sampleRate;
+    [NullAllowed, Export ("sampleRate")]
+    string SampleRate { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nullable sampled;
+    [NullAllowed, Export ("sampled")]
+    string Sampled { get; }
+
+    // @property (readonly, nonatomic) NSString * _Nullable replayId;
+    [NullAllowed, Export ("replayId")]
+    string ReplayId { get; }
+
+    // -(instancetype _Nonnull)initWithTraceId:(SentryId * _Nonnull)traceId publicKey:(NSString * _Nonnull)publicKey releaseName:(NSString * _Nullable)releaseName environment:(NSString * _Nullable)environment transaction:(NSString * _Nullable)transaction userSegment:(NSString * _Nullable)userSegment sampleRate:(NSString * _Nullable)sampleRate sampled:(NSString * _Nullable)sampled replayId:(NSString * _Nullable)replayId;
+    [Export ("initWithTraceId:publicKey:releaseName:environment:transaction:userSegment:sampleRate:sampled:replayId:")]
+    NativeHandle Constructor (SentryId traceId, string publicKey, [NullAllowed] string releaseName, [NullAllowed] string environment, [NullAllowed] string transaction, [NullAllowed] string userSegment, [NullAllowed] string sampleRate, [NullAllowed] string sampled, [NullAllowed] string replayId);
+
+    // -(instancetype _Nullable)initWithScope:(SentryScope * _Nonnull)scope options:(SentryOptions * _Nonnull)options;
+    [Export ("initWithScope:options:")]
+    NativeHandle Constructor (SentryScope scope, SentryOptions options);
+
+    // -(instancetype _Nullable)initWithDict:(NSDictionary<NSString *,id> * _Nonnull)dictionary;
+    [Export ("initWithDict:")]
+    NativeHandle Constructor (NSDictionary<NSString, NSObject> dictionary);
+
+    // -(instancetype _Nullable)initWithTracer:(SentryTracer * _Nonnull)tracer scope:(SentryScope * _Nullable)scope options:(SentryOptions * _Nonnull)options;
+    [Export ("initWithTracer:scope:options:")]
+    NativeHandle Constructor (SentryTracer tracer, [NullAllowed] SentryScope scope, SentryOptions options);
+
+    // -(instancetype _Nonnull)initWithTraceId:(SentryId * _Nonnull)traceId options:(SentryOptions * _Nonnull)options userSegment:(NSString * _Nullable)userSegment replayId:(NSString * _Nullable)replayId;
+    [Export ("initWithTraceId:options:userSegment:replayId:")]
+    NativeHandle Constructor (SentryId traceId, SentryOptions options, [NullAllowed] string userSegment, [NullAllowed] string replayId);
+
+    // -(SentryBaggage * _Nonnull)toBaggage;
+    [Export ("toBaggage")]
+    SentryBaggage ToBaggage();
 }
 
 // @interface SentryTraceHeader : NSObject

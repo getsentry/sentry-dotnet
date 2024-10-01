@@ -234,14 +234,12 @@ public partial class SentryMauiAppBuilderExtensionsTests
     {
         // Arrange
         var builder = _fixture.Builder;
-        var fileSystem = new FakeFileSystem();
-        using var cacheDirectory = new TempDirectory(fileSystem);
+        using var cacheDirectory = new TempDirectory();
         var cachePath = cacheDirectory.Path;
 
         // Act
         builder.UseSentry(options =>
         {
-            options.FileSystem = fileSystem;
             options.CacheDirectoryPath = cachePath;
         });
 

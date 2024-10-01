@@ -41,6 +41,10 @@ if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/
 $iPhoneSdkVersion = sharpie xcode -sdks | grep -o -m 1 'iphoneos\S*'
 Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
 
+# The umbrella header is provided in the "new" style of `#import <Sentry/SomeHeader.h>` instead of `#import "SomeHeader.h"` which causes sharpie to fail resolve those headers
+$umbrellaHeader = "$CocoaSdkPath/Carthage/Headers/Sentry.h"
+Set-Content -Path $umbrellaHeader -Value ((Get-Content -Path $umbrellaHeader -Raw) -replace '<Sentry/([^>]+)>', '"$1"')
+
 # Generate bindings
 Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk $iPhoneSdkVersion `

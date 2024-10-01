@@ -247,6 +247,27 @@ public class SentryTransactionTests
     }
 
     [Fact]
+    public void SerializeObject_TransactionContainsUnfinishedSpan_SerializesDeserializesValidObject()
+    {
+        // Arrange
+        SentryTransaction capturedTransaction = null;
+        var hub = Substitute.For<IHub>();
+        hub.CaptureTransaction(Arg.Do<SentryTransaction>(t => capturedTransaction = t));
+
+        var transaction = new TransactionTracer(hub, "test.name", "test.operation");
+        transaction.StartChild("child_op123", "child_desc123");
+        transaction.Finish(SpanStatus.Aborted);
+
+        // Act
+        var actualString = capturedTransaction.ToJsonString(_testOutputLogger);
+        var actualTransaction = Json.Parse(actualString, SentryTransaction.FromJson);
+
+        // Assert
+        Assert.Single(actualTransaction.Spans); // Sanity Check
+        Assert.Null(actualTransaction.Spans.First().EndTimestamp);
+    }
+
+    [Fact]
     public void StartChild_LevelOne_Works()
     {
         // Arrange

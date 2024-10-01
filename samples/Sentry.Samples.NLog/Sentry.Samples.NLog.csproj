@@ -6,16 +6,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NLog" Version="5.2.4" />
-    <ProjectReference Include="..\..\src\Sentry.NLog\Sentry.NLog.csproj">
-      <Private>true</Private>
-    </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="NLog" Version="5.2.4" />
+    <ProjectReference Include="..\..\src\Sentry.NLog\Sentry.NLog.csproj">
+      <Private>true</Private>
+    </ProjectReference>
+  </ItemGroup>
+  
 </Project>

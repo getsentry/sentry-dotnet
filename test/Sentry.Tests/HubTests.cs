@@ -1,3 +1,4 @@
+using System.IO.Abstractions.TestingHelpers;
 using Sentry.Internal.Http;
 
 namespace Sentry.Tests;
@@ -269,6 +270,64 @@ public partial class HubTests
         Assert.Equal(child.ParentSpanId, evt.Contexts.Trace.ParentSpanId);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CaptureEvent_Exception_LeavesBreadcrumb(bool withScopeCallback)
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+        var evt = new SentryEvent(new Exception());
+        var scope = hub.ScopeManager.GetCurrent().Key;
+
+        // Act
+        _ = withScopeCallback
+            ? hub.CaptureEvent(evt, s => s.ClearBreadcrumbs())
+            : hub.CaptureEvent(evt);
+
+        // Assert
+        scope.Breadcrumbs.Should().NotBeEmpty();
+        using var assertionScope = new AssertionScope();
+        var breadcrumb = scope.Breadcrumbs.Last();
+        breadcrumb.Message.Should().Be(evt.Exception!.Message);
+        breadcrumb.Level.Should().Be(BreadcrumbLevel.Critical);
+        breadcrumb.Category.Should().Be("Exception");
+    }
+
+    [Fact]
+    public void CaptureEvent_WithMessageAndException_StoresExceptionMessageAsData()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+        var evt = new SentryEvent(new Exception())
+        {
+            Message = new SentryMessage
+            {
+                Formatted = "formatted",
+                Message = "message"
+            }
+        };
+        var scope = hub.ScopeManager.GetCurrent().Key;
+
+        // Act
+        hub.CaptureEvent(evt);
+
+        // Assert
+        scope.Breadcrumbs.Should().NotBeEmpty();
+        using var assertionScope = new AssertionScope();
+        var breadcrumb = scope.Breadcrumbs.Last();
+        breadcrumb.Message.Should().Be(evt.Message.Formatted);
+        breadcrumb.Data.Should().BeEquivalentTo(
+            new Dictionary<string, string>
+            {
+                ["exception_message"] = evt.Exception!.Message
+            });
+        breadcrumb.Level.Should().Be(BreadcrumbLevel.Critical);
+        breadcrumb.Category.Should().Be("Exception");
+    }
+
     internal class EvilContext
     {
         // This property will throw an exception during serialization.
@@ -314,8 +373,7 @@ public partial class HubTests
         var cts = new CancellationTokenSource();
         cts.Token.Register(() => tcs.TrySetCanceled());
 
-        var fileSystem = new FakeFileSystem();
-        using var tempDirectory = offlineCaching ? new TempDirectory(fileSystem) : null;
+        using var tempDirectory = offlineCaching ? new TempDirectory() : null;
 
         var logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(_output);
 
@@ -324,14 +382,15 @@ public partial class HubTests
             Dsn = ValidDsn,
             // To go through a round trip serialization of cached envelope
             CacheDirectoryPath = tempDirectory?.Path,
-            FileSystem = fileSystem,
             // So we don't need to deal with gzip payloads
             RequestBodyCompressionLevel = CompressionLevel.NoCompression,
             CreateHttpMessageHandler = () => new CallbackHttpClientHandler(Verify),
             // Not to send some session envelope
             AutoSessionTracking = false,
             Debug = true,
-            DiagnosticLogger = logger
+            DiagnosticLogger = logger,
+            // This keeps all writing-to-file operations in memory instead of actually writing to disk
+            FileSystem = new FakeFileSystem()
         };
 
         // Disable process exit flush to resolve "There is no currently active test." errors.
@@ -1530,8 +1589,7 @@ public partial class HubTests
     public async Task FlushOnDispose_SendsEnvelope(bool cachingEnabled)
     {
         // Arrange
-        var fileSystem = new FakeFileSystem();
-        using var cacheDirectory = new TempDirectory(fileSystem);
+        using var cacheDirectory = new TempDirectory();
         var transport = Substitute.For<ITransport>();
 
         var options = new SentryOptions
@@ -1545,7 +1603,6 @@ public partial class HubTests
         if (cachingEnabled)
         {
             options.CacheDirectoryPath = cacheDirectory.Path;
-            options.FileSystem = fileSystem;
         }
 
         // Act

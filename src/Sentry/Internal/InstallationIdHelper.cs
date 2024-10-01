@@ -1,20 +1,12 @@
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
-namespace Sentry;
+namespace Sentry.Internal;
 
-internal class InstallationIdHelper
+internal class InstallationIdHelper(SentryOptions options)
 {
     private readonly object _installationIdLock = new();
     private string? _installationId;
-    private readonly SentryOptions _options;
-    private readonly string? _persistenceDirectoryPath;
-
-    public InstallationIdHelper(SentryOptions options)
-    {
-        _options = options;
-        _persistenceDirectoryPath = options.CacheDirectoryPath ?? options.TryGetDsnSpecificCacheDirectoryPath();
-    }
 
     public string? TryGetInstallationId()
     {
@@ -42,11 +34,11 @@ internal class InstallationIdHelper
 
             if (!string.IsNullOrWhiteSpace(id))
             {
-                _options.LogDebug("Resolved installation ID '{0}'.", id);
+                options.LogDebug("Resolved installation ID '{0}'.", id);
             }
             else
             {
-                _options.LogDebug("Failed to resolve installation ID.");
+                options.LogDebug("Failed to resolve installation ID.");
             }
 
             return _installationId = id;
@@ -55,37 +47,52 @@ internal class InstallationIdHelper
 
     private string? TryGetPersistentInstallationId()
     {
+        if (options.DisableFileWrite)
+        {
+            options.LogDebug("File write has been disabled via the options. Skipping trying to get persistent installation ID.");
+            return null;
+        }
+
         try
         {
-            var rootPath = _persistenceDirectoryPath ??
+            var rootPath = options.CacheDirectoryPath ??
                            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            var directoryPath = Path.Combine(rootPath, "Sentry", _options.Dsn!.GetHashString());
+            var directoryPath = Path.Combine(rootPath, "Sentry", options.Dsn!.GetHashString());
+            var fileSystem = options.FileSystem;
 
-            Directory.CreateDirectory(directoryPath);
+            if (fileSystem.CreateDirectory(directoryPath) is not FileOperationResult.Success)
+            {
+                options.LogDebug("Failed to create a directory for installation ID file ({0}).", directoryPath);
+                return null;
+            }
 
-            _options.LogDebug("Created directory for installation ID file ({0}).", directoryPath);
+            options.LogDebug("Created directory for installation ID file ({0}).", directoryPath);
 
             var filePath = Path.Combine(directoryPath, ".installation");
 
             // Read installation ID stored in a file
-            if (File.Exists(filePath))
+            if (fileSystem.FileExists(filePath))
             {
-                return File.ReadAllText(filePath);
+                return fileSystem.ReadAllTextFromFile(filePath);
             }
-            _options.LogDebug("File containing installation ID does not exist ({0}).", filePath);
+            options.LogDebug("File containing installation ID does not exist ({0}).", filePath);
 
             // Generate new installation ID and store it in a file
             var id = Guid.NewGuid().ToString();
-            File.WriteAllText(filePath, id);
+            if (fileSystem.WriteAllTextToFile(filePath, id) is not FileOperationResult.Success)
+            {
+                options.LogDebug("Failed to write Installation ID to file ({0}).", filePath);
+                return null;
+            }
 
-            _options.LogDebug("Saved installation ID '{0}' to file '{1}'.", id, filePath);
+            options.LogDebug("Saved installation ID '{0}' to file '{1}'.", id, filePath);
             return id;
         }
         // If there's no write permission or the platform doesn't support this, we handle
         // and let the next installation id strategy kick in
         catch (Exception ex)
         {
-            _options.LogError(ex, "Failed to resolve persistent installation ID.");
+            options.LogError(ex, "Failed to resolve persistent installation ID.");
             return null;
         }
     }
@@ -105,7 +112,7 @@ internal class InstallationIdHelper
 
             if (string.IsNullOrWhiteSpace(installationId))
             {
-                _options.LogError("Failed to find an appropriate network interface for installation ID.");
+                options.LogError("Failed to find an appropriate network interface for installation ID.");
                 return null;
             }
 
@@ -113,7 +120,7 @@ internal class InstallationIdHelper
         }
         catch (Exception ex)
         {
-            _options.LogError(ex, "Failed to resolve hardware installation ID.");
+            options.LogError(ex, "Failed to resolve hardware installation ID.");
             return null;
         }
     }

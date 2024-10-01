@@ -8,9 +8,9 @@ internal static class Program
         // Enable the SDK
         using (SentrySdk.Init(options =>
         {
-            options.Dsn =
-                // NOTE: ADD YOUR OWN DSN BELOW so you can see the events in your own Sentry account
-                "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+            // You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+            // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+            options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
 
             options.Debug = true;
             // options.AutoSessionTracking = true;
