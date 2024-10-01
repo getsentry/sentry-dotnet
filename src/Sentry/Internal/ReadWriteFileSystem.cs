@@ -2,31 +2,36 @@ namespace Sentry.Internal;
 
 internal class ReadWriteFileSystem : FileSystemBase
 {
-    public override FileOperationResult CreateDirectory(string path)
+    // Note: You are responsible for handling success/failure when attempting to write to disk.
+    // You are required to check for `Options.FileWriteDisabled` whether you are allowed to call any writing operations.
+    // The options will automatically pick between `ReadOnly` and `ReadAndWrite` to prevent accidental file writing that
+    // could cause crashes on restricted platforms like the Nintendo Switch.
+
+    public override bool CreateDirectory(string path)
     {
         Directory.CreateDirectory(path);
-        return DirectoryExists(path) ? FileOperationResult.Success : FileOperationResult.Failure;
+        return DirectoryExists(path);
     }
 
-    public override FileOperationResult DeleteDirectory(string path, bool recursive = false)
+    public override bool DeleteDirectory(string path, bool recursive = false)
     {
         Directory.Delete(path, recursive);
-        return Directory.Exists(path) ? FileOperationResult.Failure : FileOperationResult.Success;
+        return !Directory.Exists(path);
     }
 
-    public override FileOperationResult CreateFileForWriting(string path, out Stream fileStream)
+    public override bool CreateFileForWriting(string path, out Stream fileStream)
     {
         fileStream = File.Create(path);
-        return FileOperationResult.Success;
+        return true;
     }
 
-    public override FileOperationResult WriteAllTextToFile(string path, string contents)
+    public override bool WriteAllTextToFile(string path, string contents)
     {
         File.WriteAllText(path, contents);
-        return File.Exists(path) ? FileOperationResult.Success : FileOperationResult.Failure;
+        return File.Exists(path);
     }
 
-    public override FileOperationResult MoveFile(string sourceFileName, string destFileName, bool overwrite = false)
+    public override bool MoveFile(string sourceFileName, string destFileName, bool overwrite = false)
     {
 #if NETCOREAPP3_0_OR_GREATER
         File.Move(sourceFileName, destFileName, overwrite);
@@ -44,15 +49,15 @@ internal class ReadWriteFileSystem : FileSystemBase
 
         if (File.Exists(sourceFileName) || !File.Exists(destFileName))
         {
-            return FileOperationResult.Failure;
+            return false;
         }
 
-        return FileOperationResult.Success;
+        return true;
     }
 
-    public override FileOperationResult DeleteFile(string path)
+    public override bool DeleteFile(string path)
     {
         File.Delete(path);
-        return File.Exists(path) ? FileOperationResult.Failure : FileOperationResult.Success;
+        return !File.Exists(path);
     }
 }

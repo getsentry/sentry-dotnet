@@ -32,7 +32,7 @@ internal class SdkComposer
 
             if (_options.DisableFileWrite)
             {
-                _options.LogInfo("File writing is disabled, Skipping caching transport creation.");
+                _options.LogInfo("File write has been disabled via the options. Skipping caching transport creation.");
             }
             else
             {
