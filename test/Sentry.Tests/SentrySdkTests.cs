@@ -228,8 +228,7 @@ public class SentrySdkTests : IDisposable
         var processingDelayPerEnvelope = TimeSpan.FromMilliseconds(200);
 
         // Arrange
-        var fileSystem = new FakeFileSystem();
-        using var cacheDirectory = new TempDirectory(fileSystem);
+        using var cacheDirectory = new TempDirectory();
         var cachePath = cacheDirectory.Path;
 
         // Pre-populate cache
@@ -242,7 +241,6 @@ public class SentrySdkTests : IDisposable
                 DiagnosticLogger = _logger,
                 Dsn = ValidDsn,
                 CacheDirectoryPath = cachePath,
-                FileSystem = fileSystem,
                 AutoSessionTracking = false,
                 InitNativeSdks = false,
             },
@@ -295,7 +293,6 @@ public class SentrySdkTests : IDisposable
                 o.Debug = true;
                 o.DiagnosticLogger = _logger;
                 o.CacheDirectoryPath = cachePath;
-                o.FileSystem = fileSystem;
                 o.InitCacheFlushTimeout = initFlushTimeout;
                 o.Transport = transport;
                 o.AutoSessionTracking = false;
