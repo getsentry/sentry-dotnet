@@ -2,20 +2,24 @@ namespace Sentry.Internal;
 
 internal class ReadOnlyFileSystem : FileSystemBase
 {
-    public override FileOperationResult CreateDirectory(string path) => FileOperationResult.Disabled;
+    // Note: You are responsible for handling success/failure when attempting to write to disk.
+    // You are required to check for `Options.FileWriteDisabled` whether you are allowed to call any writing operations.
+    // The options will automatically pick between `ReadOnly` and `ReadAndWrite` to prevent accidental file writing that
+    // could cause crashes on restricted platforms like the Nintendo Switch.
 
-    public override FileOperationResult DeleteDirectory(string path, bool recursive = false) => FileOperationResult.Disabled;
+    public override bool CreateDirectory(string path) => false;
 
-    public override FileOperationResult CreateFileForWriting(string path, out Stream fileStream)
+    public override bool DeleteDirectory(string path, bool recursive = false) => false;
+
+    public override bool CreateFileForWriting(string path, out Stream fileStream)
     {
         fileStream = Stream.Null;
-        return FileOperationResult.Disabled;
+        return false;
     }
 
-    public override FileOperationResult WriteAllTextToFile(string path, string contents) => FileOperationResult.Disabled;
+    public override bool WriteAllTextToFile(string path, string contents) => false;
 
-    public override FileOperationResult MoveFile(string sourceFileName, string destFileName, bool overwrite = false) =>
-        FileOperationResult.Disabled;
+    public override bool MoveFile(string sourceFileName, string destFileName, bool overwrite = false) => false;
 
-    public override FileOperationResult DeleteFile(string path) => FileOperationResult.Disabled;
+    public override bool DeleteFile(string path) => false;
 }

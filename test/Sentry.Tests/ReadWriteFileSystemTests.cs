@@ -12,7 +12,7 @@ public class ReadWriteFileSystemTests
 
         var result = _sut.CreateDirectory(directoryPath);
 
-        Assert.Equal(FileOperationResult.Success, result);
+        Assert.True(result);
         Assert.True(Directory.Exists(directoryPath));
     }
 
@@ -30,7 +30,7 @@ public class ReadWriteFileSystemTests
         var result = _sut.DeleteDirectory(directoryPath);
 
         // Assert
-        Assert.Equal(FileOperationResult.Success, result);
+        Assert.True(result);
         Assert.False(Directory.Exists(directoryPath));
     }
 
@@ -44,7 +44,7 @@ public class ReadWriteFileSystemTests
         fileStream.Dispose();
 
         // Assert
-        Assert.Equal(FileOperationResult.Success, result);
+        Assert.True(result);
         Assert.True(File.Exists(filePath));
     }
 
@@ -58,7 +58,7 @@ public class ReadWriteFileSystemTests
         var result = _sut.WriteAllTextToFile(filePath, content);
 
         // Assert
-        Assert.Equal(FileOperationResult.Success, result);
+        Assert.True(result);
         Assert.True(File.Exists(filePath));
         Assert.Equal(content, _sut.ReadAllTextFromFile(filePath));
     }
@@ -79,7 +79,7 @@ public class ReadWriteFileSystemTests
         var result = _sut.MoveFile(sourcePath, destinationPath);
 
         // Assert
-        Assert.Equal(FileOperationResult.Success, result);
+        Assert.True(result);
         Assert.True(File.Exists(destinationPath));
         Assert.False(File.Exists(sourcePath));
     }
@@ -98,7 +98,7 @@ public class ReadWriteFileSystemTests
         var result = _sut.DeleteFile(filePath);
 
         // Assert
-        Assert.Equal(FileOperationResult.Success, result);
+        Assert.True(result);
         Assert.False(File.Exists(filePath));
     }
 }

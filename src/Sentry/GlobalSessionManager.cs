@@ -51,29 +51,42 @@ internal class GlobalSessionManager : ISessionManager
             return;
         }
 
+        if (_options.DisableFileWrite)
+        {
+            _options.LogInfo("File write has been disabled via the options. Skipping persisting session.");
+            return;
+        }
+
         try
         {
             _options.LogDebug("Creating persistence directory for session file at '{0}'.", _persistenceDirectoryPath);
 
-            var result = _options.FileSystem.CreateDirectory(_persistenceDirectoryPath);
-            if (result is not FileOperationResult.Success)
+            if (!_options.FileSystem.CreateDirectory(_persistenceDirectoryPath))
             {
-                if (result is FileOperationResult.Disabled)
-                {
-                    _options.LogInfo("Persistent directory for session file has not been created. File-write has been disabled via the options.");
-                }
-                else
-                {
-                    _options.LogError("Failed to create persistent directory for session file.");
-                }
-
+                _options.LogError("Failed to create persistent directory for session file.");
                 return;
             }
 
             var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
 
             var persistedSessionUpdate = new PersistedSessionUpdate(update, pauseTimestamp);
-            persistedSessionUpdate.WriteToFile(_options.FileSystem, filePath, _options.DiagnosticLogger);
+            if (!_options.FileSystem.CreateFileForWriting(filePath, out var file))
+            {
+                _options.LogError("Failed to persist session file.");
+                return;
+            }
+
+            using var writer = new Utf8JsonWriter(file);
+
+            try
+            {
+                persistedSessionUpdate.WriteTo(writer, _options.DiagnosticLogger);
+                writer.Flush();
+            }
+            finally
+            {
+                file.Dispose();
+            }
 
             _options.LogDebug("Persisted session to a file '{0}'.", filePath);
         }
@@ -88,6 +101,12 @@ internal class GlobalSessionManager : ISessionManager
         if (string.IsNullOrWhiteSpace(_persistenceDirectoryPath))
         {
             _options.LogDebug("Persistence directory is not set, not deleting any persisted session file.");
+            return;
+        }
+
+        if (_options.DisableFileWrite)
+        {
+            _options.LogInfo("File write has been disabled via the options. Skipping deletion of persisted session files.");
             return;
         }
 
@@ -108,7 +127,11 @@ internal class GlobalSessionManager : ISessionManager
                 }
             }
 
-            _options.FileSystem.DeleteFile(filePath);
+            if (!_options.FileSystem.DeleteFile(filePath))
+            {
+                _options.LogError("Failed to delete persisted session file.");
+                return;
+            }
 
             _options.LogInfo("Deleted persisted session file '{0}'.", filePath);
         }

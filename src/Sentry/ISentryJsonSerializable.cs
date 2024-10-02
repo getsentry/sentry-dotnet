@@ -17,21 +17,3 @@ public interface ISentryJsonSerializable
     /// </remarks>
     void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger);
 }
-
-internal static class JsonSerializableExtensions
-{
-    public static void WriteToFile(this ISentryJsonSerializable serializable, IFileSystem fileSystem, string filePath, IDiagnosticLogger? logger)
-    {
-        var result = fileSystem.CreateFileForWriting(filePath, out var file);
-        if (result is not FileOperationResult.Success)
-        {
-            return;
-        }
-
-        using var writer = new Utf8JsonWriter(file);
-
-        serializable.WriteTo(writer, logger);
-        writer.Flush();
-        file.Dispose();
-    }
-}

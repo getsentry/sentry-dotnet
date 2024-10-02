@@ -60,7 +60,7 @@ internal class InstallationIdHelper(SentryOptions options)
             var directoryPath = Path.Combine(rootPath, "Sentry", options.Dsn!.GetHashString());
             var fileSystem = options.FileSystem;
 
-            if (fileSystem.CreateDirectory(directoryPath) is not FileOperationResult.Success)
+            if (!fileSystem.CreateDirectory(directoryPath))
             {
                 options.LogDebug("Failed to create a directory for installation ID file ({0}).", directoryPath);
                 return null;
@@ -79,7 +79,7 @@ internal class InstallationIdHelper(SentryOptions options)
 
             // Generate new installation ID and store it in a file
             var id = Guid.NewGuid().ToString();
-            if (fileSystem.WriteAllTextToFile(filePath, id) is not FileOperationResult.Success)
+            if (!fileSystem.WriteAllTextToFile(filePath, id))
             {
                 options.LogDebug("Failed to write Installation ID to file ({0}).", filePath);
                 return null;
