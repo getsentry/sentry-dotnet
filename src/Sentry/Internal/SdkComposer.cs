@@ -20,13 +20,29 @@ internal class SdkComposer
 
     private ITransport CreateTransport()
     {
+        _options.LogDebug("Creating transport.");
+
         // Start from either the transport given on options, or create a new HTTP transport.
         var transport = _options.Transport ?? CreateHttpTransport();
 
         // When a cache directory path is given, wrap the transport in a caching transport.
         if (!string.IsNullOrWhiteSpace(_options.CacheDirectoryPath))
         {
-            transport = CachingTransport.Create(transport, _options);
+            _options.LogDebug("Cache directory path is specified.");
+
+            if (_options.DisableFileWrite)
+            {
+                _options.LogInfo("File write has been disabled via the options. Skipping caching transport creation.");
+            }
+            else
+            {
+                _options.LogDebug("File writing is enabled, wrapping transport in caching transport.");
+                transport = CachingTransport.Create(transport, _options);
+            }
+        }
+        else
+        {
+            _options.LogDebug("No cache directory path specified. Skipping caching transport creation.");
         }
 
         // Wrap the transport with the Spotlight one that double sends the envelope: Sentry + Spotlight
