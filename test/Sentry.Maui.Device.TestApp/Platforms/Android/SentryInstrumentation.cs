@@ -5,6 +5,12 @@ using Environment = System.Environment;
 
 namespace Sentry.Maui.Device.TestApp;
 
+/// <summary>
+/// Decorating this class with the Instrumentation attribute means we can specify it as our instrumentation entry point
+/// when launching from XHarness. We can then intercept the OnStart event to set environment variables on Android from
+/// arguments passed to the instrumentation. Note that AndroidEnableMarshalMethods also has to be set in the csproj file
+/// for this to work.
+/// </summary>
 [Instrumentation(Name = "Sentry.Maui.Device.TestApp.SentryInstrumentation")]
 public class SentryInstrumentation : XHarnessInstrumentation
 {
