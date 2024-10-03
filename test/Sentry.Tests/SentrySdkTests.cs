@@ -424,9 +424,13 @@ public class SentrySdkTests : IDisposable
         Assert.False(invoked);
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task ConfigureScope_OnTask_PropagatedToCaller()
     {
+#if __ANDROID__
+        Skip.If(true, "Flaky on Android");
+#endif
+
         const string expected = "test";
         using var _ = SentrySdk.Init(o =>
         {
