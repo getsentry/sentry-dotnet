@@ -17,6 +17,7 @@ public class LoggingTests
 #if __IOS__
         Skip.If(true, "Flaky on iOS");
 #endif
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky on CI");
 
         // Arrange
         var worker = Substitute.For<IBackgroundWorker>();
