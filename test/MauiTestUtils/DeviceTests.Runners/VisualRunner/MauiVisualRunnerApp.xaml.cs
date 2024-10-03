@@ -3,35 +3,54 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner.Pages;
 
-namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner;
-
-public partial class MauiVisualRunnerApp : Application
+namespace Microsoft.Maui.TestUtils.DeviceTests.Runners.VisualRunner
 {
-    private readonly TestOptions _options;
-    private readonly ILogger _logger;
+    public partial class MauiVisualRunnerApp : Application
 
-    public MauiVisualRunnerApp(TestOptions options, ILogger logger)
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-ios)'
+    Before:
+            readonly TestOptions _options;
+            readonly ILogger _logger;
+    After:
+            private readonly TestOptions _options;
+            private readonly ILogger _logger;
+    */
+
+    /* Unmerged change from project 'TestUtils.DeviceTests.Runners(net8.0-maccatalyst)'
+    Before:
+            readonly TestOptions _options;
+            readonly ILogger _logger;
+    After:
+            private readonly TestOptions _options;
+            private readonly ILogger _logger;
+    */
     {
-        _options = options;
-        _logger = logger;
+        private readonly TestOptions _options;
+        private readonly ILogger _logger;
 
-        InitializeComponent();
-    }
+        public MauiVisualRunnerApp(TestOptions options, ILogger logger)
+        {
+            _options = options;
+            _logger = logger;
 
-    protected override Window CreateWindow(IActivationState? activationState)
-    {
-        var hp = new HomePage();
+            InitializeComponent();
+        }
 
-        var nav = new TestNavigator(hp.Navigation);
+        protected override Window CreateWindow(IActivationState? activationState)
+        {
+            var hp = new HomePage();
 
-        var runner = new DeviceRunner(_options.Assemblies, nav, _logger);
+            var nav = new TestNavigator(hp.Navigation);
 
-        var vm = new HomeViewModel(nav, runner);
+            var runner = new DeviceRunner(_options.Assemblies, nav, _logger);
 
-        hp.BindingContext = vm;
+            var vm = new HomeViewModel(nav, runner);
 
-        var navPage = new NavigationPage(hp);
+            hp.BindingContext = vm;
 
-        return new Window(navPage);
+            var navPage = new NavigationPage(hp);
+
+            return new Window(navPage);
+        }
     }
 }
