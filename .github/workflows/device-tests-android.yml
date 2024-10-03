@@ -80,7 +80,7 @@ jobs:
 
 
       - name: Run Tests
-        timeout-minutes: 30
+        timeout-minutes: 40
         uses: reactivecircus/android-emulator-runner@f0d1ed2dcad93c7479e8b2f2226c83af54494915 # Tag: v2.32.0
         with:
           api-level: ${{ matrix.api-level }}

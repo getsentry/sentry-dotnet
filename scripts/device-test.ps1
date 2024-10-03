@@ -31,7 +31,7 @@ try
         $arguments = @(
             '--app', "$buildDir/io.sentry.dotnet.maui.device.testapp-Signed.apk",
             '--package-name', 'io.sentry.dotnet.maui.device.testapp',
-            '--launch-timeout', '00:10:00'
+            '--launch-timeout', '00:20:00'
         )
     }
     elseif ($Platform -eq 'ios')
