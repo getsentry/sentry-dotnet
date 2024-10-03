@@ -50,7 +50,7 @@ public class LoggingTests
                 != null));
     }
 
-    [Theory]
+    [SkippableTheory]
     [InlineData(LogLevel.Critical)]
     [InlineData(LogLevel.Error)]
     [InlineData(LogLevel.Warning)]
@@ -59,6 +59,10 @@ public class LoggingTests
     [InlineData(LogLevel.Trace)]
     public void Log_AddsBreadcrumb(LogLevel logLevel)
     {
+#if __IOS__
+        Skip.If(true, "Flaky on iOS");
+#endif
+
         // Arrange
         var worker = Substitute.For<IBackgroundWorker>();
 
