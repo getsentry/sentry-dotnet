@@ -21,22 +21,15 @@ public class SentryInstrumentation : XHarnessInstrumentation
 
     public override void OnStart()
     {
-        try
+        Console.WriteLine("Parsing instrumentation arguments");
+        if (IsGitHubActions)
         {
-            Console.WriteLine("Parsing instrumentation arguments");
-            if (IsGitHubActions)
-            {
-                Console.WriteLine("CI build detected - setting environment variables for CI on the device");
-                Environment.SetEnvironmentVariable("GITHUB_ACTIONS", "true");
-            }
-            else
-            {
-                Console.WriteLine("CI build not detected - no environment variables set");
-            }
+            Console.WriteLine("CI build detected - setting environment variables for CI on the device");
+            Environment.SetEnvironmentVariable("GITHUB_ACTIONS", "true");
         }
-        catch (Exception e)
+        else
         {
-            Console.WriteLine(e);
+            Console.WriteLine("CI build not detected - no environment variables set");
         }
 
         base.OnStart();
