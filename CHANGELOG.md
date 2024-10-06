@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fixed "Failed to persist session" error on iOS ([#3655](https://github.com/getsentry/sentry-dotnet/pull/3655))
+
 ### Dependencies
 
 - Bump CLI from v2.36.5 to v2.36.6 ([#3647](https://github.com/getsentry/sentry-dotnet/pull/3647))
