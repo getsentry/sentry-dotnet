@@ -55,9 +55,14 @@ internal sealed class SentryLogger : ILogger
             var @event = CreateEvent(logLevel, eventId, state, exception, message, CategoryName);
 
             _ = _hub.CaptureEvent(@event);
+
+            // Capturing exception events adds a breadcrumb automatically... we don't want to add another one
+            if (exception != null)
+            {
+                return;
+            }
         }
 
-        // Even if it was sent as event, add breadcrumb so next event includes it
         if (ShouldAddBreadcrumb(logLevel, eventId, exception))
         {
             var data = eventId.ToDictionaryOrNull();
@@ -72,7 +77,7 @@ internal sealed class SentryLogger : ILogger
 
             _hub.AddBreadcrumb(
                 _clock,
-                message ?? exception?.Message!,
+                (message ?? exception?.Message)!,
                 CategoryName,
                 null,
                 data,

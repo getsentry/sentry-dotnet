@@ -40,6 +40,7 @@ Sentry offers other integrations that are not part of this repository:
 
 * [Sentry.Unity](https://github.com/getsentry/sentry-unity): Unity integrations
 * [Sentry.Xamarin](https://github.com/getsentry/sentry-xamarin): Xamarin native and Xamarin.Forms integrations
+* [Sentry.PowerShell](https://github.com/getsentry/sentry-powershell/): SDK for PowerShell and PowerShell Core. It's available on the [PowerShell Gallery](https://www.powershellgallery.com/packages/Sentry/)
 
 Looking for something else? Let us know by [raising an issue](https://github.com/getsentry/sentry-dotnet/issues/new).
 

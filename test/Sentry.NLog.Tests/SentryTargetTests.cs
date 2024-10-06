@@ -166,6 +166,31 @@ public class SentryTargetTests
     }
 
     [Fact]
+    public void Log_WithException_NoBreadcrumb()
+    {
+        _fixture.Options.MinimumEventLevel = LogLevel.Error;
+        var logger = _fixture.GetLoggerFactory().GetLogger("sentry");
+
+        logger.Error(new Exception("expected"), DefaultMessage);
+
+        // Breadcrumbs get created automatically by the hub for captured exceptions... we don't want
+        // our logging integration to be creating these also
+        _fixture.Scope.Breadcrumbs.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Log_WithoutException_LeavesBreadcrumb()
+    {
+        _fixture.Options.MinimumEventLevel = LogLevel.Error;
+        var logger = _fixture.GetLoggerFactory().GetLogger("sentry");
+
+        // LogLevel.Error will create an event, but there's no exception so we do want a breadcrumb
+        logger.Error(DefaultMessage);
+
+        _fixture.Scope.Breadcrumbs.Should().NotBeEmpty();
+    }
+
+    [Fact]
     public void Log_WithException_CreatesEventWithException()
     {
         var expected = new Exception("expected");

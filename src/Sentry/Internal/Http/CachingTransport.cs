@@ -78,6 +78,10 @@ internal class CachingTransport : ITransport, IDisposable
             options.TryGetProcessSpecificCacheDirectoryPath() ??
             throw new InvalidOperationException("Cache directory or DSN is not set.");
 
+        // Sanity check: This should never happen in the first place.
+        // We check for `DisableFileWrite` before creating the CachingTransport.
+        Debug.Assert(!_options.DisableFileWrite);
+
         _processingDirectoryPath = Path.Combine(_isolatedCacheDirectoryPath, ProcessingFolder);
     }
 
@@ -451,7 +455,12 @@ internal class CachingTransport : ITransport, IDisposable
 
         EnsureFreeSpaceInCache();
 
-        var stream = _fileSystem.CreateFileForWriting(envelopeFilePath);
+        if (!_options.FileSystem.CreateFileForWriting(envelopeFilePath, out var stream))
+        {
+            _options.LogDebug("Failed to store to cache.");
+            return;
+        }
+
 #if NETFRAMEWORK || NETSTANDARD2_0
         using(stream)
 #else

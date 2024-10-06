@@ -33,22 +33,29 @@ public class SentryLoggerTests
     }
 
     [Fact]
-    public void Log_WithException_BreadcrumbFromException()
+    public void Log_EventWithException_NoBreadcrumb()
     {
         var expectedException = new Exception("expected message");
-        const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Critical;
 
         var sut = _fixture.GetSut();
 
+        // LogLevel.Critical will create an event
         sut.Log<object>(LogLevel.Critical, default, null, expectedException, null);
 
-        var b = _fixture.Scope.Breadcrumbs.First();
-        Assert.Equal(expectedException.Message, b.Message);
-        Assert.Equal(DateTimeOffset.MaxValue, b.Timestamp);
-        Assert.Equal(_fixture.CategoryName, b.Category);
-        Assert.Equal(expectedLevel, b.Level);
-        Assert.Equal(BreadcrumbType, b.Type);
-        Assert.Null(b.Data);
+        // Breadcrumbs get created automatically by the hub for captured exceptions... we don't want
+        // our logging integration to be creating these also
+        _fixture.Scope.Breadcrumbs.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Log_EventWithoutException_LeavesBreadcrumb()
+    {
+        var sut = _fixture.GetSut();
+
+        // LogLevel.Critical will create an event, but there's no exception so we do want a breadcrumb
+        sut.Log<object>(LogLevel.Critical, default, null, null, null);
+
+        _fixture.Scope.Breadcrumbs.Should().NotBeEmpty();
     }
 
     [Fact]
@@ -142,25 +149,6 @@ public class SentryLoggerTests
     }
 
     [Fact]
-    public void Log_WithEventId_EventIdAsBreadcrumbData()
-    {
-        var expectedEventId = new EventId(10, "EventId-!@#$%^&*(");
-        const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Critical;
-
-        var sut = _fixture.GetSut();
-
-        sut.Log<object>(LogLevel.Critical, expectedEventId, null, null, null);
-
-        var b = _fixture.Scope.Breadcrumbs.First();
-        Assert.Equal(expectedEventId.ToString(), b.Data![EventIdExtensions.DataKey]);
-        Assert.Equal(DateTimeOffset.MaxValue, b.Timestamp);
-        Assert.Equal(_fixture.CategoryName, b.Category);
-        Assert.Equal(expectedLevel, b.Level);
-        Assert.Equal(BreadcrumbType, b.Type);
-        Assert.Null(b.Message);
-    }
-
-    [Fact]
     public void LogCritical_MatchingFilter_DoesNotCapturesEvent()
     {
         const string expected = "message";
@@ -204,26 +192,6 @@ public class SentryLoggerTests
 
         _ = _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Any<SentryEvent>());
-    }
-
-    [Fact]
-    public void LogCritical_NotMatchingFilter_AddsBreadcrumb()
-    {
-        var scope = new Scope();
-        _fixture.Hub.ConfigureScope(Arg.Invoke(scope));
-
-        const string expected = "message";
-        _fixture.Options.AddLogEntryFilter((_, _, _, _) => false);
-        _fixture.Options.AddLogEntryFilter((_, _, _, _) => false);
-
-        var sut = _fixture.GetSut();
-
-        sut.LogCritical(expected);
-
-        _fixture.Hub.Received(1)
-            .ConfigureScope(Arg.Any<Action<Scope>>());
-
-        _ = Assert.Single(scope.Breadcrumbs);
     }
 
     [Fact]
@@ -288,81 +256,6 @@ public class SentryLoggerTests
 
         _ = _fixture.Hub.Received(1)
             .CaptureEvent(Arg.Any<SentryEvent>());
-    }
-
-    [Fact]
-    public void LogCritical_DefaultOptions_RecordsBreadcrumbs()
-    {
-        const string expectedMessage = "message";
-        const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Critical;
-
-        var sut = _fixture.GetSut();
-
-        sut.LogCritical(expectedMessage);
-
-        var b = _fixture.Scope.Breadcrumbs.First();
-        Assert.Equal(expectedMessage, b.Message);
-        Assert.Equal(DateTimeOffset.MaxValue, b.Timestamp);
-        Assert.Equal(_fixture.CategoryName, b.Category);
-        Assert.Equal(expectedLevel, b.Level);
-        Assert.Equal(BreadcrumbType, b.Type);
-        Assert.Null(b.Data);
-    }
-
-    [Fact]
-    public void LogCritical_ExceptionAndMessage_ExceptionMessageAsBreadcrumbData()
-    {
-        const string expectedMessage = "message";
-        var exception = new Exception("exception message");
-
-        var sut = _fixture.GetSut();
-
-        sut.LogCritical(exception, expectedMessage);
-
-        var b = _fixture.Scope.Breadcrumbs.First();
-        Assert.Contains(b.Data,
-            pair => pair.Key == "exception_message" && pair.Value == exception.Message);
-        Assert.Equal(expectedMessage, b.Message);
-    }
-
-    [Fact]
-    public void LogCritical_ExceptionAndMessageAndEventId_ExceptionMessageAndEventIdAsBreadcrumbData()
-    {
-        const string expectedMessage = "message";
-        const int expectedEventId = 1;
-        var exception = new Exception("exception message");
-
-        var sut = _fixture.GetSut();
-
-        sut.LogCritical(expectedEventId, exception, expectedMessage);
-
-        var b = _fixture.Scope.Breadcrumbs.First();
-        Assert.Contains(b.Data,
-            pair => pair.Key == "exception_message"
-                    && pair.Value == exception.Message);
-        Assert.Contains(b.Data,
-            pair => pair.Key == EventIdExtensions.DataKey
-                    && pair.Value == expectedEventId.ToString());
-        Assert.Equal(expectedMessage, b.Message);
-    }
-
-    [Fact]
-    public void LogError_DefaultOptions_RecordsBreadcrumbs()
-    {
-        const string expectedMessage = "message";
-        const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Error;
-
-        var sut = _fixture.GetSut();
-
-        sut.LogError(expectedMessage);
-
-        var b = _fixture.Scope.Breadcrumbs.First();
-        Assert.Equal(expectedMessage, b.Message);
-        Assert.Equal(DateTimeOffset.MaxValue, b.Timestamp);
-        Assert.Equal(_fixture.CategoryName, b.Category);
-        Assert.Equal(expectedLevel, b.Level);
-        Assert.Equal(BreadcrumbType, b.Type);
-        Assert.Null(b.Data);
     }
 
     [Fact]

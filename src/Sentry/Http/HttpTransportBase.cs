@@ -383,12 +383,26 @@ public abstract class HttpTransportBase
                     persistLargeEnvelopePathEnvVar,
                     destinationDirectory);
 
+                if (_options.DisableFileWrite)
+                {
+                    _options.LogInfo("File write has been disabled via the options. Skipping persisting envelope.");
+                    return;
+                }
+
                 var destination = Path.Combine(destinationDirectory, "envelope_too_large",
                     (eventId ?? SentryId.Create()).ToString());
 
-                Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+                if (!_options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!))
+                {
+                    _options.LogError("Failed to create directory to store the envelope.");
+                    return;
+                }
 
-                var envelopeFile = File.Create(destination);
+                if (!_options.FileSystem.CreateFileForWriting(destination, out var envelopeFile))
+                {
+                    _options.LogError("Failed to create envelope file.");
+                    return;
+                }
 
                 using (envelopeFile)
                 {
@@ -439,12 +453,27 @@ public abstract class HttpTransportBase
                     persistLargeEnvelopePathEnvVar,
                     destinationDirectory);
 
+                if (_options.DisableFileWrite)
+                {
+                    _options.LogInfo("File write has been disabled via the options. Skipping persisting envelope.");
+                    return;
+                }
+
                 var destination = Path.Combine(destinationDirectory, "envelope_too_large",
                     (eventId ?? SentryId.Create()).ToString());
 
-                Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+                if (!_options.FileSystem.CreateDirectory(Path.GetDirectoryName(destination)!))
+                {
+                    _options.LogError("Failed to create directory to store the envelope.");
+                    return;
+                }
 
-                var envelopeFile = File.Create(destination);
+                if (!_options.FileSystem.CreateFileForWriting(destination, out var envelopeFile))
+                {
+                    _options.LogError("Failed to create envelope file.");
+                    return;
+                }
+
 #if NETFRAMEWORK || NETSTANDARD2_0
                 using (envelopeFile)
 #else

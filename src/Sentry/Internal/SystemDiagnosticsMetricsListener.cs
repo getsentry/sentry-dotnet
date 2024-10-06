@@ -11,10 +11,13 @@ internal class SystemDiagnosticsMetricsListener : IDisposable
 
     internal readonly MeterListener _sentryListener = new();
 
+#pragma warning disable CS0618 // Obsolete Warning
     private SystemDiagnosticsMetricsListener(ExperimentalMetricsOptions metricsOptions)
         : this(metricsOptions, () => SentrySdk.Metrics)
+#pragma warning restore CS0618
     {
     }
+
 
     /// <summary>
     /// Overload for testing purposes - allows us to supply a mock IMetricAggregator

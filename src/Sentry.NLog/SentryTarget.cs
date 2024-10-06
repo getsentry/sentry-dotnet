@@ -387,6 +387,12 @@ public sealed class SentryTarget : TargetWithContext
             }
 
             _ = hub.CaptureEvent(evt);
+
+            // Capturing exception events adds a breadcrumb automatically... we don't want to add another one
+            if (exception != null)
+            {
+                return;
+            }
         }
 
         // Whether or not it was sent as event, add breadcrumb so the next event includes it

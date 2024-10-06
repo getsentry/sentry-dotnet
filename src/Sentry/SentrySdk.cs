@@ -440,7 +440,7 @@ public static partial class SentrySdk
     /// Captures the exception.
     /// </summary>
     /// <param name="exception">The exception.</param>
-    /// <returns>The Id of the even.t</returns>
+    /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
     public static SentryId CaptureException(Exception exception)
         => CurrentHub.CaptureException(exception);
@@ -453,7 +453,7 @@ public static partial class SentrySdk
     /// </remarks>
     /// <param name="exception">The exception.</param>
     /// <param name="configureScope">The callback to configure the scope.</param>
-    /// <returns>The Id of the even.t</returns>
+    /// <returns>The Id of the event.</returns>
     [DebuggerStepThrough]
     public static SentryId CaptureException(Exception exception, Action<Scope> configureScope)
         => CurrentHub.CaptureException(exception, configureScope);
@@ -668,6 +668,9 @@ public static partial class SentrySdk
         => CurrentHub.ContinueTrace(traceHeader, baggageHeader, name, operation);
 
     /// <inheritdoc cref="IMetricAggregator"/>
+    [Obsolete("The SentrySdk.Metrics module is deprecated and will be removed in the next major release. " +
+              "Sentry will reject all metrics sent after October 7, 2024." +
+              "Learn more: https://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-to-Metrics")]
     public static IMetricAggregator Metrics
         => CurrentHub.Metrics;
 
