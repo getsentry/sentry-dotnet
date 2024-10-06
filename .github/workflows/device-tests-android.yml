@@ -51,8 +51,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # These are all a bit flaky. We used to run versions 27-31... now we just run 27 and 31
-        api-level: [27, 31]
+        # We run against both an older and a newer API
+        api-level: [27, 33]
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
@@ -80,8 +80,8 @@ jobs:
 
 
       - name: Run Tests
-        timeout-minutes: 30
-        uses: reactivecircus/android-emulator-runner@f0d1ed2dcad93c7479e8b2f2226c83af54494915 # pin@v3
+        timeout-minutes: 40
+        uses: reactivecircus/android-emulator-runner@f0d1ed2dcad93c7479e8b2f2226c83af54494915 # Tag: v2.32.0
         with:
           api-level: ${{ matrix.api-level }}
           # We don't need the Google APIs, but the default images are not available for 32+

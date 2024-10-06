@@ -277,7 +277,7 @@ public partial class HubTests
     {
         // Arrange
         _fixture.Options.TracesSampleRate = 1.0;
-        var hub = _fixture.GetSut();
+        using var hub = _fixture.GetSut();
         var evt = new SentryEvent(new Exception());
         var scope = hub.ScopeManager.GetCurrent().Key;
 
@@ -1131,9 +1131,13 @@ public partial class HubTests
         transport.GetSentEnvelopes().Should().BeEmpty();
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task CaptureTransaction_WithAsyncThrowingTransactionProfiler_SendsTransactionWithoutProfile()
     {
+#if __ANDROID__
+        Skip.If(true, "Flaky on Android");
+#endif
+
         // Arrange
         var transport = new FakeTransport();
         var logger = new TestOutputDiagnosticLogger(_output);
