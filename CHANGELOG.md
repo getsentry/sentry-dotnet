@@ -4,7 +4,7 @@
 
 ### Features
 
- - add `BeforeCaptureScreenshot` callback option | #3353
+ - Added an `BeforeCaptureScreenshot` callback to the options: allowing the user to set an action before the screenshot is being taken ([#3661](https://github.com/getsentry/sentry-dotnet/pull/3661))
 
 ### Dependencies
 
