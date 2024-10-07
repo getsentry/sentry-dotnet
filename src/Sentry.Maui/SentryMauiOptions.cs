@@ -65,8 +65,36 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// Screenshots can be removed from some specific events during BeforeSend through the Hint.
     /// </remarks>
     public bool AttachScreenshot { get; set; }
+    private Func<SentryEvent, SentryHint, SentryEvent?>? _beforeSend;
     /// <summary>
     /// Action performed before attaching a screenshot
     /// </summary>
-    public Action BeforeCaptureScreenshot { get; set; } = () => { };
+    //public Action<SentryEvent, SentryHint, SentryEvent?> BeforeCaptureScreenshot { get; set; } = (SentryEvent @event, SentryHint hint) => { };
+    internal Func<SentryEvent, SentryHint, SentryEvent?>? BeforeCaptureScreenshotInternal => _beforeSend;
+
+    /// <summary>
+    /// Configures a callback function to be invoked before taking a screenshot
+    /// </summary>
+    /// <remarks>
+    /// The event returned by this callback will be sent to Sentry. This allows the
+    /// application a chance to inspect and/or modify the event before it's sent. If the
+    /// event should not be sent at all, return null from the callback.
+    /// </remarks>
+    public void BeforeCaptureScreenshot(Func<SentryEvent, SentryHint, SentryEvent?> beforeSend)
+    {
+        _beforeSend = beforeSend;
+    }
+
+    /// <summary>
+    /// Configures a callback function to be invoked before taking a screenshot
+    /// </summary>
+    /// <remarks>
+    /// The event returned by this callback will be sent to Sentry. This allows the
+    /// application a chance to inspect and/or modify the event before it's sent. If the
+    /// event should not be sent at all, return null from the callback.
+    /// </remarks>
+    public void BeforeCaptureScreenshot(Func<SentryEvent, SentryEvent?> beforeSend)
+    {
+        _beforeSend = (@event, _) => beforeSend(@event);
+    }
 }
