@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Sentry.Samples.Maui;
 
 public static class MauiProgram
@@ -22,6 +24,11 @@ public static class MauiProgram
 
                 options.Debug = true;
                 options.SampleRate = 1.0F;
+                //options.BeforeCaptureScreenshot = () =>
+                //{
+                //    Debug.WriteLine("screenshot about to be taken.");
+                //}
+                ;
             })
 
             .ConfigureFonts(fonts =>
