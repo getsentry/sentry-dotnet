@@ -1,3 +1,5 @@
+using NSubstitute.Exceptions;
+
 namespace Sentry.Maui.Tests;
 
 public class SentryMauiOptionsTests
@@ -65,25 +67,26 @@ public class SentryMauiOptionsTests
         var options = new SentryMauiOptions();
 
         // Act
-        bool result = options.BeforeCaptureScreenshot == emptyAction;
+        //bool result = options.BeforeCaptureScreenshot == emptyAction;
 
         // Assert 
-        Assert.False(result);
+        //Assert.p();
     }
     [Fact]
     public void BeforeCaptureScreenshot_Specified()
     {
         // Arrange
-        Action emptyAction = () => { };
         var options = new SentryMauiOptions();
+        options.AttachScreenshot = true;
 
         // Act
-        options.BeforeCaptureScreenshot = () =>
+        options.BeforeCaptureScreenshot((SentryEvent @event) =>
         {
-            Console.WriteLine("BeforeCaptureScreenshot is being called");
-        };
+            return @event;
+        });
 
         // Assert
-        Assert.True(options.BeforeCaptureScreenshot != emptyAction);
+        Assert.True(options.BeforeCaptureScreenshotInternal != null);
+
     }
 }

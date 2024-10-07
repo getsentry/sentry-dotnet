@@ -24,11 +24,11 @@ public static class MauiProgram
 
                 options.Debug = true;
                 options.SampleRate = 1.0F;
-                options.BeforeCaptureScreenshot = () =>
+                options.BeforeCaptureScreenshot ( (SentryEvent @event, SentryHint hint) =>
                 {
                     Debug.WriteLine("screenshot about to be taken.");
-                }
-                ;
+                    return @event;
+                });
             })
 
             .ConfigureFonts(fonts =>
