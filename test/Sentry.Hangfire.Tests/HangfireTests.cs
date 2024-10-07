@@ -10,7 +10,7 @@ public class HangfireTests : IClassFixture<HangfireFixture>
     }
 
     [Fact]
-    public async void ExecuteJobWithAttribute_CapturesCheckInInProgressAndOkWithDuration()
+    public async Task ExecuteJobWithAttribute_CapturesCheckInInProgressAndOkWithDuration()
     {
         var sentryId = SentryId.Create();
         _fixture.Hub.CaptureCheckIn(Arg.Any<string>(), Arg.Any<CheckInStatus>()).Returns(sentryId);
@@ -29,7 +29,7 @@ public class HangfireTests : IClassFixture<HangfireFixture>
     }
 
     [Fact]
-    public async void ExecuteJobWithException_CapturesCheckInInProgressAndErrorWithDuration()
+    public async Task ExecuteJobWithException_CapturesCheckInInProgressAndErrorWithDuration()
     {
         var sentryId = SentryId.Create();
         _fixture.Hub.CaptureCheckIn(Arg.Any<string>(), Arg.Any<CheckInStatus>()).Returns(sentryId);
@@ -50,7 +50,7 @@ public class HangfireTests : IClassFixture<HangfireFixture>
     }
 
     [Fact]
-    public async void ExecuteJobWithoutAttribute_DoesNotCapturesCheckInButLogs()
+    public async Task ExecuteJobWithoutAttribute_DoesNotCapturesCheckInButLogs()
     {
         var sentryId = SentryId.Create();
         _fixture.Hub.CaptureCheckIn(Arg.Any<string>(), Arg.Any<CheckInStatus>()).Returns(sentryId);

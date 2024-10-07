@@ -210,12 +210,9 @@ public class SentryQueryPerformanceListenerTests
         // This operation will result in one reading operation and two non scalar operations.
         _fixture.Hub.Received(3).GetSpan();
         // In-memory database doesn't have a CommandText so Description is expected to be null
-        Assert.NotEmpty(_fixture.Spans.Where(
-            span => DbNonQueryKey == span.Operation && span.Description is "CREATE SCHEMA (CodeFirstDatabase(dbo.__MigrationHistory(ContextKey(Effort.string)MigrationId(Effort.string)Model(Effort.binary)ProductVersion(Effort.string))))"));
-        Assert.NotEmpty(_fixture.Spans.Where(
-            span => DbNonQueryKey == span.Operation && span.Description is null));
-        Assert.NotEmpty(_fixture.Spans.Where(
-            span => DbReaderKey == span.Operation && span.Description is null));
+        Assert.Contains(_fixture.Spans, span => DbNonQueryKey == span.Operation && span.Description is "CREATE SCHEMA (CodeFirstDatabase(dbo.__MigrationHistory(ContextKey(Effort.string)MigrationId(Effort.string)Model(Effort.binary)ProductVersion(Effort.string))))");
+        Assert.Contains(_fixture.Spans, span => DbNonQueryKey == span.Operation && span.Description is null);
+        Assert.Contains(_fixture.Spans, span => DbReaderKey == span.Operation && span.Description is null);
 
         Assert.All(_fixture.Spans, span => span.Received(1).Finish(Arg.Is<SpanStatus>(status => SpanStatus.Ok == status)));
         integration.Unregister();
