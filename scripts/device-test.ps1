@@ -21,7 +21,7 @@ $CI = Test-Path env:CI
 Push-Location $PSScriptRoot/..
 try
 {
-    $tfm = 'net7.0-'
+    $tfm = 'net8.0-'
     $arch = (!$IsWindows -and $(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
     if ($Platform -eq 'android')
     {

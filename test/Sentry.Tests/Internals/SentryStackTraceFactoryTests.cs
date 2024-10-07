@@ -52,7 +52,7 @@ public partial class SentryStackTraceFactoryTests
     [Theory]
     [InlineData(StackTraceMode.Original, "AsyncWithWait_StackTrace { <lambda> }")]
     [InlineData(StackTraceMode.Enhanced, "void SentryStackTraceFactoryTests.AsyncWithWait_StackTrace(StackTraceMode mode, string method)+() => { }")]
-    public async void AsyncWithWait_StackTrace(StackTraceMode mode, string method)
+    public async Task AsyncWithWait_StackTrace(StackTraceMode mode, string method)
     {
         _fixture.SentryOptions.StackTraceMode = mode;
         _fixture.SentryOptions.AttachStacktrace = true;

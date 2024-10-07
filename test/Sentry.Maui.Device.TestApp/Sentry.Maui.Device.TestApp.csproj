@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks />
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios</TargetFrameworks>
     <!-- Currently broken on .NET 7, see
       - https://github.com/dotnet/maui/issues/18573
       - https://developercommunity.visualstudio.com/t/MAUI0000:-SystemMissingMethodException:/10505327?sort=newest&ftype=problem
@@ -70,8 +70,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DeviceRunners.XHarness.Maui" Version="0.1.0-preview.1" />
-    <PackageReference Include="DeviceRunners.XHarness.Xunit" Version="0.1.0-preview.1" />
+    <PackageReference Include="DeviceRunners.XHarness.Maui" Version="0.1.0-preview.2" />
+    <PackageReference Include="DeviceRunners.XHarness.Xunit" Version="0.1.0-preview.2" />
   </ItemGroup>
 
   <ItemGroup>

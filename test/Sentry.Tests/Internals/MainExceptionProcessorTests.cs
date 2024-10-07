@@ -51,7 +51,7 @@ public partial class MainExceptionProcessorTests
 
         sut.Process(exp, evt);
 
-        Assert.Single(evt.SentryExceptions!.Where(p => p.Mechanism?.Handled == null));
+        Assert.Single(evt.SentryExceptions!, p => p.Mechanism?.Handled == null);
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public partial class MainExceptionProcessorTests
 
         sut.Process(exp, evt);
 
-        Assert.Single(evt.SentryExceptions!.Where(p => p.Mechanism?.Handled == false));
+        Assert.Single(evt.SentryExceptions!, p => p.Mechanism?.Handled == false);
     }
 
     [Fact]
@@ -79,7 +79,7 @@ public partial class MainExceptionProcessorTests
 
         sut.Process(exp, evt);
 
-        Assert.Single(evt.SentryExceptions!.Where(p => p.Mechanism?.Handled == true));
+        Assert.Single(evt.SentryExceptions!, p => p.Mechanism?.Handled == true);
     }
 
     [Fact]
@@ -91,7 +91,7 @@ public partial class MainExceptionProcessorTests
 
         sut.Process(exp, evt);
 
-        Assert.Single(evt.SentryExceptions!.Where(p => p.Mechanism?.Handled == true));
+        Assert.Single(evt.SentryExceptions!, p => p.Mechanism?.Handled == true);
     }
 
     [Fact]
