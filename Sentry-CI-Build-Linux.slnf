@@ -10,6 +10,7 @@
       "samples\\Sentry.Samples.AspNetCore.Grpc\\Sentry.Samples.AspNetCore.Grpc.csproj",
       "samples\\Sentry.Samples.AspNetCore.Mvc\\Sentry.Samples.AspNetCore.Mvc.csproj",
       "samples\\Sentry.Samples.AspNetCore.Serilog\\Sentry.Samples.AspNetCore.Serilog.csproj",
+      "samples\\Sentry.Samples.AspNetCore.WebAPI.Profiling\\Sentry.Samples.AspNetCore.WebAPI.Profiling.csproj",
       "samples\\Sentry.Samples.Aws.Lambda.AspNetCoreServer\\Sentry.Samples.Aws.Lambda.AspNetCoreServer.csproj",
       "samples\\Sentry.Samples.Azure.Functions.Worker\\Sentry.Samples.Azure.Functions.Worker.csproj",
       "samples\\Sentry.Samples.Console.Basic\\Sentry.Samples.Console.Basic.csproj",
