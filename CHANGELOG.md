@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.12.1
+## Unreleased
 
 ### Support for XCode 16.0 (BREAKING CHANGE)
 
@@ -10,7 +10,7 @@ Using `XCode 16` to build .NET applications targeting iOS and Mac Catalyst requi
 
 As such, if you are using `Sentry 4.12.x` and targeting iOS or macCatalyst then you will need to install and use XCode 16 and `iOS SDK 18.0.8303` (.NET 9 will also support XCode 16, when it is released in November).
 
-## Unreleased
+## 4.12.0
 
 ### API Changes
 
