@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+### Features
+ - add `BeforeCaptureScreenshot` callback option | #3353
 
 ### Fixes
 
