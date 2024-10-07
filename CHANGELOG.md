@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Added `SentryOptions` extension for profiling `options.AddProfilingIntegration()` ([#3660](https://github.com/getsentry/sentry-dotnet/pull/3660))
+
 ### Dependencies
 
 - Bump CLI from v2.36.5 to v2.36.6 ([#3647](https://github.com/getsentry/sentry-dotnet/pull/3647))
