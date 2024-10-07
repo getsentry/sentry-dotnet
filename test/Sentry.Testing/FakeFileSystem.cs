@@ -1,54 +1,80 @@
-using MockFileSystem = System.IO.Abstractions.TestingHelpers.MockFileSystem;
+using System.IO.Abstractions.TestingHelpers;
 
 namespace Sentry.Testing;
 
-public class FakeFileSystem : IFileSystem
+internal class FakeFileSystem : IFileSystem
 {
-    // This is an in-memory implementation provided by https://github.com/TestableIO/System.IO.Abstractions
-    private readonly MockFileSystem _mockFileSystem = new();
+    private readonly MockFileSystem _fileSystem = new();
 
-    public IEnumerable<string> EnumerateFiles(string path) => _mockFileSystem.Directory.EnumerateFiles(path);
+    public IEnumerable<string> EnumerateFiles(string path) => _fileSystem.Directory.EnumerateFiles(path);
 
     public IEnumerable<string> EnumerateFiles(string path, string searchPattern) =>
-        _mockFileSystem.Directory.EnumerateFiles(path, searchPattern);
+        _fileSystem.Directory.EnumerateFiles(path, searchPattern);
 
     public IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption) =>
-        _mockFileSystem.Directory.EnumerateFiles(path, searchPattern, searchOption);
+        _fileSystem.Directory.EnumerateFiles(path, searchPattern, searchOption);
 
-    public void CreateDirectory(string path) => _mockFileSystem.Directory.CreateDirectory(path);
+    public bool DirectoryExists(string path) => _fileSystem.Directory.Exists(path);
 
-    public void DeleteDirectory(string path, bool recursive = false) =>
-        _mockFileSystem.Directory.Delete(path, recursive);
+    public bool FileExists(string path) => _fileSystem.File.Exists(path);
 
-    public bool DirectoryExists(string path) => _mockFileSystem.Directory.Exists(path);
+    public DateTimeOffset GetFileCreationTime(string path) => new FileInfo(path).CreationTimeUtc;
 
-    public bool FileExists(string path) => _mockFileSystem.File.Exists(path);
+    public string ReadAllTextFromFile(string path) => _fileSystem.File.ReadAllText(path);
 
-    public void MoveFile(string sourceFileName, string destFileName, bool overwrite = false)
+    public Stream OpenFileForReading(string path) => _fileSystem.File.OpenRead(path);
+
+    public bool CreateDirectory(string path)
     {
-#if NET5_0_OR_GREATER
-        _mockFileSystem.File.Move(sourceFileName, destFileName, overwrite);
+        _fileSystem.Directory.CreateDirectory(path);
+        return _fileSystem.Directory.Exists(path);
+    }
+
+    public bool DeleteDirectory(string path, bool recursive = false)
+    {
+        _fileSystem.Directory.Delete(path, recursive);
+        return !_fileSystem.Directory.Exists(path);
+    }
+
+    public bool CreateFileForWriting(string path, out Stream stream)
+    {
+        stream = _fileSystem.File.Create(path);
+        return true;
+    }
+
+    public bool WriteAllTextToFile(string path, string contents)
+    {
+        _fileSystem.File.WriteAllText(path, contents);
+        return _fileSystem.File.Exists(path);
+    }
+
+    public bool MoveFile(string sourceFileName, string destFileName, bool overwrite = false)
+    {
+#if NETCOREAPP3_0_OR_GREATER
+        _fileSystem.File.Move(sourceFileName, destFileName, overwrite);
 #else
         if (overwrite)
         {
-            _mockFileSystem.File.Copy(sourceFileName, destFileName, overwrite: true);
-            _mockFileSystem.File.Delete(sourceFileName);
+            _fileSystem.File.Copy(sourceFileName, destFileName, overwrite: true);
+            _fileSystem.File.Delete(sourceFileName);
         }
         else
         {
-            _mockFileSystem.File.Move(sourceFileName, destFileName);
+            _fileSystem.File.Move(sourceFileName, destFileName);
         }
 #endif
+
+        if (_fileSystem.File.Exists(sourceFileName) || !_fileSystem.File.Exists(destFileName))
+        {
+            return false;
+        }
+
+        return true;
     }
 
-    public void DeleteFile(string path) => _mockFileSystem.File.Delete(path);
-
-    public DateTimeOffset GetFileCreationTime(string path) =>
-        _mockFileSystem.FileInfo.New(path).CreationTimeUtc;
-
-    public string ReadAllTextFromFile(string file) => _mockFileSystem.File.ReadAllText(file);
-
-    public Stream OpenFileForReading(string path) => _mockFileSystem.File.OpenRead(path);
-
-    public Stream CreateFileForWriting(string path) => _mockFileSystem.File.Create(path);
+    public bool DeleteFile(string path)
+    {
+        _fileSystem.File.Delete(path);
+        return !_fileSystem.File.Exists(path);
+    }
 }

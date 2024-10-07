@@ -10,7 +10,7 @@ on:
       - "**.md"
 
 env:
-  XCODE_VERSION: 15.4
+  XCODE_VERSION: 16
 
 jobs:
   build-sentry-native:
@@ -33,6 +33,9 @@ jobs:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-${{ runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           enableCrossOsArchive: true
+
+      - name: Remove unused applications
+        uses: ./.github/actions/freediskspace
 
       - name: Install build dependencies
         if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'Linux'
@@ -65,10 +68,16 @@ jobs:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
 
+      - name: Setup Xcode
+        if: matrix.os == 'macos-latest'
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_${{env.XCODE_VERSION}}.app/Contents/Developer
+          xcodebuild -version
+
       - name: Remove unused applications
         uses: ./.github/actions/freediskspace
 
-      # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
+      # We use macOS for the final publishing build so we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
         if: startsWith(matrix.os, 'macos')
         run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
@@ -179,6 +188,12 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
+      - name: Setup Xcode
+        if: matrix.os == 'macos-latest'
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_${{env.XCODE_VERSION}}.app/Contents/Developer
+          xcodebuild -version
 
       # Needed for Android SDK setup step
       - uses: actions/setup-java@v4

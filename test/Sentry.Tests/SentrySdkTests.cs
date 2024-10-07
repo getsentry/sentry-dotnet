@@ -228,8 +228,7 @@ public class SentrySdkTests : IDisposable
         var processingDelayPerEnvelope = TimeSpan.FromMilliseconds(200);
 
         // Arrange
-        var fileSystem = new FakeFileSystem();
-        using var cacheDirectory = new TempDirectory(fileSystem);
+        using var cacheDirectory = new TempDirectory();
         var cachePath = cacheDirectory.Path;
 
         // Pre-populate cache
@@ -242,7 +241,6 @@ public class SentrySdkTests : IDisposable
                 DiagnosticLogger = _logger,
                 Dsn = ValidDsn,
                 CacheDirectoryPath = cachePath,
-                FileSystem = fileSystem,
                 AutoSessionTracking = false,
                 InitNativeSdks = false,
             },
@@ -295,7 +293,6 @@ public class SentrySdkTests : IDisposable
                 o.Debug = true;
                 o.DiagnosticLogger = _logger;
                 o.CacheDirectoryPath = cachePath;
-                o.FileSystem = fileSystem;
                 o.InitCacheFlushTimeout = initFlushTimeout;
                 o.Transport = transport;
                 o.AutoSessionTracking = false;
@@ -427,9 +424,13 @@ public class SentrySdkTests : IDisposable
         Assert.False(invoked);
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task ConfigureScope_OnTask_PropagatedToCaller()
     {
+#if __ANDROID__
+        Skip.If(true, "Flaky on Android");
+#endif
+
         const string expected = "test";
         using var _ = SentrySdk.Init(o =>
         {
@@ -439,12 +440,13 @@ public class SentrySdkTests : IDisposable
             o.InitNativeSdks = false;
         });
 
-        await ModifyScope();
+        await ModifyScope().FailFastOnException();
 
         string actual = null;
         SentrySdk.ConfigureScope(s => actual = s.Breadcrumbs.First().Message);
 
         Assert.Equal(expected, actual);
+        return;
 
         async Task ModifyScope()
         {

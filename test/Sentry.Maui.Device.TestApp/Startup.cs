@@ -1,5 +1,5 @@
+using DeviceRunners.XHarness;
 using Microsoft.Maui.LifecycleEvents;
-using Microsoft.Maui.TestUtils.DeviceTests.Runners;
 
 namespace Sentry.Maui.Device.TestApp;
 
@@ -13,29 +13,22 @@ public static class MauiProgram
 #if __ANDROID__
                 life.AddAndroid(android =>
                 {
-                    android.OnCreate((activity, bundle) =>
-                        Platform.Init(activity, bundle));
+                    android.OnCreate(Platform.Init);
                 });
 #endif
             })
-            .ConfigureTests(new TestOptions
+            .UseXHarnessTestRunner(conf =>
             {
-                // This is the list of assemblies containing tests that will be run
-                Assemblies =
-                {
+                conf.AddTestAssemblies([
                     typeof(Sentry.Tests.SentrySdkTests).Assembly,
                     typeof(Sentry.Extensions.Logging.Tests.LogLevelExtensionsTests).Assembly,
                     typeof(Sentry.Maui.Tests.SentryMauiOptionsTests).Assembly,
 #if ANDROID
                     typeof(Sentry.Android.AssemblyReader.Tests.AndroidAssemblyReaderTests).Assembly,
 #endif
-                }
-            })
-            .UseHeadlessRunner(new HeadlessRunnerOptions
-            {
-                RequiresUIContext = true,
-            })
-            .UseVisualRunner();
+                ]);
+                conf.AddXunit();
+            });
 
         return appBuilder.Build();
     }

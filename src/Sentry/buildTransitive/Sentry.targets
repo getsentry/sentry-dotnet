@@ -96,6 +96,7 @@
       <SentryCLIBaseCommand>&quot;$(SentryCLI)&quot;</SentryCLIBaseCommand>
       <SentryCLIBaseCommand Condition="'$(SentryCLIBaseOptions.Trim())' != ''">$(SentryCLIBaseCommand) $(SentryCLIBaseOptions.Trim())</SentryCLIBaseCommand>
 
+      <SentryReleaseOptions Condition="'$(SentryOrg)' != ''">$(SentryReleaseOptions) --org $(SentryOrg)</SentryReleaseOptions>
       <SentryReleaseOptions Condition="'$(SentryProject)' != ''">$(SentryReleaseOptions) --project $(SentryProject)</SentryReleaseOptions>
       <SentrySetCommitOptions Condition="'$(SentrySetCommitOptions)' == ''">--auto</SentrySetCommitOptions>
 

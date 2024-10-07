@@ -16,6 +16,9 @@
     <SelfContained>true</SelfContained>
     <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
 
+    <!-- See https://github.com/dotnet/xharness/issues/1281#issuecomment-2390579883 -->
+    <AndroidEnableMarshalMethods>false</AndroidEnableMarshalMethods>
+
     <!-- Display name -->
     <ApplicationTitle>Sentry.Maui.Device.TestApp</ApplicationTitle>
 
@@ -76,22 +79,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MauiTestUtils\DeviceTests\TestUtils.DeviceTests.csproj" />
-    <ProjectReference Include="..\MauiTestUtils\DeviceTests.Runners\TestUtils.DeviceTests.Runners.csproj" />
-    <ProjectReference Include="..\MauiTestUtils\DeviceTests.Runners.SourceGen\TestUtils.DeviceTests.Runners.SourceGen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <PackageReference Include="DeviceRunners.XHarness.Maui" Version="0.1.0-preview.1" />
+    <PackageReference Include="DeviceRunners.XHarness.Xunit" Version="0.1.0-preview.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Sentry.Android.AssemblyReader.Tests\Sentry.Android.AssemblyReader.Tests.csproj" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
     <ProjectReference Include="..\Sentry.Tests\Sentry.Tests.csproj" />
     <ProjectReference Include="..\Sentry.Extensions.Logging.Tests\Sentry.Extensions.Logging.Tests.csproj" />
     <ProjectReference Include="..\Sentry.Maui.Tests\Sentry.Maui.Tests.csproj" />
-  </ItemGroup>
-
-  <!-- https://github.com/dotnet/maui/blob/main/.nuspec/Microsoft.Maui.TestUtils.DeviceTests.Runners.targets -->
-  <ItemGroup>
-    <CompilerVisibleProperty Include="RootNamespace" />
-    <CompilerVisibleProperty Include="ApplicationId" />
-    <CompilerVisibleProperty Include="ApplicationTitle" />
-    <CompilerVisibleItemMetadata Include="AdditionalFiles" MetadataName="IsMauiSplashScreen" />
-    <AdditionalFiles Include="@(MauiSplashScreen)" IsMauiSplashScreen="True" />
   </ItemGroup>
 
 </Project>

@@ -51,8 +51,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # These are all a bit flaky. We used to run versions 27-31... now we just run 27 and 31
-        api-level: [27, 31]
+        # We run against both an older and a newer API
+        api-level: [27, 33]
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
@@ -74,14 +74,14 @@ jobs:
           path: bin
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@16bf8bc8fe830fa669c3c9f914d3eb147c629707 # pin@v3
+        uses: gradle/actions/setup-gradle@d156388eb19639ec20ade50009f3d199ce1e2808 # pin@v3
 
       # Cached AVD setup per https://github.com/ReactiveCircus/android-emulator-runner/blob/main/README.md
 
 
       - name: Run Tests
-        timeout-minutes: 30
-        uses: reactivecircus/android-emulator-runner@f0d1ed2dcad93c7479e8b2f2226c83af54494915 # pin@v3
+        timeout-minutes: 40
+        uses: reactivecircus/android-emulator-runner@f0d1ed2dcad93c7479e8b2f2226c83af54494915 # Tag: v2.32.0
         with:
           api-level: ${{ matrix.api-level }}
           # We don't need the Google APIs, but the default images are not available for 32+

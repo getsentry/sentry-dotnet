@@ -107,14 +107,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{6987A1CC-6
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndroidTestApp", "test\AndroidTestApp\AndroidTestApp.csproj", "{99E2D1A4-1853-49F9-96B6-59C70FA3DE3A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MauiTestUtils", "MauiTestUtils", "{A11512A4-26BD-4936-B7A6-6FCE2E78FA80}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestUtils.DeviceTests.Runners.SourceGen", "test\MauiTestUtils\DeviceTests.Runners.SourceGen\TestUtils.DeviceTests.Runners.SourceGen.csproj", "{7C1A1318-137E-4E1E-ADB3-C0CE2B10F779}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestUtils.DeviceTests.Runners", "test\MauiTestUtils\DeviceTests.Runners\TestUtils.DeviceTests.Runners.csproj", "{1C6F1CB1-2339-4E8B-9941-80998B940DCC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestUtils.DeviceTests", "test\MauiTestUtils\DeviceTests\TestUtils.DeviceTests.csproj", "{E92F0A4E-2653-4341-8732-2AC9CF766739}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Android.AssemblyReader.Tests", "test\Sentry.Android.AssemblyReader.Tests\Sentry.Android.AssemblyReader.Tests.csproj", "{3C543CED-F801-4843-BA48-76142843E1B9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AspNet.Tests", "test\Sentry.AspNet.Tests\Sentry.AspNet.Tests.csproj", "{7ABAA536-7BEC-46D7-9C61-82440DDC9AA8}"
@@ -182,11 +174,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{233D34AB-9
 		README.md = README.md
 		CHANGELOG.md = CHANGELOG.md
 		CONTRIBUTING.md = CONTRIBUTING.md
-		.codecov.yml = .codecov.yml
-		.gitignore = .gitignore
-		global.json = global.json
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
+		global.json = global.json
+		nuget.config = nuget.config
+		.codecov.yml = .codecov.yml
+		.gitignore = .gitignore
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AspNetCore.Blazor.WebAssembly", "src\Sentry.AspNetCore.Blazor.WebAssembly\Sentry.AspNetCore.Blazor.WebAssembly.csproj", "{8298202C-9983-4D0A-851D-805539EE481A}"
@@ -381,18 +374,6 @@ Global
 		{99E2D1A4-1853-49F9-96B6-59C70FA3DE3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99E2D1A4-1853-49F9-96B6-59C70FA3DE3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99E2D1A4-1853-49F9-96B6-59C70FA3DE3A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7C1A1318-137E-4E1E-ADB3-C0CE2B10F779}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7C1A1318-137E-4E1E-ADB3-C0CE2B10F779}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7C1A1318-137E-4E1E-ADB3-C0CE2B10F779}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7C1A1318-137E-4E1E-ADB3-C0CE2B10F779}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1C6F1CB1-2339-4E8B-9941-80998B940DCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1C6F1CB1-2339-4E8B-9941-80998B940DCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1C6F1CB1-2339-4E8B-9941-80998B940DCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1C6F1CB1-2339-4E8B-9941-80998B940DCC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E92F0A4E-2653-4341-8732-2AC9CF766739}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E92F0A4E-2653-4341-8732-2AC9CF766739}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E92F0A4E-2653-4341-8732-2AC9CF766739}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E92F0A4E-2653-4341-8732-2AC9CF766739}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3C543CED-F801-4843-BA48-76142843E1B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3C543CED-F801-4843-BA48-76142843E1B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C543CED-F801-4843-BA48-76142843E1B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -568,10 +549,6 @@ Global
 		{854EBD1B-73EE-4B93-89DF-E70436FF14CB} = {230B9384-90FD-4551-A5DE-1A5C197F25B6}
 		{5F253D7F-BF27-46F5-9382-73A66EC247BF} = {230B9384-90FD-4551-A5DE-1A5C197F25B6}
 		{99E2D1A4-1853-49F9-96B6-59C70FA3DE3A} = {6987A1CC-608E-4868-A02C-09D30C8B7B2D}
-		{A11512A4-26BD-4936-B7A6-6FCE2E78FA80} = {6987A1CC-608E-4868-A02C-09D30C8B7B2D}
-		{7C1A1318-137E-4E1E-ADB3-C0CE2B10F779} = {A11512A4-26BD-4936-B7A6-6FCE2E78FA80}
-		{1C6F1CB1-2339-4E8B-9941-80998B940DCC} = {A11512A4-26BD-4936-B7A6-6FCE2E78FA80}
-		{E92F0A4E-2653-4341-8732-2AC9CF766739} = {A11512A4-26BD-4936-B7A6-6FCE2E78FA80}
 		{3C543CED-F801-4843-BA48-76142843E1B9} = {6987A1CC-608E-4868-A02C-09D30C8B7B2D}
 		{7ABAA536-7BEC-46D7-9C61-82440DDC9AA8} = {6987A1CC-608E-4868-A02C-09D30C8B7B2D}
 		{D7D1EA68-ACE3-4DF3-A33C-EBB5B74701F5} = {6987A1CC-608E-4868-A02C-09D30C8B7B2D}

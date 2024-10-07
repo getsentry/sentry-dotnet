@@ -158,7 +158,6 @@ filterConfigs:
         - "test/**/Sentry.Maui.Tests.csproj"
         - "test/**/Sentry.Testing.csproj"
         - "test/**/Sentry.Tests.csproj"
-        - "test/MauiTestUtils/**/*.csproj"
 
   - outputPath: SentryNoMobile.slnf
     solution: .generated.NoMobile.sln

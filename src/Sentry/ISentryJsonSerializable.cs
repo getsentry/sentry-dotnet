@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry;
 
@@ -15,16 +16,4 @@ public interface ISentryJsonSerializable
     /// Avoid relying on this method in user code.
     /// </remarks>
     void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger);
-}
-
-internal static class JsonSerializableExtensions
-{
-    public static void WriteToFile(this ISentryJsonSerializable serializable, string filePath, IDiagnosticLogger? logger)
-    {
-        using var file = File.Create(filePath);
-        using var writer = new Utf8JsonWriter(file);
-
-        serializable.WriteTo(writer, logger);
-        writer.Flush();
-    }
 }

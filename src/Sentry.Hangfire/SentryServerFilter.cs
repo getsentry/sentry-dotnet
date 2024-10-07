@@ -34,7 +34,11 @@ internal class SentryServerFilter : IServerFilter
         }
 
         var checkInId = _hub.CaptureCheckIn(monitorSlug, CheckInStatus.InProgress);
-        context.Items.Add(SentryCheckInIdKey, checkInId);
+
+        // Note that we may be overwriting context.Items[SentryCheckInIdKey] here, which is intentional. If that happens
+        // then implicitly OnPerforming was called previously with the same context, but we never made it to OnPerformed
+        // This might happen if a Hangfire job failed at least once, with automatic retries configured.
+        context.Items[SentryCheckInIdKey] = checkInId;
     }
 
     public void OnPerformed(PerformedContext context)

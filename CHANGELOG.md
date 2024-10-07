@@ -14,10 +14,51 @@
 - `Device.BatteryLevel` and `Device.ProcessorFrequency` are now stored as floats rather than ints, to align with the Cocoa and Java SDKs ([#3567](https://github.com/getsentry/sentry-dotnet/pull/3567))
 - `SentryOptions.EnableTracing` has been removed. Instead, tracing should be enabled or disabled by setting the `SentryOptions.TracesSampleRate` or by using `SentryOptions.TracesSampler` to configure a sampling function ([#3569](https://github.com/getsentry/sentry-dotnet/pull/3569))
 - The `FailedRequestTargets`, `TagFilters` and `TracePropagationTargets` options have all been changed from `SubstringOrRegexPattern` to `IList<StringOrRegex>` ([#3566](https://github.com/getsentry/sentry-dotnet/pull/3566))
+- `Scope.Transaction` is now always stored as an `AsyncLocal` also in [Global Mode](https://docs.sentry.io/platforms/dotnet/configuration/options/#is-global-mode-enabled), to prevent auto-instrumented spans from the UI ending up parented to transactions from a background task (or vice versa). ([#3596](https://github.com/getsentry/sentry-dotnet/pull/3596))
+
 ## Unreleased
+
+### Dependencies
+
+- Bump CLI from v2.36.5 to v2.36.6 ([#3647](https://github.com/getsentry/sentry-dotnet/pull/3647))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2366)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.36.5...2.36.6)
+
+## 4.12.0
+
+### API Changes
+
+- The `SentrySdk.Metrics` module is deprecated and will be removed in the next major release.
+  Sentry will reject all metrics sent after October 7, 2024.
+  Learn more: https://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-to-Metrics  ([#3619](https://github.com/getsentry/sentry-dotnet/pull/3619))
+
+### Fixes
+
+- Fixed duplicate key exception for Hangfire jobs with AutomaticRetry ([#3631](https://github.com/getsentry/sentry-dotnet/pull/3631))
+
+### Features
+
+- Added a flag to options `DisableFileWrite` to allow users to opt-out of all file writing operations. Note that toggling this will affect features such as offline caching and auto-session tracking and release health as these rely on some file persistency ([#3614](https://github.com/getsentry/sentry-dotnet/pull/3614), [#3641](https://github.com/getsentry/sentry-dotnet/pull/3641))
+
+### Dependencies
+
+- Bump Native SDK from v0.7.9 to v0.7.10 ([#3623](https://github.com/getsentry/sentry-dotnet/pull/3623))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0710)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.9...0.7.10)
+- Bump CLI from v2.36.1 to v2.36.5 ([#3624](https://github.com/getsentry/sentry-dotnet/pull/3624), [#3634](https://github.com/getsentry/sentry-dotnet/pull/3634), [#3642](https://github.com/getsentry/sentry-dotnet/pull/3642), [#3644](https://github.com/getsentry/sentry-dotnet/pull/3644))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2365)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.36.1...2.36.5)
+- Update Perfview/TraceEvent to e343a0c ([#3492](https://github.com/getsentry/sentry-dotnet/pull/3492))
+
+## 4.11.0
+
+### Features
+
+- All exceptions are now added as breadcrumbs on future events. Previously this was only the case for exceptions captured via the `Sentry.SeriLog` or `Sentry.Extensions.Logging` integrations. ([#3584](https://github.com/getsentry/sentry-dotnet/pull/3584))
 
 ### Fixes
 - On mobile devices, the SDK no longer throws a `FormatException` for `ProcessorFrequency` when trying to report native events ([#3541](https://github.com/getsentry/sentry-dotnet/pull/3541))
+- Add missing org parameter to the CLI release operations ([#3600](https://github.com/getsentry/sentry-dotnet/pull/3600))
 
 ### API Changes
 - When the Sentry SDK is disabled, `SentrySdk.StartTransaction()` now returns a `NoOpTransaction`, which avoids unnecessary memory allocations ([#3581](https://github.com/getsentry/sentry-dotnet/pull/3581))
@@ -27,9 +68,9 @@
 - Bump Cocoa SDK from v8.35.0 to v8.36.0 ([#3570](https://github.com/getsentry/sentry-dotnet/pull/3570), [#3575](https://github.com/getsentry/sentry-dotnet/pull/3575))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8360)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.35.0...8.36.0)
-- Bump CLI from v2.33.1 to v2.34.1 ([#3578](https://github.com/getsentry/sentry-dotnet/pull/3578))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2341)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.33.1...2.34.1)
+- Bump CLI from v2.33.1 to v2.36.1 ([#3578](https://github.com/getsentry/sentry-dotnet/pull/3578), [#3599](https://github.com/getsentry/sentry-dotnet/pull/3599), [#3603](https://github.com/getsentry/sentry-dotnet/pull/3603), [#3606](https://github.com/getsentry/sentry-dotnet/pull/3606))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2361)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.33.1...2.36.1)
 - Bump Native SDK from v0.7.8 to v0.7.9 ([#3577](https://github.com/getsentry/sentry-dotnet/pull/3577))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#079)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.7.8...0.7.9)
