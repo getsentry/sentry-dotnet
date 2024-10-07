@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+ - add `BeforeCaptureScreenshot` callback option | #3353
+
 ### Dependencies
 
 - Bump CLI from v2.36.5 to v2.36.6 ([#3647](https://github.com/getsentry/sentry-dotnet/pull/3647))
