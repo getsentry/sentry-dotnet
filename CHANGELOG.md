@@ -4,9 +4,11 @@
 
 ### Support for XCode 16.0 (BREAKING CHANGE)
 
+If you are using XCode 16.0, you will need to update to `Sentry 4.12.0` or later. If you are still using XCode 15.4 then you should continue to use `Sentry 4.11.0` or earlier. 
+
 Using `XCode 16` to build .NET applications targeting iOS and Mac Catalyst requires [iOS SDK 18.0.8303](https://github.com/xamarin/xamarin-macios/releases/tag/dotnet-8.0.1xx-xcode16.0-8303). We [built Sentry 4.12.0 using XCode 16](https://github.com/getsentry/sentry-dotnet/pull/3635/files) in order to support this scenario.
 
-If you are using `Sentry 4.12.x` and targeting iOS or macCatalyst then you will need to install and use `iOS SDK 18.0.8303` (.NET 9 will also support XCode 16, when it is released in November).
+As such, if you are using `Sentry 4.12.x` and targeting iOS or macCatalyst then you will need to install and use XCode 16 and `iOS SDK 18.0.8303` (.NET 9 will also support XCode 16, when it is released in November).
 
 ## 4.12.0
 
