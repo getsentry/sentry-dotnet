@@ -56,4 +56,34 @@ public class SentryMauiOptionsTests
         var options = new SentryMauiOptions();
         Assert.False(options.AttachScreenshot);
     }
+
+    [Fact]
+    public void BeforeCaptureScreenshot_Default()
+    {
+        // Arrange
+        Action emptyAction = () => { };
+        var options = new SentryMauiOptions();
+
+        // Act
+        bool result = options.BeforeCaptureScreenshot == emptyAction;
+
+        // Assert 
+        Assert.False(result);
+    }
+    [Fact]
+    public void BeforeCaptureScreenshot_Specified()
+    {
+        // Arrange
+        Action emptyAction = () => { };
+        var options = new SentryMauiOptions();
+
+        // Act
+        options.BeforeCaptureScreenshot = () =>
+        {
+            Console.WriteLine("BeforeCaptureScreenshot is being called");
+        };
+
+        // Assert
+        Assert.True(options.BeforeCaptureScreenshot != emptyAction);
+    }
 }
