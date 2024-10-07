@@ -69,7 +69,6 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// <summary>
     /// Action performed before attaching a screenshot
     /// </summary>
-    //public Action<SentryEvent, SentryHint, SentryEvent?> BeforeCaptureScreenshot { get; set; } = (SentryEvent @event, SentryHint hint) => { };
     internal Func<SentryEvent, SentryHint, SentryEvent?>? BeforeCaptureScreenshotInternal => _beforeSend;
 
     /// <summary>
