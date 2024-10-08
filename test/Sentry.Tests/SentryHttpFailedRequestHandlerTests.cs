@@ -86,7 +86,7 @@ public class SentryHttpFailedRequestHandlerTests
         var options = new SentryOptions
         {
             CaptureFailedRequests = true,
-            FailedRequestTargets = new List<SubstringOrRegexPattern> { "http://foo/" }
+            FailedRequestTargets = new List<StringOrRegex> { "http://foo/" }
         };
         var sut = GetSut(options);
 

@@ -605,7 +605,7 @@ public class ScopeTests
 
         var scope = new Scope(new SentryOptions
         {
-            TagFilters = new[] { new SubstringOrRegexPattern("AzureFunctions_") }
+            TagFilters = new[] { new StringOrRegex("AzureFunctions_") }
         });
 
         foreach (var (key, value) in tags)
