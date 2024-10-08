@@ -20,7 +20,9 @@ internal class SentryMauiScreenshotProcessor : ISentryEventProcessorWithHint
     {
         // Call back before taking the screenshot if the callback is not null
         if (_options.BeforeCaptureScreenshotInternal != null)
+        {
             _options.BeforeCaptureScreenshotInternal.Invoke(@event, hint);
+        }
 
         hint.Attachments.Add(new ScreenshotAttachment(_options));
         return @event;
