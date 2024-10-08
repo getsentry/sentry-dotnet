@@ -665,6 +665,7 @@ namespace Sentry
         public Sentry.StartupTimeDetectionMode DetectStartupTime { get; set; }
         public Sentry.SentryLevel DiagnosticLevel { get; set; }
         public Sentry.Extensibility.IDiagnosticLogger? DiagnosticLogger { get; set; }
+        public bool DisableFileWrite { get; set; }
         public string? Distribution { get; set; }
         public string? Dsn { get; set; }
         public bool EnableScopeSync { get; set; }
@@ -783,6 +784,10 @@ namespace Sentry
     {
         public static bool IsEnabled { get; }
         public static Sentry.SentryId LastEventId { get; }
+        [System.Obsolete("The SentrySdk.Metrics module is deprecated and will be removed in the next major " +
+            "release. Sentry will reject all metrics sent after October 7, 2024.Learn more: h" +
+            "ttps://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-" +
+            "to-Metrics")]
         public static Sentry.IMetricAggregator Metrics { get; }
         public static void AddBreadcrumb(Sentry.Breadcrumb breadcrumb, Sentry.SentryHint? hint = null) { }
         public static void AddBreadcrumb(string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
@@ -1320,6 +1325,10 @@ namespace Sentry.Extensibility
         public static readonly Sentry.Extensibility.HubAdapter Instance;
         public bool IsEnabled { get; }
         public Sentry.SentryId LastEventId { get; }
+        [System.Obsolete("The SentrySdk.Metrics module is deprecated and will be removed in the next major " +
+            "release. Sentry will reject all metrics sent after October 7, 2024.Learn more: h" +
+            "ttps://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-" +
+            "to-Metrics")]
         public Sentry.IMetricAggregator Metrics { get; }
         public void AddBreadcrumb(string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public void AddBreadcrumb(Sentry.Infrastructure.ISystemClock clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
