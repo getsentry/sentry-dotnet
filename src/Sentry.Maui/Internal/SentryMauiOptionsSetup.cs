@@ -1,7 +1,9 @@
 using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+#if !PLATFORM_NEUTRAL
 using Microsoft.Maui.Networking;
+#endif
 using Sentry.Infrastructure;
 
 namespace Sentry.Maui.Internal;
