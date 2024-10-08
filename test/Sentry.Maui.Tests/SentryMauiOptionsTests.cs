@@ -58,20 +58,6 @@ public class SentryMauiOptionsTests
         var options = new SentryMauiOptions();
         Assert.False(options.AttachScreenshot);
     }
-
-    [Fact]
-    public void BeforeCaptureScreenshot_Default()
-    {
-        // Arrange
-        Action emptyAction = () => { };
-        var options = new SentryMauiOptions();
-
-        // Act
-        //bool result = options.BeforeCaptureScreenshot == emptyAction;
-
-        // Assert 
-        //Assert.p();
-    }
     [Fact]
     public void BeforeCaptureScreenshot_Specified()
     {
