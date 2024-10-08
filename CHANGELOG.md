@@ -8,9 +8,9 @@
 
 ### Dependencies
 
-- Bump CLI from v2.36.5 to v2.36.6 ([#3647](https://github.com/getsentry/sentry-dotnet/pull/3647))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2366)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.36.5...2.36.6)
+- Bump CLI from v2.36.5 to v2.37.0 ([#3647](https://github.com/getsentry/sentry-dotnet/pull/3647), [#3664](https://github.com/getsentry/sentry-dotnet/pull/3664))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2370)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.36.5...2.37.0)
 
 ## 4.12.0
 
