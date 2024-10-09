@@ -13,6 +13,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
     private readonly ISessionManager _sessionManager;
     private readonly SentryOptions _options;
     private readonly RandomValuesFactory _randomValuesFactory;
+    private readonly MemoryMonitor? _memoryMonitor;
 
     private int _isPersistedSessionRecovered;
 
@@ -62,6 +63,15 @@ internal class Hub : IHub, IMetricHub, IDisposable
             // Push the first scope so the async local starts from here
             PushScope();
         }
+
+#if NET5_0_OR_GREATER
+
+        if (options.AutomaticHeapDumpMemoryThreshold is {} threshold)
+        {
+            _memoryMonitor = new MemoryMonitor(threshold, options, CaptureHeapDump);
+        }
+
+#endif
 
         if (options.ExperimentalMetrics is not null)
         {
@@ -493,6 +503,32 @@ internal class Hub : IHub, IMetricHub, IDisposable
         {
             _options.LogError(e, "Failure to capture event: {0}", evt.EventId);
             return SentryId.Empty;
+        }
+    }
+
+    public void CaptureHeapDump(string dumpFile)
+    {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        try
+        {
+            _options.LogDebug("Capturing heap dump '{0}'", dumpFile);
+
+            var evt = new SentryEvent
+            {
+                Message = "Memory threshold exceeded",
+                Level = SentryLevel.Warning
+            };
+            var hint = new SentryHint(_options);
+            hint.AddAttachment(dumpFile);
+            CaptureEvent(evt, CurrentScope, hint);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to capture heap dump");
         }
     }
 

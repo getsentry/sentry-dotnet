@@ -526,6 +526,31 @@ public class SentryOptions
         }
     }
 
+#if NET5_0_OR_GREATER
+
+    /// <summary>
+    /// Specifies a threshold for memory usage as a percentage of total available system memory. Sentry will
+    /// automatically capture a heap dump if the memory usage of the process exceeds this threshold. This can be useful
+    /// to diagnose memory leaks.
+    /// </summary>
+    /// <remarks>Must be a value between 0 and 100</remarks>
+    public short? AutomaticHeapDumpMemoryThreshold
+    {
+        get => _automaticHeapDumpMemoryThreshold;
+        set
+        {
+            if (value is not null && (value < 0 || value > 100))
+            {
+                throw new ArgumentException("Must be a value between 0 and 100", nameof(value));
+            }
+
+            _automaticHeapDumpMemoryThreshold = value;
+        }
+    }
+    private short? _automaticHeapDumpMemoryThreshold;
+
+#endif
+
     private int _maxCacheItems = 30;
 
     /// <summary>
