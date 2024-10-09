@@ -1,5 +1,8 @@
 /*
- * dotnet-gcdump needs .NET 6 or later... also `GC.GetGCMemoryInfo()` is not available in NetFX or NetStandard
+ * dotnet-gcdump needs .NET 6 or later:
+ * https://www.nuget.org/packages/dotnet-gcdump#supportedframeworks-body-tab
+ *
+ * Also `GC.GetGCMemoryInfo()` is not available in NetFX or NetStandard
  */
 #if NET6_0_OR_GREATER
 
