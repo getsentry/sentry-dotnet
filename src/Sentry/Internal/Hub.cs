@@ -520,7 +520,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
             var evt = new SentryEvent
             {
                 Message = "Memory threshold exceeded",
-                Level = SentryLevel.Warning
+                Level = _options.HeapDumpEventLevel
             };
             var hint = new SentryHint(_options);
             hint.AddAttachment(dumpFile);

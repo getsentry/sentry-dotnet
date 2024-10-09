@@ -549,6 +549,11 @@ public class SentryOptions
     }
     private short? _automaticHeapDumpMemoryThreshold;
 
+    /// <summary>
+    /// Specifies the event level to be used if the process exceeds the <see cref="AutomaticHeapDumpMemoryThreshold"/>
+    /// </summary>
+    public SentryLevel HeapDumpEventLevel { get; set; } = SentryLevel.Warning;
+
 #endif
 
     private int _maxCacheItems = 30;
