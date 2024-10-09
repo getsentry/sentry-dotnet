@@ -78,7 +78,7 @@ internal class MemoryMonitor
         process.Start();
         while (!process.StandardOutput.EndOfStream)
         {
-            if (process.StandardOutput.ReadLine() is {} line)
+            if (process.StandardOutput.ReadLine() is { } line)
             {
                 _options.LogDebug(line);
             }

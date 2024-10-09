@@ -66,7 +66,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
 
 #if NET5_0_OR_GREATER
 
-        if (options.AutomaticHeapDumpMemoryThreshold is {} threshold)
+        if (options.AutomaticHeapDumpMemoryThreshold is { } threshold)
         {
             _memoryMonitor = new MemoryMonitor(threshold, options, CaptureHeapDump);
         }
