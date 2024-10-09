@@ -526,7 +526,10 @@ public class SentryOptions
         }
     }
 
-#if NET5_0_OR_GREATER
+/*
+ * dotnet-gcdump needs .NET 6 or later... also `GC.GetGCMemoryInfo()` is not available in NetFX or NetStandard
+ */
+#if NET6_0_OR_GREATER
 
     /// <summary>
     /// Specifies a threshold for memory usage as a percentage of total available system memory. Sentry will
