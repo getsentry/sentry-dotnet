@@ -14,6 +14,17 @@
 
 ## 4.12.0
 
+### Support for Xcode 16.0 (BREAKING CHANGE)
+
+If you are using Xcode 16.0, you will need to update the SDK to version `4.12.0` or later.
+If you are still using Xcode 15.4 or earlier, you need to continue to use version `4.11.0` or earlier.
+
+Using Xcode 16 to build .NET applications targeting iOS and Mac Catalyst requires [.NET workload for iOS SDK version 18.0.8303](https://github.com/xamarin/xamarin-macios/releases/tag/dotnet-8.0.1xx-xcode16.0-8303). We [built the SDK version 4.12.0 using Xcode 16](https://github.com/getsentry/sentry-dotnet/pull/3635/files) in order to support this scenario. That, unfortunately, breaks folks using older version of Xcode.
+
+As such, if you are using SDK version `4.12.x` and targeting iOS or Mac Catalyst, you will need to install and use Xcode 16 and `workload iOS SDK 18.0.8303`
+
+Note that .NET 9 will also support Xcode 16, when it is released next month (Nov 2024).
+
 ### API Changes
 
 - The `SentrySdk.Metrics` module is deprecated and will be removed in the next major release.
