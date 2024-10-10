@@ -3,7 +3,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseSentry(o =>
 {
     o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
-    o.AddIntegration(new ProfilingIntegration());
+    o.AddProfilingIntegration();
     o.ProfilesSampleRate = 0.1;
     o.TracesSampleRate = 1.0;
 });

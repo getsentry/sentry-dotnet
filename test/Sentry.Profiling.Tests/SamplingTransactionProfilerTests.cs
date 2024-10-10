@@ -224,7 +224,7 @@ public class SamplingTransactionProfilerTests
         // Disable process exit flush to resolve "There is no currently active test." errors.
         options.DisableAppDomainProcessExitFlush();
 
-        options.AddIntegration(new ProfilingIntegration(TimeSpan.FromSeconds(10)));
+        options.AddProfilingIntegration(TimeSpan.FromSeconds(10));
 
         try
         {
@@ -314,7 +314,7 @@ public class SamplingTransactionProfilerTests
             ProfilesSampleRate = 1.0,
         };
 
-        options.AddIntegration(new ProfilingIntegration(TimeSpan.FromSeconds(10)));
+        options.AddProfilingIntegration(TimeSpan.FromSeconds(10));
 
         try
         {
@@ -361,7 +361,7 @@ public class SamplingTransactionProfilerTests
             TracesSampleRate = 1.0,
             ProfilesSampleRate = 0,
         };
-        options.AddIntegration(new ProfilingIntegration());
+        options.AddProfilingIntegration();
         using var hub = new Hub(options);
         Assert.Null(hub.Options.TransactionProfilerFactory);
     }
@@ -375,7 +375,7 @@ public class SamplingTransactionProfilerTests
             TracesSampleRate = 0,
             ProfilesSampleRate = 1.0,
         };
-        options.AddIntegration(new ProfilingIntegration());
+        options.AddProfilingIntegration();
         using var hub = new Hub(options);
         Assert.Null(hub.Options.TransactionProfilerFactory);
     }
@@ -389,7 +389,7 @@ public class SamplingTransactionProfilerTests
             TracesSampleRate = 1.0,
             ProfilesSampleRate = 1.0,
         };
-        options.AddIntegration(new ProfilingIntegration());
+        options.AddProfilingIntegration();
         using var hub = new Hub(options);
         Assert.NotNull(hub.Options.TransactionProfilerFactory);
     }

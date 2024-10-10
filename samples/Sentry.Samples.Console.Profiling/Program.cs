@@ -22,7 +22,7 @@ internal static class Program
             // Debugging
             options.ShutdownTimeout = TimeSpan.FromMinutes(5);
 
-            options.AddIntegration(new ProfilingIntegration(TimeSpan.FromMilliseconds(500)));
+            options.AddProfilingIntegration(TimeSpan.FromMilliseconds(500));
         }))
         {
             var tx = SentrySdk.StartTransaction("app", "run");

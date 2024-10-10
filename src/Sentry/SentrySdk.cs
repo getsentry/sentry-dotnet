@@ -102,7 +102,7 @@ public static partial class SentrySdk
 #endif
         {
             LogWarningIfProfilingMisconfigured(options, ", because ProfilingIntegration from package Sentry.Profiling" +
-            " hasn't been registered. You can do that by calling 'options.AddIntegration(new ProfilingIntegration())'");
+            " hasn't been registered. You can do that by calling 'options.AddProfilingIntegration()'");
         }
 #endif
 

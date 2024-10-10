@@ -42,5 +42,9 @@ public class ProfilingIntegration : ISdkIntegration
                 options.LogError(e, "Failed to initialize the profiler");
             }
         }
+        else
+        {
+            options.LogInfo("Profiling Integration is disabled because profiling is disabled by configuration.");
+        }
     }
 }

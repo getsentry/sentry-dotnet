@@ -2,6 +2,10 @@
 
 ## 4.12.1
 
+### Features
+
+- Added `SentryOptions` extension for profiling `options.AddProfilingIntegration()` ([#3660](https://github.com/getsentry/sentry-dotnet/pull/3660))
+
 ### Fixes
 
 - Fixed "Failed to persist session" error on iOS ([#3655](https://github.com/getsentry/sentry-dotnet/pull/3655))

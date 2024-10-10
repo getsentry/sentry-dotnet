@@ -22,7 +22,7 @@ public static int Main(string[] args)
         o.Dsn = DefaultDsn;
         o.Debug = true;
         o.TracesSampleRate = 1.0;
-        o.AddIntegration(new ProfilingIntegration(Path.GetTempPath()));
+        o.AddProfilingIntegration();
         o.DiagnosticLogger = new FileAppenderDiagnosticLogger("C:/dev/Aura.UI/test.log", SentryLevel.Debug);
     }))
     {
