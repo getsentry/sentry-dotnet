@@ -13,7 +13,10 @@ internal class Hub : IHub, IMetricHub, IDisposable
     private readonly ISessionManager _sessionManager;
     private readonly SentryOptions _options;
     private readonly RandomValuesFactory _randomValuesFactory;
+
+#if NET6_0_OR_GREATER && !(IOS || ANDROID)
     private readonly MemoryMonitor? _memoryMonitor;
+#endif
 
     private int _isPersistedSessionRecovered;
 
@@ -64,13 +67,11 @@ internal class Hub : IHub, IMetricHub, IDisposable
             PushScope();
         }
 
-#if NET5_0_OR_GREATER
-
+#if NET6_0_OR_GREATER && !(IOS || ANDROID)
         if (options.AutomaticHeapDumpMemoryThreshold is {} threshold)
         {
             _memoryMonitor = new MemoryMonitor(threshold, options, CaptureHeapDump);
         }
-
 #endif
 
         if (options.ExperimentalMetrics is not null)
@@ -506,6 +507,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
+#if NET6_0_OR_GREATER && !(IOS || ANDROID)
     public void CaptureHeapDump(string dumpFile)
     {
         if (!IsEnabled)
@@ -531,6 +533,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
             _options.LogError(e, "Failure to capture heap dump");
         }
     }
+#endif
 
     public void CaptureUserFeedback(UserFeedback userFeedback)
     {

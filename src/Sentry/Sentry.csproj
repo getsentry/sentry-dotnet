@@ -142,6 +142,22 @@
     <None Include="$(SentryCLIDirectory)**" Pack="true" PackagePath="tools\" />
   </ItemGroup>
 
+  <!-- Download gcdump during the restore phase, when publishing from macOS -->
+  <Target Name="DownloadGCDump" BeforeTargets="CollectPackageReferences" Condition="'$(GCDumpDirectory)' != '' And !Exists('$(GCDumpZip)')">
+    <!-- NuGet doesn't have any "download" functionality, so we'll install it locally to a temporary folder   -->
+    <Exec Command="dotnet tool install dotnet-gcdump --version $(GCDumpVersion) --tool-path $(GCDumpTempDirectory)" />
+    <!-- Compress the tool files -->
+    <Exec Command="zip -r $(GCDumpZip) $(GCDumpIncludeFiles)" />
+    <!-- Clean up tool files after zipping -->
+    <Exec Command="dotnet tool uninstall dotnet-gcdump --tool-path $(GCDumpTempDirectory)" />
+    <RemoveDir Directories="$(GCDumpTempDirectory)\" />
+  </Target>
+
+  <!-- Bundle the Sentry CLI into the Sentry Nuget package. -->
+  <ItemGroup Condition="'$(GCDumpDirectory)' != ''">
+    <None Include="$(GCDumpDirectory)**" Pack="true" PackagePath="tools\" />
+  </ItemGroup>
+
   <ItemGroup>
     <InternalsVisibleTo Include="Sentry.Android.AssemblyReader.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNet" PublicKey="$(SentryPublicKey)" />

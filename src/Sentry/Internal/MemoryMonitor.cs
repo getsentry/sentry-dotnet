@@ -4,7 +4,7 @@
  *
  * Also `GC.GetGCMemoryInfo()` is not available in NetFX or NetStandard
  */
-#if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER && !(IOS || ANDROID)
 
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
