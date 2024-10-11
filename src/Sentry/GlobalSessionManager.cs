@@ -76,10 +76,9 @@ internal class GlobalSessionManager : ISessionManager
                 return;
             }
 
-            using var writer = new Utf8JsonWriter(file);
-
             try
             {
+                using var writer = new Utf8JsonWriter(file);
                 persistedSessionUpdate.WriteTo(writer, _options.DiagnosticLogger);
                 writer.Flush();
             }
