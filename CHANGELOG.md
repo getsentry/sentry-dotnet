@@ -13,7 +13,6 @@
 - `Scope.Transaction` is now always stored as an `AsyncLocal` also in [Global Mode](https://docs.sentry.io/platforms/dotnet/configuration/options/#is-global-mode-enabled), to prevent auto-instrumented spans from the UI ending up parented to transactions from a background task (or vice versa). ([#3596](https://github.com/getsentry/sentry-dotnet/pull/3596))
 - Heap dumps can be captured automatically when memory usage exceeds a configurable threshold ([#3667](https://github.com/getsentry/sentry-dotnet/pull/3667))
 
-## Unreleased
 ## 4.12.1
 
 ### Fixes
