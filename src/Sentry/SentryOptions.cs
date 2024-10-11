@@ -526,9 +526,9 @@ public class SentryOptions
         }
     }
 
-/*
- * dotnet-gcdump needs .NET 6 or later... also `GC.GetGCMemoryInfo()` is not available in NetFX or NetStandard
- */
+    /*
+     * dotnet-gcdump needs .NET 6 or later... also `GC.GetGCMemoryInfo()` is not available in NetFX or NetStandard
+     */
 #if NET6_0_OR_GREATER
 
     /// <summary>
