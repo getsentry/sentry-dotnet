@@ -651,6 +651,7 @@ namespace Sentry
         public bool AttachStacktrace { get; set; }
         public bool AutoSessionTracking { get; set; }
         public System.TimeSpan AutoSessionTrackingInterval { get; set; }
+        public short? AutomaticHeapDumpMemoryThreshold { get; set; }
         public Sentry.Extensibility.IBackgroundWorker? BackgroundWorker { get; set; }
         public string? CacheDirectoryPath { get; set; }
         public bool CaptureFailedRequests { get; set; }
@@ -674,6 +675,7 @@ namespace Sentry
         public System.Collections.Generic.IList<Sentry.HttpStatusCodeRange> FailedRequestStatusCodes { get; set; }
         public System.Collections.Generic.IList<Sentry.StringOrRegex> FailedRequestTargets { get; set; }
         public System.TimeSpan FlushTimeout { get; set; }
+        public Sentry.SentryLevel HeapDumpEventLevel { get; set; }
         public System.Net.IWebProxy? HttpProxy { get; set; }
         public System.TimeSpan InitCacheFlushTimeout { get; set; }
         public bool IsEnvironmentUser { get; set; }
