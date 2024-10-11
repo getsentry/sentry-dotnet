@@ -368,6 +368,32 @@ public class SentryScopeManagerTests
         client1.Should().BeSameAs(client2);
     }
 
+    /// <summary>
+    /// See https://github.com/getsentry/sentry-dotnet/issues/3590
+    /// </summary>
+    [Fact]
+    public void GlobalMode_ScopeTransaction_NotGlobal()
+    {
+        // Arrange
+        _fixture.SentryOptions.IsGlobalModeEnabled = true;
+        var sut = _fixture.GetSut();
+
+        // Act
+        Task.Run(() =>
+        {
+            var (scope, _) = sut.GetCurrent();
+            scope.SetExtra("Foo", "Bar");
+            scope.Transaction = Substitute.For<ITransactionTracer>();
+        });
+
+        // Assert
+        Task.Run(() =>
+        {
+            var (scope, _) = sut.GetCurrent();
+            scope.Extra["Foo"].Should().Be("Bar");  // In global mode most scope data should be shared
+            scope.Transaction.Should().BeNull();            // But transaction should be isolated
+        });
+    }
 
     [Fact]
     public void GlobalMode_Disabled_Uses_AsyncLocalScopeStackContainer()

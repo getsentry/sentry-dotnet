@@ -26,7 +26,6 @@ internal class DynamicSamplingContext
         double? sampleRate = null,
         string? release = null,
         string? environment = null,
-        string? userSegment = null,
         string? transactionName = null)
     {
         // Validate and set required values
@@ -70,11 +69,6 @@ internal class DynamicSamplingContext
         if (!string.IsNullOrWhiteSpace(environment))
         {
             items.Add("environment", environment);
-        }
-
-        if (!string.IsNullOrWhiteSpace(userSegment))
-        {
-            items.Add("user_segment", userSegment);
         }
 
         if (!string.IsNullOrWhiteSpace(transactionName))
@@ -127,9 +121,6 @@ internal class DynamicSamplingContext
         var traceId = transaction.TraceId;
         var sampled = transaction.IsSampled;
         var sampleRate = transaction.SampleRate!.Value;
-#pragma warning disable CS0618 // Type or member is obsolete
-        var userSegment = transaction.User.Segment;
-#pragma warning restore CS0618 // Type or member is obsolete
         var transactionName = transaction.NameSource.IsHighQuality() ? transaction.Name : null;
 
         // These two may not have been set yet on the transaction, but we can get them directly.
@@ -143,7 +134,6 @@ internal class DynamicSamplingContext
             sampleRate,
             release,
             environment,
-            userSegment,
             transactionName);
     }
 
