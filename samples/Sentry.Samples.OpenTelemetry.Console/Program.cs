@@ -21,7 +21,6 @@ SentrySdk.Init(options =>
     options.Debug = true;
     options.TracesSampleRate = 1.0;
     options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
-    options.AutomaticHeapDumpMemoryThreshold = 5;
 });
 
 using var tracerProvider = Sdk.CreateTracerProviderBuilder()
@@ -32,54 +31,23 @@ using var tracerProvider = Sdk.CreateTracerProviderBuilder()
 
 Console.WriteLine("Hello World!");
 
-var memoryHog = new List<object>();
-ConsoleKeyInfo key = default;
-do
+// Finally we can use OpenTelemetry to instrument our code. This activity will be captured as a Sentry transaction.
+using (var activity = activitySource.StartActivity("Main"))
 {
-    Console.WriteLine("Select an option:");
-    Console.WriteLine("c - force garbage collection");
-    Console.WriteLine("m - hog some more memory");
-    Console.WriteLine("q - quit");
-    key = Console.ReadKey();
-    Console.WriteLine("");
-    switch (key.KeyChar)
+    // This creates a span called "Task 1" within the transaction
+    using (var task = activitySource.StartActivity("Task 1"))
     {
-        case 'c':
-            Console.WriteLine("Forcing garbage collection...");
-            GC.Collect();
-            break;
-        case 'm':
-            Console.WriteLine("Hogging some more memory...");
-            for (var i = 0; i < 100000; i++)
-            {
-                var array = new byte[1024 * 80]; // 80KB
-                array.Initialize();
-                memoryHog.Add(array);
-            }
-
-            break;
+        task?.SetTag("Answer", 42);
+        Thread.Sleep(100); // simulate some work
+        Console.WriteLine("Task 1 completed");
+        task?.SetStatus(Status.Ok);
     }
-}
-while (key.KeyChar != 'q');
-GC.KeepAlive(memoryHog);
 
-// // Finally we can use OpenTelemetry to instrument our code. This activity will be captured as a Sentry transaction.
-// using (var activity = activitySource.StartActivity("Main"))
-// {
-//     // This creates a span called "Task 1" within the transaction
-//     using (var task = activitySource.StartActivity("Task 1"))
-//     {
-//         task?.SetTag("Answer", 42);
-//         Thread.Sleep(100); // simulate some work
-//         Console.WriteLine("Task 1 completed");
-//         task?.SetStatus(Status.Ok);
-//     }
-//
-//     // Since we use `AddHttpClientInstrumentation` when initializing OpenTelemetry, the following Http request will also
-//     // be captured as a Sentry span
-//     var httpClient = new HttpClient();
-//     var html = await httpClient.GetStringAsync("https://example.com/");
-//     Console.WriteLine(html);
-// }
+    // Since we use `AddHttpClientInstrumentation` when initializing OpenTelemetry, the following Http request will also
+    // be captured as a Sentry span
+    var httpClient = new HttpClient();
+    var html = await httpClient.GetStringAsync("https://example.com/");
+    Console.WriteLine(html);
+}
 
 Console.WriteLine("Goodbye cruel world...");

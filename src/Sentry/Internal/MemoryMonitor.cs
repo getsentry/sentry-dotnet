@@ -47,13 +47,13 @@ internal class MemoryMonitor
         // Calculate the percentage of memory used
         // var usedMemoryPercentage = GC.GetGCMemoryInfo().MemoryLoadBytes;
         var usedMemoryPercentage = ((double)usedMemory / _totalMemory) * 100;
-        _options.LogDebug("Total Memory: {0:N0} bytes", _totalMemory);
-        _options.LogDebug("Threshold: {0:N0} bytes", _thresholdBytes);
-        _options.LogDebug("Memory used: {0:N0} bytes ({1:N2}%)", usedMemory, usedMemoryPercentage);
 
         // Trigger the event if the threshold is exceeded
         if (usedMemory > _thresholdBytes && !_dumpTriggered)
         {
+            _options.LogDebug("Total Memory: {0:N0} bytes", _totalMemory);
+            _options.LogDebug("Threshold: {0:N0} bytes", _thresholdBytes);
+            _options.LogDebug("Memory used: {0:N0} bytes ({1:N2}%)", usedMemory, usedMemoryPercentage);
             _dumpTriggered = true;
             CaptureMemoryDump();
         }
@@ -70,7 +70,7 @@ internal class MemoryMonitor
         var processId = Environment.ProcessId;
         _options.LogInfo("Creating a memory dump for Process ID: {0}", processId);
 
-        var command = $"dotnet-gcdump collect -p {processId} -o {dumpFile}";
+        var command = $"dotnet-gcdump collect -p {processId} -o '{dumpFile}'";
         var startInfo = new ProcessStartInfo
         {
             FileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "cmd.exe" : "/bin/bash",
