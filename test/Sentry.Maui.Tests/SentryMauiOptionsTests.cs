@@ -72,7 +72,7 @@ public class SentryMauiOptionsTests
         });
 
         // Assert
-        Assert.True(options.BeforeCaptureScreenshotInternal != null);
+        Assert.IsNotNull(options.BeforeCaptureScreenshotInternal);
 
     }
 }
