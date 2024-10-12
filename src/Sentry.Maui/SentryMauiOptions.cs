@@ -65,6 +65,7 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// Screenshots can be removed from some specific events during BeforeSend through the Hint.
     /// </remarks>
     public bool AttachScreenshot { get; set; }
+
     private Func<SentryEvent, SentryHint, SentryEvent?>? _beforeCaptureScreenshot;
     /// <summary>
     /// Action performed before attaching a screenshot
