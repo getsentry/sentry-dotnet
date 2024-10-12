@@ -6,6 +6,10 @@
 
 - Fixed "Failed to persist session" error on iOS ([#3655](https://github.com/getsentry/sentry-dotnet/pull/3655))
 
+### Features
+
+ - Added a `BeforeCaptureScreenshot` callback to the options: allowing the user to set an action before the screenshot is taken ([#3661](https://github.com/getsentry/sentry-dotnet/pull/3661))
+
 ### Dependencies
 
 - Bump CLI from v2.36.5 to v2.37.0 ([#3647](https://github.com/getsentry/sentry-dotnet/pull/3647), [#3664](https://github.com/getsentry/sentry-dotnet/pull/3664))

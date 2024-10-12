@@ -1,3 +1,5 @@
+using NSubstitute.Exceptions;
+
 namespace Sentry.Maui.Tests;
 
 public class SentryMauiOptionsTests
@@ -55,5 +57,22 @@ public class SentryMauiOptionsTests
     {
         var options = new SentryMauiOptions();
         Assert.False(options.AttachScreenshot);
+    }
+    [Fact]
+    public void BeforeCaptureScreenshot_Specified()
+    {
+        // Arrange
+        var options = new SentryMauiOptions();
+        options.AttachScreenshot = true;
+
+        // Act
+        options.BeforeCaptureScreenshot((SentryEvent @event) =>
+        {
+            return @event;
+        });
+
+        // Assert
+        Assert.NotNull(options.BeforeCaptureScreenshotInternal);
+
     }
 }
