@@ -147,15 +147,15 @@
     <!-- NuGet doesn't have any "download" functionality, so we'll install it locally to a temporary folder   -->
     <Exec Command="dotnet tool install dotnet-gcdump --version $(GCDumpVersion) --tool-path $(GCDumpTempDirectory)" />
     <!-- Compress the tool files -->
-    <ZipDirectory SourceDirectory="$(GCDumpIncludeFiles)" DestinationFile="$(GCDumpZip)" />
+    <Exec Command="zip -r $(GCDumpZip) $(GCDumpIncludeFiles)" />
     <!-- Clean up tool files after zipping -->
     <Exec Command="dotnet tool uninstall dotnet-gcdump --tool-path $(GCDumpTempDirectory)" />
-    <RemoveDir Directories="$(GCDumpTempDirectory)" />
+    <RemoveDir Directories="$(GCDumpTempDirectory)\" />
   </Target>
 
   <!-- Bundle the Sentry CLI into the Sentry Nuget package. -->
-  <ItemGroup Condition="Exists('$(GCDumpZip)')">
-    <None Include="$(GCDumpZip)" Pack="true" PackagePath="tools\dotnet-gcdump.zip" />
+  <ItemGroup Condition="'$(GCDumpDirectory)' != ''">
+    <None Include="$(GCDumpDirectory)**" Pack="true" PackagePath="tools\" />
   </ItemGroup>
 
   <ItemGroup>
