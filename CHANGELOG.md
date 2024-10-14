@@ -6,6 +6,10 @@
 
 - Make `Sentry.AspNetCore.Blazor.WebAssembly` generally available. ([#3674](https://github.com/getsentry/sentry-dotnet/pull/3674))
 
+### Fixes
+
+- Events from NDK on Android will report sdk.name `sentry.native.android.dotnet` ([#3682](https://github.com/getsentry/sentry-dotnet/pull/3682))
+
 ## 4.12.1
 
 ### Fixes
