@@ -35,7 +35,7 @@ jobs:
           enableCrossOsArchive: true
 
       - name: Free Disk Space (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
+        if: contains(matrix.os,'ubuntu')
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
         with:
           android: true
@@ -63,7 +63,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest-4-cores, windows-latest, macos-latest]
 
     steps:
       - name: Cancel Previous Runs
@@ -177,7 +177,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest-4-cores, windows-latest, macos-latest]
 
     steps:
       - uses: actions/checkout@v4

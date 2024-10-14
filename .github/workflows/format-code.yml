@@ -27,7 +27,7 @@ jobs:
         run: dotnet tool install -g dotnet-format
 
       - name: Format Code
-        # We're excluding `./**/*OptionsSetup.cs` from the format because the tool struggles with 
+        # We're excluding `./**/*OptionsSetup.cs` from the format because the tool struggles with
         # source generators
         run: dotnet format Sentry.sln --no-restore --exclude ./modules --exclude ./**/*OptionsSetup.cs
 
