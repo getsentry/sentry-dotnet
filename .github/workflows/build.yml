@@ -15,11 +15,11 @@ env:
 jobs:
   build-sentry-native:
     name: sentry-native (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu, windows, macos]
+        os: [ubuntu-latest-4-cores, windows-latest, macos-latest]
 
     steps:
       - name: Checkout
