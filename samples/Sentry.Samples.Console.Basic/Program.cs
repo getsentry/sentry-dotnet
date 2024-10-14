@@ -147,7 +147,10 @@ async Task HeapDumpDemo(CancellationToken cancellationToken)
     var memoryHog = new List<byte[]>();
     Console.WriteLine();
     Console.WriteLine("Hogging memory...");
-    Console.WriteLine("Sentry checks memory usage every time a full garbage collection occurs. It might take a while to trigger this.");
+
+    // Sentry checks memory usage every time a full garbage collection occurs. It might take a while to trigger this,
+    // although we've configured some ridiculously aggressive settings in the runtimeconfig.template.json file to make
+    // this happen more quickly, for the purposes of this demo... definitely don't do this in production!
     while (cancellationToken.IsCancellationRequested == false)
     {
         var array = new byte[2_000_000_000];

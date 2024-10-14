@@ -45,6 +45,7 @@ internal class MemoryMonitor
     {
         // Get the memory used by the application
         var usedMemory = Environment.WorkingSet;
+        // var usedMemory = System.Diagnostics.Process.GetCurrentProcess().PagedMemorySize64;
 
         // Calculate the percentage of memory used
         // var usedMemoryPercentage = GC.GetGCMemoryInfo().MemoryLoadBytes;
