@@ -17,6 +17,8 @@ internal class MemoryMonitor
     private readonly long _thresholdBytes;
     private readonly long _totalMemory;
     private bool _dumpTriggered;
+    private GarbageCollectionMonitor _gcMonitor;
+    CancellationTokenSource _cancellationTokenSource = new();
 
     private Action<string> OnDumpCollected { get; }
 
@@ -35,8 +37,8 @@ internal class MemoryMonitor
         _thresholdBytes = (long)Math.Ceiling(portion * _totalMemory);
         _options.LogInfo("Automatic heap dump enabled if memory usage exceeds {0:N0} bytes ({1}%)", _thresholdBytes, thresholdPercentage);
 
-        // TODO: Pass in a cancellation token so that we can stop monitoring once a dump has been captured
-        GarbageCollectionMonitor.Start(CheckMemoryUsage);
+        _gcMonitor = new GarbageCollectionMonitor(CheckMemoryUsage);
+        _gcMonitor.Start(_cancellationTokenSource.Token);
     }
 
     private void CheckMemoryUsage()

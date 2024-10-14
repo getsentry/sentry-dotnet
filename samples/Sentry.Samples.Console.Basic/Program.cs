@@ -13,6 +13,8 @@
 
 using System.Net.Http;
 
+CancellationTokenSource cts = new();
+
 SentrySdk.Init(options =>
 {
     // You can set here in code, or you can set it in the SENTRY_DSN environment variable.
@@ -42,6 +44,15 @@ SentrySdk.Init(options =>
 
     // This determines the level of heap dump events that are sent to Sentry
     options.HeapDumpEventLevel = SentryLevel.Warning;
+
+    // This is an example of intercepting events before they get sent to Sentry. Typically you might use this to
+    // filter events that you didn't want to send but in this case we're using it to detect when a heap dump has
+    // been captured, so we know when to stop allocating memory in the heap dump demo.
+    options.SetBeforeSend((evt, hint) =>
+    {
+        cts.Cancel();
+        return evt; // If we returned null here, that would stop the event from being sent
+    });
 #endif
 });
 
@@ -57,7 +68,7 @@ SentrySdk.Init(options =>
             await TracingDemo();
             break;
         case '2':
-            await HeapDumpDemo();
+            await HeapDumpDemo(cts.Token);
             break;
     }
 #else
@@ -131,38 +142,18 @@ async Task TracingDemo()
 
 // Heap dumps are only supported in .NET 6.0 or later.
 #if NET6_0_OR_GREATER
-async Task HeapDumpDemo()
+async Task HeapDumpDemo(CancellationToken cancellationToken)
 {
-    var memoryHog = new List<object>();
-    ConsoleKeyInfo key = default;
-    do
+    var memoryHog = new List<byte[]>();
+    Console.WriteLine();
+    Console.WriteLine("Hogging memory...");
+    Console.WriteLine("Sentry checks memory usage every time a full garbage collection occurs. It might take a while to trigger this.");
+    while (cancellationToken.IsCancellationRequested == false)
     {
-        Console.WriteLine();
-        Console.WriteLine("Select an option:");
-        Console.WriteLine("c - force garbage collection");
-        Console.WriteLine("m - hog some more memory");
-        Console.WriteLine("q - quit");
-        key = Console.ReadKey();
-        Console.WriteLine("");
-        switch (key.KeyChar)
-        {
-            case 'c':
-                Console.WriteLine("Forcing garbage collection...");
-                GC.Collect();
-                break;
-            case 'm':
-                Console.WriteLine("Hogging some more memory...");
-                for (var i = 0; i < 100000; i++)
-                {
-                    var array = new byte[1024 * 80]; // 80KB
-                    array.Initialize();
-                    memoryHog.Add(array);
-                }
-
-                break;
-        }
+        var array = new byte[2_000_000_000];
+        array.Initialize();
+        memoryHog.Add(array);
     }
-    while (key.KeyChar != 'q');
     GC.KeepAlive(memoryHog);
     await Task.CompletedTask;
 }
