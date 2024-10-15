@@ -70,7 +70,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
 #if NET6_0_OR_GREATER && !(IOS || ANDROID)
         if (options.AutomaticHeapDumpMemoryThreshold is { } threshold)
         {
-            _memoryMonitor = new MemoryMonitor(threshold, options, CaptureHeapDump);
+            _memoryMonitor = new MemoryMonitor(options, threshold, CaptureHeapDump);
         }
 #endif
 
@@ -691,6 +691,10 @@ internal class Hub : IHub, IMetricHub, IDisposable
         {
             return;
         }
+
+#if NET6_0_OR_GREATER && !(IOS || ANDROID)
+        _memoryMonitor?.Dispose();
+#endif
 
         try
         {

@@ -11,18 +11,17 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry.Internal;
 
-internal class MemoryMonitor
+internal class MemoryMonitor : IDisposable
 {
     private readonly SentryOptions _options;
-    private readonly long _thresholdBytes;
     private readonly long _totalMemory;
+    internal readonly long _thresholdBytes;
     private bool _dumpTriggered;
-    private GarbageCollectionMonitor _gcMonitor;
-    CancellationTokenSource _cancellationTokenSource = new();
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     private Action<string> OnDumpCollected { get; }
 
-    public MemoryMonitor(short thresholdPercentage, SentryOptions options, Action<string> onDumpCollected)
+    public MemoryMonitor(SentryOptions options, short thresholdPercentage, Action<string> onDumpCollected)
     {
         if (thresholdPercentage is < 0 or > 100)
         {
@@ -37,8 +36,7 @@ internal class MemoryMonitor
         _thresholdBytes = (long)Math.Ceiling(portion * _totalMemory);
         _options.LogInfo("Automatic heap dump enabled if memory usage exceeds {0:N0} bytes ({1}%)", _thresholdBytes, thresholdPercentage);
 
-        _gcMonitor = new GarbageCollectionMonitor(CheckMemoryUsage);
-        _gcMonitor.Start(_cancellationTokenSource.Token);
+        GarbageCollectionMonitor.Start(CheckMemoryUsage, _cancellationTokenSource.Token);
     }
 
     private void CheckMemoryUsage()
@@ -54,16 +52,22 @@ internal class MemoryMonitor
         // Trigger the event if the threshold is exceeded
         if (usedMemory > _thresholdBytes && !_dumpTriggered)
         {
+            _dumpTriggered = true;
             _options.LogDebug("Total Memory: {0:N0} bytes", _totalMemory);
             _options.LogDebug("Threshold: {0:N0} bytes", _thresholdBytes);
             _options.LogDebug("Memory used: {0:N0} bytes ({1:N2}%)", usedMemory, usedMemoryPercentage);
-            _dumpTriggered = true;
             CaptureMemoryDump();
         }
     }
 
     internal void CaptureMemoryDump()
     {
+        if (_options.DisableFileWrite)
+        {
+            _options.LogDebug("File write has been disabled via the options. Unable to create memory dump.");
+            return;
+        }
+
         var dumpFile = TryGetDumpLocation();
         if (dumpFile is null)
         {
@@ -102,14 +106,8 @@ internal class MemoryMonitor
         OnDumpCollected(dumpFile);
     }
 
-    private string? TryGetDumpLocation()
+    internal string? TryGetDumpLocation()
     {
-        if (_options.DisableFileWrite)
-        {
-            _options.LogDebug("File write has been disabled via the options. Unable to create memory dump.");
-            return null;
-        }
-
         try
         {
             var rootPath = _options.CacheDirectoryPath ??
@@ -119,7 +117,7 @@ internal class MemoryMonitor
 
             if (!fileSystem.CreateDirectory(directoryPath))
             {
-                _options.LogDebug("Failed to create a directory for memory dump ({0}).", directoryPath);
+                _options.LogWarning("Failed to create a directory for memory dump ({0}).", directoryPath);
                 return null;
             }
             _options.LogDebug("Created directory for heap dump ({0}).", directoryPath);
@@ -129,7 +127,8 @@ internal class MemoryMonitor
             var filePath = Path.Combine(directoryPath, $"{timestamp}_{processId}.gcdump");
             if (fileSystem.FileExists(filePath))
             {
-                fileSystem.DeleteFile(filePath);
+                _options.LogWarning("Duplicate dump file detected.");
+                return null;
             }
 
             return filePath;
@@ -140,6 +139,11 @@ internal class MemoryMonitor
             _options.LogError(ex, "Failed to resolve appropriate memory dump location.");
             return null;
         }
+    }
+
+    public void Dispose()
+    {
+        _cancellationTokenSource.Cancel();
     }
 }
 
