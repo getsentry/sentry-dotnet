@@ -12,7 +12,7 @@ public class MemoryMonitorTests
             DiagnosticLogger = Substitute.For<IDiagnosticLogger>()
         };
 
-        public Action<string> OnDumpCollected { get; set; } = _ => {  };
+        public Action<string> OnDumpCollected { get; set; } = _ => { };
 
         private const short ThresholdPercentage = 5;
 

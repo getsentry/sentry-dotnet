@@ -30,7 +30,7 @@ public class Debouncer
     /// <param name="cooldown">An optional obligatory cooldown since the last event before any other events will be processed</param>
     /// <returns></returns>
     public static Debouncer PerMinute(int eventMaximum = 1, TimeSpan? cooldown = null)
-        => new (DebouncerInterval.Minute, eventMaximum, cooldown);
+        => new(DebouncerInterval.Minute, eventMaximum, cooldown);
 
     /// <summary>
     /// Creates a debouncer that limits the number of events per hour
@@ -39,7 +39,7 @@ public class Debouncer
     /// <param name="cooldown">An optional obligatory cooldown since the last event before any other events will be processed</param>
     /// <returns></returns>
     public static Debouncer PerHour(int eventMaximum = 1, TimeSpan? cooldown = null)
-        => new (DebouncerInterval.Hour, eventMaximum, cooldown);
+        => new(DebouncerInterval.Hour, eventMaximum, cooldown);
 
     /// <summary>
     /// Creates a debouncer that limits the number of events per day
@@ -48,7 +48,7 @@ public class Debouncer
     /// <param name="cooldown">An optional obligatory cooldown since the last event before any other events will be processed</param>
     /// <returns></returns>
     public static Debouncer PerDay(int eventMaximum = 1, TimeSpan? cooldown = null)
-        => new (DebouncerInterval.Day, eventMaximum, cooldown);
+        => new(DebouncerInterval.Day, eventMaximum, cooldown);
 
     /// <summary>
     /// Creates a debouncer that limits the number of events that will be processed for the lifetime of the application
@@ -57,7 +57,7 @@ public class Debouncer
     /// <param name="cooldown">An optional obligatory cooldown since the last event before any other events will be processed</param>
     /// <returns></returns>
     public static Debouncer PerApplicationLifetime(int eventMaximum = 1, TimeSpan? cooldown = null)
-        => new (DebouncerInterval.ApplicationLifetime, eventMaximum, cooldown);
+        => new(DebouncerInterval.ApplicationLifetime, eventMaximum, cooldown);
 
     private TimeSpan IntervalTimeSpan()
     {

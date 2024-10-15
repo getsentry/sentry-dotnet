@@ -61,20 +61,21 @@ SentrySdk.Init(options =>
 });
 
 #if NET6_0_OR_GREATER
-    await Task.Delay(1000);
-    Console.WriteLine();
-    Console.WriteLine("Choose a demo:");
-    Console.WriteLine("1. Tracing");
-    Console.WriteLine("2. Heap Dump");
-    Console.WriteLine("... or press any other key to quit.");
-    switch (Console.ReadKey().KeyChar) {
-        case '1':
-            await TracingDemo();
-            break;
-        case '2':
-            await HeapDumpDemo(cts.Token);
-            break;
-    }
+await Task.Delay(1000);
+Console.WriteLine();
+Console.WriteLine("Choose a demo:");
+Console.WriteLine("1. Tracing");
+Console.WriteLine("2. Heap Dump");
+Console.WriteLine("... or press any other key to quit.");
+switch (Console.ReadKey().KeyChar)
+{
+    case '1':
+        await TracingDemo();
+        break;
+    case '2':
+        await HeapDumpDemo(cts.Token);
+        break;
+}
 #else
     await TracingDemo();
 #endif
