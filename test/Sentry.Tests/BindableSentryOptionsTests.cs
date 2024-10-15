@@ -5,7 +5,13 @@ namespace Sentry.Tests;
 
 public class BindableSentryOptionsTests : BindableTests<SentryOptions>
 {
-    public BindableSentryOptionsTests() : base(nameof(SentryOptions.ExperimentalMetrics))
+    public BindableSentryOptionsTests() : base(
+        nameof(SentryOptions.ExperimentalMetrics)
+#if NET6_0_OR_GREATER && !(IOS || ANDROID)
+        , nameof(SentryOptions.HeapDumpDebouncer)
+        , nameof(SentryOptions.HeapDumpTrigger)
+#endif
+    )
     {
     }
 

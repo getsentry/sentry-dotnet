@@ -27,10 +27,10 @@ public class MemoryMonitorTests
     private readonly Fixture _fixture = new();
 
     [Fact]
-    public void Constructor_TriggersConfigured_Throws()
+    public void Constructor_NoTriggersConfigured_Throws()
     {
         // Arrange
-        _fixture.Options.HeapDumpTrigger = HeapDumpTriggers.Never;
+        _fixture.Options.HeapDumpTrigger = null;
 
         // Act
         Assert.Throws<ArgumentException>(() => new MemoryMonitor(_fixture.Options, _fixture.OnDumpCollected));

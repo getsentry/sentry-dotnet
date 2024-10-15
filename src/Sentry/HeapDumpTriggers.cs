@@ -10,7 +10,6 @@ public delegate bool HeapDumpTrigger(long usedMemory, long totalMemory);
 
 internal static class HeapDumpTriggers
 {
-    internal static HeapDumpTrigger Never { get; }  = (_, _) => false;
     internal static HeapDumpTrigger MemoryPercentageThreshold(int memoryPercentageThreshold)
     {
         if (memoryPercentageThreshold is < 0 or > 100)

@@ -75,6 +75,13 @@ namespace Sentry
         ManagedBackgroundThread = 1,
         Native = 2,
     }
+    public class Debouncer
+    {
+        public static Sentry.Debouncer PerApplicationLifetime(int eventMaximum = 1, System.TimeSpan? cooldown = default) { }
+        public static Sentry.Debouncer PerDay(int eventMaximum = 1, System.TimeSpan? cooldown = default) { }
+        public static Sentry.Debouncer PerHour(int eventMaximum = 1, System.TimeSpan? cooldown = default) { }
+        public static Sentry.Debouncer PerMinute(int eventMaximum = 1, System.TimeSpan? cooldown = default) { }
+    }
     [System.Flags]
     public enum DeduplicateMode
     {
@@ -125,6 +132,7 @@ namespace Sentry
     {
         public static void SetTags(this Sentry.IHasTags hasTags, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> tags) { }
     }
+    public delegate bool HeapDumpTrigger(long usedMemory, long totalMemory);
     public static class HintTypes
     {
         public const string HttpResponseMessage = "http-response-message";
@@ -652,7 +660,6 @@ namespace Sentry
         public bool AttachStacktrace { get; set; }
         public bool AutoSessionTracking { get; set; }
         public System.TimeSpan AutoSessionTrackingInterval { get; set; }
-        public short? AutomaticHeapDumpMemoryThreshold { get; set; }
         public Sentry.Extensibility.IBackgroundWorker? BackgroundWorker { get; set; }
         public string? CacheDirectoryPath { get; set; }
         public bool CaptureFailedRequests { get; set; }
@@ -676,6 +683,7 @@ namespace Sentry
         public System.Collections.Generic.IList<Sentry.HttpStatusCodeRange> FailedRequestStatusCodes { get; set; }
         public System.Collections.Generic.IList<Sentry.StringOrRegex> FailedRequestTargets { get; set; }
         public System.TimeSpan FlushTimeout { get; set; }
+        public Sentry.Debouncer HeapDumpDebouncer { get; set; }
         public Sentry.SentryLevel HeapDumpEventLevel { get; set; }
         public System.Net.IWebProxy? HttpProxy { get; set; }
         public System.TimeSpan InitCacheFlushTimeout { get; set; }
@@ -737,6 +745,8 @@ namespace Sentry
         public void DisableSystemDiagnosticsMetricsIntegration() { }
         public void DisableUnobservedTaskExceptionCapture() { }
         public void DisableWinUiUnhandledExceptionIntegration() { }
+        public void EnableHeapDumps(Sentry.HeapDumpTrigger trigger) { }
+        public void EnableHeapDumps(short memoryPercentageThreshold) { }
         public System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors() { }
         public System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> GetAllExceptionProcessors() { }
         public System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryTransactionProcessor> GetAllTransactionProcessors() { }
