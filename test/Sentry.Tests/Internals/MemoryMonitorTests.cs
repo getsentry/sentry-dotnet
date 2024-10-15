@@ -3,6 +3,9 @@ namespace Sentry.Tests.Internals;
 
 public class MemoryMonitorTests
 {
+    private HeapDumpTrigger NeverTrigger { get; } = (_, _) => false;
+    private HeapDumpTrigger AlwaysTrigger { get; } = (_, _) => true;
+
     private class Fixture
     {
         public SentryOptions Options { get; set; } = new()
@@ -14,13 +17,14 @@ public class MemoryMonitorTests
 
         public Action<string> OnDumpCollected { get; set; } = _ => { };
 
+        public Action OnCaptureDump { get; set; } = null;
+
         private const short ThresholdPercentage = 5;
 
         public MemoryMonitor GetSut()
         {
-            Options.EnableHeapDumps(ThresholdPercentage);
             Options.DiagnosticLogger?.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-            return new MemoryMonitor(Options, OnDumpCollected);
+            return new MemoryMonitor(Options, OnDumpCollected, OnCaptureDump);
         }
     }
 
@@ -37,9 +41,61 @@ public class MemoryMonitorTests
     }
 
     [Fact]
+    public void CheckMemoryUsage_Debounced_DoesNotCapture()
+    {
+        // Arrange
+        _fixture.Options.HeapDumpTrigger = AlwaysTrigger;
+        _fixture.Options.HeapDumpDebouncer = Debouncer.PerApplicationLifetime(0); // but always debounce
+        var dumpCaptured = false;
+        _fixture.OnCaptureDump = () => dumpCaptured = true;
+        using var sut = _fixture.GetSut();
+
+        // Act
+        sut.CheckMemoryUsage();
+
+        // Assert
+        dumpCaptured.Should().BeFalse();
+    }
+
+    [Fact]
+    public void CheckMemoryUsage_NotTriggered_DoesNotCapture()
+    {
+        // Arrange
+        _fixture.Options.HeapDumpTrigger = NeverTrigger;
+        _fixture.Options.HeapDumpDebouncer = Debouncer.PerApplicationLifetime(int.MaxValue); // never debounce
+        var dumpCaptured = false;
+        _fixture.OnCaptureDump = () => dumpCaptured = true;
+        using var sut = _fixture.GetSut();
+
+        // Act
+        sut.CheckMemoryUsage();
+
+        // Assert
+        dumpCaptured.Should().BeFalse();
+    }
+
+    [Fact]
+    public void CheckMemoryUsage_TriggeredNotDebounced_Captures()
+    {
+        // Arrange
+        _fixture.Options.HeapDumpTrigger = AlwaysTrigger;
+        _fixture.Options.HeapDumpDebouncer = Debouncer.PerApplicationLifetime(int.MaxValue); // never debounce
+        var dumpCaptured = false;
+        _fixture.OnCaptureDump = () => dumpCaptured = true;
+        using var sut = _fixture.GetSut();
+
+        // Act
+        sut.CheckMemoryUsage();
+
+        // Assert
+        dumpCaptured.Should().BeTrue();
+    }
+
+    [Fact]
     public void CaptureMemoryDump_DisableFileWrite_DoesNotCapture()
     {
         // Arrange
+        _fixture.Options.HeapDumpTrigger = AlwaysTrigger;
         _fixture.Options.DisableFileWrite = true;
         using var sut = _fixture.GetSut();
 
@@ -55,6 +111,7 @@ public class MemoryMonitorTests
     public void CaptureMemoryDump_CapturesDump()
     {
         // Arrange
+        _fixture.Options.HeapDumpTrigger = AlwaysTrigger;
         _fixture.Options.FileSystem = new FakeFileSystem();
         string dumpFile = null;
         _fixture.OnDumpCollected = path => dumpFile = path;
@@ -71,6 +128,7 @@ public class MemoryMonitorTests
     public void CaptureMemoryDump_UnresolvedDumpLocation_DoesNotCapture()
     {
         // Arrange
+        _fixture.Options.HeapDumpTrigger = AlwaysTrigger;
         _fixture.Options.FileSystem = Substitute.For<IFileSystem>();
         _fixture.Options.FileSystem.CreateDirectory(Arg.Any<string>()).Returns(false);
         using var sut = _fixture.GetSut();
@@ -86,6 +144,7 @@ public class MemoryMonitorTests
     public void TryGetDumpLocation_DirectoryCreationFails_ReturnsNull()
     {
         // Arrange
+        _fixture.Options.HeapDumpTrigger = AlwaysTrigger;
         _fixture.Options.FileSystem = Substitute.For<IFileSystem>();
         _fixture.Options.FileSystem.CreateDirectory(Arg.Any<string>()).Returns(false);
         using var sut = _fixture.GetSut();
@@ -104,6 +163,7 @@ public class MemoryMonitorTests
     public void TryGetDumpLocation_DumpFileExists_ReturnsNull()
     {
         // Arrange
+        _fixture.Options.HeapDumpTrigger = AlwaysTrigger;
         _fixture.Options.FileSystem = Substitute.For<IFileSystem>();
         _fixture.Options.FileSystem.CreateDirectory(Arg.Any<string>()).Returns(true);
         _fixture.Options.FileSystem.FileExists(Arg.Any<string>()).Returns(true);
@@ -123,6 +183,7 @@ public class MemoryMonitorTests
     public void TryGetDumpLocation_Exception_LogsError()
     {
         // Arrange
+        _fixture.Options.HeapDumpTrigger = AlwaysTrigger;
         _fixture.Options.FileSystem = Substitute.For<IFileSystem>();
         _fixture.Options.FileSystem.CreateDirectory(Arg.Any<string>()).Throws(_ => new Exception());
         using var sut = _fixture.GetSut();
@@ -139,6 +200,7 @@ public class MemoryMonitorTests
     public void TryGetDumpLocation_ReturnsFilePath()
     {
         // Arrange
+        _fixture.Options.HeapDumpTrigger = AlwaysTrigger;
         _fixture.Options.FileSystem = new FakeFileSystem();
         using var sut = _fixture.GetSut();
 

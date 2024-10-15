@@ -20,21 +20,23 @@ internal class MemoryMonitor : IDisposable
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-    private Action<string> OnDumpCollected { get; }
+    private readonly Action _onCaptureDump; // Just for testing purposes
+    private readonly Action<string> _onDumpCollected;
 
-    public MemoryMonitor(SentryOptions options, Action<string> onDumpCollected)
+    public MemoryMonitor(SentryOptions options, Action<string> onDumpCollected, Action? onCaptureDump = null)
     {
         _options = options;
         _dumpTrigger = options.HeapDumpTrigger
                        ?? throw new ArgumentException("No heap dump trigger configured on the options", nameof(options));
-        OnDumpCollected = onDumpCollected;
+        _onDumpCollected = onDumpCollected;
+        _onCaptureDump = onCaptureDump ?? CaptureMemoryDump;
 
         _totalMemory = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
 
         GarbageCollectionMonitor.Start(CheckMemoryUsage, _cancellationTokenSource.Token);
     }
 
-    private void CheckMemoryUsage()
+    internal void CheckMemoryUsage()
     {
         var eventTime = DateTimeOffset.UtcNow;
         if (!_options.HeapDumpDebouncer.CanProcess(eventTime))
@@ -54,7 +56,7 @@ internal class MemoryMonitor : IDisposable
         _options.LogDebug("Total Memory: {0:N0} bytes", _totalMemory);
         _options.LogDebug("Memory used: {0:N0} bytes ({1:N2}%)", usedMemory, usedMemoryPercentage);
         _options.LogDebug("Automatic heap dump triggered");
-        CaptureMemoryDump();
+        _onCaptureDump();
     }
 
     internal void CaptureMemoryDump()
@@ -96,11 +98,11 @@ internal class MemoryMonitor : IDisposable
 
         if (!_options.FileSystem.FileExists(dumpFile))
         {
-            // if this happens, hopefully there would be more information in the standard output from gcdump above
+            // if this happens, hopefully there would be more information in the standard output from the process above
             _options.LogError("Unexpected error creating memory dump. Check debug logs for more information.");
         }
 
-        OnDumpCollected(dumpFile);
+        _onDumpCollected(dumpFile);
     }
 
     internal string? TryGetDumpLocation()
