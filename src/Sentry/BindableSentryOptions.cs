@@ -21,10 +21,6 @@ internal partial class BindableSentryOptions
     public string? Environment { get; set; }
     public string? Dsn { get; set; }
     public int? MaxQueueItems { get; set; }
-#if NET6_0_OR_GREATER
-    public short? AutomaticHeapDumpMemoryThreshold { get; set; }
-    public SentryLevel? HeapDumpEventLevel { get; set; }
-#endif
     public int? MaxCacheItems { get; set; }
     public TimeSpan? ShutdownTimeout { get; set; }
     public TimeSpan? FlushTimeout { get; set; }
@@ -72,10 +68,6 @@ internal partial class BindableSentryOptions
         options.Environment = Environment ?? options.Environment;
         options.Dsn = Dsn ?? options.Dsn;
         options.MaxQueueItems = MaxQueueItems ?? options.MaxQueueItems;
-#if NET6_0_OR_GREATER
-        options.AutomaticHeapDumpMemoryThreshold = AutomaticHeapDumpMemoryThreshold ?? options.AutomaticHeapDumpMemoryThreshold;
-        options.HeapDumpEventLevel = HeapDumpEventLevel ?? options.HeapDumpEventLevel;
-#endif
         options.MaxCacheItems = MaxCacheItems ?? options.MaxCacheItems;
         options.ShutdownTimeout = ShutdownTimeout ?? options.ShutdownTimeout;
         options.FlushTimeout = FlushTimeout ?? options.FlushTimeout;

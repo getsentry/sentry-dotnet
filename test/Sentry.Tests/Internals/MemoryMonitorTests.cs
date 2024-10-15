@@ -13,16 +13,28 @@ public class MemoryMonitorTests
         };
 
         public Action<string> OnDumpCollected { get; set; } = _ => {  };
-        public short ThresholdPercentage { get; set; } = 5;
+
+        private const short ThresholdPercentage = 5;
 
         public MemoryMonitor GetSut()
         {
+            Options.EnableHeapDumps(ThresholdPercentage);
             Options.DiagnosticLogger?.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-            return new(Options, ThresholdPercentage, OnDumpCollected);
+            return new MemoryMonitor(Options, OnDumpCollected);
         }
     }
 
     private readonly Fixture _fixture = new();
+
+    [Fact]
+    public void Constructor_TriggersConfigured_Throws()
+    {
+        // Arrange
+        _fixture.Options.HeapDumpTrigger = HeapDumpTriggers.Never;
+
+        // Act
+        Assert.Throws<ArgumentException>(() => new MemoryMonitor(_fixture.Options, _fixture.OnDumpCollected));
+    }
 
     [Fact]
     public void CaptureMemoryDump_DisableFileWrite_DoesNotCapture()

@@ -40,12 +40,16 @@ SentrySdk.Init(options =>
 #if NET6_0_OR_GREATER
     // This option tells Sentry to capture a heap dump when the process uses more than 5% of the total memory. The heap
     // dump will be sent to Sentry as a file attachment.
-    options.AutomaticHeapDumpMemoryThreshold = 5;
+    options.EnableHeapDumps(5);
 
     // This determines the level of heap dump events that are sent to Sentry
     options.HeapDumpEventLevel = SentryLevel.Warning;
 
-    // This is an example of intercepting events before they get sent to Sentry. Typically you might use this to
+    // A debouncer can be configured to tell Sentry how frequently to send heap dumps. In this case we've configured it
+    // to capture a maximum of 3 events per day and to wait at least 1 hour between each event.
+    options.HeapDumpDebouncer = Debouncer.PerDay(3, TimeSpan.FromHours(1));
+
+    // This is an example of intercepting events before they get sent to Sentry. Typically, you might use this to
     // filter events that you didn't want to send but in this case we're using it to detect when a heap dump has
     // been captured, so we know when to stop allocating memory in the heap dump demo.
     options.SetBeforeSend((evt, hint) =>

@@ -13,51 +13,48 @@ namespace Sentry.Internal;
 
 internal class MemoryMonitor : IDisposable
 {
-    private readonly SentryOptions _options;
     private readonly long _totalMemory;
-    internal readonly long _thresholdBytes;
-    private bool _dumpTriggered;
+
+    private readonly SentryOptions _options;
+    private readonly HeapDumpTrigger _dumpTrigger;
+
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     private Action<string> OnDumpCollected { get; }
 
-    public MemoryMonitor(SentryOptions options, short thresholdPercentage, Action<string> onDumpCollected)
+    public MemoryMonitor(SentryOptions options, Action<string> onDumpCollected)
     {
-        if (thresholdPercentage is < 0 or > 100)
-        {
-            throw new ArgumentException("Must be a value between 0 and 100", nameof(thresholdPercentage));
-        }
-
         _options = options;
+        _dumpTrigger = options.HeapDumpTrigger
+                       ?? throw new ArgumentException("No heap dump trigger configured on the options", nameof(options));
         OnDumpCollected = onDumpCollected;
 
         _totalMemory = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
-        var portion = (double)thresholdPercentage / 100;
-        _thresholdBytes = (long)Math.Ceiling(portion * _totalMemory);
-        _options.LogInfo("Automatic heap dump enabled if memory usage exceeds {0:N0} bytes ({1}%)", _thresholdBytes, thresholdPercentage);
 
         GarbageCollectionMonitor.Start(CheckMemoryUsage, _cancellationTokenSource.Token);
     }
 
     private void CheckMemoryUsage()
     {
-        // Get the memory used by the application
-        var usedMemory = Environment.WorkingSet;
-        // var usedMemory = System.Diagnostics.Process.GetCurrentProcess().PagedMemorySize64;
-
-        // Calculate the percentage of memory used
-        // var usedMemoryPercentage = GC.GetGCMemoryInfo().MemoryLoadBytes;
-        var usedMemoryPercentage = ((double)usedMemory / _totalMemory) * 100;
-
-        // Trigger the event if the threshold is exceeded
-        if (usedMemory > _thresholdBytes && !_dumpTriggered)
+        var eventTime = DateTimeOffset.UtcNow;
+        if (!_options.HeapDumpDebouncer.CanProcess(eventTime))
         {
-            _dumpTriggered = true;
-            _options.LogDebug("Total Memory: {0:N0} bytes", _totalMemory);
-            _options.LogDebug("Threshold: {0:N0} bytes", _thresholdBytes);
-            _options.LogDebug("Memory used: {0:N0} bytes ({1:N2}%)", usedMemory, usedMemoryPercentage);
-            CaptureMemoryDump();
+            return;
         }
+
+        var usedMemory = Environment.WorkingSet;
+        if (!_dumpTrigger(usedMemory, _totalMemory))
+        {
+            return;
+        }
+
+        _options.HeapDumpDebouncer.RecordOccurence(eventTime);
+
+        var usedMemoryPercentage = ((double)usedMemory / _totalMemory) * 100;
+        _options.LogDebug("Total Memory: {0:N0} bytes", _totalMemory);
+        _options.LogDebug("Memory used: {0:N0} bytes ({1:N2}%)", usedMemory, usedMemoryPercentage);
+        _options.LogDebug("Automatic heap dump triggered");
+        CaptureMemoryDump();
     }
 
     internal void CaptureMemoryDump()

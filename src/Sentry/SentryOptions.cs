@@ -532,30 +532,54 @@ public class SentryOptions
 #if NET6_0_OR_GREATER
 
     /// <summary>
-    /// Specifies a threshold for memory usage as a percentage of total available system memory. Sentry will
-    /// automatically capture a heap dump if the memory usage of the process exceeds this threshold. This can be useful
-    /// to diagnose memory leaks.
+    /// Configures a heap dump to be captured if the percentage of memory used exceeds a certain threshold.
+    /// This can be useful to diagnose memory leaks.
     /// </summary>
-    /// <remarks>Must be a value between 0 and 100</remarks>
-    public short? AutomaticHeapDumpMemoryThreshold
-    {
-        get => _automaticHeapDumpMemoryThreshold;
-        set
-        {
-            if (value is not null && (value < 0 || value > 100))
-            {
-                throw new ArgumentException("Must be a value between 0 and 100", nameof(value));
-            }
-
-            _automaticHeapDumpMemoryThreshold = value;
-        }
-    }
-    private short? _automaticHeapDumpMemoryThreshold;
+    /// <param name="memoryPercentageThreshold">
+    /// The memory threshold at which to trigger a heap dump, as a percentage of total available memory.
+    /// Must be a number between 1 and 99.
+    /// </param>
+    /// <remarks>
+    /// The <see cref="HeapDumpDebouncer"/> and <see cref="HeapDumpEventLevel"/> can be used to restrict how frequently
+    /// heap dumps are captured and the severity level associated with these events on Sentry.
+    /// </remarks>
+    public void EnableHeapDumps(short memoryPercentageThreshold)
+        => HeapDumpTrigger = HeapDumpTriggers.MemoryPercentageThreshold(memoryPercentageThreshold);
 
     /// <summary>
-    /// Specifies the event level to be used if the process exceeds the <see cref="AutomaticHeapDumpMemoryThreshold"/>
+    /// Configures Sentry to capture a heap dump based on a trigger function.
+    /// This can be useful to diagnose memory leaks.
+    /// </summary>
+    /// <param name="trigger">
+    /// A custom trigger function that accepts the current memory usage and total available memory as arguments and
+    /// return true to indicate that a heap dump should be captured or false otherwise.
+    /// </param>
+    /// <remarks>
+    /// The <see cref="HeapDumpDebouncer"/> and <see cref="HeapDumpEventLevel"/> can be used to restrict how frequently
+    /// heap dumps are captured and the severity level associated with these events on Sentry.
+    /// </remarks>
+    public void EnableHeapDumps(HeapDumpTrigger trigger) => HeapDumpTrigger = trigger;
+
+    internal HeapDumpTrigger? HeapDumpTrigger { get; set; }
+
+    /// <summary>
+    /// Specifies the event level to be used when capturing heap dumps. Defaults to <see cref="SentryLevel.Warning"/>.
     /// </summary>
     public SentryLevel HeapDumpEventLevel { get; set; } = SentryLevel.Warning;
+
+    /// <summary>
+    /// Limits the frequency at which heap dumps are captured. Defaults to one per application lifetime but this can be
+    /// changed by assigning a different <see cref="Debouncer"/>.
+    /// <example>
+    /// <code>
+    /// SentrySdk.Init(options => {
+    ///     // Configure other options...
+    ///     options.HeapDumpDebouncer = Debouncer.PerHour(1, TimeSpan.FromMinutes(5))
+    /// });
+    /// </code>
+    /// </example>
+    /// </summary>
+    public Debouncer HeapDumpDebouncer { get; set; } = Debouncer.PerApplicationLifetime();
 
 #endif
 
