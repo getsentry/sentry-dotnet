@@ -7,6 +7,18 @@ namespace Sentry.Testing;
 /// </summary>
 public static class SentryOptionsExtensions
 {
+    private static SentryOptions DidNotReceiveReceiveLog(this SentryOptions substitute, SentryLevel level)
+    {
+        substitute.DiagnosticLogger.DidNotReceive().Log(level, Arg.Any<string>(), null, Arg.Any<object[]>());
+        return substitute;
+    }
+
+    private static SentryOptions DidNotReceiveReceiveLog(this SentryOptions substitute, SentryLevel level, string message, params object[] args)
+    {
+        substitute.DiagnosticLogger.DidNotReceive().Log(level, message, null, args);
+        return substitute;
+    }
+
     private static SentryOptions ReceivedLog(this SentryOptions substitute, SentryLevel level)
     {
         substitute.DiagnosticLogger.Received().Log(level, Arg.Any<string>(), null, Arg.Any<object[]>());
@@ -19,11 +31,23 @@ public static class SentryOptionsExtensions
         return substitute;
     }
 
+    public static SentryOptions ReceivedLogDebug(this SentryOptions substitute)
+        => ReceivedLog(substitute, SentryLevel.Debug);
+
+    public static SentryOptions ReceivedLogDebug(this SentryOptions substitute, string message, params object[] args)
+        => ReceivedLog(substitute, SentryLevel.Debug, message, args);
+
     public static SentryOptions ReceivedLogInfo(this SentryOptions substitute)
         => ReceivedLog(substitute, SentryLevel.Info);
 
     public static SentryOptions ReceivedLogInfo(this SentryOptions substitute, string message, params object[] args)
         => ReceivedLog(substitute, SentryLevel.Info, message, args);
+
+    public static SentryOptions DidNotReceiveReceiveLogInfo(this SentryOptions substitute)
+        => DidNotReceiveReceiveLog(substitute, SentryLevel.Info);
+
+    public static SentryOptions DidNotReceiveReceiveLogInfo(this SentryOptions substitute, string message, params object[] args)
+        => DidNotReceiveReceiveLog(substitute, SentryLevel.Info, message, args);
 
     public static SentryOptions ReceivedLogWarning(this SentryOptions substitute)
         => ReceivedLog(substitute, SentryLevel.Warning);

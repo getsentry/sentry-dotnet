@@ -11,7 +11,8 @@ public class MemoryMonitorTests
             Debug = true,
             DiagnosticLogger = Substitute.For<IDiagnosticLogger>()
         };
-        public Action<string> OnDumpCollected { get; set; } = _ => { };
+
+        public Action<string> OnDumpCollected { get; set; } = _ => {  };
         public short ThresholdPercentage { get; set; } = 5;
 
         public MemoryMonitor GetSut()
@@ -22,6 +23,52 @@ public class MemoryMonitorTests
     }
 
     private readonly Fixture _fixture = new();
+
+    [Fact]
+    public void CaptureMemoryDump_DisableFileWrite_DoesNotCapture()
+    {
+        // Arrange
+        _fixture.Options.DisableFileWrite = true;
+        using var sut = _fixture.GetSut();
+
+        // Act
+        sut.CaptureMemoryDump();
+
+        // Assert
+        _fixture.Options.ReceivedLogDebug("File write has been disabled via the options. Unable to create memory dump.");
+        _fixture.Options.DidNotReceiveReceiveLogInfo("Creating a memory dump for Process ID: {0}", Arg.Any<int>());
+    }
+
+    [Fact]
+    public void CaptureMemoryDump_CapturesDump()
+    {
+        // Arrange
+        _fixture.Options.FileSystem = new FakeFileSystem();
+        string dumpFile = null;
+        _fixture.OnDumpCollected = path => dumpFile = path;
+        using var sut = _fixture.GetSut();
+
+        // Act
+        sut.CaptureMemoryDump();
+
+        // Assert
+        dumpFile.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void CaptureMemoryDump_UnresolvedDumpLocation_DoesNotCapture()
+    {
+        // Arrange
+        _fixture.Options.FileSystem = Substitute.For<IFileSystem>();
+        _fixture.Options.FileSystem.CreateDirectory(Arg.Any<string>()).Returns(false);
+        using var sut = _fixture.GetSut();
+
+        // Act
+        sut.CaptureMemoryDump();
+
+        // Assert
+        _fixture.Options.DidNotReceiveReceiveLogInfo("Creating a memory dump for Process ID: {0}", Arg.Any<int>());
+    }
 
     [Fact]
     public void TryGetDumpLocation_DirectoryCreationFails_ReturnsNull()
