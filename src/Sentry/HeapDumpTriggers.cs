@@ -23,4 +23,5 @@ internal static class HeapDumpTriggers
             var thresholdBytes = (long)Math.Ceiling(portion * totalMemory);
             return usedMemory > thresholdBytes;
         };
-    }}
+    }
+}
