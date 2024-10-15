@@ -5,7 +5,7 @@ namespace Sentry.Extensions.Logging.Tests;
 
 public class SentryLoggingOptionsTests : BindableTests<SentryLoggingOptions>
 {
-    public SentryLoggingOptionsTests() :  base(
+    public SentryLoggingOptionsTests() : base(
         nameof(SentryOptions.ExperimentalMetrics)
 #if NET6_0_OR_GREATER && !(IOS || ANDROID)
         , nameof(SentryOptions.HeapDumpDebouncer)
