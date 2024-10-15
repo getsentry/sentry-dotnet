@@ -23,8 +23,7 @@ public class EventProcessorTests
             await hub.FlushAsync();
         }
 
-        await Verify(transport.Envelopes)
-            .IgnoreStandardSentryMembers();
+        await Verify(transport.Envelopes);
     }
 
     [Fact]
@@ -43,8 +42,7 @@ public class EventProcessorTests
             await hub.FlushAsync();
         }
 
-        await Verify(transport.Envelopes)
-            .IgnoreStandardSentryMembers();
+        await Verify(transport.Envelopes);
     }
 
     public class TheEventProcessor : ISentryEventProcessor
@@ -69,8 +67,7 @@ public class EventProcessorTests
             await hub.FlushAsync();
         }
 
-        await Verify(transport.Envelopes)
-            .IgnoreStandardSentryMembers();
+        await Verify(transport.Envelopes);
     }
 
     public class DiscardEventProcessor : ISentryEventProcessor

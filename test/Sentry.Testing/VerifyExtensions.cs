@@ -6,39 +6,39 @@ namespace Sentry.Testing;
 
 public static class VerifyExtensions
 {
-    public static SettingsTask IgnoreStandardSentryMembers(this SettingsTask settings)
+    [ModuleInitializer]
+    public static void Initialize()
     {
-        return settings
-            .ScrubMachineName()
-            .ScrubUserName()
-            .AddExtraSettings(_ =>
-            {
-                _.Converters.Add(new SpansConverter());
-                _.Converters.Add(new ContextsConverter());
-                _.Converters.Add(new DebugImageConverter());
-                _.Converters.Add(new StackFrameConverter());
-            })
-            .IgnoreMembers("version", "elapsed")
-            .IgnoreMembersWithType<SdkVersion>()
-            .IgnoreMembersWithType<DateTimeOffset>()
-            .IgnoreMembersWithType<SpanId>()
-            .IgnoreMembersWithType<SentryId>()
-            .IgnoreMembers<SentryEvent>(
-                _ => _.Modules,
-                _ => _.Release)
-            .IgnoreMembers<SentryRequest>(
-                _ => _.Env,
-                _ => _.Url,
-                _ => _.Headers)
-            .IgnoreMembers<SessionUpdate>(
-                _ => _.Duration)
-            .IgnoreMembers<SentryTransaction>(
-                _ => _.Release)
-            .IgnoreMembers<SentryException>(
-                _ => _.Module,
-                _ => _.ThreadId)
-            .IgnoreMembers<SentryThread>(_ => _.Id)
-            .IgnoreStackTrace();
+        VerifierSettings.ScrubMachineName();
+        VerifierSettings.ScrubUserName();
+        VerifierSettings.AddExtraSettings(_ =>
+        {
+            _.Converters.Add(new SpansConverter());
+            _.Converters.Add(new ContextsConverter());
+            _.Converters.Add(new DebugImageConverter());
+            _.Converters.Add(new StackFrameConverter());
+        });
+        VerifierSettings.IgnoreMembers("version", "elapsed");
+        VerifierSettings.IgnoreMembersWithType<SdkVersion>();
+        VerifierSettings.IgnoreMembersWithType<DateTimeOffset>();
+        VerifierSettings.IgnoreMembersWithType<SpanId>();
+        VerifierSettings.IgnoreMembersWithType<SentryId>();
+        VerifierSettings.IgnoreMembers<SentryEvent>(
+            _ => _.Modules,
+            _ => _.Release);
+        VerifierSettings.IgnoreMembers<SentryRequest>(
+            _ => _.Env,
+            _ => _.Url,
+            _ => _.Headers);
+        VerifierSettings.IgnoreMembers<SessionUpdate>(
+            _ => _.Duration);
+        VerifierSettings.IgnoreMembers<SentryTransaction>(
+            _ => _.Release);
+        VerifierSettings.IgnoreMembers<SentryException>(
+            _ => _.Module,
+            _ => _.ThreadId);
+        VerifierSettings.IgnoreMembers<SentryThread>(_ => _.Id);
+        VerifierSettings.IgnoreStackTrace();
     }
 
     private class SpansConverter : WriteOnlyJsonConverter<IReadOnlyCollection<SentrySpan>>

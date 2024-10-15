@@ -49,8 +49,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         }
 
         var result = await Verify(transport.Payloads)
-            .IgnoreMember<IEventLike>(_ => _.Environment)
-            .IgnoreStandardSentryMembers();
+            .IgnoreMember<IEventLike>(_ => _.Environment);
         Assert.DoesNotContain("SHOULD NOT APPEAR IN PAYLOAD", result.Text);
     }
 #endif
@@ -138,7 +137,6 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
                 var efVersion = typeof(DbContext).Assembly.GetName().Version!.ToString(3);
                 return line.Replace(efVersion, "");
             })
-            .IgnoreStandardSentryMembers()
             .UniqueForRuntimeAndVersion();
         Assert.DoesNotContain("An error occurred while saving the entity changes", result.Text);
     }
@@ -214,7 +212,6 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
 
         var result = await Verify(transport.Payloads)
             .IgnoreMember<IEventLike>(_ => _.Environment)
-            .IgnoreStandardSentryMembers()
             .UniqueForRuntimeAndVersion();
         Assert.DoesNotContain("SHOULD NOT APPEAR IN PAYLOAD", result.Text);
     }

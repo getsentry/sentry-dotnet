@@ -33,7 +33,6 @@ public partial class ScopeExtensionsTests
         // Act
         _sut.Populate(_httpContext, SentryAspNetCoreOptions);
 
-        return Verify(_sut)
-            .IgnoreStandardSentryMembers();
+        return Verify(_sut);
     }
 }

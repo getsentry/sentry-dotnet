@@ -53,8 +53,7 @@ public class IntegrationTests
             }
         }
 
-        var result = await Verify(transport.Payloads)
-            .IgnoreStandardSentryMembers();
+        var result = await Verify(transport.Payloads);
         Assert.DoesNotContain(shouldNotAppearInPayload, result.Text);
         options.DisableDbInterceptionIntegration();
     }
