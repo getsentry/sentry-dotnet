@@ -5,7 +5,13 @@ namespace Sentry.Azure.Functions.Worker.Tests;
 
 public class BindableSentryAzureFunctionsOptionsTests : BindableTests<SentryAzureFunctionsOptions>
 {
-    public BindableSentryAzureFunctionsOptionsTests() : base(nameof(SentryAzureFunctionsOptions.ExperimentalMetrics))
+    public BindableSentryAzureFunctionsOptionsTests() : base(
+        nameof(SentryOptions.ExperimentalMetrics)
+#if NET6_0_OR_GREATER && !(IOS || ANDROID)
+        , nameof(SentryOptions.HeapDumpDebouncer)
+        , nameof(SentryOptions.HeapDumpTrigger)
+#endif
+    )
     {
     }
 

@@ -5,7 +5,13 @@ namespace Sentry.Maui.Tests;
 
 public class BindableSentryMauiOptionsTests : BindableTests<SentryMauiOptions>
 {
-    public BindableSentryMauiOptionsTests() : base(nameof(SentryMauiOptions.ExperimentalMetrics))
+    public BindableSentryMauiOptionsTests() : base(
+        nameof(SentryOptions.ExperimentalMetrics)
+#if NET6_0_OR_GREATER && !(IOS || ANDROID)
+        , nameof(SentryOptions.HeapDumpDebouncer)
+        , nameof(SentryOptions.HeapDumpTrigger)
+#endif
+    )
     {
     }
 
