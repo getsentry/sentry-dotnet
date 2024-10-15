@@ -5,7 +5,7 @@ namespace Sentry.AspNetCore.Tests;
 
 public class BindableSentryAspNetCoreOptionsTests : BindableTests<SentryAspNetCoreOptions>
 {
-    public BindableSentryAspNetCoreOptionsTests() :  base(
+    public BindableSentryAspNetCoreOptionsTests() : base(
         nameof(SentryOptions.ExperimentalMetrics)
 #if NET6_0_OR_GREATER && !(IOS || ANDROID)
         , nameof(SentryOptions.HeapDumpDebouncer)
