@@ -44,5 +44,6 @@ runs:
           wasm-tools maui-android \
           ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows macos' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
+          ${{ runner.os == 'Linux' && 'ios' || '' }} \
           --temp-dir "${{ runner.temp }}" \
           --skip-sign-check
