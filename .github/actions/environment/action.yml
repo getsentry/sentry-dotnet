@@ -36,7 +36,7 @@ runs:
           6.0.x
           7.0.x
           8.0.x
-          9.0.100-rc.1.24452.12
+          9.0.100-rc.2.24474.11
 
     - name: Install .NET Workloads
       shell: bash
