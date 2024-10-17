@@ -62,12 +62,7 @@ public static partial class SentrySdk
 
         // Convert NdkHandlerStrategy .net to Java Android
         var handlerStrat = (int)options.HandlerStrategy;
-        JavaSdk.Android.Core.NdkHandlerStrategy? handlerStrategy = null;
-        if (strats is not null)
-        {
-            handlerStrategy = strats.GetValue((int)options.HandlerStrategy) as JavaSdk.Android.Core.NdkHandlerStrategy;
-
-        }
+        JavaSdk.Android.Core.NdkHandlerStrategy? handlerStrategy = JavaSdk.Android.Core.NdkHandlerStrategy.Values()?[handlerStrat];
 
         var configuration = new OptionsConfigurationCallback(o =>
         {
@@ -196,11 +191,11 @@ public static partial class SentrySdk
         }
         else
         {
-            SentryAndroid.Init(AppContext, configuration);
+            SentryAndroid.Init(AppContext);
         }
 
         // Set options for the managed SDK that depend on the Android SDK. (The user will not be able to modify these.)
-        options.AddEventProcessor(new AndroidEventProcessor(nativeOptions!));
+        options.AddEventProcessor(new AndroidEventProcessor((SentryAndroidOptions)nativeOptions!));
         if (options.Android.LogCatIntegration != LogCatIntegrationType.None)
         {
             options.AddEventProcessor(new LogCatAttachmentEventProcessor(options.DiagnosticLogger, options.Android.LogCatIntegration, options.Android.LogCatMaxLines));
