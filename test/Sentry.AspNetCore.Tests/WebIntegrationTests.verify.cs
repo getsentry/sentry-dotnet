@@ -64,7 +64,6 @@ public class WebIntegrationTests
         server.Dispose();
 
         await Verify(new { result, transport.Payloads })
-            .IgnoreStandardSentryMembers()
             .ScrubAspMembers()
             .UniqueForTargetFrameworkAndVersion();
     }
@@ -136,7 +135,6 @@ public class WebIntegrationTests
         server.Dispose();
 
         await Verify(new { result, transport.Payloads })
-            .IgnoreStandardSentryMembers()
             .ScrubAspMembers();
     }
 

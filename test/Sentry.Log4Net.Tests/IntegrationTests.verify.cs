@@ -31,7 +31,6 @@ public class IntegrationTests
         }
 
         await Verify(transport.Envelopes)
-            .IgnoreStandardSentryMembers()
             .IgnoreMembers("ThreadName", "Domain", "Extra");
     }
 
@@ -82,7 +81,6 @@ public class IntegrationTests
                     transport.Envelopes,
                     warningsAndAbove
                 })
-            .IgnoreStandardSentryMembers()
             .IgnoreMembers("ThreadName", "Domain", "Extra");
         Assert.Empty(warningsAndAbove);
     }

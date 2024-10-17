@@ -57,8 +57,7 @@ public class IntegrationTests
         Log.CloseAndFlush();
 
         return Verify(transport.Envelopes)
-            .UniqueForRuntimeAndVersion()
-            .IgnoreStandardSentryMembers();
+            .UniqueForRuntimeAndVersion();
     }
 
     [Fact]
@@ -98,8 +97,7 @@ public class IntegrationTests
                         .Entries
                         .Where(_ => _.Level == SentryLevel.Error),
                     transport.Envelopes
-                })
-            .IgnoreStandardSentryMembers();
+                });
     }
 }
 #endif

@@ -43,7 +43,6 @@ public partial class HubTests
 
         await Verify(worker.Envelopes)
             .UniqueForRuntimeAndVersion()
-            .IgnoreStandardSentryMembers()
             .IgnoreMember("Stacktrace")
             .IgnoreMember<SentryThread>(_ => _.Name)
             .IgnoreInstance<DebugImage>(_ =>
