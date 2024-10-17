@@ -61,7 +61,7 @@ public static partial class SentrySdk
         SentryAndroidOptions? nativeOptions = null;
 
         // Convert NdkHandlerStrategy .net to Java Android
-        var strats = Enum.GetValuesAsUnderlyingType(typeof(NdkHandlerStrategy));
+        var handlerStrat = (int)options.HandlerStrategy;
         JavaSdk.Android.Core.NdkHandlerStrategy? handlerStrategy = null;
         if (strats is not null)
         {
