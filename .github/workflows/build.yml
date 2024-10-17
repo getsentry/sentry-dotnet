@@ -182,6 +182,7 @@ jobs:
           sudo apt update
           sudo apt install libcurl4-openssl-dev
 
+      # Possibly instead of installing net9.0 here we could pin the workload version when installing workloads
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
@@ -203,7 +204,8 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@00854ea68c109d98c75d956347303bf7c45b0277 # v3.2.1
 
-      - run: dotnet workload install android maui-android
+      - name: Install android Workloads  
+        run: dotnet workload install maui-android
 
       - name: Test
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
