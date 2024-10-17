@@ -9,6 +9,12 @@
     <SentryAttributesFile>Sentry.Attributes$(MSBuildProjectExtension.Replace('proj', ''))</SentryAttributesFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(PkgSentry)' == ''">
+    <!-- If Sentry was added via PackageReference, PkgSentry will already be set to the path of the Sentry nuget package.
+         However, older-style projects using packages.config will need us to resolve the path manually. -->
+    <PkgSentry Condition="$([System.String]::new('%(Reference.Identity)').StartsWith('Sentry,'))">$([System.IO.Directory]::GetParent(%(Reference.HintPath)).Parent.Parent.FullName)</PkgSentry>
+  </PropertyGroup>
+
   <Target Name="WriteSentryAttributes"
           Condition="$(Language) == 'VB' or $(Language) == 'C#' or $(Language) == 'F#'"
           BeforeTargets="BeforeCompile;CoreCompile"
@@ -32,9 +38,10 @@
     </WriteCodeFragment>
   </Target>
 
-  <Target Name="CheckSentryCLI" AfterTargets="Build" Condition="'$(InnerTargets)' == ''">
+  <!-- Set defaults for the Sentry properties. -->
+  <Target Name="SetSentryPropertyDefaults" AfterTargets="Build" Condition="'$(InnerTargets)' == ''">
     <PropertyGroup>
-      <!-- Set defaults for the Sentry properties. -->
+      <SentryBundleGCDump Condition="'$(SentryBundleGCDump)' == ''">false</SentryBundleGCDump>
       <SentryUploadSymbols Condition="'$(SentryUploadSymbols)' == ''">false</SentryUploadSymbols>
       <SentryUploadSources Condition="'$(SentryUploadSources)' == ''">false</SentryUploadSources>
       <SentrySetCommits Condition="'$(SentrySetCommits)' == ''">false</SentrySetCommits>
@@ -52,15 +59,24 @@
     </PropertyGroup>
   </Target>
 
-  <Target Name="PrepareSentryCLI" AfterTargets="CheckSentryCLI" Condition="'$(UseSentryCLI)' == 'true'">
-    <!--
-      If Sentry was added via PackageReference, PkgSentry will already be set to the path of the Sentry nuget package.
-      However, older-style projects using packages.config will need us to resolve the path manually.
-    -->
-    <PropertyGroup Condition="'$(SentryCLIDirectory)' == '' And '$(PkgSentry)' == ''">
-      <PkgSentry Condition="$([System.String]::new('%(Reference.Identity)').StartsWith('Sentry,'))">$([System.IO.Directory]::GetParent(%(Reference.HintPath)).Parent.Parent.FullName)</PkgSentry>
+  <Target Name="IncludeGCDump" AfterTargets="SetSentryPropertyDefaults" Condition="'$(SentryBundleGCDump)' == 'true'">
+    <!-- Sentry CLI comes from the Sentry Nuget package when installed. -->
+    <PropertyGroup Condition="'$(PkgSentry)' != '' and '$(GCDumpDirectory)' == ''">
+      <GCDumpDirectory>$(PkgSentry)\tools\dotnet-gcdump\</GCDumpDirectory>
     </PropertyGroup>
 
+    <!-- Copy the files to the build output -->
+    <ItemGroup Condition="Exists('$(GCDumpDirectory)')">
+      <GCDumpFiles Include="$(GCDumpDirectory)**\*.*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(GCDumpFiles)" DestinationFolder="$(OutputPath)dotnet-gcdump\%(RecursiveDir)" SkipUnchangedFiles="true" />
+
+    <Message Importance="high" Text="dotnet-gcdump not found at: '$(GCDumpDirectory)'"  Condition="!Exists('$(GCDumpDirectory)')"/>
+  </Target>
+
+
+  <Target Name="PrepareSentryCLI" AfterTargets="SetSentryPropertyDefaults" Condition="'$(UseSentryCLI)' == 'true'">
     <!-- Sentry CLI comes from the Sentry Nuget package when installed. -->
     <PropertyGroup Condition="'$(SentryCLIDirectory)' == '' And '$(PkgSentry)' != ''">
       <SentryCLIDirectory>$(PkgSentry)\tools\</SentryCLIDirectory>

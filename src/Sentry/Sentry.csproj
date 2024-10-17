@@ -23,6 +23,7 @@
   <Import Project="Platforms\Cocoa\Sentry.Cocoa.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
   <Import Project="Platforms\Native\Sentry.Native.targets"
         Condition="'$(TargetPlatformIdentifier)' != 'android' and '$(TargetPlatformIdentifier)' != 'ios' and '$(TargetPlatformIdentifier)' != 'maccatalyst'"/>
+  <Import Project="GCDump.props" />
 
   <PropertyGroup Condition="'$(FrameworkSupportsAot)' == 'true'">
     <IsAotCompatible>true</IsAotCompatible>
@@ -141,7 +142,7 @@
   <ItemGroup Condition="'$(SentryCLIDirectory)' != ''">
     <None Include="$(SentryCLIDirectory)**" Pack="true" PackagePath="tools\" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <InternalsVisibleTo Include="Sentry.Android.AssemblyReader.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNet" PublicKey="$(SentryPublicKey)" />
