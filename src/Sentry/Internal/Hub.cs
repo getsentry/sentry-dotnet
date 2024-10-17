@@ -14,6 +14,10 @@ internal class Hub : IHub, IMetricHub, IDisposable
     private readonly SentryOptions _options;
     private readonly RandomValuesFactory _randomValuesFactory;
 
+#if NET6_0_OR_GREATER && !(IOS || ANDROID)
+    private readonly MemoryMonitor? _memoryMonitor;
+#endif
+
     private int _isPersistedSessionRecovered;
 
     // Internal for testability
@@ -62,6 +66,13 @@ internal class Hub : IHub, IMetricHub, IDisposable
             // Push the first scope so the async local starts from here
             PushScope();
         }
+
+#if NET6_0_OR_GREATER && !(IOS || ANDROID)
+        if (options.HeapDumpTrigger is not null)
+        {
+            _memoryMonitor = new MemoryMonitor(options, CaptureHeapDump);
+        }
+#endif
 
         if (options.ExperimentalMetrics is not null)
         {
@@ -496,6 +507,34 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
+#if NET6_0_OR_GREATER && !(IOS || ANDROID)
+    public void CaptureHeapDump(string dumpFile)
+    {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        try
+        {
+            _options.LogDebug("Capturing heap dump '{0}'", dumpFile);
+
+            var evt = new SentryEvent
+            {
+                Message = "Memory threshold exceeded",
+                Level = _options.HeapDumpEventLevel
+            };
+            var hint = new SentryHint(_options);
+            hint.AddAttachment(dumpFile);
+            CaptureEvent(evt, CurrentScope, hint);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to capture heap dump");
+        }
+    }
+#endif
+
     public void CaptureUserFeedback(UserFeedback userFeedback)
     {
         if (!IsEnabled)
@@ -652,6 +691,10 @@ internal class Hub : IHub, IMetricHub, IDisposable
         {
             return;
         }
+
+#if NET6_0_OR_GREATER && !(IOS || ANDROID)
+        _memoryMonitor?.Dispose();
+#endif
 
         try
         {
