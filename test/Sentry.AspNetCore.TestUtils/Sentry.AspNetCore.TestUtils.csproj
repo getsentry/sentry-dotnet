@@ -30,10 +30,15 @@
   <ItemGroup Condition="$(TargetFramework) == 'net48'">
     <PackageReference Include="Microsoft.AspNetCore" Version="2.1.7" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.1.1" />
+    <!-- https://github.com/advisories/GHSA-hxrm-9w7p-39cc -->
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.1.22" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.1.1" />
 
     <!-- This is needed because the version that is brought in transitively also has a vulnerability warning -->
     <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.1.25" />
+    <!-- https://github.com/advisories/GHSA-vmch-3w2x-vhgq -->
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets" Version="2.1.40" />
+
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework) == 'net6.0'">

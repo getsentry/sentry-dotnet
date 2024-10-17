@@ -1,5 +1,9 @@
 # Changelog
 
+## Next Major Release (alpha)
+
+- Added support for `.NET 9` (preview) ([#3513](https://github.com/getsentry/sentry-dotnet/pull/3513))
+
 ## Version Five
 
 ### API Changes
