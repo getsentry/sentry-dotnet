@@ -59,6 +59,16 @@ public static partial class SentrySdk
 
         // Define the configuration for the Android SDK
         SentryAndroidOptions? nativeOptions = null;
+
+        // Convert NdkHandlerStrategy .net to Java Android
+        var strats = Enum.GetValuesAsUnderlyingType(typeof(NdkHandlerStrategy));
+        JavaSdk.Android.Core.NdkHandlerStrategy? handlerStrategy = null;
+        if (strats is not null)
+        {
+            handlerStrategy = strats.GetValue((int)options.HandlerStrategy) as JavaSdk.Android.Core.NdkHandlerStrategy;
+
+        }
+
         var configuration = new OptionsConfigurationCallback(o =>
         {
             // Capture the android options reference on the outer scope
@@ -87,6 +97,7 @@ public static partial class SentrySdk
             o.ServerName = options.ServerName;
             o.SessionTrackingIntervalMillis = (long)options.AutoSessionTrackingInterval.TotalMilliseconds;
             o.ShutdownTimeoutMillis = (long)options.ShutdownTimeout.TotalMilliseconds;
+            o.SetNativeHandlerStrategy(handlerStrategy ?? JavaSdk.Android.Core.NdkHandlerStrategy.SentryHandlerStrategyDefault);
 
             if (options.CacheDirectoryPath is { } cacheDirectoryPath)
             {

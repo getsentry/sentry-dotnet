@@ -77,6 +77,16 @@ public class SentryOptions
         set => _isGlobalModeEnabled = value;
     }
 #endif
+    private NdkHandlerStrategy _handlerStrategy = NdkHandlerStrategy.SENTRY_HANDLER_STRATEGY_DEFAULT;
+    /// <summary>
+    /// Handler Strategy
+    /// </summary>
+    public NdkHandlerStrategy HandlerStrategy
+    {
+        get { return _handlerStrategy; }
+        set { _handlerStrategy = value; }
+        
+    }
 
     /// <summary>
     /// A scope set outside of Sentry SDK. If set, the global parameters from the SDK's scope will be sent to the observed scope.<br/>
