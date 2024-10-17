@@ -76,7 +76,22 @@ internal class MemoryMonitor : IDisposable
         var processId = Environment.ProcessId;
         _options.LogInfo("Creating a memory dump for Process ID: {0}", processId);
 
-        var command = $"dotnet-gcdump collect -p {processId} -o '{dumpFile}'";
+        // Check which patth to use for dotnet-gcdump. If it's been bundled with the application, it will be available
+        // in the `dotnet-gcdump` folder of the application directory. Otherwise we assume it has been installed globally.
+        var bundledToolPath = Path.Combine(AppContext.BaseDirectory, "dotnet-gcdump", "dotnet-gcdump.dll");
+        if (File.Exists(bundledToolPath))
+        {
+            _options.LogDebug($"Using bundled version of dotnet-gcdump from: {bundledToolPath}");
+        }
+        else
+        {
+            _options.LogDebug("Using global version of dotnet-gcdump");
+        }
+
+        var arguments = $"collect -p {processId} -o '{dumpFile}'";
+        var command = File.Exists(bundledToolPath)
+            ? $"dotnet {bundledToolPath} {arguments}"
+            : $"dotnet-gcdump {arguments}";
         var startInfo = new ProcessStartInfo
         {
             FileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "cmd.exe" : "/bin/bash",
