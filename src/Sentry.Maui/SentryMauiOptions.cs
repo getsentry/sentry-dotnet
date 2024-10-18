@@ -67,11 +67,11 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// </remarks>
     public bool AttachScreenshot { get; set; }
 
-    private Func<SentryEvent, SentryHint, SentryEvent?>? _beforeCaptureScreenshot;
+    private Action<SentryHint>? _beforeCaptureScreenshot;
     /// <summary>
     /// Action performed before attaching a screenshot
     /// </summary>
-    internal Func<SentryEvent, SentryHint, SentryEvent?>? BeforeCaptureScreenshotInternal => _beforeCaptureScreenshot;
+    internal Action<SentryHint>? BeforeCaptureScreenshotInternal => _beforeCaptureScreenshot;
 
     /// <summary>
     /// Configures a callback function to be invoked before taking a screenshot
@@ -83,9 +83,9 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// </remarks>
     /// <param name="beforeCaptureScreenshot"></param>
     ///<param name="skipScreenshot">prevent screenshot from being taken</param>
-    public void BeforeCaptureScreenshot(Func<SentryEvent, SentryEvent?> beforeCaptureScreenshot, bool skipScreenshot = false)
+    public void BeforeCaptureScreenshot(Action beforeCaptureScreenshot, bool skipScreenshot = false)
     {
-        _beforeCaptureScreenshot = (@event, hint) =>
+        _beforeCaptureScreenshot = (hint) =>
         {
             if (skipScreenshot)
             {
@@ -96,7 +96,6 @@ public class SentryMauiOptions : SentryLoggingOptions
             {
                 hint.Attachments.Add(new ScreenshotAttachment(this));
             }
-            return beforeCaptureScreenshot(@event);
         };
     }
 }

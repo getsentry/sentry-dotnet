@@ -67,9 +67,8 @@ public class SentryMauiOptionsTests
         options.AttachScreenshot = true;
 
         // Act
-        options.BeforeCaptureScreenshot((SentryEvent @event) =>
+        options.BeforeCaptureScreenshot(() =>
         {
-            return @event;
         });
 
         // Assert
@@ -85,9 +84,8 @@ public class SentryMauiOptionsTests
         options.AttachScreenshot = true;
 
         // Act
-        options.BeforeCaptureScreenshot((SentryEvent @event) =>
+        options.BeforeCaptureScreenshot(() =>
         {
-            return @event;
         }, skipScreenshot:true);
 
         // Assert
