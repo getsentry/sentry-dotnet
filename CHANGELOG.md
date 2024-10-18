@@ -2,8 +2,10 @@
 
 ## Unreleased
 
-### Features
-- Implement Handler Strategy ([#3694](https://github.com/getsentry/sentry-dotnet/pull/3694))
+### Fixes
+
+- Android: Fix for SIGSEGV reported by Sentry when a NullReferenceException is thrown in Release mode ([#3694](https://github.com/getsentry/sentry-dotnet/pull/3694))
+  - To turn it on, set: `options.HandlerStrategy = NdkHandlerStrategy.SENTRY_HANDLER_STRATEGY_CHAIN_AT_START;`
 
 ## 4.12.1
 
