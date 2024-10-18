@@ -83,7 +83,7 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// </remarks>
     /// <param name="beforeCaptureScreenshot"></param>
     ///<param name="skipScreenshot">prevent screenshot from being taken</param>
-    public void BeforeCaptureScreenshot(Func<SentryEvent, SentryHint, SentryEvent?> beforeCaptureScreenshot, bool skipScreenshot = false)
+    public void BeforeCaptureScreenshot(Func<SentryEvent, SentryEvent?> beforeCaptureScreenshot, bool skipScreenshot = false)
     {
         _beforeCaptureScreenshot = (@event, hint) =>
         {
@@ -96,7 +96,7 @@ public class SentryMauiOptions : SentryLoggingOptions
             {
                 hint.Attachments.Add(new ScreenshotAttachment(this));
             }
-            return beforeCaptureScreenshot(@event, hint);
+            return beforeCaptureScreenshot(@event);
         };
     }
 }
