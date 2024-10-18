@@ -56,6 +56,7 @@ public class SentryMauiOptionsTests
         var options = new SentryMauiOptions();
         Assert.False(options.AttachScreenshot);
     }
+
     [Fact]
     public void HandlerStrategy_Default()
     {
