@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Features
+- Implement Handler Strategy ([#3694](https://github.com/getsentry/sentry-dotnet/pull/3694))
+
 ## 4.12.1
 
 ### Fixes
