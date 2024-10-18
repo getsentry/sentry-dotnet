@@ -1,4 +1,5 @@
 using Sentry.Extensions.Logging;
+using Sentry.Maui.Internal;
 
 namespace Sentry.Maui;
 
@@ -80,21 +81,22 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// application a chance to inspect and/or modify the event before it's sent. If the
     /// event should not be sent at all, return null from the callback.
     /// </remarks>
-    public void BeforeCaptureScreenshot(Func<SentryEvent, SentryHint, SentryEvent?> beforeCaptureScreenshot)
+    /// <param name="beforeCaptureScreenshot"></param>
+    ///<param name="skipScreenshot">prevent screenshot from being taken</param>
+    public void BeforeCaptureScreenshot(Func<SentryEvent, SentryHint, SentryEvent?> beforeCaptureScreenshot, bool skipScreenshot = false)
     {
-        _beforeCaptureScreenshot = beforeCaptureScreenshot;
-    }
-
-    /// <summary>
-    /// Configures a callback function to be invoked before taking a screenshot
-    /// </summary>
-    /// <remarks>
-    /// The event returned by this callback will be sent to Sentry. This allows the
-    /// application a chance to inspect and/or modify the event before it's sent. If the
-    /// event should not be sent at all, return null from the callback.
-    /// </remarks>
-    public void BeforeCaptureScreenshot(Func<SentryEvent, SentryEvent?> beforeSend)
-    {
-        _beforeCaptureScreenshot = (@event, _) => beforeSend(@event);
+        _beforeCaptureScreenshot = (@event, hint) =>
+        {
+            if (skipScreenshot)
+            {
+                // prevent the screenshot from being taken
+                hint.Attachments.Clear();
+            }
+            else
+            {
+                hint.Attachments.Add(new ScreenshotAttachment(this));
+            }
+            return beforeCaptureScreenshot(@event, hint);
+        };
     }
 }
