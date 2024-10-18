@@ -24,7 +24,7 @@ public static class MauiProgram
 
                 options.Debug = true;
                 options.SampleRate = 1.0F;
-                options.BeforeCaptureScreenshot((SentryEvent @event, SentryHint hint) =>
+                options.BeforeCaptureScreenshot((SentryEvent @event) =>
                 {
                     Debug.WriteLine("screenshot about to be taken.");
                     return @event;
