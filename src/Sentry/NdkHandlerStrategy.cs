@@ -22,11 +22,9 @@ namespace Sentry
     /// </summary>
     public static class  HandlerStrategyExtension
     {
-#if ANDROID
         internal static JavaSdk.Android.Core.NdkHandlerStrategy ToJava(this NdkHandlerStrategy strategy)
         {
-            return JavaSdk.Android.Core.NdkHandlerStrategy.Values()?[(int)strategy] ?? JavaSdk.Android.Core.NdkHandlerStrategy.SentryHandlerStrategyDefault;
+            return JavaSdk.Android.Core.NdkHandlerStrategy.Values()![(int)strategy];
         }
-#endif
     }
 }
