@@ -80,7 +80,16 @@ public class SentryOptions
     /// <summary>
     /// Strategy used by the handler
     /// </summary>
-    /// <seealso href="https://github.com/dotnet/android/issues/9055#issuecomment-2261347912">
+    /// <code>
+    /// SentrySdk.Init(options =>
+    /// {
+    /// Sentry
+    /// // ...
+    /// options.HandlerStrategy = NdkHandlerStrategy.SENTRY_HANDLER_STRATEGY_DEFAULT;
+    /// // ... other options
+    /// }
+    /// </code>
+    /// <seealso href="https://github.com/dotnet/android/issues/9055#issuecomment-2261347912"/>
     public NdkHandlerStrategy HandlerStrategy { get; set; } = NdkHandlerStrategy.SENTRY_HANDLER_STRATEGY_DEFAULT;
 
     /// <summary>
