@@ -60,9 +60,7 @@ public static partial class SentrySdk
         // Define the configuration for the Android SDK
         SentryAndroidOptions? nativeOptions = null;
 
-        // Convert the .NET NdkHandlerStrategy to Java / Android
-        var handlerStrat = (int)options.HandlerStrategy;
-        JavaSdk.Android.Core.NdkHandlerStrategy? handlerStrategy = JavaSdk.Android.Core.NdkHandlerStrategy.Values()?[handlerStrat];
+        var handlerStrategy = options.HandlerStrategy.ToJava();
 
         var configuration = new OptionsConfigurationCallback(o =>
         {

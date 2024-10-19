@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Sentry
 {
     /// <summary>
@@ -21,5 +15,18 @@ namespace Sentry
         /// </summary>
         SENTRY_HANDLER_STRATEGY_CHAIN_AT_START,
 
+
+    }
+    /// <summary>
+    /// Extension class of strategy containing relevant its actions 
+    /// </summary>
+    public static class  HandlerStrategyExtension
+    {
+#if ANDROID
+        internal static JavaSdk.Android.Core.NdkHandlerStrategy ToJava(this NdkHandlerStrategy strategy)
+        {
+            return JavaSdk.Android.Core.NdkHandlerStrategy.Values()?[(int)strategy] ?? JavaSdk.Android.Core.NdkHandlerStrategy.SentryHandlerStrategyDefault;
+        }
+#endif
     }
 }
