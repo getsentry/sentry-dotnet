@@ -189,7 +189,7 @@ public static partial class SentrySdk
         }
         else
         {
-            SentryAndroid.Init(AppContext);
+            SentryAndroid.Init(AppContext, configuration);
         }
 
         // Set options for the managed SDK that depend on the Android SDK. (The user will not be able to modify these.)
