@@ -1,9 +1,9 @@
-namespace Sentry
+﻿namespace Sentry
 {
     /// <summary>
     /// Handler strategy
     /// </summary>
-    /// 
+    ///
     public enum NdkHandlerStrategy
     {
         /// <summary>
@@ -18,7 +18,7 @@ namespace Sentry
 
     }
     /// <summary>
-    /// Extension class of strategy containing relevant its actions 
+    /// Extension class of strategy containing relevant its actions
     /// </summary>
     public static class  HandlerStrategyExtension
     {
