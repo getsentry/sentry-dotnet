@@ -193,7 +193,7 @@ public static partial class SentrySdk
         }
 
         // Set options for the managed SDK that depend on the Android SDK. (The user will not be able to modify these.)
-        options.AddEventProcessor(new AndroidEventProcessor((SentryAndroidOptions)nativeOptions!));
+        options.AddEventProcessor(new AndroidEventProcessor(nativeOptions!));
         if (options.Android.LogCatIntegration != LogCatIntegrationType.None)
         {
             options.AddEventProcessor(new LogCatAttachmentEventProcessor(options.DiagnosticLogger, options.Android.LogCatIntegration, options.Android.LogCatMaxLines));
