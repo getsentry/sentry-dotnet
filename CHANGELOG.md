@@ -5,14 +5,42 @@
 ### Features
 
  - Added a `BeforeCaptureScreenshot` callback to the options: allowing the user to set an action before the screenshot is taken ([#3661](https://github.com/getsentry/sentry-dotnet/pull/3661))
+- Make `Sentry.AspNetCore.Blazor.WebAssembly` generally available. ([#3674](https://github.com/getsentry/sentry-dotnet/pull/3674))
+
+### Fixes
+
+- Events from NDK on Android will report sdk.name `sentry.native.android.dotnet` ([#3682](https://github.com/getsentry/sentry-dotnet/pull/3682))
 
 ### Dependencies
 
-- Bump CLI from v2.36.5 to v2.36.6 ([#3647](https://github.com/getsentry/sentry-dotnet/pull/3647))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2366)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.36.5...2.36.6)
+- Bump Java SDK from v7.14.0 to v7.15.0 ([#3670](https://github.com/getsentry/sentry-dotnet/pull/3670))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7150)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.14.0...7.15.0)
+
+## 4.12.1
+
+### Fixes
+
+- Fixed "Failed to persist session" error on iOS ([#3655](https://github.com/getsentry/sentry-dotnet/pull/3655))
+
+### Dependencies
+
+- Bump CLI from v2.36.5 to v2.37.0 ([#3647](https://github.com/getsentry/sentry-dotnet/pull/3647), [#3664](https://github.com/getsentry/sentry-dotnet/pull/3664))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2370)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.36.5...2.37.0)
 
 ## 4.12.0
+
+### Support for Xcode 16.0 (BREAKING CHANGE)
+
+If you are using Xcode 16.0, you will need to update the SDK to version `4.12.0` or later.
+If you are still using Xcode 15.4 or earlier, you need to continue to use version `4.11.0` or earlier.
+
+Using Xcode 16 to build .NET applications targeting iOS and Mac Catalyst requires [.NET workload for iOS SDK version 18.0.8303](https://github.com/xamarin/xamarin-macios/releases/tag/dotnet-8.0.1xx-xcode16.0-8303). We [built the SDK version 4.12.0 using Xcode 16](https://github.com/getsentry/sentry-dotnet/pull/3635/files) in order to support this scenario. That, unfortunately, breaks folks using older version of Xcode.
+
+As such, if you are using SDK version `4.12.x` and targeting iOS or Mac Catalyst, you will need to install and use Xcode 16 and `workload iOS SDK 18.0.8303`
+
+Note that .NET 9 will also support Xcode 16, when it is released next month (Nov 2024).
 
 ### API Changes
 

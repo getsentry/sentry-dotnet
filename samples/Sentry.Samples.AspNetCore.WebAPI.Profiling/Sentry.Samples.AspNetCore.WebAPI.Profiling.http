@@ -1,0 +1,6 @@
+@Sentry.Samples.AspNetCore.WebAPI.Profiling_HostAddress = http://localhost:5154
+
+GET {{Sentry.Samples.AspNetCore.WebAPI.Profiling_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
