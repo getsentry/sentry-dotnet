@@ -24,10 +24,14 @@ public static class MauiProgram
 
                 options.Debug = true;
                 options.SampleRate = 1.0F;
-                options.BeforeCaptureScreenshot(() =>
+                
+                options.SetBeforeCapture((@event, hint) =>
                 {
-                    Debug.WriteLine("screenshot about to be taken.");
-                },true);
+                    Console.WriteLine("screenshot about to be captured.");
+
+                    // Return true to capture or false to prevent the capture
+                    return true;
+                });
             })
 
             .ConfigureFonts(fonts =>
