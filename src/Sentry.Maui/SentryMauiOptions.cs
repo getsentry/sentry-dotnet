@@ -68,11 +68,11 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// </remarks>
     public bool AttachScreenshot { get; set; }
 
-    private Func<SentryEvent, SentryHint, bool>? _beforeCaptureScreenshot;
+    private Func<SentryEvent, SentryHint, bool>? _beforeCapture;
     /// <summary>
     /// Action performed before attaching a screenshot
     /// </summary>
-    internal Func<SentryEvent, SentryHint, bool>? BeforeCaptureScreenshotInternal => _beforeCaptureScreenshot;
+    internal Func<SentryEvent, SentryHint, bool>? BeforeCaptureInternal => _beforeCapture;
 
     /// <summary>
     /// Configures a callback function to be invoked before taking a screenshot
@@ -80,9 +80,17 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// <remarks>
     /// if this callback return false the capture will not take place
     /// </remarks>
+    /// <code>
+    /// 
+    ///options.SetBeforeCapture((@event, hint) =>
+    ///{
+    ///    // Return true to capture or false to prevent the capture
+    ///    return true;
+    ///});
+    /// </code>
     /// <param name="beforeCapture">Callback to be executed before taking a screenshot</param>
     public void SetBeforeCapture(Func<SentryEvent, SentryHint, bool> beforeCapture)
     {
-        _beforeCaptureScreenshot = beforeCapture;
+        _beforeCapture = beforeCapture;
     }
 }
