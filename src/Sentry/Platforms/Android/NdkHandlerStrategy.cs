@@ -1,30 +1,27 @@
-﻿namespace Sentry
+﻿namespace Sentry;
+
+/// <summary>
+/// Handler strategy
+/// </summary>
+///
+public enum NdkHandlerStrategy
 {
     /// <summary>
-    /// Handler strategy
+    /// default handler strategy -> value 0
     /// </summary>
-    ///
-    public enum NdkHandlerStrategy
-    {
-        /// <summary>
-        /// default handler strategy -> value 0
-        /// </summary>
-        SENTRY_HANDLER_STRATEGY_DEFAULT,
-        /// <summary>
-        /// Handle strategy chain at start -> value 1
-        /// </summary>
-        SENTRY_HANDLER_STRATEGY_CHAIN_AT_START,
-
-
-    }
+    SENTRY_HANDLER_STRATEGY_DEFAULT,
     /// <summary>
-    /// Extension class of strategy containing relevant its actions
+    /// Handle strategy chain at start -> value 1
     /// </summary>
-    public static class  HandlerStrategyExtension
+    SENTRY_HANDLER_STRATEGY_CHAIN_AT_START,
+}
+/// <summary>
+/// Extension class of strategy containing relevant its actions
+/// </summary>
+public static class  HandlerStrategyExtension
+{
+    internal static JavaSdk.Android.Core.NdkHandlerStrategy ToJava(this NdkHandlerStrategy strategy)
     {
-        internal static JavaSdk.Android.Core.NdkHandlerStrategy ToJava(this NdkHandlerStrategy strategy)
-        {
-            return JavaSdk.Android.Core.NdkHandlerStrategy.Values()![(int)strategy];
-        }
+        return JavaSdk.Android.Core.NdkHandlerStrategy.Values()![(int)strategy];
     }
 }
