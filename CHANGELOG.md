@@ -6,6 +6,17 @@
 
 - Android: Fix for SIGSEGV reported by Sentry when a NullReferenceException is thrown in Release mode ([#3694](https://github.com/getsentry/sentry-dotnet/pull/3694))
   - To turn it on, set: `options.HandlerStrategy = NdkHandlerStrategy.SENTRY_HANDLER_STRATEGY_CHAIN_AT_START;`
+- Events from NDK on Android will report sdk.name `sentry.native.android.dotnet` ([#3682](https://github.com/getsentry/sentry-dotnet/pull/3682))
+
+### Features
+
+- Make `Sentry.AspNetCore.Blazor.WebAssembly` generally available. ([#3674](https://github.com/getsentry/sentry-dotnet/pull/3674))
+
+### Dependencies
+
+- Bump Java SDK from v7.14.0 to v7.15.0 ([#3670](https://github.com/getsentry/sentry-dotnet/pull/3670))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7150)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.14.0...7.15.0)
 
 ## 4.12.1
 

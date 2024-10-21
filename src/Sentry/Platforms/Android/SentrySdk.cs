@@ -169,7 +169,7 @@ public static partial class SentrySdk
             o.EnableExternalConfiguration = false;
             o.EnableDeduplication = false;
             o.AttachServerName = false;
-            o.NativeSdkName = "sentry.native.dotnet";
+            o.NativeSdkName = "sentry.native.android.dotnet";
 
             // These options are intentionally not expose or modified
             //o.MaxRequestBodySize   // N/A for Android apps
