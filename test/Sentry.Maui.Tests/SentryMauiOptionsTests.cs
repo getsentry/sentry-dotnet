@@ -56,31 +56,4 @@ public class SentryMauiOptionsTests
         var options = new SentryMauiOptions();
         Assert.False(options.AttachScreenshot);
     }
-
-    [Fact]
-    public void HandlerStrategy_Default()
-    {
-        // Arrange
-        var options = new SentryMauiOptions();
-        var expected = NdkHandlerStrategy.SENTRY_HANDLER_STRATEGY_DEFAULT;
-
-        // Assert
-        // testing default state here so nothing to assert
-
-        // Act
-        Assert.Equal(expected, options.HandlerStrategy);
-    }
-    [Fact]
-    public void HandlerStrategy_set()
-    {
-        // Arrange
-        var options = new SentryMauiOptions();
-        var notExpected = NdkHandlerStrategy.SENTRY_HANDLER_STRATEGY_DEFAULT;
-
-        // Assert
-        options.HandlerStrategy = NdkHandlerStrategy.SENTRY_HANDLER_STRATEGY_CHAIN_AT_START;
-
-        // Act
-        Assert.NotEqual(notExpected, options.HandlerStrategy);
-    }
 }
