@@ -13,10 +13,10 @@ namespace Sentry.Maui
     {
         public SentryMauiOptions() { }
         public bool AttachScreenshot { get; set; }
-        public System.Action BeforeCaptureScreenshot { get; set; }
         public bool CreateElementEventsBreadcrumbs { get; set; }
         public bool IncludeBackgroundingStateInBreadcrumbs { get; set; }
         public bool IncludeTextInBreadcrumbs { get; set; }
         public bool IncludeTitleInBreadcrumbs { get; set; }
+        public void SetBeforeCapture(System.Func<Sentry.SentryEvent, Sentry.SentryHint, bool> beforeCapture) { }
     }
 }
