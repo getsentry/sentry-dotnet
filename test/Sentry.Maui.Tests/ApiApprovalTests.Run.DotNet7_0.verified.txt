@@ -17,6 +17,6 @@ namespace Sentry.Maui
         public bool IncludeBackgroundingStateInBreadcrumbs { get; set; }
         public bool IncludeTextInBreadcrumbs { get; set; }
         public bool IncludeTitleInBreadcrumbs { get; set; }
-        public void SetBeforeCapture(System.Func<Sentry.SentryEvent, Sentry.SentryHint, bool> beforeCapture) { }
+        public void SetBeforeScreenshotCapture(System.Func<Sentry.SentryEvent, Sentry.SentryHint, bool> beforeCapture) { }
     }
 }

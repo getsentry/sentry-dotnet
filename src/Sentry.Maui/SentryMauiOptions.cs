@@ -89,7 +89,7 @@ public class SentryMauiOptions : SentryLoggingOptions
     ///});
     /// </code>
     /// <param name="beforeCapture">Callback to be executed before taking a screenshot</param>
-    public void SetBeforeCapture(Func<SentryEvent, SentryHint, bool> beforeCapture)
+    public void SetBeforeScreenshotCapture(Func<SentryEvent, SentryHint, bool> beforeCapture)
     {
         _beforeCapture = beforeCapture;
     }
