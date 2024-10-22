@@ -163,6 +163,13 @@ public static partial class SentrySdk
             options.Native.InAppExcludes?.ForEach(o.AddInAppExclude);
             options.Native.InAppIncludes?.ForEach(o.AddInAppInclude);
 
+            o.Experimental.SessionReplay.ErrorSampleRate =
+                (JavaDouble?)options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate;
+            o.Experimental.SessionReplay.SessionSampleRate =
+                (JavaDouble?)options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate;
+            o.Experimental.SessionReplay.RedactAllImages = options.Native.ExperimentalOptions.SessionReplay.RedactAllImages;
+            o.Experimental.SessionReplay.RedactAllText = options.Native.ExperimentalOptions.SessionReplay.RedactAllText;
+
             // These options are intentionally set and not exposed for modification
             o.EnableExternalConfiguration = false;
             o.EnableDeduplication = false;
