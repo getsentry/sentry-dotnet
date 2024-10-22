@@ -10,7 +10,7 @@ on:
       - "**.md"
 
 env:
-  XCODE_VERSION: 15.4
+  XCODE_VERSION: 16
 
 jobs:
   ios-tests:
@@ -35,6 +35,11 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/environment
+
+      - name: Setup Xcode
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_${{env.XCODE_VERSION}}.app/Contents/Developer
+          xcodebuild -version
 
       - name: Build iOS Test App
         run: pwsh ./scripts/device-test.ps1 ios -Build
