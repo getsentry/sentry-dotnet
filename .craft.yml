@@ -8,6 +8,7 @@ targets:
       nuget:Sentry:
       nuget:Sentry.AspNetCore:
       nuget:Sentry.AspNetCore.Grpc:
+      nuget:Sentry.AspNetCore.Blazor.WebAssembly:
       nuget:Sentry.AspNet:
       nuget:Sentry.Azure.Functions.Worker:
       nuget:Sentry.DiagnosticSource:
