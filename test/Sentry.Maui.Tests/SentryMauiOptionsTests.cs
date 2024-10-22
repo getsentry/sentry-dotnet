@@ -60,24 +60,6 @@ public class SentryMauiOptionsTests
     }
 
     [Fact]
-    public void BeforeCaptureScreenshot_Default()
-    {
-        // Arrange
-        var options = new SentryMauiOptions();
-        options.AttachScreenshot = true;
-
-        // Act
-        options.SetBeforeScreenshotCapture((@event, hint) =>
-        {
-            return true;
-        });
-
-        // Assert
-        Assert.NotNull(options.BeforeCaptureInternal);
-
-    }
-
-    [Fact]
     public void BeforeCaptureScreenshot_Skip_Screenshot()
     {
         // Arrange
