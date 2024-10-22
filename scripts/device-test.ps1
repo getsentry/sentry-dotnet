@@ -60,7 +60,8 @@ try
 
     if ($Build)
     {
-        dotnet build -f $tfm -c Release test/Sentry.Maui.Device.TestApp
+        # We disable AOT for device tests: https://github.com/nsubstitute/NSubstitute/issues/834
+        dotnet build -f $tfm -c Release -p:EnableAot=false test/Sentry.Maui.Device.TestApp
         if ($LASTEXITCODE -ne 0)
         {
             throw 'Failed to build Sentry.Maui.Device.TestApp'

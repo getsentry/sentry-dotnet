@@ -33,7 +33,7 @@
 
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(FrameworkSupportsAot)' == 'true'">
+  <PropertyGroup Condition="'$(EnableAot)' == 'true'">
     <IsAotCompatible>true</IsAotCompatible>
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
   </PropertyGroup>
