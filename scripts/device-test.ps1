@@ -73,7 +73,7 @@ try
         if (!(Get-Command xharness -ErrorAction SilentlyContinue))
         {
             Push-Location ($CI ? $env:RUNNER_TEMP : $IsWindows ? $env:TMP : $IsMacos ? $env:TMPDIR : '/temp')
-            dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '9.*-*' `
+            dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '10.0.0-prerelease*' `
                 --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
             Pop-Location
         }
