@@ -60,7 +60,7 @@ public class SentryMauiOptionsTests
     }
 
     [Fact]
-    public void BeforeCaptureScreenshot_Skip_Screenshot()
+    public void BeforeCaptureScreenshot_Set()
     {
         // Arrange
         var options = new SentryMauiOptions();
@@ -74,6 +74,18 @@ public class SentryMauiOptionsTests
 
         // Assert
         Assert.NotNull(options.BeforeCaptureInternal);
+
+    }
+
+    [Fact]
+    public void BeforeCaptureScreenshot_NotSet()
+    {
+        // Arrange
+        var options = new SentryMauiOptions();
+        options.AttachScreenshot = true;
+
+        // Assert
+        Assert.Null(options.BeforeCaptureInternal);
 
     }
 }
