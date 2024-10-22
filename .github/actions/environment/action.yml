@@ -30,18 +30,19 @@ runs:
 
     # .NET 6 and .NET 8 are not built-in with macos-13
     - name: Install .NET SDK
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: |
           6.0.x
           7.0.x
           8.0.x
+          9.0.100-rc.2.24474.11
 
     - name: Install .NET Workloads
       shell: bash
       run: >
         dotnet workload install \
-          wasm-tools maui-android \
+          wasm-tools wasm-tools-net8 maui-android \
           ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows macos' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
           --temp-dir "${{ runner.temp }}" \
