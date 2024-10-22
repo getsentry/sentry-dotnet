@@ -42,7 +42,7 @@ public class SingleFileAppTests
     private static string TargetFramework => "net5.0";
 #else
     // Adding a new TFM to the project? Include it above
-    #error "Target Framework not yet supported for single file apps"
+#error "Target Framework not yet supported for single file apps"
 #endif
 
     private static string SingleFileAppName => RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
