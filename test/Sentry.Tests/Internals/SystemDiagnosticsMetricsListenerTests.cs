@@ -1,4 +1,7 @@
-#if NET8_0_OR_GREATER
+/*
+ * Failing in device tests, but we're going to deprecate this functionality in v5 anyway so skipping on iOS and Android
+ */
+#if NET8_0_OR_GREATER && !(__IOS__ || __ANDROID__)
 using System.Diagnostics.Metrics;
 
 namespace Sentry.Tests.Internals;

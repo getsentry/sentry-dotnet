@@ -6,7 +6,7 @@
       <Description>Official Azure Functions Worker SDK integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(FrameworkSupportsAot)' == 'true'">
+    <PropertyGroup Condition="'$(EnableAot)' == 'true'">
       <IsAotCompatible>true</IsAotCompatible>
       <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     </PropertyGroup>
