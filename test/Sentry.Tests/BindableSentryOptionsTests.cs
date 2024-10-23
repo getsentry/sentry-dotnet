@@ -5,7 +5,9 @@ namespace Sentry.Tests;
 
 public class BindableSentryOptionsTests : BindableTests<SentryOptions>
 {
-    public BindableSentryOptionsTests() : base(nameof(SentryOptions.ExperimentalMetrics))
+    public BindableSentryOptionsTests() : base(
+        nameof(SentryOptions.ExperimentalMetrics)
+    )
     {
     }
 

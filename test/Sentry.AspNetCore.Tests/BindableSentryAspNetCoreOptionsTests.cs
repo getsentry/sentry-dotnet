@@ -5,7 +5,9 @@ namespace Sentry.AspNetCore.Tests;
 
 public class BindableSentryAspNetCoreOptionsTests : BindableTests<SentryAspNetCoreOptions>
 {
-    public BindableSentryAspNetCoreOptionsTests() : base(nameof(SentryAspNetCoreOptions.ExperimentalMetrics))
+    public BindableSentryAspNetCoreOptionsTests() : base(
+        nameof(SentryOptions.ExperimentalMetrics)
+    )
     {
     }
 

@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <VersionPrefix>4.12.1</VersionPrefix>
+    <VersionPrefix>4.12.2-alpha</VersionPrefix>
     <LangVersion>12</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -72,6 +72,15 @@
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
     <SentryCLIVersion>2.37.0</SentryCLIVersion>
     <SentryCLIDirectory>$(MSBuildThisFileDirectory)tools\sentry-cli\$(SentryCLIVersion)\</SentryCLIDirectory>
+  </PropertyGroup>
+
+  <!-- dotnet-gcdump needs net6+ and won't work on mobile. -->
+  <PropertyGroup>
+    <PlatformIsLegacy Condition="$(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netstandard'))">true</PlatformIsLegacy>
+    <PlatformIsMobile Condition="$(TargetFramework.EndsWith('android')) or $(TargetFramework.EndsWith('ios')) or $(TargetFramework.EndsWith('maccatalyst'))">true</PlatformIsMobile>
+    <MemoryDumpSupported Condition="!($(PlatformIsLegacy) == 'true' or $(PlatformIsMobile) == 'true')">true</MemoryDumpSupported>
+
+    <DefineConstants Condition="'$(MemoryDumpSupported)' == 'true'">$(DefineConstants);MEMORY_DUMP_SUPPORTED</DefineConstants>
   </PropertyGroup>
 
   <!-- Public key of .assets/Sentry.snk - not a secret.  Used by other InternalsVisibleTo entries throughout the solution. -->
