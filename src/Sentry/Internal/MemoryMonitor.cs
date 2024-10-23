@@ -84,20 +84,12 @@ internal sealed class MemoryMonitor : IDisposable
         // Check which patth to use for dotnet-gcdump. If it's been bundled with the application, it will be available
         // in the `dotnet-gcdump` folder of the application directory. Otherwise we assume it has been installed globally.
         var bundledToolPath = Path.Combine(AppContext.BaseDirectory, "dotnet-gcdump", "dotnet-gcdump.dll");
-        if (File.Exists(bundledToolPath))
-        {
-            _options.LogDebug($"Using bundled version of dotnet-gcdump from: {bundledToolPath}");
-        }
-        else
-        {
-            _options.LogDebug("Using global version of dotnet-gcdump");
-        }
-
         var arguments = $"collect -p {processId} -o '{dumpFile}'";
-        var command = File.Exists(bundledToolPath)
+        var command = _options.FileSystem.FileExists(bundledToolPath)
             ? $"dotnet {bundledToolPath} {arguments}"
             : $"dotnet-gcdump {arguments}";
 
+        _options.LogDebug($"Starting process: {command}");
         using var process = new Process();
         process.StartInfo = new ProcessStartInfo
         {
