@@ -59,9 +59,8 @@ internal sealed class MemoryMonitor : IDisposable
         _options.HeapDumpDebouncer.RecordOccurence(eventTime);
 
         var usedMemoryPercentage = ((double)usedMemory / _totalMemory) * 100;
-        _options.LogDebug("Total Memory: {0:N0} bytes", _totalMemory);
-        _options.LogDebug("Memory used: {0:N0} bytes ({1:N2}%)", usedMemory, usedMemoryPercentage);
-        _options.LogDebug("Automatic heap dump triggered");
+        _options.LogDebug("Auto heap dump triggered: Total: {0:N0} bytes, Used: {1:N0} bytes ({2:N2}%)",
+            _totalMemory, usedMemory, usedMemoryPercentage);
         _onCaptureDump();
     }
 
@@ -98,16 +97,17 @@ internal sealed class MemoryMonitor : IDisposable
         var command = File.Exists(bundledToolPath)
             ? $"dotnet {bundledToolPath} {arguments}"
             : $"dotnet-gcdump {arguments}";
-        var startInfo = new ProcessStartInfo
+
+        using var process = new Process();
+        process.StartInfo = new ProcessStartInfo
         {
             FileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "cmd.exe" : "/bin/bash",
             Arguments = $"-c \"{command}\"",
             RedirectStandardOutput = true,
+            RedirectStandardError = false,
             UseShellExecute = false,
             CreateNoWindow = true,
         };
-
-        var process = new Process { StartInfo = startInfo };
         process.Start();
         while (!process.StandardOutput.EndOfStream)
         {
