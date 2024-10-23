@@ -13,6 +13,22 @@
 - `Scope.Transaction` is now always stored as an `AsyncLocal` also in [Global Mode](https://docs.sentry.io/platforms/dotnet/configuration/options/#is-global-mode-enabled), to prevent auto-instrumented spans from the UI ending up parented to transactions from a background task (or vice versa). ([#3596](https://github.com/getsentry/sentry-dotnet/pull/3596))
 - Heap dumps can be captured automatically when memory usage exceeds a configurable threshold ([#3667](https://github.com/getsentry/sentry-dotnet/pull/3667))
 
+## Unreleased
+
+### Features
+
+- Make `Sentry.AspNetCore.Blazor.WebAssembly` generally available. ([#3674](https://github.com/getsentry/sentry-dotnet/pull/3674))
+
+### Fixes
+
+- Events from NDK on Android will report sdk.name `sentry.native.android.dotnet` ([#3682](https://github.com/getsentry/sentry-dotnet/pull/3682))
+
+### Dependencies
+
+- Bump Java SDK from v7.14.0 to v7.15.0 ([#3670](https://github.com/getsentry/sentry-dotnet/pull/3670))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7150)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.14.0...7.15.0)
+
 ## 4.12.1
 
 ### Fixes
