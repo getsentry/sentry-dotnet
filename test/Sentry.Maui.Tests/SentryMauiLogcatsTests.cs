@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Options;
-using static Android.Icu.Text.IDNA;
 
 namespace Sentry.Maui.Tests;
 
