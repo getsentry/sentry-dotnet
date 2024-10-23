@@ -8,13 +8,7 @@
   <PropertyGroup>
     <SentryAttributesFile>Sentry.Attributes$(MSBuildProjectExtension.Replace('proj', ''))</SentryAttributesFile>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(PkgSentry)' == ''">
-    <!-- If Sentry was added via PackageReference, PkgSentry will already be set to the path of the Sentry nuget package.
-         However, older-style projects using packages.config will need us to resolve the path manually. -->
-    <PkgSentry Condition="$([System.String]::new('%(Reference.Identity)').StartsWith('Sentry,'))">$([System.IO.Directory]::GetParent(%(Reference.HintPath)).Parent.Parent.FullName)</PkgSentry>
-  </PropertyGroup>
-
+  
   <Target Name="WriteSentryAttributes"
           Condition="$(Language) == 'VB' or $(Language) == 'C#' or $(Language) == 'F#'"
           BeforeTargets="BeforeCompile;CoreCompile"

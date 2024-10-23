@@ -529,7 +529,7 @@ public class SentryOptions
     /*
      * dotnet-gcdump needs .NET 6 or later... also `GC.GetGCMemoryInfo()` is not available in NetFX or NetStandard
      */
-#if NET6_0_OR_GREATER && !(IOS || ANDROID)
+#if MEMORY_DUMP_SUPPORTED
 
     /// <summary>
     /// Configures a heap dump to be captured if the percentage of memory used exceeds a certain threshold.

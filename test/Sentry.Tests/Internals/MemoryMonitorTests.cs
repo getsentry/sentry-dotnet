@@ -1,4 +1,4 @@
-#if NET6_0_OR_GREATER && !(IOS || ANDROID)
+#if MEMORY_DUMP_SUPPORTED
 namespace Sentry.Tests.Internals;
 
 public class MemoryMonitorTests

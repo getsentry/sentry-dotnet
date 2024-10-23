@@ -7,7 +7,7 @@ public class BindableSentryAspNetCoreOptionsTests : BindableTests<SentryAspNetCo
 {
     public BindableSentryAspNetCoreOptionsTests() : base(
         nameof(SentryOptions.ExperimentalMetrics)
-#if NET6_0_OR_GREATER && !(IOS || ANDROID)
+#if MEMORY_DUMP_SUPPORTED
         , nameof(SentryOptions.HeapDumpDebouncer)
         , nameof(SentryOptions.HeapDumpTrigger)
 #endif

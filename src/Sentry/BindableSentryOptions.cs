@@ -21,9 +21,6 @@ internal partial class BindableSentryOptions
     public string? Environment { get; set; }
     public string? Dsn { get; set; }
     public int? MaxQueueItems { get; set; }
-#if NET6_0_OR_GREATER && !(IOS || ANDROID)
-    public SentryLevel? HeapDumpEventLevel { get; set; }
-#endif
     public int? MaxCacheItems { get; set; }
     public TimeSpan? ShutdownTimeout { get; set; }
     public TimeSpan? FlushTimeout { get; set; }
@@ -54,6 +51,9 @@ internal partial class BindableSentryOptions
     public bool? JsonPreserveReferences { get; set; }
     public bool? EnableSpotlight { get; set; }
     public string? SpotlightUrl { get; set; }
+#if MEMORY_DUMP_SUPPORTED
+    public SentryLevel? HeapDumpEventLevel { get; set; }
+#endif
 
     public void ApplyTo(SentryOptions options)
     {
@@ -71,9 +71,6 @@ internal partial class BindableSentryOptions
         options.Environment = Environment ?? options.Environment;
         options.Dsn = Dsn ?? options.Dsn;
         options.MaxQueueItems = MaxQueueItems ?? options.MaxQueueItems;
-#if NET6_0_OR_GREATER && !(IOS || ANDROID)
-        options.HeapDumpEventLevel = HeapDumpEventLevel ?? options.HeapDumpEventLevel;
-#endif
         options.MaxCacheItems = MaxCacheItems ?? options.MaxCacheItems;
         options.ShutdownTimeout = ShutdownTimeout ?? options.ShutdownTimeout;
         options.FlushTimeout = FlushTimeout ?? options.FlushTimeout;
@@ -103,6 +100,9 @@ internal partial class BindableSentryOptions
         options.JsonPreserveReferences = JsonPreserveReferences ?? options.JsonPreserveReferences;
         options.EnableSpotlight = EnableSpotlight ?? options.EnableSpotlight;
         options.SpotlightUrl = SpotlightUrl ?? options.SpotlightUrl;
+#if MEMORY_DUMP_SUPPORTED
+        options.HeapDumpEventLevel = HeapDumpEventLevel ?? options.HeapDumpEventLevel;
+#endif
 
 #if ANDROID
         Android.ApplyTo(options.Android);

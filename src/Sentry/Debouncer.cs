@@ -98,11 +98,6 @@ public class Debouncer
         }
 
         var eventTime = timestamp ?? DateTimeOffset.UtcNow;
-        if (_cooldown is { } cooldown && _lastEvent + cooldown > eventTime)
-        {
-            return false;
-        }
-
-        return true;
+        return _cooldown is not { } cooldown || _lastEvent + cooldown <= eventTime;
     }
 }

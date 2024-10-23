@@ -9,12 +9,13 @@
  * For more advanced features of the SDK, see Sentry.Samples.Console.Customized.
  */
 
-// Initialize the Sentry SDK.  (It is not necessary to dispose it.)
-
 using System.Net.Http;
+using System.Reflection;
+using static System.Console;
 
 CancellationTokenSource cts = new();
 
+// Initialize the Sentry SDK.  (It is not necessary to dispose it.)
 SentrySdk.Init(options =>
 {
     // You can set here in code, or you can set it in the SENTRY_DSN environment variable.
@@ -62,12 +63,12 @@ SentrySdk.Init(options =>
 
 #if NET6_0_OR_GREATER
 await Task.Delay(1000);
-Console.WriteLine();
-Console.WriteLine("Choose a demo:");
-Console.WriteLine("1. Tracing");
-Console.WriteLine("2. Heap Dump");
-Console.WriteLine("... or press any other key to quit.");
-switch (Console.ReadKey().KeyChar)
+WriteLine();
+WriteLine("Choose a demo:");
+WriteLine("1. Tracing");
+WriteLine("2. Heap Dump");
+WriteLine("... or press any other key to quit.");
+switch (ReadKey().KeyChar)
 {
     case '1':
         await TracingDemo();
@@ -102,7 +103,7 @@ async Task TracingDemo()
         var messageHandler = new SentryHttpMessageHandler();
         var httpClient = new HttpClient(messageHandler, true);
         var html = await httpClient.GetStringAsync("https://example.com/");
-        Console.WriteLine(html);
+        WriteLine(html);
     }
 
     async Task SecondFunction()
@@ -149,9 +150,9 @@ async Task TracingDemo()
 #if NET6_0_OR_GREATER
 async Task HeapDumpDemo(CancellationToken cancellationToken)
 {
-    var memoryHog = new List<byte[]>();
-    Console.WriteLine();
-    Console.WriteLine("Hogging memory...");
+    var memoryHog = new List<object>();
+    WriteLine();
+    WriteLine("Hogging memory...");
 
     // Sentry checks memory usage every time a full garbage collection occurs. It might take a while to trigger this,
     // although we've configured some ridiculously aggressive settings in the runtimeconfig.template.json file to make

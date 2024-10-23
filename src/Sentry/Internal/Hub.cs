@@ -14,7 +14,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
     private readonly SentryOptions _options;
     private readonly RandomValuesFactory _randomValuesFactory;
 
-#if NET6_0_OR_GREATER && !(IOS || ANDROID)
+#if MEMORY_DUMP_SUPPORTED
     private readonly MemoryMonitor? _memoryMonitor;
 #endif
 
@@ -67,9 +67,13 @@ internal class Hub : IHub, IMetricHub, IDisposable
             PushScope();
         }
 
-#if NET6_0_OR_GREATER && !(IOS || ANDROID)
+#if MEMORY_DUMP_SUPPORTED
         if (options.HeapDumpTrigger is not null)
         {
+            if (_options.DisableFileWrite)
+            {
+                _options.LogError("Automatic Heap Dumps cannot be used with file write disabled.");
+            }
             _memoryMonitor = new MemoryMonitor(options, CaptureHeapDump);
         }
 #endif
@@ -507,7 +511,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
-#if NET6_0_OR_GREATER && !(IOS || ANDROID)
+#if MEMORY_DUMP_SUPPORTED
     public void CaptureHeapDump(string dumpFile)
     {
         if (!IsEnabled)
@@ -692,7 +696,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
             return;
         }
 
-#if NET6_0_OR_GREATER && !(IOS || ANDROID)
+#if MEMORY_DUMP_SUPPORTED
         _memoryMonitor?.Dispose();
 #endif
 

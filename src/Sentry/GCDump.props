@@ -1,10 +1,5 @@
 <Project>
-  <!-- Check if we're building for a target framework that supports dotnet-gcdump -->
   <PropertyGroup>
-    <PlatformIsLegacy Condition="$(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netstandard'))">true</PlatformIsLegacy>
-    <PlatformIsMobile Condition="$(TargetFramework.EndsWith('android')) or $(TargetFramework.EndsWith('ios')) or $(TargetFramework.EndsWith('maccatalyst'))">true</PlatformIsMobile>
-    <PlatformSupportsGcDump Condition="!($(PlatformIsLegacy) == 'true' or $(PlatformIsMobile) == 'true')">true</PlatformSupportsGcDump>
-
     <GCDumpVersion>8.0.547301</GCDumpVersion>
     <GCDumpRootDirectory>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\tools\gcdump\'))</GCDumpRootDirectory>
     <GCDumpTempDirectory>$(GCDumpRootDirectory)$(GCDumpVersion)\</GCDumpTempDirectory>
@@ -12,7 +7,7 @@
     <GCDumpIncludeFiles>$(GCDumpTempDirectory).store\dotnet-gcdump\$(GCDumpVersion)\dotnet-gcdump\$(GCDumpVersion)\tools\net6.0\any\</GCDumpIncludeFiles>
   </PropertyGroup>
 
-  <Target Name="DownloadGCDump" BeforeTargets="CollectPackageReferences" Condition="'$(PlatformSupportsGcDump)' == 'true'">
+  <Target Name="DownloadGCDump" BeforeTargets="CollectPackageReferences">
     <Message Importance="normal" Text="Found dotnet-gcdump - skipping download... " Condition="Exists('$(GCDumpIncludeFiles)')" />
     <Message Importance="normal" Text="dotnet-gcdump not found... downloading to $(GCDumpTempDirectory)" Condition="!Exists('$(GCDumpIncludeFiles)')" />
 
@@ -23,7 +18,7 @@
   </Target>
 
   <!-- Include GCDump in the Sentry Nuget package. -->
-  <ItemGroup Condition="'$(PlatformSupportsGcDump)' == 'true'">
+  <ItemGroup>
     <None Include="$(GCDumpIncludeFiles)**" Pack="true" PackagePath="tools\dotnet-gcdump\" />
   </ItemGroup>
 

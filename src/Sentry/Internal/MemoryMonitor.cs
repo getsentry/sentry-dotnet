@@ -4,14 +4,14 @@
  *
  * Also `GC.GetGCMemoryInfo()` is not available in NetFX or NetStandard
  */
-#if NET6_0_OR_GREATER && !(IOS || ANDROID)
+#if MEMORY_DUMP_SUPPORTED
 
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Internal;
 
-internal class MemoryMonitor : IDisposable
+internal sealed class MemoryMonitor : IDisposable
 {
     private readonly long _totalMemory;
 
@@ -33,7 +33,7 @@ internal class MemoryMonitor : IDisposable
 
         _totalMemory = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
 
-        GarbageCollectionMonitor.Start(CheckMemoryUsage, _cancellationTokenSource.Token);
+        GarbageCollectionMonitor.Start(_options, CheckMemoryUsage, _cancellationTokenSource.Token);
     }
 
     internal void CheckMemoryUsage()
@@ -114,7 +114,7 @@ internal class MemoryMonitor : IDisposable
         if (!_options.FileSystem.FileExists(dumpFile))
         {
             // if this happens, hopefully there would be more information in the standard output from the process above
-            _options.LogError("Unexpected error creating memory dump. Check debug logs for more information.");
+            _options.LogError("Unexpected error creating memory dump. Use debug-level to see output of dotnet-gcdump.");
         }
 
         _onDumpCollected(dumpFile);

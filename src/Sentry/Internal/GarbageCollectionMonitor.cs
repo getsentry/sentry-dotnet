@@ -1,3 +1,5 @@
+using Sentry.Extensibility;
+
 namespace Sentry.Internal;
 
 /// <summary>
@@ -8,21 +10,41 @@ internal sealed class GarbageCollectionMonitor
     private const int MaxGenerationThreshold = 10;
     private const int LargeObjectHeapThreshold = 10;
 
-    public static void Start(Action onGarbageCollected, CancellationToken cancellationToken) =>
-        Task.Run(() => MonitorGarbageCollection(onGarbageCollected, cancellationToken), cancellationToken);
+    public static Task Start(SentryOptions options, Action onGarbageCollected, CancellationToken cancellationToken) =>
+        Task.Run(() => MonitorGarbageCollection(options, onGarbageCollected, cancellationToken), cancellationToken);
 
-    private static void MonitorGarbageCollection(Action onGarbageCollected, CancellationToken cancellationToken)
+    private static void MonitorGarbageCollection(SentryOptions options, Action onGarbageCollected, CancellationToken cancellationToken)
     {
-        GC.RegisterForFullGCNotification(MaxGenerationThreshold, LargeObjectHeapThreshold);
-
-        while (!cancellationToken.IsCancellationRequested)
+        try
         {
-            if (GC.WaitForFullGCComplete(1000) == GCNotificationStatus.Succeeded)
+            GC.RegisterForFullGCNotification(MaxGenerationThreshold, LargeObjectHeapThreshold);
+            try
             {
-                onGarbageCollected?.Invoke();
+                while (!cancellationToken.IsCancellationRequested)
+                {
+#if NET8_0_OR_GREATER
+                    if (GC.WaitForFullGCComplete(TimeSpan.FromSeconds(1)) == GCNotificationStatus.Succeeded)
+#else
+                    if (GC.WaitForFullGCComplete(1000) == GCNotificationStatus.Succeeded)
+#endif
+                    {
+                        onGarbageCollected?.Invoke();
+                    }
+                }
+            }
+            finally
+            {
+                GC.CancelFullGCNotification();
             }
         }
-
-        GC.CancelFullGCNotification();
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // Ignore
+        }
+        catch (Exception e)
+        {
+            // This might happen if concurrent garbage collection is enabled.
+            options.LogError(e, "Garbage collection monitor failed");
+        }
     }
 }
