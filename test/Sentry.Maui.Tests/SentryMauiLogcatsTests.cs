@@ -68,7 +68,12 @@ public class SentryMauiLogcatsTests
 #endif
 
         // Arrange
-        var builder = _fixture.Builder.UseSentry(options => options.Android.LogCatIntegration = Android.LogCatIntegrationType.All);
+        var builder = _fixture.Builder.UseSentry(options =>
+        {
+#if ANDROID
+            options.Android.LogCatIntegration = Android.LogCatIntegrationType.All;
+#endif
+        });
 
         // Act
         using var app = builder.Build();
@@ -93,7 +98,12 @@ public class SentryMauiLogcatsTests
 #endif
 
         // Arrange
-        var builder = _fixture.Builder.UseSentry(options => options.Android.LogCatIntegration = Android.LogCatIntegrationType.Errors);
+        var builder = _fixture.Builder.UseSentry(options =>
+        {
+#if ANDROID
+            options.Android.LogCatIntegration = Android.LogCatIntegrationType.Errors;
+#endif
+        });
 
         // Act
         using var app = builder.Build();
@@ -120,7 +130,12 @@ public class SentryMauiLogcatsTests
 #endif
 
         // Arrange
-        var builder = _fixture.Builder.UseSentry(options => options.Android.LogCatIntegration = Android.LogCatIntegrationType.None);
+        var builder = _fixture.Builder.UseSentry(options =>
+        {
+#if ANDROID
+            options.Android.LogCatIntegration = Android.LogCatIntegrationType.None;
+#endif
+        });
 
         // Act
         using var app = builder.Build();
