@@ -7,13 +7,13 @@ namespace Sentry.Testing;
 /// </summary>
 public static class SentryOptionsExtensions
 {
-    private static SentryOptions DidNotReceiveReceiveLog(this SentryOptions substitute, SentryLevel level)
+    private static SentryOptions DidNotReceiveLog(this SentryOptions substitute, SentryLevel level)
     {
         substitute.DiagnosticLogger.DidNotReceive().Log(level, Arg.Any<string>(), null, Arg.Any<object[]>());
         return substitute;
     }
 
-    private static SentryOptions DidNotReceiveReceiveLog(this SentryOptions substitute, SentryLevel level, string message, params object[] args)
+    private static SentryOptions DidNotReceiveLog(this SentryOptions substitute, SentryLevel level, string message, params object[] args)
     {
         substitute.DiagnosticLogger.DidNotReceive().Log(level, message, null, args);
         return substitute;
@@ -44,10 +44,10 @@ public static class SentryOptionsExtensions
         => ReceivedLog(substitute, SentryLevel.Info, message, args);
 
     public static SentryOptions DidNotReceiveReceiveLogInfo(this SentryOptions substitute)
-        => DidNotReceiveReceiveLog(substitute, SentryLevel.Info);
+        => DidNotReceiveLog(substitute, SentryLevel.Info);
 
     public static SentryOptions DidNotReceiveReceiveLogInfo(this SentryOptions substitute, string message, params object[] args)
-        => DidNotReceiveReceiveLog(substitute, SentryLevel.Info, message, args);
+        => DidNotReceiveLog(substitute, SentryLevel.Info, message, args);
 
     public static SentryOptions ReceivedLogWarning(this SentryOptions substitute)
         => ReceivedLog(substitute, SentryLevel.Warning);
