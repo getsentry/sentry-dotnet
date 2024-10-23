@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This sample demonstrates how you can configure Sentry to automatically capture heap dumps based on certain memory
  * triggers (e.g. if memory consumption exceeds a certain percentage threshold).
  *
