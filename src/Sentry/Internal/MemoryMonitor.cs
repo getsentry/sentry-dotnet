@@ -37,7 +37,13 @@ internal sealed class MemoryMonitor : IDisposable
 
         _totalMemory = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
 
-        GarbageCollectionMonitor.Start(_options, CheckMemoryUsage, _cancellationTokenSource.Token);
+        // Since we're not awaiting the task, the continuation will happen elsewhere but that's OK - all we care about
+        // is that any exceptions get logged as soon as possible.
+        GarbageCollectionMonitor.Start(CheckMemoryUsage, _cancellationTokenSource.Token)
+            .ContinueWith(
+                t => _options.LogError(t.Exception!, "Garbage collection monitor failed"),
+                TaskContinuationOptions.OnlyOnFaulted // guarantees that the exception is not null
+            );
     }
 
     internal void CheckMemoryUsage()
