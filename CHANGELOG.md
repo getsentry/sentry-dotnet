@@ -16,6 +16,7 @@
 - Bump Java SDK from v7.14.0 to v7.15.0 ([#3670](https://github.com/getsentry/sentry-dotnet/pull/3670))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7150)
   - [diff](https://github.com/getsentry/sentry-java/compare/7.14.0...7.15.0)
+- Bumped `System.Text.Json` from v6.0.8 to v6.0.10 ([#3704](https://github.com/getsentry/sentry-dotnet/pull/3704))
 
 ## 4.12.1
 
