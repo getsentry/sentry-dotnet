@@ -8,7 +8,7 @@
   <PropertyGroup>
     <SentryAttributesFile>Sentry.Attributes$(MSBuildProjectExtension.Replace('proj', ''))</SentryAttributesFile>
   </PropertyGroup>
-  
+
   <Target Name="WriteSentryAttributes"
           Condition="$(Language) == 'VB' or $(Language) == 'C#' or $(Language) == 'F#'"
           BeforeTargets="BeforeCompile;CoreCompile"
@@ -54,7 +54,7 @@
   </Target>
 
   <Target Name="IncludeGCDump" AfterTargets="SetSentryPropertyDefaults" Condition="'$(SentryBundleGCDump)' == 'true'">
-    <!-- Sentry CLI comes from the Sentry Nuget package when installed. -->
+    <!-- dotnet-gcdump comes from the Sentry Nuget package when installed. -->
     <PropertyGroup Condition="'$(PkgSentry)' != '' and '$(GCDumpDirectory)' == ''">
       <GCDumpDirectory>$(PkgSentry)\tools\dotnet-gcdump\</GCDumpDirectory>
     </PropertyGroup>
