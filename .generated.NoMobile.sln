@@ -165,7 +165,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Hangfire", "src\Sent
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Hangfire.Tests", "test\Sentry.Hangfire.Tests\Sentry.Hangfire.Tests.csproj", "{46E40BE8-1AB0-4846-B0A2-A40AD0272C64}"
 EndProject
-Project("{{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AspNetCore.WebAPI.Profiling", "samples\Sentry.Samples.AspNetCore.WebAPI.Profiling\Sentry.Samples.AspNetCore.WebAPI.Profiling.csproj", "{A5B26C14-7313-4EDC-91E3-287F9374AB75}"
+Project("{00000000-0000-0000-0000-000000000000}") = "Sentry.Samples.AspNetCore.WebAPI.Profiling", "samples\Sentry.Samples.AspNetCore.WebAPI.Profiling\Sentry.Samples.AspNetCore.WebAPI.Profiling.csproj", "{A5B26C14-7313-4EDC-91E3-287F9374AB75}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{233D34AB-970E-4913-AA1E-172E833FB5B2}"
 	ProjectSection(SolutionItems) = preProject
@@ -179,6 +179,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{233D34AB-9
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AspNetCore.Blazor.WebAssembly", "src\Sentry.AspNetCore.Blazor.WebAssembly\Sentry.AspNetCore.Blazor.WebAssembly.csproj", "{8298202C-9983-4D0A-851D-805539EE481A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Console.HeapDump", "samples\Sentry.Samples.Console.HeapDump\Sentry.Samples.Console.HeapDump.csproj", "{D7DF0B26-AD43-4F8B-9BFE-C4471CCC9821}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -276,6 +278,7 @@ Global
 		{4E0DC405-C372-4396-A5DF-F6AA108DA01C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9B175EC8-6B64-4345-A158-091CB8876077}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9B175EC8-6B64-4345-A158-091CB8876077}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B175EC8-6B64-4345-A158-091CB8876077}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{9B175EC8-6B64-4345-A158-091CB8876077}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B175EC8-6B64-4345-A158-091CB8876077}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EE0DC846-52F3-46AF-BC0D-DEF81150CEC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -498,6 +501,10 @@ Global
 		{A5B26C14-7313-4EDC-91E3-287F9374AB75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5B26C14-7313-4EDC-91E3-287F9374AB75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A5B26C14-7313-4EDC-91E3-287F9374AB75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7DF0B26-AD43-4F8B-9BFE-C4471CCC9821}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7DF0B26-AD43-4F8B-9BFE-C4471CCC9821}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7DF0B26-AD43-4F8B-9BFE-C4471CCC9821}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7DF0B26-AD43-4F8B-9BFE-C4471CCC9821}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -581,5 +588,6 @@ Global
 		{46E40BE8-1AB0-4846-B0A2-A40AD0272C64} = {6987A1CC-608E-4868-A02C-09D30C8B7B2D}
 		{8298202C-9983-4D0A-851D-805539EE481A} = {230B9384-90FD-4551-A5DE-1A5C197F25B6}
 		{A5B26C14-7313-4EDC-91E3-287F9374AB75} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
+		{D7DF0B26-AD43-4F8B-9BFE-C4471CCC9821} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
 	EndGlobalSection
 EndGlobal
