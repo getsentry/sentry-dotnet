@@ -3,17 +3,24 @@
     <GCDumpVersion>8.0.547301</GCDumpVersion>
     <GCDumpRootDirectory>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\tools\gcdump\'))</GCDumpRootDirectory>
     <GCDumpTempDirectory>$(GCDumpRootDirectory)$(GCDumpVersion)\</GCDumpTempDirectory>
-    <!-- This is just where the relevant files are stored in the dotnet-gcdump Nuget package -->
-    <GCDumpIncludeFiles>$(GCDumpTempDirectory).store\dotnet-gcdump\$(GCDumpVersion)\dotnet-gcdump\$(GCDumpVersion)\tools\net6.0\any\</GCDumpIncludeFiles>
+    <GCDumpNuGetPackage>$(GCDumpTempDirectory)dotnet-gcdump.$(GCDumpVersion).nupkg</GCDumpNuGetPackage>
+    <GCDumpNuGetUrl>https://www.nuget.org/api/v2/package/dotnet-gcdump/$(GCDumpVersion)</GCDumpNuGetUrl>
+    <GCDumpIncludeFiles>$(GCDumpTempDirectory)tools\net6.0\any\</GCDumpIncludeFiles>
   </PropertyGroup>
 
   <Target Name="DownloadGCDump" BeforeTargets="CollectPackageReferences">
-    <Message Importance="normal" Text="Found dotnet-gcdump - skipping download... " Condition="Exists('$(GCDumpIncludeFiles)')" />
-    <Message Importance="normal" Text="dotnet-gcdump not found... downloading to $(GCDumpTempDirectory)" Condition="!Exists('$(GCDumpIncludeFiles)')" />
+    <Message Importance="normal" Text="Found dotnet-gcdump - skipping download... " Condition="Exists('$(GCDumpNuGetPackage)')" />
+    <Message Importance="normal" Text="dotnet-gcdump not found... downloading to $(GCDumpTempDirectory)" Condition="!Exists('$(GCDumpNuGetPackage)')" />
 
-    <!-- NuGet doesn't have any "download" functionality, so we'll install it locally to a temporary folder   -->
-    <Exec Command="dotnet tool install dotnet-gcdump --version $(GCDumpVersion) --tool-path $(GCDumpTempDirectory)" Condition="!Exists('$(GCDumpIncludeFiles)')" IgnoreExitCode="true" />
+    <!-- Download the NuGet package directly -->
+    <DownloadFile SourceUrl="$(GCDumpNuGetUrl)" DestinationFolder="$(GCDumpTempDirectory)" Condition="!Exists('$(GCDumpNuGetPackage)')">
+      <Output TaskParameter="DownloadedFile" ItemName="GCDumpNuGetPackage" />
+    </DownloadFile>
 
+    <!-- Extract the NuGet package -->
+    <Unzip SourceFiles="$(GCDumpNuGetPackage)" DestinationFolder="$(GCDumpTempDirectory)" Condition="!Exists('$(GCDumpIncludeFiles)')" />
+
+    <Message Importance="high" Text="Unable to locate dotnet-gcdump nuget after install : $(GCDumpNuGetPackage)" Condition="!Exists('$(GCDumpNuGetPackage)')" />
     <Message Importance="high" Text="Unable to locate dotnet-gcdump files after install : $(GCDumpIncludeFiles)" Condition="!Exists('$(GCDumpIncludeFiles)')" />
   </Target>
 
