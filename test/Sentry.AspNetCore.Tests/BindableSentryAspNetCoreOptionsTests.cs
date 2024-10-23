@@ -7,10 +7,6 @@ public class BindableSentryAspNetCoreOptionsTests : BindableTests<SentryAspNetCo
 {
     public BindableSentryAspNetCoreOptionsTests() : base(
         nameof(SentryOptions.ExperimentalMetrics)
-#if MEMORY_DUMP_SUPPORTED
-        , nameof(SentryOptions.HeapDumpDebouncer)
-        , nameof(SentryOptions.HeapDumpTrigger)
-#endif
     )
     {
     }

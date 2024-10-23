@@ -16,7 +16,7 @@ internal sealed class MemoryMonitor : IDisposable
     private readonly long _totalMemory;
 
     private readonly SentryOptions _options;
-    private readonly HeapDumpTrigger _dumpTrigger;
+    private readonly HeapDumpOptions _dumpOptions;
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -25,38 +25,36 @@ internal sealed class MemoryMonitor : IDisposable
 
     public MemoryMonitor(SentryOptions options, Action<string> onDumpCollected, Action? onCaptureDump = null)
     {
+        if (options.HeapDumpOptions is null)
+        {
+            throw new ArgumentException("No heap dump options provided", nameof(options));
+        }
+
         _options = options;
-        _dumpTrigger = options.HeapDumpTrigger
-                       ?? throw new ArgumentException("No heap dump trigger configured on the options", nameof(options));
+        _dumpOptions = options.HeapDumpOptions;
         _onDumpCollected = onDumpCollected;
         _onCaptureDump = onCaptureDump ?? CaptureMemoryDump;
 
         _totalMemory = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
 
-        // Since we're not awaiting the task, the continuation will happen elsewhere but that's OK - all we care about
-        // is that any exceptions get logged as soon as possible.
-        GarbageCollectionMonitor.Start(CheckMemoryUsage, _cancellationTokenSource.Token)
-            .ContinueWith(
-                t => _options.LogError(t.Exception!, "Garbage collection monitor failed"),
-                TaskContinuationOptions.OnlyOnFaulted // guarantees that the exception is not null
-            );
+        GarbageCollectionMonitor.Start(_options, CheckMemoryUsage, _cancellationTokenSource.Token);
     }
 
     internal void CheckMemoryUsage()
     {
         var eventTime = DateTimeOffset.UtcNow;
-        if (!_options.HeapDumpDebouncer.CanProcess(eventTime))
+        if (!_dumpOptions.Debouncer.CanProcess(eventTime))
         {
             return;
         }
 
         var usedMemory = Environment.WorkingSet;
-        if (!_dumpTrigger(usedMemory, _totalMemory))
+        if (!_dumpOptions.Trigger(usedMemory, _totalMemory))
         {
             return;
         }
 
-        _options.HeapDumpDebouncer.RecordOccurence(eventTime);
+        _dumpOptions.Debouncer.RecordOccurence(eventTime);
 
         var usedMemoryPercentage = ((double)usedMemory / _totalMemory) * 100;
         _options.LogDebug("Auto heap dump triggered: Total: {0:N0} bytes, Used: {1:N0} bytes ({2:N2}%)",
@@ -84,7 +82,7 @@ internal sealed class MemoryMonitor : IDisposable
         // Check which patth to use for dotnet-gcdump. If it's been bundled with the application, it will be available
         // in the `dotnet-gcdump` folder of the application directory. Otherwise we assume it has been installed globally.
         var bundledToolPath = Path.Combine(AppContext.BaseDirectory, "dotnet-gcdump", "dotnet-gcdump.dll");
-        var arguments = $"collect -p {processId} -o '{dumpFile}'";
+        var arguments = $"collect -v -p {processId} -o '{dumpFile}'";
         var command = _options.FileSystem.FileExists(bundledToolPath)
             ? $"dotnet {bundledToolPath} {arguments}"
             : $"dotnet-gcdump {arguments}";
@@ -105,9 +103,14 @@ internal sealed class MemoryMonitor : IDisposable
         {
             if (process.StandardOutput.ReadLine() is { } line)
             {
-                _options.LogDebug(line);
+                _options.LogDebug($"gcdump: {line}");
             }
         }
+#if NET8_0_OR_GREATER
+        process.WaitForExit(TimeSpan.FromSeconds(5));
+#else
+        process.WaitForExit(5000);
+#endif
 
         if (!_options.FileSystem.FileExists(dumpFile))
         {

@@ -100,9 +100,6 @@ internal partial class BindableSentryOptions
         options.JsonPreserveReferences = JsonPreserveReferences ?? options.JsonPreserveReferences;
         options.EnableSpotlight = EnableSpotlight ?? options.EnableSpotlight;
         options.SpotlightUrl = SpotlightUrl ?? options.SpotlightUrl;
-#if MEMORY_DUMP_SUPPORTED
-        options.HeapDumpEventLevel = HeapDumpEventLevel ?? options.HeapDumpEventLevel;
-#endif
 
 #if ANDROID
         Android.ApplyTo(options.Android);

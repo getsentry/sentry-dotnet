@@ -7,10 +7,6 @@ public class SentryLoggingOptionsTests : BindableTests<SentryLoggingOptions>
 {
     public SentryLoggingOptionsTests() : base(
         nameof(SentryOptions.ExperimentalMetrics)
-#if MEMORY_DUMP_SUPPORTED
-        , nameof(SentryOptions.HeapDumpDebouncer)
-        , nameof(SentryOptions.HeapDumpTrigger)
-#endif
     )
     {
     }

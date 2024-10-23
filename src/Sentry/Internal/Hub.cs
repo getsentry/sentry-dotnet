@@ -68,7 +68,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
 
 #if MEMORY_DUMP_SUPPORTED
-        if (options.HeapDumpTrigger is not null)
+        if (options.HeapDumpOptions is not null)
         {
             if (_options.DisableFileWrite)
             {
@@ -512,7 +512,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
     }
 
 #if MEMORY_DUMP_SUPPORTED
-    public void CaptureHeapDump(string dumpFile)
+    internal void CaptureHeapDump(string dumpFile)
     {
         if (!IsEnabled)
         {
@@ -526,7 +526,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
             var evt = new SentryEvent
             {
                 Message = "Memory threshold exceeded",
-                Level = _options.HeapDumpEventLevel
+                Level = _options.HeapDumpOptions?.Level ?? SentryLevel.Warning,
             };
             var hint = new SentryHint(_options);
             hint.AddAttachment(dumpFile);
