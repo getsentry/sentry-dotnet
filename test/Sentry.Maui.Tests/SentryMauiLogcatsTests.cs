@@ -89,6 +89,34 @@ public class SentryMauiLogcatsTests
         // Assert
         envelope!.Items.Any(env => env.TryGetFileName() == "logcat.log").Should().BeTrue();
     }
+    [SkippableFact]
+    public async Task CaptureException_WhenAttachLogcats_UnhandledExceptionsAsync()
+    {
+#if __IOS__
+        Skip.If(true, "Doesn't support logcats");
+#endif
+
+        // Arrange
+        var builder = _fixture.Builder.UseSentry(options =>
+        {
+            options.Android.LogCatIntegration = Android.LogCatIntegrationType.Unhandled;
+        });
+
+        // Act
+        using var app = builder.Build();
+        var client = app.Services.GetRequiredService<ISentryClient>();
+        var sentryId = client.CaptureException(BuildUnhandledException());
+
+        await client.FlushAsync();
+
+        var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
+        envelope.Should().NotBeNull("Envelope with sentryId {0} should be sent", sentryId);
+        var envelopeItem = envelope!.Items.FirstOrDefault(item => item.TryGetType() == "attachment");
+
+        // Assert
+        envelopeItem.Should().NotBeNull();
+        envelopeItem!.TryGetFileName().Should().Be("logcat.log");
+    }
 
     [SkippableFact]
     public async Task CaptureException_WhenAttachLogcats_ErrorsAsync()
@@ -147,6 +175,22 @@ public class SentryMauiLogcatsTests
 
         // Assert
         envelopeItem.Should().BeNull();
+    }
+    private static Exception BuildUnhandledException()
+    {
+        try
+        {
+            // Throwing will put a stack trace on the exception
+            throw new Exception("Error");
+        }
+        catch (Exception exception)
+        {
+            // Add extra data to test fully
+            exception.Data[Mechanism.HandledKey] = false;
+            exception.Data[Mechanism.MechanismKey] = "AppDomain.UnhandledException";
+            exception.Data["foo"] = "bar";
+            return exception;
+        }
     }
 #endif
 }
