@@ -64,7 +64,6 @@ public class SentryMauiOptionsTests
         Assert.Equal(expected, options.Android.LogCatIntegration);
     }
 
-#if ANDROID
     [Fact]
     public void HandlerStrategy_Set()
     {
