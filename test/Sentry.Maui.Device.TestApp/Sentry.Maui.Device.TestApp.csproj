@@ -4,10 +4,6 @@
     <TargetFrameworks />
     <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios</TargetFrameworks>
-    <!-- Currently broken on .NET 7, see
-      - https://github.com/dotnet/maui/issues/18573
-      - https://developercommunity.visualstudio.com/t/MAUI0000:-SystemMissingMethodException:/10505327?sort=newest&ftype=problem
-      <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks> -->
 
     <OutputType>Exe</OutputType>
     <SingleProject>true</SingleProject>
@@ -16,8 +12,8 @@
     <UseMaui>true</UseMaui>
     <SelfContained>true</SelfContained>
 
-    <!-- See https://github.com/dotnet/xharness/issues/1281#issuecomment-2390579883 -->
-    <AndroidEnableMarshalMethods>false</AndroidEnableMarshalMethods>
+    <!-- Disable linking for iOS -->
+    <MtouchLink>None</MtouchLink>
 
     <!-- Display name -->
     <ApplicationTitle>Sentry.Maui.Device.TestApp</ApplicationTitle>
@@ -36,9 +32,6 @@
          https://docs.microsoft.com/en-us/dotnet/core/compatibility/sdk/5.0/referencing-executable-generates-error -->
     <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
 
-    <!-- https://github.com/xamarin/xamarin-android/issues/6809 -->
-    <NoWarn>$(NoWarn);XA4218</NoWarn>
-
   </PropertyGroup>
 
   <!--
@@ -48,14 +41,8 @@
   <PropertyGroup>
     <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
     <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
-
-    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android'      And '$(OSArchitecture)' == 'Arm64'">android-arm64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(OSArchitecture)' == 'Arm64'">iossimulator-arm64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'  And '$(OSArchitecture)' == 'Arm64'">maccatalyst-arm64</RuntimeIdentifier>
-
-    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android'      And '$(OSArchitecture)' == 'x64'">android-x64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(OSArchitecture)' == 'x64'">iossimulator-x64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'  And '$(OSArchitecture)' == 'x64'">maccatalyst-x64</RuntimeIdentifier>
   </PropertyGroup>
 
   <ItemGroup>
@@ -65,7 +52,6 @@
 
   <!-- Configure XUnit -->
   <ItemGroup>
-    <AndroidAsset Include="..\xunit.runner.json" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
     <Content Include="..\xunit.runner.json" CopyToOutputDirectory="PreserveNewest" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
   </ItemGroup>
 
