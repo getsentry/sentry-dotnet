@@ -2,14 +2,16 @@
 
 ## Unreleased
 
+### Fixes
+
+- Android: Fix for SIGSEGV reported by Sentry when a NullReferenceException is thrown in Release mode ([#3694](https://github.com/getsentry/sentry-dotnet/pull/3694))
+  - To turn it on, set: `options.HandlerStrategy = NdkHandlerStrategy.SENTRY_HANDLER_STRATEGY_CHAIN_AT_START;`
+- Events from NDK on Android will report sdk.name `sentry.native.android.dotnet` ([#3682](https://github.com/getsentry/sentry-dotnet/pull/3682))
+
 ### Features
 
 - Added a `SetBeforeScreenshotCapture` callback to the options: allowing the user to set an action before the screenshot is taken ([#3661](https://github.com/getsentry/sentry-dotnet/pull/3661))
 - Make `Sentry.AspNetCore.Blazor.WebAssembly` generally available. ([#3674](https://github.com/getsentry/sentry-dotnet/pull/3674))
-
-### Fixes
-
-- Events from NDK on Android will report sdk.name `sentry.native.android.dotnet` ([#3682](https://github.com/getsentry/sentry-dotnet/pull/3682))
 
 ### Dependencies
 
