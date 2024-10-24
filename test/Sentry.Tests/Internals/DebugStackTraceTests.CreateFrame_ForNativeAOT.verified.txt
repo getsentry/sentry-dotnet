@@ -1,7 +1,0 @@
-﻿{
-  function: DoSomething(int, long),
-  module: Foo.Bar,
-  in_app: true,
-  image_addr: 0x1,
-  instruction_addr: 0x2
-}

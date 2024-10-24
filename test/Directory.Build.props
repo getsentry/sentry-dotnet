@@ -26,16 +26,6 @@
 
   <ItemGroup>
     <Using Include="Sentry" />
-    <Using Include="Sentry.DsnSamples" Static="True" />
-    <Using Include="Sentry.Extensibility" />
-    <Using Include="Sentry.Infrastructure" />
-    <Using Include="Sentry.Integrations" />
-    <Using Include="Sentry.Internal" />
-    <Using Include="Sentry.Internal.Extensions" />
-    <Using Include="Sentry.Protocol" />
-    <Using Include="Sentry.Protocol.Envelopes" />
-    <Using Include="Sentry.Reflection" />
-    <Using Include="Sentry.Testing" />
 
     <Using Include="FluentAssertions" />
     <Using Include="FluentAssertions.Execution" />

@@ -6,16 +6,6 @@
     <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
-  <!-- platform-specific targets cannot currently run snapshot verification tests -->
-  <ItemGroup Condition="'$(TargetPlatformIdentifier)' != ''">
-    <Compile Remove="**\*.verify.cs" />
-  </ItemGroup>
-
-  <!-- common module init for all test projects -->
-  <ItemGroup Condition="'$(IsTestProject)' == 'true'">
-    <Compile Include="$(MSBuildThisFileDirectory)CommonModuleInit.cs" />
-  </ItemGroup>
-
   <!-- configure xunit -->
   <ItemGroup Condition="'$(IsTestProject)' == 'true'">
     <Content Include="..\xunit.runner.windows.json" Condition="$([MSBuild]::IsOSPlatform('windows'))">
@@ -26,10 +16,4 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
-  <PropertyGroup>
-    <!-- Used in buildTransitive\Sentry.targets -->
-    <IsSentryTestProject>true</IsSentryTestProject>
-  </PropertyGroup>
-  <Import Project="$(MSBuildThisFileDirectory)..\src\Sentry\buildTransitive\Sentry.targets" />
 </Project>

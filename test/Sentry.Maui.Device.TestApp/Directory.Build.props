@@ -8,6 +8,5 @@
 
   <ItemGroup>
     <Using Include="Sentry"/>
-    <Using Include="Sentry.Extensibility"/>
   </ItemGroup>
 </Project>

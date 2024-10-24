@@ -1,39 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net7.0;net6.0;net48</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android;net8.0-android</TargetFrameworks>
+    <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios;net8.0-ios</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst;net8.0-maccatalyst</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
-    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetPlatformIdentifier)' == ''">
-    <ProjectReference Include="..\Sentry.Testing.CrashableApp\Sentry.Testing.CrashableApp.csproj" />
+<!--    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />-->
   </ItemGroup>
 
   <ItemGroup>
     <None Update="HintTests.CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed.Core3_1.verified.txt">
-      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
-      <DependentUpon>HintTests.cs</DependentUpon>
-    </None>
-    <None Update="HintTests.CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed.DotNet6_0.verified.txt">
-      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
-      <DependentUpon>HintTests.cs</DependentUpon>
-    </None>
-    <None Update="HintTests.CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed.DotNet7_0.verified.txt">
-      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
-      <DependentUpon>HintTests.cs</DependentUpon>
-    </None>
-    <None Update="HintTests.CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed.Mono4_0.verified.txt">
-      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
-      <DependentUpon>HintTests.cs</DependentUpon>
-    </None>
-    <None Update="HintTests.CaptureEvent_ActiveTransaction_UnhandledExceptionTransactionEndedAsCrashed.Net4_8.verified.txt">
       <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
       <DependentUpon>HintTests.cs</DependentUpon>
     </None>
