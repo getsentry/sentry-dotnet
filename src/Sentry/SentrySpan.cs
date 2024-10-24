@@ -10,7 +10,7 @@ namespace Sentry;
 /// <summary>
 /// Transaction span.
 /// </summary>
-public class SentrySpan : ISpanData, ISentryJsonSerializable, ITraceContextInternal
+public class SentrySpan : ISpanData, ISentryJsonSerializable
 {
     /// <inheritdoc />
     public SpanId SpanId { get; private set; }

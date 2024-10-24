@@ -7,7 +7,7 @@ namespace Sentry.Protocol;
 /// <summary>
 /// Trace context data.
 /// </summary>
-public class Trace : ITraceContext, ITraceContextInternal, ISentryJsonSerializable, ICloneable<Trace>, IUpdatable<Trace>
+public class Trace : ITraceContext, ISentryJsonSerializable, ICloneable<Trace>, IUpdatable<Trace>
 {
     /// <summary>
     /// Tells Sentry which type of context this is.
