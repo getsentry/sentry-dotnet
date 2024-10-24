@@ -100,9 +100,7 @@ public class SentryMauiLogcatsTests
         // Arrange
         var builder = _fixture.Builder.UseSentry(options =>
         {
-#if ANDROID
             options.Android.LogCatIntegration = Android.LogCatIntegrationType.Errors;
-#endif
         });
 
         // Act
@@ -132,9 +130,7 @@ public class SentryMauiLogcatsTests
         // Arrange
         var builder = _fixture.Builder.UseSentry(options =>
         {
-#if ANDROID
             options.Android.LogCatIntegration = Android.LogCatIntegrationType.None;
-#endif
         });
 
         // Act
