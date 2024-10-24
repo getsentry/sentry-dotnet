@@ -10,13 +10,18 @@
 
 ### Features
 
+- Added a `SetBeforeScreenshotCapture` callback to the options: allowing the user to set an action before the screenshot is taken ([#3661](https://github.com/getsentry/sentry-dotnet/pull/3661))
 - Make `Sentry.AspNetCore.Blazor.WebAssembly` generally available. ([#3674](https://github.com/getsentry/sentry-dotnet/pull/3674))
 
 ### Dependencies
 
-- Bump Java SDK from v7.14.0 to v7.15.0 ([#3670](https://github.com/getsentry/sentry-dotnet/pull/3670))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7150)
-  - [diff](https://github.com/getsentry/sentry-java/compare/7.14.0...7.15.0)
+- Bump Java SDK from v7.14.0 to v7.16.0 ([#3670](https://github.com/getsentry/sentry-dotnet/pull/3670), [#3707](https://github.com/getsentry/sentry-dotnet/pull/3707))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7160)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.14.0...7.16.0)
+- Bump CLI from v2.37.0 to v2.38.0 ([#3702](https://github.com/getsentry/sentry-dotnet/pull/3702))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2380)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.37.0...2.38.0)
+- Bumped `System.Text.Json` from v6.0.8 to v6.0.10 ([#3704](https://github.com/getsentry/sentry-dotnet/pull/3704))
 
 ## 4.12.1
 

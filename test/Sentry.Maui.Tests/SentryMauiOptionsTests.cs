@@ -1,3 +1,5 @@
+using NSubstitute.Exceptions;
+
 namespace Sentry.Maui.Tests;
 
 public class SentryMauiOptionsTests
@@ -61,7 +63,6 @@ public class SentryMauiOptionsTests
         // Assert
         Assert.Equal(expected, options.Android.LogCatIntegration);
     }
-#endif
 
 #if ANDROID
     [Fact]
@@ -79,4 +80,33 @@ public class SentryMauiOptionsTests
     }
 #endif
 
+    [Fact]
+    public void BeforeCaptureScreenshot_Set()
+    {
+        // Arrange
+        var options = new SentryMauiOptions();
+        options.AttachScreenshot = true;
+
+        // Act
+        options.SetBeforeScreenshotCapture((@event, hint) =>
+        {
+            return false;
+        });
+
+        // Assert
+        Assert.NotNull(options.BeforeCaptureInternal);
+
+    }
+
+    [Fact]
+    public void BeforeCaptureScreenshot_NotSet()
+    {
+        // Arrange
+        var options = new SentryMauiOptions();
+        options.AttachScreenshot = true;
+
+        // Assert
+        Assert.Null(options.BeforeCaptureInternal);
+
+    }
 }
