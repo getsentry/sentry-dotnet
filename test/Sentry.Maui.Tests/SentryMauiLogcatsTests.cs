@@ -119,6 +119,33 @@ public class SentryMauiLogcatsTests
     }
 
     [SkippableFact]
+    public async Task CaptureException_WhenAttachLogcats_HandledExceptionsAsync()
+    {
+#if __IOS__
+        Skip.If(true, "Doesn't support logcats");
+#endif
+
+        // Arrange
+        var builder = _fixture.Builder.UseSentry(options =>
+        {
+            options.Android.LogCatIntegration = Android.LogCatIntegrationType.Unhandled;
+        });
+
+        // Act
+        using var app = builder.Build();
+        var client = app.Services.GetRequiredService<ISentryClient>();
+        var sentryId = client.CaptureException(new Exception());
+
+        await client.FlushAsync();
+
+        var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
+        envelope.Should().NotBeNull("Envelope with sentryId {0} should be sent", sentryId);
+
+        // Assert
+        envelope!.Items.Any(item => item.TryGetType() == "attachment").Should().BeFalse();
+    }
+
+    [SkippableFact]
     public async Task CaptureException_WhenAttachLogcats_ErrorsAsync()
     {
 #if __IOS__
