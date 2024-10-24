@@ -1,5 +1,0 @@
-[*.cs]
-
-# Reason: Azure Functions worker doesn't set SynchronizationContext but Durable Functions does and required affinity.
-# (https://github.com/Azure/azure-functions-dotnet-worker/issues/1520)
-dotnet_diagnostic.CA2007.severity = none

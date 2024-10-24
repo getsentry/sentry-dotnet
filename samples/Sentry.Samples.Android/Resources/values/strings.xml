@@ -1,8 +1,0 @@
-<resources>
-    <string name="app_name">Sentry .NET Android Sample</string>
-    <string name="capture_exception">Throw and Capture C# Exception</string>
-    <string name="throw_unhandled_exception">Throw C# Exception</string>
-    <string name="throw_java_exception">Throw Java Exception</string>
-    <string name="throw_java_exception_background_thread">Throw Java Exception (Background Thread)</string>
-    <string name="crash_in_c">Segfault in C</string>
-</resources>

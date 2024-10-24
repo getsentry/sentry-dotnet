@@ -1,4 +1,0 @@
-<Project>
-  <!-- Skip over the Directory.Build.props in the test folder, but still use the one in the root -->
-  <Import Project="..\..\Directory.Build.props" />
-</Project>
