@@ -89,6 +89,7 @@ public class SentryMauiLogcatsTests
         // Assert
         envelope!.Items.Any(env => env.TryGetFileName() == "logcat.log").Should().BeTrue();
     }
+
     [SkippableFact]
     public async Task CaptureException_WhenAttachLogcats_UnhandledExceptionsAsync()
     {
@@ -99,7 +100,9 @@ public class SentryMauiLogcatsTests
         // Arrange
         var builder = _fixture.Builder.UseSentry(options =>
         {
+#if ANDROID
             options.Android.LogCatIntegration = Android.LogCatIntegrationType.Unhandled;
+#endif
         });
 
         // Act
@@ -128,7 +131,9 @@ public class SentryMauiLogcatsTests
         // Arrange
         var builder = _fixture.Builder.UseSentry(options =>
         {
+#if ANDROID
             options.Android.LogCatIntegration = Android.LogCatIntegrationType.Unhandled;
+#endif
         });
 
         // Act
@@ -155,7 +160,9 @@ public class SentryMauiLogcatsTests
         // Arrange
         var builder = _fixture.Builder.UseSentry(options =>
         {
+#if ANDROID
             options.Android.LogCatIntegration = Android.LogCatIntegrationType.Errors;
+#endif
         });
 
         // Act
@@ -185,7 +192,9 @@ public class SentryMauiLogcatsTests
         // Arrange
         var builder = _fixture.Builder.UseSentry(options =>
         {
+#if ANDROID
             options.Android.LogCatIntegration = Android.LogCatIntegrationType.None;
+#endif
         });
 
         // Act
