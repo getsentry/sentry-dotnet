@@ -20,6 +20,9 @@
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2380)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.37.0...2.38.0)
 - Bumped `System.Text.Json` from v6.0.8 to v6.0.10 ([#3704](https://github.com/getsentry/sentry-dotnet/pull/3704))
+- Bump Cocoa SDK from v8.36.0 to v8.38.0 ([#3685](https://github.com/getsentry/sentry-dotnet/pull/3685))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8380)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.36.0...8.38.0)
 
 ## 4.12.1
 
