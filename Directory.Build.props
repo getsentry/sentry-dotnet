@@ -2,8 +2,6 @@
 
   <PropertyGroup>
     <VersionPrefix>4.12.1</VersionPrefix>
-    <!-- TODO: Remove Suffix for 5.0.0 release   -->
-    <VersionSuffix>alpha</VersionSuffix>
     <LangVersion>12</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
