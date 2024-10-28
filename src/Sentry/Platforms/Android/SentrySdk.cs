@@ -89,7 +89,6 @@ public static partial class SentrySdk
             // These options we have behind feature flags
             if (options is { IsPerformanceMonitoringEnabled: true, Native.EnableTracing: true })
             {
-                o.EnableTracing = null;
                 o.TracesSampleRate = (JavaDouble?)options.TracesSampleRate;
 
                 if (options.TracesSampler is { } tracesSampler)
