@@ -49,6 +49,13 @@
         Id: Guid_1,
         IpAddress: {{auto}}
       },
+      Breadcrumbs: [
+        {
+          Message: my exception,
+          Category: Exception,
+          Level: critical
+        }
+      ],
       Spans: [
         {
           IsFinished: true,

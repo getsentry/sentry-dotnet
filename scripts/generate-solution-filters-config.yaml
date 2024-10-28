@@ -53,7 +53,6 @@ filterConfigs:
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
-        - "**/*Maui.Device.TestApp.csproj"
         - "**/*SourceGen.csproj"
         - "**/Sentry.Samples.Android.csproj"
 
@@ -159,7 +158,6 @@ filterConfigs:
         - "test/**/Sentry.Maui.Tests.csproj"
         - "test/**/Sentry.Testing.csproj"
         - "test/**/Sentry.Tests.csproj"
-        - "test/MauiTestUtils/**/*.csproj"
 
   - outputPath: SentryNoMobile.slnf
     solution: .generated.NoMobile.sln

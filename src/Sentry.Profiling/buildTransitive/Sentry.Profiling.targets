@@ -1,4 +1,8 @@
 <Project>
+  <ItemGroup Condition="$(Language) == 'C#' and $(SentryImplicitUsings) != 'false' and ($(ImplicitUsings) == 'enable' or $(ImplicitUsings) == 'true')">
+    <Using Include="Sentry.Profiling" />
+  </ItemGroup>
+
   <Target BeforeTargets="BeforeBuild" Name="CheckPlatformSupport">
     <Error Text="Package Sentry.Profiling is not supported on platform '$(TargetPlatformIdentifier)'."
            Condition="'$(TargetPlatformIdentifier)' == 'android'" />

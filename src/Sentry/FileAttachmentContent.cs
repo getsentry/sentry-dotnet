@@ -1,3 +1,5 @@
+using Sentry.Internal;
+
 namespace Sentry;
 
 /// <summary>

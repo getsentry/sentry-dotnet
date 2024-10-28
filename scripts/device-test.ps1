@@ -30,18 +30,30 @@ try
         $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/android-$arch"
         $arguments = @(
             '--app', "$buildDir/io.sentry.dotnet.maui.device.testapp-Signed.apk",
-            '--package-name', 'io.sentry.dotnet.maui.device.testapp'
+            '--package-name', 'io.sentry.dotnet.maui.device.testapp',
+            '--launch-timeout', '00:10:00',
+            '--instrumentation', 'Sentry.Maui.Device.TestApp.SentryInstrumentation'
         )
+
+        if ($CI)
+        {
+            $arguments += '--arg'
+            $arguments += 'IsGitHubActions=true'
+        }
     }
     elseif ($Platform -eq 'ios')
     {
         $tfm += 'ios'
         $group = 'apple'
+        # Always use x64 on iOS, since arm64 doesn't support JIT, which is required for tests using NSubstitute
+        $arch = 'x64'
         $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/iossimulator-$arch"
+        $envValue = $CI ? 'true' : 'false'
         $arguments = @(
             '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
             '--target', 'ios-simulator-64',
-            '--launch-timeout', '00:10:00'
+            '--launch-timeout', '00:10:00',
+            '--set-env', 'CI=$envValue'
         )
     }
 

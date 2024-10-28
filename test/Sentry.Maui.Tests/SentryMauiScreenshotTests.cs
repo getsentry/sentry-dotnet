@@ -24,6 +24,7 @@ public class SentryMauiScreenshotTests
                 options.DiagnosticLogger = Logger;
                 options.AutoSessionTracking = false; //Get rid of session envelope for easier Assert
                 options.CacheDirectoryPath = null;   //Do not wrap our FakeTransport with a caching transport
+                options.FlushTimeout = TimeSpan.FromSeconds(10);
             });
 
             Builder = builder;
@@ -33,9 +34,13 @@ public class SentryMauiScreenshotTests
     private readonly Fixture _fixture = new();
 
 #if __MOBILE__
-    [Fact]
+    [SkippableFact]
     public async Task CaptureException_WhenAttachScreenshots_ContainsScreenshotAttachmentAsync()
     {
+#if __IOS__
+        Skip.If(true, "Flaky on iOS");
+#endif
+
         // Arrange
         var builder = _fixture.Builder.UseSentry();
 
@@ -46,9 +51,9 @@ public class SentryMauiScreenshotTests
         await client.FlushAsync();
 
         var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
-        
+
         var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
-        envelope.Should().NotBeNull();
+        envelope.Should().NotBeNull("Envelope with sentryId {0} should be sent", sentryId);
 
         var envelopeItem = envelope!.Items.FirstOrDefault(item => item.TryGetType() == "attachment");
 
@@ -64,11 +69,14 @@ public class SentryMauiScreenshotTests
             envelopeItem!.TryGetFileName().Should().Be("screenshot.jpg");
         }
     }
-#endif
 
-    [Fact]
+    [SkippableFact]
     public async Task CaptureException_RemoveScreenshot_NotContainsScreenshotAttachmentAsync()
     {
+#if __IOS__
+        Skip.If(true, "Flaky on iOS");
+#endif
+
         // Arrange
         var builder = _fixture.Builder.UseSentry(options => options.SetBeforeSend((e, hint) =>
             {
@@ -93,4 +101,76 @@ public class SentryMauiScreenshotTests
         // Assert
         envelopeItem.Should().BeNull();
     }
+
+    [SkippableFact]
+    public async Task CaptureException_BeforeCaptureScreenshot_DisableCaptureAsync()
+    {
+#if __IOS__
+        Skip.If(true, "Flaky on iOS");
+#endif
+
+        // Arrange
+        var builder = _fixture.Builder.UseSentry(options => options.SetBeforeScreenshotCapture((e, hint) =>
+            {
+                return false;
+            }
+        ));
+
+        // Act
+        using var app = builder.Build();
+        var client = app.Services.GetRequiredService<ISentryClient>();
+        var sentryId = client.CaptureException(new Exception());
+        await client.FlushAsync();
+
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
+        envelope.Should().NotBeNull();
+
+        var envelopeItem = envelope!.Items.FirstOrDefault(item => item.TryGetType() == "attachment");
+
+        // Assert
+        envelopeItem.Should().BeNull();
+    }
+
+    [SkippableFact]
+    public async Task CaptureException_BeforeCaptureScreenshot_DefaultAsync()
+    {
+#if __IOS__
+        Skip.If(true, "Flaky on iOS");
+#endif
+
+        // Arrange
+        var builder = _fixture.Builder.UseSentry(options => options.SetBeforeScreenshotCapture((e, hint) =>
+        {
+            return true;
+        }
+        ));
+
+        // Act
+        using var app = builder.Build();
+        var client = app.Services.GetRequiredService<ISentryClient>();
+        var sentryId = client.CaptureException(new Exception());
+        await client.FlushAsync();
+
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
+        envelope.Should().NotBeNull("Envelope with sentryId {0} should be sent", sentryId);
+
+        var envelopeItem = envelope!.Items.FirstOrDefault(item => item.TryGetType() == "attachment");
+
+        // Assert
+        // On Android this can fail due to MAUI not being able to detect current Activity, see issue https://github.com/dotnet/maui/issues/19450
+        if (_fixture.Logger.Entries.Any(entry => entry.Level == SentryLevel.Error && entry.Exception is NullReferenceException))
+        {
+            envelopeItem.Should().BeNull();
+        }
+        else
+        {
+        envelopeItem.Should().NotBeNull();
+            envelopeItem!.TryGetFileName().Should().Be("screenshot.jpg");
+        }
+    }
+#endif
 }

@@ -2,6 +2,112 @@
 
 ## Unreleased
 
+### Features
+
+- Added a `SetBeforeScreenshotCapture` callback to the options: allowing the user to set an action before the screenshot is taken ([#3661](https://github.com/getsentry/sentry-dotnet/pull/3661))
+- Make `Sentry.AspNetCore.Blazor.WebAssembly` generally available. ([#3674](https://github.com/getsentry/sentry-dotnet/pull/3674))
+
+### Fixes
+
+- Events from NDK on Android will report sdk.name `sentry.native.android.dotnet` ([#3682](https://github.com/getsentry/sentry-dotnet/pull/3682))
+
+### Dependencies
+
+- Bump Java SDK from v7.14.0 to v7.16.0 ([#3670](https://github.com/getsentry/sentry-dotnet/pull/3670), [#3707](https://github.com/getsentry/sentry-dotnet/pull/3707))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7160)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.14.0...7.16.0)
+- Bump CLI from v2.37.0 to v2.38.0 ([#3702](https://github.com/getsentry/sentry-dotnet/pull/3702))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2380)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.37.0...2.38.0)
+- Bumped `System.Text.Json` from v6.0.8 to v6.0.10 ([#3704](https://github.com/getsentry/sentry-dotnet/pull/3704))
+
+## 4.12.1
+
+### Fixes
+
+- Fixed "Failed to persist session" error on iOS ([#3655](https://github.com/getsentry/sentry-dotnet/pull/3655))
+
+### Dependencies
+
+- Bump CLI from v2.36.5 to v2.37.0 ([#3647](https://github.com/getsentry/sentry-dotnet/pull/3647), [#3664](https://github.com/getsentry/sentry-dotnet/pull/3664))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2370)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.36.5...2.37.0)
+
+## 4.12.0
+
+### Support for Xcode 16.0 (BREAKING CHANGE)
+
+If you are using Xcode 16.0, you will need to update the SDK to version `4.12.0` or later.
+If you are still using Xcode 15.4 or earlier, you need to continue to use version `4.11.0` or earlier.
+
+Using Xcode 16 to build .NET applications targeting iOS and Mac Catalyst requires [.NET workload for iOS SDK version 18.0.8303](https://github.com/xamarin/xamarin-macios/releases/tag/dotnet-8.0.1xx-xcode16.0-8303). We [built the SDK version 4.12.0 using Xcode 16](https://github.com/getsentry/sentry-dotnet/pull/3635/files) in order to support this scenario. That, unfortunately, breaks folks using older version of Xcode.
+
+As such, if you are using SDK version `4.12.x` and targeting iOS or Mac Catalyst, you will need to install and use Xcode 16 and `workload iOS SDK 18.0.8303`
+
+Note that .NET 9 will also support Xcode 16, when it is released next month (Nov 2024).
+
+### API Changes
+
+- The `SentrySdk.Metrics` module is deprecated and will be removed in the next major release.
+  Sentry will reject all metrics sent after October 7, 2024.
+  Learn more: https://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-to-Metrics  ([#3619](https://github.com/getsentry/sentry-dotnet/pull/3619))
+
+### Fixes
+
+- Fixed duplicate key exception for Hangfire jobs with AutomaticRetry ([#3631](https://github.com/getsentry/sentry-dotnet/pull/3631))
+
+### Features
+
+- Added a flag to options `DisableFileWrite` to allow users to opt-out of all file writing operations. Note that toggling this will affect features such as offline caching and auto-session tracking and release health as these rely on some file persistency ([#3614](https://github.com/getsentry/sentry-dotnet/pull/3614), [#3641](https://github.com/getsentry/sentry-dotnet/pull/3641))
+
+### Dependencies
+
+- Bump Native SDK from v0.7.9 to v0.7.10 ([#3623](https://github.com/getsentry/sentry-dotnet/pull/3623))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0710)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.9...0.7.10)
+- Bump CLI from v2.36.1 to v2.36.5 ([#3624](https://github.com/getsentry/sentry-dotnet/pull/3624), [#3634](https://github.com/getsentry/sentry-dotnet/pull/3634), [#3642](https://github.com/getsentry/sentry-dotnet/pull/3642), [#3644](https://github.com/getsentry/sentry-dotnet/pull/3644))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2365)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.36.1...2.36.5)
+- Update Perfview/TraceEvent to e343a0c ([#3492](https://github.com/getsentry/sentry-dotnet/pull/3492))
+
+## 4.11.0
+
+### Features
+
+- All exceptions are now added as breadcrumbs on future events. Previously this was only the case for exceptions captured via the `Sentry.SeriLog` or `Sentry.Extensions.Logging` integrations. ([#3584](https://github.com/getsentry/sentry-dotnet/pull/3584))
+
+### Fixes
+- On mobile devices, the SDK no longer throws a `FormatException` for `ProcessorFrequency` when trying to report native events ([#3541](https://github.com/getsentry/sentry-dotnet/pull/3541))
+- Add missing org parameter to the CLI release operations ([#3600](https://github.com/getsentry/sentry-dotnet/pull/3600))
+
+### API Changes
+- When the Sentry SDK is disabled, `SentrySdk.StartTransaction()` now returns a `NoOpTransaction`, which avoids unnecessary memory allocations ([#3581](https://github.com/getsentry/sentry-dotnet/pull/3581))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.35.0 to v8.36.0 ([#3570](https://github.com/getsentry/sentry-dotnet/pull/3570), [#3575](https://github.com/getsentry/sentry-dotnet/pull/3575))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8360)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.35.0...8.36.0)
+- Bump CLI from v2.33.1 to v2.36.1 ([#3578](https://github.com/getsentry/sentry-dotnet/pull/3578), [#3599](https://github.com/getsentry/sentry-dotnet/pull/3599), [#3603](https://github.com/getsentry/sentry-dotnet/pull/3603), [#3606](https://github.com/getsentry/sentry-dotnet/pull/3606))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2361)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.33.1...2.36.1)
+- Bump Native SDK from v0.7.8 to v0.7.9 ([#3577](https://github.com/getsentry/sentry-dotnet/pull/3577))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#079)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.8...0.7.9)
+
+## 4.10.2
+
+### Various fixes & improvements
+
+- fix: Prevent deadlock in `Hub.Dispose` (#3539) by @bitsandfoxes
+- build(deps): bump github/codeql-action from 3.26.0 to 3.26.2 (#3543) by @dependabot
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.34.0 to v8.35.0 ([#3548](https://github.com/getsentry/sentry-dotnet/pull/3548))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8350)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.34.0...8.35.0)
+
 ## Fixes
 
 - Resolved a potential deadlock during SDK shutdown ([#3539](https://github.com/getsentry/sentry-dotnet/pull/3539))

@@ -35,6 +35,7 @@ internal partial class BindableSentryOptions
     public string? CacheDirectoryPath { get; set; }
     public bool? CaptureFailedRequests { get; set; }
     public List<string>? FailedRequestTargets { get; set; }
+    public bool? DisableFileWrite { get; set; }
     public TimeSpan? InitCacheFlushTimeout { get; set; }
     public Dictionary<string, string>? DefaultTags { get; set; }
     public bool? EnableTracing { get; set; }
@@ -81,6 +82,7 @@ internal partial class BindableSentryOptions
         options.CacheDirectoryPath = CacheDirectoryPath ?? options.CacheDirectoryPath;
         options.CaptureFailedRequests = CaptureFailedRequests ?? options.CaptureFailedRequests;
         options.FailedRequestTargets = FailedRequestTargets?.Select(s => new SubstringOrRegexPattern(s)).ToList() ?? options.FailedRequestTargets;
+        options.DisableFileWrite = DisableFileWrite ?? options.DisableFileWrite;
         options.InitCacheFlushTimeout = InitCacheFlushTimeout ?? options.InitCacheFlushTimeout;
         options.DefaultTags = DefaultTags ?? options.DefaultTags;
 #pragma warning disable CS0618 // Type or member is obsolete

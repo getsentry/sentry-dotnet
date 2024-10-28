@@ -722,11 +722,21 @@ public class SentryOptions
         set => _failedRequestTargets = new(value.WithConfigBinding);
     }
 
+    private IFileSystem? _fileSystem;
     /// <summary>
-    /// Sets the filesystem instance to use. Defaults to the actual <see cref="Sentry.Internal.FileSystem"/>.
+    /// Sets the filesystem instance to use. Defaults to the actual <see cref="ReadWriteFileSystem"/>.
     /// Used for testing.
     /// </summary>
-    internal IFileSystem FileSystem { get; set; } = Internal.FileSystem.Instance;
+    internal IFileSystem FileSystem
+    {
+        get => _fileSystem ??= DisableFileWrite ? new ReadOnlyFileSystem() : new ReadWriteFileSystem();
+        set => _fileSystem = value;
+    }
+
+    /// <summary>
+    /// Allows to disable the SDKs writing to disk operations
+    /// </summary>
+    public bool DisableFileWrite { get; set; }
 
     /// <summary>
     /// If set to a positive value, Sentry will attempt to flush existing local event cache when initializing.
@@ -1012,10 +1022,9 @@ public class SentryOptions
     /// end the session when it's closed.
     /// </summary>
     /// <remarks>
-    /// Note: this is disabled by default in the current version (except for mobile targets and MAUI),
-    /// but will become enabled by default in the next major version.
-    /// Currently this only works for release health in client mode
-    /// (desktop, mobile applications, but not web servers).
+    /// Currently, this only works for release health in client mode (desktop, mobile applications, but not web servers)
+    /// as this feature requires access to the filesystem to sync sessions and multiple instances of the app will race
+    /// each other.
     /// </remarks>
     public bool AutoSessionTracking { get; set; } = false;
 #endif

@@ -429,7 +429,7 @@ public class SentryTransactionTests
     public async Task Finish_SentryRequestTransactionGetsIgnored()
     {
         // See https://github.com/getsentry/sentry-dotnet/issues/2785
-        Skip.If(TestEnvironment.IsGitHubActions);
+        Skip.If(TestEnvironment.IsGitHubActions, "This test is flaky in CI");
 
         // Arrange
         var client = Substitute.For<ISentryClient>();
