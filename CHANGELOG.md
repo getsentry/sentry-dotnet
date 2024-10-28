@@ -1,19 +1,6 @@
 # Changelog
 
-## Version Five
-
-### API Changes
-
-- You should no longer pass `AndroidContext` as an argument to `SentrySdk.Init` ([#3562](https://github.com/getsentry/sentry-dotnet/pull/3562))
-- The `SentryUser.Segment` property has been deprecated. Consider sending this as a tag or additional data instead ([#3563](https://github.com/getsentry/sentry-dotnet/pull/3563))
-- The ITraceContext now includes an [Origin](https://develop.sentry.dev/sdk/telemetry/traces/trace-origin/), which is set automatically and is primarily used internally by the Sentry server ([#3564](https://github.com/getsentry/sentry-dotnet/pull/3564))
-- `Device.BatteryLevel` and `Device.ProcessorFrequency` are now stored as floats rather than ints, to align with the Cocoa and Java SDKs ([#3567](https://github.com/getsentry/sentry-dotnet/pull/3567))
-- `SentryOptions.EnableTracing` has been removed. Instead, tracing should be enabled or disabled by setting the `SentryOptions.TracesSampleRate` or by using `SentryOptions.TracesSampler` to configure a sampling function ([#3569](https://github.com/getsentry/sentry-dotnet/pull/3569))
-- The `FailedRequestTargets`, `TagFilters` and `TracePropagationTargets` options have all been changed from `SubstringOrRegexPattern` to `IList<StringOrRegex>` ([#3566](https://github.com/getsentry/sentry-dotnet/pull/3566))
-- `Scope.Transaction` is now always stored as an `AsyncLocal` also in [Global Mode](https://docs.sentry.io/platforms/dotnet/configuration/options/#is-global-mode-enabled), to prevent auto-instrumented spans from the UI ending up parented to transactions from a background task (or vice versa). ([#3596](https://github.com/getsentry/sentry-dotnet/pull/3596))
-- Heap dumps can be captured automatically when memory usage exceeds a configurable threshold ([#3667](https://github.com/getsentry/sentry-dotnet/pull/3667))
-
-## Unreleased
+## 14.12.1-dump1
 
 ### Features
 
@@ -28,6 +15,19 @@
 - Bump Java SDK from v7.14.0 to v7.15.0 ([#3670](https://github.com/getsentry/sentry-dotnet/pull/3670))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7150)
   - [diff](https://github.com/getsentry/sentry-java/compare/7.14.0...7.15.0)
+
+## Version Five
+
+### API Changes
+
+- You should no longer pass `AndroidContext` as an argument to `SentrySdk.Init` ([#3562](https://github.com/getsentry/sentry-dotnet/pull/3562))
+- The `SentryUser.Segment` property has been deprecated. Consider sending this as a tag or additional data instead ([#3563](https://github.com/getsentry/sentry-dotnet/pull/3563))
+- The ITraceContext now includes an [Origin](https://develop.sentry.dev/sdk/telemetry/traces/trace-origin/), which is set automatically and is primarily used internally by the Sentry server ([#3564](https://github.com/getsentry/sentry-dotnet/pull/3564))
+- `Device.BatteryLevel` and `Device.ProcessorFrequency` are now stored as floats rather than ints, to align with the Cocoa and Java SDKs ([#3567](https://github.com/getsentry/sentry-dotnet/pull/3567))
+- `SentryOptions.EnableTracing` has been removed. Instead, tracing should be enabled or disabled by setting the `SentryOptions.TracesSampleRate` or by using `SentryOptions.TracesSampler` to configure a sampling function ([#3569](https://github.com/getsentry/sentry-dotnet/pull/3569))
+- The `FailedRequestTargets`, `TagFilters` and `TracePropagationTargets` options have all been changed from `SubstringOrRegexPattern` to `IList<StringOrRegex>` ([#3566](https://github.com/getsentry/sentry-dotnet/pull/3566))
+- `Scope.Transaction` is now always stored as an `AsyncLocal` also in [Global Mode](https://docs.sentry.io/platforms/dotnet/configuration/options/#is-global-mode-enabled), to prevent auto-instrumented spans from the UI ending up parented to transactions from a background task (or vice versa). ([#3596](https://github.com/getsentry/sentry-dotnet/pull/3596))
+- Heap dumps can be captured automatically when memory usage exceeds a configurable threshold ([#3667](https://github.com/getsentry/sentry-dotnet/pull/3667))
 
 ## 4.12.1
 
