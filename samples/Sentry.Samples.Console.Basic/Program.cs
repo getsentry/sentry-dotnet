@@ -4,7 +4,6 @@
  * - Performance Tracing (Transactions / Spans)
  * - Release Health (Sessions)
  * - MSBuild integration for Source Context (see the csproj)
- * - Heap Dumps (.NET 6.0 or later)
  *
  * For more advanced features of the SDK, see Sentry.Samples.Console.Customized.
  */
