@@ -33,13 +33,10 @@
 
   </PropertyGroup>
 
-  <!--
-    Use the arm64 runtime when building on arm64 Macs.
-    See https://github.com/xamarin/xamarin-macios/issues/17841
-  -->
   <PropertyGroup>
     <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
     <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
+    <!-- On iOS we always target x64 since Arm64 doesn't support JIT, which is required by tests using NSubstitute -->
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'">iossimulator-x64</RuntimeIdentifier>
   </PropertyGroup>
 
