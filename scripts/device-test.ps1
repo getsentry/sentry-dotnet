@@ -47,7 +47,7 @@ try
         $group = 'apple'
         # Always use x64 on iOS, since arm64 doesn't support JIT, which is required for tests using NSubstitute
         $arch = 'x64'
-        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/iossimulator-$arch"
+        $buildDir = "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/iossimulator-$arch"
         $envValue = $CI ? 'true' : 'false'
         $arguments = @(
             '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
