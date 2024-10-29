@@ -9,10 +9,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(FrameworkSupportsAot)' == 'true'">
-    <IsAotCompatible>true</IsAotCompatible>
-  </PropertyGroup>
-
   <ItemGroup>
     <InternalsVisibleTo Include="Sentry.DiagnosticSource" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.DiagnosticSource.IntegrationTests" PublicKey="$(SentryPublicKey)" />
