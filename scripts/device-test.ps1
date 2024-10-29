@@ -4,6 +4,8 @@ param(
     [ValidateSet('android', 'ios')] # TODO , 'maccatalyst'
     [String] $Platform,
 
+    [String] $tfm = 'net7.0',
+
     [Switch] $Build,
     [Switch] $Run
 )
@@ -21,11 +23,10 @@ $CI = Test-Path env:CI
 Push-Location $PSScriptRoot/..
 try
 {
-    $tfm = 'net7.0-'
     $arch = (!$IsWindows -and $(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
     if ($Platform -eq 'android')
     {
-        $tfm += 'android'
+        $tfm += '-android'
         $group = 'android'
         $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/android-$arch"
         $arguments = @(
@@ -43,7 +44,7 @@ try
     }
     elseif ($Platform -eq 'ios')
     {
-        $tfm += 'ios'
+        $tfm += '-ios'
         $group = 'apple'
         # we always use x64 on iOS, since arm64 doesn't support JIT, which is required for tests using NSubstitute
         $arch = 'x64'

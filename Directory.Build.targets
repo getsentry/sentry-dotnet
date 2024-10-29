@@ -1,18 +1,5 @@
 <Project>
 
-  <!--
-    Note: The following platform-specific properties need to be set in both Directory.Build.props and DirectoryBuild.targets.
-    TODO: Figure out how to consolidate to a single location.
-  -->
-  <PropertyGroup>
-    <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
-    <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'ios'">10.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'android'">21.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-    <TargetPlatformMinVersion Condition="'$(TargetPlatformIdentifier)' == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
-  </PropertyGroup>
-
   <ItemGroup Condition="'$(TargetPlatformIdentifier)' != 'android'">
     <Compile Remove="**\*.Android.cs" />
     <Compile Remove="**\Android\**\*.cs" />
