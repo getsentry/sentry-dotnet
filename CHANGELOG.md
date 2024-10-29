@@ -20,6 +20,9 @@
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2380)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.37.0...2.38.0)
 - Bumped `System.Text.Json` from v6.0.8 to v6.0.10 ([#3704](https://github.com/getsentry/sentry-dotnet/pull/3704))
+- Bump Native SDK from v0.7.10 to v0.7.11 ([#3715](https://github.com/getsentry/sentry-dotnet/pull/3715))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0711)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.10...0.7.11)
 
 ## 4.12.1
 
