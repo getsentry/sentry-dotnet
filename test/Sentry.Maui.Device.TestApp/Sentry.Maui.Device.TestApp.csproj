@@ -39,6 +39,10 @@
     <!-- https://github.com/xamarin/xamarin-android/issues/6809 -->
     <NoWarn>$(NoWarn);XA4218</NoWarn>
 
+    <!-- This allows us to use NSubstitute on iOS when targeting net8.0-ios or greater
+        https://learn.microsoft.com/en-us/dotnet/maui/macios/interpreter?view=net-maui-8.0
+    -->
+    <UseInterpreter Condition="$(TargetFramework.Contains('-ios')) and '$(Configuration)' == 'Release'">true</UseInterpreter>
   </PropertyGroup>
 
   <!--

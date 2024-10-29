@@ -44,23 +44,18 @@ jobs:
       - name: Build iOS Test App
         run: pwsh ./scripts/device-test.ps1 ios -Build
 
-# **********************************************************************************************************************
-# Starting with Xcode 16 and iOS 18 the device tests for iOS no longer work for any tests that make use of NSubsitute.
-# Attempting to tun these tests results in a System.PlatformNotSupportedException : PlatformNotSupported_ReflectionEmit.
-# If we ever find a solution to this, we can re-enable device tests for iOS here.
-# **********************************************************************************************************************
-#      - name: Run Tests
-#        id: first-run
-#        continue-on-error: true
-#        run: pwsh scripts/device-test.ps1 ios -Run
-#
-#      - name: Retry Tests (if previous failed to run)
-#        if: steps.first-run.outcome == 'failure'
-#        run: pwsh scripts/device-test.ps1 ios -Run
-#
-#      - name: Upload results
-#        if: success() || failure()
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: device-test-ios-results
-#          path: test_output
+      - name: Run Tests
+        id: first-run
+        continue-on-error: true
+        run: pwsh scripts/device-test.ps1 ios -Run
+
+      - name: Retry Tests (if previous failed to run)
+        if: steps.first-run.outcome == 'failure'
+        run: pwsh scripts/device-test.ps1 ios -Run
+
+      - name: Upload results
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: device-test-ios-results
+          path: test_output
