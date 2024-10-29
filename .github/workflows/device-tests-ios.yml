@@ -47,8 +47,8 @@ jobs:
       # Just for debugging purposes - on CI xharness can't seem to resolve the Info.plist fro our app
       - name: List files in bin directory
         run: |
-          echo "Listing all files and directories under /Users/runner/work/sentry-dotnet/sentry-dotnet/bin/"
-          ls -R /Users/runner/work/sentry-dotnet/sentry-dotnet/bin/
+          echo "Listing all files and directories under /Users/runner/work/sentry-dotnet/sentry-dotnet/"
+          ls -R /Users/runner/work/sentry-dotnet/sentry-dotnet/
 
       - name: Run Tests
         id: first-run
