@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Android - allow logcat attachments to be previewed in Sentry ([#3711](https://github.com/getsentry/sentry-dotnet/pull/3711))
+
 ## 4.12.1
 
 ### Fixes
