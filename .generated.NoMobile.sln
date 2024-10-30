@@ -155,8 +155,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastSerialization", "module
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Console.Native", "samples\Sentry.Samples.Console.Native\Sentry.Samples.Console.Native.csproj", "{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Console.Metrics", "samples\Sentry.Samples.Console.Metrics\Sentry.Samples.Console.Metrics.csproj", "{BD2D08FC-8675-4157-A73C-D75F6A3856D3}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.MacOS", "samples\Sentry.Samples.MacOS\Sentry.Samples.MacOS.csproj", "{5B100CC0-1A78-407E-A5A5-94BC06D67461}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Hangfire", "samples\Sentry.Samples.Hangfire\Sentry.Samples.Hangfire.csproj", "{407C477D-69C0-4B02-8A68-EE6B5A81C696}"
@@ -165,7 +163,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Hangfire", "src\Sent
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Hangfire.Tests", "test\Sentry.Hangfire.Tests\Sentry.Hangfire.Tests.csproj", "{46E40BE8-1AB0-4846-B0A2-A40AD0272C64}"
 EndProject
-Project("{{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AspNetCore.WebAPI.Profiling", "samples\Sentry.Samples.AspNetCore.WebAPI.Profiling\Sentry.Samples.AspNetCore.WebAPI.Profiling.csproj", "{A5B26C14-7313-4EDC-91E3-287F9374AB75}"
+Project("{00000000-0000-0000-0000-000000000000}") = "Sentry.Samples.AspNetCore.WebAPI.Profiling", "samples\Sentry.Samples.AspNetCore.WebAPI.Profiling\Sentry.Samples.AspNetCore.WebAPI.Profiling.csproj", "{A5B26C14-7313-4EDC-91E3-287F9374AB75}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{233D34AB-970E-4913-AA1E-172E833FB5B2}"
 	ProjectSection(SolutionItems) = preProject
@@ -276,6 +274,7 @@ Global
 		{4E0DC405-C372-4396-A5DF-F6AA108DA01C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9B175EC8-6B64-4345-A158-091CB8876077}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9B175EC8-6B64-4345-A158-091CB8876077}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B175EC8-6B64-4345-A158-091CB8876077}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{9B175EC8-6B64-4345-A158-091CB8876077}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B175EC8-6B64-4345-A158-091CB8876077}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EE0DC846-52F3-46AF-BC0D-DEF81150CEC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -470,10 +469,6 @@ Global
 		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BD2D08FC-8675-4157-A73C-D75F6A3856D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BD2D08FC-8675-4157-A73C-D75F6A3856D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BD2D08FC-8675-4157-A73C-D75F6A3856D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD2D08FC-8675-4157-A73C-D75F6A3856D3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5B100CC0-1A78-407E-A5A5-94BC06D67461}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5B100CC0-1A78-407E-A5A5-94BC06D67461}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B100CC0-1A78-407E-A5A5-94BC06D67461}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -574,7 +569,6 @@ Global
 		{67269916-C417-4CEE-BD7D-CA66C3830AEE} = {A3CCA27E-4DF8-479D-833C-CAA0950715AA}
 		{8032310D-3C06-442C-A318-F365BCC4C804} = {A3CCA27E-4DF8-479D-833C-CAA0950715AA}
 		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
-		{BD2D08FC-8675-4157-A73C-D75F6A3856D3} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
 		{5B100CC0-1A78-407E-A5A5-94BC06D67461} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
 		{407C477D-69C0-4B02-8A68-EE6B5A81C696} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
 		{EADF25F5-8D02-4747-AB54-5F2BAA648471} = {230B9384-90FD-4551-A5DE-1A5C197F25B6}
