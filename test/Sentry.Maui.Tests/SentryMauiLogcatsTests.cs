@@ -39,9 +39,6 @@ public class SentryMauiLogcatsTests
     [Fact]
     public void CaptureException_CheckLogcatType()
     {
-#if __IOS__
-        Skip.If(true, "Doesn't support logcats");
-#endif
         var builder = _fixture.Builder.UseSentry(options =>
         {
 #if ANDROID
