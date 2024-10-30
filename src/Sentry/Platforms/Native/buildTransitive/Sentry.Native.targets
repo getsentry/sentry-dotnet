@@ -7,31 +7,33 @@
 
   Note:Target framework conditions should be kept synchronized with src/Sentry/buildTransitive/Sentry.Native.targets -->
 <Project>
+
   <PropertyGroup>
     <!-- net8.0 or greater -->
-    <FrameworkSupportsNative Condition="!$(TargetFramework.StartsWith('net4'))
-      And !$(TargetFramework.StartsWith('netstandard2'))
-      And !$(TargetFramework.StartsWith('net6'))
-      And !$(TargetFramework.StartsWith('net7'))
-      And ('$(OutputType)' == 'Exe' Or '$(OutputType)' == 'WinExe')">
-      true
-    </FrameworkSupportsNative>
+    <FrameworkSupportsNative Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0')) and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">true</FrameworkSupportsNative>
   </PropertyGroup>
-  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' And '$(RuntimeIdentifier)' == 'win-x64'">
+
+  <!-- TODO: Remove - Just for debugging on CI  -->
+  <Target Name="LOG NATIVE SUPPORT" BeforeTargets="build">
+    <Message Importance="high" Text="TargetFramework: $(TargetFramework) - OutputType: $(OutputType)" />
+    <Message Importance="high" Text="FrameworkSupportsNative: $(FrameworkSupportsNative)" />
+  </Target>
+
+  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and '$(RuntimeIdentifier)' == 'win-x64'">
     <DirectPInvoke Include="sentry-native" />
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\win-x64\sentry-native.lib" />
     <NativeLibrary Include="dbghelp.lib" />
     <NativeLibrary Include="winhttp.lib" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' And '$(RuntimeIdentifier)' == 'linux-x64'">
+  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and '$(RuntimeIdentifier)' == 'linux-x64'">
     <DirectPInvoke Include="sentry-native" />
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\linux-x64\libsentry-native.a" />
     <!-- See: https://github.com/dotnet/runtime/issues/97414 -->
     <NativeSystemLibrary Include="curl" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' And ('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64')">
+  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and ('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64')">
     <DirectPInvoke Include="sentry-native" />
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\osx\libsentry-native.a" />
     <NativeSystemLibrary Include="curl" />
