@@ -199,13 +199,6 @@ public class SentryOptions
             }
 #endif
 
-#if NET8_0_OR_GREATER
-            if ((_defaultIntegrations & DefaultIntegrations.SystemDiagnosticsMetricsIntegration) != 0)
-            {
-                yield return new SystemDiagnosticsMetricsIntegration();
-            }
-#endif
-
             foreach (var integration in _integrations)
             {
                 yield return integration;
@@ -1097,18 +1090,6 @@ public class SentryOptions
 #endif
     [EditorBrowsable(EditorBrowsableState.Never)]
     public Func<string, PEReader?>? AssemblyReader { get; set; }
-
-    /// <summary>
-    /// <para>
-    /// Settings for the EXPERIMENTAL metrics feature. This feature is preview only and subject to change without a
-    /// major version bump. Currently it's recommended for noodling only - DON'T USE IN PRODUCTION!
-    /// </para>
-    /// <para>
-    /// By default the ExperimentalMetrics Options is null, which means the feature is disabled. If you want to enable
-    /// Experimental metrics, you must set this property to a non-null value.
-    /// </para>
-    /// </summary>
-    public ExperimentalMetricsOptions? ExperimentalMetrics { get; set; }
 
     /// <summary>
     /// The Spotlight URL. Defaults to http://localhost:8969/stream
