@@ -35,8 +35,8 @@ public class SentryMauiLogcatsTests
 
     private readonly Fixture _fixture = new();
 
-#if __MOBILE__
-    [SkippableFact]
+#if ANDROID
+    [Fact]
     public void CaptureException_CheckLogcatType()
     {
 #if __IOS__
