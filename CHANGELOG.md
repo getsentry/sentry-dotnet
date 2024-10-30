@@ -5,7 +5,6 @@
 ### Fixes
 
 - Android: Fix for SIGSEGV reported by Sentry when a NullReferenceException is thrown in Release mode ([#3694](https://github.com/getsentry/sentry-dotnet/pull/3694))
-  - To turn it on, set: `options.HandlerStrategy = NdkHandlerStrategy.SENTRY_HANDLER_STRATEGY_CHAIN_AT_START;`
 - Events from NDK on Android will report sdk.name `sentry.native.android.dotnet` ([#3682](https://github.com/getsentry/sentry-dotnet/pull/3682))
 
 ### Features
