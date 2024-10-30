@@ -211,8 +211,6 @@ jobs:
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         with:
           path: integration-test
-        env:
-          DYLD_PRINT_LIBRARIES: YES
 
   test-solution-filters:
     runs-on: ubuntu-latest
