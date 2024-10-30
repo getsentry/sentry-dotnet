@@ -13,12 +13,6 @@
     <FrameworkSupportsNative Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0')) and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">true</FrameworkSupportsNative>
   </PropertyGroup>
 
-  <!-- TODO: Remove - Just for debugging on CI  -->
-  <Target Name="LOG NATIVE SUPPORT" BeforeTargets="build">
-    <Message Importance="high" Text="TargetFramework: $(TargetFramework) - OutputType: $(OutputType)" />
-    <Message Importance="high" Text="FrameworkSupportsNative: $(FrameworkSupportsNative)" />
-  </Target>
-
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and '$(RuntimeIdentifier)' == 'win-x64'">
     <DirectPInvoke Include="sentry-native" />
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\win-x64\sentry-native.lib" />
