@@ -4,6 +4,7 @@
 
 ### Features
 
+- Android - allow logcat attachments to be previewed in Sentry ([#3711](https://github.com/getsentry/sentry-dotnet/pull/3711))
 - Added a `SetBeforeScreenshotCapture` callback to the options: allowing the user to set an action before the screenshot is taken ([#3661](https://github.com/getsentry/sentry-dotnet/pull/3661))
 - Make `Sentry.AspNetCore.Blazor.WebAssembly` generally available. ([#3674](https://github.com/getsentry/sentry-dotnet/pull/3674))
 
