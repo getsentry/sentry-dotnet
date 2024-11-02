@@ -96,11 +96,13 @@ filterConfigs:
         - "**/Sentry.OpenTelemetry.csproj"
         - "**/Sentry.Serilog.csproj"
         - "**/Sentry.csproj"
+        - "**/Sentry.Analyzers.csproj"
         - "**/Sentry.Hangfire.csproj"
         - "**/Sentry.Samples.Hangfire.csproj"
         - "**/Sentry.Testing.csproj"
         - "**/Sentry.Testing.CrashableApp.csproj"
         - "**/Sentry.Tests.csproj"
+        - "**/Sentry.Analyzers.Tests.csproj"
 
   - outputPath: Sentry.Azure.Functions.slnf
     include:
@@ -109,9 +111,11 @@ filterConfigs:
         - "**/Sentry.Samples.Console.Basic.csproj"
         - "**/Sentry.Extensions.Logging.csproj"
         - "**/Sentry.csproj"
+        - "**/Sentry.Analyzers.csproj"
         - "**/Sentry.Testing.csproj"
         - "**/Sentry.Testing.CrashableApp.csproj"
         - "**/Sentry.Tests.csproj"
+        - "**/Sentry.Analyzers.Tests.csproj"
 
   - outputPath: SentryCore.slnf
     solution: .generated.NoMobile.sln
@@ -123,10 +127,12 @@ filterConfigs:
         - "**/Sentry.Samples.Console.Profiling.csproj"
         - "**/Sentry.Profiling.csproj"
         - "**/Sentry.csproj"
+        - "**/Sentry.Analyzers.csproj"
         - "**/Sentry.Profiling.Tests.csproj"
         - "**/Sentry.Testing.csproj"
         - "**/Sentry.Testing.CrashableApp.csproj"
         - "**/Sentry.Tests.csproj"
+        - "**/Sentry.Analyzers.Tests.csproj"
 
   - outputPath: SentryDiagnosticSource.slnf
     solution: .generated.NoMobile.sln
@@ -134,10 +140,12 @@ filterConfigs:
       patterns:
         - "**/*DiagnosticSource*.csproj"
         - "**/Sentry.csproj"
+        - "**/Sentry.Analyzers.csproj"
         - "**/Sentry.Extensions.Logging.csproj"
         - "**/Sentry.Testing.csproj"
         - "**/Sentry.Testing.CrashableApp.csproj"
         - "**/Sentry.Tests.csproj"
+        - "**/Sentry.Analyzers.Tests.csproj"
 
   - outputPath: SentryMobile.slnf
     include:
@@ -147,6 +155,7 @@ filterConfigs:
         - "samples/**/*MacCatalyst.csproj"
         - "samples/**/*Maui.csproj"
         - "src/**/Sentry.csproj"
+        - "src/**/Sentry.Analyzers.csproj"
         - "src/**/*Android*.csproj"
         - "src/**/*Bindings.Android.csproj"
         - "src/**/*Bindings.Cocoa.csproj"
@@ -158,6 +167,7 @@ filterConfigs:
         - "test/**/Sentry.Maui.Tests.csproj"
         - "test/**/Sentry.Testing.csproj"
         - "test/**/Sentry.Tests.csproj"
+        - "src/**/Sentry.Analyzers.Tests.csproj"
 
   - outputPath: SentryNoMobile.slnf
     solution: .generated.NoMobile.sln
