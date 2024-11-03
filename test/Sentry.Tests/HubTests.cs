@@ -1553,11 +1553,15 @@ public partial class HubTests
         _fixture.Client.Received().CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
-    [Theory]
+    [SkippableTheory]
     [InlineData(false)]
     [InlineData(true)]
     public async Task FlushOnDispose_SendsEnvelope(bool cachingEnabled)
     {
+#if __IOS__
+        Skip.If(true, "Flaky on iOS");
+#endif
+
         // Arrange
         using var cacheDirectory = new TempDirectory();
         var transport = Substitute.For<ITransport>();

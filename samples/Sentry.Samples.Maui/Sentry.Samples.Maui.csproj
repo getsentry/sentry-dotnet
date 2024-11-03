@@ -6,7 +6,7 @@
       On Mac, we'll also build for iOS and MacCatalyst.
       On Windows, we'll also build for Windows 10.
     -->
-    <TargetFrameworks>net8.0-android</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net8.0-android</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
     <OutputType>Exe</OutputType>
@@ -98,7 +98,7 @@
     <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net8'))">
+  <ItemGroup Condition="($(TargetFramework.StartsWith('net8')) Or $(TargetFramework.StartsWith('net9')))">
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
     <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
   </ItemGroup>
