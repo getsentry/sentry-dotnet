@@ -1,4 +1,7 @@
 using Microsoft.Extensions.Options;
+#if ANDROID
+using Sentry.Android;
+#endif
 
 namespace Sentry.Maui.Tests;
 
@@ -26,21 +29,18 @@ public class SentryMauiLogcatsTests
                 options.CacheDirectoryPath = null;   //Do not wrap our FakeTransport with a caching transport
                 options.FlushTimeout = TimeSpan.FromSeconds(10);
             });
-
+          
             Builder = builder;
         }
     }
 
     private readonly Fixture _fixture = new();
 
-#if __MOBILE__
+
+#if ANDROID
     [SkippableFact]
     public async Task CaptureException_WhenAttachLogcats_DefaultAsync()
     {
-#if __IOS__
-        Skip.If(true, "Doesn't support logcats");
-#endif
-
         // Arrange
         var builder = _fixture.Builder.UseSentry();
 
@@ -63,16 +63,11 @@ public class SentryMauiLogcatsTests
     [SkippableFact]
     public async Task CaptureException_WhenAttachLogcats_AllExceptionsAsync()
     {
-#if __IOS__
-        Skip.If(true, "Doesn't support logcats");
-#endif
 
         // Arrange
         var builder = _fixture.Builder.UseSentry(options =>
         {
-#if ANDROID
             options.Android.LogCatIntegration = Android.LogCatIntegrationType.All;
-#endif
         });
 
         // Act
@@ -93,16 +88,11 @@ public class SentryMauiLogcatsTests
     [SkippableFact]
     public async Task CaptureException_WhenAttachLogcats_UnhandledExceptionsAsync()
     {
-#if __IOS__
-        Skip.If(true, "Doesn't support logcats");
-#endif
 
         // Arrange
         var builder = _fixture.Builder.UseSentry(options =>
         {
-#if ANDROID
             options.Android.LogCatIntegration = Android.LogCatIntegrationType.Unhandled;
-#endif
         });
 
         // Act
@@ -124,16 +114,11 @@ public class SentryMauiLogcatsTests
     [SkippableFact]
     public async Task CaptureException_WhenAttachLogcats_HandledExceptionsAsync()
     {
-#if __IOS__
-        Skip.If(true, "Doesn't support logcats");
-#endif
 
         // Arrange
         var builder = _fixture.Builder.UseSentry(options =>
         {
-#if ANDROID
             options.Android.LogCatIntegration = Android.LogCatIntegrationType.Unhandled;
-#endif
         });
 
         // Act
@@ -153,16 +138,11 @@ public class SentryMauiLogcatsTests
     [SkippableFact]
     public async Task CaptureException_WhenAttachLogcats_ErrorsAsync()
     {
-#if __IOS__
-        Skip.If(true, "Doesn't support logcats");
-#endif
 
         // Arrange
         var builder = _fixture.Builder.UseSentry(options =>
         {
-#if ANDROID
             options.Android.LogCatIntegration = Android.LogCatIntegrationType.Errors;
-#endif
         });
 
         // Act
@@ -185,16 +165,11 @@ public class SentryMauiLogcatsTests
     [SkippableFact]
     public async Task CaptureException_WhenAttachLogcats_NoneAsync()
     {
-#if __IOS__
-        Skip.If(true, "Doesn't support logcats");
-#endif
 
         // Arrange
         var builder = _fixture.Builder.UseSentry(options =>
         {
-#if ANDROID
             options.Android.LogCatIntegration = Android.LogCatIntegrationType.None;
-#endif
         });
 
         // Act
@@ -227,6 +202,32 @@ public class SentryMauiLogcatsTests
             exception.Data["foo"] = "bar";
             return exception;
         }
+    [Fact]
+    public void CaptureException_CheckLogcatType()
+    {
+        var builder = _fixture.Builder.UseSentry(options =>
+        {
+            options.Android.LogCatIntegration = Android.LogCatIntegrationType.All;
+        });
+
+        // Arrange
+        var processor = Substitute.For<ISentryEventProcessorWithHint>();
+        using var app = builder.Build();
+        SentryHint hint = null;
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        var scope = new Scope(options);
+
+        // Act
+        processor.Process(Arg.Any<SentryEvent>(), Arg.Do<SentryHint>(h => hint = h)).Returns(new SentryEvent());
+        options.AddEventProcessor(processor);
+
+        _ = new SentryClient(options).CaptureEvent(new SentryEvent(), scope);
+
+
+        // Assert
+        hint.Should().NotBeNull();
+        hint.Attachments.First().ContentType.Should().Be("text/plain", hint.Attachments.First().ContentType);
     }
 #endif
 }
