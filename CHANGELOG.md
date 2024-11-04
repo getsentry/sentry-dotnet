@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Limited experimental support for Session Replay Recording on Android ([#3552](https://github.com/getsentry/sentry-dotnet/pull/3552))
+
 ## 4.12.2
 
 ### Features
