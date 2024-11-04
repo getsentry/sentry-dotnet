@@ -166,6 +166,7 @@ internal sealed class MemoryMonitor : IDisposable
     {
         // Important no exceptions can be thrown from this method as it's called when disposing the Hub
         _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
     }
 }
 

@@ -74,7 +74,10 @@ internal class Hub : IHub, IMetricHub, IDisposable
             {
                 _options.LogError("Automatic Heap Dumps cannot be used with file write disabled.");
             }
-            _memoryMonitor = new MemoryMonitor(options, CaptureHeapDump);
+            else
+            {
+                _memoryMonitor = new MemoryMonitor(options, CaptureHeapDump);
+            }
         }
 #endif
 
