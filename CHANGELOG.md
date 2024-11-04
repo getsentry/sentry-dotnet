@@ -12,6 +12,7 @@
 - The `FailedRequestTargets`, `TagFilters` and `TracePropagationTargets` options have all been changed from `SubstringOrRegexPattern` to `IList<StringOrRegex>` ([#3566](https://github.com/getsentry/sentry-dotnet/pull/3566))
 - `Scope.Transaction` is now always stored as an `AsyncLocal` also in [Global Mode](https://docs.sentry.io/platforms/dotnet/configuration/options/#is-global-mode-enabled), to prevent auto-instrumented spans from the UI ending up parented to transactions from a background task (or vice versa). ([#3596](https://github.com/getsentry/sentry-dotnet/pull/3596))
 - Sentry's Experimental Metrics feature has been deprecated and removed from the SDK. ([#3718](https://github.com/getsentry/sentry-dotnet/pull/3718))
+- Added support for 16 KB page sizes on Android ([#3723](https://github.com/getsentry/sentry-dotnet/pull/3723))
 
 ### Features
 - Added support for `.NET 9` (preview) ([#3699](https://github.com/getsentry/sentry-dotnet/pull/3699))
