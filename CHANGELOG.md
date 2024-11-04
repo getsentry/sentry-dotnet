@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- When using OTel and ASP.NET Core the SDK could try to process OTel spans after the SDK had been closed ([#3726](https://github.com/getsentry/sentry-dotnet/pull/3726))
+
 ## 4.12.2
 
 ### Features
