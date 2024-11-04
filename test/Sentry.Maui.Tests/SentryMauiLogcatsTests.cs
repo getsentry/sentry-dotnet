@@ -29,7 +29,7 @@ public class SentryMauiLogcatsTests
                 options.CacheDirectoryPath = null;   //Do not wrap our FakeTransport with a caching transport
                 options.FlushTimeout = TimeSpan.FromSeconds(10);
             });
-          
+
             Builder = builder;
         }
     }
@@ -202,8 +202,8 @@ public class SentryMauiLogcatsTests
             exception.Data["foo"] = "bar";
             return exception;
         }
-    [Fact]
-    public void CaptureException_CheckLogcatType()
+
+        public void CaptureException_CheckLogcatType()
     {
         var builder = _fixture.Builder.UseSentry(options =>
         {
