@@ -17,6 +17,9 @@
 ### Features
 - Added support for `.NET 9` (preview) ([#3699](https://github.com/getsentry/sentry-dotnet/pull/3699))
 
+### Features
+- Added support for `.NET 9` (preview) ([#3699](https://github.com/getsentry/sentry-dotnet/pull/3699))
+
 ## Unreleased
 
 ### Features
