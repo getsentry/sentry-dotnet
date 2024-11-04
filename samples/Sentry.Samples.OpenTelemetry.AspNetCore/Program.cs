@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authentication;
-using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Sentry.OpenTelemetry;
@@ -23,18 +22,7 @@ builder.Services.AddOpenTelemetry()
             .AddHttpClientInstrumentation()
             // Finally we configure OpenTelemetry to send traces to Sentry
             .AddSentry()
-    )
-    // This block configures OpenTelemetry metrics that we care about... later we'll configure Sentry to capture these
-    .WithMetrics(metrics =>
-    {
-        metrics
-            .AddRuntimeInstrumentation() // <-- Requires the OpenTelemetry.Instrumentation.Runtime package
-                                         // Collect some of the built-in ASP.NET Core metrics
-            .AddMeter(
-                "Microsoft.AspNetCore.Hosting",
-                "Microsoft.AspNetCore.Server.Kestrel",
-                "System.Net.Http");
-    });
+    );
 
 builder.WebHost.UseSentry(options =>
 {
@@ -46,17 +34,6 @@ builder.WebHost.UseSentry(options =>
     options.SendDefaultPii = true;
     options.TracesSampleRate = 1.0;
     options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
-    // This shows experimental support for capturing OpenTelemetry metrics with Sentry
-    options.ExperimentalMetrics = new ExperimentalMetricsOptions()
-    {
-        // Here we're telling Sentry to capture all built-in metrics. This includes all the metrics we configured
-        // OpenTelemetry to emit when we called `builder.Services.AddOpenTelemetry()` above:
-        // - "OpenTelemetry.Instrumentation.Runtime"
-        // - "Microsoft.AspNetCore.Hosting",
-        // - "Microsoft.AspNetCore.Server.Kestrel",
-        // - "System.Net.Http"
-        CaptureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All
-    };
 });
 
 builder.Services

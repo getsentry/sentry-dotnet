@@ -5,12 +5,6 @@ namespace Sentry.Maui.Tests;
 
 public class BindableSentryMauiOptionsTests : BindableTests<SentryMauiOptions>
 {
-    public BindableSentryMauiOptionsTests() : base(
-        nameof(SentryOptions.ExperimentalMetrics)
-    )
-    {
-    }
-
     [Fact]
     public void BindableProperties_MatchOptionsProperties()
     {

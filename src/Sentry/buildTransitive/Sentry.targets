@@ -152,7 +152,10 @@
               See https://github.com/dotnet/sdk/issues/26324#issuecomment-1169236993
       Note 2: Target framework conditions should be kept synchronized with src/Sentry/Platforms/Native/buildTransitive/Sentry.Native.targets -->
   <PropertyGroup Condition="
-      $(TargetFramework.StartsWith('net8'))
+      !$(TargetFramework.StartsWith('net4'))
+      And !$(TargetFramework.StartsWith('netstandard2'))
+      And !$(TargetFramework.StartsWith('net6'))
+      And !$(TargetFramework.StartsWith('net7'))
       and '$(PublishDir)' != ''
       and '$(PublishAot)' == 'true'
       and '$(_IsPublishing)' == 'true'

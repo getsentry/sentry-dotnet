@@ -5,7 +5,7 @@ using Sentry.Protocol.Metrics;
 
 namespace Sentry.Internal;
 
-internal class Hub : IHub, IMetricHub, IDisposable
+internal class Hub : IHub, IDisposable
 {
     private readonly object _sessionPauseLock = new();
 
@@ -24,9 +24,6 @@ internal class Hub : IHub, IMetricHub, IDisposable
     internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
 
     internal IInternalScopeManager ScopeManager { get; }
-
-    /// <inheritdoc cref="IMetricAggregator"/>
-    public IMetricAggregator Metrics { get; }
 
     private int _isEnabled = 1;
     public bool IsEnabled => _isEnabled == 1;
@@ -80,16 +77,6 @@ internal class Hub : IHub, IMetricHub, IDisposable
             }
         }
 #endif
-
-        if (options.ExperimentalMetrics is not null)
-        {
-            options.LogDebug("Registering integration: Metrics");
-            Metrics = new MetricAggregator(options, this);
-        }
-        else
-        {
-            Metrics = new DisabledMetricAggregator();
-        }
 
         foreach (var integration in options.Integrations)
         {
@@ -582,7 +569,6 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
-    /// <inheritdoc cref="IMetricHub.CaptureMetrics"/>
     public void CaptureMetrics(IEnumerable<Metric> metrics)
     {
         if (!IsEnabled)
@@ -604,7 +590,6 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
-    /// <inheritdoc cref="IMetricHub.CaptureCodeLocations"/>
     public void CaptureCodeLocations(CodeLocations codeLocations)
     {
         if (!IsEnabled)
@@ -623,7 +608,6 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
-    /// <inheritdoc cref="IMetricHub.StartSpan"/>
     public ISpan StartSpan(string operation, string description)
     {
         ITransactionTracer? currentTransaction = null;

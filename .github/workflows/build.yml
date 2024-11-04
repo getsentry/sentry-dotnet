@@ -15,11 +15,11 @@ env:
 jobs:
   build-sentry-native:
     name: sentry-native (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu, windows, macos]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - name: Checkout
@@ -34,16 +34,8 @@ jobs:
           key: sentry-native-${{ runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           enableCrossOsArchive: true
 
-      - name: Free Disk Space (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
-        with:
-          android: true
-          dotnet: false
-          haskell: true
-          large-packages: false
-          docker-images: false
-          swap-storage: true
+      - name: Remove unused applications
+        uses: ./.github/actions/freediskspace
 
       - name: Install build dependencies
         if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'Linux'
@@ -70,31 +62,22 @@ jobs:
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
 
-      - name: Setup Xcode
-        if: matrix.os == 'macos-latest'
-        run: |
-          sudo xcode-select --switch /Applications/Xcode_${{env.XCODE_VERSION}}.app/Contents/Developer
-          xcodebuild -version
-
-      # We only use Xcode 16
-      - name: Remove unused applications
-        if: matrix.os == 'macos-latest'
-        run: |
-          df -hI /dev/disk3s1s1
-          sudo rm -rf /Applications/Xcode_14.3.1.app
-          sudo rm -rf /Applications/Xcode_15.0.1.app
-          sudo rm -rf /Applications/Xcode_15.1.app
-          sudo rm -rf /Applications/Xcode_15.2.app
-          sudo rm -rf /Applications/Xcode_15.3.app
-          df -hI /dev/disk3s1s1
-
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
 
-      # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
+      - name: Setup Xcode
+        if: matrix.os == 'macos-latest'
+        run: |
+          sudo xcode-select --switch /Applications/Xcode_${{env.XCODE_VERSION}}.app/Contents/Developer
+          xcodebuild -version
+
+      - name: Remove unused applications
+        uses: ./.github/actions/freediskspace
+
+      # We use macOS for the final publishing build so we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
         if: startsWith(matrix.os, 'macos')
         run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
@@ -199,9 +182,12 @@ jobs:
           sudo apt update
           sudo apt install libcurl4-openssl-dev
 
+      # Possibly instead of installing net9.0 here we could pin the workload version when installing workloads
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: |
+            8.0.x
+            9.0.100-rc.2.24474.11
 
       - name: Setup Xcode
         if: matrix.os == 'macos-latest'
@@ -218,7 +204,8 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@00854ea68c109d98c75d956347303bf7c45b0277 # v3.2.1
 
-      - run: dotnet workload install android maui-android
+      - name: Install android Workloads
+        run: dotnet workload install maui-android
 
       - name: Test
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
