@@ -34,9 +34,9 @@ public class SentrySpanProcessorTests : ActivitySourceTests
 
         public Hub GetHub() => Hub ??= new Hub(Options, Client, SessionManager, Clock, ScopeManager);
 
-        public SentrySpanProcessor GetSut()
+        public SentrySpanProcessor GetSut(IHub hub = null)
         {
-            return new SentrySpanProcessor(GetHub(), Enrichers);
+            return new SentrySpanProcessor(hub ?? GetHub(), Enrichers);
         }
     }
 
@@ -486,6 +486,54 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         }
 
         transaction.IsSentryRequest.Should().BeTrue();
+    }
+
+    [Fact]
+    public void OnStart_DisabledHub_DoesNothing()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        SentryClientExtensions.SentryOptionsForTestingOnly = _fixture.Options;
+        var hub = Substitute.For<IHub>();
+        hub.IsEnabled.Returns(false);
+        var sut = _fixture.GetSut(hub);
+
+        var data = Tracer.StartActivity()!;
+
+        // Act
+        sut.OnStart(data);
+
+        // Assert
+        sut._map.Should().BeEmpty();
+        hub.Received(0).GetSpan();
+        hub.Received(0).StartTransaction(
+            Arg.Any<ITransactionContext>(),
+            Arg.Any<IReadOnlyDictionary<string, object>>()
+            );
+    }
+
+    [Fact]
+    public void OnEnd_DisabledHub_DoesNothing()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        SentryClientExtensions.SentryOptionsForTestingOnly = _fixture.Options;
+        var hub = Substitute.For<IHub>();
+        hub.IsEnabled.Returns(true, false);
+        var sut = _fixture.GetSut(hub);
+
+        var data = Tracer.StartActivity()!;
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        sut._map.Should().BeEmpty();
+        hub.Received(0).GetSpan();
+        hub.Received(0).StartTransaction(
+            Arg.Any<ITransactionContext>(),
+            Arg.Any<IReadOnlyDictionary<string, object>>()
+        );
     }
 
     private static void FilterActivity(Activity activity)
