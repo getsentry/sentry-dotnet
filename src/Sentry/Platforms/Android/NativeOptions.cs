@@ -270,8 +270,8 @@ public partial class SentryOptions
         {
             public double? OnErrorSampleRate { get; set; }
             public double? SessionSampleRate { get; set; }
-            public bool RedactAllImages { get; set; } = true;
-            public bool RedactAllText { get; set; } = true;
+            public bool MaskAllImages { get; set; } = true;
+            public bool MaskAllText { get; set; } = true;
         }
         /// <summary>
         /// ExperimentalOptions

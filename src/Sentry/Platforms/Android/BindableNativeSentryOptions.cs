@@ -88,8 +88,8 @@ internal partial class BindableSentryOptions
                 options.ExperimentalOptions.SessionReplay.SessionSampleRate = sessionSampleRate;
 #pragma warning restore CA1422
             }
-            ExperimentalOptions.SessionReplay.RedactAllText = options.ExperimentalOptions.SessionReplay.RedactAllText;
-            ExperimentalOptions.SessionReplay.RedactAllImages = options.ExperimentalOptions.SessionReplay.RedactAllImages;
+            ExperimentalOptions.SessionReplay.RedactAllText = options.ExperimentalOptions.SessionReplay.MaskAllText;
+            ExperimentalOptions.SessionReplay.RedactAllImages = options.ExperimentalOptions.SessionReplay.MaskAllImages;
         }
     }
 }
