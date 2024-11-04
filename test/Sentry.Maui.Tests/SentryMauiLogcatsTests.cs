@@ -187,21 +187,7 @@ public class SentryMauiLogcatsTests
         // Assert
         envelopeItem.Should().BeNull();
     }
-    private static Exception BuildUnhandledException()
-    {
-        try
-        {
-            // Throwing will put a stack trace on the exception
-            throw new Exception("Error");
-        }
-        catch (Exception exception)
-        {
-            // Add extra data to test fully
-            exception.Data[Mechanism.HandledKey] = false;
-            exception.Data[Mechanism.MechanismKey] = "AppDomain.UnhandledException";
-            exception.Data["foo"] = "bar";
-            return exception;
-        }
+
     [Fact]
     public void CaptureException_CheckLogcatType()
     {
@@ -228,6 +214,23 @@ public class SentryMauiLogcatsTests
         // Assert
         hint.Should().NotBeNull();
         hint.Attachments.First().ContentType.Should().Be("text/plain", hint.Attachments.First().ContentType);
+    }
+
+    private static Exception BuildUnhandledException()
+    {
+        try
+        {
+            // Throwing will put a stack trace on the exception
+            throw new Exception("Error");
+        }
+        catch (Exception exception)
+        {
+            // Add extra data to test fully
+            exception.Data[Mechanism.HandledKey] = false;
+            exception.Data[Mechanism.MechanismKey] = "AppDomain.UnhandledException";
+            exception.Data["foo"] = "bar";
+            return exception;
+        }
     }
 #endif
 }
