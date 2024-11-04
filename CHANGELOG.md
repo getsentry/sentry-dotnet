@@ -1,9 +1,10 @@
 # Changelog
 
-## Unreleased
+## 4.12.2
 
 ### Features
 
+- Android - allow logcat attachments to be previewed in Sentry ([#3711](https://github.com/getsentry/sentry-dotnet/pull/3711))
 - Added a `SetBeforeScreenshotCapture` callback to the options: allowing the user to set an action before the screenshot is taken ([#3661](https://github.com/getsentry/sentry-dotnet/pull/3661))
 - Make `Sentry.AspNetCore.Blazor.WebAssembly` generally available. ([#3674](https://github.com/getsentry/sentry-dotnet/pull/3674))
 
@@ -16,10 +17,13 @@
 - Bump Java SDK from v7.14.0 to v7.16.0 ([#3670](https://github.com/getsentry/sentry-dotnet/pull/3670), [#3707](https://github.com/getsentry/sentry-dotnet/pull/3707))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7160)
   - [diff](https://github.com/getsentry/sentry-java/compare/7.14.0...7.16.0)
-- Bump CLI from v2.37.0 to v2.38.0 ([#3702](https://github.com/getsentry/sentry-dotnet/pull/3702))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2380)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.37.0...2.38.0)
+- Bump CLI from v2.37.0 to v2.38.1 ([#3702](https://github.com/getsentry/sentry-dotnet/pull/3702), [#3720](https://github.com/getsentry/sentry-dotnet/pull/3720))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2381)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.37.0...2.38.1)
 - Bumped `System.Text.Json` from v6.0.8 to v6.0.10 ([#3704](https://github.com/getsentry/sentry-dotnet/pull/3704))
+- Bump Native SDK from v0.7.10 to v0.7.11 ([#3715](https://github.com/getsentry/sentry-dotnet/pull/3715))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0711)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.10...0.7.11)
 
 ## 4.12.1
 
