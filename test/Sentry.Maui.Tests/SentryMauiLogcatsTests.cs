@@ -29,7 +29,7 @@ public class SentryMauiLogcatsTests
                 options.CacheDirectoryPath = null;   //Do not wrap our FakeTransport with a caching transport
                 options.FlushTimeout = TimeSpan.FromSeconds(10);
             });
-          
+
             Builder = builder;
         }
     }
