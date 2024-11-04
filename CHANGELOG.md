@@ -1,10 +1,17 @@
 # Changelog
 
+ChangeLogs
+
+## Unreleased
+
+### Fixes
+
+- Android - fix bug that prevents logcat.log from getting attached to unhandled events (SIGSEGV Segfault) ([#3694](https://github.com/getsentry/sentry-dotnet/pull/3694))
+
 ## 4.12.2
 
 ### Fixes
 
-- Android - fix bug that prevents logcat.log from getting attached to unhandled event (SIGSEGV Segfault) ([#3694](https://github.com/getsentry/sentry-dotnet/pull/3694))
 - Events from NDK on Android will report sdk.name `sentry.native.android.dotnet` ([#3682](https://github.com/getsentry/sentry-dotnet/pull/3682))
 
 ### Features
