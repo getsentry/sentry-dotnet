@@ -10,6 +10,12 @@
 
 - When using OTel and ASP.NET Core the SDK could try to process OTel spans after the SDK had been closed ([#3726](https://github.com/getsentry/sentry-dotnet/pull/3726))
 
+### Dependencies
+
+- Bump Cocoa SDK from v8.36.0 to v8.39.0 ([#3716](https://github.com/getsentry/sentry-dotnet/pull/3716))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8390)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.36.0...8.39.0)
+
 ## 4.12.2
 
 ### Features
