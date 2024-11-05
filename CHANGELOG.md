@@ -10,6 +10,12 @@
 
 - When using OTel and ASP.NET Core the SDK could try to process OTel spans after the SDK had been closed ([#3726](https://github.com/getsentry/sentry-dotnet/pull/3726))
 
+### Dependencies
+
+- Bump CLI from v2.38.1 to v2.38.2 ([#3728](https://github.com/getsentry/sentry-dotnet/pull/3728))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2382)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.38.1...2.38.2)
+
 ## 4.12.2
 
 ### Features
