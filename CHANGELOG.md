@@ -15,6 +15,7 @@
 
 ### Features
 - Added support for `.NET 9` (preview) ([#3699](https://github.com/getsentry/sentry-dotnet/pull/3699))
+- libsentrysupplemental.so now supports 16 KB page sizes on Android ([#3723](https://github.com/getsentry/sentry-dotnet/pull/3723))
 
 ## Unreleased
 
