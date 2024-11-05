@@ -7,8 +7,9 @@
     <IsBindingProject>true</IsBindingProject>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
-    <SentryCocoaSdkDirectory>..\..\modules\sentry-cocoa\</SentryCocoaSdkDirectory>
-    <SentryCocoaFramework>$(SentryCocoaSdkDirectory)Carthage\Build-$(TargetPlatformIdentifier)\Sentry.xcframework</SentryCocoaFramework>
+    <SentryCocoaCache>..\..\modules\sentry-cocoa\</SentryCocoaCache>
+    <SentryCocoaFrameworkHeaders>$(SentryCocoaCache)Sentry.framework\</SentryCocoaFrameworkHeaders>
+    <SentryCocoaFramework>$(SentryCocoaCache)Sentry-Dynamic.xcframework</SentryCocoaFramework>
   </PropertyGroup>
 
   <!-- Build empty assemblies when not on macOS, to pass the solution build. -->
@@ -44,18 +45,53 @@
     <None Include="buildTransitive\Sentry.Bindings.Cocoa.targets" Pack="true" PackagePath="buildTransitive\Sentry.Bindings.Cocoa.targets" />
   </ItemGroup>
 
-  <!-- Build the Sentry Cocoa SDK -->
-  <Target Name="_BuildSentryCocoaSDK" BeforeTargets="DispatchToInnerBuilds;BeforeBuild" Condition="'$(CI)' != 'true' and $([MSBuild]::IsOSPlatform('OSX'))"
-    Inputs="..\..\.git\modules\modules\sentry-cocoa\HEAD" Outputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha">
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildSentryCocoaSDK" Properties="TargetFramework=once" />
+  <!-- Downloads and sets up the Cocoa SDK: dotnet msbuild /t:setupCocoaSDK src/Sentry.Bindings.Cocoa/Sentry.Bindings.Cocoa.csproj -->
+  <Target Name="SetupCocoaSDK"
+          Condition="$([MSBuild]::IsOSPlatform('OSX')) And !Exists('$(SentryCocoaCache)Sentry-Dynamic.xcframework')"
+          BeforeTargets="BeforeBuild">
+
+    <PropertyGroup>
+      <PropertiesContent>$([System.IO.File]::ReadAllText("../../modules/sentry-cocoa.properties"))</PropertiesContent>
+      <CocoaVersion>$([System.Text.RegularExpressions.Regex]::Match($(PropertiesContent), 'version\s*=\s*(\d+\.\d+\.\d+)').Groups[1].Value)</CocoaVersion>
+    </PropertyGroup>
+
+    <Message Importance="High" Text="Setting up the Cocoa SDK version '$(CocoaVersion)'." />
+
+    <!-- Clean cache if version does not exist to get rid of old versions -->
+    <RemoveDir
+      Condition="!Exists('$(SentryCocoaCache)Sentry-Dynamic-$(CocoaVersion).xcframework.zip')"
+      Directories="$(SentryCocoaCache)" />
+
+    <!-- Create cache directory -->
+    <MakeDir Condition="!Exists('$(SentryCocoaCache)')" Directories="$(SentryCocoaCache)" />
+
+    <!-- Download the Cocoa SDK as pre-built .xcframework -->
+    <Exec
+      Condition="!Exists('$(SentryCocoaCache)Sentry-Dynamic-$(CocoaVersion).xcframework.zip')"
+      Command="curl -L https://github.com/getsentry/sentry-cocoa/releases/download/$(CocoaVersion)/Sentry-Dynamic.xcframework.zip -o $(SentryCocoaCache)Sentry-Dynamic-$(CocoaVersion).xcframework.zip" />
+
+    <Exec
+      Condition="!Exists('$(SentryCocoaCache)Sentry-Dynamic.xcframework')"
+      Command="unzip -o $(SentryCocoaCache)Sentry-Dynamic-$(CocoaVersion).xcframework.zip -d $(SentryCocoaCache)" />
+
+    <!-- Make a copy of the header files before we butcher these to suite objective sharpie -->
+    <MakeDir Directories="$(SentryCocoaFrameworkHeaders)" />
+    <ItemGroup>
+      <FilesToCopy Include="$(SentryCocoaCache)Sentry-Dynamic.xcframework\ios-arm64_arm64e\Sentry.framework\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(FilesToCopy)"
+          DestinationFolder="$(SentryCocoaFrameworkHeaders)%(RecursiveDir)"
+          SkipUnchangedFiles="true" />
   </Target>
-  <Target Name="_InnerBuildSentryCocoaSDK">
-    <Exec Command="../../scripts/build-sentry-cocoa.sh" />
+
+  <Target Name="CleanCocoaSDK" AfterTargets="Clean" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+    <RemoveDir Directories="$(SentryCocoaCache)" ContinueOnError="true" />
   </Target>
 
   <!-- Generate bindings -->
-  <Target Name="_GenerateSentryCocoaBindings" AfterTargets="_BuildSentryCocoaSDK" Condition="$([MSBuild]::IsOSPlatform('OSX'))"
-          Inputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha" Outputs="ApiDefinitions.cs;StructsAndEnums.cs">
+  <Target Name="_GenerateSentryCocoaBindings" AfterTargets="SetupCocoaSDK"
+          Condition="$([MSBuild]::IsOSPlatform('OSX')) and Exists('$(SentryCocoaFrameworkHeaders)')"
+          Outputs="ApiDefinitions.cs;StructsAndEnums.cs">
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerGenerateSentryCocoaBindings" Properties="TargetFramework=once" />
   </Target>
   <Target Name="_InnerGenerateSentryCocoaBindings">
