@@ -10,11 +10,15 @@ public static partial class SentrySdk
     private static void InitSentryCocoaSdk(SentryOptions options)
     {
         options.LogDebug("Initializing native SDK");
+
+        if (options.IOS.ExceptionMode != MarshalExceptionMode.None)
+        {
         // Workaround for https://github.com/xamarin/xamarin-macios/issues/15252
         ObjCRuntime.Runtime.MarshalManagedException += (_, args) =>
         {
-            args.ExceptionMode = ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode;
+                args.ExceptionMode = options.IOS.ExceptionMode.ToObjC();
         };
+        }
 
         // Set default release and distribution
         options.Release ??= GetDefaultReleaseString();
