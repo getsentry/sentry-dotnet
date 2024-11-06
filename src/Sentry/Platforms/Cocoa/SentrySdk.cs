@@ -1,7 +1,7 @@
 using Sentry.Cocoa;
 using Sentry.Cocoa.Extensions;
-using Sentry.Internal;
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry;
