@@ -88,13 +88,4 @@ public class SentryMauiOptionsTests
         Assert.Null(options.BeforeCaptureInternal);
 
     }
-
-#if IOS
-    [Fact]
-    public void EnableMarshalManagedException_Default()
-    {
-        var options = new SentryMauiOptions();
-        Assert.True(options.Native.EnableMarshalManagedException);
-    }
-#endif
 }

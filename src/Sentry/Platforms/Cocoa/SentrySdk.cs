@@ -11,7 +11,8 @@ public static partial class SentrySdk
     {
         options.LogDebug("Initializing native SDK");
 
-        if (options.Native.EnableMarshalManagedException)
+        // If compiled with native AOT
+        if (!(!RuntimeFeature.IsDynamicCodeCompiled && !RuntimeFeature.IsDynamicCodeSupported))
         {
             // Needed for Native AOT but not for MonoVM anymore:
             // https://github.com/xamarin/xamarin-macios/issues/15252#issuecomment-2349301905
