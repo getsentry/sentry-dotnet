@@ -183,7 +183,7 @@ public partial class SentryOptions
         /// The default value is <c>false</c> (disabled).
         /// </summary>
         public bool EnableTracing { get; set; } = false;
-        
+
         /// <summary>
         /// Enable or disable the subscription to ObjCRuntime.Runtime.MarshalManagedException.
         /// default value: true
