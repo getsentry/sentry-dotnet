@@ -11,12 +11,12 @@ public static partial class SentrySdk
     {
         options.LogDebug("Initializing native SDK");
 
-        if (options.IOS.ExceptionMode != MarshalExceptionMode.None)
+        if (options.Native.EnableMarshalManagedException)
         {
             // Workaround for https://github.com/xamarin/xamarin-macios/issues/15252
             ObjCRuntime.Runtime.MarshalManagedException += (_, args) =>
             {
-                args.ExceptionMode = options.IOS.ExceptionMode.ToObjC();
+                args.ExceptionMode = ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode;
             };
         }
 
