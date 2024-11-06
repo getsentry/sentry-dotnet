@@ -18,21 +18,12 @@ public class FileSystemAnalyzer  : DiagnosticAnalyzer
 {
     private const string DiagnosticId = "SN0001";
 
-    private static readonly LocalizableString Title = new LocalizableResourceString(nameof(Resources.SN0001Title),
-        Resources.ResourceManager, typeof(Resources));
-
-    private static readonly LocalizableString MessageFormat =
-        new LocalizableResourceString(nameof(Resources.SN0001MessageFormat), Resources.ResourceManager,
-            typeof(Resources));
-
-    private static readonly LocalizableString Description =
-        new LocalizableResourceString(nameof(Resources.SN0001Description), Resources.ResourceManager,
-            typeof(Resources));
-
+    private const string Title = "Use IFileSystem wrapper";
+    private const string MessageFormat = "Route file system access through IFileSystem wrapper";
     private const string Category = "Usage";
 
     private static readonly DiagnosticDescriptor Rule = new(DiagnosticId, Title, MessageFormat, Category,
-        DiagnosticSeverity.Warning, isEnabledByDefault: true, description: Description);
+        DiagnosticSeverity.Warning, isEnabledByDefault: true);
 
     /// <summary>
     /// Returns a set of descriptors for the diagnostics that this analyzer is capable of producing.
