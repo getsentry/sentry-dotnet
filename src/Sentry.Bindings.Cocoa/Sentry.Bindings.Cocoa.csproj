@@ -52,7 +52,7 @@
 
     <PropertyGroup>
       <PropertiesContent>$([System.IO.File]::ReadAllText("../../modules/sentry-cocoa.properties"))</PropertiesContent>
-      <CocoaVersion>$([System.Text.RegularExpressions.Regex]::Match($(PropertiesContent), 'version\s*=\s*(\d+\.\d+\.\d+)').Groups[1].Value)</CocoaVersion>
+      <CocoaVersion>$([System.Text.RegularExpressions.Regex]::Match($(PropertiesContent), 'version\s*=\s*([^\s]+)').Groups[1].Value)</CocoaVersion>
     </PropertyGroup>
 
     <Message Importance="High" Text="Setting up the Cocoa SDK version '$(CocoaVersion)'." />
