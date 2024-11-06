@@ -13,7 +13,8 @@ public static partial class SentrySdk
 
         if (options.Native.EnableMarshalManagedException)
         {
-            // Workaround for https://github.com/xamarin/xamarin-macios/issues/15252
+            // Needed for Native AOT but not for MonoVM anymore:
+            // https://github.com/xamarin/xamarin-macios/issues/15252#issuecomment-2349301905
             ObjCRuntime.Runtime.MarshalManagedException += (_, args) =>
             {
                 args.ExceptionMode = ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode;
