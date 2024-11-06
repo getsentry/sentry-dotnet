@@ -1,5 +1,6 @@
 using Sentry.Cocoa;
 using Sentry.Cocoa.Extensions;
+using Sentry.Internal;
 using Sentry.Extensibility;
 
 // ReSharper disable once CheckNamespace
@@ -12,7 +13,7 @@ public static partial class SentrySdk
         options.LogDebug("Initializing native SDK");
 
         // If compiled with native AOT
-        if (!(!RuntimeFeature.IsDynamicCodeCompiled && !RuntimeFeature.IsDynamicCodeSupported))
+        if (!AotHelper.IsAOT)
         {
             // Needed for Native AOT but not for MonoVM anymore:
             // https://github.com/xamarin/xamarin-macios/issues/15252#issuecomment-2349301905
