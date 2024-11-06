@@ -189,9 +189,9 @@ public partial class SentryOptions
         /// default value: true
         /// </summary>
         /// <remarks>
-        /// We recommend to set EnableMarshalManagedException to false for NativeAOT to avoid the used of unsupported marshelling behaviour
-        /// for more, see: https://github.com/getsentry/sentry-dotnet/pull/3729
+        /// We recommend to set EnableMarshalManagedException to false for NativeAOT to avoid the used of unsupported marshelling behaviour.
         /// </remarks>
+        /// <seealso href="https://github.com/xamarin/xamarin-macios/issues/15252#issuecomment-2349301905" />
         public bool EnableMarshalManagedException { get; set; } = true;
         internal List<string>? InAppExcludes { get; private set; }
         internal List<string>? InAppIncludes { get; private set; }
