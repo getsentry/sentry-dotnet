@@ -125,14 +125,14 @@ jobs:
 
       - name: Test Diagnostics
         if: matrix.os == 'windows-latest'
-        run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage" -v diag --diag:logFile=diagnostics.log
+        run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage" -v diag --diag "${{ github.workspace }}/diagnostics.log"
 
       - name: Upload Diagnostic Log
         if: always() && matrix.os == 'windows-latest'
         uses: actions/upload-artifact@v4
         with:
           name: diagnostics-log
-          path: diagnostics.log
+          path: ${{ github.workspace }}/diagnostics.log
 
       - name: Test
         if: matrix.os != 'windows-latest'
