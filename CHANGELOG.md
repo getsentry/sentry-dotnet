@@ -9,7 +9,7 @@
 ### Fixes
 
 - When using OTel and ASP.NET Core the SDK could try to process OTel spans after the SDK had been closed ([#3726](https://github.com/getsentry/sentry-dotnet/pull/3726))
-- iOS - added a native option to set Enable MarshalManagedException preventing use of unsupported marshalling behaviour for [Native AOT] ([#3729](https://github.com/getsentry/sentry-dotnet/pull/3729))
+- iOS - added a native option to set Enable MarshalManagedException, preventing use of unsupported marshalling behaviour for [Native AOT] ([#3729](https://github.com/getsentry/sentry-dotnet/pull/3729))
 
 ### Dependencies
 
