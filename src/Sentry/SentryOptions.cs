@@ -1249,7 +1249,6 @@ public class SentryOptions
         AssemblyReader = name => reader.Value?.TryReadAssembly(name);
 
 #elif __IOS__
-        IOS = new IOSOptions();
         Native = new NativeOptions(this);
 #endif
 
