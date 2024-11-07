@@ -130,10 +130,6 @@ jobs:
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
 
-      - name: Build Cocoa SDK
-        if: runner.os == 'macOS'
-        uses: ./.github/actions/buildcocoasdk
-
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 

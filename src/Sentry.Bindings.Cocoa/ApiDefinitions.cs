@@ -7,6 +7,7 @@
 using System;
 using Foundation;
 using ObjCRuntime;
+using Sentry;
 using UIKit;
 
 namespace Sentry.CocoaSdk;
@@ -1521,6 +1522,14 @@ interface SentryOptions
     [Export ("enableAppHangTracking")]
     bool EnableAppHangTracking { get; set; }
 
+    // @property (assign, nonatomic) BOOL enableAppHangTrackingV2;
+    [Export ("enableAppHangTrackingV2")]
+    bool EnableAppHangTrackingV2 { get; set; }
+
+    // @property (assign, nonatomic) BOOL enableReportNonFullyBlockingAppHangs;
+    [Export ("enableReportNonFullyBlockingAppHangs")]
+    bool EnableReportNonFullyBlockingAppHangs { get; set; }
+
     // @property (assign, nonatomic) NSTimeInterval appHangTimeoutInterval;
     [Export ("appHangTimeoutInterval")]
     double AppHangTimeoutInterval { get; set; }
@@ -1567,22 +1576,36 @@ interface SentryOptions
     // @property (copy, nonatomic) NSString * _Nonnull spotlightUrl;
     [Export ("spotlightUrl")]
     string SpotlightUrl { get; set; }
+}
 
-    // @property (assign, nonatomic) BOOL enableMetrics;
-    [Export ("enableMetrics")]
-    bool EnableMetrics { get; set; }
+// @interface SentryReplayApi : NSObject
+[BaseType (typeof(NSObject))]
+[Internal]
+interface SentryReplayApi
+{
+    // -(void)maskView:(UIView * _Nonnull)view __attribute__((swift_name("maskView(_:)")));
+    [Export ("maskView:")]
+    void MaskView (UIView view);
 
-    // @property (assign, nonatomic) BOOL enableDefaultTagsForMetrics;
-    [Export ("enableDefaultTagsForMetrics")]
-    bool EnableDefaultTagsForMetrics { get; set; }
+    // -(void)unmaskView:(UIView * _Nonnull)view __attribute__((swift_name("unmaskView(_:)")));
+    [Export ("unmaskView:")]
+    void UnmaskView (UIView view);
 
-    // @property (assign, nonatomic) BOOL enableSpanLocalMetricAggregation;
-    [Export ("enableSpanLocalMetricAggregation")]
-    bool EnableSpanLocalMetricAggregation { get; set; }
+    // -(void)pause;
+    [Export ("pause")]
+    void Pause ();
 
-    // @property (copy, nonatomic) SentryBeforeEmitMetricCallback _Nullable beforeEmitMetric;
-    [NullAllowed, Export ("beforeEmitMetric", ArgumentSemantic.Copy)]
-    SentryBeforeEmitMetricCallback BeforeEmitMetric { get; set; }
+    // -(void)resume;
+    [Export ("resume")]
+    void Resume ();
+
+    // -(void)start;
+    [Export ("start")]
+    void Start ();
+
+    // -(void)stop;
+    [Export ("stop")]
+    void Stop ();
 }
 
 // @interface SentryRequest : NSObject <SentrySerializable>
@@ -1634,6 +1657,11 @@ interface SentrySDK
     [Static]
     [Export ("isEnabled")]
     bool IsEnabled { get; }
+
+    // @property (readonly, nonatomic, class) SentryReplayApi * _Nonnull replay;
+    [Static]
+    [Export ("replay")]
+    SentryReplayApi Replay { get; }
 
     // +(void)startWithOptions:(SentryOptions * _Nonnull)options __attribute__((swift_name("start(options:)")));
     [Static]
@@ -1740,6 +1768,11 @@ interface SentrySDK
     [Export ("captureUserFeedback:")]
     void CaptureUserFeedback (SentryUserFeedback userFeedback);
 
+    // +(void)showUserFeedbackForm;
+    [Static]
+    [Export ("showUserFeedbackForm")]
+    void ShowUserFeedbackForm ();
+
     // +(void)addBreadcrumb:(SentryBreadcrumb * _Nonnull)crumb __attribute__((swift_name("addBreadcrumb(_:)")));
     [Static]
     [Export ("addBreadcrumb:")]
@@ -1804,16 +1837,6 @@ interface SentrySDK
     [Static]
     [Export ("close")]
     void Close ();
-
-    // +(void)replayRedactView:(UIView * _Nonnull)view;
-    [Static]
-    [Export ("replayRedactView:")]
-    void ReplayRedactView (UIView view);
-
-    // +(void)replayIgnoreView:(UIView * _Nonnull)view;
-    [Static]
-    [Export ("replayIgnoreView:")]
-    void ReplayIgnoreView (UIView view);
 
     // +(void)startProfiler;
     [Static]
