@@ -119,19 +119,7 @@ jobs:
       - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
 
-#      - name: Test Diagnostics
-#        if: matrix.os == 'windows-latest'
-#        run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage" -v diag --diag "${{ github.workspace }}/diagnostics.log"
-#
-#      - name: Upload Diagnostic Log
-#        if: always() && matrix.os == 'windows-latest'
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: diagnostics-log
-#          path: ${{ github.workspace }}/diagnostics.log
-
       - name: Test
-#        if: matrix.os != 'windows-latest'
         run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
 
       - name: Upload code coverage
