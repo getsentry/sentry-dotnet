@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- iOS - prevent use of unsupported marshalling behavior `MarshalManagedExceptionMode.UnwindNativeCode` for [Native AOT] ([#3729](https://github.com/getsentry/sentry-dotnet/pull/3729))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.36.0 to v8.39.0 ([#3727](https://github.com/getsentry/sentry-dotnet/pull/3727))
@@ -20,7 +24,6 @@
 ### Fixes
 
 - When using OTel and ASP.NET Core the SDK could try to process OTel spans after the SDK had been closed ([#3726](https://github.com/getsentry/sentry-dotnet/pull/3726))
-- iOS - added a native option to set Enable MarshalManagedException, preventing use of unsupported marshalling behaviour for [Native AOT] ([#3729](https://github.com/getsentry/sentry-dotnet/pull/3729))
 
 ### Dependencies
 
