@@ -1,7 +1,6 @@
 using Sentry.Cocoa;
 using Sentry.Cocoa.Extensions;
 using Sentry.Extensibility;
-using Sentry.Internal;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry;
@@ -11,17 +10,11 @@ public static partial class SentrySdk
     private static void InitSentryCocoaSdk(SentryOptions options)
     {
         options.LogDebug("Initializing native SDK");
-
-        // If compiled with native AOT
-        if (!AotHelper.IsAOT)
+        // Workaround for https://github.com/xamarin/xamarin-macios/issues/15252
+        ObjCRuntime.Runtime.MarshalManagedException += (_, args) =>
         {
-            // Needed for Native AOT but not for MonoVM anymore:
-            // https://github.com/xamarin/xamarin-macios/issues/15252#issuecomment-2349301905
-            ObjCRuntime.Runtime.MarshalManagedException += (_, args) =>
-            {
-                args.ExceptionMode = ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode;
-            };
-        }
+            args.ExceptionMode = ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode;
+        };
 
         // Set default release and distribution
         options.Release ??= GetDefaultReleaseString();

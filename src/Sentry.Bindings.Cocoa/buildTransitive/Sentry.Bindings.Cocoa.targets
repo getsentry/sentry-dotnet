@@ -13,6 +13,7 @@
 
     <PropertyGroup>
       <HotRestartPackageResourcesDir>$(TEMP)\Xamarin\HotRestart\Resources\</HotRestartPackageResourcesDir>
+      <MtouchExtraArgs Condition="'$(PublishAot)' == 'true'">--marshal-objectivec-exceptions:disable</MtouchExtraArgs>
     </PropertyGroup>
 
 		<ItemGroup>
