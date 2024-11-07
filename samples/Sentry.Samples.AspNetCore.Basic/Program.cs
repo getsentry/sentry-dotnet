@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Mvc;
+using Sentry.Extensibility;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.UseSentry(options =>
@@ -7,6 +10,7 @@ builder.WebHost.UseSentry(options =>
 
     // Enable Sentry performance monitoring
     options.TracesSampleRate = 1.0;
+    options.MaxRequestBodySize = RequestSize.Always;
 
 #if DEBUG
     // Log debug information about the Sentry SDK
@@ -14,35 +18,48 @@ builder.WebHost.UseSentry(options =>
 #endif
 });
 
+// Register HttpClient as a service
+builder.Services.AddHttpClient("local", client =>
+{
+    client.BaseAddress = new Uri("http://localhost:59740");
+});
+
 var app = builder.Build();
 
 // An example ASP.NET Core middleware that throws an
 // exception when serving a request to path: /throw
-app.MapGet("/throw/{message?}", context =>
+app.MapGet("/throw/{message?}", async ([FromServices] IHttpClientFactory clientFactory) =>
 {
-    var exceptionMessage = context.GetRouteValue("message") as string;
-
-    var log = context.RequestServices.GetRequiredService<ILoggerFactory>()
-        .CreateLogger<Program>();
-
-    log.LogInformation("Handling some request...");
-
-    var hub = context.RequestServices.GetRequiredService<IHub>();
-    hub.ConfigureScope(s =>
+    try
     {
-        // More data can be added to the scope like this:
-        s.SetTag("Sample", "ASP.NET Core"); // indexed by Sentry
-        s.SetExtra("Extra!", "Some extra information");
-    });
+        var client = clientFactory.CreateClient("local");
+        var content = new StringContent("x=1&y=2&", System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");
+        var response = await client.PostAsync("/submit", content);
+        var responseString = await response.Content.ReadAsStringAsync();
 
-    log.LogInformation("Logging info...");
-    log.LogWarning("Logging some warning!");
+        return Results.Content(responseString, "application/json");
+    }
+    catch (Exception e)
+    {
+        throw new Exception("An error occurred while processing the request", e);
+    }
+});
 
-    // The following exception will be captured by the SDK and the event
-    // will include the Log messages and any custom scope modifications
-    // as exemplified above.
-    throw new Exception(
-        exceptionMessage ?? "An exception thrown from the ASP.NET Core pipeline");
+// POST endpoint to handle form submission
+app.MapPost("/submit", async (HttpContext context) =>
+{
+    await Task.Delay(50); // Simulate a delay
+    throw new Exception("Test exception - needs a body");
+    // var form = await context.Request.ReadFormAsync();
+    // var x = form["x"];
+    // var y = form["y"];
+    //
+    // var log = context.RequestServices.GetRequiredService<ILoggerFactory>()
+    //     .CreateLogger<Program>();
+    //
+    // log.LogInformation("Received form data: x={x}, y={y}", x, y);
+    //
+    // return Results.Ok(new { x, y });
 });
 
 app.Run();
