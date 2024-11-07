@@ -152,6 +152,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SingleFileTestApp", "test\SingleFileTestApp\SingleFileTestApp.csproj", "{162A1CAE-ACEE-45CA-A6D0-7702ADE4D3DE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "modules", "modules", "{A3CCA27E-4DF8-479D-833C-CAA0950715AA}"
+	ProjectSection(SolutionItems) = preProject
+		modules\sentry-cocoa.properties = modules\sentry-cocoa.properties
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraceEvent", "modules\perfview\src\TraceEvent\TraceEvent.csproj", "{67269916-C417-4CEE-BD7D-CA66C3830AEE}"
 EndProject

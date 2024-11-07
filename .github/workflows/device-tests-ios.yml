@@ -30,9 +30,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Build Cocoa SDK
-        uses: ./.github/actions/buildcocoasdk
-
       - name: Setup Environment
         uses: ./.github/actions/environment
 
