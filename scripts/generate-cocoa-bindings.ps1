@@ -2,7 +2,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $RootPath = (Get-Item $PSScriptRoot).Parent.FullName
-$CocoaSdkPath = "$RootPath/modules/sentry-cocoa"
+$CocoaSdkPath = "$RootPath/modules/sentry-cocoa/Sentry.framework"
 $BindingsPath = "$RootPath/src/Sentry.Bindings.Cocoa"
 $BackupPath = "$BindingsPath/obj/_unpatched"
 
@@ -41,16 +41,38 @@ if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/
 $iPhoneSdkVersion = sharpie xcode -sdks | grep -o -m 1 'iphoneos\S*'
 Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
 
-# The umbrella header is provided in the "new" style of `#import <Sentry/SomeHeader.h>` instead of `#import "SomeHeader.h"` which causes sharpie to fail resolve those headers
-$umbrellaHeader = "$CocoaSdkPath/Carthage/Headers/Sentry.h"
-Set-Content -Path $umbrellaHeader -Value ((Get-Content -Path $umbrellaHeader -Raw) -replace '<Sentry/([^>]+)>', '"$1"')
+## Imports in the various header files are provided in the "new" style of:
+#     `#import <Sentry/SomeHeader.h>`
+# ...instead of:
+#     `#import "SomeHeader.h"`
+# This causes sharpie to fail resolve those headers
+$filesToPatch = Get-ChildItem -Path "$CocoaSdkPath/Headers" -Filter *.h -Recurse | Select-Object -ExpandProperty FullName
+foreach ($file in $filesToPatch) {
+    if (Test-Path $file) {
+        $content = Get-Content -Path $file -Raw
+        $content = $content -replace '<Sentry/([^>]+)>', '"$1"'
+        Set-Content -Path $file -Value $content
+    } else {
+        Write-Host "File not found: $file"
+    }
+}
+$privateHeaderFile = "$CocoaSdkPath/PrivateHeaders/PrivatesHeader.h"
+if (Test-Path $privateHeaderFile) {
+    $content = Get-Content -Path $privateHeaderFile -Raw
+    $content = $content -replace '"SentryDefines.h"', '"../Headers/SentryDefines.h"'
+    $content = $content -replace '"SentryProfilingConditionals.h"', '"../Headers/SentryProfilingConditionals.h"'
+    Set-Content -Path $privateHeaderFile -Value $content
+    Write-Host "Patched includes: $privateHeaderFile"
+} else {
+    Write-Host "File not found: $privateHeaderFile"
+}
 
 # Generate bindings
 Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk $iPhoneSdkVersion `
-    -scope "$CocoaSdkPath/Carthage/Headers" `
-    "$CocoaSdkPath/Carthage/Headers/Sentry.h" `
-    "$CocoaSdkPath/Carthage/Headers/PrivateSentrySDKOnly.h" `
+    -scope "$CocoaSdkPath" `
+    "$CocoaSdkPath/Headers/Sentry.h" `
+    "$CocoaSdkPath/PrivateHeaders/PrivateSentrySDKOnly.h" `
     -o $BindingsPath `
     -c -Wno-objc-property-no-attribute
 
