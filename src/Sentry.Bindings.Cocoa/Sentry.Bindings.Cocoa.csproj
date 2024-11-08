@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <!-- Build empty assemblies when not on macOS, to pass the solution build. -->
-  <ItemGroup Condition="!$([MSBuild]::IsOSPlatform('OSX'))">
+  <ItemGroup Condition="!($([MSBuild]::IsOSPlatform('OSX')) Or $([MSBuild]::IsOSPlatform('windows')))">
     <Compile Remove="*" />
     <Using Remove="*" />
   </ItemGroup>
@@ -26,7 +26,7 @@
     <InternalsVisibleTo Include="Sentry.Maui.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
-  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+  <ItemGroup Condition="($([MSBuild]::IsOSPlatform('OSX')) Or $([MSBuild]::IsOSPlatform('windows')))">
 
     <!-- Set up the binding project. -->
     <ObjcBindingApiDefinition Include="ApiDefinitions.cs" />
@@ -90,7 +90,7 @@
 
   <!-- Generate bindings -->
   <Target Name="_GenerateSentryCocoaBindings" AfterTargets="SetupCocoaSDK"
-          Condition="$([MSBuild]::IsOSPlatform('OSX')) and Exists('$(SentryCocoaFrameworkHeaders)')"
+          Condition="($([MSBuild]::IsOSPlatform('OSX')) Or $([MSBuild]::IsOSPlatform('windows'))) and Exists('$(SentryCocoaFrameworkHeaders)')"
           Outputs="ApiDefinitions.cs;StructsAndEnums.cs">
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerGenerateSentryCocoaBindings" Properties="TargetFramework=once" />
   </Target>
