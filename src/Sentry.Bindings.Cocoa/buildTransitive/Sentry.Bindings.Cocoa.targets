@@ -1,6 +1,21 @@
 <Project>
 
   <!--
+     Workaround for https://github.com/xamarin/xamarin-macios/issues/15252
+     ensuring that Native AOT compile code does not get the wrong marshal-managed-exceptions
+    -->
+  <Target Name="_SentryMarshalExceptionManagement">
+    <PropertyGroup Condition="'$(PublishAot)' == 'true'">
+      <MtouchExtraArgs>marshal-managed-exceptions:disable</MtouchExtraArgs>
+      <MtouchNoSymbolStrip Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">True</MtouchNoSymbolStrip>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(PublishAot)' == 'false' Or '$(PublishAot)' == ''">
+      <MtouchExtraArgs>--marshal-managed-exceptions:unwindnativecode</MtouchExtraArgs>
+    </PropertyGroup>
+  </Target>
+
+  <!--
     Workaround to ensure the Sentry Cocoa SDK is present when using iOS "Hot Restart" deployments on Windows
     Based on https://github.com/xamarin/xamarin-macios/pull/16605
     The only differences are:
@@ -13,7 +28,6 @@
 
     <PropertyGroup>
       <HotRestartPackageResourcesDir>$(TEMP)\Xamarin\HotRestart\Resources\</HotRestartPackageResourcesDir>
-      <MtouchExtraArgs Condition="'$(PublishAot)' == 'true'">--marshal-objectivec-exceptions:disable</MtouchExtraArgs>
     </PropertyGroup>
 
 		<ItemGroup>
