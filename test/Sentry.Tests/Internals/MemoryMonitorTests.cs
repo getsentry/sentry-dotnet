@@ -8,6 +8,8 @@ public class MemoryMonitorTests
 
     private class Fixture
     {
+        private IGCImplementation GCImplementation { get; set; }
+
         public SentryOptions Options { get; set; } = new()
         {
             Dsn = ValidDsn,
@@ -24,7 +26,12 @@ public class MemoryMonitorTests
         public MemoryMonitor GetSut()
         {
             Options.DiagnosticLogger?.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-            return new MemoryMonitor(Options, OnDumpCollected, OnCaptureDump);
+            if (GCImplementation is null)
+            {
+                GCImplementation = Substitute.For<IGCImplementation>();
+                GCImplementation.TotalAvailableMemoryBytes.Returns(1024 * 1024 * 1024);
+            }
+            return new MemoryMonitor(Options, OnDumpCollected, OnCaptureDump, GCImplementation);
         }
     }
 

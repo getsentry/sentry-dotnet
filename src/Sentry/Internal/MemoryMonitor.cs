@@ -23,7 +23,7 @@ internal sealed class MemoryMonitor : IDisposable
     private readonly Action _onCaptureDump; // Just for testing purposes
     private readonly Action<string> _onDumpCollected;
 
-    public MemoryMonitor(SentryOptions options, Action<string> onDumpCollected, Action? onCaptureDump = null)
+    public MemoryMonitor(SentryOptions options, Action<string> onDumpCollected, Action? onCaptureDump = null, IGCImplementation? gc = null)
     {
         if (options.HeapDumpOptions is null)
         {
@@ -35,11 +35,12 @@ internal sealed class MemoryMonitor : IDisposable
         _onDumpCollected = onDumpCollected;
         _onCaptureDump = onCaptureDump ?? CaptureMemoryDump;
 
-        _totalMemory = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes;
+        gc ??= new SystemGCImplementation();
+        _totalMemory = gc.TotalAvailableMemoryBytes;
 
         // Since we're not awaiting the task, the continuation will happen elsewhere but that's OK - all we care about
         // is that any exceptions get logged as soon as possible.
-        GarbageCollectionMonitor.Start(CheckMemoryUsage, _cancellationTokenSource.Token)
+        GarbageCollectionMonitor.Start(CheckMemoryUsage, _cancellationTokenSource.Token, gc)
             .ContinueWith(
                 t => _options.LogError(t.Exception!, "Garbage collection monitor failed"),
                 TaskContinuationOptions.OnlyOnFaulted // guarantees that the exception is not null

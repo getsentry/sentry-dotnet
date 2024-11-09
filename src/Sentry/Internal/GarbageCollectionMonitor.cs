@@ -36,37 +36,4 @@ internal sealed class GarbageCollectionMonitor
             gc.CancelFullGCNotification();
         }
     }
-
-    /// <summary>
-    /// When not testing we use `System.GC`.
-    /// </summary>
-    /// <remarks>
-    /// All these methods can throw an exception if concurrent garbage collection has been enabled in the runtime
-    /// settings for the application.
-    /// </remarks>
-    private class SystemGCImplementation : IGCImplementation
-    {
-        public void RegisterForFullGCNotification(int maxGenerationThreshold, int largeObjectHeapThreshold) =>
-            GC.RegisterForFullGCNotification(maxGenerationThreshold, largeObjectHeapThreshold);
-
-        public GCNotificationStatus WaitForFullGCComplete(TimeSpan timeout) =>
-#if NET8_0_OR_GREATER
-            GC.WaitForFullGCComplete(timeout);
-#else
-        GC.WaitForFullGCComplete((int)timeout.TotalMilliseconds);
-#endif
-
-        public void CancelFullGCNotification() =>
-            GC.CancelFullGCNotification();
-    }
-}
-
-/// <summary>
-/// This allows us to test the GarbageCollectionMonitor class without a dependency on System.GC, which is static
-/// </summary>
-internal interface IGCImplementation
-{
-    void RegisterForFullGCNotification(int maxGenerationThreshold, int largeObjectHeapThreshold);
-    GCNotificationStatus WaitForFullGCComplete(TimeSpan timeout);
-    void CancelFullGCNotification();
 }

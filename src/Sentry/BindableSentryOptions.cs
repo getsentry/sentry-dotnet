@@ -51,9 +51,6 @@ internal partial class BindableSentryOptions
     public bool? JsonPreserveReferences { get; set; }
     public bool? EnableSpotlight { get; set; }
     public string? SpotlightUrl { get; set; }
-#if MEMORY_DUMP_SUPPORTED
-    public SentryLevel? HeapDumpEventLevel { get; set; }
-#endif
 
     public void ApplyTo(SentryOptions options)
     {
