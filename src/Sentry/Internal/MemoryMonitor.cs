@@ -25,13 +25,6 @@ internal sealed class MemoryMonitor : IDisposable
 
     private Task? _monitorTask;
 
-    /// <summary>
-    /// Creates a memory monitor.
-    /// </summary>
-    /// <remarks>
-    /// A mock will need to be supplied for the <paramref name="gc"></paramref> parameter when testing as otherwise these
-    /// tests will hang when running on the Windows GitHub runners.
-    /// </remarks>
     public MemoryMonitor(SentryOptions options, Action<string> onDumpCollected, Action? onCaptureDump = null, IGCImplementation? gc = null)
     {
         if (options.HeapDumpOptions is null)
@@ -78,7 +71,12 @@ internal sealed class MemoryMonitor : IDisposable
         _onCaptureDump();
     }
 
-    internal void CaptureMemoryDump()
+    public void CaptureMemoryDump() => CaptureMemoryDump(DefaultProcessRunner);
+
+    /// <summary>
+    /// Override used for testing
+    /// </summary>
+    internal void CaptureMemoryDump(Action<string> dumpProcessRunner)
     {
         if (_options.DisableFileWrite)
         {
@@ -93,7 +91,26 @@ internal sealed class MemoryMonitor : IDisposable
         }
 
         var command = $"dotnet-gcdump collect -v -p {Environment.ProcessId} -o '{dumpFile}'";
+        dumpProcessRunner.Invoke(command);
 
+        if (!_options.FileSystem.FileExists(dumpFile))
+        {
+            // if this happens, hopefully there would be more information in the standard output from the process above
+            _options.LogError("Unexpected error creating memory dump. Use debug-level to see output of dotnet-gcdump.");
+            return;
+        }
+
+        _onDumpCollected(dumpFile);
+    }
+
+    /// <summary>
+    /// Default process runner for the memory dump command
+    /// </summary>
+    /// <remarks>
+    /// This code hangs the test runners on Windows in CI so must be mocked for testing.
+    /// </remarks>
+    private void DefaultProcessRunner(string command)
+    {
         _options.LogDebug($"Starting process: {command}");
         using var process = new Process();
         process.StartInfo = new ProcessStartInfo
@@ -118,14 +135,6 @@ internal sealed class MemoryMonitor : IDisposable
 #else
         process.WaitForExit(5000);
 #endif
-
-        if (!_options.FileSystem.FileExists(dumpFile))
-        {
-            // if this happens, hopefully there would be more information in the standard output from the process above
-            _options.LogError("Unexpected error creating memory dump. Use debug-level to see output of dotnet-gcdump.");
-        }
-
-        _onDumpCollected(dumpFile);
     }
 
     internal string? TryGetDumpLocation()

@@ -118,62 +118,57 @@ public class MemoryMonitorTests
         dumpCaptured.Should().BeTrue();
     }
 
-    [SkippableFact]
+    [Fact]
     public void CaptureMemoryDump_DisableFileWrite_DoesNotCapture()
     {
-        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
-
         // Arrange
         _fixture.Options.EnableHeapDumps(AlwaysTrigger);
         _fixture.Options.DisableFileWrite = true;
         using var sut = _fixture.GetSut();
+        var processRunner = Substitute.For<Action<string>>();
 
         // Act
-        sut.CaptureMemoryDump();
+        sut.CaptureMemoryDump(processRunner);
 
         // Assert
         _fixture.Options.ReceivedLogDebug("File write has been disabled via the options. Unable to create memory dump.");
-        _fixture.Options.DidNotReceiveReceiveLogInfo("Creating a memory dump for Process ID: {0}", Arg.Any<int>());
+        processRunner.DidNotReceive().Invoke(Arg.Any<string>());
     }
 
-    [SkippableFact]
-    public void CaptureMemoryDump_CapturesDump()
-    {
-        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
-
-        // Arrange
-        _fixture.Options.EnableHeapDumps(AlwaysTrigger);
-        _fixture.Options.FileSystem = new FakeFileSystem();
-        string dumpFile = null;
-        _fixture.OnDumpCollected = path => dumpFile = path;
-        using var sut = _fixture.GetSut();
-
-        // Act
-        sut.CaptureMemoryDump();
-
-        // Assert
-        dumpFile.Should().NotBeNull();
-    }
-
-    [SkippableFact]
+    [Fact]
     public void CaptureMemoryDump_UnresolvedDumpLocation_DoesNotCapture()
     {
-        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
-
         // Arrange
         _fixture.Options.EnableHeapDumps(AlwaysTrigger);
         _fixture.Options.FileSystem = Substitute.For<IFileSystem>();
         _fixture.Options.FileSystem.CreateDirectory(Arg.Any<string>()).Returns(false);
         using var sut = _fixture.GetSut();
+        var processRunner = Substitute.For<Action<string>>();
 
         // Act
-        sut.CaptureMemoryDump();
+        sut.CaptureMemoryDump(processRunner);
 
         // Assert
-        _fixture.Options.DidNotReceiveReceiveLogInfo("Creating a memory dump for Process ID: {0}", Arg.Any<int>());
+        processRunner.DidNotReceive().Invoke(Arg.Any<string>());
     }
 
-    [SkippableFact]
+    [Fact]
+    public void CaptureMemoryDump_CapturesDump()
+    {
+        // Arrange
+        _fixture.Options.EnableHeapDumps(AlwaysTrigger);
+        _fixture.Options.FileSystem = new FakeFileSystem();
+        using var sut = _fixture.GetSut();
+        var processRunner = Substitute.For<Action<string>>();
+
+        // Act
+        sut.CaptureMemoryDump(processRunner);
+
+        // Assert
+        processRunner.Received(1).Invoke(Arg.Any<string>());
+    }
+
+    [Fact]
     public void TryGetDumpLocation_DirectoryCreationFails_ReturnsNull()
     {
         // Arrange
@@ -192,7 +187,7 @@ public class MemoryMonitorTests
         _fixture.Options.ReceivedLogWarning("Failed to create a directory for memory dump ({0}).", Arg.Any<string>());
     }
 
-    [SkippableFact]
+    [Fact]
     public void TryGetDumpLocation_DumpFileExists_ReturnsNull()
     {
         // Arrange
@@ -212,7 +207,7 @@ public class MemoryMonitorTests
         _fixture.Options.ReceivedLogWarning("Duplicate dump file detected.");
     }
 
-    [SkippableFact]
+    [Fact]
     public void TryGetDumpLocation_Exception_LogsError()
     {
         // Arrange
@@ -229,7 +224,7 @@ public class MemoryMonitorTests
         _fixture.Options.ReceivedLogError(Arg.Any<Exception>(), "Failed to resolve appropriate memory dump location.");
     }
 
-    [SkippableFact]
+    [Fact]
     public void TryGetDumpLocation_ReturnsFilePath()
     {
         // Arrange
