@@ -542,8 +542,13 @@ public class SentryOptions
         => EnableHeapDumps(HeapDumpTriggers.MemoryPercentageThreshold(memoryPercentageThreshold), debouncer, level);
 
     /// <summary>
-    /// Configures Sentry to capture a heap dump based on a trigger function.
-    /// This can be useful to diagnose memory leaks.
+    /// <para>
+    /// Configures Sentry to capture a heap dump based on a trigger function. This can be useful to diagnose memory leaks.
+    /// </para>
+    /// <para>
+    /// Note: This feature requires `dotnet-gcdump` to be installed globally on the machine or container where the heap
+    /// dumps will be captured. You can install this by running: `dotnet tool install --global dotnet-gcdump`
+    /// </para>
     /// </summary>
     /// <param name="trigger">
     /// A custom trigger function that accepts the current memory usage and total available memory as arguments and
