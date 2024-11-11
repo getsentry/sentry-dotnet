@@ -23,6 +23,8 @@ internal sealed class MemoryMonitor : IDisposable
     private readonly Action _onCaptureDump; // Just for testing purposes
     private readonly Action<string> _onDumpCollected;
 
+    private Task? _monitorTask;
+
     /// <summary>
     /// Creates a memory monitor.
     /// </summary>
@@ -47,7 +49,7 @@ internal sealed class MemoryMonitor : IDisposable
 
         // Since we're not awaiting the task, the continuation will happen elsewhere but that's OK - all we care about
         // is that any exceptions get logged as soon as possible.
-        GarbageCollectionMonitor.Start(CheckMemoryUsage, _cancellationTokenSource.Token, gc)
+        _monitorTask = GarbageCollectionMonitor.Start(CheckMemoryUsage, _cancellationTokenSource.Token, gc)
             .ContinueWith(
                 t => _options.LogError(t.Exception!, "Garbage collection monitor failed"),
                 TaskContinuationOptions.OnlyOnFaulted // guarantees that the exception is not null
@@ -174,6 +176,18 @@ internal sealed class MemoryMonitor : IDisposable
     {
         // Important no exceptions can be thrown from this method as it's called when disposing the Hub
         _cancellationTokenSource.Cancel();
+        try
+        {
+            _monitorTask?.Wait(500); // This should complete very quickly (possibly before we even wait)
+        }
+        catch (OperationCanceledException)
+        {
+            // Ignore
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Error waiting for GarbageCollectionMonitor task to complete");
+        }
         _cancellationTokenSource.Dispose();
     }
 }

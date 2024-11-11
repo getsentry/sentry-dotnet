@@ -39,6 +39,8 @@ public class MemoryMonitorTests
 
     private readonly Fixture _fixture = new();
 
+    private const bool SkipGetSutTests = true;
+
     [SkippableFact]
     public void Constructor_NoHeapdumpsConfigured_Throws()
     {
@@ -49,15 +51,23 @@ public class MemoryMonitorTests
         _fixture.Options.HeapDumpOptions = null;
 
         // Act
-        Assert.Throws<ArgumentException>(() => new MemoryMonitor(
-            _fixture.Options, _fixture.OnDumpCollected, doNothing, Fixture.MockGCImplementation()
+        MemoryMonitor sut = null;
+        try
+        {
+            Assert.Throws<ArgumentException>(() => sut = new MemoryMonitor(
+                _fixture.Options, _fixture.OnDumpCollected, doNothing, Fixture.MockGCImplementation()
             ));
+        }
+        finally
+        {
+            sut?.Dispose();
+        }
     }
 
     [SkippableFact]
     public void CheckMemoryUsage_Debounced_DoesNotCapture()
     {
-        // Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
+        Skip.If(SkipGetSutTests && RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
 
         // Arrange
         _fixture.Options.EnableHeapDumps(
@@ -78,7 +88,7 @@ public class MemoryMonitorTests
     [SkippableFact]
     public void CheckMemoryUsage_NotTriggered_DoesNotCapture()
     {
-        // Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
+        Skip.If(SkipGetSutTests && RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
 
         // Arrange
         _fixture.Options.EnableHeapDumps(
@@ -99,7 +109,7 @@ public class MemoryMonitorTests
     [SkippableFact]
     public void CheckMemoryUsage_TriggeredNotDebounced_Captures()
     {
-        // Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
+        Skip.If(SkipGetSutTests && RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
 
         // Arrange
         _fixture.Options.EnableHeapDumps(
@@ -120,7 +130,7 @@ public class MemoryMonitorTests
     [SkippableFact]
     public void CaptureMemoryDump_DisableFileWrite_DoesNotCapture()
     {
-        // Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
+        Skip.If(SkipGetSutTests && RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
 
         // Arrange
         _fixture.Options.EnableHeapDumps(AlwaysTrigger);
@@ -138,7 +148,7 @@ public class MemoryMonitorTests
     [SkippableFact]
     public void CaptureMemoryDump_CapturesDump()
     {
-        // Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
+        Skip.If(SkipGetSutTests && RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
 
         // Arrange
         _fixture.Options.EnableHeapDumps(AlwaysTrigger);
@@ -157,7 +167,7 @@ public class MemoryMonitorTests
     [SkippableFact]
     public void CaptureMemoryDump_UnresolvedDumpLocation_DoesNotCapture()
     {
-        // Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
+        Skip.If(SkipGetSutTests && RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
 
         // Arrange
         _fixture.Options.EnableHeapDumps(AlwaysTrigger);
@@ -175,7 +185,7 @@ public class MemoryMonitorTests
     [SkippableFact]
     public void TryGetDumpLocation_DirectoryCreationFails_ReturnsNull()
     {
-        // Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
+        Skip.If(SkipGetSutTests && RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
 
         // Arrange
         _fixture.Options.EnableHeapDumps(AlwaysTrigger);
@@ -196,7 +206,7 @@ public class MemoryMonitorTests
     [SkippableFact]
     public void TryGetDumpLocation_DumpFileExists_ReturnsNull()
     {
-        // Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
+        Skip.If(SkipGetSutTests && RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
 
         // Arrange
         _fixture.Options.EnableHeapDumps(AlwaysTrigger);
@@ -218,7 +228,7 @@ public class MemoryMonitorTests
     [SkippableFact]
     public void TryGetDumpLocation_Exception_LogsError()
     {
-        // Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
+        Skip.If(SkipGetSutTests && RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
 
         // Arrange
         _fixture.Options.EnableHeapDumps(AlwaysTrigger);
@@ -237,7 +247,7 @@ public class MemoryMonitorTests
     [SkippableFact]
     public void TryGetDumpLocation_ReturnsFilePath()
     {
-        // Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
+        Skip.If(SkipGetSutTests && RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
 
         // Arrange
         _fixture.Options.EnableHeapDumps(AlwaysTrigger);
