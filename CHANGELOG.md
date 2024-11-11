@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- fixed issue that causes a crash when using NLog with FailedRequestStatusCodes options in a Maui app with Trimming enabled ([#3743](https://github.com/getsentry/sentry-dotnet/pull/3743))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.36.0 to v8.39.0 ([#3727](https://github.com/getsentry/sentry-dotnet/pull/3727))
