@@ -92,16 +92,7 @@ internal sealed class MemoryMonitor : IDisposable
             return;
         }
 
-        var processId = Environment.ProcessId;
-        _options.LogInfo("Creating a memory dump for Process ID: {0}", processId);
-
-        // Check which patth to use for dotnet-gcdump. If it's been bundled with the application, it will be available
-        // in the `dotnet-gcdump` folder of the application directory. Otherwise we assume it has been installed globally.
-        var bundledToolPath = Path.Combine(AppContext.BaseDirectory, "dotnet-gcdump", "dotnet-gcdump.dll");
-        var arguments = $"collect -v -p {processId} -o '{dumpFile}'";
-        var command = _options.FileSystem.FileExists(bundledToolPath)
-            ? $"dotnet {bundledToolPath} {arguments}"
-            : $"dotnet-gcdump {arguments}";
+        var command = $"dotnet-gcdump collect -v -p {Environment.ProcessId} -o '{dumpFile}'";
 
         _options.LogDebug($"Starting process: {command}");
         using var process = new Process();
