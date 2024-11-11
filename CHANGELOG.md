@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Fixed ArgumentNullException on ASP.NET in FormRequestPayloadExtractor when handling poorly structured form data ([#3734](https://github.com/getsentry/sentry-dotnet/pull/3734))
+- Fixed ArgumentNullException in FormRequestPayloadExtractor when handling invalid form data on ASP.NET ([#3734](https://github.com/getsentry/sentry-dotnet/pull/3734))
 
 ### Dependencies
 
