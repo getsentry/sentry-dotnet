@@ -23,6 +23,13 @@ internal sealed class MemoryMonitor : IDisposable
     private readonly Action _onCaptureDump; // Just for testing purposes
     private readonly Action<string> _onDumpCollected;
 
+    /// <summary>
+    /// Creates a memory monitor.
+    /// </summary>
+    /// <remarks>
+    /// A mock will need to be supplied for the <paramref name="gc"></paramref> parameter when testing as otherwise these
+    /// tests will hang when running on the Windows GitHub runners.
+    /// </remarks>
     public MemoryMonitor(SentryOptions options, Action<string> onDumpCollected, Action? onCaptureDump = null, IGCImplementation? gc = null)
     {
         if (options.HeapDumpOptions is null)
