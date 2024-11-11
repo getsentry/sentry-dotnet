@@ -134,7 +134,7 @@ jobs:
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
       - name: Build
-        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -clp:PerformanceSummary
+        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -ds
 
       - name: Test
         run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
@@ -165,6 +165,12 @@ jobs:
             src/**/Release/*.nupkg
             src/**/Release/*.snupkg
 
+      - name: Upload build log
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ matrix.os }}
+          path: build.log
+    
   integration-test:
     needs: build
     name: Integration test (${{ matrix.os }})
