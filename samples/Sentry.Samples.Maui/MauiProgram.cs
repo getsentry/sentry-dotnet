@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace Sentry.Samples.Maui;
 
 public static class MauiProgram
@@ -22,8 +24,23 @@ public static class MauiProgram
 
                 options.Debug = true;
                 options.SampleRate = 1.0F;
-            })
 
+#if ANDROID
+                // Currently experimental support is only available on Android
+                options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate = 1.0;
+                options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate = 1.0;
+                options.Native.ExperimentalOptions.SessionReplay.MaskAllImages = false;
+                options.Native.ExperimentalOptions.SessionReplay.MaskAllText = false;
+#endif
+
+                options.SetBeforeScreenshotCapture((@event, hint) =>
+                {
+                    Console.WriteLine("screenshot about to be captured.");
+
+                    // Return true to capture or false to prevent the capture
+                    return true;
+                });
+            })
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

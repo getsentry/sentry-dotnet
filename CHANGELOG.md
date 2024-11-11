@@ -6,17 +6,80 @@
 
 - Added `SentryOptions` extension for profiling `options.AddProfilingIntegration()` ([#3660](https://github.com/getsentry/sentry-dotnet/pull/3660))
 
+### Dependencies
+
+- Bump Cocoa SDK from v8.36.0 to v8.39.0 ([#3727](https://github.com/getsentry/sentry-dotnet/pull/3727))
+    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8390)
+    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.36.0...8.39.0)
+- Bump Native SDK from v0.7.11 to v0.7.12 ([#3731](https://github.com/getsentry/sentry-dotnet/pull/3731))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0712)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.11...0.7.12)
+
+## 4.13.0
+
+### Features
+
+- Limited experimental support for Session Replay Recording on Android ([#3552](https://github.com/getsentry/sentry-dotnet/pull/3552))
+
+### Fixes
+
+- When using OTel and ASP.NET Core the SDK could try to process OTel spans after the SDK had been closed ([#3726](https://github.com/getsentry/sentry-dotnet/pull/3726))
+
+### Dependencies
+
+- Bump CLI from v2.38.1 to v2.38.2 ([#3728](https://github.com/getsentry/sentry-dotnet/pull/3728))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2382)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.38.1...2.38.2)
+
+## 4.12.2
+
+### Features
+
+- Android - allow logcat attachments to be previewed in Sentry ([#3711](https://github.com/getsentry/sentry-dotnet/pull/3711))
+- Added a `SetBeforeScreenshotCapture` callback to the options: allowing the user to set an action before the screenshot is taken ([#3661](https://github.com/getsentry/sentry-dotnet/pull/3661))
+- Make `Sentry.AspNetCore.Blazor.WebAssembly` generally available. ([#3674](https://github.com/getsentry/sentry-dotnet/pull/3674))
+
+### Fixes
+
+- Events from NDK on Android will report sdk.name `sentry.native.android.dotnet` ([#3682](https://github.com/getsentry/sentry-dotnet/pull/3682))
+
+### Dependencies
+
+- Bump Java SDK from v7.14.0 to v7.16.0 ([#3670](https://github.com/getsentry/sentry-dotnet/pull/3670), [#3707](https://github.com/getsentry/sentry-dotnet/pull/3707))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7160)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.14.0...7.16.0)
+- Bump CLI from v2.37.0 to v2.38.1 ([#3702](https://github.com/getsentry/sentry-dotnet/pull/3702), [#3720](https://github.com/getsentry/sentry-dotnet/pull/3720))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2381)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.37.0...2.38.1)
+- Bumped `System.Text.Json` from v6.0.8 to v6.0.10 ([#3704](https://github.com/getsentry/sentry-dotnet/pull/3704))
+- Bump Native SDK from v0.7.10 to v0.7.11 ([#3715](https://github.com/getsentry/sentry-dotnet/pull/3715))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0711)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.10...0.7.11)
+
+## 4.12.1
+
 ### Fixes
 
 - Fixed "Failed to persist session" error on iOS ([#3655](https://github.com/getsentry/sentry-dotnet/pull/3655))
 
 ### Dependencies
 
-- Bump CLI from v2.36.5 to v2.36.6 ([#3647](https://github.com/getsentry/sentry-dotnet/pull/3647))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2366)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.36.5...2.36.6)
+- Bump CLI from v2.36.5 to v2.37.0 ([#3647](https://github.com/getsentry/sentry-dotnet/pull/3647), [#3664](https://github.com/getsentry/sentry-dotnet/pull/3664))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2370)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.36.5...2.37.0)
 
 ## 4.12.0
+
+### Support for Xcode 16.0 (BREAKING CHANGE)
+
+If you are using Xcode 16.0, you will need to update the SDK to version `4.12.0` or later.
+If you are still using Xcode 15.4 or earlier, you need to continue to use version `4.11.0` or earlier.
+
+Using Xcode 16 to build .NET applications targeting iOS and Mac Catalyst requires [.NET workload for iOS SDK version 18.0.8303](https://github.com/xamarin/xamarin-macios/releases/tag/dotnet-8.0.1xx-xcode16.0-8303). We [built the SDK version 4.12.0 using Xcode 16](https://github.com/getsentry/sentry-dotnet/pull/3635/files) in order to support this scenario. That, unfortunately, breaks folks using older version of Xcode.
+
+As such, if you are using SDK version `4.12.x` and targeting iOS or Mac Catalyst, you will need to install and use Xcode 16 and `workload iOS SDK 18.0.8303`
+
+Note that .NET 9 will also support Xcode 16, when it is released next month (Nov 2024).
 
 ### API Changes
 

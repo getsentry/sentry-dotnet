@@ -3,6 +3,16 @@
 We love receiving PRs from the community with features and fixed.
 For big feature it's advised to raise an issue to discuss it first.
 
+# Guidelines
+
+* Please avoid mixing changes needed for a feature with other changes such as refactors, automated IDE changes like adding BOM characters, empty lines, etc.
+* Feel free to start with a draft PR, while you work on it. You can ask pointed questoins by reviewing your own code this way, while signaling to the reviewer that the PR isn't ready for review just yet.
+* Mark the PR ready for review once you've completed the change, including:
+  * The description should link to relevant context such as tickets, discussions or previous PRs. Consider screenshots of the events in Sentry or other relevant visual things.
+  * Add tests that excercise your change. The repo has lots of examples of Unit and integration tests. Including device tests that run on Android and iOS.
+  * CI should be green.
+  * The ideal state is where a reviewer approves it, and merges immediately. But on more complex changes, some back and forth through reviews is expected.
+
 ## TLDR
 
 * Install the .NET SDKs

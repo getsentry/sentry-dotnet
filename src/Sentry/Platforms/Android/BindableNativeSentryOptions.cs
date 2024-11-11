@@ -1,4 +1,5 @@
 // ReSharper disable once CheckNamespace
+
 namespace Sentry;
 
 internal partial class BindableSentryOptions
@@ -34,7 +35,20 @@ internal partial class BindableSentryOptions
         public TimeSpan? ReadTimeout { get; set; }
         public bool? EnableTracing { get; set; }
         public bool? EnableBeforeSend { get; set; }
+        public NativeExperimentalOptions ExperimentalOptions { get; set; } = new();
 
+        internal class NativeExperimentalOptions
+        {
+            public NativeSentryReplayOptions SessionReplay { get; set; } = new();
+        }
+
+        internal class NativeSentryReplayOptions
+        {
+            public double? OnErrorSampleRate { get; set; }
+            public double? SessionSampleRate { get; set; }
+            public bool RedactAllImages { get; set; }
+            public bool RedactAllText { get; set; }
+        }
         public void ApplyTo(SentryOptions.NativeOptions options)
         {
             options.AnrEnabled = AnrEnabled ?? options.AnrEnabled;
@@ -61,6 +75,21 @@ internal partial class BindableSentryOptions
             options.ReadTimeout = ReadTimeout ?? options.ReadTimeout;
             options.EnableTracing = EnableTracing ?? options.EnableTracing;
             options.EnableBeforeSend = EnableBeforeSend ?? options.EnableBeforeSend;
+
+            if (ExperimentalOptions.SessionReplay.OnErrorSampleRate is { } errorSampleRate)
+            {
+#pragma warning disable CA1422
+                options.ExperimentalOptions.SessionReplay.OnErrorSampleRate = errorSampleRate;
+#pragma warning restore CA1422
+            }
+            if (ExperimentalOptions.SessionReplay.SessionSampleRate is { } sessionSampleRate)
+            {
+#pragma warning disable CA1422
+                options.ExperimentalOptions.SessionReplay.SessionSampleRate = sessionSampleRate;
+#pragma warning restore CA1422
+            }
+            ExperimentalOptions.SessionReplay.RedactAllText = options.ExperimentalOptions.SessionReplay.MaskAllText;
+            ExperimentalOptions.SessionReplay.RedactAllImages = options.ExperimentalOptions.SessionReplay.MaskAllImages;
         }
     }
 }
