@@ -61,7 +61,7 @@ public class MemoryMonitorTests
         }
     }
 
-    [SkippableFact]
+    [Fact]
     public void CheckMemoryUsage_Debounced_DoesNotCapture()
     {
         // Arrange
@@ -80,7 +80,7 @@ public class MemoryMonitorTests
         dumpCaptured.Should().BeFalse();
     }
 
-    [SkippableFact]
+    [Fact]
     public void CheckMemoryUsage_NotTriggered_DoesNotCapture()
     {
         // Arrange
@@ -99,7 +99,7 @@ public class MemoryMonitorTests
         dumpCaptured.Should().BeFalse();
     }
 
-    [SkippableFact]
+    [Fact]
     public void CheckMemoryUsage_TriggeredNotDebounced_Captures()
     {
         // Arrange
@@ -121,8 +121,6 @@ public class MemoryMonitorTests
     [SkippableFact]
     public void CaptureMemoryDump_DisableFileWrite_DoesNotCapture()
     {
-        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
-
         // Arrange
         _fixture.Options.EnableHeapDumps(AlwaysTrigger);
         _fixture.Options.DisableFileWrite = true;
@@ -139,8 +137,6 @@ public class MemoryMonitorTests
     [SkippableFact]
     public void CaptureMemoryDump_CapturesDump()
     {
-        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
-
         // Arrange
         _fixture.Options.EnableHeapDumps(AlwaysTrigger);
         _fixture.Options.FileSystem = new FakeFileSystem();
@@ -158,8 +154,6 @@ public class MemoryMonitorTests
     [SkippableFact]
     public void CaptureMemoryDump_UnresolvedDumpLocation_DoesNotCapture()
     {
-        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
-
         // Arrange
         _fixture.Options.EnableHeapDumps(AlwaysTrigger);
         _fixture.Options.FileSystem = Substitute.For<IFileSystem>();
