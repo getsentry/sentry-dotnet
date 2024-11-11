@@ -5,8 +5,6 @@ public class GarbageCollectionMonitorTests
     [SkippableFact]
     public async Task MonitorGarbageCollection_TaskCancelled_CancelsFullGCNotification()
     {
-        // Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
-
         // Arrange
         var reset = new ManualResetEventSlim(false);
         var gc = Substitute.For<IGCImplementation>();
@@ -30,8 +28,6 @@ public class GarbageCollectionMonitorTests
     [SkippableFact]
     public async Task MonitorGarbageCollection_WaitForFullGCCompleteSucceeds_InvokesOnGarbageCollected()
     {
-        // Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
-
         // Arrange
         var reset = new ManualResetEventSlim(false);
         var onGarbageCollected = Substitute.For<Action>();
@@ -57,8 +53,6 @@ public class GarbageCollectionMonitorTests
     [SkippableFact]
     public async Task MonitorGarbageCollection_GCException_Throws()
     {
-        // Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "These tests may be hanging in CI on Windows");
-
         // Arrange
         var onGarbageCollected = Substitute.For<Action>();
         var gc = Substitute.For<IGCImplementation>();
