@@ -5,6 +5,8 @@ namespace Sentry.AspNetCore.Tests;
 
 public class FormRequestPayloadExtractorTests : BaseRequestPayloadExtractorTests<FormRequestPayloadExtractor>
 {
+    protected override string SupportedContentType => "application/x-www-form-urlencoded";
+
     public FormRequestPayloadExtractorTests()
     {
         TestFixture = new Fixture();
