@@ -51,7 +51,7 @@ public class SentryTraceHeaderTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("  ")]
-    public void Parse_WithoutHeaderValue_ReturnsNull(string? headerValue)
+    public void Parse_WithoutHeaderValue_ReturnsNull(string headerValue)
     {
         // Act
         var header = SentryTraceHeader.Parse(headerValue);
