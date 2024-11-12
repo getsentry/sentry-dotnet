@@ -5,6 +5,7 @@
 ### Fixes
 
 - Fixed ArgumentNullException in FormRequestPayloadExtractor when handling invalid form data on ASP.NET ([#3734](https://github.com/getsentry/sentry-dotnet/pull/3734))
+- Fixed NullReferenceException in SentryTraceHeader when parsing null or empty values ([#3745](https://github.com/getsentry/sentry-dotnet/pull/3745))
 
 ### Dependencies
 
