@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fixed ArgumentNullException in FormRequestPayloadExtractor when handling invalid form data on ASP.NET ([#3734](https://github.com/getsentry/sentry-dotnet/pull/3734))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.36.0 to v8.39.0 ([#3727](https://github.com/getsentry/sentry-dotnet/pull/3727))
