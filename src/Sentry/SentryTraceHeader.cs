@@ -42,8 +42,13 @@ public class SentryTraceHeader
     /// <summary>
     /// Parses <see cref="SentryTraceHeader"/> from string.
     /// </summary>
-    public static SentryTraceHeader Parse(string value)
+    public static SentryTraceHeader? Parse(string value)
     {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
         var components = value.Split('-', StringSplitOptions.RemoveEmptyEntries);
         if (components.Length < 2)
         {
