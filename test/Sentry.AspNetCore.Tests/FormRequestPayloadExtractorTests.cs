@@ -5,15 +5,20 @@ namespace Sentry.AspNetCore.Tests;
 
 public class FormRequestPayloadExtractorTests : BaseRequestPayloadExtractorTests<FormRequestPayloadExtractor>
 {
+    protected override string SupportedContentType => "application/x-www-form-urlencoded";
+
     public FormRequestPayloadExtractorTests()
     {
         TestFixture = new Fixture();
-        _ = TestFixture.HttpRequest.ContentType.Returns("application/x-www-form-urlencoded");
     }
 
-    [Fact]
-    public void ExtractPayload_SupportedContentType_ReadForm()
+    [Theory]
+    [InlineData("application/x-www-form-urlencoded")]
+    [InlineData("application/x-www-form-urlencoded; charset=utf-8")]
+    public void ExtractPayload_SupportedContentType_ReadForm(string contentType)
     {
+        TestFixture.HttpRequest.ContentType.Returns(contentType);
+
         var expected = new Dictionary<string, StringValues> { { "key", new StringValues("val") } };
         var f = new FormCollection(expected);
         _ = TestFixture.HttpRequestCore.Form.Returns(f);
@@ -32,7 +37,7 @@ public class FormRequestPayloadExtractorTests : BaseRequestPayloadExtractorTests
     [Fact]
     public void ExtractPayload_UnsupportedContentType_DoesNotReadStream()
     {
-        _ = TestFixture.HttpRequest.ContentType.Returns("application/json");
+        TestFixture.HttpRequest.ContentType.Returns("application/json");
 
         var sut = TestFixture.GetSut();
 

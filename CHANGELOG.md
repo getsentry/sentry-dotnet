@@ -5,6 +5,9 @@
 ### Features
 
 - Added `SentryOptions` extension for profiling `options.AddProfilingIntegration()` ([#3660](https://github.com/getsentry/sentry-dotnet/pull/3660))
+### Fixes
+
+- Fixed ArgumentNullException in FormRequestPayloadExtractor when handling invalid form data on ASP.NET ([#3734](https://github.com/getsentry/sentry-dotnet/pull/3734))
 
 ### Dependencies
 
