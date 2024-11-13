@@ -10,9 +10,9 @@ public class FormRequestPayloadExtractor : BaseRequestPayloadExtractor
     /// <summary>
     /// Supports <see cref="IHttpRequest"/> with content type application/x-www-form-urlencoded.
     /// </summary>
-    protected override bool IsSupported(IHttpRequest request)
-        => SupportedContentType
-            .Equals(request.ContentType, StringComparison.InvariantCulture);
+    protected override bool IsSupported(IHttpRequest request) =>
+        SupportedContentType.Equals(request.ContentType, StringComparison.InvariantCulture)
+        || (request.ContentType?.StartsWith($"{SupportedContentType};", StringComparison.InvariantCulture) == true);
 
     /// <summary>
     /// Extracts the request form data as a dictionary.
