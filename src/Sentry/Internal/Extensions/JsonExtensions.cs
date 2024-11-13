@@ -156,7 +156,21 @@ internal static class JsonExtensions
 
         foreach (var (name, value) in json.EnumerateObject())
         {
+
+            switch (value.ValueKind)
+            {
+                case JsonValueKind.Number:
+                    value.TryGetDouble(out double val);
+                    result[name] = val.ToString();
+                    break;
+                case JsonValueKind.True:
+                case JsonValueKind.False:
+                    result[name] = value.ValueKind.ToString();
+                    break;
+                default:
             result[name] = value.GetString();
+                    break;
+            }
         }
 
         return result;
