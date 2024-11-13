@@ -7,7 +7,6 @@
       On Windows, we'll also build for Windows 10.
     -->
     <TargetFrameworks>net8.0-android</TargetFrameworks>
-    <RuntimeIdentifiers Condition="$(TargetFramework.Contains('-android'))">android-arm;android-arm64;android-x86;android-x64</RuntimeIdentifiers>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
     <OutputType>Exe</OutputType>
@@ -68,7 +67,7 @@
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(OSArchitecture)' == 'Arm64' And '$(_IsPublishing)' != 'true'">iossimulator-arm64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'  And '$(OSArchitecture)' == 'Arm64'">maccatalyst-arm64</RuntimeIdentifier>
 
-    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android'      And '$(OSArchitecture)' == 'x64'">android-x64</RuntimeIdentifier>
+    <RuntimeIdentifiers Condition="'$(TargetPlatformIdentifier)' == 'android'     And '$(OSArchitecture)' == 'x64'">android-arm;android-arm64;android-x86;android-x64</RuntimeIdentifiers>
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(OSArchitecture)' == 'x64' And '$(_IsPublishing)' != 'true'">iossimulator-x64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'  And '$(OSArchitecture)' == 'x64'">maccatalyst-x64</RuntimeIdentifier>
   </PropertyGroup>
