@@ -123,13 +123,6 @@ jobs:
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
-      - name: Check Android SDK Build tools
-        if: runner.os == 'macOS'
-        run: |
-          echo "ANDROID_HOME is set to: $ANDROID_HOME"
-          echo "Contents of Users/runner/Library/Android/sdk/build-tools/"
-          ls -ltr /Users/runner/Library/Android/sdk/build-tools/
-
       # https://github.com/actions/runner-images/issues/10814
       - name: Workaround build-tools issue
         if: runner.os == 'macOS'
