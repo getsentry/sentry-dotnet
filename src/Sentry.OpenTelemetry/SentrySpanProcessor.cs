@@ -83,6 +83,14 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     /// <inheritdoc />
     public override void OnStart(Activity data)
     {
+        if (!_hub.IsEnabled)
+        {
+            // This would be unusual... it might happen if the SDK is closed while the processor is still running and
+            // we receive new telemetry. In this case, we can't log anything because our logger is disabled, so we just
+            // swallow it
+            return;
+        }
+
         if (data.ParentSpanId != default && _map.TryGetValue(data.ParentSpanId, out var mappedParent))
         {
             // Explicit ParentSpanId of another activity that we have already mapped
@@ -165,6 +173,14 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     /// <inheritdoc />
     public override void OnEnd(Activity data)
     {
+        if (!_hub.IsEnabled)
+        {
+            // This would be unusual... it might happen if the SDK is closed while the processor is still running and
+            // we receive new telemetry. In this case, we can't log anything because our logger is disabled, so we just
+            // swallow it
+            return;
+        }
+
         // Make a dictionary of the attributes (aka "tags") for faster lookup when used throughout the processor.
         var attributes = data.TagObjects.ToDict();
 
