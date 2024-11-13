@@ -911,7 +911,7 @@ namespace Sentry
         public Sentry.SpanId SpanId { get; }
         public Sentry.SentryId TraceId { get; }
         public override string ToString() { }
-        public static Sentry.SentryTraceHeader Parse(string value) { }
+        public static Sentry.SentryTraceHeader? Parse(string value) { }
     }
     public class SentryTransaction : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISentryJsonSerializable, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
