@@ -12,7 +12,7 @@ jobs:
     name: Format Code
     # Running on 'macos' because Linux is missing the `ios` workload
     # See: https://github.com/dotnet/runtime/issues/85505
-    runs-on: macos-latest
+    runs-on: macos-15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,7 +29,7 @@ jobs:
         run: dotnet tool install -g dotnet-format
 
       - name: Format Code
-        # We're excluding `./**/*OptionsSetup.cs` from the format because the tool struggles with 
+        # We're excluding `./**/*OptionsSetup.cs` from the format because the tool struggles with
         # source generators
         run: dotnet format Sentry.sln --no-restore --exclude ./modules --exclude ./**/*OptionsSetup.cs
 

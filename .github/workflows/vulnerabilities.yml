@@ -10,7 +10,7 @@ on:
 jobs:
   list-vulnerable-packages:
     name: List vulnerable packages
-    runs-on: macos-latest
+    runs-on: macos-15
 
     steps:
       - name: Checkout
