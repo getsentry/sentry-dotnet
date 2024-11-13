@@ -123,6 +123,23 @@ jobs:
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
+      - name: Check Android SDK Build tools
+        if: runner.os == 'macOS'
+        run: |
+          echo "ANDROID_HOME is set to: $ANDROID_HOME"
+          echo "Contents of Users/runner/Library/Android/sdk/build-tools/"
+          ls -ltr /Users/runner/Library/Android/sdk/build-tools/
+
+      # https://github.com/actions/runner-images/issues/10814
+      - name: Workaround build-tools issue
+        if: runner.os == 'macOS'
+        run: |
+          curl https://dl.google.com/android/repository/build-tools_r35_macosx.zip > $ANDROID_HOME/build-tools_r35_macosx.zip
+          cd $ANDROID_HOME
+          mkdir build-tools
+          unzip build-tools_r35_macosx.zip
+          mv android-15 build-tools/35.0.0
+
       - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
 
