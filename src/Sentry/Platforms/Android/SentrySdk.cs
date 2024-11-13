@@ -132,6 +132,11 @@ public static partial class SentrySdk
             {
                 o.BeforeSend = new BeforeSendCallback(beforeSend, options, o);
             }
+            else
+            {
+                // Prevent JavaBackgroundThread crashes from creating duplicated event: one UnhandledException one AppDomain.UnhandledException
+                o.BeforeSend = new BeforeSendCallback(((_, _) =>null), options, o);
+            }
 
             // These options are from SentryAndroidOptions
             o.AttachScreenshot = options.Native.AttachScreenshot;
