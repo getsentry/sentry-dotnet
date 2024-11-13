@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- prevent event duplication and missing attachements when `JavaBackgroundThread` crashes occur ([#3756](https://github.com/getsentry/sentry-dotnet/pull/3756))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.36.0 to v8.39.0 ([#3727](https://github.com/getsentry/sentry-dotnet/pull/3727))
