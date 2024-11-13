@@ -10,8 +10,8 @@ on:
 jobs:
   format-code:
     name: Format Code
-    # Running on 'macos' because Linux is missing the `ios` workload
-    # See: https://github.com/dotnet/runtime/issues/85505
+    # Run on 'macos' because Linux is missing the `ios` workload: https://github.com/dotnet/runtime/issues/85505
+    # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
     runs-on: macos-15
     steps:
       - name: Checkout

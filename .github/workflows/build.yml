@@ -19,6 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
         os: [ubuntu-latest, windows-latest, macos-15]
 
     steps:
@@ -63,6 +64,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
         os: [ubuntu-latest, windows-latest, macos-15]
 
     steps:
@@ -161,6 +163,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
         os: [ubuntu-latest, windows-latest, macos-15]
 
     steps:
