@@ -135,7 +135,7 @@ public static partial class SentrySdk
             else
             {
                 // Prevent JavaBackgroundThread crashes from creating duplicated event: one UnhandledException one AppDomain.UnhandledException
-                o.BeforeSend = new BeforeSendCallback(((_, _) =>null), options, o);
+                o.BeforeSend = new BeforeSendCallback(((_, _) => null), options, o);
             }
 
             // These options are from SentryAndroidOptions

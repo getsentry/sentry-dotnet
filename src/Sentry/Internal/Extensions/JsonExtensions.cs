@@ -168,7 +168,7 @@ internal static class JsonExtensions
                     result[name] = value.ValueKind.ToString();
                     break;
                 default:
-            result[name] = value.GetString();
+                    result[name] = value.GetString();
                     break;
             }
         }
