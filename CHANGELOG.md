@@ -1,12 +1,36 @@
 # Changelog
 
-ChangeLogs
-
 ## Unreleased
 
 ### Fixes
 
+- Fixed ArgumentNullException in FormRequestPayloadExtractor when handling invalid form data on ASP.NET ([#3734](https://github.com/getsentry/sentry-dotnet/pull/3734))
 - Android - fix bug that prevents logcat.log from getting attached to unhandled events (SIGSEGV Segfault) ([#3694](https://github.com/getsentry/sentry-dotnet/pull/3694))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.36.0 to v8.39.0 ([#3727](https://github.com/getsentry/sentry-dotnet/pull/3727))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8390)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.36.0...8.39.0)
+- Bump Native SDK from v0.7.11 to v0.7.12 ([#3731](https://github.com/getsentry/sentry-dotnet/pull/3731))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0712)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.11...0.7.12)
+
+## 4.13.0
+
+### Features
+
+- Limited experimental support for Session Replay Recording on Android ([#3552](https://github.com/getsentry/sentry-dotnet/pull/3552))
+
+### Fixes
+
+- When using OTel and ASP.NET Core the SDK could try to process OTel spans after the SDK had been closed ([#3726](https://github.com/getsentry/sentry-dotnet/pull/3726))
+
+### Dependencies
+
+- Bump CLI from v2.38.1 to v2.38.2 ([#3728](https://github.com/getsentry/sentry-dotnet/pull/3728))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2382)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.38.1...2.38.2)
 
 ## 4.12.2
 
