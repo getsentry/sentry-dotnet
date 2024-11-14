@@ -127,11 +127,18 @@ jobs:
       - name: Workaround build-tools issue
         if: runner.os == 'macOS'
         run: |
-          curl https://dl.google.com/android/repository/build-tools_r34_macosx.zip > $ANDROID_HOME/build-tools_r34_macosx.zip
+          curl https://dl.google.com/android/repository/build-tools_r35_macosx.zip > $ANDROID_HOME/build-tools_r35_macosx.zip
           cd $ANDROID_HOME
           mkdir build-tools
-          unzip build-tools_r34_macosx.zip
+          unzip build-tools_r35_macosx.zip
           mv android-15 build-tools/35.0.0
+          cd -
+
+      - name: Install Android SDKs
+        if: runner.os == 'macOS'
+        run: |
+          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net7.0-android -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
+          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
 
       - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
