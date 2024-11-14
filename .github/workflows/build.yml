@@ -127,10 +127,10 @@ jobs:
       - name: Workaround build-tools issue
         if: runner.os == 'macOS'
         run: |
-          curl https://dl.google.com/android/repository/build-tools_r35_macosx.zip > $ANDROID_HOME/build-tools_r35_macosx.zip
+          curl https://dl.google.com/android/repository/build-tools_r34_macosx.zip > $ANDROID_HOME/build-tools_r34_macosx.zip
           cd $ANDROID_HOME
           mkdir build-tools
-          unzip build-tools_r35_macosx.zip
+          unzip build-tools_r34_macosx.zip
           mv android-15 build-tools/35.0.0
 
       - name: Build
