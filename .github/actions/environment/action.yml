@@ -25,6 +25,7 @@ runs:
     # https://github.com/actions/runner-images/issues/10814
     - name: Workaround build-tools issue
       if: runner.os == 'macOS'
+      shell: bash
       run: |
         curl https://dl.google.com/android/repository/build-tools_r35_macosx.zip > $ANDROID_HOME/build-tools_r35_macosx.zip
         cd $ANDROID_HOME
