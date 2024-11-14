@@ -192,26 +192,8 @@ jobs:
           sudo apt update
           sudo apt install libcurl4-openssl-dev
 
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
-
-      - name: Setup Xcode
-        if: runner.os == 'macOS'
-        run: |
-          sudo xcode-select --switch /Applications/Xcode_${{env.XCODE_VERSION}}.app/Contents/Developer
-          xcodebuild -version
-
-      # Needed for Android SDK setup step
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3.2.2
-
-      - run: dotnet workload install android maui-android
+      - name: Setup Environment
+        uses: ./.github/actions/environment
 
       - name: Test
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
