@@ -41,6 +41,7 @@ runs:
 
     - name: Install Mono
       if: runner.os == 'macOS'
+      shell: bash
       run: brew install mono
 
     - name: Install .NET SDK
