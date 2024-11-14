@@ -43,10 +43,11 @@ runs:
     - name: Install Mono
       if: runner.os == 'macOS'
       shell: bash
-      # The `rm` command is to work around a weird error with the `brew install mono` command
+      # Attempt to install Mono, allowing it to fail silently
+      # Then ensure mono is correctly linked, overwriting any conflicting symlinks
       run: |
-        rm -f '/usr/local/share/man/man1/al.1'
-        brew install mono
+        brew install mono || true
+        brew link --overwrite mono
 
     - name: Install .NET SDK
       if: runner.os != 'Windows'
