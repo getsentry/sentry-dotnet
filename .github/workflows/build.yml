@@ -9,9 +9,6 @@ on:
     paths-ignore:
       - "**.md"
 
-env:
-  XCODE_VERSION: 16
-
 jobs:
   build-sentry-native:
     name: sentry-native (${{ matrix.os }})
@@ -69,12 +66,6 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
-
-      - name: Setup Xcode
-        if: matrix.os == 'macos-latest'
-        run: |
-          sudo xcode-select --switch /Applications/Xcode_${{env.XCODE_VERSION}}.app/Contents/Developer
-          xcodebuild -version
 
       - name: Remove unused applications
         uses: ./.github/actions/freediskspace
@@ -175,6 +166,7 @@ jobs:
             Directory.Build.props
             integration-test
             .github
+
       - name: Fetch Nuget Packages
         uses: actions/download-artifact@v4
         with:
