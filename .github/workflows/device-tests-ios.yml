@@ -9,12 +9,9 @@ on:
     paths-ignore:
       - "**.md"
 
-env:
-  XCODE_VERSION: 16
-
 jobs:
   ios-tests:
-    runs-on: macos-latest
+    runs-on: macos-15
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
@@ -32,11 +29,6 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/environment
-
-      - name: Setup Xcode
-        run: |
-          sudo xcode-select --switch /Applications/Xcode_${{env.XCODE_VERSION}}.app/Contents/Developer
-          xcodebuild -version
 
       - name: Build iOS Test App
         run: pwsh ./scripts/device-test.ps1 ios -Build
