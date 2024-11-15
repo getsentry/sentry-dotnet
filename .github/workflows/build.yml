@@ -9,9 +9,6 @@ on:
     paths-ignore:
       - "**.md"
 
-env:
-  XCODE_VERSION: 16
-
 jobs:
   build-sentry-native:
     name: sentry-native (${{ matrix.os }})
@@ -19,7 +16,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
+        os: [ubuntu-latest, windows-latest, macos-15]
 
     steps:
       - name: Checkout
@@ -55,7 +53,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
+        os: [ubuntu-latest, windows-latest, macos-15]
 
     steps:
       - name: Cancel Previous Runs
@@ -68,18 +67,12 @@ jobs:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
 
-      - name: Setup Xcode
-        if: matrix.os == 'macos-latest'
-        run: |
-          sudo xcode-select --switch /Applications/Xcode_${{env.XCODE_VERSION}}.app/Contents/Developer
-          xcodebuild -version
-
       - name: Remove unused applications
         uses: ./.github/actions/freediskspace
 
       # We use macOS for the final publishing build so we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
-        if: startsWith(matrix.os, 'macos')
+        if: runner.os == 'macOS'
         run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
 
       - name: Download sentry-native (Linux)
@@ -115,6 +108,12 @@ jobs:
 
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
+
+      - name: Install Android SDKs
+        if: runner.os == 'macOS'
+        run: |
+          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net7.0-android -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
+          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
 
       - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
@@ -156,7 +155,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
+        os: [ubuntu-latest, windows-latest, macos-15]
 
     steps:
       - uses: actions/checkout@v4
@@ -166,6 +166,8 @@ jobs:
           sparse-checkout: |
             Directory.Build.props
             integration-test
+            .github
+
       - name: Fetch Nuget Packages
         uses: actions/download-artifact@v4
         with:
@@ -178,30 +180,8 @@ jobs:
           sudo apt update
           sudo apt install libcurl4-openssl-dev
 
-      # Possibly instead of installing net9.0 here we could pin the workload version when installing workloads
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: |
-            8.0.x
-            9.0.100
-
-      - name: Setup Xcode
-        if: matrix.os == 'macos-latest'
-        run: |
-          sudo xcode-select --switch /Applications/Xcode_${{env.XCODE_VERSION}}.app/Contents/Developer
-          xcodebuild -version
-
-      # Needed for Android SDK setup step
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@00854ea68c109d98c75d956347303bf7c45b0277 # v3.2.1
-
-      - name: Install android Workloads
-        run: dotnet workload install maui-android
+      - name: Setup Environment
+        uses: ./.github/actions/environment
 
       - name: Test
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
