@@ -15,11 +15,12 @@ env:
 jobs:
   build-sentry-native:
     name: sentry-native (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu, windows, macos]
+        # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
+        os: [ubuntu-latest, windows-latest, macos-15]
 
     steps:
       - name: Checkout
@@ -35,7 +36,7 @@ jobs:
           enableCrossOsArchive: true
 
       - name: Free Disk Space (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
+        if: runner.os == 'Linux'
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
         with:
           android: true
@@ -63,7 +64,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
+        os: [ubuntu-latest, windows-latest, macos-15]
 
     steps:
       - name: Cancel Previous Runs
@@ -71,22 +73,10 @@ jobs:
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
 
       - name: Setup Xcode
-        if: matrix.os == 'macos-latest'
+        if: runner.os == 'macOS'
         run: |
           sudo xcode-select --switch /Applications/Xcode_${{env.XCODE_VERSION}}.app/Contents/Developer
           xcodebuild -version
-
-      # We only use Xcode 16
-      - name: Remove unused applications
-        if: matrix.os == 'macos-latest'
-        run: |
-          df -hI /dev/disk3s1s1
-          sudo rm -rf /Applications/Xcode_14.3.1.app
-          sudo rm -rf /Applications/Xcode_15.0.1.app
-          sudo rm -rf /Applications/Xcode_15.1.app
-          sudo rm -rf /Applications/Xcode_15.2.app
-          sudo rm -rf /Applications/Xcode_15.3.app
-          df -hI /dev/disk3s1s1
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -96,7 +86,7 @@ jobs:
 
       # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
-        if: startsWith(matrix.os, 'macos')
+        if: runner.os == 'macOS'
         run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
 
       - name: Download sentry-native (Linux)
@@ -132,6 +122,12 @@ jobs:
 
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
+
+      - name: Install Android SDKs
+        if: runner.os == 'macOS'
+        run: |
+          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net7.0-android -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
+          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
 
       - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
@@ -173,7 +169,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
+        os: [ubuntu-latest, windows-latest, macos-15]
 
     steps:
       - uses: actions/checkout@v4
@@ -183,6 +180,7 @@ jobs:
           sparse-checkout: |
             Directory.Build.props
             integration-test
+            .github
       - name: Fetch Nuget Packages
         uses: actions/download-artifact@v4
         with:
@@ -195,26 +193,8 @@ jobs:
           sudo apt update
           sudo apt install libcurl4-openssl-dev
 
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
-
-      - name: Setup Xcode
-        if: matrix.os == 'macos-latest'
-        run: |
-          sudo xcode-select --switch /Applications/Xcode_${{env.XCODE_VERSION}}.app/Contents/Developer
-          xcodebuild -version
-
-      # Needed for Android SDK setup step
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@00854ea68c109d98c75d956347303bf7c45b0277 # v3.2.1
-
-      - run: dotnet workload install android maui-android
+      - name: Setup Environment
+        uses: ./.github/actions/environment
 
       - name: Test
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2

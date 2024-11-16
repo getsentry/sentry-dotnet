@@ -22,14 +22,35 @@ runs:
       with:
         log-accepted-android-sdk-licenses: false
 
+    # https://github.com/actions/runner-images/issues/10814
+    - name: Workaround build-tools issue
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        curl https://dl.google.com/android/repository/build-tools_r35_macosx.zip > $ANDROID_HOME/build-tools_r35_macosx.zip
+        cd $ANDROID_HOME
+        mkdir -p build-tools
+        unzip build-tools_r35_macosx.zip
+        mv android-15 build-tools/35.0.0
+        cd -
+
     - name: Set Java Version
       uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
         java-version: '11'
 
-    # .NET 6 and .NET 8 are not built-in with macos-13
+    - name: Install Mono
+      if: runner.os == 'macOS'
+      shell: bash
+      # Attempt to install Mono, allowing it to fail silently
+      # Then ensure mono is correctly linked, overwriting any conflicting symlinks
+      run: |
+        brew install mono || true
+        brew link --overwrite mono
+
     - name: Install .NET SDK
+      if: runner.os != 'Windows'
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: |
