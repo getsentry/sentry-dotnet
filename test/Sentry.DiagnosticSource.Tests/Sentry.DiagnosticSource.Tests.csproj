@@ -8,16 +8,16 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
-    <!-- https://github.com/advisories/GHSA-hh2w-p6rv-4g7w -->
-    <PackageReference Include="System.Text.Json" Version="8.0.4" />
+    <!-- https://github.com/advisories/GHSA-8g4q-xg66-9fp4 -->
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
 
   <!-- Test EF Core 7 on .NET 7 -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.8" />
-    <!-- https://github.com/advisories/GHSA-hh2w-p6rv-4g7w -->
-    <PackageReference Include="System.Text.Json" Version="8.0.4" />
+    <!-- https://github.com/advisories/GHSA-8g4q-xg66-9fp4 -->
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
 
   <!-- Test EF Core 6 on .NET 6 -->
