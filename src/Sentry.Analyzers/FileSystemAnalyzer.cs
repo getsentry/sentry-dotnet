@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -14,7 +14,7 @@ namespace Sentry.Analyzers;
 /// Analyzer that issues a warning if file system access is done outside IFileSystem wrapper implementations.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
-public class FileSystemAnalyzer  : DiagnosticAnalyzer
+public class FileSystemAnalyzer : DiagnosticAnalyzer
 {
     private const string DiagnosticId = "SN0001";
 
