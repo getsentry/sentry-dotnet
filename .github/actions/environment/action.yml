@@ -50,7 +50,6 @@ runs:
         brew link --overwrite mono
 
     - name: Install .NET SDK
-      if: runner.os != 'Windows'
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: |
