@@ -17,6 +17,10 @@
 - Added support for `.NET 9` (preview) ([#3699](https://github.com/getsentry/sentry-dotnet/pull/3699))
 - libsentrysupplemental.so now supports 16 KB page sizes on Android ([#3723](https://github.com/getsentry/sentry-dotnet/pull/3723))
 
+### Fixes
+
+- Fixed NullReferenceException in SentryTraceHeader when parsing null or empty values ([#3757](https://github.com/getsentry/sentry-dotnet/pull/3757))
+
 ## Unreleased
 
 ### Fixes

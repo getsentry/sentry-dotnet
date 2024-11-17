@@ -40,10 +40,25 @@ public class SentryTraceHeader
         : $"{TraceId}-{SpanId}";
 
     /// <summary>
-    /// Parses <see cref="SentryTraceHeader"/> from string.
+    /// Parses a <see cref="SentryTraceHeader"/> from a string representation of the Sentry trace header.
     /// </summary>
-    public static SentryTraceHeader Parse(string value)
+    /// <param name="value">
+    /// A string containing the Sentry trace header, expected to follow the format "traceId-spanId-sampled",
+    /// where "sampled" is optional.
+    /// </param>
+    /// <returns>
+    /// A <see cref="SentryTraceHeader"/> object if parsing succeeds, or <c>null</c> if the input string is null, empty, or whitespace.
+    /// </returns>
+    /// <exception cref="FormatException">
+    /// Thrown if the input string does not contain a valid trace header format, specifically if it lacks required trace ID and span ID components.
+    /// </exception>
+    public static SentryTraceHeader? Parse(string value)
     {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
         var components = value.Split('-', StringSplitOptions.RemoveEmptyEntries);
         if (components.Length < 2)
         {
