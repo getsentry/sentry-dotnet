@@ -192,12 +192,8 @@ public static partial class SentrySdk
         options.EnableScopeSync = true;
         options.ScopeObserver = new CocoaScopeObserver(options);
 
-        if (options.IsProfilingEnabled)
-        {
-            options.LogDebug("Profiling is enabled, attaching native SDK profiler factory");
-            options.TransactionProfilerFactory ??= new CocoaProfilerFactory(options);
-        }
-
+        // Note: don't use AddProfilingIntegration as it would print a warning if user used it too.
+        options.AddIntegration(new ProfilingIntegration());
         // TODO: Pause/Resume
     }
 
