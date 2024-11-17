@@ -54,7 +54,7 @@ public class FileSystemAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        if (ContainingClassImplementsInterface(context, "Sentry.Internal.IFileSystem"))
+        if (ContainingTypeImplementsInterface(context, "Sentry.Internal.IFileSystem"))
         {
             // Allow direct file system access in IFileSystem implementations
             return;
@@ -63,14 +63,14 @@ public class FileSystemAnalyzer : DiagnosticAnalyzer
         context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation()));
     }
 
-    private static bool ContainingClassImplementsInterface(SyntaxNodeAnalysisContext context, string interfaceName)
+    private static bool ContainingTypeImplementsInterface(SyntaxNodeAnalysisContext context, string interfaceName)
     {
-        if (!TryFindClassDeclarationForNode(context, out var classDeclarationSyntax))
+        if (!TryFindDeclarationForNode(context, out var typeDeclarationSyntax))
         {
             return false;
         }
 
-        var namedTypeSymbol = context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax, context.CancellationToken);
+        var namedTypeSymbol = context.SemanticModel.GetDeclaredSymbol(typeDeclarationSyntax, context.CancellationToken);
         if (namedTypeSymbol == null)
         {
             return false;
@@ -79,25 +79,25 @@ public class FileSystemAnalyzer : DiagnosticAnalyzer
         return namedTypeSymbol.AllInterfaces.Any(i => i.ToDisplayString() == interfaceName);
     }
 
-    private static bool TryFindClassDeclarationForNode(
+    private static bool TryFindDeclarationForNode(
         SyntaxNodeAnalysisContext context,
-        [NotNullWhen(true)] out ClassDeclarationSyntax? classDeclarationSyntax)
+        [NotNullWhen(true)] out TypeDeclarationSyntax? typeDeclarationSyntax)
     {
         var parentClassNode = context.Node;
 
-        // Traverse parent nodes until class declaration is found
-        while (parentClassNode is not ClassDeclarationSyntax && parentClassNode != null)
+        // Traverse parent nodes until type declaration is found
+        while (parentClassNode is not TypeDeclarationSyntax && parentClassNode != null)
         {
             parentClassNode = parentClassNode.Parent;
         }
 
-        if (parentClassNode is not ClassDeclarationSyntax classDeclaration)
+        if (parentClassNode is not TypeDeclarationSyntax typeDeclaration)
         {
-            classDeclarationSyntax = null;
+            typeDeclarationSyntax = null;
             return false;
         }
 
-        classDeclarationSyntax = classDeclaration;
+        typeDeclarationSyntax = typeDeclaration;
         return true;
     }
 }
