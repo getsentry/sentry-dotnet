@@ -155,7 +155,7 @@ public sealed class Breadcrumb : ISentryJsonSerializable
         var timestamp = json.GetPropertyOrNull("timestamp")?.GetDateTimeOffset();
         var message = json.GetPropertyOrNull("message")?.GetString();
         var type = json.GetPropertyOrNull("type")?.GetString();
-        var data = json.GetPropertyOrNull("data")?.GetStringDictionaryOrNull();
+        var data = json.GetPropertyOrNull("data")?.GetDictionaryOrNull()?.ToDictionary(kvp => kvp.Key, kvp => kvp.Value?.ToString()); //
         var category = json.GetPropertyOrNull("category")?.GetString();
         var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<BreadcrumbLevel>() ?? default;
 
