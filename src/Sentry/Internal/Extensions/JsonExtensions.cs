@@ -156,7 +156,7 @@ internal static class JsonExtensions
 
         foreach (var (name, value) in json.EnumerateObject())
         {
-                    result[name] = value.GetString();
+            result[name] = value.GetString();
         }
 
         return result;
