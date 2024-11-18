@@ -70,7 +70,7 @@ runs:
       shell: bash
       run: >
         dotnet workload install \
-          wasm-tools wasm-tools-net8 maui-android \
+          wasm-tools maui-android \
           ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows macos' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-ios maui-maccatalyst maui-windows' || '' }} \
           --temp-dir "${{ runner.temp }}" \
