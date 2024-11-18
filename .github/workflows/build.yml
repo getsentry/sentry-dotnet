@@ -121,9 +121,12 @@ jobs:
         uses: ./.github/actions/buildnative
 
       - name: Restore .NET Dependencies
-        run: >
-          dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo \
-          ${{ runner.os == 'Windows' && 'maui-windows  > $GITHUB_WORKSPACE/restore_output.log' || '' }}
+        if: runner.os != 'Windows'
+        run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
+
+      - name: Restore .NET Dependencies (Windows
+        if: runner.os == 'Windows'
+        run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo -v diag > $GITHUB_WORKSPACE/restore_output.log
 
       - name: Upload Restore Output
         if: runner.os == 'Windows'
