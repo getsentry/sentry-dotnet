@@ -4,7 +4,6 @@
     "projects": [
       "benchmarks\\Sentry.Benchmarks\\Sentry.Benchmarks.csproj",
       "samples\\Sentry.Samples.Console.Basic\\Sentry.Samples.Console.Basic.csproj",
-      "samples\\Sentry.Samples.Console.Metrics\\Sentry.Samples.Console.Metrics.csproj",
       "samples\\Sentry.Samples.Console.Profiling\\Sentry.Samples.Console.Profiling.csproj",
       "src\\Sentry.Profiling\\Sentry.Profiling.csproj",
       "src\\Sentry\\Sentry.csproj",
