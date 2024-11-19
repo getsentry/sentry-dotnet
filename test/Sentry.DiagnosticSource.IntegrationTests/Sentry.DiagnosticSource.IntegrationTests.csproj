@@ -38,7 +38,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LocalDb" Version="14.2.1" />
+    <PackageReference Include="LocalDb" Version="18.0.1" />
+    <!-- https://github.com/advisories/GHSA-m5vv-6r4h-3vj9 -->
+    <PackageReference Include="Azure.Identity" Version="1.11.4" />
   </ItemGroup>
 
   <ItemGroup>
