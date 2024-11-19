@@ -568,7 +568,7 @@ public class EnvelopeTests
     }
 
     [Fact]
-    public async void AsyncSerialization_EnvelopeWithThrowingItem_DoesntThrow()
+    public async Task AsyncSerialization_EnvelopeWithThrowingItem_DoesntThrow()
     {
         // Arrange
         using var envelope = new Envelope(

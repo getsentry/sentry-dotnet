@@ -67,16 +67,6 @@ public class ScopeExtensionsTests
     }
 
     [Fact]
-    public void HasUser_UserWithSegment_ReturnsTrue()
-    {
-        var sut = _fixture.GetSut();
-#pragma warning disable CS0618 // Type or member is obsolete
-        sut.User.Segment = "test";
-#pragma warning restore CS0618 // Type or member is obsolete
-        Assert.True(sut.HasUser());
-    }
-
-    [Fact]
     public void HasUser_UserWithOther_ReturnsTrue()
     {
         var sut = _fixture.GetSut();
