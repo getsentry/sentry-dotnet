@@ -13,6 +13,12 @@
 
     <!-- Allow references to unsigned assemblies (like MAUI) from signed projects -->
     <NoWarn>$(NoWarn);CS8002</NoWarn>
+
+    <!-- We need to support old stuff. Applications should definitely address these advisory warnings though. -->
+    <NoWarn>$(NoWarn);NU1903</NoWarn>
+
+    <!-- https://learn.microsoft.com/en-us/dotnet/core/compatibility/sdk/8.0/dotnet-restore-audit#version-introduced -->
+    <WarningsNotAsErrors>NU1903</WarningsNotAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' != 'Release'">
@@ -34,11 +40,15 @@
   <!--
     Note: The following platform-specific properties need to be set in both Directory.Build.props and DirectoryBuild.targets.
     TODO: Figure out how to consolidate to a single location.
+    - Directory.Build.props will get imported at the beginning of the project files, so sets properties that are
+    prerequisites for the build and can be overriden in the project files.
+    - Directory.Build.targets will get imported at the end of the project files, so can be used to run common custom
+    tasks or ultimately override properties set in Directory.Build.props or the project files.
   -->
   <PropertyGroup>
     <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
-    <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'ios'">10.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'ios'">12.2</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'android'">21.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="'$(TargetPlatformIdentifier)' == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="'$(TargetPlatformIdentifier)' == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
@@ -72,6 +82,15 @@
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
     <SentryCLIVersion>2.38.2</SentryCLIVersion>
     <SentryCLIDirectory>$(MSBuildThisFileDirectory)tools\sentry-cli\$(SentryCLIVersion)\</SentryCLIDirectory>
+  </PropertyGroup>
+
+  <!-- dotnet-gcdump needs net6+ and won't work on mobile. -->
+  <PropertyGroup>
+    <PlatformIsLegacy Condition="$(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netstandard'))">true</PlatformIsLegacy>
+    <PlatformIsMobile Condition="$(TargetFramework.EndsWith('android')) or $(TargetFramework.EndsWith('ios')) or $(TargetFramework.EndsWith('maccatalyst'))">true</PlatformIsMobile>
+    <MemoryDumpSupported Condition="!($(PlatformIsLegacy) == 'true' or $(PlatformIsMobile) == 'true')">true</MemoryDumpSupported>
+
+    <DefineConstants Condition="'$(MemoryDumpSupported)' == 'true'">$(DefineConstants);MEMORY_DUMP_SUPPORTED</DefineConstants>
   </PropertyGroup>
 
   <!-- Public key of .assets/Sentry.snk - not a secret.  Used by other InternalsVisibleTo entries throughout the solution. -->

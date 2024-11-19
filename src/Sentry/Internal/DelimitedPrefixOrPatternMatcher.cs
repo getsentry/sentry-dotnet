@@ -7,11 +7,11 @@ internal class DelimitedPrefixOrPatternMatcher(char delimiter = '.', StringCompa
 {
     public bool IsMatch(StringOrRegex stringOrRegex, string value)
     {
-        if (stringOrRegex._prefix is not null)
+        if (stringOrRegex._string is not null)
         {
             // Check for a prefix followed by the separator
-            return stringOrRegex._prefix != null && value.StartsWith(stringOrRegex._prefix, comparison) &&
-                   value.Length > stringOrRegex._prefix.Length && value[stringOrRegex._prefix.Length] == delimiter;
+            return stringOrRegex._string != null && value.StartsWith(stringOrRegex._string, comparison) &&
+                   value.Length > stringOrRegex._string.Length && value[stringOrRegex._string.Length] == delimiter;
         }
 
         // Check for any regex match followed by the separator

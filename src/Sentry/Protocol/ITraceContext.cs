@@ -26,6 +26,14 @@ public interface ITraceContext
     string Operation { get; }
 
     /// <summary>
+    /// Specifies the origin of the trace. If no origin is set then the trace origin is assumed to be "manual".
+    /// </summary>
+    /// <remarks>
+    /// See https://develop.sentry.dev/sdk/performance/trace-origin/ for more information.
+    /// </remarks>
+    string? Origin { get; }
+
+    /// <summary>
     /// Description.
     /// </summary>
     string? Description { get; }
