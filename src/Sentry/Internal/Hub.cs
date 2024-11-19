@@ -5,7 +5,7 @@ using Sentry.Protocol.Metrics;
 
 namespace Sentry.Internal;
 
-internal class Hub : IHub, IMetricHub, IDisposable
+internal class Hub : IHub, IDisposable
 {
     private readonly object _sessionPauseLock = new();
 
@@ -14,15 +14,16 @@ internal class Hub : IHub, IMetricHub, IDisposable
     private readonly SentryOptions _options;
     private readonly RandomValuesFactory _randomValuesFactory;
 
+#if MEMORY_DUMP_SUPPORTED
+    private readonly MemoryMonitor? _memoryMonitor;
+#endif
+
     private int _isPersistedSessionRecovered;
 
     // Internal for testability
     internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
 
     internal IInternalScopeManager ScopeManager { get; }
-
-    /// <inheritdoc cref="IMetricAggregator"/>
-    public IMetricAggregator Metrics { get; }
 
     private int _isEnabled = 1;
     public bool IsEnabled => _isEnabled == 1;
@@ -63,15 +64,19 @@ internal class Hub : IHub, IMetricHub, IDisposable
             PushScope();
         }
 
-        if (options.ExperimentalMetrics is not null)
+#if MEMORY_DUMP_SUPPORTED
+        if (options.HeapDumpOptions is not null)
         {
-            options.LogDebug("Registering integration: Metrics");
-            Metrics = new MetricAggregator(options, this);
+            if (_options.DisableFileWrite)
+            {
+                _options.LogError("Automatic Heap Dumps cannot be used with file write disabled.");
+            }
+            else
+            {
+                _memoryMonitor = new MemoryMonitor(options, CaptureHeapDump);
+            }
         }
-        else
-        {
-            Metrics = new DisabledMetricAggregator();
-        }
+#endif
 
         foreach (var integration in options.Integrations)
         {
@@ -129,9 +134,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
         // Additionally, we will always sample out if tracing is explicitly disabled.
         // Do not invoke the TracesSampler, evaluate the TracesSampleRate, and override any sampling decision
         // that may have been already set (i.e.: from a sentry-trace header).
-#pragma warning disable CS0618 // Type or member is obsolete
-        if (!IsEnabled || _options.EnableTracing is false)
-#pragma warning restore CS0618 // Type or member is obsolete
+        if (!IsEnabled)
         {
             transaction.IsSampled = false;
             transaction.SampleRate = 0.0;
@@ -156,9 +159,7 @@ internal class Hub : IHub, IMetricHub, IDisposable
             // Random sampling runs only if the sampling decision hasn't been made already.
             if (transaction.IsSampled == null)
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                var sampleRate = _options.TracesSampleRate ?? (_options.EnableTracing is true ? 1.0 : 0.0);
-#pragma warning restore CS0618 // Type or member is obsolete
+                var sampleRate = _options.TracesSampleRate ?? 0.0;
                 transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
                 transaction.SampleRate = sampleRate;
             }
@@ -500,6 +501,34 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
+#if MEMORY_DUMP_SUPPORTED
+    internal void CaptureHeapDump(string dumpFile)
+    {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        try
+        {
+            _options.LogDebug("Capturing heap dump '{0}'", dumpFile);
+
+            var evt = new SentryEvent
+            {
+                Message = "Memory threshold exceeded",
+                Level = _options.HeapDumpOptions?.Level ?? SentryLevel.Warning,
+            };
+            var hint = new SentryHint(_options);
+            hint.AddAttachment(dumpFile);
+            CaptureEvent(evt, CurrentScope, hint);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to capture heap dump");
+        }
+    }
+#endif
+
     public void CaptureUserFeedback(UserFeedback userFeedback)
     {
         if (!IsEnabled)
@@ -540,7 +569,6 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
-    /// <inheritdoc cref="IMetricHub.CaptureMetrics"/>
     public void CaptureMetrics(IEnumerable<Metric> metrics)
     {
         if (!IsEnabled)
@@ -562,7 +590,6 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
-    /// <inheritdoc cref="IMetricHub.CaptureCodeLocations"/>
     public void CaptureCodeLocations(CodeLocations codeLocations)
     {
         if (!IsEnabled)
@@ -581,7 +608,6 @@ internal class Hub : IHub, IMetricHub, IDisposable
         }
     }
 
-    /// <inheritdoc cref="IMetricHub.StartSpan"/>
     public ISpan StartSpan(string operation, string description)
     {
         ITransactionTracer? currentTransaction = null;
@@ -656,6 +682,10 @@ internal class Hub : IHub, IMetricHub, IDisposable
         {
             return;
         }
+
+#if MEMORY_DUMP_SUPPORTED
+        _memoryMonitor?.Dispose();
+#endif
 
         try
         {

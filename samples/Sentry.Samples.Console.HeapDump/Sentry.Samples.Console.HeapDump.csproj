@@ -1,10 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-      <OutputType>Exe</OutputType>
-      <TargetFramework>net8.0</TargetFramework>
-  </PropertyGroup>
-
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <InvariantGlobalization>true</InvariantGlobalization>
+    </PropertyGroup>
   <PropertyGroup>
     <!--
     Note, these options do nothing if you are not authenticated.
@@ -34,12 +36,20 @@
     To associate commits with releases
     See https://docs.sentry.io/cli/releases/#commit-integration
     -->
+    <SentrySetCommits>true</SentrySetCommits>
+    <SentrySetCommitOptions>--local</SentrySetCommitOptions>
+
+    <!--
+    To associate commits with releases
+    See https://docs.sentry.io/cli/releases/#commit-integration
+    -->
     <!--    <SentrySetCommits>true</SentrySetCommits>-->
     <!--    <SentrySetCommitOptions>&#45;&#45;local</SentrySetCommitOptions>-->
   </PropertyGroup>
 
+  <!-- In your own project, this would be a PackageReference to the latest version of Sentry. -->
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
   </ItemGroup>
-
+  
 </Project>

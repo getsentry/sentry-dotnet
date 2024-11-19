@@ -12,7 +12,11 @@ internal static class JavaExtensions
 
     public static Throwable ToThrowable(this Exception exception) => Throwable.FromException(exception);
 
-    public static IDictionary<TKey, TValue> WorkaroundKeyIteratorBug<TKey, TValue>(this IDictionary<TKey, TValue> dictionary)
+    public static IDictionary<TKey, TValue> WorkaroundKeyIteratorBug<
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] TKey,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] TValue
+        >
+        (this IDictionary<TKey, TValue> dictionary)
     {
         // Workaround for https://github.com/getsentry/sentry-dotnet/issues/1751
         // Java.Lang.Error: no non-static method "Ljava/util/concurrent/ConcurrentHashMap$KeyIterator;.hasNext()Z"

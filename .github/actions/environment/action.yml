@@ -51,19 +51,27 @@ runs:
 
     - name: Install .NET SDK
       if: runner.os != 'Windows'
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: |
           6.0.x
           7.0.x
           8.0.x
+          9.0.100
+
+    - name: Install .NET 9
+      if: runner.os == 'Windows'
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          9.0.100
 
     - name: Install .NET Workloads
       shell: bash
       run: >
         dotnet workload install \
-          wasm-tools maui-android \
+          wasm-tools wasm-tools-net8 maui-android \
           ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows macos' || '' }} \
-          ${{ runner.os == 'Windows' && 'maui-windows' || '' }} \
+          ${{ runner.os == 'Windows' && 'maui-ios maui-maccatalyst maui-windows' || '' }} \
           --temp-dir "${{ runner.temp }}" \
           --skip-sign-check
