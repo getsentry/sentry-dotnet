@@ -66,7 +66,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         var options = new SentryOptions
         {
             CaptureFailedRequests = true,
-            FailedRequestTargets = new List<SubstringOrRegexPattern> { "http://foo/" }
+            FailedRequestTargets = new List<StringOrRegex> { "http://foo/" }
         };
         var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
 

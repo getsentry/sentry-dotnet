@@ -40,7 +40,10 @@ jobs:
           languages: csharp
 
       - name: Restore .NET Dependencies
-        run: dotnet restore Sentry-CI-CodeQL.slnf --nologo
+        # We should be able to get rid of the restore here, if we install the correct workloads in actions/environment
+        run: |
+          dotnet workload restore
+          dotnet restore Sentry-CI-CodeQL.slnf --nologo
 
       - name: Build
         run: dotnet build Sentry-CI-CodeQL.slnf --no-restore --nologo
