@@ -14,6 +14,10 @@ internal class Hub : IHub, IDisposable
     private readonly SentryOptions _options;
     private readonly RandomValuesFactory _randomValuesFactory;
 
+#if MEMORY_DUMP_SUPPORTED
+    private readonly MemoryMonitor? _memoryMonitor;
+#endif
+
     private int _isPersistedSessionRecovered;
 
     // Internal for testability
@@ -59,6 +63,20 @@ internal class Hub : IHub, IDisposable
             // Push the first scope so the async local starts from here
             PushScope();
         }
+
+#if MEMORY_DUMP_SUPPORTED
+        if (options.HeapDumpOptions is not null)
+        {
+            if (_options.DisableFileWrite)
+            {
+                _options.LogError("Automatic Heap Dumps cannot be used with file write disabled.");
+            }
+            else
+            {
+                _memoryMonitor = new MemoryMonitor(options, CaptureHeapDump);
+            }
+        }
+#endif
 
         foreach (var integration in options.Integrations)
         {
@@ -483,6 +501,34 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+#if MEMORY_DUMP_SUPPORTED
+    internal void CaptureHeapDump(string dumpFile)
+    {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        try
+        {
+            _options.LogDebug("Capturing heap dump '{0}'", dumpFile);
+
+            var evt = new SentryEvent
+            {
+                Message = "Memory threshold exceeded",
+                Level = _options.HeapDumpOptions?.Level ?? SentryLevel.Warning,
+            };
+            var hint = new SentryHint(_options);
+            hint.AddAttachment(dumpFile);
+            CaptureEvent(evt, CurrentScope, hint);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to capture heap dump");
+        }
+    }
+#endif
+
     public void CaptureUserFeedback(UserFeedback userFeedback)
     {
         if (!IsEnabled)
@@ -636,6 +682,10 @@ internal class Hub : IHub, IDisposable
         {
             return;
         }
+
+#if MEMORY_DUMP_SUPPORTED
+        _memoryMonitor?.Dispose();
+#endif
 
         try
         {

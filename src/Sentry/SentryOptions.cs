@@ -519,6 +519,54 @@ public class SentryOptions
         }
     }
 
+    /*
+     * dotnet-gcdump needs .NET 6 or later... also `GC.GetGCMemoryInfo()` is not available in NetFX or NetStandard
+     */
+#if MEMORY_DUMP_SUPPORTED
+
+    /// <summary>
+    /// Configures a heap dump to be captured if the percentage of memory used exceeds a certain threshold.
+    /// This can be useful to diagnose memory leaks.
+    /// </summary>
+    /// <param name="memoryPercentageThreshold">
+    /// The memory threshold at which to trigger a heap dump, as a percentage of total available memory.
+    /// Must be a number between 1 and 99.
+    /// </param>
+    /// <param name="debouncer">
+    /// Limits the frequency at which heap dumps are captured. If no debouncer is set then this defaults to
+    /// <code>Debouncer.PerApplicationLifetime()</code>
+    /// </param>
+    /// <param name="level">Optional parameter controlling the event level associated with heap dumps.
+    /// Defaults to <see cref="SentryLevel.Warning"/>.</param>
+    public void EnableHeapDumps(short memoryPercentageThreshold, Debouncer? debouncer = null, SentryLevel level = SentryLevel.Warning)
+        => EnableHeapDumps(HeapDumpTriggers.MemoryPercentageThreshold(memoryPercentageThreshold), debouncer, level);
+
+    /// <summary>
+    /// <para>
+    /// Configures Sentry to capture a heap dump based on a trigger function. This can be useful to diagnose memory leaks.
+    /// </para>
+    /// <para>
+    /// Note: This feature requires `dotnet-gcdump` to be installed globally on the machine or container where the heap
+    /// dumps will be captured. You can install this by running: `dotnet tool install --global dotnet-gcdump`
+    /// </para>
+    /// </summary>
+    /// <param name="trigger">
+    /// A custom trigger function that accepts the current memory usage and total available memory as arguments and
+    /// return true to indicate that a heap dump should be captured or false otherwise.
+    /// </param>
+    /// <param name="debouncer">
+    /// Limits the frequency at which heap dumps are captured. If no debouncer is set then this defaults to
+    /// <code>Debouncer.PerApplicationLifetime()</code>
+    /// </param>
+    /// <param name="level">Optional parameter controlling the event level associated with heap dumps.
+    /// Defaults to <see cref="SentryLevel.Warning"/>.</param>
+    public void EnableHeapDumps(HeapDumpTrigger trigger, Debouncer? debouncer = null, SentryLevel level = SentryLevel.Warning)
+        => HeapDumpOptions = new HeapDumpOptions(trigger, debouncer ?? Debouncer.PerApplicationLifetime(), level);
+
+    internal HeapDumpOptions? HeapDumpOptions { get; set; }
+
+#endif
+
     private int _maxCacheItems = 30;
 
     /// <summary>
