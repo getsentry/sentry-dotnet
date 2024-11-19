@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks />
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios</TargetFrameworks>
     <!-- Currently broken on .NET 7, see
       - https://github.com/dotnet/maui/issues/18573
       - https://developercommunity.visualstudio.com/t/MAUI0000:-SystemMissingMethodException:/10505327?sort=newest&ftype=problem
@@ -13,8 +13,8 @@
     <SingleProject>true</SingleProject>
     <RootNamespace>Sentry.Maui.Device.TestApp</RootNamespace>
     <AssemblyName>Sentry.Maui.Device.TestApp</AssemblyName>
-    <UseMaui>true</UseMaui>
     <SelfContained>true</SelfContained>
+    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
 
     <!-- See https://github.com/dotnet/xharness/issues/1281#issuecomment-2390579883 -->
     <AndroidEnableMarshalMethods>false</AndroidEnableMarshalMethods>
@@ -39,6 +39,10 @@
     <!-- https://github.com/xamarin/xamarin-android/issues/6809 -->
     <NoWarn>$(NoWarn);XA4218</NoWarn>
 
+    <!-- This allows us to use NSubstitute on iOS when targeting net8.0-ios or greater
+        https://learn.microsoft.com/en-us/dotnet/maui/macios/interpreter?view=net-maui-8.0
+    -->
+    <UseInterpreter Condition="$(TargetFramework.Contains('-ios')) and '$(Configuration)' == 'Release'">true</UseInterpreter>
   </PropertyGroup>
 
   <!--
@@ -58,6 +62,15 @@
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'  And '$(OSArchitecture)' == 'Arm64'">maccatalyst-arm64</RuntimeIdentifier>
     <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'  And '$(OSArchitecture)' == 'x64'">maccatalyst-x64</RuntimeIdentifier>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.83" />
+    <PackageReference Include="Microsoft.Maui.Core" Version="8.0.83" />
+    <PackageReference Include="Microsoft.Maui.Essentials" Version="8.0.83" />
+
+    <!-- https://github.com/advisories/GHSA-5f2m-466j-3848 -->
+    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
+  </ItemGroup>
 
   <ItemGroup>
     <MauiIcon Include="Resources\appicon.svg" ForegroundFile="Resources\appiconfg.svg" Color="#512BD4" />

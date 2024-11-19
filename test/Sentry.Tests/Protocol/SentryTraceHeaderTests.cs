@@ -46,4 +46,17 @@ public class SentryTraceHeaderTests
         header.SpanId.Should().Be(SpanId.Parse("1000000000000000"));
         header.IsSampled.Should().BeFalse();
     }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("  ")]
+    public void Parse_WithoutHeaderValue_ReturnsNull(string headerValue)
+    {
+        // Act
+        var header = SentryTraceHeader.Parse(headerValue);
+
+        // Assert
+        header.Should().BeNull();
+    }
 }

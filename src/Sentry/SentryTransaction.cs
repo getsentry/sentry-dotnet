@@ -10,7 +10,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry performance transaction.
 /// </summary>
-public class SentryTransaction : ITransactionData, ISentryJsonSerializable, ITraceContextInternal
+public class SentryTransaction : ITransactionData, ISentryJsonSerializable
 {
     /// <summary>
     /// Transaction's event ID.
