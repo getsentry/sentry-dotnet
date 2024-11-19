@@ -124,16 +124,23 @@ jobs:
         if: runner.os != 'Windows'
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
+      - name: List .NET SDKs and Workloads
+        if: runner.os == 'Windows'
+        run: |
+          dotnet --info
+          dotnet workload list
+
       - name: Restore .NET Dependencies (Windows)
         if: runner.os == 'Windows'
-        run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo -v diag > ${{ github.workspace }}\restore_output.log
+        run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
+#        run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo -v diag > ${{ github.workspace }}\restore_output.log
 
-      - name: Upload Restore Output
-        if: failure() && runner.os == 'Windows'
-        uses: actions/upload-artifact@v4
-        with:
-          name: restore-output
-          path: ${{ github.workspace }}\restore_output.log
+#      - name: Upload Restore Output
+#        if: failure() && runner.os == 'Windows'
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: restore-output
+#          path: ${{ github.workspace }}\restore_output.log
 
       - name: Install Android SDKs
         if: runner.os == 'macOS'
