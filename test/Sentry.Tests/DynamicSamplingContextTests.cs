@@ -255,16 +255,13 @@ public class DynamicSamplingContextTests
             SampleRate = 0.5,
             User =
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                Segment = "Group A"
-#pragma warning restore CS0618 // Type or member is obsolete
             },
         };
 
         var dsc = transaction.CreateDynamicSamplingContext(options);
 
         Assert.NotNull(dsc);
-        Assert.Equal(isSampled.HasValue ? 8 : 7, dsc.Items.Count);
+        Assert.Equal(isSampled.HasValue ? 7 : 6, dsc.Items.Count);
         Assert.Equal(traceId.ToString(), Assert.Contains("trace_id", dsc.Items));
         Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
         if (transaction.IsSampled is { } sampled)
@@ -278,7 +275,6 @@ public class DynamicSamplingContextTests
         Assert.Equal("0.5", Assert.Contains("sample_rate", dsc.Items));
         Assert.Equal("foo@2.4.5", Assert.Contains("release", dsc.Items));
         Assert.Equal("staging", Assert.Contains("environment", dsc.Items));
-        Assert.Equal("Group A", Assert.Contains("user_segment", dsc.Items));
         Assert.Equal("GET /person/{id}", Assert.Contains("transaction", dsc.Items));
     }
 

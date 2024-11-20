@@ -18,11 +18,6 @@ public interface IHub : ISentryClient, ISentryScopeManager
     SentryId LastEventId { get; }
 
     /// <summary>
-    /// <inheritdoc cref="IMetricAggregator"/>
-    /// </summary>
-    IMetricAggregator Metrics { get; }
-
-    /// <summary>
     /// Starts a transaction.
     /// </summary>
     ITransactionTracer StartTransaction(

@@ -196,11 +196,6 @@ public class DisabledHub : IHub, IDisposable
     public Task FlushAsync(TimeSpan timeout) => Task.CompletedTask;
 
     /// <summary>
-    /// Disabled Metrics Aggregator (all methods are no-op).
-    /// </summary>
-    public IMetricAggregator Metrics { get; } = new DisabledMetricAggregator();
-
-    /// <summary>
     /// No-Op.
     /// </summary>
     public void Dispose()

@@ -133,7 +133,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
             }
         }
 
-        if (_options?.TracePropagationTargets.ContainsMatch(url) is true or null)
+        if (_options?.TracePropagationTargets.MatchesSubstringOrRegex(url) is true or null)
         {
             AddSentryTraceHeader(request);
             AddBaggageHeader(request);

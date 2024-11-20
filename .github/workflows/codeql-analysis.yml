@@ -35,17 +35,20 @@ jobs:
         uses: ./.github/actions/environment
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@662472033e021d55d94146f66f6058822b0b39fd # pin@v2
+        uses: github/codeql-action/init@4f3212b61783c3c68e8309a0f18a699764811cda # pin@v2
         with:
           languages: csharp
 
       - name: Restore .NET Dependencies
-        run: dotnet restore Sentry-CI-CodeQL.slnf --nologo
+        # We should be able to get rid of the restore here, if we install the correct workloads in actions/environment
+        run: |
+          dotnet workload restore
+          dotnet restore Sentry-CI-CodeQL.slnf --nologo
 
       - name: Build
         run: dotnet build Sentry-CI-CodeQL.slnf --no-restore --nologo
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@662472033e021d55d94146f66f6058822b0b39fd # pin@v2
+        uses: github/codeql-action/analyze@4f3212b61783c3c68e8309a0f18a699764811cda # pin@v2
         with:
           category: '/language:csharp'

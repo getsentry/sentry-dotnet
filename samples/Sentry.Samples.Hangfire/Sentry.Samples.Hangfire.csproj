@@ -10,6 +10,8 @@
     <PackageReference Include="Hangfire.Core" Version="1.8.12" />
     <PackageReference Include="Hangfire.MemoryStorage" Version="1.8.1" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.12" />
+    <!-- https://github.com/advisories/GHSA-5crp-9r3c-p9vr -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.*" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

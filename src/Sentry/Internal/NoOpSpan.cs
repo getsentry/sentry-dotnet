@@ -5,7 +5,7 @@ namespace Sentry.Internal;
 /// <summary>
 /// Span class to use when we can't return null but a request to create a span couldn't be completed.
 /// </summary>
-internal class NoOpSpan : ISpan, ITraceContextInternal
+internal class NoOpSpan : ISpan
 {
     public static ISpan Instance { get; } = new NoOpSpan();
 
