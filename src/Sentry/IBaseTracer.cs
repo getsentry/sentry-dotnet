@@ -1,6 +1,6 @@
 namespace Sentry;
 
-internal interface IBaseTracer : ITraceContextInternal
+internal interface IBaseTracer
 {
     internal bool IsOtelInstrumenter { get; }
 }

@@ -1,5 +1,27 @@
 # Changelog
 
+## Version Five
+
+### API Changes
+
+- You should no longer pass `AndroidContext` as an argument to `SentrySdk.Init` ([#3562](https://github.com/getsentry/sentry-dotnet/pull/3562))
+- The `SentryUser.Segment` property has been deprecated. Consider sending this as a tag or additional data instead ([#3563](https://github.com/getsentry/sentry-dotnet/pull/3563))
+- The ITraceContext now includes an [Origin](https://develop.sentry.dev/sdk/telemetry/traces/trace-origin/), which is set automatically and is primarily used internally by the Sentry server ([#3564](https://github.com/getsentry/sentry-dotnet/pull/3564))
+- `Device.BatteryLevel` and `Device.ProcessorFrequency` are now stored as floats rather than ints, to align with the Cocoa and Java SDKs ([#3567](https://github.com/getsentry/sentry-dotnet/pull/3567))
+- `SentryOptions.EnableTracing` has been removed. Instead, tracing should be enabled or disabled by setting the `SentryOptions.TracesSampleRate` or by using `SentryOptions.TracesSampler` to configure a sampling function ([#3569](https://github.com/getsentry/sentry-dotnet/pull/3569))
+- The `FailedRequestTargets`, `TagFilters` and `TracePropagationTargets` options have all been changed from `SubstringOrRegexPattern` to `IList<StringOrRegex>` ([#3566](https://github.com/getsentry/sentry-dotnet/pull/3566))
+- `Scope.Transaction` is now always stored as an `AsyncLocal` also in [Global Mode](https://docs.sentry.io/platforms/dotnet/configuration/options/#is-global-mode-enabled), to prevent auto-instrumented spans from the UI ending up parented to transactions from a background task (or vice versa). ([#3596](https://github.com/getsentry/sentry-dotnet/pull/3596))
+- Heap dumps can be captured automatically when memory usage exceeds a configurable threshold ([#3667](https://github.com/getsentry/sentry-dotnet/pull/3667))
+- Sentry's Experimental Metrics feature has been deprecated and removed from the SDK. ([#3718](https://github.com/getsentry/sentry-dotnet/pull/3718))
+
+### Features
+- Added support for `.NET 9` (preview) ([#3699](https://github.com/getsentry/sentry-dotnet/pull/3699))
+- libsentrysupplemental.so now supports 16 KB page sizes on Android ([#3723](https://github.com/getsentry/sentry-dotnet/pull/3723))
+
+### Fixes
+
+- Fixed NullReferenceException in SentryTraceHeader when parsing null or empty values ([#3757](https://github.com/getsentry/sentry-dotnet/pull/3757))
+
 ## Unreleased
 
 ### Fixes
@@ -14,6 +36,9 @@
 - Bump Native SDK from v0.7.11 to v0.7.12 ([#3731](https://github.com/getsentry/sentry-dotnet/pull/3731))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0712)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.7.11...0.7.12)
+- Bump Java SDK from v7.16.0 to v7.17.0 ([#3749](https://github.com/getsentry/sentry-dotnet/pull/3749))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7170)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.16.0...7.17.0)
 
 ## 4.13.0
 

@@ -16,7 +16,7 @@
       "samples\\Sentry.Samples.Azure.Functions.Worker\\Sentry.Samples.Azure.Functions.Worker.csproj",
       "samples\\Sentry.Samples.Console.Basic\\Sentry.Samples.Console.Basic.csproj",
       "samples\\Sentry.Samples.Console.Customized\\Sentry.Samples.Console.Customized.csproj",
-      "samples\\Sentry.Samples.Console.Metrics\\Sentry.Samples.Console.Metrics.csproj",
+      "samples\\Sentry.Samples.Console.HeapDump\\Sentry.Samples.Console.HeapDump.csproj",
       "samples\\Sentry.Samples.Console.Native\\Sentry.Samples.Console.Native.csproj",
       "samples\\Sentry.Samples.Console.Profiling\\Sentry.Samples.Console.Profiling.csproj",
       "samples\\Sentry.Samples.EntityFramework\\Sentry.Samples.EntityFramework.csproj",
