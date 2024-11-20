@@ -56,7 +56,7 @@ internal partial class BindableSentryOptions
     {
         options.IsGlobalModeEnabled = IsGlobalModeEnabled ?? options.IsGlobalModeEnabled;
         options.EnableScopeSync = EnableScopeSync ?? options.EnableScopeSync;
-        options.TagFilters = TagFilters?.Select(s => new SubstringOrRegexPattern(s)).ToList() ?? options.TagFilters;
+        options.TagFilters = TagFilters?.Select(s => new StringOrRegex(s)).ToList() ?? options.TagFilters;
         options.SendDefaultPii = SendDefaultPii ?? options.SendDefaultPii;
         options.IsEnvironmentUser = IsEnvironmentUser ?? options.IsEnvironmentUser;
         options.ServerName = ServerName ?? options.ServerName;
@@ -81,16 +81,13 @@ internal partial class BindableSentryOptions
         options.DeduplicateMode = DeduplicateMode ?? options.DeduplicateMode;
         options.CacheDirectoryPath = CacheDirectoryPath ?? options.CacheDirectoryPath;
         options.CaptureFailedRequests = CaptureFailedRequests ?? options.CaptureFailedRequests;
-        options.FailedRequestTargets = FailedRequestTargets?.Select(s => new SubstringOrRegexPattern(s)).ToList() ?? options.FailedRequestTargets;
+        options.FailedRequestTargets = FailedRequestTargets?.Select(s => new StringOrRegex(s)).ToList() ?? options.FailedRequestTargets;
         options.DisableFileWrite = DisableFileWrite ?? options.DisableFileWrite;
         options.InitCacheFlushTimeout = InitCacheFlushTimeout ?? options.InitCacheFlushTimeout;
         options.DefaultTags = DefaultTags ?? options.DefaultTags;
-#pragma warning disable CS0618 // Type or member is obsolete
-        options.EnableTracing = EnableTracing ?? options.EnableTracing;
-#pragma warning restore CS0618 // Type or member is obsolete
         options.TracesSampleRate = TracesSampleRate ?? options.TracesSampleRate;
         options.ProfilesSampleRate = ProfilesSampleRate ?? options.ProfilesSampleRate;
-        options.TracePropagationTargets = TracePropagationTargets?.Select(s => new SubstringOrRegexPattern(s)).ToList() ?? options.TracePropagationTargets;
+        options.TracePropagationTargets = TracePropagationTargets?.Select(s => new StringOrRegex(s)).ToList() ?? options.TracePropagationTargets;
         options.StackTraceMode = StackTraceMode ?? options.StackTraceMode;
         options.MaxAttachmentSize = MaxAttachmentSize ?? options.MaxAttachmentSize;
         options.DetectStartupTime = DetectStartupTime ?? options.DetectStartupTime;

@@ -7,21 +7,27 @@
 
   Note:Target framework conditions should be kept synchronized with src/Sentry/buildTransitive/Sentry.Native.targets -->
 <Project>
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net8')) and ('$(OutputType)' == 'Exe' Or '$(OutputType)' == 'WinExe') And '$(RuntimeIdentifier)' == 'win-x64'">
+
+  <PropertyGroup>
+    <!-- net8.0 or greater -->
+    <FrameworkSupportsNative Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0')) and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">true</FrameworkSupportsNative>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and '$(RuntimeIdentifier)' == 'win-x64'">
     <DirectPInvoke Include="sentry-native" />
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\win-x64\sentry-native.lib" />
     <NativeLibrary Include="dbghelp.lib" />
     <NativeLibrary Include="winhttp.lib" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net8')) and ('$(OutputType)' == 'Exe' Or '$(OutputType)' == 'WinExe') And '$(RuntimeIdentifier)' == 'linux-x64'">
+  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and '$(RuntimeIdentifier)' == 'linux-x64'">
     <DirectPInvoke Include="sentry-native" />
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\linux-x64\libsentry-native.a" />
     <!-- See: https://github.com/dotnet/runtime/issues/97414 -->
     <NativeSystemLibrary Include="curl" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net8')) and ('$(OutputType)' == 'Exe' Or '$(OutputType)' == 'WinExe') And ('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64')">
+  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and ('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64')">
     <DirectPInvoke Include="sentry-native" />
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\osx\libsentry-native.a" />
     <NativeSystemLibrary Include="curl" />

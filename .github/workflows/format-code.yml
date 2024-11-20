@@ -23,7 +23,10 @@ jobs:
         uses: ./.github/actions/environment
 
       - name: Restore .NET Dependencies
-        run: dotnet restore Sentry.sln --nologo
+        # We should be able to get rid of the restore here, if we install the correct workloads in actions/environment
+        run: |
+          dotnet workload restore
+          dotnet restore Sentry.sln --nologo
 
       - name: Install dotnet format
         run: dotnet tool install -g dotnet-format

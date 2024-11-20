@@ -1,0 +1,35 @@
+name: Remove unused applications
+description: Frees disk space by removing unused applications
+runs:
+  using: composite
+  steps:
+
+    - name: Free Disk Space
+      if: runner.os == 'Linux'
+      uses: jlumbroso/free-disk-space@f68fdb76e2ea636224182cfb7377ff9a1708f9b8
+      with:
+        android: false
+        dotnet: false
+        haskell: true
+        large-packages: false
+        docker-images: true
+        swap-storage: true
+
+    # TODO: Do we need all of these or just one?
+    #  514M	/usr/lib/llvm-15
+    #  486M	/usr/lib/llvm-14
+    #  448M	/usr/lib/llvm-13
+    - name: Remove unused applications
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        df -h /dev/root
+        sudo rm -rf /usr/local/.ghcup
+        sudo rm -rf /usr/local/julia1.10.5
+        sudo rm -rf /usr/lib/heroku
+        sudo rm -rf /opt/hostedtoolcache/go
+        sudo rm -rf /opt/hostedtoolcache/Ruby
+        sudo apt-get remove -y '^mysql-.*' --fix-missing || echo "::warning::The command [sudo apt-get remove -y '^mysql-.*' --fix-missing] failed to complete successfully. Proceeding..."
+        sudo apt-get autoremove -y || echo "::warning::The command [sudo apt-get autoremove -y] failed to complete successfully. Proceeding..."
+        sudo apt-get clean || echo "::warning::The command [sudo apt-get clean] failed to complete successfully. Proceeding..."
+        df -h /dev/root

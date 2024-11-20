@@ -42,19 +42,19 @@ namespace Sentry
     }
     public static class BuiltInSystemDiagnosticsMeters
     {
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreDiagnostics;
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreHeaderParsing;
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreHosting;
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreHttpConnections;
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreRateLimiting;
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreRouting;
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftAspNetCoreServerKestrel;
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftExtensionsDiagnosticsHealthChecks;
-        public static readonly Sentry.SubstringOrRegexPattern MicrosoftExtensionsDiagnosticsResourceMonitoring;
-        public static readonly Sentry.SubstringOrRegexPattern OpenTelemetryInstrumentationRuntime;
-        public static readonly Sentry.SubstringOrRegexPattern SystemNetHttp;
-        public static readonly Sentry.SubstringOrRegexPattern SystemNetNameResolution;
-        public static System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> All { get; }
+        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreDiagnostics;
+        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreHeaderParsing;
+        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreHosting;
+        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreHttpConnections;
+        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreRateLimiting;
+        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreRouting;
+        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreServerKestrel;
+        public static readonly Sentry.StringOrRegex MicrosoftExtensionsDiagnosticsHealthChecks;
+        public static readonly Sentry.StringOrRegex MicrosoftExtensionsDiagnosticsResourceMonitoring;
+        public static readonly Sentry.StringOrRegex OpenTelemetryInstrumentationRuntime;
+        public static readonly Sentry.StringOrRegex SystemNetHttp;
+        public static readonly Sentry.StringOrRegex SystemNetNameResolution;
+        public static System.Collections.Generic.IList<Sentry.StringOrRegex> All { get; }
     }
     public class ByteAttachmentContent : Sentry.IAttachmentContent
     {
@@ -73,6 +73,13 @@ namespace Sentry
     {
         Managed = 0,
         ManagedBackgroundThread = 1,
+    }
+    public class Debouncer
+    {
+        public static Sentry.Debouncer PerApplicationLifetime(int eventMaximum = 1, System.TimeSpan? cooldown = default) { }
+        public static Sentry.Debouncer PerDay(int eventMaximum = 1, System.TimeSpan? cooldown = default) { }
+        public static Sentry.Debouncer PerHour(int eventMaximum = 1, System.TimeSpan? cooldown = default) { }
+        public static Sentry.Debouncer PerMinute(int eventMaximum = 1, System.TimeSpan? cooldown = default) { }
     }
     [System.Flags]
     public enum DeduplicateMode
@@ -105,8 +112,8 @@ namespace Sentry
     public class ExperimentalMetricsOptions
     {
         public ExperimentalMetricsOptions() { }
-        public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> CaptureSystemDiagnosticsInstruments { get; set; }
-        public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> CaptureSystemDiagnosticsMeters { get; set; }
+        public System.Collections.Generic.IList<Sentry.StringOrRegex> CaptureSystemDiagnosticsInstruments { get; set; }
+        public System.Collections.Generic.IList<Sentry.StringOrRegex> CaptureSystemDiagnosticsMeters { get; set; }
         public bool EnableCodeLocations { get; set; }
     }
     public class FileAttachmentContent : Sentry.IAttachmentContent
@@ -123,6 +130,7 @@ namespace Sentry
     {
         public static void SetTags(this Sentry.IHasTags hasTags, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> tags) { }
     }
+    public delegate bool HeapDumpTrigger(long usedMemory, long totalMemory);
     public static class HintTypes
     {
         public const string HttpResponseMessage = "http-response-message";
@@ -192,7 +200,6 @@ namespace Sentry
     public interface IHub : Sentry.ISentryClient, Sentry.ISentryScopeManager
     {
         Sentry.SentryId LastEventId { get; }
-        Sentry.IMetricAggregator Metrics { get; }
         void BindException(System.Exception exception, Sentry.ISpan span);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.SentryHint? hint, System.Action<Sentry.Scope> configureScope);
@@ -206,17 +213,6 @@ namespace Sentry
         void ResumeSession();
         void StartSession();
         Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext);
-    }
-    public interface IMetricAggregator : System.IDisposable
-    {
-        void Distribution(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
-        System.Threading.Tasks.Task FlushAsync(bool force = true, System.Threading.CancellationToken cancellationToken = default);
-        void Gauge(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
-        void Increment(string key, double value = 1, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
-        void Set(string key, int value, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
-        void Set(string key, string value, Sentry.MeasurementUnit? unit = default, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
-        System.IDisposable StartTimer(string key, Sentry.MeasurementUnit.Duration unit = 3, System.Collections.Generic.IDictionary<string, string>? tags = null, int stackLevel = 1);
-        void Timing(string key, double value, Sentry.MeasurementUnit.Duration unit = 3, System.Collections.Generic.IDictionary<string, string>? tags = null, System.DateTimeOffset? timestamp = default, int stackLevel = 1);
     }
     public interface IScopeObserver
     {
@@ -667,12 +663,9 @@ namespace Sentry
         public string? Dsn { get; set; }
         public bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }
-        [System.Obsolete("Use TracesSampleRate or TracesSampler instead")]
-        public bool? EnableTracing { get; set; }
         public string? Environment { get; set; }
-        public Sentry.ExperimentalMetricsOptions? ExperimentalMetrics { get; set; }
         public System.Collections.Generic.IList<Sentry.HttpStatusCodeRange> FailedRequestStatusCodes { get; set; }
-        public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> FailedRequestTargets { get; set; }
+        public System.Collections.Generic.IList<Sentry.StringOrRegex> FailedRequestTargets { get; set; }
         public System.TimeSpan FlushTimeout { get; set; }
         public System.Net.IWebProxy? HttpProxy { get; set; }
         public System.TimeSpan InitCacheFlushTimeout { get; set; }
@@ -698,8 +691,8 @@ namespace Sentry
         public System.TimeSpan ShutdownTimeout { get; set; }
         public string SpotlightUrl { get; set; }
         public Sentry.StackTraceMode StackTraceMode { get; set; }
-        public System.Collections.Generic.ICollection<Sentry.SubstringOrRegexPattern> TagFilters { get; set; }
-        public System.Collections.Generic.IList<Sentry.SubstringOrRegexPattern> TracePropagationTargets { get; set; }
+        public System.Collections.Generic.IList<Sentry.StringOrRegex> TagFilters { get; set; }
+        public System.Collections.Generic.IList<Sentry.StringOrRegex> TracePropagationTargets { get; set; }
         public double? TracesSampleRate { get; set; }
         public System.Func<Sentry.TransactionSamplingContext, double?>? TracesSampler { get; set; }
         public Sentry.Extensibility.ITransport? Transport { get; set; }
@@ -781,11 +774,6 @@ namespace Sentry
     {
         public static bool IsEnabled { get; }
         public static Sentry.SentryId LastEventId { get; }
-        [System.Obsolete("The SentrySdk.Metrics module is deprecated and will be removed in the next major " +
-            "release. Sentry will reject all metrics sent after October 7, 2024.Learn more: h" +
-            "ttps://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-" +
-            "to-Metrics")]
-        public static Sentry.IMetricAggregator Metrics { get; }
         public static void AddBreadcrumb(Sentry.Breadcrumb breadcrumb, Sentry.SentryHint? hint = null) { }
         public static void AddBreadcrumb(string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void AddBreadcrumb(Sentry.Infrastructure.ISystemClock? clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
@@ -928,7 +916,7 @@ namespace Sentry
         public Sentry.SpanId SpanId { get; }
         public Sentry.SentryId TraceId { get; }
         public override string ToString() { }
-        public static Sentry.SentryTraceHeader Parse(string value) { }
+        public static Sentry.SentryTraceHeader? Parse(string value) { }
     }
     public class SentryTransaction : Sentry.IEventLike, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISentryJsonSerializable, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
@@ -982,8 +970,6 @@ namespace Sentry
         public string? Id { get; set; }
         public string? IpAddress { get; set; }
         public System.Collections.Generic.IDictionary<string, string> Other { get; set; }
-        [System.Obsolete("This property is deprecated and will be removed in a future version.")]
-        public string? Segment { get; set; }
         public string? Username { get; set; }
         public Sentry.SentryUser Clone() { }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
@@ -1124,16 +1110,16 @@ namespace Sentry
         public StreamAttachmentContent(System.IO.Stream stream) { }
         public System.IO.Stream GetStream() { }
     }
-    [System.ComponentModel.TypeConverter(typeof(Sentry.SubstringOrRegexPatternTypeConverter))]
-    public class SubstringOrRegexPattern
+    [System.ComponentModel.TypeConverter(typeof(Sentry.StringOrRegexTypeConverter))]
+    public class StringOrRegex
     {
-        public SubstringOrRegexPattern(System.Text.RegularExpressions.Regex regex) { }
-        public SubstringOrRegexPattern(string substringOrRegexPattern, System.StringComparison comparison = 5) { }
+        public StringOrRegex(string stringOrRegex) { }
+        public StringOrRegex(System.Text.RegularExpressions.Regex regex) { }
         public override bool Equals(object? obj) { }
         public override int GetHashCode() { }
         public override string ToString() { }
-        public static Sentry.SubstringOrRegexPattern op_Implicit(string substringOrRegexPattern) { }
-        public static Sentry.SubstringOrRegexPattern op_Implicit(System.Text.RegularExpressions.Regex regex) { }
+        public static Sentry.StringOrRegex op_Implicit(string stringOrRegex) { }
+        public static Sentry.StringOrRegex op_Implicit(System.Text.RegularExpressions.Regex regex) { }
     }
     public class TransactionContext : Sentry.SpanContext, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext
     {
@@ -1284,7 +1270,6 @@ namespace Sentry.Extensibility
         public static readonly Sentry.Extensibility.DisabledHub Instance;
         public bool IsEnabled { get; }
         public Sentry.SentryId LastEventId { get; }
-        public Sentry.IMetricAggregator Metrics { get; }
         public void BindClient(Sentry.ISentryClient client) { }
         public void BindException(System.Exception exception, Sentry.ISpan span) { }
         public Sentry.SentryId CaptureCheckIn(string monitorSlug, Sentry.CheckInStatus status, Sentry.SentryId? sentryId = default, System.TimeSpan? duration = default, Sentry.Scope? scope = null, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
@@ -1324,11 +1309,6 @@ namespace Sentry.Extensibility
         public static readonly Sentry.Extensibility.HubAdapter Instance;
         public bool IsEnabled { get; }
         public Sentry.SentryId LastEventId { get; }
-        [System.Obsolete("The SentrySdk.Metrics module is deprecated and will be removed in the next major " +
-            "release. Sentry will reject all metrics sent after October 7, 2024.Learn more: h" +
-            "ttps://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-" +
-            "to-Metrics")]
-        public Sentry.IMetricAggregator Metrics { get; }
         public void AddBreadcrumb(string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public void AddBreadcrumb(Sentry.Infrastructure.ISystemClock clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public void BindClient(Sentry.ISentryClient client) { }
@@ -1597,7 +1577,7 @@ namespace Sentry.Protocol
         public const string Type = "device";
         public Device() { }
         public string? Architecture { get; set; }
-        public short? BatteryLevel { get; set; }
+        public float? BatteryLevel { get; set; }
         public string? BatteryStatus { get; set; }
         public System.DateTimeOffset? BootTime { get; set; }
         public string? Brand { get; set; }
@@ -1619,7 +1599,7 @@ namespace Sentry.Protocol
         public string? Name { get; set; }
         public Sentry.Protocol.DeviceOrientation? Orientation { get; set; }
         public int? ProcessorCount { get; set; }
-        public int? ProcessorFrequency { get; set; }
+        public float? ProcessorFrequency { get; set; }
         public float? ScreenDensity { get; set; }
         public int? ScreenDpi { get; set; }
         public string? ScreenResolution { get; set; }
@@ -1669,6 +1649,7 @@ namespace Sentry.Protocol
         string? Description { get; }
         bool? IsSampled { get; }
         string Operation { get; }
+        string? Origin { get; }
         Sentry.SpanId? ParentSpanId { get; }
         Sentry.SpanId SpanId { get; }
         Sentry.SpanStatus? Status { get; }
