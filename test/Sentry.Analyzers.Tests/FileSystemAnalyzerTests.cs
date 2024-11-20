@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis;
 using Verifier =
     Microsoft.CodeAnalysis.CSharp.Testing.CSharpAnalyzerVerifier<Sentry.Analyzers.FileSystemAnalyzer, Microsoft.CodeAnalysis.Testing.DefaultVerifier>;
 
@@ -108,6 +109,18 @@ public class FileSystemAnalyzerTests
                             }
 
                             public interface IFileSystem {}
+                            """;
+
+        await Verifier.VerifyAnalyzerAsync(text);
+    }
+
+    [Fact]
+    public async Task Verify_UsingFileSystemOutsideOfContainingType_TriggersAUseFileSystemWrapperWarning()
+    {
+        // CS8805 error is not relevant for the test, but is for top level statement
+        const string text = """
+                            using System.IO;
+                            {|CS8805:var t = {|SN0001:File.Exists|}("fileName.txt");|}
                             """;
 
         await Verifier.VerifyAnalyzerAsync(text);
