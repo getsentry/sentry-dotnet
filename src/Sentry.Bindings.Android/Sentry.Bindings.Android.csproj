@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0-android</TargetFramework>
+    <TargetFrameworks>net8.0-android</TargetFrameworks>
     <!-- BG8605 and BG8606 happen because there's a missing androidx.lifecycle dependency, but we don't need it here.  (The native Android Sentry SDK will use it if it exists.) -->
     <NoWarn>$(NoWarn);BG8605;BG8606</NoWarn>
-    <SentryAndroidSdkVersion>7.17.0</SentryAndroidSdkVersion>
+    <SentryAndroidSdkVersion>7.18.0</SentryAndroidSdkVersion>
     <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
     <Description>.NET Bindings for the Sentry Android SDK</Description>
   </PropertyGroup>
@@ -12,6 +12,7 @@
   <ItemGroup>
     <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="" />
+    <None Include="$(MSBuildThisFileDirectory)build/Sentry.Bindings.Android.targets" Pack="true" PackagePath="build/Sentry.Bindings.Android.targets" />
     <None Include="$(MSBuildThisFileDirectory)build/Sentry.Bindings.Android.targets" Pack="true" PackagePath="build/$(TargetFramework)$(TargetPlatformVersion)/Sentry.Bindings.Android.targets" />
     <None Include="$(MSBuildThisFileDirectory)sentry-proguard.cfg" Pack="true" PackagePath="" />
     <PackageReference Remove="SIL.ReleaseTasks" />

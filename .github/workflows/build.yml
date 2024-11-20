@@ -9,9 +9,6 @@ on:
     paths-ignore:
       - "**.md"
 
-env:
-  XCODE_VERSION: 16
-
 jobs:
   build-sentry-native:
     name: sentry-native (${{ matrix.os }})
@@ -35,16 +32,8 @@ jobs:
           key: sentry-native-${{ runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           enableCrossOsArchive: true
 
-      - name: Free Disk Space (Ubuntu)
-        if: runner.os == 'Linux'
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
-        with:
-          android: true
-          dotnet: false
-          haskell: true
-          large-packages: false
-          docker-images: false
-          swap-storage: true
+      - name: Remove unused applications
+        uses: ./.github/actions/freediskspace
 
       - name: Install build dependencies
         if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'Linux'
@@ -72,19 +61,16 @@ jobs:
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
 
-      - name: Setup Xcode
-        if: runner.os == 'macOS'
-        run: |
-          sudo xcode-select --switch /Applications/Xcode_${{env.XCODE_VERSION}}.app/Contents/Developer
-          xcodebuild -version
-
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
 
-      # We use macOS for the final publishing build so we we get all the iOS/macCatalyst targets in the packages
+      - name: Remove unused applications
+        uses: ./.github/actions/freediskspace
+
+      # We use macOS for the final publishing build so we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
         if: runner.os == 'macOS'
         run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
@@ -126,7 +112,6 @@ jobs:
       - name: Install Android SDKs
         if: runner.os == 'macOS'
         run: |
-          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net7.0-android -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
           dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
 
       - name: Build
@@ -136,7 +121,7 @@ jobs:
         run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
 
       - name: Upload code coverage
-        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238
+        uses: codecov/codecov-action@5c47607acb93fed5485fdbf7232e8a31425f672a
 
       - name: Upload build and test outputs
         if: failure()
@@ -181,6 +166,7 @@ jobs:
             Directory.Build.props
             integration-test
             .github
+
       - name: Fetch Nuget Packages
         uses: actions/download-artifact@v4
         with:

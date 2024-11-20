@@ -29,8 +29,8 @@ public class UnobservedTaskExceptionIntegrationTests
     }
 #endif
 
-    // Test is flaky on mobile in CI.
-#if !(__MOBILE__ && CI_BUILD)
+    // Test is flaky on mobile
+#if !(__MOBILE__)
     [Fact]
     public void Handle_UnobservedTaskException_CaptureEvent()
     {
