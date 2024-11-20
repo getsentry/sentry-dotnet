@@ -158,8 +158,11 @@ internal static class C
     {
         if (options.CacheDirectoryPath is null)
         {
+            // Allow direct file system usage - Not application for Nintendo Switch
+#pragma warning disable SN0001
             // same as the default of sentry-native
             return Path.Combine(Directory.GetCurrentDirectory(), ".sentry-native");
+#pragma warning restore SN0001
         }
         else
         {

@@ -26,7 +26,8 @@
 
 ### Fixes
 
-- Fixed ArgumentNullException in FormRequestPayloadExtractor when handling invalid form data on ASP.NET ([#3734](https://github.com/getsentry/sentry-dotnet/pull/3734))
+- ArgumentNullException in FormRequestPayloadExtractor when handling invalid form data on ASP.NET ([#3734](https://github.com/getsentry/sentry-dotnet/pull/3734))
+- Crash when using NLog with FailedRequestStatusCodes options in a Maui app with Trimming enabled ([#3743](https://github.com/getsentry/sentry-dotnet/pull/3743))
 - iOS - prevent use of unsupported marshalling behavior `MarshalManagedExceptionMode.UnwindNativeCode` for [Native AOT] ([#3729](https://github.com/getsentry/sentry-dotnet/pull/3729))
 
 ### Dependencies

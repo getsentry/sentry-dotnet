@@ -3,6 +3,7 @@
     "path": "Sentry.sln",
     "projects": [
       "benchmarks\\Sentry.Benchmarks\\Sentry.Benchmarks.csproj",
+      "src\\Sentry.Analyzers\\Sentry.Analyzers.csproj",
       "src\\Sentry.Android.AssemblyReader\\Sentry.Android.AssemblyReader.csproj",
       "src\\Sentry.AspNet\\Sentry.AspNet.csproj",
       "src\\Sentry.AspNetCore.Blazor.WebAssembly\\Sentry.AspNetCore.Blazor.WebAssembly.csproj",
@@ -21,6 +22,7 @@
       "src\\Sentry.Profiling\\Sentry.Profiling.csproj",
       "src\\Sentry.Serilog\\Sentry.Serilog.csproj",
       "src\\Sentry\\Sentry.csproj",
+      "test\\Sentry.Analyzers.Tests\\Sentry.Analyzers.Tests.csproj",
       "test\\Sentry.Android.AssemblyReader.Tests\\Sentry.Android.AssemblyReader.Tests.csproj",
       "test\\Sentry.AspNet.Tests\\Sentry.AspNet.Tests.csproj",
       "test\\Sentry.AspNetCore.Grpc.Tests\\Sentry.AspNetCore.Grpc.Tests.csproj",
