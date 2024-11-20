@@ -7,7 +7,6 @@
   <Target Name="_SentryMarshalExceptionManagement">
     <PropertyGroup Condition="'$(PublishAot)' == 'true'">
       <MtouchExtraArgs>marshal-managed-exceptions:disable</MtouchExtraArgs>
-      <MtouchNoSymbolStrip Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">True</MtouchNoSymbolStrip>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(PublishAot)' != 'true'">
