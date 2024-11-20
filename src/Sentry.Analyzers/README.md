@@ -1,0 +1,1 @@
+Analyzer ensures that all file system access continues to be routed through the SDK’s custom wrappers. It is meant for consumption from `Sentry` itself, for development of the SDK. For details see [issue #3643.](https://github.com/getsentry/sentry-dotnet/issues/3643)
