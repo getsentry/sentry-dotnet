@@ -10,7 +10,7 @@
       <MtouchNoSymbolStrip Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">True</MtouchNoSymbolStrip>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(PublishAot)' == 'false' Or '$(PublishAot)' == ''">
+    <PropertyGroup Condition="'$(PublishAot)' != 'true'">
       <MtouchExtraArgs>--marshal-managed-exceptions:unwindnativecode</MtouchExtraArgs>
     </PropertyGroup>
   </Target>
