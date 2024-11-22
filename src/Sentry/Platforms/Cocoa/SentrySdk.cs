@@ -193,7 +193,10 @@ public static partial class SentrySdk
         options.ScopeObserver = new CocoaScopeObserver(options);
 
         // Note: don't use AddProfilingIntegration as it would print a warning if user used it too.
-        options.AddIntegration(new ProfilingIntegration());
+        if (!options.HasIntegration<ProfilingIntegration>())
+        {
+            options.AddIntegration(new ProfilingIntegration());
+        }
         // TODO: Pause/Resume
     }
 
