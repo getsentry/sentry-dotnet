@@ -2,14 +2,6 @@
 
 ## Unreleased
 
-### Dependencies
-
-- Bump Native SDK from v0.7.13 to v0.7.14 ([#3775](https://github.com/getsentry/sentry-dotnet/pull/3775))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0714)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.13...0.7.14)
-
-## Version Five
-
 ### API Changes
 
 - You should no longer pass `AndroidContext` as an argument to `SentrySdk.Init` ([#3562](https://github.com/getsentry/sentry-dotnet/pull/3562))
@@ -29,11 +21,6 @@
 ### Fixes
 
 - Fixed NullReferenceException in SentryTraceHeader when parsing null or empty values ([#3757](https://github.com/getsentry/sentry-dotnet/pull/3757))
-
-## Unreleased
-
-### Fixes
-
 - ArgumentNullException in FormRequestPayloadExtractor when handling invalid form data on ASP.NET ([#3734](https://github.com/getsentry/sentry-dotnet/pull/3734))
 - Crash when using NLog with FailedRequestStatusCodes options in a Maui app with Trimming enabled ([#3743](https://github.com/getsentry/sentry-dotnet/pull/3743))
 
@@ -42,12 +29,15 @@
 - Bump Cocoa SDK from v8.36.0 to v8.39.0 ([#3727](https://github.com/getsentry/sentry-dotnet/pull/3727))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8390)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.36.0...8.39.0)
-- Bump Native SDK from v0.7.11 to v0.7.12 ([#3731](https://github.com/getsentry/sentry-dotnet/pull/3731))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0712)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.11...0.7.12)
 - Bump Java SDK from v7.16.0 to v7.18.0 ([#3749](https://github.com/getsentry/sentry-dotnet/pull/3749), [#3771](https://github.com/getsentry/sentry-dotnet/pull/3771))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7180)
   - [diff](https://github.com/getsentry/sentry-java/compare/7.16.0...7.18.0)
+- Bump Native SDK from v0.7.11 to v0.7.12 ([#3731](https://github.com/getsentry/sentry-dotnet/pull/3731))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0712)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.11...0.7.12)
+- Bump Native SDK from v0.7.13 to v0.7.14 ([#3775](https://github.com/getsentry/sentry-dotnet/pull/3775))
+    - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0714)
+    - [diff](https://github.com/getsentry/sentry-native/compare/0.7.13...0.7.14)
 
 ## 4.13.0
 
