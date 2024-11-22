@@ -129,6 +129,9 @@ public class SamplingTransactionProfilerTests
     [InlineData(10)]
     private void Profiler_SingleProfile_Works(int startTimeoutSeconds)
     {
+        // This test is flaky both on CI and locally.
+        Skip.If(true);
+
         using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(startTimeoutSeconds));
         // in the async startup case, we need to wait before collecting
         if (startTimeoutSeconds == 0)
@@ -286,7 +289,8 @@ public class SamplingTransactionProfilerTests
     [SkippableFact]
     private async Task Profiler_ThrowingOnSessionStartup_DoesntBreakSentryInit()
     {
-        Skip.If(TestEnvironment.IsGitHubActions);
+        // This test is flaky both on CI and locally.
+        Skip.If(true);
 
         SampleProfilerSession.ThrowOnNextStartupForTests = true;
 

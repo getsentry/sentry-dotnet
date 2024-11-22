@@ -31,7 +31,10 @@ internal static class AndroidHelpers
             return null;
         }
 
+        // Allow direct file system usage
+#pragma warning disable SN0001
         if (!File.Exists(apkPath))
+#pragma warning restore SN0001
         {
             logger?.LogWarning("APK doesn't exist at {0}", apkPath);
             return null;

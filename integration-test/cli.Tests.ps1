@@ -141,6 +141,15 @@ Describe 'MAUI' -ForEach @(
         }
 
         AddPackageReference $name 'Sentry.Maui'
+
+        if (Test-Path env:CI)
+        {
+            dotnet build $name/$name.csproj -t:InstallAndroidDependencies -f:$framework-android -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/" | ForEach-Object { Write-Host $_ }
+            if ($LASTEXITCODE -ne 0)
+            {
+                throw "Failed to install android dependencies."
+            }
+        }
     }
 
     It "uploads symbols and sources for an Android build" {

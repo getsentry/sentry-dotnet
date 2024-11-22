@@ -30,7 +30,10 @@ public class FileDiagnosticLogger : DiagnosticLogger
     public FileDiagnosticLogger(string path, SentryLevel minimalLevel, bool alsoWriteToConsole = false)
         : base(minimalLevel)
     {
+        // Allow direct file system usage
+#pragma warning disable SN0001
         var stream = File.OpenWrite(path);
+#pragma warning restore SN0001
         _writer = new StreamWriter(stream);
         _alsoWriteToConsole = alsoWriteToConsole;
 

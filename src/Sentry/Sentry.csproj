@@ -9,9 +9,9 @@
 
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
     <TargetFrameworks>net8.0;net6.0;netstandard2.1;netstandard2.0;net462</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net7.0-android;net8.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-ios;net8.0-ios</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst;net8.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-maccatalyst</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Unity'">
@@ -24,7 +24,7 @@
   <Import Project="Platforms\Native\Sentry.Native.targets"
         Condition="'$(TargetPlatformIdentifier)' != 'android' and '$(TargetPlatformIdentifier)' != 'ios' and '$(TargetPlatformIdentifier)' != 'maccatalyst'"/>
 
-  <PropertyGroup Condition="'$(FrameworkSupportsAot)' == 'true'">
+  <PropertyGroup Condition="'$(EnableAot)' == 'true'">
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
@@ -47,6 +47,10 @@
   <!-- Ben.Demystifier also needs System.Reflection.Metadata 5.0.0 or higher on all platforms. -->
   <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4'))">
     <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sentry.Analyzers\Sentry.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
   </ItemGroup>
 
   <!-- Sentry.DiagnosticSource is compiled directly into Sentry for .NET Core and .NET targets only. -->
@@ -81,12 +85,12 @@
   </ItemGroup>
 
   <!-- Ensure at least version 6 of System.Text.Json so we have JsonSerializationContext available -->
-  <ItemGroup Condition="!$(TargetFramework.StartsWith('net6')) and !$(TargetFramework.StartsWith('net7')) and !$(TargetFramework.StartsWith('net8'))">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netstandard'))">
     <PackageReference Include="System.Text.Json" Version="6.0.10" >
-  <!--
-    Ignoring the vulnerability warning: https://github.com/advisories/GHSA-hh2w-p6rv-4g7w
-    The app can/should pin to the latest version. We will bump once a patch on v6 (still LTS until Nov 24) is out
-  -->
+      <!--
+        Ignoring the vulnerability warning: https://github.com/advisories/GHSA-hh2w-p6rv-4g7w
+        The app can/should pin to the latest version. We will bump once a patch on v6 (still LTS until Nov 24) is out
+      -->
       <NoWarn>NU1903</NoWarn>
     </PackageReference>
   </ItemGroup>
@@ -182,6 +186,7 @@
     <InternalsVisibleTo Include="Sentry.Serilog.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Testing" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Analyzers.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
 </Project>
