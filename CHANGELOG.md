@@ -32,12 +32,9 @@
 - Bump Java SDK from v7.16.0 to v7.18.0 ([#3749](https://github.com/getsentry/sentry-dotnet/pull/3749), [#3771](https://github.com/getsentry/sentry-dotnet/pull/3771))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7180)
   - [diff](https://github.com/getsentry/sentry-java/compare/7.16.0...7.18.0)
-- Bump Native SDK from v0.7.11 to v0.7.12 ([#3731](https://github.com/getsentry/sentry-dotnet/pull/3731))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0712)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.11...0.7.12)
-- Bump Native SDK from v0.7.13 to v0.7.14 ([#3775](https://github.com/getsentry/sentry-dotnet/pull/3775))
-    - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0714)
-    - [diff](https://github.com/getsentry/sentry-native/compare/0.7.13...0.7.14)
+- Bump Native SDK from v0.7.11 to v0.7.15 ([#3731](https://github.com/getsentry/sentry-dotnet/pull/3731), [#3770](https://github.com/getsentry/sentry-dotnet/pull/3770), [#3775](https://github.com/getsentry/sentry-dotnet/pull/3775), [#3779](https://github.com/getsentry/sentry-dotnet/pull/3779))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0715)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.11...0.7.15)
 
 ## 4.13.0
 
