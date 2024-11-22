@@ -20,6 +20,10 @@ public class SentryClient : ISentryClient, IDisposable
     private readonly RandomValuesFactory _randomValuesFactory;
     private readonly Enricher _enricher;
 
+#if ANDROID
+    private readonly object _eventLock = new object();
+#endif
+
     internal IBackgroundWorker Worker { get; }
 
     internal SentryOptions Options => _options;
@@ -313,7 +317,15 @@ public class SentryClient : ISentryClient, IDisposable
 
         foreach (var processor in scope.GetAllEventProcessors())
         {
+#if ANDROID
+            // Use of lock to prevent `JNI DETECTED ERROR IN APPLICATION` on Android (please see https://github.com/getsentry/sentry-dotnet/issues/3627)
+            lock (_eventLock)
+            {
+#endif
             processedEvent = processor.DoProcessEvent(processedEvent, hint);
+#if ANDROID
+            }
+#endif
 
             if (processedEvent == null)
             {
