@@ -12,8 +12,11 @@
   <ItemGroup>
     <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="" />
+    <!--
+    Normally we'd put this in a TFM specific directory, however this package only targets one TFM:
+      https://learn.microsoft.com/en-us/nuget/concepts/msbuild-props-and-targets
+    -->
     <None Include="$(MSBuildThisFileDirectory)build/Sentry.Bindings.Android.targets" Pack="true" PackagePath="build/Sentry.Bindings.Android.targets" />
-    <None Include="$(MSBuildThisFileDirectory)build/Sentry.Bindings.Android.targets" Pack="true" PackagePath="build/$(TargetFramework)$(TargetPlatformVersion)/Sentry.Bindings.Android.targets" />
     <None Include="$(MSBuildThisFileDirectory)sentry-proguard.cfg" Pack="true" PackagePath="" />
     <PackageReference Remove="SIL.ReleaseTasks" />
   </ItemGroup>
