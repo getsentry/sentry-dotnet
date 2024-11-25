@@ -6,7 +6,7 @@ namespace Sentry.Maui.Internal;
 
 internal static class MauiDeviceData
 {
-    public static void ApplyMauiDeviceData(this Device device, IDiagnosticLogger? logger)
+    public static void ApplyMauiDeviceData(this Device device, IDiagnosticLogger? logger, INetworkStatusListener? networkStatusListener)
     {
         try
         {
@@ -54,15 +54,7 @@ internal static class MauiDeviceData
                 logger?.LogDebug("No permission to read battery state from the device.");
             }
 
-            // https://docs.microsoft.com/dotnet/maui/platform-integration/communication/networking#using-connectivity
-            try
-            {
-                device.IsOnline ??= Connectivity.NetworkAccess == NetworkAccess.Internet;
-            }
-            catch (PermissionException)
-            {
-                logger?.LogDebug("No permission to read network state from the device.");
-            }
+            device.IsOnline = networkStatusListener!.Online;
 
 #if MACCATALYST || IOS
             if (MainThread.IsMainThread)

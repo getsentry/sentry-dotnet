@@ -23,6 +23,7 @@
 - Fixed NullReferenceException in SentryTraceHeader when parsing null or empty values ([#3757](https://github.com/getsentry/sentry-dotnet/pull/3757))
 - ArgumentNullException in FormRequestPayloadExtractor when handling invalid form data on ASP.NET ([#3734](https://github.com/getsentry/sentry-dotnet/pull/3734))
 - Crash when using NLog with FailedRequestStatusCodes options in a Maui app with Trimming enabled ([#3743](https://github.com/getsentry/sentry-dotnet/pull/3743))
+- MAUI - Fixed `JNI DETECTED ERROR IN APPLICATION` Android crashes when multiple exceptions have to be captured in quick successions ([#3791](https://github.com/getsentry/sentry-dotnet/pull/3791))
 
 ### Dependencies
 
