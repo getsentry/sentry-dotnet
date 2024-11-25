@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.39.0 to v8.41.0 ([#3786](https://github.com/getsentry/sentry-dotnet/pull/3786))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8410)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.41.0)
+
 ## 5.0.0-alpha.1
 
 ### API Changes

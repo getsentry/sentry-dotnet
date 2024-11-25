@@ -59,10 +59,6 @@ delegate NSNumber SentryTracesSamplerCallback (SentrySamplingContext samplingCon
 [Internal]
 delegate void SentrySpanCallback ([NullAllowed] SentrySpan span);
 
-// typedef BOOL (^SentryBeforeEmitMetricCallback)(NSString * _Nonnull, NSDictionary<NSString *,NSString *> * _Nonnull);
-[Internal]
-delegate bool SentryBeforeEmitMetricCallback (string arg0, NSDictionary<NSString, NSString> arg1);
-
 // @interface SentryAttachment : NSObject
 [BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
@@ -1398,6 +1394,10 @@ interface SentryOptions
     [Export ("enablePerformanceV2")]
     bool EnablePerformanceV2 { get; set; }
 
+    // @property (assign, nonatomic) BOOL enablePersistingTracesWhenCrashing;
+    [Export ("enablePersistingTracesWhenCrashing")]
+    bool EnablePersistingTracesWhenCrashing { get; set; }
+
     // @property (nonatomic) SentryScope * _Nonnull (^ _Nonnull)(SentryScope * _Nonnull) initialScope;
     [Export ("initialScope", ArgumentSemantic.Assign)]
     Func<SentryScope, SentryScope> InitialScope { get; set; }
@@ -2439,6 +2439,16 @@ interface PrivateSentrySDKOnly
     [Static]
     [Export ("addReplayRedactClasses:")]
     void AddReplayRedactClasses (Class[] classes);
+
+    // +(void)setIgnoreContainerClass:(Class _Nonnull)containerClass;
+    [Static]
+    [Export ("setIgnoreContainerClass:")]
+    void SetIgnoreContainerClass (Class containerClass);
+
+    // +(void)setRedactContainerClass:(Class _Nonnull)containerClass;
+    [Static]
+    [Export ("setRedactContainerClass:")]
+    void SetRedactContainerClass (Class containerClass);
 
     // +(NSDictionary<NSString *,id> * _Nullable)appStartMeasurementWithSpans;
     [Static]
