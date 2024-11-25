@@ -54,7 +54,7 @@ internal static class MauiDeviceData
                 logger?.LogDebug("No permission to read battery state from the device.");
             }
 
-            device.IsOnline = networkStatusListener!.Online;
+            device.IsOnline ??= networkStatusListener!.Online;
 
 #if MACCATALYST || IOS
             if (MainThread.IsMainThread)
