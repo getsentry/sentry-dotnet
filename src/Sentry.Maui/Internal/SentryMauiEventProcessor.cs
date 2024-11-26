@@ -31,14 +31,14 @@ internal class SentryMauiEventProcessor : ISentryEventProcessor
         _deviceSupportsGyroscope = Gyroscope.IsSupported;
 #endif
 
-#if IOS
+#if MACCATALYST || IOS
         if (MainThread.IsMainThread)
         {
 #endif
         // https://docs.microsoft.com/dotnet/maui/platform-integration/device/information
         _deviceInfo = DeviceInfo.Current;
         _deviceIdiom = _deviceInfo.Idiom.ToString();
-#if IOS
+#if MACCATALYST || IOS
         }
         else
         {
