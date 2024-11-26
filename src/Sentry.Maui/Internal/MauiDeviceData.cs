@@ -65,7 +65,7 @@ internal static class MauiDeviceData
                 resetEvent.Wait();
             }
 #else
-            SetDisplayInfo(displayInfo);
+            CaptureDisplayInfo(displayInfo);
 #endif
 
             device.SupportsVibration ??= supportsVibration;
@@ -120,13 +120,9 @@ internal static class MauiDeviceData
             // ? = display.Rotation;
             resetEvent?.Set();
         }
-#endif
-        
-
-        void SetDisplayInfo(DisplayInfo display, ManualResetEventSlim? resetEvent = null)
+#else
+        void CaptureDisplayInfo(DisplayInfo display)
         {
-            // https://docs.microsoft.com/dotnet/maui/platform-integration/device/display
-            //var display = DeviceDisplay.MainDisplayInfo;
             device.ScreenResolution ??= $"{(int)display.Width}x{(int)display.Height}";
             device.ScreenDensity ??= (float)display.Density;
             device.Orientation ??= display.Orientation switch
@@ -138,7 +134,7 @@ internal static class MauiDeviceData
             // device.ScreenDpi ??= ?
             // ? = display.RefreshRate;
             // ? = display.Rotation;
-            resetEvent?.Set();
         }
+#endif
     }
 }
