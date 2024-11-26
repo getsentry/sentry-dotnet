@@ -121,6 +121,7 @@ internal static class MauiDeviceData
             resetEvent?.Set();
         }
 #else
+
         void CaptureDisplayInfo(DisplayInfo display)
         {
             device.ScreenResolution ??= $"{(int)display.Width}x{(int)display.Height}";
