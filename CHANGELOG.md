@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 5.0.0-alpha.1
 
 ### API Changes
 
@@ -17,6 +17,7 @@
 ### Features
 - Added support for `.NET 9` (preview) ([#3699](https://github.com/getsentry/sentry-dotnet/pull/3699))
 - libsentrysupplemental.so now supports 16 KB page sizes on Android ([#3723](https://github.com/getsentry/sentry-dotnet/pull/3723))
+- Added `SentryOptions` extension for profiling: `options.AddProfilingIntegration()` ([#3660](https://github.com/getsentry/sentry-dotnet/pull/3660))
 
 ### Fixes
 
@@ -36,6 +37,9 @@
 - Bump Native SDK from v0.7.11 to v0.7.15 ([#3731](https://github.com/getsentry/sentry-dotnet/pull/3731), [#3770](https://github.com/getsentry/sentry-dotnet/pull/3770), [#3775](https://github.com/getsentry/sentry-dotnet/pull/3775), [#3779](https://github.com/getsentry/sentry-dotnet/pull/3779))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0715)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.7.11...0.7.15)
+- Bump CLI from v2.38.2 to v2.39.0 ([#3782](https://github.com/getsentry/sentry-dotnet/pull/3782))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2390)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.38.2...2.39.0)
 
 ## 4.13.0
 

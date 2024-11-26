@@ -26,5 +26,6 @@ jobs:
     with:
       name: ${{ matrix.name }}
       path: ${{ matrix.path }}
+      pr-strategy: update
     secrets:
       api-token: ${{ secrets.CI_DEPLOY_KEY }}
