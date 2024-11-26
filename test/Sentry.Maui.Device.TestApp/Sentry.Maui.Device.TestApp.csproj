@@ -72,11 +72,6 @@
     <PackageReference Include="System.Private.Uri" Version="4.3.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <MauiIcon Include="Resources\appicon.svg" ForegroundFile="Resources\appiconfg.svg" Color="#512BD4" />
-    <MauiSplashScreen Include="Resources\appiconfg.svg" Color="#512BD4" BaseSize="128,128" />
-  </ItemGroup>
-
   <!-- Configure XUnit -->
   <ItemGroup>
     <AndroidAsset Include="..\xunit.runner.json" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
