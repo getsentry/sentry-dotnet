@@ -21,6 +21,7 @@ internal class SentryMauiEventProcessor : ISentryEventProcessor
         // https://docs.microsoft.com/dotnet/maui/platform-integration/device/display
         _displayInfo = DeviceDisplay.MainDisplayInfo;
 
+#if !PLATFORM_NEUTRAL
 
         // https://docs.microsoft.com/dotnet/maui/platform-integration/device/vibrate
         _deviceSupportsVibration = Vibration.Default.IsSupported;
@@ -28,6 +29,7 @@ internal class SentryMauiEventProcessor : ISentryEventProcessor
         // https://docs.microsoft.com/dotnet/maui/platform-integration/device/sensors
         _deviceSupportsAccelerometer = Accelerometer.IsSupported;
         _deviceSupportsGyroscope = Gyroscope.IsSupported;
+#endif
 
         // https://docs.microsoft.com/dotnet/maui/platform-integration/device/information
         _deviceInfo = DeviceInfo.Current;
