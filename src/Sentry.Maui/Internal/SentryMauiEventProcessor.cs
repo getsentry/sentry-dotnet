@@ -8,9 +8,9 @@ internal class SentryMauiEventProcessor : ISentryEventProcessor
     private readonly DisplayInfo _displayInfo;
 
     private readonly SentryMauiOptions _options;
-    private readonly bool _deviceSupportsVibration;
-    private readonly bool _deviceSupportsAccelerometer;
-    private readonly bool _deviceSupportsGyroscope;
+    private readonly bool _deviceSupportsVibration = false;
+    private readonly bool _deviceSupportsAccelerometer = false;
+    private readonly bool _deviceSupportsGyroscope = false;
     private readonly IDeviceInfo _deviceInfo;
     private readonly string _deviceIdiom;
 
