@@ -11,8 +11,8 @@ internal class SentryMauiEventProcessor : ISentryEventProcessor
     private readonly bool _deviceSupportsVibration = false;
     private readonly bool _deviceSupportsAccelerometer = false;
     private readonly bool _deviceSupportsGyroscope = false;
-    private readonly IDeviceInfo _deviceInfo;
-    private readonly string _deviceIdiom;
+    private IDeviceInfo? _deviceInfo;
+    private string _deviceIdiom = string.Empty;
 
     public SentryMauiEventProcessor(SentryMauiOptions options)
     {
@@ -31,9 +31,24 @@ internal class SentryMauiEventProcessor : ISentryEventProcessor
         _deviceSupportsGyroscope = Gyroscope.IsSupported;
 #endif
 
+#if IOS
+        if (MainThread.IsMainThread)
+        {
+#endif
         // https://docs.microsoft.com/dotnet/maui/platform-integration/device/information
         _deviceInfo = DeviceInfo.Current;
         _deviceIdiom = _deviceInfo.Idiom.ToString();
+#if IOS
+        }
+        else
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                _deviceInfo = DeviceInfo.Current;
+                _deviceIdiom = _deviceInfo.Idiom.ToString();
+            });
+        }
+#endif
 
     }
 
@@ -46,7 +61,7 @@ internal class SentryMauiEventProcessor : ISentryEventProcessor
         @event.Contexts.Device.ApplyMauiDeviceData(_options.DiagnosticLogger,
                                                    _options.NetworkStatusListener,
                                                    _deviceIdiom,
-                                                   _deviceInfo,
+                                                   _deviceInfo!,
                                                    _displayInfo,
                                                    _deviceSupportsVibration,
                                                    _deviceSupportsAccelerometer,
