@@ -57,7 +57,7 @@ internal static class MauiDeviceData
 #if MACCATALYST || IOS
             if (MainThread.IsMainThread)
             {
-                CaptureDisplayInfo();
+                CaptureDisplayInfo(displayInfo);
             }
             else
             {
@@ -66,7 +66,7 @@ internal static class MauiDeviceData
                 // See https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/device/display?view=net-maui-8.0&tabs=macios#platform-differences
                 using var resetEvent = new ManualResetEventSlim(false);
                 // ReSharper disable once AccessToDisposedClosure - not disposed until lambda completes
-                MainThread.BeginInvokeOnMainThread(() => CaptureDisplayInfo(resetEvent));
+                MainThread.BeginInvokeOnMainThread(() => CaptureDisplayInfo(displayInfo, resetEvent));
                 resetEvent.Wait();
             }
 #else
@@ -107,11 +107,8 @@ internal static class MauiDeviceData
             logger?.LogError(ex, "Error getting MAUI device information.");
         }
 
-#if MACCATALYST || IOS
-        void CaptureDisplayInfo(ManualResetEventSlim? resetEvent = null)
+        void CaptureDisplayInfo(DisplayInfo display, ManualResetEventSlim? resetEvent = null)
         {
-            // https://docs.microsoft.com/dotnet/maui/platform-integration/device/display
-            var display = DeviceDisplay.MainDisplayInfo;
             device.ScreenResolution ??= $"{(int)display.Width}x{(int)display.Height}";
             device.ScreenDensity ??= (float)display.Density;
             device.Orientation ??= display.Orientation switch
@@ -125,22 +122,5 @@ internal static class MauiDeviceData
             // ? = display.Rotation;
             resetEvent?.Set();
         }
-#else
-
-        void CaptureDisplayInfo(DisplayInfo display)
-        {
-            device.ScreenResolution ??= $"{(int)display.Width}x{(int)display.Height}";
-            device.ScreenDensity ??= (float)display.Density;
-            device.Orientation ??= display.Orientation switch
-            {
-                DisplayOrientation.Portrait => DeviceOrientation.Portrait,
-                DisplayOrientation.Landscape => DeviceOrientation.Landscape,
-                _ => null
-            };
-            // device.ScreenDpi ??= ?
-            // ? = display.RefreshRate;
-            // ? = display.Rotation;
-        }
-#endif
     }
 }
