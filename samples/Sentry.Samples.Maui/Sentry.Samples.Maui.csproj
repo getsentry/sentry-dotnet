@@ -45,7 +45,7 @@
   <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' or $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
     <PublishAot>true</PublishAot>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <SentryOrg>sentry-sdks</SentryOrg>
     <SentryProject>sentry-dotnet</SentryProject>
@@ -57,6 +57,28 @@
     <SentryUploadSymbols>true</SentryUploadSymbols>
     <SentryUploadSources>true</SentryUploadSources>
   </PropertyGroup>
+
+  <!--
+    Use the arm64 runtime when building on arm64, and the x64 runtime when building on x64 Macs.
+    See https://github.com/xamarin/xamarin-macios/issues/17841
+  -->
+  <PropertyGroup>
+    <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
+    <TargetPlatformIdentifier>$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)'))</TargetPlatformIdentifier>
+
+    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android'      And '$(OSArchitecture)' == 'Arm64'">android-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(_IsPublishing)' == 'true'">ios-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(OSArchitecture)' == 'Arm64' And '$(_IsPublishing)' != 'true'">iossimulator-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'  And '$(OSArchitecture)' == 'Arm64'">maccatalyst-arm64</RuntimeIdentifier>
+
+    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'android'      And '$(OSArchitecture)' == 'x64'">android-x64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'ios'          And '$(OSArchitecture)' == 'x64' And '$(_IsPublishing)' != 'true'">iossimulator-x64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(TargetPlatformIdentifier)' == 'maccatalyst'  And '$(OSArchitecture)' == 'x64'">maccatalyst-x64</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <Target Name="LOG IDENTIFIERS" BeforeTargets="build">
+    <Message Importance="high" Text="TargetFramework: $(TargetFramework) - RuntimeIdentifier: $(RuntimeIdentifier)" />
+  </Target>
 
   <ItemGroup>
     <!-- App Icon -->
