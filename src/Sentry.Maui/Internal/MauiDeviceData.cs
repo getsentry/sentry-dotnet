@@ -121,7 +121,7 @@ internal static class MauiDeviceData
             resetEvent?.Set();
         }
 #endif
-        
+
 
         void SetDisplayInfo(DisplayInfo display, ManualResetEventSlim? resetEvent = null)
         {
