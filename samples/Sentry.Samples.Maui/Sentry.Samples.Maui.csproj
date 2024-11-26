@@ -12,8 +12,14 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Sentry.Samples.Maui</RootNamespace>
     <UseMaui>true</UseMaui>
+    <!-- 
+    Self contained is required when separating the Restore and Build phases in CI on our windows runner:
+      https://github.com/dotnet/sdk/issues/40517#issuecomment-2327354514
+    -->
+    <SelfContained>true</SelfContained>
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
+    <PublishReadyToRun>false</PublishReadyToRun>
 
     <!-- Display name -->
     <ApplicationTitle>Sentry.Samples.Maui</ApplicationTitle>
