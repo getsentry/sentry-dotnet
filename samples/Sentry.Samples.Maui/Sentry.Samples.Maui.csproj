@@ -84,9 +84,9 @@
     <!-- Splash Screen -->
     <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
 
-    <!-- Images -->
-    <MauiImage Include="Resources\Images\*" />
-    <MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
 
     <!-- Custom Fonts -->
     <MauiFont Include="Resources\Fonts\*" />
