@@ -6,29 +6,22 @@ namespace Sentry.Maui.Internal;
 
 internal static class MauiDeviceData
 {
-    public static void ApplyMauiDeviceData(this Device device, IDiagnosticLogger? logger, INetworkStatusListener? networkStatusListener)
+    public static void ApplyMauiDeviceData(this Device device, IDiagnosticLogger? logger, INetworkStatusListener? networkStatusListener, string deviceName, string deviceManufacturer, string deviceModel, string deviceType, bool? deviceSimulator, DevicePlatform devicePlatform, DisplayInfo displayInfo, bool supportsVibration, bool supportsAccelerometer, bool supportsGyroscope)
     {
         try
         {
             // TODO: Add more device data where indicated
 
-            // https://docs.microsoft.com/dotnet/maui/platform-integration/device/information
-            var deviceInfo = DeviceInfo.Current;
-            if (deviceInfo.Platform == DevicePlatform.Unknown)
+            if (devicePlatform == DevicePlatform.Unknown)
             {
                 // return early so we don't get NotImplementedExceptions (i.e., in unit tests, etc.)
                 return;
             }
-            device.Name ??= deviceInfo.Name;
-            device.Manufacturer ??= deviceInfo.Manufacturer;
-            device.Model ??= deviceInfo.Model;
-            device.DeviceType ??= deviceInfo.Idiom.ToString();
-            device.Simulator ??= deviceInfo.DeviceType switch
-            {
-                DeviceType.Virtual => true,
-                DeviceType.Physical => false,
-                _ => null
-            };
+            device.Name ??= deviceName;
+            device.Manufacturer ??= deviceManufacturer;
+            device.Model ??= deviceModel;
+            device.DeviceType ??= deviceType;
+            device.Simulator = deviceSimulator;
             // device.Brand ??= ?
             // device.Family ??= ?
             // device.ModelId ??= ?
@@ -72,15 +65,12 @@ internal static class MauiDeviceData
                 resetEvent.Wait();
             }
 #else
-            CaptureDisplayInfo();
+            SetDisplayInfo(displayInfo);
 #endif
 
-            // https://docs.microsoft.com/dotnet/maui/platform-integration/device/vibrate
-            device.SupportsVibration ??= Vibration.Default.IsSupported;
-
-            // https://docs.microsoft.com/dotnet/maui/platform-integration/device/sensors
-            device.SupportsAccelerometer ??= Accelerometer.IsSupported;
-            device.SupportsGyroscope ??= Gyroscope.IsSupported;
+            device.SupportsVibration ??= supportsVibration;
+            device.SupportsAccelerometer ??= supportsAccelerometer;
+            device.SupportsGyroscope ??= supportsGyroscope;
 
             // https://docs.microsoft.com/dotnet/maui/platform-integration/device/geolocation
             // TODO: How to get without actually trying to make a location request?
@@ -112,10 +102,31 @@ internal static class MauiDeviceData
             logger?.LogError(ex, "Error getting MAUI device information.");
         }
 
+#if MACCATALYST || IOS
         void CaptureDisplayInfo(ManualResetEventSlim? resetEvent = null)
         {
             // https://docs.microsoft.com/dotnet/maui/platform-integration/device/display
             var display = DeviceDisplay.MainDisplayInfo;
+            device.ScreenResolution ??= $"{(int)display.Width}x{(int)display.Height}";
+            device.ScreenDensity ??= (float)display.Density;
+            device.Orientation ??= display.Orientation switch
+            {
+                DisplayOrientation.Portrait => DeviceOrientation.Portrait,
+                DisplayOrientation.Landscape => DeviceOrientation.Landscape,
+                _ => null
+            };
+            // device.ScreenDpi ??= ?
+            // ? = display.RefreshRate;
+            // ? = display.Rotation;
+            resetEvent?.Set();
+        }
+#endif
+        
+
+        void SetDisplayInfo(DisplayInfo display, ManualResetEventSlim? resetEvent = null)
+        {
+            // https://docs.microsoft.com/dotnet/maui/platform-integration/device/display
+            //var display = DeviceDisplay.MainDisplayInfo;
             device.ScreenResolution ??= $"{(int)display.Width}x{(int)display.Height}";
             device.ScreenDensity ??= (float)display.Density;
             device.Orientation ??= display.Orientation switch
