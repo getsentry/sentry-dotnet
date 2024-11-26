@@ -6,22 +6,27 @@ namespace Sentry.Maui.Internal;
 
 internal static class MauiDeviceData
 {
-    public static void ApplyMauiDeviceData(this Device device, IDiagnosticLogger? logger, INetworkStatusListener? networkStatusListener, string deviceName, string deviceManufacturer, string deviceModel, string deviceType, bool? deviceSimulator, DevicePlatform devicePlatform, DisplayInfo displayInfo, bool supportsVibration, bool supportsAccelerometer, bool supportsGyroscope)
+    public static void ApplyMauiDeviceData(this Device device, IDiagnosticLogger? logger, INetworkStatusListener? networkStatusListener, string deviceIdiom, IDeviceInfo deviceInfo, DisplayInfo displayInfo, bool supportsVibration, bool supportsAccelerometer, bool supportsGyroscope)
     {
         try
         {
             // TODO: Add more device data where indicated
 
-            if (devicePlatform == DevicePlatform.Unknown)
+            if (deviceInfo.Platform == DevicePlatform.Unknown)
             {
                 // return early so we don't get NotImplementedExceptions (i.e., in unit tests, etc.)
                 return;
             }
-            device.Name ??= deviceName;
-            device.Manufacturer ??= deviceManufacturer;
-            device.Model ??= deviceModel;
-            device.DeviceType ??= deviceType;
-            device.Simulator = deviceSimulator;
+            device.Name ??= deviceInfo.Name;
+            device.Manufacturer ??= deviceInfo.Manufacturer;
+            device.Model ??= deviceInfo.Model;
+            device.DeviceType ??= deviceIdiom;
+            device.Simulator = deviceInfo.DeviceType switch
+            {
+                DeviceType.Virtual => true,
+                DeviceType.Physical => false,
+                _ => null
+            };
             // device.Brand ??= ?
             // device.Family ??= ?
             // device.ModelId ??= ?

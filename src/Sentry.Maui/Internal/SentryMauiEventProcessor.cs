@@ -12,12 +12,7 @@ internal class SentryMauiEventProcessor : ISentryEventProcessor
     private readonly bool _deviceSupportsAccelerometer;
     private readonly bool _deviceSupportsGyroscope;
     private readonly IDeviceInfo _deviceInfo;
-    private readonly string _deviceDeviceType;
-    private readonly DevicePlatform _devicePlatform;
-    private readonly bool? _deviceSimulator;
-    private readonly string _deviceName;
-    private readonly string _deviceManufacturer;
-    private readonly string _deviceModel;
+    private readonly string _deviceIdiom;
 
     public SentryMauiEventProcessor(SentryMauiOptions options)
     {
@@ -36,18 +31,8 @@ internal class SentryMauiEventProcessor : ISentryEventProcessor
 
         // https://docs.microsoft.com/dotnet/maui/platform-integration/device/information
         _deviceInfo = DeviceInfo.Current;
+        _deviceIdiom = _deviceInfo.Idiom.ToString();
 
-        _deviceName = _deviceInfo.Name;
-        _deviceManufacturer = _deviceInfo.Manufacturer;
-        _deviceModel = _deviceInfo.Model;
-        _deviceDeviceType = _deviceInfo.Idiom.ToString();
-        _devicePlatform = _deviceInfo.Platform;
-        _deviceSimulator = _deviceInfo.DeviceType switch
-        {
-            DeviceType.Virtual => true,
-            DeviceType.Physical => false,
-            _ => null
-        };
     }
 
     public SentryEvent Process(SentryEvent @event)
@@ -58,12 +43,8 @@ internal class SentryMauiEventProcessor : ISentryEventProcessor
         // Apply Device Data
         @event.Contexts.Device.ApplyMauiDeviceData(_options.DiagnosticLogger,
                                                    _options.NetworkStatusListener,
-                                                   _deviceName,
-                                                   _deviceManufacturer,
-                                                   _deviceModel,
-                                                   _deviceDeviceType,
-                                                   _deviceSimulator,
-                                                   _devicePlatform,
+                                                   _deviceIdiom,
+                                                   _deviceInfo,
                                                    _displayInfo,
                                                    _deviceSupportsVibration,
                                                    _deviceSupportsAccelerometer,
