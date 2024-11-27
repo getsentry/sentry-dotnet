@@ -147,8 +147,8 @@ internal enum SentryTransactionNameSource : long
 }
 '@
 
-$Text += "`r`n$SentryLevel"
-$Text += "`r`n$SentryTransactionNameSource"
+$Text += "`n$SentryLevel"
+$Text += "`n$SentryTransactionNameSource"
 
 # Add header and output file
 $Text = "$Header`n`n$Text"
@@ -296,7 +296,7 @@ interface SentryId
 }
 '@
 
-$Text += "`r`n$SentryId"
+$Text += "`n$SentryId"
 
 # Add header and output file
 $Text = "$Header`n`n$Text"

@@ -91,7 +91,7 @@
   <!-- Generate bindings -->
   <Target Name="_GenerateSentryCocoaBindings" AfterTargets="SetupCocoaSDK"
           Condition="$([MSBuild]::IsOSPlatform('OSX')) and Exists('$(SentryCocoaFrameworkHeaders)')"
-          Inputs="../../modules/sentry-cocoa.properties"
+          Inputs="../../modules/sentry-cocoa.properties;../../scripts/generate-cocoa-bindings.ps1"
           Outputs="ApiDefinitions.cs;StructsAndEnums.cs">
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerGenerateSentryCocoaBindings" Properties="TargetFramework=once" />
   </Target>
