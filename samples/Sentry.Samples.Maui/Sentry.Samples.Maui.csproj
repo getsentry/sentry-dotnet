@@ -12,7 +12,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Sentry.Samples.Maui</RootNamespace>
     <UseMaui>true</UseMaui>
-    <!-- 
+    <!--
     Self contained is required when separating the Restore and Build phases in CI on our windows runner:
       https://github.com/dotnet/sdk/issues/40517#issuecomment-2327354514
     -->
@@ -107,9 +107,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
-    <!-- https://github.com/advisories/GHSA-5f2m-466j-3848 -->
-    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
   </ItemGroup>
 
 </Project>
