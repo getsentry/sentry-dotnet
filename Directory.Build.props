@@ -87,7 +87,7 @@
   <!-- dotnet-gcdump needs net6+ and won't work on mobile. -->
   <PropertyGroup>
     <PlatformIsLegacy Condition="$(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netstandard'))">true</PlatformIsLegacy>
-    <PlatformIsMobile Condition="$(TargetFramework.EndsWith('android')) or $(TargetFramework.EndsWith('ios')) or $(TargetFramework.EndsWith('maccatalyst'))">true</PlatformIsMobile>
+    <PlatformIsMobile Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' or $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' or $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">true</PlatformIsMobile>
     <MemoryDumpSupported Condition="!($(PlatformIsLegacy) == 'true' or $(PlatformIsMobile) == 'true')">true</MemoryDumpSupported>
 
     <DefineConstants Condition="'$(MemoryDumpSupported)' == 'true'">$(DefineConstants);MEMORY_DUMP_SUPPORTED</DefineConstants>
