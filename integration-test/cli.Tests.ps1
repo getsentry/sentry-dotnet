@@ -119,10 +119,13 @@ Describe 'MAUI' -ForEach @(
         }
 
         $name = 'maui-app'
+        $androidTpv = '34.0'
+        $iosTpv = '17.0'
+
         DotnetNew 'maui' $name $framework
 
         # Workaround for the missing "ios" workload on Linux, see https://github.com/dotnet/maui/pull/18580
-        $tfs = $IsMacos ? "$framework-android;$framework-ios;$framework-maccatalyst" : "$framework-android"
+        $tfs = $IsMacos ? "$framework-android$androidTpv;$framework-ios$iosTpv;$framework-maccatalyst$iosTpv" : "$framework-android$androidTpv"
         (Get-Content $name/$name.csproj) -replace '<TargetFrameworks>[^<]+</TargetFrameworks>', "<TargetFrameworks>$tfs</TargetFrameworks>" | Set-Content $name/$name.csproj
 
         dotnet remove $name/$name.csproj package 'Microsoft.Extensions.Logging.Debug' | ForEach-Object { Write-Host $_ }
@@ -144,7 +147,7 @@ Describe 'MAUI' -ForEach @(
 
         if (Test-Path env:CI)
         {
-            dotnet build $name/$name.csproj -t:InstallAndroidDependencies -f:$framework-android -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/" | ForEach-Object { Write-Host $_ }
+            dotnet build $name/$name.csproj -t:InstallAndroidDependencies -f:$framework-android$androidTpv -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/" | ForEach-Object { Write-Host $_ }
             if ($LASTEXITCODE -ne 0)
             {
                 throw "Failed to install android dependencies."
@@ -153,7 +156,7 @@ Describe 'MAUI' -ForEach @(
     }
 
     It "uploads symbols and sources for an Android build" {
-        $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-android"
+        $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-android$androidTpv"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'libsentry-android.so',
             'libsentry.so',
@@ -166,7 +169,7 @@ Describe 'MAUI' -ForEach @(
     }
 
     It "uploads symbols and sources for an iOS build" -Skip:(!$IsMacOS) {
-        $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-ios"
+        $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-ios$iosTpv"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'libmono-component-debugger.dylib',
             'libmono-component-diagnostics_tracing.dylib',
