@@ -6,9 +6,9 @@
       On Mac, we'll also build for iOS and MacCatalyst.
       On Windows, we'll also build for Windows 10.
     -->
-    <TargetFrameworks>$(TargetFrameworks);net9.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net9.0-android35.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0;net9.0-ios18.0;net9.0-maccatalyst18.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net9.0-ios18.0;net9.0-maccatalyst18.0</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <RootNamespace>Sentry.Samples.Maui</RootNamespace>
     <UseMaui>true</UseMaui>
