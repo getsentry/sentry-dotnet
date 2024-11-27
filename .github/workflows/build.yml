@@ -112,7 +112,7 @@ jobs:
       - name: Install Android SDKs
         if: runner.os == 'macOS'
         run: |
-          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
+          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
 
       - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
