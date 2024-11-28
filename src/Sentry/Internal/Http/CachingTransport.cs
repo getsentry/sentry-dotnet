@@ -41,7 +41,7 @@ internal class CachingTransport : ITransport, IDisposable
     // and write from/to the cache directory.
     // Lock usage is minimized by moving files that are being processed to a special directory
     // where collisions are not expected.
-    private readonly Lock _cacheDirectoryLock = new();
+    private readonly SentryLock _cacheDirectoryLock = new();
 
     private readonly CancellationTokenSource _workerCts = new();
     private Task _worker = null!;

@@ -6,7 +6,28 @@ namespace Sentry.Maui.Internal;
 
 internal static class MauiDeviceData
 {
-    public static void ApplyMauiDeviceData(this Device device, IDiagnosticLogger? logger)
+#if NET9_0_OR_GREATER && ANDROID
+    private static readonly Lock JniLock = new();
+#elif ANDROID
+    private static readonly object JniLock = new();
+#endif
+
+    public static void ApplyMauiDeviceData(this Device device, IDiagnosticLogger? logger,
+        INetworkStatusListener? networkStatusListener)
+    {
+#if ANDROID
+        // Accessing device information on Android doesn't have to happen on the UI thread, but it's not threadsafe.
+        // See: https://github.com/getsentry/sentry-dotnet/issues/3627
+        lock (JniLock)
+        {
+            ApplyMauiDeviceDataInternal(device, logger, networkStatusListener);
+        }
+#else
+        ApplyMauiDeviceDataInternal(device, logger, networkStatusListener);
+#endif
+    }
+
+    private static void ApplyMauiDeviceDataInternal(Device device, IDiagnosticLogger? logger, INetworkStatusListener? networkStatusListener)
     {
         try
         {
@@ -54,10 +75,9 @@ internal static class MauiDeviceData
                 logger?.LogDebug("No permission to read battery state from the device.");
             }
 
-            // https://docs.microsoft.com/dotnet/maui/platform-integration/communication/networking#using-connectivity
             try
             {
-                device.IsOnline ??= Connectivity.NetworkAccess == NetworkAccess.Internet;
+                device.IsOnline ??= networkStatusListener?.Online;
             }
             catch (PermissionException)
             {
