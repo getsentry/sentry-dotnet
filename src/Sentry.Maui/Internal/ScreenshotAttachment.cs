@@ -42,9 +42,7 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
     {
         var stream = Stream.Null;
         // Not including this on Windows specific build because on WinUI this can deadlock.
-#if !(__ANDROID__ || __IOS__)
-        return stream;
-#endif
+#if (__ANDROID__ || __IOS__)
         Stream CaptureScreenBlocking()
         {
             // This actually runs synchronously (returning Task.FromResult) on the following platforms:
@@ -60,6 +58,7 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
             return stream;
         }
 
+#endif
 #if __IOS__
         if (MainThread.IsMainThread)
         {
@@ -75,7 +74,7 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
                 return await screen.OpenReadAsync(ScreenshotFormat.Jpeg).ConfigureAwait(true);
             }).ConfigureAwait(false).GetAwaiter().GetResult();
         }
-#else
+#elif __ANDROID__
         // Capturing screenshots is not threadsafe on Android
         lock (JniLock)
         {
