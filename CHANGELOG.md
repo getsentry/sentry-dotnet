@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump CLI from v2.39.0 to v2.39.1 ([#3799](https://github.com/getsentry/sentry-dotnet/pull/3799))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2391)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.39.0...2.39.1)
+
 ## 5.0.0-alpha.1
 
 ### API Changes
