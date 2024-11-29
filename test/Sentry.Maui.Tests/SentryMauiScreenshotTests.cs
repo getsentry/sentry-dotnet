@@ -172,5 +172,40 @@ public class SentryMauiScreenshotTests
             envelopeItem!.TryGetFileName().Should().Be("screenshot.jpg");
         }
     }
+
+    [Fact]
+    public async Task CaptureException_AttachScreenshot_Threadsafe()
+    {
+        // Arrange
+        var builder = _fixture.Builder.UseSentry(options =>
+        {
+            options.AttachScreenshot = true;
+        });
+        await using var app = builder.Build();
+        var client = app.Services.GetRequiredService<ISentryClient>();
+
+        // Act
+        var tasks = new List<Task<SentryId>>();
+        for (var i = 0; i < 20; i++)
+        {
+            var j = i;
+            tasks.Add(Task.Run(() =>
+            {
+                var exSample = new NotImplementedException("Sample Exception " + j);
+                var sentryId = client.CaptureException(exSample);
+                client.FlushAsync();
+                return sentryId;
+            }));
+        }
+
+        // Assert
+        while (tasks.Any())
+        {
+            var finishedTask = await Task.WhenAny(tasks);
+
+            finishedTask.Exception.Should().BeNull();
+            tasks.Remove(finishedTask);
+        }
+    }
 #endif
 }
