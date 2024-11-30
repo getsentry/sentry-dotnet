@@ -1,10 +1,10 @@
 namespace Sentry.Internal;
 
-internal class Lock : IDisposable
+internal class SentryLock : IDisposable
 {
     private readonly Signal _signal;
 
-    public Lock() => _signal = new Signal(true);
+    public SentryLock() => _signal = new Signal(true);
 
     public async Task<IDisposable> AcquireAsync(CancellationToken cancellationToken = default)
     {

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Fixes
+- Fixed JNI Error when accessing Android device data from multiple threads ([#3802](https://github.com/getsentry/sentry-dotnet/pull/3802))
+
 ### Dependencies
 
 - Bump CLI from v2.39.0 to v2.39.1 ([#3799](https://github.com/getsentry/sentry-dotnet/pull/3799))

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <VersionPrefix>5.0.0-alpha.1</VersionPrefix>
-    <LangVersion>12</LangVersion>
+    <LangVersion>13</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory).assets\Sentry.snk</AssemblyOriginatorKeyFile>
