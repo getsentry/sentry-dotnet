@@ -15,10 +15,10 @@
     <NoWarn>$(NoWarn);CS8002</NoWarn>
 
     <!-- We need to support old stuff. Applications should definitely address these advisory warnings though. -->
-    <NoWarn>$(NoWarn);NU1903</NoWarn>
+    <NoWarn>$(NoWarn);NU1902;NU1903</NoWarn>
 
     <!-- https://learn.microsoft.com/en-us/dotnet/core/compatibility/sdk/8.0/dotnet-restore-audit#version-introduced -->
-    <WarningsNotAsErrors>NU1903</WarningsNotAsErrors>
+    <WarningsNotAsErrors>NU1902;NU1903</WarningsNotAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' != 'Release'">
