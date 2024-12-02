@@ -48,7 +48,7 @@
 
     <PackageReference Include="NSubstitute" Version="5.1.0" />
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
-    <PackageReference Include="xunit" Version="2.6.5" />
+    <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
     <PackageReference Include="GitHubActionsTestLogger" Version="2.3.3" />
     <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="20.0.4" />
@@ -56,7 +56,7 @@
 
   <!-- only non-platform-specific projects should include these packages -->
   <ItemGroup Condition="'$(TargetPlatformIdentifier)'==''">
-    <PackageReference Include="Verify.Xunit" Version="22.11.4" />
+    <PackageReference Include="Verify.Xunit" Version="28.4.0" />
     <PackageReference Include="Verify.DiffPlex" Version="2.3.0" />
     <PackageReference Include="PublicApiGenerator" Version="11.1.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5" PrivateAssets="All" />

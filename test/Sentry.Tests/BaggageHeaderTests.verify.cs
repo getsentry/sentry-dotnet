@@ -1,6 +1,5 @@
 namespace Sentry.Tests;
 
-[UsesVerify]
 public partial class BaggageHeaderTests
 {
     [Fact]

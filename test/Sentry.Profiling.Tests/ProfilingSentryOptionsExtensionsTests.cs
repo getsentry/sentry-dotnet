@@ -2,8 +2,6 @@ namespace Sentry.Profiling.Tests;
 
 #nullable enable
 
-[UsesVerify]
-
 public class ProfilingSentryOptionsExtensionsTests
 {
     private readonly InMemoryDiagnosticLogger _logger = new();
