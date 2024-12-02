@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### API Changes
+
+- Removed net6.0 and net7.0 TFMs as Microsoft has stopped supporting both of these now ([#3807](https://github.com/getsentry/sentry-dotnet/pull/3807))
+
 ### Fixes
 - Fixed JNI Error when accessing Android device data from multiple threads ([#3802](https://github.com/getsentry/sentry-dotnet/pull/3802))
 
