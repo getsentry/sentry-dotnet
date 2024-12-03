@@ -46,8 +46,8 @@ runs:
       # Attempt to install Mono, allowing it to fail silently
       # Then ensure mono is correctly linked, overwriting any conflicting symlinks
       run: |
-        brew install mono || true
-        brew link --overwrite mono
+        brew install mono-mdk || true
+        brew link --overwrite mono-mdk
 
     - name: Install .NET SDK
       if: runner.os != 'Windows'
