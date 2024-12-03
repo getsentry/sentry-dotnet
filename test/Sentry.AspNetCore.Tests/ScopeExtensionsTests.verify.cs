@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Routing;
 
 namespace Sentry.AspNetCore.Tests;
 
-[UsesVerify]
 public partial class ScopeExtensionsTests
 {
     [Fact]

@@ -806,7 +806,7 @@ public class SentryMiddlewareTests
         sut.PopulateScope(_fixture.HttpContext, scope);
         sut.PopulateScope(_fixture.HttpContext, scope);
 
-        Assert.Single(scope.GetAllEventProcessors().Where(c => c == customProcessor));
+        Assert.Single(scope.GetAllEventProcessors(), c => c == customProcessor);
     }
 
     [Fact]
@@ -841,7 +841,7 @@ public class SentryMiddlewareTests
         sut.PopulateScope(_fixture.HttpContext, scope);
         sut.PopulateScope(_fixture.HttpContext, scope);
 
-        Assert.Single(scope.GetAllExceptionProcessors().Where(c => c == customEventExceptionProcessor));
+        Assert.Single(scope.GetAllExceptionProcessors(), c => c == customEventExceptionProcessor);
     }
 
     [Fact]
@@ -876,6 +876,6 @@ public class SentryMiddlewareTests
         sut.PopulateScope(_fixture.HttpContext, scope);
         sut.PopulateScope(_fixture.HttpContext, scope);
 
-        Assert.Single(scope.GetAllTransactionProcessors().Where(c => c == customTransactionProcessor));
+        Assert.Single(scope.GetAllTransactionProcessors(), c => c == customTransactionProcessor);
     }
 }

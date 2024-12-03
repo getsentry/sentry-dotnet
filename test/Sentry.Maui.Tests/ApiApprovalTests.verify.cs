@@ -1,6 +1,5 @@
 namespace Sentry.Maui.Tests;
 
-[UsesVerify]
 public class ApiApprovalTests
 {
     [Fact]
