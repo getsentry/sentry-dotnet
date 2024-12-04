@@ -11,6 +11,12 @@ runs:
         echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" >> $GITHUB_ENV
         echo "DOTNET_NOLOGO=1" >> $GITHUB_ENV
 
+    # See https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md#xcode
+    - name: Pin the Xcode Version
+      if: runner.os == 'macOS'
+      shell: bash
+      run: sudo xcode-select --switch /Applications/Xcode_16.0.app
+
     # Needed for Android SDK setup step
     - uses: actions/setup-java@v3
       with:
