@@ -79,8 +79,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DeviceRunners.XHarness.Maui" Version="0.1.0-preview.1" />
-    <PackageReference Include="DeviceRunners.XHarness.Xunit" Version="0.1.0-preview.1" />
+    <PackageReference Include="DeviceRunners.XHarness.Maui" Version="0.1.0-preview.2" />
+    <PackageReference Include="DeviceRunners.XHarness.Xunit" Version="0.1.0-preview.2" />
   </ItemGroup>
 
   <ItemGroup>
