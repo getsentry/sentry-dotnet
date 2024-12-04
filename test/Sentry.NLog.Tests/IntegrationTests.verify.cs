@@ -1,6 +1,5 @@
 namespace Sentry.NLog.Tests;
 
-[UsesVerify]
 public class IntegrationTests
 {
     [Fact]

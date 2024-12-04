@@ -1,6 +1,5 @@
 namespace Sentry.Tests.Internals;
 
-[UsesVerify]
 public class CollectionExtensionsTests
 {
     [Fact]

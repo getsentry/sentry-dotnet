@@ -1,6 +1,5 @@
 namespace Sentry.DiagnosticSource.IntegrationTests;
 
-[UsesVerify]
 public class SqlListenerTests : IClassFixture<LocalDbFixture>
 {
     private readonly LocalDbFixture _fixture;
