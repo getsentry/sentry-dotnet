@@ -54,7 +54,6 @@ filterConfigs:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*SourceGen.csproj"
-        - "**/Sentry.Samples.Android.csproj"
 
   - outputPath: Sentry-CI-Build-Windows.slnf
     include:

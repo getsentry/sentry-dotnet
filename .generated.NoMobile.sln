@@ -190,6 +190,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Analyzers", "src\Sentry.Analyzers\Sentry.Analyzers.csproj", "{E36C8DCA-464E-41CB-B189-F58553AAA8D4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Analyzers.Tests", "test\Sentry.Analyzers.Tests\Sentry.Analyzers.Tests.csproj", "{5A17FEF9-07BB-47B8-9883-9C2CC93F09E8}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Console.HeapDump", "samples\Sentry.Samples.Console.HeapDump\Sentry.Samples.Console.HeapDump.csproj", "{D7DF0B26-AD43-4F8B-9BFE-C4471CCC9821}"
 EndProject
 Global
