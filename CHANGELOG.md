@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### API Changes
+
+- Temporarily removed experimental Session Replay support ([#3827](https://github.com/getsentry/sentry-dotnet/pull/3827))
+
 ### Fixes
 - Fixed JNI Error when accessing Android device data from multiple threads ([#3802](https://github.com/getsentry/sentry-dotnet/pull/3802))
 
