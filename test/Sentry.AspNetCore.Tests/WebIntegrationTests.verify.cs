@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Sentry.AspNetCore.Tests;
 
-[UsesVerify]
 public class WebIntegrationTests
 {
     private readonly TestOutputDiagnosticLogger _logger;

@@ -81,6 +81,9 @@
   <ItemGroup>
     <PackageReference Include="DeviceRunners.XHarness.Maui" Version="0.1.0-preview.1" />
     <PackageReference Include="DeviceRunners.XHarness.Xunit" Version="0.1.0-preview.1" />
+    <!-- Prevent downgrade of these packages for DeviceRunners.XHarness.Xunit 0.1.0-preview.1   -->
+    <PackageReference Include="System.Net.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
