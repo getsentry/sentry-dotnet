@@ -5,11 +5,6 @@ namespace Sentry.Tests.Platforms.Android;
 
 public class BindableNativeOptionsTests : BindableTests<SentryOptions.NativeOptions>
 {
-    public BindableNativeOptionsTests()
-        : base(nameof(BindableSentryOptions.NativeOptions.ExperimentalOptions))
-    {
-    }
-
     [Fact]
     public void BindableProperties_MatchOptionsProperties()
     {
