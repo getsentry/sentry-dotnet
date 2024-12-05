@@ -6,7 +6,6 @@ namespace Sentry.Profiling.Tests;
 // Note: we must not run tests in parallel because we only support profiling one transaction at a time.
 // That means setting up a test-collection with parallelization disabled and NOT using any async test functions.
 [CollectionDefinition(nameof(SamplingTransactionProfilerTests), DisableParallelization = true)]
-[UsesVerify]
 public class SamplingTransactionProfilerTests
 {
     private readonly TestOutputDiagnosticLogger _testOutputLogger;

@@ -4,7 +4,6 @@ using System.Text.Json.Serialization.Metadata;
 
 namespace Sentry.Tests;
 
-[UsesVerify]
 public class SerializationTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;

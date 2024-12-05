@@ -1,6 +1,5 @@
 namespace Sentry.Tests;
 
-[UsesVerify]
 public class EventProcessorTests
 {
     private readonly TestOutputDiagnosticLogger _logger;
