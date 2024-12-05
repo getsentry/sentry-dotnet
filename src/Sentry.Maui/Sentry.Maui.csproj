@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Official MAUI integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <!--
-      Target net8.0 so we can run unit tests on platform-neutral code.
+      Target net8.0 and net9.0 so we can run unit tests on platform-neutral code.
       Target other platforms so we can include platform-specific code, and bundle native SDKs.
     -->
     <TargetFrameworks>net9.0;net8.0</TargetFrameworks>

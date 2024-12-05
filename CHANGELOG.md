@@ -4,6 +4,7 @@
 
 ### API Changes
 
+- Removed net6.0 and net7.0 TFMs as Microsoft has stopped supporting both of these now ([#3807](https://github.com/getsentry/sentry-dotnet/pull/3807))
 - Temporarily removed experimental Session Replay support ([#3827](https://github.com/getsentry/sentry-dotnet/pull/3827))
 
 ### Fixes

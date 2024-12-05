@@ -1,33 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net7.0;net6.0;net48</TargetFrameworks>
+    <TargetFrameworks>net9.0;net8.0;net48</TargetFrameworks>
   </PropertyGroup>
+
+  <!-- Test EF Core 9 on .NET 9 -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Verify.EntityFramework" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
+  </ItemGroup>
 
   <!-- Test EF Core 8 on .NET 8 -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <PackageReference Include="Verify.EntityFramework" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
-  </ItemGroup>
-
-  <!--
-    For now, we will use EF Core 6 in the .NET 7 tests here, until this issue has a resolution:
-    https://github.com/dotnet/efcore/issues/29543
-  -->
-
-  <!-- Test EF Core 7 on .NET 7 -->
-  <!-- <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
-    <PackageReference Include="Verify.EntityFramework" Version="8.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.8" />
-  </ItemGroup> -->
-
-  <!-- Test EF Core 6 on .NET 6 and 7 -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0' Or '$(TargetFramework)' == 'net7.0'">
-    <PackageReference Include="Verify.EntityFramework" Version="7.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.19" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.19" />
   </ItemGroup>
 
   <!-- Test EF Core 3.1 on .NET Framework -->

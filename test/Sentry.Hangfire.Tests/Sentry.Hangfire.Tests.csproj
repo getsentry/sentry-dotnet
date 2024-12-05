@@ -3,7 +3,7 @@
   <PropertyGroup>
     <!-- We're skipping testing on net48 due to Hangfire not supporting strong names signing of its assemblies.
     Read more here: https://github.com/HangfireIO/Hangfire/issues/1076 -->
-    <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
