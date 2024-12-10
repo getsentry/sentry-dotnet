@@ -46,7 +46,7 @@
     </None>
   </ItemGroup>
 
-  <Target Name="CleanNativeSDK" BeforeTargets="CoreClean" Condition="'$(TargetFramework)' == 'net8.0'">
+  <Target Name="CleanNativeSDK" BeforeTargets="CoreClean" Condition="'$(TargetFramework)' == 'net8.0' or '$(TargetFramework)' == 'net9.0'">
     <Message Text="Inside Custom Clean" Importance="high"/>
     <RemoveDir Directories="$(SentryNativeOutputDirectory)" />
     <RemoveDir Directories="$(SentryNativeSourceDirectory)build" />
@@ -56,7 +56,7 @@
        built already on each native platform and fetched for the final .net build. -->
   <Target Name="_BuildSentryNativeSDK"
     BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
-    Condition="'$(TargetFramework)' == 'net8.0' and '$(CI)' != 'true'"
+    Condition="('$(TargetFramework)' == 'net8.0' or '$(TargetFramework)' == 'net9.0') and '$(CI)' != 'true'"
     Inputs="$(SentryNativeBuildInputs)"
     Outputs="$(SentryNativeBuildOutputs)">
     <!-- We want a "-Clean" because if the build script changes, previous cmake cache may contain invalid defines. -->

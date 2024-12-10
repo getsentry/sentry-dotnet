@@ -1,0 +1,64 @@
+﻿[
+  {
+    Source: {
+      Name: my transaction,
+      Platform: csharp,
+      Operation: my operation,
+      Description: ,
+      Status: Ok,
+      IsSampled: true,
+      SampleRate: 1.0,
+      Request: {},
+      Contexts: {
+        trace: {
+          Operation: my operation,
+          Description: ,
+          Status: Ok,
+          IsSampled: true
+        }
+      },
+      User: {
+        Id: Guid_1,
+        IpAddress: {{auto}}
+      },
+      Spans: [
+        {
+          IsFinished: true,
+          Operation: db.connection,
+          Description: SqlListenerTests.verify_LoggingAsync,
+          Status: Ok,
+          IsSampled: true,
+          Extra: {
+            bytes_sent : 376,
+            db.connection_id: Guid_2,
+            db.name: SqlListenerTests.verify_LoggingAsync,
+            db.operation_id: Guid_3,
+            db.server: (LocalDb)\SqlListenerTests,
+            db.system: sql,
+            rows_sent: 0
+          }
+        },
+        {
+          IsFinished: true,
+          Operation: db.query,
+          Description:
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [TestEntities] ([Property])
+OUTPUT INSERTED.[Id]
+VALUES (@p0);
+,
+          Status: Ok,
+          IsSampled: true,
+          Extra: {
+            db.connection_id: Guid_2,
+            db.name: SqlListenerTests.verify_LoggingAsync,
+            db.operation_id: Guid_4,
+            db.system: sql
+          }
+        }
+      ],
+      IsFinished: true
+    }
+  }
+]
