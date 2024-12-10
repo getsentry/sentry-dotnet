@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <PackageTags>$(PackageTags);AspNetCore;gRPC</PackageTags>
     <Description>Official ASP.NET Core gRPC integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
   </PropertyGroup>
