@@ -9,6 +9,7 @@
 
 ### Fixes
 - Fixed JNI Error when accessing Android device data from multiple threads ([#3802](https://github.com/getsentry/sentry-dotnet/pull/3802))
+- Address Trim warnings so that MAUI applications can be compiled AOT ([#3841](https://github.com/getsentry/sentry-dotnet/pull/3841))
 
 ### Dependencies
 
