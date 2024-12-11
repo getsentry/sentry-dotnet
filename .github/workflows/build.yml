@@ -189,7 +189,6 @@ jobs:
 
 
   trim-analysis:
-    needs: build
     name: Trim analysis
     runs-on: macos-15
 
