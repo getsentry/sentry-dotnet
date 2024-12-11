@@ -187,6 +187,44 @@ jobs:
         with:
           path: integration-test
 
+
+  trim-analysis:
+    needs: build
+    name: Trim analysis
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 2 # default is 1 and codecov needs > 1
+
+      # We use macOS for the final publishing build so we get all the iOS/macCatalyst targets in the packages
+      - name: Set Environment Variables
+        run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
+
+      - name: Download sentry-native (macOS)
+        uses: actions/cache/restore@v4
+        with:
+          path: src/Sentry/Platforms/Native/sentry-native
+          key: sentry-native-macOS-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
+      - name: Build Native Dependencies
+        uses: ./.github/actions/buildnative
+
+      - name: Install Android SDKs
+        if: runner.os == 'macOS'
+        run: |
+          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
+
+      - name: Publish Test app
+        run: dotnet publish test/Sentry.TrimTest/Sentry.TrimTest.csproj -c Release -r osx-arm64
+
   test-solution-filters:
     runs-on: ubuntu-latest
     if: ${{ !startsWith(github.ref_name, 'release/') }}

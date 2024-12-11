@@ -71,6 +71,7 @@
       "test\\Sentry.Testing.CrashableApp\\Sentry.Testing.CrashableApp.csproj",
       "test\\Sentry.Testing\\Sentry.Testing.csproj",
       "test\\Sentry.Tests\\Sentry.Tests.csproj",
+      "test\\Sentry.TrimTest\\Sentry.TrimTest.csproj",
       "test\\SingleFileTestApp\\SingleFileTestApp.csproj"
     ]
   }
