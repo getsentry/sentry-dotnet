@@ -13,7 +13,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
     <TrimmerRootAssembly Include="Sentry" />
+    <TrimmerRootAssembly Include="Sentry.Maui" />
   </ItemGroup>
 
 </Project>
