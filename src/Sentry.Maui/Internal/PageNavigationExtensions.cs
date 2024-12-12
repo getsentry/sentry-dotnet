@@ -14,12 +14,10 @@ internal static class PageNavigationExtensions
         {
             return;
         }
-
-        var eventArgsType = typeof(NavigatedFromEventArgs);
-        DestinationPageProperty =
-            eventArgsType.GetProperty("DestinationPage", BindingFlags.Instance | BindingFlags.NonPublic);
-        PreviousPageProperty =
-            eventArgsType.GetProperty("PreviousPage", BindingFlags.Instance | BindingFlags.NonPublic);
+        DestinationPageProperty = typeof(NavigatedFromEventArgs)
+            .GetProperty("DestinationPage", BindingFlags.Instance | BindingFlags.NonPublic);
+        PreviousPageProperty = typeof(NavigatedToEventArgs)
+            .GetProperty("PreviousPage", BindingFlags.Instance | BindingFlags.NonPublic);
     }
 
     /// <summary>
