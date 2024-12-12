@@ -24,6 +24,10 @@ groupConfigs:
   windowsOnly:
     # .NET Framework projects
     - "**/*.AspNet.csproj"
+  artefacts:
+    # Any projects in the obj or bin directories
+    - "**/obj/**/*.csproj"
+    - "**/bin/**/*.csproj"
 
 filterConfigs:
 
