@@ -12,7 +12,7 @@ internal static class AotHelper
 
     static AotHelper()
     {
-        IsTrimmed = SupportsUnreferencedCode();
+        IsTrimmed = CheckIsTrimmed();
 #if NETSTANDARD2_0 || NETFRAMEWORK
         IsDynamicCodeSupported = true;
 #else
@@ -23,7 +23,7 @@ internal static class AotHelper
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AvoidAtRuntime)]
-    private static bool SupportsUnreferencedCode()
+    private static bool CheckIsTrimmed()
     {
         var stackTrace = new StackTrace(false);
         return stackTrace.GetFrame(0)?.GetMethod() is null;
