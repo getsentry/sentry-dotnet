@@ -41,6 +41,7 @@ filterConfigs:
         - "**/*Maui.Device.TestApp.csproj"
         - "**/*SourceGen.csproj"
         - "**/*TestUtils*.csproj"
+        - "**/*Sentry.TrimTest.csproj"
 
   - outputPath: Sentry-CI-Build-macOS.slnf
     include:
@@ -54,6 +55,7 @@ filterConfigs:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*SourceGen.csproj"
+        - "**/*Sentry.TrimTest.csproj"
 
   - outputPath: Sentry-CI-Build-Windows.slnf
     include:
@@ -72,6 +74,7 @@ filterConfigs:
         - "**/*Sentry.Samples.Android.csproj"
         - "**/*OpenTelemetry.AspNet.csproj"
         - "**/*SourceGen.csproj"
+        - "**/*Sentry.TrimTest.csproj"
 
   - outputPath: Sentry-CI-CodeQL.slnf
     include:
@@ -178,6 +181,7 @@ filterConfigs:
         - "**/*Android*.csproj"
         - "**/*Ios*.csproj"
         - "**/*Maui*.csproj"
+        - "**/*Sentry.TrimTest.csproj"
 
   - outputPath: SentryNoSamples.slnf
     include:
@@ -189,3 +193,4 @@ filterConfigs:
         - "**/*Bindings*"
         - "**/*DeviceTests*"
         - "**/*TestApp*"
+        - "**/*Sentry.TrimTest.csproj"

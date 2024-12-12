@@ -14,6 +14,7 @@
       "samples\\Sentry.Samples.AspNetCore.Serilog\\Sentry.Samples.AspNetCore.Serilog.csproj",
       "samples\\Sentry.Samples.AspNetCore.WebAPI.Profiling\\Sentry.Samples.AspNetCore.WebAPI.Profiling.csproj",
       "samples\\Sentry.Samples.Aws.Lambda.AspNetCoreServer\\Sentry.Samples.Aws.Lambda.AspNetCoreServer.csproj",
+      "samples\\Sentry.Samples.Azure.Functions.Worker\\obj\\Release\\net8.0\\WorkerExtensions\\WorkerExtensions.csproj",
       "samples\\Sentry.Samples.Azure.Functions.Worker\\Sentry.Samples.Azure.Functions.Worker.csproj",
       "samples\\Sentry.Samples.Console.Basic\\Sentry.Samples.Console.Basic.csproj",
       "samples\\Sentry.Samples.Console.Customized\\Sentry.Samples.Console.Customized.csproj",
@@ -38,10 +39,10 @@
       "samples\\Sentry.Samples.Serilog\\Sentry.Samples.Serilog.csproj",
       "src\\Sentry.Analyzers\\Sentry.Analyzers.csproj",
       "src\\Sentry.Android.AssemblyReader\\Sentry.Android.AssemblyReader.csproj",
+      "src\\Sentry.AspNet\\Sentry.AspNet.csproj",
       "src\\Sentry.AspNetCore.Blazor.WebAssembly\\Sentry.AspNetCore.Blazor.WebAssembly.csproj",
       "src\\Sentry.AspNetCore.Grpc\\Sentry.AspNetCore.Grpc.csproj",
       "src\\Sentry.AspNetCore\\Sentry.AspNetCore.csproj",
-      "src\\Sentry.AspNet\\Sentry.AspNet.csproj",
       "src\\Sentry.Azure.Functions.Worker\\Sentry.Azure.Functions.Worker.csproj",
       "src\\Sentry.Bindings.Android\\Sentry.Bindings.Android.csproj",
       "src\\Sentry.Bindings.Cocoa\\Sentry.Bindings.Cocoa.csproj",
@@ -80,7 +81,6 @@
       "test\\Sentry.Testing.CrashableApp\\Sentry.Testing.CrashableApp.csproj",
       "test\\Sentry.Testing\\Sentry.Testing.csproj",
       "test\\Sentry.Tests\\Sentry.Tests.csproj",
-      "test\\Sentry.TrimTest\\Sentry.TrimTest.csproj",
       "test\\SingleFileTestApp\\SingleFileTestApp.csproj"
     ]
   }

@@ -2,6 +2,7 @@
   "solution": {
     "path": "Sentry.sln",
     "projects": [
+      "samples\\Sentry.Samples.Azure.Functions.Worker\\obj\\Release\\net8.0\\WorkerExtensions\\WorkerExtensions.csproj",
       "samples\\Sentry.Samples.Azure.Functions.Worker\\Sentry.Samples.Azure.Functions.Worker.csproj",
       "samples\\Sentry.Samples.Console.Basic\\Sentry.Samples.Console.Basic.csproj",
       "src\\Sentry.Analyzers\\Sentry.Analyzers.csproj",
