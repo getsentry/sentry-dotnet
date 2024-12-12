@@ -12,7 +12,7 @@ namespace Sentry.Internal.DiagnosticSource;
 /// </remarks>
 internal static class ReflectionHelper
 {
-    [UnconditionalSuppressMessage("TrimAnalyzer", "IL2075", Justification = AotHelper.SuppressionJustification)]
+    [UnconditionalSuppressMessage("TrimAnalyzer", "IL2075: DynamicallyAccessedMembers", Justification = AotHelper.AvoidAtRuntime)]
     public static object? GetProperty(this object obj, string name, IDiagnosticLogger? logger = null)
     {
         if (AotHelper.IsTrimmed)

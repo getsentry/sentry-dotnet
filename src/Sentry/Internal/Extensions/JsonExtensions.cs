@@ -564,8 +564,8 @@ internal static class JsonExtensions
         return JitSerializeToUtf8Bytes();
 #endif
 
-        [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
-        [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = AotHelper.SuppressionJustification)]
+        [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
+        [UnconditionalSuppressMessage("AOT", "IL3050: RequiresDynamicCode", Justification = AotHelper.AvoidAtRuntime)]
         byte[] JitSerializeToUtf8Bytes() => JsonSerializer.SerializeToUtf8Bytes(value, SerializerOptions);
     }
 
@@ -586,8 +586,8 @@ internal static class JsonExtensions
 #endif
         return;
 
-        [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = AotHelper.SuppressionJustification)]
-        [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
+        [UnconditionalSuppressMessage("AOT", "IL3050: RequiresDynamicCode", Justification = AotHelper.AvoidAtRuntime)]
+        [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
         void JitSerialize()
         {
             var options = preserveReferences ? AltSerializerOptions : SerializerOptions;

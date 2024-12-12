@@ -173,7 +173,7 @@ internal class DebugStackTrace : SentryStackTrace
     /// <summary>
     /// Creates an enumerator of <see cref="SentryStackFrame"/> from a <see cref="StackTrace"/>.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
+    [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
     private IEnumerable<SentryStackFrame> CreateFrames(StackTrace stackTrace, bool isCurrentStackTrace, Func<string?, bool> skipFrame)
     {
         var frames = (!AotHelper.IsNativeAot && _options.StackTraceMode == StackTraceMode.Enhanced)
@@ -291,7 +291,7 @@ internal class DebugStackTrace : SentryStackTrace
     /// <summary>
     /// Default the implementation of CreateFrame.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
+    [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
     private SentryStackFrame? TryCreateManagedFrame(IStackFrame stackFrame)
     {
         if (stackFrame.GetMethod() is not { } method)
@@ -508,7 +508,7 @@ internal class DebugStackTrace : SentryStackTrace
         }
     }
 
-    [UnconditionalSuppressMessage("SingleFile", "IL3002:Avoid calling members marked with 'RequiresAssemblyFilesAttribute' when publishing as a single-file", Justification = "Code is avoided at runtime.")]
+    [UnconditionalSuppressMessage("SingleFile", "IL3002: calling members marked with 'RequiresAssemblyFilesAttribute'", Justification = AotHelper.AvoidAtRuntime)]
     private static PEReader? TryReadAssemblyFromDisk(Module module, SentryOptions options, out string? assemblyName)
     {
         try

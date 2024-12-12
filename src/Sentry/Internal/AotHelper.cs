@@ -1,35 +1,31 @@
+using Sentry.Protocol;
+
 namespace Sentry.Internal;
 
 internal static class AotHelper
 {
-    internal const string SuppressionJustification = "Non-trimmable code is avoided at runtime";
+    internal const string AvoidAtRuntime = "Non-trimmable code is avoided at runtime";
+
     internal static bool IsTrimmed { get; }
-
-    private class AotTester
-    {
-        public void Test() { }
-    }
-
-#if NET8_0_OR_GREATER
-    // TODO this probably more closely represents trimming rather than NativeAOT?
+    internal static bool IsDynamicCodeSupported { get; }
     internal static bool IsNativeAot { get; }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
     static AotHelper()
     {
-        var stackTrace = new StackTrace(false);
-        IsTrimmed = stackTrace.GetFrame(0)?.GetMethod() is null;
-        IsNativeAot = IsTrimmed;
-    }
+        IsTrimmed = SupportsUnreferencedCode();
+#if NETSTANDARD2_0 || NETFRAMEWORK
+        IsDynamicCodeSupported = true;
 #else
-    // This is a compile-time const so that the irrelevant code is removed during compilation.
-    internal const bool IsNativeAot = false;
+        IsDynamicCodeSupported = RuntimeFeature.IsDynamicCodeSupported;
+#endif
+        // This is our best guess at determining whether AOT is enabled
+        IsNativeAot = IsTrimmed && !IsDynamicCodeSupported;
+    }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
-    static AotHelper()
+    [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AvoidAtRuntime)]
+    private static bool SupportsUnreferencedCode()
     {
         var stackTrace = new StackTrace(false);
-        IsTrimmed = stackTrace.GetFrame(0)?.GetMethod() is null;
+        return stackTrace.GetFrame(0)?.GetMethod() is null;
     }
-#endif
 }
