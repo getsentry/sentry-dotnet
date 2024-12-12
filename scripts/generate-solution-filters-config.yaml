@@ -39,6 +39,7 @@ filterConfigs:
       groups:
         - "macOnly"
         - "windowsOnly"
+        - "artefacts"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
@@ -55,6 +56,8 @@ filterConfigs:
         - "modules/perfview/**/TraceEvent.csproj"
         - "modules/perfview/**/FastSerialization.csproj"
     exclude:
+      groups:
+        - "artefacts"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
@@ -71,6 +74,7 @@ filterConfigs:
     exclude:
       groups:
         - "macOnly"
+        - "artefacts"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
@@ -85,6 +89,8 @@ filterConfigs:
       groups:
         - "allProjects"
     exclude:
+      groups:
+          - "artefacts"
       patterns:
         - "**/Sentry.Bindings*.csproj"
         - "benchmarks/**/*.csproj"
@@ -122,6 +128,9 @@ filterConfigs:
         - "**/Sentry.Testing.CrashableApp.csproj"
         - "**/Sentry.Tests.csproj"
         - "**/Sentry.Analyzers.Tests.csproj"
+    exclude:
+      groups:
+        - "artefacts"
 
   - outputPath: SentryCore.slnf
     solution: .generated.NoMobile.sln
@@ -180,6 +189,8 @@ filterConfigs:
       groups:
         - "allProjects"
     exclude:
+      groups:
+        - "artefacts"
       patterns:
         - "**/*Bindings*.csproj"
         - "**/*Android*.csproj"
