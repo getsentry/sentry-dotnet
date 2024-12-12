@@ -9,13 +9,22 @@
     <!-- See https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/prepare-libraries-for-trimming#show-all-warnings-with-test-app -->
     <PublishTrimmed>true</PublishTrimmed>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
     <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Serilog\Sentry.Serilog.csproj" />
     <TrimmerRootAssembly Include="Sentry" />
+    <TrimmerRootAssembly Include="Sentry.DiagnosticSource" />
+    <TrimmerRootAssembly Include="Sentry.Extensions.Logging" />
     <TrimmerRootAssembly Include="Sentry.Maui" />
+    <TrimmerRootAssembly Include="Sentry.OpenTelemetry" />
+    <TrimmerRootAssembly Include="Sentry.Serilog" />
   </ItemGroup>
 
 </Project>

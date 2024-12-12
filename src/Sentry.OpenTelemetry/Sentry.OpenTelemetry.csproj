@@ -16,7 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpenTelemetry" Version="1.5.0" />
+    <!-- Version 1.6.0 is the minimum version that does not have trim warnings   -->
+    <PackageReference Include="OpenTelemetry" Version="1.6.0" />
   </ItemGroup>
 
   <ItemGroup>
