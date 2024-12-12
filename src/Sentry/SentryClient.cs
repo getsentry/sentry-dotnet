@@ -194,7 +194,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            if (!AotHelper.IsNativeAot)
+            if (!AotHelper.IsTrimmed)
             {
                 // Attempt to demystify exceptions before adding them as breadcrumbs.
                 e.Demystify();
@@ -435,7 +435,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            if (!AotHelper.IsNativeAot)
+            if (!AotHelper.IsTrimmed)
             {
                 // Attempt to demystify exceptions before adding them as breadcrumbs.
                 e.Demystify();

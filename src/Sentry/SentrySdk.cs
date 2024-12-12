@@ -50,9 +50,9 @@ public static partial class SentrySdk
 
 #pragma warning disable CS0162 // Unreachable code detected
 #pragma warning disable 0162 // Unreachable code on old .NET frameworks
-        options.LogDebug(AotHelper.IsDynamicCodeSupported
-            ? "This doesn't look like a Native AOT application build."
-            : "This looks like a Native AOT application build."
+        options.LogDebug(AotHelper.IsTrimmed
+            ? "This looks like a Native AOT application build."
+            : "This doesn't look like a Native AOT application build."
         );
 #pragma warning restore 0162
 #pragma warning restore CS0162 // Unreachable code detected
@@ -65,6 +65,9 @@ public static partial class SentrySdk
 #elif ANDROID
             InitSentryAndroidSdk(options);
 #elif NET8_0_OR_GREATER
+            // TODO: Is this working properly? Currently we don't have any way to check if the app is being compiled AOT
+            // All we know is whether trimming has been enabled or not. I think at the moment we'll be initialising
+            // SentryNative for managed applications when they've been trimmed!
             if (SentryNative.IsAvailable)
             {
                 InitNativeSdk(options);
@@ -90,7 +93,7 @@ public static partial class SentrySdk
         LogWarningIfProfilingMisconfigured(options, " on Android");
 #else
 #if NET8_0_OR_GREATER
-        if (AotHelper.IsNativeAot)
+        if (AotHelper.IsTrimmed)
         {
             LogWarningIfProfilingMisconfigured(options, " for NativeAOT");
         }

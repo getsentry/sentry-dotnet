@@ -14,7 +14,7 @@ internal static class ModuleExtensions
     [UnconditionalSuppressMessage("SingleFile", "IL3002: calling members marked with 'RequiresAssemblyFilesAttribute'", Justification = AotHelper.AvoidAtRuntime)]
     public static string? GetNameOrScopeName(this Module module)
     {
-        return (AotHelper.IsNativeAot || module?.Name is null || module.Name.Equals(UnknownLocation))
+        return (AotHelper.IsTrimmed || module?.Name is null || module.Name.Equals(UnknownLocation))
             ? module?.ScopeName
             : module?.Name;
     }

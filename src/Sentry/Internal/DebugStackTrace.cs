@@ -176,7 +176,7 @@ internal class DebugStackTrace : SentryStackTrace
     [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
     private IEnumerable<SentryStackFrame> CreateFrames(StackTrace stackTrace, bool isCurrentStackTrace, Func<string?, bool> skipFrame)
     {
-        var frames = (!AotHelper.IsNativeAot && _options.StackTraceMode == StackTraceMode.Enhanced)
+        var frames = (!AotHelper.IsTrimmed && _options.StackTraceMode == StackTraceMode.Enhanced)
             ? EnhancedStackTrace.GetFrames(stackTrace).Select(p => new RealStackFrame(p))
             : stackTrace.GetFrames().Select(p => new RealStackFrame(p));
 

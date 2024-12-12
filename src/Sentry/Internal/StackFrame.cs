@@ -113,7 +113,7 @@ internal class RealStackFrame : IStackFrame
     public MethodBase? GetMethod()
     {
 #pragma warning disable 0162 // Unreachable code on old .NET frameworks
-        return AotHelper.IsNativeAot ? null : _frame.GetMethod();
+        return AotHelper.IsTrimmed ? null : _frame.GetMethod();
 #pragma warning restore 0162
     }
 
