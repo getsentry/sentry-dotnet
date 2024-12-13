@@ -82,6 +82,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
+    [UnconditionalSuppressMessage("Trimming", "IL2075: DynamicallyAccessedMembers", Justification = AotHelper.AvoidAtRuntime)]
     private async Task<TransactionContext> StartOrContinueTraceAsync(FunctionContext context)
     {
         var transactionName = context.FunctionDefinition.Name;
