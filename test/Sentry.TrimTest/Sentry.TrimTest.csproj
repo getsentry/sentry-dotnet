@@ -14,6 +14,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.AspNetCore.Grpc\Sentry.AspNetCore.Grpc.csproj" />
     <ProjectReference Include="..\..\src\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj" />
     <ProjectReference Include="..\..\src\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
     <ProjectReference Include="..\..\src\Sentry.Google.Cloud.Functions\Sentry.Google.Cloud.Functions.csproj" />
@@ -22,6 +24,8 @@
     <ProjectReference Include="..\..\src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj" />
     <ProjectReference Include="..\..\src\Sentry.Serilog\Sentry.Serilog.csproj" />
     <TrimmerRootAssembly Include="Sentry" />
+    <TrimmerRootAssembly Include="Sentry.AspNetCore" />
+    <TrimmerRootAssembly Include="Sentry.AspNetCore.Grpc" />
     <TrimmerRootAssembly Include="Sentry.DiagnosticSource" />
     <TrimmerRootAssembly Include="Sentry.Extensions.Logging" />
     <TrimmerRootAssembly Include="Sentry.Google.Cloud.Functions" />
@@ -33,6 +37,7 @@
 
   <ItemGroup>
 <!--    The following packages are deliberately excluded from the TrimTest app because they do not support trimming -->
+<!--    Sentry.AspNetCore.Blazor.WebAssembly: produces trim warnings... not yet sure how to resolve these -->
 <!--    Sentry.Hangfire: Hangfire.Core produces trim warnings and relies on Newtonsoft.Json -->
 <!--    Sentry.Log4Net: Trimming is only supported on net6.0 and above -->
 <!--    Sentry.Profiling: FastSerialization and DynamicTraceEventParser produce trim warnings -->
