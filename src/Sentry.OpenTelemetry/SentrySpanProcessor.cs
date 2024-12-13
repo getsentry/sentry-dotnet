@@ -463,7 +463,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             Exception exception;
             try
             {
-                if (CreatePoorMansException(exceptionType, message) is not {} poorMansException)
+                if (CreatePoorMansException(exceptionType, message) is not { } poorMansException)
                 {
                     _options?.DiagnosticLogger?.LogWarning($"Unable to create poor man's exception with trimming enabled : {exceptionType}");
                     continue;
