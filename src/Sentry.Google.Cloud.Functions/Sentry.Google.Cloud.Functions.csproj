@@ -6,9 +6,15 @@
     <Description>Official Google Cloud Functions integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(EnableAot)' == 'true'">
+    <IsAotCompatible>true</IsAotCompatible>
+    <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
     <PackageReference Include="Google.Cloud.Functions.Hosting" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

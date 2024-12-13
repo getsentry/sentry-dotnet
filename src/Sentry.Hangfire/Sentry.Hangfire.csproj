@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(EnableAot)' == 'true'">
+    <!-- Although Sentry.Hangfire is trim compatible, Hangfire.Core produces trim warnings so ultimately neither
+    Hangfire nor Sentry.Hangfire should be used in applications built using Trimming or AOT compilation -->
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
