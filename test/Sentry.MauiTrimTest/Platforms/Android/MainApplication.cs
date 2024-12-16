@@ -1,4 +1,4 @@
-﻿using Android.App;
+using Android.App;
 using Android.Runtime;
 
 namespace Sentry.MauiTrimTest;
@@ -6,10 +6,10 @@ namespace Sentry.MauiTrimTest;
 [Application]
 public class MainApplication : MauiApplication
 {
-	public MainApplication(IntPtr handle, JniHandleOwnership ownership)
-		: base(handle, ownership)
-	{
-	}
+    public MainApplication(IntPtr handle, JniHandleOwnership ownership)
+        : base(handle, ownership)
+    {
+    }
 
-	protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
+    protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
 }
