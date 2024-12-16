@@ -28,6 +28,9 @@ groupConfigs:
     # Any projects in the obj or bin directories
     - "**/obj/**/*.csproj"
     - "**/bin/**/*.csproj"
+  trimTests:
+    - "**/Sentry.TrimTest.csproj"
+    - "**/Sentry.MauiTrimTest.csproj"
 
 filterConfigs:
 
@@ -40,13 +43,12 @@ filterConfigs:
         - "macOnly"
         - "windowsOnly"
         - "artefacts"
+        - "trimTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Maui.Device.TestApp.csproj"
         - "**/*SourceGen.csproj"
-        - "**/*TestUtils*.csproj"
-        - "**/*Sentry.TrimTest.csproj"
 
   - outputPath: Sentry-CI-Build-macOS.slnf
     include:
@@ -58,11 +60,11 @@ filterConfigs:
     exclude:
       groups:
         - "artefacts"
+        - "trimTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*SourceGen.csproj"
-        - "**/*Sentry.TrimTest.csproj"
 
   - outputPath: Sentry-CI-Build-Windows.slnf
     include:
@@ -75,6 +77,7 @@ filterConfigs:
       groups:
         - "macOnly"
         - "artefacts"
+        - "trimTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
@@ -82,7 +85,6 @@ filterConfigs:
         - "**/*Sentry.Samples.Android.csproj"
         - "**/*OpenTelemetry.AspNet.csproj"
         - "**/*SourceGen.csproj"
-        - "**/*Sentry.TrimTest.csproj"
 
   - outputPath: Sentry-CI-CodeQL.slnf
     include:
@@ -191,21 +193,22 @@ filterConfigs:
     exclude:
       groups:
         - "artefacts"
+        - "trimTests"
       patterns:
         - "**/*Bindings*.csproj"
         - "**/*Android*.csproj"
         - "**/*Ios*.csproj"
         - "**/*Maui*.csproj"
-        - "**/*Sentry.TrimTest.csproj"
 
   - outputPath: SentryNoSamples.slnf
     include:
       groups:
         - "allProjects"
     exclude:
+      groups:
+        - "trimTests"
       patterns:
         - "samples/**/*"
         - "**/*Bindings*"
         - "**/*DeviceTests*"
         - "**/*TestApp*"
-        - "**/*Sentry.TrimTest.csproj"

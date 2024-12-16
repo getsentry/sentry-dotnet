@@ -195,6 +195,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Console.Heap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.TrimTest", "test\Sentry.TrimTest\Sentry.TrimTest.csproj", "{6030B748-0000-43B5-B8A8-399AA42F5229}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.MauiTrimTest", "test\Sentry.MauiTrimTest\Sentry.MauiTrimTest.csproj", "{DF92E098-822C-4B94-B96B-56BFB91FBB54}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -526,6 +528,10 @@ Global
 		{6030B748-0000-43B5-B8A8-399AA42F5229}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6030B748-0000-43B5-B8A8-399AA42F5229}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6030B748-0000-43B5-B8A8-399AA42F5229}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF92E098-822C-4B94-B96B-56BFB91FBB54}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF92E098-822C-4B94-B96B-56BFB91FBB54}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF92E098-822C-4B94-B96B-56BFB91FBB54}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF92E098-822C-4B94-B96B-56BFB91FBB54}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -612,5 +618,6 @@ Global
 		{5A17FEF9-07BB-47B8-9883-9C2CC93F09E8} = {6987A1CC-608E-4868-A02C-09D30C8B7B2D}
 		{D7DF0B26-AD43-4F8B-9BFE-C4471CCC9821} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
 		{6030B748-0000-43B5-B8A8-399AA42F5229} = {6987A1CC-608E-4868-A02C-09D30C8B7B2D}
+		{DF92E098-822C-4B94-B96B-56BFB91FBB54} = {6987A1CC-608E-4868-A02C-09D30C8B7B2D}
 	EndGlobalSection
 EndGlobal
