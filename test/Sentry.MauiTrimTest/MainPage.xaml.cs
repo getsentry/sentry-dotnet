@@ -1,14 +1,14 @@
-﻿namespace Sentry.MauiTrimTest;
+namespace Sentry.MauiTrimTest;
 
 public partial class MainPage : ContentPage
 {
 
-/* Unmerged change from project 'Sentry.MauiTrimTest(net9.0-ios18.0)'
-Before:
-	int count = 0;
-After:
-    private int count = 0;
-*/
+    /* Unmerged change from project 'Sentry.MauiTrimTest(net9.0-ios18.0)'
+    Before:
+        int count = 0;
+    After:
+        private int count = 0;
+    */
     private int count = 0;
 
     public MainPage()
