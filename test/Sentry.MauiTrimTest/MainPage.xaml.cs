@@ -1,4 +1,4 @@
-﻿namespace Sentry.MauiTrimTest;
+namespace Sentry.MauiTrimTest;
 
 public partial class MainPage : ContentPage
 {
