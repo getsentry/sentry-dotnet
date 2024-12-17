@@ -24,7 +24,6 @@
     <ProjectReference Include="..\..\src\Sentry.EntityFramework\Sentry.EntityFramework.csproj" />
     <ProjectReference Include="..\..\src\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
     <ProjectReference Include="..\..\src\Sentry.Google.Cloud.Functions\Sentry.Google.Cloud.Functions.csproj" />
-<!--    <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />-->
     <ProjectReference Include="..\..\src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj" />
     <ProjectReference Include="..\..\src\Sentry.Serilog\Sentry.Serilog.csproj" />
     <TrimmerRootAssembly Include="Sentry" />
@@ -34,8 +33,6 @@
     <TrimmerRootAssembly Include="Sentry.EntityFramework" />
     <TrimmerRootAssembly Include="Sentry.Extensions.Logging" />
     <TrimmerRootAssembly Include="Sentry.Google.Cloud.Functions" />
-<!--    <TrimmerRootAssembly Include="Sentry.Maui" />-->
-    <TrimmerRootAssembly Include="Sentry.NLog" />
     <TrimmerRootAssembly Include="Sentry.OpenTelemetry" />
     <TrimmerRootAssembly Include="Sentry.Serilog" />
   </ItemGroup>
