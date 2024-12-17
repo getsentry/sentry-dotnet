@@ -20,34 +20,6 @@ public static partial class SentrySdk
 {
     private static AndroidContext AppContext { get; set; } = Application.Context;
 
-    /// <summary>
-    /// Initializes the SDK for Android, with an optional configuration options callback.
-    /// </summary>
-    /// <param name="context">The Android application context.</param>
-    /// <param name="configureOptions">The configuration options callback.</param>
-    /// <returns>An object that should be disposed when the application terminates.</returns>
-    [Obsolete("It is no longer required to provide the application context when calling Init. " +
-              "This method may be removed in a future major release.")]
-    public static IDisposable Init(AndroidContext context, Action<SentryOptions>? configureOptions)
-    {
-        AppContext = context;
-        return Init(configureOptions);
-    }
-
-    /// <summary>
-    /// Initializes the SDK for Android, using a configuration options instance.
-    /// </summary>
-    /// <param name="context">The Android application context.</param>
-    /// <param name="options">The configuration options instance.</param>
-    /// <returns>An object that should be disposed when the application terminates.</returns>
-    [Obsolete("It is no longer required to provide the application context when calling Init. " +
-              "This method may be removed in a future major release.")]
-    public static IDisposable Init(AndroidContext context, SentryOptions options)
-    {
-        AppContext = context;
-        return Init(options);
-    }
-
     private static void InitSentryAndroidSdk(SentryOptions options)
     {
         // Set default release and distribution
@@ -119,9 +91,6 @@ public static partial class SentrySdk
             // These options we have behind feature flags
             if (options is { IsPerformanceMonitoringEnabled: true, Native.EnableTracing: true })
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                o.EnableTracing = (JavaBoolean?)options.EnableTracing;
-#pragma warning restore CS0618 // Type or member is obsolete
                 o.TracesSampleRate = (JavaDouble?)options.TracesSampleRate;
 
                 if (options.TracesSampler is { } tracesSampler)
@@ -164,13 +133,6 @@ public static partial class SentrySdk
             // In-App Excludes and Includes to be passed to the Android SDK
             options.Native.InAppExcludes?.ForEach(o.AddInAppExclude);
             options.Native.InAppIncludes?.ForEach(o.AddInAppInclude);
-
-            o.Experimental.SessionReplay.OnErrorSampleRate =
-                (JavaDouble?)options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate;
-            o.Experimental.SessionReplay.SessionSampleRate =
-                (JavaDouble?)options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate;
-            o.Experimental.SessionReplay.SetMaskAllImages(options.Native.ExperimentalOptions.SessionReplay.MaskAllImages);
-            o.Experimental.SessionReplay.SetMaskAllText(options.Native.ExperimentalOptions.SessionReplay.MaskAllText);
 
             // These options are intentionally set and not exposed for modification
             o.EnableExternalConfiguration = false;

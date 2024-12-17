@@ -75,13 +75,6 @@ public static partial class SentrySdk
         // These options we have behind feature flags
         if (options is { IsPerformanceMonitoringEnabled: true, Native.EnableTracing: true })
         {
-#pragma warning disable CS0618 // Type or member is obsolete
-            if (options.EnableTracing != null)
-            {
-                nativeOptions.EnableTracing = options.EnableTracing.Value;
-            }
-#pragma warning restore CS0618 // Type or member is obsolete
-
             nativeOptions.TracesSampleRate = options.TracesSampleRate;
 
             if (options.TracesSampler is { } tracesSampler)
@@ -192,12 +185,11 @@ public static partial class SentrySdk
         options.EnableScopeSync = true;
         options.ScopeObserver = new CocoaScopeObserver(options);
 
-        if (options.IsProfilingEnabled)
+        // Note: don't use AddProfilingIntegration as it would print a warning if user used it too.
+        if (!options.HasIntegration<ProfilingIntegration>())
         {
-            options.LogDebug("Profiling is enabled, attaching native SDK profiler factory");
-            options.TransactionProfilerFactory ??= new CocoaProfilerFactory(options);
+            options.AddIntegration(new ProfilingIntegration());
         }
-
         // TODO: Pause/Resume
     }
 

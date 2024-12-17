@@ -4,7 +4,6 @@ using Microsoft.Diagnostics.Tracing.EventPipe;
 
 namespace Sentry.Profiling.Tests;
 
-[UsesVerify]
 public class TraceLogProcessorTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;

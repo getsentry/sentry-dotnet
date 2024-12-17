@@ -62,6 +62,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Serilog", "samples\Sentry.Samples.Serilog\Sentry.Samples.Serilog.csproj", "{AA98FD8D-1254-4B34-840C-06BB263933DE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{230B9384-90FD-4551-A5DE-1A5C197F25B6}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+		src\Directory.Build.targets = src\Directory.Build.targets
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Android.AssemblyReader", "src\Sentry.Android.AssemblyReader\Sentry.Android.AssemblyReader.csproj", "{20386BBE-1F55-4503-9F5F-F2C6B29DE865}"
 EndProject
@@ -148,14 +152,15 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SingleFileTestApp", "test\SingleFileTestApp\SingleFileTestApp.csproj", "{162A1CAE-ACEE-45CA-A6D0-7702ADE4D3DE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "modules", "modules", "{A3CCA27E-4DF8-479D-833C-CAA0950715AA}"
+	ProjectSection(SolutionItems) = preProject
+		modules\sentry-cocoa.properties = modules\sentry-cocoa.properties
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TraceEvent", "modules\perfview\src\TraceEvent\TraceEvent.csproj", "{67269916-C417-4CEE-BD7D-CA66C3830AEE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FastSerialization", "modules\perfview\src\FastSerialization\FastSerialization.csproj", "{8032310D-3C06-442C-A318-F365BCC4C804}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Console.Native", "samples\Sentry.Samples.Console.Native\Sentry.Samples.Console.Native.csproj", "{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Console.Metrics", "samples\Sentry.Samples.Console.Metrics\Sentry.Samples.Console.Metrics.csproj", "{BD2D08FC-8675-4157-A73C-D75F6A3856D3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.MacOS", "samples\Sentry.Samples.MacOS\Sentry.Samples.MacOS.csproj", "{5B100CC0-1A78-407E-A5A5-94BC06D67461}"
 EndProject
@@ -165,7 +170,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Hangfire", "src\Sent
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Hangfire.Tests", "test\Sentry.Hangfire.Tests\Sentry.Hangfire.Tests.csproj", "{46E40BE8-1AB0-4846-B0A2-A40AD0272C64}"
 EndProject
-Project("{{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AspNetCore.WebAPI.Profiling", "samples\Sentry.Samples.AspNetCore.WebAPI.Profiling\Sentry.Samples.AspNetCore.WebAPI.Profiling.csproj", "{A5B26C14-7313-4EDC-91E3-287F9374AB75}"
+Project("{00000000-0000-0000-0000-000000000000}") = "Sentry.Samples.AspNetCore.WebAPI.Profiling", "samples\Sentry.Samples.AspNetCore.WebAPI.Profiling\Sentry.Samples.AspNetCore.WebAPI.Profiling.csproj", "{A5B26C14-7313-4EDC-91E3-287F9374AB75}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{233D34AB-970E-4913-AA1E-172E833FB5B2}"
 	ProjectSection(SolutionItems) = preProject
@@ -176,9 +181,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{233D34AB-9
 		Directory.Build.targets = Directory.Build.targets
 		global.json = global.json
 		nuget.config = nuget.config
+		.codecov.yml = .codecov.yml
+		.gitignore = .gitignore
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.AspNetCore.Blazor.WebAssembly", "src\Sentry.AspNetCore.Blazor.WebAssembly\Sentry.AspNetCore.Blazor.WebAssembly.csproj", "{8298202C-9983-4D0A-851D-805539EE481A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Analyzers", "src\Sentry.Analyzers\Sentry.Analyzers.csproj", "{E36C8DCA-464E-41CB-B189-F58553AAA8D4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Analyzers.Tests", "test\Sentry.Analyzers.Tests\Sentry.Analyzers.Tests.csproj", "{5A17FEF9-07BB-47B8-9883-9C2CC93F09E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.Console.HeapDump", "samples\Sentry.Samples.Console.HeapDump\Sentry.Samples.Console.HeapDump.csproj", "{D7DF0B26-AD43-4F8B-9BFE-C4471CCC9821}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -276,6 +289,7 @@ Global
 		{4E0DC405-C372-4396-A5DF-F6AA108DA01C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9B175EC8-6B64-4345-A158-091CB8876077}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9B175EC8-6B64-4345-A158-091CB8876077}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B175EC8-6B64-4345-A158-091CB8876077}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{9B175EC8-6B64-4345-A158-091CB8876077}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B175EC8-6B64-4345-A158-091CB8876077}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EE0DC846-52F3-46AF-BC0D-DEF81150CEC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -470,10 +484,6 @@ Global
 		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BD2D08FC-8675-4157-A73C-D75F6A3856D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BD2D08FC-8675-4157-A73C-D75F6A3856D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BD2D08FC-8675-4157-A73C-D75F6A3856D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD2D08FC-8675-4157-A73C-D75F6A3856D3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5B100CC0-1A78-407E-A5A5-94BC06D67461}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5B100CC0-1A78-407E-A5A5-94BC06D67461}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B100CC0-1A78-407E-A5A5-94BC06D67461}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -498,6 +508,18 @@ Global
 		{A5B26C14-7313-4EDC-91E3-287F9374AB75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A5B26C14-7313-4EDC-91E3-287F9374AB75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A5B26C14-7313-4EDC-91E3-287F9374AB75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E36C8DCA-464E-41CB-B189-F58553AAA8D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E36C8DCA-464E-41CB-B189-F58553AAA8D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E36C8DCA-464E-41CB-B189-F58553AAA8D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E36C8DCA-464E-41CB-B189-F58553AAA8D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A17FEF9-07BB-47B8-9883-9C2CC93F09E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A17FEF9-07BB-47B8-9883-9C2CC93F09E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A17FEF9-07BB-47B8-9883-9C2CC93F09E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A17FEF9-07BB-47B8-9883-9C2CC93F09E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7DF0B26-AD43-4F8B-9BFE-C4471CCC9821}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7DF0B26-AD43-4F8B-9BFE-C4471CCC9821}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7DF0B26-AD43-4F8B-9BFE-C4471CCC9821}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7DF0B26-AD43-4F8B-9BFE-C4471CCC9821}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -574,12 +596,14 @@ Global
 		{67269916-C417-4CEE-BD7D-CA66C3830AEE} = {A3CCA27E-4DF8-479D-833C-CAA0950715AA}
 		{8032310D-3C06-442C-A318-F365BCC4C804} = {A3CCA27E-4DF8-479D-833C-CAA0950715AA}
 		{FC8AEABA-1A40-4891-9EBA-4B6A1F7244B2} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
-		{BD2D08FC-8675-4157-A73C-D75F6A3856D3} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
 		{5B100CC0-1A78-407E-A5A5-94BC06D67461} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
 		{407C477D-69C0-4B02-8A68-EE6B5A81C696} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
 		{EADF25F5-8D02-4747-AB54-5F2BAA648471} = {230B9384-90FD-4551-A5DE-1A5C197F25B6}
 		{46E40BE8-1AB0-4846-B0A2-A40AD0272C64} = {6987A1CC-608E-4868-A02C-09D30C8B7B2D}
 		{8298202C-9983-4D0A-851D-805539EE481A} = {230B9384-90FD-4551-A5DE-1A5C197F25B6}
 		{A5B26C14-7313-4EDC-91E3-287F9374AB75} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
+		{E36C8DCA-464E-41CB-B189-F58553AAA8D4} = {230B9384-90FD-4551-A5DE-1A5C197F25B6}
+		{5A17FEF9-07BB-47B8-9883-9C2CC93F09E8} = {6987A1CC-608E-4868-A02C-09D30C8B7B2D}
+		{D7DF0B26-AD43-4F8B-9BFE-C4471CCC9821} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
 	EndGlobalSection
 EndGlobal

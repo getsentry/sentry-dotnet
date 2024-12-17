@@ -1,3 +1,5 @@
+using Sentry.Internal;
+
 namespace Sentry;
 
 /// <summary>
@@ -11,7 +13,7 @@ public class ExperimentalMetricsOptions
     /// </summary>
     public bool EnableCodeLocations { get; set; } = true;
 
-    private IList<SubstringOrRegexPattern> _captureSystemDiagnosticsInstruments = new List<SubstringOrRegexPattern>();
+    private IList<StringOrRegex> _captureSystemDiagnosticsInstruments = new List<StringOrRegex>();
 
     /// <summary>
     /// <para>
@@ -19,13 +21,13 @@ public class ExperimentalMetricsOptions
     /// matches one of the items in this list will be collected and reported to Sentry.
     /// </para>
     /// <para>
-    /// These can be either custom Instruments that you have created or any of the built in metrics that are available.
+    /// These can be either custom Instruments that you have created or any of the built-in metrics that are available.
     /// </para>
     /// <para>
     /// See https://learn.microsoft.com/en-us/dotnet/core/diagnostics/built-in-metrics for more information.
     /// </para>
     /// </summary>
-    public IList<SubstringOrRegexPattern> CaptureSystemDiagnosticsInstruments
+    public IList<StringOrRegex> CaptureSystemDiagnosticsInstruments
     {
         // NOTE: During configuration binding, .NET 6 and lower used to just call Add on the existing item.
         //       .NET 7 changed this to call the setter with an array that already starts with the old value.
@@ -34,7 +36,7 @@ public class ExperimentalMetricsOptions
         set => _captureSystemDiagnosticsInstruments = value.WithConfigBinding();
     }
 
-    private IList<SubstringOrRegexPattern> _captureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All;
+    private IList<StringOrRegex> _captureSystemDiagnosticsMeters = BuiltInSystemDiagnosticsMeters.All;
 
     /// <summary>
     /// <para>
@@ -42,13 +44,13 @@ public class ExperimentalMetricsOptions
     /// whose name matches one of the items in this list will be collected and reported to Sentry.
     /// </para>
     /// <para>
-    /// These can be either custom Instruments that you have created or any of the built in metrics that are available.
+    /// These can be either custom Instruments that you have created or any of the built-in metrics that are available.
     /// </para>
     /// <para>
     /// See https://learn.microsoft.com/en-us/dotnet/core/diagnostics/built-in-metrics for more information.
     /// </para>
     /// </summary>
-    public IList<SubstringOrRegexPattern> CaptureSystemDiagnosticsMeters
+    public IList<StringOrRegex> CaptureSystemDiagnosticsMeters
     {
         // NOTE: During configuration binding, .NET 6 and lower used to just call Add on the existing item.
         //       .NET 7 changed this to call the setter with an array that already starts with the old value.

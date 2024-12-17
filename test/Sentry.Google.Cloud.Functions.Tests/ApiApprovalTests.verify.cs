@@ -2,7 +2,6 @@ using Google.Cloud.Functions.Framework;
 
 namespace Sentry.Google.Cloud.Functions.Tests;
 
-[UsesVerify]
 public class ApiApprovalTests
 {
     [Fact]

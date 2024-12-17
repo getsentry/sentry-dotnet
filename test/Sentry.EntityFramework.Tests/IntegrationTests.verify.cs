@@ -1,7 +1,6 @@
 #if NETFRAMEWORK
 namespace Sentry.EntityFramework.Tests;
 
-[UsesVerify]
 [Collection("Sequential")]
 public class IntegrationTests
 {

@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == ''">net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == 'true'">net7.0-ios</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == 'true' And '$(NO_MACCATALYST)' == ''">net7.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == ''">net8.0-ios17.0;net8.0-maccatalyst17.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == 'true'">net8.0-ios17.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == 'true' And '$(NO_MACCATALYST)' == ''">net8.0-maccatalyst17.0</TargetFrameworks>
     <IsBindingProject>true</IsBindingProject>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
@@ -91,7 +91,7 @@
   <!-- Generate bindings -->
   <Target Name="_GenerateSentryCocoaBindings" AfterTargets="SetupCocoaSDK"
           Condition="$([MSBuild]::IsOSPlatform('OSX')) and Exists('$(SentryCocoaFrameworkHeaders)')"
-          Inputs="../../modules/sentry-cocoa.properties"
+          Inputs="../../modules/sentry-cocoa.properties;../../scripts/generate-cocoa-bindings.ps1"
           Outputs="ApiDefinitions.cs;StructsAndEnums.cs">
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerGenerateSentryCocoaBindings" Properties="TargetFramework=once" />
   </Target>

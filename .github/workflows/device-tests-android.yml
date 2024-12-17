@@ -39,7 +39,7 @@ jobs:
         with:
           name: device-test-android
           if-no-files-found: error
-          path: test/Sentry.Maui.Device.TestApp/bin/Release/net7.0-android/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
+          path: test/Sentry.Maui.Device.TestApp/bin/Release/net8.0-android34.0/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
 
   android:
     needs: [build]
@@ -74,7 +74,7 @@ jobs:
           path: bin
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@d156388eb19639ec20ade50009f3d199ce1e2808 # pin@v3
+        uses: gradle/actions/setup-gradle@cc4fc85e6b35bafd578d5ffbc76a5518407e1af0 # pin@v3
 
       # Cached AVD setup per https://github.com/ReactiveCircus/android-emulator-runner/blob/main/README.md
 

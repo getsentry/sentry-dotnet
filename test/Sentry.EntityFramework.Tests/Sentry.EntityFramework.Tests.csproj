@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net7.0;net6.0</TargetFrameworks>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
   </PropertyGroup>
 
   <!-- Running these tests on Mono fail -->
@@ -10,12 +10,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EntityFramework" Version="6.4.4" />
+    <PackageReference Include="EntityFramework" Version="6.5.1" />
     <PackageReference Include="Effort.EF6" Version="2.2.16" />
-    <PackageReference Include="EfClassicLocalDb" Version="14.5.2" />
-
-    <!-- this is needed because the version that is brought in transitively has a vulnerability warning -->
-    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+    <PackageReference Include="EfClassicLocalDb" Version="18.0.1" />
 
     <ProjectReference Include="..\..\src\Sentry.EntityFramework\Sentry.EntityFramework.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />

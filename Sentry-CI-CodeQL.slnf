@@ -2,6 +2,7 @@
   "solution": {
     "path": "Sentry.sln",
     "projects": [
+      "src\\Sentry.Analyzers\\Sentry.Analyzers.csproj",
       "src\\Sentry.Android.AssemblyReader\\Sentry.Android.AssemblyReader.csproj",
       "src\\Sentry.AspNet\\Sentry.AspNet.csproj",
       "src\\Sentry.AspNetCore.Blazor.WebAssembly\\Sentry.AspNetCore.Blazor.WebAssembly.csproj",

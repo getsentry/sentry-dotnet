@@ -102,7 +102,7 @@ public static partial class SentrySdk
 #endif
         {
             LogWarningIfProfilingMisconfigured(options, ", because ProfilingIntegration from package Sentry.Profiling" +
-            " hasn't been registered. You can do that by calling 'options.AddIntegration(new ProfilingIntegration())'");
+            " hasn't been registered. You can do that by calling 'options.AddProfilingIntegration()'");
         }
 #endif
 
@@ -666,13 +666,6 @@ public static partial class SentrySdk
         string? name = null,
         string? operation = null)
         => CurrentHub.ContinueTrace(traceHeader, baggageHeader, name, operation);
-
-    /// <inheritdoc cref="IMetricAggregator"/>
-    [Obsolete("The SentrySdk.Metrics module is deprecated and will be removed in the next major release. " +
-              "Sentry will reject all metrics sent after October 7, 2024." +
-              "Learn more: https://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-to-Metrics")]
-    public static IMetricAggregator Metrics
-        => CurrentHub.Metrics;
 
     /// <inheritdoc cref="IHub.StartSession"/>
     [DebuggerStepThrough]
