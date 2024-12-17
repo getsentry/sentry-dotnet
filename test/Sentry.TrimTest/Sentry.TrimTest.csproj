@@ -25,7 +25,6 @@
     <ProjectReference Include="..\..\src\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
     <ProjectReference Include="..\..\src\Sentry.Google.Cloud.Functions\Sentry.Google.Cloud.Functions.csproj" />
 <!--    <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />-->
-<!--    <ProjectReference Include="..\..\src\Sentry.NLog\Sentry.NLog.csproj" />-->
     <ProjectReference Include="..\..\src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj" />
     <ProjectReference Include="..\..\src\Sentry.Serilog\Sentry.Serilog.csproj" />
     <TrimmerRootAssembly Include="Sentry" />
@@ -36,17 +35,20 @@
     <TrimmerRootAssembly Include="Sentry.Extensions.Logging" />
     <TrimmerRootAssembly Include="Sentry.Google.Cloud.Functions" />
 <!--    <TrimmerRootAssembly Include="Sentry.Maui" />-->
-<!--    <TrimmerRootAssembly Include="Sentry.NLog" />-->
+    <TrimmerRootAssembly Include="Sentry.NLog" />
     <TrimmerRootAssembly Include="Sentry.OpenTelemetry" />
     <TrimmerRootAssembly Include="Sentry.Serilog" />
   </ItemGroup>
 
   <ItemGroup>
-<!--    The following packages are deliberately excluded from the TrimTest app because they do not support trimming -->
-<!--    Sentry.AspNetCore.Blazor.WebAssembly: produces trim warnings... not yet sure how to resolve these -->
+<!--    The following packages are deliberately excluded from the TrimTest app because their dependencies do not support trimming -->
 <!--    Sentry.Azure.Functions.Worker: `Microsoft.Azure.Functions.Worker` produces [trim warnings](https://github.com/Azure/azure-functions-dotnet-worker/issues/2899) -->
 <!--    Sentry.Hangfire: Hangfire.Core produces trim warnings -->
 <!--    Sentry.Log4Net: log4net produces trim warnings -->
+<!--    Sentry.NLog: NLog produces AOT analysis errors -->
+
+<!--    The following packages are deliberately excluded from the TrimTest because they do not support trimming yet -->
+<!--    Sentry.AspNetCore.Blazor.WebAssembly: produces trim warnings... not yet sure how to resolve these -->
 <!--    Sentry.Profiling: FastSerialization and DynamicTraceEventParser produce trim warnings -->
   </ItemGroup>
 
