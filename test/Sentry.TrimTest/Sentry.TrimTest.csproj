@@ -19,7 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     <ProjectReference Include="..\..\src\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
-<!--    <ProjectReference Include="..\..\src\Sentry.AspNetCore.Grpc\Sentry.AspNetCore.Grpc.csproj" />-->
+    <ProjectReference Include="..\..\src\Sentry.AspNetCore.Grpc\Sentry.AspNetCore.Grpc.csproj" />
     <ProjectReference Include="..\..\src\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj" />
     <ProjectReference Include="..\..\src\Sentry.EntityFramework\Sentry.EntityFramework.csproj" />
     <ProjectReference Include="..\..\src\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
@@ -30,7 +30,7 @@
     <ProjectReference Include="..\..\src\Sentry.Serilog\Sentry.Serilog.csproj" />
     <TrimmerRootAssembly Include="Sentry" />
     <TrimmerRootAssembly Include="Sentry.AspNetCore" />
-<!--    <TrimmerRootAssembly Include="Sentry.AspNetCore.Grpc" />-->
+    <TrimmerRootAssembly Include="Sentry.AspNetCore.Grpc" />
     <TrimmerRootAssembly Include="Sentry.DiagnosticSource" />
     <TrimmerRootAssembly Include="Sentry.EntityFramework" />
     <TrimmerRootAssembly Include="Sentry.Extensions.Logging" />
