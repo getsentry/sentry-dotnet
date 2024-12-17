@@ -9,6 +9,7 @@
 
 ### Fixes
 - Fixed JNI Error when accessing Android device data from multiple threads ([#3802](https://github.com/getsentry/sentry-dotnet/pull/3802))
+- Fix "System.ArgumentOutOfRangeException: Specified argument was out of the range of valid values. (Parameter 'idData')" error propagating OpenTelemetry span ids ([#3850](https://github.com/getsentry/sentry-dotnet/pull/3850))
 
 ### Dependencies
 
