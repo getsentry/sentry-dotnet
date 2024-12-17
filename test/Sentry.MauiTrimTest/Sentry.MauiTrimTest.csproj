@@ -75,10 +75,12 @@
 
   <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
     <!-- Some analysis errors only show when AOT is enabled - not all of them are related to trimming -->
-    <PublishAot>true</PublishAot>
+    <!-- TODO: Reneable once this issue has been addressed: https://github.com/dotnet/runtime/pull/109186 -->
+    <!--    <PublishAot>true</PublishAot>-->
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
     <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
     <!-- Ensure code for Bindings is included for trim analysis... the bindings are part of the core Sentry package  -->
     <TrimmerRootAssembly Include="Sentry" RootMode="All" />
