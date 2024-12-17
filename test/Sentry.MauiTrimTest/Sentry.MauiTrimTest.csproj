@@ -65,11 +65,17 @@
 	</ItemGroup>
 
   <PropertyGroup>
+    <!-- See https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/prepare-libraries-for-trimming#show-all-warnings-with-test-app -->
     <!-- Ensure trimming is enabled when publishing the app -->
     <PublishTrimmed>true</PublishTrimmed>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <!-- Give detailed errors on trim warnings in any dependencies -->
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
+    <!-- Some analysis errors only show when AOT is enabled - not all of them are related to trimming -->
+    <PublishAot>true</PublishAot>
   </PropertyGroup>
 
   <ItemGroup>
