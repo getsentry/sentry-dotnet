@@ -64,28 +64,29 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
 	</ItemGroup>
 
-  <PropertyGroup>
-    <!-- See https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/prepare-libraries-for-trimming#show-all-warnings-with-test-app -->
-    <!-- Ensure trimming is enabled when publishing the app -->
-    <PublishTrimmed>true</PublishTrimmed>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <!-- Give detailed errors on trim warnings in any dependencies -->
-    <TrimmerSingleWarn>false</TrimmerSingleWarn>
-  </PropertyGroup>
+	<PropertyGroup>
+		<!-- See https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/prepare-libraries-for-trimming#show-all-warnings-with-test-app -->
+		<!-- Ensure trimming is enabled when publishing the app -->
+		<PublishTrimmed>true</PublishTrimmed>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<!-- Give detailed errors on trim warnings in any dependencies -->
+		<TrimmerSingleWarn>false</TrimmerSingleWarn>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
-    <!-- Some analysis errors only show when AOT is enabled - not all of them are related to trimming -->
-    <!-- TODO: Reneable once this issue has been addressed: https://github.com/dotnet/runtime/pull/109186 -->
-    <!--    <PublishAot>true</PublishAot>-->
-  </PropertyGroup>
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
+		<!-- Some analysis errors only show when AOT is enabled - not all of them are related to trimming -->
+		<PublishAot>true</PublishAot>
+		<!-- TODO: Remove once this issue has been addressed: https://github.com/dotnet/runtime/pull/109186 -->
+		<WarningsNotAsErrors>IL3050;IL3053</WarningsNotAsErrors>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
-    <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
-    <!-- Ensure code for Bindings is included for trim analysis... the bindings are part of the core Sentry package  -->
-    <TrimmerRootAssembly Include="Sentry" RootMode="All" />
-    <!-- Ensure code in Sentry.Maui that conditionally targets mobile is included for trim analysis -->
-    <TrimmerRootAssembly Include="Sentry.Maui" RootMode="All" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+		<ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
+		<!-- Ensure code for Bindings is included for trim analysis... the bindings are part of the core Sentry package  -->
+		<TrimmerRootAssembly Include="Sentry" RootMode="All" />
+		<!-- Ensure code in Sentry.Maui that conditionally targets mobile is included for trim analysis -->
+		<TrimmerRootAssembly Include="Sentry.Maui" RootMode="All" />
+	</ItemGroup>
 
 </Project>
