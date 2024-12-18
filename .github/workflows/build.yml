@@ -221,7 +221,7 @@ jobs:
         run: |
           dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
 
-      - name: Publish Test app (OSX)
+      - name: Publish Test app (macOS)
         run: dotnet publish test/Sentry.TrimTest/Sentry.TrimTest.csproj -c Release -r osx-arm64
 
       - name: Publish Test app (Android)
