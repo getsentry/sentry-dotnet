@@ -1,4 +1,8 @@
+using Sentry.Infrastructure;
+
 namespace Sentry;
+
+#if MEMORY_DUMP_SUPPORTED
 
 /// <summary>
 /// Delegate that determines whether a heap dump should be triggered or not.
@@ -6,6 +10,7 @@ namespace Sentry;
 /// <param name="usedMemory">Memory currently used by the process</param>
 /// <param name="totalMemory">Total available memory</param>
 /// <returns><see langword="true"/> if the heap dump should be triggered; otherwise, <see langword="false"/>.</returns>
+[Experimental(DiagnosticId.ExperimentalFeature)]
 public delegate bool HeapDumpTrigger(long usedMemory, long totalMemory);
 
 internal static class HeapDumpTriggers
@@ -25,3 +30,5 @@ internal static class HeapDumpTriggers
         };
     }
 }
+
+#endif

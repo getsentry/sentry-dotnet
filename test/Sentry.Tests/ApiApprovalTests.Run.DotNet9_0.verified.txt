@@ -75,6 +75,7 @@ namespace Sentry
         ManagedBackgroundThread = 1,
         Native = 2,
     }
+    [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
     public class Debouncer
     {
         public static Sentry.Debouncer PerApplicationLifetime(int eventMaximum = 1, System.TimeSpan? cooldown = default) { }
@@ -132,6 +133,7 @@ namespace Sentry
     {
         public static void SetTags(this Sentry.IHasTags hasTags, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> tags) { }
     }
+    [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
     public delegate bool HeapDumpTrigger(long usedMemory, long totalMemory);
     public static class HintTypes
     {
@@ -730,7 +732,9 @@ namespace Sentry
         public void DisableSystemDiagnosticsMetricsIntegration() { }
         public void DisableUnobservedTaskExceptionCapture() { }
         public void DisableWinUiUnhandledExceptionIntegration() { }
+        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void EnableHeapDumps(Sentry.HeapDumpTrigger trigger, Sentry.Debouncer? debouncer = null, Sentry.SentryLevel level = 2) { }
+        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void EnableHeapDumps(short memoryPercentageThreshold, Sentry.Debouncer? debouncer = null, Sentry.SentryLevel level = 2) { }
         public System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventProcessor> GetAllEventProcessors() { }
         public System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> GetAllExceptionProcessors() { }
