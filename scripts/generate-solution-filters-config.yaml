@@ -24,6 +24,13 @@ groupConfigs:
   windowsOnly:
     # .NET Framework projects
     - "**/*.AspNet.csproj"
+  artefacts:
+    # Any projects in the obj or bin directories
+    - "**/obj/**/*.csproj"
+    - "**/bin/**/*.csproj"
+  trimTests:
+    - "**/Sentry.TrimTest.csproj"
+    - "**/Sentry.MauiTrimTest.csproj"
 
 filterConfigs:
 
@@ -35,12 +42,13 @@ filterConfigs:
       groups:
         - "macOnly"
         - "windowsOnly"
+        - "artefacts"
+        - "trimTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Maui.Device.TestApp.csproj"
         - "**/*SourceGen.csproj"
-        - "**/*TestUtils*.csproj"
 
   - outputPath: Sentry-CI-Build-macOS.slnf
     include:
@@ -50,6 +58,9 @@ filterConfigs:
         - "modules/perfview/**/TraceEvent.csproj"
         - "modules/perfview/**/FastSerialization.csproj"
     exclude:
+      groups:
+        - "artefacts"
+        - "trimTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
@@ -65,6 +76,8 @@ filterConfigs:
     exclude:
       groups:
         - "macOnly"
+        - "artefacts"
+        - "trimTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
@@ -78,6 +91,8 @@ filterConfigs:
       groups:
         - "allProjects"
     exclude:
+      groups:
+          - "artefacts"
       patterns:
         - "**/Sentry.Bindings*.csproj"
         - "benchmarks/**/*.csproj"
@@ -115,6 +130,9 @@ filterConfigs:
         - "**/Sentry.Testing.CrashableApp.csproj"
         - "**/Sentry.Tests.csproj"
         - "**/Sentry.Analyzers.Tests.csproj"
+    exclude:
+      groups:
+        - "artefacts"
 
   - outputPath: SentryCore.slnf
     solution: .generated.NoMobile.sln
@@ -173,6 +191,9 @@ filterConfigs:
       groups:
         - "allProjects"
     exclude:
+      groups:
+        - "artefacts"
+        - "trimTests"
       patterns:
         - "**/*Bindings*.csproj"
         - "**/*Android*.csproj"
@@ -184,6 +205,8 @@ filterConfigs:
       groups:
         - "allProjects"
     exclude:
+      groups:
+        - "trimTests"
       patterns:
         - "samples/**/*"
         - "**/*Bindings*"

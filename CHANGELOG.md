@@ -11,6 +11,7 @@
 - Fixed JNI Error when accessing Android device data from multiple threads ([#3802](https://github.com/getsentry/sentry-dotnet/pull/3802))
 - Android - fix bug that prevents logcat.log from getting attached to unhandled events (SIGSEGV Segfault) ([#3694](https://github.com/getsentry/sentry-dotnet/pull/3694))
 - Fix "System.ArgumentOutOfRangeException: Specified argument was out of the range of valid values. (Parameter 'idData')" error propagating OpenTelemetry span ids ([#3850](https://github.com/getsentry/sentry-dotnet/pull/3850))
+- Address Trim warnings so that MAUI applications can be compiled AOT ([#3841](https://github.com/getsentry/sentry-dotnet/pull/3841))
 
 ### Dependencies
 

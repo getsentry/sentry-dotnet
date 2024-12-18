@@ -55,6 +55,7 @@
       "test\\Sentry.AspNet.Tests\\Sentry.AspNet.Tests.csproj",
       "test\\Sentry.AspNetCore.Grpc.Tests\\Sentry.AspNetCore.Grpc.Tests.csproj",
       "test\\Sentry.AspNetCore.Tests\\Sentry.AspNetCore.Tests.csproj",
+      "test\\Sentry.AspNetCore.TestUtils\\Sentry.AspNetCore.TestUtils.csproj",
       "test\\Sentry.Azure.Functions.Worker.Tests\\Sentry.Azure.Functions.Worker.Tests.csproj",
       "test\\Sentry.DiagnosticSource.IntegrationTests\\Sentry.DiagnosticSource.IntegrationTests.csproj",
       "test\\Sentry.DiagnosticSource.Tests\\Sentry.DiagnosticSource.Tests.csproj",

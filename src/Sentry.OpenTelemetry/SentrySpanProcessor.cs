@@ -463,9 +463,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             Exception exception;
             try
             {
-                var type = Type.GetType(exceptionType)!;
-                exception = (Exception)Activator.CreateInstance(type, message)!;
-                exception.SetSentryMechanism("SentrySpanProcessor.ErrorSpan");
+                if (CreatePoorMansException(exceptionType, message) is not { } poorMansException)
+                {
+                    _options?.DiagnosticLogger?.LogWarning($"Unable to create poor man's exception with trimming enabled : {exceptionType}");
+                    continue;
+                }
+                exception = poorMansException;
             }
             catch
             {
@@ -490,5 +493,19 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 trace.TraceId = activity.TraceId.AsSentryId();
             });
         }
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2057", Justification = AotHelper.AvoidAtRuntime)]
+    private static Exception? CreatePoorMansException(string exceptionType, string message)
+    {
+        if (AotHelper.IsTrimmed)
+        {
+            return null;
+        }
+
+        var type = Type.GetType(exceptionType)!;
+        var exception = (Exception)Activator.CreateInstance(type, message)!;
+        exception.SetSentryMechanism("SentrySpanProcessor.ErrorSpan");
+        return exception;
     }
 }

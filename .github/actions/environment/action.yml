@@ -15,7 +15,7 @@ runs:
     - name: Pin the Xcode Version
       if: runner.os == 'macOS'
       shell: bash
-      run: sudo xcode-select --switch /Applications/Xcode_16.0.app
+      run: sudo xcode-select --switch /Applications/Xcode_16.2.app
 
     # Needed for Android SDK setup step
     - uses: actions/setup-java@v3
