@@ -1,5 +1,7 @@
 namespace Sentry.Tests;
 
+#if MEMORY_DUMP_SUPPORTED
+
 public class DebouncerTests
 {
     [Fact]
@@ -142,3 +144,5 @@ public class DebouncerTests
         debouncer._lastEvent.Should().Be(secondEventTime);
     }
 }
+
+#endif

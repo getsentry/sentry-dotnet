@@ -5,66 +5,46 @@
 ### API Changes
 
 - Removed net6.0 and net7.0 TFMs as Microsoft has stopped supporting both of these now. If you need to target net6.0 or net7.0 then we recommend using version 4.x of the .NET SDK for Sentry. ([#3807](https://github.com/getsentry/sentry-dotnet/pull/3807))
+- Sentry's Experimental Metrics feature has been deprecated and removed from the SDK. ([#3718](https://github.com/getsentry/sentry-dotnet/pull/3718))
+- `SentryOptions.EnableTracing` has been removed. Instead, tracing should be enabled or disabled by setting the `SentryOptions.TracesSampleRate` or by using `SentryOptions.TracesSampler` to configure a sampling function ([#3569](https://github.com/getsentry/sentry-dotnet/pull/3569))
 - Temporarily removed experimental Session Replay support ([#3827](https://github.com/getsentry/sentry-dotnet/pull/3827))
-
-### Fixes
-- Fixed JNI Error when accessing Android device data from multiple threads ([#3802](https://github.com/getsentry/sentry-dotnet/pull/3802))
-- Android - fix bug that prevents logcat.log from getting attached to unhandled events (SIGSEGV Segfault) ([#3694](https://github.com/getsentry/sentry-dotnet/pull/3694))
-- Fix "System.ArgumentOutOfRangeException: Specified argument was out of the range of valid values. (Parameter 'idData')" error propagating OpenTelemetry span ids ([#3850](https://github.com/getsentry/sentry-dotnet/pull/3850))
-- Address Trim warnings so that MAUI applications can be compiled AOT ([#3841](https://github.com/getsentry/sentry-dotnet/pull/3841))
-
-### Dependencies
-
-- Bump CLI from v2.39.0 to v2.39.1 ([#3799](https://github.com/getsentry/sentry-dotnet/pull/3799))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2391)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.39.0...2.39.1)
-- Bump Java SDK from v7.18.0 to v7.19.0 ([#3805](https://github.com/getsentry/sentry-dotnet/pull/3805), [#3844](https://github.com/getsentry/sentry-dotnet/pull/3844))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7190)
-  - [diff](https://github.com/getsentry/sentry-java/compare/7.18.0...7.19.0)
-- Bump Native SDK from v0.7.15 to v0.7.16 ([#3825](https://github.com/getsentry/sentry-dotnet/pull/3825))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0716)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.15...0.7.16)
-
-## 5.0.0-alpha.1
-
-### API Changes
-
 - You should no longer pass `AndroidContext` as an argument to `SentrySdk.Init` ([#3562](https://github.com/getsentry/sentry-dotnet/pull/3562))
 - The `SentryUser.Segment` property has been deprecated. Consider sending this as a tag or additional data instead ([#3563](https://github.com/getsentry/sentry-dotnet/pull/3563))
 - The ITraceContext now includes an [Origin](https://develop.sentry.dev/sdk/telemetry/traces/trace-origin/), which is set automatically and is primarily used internally by the Sentry server ([#3564](https://github.com/getsentry/sentry-dotnet/pull/3564))
 - `Device.BatteryLevel` and `Device.ProcessorFrequency` are now stored as floats rather than ints, to align with the Cocoa and Java SDKs ([#3567](https://github.com/getsentry/sentry-dotnet/pull/3567))
-- `SentryOptions.EnableTracing` has been removed. Instead, tracing should be enabled or disabled by setting the `SentryOptions.TracesSampleRate` or by using `SentryOptions.TracesSampler` to configure a sampling function ([#3569](https://github.com/getsentry/sentry-dotnet/pull/3569))
 - The `FailedRequestTargets`, `TagFilters` and `TracePropagationTargets` options have all been changed from `SubstringOrRegexPattern` to `IList<StringOrRegex>` ([#3566](https://github.com/getsentry/sentry-dotnet/pull/3566))
 - `Scope.Transaction` is now always stored as an `AsyncLocal` also in [Global Mode](https://docs.sentry.io/platforms/dotnet/configuration/options/#is-global-mode-enabled), to prevent auto-instrumented spans from the UI ending up parented to transactions from a background task (or vice versa). ([#3596](https://github.com/getsentry/sentry-dotnet/pull/3596))
-- Heap dumps can be captured automatically when memory usage exceeds a configurable threshold ([#3667](https://github.com/getsentry/sentry-dotnet/pull/3667))
-- Sentry's Experimental Metrics feature has been deprecated and removed from the SDK. ([#3718](https://github.com/getsentry/sentry-dotnet/pull/3718))
 
 ### Features
-- Added support for `.NET 9` (preview) ([#3699](https://github.com/getsentry/sentry-dotnet/pull/3699))
+- Added support for `.NET 9` ([#3699](https://github.com/getsentry/sentry-dotnet/pull/3699))
+- Heap dumps can be captured automatically when memory usage exceeds a configurable threshold. Note that this API is still experimental and may change based on user feedback. ([#3667](https://github.com/getsentry/sentry-dotnet/pull/3667))
 - libsentrysupplemental.so now supports 16 KB page sizes on Android ([#3723](https://github.com/getsentry/sentry-dotnet/pull/3723))
 - Added `SentryOptions` extension for profiling: `options.AddProfilingIntegration()` ([#3660](https://github.com/getsentry/sentry-dotnet/pull/3660))
 
 ### Fixes
-
+- Address Trim warnings to enable AOT support, including support for MAUI specifically. ([#3841](https://github.com/getsentry/sentry-dotnet/pull/3841))
+- Fixed JNI Error when accessing Android device data from multiple threads ([#3802](https://github.com/getsentry/sentry-dotnet/pull/3802))
+- Android - fix bug that prevents logcat.log from getting attached to unhandled events (SIGSEGV Segfault) ([#3694](https://github.com/getsentry/sentry-dotnet/pull/3694))
 - Fixed ArgumentNullException in FormRequestPayloadExtractor when handling invalid form data on ASP.NET ([#3734](https://github.com/getsentry/sentry-dotnet/pull/3734))
 - Fixed NullReferenceException in SentryTraceHeader when parsing null or empty values ([#3757](https://github.com/getsentry/sentry-dotnet/pull/3757))
+- Fix "System.ArgumentOutOfRangeException: Specified argument was out of the range of valid values. (Parameter 'idData')" error propagating OpenTelemetry span ids ([#3850](https://github.com/getsentry/sentry-dotnet/pull/3850))
 - ArgumentNullException in FormRequestPayloadExtractor when handling invalid form data on ASP.NET ([#3734](https://github.com/getsentry/sentry-dotnet/pull/3734))
-- Crash when using NLog with FailedRequestStatusCodes options in a Maui app with Trimming enabled ([#3743](https://github.com/getsentry/sentry-dotnet/pull/3743))
+- Fixed crash when using NLog with FailedRequestStatusCodes options in a Maui app with Trimming enabled ([#3743](https://github.com/getsentry/sentry-dotnet/pull/3743))
 
 ### Dependencies
 
+- Bump CLI from v2.38.2 to v2.39.1 ([#3782](https://github.com/getsentry/sentry-dotnet/pull/3782)) ([#3799](https://github.com/getsentry/sentry-dotnet/pull/3799))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2391)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.38.2...2.39.1)
+- Bump Java SDK from v7.16.0 to v7.19.0 ([#3749](https://github.com/getsentry/sentry-dotnet/pull/3749), [#3771](https://github.com/getsentry/sentry-dotnet/pull/3771)) ([#3805](https://github.com/getsentry/sentry-dotnet/pull/3805), [#3844](https://github.com/getsentry/sentry-dotnet/pull/3844))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7190)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.16.0...7.19.0)
 - Bump Cocoa SDK from v8.36.0 to v8.39.0 ([#3727](https://github.com/getsentry/sentry-dotnet/pull/3727))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8390)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.36.0...8.39.0)
-- Bump Java SDK from v7.16.0 to v7.18.0 ([#3749](https://github.com/getsentry/sentry-dotnet/pull/3749), [#3771](https://github.com/getsentry/sentry-dotnet/pull/3771))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7180)
-  - [diff](https://github.com/getsentry/sentry-java/compare/7.16.0...7.18.0)
-- Bump Native SDK from v0.7.11 to v0.7.15 ([#3731](https://github.com/getsentry/sentry-dotnet/pull/3731), [#3770](https://github.com/getsentry/sentry-dotnet/pull/3770), [#3775](https://github.com/getsentry/sentry-dotnet/pull/3775), [#3779](https://github.com/getsentry/sentry-dotnet/pull/3779))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0715)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.11...0.7.15)
-- Bump CLI from v2.38.2 to v2.39.0 ([#3782](https://github.com/getsentry/sentry-dotnet/pull/3782))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2390)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.38.2...2.39.0)
+    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8390)
+    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.36.0...8.39.0)
+- Bump Native SDK from v0.7.11 to v0.7.16 ([#3731](https://github.com/getsentry/sentry-dotnet/pull/3731), [#3770](https://github.com/getsentry/sentry-dotnet/pull/3770), [#3775](https://github.com/getsentry/sentry-dotnet/pull/3775), [#3779](https://github.com/getsentry/sentry-dotnet/pull/3779)) ([#3825](https://github.com/getsentry/sentry-dotnet/pull/3825))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0716)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.11...0.7.16)
 
 ## 4.13.0
 
