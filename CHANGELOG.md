@@ -7,6 +7,9 @@
 - Bump Native SDK from v0.7.16 to v0.7.17 ([#3857](https://github.com/getsentry/sentry-dotnet/pull/3857))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0717)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.7.16...0.7.17)
+- Bump Java SDK from v7.19.0 to v7.20.0 ([#3866](https://github.com/getsentry/sentry-dotnet/pull/3866))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7200)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.19.0...7.20.0)
 
 ## 5.0.0
 
