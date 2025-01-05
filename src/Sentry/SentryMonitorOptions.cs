@@ -51,11 +51,6 @@ public enum SentryMonitorInterval
 /// </summary>
 public partial class SentryMonitorOptions : ISentryJsonSerializable
 {
-    private SentryMonitorScheduleType _type = SentryMonitorScheduleType.None;
-    private string? _crontab;
-    private int? _interval;
-    private SentryMonitorInterval? _unit;
-
     // Breakdown of the validation
     // ^(\*|([0-5]?\d))                 Minute  0 - 59
     // (\s+)(\*|([01]?\d|2[0-3]))       Hour    0 - 23
@@ -63,18 +58,22 @@ public partial class SentryMonitorOptions : ISentryJsonSerializable
     // (\s+)(\*|([1-9]|1[0-2]))         Month   1 - 12
     // (\s+)(\*|([0-7]))                Weekday 0 - 7
     // $                                End of string
-#if NET7_0_OR_GREATER
-    [GeneratedRegex(@"^(\*|([0-5]?\d))(\s+)(\*|([01]?\d|2[0-3]))(\s+)(\*|([1-9]|[12]\d|3[01]))(\s+)(\*|([1-9]|1[0-2]))(\s+)(\*|([0-7]))$", RegexOptions.IgnoreCase)]
-    private static partial Regex CrontabValidation();
-#else
-    private static Regex? CrontabValidationInstance;
+    private const string ValidCrontabPattern = @"^(\*|([0-5]?\d))(\s+)(\*|([01]?\d|2[0-3]))(\s+)(\*|([1-9]|[12]\d|3[01]))(\s+)(\*|([1-9]|1[0-2]))(\s+)(\*|([0-7]))$";
 
-    private static Regex CrontabValidation()
-    {
-        return CrontabValidationInstance ??= new Regex(
-            @"^(\*|([0-5]?\d))(\s+)(\*|([01]?\d|2[0-3]))(\s+)(\*|([1-9]|[12]\d|3[01]))(\s+)(\*|([1-9]|1[0-2]))(\s+)(\*|([0-7]))$",
-            RegexOptions.Compiled | RegexOptions.CultureInvariant);
-    }
+    private SentryMonitorScheduleType _type = SentryMonitorScheduleType.None;
+    private string? _crontab;
+    private int? _interval;
+    private SentryMonitorInterval? _unit;
+
+#if NET9_0_OR_GREATER
+    [GeneratedRegex(ValidCrontabPattern, RegexOptions.IgnoreCase)]
+    private static partial Regex ValidCrontab { get; }
+#elif NET8_0
+    [GeneratedRegex(ValidCrontabPattern, RegexOptions.IgnoreCase)]
+    private static partial Regex ValidCrontabRegex();
+    private static readonly Regex ValidCrontab = ValidCrontabRegex();
+#else
+    private static readonly Regex ValidCrontab = new(ValidCrontabPattern, RegexOptions.Compiled | RegexOptions.CultureInvariant);
 #endif
 
     /// <summary>
@@ -88,7 +87,7 @@ public partial class SentryMonitorOptions : ISentryJsonSerializable
             throw new ArgumentException("You tried to set the interval twice. The Check-Ins interval is supposed to be set only once.");
         }
 
-        if (!CrontabValidation().IsMatch(crontab))
+        if (!ValidCrontab.IsMatch(crontab))
         {
             throw new ArgumentException("The provided crontab does not match the expected format of '* * * * *' " +
                                         "translating to 'minute', 'hour', 'day of the month', 'month', and 'day of the week'.");
