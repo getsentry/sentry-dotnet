@@ -123,7 +123,7 @@ jobs:
         run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
 
       - name: Upload code coverage
-        uses: codecov/codecov-action@7f8b4b4bde536c465e797be725718b88c5d95e0e
+        uses: codecov/codecov-action@1e68e06f1dbfde0e4cefc87efeba9e4643565303
 
       - name: Upload build and test outputs
         if: failure()
