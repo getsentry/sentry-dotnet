@@ -16,8 +16,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Pin ubuntu to ensure mono is installed
         # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
-        os: [ubuntu-latest, windows-latest, macos-15]
+        os: [ubuntu-22.04, windows-latest, macos-15]
 
     steps:
       - name: Checkout
@@ -53,8 +54,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Pin ubuntu to ensure mono is installed
         # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
-        os: [ubuntu-latest, windows-latest, macos-15]
+        os: [ubuntu-22.04, windows-latest, macos-15]
 
     steps:
       - name: Cancel Previous Runs
@@ -154,8 +156,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # Pin ubuntu to ensure mono is installed
         # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
-        os: [ubuntu-latest, windows-latest, macos-15]
+        os: [ubuntu-22.04, windows-latest, macos-15]
 
     steps:
       - uses: actions/checkout@v4
@@ -234,7 +237,7 @@ jobs:
 #        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net9.0-ios18.0 -r ios-arm64
 
   test-solution-filters:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: ${{ !startsWith(github.ref_name, 'release/') }}
 
     steps:
