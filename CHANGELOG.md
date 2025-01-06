@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Fixes
+
+- .NET Mobile: Disable and made obsolete the iOS Watchdog termination feature which is based on heuristics that don't work in .NET ([#3867](https://github.com/getsentry/sentry-dotnet/pull/3867))
+
+
 ### Dependencies
 
 - Bump Native SDK from v0.7.16 to v0.7.17 ([#3857](https://github.com/getsentry/sentry-dotnet/pull/3857))

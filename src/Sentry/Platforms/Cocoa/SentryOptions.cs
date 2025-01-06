@@ -128,13 +128,16 @@ public partial class SentryOptions
         public bool EnableNetworkTracking { get; set; } = true;
 
         /// <summary>
-        /// Whether to enable watchdog termination tracking or not.
-        /// The default value is <c>true</c> (enabled).
+        /// Whether to enable watchdog termination tracking or not. NOT advised.
+        /// The default value is <c>false</c> (disabled).
         /// </summary>
         /// <remarks>
-        /// https://docs.sentry.io/platforms/apple/configuration/watchdog-terminations/
+        /// This feature is prone to false positives on .NET since it relies on heuristics that don't work in this environment.
         /// </remarks>
-        public bool EnableWatchdogTerminationTracking { get; set; } = true;
+        /// <seealso href="https://github.com/getsentry/sentry-dotnet/issues/3860" />
+        /// <seealso href="https://docs.sentry.io/platforms/apple/configuration/watchdog-terminations/" />
+        [Obsolete("See: https://github.com/getsentry/sentry-dotnet/issues/3860")]
+        public bool EnableWatchdogTerminationTracking { get; set; } = false;
 
         /// <summary>
         /// Whether the SDK should use swizzling or not.

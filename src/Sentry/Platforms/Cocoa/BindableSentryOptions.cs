@@ -38,7 +38,9 @@ internal partial class BindableSentryOptions
             options.EnableFileIOTracing = EnableFileIOTracing ?? options.EnableFileIOTracing;
             options.EnableNetworkBreadcrumbs = EnableNetworkBreadcrumbs ?? options.EnableNetworkBreadcrumbs;
             options.EnableNetworkTracking = EnableNetworkTracking ?? options.EnableNetworkTracking;
+#pragma warning disable CS0618 // Type or member is obsolete
             options.EnableWatchdogTerminationTracking = EnableWatchdogTerminationTracking ?? options.EnableWatchdogTerminationTracking;
+#pragma warning restore CS0618 // Type or member is obsolete
             options.EnableSwizzling = EnableSwizzling ?? options.EnableSwizzling;
             options.EnableUIViewControllerTracing = EnableUIViewControllerTracing ?? options.EnableUIViewControllerTracing;
             options.EnableUserInteractionTracing = EnableUserInteractionTracing ?? options.EnableUserInteractionTracing;
