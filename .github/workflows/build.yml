@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
+        # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
         os: [ubuntu-latest, windows-latest, macos-15]
 
     steps:
@@ -53,7 +53,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
+        # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
         os: [ubuntu-latest, windows-latest, macos-15]
 
     steps:
@@ -112,7 +112,7 @@ jobs:
       - name: Install Android SDKs
         if: runner.os == 'macOS'
         run: |
-          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
+          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
 
       - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
@@ -121,7 +121,7 @@ jobs:
         run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
 
       - name: Upload code coverage
-        uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238
+        uses: codecov/codecov-action@7f8b4b4bde536c465e797be725718b88c5d95e0e
 
       - name: Upload build and test outputs
         if: failure()
@@ -154,7 +154,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
+        # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
         os: [ubuntu-latest, windows-latest, macos-15]
 
     steps:
@@ -186,6 +186,52 @@ jobs:
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         with:
           path: integration-test
+
+
+  trim-analysis:
+    name: Trim analysis
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 2 # default is 1 and codecov needs > 1
+
+      # We use macOS for the final publishing build so we get all the iOS/macCatalyst targets in the packages
+      - name: Set Environment Variables
+        run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
+
+      - name: Download sentry-native (macOS)
+        uses: actions/cache/restore@v4
+        with:
+          path: src/Sentry/Platforms/Native/sentry-native
+          key: sentry-native-macOS-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
+      - name: Build Native Dependencies
+        uses: ./.github/actions/buildnative
+
+      - name: Install Android SDKs
+        if: runner.os == 'macOS'
+        run: |
+          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
+
+      - name: Publish Test app (macOS)
+        run: dotnet publish test/Sentry.TrimTest/Sentry.TrimTest.csproj -c Release -r osx-arm64
+
+      - name: Publish Test app (Android)
+        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net9.0-android35.0 -r android-arm64
+
+# We can't publish iOS applications on CI yet. We'd need a valid bundle identifier and to install the relevant
+# certificates/profiles on CI (presumably certs associated with the Sentry org).
+# See https://youtrack.jetbrains.com/issue/RIDER-17115/Could-not-find-any-available-provisioning-profiles-for-iOS
+#      - name: Publish Test app (iOS)
+#        run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net9.0-ios18.0 -r ios-arm64
 
   test-solution-filters:
     runs-on: ubuntu-latest

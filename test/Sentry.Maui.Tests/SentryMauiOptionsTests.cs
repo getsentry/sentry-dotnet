@@ -52,12 +52,32 @@ public class SentryMauiOptionsTests
 #endif
     }
 
+#if ANDROID
     [Fact]
-    public void AttachScreenshots_Default()
+    public void HandlerStrategy_Default()
     {
+        // Arrange
+        var expected = Android.LogCatIntegrationType.None;
         var options = new SentryMauiOptions();
-        Assert.False(options.AttachScreenshot);
+
+        // Assert
+        Assert.Equal(expected, options.Android.LogCatIntegration);
     }
+
+    [Fact]
+    public void HandlerStrategy_Set()
+    {
+        // Arrange
+        var expected = Android.LogCatIntegrationType.None;
+        var options = new SentryMauiOptions();
+
+        // Act
+        options.Android.LogCatIntegration = Android.LogCatIntegrationType.All;
+
+        // Assert
+        Assert.NotEqual(expected, options.Android.LogCatIntegration);
+    }
+#endif
 
     [Fact]
     public void BeforeCaptureScreenshot_Set()

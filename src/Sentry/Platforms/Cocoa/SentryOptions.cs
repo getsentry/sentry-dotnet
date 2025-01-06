@@ -1,4 +1,6 @@
 using ObjCRuntime;
+using Sentry.Cocoa;
+using Sentry.Extensibility;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry;
@@ -126,13 +128,16 @@ public partial class SentryOptions
         public bool EnableNetworkTracking { get; set; } = true;
 
         /// <summary>
-        /// Whether to enable watchdog termination tracking or not.
-        /// The default value is <c>true</c> (enabled).
+        /// Whether to enable watchdog termination tracking or not. NOT advised.
+        /// The default value is <c>false</c> (disabled).
         /// </summary>
         /// <remarks>
-        /// https://docs.sentry.io/platforms/apple/configuration/watchdog-terminations/
+        /// This feature is prone to false positives on .NET since it relies on heuristics that don't work in this environment.
         /// </remarks>
-        public bool EnableWatchdogTerminationTracking { get; set; } = true;
+        /// <seealso href="https://github.com/getsentry/sentry-dotnet/issues/3860" />
+        /// <seealso href="https://docs.sentry.io/platforms/apple/configuration/watchdog-terminations/" />
+        [Obsolete("See: https://github.com/getsentry/sentry-dotnet/issues/3860")]
+        public bool EnableWatchdogTerminationTracking { get; set; } = false;
 
         /// <summary>
         /// Whether the SDK should use swizzling or not.
@@ -214,5 +219,39 @@ public partial class SentryOptions
             InAppIncludes ??= new List<string>();
             InAppIncludes.Add(prefix);
         }
+    }
+
+    // We actually add the profiling integration automatically in InitSentryCocoaSdk().
+    // However, if user calls AddProfilingIntegration() multiple times, we print a warning, as usual.
+    private bool _profilingIntegrationAddedByUser = false;
+
+    /// <summary>
+    /// Adds ProfilingIntegration to Sentry.
+    /// </summary>
+    /// <param name="startupTimeout">
+    /// Unused, only here so that the signature is the same as AddProfilingIntegration() from package Sentry.Profiling.
+    /// </param>
+    public void AddProfilingIntegration(TimeSpan startupTimeout = default)
+    {
+        if (HasIntegration<ProfilingIntegration>())
+        {
+            if (_profilingIntegrationAddedByUser)
+            {
+                DiagnosticLogger?.LogWarning($"{nameof(ProfilingIntegration)} has already been added. The second call to {nameof(AddProfilingIntegration)} will be ignored.");
+            }
+            return;
+        }
+
+        _profilingIntegrationAddedByUser = true;
+        AddIntegration(new ProfilingIntegration());
+    }
+
+    /// <summary>
+    /// Disables the Profiling integration.
+    /// </summary>
+    public void DisableProfilingIntegration()
+    {
+        _profilingIntegrationAddedByUser = false;
+        RemoveIntegration<ProfilingIntegration>();
     }
 }

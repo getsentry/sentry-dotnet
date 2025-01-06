@@ -176,6 +176,9 @@ public class SentryClient : ISentryClient, IDisposable
         CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
     }
 
+#if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
+#endif
     private SentryTransaction? BeforeSendTransaction(SentryTransaction transaction, SentryHint hint)
     {
         if (_options.BeforeSendTransactionInternal is null)
@@ -191,7 +194,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            if (!AotHelper.IsNativeAot)
+            if (!AotHelper.IsTrimmed)
             {
                 // Attempt to demystify exceptions before adding them as breadcrumbs.
                 e.Demystify();
@@ -415,6 +418,9 @@ public class SentryClient : ISentryClient, IDisposable
         return false;
     }
 
+#if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
+#endif
     private SentryEvent? BeforeSend(SentryEvent? @event, SentryHint hint)
     {
         if (_options.BeforeSendInternal == null)
@@ -429,7 +435,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            if (!AotHelper.IsNativeAot)
+            if (!AotHelper.IsTrimmed)
             {
                 // Attempt to demystify exceptions before adding them as breadcrumbs.
                 e.Demystify();

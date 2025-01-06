@@ -1,9 +1,14 @@
+using Sentry.Infrastructure;
+
 namespace Sentry;
+
+#if MEMORY_DUMP_SUPPORTED
 
 /// <summary>
 /// A debouncer that can be used to limit the number of occurrences of an event within a given interval and optionally,
 /// enforce a minimum cooldown period between events.
 /// </summary>
+[Experimental(DiagnosticId.ExperimentalFeature)]
 public class Debouncer
 {
     internal enum DebouncerInterval { Minute, Hour, Day, ApplicationLifetime }
@@ -101,3 +106,5 @@ public class Debouncer
         return _cooldown is not { } cooldown || _lastEvent + cooldown <= eventTime;
     }
 }
+
+#endif

@@ -6,7 +6,14 @@ namespace Sentry.Maui.Internal;
 
 internal static class MauiDeviceData
 {
-    public static void ApplyMauiDeviceData(this Device device, IDiagnosticLogger? logger)
+#if NET9_0_OR_GREATER && ANDROID
+    private static readonly Lock JniLock = new();
+#elif ANDROID
+    private static readonly object JniLock = new();
+#endif
+
+    public static void ApplyMauiDeviceData(this Device device, IDiagnosticLogger? logger,
+        INetworkStatusListener? networkStatusListener)
     {
         try
         {
@@ -22,7 +29,17 @@ internal static class MauiDeviceData
             device.Name ??= deviceInfo.Name;
             device.Manufacturer ??= deviceInfo.Manufacturer;
             device.Model ??= deviceInfo.Model;
+#if ANDROID
+            // DeviceInfo.Idiom is not threadsafe on Android
+            // See: https://github.com/getsentry/sentry-dotnet/issues/3627
+            lock (JniLock)
+            {
+                device.DeviceType ??= deviceInfo.Idiom.ToString();
+            }
+#else
             device.DeviceType ??= deviceInfo.Idiom.ToString();
+#endif
+
             device.Simulator ??= deviceInfo.DeviceType switch
             {
                 DeviceType.Virtual => true,
@@ -54,10 +71,12 @@ internal static class MauiDeviceData
                 logger?.LogDebug("No permission to read battery state from the device.");
             }
 
-            // https://docs.microsoft.com/dotnet/maui/platform-integration/communication/networking#using-connectivity
             try
             {
-                device.IsOnline ??= Connectivity.NetworkAccess == NetworkAccess.Internet;
+                // Note: Connectivity.NetworkAccess is not threadsafe on Android. As we already have a network listener
+                // monitoring the status of the network, we get the online satus from there instead (on all platforms)
+                // See: https://github.com/getsentry/sentry-dotnet/issues/3627
+                device.IsOnline ??= networkStatusListener?.Online;
             }
             catch (PermissionException)
             {
@@ -78,6 +97,13 @@ internal static class MauiDeviceData
                 // ReSharper disable once AccessToDisposedClosure - not disposed until lambda completes
                 MainThread.BeginInvokeOnMainThread(() => CaptureDisplayInfo(resetEvent));
                 resetEvent.Wait();
+            }
+#elif ANDROID
+            // DeviceDisplay.Current is not threadsafe on Android.
+            // See: https://github.com/getsentry/sentry-dotnet/issues/3627
+            lock (JniLock)
+            {
+                CaptureDisplayInfo();
             }
 #else
             CaptureDisplayInfo();

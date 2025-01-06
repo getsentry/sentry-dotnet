@@ -25,7 +25,7 @@ try
     $arch = (!$IsWindows -and $(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
     if ($Platform -eq 'android')
     {
-        $tfm += 'android'
+        $tfm += 'android34.0'
         $group = 'android'
         $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/android-$arch"
         $arguments = @(
@@ -43,7 +43,7 @@ try
     }
     elseif ($Platform -eq 'ios')
     {
-        $tfm += 'ios'
+        $tfm += 'ios17.0'
         $group = 'apple'
         # Always use x64 on iOS, since arm64 doesn't support JIT, which is required for tests using NSubstitute
         $arch = 'x64'
@@ -60,7 +60,7 @@ try
     if ($Build)
     {
         # We disable AOT for device tests: https://github.com/nsubstitute/NSubstitute/issues/834
-        dotnet build -f $tfm -c Release -p:EnableAot=false test/Sentry.Maui.Device.TestApp
+        dotnet build -f $tfm -c Release -p:EnableAot=false -p:NoSymbolStrip=true test/Sentry.Maui.Device.TestApp
         if ($LASTEXITCODE -ne 0)
         {
             throw 'Failed to build Sentry.Maui.Device.TestApp'

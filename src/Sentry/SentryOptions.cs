@@ -525,9 +525,18 @@ public class SentryOptions
 #if MEMORY_DUMP_SUPPORTED
 
     /// <summary>
+    /// <para>
     /// Configures a heap dump to be captured if the percentage of memory used exceeds a certain threshold.
     /// This can be useful to diagnose memory leaks.
+    /// </para>
+    /// <para>
+    /// Note: This feature requires `dotnet-gcdump` to be installed globally on the machine or container where the heap
+    /// dumps will be captured. You can install this by running: `dotnet tool install --global dotnet-gcdump`
+    /// </para>
     /// </summary>
+    /// <remarks>
+    /// This API is experimental and may change in future versions.
+    /// </remarks>
     /// <param name="memoryPercentageThreshold">
     /// The memory threshold at which to trigger a heap dump, as a percentage of total available memory.
     /// Must be a number between 1 and 99.
@@ -538,6 +547,7 @@ public class SentryOptions
     /// </param>
     /// <param name="level">Optional parameter controlling the event level associated with heap dumps.
     /// Defaults to <see cref="SentryLevel.Warning"/>.</param>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public void EnableHeapDumps(short memoryPercentageThreshold, Debouncer? debouncer = null, SentryLevel level = SentryLevel.Warning)
         => EnableHeapDumps(HeapDumpTriggers.MemoryPercentageThreshold(memoryPercentageThreshold), debouncer, level);
 
@@ -550,6 +560,9 @@ public class SentryOptions
     /// dumps will be captured. You can install this by running: `dotnet tool install --global dotnet-gcdump`
     /// </para>
     /// </summary>
+    /// <remarks>
+    /// This API is experimental and may change in future versions.
+    /// </remarks>
     /// <param name="trigger">
     /// A custom trigger function that accepts the current memory usage and total available memory as arguments and
     /// return true to indicate that a heap dump should be captured or false otherwise.
@@ -560,6 +573,7 @@ public class SentryOptions
     /// </param>
     /// <param name="level">Optional parameter controlling the event level associated with heap dumps.
     /// Defaults to <see cref="SentryLevel.Warning"/>.</param>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public void EnableHeapDumps(HeapDumpTrigger trigger, Debouncer? debouncer = null, SentryLevel level = SentryLevel.Warning)
         => HeapDumpOptions = new HeapDumpOptions(trigger, debouncer ?? Debouncer.PerApplicationLifetime(), level);
 

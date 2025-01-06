@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0-android</TargetFrameworks>
+    <TargetFrameworks>net8.0-android34.0</TargetFrameworks>
     <!-- BG8605 and BG8606 happen because there's a missing androidx.lifecycle dependency, but we don't need it here.  (The native Android Sentry SDK will use it if it exists.) -->
     <NoWarn>$(NoWarn);BG8605;BG8606</NoWarn>
-    <SentryAndroidSdkVersion>7.17.0</SentryAndroidSdkVersion>
+    <SentryAndroidSdkVersion>7.19.0</SentryAndroidSdkVersion>
     <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
     <Description>.NET Bindings for the Sentry Android SDK</Description>
   </PropertyGroup>
@@ -12,8 +12,11 @@
   <ItemGroup>
     <None Remove="$(MSBuildThisFileDirectory)..\..\README.md" />
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="" />
+    <!--
+    Normally we'd put this in a TFM specific directory, however this package only targets one TFM:
+      https://learn.microsoft.com/en-us/nuget/concepts/msbuild-props-and-targets
+    -->
     <None Include="$(MSBuildThisFileDirectory)build/Sentry.Bindings.Android.targets" Pack="true" PackagePath="build/Sentry.Bindings.Android.targets" />
-    <None Include="$(MSBuildThisFileDirectory)build/Sentry.Bindings.Android.targets" Pack="true" PackagePath="build/$(TargetFramework)$(TargetPlatformVersion)/Sentry.Bindings.Android.targets" />
     <None Include="$(MSBuildThisFileDirectory)sentry-proguard.cfg" Pack="true" PackagePath="" />
     <PackageReference Remove="SIL.ReleaseTasks" />
   </ItemGroup>
@@ -30,7 +33,6 @@
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar" />
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-core-$(SentryAndroidSdkVersion).aar" />
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).aar" />
-    <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-replay-$(SentryAndroidSdkVersion).aar" />
     <AndroidLibrary Include="..\..\lib\sentry-android-supplemental\bin\sentry-android-supplemental.jar" />
     <AndroidNativeLibrary Include="..\..\lib\sentrysupplemental\bin\arm64-v8a\libsentrysupplemental.so" Abi="arm64-v8a" />
     <AndroidNativeLibrary Include="..\..\lib\sentrysupplemental\bin\armeabi-v7a\libsentrysupplemental.so" Abi="armeabi-v7a" />
@@ -49,12 +51,6 @@
       SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-ndk/$(SentryAndroidSdkVersion)/sentry-android-ndk-$(SentryAndroidSdkVersion).aar"
       DestinationFolder="$(SentryAndroidSdkDirectory)"
       Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).aar')"
-      Retries="3"
-    />
-    <DownloadFile
-      SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-replay/$(SentryAndroidSdkVersion)/sentry-android-replay-$(SentryAndroidSdkVersion).aar"
-      DestinationFolder="$(SentryAndroidSdkDirectory)"
-      Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-android-replay-$(SentryAndroidSdkVersion).aar')"
       Retries="3"
     />
     <DownloadFile

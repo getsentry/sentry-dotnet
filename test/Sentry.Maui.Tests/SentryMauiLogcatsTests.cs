@@ -29,13 +29,165 @@ public class SentryMauiLogcatsTests
                 options.CacheDirectoryPath = null;   //Do not wrap our FakeTransport with a caching transport
                 options.FlushTimeout = TimeSpan.FromSeconds(10);
             });
+
             Builder = builder;
         }
     }
 
     private readonly Fixture _fixture = new();
 
+
 #if ANDROID
+    [SkippableFact]
+    public async Task CaptureException_WhenAttachLogcats_DefaultAsync()
+    {
+        // Arrange
+        var builder = _fixture.Builder.UseSentry();
+
+        // Act
+        using var app = builder.Build();
+        var client = app.Services.GetRequiredService<ISentryClient>();
+        var sentryId = client.CaptureException(new Exception());
+        await client.FlushAsync();
+
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
+        envelope.Should().NotBeNull("Envelope with sentryId {0} should be sent", sentryId);
+        var envelopeItem = envelope!.Items.FirstOrDefault(item => item.TryGetType() == "attachment");
+
+        // Assert
+        envelopeItem.Should().BeNull();
+    }
+
+    [SkippableFact]
+    public async Task CaptureException_WhenAttachLogcats_AllExceptionsAsync()
+    {
+
+        // Arrange
+        var builder = _fixture.Builder.UseSentry(options =>
+        {
+            options.Android.LogCatIntegration = Android.LogCatIntegrationType.All;
+        });
+
+        // Act
+        using var app = builder.Build();
+        var client = app.Services.GetRequiredService<ISentryClient>();
+        var sentryId = client.CaptureException(new Exception());
+        await client.FlushAsync();
+
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
+        envelope.Should().NotBeNull("Envelope with sentryId {0} should be sent", sentryId);
+
+        // Assert
+        envelope!.Items.Any(env => env.TryGetFileName() == "logcat.log").Should().BeTrue();
+    }
+
+    [SkippableFact]
+    public async Task CaptureException_WhenAttachLogcats_UnhandledExceptionsAsync()
+    {
+
+        // Arrange
+        var builder = _fixture.Builder.UseSentry(options =>
+        {
+            options.Android.LogCatIntegration = Android.LogCatIntegrationType.Unhandled;
+        });
+
+        // Act
+        using var app = builder.Build();
+        var client = app.Services.GetRequiredService<ISentryClient>();
+        var sentryId = client.CaptureException(BuildUnhandledException());
+
+        await client.FlushAsync();
+
+        var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
+        envelope.Should().NotBeNull("Envelope with sentryId {0} should be sent", sentryId);
+        var envelopeItem = envelope!.Items.FirstOrDefault(item => item.TryGetType() == "attachment");
+
+        // Assert
+        envelopeItem.Should().NotBeNull();
+        envelopeItem!.TryGetFileName().Should().Be("logcat.log");
+    }
+
+    [SkippableFact]
+    public async Task CaptureException_WhenAttachLogcats_HandledExceptionsAsync()
+    {
+
+        // Arrange
+        var builder = _fixture.Builder.UseSentry(options =>
+        {
+            options.Android.LogCatIntegration = Android.LogCatIntegrationType.Unhandled;
+        });
+
+        // Act
+        using var app = builder.Build();
+        var client = app.Services.GetRequiredService<ISentryClient>();
+        var sentryId = client.CaptureException(new Exception());
+
+        await client.FlushAsync();
+
+        var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
+        envelope.Should().NotBeNull("Envelope with sentryId {0} should be sent", sentryId);
+
+        // Assert
+        envelope!.Items.Any(item => item.TryGetType() == "attachment").Should().BeFalse();
+    }
+
+    [SkippableFact]
+    public async Task CaptureException_WhenAttachLogcats_ErrorsAsync()
+    {
+
+        // Arrange
+        var builder = _fixture.Builder.UseSentry(options =>
+        {
+            options.Android.LogCatIntegration = Android.LogCatIntegrationType.Errors;
+        });
+
+        // Act
+        using var app = builder.Build();
+        var client = app.Services.GetRequiredService<ISentryClient>();
+        var sentryId = client.CaptureException(new Exception());
+        await client.FlushAsync();
+
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
+        envelope.Should().NotBeNull("Envelope with sentryId {0} should be sent", sentryId);
+        var envelopeItem = envelope!.Items.FirstOrDefault(item => item.TryGetType() == "attachment");
+
+        // Assert
+        envelopeItem.Should().NotBeNull();
+        envelopeItem!.TryGetFileName().Should().Be("logcat.log");
+    }
+
+    [SkippableFact]
+    public async Task CaptureException_WhenAttachLogcats_NoneAsync()
+    {
+
+        // Arrange
+        var builder = _fixture.Builder.UseSentry(options =>
+        {
+            options.Android.LogCatIntegration = Android.LogCatIntegrationType.None;
+        });
+
+        // Act
+        using var app = builder.Build();
+        var client = app.Services.GetRequiredService<ISentryClient>();
+        var sentryId = client.CaptureException(new Exception());
+        await client.FlushAsync();
+
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+
+        var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
+        envelope.Should().NotBeNull("Envelope with sentryId {0} should be sent", sentryId);
+        var envelopeItem = envelope!.Items.FirstOrDefault(item => item.TryGetType() == "attachment");
+
+        // Assert
+        envelopeItem.Should().BeNull();
+    }
+
     [Fact]
     public void CaptureException_CheckLogcatType()
     {
@@ -62,6 +214,23 @@ public class SentryMauiLogcatsTests
         // Assert
         hint.Should().NotBeNull();
         hint.Attachments.First().ContentType.Should().Be("text/plain", hint.Attachments.First().ContentType);
+    }
+
+    private static Exception BuildUnhandledException()
+    {
+        try
+        {
+            // Throwing will put a stack trace on the exception
+            throw new Exception("Error");
+        }
+        catch (Exception exception)
+        {
+            // Add extra data to test fully
+            exception.Data[Mechanism.HandledKey] = false;
+            exception.Data[Mechanism.MechanismKey] = "AppDomain.UnhandledException";
+            exception.Data["foo"] = "bar";
+            return exception;
+        }
     }
 #endif
 }

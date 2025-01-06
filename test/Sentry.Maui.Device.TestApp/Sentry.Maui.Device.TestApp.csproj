@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks />
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android34.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios17.0</TargetFrameworks>
     <!-- Currently broken on .NET 7, see
       - https://github.com/dotnet/maui/issues/18573
       - https://developercommunity.visualstudio.com/t/MAUI0000:-SystemMissingMethodException:/10505327?sort=newest&ftype=problem
@@ -72,11 +72,6 @@
     <PackageReference Include="System.Private.Uri" Version="4.3.2" />
   </ItemGroup>
 
-  <ItemGroup>
-    <MauiIcon Include="Resources\appicon.svg" ForegroundFile="Resources\appiconfg.svg" Color="#512BD4" />
-    <MauiSplashScreen Include="Resources\appiconfg.svg" Color="#512BD4" BaseSize="128,128" />
-  </ItemGroup>
-
   <!-- Configure XUnit -->
   <ItemGroup>
     <AndroidAsset Include="..\xunit.runner.json" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
@@ -86,6 +81,9 @@
   <ItemGroup>
     <PackageReference Include="DeviceRunners.XHarness.Maui" Version="0.1.0-preview.1" />
     <PackageReference Include="DeviceRunners.XHarness.Xunit" Version="0.1.0-preview.1" />
+    <!-- Prevent downgrade of these packages for DeviceRunners.XHarness.Xunit 0.1.0-preview.1   -->
+    <PackageReference Include="System.Net.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>

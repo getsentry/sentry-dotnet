@@ -1,6 +1,5 @@
 namespace Sentry.Tests.Protocol;
 
-[UsesVerify]
 public partial class SentryEventTests
 {
     [Fact]

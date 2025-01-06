@@ -29,7 +29,9 @@ public class SentryStartup : FunctionsStartup
 
         // TODO: refactor this with SentryWebHostBuilderExtensions
         var section = context.Configuration.GetSection("Sentry");
-        logging.Services.Configure<SentryAspNetCoreOptions>(section);
+        logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>>(
+            _ => new SentryAspNetCoreOptionsSetup(section)
+            );
 
         logging.Services.Configure<SentryAspNetCoreOptions>(options =>
         {

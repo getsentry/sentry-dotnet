@@ -3,7 +3,6 @@ using ISentrySerializable = Sentry.Protocol.Envelopes.ISerializable;
 
 namespace Sentry.Tests;
 
-[UsesVerify]
 public class MetricTests
 {
     public static IEnumerable<object[]> GetMetrics()

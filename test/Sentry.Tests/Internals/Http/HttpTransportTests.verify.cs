@@ -2,7 +2,6 @@ using Sentry.Http;
 
 namespace Sentry.Tests.Internals.Http;
 
-[UsesVerify]
 public partial class HttpTransportTests
 {
     [Fact]

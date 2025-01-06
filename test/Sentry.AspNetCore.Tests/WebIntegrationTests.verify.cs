@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Sentry.AspNetCore.Tests;
 
-[UsesVerify]
 public class WebIntegrationTests
 {
     private readonly TestOutputDiagnosticLogger _logger;
@@ -137,7 +136,8 @@ public class WebIntegrationTests
 
         await Verify(new { result, transport.Payloads })
             .IgnoreStandardSentryMembers()
-            .ScrubAspMembers();
+            .ScrubAspMembers()
+            .UniqueForTargetFrameworkAndVersion();
     }
 
     [ApiController]

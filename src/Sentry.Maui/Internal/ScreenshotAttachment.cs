@@ -27,6 +27,12 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
 {
     private readonly SentryMauiOptions _options;
 
+#if NET9_0_OR_GREATER && ANDROID
+    private static readonly Lock JniLock = new();
+#elif ANDROID
+    private static readonly object JniLock = new();
+#endif
+
     public ScreenshotAttachmentContent(SentryMauiOptions options)
     {
         _options = options;
@@ -36,7 +42,7 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
     {
         var stream = Stream.Null;
         // Not including this on Windows specific build because on WinUI this can deadlock.
-#if __ANDROID__ || __IOS__
+#if (__ANDROID__ || __IOS__)
         Stream CaptureScreenBlocking()
         {
             // This actually runs synchronously (returning Task.FromResult) on the following platforms:
@@ -52,22 +58,27 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
             return stream;
         }
 
+#endif
+#if __IOS__
         if (MainThread.IsMainThread)
         {
             stream = CaptureScreenBlocking();
         }
         else
         {
-#if __ANDROID__ //Android does not require UI thread to capture screen but iOS does.
-            stream = CaptureScreenBlocking();
-#else
+            // Screenshots have to be captured from the UI thread on iOS
             stream = MainThread.InvokeOnMainThreadAsync(async () =>
             {
                 var screen = await Screenshot.Default.CaptureAsync().ConfigureAwait(true);
 
                 return await screen.OpenReadAsync(ScreenshotFormat.Jpeg).ConfigureAwait(true);
             }).ConfigureAwait(false).GetAwaiter().GetResult();
-#endif
+        }
+#elif __ANDROID__
+        // Capturing screenshots is not threadsafe on Android
+        lock (JniLock)
+        {
+            stream = CaptureScreenBlocking();
         }
 #endif
         return stream;

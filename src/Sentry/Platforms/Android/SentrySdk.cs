@@ -31,6 +31,7 @@ public static partial class SentrySdk
 
         // Define the configuration for the Android SDK
         SentryAndroidOptions? nativeOptions = null;
+
         var configuration = new OptionsConfigurationCallback(o =>
         {
             // Capture the android options reference on the outer scope
@@ -59,6 +60,7 @@ public static partial class SentrySdk
             o.ServerName = options.ServerName;
             o.SessionTrackingIntervalMillis = (long)options.AutoSessionTrackingInterval.TotalMilliseconds;
             o.ShutdownTimeoutMillis = (long)options.ShutdownTimeout.TotalMilliseconds;
+            o.SetNativeHandlerStrategy(JavaSdk.Android.Core.NdkHandlerStrategy.SentryHandlerStrategyChainAtStart);
 
             if (options.CacheDirectoryPath is { } cacheDirectoryPath)
             {
@@ -131,13 +133,6 @@ public static partial class SentrySdk
             // In-App Excludes and Includes to be passed to the Android SDK
             options.Native.InAppExcludes?.ForEach(o.AddInAppExclude);
             options.Native.InAppIncludes?.ForEach(o.AddInAppInclude);
-
-            o.Experimental.SessionReplay.OnErrorSampleRate =
-                (JavaDouble?)options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate;
-            o.Experimental.SessionReplay.SessionSampleRate =
-                (JavaDouble?)options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate;
-            o.Experimental.SessionReplay.SetMaskAllImages(options.Native.ExperimentalOptions.SessionReplay.MaskAllImages);
-            o.Experimental.SessionReplay.SetMaskAllText(options.Native.ExperimentalOptions.SessionReplay.MaskAllText);
 
             // These options are intentionally set and not exposed for modification
             o.EnableExternalConfiguration = false;

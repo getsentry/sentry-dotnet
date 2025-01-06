@@ -11,10 +11,10 @@ internal static class ModuleExtensions
     /// </summary>
     /// <param name="module">A Module instance</param>
     /// <returns>module.Name, if this is available. module.ScopeName otherwise</returns>
-    [UnconditionalSuppressMessage("SingleFile", "IL3002:Avoid calling members marked with 'RequiresAssemblyFilesAttribute' when publishing as a single-file", Justification = AotHelper.SuppressionJustification)]
+    [UnconditionalSuppressMessage("SingleFile", "IL3002: calling members marked with 'RequiresAssemblyFilesAttribute'", Justification = AotHelper.AvoidAtRuntime)]
     public static string? GetNameOrScopeName(this Module module)
     {
-        return (AotHelper.IsNativeAot || module?.Name is null || module.Name.Equals(UnknownLocation))
+        return (AotHelper.IsTrimmed || module?.Name is null || module.Name.Equals(UnknownLocation))
             ? module?.ScopeName
             : module?.Name;
     }

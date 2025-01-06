@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Official OpenTelemetry integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <PackageTags>$(PackageTags);OpenTelemetry</PackageTags>
-    <TargetFrameworks>net8.0;net6.0;netstandard2.1;netstandard2.0;net462</TargetFrameworks>
+    <TargetFrameworks>net9.0;net8.0;netstandard2.1;netstandard2.0;net462</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
@@ -16,7 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpenTelemetry" Version="1.5.0" />
+    <!-- Version 1.6.0 is the minimum version that does not have trim warnings   -->
+    <PackageReference Include="OpenTelemetry" Version="1.6.0" />
   </ItemGroup>
 
   <ItemGroup>

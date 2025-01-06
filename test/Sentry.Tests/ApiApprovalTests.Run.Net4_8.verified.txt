@@ -74,13 +74,6 @@ namespace Sentry
         Managed = 0,
         ManagedBackgroundThread = 1,
     }
-    public class Debouncer
-    {
-        public static Sentry.Debouncer PerApplicationLifetime(int eventMaximum = 1, System.TimeSpan? cooldown = default) { }
-        public static Sentry.Debouncer PerDay(int eventMaximum = 1, System.TimeSpan? cooldown = default) { }
-        public static Sentry.Debouncer PerHour(int eventMaximum = 1, System.TimeSpan? cooldown = default) { }
-        public static Sentry.Debouncer PerMinute(int eventMaximum = 1, System.TimeSpan? cooldown = default) { }
-    }
     [System.Flags]
     public enum DeduplicateMode
     {
@@ -130,7 +123,6 @@ namespace Sentry
     {
         public static void SetTags(this Sentry.IHasTags hasTags, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> tags) { }
     }
-    public delegate bool HeapDumpTrigger(long usedMemory, long totalMemory);
     public static class HintTypes
     {
         public const string HttpResponseMessage = "http-response-message";
