@@ -127,7 +127,9 @@ public static partial class SentrySdk
         nativeOptions.EnableFileIOTracing = options.Native.EnableFileIOTracing;
         nativeOptions.EnableNetworkBreadcrumbs = options.Native.EnableNetworkBreadcrumbs;
         nativeOptions.EnableNetworkTracking = options.Native.EnableNetworkTracking;
+#pragma warning disable CS0618 // Type or member is obsolete
         nativeOptions.EnableWatchdogTerminationTracking = options.Native.EnableWatchdogTerminationTracking;
+#pragma warning restore CS0618 // Type or member is obsolete
         nativeOptions.EnableSwizzling = options.Native.EnableSwizzling;
         nativeOptions.EnableUIViewControllerTracing = options.Native.EnableUIViewControllerTracing;
         nativeOptions.EnableUserInteractionTracing = options.Native.EnableUserInteractionTracing;
