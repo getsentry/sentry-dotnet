@@ -5,7 +5,7 @@
 ### Fixes
 
 - .NET Mobile: Disable and made obsolete the iOS Watchdog termination feature which is based on heuristics that don't work in .NET ([#3867](https://github.com/getsentry/sentry-dotnet/pull/3867))
-
+- NullReferenceExceptions causing application crashes in AOT compiled applications (PR #3694) ([#3871](https://github.com/getsentry/sentry-dotnet/pull/3871))
 
 ### Dependencies
 
