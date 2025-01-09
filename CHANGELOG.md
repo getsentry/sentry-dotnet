@@ -2,6 +2,10 @@
 
 ## 5.0.1
 
+### Features
+
+- .NET on iOS: Add experimental EnableAppHangTrackingV2 configuration flag to the options binding SDK ([#3877](https://github.com/getsentry/sentry-dotnet/pull/3877))
+
 ### Fixes
 
 - .NET Mobile: Disable and made obsolete the iOS Watchdog termination feature which is based on heuristics that don't work in .NET ([#3867](https://github.com/getsentry/sentry-dotnet/pull/3867))
