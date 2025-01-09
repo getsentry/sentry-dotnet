@@ -181,10 +181,12 @@ public partial class SentryOptions
         public NSUrlSessionDelegate? UrlSessionDelegate { get; set; } = null;
 
         /// <summary>
-        /// The SessionReplay Options from the Cocoa SDK.
+        /// Gets or sets the session replay options.
         /// </summary>
-        public NativeSentryReplayOptions SentryReplayOptions { get; set; } = new();
-
+        /// <remarks>
+        /// <see href="https://docs.sentry.io/platforms/apple/guides/ios/session-replay">sentry.io</see>
+        /// </remarks>
+        public NativeSentryReplayOptions SessionReplay { get; set; } = new();
 
         // ---------- Other ----------
 
@@ -226,14 +228,14 @@ public partial class SentryOptions
         }
 
         /// <summary>
-        /// The SessionReplay Options from the Cocoa SDK.
+        /// Native session replay options.
         /// </summary>
         public class NativeSentryReplayOptions
         {
             /// <summary>
             /// Gets or sets the percentage of a session
-            /// recording to be sent. Values should be between 0.0
-            /// and 1.0. The default is 0.
+            /// replay to be sent. The value should be between 0.0
+            /// and 1.0. Default is 0.
             /// </summary>
             /// <remarks>
             /// <see href="https://docs.sentry.io/platforms/apple/guides/ios/session-replay/#sampling">sentry.io</see>
@@ -242,8 +244,8 @@ public partial class SentryOptions
 
             /// <summary>
             /// Gets or sets the percentage of an error
-            /// recording to be sent. Values should be between 0.0
-            /// and 1.0. The default is 0.
+            /// replay to be sent. The value should be between 0.0
+            /// and 1.0. Default is 0.
             /// </summary>
             /// <remarks>
             /// <see href="https://docs.sentry.io/platforms/apple/guides/ios/session-replay/#sampling">sentry.io</see>
@@ -252,7 +254,7 @@ public partial class SentryOptions
 
             /// <summary>
             /// Gets or sets a value determining whether
-            /// text should be masked during recording.
+            /// text should be masked during replays.
             /// </summary>
             /// <remarks>
             /// <see href="https://docs.sentry.io/platforms/apple/guides/ios/session-replay/#privacy">sentry.io</see>
@@ -261,7 +263,7 @@ public partial class SentryOptions
 
             /// <summary>
             /// Gets or sets a value determining whether
-            /// images should be masked during recording.
+            /// images should be masked during replays.
             /// </summary>
             /// <remarks>
             /// <see href="https://docs.sentry.io/platforms/apple/guides/ios/session-replay/#privacy">sentry.io</see>

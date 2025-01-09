@@ -8,7 +8,7 @@ public class BindableSentryOptionsTests : BindableTests<SentryOptions.NativeOpti
     public BindableSentryOptionsTests()
     : base(
         nameof(SentryOptions.NativeOptions.UrlSessionDelegate),
-        nameof(SentryOptions.Native.SentryReplayOptions))
+        nameof(SentryOptions.Native.SessionReplay))
     {
     }
 

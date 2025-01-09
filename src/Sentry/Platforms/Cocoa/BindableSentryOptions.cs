@@ -27,7 +27,7 @@ internal partial class BindableSentryOptions
         public bool? EnableUIViewControllerTracing { get; set; }
         public bool? EnableUserInteractionTracing { get; set; }
         public bool? EnableTracing { get; set; }
-        public NativeSentryReplayOptions? SentryReplayOptions { get; set; }
+        public NativeSentryReplayOptions? SessionReplay { get; set; }
 
         public void ApplyTo(SentryOptions.NativeOptions options)
         {
@@ -48,7 +48,7 @@ internal partial class BindableSentryOptions
             options.EnableUIViewControllerTracing = EnableUIViewControllerTracing ?? options.EnableUIViewControllerTracing;
             options.EnableUserInteractionTracing = EnableUserInteractionTracing ?? options.EnableUserInteractionTracing;
             options.EnableTracing = EnableTracing ?? options.EnableTracing;
-            options.SentryReplayOptions = SentryReplayOptions ?? options.SentryReplayOptions;
+            options.SessionReplay = SessionReplay ?? options.SessionReplay;
         }
     }
 }

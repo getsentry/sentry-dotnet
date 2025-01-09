@@ -34,7 +34,10 @@ public static class MauiProgram
                 });
 
 #if IOS
-                
+                options.Native.SessionReplay.SessionSampleRate = 1.0f;
+                options.Native.SessionReplay.OnErrorSampleRate = 1.0f;
+                options.Native.SessionReplay.MaskAllText = false;
+                options.Native.SessionReplay.MaskAllImages = false;
 #endif
             })
 
