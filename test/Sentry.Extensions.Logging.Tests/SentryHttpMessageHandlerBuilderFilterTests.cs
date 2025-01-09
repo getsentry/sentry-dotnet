@@ -4,9 +4,13 @@ namespace Sentry.Extensions.Logging.Tests;
 
 public class SentryHttpMessageHandlerBuilderFilterTests
 {
-    [Fact]
+    [SkippableFact]
     public void Configure_HandlerEnabled_ShouldAddSentryHttpMessageHandler()
     {
+#if __ANDROID__
+        Skip.If(true, "Can't create proxies for classes without parameterless constructors on Android");
+#endif
+
         // Arrange
         var hub = Substitute.For<IHub>();
         SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions { DisableSentryHttpMessageHandler = false };
@@ -24,9 +28,13 @@ public class SentryHttpMessageHandlerBuilderFilterTests
         handlerBuilder.AdditionalHandlers.Should().ContainSingle(h => h is SentryHttpMessageHandler);
     }
 
-    [Fact]
+    [SkippableFact]
     public void Configure_HandlerDisabled_ShouldNotAddSentryHttpMessageHandler()
     {
+#if __ANDROID__
+        Skip.If(true, "Can't create proxies for classes without parameterless constructors on Android");
+#endif
+
         // Arrange
         var hub = Substitute.For<IHub>();
         SentryClientExtensions.SentryOptionsForTestingOnly = new SentryOptions { DisableSentryHttpMessageHandler = true };
