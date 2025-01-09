@@ -4,7 +4,7 @@
 
 ### Features
 
-- Add experimental EnableAppHangTrackingV2 configuration flag to the dotnet SDK ([#3877](https://github.com/getsentry/sentry-dotnet/pull/3877))
+- .NET on iOS: Add experimental EnableAppHangTrackingV2 configuration flag to the options binding SDK ([#3877](https://github.com/getsentry/sentry-dotnet/pull/3877))
 
 ### Fixes
 

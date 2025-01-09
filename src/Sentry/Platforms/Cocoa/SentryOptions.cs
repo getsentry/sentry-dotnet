@@ -71,7 +71,7 @@ public partial class SentryOptions
         /// <summary>
         /// IMPORTANT: This feature is experimental and may have bugs.
         /// <br/>
-        /// As of version 8.39.0-beta.1, you can enable AppHangsV2, which is available on iOS and tvOS.
+        /// As of version 8.39.0-beta.1 of the sentry-cocoa SDK, you can enable AppHangsV2, which is available on iOS and tvOS.
         /// The main difference is that AppHangsV2 differentiates between fully-blocking and non-fully-blocking
         /// app hangs, which you might choose to ignore. A fully-blocking app hang is when the main thread is stuck
         /// completely, and the app can't render a single frame.
