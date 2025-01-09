@@ -1,11 +1,11 @@
 # Changelog
 
-## Unreleased
+## 5.0.1
 
 ### Fixes
 
 - .NET Mobile: Disable and made obsolete the iOS Watchdog termination feature which is based on heuristics that don't work in .NET ([#3867](https://github.com/getsentry/sentry-dotnet/pull/3867))
-
+- .NET on Android: NullReferenceException handled by Mono cause the app to crash (PR #3694) ([#3871](https://github.com/getsentry/sentry-dotnet/pull/3871))
 
 ### Dependencies
 
