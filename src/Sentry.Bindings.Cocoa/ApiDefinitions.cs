@@ -59,10 +59,6 @@ delegate NSNumber SentryTracesSamplerCallback (SentrySamplingContext samplingCon
 [Internal]
 delegate void SentrySpanCallback ([NullAllowed] SentrySpan span);
 
-// typedef BOOL (^SentryBeforeEmitMetricCallback)(NSString * _Nonnull, NSDictionary<NSString *,NSString *> * _Nonnull);
-[Internal]
-delegate bool SentryBeforeEmitMetricCallback (string arg0, NSDictionary<NSString, NSString> arg1);
-
 // @interface SentryAttachment : NSObject
 [BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
@@ -299,7 +295,7 @@ interface SentryDebugImageProvider
     [Export ("getDebugImagesForThreads:")]
     SentryDebugMeta[] GetDebugImagesForThreads (SentryThread[] threads);
 
-    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForThreads:(NSArray<SentryThread *> * _Nonnull)threads isCrash:(BOOL)isCrash;
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForThreads:(NSArray<SentryThread *> * _Nonnull)threads isCrash:(BOOL)isCrash __attribute__((deprecated("This method is slow and will be removed in a future version. Use -[getDebugImagesFromCacheForThreads:] instead.")));
     [Export ("getDebugImagesForThreads:isCrash:")]
     SentryDebugMeta[] GetDebugImagesForThreads (SentryThread[] threads, bool isCrash);
 
@@ -307,7 +303,7 @@ interface SentryDebugImageProvider
     [Export ("getDebugImagesForFrames:")]
     SentryDebugMeta[] GetDebugImagesForFrames (SentryFrame[] frames);
 
-    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForFrames:(NSArray<SentryFrame *> * _Nonnull)frames isCrash:(BOOL)isCrash;
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForFrames:(NSArray<SentryFrame *> * _Nonnull)frames isCrash:(BOOL)isCrash __attribute__((deprecated("This method is slow and will be removed in a future version. Use -[getDebugImagesFromCacheForFrames:] instead.")));
     [Export ("getDebugImagesForFrames:isCrash:")]
     SentryDebugMeta[] GetDebugImagesForFrames (SentryFrame[] frames, bool isCrash);
 
@@ -315,7 +311,7 @@ interface SentryDebugImageProvider
     [Export ("getDebugImages")]
     SentryDebugMeta[] DebugImages { get; }
 
-    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesCrashed:(BOOL)isCrash;
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesCrashed:(BOOL)isCrash __attribute__((deprecated("This method is slow and will be removed in a future version. Use -[getDebugImagesFromCache:] instead.")));
     [Export ("getDebugImagesCrashed:")]
     SentryDebugMeta[] GetDebugImagesCrashed (bool isCrash);
 }
@@ -1398,6 +1394,10 @@ interface SentryOptions
     [Export ("enablePerformanceV2")]
     bool EnablePerformanceV2 { get; set; }
 
+    // @property (assign, nonatomic) BOOL enablePersistingTracesWhenCrashing;
+    [Export ("enablePersistingTracesWhenCrashing")]
+    bool EnablePersistingTracesWhenCrashing { get; set; }
+
     // @property (nonatomic) SentryScope * _Nonnull (^ _Nonnull)(SentryScope * _Nonnull) initialScope;
     [Export ("initialScope", ArgumentSemantic.Assign)]
     Func<SentryScope, SentryScope> InitialScope { get; set; }
@@ -1429,6 +1429,10 @@ interface SentryOptions
     // @property (assign, nonatomic) BOOL enablePreWarmedAppStartTracing;
     [Export ("enablePreWarmedAppStartTracing")]
     bool EnablePreWarmedAppStartTracing { get; set; }
+
+    // @property (nonatomic, strong) SentryReplayOptions * _Nonnull sessionReplay;
+    [Export ("sessionReplay", ArgumentSemantic.Strong)]
+    SentryReplayOptions SessionReplay { get; set; }
 
     // @property (assign, nonatomic) BOOL enableNetworkTracking;
     [Export ("enableNetworkTracking")]
@@ -1767,11 +1771,6 @@ interface SentrySDK
     [Static]
     [Export ("captureUserFeedback:")]
     void CaptureUserFeedback (SentryUserFeedback userFeedback);
-
-    // +(void)showUserFeedbackForm;
-    [Static]
-    [Export ("showUserFeedbackForm")]
-    void ShowUserFeedbackForm ();
 
     // +(void)addBreadcrumb:(SentryBreadcrumb * _Nonnull)crumb __attribute__((swift_name("addBreadcrumb(_:)")));
     [Static]
@@ -2354,6 +2353,11 @@ interface PrivateSentrySDKOnly
     [Export ("getSdkVersionString")]
     string SdkVersionString { get; }
 
+    // +(void)addSdkPackage:(NSString * _Nonnull)name version:(NSString * _Nonnull)version;
+    [Static]
+    [Export ("addSdkPackage:version:")]
+    void AddSdkPackage (string name, string version);
+
     // +(NSDictionary * _Nonnull)getExtraContext;
     [Static]
     [Export ("getExtraContext")]
@@ -2440,6 +2444,16 @@ interface PrivateSentrySDKOnly
     [Export ("addReplayRedactClasses:")]
     void AddReplayRedactClasses (Class[] classes);
 
+    // +(void)setIgnoreContainerClass:(Class _Nonnull)containerClass;
+    [Static]
+    [Export ("setIgnoreContainerClass:")]
+    void SetIgnoreContainerClass (Class containerClass);
+
+    // +(void)setRedactContainerClass:(Class _Nonnull)containerClass;
+    [Static]
+    [Export ("setRedactContainerClass:")]
+    void SetRedactContainerClass (Class containerClass);
+
     // +(NSDictionary<NSString *,id> * _Nullable)appStartMeasurementWithSpans;
     [Static]
     [NullAllowed, Export ("appStartMeasurementWithSpans")]
@@ -2483,4 +2497,71 @@ interface SentryId
     // @property (readonly, nonatomic) NSUInteger hash;
     [Export ("hash")]
     nuint Hash { get; }
+}
+
+// @interface SentryReplayOptions : NSObject <SentryRedactOptions>
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry19SentryReplayOptions")]
+[Internal]
+interface SentryReplayOptions //: ISentryRedactOptions
+{
+    // @property (nonatomic) float sessionSampleRate;
+    [Export ("sessionSampleRate")]
+    float SessionSampleRate { get; set; }
+
+    // @property (nonatomic) float onErrorSampleRate;
+    [Export ("onErrorSampleRate")]
+    float OnErrorSampleRate { get; set; }
+
+    // @property (nonatomic) BOOL maskAllText;
+    [Export ("maskAllText")]
+    bool MaskAllText { get; set; }
+
+    // @property (nonatomic) BOOL maskAllImages;
+    [Export ("maskAllImages")]
+    bool MaskAllImages { get; set; }
+
+    // @property (nonatomic) enum SentryReplayQuality quality;
+    [Export ("quality", ArgumentSemantic.Assign)]
+    SentryReplayQuality Quality { get; set; }
+
+    // @property (copy, nonatomic) NSArray<Class> * _Nonnull maskedViewClasses;
+    //[Export ("maskedViewClasses", ArgumentSemantic.Copy)]
+    //Class[] MaskedViewClasses { get; set; }
+
+    // @property (copy, nonatomic) NSArray<Class> * _Nonnull unmaskedViewClasses;
+    //[Export ("unmaskedViewClasses", ArgumentSemantic.Copy)]
+    //Class[] UnmaskedViewClasses { get; set; }
+
+    // @property (readonly, nonatomic) NSInteger replayBitRate;
+    [Export ("replayBitRate")]
+    nint ReplayBitRate { get; }
+
+    // @property (readonly, nonatomic) float sizeScale;
+    [Export ("sizeScale")]
+    float SizeScale { get; }
+
+    // @property (nonatomic) NSUInteger frameRate;
+    [Export ("frameRate")]
+    nuint FrameRate { get; set; }
+
+    // @property (readonly, nonatomic) NSTimeInterval errorReplayDuration;
+    [Export ("errorReplayDuration")]
+    double ErrorReplayDuration { get; }
+
+    // @property (readonly, nonatomic) NSTimeInterval sessionSegmentDuration;
+    [Export ("sessionSegmentDuration")]
+    double SessionSegmentDuration { get; }
+
+    // @property (readonly, nonatomic) NSTimeInterval maximumDuration;
+    [Export ("maximumDuration")]
+    double MaximumDuration { get; }
+
+    // -(instancetype _Nonnull)initWithSessionSampleRate:(float)sessionSampleRate onErrorSampleRate:(float)onErrorSampleRate maskAllText:(BOOL)maskAllText maskAllImages:(BOOL)maskAllImages __attribute__((objc_designated_initializer));
+    [Export ("initWithSessionSampleRate:onErrorSampleRate:maskAllText:maskAllImages:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (float sessionSampleRate, float onErrorSampleRate, bool maskAllText, bool maskAllImages);
+
+    // -(instancetype _Nonnull)initWithDictionary:(NSDictionary<NSString *,id> * _Nonnull)dictionary;
+    [Export ("initWithDictionary:")]
+    NativeHandle Constructor (NSDictionary<NSString, NSObject> dictionary);
 }

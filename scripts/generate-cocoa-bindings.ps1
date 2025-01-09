@@ -147,8 +147,36 @@ internal enum SentryTransactionNameSource : long
 }
 '@
 
+# This enum resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
+$SentryReplayQuality = @'
+
+[Native]
+internal enum SentryReplayQuality : long
+{
+    Low = 0,
+    Medium = 1,
+    High = 2
+}
+'@
+
+# This enum resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
+$SentryReplayType = @'
+
+[Native]
+internal enum SentryReplayType : long
+{
+    Session = 0,
+    Buffer = 1
+}
+'@
+
 $Text += "`n$SentryLevel"
 $Text += "`n$SentryTransactionNameSource"
+$Text += "`n$SentryReplayQuality"
+$Text += "`n$SentryReplayType"
+
 
 # Add header and output file
 $Text = "$Header`n`n$Text"
@@ -297,6 +325,80 @@ interface SentryId
 '@
 
 $Text += "`n$SentryId"
+
+# This interface resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
+$SentryReplayOptions = @'
+
+// @interface SentryReplayOptions : NSObject <SentryRedactOptions>
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry19SentryReplayOptions")]
+[Internal]
+interface SentryReplayOptions //: ISentryRedactOptions
+{
+    // @property (nonatomic) float sessionSampleRate;
+    [Export ("sessionSampleRate")]
+    float SessionSampleRate { get; set; }
+
+    // @property (nonatomic) float onErrorSampleRate;
+    [Export ("onErrorSampleRate")]
+    float OnErrorSampleRate { get; set; }
+
+    // @property (nonatomic) BOOL maskAllText;
+    [Export ("maskAllText")]
+    bool MaskAllText { get; set; }
+
+    // @property (nonatomic) BOOL maskAllImages;
+    [Export ("maskAllImages")]
+    bool MaskAllImages { get; set; }
+
+    // @property (nonatomic) enum SentryReplayQuality quality;
+    [Export ("quality", ArgumentSemantic.Assign)]
+    SentryReplayQuality Quality { get; set; }
+
+    // @property (copy, nonatomic) NSArray<Class> * _Nonnull maskedViewClasses;
+    //[Export ("maskedViewClasses", ArgumentSemantic.Copy)]
+    //Class[] MaskedViewClasses { get; set; }
+
+    // @property (copy, nonatomic) NSArray<Class> * _Nonnull unmaskedViewClasses;
+    //[Export ("unmaskedViewClasses", ArgumentSemantic.Copy)]
+    //Class[] UnmaskedViewClasses { get; set; }
+
+    // @property (readonly, nonatomic) NSInteger replayBitRate;
+    [Export ("replayBitRate")]
+    nint ReplayBitRate { get; }
+
+    // @property (readonly, nonatomic) float sizeScale;
+    [Export ("sizeScale")]
+    float SizeScale { get; }
+
+    // @property (nonatomic) NSUInteger frameRate;
+    [Export ("frameRate")]
+    nuint FrameRate { get; set; }
+
+    // @property (readonly, nonatomic) NSTimeInterval errorReplayDuration;
+    [Export ("errorReplayDuration")]
+    double ErrorReplayDuration { get; }
+
+    // @property (readonly, nonatomic) NSTimeInterval sessionSegmentDuration;
+    [Export ("sessionSegmentDuration")]
+    double SessionSegmentDuration { get; }
+
+    // @property (readonly, nonatomic) NSTimeInterval maximumDuration;
+    [Export ("maximumDuration")]
+    double MaximumDuration { get; }
+
+    // -(instancetype _Nonnull)initWithSessionSampleRate:(float)sessionSampleRate onErrorSampleRate:(float)onErrorSampleRate maskAllText:(BOOL)maskAllText maskAllImages:(BOOL)maskAllImages __attribute__((objc_designated_initializer));
+    [Export ("initWithSessionSampleRate:onErrorSampleRate:maskAllText:maskAllImages:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (float sessionSampleRate, float onErrorSampleRate, bool maskAllText, bool maskAllImages);
+
+    // -(instancetype _Nonnull)initWithDictionary:(NSDictionary<NSString *,id> * _Nonnull)dictionary;
+    [Export ("initWithDictionary:")]
+    NativeHandle Constructor (NSDictionary<NSString, NSObject> dictionary);
+}
+'@
+
+$Text += "`n$SentryReplayOptions"
 
 # Add header and output file
 $Text = "$Header`n`n$Text"
