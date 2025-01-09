@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Added `SentryOptions.DisableSentryHttpMessageHandler` ([#3879](https://github.com/getsentry/sentry-dotnet/pull/3879))
+
 ## 5.0.1
 
 ### Fixes
