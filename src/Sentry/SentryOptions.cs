@@ -1067,6 +1067,14 @@ public class SentryOptions
     internal Instrumenter Instrumenter { get; set; } = Instrumenter.Sentry;
 
     /// <summary>
+    /// <para>
+    /// Set to `true` to prevents Sentry from automatically registering <see cref="SentryHttpMessageHandler"/>.
+    /// </para>
+    /// <para>Defaults to `false`. Should be set to `true` when using the OpenTelemetry.Instrumentation.Http.</para>
+    /// </summary>
+    public bool DisableSentryHttpMessageHandler { get; set; } = false;
+
+    /// <summary>
     /// Adds a <see cref="JsonConverter"/> to be used when serializing or deserializing
     /// objects to JSON with this SDK.  For example, when custom context data might use
     /// a data type that requires custom serialization logic.
