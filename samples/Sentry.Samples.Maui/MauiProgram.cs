@@ -13,7 +13,7 @@ public static class MauiProgram
             .UseSentry(options =>
             {
                 // The DSN is the only required option.
-                options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+                options.Dsn = "https://ee8418ac652ffa7d1a7a97c7d8236175@o4507777248198656.ingest.us.sentry.io/4508439773577216";
 
                 // By default, we will send the last 100 breadcrumbs with each event.
                 // If you want to see everything we can capture from MAUI, you may wish to use a larger value.
@@ -32,6 +32,10 @@ public static class MauiProgram
                     // Return true to capture or false to prevent the capture
                     return true;
                 });
+
+#if IOS
+                
+#endif
             })
 
             .ConfigureFonts(fonts =>

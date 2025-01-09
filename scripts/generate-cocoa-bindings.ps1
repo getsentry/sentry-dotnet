@@ -351,6 +351,8 @@ interface SentryReplayOptions //: ISentryRedactOptions
     [Export ("maskAllImages")]
     bool MaskAllImages { get; set; }
 
+    /*
+
     // @property (nonatomic) enum SentryReplayQuality quality;
     [Export ("quality", ArgumentSemantic.Assign)]
     SentryReplayQuality Quality { get; set; }
@@ -395,6 +397,7 @@ interface SentryReplayOptions //: ISentryRedactOptions
     // -(instancetype _Nonnull)initWithDictionary:(NSDictionary<NSString *,id> * _Nonnull)dictionary;
     [Export ("initWithDictionary:")]
     NativeHandle Constructor (NSDictionary<NSString, NSObject> dictionary);
+    */
 }
 '@
 
