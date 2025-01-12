@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Added `SentryOptions.DisableSentryHttpMessageHandler` ([#3879](https://github.com/getsentry/sentry-dotnet/pull/3879))
+- Added `SentryOptions.DisableSentryHttpMessageHandler`. Useful if you're using `OpenTelemetry.Instrumentation.Http` and ending up with duplicate spans. ([#3879](https://github.com/getsentry/sentry-dotnet/pull/3879))
 
 ## 5.0.1
 
