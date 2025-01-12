@@ -118,10 +118,12 @@
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='TempSensorBreadcrumbsIntegration']" />
   <remove-node path="/api/package[@name='io.sentry.android.core.internal.gestures']" />
   <remove-node path="/api/package[@name='io.sentry.android.core.performance']" />
+  <remove-node path="/api/package[@name='io.sentry.android.replay.viewhierarchy']" />
+  <remove-node path="/api/package[@name='io.sentry.android.replay.util']" />
 
   <remove-node path="/api/package[starts-with(@name,'io.sentry')]/*/method[@name='clone' and count(parameter)=0]" />
   <remove-node path="/api/package[starts-with(@name,'io.sentry')]/class/implements[@name='io.sentry.JsonDeserializer']" />
-  <remove-node path="/api/package[@name='io.sentry.vendor.gson.stream']/class[@name='JsonToken']/field[@name='NAME']" />>
+  <remove-node path="/api/package[@name='io.sentry.vendor.gson.stream']/class[@name='JsonToken']/field[@name='NAME']" />
 
   <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='ExceptionMechanismException']" />
   <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='InvalidSentryTraceHeaderException']" />

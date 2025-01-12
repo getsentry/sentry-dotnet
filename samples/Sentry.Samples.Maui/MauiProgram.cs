@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace Sentry.Samples.Maui;
 
 public static class MauiProgram
@@ -33,7 +31,7 @@ public static class MauiProgram
                     return true;
                 });
 
-#if IOS
+#if ANDROID || IOS
                 options.Native.SessionReplay.SessionSampleRate = 1.0f;
                 options.Native.SessionReplay.OnErrorSampleRate = 1.0f;
                 options.Native.SessionReplay.MaskAllText = false;

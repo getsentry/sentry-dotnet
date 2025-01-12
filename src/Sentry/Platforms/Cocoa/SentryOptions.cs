@@ -198,10 +198,10 @@ public partial class SentryOptions
         public NSUrlSessionDelegate? UrlSessionDelegate { get; set; } = null;
 
         /// <summary>
-        /// Gets or sets the session replay options.
+        /// Gets or sets the replay options.
         /// </summary>
         /// <remarks>
-        /// <see href="https://docs.sentry.io/platforms/apple/guides/ios/session-replay">sentry.io</see>
+        /// <see href="https://docs.sentry.io/product/explore/session-replay/mobile/">sentry.io</see>
         /// </remarks>
         public NativeSentryReplayOptions SessionReplay { get; set; } = new();
 
@@ -242,50 +242,6 @@ public partial class SentryOptions
         {
             InAppIncludes ??= new List<string>();
             InAppIncludes.Add(prefix);
-        }
-
-        /// <summary>
-        /// Native session replay options.
-        /// </summary>
-        public class NativeSentryReplayOptions
-        {
-            /// <summary>
-            /// Gets or sets the percentage of a session
-            /// replay to be sent. The value should be between 0.0
-            /// and 1.0. Default is 0.
-            /// </summary>
-            /// <remarks>
-            /// <see href="https://docs.sentry.io/platforms/apple/guides/ios/session-replay/#sampling">sentry.io</see>
-            /// </remarks>
-            public float SessionSampleRate { get; set; }
-
-            /// <summary>
-            /// Gets or sets the percentage of an error
-            /// replay to be sent. The value should be between 0.0
-            /// and 1.0. Default is 0.
-            /// </summary>
-            /// <remarks>
-            /// <see href="https://docs.sentry.io/platforms/apple/guides/ios/session-replay/#sampling">sentry.io</see>
-            /// </remarks>
-            public float OnErrorSampleRate { get; set; }
-
-            /// <summary>
-            /// Gets or sets a value determining whether
-            /// text should be masked during replays.
-            /// </summary>
-            /// <remarks>
-            /// <see href="https://docs.sentry.io/platforms/apple/guides/ios/session-replay/#privacy">sentry.io</see>
-            /// </remarks>
-            public bool MaskAllText { get; set; } = true;
-
-            /// <summary>
-            /// Gets or sets a value determining whether
-            /// images should be masked during replays.
-            /// </summary>
-            /// <remarks>
-            /// <see href="https://docs.sentry.io/platforms/apple/guides/ios/session-replay/#privacy">sentry.io</see>
-            /// </remarks>
-            public bool MaskAllImages { get; set; } = true;
         }
     }
 

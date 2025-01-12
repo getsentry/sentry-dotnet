@@ -205,6 +205,14 @@ public partial class SentryOptions
         /// </summary>
         public TimeSpan ReadTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
+        /// <summary>
+        /// Gets or sets the session replay options.
+        /// </summary>
+        /// <remarks>
+        /// <see href="https://docs.sentry.io/product/explore/session-replay/mobile/">sentry.io</see>
+        /// </remarks>
+        public NativeSentryReplayOptions SessionReplay { get; set; } = new();
+
         // ---------- Other ----------
 
         internal List<string>? InAppExcludes { get; private set; }
