@@ -98,4 +98,9 @@ internal static class EnumExtensions
         (TransactionNameSource)source;
     public static CocoaSdk.SentryTransactionNameSource ToCocoaTransactionNameSource(this TransactionNameSource source) =>
         (CocoaSdk.SentryTransactionNameSource)source;
+
+    public static SentryReplayQuality ToSentryReplayQuality(this CocoaSdk.SentryReplayQuality replayQuality) =>
+        (SentryReplayQuality)replayQuality;
+    public static CocoaSdk.SentryReplayQuality ToCocoaSentryReplayQuality(this SentryReplayQuality replayQuality) =>
+        (CocoaSdk.SentryReplayQuality)replayQuality;
 }

@@ -2520,11 +2520,11 @@ interface SentryReplayOptions //: ISentryRedactOptions
     [Export ("maskAllImages")]
     bool MaskAllImages { get; set; }
 
-    /*
-
     // @property (nonatomic) enum SentryReplayQuality quality;
     [Export ("quality", ArgumentSemantic.Assign)]
     SentryReplayQuality Quality { get; set; }
+
+    /*
 
     // @property (copy, nonatomic) NSArray<Class> * _Nonnull maskedViewClasses;
     //[Export ("maskedViewClasses", ArgumentSemantic.Copy)]

@@ -36,6 +36,7 @@ public static class MauiProgram
                 options.Native.SessionReplay.OnErrorSampleRate = 1.0f;
                 options.Native.SessionReplay.MaskAllText = false;
                 options.Native.SessionReplay.MaskAllImages = false;
+                options.Native.SessionReplay.Quality = SentryReplayQuality.Low;
 #endif
             })
 
