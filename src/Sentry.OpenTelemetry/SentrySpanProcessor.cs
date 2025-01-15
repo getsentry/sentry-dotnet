@@ -181,6 +181,14 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             return;
         }
 
+        // Skip any activities that are not recorded.
+        if (data is { Recorded: false, IsAllDataRequested: false })
+        {
+            _options?.DiagnosticLogger?.LogDebug($"Ignoring unrecorded Activity {data.SpanId}.");
+            _map.TryRemove(data.SpanId, out _);
+            return;
+        }
+
         // Make a dictionary of the attributes (aka "tags") for faster lookup when used throughout the processor.
         var attributes = data.TagObjects.ToDict();
 

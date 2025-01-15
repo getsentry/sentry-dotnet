@@ -459,6 +459,88 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         }
     }
 
+    [Fact]
+    public void OnEnd_FilteredTransaction_DoesNotFinishTransaction()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var parent = Tracer.StartActivity("transaction")!;
+        sut.OnStart(parent);
+
+        var data = Tracer.StartActivity("test operation", kind: ActivityKind.Internal)!;
+        data.DisplayName = "test display name";
+        sut.OnStart(data);
+
+        FilterActivity(parent);
+
+        sut._map.TryGetValue(parent.SpanId, out var span);
+
+        // Act
+        sut.OnEnd(data);
+        sut.OnEnd(parent);
+
+        // Assert
+        if (span is not TransactionTracer transaction)
+        {
+            Assert.Fail("Span is not a transaction tracer");
+            return;
+        }
+
+        using (new AssertionScope())
+        {
+            transaction.EndTimestamp.Should().BeNull();
+            transaction.Status.Should().BeNull();
+        }
+    }
+
+    [Fact]
+    public void OnEnd_FilteredSpan_RemovesSpan()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var parent = Tracer.StartActivity("transaction")!;
+        sut.OnStart(parent);
+
+        var data = Tracer.StartActivity("test operation", kind: ActivityKind.Internal)!;
+        data.DisplayName = "test display name";
+        sut.OnStart(data);
+
+        FilterActivity(data);
+
+        sut._map.TryGetValue(parent.SpanId, out var parentSpan);
+        sut._map.TryGetValue(data.SpanId, out var childSpan);
+
+        // Act
+        sut.OnEnd(data);
+        sut.OnEnd(parent);
+
+        // Assert
+        if (parentSpan is not TransactionTracer transaction)
+        {
+            Assert.Fail("parentSpan is not a transaction tracer");
+            return;
+        }
+        if (childSpan is not SpanTracer span)
+        {
+            Assert.Fail("span is not a span tracer");
+            return;
+        }
+
+        using (new AssertionScope())
+        {
+            span.EndTimestamp.Should().BeNull();
+            span.Status.Should().BeNull();
+
+            transaction.EndTimestamp.Should().NotBeNull();
+            transaction.Status.Should().Be(SpanStatus.Ok);
+            transaction.Spans.Should().BeEmpty();
+        }
+    }
+
     [Theory]
     [InlineData(OtelSemanticConventions.AttributeUrlFull)]
     [InlineData(OtelSemanticConventions.AttributeHttpUrl)]
