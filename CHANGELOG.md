@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Significant change in behavior
+
+- The User.IpAddress is now only set to `{{auto}}` when `SendDefaultPii` is enabled. This change gives you control over IP address collection directly on the client ([#3893](https://github.com/getsentry/sentry-dotnet/pull/3893))
+
 ### Fixes
 
 - .NET Mobile: Disable and made obsolete the iOS Watchdog termination feature which is based on heuristics that don't work in .NET ([#3867](https://github.com/getsentry/sentry-dotnet/pull/3867))
