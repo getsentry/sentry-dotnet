@@ -76,12 +76,16 @@ internal class Enricher
 
         // User
         // Report local user if opt-in PII, no user was already set to event and feature not opted-out:
-        if (_options is { SendDefaultPii: true, IsEnvironmentUser: true } && !eventLike.HasUser())
+        if (_options.SendDefaultPii)
         {
-            eventLike.User.Username = Environment.UserName;
+            if (_options.IsEnvironmentUser && !eventLike.HasUser())
+            {
+                eventLike.User.Username = Environment.UserName;
+            }
+
+            eventLike.User.IpAddress ??= DefaultIpAddress;
         }
         eventLike.User.Id ??= _options.InstallationId;
-        eventLike.User.IpAddress ??= DefaultIpAddress;
 
         //Apply App startup and Boot time
         eventLike.Contexts.App.StartTime ??= ProcessInfo.Instance?.StartupTime;
