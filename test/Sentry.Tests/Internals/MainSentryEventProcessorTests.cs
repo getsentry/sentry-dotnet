@@ -132,7 +132,7 @@ public class MainSentryEventProcessorTests
     }
 
     [Fact]
-    public void Process_SendDefaultPiiFalse_UserIpNull()
+    public void Process_SendDefaultPiiFalse_UserIpUserIpNotSet()
     {
         //Arrange
         var evt = new SentryEvent();
