@@ -103,3 +103,12 @@ internal enum SentryReplayType : long
     Session = 0,
     Buffer = 1
 }
+
+[Native]
+internal enum SentryRRWebEventType : long
+{
+    None = 0,
+    Touch = 3,
+    Meta = 4,
+    Custom = 5
+}

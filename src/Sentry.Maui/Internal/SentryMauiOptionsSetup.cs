@@ -57,5 +57,10 @@ internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
         // We can use MAUI's network connectivity information to inform the CachingTransport when we're offline.
         options.NetworkStatusListener = new MauiNetworkStatusListener(Connectivity.Current, options);
 #endif
+
+// TODO: Investigate why this is being called twice on iOS Simulator, resulting in 2 copies added to integrations list...
+#if ANDROID || IOS || MACCATALYST
+        options.AddIntegration(new SentryMauiReplayIntegration(options));
+#endif
     }
 }
