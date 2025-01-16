@@ -4,6 +4,7 @@
     <TargetFrameworks />
     <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android34.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios17.0</TargetFrameworks>
+    <UseMaui>true</UseMaui>
     <!-- Currently broken on .NET 7, see
       - https://github.com/dotnet/maui/issues/18573
       - https://developercommunity.visualstudio.com/t/MAUI0000:-SystemMissingMethodException:/10505327?sort=newest&ftype=problem
@@ -64,9 +65,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.83" />
-    <PackageReference Include="Microsoft.Maui.Core" Version="8.0.83" />
-    <PackageReference Include="Microsoft.Maui.Essentials" Version="8.0.83" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+    <PackageReference Include="Microsoft.Maui.Core" Version="$(MauiVersion)" />
+    <PackageReference Include="Microsoft.Maui.Essentials" Version="$(MauiVersion)" />
 
     <!-- https://github.com/advisories/GHSA-5f2m-466j-3848 -->
     <PackageReference Include="System.Private.Uri" Version="4.3.2" />
