@@ -6,10 +6,17 @@
 
 - The User.IpAddress is now only set to `{{auto}}` when `SendDefaultPii` is enabled. This change gives you control over IP address collection directly on the client ([#3893](https://github.com/getsentry/sentry-dotnet/pull/3893))
 
+### Features
+
+- .NET on iOS: Add experimental EnableAppHangTrackingV2 configuration flag to the options binding SDK ([#3877](https://github.com/getsentry/sentry-dotnet/pull/3877))
+- Added `SentryOptions.DisableSentryHttpMessageHandler`. Useful if you're using `OpenTelemetry.Instrumentation.Http` and ending up with duplicate spans. ([#3879](https://github.com/getsentry/sentry-dotnet/pull/3879))
+
+## 5.0.1
+
 ### Fixes
 
 - .NET Mobile: Disable and made obsolete the iOS Watchdog termination feature which is based on heuristics that don't work in .NET ([#3867](https://github.com/getsentry/sentry-dotnet/pull/3867))
-
+- .NET on Android: NullReferenceException handled by Mono cause the app to crash (PR #3694) ([#3871](https://github.com/getsentry/sentry-dotnet/pull/3871))
 
 ### Dependencies
 
