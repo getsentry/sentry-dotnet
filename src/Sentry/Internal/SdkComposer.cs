@@ -77,13 +77,6 @@ internal class SdkComposer
 
     private LazyHttpTransport CreateHttpTransport()
     {
-        if (_options.SentryHttpClientFactory is not null)
-        {
-            _options.LogDebug(
-                "Using ISentryHttpClientFactory set through options: {0}.",
-                _options.SentryHttpClientFactory.GetType().Name);
-        }
-
         return new LazyHttpTransport(_options);
     }
 
