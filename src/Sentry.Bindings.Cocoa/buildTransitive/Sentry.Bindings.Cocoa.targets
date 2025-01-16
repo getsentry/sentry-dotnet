@@ -6,7 +6,7 @@
     -->
   <Target Name="_SentryMarshalExceptionManagement">
     <PropertyGroup Condition="'$(PublishAot)' == 'true'">
-      <MtouchExtraArgs>marshal-managed-exceptions:disable</MtouchExtraArgs>
+      <MtouchExtraArgs>--marshal-managed-exceptions:disable</MtouchExtraArgs>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(PublishAot)' != 'true'">
