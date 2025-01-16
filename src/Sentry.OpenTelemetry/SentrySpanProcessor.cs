@@ -182,7 +182,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         }
 
         // Skip any activities that are not recorded.
-        if (data is { Recorded: false, IsAllDataRequested: false })
+        if (data is { Recorded: false })
         {
             _options?.DiagnosticLogger?.LogDebug($"Ignoring unrecorded Activity {data.SpanId}.");
             _map.TryRemove(data.SpanId, out _);
