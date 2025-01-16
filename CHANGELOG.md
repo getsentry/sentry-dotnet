@@ -4,18 +4,12 @@
 
 ### Features
 
+- .NET on iOS: Add experimental EnableAppHangTrackingV2 configuration flag to the options binding SDK ([#3877](https://github.com/getsentry/sentry-dotnet/pull/3877))
 - Added `SentryOptions.DisableSentryHttpMessageHandler`. Useful if you're using `OpenTelemetry.Instrumentation.Http` and ending up with duplicate spans. ([#3879](https://github.com/getsentry/sentry-dotnet/pull/3879))
 
 ### Fixes
 
 - OTel activities that are marked as not recorded are no longer sent to Sentry ([#3890](https://github.com/getsentry/sentry-dotnet/pull/3890))
-
-## 5.0.1
-
-### Features
-
-- .NET on iOS: Add experimental EnableAppHangTrackingV2 configuration flag to the options binding SDK ([#3877](https://github.com/getsentry/sentry-dotnet/pull/3877))
-- Added `SentryOptions.DisableSentryHttpMessageHandler`. Useful if you're using `OpenTelemetry.Instrumentation.Http` and ending up with duplicate spans. ([#3879](https://github.com/getsentry/sentry-dotnet/pull/3879))
 
 ## 5.0.1
 
