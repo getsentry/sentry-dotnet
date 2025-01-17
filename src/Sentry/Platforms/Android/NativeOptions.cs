@@ -167,13 +167,19 @@ public partial class SentryOptions
         public TimeSpan ConnectionTimeout { get; set; } = TimeSpan.FromSeconds(5);
 
         /// <summary>
+        /// <para>
         /// Gets or sets a value that indicates if the NDK (Android Native Development Kit) is enabled.
-        /// The default value is <c>true</c> (enabled).
+        /// The default value is <c>false</c> (disabled).
+        /// </para>
+        /// <para>
+        /// NOTE: We do not currently recommend enabling this feature.
+        /// See: https://github.com/getsentry/sentry-dotnet/issues/3902
+        /// </para>
         /// </summary>
         /// <remarks>
         /// See https://docs.sentry.io/platforms/android/using-ndk/#disable-ndk-integration
         /// </remarks>
-        public bool EnableNdk { get; set; } = true;
+        public bool EnableNdk { get; set; } = false;
 
         /// <summary>
         /// Gets or sets a value that indicates if the hook that flushes when the main Java thread shuts down
