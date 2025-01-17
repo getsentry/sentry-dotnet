@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Significant change in behavior
+- The NDK is now disabled by default on Android, to prevent SIGSEGV errors resulting from managed NullReferenceExceptions ([#3903](https://github.com/getsentry/sentry-dotnet/pull/3903))
+
 ### Features
 
 - .NET on iOS: Add experimental EnableAppHangTrackingV2 configuration flag to the options binding SDK ([#3877](https://github.com/getsentry/sentry-dotnet/pull/3877))
