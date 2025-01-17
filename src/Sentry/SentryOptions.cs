@@ -222,6 +222,13 @@ public class SentryOptions
 
     internal HttpClient GetHttpClient()
     {
+        if (SentryHttpClientFactory is not null)
+        {
+            DiagnosticLogger?.LogDebug(
+                "Using ISentryHttpClientFactory set through options: {0}.",
+                SentryHttpClientFactory.GetType().Name);
+        }
+
         var factory = SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
         return factory.Create(this);
     }

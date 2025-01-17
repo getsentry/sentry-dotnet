@@ -23,7 +23,7 @@ internal class SdkComposer
         _options.LogDebug("Creating transport.");
 
         // Start from either the transport given on options, or create a new HTTP transport.
-        var transport = _options.Transport ?? CreateHttpTransport();
+        var transport = _options.Transport ?? new LazyHttpTransport(_options);
 
         // When a cache directory path is given, wrap the transport in a caching transport.
         if (!string.IsNullOrWhiteSpace(_options.CacheDirectoryPath))
@@ -73,18 +73,6 @@ internal class SdkComposer
         _options.Transport = transport;
 
         return transport;
-    }
-
-    private LazyHttpTransport CreateHttpTransport()
-    {
-        if (_options.SentryHttpClientFactory is not null)
-        {
-            _options.LogDebug(
-                "Using ISentryHttpClientFactory set through options: {0}.",
-                _options.SentryHttpClientFactory.GetType().Name);
-        }
-
-        return new LazyHttpTransport(_options);
     }
 
     public IBackgroundWorker CreateBackgroundWorker()

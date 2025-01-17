@@ -11,6 +11,12 @@
 
 - OTel activities that are marked as not recorded are no longer sent to Sentry ([#3890](https://github.com/getsentry/sentry-dotnet/pull/3890))
 
+### Dependencies
+
+- Bump Native SDK from v0.7.17 to v0.7.18 ([#3891](https://github.com/getsentry/sentry-dotnet/pull/3891))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0718)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.17...0.7.18)
+
 ## 5.0.1
 
 ### Fixes
