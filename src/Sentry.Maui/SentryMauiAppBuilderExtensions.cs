@@ -44,7 +44,6 @@ public static class SentryMauiAppBuilderExtensions
     {
         var services = builder.Services;
 
-        services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
         if (configureOptions != null)
         {
             services.Configure(configureOptions);
@@ -53,6 +52,7 @@ public static class SentryMauiAppBuilderExtensions
         services.AddLogging();
         services.AddSingleton<ILoggerProvider, SentryMauiLoggerProvider>();
         services.AddSingleton<IMauiInitializeService, SentryMauiInitializer>();
+        services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
         services.AddSingleton<Disposer>();
         services.TryAddSingleton<IMauiEventsBinder, MauiEventsBinder>();
 
