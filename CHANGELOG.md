@@ -9,7 +9,7 @@
 
 ### Fixes
 
-- Fixed duplicate SentryMauiOptions registration ([#3905](https://github.com/getsentry/sentry-dotnet/pull/3905))
+- Fixed duplicate SentryMauiEventProcessors ([#3905](https://github.com/getsentry/sentry-dotnet/pull/3905))
 
 ### Dependencies
 
