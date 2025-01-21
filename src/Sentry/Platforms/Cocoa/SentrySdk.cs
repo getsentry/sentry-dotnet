@@ -154,20 +154,35 @@ public static partial class SentrySdk
         // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
         // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
         // This is partially due to our setting ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode above.
-        // Thankfully, we can see Xamarin's unhandled exception handler on the stack trace, so we can filter them out.
-        // Here is the function that calls abort(), which we will use as a filter:
-        // https://github.com/xamarin/xamarin-macios/blob/c55fbdfef95028ba03d0f7a35aebca03bd76f852/runtime/runtime.m#L1114-L1122
         nativeOptions.BeforeSend = evt =>
         {
+            options.LogDebug("***** Intercepted event *****");
+
             // There should only be one exception on the event in this case
             if (evt.Exceptions?.Length == 1)
             {
                 // It will match the following characteristics
                 var ex = evt.Exceptions[0];
-                if (ex.Type == "SIGABRT" && ex.Value == "Signal 6, Code 0" &&
+
+                // Thankfully, sometimes we can see Xamarin's unhandled exception handler on the stack trace, so we can filter
+                // them out. Here is the function that calls abort(), which we will use as a filter:
+                // https://github.com/xamarin/xamarin-macios/blob/c55fbdfef95028ba03d0f7a35aebca03bd76f852/runtime/runtime.m#L1114-L1122
+                if (ex.Type == "EXC_BAD_ACCESS" && ex.Value == "Signal 6, Code 0" &&
                     ex.Stacktrace?.Frames.Any(f => f.Function == "xamarin_unhandled_exception_handler") is true)
                 {
-                    // Don't sent it
+                    // Don't send it
+                    return null!;
+                }
+
+                // In the case of NullReferenceExceptions, Xamarin's unhandled exception handler doesn't seem to catch
+                // it... so we filter these explicitly irrespective of the stack trace. This is possibly a bit dangerous
+                // as we could be filtering exceptions from native code blocks that don't get captured by our managed
+                // SDK. We don't have any easy way to know whether the exception is managed code (compiled to native)
+                // or bona fide native code though.
+                // See: https://github.com/getsentry/sentry-dotnet/issues/3776
+                if (ex.Type == "SIGABRT" && ex.Value.Contains("Attempted to dereference null pointer."))
+                {
+                    // Don't send it
                     return null!;
                 }
             }
