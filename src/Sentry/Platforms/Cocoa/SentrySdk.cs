@@ -1,6 +1,8 @@
 using Sentry.Cocoa;
 using Sentry.Cocoa.Extensions;
 using Sentry.Extensibility;
+using Sentry.Internal;
+using Sentry.PlatformAbstractions;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry;
@@ -10,10 +12,10 @@ public static partial class SentrySdk
     private static void InitSentryCocoaSdk(SentryOptions options)
     {
         options.LogDebug("Initializing native SDK");
-        // Workaround for https://github.com/xamarin/xamarin-macios/issues/15252
         ObjCRuntime.Runtime.MarshalManagedException += (_, args) =>
         {
-            args.ExceptionMode = ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode;
+            // This MAY be overriden in Sentry.Bindings.Cocoa.targets
+            options.LogDebug($"MarshalManagedExceptionMode: {args.ExceptionMode}");
         };
 
         // Set default release and distribution
