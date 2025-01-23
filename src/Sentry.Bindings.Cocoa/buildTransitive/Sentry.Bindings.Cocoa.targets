@@ -52,13 +52,11 @@
   <!--
    Ensure the AppDomain.CurrentDomain.UnhandledException gets triggered - see:
     https://github.com/xamarin/xamarin-macios/issues/15252
-   Not supported on the CoreCLR - see:
-    https://github.com/xamarin/xamarin-macios/blob/0a81da28e4217624a54ccb83541e1eb8ba651fca/runtime/runtime.m#L2480-L2491
 
-   The condition is a bit hacky - it relies on:
-    https://github.com/xamarin/xamarin-macios/blob/0ab074390689880fe9269804a0156341d30251f6/dotnet/targets/Xamarin.Shared.Sdk.targets#L1004-L1006
+   Not supported on the CoreCLR or NativeAOT - see:
+    https://github.com/xamarin/xamarin-macios/blob/0a81da28e4217624a54ccb83541e1eb8ba651fca/runtime/runtime.m#L2480-L2491
   -->
-  <PropertyGroup Condition="'$(_XamarinRuntime)' != 'CoreCLR'">
+  <PropertyGroup Condition="'$(UseMonoRuntime)' == 'true'">
     <MtouchExtraArgs>--marshal-managed-exceptions=unwindnativecode</MtouchExtraArgs>
   </PropertyGroup>
 
