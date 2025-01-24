@@ -18,6 +18,7 @@
 - Bump CLI from v2.40.0 to v2.41.1 ([#3910](https://github.com/getsentry/sentry-dotnet/pull/3910))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2411)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.40.0...2.41.1)
+- Update Perfview/TraceEvent to 930041c ([#3917](https://github.com/getsentry/sentry-dotnet/pull/3917))
 
 ## 5.0.1
 
