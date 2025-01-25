@@ -14,7 +14,8 @@ internal class SentryHttpMessageHandlerBuilderFilter : IHttpMessageHandlerBuilde
         handlerBuilder =>
         {
             var hub = _getHub();
-            if (!handlerBuilder.AdditionalHandlers.Any(h => h is SentryHttpMessageHandler))
+            var enableHandler = hub.GetSentryOptions()?.DisableSentryHttpMessageHandler == false;
+            if (enableHandler && !handlerBuilder.AdditionalHandlers.Any(h => h is SentryHttpMessageHandler))
             {
                 handlerBuilder.AdditionalHandlers.Add(
                     new SentryHttpMessageHandler(hub)

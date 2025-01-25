@@ -48,6 +48,7 @@ internal partial class BindableSentryOptions
     public TimeSpan? AutoSessionTrackingInterval { get; set; }
     public bool? AutoSessionTracking { get; set; }
     public bool? UseAsyncFileIO { get; set; }
+    public bool? DisableSentryHttpMessageHandler { get; set; }
     public bool? JsonPreserveReferences { get; set; }
     public bool? EnableSpotlight { get; set; }
     public string? SpotlightUrl { get; set; }
@@ -94,6 +95,7 @@ internal partial class BindableSentryOptions
         options.AutoSessionTrackingInterval = AutoSessionTrackingInterval ?? options.AutoSessionTrackingInterval;
         options.AutoSessionTracking = AutoSessionTracking ?? options.AutoSessionTracking;
         options.UseAsyncFileIO = UseAsyncFileIO ?? options.UseAsyncFileIO;
+        options.DisableSentryHttpMessageHandler = DisableSentryHttpMessageHandler ?? options.DisableSentryHttpMessageHandler;
         options.JsonPreserveReferences = JsonPreserveReferences ?? options.JsonPreserveReferences;
         options.EnableSpotlight = EnableSpotlight ?? options.EnableSpotlight;
         options.SpotlightUrl = SpotlightUrl ?? options.SpotlightUrl;

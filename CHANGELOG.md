@@ -1,10 +1,25 @@
 # Changelog
 
-## 5.0.1
+## Unreleased
 
 ### Features
 
 - .NET on iOS: Add experimental EnableAppHangTrackingV2 configuration flag to the options binding SDK ([#3877](https://github.com/getsentry/sentry-dotnet/pull/3877))
+- Added `SentryOptions.DisableSentryHttpMessageHandler`. Useful if you're using `OpenTelemetry.Instrumentation.Http` and ending up with duplicate spans. ([#3879](https://github.com/getsentry/sentry-dotnet/pull/3879))
+
+### Dependencies
+
+- Bump Native SDK from v0.7.17 to v0.7.19 ([#3891](https://github.com/getsentry/sentry-dotnet/pull/3891), [#3908](https://github.com/getsentry/sentry-dotnet/pull/3908))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0719)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.17...0.7.19)
+- Bump Java SDK from v7.20.0 to v7.20.1 ([#3907](https://github.com/getsentry/sentry-dotnet/pull/3907))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7201)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.20.0...7.20.1)
+- Bump CLI from v2.40.0 to v2.41.1 ([#3910](https://github.com/getsentry/sentry-dotnet/pull/3910))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2411)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.40.0...2.41.1)
+
+## 5.0.1
 
 ### Fixes
 

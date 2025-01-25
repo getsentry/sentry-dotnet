@@ -222,6 +222,13 @@ public class SentryOptions
 
     internal HttpClient GetHttpClient()
     {
+        if (SentryHttpClientFactory is not null)
+        {
+            DiagnosticLogger?.LogDebug(
+                "Using ISentryHttpClientFactory set through options: {0}.",
+                SentryHttpClientFactory.GetType().Name);
+        }
+
         var factory = SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
         return factory.Create(this);
     }
@@ -1065,6 +1072,14 @@ public class SentryOptions
     /// </para>
     /// </summary>
     internal Instrumenter Instrumenter { get; set; } = Instrumenter.Sentry;
+
+    /// <summary>
+    /// <para>
+    /// Set to `true` to prevents Sentry from automatically registering <see cref="SentryHttpMessageHandler"/>.
+    /// </para>
+    /// <para>Defaults to `false`. Should be set to `true` when using the OpenTelemetry.Instrumentation.Http.</para>
+    /// </summary>
+    public bool DisableSentryHttpMessageHandler { get; set; } = false;
 
     /// <summary>
     /// Adds a <see cref="JsonConverter"/> to be used when serializing or deserializing

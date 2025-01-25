@@ -664,6 +664,7 @@ namespace Sentry
         public Sentry.SentryLevel DiagnosticLevel { get; set; }
         public Sentry.Extensibility.IDiagnosticLogger? DiagnosticLogger { get; set; }
         public bool DisableFileWrite { get; set; }
+        public bool DisableSentryHttpMessageHandler { get; set; }
         public string? Distribution { get; set; }
         public string? Dsn { get; set; }
         public bool EnableScopeSync { get; set; }

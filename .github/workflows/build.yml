@@ -220,7 +220,14 @@ jobs:
         uses: ./.github/actions/buildnative
 
       - name: Install Android SDKs
+        id: installandroidsdks
+        continue-on-error: true
         if: runner.os == 'macOS'
+        run: |
+          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
+
+      - name: Install Android SDKs (retry)
+        if: steps.installandroidsdks.outcome=='failure' && runner.os == 'macOS'
         run: |
           dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
 
