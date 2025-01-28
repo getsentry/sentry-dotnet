@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Significant change in behavior
+
+- The User.IpAddress is now only set to `{{auto}}` when `SendDefaultPii` is enabled. This change gives you control over IP address collection directly on the client ([#3893](https://github.com/getsentry/sentry-dotnet/pull/3893))
+
 ### Features
 
 - .NET on iOS: Add experimental EnableAppHangTrackingV2 configuration flag to the options binding SDK ([#3877](https://github.com/getsentry/sentry-dotnet/pull/3877))

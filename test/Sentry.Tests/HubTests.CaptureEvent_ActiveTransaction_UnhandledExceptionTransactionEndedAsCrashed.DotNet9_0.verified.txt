@@ -112,8 +112,7 @@
               }
             },
             User: {
-              Id: Guid_1,
-              IpAddress: {{auto}}
+              Id: Guid_1
             },
             Environment: production
           }
@@ -177,8 +176,7 @@
               }
             },
             User: {
-              Id: Guid_1,
-              IpAddress: {{auto}}
+              Id: Guid_1
             },
             Environment: production,
             IsFinished: true
