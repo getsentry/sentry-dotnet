@@ -170,7 +170,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Hangfire", "src\Sent
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Hangfire.Tests", "test\Sentry.Hangfire.Tests\Sentry.Hangfire.Tests.csproj", "{46E40BE8-1AB0-4846-B0A2-A40AD0272C64}"
 EndProject
-Project("{00000000-0000-0000-0000-000000000000}") = "Sentry.Samples.AspNetCore.WebAPI.Profiling", "samples\Sentry.Samples.AspNetCore.WebAPI.Profiling\Sentry.Samples.AspNetCore.WebAPI.Profiling.csproj", "{A5B26C14-7313-4EDC-91E3-287F9374AB75}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.AspNetCore.WebAPI.Profiling", "samples\Sentry.Samples.AspNetCore.WebAPI.Profiling\Sentry.Samples.AspNetCore.WebAPI.Profiling.csproj", "{A5B26C14-7313-4EDC-91E3-287F9374AB75}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{233D34AB-970E-4913-AA1E-172E833FB5B2}"
 	ProjectSection(SolutionItems) = preProject
