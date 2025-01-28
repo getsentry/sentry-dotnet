@@ -167,7 +167,7 @@ public static partial class SentrySdk
                 // Thankfully, sometimes we can see Xamarin's unhandled exception handler on the stack trace, so we can filter
                 // them out. Here is the function that calls abort(), which we will use as a filter:
                 // https://github.com/xamarin/xamarin-macios/blob/c55fbdfef95028ba03d0f7a35aebca03bd76f852/runtime/runtime.m#L1114-L1122
-                if (ex.Type == "EXC_BAD_ACCESS" && ex.Value == "Signal 6, Code 0" &&
+                if (ex.Type == "SIGABRT" && ex.Value == "Signal 6, Code 0" &&
                     ex.Stacktrace?.Frames.Any(f => f.Function == "xamarin_unhandled_exception_handler") is true)
                 {
                     // Don't send it
