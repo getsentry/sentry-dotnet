@@ -9,7 +9,7 @@
 
 ### Fixes
 
-- Use MarshalManagedExceptionMode.Default on CoreCLR ([#3912](https://github.com/getsentry/sentry-dotnet/pull/3912))
+- MarshalManagedExceptionMode.Default is now used when capturing native exceptions in AOT compiled iOS applications, making native stack traces more readable ([#3912](https://github.com/getsentry/sentry-dotnet/pull/3912))
 
 ### Dependencies
 
