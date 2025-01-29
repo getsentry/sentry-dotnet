@@ -18,8 +18,7 @@
         }
       },
       User: {
-        Id: Guid_1,
-        IpAddress: {{auto}}
+        Id: Guid_1
       },
       Spans: [
         {
