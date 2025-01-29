@@ -89,13 +89,14 @@ internal class SampleProfileBuilder
     {
         var key = (int)callstackIndex;
 
-        if (!_stackIndexes.ContainsKey(key))
+        if (!_stackIndexes.TryGetValue(key, out var value))
         {
             Profile.Stacks.Add(CreateStackTrace(callstackIndex));
-            _stackIndexes[key] = Profile.Stacks.Count - 1;
+            value = Profile.Stacks.Count - 1;
+            _stackIndexes[key] = value;
         }
 
-        return _stackIndexes[key];
+        return value;
     }
 
     private Internal.GrowableArray<int> CreateStackTrace(CallStackIndex callstackIndex)
@@ -195,16 +196,17 @@ internal class SampleProfileBuilder
     {
         var key = (int)thread.ThreadIndex;
 
-        if (!_threadIndexes.ContainsKey(key))
+        if (!_threadIndexes.TryGetValue(key, out var value))
         {
             Profile.Threads.Add(new()
             {
                 Name = thread.ThreadInfo ?? $"Thread {thread.ThreadID}",
             });
-            _threadIndexes[key] = Profile.Threads.Count - 1;
+            value = Profile.Threads.Count - 1;
+            _threadIndexes[key] = value;
             _downsampler.NewThreadAdded(_threadIndexes[key]);
         }
 
-        return _threadIndexes[key];
+        return value;
     }
 }
