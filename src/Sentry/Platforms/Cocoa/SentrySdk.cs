@@ -156,8 +156,6 @@ public static partial class SentrySdk
         // This is partially due to our setting ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode above.
         nativeOptions.BeforeSend = evt =>
         {
-            options.LogDebug("***** Intercepted event *****");
-
             // There should only be one exception on the event in this case
             if (evt.Exceptions?.Length == 1)
             {
