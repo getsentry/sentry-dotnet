@@ -174,13 +174,10 @@ public static partial class SentrySdk
                     return null!;
                 }
 
-                // In the case of NullReferenceExceptions, Xamarin's unhandled exception handler doesn't seem to catch
-                // it... so we filter these explicitly irrespective of the stack trace. This is possibly a bit dangerous
-                // as we could be filtering exceptions from native code blocks that don't get captured by our managed
-                // SDK. We don't have any easy way to know whether the exception is managed code (compiled to native)
-                // or bona fide native code though.
+                // Similar workaround for NullReferenceExceptions. We don't have any easy way to know whether the
+                // exception is managed code (compiled to native) or original native code though.
                 // See: https://github.com/getsentry/sentry-dotnet/issues/3776
-                if (ex.Type == "SIGABRT" && ex.Value.Contains("Attempted to dereference null pointer."))
+                if (ex.Type == "EXC_BAD_ACCESS")
                 {
                     // Don't send it
                     return null!;
