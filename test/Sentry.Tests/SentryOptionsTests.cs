@@ -1,6 +1,8 @@
 namespace Sentry.Tests;
 #if NETFRAMEWORK
 using Sentry.PlatformAbstractions;
+#elif IOS || MACCATALYST
+using Sentry.Cocoa;
 #endif
 public partial class SentryOptionsTests
 {
@@ -285,6 +287,16 @@ public partial class SentryOptionsTests
     }
 #endif
 
+#if IOS || MACCATALYST
+    [Fact]
+    public void DisableRuntimeMarshalManagedExceptionCapture_RemovesRuntimeMarshalManagedExceptionIntegration()
+    {
+        var sut = new SentryOptions();
+        sut.DisableRuntimeMarshalManagedExceptionCapture();
+        Assert.DoesNotContain(sut.Integrations,
+            p => p is RuntimeMarshalManagedExceptionIntegration);
+    }
+#else
     [Fact]
     public void DisableAppDomainUnhandledExceptionCapture_RemovesAppDomainUnhandledExceptionIntegration()
     {
@@ -293,6 +305,7 @@ public partial class SentryOptionsTests
         Assert.DoesNotContain(sut.Integrations,
             p => p is AppDomainUnhandledExceptionIntegration);
     }
+#endif
 
     [Fact]
     public void DisableTaskUnobservedTaskExceptionCapture_UnobservedTaskExceptionIntegration()
@@ -581,12 +594,21 @@ public partial class SentryOptionsTests
         _ = Assert.IsType<DuplicateEventDetectionEventProcessor>(sut.GetAllEventProcessors().First());
     }
 
+#if IOS || MACCATALYST
+    [Fact]
+    public void Integrations_Includes_RuntimeMarshalManagedExceptionIntegration()
+    {
+        var sut = new SentryOptions();
+        Assert.Contains(sut.Integrations, i => i.GetType() == typeof(RuntimeMarshalManagedExceptionIntegration));
+    }
+#else
     [Fact]
     public void Integrations_Includes_AppDomainUnhandledExceptionIntegration()
     {
         var sut = new SentryOptions();
         Assert.Contains(sut.Integrations, i => i.GetType() == typeof(AppDomainUnhandledExceptionIntegration));
     }
+#endif
 
     [Fact]
     public void Integrations_Includes_AppDomainProcessExitIntegration()
