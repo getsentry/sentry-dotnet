@@ -14,6 +14,7 @@
 ### Fixes
 
 - Fixed duplicate SentryMauiEventProcessors ([#3905](https://github.com/getsentry/sentry-dotnet/pull/3905))
+- Fixed invalid string.Format index in Debug logs for the DiagnosticSource integration ([#3923](https://github.com/getsentry/sentry-dotnet/pull/3923))
 
 ### Dependencies
 
