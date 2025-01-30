@@ -23,7 +23,7 @@ public class RuntimeMarshalManagedExceptionIntegrationTests
         var sut = _fixture.GetSut();
         sut.Register(_fixture.Hub, SentryOptions);
 
-        sut.Handle(this, new MarshalManagedExceptionEventArgs{Exception = new Exception()});
+        sut.Handle(this, new MarshalManagedExceptionEventArgs { Exception = new Exception() });
 
         _fixture.Hub.Received(1).CaptureEvent(Arg.Any<SentryEvent>());
     }
@@ -35,7 +35,7 @@ public class RuntimeMarshalManagedExceptionIntegrationTests
         sut.Register(_fixture.Hub, SentryOptions);
 
         var exception = new Exception();
-        sut.Handle(this, new MarshalManagedExceptionEventArgs{Exception = exception});
+        sut.Handle(this, new MarshalManagedExceptionEventArgs { Exception = exception });
         Assert.Equal(false, exception.Data[Mechanism.HandledKey]);
         Assert.True(exception.Data.Contains(Mechanism.MechanismKey));
 
