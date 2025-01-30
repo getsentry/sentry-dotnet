@@ -39,6 +39,8 @@ public class AppDelegate : UIApplicationDelegate
 #pragma warning restore CA1416
             : UIColor.White;
         var buttonConfig = UIButtonConfiguration.TintedButtonConfiguration;
+        var terminalButtonConfig = UIButtonConfiguration.TintedButtonConfiguration;
+        terminalButtonConfig.BaseBackgroundColor = UIColor.SystemRed;
 
         var vc = new UIViewController();
 
@@ -50,7 +52,7 @@ public class AppDelegate : UIApplicationDelegate
             AutoresizingMask = UIViewAutoresizing.All
         };
 
-        // UIButton for managed crash
+        // UIButton for a managed exception that we'll catch and handle (won't crash the app)
         var managedCrashButton = new UIButton(UIButtonType.RoundedRect)
         {
             AutoresizingMask = UIViewAutoresizing.All,
@@ -62,8 +64,7 @@ public class AppDelegate : UIApplicationDelegate
             Console.WriteLine("Managed Crash button clicked!");
             try
             {
-                string s = null!;
-                Console.WriteLine("Length: {0}", s.Length);
+                throw new Exception("Catch this!");
             }
             catch (Exception e)
             {
@@ -71,22 +72,42 @@ public class AppDelegate : UIApplicationDelegate
             }
         };
 
+        // UIButton for unhandled managed exception
+        var unhandledCrashButton = new UIButton(UIButtonType.RoundedRect)
+        {
+            AutoresizingMask = UIViewAutoresizing.All,
+            Configuration = terminalButtonConfig
+        };
+        unhandledCrashButton.SetTitle("Unhandled Crash", UIControlState.Normal);
+        unhandledCrashButton.TouchUpInside += delegate
+        {
+            Console.WriteLine("Unhandled Crash button clicked!");
+            string s = null!;
+            // This will cause a NullReferenceException that will crash the app before Sentry can send the event.
+            // Since we're using a caching transport though, the exception will be written to disk and sent the
+            // next time the app is launched.
+            Console.WriteLine("Length: {0}", s.Length);
+        };
+
         // UIButton for native crash
         var nativeCrashButton = new UIButton(UIButtonType.System)
         {
-            Configuration = buttonConfig
+            Configuration = terminalButtonConfig
         };
         nativeCrashButton.SetTitle("Native Crash", UIControlState.Normal);
         nativeCrashButton.TouchUpInside += delegate
         {
             Console.WriteLine("Native Crash button clicked!");
 #pragma warning disable CS0618 // Type or member is obsolete
+            // This will cause a native crash that will crash the application before
+            // Sentry gets a chance to send the event. Since we've enabled caching however,
+            // the event will be written to disk and sent the next time the app is launched.
             SentrySdk.CauseCrash(CrashType.Native);
 #pragma warning restore CS0618 // Type or member is obsolete
         };
 
         // create a UIStackView to hold the label and buttons
-        var stackView = new UIStackView(new UIView[] { label, managedCrashButton, nativeCrashButton })
+        var stackView = new UIStackView(new UIView[] { label, managedCrashButton, unhandledCrashButton, nativeCrashButton })
         {
             Axis = UILayoutConstraintAxis.Vertical,
             Distribution = UIStackViewDistribution.FillEqually,
@@ -111,21 +132,6 @@ public class AppDelegate : UIApplicationDelegate
 
         // make the window visible
         Window.MakeKeyAndVisible();
-
-        AppDomain.CurrentDomain.UnhandledException += (_, _) =>
-        {
-            Console.WriteLine("In UnhandledException Handler");
-        };
-
-        Runtime.MarshalManagedException += (_, _) =>
-        {
-            Console.WriteLine("In MarshalManagedException Handler");
-        };
-
-        Runtime.MarshalObjectiveCException += (_, _) =>
-        {
-            Console.WriteLine("In MarshalObjectiveCException Handler");
-        };
 
         return true;
     }
