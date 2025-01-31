@@ -148,7 +148,6 @@ public static partial class SentrySdk
         // When we have an unhandled managed exception, we send that to Sentry twice - once managed and once native.
         // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
         // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
-        // This is partially due to our setting ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode above.
         nativeOptions.BeforeSend = evt =>
         {
             // There should only be one exception on the event in this case
@@ -164,6 +163,7 @@ public static partial class SentrySdk
                     ex.Stacktrace?.Frames.Any(f => f.Function == "xamarin_unhandled_exception_handler") is true)
                 {
                     // Don't send it
+                    options.LogDebug("Discarded {0} error ({1}). Captured as  managed exception instead.", ex.Type, ex.Value);
                     return null!;
                 }
 
@@ -173,6 +173,7 @@ public static partial class SentrySdk
                 if (ex.Type == "EXC_BAD_ACCESS")
                 {
                     // Don't send it
+                    options.LogDebug("Discarded {0} error ({1}). Captured as  managed exception instead.", ex.Type, ex.Value);
                     return null!;
                 }
             }

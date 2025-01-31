@@ -1,4 +1,4 @@
-# if IOS
+#if IOS
 using ObjCRuntime;
 using Sentry.Cocoa;
 
