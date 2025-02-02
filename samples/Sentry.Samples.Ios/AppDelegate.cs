@@ -18,6 +18,7 @@ public class AppDelegate : UIApplicationDelegate
         {
             options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
             options.Debug = true;
+            options.SampleRate = 1.0F;
             options.TracesSampleRate = 1.0;
             options.ProfilesSampleRate = 1.0;
 
@@ -26,7 +27,7 @@ public class AppDelegate : UIApplicationDelegate
             // Enable Native iOS SDK App Hangs detection
             options.Native.EnableAppHangTracking = true;
 
-            options.CacheDirectoryPath = Path.Combine(Path.GetTempPath(), "test12");
+            options.CacheDirectoryPath = Path.GetTempPath();
         });
 
         // create a new window instance based on the screen size

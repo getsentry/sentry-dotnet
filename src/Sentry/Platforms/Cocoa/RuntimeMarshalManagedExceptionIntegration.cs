@@ -40,6 +40,9 @@ internal class RuntimeMarshalManagedExceptionIntegration : ISdkIntegration
 
             // Call the internal implementation, so that we still capture even if the hub has been disabled.
             _hub?.CaptureExceptionInternal(ex);
+
+            // This is likely a terminal exception so try to send the crash report before shutting down
+            _hub?.Flush();
         }
     }
 }
