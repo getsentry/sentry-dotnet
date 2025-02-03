@@ -3,6 +3,7 @@ using Android.OS;
 using Sentry.Android;
 using Sentry.Android.Callbacks;
 using Sentry.Android.Extensions;
+using Sentry.Extensibility;
 using Sentry.JavaSdk.Android.Core;
 
 // Don't let the Sentry Android SDK auto-init, as we do that manually in SentrySdk.Init
@@ -99,10 +100,19 @@ public static partial class SentrySdk
                 }
             }
 
-            if (options.Native.EnableBeforeSend && options.BeforeSendInternal is { } beforeSend)
+            SentryEvent? BeforeSendWrapper(SentryEvent evt, SentryHint hint)
             {
-                o.BeforeSend = new BeforeSendCallback(beforeSend, options, o);
+                if (evt.SentryExceptions?.SingleOrDefault() is { Type: "SIGSEGV", Value: "Segfault" } exception)
+                {
+                    options.LogDebug("Suppressing SIGSEGV (this will be thrown as a managed exception instead)");
+                    return null;
+                }
+                // Call the user defined BeforeSend callback, if it's defined - otherwise return the event as-is
+                return (options.Native.EnableBeforeSend && options.BeforeSendInternal is { } beforeSend)
+                    ? beforeSend(evt, hint)
+                    : evt;
             }
+            o.BeforeSend = new BeforeSendCallback(BeforeSendWrapper, options, o);
 
             // These options are from SentryAndroidOptions
             o.AttachScreenshot = options.Native.AttachScreenshot;
