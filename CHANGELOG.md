@@ -1,9 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Native SIGSEGV errors resulting from managed NullReferenceExceptions are now suppressed on Android ([#3903](https://github.com/getsentry/sentry-dotnet/pull/3903))
+
 ## 5.1.0
 
 ### Significant change in behavior
-- The NDK is now disabled by default on Android, to prevent SIGSEGV errors resulting from managed NullReferenceExceptions ([#3903](https://github.com/getsentry/sentry-dotnet/pull/3903))
 - The User.IpAddress is now only set to `{{auto}}` when `SendDefaultPii` is enabled. This change gives you control over IP address collection directly on the client ([#3893](https://github.com/getsentry/sentry-dotnet/pull/3893))
 
 ### Features
