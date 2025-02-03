@@ -13,6 +13,27 @@ public class SerializationTests
         _testOutputLogger = new TestOutputDiagnosticLogger(output);
     }
 
+    [Fact]
+    public void Test()
+    {
+        // TODO: verify assert this once I've got span extra/data
+        var hub = Substitute.For<IHub>();
+        var context = new TransactionContext("name", "operation", new SentryTraceHeader(SentryId.Empty, SpanId.Empty, false));
+        var transactionTracer = new TransactionTracer(hub, context);
+        var span = transactionTracer.StartChild("childop");
+        span.SetExtra("span1", "value1");
+
+
+        var transaction = new SentryTransaction("name", "operation")
+        {
+            IsSampled = false
+        };
+        transaction.SetExtra("transaction1", "transaction_value");
+
+        var json = transaction.ToJsonString();
+        _testOutputLogger.LogDebug(json);
+    }
+
     [Theory]
     [MemberData(nameof(GetData))]
     public async Task Serialization(string name, object target)
