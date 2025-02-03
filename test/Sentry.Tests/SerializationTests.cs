@@ -14,7 +14,7 @@ public class SerializationTests
     }
 
     [Fact]
-    public void Serialization_TransactionAndSpanData()
+    public async Task Serialization_TransactionAndSpanData()
     {
         var hub = Substitute.For<IHub>();
         var context = new TransactionContext("name", "operation", new SentryTraceHeader(SentryId.Empty, SpanId.Empty, false));
@@ -27,9 +27,10 @@ public class SerializationTests
             IsSampled = false
         };
         transaction.SetExtra("transaction1", "transaction_value");
+        await Verify(transaction);
 
+        // verify deserialization
         var json = transaction.ToJsonString(_testOutputLogger);
-
         var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(json));
         var el = JsonElement.ParseValue(ref reader);
         var backTransaction = SentryTransaction.FromJson(el);
