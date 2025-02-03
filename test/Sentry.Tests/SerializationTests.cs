@@ -14,24 +14,28 @@ public class SerializationTests
     }
 
     [Fact]
-    public void Test()
+    public void Serialization_TransactionAndSpanData()
     {
-        // TODO: verify assert this once I've got span extra/data
         var hub = Substitute.For<IHub>();
         var context = new TransactionContext("name", "operation", new SentryTraceHeader(SentryId.Empty, SpanId.Empty, false));
         var transactionTracer = new TransactionTracer(hub, context);
         var span = transactionTracer.StartChild("childop");
         span.SetExtra("span1", "value1");
 
-
-        var transaction = new SentryTransaction("name", "operation")
+        var transaction = new SentryTransaction(transactionTracer)
         {
             IsSampled = false
         };
         transaction.SetExtra("transaction1", "transaction_value");
 
-        var json = transaction.ToJsonString();
-        _testOutputLogger.LogDebug(json);
+        var json = transaction.ToJsonString(_testOutputLogger);
+
+        var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(json));
+        var el = JsonElement.ParseValue(ref reader);
+        var backTransaction = SentryTransaction.FromJson(el);
+
+        backTransaction.Spans.First().Extra["span1"].Should().Be("value1", "Span value missing");
+        backTransaction.Contexts.Trace.Extra["transaction1"].Should().Be("transaction_value", "Transaction value missing");
     }
 
     [Theory]
