@@ -179,11 +179,9 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
     /// <inheritdoc />
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
 
-    // Not readonly because of deserialization
-    private Dictionary<string, object?> _extra = new();
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _extra;
+    public IReadOnlyDictionary<string, object?> Extra => Contexts.Trace.Extra;
 
     // Not readonly because of deserialization
     private Dictionary<string, string> _tags = new();
@@ -270,7 +268,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
         Sdk = tracer.Sdk;
         Fingerprint = tracer.Fingerprint;
         _breadcrumbs = tracer.Breadcrumbs.ToList();
-        _extra = tracer.Extra.ToDict();
         _tags = tracer.Tags.ToDict();
 
         _spans = FromTracerSpans(tracer);
@@ -340,7 +337,7 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
 
     /// <inheritdoc />
     public void SetExtra(string key, object? value) =>
-        _extra[key] = value;
+        Contexts.Trace.SetExtra(key, value);
 
     /// <inheritdoc />
     public void SetTag(string key, string value) =>
@@ -401,7 +398,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
         writer.WriteSerializable("sdk", Sdk, logger);
         writer.WriteStringArrayIfNotEmpty("fingerprint", _fingerprint);
         writer.WriteArrayIfNotEmpty("breadcrumbs", _breadcrumbs, logger);
-        writer.WriteDictionaryIfNotEmpty("extra", _extra, logger);
         writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
         writer.WriteArrayIfNotEmpty("spans", _spans, logger);
         writer.WriteDictionaryIfNotEmpty("measurements", _measurements, logger);
@@ -434,8 +430,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
             .EnumerateArray().Select(j => j.GetString()!).ToArray();
         var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?
             .EnumerateArray().Select(Breadcrumb.FromJson).ToList() ?? new();
-        var extra = json.GetPropertyOrNull("extra")?
-            .GetDictionaryOrNull() ?? new();
         var tags = json.GetPropertyOrNull("tags")?
             .GetStringDictionaryOrNull()?.WhereNotNullValue().ToDict() ?? new();
         var measurements = json.GetPropertyOrNull("measurements")?
@@ -459,7 +453,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
             Sdk = sdk,
             _fingerprint = fingerprint,
             _breadcrumbs = breadcrumbs,
-            _extra = extra,
             _tags = tags,
             _measurements = measurements,
             _spans = spans
