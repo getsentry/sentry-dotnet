@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Emit transaction.data inside contexts.trace.data ([#3936](https://github.com/getsentry/sentry-dotnet/pull/3936))
+
 ## 5.1.0
 
 ### Significant change in behavior
@@ -13,7 +19,6 @@
 
 ### Fixes
 
-- Emit transaction.data inside contexts.trace.data ([#3936](https://github.com/getsentry/sentry-dotnet/pull/3936))
 - Prevent Native EXC_BAD_ACCESS signal errors from being captured when managed NullRefrenceExceptions occur ([#3909](https://github.com/getsentry/sentry-dotnet/pull/3909))
 - Fixed duplicate SentryMauiEventProcessors ([#3905](https://github.com/getsentry/sentry-dotnet/pull/3905))
 - Fixed invalid string.Format index in Debug logs for the DiagnosticSource integration ([#3923](https://github.com/getsentry/sentry-dotnet/pull/3923))
