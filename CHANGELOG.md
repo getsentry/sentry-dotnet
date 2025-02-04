@@ -5,6 +5,7 @@
 ### Fixes
 
 - Native SIGSEGV errors resulting from managed NullReferenceExceptions are now suppressed on Android ([#3903](https://github.com/getsentry/sentry-dotnet/pull/3903))
+- OTel activities that are marked as not recorded are no longer sent to Sentry ([#3890](https://github.com/getsentry/sentry-dotnet/pull/3890))
 
 ## 5.1.0
 
@@ -24,9 +25,9 @@
 
 ### Dependencies
 
-- Bump Native SDK from v0.7.17 to v0.7.19 ([#3891](https://github.com/getsentry/sentry-dotnet/pull/3891), [#3908](https://github.com/getsentry/sentry-dotnet/pull/3908))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0719)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.17...0.7.19)
+- Bump Native SDK from v0.7.17 to v0.7.20 ([#3891](https://github.com/getsentry/sentry-dotnet/pull/3891), [#3908](https://github.com/getsentry/sentry-dotnet/pull/3908), [#3929](https://github.com/getsentry/sentry-dotnet/pull/3929))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0720)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.17...0.7.20)
 - Bump Java SDK from v7.20.0 to v7.20.1 ([#3907](https://github.com/getsentry/sentry-dotnet/pull/3907))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7201)
   - [diff](https://github.com/getsentry/sentry-java/compare/7.20.0...7.20.1)
