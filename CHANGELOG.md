@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Emit transaction.data inside contexts.trace.data ([#3936](https://github.com/getsentry/sentry-dotnet/pull/3936))
+
 ## 5.1.0
 
 ### Significant change in behavior

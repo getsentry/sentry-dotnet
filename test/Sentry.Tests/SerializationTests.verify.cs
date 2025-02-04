@@ -4,15 +4,8 @@ using System.Text.Json.Serialization.Metadata;
 
 namespace Sentry.Tests;
 
-public class SerializationTests
+public partial class SerializationTests
 {
-    private readonly IDiagnosticLogger _testOutputLogger;
-
-    public SerializationTests(ITestOutputHelper output)
-    {
-        _testOutputLogger = new TestOutputDiagnosticLogger(output);
-    }
-
     [Theory]
     [MemberData(nameof(GetData))]
     public async Task Serialization(string name, object target)
