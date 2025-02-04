@@ -100,19 +100,7 @@ public static partial class SentrySdk
                 }
             }
 
-            SentryEvent? BeforeSendWrapper(SentryEvent evt, SentryHint hint)
-            {
-                if (evt.SentryExceptions?.SingleOrDefault() is { Type: "SIGSEGV", Value: "Segfault" } exception)
-                {
-                    options.LogDebug("Suppressing SIGSEGV (this will be thrown as a managed exception instead)");
-                    return null;
-                }
-                // Call the user defined BeforeSend callback, if it's defined - otherwise return the event as-is
-                return (options.Native.EnableBeforeSend && options.BeforeSendInternal is { } beforeSend)
-                    ? beforeSend(evt, hint)
-                    : evt;
-            }
-            o.BeforeSend = new BeforeSendCallback(BeforeSendWrapper, options, o);
+            o.BeforeSend = new BeforeSendCallback(BeforeSendWrapper(options), options, o);
 
             // These options are from SentryAndroidOptions
             o.AttachScreenshot = options.Native.AttachScreenshot;
@@ -180,6 +168,25 @@ public static partial class SentrySdk
         options.ScopeObserver = new AndroidScopeObserver(options);
 
         // TODO: Pause/Resume
+    }
+
+    internal static Func<SentryEvent, SentryHint, SentryEvent?> BeforeSendWrapper(SentryOptions options)
+    {
+        return (evt, hint) =>
+        {
+            // Suppress SIGSEGV errors.
+            // See: https://github.com/getsentry/sentry-dotnet/pull/3903
+            if (evt.SentryExceptions?.SingleOrDefault() is { Type: "SIGSEGV", Value: "Segfault" } exception)
+            {
+                options.LogDebug("Suppressing SIGSEGV (this will be thrown as a managed exception instead)");
+                return null;
+            }
+
+            // Call the user defined BeforeSend callback, if it's defined - otherwise return the event as-is
+            return (options.Native.EnableBeforeSend && options.BeforeSendInternal is { } beforeSend)
+                ? beforeSend(evt, hint)
+                : evt;
+        };
     }
 
     private static void AndroidEnvironment_UnhandledExceptionRaiser(object? _, RaiseThrowableEventArgs e)
