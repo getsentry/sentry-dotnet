@@ -62,6 +62,14 @@ runs:
           8.0.x
           9.0.100
 
+    # See https://github.com/getsentry/sentry-dotnet/issues/3915
+    - name: Update dev certificates
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        dotnet dev-certs https --clean
+        dotnet dev-certs https --trust
+
     - name: Install .NET Workloads
       shell: bash
       run: >
