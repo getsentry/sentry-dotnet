@@ -50,7 +50,6 @@ internal partial class BindableSentryOptions
             options.EnableUIViewControllerTracing = EnableUIViewControllerTracing ?? options.EnableUIViewControllerTracing;
             options.EnableUserInteractionTracing = EnableUserInteractionTracing ?? options.EnableUserInteractionTracing;
             options.EnableTracing = EnableTracing ?? options.EnableTracing;
-            options.SessionReplay = SessionReplay ?? options.SessionReplay;
         }
     }
 }

@@ -267,7 +267,7 @@ $Text = $Text -replace '\[Static\]\s*\[Internal\]\s*partial\s+interface\s+Consta
 
 # Update MethodToProperty translations
 $Text = $Text -replace '(Export \("get\w+"\)\]\n)\s*\[Verify \(MethodToProperty\)\]\n(.+ \{ get; \})', '$1$2'
-$Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+ (?:Hash|Value|DefaultIntegrations) \{ get; \})', '$1'
+$Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+ (?:Hash|Value|DefaultIntegrations|AppStartMeasurementWithSpans|BaggageHttpHeader) \{ get; \})', '$1'
 $Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+) \{ get; \}', '$1();'
 
 # Allow weakly typed NSArray
@@ -498,24 +498,6 @@ interface SentryViewScreenshotProvider
 '@
 
 $Text += "`n$SentryViewScreenshotProvider"
-
-# This interface resides in the Sentry-Swift.h
-# Appending it here so we don't need to import and create bindings for the entire header
-$defaultReplayBreadcrumbConverter = @'
-
-// @interface SentrySRDefaultBreadcrumbConverter : NSObject <SentryReplayBreadcrumbConverter>
-[BaseType (typeof(NSObject), Name = "_TtC6Sentry34SentrySRDefaultBreadcrumbConverter")]
-[Internal]
-interface SentrySRDefaultBreadcrumbConverter
-{
-	// -(id<SentryRRWebEvent> _Nullable)convertFrom:(SentryBreadcrumb * _Nonnull)breadcrumb __attribute__((warn_unused_result("")));
-	[Export ("convertFrom:")]
-	[return: NullAllowed]
-	SentryRRWebEvent ConvertFrom (SentryBreadcrumb breadcrumb);
-}
-'@
-
-$Text += "`n$defaultReplayBreadcrumbConverter"
 
 # This interface resides in the Sentry-Swift.h
 # Appending it here so we don't need to import and create bindings for the entire header

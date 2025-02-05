@@ -279,13 +279,6 @@ interface SentryClient
     void Close ();
 }
 
-// @interface SentryCrashExceptionApplication : NSObject
-[BaseType (typeof(NSObject))]
-[Internal]
-interface SentryCrashExceptionApplication
-{
-}
-
 // @interface SentryDebugImageProvider : NSObject
 [BaseType (typeof(NSObject))]
 [Internal]
@@ -870,7 +863,7 @@ interface SentrySpan : SentrySerializable
     // @required -(NSString * _Nullable)baggageHttpHeader;
     [Abstract]
     [NullAllowed, Export ("baggageHttpHeader")]
-    string BaggageHttpHeader();
+    string BaggageHttpHeader { get; }
 }
 
 // @interface SentryHub : NSObject
@@ -2459,10 +2452,15 @@ interface PrivateSentrySDKOnly
     [Export ("setRedactContainerClass:")]
     void SetRedactContainerClass (Class containerClass);
 
+    // +(void)setReplayTags:(NSDictionary<NSString *,id> * _Nonnull)tags;
+    [Static]
+    [Export ("setReplayTags:")]
+    void SetReplayTags (NSDictionary<NSString, NSObject> tags);
+
     // +(NSDictionary<NSString *,id> * _Nullable)appStartMeasurementWithSpans;
     [Static]
     [NullAllowed, Export ("appStartMeasurementWithSpans")]
-    NSDictionary<NSString, NSObject> AppStartMeasurementWithSpans();
+    NSDictionary<NSString, NSObject> AppStartMeasurementWithSpans { get; }
 
     // +(SentryUser * _Nonnull)userWithDictionary:(NSDictionary * _Nonnull)dictionary;
     [Static]
@@ -2629,17 +2627,6 @@ interface SentryViewScreenshotProvider
 	[Abstract]
 	[Export ("imageWithView:onComplete:")]
 	void OnComplete (UIView view, Action<UIImage> onComplete);
-}
-
-// @interface SentrySRDefaultBreadcrumbConverter : NSObject <SentryReplayBreadcrumbConverter>
-[BaseType (typeof(NSObject), Name = "_TtC6Sentry34SentrySRDefaultBreadcrumbConverter")]
-[Internal]
-interface SentrySRDefaultBreadcrumbConverter
-{
-	// -(id<SentryRRWebEvent> _Nullable)convertFrom:(SentryBreadcrumb * _Nonnull)breadcrumb __attribute__((warn_unused_result("")));
-	[Export ("convertFrom:")]
-	[return: NullAllowed]
-	SentryRRWebEvent ConvertFrom (SentryBreadcrumb breadcrumb);
 }
 
 // @interface SentrySessionReplayIntegration : SentryBaseIntegration
