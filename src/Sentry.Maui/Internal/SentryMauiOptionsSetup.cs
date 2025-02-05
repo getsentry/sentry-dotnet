@@ -15,7 +15,7 @@ internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
     public SentryMauiOptionsSetup(IConfiguration config)
     {
         ArgumentNullException.ThrowIfNull(config);
-        _config = config;
+        _config = config.GetSection("Sentry");
     }
 
     public void Configure(SentryMauiOptions options)

@@ -44,9 +44,6 @@ public static class SentryMauiAppBuilderExtensions
     {
         var services = builder.Services;
 
-        var section = builder.Configuration.GetSection("Sentry");
-        services.AddSingleton<IConfigureOptions<SentryMauiOptions>>(_ => new SentryMauiOptionsSetup(section));
-
         if (configureOptions != null)
         {
             services.Configure(configureOptions);
