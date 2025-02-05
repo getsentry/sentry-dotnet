@@ -116,4 +116,22 @@ internal static class EnumExtensions
             TransactionNameSource.Component => JavaSdk.Protocol.TransactionNameSource.Component,
             _ => throw new ArgumentOutOfRangeException(nameof(source), source, message: default)
         };
+
+    public static SentryReplayQuality ToSentryReplayQuality(this JavaSdk.SentryReplayOptions.SentryReplayQuality replayQuality) =>
+        replayQuality.Name() switch
+        {
+            "LOW" => SentryReplayQuality.Low,
+            "MEDIUM" => SentryReplayQuality.Medium,
+            "HIGH" => SentryReplayQuality.High,
+            _ => throw new ArgumentOutOfRangeException(nameof(replayQuality), replayQuality.Name(), message: default)
+        };
+
+    public static JavaSdk.SentryReplayOptions.SentryReplayQuality ToJavaReplayQuality(this SentryReplayQuality replayQuality) =>
+        replayQuality switch
+        {
+            SentryReplayQuality.Low => JavaSdk.SentryReplayOptions.SentryReplayQuality.Low,
+            SentryReplayQuality.Medium => JavaSdk.SentryReplayOptions.SentryReplayQuality.Medium,
+            SentryReplayQuality.High => JavaSdk.SentryReplayOptions.SentryReplayQuality.High,
+            _ => throw new ArgumentOutOfRangeException(nameof(replayQuality), replayQuality, message: default)
+        };
 }

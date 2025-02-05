@@ -93,4 +93,8 @@ public class SentryMauiOptions : SentryLoggingOptions
     {
         _beforeCapture = beforeCapture;
     }
+
+#if ANDROID || IOS || MACCATALYST
+    internal bool SessionReplayEnabled => Native.SessionReplay.SessionSampleRate > 0.0f || Native.SessionReplay.OnErrorSampleRate > 0.0f;
+#endif
 }
