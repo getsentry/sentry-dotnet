@@ -6,6 +6,12 @@
 
 - OTel activities that are marked as not recorded are no longer sent to Sentry ([#3890](https://github.com/getsentry/sentry-dotnet/pull/3890))
 
+### Dependencies
+
+- Bump Java SDK from v7.20.1 to v8.1.0 ([#3911](https://github.com/getsentry/sentry-dotnet/pull/3911))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#810)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.20.1...8.1.0)
+
 ## 5.1.0
 
 ### Significant change in behavior
