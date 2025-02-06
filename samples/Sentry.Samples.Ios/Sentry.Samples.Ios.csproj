@@ -1,13 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0-ios17.0</TargetFramework>
+    <TargetFramework>net9.0-ios18.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
-    <SupportedOSPlatformVersion>11.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion>15.0</SupportedOSPlatformVersion>
     <SelfContained>true</SelfContained>
     <PublishAot>true</PublishAot>
+    <!-- TODO: Remove once this issue has been addressed: https://github.com/dotnet/runtime/pull/109186 -->
+    <WarningsNotAsErrors>IL3050;IL3053</WarningsNotAsErrors>
   </PropertyGroup>
 
   <PropertyGroup>

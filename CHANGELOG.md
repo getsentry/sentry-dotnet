@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Fixes
+
+- OTel activities that are marked as not recorded are no longer sent to Sentry ([#3890](https://github.com/getsentry/sentry-dotnet/pull/3890))
+
+## 5.1.0
+
 ### Significant change in behavior
 
 - The User.IpAddress is now only set to `{{auto}}` when `SendDefaultPii` is enabled. This change gives you control over IP address collection directly on the client ([#3893](https://github.com/getsentry/sentry-dotnet/pull/3893))
@@ -13,13 +19,15 @@
 
 ### Fixes
 
+- Prevent Native EXC_BAD_ACCESS signal errors from being captured when managed NullRefrenceExceptions occur ([#3909](https://github.com/getsentry/sentry-dotnet/pull/3909))
 - Fixed duplicate SentryMauiEventProcessors ([#3905](https://github.com/getsentry/sentry-dotnet/pull/3905))
+- Fixed invalid string.Format index in Debug logs for the DiagnosticSource integration ([#3923](https://github.com/getsentry/sentry-dotnet/pull/3923))
 
 ### Dependencies
 
-- Bump Native SDK from v0.7.17 to v0.7.19 ([#3891](https://github.com/getsentry/sentry-dotnet/pull/3891), [#3908](https://github.com/getsentry/sentry-dotnet/pull/3908))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0719)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.17...0.7.19)
+- Bump Native SDK from v0.7.17 to v0.7.20 ([#3891](https://github.com/getsentry/sentry-dotnet/pull/3891), [#3908](https://github.com/getsentry/sentry-dotnet/pull/3908), [#3929](https://github.com/getsentry/sentry-dotnet/pull/3929))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0720)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.17...0.7.20)
 - Bump Java SDK from v7.20.0 to v7.20.1 ([#3907](https://github.com/getsentry/sentry-dotnet/pull/3907))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7201)
   - [diff](https://github.com/getsentry/sentry-java/compare/7.20.0...7.20.1)
