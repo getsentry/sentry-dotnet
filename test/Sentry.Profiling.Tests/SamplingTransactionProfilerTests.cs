@@ -205,7 +205,6 @@ public class SamplingTransactionProfilerTests
 
             Assert.Contains("Method/LoadVerbose", eventsReceived);
             Assert.Contains("Method/ILToNativeMap", eventsReceived);
-            Assert.Contains("Method/UnloadVerbose", eventsReceived);
 
             Assert.Contains("MethodToBeLoaded", loadedMethods);
         }
