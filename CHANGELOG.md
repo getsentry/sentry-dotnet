@@ -5,6 +5,7 @@
 ### Fixes
 
 - OTel activities that are marked as not recorded are no longer sent to Sentry ([#3890](https://github.com/getsentry/sentry-dotnet/pull/3890))
+- Unknown stack frames in profiles on .NET 8+ ([#3942](https://github.com/getsentry/sentry-dotnet/pull/3942))
 
 ## 5.1.0
 
@@ -22,7 +23,6 @@
 - Prevent Native EXC_BAD_ACCESS signal errors from being captured when managed NullRefrenceExceptions occur ([#3909](https://github.com/getsentry/sentry-dotnet/pull/3909))
 - Fixed duplicate SentryMauiEventProcessors ([#3905](https://github.com/getsentry/sentry-dotnet/pull/3905))
 - Fixed invalid string.Format index in Debug logs for the DiagnosticSource integration ([#3923](https://github.com/getsentry/sentry-dotnet/pull/3923))
-- Unknown stack frames in profiles on .NET 8+ ([#3942](https://github.com/getsentry/sentry-dotnet/pull/3942))
 
 ### Dependencies
 
