@@ -24,7 +24,7 @@ public partial class SerializationTests
         {
             IsSampled = false
         };
-        transaction.SetExtra("transaction1", "transaction_value");
+        transaction.Contexts.Trace.SetData("transaction1", "transaction_value");
         var json = transaction.ToJsonString(_testOutputLogger);
         _testOutputLogger.LogDebug(json);
 
@@ -45,6 +45,6 @@ public partial class SerializationTests
         var backTransaction = SentryTransaction.FromJson(el);
 
         backTransaction.Spans.First().Extra["span1"].Should().Be("value1", "Span value missing");
-        backTransaction.Contexts.Trace.Extra["transaction1"].Should().Be("transaction_value", "Transaction value missing");
+        backTransaction.Contexts.Trace.Data["transaction1"].Should().Be("transaction_value", "Transaction value missing");
     }
 }

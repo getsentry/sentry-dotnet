@@ -339,6 +339,7 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
         _breadcrumbs.Add(breadcrumb);
 
     /// <inheritdoc />
+    [Obsolete("Add metadata to Contexts.Trace.SetData")]
     public void SetExtra(string key, object? value) =>
         _extra[key] = value;
 
