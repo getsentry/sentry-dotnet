@@ -744,7 +744,7 @@ public class CachingTransportTests
         foreach (var item in envelope.Items)
         {
             options.ClientReportRecorder.Received(1)
-                .RecordDiscardedEvent(DiscardReason.SendError, item.DataCategory);
+                .RecordDiscardedEvent(DiscardReason.BufferOverflow, item.DataCategory);
         }
     }
 

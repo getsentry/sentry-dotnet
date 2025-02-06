@@ -313,7 +313,7 @@ internal class CachingTransport : ITransport, IDisposable
         // When envelopes are too big, the server will reset the connection as soon as the maximum size is exceeded
         // (it doesn't wait for us to finish sending the whole envelope).
         return ex is SocketException { ErrorCode: 32 /* Broken pipe */ }
-            || (ex.InnerException is { } innerException && IsRejectedByServer(ex.InnerException));
+            || (ex.InnerException is { } innerException && IsRejectedByServer(innerException));
     }
 
     private async Task InnerProcessCacheAsync(string file, CancellationToken cancellation)
@@ -357,7 +357,7 @@ internal class CachingTransport : ITransport, IDisposable
                     }
                     catch (Exception ex) when (IsRejectedByServer(ex))
                     {
-                        _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.SendError, envelope);
+                        _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.BufferOverflow, envelope);
                         _options.LogError(ex, "Failed to send cached envelope: {0}. The envelope is likely too big and will be discarded.", file);
                     }
                     catch (Exception ex) when (IsNetworkUnavailableError(ex))
