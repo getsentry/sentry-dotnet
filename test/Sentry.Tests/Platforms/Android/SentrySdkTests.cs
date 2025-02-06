@@ -4,10 +4,11 @@ namespace Sentry.Tests.Platforms.Android;
 public class SentrySdkTests
 {
     [Fact]
-    public void BeforeSendWrapper_SuppressSIGSEGV_ReturnsNull()
+    public void BeforeSendWrapper_Suppress_SIGSEGV_ReturnsNull()
     {
         // Arrange
         var options = new SentryOptions();
+        options.Android.SuppressSegfaults = true;
         var evt = new SentryEvent
         {
             SentryExceptions = new[]
@@ -26,6 +27,32 @@ public class SentrySdkTests
 
         // Assert
         result.Should().BeNull();
+    }
+
+    [Fact]
+    public void BeforeSendWrapper_DontSupress_SIGSEGV_ReturnsEvent()
+    {
+        // Arrange
+        var options = new SentryOptions();
+        options.Android.SuppressSegfaults = false;
+        var evt = new SentryEvent
+        {
+            SentryExceptions = new[]
+            {
+                new SentryException
+                {
+                    Type = "SIGSEGV",
+                    Value = "Segfault"
+                }
+            }
+        };
+        var hint = new SentryHint();
+
+        // Act
+        var result = SentrySdk.BeforeSendWrapper(options).Invoke(evt, hint);
+
+        // Assert
+        result.Should().Be(evt);
     }
 
     [Fact]

@@ -176,7 +176,8 @@ public static partial class SentrySdk
         {
             // Suppress SIGSEGV errors.
             // See: https://github.com/getsentry/sentry-dotnet/pull/3903
-            if (evt.SentryExceptions?.FirstOrDefault() is { Type: "SIGSEGV", Value: "Segfault" } exception)
+            if (options.Android.SuppressSegfaults
+                && evt.SentryExceptions?.FirstOrDefault() is { Type: "SIGSEGV", Value: "Segfault" })
             {
                 options.LogDebug("Suppressing SIGSEGV (this will be thrown as a managed exception instead)");
                 return null;
