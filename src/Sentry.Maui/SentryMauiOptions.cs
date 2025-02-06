@@ -36,6 +36,12 @@ public class SentryMauiOptions : SentryLoggingOptions
     public bool IncludeTextInBreadcrumbs { get; set; }
 
     /// <summary>
+    /// Gets or sets whether MAUI event binder will be active
+    /// The default is <c>true</c> (include).
+    /// </summary>
+    public bool EnableMauiEventsBinder { get; set; } = true;
+
+    /// <summary>
     /// Gets or sets whether elements that implement <see cref="ITitledElement"/>
     /// (such as <see cref="Window"/>, <see cref="Page"/>, and others)
     /// will have their titles included on breadcrumbs.
@@ -81,7 +87,7 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// if this callback return false the capture will not take place
     /// </remarks>
     /// <code>
-    /// 
+    ///
     ///options.SetBeforeCapture((@event, hint) =>
     ///{
     ///    // Return true to capture or false to prevent the capture

@@ -30,6 +30,9 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     public void HandleApplicationEvents(Application application, bool bind = true)
     {
+        if (!_options.EnableMauiEventsBinder)
+            return;
+
         if (bind)
         {
             // Attach element events to all descendents as they are added to the application.
