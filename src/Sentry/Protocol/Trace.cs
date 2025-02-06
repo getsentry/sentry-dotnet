@@ -7,7 +7,7 @@ namespace Sentry.Protocol;
 /// <summary>
 /// Trace context data.
 /// </summary>
-public class Trace : ITraceContext, IHasExtra, ISentryJsonSerializable, ICloneable<Trace>, IUpdatable<Trace>
+public class Trace : ITraceContext, ISentryJsonSerializable, ICloneable<Trace>, IUpdatable<Trace>
 {
     /// <summary>
     /// Tells Sentry which type of context this is.
@@ -103,7 +103,6 @@ public class Trace : ITraceContext, IHasExtra, ISentryJsonSerializable, ICloneab
         writer.WriteString("origin", Origin ?? Internal.OriginHelper.Manual);
         writer.WriteStringIfNotWhiteSpace("description", Description);
         writer.WriteStringIfNotWhiteSpace("status", Status?.ToString().ToSnakeCase());
-        writer.WriteDictionaryIfNotEmpty("data", _extra, logger);
 
         writer.WriteEndObject();
     }
@@ -121,7 +120,6 @@ public class Trace : ITraceContext, IHasExtra, ISentryJsonSerializable, ICloneab
         var description = json.GetPropertyOrNull("description")?.GetString();
         var status = json.GetPropertyOrNull("status")?.GetString()?.Replace("_", "").ParseEnum<SpanStatus>();
         var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean();
-        var extra = json.GetPropertyOrNull("data")?.GetDictionaryOrNull() ?? new();
 
         return new Trace
         {
@@ -132,19 +130,7 @@ public class Trace : ITraceContext, IHasExtra, ISentryJsonSerializable, ICloneab
             Origin = origin,
             Description = description,
             Status = status,
-            IsSampled = isSampled,
-            _extra = extra
+            IsSampled = isSampled
         };
     }
-
-
-    // not readonly for serialization
-    private Dictionary<string, object?> _extra = new();
-
-    /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _extra;
-
-    /// <inheritdoc />
-    public void SetExtra(string key, object? value)
-        => _extra[key] = value;
 }
