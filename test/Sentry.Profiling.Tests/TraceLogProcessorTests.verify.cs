@@ -20,16 +20,24 @@ public class TraceLogProcessorTests
     // [Fact]
     // public void ManualDebugging()
     // {
-    //     var etlFilePath = "C:/dev/Aura.UI/profile.nettrace";
+    //     var etlFilePath = "T:/src/sentry-dotnet/samples/Sentry.Samples.Console.Profiling/Sentry.Samples.Console.Profiling.exe_20250124_144756.nettrace";
     //     var etlxFilePath = Path.ChangeExtension(etlFilePath, ".etlx");
     //     if (!File.Exists(etlxFilePath))
     //     {
     //         TraceLog.CreateFromEventTraceLogFile(etlFilePath, etlxFilePath);
     //     }
     //     using var eventLog = new TraceLog(etlxFilePath);
-    //     var processor = new TraceLogProcessor(new(), eventLog);
-    //     var profile = processor.Process(CancellationToken.None);
-    //     var json = profile.ToJsonString(_testOutputLogger);
+    //     var builder = new SampleProfileBuilder(new(), eventLog);
+    //     foreach (var event_ in eventLog.Events)
+    //     {
+    //         if (event_.ProviderGuid == SampleProfilerTraceEventParser.ProviderGuid)
+    //         {
+    //             builder.AddSample(event_, event_.TimeStampRelativeMSec);
+    //         }
+    //     }
+
+    //     var json = builder.Profile.ToJsonString(_testOutputLogger);
+    //     VerifyJson(json);
     // }
 
     private SampleProfile BuilProfile(TraceLogEventSource eventSource)
