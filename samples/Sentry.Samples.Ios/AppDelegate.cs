@@ -30,6 +30,11 @@ public class AppDelegate : UIApplicationDelegate
             options.CacheDirectoryPath = Path.GetTempPath();
         });
 
+        SentrySdk.ConfigureScope(scope =>
+        {
+            scope.SetTag("IAmNull", null!);
+        });
+
         // create a new window instance based on the screen size
         Window = new UIWindow(UIScreen.MainScreen.Bounds);
 
