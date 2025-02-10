@@ -3,6 +3,7 @@ using Android.OS;
 using Sentry.Android;
 using Sentry.Android.Callbacks;
 using Sentry.Android.Extensions;
+using Sentry.Extensibility;
 using Sentry.JavaSdk.Android.Core;
 
 // Don't let the Sentry Android SDK auto-init, as we do that manually in SentrySdk.Init
@@ -99,10 +100,7 @@ public static partial class SentrySdk
                 }
             }
 
-            if (options.Native.EnableBeforeSend && options.BeforeSendInternal is { } beforeSend)
-            {
-                o.BeforeSend = new BeforeSendCallback(beforeSend, options, o);
-            }
+            o.BeforeSend = new BeforeSendCallback(BeforeSendWrapper(options), options, o);
 
             // These options are from SentryAndroidOptions
             o.AttachScreenshot = options.Native.AttachScreenshot;
@@ -170,6 +168,26 @@ public static partial class SentrySdk
         options.ScopeObserver = new AndroidScopeObserver(options);
 
         // TODO: Pause/Resume
+    }
+
+    internal static Func<SentryEvent, SentryHint, SentryEvent?> BeforeSendWrapper(SentryOptions options)
+    {
+        return (evt, hint) =>
+        {
+            // Suppress SIGSEGV errors.
+            // See: https://github.com/getsentry/sentry-dotnet/pull/3903
+            if (options.Android.SuppressSegfaults
+                && evt.SentryExceptions?.FirstOrDefault() is { Type: "SIGSEGV", Value: "Segfault" })
+            {
+                options.LogDebug("Suppressing SIGSEGV (this will be thrown as a managed exception instead)");
+                return null;
+            }
+
+            // Call the user defined BeforeSend callback, if it's defined - otherwise return the event as-is
+            return (options.Native.EnableBeforeSend && options.BeforeSendInternal is { } beforeSend)
+                ? beforeSend(evt, hint)
+                : evt;
+        };
     }
 
     private static void AndroidEnvironment_UnhandledExceptionRaiser(object? _, RaiseThrowableEventArgs e)
