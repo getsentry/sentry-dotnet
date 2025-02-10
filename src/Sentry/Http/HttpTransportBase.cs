@@ -271,6 +271,7 @@ public abstract class HttpTransportBase
 
         // Join to a string to handle both single-header and multi-header cases
         var rateLimitsEncoded = string.Join(",", rateLimitHeaderValues);
+        _options.LogDebug("Parsing rate limit headers: {0}", rateLimitsEncoded);
 
         // Parse and order by retry-after so that the longer rate limits are set last (and not overwritten)
         var rateLimits = RateLimit.ParseMany(rateLimitsEncoded).OrderBy(rl => rl.RetryAfter);
