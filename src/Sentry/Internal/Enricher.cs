@@ -45,8 +45,15 @@ internal class Enricher
                 } catch {
                     eventLike.Contexts.OperatingSystem.RawDescription = Environment.OSVersion.VersionString;
                 }
+
 #else
                 eventLike.Contexts.OperatingSystem.RawDescription = RuntimeInformation.OSDescription;
+                if (eventLike.Contexts.OperatingSystem.RawDescription.StartsWith("Darwin"))
+                {
+                    // works for catalyst and net9 base
+                    eventLike.Contexts.OperatingSystem.Name = "macOS";
+                    eventLike.Contexts.OperatingSystem.Version = Environment.OSVersion.Version.ToString(); // reports macOS version (ie. 15.3.0)
+                }
 #endif
             }
         }

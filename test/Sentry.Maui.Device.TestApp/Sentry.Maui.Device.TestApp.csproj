@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks />
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android34.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios17.0</TargetFrameworks>
+    <TargetFrameworks>net8.0-maccatalyst17.0</TargetFrameworks>
+    <!--    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android34.0</TargetFrameworks>-->
+    <!--    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios17.0</TargetFrameworks>-->
     <UseMaui>true</UseMaui>
     <!-- Currently broken on .NET 7, see
       - https://github.com/dotnet/maui/issues/18573
@@ -65,33 +65,33 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-    <PackageReference Include="Microsoft.Maui.Core" Version="$(MauiVersion)" />
-    <PackageReference Include="Microsoft.Maui.Essentials" Version="$(MauiVersion)" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/>
+    <PackageReference Include="Microsoft.Maui.Core" Version="$(MauiVersion)"/>
+    <PackageReference Include="Microsoft.Maui.Essentials" Version="$(MauiVersion)"/>
 
     <!-- https://github.com/advisories/GHSA-5f2m-466j-3848 -->
-    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
+    <PackageReference Include="System.Private.Uri" Version="4.3.2"/>
   </ItemGroup>
 
   <!-- Configure XUnit -->
   <ItemGroup>
-    <AndroidAsset Include="..\xunit.runner.json" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
-    <Content Include="..\xunit.runner.json" CopyToOutputDirectory="PreserveNewest" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
+    <AndroidAsset Include="..\xunit.runner.json" Condition="'$(TargetPlatformIdentifier)' == 'android'"/>
+    <Content Include="..\xunit.runner.json" CopyToOutputDirectory="PreserveNewest" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'"/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DeviceRunners.XHarness.Maui" Version="0.1.0-preview.1" />
-    <PackageReference Include="DeviceRunners.XHarness.Xunit" Version="0.1.0-preview.1" />
+    <PackageReference Include="DeviceRunners.XHarness.Maui" Version="0.1.0-preview.1"/>
+    <PackageReference Include="DeviceRunners.XHarness.Xunit" Version="0.1.0-preview.1"/>
     <!-- Prevent downgrade of these packages for DeviceRunners.XHarness.Xunit 0.1.0-preview.1   -->
-    <PackageReference Include="System.Net.Primitives" Version="4.3.0" />
-    <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
+    <PackageReference Include="System.Net.Primitives" Version="4.3.0"/>
+    <PackageReference Include="System.IO.FileSystem" Version="4.3.0"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sentry.Android.AssemblyReader.Tests\Sentry.Android.AssemblyReader.Tests.csproj" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
-    <ProjectReference Include="..\Sentry.Tests\Sentry.Tests.csproj" />
-    <ProjectReference Include="..\Sentry.Extensions.Logging.Tests\Sentry.Extensions.Logging.Tests.csproj" />
-    <ProjectReference Include="..\Sentry.Maui.Tests\Sentry.Maui.Tests.csproj" />
+    <ProjectReference Include="..\Sentry.Android.AssemblyReader.Tests\Sentry.Android.AssemblyReader.Tests.csproj" Condition="'$(TargetPlatformIdentifier)' == 'android'"/>
+    <ProjectReference Include="..\Sentry.Tests\Sentry.Tests.csproj"/>
+    <ProjectReference Include="..\Sentry.Extensions.Logging.Tests\Sentry.Extensions.Logging.Tests.csproj"/>
+    <ProjectReference Include="..\Sentry.Maui.Tests\Sentry.Maui.Tests.csproj"/>
   </ItemGroup>
 
 </Project>
