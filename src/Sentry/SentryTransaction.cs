@@ -332,7 +332,10 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
         _breadcrumbs.Add(breadcrumb);
 
     /// <inheritdoc />
-    [Obsolete("Use Data property instead.")]
+    public IReadOnlyDictionary<string, object?> Data => _contexts.Trace.Data;
+
+    /// <inheritdoc />
+    [Obsolete("Use Data")]
     public IReadOnlyDictionary<string, object?> Extra => _contexts.Trace.Data;
 
     /// <inheritdoc />

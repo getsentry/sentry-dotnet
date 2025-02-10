@@ -44,7 +44,7 @@ public partial class SerializationTests
         var el = JsonElement.ParseValue(ref reader);
         var backTransaction = SentryTransaction.FromJson(el);
 
-        backTransaction.Spans.First().Extra["span1"].Should().Be("value1", "Span value missing");
+        backTransaction.Spans.First().Data["span1"].Should().Be("value1", "Span value missing");
         backTransaction.Contexts.Trace.Data["transaction1"].Should().Be("transaction_value", "Transaction value missing");
     }
 }
