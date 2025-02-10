@@ -180,12 +180,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
 
     // Not readonly because of deserialization
-    private Dictionary<string, object?> _extra = new();
-
-    /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _extra;
-
-    // Not readonly because of deserialization
     private Dictionary<string, string> _tags = new();
 
     /// <inheritdoc />
@@ -270,7 +264,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
         Sdk = tracer.Sdk;
         Fingerprint = tracer.Fingerprint;
         _breadcrumbs = tracer.Breadcrumbs.ToList();
-        _extra = tracer.Extra.ToDict();
         _tags = tracer.Tags.ToDict();
 
         _spans = FromTracerSpans(tracer);
@@ -339,9 +332,17 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
         _breadcrumbs.Add(breadcrumb);
 
     /// <inheritdoc />
-    [Obsolete("Add metadata to Contexts.Trace.SetData")]
+    [Obsolete("Use Data property instead.")]
+    public IReadOnlyDictionary<string, object?> Extra => _contexts.Trace.Data;
+
+    /// <inheritdoc />
+    [Obsolete("Use SetData")]
     public void SetExtra(string key, object? value) =>
-        _extra[key] = value;
+        SetData(key, value);
+
+    /// <inheritdoc />
+    public void SetData(string key, object value) =>
+        _contexts.Trace.SetData(key, value);
 
     /// <inheritdoc />
     public void SetTag(string key, string value) =>
