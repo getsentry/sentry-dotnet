@@ -18,13 +18,13 @@ public partial class SerializationTests
         var context = new TransactionContext("name", "operation", new SentryTraceHeader(SentryId.Empty, SpanId.Empty, false));
         var transactionTracer = new TransactionTracer(hub, context);
         var span = transactionTracer.StartChild("childop");
-        span.SetExtra("span1", "value1");
+        span.SetData("span1", "value1");
 
-        var transaction = new SentryTransaction(transactionTracer)
-        {
-            IsSampled = false
-        };
-        transaction.Contexts.Trace.SetData("transaction1", "transaction_value");
+         var transaction = new SentryTransaction(transactionTracer)
+         {
+             IsSampled = false
+         };
+        transaction.SetData("transaction1", "transaction_value");
         var json = transaction.ToJsonString(_testOutputLogger);
         _testOutputLogger.LogDebug(json);
 

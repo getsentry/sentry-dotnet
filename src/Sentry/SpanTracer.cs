@@ -82,13 +82,21 @@ public class SpanTracer : IBaseTracer, ISpan
     public void UnsetTag(string key) =>
         (InternalTags ??= new ConcurrentDictionary<string, string>()).TryRemove(key, out _);
 
-    private readonly ConcurrentDictionary<string, object?> _data = new();
+    private Dictionary<string, object?>? _data;
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _data;
+    public IReadOnlyDictionary<string, object?> Data =>
+        _data ??= new Dictionary<string, object?>();
 
     /// <inheritdoc />
-    public void SetExtra(string key, object? value) => _data[key] = value;
+    public void SetData(string key, object? value) =>
+        (_data ??= new Dictionary<string, object?>())[key] = value;
+
+    /// <inheritdoc />
+    public IReadOnlyDictionary<string, object?> Extra => Data;
+
+    /// <inheritdoc />
+    public void SetExtra(string key, object? value) => SetData(key, value);
 
     internal Func<bool>? IsFiltered { get; set; }
 

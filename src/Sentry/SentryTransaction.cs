@@ -341,7 +341,7 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
         SetData(key, value);
 
     /// <inheritdoc />
-    public void SetData(string key, object value) =>
+    public void SetData(string key, object? value) =>
         _contexts.Trace.SetData(key, value);
 
     /// <inheritdoc />
@@ -403,7 +403,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
         writer.WriteSerializable("sdk", Sdk, logger);
         writer.WriteStringArrayIfNotEmpty("fingerprint", _fingerprint);
         writer.WriteArrayIfNotEmpty("breadcrumbs", _breadcrumbs, logger);
-        writer.WriteDictionaryIfNotEmpty("extra", _extra, logger);
         writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
         writer.WriteArrayIfNotEmpty("spans", _spans, logger);
         writer.WriteDictionaryIfNotEmpty("measurements", _measurements, logger);
@@ -461,7 +460,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
             Sdk = sdk,
             _fingerprint = fingerprint,
             _breadcrumbs = breadcrumbs,
-            _extra = extra,
             _tags = tags,
             _measurements = measurements,
             _spans = spans
