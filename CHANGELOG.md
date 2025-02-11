@@ -9,6 +9,7 @@
 - Fixed envelopes with oversized attachments getting stuck in __processing ([#3938](https://github.com/getsentry/sentry-dotnet/pull/3938))
 - Unknown stack frames in profiles on .NET 8+ ([#3942](https://github.com/getsentry/sentry-dotnet/pull/3942))
 - Deduplicate profiling stack frames ([#3941](https://github.com/getsentry/sentry-dotnet/pull/3941))
+- Map iOS native events - OnCrashedLastRun and BeforeSend ([#2102](https://github.com/getsentry/sentry-dotnet/pull/3958))
 
 ## 5.1.0
 
