@@ -212,6 +212,7 @@ public class DynamicSamplingContextTests
 
     [Theory]
     [InlineData("true")]
+    [InlineData("false")]
     public void CreateFromBaggage_SampledNoSampleRand_GeneratesConsistentSampleRand(string sampled)
     {
         var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
@@ -269,10 +270,11 @@ public class DynamicSamplingContextTests
         var dsc = baggage.CreateDynamicSamplingContext();
 
         Assert.NotNull(dsc);
-        Assert.Equal(3, dsc.Items.Count);
+        Assert.Equal(4, dsc.Items.Count);
         Assert.Equal("43365712692146d08ee11a729dfbcaca", Assert.Contains("trace_id", dsc.Items));
         Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
         Assert.Equal("1.0", Assert.Contains("sample_rate", dsc.Items));
+        Assert.Contains("sample_rand", dsc.Items);
     }
 
     [Fact]
@@ -314,6 +316,7 @@ public class DynamicSamplingContextTests
             {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
             {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
             {"sentry-sample_rate", "1.0"},
+            {"sentry-sample_rand", "0.1234"},
             {"sentry-release", "test@1.0.0+abc"},
             {"sentry-environment", "production"},
             {"sentry-user_segment", "Group B"},

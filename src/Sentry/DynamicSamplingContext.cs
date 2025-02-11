@@ -100,7 +100,7 @@ internal class DynamicSamplingContext
             return null;
         }
 
-        if (items.TryGetValue("sampled", out var sampledString) && !bool.TryParse(sampledString, out _))
+        if (items.TryGetValue("sampled", out var sampledString) && !bool.TryParse(sampledString, out var sampled))
         {
             return null;
         }
@@ -124,7 +124,14 @@ internal class DynamicSamplingContext
         else
         {
             var seed = FnvHash.ComputeHash(traceId);
-            var rand = new Random(seed).NextDouble() * rate;
+            var rand = new Random(seed).NextDouble();
+            if (!string.IsNullOrEmpty(sampledString))
+            {
+                // Ensure sample_rand is consistent with the sampling decision that has already been made
+                rand = bool.Parse(sampledString)
+                    ? rand * rate // 0 <= sampleRand < rate
+                    : rate + (1 - rate) * rand; // rate < sampleRand < 1
+            }
             items.Add("sample_rand", rand.ToString("N4", CultureInfo.InvariantCulture));
         }
         return new DynamicSamplingContext(items);
