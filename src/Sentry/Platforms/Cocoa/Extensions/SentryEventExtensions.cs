@@ -40,7 +40,7 @@ internal static class SentryEventExtensions
         using var data = NSData.FromStream(stream)!;
         var cocoaEnvelope = CocoaSdk.PrivateSentrySDKOnly.EnvelopeWithData(data);
 
-        var cocoaEvent = (CocoaSdk.SentryEvent) cocoaEnvelope.Items.GetItem<CocoaSdk.SentryEvent>(0);
+        var cocoaEvent = (CocoaSdk.SentryEvent)cocoaEnvelope.Items.GetItem<CocoaSdk.SentryEvent>(0);
         return cocoaEvent;
     }
 }
