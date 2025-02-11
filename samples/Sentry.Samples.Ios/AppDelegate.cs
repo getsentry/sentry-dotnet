@@ -28,6 +28,17 @@ public class AppDelegate : UIApplicationDelegate
             options.Native.EnableAppHangTracking = true;
 
             options.CacheDirectoryPath = Path.GetTempPath();
+
+            options.Native.BeforeSend = e =>
+            {
+                e.SetTag("dotnet-iOS-Native-Before", "Hello World");
+                return e;
+            };
+
+            options.Native.CrashedLastRun = e =>
+            {
+                Console.WriteLine(e);
+            };
         });
 
         // create a new window instance based on the screen size

@@ -35,6 +35,7 @@ public static partial class SentrySdk
         nativeOptions.SendDefaultPii = options.SendDefaultPii;
         nativeOptions.SessionTrackingIntervalMillis = (nuint)options.AutoSessionTrackingInterval.TotalMilliseconds;
 
+        // nativeOptions.BeforeSend
         if (options.Environment is { } environment)
         {
             nativeOptions.Environment = environment;
@@ -88,27 +89,44 @@ public static partial class SentrySdk
 
         // TODO: Finish SentryEventExtensions to enable these
 
-        // if (options.Native.EnableBeforeSend && options.BeforeSend is { } beforeSend)
-        // {
-        //     nativeOptions.BeforeSend = evt =>
-        //     {
-        //         var sentryEvent = evt.ToSentryEvent(nativeOptions);
-        //         var result = beforeSend(sentryEvent)?.ToCocoaSentryEvent(options, nativeOptions);
-        //
-        //         // Note: Nullable result is allowed but delegate is generated incorrectly
-        //         // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
-        //         return result!;
-        //     };
-        // }
+        if (options.Native.BeforeSend is { } beforeSend)
+        {
+            nativeOptions.BeforeSend = evt =>
+            {
+                // because we delegate to user code, we need to protect anything that could happen in this event
+                try
+                {
+                    var sentryEvent = evt.ToSentryEvent(nativeOptions);
+                    var result = beforeSend(sentryEvent)?.ToCocoaSentryEvent(options, nativeOptions);
 
-        // if (options.Native.OnCrashedLastRun is { } onCrashedLastRun)
-        // {
-        //     nativeOptions.OnCrashedLastRun = evt =>
-        //     {
-        //         var sentryEvent = evt.ToSentryEvent(nativeOptions);
-        //         onCrashedLastRun(sentryEvent);
-        //     };
-        // }
+                    // Note: Nullable result is allowed but delegate is generated incorrectly
+                    // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
+                    return result!;
+                }
+                catch (Exception ex)
+                {
+                    options.LogError(ex, "Before Send Error");
+                    return evt;
+                }
+            };
+        }
+
+        if (options.Native.CrashedLastRun is { } onCrashedLastRun)
+        {
+            nativeOptions.OnCrashedLastRun = evt =>
+            {
+                // because we delegate to user code, we need to protect anything that could happen in this event
+                try
+                {
+                    var sentryEvent = evt.ToSentryEvent(nativeOptions);
+                    onCrashedLastRun(sentryEvent);
+                }
+                catch (Exception ex)
+                {
+                    options.LogError(ex, "Crashed Last Run Error");
+                }
+            };
+        }
 
         // These options are from Cocoa's SentryOptions
         nativeOptions.AttachScreenshot = options.Native.AttachScreenshot;

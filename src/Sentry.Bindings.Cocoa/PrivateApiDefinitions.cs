@@ -30,3 +30,13 @@ interface SentrySession
 interface SentryTracer
 {
 }
+
+[Internal]
+[DisableDefaultCtor]
+[BaseType (typeof(NSObject))]
+interface SentryEnvelope
+{
+    // @property (nonatomic, readonly, strong) NSArray<SentryEnvelopeItem *> *items;
+    [Export("items")]
+    NSArray Items { get; }
+}
