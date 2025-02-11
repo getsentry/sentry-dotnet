@@ -48,7 +48,7 @@ internal class Enricher
 
 #else
                 eventLike.Contexts.OperatingSystem.RawDescription = RuntimeInformation.OSDescription;
-                if (eventLike.Contexts.OperatingSystem.RawDescription.StartsWith("Darwin"))
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
                     // works for catalyst and net9 base
                     eventLike.Contexts.OperatingSystem.Name = "macOS";
