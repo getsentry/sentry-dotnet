@@ -69,7 +69,7 @@ internal sealed class CocoaScopeObserver : IScopeObserver
     {
         if (value is null)
         {
-            _options.LogDebug("Tag with key '{0}' was null.", key);
+            _options.LogDebug("Tag with key '{0}' was null. Use Unset to remove tags instead.", key);
             return;
         }
 
