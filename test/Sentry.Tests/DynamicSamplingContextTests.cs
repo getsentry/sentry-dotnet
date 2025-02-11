@@ -356,6 +356,7 @@ public class DynamicSamplingContextTests
             NameSource = TransactionNameSource.Route,
             IsSampled = isSampled,
             SampleRate = 0.5,
+            SampleRand = (isSampled ?? true) ? 0.4000 : 0.6000, // Lower than the sample rate means sampled == true
             User =
             {
             },
@@ -364,7 +365,7 @@ public class DynamicSamplingContextTests
         var dsc = transaction.CreateDynamicSamplingContext(options);
 
         Assert.NotNull(dsc);
-        Assert.Equal(isSampled.HasValue ? 7 : 6, dsc.Items.Count);
+        Assert.Equal(isSampled.HasValue ? 8 : 7, dsc.Items.Count);
         Assert.Equal(traceId.ToString(), Assert.Contains("trace_id", dsc.Items));
         Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
         if (transaction.IsSampled is { } sampled)
@@ -376,6 +377,7 @@ public class DynamicSamplingContextTests
             Assert.DoesNotContain("sampled", dsc.Items);
         }
         Assert.Equal("0.5", Assert.Contains("sample_rate", dsc.Items));
+        Assert.Equal((isSampled ?? true) ? "0.4000" : "0.6000", Assert.Contains("sample_rand", dsc.Items));
         Assert.Equal("foo@2.4.5", Assert.Contains("release", dsc.Items));
         Assert.Equal("staging", Assert.Contains("environment", dsc.Items));
         Assert.Equal("GET /person/{id}", Assert.Contains("transaction", dsc.Items));

@@ -129,6 +129,10 @@ internal class Hub : IHub, IDisposable
     {
         var transaction = new TransactionTracer(this, context);
 
+        transaction.SampleRand = (dynamicSamplingContext is not null)
+            ? double.Parse(dynamicSamplingContext.Items["sample_rand"], NumberStyles.Float, CultureInfo.InvariantCulture)
+            : transaction.SampleRand = SampleRandHelper.GenerateSampleRand(context.TraceId.ToString());
+
         // If the hub is disabled, we will always sample out.  In other words, starting a transaction
         // after disposing the hub will result in that transaction not being sent to Sentry.
         // Additionally, we will always sample out if tracing is explicitly disabled.
@@ -151,7 +155,7 @@ internal class Hub : IHub, IDisposable
 
                 if (tracesSampler(samplingContext) is { } sampleRate)
                 {
-                    transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
+                    transaction.IsSampled = SampleRandHelper.IsSampled(transaction.SampleRand.Value, sampleRate);
                     transaction.SampleRate = sampleRate;
                 }
             }
@@ -160,7 +164,7 @@ internal class Hub : IHub, IDisposable
             if (transaction.IsSampled == null)
             {
                 var sampleRate = _options.TracesSampleRate ?? 0.0;
-                transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
+                transaction.IsSampled = SampleRandHelper.IsSampled(transaction.SampleRand.Value, sampleRate);
                 transaction.SampleRate = sampleRate;
             }
 

@@ -25,6 +25,7 @@ internal class DynamicSamplingContext
         string publicKey,
         bool? sampled,
         double? sampleRate = null,
+        double? sampleRand = null,
         string? release = null,
         string? environment = null,
         string? transactionName = null)
@@ -45,6 +46,11 @@ internal class DynamicSamplingContext
             throw new ArgumentOutOfRangeException(nameof(sampleRate));
         }
 
+        if (sampleRand is < 0.0 or >= 1.0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(sampleRand));
+        }
+
         var items = new Dictionary<string, string>(capacity: 7)
         {
             ["trace_id"] = traceId.ToString(),
@@ -60,6 +66,11 @@ internal class DynamicSamplingContext
         if (sampleRate is not null)
         {
             items.Add("sample_rate", sampleRate.Value.ToString(CultureInfo.InvariantCulture));
+        }
+
+        if (sampleRand is not null)
+        {
+            items.Add("sample_rand", sampleRand.Value.ToString("N4", CultureInfo.InvariantCulture));
         }
 
         if (!string.IsNullOrWhiteSpace(release))
@@ -123,8 +134,7 @@ internal class DynamicSamplingContext
         }
         else
         {
-            var seed = FnvHash.ComputeHash(traceId);
-            var rand = new Random(seed).NextDouble();
+            var rand = SampleRandHelper.GenerateSampleRand(traceId);
             if (!string.IsNullOrEmpty(sampledString))
             {
                 // Ensure sample_rand is consistent with the sampling decision that has already been made
@@ -144,6 +154,7 @@ internal class DynamicSamplingContext
         var traceId = transaction.TraceId;
         var sampled = transaction.IsSampled;
         var sampleRate = transaction.SampleRate!.Value;
+        var sampleRand = transaction.SampleRand;
         var transactionName = transaction.NameSource.IsHighQuality() ? transaction.Name : null;
 
         // These two may not have been set yet on the transaction, but we can get them directly.
@@ -155,6 +166,7 @@ internal class DynamicSamplingContext
             publicKey,
             sampled,
             sampleRate,
+            sampleRand,
             release,
             environment,
             transactionName);
