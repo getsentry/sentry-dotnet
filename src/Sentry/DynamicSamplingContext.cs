@@ -1,3 +1,4 @@
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry;
@@ -111,6 +112,21 @@ internal class DynamicSamplingContext
             return null;
         }
 
+        // See https://develop.sentry.dev/sdk/telemetry/traces/#propagated-random-value
+        if (items.TryGetValue("sample_rand", out var sampleRand))
+        {
+            if (!double.TryParse(sampleRand, NumberStyles.Float, CultureInfo.InvariantCulture, out var rand) ||
+                 rand is < 0.0 or >= 1.0)
+            {
+                return null;
+            }
+        }
+        else
+        {
+            var seed = FnvHash.ComputeHash(traceId);
+            var rand = new Random(seed).NextDouble() * rate;
+            items.Add("sample_rand", rand.ToString("N4", CultureInfo.InvariantCulture));
+        }
         return new DynamicSamplingContext(items);
     }
 

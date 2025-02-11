@@ -143,6 +143,104 @@ public class DynamicSamplingContextTests
     }
 
     [Fact]
+    public void CreateFromBaggage_SampleRand_Invalid()
+    {
+        var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "1.0"},
+            {"sentry-sample_rand", "not-a-number"},
+        });
+
+        var dsc = baggage.CreateDynamicSamplingContext();
+
+        Assert.Null(dsc);
+    }
+
+    [Fact]
+    public void CreateFromBaggage_SampleRand_TooLow()
+    {
+        var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "1.0"},
+            {"sentry-sample_rand", "-0.1"}
+        });
+
+        var dsc = baggage.CreateDynamicSamplingContext();
+
+        Assert.Null(dsc);
+    }
+
+    [Fact]
+    public void CreateFromBaggage_SampleRand_TooHigh()
+    {
+        var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "1.0"},
+            {"sentry-sample_rand", "1.0"} // Must be less than 1
+        });
+
+        var dsc = baggage.CreateDynamicSamplingContext();
+
+        Assert.Null(dsc);
+    }
+
+    [Fact]
+    public void CreateFromBaggage_NotSampledNoSampleRand_GeneratesSampleRand()
+    {
+        var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "0.5"}
+        });
+
+        var dsc = baggage.CreateDynamicSamplingContext();
+
+        using var scope = new AssertionScope();
+        Assert.NotNull(dsc);
+        var sampleRandItem = Assert.Contains("sample_rand", dsc.Items);
+        var sampleRand = double.Parse(sampleRandItem, NumberStyles.Float, CultureInfo.InvariantCulture);
+        Assert.True(sampleRand >= 0.0);
+        Assert.True(sampleRand < 1.0);
+    }
+
+    [Theory]
+    [InlineData("true")]
+    public void CreateFromBaggage_SampledNoSampleRand_GeneratesConsistentSampleRand(string sampled)
+    {
+        var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "0.5"},
+            {"sentry-sampled", sampled},
+        });
+
+        var dsc = baggage.CreateDynamicSamplingContext();
+
+        using var scope = new AssertionScope();
+        Assert.NotNull(dsc);
+        var sampleRandItem = Assert.Contains("sample_rand", dsc.Items);
+        var sampleRand = double.Parse(sampleRandItem, NumberStyles.Float, CultureInfo.InvariantCulture);
+        if (sampled == "true")
+        {
+            Assert.True(sampleRand >= 0.0);
+            Assert.True(sampleRand < 0.5);
+        }
+        else
+        {
+            Assert.True(sampleRand >= 0.5);
+            Assert.True(sampleRand < 1.0);
+        }
+    }
+
+    [Fact]
     public void CreateFromBaggage_Sampled_MalFormed()
     {
         var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
@@ -186,6 +284,7 @@ public class DynamicSamplingContextTests
             {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
             {"sentry-sampled", "true"},
             {"sentry-sample_rate", "1.0"},
+            {"sentry-sample_rand", "0.1234"},
             {"sentry-release", "test@1.0.0+abc"},
             {"sentry-environment", "production"},
             {"sentry-user_segment", "Group B"},
@@ -200,6 +299,7 @@ public class DynamicSamplingContextTests
         Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
         Assert.Equal("true", Assert.Contains("sampled", dsc.Items));
         Assert.Equal("1.0", Assert.Contains("sample_rate", dsc.Items));
+        Assert.Equal("0.1234", Assert.Contains("sample_rand", dsc.Items));
         Assert.Equal("test@1.0.0+abc", Assert.Contains("release", dsc.Items));
         Assert.Equal("production", Assert.Contains("environment", dsc.Items));
         Assert.Equal("Group B", Assert.Contains("user_segment", dsc.Items));
