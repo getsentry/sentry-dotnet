@@ -7,6 +7,7 @@
 - OTel activities that are marked as not recorded are no longer sent to Sentry ([#3890](https://github.com/getsentry/sentry-dotnet/pull/3890))
 - Unknown stack frames in profiles on .NET 8+ ([#3942](https://github.com/getsentry/sentry-dotnet/pull/3942))
 - Deduplicate profiling stack frames ([#3941](https://github.com/getsentry/sentry-dotnet/pull/3941))
+- Ignore null value on CocoaScopeObserver.SetTag ([#3948](https://github.com/getsentry/sentry-dotnet/pull/3948))
 
 ## 5.1.0
 
