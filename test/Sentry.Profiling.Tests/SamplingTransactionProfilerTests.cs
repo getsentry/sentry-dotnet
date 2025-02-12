@@ -184,9 +184,8 @@ public class SamplingTransactionProfilerTests
     [SkippableFact]
     public async Task EventPipeSession_ReceivesExpectedCLREvents()
     {
-        Skip.If(TestEnvironment.IsGitHubActions, "Flaky on CI");
-
-        var session = SampleProfilerSession.StartNew(_testOutputLogger);
+        SampleProfilerSession? session = null;
+        SkipIfFailsInCI(() => session = SampleProfilerSession.StartNew(_testOutputLogger));
         using (session)
         {
             var eventsReceived = new HashSet<string>();
@@ -194,6 +193,7 @@ public class SamplingTransactionProfilerTests
 
             var loadedMethods = new HashSet<string>();
             session!.EventSource.Clr.MethodLoadVerbose += (MethodLoadUnloadVerboseTraceData ev) => loadedMethods.Add(ev.MethodName);
+
 
             await session.WaitForFirstEventAsync(CancellationToken.None);
             var limitMs = 50;
