@@ -82,7 +82,7 @@ public class SpanTracer : IBaseTracer, ISpan
     public void UnsetTag(string key) =>
         (InternalTags ??= new ConcurrentDictionary<string, string>()).TryRemove(key, out _);
 
-     readonly ConcurrentDictionary<string, object?> _data = new();
+    private readonly ConcurrentDictionary<string, object?> _data = new();
 
     /// <inheritdoc />
     public IReadOnlyDictionary<string, object?> Data => _data;
