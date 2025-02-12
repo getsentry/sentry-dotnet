@@ -14,11 +14,13 @@ internal partial class BindableSentryOptions
     {
         public LogCatIntegrationType? LogCatIntegration { get; set; }
         public int? LogCatMaxLines { get; set; }
+        public bool? SuppressSegfaults { get; set; }
 
         public void ApplyTo(SentryOptions.AndroidOptions options)
         {
             options.LogCatIntegration = LogCatIntegration ?? options.LogCatIntegration;
             options.LogCatMaxLines = LogCatMaxLines ?? options.LogCatMaxLines;
+            options.SuppressSegfaults = SuppressSegfaults ?? options.SuppressSegfaults;
         }
     }
 }

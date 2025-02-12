@@ -300,12 +300,21 @@ internal class CachingTransport : ITransport, IDisposable
         }
     }
 
-    private static bool IsNetworkError(Exception exception) =>
+    private static bool IsNetworkUnavailableError(Exception exception) =>
         exception switch
         {
+            // TODO: Could we make this more specific? Lots of these errors are unrelated to network availability.
             HttpRequestException or WebException or IOException or SocketException => true,
             _ => false
         };
+
+    private static bool IsRejectedByServer(Exception ex)
+    {
+        // When envelopes are too big, the server will reset the connection as soon as the maximum size is exceeded
+        // (it doesn't wait for us to finish sending the whole envelope).
+        return ex is SocketException { ErrorCode: 32 /* Broken pipe */ }
+            || (ex.InnerException is { } innerException && IsRejectedByServer(innerException));
+    }
 
     private async Task InnerProcessCacheAsync(string file, CancellationToken cancellation)
     {
@@ -346,8 +355,15 @@ internal class CachingTransport : ITransport, IDisposable
                         // Let the worker catch, log, wait a bit and retry.
                         throw;
                     }
-                    catch (Exception ex) when (IsNetworkError(ex))
+                    catch (Exception ex) when (IsRejectedByServer(ex))
                     {
+                        _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.BufferOverflow, envelope);
+                        _options.LogError(ex, "Failed to send cached envelope: {0}. The envelope is likely too big and will be discarded.", file);
+                    }
+                    catch (Exception ex) when (IsNetworkUnavailableError(ex))
+                    {
+                        // TODO: Envelopes could end up in an infinite loop here. We should consider implementing some
+                        // kind backoff strategy and a retry limit... then drop the envelopes if the limit is exceeded.
                         if (_options.NetworkStatusListener is PollingNetworkStatusListener pollingListener)
                         {
                             pollingListener.Online = false;
