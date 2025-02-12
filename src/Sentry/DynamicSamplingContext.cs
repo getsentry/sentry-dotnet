@@ -51,7 +51,7 @@ internal class DynamicSamplingContext
             throw new ArgumentOutOfRangeException(nameof(sampleRand));
         }
 
-        var items = new Dictionary<string, string>(capacity: 7)
+        var items = new Dictionary<string, string>(capacity: 8)
         {
             ["trace_id"] = traceId.ToString(),
             ["public_key"] = publicKey,

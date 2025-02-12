@@ -701,7 +701,27 @@ public partial class HubTests
     }
 
     [Fact]
-    public void StartTransaction_DynamicSamplingContext_InheritsSampleRand()
+    public void StartTransaction_DynamicSamplingContextWithoutSampleRand_SampleRandNotPropagated()
+    {
+        // Arrange
+        var transactionContext = new TransactionContext("name", "operation");
+        var customContext = new Dictionary<string, object>();
+
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext, customContext, DynamicSamplingContext.Empty);
+
+        // Assert
+        var transactionTracer = ((TransactionTracer)transaction);
+        transactionTracer.SampleRand.Should().NotBeNull();
+        transactionTracer.DynamicSamplingContext.Should().NotBeNull();
+        // See https://develop.sentry.dev/sdk/telemetry/traces/dynamic-sampling-context/#freezing-dynamic-sampling-context
+        transactionTracer.DynamicSamplingContext!.Items.Should().NotContainKey("sample_rand");
+    }
+
+    [Fact]
+    public void StartTransaction_DynamicSamplingContextWithSampleRand_InheritsSampleRand()
     {
         // Arrange
         var transactionContext = new TransactionContext("name", "operation");

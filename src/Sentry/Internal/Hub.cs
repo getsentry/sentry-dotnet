@@ -127,11 +127,12 @@ internal class Hub : IHub, IDisposable
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
     {
-        var transaction = new TransactionTracer(this, context);
-
-        transaction.SampleRand = (dynamicSamplingContext is not null)
-            ? double.Parse(dynamicSamplingContext.Items["sample_rand"], NumberStyles.Float, CultureInfo.InvariantCulture)
-            : transaction.SampleRand = SampleRandHelper.GenerateSampleRand(context.TraceId.ToString());
+        var transaction = new TransactionTracer(this, context)
+        {
+            SampleRand = dynamicSamplingContext?.Items.TryGetValue("sample_rand", out var sampleRand) ?? false
+                ? double.Parse(sampleRand, NumberStyles.Float, CultureInfo.InvariantCulture)
+                : SampleRandHelper.GenerateSampleRand(context.TraceId.ToString())
+        };
 
         // If the hub is disabled, we will always sample out.  In other words, starting a transaction
         // after disposing the hub will result in that transaction not being sent to Sentry.

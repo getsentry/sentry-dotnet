@@ -1,4 +1,3 @@
-#if NETCOREAPP3_1_OR_GREATER
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -680,5 +679,3 @@ public class SentryTracingMiddlewareTests
         transaction.NameSource.Should().Be(TransactionNameSource.Url);
     }
 }
-
-#endif
