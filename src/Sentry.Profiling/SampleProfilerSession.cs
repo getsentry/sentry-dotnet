@@ -17,15 +17,18 @@ internal class SampleProfilerSession : IDisposable
     private readonly IDiagnosticLogger? _logger;
     private readonly SentryStopwatch _stopwatch;
     private bool _stopped = false;
+    private Task _processing;
 
-    private SampleProfilerSession(SentryStopwatch stopwatch, EventPipeSession session, TraceLogEventSource eventSource, IDiagnosticLogger? logger)
+    private SampleProfilerSession(SentryStopwatch stopwatch, EventPipeSession session, TraceLogEventSource eventSource, Task processing, IDiagnosticLogger? logger)
     {
         _session = session;
         _logger = logger;
         _eventSource = eventSource;
         _sampleEventParser = new SampleProfilerTraceEventParser(_eventSource);
         _stopwatch = stopwatch;
+        _processing = processing;
     }
+
 
     // Exposed only for benchmarks.
     internal static EventPipeProvider[] Providers = new[]
@@ -86,7 +89,7 @@ internal class SampleProfilerSession : IDisposable
             var eventSource = TraceLog.CreateFromEventPipeSession(session, TraceLog.EventPipeRundownConfiguration.Enable(client));
 
             // Process() blocks until the session is stopped so we need to run it on a separate thread.
-            Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning)
+            var processing = Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning)
                 .ContinueWith(_ =>
                 {
                     if (_.Exception?.InnerException is { } e)
@@ -95,7 +98,7 @@ internal class SampleProfilerSession : IDisposable
                     }
                 }, TaskContinuationOptions.OnlyOnFaulted);
 
-            return new SampleProfilerSession(stopWatch, session, eventSource, logger);
+            return new SampleProfilerSession(stopWatch, session, eventSource, processing, logger);
         }
         catch (Exception ex)
         {
@@ -128,6 +131,7 @@ internal class SampleProfilerSession : IDisposable
             {
                 _stopped = true;
                 _session.Stop();
+                _processing.Wait();
                 _session.Dispose();
                 _eventSource.Dispose();
             }
