@@ -615,6 +615,24 @@ public class ScopeTests
 
         scope.Tags.Should().OnlyContain(pair => pair.Key == "AzFunctions" && pair.Value == "rule");
     }
+
+    [Fact]
+    public void SetTag_NullValue_DoesNotThrowArgumentNullException()
+    {
+        var scope = new Scope();
+
+        ArgumentNullException exception = null;
+        try
+        {
+            scope.SetTag("IAmNull", null);
+        }
+        catch (ArgumentNullException e)
+        {
+            exception = e;
+        }
+
+        Assert.Null(exception);
+    }
 }
 
 public static class ScopeTestExtensions
