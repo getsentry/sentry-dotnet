@@ -147,6 +147,7 @@
         environment: production,
         public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
         release: release,
+        sample_rand: {Scrubbed},
         sample_rate: 1,
         sampled: true,
         trace_id: Guid_3,
