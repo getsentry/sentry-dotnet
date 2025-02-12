@@ -20,10 +20,10 @@ public partial class SerializationTests
         var span = transactionTracer.StartChild("childop");
         span.SetData("span1", "value1");
 
-         var transaction = new SentryTransaction(transactionTracer)
-         {
-             IsSampled = false
-         };
+        var transaction = new SentryTransaction(transactionTracer)
+        {
+            IsSampled = false
+        };
         transaction.SetData("transaction1", "transaction_value");
         var json = transaction.ToJsonString(_testOutputLogger);
         _testOutputLogger.LogDebug(json);
