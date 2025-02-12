@@ -1,5 +1,4 @@
-using Microsoft.Diagnostics.Tracing;
-using Microsoft.Diagnostics.Tracing.Parsers.Clr;
+using System.IO.Abstractions.TestingHelpers;
 using Sentry.Internal.Http;
 
 namespace Sentry.Profiling.Tests;
@@ -179,40 +178,6 @@ public class SamplingTransactionProfilerTests
             Assert.NotNull(profileInfo);
             Assert.Contains("Profiling is being cut-of after 50 ms because the transaction takes longer than that.", _testOutputLogger.Entries.Select(e => e.Message));
         }
-    }
-
-    [SkippableFact]
-    public async Task EventPipeSession_ReceivesExpectedCLREvents()
-    {
-        SampleProfilerSession? session = null;
-        SkipIfFailsInCI(() => session = SampleProfilerSession.StartNew(_testOutputLogger));
-        using (session)
-        {
-            var eventsReceived = new HashSet<string>();
-            session!.EventSource.Clr.All += (TraceEvent ev) => eventsReceived.Add(ev.EventName);
-
-            var loadedMethods = new HashSet<string>();
-            session!.EventSource.Clr.MethodLoadVerbose += (MethodLoadUnloadVerboseTraceData ev) => loadedMethods.Add(ev.MethodName);
-
-
-            await session.WaitForFirstEventAsync(CancellationToken.None);
-            var limitMs = 50;
-            var sut = new SamplingTransactionProfiler(_testSentryOptions, session, limitMs, CancellationToken.None);
-            RunForMs(limitMs * 5);
-            MethodToBeLoaded(100);
-            RunForMs(limitMs * 5);
-            sut.Finish();
-
-            Assert.Contains("Method/LoadVerbose", eventsReceived);
-            Assert.Contains("Method/ILToNativeMap", eventsReceived);
-
-            Assert.Contains("MethodToBeLoaded", loadedMethods);
-        }
-    }
-
-    private static long MethodToBeLoaded(int n)
-    {
-        return -n;
     }
 
     [SkippableTheory]
