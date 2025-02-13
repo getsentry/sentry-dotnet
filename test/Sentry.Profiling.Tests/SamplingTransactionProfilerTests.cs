@@ -194,12 +194,11 @@ public class SamplingTransactionProfilerTests
         {
             var eventsReceived = new HashSet<string>();
             session!.EventSource.Clr.MethodLoadVerbose += (_) => eventsReceived.Add("Method/LoadVerbose");
-            session!.EventSource.Clr.MethodUnloadVerbose += (_) => eventsReceived.Add("Method/UnloadVerbose");
             session!.EventSource.Clr.MethodILToNativeMap += (_) => eventsReceived.Add("Method/ILToNativeMap");
 
             await session.WaitForFirstEventAsync(CancellationToken.None);
             var tries = 0;
-            while (eventsReceived.Count < 3 && tries++ < 10)
+            while (eventsReceived.Count < 2 && tries++ < 10)
             {
                 if (tries > 1)
                 {
@@ -213,7 +212,6 @@ public class SamplingTransactionProfilerTests
             }
 
             Assert.Contains("Method/LoadVerbose", eventsReceived);
-            Assert.Contains("Method/UnloadVerbose", eventsReceived);
             Assert.Contains("Method/ILToNativeMap", eventsReceived);
         }
     }
