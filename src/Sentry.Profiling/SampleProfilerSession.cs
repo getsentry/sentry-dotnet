@@ -12,32 +12,31 @@ namespace Sentry.Profiling;
 internal class SampleProfilerSession : IDisposable
 {
     private readonly EventPipeSession _session;
+    private readonly TraceLogEventSource _eventSource;
     private readonly SampleProfilerTraceEventParser _sampleEventParser;
     private readonly IDiagnosticLogger? _logger;
     private readonly SentryStopwatch _stopwatch;
     private bool _stopped = false;
-    private Task _processing;
 
-    private SampleProfilerSession(SentryStopwatch stopwatch, EventPipeSession session, TraceLogEventSource eventSource, Task processing, IDiagnosticLogger? logger)
+    private SampleProfilerSession(SentryStopwatch stopwatch, EventPipeSession session, TraceLogEventSource eventSource, IDiagnosticLogger? logger)
     {
         _session = session;
         _logger = logger;
-        EventSource = eventSource;
-        _sampleEventParser = new SampleProfilerTraceEventParser(EventSource);
+        _eventSource = eventSource;
+        _sampleEventParser = new SampleProfilerTraceEventParser(_eventSource);
         _stopwatch = stopwatch;
-        _processing = processing;
     }
 
     // Exposed only for benchmarks.
     internal static EventPipeProvider[] Providers = new[]
     {
-        new EventPipeProvider(ClrTraceEventParser.ProviderName, EventLevel.Verbose, (long) (
-            ClrTraceEventParser.Keywords.Jit
-            | ClrTraceEventParser.Keywords.NGen
-            | ClrTraceEventParser.Keywords.Loader
-            | ClrTraceEventParser.Keywords.Binder
-            | ClrTraceEventParser.Keywords.JittedMethodILToNativeMap
-            )),
+        // Note: all events we need issued by "DotNETRuntime" provider are at "EventLevel.Informational"
+        // see https://learn.microsoft.com/en-us/dotnet/fundamentals/diagnostics/runtime-events
+        // TODO replace Keywords.Default with a subset. Currently it is:
+        //   Default = GC | Type | GCHeapSurvivalAndMovement | Binder | Loader | Jit | NGen | SupressNGen
+        //                | StopEnumeration | Security | AppDomainResourceManagement | Exception | Threading | Contention | Stack | JittedMethodILToNativeMap
+        //                | ThreadTransfer | GCHeapAndTypeNames | Codesymbols | Compilation,
+        new EventPipeProvider(ClrTraceEventParser.ProviderName, EventLevel.Informational, (long) ClrTraceEventParser.Keywords.Default),
         new EventPipeProvider(SampleProfilerTraceEventParser.ProviderName, EventLevel.Informational),
         // new EventPipeProvider(TplEtwProviderTraceEventParser.ProviderName, EventLevel.Informational, (long) TplEtwProviderTraceEventParser.Keywords.Default)
     };
@@ -47,14 +46,11 @@ internal class SampleProfilerSession : IDisposable
     // need a large buffer if we're connecting righ away. Leaving it too large increases app memory usage.
     internal static int CircularBufferMB = 16;
 
-    // Exposed for tests
-    internal TraceLogEventSource EventSource { get; }
-
     public SampleProfilerTraceEventParser SampleEventParser => _sampleEventParser;
 
     public TimeSpan Elapsed => _stopwatch.Elapsed;
 
-    public TraceLog TraceLog => EventSource.TraceLog;
+    public TraceLog TraceLog => _eventSource.TraceLog;
 
     // default is false, set 1 for true.
     private static int _throwOnNextStartupForTests = 0;
@@ -90,7 +86,7 @@ internal class SampleProfilerSession : IDisposable
             var eventSource = TraceLog.CreateFromEventPipeSession(session, TraceLog.EventPipeRundownConfiguration.Enable(client));
 
             // Process() blocks until the session is stopped so we need to run it on a separate thread.
-            var processing = Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning)
+            Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning)
                 .ContinueWith(_ =>
                 {
                     if (_.Exception?.InnerException is { } e)
@@ -99,7 +95,7 @@ internal class SampleProfilerSession : IDisposable
                     }
                 }, TaskContinuationOptions.OnlyOnFaulted);
 
-            return new SampleProfilerSession(stopWatch, session, eventSource, processing, logger);
+            return new SampleProfilerSession(stopWatch, session, eventSource, logger);
         }
         catch (Exception ex)
         {
@@ -112,7 +108,7 @@ internal class SampleProfilerSession : IDisposable
     {
         var tcs = new TaskCompletionSource();
         var cb = (TraceEvent _) => { tcs.TrySetResult(); };
-        EventSource.AllEvents += cb;
+        _eventSource.AllEvents += cb;
         try
         {
             // Wait for the first event to be processed.
@@ -120,7 +116,7 @@ internal class SampleProfilerSession : IDisposable
         }
         finally
         {
-            EventSource.AllEvents -= cb;
+            _eventSource.AllEvents -= cb;
         }
     }
 
@@ -132,9 +128,8 @@ internal class SampleProfilerSession : IDisposable
             {
                 _stopped = true;
                 _session.Stop();
-                _processing.Wait();
                 _session.Dispose();
-                EventSource.Dispose();
+                _eventSource.Dispose();
             }
             catch (Exception ex)
             {
