@@ -61,7 +61,7 @@
           Description: SqlListenerTests.verify_RecordsSqlAsync,
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             bytes_received: 167,
             bytes_sent : 536,
             db.connection_id: Guid_2,
@@ -78,7 +78,7 @@
           Description: insert into MyTable (Value) values (@value);,
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             db.connection_id: Guid_2,
             db.name: SqlListenerTests.verify_RecordsSqlAsync,
             db.operation_id: Guid_4,
@@ -91,7 +91,7 @@
           Description: select Value from MyTable where Value = @value,
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             db.connection_id: Guid_2,
             db.name: SqlListenerTests.verify_RecordsSqlAsync,
             db.operation_id: Guid_5,
