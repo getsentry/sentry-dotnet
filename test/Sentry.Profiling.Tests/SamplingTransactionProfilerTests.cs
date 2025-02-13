@@ -1,4 +1,5 @@
-using System.IO.Abstractions.TestingHelpers;
+using Microsoft.Diagnostics.Tracing;
+using Microsoft.Diagnostics.Tracing.Parsers.Clr;
 using Sentry.Internal.Http;
 
 namespace Sentry.Profiling.Tests;
@@ -178,6 +179,48 @@ public class SamplingTransactionProfilerTests
             Assert.NotNull(profileInfo);
             Assert.Contains("Profiling is being cut-of after 50 ms because the transaction takes longer than that.", _testOutputLogger.Entries.Select(e => e.Message));
         }
+    }
+
+
+    /// <summary>
+    /// Guards regression of https://github.com/microsoft/perfview/issues/2155
+    /// </summary>
+    [SkippableFact]
+    public async Task EventPipeSession_ReceivesExpectedCLREvents()
+    {
+        SampleProfilerSession? session = null;
+        SkipIfFailsInCI(() => session = SampleProfilerSession.StartNew(_testOutputLogger));
+        using (session)
+        {
+            var eventsReceived = new HashSet<string>();
+            session!.EventSource.Clr.MethodLoadVerbose += (_) => eventsReceived.Add("Method/LoadVerbose");
+            session!.EventSource.Clr.MethodUnloadVerbose += (_) => eventsReceived.Add("Method/UnloadVerbose");
+            session!.EventSource.Clr.MethodILToNativeMap += (_) => eventsReceived.Add("Method/ILToNativeMap");
+
+            await session.WaitForFirstEventAsync(CancellationToken.None);
+            var tries = 0;
+            while (eventsReceived.Count < 3 && tries++ < 10)
+            {
+                if (tries > 1)
+                {
+                    await Task.Delay(100);
+                }
+                var limitMs = 50;
+                var sut = new SamplingTransactionProfiler(_testSentryOptions, session, limitMs, CancellationToken.None);
+                MethodToBeLoaded(100);
+                RunForMs(limitMs);
+                sut.Finish();
+            }
+
+            Assert.Contains("Method/LoadVerbose", eventsReceived);
+            Assert.Contains("Method/UnloadVerbose", eventsReceived);
+            Assert.Contains("Method/ILToNativeMap", eventsReceived);
+        }
+    }
+
+    private static long MethodToBeLoaded(int n)
+    {
+        return -n;
     }
 
     [SkippableTheory]
