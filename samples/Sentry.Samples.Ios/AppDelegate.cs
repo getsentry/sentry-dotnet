@@ -29,13 +29,13 @@ public class AppDelegate : UIApplicationDelegate
 
             options.CacheDirectoryPath = Path.GetTempPath();
 
-            options.Native.BeforeSend = e =>
+            options.SetBeforeSend((evt, _) =>
             {
-                e.SetTag("dotnet-iOS-Native-Before", "Hello World");
-                return e;
-            };
+                evt.SetTag("dotnet-iOS-Native-Before", "Hello World");
+                return evt;
+            });
 
-            options.Native.CrashedLastRun = e =>
+            options.OnCrashedLastRun = e =>
             {
                 Console.WriteLine(e);
             };

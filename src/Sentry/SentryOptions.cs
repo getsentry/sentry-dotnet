@@ -1075,6 +1075,14 @@ public class SentryOptions
     /// </summary>
     public Func<bool>? CrashedLastRun { get; set; }
 
+    #if IOS || MACCATALYST
+    // this event currently isn't being pushed from Android
+    /// <summary>
+    /// Delegate which is run with event information if the application crashed during last run.
+    /// </summary>
+    public Action<SentryEvent>? OnCrashedLastRun { get; set; }
+    #endif
+
     /// <summary>
     /// <para>
     ///     Gets the <see cref="Instrumenter"/> used to create spans.

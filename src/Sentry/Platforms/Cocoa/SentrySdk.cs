@@ -89,7 +89,7 @@ public static partial class SentrySdk
 
         // TODO: Finish SentryEventExtensions to enable these
 
-        if (options.Native.BeforeSend is { } beforeSend)
+        if (options.BeforeSendInternal is { } beforeSend)
         {
             nativeOptions.BeforeSend = evt =>
             {
@@ -130,7 +130,7 @@ public static partial class SentrySdk
                 try
                 {
                     var sentryEvent = evt.ToSentryEvent(nativeOptions);
-                    var result = beforeSend(sentryEvent)?.ToCocoaSentryEvent(options, nativeOptions);
+                    var result = beforeSend(sentryEvent, null!)?.ToCocoaSentryEvent(options, nativeOptions);
 
                     // Note: Nullable result is allowed but delegate is generated incorrectly
                     // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
@@ -144,7 +144,7 @@ public static partial class SentrySdk
             };
         }
 
-        if (options.Native.CrashedLastRun is { } onCrashedLastRun)
+        if (options.OnCrashedLastRun is { } onCrashedLastRun)
         {
             nativeOptions.OnCrashedLastRun = evt =>
             {

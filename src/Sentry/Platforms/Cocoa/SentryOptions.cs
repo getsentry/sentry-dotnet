@@ -236,16 +236,6 @@ public partial class SentryOptions
             InAppIncludes ??= new List<string>();
             InAppIncludes.Add(prefix);
         }
-
-        /// <summary>
-        /// Sets native BeforeSend callback
-        /// </summary>
-        public Func<SentryEvent, SentryEvent>? BeforeSend { get; set; }
-
-        /// <summary>
-        /// Sets native OnCrashedLastRun callback
-        /// </summary>
-        public Action<SentryEvent>? CrashedLastRun { get; set; }
     }
 
     // We actually add the profiling integration automatically in InitSentryCocoaSdk().
