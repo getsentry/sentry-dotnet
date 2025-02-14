@@ -33,22 +33,22 @@ internal class DynamicSamplingContext
         // Validate and set required values
         if (traceId == SentryId.Empty)
         {
-            throw new ArgumentOutOfRangeException(nameof(traceId));
+            throw new ArgumentOutOfRangeException(nameof(traceId), "cannot be empty");
         }
 
         if (string.IsNullOrWhiteSpace(publicKey))
         {
-            throw new ArgumentException(default, nameof(publicKey));
+            throw new ArgumentException("cannot be empty", nameof(publicKey));
         }
 
         if (sampleRate is < 0.0 or > 1.0)
         {
-            throw new ArgumentOutOfRangeException(nameof(sampleRate));
+            throw new ArgumentOutOfRangeException(nameof(sampleRate), "Arg invalid if < 0.0 or > 1.0");
         }
 
         if (sampleRand is < 0.0 or >= 1.0)
         {
-            throw new ArgumentOutOfRangeException(nameof(sampleRand));
+            throw new ArgumentOutOfRangeException(nameof(sampleRand), "Arg invalid if < 0.0 or >= 1.0");
         }
 
         var items = new Dictionary<string, string>(capacity: 8)
