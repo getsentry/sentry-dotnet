@@ -87,61 +87,57 @@ public static partial class SentrySdk
             }
         }
 
-        // TODO: Finish SentryEventExtensions to enable these
-
-        if (options.BeforeSendInternal is { } beforeSend)
+        nativeOptions.BeforeSend = evt =>
         {
-            nativeOptions.BeforeSend = evt =>
+            // When we have an unhandled managed exception, we send that to Sentry twice - once managed and once native.
+            // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
+            // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
+
+            // There should only be one exception on the event in this case
+            if (evt.Exceptions?.Length == 1)
             {
-                // When we have an unhandled managed exception, we send that to Sentry twice - once managed and once native.
-                // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
-                // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
+                // It will match the following characteristics
+                var ex = evt.Exceptions[0];
 
-                // There should only be one exception on the event in this case
-                if (evt.Exceptions?.Length == 1)
+                // Thankfully, sometimes we can see Xamarin's unhandled exception handler on the stack trace, so we can filter
+                // them out. Here is the function that calls abort(), which we will use as a filter:
+                // https://github.com/xamarin/xamarin-macios/blob/c55fbdfef95028ba03d0f7a35aebca03bd76f852/runtime/runtime.m#L1114-L1122
+                if (ex.Type == "SIGABRT" && ex.Value == "Signal 6, Code 0" &&
+                    ex.Stacktrace?.Frames.Any(f => f.Function == "xamarin_unhandled_exception_handler") is true)
                 {
-                    // It will match the following characteristics
-                    var ex = evt.Exceptions[0];
-
-                    // Thankfully, sometimes we can see Xamarin's unhandled exception handler on the stack trace, so we can filter
-                    // them out. Here is the function that calls abort(), which we will use as a filter:
-                    // https://github.com/xamarin/xamarin-macios/blob/c55fbdfef95028ba03d0f7a35aebca03bd76f852/runtime/runtime.m#L1114-L1122
-                    if (ex.Type == "SIGABRT" && ex.Value == "Signal 6, Code 0" &&
-                        ex.Stacktrace?.Frames.Any(f => f.Function == "xamarin_unhandled_exception_handler") is true)
-                    {
-                        // Don't send it
-                        options.LogDebug("Discarded {0} error ({1}). Captured as  managed exception instead.", ex.Type, ex.Value);
-                        return null!;
-                    }
-
-                    // Similar workaround for NullReferenceExceptions. We don't have any easy way to know whether the
-                    // exception is managed code (compiled to native) or original native code though.
-                    // See: https://github.com/getsentry/sentry-dotnet/issues/3776
-                    if (ex.Type == "EXC_BAD_ACCESS")
-                    {
-                        // Don't send it
-                        options.LogDebug("Discarded {0} error ({1}). Captured as  managed exception instead.", ex.Type, ex.Value);
-                        return null!;
-                    }
+                    // Don't send it
+                    options.LogDebug("Discarded {0} error ({1}). Captured as  managed exception instead.", ex.Type, ex.Value);
+                    return null!;
                 }
 
-                // we run our SIGABRT checks first before handing over to user events
-                // because we delegate to user code, we need to protect anything that could happen in this event
-                try
+                // Similar workaround for NullReferenceExceptions. We don't have any easy way to know whether the
+                // exception is managed code (compiled to native) or original native code though.
+                // See: https://github.com/getsentry/sentry-dotnet/issues/3776
+                if (ex.Type == "EXC_BAD_ACCESS")
                 {
-                    var sentryEvent = evt.ToSentryEvent(nativeOptions);
-                    var result = beforeSend(sentryEvent, null!)?.ToCocoaSentryEvent(options, nativeOptions);
+                    // Don't send it
+                    options.LogDebug("Discarded {0} error ({1}). Captured as  managed exception instead.", ex.Type, ex.Value);
+                    return null!;
+                }
+            }
 
-                    // Note: Nullable result is allowed but delegate is generated incorrectly
-                    // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
-                    return result!;
-                }
-                catch (Exception ex)
-                {
-                    options.LogError(ex, "Before Send Error");
-                    return evt;
-                }
-            };
+            // we run our SIGABRT checks first before handing over to user events
+            // because we delegate to user code, we need to protect anything that could happen in this event
+            try
+            {
+                var sentryEvent = evt.ToSentryEvent(nativeOptions);
+                var result = options.BeforeSendInternal?.Invoke(sentryEvent, null!)?.ToCocoaSentryEvent(options, nativeOptions);
+
+                // Note: Nullable result is allowed but delegate is generated incorrectly
+                // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
+                return result!;
+            }
+            catch (Exception ex)
+            {
+                options.LogError(ex, "Before Send Error");
+                return evt;
+            }
+        };
         }
 
         if (options.OnCrashedLastRun is { } onCrashedLastRun)
