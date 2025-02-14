@@ -1,9 +1,11 @@
 using System.Diagnostics.Tracing;
 using Microsoft.Diagnostics.NETCore.Client;
+using Microsoft.Diagnostics.Symbols;
 using Microsoft.Diagnostics.Tracing;
 using Microsoft.Diagnostics.Tracing.Etlx;
 using Microsoft.Diagnostics.Tracing.EventPipe;
 using Microsoft.Diagnostics.Tracing.Parsers;
+using Microsoft.Diagnostics.Tracing.Stacks;
 using Sentry.Extensibility;
 using Sentry.Internal;
 
@@ -13,7 +15,11 @@ internal class SampleProfilerSession : IDisposable
 {
     private readonly EventPipeSession _session;
     private readonly TraceLogEventSource _eventSource;
+    private readonly MutableTraceEventStackSource _stackSource;
     private readonly SampleProfilerTraceEventParser _sampleEventParser;
+    private readonly SymbolReader _symbolReader;
+    private readonly ActivityComputer _activityComputer;
+    // private readonly StartStopActivityComputer _startStopActivityComputer;
     private readonly IDiagnosticLogger? _logger;
     private readonly SentryStopwatch _stopwatch;
     private bool _stopped = false;
@@ -24,7 +30,14 @@ internal class SampleProfilerSession : IDisposable
         _logger = logger;
         _eventSource = eventSource;
         _sampleEventParser = new SampleProfilerTraceEventParser(_eventSource);
+        _symbolReader = new SymbolReader(TextWriter.Null);
+        _activityComputer = new ActivityComputer(eventSource, _symbolReader);
+        // _startStopActivityComputer = new StartStopActivityComputer(eventSource, _activityComputer);
         _stopwatch = stopwatch;
+        _stackSource = new MutableTraceEventStackSource(eventSource.TraceLog)
+        {
+            OnlyManagedCodeStacks = true // EventPipe only has managed stacks.
+        };
     }
 
     // Exposed only for benchmarks.
@@ -38,7 +51,7 @@ internal class SampleProfilerSession : IDisposable
         //                | ThreadTransfer | GCHeapAndTypeNames | Codesymbols | Compilation,
         new EventPipeProvider(ClrTraceEventParser.ProviderName, EventLevel.Informational, (long) ClrTraceEventParser.Keywords.Default),
         new EventPipeProvider(SampleProfilerTraceEventParser.ProviderName, EventLevel.Informational),
-        // new EventPipeProvider(TplEtwProviderTraceEventParser.ProviderName, EventLevel.Informational, (long) TplEtwProviderTraceEventParser.Keywords.Default)
+        new EventPipeProvider(TplEtwProviderTraceEventParser.ProviderName, EventLevel.Informational, (long) TplEtwProviderTraceEventParser.Keywords.Default)
     };
 
     // Exposed only for benchmarks.
@@ -129,6 +142,7 @@ internal class SampleProfilerSession : IDisposable
                 _stopped = true;
                 _session.Stop();
                 _session.Dispose();
+                _symbolReader.Dispose();
                 _eventSource.Dispose();
             }
             catch (Exception ex)
@@ -139,4 +153,7 @@ internal class SampleProfilerSession : IDisposable
     }
 
     public void Dispose() => Stop();
+
+    public SampleProfileBuilder CreateProfileBuilder(SentryOptions options)
+        => new(options, _eventSource.TraceLog, _stackSource, _activityComputer);
 }

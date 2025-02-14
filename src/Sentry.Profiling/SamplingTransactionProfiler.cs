@@ -24,7 +24,7 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         _cancellationToken = cancellationToken;
         _startTimeMs = session.Elapsed.TotalMilliseconds;
         _endTimeMs = double.MaxValue;
-        _processor = new SampleProfileBuilder(options, session.TraceLog);
+        _processor = session.CreateProfileBuilder(options);
         session.SampleEventParser.ThreadSample += OnThreadSample;
         cancellationToken.Register(() =>
         {
@@ -61,7 +61,6 @@ internal class SamplingTransactionProfiler : ITransactionProfiler
         return false;
     }
 
-    // We need custom sampling because the TraceLog dispatches events from a queue with a delay of about 2 seconds.
     private void OnThreadSample(TraceEvent data)
     {
         var timestampMs = data.TimeStampRelativeMSec;
