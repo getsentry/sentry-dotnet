@@ -66,15 +66,26 @@ public class SentrySpan : ISpanData, ISentryJsonSerializable
         (_tags ??= new Dictionary<string, string>()).Remove(key);
 
     // Aka 'data'
-    private Dictionary<string, object?>? _extra;
     private readonly MetricsSummary? _metricsSummary;
 
-    /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _extra ??= new Dictionary<string, object?>();
+
+    private Dictionary<string, object?>? _data;
 
     /// <inheritdoc />
-    public void SetExtra(string key, object? value) =>
-        (_extra ??= new Dictionary<string, object?>())[key] = value;
+    public IReadOnlyDictionary<string, object?> Data =>
+        _data ??= new Dictionary<string, object?>();
+
+    /// <inheritdoc />
+    public void SetData(string key, object? value) =>
+        (_data ??= new Dictionary<string, object?>())[key] = value;
+
+    /// <inheritdoc />
+    [Obsolete("Use SetData")]
+    public IReadOnlyDictionary<string, object?> Extra => Data;
+
+    /// <inheritdoc />
+    [Obsolete("Use Data")]
+    public void SetExtra(string key, object? value) => SetData(key, value);
 
     /// <summary>
     /// Initializes an instance of <see cref="SentrySpan"/>.
@@ -100,7 +111,7 @@ public class SentrySpan : ISpanData, ISentryJsonSerializable
         Description = tracer.Description;
         Status = tracer.Status;
         IsSampled = tracer.IsSampled;
-        _extra = tracer.Extra.ToDict();
+        _data = tracer.Data.ToDict();
 
         if (tracer is SpanTracer spanTracer)
         {
@@ -138,7 +149,7 @@ public class SentrySpan : ISpanData, ISentryJsonSerializable
         writer.WriteString("start_timestamp", StartTimestamp);
         writer.WriteStringIfNotNull("timestamp", EndTimestamp);
         writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
-        writer.WriteDictionaryIfNotEmpty("data", _extra!, logger);
+        writer.WriteDictionaryIfNotEmpty("data", _data!, logger);
         writer.WriteDictionaryIfNotEmpty("measurements", _measurements, logger);
         writer.WriteSerializableIfNotNull("_metrics_summary", _metricsSummary, logger);
 
@@ -173,7 +184,7 @@ public class SentrySpan : ISpanData, ISentryJsonSerializable
             Status = status,
             IsSampled = isSampled,
             _tags = tags!,
-            _extra = data!,
+            _data = data!,
             _measurements = measurements,
         };
     }

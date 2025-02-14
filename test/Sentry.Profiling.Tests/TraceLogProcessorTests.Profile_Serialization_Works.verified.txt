@@ -84,12 +84,11 @@
       36
     ],
     [
-      17
+      37
     ],
     [
       0,
       1,
-      37,
       38,
       39,
       40,
@@ -97,37 +96,35 @@
       42,
       43,
       44,
-      21,
+      45,
+      46,
       22
     ],
     [
-      45,
-      46,
       47,
       48,
       49,
       50,
-      17
-    ],
-    [
       51,
       52,
+      37
+    ],
+    [
       53,
       54,
       55,
-      17
-    ],
-    [
       56,
       57,
-      58,
-      59,
-      17
+      37
     ],
     [
+      58,
+      59,
       60,
       61,
-      62,
+      62
+    ],
+    [
       63,
       64,
       65,
@@ -135,55 +132,48 @@
       67,
       68,
       69,
-      56,
-      57,
-      58,
-      59,
-      17
-    ],
-    [
       70,
       71,
       72,
+      58,
+      59,
+      60,
+      61,
+      62
+    ],
+    [
       73,
       74,
-      69,
-      56,
-      57,
-      58,
-      59,
-      17
-    ],
-    [
       75,
-      74,
-      69,
-      56,
-      57,
-      58,
-      59,
-      17
-    ],
-    [
-      56,
-      57,
-      58,
-      59,
-      17
-    ],
-    [
       76,
       77,
       78,
-      79,
-      80,
-      81,
-      82,
-      83,
+      58,
       59,
-      17
+      60,
+      61,
+      62
     ],
     [
+      79,
+      80,
+      78,
+      58,
+      59,
+      60,
+      61,
+      62
+    ],
+    [
+      81,
+      59,
+      60,
+      61,
+      62
+    ],
+    [
+      82,
+      83,
       84,
       85,
       86,
@@ -191,22 +181,31 @@
       88,
       89,
       90,
+      62
+    ],
+    [
       91,
       92,
-      77,
-      78,
-      79,
-      80,
-      81,
-      82,
-      83,
-      59,
-      17
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      62
     ],
     [
       0,
       1,
-      37,
       38,
       39,
       40,
@@ -214,14 +213,15 @@
       42,
       43,
       44,
-      21,
+      45,
+      46,
       22
     ],
     [
       18,
       19,
       20,
-      21,
+      101,
       22
     ]
   ],
@@ -317,6 +317,7 @@
       in_app: true
     },
     {
+      in_app: false,
       instruction_addr: 0x7ff947fd8378
     },
     {
@@ -410,6 +411,11 @@
       in_app: false
     },
     {
+      function: Aura.UI.Gallery.NetCore.Program.Main(class System.String[]),
+      module: Aura.UI.Gallery.NetCore,
+      in_app: true
+    },
+    {
       function: System.IO.Stream+<>c.<BeginReadInternal>b__40_0(class System.Object),
       module: System.Private.CoreLib.il,
       in_app: false
@@ -450,6 +456,11 @@
       in_app: false
     },
     {
+      function: System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart(),
+      module: System.Private.CoreLib.il,
+      in_app: false
+    },
+    {
       function: System.Collections.Concurrent.ConcurrentDictionary`2[System.__Canon,System.IntPtr].TryAddInternal(!0,value class System.Nullable`1<int32>,!1,bool,bool,!1&),
       module: System.Collections.Concurrent.il,
       in_app: false
@@ -475,6 +486,7 @@
       in_app: true
     },
     {
+      in_app: false,
       instruction_addr: 0x7ff94be7aed3
     },
     {
@@ -520,6 +532,11 @@
     {
       function: Avalonia.ClassicDesktopStyleApplicationLifetimeExtensions.StartWithClassicDesktopLifetime(!!0,class System.String[],value class Avalonia.Controls.ShutdownMode),
       module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: Aura.UI.Gallery.NetCore.Program.Main(class System.String[]),
+      module: Aura.UI.Gallery.NetCore,
       in_app: true
     },
     {
@@ -598,9 +615,24 @@
       in_app: true
     },
     {
+      function: Avalonia.Controls.Primitives.TemplatedControl..cctor(),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
       function: System.Reactive.Linq.Observable.Merge(class System.IObservable`1<!!0>[]),
       module: system.reactive,
       in_app: false
+    },
+    {
+      function: Avalonia.Controls.TextBlock..cctor(),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
+      function: Avalonia.Controls.Window..cctor(),
+      module: Avalonia.Controls,
+      in_app: true
     },
     {
       function: Avalonia.Win32.Win32Platform.SetDpiAwareness(),
@@ -643,6 +675,11 @@
       in_app: true
     },
     {
+      function: Avalonia.ClassicDesktopStyleApplicationLifetimeExtensions.StartWithClassicDesktopLifetime(!!0,class System.String[],value class Avalonia.Controls.ShutdownMode),
+      module: Avalonia.Controls,
+      in_app: true
+    },
+    {
       function: System.Drawing.SafeNativeMethods+Gdip..cctor(),
       module: system.drawing.common,
       in_app: false
@@ -678,12 +715,23 @@
       in_app: true
     },
     {
+      in_app: false,
       instruction_addr: 0x7ffa0d468281
     },
     {
       function: Avalonia.Win32.Win32Platform.CreateMessageWindow(),
       module: avalonia.win32,
       in_app: true
+    },
+    {
+      function: Avalonia.Win32.Win32Platform..ctor(),
+      module: avalonia.win32,
+      in_app: true
+    },
+    {
+      function: System.Threading.PortableThreadPool+WorkerThread.WorkerThreadStart(),
+      module: System.Private.CoreLib.il,
+      in_app: false
     }
   ],
   samples: [
