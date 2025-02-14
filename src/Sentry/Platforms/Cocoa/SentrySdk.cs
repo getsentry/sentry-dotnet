@@ -138,7 +138,6 @@ public static partial class SentrySdk
                 return evt;
             }
         };
-        }
 
         if (options.OnCrashedLastRun is { } onCrashedLastRun)
         {
