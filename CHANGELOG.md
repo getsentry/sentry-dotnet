@@ -10,6 +10,7 @@
 - Unknown stack frames in profiles on .NET 8+ ([#3942](https://github.com/getsentry/sentry-dotnet/pull/3942))
 - Deduplicate profiling stack frames ([#3941](https://github.com/getsentry/sentry-dotnet/pull/3941))
 - Ignore null value on CocoaScopeObserver.SetTag ([#3948](https://github.com/getsentry/sentry-dotnet/pull/3948))
+- Add Azure Function UseSentry overloads for easier wire ups  ([#3971](https://github.com/getsentry/sentry-dotnet/pull/3971))
 
 ## 5.1.0
 
