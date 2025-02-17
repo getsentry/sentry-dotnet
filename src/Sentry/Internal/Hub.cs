@@ -127,8 +127,6 @@ internal class Hub : IHub, IDisposable
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
     {
-        var transaction = new TransactionTracer(this, context);
-
         // If the hub is disabled, we will always sample out.  In other words, starting a transaction
         // after disposing the hub will result in that transaction not being sent to Sentry.
         // Additionally, we will always sample out if tracing is explicitly disabled.
@@ -136,41 +134,46 @@ internal class Hub : IHub, IDisposable
         // that may have been already set (i.e.: from a sentry-trace header).
         if (!IsEnabled)
         {
-            transaction.IsSampled = false;
-            transaction.SampleRate = 0.0;
+            return NoOpTransaction.Instance;
         }
-        else
+
+        double? sampleRate = null;
+
+        // Except when tracing is disabled, TracesSampler runs regardless of whether a decision
+        // has already been made, as it can be used to override it.
+        if (_options.TracesSampler is { } tracesSampler)
         {
-            // Except when tracing is disabled, TracesSampler runs regardless of whether a decision
-            // has already been made, as it can be used to override it.
-            if (_options.TracesSampler is { } tracesSampler)
-            {
-                var samplingContext = new TransactionSamplingContext(
-                    context,
-                    customSamplingContext);
+            var samplingContext = new TransactionSamplingContext(
+                context,
+                customSamplingContext);
 
-                if (tracesSampler(samplingContext) is { } sampleRate)
-                {
-                    transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
-                    transaction.SampleRate = sampleRate;
-                }
-            }
-
-            // Random sampling runs only if the sampling decision hasn't been made already.
-            if (transaction.IsSampled == null)
+            if (tracesSampler(samplingContext) is { } samplerSampleRate)
             {
-                var sampleRate = _options.TracesSampleRate ?? 0.0;
-                transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
-                transaction.SampleRate = sampleRate;
+                sampleRate = samplerSampleRate;
             }
+        }
 
-            if (transaction.IsSampled is true &&
-                _options.TransactionProfilerFactory is { } profilerFactory &&
-                _randomValuesFactory.NextBool(_options.ProfilesSampleRate ?? 0.0))
-            {
-                // TODO cancellation token based on Hub being closed?
-                transaction.TransactionProfiler = profilerFactory.Start(transaction, CancellationToken.None);
-            }
+        // If the sampling decision isn't made by a trace sampler then fallback to Random sampling
+        sampleRate ??= _options.TracesSampleRate ?? 0.0;
+
+        var isSampled = _randomValuesFactory.NextBool(sampleRate.Value);
+        if (!isSampled)
+        {
+            // var unsampledTransaction = new UnsampledTransaction(this, context);
+            // return unsampledTransaction;
+            return new UnsampledTransaction(this, context);
+        }
+
+        var transaction = new TransactionTracer(this, context)
+        {
+            IsSampled = true,
+            SampleRate = sampleRate
+        };
+        if (_options.TransactionProfilerFactory is { } profilerFactory &&
+            _randomValuesFactory.NextBool(_options.ProfilesSampleRate ?? 0.0))
+        {
+            // TODO cancellation token based on Hub being closed?
+            transaction.TransactionProfiler = profilerFactory.Start(transaction, CancellationToken.None);
         }
 
         // Use the provided DSC, or create one based on this transaction.
@@ -213,6 +216,8 @@ internal class Hub : IHub, IDisposable
     public BaggageHeader GetBaggage()
     {
         var span = GetSpan();
+        // TODO: Things like the SampleRand won't get propagated unless we get them from a DSC
+        // ... so we'd need to get these from an UnsampledTransaction as well as a TransactionTracer
         if (span?.GetTransaction() is TransactionTracer { DynamicSamplingContext: { IsEmpty: false } dsc })
         {
             return dsc.ToBaggageHeader();
