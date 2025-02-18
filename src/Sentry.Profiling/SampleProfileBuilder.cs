@@ -16,8 +16,12 @@ internal class SampleProfileBuilder
     // Output profile being built.
     public readonly SampleProfile Profile = new();
 
-    // A sparse array that maps from StackSourceFrameIndex to an index in the output Profile.frames.
-    private readonly Dictionary<int, int> _frameIndexes = new();
+    // A sparse array that maps from CodeAddressIndex to an index in the output Profile.frames.
+    private readonly Dictionary<int, int> _frameIndexesByCodeAddressIndex = new();
+
+    // A sparse array that maps from MethodIndex to an index in the output Profile.frames.
+    // This deduplicates frames that map to the same method but have a different CodeAddressIndex.
+    private readonly Dictionary<int, int> _frameIndexesByMethodIndex = new();
 
     // A dictionary from a CallStackIndex to an index in the output Profile.stacks.
     private readonly Dictionary<int, int> _stackIndexes = new();
@@ -85,13 +89,14 @@ internal class SampleProfileBuilder
     {
         var key = (int)callstackIndex;
 
-        if (!_stackIndexes.ContainsKey(key))
+        if (!_stackIndexes.TryGetValue(key, out var value))
         {
             Profile.Stacks.Add(CreateStackTrace(callstackIndex));
-            _stackIndexes[key] = Profile.Stacks.Count - 1;
+            value = Profile.Stacks.Count - 1;
+            _stackIndexes[key] = value;
         }
 
-        return _stackIndexes[key];
+        return value;
     }
 
     private Internal.GrowableArray<int> CreateStackTrace(CallStackIndex callstackIndex)
@@ -116,21 +121,71 @@ internal class SampleProfileBuilder
         return stackTrace;
     }
 
+    private int PushNewFrame(SentryStackFrame frame)
+    {
+        Profile.Frames.Add(frame);
+        return Profile.Frames.Count - 1;
+    }
+
     /// <summary>
     /// Check if the frame is already stored in the output Profile, or adds it.
     /// </summary>
     /// <returns>The index to the output Profile frames array.</returns>
     private int AddStackFrame(CodeAddressIndex codeAddressIndex)
     {
-        var key = (int)codeAddressIndex;
-
-        if (!_frameIndexes.ContainsKey(key))
+        if (_frameIndexesByCodeAddressIndex.TryGetValue((int)codeAddressIndex, out var value))
         {
-            Profile.Frames.Add(CreateStackFrame(codeAddressIndex));
-            _frameIndexes[key] = Profile.Frames.Count - 1;
+            return value;
         }
 
-        return _frameIndexes[key];
+        var methodIndex = _traceLog.CodeAddresses.MethodIndex(codeAddressIndex);
+        if (methodIndex != MethodIndex.Invalid)
+        {
+            value = AddStackFrame(methodIndex);
+            _frameIndexesByCodeAddressIndex[(int)codeAddressIndex] = value;
+            return value;
+        }
+
+        // Fall back if the method info is unknown, see more info on Symbol resolution in
+        // https://github.com/getsentry/perfview/blob/031250ffb4f9fcadb9263525d6c9f274be19ca51/src/PerfView/SupportFiles/UsersGuide.htm#L7745-L7784
+        if (_traceLog.CodeAddresses[codeAddressIndex] is { } codeAddressInfo)
+        {
+            var frame = new SentryStackFrame
+            {
+                InstructionAddress = (long?)codeAddressInfo.Address,
+                Module = codeAddressInfo.ModuleFile?.Name,
+            };
+            frame.ConfigureAppFrame(_options);
+
+            return _frameIndexesByCodeAddressIndex[(int)codeAddressIndex] = PushNewFrame(frame);
+        }
+
+        // If all else fails, it's a completely unknown frame.
+        // TODO check this - maybe we would be able to resolve it later in the future?
+        return PushNewFrame(new SentryStackFrame { InApp = false });
+    }
+
+    /// <summary>
+    /// Check if the frame is already stored in the output Profile, or adds it.
+    /// </summary>
+    /// <returns>The index to the output Profile frames array.</returns>
+    private int AddStackFrame(MethodIndex methodIndex)
+    {
+        if (_frameIndexesByMethodIndex.TryGetValue((int)methodIndex, out var value))
+        {
+            return value;
+        }
+
+        var method = _traceLog.CodeAddresses.Methods[methodIndex];
+
+        var frame = new SentryStackFrame
+        {
+            Function = method.FullMethodName,
+            Module = method.MethodModuleFile?.Name
+        };
+        frame.ConfigureAppFrame(_options);
+
+        return _frameIndexesByMethodIndex[(int)methodIndex] = PushNewFrame(frame);
     }
 
     /// <summary>
@@ -141,52 +196,17 @@ internal class SampleProfileBuilder
     {
         var key = (int)thread.ThreadIndex;
 
-        if (!_threadIndexes.ContainsKey(key))
+        if (!_threadIndexes.TryGetValue(key, out var value))
         {
             Profile.Threads.Add(new()
             {
                 Name = thread.ThreadInfo ?? $"Thread {thread.ThreadID}",
             });
-            _threadIndexes[key] = Profile.Threads.Count - 1;
+            value = Profile.Threads.Count - 1;
+            _threadIndexes[key] = value;
             _downsampler.NewThreadAdded(_threadIndexes[key]);
         }
 
-        return _threadIndexes[key];
-    }
-
-    private SentryStackFrame CreateStackFrame(CodeAddressIndex codeAddressIndex)
-    {
-        var frame = new SentryStackFrame();
-
-        var methodIndex = _traceLog.CodeAddresses.MethodIndex(codeAddressIndex);
-        if (_traceLog.CodeAddresses.Methods[methodIndex] is { } method)
-        {
-            frame.Function = method.FullMethodName;
-
-            if (method.MethodModuleFile is { } moduleFile)
-            {
-                frame.Module = moduleFile.Name;
-            }
-
-            frame.ConfigureAppFrame(_options);
-        }
-        else
-        {
-            // Fall back if the method info is unknown, see more info on Symbol resolution in
-            // https://github.com/getsentry/perfview/blob/031250ffb4f9fcadb9263525d6c9f274be19ca51/src/PerfView/SupportFiles/UsersGuide.htm#L7745-L7784
-            frame.InstructionAddress = (long?)_traceLog.CodeAddresses.Address(codeAddressIndex);
-
-            if (_traceLog.CodeAddresses.ModuleFile(codeAddressIndex) is { } moduleFile)
-            {
-                frame.Module = moduleFile.Name;
-                frame.ConfigureAppFrame(_options);
-            }
-            else
-            {
-                frame.InApp = false;
-            }
-        }
-
-        return frame;
+        return value;
     }
 }
