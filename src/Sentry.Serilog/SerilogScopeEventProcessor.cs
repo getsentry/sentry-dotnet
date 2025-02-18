@@ -35,7 +35,12 @@ internal class SerilogScopeEventProcessor : ISentryEventProcessor
             if (!@event.Tags.ContainsKey(key))
             {
                 // Potentially we could be doing SetData here instead of SetTag. See DefaultSentryScopeStateProcessor.
-                @event.SetTag(key, value.ToString("l", null));
+                @event.SetTag(
+                    key,
+                    value is ScalarValue { Value: string stringValue }
+                        ? stringValue
+                        : value.ToString()
+                    );
             }
         }
         return @event;

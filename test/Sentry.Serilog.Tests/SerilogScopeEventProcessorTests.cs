@@ -4,8 +4,10 @@ namespace Sentry.Serilog.Tests;
 
 public class SerilogScopeEventProcessorTests
 {
-    [Fact]
-    public void Emit_WithException_CreatesEventWithException()
+    [Theory]
+    [InlineData("42", "42")]
+    [InlineData(42, "42")]
+    public void Emit_WithException_CreatesEventWithException(object value, string expected)
     {
         // Arrange
         var options = new SentryOptions();
@@ -17,7 +19,7 @@ public class SerilogScopeEventProcessorTests
 
         // Act
         SentryEvent evt;
-        using (logger.BeginScope(new Dictionary<string, object> { ["Answer"] = "42" }))
+        using (logger.BeginScope(new Dictionary<string, object> { ["Answer"] = value }))
         {
             evt = new SentryEvent();
             sut.Process(evt);
@@ -25,6 +27,6 @@ public class SerilogScopeEventProcessorTests
 
         // Assert
         evt.Tags.Should().ContainKey("Answer");
-        evt.Tags["Answer"].Should().Be("42");
+        evt.Tags["Answer"].Should().Be(expected);
     }
 }
