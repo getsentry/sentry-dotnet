@@ -5,7 +5,9 @@
 ### Features
 
 - Sync Serilog scope properties with Sentry events ([#3976](https://github.com/getsentry/sentry-dotnet/pull/3976))
+
 ### Fixes
+
 - Add Azure Function UseSentry overloads for easier wire ups  ([#3971](https://github.com/getsentry/sentry-dotnet/pull/3971))
 
 ## 5.1.1
