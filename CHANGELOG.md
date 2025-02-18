@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+- Add Azure Function UseSentry overloads for easier wire ups  ([#3971](https://github.com/getsentry/sentry-dotnet/pull/3971))
+
 ## 5.1.1
 
 ### Fixes
