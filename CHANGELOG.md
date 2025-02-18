@@ -5,6 +5,8 @@
 ### Features
 
 - Sync Serilog scope properties with Sentry events ([#3976](https://github.com/getsentry/sentry-dotnet/pull/3976))
+### Fixes
+- Add Azure Function UseSentry overloads for easier wire ups  ([#3971](https://github.com/getsentry/sentry-dotnet/pull/3971))
 
 ## 5.1.1
 
@@ -16,6 +18,7 @@
 - Fixed envelopes with oversized attachments getting stuck in __processing ([#3938](https://github.com/getsentry/sentry-dotnet/pull/3938))
 - OperatingSystem will now return macOS as OS name instead of 'Darwin' as well as the proper version. ([#2710](https://github.com/getsentry/sentry-dotnet/pull/3956))
 - Ignore null value on CocoaScopeObserver.SetTag ([#3948](https://github.com/getsentry/sentry-dotnet/pull/3948))
+- Deduplicate profiling stack frames ([#3969](https://github.com/getsentry/sentry-dotnet/pull/3969))
 
 ## 5.1.0
 
