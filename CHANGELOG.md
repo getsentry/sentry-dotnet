@@ -1,15 +1,19 @@
 # Changelog
 
-## Unreleased
+## 5.1.1
 
 ### Fixes
 
+- Emit transaction.data inside contexts.trace.data ([#3936](https://github.com/getsentry/sentry-dotnet/pull/3936))
 - Native SIGSEGV errors resulting from managed NullReferenceExceptions are now suppressed on Android ([#3903](https://github.com/getsentry/sentry-dotnet/pull/3903))
 - OTel activities that are marked as not recorded are no longer sent to Sentry ([#3890](https://github.com/getsentry/sentry-dotnet/pull/3890))
 - Fixed envelopes with oversized attachments getting stuck in __processing ([#3938](https://github.com/getsentry/sentry-dotnet/pull/3938))
 - Unknown stack frames in profiles on .NET 8+ ([#3942](https://github.com/getsentry/sentry-dotnet/pull/3942))
 - Deduplicate profiling stack frames ([#3941](https://github.com/getsentry/sentry-dotnet/pull/3941))
 - Map iOS native events - OnCrashedLastRun and BeforeSend ([#2102](https://github.com/getsentry/sentry-dotnet/pull/3958))
+- OperatingSystem will now return macOS as OS name instead of 'Darwin' as well as the proper version. ([#2710](https://github.com/getsentry/sentry-dotnet/pull/3956))
+- Ignore null value on CocoaScopeObserver.SetTag ([#3948](https://github.com/getsentry/sentry-dotnet/pull/3948))
+- Deduplicate profiling stack frames ([#3969](https://github.com/getsentry/sentry-dotnet/pull/3969))
 
 ## 5.1.0
 

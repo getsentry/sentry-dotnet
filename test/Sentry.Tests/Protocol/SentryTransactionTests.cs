@@ -207,7 +207,7 @@ public class SentryTransactionTests
             "category",
             BreadcrumbLevel.Warning));
 
-        transaction.SetExtra("extra_key", "extra_value");
+        transaction.SetData("extra_key", "extra_value");
         transaction.Fingerprint = new[] { "fingerprint" };
         transaction.SetTag("tag_key", "tag_value");
         transaction.SetMeasurement("measurement_1", 111);
