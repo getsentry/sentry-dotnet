@@ -2454,12 +2454,6 @@ interface PrivateSentrySDKOnly
     [Static]
     [Export ("breadcrumbWithDictionary:")]
     SentryBreadcrumb BreadcrumbWithDictionary (NSDictionary dictionary);
-
-
-    // +(SentryEnvelope * _Nonnull)envelopeWithData:(NSData * _Nonnull)data;
-    [Static]
-    [Export ("envelopeWithData:")]
-    SentryEnvelope EnvelopeWithData (NSData data);
 }
 
 // @interface SentryId : NSObject

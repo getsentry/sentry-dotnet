@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Cocoa.Extensions;
@@ -18,10 +19,11 @@ internal static class SentryEventExtensions
      * updating the objects on either side.
      */
 
-    public static SentryEvent ToSentryEvent(this CocoaSdk.SentryEvent sentryEvent, SentryCocoaSdkOptions nativeOptions)
+    public static SentryEvent? ToSentryEvent(this CocoaSdk.SentryEvent sentryEvent)
     {
-        using var stream = sentryEvent.ToJsonStream()!;
-        //stream.Seek(0, SeekOrigin.Begin); ??
+        using var stream = sentryEvent.ToJsonStream();
+        if (stream == null)
+            return null;
 
         using var json = JsonDocument.Parse(stream);
         var exception = sentryEvent.Error == null ? null : new NSErrorException(sentryEvent.Error);
@@ -29,18 +31,50 @@ internal static class SentryEventExtensions
         return ev;
     }
 
-    public static CocoaSdk.SentryEvent ToCocoaSentryEvent(this SentryEvent sentryEvent, SentryOptions options, SentryCocoaSdkOptions nativeOptions)
+    public static CocoaSdk.SentryEvent ToCocoaSentryEvent(this SentryEvent sentryEvent, SentryOptions options)
     {
-        var envelope = Envelope.FromEvent(sentryEvent);
+        var native = new CocoaSdk.SentryEvent();
 
-        using var stream = new MemoryStream();
-        envelope.Serialize(stream, options.DiagnosticLogger);
-        stream.Seek(0, SeekOrigin.Begin);
+        native.ServerName = sentryEvent.ServerName;
+        native.Dist = sentryEvent.Distribution;
+        native.Logger = sentryEvent.Logger;
+        native.ReleaseName = sentryEvent.Release;
+        native.Environment = sentryEvent.Environment;
+        native.Platform = sentryEvent.Platform!;
+        native.Transaction = sentryEvent.TransactionName!;
+        native.Fingerprint = sentryEvent.Fingerprint?.ToArray();
+        native.Timestamp = sentryEvent.Timestamp.ToNSDate();
+        native.Modules = sentryEvent.Modules.ToDictionary(kv => kv.Key, kv => kv.Value);
 
-        using var data = NSData.FromStream(stream)!;
-        var cocoaEnvelope = CocoaSdk.PrivateSentrySDKOnly.EnvelopeWithData(data);
+        native.Tags = sentryEvent.Tags?.ToDictionary(kv => kv.Key, kv => kv.Value);
+        native.EventId = sentryEvent.EventId.ToCocoaSentryId();
+        native.Extra = sentryEvent.Extra?.ToDictionary(kv => kv.Key, kv => kv.Value);
+        native.Breadcrumbs = sentryEvent.Breadcrumbs?.Select(x => x.ToCocoaBreadcrumb()).ToArray();
+        native.User = sentryEvent.User?.ToCocoaUser();
+        // native.Error = NSError.FromDomain() sentryEvent.Exception
+        //sentryEvent.Request;
+        // native.Level = sentryEvent.Level;
+        // native.Sdk = sentryEvent.Sdk
+        // native.Context = sentryEvent.Contexts;
+        // sentryEvent.DebugImages
+        // sentryEvent.SentryExceptions
+        // native.Type = sentryEvent.T
+        // native.Message = sentryEvent.Message
+        // native.Threads = sentryEvent.SentryThreads
 
-        var cocoaEvent = (CocoaSdk.SentryEvent)cocoaEnvelope.Items.GetItem<CocoaSdk.SentryEvent>(0);
-        return cocoaEvent;
+        return native;
     }
 }
+// var envelope = Envelope.FromEvent(sentryEvent);
+// var native = new CocoaSdk.SentryEvent();
+//
+// using var stream = new MemoryStream();
+// envelope.Serialize(stream, options.DiagnosticLogger);
+// stream.Seek(0, SeekOrigin.Begin);
+//
+// using var data = NSData.FromStream(stream)!;
+// var cocoaEnvelope = CocoaSdk.PrivateSentrySDKOnly.EnvelopeWithData(data);
+//
+// var cocoaEvent = (CocoaSdk.SentryEvent)cocoaEnvelope.Items.GetItem<CocoaSdk.SentryEvent>(0);
+// // this will return a SentryEnvelopeItem which has isCrashEvent that causes native serialization panic
+// return cocoaEvent;

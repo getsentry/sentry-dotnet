@@ -106,7 +106,8 @@ public static partial class SentrySdk
                     ex.Stacktrace?.Frames.Any(f => f.Function == "xamarin_unhandled_exception_handler") is true)
                 {
                     // Don't send it
-                    options.LogDebug("Discarded {0} error ({1}). Captured as  managed exception instead.", ex.Type, ex.Value);
+                    options.LogDebug("Discarded {0} error ({1}). Captured as  managed exception instead.", ex.Type,
+                        ex.Value);
                     return null!;
                 }
 
@@ -116,7 +117,8 @@ public static partial class SentrySdk
                 if (ex.Type == "EXC_BAD_ACCESS")
                 {
                     // Don't send it
-                    options.LogDebug("Discarded {0} error ({1}). Captured as  managed exception instead.", ex.Type, ex.Value);
+                    options.LogDebug("Discarded {0} error ({1}). Captured as  managed exception instead.", ex.Type,
+                        ex.Value);
                     return null!;
                 }
             }
@@ -125,12 +127,19 @@ public static partial class SentrySdk
             // because we delegate to user code, we need to protect anything that could happen in this event
             try
             {
-                var sentryEvent = evt.ToSentryEvent(nativeOptions);
-                var result = options.BeforeSendInternal?.Invoke(sentryEvent, null!)?.ToCocoaSentryEvent(options, nativeOptions);
+                var sentryEvent = evt.ToSentryEvent();
+                if (sentryEvent != null)
+                {
+                    var result = options
+                        .BeforeSendInternal?
+                        .Invoke(sentryEvent, null!)?
+                        .ToCocoaSentryEvent(options);
 
-                // Note: Nullable result is allowed but delegate is generated incorrectly
-                // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
-                return result!;
+                    // // Note: Nullable result is allowed but delegate is generated incorrectly
+                    // // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
+                    return result!;
+                }
+                return evt;
             }
             catch (Exception ex)
             {
@@ -143,12 +152,14 @@ public static partial class SentrySdk
         {
             nativeOptions.OnCrashedLastRun = evt =>
             {
-
                 // because we delegate to user code, we need to protect anything that could happen in this event
                 try
                 {
-                    var sentryEvent = evt.ToSentryEvent(nativeOptions);
-                    onCrashedLastRun(sentryEvent);
+                    var sentryEvent = evt.ToSentryEvent();
+                    if (sentryEvent != null)
+                    {
+                        onCrashedLastRun(sentryEvent);
+                    }
                 }
                 catch (Exception ex)
                 {
