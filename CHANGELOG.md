@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Sync Serilog scope properties with Sentry events ([#3976](https://github.com/getsentry/sentry-dotnet/pull/3976))
+
 ## 5.1.1
 
 ### Fixes
