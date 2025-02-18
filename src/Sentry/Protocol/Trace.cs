@@ -50,6 +50,21 @@ public class Trace : ITraceContext, ISentryJsonSerializable, ICloneable<Trace>, 
     /// <inheritdoc />
     public bool? IsSampled { get; internal set; }
 
+    private Dictionary<string, object?> _data = new();
+
+    /// <summary>
+    /// Get the metadata
+    /// </summary>
+    public IReadOnlyDictionary<string, object?> Data => _data;
+
+    /// <summary>
+    /// Adds metadata to the trace
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
+    public void SetData(string key, object? value)
+        => _data[key] = value;
+
     /// <summary>
     /// Clones this instance.
     /// </summary>
@@ -63,7 +78,8 @@ public class Trace : ITraceContext, ISentryJsonSerializable, ICloneable<Trace>, 
         Operation = Operation,
         Origin = Origin,
         Status = Status,
-        IsSampled = IsSampled
+        IsSampled = IsSampled,
+        _data = _data.ToDict()
     };
 
     /// <summary>
@@ -103,6 +119,7 @@ public class Trace : ITraceContext, ISentryJsonSerializable, ICloneable<Trace>, 
         writer.WriteString("origin", Origin ?? Internal.OriginHelper.Manual);
         writer.WriteStringIfNotWhiteSpace("description", Description);
         writer.WriteStringIfNotWhiteSpace("status", Status?.ToString().ToSnakeCase());
+        writer.WriteDictionaryIfNotEmpty("data", _data, logger);
 
         writer.WriteEndObject();
     }
@@ -120,6 +137,7 @@ public class Trace : ITraceContext, ISentryJsonSerializable, ICloneable<Trace>, 
         var description = json.GetPropertyOrNull("description")?.GetString();
         var status = json.GetPropertyOrNull("status")?.GetString()?.Replace("_", "").ParseEnum<SpanStatus>();
         var isSampled = json.GetPropertyOrNull("sampled")?.GetBoolean();
+        var data = json.GetPropertyOrNull("data")?.GetDictionaryOrNull() ?? new();
 
         return new Trace
         {
@@ -130,7 +148,8 @@ public class Trace : ITraceContext, ISentryJsonSerializable, ICloneable<Trace>, 
             Origin = origin,
             Description = description,
             Status = status,
-            IsSampled = isSampled
+            IsSampled = isSampled,
+            _data = data
         };
     }
 }

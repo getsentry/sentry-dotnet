@@ -27,7 +27,7 @@
           Description: SqlListenerTests.verify_LoggingAsync,
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             bytes_sent : 376,
             db.connection_id: Guid_2,
             db.name: SqlListenerTests.verify_LoggingAsync,
@@ -49,7 +49,7 @@ VALUES (@p0);
 ,
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             db.connection_id: Guid_2,
             db.name: SqlListenerTests.verify_LoggingAsync,
             db.operation_id: Guid_4,

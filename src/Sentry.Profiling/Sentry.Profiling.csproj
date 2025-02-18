@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
-    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.553101" />
+    <PackageReference Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.510501" />
     <!--  This triggers the build of this project and its dependencies. We don't need all of them but this is the easiest way -->
     <!--  to make sure the project builds/cleans etc in tandem with this. Packaging copies the 2 DLLs we need below -->
     <ProjectReference Include="../../modules/perfview/src/TraceEvent/TraceEvent.csproj" PrivateAssets="all" />
