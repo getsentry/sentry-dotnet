@@ -5,6 +5,12 @@
 ### Fixes
 - Add Azure Function UseSentry overloads for easier wire ups  ([#3971](https://github.com/getsentry/sentry-dotnet/pull/3971))
 
+### Dependencies
+
+- Bump CLI from v2.41.1 to v2.42.1 ([#3979](https://github.com/getsentry/sentry-dotnet/pull/3979))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2421)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.41.1...2.42.1)
+
 ## 5.1.1
 
 ### Fixes
