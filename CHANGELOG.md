@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Support sending User Feedback without errors/exceptions ([#3981](https://github.com/getsentry/sentry-dotnet/pull/3981))
+
 ### Fixes
 - Add Azure Function UseSentry overloads for easier wire ups  ([#3971](https://github.com/getsentry/sentry-dotnet/pull/3971))
 
