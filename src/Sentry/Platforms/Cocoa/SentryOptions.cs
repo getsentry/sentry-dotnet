@@ -197,6 +197,13 @@ public partial class SentryOptions
         /// </remarks>
         public NSUrlSessionDelegate? UrlSessionDelegate { get; set; } = null;
 
+        /// <summary>
+        /// Gets or sets the replay options.
+        /// </summary>
+        /// <remarks>
+        /// <see href="https://docs.sentry.io/product/explore/session-replay/mobile/">sentry.io</see>
+        /// </remarks>
+        public NativeSentryReplayOptions SessionReplay { get; set; } = new();
 
         // ---------- Other ----------
 

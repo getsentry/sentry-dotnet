@@ -130,6 +130,11 @@ public static partial class SentrySdk
         nativeOptions.EnableUIViewControllerTracing = options.Native.EnableUIViewControllerTracing;
         nativeOptions.EnableUserInteractionTracing = options.Native.EnableUserInteractionTracing;
         nativeOptions.UrlSessionDelegate = options.Native.UrlSessionDelegate;
+        nativeOptions.SessionReplay.SessionSampleRate = options.Native.SessionReplay.SessionSampleRate;
+        nativeOptions.SessionReplay.OnErrorSampleRate = options.Native.SessionReplay.OnErrorSampleRate;
+        nativeOptions.SessionReplay.MaskAllText = options.Native.SessionReplay.MaskAllText;
+        nativeOptions.SessionReplay.MaskAllImages = options.Native.SessionReplay.MaskAllImages;
+        nativeOptions.SessionReplay.Quality = options.Native.SessionReplay.Quality.ToCocoaSentryReplayQuality();
 
         // StitchAsyncCode removed from Cocoa SDK in 8.6.0 with https://github.com/getsentry/sentry-cocoa/pull/2973
         // nativeOptions.StitchAsyncCode = options.Native.StitchAsyncCode;
