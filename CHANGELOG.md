@@ -29,6 +29,10 @@
 - Ignore null value on CocoaScopeObserver.SetTag ([#3948](https://github.com/getsentry/sentry-dotnet/pull/3948))
 - Deduplicate profiling stack frames ([#3969](https://github.com/getsentry/sentry-dotnet/pull/3969))
 
+### Enhancements
+
+- Profiling: improve performance by subscribing only to necessary CLR events ([#3970](https://github.com/getsentry/sentry-dotnet/pull/3970))
+
 ## 5.1.0
 
 ### Significant change in behavior
