@@ -479,6 +479,7 @@ namespace Sentry
         public Sentry.Protocol.Browser Browser { get; }
         public int Count { get; }
         public Sentry.Protocol.Device Device { get; }
+        public Sentry.SentryFeedback Feedback { get; }
         public Sentry.Protocol.Gpu Gpu { get; }
         public bool IsReadOnly { get; }
         public object this[string key] { get; set; }
@@ -536,6 +537,18 @@ namespace Sentry
         public void UnsetTag(string key) { }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryEvent FromJson(System.Text.Json.JsonElement json) { }
+    }
+    public sealed class SentryFeedback : Sentry.ISentryJsonSerializable
+    {
+        public SentryFeedback() { }
+        public Sentry.SentryId AssociatedEventId { get; set; }
+        public string? ContactEmail { get; set; }
+        public string Message { get; set; }
+        public string? Name { get; set; }
+        public string? ReplayId { get; set; }
+        public string? Url { get; set; }
+        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
+        public static Sentry.SentryFeedback FromJson(System.Text.Json.JsonElement json) { }
     }
     public class SentryGraphQLHttpMessageHandler : Sentry.SentryMessageHandler
     {
