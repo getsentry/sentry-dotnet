@@ -326,6 +326,14 @@ public static class SentrySinkExtensions
                 sentrySerilogOptions.DefaultTags.Add(tag.Key, tag.Value);
             }
         }
+
+        // This only works when the SDK is initialized using the LoggerSinkConfiguration extensions. If the SDK is
+        // initialized using some other integration then the processor will need to be added manually to whichever
+        // options are used to initialize the SDK.
+        if (sentrySerilogOptions.InitializeSdk)
+        {
+            sentrySerilogOptions.ApplySerilogScopeToEvents();
+        }
     }
 
     /// <summary>
