@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry;
@@ -6,58 +7,53 @@ namespace Sentry;
 /// <summary>
 /// Sentry User Feedback.
 /// </summary>
-public sealed class SentryFeedback : ISentryJsonSerializable
+public sealed class SentryFeedback : ISentryJsonSerializable, ICloneable<SentryFeedback>, IUpdatable<SentryFeedback>
 {
-    // final String? replayId;
-    // final String? url;
-    // final SentryId? associatedEventId;
+    /// <summary>
+    /// Tells Sentry which type of context this is.
+    /// </summary>
+    internal const string Type = "feedback";
 
     /// <summary>
     /// Message containing the user's feedback.
     /// </summary>
-    public string Message { get; }
+    public string Message { get; set; } = string.Empty;
 
     /// <summary>
     /// The name of the user.
     /// </summary>
-    public string? ContactEmail { get; }
+    public string? ContactEmail { get; set; }
 
     /// <summary>
     /// The name of the user.
     /// </summary>
-    public string? Name { get; }
+    public string? Name { get; set; }
 
     /// <summary>
     /// Optional ID of the Replay session associated with the feedback.
     /// </summary>
-    public string? ReplayId { get; }
+    public string? ReplayId { get; set; }
 
     /// <summary>
     /// The name of the user.
     /// </summary>
-    public string? Url { get; }
+    public string? Url { get; set; }
 
     /// <summary>
     /// Optional ID of the event that the user feedback is associated with.
     /// </summary>
-    public SentryId AssociatedEventId { get; }
-
-    /// <summary>
-    /// Initializes an instance of <see cref="SentryFeedback"/>.
-    /// </summary>
-    public SentryFeedback(string message, string? contactEmail, string? name, string? replayId, string? url, SentryId eventId)
-    {
-        Message = message;
-        ContactEmail = contactEmail;
-        Name = name;
-        ReplayId = replayId;
-        Url = url;
-        AssociatedEventId = eventId;
-    }
+    public SentryId AssociatedEventId { get; set; }
 
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
+        if (string.IsNullOrEmpty(Message))
+        {
+            logger?.LogWarning("Feedback message is empty - Feedback will be serialized as null");
+            writer.WriteNullValue();
+            return;
+        }
+
         writer.WriteStartObject();
 
         writer.WriteString("message", Message);
@@ -82,6 +78,57 @@ public sealed class SentryFeedback : ISentryJsonSerializable
         var url = json.GetPropertyOrNull("url")?.GetString();
         var eventId = json.GetPropertyOrNull("associated_event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
 
-        return new SentryFeedback(message, contactEmail, name, replayId, url, eventId);
+        return new SentryFeedback
+        {
+            Message = message,
+            ContactEmail = contactEmail,
+            Name = name,
+            ReplayId = replayId,
+            Url = url,
+            AssociatedEventId = eventId
+        };
+    }
+
+    internal SentryFeedback Clone() => ((ICloneable<SentryFeedback>)this).Clone();
+
+    SentryFeedback ICloneable<SentryFeedback>.Clone()
+        => new()
+        {
+            Message = Message,
+            ContactEmail = ContactEmail,
+            Name = Name,
+            ReplayId = ReplayId,
+            Url = Url,
+            AssociatedEventId = AssociatedEventId
+        };
+
+    /// <summary>
+    /// Updates this instance with data from the properties in the <paramref name="source"/>,
+    /// unless there is already a value in the existing property.
+    /// </summary>
+    void UpdateFrom(SentryFeedback source) => ((IUpdatable<SentryFeedback>)this).UpdateFrom(source);
+
+    void IUpdatable<SentryFeedback>.UpdateFrom(SentryFeedback source)
+    {
+        if (string.IsNullOrEmpty(Message))
+        {
+            Message = source.Message;
+        }
+        ContactEmail ??= source.ContactEmail;
+        Name ??= source.Name;
+        ReplayId ??= source.ReplayId;
+        Url ??= source.Url;
+        if (AssociatedEventId == SentryId.Empty)
+        {
+            AssociatedEventId = source.AssociatedEventId;
+        }
+    }
+
+    void IUpdatable.UpdateFrom(object source)
+    {
+        if (source is SentryFeedback runtime)
+        {
+            ((IUpdatable<SentryFeedback>)this).UpdateFrom(runtime);
+        }
     }
 }

@@ -31,6 +31,11 @@ public sealed class SentryContexts : IDictionary<string, object>, ISentryJsonSer
     public Device Device => _innerDictionary.GetOrCreate<Device>(Device.Type);
 
     /// <summary>
+    /// Holds user feedback.
+    /// </summary>
+    public SentryFeedback Feedback => _innerDictionary.GetOrCreate<SentryFeedback>(SentryFeedback.Type);
+
+    /// <summary>
     /// Defines the operating system.
     /// </summary>
     /// <remarks>
@@ -146,6 +151,10 @@ public sealed class SentryContexts : IDictionary<string, object>, ISentryJsonSer
             else if (string.Equals(type, Device.Type, StringComparison.OrdinalIgnoreCase))
             {
                 result[name] = Device.FromJson(value);
+            }
+            else if (string.Equals(type, SentryFeedback.Type, StringComparison.OrdinalIgnoreCase))
+            {
+                result[name] = SentryFeedback.FromJson(value);
             }
             else if (string.Equals(type, OperatingSystem.Type, StringComparison.OrdinalIgnoreCase))
             {
