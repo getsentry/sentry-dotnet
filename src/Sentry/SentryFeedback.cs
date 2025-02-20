@@ -106,7 +106,7 @@ public sealed class SentryFeedback : ISentryJsonSerializable, ICloneable<SentryF
     /// Updates this instance with data from the properties in the <paramref name="source"/>,
     /// unless there is already a value in the existing property.
     /// </summary>
-    void UpdateFrom(SentryFeedback source) => ((IUpdatable<SentryFeedback>)this).UpdateFrom(source);
+    private void UpdateFrom(SentryFeedback source) => ((IUpdatable<SentryFeedback>)this).UpdateFrom(source);
 
     void IUpdatable<SentryFeedback>.UpdateFrom(SentryFeedback source)
     {
