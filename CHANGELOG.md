@@ -16,6 +16,9 @@
 - Bump CLI from v2.41.1 to v2.42.1 ([#3979](https://github.com/getsentry/sentry-dotnet/pull/3979))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2421)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.41.1...2.42.1)
+- Bump Java SDK from v7.20.1 to v8.2.0 ([#3911](https://github.com/getsentry/sentry-dotnet/pull/3911))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#820)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.20.1...8.2.0)
 
 ## 5.1.1
 
