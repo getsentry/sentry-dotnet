@@ -33,7 +33,19 @@ public sealed class SentryContexts : IDictionary<string, object>, ISentryJsonSer
     /// <summary>
     /// Holds user feedback.
     /// </summary>
-    public SentryFeedback Feedback => _innerDictionary.GetOrCreate<SentryFeedback>(SentryFeedback.Type);
+    public SentryFeedback? Feedback
+    {
+        get => _innerDictionary.TryGetValue<SentryFeedback>(SentryFeedback.Type);
+        set
+        {
+            if (value is null)
+            {
+                _innerDictionary.TryRemove(SentryFeedback.Type, out _);
+                return;
+            }
+            _innerDictionary[SentryFeedback.Type] = value;
+        }
+    }
 
     /// <summary>
     /// Defines the operating system.

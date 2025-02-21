@@ -7,7 +7,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry User Feedback.
 /// </summary>
-public sealed class SentryFeedback : ISentryJsonSerializable, ICloneable<SentryFeedback>, IUpdatable<SentryFeedback>
+public sealed class SentryFeedback : ISentryJsonSerializable, ICloneable<SentryFeedback>
 {
     /// <summary>
     /// Tells Sentry which type of context this is.
@@ -44,12 +44,25 @@ public sealed class SentryFeedback : ISentryJsonSerializable, ICloneable<SentryF
     /// </summary>
     public SentryId AssociatedEventId { get; set; }
 
+    /// <summary>
+    /// Creates an instance of <see cref="SentryFeedback"/>.
+    /// </summary>
+    public SentryFeedback(string message, string? contactEmail = null, string? name = null, string? replayId = null, string? url = null, SentryId associatedEventId = default)
+    {
+        Message = message;
+        ContactEmail = contactEmail;
+        Name = name;
+        ReplayId = replayId;
+        Url = url;
+        AssociatedEventId = associatedEventId;
+    }
+
     /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         if (string.IsNullOrEmpty(Message))
         {
-            logger?.LogWarning("Feedback message is empty - Feedback will be serialized as null");
+            logger?.LogWarning("Feedback message is empty - serializing as null");
             writer.WriteNullValue();
             return;
         }
@@ -71,64 +84,18 @@ public sealed class SentryFeedback : ISentryJsonSerializable, ICloneable<SentryF
     /// </summary>
     public static SentryFeedback FromJson(JsonElement json)
     {
-        var message = json.GetPropertyOrNull("message")?.GetString() ?? "";
+        var message = json.GetPropertyOrNull("message")?.GetString() ?? "<empty>";
         var contactEmail = json.GetPropertyOrNull("contact_email")?.GetString();
         var name = json.GetPropertyOrNull("name")?.GetString();
         var replayId = json.GetPropertyOrNull("replay_id")?.GetString();
         var url = json.GetPropertyOrNull("url")?.GetString();
         var eventId = json.GetPropertyOrNull("associated_event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
 
-        return new SentryFeedback
-        {
-            Message = message,
-            ContactEmail = contactEmail,
-            Name = name,
-            ReplayId = replayId,
-            Url = url,
-            AssociatedEventId = eventId
-        };
+        return new SentryFeedback(message, contactEmail, name, replayId, url, eventId);
     }
 
     internal SentryFeedback Clone() => ((ICloneable<SentryFeedback>)this).Clone();
 
     SentryFeedback ICloneable<SentryFeedback>.Clone()
-        => new()
-        {
-            Message = Message,
-            ContactEmail = ContactEmail,
-            Name = Name,
-            ReplayId = ReplayId,
-            Url = Url,
-            AssociatedEventId = AssociatedEventId
-        };
-
-    /// <summary>
-    /// Updates this instance with data from the properties in the <paramref name="source"/>,
-    /// unless there is already a value in the existing property.
-    /// </summary>
-    void UpdateFrom(SentryFeedback source) => ((IUpdatable<SentryFeedback>)this).UpdateFrom(source);
-
-    void IUpdatable<SentryFeedback>.UpdateFrom(SentryFeedback source)
-    {
-        if (string.IsNullOrEmpty(Message))
-        {
-            Message = source.Message;
-        }
-        ContactEmail ??= source.ContactEmail;
-        Name ??= source.Name;
-        ReplayId ??= source.ReplayId;
-        Url ??= source.Url;
-        if (AssociatedEventId == SentryId.Empty)
-        {
-            AssociatedEventId = source.AssociatedEventId;
-        }
-    }
-
-    void IUpdatable.UpdateFrom(object source)
-    {
-        if (source is SentryFeedback runtime)
-        {
-            ((IUpdatable<SentryFeedback>)this).UpdateFrom(runtime);
-        }
-    }
+        => new(Message, ContactEmail, Name, ReplayId, Url, AssociatedEventId);
 }
