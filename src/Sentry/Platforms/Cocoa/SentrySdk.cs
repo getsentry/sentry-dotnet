@@ -135,11 +135,9 @@ public static partial class SentrySdk
                     return evt;
 
                 var result = options.BeforeSendInternal(sentryEvent, null!);
-#pragma warning disable 8603
                 // returning null is fine - the native binding even has this set, but the tooling doesn't want to obey, so the pragma was necessary
                 if (result == null)
-                    return null;
-#pragma warning restore 8603
+                    return null!;
 
                 evt.ServerName = result.ServerName;
                 evt.Dist = result.Distribution;
