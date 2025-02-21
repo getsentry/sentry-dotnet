@@ -100,6 +100,8 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     /// </summary>
     public double? SampleRate { get; internal set; }
 
+    internal double? SampleRand { get; set; }
+
     /// <inheritdoc />
     public SentryLevel? Level { get; set; }
 
