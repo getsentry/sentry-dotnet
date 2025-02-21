@@ -263,7 +263,7 @@ internal static class CocoaExtensions
 
         return native;
     }
-    
+
     // not tested or needed yet - leaving for future just in case
     // public static CocoaSdk.SentryThread ToCocoaSentryThread(this SentryThread thread)
     // {
