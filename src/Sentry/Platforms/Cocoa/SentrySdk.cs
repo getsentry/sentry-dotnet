@@ -94,7 +94,7 @@ public static partial class SentrySdk
             // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
 
             // There should only be one exception on the event in this case
-            if (evt.Exceptions?.Length == 1)
+            if (options.Native.SuppressSegfaults && evt.Exceptions?.Length == 1)
             {
                 // It will match the following characteristics
                 var ex = evt.Exceptions[0];
@@ -125,21 +125,48 @@ public static partial class SentrySdk
 
             // we run our SIGABRT checks first before handing over to user events
             // because we delegate to user code, we need to protect anything that could happen in this event
+            if (options.BeforeSendInternal == null)
+                return evt;
+
             try
             {
                 var sentryEvent = evt.ToSentryEvent();
-                if (sentryEvent != null)
-                {
-                    var result = options
-                        .BeforeSendInternal?
-                        .Invoke(sentryEvent, null!)?
-                        .ToCocoaSentryEvent(options);
+                if (sentryEvent == null)
+                    return evt;
 
-                    // // Note: Nullable result is allowed but delegate is generated incorrectly
-                    // // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
-                    return result!;
+                var result = options.BeforeSendInternal(sentryEvent, null!);
+#pragma warning disable 8603
+                // returning null is fine - the native binding even has this set, but the tooling doesn't want to obey, so the pragma was necessary
+                if (result == null)
+                    return null;
+#pragma warning restore 8603
+
+                evt.ServerName = result.ServerName;
+                evt.Dist = result.Distribution;
+                evt.Logger = result.Logger;
+                evt.ReleaseName = result.Release;
+                evt.Environment = result.Environment;
+                evt.Platform = result.Platform!;
+                evt.Transaction = result.TransactionName!;
+                evt.Message = result.Message?.ToCocoaSentryMessage();
+                evt.Tags = result.Tags?.ToNSDictionaryStrings();
+                evt.Extra = result.Extra?.ToNSDictionary();
+                evt.Breadcrumbs = result.Breadcrumbs?.Select(x => x.ToCocoaBreadcrumb()).ToArray();
+                evt.User = result.User?.ToCocoaUser();
+
+                if (result.Level != null)
+                {
+                    evt.Level = result.Level.Value.ToCocoaSentryLevel();
                 }
-                return evt;
+
+                if (result.Exception != null)
+                {
+                    evt.Error = new NSError(new NSString(result.Exception.ToString()), IntPtr.Zero);
+                }
+
+                // Note: Nullable result is allowed but delegate is generated incorrectly
+                // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
+                return evt!;
             }
             catch (Exception ex)
             {

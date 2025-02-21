@@ -169,6 +169,24 @@ internal static class CocoaExtensions
                 d.Keys.ToArray());
     }
 
+    public static NSDictionary<NSString, NSString> ToNSDictionaryStrings(
+        this IEnumerable<KeyValuePair<string, string>> dict)
+    {
+        var d = new Dictionary<NSString, NSString>();
+        foreach (var item in dict)
+        {
+            if (item.Value != null)
+            {
+                d.Add((NSString)item.Key, new NSString(item.Value));
+            }
+        }
+
+        return NSDictionary<NSString, NSString>
+            .FromObjectsAndKeys(
+                d.Values.ToArray(),
+                d.Keys.ToArray());
+    }
+
     public static NSDictionary<NSString, NSObject>? ToNullableNSDictionary<TValue>(
         this ICollection<KeyValuePair<string, TValue>> dict) =>
         dict.Count == 0 ? null : dict.ToNSDictionary();
@@ -224,4 +242,101 @@ internal static class CocoaExtensions
                 $"NSNumber \"{n.StringValue}\" has an unknown ObjCType \"{n.ObjCType}\" (Class: \"{n.Class.Name}\")")
         };
     }
+
+
+    public static SentryEvent? ToSentryEvent(this CocoaSdk.SentryEvent sentryEvent)
+    {
+        using var stream = sentryEvent.ToJsonStream();
+        if (stream == null)
+            return null;
+
+        using var json = JsonDocument.Parse(stream);
+        var exception = sentryEvent.Error == null ? null : new NSErrorException(sentryEvent.Error);
+        var ev = SentryEvent.FromJson(json.RootElement, exception);
+        return ev;
+    }
+
+    public static CocoaSdk.SentryMessage ToCocoaSentryMessage(this SentryMessage msg)
+    {
+        var native = new CocoaSdk.SentryMessage(msg.Formatted ?? string.Empty);
+        native.Params = msg.Params?.Select(x => x.ToString()!).ToArray() ?? new string[0];
+
+        return native;
+    }
+    
+    // not tested or needed yet - leaving for future just in case
+    // public static CocoaSdk.SentryThread ToCocoaSentryThread(this SentryThread thread)
+    // {
+    //     var id = NSNumber.FromInt32(thread.Id ?? 0);
+    //     var native = new CocoaSdk.SentryThread(id);
+    //     native.Crashed = thread.Crashed;
+    //     native.Current = thread.Current;
+    //     native.Name = thread.Name;
+    //     native.Stacktrace = thread.Stacktrace?.ToCocoaSentryStackTrace();
+    //     // native.IsMain = not in dotnet
+    //     return native;
+    // }
+    //
+    // public static CocoaSdk.SentryRequest ToCocoaSentryRequest(this SentryRequest request)
+    // {
+    //     var native = new CocoaSdk.SentryRequest();
+    //     native.Cookies = request.Cookies;
+    //     native.Headers = request.Headers?.ToNSDictionaryStrings();
+    //     native.Method = request.Method;
+    //     native.QueryString = request.QueryString;
+    //     native.Url = request.Url;
+    //
+    //     // native.BodySize does not exist in dotnet
+    //     return native;
+    // }
+    //
+
+    // public static CocoaSdk.SentryException ToCocoaSentryException(this SentryException ex)
+    // {
+    //     var native = new CocoaSdk.SentryException(ex.Value ?? string.Empty, ex.Type ?? string.Empty);
+    //     native.Module = ex.Module;
+    //     native.Mechanism = ex.Mechanism?.ToCocoaSentryMechanism();
+    //     native.Stacktrace = ex.Stacktrace?.ToCocoaSentryStackTrace();
+    //     // not part of native - ex.ThreadId;
+    //     return native;
+    // }
+    //
+    // public static CocoaSdk.SentryStacktrace ToCocoaSentryStackTrace(this SentryStackTrace stackTrace)
+    // {
+    //     var frames = stackTrace.Frames?.Select(x => x.ToCocoaSentryFrame()).ToArray() ?? new CocoaSdk.SentryFrame[0];
+    //     var native = new CocoaSdk.SentryStacktrace(frames, new NSDictionary<NSString, NSString>());
+    //     // native.Register & native.Snapshot missing in dotnet
+    //     return native;
+    // }
+    //
+    // public static CocoaSdk.SentryFrame ToCocoaSentryFrame(this SentryStackFrame frame)
+    // {
+    //     var native = new CocoaSdk.SentryFrame();
+    //     native.Module = frame.Module;
+    //     native.Package = frame.Package;
+    //     native.InstructionAddress = frame.InstructionAddress?.ToString();
+    //     native.Function = frame.Function;
+    //     native.Platform = frame.Platform;
+    //     native.ColumnNumber = frame.ColumnNumber;
+    //     native.FileName = frame.FileName;
+    //     native.InApp = frame.InApp;
+    //     native.ImageAddress = frame.ImageAddress?.ToString();
+    //     native.LineNumber = frame.LineNumber;
+    //     native.SymbolAddress = frame.SymbolAddress?.ToString();
+    //
+    //     // native.StackStart = doesn't exist in dotnet
+    //     return native;
+    // }
+    //
+    // public static CocoaSdk.SentryMechanism ToCocoaSentryMechanism(this Mechanism mechanism)
+    // {
+    //     var native = new CocoaSdk.SentryMechanism(mechanism.Type);
+    //     native.Synthetic = mechanism.Synthetic;
+    //     native.Handled = mechanism.Handled;
+    //     native.Desc = mechanism.Description;
+    //     native.HelpLink = mechanism.HelpLink;
+    //     native.Data = mechanism.Data?.ToNSDictionary();
+    //     // TODO: Meta does not currently translate in dotnet - native.Meta = null;
+    //     return native;
+    // }
 }
