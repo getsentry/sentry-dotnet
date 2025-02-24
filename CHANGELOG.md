@@ -4,7 +4,8 @@
 
 ### Fixes
 
-- Map iOS native events - OnCrashedLastRun and BeforeSend ([#2102](https://github.com/getsentry/sentry-dotnet/pull/3958))
+- Native iOS events are now exposed to the dotnet layer for users to hook through SentryOptions.BeforeSend and SentryOptions.OnCrashedLastRun ([#2102](https://github.com/getsentry/sentry-dotnet/pull/3958))
+
 ### Features
 
 - Serilog scope properties are now sent with Sentry events ([#3976](https://github.com/getsentry/sentry-dotnet/pull/3976))
