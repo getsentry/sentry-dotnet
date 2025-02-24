@@ -225,6 +225,7 @@ namespace Sentry
         Sentry.SentryId CaptureCheckIn(string monitorSlug, Sentry.CheckInStatus status, Sentry.SentryId? sentryId = default, System.TimeSpan? duration = default, Sentry.Scope? scope = null, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null);
         bool CaptureEnvelope(Sentry.Protocol.Envelopes.Envelope envelope);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null);
+        void CaptureFeedback(Sentry.SentryFeedback feedback, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null);
         void CaptureSession(Sentry.SessionUpdate sessionUpdate);
         void CaptureTransaction(Sentry.SentryTransaction transaction);
         void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.SentryHint? hint);
@@ -449,6 +450,7 @@ namespace Sentry
         public Sentry.SentryId CaptureCheckIn(string monitorSlug, Sentry.CheckInStatus status, Sentry.SentryId? sentryId = default, System.TimeSpan? duration = default, Sentry.Scope? scope = null, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
         public bool CaptureEnvelope(Sentry.Protocol.Envelopes.Envelope envelope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent? @event, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
+        public void CaptureFeedback(Sentry.SentryFeedback feedback, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.SentryHint? hint) { }
@@ -479,7 +481,7 @@ namespace Sentry
         public Sentry.Protocol.Browser Browser { get; }
         public int Count { get; }
         public Sentry.Protocol.Device Device { get; }
-        public Sentry.SentryFeedback Feedback { get; }
+        public Sentry.SentryFeedback? Feedback { get; set; }
         public Sentry.Protocol.Gpu Gpu { get; }
         public bool IsReadOnly { get; }
         public object this[string key] { get; set; }
@@ -540,7 +542,7 @@ namespace Sentry
     }
     public sealed class SentryFeedback : Sentry.ISentryJsonSerializable
     {
-        public SentryFeedback() { }
+        public SentryFeedback(string message, string? contactEmail = null, string? name = null, string? replayId = null, string? url = null, Sentry.SentryId associatedEventId = default) { }
         public Sentry.SentryId AssociatedEventId { get; set; }
         public string? ContactEmail { get; set; }
         public string Message { get; set; }
@@ -797,6 +799,7 @@ namespace Sentry
         public static Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.SentryHint? hint, System.Action<Sentry.Scope> configureScope) { }
         public static Sentry.SentryId CaptureException(System.Exception exception) { }
         public static Sentry.SentryId CaptureException(System.Exception exception, System.Action<Sentry.Scope> configureScope) { }
+        public static void CaptureFeedback(Sentry.SentryFeedback feedback, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public static Sentry.SentryId CaptureMessage(string message, Sentry.SentryLevel level = 1) { }
         public static Sentry.SentryId CaptureMessage(string message, System.Action<Sentry.Scope> configureScope, Sentry.SentryLevel level = 1) { }
         public static void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
@@ -1302,6 +1305,7 @@ namespace Sentry.Extensibility
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.SentryHint? hint, System.Action<Sentry.Scope> configureScope) { }
+        public void CaptureFeedback(Sentry.SentryFeedback feedback, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.SentryHint? hint) { }
@@ -1346,6 +1350,7 @@ namespace Sentry.Extensibility
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope, Sentry.SentryHint? hint = null) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.SentryHint? hint, System.Action<Sentry.Scope> configureScope) { }
         public Sentry.SentryId CaptureException(System.Exception exception) { }
+        public void CaptureFeedback(Sentry.SentryFeedback feedback, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.SentryHint? hint) { }
@@ -1791,6 +1796,7 @@ namespace Sentry.Protocol.Envelopes
         public static System.Threading.Tasks.Task<Sentry.Protocol.Envelopes.Envelope> DeserializeAsync(System.IO.Stream stream, System.Threading.CancellationToken cancellationToken = default) { }
         public static Sentry.Protocol.Envelopes.Envelope FromCheckIn(Sentry.SentryCheckIn checkIn) { }
         public static Sentry.Protocol.Envelopes.Envelope FromEvent(Sentry.SentryEvent @event, Sentry.Extensibility.IDiagnosticLogger? logger = null, System.Collections.Generic.IReadOnlyCollection<Sentry.SentryAttachment>? attachments = null, Sentry.SessionUpdate? sessionUpdate = null) { }
+        public static Sentry.Protocol.Envelopes.Envelope FromFeedback(Sentry.SentryEvent @event, Sentry.Extensibility.IDiagnosticLogger? logger = null, System.Collections.Generic.IReadOnlyCollection<Sentry.SentryAttachment>? attachments = null, Sentry.SessionUpdate? sessionUpdate = null) { }
         public static Sentry.Protocol.Envelopes.Envelope FromSession(Sentry.SessionUpdate sessionUpdate) { }
         public static Sentry.Protocol.Envelopes.Envelope FromTransaction(Sentry.SentryTransaction transaction) { }
         public static Sentry.Protocol.Envelopes.Envelope FromUserFeedback(Sentry.UserFeedback sentryUserFeedback) { }
@@ -1810,6 +1816,7 @@ namespace Sentry.Protocol.Envelopes
         public static Sentry.Protocol.Envelopes.EnvelopeItem FromAttachment(Sentry.SentryAttachment attachment) { }
         public static Sentry.Protocol.Envelopes.EnvelopeItem FromCheckIn(Sentry.SentryCheckIn checkIn) { }
         public static Sentry.Protocol.Envelopes.EnvelopeItem FromEvent(Sentry.SentryEvent @event) { }
+        public static Sentry.Protocol.Envelopes.EnvelopeItem FromFeedback(Sentry.SentryEvent @event) { }
         public static Sentry.Protocol.Envelopes.EnvelopeItem FromSession(Sentry.SessionUpdate sessionUpdate) { }
         public static Sentry.Protocol.Envelopes.EnvelopeItem FromTransaction(Sentry.SentryTransaction transaction) { }
         public static Sentry.Protocol.Envelopes.EnvelopeItem FromUserFeedback(Sentry.UserFeedback sentryUserFeedback) { }
