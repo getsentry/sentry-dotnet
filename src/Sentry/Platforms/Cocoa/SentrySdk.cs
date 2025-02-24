@@ -93,7 +93,7 @@ public static partial class SentrySdk
             // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
 
             // There should only be one exception on the event in this case
-            if (evt.Exceptions?.Length == 1)
+            if (options.Native.SuppressSegfaults && evt.Exceptions?.Length == 1)
             {
                 // It will match the following characteristics
                 var ex = evt.Exceptions[0];
