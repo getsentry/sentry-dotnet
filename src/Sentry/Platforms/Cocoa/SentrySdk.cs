@@ -138,28 +138,7 @@ public static partial class SentrySdk
                     return null!;
 
                 // we only support a subset of mutated data to be passed back to the native SDK at this time
-                evt.ServerName = result.ServerName;
-                evt.Dist = result.Distribution;
-                evt.Logger = result.Logger;
-                evt.ReleaseName = result.Release;
-                evt.Environment = result.Environment;
-                evt.Platform = result.Platform!;
-                evt.Transaction = result.TransactionName!;
-                evt.Message = result.Message?.ToCocoaSentryMessage();
-                evt.Tags = result.Tags?.ToNSDictionaryStrings();
-                evt.Extra = result.Extra?.ToNSDictionary();
-                evt.Breadcrumbs = result.Breadcrumbs?.Select(x => x.ToCocoaBreadcrumb()).ToArray();
-                evt.User = result.User?.ToCocoaUser();
-
-                if (result.Level != null)
-                {
-                    evt.Level = result.Level.Value.ToCocoaSentryLevel();
-                }
-
-                if (result.Exception != null)
-                {
-                    evt.Error = new NSError(new NSString(result.Exception.ToString()), IntPtr.Zero);
-                }
+                result.CopyToCocoaSentryEvent(evt);
 
                 // Note: Nullable result is allowed but delegate is generated incorrectly
                 // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294

@@ -243,6 +243,32 @@ internal static class CocoaExtensions
         };
     }
 
+    public static void CopyToCocoaSentryEvent(this SentryEvent managed, CocoaSdk.SentryEvent native)
+    {
+        // we only support a subset of mutated data to be passed back to the native SDK at this time
+        native.ServerName = managed.ServerName;
+        native.Dist = managed.Distribution;
+        native.Logger = managed.Logger;
+        native.ReleaseName = managed.Release;
+        native.Environment = managed.Environment;
+        native.Platform = managed.Platform!;
+        native.Transaction = managed.TransactionName!;
+        native.Message = managed.Message?.ToCocoaSentryMessage();
+        native.Tags = managed.Tags?.ToNSDictionaryStrings();
+        native.Extra = managed.Extra?.ToNSDictionary();
+        native.Breadcrumbs = managed.Breadcrumbs?.Select(x => x.ToCocoaBreadcrumb()).ToArray();
+        native.User = managed.User?.ToCocoaUser();
+
+        if (managed.Level != null)
+        {
+            native.Level = managed.Level.Value.ToCocoaSentryLevel();
+        }
+
+        if (managed.Exception != null)
+        {
+            native.Error = new NSError(new NSString(managed.Exception.ToString()), IntPtr.Zero);
+        }
+    }
 
     public static SentryEvent? ToSentryEvent(this CocoaSdk.SentryEvent sentryEvent)
     {
