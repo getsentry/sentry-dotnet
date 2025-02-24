@@ -135,10 +135,10 @@ public static partial class SentrySdk
                     return evt;
 
                 var result = options.BeforeSendInternal(sentryEvent, null!);
-                // returning null is fine - the native binding even has this set, but the tooling doesn't want to obey, so the pragma was necessary
                 if (result == null)
                     return null!;
 
+                // we only support a subset of mutated data to be passed back to the native SDK at this time
                 evt.ServerName = result.ServerName;
                 evt.Dist = result.Distribution;
                 evt.Logger = result.Logger;
