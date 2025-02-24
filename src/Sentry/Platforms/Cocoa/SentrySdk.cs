@@ -35,7 +35,6 @@ public static partial class SentrySdk
         nativeOptions.SendDefaultPii = options.SendDefaultPii;
         nativeOptions.SessionTrackingIntervalMillis = (nuint)options.AutoSessionTrackingInterval.TotalMilliseconds;
 
-        // nativeOptions.BeforeSend
         if (options.Environment is { } environment)
         {
             nativeOptions.Environment = environment;
