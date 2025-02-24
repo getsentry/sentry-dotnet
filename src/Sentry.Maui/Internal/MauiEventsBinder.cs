@@ -11,6 +11,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
 {
     private readonly IHub _hub;
     private readonly SentryMauiOptions _options;
+    private readonly IEnumerable<IMauiElementEventBinder> _elementEventBinders;
 
     // https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types
     // https://github.com/getsentry/sentry/blob/master/static/app/types/breadcrumbs.tsx
@@ -22,10 +23,11 @@ internal class MauiEventsBinder : IMauiEventsBinder
     internal const string RenderingCategory = "ui.rendering";
     internal const string UserActionCategory = "ui.useraction";
 
-    public MauiEventsBinder(IHub hub, IOptions<SentryMauiOptions> options)
+    public MauiEventsBinder(IHub hub, IOptions<SentryMauiOptions> options, IEnumerable<IMauiElementEventBinder> elementEventBinders)
     {
         _hub = hub;
         _options = options.Value;
+        _elementEventBinders = elementEventBinders;
     }
 
     public void HandleApplicationEvents(Application application, bool bind = true)
@@ -96,12 +98,27 @@ internal class MauiEventsBinder : IMauiEventsBinder
             case Page page:
                 HandlePageEvents(page);
                 break;
-            case Button button:
-                HandleButtonEvents(button);
+            default:
+                if (e.Element is VisualElement ve)
+                {
+                    foreach (var binder in _elementEventBinders)
+                    {
+                        binder.Bind(ve, OnBreadcrumbCreateCallback);
+                    }
+                }
                 break;
-
-                // TODO: Attach to specific events on more control types
         }
+    }
+
+    private void OnBreadcrumbCreateCallback(BreadcrumbEvent breadcrumb)
+    {
+        _hub.AddBreadcrumbForEvent(
+            _options,
+            breadcrumb.Sender,
+            breadcrumb.EventName,
+            UserType,
+            UserActionCategory
+        );
     }
 
     private void OnApplicationOnDescendantRemoved(object? _, ElementEventArgs e)
@@ -127,8 +144,14 @@ internal class MauiEventsBinder : IMauiEventsBinder
             case Page page:
                 HandlePageEvents(page, bind: false);
                 break;
-            case Button button:
-                HandleButtonEvents(button, bind: false);
+            default:
+                if (e.Element is VisualElement ve)
+                {
+                    foreach (var binder in _elementEventBinders)
+                    {
+                        binder.UnBind(ve);
+                    }
+                }
                 break;
         }
     }
@@ -279,22 +302,6 @@ internal class MauiEventsBinder : IMauiEventsBinder
         }
     }
 
-    internal void HandleButtonEvents(Button button, bool bind = true)
-    {
-        if (bind)
-        {
-            button.Clicked += OnButtonOnClicked;
-            button.Pressed += OnButtonOnPressed;
-            button.Released += OnButtonOnReleased;
-        }
-        else
-        {
-            button.Clicked -= OnButtonOnClicked;
-            button.Pressed -= OnButtonOnPressed;
-            button.Released -= OnButtonOnReleased;
-        }
-    }
-
     // Application Events
 
     private void OnApplicationOnPageAppearing(object? sender, Page page) =>
@@ -424,15 +431,4 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     private void OnPageOnLayoutChanged(object? sender, EventArgs _) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.LayoutChanged), SystemType, RenderingCategory);
-
-    // Button Events
-
-    private void OnButtonOnClicked(object? sender, EventArgs _) =>
-        _hub.AddBreadcrumbForEvent(_options, sender, nameof(Button.Clicked), UserType, UserActionCategory);
-
-    private void OnButtonOnPressed(object? sender, EventArgs _) =>
-        _hub.AddBreadcrumbForEvent(_options, sender, nameof(Button.Pressed), UserType, UserActionCategory);
-
-    private void OnButtonOnReleased(object? sender, EventArgs _) =>
-        _hub.AddBreadcrumbForEvent(_options, sender, nameof(Button.Released), UserType, UserActionCategory);
 }
