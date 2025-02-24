@@ -54,8 +54,8 @@ public class NativeSerializationTests
         native.Platform = "native platform";
         native.Transaction = "native transaction";
         native.Message = new SentryMessage { Params = ["Test"] }.ToCocoaSentryMessage();
-        native.Tags = new Dictionary<string, string> {{ "TestTagKey", "TestTagValue"}}.ToNSDictionaryStrings();
-        native.Extra = new Dictionary<string, string> {{ "TestExtraKey", "TestExtraValue"}}.ToNSDictionaryStrings();
+        native.Tags = new Dictionary<string, string> { { "TestTagKey", "TestTagValue" } }.ToNSDictionaryStrings();
+        native.Extra = new Dictionary<string, string> { { "TestExtraKey", "TestExtraValue" } }.ToNSDictionaryStrings();
         native.Breadcrumbs =
         [
             new CocoaSdk.SentryBreadcrumb(CocoaSdk.SentryLevel.Debug, "category")
@@ -71,7 +71,7 @@ public class NativeSerializationTests
         AssertEqual(managed, native);
     }
 
-    static void AssertEqual(SentryEvent managed, CocoaSdk.SentryEvent native)
+    private static void AssertEqual(SentryEvent managed, CocoaSdk.SentryEvent native)
     {
         native.ServerName.Should().Be(managed.ServerName);
         native.Dist.Should().Be(managed.Distribution);
