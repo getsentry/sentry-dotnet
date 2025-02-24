@@ -72,7 +72,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         }
     }
 
-    private void OnApplicationOnDescendantAdded(object? _, ElementEventArgs e)
+    internal void OnApplicationOnDescendantAdded(object? _, ElementEventArgs e)
     {
         if (_options.CreateElementEventsBreadcrumbs)
         {
@@ -110,7 +110,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         }
     }
 
-    private void OnBreadcrumbCreateCallback(BreadcrumbEvent breadcrumb)
+    internal void OnBreadcrumbCreateCallback(BreadcrumbEvent breadcrumb)
     {
         _hub.AddBreadcrumbForEvent(
             _options,

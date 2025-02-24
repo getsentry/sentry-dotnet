@@ -19,7 +19,7 @@ public partial class MauiEventsBinderTests
                 .Do(c => c.Arg<Action<Scope>>()(Scope));
 
             var options = Microsoft.Extensions.Options.Options.Create(Options);
-            Binder = new MauiEventsBinder(hub, options);
+            Binder = new MauiEventsBinder(hub, options, [new MauiButtonEventsBinder()]);
         }
     }
 
