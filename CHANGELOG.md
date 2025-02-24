@@ -4,6 +4,7 @@
 
 ### Features
 
+- Using SentryOptions.SuppressSegfaults, users can now block duplicate errors from native due to dotnet NullReferenceExceptions - Defaults to false ([#3998](https://github.com/getsentry/sentry-dotnet/pull/3998))
 - Native iOS events are now exposed to the dotnet layer for users to hook through SentryOptions.BeforeSend and SentryOptions.OnCrashedLastRun ([#2102](https://github.com/getsentry/sentry-dotnet/pull/3958))
 - Serilog scope properties are now sent with Sentry events ([#3976](https://github.com/getsentry/sentry-dotnet/pull/3976))
 - The sample seed used for sampling decisions is now propagated, for use in downstream custom trace samplers ([#3951](https://github.com/getsentry/sentry-dotnet/pull/3951))
