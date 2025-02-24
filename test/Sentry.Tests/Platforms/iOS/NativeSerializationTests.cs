@@ -24,7 +24,7 @@ public class NativeSerializationTests
         evt.TransactionName = "test transaction name";
         evt.Message = new SentryMessage { Params = ["Test"] };
         evt.SetTag("TestTagKey", "TestTagValue");
-        evt.AddBreadcrumb(new Breadcrumb(DateTimeOffset.Now, "test breadcrumb", "test type"));
+        evt.AddBreadcrumb(new Breadcrumb("test breadcrumb", "test type"));
         evt.SetExtra("TestExtraKey", "TestExtraValue");
         evt.User = new SentryUser
         {
@@ -55,7 +55,7 @@ public class NativeSerializationTests
         native.Transaction = "native transaction";
         native.Message = new SentryMessage { Params = ["Test"] }.ToCocoaSentryMessage();
         native.Tags = new Dictionary<string, string> { { "TestTagKey", "TestTagValue" } }.ToNSDictionaryStrings();
-        native.Extra = new Dictionary<string, string> { { "TestExtraKey", "TestExtraValue" } }.ToNSDictionaryStrings();
+        native.Extra = new Dictionary<string, string> { { "TestExtraKey", "TestExtraValue" } }.ToNSDictionary();
         native.Breadcrumbs =
         [
             new CocoaSdk.SentryBreadcrumb(CocoaSdk.SentryLevel.Debug, "category")
@@ -81,7 +81,7 @@ public class NativeSerializationTests
         native.Platform.Should().Be(managed.Platform!);
         native.Transaction.Should().Be(managed.TransactionName!);
 
-        native.Message.Params.First().Should().Be(managed.Message.Params.First());
+        native.Message.Params.First().Should().Be(managed.Message.Params.First().ToString());
 
         native.Extra.Keys[0].Should().Be(new NSString(managed.Extra.Keys.First()));
         native.Extra.Values[0].Should().Be(NSObject.FromObject(managed.Extra.Values.First()));
