@@ -13,6 +13,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     private const string TypeKey = "type";
 
     internal const string TypeValueEvent = "event";
+    internal const string TypeValueFeedback = "feedback";
     internal const string TypeValueUserReport = "user_report";
     internal const string TypeValueTransaction = "transaction";
     internal const string TypeValueSpan = "span";
@@ -211,6 +212,19 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
         {
             [TypeKey] = TypeValueEvent
+        };
+
+        return new EnvelopeItem(header, new JsonSerializable(@event));
+    }
+
+    /// <summary>
+    /// Creates an <see cref="EnvelopeItem"/> from a feedback <paramref name="event"/>.
+    /// </summary>
+    public static EnvelopeItem FromFeedback(SentryEvent @event)
+    {
+        var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
+        {
+            [TypeKey] = TypeValueFeedback
         };
 
         return new EnvelopeItem(header, new JsonSerializable(@event));

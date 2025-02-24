@@ -150,6 +150,13 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
+    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    {
+    }
+
+    /// <summary>
+    /// No-Op.
+    /// </summary>
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope) => SentryId.Empty;
 
     /// <summary>
