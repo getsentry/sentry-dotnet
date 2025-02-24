@@ -1578,6 +1578,27 @@ public partial class HubTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
+    public void CaptureFeedback_HubEnabled(bool enabled)
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        if (!enabled)
+        {
+            hub.Dispose();
+        }
+
+        var feedback = new SentryFeedback("Test feedback");
+
+        // Act
+        hub.CaptureFeedback(feedback);
+
+        // Assert
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
     public void CaptureUserFeedback_HubEnabled(bool enabled)
     {
         // Arrange
