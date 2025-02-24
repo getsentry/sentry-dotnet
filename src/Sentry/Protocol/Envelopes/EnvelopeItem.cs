@@ -10,7 +10,7 @@ namespace Sentry.Protocol.Envelopes;
 /// </summary>
 public sealed class EnvelopeItem : ISerializable, IDisposable
 {
-    private const string TypeKey = "type";
+    internal const string TypeKey = "type";
 
     internal const string TypeValueEvent = "event";
     internal const string TypeValueFeedback = "feedback";
