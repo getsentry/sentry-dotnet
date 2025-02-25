@@ -1,4 +1,7 @@
+using System;
 using Microsoft.Extensions.Options;
+using Microsoft.Maui.Controls;
+using Sentry.Internal;
 
 namespace Sentry.Maui.Internal;
 
@@ -245,6 +248,75 @@ internal class MauiEventsBinder : IMauiEventsBinder
         }
     }
 
+
+    /*
+class NativeAppStartHandler {
+       NativeAppStartHandler(this._native);
+
+       final SentryNativeBinding _native;
+
+       late final Hub _hub;
+       late final SentryFlutterOptions _options;
+
+       /// We filter out App starts more than 60s
+       static const _maxAppStartMillis = 60000;
+
+       Future<void> call(Hub hub, SentryFlutterOptions options,
+           {required DateTime? appStartEnd}) async {
+         _hub = hub;
+         _options = options;
+
+         final nativeAppStart = await _native.fetchNativeAppStart();
+         if (nativeAppStart == null) {
+           return;
+         }
+         final appStartInfo = _infoNativeAppStart(nativeAppStart, appStartEnd);
+         if (appStartInfo == null) {
+           return;
+         }
+
+         // Create Transaction & Span
+
+         const screenName = 'root /';
+         final transaction = _hub.startTransaction(
+           screenName,
+           SentrySpanOperations.uiLoad,
+           startTimestamp: appStartInfo.start,
+         );
+         final ttidSpan = transaction.startChild(
+           SentrySpanOperations.uiTimeToInitialDisplay,
+           description: '$screenName initial display',
+           startTimestamp: appStartInfo.start,
+         );
+
+         // Enrich Transaction
+
+         SentryTracer sentryTracer;
+         if (transaction is SentryTracer) {
+           sentryTracer = transaction;
+         } else {
+           return;
+         }
+
+         SentryMeasurement? measurement;
+         if (options.autoAppStart) {
+           measurement = appStartInfo.toMeasurement();
+         } else if (appStartEnd != null) {
+           appStartInfo.end = appStartEnd;
+           measurement = appStartInfo.toMeasurement();
+         }
+
+         if (measurement != null) {
+           sentryTracer.measurements[measurement.name] = measurement;
+           await _attachAppStartSpans(appStartInfo, sentryTracer);
+         }
+
+         // Finish Transaction & Span
+
+         await ttidSpan.finish(endTimestamp: appStartInfo.end);
+         await transaction.finish(endTimestamp: appStartInfo.end);
+     */
+
     internal void HandlePageEvents(Page page, bool bind = true)
     {
         if (bind)
@@ -253,6 +325,11 @@ internal class MauiEventsBinder : IMauiEventsBinder
             // https://docs.microsoft.com/dotnet/maui/fundamentals/shell/lifecycle
             page.Appearing += OnPageOnAppearing;
             page.Disappearing += OnPageOnDisappearing;
+
+
+            // TODO: if I haven't already done the TTID, perform it here and end it in OnPageOnNavigatedTo
+            var timestamp = ProcessInfo.Instance!.StartupTimestamp;
+
 
             // Navigation events
             // https://github.com/dotnet/docs-maui/issues/583
