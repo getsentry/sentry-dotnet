@@ -14,6 +14,8 @@
             <Label Text="Name" Margin="0,20,0,0" />
             <Entry x:Name="NameEntry" Placeholder="Enter your name" />
 
+            <Button Text="Attach Screenshot" Clicked="OnAttachScreenshotClicked" Margin="0,20,0,0" />
+
             <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" Margin="0,20,0,0" Spacing="10">
                 <Button Text="Cancel" Clicked="OnCancelClicked" BackgroundColor="Red" TextColor="White" />
                 <Button Text="Submit" Clicked="OnSubmitClicked" BackgroundColor="Green" TextColor="White" />
