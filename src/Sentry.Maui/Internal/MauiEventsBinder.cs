@@ -121,7 +121,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         );
     }
 
-    private void OnApplicationOnDescendantRemoved(object? _, ElementEventArgs e)
+    internal void OnApplicationOnDescendantRemoved(object? _, ElementEventArgs e)
     {
         // All elements have a set of common events we can hook
         HandleElementEvents(e.Element, bind: false);

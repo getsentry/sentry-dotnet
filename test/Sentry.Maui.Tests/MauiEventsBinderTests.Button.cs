@@ -47,6 +47,8 @@ public partial class MauiEventsBinderTests
         button.RaiseEvent(eventName, EventArgs.Empty);
         Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
+        _fixture.Binder.OnApplicationOnDescendantRemoved(null, el);
+
         // Act
         button.RaiseEvent(eventName, EventArgs.Empty);
 
