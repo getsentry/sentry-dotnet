@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Sentry.Samples.Maui.SubmitFeedback">
+    <ContentPage.Content>
+        <StackLayout Padding="20">
+            <Label Text="Message" />
+            <Editor x:Name="MessageEditor" Placeholder="Enter your feedback message" />
+
+            <Label Text="Contact Email" Margin="0,20,0,0" />
+            <Entry x:Name="ContactEmailEntry" Placeholder="Enter your contact email" />
+
+            <Label Text="Name" Margin="0,20,0,0" />
+            <Entry x:Name="NameEntry" Placeholder="Enter your name" />
+
+            <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" Margin="0,20,0,0" Spacing="10">
+                <Button Text="Cancel" Clicked="OnCancelClicked" BackgroundColor="Red" TextColor="White" />
+                <Button Text="Submit" Clicked="OnSubmitClicked" BackgroundColor="Green" TextColor="White" />
+            </StackLayout>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

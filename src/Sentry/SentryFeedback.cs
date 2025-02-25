@@ -42,12 +42,12 @@ public sealed class SentryFeedback : ISentryJsonSerializable, ICloneable<SentryF
     /// <summary>
     /// Optional ID of the event that the user feedback is associated with.
     /// </summary>
-    public SentryId AssociatedEventId { get; set; }
+    public SentryId? AssociatedEventId { get; set; }
 
     /// <summary>
     /// Creates an instance of <see cref="SentryFeedback"/>.
     /// </summary>
-    public SentryFeedback(string message, string? contactEmail = null, string? name = null, string? replayId = null, string? url = null, SentryId associatedEventId = default)
+    public SentryFeedback(string message, string? contactEmail = null, string? name = null, string? replayId = null, string? url = null, SentryId? associatedEventId = null)
     {
         Message = message;
         ContactEmail = contactEmail;
@@ -74,7 +74,7 @@ public sealed class SentryFeedback : ISentryJsonSerializable, ICloneable<SentryF
         writer.WriteStringIfNotWhiteSpace("name", Name);
         writer.WriteStringIfNotWhiteSpace("replay_id", ReplayId);
         writer.WriteStringIfNotWhiteSpace("url", Url);
-        writer.WriteSerializable("associated_event_id", AssociatedEventId, logger);
+        writer.WriteSerializableIfNotNull("associated_event_id", AssociatedEventId, logger);
 
         writer.WriteEndObject();
     }
@@ -89,7 +89,7 @@ public sealed class SentryFeedback : ISentryJsonSerializable, ICloneable<SentryF
         var name = json.GetPropertyOrNull("name")?.GetString();
         var replayId = json.GetPropertyOrNull("replay_id")?.GetString();
         var url = json.GetPropertyOrNull("url")?.GetString();
-        var eventId = json.GetPropertyOrNull("associated_event_id")?.Pipe(SentryId.FromJson) ?? SentryId.Empty;
+        var eventId = json.GetPropertyOrNull("associated_event_id")?.Pipe(SentryId.FromJson);
 
         return new SentryFeedback(message, contactEmail, name, replayId, url, eventId);
     }
