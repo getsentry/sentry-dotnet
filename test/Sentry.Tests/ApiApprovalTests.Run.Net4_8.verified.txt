@@ -545,8 +545,8 @@ namespace Sentry
     }
     public sealed class SentryFeedback : Sentry.ISentryJsonSerializable
     {
-        public SentryFeedback(string message, string? contactEmail = null, string? name = null, string? replayId = null, string? url = null, Sentry.SentryId associatedEventId = default) { }
-        public Sentry.SentryId AssociatedEventId { get; set; }
+        public SentryFeedback(string message, string? contactEmail = null, string? name = null, string? replayId = null, string? url = null, Sentry.SentryId? associatedEventId = default) { }
+        public Sentry.SentryId? AssociatedEventId { get; set; }
         public string? ContactEmail { get; set; }
         public string Message { get; set; }
         public string? Name { get; set; }
