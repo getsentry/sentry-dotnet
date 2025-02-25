@@ -78,5 +78,6 @@ public partial class SubmitFeedback : ContentPage
         catch (Exception ex)
         {
             await DisplayAlert("Error", $"An error occurred while selecting the screenshot: {ex.Message}", "OK");
-        }    }
+        }
+    }
 }
