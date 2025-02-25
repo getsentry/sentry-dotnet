@@ -333,6 +333,7 @@ public sealed class Envelope : ISerializable, IDisposable
     /// <summary>
     /// Creates an envelope that contains a single user feedback.
     /// </summary>
+    [Obsolete("Use FromFeedback instead.")]
     public static Envelope FromUserFeedback(UserFeedback sentryUserFeedback)
     {
         var eventId = sentryUserFeedback.EventId;

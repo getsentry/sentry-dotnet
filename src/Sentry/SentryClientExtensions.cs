@@ -48,6 +48,7 @@ public static class SentryClientExtensions
     /// <param name="email">The user email.</param>
     /// <param name="comments">The user comments.</param>
     /// <param name="name">The optional username.</param>
+    [Obsolete("Use CaptureFeedback instead.")]
     public static void CaptureUserFeedback(this ISentryClient client, SentryId eventId, string email, string comments,
         string? name = null)
     {

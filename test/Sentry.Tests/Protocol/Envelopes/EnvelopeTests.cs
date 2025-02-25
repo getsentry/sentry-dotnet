@@ -798,6 +798,7 @@ public class EnvelopeTests
     [Fact]
     public async Task Roundtrip_WithUserFeedback_Success()
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         // Arrange
         var feedback = new UserFeedback(
             SentryId.Create(),
@@ -817,6 +818,7 @@ public class EnvelopeTests
 
         // Assert
         envelopeRoundtrip.Should().BeEquivalentTo(envelope);
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Fact]

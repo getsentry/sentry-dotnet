@@ -546,6 +546,7 @@ internal class Hub : IHub, IDisposable
     }
 #endif
 
+    [Obsolete("Use CaptureFeedback instead.")]
     public void CaptureUserFeedback(UserFeedback userFeedback)
     {
         if (!IsEnabled)

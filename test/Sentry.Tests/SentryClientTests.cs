@@ -799,6 +799,7 @@ public partial class SentryClientTests
     [Fact]
     public void CaptureUserFeedback_EventIdEmpty_IgnoreUserFeedback()
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         //Arrange
         var sut = _fixture.GetSut();
 
@@ -808,11 +809,13 @@ public partial class SentryClientTests
 
         //Assert
         _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Fact]
     public void CaptureUserFeedback_ValidUserFeedback_FeedbackRegistered()
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         //Arrange
         var sut = _fixture.GetSut();
 
@@ -822,11 +825,13 @@ public partial class SentryClientTests
 
         //Assert
         _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Fact]
     public void CaptureUserFeedback_EventIdEmpty_FeedbackIgnored()
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         //Arrange
         var sut = _fixture.GetSut();
 
@@ -835,6 +840,7 @@ public partial class SentryClientTests
 
         //Assert
         _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Fact]
@@ -940,9 +946,11 @@ public partial class SentryClientTests
     [Fact]
     public void CaptureUserFeedback_DisposedClient_DoesNotThrow()
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         var sut = _fixture.GetSut();
         sut.Dispose();
         sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "name", "email", "comment"));
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Fact]

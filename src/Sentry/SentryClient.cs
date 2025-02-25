@@ -117,6 +117,7 @@ public class SentryClient : ISentryClient, IDisposable
     }
 
     /// <inheritdoc />
+    [Obsolete("Use CaptureFeedback instead.")]
     public void CaptureUserFeedback(UserFeedback userFeedback)
     {
         if (userFeedback.EventId.Equals(SentryId.Empty))

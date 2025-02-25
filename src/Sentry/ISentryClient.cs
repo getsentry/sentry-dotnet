@@ -40,6 +40,7 @@ public interface ISentryClient
     /// Captures a user feedback.
     /// </summary>
     /// <param name="userFeedback">The user feedback to send to Sentry.</param>
+    [Obsolete("Use CaptureFeedback instead.")]
     void CaptureUserFeedback(UserFeedback userFeedback);
 
     /// <summary>

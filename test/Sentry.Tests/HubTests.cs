@@ -1601,6 +1601,7 @@ public partial class HubTests
     [InlineData(false)]
     public void CaptureUserFeedback_HubEnabled(bool enabled)
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         // Arrange
         var hub = _fixture.GetSut();
         if (!enabled)
@@ -1615,6 +1616,7 @@ public partial class HubTests
 
         // Assert
         _fixture.Client.Received(enabled ? 1 : 0).CaptureUserFeedback(Arg.Any<UserFeedback>());
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Theory]
