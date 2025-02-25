@@ -86,7 +86,6 @@ public class SentryClient : ISentryClient, IDisposable
     {
         if (string.IsNullOrEmpty(feedback.Message))
         {
-            // Ignore the user feedback if EventId is empty
             _options.LogWarning("Feedback dropped due to empty message.");
             return;
         }

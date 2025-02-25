@@ -900,7 +900,7 @@ public class EnvelopeTests
             Arg.Is<string>(m => m.Contains("Feedback can only contain one attachment")),
             null,
             Arg.Any<object[]>());
-        envelope.Items.Should().ContainSingle(item => item.Header[EnvelopeItem.TypeKey].ToString() == EnvelopeItem.TypeValueAttachment);
+        envelope.Items.Should().ContainSingle(item => item.TryGetType() == EnvelopeItem.TypeValueAttachment);
     }
 
     [Fact]

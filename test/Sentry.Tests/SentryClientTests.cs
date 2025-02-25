@@ -836,6 +836,7 @@ public partial class SentryClientTests
         //Assert
         _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
     }
+
     [Fact]
     public void Dispose_should_only_flush()
     {
@@ -847,6 +848,93 @@ public partial class SentryClientTests
 
         //Assert is still usable
         client.CaptureEvent(new SentryEvent { Message = "Test" });
+    }
+
+    [Fact]
+    public void CaptureFeedback_DisposedClient_DoesNotThrow()
+    {
+        // Arrange
+        var feedback = new SentryFeedback("Everything is great!");
+
+        var sut = _fixture.GetSut();
+        sut.Dispose();
+
+        // Act / Assert
+        sut.CaptureFeedback(feedback);
+    }
+
+    [Fact]
+    public void CaptureFeedback_NoMessage_FeedbackIgnored()
+    {
+        //Arrange
+        var sut = _fixture.GetSut();
+        var feedback = new SentryFeedback(string.Empty);
+
+        //Act
+        sut.CaptureFeedback(feedback);
+
+        //Assert
+        _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureFeedback_ValidUserFeedback_FeedbackRegistered()
+    {
+        //Arrange
+        var sut = _fixture.GetSut();
+        var feedback = new SentryFeedback("Everything is great!");
+
+        //Act
+        sut.CaptureFeedback(feedback);
+
+        //Assert
+        _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+    }
+
+    [Fact]
+    public void CaptureFeedback_WithScope_ScopeCopiedToEvent()
+    {
+        //Arrange
+        const string expectedBreadcrumb = "test";
+        var scope = new Scope(_fixture.SentryOptions);
+        scope.AddBreadcrumb(expectedBreadcrumb);
+        scope.Level = SentryLevel.Warning;
+        var feedback = new SentryFeedback("Everything is great!");
+        var sut = _fixture.GetSut();
+
+        Envelope envelope = null;
+        sut.Worker.When(w => w.EnqueueEnvelope(Arg.Any<Envelope>()))
+            .Do(callback => envelope = callback.Arg<Envelope>());
+
+        //Act
+        sut.CaptureFeedback(feedback, scope);
+
+        //Assert
+        _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        envelope.Should().NotBeNull();
+        envelope.Items.Should().Contain(item => item.TryGetType() == EnvelopeItem.TypeValueFeedback);
+        var item = envelope.Items.First(x => x.TryGetType() == EnvelopeItem.TypeValueFeedback);
+        var @event = (SentryEvent)((JsonSerializable)item.Payload).Source;
+        @event.Level.Should().Be(scope.Level);
+        Assert.Equal(scope.Breadcrumbs, @event.Breadcrumbs);
+    }
+
+    [Fact]
+    public void CaptureFeedback_WithHint_HasHintAttachment()
+    {
+        //Arrange
+        var sut = _fixture.GetSut();
+        var feedback = new SentryFeedback("Everything is great!");
+        var hint = new SentryHint();
+        hint.Attachments.Add(AttachmentHelper.FakeAttachment("foo.txt"));
+
+        //Act
+        sut.CaptureFeedback(feedback, null, hint);
+
+        //Assert
+        _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
+            envelope.Items.Count(item => item.TryGetType() == "attachment") == 1));
     }
 
     [Fact]
