@@ -833,7 +833,9 @@ public class EnvelopeTests
             "https://www.example.com",
             SentryId.Create()
         );
-        var evt = new SentryEvent { Level = SentryLevel.Info,
+        var evt = new SentryEvent
+        {
+            Level = SentryLevel.Info,
             Contexts =
             {
                 Feedback = feedback
@@ -880,7 +882,9 @@ public class EnvelopeTests
             "https://www.example.com",
             SentryId.Create()
         );
-        var evt = new SentryEvent { Level = SentryLevel.Info,
+        var evt = new SentryEvent
+        {
+            Level = SentryLevel.Info,
             Contexts =
             {
                 Feedback = feedback
