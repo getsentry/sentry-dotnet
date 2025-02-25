@@ -16,12 +16,6 @@ public class MauiButtonEventsBinder : IMauiElementEventBinder
             button.Pressed += OnButtonOnPressed;
             button.Released += OnButtonOnReleased;
         }
-        else if (element is ImageButton image)
-        {
-            image.Clicked += OnButtonOnClicked;
-            image.Pressed += OnButtonOnPressed;
-            image.Released += OnButtonOnReleased;
-        }
     }
 
     /// <inheritdoc />
@@ -32,12 +26,6 @@ public class MauiButtonEventsBinder : IMauiElementEventBinder
             button.Clicked -= OnButtonOnClicked;
             button.Pressed -= OnButtonOnPressed;
             button.Released -= OnButtonOnReleased;
-        }
-        else if (element is ImageButton image)
-        {
-            image.Clicked -= OnButtonOnClicked;
-            image.Pressed -= OnButtonOnPressed;
-            image.Released -= OnButtonOnReleased;
         }
     }
 
