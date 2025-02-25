@@ -15,6 +15,13 @@ namespace Sentry;
 /// </remarks>
 public static partial class SentrySdk
 {
+    /// <summary>
+    /// The starting ticks
+    /// </summary>
+    public static long AppStartTicks => _appStartTicks ??= Stopwatch.GetTimestamp();
+    private static long? _appStartTicks;
+
+
     internal static IHub CurrentHub = DisabledHub.Instance;
 
     internal static SentryOptions? CurrentOptions => CurrentHub.GetSentryOptions();

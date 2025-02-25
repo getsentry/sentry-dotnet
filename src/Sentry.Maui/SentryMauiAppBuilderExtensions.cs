@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Maui.LifecycleEvents;
+using Sentry;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Sentry.Maui;
@@ -42,6 +43,8 @@ public static class SentryMauiAppBuilderExtensions
     public static MauiAppBuilder UseSentry(this MauiAppBuilder builder,
         Action<SentryMauiOptions>? configureOptions)
     {
+        _ = SentrySdk.AppStartTicks; // ensure start ticks is hit, this is almost immediately in range of startup
+
         var services = builder.Services;
 
         if (configureOptions != null)
