@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FluentAssertions;
 using Foundation;
 using Sentry.Cocoa.Extensions;
 using Xunit;
@@ -79,7 +80,7 @@ public class CocoaExtensionsTests
 
     private static void AssertEqual(SentryEvent managed, CocoaSdk.SentryEvent native)
     {
-        native.ServerName.Should().Be(managed.ServerName);
+        native.ServerName.Should().Be(managed.ServerName, "Server Name");
         native.Dist.Should().Be(managed.Distribution, "Distribution");
         native.Logger.Should().Be(managed.Logger, "Logger");
         native.ReleaseName.Should().Be(managed.Release, "Release");
