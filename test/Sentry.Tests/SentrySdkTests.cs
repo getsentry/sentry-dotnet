@@ -859,6 +859,11 @@ public class SentrySdkTests : IDisposable
             BackgroundWorker = Substitute.For<IBackgroundWorker>(),
             InitNativeSdks = false
         };
+        options.SetBeforeSend(e =>
+        {
+            // we return a result for suppress segfaults because it expects null and null for the opposite case
+            return suppressSegfaults ? e : null;
+        });
         options.Native.SuppressSegfaults = suppressSegfaults;
 
         var evt = new Sentry.CocoaSdk.SentryEvent();
@@ -881,7 +886,7 @@ public class SentrySdkTests : IDisposable
         else
         {
             result.Should().NotBeNull();
-            result.Should.Exceptions.First().Type.Should().Be("SIGABRT");
+            result.Exceptions.First().Type.Should().Be("SIGABRT");
         }
     }
 
