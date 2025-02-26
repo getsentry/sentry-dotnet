@@ -5,13 +5,13 @@ namespace Sentry.Maui.Tests;
 public partial class MauiEventsBinderTests
 {
     [Theory]
-    [InlineData(nameof(Button.Clicked))]
-    [InlineData(nameof(Button.Pressed))]
-    [InlineData(nameof(Button.Released))]
-    public void Button_CommonEvents_AddsBreadcrumb(string eventName)
+    [InlineData(nameof(ImageButton.Clicked))]
+    [InlineData(nameof(ImageButton.Pressed))]
+    [InlineData(nameof(ImageButton.Released))]
+    public void ImageButton_CommonEvents_AddsBreadcrumb(string eventName)
     {
         // Arrange
-        var button = new Button
+        var button = new ImageButton
         {
             StyleId = "button"
         };
@@ -23,21 +23,21 @@ public partial class MauiEventsBinderTests
 
         // Assert
         var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
-        Assert.Equal($"{nameof(Button)}.{eventName}", crumb.Message);
+        Assert.Equal($"{nameof(ImageButton)}.{eventName}", crumb.Message);
         Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
         Assert.Equal(MauiEventsBinder.UserType, crumb.Type);
         Assert.Equal(MauiEventsBinder.UserActionCategory, crumb.Category);
-        crumb.Data.Should().Contain($"{nameof(Button)}.Name", "button");
+        crumb.Data.Should().Contain($"{nameof(ImageButton)}.Name", "button");
     }
 
     [Theory]
-    [InlineData(nameof(Button.Clicked))]
-    [InlineData(nameof(Button.Pressed))]
-    [InlineData(nameof(Button.Released))]
-    public void Button_UnbindCommonEvents_DoesNotAddBreadcrumb(string eventName)
+    [InlineData(nameof(ImageButton.Clicked))]
+    [InlineData(nameof(ImageButton.Pressed))]
+    [InlineData(nameof(ImageButton.Released))]
+    public void ImageButton_UnbindCommonEvents_DoesNotAddBreadcrumb(string eventName)
     {
         // Arrange
-        var button = new Button
+        var button = new ImageButton
         {
             StyleId = "button"
         };
