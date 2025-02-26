@@ -843,7 +843,7 @@ public class SentrySdkTests : IDisposable
             Arg.Any<object[]>());
     }
 
-    #if __IOS__
+#if __IOS__
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -917,7 +917,7 @@ public class SentrySdkTests : IDisposable
         result.Should().NotBeNull();
         result.Platform.Should().Be("dotnet");
     }
-    #endif
+#endif
 
     public void Dispose()
     {
