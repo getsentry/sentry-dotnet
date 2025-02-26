@@ -51,6 +51,7 @@ public class CocoaExtensionsTests
         var native = new CocoaSdk.SentryEvent();
 
         native.Timestamp = DateTimeOffset.UtcNow.ToNSDate();
+        native.Level = Sentry.CocoaSdk.SentryLevel.Debug;
         native.ServerName = "native server name";
         native.Dist = "native dist";
         native.Logger = "native logger";
