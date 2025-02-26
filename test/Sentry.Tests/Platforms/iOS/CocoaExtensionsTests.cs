@@ -7,10 +7,10 @@ using Xunit;
 
 namespace Sentry.Tests.Platforms.iOS;
 
-public class NativeSerializationTests
+public class CocoaExtensionsTests
 {
     [Fact]
-    public void Managed_To_Native()
+    public void CopyToCocoaSentryEvent_CopiesProperties()
     {
         var evt = new SentryEvent(new Exception("Test Exception"));
 
@@ -42,10 +42,11 @@ public class NativeSerializationTests
 
 
     [Fact]
-    public void Native_To_Managed()
+    public void ToSentryEvent_ConvertToManaged()
     {
         var native = new CocoaSdk.SentryEvent();
 
+        native.Timestamp = DateTimeOffset.UtcNow.ToNSDate();
         native.ServerName = "native server name";
         native.Dist = "native dist";
         native.Logger = "native logger";

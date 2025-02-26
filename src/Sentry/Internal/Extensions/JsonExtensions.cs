@@ -227,7 +227,8 @@ internal static class JsonExtensions
         {
             if (dtRaw.Value.ValueKind == JsonValueKind.Number)
             {
-                result = DateTimeOffset.FromUnixTimeSeconds(dtRaw.Value.GetInt64());
+                var epoch = Convert.ToInt64(dtRaw.Value.GetDouble());
+                result = DateTimeOffset.FromUnixTimeSeconds(epoch);
             }
             else
             {
