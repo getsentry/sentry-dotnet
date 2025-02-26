@@ -2,21 +2,27 @@
 
 ## Unreleased
 
+
 ### Features
 
 - User Feedback can now be captured without errors/exceptions. Note that these APIs replace the older UserFeedback APIs, which have now been marked as obsolete (and will be removed in a future major version bump) ([#3981](https://github.com/getsentry/sentry-dotnet/pull/3981))
+- Users can now register their own MAUI controls for breadcrumb creation ([#3997](https://github.com/getsentry/sentry-dotnet/pull/3997))
 - Serilog scope properties are now sent with Sentry events ([#3976](https://github.com/getsentry/sentry-dotnet/pull/3976))
 - The sample seed used for sampling decisions is now propagated, for use in downstream custom trace samplers ([#3951](https://github.com/getsentry/sentry-dotnet/pull/3951))
+- Add Azure Function UseSentry overloads for easier wire ups  ([#3971](https://github.com/getsentry/sentry-dotnet/pull/3971))
 
 ### Fixes
 
-- Add Azure Function UseSentry overloads for easier wire ups  ([#3971](https://github.com/getsentry/sentry-dotnet/pull/3971))
+- Fix mismapped breadcrumb levels coming in from native to dotnet SDK ([#3993](https://github.com/getsentry/sentry-dotnet/pull/3993))
 
 ### Dependencies
 
-- Bump CLI from v2.41.1 to v2.42.1 ([#3979](https://github.com/getsentry/sentry-dotnet/pull/3979))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2421)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.41.1...2.42.1)
+- Bump CLI from v2.41.1 to v2.42.2 ([#3979](https://github.com/getsentry/sentry-dotnet/pull/3979), [#4002](https://github.com/getsentry/sentry-dotnet/pull/4002))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2422)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.41.1...2.42.2)
+- Bump Native SDK from v0.7.20 to v0.8.0 ([#4003](https://github.com/getsentry/sentry-dotnet/pull/4003))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#080)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.20...0.8.0)
 
 ## 5.1.1
 
