@@ -251,7 +251,6 @@ internal static class CocoaExtensions
         native.Logger = managed.Logger;
         native.ReleaseName = managed.Release;
         native.Environment = managed.Environment;
-        native.Platform = managed.Platform!;
         native.Transaction = managed.TransactionName!;
         native.Message = managed.Message?.ToCocoaSentryMessage();
         native.Tags = managed.Tags?.ToNSDictionaryStrings();

@@ -20,7 +20,6 @@ public class CocoaExtensionsTests
         evt.Logger = "test logger";
         evt.Release = "test release";
         evt.Environment = "test environment";
-        evt.Platform = "test platform";
         evt.TransactionName = "test transaction name";
         evt.Message = new SentryMessage { Params = ["Test"] };
         evt.SetTag("TestTagKey", "TestTagValue");
@@ -52,7 +51,6 @@ public class CocoaExtensionsTests
         native.Logger = "native logger";
         native.ReleaseName = "native release";
         native.Environment = "native env";
-        native.Platform = "native platform";
         native.Transaction = "native transaction";
         native.Message = new SentryMessage { Params = ["Test"] }.ToCocoaSentryMessage();
         native.Tags = new Dictionary<string, string> { { "TestTagKey", "TestTagValue" } }.ToNSDictionaryStrings();
@@ -79,7 +77,6 @@ public class CocoaExtensionsTests
         native.Logger.Should().Be(managed.Logger);
         native.ReleaseName.Should().Be(managed.Release);
         native.Environment.Should().Be(managed.Environment);
-        native.Platform.Should().Be(managed.Platform!);
         native.Transaction.Should().Be(managed.TransactionName!);
 
         native.Message.Params.First().Should().Be(managed.Message.Params.First().ToString());
