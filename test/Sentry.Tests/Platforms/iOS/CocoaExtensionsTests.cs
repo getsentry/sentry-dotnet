@@ -84,7 +84,7 @@ public class CocoaExtensionsTests
         native.ReleaseName.Should().Be(managed.Release, "Release");
         native.Environment.Should().Be(managed.Environment, "Environment");
         native.Transaction.Should().Be(managed.TransactionName!, "Transaction");
-        native.Level!.ToString().Equals(managed.Level.ToString(), "Level");
+        native.Level!.ToString().Should().Be(managed.Level.ToString(), "Level");
 
         native.Extra.Should().NotBeNull("No extras found");
         native.Extra.Count.Should().Be(1, "Extras should have 1 item");
