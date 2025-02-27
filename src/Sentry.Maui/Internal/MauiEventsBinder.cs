@@ -34,7 +34,16 @@ internal class MauiEventsBinder : IMauiEventsBinder
     {
         if (bind)
         {
-            // Attach element events to all descendents as they are added to the application.
+            // Attach element events to all existing descendants (skip the application itself)
+            foreach (var descendant in application.GetVisualTreeDescendants().Skip(1))
+            {
+                if (descendant is VisualElement element)
+                {
+                    OnApplicationOnDescendantAdded(application, new ElementEventArgs(element));
+                }
+            }
+
+            // Attach element events to all descendants as they are added to the application.
             application.DescendantAdded += OnApplicationOnDescendantAdded;
             application.DescendantRemoved += OnApplicationOnDescendantRemoved;
 
