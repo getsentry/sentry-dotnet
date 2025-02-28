@@ -94,7 +94,7 @@ public class SentryClient : ISentryClient, IDisposable
         hint ??= new SentryHint();
         hint.AddAttachmentsFromScope(scope);
 
-        _options.LogInfo("Capturing event.");
+        _options.LogInfo("Capturing feedback: '{0}'.", feedback.Message);
 
         var evt = new SentryEvent { Level = SentryLevel.Info };
         evt.Contexts.Feedback = feedback;

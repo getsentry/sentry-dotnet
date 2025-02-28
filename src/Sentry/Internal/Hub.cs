@@ -515,7 +515,6 @@ internal class Hub : IHub, IDisposable
 
         scope ??= CurrentScope;
         CurrentClient.CaptureFeedback(feedback, scope, hint);
-        scope.SessionUpdate = null;
     }
 
 #if MEMORY_DUMP_SUPPORTED

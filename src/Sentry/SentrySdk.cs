@@ -489,6 +489,16 @@ public static partial class SentrySdk
         => CurrentHub.CaptureFeedback(feedback, scope, hint);
 
     /// <summary>
+    /// Captures feedback from the user.
+    /// </summary>
+    [DebuggerStepThrough]
+    public static void CaptureFeedback(string message, string? contactEmail = null, string? name = null,
+        string? replayId = null, string? url = null, SentryId? associatedEventId = null, Scope? scope = null,
+        SentryHint? hint = null)
+        => CurrentHub.CaptureFeedback(new SentryFeedback(message, contactEmail, name, replayId, url, associatedEventId),
+            scope, hint);
+
+    /// <summary>
     /// Captures a user feedback.
     /// </summary>
     /// <param name="userFeedback">The user feedback to send to Sentry.</param>

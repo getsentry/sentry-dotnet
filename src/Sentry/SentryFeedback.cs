@@ -20,7 +20,7 @@ public sealed class SentryFeedback : ISentryJsonSerializable, ICloneable<SentryF
     public string Message { get; set; } = string.Empty;
 
     /// <summary>
-    /// The name of the user.
+    /// The user's contact email address.
     /// </summary>
     public string? ContactEmail { get; set; }
 
@@ -35,7 +35,7 @@ public sealed class SentryFeedback : ISentryJsonSerializable, ICloneable<SentryF
     public string? ReplayId { get; set; }
 
     /// <summary>
-    /// The name of the user.
+    /// Url that the feedback relates to
     /// </summary>
     public string? Url { get; set; }
 
