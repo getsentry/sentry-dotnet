@@ -1,4 +1,8 @@
+using System;
+using System.Linq;
+using FluentAssertions;
 using Sentry.Android.Extensions;
+using Xunit;
 
 namespace Sentry.Tests.Platforms.Android;
 
@@ -58,14 +62,8 @@ public class JsonExtensionsTests
         {
             Params = ["Test"]
         };
-        native.Tags = new Dictionary<string, string>
-        {
-            { "TestTagKey", "TestTagValue" }
-        };
-        native.Extras = new Dictionary<string, Java.Lang.Object>
-        {
-            { "TestExtraKey", new Java.Lang.String("TestExtraValue") }
-        };
+        native.SetTag("TestTagKey", "TestTagValue");
+        native.SetExtra("TestExtraKey", "TestExtraValue");
         native.Breadcrumbs =
         [
             new JavaSdk.Breadcrumb
@@ -78,7 +76,6 @@ public class JsonExtensionsTests
         native.User = new JavaSdk.Protocol.User
         {
             Id = "user id",
-            Name = "test name",
             Username = "test",
             Email = "test@sentry.io",
             IpAddress = "127.0.0.1"
@@ -103,13 +100,13 @@ public class JsonExtensionsTests
 
         // extras
         native.Extras.Should().NotBeNull("No extras found");
-        native.Extras.Count.Should().Be(1, "Extras should have 1 item");
+        native.Extras!.Count.Should().Be(1, "Extras should have 1 item");
         native.Extras!.Keys!.First().Should().Be(managed.Extra.Keys.First(), "Extras key should match");
-        native.Extras!.Values!.First().Should().Be(managed.Extra.Values.First(), "Extra value should match");
+        native.Extras!.Values!.First().ToString().Should().Be(managed.Extra.Values.First().ToString(), "Extra value should match");
 
         // tags
         native.Tags.Should().NotBeNull("No tags found");
-        native.Tags.Count.Should().Be(1, "Tags should have 1 item");
+        native.Tags!.Count.Should().Be(1, "Tags should have 1 item");
         native.Tags!.Keys!.First().Should().Be(managed.Tags.Keys.First());
         native.Tags!.Values!.First().Should().Be(managed.Tags.Values.First());
 

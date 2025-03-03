@@ -17,10 +17,11 @@ internal static class SentryEventExtensions
 
     public static SentryEvent ToSentryEvent(this JavaSdk.SentryEvent sentryEvent, JavaSdk.SentryOptions javaOptions)
     {
-        if (sentryEvent.User != null)
+        if (sentryEvent.Sdk != null)
         {
             // when we cast this serialize this over, this value must be set
-            sentryEvent.User.Name ??= string.Empty;
+            sentryEvent.Sdk.Name ??= "Sentry";
+            sentryEvent.Sdk.Version ??= "1.0.0";
         }
         using var stream = new MemoryStream();
         using var streamWriter = new JavaOutputStreamWriter(stream);
@@ -36,9 +37,10 @@ internal static class SentryEventExtensions
 
     public static JavaSdk.SentryEvent ToJavaSentryEvent(this SentryEvent sentryEvent, SentryOptions options, JavaSdk.SentryOptions javaOptions)
     {
-        if (sentryEvent.User != null)
+        if (sentryEvent.Sdk != null)
         {
-            sentryEvent.User.Name ??= String.Empty;
+            sentryEvent.Sdk.Name ??= "Sentry";
+            sentryEvent.Sdk.Version ??= "1.0.0";
         }
         using var stream = new MemoryStream();
         using var jsonWriter = new Utf8JsonWriter(stream);
