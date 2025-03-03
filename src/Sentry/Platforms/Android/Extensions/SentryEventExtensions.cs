@@ -20,7 +20,7 @@ internal static class SentryEventExtensions
         if (sentryEvent.User != null)
         {
             // when we cast this serialize this over, this value must be set
-            sentryEvent.User.Name ??= String.Empty;
+            sentryEvent.User.Name ??= string.Empty;
         }
         using var stream = new MemoryStream();
         using var streamWriter = new JavaOutputStreamWriter(stream);
