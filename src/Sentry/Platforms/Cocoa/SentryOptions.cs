@@ -197,7 +197,6 @@ public partial class SentryOptions
         /// </remarks>
         public NSUrlSessionDelegate? UrlSessionDelegate { get; set; } = null;
 
-
         // ---------- Other ----------
 
         /// <summary>
