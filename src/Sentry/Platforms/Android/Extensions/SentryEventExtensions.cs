@@ -38,7 +38,7 @@ internal static class SentryEventExtensions
     {
         if (sentryEvent.User != null)
         {
-            sentryEvent.User.Name ??= String.Empty;
+            sentryEvent.User.Name ??= string.Empty;
         }
         using var stream = new MemoryStream();
         using var jsonWriter = new Utf8JsonWriter(stream);
