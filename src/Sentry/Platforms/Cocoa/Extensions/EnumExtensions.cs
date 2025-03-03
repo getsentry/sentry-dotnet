@@ -11,7 +11,8 @@ internal static class EnumExtensions
         SentryLevel.Info => CocoaSdk.SentryLevel.Info,
         SentryLevel.Warning => CocoaSdk.SentryLevel.Warning,
         SentryLevel.Error => CocoaSdk.SentryLevel.Error,
-        SentryLevel.Fatal => CocoaSdk.SentryLevel.Fatal
+        SentryLevel.Fatal => CocoaSdk.SentryLevel.Fatal,
+        _ => throw new ArgumentOutOfRangeException(nameof(level), level, null)
     };
 
     public static BreadcrumbLevel ToBreadcrumbLevel(this CocoaSdk.SentryLevel level) =>
