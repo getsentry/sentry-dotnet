@@ -100,7 +100,10 @@ public static partial class SentrySdk
                 }
             }
 
-            o.BeforeSend = new BeforeSendCallback(BeforeSendWrapper(options), options, o);
+            if (options.Android.SuppressSegfaults || options.Native.EnableBeforeSend || options.BeforeSendInternal != null)
+            {
+                o.BeforeSend = new BeforeSendCallback(BeforeSendWrapper(options), options, o);
+            }
 
             // These options are from SentryAndroidOptions
             o.AttachScreenshot = options.Native.AttachScreenshot;
