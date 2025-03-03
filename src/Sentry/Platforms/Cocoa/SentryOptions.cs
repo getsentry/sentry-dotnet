@@ -197,6 +197,21 @@ public partial class SentryOptions
         /// </remarks>
         public NSUrlSessionDelegate? UrlSessionDelegate { get; set; } = null;
 
+        /// <summary>
+        /// <para>
+        /// Whether to suppress capturing SIGSEGV (Segfault) errors in the Native SDK.
+        /// </para>
+        /// <para>
+        /// When managed code results in a NullReferenceException, this also causes a SIGSEGV (Segfault). Duplicate
+        /// events (one managed and one native) can be prevented by suppressing native Segfaults, which may be
+        /// convenient.
+        /// </para>
+        /// <para>
+        /// Enabling this may prevent the capture of Segfault originating from native (not managed) code... so it may
+        /// prevent the capture of genuine native Segfault errors.
+        /// </para>
+        /// </summary>
+        public bool SuppressSegfaults { get; set; } = false;
 
         // ---------- Other ----------
 
