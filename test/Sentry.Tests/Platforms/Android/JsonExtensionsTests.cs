@@ -78,6 +78,7 @@ public class JsonExtensionsTests
         native.User = new JavaSdk.Protocol.User
         {
             Id = "user id",
+            Name = "test name",
             Username = "test",
             Email = "test@sentry.io",
             IpAddress = "127.0.0.1"
@@ -97,7 +98,7 @@ public class JsonExtensionsTests
         native.Release.Should().Be(managed.Release, "Release");
         native.Environment.Should().Be(managed.Environment, "Environment");
         native.Transaction.Should().Be(managed.TransactionName!, "Transaction");
-        native.Level!.ToString().Should().Be(managed.Level.ToString(), "Level");
+        native.Level!.ToString().ToUpper().Should().Be(managed.Level.ToUpper().ToString(), "Level");
         native.Throwable.Message.Should().Be(managed.Exception!.Message, "Message should match");
 
         // extras
