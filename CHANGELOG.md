@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Dependencies
+
+- Bump Native SDK from v0.8.0 to v0.8.1 ([#4014](https://github.com/getsentry/sentry-dotnet/pull/4014))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#081)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.8.0...0.8.1)
+
+## 5.2.0
 
 ### Features
 

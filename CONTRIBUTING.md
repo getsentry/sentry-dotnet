@@ -153,3 +153,21 @@ In CI, these packages are expected to be present, while locally, scripts will ru
 You can run individual tests either via Pester integration (e.g. in VS Code), or from command line: `./integration-test/cli.Tests.ps1`. Consult Pester docs for details on how to write tests.
 
 Because these tests rely on a Sentry server mock (`Invoke-SentryServer`) from <https://github.com/getsentry/github-workflows/tree/main/sentry-cli/integration-test>, you need to check out [getsentry/github-workflows](https://github.com/getsentry/github-workflows) as a sibling directory next to your `getsentry/sentry-dotnet` checkout.
+
+## Maintaining the Ben.Demystifier Submodule
+
+This repo uses a variety of techniques to vendor in third party code without creating external dependencies. One of
+those is submodules.
+
+One of those submodules is Ben.Demystifier, which was originally written by Ben Adams. Attempts to contact Ben in recent 
+years have been unsuccessful so we've started maintaining a permanent fork of the project at:
+- https://github.com/getsentry/Ben.Demystifier
+
+Any significant changes to the submodule should be made in a branch and merged into the submodule's `main` branch. 
+However, many of the members of Ben.Demystifier are public. That makes sense if people are using Ben.Demystifier as a 
+library, but in this repo we want to keep those members internal.
+
+Once changes to Ben.Demystifier have been merged into the main branch then, the `internal` branch of Ben.Demystifier 
+should be updated from the main branch and the `modules/make-internal.sh` script run again (if necessary). This repo 
+should reference the most recent commit on the `internal` branch of Ben.Demystifier then (functionally identical to the
+main branch - the only difference being the changes to member visibility).

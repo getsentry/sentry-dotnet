@@ -86,7 +86,6 @@ public static partial class SentrySdk
             }
         }
 
-        // HACK: generated native binding does not set nullable, but null is an acceptable return value here
         nativeOptions.BeforeSend = evt => ProcessOnBeforeSend(options, evt)!;
 
         if (options.OnCrashedLastRun is { } onCrashedLastRun)
