@@ -15,7 +15,6 @@ public sealed class SentryUser : ISentryJsonSerializable
     private string? _username;
     private string? _email;
     private string? _ipAddress;
-    private string? _name;
     private IDictionary<string, string>? _other;
 
     /// <summary>
@@ -45,22 +44,6 @@ public sealed class SentryUser : ISentryJsonSerializable
             if (_username != value)
             {
                 _username = value;
-                PropertyChanged?.Invoke(this);
-            }
-        }
-    }
-
-    /// <summary>
-    /// The name of the user.
-    /// </summary>
-    public string? Name
-    {
-        get => _name;
-        set
-        {
-            if (_name != value)
-            {
-                _name = value;
                 PropertyChanged?.Invoke(this);
             }
         }
@@ -156,7 +139,6 @@ public sealed class SentryUser : ISentryJsonSerializable
 
         writer.WriteStringIfNotWhiteSpace("id", Id);
         writer.WriteStringIfNotWhiteSpace("username", Username);
-        writer.WriteStringIfNotWhiteSpace("name", Name);
         writer.WriteStringIfNotWhiteSpace("email", Email);
         writer.WriteStringIfNotWhiteSpace("ip_address", IpAddress);
         writer.WriteStringDictionaryIfNotEmpty("other", _other!);
@@ -173,7 +155,6 @@ public sealed class SentryUser : ISentryJsonSerializable
         var username = json.GetPropertyOrNull("username")?.GetString();
         var email = json.GetPropertyOrNull("email")?.GetString();
         var ip = json.GetPropertyOrNull("ip_address")?.GetString();
-        var name = json.GetPropertyOrNull("name")?.GetString();
         var segment = json.GetPropertyOrNull("segment")?.GetString();
         var other = json.GetPropertyOrNull("other")?.GetStringDictionaryOrNull();
 
@@ -183,7 +164,6 @@ public sealed class SentryUser : ISentryJsonSerializable
             Username = username,
             Email = email,
             IpAddress = ip,
-            Name = name,
             _other = other?.WhereNotNullValue().ToDict()
         };
     }
