@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Single quotes added to the release name when using MS Build to create Sentry releases on Windows ([#4015](https://github.com/getsentry/sentry-dotnet/pull/4015))
+
 ## 5.2.0
 
 ### Features
