@@ -4,7 +4,15 @@ internal static class EnumExtensions
 {
     // These align, so we can just cast
     public static SentryLevel ToSentryLevel(this CocoaSdk.SentryLevel level) => (SentryLevel)level;
-    public static CocoaSdk.SentryLevel ToCocoaSentryLevel(this SentryLevel level) => (CocoaSdk.SentryLevel)level;
+
+    public static CocoaSdk.SentryLevel ToCocoaSentryLevel(this SentryLevel level) => level switch
+    {
+        SentryLevel.Debug => CocoaSdk.SentryLevel.Debug,
+        SentryLevel.Info => CocoaSdk.SentryLevel.Info,
+        SentryLevel.Warning => CocoaSdk.SentryLevel.Warning,
+        SentryLevel.Error => CocoaSdk.SentryLevel.Error,
+        SentryLevel.Fatal => CocoaSdk.SentryLevel.Fatal
+    };
 
     public static BreadcrumbLevel ToBreadcrumbLevel(this CocoaSdk.SentryLevel level) =>
         level switch

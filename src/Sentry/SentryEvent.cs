@@ -286,6 +286,25 @@ public sealed class SentryEvent : IEventLike, ISentryJsonSerializable
     /// </summary>
     public static SentryEvent FromJson(JsonElement json) => FromJson(json, null);
 
+
+    static SentryLevel? SafeLevelFromJson(JsonElement json)
+    {
+        var levelString = json.GetPropertyOrNull("level")?.GetString();
+        if (levelString == null)
+            return null;
+
+        // Native SentryLevel.None does not exist in dotnet
+        return levelString.ToLowerInvariant() switch
+        {
+            "debug" => SentryLevel.Debug,
+            "info" => SentryLevel.Info,
+            "warning" => SentryLevel.Warning,
+            "fatal" => SentryLevel.Fatal,
+            "error" => SentryLevel.Error,
+            _ => null
+        };
+    }
+
     internal static SentryEvent FromJson(JsonElement json, Exception? exception)
     {
         var modules = json.GetPropertyOrNull("modules")?.GetStringDictionaryOrNull();
@@ -299,7 +318,7 @@ public sealed class SentryEvent : IEventLike, ISentryJsonSerializable
         var distribution = json.GetPropertyOrNull("dist")?.GetString();
         var exceptionValues = json.GetPropertyOrNull("exception")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryException.FromJson).ToList().Pipe(v => new SentryValues<SentryException>(v));
         var threadValues = json.GetPropertyOrNull("threads")?.GetPropertyOrNull("values")?.EnumerateArray().Select(SentryThread.FromJson).ToList().Pipe(v => new SentryValues<SentryThread>(v));
-        var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<SentryLevel>();
+
         var transaction = json.GetPropertyOrNull("transaction")?.GetString();
         var request = json.GetPropertyOrNull("request")?.Pipe(SentryRequest.FromJson);
         var contexts = json.GetPropertyOrNull("contexts")?.Pipe(SentryContexts.FromJson);
@@ -310,7 +329,7 @@ public sealed class SentryEvent : IEventLike, ISentryJsonSerializable
         var breadcrumbs = json.GetPropertyOrNull("breadcrumbs")?.EnumerateArray().Select(Breadcrumb.FromJson).ToList();
         var extra = json.GetPropertyOrNull("extra")?.GetDictionaryOrNull();
         var tags = json.GetPropertyOrNull("tags")?.GetStringDictionaryOrNull();
-
+        var level = SafeLevelFromJson(json);
         var debugMeta = json.GetPropertyOrNull("debug_meta")?.Pipe(DebugMeta.FromJson);
 
         return new SentryEvent(exception, timestamp, eventId)
