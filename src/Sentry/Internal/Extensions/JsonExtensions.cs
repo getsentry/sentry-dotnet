@@ -156,7 +156,14 @@ internal static class JsonExtensions
 
         foreach (var (name, value) in json.EnumerateObject())
         {
-            result[name] = value.GetString();
+            if (value.ValueKind == JsonValueKind.String)
+            {
+                result[name] = value.GetString();
+            }
+            else
+            {
+                result[name] = value.ToString();
+            }
         }
 
         return result;
