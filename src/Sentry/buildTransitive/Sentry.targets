@@ -333,7 +333,7 @@
           Condition="'$(SentryCLI)' != '' and '$(SentryCreateRelease)' == 'true'">
     <Message Importance="High" Text="Creating Sentry Release: $(_SentryRelease)" />
     <Exec
-      Command="$(SentryCLIBaseCommand) releases new '$(_SentryRelease)' $(SentryReleaseOptions)"
+      Command="$(SentryCLIBaseCommand) releases new $(_SentryRelease) $(SentryReleaseOptions)"
       IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
     </Exec>
@@ -344,7 +344,7 @@
           Condition="'$(SentryCLI)' != '' and '$(SentrySetCommits)' == 'true'">
     <Message Importance="High" Text="Setting Sentry commits" />
     <Exec
-      Command="$(SentryCLIBaseCommand) releases set-commits $(SentrySetCommitOptions) '$(_SentryRelease)' $(SentryReleaseOptions)"
+      Command="$(SentryCLIBaseCommand) releases set-commits $(SentrySetCommitOptions) $(_SentryRelease) $(SentryReleaseOptions)"
       IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
     </Exec>
