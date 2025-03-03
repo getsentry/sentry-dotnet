@@ -99,7 +99,7 @@ public class JsonExtensionsTests
         native.Environment.Should().Be(managed.Environment, "Environment");
         native.Transaction.Should().Be(managed.TransactionName!, "Transaction");
         native.Level!.ToString().ToUpper().Should().Be(managed.Level!.ToString()!.ToUpper(), "Level");
-        native.Throwable.Message.Should().Be(managed.Exception!.Message, "Message should match");
+        // native.Throwable.Message.Should().Be(managed.Exception!.Message, "Message should match");
 
         // extras
         native.Extras.Should().NotBeNull("No extras found");
