@@ -20,6 +20,11 @@ public class MainActivity : Activity
             // https://docs.sentry.io/platforms/android/configuration/
             // Enable Native Android SDK ANR detection
             options.Native.AnrEnabled = true;
+
+            options.SetBeforeSend(evt =>
+            {
+                return evt;
+            });
         });
 
         // Here's an example of adding custom scope information.
