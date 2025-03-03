@@ -286,8 +286,7 @@ public sealed class SentryEvent : IEventLike, ISentryJsonSerializable
     /// </summary>
     public static SentryEvent FromJson(JsonElement json) => FromJson(json, null);
 
-
-    static SentryLevel? SafeLevelFromJson(JsonElement json)
+    private static SentryLevel? SafeLevelFromJson(JsonElement json)
     {
         var levelString = json.GetPropertyOrNull("level")?.GetString();
         if (levelString == null)
