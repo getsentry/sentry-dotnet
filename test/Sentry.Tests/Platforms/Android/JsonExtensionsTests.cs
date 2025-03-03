@@ -64,7 +64,7 @@ public class JsonExtensionsTests
         };
         native.Extras = new Dictionary<string, Java.Lang.Object>
         {
-            { "TestExtraKey", "TestExtraValue" }
+            { "TestExtraKey", new Java.Lang.String("TestExtraValue") }
         };
         native.Breadcrumbs =
         [

@@ -36,6 +36,10 @@ internal static class SentryEventExtensions
 
     public static JavaSdk.SentryEvent ToJavaSentryEvent(this SentryEvent sentryEvent, SentryOptions options, JavaSdk.SentryOptions javaOptions)
     {
+        if (sentryEvent.User != null)
+        {
+            sentryEvent.User.Name ??= String.Empty;
+        }
         using var stream = new MemoryStream();
         using var jsonWriter = new Utf8JsonWriter(stream);
         sentryEvent.WriteTo(jsonWriter, options.DiagnosticLogger);
