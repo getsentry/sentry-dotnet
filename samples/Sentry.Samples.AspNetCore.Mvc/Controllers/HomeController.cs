@@ -1,6 +1,7 @@
 using System.Data;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Samples.AspNetCore.Mvc.Models;
 using Sentry.Ben.BlockingDetector;
 using Sentry.Samples.AspNetCore.Mvc.Models;
 
@@ -175,5 +176,34 @@ public class HomeController(ILogger<HomeController> logger) : Controller
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+
+    [HttpGet("[controller]/feedback")]
+    public IActionResult Feedback()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SubmitFeedback(FeedbackModel feedback)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View("Feedback", feedback);
+        }
+
+        var sentryFeedback = new SentryFeedback(feedback.Message!, feedback.ContactEmail, feedback.Name);
+        var hint = new SentryHint();
+
+        if (feedback.Screenshot is { Length: > 0 })
+        {
+            await using var memoryStream = new MemoryStream();
+            await feedback.Screenshot.CopyToAsync(memoryStream);
+            hint.AddAttachment(memoryStream.ToArray(), feedback.Screenshot.FileName, AttachmentType.Default, "image/png");
+        }
+
+        SentrySdk.CaptureFeedback(sentryFeedback, null, hint);
+        ViewBag.Message = "Feedback submitted successfully!";
+        return View("Index");
     }
 }

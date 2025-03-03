@@ -29,9 +29,18 @@ public interface ISentryClient
     SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, SentryHint? hint = null);
 
     /// <summary>
+    /// Captures feedback from the user.
+    /// </summary>
+    /// <param name="feedback">The feedback to send to Sentry.</param>
+    /// <param name="scope">An optional scope to be applied to the event.</param>
+    /// <param name="hint">An optional hint providing high level context for the source of the event</param>
+    void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null);
+
+    /// <summary>
     /// Captures a user feedback.
     /// </summary>
     /// <param name="userFeedback">The user feedback to send to Sentry.</param>
+    [Obsolete("Use CaptureFeedback instead.")]
     void CaptureUserFeedback(UserFeedback userFeedback);
 
     /// <summary>

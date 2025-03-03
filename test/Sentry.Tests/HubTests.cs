@@ -1578,8 +1578,30 @@ public partial class HubTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
+    public void CaptureFeedback_HubEnabled(bool enabled)
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        if (!enabled)
+        {
+            hub.Dispose();
+        }
+
+        var feedback = new SentryFeedback("Test feedback");
+
+        // Act
+        hub.CaptureFeedback(feedback);
+
+        // Assert
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
     public void CaptureUserFeedback_HubEnabled(bool enabled)
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         // Arrange
         var hub = _fixture.GetSut();
         if (!enabled)
@@ -1594,6 +1616,7 @@ public partial class HubTests
 
         // Assert
         _fixture.Client.Received(enabled ? 1 : 0).CaptureUserFeedback(Arg.Any<UserFeedback>());
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Theory]

@@ -17,6 +17,24 @@ internal static class CollectionsExtensions
         throw new($"Expected a type of {typeof(TValue)} to exist for the key '{key}'. Instead found a {value.GetType()}. The likely cause of this is that the value for '{key}' has been incorrectly set to an instance of a different type.");
     }
 
+    public static TValue? TryGetValue<TValue>(
+        this ConcurrentDictionary<string, object> dictionary,
+        string key)
+        where TValue : class
+    {
+        if (!dictionary.TryGetValue(key, out var value))
+        {
+            return null;
+        }
+
+        if (value is TValue casted)
+        {
+            return casted;
+        }
+
+        throw new($"Expected a type of {typeof(TValue)} to exist for the key '{key}'. Instead found a {value.GetType()}. The likely cause of this is that the value for '{key}' has been incorrectly set to an instance of a different type.");
+    }
+
     public static void TryCopyTo<TKey, TValue>(this IDictionary<TKey, TValue> from, IDictionary<TKey, TValue> to)
         where TKey : notnull
     {

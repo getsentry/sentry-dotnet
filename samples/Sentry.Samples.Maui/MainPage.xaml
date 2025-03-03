@@ -70,6 +70,13 @@
                 Clicked="OnNativeCrashClicked"
                 HorizontalOptions="Center" />
 
+            <Button
+                x:Name="FeedbackBtn"
+                Text="Submit Feedback"
+                SemanticProperties.Hint="Provides a form that can be used to capture open feedback from the user."
+                Clicked="OnFeedbackClicked"
+                HorizontalOptions="Center" />
+
         </VerticalStackLayout>
     </ScrollView>
 
