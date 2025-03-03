@@ -17,7 +17,7 @@ internal static class SentryEventExtensions
 
     public static SentryEvent ToSentryEvent(this JavaSdk.SentryEvent sentryEvent, JavaSdk.SentryOptions javaOptions)
     {
-        if (sentryEvent?.User != null)
+        if (sentryEvent.User != null)
         {
             // when we cast this serialize this over, this value must be set
             sentryEvent.User.Name ??= String.Empty;
