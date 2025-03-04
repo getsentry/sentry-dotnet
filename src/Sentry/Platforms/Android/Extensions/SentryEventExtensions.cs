@@ -1,3 +1,5 @@
+using Sentry.Internal;
+
 namespace Sentry.Android.Extensions;
 
 internal static class SentryEventExtensions
@@ -20,8 +22,8 @@ internal static class SentryEventExtensions
         if (sentryEvent.Sdk != null)
         {
             // when we cast this serialize this over, this value must be set
-            sentryEvent.Sdk.Name ??= "Sentry";
-            sentryEvent.Sdk.Version ??= "1.0.0";
+            sentryEvent.Sdk.Name ??= Constants.SdkName;
+            sentryEvent.Sdk.Version ??= SdkVersion.Instance.Version;
         }
         using var stream = new MemoryStream();
         using var streamWriter = new JavaOutputStreamWriter(stream);
@@ -39,8 +41,8 @@ internal static class SentryEventExtensions
     {
         if (sentryEvent.Sdk != null)
         {
-            sentryEvent.Sdk.Name ??= "Sentry";
-            sentryEvent.Sdk.Version ??= "1.0.0";
+            sentryEvent.Sdk.Name ??= Constants.SdkName;
+            sentryEvent.Sdk.Version ??= SdkVersion.Instance.Version;
         }
         using var stream = new MemoryStream();
         using var jsonWriter = new Utf8JsonWriter(stream);
