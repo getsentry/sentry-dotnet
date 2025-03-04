@@ -860,12 +860,13 @@ public class SentrySdkTests : IDisposable
             InitNativeSdks = false,
         };
         options.Native.SuppressExcBadAccess = suppressNativeErrors;
+
+        var called = false;
         options.SetBeforeSend(e =>
         {
-            // we return a result for suppress segfaults because it expects null and null for the opposite case
-            return suppressNativeErrors ? e : null;
+            called = true;
+            return e;
         });
-
         var evt = new Sentry.CocoaSdk.SentryEvent();
         var ex = new Sentry.CocoaSdk.SentryException("Not checked", "EXC_BAD_ACCESS");
         evt.Exceptions = [ex];
@@ -873,11 +874,12 @@ public class SentrySdkTests : IDisposable
 
         if (suppressNativeErrors)
         {
+            called.Should().BeFalse();
             result.Should().BeNull();
         }
         else
         {
-            result.Should().NotBeNull();
+            called.Should().BeTrue();
             result.Exceptions.First().Type.Should().Be("SIGABRT");
         }
     }
