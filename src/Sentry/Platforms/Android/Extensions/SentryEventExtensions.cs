@@ -23,7 +23,7 @@ internal static class SentryEventExtensions
         {
             // when we cast this serialize this over, this value must be set
             sentryEvent.Sdk.Name ??= Constants.SdkName;
-            sentryEvent.Sdk.Version ??= SdkVersion.Instance.Version;
+            sentryEvent.Sdk.Version ??= SdkVersion.Instance.Version ?? "0.0.0";
         }
         using var stream = new MemoryStream();
         using var streamWriter = new JavaOutputStreamWriter(stream);
@@ -42,7 +42,7 @@ internal static class SentryEventExtensions
         if (sentryEvent.Sdk != null)
         {
             sentryEvent.Sdk.Name ??= Constants.SdkName;
-            sentryEvent.Sdk.Version ??= SdkVersion.Instance.Version;
+            sentryEvent.Sdk.Version ??= SdkVersion.Instance.Version ?? "0.0.0";
         }
         using var stream = new MemoryStream();
         using var jsonWriter = new Utf8JsonWriter(stream);
