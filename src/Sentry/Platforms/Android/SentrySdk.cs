@@ -100,9 +100,13 @@ public static partial class SentrySdk
                 }
             }
 
-            if (options.Android.SuppressSegfaults || options.Native.EnableBeforeSend || options.BeforeSendInternal != null)
+            if (options.Android.SuppressSegfaults)
             {
                 o.BeforeSend = new BeforeSendCallback(BeforeSendWrapper(options), options, o);
+            }
+            else if (options.Native.EnableBeforeSend && options.BeforeSendInternal is { } beforeSend)
+            {
+                o.BeforeSend = beforeSend;
             }
 
             // These options are from SentryAndroidOptions
