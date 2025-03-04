@@ -847,7 +847,7 @@ public class SentrySdkTests : IDisposable
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void ProcessOnBeforeSend_SegfaultsSuppressed(bool suppressSegfaults)
+    public void ProcessOnBeforeSend_NativeErrorSuppression(bool suppressNativeErrors)
     {
         var options = new SentryOptions
         {
@@ -859,28 +859,19 @@ public class SentrySdkTests : IDisposable
             BackgroundWorker = Substitute.For<IBackgroundWorker>(),
             InitNativeSdks = false,
         };
-        options.Native.SuppressSegfaults = suppressSegfaults;
+        options.Native.SuppressExcBadAccess = suppressNativeErrors;
         options.SetBeforeSend(e =>
         {
             // we return a result for suppress segfaults because it expects null and null for the opposite case
-            return suppressSegfaults ? e : null;
+            return suppressNativeErrors ? e : null;
         });
-        options.Native.SuppressSegfaults = suppressSegfaults;
 
         var evt = new Sentry.CocoaSdk.SentryEvent();
-        var ex = new Sentry.CocoaSdk.SentryException("Signal 6, Code 0", "SIGABRT");
-        var st = new Sentry.CocoaSdk.SentryStacktrace(
-            [new Sentry.CocoaSdk.SentryFrame
-            {
-                Function = "xamarin_unhandled_exception_handler"
-            }],
-            new Foundation.NSDictionary<Foundation.NSString, Foundation.NSString>()
-        );
-        ex.Stacktrace = st;
+        var ex = new Sentry.CocoaSdk.SentryException("Not checked", "EXC_BAD_ACCESS");
         evt.Exceptions = [ex];
         var result = SentrySdk.ProcessOnBeforeSend(options, evt);
 
-        if (suppressSegfaults)
+        if (suppressNativeErrors)
         {
             result.Should().BeNull();
         }

@@ -195,7 +195,7 @@ public static partial class SentrySdk
         // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
 
         // There should only be one exception on the event in this case
-        if (options.Native.SuppressSegfaults && evt.Exceptions?.Length == 1)
+        if ((options.Native.SuppressSignalAborts || options.Native.SuppressExcBadAccess) && evt.Exceptions?.Length == 1)
         {
             // It will match the following characteristics
             var ex = evt.Exceptions[0];
@@ -203,7 +203,7 @@ public static partial class SentrySdk
             // Thankfully, sometimes we can see Xamarin's unhandled exception handler on the stack trace, so we can filter
             // them out. Here is the function that calls abort(), which we will use as a filter:
             // https://github.com/xamarin/xamarin-macios/blob/c55fbdfef95028ba03d0f7a35aebca03bd76f852/runtime/runtime.m#L1114-L1122
-            if (ex.Type == "SIGABRT" && ex.Value == "Signal 6, Code 0" &&
+            if (options.Native.SuppressSignalAborts && ex.Type == "SIGABRT" && ex.Value == "Signal 6, Code 0" &&
                 ex.Stacktrace?.Frames.Any(f => f.Function == "xamarin_unhandled_exception_handler") is true)
             {
                 // Don't send it
@@ -215,7 +215,7 @@ public static partial class SentrySdk
             // Similar workaround for NullReferenceExceptions. We don't have any easy way to know whether the
             // exception is managed code (compiled to native) or original native code though.
             // See: https://github.com/getsentry/sentry-dotnet/issues/3776
-            if (ex.Type == "EXC_BAD_ACCESS")
+            if (options.Native.SuppressExcBadAccess && ex.Type == "EXC_BAD_ACCESS")
             {
                 // Don't send it
                 options.LogDebug("Discarded {0} error ({1}). Captured as  managed exception instead.", ex.Type,

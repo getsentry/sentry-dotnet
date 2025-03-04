@@ -199,19 +199,35 @@ public partial class SentryOptions
 
         /// <summary>
         /// <para>
-        /// Whether to suppress capturing SIGSEGV (Segfault) errors in the Native SDK.
+        /// Whether to suppress capturing SIGABRT errors in the Native SDK.
         /// </para>
         /// <para>
-        /// When managed code results in a NullReferenceException, this also causes a SIGSEGV (Segfault). Duplicate
-        /// events (one managed and one native) can be prevented by suppressing native Segfaults, which may be
+        /// When managed code results in a NullReferenceException, this also causes a SIGABRT. Duplicate
+        /// events (one managed and one native) can be prevented by suppressing native SIGABRT, which may be
         /// convenient.
         /// </para>
         /// <para>
-        /// Enabling this may prevent the capture of Segfault originating from native (not managed) code... so it may
-        /// prevent the capture of genuine native Segfault errors.
+        /// Enabling this may prevent the capture of SIGABRT originating from native (not managed) code... so it may
+        /// prevent the capture of genuine native SIGABRT errors.
         /// </para>
         /// </summary>
-        public bool SuppressSegfaults { get; set; } = false;
+        public bool SuppressSignalAborts { get; set; } = false;
+
+        /// <summary>
+        /// <para>
+        /// Whether to suppress capturing EXC_BAD_ACCESS errors in the Native SDK.
+        /// </para>
+        /// <para>
+        /// When managed code results in a NullReferenceException, this also causes a EXC_BAD_ACCESS. Duplicate
+        /// events (one managed and one native) can be prevented by suppressing native EXC_BAD_ACCESS, which may be
+        /// convenient.
+        /// </para>
+        /// <para>
+        /// Enabling this may prevent the capture of EXC_BAD_ACCESS originating from native (not managed) code... so it may
+        /// prevent the capture of genuine native EXC_BAD_ACCESS errors.
+        /// </para>
+        /// </summary>
+        public bool SuppressExcBadAccess { get; set; } = false;
 
         // ---------- Other ----------
 
