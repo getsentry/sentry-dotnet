@@ -102,11 +102,12 @@ public static partial class SentrySdk
 
             if (options.Android.SuppressSegfaults)
             {
+                // user BeforeSend will be run by the wrapper as well if it is set
                 o.BeforeSend = new BeforeSendCallback(BeforeSendWrapper(options), options, o);
             }
-            else if (options.Native.EnableBeforeSend && options.BeforeSendInternal is { } beforeSend)
+            else if (options.Native.EnableBeforeSend && options.BeforeSendInternal != null)
             {
-                o.BeforeSend = beforeSend;
+                o.BeforeSend = options.BeforeSendInternal;
             }
 
             // These options are from SentryAndroidOptions
