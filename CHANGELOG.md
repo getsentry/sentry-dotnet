@@ -6,6 +6,7 @@
 
 - Using SentryOptions.SuppressSegfaults, users can now block duplicate errors from native due to dotnet NullReferenceExceptions - Defaults to false ([#3998](https://github.com/getsentry/sentry-dotnet/pull/3998))
 - Native iOS events are now exposed to the dotnet layer for users to hook through SentryOptions.BeforeSend and SentryOptions.OnCrashedLastRun ([#2102](https://github.com/getsentry/sentry-dotnet/pull/3958))
+- Prevent crashes from occurring on Android during OnBeforeSend ([#4022](https://github.com/getsentry/sentry-dotnet/pull/4022))
 
 ### Dependencies
 

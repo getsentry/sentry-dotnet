@@ -29,8 +29,13 @@ public class AppDelegate : UIApplicationDelegate
 
             options.CacheDirectoryPath = Path.GetTempPath();
 
-            options.SetBeforeSend((evt, _) =>
+            options.SetBeforeSend(evt =>
             {
+                if (evt.Exception?.Message.Contains("Something you don't care want logged?") ?? false)
+                {
+                    return null; // return null to filter out event
+                }
+                // or add additional data
                 evt.SetTag("dotnet-iOS-Native-Before", "Hello World");
                 return evt;
             });
