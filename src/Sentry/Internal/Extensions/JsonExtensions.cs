@@ -220,6 +220,31 @@ internal static class JsonExtensions
         return double.Parse(json.ToString()!, CultureInfo.InvariantCulture);
     }
 
+    /// <summary>
+    /// Safety value to deal with native serialization - allows datetimeoffset to come in as a long or string value
+    /// </summary>
+    /// <param name="json"></param>
+    /// <param name="propertyName"></param>
+    /// <returns></returns>
+    public static DateTimeOffset? GetSafeDateTimeOffset(this JsonElement json, string propertyName)
+    {
+        DateTimeOffset? result = null;
+        var dtRaw = json.GetPropertyOrNull(propertyName);
+        if (dtRaw != null)
+        {
+            if (dtRaw.Value.ValueKind == JsonValueKind.Number)
+            {
+                var epoch = Convert.ToInt64(dtRaw.Value.GetDouble());
+                result = DateTimeOffset.FromUnixTimeSeconds(epoch);
+            }
+            else
+            {
+                result = dtRaw.Value.GetDateTimeOffset();
+            }
+        }
+        return result;
+    }
+
     public static long? GetHexAsLong(this JsonElement json)
     {
         // If the address is in json as a number, we can just use it.
