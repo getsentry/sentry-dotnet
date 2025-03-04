@@ -23,6 +23,10 @@ public class MainActivity : Activity
 
             options.SetBeforeSend(evt =>
             {
+                if (evt.Exception?.Message.Contains("Something you don't care about?") ?? false)
+                {
+                    return null; // return null to filter out event
+                }
                 return evt;
             });
         });

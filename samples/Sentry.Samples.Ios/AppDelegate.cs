@@ -28,6 +28,15 @@ public class AppDelegate : UIApplicationDelegate
             options.Native.EnableAppHangTracking = true;
 
             options.CacheDirectoryPath = Path.GetTempPath();
+
+            options.SetBeforeSend(evt =>
+            {
+                if (evt.Exception?.Message.Contains("Something you don't care about?") ?? false)
+                {
+                    return null; // return null to filter out event
+                }
+                return evt;
+            });
         });
 
         // create a new window instance based on the screen size
