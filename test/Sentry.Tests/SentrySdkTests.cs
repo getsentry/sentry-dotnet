@@ -857,8 +857,9 @@ public class SentrySdkTests : IDisposable
             Debug = true,
             AutoSessionTracking = false,
             BackgroundWorker = Substitute.For<IBackgroundWorker>(),
-            InitNativeSdks = false
+            InitNativeSdks = false,
         };
+        options.Native.SuppressSegfaults = suppressSegfaults;
         options.SetBeforeSend(e =>
         {
             // we return a result for suppress segfaults because it expects null and null for the opposite case
@@ -910,17 +911,16 @@ public class SentrySdkTests : IDisposable
         native.Logger = "logger";
         native.ReleaseName = "release name";
         native.Environment = "environment";
-        native.Platform = "platform";
         native.Transaction = "transaction name";
 
         options.SetBeforeSend(e =>
         {
-            e.Platform = "dotnet";
+            e.TransactionName = "dotnet";
             return e;
         });
         var result = SentrySdk.ProcessOnBeforeSend(options, native);
         result.Should().NotBeNull();
-        result.Platform.Should().Be("dotnet");
+        result.Transaction.Should().Be("dotnet");
     }
 #endif
 
