@@ -880,7 +880,7 @@ public class SentrySdkTests : IDisposable
         else
         {
             called.Should().BeTrue();
-            result.Exceptions.First().Type.Should().Be("SIGABRT");
+            result.Exceptions.First().Type.Should().Be("EXC_BAD_ACCESS");
         }
     }
 
