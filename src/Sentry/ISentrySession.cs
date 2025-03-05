@@ -8,40 +8,40 @@ public interface ISentrySession
     /// <summary>
     /// Session auto-generated ID.
     /// </summary>
-    SentryId Id { get; }
+    public SentryId Id { get; }
 
     /// <summary>
     /// Session distinct ID.
     /// </summary>
-    string? DistinctId { get; }
+    public string? DistinctId { get; }
 
     /// <summary>
     /// Session start timestamp.
     /// </summary>
-    DateTimeOffset StartTimestamp { get; }
+    public DateTimeOffset StartTimestamp { get; }
 
     /// <summary>
     /// Release.
     /// </summary>
-    string Release { get; }
+    public string Release { get; }
 
     /// <summary>
     /// Environment.
     /// </summary>
-    string? Environment { get; }
+    public string? Environment { get; }
 
     /// <summary>
     /// IP address of the user.
     /// </summary>
-    string? IpAddress { get; }
+    public string? IpAddress { get; }
 
     /// <summary>
     /// User agent.
     /// </summary>
-    string? UserAgent { get; }
+    public string? UserAgent { get; }
 
     /// <summary>
     /// Reported error count.
     /// </summary>
-    int ErrorCount { get; }
+    public int ErrorCount { get; }
 }

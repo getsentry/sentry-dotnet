@@ -5,8 +5,8 @@ namespace Sentry.Internal;
 /// </summary>
 internal interface IGCImplementation
 {
-    void RegisterForFullGCNotification(int maxGenerationThreshold, int largeObjectHeapThreshold);
-    GCNotificationStatus WaitForFullGCComplete(TimeSpan timeout);
-    void CancelFullGCNotification();
-    long TotalAvailableMemoryBytes { get; }
+    public void RegisterForFullGCNotification(int maxGenerationThreshold, int largeObjectHeapThreshold);
+    public GCNotificationStatus WaitForFullGCComplete(TimeSpan timeout);
+    public void CancelFullGCNotification();
+    public long TotalAvailableMemoryBytes { get; }
 }

@@ -14,7 +14,7 @@ public interface ISentryTransactionProcessor
     /// Returning null will stop the processing pipeline.
     /// Meaning the transaction should no longer be processed nor send.
     /// </remarks>
-    SentryTransaction? Process(SentryTransaction transaction);
+    public SentryTransaction? Process(SentryTransaction transaction);
 }
 
 internal static class ISentryTransactionProcessorExtensions

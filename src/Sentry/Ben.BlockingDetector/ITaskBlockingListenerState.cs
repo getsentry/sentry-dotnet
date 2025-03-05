@@ -2,7 +2,7 @@ namespace Sentry.Ben.BlockingDetector;
 
 internal interface ITaskBlockingListenerState
 {
-    void Suppress();
-    bool IsSuppressed();
-    void Restore();
+    public void Suppress();
+    public bool IsSuppressed();
+    public void Restore();
 }

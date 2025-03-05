@@ -11,44 +11,44 @@ public interface ISpan : ISpanData
     /// Span description.
     /// </summary>
     // 'new' because it adds a setter.
-    new string? Description { get; set; }
+    public new string? Description { get; set; }
 
     /// <summary>
     /// Span operation.
     /// </summary>
     // 'new' because it adds a setter.
-    new string Operation { get; set; }
+    public new string Operation { get; set; }
 
     /// <summary>
     /// Span status.
     /// </summary>
     // 'new' because it adds a setter.
-    new SpanStatus? Status { get; set; }
+    public new SpanStatus? Status { get; set; }
 
     /// <summary>
     /// Starts a child span.
     /// </summary>
-    ISpan StartChild(string operation);
+    public ISpan StartChild(string operation);
 
     /// <summary>
     /// Finishes the span.
     /// </summary>
-    void Finish();
+    public void Finish();
 
     /// <summary>
     /// Finishes the span with the specified status.
     /// </summary>
-    void Finish(SpanStatus status);
+    public void Finish(SpanStatus status);
 
     /// <summary>
     /// Finishes the span with the specified exception and status.
     /// </summary>
-    void Finish(Exception exception, SpanStatus status);
+    public void Finish(Exception exception, SpanStatus status);
 
     /// <summary>
     /// Finishes the span with the specified exception and automatically inferred status.
     /// </summary>
-    void Finish(Exception exception);
+    public void Finish(Exception exception);
 }
 
 /// <summary>

@@ -16,6 +16,6 @@ public interface ISentryEventProcessorWithHint : ISentryEventProcessor
     /// Returning null will stop the processing pipeline so that the event will neither be processed by
     /// additional event processors or sent to Sentry.
     /// </remarks>
-    SentryEvent? Process(SentryEvent @event, SentryHint hint);
+    public SentryEvent? Process(SentryEvent @event, SentryHint hint);
 }
 

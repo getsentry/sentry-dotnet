@@ -12,6 +12,6 @@ public interface IProtobufRequestPayloadExtractor
     /// </summary>
     /// <param name="request">The gRPC Request object.</param>
     /// <returns>The extracted payload.</returns>
-    IMessage? ExtractPayload<TRequest>(IProtobufRequest<TRequest> request)
+    public IMessage? ExtractPayload<TRequest>(IProtobufRequest<TRequest> request)
         where TRequest : class, IMessage;
 }

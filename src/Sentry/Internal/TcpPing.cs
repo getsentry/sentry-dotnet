@@ -2,7 +2,7 @@ namespace Sentry.Internal;
 
 internal interface IPing
 {
-    Task<bool> IsAvailableAsync(CancellationToken cancellationToken);
+    public Task<bool> IsAvailableAsync(CancellationToken cancellationToken);
 }
 
 internal class TcpPing(string hostToCheck, int portToCheck = 443) : IPing

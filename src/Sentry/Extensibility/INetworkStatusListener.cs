@@ -14,11 +14,11 @@ public interface INetworkStatusListener
     /// <summary>
     /// Gets a value that indicates whether the network is online.
     /// </summary>
-    bool Online { get; }
+    public bool Online { get; }
 
     /// <summary>
     /// Asynchronously waits for the network to come online.
     /// </summary>
     /// <param name="cancellationToken">A token which cancels waiting.</param>
-    Task WaitForNetworkOnlineAsync(CancellationToken cancellationToken);
+    public Task WaitForNetworkOnlineAsync(CancellationToken cancellationToken);
 }

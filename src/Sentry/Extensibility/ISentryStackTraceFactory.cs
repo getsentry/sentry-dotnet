@@ -10,5 +10,5 @@ public interface ISentryStackTraceFactory
     /// </summary>
     /// <param name="exception">The exception to create the stacktrace from.</param>
     /// <returns>A Sentry stack trace.</returns>
-    SentryStackTrace? Create(Exception? exception = null);
+    public SentryStackTrace? Create(Exception? exception = null);
 }

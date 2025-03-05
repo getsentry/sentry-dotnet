@@ -10,5 +10,5 @@ public interface ISentryHttpClientFactory
     /// </summary>
     /// <param name="options">The options.</param>
     /// <returns><see cref="HttpClient"/>.</returns>
-    HttpClient Create(SentryOptions options);
+    public HttpClient Create(SentryOptions options);
 }

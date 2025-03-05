@@ -10,5 +10,5 @@ public interface IQueryLogger
     /// </summary>
     /// <param name="text">The query text.</param>
     /// <param name="level">The level.</param>
-    void Log(string text, BreadcrumbLevel level = BreadcrumbLevel.Debug);
+    public void Log(string text, BreadcrumbLevel level = BreadcrumbLevel.Debug);
 }

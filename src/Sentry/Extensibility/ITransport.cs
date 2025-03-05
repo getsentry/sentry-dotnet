@@ -12,5 +12,5 @@ public interface ITransport
     /// </summary>
     /// <param name="envelope">The envelope to send to Sentry.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
-    Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default);
+    public Task SendEnvelopeAsync(Envelope envelope, CancellationToken cancellationToken = default);
 }

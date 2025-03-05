@@ -10,5 +10,5 @@ public interface IAndroidAssemblyReader : IDisposable
     /// </summary>
     /// <param name="name">The name of the assembly.</param>
     /// <returns>The reader, or <c>null</c> if the assembly could not be found.</returns>
-    PEReader? TryReadAssembly(string name);
+    public PEReader? TryReadAssembly(string name);
 }

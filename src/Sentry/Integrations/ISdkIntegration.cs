@@ -13,5 +13,5 @@ public interface ISdkIntegration
     /// </remarks>
     /// <param name="hub">The hub.</param>
     /// <param name="options">The options.</param>
-    void Register(IHub hub, SentryOptions options);
+    public void Register(IHub hub, SentryOptions options);
 }

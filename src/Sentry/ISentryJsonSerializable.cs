@@ -15,5 +15,5 @@ public interface ISentryJsonSerializable
     /// Note: this method is meant only for internal use and is exposed due to a language limitation.
     /// Avoid relying on this method in user code.
     /// </remarks>
-    void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger);
+    public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger);
 }
