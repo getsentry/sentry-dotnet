@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- User Feedback can now be captured without errors/exceptions. Note that these APIs replace the older UserFeedback APIs, which have now been marked as obsolete (and will be removed in a future major version bump) ([#3981](https://github.com/getsentry/sentry-dotnet/pull/3981))
+
 ### Fixes
 
 - Using SentryOptions.Native.SuppressExcBadAccess and SentryOptions.Native.SuppressSignalAborts, users can now block duplicate errors from native due to dotnet NullReferenceExceptions - Defaults to false ([#3998](https://github.com/getsentry/sentry-dotnet/pull/3998))
@@ -18,7 +22,6 @@
 
 ### Features
 
-- User Feedback can now be captured without errors/exceptions. Note that these APIs replace the older UserFeedback APIs, which have now been marked as obsolete (and will be removed in a future major version bump) ([#3981](https://github.com/getsentry/sentry-dotnet/pull/3981))
 - Users can now register their own MAUI controls for breadcrumb creation ([#3997](https://github.com/getsentry/sentry-dotnet/pull/3997))
 - Serilog scope properties are now sent with Sentry events ([#3976](https://github.com/getsentry/sentry-dotnet/pull/3976))
 - The sample seed used for sampling decisions is now propagated, for use in downstream custom trace samplers ([#3951](https://github.com/getsentry/sentry-dotnet/pull/3951))
