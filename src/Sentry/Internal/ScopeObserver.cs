@@ -81,6 +81,11 @@ internal abstract class ScopeObserver : Sentry.IScopeObserver
         }
     }
 
+    public void SetTrace(SentryId traceId, SpanId parentSpanId)
+    {
+        throw new NotImplementedException();
+    }
+
     public abstract void SetUserImpl(SentryUser user);
 
     public abstract void UnsetUserImpl();
