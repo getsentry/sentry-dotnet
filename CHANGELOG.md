@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## Features
+
+- Added `SentrySdk.CrashedLastRun()`. Users can now retrieve the `LastRunState` ([#4025](https://github.com/getsentry/sentry-dotnet/pull/4025))
+
 ### Fixes
 
 - Using SentryOptions.Native.SuppressExcBadAccess and SentryOptions.Native.SuppressSignalAborts, users can now block duplicate errors from native due to dotnet NullReferenceExceptions - Defaults to false ([#3998](https://github.com/getsentry/sentry-dotnet/pull/3998))
