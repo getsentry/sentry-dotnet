@@ -29,4 +29,9 @@ public interface IScopeObserver
     /// Sets the user information.
     /// </summary>
     void SetUser(SentryUser? user);
+
+    /// <summary>
+    /// Sets the current trace
+    /// </summary>
+    void SetTrace(SentryId traceId, SpanId parentSpanId);
 }
