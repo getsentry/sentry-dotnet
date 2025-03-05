@@ -13,6 +13,9 @@
 - Bump Native SDK from v0.8.0 to v0.8.1 ([#4014](https://github.com/getsentry/sentry-dotnet/pull/4014))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#081)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.8.0...0.8.1)
+- Bump Java SDK from v7.20.1 to v8.3.0 ([#3911](https://github.com/getsentry/sentry-dotnet/pull/3911))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#830)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.20.1...8.3.0)
 
 ## 5.2.0
 
