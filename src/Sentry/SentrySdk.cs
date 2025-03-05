@@ -705,6 +705,11 @@ public static partial class SentrySdk
     public static void ResumeSession()
         => CurrentHub.ResumeSession();
 
+    /// <inheritdoc cref="IHub.CrashedLastRun"/>
+    [DebuggerStepThrough]
+    public static CrashedLastRun CrashedLastRun()
+        => CurrentHub.CrashedLastRun();
+
     /// <summary>
     /// Deliberately crashes an application, which is useful for testing and demonstration purposes.
     /// </summary>

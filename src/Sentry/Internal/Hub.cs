@@ -679,6 +679,26 @@ internal class Hub : IHub, IDisposable
         return SentryId.Empty;
     }
 
+
+    public CrashedLastRun CrashedLastRun()
+    {
+        if (!IsEnabled)
+        {
+            return Sentry.CrashedLastRun.Unknown;
+        }
+
+        if (_options.CrashedLastRun is null)
+        {
+            _options.DiagnosticLogger?.LogDebug("The SDK does not have a 'CrashedLastRun' set. " +
+                                                "This might be due to a missing or disabled native integration.");
+            return Sentry.CrashedLastRun.Unknown;
+        }
+
+        return _options.CrashedLastRun.Invoke()
+            ? Sentry.CrashedLastRun.Crashed
+            : Sentry.CrashedLastRun.DidNotCrash;
+    }
+
     public async Task FlushAsync(TimeSpan timeout)
     {
         try

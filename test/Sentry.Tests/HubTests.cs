@@ -1706,6 +1706,73 @@ public partial class HubTests
         _fixture.Client.Received().CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
+    [Fact]
+    public void GetLastRunState_WithoutInit_ReturnsUnknown()
+    {
+        // Make sure SDK is closed
+        SentrySdk.Close();
+
+        // Act
+        var result = SentrySdk.CrashedLastRun();
+
+        // Assert
+        Assert.Equal(CrashedLastRun.Unknown, result);
+    }
+
+    [Fact]
+    public void GetLastRunState_WhenCrashed_ReturnsCrashed()
+    {
+        // Arrange
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            CrashedLastRun = () => true // Mock crashed state
+        };
+
+        // Act
+        SentrySdk.Init(options);
+        var result = SentrySdk.CrashedLastRun();
+
+        // Assert
+        Assert.Equal(CrashedLastRun.Crashed, result);
+    }
+
+    [Fact]
+    public void GetLastRunState_WhenNotCrashed_ReturnsDidNotCrash()
+    {
+        // Arrange
+        var options = new SentryOptions()
+        {
+            Dsn = ValidDsn,
+            CrashedLastRun = () => false // Mock non-crashed state
+        };
+
+        // Act
+        SentrySdk.Init(options);
+        var result = SentrySdk.CrashedLastRun();
+
+        // Assert
+        Assert.Equal(CrashedLastRun.DidNotCrash, result);
+    }
+
+    [Fact]
+    public void GetLastRunState_WithNullDelegate_ReturnsUnknown()
+    {
+        // Arrange
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            CrashedLastRun = null // Explicitly set to null
+        };
+
+        // Act
+        SentrySdk.Init(options);
+        var result = SentrySdk.CrashedLastRun();
+
+        // Assert
+        Assert.Equal(CrashedLastRun.Unknown, result);
+    }
+
     [SkippableTheory]
     [InlineData(false)]
     [InlineData(true)]

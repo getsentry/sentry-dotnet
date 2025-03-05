@@ -74,6 +74,12 @@ namespace Sentry
         Managed = 0,
         ManagedBackgroundThread = 1,
     }
+    public enum CrashedLastRun
+    {
+        Unknown = 0,
+        DidNotCrash = 1,
+        Crashed = 2,
+    }
     [System.Flags]
     public enum DeduplicateMode
     {
@@ -202,6 +208,7 @@ namespace Sentry
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.SentryHint? hint, System.Action<Sentry.Scope> configureScope);
         Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null);
         Sentry.TransactionContext ContinueTrace(string? traceHeader, string? baggageHeader, string? name = null, string? operation = null);
+        Sentry.CrashedLastRun CrashedLastRun();
         void EndSession(Sentry.SessionEndStatus status = 0);
         Sentry.BaggageHeader? GetBaggage();
         Sentry.ISpan? GetSpan();
@@ -822,6 +829,7 @@ namespace Sentry
         public static System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
         public static Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null) { }
         public static Sentry.TransactionContext ContinueTrace(string? traceHeader, string? baggageHeader, string? name = null, string? operation = null) { }
+        public static Sentry.CrashedLastRun CrashedLastRun() { }
         public static void EndSession(Sentry.SessionEndStatus status = 0) { }
         public static void Flush() { }
         public static void Flush(System.TimeSpan timeout) { }
@@ -1323,6 +1331,7 @@ namespace Sentry.Extensibility
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
         public Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null) { }
         public Sentry.TransactionContext ContinueTrace(string? traceHeader, string? baggageHeader, string? name = null, string? operation = null) { }
+        public Sentry.CrashedLastRun CrashedLastRun() { }
         public void Dispose() { }
         public void EndSession(Sentry.SessionEndStatus status = 0) { }
         public System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout) { }
@@ -1369,6 +1378,7 @@ namespace Sentry.Extensibility
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
         public Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null) { }
         public Sentry.TransactionContext ContinueTrace(string? traceHeader, string? baggageHeader, string? name = null, string? operation = null) { }
+        public Sentry.CrashedLastRun CrashedLastRun() { }
         public void EndSession(Sentry.SessionEndStatus status = 0) { }
         public System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout) { }
         public Sentry.BaggageHeader? GetBaggage() { }

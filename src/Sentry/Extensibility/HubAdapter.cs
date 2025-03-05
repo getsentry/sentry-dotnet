@@ -288,6 +288,12 @@ public sealed class HubAdapter : IHub
         => SentrySdk.CaptureCheckIn(monitorSlug, status, sentryId, duration, scope, monitorOptions);
 
     /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    public CrashedLastRun CrashedLastRun()
+        => SentrySdk.CrashedLastRun();
+
+    /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>
     /// </summary>
     [DebuggerStepThrough]

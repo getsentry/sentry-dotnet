@@ -198,6 +198,12 @@ public class DisabledHub : IHub, IDisposable
         => SentryId.Empty;
 
     /// <summary>
+    /// No-Op
+    /// </summary>
+    public CrashedLastRun CrashedLastRun()
+        => Sentry.CrashedLastRun.Unknown;
+
+    /// <summary>
     /// No-Op.
     /// </summary>
     public Task FlushAsync(TimeSpan timeout) => Task.CompletedTask;
