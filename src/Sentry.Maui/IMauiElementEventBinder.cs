@@ -13,13 +13,13 @@ public interface IMauiElementEventBinder
     /// This adds a breadcrumb to the sentry hub
     /// NOTE: we will override the type, timestamp, and category of the breadcrumb
     /// </param>
-    void Bind(VisualElement element, Action<BreadcrumbEvent> addBreadcrumb);
+    public void Bind(VisualElement element, Action<BreadcrumbEvent> addBreadcrumb);
 
     /// <summary>
     /// Unbind the element because MAUI is removing the page
     /// </summary>
     /// <param name="element"></param>
-    void UnBind(VisualElement element);
+    public void UnBind(VisualElement element);
 }
 
 /// <summary>

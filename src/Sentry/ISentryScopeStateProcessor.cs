@@ -8,5 +8,5 @@ public interface ISentryScopeStateProcessor
     /// <summary>
     /// Applies state onto a scope.
     /// </summary>
-    void Apply(Scope scope, object state);
+    public void Apply(Scope scope, object state);
 }

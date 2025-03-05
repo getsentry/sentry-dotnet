@@ -2,19 +2,19 @@ namespace Sentry;
 
 internal interface ISessionManager
 {
-    bool IsSessionActive { get; }
+    public bool IsSessionActive { get; }
 
-    SessionUpdate? TryRecoverPersistedSession();
+    public SessionUpdate? TryRecoverPersistedSession();
 
-    SessionUpdate? StartSession();
+    public SessionUpdate? StartSession();
 
-    SessionUpdate? EndSession(DateTimeOffset timestamp, SessionEndStatus status);
+    public SessionUpdate? EndSession(DateTimeOffset timestamp, SessionEndStatus status);
 
-    SessionUpdate? EndSession(SessionEndStatus status);
+    public SessionUpdate? EndSession(SessionEndStatus status);
 
-    void PauseSession();
+    public void PauseSession();
 
-    IReadOnlyList<SessionUpdate> ResumeSession();
+    public IReadOnlyList<SessionUpdate> ResumeSession();
 
-    SessionUpdate? ReportError();
+    public SessionUpdate? ReportError();
 }
