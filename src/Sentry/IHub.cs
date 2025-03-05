@@ -116,4 +116,11 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// <param name="configureScope">The callback to configure the scope.</param>
     /// <returns></returns>
     public SentryId CaptureEvent(SentryEvent evt, SentryHint? hint, Action<Scope> configureScope);
+
+    /// <summary>
+    /// Retrieves the crash state of the previous application run.
+    /// This indicates whether the application terminated normally or crashed.
+    /// </summary>
+    /// <returns><see cref="CrashedLastRun"/> indicating the state of the previous run.</returns>
+    public CrashedLastRun CrashedLastRun();
 }
