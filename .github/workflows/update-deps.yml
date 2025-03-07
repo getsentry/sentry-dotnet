@@ -18,6 +18,7 @@ jobs:
             path: modules/sentry-cocoa.properties
           - name: Java SDK
             path: scripts/update-java.ps1
+            pattern: '^7\.'  # Bumping major version would increase min API version so we need to bump .net SDK too
           - name: Native SDK
             path: modules/sentry-native
           - name: CLI
