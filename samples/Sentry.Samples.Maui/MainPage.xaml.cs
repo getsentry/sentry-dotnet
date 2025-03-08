@@ -95,4 +95,9 @@ public partial class MainPage
             CancellationToken cancellationToken)
             => throw new Exception();
     }
+
+    private async void OnFeedbackClicked(object sender, EventArgs e)
+    {
+        await Navigation.PushModalAsync(new SubmitFeedback());
+    }
 }

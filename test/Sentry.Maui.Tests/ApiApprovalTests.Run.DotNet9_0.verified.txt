@@ -9,6 +9,23 @@
 }
 namespace Sentry.Maui
 {
+    public class BreadcrumbEvent : System.IEquatable<Sentry.Maui.BreadcrumbEvent>
+    {
+        public BreadcrumbEvent(object? Sender, string EventName, [System.Runtime.CompilerServices.TupleElementNames(new string[] {
+                "Key",
+                "Value"})] params System.Collections.Generic.IEnumerable<System.ValueTuple<string, string>>[] ExtraData) { }
+        public string EventName { get; init; }
+        [System.Runtime.CompilerServices.TupleElementNames(new string[] {
+                "Key",
+                "Value"})]
+        public System.Collections.Generic.IEnumerable<System.ValueTuple<string, string>>[] ExtraData { get; init; }
+        public object? Sender { get; init; }
+    }
+    public interface IMauiElementEventBinder
+    {
+        void Bind(Microsoft.Maui.Controls.VisualElement element, System.Action<Sentry.Maui.BreadcrumbEvent> addBreadcrumb);
+        void UnBind(Microsoft.Maui.Controls.VisualElement element);
+    }
     public class SentryMauiOptions : Sentry.Extensions.Logging.SentryLoggingOptions
     {
         public SentryMauiOptions() { }
@@ -18,5 +35,20 @@ namespace Sentry.Maui
         public bool IncludeTextInBreadcrumbs { get; set; }
         public bool IncludeTitleInBreadcrumbs { get; set; }
         public void SetBeforeScreenshotCapture(System.Func<Sentry.SentryEvent, Sentry.SentryHint, bool> beforeCapture) { }
+    }
+}
+namespace Sentry.Maui.Internal
+{
+    public class MauiButtonEventsBinder : Sentry.Maui.IMauiElementEventBinder
+    {
+        public MauiButtonEventsBinder() { }
+        public void Bind(Microsoft.Maui.Controls.VisualElement element, System.Action<Sentry.Maui.BreadcrumbEvent> addBreadcrumb) { }
+        public void UnBind(Microsoft.Maui.Controls.VisualElement element) { }
+    }
+    public class MauiImageButtonEventsBinder : Sentry.Maui.IMauiElementEventBinder
+    {
+        public MauiImageButtonEventsBinder() { }
+        public void Bind(Microsoft.Maui.Controls.VisualElement element, System.Action<Sentry.Maui.BreadcrumbEvent> addBreadcrumb) { }
+        public void UnBind(Microsoft.Maui.Controls.VisualElement element) { }
     }
 }
