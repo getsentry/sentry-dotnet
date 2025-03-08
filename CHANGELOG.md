@@ -36,6 +36,7 @@
 ### Fixes
 
 - Fix mismapped breadcrumb levels coming in from native to dotnet SDK ([#3993](https://github.com/getsentry/sentry-dotnet/pull/3993))
+- Deduplicate profiling stack frames ([#3969](https://github.com/getsentry/sentry-dotnet/pull/3969))
 
 ### Dependencies
 
