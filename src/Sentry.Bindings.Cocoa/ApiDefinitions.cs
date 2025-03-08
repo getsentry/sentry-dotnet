@@ -27,7 +27,6 @@ delegate SentryBreadcrumb SentryBeforeBreadcrumbCallback (SentryBreadcrumb bread
 
 // typedef SentryEvent * _Nullable (^SentryBeforeSendEventCallback)(SentryEvent * _Nonnull);
 [Internal]
-[return: NullAllowed]
 delegate SentryEvent SentryBeforeSendEventCallback (SentryEvent @event);
 
 // typedef id<SentrySpan> _Nullable (^SentryBeforeSendSpanCallback)(id<SentrySpan> _Nonnull);

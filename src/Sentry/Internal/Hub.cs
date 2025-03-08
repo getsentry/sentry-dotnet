@@ -506,6 +506,17 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        scope ??= CurrentScope;
+        CurrentClient.CaptureFeedback(feedback, scope, hint);
+    }
+
 #if MEMORY_DUMP_SUPPORTED
     internal void CaptureHeapDump(string dumpFile)
     {
@@ -534,6 +545,7 @@ internal class Hub : IHub, IDisposable
     }
 #endif
 
+    [Obsolete("Use CaptureFeedback instead.")]
     public void CaptureUserFeedback(UserFeedback userFeedback)
     {
         if (!IsEnabled)

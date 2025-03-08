@@ -798,6 +798,7 @@ public class EnvelopeTests
     [Fact]
     public async Task Roundtrip_WithUserFeedback_Success()
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         // Arrange
         var feedback = new UserFeedback(
             SentryId.Create(),
@@ -817,6 +818,95 @@ public class EnvelopeTests
 
         // Assert
         envelopeRoundtrip.Should().BeEquivalentTo(envelope);
+#pragma warning restore CS0618 // Type or member is obsolete
+    }
+
+    [Fact]
+    public async Task Roundtrip_WithFeedback_Success()
+    {
+        // Arrange
+        var feedback = new SentryFeedback(
+            "Everything is great!",
+            "foo@bar.com",
+            "Someone Nice",
+            "fake-replay-id",
+            "https://www.example.com",
+            SentryId.Create()
+        );
+        var evt = new SentryEvent
+        {
+            Level = SentryLevel.Info,
+            Contexts =
+            {
+                Feedback = feedback
+            }
+        };
+
+        using var envelope = Envelope.FromFeedback(evt);
+
+        using var stream = new MemoryStream();
+
+        // Act
+        await envelope.SerializeAsync(stream, _testOutputLogger);
+        stream.Seek(0, SeekOrigin.Begin);
+
+        using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
+
+        // Assert
+        envelopeRoundtrip.Should().BeEquivalentTo(envelope);
+    }
+
+    [Fact]
+    public void FromFeedback_NoFeedbackContext_Throws()
+    {
+        // Arrange
+        var evt = new SentryEvent { Level = SentryLevel.Info };
+
+        // Act
+        Action act = () => Envelope.FromFeedback(evt);
+
+        // Assert
+        act.Should().Throw<ArgumentException>()
+            .WithMessage("Unable to create envelope - the event does not contain any feedback.");
+    }
+
+    [Fact]
+    public void FromFeedback_MultipleAttachments_LogsWarning()
+    {
+        // Arrange
+        var feedback = new SentryFeedback(
+            "Everything is great!",
+            "foo@bar.com",
+            "Someone Nice",
+            "fake-replay-id",
+            "https://www.example.com",
+            SentryId.Create()
+        );
+        var evt = new SentryEvent
+        {
+            Level = SentryLevel.Info,
+            Contexts =
+            {
+                Feedback = feedback
+            }
+        };
+        var logger = Substitute.For<IDiagnosticLogger>();
+        logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+
+        List<SentryAttachment> attachments = [
+            AttachmentHelper.FakeAttachment("file1.txt"), AttachmentHelper.FakeAttachment("file2.txt")
+        ];
+
+        // Act
+        using var envelope = Envelope.FromFeedback(evt, logger, attachments);
+
+        // Assert
+        logger.Received(1).Log(
+            SentryLevel.Warning,
+            Arg.Is<string>(m => m.Contains("Feedback can only contain one attachment")),
+            null,
+            Arg.Any<object[]>());
+        envelope.Items.Should().ContainSingle(item => item.TryGetType() == EnvelopeItem.TypeValueAttachment);
     }
 
     [Fact]

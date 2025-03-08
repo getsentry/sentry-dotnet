@@ -20,6 +20,17 @@ public class MainActivity : Activity
             // https://docs.sentry.io/platforms/android/configuration/
             // Enable Native Android SDK ANR detection
             options.Native.AnrEnabled = true;
+
+            options.SetBeforeSend(evt =>
+            {
+                if (evt.Exception?.Message.Contains("Something you don't care want logged?") ?? false)
+                {
+                    return null; // return null to filter out event
+                }
+                // or add additional data
+                evt.SetTag("dotnet-Android-Native-Before", "Hello World");
+                return evt;
+            });
         });
 
         // Here's an example of adding custom scope information.
