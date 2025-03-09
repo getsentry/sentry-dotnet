@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Enhancements
+
+- Profiling: improve performance by subscribing only to necessary CLR events ([#3970](https://github.com/getsentry/sentry-dotnet/pull/3970))
+
 ### Fixes
 
 - Unknown stack frames in profiles on .NET 8+ ([#3967](https://github.com/getsentry/sentry-dotnet/pull/3967))

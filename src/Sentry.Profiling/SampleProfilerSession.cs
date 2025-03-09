@@ -31,13 +31,13 @@ internal class SampleProfilerSession : IDisposable
     // Exposed only for benchmarks.
     internal static EventPipeProvider[] Providers = new[]
     {
-        // Note: all events we need issued by "DotNETRuntime" provider are at "EventLevel.Informational"
-        // see https://learn.microsoft.com/en-us/dotnet/fundamentals/diagnostics/runtime-events
-        // TODO replace Keywords.Default with a subset. Currently it is:
-        //   Default = GC | Type | GCHeapSurvivalAndMovement | Binder | Loader | Jit | NGen | SupressNGen
-        //                | StopEnumeration | Security | AppDomainResourceManagement | Exception | Threading | Contention | Stack | JittedMethodILToNativeMap
-        //                | ThreadTransfer | GCHeapAndTypeNames | Codesymbols | Compilation,
-        new EventPipeProvider(ClrTraceEventParser.ProviderName, EventLevel.Verbose, (long) ClrTraceEventParser.Keywords.Default),
+        new EventPipeProvider(ClrTraceEventParser.ProviderName, EventLevel.Verbose, (long) (
+            ClrTraceEventParser.Keywords.Jit
+            | ClrTraceEventParser.Keywords.NGen
+            | ClrTraceEventParser.Keywords.Loader
+            | ClrTraceEventParser.Keywords.Binder
+            | ClrTraceEventParser.Keywords.JittedMethodILToNativeMap
+            )),
         new EventPipeProvider(SampleProfilerTraceEventParser.ProviderName, EventLevel.Informational),
         // new EventPipeProvider(TplEtwProviderTraceEventParser.ProviderName, EventLevel.Informational, (long) TplEtwProviderTraceEventParser.Keywords.Default)
     };
