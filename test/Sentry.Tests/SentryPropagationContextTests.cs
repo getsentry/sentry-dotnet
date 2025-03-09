@@ -83,6 +83,7 @@ public class SentryPropagationContextTests
         var baggageHeader = BaggageHeader.Create(new List<KeyValuePair<string, string>>
         {
             { "sentry-sample_rate", "1.0" },
+            { "sentry-sample_rand", "0.1234" },
             { "sentry-trace_id", "75302ac48a024bde9a3b3734a82e36c8" },
             { "sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff" },
             { "sentry-replay_id", "bfd31b89a59d41c99d96dc2baf840ecd" }
@@ -90,6 +91,6 @@ public class SentryPropagationContextTests
 
         var propagationContext = SentryPropagationContext.CreateFromHeaders(null, traceHeader, baggageHeader);
 
-        Assert.Equal(4, propagationContext.GetOrCreateDynamicSamplingContext(new SentryOptions()).Items.Count);
+        Assert.Equal(5, propagationContext.GetOrCreateDynamicSamplingContext(new SentryOptions()).Items.Count);
     }
 }

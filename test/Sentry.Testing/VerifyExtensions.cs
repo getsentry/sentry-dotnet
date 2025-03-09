@@ -11,6 +11,7 @@ public static class VerifyExtensions
         return settings
             .ScrubMachineName()
             .ScrubUserName()
+            .ScrubMember("sample_rand")
             .AddExtraSettings(_ =>
             {
                 _.Converters.Add(new SpansConverter());

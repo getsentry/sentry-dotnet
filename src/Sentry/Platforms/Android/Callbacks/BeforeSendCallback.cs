@@ -1,4 +1,5 @@
 using Sentry.Android.Extensions;
+using Sentry.Extensibility;
 
 namespace Sentry.Android.Callbacks;
 
@@ -22,10 +23,19 @@ internal class BeforeSendCallback : JavaObject, JavaSdk.SentryOptions.IBeforeSen
     {
         // Note: Hint is unused due to:
         // https://github.com/getsentry/sentry-dotnet/issues/1469
-
-        var evnt = e.ToSentryEvent(_javaOptions);
-        var hint = h.ToHint();
-        var result = _beforeSend?.Invoke(evnt, hint);
-        return result?.ToJavaSentryEvent(_options, _javaOptions);
+        try
+        {
+            // because this can go out to user code, we want to prevent external crashing
+            // also, native types tend to move before dotnet does, so serialization can fail
+            var evnt = e.ToSentryEvent(_javaOptions);
+            var hint = h.ToHint();
+            var result = _beforeSend?.Invoke(evnt, hint);
+            return result?.ToJavaSentryEvent(_options, _javaOptions);
+        }
+        catch (Exception exception)
+        {
+            _options.LogError(exception, "Before Send Error");
+            return e;
+        }
     }
 }

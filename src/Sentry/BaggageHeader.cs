@@ -26,7 +26,7 @@ public class BaggageHeader
 
     // We can safely return a dictionary of Sentry members, as we are in control over the keys added.
     // Just to be safe though, we'll group by key and only take the first of each one.
-    internal IReadOnlyDictionary<string, string> GetSentryMembers() =>
+    internal Dictionary<string, string> GetSentryMembers() =>
         Members
             .Where(kvp => kvp.Key.StartsWith(SentryKeyPrefix))
             .GroupBy(kvp => kvp.Key, kvp => kvp.Value)

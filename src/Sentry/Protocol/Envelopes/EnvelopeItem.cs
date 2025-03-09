@@ -13,6 +13,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     private const string TypeKey = "type";
 
     internal const string TypeValueEvent = "event";
+    internal const string TypeValueFeedback = "feedback";
     internal const string TypeValueUserReport = "user_report";
     internal const string TypeValueTransaction = "transaction";
     internal const string TypeValueSpan = "span";
@@ -217,8 +218,22 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     }
 
     /// <summary>
+    /// Creates an <see cref="EnvelopeItem"/> from a feedback <paramref name="event"/>.
+    /// </summary>
+    public static EnvelopeItem FromFeedback(SentryEvent @event)
+    {
+        var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
+        {
+            [TypeKey] = TypeValueFeedback
+        };
+
+        return new EnvelopeItem(header, new JsonSerializable(@event));
+    }
+
+    /// <summary>
     /// Creates an <see cref="EnvelopeItem"/> from <paramref name="sentryUserFeedback"/>.
     /// </summary>
+    [Obsolete("Use FromFeedback instead.")]
     public static EnvelopeItem FromUserFeedback(UserFeedback sentryUserFeedback)
     {
         var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
@@ -392,9 +407,11 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         // User report
         if (string.Equals(payloadType, TypeValueUserReport, StringComparison.OrdinalIgnoreCase))
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             var bufferLength = (int)(payloadLength ?? stream.Length);
             var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
             var userFeedback = Json.Parse(buffer, UserFeedback.FromJson);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             return new JsonSerializable(userFeedback);
         }

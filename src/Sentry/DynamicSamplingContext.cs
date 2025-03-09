@@ -1,3 +1,4 @@
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry;
@@ -24,6 +25,7 @@ internal class DynamicSamplingContext
         string publicKey,
         bool? sampled,
         double? sampleRate = null,
+        double? sampleRand = null,
         string? release = null,
         string? environment = null,
         string? transactionName = null)
@@ -31,20 +33,25 @@ internal class DynamicSamplingContext
         // Validate and set required values
         if (traceId == SentryId.Empty)
         {
-            throw new ArgumentOutOfRangeException(nameof(traceId));
+            throw new ArgumentOutOfRangeException(nameof(traceId), "cannot be empty");
         }
 
         if (string.IsNullOrWhiteSpace(publicKey))
         {
-            throw new ArgumentException(default, nameof(publicKey));
+            throw new ArgumentException("cannot be empty", nameof(publicKey));
         }
 
         if (sampleRate is < 0.0 or > 1.0)
         {
-            throw new ArgumentOutOfRangeException(nameof(sampleRate));
+            throw new ArgumentOutOfRangeException(nameof(sampleRate), "Arg invalid if < 0.0 or > 1.0");
         }
 
-        var items = new Dictionary<string, string>(capacity: 7)
+        if (sampleRand is < 0.0 or >= 1.0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(sampleRand), "Arg invalid if < 0.0 or >= 1.0");
+        }
+
+        var items = new Dictionary<string, string>(capacity: 8)
         {
             ["trace_id"] = traceId.ToString(),
             ["public_key"] = publicKey,
@@ -59,6 +66,11 @@ internal class DynamicSamplingContext
         if (sampleRate is not null)
         {
             items.Add("sample_rate", sampleRate.Value.ToString(CultureInfo.InvariantCulture));
+        }
+
+        if (sampleRand is not null)
+        {
+            items.Add("sample_rand", sampleRand.Value.ToString("N4", CultureInfo.InvariantCulture));
         }
 
         if (!string.IsNullOrWhiteSpace(release))
@@ -99,7 +111,7 @@ internal class DynamicSamplingContext
             return null;
         }
 
-        if (items.TryGetValue("sampled", out var sampledString) && !bool.TryParse(sampledString, out _))
+        if (items.TryGetValue("sampled", out var sampledString) && !bool.TryParse(sampledString, out var sampled))
         {
             return null;
         }
@@ -111,6 +123,27 @@ internal class DynamicSamplingContext
             return null;
         }
 
+        // See https://develop.sentry.dev/sdk/telemetry/traces/#propagated-random-value
+        if (items.TryGetValue("sample_rand", out var sampleRand))
+        {
+            if (!double.TryParse(sampleRand, NumberStyles.Float, CultureInfo.InvariantCulture, out var rand) ||
+                 rand is < 0.0 or >= 1.0)
+            {
+                return null;
+            }
+        }
+        else
+        {
+            var rand = SampleRandHelper.GenerateSampleRand(traceId);
+            if (!string.IsNullOrEmpty(sampledString))
+            {
+                // Ensure sample_rand is consistent with the sampling decision that has already been made
+                rand = bool.Parse(sampledString)
+                    ? rand * rate // 0 <= sampleRand < rate
+                    : rate + (1 - rate) * rand; // rate < sampleRand < 1
+            }
+            items.Add("sample_rand", rand.ToString("N4", CultureInfo.InvariantCulture));
+        }
         return new DynamicSamplingContext(items);
     }
 
@@ -121,6 +154,7 @@ internal class DynamicSamplingContext
         var traceId = transaction.TraceId;
         var sampled = transaction.IsSampled;
         var sampleRate = transaction.SampleRate!.Value;
+        var sampleRand = transaction.SampleRand;
         var transactionName = transaction.NameSource.IsHighQuality() ? transaction.Name : null;
 
         // These two may not have been set yet on the transaction, but we can get them directly.
@@ -132,6 +166,7 @@ internal class DynamicSamplingContext
             publicKey,
             sampled,
             sampleRate,
+            sampleRand,
             release,
             environment,
             transactionName);

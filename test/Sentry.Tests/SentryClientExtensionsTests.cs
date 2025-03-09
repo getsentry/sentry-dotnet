@@ -81,18 +81,22 @@ public class SentryClientExtensionsTests
     [Fact]
     public void CaptureUserFeedback_EnabledClient_CapturesUserFeedback()
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         _ = _sut.IsEnabled.Returns(true);
         _sut.CaptureUserFeedback(Guid.Parse("1ec19311a7c048818de80b18dcc43eaa"), "email@email.com", "comments");
         _sut.Received(1).CaptureUserFeedback(Arg.Any<UserFeedback>());
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Fact]
     public void CaptureUserFeedback_DisabledClient_DoesNotCaptureUserFeedback()
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         _ = _sut.IsEnabled.Returns(false);
         _sut.CaptureUserFeedback(Guid.Parse("1ec19311a7c048818de80b18dcc43eea"), "email@email.com", "comments");
 
         _sut.DidNotReceive().CaptureUserFeedback(Arg.Any<UserFeedback>());
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Fact]

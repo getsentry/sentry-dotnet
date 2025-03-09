@@ -12,19 +12,20 @@ namespace Sentry.Profiling;
 internal class SampleProfilerSession : IDisposable
 {
     private readonly EventPipeSession _session;
-    private readonly TraceLogEventSource _eventSource;
     private readonly SampleProfilerTraceEventParser _sampleEventParser;
     private readonly IDiagnosticLogger? _logger;
     private readonly SentryStopwatch _stopwatch;
     private bool _stopped = false;
+    private Task _processing;
 
-    private SampleProfilerSession(SentryStopwatch stopwatch, EventPipeSession session, TraceLogEventSource eventSource, IDiagnosticLogger? logger)
+    private SampleProfilerSession(SentryStopwatch stopwatch, EventPipeSession session, TraceLogEventSource eventSource, Task processing, IDiagnosticLogger? logger)
     {
         _session = session;
         _logger = logger;
-        _eventSource = eventSource;
-        _sampleEventParser = new SampleProfilerTraceEventParser(_eventSource);
+        EventSource = eventSource;
+        _sampleEventParser = new SampleProfilerTraceEventParser(EventSource);
         _stopwatch = stopwatch;
+        _processing = processing;
     }
 
     // Exposed only for benchmarks.
@@ -46,11 +47,14 @@ internal class SampleProfilerSession : IDisposable
     // need a large buffer if we're connecting righ away. Leaving it too large increases app memory usage.
     internal static int CircularBufferMB = 16;
 
+    // Exposed for tests
+    internal TraceLogEventSource EventSource { get; }
+
     public SampleProfilerTraceEventParser SampleEventParser => _sampleEventParser;
 
     public TimeSpan Elapsed => _stopwatch.Elapsed;
 
-    public TraceLog TraceLog => _eventSource.TraceLog;
+    public TraceLog TraceLog => EventSource.TraceLog;
 
     // default is false, set 1 for true.
     private static int _throwOnNextStartupForTests = 0;
@@ -86,7 +90,7 @@ internal class SampleProfilerSession : IDisposable
             var eventSource = TraceLog.CreateFromEventPipeSession(session, TraceLog.EventPipeRundownConfiguration.Enable(client));
 
             // Process() blocks until the session is stopped so we need to run it on a separate thread.
-            Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning)
+            var processing = Task.Factory.StartNew(eventSource.Process, TaskCreationOptions.LongRunning)
                 .ContinueWith(_ =>
                 {
                     if (_.Exception?.InnerException is { } e)
@@ -95,7 +99,7 @@ internal class SampleProfilerSession : IDisposable
                     }
                 }, TaskContinuationOptions.OnlyOnFaulted);
 
-            return new SampleProfilerSession(stopWatch, session, eventSource, logger);
+            return new SampleProfilerSession(stopWatch, session, eventSource, processing, logger);
         }
         catch (Exception ex)
         {
@@ -108,7 +112,7 @@ internal class SampleProfilerSession : IDisposable
     {
         var tcs = new TaskCompletionSource();
         var cb = (TraceEvent _) => { tcs.TrySetResult(); };
-        _eventSource.AllEvents += cb;
+        EventSource.AllEvents += cb;
         try
         {
             // Wait for the first event to be processed.
@@ -116,7 +120,7 @@ internal class SampleProfilerSession : IDisposable
         }
         finally
         {
-            _eventSource.AllEvents -= cb;
+            EventSource.AllEvents -= cb;
         }
     }
 
@@ -128,8 +132,9 @@ internal class SampleProfilerSession : IDisposable
             {
                 _stopped = true;
                 _session.Stop();
+                _processing.Wait();
                 _session.Dispose();
-                _eventSource.Dispose();
+                EventSource.Dispose();
             }
             catch (Exception ex)
             {

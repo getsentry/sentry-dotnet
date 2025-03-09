@@ -681,6 +681,136 @@ public partial class HubTests
     }
 
     [Fact]
+    public void StartTransaction_NoDynamicSamplingContext_GeneratesSampleRand()
+    {
+        // Arrange
+        var transactionContext = new TransactionContext("name", "operation");
+        var customContext = new Dictionary<string, object>();
+
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext, customContext);
+
+        // Assert
+        var transactionTracer = ((TransactionTracer)transaction);
+        transactionTracer.SampleRand.Should().NotBeNull();
+        transactionTracer.DynamicSamplingContext.Should().NotBeNull();
+        transactionTracer.DynamicSamplingContext!.Items.Should().ContainKey("sample_rand");
+        transactionTracer.DynamicSamplingContext.Items["sample_rand"].Should().Be(transactionTracer.SampleRand!.Value.ToString("N4", CultureInfo.InvariantCulture));
+    }
+
+    [Fact]
+    public void StartTransaction_DynamicSamplingContextWithoutSampleRand_SampleRandNotPropagated()
+    {
+        // Arrange
+        var transactionContext = new TransactionContext("name", "operation");
+        var customContext = new Dictionary<string, object>();
+
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext, customContext, DynamicSamplingContext.Empty);
+
+        // Assert
+        var transactionTracer = ((TransactionTracer)transaction);
+        transactionTracer.SampleRand.Should().NotBeNull();
+        transactionTracer.DynamicSamplingContext.Should().NotBeNull();
+        // See https://develop.sentry.dev/sdk/telemetry/traces/dynamic-sampling-context/#freezing-dynamic-sampling-context
+        transactionTracer.DynamicSamplingContext!.Items.Should().NotContainKey("sample_rand");
+    }
+
+    [Fact]
+    public void StartTransaction_DynamicSamplingContextWithSampleRand_InheritsSampleRand()
+    {
+        // Arrange
+        var transactionContext = new TransactionContext("name", "operation");
+        var customContext = new Dictionary<string, object>();
+        var dsc = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sampled", "true"},
+            {"sentry-sample_rate", "0.5"}, // Required in the baggage header, but ignored by sampling logic
+            {"sentry-sample_rand", "0.1234"}
+        }).CreateDynamicSamplingContext();
+
+        _fixture.Options.TracesSampleRate = 0.4;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext, customContext, dsc);
+
+        // Assert
+        var transactionTracer = ((TransactionTracer)transaction);
+        transactionTracer.IsSampled.Should().Be(true);
+        transactionTracer.SampleRate.Should().Be(0.4);
+        transactionTracer.SampleRand.Should().Be(0.1234);
+        transactionTracer.DynamicSamplingContext.Should().Be(dsc);
+    }
+
+    [Theory]
+    [InlineData(0.1, false)]
+    [InlineData(0.2, true)]
+    public void StartTransaction_TraceSampler_UsesSampleRand(double sampleRate, bool expectedIsSampled)
+    {
+        // Arrange
+        var transactionContext = new TransactionContext("name", "operation");
+        var customContext = new Dictionary<string, object>();
+        var dsc = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sampled", "true"},
+            {"sentry-sample_rate", "0.5"},
+            {"sentry-sample_rand", "0.1234"}
+        }).CreateDynamicSamplingContext();
+
+        _fixture.Options.TracesSampler = _ => sampleRate;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext, customContext, dsc);
+
+        // Assert
+        var transactionTracer = ((TransactionTracer)transaction);
+        transactionTracer.IsSampled.Should().Be(expectedIsSampled);
+        transactionTracer.SampleRate.Should().Be(sampleRate);
+        transactionTracer.SampleRand.Should().Be(0.1234);
+        transactionTracer.DynamicSamplingContext.Should().Be(dsc);
+    }
+
+    [Theory]
+    [InlineData(0.1, false)]
+    [InlineData(0.2, true)]
+    public void StartTransaction_StaticSampler_UsesSampleRand(double sampleRate, bool expectedIsSampled)
+    {
+        // Arrange
+        var transactionContext = new TransactionContext("name", "operation");
+        var customContext = new Dictionary<string, object>();
+        var dsc = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "0.5"}, // Static sampling ignores this and uses options.TracesSampleRate instead
+            {"sentry-sample_rand", "0.1234"}
+        }).CreateDynamicSamplingContext();
+
+        _fixture.Options.TracesSampleRate = sampleRate;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext, customContext, dsc);
+
+        // Assert
+        var transactionTracer = ((TransactionTracer)transaction);
+        transactionTracer.IsSampled.Should().Be(expectedIsSampled);
+        transactionTracer.SampleRate.Should().Be(sampleRate);
+        transactionTracer.SampleRand.Should().Be(0.1234);
+        transactionTracer.DynamicSamplingContext.Should().Be(dsc);
+    }
+
+    [Fact]
     public void StartTransaction_DifferentInstrumenter_SampledIn()
     {
         // Arrange
@@ -1448,8 +1578,30 @@ public partial class HubTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
+    public void CaptureFeedback_HubEnabled(bool enabled)
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        if (!enabled)
+        {
+            hub.Dispose();
+        }
+
+        var feedback = new SentryFeedback("Test feedback");
+
+        // Act
+        hub.CaptureFeedback(feedback);
+
+        // Assert
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
     public void CaptureUserFeedback_HubEnabled(bool enabled)
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         // Arrange
         var hub = _fixture.GetSut();
         if (!enabled)
@@ -1464,6 +1616,7 @@ public partial class HubTests
 
         // Assert
         _fixture.Client.Received(enabled ? 1 : 0).CaptureUserFeedback(Arg.Any<UserFeedback>());
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Theory]
