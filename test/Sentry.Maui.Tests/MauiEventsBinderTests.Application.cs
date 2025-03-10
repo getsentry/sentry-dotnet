@@ -145,6 +145,36 @@ public partial class MauiEventsBinderTests
         Assert.Single(_fixture.Scope.Breadcrumbs);
     }
 
+    [Fact]
+    public void Application_HandleApplicationEvents_TracksExistingDescendants()
+    {
+        // Arrange
+        var application = MockApplication.Create();
+        var element = new MockVisualElement("element");
+        var mainPage = new ContentPage
+        {
+            Content = new VerticalStackLayout
+            {
+                element
+            }
+        };
+
+        application.AddWindow(mainPage);
+
+        _fixture.Binder.HandleApplicationEvents(application);
+
+        // Act
+        element.RaiseEvent(nameof(VisualElement.Focused), new FocusEventArgs(element, true));
+
+        // Assert
+        var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
+        Assert.Equal($"{nameof(MockVisualElement)}.{nameof(VisualElement.Focused)}", crumb.Message);
+        Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
+        Assert.Equal(MauiEventsBinder.SystemType, crumb.Type);
+        Assert.Equal(MauiEventsBinder.RenderingCategory, crumb.Category);
+        crumb.Data.Should().Contain($"{nameof(MockVisualElement)}.Name", "element");
+    }
+
     public static IEnumerable<object[]> ApplicationModalEventsData
     {
         get
