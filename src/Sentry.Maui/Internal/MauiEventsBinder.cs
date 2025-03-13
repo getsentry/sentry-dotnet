@@ -2,6 +2,7 @@ using System;
 using Microsoft.Extensions.Options;
 using Microsoft.Maui.Controls;
 using Sentry.Internal;
+using Sentry.Protocol;
 
 namespace Sentry.Maui.Internal;
 
@@ -15,6 +16,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private readonly IHub _hub;
     private readonly SentryMauiOptions _options;
     private readonly IEnumerable<IMauiElementEventBinder> _elementEventBinders;
+    private readonly IEnumerable<IMauiPageEventHandler> _pageEventHandlers;
 
     // https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types
     // https://github.com/getsentry/sentry/blob/master/static/app/types/breadcrumbs.tsx
@@ -26,11 +28,13 @@ internal class MauiEventsBinder : IMauiEventsBinder
     internal const string RenderingCategory = "ui.rendering";
     internal const string UserActionCategory = "ui.useraction";
 
-    public MauiEventsBinder(IHub hub, IOptions<SentryMauiOptions> options, IEnumerable<IMauiElementEventBinder> elementEventBinders)
+
+    public MauiEventsBinder(IHub hub, IOptions<SentryMauiOptions> options, IEnumerable<IMauiElementEventBinder> elementEventBinders, IEnumerable<IMauiPageEventHandler> pageEventHandlers)
     {
         _hub = hub;
         _options = options.Value;
         _elementEventBinders = elementEventBinders;
+        _pageEventHandlers = pageEventHandlers;
     }
 
     public void HandleApplicationEvents(Application application, bool bind = true)
@@ -271,75 +275,6 @@ internal class MauiEventsBinder : IMauiEventsBinder
         }
     }
 
-
-    /*
-class NativeAppStartHandler {
-       NativeAppStartHandler(this._native);
-
-       final SentryNativeBinding _native;
-
-       late final Hub _hub;
-       late final SentryFlutterOptions _options;
-
-       /// We filter out App starts more than 60s
-       static const _maxAppStartMillis = 60000;
-
-       Future<void> call(Hub hub, SentryFlutterOptions options,
-           {required DateTime? appStartEnd}) async {
-         _hub = hub;
-         _options = options;
-
-         final nativeAppStart = await _native.fetchNativeAppStart();
-         if (nativeAppStart == null) {
-           return;
-         }
-         final appStartInfo = _infoNativeAppStart(nativeAppStart, appStartEnd);
-         if (appStartInfo == null) {
-           return;
-         }
-
-         // Create Transaction & Span
-
-         const screenName = 'root /';
-         final transaction = _hub.startTransaction(
-           screenName,
-           SentrySpanOperations.uiLoad,
-           startTimestamp: appStartInfo.start,
-         );
-         final ttidSpan = transaction.startChild(
-           SentrySpanOperations.uiTimeToInitialDisplay,
-           description: '$screenName initial display',
-           startTimestamp: appStartInfo.start,
-         );
-
-         // Enrich Transaction
-
-         SentryTracer sentryTracer;
-         if (transaction is SentryTracer) {
-           sentryTracer = transaction;
-         } else {
-           return;
-         }
-
-         SentryMeasurement? measurement;
-         if (options.autoAppStart) {
-           measurement = appStartInfo.toMeasurement();
-         } else if (appStartEnd != null) {
-           appStartInfo.end = appStartEnd;
-           measurement = appStartInfo.toMeasurement();
-         }
-
-         if (measurement != null) {
-           sentryTracer.measurements[measurement.name] = measurement;
-           await _attachAppStartSpans(appStartInfo, sentryTracer);
-         }
-
-         // Finish Transaction & Span
-
-         await ttidSpan.finish(endTimestamp: appStartInfo.end);
-         await transaction.finish(endTimestamp: appStartInfo.end);
-     */
-
     internal void HandlePageEvents(Page page, bool bind = true)
     {
         if (bind)
@@ -348,11 +283,6 @@ class NativeAppStartHandler {
             // https://docs.microsoft.com/dotnet/maui/fundamentals/shell/lifecycle
             page.Appearing += OnPageOnAppearing;
             page.Disappearing += OnPageOnDisappearing;
-
-
-            // TODO: if I haven't already done the TTID, perform it here and end it in OnPageOnNavigatedTo
-            var timestamp = ProcessInfo.Instance!.StartupTimestamp;
-
 
             // Navigation events
             // https://github.com/dotnet/docs-maui/issues/583
@@ -381,10 +311,18 @@ class NativeAppStartHandler {
 
     // Application Events
 
-    private void OnApplicationOnPageAppearing(object? sender, Page page) =>
+    private void OnApplicationOnPageAppearing(object? sender, Page page)
+    {
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.PageAppearing), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, page, nameof(Page)));
-    private void OnApplicationOnPageDisappearing(object? sender, Page page) =>
+        RunPageEventHandlers(handler => handler.OnAppearing(page));
+    }
+
+    private void OnApplicationOnPageDisappearing(object? sender, Page page)
+    {
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.PageDisappearing), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, page, nameof(Page)));
+        RunPageEventHandlers(handler => handler.OnDisappearing(page));
+    }
+
     private void OnApplicationOnModalPushed(object? sender, ModalPushedEventArgs e) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushed), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
     private void OnApplicationOnModalPopped(object? sender, ModalPoppedEventArgs e) =>
@@ -508,4 +446,9 @@ class NativeAppStartHandler {
 
     private void OnPageOnLayoutChanged(object? sender, EventArgs _) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.LayoutChanged), SystemType, RenderingCategory);
+
+    private void RunPageEventHandlers(Action<IMauiPageEventHandler> action)
+    {
+        foreach (var handler in _pageEventHandlers) action(handler); // TODO: try/catch in case of user code?
+    }
 }

@@ -5,6 +5,7 @@ using Microsoft.Maui.LifecycleEvents;
 using Sentry;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
+using Sentry.Internal;
 using Sentry.Maui;
 using Sentry.Maui.Internal;
 
@@ -43,8 +44,8 @@ public static class SentryMauiAppBuilderExtensions
     public static MauiAppBuilder UseSentry(this MauiAppBuilder builder,
         Action<SentryMauiOptions>? configureOptions)
     {
-        _ = SentrySdk.AppStartTicks; // ensure start ticks is hit, this is almost immediately in range of startup
-
+        // we set this as early as possible and during the DI phase
+        TtdMauiPageEventHandler.StartupTimestamp = Stopwatch.GetTimestamp();
         var services = builder.Services;
 
         if (configureOptions != null)
@@ -62,6 +63,7 @@ public static class SentryMauiAppBuilderExtensions
         services.AddSingleton<IMauiElementEventBinder, MauiImageButtonEventsBinder>();
         services.TryAddSingleton<IMauiEventsBinder, MauiEventsBinder>();
 
+        services.AddSingleton<IMauiPageEventHandler, TtdMauiPageEventHandler>();
         services.AddSentry<SentryMauiOptions>();
 
         builder.RegisterMauiEventsBinder();
