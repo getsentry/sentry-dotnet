@@ -1,4 +1,4 @@
-namespace Sentry.Android.AssemblyReader;
+namespace Sentry.Android.AssemblyReader.V1;
 
 internal abstract class AndroidAssemblyReader : IDisposable
 {

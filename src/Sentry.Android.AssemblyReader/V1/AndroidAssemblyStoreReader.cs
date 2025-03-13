@@ -1,4 +1,4 @@
-namespace Sentry.Android.AssemblyReader;
+namespace Sentry.Android.AssemblyReader.V1;
 
 // See https://devblogs.microsoft.com/dotnet/performance-improvements-in-dotnet-maui/#single-file-assembly-stores
 internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndroidAssemblyReader
