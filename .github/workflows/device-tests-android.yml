@@ -12,6 +12,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tfm: [net8.0, net9.0]
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
@@ -32,14 +36,23 @@ jobs:
         uses: ./.github/actions/buildnative
 
       - name: Build Android Test App
-        run: pwsh ./scripts/device-test.ps1 android -Build
+        run: pwsh ./scripts/device-test.ps1 android -Build -Tfm ${{ matrix.tfm }}
 
-      - name: Upload Android Test App
+      - name: Upload Android Test App (net8.0)
+        if: matrix.tfm == 'net8.0'
         uses: actions/upload-artifact@v4
         with:
-          name: device-test-android
+          name: device-test-android-net8.0
           if-no-files-found: error
           path: test/Sentry.Maui.Device.TestApp/bin/Release/net8.0-android34.0/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
+
+      - name: Upload Android Test App (net9.0)
+        if: matrix.tfm == 'net9.0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: device-test-android-net9.0
+          if-no-files-found: error
+          path: test/Sentry.Maui.Device.TestApp/bin/Release/net9.0-android35.0/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
 
   android:
     needs: [build]
@@ -51,6 +64,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        tfm: [net8.0, net9.0]
         # We run against both an older and a newer API
         api-level: [27, 33]
     env:
@@ -70,14 +84,13 @@ jobs:
       - name: Download test app artifact
         uses: actions/download-artifact@v4
         with:
-          name: device-test-android
+          name: device-test-android-${{ matrix.tfm }}
           path: bin
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@94baf225fe0a508e581a564467443d0e2379123b # pin@v3
 
       # Cached AVD setup per https://github.com/ReactiveCircus/android-emulator-runner/blob/main/README.md
-
 
       - name: Run Tests
         timeout-minutes: 40
@@ -92,11 +105,11 @@ jobs:
           disk-size: 4096M
           emulator-options: -no-snapshot-save -no-window -accel on -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
-          script: pwsh scripts/device-test.ps1 android -Run
+          script: pwsh scripts/device-test.ps1 android -Run -Tfm ${{ matrix.tfm }}
 
       - name: Upload results
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: device-test-android-${{ matrix.api-level }}-results
+          name: device-test-android-${{ matrix.api-level }}-${{ matrix.tfm }}-results
           path: test_output

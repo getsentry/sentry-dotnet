@@ -1,3 +1,5 @@
+using Sentry.Android.AssemblyReader.V1;
+
 namespace Sentry.Android.AssemblyReader.Tests;
 
 public class AndroidAssemblyReaderTests
@@ -41,11 +43,11 @@ public class AndroidAssemblyReaderTests
         using var sut = GetSut(isAssemblyStore, isCompressed: true);
         if (isAssemblyStore)
         {
-            Assert.IsType<AssemblyReader.AndroidAssemblyStoreReader>(sut);
+            Assert.IsType<AndroidAssemblyStoreReader>(sut);
         }
         else
         {
-            Assert.IsType<AssemblyReader.AndroidAssemblyDirectoryReader>(sut);
+            Assert.IsType<AndroidAssemblyDirectoryReader>(sut);
         }
     }
 
