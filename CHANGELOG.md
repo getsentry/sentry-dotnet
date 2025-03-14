@@ -10,6 +10,12 @@
 
 - Unknown stack frames in profiles on .NET 8+ ([#3967](https://github.com/getsentry/sentry-dotnet/pull/3967))
 
+### Dependencies
+
+- Bump CLI from v2.42.2 to v2.42.3 ([#4036](https://github.com/getsentry/sentry-dotnet/pull/4036))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2423)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.42.2...2.42.3)
+
 ## 5.3.0
 
 ### Features
