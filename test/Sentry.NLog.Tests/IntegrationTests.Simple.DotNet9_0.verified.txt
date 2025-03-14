@@ -59,7 +59,10 @@
                   Type: generic,
                   Handled: true,
                   Synthetic: false,
-                  IsExceptionGroup: false
+                  IsExceptionGroup: false,
+                  Data: {
+                    HResult: 0x80131500
+                  }
                 }
               }
             ],
