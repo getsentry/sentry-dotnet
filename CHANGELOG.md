@@ -1,11 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Exception.HResult is now included in the mechanism data for all exceptions ([#4029](https://github.com/getsentry/sentry-dotnet/pull/4029))
+
 ## 5.3.0
 
 ### Features
 
 - User Feedback can now be captured without errors/exceptions. Note that these APIs replace the older UserFeedback APIs, which have now been marked as obsolete (and will be removed in a future major version bump) ([#3981](https://github.com/getsentry/sentry-dotnet/pull/3981))
-- Exception.HResult is now included in the mechanism data for all exceptions ([#4029](https://github.com/getsentry/sentry-dotnet/pull/4029))
 
 ### Fixes
 
