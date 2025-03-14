@@ -12,7 +12,7 @@ public partial class MainExceptionProcessorTests
     private readonly Fixture _fixture = new();
 
     [Fact]
-    public void Process_ExceptionsWithoutData_MechanismDataIsEmpty()
+    public void Process_ExceptionsWithoutData_MechanismDataIsMinimal()
     {
         var sut = _fixture.GetSut();
         var evt = new SentryEvent();
@@ -21,7 +21,12 @@ public partial class MainExceptionProcessorTests
         sut.Process(ex, evt);
 
         var sentryException = evt.SentryExceptions!.Single();
-        Assert.Empty(sentryException.Mechanism!.Data);
+
+        // All managed exceptions has an HResult, at a bare minimum (which we store in the Mechanism.Data)
+        sentryException.Mechanism!.Data.Should().BeEquivalentTo(new Dictionary<string, string>()
+        {
+            ["HResult"] = "0x80131500" // The default value of HRESULT for managed exceptions (COR_E_EXCEPTION)
+        });
     }
 
     [Fact]
@@ -109,7 +114,13 @@ public partial class MainExceptionProcessorTests
 
         var actual = sut.CreateSentryExceptions(ex).Single();
 
-        Assert.Null(actual.Mechanism);
+        // The custom data won't be added, but the mechanism data will still contain an HResult.
+        // We add the HResult for all exceptions
+        actual.Mechanism!.Data.Should().BeEquivalentTo(new Dictionary<string, string>()
+        {
+            ["HResult"] = "0x80131500" // The default value of HRESULT for managed exceptions (COR_E_EXCEPTION)
+        });
+
     }
 
     [Fact]

@@ -224,7 +224,8 @@
                   Synthetic: false,
                   IsExceptionGroup: false,
                   Data: {
-                    details: Do work always throws.
+                    details: Do work always throws.,
+                    HResult: 0x80131500
                   }
                 }
               }

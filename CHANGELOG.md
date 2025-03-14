@@ -2,8 +2,9 @@
 
 ## Unreleased
 
-### Enhancements
+### Features
 
+- Exception.HResult is now included in the mechanism data for all exceptions ([#4029](https://github.com/getsentry/sentry-dotnet/pull/4029))
 - Profiling: improve performance by subscribing only to necessary CLR events ([#3970](https://github.com/getsentry/sentry-dotnet/pull/3970))
 
 ### Fixes
