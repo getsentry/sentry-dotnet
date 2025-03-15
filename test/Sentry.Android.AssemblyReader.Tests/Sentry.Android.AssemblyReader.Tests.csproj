@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android34.0</TargetFrameworks>
+    <!-- IMPORTANT: We must test with new TFMs as the store format changes with new versions of .NET -->
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android34.0;net9.0-android35.0</TargetFrameworks>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 

@@ -5,7 +5,8 @@ param(
     [String] $Platform,
 
     [Switch] $Build,
-    [Switch] $Run
+    [Switch] $Run,
+    [String] $Tfm
 )
 
 Set-StrictMode -Version latest
@@ -21,13 +22,29 @@ $CI = Test-Path env:CI
 Push-Location $PSScriptRoot/..
 try
 {
-    $tfm = 'net8.0-'
+    if (!$Tfm)
+    {
+        $Tfm = 'net8.0'
+    }
+    switch ($Tfm) {
+        'net8.0' {
+            $androidLevel = '34.0'
+            $iosLevel = '17.0'
+        }
+        'net9.0' {
+            $androidLevel = '35.0'
+            $iosLevel = '18.0'
+        }
+        default {
+            throw "Unsupported Target Framework: $Tfm"
+        }
+    }
     $arch = (!$IsWindows -and $(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
     if ($Platform -eq 'android')
     {
-        $tfm += 'android34.0'
+        $Tfm += '-android' + $androidLevel
         $group = 'android'
-        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/android-$arch"
+        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$Tfm/android-$arch"
         $arguments = @(
             '--app', "$buildDir/io.sentry.dotnet.maui.device.testapp-Signed.apk",
             '--package-name', 'io.sentry.dotnet.maui.device.testapp',
@@ -43,11 +60,11 @@ try
     }
     elseif ($Platform -eq 'ios')
     {
-        $tfm += 'ios17.0'
+        $Tfm += '-ios' + $iosLevel
         $group = 'apple'
         # Always use x64 on iOS, since arm64 doesn't support JIT, which is required for tests using NSubstitute
         $arch = 'x64'
-        $buildDir = "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/iossimulator-$arch"
+        $buildDir = "test/Sentry.Maui.Device.TestApp/bin/Release/$Tfm/iossimulator-$arch"
         $envValue = $CI ? 'true' : 'false'
         $arguments = @(
             '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
@@ -60,7 +77,7 @@ try
     if ($Build)
     {
         # We disable AOT for device tests: https://github.com/nsubstitute/NSubstitute/issues/834
-        dotnet build -f $tfm -c Release -p:EnableAot=false -p:NoSymbolStrip=true test/Sentry.Maui.Device.TestApp
+        dotnet build -f $Tfm -c Release -p:EnableAot=false -p:NoSymbolStrip=true test/Sentry.Maui.Device.TestApp
         if ($LASTEXITCODE -ne 0)
         {
             throw 'Failed to build Sentry.Maui.Device.TestApp'
