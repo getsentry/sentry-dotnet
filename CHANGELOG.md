@@ -6,6 +6,12 @@
 
 - Target `net9.0` on Sentry.Google.Cloud.Functions to avoid conflict with Sentry.AspNetCore ([#4039](https://github.com/getsentry/sentry-dotnet/pull/4039))
 
+### Dependencies
+
+- Bump CLI from v2.42.2 to v2.42.3 ([#4036](https://github.com/getsentry/sentry-dotnet/pull/4036))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2423)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.42.2...2.42.3)
+
 ## 5.4.0
 
 ### Enhancements
