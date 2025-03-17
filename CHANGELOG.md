@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Fixed symbolication and source context for net9.0-android ([#4033](https://github.com/getsentry/sentry-dotnet/pull/4033))
+
 ### Dependencies
 
 - Bump CLI from v2.42.2 to v2.42.3 ([#4036](https://github.com/getsentry/sentry-dotnet/pull/4036))
