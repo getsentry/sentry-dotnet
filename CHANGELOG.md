@@ -5,7 +5,7 @@
 ### Fixes
 
 - Target `net9.0` on Sentry.Google.Cloud.Functions to avoid conflict with Sentry.AspNetCore ([#4039](https://github.com/getsentry/sentry-dotnet/pull/4039))
-- Changed default value for `SentryOptions.EnableAppHangTrackingV2` to `false` ([#4041](https://github.com/getsentry/sentry-dotnet/pull/4041))
+- Changed default value for `SentryOptions.EnableAppHangTrackingV2` to `false` ([#4042](https://github.com/getsentry/sentry-dotnet/pull/4042))
 
 ### Features
 
