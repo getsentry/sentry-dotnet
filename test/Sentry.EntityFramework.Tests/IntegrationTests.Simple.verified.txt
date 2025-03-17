@@ -10,7 +10,15 @@
       SentryExceptions: [
         {
           Type: System.Exception,
-          Value: my exception
+          Value: my exception,
+          Mechanism: {
+            Type: generic,
+            Synthetic: false,
+            IsExceptionGroup: false,
+            Data: {
+              HResult: 0x80131500
+            }
+          }
         }
       ],
       Level: error,
