@@ -11,6 +11,7 @@ on:
 
 jobs:
   build:
+    name: Build (${{ matrix.tfm }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -44,7 +45,7 @@ jobs:
         with:
           name: device-test-android-net8.0
           if-no-files-found: error
-          path: test/Sentry.Maui.Device.TestApp/bin/Release/net8.0-android34.0/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
+          path: test/Sentry.Maui.Device.TestApp/bin/Release/net8.0-android/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
 
       - name: Upload Android Test App (net9.0)
         if: matrix.tfm == 'net9.0'
@@ -52,11 +53,11 @@ jobs:
         with:
           name: device-test-android-net9.0
           if-no-files-found: error
-          path: test/Sentry.Maui.Device.TestApp/bin/Release/net9.0-android35.0/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
+          path: test/Sentry.Maui.Device.TestApp/bin/Release/net9.0-android/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
 
   android:
     needs: [build]
-    name: Run Android API-${{ matrix.api-level }} Test
+    name: Run Android API-${{ matrix.api-level }} Test (${{ matrix.tfm }})
 
     # Requires a "larger runner", for nested virtualization support
     runs-on: ubuntu-latest-4-cores
