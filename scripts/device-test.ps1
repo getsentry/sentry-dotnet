@@ -26,23 +26,10 @@ try
     {
         $Tfm = 'net8.0'
     }
-    switch ($Tfm) {
-        'net8.0' {
-            $androidLevel = '34.0'
-            $iosLevel = '17.0'
-        }
-        'net9.0' {
-            $androidLevel = '35.0'
-            $iosLevel = '18.0'
-        }
-        default {
-            throw "Unsupported Target Framework: $Tfm"
-        }
-    }
     $arch = (!$IsWindows -and $(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
     if ($Platform -eq 'android')
     {
-        $Tfm += '-android' + $androidLevel
+        $Tfm += '-android'
         $group = 'android'
         $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$Tfm/android-$arch"
         $arguments = @(
@@ -60,7 +47,7 @@ try
     }
     elseif ($Platform -eq 'ios')
     {
-        $Tfm += '-ios' + $iosLevel
+        $Tfm += '-ios'
         $group = 'apple'
         # Always use x64 on iOS, since arm64 doesn't support JIT, which is required for tests using NSubstitute
         $arch = 'x64'
