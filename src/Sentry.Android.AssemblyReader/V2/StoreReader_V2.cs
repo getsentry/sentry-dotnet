@@ -1,4 +1,3 @@
-#if NET9_0_OR_GREATER
 /*
  * Adapted from https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/tools/assembly-store-reader-mk2/AssemblyStore/StoreReader_V2.cs
  * Original code licensed under the MIT License (https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/LICENSE.TXT)
@@ -6,7 +5,7 @@
 
 namespace Sentry.Android.AssemblyReader.V2;
 
-partial class StoreReader_V2 : AssemblyStoreReader
+internal partial class StoreReader_V2 : AssemblyStoreReader
 {
 	// Bit 31 is set for 64-bit platforms, cleared for the 32-bit ones
 	const uint ASSEMBLY_STORE_FORMAT_VERSION_64BIT = 0x80000002; // Must match the ASSEMBLY_STORE_FORMAT_VERSION native constant
@@ -219,5 +218,3 @@ partial class StoreReader_V2 : AssemblyStoreReader
 		Assemblies = storeItems.AsReadOnly ();
 	}
 }
-
-#endif

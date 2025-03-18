@@ -1,4 +1,3 @@
-#if NET9_0_OR_GREATER
 /*
  * Adapted from https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/tools/assembly-store-reader-mk2/AssemblyStore/Utils.cs
  * Original code licensed under the MIT License (https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/LICENSE.TXT)
@@ -10,7 +9,7 @@ using ZipArchive = Xamarin.Tools.Zip.ZipArchive;
 
 namespace Sentry.Android.AssemblyReader.V2;
 
-static class Utils
+internal static class Utils
 {
 	static readonly string[] aabZipEntries = {
 		"base/manifest/AndroidManifest.xml",
@@ -153,5 +152,3 @@ static class Utils
 		return true;
 	}
 }
-
-#endif

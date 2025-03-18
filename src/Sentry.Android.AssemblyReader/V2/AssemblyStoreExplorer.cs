@@ -1,4 +1,3 @@
-#if NET9_0_OR_GREATER
 /*
  * Adapted from https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/tools/assembly-store-reader-mk2/AssemblyStore/AssemblyStoreExplorer.cs
  * Original code licensed under the MIT License (https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/LICENSE.TXT)
@@ -9,7 +8,7 @@ using ZipArchive = Xamarin.Tools.Zip.ZipArchive;
 
 namespace Sentry.Android.AssemblyReader.V2;
 
-class AssemblyStoreExplorer
+internal class AssemblyStoreExplorer
 {
 	readonly AssemblyStoreReader reader;
 
@@ -45,7 +44,12 @@ class AssemblyStoreExplorer
                 dict.Add(item.Name, item);
             }
         }
+#if NETSTANDARD
+        // ReadOnlyDictionary is not available in netstandard2.0
+        AssembliesByName = dict;
+#else
         AssembliesByName = dict.AsReadOnly ();
+#endif
 	}
 
 	protected AssemblyStoreExplorer (FileInfo storeInfo, DebugLogger? logger)
@@ -217,5 +221,3 @@ class AssemblyStoreExplorer
 		return true;
 	}
 }
-
-#endif

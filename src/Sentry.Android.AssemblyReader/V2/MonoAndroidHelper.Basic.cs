@@ -1,4 +1,3 @@
-#if NET9_0_OR_GREATER
 /*
  * Adapted from https://github.com/dotnet/android/blob/3822f2b1ee7061813b1d456af22e043e66e2f698/src/Xamarin.Android.Build.Tasks/Utilities/MonoAndroidHelper.Basic.cs
  * Original code licensed under the MIT License (https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/LICENSE.TXT)
@@ -8,7 +7,7 @@ using System.IO.Hashing;
 
 namespace Sentry.Android.AssemblyReader.V2;
 
-partial class MonoAndroidHelper
+internal partial class MonoAndroidHelper
 {
 	public static class AndroidAbi
 	{
@@ -242,5 +241,3 @@ partial class MonoAndroidHelper
 		return (ulong)XxHash32.HashToUInt32 (stringBytes);
 	}
 }
-
-#endif
