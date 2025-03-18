@@ -19,12 +19,16 @@ public static class AndroidAssemblyReaderFactory
         logger?.Invoke("Opening APK: {0}", apkPath);
         var zipArchive = ZipFile.Open(apkPath, ZipArchiveMode.Read);
 
+        // TODO: Try to read using the v2 store format
+
+        // Try to read using the v1 store format
         if (zipArchive.GetEntry("assemblies/assemblies.manifest") is not null)
         {
             logger?.Invoke("APK uses AssemblyStore");
             return new AndroidAssemblyStoreReader(zipArchive, supportedAbis, logger);
         }
 
+        // Try to read from file system
         logger?.Invoke("APK doesn't use AssemblyStore");
         return new AndroidAssemblyDirectoryReader(zipArchive, supportedAbis, logger);
     }
