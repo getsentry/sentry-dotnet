@@ -1,11 +1,11 @@
 namespace Sentry.Android.AssemblyReader.V1;
 
 // See https://devblogs.microsoft.com/dotnet/performance-improvements-in-dotnet-maui/#single-file-assembly-stores
-internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndroidAssemblyReader
+internal sealed class AndroidAssemblyStoreReaderV1 : AndroidAssemblyReader, IAndroidAssemblyReader
 {
     private readonly AssemblyStoreExplorer _explorer;
 
-    public AndroidAssemblyStoreReader(ZipArchive zip, IList<string> supportedAbis, DebugLogger? logger)
+    public AndroidAssemblyStoreReaderV1(ZipArchive zip, IList<string> supportedAbis, DebugLogger? logger)
         : base(zip, supportedAbis, logger)
     {
         _explorer = new(zip, supportedAbis, logger);
@@ -29,7 +29,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
             return null;
         }
 
-        return CreatePEReader(name, stream);
+        return CreatePEReader(name, stream, Logger);
     }
 
     private AssemblyStoreAssembly? TryFindAssembly(string name)

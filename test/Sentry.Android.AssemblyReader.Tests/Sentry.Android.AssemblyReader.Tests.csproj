@@ -14,10 +14,11 @@
 
   <!--  Build the Android test app in various configurations during the build of this test project. -->
   <Target Name="BuildTestAPKs" BeforeTargets="DispatchToInnerBuilds;BeforeBuild" Condition="'$(TargetPlatformIdentifier)' != 'android'">
+    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Restore" />
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net8.0-android" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net9.0-android" />
   </Target>
   <Target Name="_InnerBuildTestAPKs">
-    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Restore" />
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Store=False;_Compressed=False" />
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Store=False;_Compressed=True" />
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Store=True;_Compressed=False" />
@@ -27,8 +28,8 @@
     <PropertyGroup>
       <_ConfigString>Store=$(_Store)-Compressed=$(_Compressed)</_ConfigString>
     </PropertyGroup>
-    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(_ConfigString)\" Condition="!Exists('TestAPKs\android-$(_ConfigString).apk')" />
-    <Copy SourceFiles="..\AndroidTestApp\bin\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk" DestinationFiles="TestAPKs\android-$(_ConfigString).apk" Condition="!Exists('TestAPKs\android-$(_ConfigString).apk')" />
+    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('TestAPKs\$(TargetFramework)-$(_ConfigString).apk')" />
+    <Copy SourceFiles="..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk" DestinationFiles="TestAPKs\$(TargetFramework)-$(_ConfigString).apk" Condition="!Exists('TestAPKs\$(TargetFramework)-$(_ConfigString).apk')" />
   </Target>
 
 </Project>

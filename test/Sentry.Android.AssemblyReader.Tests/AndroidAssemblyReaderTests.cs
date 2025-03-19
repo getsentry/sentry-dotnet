@@ -1,10 +1,17 @@
-using Sentry.Android.AssemblyReader.V1;
-
 namespace Sentry.Android.AssemblyReader.Tests;
 
 public class AndroidAssemblyReaderTests
 {
     private readonly ITestOutputHelper _output;
+
+#if NET9_0
+    private static string TargetFramework => "net9.0";
+#elif NET8_0
+    private static string TargetFramework => "net8.0";
+#else
+    // Adding a new TFM to the project? Include it above
+#error "Target Framework not yet supported for AndroidAssemblyReader"
+#endif
 
     public AndroidAssemblyReaderTests(ITestOutputHelper output)
     {
@@ -21,7 +28,7 @@ public class AndroidAssemblyReaderTests
             Path.GetFullPath(Path.Combine(
                 Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
                 "..", "..", "..", "TestAPKs",
-                $"android-Store={isAssemblyStore}-Compressed={isCompressed}.apk"));
+                $"{TargetFramework}-android-Store={isAssemblyStore}-Compressed={isCompressed}.apk"));
 
         _output.WriteLine($"Checking if APK exists: {apkPath}");
         File.Exists(apkPath).Should().BeTrue();
@@ -41,9 +48,13 @@ public class AndroidAssemblyReaderTests
         Skip.If(true, "It's unknown whether the current Android app APK is an assembly store or not.");
 #endif
         using var sut = GetSut(isAssemblyStore, isCompressed: true);
-        if (isAssemblyStore)
+        if (isAssemblyStore && TargetFramework == "net9.0")
         {
-            Assert.IsType<AndroidAssemblyStoreReader>(sut);
+            Assert.IsType<V2.AndroidAssemblyStoreReaderV2>(sut);
+        }
+        else if (isAssemblyStore && TargetFramework == "net8.0")
+        {
+            Assert.IsType<V1.AndroidAssemblyStoreReaderV1>(sut);
         }
         else
         {
@@ -75,6 +86,10 @@ public class AndroidAssemblyReaderTests
         // No need to run all combinations - we only test the current APK which is (likely) compressed assembly store.
         Skip.If(!isAssemblyStore);
         Skip.If(!isCompressed);
+#endif
+#if NET9_0_OR_GREATER
+        // Building without an assembly store is not yet supported in net9.0 and above
+        Skip.If(!isAssemblyStore);
 #endif
         using var sut = GetSut(isAssemblyStore, isCompressed);
 

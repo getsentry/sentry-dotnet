@@ -44,12 +44,7 @@ internal class AssemblyStoreExplorer
                 dict.Add(item.Name, item);
             }
         }
-#if NETSTANDARD
-        // ReadOnlyDictionary is not available in netstandard2.0
-        AssembliesByName = dict;
-#else
         AssembliesByName = dict.AsReadOnly ();
-#endif
 	}
 
 	protected AssemblyStoreExplorer (FileInfo storeInfo, DebugLogger? logger)
@@ -150,7 +145,7 @@ internal class AssemblyStoreExplorer
 				continue;
 			}
 
-			ZipEntry entry = zip.ReadEntry (path);
+			var entry = zip.ReadEntry (path);
 			var stream = new MemoryStream ();
 			entry.Extract (stream);
 			ret.Add (new AssemblyStoreExplorer (stream, $"{fi.FullName}!{path}", logger));
@@ -163,12 +158,12 @@ internal class AssemblyStoreExplorer
 		return (ret, null, true);
 	}
 
-	public Stream? ReadImageData (AssemblyStoreItem item, bool uncompressIfNeeded = false)
+	public MemoryStream? ReadImageData (AssemblyStoreItem item, bool uncompressIfNeeded = false)
 	{
 		return reader.ReadEntryImageData (item, uncompressIfNeeded);
 	}
 
-	string EnsureCorrectAssemblyName (string assemblyName)
+    private string EnsureCorrectAssemblyName (string assemblyName)
 	{
 		assemblyName = Path.GetFileName (assemblyName);
 		if (reader.NeedsExtensionInName) {

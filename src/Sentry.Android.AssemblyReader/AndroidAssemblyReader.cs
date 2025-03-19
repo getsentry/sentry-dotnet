@@ -1,4 +1,4 @@
-namespace Sentry.Android.AssemblyReader.V1;
+namespace Sentry.Android.AssemblyReader;
 
 internal abstract class AndroidAssemblyReader : IDisposable
 {
@@ -18,9 +18,9 @@ internal abstract class AndroidAssemblyReader : IDisposable
         ZipArchive.Dispose();
     }
 
-    protected PEReader CreatePEReader(string assemblyName, MemoryStream inputStream)
+    internal static PEReader CreatePEReader(string assemblyName, MemoryStream inputStream, DebugLogger? logger)
     {
-        var decompressedStream = TryDecompressLZ4(assemblyName, inputStream);
+        var decompressedStream = TryDecompressLZ4(assemblyName, inputStream, logger);
 
         // Use the decompressed stream, or if null, i.e. it wasn't compressed, use the original.
         return new PEReader(decompressedStream ?? inputStream);
@@ -35,7 +35,7 @@ internal abstract class AndroidAssemblyReader : IDisposable
     ///    [rest: lz4 compressed payload]
     /// </summary>
     /// <seealso href="https://github.com/xamarin/xamarin-android/blob/c92702619f5fabcff0ed88e09160baf9edd70f41/tools/decompress-assemblies/main.cs#L26" />
-    private Stream? TryDecompressLZ4(string assemblyName, MemoryStream inputStream)
+    private static Stream? TryDecompressLZ4(string assemblyName, MemoryStream inputStream, DebugLogger? logger)
     {
         const uint compressedDataMagic = 0x5A4C4158; // 'XALZ', little-endian
         const int payloadOffset = 12;
@@ -51,7 +51,7 @@ internal abstract class AndroidAssemblyReader : IDisposable
         Debug.Assert(inputStream.Position == payloadOffset);
         var inputLength = (int)(inputStream.Length - payloadOffset);
 
-        Logger?.Invoke("Decompressing assembly ({0} bytes uncompressed) using LZ4", decompressedLength);
+        logger?.Invoke("Decompressing assembly ({0} bytes uncompressed) using LZ4", decompressedLength);
 
         var outputStream = new MemoryStream(decompressedLength);
 

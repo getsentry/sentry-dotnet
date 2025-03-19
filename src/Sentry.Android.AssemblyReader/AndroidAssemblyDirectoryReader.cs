@@ -1,4 +1,6 @@
-namespace Sentry.Android.AssemblyReader.V1;
+using Sentry.Android.AssemblyReader.V1;
+
+namespace Sentry.Android.AssemblyReader;
 
 // The "Old" app type - where each DLL is placed in the 'assemblies' directory as an individual file.
 internal sealed class AndroidAssemblyDirectoryReader : AndroidAssemblyReader, IAndroidAssemblyReader
@@ -31,7 +33,7 @@ internal sealed class AndroidAssemblyDirectoryReader : AndroidAssemblyReader, IA
             zipStream.CopyTo(memStream);
             memStream.Position = 0;
         }
-        return CreatePEReader(name, memStream);
+        return CreatePEReader(name, memStream, Logger);
     }
 
     private ZipArchiveEntry? FindAssembly(string name)

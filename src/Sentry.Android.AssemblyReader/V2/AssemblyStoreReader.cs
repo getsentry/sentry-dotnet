@@ -61,7 +61,7 @@ internal abstract class AssemblyStoreReader
 	protected abstract void Prepare ();
 	protected abstract ulong GetStoreStartDataOffset ();
 
-	public Stream ReadEntryImageData (AssemblyStoreItem entry, bool uncompressIfNeeded = false)
+	public MemoryStream ReadEntryImageData (AssemblyStoreItem entry, bool uncompressIfNeeded = false)
 	{
 		ulong startOffset = GetStoreStartDataOffset ();
 		StoreStream.Seek ((uint)startOffset + entry.DataOffset, SeekOrigin.Begin);

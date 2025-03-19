@@ -1,4 +1,5 @@
 using Sentry.Android.AssemblyReader.V1;
+using Sentry.Android.AssemblyReader.V2;
 
 namespace Sentry.Android.AssemblyReader;
 
@@ -17,18 +18,23 @@ public static class AndroidAssemblyReaderFactory
     public static IAndroidAssemblyReader Open(string apkPath, IList<string> supportedAbis, DebugLogger? logger = null)
     {
         logger?.Invoke("Opening APK: {0}", apkPath);
-        var zipArchive = ZipFile.Open(apkPath, ZipArchiveMode.Read);
 
-        // TODO: Try to read using the v2 store format
-
-        // Try to read using the v1 store format
-        if (zipArchive.GetEntry("assemblies/assemblies.manifest") is not null)
+        // Try to read using the v2 store format
+        if (AndroidAssemblyStoreReaderV2.TryReadStore(apkPath, supportedAbis, logger, out var readerV2))
         {
-            logger?.Invoke("APK uses AssemblyStore");
-            return new AndroidAssemblyStoreReader(zipArchive, supportedAbis, logger);
+            logger?.Invoke("APK uses AssemblyStore V2");
+            return readerV2;
         }
 
-        // Try to read from file system
+        // Try to read using the v1 store format
+        var zipArchive = ZipFile.Open(apkPath, ZipArchiveMode.Read);
+        if (zipArchive.GetEntry("assemblies/assemblies.manifest") is not null)
+        {
+            logger?.Invoke("APK uses AssemblyStore V1");
+            return new AndroidAssemblyStoreReaderV1(zipArchive, supportedAbis, logger);
+        }
+
+        // Finally, try to read from file system
         logger?.Invoke("APK doesn't use AssemblyStore");
         return new AndroidAssemblyDirectoryReader(zipArchive, supportedAbis, logger);
     }
