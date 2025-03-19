@@ -3,8 +3,6 @@
  * Original code licensed under the MIT License (https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/LICENSE.TXT)
  */
 
-using System.IO.Hashing;
-
 namespace Sentry.Android.AssemblyReader.V2;
 
 internal partial class MonoAndroidHelper
@@ -323,16 +321,4 @@ After:
 
     public static byte[] Utf8StringToBytes(string str) => Encoding.UTF8.GetBytes(str);
     public static byte[] Utf16StringToBytes(string str) => Encoding.Unicode.GetBytes(str);
-
-    public static ulong GetXxHash(string str, bool is64Bit) => GetXxHash(Utf8StringToBytes(str), is64Bit);
-
-    public static ulong GetXxHash(byte[] stringBytes, bool is64Bit)
-    {
-        if (is64Bit)
-        {
-            return XxHash3.HashToUInt64(stringBytes);
-        }
-
-        return (ulong)XxHash32.HashToUInt32(stringBytes);
-    }
 }
