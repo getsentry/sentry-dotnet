@@ -8,29 +8,29 @@ namespace Sentry.Android.AssemblyReader.V2;
 internal partial class StoreReader_V2 : AssemblyStoreReader
 {
 
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	// Bit 31 is set for 64-bit platforms, cleared for the 32-bit ones
-	const uint ASSEMBLY_STORE_FORMAT_VERSION_64BIT = 0x80000002; // Must match the ASSEMBLY_STORE_FORMAT_VERSION native constant
-	const uint ASSEMBLY_STORE_FORMAT_VERSION_32BIT = 0x00000002;
-	const uint ASSEMBLY_STORE_FORMAT_VERSION_MASK  = 0xF0000000;
+    /* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
+    Before:
+        // Bit 31 is set for 64-bit platforms, cleared for the 32-bit ones
+        const uint ASSEMBLY_STORE_FORMAT_VERSION_64BIT = 0x80000002; // Must match the ASSEMBLY_STORE_FORMAT_VERSION native constant
+        const uint ASSEMBLY_STORE_FORMAT_VERSION_32BIT = 0x00000002;
+        const uint ASSEMBLY_STORE_FORMAT_VERSION_MASK  = 0xF0000000;
 
-	const uint ASSEMBLY_STORE_ABI_AARCH64          = 0x00010000;
-	const uint ASSEMBLY_STORE_ABI_ARM              = 0x00020000;
-	const uint ASSEMBLY_STORE_ABI_X64              = 0x00030000;
-	const uint ASSEMBLY_STORE_ABI_X86              = 0x00040000;
-	const uint ASSEMBLY_STORE_ABI_MASK             = 0x00FF0000;
-After:
-    // Bit 31 is set for 64-bit platforms, cleared for the 32-bit ones
-    private const uint ASSEMBLY_STORE_FORMAT_VERSION_64BIT = 0x80000002; // Must match the ASSEMBLY_STORE_FORMAT_VERSION native constant
-    private const uint ASSEMBLY_STORE_FORMAT_VERSION_32BIT = 0x00000002;
-    private const uint ASSEMBLY_STORE_FORMAT_VERSION_MASK  = 0xF0000000;
-    private const uint ASSEMBLY_STORE_ABI_AARCH64          = 0x00010000;
-    private const uint ASSEMBLY_STORE_ABI_ARM              = 0x00020000;
-    private const uint ASSEMBLY_STORE_ABI_X64              = 0x00030000;
-    private const uint ASSEMBLY_STORE_ABI_X86              = 0x00040000;
-    private const uint ASSEMBLY_STORE_ABI_MASK             = 0x00FF0000;
-*/
+        const uint ASSEMBLY_STORE_ABI_AARCH64          = 0x00010000;
+        const uint ASSEMBLY_STORE_ABI_ARM              = 0x00020000;
+        const uint ASSEMBLY_STORE_ABI_X64              = 0x00030000;
+        const uint ASSEMBLY_STORE_ABI_X86              = 0x00040000;
+        const uint ASSEMBLY_STORE_ABI_MASK             = 0x00FF0000;
+    After:
+        // Bit 31 is set for 64-bit platforms, cleared for the 32-bit ones
+        private const uint ASSEMBLY_STORE_FORMAT_VERSION_64BIT = 0x80000002; // Must match the ASSEMBLY_STORE_FORMAT_VERSION native constant
+        private const uint ASSEMBLY_STORE_FORMAT_VERSION_32BIT = 0x00000002;
+        private const uint ASSEMBLY_STORE_FORMAT_VERSION_MASK  = 0xF0000000;
+        private const uint ASSEMBLY_STORE_ABI_AARCH64          = 0x00010000;
+        private const uint ASSEMBLY_STORE_ABI_ARM              = 0x00020000;
+        private const uint ASSEMBLY_STORE_ABI_X64              = 0x00030000;
+        private const uint ASSEMBLY_STORE_ABI_X86              = 0x00040000;
+        private const uint ASSEMBLY_STORE_ABI_MASK             = 0x00FF0000;
+    */
     // Bit 31 is set for 64-bit platforms, cleared for the 32-bit ones
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_64BIT = 0x80000002; // Must match the ASSEMBLY_STORE_FORMAT_VERSION native constant
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_32BIT = 0x00000002;
@@ -50,14 +50,14 @@ After:
 
     private readonly HashSet<uint> supportedVersions;
 
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	Header? header;
-	ulong elfOffset = 0;
-After:
-    private Header? header;
-    private ulong elfOffset = 0;
-*/
+    /* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
+    Before:
+        Header? header;
+        ulong elfOffset = 0;
+    After:
+        private Header? header;
+        private ulong elfOffset = 0;
+    */
     private Header? header;
     private ulong elfOffset = 0;
 
@@ -112,12 +112,12 @@ After:
             ASSEMBLY_STORE_FORMAT_VERSION_32BIT | ASSEMBLY_STORE_ABI_X86,
         };
 
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	static string GetBlobName (string abi) => $"libassemblies.{abi}.blob.so";
-After:
-    private static string GetBlobName (string abi) => $"libassemblies.{abi}.blob.so";
-*/
+        /* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
+        Before:
+            static string GetBlobName (string abi) => $"libassemblies.{abi}.blob.so";
+        After:
+            private static string GetBlobName (string abi) => $"libassemblies.{abi}.blob.so";
+        */
     }
 
     private static string GetBlobName(string abi) => $"libassemblies.{abi}.blob.so";
