@@ -27,12 +27,12 @@ internal partial class StoreReader_V2
             this.index_entry_count = index_entry_count;
             this.index_size = index_size;
 
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	sealed class IndexEntry
-After:
-    private sealed class IndexEntry
-*/
+            /* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
+            Before:
+                sealed class IndexEntry
+            After:
+                private sealed class IndexEntry
+            */
         }
     }
 
@@ -46,12 +46,12 @@ After:
             this.name_hash = name_hash;
             this.descriptor_index = descriptor_index;
 
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	sealed class EntryDescriptor
-After:
-    private sealed class EntryDescriptor
-*/
+            /* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
+            Before:
+                sealed class EntryDescriptor
+            After:
+                private sealed class EntryDescriptor
+            */
         }
     }
 
@@ -68,12 +68,12 @@ After:
         public uint config_data_offset;
         public uint config_data_size;
 
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	sealed class StoreItem_V2 : AssemblyStoreItem
-After:
-    private sealed class StoreItem_V2 : AssemblyStoreItem
-*/
+        /* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
+        Before:
+            sealed class StoreItem_V2 : AssemblyStoreItem
+        After:
+            private sealed class StoreItem_V2 : AssemblyStoreItem
+        */
     }
 
     private sealed class StoreItem_V2 : AssemblyStoreItem
@@ -89,12 +89,12 @@ After:
             ConfigSize = descriptor.config_data_size;
             TargetArch = targetArch;
 
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-		static List<ulong> IndexToHashes (List<IndexEntry> indexEntries)
-After:
-        private static List<ulong> IndexToHashes (List<IndexEntry> indexEntries)
-*/
+            /* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
+            Before:
+                    static List<ulong> IndexToHashes (List<IndexEntry> indexEntries)
+            After:
+                    private static List<ulong> IndexToHashes (List<IndexEntry> indexEntries)
+            */
         }
 
         private static List<ulong> IndexToHashes(List<IndexEntry> indexEntries)
@@ -107,12 +107,12 @@ After:
 
             return ret;
 
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	sealed class TemporaryItem
-After:
-    private sealed class TemporaryItem
-*/
+            /* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
+            Before:
+                sealed class TemporaryItem
+            After:
+                private sealed class TemporaryItem
+            */
         }
     }
 
