@@ -46,12 +46,12 @@ internal abstract class AssemblyStoreReader
 
         return null;
 
-        /* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-        Before:
-            static AssemblyStoreReader? MakeReaderReady (AssemblyStoreReader reader)
-        After:
-            private static AssemblyStoreReader? MakeReaderReady (AssemblyStoreReader reader)
-        */
+/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
+Before:
+	static AssemblyStoreReader? MakeReaderReady (AssemblyStoreReader reader)
+After:
+    private static AssemblyStoreReader? MakeReaderReady (AssemblyStoreReader reader)
+*/
     }
 
     private static AssemblyStoreReader? MakeReaderReady(AssemblyStoreReader reader)
