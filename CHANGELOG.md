@@ -2,9 +2,14 @@
 
 ## Unreleased
 
+### Features
+
+- Exception.HResult is now included in the mechanism data for all exceptions ([#4029](https://github.com/getsentry/sentry-dotnet/pull/4029))
+
 ### Fixes
 
 - Fixed symbolication and source context for net9.0-android ([#4033](https://github.com/getsentry/sentry-dotnet/pull/4033))
+- Target `net9.0` on Sentry.Google.Cloud.Functions to avoid conflict with Sentry.AspNetCore ([#4039](https://github.com/getsentry/sentry-dotnet/pull/4039))
 
 ### Dependencies
 
@@ -21,6 +26,7 @@
 ### Fixes
 
 - Unknown stack frames in profiles on .NET 8+ ([#3967](https://github.com/getsentry/sentry-dotnet/pull/3967))
+- Missing MAUI `Shell` navigation breadcrumbs on iOS ([#4006](https://github.com/getsentry/sentry-dotnet/pull/4006))
 
 ## 5.3.0
 
