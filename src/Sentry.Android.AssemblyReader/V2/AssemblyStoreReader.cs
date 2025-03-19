@@ -9,80 +9,92 @@ internal abstract class AssemblyStoreReader
 {
     protected DebugLogger? Logger { get; }
 
-    static readonly UTF8Encoding ReaderEncoding = new UTF8Encoding (false);
+    private static readonly UTF8Encoding ReaderEncoding = new UTF8Encoding(false);
 
-	protected Stream StoreStream                { get; }
+    protected Stream StoreStream { get; }
 
-	public abstract string Description          { get; }
-	public abstract bool NeedsExtensionInName   { get; }
-	public string StorePath                     { get; }
+    public abstract string Description { get; }
+    public abstract bool NeedsExtensionInName { get; }
+    public string StorePath { get; }
 
-	public AndroidTargetArch TargetArch         { get; protected set; } = AndroidTargetArch.Arm;
-	public uint AssemblyCount                   { get; protected set; }
-	public uint IndexEntryCount                 { get; protected set; }
-	public IList<AssemblyStoreItem>? Assemblies { get; protected set; }
-	public bool Is64Bit                         { get; protected set; }
+    public AndroidTargetArch TargetArch { get; protected set; } = AndroidTargetArch.Arm;
+    public uint AssemblyCount { get; protected set; }
+    public uint IndexEntryCount { get; protected set; }
+    public IList<AssemblyStoreItem>? Assemblies { get; protected set; }
+    public bool Is64Bit { get; protected set; }
 
-	protected AssemblyStoreReader (Stream store, string path, DebugLogger? logger)
-	{
-		StoreStream = store;
-		StorePath = path;
+    protected AssemblyStoreReader(Stream store, string path, DebugLogger? logger)
+    {
+        StoreStream = store;
+        StorePath = path;
         Logger = logger;
-	}
+    }
 
-	public static AssemblyStoreReader? Create (Stream store, string path, DebugLogger? logger)
-	{
-		AssemblyStoreReader? reader = MakeReaderReady (new StoreReader_V1 (store, path, logger));
-		if (reader != null) {
-			return reader;
-		}
+    public static AssemblyStoreReader? Create(Stream store, string path, DebugLogger? logger)
+    {
+        AssemblyStoreReader? reader = MakeReaderReady(new StoreReader_V1(store, path, logger));
+        if (reader != null)
+        {
+            return reader;
+        }
 
-		reader = MakeReaderReady (new StoreReader_V2 (store, path, logger));
-		if (reader != null) {
-			return reader;
-		}
+        reader = MakeReaderReady(new StoreReader_V2(store, path, logger));
+        if (reader != null)
+        {
+            return reader;
+        }
 
-		return null;
-	}
+        return null;
 
+/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
+Before:
 	static AssemblyStoreReader? MakeReaderReady (AssemblyStoreReader reader)
-	{
-		if (!reader.IsSupported ()) {
-			return null;
-		}
+After:
+    private static AssemblyStoreReader? MakeReaderReady (AssemblyStoreReader reader)
+*/
+    }
 
-		reader.Prepare ();
-		return reader;
-	}
+    private static AssemblyStoreReader? MakeReaderReady(AssemblyStoreReader reader)
+    {
+        if (!reader.IsSupported())
+        {
+            return null;
+        }
 
-	protected BinaryReader CreateReader () => new BinaryReader (StoreStream, ReaderEncoding, leaveOpen: true);
+        reader.Prepare();
+        return reader;
+    }
 
-	protected abstract bool IsSupported ();
-	protected abstract void Prepare ();
-	protected abstract ulong GetStoreStartDataOffset ();
+    protected BinaryReader CreateReader() => new BinaryReader(StoreStream, ReaderEncoding, leaveOpen: true);
 
-	public MemoryStream ReadEntryImageData (AssemblyStoreItem entry, bool uncompressIfNeeded = false)
-	{
-		ulong startOffset = GetStoreStartDataOffset ();
-		StoreStream.Seek ((uint)startOffset + entry.DataOffset, SeekOrigin.Begin);
-		var stream = new MemoryStream ();
+    protected abstract bool IsSupported();
+    protected abstract void Prepare();
+    protected abstract ulong GetStoreStartDataOffset();
 
-		if (uncompressIfNeeded) {
-			throw new NotImplementedException ();
-		}
+    public MemoryStream ReadEntryImageData(AssemblyStoreItem entry, bool uncompressIfNeeded = false)
+    {
+        ulong startOffset = GetStoreStartDataOffset();
+        StoreStream.Seek((uint)startOffset + entry.DataOffset, SeekOrigin.Begin);
+        var stream = new MemoryStream();
 
-		const long BufferSize = 65535;
-		byte[] buffer = Utils.BytePool.Rent ((int)BufferSize);
-		long remainingToRead = entry.DataSize;
+        if (uncompressIfNeeded)
+        {
+            throw new NotImplementedException();
+        }
 
-		while (remainingToRead > 0) {
-			int nread = StoreStream.Read (buffer, 0, (int)Math.Min (BufferSize, remainingToRead));
-			stream.Write (buffer, 0, nread);
-			remainingToRead -= (long)nread;
-		}
-		stream.Flush ();
-		stream.Seek (0, SeekOrigin.Begin);
+        const long BufferSize = 65535;
+        byte[] buffer = Utils.BytePool.Rent((int)BufferSize);
+        long remainingToRead = entry.DataSize;
 
-		return stream;
-	}
+        while (remainingToRead > 0)
+        {
+            int nread = StoreStream.Read(buffer, 0, (int)Math.Min(BufferSize, remainingToRead));
+            stream.Write(buffer, 0, nread);
+            remainingToRead -= (long)nread;
+        }
+        stream.Flush();
+        stream.Seek(0, SeekOrigin.Begin);
+
+        return stream;
+    }
 }

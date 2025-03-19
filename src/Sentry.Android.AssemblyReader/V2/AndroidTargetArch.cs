@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Adapted from https://github.com/dotnet/android-tools/blob/ab2165daf27d4fcb29e88bc022e0ab0be33aff69/src/Xamarin.Android.Tools.AndroidSdk/AndroidTargetArch.cs
  * Original code licensed under the MIT License (https://github.com/dotnet/android-tools/blob/ab2165daf27d4fcb29e88bc022e0ab0be33aff69/LICENSE)
  */

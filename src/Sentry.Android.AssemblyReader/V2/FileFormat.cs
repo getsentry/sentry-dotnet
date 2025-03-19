@@ -7,11 +7,11 @@ namespace Sentry.Android.AssemblyReader.V2;
 
 internal enum FileFormat
 {
-	Aab,
-	AabBase,
-	Apk,
-	AssemblyStore,
-	ELF,
-	Zip,
-	Unknown,
+    Aab,
+    AabBase,
+    Apk,
+    AssemblyStore,
+    ELF,
+    Zip,
+    Unknown,
 }

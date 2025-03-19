@@ -7,10 +7,10 @@ namespace Sentry.Android.AssemblyReader.V2;
 
 internal enum ELFPayloadError
 {
-	None,
-	NotELF,
-	LoadFailed,
-	NotSharedLibrary,
-	NotLittleEndian,
-	NoPayloadSection,
+    None,
+    NotELF,
+    LoadFailed,
+    NotSharedLibrary,
+    NotLittleEndian,
+    NoPayloadSection,
 }

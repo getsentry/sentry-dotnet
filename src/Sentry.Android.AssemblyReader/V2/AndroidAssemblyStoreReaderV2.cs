@@ -99,7 +99,7 @@ internal class AndroidAssemblyStoreReaderV2 : IAndroidAssemblyReader
         {
             if (explorer.AssembliesByName?.TryGetValue(name, out var assembly) is true)
             {
-                explorerAssembly = new(explorer,assembly);
+                explorerAssembly = new(explorer, assembly);
                 return true;
             }
         }
