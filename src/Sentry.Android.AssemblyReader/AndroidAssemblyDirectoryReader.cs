@@ -1,4 +1,5 @@
 using Sentry.Android.AssemblyReader.V1;
+using Sentry.Android.AssemblyReader.V2;
 
 namespace Sentry.Android.AssemblyReader;
 
@@ -27,12 +28,7 @@ internal sealed class AndroidAssemblyDirectoryReader : AndroidAssemblyReader, IA
         Logger?.Invoke("Resolved assembly {0} in the APK at {1}", name, zipEntry.FullName);
 
         // We need a seekable stream for the PEReader (or even to check whether the DLL is compressed), so make a copy.
-        var memStream = new MemoryStream((int)zipEntry.Length);
-        using (var zipStream = zipEntry.Open())
-        {
-            zipStream.CopyTo(memStream);
-            memStream.Position = 0;
-        }
+        var memStream = zipEntry.Extract();
         return CreatePEReader(name, memStream, Logger);
     }
 

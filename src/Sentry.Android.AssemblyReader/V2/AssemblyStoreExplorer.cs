@@ -3,9 +3,6 @@
  * Original code licensed under the MIT License (https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/LICENSE.TXT)
  */
 
-using Xamarin.Tools.Zip;
-using ZipArchive = Xamarin.Tools.Zip.ZipArchive;
-
 namespace Sentry.Android.AssemblyReader.V2;
 
 internal class AssemblyStoreExplorer
@@ -237,14 +234,11 @@ After:
 
     private static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenCommon(FileInfo fi, List<IList<string>> pathLists, DebugLogger? logger)
     {
-        using var zip = ZipArchive.Open(fi.FullName, FileMode.Open);
-        IList<AssemblyStoreExplorer>? explorers;
-        string? errorMessage;
-        bool pathsFound;
+        using var zip = ZipFile.Open(fi.FullName, ZipArchiveMode.Read);
 
-        foreach (IList<string> paths in pathLists)
+        foreach (var paths in pathLists)
         {
-            (explorers, errorMessage, pathsFound) = TryLoad(fi, zip, paths, logger);
+            var (explorers, errorMessage, pathsFound) = TryLoad(fi, zip, paths, logger);
             if (pathsFound)
             {
                 return (explorers, errorMessage);
@@ -258,16 +252,14 @@ After:
     {
         var ret = new List<AssemblyStoreExplorer>();
 
-        foreach (string path in paths)
+        foreach (var path in paths)
         {
-            if (!zip.ContainsEntry(path))
+            if (zip.GetEntry(path) is not {} entry)
             {
                 continue;
             }
 
-            var entry = zip.ReadEntry(path);
-            var stream = new MemoryStream();
-            entry.Extract(stream);
+            var stream = entry.Extract();
             ret.Add(new AssemblyStoreExplorer(stream, $"{fi.FullName}!{path}", logger));
         }
 

@@ -5,7 +5,6 @@
 using ELFSharp.ELF;
 using ELFSharp.ELF.Sections;
 using Machine = ELFSharp.ELF.Machine;
-using ZipArchive = Xamarin.Tools.Zip.ZipArchive;
 
 namespace Sentry.Android.AssemblyReader.V2;
 
@@ -163,7 +162,7 @@ After:
 
     private static FileFormat DetectAndroidArchive(FileInfo info, FileFormat defaultFormat)
     {
-        using var zip = ZipArchive.Open(info.FullName, FileMode.Open);
+        using var zip = ZipFile.Open(info.FullName, ZipArchiveMode.Read);
 
         if (HasAllEntries(zip, aabZipEntries))
         {
@@ -192,14 +191,23 @@ After:
 
     private static bool HasAllEntries(ZipArchive zip, string[] entries)
     {
-        foreach (string entry in entries)
+        foreach (var entry in entries)
         {
-            if (!zip.ContainsEntry(entry, caseSensitive: true))
+            if (zip.GetEntry(entry) is null)
             {
                 return false;
             }
         }
 
         return true;
+    }
+
+    internal static MemoryStream Extract(this ZipArchiveEntry zipEntry)
+    {
+        var memStream = new MemoryStream((int)zipEntry.Length);
+        using var zipStream = zipEntry.Open();
+        zipStream.CopyTo(memStream);
+        memStream.Position = 0;
+        return memStream;
     }
 }
