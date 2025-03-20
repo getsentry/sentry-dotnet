@@ -60,7 +60,7 @@ runs:
       with:
         dotnet-version: |
           8.0.x
-          9.0.100
+          9.0.103
 
     - name: Install .NET Workloads
       shell: bash
