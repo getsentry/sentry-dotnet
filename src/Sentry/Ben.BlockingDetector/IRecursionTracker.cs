@@ -2,7 +2,7 @@ namespace Sentry.Ben.BlockingDetector;
 
 internal interface IRecursionTracker
 {
-    void Recurse();
-    void Backtrack();
-    bool IsFirstRecursion();
+    public void Recurse();
+    public void Backtrack();
+    public bool IsFirstRecursion();
 }
