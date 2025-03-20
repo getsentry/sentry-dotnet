@@ -38,20 +38,13 @@ internal abstract class AssemblyStoreReader
             return reader;
         }
 
-        reader = MakeReaderReady(new StoreReader_V2(store, path, logger));
+        reader = MakeReaderReady(new StoreReaderV2(store, path, logger));
         if (reader != null)
         {
             return reader;
         }
 
         return null;
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	static AssemblyStoreReader? MakeReaderReady (AssemblyStoreReader reader)
-After:
-    private static AssemblyStoreReader? MakeReaderReady (AssemblyStoreReader reader)
-*/
     }
 
     private static AssemblyStoreReader? MakeReaderReady(AssemblyStoreReader reader)

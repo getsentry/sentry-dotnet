@@ -10,27 +10,6 @@ namespace Sentry.Android.AssemblyReader.V2;
 
 internal static class Utils
 {
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	static readonly string[] aabZipEntries = {
-After:
-    private static readonly string[] aabZipEntries = {
-*/
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	static readonly string[] aabBaseZipEntries = {
-After:
-    private static readonly string[] aabBaseZipEntries = {
-*/
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	static readonly string[] apkZipEntries = {
-After:
-    private static readonly string[] apkZipEntries = {
-*/
     private static readonly string[] aabZipEntries = {
         "base/manifest/AndroidManifest.xml",
         "BundleConfig.pb",
@@ -151,13 +130,6 @@ After:
         }
 
         return (DetectAndroidArchive(info, format), info);
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	static FileFormat DetectAndroidArchive (FileInfo info, FileFormat defaultFormat)
-After:
-    private static FileFormat DetectAndroidArchive (FileInfo info, FileFormat defaultFormat)
-*/
     }
 
     private static FileFormat DetectAndroidArchive(FileInfo info, FileFormat defaultFormat)
@@ -180,13 +152,6 @@ After:
         }
 
         return defaultFormat;
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	static bool HasAllEntries (ZipArchive zip, string[] entries)
-After:
-    private static bool HasAllEntries (ZipArchive zip, string[] entries)
-*/
     }
 
     private static bool HasAllEntries(ZipArchive zip, string[] entries)

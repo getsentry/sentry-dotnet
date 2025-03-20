@@ -28,98 +28,11 @@ internal partial class MonoAndroidHelper
         AndroidTargetArch.Arm64,
         AndroidTargetArch.X86,
         AndroidTargetArch.X86_64,
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	static readonly char[] ZipPathTrimmedChars = {'/', '\\'};
-
-	static readonly Dictionary<string, string> ClangAbiMap = new Dictionary<string, string> (StringComparer.OrdinalIgnoreCase) {
-After:
-    private static readonly char[] ZipPathTrimmedChars = {'/', '\\'};
-    private static readonly Dictionary<string, string> ClangAbiMap = new Dictionary<string, string> (StringComparer.OrdinalIgnoreCase) {
-*/
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	static readonly Dictionary<string, AndroidTargetArch> AbiToArchMap = new Dictionary<string, AndroidTargetArch> (StringComparer.OrdinalIgnoreCase) {
-After:
-    private static readonly Dictionary<string, AndroidTargetArch> AbiToArchMap = new Dictionary<string, AndroidTargetArch> (StringComparer.OrdinalIgnoreCase) {
-*/
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	static readonly Dictionary<string, string> AbiToRidMap = new Dictionary<string, string> (StringComparer.OrdinalIgnoreCase) {
-After:
-    private static readonly Dictionary<string, string> AbiToRidMap = new Dictionary<string, string> (StringComparer.OrdinalIgnoreCase) {
-*/
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	static readonly Dictionary<string, string> RidToAbiMap = new Dictionary<string, string> (StringComparer.OrdinalIgnoreCase) {
-After:
-    private static readonly Dictionary<string, string> RidToAbiMap = new Dictionary<string, string> (StringComparer.OrdinalIgnoreCase) {
-*/
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	static readonly Dictionary<string, AndroidTargetArch> RidToArchMap = new Dictionary<string, AndroidTargetArch> (StringComparer.OrdinalIgnoreCase) {
-After:
-    private static readonly Dictionary<string, AndroidTargetArch> RidToArchMap = new Dictionary<string, AndroidTargetArch> (StringComparer.OrdinalIgnoreCase) {
-*/
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	static readonly Dictionary<AndroidTargetArch, string> ArchToRidMap = new Dictionary<AndroidTargetArch, string> {
-After:
-    private static readonly Dictionary<AndroidTargetArch, string> ArchToRidMap = new Dictionary<AndroidTargetArch, string> {
-*/
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	static readonly Dictionary<AndroidTargetArch, string> ArchToAbiMap = new Dictionary<AndroidTargetArch, string> {
-After:
-    private static readonly Dictionary<AndroidTargetArch, string> ArchToAbiMap = new Dictionary<AndroidTargetArch, string> {
-*/
     };
     private static readonly char[] ZipPathTrimmedChars = { '/', '\\' };
     private static readonly Dictionary<string, string> ClangAbiMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
         {"arm64-v8a",   "aarch64"},
         {"armeabi-v7a", "arm"},
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-		if (!String.IsNullOrEmpty (part1)) {
-After:
-		if (!string.IsNullOrEmpty (part1)) {
-*/
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-				if (String.IsNullOrEmpty (p)) {
-After:
-				if (string.IsNullOrEmpty (p)) {
-*/
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-			return String.Empty;
-After:
-			return string.Empty;
-*/
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-		return String.Join ("/", parts);
-After:
-		return string.Join ("/", parts);
-*/
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-		if (!String.IsNullOrEmpty (culture)) {
-After:
-		if (!string.IsNullOrEmpty (culture)) {
-*/
         {"x86",         "i686"},
         {"x86_64",      "x86_64"}
     };

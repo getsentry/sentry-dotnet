@@ -80,119 +80,6 @@ internal class AssemblyStoreExplorer
 
             default:
                 return (null, $"File '{inputFile}' has an unsupported format '{format}'");
-
-/* Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)'
-Before:
-	static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenAab (FileInfo fi, DebugLogger? logger)
-	{
-		return OpenCommon (
-			fi,
-			new List<IList<string>> {
-				StoreReader_V2.AabPaths,
-				StoreReader_V1.AabPaths,
-			},
-            logger
-		);
-	}
-
-	static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenAabBase (FileInfo fi, DebugLogger? logger)
-	{
-		return OpenCommon (
-			fi,
-			new List<IList<string>> {
-				StoreReader_V2.AabBasePaths,
-				StoreReader_V1.AabBasePaths,
-			},
-            logger
-		);
-	}
-
-	static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenApk (FileInfo fi, DebugLogger? logger)
-	{
-		return OpenCommon (
-			fi,
-			new List<IList<string>> {
-				StoreReader_V2.ApkPaths,
-				StoreReader_V1.ApkPaths,
-			},
-            logger
-		);
-	}
-
-	static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenCommon (FileInfo fi, List<IList<string>> pathLists, DebugLogger? logger)
-	{
-		using var zip = ZipArchive.Open (fi.FullName, FileMode.Open);
-		IList<AssemblyStoreExplorer>? explorers;
-		string? errorMessage;
-		bool pathsFound;
-
-		foreach (IList<string> paths in pathLists) {
-			(explorers, errorMessage, pathsFound) = TryLoad (fi, zip, paths, logger);
-			if (pathsFound) {
-				return (explorers, errorMessage);
-			}
-		}
-
-		return (null, "Unable to find any blob entries");
-	}
-
-	static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage, bool pathsFound) TryLoad (FileInfo fi, ZipArchive zip, IList<string> paths, DebugLogger? logger)
-After:
-    private static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenAab (FileInfo fi, DebugLogger? logger)
-	{
-		return OpenCommon (
-			fi,
-			new List<IList<string>> {
-				StoreReader_V2.AabPaths,
-				StoreReader_V1.AabPaths,
-			},
-            logger
-		);
-	}
-
-    private static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenAabBase (FileInfo fi, DebugLogger? logger)
-	{
-		return OpenCommon (
-			fi,
-			new List<IList<string>> {
-				StoreReader_V2.AabBasePaths,
-				StoreReader_V1.AabBasePaths,
-			},
-            logger
-		);
-	}
-
-    private static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenApk (FileInfo fi, DebugLogger? logger)
-	{
-		return OpenCommon (
-			fi,
-			new List<IList<string>> {
-				StoreReader_V2.ApkPaths,
-				StoreReader_V1.ApkPaths,
-			},
-            logger
-		);
-	}
-
-    private static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenCommon (FileInfo fi, List<IList<string>> pathLists, DebugLogger? logger)
-	{
-		using var zip = ZipArchive.Open (fi.FullName, FileMode.Open);
-		IList<AssemblyStoreExplorer>? explorers;
-		string? errorMessage;
-		bool pathsFound;
-
-		foreach (IList<string> paths in pathLists) {
-			(explorers, errorMessage, pathsFound) = TryLoad (fi, zip, paths, logger);
-			if (pathsFound) {
-				return (explorers, errorMessage);
-			}
-		}
-
-		return (null, "Unable to find any blob entries");
-	}
-
-    private static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage, bool pathsFound) TryLoad (FileInfo fi, ZipArchive zip, IList<string> paths, DebugLogger? logger)
-*/
         }
     }
 
@@ -201,7 +88,7 @@ After:
         return OpenCommon(
             fi,
             new List<IList<string>> {
-                StoreReader_V2.AabPaths,
+                StoreReaderV2.AabPaths,
                 StoreReader_V1.AabPaths,
             },
             logger
@@ -213,7 +100,7 @@ After:
         return OpenCommon(
             fi,
             new List<IList<string>> {
-                StoreReader_V2.AabBasePaths,
+                StoreReaderV2.AabBasePaths,
                 StoreReader_V1.AabBasePaths,
             },
             logger
@@ -225,7 +112,7 @@ After:
         return OpenCommon(
             fi,
             new List<IList<string>> {
-                StoreReader_V2.ApkPaths,
+                StoreReaderV2.ApkPaths,
                 StoreReader_V1.ApkPaths,
             },
             logger
