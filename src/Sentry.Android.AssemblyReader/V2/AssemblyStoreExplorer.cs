@@ -141,7 +141,7 @@ internal class AssemblyStoreExplorer
 
         foreach (var path in paths)
         {
-            if (zip.GetEntry(path) is not {} entry)
+            if (zip.GetEntry(path) is not { } entry)
             {
                 continue;
             }
