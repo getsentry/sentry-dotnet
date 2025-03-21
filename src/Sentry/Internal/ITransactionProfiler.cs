@@ -8,7 +8,7 @@ internal interface ITransactionProfilerFactory
     /// <summary>
     /// Called during transaction start to start a new profiler, if applicable.
     /// </summary>
-    ITransactionProfiler? Start(ITransactionTracer transaction, CancellationToken cancellationToken);
+    public ITransactionProfiler? Start(ITransactionTracer transaction, CancellationToken cancellationToken);
 }
 
 /// <summary>
@@ -19,9 +19,9 @@ internal interface ITransactionProfiler
     /// <summary>
     /// Called when the transaction ends - this should stop profile samples collection.
     /// </summary>
-    void Finish();
+    public void Finish();
 
     /// <summary>Process and collect the profile.</summary>
     /// <returns>The collected profile.</returns>
-    ISerializable? Collect(SentryTransaction transaction);
+    public ISerializable? Collect(SentryTransaction transaction);
 }
