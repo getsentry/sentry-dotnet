@@ -19,14 +19,19 @@ public static class AndroidAssemblyReaderFactory
     {
         logger?.Invoke("Opening APK: {0}", apkPath);
 
-        // Try to read using the v2 store format
+#if NET9_0
+        logger?.Invoke("Reading files using V2 APK layout.");
         if (AndroidAssemblyStoreReaderV2.TryReadStore(apkPath, supportedAbis, logger, out var readerV2))
         {
             logger?.Invoke("APK uses AssemblyStore V2");
             return readerV2;
         }
 
-        // Try to read using the v1 store format
+        logger?.Invoke("APK doesn't use AssemblyStore");
+        return new AndroidAssemblyDirectoryReaderV2(apkPath, supportedAbis, logger);
+#else
+        logger?.Invoke("Reading files using V1 APK layout.");
+
         var zipArchive = ZipFile.OpenRead(apkPath);
         if (zipArchive.GetEntry("assemblies/assemblies.manifest") is not null)
         {
@@ -34,8 +39,8 @@ public static class AndroidAssemblyReaderFactory
             return new AndroidAssemblyStoreReaderV1(zipArchive, supportedAbis, logger);
         }
 
-        // Finally, try to read from file system
         logger?.Invoke("APK doesn't use AssemblyStore");
-        return new AndroidAssemblyDirectoryReader(zipArchive, supportedAbis, logger);
+        return new AndroidAssemblyDirectoryReaderV1(zipArchive, supportedAbis, logger);
+#endif
     }
 }

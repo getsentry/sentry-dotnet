@@ -1,3 +1,5 @@
+using Sentry.Android.AssemblyReader.V1;
+
 namespace Sentry.Android.AssemblyReader.Tests;
 
 public class AndroidAssemblyReaderTests
@@ -58,7 +60,7 @@ public class AndroidAssemblyReaderTests
         }
         else
         {
-            Assert.IsType<AndroidAssemblyDirectoryReader>(sut);
+            Assert.IsType<AndroidAssemblyDirectoryReaderV1>(sut);
         }
     }
 
@@ -86,12 +88,6 @@ public class AndroidAssemblyReaderTests
         // No need to run all combinations - we only test the current APK which is (likely) compressed assembly store.
         Skip.If(!isAssemblyStore);
         Skip.If(!isCompressed);
-#endif
-#if NET9_0_OR_GREATER
-        // Building without an assembly store is not yet supported in net9.0 and above
-        // TODO: See if we can support this. There might be some hints as to how this works at:
-        //   https://github.com/dotnet/android/blob/6394773fad5108b0d7b4e6f087dc3e6ea997401a/src/Xamarin.Android.Build.Tasks/Tests/Xamarin.Android.Build.Tests/Utilities/ArchiveAssemblyHelper.cs#L61-L65
-        Skip.If(!isAssemblyStore);
 #endif
         using var sut = GetSut(isAssemblyStore, isCompressed);
 

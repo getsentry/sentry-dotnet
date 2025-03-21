@@ -1,12 +1,11 @@
-using Sentry.Android.AssemblyReader.V1;
 using Sentry.Android.AssemblyReader.V2;
 
-namespace Sentry.Android.AssemblyReader;
+namespace Sentry.Android.AssemblyReader.V1;
 
 // The "Old" app type - where each DLL is placed in the 'assemblies' directory as an individual file.
-internal sealed class AndroidAssemblyDirectoryReader : AndroidAssemblyReader, IAndroidAssemblyReader
+internal sealed class AndroidAssemblyDirectoryReaderV1 : AndroidAssemblyReader, IAndroidAssemblyReader
 {
-    public AndroidAssemblyDirectoryReader(ZipArchive zip, IList<string> supportedAbis, DebugLogger? logger)
+    public AndroidAssemblyDirectoryReaderV1(ZipArchive zip, IList<string> supportedAbis, DebugLogger? logger)
         : base(zip, supportedAbis, logger) { }
 
     public PEReader? TryReadAssembly(string name)
