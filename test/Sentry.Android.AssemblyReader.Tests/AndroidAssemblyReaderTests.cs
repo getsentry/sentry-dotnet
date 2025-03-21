@@ -1,8 +1,19 @@
+using Sentry.Android.AssemblyReader.V1;
+
 namespace Sentry.Android.AssemblyReader.Tests;
 
 public class AndroidAssemblyReaderTests
 {
     private readonly ITestOutputHelper _output;
+
+#if NET9_0
+    private static string TargetFramework => "net9.0";
+#elif NET8_0
+    private static string TargetFramework => "net8.0";
+#else
+    // Adding a new TFM to the project? Include it above
+#error "Target Framework not yet supported for AndroidAssemblyReader"
+#endif
 
     public AndroidAssemblyReaderTests(ITestOutputHelper output)
     {
@@ -19,7 +30,7 @@ public class AndroidAssemblyReaderTests
             Path.GetFullPath(Path.Combine(
                 Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
                 "..", "..", "..", "TestAPKs",
-                $"android-Store={isAssemblyStore}-Compressed={isCompressed}.apk"));
+                $"{TargetFramework}-android-Store={isAssemblyStore}-Compressed={isCompressed}.apk"));
 
         _output.WriteLine($"Checking if APK exists: {apkPath}");
         File.Exists(apkPath).Should().BeTrue();
@@ -39,13 +50,17 @@ public class AndroidAssemblyReaderTests
         Skip.If(true, "It's unknown whether the current Android app APK is an assembly store or not.");
 #endif
         using var sut = GetSut(isAssemblyStore, isCompressed: true);
-        if (isAssemblyStore)
+        if (isAssemblyStore && TargetFramework == "net9.0")
         {
-            Assert.IsType<AssemblyReader.AndroidAssemblyStoreReader>(sut);
+            Assert.IsType<V2.AndroidAssemblyStoreReaderV2>(sut);
+        }
+        else if (isAssemblyStore && TargetFramework == "net8.0")
+        {
+            Assert.IsType<V1.AndroidAssemblyStoreReaderV1>(sut);
         }
         else
         {
-            Assert.IsType<AssemblyReader.AndroidAssemblyDirectoryReader>(sut);
+            Assert.IsType<AndroidAssemblyDirectoryReaderV1>(sut);
         }
     }
 
