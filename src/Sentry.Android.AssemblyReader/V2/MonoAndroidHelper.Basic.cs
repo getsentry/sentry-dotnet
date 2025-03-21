@@ -78,7 +78,8 @@ internal partial class MonoAndroidHelper
         if (!AbiToArchMap.TryGetValue(abi, out AndroidTargetArch arch))
         {
             throw new NotSupportedException($"Internal error: unsupported ABI '{abi}'");
-        };
+        }
+        ;
 
         return arch;
     }
@@ -88,7 +89,8 @@ internal partial class MonoAndroidHelper
         if (!AbiToRidMap.TryGetValue(abi, out var rid))
         {
             throw new NotSupportedException($"Internal error: unsupported ABI '{abi}'");
-        };
+        }
+        ;
 
         return rid;
     }
@@ -98,7 +100,8 @@ internal partial class MonoAndroidHelper
         if (!RidToAbiMap.TryGetValue(rid, out var abi))
         {
             throw new NotSupportedException($"Internal error: unsupported Runtime Identifier '{rid}'");
-        };
+        }
+        ;
 
         return abi;
     }
@@ -108,7 +111,8 @@ internal partial class MonoAndroidHelper
         if (!RidToArchMap.TryGetValue(rid, out AndroidTargetArch arch))
         {
             return AndroidTargetArch.None;
-        };
+        }
+        ;
 
         return arch;
     }
@@ -119,7 +123,8 @@ internal partial class MonoAndroidHelper
         if (arch == AndroidTargetArch.None)
         {
             throw new NotSupportedException($"Internal error: unsupported Runtime Identifier '{rid}'");
-        };
+        }
+        ;
 
         return arch;
     }
@@ -129,7 +134,8 @@ internal partial class MonoAndroidHelper
         if (!ArchToRidMap.TryGetValue(arch, out var rid))
         {
             throw new InvalidOperationException($"Internal error: unsupported architecture '{arch}'");
-        };
+        }
+        ;
 
         return rid;
     }
@@ -139,7 +145,8 @@ internal partial class MonoAndroidHelper
         if (!ArchToAbiMap.TryGetValue(arch, out var abi))
         {
             throw new InvalidOperationException($"Internal error: unsupported architecture '{arch}'");
-        };
+        }
+        ;
 
         return abi;
     }
@@ -177,7 +184,8 @@ internal partial class MonoAndroidHelper
         if (!string.IsNullOrEmpty(part1))
         {
             parts.Add(part1.TrimEnd(ZipPathTrimmedChars));
-        };
+        }
+        ;
 
         if (pathParts != null && pathParts.Count > 0)
         {

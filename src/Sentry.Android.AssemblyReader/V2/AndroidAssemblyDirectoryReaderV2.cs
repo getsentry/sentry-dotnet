@@ -6,7 +6,7 @@ namespace Sentry.Android.AssemblyReader.V2;
 internal sealed class AndroidAssemblyDirectoryReaderV2 : IAndroidAssemblyReader
 {
     private DebugLogger? Logger { get; }
-    private HashSet<AndroidTargetArch> SupportedArchitectures { get; } = new ();
+    private HashSet<AndroidTargetArch> SupportedArchitectures { get; } = new();
     private readonly ArchiveAssemblyHelper _archiveAssemblyHelper;
 
     public AndroidAssemblyDirectoryReaderV2(string apkPath, IList<string> supportedAbis, DebugLogger? logger)
