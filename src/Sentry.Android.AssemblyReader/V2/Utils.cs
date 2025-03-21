@@ -134,7 +134,7 @@ internal static class Utils
 
     private static FileFormat DetectAndroidArchive(FileInfo info, FileFormat defaultFormat)
     {
-        using var zip = ZipFile.Open(info.FullName, ZipArchiveMode.Read);
+        using var zip = ZipFile.OpenRead(info.FullName);
 
         if (HasAllEntries(zip, aabZipEntries))
         {
@@ -175,4 +175,6 @@ internal static class Utils
         memStream.Position = 0;
         return memStream;
     }
+
+    internal static bool ContainsEntry(this ZipArchive zip, string entry) => zip.GetEntry(entry) is not null;
 }

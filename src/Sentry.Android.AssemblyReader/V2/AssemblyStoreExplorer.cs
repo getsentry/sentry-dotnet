@@ -121,7 +121,7 @@ internal class AssemblyStoreExplorer
 
     private static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenCommon(FileInfo fi, List<IList<string>> pathLists, DebugLogger? logger)
     {
-        using var zip = ZipFile.Open(fi.FullName, ZipArchiveMode.Read);
+        using var zip = ZipFile.OpenRead(fi.FullName);
 
         foreach (var paths in pathLists)
         {

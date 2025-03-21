@@ -27,7 +27,7 @@ public static class AndroidAssemblyReaderFactory
         }
 
         // Try to read using the v1 store format
-        var zipArchive = ZipFile.Open(apkPath, ZipArchiveMode.Read);
+        var zipArchive = ZipFile.OpenRead(apkPath);
         if (zipArchive.GetEntry("assemblies/assemblies.manifest") is not null)
         {
             logger?.Invoke("APK uses AssemblyStore V1");
