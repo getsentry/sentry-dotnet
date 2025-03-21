@@ -514,7 +514,7 @@ internal class ArchiveAssemblyHelper
         return rids;
 
 <<<<<<< TODO: Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)', Before:
-	void ListFiles (List<string> existingFiles, List<string> missingFiles, List<string> additionalFiles)
+        void ListFiles(List<string> existingFiles, List<string> missingFiles, List<string> additionalFiles)
 =======
     private void ListFiles (List<string> existingFiles, List<string> missingFiles, List<string> additionalFiles)
 >>>>>>> After
@@ -541,7 +541,7 @@ internal class ArchiveAssemblyHelper
                 Console.WriteLine($"    {file}");
 
 <<<<<<< TODO: Unmerged change from project 'Sentry.Android.AssemblyReader(net9.0)', Before:
-	(string prefixAssemblies, string prefixLib) GetArchivePrefixes (string abi) => ($"{MonoAndroidHelper.MakeZipArchivePath (_assembliesRootDir, abi)}/", $"lib/{abi}/");
+                (string prefixAssemblies, string prefixLib) GetArchivePrefixes(string abi) => ($"{MonoAndroidHelper.MakeZipArchivePath(_assembliesRootDir, abi)}/", $"lib/{abi}/");
 =======
     private (string prefixAssemblies, string prefixLib) GetArchivePrefixes (string abi) => ($"{MonoAndroidHelper.MakeZipArchivePath (_assembliesRootDir, abi)}/", $"lib/{abi}/");
 >>>>>>> After
