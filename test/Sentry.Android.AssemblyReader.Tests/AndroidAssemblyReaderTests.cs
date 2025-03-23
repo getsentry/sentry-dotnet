@@ -1,5 +1,3 @@
-using Sentry.Android.AssemblyReader.V1;
-
 namespace Sentry.Android.AssemblyReader.Tests;
 
 public class AndroidAssemblyReaderTests
@@ -50,17 +48,27 @@ public class AndroidAssemblyReaderTests
         Skip.If(true, "It's unknown whether the current Android app APK is an assembly store or not.");
 #endif
         using var sut = GetSut(isAssemblyStore, isCompressed: true);
-        if (isAssemblyStore && TargetFramework == "net9.0")
+        if (isAssemblyStore)
         {
-            Assert.IsType<V2.AndroidAssemblyStoreReaderV2>(sut);
-        }
-        else if (isAssemblyStore && TargetFramework == "net8.0")
-        {
-            Assert.IsType<V1.AndroidAssemblyStoreReaderV1>(sut);
+            if (TargetFramework == "net9.0")
+            {
+                Assert.IsType<V2.AndroidAssemblyStoreReaderV2>(sut);
+            }
+            else if (TargetFramework == "net8.0")
+            {
+                Assert.IsType<V1.AndroidAssemblyStoreReaderV1>(sut);
+            }
         }
         else
         {
-            Assert.IsType<AndroidAssemblyDirectoryReaderV1>(sut);
+            if (TargetFramework == "net9.0")
+            {
+                Assert.IsType<V2.AndroidAssemblyDirectoryReaderV2>(sut);
+            }
+            else if (TargetFramework == "net8.0")
+            {
+                Assert.IsType<V1.AndroidAssemblyDirectoryReaderV1>(sut);
+            }
         }
     }
 
