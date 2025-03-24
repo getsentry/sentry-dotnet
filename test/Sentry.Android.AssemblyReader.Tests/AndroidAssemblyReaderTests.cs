@@ -39,36 +39,43 @@ public class AndroidAssemblyReaderTests
 #endif
     }
 
-    [SkippableTheory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void CreatesCorrectReader(bool isAssemblyStore)
+    [SkippableFact]
+    public void CreatesCorrectStoreReader()
     {
 #if ANDROID
         Skip.If(true, "It's unknown whether the current Android app APK is an assembly store or not.");
 #endif
-        using var sut = GetSut(isAssemblyStore, isCompressed: true);
-        if (isAssemblyStore)
+        using var sut = GetSut(true, isCompressed: true);
+        switch (TargetFramework)
         {
-            if (TargetFramework == "net9.0")
-            {
+            case "net9.0":
                 Assert.IsType<V2.AndroidAssemblyStoreReaderV2>(sut);
-            }
-            else if (TargetFramework == "net8.0")
-            {
+                break;
+            case "net8.0":
                 Assert.IsType<V1.AndroidAssemblyStoreReaderV1>(sut);
-            }
+                break;
+            default:
+                throw new NotSupportedException($"Unsupported target framework: {TargetFramework}");
         }
-        else
+    }
+
+    [SkippableFact]
+    public void CreatesCorrectArchiveReader()
+    {
+#if ANDROID
+        Skip.If(true, "It's unknown whether the current Android app APK is an assembly store or not.");
+#endif
+        using var sut = GetSut(false, isCompressed: true);
+        switch (TargetFramework)
         {
-            if (TargetFramework == "net9.0")
-            {
+            case "net9.0":
                 Assert.IsType<V2.AndroidAssemblyDirectoryReaderV2>(sut);
-            }
-            else if (TargetFramework == "net8.0")
-            {
+                break;
+            case "net8.0":
                 Assert.IsType<V1.AndroidAssemblyDirectoryReaderV1>(sut);
-            }
+                break;
+            default:
+                throw new NotSupportedException($"Unsupported target framework: {TargetFramework}");
         }
     }
 
