@@ -7,19 +7,15 @@ namespace Sentry.Android.AssemblyReader.V2;
 
 internal class AssemblyStoreExplorer
 {
-    private readonly AssemblyStoreReader reader;
+    private readonly AssemblyStoreReader _reader;
 
-    public string StorePath { get; }
     public AndroidTargetArch? TargetArch { get; }
-    public uint AssemblyCount { get; }
-    public uint IndexEntryCount { get; }
     public IList<AssemblyStoreItem>? Assemblies { get; }
     public IDictionary<string, AssemblyStoreItem>? AssembliesByName { get; }
     public bool Is64Bit { get; }
 
-    protected AssemblyStoreExplorer(Stream storeStream, string path, DebugLogger? logger)
+    private AssemblyStoreExplorer(Stream storeStream, string path, DebugLogger? logger)
     {
-        StorePath = path;
         var storeReader = AssemblyStoreReader.Create(storeStream, path, logger);
         if (storeReader == null)
         {
@@ -27,12 +23,10 @@ internal class AssemblyStoreExplorer
             throw new NotSupportedException($"Format of assembly store '{path}' is unsupported");
         }
 
-        reader = storeReader;
-        TargetArch = reader.TargetArch;
-        AssemblyCount = reader.AssemblyCount;
-        IndexEntryCount = reader.IndexEntryCount;
-        Assemblies = reader.Assemblies;
-        Is64Bit = reader.Is64Bit;
+        _reader = storeReader;
+        TargetArch = _reader.TargetArch;
+        Assemblies = _reader.Assemblies;
+        Is64Bit = _reader.Is64Bit;
 
         var dict = new Dictionary<string, AssemblyStoreItem>(StringComparer.Ordinal);
         if (Assemblies is not null)
@@ -45,13 +39,13 @@ internal class AssemblyStoreExplorer
         AssembliesByName = dict.AsReadOnly();
     }
 
-    protected AssemblyStoreExplorer(FileInfo storeInfo, DebugLogger? logger)
+    private AssemblyStoreExplorer(FileInfo storeInfo, DebugLogger? logger)
         : this(storeInfo.OpenRead(), storeInfo.FullName, logger)
     { }
 
     public static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) Open(string inputFile, DebugLogger? logger)
     {
-        (FileFormat format, FileInfo? info) = Utils.DetectFileFormat(inputFile);
+        var (format, info) = Utils.DetectFileFormat(inputFile);
         if (info == null)
         {
             return (null, $"File '{inputFile}' does not exist.");
@@ -84,40 +78,13 @@ internal class AssemblyStoreExplorer
     }
 
     private static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenAab(FileInfo fi, DebugLogger? logger)
-    {
-        return OpenCommon(
-            fi,
-            new List<IList<string>> {
-                StoreReaderV2.AabPaths,
-                StoreReader_V1.AabPaths,
-            },
-            logger
-        );
-    }
+        => OpenCommon(fi, [StoreReaderV2.AabPaths, StoreReader_V1.AabPaths], logger);
 
     private static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenAabBase(FileInfo fi, DebugLogger? logger)
-    {
-        return OpenCommon(
-            fi,
-            new List<IList<string>> {
-                StoreReaderV2.AabBasePaths,
-                StoreReader_V1.AabBasePaths,
-            },
-            logger
-        );
-    }
+        => OpenCommon(fi, [StoreReaderV2.AabBasePaths, StoreReader_V1.AabBasePaths], logger);
 
     private static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenApk(FileInfo fi, DebugLogger? logger)
-    {
-        return OpenCommon(
-            fi,
-            new List<IList<string>> {
-                StoreReaderV2.ApkPaths,
-                StoreReader_V1.ApkPaths,
-            },
-            logger
-        );
-    }
+        => OpenCommon(fi, [StoreReaderV2.ApkPaths, StoreReader_V1.ApkPaths], logger);
 
     private static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenCommon(FileInfo fi, List<IList<string>> pathLists, DebugLogger? logger)
     {
@@ -160,70 +127,6 @@ internal class AssemblyStoreExplorer
 
     public MemoryStream? ReadImageData(AssemblyStoreItem item, bool uncompressIfNeeded = false)
     {
-        return reader.ReadEntryImageData(item, uncompressIfNeeded);
-    }
-
-    private string EnsureCorrectAssemblyName(string assemblyName)
-    {
-        assemblyName = Path.GetFileName(assemblyName);
-        if (reader.NeedsExtensionInName)
-        {
-            if (!assemblyName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
-            {
-                return $"{assemblyName}.dll";
-            }
-        }
-        else
-        {
-            if (assemblyName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
-            {
-                return Path.GetFileNameWithoutExtension(assemblyName);
-            }
-        }
-
-        return assemblyName;
-    }
-
-    public IList<AssemblyStoreItem>? Find(string assemblyName, AndroidTargetArch? targetArch = null)
-    {
-        if (Assemblies == null)
-        {
-            return null;
-        }
-
-        assemblyName = EnsureCorrectAssemblyName(assemblyName);
-        var items = new List<AssemblyStoreItem>();
-        foreach (AssemblyStoreItem item in Assemblies)
-        {
-            if (string.CompareOrdinal(assemblyName, item.Name) != 0)
-            {
-                continue;
-            }
-
-            if (targetArch != null && item.TargetArch != targetArch)
-            {
-                continue;
-            }
-
-            items.Add(item);
-        }
-
-        if (items.Count == 0)
-        {
-            return null;
-        }
-
-        return items;
-    }
-
-    public bool Contains(string assemblyName, AndroidTargetArch? targetArch = null)
-    {
-        IList<AssemblyStoreItem>? items = Find(assemblyName, targetArch);
-        if (items == null || items.Count == 0)
-        {
-            return false;
-        }
-
-        return true;
+        return _reader.ReadEntryImageData(item, uncompressIfNeeded);
     }
 }

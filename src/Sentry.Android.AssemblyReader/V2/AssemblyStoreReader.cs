@@ -32,7 +32,7 @@ internal abstract class AssemblyStoreReader
 
     public static AssemblyStoreReader? Create(Stream store, string path, DebugLogger? logger)
     {
-        AssemblyStoreReader? reader = MakeReaderReady(new StoreReader_V1(store, path, logger));
+        var reader = MakeReaderReady(new StoreReader_V1(store, path, logger));
         if (reader != null)
         {
             return reader;

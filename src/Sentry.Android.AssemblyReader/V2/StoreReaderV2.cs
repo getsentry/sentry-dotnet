@@ -90,7 +90,7 @@ internal partial class StoreReaderV2 : AssemblyStoreReader
         using var reader = CreateReader();
 
         uint magic = reader.ReadUInt32();
-        if (magic == Utils.ELF_MAGIC)
+        if (magic == Utils.ELFMagic)
         {
             ELFPayloadError error;
             (elfOffset, _, error) = Utils.FindELFPayloadSectionOffsetAndSize(StoreStream);
@@ -120,7 +120,7 @@ internal partial class StoreReaderV2 : AssemblyStoreReader
             }
         }
 
-        if (magic != Utils.ASSEMBLY_STORE_MAGIC)
+        if (magic != Utils.AssemblyStoreMagic)
         {
             Logger?.Invoke("Store '{0}' has invalid header magic number.", StorePath);
             return false;

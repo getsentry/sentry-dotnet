@@ -81,16 +81,17 @@ internal class AndroidAssemblyStoreReaderV2 : IAndroidAssemblyReader
             return assembly;
         }
 
-        if (name.EndsWith(".dll", ignoreCase: true, CultureInfo.InvariantCulture) ||
-            name.EndsWith(".exe", ignoreCase: true, CultureInfo.InvariantCulture))
+        if ((IsFileType(".dll") || IsFileType(".exe")) && FindBestAssembly(name[..^4], out assembly))
         {
-            if (FindBestAssembly(name.Substring(0, name.Length - 4), out assembly))
-            {
-                return assembly;
-            }
+            return assembly;
         }
 
         return null;
+
+        bool IsFileType(string extension)
+        {
+            return name.EndsWith(extension, ignoreCase: true, CultureInfo.InvariantCulture);
+        }
     }
 
     private bool FindBestAssembly(string name, out ExplorerStoreItem? explorerAssembly)
@@ -117,19 +118,6 @@ internal class AndroidAssemblyStoreReaderV2 : IAndroidAssemblyReader
 
 internal static class DeviceArchitectureExtensions
 {
-    public static bool IsSupportedBy(this Span<string> abis, AndroidTargetArch targetArch)
-    {
-        foreach (var abi in abis)
-        {
-            if (abi.AbiToDeviceArchitecture() == targetArch)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public static AndroidTargetArch AbiToDeviceArchitecture(this string abi) =>
         abi switch
         {

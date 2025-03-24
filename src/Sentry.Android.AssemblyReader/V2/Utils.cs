@@ -10,27 +10,27 @@ namespace Sentry.Android.AssemblyReader.V2;
 
 internal static class Utils
 {
-    private static readonly string[] aabZipEntries = {
+    private static readonly string[] AabZipEntries = {
         "base/manifest/AndroidManifest.xml",
         "BundleConfig.pb",
     };
-    private static readonly string[] aabBaseZipEntries = {
+    private static readonly string[] AabBaseZipEntries = {
         "manifest/AndroidManifest.xml",
     };
-    private static readonly string[] apkZipEntries = {
+    private static readonly string[] ApkZipEntries = {
         "AndroidManifest.xml",
     };
 
-    public const uint ZIP_MAGIC = 0x4034b50;
-    public const uint ASSEMBLY_STORE_MAGIC = 0x41424158;
-    public const uint ELF_MAGIC = 0x464c457f;
+    public const uint ZipMagic = 0x4034b50;
+    public const uint AssemblyStoreMagic = 0x41424158;
+    public const uint ELFMagic = 0x464c457f;
 
     public static readonly ArrayPool<byte> BytePool = ArrayPool<byte>.Shared;
 
     public static (ulong offset, ulong size, ELFPayloadError error) FindELFPayloadSectionOffsetAndSize(Stream stream)
     {
         stream.Seek(0, SeekOrigin.Begin);
-        Class elfClass = ELFReader.CheckELFType(stream);
+        var elfClass = ELFReader.CheckELFType(stream);
         if (elfClass == Class.NotELF)
         {
             return ReturnError(null, ELFPayloadError.NotELF);
@@ -56,7 +56,7 @@ internal static class Utils
             return ReturnError(elf, ELFPayloadError.NoPayloadSection);
         }
 
-        bool is64 = elf.Machine switch
+        var is64 = elf.Machine switch
         {
             Machine.ARM => false,
             Machine.Intel386 => false,
@@ -116,11 +116,11 @@ internal static class Utils
         using var reader = new BinaryReader(info.OpenRead());
 
         // ATM, all formats we recognize have 4-byte magic at the start
-        FileFormat format = reader.ReadUInt32() switch
+        var format = reader.ReadUInt32() switch
         {
-            Utils.ZIP_MAGIC => FileFormat.Zip,
-            Utils.ELF_MAGIC => FileFormat.ELF,
-            Utils.ASSEMBLY_STORE_MAGIC => FileFormat.AssemblyStore,
+            ZipMagic => FileFormat.Zip,
+            ELFMagic => FileFormat.ELF,
+            AssemblyStoreMagic => FileFormat.AssemblyStore,
             _ => FileFormat.Unknown
         };
 
@@ -136,17 +136,17 @@ internal static class Utils
     {
         using var zip = ZipFile.OpenRead(info.FullName);
 
-        if (HasAllEntries(zip, aabZipEntries))
+        if (HasAllEntries(zip, AabZipEntries))
         {
             return FileFormat.Aab;
         }
 
-        if (HasAllEntries(zip, apkZipEntries))
+        if (HasAllEntries(zip, ApkZipEntries))
         {
             return FileFormat.Apk;
         }
 
-        if (HasAllEntries(zip, aabBaseZipEntries))
+        if (HasAllEntries(zip, AabBaseZipEntries))
         {
             return FileFormat.AabBase;
         }
@@ -175,6 +175,4 @@ internal static class Utils
         memStream.Position = 0;
         return memStream;
     }
-
-    internal static bool ContainsEntry(this ZipArchive zip, string entry) => zip.GetEntry(entry) is not null;
 }

@@ -72,7 +72,7 @@ internal partial class StoreReaderV2
         private static List<ulong> IndexToHashes(List<IndexEntry> indexEntries)
         {
             var ret = new List<ulong>();
-            foreach (IndexEntry ie in indexEntries)
+            foreach (var ie in indexEntries)
             {
                 ret.Add(ie.name_hash);
             }
