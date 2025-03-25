@@ -28,9 +28,10 @@ internal abstract class AndroidAssemblyReader : IDisposable
 
     /// <summary>
     /// The DLL may be LZ4 compressed, see https://github.com/xamarin/xamarin-android/pull/4686
+    /// In particular: https://github.com/dotnet/android/blob/44c5c30d3da692c54ca27d4a41571ef20b73670f/src/Xamarin.Android.Build.Tasks/Utilities/AssemblyCompression.cs#L96-L104
     /// The format is:
     ///    [ 4 byte magic header ] (XALZ)
-    ///    [ 4 byte header index ]
+    ///    [ 4 byte descriptor header index ]
     ///    [ 4 byte uncompressed payload length ]
     ///    [rest: lz4 compressed payload]
     /// </summary>

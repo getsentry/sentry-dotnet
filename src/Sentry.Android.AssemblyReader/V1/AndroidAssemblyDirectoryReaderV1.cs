@@ -1,5 +1,3 @@
-using Sentry.Android.AssemblyReader.V2;
-
 namespace Sentry.Android.AssemblyReader.V1;
 
 // The "Old" app type - where each DLL is placed in the 'assemblies' directory as an individual file.
