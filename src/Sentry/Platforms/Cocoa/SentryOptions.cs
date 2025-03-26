@@ -83,7 +83,7 @@ public partial class SentryOptions
         /// <remarks>
         /// See https://docs.sentry.io/platforms/apple/configuration/app-hangs/#app-hangs-v2
         /// </remarks>
-        public bool EnableAppHangTrackingV2 { get; set; } = true;
+        public bool EnableAppHangTrackingV2 { get; set; } = false;
 
         /// <summary>
         /// When enabled, the SDK adds breadcrumbs for various system events.
