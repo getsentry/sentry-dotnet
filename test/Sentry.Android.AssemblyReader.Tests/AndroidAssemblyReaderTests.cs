@@ -18,7 +18,7 @@ public class AndroidAssemblyReaderTests
         _output = output;
     }
 
-    private IAndroidAssemblyReader GetSut(bool isAssemblyStore, bool isCompressed)
+    private IAndroidAssemblyReader GetSut(bool isAot, bool isAssemblyStore, bool isCompressed)
     {
 #if ANDROID
         var logger = new TestOutputDiagnosticLogger(_output);
@@ -28,7 +28,7 @@ public class AndroidAssemblyReaderTests
             Path.GetFullPath(Path.Combine(
                 Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
                 "..", "..", "..", "TestAPKs",
-                $"{TargetFramework}-android-Store={isAssemblyStore}-Compressed={isCompressed}.apk"));
+                $"{TargetFramework}-android-Aot={isAot}-Store={isAssemblyStore}-Compressed={isCompressed}.apk"));
 
         _output.WriteLine($"Checking if APK exists: {apkPath}");
         File.Exists(apkPath).Should().BeTrue();
@@ -45,7 +45,7 @@ public class AndroidAssemblyReaderTests
 #if ANDROID
         Skip.If(true, "It's unknown whether the current Android app APK is an assembly store or not.");
 #endif
-        using var sut = GetSut(true, isCompressed: true);
+        using var sut = GetSut(false, true, isCompressed: true);
         switch (TargetFramework)
         {
             case "net9.0":
@@ -65,7 +65,7 @@ public class AndroidAssemblyReaderTests
 #if ANDROID
         Skip.If(true, "It's unknown whether the current Android app APK is an assembly store or not.");
 #endif
-        using var sut = GetSut(false, isCompressed: true);
+        using var sut = GetSut(false, false, isCompressed: true);
         switch (TargetFramework)
         {
             case "net9.0":
@@ -84,27 +84,32 @@ public class AndroidAssemblyReaderTests
     [InlineData(true)]
     public void ReturnsNullIfAssemblyDoesntExist(bool isAssemblyStore)
     {
-        using var sut = GetSut(isAssemblyStore, isCompressed: true);
+        using var sut = GetSut(false, isAssemblyStore, isCompressed: true);
         Assert.Null(sut.TryReadAssembly("NonExistent.dll"));
     }
 
+    public static IEnumerable<object[]> ReadsAssemblyPermutations =>
+#if NET8_0
+        from isAot in new[] { false }
+#else
+        from isAot in new[] { true, false }
+#endif
+        from isStore in new[] { true, false }
+        from isCompressed in new[] { true, false }
+        from assemblyName in new[] { "Mono.Android.dll", "System.Private.CoreLib.dll" }
+        select new object[] { isAot, isStore, isCompressed, assemblyName };
+
     [SkippableTheory]
-    [InlineData(false, true, "Mono.Android.dll")]
-    [InlineData(false, false, "Mono.Android.dll")]
-    [InlineData(false, true, "System.Private.CoreLib.dll")]
-    [InlineData(false, false, "System.Private.CoreLib.dll")]
-    [InlineData(true, true, "Mono.Android.dll")]
-    [InlineData(true, false, "Mono.Android.dll")]
-    [InlineData(true, true, "System.Private.CoreLib.dll")]
-    [InlineData(true, false, "System.Private.CoreLib.dll")]
-    public void ReadsAssembly(bool isAssemblyStore, bool isCompressed, string assemblyName)
+    [MemberData(nameof(ReadsAssemblyPermutations))]
+    public void ReadsAssembly(bool isAot, bool isAssemblyStore, bool isCompressed, string assemblyName)
     {
 #if ANDROID
-        // No need to run all combinations - we only test the current APK which is (likely) compressed assembly store.
+        // No need to run all combinations - we only test the current APK which is likely JIT compressed assembly store.
+        Skip.If(isAot);
         Skip.If(!isAssemblyStore);
         Skip.If(!isCompressed);
 #endif
-        using var sut = GetSut(isAssemblyStore, isCompressed);
+        using var sut = GetSut(isAot, isAssemblyStore, isCompressed);
 
         var peReader = sut.TryReadAssembly(assemblyName);
         Assert.NotNull(peReader);
