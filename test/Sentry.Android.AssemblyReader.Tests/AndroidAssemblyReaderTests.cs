@@ -91,12 +91,12 @@ public class AndroidAssemblyReaderTests
     [SkippableTheory]
     [InlineData(false, true, "Mono.Android.dll")]
     [InlineData(false, false, "Mono.Android.dll")]
-    [InlineData(false, true, "System.Runtime.dll")]
-    [InlineData(false, false, "System.Runtime.dll")]
+    [InlineData(false, true, "System.Private.CoreLib.dll")]
+    [InlineData(false, false, "System.Private.CoreLib.dll")]
     [InlineData(true, true, "Mono.Android.dll")]
     [InlineData(true, false, "Mono.Android.dll")]
-    [InlineData(true, true, "System.Runtime.dll")]
-    [InlineData(true, false, "System.Runtime.dll")]
+    [InlineData(true, true, "System.Private.CoreLib.dll")]
+    [InlineData(true, false, "System.Private.CoreLib.dll")]
     public void ReadsAssembly(bool isAssemblyStore, bool isCompressed, string assemblyName)
     {
 #if ANDROID
