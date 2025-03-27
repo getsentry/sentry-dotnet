@@ -37,8 +37,12 @@
     <PropertyGroup>
       <_ConfigString>A=$(_Aot)-S=$(_Store)-C=$(_Compressed)</_ConfigString>
     </PropertyGroup>
+    <Message Text="Building APK for $(TargetFramework) with config: $(_ConfigString)" Importance="high" />
     <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;PublishAot=$(_Aot);_IsPublishing=true;RuntimeIdentifier=android-x64;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('TestAPKs\$(TargetFramework)-$(_ConfigString).apk')" />
+    <Message Text="Copying APK from ..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk to TestAPKs\$(TargetFramework)-$(_ConfigString).apk" Importance="high" />
+    <Message Text="Source APK exists: $(Exists('..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk'))" Importance="high" />
     <Copy SourceFiles="..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk" DestinationFiles="TestAPKs\$(TargetFramework)-$(_ConfigString).apk" Condition="!Exists('TestAPKs\$(TargetFramework)-$(_ConfigString).apk')" />
+    <Message Text="APK copy result: Exists('TestAPKs\$(TargetFramework)-$(_ConfigString).apk') = $(Exists('TestAPKs\$(TargetFramework)-$(_ConfigString).apk'))" Importance="high" />
   </Target>
 
 </Project>

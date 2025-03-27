@@ -116,7 +116,12 @@ jobs:
         run: |
           dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
 
+      - name: Build (Linux)
+        if: runner.os == 'Linux'
+        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:detailed -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
+
       - name: Build
+        if: runner.os != 'Linux'
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
 
       - name: Test
