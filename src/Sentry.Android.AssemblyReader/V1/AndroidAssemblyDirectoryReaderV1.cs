@@ -26,7 +26,7 @@ internal sealed class AndroidAssemblyDirectoryReaderV1 : AndroidAssemblyReader, 
 
         // We need a seekable stream for the PEReader (or even to check whether the DLL is compressed), so make a copy.
         var memStream = zipEntry.Extract();
-        return CreatePEReader(name, memStream, Logger);
+        return ArchiveUtils.CreatePEReader(name, memStream, Logger);
     }
 
     private ZipArchiveEntry? FindAssembly(string name)

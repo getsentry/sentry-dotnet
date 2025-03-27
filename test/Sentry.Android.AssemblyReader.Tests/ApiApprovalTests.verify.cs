@@ -1,5 +1,3 @@
-using Sentry.Android.AssemblyReader.V1;
-
 namespace Sentry.Android.AssemblyReader.Tests;
 
 public class ApiApprovalTests

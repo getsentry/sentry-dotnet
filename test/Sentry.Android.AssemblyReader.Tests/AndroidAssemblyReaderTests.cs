@@ -1,3 +1,6 @@
+using Sentry.Android.AssemblyReader.V1;
+using Sentry.Android.AssemblyReader.V2;
+
 namespace Sentry.Android.AssemblyReader.Tests;
 
 public class AndroidAssemblyReaderTests
@@ -49,10 +52,10 @@ public class AndroidAssemblyReaderTests
         switch (TargetFramework)
         {
             case "net9.0":
-                Assert.IsType<V2.AndroidAssemblyStoreReaderV2>(sut);
+                Assert.IsType<AndroidAssemblyStoreReaderV2>(sut);
                 break;
             case "net8.0":
-                Assert.IsType<V1.AndroidAssemblyStoreReaderV1>(sut);
+                Assert.IsType<AndroidAssemblyStoreReaderV1>(sut);
                 break;
             default:
                 throw new NotSupportedException($"Unsupported target framework: {TargetFramework}");
@@ -69,10 +72,10 @@ public class AndroidAssemblyReaderTests
         switch (TargetFramework)
         {
             case "net9.0":
-                Assert.IsType<V2.AndroidAssemblyDirectoryReaderV2>(sut);
+                Assert.IsType<AndroidAssemblyDirectoryReaderV2>(sut);
                 break;
             case "net8.0":
-                Assert.IsType<V1.AndroidAssemblyDirectoryReaderV1>(sut);
+                Assert.IsType<AndroidAssemblyDirectoryReaderV1>(sut);
                 break;
             default:
                 throw new NotSupportedException($"Unsupported target framework: {TargetFramework}");

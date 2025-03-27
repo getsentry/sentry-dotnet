@@ -29,7 +29,7 @@ internal sealed class AndroidAssemblyStoreReaderV1 : AndroidAssemblyReader, IAnd
             return null;
         }
 
-        return CreatePEReader(name, stream, Logger);
+        return ArchiveUtils.CreatePEReader(name, stream, Logger);
     }
 
     private AssemblyStoreAssembly? TryFindAssembly(string name)
@@ -409,7 +409,7 @@ internal sealed class AndroidAssemblyStoreReaderV1 : AndroidAssemblyReader, IAnd
             assembly.ConfigDataOffset == 0 ? null : GetDataSlice(assembly.ConfigDataOffset, assembly.ConfigDataSize);
 
         private MemoryStream? GetDataSlice(uint offset, uint size) =>
-            size == 0 ? null : new MemorySlice(_storeData, (int)offset, (int)size);
+            size == 0 ? null : new ArchiveUtils.MemorySlice(_storeData, (int)offset, (int)size);
 
         public bool HasIdenticalContent(AssemblyStoreReader other)
         {

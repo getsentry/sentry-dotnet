@@ -1,5 +1,3 @@
-using Sentry.Android.AssemblyReader.V2;
-
 namespace Sentry.Android.AssemblyReader.V2;
 
 // The "Old" app type - where each DLL is placed in the 'assemblies' directory as an individual file.
@@ -36,7 +34,7 @@ internal sealed class AndroidAssemblyDirectoryReaderV2 : IAndroidAssemblyReader
             }
 
             Logger?.Invoke("Resolved assembly {0} in the APK", name);
-            return AndroidAssemblyReader.CreatePEReader(name, memStream, Logger);
+            return ArchiveUtils.CreatePEReader(name, memStream, Logger);
         }
 
         Logger?.Invoke("Couldn't find assembly {0} in the APK", name);
