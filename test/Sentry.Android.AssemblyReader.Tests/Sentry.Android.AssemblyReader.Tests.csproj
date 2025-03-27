@@ -35,7 +35,7 @@
   </Target>
   <Target Name="_BuildTestAPK">
     <PropertyGroup>
-      <_ConfigString>Aot=$(_Aot)-Store=$(_Store)-Compressed=$(_Compressed)</_ConfigString>
+      <_ConfigString>A=$(_Aot)-S=$(_Store)-C=$(_Compressed)</_ConfigString>
     </PropertyGroup>
     <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;PublishAot=$(_Aot);_IsPublishing=true;RuntimeIdentifier=android-x64;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('TestAPKs\$(TargetFramework)-$(_ConfigString).apk')" />
     <Copy SourceFiles="..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk" DestinationFiles="TestAPKs\$(TargetFramework)-$(_ConfigString).apk" Condition="!Exists('TestAPKs\$(TargetFramework)-$(_ConfigString).apk')" />

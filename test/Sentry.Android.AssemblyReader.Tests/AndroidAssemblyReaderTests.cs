@@ -28,7 +28,7 @@ public class AndroidAssemblyReaderTests
             Path.GetFullPath(Path.Combine(
                 Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
                 "..", "..", "..", "TestAPKs",
-                $"{TargetFramework}-android-Aot={isAot}-Store={isAssemblyStore}-Compressed={isCompressed}.apk"));
+                $"{TargetFramework}-android-A={isAot}-S={isAssemblyStore}-C={isCompressed}.apk"));
 
         _output.WriteLine($"Checking if APK exists: {apkPath}");
         File.Exists(apkPath).Should().BeTrue();
