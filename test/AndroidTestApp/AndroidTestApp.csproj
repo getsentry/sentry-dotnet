@@ -10,4 +10,10 @@
     <ApplicationVersion>1</ApplicationVersion>
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
+    <RuntimeIdentifier Condition="'$(OSArchitecture)' == 'Arm64'">android-arm64</RuntimeIdentifier>
+    <RuntimeIdentifier Condition="'$(OSArchitecture)' == 'x64'">android-x64</RuntimeIdentifier>
+  </PropertyGroup>
 </Project>
