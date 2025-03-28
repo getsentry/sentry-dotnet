@@ -97,7 +97,8 @@ namespace ELFSharp.ELF
 
         public void Dispose()
         {
-            if (ownsStream) reader.BaseStream.Dispose();
+            if (ownsStream)
+                reader.BaseStream.Dispose();
         }
 
         public IEnumerable<TSection> GetSections<TSection>() where TSection : Section<T>
@@ -224,7 +225,8 @@ namespace ELFSharp.ELF
         private void ReadSections()
         {
             sectionHeaders = new List<SectionHeader>();
-            if (HasSectionsStringTable) sectionIndicesByName = new Dictionary<string, int>();
+            if (HasSectionsStringTable)
+                sectionIndicesByName = new Dictionary<string, int>();
 
             for (var i = 0; i < sectionHeaderEntryCount; i++)
             {
@@ -245,7 +247,8 @@ namespace ELFSharp.ELF
                 sectionHeaders.Count
             ));
             FindStringTables();
-            for (var i = 0; i < sectionHeaders.Count; i++) TouchSection(i);
+            for (var i = 0; i < sectionHeaders.Count; i++)
+                TouchSection(i);
             sectionHeaders = null;
             currentStage = Stage.AfterSectionsAreRead;
         }
@@ -254,7 +257,8 @@ namespace ELFSharp.ELF
         {
             if (currentStage != Stage.Initalizing)
                 throw new InvalidOperationException("TouchSection invoked in improper state.");
-            if (sections[index] != null) return;
+            if (sections[index] != null)
+                return;
             var section = GetSectionFromSectionHeader(sectionHeaders[index]);
             sections[index] = section;
         }
@@ -271,7 +275,8 @@ namespace ELFSharp.ELF
 
         private void ReadStringTable()
         {
-            if (!HasSectionHeader || !HasSectionsStringTable) return;
+            if (!HasSectionHeader || !HasSectionsStringTable)
+                return;
 
             var header = ReadSectionHeader(checked((int)stringTableIndex));
             if (header.Type != SectionType.StringTable)
@@ -353,23 +358,28 @@ namespace ELFSharp.ELF
                 // If the index of the string table is larger than or equal to SHN_LORESERVE (0xff00), this member holds SHN_XINDEX (0xffff)
                 // and the real index of the section name string table section is held in the sh_link member of the initial entry in section
                 // header table. Otherwise, the sh_link member of the initial entry in section header table contains the value zero.
-                if (stringTableIndex == 0xffff) stringTableIndex = checked(firstSectionHeader.Link);
+                if (stringTableIndex == 0xffff)
+                    stringTableIndex = checked(firstSectionHeader.Link);
             }
         }
 
         private GetSectionResult TryGetSectionInner(string name, out Section<T> section)
         {
             section = default;
-            if (!HasSectionsStringTable) return GetSectionResult.NoSectionsStringTable;
-            if (!sectionIndicesByName.TryGetValue(name, out var index)) return GetSectionResult.NoSuchSection;
-            if (index == SectionNameNotUniqueMarker) return GetSectionResult.SectionNameNotUnique;
+            if (!HasSectionsStringTable)
+                return GetSectionResult.NoSectionsStringTable;
+            if (!sectionIndicesByName.TryGetValue(name, out var index))
+                return GetSectionResult.NoSuchSection;
+            if (index == SectionNameNotUniqueMarker)
+                return GetSectionResult.SectionNameNotUnique;
             return TryGetSectionInner(index, out section);
         }
 
         private GetSectionResult TryGetSectionInner(int index, out Section<T> section)
         {
             section = default;
-            if (index >= sections.Count) return GetSectionResult.NoSuchSection;
+            if (index >= sections.Count)
+                return GetSectionResult.NoSuchSection;
             if (sections[index] != null)
             {
                 section = sections[index];

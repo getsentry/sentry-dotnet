@@ -2,10 +2,10 @@ namespace ELFSharp.ELF.Sections
 {
     internal interface ISection
     {
-        string Name { get; }
-        uint NameIndex { get; }
-        SectionType Type { get; }
-        SectionFlags Flags { get; }
-        byte[] GetContents();
+        public string Name { get; }
+        public uint NameIndex { get; }
+        public SectionType Type { get; }
+        public SectionFlags Flags { get; }
+        public byte[] GetContents();
     }
 }

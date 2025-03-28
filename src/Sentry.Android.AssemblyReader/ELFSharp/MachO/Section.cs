@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 
 namespace ELFSharp.MachO
@@ -35,7 +35,8 @@ namespace ELFSharp.MachO
 
         public byte[] GetData()
         {
-            if (Offset < segment.FileOffset || Offset + Size > segment.FileOffset + segment.Size) return new byte[0];
+            if (Offset < segment.FileOffset || Offset + Size > segment.FileOffset + segment.Size)
+                return new byte[0];
             var result = new byte[Size];
             Array.Copy(segment.GetData(), (int)(Offset - segment.FileOffset), result, 0, (int)Size);
             return result;

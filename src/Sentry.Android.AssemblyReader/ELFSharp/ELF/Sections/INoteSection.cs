@@ -2,7 +2,7 @@ namespace ELFSharp.ELF.Sections
 {
     internal interface INoteSection : ISection
     {
-        string NoteName { get; }
-        byte[] Description { get; }
+        public string NoteName { get; }
+        public byte[] Description { get; }
     }
 }

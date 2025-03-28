@@ -1,4 +1,4 @@
-﻿namespace ELFSharp.ELF.Sections
+namespace ELFSharp.ELF.Sections
 {
     internal enum SpecialSectionIndex : ushort
     {

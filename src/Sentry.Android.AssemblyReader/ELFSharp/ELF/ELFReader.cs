@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 
@@ -20,7 +20,8 @@ namespace ELFSharp.ELF
 
         public static IELF Load(Stream stream, bool shouldOwnStream)
         {
-            if (!TryLoad(stream, shouldOwnStream, out var elf)) throw new ArgumentException(NotELFMessage);
+            if (!TryLoad(stream, shouldOwnStream, out var elf))
+                throw new ArgumentException(NotELFMessage);
 
             return elf;
         }
@@ -56,7 +57,8 @@ namespace ELFSharp.ELF
         {
             var currentStreamPosition = stream.Position;
 
-            if (stream.Length < Consts.MinimalELFSize) return Class.NotELF;
+            if (stream.Length < Consts.MinimalELFSize)
+                return Class.NotELF;
 
             using (var reader = new BinaryReader(stream, Encoding.UTF8, true))
             {
@@ -81,7 +83,8 @@ namespace ELFSharp.ELF
 
         public static ELF<T> Load<T>(Stream stream, bool shouldOwnStream) where T : struct
         {
-            if (CheckELFType(stream) == Class.NotELF) throw new ArgumentException(NotELFMessage);
+            if (CheckELFType(stream) == Class.NotELF)
+                throw new ArgumentException(NotELFMessage);
 
             return new ELF<T>(stream, shouldOwnStream);
         }

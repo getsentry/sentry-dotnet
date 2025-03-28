@@ -2,12 +2,12 @@ namespace ELFSharp.ELF.Sections
 {
     internal interface ISymbolEntry
     {
-        string Name { get; }
-        SymbolBinding Binding { get; }
-        SymbolType Type { get; }
-        SymbolVisibility Visibility { get; }
-        bool IsPointedIndexSpecial { get; }
-        ISection PointedSection { get; }
-        ushort PointedSectionIndex { get; }
+        public string Name { get; }
+        public SymbolBinding Binding { get; }
+        public SymbolType Type { get; }
+        public SymbolVisibility Visibility { get; }
+        public bool IsPointedIndexSpecial { get; }
+        public ISection PointedSection { get; }
+        public ushort PointedSectionIndex { get; }
     }
 }

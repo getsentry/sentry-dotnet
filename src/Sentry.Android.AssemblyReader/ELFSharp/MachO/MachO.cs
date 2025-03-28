@@ -12,7 +12,7 @@ namespace ELFSharp.MachO
 
         internal MachO(Stream stream, bool is64, Endianess endianess, bool ownsStream)
         {
-            this.Is64 = is64;
+            Is64 = is64;
 
             using var reader = new SimpleEndianessAwareReader(stream, endianess, !ownsStream);
 
@@ -22,7 +22,8 @@ namespace ELFSharp.MachO
             var noOfCommands = reader.ReadInt32();
             reader.ReadInt32(); // size of commands
             Flags = (HeaderFlags)reader.ReadUInt32();
-            if (is64) reader.ReadBytes(4); // reserved
+            if (is64)
+                reader.ReadBytes(4); // reserved
             commands = new Command[noOfCommands];
             ReadCommands(noOfCommands, stream, reader);
         }

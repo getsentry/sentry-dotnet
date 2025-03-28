@@ -4,6 +4,6 @@ namespace ELFSharp.ELF.Sections
 {
     internal interface IDynamicSection : ISection
     {
-        IEnumerable<IDynamicEntry> Entries { get; }
+        public IEnumerable<IDynamicEntry> Entries { get; }
     }
 }

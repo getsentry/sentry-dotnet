@@ -1,4 +1,4 @@
-﻿using ELFSharp.Utilities;
+using ELFSharp.Utilities;
 
 #nullable disable
 
@@ -43,7 +43,8 @@ namespace ELFSharp.ELF.Sections
         private void ReadSectionHeader()
         {
             NameIndex = reader.ReadUInt32();
-            if (table != null) Name = table[NameIndex];
+            if (table != null)
+                Name = table[NameIndex];
             Type = (SectionType)reader.ReadUInt32();
             RawFlags = ReadAddress();
             Flags = unchecked((SectionFlags)RawFlags);

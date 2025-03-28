@@ -44,7 +44,8 @@ namespace ELFSharp.ELF.Segments
         /// <returns>Segment contents as byte array.</returns>
         public byte[] GetFileContents()
         {
-            if (FileSize == 0) return new byte[0];
+            if (FileSize == 0)
+                return new byte[0];
 
             SeekTo(Offset);
             var result = new byte[checked((int)FileSize)];
@@ -61,7 +62,8 @@ namespace ELFSharp.ELF.Segments
         public byte[] GetMemoryContents()
         {
             var sizeAsInt = Size.To<int>();
-            if (sizeAsInt == 0) return new byte[0];
+            if (sizeAsInt == 0)
+                return new byte[0];
 
             SeekTo(Offset);
             var result = new byte[sizeAsInt];
@@ -90,14 +92,16 @@ namespace ELFSharp.ELF.Segments
         {
             SeekTo(headerOffset);
             Type = (SegmentType)reader.ReadUInt32();
-            if (elfClass == Class.Bit64) Flags = (SegmentFlags)reader.ReadUInt32();
+            if (elfClass == Class.Bit64)
+                Flags = (SegmentFlags)reader.ReadUInt32();
             // TODO: some functions?s
             Offset = elfClass == Class.Bit32 ? reader.ReadUInt32() : reader.ReadInt64();
             Address = (elfClass == Class.Bit32 ? reader.ReadUInt32() : reader.ReadUInt64()).To<T>();
             PhysicalAddress = (elfClass == Class.Bit32 ? reader.ReadUInt32() : reader.ReadUInt64()).To<T>();
             FileSize = elfClass == Class.Bit32 ? reader.ReadInt32() : reader.ReadInt64();
             Size = (elfClass == Class.Bit32 ? reader.ReadUInt32() : reader.ReadUInt64()).To<T>();
-            if (elfClass == Class.Bit32) Flags = (SegmentFlags)reader.ReadUInt32();
+            if (elfClass == Class.Bit32)
+                Flags = (SegmentFlags)reader.ReadUInt32();
 
             Alignment = (elfClass == Class.Bit32 ? reader.ReadUInt32() : reader.ReadUInt64()).To<T>();
         }

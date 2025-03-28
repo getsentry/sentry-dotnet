@@ -7,20 +7,20 @@ namespace ELFSharp.ELF
 {
     internal interface IELF : IDisposable
     {
-        Endianess Endianess { get; }
-        Class Class { get; }
-        FileType Type { get; }
-        Machine Machine { get; }
-        bool HasSegmentHeader { get; }
-        bool HasSectionHeader { get; }
-        bool HasSectionsStringTable { get; }
-        IReadOnlyList<ISegment> Segments { get; }
-        IStringTable SectionsStringTable { get; }
-        IReadOnlyList<ISection> Sections { get; }
-        IEnumerable<T> GetSections<T>() where T : ISection;
-        bool TryGetSection(string name, out ISection section);
-        ISection GetSection(string name);
-        bool TryGetSection(int index, out ISection section);
-        ISection GetSection(int index);
+        public Endianess Endianess { get; }
+        public Class Class { get; }
+        public FileType Type { get; }
+        public Machine Machine { get; }
+        public bool HasSegmentHeader { get; }
+        public bool HasSectionHeader { get; }
+        public bool HasSectionsStringTable { get; }
+        public IReadOnlyList<ISegment> Segments { get; }
+        public IStringTable SectionsStringTable { get; }
+        public IReadOnlyList<ISection> Sections { get; }
+        public IEnumerable<T> GetSections<T>() where T : ISection;
+        public bool TryGetSection(string name, out ISection section);
+        public ISection GetSection(string name);
+        public bool TryGetSection(int index, out ISection section);
+        public ISection GetSection(int index);
     }
 }
