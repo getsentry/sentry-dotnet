@@ -29,7 +29,7 @@ public interface IScopeObserver
     /// Sets the user information.
     /// </summary>
     public void SetUser(SentryUser? user);
-    
+
     /// <summary>
     /// Sets the current trace
     /// </summary>
