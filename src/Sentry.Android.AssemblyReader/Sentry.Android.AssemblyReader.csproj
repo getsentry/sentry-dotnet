@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ELFSharp" Version="2.17.3" />
     <PackageReference Include="K4os.Compression.LZ4" Version="1.3.6" />
   </ItemGroup>
 
@@ -25,6 +24,10 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Sentry.Android.AssemblyReader.Tests" PublicKey="$(SentryPublicKey)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ElfSharp\" />
   </ItemGroup>
 
 </Project>
