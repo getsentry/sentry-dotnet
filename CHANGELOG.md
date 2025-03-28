@@ -4,6 +4,39 @@
 
 ### Fixes
 
+- Single quotes added to the release name when using MS Build to create Sentry releases on Windows ([#4015](https://github.com/getsentry/sentry-dotnet/pull/4015))
+- Target `net9.0` on Sentry.Google.Cloud.Functions to avoid conflict with Sentry.AspNetCore ([#4039](https://github.com/getsentry/sentry-dotnet/pull/4039))
+- Changed default value for `SentryOptions.EnableAppHangTrackingV2` to `false` ([#4042](https://github.com/getsentry/sentry-dotnet/pull/4042))
+
+### Features
+
+- Exception.HResult is now included in the mechanism data for all exceptions ([#4029](https://github.com/getsentry/sentry-dotnet/pull/4029))
+
+### Dependencies
+
+- Bump CLI from v2.42.2 to v2.43.0 ([#4036](https://github.com/getsentry/sentry-dotnet/pull/4036), [#4049](https://github.com/getsentry/sentry-dotnet/pull/4049), [#4060](https://github.com/getsentry/sentry-dotnet/pull/4060), [#4062](https://github.com/getsentry/sentry-dotnet/pull/4062))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2430)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.42.2...2.43.0)
+
+## 5.4.0
+
+### Enhancements
+
+- Profiling: improve performance by subscribing only to necessary CLR events ([#3970](https://github.com/getsentry/sentry-dotnet/pull/3970))
+
+### Fixes
+
+- Unknown stack frames in profiles on .NET 8+ ([#3967](https://github.com/getsentry/sentry-dotnet/pull/3967))
+- Missing MAUI `Shell` navigation breadcrumbs on iOS ([#4006](https://github.com/getsentry/sentry-dotnet/pull/4006))
+
+## 5.3.0
+
+### Features
+
+- User Feedback can now be captured without errors/exceptions. Note that these APIs replace the older UserFeedback APIs, which have now been marked as obsolete (and will be removed in a future major version bump) ([#3981](https://github.com/getsentry/sentry-dotnet/pull/3981))
+
+### Fixes
+
 - Using SentryOptions.Native.SuppressExcBadAccess and SentryOptions.Native.SuppressSignalAborts, users can now block duplicate errors from native due to dotnet NullReferenceExceptions - Defaults to false ([#3998](https://github.com/getsentry/sentry-dotnet/pull/3998))
 - Native iOS events are now exposed to the dotnet layer for users to hook through SentryOptions.BeforeSend and SentryOptions.OnCrashedLastRun ([#2102](https://github.com/getsentry/sentry-dotnet/pull/3958))
 - Prevent crashes from occurring on Android during OnBeforeSend ([#4022](https://github.com/getsentry/sentry-dotnet/pull/4022))
@@ -18,7 +51,6 @@
 
 ### Features
 
-- User Feedback can now be captured without errors/exceptions. Note that these APIs replace the older UserFeedback APIs, which have now been marked as obsolete (and will be removed in a future major version bump) ([#3981](https://github.com/getsentry/sentry-dotnet/pull/3981))
 - Users can now register their own MAUI controls for breadcrumb creation ([#3997](https://github.com/getsentry/sentry-dotnet/pull/3997))
 - Serilog scope properties are now sent with Sentry events ([#3976](https://github.com/getsentry/sentry-dotnet/pull/3976))
 - The sample seed used for sampling decisions is now propagated, for use in downstream custom trace samplers ([#3951](https://github.com/getsentry/sentry-dotnet/pull/3951))
@@ -27,6 +59,7 @@
 ### Fixes
 
 - Fix mismapped breadcrumb levels coming in from native to dotnet SDK ([#3993](https://github.com/getsentry/sentry-dotnet/pull/3993))
+- Deduplicate profiling stack frames ([#3969](https://github.com/getsentry/sentry-dotnet/pull/3969))
 
 ### Dependencies
 
@@ -47,7 +80,6 @@
 - Fixed envelopes with oversized attachments getting stuck in __processing ([#3938](https://github.com/getsentry/sentry-dotnet/pull/3938))
 - OperatingSystem will now return macOS as OS name instead of 'Darwin' as well as the proper version. ([#2710](https://github.com/getsentry/sentry-dotnet/pull/3956))
 - Ignore null value on CocoaScopeObserver.SetTag ([#3948](https://github.com/getsentry/sentry-dotnet/pull/3948))
-- Deduplicate profiling stack frames ([#3969](https://github.com/getsentry/sentry-dotnet/pull/3969))
 
 ## 5.1.0
 

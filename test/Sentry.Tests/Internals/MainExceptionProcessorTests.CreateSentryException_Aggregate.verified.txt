@@ -8,7 +8,10 @@
       Synthetic: false,
       IsExceptionGroup: false,
       ExceptionId: 2,
-      ParentId: 0
+      ParentId: 0,
+      Data: {
+        HResult: 0x80131500
+      }
     }
   },
   {
@@ -20,7 +23,10 @@
       Synthetic: false,
       IsExceptionGroup: false,
       ExceptionId: 1,
-      ParentId: 0
+      ParentId: 0,
+      Data: {
+        HResult: 0x80131500
+      }
     }
   },
   {
@@ -33,7 +39,8 @@
       IsExceptionGroup: true,
       ExceptionId: 0,
       Data: {
-        foo: bar
+        foo: bar,
+        HResult: 0x80131500
       }
     }
   }

@@ -2,5 +2,5 @@ namespace Sentry;
 
 internal interface ISentryFailedRequestHandler
 {
-    void HandleResponse(HttpResponseMessage response);
+    public void HandleResponse(HttpResponseMessage response);
 }

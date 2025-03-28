@@ -6,7 +6,7 @@ namespace Sentry.Internal;
 /// </summary>
 internal interface IStackFrame
 {
-    StackFrame? Frame { get; }
+    public StackFrame? Frame { get; }
 
     /// <summary>
     /// Returns a pointer to the base address of the native image that this stack frame is executing.
