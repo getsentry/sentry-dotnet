@@ -33,5 +33,5 @@ public interface IScopeObserver
     /// <summary>
     /// Sets the current trace
     /// </summary>
-    void SetTrace(SentryId traceId, SpanId parentSpanId);
+    public void SetTrace(SentryId traceId, SpanId parentSpanId);
 }
