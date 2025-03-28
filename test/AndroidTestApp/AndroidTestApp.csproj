@@ -10,8 +10,4 @@
     <ApplicationVersion>1</ApplicationVersion>
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
   </PropertyGroup>
-
-  <PropertyGroup>
-    <RuntimeIdentifier>android-x64</RuntimeIdentifier>
-  </PropertyGroup>
 </Project>
