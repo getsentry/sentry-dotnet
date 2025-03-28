@@ -1013,7 +1013,7 @@ public partial class HubTests
         var propagationContext = new SentryPropagationContext(
             SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
             SpanId.Parse("2000000000000000"));
-        hub.ConfigureScope(scope => scope.PropagationContext = propagationContext);
+        hub.ConfigureScope(scope => scope.SetPropagationContext(propagationContext));
 
         // Act
         var header = hub.GetTraceHeader();
@@ -1052,7 +1052,7 @@ public partial class HubTests
         var hub = _fixture.GetSut();
         var propagationContext = new SentryPropagationContext(
             SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1000000000000000"));
-        hub.ConfigureScope(scope => scope.PropagationContext = propagationContext);
+        hub.ConfigureScope(scope => scope.SetPropagationContext(propagationContext));
 
         // Act
         var baggage = hub.GetBaggage();
@@ -1069,7 +1069,7 @@ public partial class HubTests
         var hub = _fixture.GetSut();
         var propagationContext = new SentryPropagationContext(
             SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1000000000000000"));
-        hub.ConfigureScope(scope => scope.PropagationContext = propagationContext);
+        hub.ConfigureScope(scope => scope.SetPropagationContext(propagationContext));
 
         var traceHeader = new SentryTraceHeader(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"),
             SpanId.Parse("2000000000000000"), null);
@@ -1104,7 +1104,7 @@ public partial class HubTests
         var hub = _fixture.GetSut();
         var propagationContext = new SentryPropagationContext(
             SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1000000000000000"));
-        hub.ConfigureScope(scope => scope.PropagationContext = propagationContext);
+        hub.ConfigureScope(scope => scope.SetPropagationContext(propagationContext));
         var traceHeader = "5bd5f6d346b442dd9177dce9302fd737-2000000000000000";
         var baggageHeader = "sentry-trace_id=5bd5f6d346b442dd9177dce9302fd737, sentry-public_key=49d0f7386ad645858ae85020e393bef3, sentry-sample_rate=1.0";
 
