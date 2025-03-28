@@ -12,8 +12,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</OSArchitecture>
-    <RuntimeIdentifier Condition="'$(OSArchitecture)' == 'Arm64'">android-arm64</RuntimeIdentifier>
-    <RuntimeIdentifier Condition="'$(OSArchitecture)' == 'x64'">android-x64</RuntimeIdentifier>
+    <RuntimeIdentifier>android-x64</RuntimeIdentifier>
   </PropertyGroup>
 </Project>

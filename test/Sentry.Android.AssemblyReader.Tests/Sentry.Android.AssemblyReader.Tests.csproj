@@ -12,6 +12,10 @@
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="TestAPKs\" />
+  </ItemGroup>
+
   <!--  Build the Android test app in various configurations during the build of this test project. -->
   <Target Name="BuildTestAPKs" BeforeTargets="DispatchToInnerBuilds;BeforeBuild" Condition="'$(TargetPlatformIdentifier)' != 'android'">
     <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Restore" />
@@ -35,16 +39,9 @@
       <SourceAPK>..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk</SourceAPK>
       <DestinationAPK>TestAPKs\$(TargetFramework)-$(_ConfigString).apk</DestinationAPK>
     </PropertyGroup>
-    <Message Text="Building APK for $(TargetFramework) with config: $(_ConfigString)" Importance="high" />
     <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;PublishAot=$(_Aot);_IsPublishing=true;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('$(DestinationAPK)')" />
 
-    <PropertyGroup>
-      <SourceAPKExists Condition="Exists('$(SourceAPK)')">True</SourceAPKExists>
-      <SourceAPKExists Condition="!Exists('$(SourceAPK)')">False</SourceAPKExists>
-    </PropertyGroup>
-
     <Message Text="Copying APK from $(SourceAPK) to $(DestinationAPK)" Importance="high" />
-    <Message Text="Source APK exists: $(SourceAPKExists)" Importance="high" />
     <Copy SourceFiles="$(SourceAPK)" DestinationFiles="$(DestinationAPK)" Condition="!Exists('$(DestinationAPK)')" />
 
     <PropertyGroup>
