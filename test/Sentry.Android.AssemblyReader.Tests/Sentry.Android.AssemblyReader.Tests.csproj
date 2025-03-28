@@ -12,10 +12,6 @@
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="TestAPKs\" />
-  </ItemGroup>
-
   <!--  Build the Android test app in various configurations during the build of this test project. -->
   <Target Name="BuildTestAPKs" BeforeTargets="DispatchToInnerBuilds;BeforeBuild" Condition="'$(TargetPlatformIdentifier)' != 'android'">
     <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Restore" />
@@ -23,15 +19,15 @@
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net9.0-android" />
   </Target>
   <Target Name="_InnerBuildTestAPKs">
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=false;_Store=False;_Compressed=False" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=false;_Store=False;_Compressed=True" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=false;_Store=True;_Compressed=False" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=false;_Store=True;_Compressed=True" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=False;_Store=False;_Compressed=False" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=False;_Store=False;_Compressed=True" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=False;_Store=True;_Compressed=False" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=False;_Store=True;_Compressed=True" />
 
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=true;_Store=False;_Compressed=False" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=true;_Store=False;_Compressed=True" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=true;_Store=True;_Compressed=False" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=true;_Store=True;_Compressed=True" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=False;_Compressed=False" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=False;_Compressed=True" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=True;_Compressed=False" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=True;_Compressed=True" />
   </Target>
   <Target Name="_BuildTestAPK">
     <PropertyGroup>
@@ -43,8 +39,8 @@
     <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;PublishAot=$(_Aot);_IsPublishing=true;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('$(DestinationAPK)')" />
 
     <PropertyGroup>
-      <SourceAPKExists Condition="Exists('..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk')">True</SourceAPKExists>
-      <SourceAPKExists Condition="!Exists('..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk')">False</SourceAPKExists>
+      <SourceAPKExists Condition="Exists('$(SourceAPK)')">True</SourceAPKExists>
+      <SourceAPKExists Condition="!Exists('$(SourceAPK)')">False</SourceAPKExists>
     </PropertyGroup>
 
     <Message Text="Copying APK from $(SourceAPK) to $(DestinationAPK)" Importance="high" />
@@ -52,8 +48,8 @@
     <Copy SourceFiles="$(SourceAPK)" DestinationFiles="$(DestinationAPK)" Condition="!Exists('$(DestinationAPK)')" />
 
     <PropertyGroup>
-      <DestinationAPKExists Condition="Exists('TestAPKs\$(TargetFramework)-$(_ConfigString).apk')">True</DestinationAPKExists>
-      <DestinationAPKExists Condition="!Exists('TestAPKs\$(TargetFramework)-$(_ConfigString).apk')">False</DestinationAPKExists>
+      <DestinationAPKExists Condition="Exists('$(DestinationAPK)')">True</DestinationAPKExists>
+      <DestinationAPKExists Condition="!Exists('$(DestinationAPK)')">False</DestinationAPKExists>
     </PropertyGroup>
     <Message Text="APK copy result: Exists('$(DestinationAPK)') = $(DestinationAPKExists)" Importance="high" />
   </Target>
