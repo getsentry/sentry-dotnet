@@ -2,10 +2,10 @@ namespace ELFSharp.ELF.Segments
 {
     internal interface ISegment
     {
-        SegmentType Type { get; }
-        SegmentFlags Flags { get; }
-        byte[] GetRawHeader();
-        byte[] GetFileContents();
-        byte[] GetMemoryContents();
+        public SegmentType Type { get; }
+        public SegmentFlags Flags { get; }
+        public byte[] GetRawHeader();
+        public byte[] GetFileContents();
+        public byte[] GetMemoryContents();
     }
 }

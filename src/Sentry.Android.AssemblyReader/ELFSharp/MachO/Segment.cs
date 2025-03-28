@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -82,7 +82,8 @@ namespace ELFSharp.MachO
 
         public byte[] GetData()
         {
-            if (data == null) return new byte[Size];
+            if (data == null)
+                return new byte[Size];
             return data.ToArray();
         }
 

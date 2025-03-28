@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -45,7 +45,8 @@ namespace ELFSharp.MachO
         public static IReadOnlyList<MachO> LoadFat(Stream stream, bool shouldOwnStream)
         {
             var result = TryLoadFat(stream, shouldOwnStream, out var machOs);
-            if (result == MachOResult.OK || result == MachOResult.FatMachO) return machOs;
+            if (result == MachOResult.OK || result == MachOResult.FatMachO)
+                return machOs;
 
             throw new InvalidOperationException(NotMachOErrorMessage);
         }
@@ -80,7 +81,8 @@ namespace ELFSharp.MachO
                 return MachOResult.FatMachO;
             }
 
-            if (!MagicToMachOType.TryGetValue(magic, out var machOType)) return MachOResult.NotMachO;
+            if (!MagicToMachOType.TryGetValue(magic, out var machOType))
+                return MachOResult.NotMachO;
 
             var machO = new MachO(stream, machOType.Is64Bit, machOType.Endianess, shouldOwnStream);
             machOs = new[] { machO };

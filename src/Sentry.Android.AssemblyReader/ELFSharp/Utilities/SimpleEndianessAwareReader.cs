@@ -13,7 +13,7 @@ namespace ELFSharp.Utilities
         public SimpleEndianessAwareReader(Stream stream, Endianess endianess, bool beNonClosing = false)
         {
             this.beNonClosing = beNonClosing;
-            this.BaseStream = stream;
+            BaseStream = stream;
             needsAdjusting = (endianess == Endianess.LittleEndian) ^ BitConverter.IsLittleEndian;
         }
 
@@ -21,7 +21,8 @@ namespace ELFSharp.Utilities
 
         public void Dispose()
         {
-            if (beNonClosing) return;
+            if (beNonClosing)
+                return;
             BaseStream.Dispose();
         }
 
@@ -33,14 +34,16 @@ namespace ELFSharp.Utilities
         public byte ReadByte()
         {
             var result = BaseStream.ReadByte();
-            if (result == -1) throw new EndOfStreamException("End of stream reached while trying to read one byte.");
+            if (result == -1)
+                throw new EndOfStreamException("End of stream reached while trying to read one byte.");
             return (byte)result;
         }
 
         public short ReadInt16()
         {
             var value = BitConverter.ToInt16(ReadBytes(2), 0);
-            if (needsAdjusting) value = IPAddress.NetworkToHostOrder(value);
+            if (needsAdjusting)
+                value = IPAddress.NetworkToHostOrder(value);
             return value;
         }
 
@@ -52,7 +55,8 @@ namespace ELFSharp.Utilities
         public int ReadInt32()
         {
             var value = BitConverter.ToInt32(ReadBytes(4), 0);
-            if (needsAdjusting) value = IPAddress.NetworkToHostOrder(value);
+            if (needsAdjusting)
+                value = IPAddress.NetworkToHostOrder(value);
             return value;
         }
 
@@ -64,7 +68,8 @@ namespace ELFSharp.Utilities
         public long ReadInt64()
         {
             var value = BitConverter.ToInt64(ReadBytes(8), 0);
-            if (needsAdjusting) value = IPAddress.NetworkToHostOrder(value);
+            if (needsAdjusting)
+                value = IPAddress.NetworkToHostOrder(value);
             return value;
         }
 

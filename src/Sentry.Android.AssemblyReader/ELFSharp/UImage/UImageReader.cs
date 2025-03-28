@@ -42,25 +42,30 @@ namespace ELFSharp.UImage
             var startingStreamPosition = stream.Position;
 
             uImage = null;
-            if (stream.Length < 64) return UImageResult.NotUImage;
+            if (stream.Length < 64)
+                return UImageResult.NotUImage;
 
             using var reader = new BinaryReader(stream, Encoding.UTF8, true);
 
             var headerForCrc = reader.ReadBytes(64);
             // we need to zero crc part
-            for (var i = 4; i < 8; i++) headerForCrc[i] = 0;
+            for (var i = 4; i < 8; i++)
+                headerForCrc[i] = 0;
 
             stream.Position = startingStreamPosition;
 
             var magic = reader.ReadUInt32BigEndian();
-            if (magic != Magic) return UImageResult.NotUImage;
+            if (magic != Magic)
+                return UImageResult.NotUImage;
 
             var crc = reader.ReadUInt32BigEndian();
-            if (crc != GzipCrc32(headerForCrc)) return UImageResult.BadChecksum;
+            if (crc != GzipCrc32(headerForCrc))
+                return UImageResult.BadChecksum;
 
             reader.ReadBytes(22);
             var imageType = (ImageType)reader.ReadByte();
-            if (!Enum.IsDefined(typeof(ImageType), imageType)) return UImageResult.NotSupportedImageType;
+            if (!Enum.IsDefined(typeof(ImageType), imageType))
+                return UImageResult.NotSupportedImageType;
 
             var multiFileImage = imageType == ImageType.MultiFileImage;
             stream.Position = startingStreamPosition;

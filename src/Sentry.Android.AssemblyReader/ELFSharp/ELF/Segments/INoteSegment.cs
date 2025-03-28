@@ -1,16 +1,16 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace ELFSharp.ELF.Segments
 {
     internal interface INoteSegment : ISegment
     {
-        string NoteName { get; }
-        ulong NoteType { get; }
-        byte[] NoteDescription { get; }
+        public string NoteName { get; }
+        public ulong NoteType { get; }
+        public byte[] NoteDescription { get; }
 
         /// <summary>
         ///     Returns all notes within the segment
         /// </summary>
-        IReadOnlyList<INoteData> Notes { get; }
+        public IReadOnlyList<INoteData> Notes { get; }
     }
 }

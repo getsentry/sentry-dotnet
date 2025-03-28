@@ -4,7 +4,7 @@ namespace ELFSharp.ELF.Sections
 {
     internal interface IStringTable : ISection
     {
-        string this[long index] { get; }
-        IEnumerable<string> Strings { get; }
+        public string this[long index] { get; }
+        public IEnumerable<string> Strings { get; }
     }
 }

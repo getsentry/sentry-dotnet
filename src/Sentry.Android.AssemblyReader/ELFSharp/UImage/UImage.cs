@@ -74,15 +74,18 @@ namespace ELFSharp.UImage
         {
             result = null;
 
-            if (imageIndex > ImageCount - 1 || imageIndex < 0) return ImageDataResult.InvalidIndex;
+            if (imageIndex > ImageCount - 1 || imageIndex < 0)
+                return ImageDataResult.InvalidIndex;
 
-            if (ImageCount == 1) return TryGetImageData(out result);
+            if (ImageCount == 1)
+                return TryGetImageData(out result);
 
             if (Compression != CompressionType.None)
                 // We only support multi file images without compression
                 return ImageDataResult.UnsupportedCompressionFormat;
 
-            if (CRC != UImageReader.GzipCrc32(rawImage)) return ImageDataResult.BadChecksum;
+            if (CRC != UImageReader.GzipCrc32(rawImage))
+                return ImageDataResult.BadChecksum;
 
             // Images sizes * 4 + terminator (which also takes 4 bytes).
             var startingOffset = 4 * (ImageCount + 1) + imageSizes.Take(imageIndex).Sum();
@@ -96,12 +99,14 @@ namespace ELFSharp.UImage
         {
             result = null;
 
-            if (ImageCount > 1) return TryGetImageData(0, out result);
+            if (ImageCount > 1)
+                return TryGetImageData(0, out result);
 
             if (Compression != CompressionType.None && Compression != CompressionType.Gzip)
                 return ImageDataResult.UnsupportedCompressionFormat;
 
-            if (CRC != UImageReader.GzipCrc32(rawImage)) return ImageDataResult.BadChecksum;
+            if (CRC != UImageReader.GzipCrc32(rawImage))
+                return ImageDataResult.BadChecksum;
 
             result = new byte[rawImage.Length];
             Array.Copy(rawImage, result, result.Length);

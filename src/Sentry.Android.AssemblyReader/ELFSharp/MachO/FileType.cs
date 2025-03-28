@@ -1,4 +1,4 @@
-﻿namespace ELFSharp.MachO
+namespace ELFSharp.MachO
 {
     internal enum FileType : uint
     {

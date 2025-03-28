@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is based on LLVM's elf.h file. You can find its license
  * in the LICENSE file.
  *

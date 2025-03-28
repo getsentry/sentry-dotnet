@@ -13,12 +13,14 @@ namespace ELFSharp.Utilities
 
         public SubStream(Stream wrappedStream, long startingPosition, long length)
         {
-            if (startingPosition < 0) throw new ArgumentException(nameof(startingPosition), NegativeArgumentMessage);
+            if (startingPosition < 0)
+                throw new ArgumentException(nameof(startingPosition), NegativeArgumentMessage);
 
             if (startingPosition > wrappedStream.Length)
                 throw new ArgumentException(nameof(startingPosition), OutsideStreamMessage);
 
-            if (length < 0) throw new ArgumentException(nameof(length), NegativeArgumentMessage);
+            if (length < 0)
+                throw new ArgumentException(nameof(length), NegativeArgumentMessage);
 
             if (startingPosition + length > wrappedStream.Length)
                 throw new ArgumentException(nameof(startingPosition), OutsideStreamMessage);
@@ -28,7 +30,7 @@ namespace ELFSharp.Utilities
             ;
             this.wrappedStream = wrappedStream;
             this.startingPosition = startingPosition;
-            this.Length = length;
+            Length = length;
 
             wrappedStream.Seek(startingPosition, SeekOrigin.Begin);
         }

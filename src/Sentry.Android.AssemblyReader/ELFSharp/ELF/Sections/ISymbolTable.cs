@@ -4,6 +4,6 @@ namespace ELFSharp.ELF.Sections
 {
     internal interface ISymbolTable : ISection
     {
-        IEnumerable<ISymbolEntry> Entries { get; }
+        public IEnumerable<ISymbolEntry> Entries { get; }
     }
 }

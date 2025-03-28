@@ -1,4 +1,4 @@
-﻿namespace ELFSharp.ELF
+namespace ELFSharp.ELF
 {
     internal enum FileType : ushort
     {

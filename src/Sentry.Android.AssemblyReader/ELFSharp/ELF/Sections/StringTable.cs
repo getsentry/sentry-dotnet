@@ -26,7 +26,8 @@ namespace ELFSharp.ELF.Sections
         {
             get
             {
-                if (!cachePopulated) PrepopulateCache();
+                if (!cachePopulated)
+                    PrepopulateCache();
                 return stringCache.Values;
             }
         }
@@ -35,7 +36,8 @@ namespace ELFSharp.ELF.Sections
         {
             get
             {
-                if (stringCache.TryGetValue(index, out var result)) return result;
+                if (stringCache.TryGetValue(index, out var result))
+                    return result;
                 return HandleUnexpectedIndex(index);
             }
         }

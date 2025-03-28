@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 #nullable disable
 
@@ -31,7 +31,8 @@ namespace ELFSharp.ELF.Sections
         {
             get
             {
-                if (IsPointedIndexSpecial) return (SpecialSectionIndex)PointedSectionIndex;
+                if (IsPointedIndexSpecial)
+                    return (SpecialSectionIndex)PointedSectionIndex;
                 throw new InvalidOperationException("Given pointed section index does not have special meaning.");
             }
         }

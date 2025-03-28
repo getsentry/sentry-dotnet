@@ -7,6 +7,6 @@ namespace ELFSharp.ELF.Sections
     /// </summary>
     internal interface IDynamicEntry
     {
-        DynamicTag Tag { get; }
+        public DynamicTag Tag { get; }
     }
 }
