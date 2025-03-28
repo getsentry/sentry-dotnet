@@ -36,20 +36,26 @@
   <Target Name="_BuildTestAPK">
     <PropertyGroup>
       <_ConfigString>A=$(_Aot)-S=$(_Store)-C=$(_Compressed)</_ConfigString>
+      <SourceAPK>..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk</SourceAPK>
+      <DestinationAPK>TestAPKs\$(TargetFramework)-$(_ConfigString).apk</DestinationAPK>
     </PropertyGroup>
     <Message Text="Building APK for $(TargetFramework) with config: $(_ConfigString)" Importance="high" />
-    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;PublishAot=$(_Aot);_IsPublishing=true;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('TestAPKs\$(TargetFramework)-$(_ConfigString).apk')" />
+    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;PublishAot=$(_Aot);_IsPublishing=true;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('$(DestinationAPK)')" />
 
     <PropertyGroup>
       <SourceAPKExists Condition="Exists('..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk')">True</SourceAPKExists>
       <SourceAPKExists Condition="!Exists('..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk')">False</SourceAPKExists>
+    </PropertyGroup>
+
+    <Message Text="Copying APK from $(SourceAPK) to $(DestinationAPK)" Importance="high" />
+    <Message Text="Source APK exists: $(SourceAPKExists)" Importance="high" />
+    <Copy SourceFiles="$(SourceAPK)" DestinationFiles="$(DestinationAPK)" Condition="!Exists('$(DestinationAPK)')" />
+
+    <PropertyGroup>
       <DestinationAPKExists Condition="Exists('TestAPKs\$(TargetFramework)-$(_ConfigString).apk')">True</DestinationAPKExists>
       <DestinationAPKExists Condition="!Exists('TestAPKs\$(TargetFramework)-$(_ConfigString).apk')">False</DestinationAPKExists>
     </PropertyGroup>
-    <Message Text="Copying APK from ..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk to TestAPKs\$(TargetFramework)-$(_ConfigString).apk" Importance="high" />
-    <Message Text="Source APK exists: $(SourceAPKExists)" Importance="high" />
-    <Copy SourceFiles="..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk" DestinationFiles="TestAPKs\$(TargetFramework)-$(_ConfigString).apk" Condition="!Exists('TestAPKs\$(TargetFramework)-$(_ConfigString).apk')" />
-    <Message Text="APK copy result: Exists('TestAPKs\$(TargetFramework)-$(_ConfigString).apk') = $(DestinationAPKExists)" Importance="high" />
+    <Message Text="APK copy result: Exists('$(DestinationAPK)') = $(DestinationAPKExists)" Importance="high" />
   </Target>
 
 </Project>
