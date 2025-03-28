@@ -28,8 +28,6 @@ public interface IScopeObserver
     /// <summary>
     /// Sets the user information.
     /// </summary>
-    void SetUser(SentryUser? user);
-
     public void SetUser(SentryUser? user);
     
     /// <summary>
