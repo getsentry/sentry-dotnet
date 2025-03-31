@@ -293,10 +293,10 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     public void SetMeasurement(string name, Measurement measurement) => _measurements[name] = measurement;
 
     /// <inheritdoc />
-    public ISpan StartChild(string operation) => StartChild(spanId: null, parentSpanId: SpanId, operation);
+    public ISpan StartChild(string operation, DateTimeOffset? timestamp = null) => StartChild(spanId: null, parentSpanId: SpanId, operation, timestamp: timestamp);
 
     internal ISpan StartChild(SpanId? spanId, SpanId parentSpanId, string operation,
-        Instrumenter instrumenter = Instrumenter.Sentry)
+        Instrumenter instrumenter = Instrumenter.Sentry, DateTimeOffset? timestamp = null)
     {
         var span = new SpanTracer(_hub, this, SpanId.Create(), parentSpanId, TraceId, operation, instrumenter: instrumenter);
         if (spanId is { } id)
@@ -368,7 +368,7 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     public ISpan? GetLastActiveSpan() => _activeSpanTracker.PeekActive();
 
     /// <inheritdoc />
-    public void Finish()
+    public void Finish(DateTimeOffset? timestamp = null)
     {
         _options?.LogDebug("Attempting to finish Transaction {0}.", SpanId);
         if (Interlocked.Exchange(ref _cancelIdleTimeout, 0) == 1)
@@ -389,6 +389,9 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
 
         TransactionProfiler?.Finish();
         Status ??= SpanStatus.Ok;
+        if (timestamp != null)
+            EndTimestamp = timestamp.Value;
+
         EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
         _options?.LogDebug("Finished Transaction {0}.", SpanId);
 
@@ -403,22 +406,22 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     }
 
     /// <inheritdoc />
-    public void Finish(SpanStatus status)
+    public void Finish(SpanStatus status, DateTimeOffset? timestamp = null)
     {
         Status = status;
-        Finish();
+        Finish(timestamp);
     }
 
     /// <inheritdoc />
-    public void Finish(Exception exception, SpanStatus status)
+    public void Finish(Exception exception, SpanStatus status, DateTimeOffset? timestamp = null)
     {
         _hub.BindException(exception, this);
-        Finish(status);
+        Finish(status, timestamp);
     }
 
     /// <inheritdoc />
-    public void Finish(Exception exception) =>
-        Finish(exception, SpanStatusConverter.FromException(exception));
+    public void Finish(Exception exception, DateTimeOffset? timestamp = null) =>
+        Finish(exception, SpanStatusConverter.FromException(exception), timestamp);
 
     /// <inheritdoc />
     public SentryTraceHeader GetTraceHeader() => new(TraceId, SpanId, IsSampled);

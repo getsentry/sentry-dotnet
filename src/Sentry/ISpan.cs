@@ -28,27 +28,27 @@ public interface ISpan : ISpanData
     /// <summary>
     /// Starts a child span.
     /// </summary>
-    public ISpan StartChild(string operation);
+    public ISpan StartChild(string operation, DateTimeOffset? startTime = null);
 
     /// <summary>
     /// Finishes the span.
-    /// </summary>
-    public void Finish();
+    /// </summary>`
+    public void Finish(DateTimeOffset? timestamp = null);
 
     /// <summary>
     /// Finishes the span with the specified status.
     /// </summary>
-    public void Finish(SpanStatus status);
+    public void Finish(SpanStatus status, DateTimeOffset? timestamp = null);
 
     /// <summary>
     /// Finishes the span with the specified exception and status.
     /// </summary>
-    public void Finish(Exception exception, SpanStatus status);
+    public void Finish(Exception exception, SpanStatus status, DateTimeOffset? timestamp = null);
 
     /// <summary>
     /// Finishes the span with the specified exception and automatically inferred status.
     /// </summary>
-    public void Finish(Exception exception);
+    public void Finish(Exception exception, DateTimeOffset? timestamp = null);
 }
 
 /// <summary>
@@ -60,18 +60,18 @@ public static class SpanExtensions
     /// <summary>
     /// Starts a child span.
     /// </summary>
-    public static ISpan StartChild(this ISpan span, string operation, string? description)
+    public static ISpan StartChild(this ISpan span, string operation, string? description, DateTimeOffset? startTime = null)
     {
-        var child = span.StartChild(operation);
+        var child = span.StartChild(operation, startTime);
         child.Description = description;
 
         return child;
     }
 
-    internal static ISpan StartChild(this ISpan span, SpanContext context)
+    internal static ISpan StartChild(this ISpan span, SpanContext context, DateTimeOffset? startTime = null)
     {
         var transaction = span.GetTransaction() as TransactionTracer;
-        if (transaction?.StartChild(context.SpanId, span.SpanId, context.Operation, context.Instrumenter)
+        if (transaction?.StartChild(context.SpanId, span.SpanId, context.Operation, context.Instrumenter, startTime)
             is not SpanTracer childSpan)
         {
             return NoOpSpan.Instance;

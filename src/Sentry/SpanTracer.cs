@@ -107,7 +107,8 @@ public class SpanTracer : IBaseTracer, ISpan
         TransactionTracer transaction,
         SpanId? parentSpanId,
         SentryId traceId,
-        string operation)
+        string operation,
+        DateTimeOffset? startTimestamp = null)
     {
         _hub = hub;
         Transaction = transaction;
@@ -115,7 +116,7 @@ public class SpanTracer : IBaseTracer, ISpan
         ParentSpanId = parentSpanId;
         TraceId = traceId;
         Operation = operation;
-        StartTimestamp = _stopwatch.StartDateTimeOffset;
+        StartTimestamp = startTimestamp ?? _stopwatch.StartDateTimeOffset;
     }
 
     internal SpanTracer(
@@ -125,7 +126,8 @@ public class SpanTracer : IBaseTracer, ISpan
         SpanId? parentSpanId,
         SentryId traceId,
         string operation,
-        Instrumenter instrumenter = Instrumenter.Sentry)
+        Instrumenter instrumenter = Instrumenter.Sentry,
+        DateTimeOffset? startTimestamp = null)
     {
         _hub = hub;
         _instrumenter = instrumenter;
@@ -134,11 +136,11 @@ public class SpanTracer : IBaseTracer, ISpan
         ParentSpanId = parentSpanId;
         TraceId = traceId;
         Operation = operation;
-        StartTimestamp = _stopwatch.StartDateTimeOffset;
+        StartTimestamp = startTimestamp ?? _stopwatch.StartDateTimeOffset;
     }
 
     /// <inheritdoc />
-    public ISpan StartChild(string operation) => Transaction.StartChild(null, parentSpanId: SpanId, operation: operation);
+    public ISpan StartChild(string operation, DateTimeOffset? timestamp = null) => Transaction.StartChild(null, parentSpanId: SpanId, operation: operation, timestamp: timestamp);
 
     /// <summary>
     /// Used to mark a span as unfinished when it was previously marked as finished. This allows us to reuse spans for
@@ -151,28 +153,31 @@ public class SpanTracer : IBaseTracer, ISpan
     }
 
     /// <inheritdoc />
-    public void Finish()
+    public void Finish(DateTimeOffset? timestamp = null)
     {
         Status ??= SpanStatus.Ok;
+        if (timestamp is not null)
+            EndTimestamp = timestamp;
+
         EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
     }
 
     /// <inheritdoc />
-    public void Finish(SpanStatus status)
+    public void Finish(SpanStatus status, DateTimeOffset? timestamp = null)
     {
         Status = status;
-        Finish();
+        Finish(timestamp);
     }
 
     /// <inheritdoc />
-    public void Finish(Exception exception, SpanStatus status)
+    public void Finish(Exception exception, SpanStatus status, DateTimeOffset? timestamp = null)
     {
         _hub.BindException(exception, this);
-        Finish(status);
+        Finish(status, timestamp);
     }
 
     /// <inheritdoc />
-    public void Finish(Exception exception) => Finish(exception, SpanStatusConverter.FromException(exception));
+    public void Finish(Exception exception, DateTimeOffset? timestamp = null) => Finish(exception, SpanStatusConverter.FromException(exception), timestamp);
 
     /// <inheritdoc />
     public SentryTraceHeader GetTraceHeader() => new(TraceId, SpanId, IsSampled);

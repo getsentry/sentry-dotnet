@@ -1,4 +1,3 @@
-using CoreFoundation;
 using Sentry.Internal;
 
 namespace Sentry.Maui.Internal;
@@ -36,17 +35,19 @@ internal class TtdMauiPageEventHandler(IHub hub) : IMauiPageEventHandler
         if (_ttidRan && StartupTimestamp != null)
             return;
 
-        DispatchTime.Now.Nanoseconds
+        //DispatchTime.Now.Nanoseconds
         _ttidRan = true;
-        var timestamp = ProcessInfo.Instance!.StartupTimestamp;
+        var startupTimestamp = ProcessInfo.Instance!.StartupTimestamp;
         var screenName = page.GetType().FullName ?? "root /";
         _transaction = hub.StartTransaction(
             LoadCategory,
             "start"
         );
+        var elapsedTime = Stopwatch.GetElapsedTime(startupTimestamp);
+
         _timeToInitialDisplaySpan = _transaction.StartChild(InitialDisplayType, $"{screenName} initial display");
-        // _timeToInitialDisplaySpan.SetMeasurement("", MeasurementUnit.Parse(""));
-        // appStartSpan.SetMeasurement("", MeasurementUnit.Parse("ms"));
+        _timeToInitialDisplaySpan.SetMeasurement("test", elapsedTime.TotalMilliseconds, MeasurementUnit.Parse("ms"));
+        _timeToInitialDisplaySpan.Finish();
     }
 
     /// <inheritdoc />
@@ -56,10 +57,9 @@ internal class TtdMauiPageEventHandler(IHub hub) : IMauiPageEventHandler
 
     public void OnNavigatedTo(Page page)
     {
-        if (_transaction != null)
+        if (_transaction is { IsFinished: false })
         {
-
-            _timeToInitialDisplaySpan?.Finish(); // timestamp for now
+            // TODO: wait for all spans
             _transaction?.Finish();
 
             _timeToInitialDisplaySpan = null;

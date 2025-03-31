@@ -524,7 +524,7 @@ public static partial class SentrySdk
     /// </summary>
     /// <remarks>
     /// Note: this method is NOT meant to be called from user code!
-    /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
+    /// Instead, call <see cref="ISpan.Finish(DateTimeOffset?)"/> on the transaction.
     /// </remarks>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
@@ -536,7 +536,7 @@ public static partial class SentrySdk
     /// </summary>
     /// <remarks>
     /// Note: this method is NOT meant to be called from user code!
-    /// Instead, call <see cref="ISpan.Finish()"/> on the transaction.
+    /// Instead, call <see cref="ISpan.Finish(DateTimeOffset?)"/> on the transaction.
     /// </remarks>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
