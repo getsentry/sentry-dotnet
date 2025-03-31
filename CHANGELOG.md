@@ -4,7 +4,10 @@
 
 ### Fixes
 
+- Single quotes added to the release name when using MS Build to create Sentry releases on Windows ([#4015](https://github.com/getsentry/sentry-dotnet/pull/4015))
 - Target `net9.0` on Sentry.Google.Cloud.Functions to avoid conflict with Sentry.AspNetCore ([#4039](https://github.com/getsentry/sentry-dotnet/pull/4039))
+- Changed default value for `SentryOptions.EnableAppHangTrackingV2` to `false` ([#4042](https://github.com/getsentry/sentry-dotnet/pull/4042))
+- Missing MAUI `Shell` navigation breadcrumbs on iOS ([#4006](https://github.com/getsentry/sentry-dotnet/pull/4006))
 
 ### Features
 
@@ -15,9 +18,9 @@
 - Bump Native SDK from v0.8.1 to v0.8.2 ([#4050](https://github.com/getsentry/sentry-dotnet/pull/4050))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#082)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.8.1...0.8.2)
-- Bump CLI from v2.42.2 to v2.42.4 ([#4036](https://github.com/getsentry/sentry-dotnet/pull/4036), [#4049](https://github.com/getsentry/sentry-dotnet/pull/4049))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2424)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.42.2...2.42.4)
+- Bump CLI from v2.42.2 to v2.43.0 ([#4036](https://github.com/getsentry/sentry-dotnet/pull/4036), [#4049](https://github.com/getsentry/sentry-dotnet/pull/4049), [#4060](https://github.com/getsentry/sentry-dotnet/pull/4060), [#4062](https://github.com/getsentry/sentry-dotnet/pull/4062))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2430)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.42.2...2.43.0)
 
 ## 5.4.0
 
@@ -28,7 +31,6 @@
 ### Fixes
 
 - Unknown stack frames in profiles on .NET 8+ ([#3967](https://github.com/getsentry/sentry-dotnet/pull/3967))
-- Missing MAUI `Shell` navigation breadcrumbs on iOS ([#4006](https://github.com/getsentry/sentry-dotnet/pull/4006))
 
 ## 5.3.0
 

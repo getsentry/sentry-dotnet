@@ -15,5 +15,5 @@ public interface ISentryTransactionProcessorWithHint : ISentryTransactionProcess
     /// Returning null will stop the processing pipeline.
     /// Meaning the transaction should no longer be processed nor send.
     /// </remarks>
-    SentryTransaction? Process(SentryTransaction transaction, SentryHint hint);
+    public SentryTransaction? Process(SentryTransaction transaction, SentryHint hint);
 }

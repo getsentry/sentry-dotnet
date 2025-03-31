@@ -11,5 +11,5 @@ public interface ISystemClock
     /// <summary>
     /// Gets the current time in UTC.
     /// </summary>
-    DateTimeOffset GetUtcNow();
+    public DateTimeOffset GetUtcNow();
 }
