@@ -10,6 +10,7 @@
 
 ### Features
 
+- The `IScopeObserver` now has an `SetTrace` that allows observing changes to the scope's trace context. The SDK uses this to propagate the `trace ID` to `sentry-native`. This allows Sentry to connect errors coming from all layers of your application ([#4026](https://github.com/getsentry/sentry-dotnet/pull/4026))
 - Exception.HResult is now included in the mechanism data for all exceptions ([#4029](https://github.com/getsentry/sentry-dotnet/pull/4029))
 
 ### Dependencies
