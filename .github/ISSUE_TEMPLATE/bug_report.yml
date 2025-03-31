@@ -113,6 +113,14 @@ body:
       required: true
 
   - type: textarea
+    id: sentryuse
+    attributes:
+      label: UseSentry or SentrySdk.Init call
+      description: Please include the block of code used in UseSentry or SentrySdk.Init - please blank out your DSN
+    validations:
+      required: true
+
+  - type: textarea
     id: repro
     attributes:
       label: Steps to Reproduce
