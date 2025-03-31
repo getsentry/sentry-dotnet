@@ -2,11 +2,11 @@ namespace Sentry.Internal;
 
 internal interface IAppDomain
 {
-    event UnhandledExceptionEventHandler UnhandledException;
+    public event UnhandledExceptionEventHandler UnhandledException;
 
-    event EventHandler ProcessExit;
+    public event EventHandler ProcessExit;
 
-    event EventHandler<UnobservedTaskExceptionEventArgs> UnobservedTaskException;
+    public event EventHandler<UnobservedTaskExceptionEventArgs> UnobservedTaskException;
 }
 
 internal sealed class AppDomainAdapter : IAppDomain

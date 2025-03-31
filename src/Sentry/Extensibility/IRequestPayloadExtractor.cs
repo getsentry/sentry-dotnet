@@ -10,5 +10,5 @@ public interface IRequestPayloadExtractor
     /// </summary>
     /// <param name="request">The HTTP Request object.</param>
     /// <returns>The extracted payload.</returns>
-    object? ExtractPayload(IHttpRequest request);
+    public object? ExtractPayload(IHttpRequest request);
 }

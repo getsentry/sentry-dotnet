@@ -8,10 +8,10 @@ public interface IHasData
     /// <summary>
     /// An arbitrary mapping of additional metadata to store with the event.
     /// </summary>
-    IReadOnlyDictionary<string, object?> Data { get; }
+    public IReadOnlyDictionary<string, object?> Data { get; }
 
     /// <summary>
     /// Sets an extra.
     /// </summary>
-    void SetData(string key, object? value);
+    public void SetData(string key, object? value);
 }

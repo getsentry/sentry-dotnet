@@ -8,17 +8,17 @@ public interface IHasTags
     /// <summary>
     /// Arbitrary key-value for this event.
     /// </summary>
-    IReadOnlyDictionary<string, string> Tags { get; }
+    public IReadOnlyDictionary<string, string> Tags { get; }
 
     /// <summary>
     /// Sets a tag.
     /// </summary>
-    void SetTag(string key, string value);
+    public void SetTag(string key, string value);
 
     /// <summary>
     /// Removes a tag.
     /// </summary>
-    void UnsetTag(string key);
+    public void UnsetTag(string key);
 }
 
 /// <summary>
