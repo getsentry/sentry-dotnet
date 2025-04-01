@@ -46,6 +46,7 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
         }
         catch (Exception ex)
         {
+            // See https://github.com/getsentry/sentry-dotnet/issues/3880#issuecomment-2640159466
             _options.LogError("Failed to capture screenshot", ex);
             // Return empty stream since calling code may assume a non-null return value
             // E.g. https://github.com/getsentry/sentry-dotnet/blob/db5606833a4b0662c6bea0663cca10cb05fb5157/src/Sentry/Protocol/Envelopes/EnvelopeItem.cs#L332-L333
