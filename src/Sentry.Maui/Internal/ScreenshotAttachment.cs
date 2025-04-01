@@ -40,6 +40,21 @@ internal class ScreenshotAttachmentContent : IAttachmentContent
 
     public Stream GetStream()
     {
+        try
+        {
+            return GetStreamInternal();
+        }
+        catch (Exception ex)
+        {
+            _options.LogError("Failed to capture screenshot", ex);
+            // Return empty stream since calling code may assume a non-null return value
+            // E.g. https://github.com/getsentry/sentry-dotnet/blob/db5606833a4b0662c6bea0663cca10cb05fb5157/src/Sentry/Protocol/Envelopes/EnvelopeItem.cs#L332-L333
+            return new MemoryStream();
+        }
+    }
+
+    private Stream GetStreamInternal()
+    {
         var stream = Stream.Null;
         // Not including this on Windows specific build because on WinUI this can deadlock.
 #if (__ANDROID__ || __IOS__)
