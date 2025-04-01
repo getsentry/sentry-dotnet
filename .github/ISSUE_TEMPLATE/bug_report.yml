@@ -36,7 +36,6 @@ body:
         - .NET Framework
         - IL2CPP
         - Mono
-        - Xamarin
         - Other
     validations:
       required: true
@@ -45,8 +44,8 @@ body:
     id: dotnet_version
     attributes:
       label: .NET Version
-      description: .NET Version
-      placeholder: 6.0.0 ← should look like this
+      description: If using .NET Core, please copy the output of 'dotnet --version' here
+      placeholder: 9.0.200 ← should look like this
     validations:
       required: true
 
@@ -68,6 +67,27 @@ body:
       required: true
 
   - type: input
+    id: os_version
+    attributes:
+      label: OS Version
+      description: Operating System Version
+
+  - type: dropdown
+    id: ide
+    attributes:
+      label: Development Environment
+      description: What development environment are you using
+      options:
+        - Visual Studio v17.x
+        - Visual Studio Code (Windows)
+        - Visual Studio Code (MacOS)
+        - Rider 2024 (Windows)
+        - Rider 2024 (MacOS)
+        - Other
+    validations:
+      required: true
+
+  - type: input
     id: sentry_sdk_version
     attributes:
       label: SDK Version
@@ -83,6 +103,22 @@ body:
       description: Leave blank if using sentry.io
     validations:
       required: false
+
+  - type: textarea
+    id: workloadset
+    attributes:
+      label: Workload Versions
+      description: If using .NET Core, please copy/paste the output of 'dotnet workload list' here
+    validations:
+      required: true
+
+  - type: textarea
+    id: sentryuse
+    attributes:
+      label: UseSentry or SentrySdk.Init call
+      description: Please include the block of code used in UseSentry or SentrySdk.Init - please blank out your DSN
+    validations:
+      required: true
 
   - type: textarea
     id: repro
