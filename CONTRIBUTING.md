@@ -6,7 +6,7 @@ For big feature it's advised to raise an issue to discuss it first.
 # Guidelines
 
 * Please avoid mixing changes needed for a feature with other changes such as refactors, automated IDE changes like adding BOM characters, empty lines, etc.
-* Feel free to start with a draft PR, while you work on it. You can ask pointed questoins by reviewing your own code this way, while signaling to the reviewer that the PR isn't ready for review just yet.
+* Feel free to start with a draft PR, while you work on it. You can ask pointed questions by reviewing your own code this way, while signaling to the reviewer that the PR isn't ready for review just yet.
 * Mark the PR ready for review once you've completed the change, including:
   * The description should link to relevant context such as tickets, discussions or previous PRs. Consider screenshots of the events in Sentry or other relevant visual things.
   * Add tests that excercise your change. The repo has lots of examples of Unit and integration tests. Including device tests that run on Android and iOS.
@@ -25,10 +25,10 @@ For big feature it's advised to raise an issue to discuss it first.
 ## Minimal Dependencies
 
 * The latest versions of the following .NET SDKs:
+  - [.NET 9.0](https://dotnet.microsoft.com/download/dotnet/9.0)
   - [.NET 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
-  - [.NET 6.0](https://dotnet.microsoft.com/download/dotnet/6.0)
 
-  *Technically, you only need the full SDK install for the latest version (8.0).  If you like, you can install the smaller ASP.NET Core Runtime packages for .NET 6.0. However, installing the full SDKs will also give you the runtimes.*
+  *Technically, you only need the full SDK install for the latest version (9.0).  If you like, you can install the smaller ASP.NET Core Runtime packages for .NET 8.0. However, installing the full SDKs will also give you the runtimes.*
 
 * [`pwsh`](https://github.com/PowerShell/PowerShell#get-powershell) Core version 6 or later on PATH.
 
@@ -153,3 +153,21 @@ In CI, these packages are expected to be present, while locally, scripts will ru
 You can run individual tests either via Pester integration (e.g. in VS Code), or from command line: `./integration-test/cli.Tests.ps1`. Consult Pester docs for details on how to write tests.
 
 Because these tests rely on a Sentry server mock (`Invoke-SentryServer`) from <https://github.com/getsentry/github-workflows/tree/main/sentry-cli/integration-test>, you need to check out [getsentry/github-workflows](https://github.com/getsentry/github-workflows) as a sibling directory next to your `getsentry/sentry-dotnet` checkout.
+
+## Maintaining the Ben.Demystifier Submodule
+
+This repo uses a variety of techniques to vendor in third party code without creating external dependencies. One of
+those is submodules.
+
+One of those submodules is Ben.Demystifier, which was originally written by Ben Adams. Attempts to contact Ben in recent 
+years have been unsuccessful so we've started maintaining a permanent fork of the project at:
+- https://github.com/getsentry/Ben.Demystifier
+
+Any significant changes to the submodule should be made in a branch and merged into the submodule's `main` branch. 
+However, many of the members of Ben.Demystifier are public. That makes sense if people are using Ben.Demystifier as a 
+library, but in this repo we want to keep those members internal.
+
+Once changes to Ben.Demystifier have been merged into the main branch then, the `internal` branch of Ben.Demystifier 
+should be updated from the main branch and the `modules/make-internal.sh` script run again (if necessary). This repo 
+should reference the most recent commit on the `internal` branch of Ben.Demystifier then (functionally identical to the
+main branch - the only difference being the changes to member visibility).

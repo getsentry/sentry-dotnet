@@ -5,39 +5,39 @@ namespace Sentry;
 /// <summary>
 /// Immutable data belonging to a span.
 /// </summary>
-public interface ISpanData : ITraceContext, IHasTags, IHasExtra
+public interface ISpanData : ITraceContext, IHasData, IHasTags, IHasExtra
 {
     /// <summary>
     /// Start timestamp.
     /// </summary>
-    DateTimeOffset StartTimestamp { get; }
+    public DateTimeOffset StartTimestamp { get; }
 
     /// <summary>
     /// End timestamp.
     /// </summary>
-    DateTimeOffset? EndTimestamp { get; }
+    public DateTimeOffset? EndTimestamp { get; }
 
     /// <summary>
     /// Whether the span is finished.
     /// </summary>
-    bool IsFinished { get; }
+    public bool IsFinished { get; }
 
     /// <summary>
     /// Get Sentry trace header.
     /// </summary>
-    SentryTraceHeader GetTraceHeader();
+    public SentryTraceHeader GetTraceHeader();
 
     /// <summary>
     /// The measurements that have been set on the transaction.
     /// </summary>
-    IReadOnlyDictionary<string, Measurement> Measurements { get; }
+    public IReadOnlyDictionary<string, Measurement> Measurements { get; }
 
     /// <summary>
     /// Sets a measurement on the transaction.
     /// </summary>
     /// <param name="name">The name of the measurement.</param>
     /// <param name="measurement">The measurement.</param>
-    void SetMeasurement(string name, Measurement measurement);
+    public void SetMeasurement(string name, Measurement measurement);
 }
 
 /// <summary>

@@ -26,8 +26,7 @@
           }
         },
         User: {
-          Id: Guid_1,
-          IpAddress: {{auto}}
+          Id: Guid_1
         },
         Environment: production,
         Breadcrumbs: [
@@ -74,10 +73,6 @@
             Category: Microsoft.AspNetCore.Routing.EndpointMiddleware
           }
         ],
-        Extra: {
-          http.request.method: GET,
-          http.response.status_code: 200
-        },
         Tags: {
           ActionId: Guid_2,
           ActionName: Sentry.AspNetCore.Tests.WebIntegrationTests+VersionController.Method (Sentry.AspNetCore.Tests),

@@ -10,7 +10,15 @@
       SentryExceptions: [
         {
           Type: System.Exception,
-          Value: my exception
+          Value: my exception,
+          Mechanism: {
+            Type: generic,
+            Synthetic: false,
+            IsExceptionGroup: false,
+            Data: {
+              HResult: 0x80131500
+            }
+          }
         }
       ],
       Level: error,
@@ -22,8 +30,7 @@
         }
       },
       User: {
-        Id: Guid_1,
-        IpAddress: {{auto}}
+        Id: Guid_1
       },
       Environment: production
     }
@@ -47,8 +54,7 @@
         }
       },
       User: {
-        Id: Guid_1,
-        IpAddress: {{auto}}
+        Id: Guid_1
       },
       Environment: production,
       Breadcrumbs: [

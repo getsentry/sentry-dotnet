@@ -34,11 +34,19 @@ public class SentryMauiScreenshotTests
     private readonly Fixture _fixture = new();
 
 #if __MOBILE__
+    // TODO: This test doesn't work on Android or iOS, so isn't much use. We should consider replacing it with some
+    // more granular tests that test SentryMauiOptionsSetup, SentryMauiScreenshotProcessor and ScreenshotAttachment
+    // in isolation. It's generally hard to test any of this functionality since ScreenshotImplementation relies of
+    // various static members like ActivityStateManager.Default:
+    // https://github.com/dotnet/maui/blob/3c7b65264d2f341a48db32263a271fd8718cfd23/src/Essentials/src/Screenshot/Screenshot.android.cs#L28
     [SkippableFact]
     public async Task CaptureException_WhenAttachScreenshots_ContainsScreenshotAttachmentAsync()
     {
 #if __IOS__
         Skip.If(true, "Flaky on iOS");
+#endif
+#if ANDROID
+        Skip.If(true, "Doesn't work on Android");
 #endif
 
         // Arrange
@@ -133,11 +141,19 @@ public class SentryMauiScreenshotTests
         envelopeItem.Should().BeNull();
     }
 
+    // TODO: This test doesn't work on Android or iOS, so isn't much use. We should consider replacing it with some
+    // more granular tests that test SentryMauiOptionsSetup, SentryMauiScreenshotProcessor and ScreenshotAttachment
+    // in isolation. It's generally hard to test any of this functionality since ScreenshotImplementation relies of
+    // various static members like ActivityStateManager.Default:
+    // https://github.com/dotnet/maui/blob/3c7b65264d2f341a48db32263a271fd8718cfd23/src/Essentials/src/Screenshot/Screenshot.android.cs#L28
     [SkippableFact]
     public async Task CaptureException_BeforeCaptureScreenshot_DefaultAsync()
     {
 #if __IOS__
         Skip.If(true, "Flaky on iOS");
+#endif
+#if ANDROID
+        Skip.If(true, "Doesn't work on Android");
 #endif
 
         // Arrange

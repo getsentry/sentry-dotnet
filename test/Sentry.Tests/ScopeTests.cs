@@ -615,6 +615,49 @@ public class ScopeTests
 
         scope.Tags.Should().OnlyContain(pair => pair.Key == "AzFunctions" && pair.Value == "rule");
     }
+
+    [Fact]
+    public void SetTag_NullValue_DoesNotThrowArgumentNullException()
+    {
+        var scope = new Scope();
+
+        ArgumentNullException exception = null;
+        try
+        {
+            scope.SetTag("IAmNull", null);
+        }
+        catch (ArgumentNullException e)
+        {
+            exception = e;
+        }
+
+        Assert.Null(exception);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void SetPropagationContext_ObserverExist_ObserverSetsTraceIfEnabled(bool enableScopeSync)
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = enableScopeSync
+        });
+        var propagationContext = new SentryPropagationContext();
+        var expectedTraceId = propagationContext.TraceId;
+        var expectedSpanId = propagationContext.SpanId;
+        var expectedCount = enableScopeSync ? 1 : 0;
+
+        // Act
+        scope.SetPropagationContext(propagationContext);
+
+        // Assert
+        scope.PropagationContext.Should().Be(propagationContext);
+        observer.Received(expectedCount).SetTrace(Arg.Is(expectedTraceId), Arg.Is(expectedSpanId));
+    }
 }
 
 public static class ScopeTestExtensions

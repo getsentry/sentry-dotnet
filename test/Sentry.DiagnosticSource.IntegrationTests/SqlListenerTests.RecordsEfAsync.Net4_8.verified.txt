@@ -10,7 +10,15 @@
       SentryExceptions: [
         {
           Type: System.Exception,
-          Value: my exception
+          Value: my exception,
+          Mechanism: {
+            Type: generic,
+            Synthetic: false,
+            IsExceptionGroup: false,
+            Data: {
+              HResult: 0x80131500
+            }
+          }
         }
       ],
       Level: error,
@@ -22,8 +30,7 @@
         }
       },
       User: {
-        Id: Guid_1,
-        IpAddress: {{auto}}
+        Id: Guid_1
       }
     }
   },
@@ -46,8 +53,7 @@
         }
       },
       User: {
-        Id: Guid_1,
-        IpAddress: {{auto}}
+        Id: Guid_1
       },
       Breadcrumbs: [
         {
@@ -69,7 +75,7 @@ FROM [TestEntities]
 WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();,
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             db.command_id: Guid_2,
             db.connection_id: Guid_3,
             db.name: SqlListenerTests.verify_RecordsEfAsync,
@@ -85,7 +91,7 @@ SELECT [t].[Id], [t].[Property]
 FROM [TestEntities] AS [t],
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             db.command_id: Guid_4,
             db.connection_id: Guid_5,
             db.name: SqlListenerTests.verify_RecordsEfAsync,

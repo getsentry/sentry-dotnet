@@ -99,4 +99,9 @@ internal sealed class AndroidScopeObserver : IScopeObserver
             _innerObserver?.SetUser(user);
         }
     }
+
+    public void SetTrace(SentryId traceId, SpanId parentSpanId)
+    {
+        // TODO: This requires sentry-java 8.4.0
+    }
 }

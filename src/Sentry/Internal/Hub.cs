@@ -127,7 +127,12 @@ internal class Hub : IHub, IDisposable
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
     {
-        var transaction = new TransactionTracer(this, context);
+        var transaction = new TransactionTracer(this, context)
+        {
+            SampleRand = dynamicSamplingContext?.Items.TryGetValue("sample_rand", out var sampleRand) ?? false
+                ? double.Parse(sampleRand, NumberStyles.Float, CultureInfo.InvariantCulture)
+                : SampleRandHelper.GenerateSampleRand(context.TraceId.ToString())
+        };
 
         // If the hub is disabled, we will always sample out.  In other words, starting a transaction
         // after disposing the hub will result in that transaction not being sent to Sentry.
@@ -151,7 +156,7 @@ internal class Hub : IHub, IDisposable
 
                 if (tracesSampler(samplingContext) is { } sampleRate)
                 {
-                    transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
+                    transaction.IsSampled = SampleRandHelper.IsSampled(transaction.SampleRand.Value, sampleRate);
                     transaction.SampleRate = sampleRate;
                 }
             }
@@ -160,7 +165,7 @@ internal class Hub : IHub, IDisposable
             if (transaction.IsSampled == null)
             {
                 var sampleRate = _options.TracesSampleRate ?? 0.0;
-                transaction.IsSampled = _randomValuesFactory.NextBool(sampleRate);
+                transaction.IsSampled = SampleRandHelper.IsSampled(transaction.SampleRand.Value, sampleRate);
                 transaction.SampleRate = sampleRate;
             }
 
@@ -250,7 +255,7 @@ internal class Hub : IHub, IDisposable
         string? operation = null)
     {
         var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader);
-        ConfigureScope(scope => scope.PropagationContext = propagationContext);
+        ConfigureScope(scope => scope.SetPropagationContext(propagationContext));
 
         return new TransactionContext(
             name: name ?? string.Empty,
@@ -501,6 +506,17 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        scope ??= CurrentScope;
+        CurrentClient.CaptureFeedback(feedback, scope, hint);
+    }
+
 #if MEMORY_DUMP_SUPPORTED
     internal void CaptureHeapDump(string dumpFile)
     {
@@ -529,6 +545,7 @@ internal class Hub : IHub, IDisposable
     }
 #endif
 
+    [Obsolete("Use CaptureFeedback instead.")]
     public void CaptureUserFeedback(UserFeedback userFeedback)
     {
         if (!IsEnabled)

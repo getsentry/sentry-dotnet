@@ -83,7 +83,7 @@ public partial class SentryOptions
         /// <remarks>
         /// See https://docs.sentry.io/platforms/apple/configuration/app-hangs/#app-hangs-v2
         /// </remarks>
-        public bool EnableAppHangTrackingV2 { get; set; } = true;
+        public bool EnableAppHangTrackingV2 { get; set; } = false;
 
         /// <summary>
         /// When enabled, the SDK adds breadcrumbs for various system events.
@@ -197,6 +197,37 @@ public partial class SentryOptions
         /// </remarks>
         public NSUrlSessionDelegate? UrlSessionDelegate { get; set; } = null;
 
+        /// <summary>
+        /// <para>
+        /// Whether to suppress capturing SIGABRT errors in the Native SDK.
+        /// </para>
+        /// <para>
+        /// When managed code results in a NullReferenceException, this also causes a SIGABRT. Duplicate
+        /// events (one managed and one native) can be prevented by suppressing native SIGABRT, which may be
+        /// convenient.
+        /// </para>
+        /// <para>
+        /// Enabling this may prevent the capture of SIGABRT originating from native (not managed) code... so it may
+        /// prevent the capture of genuine native SIGABRT errors.
+        /// </para>
+        /// </summary>
+        public bool SuppressSignalAborts { get; set; } = false;
+
+        /// <summary>
+        /// <para>
+        /// Whether to suppress capturing EXC_BAD_ACCESS errors in the Native SDK.
+        /// </para>
+        /// <para>
+        /// When managed code results in a NullReferenceException, this also causes a EXC_BAD_ACCESS. Duplicate
+        /// events (one managed and one native) can be prevented by suppressing native EXC_BAD_ACCESS, which may be
+        /// convenient.
+        /// </para>
+        /// <para>
+        /// Enabling this may prevent the capture of EXC_BAD_ACCESS originating from native (not managed) code... so it may
+        /// prevent the capture of genuine native EXC_BAD_ACCESS errors.
+        /// </para>
+        /// </summary>
+        public bool SuppressExcBadAccess { get; set; } = false;
 
         // ---------- Other ----------
 

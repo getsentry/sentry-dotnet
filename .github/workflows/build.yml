@@ -117,13 +117,19 @@ jobs:
           dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
 
       - name: Build
-        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true
+        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
+
+      - name: Upload build logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ runner.os }}-build-logs
+          path: build.binlog
 
       - name: Test
         run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
 
       - name: Upload code coverage
-        uses: codecov/codecov-action@1e68e06f1dbfde0e4cefc87efeba9e4643565303
+        uses: codecov/codecov-action@0565863a31f2c772f9f0395002a31e3f06189574
 
       - name: Upload build and test outputs
         if: failure()
@@ -220,7 +226,14 @@ jobs:
         uses: ./.github/actions/buildnative
 
       - name: Install Android SDKs
+        id: installandroidsdks
+        continue-on-error: true
         if: runner.os == 'macOS'
+        run: |
+          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
+
+      - name: Install Android SDKs (retry)
+        if: steps.installandroidsdks.outcome=='failure' && runner.os == 'macOS'
         run: |
           dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
 

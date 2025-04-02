@@ -210,6 +210,13 @@ public static partial class SentrySdk
     }
 
     /// <summary>
+    /// Allows to set the trace
+    /// </summary>
+    internal static void SetTrace(SentryId traceId, SpanId parentSpanId) =>
+        CurrentHub.ConfigureScope(scope =>
+            scope.SetPropagationContext(new SentryPropagationContext(traceId, parentSpanId)));
+
+    /// <summary>
     /// Flushes the queue of captured events until the timeout set in <see cref="SentryOptions.FlushTimeout"/>
     /// is reached.
     /// </summary>
@@ -482,10 +489,28 @@ public static partial class SentrySdk
         => CurrentHub.CaptureMessage(message, configureScope, level);
 
     /// <summary>
+    /// Captures feedback from the user.
+    /// </summary>
+    [DebuggerStepThrough]
+    public static void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+        => CurrentHub.CaptureFeedback(feedback, scope, hint);
+
+    /// <summary>
+    /// Captures feedback from the user.
+    /// </summary>
+    [DebuggerStepThrough]
+    public static void CaptureFeedback(string message, string? contactEmail = null, string? name = null,
+        string? replayId = null, string? url = null, SentryId? associatedEventId = null, Scope? scope = null,
+        SentryHint? hint = null)
+        => CurrentHub.CaptureFeedback(new SentryFeedback(message, contactEmail, name, replayId, url, associatedEventId),
+            scope, hint);
+
+    /// <summary>
     /// Captures a user feedback.
     /// </summary>
     /// <param name="userFeedback">The user feedback to send to Sentry.</param>
     [DebuggerStepThrough]
+    [Obsolete("Use CaptureFeedback instead.")]
     public static void CaptureUserFeedback(UserFeedback userFeedback)
         => CurrentHub.CaptureUserFeedback(userFeedback);
 
@@ -497,6 +522,7 @@ public static partial class SentrySdk
     /// <param name="comments">The user comments.</param>
     /// <param name="name">The optional username.</param>
     [DebuggerStepThrough]
+    [Obsolete("Use CaptureFeedback instead.")]
     public static void CaptureUserFeedback(SentryId eventId, string email, string comments, string? name = null)
         => CurrentHub.CaptureUserFeedback(new UserFeedback(eventId, name, email, comments));
 

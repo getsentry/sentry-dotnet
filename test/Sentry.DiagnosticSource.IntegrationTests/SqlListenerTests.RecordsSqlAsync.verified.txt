@@ -10,7 +10,15 @@
       SentryExceptions: [
         {
           Type: System.Exception,
-          Value: my exception
+          Value: my exception,
+          Mechanism: {
+            Type: generic,
+            Synthetic: false,
+            IsExceptionGroup: false,
+            Data: {
+              HResult: 0x80131500
+            }
+          }
         }
       ],
       Level: error,
@@ -22,8 +30,7 @@
         }
       },
       User: {
-        Id: Guid_1,
-        IpAddress: {{auto}}
+        Id: Guid_1
       }
     }
   },
@@ -46,8 +53,7 @@
         }
       },
       User: {
-        Id: Guid_1,
-        IpAddress: {{auto}}
+        Id: Guid_1
       },
       Breadcrumbs: [
         {
@@ -63,7 +69,7 @@
           Description: SqlListenerTests.verify_RecordsSqlAsync,
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             bytes_received: 167,
             bytes_sent : 536,
             db.connection_id: Guid_2,
@@ -80,7 +86,7 @@
           Description: insert into MyTable (Value) values (@value);,
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             db.connection_id: Guid_2,
             db.name: SqlListenerTests.verify_RecordsSqlAsync,
             db.operation_id: Guid_4,
@@ -93,7 +99,7 @@
           Description: select Value from MyTable where Value = @value,
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             db.connection_id: Guid_2,
             db.name: SqlListenerTests.verify_RecordsSqlAsync,
             db.operation_id: Guid_5,

@@ -44,9 +44,6 @@ public static class SentryMauiAppBuilderExtensions
     {
         var services = builder.Services;
 
-        var section = builder.Configuration.GetSection("Sentry");
-        services.AddSingleton<IConfigureOptions<SentryMauiOptions>>(_ => new SentryMauiOptionsSetup(section));
-
         if (configureOptions != null)
         {
             services.Configure(configureOptions);
@@ -57,6 +54,9 @@ public static class SentryMauiAppBuilderExtensions
         services.AddSingleton<IMauiInitializeService, SentryMauiInitializer>();
         services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
         services.AddSingleton<Disposer>();
+
+        services.AddSingleton<IMauiElementEventBinder, MauiButtonEventsBinder>();
+        services.AddSingleton<IMauiElementEventBinder, MauiImageButtonEventsBinder>();
         services.TryAddSingleton<IMauiEventsBinder, MauiEventsBinder>();
 
         services.AddSentry<SentryMauiOptions>();

@@ -227,6 +227,14 @@ public sealed class HubAdapter : IHub
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
+    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+        => SentrySdk.CaptureFeedback(feedback, scope, hint);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
         => SentrySdk.CaptureEvent(evt, configureScope);
 
@@ -292,6 +300,7 @@ public sealed class HubAdapter : IHub
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
+    [Obsolete("Use CaptureFeedback instead.")]
     public void CaptureUserFeedback(UserFeedback sentryUserFeedback)
         => SentrySdk.CaptureUserFeedback(sentryUserFeedback);
 }

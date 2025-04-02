@@ -18,6 +18,11 @@ using Sentry.Android;
 using Sentry.Android.AssemblyReader;
 #endif
 
+#if IOS || MACCATALYST
+using ObjCRuntime;
+using Sentry.Cocoa;
+#endif
+
 namespace Sentry;
 
 /// <summary>
@@ -162,10 +167,17 @@ public class SentryOptions
                 yield return new AutoSessionTrackingIntegration();
             }
 
+#if IOS || MACCATALYST
+            if ((_defaultIntegrations & DefaultIntegrations.RuntimeMarshalManagedExceptionIntegration) != 0)
+            {
+                yield return new RuntimeMarshalManagedExceptionIntegration();
+            }
+#else
             if ((_defaultIntegrations & DefaultIntegrations.AppDomainUnhandledExceptionIntegration) != 0)
             {
                 yield return new AppDomainUnhandledExceptionIntegration();
             }
+#endif
 
             if ((_defaultIntegrations & DefaultIntegrations.AppDomainProcessExitIntegration) != 0)
             {
@@ -222,6 +234,13 @@ public class SentryOptions
 
     internal HttpClient GetHttpClient()
     {
+        if (SentryHttpClientFactory is not null)
+        {
+            DiagnosticLogger?.LogDebug(
+                "Using ISentryHttpClientFactory set through options: {0}.",
+                SentryHttpClientFactory.GetType().Name);
+        }
+
         var factory = SentryHttpClientFactory ?? new DefaultSentryHttpClientFactory();
         return factory.Create(this);
     }
@@ -1056,6 +1075,14 @@ public class SentryOptions
     /// </summary>
     public Func<bool>? CrashedLastRun { get; set; }
 
+#if IOS || MACCATALYST
+    // this event currently isn't being pushed from Android
+    /// <summary>
+    /// Delegate which is run with event information if the application crashed during last run.
+    /// </summary>
+    public Action<SentryEvent>? OnCrashedLastRun { get; set; }
+#endif
+
     /// <summary>
     /// <para>
     ///     Gets the <see cref="Instrumenter"/> used to create spans.
@@ -1232,7 +1259,11 @@ public class SentryOptions
         _integrations = new();
 
         _defaultIntegrations = DefaultIntegrations.AutoSessionTrackingIntegration |
+#if IOS || MACCATALYST
+                               DefaultIntegrations.RuntimeMarshalManagedExceptionIntegration |
+#else
                                DefaultIntegrations.AppDomainUnhandledExceptionIntegration |
+#endif
                                DefaultIntegrations.AppDomainProcessExitIntegration |
                                DefaultIntegrations.AutoSessionTrackingIntegration |
                                DefaultIntegrations.UnobservedTaskExceptionIntegration
@@ -1656,11 +1687,19 @@ public class SentryOptions
     public void DisableDuplicateEventDetection()
         => RemoveEventProcessor<DuplicateEventDetectionEventProcessor>();
 
+#if IOS || MACCATALYST
+    /// <summary>
+    /// Disables the capture of errors through <see cref="Runtime.MarshalManagedException"/>.
+    /// </summary>
+    public void DisableRuntimeMarshalManagedExceptionCapture() =>
+        RemoveDefaultIntegration(DefaultIntegrations.RuntimeMarshalManagedExceptionIntegration);
+#else
     /// <summary>
     /// Disables the capture of errors through <see cref="AppDomain.UnhandledException"/>.
     /// </summary>
     public void DisableAppDomainUnhandledExceptionCapture() =>
         RemoveDefaultIntegration(DefaultIntegrations.AppDomainUnhandledExceptionIntegration);
+#endif
 
 #if HAS_DIAGNOSTIC_INTEGRATION
     /// <summary>
@@ -1718,7 +1757,11 @@ public class SentryOptions
     internal enum DefaultIntegrations
     {
         AutoSessionTrackingIntegration = 1 << 0,
+#if IOS || MACCATALYST
+        RuntimeMarshalManagedExceptionIntegration = 1 << 1,
+#else
         AppDomainUnhandledExceptionIntegration = 1 << 1,
+#endif
         AppDomainProcessExitIntegration = 1 << 2,
         UnobservedTaskExceptionIntegration = 1 << 3,
 #if NETFRAMEWORK

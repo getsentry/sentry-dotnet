@@ -10,7 +10,15 @@
       SentryExceptions: [
         {
           Type: System.Exception,
-          Value: my exception
+          Value: my exception,
+          Mechanism: {
+            Type: generic,
+            Synthetic: false,
+            IsExceptionGroup: false,
+            Data: {
+              HResult: 0x80131500
+            }
+          }
         }
       ],
       Level: error,
@@ -22,8 +30,7 @@
         }
       },
       User: {
-        Id: Guid_1,
-        IpAddress: {{auto}}
+        Id: Guid_1
       }
     }
   },
@@ -46,8 +53,7 @@
         }
       },
       User: {
-        Id: Guid_1,
-        IpAddress: {{auto}}
+        Id: Guid_1
       },
       Breadcrumbs: [
         {
@@ -63,7 +69,7 @@
           Description: SqlListenerTests.verify_RecordsEfAsync,
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             bytes_received: 225,
             bytes_sent : 570,
             db.connection_id: Guid_2,
@@ -86,7 +92,7 @@ VALUES (@p0);
 ,
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             db.connection_id: Guid_2,
             db.name: SqlListenerTests.verify_RecordsEfAsync,
             db.operation_id: Guid_4,
@@ -99,7 +105,7 @@ VALUES (@p0);
           Description: 'DbSet<TestEntity>()',
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             db.system: mssql
           }
         },
@@ -111,7 +117,7 @@ SELECT [t].[Id], [t].[Property]
 FROM [TestEntities] AS [t],
           Status: Ok,
           IsSampled: true,
-          Extra: {
+          Data: {
             db.connection_id: Guid_2,
             db.name: SqlListenerTests.verify_RecordsEfAsync,
             db.operation_id: Guid_5,
