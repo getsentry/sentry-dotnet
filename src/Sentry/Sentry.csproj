@@ -16,7 +16,13 @@
 
   <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Unity'">
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+    <!-- To be able to make the internals visible, since we're not signing the assembly for Unity -->
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
+
+  <ItemGroup Condition="'$(SolutionName)' == 'Sentry.Unity'">
+    <InternalsVisibleTo Include="Sentry.Unity" />
+  </ItemGroup>
 
   <!-- Platform-specific props included here -->
   <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />

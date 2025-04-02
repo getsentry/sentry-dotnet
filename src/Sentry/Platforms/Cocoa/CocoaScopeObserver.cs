@@ -107,4 +107,9 @@ internal sealed class CocoaScopeObserver : IScopeObserver
             _innerObserver?.SetUser(user);
         }
     }
+
+    public void SetTrace(SentryId traceId, SpanId parentSpanId)
+    {
+        // TODO: Missing corresponding functionality on the Cocoa SDK
+    }
 }
