@@ -241,6 +241,9 @@ internal static class C
     [DllImport("sentry-native")]
     internal static extern void sentry_remove_extra(string key);
 
+    [DllImport("sentry-native")]
+    internal static extern void sentry_set_trace(string traceId, string parentSpanId);
+
     internal static Dictionary<long, DebugImage> LoadDebugImages(IDiagnosticLogger? logger)
     {
         // It only makes sense to load them once because they're cached on the native side anyway. We could force

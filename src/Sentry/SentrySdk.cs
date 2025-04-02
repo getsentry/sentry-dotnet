@@ -210,6 +210,13 @@ public static partial class SentrySdk
     }
 
     /// <summary>
+    /// Allows to set the trace
+    /// </summary>
+    internal static void SetTrace(SentryId traceId, SpanId parentSpanId) =>
+        CurrentHub.ConfigureScope(scope =>
+            scope.SetPropagationContext(new SentryPropagationContext(traceId, parentSpanId)));
+
+    /// <summary>
     /// Flushes the queue of captured events until the timeout set in <see cref="SentryOptions.FlushTimeout"/>
     /// is reached.
     /// </summary>

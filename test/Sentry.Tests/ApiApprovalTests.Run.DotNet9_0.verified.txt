@@ -229,6 +229,7 @@ namespace Sentry
         void AddBreadcrumb(Sentry.Breadcrumb breadcrumb);
         void SetExtra(string key, object? value);
         void SetTag(string key, string value);
+        void SetTrace(Sentry.SentryId traceId, Sentry.SpanId parentSpanId);
         void SetUser(Sentry.SentryUser? user);
         void UnsetTag(string key);
     }

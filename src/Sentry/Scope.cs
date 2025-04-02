@@ -233,7 +233,7 @@ public class Scope : IEventLike
         }
     }
 
-    internal SentryPropagationContext PropagationContext { get; set; }
+    internal SentryPropagationContext PropagationContext { get; private set; }
 
     internal SessionUpdate? SessionUpdate { get; set; }
 
@@ -375,6 +375,15 @@ public class Scope : IEventLike
     /// Adds an attachment.
     /// </summary>
     public void AddAttachment(SentryAttachment attachment) => _attachments.Add(attachment);
+
+    internal void SetPropagationContext(SentryPropagationContext propagationContext)
+    {
+        PropagationContext = propagationContext;
+        if (Options.EnableScopeSync)
+        {
+            Options.ScopeObserver?.SetTrace(propagationContext.TraceId, propagationContext.SpanId);
+        }
+    }
 
     /// <summary>
     /// Resets all the properties and collections within the scope to their default values.

@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android34.0</TargetFrameworks>
+    <!-- IMPORTANT: We must test with new TFMs as the store format changes with new versions of .NET -->
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android34.0;net9.0-android35.0</TargetFrameworks>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
@@ -11,23 +12,43 @@
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="TestAPKs\" />
+  </ItemGroup>
+
   <!--  Build the Android test app in various configurations during the build of this test project. -->
   <Target Name="BuildTestAPKs" BeforeTargets="DispatchToInnerBuilds;BeforeBuild" Condition="'$(TargetPlatformIdentifier)' != 'android'">
+    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Restore" />
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net8.0-android" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net9.0-android" />
   </Target>
   <Target Name="_InnerBuildTestAPKs">
-    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Restore" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Store=False;_Compressed=False" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Store=False;_Compressed=True" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Store=True;_Compressed=False" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Store=True;_Compressed=True" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=False;_Store=False;_Compressed=False" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=False;_Store=False;_Compressed=True" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=False;_Store=True;_Compressed=False" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=False;_Store=True;_Compressed=True" />
+
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=False;_Compressed=False" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=False;_Compressed=True" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=True;_Compressed=False" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=True;_Compressed=True" />
   </Target>
   <Target Name="_BuildTestAPK">
     <PropertyGroup>
-      <_ConfigString>Store=$(_Store)-Compressed=$(_Compressed)</_ConfigString>
+      <_ConfigString>A=$(_Aot)-S=$(_Store)-C=$(_Compressed)</_ConfigString>
+      <SourceAPK>..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk</SourceAPK>
+      <DestinationAPK>TestAPKs\$(TargetFramework)-$(_ConfigString).apk</DestinationAPK>
     </PropertyGroup>
-    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(_ConfigString)\" Condition="!Exists('TestAPKs\android-$(_ConfigString).apk')" />
-    <Copy SourceFiles="..\AndroidTestApp\bin\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk" DestinationFiles="TestAPKs\android-$(_ConfigString).apk" Condition="!Exists('TestAPKs\android-$(_ConfigString).apk')" />
+    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;PublishAot=$(_Aot);_IsPublishing=true;RuntimeIdentifier=android-x64;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('$(DestinationAPK)')" />
+
+    <Message Text="Copying APK from $(SourceAPK) to $(DestinationAPK)" Importance="high" />
+    <Copy SourceFiles="$(SourceAPK)" DestinationFiles="$(DestinationAPK)" Condition="!Exists('$(DestinationAPK)')" />
+
+    <PropertyGroup>
+      <DestinationAPKExists Condition="Exists('$(DestinationAPK)')">True</DestinationAPKExists>
+      <DestinationAPKExists Condition="!Exists('$(DestinationAPK)')">False</DestinationAPKExists>
+    </PropertyGroup>
+    <Message Text="APK copy result: Exists('$(DestinationAPK)') = $(DestinationAPKExists)" Importance="high" />
   </Target>
 
 </Project>

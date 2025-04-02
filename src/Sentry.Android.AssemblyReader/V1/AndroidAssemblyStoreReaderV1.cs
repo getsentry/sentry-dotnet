@@ -1,11 +1,11 @@
-namespace Sentry.Android.AssemblyReader;
+namespace Sentry.Android.AssemblyReader.V1;
 
 // See https://devblogs.microsoft.com/dotnet/performance-improvements-in-dotnet-maui/#single-file-assembly-stores
-internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndroidAssemblyReader
+internal sealed class AndroidAssemblyStoreReaderV1 : AndroidAssemblyReader, IAndroidAssemblyReader
 {
     private readonly AssemblyStoreExplorer _explorer;
 
-    public AndroidAssemblyStoreReader(ZipArchive zip, IList<string> supportedAbis, DebugLogger? logger)
+    public AndroidAssemblyStoreReaderV1(ZipArchive zip, IList<string> supportedAbis, DebugLogger? logger)
         : base(zip, supportedAbis, logger)
     {
         _explorer = new(zip, supportedAbis, logger);
@@ -29,7 +29,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
             return null;
         }
 
-        return CreatePEReader(name, stream);
+        return ArchiveUtils.CreatePEReader(name, stream, Logger);
     }
 
     private AssemblyStoreAssembly? TryFindAssembly(string name)
@@ -409,7 +409,7 @@ internal sealed class AndroidAssemblyStoreReader : AndroidAssemblyReader, IAndro
             assembly.ConfigDataOffset == 0 ? null : GetDataSlice(assembly.ConfigDataOffset, assembly.ConfigDataSize);
 
         private MemoryStream? GetDataSlice(uint offset, uint size) =>
-            size == 0 ? null : new MemorySlice(_storeData, (int)offset, (int)size);
+            size == 0 ? null : new ArchiveUtils.MemorySlice(_storeData, (int)offset, (int)size);
 
         public bool HasIdenticalContent(AssemblyStoreReader other)
         {
