@@ -90,13 +90,8 @@
     This API uses FrameMetrics, which requires Android >= 24.0.  We currently target Android >= 21.0 which is the minimum supported by MAUI.
     AndroidProfiler is dependant on SentryFrameMetricsCollector
   -->
-  <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='SpanFrameMetricsCollector']/*" />
   <remove-node path="/api/package[@name='io.sentry.android.core.internal.util']/*[starts-with(@name,'SentryFrameMetricsCollector')]" />
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AndroidProfiler']/*" />
-  <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AndroidContinuousProfiler']/*" />
-
-  <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='SentryAndroidOptions']/method[@name='getFrameMetricsCollector']" />
-  <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='SentryAndroidOptions']/method[@name='setFrameMetricsCollector']" />
 
   <!-- Remove problematic classes for profiling that create a stack overflow during code generation, which appears as:
       error MSB6006: "dotnet" exited with code 134
@@ -113,7 +108,7 @@
   -->
   <remove-node path="/api/package[@name='io.sentry']/interface[@name='BackfillingEventProcessor']" />
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AnrV2EventProcessor']" />
-
+  
   <!--
     SentryEvent.serialize() expects an parameter which implements IObjectWriter.
     JsonObjectWriter implements IObjectWriter in Java, but somehow this is not reflected in the generated binding.
@@ -153,4 +148,11 @@
   <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='SentryEnvelopeException']" />
   <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='SentryHttpClientException']" />
   <remove-node path="/api/package[@name='io.sentry.vendor.gson.stream']/class[@name='MalformedJsonException']" />
+
+  <!-- Remove CombinedContextsView.PutAll method due to conflicts when attempting to overwrite a method with the same name. -->
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='CombinedContextsView']/method[@name='putAll']" />
+  <!-- Remove ISentryLifecycleToken.Close method due to conflicts with IAutoCloseable.Close due to having the same name. -->
+  <remove-node path="/api/package[@name='io.sentry']/interface[@name='ISentryLifecycleToken']/method[@name='close']" />
+  <!-- Remove QueueFile. The `.iterator` method has nullability issues -->
+  <remove-node path="/api/package[@name='io.sentry.cache.tape']/class[@name='QueueFile']" />
 </metadata>
