@@ -49,7 +49,7 @@ public class AndroidAssemblyReaderTests
 #if ANDROID
         Skip.If(true, "It's unknown whether the current Android app APK is an assembly store or not.");
 #endif
-        using var sut = GetSut(false, true, isCompressed: true);
+        using var sut = GetSut(isAot: false, isAssemblyStore: true, isCompressed: true);
         switch (TargetFramework)
         {
             case "net9.0":
@@ -69,7 +69,7 @@ public class AndroidAssemblyReaderTests
 #if ANDROID
         Skip.If(true, "It's unknown whether the current Android app APK is an assembly store or not.");
 #endif
-        using var sut = GetSut(false, false, isCompressed: true);
+        using var sut = GetSut(isAot: false, isAssemblyStore: false, isCompressed: true);
         switch (TargetFramework)
         {
             case "net9.0":
@@ -88,7 +88,7 @@ public class AndroidAssemblyReaderTests
     [InlineData(true)]
     public void ReturnsNullIfAssemblyDoesntExist(bool isAssemblyStore)
     {
-        using var sut = GetSut(false, isAssemblyStore, isCompressed: true);
+        using var sut = GetSut(isAot: false, isAssemblyStore, isCompressed: true);
         Assert.Null(sut.TryReadAssembly("NonExistent.dll"));
     }
 
