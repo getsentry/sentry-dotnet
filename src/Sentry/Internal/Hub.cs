@@ -506,6 +506,29 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    public void CaptureFeedback(SentryFeedback feedback, SentryHint hint, Action<Scope> configureScope)
+    {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        try
+        {
+            var clonedScope = CurrentScope.Clone();
+            configureScope(clonedScope);
+
+            // Although we clone a temporary scope for the configureScope action, for the second scope
+            // argument (the breadcrumbScope) we pass in the current scope... this is because we want
+            // a breadcrumb to be left on the current scope for exception events
+            CaptureFeedback(feedback, clonedScope, hint);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to capture feedback");
+        }
+    }
+
     public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
     {
         if (!IsEnabled)
