@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Sentry Java SDK dependencies are now detected and included in the Android bindings ([#4079](https://github.com/getsentry/sentry-dotnet/pull/4079))
+
 ## 5.5.0
 
 ### Features
@@ -563,7 +569,6 @@ Unable to load DLL sentry-native or one of its dependencies
 ### Fixes
 
 - Dynamic Sampling Context not propagated correctly for HttpClient spans ([#3208](https://github.com/getsentry/sentry-dotnet/pull/3208))
-- Sentry Java SDK dependencies are now detected and included in the Android bindings ([#4079](https://github.com/getsentry/sentry-dotnet/pull/4079))
 
 ## 4.2.0
 
