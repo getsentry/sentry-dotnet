@@ -19,6 +19,11 @@
     <None Include="$(MSBuildThisFileDirectory)build/Sentry.Bindings.Android.targets" Pack="true" PackagePath="build/Sentry.Bindings.Android.targets" />
     <None Include="$(MSBuildThisFileDirectory)sentry-proguard.cfg" Pack="true" PackagePath="" />
     <PackageReference Remove="SIL.ReleaseTasks" />
+
+    <!-- Dependencies for AndroidMavenLibrary references   -->
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.8.7.2" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.8.7.2" />
+    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.15.0.2" />
   </ItemGroup>
 
   <ItemGroup>
