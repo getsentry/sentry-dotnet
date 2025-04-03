@@ -5,6 +5,7 @@ namespace Sentry.Maui.Tests.Mocks;
 public class MockApplication : Application
 {
     private static readonly object LockObj = new();
+    private Page _mainPage;
 
     static MockApplication()
     {
@@ -16,6 +17,23 @@ public class MockApplication : Application
 
     private MockApplication()
     {
+    }
+
+    public void AddWindow(Page mainPage)
+    {
+        _mainPage = mainPage;
+        ((IApplication)this).CreateWindow(null);
+        _mainPage = null;
+    }
+
+    protected override Window CreateWindow(IActivationState activationState)
+    {
+        if (_mainPage != null)
+        {
+            return new Window(_mainPage);
+        }
+
+        return base.CreateWindow(activationState);
     }
 
     public static MockApplication Create()

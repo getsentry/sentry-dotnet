@@ -6,7 +6,7 @@ For big feature it's advised to raise an issue to discuss it first.
 # Guidelines
 
 * Please avoid mixing changes needed for a feature with other changes such as refactors, automated IDE changes like adding BOM characters, empty lines, etc.
-* Feel free to start with a draft PR, while you work on it. You can ask pointed questoins by reviewing your own code this way, while signaling to the reviewer that the PR isn't ready for review just yet.
+* Feel free to start with a draft PR, while you work on it. You can ask pointed questions by reviewing your own code this way, while signaling to the reviewer that the PR isn't ready for review just yet.
 * Mark the PR ready for review once you've completed the change, including:
   * The description should link to relevant context such as tickets, discussions or previous PRs. Consider screenshots of the events in Sentry or other relevant visual things.
   * Add tests that excercise your change. The repo has lots of examples of Unit and integration tests. Including device tests that run on Android and iOS.
@@ -25,10 +25,10 @@ For big feature it's advised to raise an issue to discuss it first.
 ## Minimal Dependencies
 
 * The latest versions of the following .NET SDKs:
+  - [.NET 9.0](https://dotnet.microsoft.com/download/dotnet/9.0)
   - [.NET 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
-  - [.NET 6.0](https://dotnet.microsoft.com/download/dotnet/6.0)
 
-  *Technically, you only need the full SDK install for the latest version (8.0).  If you like, you can install the smaller ASP.NET Core Runtime packages for .NET 6.0. However, installing the full SDKs will also give you the runtimes.*
+  *Technically, you only need the full SDK install for the latest version (9.0).  If you like, you can install the smaller ASP.NET Core Runtime packages for .NET 8.0. However, installing the full SDKs will also give you the runtimes.*
 
 * [`pwsh`](https://github.com/PowerShell/PowerShell#get-powershell) Core version 6 or later on PATH.
 

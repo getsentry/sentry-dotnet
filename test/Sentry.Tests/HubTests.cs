@@ -1013,7 +1013,7 @@ public partial class HubTests
         var propagationContext = new SentryPropagationContext(
             SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
             SpanId.Parse("2000000000000000"));
-        hub.ConfigureScope(scope => scope.PropagationContext = propagationContext);
+        hub.ConfigureScope(scope => scope.SetPropagationContext(propagationContext));
 
         // Act
         var header = hub.GetTraceHeader();
@@ -1052,7 +1052,7 @@ public partial class HubTests
         var hub = _fixture.GetSut();
         var propagationContext = new SentryPropagationContext(
             SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1000000000000000"));
-        hub.ConfigureScope(scope => scope.PropagationContext = propagationContext);
+        hub.ConfigureScope(scope => scope.SetPropagationContext(propagationContext));
 
         // Act
         var baggage = hub.GetBaggage();
@@ -1069,7 +1069,7 @@ public partial class HubTests
         var hub = _fixture.GetSut();
         var propagationContext = new SentryPropagationContext(
             SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1000000000000000"));
-        hub.ConfigureScope(scope => scope.PropagationContext = propagationContext);
+        hub.ConfigureScope(scope => scope.SetPropagationContext(propagationContext));
 
         var traceHeader = new SentryTraceHeader(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"),
             SpanId.Parse("2000000000000000"), null);
@@ -1104,7 +1104,7 @@ public partial class HubTests
         var hub = _fixture.GetSut();
         var propagationContext = new SentryPropagationContext(
             SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1000000000000000"));
-        hub.ConfigureScope(scope => scope.PropagationContext = propagationContext);
+        hub.ConfigureScope(scope => scope.SetPropagationContext(propagationContext));
         var traceHeader = "5bd5f6d346b442dd9177dce9302fd737-2000000000000000";
         var baggageHeader = "sentry-trace_id=5bd5f6d346b442dd9177dce9302fd737, sentry-public_key=49d0f7386ad645858ae85020e393bef3, sentry-sample_rate=1.0";
 
@@ -1578,8 +1578,30 @@ public partial class HubTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
+    public void CaptureFeedback_HubEnabled(bool enabled)
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        if (!enabled)
+        {
+            hub.Dispose();
+        }
+
+        var feedback = new SentryFeedback("Test feedback");
+
+        // Act
+        hub.CaptureFeedback(feedback);
+
+        // Assert
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
     public void CaptureUserFeedback_HubEnabled(bool enabled)
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         // Arrange
         var hub = _fixture.GetSut();
         if (!enabled)
@@ -1594,6 +1616,7 @@ public partial class HubTests
 
         // Assert
         _fixture.Client.Received(enabled ? 1 : 0).CaptureUserFeedback(Arg.Any<UserFeedback>());
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Theory]
