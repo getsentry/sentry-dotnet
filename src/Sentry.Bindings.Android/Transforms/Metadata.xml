@@ -64,8 +64,22 @@
   <attr path="/api/package[@name='io.sentry']/interface[@name='ObjectReader']/method[@name='dateOrNull']" name="visibility">internal</attr>
 
 
-    <!-- Fix missing compareTo(Object) methods on classes extending SentryDate. -->
+  <!-- Fix missing compareTo(Object) methods on classes extending SentryDate. -->
   <add-node path="/api/package[@name='io.sentry']/class[@extends='io.sentry.SentryDate']">
+    <method name="compareTo" return="int" abstract="false" native="false" synchronized="false" static="false" final="false" deprecated="not deprecated" visibility="public">
+        <parameter name="p0" type="java.lang.Object" />
+    </method>
+  </add-node>
+
+  <!-- Fix missing compareTo(Object) method for EventProcessorAndOrder-->
+  <add-node path="/api/package[@name='io.sentry.internal.eventprocessor']/class[@name='EventProcessorAndOrder']">
+    <method name="compareTo" return="int" abstract="false" native="false" synchronized="false" static="false" final="false" deprecated="not deprecated" visibility="public">
+        <parameter name="p0" type="java.lang.Object" />
+    </method>
+  </add-node>
+
+  <!-- Fix missing compareTo(Object) method for Breadcrumb -->
+  <add-node path="/api/package[@name='io.sentry']/class[@name='Breadcrumb']">
     <method name="compareTo" return="int" abstract="false" native="false" synchronized="false" static="false" final="false" deprecated="not deprecated" visibility="public">
         <parameter name="p0" type="java.lang.Object" />
     </method>
@@ -79,6 +93,13 @@
   <remove-node path="/api/package[@name='io.sentry.android.core.internal.util']/*[starts-with(@name,'SentryFrameMetricsCollector')]" />
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AndroidProfiler']/*" />
 
+  <!-- Remove problematic classes for profiling that create a stack overflow during code generation, which appears as:
+      error MSB6006: "dotnet" exited with code 134
+  -->
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='ProfileChunk']" />
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='ProfilingTraceData']" />
+  <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AndroidProfiler']" />
+
   <!--
     The BackfillingEventProcessor interface creates a stack overflow during code generation, which appears as:
       error MSB6006: "dotnet" exited with code 134
@@ -87,7 +108,7 @@
   -->
   <remove-node path="/api/package[@name='io.sentry']/interface[@name='BackfillingEventProcessor']" />
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AnrV2EventProcessor']" />
-
+  
   <!--
     SentryEvent.serialize() expects an parameter which implements IObjectWriter.
     JsonObjectWriter implements IObjectWriter in Java, but somehow this is not reflected in the generated binding.
@@ -115,17 +136,23 @@
   <remove-node path="/api/package[@name='io.sentry']/class[@name='OutboxSender']" />
   <remove-node path="/api/package[@name='io.sentry.cache']/class[@name='EnvelopeCache']" />
   <remove-node path="/api/package[@name='io.sentry.android.core.cache']/class[@name='AndroidEnvelopeCache']" />
-  <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='TempSensorBreadcrumbsIntegration']" />
   <remove-node path="/api/package[@name='io.sentry.android.core.internal.gestures']" />
   <remove-node path="/api/package[@name='io.sentry.android.core.performance']" />
 
   <remove-node path="/api/package[starts-with(@name,'io.sentry')]/*/method[@name='clone' and count(parameter)=0]" />
   <remove-node path="/api/package[starts-with(@name,'io.sentry')]/class/implements[@name='io.sentry.JsonDeserializer']" />
-  <remove-node path="/api/package[@name='io.sentry.vendor.gson.stream']/class[@name='JsonToken']/field[@name='NAME']" />>
+  <remove-node path="/api/package[@name='io.sentry.vendor.gson.stream']/class[@name='JsonToken']/field[@name='NAME']" />
 
   <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='ExceptionMechanismException']" />
   <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='InvalidSentryTraceHeaderException']" />
   <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='SentryEnvelopeException']" />
   <remove-node path="/api/package[@name='io.sentry.exception']/class[@name='SentryHttpClientException']" />
   <remove-node path="/api/package[@name='io.sentry.vendor.gson.stream']/class[@name='MalformedJsonException']" />
+
+  <!-- Remove CombinedContextsView.PutAll method due to conflicts when attempting to overwrite a method with the same name. -->
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='CombinedContextsView']/method[@name='putAll']" />
+  <!-- Remove ISentryLifecycleToken.Close method due to conflicts with IAutoCloseable.Close due to having the same name. -->
+  <remove-node path="/api/package[@name='io.sentry']/interface[@name='ISentryLifecycleToken']/method[@name='close']" />
+  <!-- Remove QueueFile. The `.iterator` method has nullability issues -->
+  <remove-node path="/api/package[@name='io.sentry.cache.tape']/class[@name='QueueFile']" />
 </metadata>
