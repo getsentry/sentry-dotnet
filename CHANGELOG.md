@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Sentry Java SDK dependencies are now detected and included in the Android bindings ([#4079](https://github.com/getsentry/sentry-dotnet/pull/4079))
+
 ## 5.5.0
 
 ### Features
