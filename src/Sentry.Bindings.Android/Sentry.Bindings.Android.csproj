@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0-android34.0;net9.0-android35.0;</TargetFrameworks>
+    <TargetFrameworks>net8.0-android34.0;net9.0-android35.0</TargetFrameworks>
     <!-- BG8605 and BG8606 happen because there's a missing androidx.lifecycle dependency, but we don't need it here.  (The native Android Sentry SDK will use it if it exists.) -->
     <NoWarn>$(NoWarn);BG8605;BG8606</NoWarn>
     <SentryAndroidSdkVersion>7.20.1</SentryAndroidSdkVersion>
@@ -19,11 +19,24 @@
     <None Include="$(MSBuildThisFileDirectory)build/Sentry.Bindings.Android.targets" Pack="true" PackagePath="build/Sentry.Bindings.Android.targets" />
     <None Include="$(MSBuildThisFileDirectory)sentry-proguard.cfg" Pack="true" PackagePath="" />
     <PackageReference Remove="SIL.ReleaseTasks" />
+  </ItemGroup>
 
-    <!-- Dependencies for AndroidMavenLibrary references   -->
-    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.8.7.2" />
-    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.8.7.2" />
-    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.15.0.2" />
+  <!-- Dependencies for AndroidMavenLibrary references -->
+  <!-- Note: versions match what was shipped with net8.0-android34.0 in MAUI -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net8'))">
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.6.1.3" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.6.1.3" />
+    <!-- MAUI 8 references this version indirectly via Xamarin.AndroidX.SwipeRefreshLayout (>= 1.1.0.14)   -->
+    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.10.1.2" />
+  </ItemGroup>
+
+  <!-- Dependencies for AndroidMavenLibrary references -->
+  <!-- Note: versions match what was shipped with net9.0-android35.0 in MAUI -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net9'))">
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.8.5.1" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.8.5.1" />
+    <!-- MAUI 9 references this version indirectly via Xamarin.AndroidX.SwipeRefreshLayout (>= 1.1.0.24)   -->
+    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.13.1.5" />
   </ItemGroup>
 
   <ItemGroup>
