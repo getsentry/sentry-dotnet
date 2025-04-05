@@ -8,6 +8,11 @@ namespace Sentry;
 public interface ISpan : ISpanData
 {
     /// <summary>
+    /// When the status of the span changes, this event will fire
+    /// </summary>
+    public event EventHandler<SpanStatus?>? StatusChanged;
+
+    /// <summary>
     /// Span description.
     /// </summary>
     // 'new' because it adds a setter.

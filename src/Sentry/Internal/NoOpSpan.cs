@@ -30,6 +30,12 @@ internal class NoOpSpan : ISpan
         set { }
     }
 
+    public event EventHandler<SpanStatus?>? StatusChanged
+    {
+        add {}
+        remove {}
+    }
+
     public string? Description
     {
         get => default;

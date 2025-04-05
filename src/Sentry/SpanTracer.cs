@@ -52,11 +52,26 @@ public class SpanTracer : IBaseTracer, ISpan
     /// <inheritdoc cref="ISpan.Operation" />
     public string Operation { get; set; }
 
+    /// <inheritdoc cref="ISpan.StatusChanged" />
+    public event EventHandler<SpanStatus?>? StatusChanged;
+
     /// <inheritdoc cref="ISpan.Description" />
     public string? Description { get; set; }
 
+    private SpanStatus? _status;
     /// <inheritdoc cref="ISpan.Status" />
-    public SpanStatus? Status { get; set; }
+    public SpanStatus? Status
+    {
+        get => _status;
+        set
+        {
+            if (_status == value)
+                return;
+
+            _status = value;
+            StatusChanged?.Invoke(this, _status);
+        }
+    }
 
     /// <summary>
     /// Used by the Sentry.OpenTelemetry.SentrySpanProcessor to mark a span as a Sentry request. Ideally we wouldn't

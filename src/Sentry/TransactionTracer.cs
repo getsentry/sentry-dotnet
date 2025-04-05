@@ -74,6 +74,9 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
         set => Contexts.Trace.Operation = value;
     }
 
+    /// <inheritdoc cref="ISpan.StatusChanged" />
+    public event EventHandler<SpanStatus?>? StatusChanged;
+
     /// <inheritdoc cref="ISpan.Description" />
     public string? Description { get; set; }
 
@@ -81,7 +84,14 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     public SpanStatus? Status
     {
         get => Contexts.Trace.Status;
-        set => Contexts.Trace.Status = value;
+        set
+        {
+            if (Contexts.Trace.Status == value)
+                return;
+
+            Contexts.Trace.Status = value;
+            StatusChanged?.Invoke(this, value);
+        }
     }
 
     /// <inheritdoc />
