@@ -5,19 +5,21 @@ namespace Sentry.Tests;
 /*
  * NOTE: All tests should be done for both asynchronous `SendAsync` and synchronous `Send` methods.
  * TODO: Find a way to consolidate these tests cleanly.
- * TODO @hangy: Add test for W3C trace context propagation.
- */
+  */
 
 public class SentryHttpMessageHandlerTests
 {
-    [Fact]
-    public async Task SendAsync_SentryTraceHeaderNotSet_SetsHeader_ByDefault()
+    [Theory]
+    [InlineData("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0", "sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0")]
+    [InlineData("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0", "traceparent", "00-75302ac48a024bde9a3b3734a82e36c8-1000000000000000-00")]
+    [InlineData("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-1", "traceparent", "00-75302ac48a024bde9a3b3734a82e36c8-1000000000000000-01")]
+    public async Task SendAsync_SentryTraceHeaderNotSet_SetsHeader_ByDefault(string traceHeader, string headerName, string expectedValue)
     {
         // Arrange
         var hub = Substitute.For<IHub>();
 
         hub.GetTraceHeader().ReturnsForAnyArgs(
-            SentryTraceHeader.Parse("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"));
+            SentryTraceHeader.Parse(traceHeader));
 
         using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
         using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
@@ -30,12 +32,15 @@ public class SentryHttpMessageHandlerTests
 
         // Assert
         request.Headers.Should().Contain(h =>
-            h.Key == "sentry-trace" &&
-            string.Concat(h.Value) == "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0");
+            h.Key == headerName &&
+            string.Concat(h.Value) == expectedValue);
     }
 
-    [Fact]
-    public async Task SendAsync_SentryTraceHeaderNotSet_SetsHeader_WhenUrlMatchesPropagationOptions()
+    [Theory]
+    [InlineData("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0", "sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0")]
+    [InlineData("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0", "traceparent", "00-75302ac48a024bde9a3b3734a82e36c8-1000000000000000-00")]
+    [InlineData("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-1", "traceparent", "00-75302ac48a024bde9a3b3734a82e36c8-1000000000000000-01")]
+    public async Task SendAsync_SentryTraceHeaderNotSet_SetsHeader_WhenUrlMatchesPropagationOptions(string traceHeader, string headerName, string expectedValue)
     {
         // Arrange
         var hub = Substitute.For<IHub>();
@@ -49,7 +54,7 @@ public class SentryHttpMessageHandlerTests
         };
 
         hub.GetTraceHeader().ReturnsForAnyArgs(
-            SentryTraceHeader.Parse("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"));
+            SentryTraceHeader.Parse(traceHeader));
 
         using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
         using var sentryHandler = new SentryHttpMessageHandler(hub, options, innerHandler, failedRequestHandler);
@@ -62,12 +67,14 @@ public class SentryHttpMessageHandlerTests
 
         // Assert
         request.Headers.Should().Contain(h =>
-            h.Key == "sentry-trace" &&
-            string.Concat(h.Value) == "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0");
+            h.Key == headerName &&
+            string.Concat(h.Value) == expectedValue);
     }
 
-    [Fact]
-    public async Task SendAsync_SentryTraceHeaderNotSet_DoesntSetHeader_WhenUrlDoesntMatchesPropagationOptions()
+    [Theory]
+    [InlineData("sentry-trace")]
+    [InlineData("traceparent")]
+    public async Task SendAsync_SentryTraceHeaderNotSet_DoesntSetHeader_WhenUrlDoesntMatchesPropagationOptions(string headerName)
     {
         // Arrange
         var hub = Substitute.For<IHub>();
@@ -93,11 +100,13 @@ public class SentryHttpMessageHandlerTests
         using var request = innerHandler.GetRequests().Single();
 
         // Assert
-        request.Headers.Should().NotContain(h => h.Key == "sentry-trace");
+        request.Headers.Should().NotContain(h => h.Key == headerName);
     }
 
-    [Fact]
-    public async Task SendAsync_SentryTraceHeaderAlreadySet_NotOverwritten()
+    [Theory]
+    [InlineData("sentry-trace")]
+    [InlineData("traceparent")]
+    public async Task SendAsync_SentryTraceHeaderAlreadySet_NotOverwritten(string headerName)
     {
         // Arrange
         var hub = Substitute.For<IHub>();
@@ -109,7 +118,7 @@ public class SentryHttpMessageHandlerTests
         using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
         using var client = new HttpClient(sentryHandler);
 
-        client.DefaultRequestHeaders.Add("sentry-trace", "foobar");
+        client.DefaultRequestHeaders.Add(headerName, "foobar");
 
         // Act
         await client.GetAsync("https://localhost/");
@@ -118,7 +127,7 @@ public class SentryHttpMessageHandlerTests
 
         // Assert
         request.Headers.Should().Contain(h =>
-            h.Key == "sentry-trace" &&
+            h.Key == headerName &&
             string.Concat(h.Value) == "foobar");
     }
 
@@ -292,14 +301,17 @@ public class SentryHttpMessageHandlerTests
     }
 
 #if NET5_0_OR_GREATER
-    [Fact]
-    public void Send_SentryTraceHeaderNotSet_SetsHeader_ByDefault()
+    [Theory]
+    [InlineData("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0", "sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0")]
+    [InlineData("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0", "traceparent", "00-75302ac48a024bde9a3b3734a82e36c8-1000000000000000-00")]
+    [InlineData("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-1", "traceparent", "00-75302ac48a024bde9a3b3734a82e36c8-1000000000000000-01")]
+    public void Send_SentryTraceHeaderNotSet_SetsHeader_ByDefault(string traceHeader, string headerName, string expectedValue)
     {
         // Arrange
         var hub = Substitute.For<IHub>();
 
         hub.GetTraceHeader().ReturnsForAnyArgs(
-            SentryTraceHeader.Parse("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"));
+            SentryTraceHeader.Parse(traceHeader));
 
         using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
         using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
@@ -312,12 +324,15 @@ public class SentryHttpMessageHandlerTests
 
         // Assert
         request.Headers.Should().Contain(h =>
-            h.Key == "sentry-trace" &&
-            string.Concat(h.Value) == "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0");
+            h.Key == headerName &&
+            string.Concat(h.Value) == expectedValue);
     }
 
-    [Fact]
-    public void Send_SentryTraceHeaderNotSet_SetsHeader_WhenUrlMatchesPropagationOptions()
+    [Theory]
+    [InlineData("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0", "sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0")]
+    [InlineData("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0", "traceparent", "00-75302ac48a024bde9a3b3734a82e36c8-1000000000000000-00")]
+    [InlineData("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-1", "traceparent", "00-75302ac48a024bde9a3b3734a82e36c8-1000000000000000-01")]
+    public void Send_SentryTraceHeaderNotSet_SetsHeader_WhenUrlMatchesPropagationOptions(string traceHeader, string headerName, string expectedValue)
     {
         // Arrange
         var hub = Substitute.For<IHub>();
@@ -331,7 +346,7 @@ public class SentryHttpMessageHandlerTests
         };
 
         hub.GetTraceHeader().ReturnsForAnyArgs(
-            SentryTraceHeader.Parse("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"));
+            SentryTraceHeader.Parse(traceHeader));
 
         using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
         using var sentryHandler = new SentryHttpMessageHandler(hub, options, innerHandler, failedRequestHandler);
@@ -344,12 +359,14 @@ public class SentryHttpMessageHandlerTests
 
         // Assert
         request.Headers.Should().Contain(h =>
-            h.Key == "sentry-trace" &&
-            string.Concat(h.Value) == "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0");
+            h.Key == headerName &&
+            string.Concat(h.Value) == expectedValue);
     }
 
-    [Fact]
-    public void Send_SentryTraceHeaderNotSet_DoesntSetHeader_WhenUrlDoesntMatchesPropagationOptions()
+    [Theory]
+    [InlineData("sentry-trace")]
+    [InlineData("traceparent")]
+    public void Send_SentryTraceHeaderNotSet_DoesntSetHeader_WhenUrlDoesntMatchesPropagationOptions(string headerName)
     {
         // Arrange
         var hub = Substitute.For<IHub>();
@@ -375,11 +392,13 @@ public class SentryHttpMessageHandlerTests
         using var request = innerHandler.GetRequests().Single();
 
         // Assert
-        request.Headers.Should().NotContain(h => h.Key == "sentry-trace");
+        request.Headers.Should().NotContain(h => h.Key == headerName);
     }
 
-    [Fact]
-    public void Send_SentryTraceHeaderAlreadySet_NotOverwritten()
+    [Theory]
+    [InlineData("sentry-trace")]
+    [InlineData("traceparent")]
+    public void Send_SentryTraceHeaderAlreadySet_NotOverwritten(string headerName)
     {
         // Arrange
         var hub = Substitute.For<IHub>();
@@ -391,7 +410,7 @@ public class SentryHttpMessageHandlerTests
         using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
         using var client = new HttpClient(sentryHandler);
 
-        client.DefaultRequestHeaders.Add("sentry-trace", "foobar");
+        client.DefaultRequestHeaders.Add(headerName, "foobar");
 
         // Act
         client.Get("https://localhost/");
@@ -400,7 +419,7 @@ public class SentryHttpMessageHandlerTests
 
         // Assert
         request.Headers.Should().Contain(h =>
-            h.Key == "sentry-trace" &&
+            h.Key == headerName &&
             string.Concat(h.Value) == "foobar");
     }
 
