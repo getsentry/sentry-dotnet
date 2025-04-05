@@ -21,7 +21,7 @@ public class SentryTraceHeaderExtensionsTests
     public void AsW3CTraceContext_WithoutSampled_ConvertsToW3CFormat()
     {
         // Arrange
-        var traceHeader = new SentryTraceHeader(SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"), SpanId.Parse("1000000000000000"), nuint);
+        var traceHeader = new SentryTraceHeader(SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"), SpanId.Parse("1000000000000000"), null);
 
         // Act
         var result = traceHeader.AsW3CTraceContext();
