@@ -153,10 +153,9 @@ public abstract class SentryMessageHandler : DelegatingHandler
     private void AddW3CTraceHeader(HttpRequestMessage request)
     {
         // Set trace header if it hasn't already been set
-        const string w3cHeaderName = "traceparent";
-        if (!request.Headers.Contains(w3cHeaderName) && _hub.GetTraceHeader() is { } traceHeader)
+        if (!request.Headers.Contains(W3CTraceHeader.HttpHeaderName) && _hub.GetTraceHeader() is { } traceHeader)
         {
-            request.Headers.Add(w3cHeaderName, traceHeader.AsW3CTraceContext());
+            request.Headers.Add(W3CTraceHeader.HttpHeaderName, new W3CTraceHeader(traceHeader).ToString());
         }
     }
 

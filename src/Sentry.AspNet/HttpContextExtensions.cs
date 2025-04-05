@@ -33,6 +33,27 @@ public static class HttpContextExtensions
         }
     }
 
+        private static SentryTraceHeader? TryGetW3CTraceHeader(HttpContext context, SentryOptions? options)
+        {
+            var value = context.Request.Headers.Get(SentryTraceHeaderExtensions.W3CTraceContextHeaderName);
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return null;
+            }
+
+            options?.LogDebug("Received Sentry trace header '{0}'.", value);
+
+            try
+            {
+                return SentryTraceHeader.Parse(value);
+            }
+            catch (Exception ex)
+            {
+                options?.LogError(ex, "Invalid Sentry trace header '{0}'.", value);
+                return null;
+            }
+        }
+
     private static BaggageHeader? TryGetBaggageHeader(HttpContext context, SentryOptions? options)
     {
         var value = context.Request.Headers.Get(BaggageHeader.HttpHeaderName);
