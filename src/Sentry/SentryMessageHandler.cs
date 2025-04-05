@@ -136,6 +136,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
         if (_options?.TracePropagationTargets.MatchesSubstringOrRegex(url) is true or null)
         {
             AddSentryTraceHeader(request);
+            AddW3CTraceHeader(request);
             AddBaggageHeader(request);
         }
     }
@@ -146,6 +147,16 @@ public abstract class SentryMessageHandler : DelegatingHandler
         if (!request.Headers.Contains(SentryTraceHeader.HttpHeaderName) && _hub.GetTraceHeader() is { } traceHeader)
         {
             request.Headers.Add(SentryTraceHeader.HttpHeaderName, traceHeader.ToString());
+        }
+    }
+
+    private void AddW3CTraceHeader(HttpRequestMessage request)
+    {
+        // Set trace header if it hasn't already been set
+        const string w3cHeaderName = "traceparent";
+        if (!request.Headers.Contains(w3cHeaderName) && _hub.GetTraceHeader() is { } traceHeader)
+        {
+            request.Headers.Add(w3cHeaderName, traceHeader.AsW3CTraceContext());
         }
     }
 

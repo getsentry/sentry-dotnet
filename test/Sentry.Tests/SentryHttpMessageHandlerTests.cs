@@ -5,6 +5,7 @@ namespace Sentry.Tests;
 /*
  * NOTE: All tests should be done for both asynchronous `SendAsync` and synchronous `Send` methods.
  * TODO: Find a way to consolidate these tests cleanly.
+ * TODO @hangy: Add test for W3C trace context propagation.
  */
 
 public class SentryHttpMessageHandlerTests
