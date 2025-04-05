@@ -5,6 +5,8 @@ namespace Sentry;
 /// </summary>
 internal class W3CTraceHeader
 {
+    private const string SupportedVersion = "00";
+
     /// <summary>
     /// The name of the W3C trace context header used for distributed tracing.
     /// This field contains the value "traceparent" which is part of the W3C Trace Context specification.
@@ -18,7 +20,10 @@ internal class W3CTraceHeader
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="source"/> is null.</exception>
     public W3CTraceHeader(SentryTraceHeader source)
     {
-        ArgumentNullException.ThrowIfNull(source);
+        if (source is null)
+        {
+            throw new ArgumentNullException(nameof(source), "Source Sentry trace header cannot be null.");
+        }
 
         SentryTraceHeader = source;
     }
@@ -31,17 +36,58 @@ internal class W3CTraceHeader
     /// </value>
     public SentryTraceHeader SentryTraceHeader { get; }
 
+     /// <summary>
+    /// Parses a <see cref="SentryTraceHeader"/> from a string representation of the Sentry trace header.
+    /// </summary>
+    /// <param name="value">
+    /// A string containing the Sentry trace header, expected to follow the format "traceId-spanId-sampled",
+    /// where "sampled" is optional.
+    /// </param>
+    /// <returns>
+    /// A <see cref="SentryTraceHeader"/> object if parsing succeeds, or <c>null</c> if the input string is null, empty, or whitespace.
+    /// </returns>
+    /// <exception cref="FormatException">
+    /// Thrown if the input string does not contain a valid trace header format, specifically if it lacks required trace ID and span ID components.
+    /// </exception>
+    public static W3CTraceHeader? Parse(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        var components = value.Split('-', StringSplitOptions.RemoveEmptyEntries);
+        if (components.Length < 2)
+        {
+            throw new FormatException($"Invalid W3C trace header: {value}.");
+        }
+
+        var version = components[0];
+        if (version != SupportedVersion)
+        {
+            throw new FormatException($"Invalid W3C trace header version: {version}.");
+        }
+
+        var traceId = SentryId.Parse(components[1]);
+        var spanId = SpanId.Parse(components[2]);
+
+        var isSampled = components.Length >= 4
+            ? string.Equals(components[3], "01", StringComparison.OrdinalIgnoreCase)
+            : (bool?)null;
+
+        return new W3CTraceHeader(new SentryTraceHeader(traceId, spanId, isSampled));
+    }
+
     /// <inheritdoc/>
     public override string ToString()
     {
-        const string version = "00";
         var traceFlags = ConvertSampledToTraceFlags(SentryTraceHeader.IsSampled);
         if (traceFlags is null)
         {
-            return $"{version}-{SentryTraceHeader.TraceId}-{SentryTraceHeader.SpanId}";
+            return $"{SupportedVersion}-{SentryTraceHeader.TraceId}-{SentryTraceHeader.SpanId}";
         }
 
-        return $"{version}-{SentryTraceHeader.TraceId}-{SentryTraceHeader.SpanId}-{traceFlags}";
+        return $"{SupportedVersion}-{SentryTraceHeader.TraceId}-{SentryTraceHeader.SpanId}-{traceFlags}";
     }
 
     /// <inheritdoc/>
