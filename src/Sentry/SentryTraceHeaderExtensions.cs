@@ -3,7 +3,7 @@ namespace Sentry;
 /// <summary>
 /// Extension methods for working with Sentry trace headers.
 /// </summary>
-public static class SentryTraceHeaderExtensions
+internal static class SentryTraceHeaderExtensions
 {
     /// <summary>
     /// Converts the Sentry trace header to W3C trace context format.
