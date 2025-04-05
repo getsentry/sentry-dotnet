@@ -1,4 +1,5 @@
 using Sentry.Internal;
+using Sentry.Internal.Extensions;
 
 namespace Sentry.Maui.Internal;
 
@@ -30,10 +31,13 @@ internal class TtdMauiPageEventHandler(IHub hub) : IMauiPageEventHandler
     private ITransactionTracer? _transaction;
 
     /// <inheritdoc />
-    public void OnAppearing(Page page)
+    public async void OnAppearing(Page page)
     {
         if (_ttidRan && StartupTimestamp != null)
             return;
+
+        // if (Interlocked.Exchange<bool>(ref _ttidRan, true))
+        //     return;
 
         //DispatchTime.Now.Nanoseconds
         _ttidRan = true;
@@ -45,29 +49,122 @@ internal class TtdMauiPageEventHandler(IHub hub) : IMauiPageEventHandler
         );
         var elapsedTime = Stopwatch.GetElapsedTime(startupTimestamp);
 
-        _timeToInitialDisplaySpan = _transaction.StartChild(InitialDisplayType, $"{screenName} initial display");
+        _timeToInitialDisplaySpan = _transaction.StartChild(InitialDisplayType, $"{screenName} initial display", ProcessInfo.Instance!.StartupTime);
         _timeToInitialDisplaySpan.SetMeasurement("test", elapsedTime.TotalMilliseconds, MeasurementUnit.Parse("ms"));
         _timeToInitialDisplaySpan.Finish();
-    }
 
-    /// <inheritdoc />
-    public void OnDisappearing(Page page)
-    {
-    }
+        // we allow 200ms for the user to start any async tasks with spans
+        await Task.Delay(200).ConfigureAwait(false);
 
-    public void OnNavigatedTo(Page page)
-    {
-        if (_transaction is { IsFinished: false })
+        try
         {
-            // TODO: wait for all spans
-            _transaction?.Finish();
+            using var cts = new CancellationTokenSource();
+            cts.CancelAfterSafe(TimeSpan.FromSeconds(30));
 
-            _timeToInitialDisplaySpan = null;
-            _transaction = null;
+            // TODO: what about time to full display - it should happen WHEN this finishes
+            await _transaction.WaitForLastSpanToFinishAsync(cts.Token).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // TODO: what to do?
+            Console.WriteLine(ex);
         }
     }
 
-    public void OnNavigatedFrom(Page page)
+    public void OnDisappearing(Page page) { }
+    public void OnNavigatedTo(Page page) { }
+    public void OnNavigatedFrom(Page page) { }
+}
+
+
+/// <summary>
+/// TDOO
+/// </summary>
+public static class Tester
+{
+    /// <summary>
+    /// TODO
+    /// </summary>
+    /// <param name="transaction"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public static async ValueTask WaitForLastSpanToFinishAsync(this ITransactionTracer transaction, CancellationToken cancellationToken = default)
     {
+        if (transaction.IsAllSpansFinished())
+        {
+            var span = transaction.GetLastFinishedSpan();
+            if (span != null)
+                transaction.Finish(span.EndTimestamp);
+        }
+        else
+        {
+            var span = await transaction.GetLastSpanWhenFinishedAsync(cancellationToken).ConfigureAwait(false);
+            if (span != null)
+                transaction.Finish(span.EndTimestamp);
+        }
+    }
+
+    /// <summary>
+    /// TODO
+    /// </summary>
+    /// <param name="transaction"></param>
+    /// <returns></returns>
+    public static bool IsAllSpansFinished(this ITransactionTracer transaction)
+        => transaction.Spans.All(x => x.IsFinished);
+
+
+    /// <summary>
+    /// TODO
+    /// </summary>
+    /// <param name="transaction"></param>
+    /// <returns></returns>
+    public static ISpan? GetLastFinishedSpan(this ITransactionTracer transaction)
+        => transaction.Spans
+            .ToList()
+            .Where(x => x.IsFinished)
+            .OrderByDescending(x => x.EndTimestamp)
+            .LastOrDefault(x => x.IsFinished);
+
+    /// <summary>
+    /// TODO
+    /// </summary>
+    /// <param name="transaction"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public static async Task<ISpan?> GetLastSpanWhenFinishedAsync(this ITransactionTracer transaction, CancellationToken cancellationToken = default)
+    {
+        // what if no spans
+        if (transaction.IsAllSpansFinished())
+            return transaction.GetLastFinishedSpan();
+
+        var tcs = new TaskCompletionSource<ISpan?>();
+        var handler = new EventHandler<SpanStatus?>((_, _) =>
+        {
+            if (transaction.IsAllSpansFinished())
+            {
+                var lastSpan = transaction.GetLastFinishedSpan();
+                tcs.SetResult(lastSpan);
+            }
+        });
+
+        try
+        {
+            foreach (var span in transaction.Spans)
+            {
+                if (!span.IsFinished)
+                {
+                    span.StatusChanged += handler;
+                }
+            }
+
+            return await tcs.Task.ConfigureAwait(false);
+        }
+        finally
+        {
+            foreach (var span in transaction.Spans)
+            {
+                span.StatusChanged -= handler;
+            }
+        }
     }
 }
