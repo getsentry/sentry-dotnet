@@ -63,6 +63,27 @@ internal static class HttpContextExtensions
             options?.LogError(ex, "Invalid Sentry trace header '{0}'.", value);
             return null;
         }
+    }    
+
+    public static W3CTraceHeader? TryGetW3CTraceHeader(this HttpContext context, SentryOptions? options)
+    {
+        var value = context.Request.Headers.GetValueOrDefault(W3CTraceHeader.HttpHeaderName);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        options?.LogDebug("Received Sentry trace header '{0}'.", value);
+
+        try
+        {
+            return W3CTraceHeader.Parse(value!);
+        }
+        catch (Exception ex)
+        {
+            options?.LogError(ex, "Invalid Sentry trace header '{0}'.", value);
+            return null;
+        }
     }
 
     public static BaggageHeader? TryGetBaggageHeader(this HttpContext context, SentryOptions? options)

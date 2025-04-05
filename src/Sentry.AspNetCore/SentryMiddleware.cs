@@ -106,6 +106,7 @@ internal class SentryMiddleware : IMiddleware
             }
 
             var traceHeader = context.TryGetSentryTraceHeader(_options);
+            traceHeader ??= context.TryGetW3CTraceHeader(_options)?.SentryTraceHeader;
             var baggageHeader = context.TryGetBaggageHeader(_options);
             var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader);
 

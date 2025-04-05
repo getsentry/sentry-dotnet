@@ -124,6 +124,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
         }
 
         var traceHeader = requestData.TryGetSentryTraceHeader(_logger);
+        traceHeader ??= requestData.TryGetW3CTraceHeader(_logger)?.SentryTraceHeader;
         var baggageHeader = requestData.TryGetBaggageHeader(_logger);
 
         return SentrySdk.ContinueTrace(traceHeader, baggageHeader, transactionName, Operation);
