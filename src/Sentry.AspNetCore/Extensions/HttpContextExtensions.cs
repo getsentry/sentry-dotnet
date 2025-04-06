@@ -63,7 +63,7 @@ internal static class HttpContextExtensions
             options?.LogError(ex, "Invalid Sentry trace header '{0}'.", value);
             return null;
         }
-    }    
+    }
 
     public static W3CTraceHeader? TryGetW3CTraceHeader(this HttpContext context, SentryOptions? options)
     {

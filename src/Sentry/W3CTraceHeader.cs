@@ -36,7 +36,7 @@ internal class W3CTraceHeader
     /// </value>
     public SentryTraceHeader SentryTraceHeader { get; }
 
-     /// <summary>
+    /// <summary>
     /// Parses a <see cref="SentryTraceHeader"/> from a string representation of the Sentry trace header.
     /// </summary>
     /// <param name="value">
@@ -57,7 +57,7 @@ internal class W3CTraceHeader
         }
 
         var components = value.Split('-', StringSplitOptions.RemoveEmptyEntries);
-        if (components.Length < 2)
+        if (components.Length < 4)
         {
             throw new FormatException($"Invalid W3C trace header: {value}.");
         }
@@ -71,9 +71,7 @@ internal class W3CTraceHeader
         var traceId = SentryId.Parse(components[1]);
         var spanId = SpanId.Parse(components[2]);
 
-        var isSampled = components.Length >= 4
-            ? string.Equals(components[3], "01", StringComparison.OrdinalIgnoreCase)
-            : (bool?)null;
+        var isSampled = string.Equals(components[3], "01", StringComparison.OrdinalIgnoreCase);
 
         return new W3CTraceHeader(new SentryTraceHeader(traceId, spanId, isSampled));
     }
@@ -82,11 +80,6 @@ internal class W3CTraceHeader
     public override string ToString()
     {
         var traceFlags = ConvertSampledToTraceFlags(SentryTraceHeader.IsSampled);
-        if (traceFlags is null)
-        {
-            return $"{SupportedVersion}-{SentryTraceHeader.TraceId}-{SentryTraceHeader.SpanId}";
-        }
-
         return $"{SupportedVersion}-{SentryTraceHeader.TraceId}-{SentryTraceHeader.SpanId}-{traceFlags}";
     }
 
@@ -104,13 +97,5 @@ internal class W3CTraceHeader
     /// <inheritdoc/>
     public override int GetHashCode() => SentryTraceHeader.GetHashCode();
 
-    private static string? ConvertSampledToTraceFlags(bool? isSampled)
-    {
-        return isSampled switch
-        {
-            true => "01",
-            false => "00",
-            null => null
-        };
-    }
+    private static string? ConvertSampledToTraceFlags(bool? isSampled) => isSampled ?? false ? "01" : "00";
 }

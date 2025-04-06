@@ -29,6 +29,6 @@ public class W3CTraceHeaderTests
         var result = traceHeader.ToString();
 
         // Assert
-        result.Should().Be("00-75302ac48a024bde9a3b3734a82e36c8-1000000000000000");
+        result.Should().Be("00-75302ac48a024bde9a3b3734a82e36c8-1000000000000000-00");
     }
 }
