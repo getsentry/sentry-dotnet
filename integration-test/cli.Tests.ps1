@@ -165,7 +165,7 @@ Describe 'MAUI' -ForEach @(
             'maui-app.pdb'
         )
         $result.ScriptOutput | Should -AnyElementMatch 'Uploaded a total of 1 new mapping files'
-        $result.ScriptOutput | Should -AnyElementMatch 'Found 17 debug information files \(1 with embedded sources\)'
+        $result.ScriptOutput | Should -AnyElementMatch 'Found 25 debug information files \(1 with embedded sources\)'
     }
 
     It "uploads symbols and sources for an iOS build" -Skip:(!$IsMacOS) {

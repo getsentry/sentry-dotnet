@@ -3,8 +3,10 @@
     <TargetFrameworks>net8.0-android34.0</TargetFrameworks>
     <!-- BG8605 and BG8606 happen because there's a missing androidx.lifecycle dependency, but we don't need it here.  (The native Android Sentry SDK will use it if it exists.) -->
     <NoWarn>$(NoWarn);BG8605;BG8606</NoWarn>
-    <SentryAndroidSdkVersion>7.20.1</SentryAndroidSdkVersion>
+    <SentryAndroidSdkVersion>8.6.0</SentryAndroidSdkVersion>
     <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
+    <!-- This gets resolved by the DownloadSentryAndroidSdk target -->
+    <SentryNativeNdkVersion></SentryNativeNdkVersion>
     <Description>.NET Bindings for the Sentry Android SDK</Description>
   </PropertyGroup>
 
@@ -59,6 +61,33 @@
       Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar')"
       Retries="3"
     />
+    <!-- The native-ndk exists outside of the android-ndk now. We're downloading the POM file to get the version of the native-ndk. -->
+    <DownloadFile
+      SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-ndk/$(SentryAndroidSdkVersion)/sentry-android-ndk-$(SentryAndroidSdkVersion).pom"
+      DestinationFolder="$(SentryAndroidSdkDirectory)"
+      Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).pom')"
+      Retries="3"
+    />
+    
+    <XmlPeek
+      XmlInputPath="$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).pom"
+      Query="//*[local-name()='dependency' and .//*[local-name()='artifactId' and text()='sentry-native-ndk']]/*[local-name()='version']/text()"
+      Condition="Exists('$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).pom')">
+      <Output TaskParameter="Result" PropertyName="SentryNativeNdkVersion" />
+    </XmlPeek>
+    
+    <DownloadFile
+      SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-native-ndk/$(SentryNativeNdkVersion)/sentry-native-ndk-$(SentryNativeNdkVersion).aar"
+      DestinationFolder="$(SentryAndroidSdkDirectory)"
+      Condition="'$(SentryNativeNdkVersion)' != '' And !Exists('$(SentryAndroidSdkDirectory)sentry-native-ndk-$(SentryNativeNdkVersion).aar')"
+      Retries="3"
+    />
+    
+    <!-- Since we're reading the version from the POM file, we need to create an item for the downloaded sentry-native-ndk -->
+    <ItemGroup Condition="'$(SentryNativeNdkVersion)' != ''">
+      <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-native-ndk-$(SentryNativeNdkVersion).aar" />
+    </ItemGroup>
   </Target>
 
+  <UsingTask TaskName="XmlPeek" AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"/>
 </Project>
