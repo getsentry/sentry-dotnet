@@ -10,34 +10,39 @@ namespace Sentry.Internal;
 /// </remarks>
 internal struct FnvHash
 {
-    public FnvHash()
+    // Provide a constructor that takes a parameter (so it’s not the default one).
+    // This lets you explicitly set your initial hash code:
+    public FnvHash(int _)
     {
+        _hashCode = Offset;
     }
 
     private const int Offset = unchecked((int)2166136261);
     private const int Prime = 16777619;
 
-    private int HashCode { get; set; } = Offset;
+    // Field (no initializer here—set it in the constructor)
+    private int _hashCode;
 
     private void Combine(byte data)
     {
         unchecked
         {
-            HashCode ^= data;
-            HashCode *= Prime;
+            _hashCode ^= data;
+            _hashCode *= Prime;
         }
     }
 
-    private static int ComputeHash(byte[] data)
+    private static int ComputeHashInternal(byte[] data)
     {
-        var result = new FnvHash();
+        // Create FnvHash via the constructor, which initializes _hashCode to Offset
+        var result = new FnvHash(0);
         foreach (var b in data)
         {
             result.Combine(b);
         }
-
-        return result.HashCode;
+        return result._hashCode;
     }
 
-    public static int ComputeHash(string data) => ComputeHash(Encoding.UTF8.GetBytes(data));
+    public static int ComputeHash(string data)
+        => ComputeHashInternal(Encoding.UTF8.GetBytes(data));
 }
