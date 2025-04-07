@@ -4,7 +4,7 @@
 
 ### Features
 
-- Added CaptureFeedback overload with configureScope parameter #4035 ([#4073](https://github.com/getsentry/sentry-dotnet/pull/4073))
+- Added CaptureFeedback overload with configureScope parameter ([#4073](https://github.com/getsentry/sentry-dotnet/pull/4073))
  
 ## 5.5.0
 
