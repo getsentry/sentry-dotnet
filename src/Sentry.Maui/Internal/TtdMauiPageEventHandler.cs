@@ -61,6 +61,7 @@ internal class TtdMauiPageEventHandler(IHub hub) : IMauiPageEventHandler
             using var cts = new CancellationTokenSource();
             cts.CancelAfterSafe(TimeSpan.FromSeconds(30));
 
+            // TODO: grab last span and add ttfd measurement
             // we're assuming that the user starts any spans around data calls, we wait for those before marking the transaction as finished
             await _transaction.FinishWithLastSpanAsync(cts.Token).ConfigureAwait(false);
         }
