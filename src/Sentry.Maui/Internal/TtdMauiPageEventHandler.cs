@@ -61,8 +61,8 @@ internal class TtdMauiPageEventHandler(IHub hub) : IMauiPageEventHandler
             using var cts = new CancellationTokenSource();
             cts.CancelAfterSafe(TimeSpan.FromSeconds(30));
 
-            // TODO: what about time to full display - it should happen WHEN this finishes
-            await _transaction.WaitForLastSpanToFinishAsync(cts.Token).ConfigureAwait(false);
+            // we're assuming that the user starts any spans around data calls, we wait for those before marking the transaction as finished
+            await _transaction.FinishWithLastSpanAsync(cts.Token).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -76,95 +76,3 @@ internal class TtdMauiPageEventHandler(IHub hub) : IMauiPageEventHandler
     public void OnNavigatedFrom(Page page) { }
 }
 
-
-/// <summary>
-/// TDOO
-/// </summary>
-public static class Tester
-{
-    /// <summary>
-    /// TODO
-    /// </summary>
-    /// <param name="transaction"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    public static async ValueTask WaitForLastSpanToFinishAsync(this ITransactionTracer transaction, CancellationToken cancellationToken = default)
-    {
-        if (transaction.IsAllSpansFinished())
-        {
-            var span = transaction.GetLastFinishedSpan();
-            if (span != null)
-                transaction.Finish(span.EndTimestamp);
-        }
-        else
-        {
-            var span = await transaction.GetLastSpanWhenFinishedAsync(cancellationToken).ConfigureAwait(false);
-            if (span != null)
-                transaction.Finish(span.EndTimestamp);
-        }
-    }
-
-    /// <summary>
-    /// TODO
-    /// </summary>
-    /// <param name="transaction"></param>
-    /// <returns></returns>
-    public static bool IsAllSpansFinished(this ITransactionTracer transaction)
-        => transaction.Spans.All(x => x.IsFinished);
-
-
-    /// <summary>
-    /// TODO
-    /// </summary>
-    /// <param name="transaction"></param>
-    /// <returns></returns>
-    public static ISpan? GetLastFinishedSpan(this ITransactionTracer transaction)
-        => transaction.Spans
-            .ToList()
-            .Where(x => x.IsFinished)
-            .OrderByDescending(x => x.EndTimestamp)
-            .LastOrDefault(x => x.IsFinished);
-
-    /// <summary>
-    /// TODO
-    /// </summary>
-    /// <param name="transaction"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    public static async Task<ISpan?> GetLastSpanWhenFinishedAsync(this ITransactionTracer transaction, CancellationToken cancellationToken = default)
-    {
-        // what if no spans
-        if (transaction.IsAllSpansFinished())
-            return transaction.GetLastFinishedSpan();
-
-        var tcs = new TaskCompletionSource<ISpan?>();
-        var handler = new EventHandler<SpanStatus?>((_, _) =>
-        {
-            if (transaction.IsAllSpansFinished())
-            {
-                var lastSpan = transaction.GetLastFinishedSpan();
-                tcs.SetResult(lastSpan);
-            }
-        });
-
-        try
-        {
-            foreach (var span in transaction.Spans)
-            {
-                if (!span.IsFinished)
-                {
-                    span.StatusChanged += handler;
-                }
-            }
-
-            return await tcs.Task.ConfigureAwait(false);
-        }
-        finally
-        {
-            foreach (var span in transaction.Spans)
-            {
-                span.StatusChanged -= handler;
-            }
-        }
-    }
-}
