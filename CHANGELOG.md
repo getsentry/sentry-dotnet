@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix UWP Net Native compilation ([#4085](https://github.com/getsentry/sentry-dotnet/pull/4085))
+
 ## 5.5.0
 
 ### Features
