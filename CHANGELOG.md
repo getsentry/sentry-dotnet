@@ -5,6 +5,7 @@
 ### Fixes
 
 - Fix UWP Net Native compilation ([#4085](https://github.com/getsentry/sentry-dotnet/pull/4085))
+- Sentry Java SDK dependencies are now detected and included in the Android bindings ([#4079](https://github.com/getsentry/sentry-dotnet/pull/4079))
 
 ## 5.5.0
 
@@ -30,6 +31,9 @@
 - Bump CLI from v2.42.2 to v2.43.0 ([#4036](https://github.com/getsentry/sentry-dotnet/pull/4036), [#4049](https://github.com/getsentry/sentry-dotnet/pull/4049), [#4060](https://github.com/getsentry/sentry-dotnet/pull/4060), [#4062](https://github.com/getsentry/sentry-dotnet/pull/4062))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2430)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.42.2...2.43.0)
+- Bump Java SDK from v7.20.1 to v8.6.0 ([#4075](https://github.com/getsentry/sentry-dotnet/pull/4075))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#860)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.20.1...8.6.0)
 
 ## 5.4.0
 
