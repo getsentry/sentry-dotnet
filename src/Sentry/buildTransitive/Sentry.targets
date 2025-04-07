@@ -9,6 +9,12 @@
     <SentryAttributesFile>Sentry.Attributes$(MSBuildProjectExtension.Replace('proj', ''))</SentryAttributesFile>
   </PropertyGroup>
 
+  <Target Name="_SentryEnsureAndroidEnableAssemblyCompressionDisabled"
+          Condition="$(TargetFramework.Contains('-android')) AND '$(AndroidEnableAssemblyCompression)' == 'false'"
+          BeforeTargets="ResolveAssemblyReferences;Build;Rebuild">
+    <Error Text="Android projects using Sentry cannot build using AndroidEnableAssemblyCompression = false due to a Microsoft issue.  Please follow https://github.com/dotnet/android/issues/9752" />
+  </Target>
+
   <Target Name="WriteSentryAttributes"
           Condition="$(Language) == 'VB' or $(Language) == 'C#' or $(Language) == 'F#'"
           BeforeTargets="BeforeCompile;CoreCompile"

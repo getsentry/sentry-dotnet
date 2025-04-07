@@ -9,6 +9,9 @@
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <!-- XA0119: Using fast deployment and a code shrinker at the same time is not recommended. Use fast deployment for Debug configurations and a code shrinker for Release configurations.-->
     <NoWarn>$(NoWarn);XA0119</NoWarn>
+
+    <!--uncomment to test targets that block this flag-->
+    <!--<AndroidEnableAssemblyCompression>false</AndroidEnableAssemblyCompression>-->
   </PropertyGroup>
 
   <ItemGroup>
