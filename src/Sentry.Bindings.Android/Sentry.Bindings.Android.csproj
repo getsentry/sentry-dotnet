@@ -1,10 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0-android34.0</TargetFrameworks>
-    <!-- BG8605 and BG8606 happen because there's a missing androidx.lifecycle dependency, but we don't need it here.  (The native Android Sentry SDK will use it if it exists.) -->
-    <NoWarn>$(NoWarn);BG8605;BG8606</NoWarn>
+    <TargetFrameworks>net8.0-android34.0;net9.0-android35.0</TargetFrameworks>
     <SentryAndroidSdkVersion>8.6.0</SentryAndroidSdkVersion>
-    <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
+    <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\$(TargetFramework)\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
     <!-- This gets resolved by the DownloadSentryAndroidSdk target -->
     <SentryNativeNdkVersion></SentryNativeNdkVersion>
     <Description>.NET Bindings for the Sentry Android SDK</Description>
@@ -31,10 +29,46 @@
     <InternalsVisibleTo Include="Sentry.Maui.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!-- Dependencies for AndroidMavenLibrary references
+       Note: versions match what was shipped with net8.0-android34.0 in:
+       https://www.nuget.org/packages/Microsoft.Maui.Core/8.0.3#dependencies-body-tab
+       -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net8'))">
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.6.1.3" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.6.1.3" />
+    <!-- MAUI 8 references this version indirectly via Xamarin.AndroidX.SwipeRefreshLayout (>= 1.1.0.14)   -->
+    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.10.1.2" />
+  </ItemGroup>
+
+  <!-- Dependencies for AndroidMavenLibrary references
+       Note: versions match what was shipped with net9.0-android35.0 in:
+       https://www.nuget.org/packages/Microsoft.Maui.Core/9.0.0#dependencies-body-tab
+       -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net9'))">
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.8.5.1" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.8.5.1" />
+    <!-- MAUI 9 references this version indirectly via Xamarin.AndroidX.SwipeRefreshLayout (>= 1.1.0.24)   -->
+    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.13.1.5" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net8'))">
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar" />
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-core-$(SentryAndroidSdkVersion).aar" />
     <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).aar" />
+  </ItemGroup>
+
+  <!-- Starting with .NET 9 we can detect Java dependencies using POM files and AndroidMavenLibrary references -->
+  <ItemGroup Condition="!$(TargetFramework.StartsWith('net8'))">
+    <AndroidLibrary
+      Include="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar"
+      Manifest="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).pom"
+      JavaArtifact="io.sentry:sentry:$(SentryAndroidSdkVersion)"
+    />
+    <AndroidMavenLibrary Include="io.sentry:sentry-android-core" Version="$(SentryAndroidSdkVersion)" />
+    <AndroidMavenLibrary Include="io.sentry:sentry-android-ndk" Version="$(SentryAndroidSdkVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <AndroidLibrary Include="..\..\lib\sentry-android-supplemental\bin\sentry-android-supplemental.jar" />
     <AndroidNativeLibrary Include="..\..\lib\sentrysupplemental\bin\arm64-v8a\libsentrysupplemental.so" Abi="arm64-v8a" />
     <AndroidNativeLibrary Include="..\..\lib\sentrysupplemental\bin\armeabi-v7a\libsentrysupplemental.so" Abi="armeabi-v7a" />
@@ -46,13 +80,13 @@
     <DownloadFile
       SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-core/$(SentryAndroidSdkVersion)/sentry-android-core-$(SentryAndroidSdkVersion).aar"
       DestinationFolder="$(SentryAndroidSdkDirectory)"
-      Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-android-core-$(SentryAndroidSdkVersion).aar')"
+      Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-android-core-$(SentryAndroidSdkVersion).aar') And $(TargetFramework.StartsWith('net8'))"
       Retries="3"
     />
     <DownloadFile
       SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-ndk/$(SentryAndroidSdkVersion)/sentry-android-ndk-$(SentryAndroidSdkVersion).aar"
       DestinationFolder="$(SentryAndroidSdkDirectory)"
-      Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).aar')"
+      Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).aar') And $(TargetFramework.StartsWith('net8'))"
       Retries="3"
     />
     <DownloadFile
@@ -61,6 +95,13 @@
       Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar')"
       Retries="3"
     />
+    <DownloadFile
+      SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry/$(SentryAndroidSdkVersion)/sentry-$(SentryAndroidSdkVersion).pom"
+      DestinationFolder="$(SentryAndroidSdkDirectory)"
+      Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).pom') And !$(TargetFramework.StartsWith('net8'))"
+      Retries="3"
+    />
+
     <!-- The native-ndk exists outside of the android-ndk now. We're downloading the POM file to get the version of the native-ndk. -->
     <DownloadFile
       SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-ndk/$(SentryAndroidSdkVersion)/sentry-android-ndk-$(SentryAndroidSdkVersion).pom"
@@ -68,24 +109,26 @@
       Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).pom')"
       Retries="3"
     />
-    
+
     <XmlPeek
       XmlInputPath="$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).pom"
       Query="//*[local-name()='dependency' and .//*[local-name()='artifactId' and text()='sentry-native-ndk']]/*[local-name()='version']/text()"
       Condition="Exists('$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).pom')">
       <Output TaskParameter="Result" PropertyName="SentryNativeNdkVersion" />
     </XmlPeek>
-    
+
     <DownloadFile
       SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-native-ndk/$(SentryNativeNdkVersion)/sentry-native-ndk-$(SentryNativeNdkVersion).aar"
       DestinationFolder="$(SentryAndroidSdkDirectory)"
-      Condition="'$(SentryNativeNdkVersion)' != '' And !Exists('$(SentryAndroidSdkDirectory)sentry-native-ndk-$(SentryNativeNdkVersion).aar')"
+      Condition="'$(SentryNativeNdkVersion)' != '' And !Exists('$(SentryAndroidSdkDirectory)sentry-native-ndk-$(SentryNativeNdkVersion).aar') And $(TargetFramework.StartsWith('net8'))"
       Retries="3"
     />
-    
-    <!-- Since we're reading the version from the POM file, we need to create an item for the downloaded sentry-native-ndk -->
-    <ItemGroup Condition="'$(SentryNativeNdkVersion)' != ''">
+
+    <ItemGroup Condition="'$(SentryNativeNdkVersion)' != '' And $(TargetFramework.StartsWith('net8'))">
       <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-native-ndk-$(SentryNativeNdkVersion).aar" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(SentryNativeNdkVersion)' != '' And !$(TargetFramework.StartsWith('net8'))">
+      <AndroidMavenLibrary Include="io.sentry:sentry-native-ndk" Version="$(SentryNativeNdkVersion)" />
     </ItemGroup>
   </Target>
 
