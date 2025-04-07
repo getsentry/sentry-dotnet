@@ -458,6 +458,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     private void RunPageEventHandlers(Action<IMauiPageEventHandler> action)
     {
-        foreach (var handler in _pageEventHandlers) action(handler); // TODO: try/catch in case of user code?
+        foreach (var handler in _pageEventHandlers)
+            action(handler); // TODO: try/catch in case of user code?
     }
 }

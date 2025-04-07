@@ -32,8 +32,8 @@ internal class NoOpSpan : ISpan
 
     public event EventHandler<SpanStatus?>? StatusChanged
     {
-        add {}
-        remove {}
+        add { }
+        remove { }
     }
 
     public string? Description

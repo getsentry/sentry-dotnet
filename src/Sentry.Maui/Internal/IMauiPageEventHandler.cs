@@ -9,23 +9,23 @@ public interface IMauiPageEventHandler
     /// Page.OnAppearing
     /// </summary>
     /// <param name="page"></param>
-    void OnAppearing(Page page);
+    public void OnAppearing(Page page);
 
     /// <summary>
     /// Page.OnDisappearing
     /// </summary>
     /// <param name="page"></param>
-    void OnDisappearing(Page page);
+    public void OnDisappearing(Page page);
 
     /// <summary>
     /// Page.OnNavigatedTo
     /// </summary>
     /// <param name="page"></param>
-    void OnNavigatedTo(Page page);
+    public void OnNavigatedTo(Page page);
 
     /// <summary>
     /// Page.OnNavigatedFrom
     /// </summary>
     /// <param name="page"></param>
-    void OnNavigatedFrom(Page page);
+    public void OnNavigatedFrom(Page page);
 }
