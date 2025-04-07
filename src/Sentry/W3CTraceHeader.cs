@@ -83,19 +83,5 @@ internal class W3CTraceHeader
         return $"{SupportedVersion}-{SentryTraceHeader.TraceId}-{SentryTraceHeader.SpanId}-{traceFlags}";
     }
 
-    /// <inheritdoc/>
-    public override bool Equals(object? obj)
-    {
-        if (obj is W3CTraceHeader other)
-        {
-            return SentryTraceHeader.Equals(other.SentryTraceHeader);
-        }
-
-        return false;
-    }
-
-    /// <inheritdoc/>
-    public override int GetHashCode() => SentryTraceHeader.GetHashCode();
-
     private static string? ConvertSampledToTraceFlags(bool? isSampled) => isSampled ?? false ? "01" : "00";
 }
