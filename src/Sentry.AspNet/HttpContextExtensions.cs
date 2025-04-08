@@ -85,6 +85,8 @@ public static class HttpContextExtensions
     {
         var options = SentrySdk.CurrentOptions;
 
+        // If both sentry-trace and traceparent headers are present, sentry-trace takes precedence.
+        // See: https://github.com/getsentry/team-sdks/issues/41
         var traceHeader = TryGetSentryTraceHeader(httpContext, options);
         traceHeader ??= TryGetW3CTraceHeader(httpContext, options)?.SentryTraceHeader;
         var baggageHeader = TryGetBaggageHeader(httpContext, options);
