@@ -506,7 +506,10 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public void CaptureFeedback(SentryFeedback feedback, SentryHint hint, Action<Scope> configureScope)
+    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope) =>
+        CaptureFeedback(feedback, null, configureScope);
+
+    public void CaptureFeedback(SentryFeedback feedback, SentryHint? hint, Action<Scope> configureScope)
     {
         if (!IsEnabled)
         {
@@ -518,9 +521,6 @@ internal class Hub : IHub, IDisposable
             var clonedScope = CurrentScope.Clone();
             configureScope(clonedScope);
 
-            // Although we clone a temporary scope for the configureScope action, for the second scope
-            // argument (the breadcrumbScope) we pass in the current scope... this is because we want
-            // a breadcrumb to be left on the current scope for exception events
             CaptureFeedback(feedback, clonedScope, hint);
         }
         catch (Exception e)
@@ -536,8 +536,15 @@ internal class Hub : IHub, IDisposable
             return;
         }
 
-        scope ??= CurrentScope;
-        CurrentClient.CaptureFeedback(feedback, scope, hint);
+        try
+        {
+            scope ??= CurrentScope;
+            CurrentClient.CaptureFeedback(feedback, scope, hint);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to capture feedback");
+        }
     }
 
 #if MEMORY_DUMP_SUPPORTED

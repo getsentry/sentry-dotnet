@@ -121,7 +121,14 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// Captures feedback from the user.
     /// </summary>
     /// <param name="feedback">The feedback to send to Sentry.</param>
-    /// <param name="hint">Hint providing high level context for the source of the event, including attachments</param>
     /// <param name="configureScope">Callback method to configure the scope.</param>
-    public void CaptureFeedback(SentryFeedback feedback, SentryHint hint, Action<Scope> configureScope);
+    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope);
+
+    /// <summary>
+    /// Captures feedback from the user.
+    /// </summary>
+    /// <param name="feedback">The feedback to send to Sentry.</param>
+    /// <param name="hint">An optional hint providing high level context for the source of the event, including attachments</param>
+    /// <param name="configureScope">Callback method to configure the scope.</param>
+    public void CaptureFeedback(SentryFeedback feedback, SentryHint? hint, Action<Scope> configureScope);
 }
