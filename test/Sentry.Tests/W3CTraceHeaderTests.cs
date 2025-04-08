@@ -19,20 +19,20 @@ public class W3CTraceHeaderTests
         result.Should().Be($"00-75302ac48a024bde9a3b3734a82e36c8-1000000000000000-{traceFlags}");
     }
 
-    [Fact]
-    public void Parse_ValidW3CHeader_ReturnsW3CTraceHeader()
+    [Theory]
+    [InlineData("00-4bc7d217a6721c0e60e85e46d25fb3e5-f51f11f284da5299-01", "4bc7d217a6721c0e60e85e46d25fb3e5", "f51f11f284da5299", true)]
+    [InlineData("00-3d19f80b6f7da306d7b5652745ec6173-703b42311109c14e-09", "3d19f80b6f7da306d7b5652745ec6173", "703b42311109c14e", true)]
+    [InlineData("00-992d690c7a3691eb0f409a3ba6ecc0cc-b4f1f8cbcc61a0e5-00", "992d690c7a3691eb0f409a3ba6ecc0cc", "b4f1f8cbcc61a0e5", false)]
+    public void Parse_ValidW3CHeader_ReturnsW3CTraceHeader(string header, string expectedTraceId, string expectedSpanId, bool expectedIsSampled)
     {
-        // Arrange
-        var header = "00-4bc7d217a6721c0e60e85e46d25fb3e5-f51f11f284da5299-01";
-
         // Act
         var result = W3CTraceHeader.Parse(header);
 
         // Assert
         result.Should().NotBeNull();
-        result.SentryTraceHeader.TraceId.ToString().Should().Be("4bc7d217a6721c0e60e85e46d25fb3e5");
-        result.SentryTraceHeader.SpanId.ToString().Should().Be("f51f11f284da5299");
-        result.SentryTraceHeader.IsSampled.Should().BeTrue();
+        result.SentryTraceHeader.TraceId.ToString().Should().Be(expectedTraceId);
+        result.SentryTraceHeader.SpanId.ToString().Should().Be(expectedSpanId);
+        result.SentryTraceHeader.IsSampled.Should().Be(expectedIsSampled);
     }
 
     [Theory]

@@ -71,7 +71,8 @@ internal class W3CTraceHeader
         var traceId = SentryId.Parse(components[1]);
         var spanId = SpanId.Parse(components[2]);
 
-        var isSampled = string.Equals(components[3], "01", StringComparison.OrdinalIgnoreCase);
+        var isSampled = string.Equals(components[3], "01", StringComparison.Ordinal) ||
+                        string.Equals(components[3], "09", StringComparison.Ordinal);
 
         return new W3CTraceHeader(new SentryTraceHeader(traceId, spanId, isSampled));
     }
