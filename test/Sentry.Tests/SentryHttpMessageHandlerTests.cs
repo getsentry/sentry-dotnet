@@ -77,6 +77,42 @@ public class SentryHttpMessageHandlerTests
         request.Headers.Should().NotContain(h => h.Key == headerName);
     }
 
+    [Fact]
+    public async Task SendAsync_SentryTraceHeaderNotSet_SetsBothHeadersHeader_WhenUrlMatchesPropagationOptions()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
+        var options = new SentryOptions
+        {
+            TracePropagationTargets = new List<StringOrRegex>
+            {
+                new("localhost")
+            }
+        };
+
+        hub.GetTraceHeader().ReturnsForAnyArgs(
+            SentryTraceHeader.Parse("6877cc6ac231622a3d1d518a472a65b8-5e3bc28befdb2e3c"));
+
+        using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
+        using var sentryHandler = new SentryHttpMessageHandler(hub, options, innerHandler, failedRequestHandler);
+        using var client = new HttpClient(sentryHandler);
+
+        // Act
+        await client.GetAsync("https://localhost/");
+
+        using var request = innerHandler.GetRequests().Single();
+
+        // Assert
+        // Both headers should be set, see https://github.com/getsentry/team-sdks/issues/41
+        request.Headers.Should().Contain(h =>
+            h.Key == SentryTraceHeader.HttpHeaderName &&
+            string.Concat(h.Value) == "6877cc6ac231622a3d1d518a472a65b8-5e3bc28befdb2e3c");
+        request.Headers.Should().Contain(h =>
+            h.Key == W3CTraceHeader.HttpHeaderName &&
+            string.Concat(h.Value) == "00-6877cc6ac231622a3d1d518a472a65b8-5e3bc28befdb2e3c-00");
+    }
+
     [Theory]
     [InlineData("sentry-trace")]
     [InlineData("traceparent")]
