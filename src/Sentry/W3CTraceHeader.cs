@@ -7,6 +7,10 @@ internal class W3CTraceHeader
 {
     private const string SupportedVersion = "00";
 
+    private const string TraceFlagsSampled = "01";
+    
+    private const string TraceFlagsNotSampled = "00";
+
     /// <summary>
     /// The name of the W3C trace context header used for distributed tracing.
     /// This field contains the value "traceparent" which is part of the W3C Trace Context specification.
@@ -70,9 +74,7 @@ internal class W3CTraceHeader
 
         var traceId = SentryId.Parse(components[1]);
         var spanId = SpanId.Parse(components[2]);
-
-        var isSampled = string.Equals(components[3], "01", StringComparison.Ordinal) ||
-                        string.Equals(components[3], "09", StringComparison.Ordinal);
+        var isSampled = ConvertTraceFlagsToSampled(components[3]);
 
         return new W3CTraceHeader(new SentryTraceHeader(traceId, spanId, isSampled));
     }
@@ -84,5 +86,38 @@ internal class W3CTraceHeader
         return $"{SupportedVersion}-{SentryTraceHeader.TraceId}-{SentryTraceHeader.SpanId}-{traceFlags}";
     }
 
-    private static string? ConvertSampledToTraceFlags(bool? isSampled) => isSampled ?? false ? "01" : "00";
+    private static string? ConvertSampledToTraceFlags(bool? isSampled) => (isSampled ?? false) ? TraceFlagsSampled : TraceFlagsNotSampled;
+
+    private static bool? ConvertTraceFlagsToSampled(string? traceFlags)
+    {
+        if (string.IsNullOrWhiteSpace(traceFlags) || traceFlags.Length != 2)
+        {
+            return null;
+        }
+
+        // In version 00 of the W3C Trace Context specification, the trace flags field is 2 hex digits.
+        // Only the first bit is used. We use string comparison first to avoid parsing the hex value in
+        // the bulk of all cases.
+        // See https://github.com/getsentry/sentry-dotnet/pull/4084#discussion_r2035771628
+        if (string.Equals(traceFlags, TraceFlagsSampled, StringComparison.Ordinal))
+        {
+            return true;
+        }
+        else if (string.Equals(traceFlags, TraceFlagsNotSampled, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        // If the trace flags field is not "01" or "00", we try to parse it as a hex number.
+        // This is a fallback for cases where the trace flags field is not in the expected format.
+        if (!byte.TryParse(traceFlags, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out byte traceFlagsBytes))
+        {
+            // If it's not a valid hex number, we can't parse it.
+            return null;
+        }
+
+        // The first bit of the trace flags field indicates whether the trace is sampled.
+        // We use bitwise AND to check if the first bit is set.
+        return (traceFlagsBytes & 0x01) == 1;
+    }
 }
