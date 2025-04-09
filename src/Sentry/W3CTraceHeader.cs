@@ -7,15 +7,23 @@ internal class W3CTraceHeader
 {
     private const string SupportedVersion = "00";
 
-    private const string TraceFlagsSampled = "01";
-    
-    private const string TraceFlagsNotSampled = "00";
-
     /// <summary>
     /// The name of the W3C trace context header used for distributed tracing.
     /// This field contains the value "traceparent" which is part of the W3C Trace Context specification.
     /// </summary>
     public const string HttpHeaderName = "traceparent";
+
+    /// <summary>
+    /// Represents the sampled trace flags value ("01") in W3C Trace Context specification.
+    /// This flag indicates that the trace is part of the sampling set and should be recorded.
+    /// </summary>
+    public const string TraceFlagsSampled = "01";
+
+    /// <summary>
+    /// Represents the unsampled trace flags value ("00") in W3C Trace Context specification.
+    /// This flag indicates that the trace is not part of the sampling set and should not be recorded.
+    /// </summary>
+    public const string TraceFlagsNotSampled = "00";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="W3CTraceHeader"/> class from a Sentry trace header.

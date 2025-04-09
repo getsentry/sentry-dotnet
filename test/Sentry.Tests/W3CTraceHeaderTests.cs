@@ -3,9 +3,9 @@ namespace Sentry.Tests;
 public class W3CTraceHeaderTests
 {
     [Theory]
-    [InlineData(true, "01")]
-    [InlineData(false, "00")]
-    [InlineData(null, "00")]
+    [InlineData(true, W3CTraceHeader.TraceFlagsSampled)]
+    [InlineData(false, W3CTraceHeader.TraceFlagsNotSampled)]
+    [InlineData(null, W3CTraceHeader.TraceFlagsNotSampled)]
     public void ToString_ConvertsToW3CFormat(bool? isSampled, string traceFlags)
     {
         // Arrange
