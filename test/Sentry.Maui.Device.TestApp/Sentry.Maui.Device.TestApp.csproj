@@ -4,7 +4,8 @@
     <TargetFrameworks></TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android;net9.0-android</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios;net9.0-ios</TargetFrameworks>
-    <!-- Pin target iOS version so that our tests don't break when new versions of Xcode are released ('net8.0-ios' floats up otherwise) -->
+    <!-- Pin target iOS version so that our tests don't break when new versions of Xcode are released.
+      'net8.0-ios' resolves the latest version of the iOS SDK otherwise. -->
     <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">18</TargetPlatformVersion>
     <UseMaui>true</UseMaui>
     <!-- Currently broken on .NET 7, see
