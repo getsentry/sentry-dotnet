@@ -4,10 +4,8 @@
     <TargetFrameworks></TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android;net9.0-android</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios;net9.0-ios</TargetFrameworks>
-    <TargetPlatformVersion Condition="'$(TargetFramework)' == 'net8.0-ios'">17</TargetPlatformVersion>
-    <TargetPlatformVersion Condition="'$(TargetFramework)' == 'net9.0-ios'">18</TargetPlatformVersion>
-    <TargetPlatformVersion Condition="'$(TargetFramework)' == 'net9.0-android'">34</TargetPlatformVersion>
-    <TargetPlatformVersion Condition="'$(TargetFramework)' == 'net9.0-android'">35</TargetPlatformVersion>
+    <!-- Pin target iOS version so that our tests don't break when new versions of Xcode are released ('net8.0-ios' floats up otherwise) -->
+    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">18</TargetPlatformVersion>
     <UseMaui>true</UseMaui>
     <!-- Currently broken on .NET 7, see
       - https://github.com/dotnet/maui/issues/18573
