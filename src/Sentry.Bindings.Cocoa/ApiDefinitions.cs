@@ -27,6 +27,7 @@ delegate SentryBreadcrumb SentryBeforeBreadcrumbCallback (SentryBreadcrumb bread
 
 // typedef SentryEvent * _Nullable (^SentryBeforeSendEventCallback)(SentryEvent * _Nonnull);
 [Internal]
+[return: NullAllowed]
 delegate SentryEvent SentryBeforeSendEventCallback (SentryEvent @event);
 
 // typedef id<SentrySpan> _Nullable (^SentryBeforeSendSpanCallback)(id<SentrySpan> _Nonnull);
@@ -57,10 +58,6 @@ delegate NSNumber SentryTracesSamplerCallback (SentrySamplingContext samplingCon
 // typedef void (^SentrySpanCallback)(id<SentrySpan> _Nullable);
 [Internal]
 delegate void SentrySpanCallback ([NullAllowed] SentrySpan span);
-
-// typedef BOOL (^SentryBeforeEmitMetricCallback)(NSString * _Nonnull, NSDictionary<NSString *,NSString *> * _Nonnull);
-[Internal]
-delegate bool SentryBeforeEmitMetricCallback (string arg0, NSDictionary<NSString, NSString> arg1);
 
 // @interface SentryAttachment : NSObject
 [BaseType (typeof(NSObject))]
@@ -282,13 +279,6 @@ interface SentryClient
     void Close ();
 }
 
-// @interface SentryCrashExceptionApplication : NSObject
-[BaseType (typeof(NSObject))]
-[Internal]
-interface SentryCrashExceptionApplication
-{
-}
-
 // @interface SentryDebugImageProvider : NSObject
 [BaseType (typeof(NSObject))]
 [Internal]
@@ -298,7 +288,7 @@ interface SentryDebugImageProvider
     [Export ("getDebugImagesForThreads:")]
     SentryDebugMeta[] GetDebugImagesForThreads (SentryThread[] threads);
 
-    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForThreads:(NSArray<SentryThread *> * _Nonnull)threads isCrash:(BOOL)isCrash;
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForThreads:(NSArray<SentryThread *> * _Nonnull)threads isCrash:(BOOL)isCrash __attribute__((deprecated("This method is slow and will be removed in a future version. Use -[getDebugImagesFromCacheForThreads:] instead.")));
     [Export ("getDebugImagesForThreads:isCrash:")]
     SentryDebugMeta[] GetDebugImagesForThreads (SentryThread[] threads, bool isCrash);
 
@@ -306,7 +296,7 @@ interface SentryDebugImageProvider
     [Export ("getDebugImagesForFrames:")]
     SentryDebugMeta[] GetDebugImagesForFrames (SentryFrame[] frames);
 
-    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForFrames:(NSArray<SentryFrame *> * _Nonnull)frames isCrash:(BOOL)isCrash;
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesForFrames:(NSArray<SentryFrame *> * _Nonnull)frames isCrash:(BOOL)isCrash __attribute__((deprecated("This method is slow and will be removed in a future version. Use -[getDebugImagesFromCacheForFrames:] instead.")));
     [Export ("getDebugImagesForFrames:isCrash:")]
     SentryDebugMeta[] GetDebugImagesForFrames (SentryFrame[] frames, bool isCrash);
 
@@ -314,7 +304,7 @@ interface SentryDebugImageProvider
     [Export ("getDebugImages")]
     SentryDebugMeta[] DebugImages { get; }
 
-    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesCrashed:(BOOL)isCrash;
+    // -(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImagesCrashed:(BOOL)isCrash __attribute__((deprecated("This method is slow and will be removed in a future version. Use -[getDebugImagesFromCache:] instead.")));
     [Export ("getDebugImagesCrashed:")]
     SentryDebugMeta[] GetDebugImagesCrashed (bool isCrash);
 }
@@ -873,7 +863,7 @@ interface SentrySpan : SentrySerializable
     // @required -(NSString * _Nullable)baggageHttpHeader;
     [Abstract]
     [NullAllowed, Export ("baggageHttpHeader")]
-    string BaggageHttpHeader();
+    string BaggageHttpHeader { get; }
 }
 
 // @interface SentryHub : NSObject
@@ -1397,6 +1387,10 @@ interface SentryOptions
     [Export ("enablePerformanceV2")]
     bool EnablePerformanceV2 { get; set; }
 
+    // @property (assign, nonatomic) BOOL enablePersistingTracesWhenCrashing;
+    [Export ("enablePersistingTracesWhenCrashing")]
+    bool EnablePersistingTracesWhenCrashing { get; set; }
+
     // @property (nonatomic) SentryScope * _Nonnull (^ _Nonnull)(SentryScope * _Nonnull) initialScope;
     [Export ("initialScope", ArgumentSemantic.Assign)]
     Func<SentryScope, SentryScope> InitialScope { get; set; }
@@ -1428,6 +1422,10 @@ interface SentryOptions
     // @property (assign, nonatomic) BOOL enablePreWarmedAppStartTracing;
     [Export ("enablePreWarmedAppStartTracing")]
     bool EnablePreWarmedAppStartTracing { get; set; }
+
+    // @property (nonatomic, strong) SentryReplayOptions * _Nonnull sessionReplay;
+    [Export ("sessionReplay", ArgumentSemantic.Strong)]
+    SentryReplayOptions SessionReplay { get; set; }
 
     // @property (assign, nonatomic) BOOL enableNetworkTracking;
     [Export ("enableNetworkTracking")]
@@ -1766,11 +1764,6 @@ interface SentrySDK
     [Static]
     [Export ("captureUserFeedback:")]
     void CaptureUserFeedback (SentryUserFeedback userFeedback);
-
-    // +(void)showUserFeedbackForm;
-    [Static]
-    [Export ("showUserFeedbackForm")]
-    void ShowUserFeedbackForm ();
 
     // +(void)addBreadcrumb:(SentryBreadcrumb * _Nonnull)crumb __attribute__((swift_name("addBreadcrumb(_:)")));
     [Static]
@@ -2353,6 +2346,11 @@ interface PrivateSentrySDKOnly
     [Export ("getSdkVersionString")]
     string SdkVersionString { get; }
 
+    // +(void)addSdkPackage:(NSString * _Nonnull)name version:(NSString * _Nonnull)version;
+    [Static]
+    [Export ("addSdkPackage:version:")]
+    void AddSdkPackage (string name, string version);
+
     // +(NSDictionary * _Nonnull)getExtraContext;
     [Static]
     [Export ("getExtraContext")]
@@ -2419,6 +2417,11 @@ interface PrivateSentrySDKOnly
     [Export ("setCurrentScreen:")]
     void SetCurrentScreen (string screenName);
 
+    // +(void)configureSessionReplayWith:(id<SentryReplayBreadcrumbConverter> _Nullable)breadcrumbConverter screenshotProvider:(id<SentryViewScreenshotProvider> _Nullable)screenshotProvider;
+    [Static]
+    [Export ("configureSessionReplayWith:screenshotProvider:")]
+    void ConfigureSessionReplayWith ([NullAllowed] SentryReplayBreadcrumbConverter breadcrumbConverter, [NullAllowed] SentryViewScreenshotProvider screenshotProvider);
+
     // +(void)captureReplay;
     [Static]
     [Export ("captureReplay")]
@@ -2439,10 +2442,25 @@ interface PrivateSentrySDKOnly
     [Export ("addReplayRedactClasses:")]
     void AddReplayRedactClasses (Class[] classes);
 
+    // +(void)setIgnoreContainerClass:(Class _Nonnull)containerClass;
+    [Static]
+    [Export ("setIgnoreContainerClass:")]
+    void SetIgnoreContainerClass (Class containerClass);
+
+    // +(void)setRedactContainerClass:(Class _Nonnull)containerClass;
+    [Static]
+    [Export ("setRedactContainerClass:")]
+    void SetRedactContainerClass (Class containerClass);
+
+    // +(void)setReplayTags:(NSDictionary<NSString *,id> * _Nonnull)tags;
+    [Static]
+    [Export ("setReplayTags:")]
+    void SetReplayTags (NSDictionary<NSString, NSObject> tags);
+
     // +(NSDictionary<NSString *,id> * _Nullable)appStartMeasurementWithSpans;
     [Static]
     [NullAllowed, Export ("appStartMeasurementWithSpans")]
-    NSDictionary<NSString, NSObject> AppStartMeasurementWithSpans();
+    NSDictionary<NSString, NSObject> AppStartMeasurementWithSpans { get; }
 
     // +(SentryUser * _Nonnull)userWithDictionary:(NSDictionary * _Nonnull)dictionary;
     [Static]
@@ -2482,4 +2500,147 @@ interface SentryId
     // @property (readonly, nonatomic) NSUInteger hash;
     [Export ("hash")]
     nuint Hash { get; }
+}
+// @interface SentryReplayOptions : NSObject <SentryRedactOptions>
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry19SentryReplayOptions")]
+[Internal]
+interface SentryReplayOptions //: ISentryRedactOptions
+{
+    // @property (nonatomic) float sessionSampleRate;
+    [Export ("sessionSampleRate")]
+    float SessionSampleRate { get; set; }
+    // @property (nonatomic) float onErrorSampleRate;
+    [Export ("onErrorSampleRate")]
+    float OnErrorSampleRate { get; set; }
+    // @property (nonatomic) BOOL maskAllText;
+    [Export ("maskAllText")]
+    bool MaskAllText { get; set; }
+    // @property (nonatomic) BOOL maskAllImages;
+    [Export ("maskAllImages")]
+    bool MaskAllImages { get; set; }
+    // @property (nonatomic) enum SentryReplayQuality quality;
+    [Export ("quality", ArgumentSemantic.Assign)]
+    SentryReplayQuality Quality { get; set; }
+    /*
+    // @property (copy, nonatomic) NSArray<Class> * _Nonnull maskedViewClasses;
+    //[Export ("maskedViewClasses", ArgumentSemantic.Copy)]
+    //Class[] MaskedViewClasses { get; set; }
+    // @property (copy, nonatomic) NSArray<Class> * _Nonnull unmaskedViewClasses;
+    //[Export ("unmaskedViewClasses", ArgumentSemantic.Copy)]
+    //Class[] UnmaskedViewClasses { get; set; }
+    // @property (readonly, nonatomic) NSInteger replayBitRate;
+    [Export ("replayBitRate")]
+    nint ReplayBitRate { get; }
+    // @property (readonly, nonatomic) float sizeScale;
+    [Export ("sizeScale")]
+    float SizeScale { get; }
+    // @property (nonatomic) NSUInteger frameRate;
+    [Export ("frameRate")]
+    nuint FrameRate { get; set; }
+    // @property (readonly, nonatomic) NSTimeInterval errorReplayDuration;
+    [Export ("errorReplayDuration")]
+    double ErrorReplayDuration { get; }
+    // @property (readonly, nonatomic) NSTimeInterval sessionSegmentDuration;
+    [Export ("sessionSegmentDuration")]
+    double SessionSegmentDuration { get; }
+    // @property (readonly, nonatomic) NSTimeInterval maximumDuration;
+    [Export ("maximumDuration")]
+    double MaximumDuration { get; }
+    // -(instancetype _Nonnull)initWithSessionSampleRate:(float)sessionSampleRate onErrorSampleRate:(float)onErrorSampleRate maskAllText:(BOOL)maskAllText maskAllImages:(BOOL)maskAllImages __attribute__((objc_designated_initializer));
+    [Export ("initWithSessionSampleRate:onErrorSampleRate:maskAllText:maskAllImages:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (float sessionSampleRate, float onErrorSampleRate, bool maskAllText, bool maskAllImages);
+    // -(instancetype _Nonnull)initWithDictionary:(NSDictionary<NSString *,id> * _Nonnull)dictionary;
+    [Export ("initWithDictionary:")]
+    NativeHandle Constructor (NSDictionary<NSString, NSObject> dictionary);
+    */
+}
+// @interface SentryRRWebEvent : NSObject <SentryRRWebEvent>
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry16SentryRRWebEvent")]
+[Protocol]
+[Model]
+[DisableDefaultCtor]
+[Internal]
+interface SentryRRWebEvent : SentrySerializable
+{
+	// @property (readonly, nonatomic) enum SentryRRWebEventType type;
+	[Export ("type")]
+	SentryRRWebEventType Type { get; }
+	// @property (readonly, copy, nonatomic) NSDate * _Nonnull timestamp;
+	[Export ("timestamp", ArgumentSemantic.Copy)]
+	NSDate Timestamp { get; }
+	// @property (readonly, copy, nonatomic) NSDictionary<NSString *,id> * _Nullable data;
+	[NullAllowed, Export ("data", ArgumentSemantic.Copy)]
+	NSDictionary<NSString, NSObject> Data { get; }
+	// -(instancetype _Nonnull)initWithType:(enum SentryRRWebEventType)type timestamp:(NSDate * _Nonnull)timestamp data:(NSDictionary<NSString *,id> * _Nullable)data __attribute__((objc_designated_initializer));
+	[Export ("initWithType:timestamp:data:")]
+	[DesignatedInitializer]
+	NativeHandle Constructor (SentryRRWebEventType type, NSDate timestamp, [NullAllowed] NSDictionary<NSString, NSObject> data);
+	// -(NSDictionary<NSString *,id> * _Nonnull)serialize __attribute__((warn_unused_result("")));
+	[Export ("serialize")]
+	new NSDictionary<NSString, NSObject> Serialize();
+}
+// @protocol SentryReplayBreadcrumbConverter <NSObject>
+[Protocol (Name = "_TtP6Sentry31SentryReplayBreadcrumbConverter_")]
+[BaseType (typeof(NSObject), Name = "_TtP6Sentry31SentryReplayBreadcrumbConverter_")]
+[Model]
+[Internal]
+interface SentryReplayBreadcrumbConverter
+{
+	// @required -(id<SentryRRWebEvent> _Nullable)convertFrom:(SentryBreadcrumb * _Nonnull)breadcrumb __attribute__((warn_unused_result("")));
+	[Abstract]
+	[Export ("convertFrom:")]
+	[return: NullAllowed]
+	SentryRRWebEvent ConvertFrom (SentryBreadcrumb breadcrumb);
+}
+// @protocol SentryViewScreenshotProvider <NSObject>
+[Protocol (Name = "_TtP6Sentry28SentryViewScreenshotProvider_")]
+[Model]
+[BaseType (typeof(NSObject), Name = "_TtP6Sentry28SentryViewScreenshotProvider_")]
+[Internal]
+interface SentryViewScreenshotProvider
+{
+	// @required -(void)imageWithView:(UIView * _Nonnull)view onComplete:(void (^ _Nonnull)(UIImage * _Nonnull))onComplete;
+	[Abstract]
+	[Export ("imageWithView:onComplete:")]
+	void OnComplete (UIView view, Action<UIImage> onComplete);
+}
+// @interface SentrySessionReplayIntegration : SentryBaseIntegration
+[BaseType (typeof(NSObject))]
+[Internal]
+interface SentrySessionReplayIntegration
+{
+    // -(instancetype _Nonnull)initForManualUse:(SentryOptions * _Nonnull)options;
+    [Export ("initForManualUse:")]
+    NativeHandle Constructor (SentryOptions options);
+    // -(BOOL)captureReplay;
+    [Export ("captureReplay")]
+    bool CaptureReplay();
+    // -(void)configureReplayWith:(id<SentryReplayBreadcrumbConverter> _Nullable)breadcrumbConverter screenshotProvider:(id<SentryViewScreenshotProvider> _Nullable)screenshotProvider;
+    [Export ("configureReplayWith:screenshotProvider:")]
+    void ConfigureReplayWith ([NullAllowed] SentryReplayBreadcrumbConverter breadcrumbConverter, [NullAllowed] SentryViewScreenshotProvider screenshotProvider);
+    // -(void)pause;
+    [Export ("pause")]
+    void Pause ();
+    // -(void)resume;
+    [Export ("resume")]
+    void Resume ();
+    // -(void)stop;
+    [Export ("stop")]
+    void Stop ();
+    // -(void)start;
+    [Export ("start")]
+    void Start ();
+    // +(id<SentryRRWebEvent> _Nonnull)createBreadcrumbwithTimestamp:(NSDate * _Nonnull)timestamp category:(NSString * _Nonnull)category message:(NSString * _Nullable)message level:(enum SentryLevel)level data:(NSDictionary<NSString *,id> * _Nullable)data;
+    [Static]
+    [Export ("createBreadcrumbwithTimestamp:category:message:level:data:")]
+    SentryRRWebEvent CreateBreadcrumbwithTimestamp (NSDate timestamp, string category, [NullAllowed] string message, SentryLevel level, [NullAllowed] NSDictionary<NSString, NSObject> data);
+    // +(id<SentryRRWebEvent> _Nonnull)createNetworkBreadcrumbWithTimestamp:(NSDate * _Nonnull)timestamp endTimestamp:(NSDate * _Nonnull)endTimestamp operation:(NSString * _Nonnull)operation description:(NSString * _Nonnull)description data:(NSDictionary<NSString *,id> * _Nonnull)data;
+    [Static]
+    [Export ("createNetworkBreadcrumbWithTimestamp:endTimestamp:operation:description:data:")]
+    SentryRRWebEvent CreateNetworkBreadcrumbWithTimestamp (NSDate timestamp, NSDate endTimestamp, string operation, string description, NSDictionary<NSString, NSObject> data);
+    // +(id<SentryReplayBreadcrumbConverter> _Nonnull)createDefaultBreadcrumbConverter;
+    [Static]
+    [Export ("createDefaultBreadcrumbConverter")]
+    SentryReplayBreadcrumbConverter CreateDefaultBreadcrumbConverter();
 }

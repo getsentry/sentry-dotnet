@@ -88,3 +88,24 @@ internal enum SentryTransactionNameSource : long
     Component = 4,
     Task = 5
 }
+[Native]
+internal enum SentryReplayQuality : long
+{
+    Low = 0,
+    Medium = 1,
+    High = 2
+}
+[Native]
+internal enum SentryReplayType : long
+{
+    Session = 0,
+    Buffer = 1
+}
+[Native]
+internal enum SentryRRWebEventType : long
+{
+    None = 0,
+    Touch = 3,
+    Meta = 4,
+    Custom = 5
+}

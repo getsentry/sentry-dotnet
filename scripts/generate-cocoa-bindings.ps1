@@ -1,3 +1,5 @@
+# Reference: https://github.com/xamarin/xamarin-macios/blob/main/docs/website/binding_types_reference_guide.md
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
@@ -147,8 +149,47 @@ internal enum SentryTransactionNameSource : long
 }
 '@
 
+# This enum resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
+$SentryReplayQuality = @'
+[Native]
+internal enum SentryReplayQuality : long
+{
+    Low = 0,
+    Medium = 1,
+    High = 2
+}
+'@
+
+# This enum resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
+$SentryReplayType = @'
+[Native]
+internal enum SentryReplayType : long
+{
+    Session = 0,
+    Buffer = 1
+}
+'@
+
+# This enum resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
+$SentryRRWebEventType = @'
+[Native]
+internal enum SentryRRWebEventType : long
+{
+    None = 0,
+    Touch = 3,
+    Meta = 4,
+    Custom = 5
+}
+'@
+
 $Text += "`n$SentryLevel"
 $Text += "`n$SentryTransactionNameSource"
+$Text += "`n$SentryReplayQuality"
+$Text += "`n$SentryReplayType"
+$Text += "`n$SentryRRWebEventType"
 
 # Add header and output file
 $Text = "$Header`n`n$Text"
@@ -221,7 +262,7 @@ $Text = $Text -replace '\[Static\]\s*\[Internal\]\s*partial\s+interface\s+Consta
 
 # Update MethodToProperty translations
 $Text = $Text -replace '(Export \("get\w+"\)\]\n)\s*\[Verify \(MethodToProperty\)\]\n(.+ \{ get; \})', '$1$2'
-$Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+ (?:Hash|Value|DefaultIntegrations) \{ get; \})', '$1'
+$Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+ (?:Hash|Value|DefaultIntegrations|AppStartMeasurementWithSpans|BaggageHttpHeader) \{ get; \})', '$1'
 $Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+) \{ get; \}', '$1();'
 
 # Allow weakly typed NSArray
@@ -234,7 +275,7 @@ $Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\()\n\s*', '$1'
 # Remove default IsEqual implementation (already implemented by NSObject)
 $Text = $Text -replace '(?ms)\n?^ *// [^\n]*isEqual:.*?$.*?;\n', ''
 
-# Replace obsolete platform avaialbility attributes
+# Replace obsolete platform availability attributes
 $Text = $Text -replace '([\[,] )MacCatalyst \(', '$1Introduced (PlatformName.MacCatalyst, '
 $Text = $Text -replace '([\[,] )Mac \(', '$1Introduced (PlatformName.MacOSX, '
 $Text = $Text -replace '([\[,] )iOS \(', '$1Introduced (PlatformName.iOS, '
@@ -247,7 +288,6 @@ $Text = $Text -replace '(?m)(^\s*\/\/[^\r\n]*$\s*\[Export \("serialize"\)\]$\s*)
 
 $Text = $Text -replace '.*SentryEnvelope .*?[\s\S]*?\n\n', ''
 $Text = $Text -replace '.*typedef.*SentryOnAppStartMeasurementAvailable.*?[\s\S]*?\n\n', ''
-$Text = $Text -replace '\n.*SentryReplayBreadcrumbConverter.*?[\s\S]*?\);\n', ''
 
 $propertiesToRemove = @(
     'SentryAppStartMeasurement',
@@ -297,6 +337,184 @@ interface SentryId
 '@
 
 $Text += "`n$SentryId"
+
+# This interface resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
+$SentryReplayOptions = @'
+// @interface SentryReplayOptions : NSObject <SentryRedactOptions>
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry19SentryReplayOptions")]
+[Internal]
+interface SentryReplayOptions //: ISentryRedactOptions
+{
+    // @property (nonatomic) float sessionSampleRate;
+    [Export ("sessionSampleRate")]
+    float SessionSampleRate { get; set; }
+    // @property (nonatomic) float onErrorSampleRate;
+    [Export ("onErrorSampleRate")]
+    float OnErrorSampleRate { get; set; }
+    // @property (nonatomic) BOOL maskAllText;
+    [Export ("maskAllText")]
+    bool MaskAllText { get; set; }
+    // @property (nonatomic) BOOL maskAllImages;
+    [Export ("maskAllImages")]
+    bool MaskAllImages { get; set; }
+    // @property (nonatomic) enum SentryReplayQuality quality;
+    [Export ("quality", ArgumentSemantic.Assign)]
+    SentryReplayQuality Quality { get; set; }
+    /*
+    // @property (copy, nonatomic) NSArray<Class> * _Nonnull maskedViewClasses;
+    //[Export ("maskedViewClasses", ArgumentSemantic.Copy)]
+    //Class[] MaskedViewClasses { get; set; }
+    // @property (copy, nonatomic) NSArray<Class> * _Nonnull unmaskedViewClasses;
+    //[Export ("unmaskedViewClasses", ArgumentSemantic.Copy)]
+    //Class[] UnmaskedViewClasses { get; set; }
+    // @property (readonly, nonatomic) NSInteger replayBitRate;
+    [Export ("replayBitRate")]
+    nint ReplayBitRate { get; }
+    // @property (readonly, nonatomic) float sizeScale;
+    [Export ("sizeScale")]
+    float SizeScale { get; }
+    // @property (nonatomic) NSUInteger frameRate;
+    [Export ("frameRate")]
+    nuint FrameRate { get; set; }
+    // @property (readonly, nonatomic) NSTimeInterval errorReplayDuration;
+    [Export ("errorReplayDuration")]
+    double ErrorReplayDuration { get; }
+    // @property (readonly, nonatomic) NSTimeInterval sessionSegmentDuration;
+    [Export ("sessionSegmentDuration")]
+    double SessionSegmentDuration { get; }
+    // @property (readonly, nonatomic) NSTimeInterval maximumDuration;
+    [Export ("maximumDuration")]
+    double MaximumDuration { get; }
+    // -(instancetype _Nonnull)initWithSessionSampleRate:(float)sessionSampleRate onErrorSampleRate:(float)onErrorSampleRate maskAllText:(BOOL)maskAllText maskAllImages:(BOOL)maskAllImages __attribute__((objc_designated_initializer));
+    [Export ("initWithSessionSampleRate:onErrorSampleRate:maskAllText:maskAllImages:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (float sessionSampleRate, float onErrorSampleRate, bool maskAllText, bool maskAllImages);
+    // -(instancetype _Nonnull)initWithDictionary:(NSDictionary<NSString *,id> * _Nonnull)dictionary;
+    [Export ("initWithDictionary:")]
+    NativeHandle Constructor (NSDictionary<NSString, NSObject> dictionary);
+    */
+}
+'@
+
+$Text += "`n$SentryReplayOptions"
+
+# This interface resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
+$SentryRRWebEvent = @'
+// @interface SentryRRWebEvent : NSObject <SentryRRWebEvent>
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry16SentryRRWebEvent")]
+[Protocol]
+[Model]
+[DisableDefaultCtor]
+[Internal]
+interface SentryRRWebEvent : SentrySerializable
+{
+	// @property (readonly, nonatomic) enum SentryRRWebEventType type;
+	[Export ("type")]
+	SentryRRWebEventType Type { get; }
+	// @property (readonly, copy, nonatomic) NSDate * _Nonnull timestamp;
+	[Export ("timestamp", ArgumentSemantic.Copy)]
+	NSDate Timestamp { get; }
+	// @property (readonly, copy, nonatomic) NSDictionary<NSString *,id> * _Nullable data;
+	[NullAllowed, Export ("data", ArgumentSemantic.Copy)]
+	NSDictionary<NSString, NSObject> Data { get; }
+	// -(instancetype _Nonnull)initWithType:(enum SentryRRWebEventType)type timestamp:(NSDate * _Nonnull)timestamp data:(NSDictionary<NSString *,id> * _Nullable)data __attribute__((objc_designated_initializer));
+	[Export ("initWithType:timestamp:data:")]
+	[DesignatedInitializer]
+	NativeHandle Constructor (SentryRRWebEventType type, NSDate timestamp, [NullAllowed] NSDictionary<NSString, NSObject> data);
+	// -(NSDictionary<NSString *,id> * _Nonnull)serialize __attribute__((warn_unused_result("")));
+	[Export ("serialize")]
+	new NSDictionary<NSString, NSObject> Serialize();
+}
+'@
+
+$Text += "`n$SentryRRWebEvent"
+
+# This interface resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
+$SentryReplayBreadcrumbConverter = @'
+// @protocol SentryReplayBreadcrumbConverter <NSObject>
+[Protocol (Name = "_TtP6Sentry31SentryReplayBreadcrumbConverter_")]
+[BaseType (typeof(NSObject), Name = "_TtP6Sentry31SentryReplayBreadcrumbConverter_")]
+[Model]
+[Internal]
+interface SentryReplayBreadcrumbConverter
+{
+	// @required -(id<SentryRRWebEvent> _Nullable)convertFrom:(SentryBreadcrumb * _Nonnull)breadcrumb __attribute__((warn_unused_result("")));
+	[Abstract]
+	[Export ("convertFrom:")]
+	[return: NullAllowed]
+	SentryRRWebEvent ConvertFrom (SentryBreadcrumb breadcrumb);
+}
+'@
+
+$Text += "`n$SentryReplayBreadcrumbConverter"
+
+# This interface resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
+$SentryViewScreenshotProvider = @'
+// @protocol SentryViewScreenshotProvider <NSObject>
+[Protocol (Name = "_TtP6Sentry28SentryViewScreenshotProvider_")]
+[Model]
+[BaseType (typeof(NSObject), Name = "_TtP6Sentry28SentryViewScreenshotProvider_")]
+[Internal]
+interface SentryViewScreenshotProvider
+{
+	// @required -(void)imageWithView:(UIView * _Nonnull)view onComplete:(void (^ _Nonnull)(UIImage * _Nonnull))onComplete;
+	[Abstract]
+	[Export ("imageWithView:onComplete:")]
+	void OnComplete (UIView view, Action<UIImage> onComplete);
+}
+'@
+
+$Text += "`n$SentryViewScreenshotProvider"
+
+# This interface resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
+$sentrySessionReplayIntegration = @'
+// @interface SentrySessionReplayIntegration : SentryBaseIntegration
+[BaseType (typeof(NSObject))]
+[Internal]
+interface SentrySessionReplayIntegration
+{
+    // -(instancetype _Nonnull)initForManualUse:(SentryOptions * _Nonnull)options;
+    [Export ("initForManualUse:")]
+    NativeHandle Constructor (SentryOptions options);
+    // -(BOOL)captureReplay;
+    [Export ("captureReplay")]
+    bool CaptureReplay();
+    // -(void)configureReplayWith:(id<SentryReplayBreadcrumbConverter> _Nullable)breadcrumbConverter screenshotProvider:(id<SentryViewScreenshotProvider> _Nullable)screenshotProvider;
+    [Export ("configureReplayWith:screenshotProvider:")]
+    void ConfigureReplayWith ([NullAllowed] SentryReplayBreadcrumbConverter breadcrumbConverter, [NullAllowed] SentryViewScreenshotProvider screenshotProvider);
+    // -(void)pause;
+    [Export ("pause")]
+    void Pause ();
+    // -(void)resume;
+    [Export ("resume")]
+    void Resume ();
+    // -(void)stop;
+    [Export ("stop")]
+    void Stop ();
+    // -(void)start;
+    [Export ("start")]
+    void Start ();
+    // +(id<SentryRRWebEvent> _Nonnull)createBreadcrumbwithTimestamp:(NSDate * _Nonnull)timestamp category:(NSString * _Nonnull)category message:(NSString * _Nullable)message level:(enum SentryLevel)level data:(NSDictionary<NSString *,id> * _Nullable)data;
+    [Static]
+    [Export ("createBreadcrumbwithTimestamp:category:message:level:data:")]
+    SentryRRWebEvent CreateBreadcrumbwithTimestamp (NSDate timestamp, string category, [NullAllowed] string message, SentryLevel level, [NullAllowed] NSDictionary<NSString, NSObject> data);
+    // +(id<SentryRRWebEvent> _Nonnull)createNetworkBreadcrumbWithTimestamp:(NSDate * _Nonnull)timestamp endTimestamp:(NSDate * _Nonnull)endTimestamp operation:(NSString * _Nonnull)operation description:(NSString * _Nonnull)description data:(NSDictionary<NSString *,id> * _Nonnull)data;
+    [Static]
+    [Export ("createNetworkBreadcrumbWithTimestamp:endTimestamp:operation:description:data:")]
+    SentryRRWebEvent CreateNetworkBreadcrumbWithTimestamp (NSDate timestamp, NSDate endTimestamp, string operation, string description, NSDictionary<NSString, NSObject> data);
+    // +(id<SentryReplayBreadcrumbConverter> _Nonnull)createDefaultBreadcrumbConverter;
+    [Static]
+    [Export ("createDefaultBreadcrumbConverter")]
+    SentryReplayBreadcrumbConverter CreateDefaultBreadcrumbConverter();
+}
+'@
+
+$Text += "`n$sentrySessionReplayIntegration"
 
 # Add header and output file
 $Text = "$Header`n`n$Text"
