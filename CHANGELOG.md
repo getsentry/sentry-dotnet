@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- New source generator allows Sentry to see true build variables like PublishAot and PublishTrimmed to properly adapt checks in the Sentry SDK ([#4101](https://github.com/getsentry/sentry-dotnet/pull/4101))
+
 ## 5.5.1
 
 ### Fixes
