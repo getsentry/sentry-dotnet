@@ -119,6 +119,19 @@ $Text = $Text -replace '(?ms)\nstatic class CFunctions.*?}\n', ''
 
 # This enum resides in the Sentry-Swift.h
 # Appending it here so we don't need to import and create bindings for the entire header
+$SentryFeedbackSource = @'
+[Native]
+internal enum SentryFeedbackSource : long
+{
+    Unknown = 0,
+    User = 1,
+    System = 2,
+    Other = 3
+}
+'@
+
+# This enum resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
 $SentryLevel = @'
 
 [Native]
@@ -185,6 +198,7 @@ internal enum SentryRRWebEventType : long
 }
 '@
 
+$Text += "`n$SentryFeedbackSource"
 $Text += "`n$SentryLevel"
 $Text += "`n$SentryTransactionNameSource"
 $Text += "`n$SentryReplayQuality"
@@ -220,6 +234,9 @@ $Text = $Text -replace '\bISentrySerializable\b', 'SentrySerializable'
 
 # Remove INSCopying due to https://github.com/xamarin/xamarin-macios/issues/17130
 $Text = $Text -replace ': INSCopying,', ':' -replace '\s?[:,] INSCopying', ''
+
+# Remove iOS attributes like [iOS (13, 0)]
+$Text = $Text -replace '\[iOS \(\d{1,2}, \d{1,2}\)\]\n?', ''
 
 # Fix delegate argument names
 $Text = $Text -replace '(NSError) arg\d', '$1 error'

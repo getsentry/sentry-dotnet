@@ -31,6 +31,7 @@
     <!-- Set up the binding project. -->
     <ObjcBindingApiDefinition Include="ApiDefinitions.cs" />
     <ObjcBindingApiDefinition Include="PrivateApiDefinitions.cs" />
+    <ObjcBindingApiDefinition Include="SwiftApiDefinitions.cs" />
     <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
     <NativeReference Include="$(SentryCocoaFramework)" Kind="Framework" />
 
