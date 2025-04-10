@@ -277,5 +277,6 @@ public partial class SentryOptions
         /// <summary>
         /// ExperimentalOptions
         /// </summary>
-        public NativeExperimentalOptions ExperimentalOptions { get; set; } = new();    }
+        public NativeExperimentalOptions ExperimentalOptions { get; set; } = new();
+    }
 }
