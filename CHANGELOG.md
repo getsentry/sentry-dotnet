@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Reintroduced experimental support for Session Replay on Android ([#4097](https://github.com/getsentry/sentry-dotnet/pull/4097))
+
 ## 5.5.1
 
 ### Fixes
