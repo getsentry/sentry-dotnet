@@ -2,6 +2,10 @@
 
 ## 5.5.1
 
+### Features
+
+- Added `CaptureFeedback` overload with `configureScope` parameter ([#4073](https://github.com/getsentry/sentry-dotnet/pull/4073))
+ 
 ### Fixes
 
 - Fix UWP Net Native compilation ([#4085](https://github.com/getsentry/sentry-dotnet/pull/4085))
