@@ -1,6 +1,11 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry;
@@ -17,7 +22,26 @@ public static partial class SentrySdk
 {
     internal static IHub CurrentHub = DisabledHub.Instance;
 
+    /// <summary>
+    /// The Build Variables generated from you csproj file and initialized by the Sentry Source Generated Module Initializer
+    /// </summary>
+    public static IReadOnlyDictionary<string, string>? BuildVariables { get; private set; }
+
     internal static SentryOptions? CurrentOptions => CurrentHub.GetSentryOptions();
+
+
+    /// <summary>
+    /// This is called by a Sentry Source-Generator module initializers to help us determine things like
+    ///     Is your app AOT
+    /// </summary>
+    /// <param name="variables"></param>
+    public static void InitializeBuildVariables(Dictionary<string, string> variables)
+    {
+        if (BuildVariables == null)
+        {
+            BuildVariables = variables.AsReadOnly();
+        }
+    }
 
     /// <summary>
     /// Last event id recorded in the current scope.

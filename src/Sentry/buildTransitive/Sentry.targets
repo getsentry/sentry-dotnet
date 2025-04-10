@@ -5,6 +5,14 @@
     <Using Include="Sentry" />
   </ItemGroup>
 
+  <ItemGroup>
+    <CompilerVisibleProperty Include="PublishAot" />
+    <CompilerVisibleProperty Include="UseDotNetNativeToolchain" />
+    <CompilerVisibleProperty Include="PublishTrimmed" />
+    <CompilerVisibleProperty Include="DisableSentrySourceGenerator" />
+    <CompilerVisibleProperty Include="Configuration" />
+  </ItemGroup>
+
   <PropertyGroup>
     <SentryAttributesFile>Sentry.Attributes$(MSBuildProjectExtension.Replace('proj', ''))</SentryAttributesFile>
   </PropertyGroup>
