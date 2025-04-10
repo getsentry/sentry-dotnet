@@ -1,5 +1,6 @@
 /*
- * This file defines Xamarin iOS API contracts for the members we need from Sentry-Swift.h
+ * This file defines iOS API contracts for the members we need from Sentry-Swift.h
+ * Note that we are **not** using Objective Sharpie to generate contracts (instead they're maintained manually).
  */
 using System;
 using Foundation;
