@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Relax Android Version Dependency and reference only Xamarin.AndroidX.Lifecycle.Process allowing other transitive libraries to pull our dependency versions forward ([#4100](https://github.com/getsentry/sentry-dotnet/pull/4100))
+
 ## 5.5.1
 
 ### Fixes
