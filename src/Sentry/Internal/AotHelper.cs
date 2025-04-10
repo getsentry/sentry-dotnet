@@ -26,7 +26,7 @@ internal static class AotHelper
         return stackTrace.GetFrame(0)?.GetMethod() is null;
     }
 
-    static bool Check(string key)
+    private static bool Check(string key)
     {
         if (SentrySdk.BuildVariables?.TryGetValue(key, out var aotValue) ?? false)
         {
