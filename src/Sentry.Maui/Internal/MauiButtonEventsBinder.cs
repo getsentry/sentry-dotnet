@@ -1,7 +1,7 @@
 namespace Sentry.Maui.Internal;
 
 /// <inheritdoc />
-public class MauiButtonEventsBinder : IMauiElementEventBinder
+public class MauiButtonEventsBinder(IHub hub) : IMauiElementEventBinder
 {
     private Action<BreadcrumbEvent>? addBreadcrumbCallback;
 
@@ -31,7 +31,14 @@ public class MauiButtonEventsBinder : IMauiElementEventBinder
 
 
     private void OnButtonOnClicked(object? sender, EventArgs _)
-        => addBreadcrumbCallback?.Invoke(new(sender, nameof(Button.Clicked)));
+    {
+        hub.ConfigureScope(scope =>
+        {
+            // scope.Transaction.SetMeasurement();
+        });
+        addBreadcrumbCallback?.Invoke(new(sender, nameof(Button.Clicked)));
+    }
+
 
     private void OnButtonOnPressed(object? sender, EventArgs _)
         => addBreadcrumbCallback?.Invoke(new(sender, nameof(Button.Pressed)));

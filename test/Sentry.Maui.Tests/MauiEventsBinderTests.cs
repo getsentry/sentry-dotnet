@@ -23,9 +23,10 @@ public partial class MauiEventsBinderTests
                 hub,
                 options,
                 [
-                    new MauiButtonEventsBinder(),
+                    new MauiButtonEventsBinder(hub),
                     new MauiImageButtonEventsBinder()
-                ]
+                ],
+                []
             );
         }
     }
