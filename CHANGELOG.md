@@ -5,6 +5,15 @@
 ### Fixes
 - Ensure user exception data is not removed by AspNetCoreExceptionProcessor ([#4016](https://github.com/getsentry/sentry-dotnet/pull/4106))
 
+- Prevent users from disabling AndroidEnableAssemblyCompression which leads to untrappable crash ([#4089](https://github.com/getsentry/sentry-dotnet/pull/4089))
+
+## 5.5.1
+
+### Fixes
+
+- Fix UWP Net Native compilation ([#4085](https://github.com/getsentry/sentry-dotnet/pull/4085))
+- Sentry Java SDK dependencies are now detected and included in the Android bindings ([#4079](https://github.com/getsentry/sentry-dotnet/pull/4079))
+
 ## 5.5.0
 
 ### Features
