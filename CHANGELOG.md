@@ -5,6 +5,8 @@
 ### Fixes
 - Remove Strong Naming from Sentry.Hangfire ([#4099](https://github.com/getsentry/sentry-dotnet/pull/4099))
 
+- Prevent users from disabling AndroidEnableAssemblyCompression which leads to untrappable crash ([#4089](https://github.com/getsentry/sentry-dotnet/pull/4089))
+
 ## 5.5.1
 
 ### Fixes
@@ -27,7 +29,6 @@
 - Changed default value for `SentryOptions.EnableAppHangTrackingV2` to `false` ([#4042](https://github.com/getsentry/sentry-dotnet/pull/4042))
 - Missing MAUI `Shell` navigation breadcrumbs on iOS ([#4006](https://github.com/getsentry/sentry-dotnet/pull/4006))
 - Prevent application crashes when capturing screenshots on iOS ([#4069](https://github.com/getsentry/sentry-dotnet/pull/4069))
-- Prevent users from disabling AndroidEnableAssemblyCompression which leads to untrappable crash ([#4089](https://github.com/getsentry/sentry-dotnet/pull/4089))
 
 ### Dependencies
 
