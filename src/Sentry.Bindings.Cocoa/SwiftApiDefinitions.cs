@@ -244,11 +244,11 @@ interface SentryUserFeedbackConfiguration
     [Export("showFormForScreenshots")]
     bool ShowFormForScreenshots { get; set; }
 
-    [NullAllowed, Export("configureForm", ArgumentSemantic.Copy)]
-    Action<SentryUserFeedbackFormConfiguration> ConfigureForm { get; set; }
+    // [NullAllowed, Export("configureForm", ArgumentSemantic.Copy)]
+    // Action<SentryUserFeedbackFormConfiguration> ConfigureForm { get; set; }
 
-    [Export("formConfig", ArgumentSemantic.Strong)]
-    SentryUserFeedbackFormConfiguration FormConfig { get; set; }
+    // [Export("formConfig", ArgumentSemantic.Strong)]
+    // SentryUserFeedbackFormConfiguration FormConfig { get; set; }
 
     [NullAllowed, Export("tags", ArgumentSemantic.Copy)]
     NSDictionary<NSString, NSObject> Tags { get; set; }
@@ -265,17 +265,17 @@ interface SentryUserFeedbackConfiguration
     [NullAllowed, Export("onSubmitError", ArgumentSemantic.Copy)]
     Action<NSError> OnSubmitError { get; set; }
 
-    [NullAllowed, Export("configureTheme", ArgumentSemantic.Copy)]
-    Action<SentryUserFeedbackThemeConfiguration> ConfigureTheme { get; set; }
-
-    [Export("theme", ArgumentSemantic.Strong)]
-    SentryUserFeedbackThemeConfiguration Theme { get; set; }
-
-    [NullAllowed, Export("configureDarkTheme", ArgumentSemantic.Copy)]
-    Action<SentryUserFeedbackThemeConfiguration> ConfigureDarkTheme { get; set; }
-
-    [Export("darkTheme", ArgumentSemantic.Strong)]
-    SentryUserFeedbackThemeConfiguration DarkTheme { get; set; }
+    // [NullAllowed, Export("configureTheme", ArgumentSemantic.Copy)]
+    // Action<SentryUserFeedbackThemeConfiguration> ConfigureTheme { get; set; }
+    //
+    // [Export("theme", ArgumentSemantic.Strong)]
+    // SentryUserFeedbackThemeConfiguration Theme { get; set; }
+    //
+    // [NullAllowed, Export("configureDarkTheme", ArgumentSemantic.Copy)]
+    // Action<SentryUserFeedbackThemeConfiguration> ConfigureDarkTheme { get; set; }
+    //
+    // [Export("darkTheme", ArgumentSemantic.Strong)]
+    // SentryUserFeedbackThemeConfiguration DarkTheme { get; set; }
 
     [Export("textEffectiveHeightCenter")]
     nfloat TextEffectiveHeightCenter { get; set; }
@@ -309,27 +309,27 @@ interface SentryUserFeedbackConfiguration
     IntPtr Constructor();
 }
 
-[BaseType(typeof(NSObject), Name = "_TtC6Sentry37SentryUserFeedbackThemeConfiguration")]
-[DisableDefaultCtor]
-[Internal]
-interface SentryUserFeedbackThemeConfiguration
-{
-    [Export("backgroundColor", ArgumentSemantic.Strong)]
-    UIColor BackgroundColor { get; set; }
-
-    [Export("textColor", ArgumentSemantic.Strong)]
-    UIColor TextColor { get; set; }
-
-    [Export("buttonColor", ArgumentSemantic.Strong)]
-    UIColor ButtonColor { get; set; }
-
-    [Export("buttonTextColor", ArgumentSemantic.Strong)]
-    UIColor ButtonTextColor { get; set; }
-
-    [Export("init")]
-    [DesignatedInitializer]
-    IntPtr Constructor();
-}
+// [BaseType(typeof(NSObject), Name = "_TtC6Sentry37SentryUserFeedbackThemeConfiguration")]
+// [DisableDefaultCtor]
+// [Internal]
+// interface SentryUserFeedbackThemeConfiguration
+// {
+//     [Export("backgroundColor", ArgumentSemantic.Strong)]
+//     UIColor BackgroundColor { get; set; }
+//
+//     [Export("textColor", ArgumentSemantic.Strong)]
+//     UIColor TextColor { get; set; }
+//
+//     [Export("buttonColor", ArgumentSemantic.Strong)]
+//     UIColor ButtonColor { get; set; }
+//
+//     [Export("buttonTextColor", ArgumentSemantic.Strong)]
+//     UIColor ButtonTextColor { get; set; }
+//
+//     [Export("init")]
+//     [DesignatedInitializer]
+//     IntPtr Constructor();
+// }
 
 [BaseType(typeof(NSObject), Name = "_TtC6Sentry37SentryUserFeedbackWidgetConfiguration")]
 [DisableDefaultCtor]
@@ -366,30 +366,30 @@ interface SentryUserFeedbackWidgetConfiguration
 }
 
 
-[BaseType(typeof(NSObject), Name = "_TtC6Sentry37SentryUserFeedbackFormConfiguration")]
-[DisableDefaultCtor]
-[Internal]
-interface SentryUserFeedbackFormConfiguration
-{
-    [Export("title", ArgumentSemantic.Copy)]
-    string Title { get; set; }
-
-    [Export("subtitle", ArgumentSemantic.Copy)]
-    string Subtitle { get; set; }
-
-    [Export("submitButtonTitle", ArgumentSemantic.Copy)]
-    string SubmitButtonTitle { get; set; }
-
-    [Export("cancelButtonTitle", ArgumentSemantic.Copy)]
-    string CancelButtonTitle { get; set; }
-
-    [Export("thankYouMessage", ArgumentSemantic.Copy)]
-    string ThankYouMessage { get; set; }
-
-    [Export("init")]
-    [DesignatedInitializer]
-    IntPtr Constructor();
-}
+// [BaseType(typeof(NSObject), Name = "_TtC6Sentry37SentryUserFeedbackFormConfiguration")]
+// [DisableDefaultCtor]
+// [Internal]
+// interface SentryUserFeedbackFormConfiguration
+// {
+//     [Export("title", ArgumentSemantic.Copy)]
+//     string Title { get; set; }
+//
+//     [Export("subtitle", ArgumentSemantic.Copy)]
+//     string Subtitle { get; set; }
+//
+//     [Export("submitButtonTitle", ArgumentSemantic.Copy)]
+//     string SubmitButtonTitle { get; set; }
+//
+//     [Export("cancelButtonTitle", ArgumentSemantic.Copy)]
+//     string CancelButtonTitle { get; set; }
+//
+//     [Export("thankYouMessage", ArgumentSemantic.Copy)]
+//     string ThankYouMessage { get; set; }
+//
+//     [Export("init")]
+//     [DesignatedInitializer]
+//     IntPtr Constructor();
+// }
 
 // @protocol SentryViewScreenshotProvider <NSObject>
 [Protocol (Name = "_TtP6Sentry28SentryViewScreenshotProvider_")]
