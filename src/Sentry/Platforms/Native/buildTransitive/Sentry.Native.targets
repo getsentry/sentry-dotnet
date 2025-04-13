@@ -11,6 +11,8 @@
   <PropertyGroup>
     <!-- net8.0 or greater -->
     <FrameworkSupportsNative Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0')) and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">true</FrameworkSupportsNative>
+    <!-- Make it opt-out -->
+    <FrameworkSupportsNative Condition="'$(DisableSentryNative)' == 'true'">false</FrameworkSupportsNative>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and '$(RuntimeIdentifier)' == 'win-x64'">
