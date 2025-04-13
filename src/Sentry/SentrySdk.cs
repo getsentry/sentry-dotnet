@@ -492,6 +492,20 @@ public static partial class SentrySdk
     /// Captures feedback from the user.
     /// </summary>
     [DebuggerStepThrough]
+    public static void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope)
+        => CurrentHub.CaptureFeedback(feedback, configureScope);
+
+    /// <summary>
+    /// Captures feedback from the user.
+    /// </summary>
+    [DebuggerStepThrough]
+    public static void CaptureFeedback(SentryFeedback feedback, SentryHint? hint, Action<Scope> configureScope)
+        => CurrentHub.CaptureFeedback(feedback, hint, configureScope);
+
+    /// <summary>
+    /// Captures feedback from the user.
+    /// </summary>
+    [DebuggerStepThrough]
     public static void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
         => CurrentHub.CaptureFeedback(feedback, scope, hint);
 
