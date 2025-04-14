@@ -104,7 +104,10 @@
 
       <SentryReleaseOptions Condition="'$(SentryOrg)' != ''">$(SentryReleaseOptions) --org $(SentryOrg)</SentryReleaseOptions>
       <SentryReleaseOptions Condition="'$(SentryProject)' != ''">$(SentryReleaseOptions) --project $(SentryProject)</SentryReleaseOptions>
+
       <SentrySetCommitOptions Condition="'$(SentrySetCommitOptions)' == ''">--auto</SentrySetCommitOptions>
+      <SentrySetCommitReleaseOptions Condition="'$(SentryOrg)' != ''">$(SentrySetCommitReleaseOptions) --org $(SentryOrg)</SentrySetCommitReleaseOptions>
+      <SentrySetCommitReleaseOptions Condition="'$(SentryProject)' != ''">$(SentrySetCommitReleaseOptions) --project $(SentryProject)</SentrySetCommitReleaseOptions>
 
       <SentryCLIUploadOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIUploadOptions) --org $(SentryOrg)</SentryCLIUploadOptions>
       <SentryCLIUploadOptions Condition="'$(SentryProject)' != ''">$(SentryCLIUploadOptions) --project $(SentryProject)</SentryCLIUploadOptions>
@@ -350,7 +353,7 @@
           Condition="'$(SentryCLI)' != '' and '$(SentrySetCommits)' == 'true'">
     <Message Importance="High" Text="Setting Sentry commits" />
     <Exec
-      Command="$(SentryCLIBaseCommand) releases set-commits $(SentrySetCommitOptions) $(_SentryRelease) $(SentryReleaseOptions)"
+      Command="$(SentryCLIBaseCommand) releases set-commits $(SentrySetCommitOptions) $(_SentryRelease) $(SentrySetCommitReleaseOptions)"
       IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
     </Exec>
