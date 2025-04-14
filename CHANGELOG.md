@@ -10,6 +10,10 @@
 
 - Prevent users from disabling AndroidEnableAssemblyCompression which leads to untrappable crash ([#4089](https://github.com/getsentry/sentry-dotnet/pull/4089))
 
+### Features
+
+- If an incoming HTTP request has the `traceparent` header, it is now parsed and interpreted like the `sentry-trace` header. Outgoing requests now contain the `traceparent` header to facilitate integration with servesr that only support the [W3C Trace Context](https://www.w3.org/TR/trace-context/). ([#4084](https://github.com/getsentry/sentry-dotnet/pull/4084))
+
 ## 5.5.1
 
 ### Fixes
