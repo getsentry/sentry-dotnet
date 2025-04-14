@@ -1,4 +1,8 @@
+using System;
 using Microsoft.Extensions.Options;
+using Microsoft.Maui.Controls;
+using Sentry.Internal;
+using Sentry.Protocol;
 
 namespace Sentry.Maui.Internal;
 
@@ -12,6 +16,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private readonly IHub _hub;
     private readonly SentryMauiOptions _options;
     private readonly IEnumerable<IMauiElementEventBinder> _elementEventBinders;
+    private readonly IEnumerable<IMauiPageEventHandler> _pageEventHandlers;
 
     // https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types
     // https://github.com/getsentry/sentry/blob/master/static/app/types/breadcrumbs.tsx
@@ -23,11 +28,13 @@ internal class MauiEventsBinder : IMauiEventsBinder
     internal const string RenderingCategory = "ui.rendering";
     internal const string UserActionCategory = "ui.useraction";
 
-    public MauiEventsBinder(IHub hub, IOptions<SentryMauiOptions> options, IEnumerable<IMauiElementEventBinder> elementEventBinders)
+
+    public MauiEventsBinder(IHub hub, IOptions<SentryMauiOptions> options, IEnumerable<IMauiElementEventBinder> elementEventBinders, IEnumerable<IMauiPageEventHandler> pageEventHandlers)
     {
         _hub = hub;
         _options = options.Value;
         _elementEventBinders = elementEventBinders;
+        _pageEventHandlers = pageEventHandlers;
     }
 
     public void HandleApplicationEvents(Application application, bool bind = true)
@@ -313,10 +320,18 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     // Application Events
 
-    private void OnApplicationOnPageAppearing(object? sender, Page page) =>
+    private void OnApplicationOnPageAppearing(object? sender, Page page)
+    {
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.PageAppearing), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, page, nameof(Page)));
-    private void OnApplicationOnPageDisappearing(object? sender, Page page) =>
+        RunPageEventHandlers(handler => handler.OnAppearing(page));
+    }
+
+    private void OnApplicationOnPageDisappearing(object? sender, Page page)
+    {
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.PageDisappearing), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, page, nameof(Page)));
+        RunPageEventHandlers(handler => handler.OnDisappearing(page));
+    }
+
     private void OnApplicationOnModalPushed(object? sender, ModalPushedEventArgs e) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Application.ModalPushed), NavigationType, NavigationCategory, data => data.AddElementInfo(_options, e.Modal, nameof(e.Modal)));
     private void OnApplicationOnModalPopped(object? sender, ModalPoppedEventArgs e) =>
@@ -440,4 +455,10 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     private void OnPageOnLayoutChanged(object? sender, EventArgs _) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(Page.LayoutChanged), SystemType, RenderingCategory);
+
+    private void RunPageEventHandlers(Action<IMauiPageEventHandler> action)
+    {
+        foreach (var handler in _pageEventHandlers)
+            action(handler); // TODO: try/catch in case of user code?
+    }
 }

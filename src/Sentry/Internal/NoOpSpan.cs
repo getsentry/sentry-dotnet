@@ -30,6 +30,12 @@ internal class NoOpSpan : ISpan
         set { }
     }
 
+    public event EventHandler<SpanStatus?>? StatusChanged
+    {
+        add { }
+        remove { }
+    }
+
     public string? Description
     {
         get => default;
@@ -42,21 +48,21 @@ internal class NoOpSpan : ISpan
         set { }
     }
 
-    public ISpan StartChild(string operation) => this;
+    public ISpan StartChild(string operation, DateTimeOffset? startTime) => this;
 
-    public void Finish()
+    public void Finish(DateTimeOffset? timestamp = null)
     {
     }
 
-    public void Finish(SpanStatus status)
+    public void Finish(SpanStatus status, DateTimeOffset? timestamp = null)
     {
     }
 
-    public void Finish(Exception exception, SpanStatus status)
+    public void Finish(Exception exception, SpanStatus status, DateTimeOffset? timestamp = null)
     {
     }
 
-    public void Finish(Exception exception)
+    public void Finish(Exception exception, DateTimeOffset? timestamp = null)
     {
     }
 

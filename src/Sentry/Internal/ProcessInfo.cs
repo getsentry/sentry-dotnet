@@ -7,6 +7,12 @@ internal class ProcessInfo
     internal static ProcessInfo? Instance;
 
     /// <summary>
+    /// The timespan.GetTimestamp() value at init
+    /// More precise for determining TTID
+    /// </summary>
+    internal long StartupTimestamp { get; private set; } = 0L;
+
+    /// <summary>
     /// When the code was initialized.
     /// </summary>
     internal DateTimeOffset? StartupTime { get; private set; }
@@ -58,11 +64,10 @@ internal class ProcessInfo
         // Fast
         var now = DateTimeOffset.UtcNow;
         StartupTime = now;
-        long? timestamp = 0;
         try
         {
-            timestamp = Stopwatch.GetTimestamp();
-            BootTime = now.AddTicks(-timestamp.Value
+            StartupTimestamp = Stopwatch.GetTimestamp();
+            BootTime = now.AddTicks(-StartupTimestamp
                                     / (Stopwatch.Frequency
                                        / TimeSpan.TicksPerSecond));
         }
@@ -79,7 +84,7 @@ internal class ProcessInfo
             options.LogError(e,
                 "Failed to find BootTime: Now {0}, GetTimestamp {1}, Frequency {2}, TicksPerSecond: {3}",
                 now,
-                timestamp,
+                StartupTimestamp,
                 Stopwatch.Frequency, TimeSpan.TicksPerSecond);
         }
 
