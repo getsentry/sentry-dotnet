@@ -19,12 +19,6 @@ runs:
       run: |
         dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
 
-    - name: Check SSL Certificates
-      shell: bash
-      if: steps.installandroidsdks2.outcome == 'failure' && runner.os == 'macOS'
-      run: |
-        openssl s_client -connect aka.ms:443 -showcerts
-
     - name: Install Android SDKs (retry 2)
       id: installandroidsdks3
       shell: bash
