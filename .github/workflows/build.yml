@@ -112,9 +112,7 @@ jobs:
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
       - name: Install Android SDKs
-        if: runner.os == 'macOS'
-        run: |
-          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
+        uses: ./.github/actions/install-android-sdks
 
       - name: Build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
@@ -226,16 +224,7 @@ jobs:
         uses: ./.github/actions/buildnative
 
       - name: Install Android SDKs
-        id: installandroidsdks
-        continue-on-error: true
-        if: runner.os == 'macOS'
-        run: |
-          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
-
-      - name: Install Android SDKs (retry)
-        if: steps.installandroidsdks.outcome=='failure' && runner.os == 'macOS'
-        run: |
-          dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
+        uses: ./.github/actions/install-android-sdks
 
       - name: Publish Test app (macOS)
         run: dotnet publish test/Sentry.TrimTest/Sentry.TrimTest.csproj -c Release -r osx-arm64
