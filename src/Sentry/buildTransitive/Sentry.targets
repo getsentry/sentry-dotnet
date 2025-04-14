@@ -16,7 +16,7 @@
   </Target>
 
   <ItemGroup Condition="$([System.OperatingSystem]::IsWindows())">
-    <!-- See: https://github.com/getsentry/sentry-dotnet/issues/3928 -->
+    <!-- See: https://github.com/getsentry/sentry-dotnet/pull/4111 -->
     <LinkerArg Include="/NODEFAULTLIB:MSVCRT" />
   </ItemGroup>
 
