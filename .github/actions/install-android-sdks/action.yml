@@ -2,16 +2,6 @@ name: Install Android SDKs
 description: Installs Android SDKs with retry logic.
 runs:
   using: composite
-  inputs:
-    android-sdk-path:
-      description: Path to the Android SDK.
-      default: /usr/local/lib/android/sdk/
-    project-path:
-      description: Path to the .csproj file.
-      default: src/Sentry/Sentry.csproj
-    tfm:
-      description: Target framework for the build.
-      default: net8.0-android34.0
   steps:
     - name: Install Android SDKs
       id: installandroidsdks1
@@ -19,7 +9,7 @@ runs:
       continue-on-error: true
       if: runner.os == 'macOS'
       run: |
-        dotnet build ${{ inputs.project-path }} -t:InstallAndroidDependencies -f:${{ inputs.tfm }} -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="${{ inputs.android-sdk-path }}"
+        dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
 
     - name: Install Android SDKs (retry 1)
       id: installandroidsdks2
@@ -27,11 +17,17 @@ runs:
       continue-on-error: true
       if: steps.installandroidsdks1.outcome == 'failure' && runner.os == 'macOS'
       run: |
-        dotnet build ${{ inputs.project-path }} -t:InstallAndroidDependencies -f:${{ inputs.tfm }} -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="${{ inputs.android-sdk-path }}"
+        dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
+
+    - name: Check SSL Certificates
+      shell: bash
+      if: steps.installandroidsdks2.outcome == 'failure' && runner.os == 'macOS'
+      run: |
+        openssl s_client -connect aka.ms:443 -showcerts
 
     - name: Install Android SDKs (retry 2)
       id: installandroidsdks3
       shell: bash
       if: steps.installandroidsdks2.outcome == 'failure' && runner.os == 'macOS'
       run: |
-        dotnet build ${{ inputs.project-path }} -t:InstallAndroidDependencies -f:${{ inputs.tfm }} -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="${{ inputs.android-sdk-path }}"
+        dotnet build src/Sentry/Sentry.csproj -t:InstallAndroidDependencies -f:net8.0-android34.0 -p:AcceptAndroidSDKLicenses=True -p:AndroidSdkPath="/usr/local/lib/android/sdk/"
