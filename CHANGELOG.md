@@ -2,8 +2,13 @@
 
 ## Unreleased
 
+### Features
+
+- Reintroduced experimental support for Session Replay on Android ([#4097](https://github.com/getsentry/sentry-dotnet/pull/4097))
+
 ### Fixes
 
+- Prevent users from disabling AndroidEnableAssemblyCompression which leads to untrappable crash ([#4089](https://github.com/getsentry/sentry-dotnet/pull/4089))
 - Added a `SentrySetCommitReleaseOptions` build property that can be specified separately from `SentryReleaseOptions` ([#4109](https://github.com/getsentry/sentry-dotnet/pull/4109))
 
 ## 5.5.1
@@ -28,7 +33,6 @@
 - Changed default value for `SentryOptions.EnableAppHangTrackingV2` to `false` ([#4042](https://github.com/getsentry/sentry-dotnet/pull/4042))
 - Missing MAUI `Shell` navigation breadcrumbs on iOS ([#4006](https://github.com/getsentry/sentry-dotnet/pull/4006))
 - Prevent application crashes when capturing screenshots on iOS ([#4069](https://github.com/getsentry/sentry-dotnet/pull/4069))
-- Prevent users from disabling AndroidEnableAssemblyCompression which leads to untrappable crash ([#4089](https://github.com/getsentry/sentry-dotnet/pull/4089))
 
 ### Dependencies
 
