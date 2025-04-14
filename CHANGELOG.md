@@ -28,6 +28,12 @@
 - The `IScopeObserver` now has an `SetTrace` that allows observing changes to the scope's trace context. The SDK uses this to propagate the `trace ID` to `sentry-native`. This allows Sentry to connect errors coming from all layers of your application ([#4026](https://github.com/getsentry/sentry-dotnet/pull/4026))
 - Exception.HResult is now included in the mechanism data for all exceptions ([#4029](https://github.com/getsentry/sentry-dotnet/pull/4029))
 
+### Dependencies
+
+- Bump Native SDK from v0.8.2 to v0.8.3 [#4072](https://github.com/getsentry/sentry-dotnet/pull/4072))
+    - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#083)
+    - [diff](https://github.com/getsentry/sentry-native/compare/0.8.2...0.8.3)
+
 ### Fixes
 
 - Fixed symbolication and source context for net9.0-android ([#4033](https://github.com/getsentry/sentry-dotnet/pull/4033))
@@ -39,7 +45,7 @@
 
 ### Dependencies
 
-- Bump Native SDK from v0.8.1 to v0.8.2 ([#4050](https://github.com/getsentry/sentry-dotnet/pull/4050))
+- Bump Native SDK from v0.8.1 to v0.8.2 ([#4050](https://github.com/getsentry/sentry-dotnet/pull/4050)
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#082)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.8.1...0.8.2)
 - Bump CLI from v2.42.2 to v2.43.0 ([#4036](https://github.com/getsentry/sentry-dotnet/pull/4036), [#4049](https://github.com/getsentry/sentry-dotnet/pull/4049), [#4060](https://github.com/getsentry/sentry-dotnet/pull/4060), [#4062](https://github.com/getsentry/sentry-dotnet/pull/4062))
@@ -121,6 +127,11 @@
 - .NET on iOS: Add experimental EnableAppHangTrackingV2 configuration flag to the options binding SDK ([#3877](https://github.com/getsentry/sentry-dotnet/pull/3877))
 - Added `SentryOptions.DisableSentryHttpMessageHandler`. Useful if you're using `OpenTelemetry.Instrumentation.Http` and ending up with duplicate spans. ([#3879](https://github.com/getsentry/sentry-dotnet/pull/3879))
 
+### Dependencies
+
+- Bump Native SDK from v0.7.17 to v0.7.18 ([#3891](https://github.com/getsentry/sentry-dotnet/pull/3891))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0718)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.17...0.7.18)
 ### Fixes
 
 - Prevent Native EXC_BAD_ACCESS signal errors from being captured when managed NullRefrenceExceptions occur ([#3909](https://github.com/getsentry/sentry-dotnet/pull/3909))
