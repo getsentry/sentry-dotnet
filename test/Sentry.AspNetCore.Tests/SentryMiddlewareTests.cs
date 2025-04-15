@@ -682,8 +682,10 @@ public class SentryMiddlewareTests
         }
     }
 
-    [Fact]
-    public async Task InvokeAsync_RequestContainsSentryHeaders_ContinuesTrace()
+    [Theory]
+    [InlineData("Sentry-Trace", "4b4d2878507b43d3af7dd8c4ab7a96d9-3cc6fd1337d243de", "4b4d2878507b43d3af7dd8c4ab7a96d9")]
+    [InlineData("traceparent", "00-4b4d2878507b43d3af7dd8c4ab7a96d8-3cc6fd1337d243de-00", "4b4d2878507b43d3af7dd8c4ab7a96d8")]
+    public async Task InvokeAsync_RequestContainsSentryHeaders_ContinuesTrace(string headerName, string headerValue, string expectedTraceId)
     {
         SentryTraceHeader capturedTraceHeader = null;
         BaggageHeader capturedBaggageHeader = null;
@@ -698,7 +700,7 @@ public class SentryMiddlewareTests
         var request = Substitute.For<HttpRequest>();
         var fakeHeaders = new HeaderDictionary
         {
-            { "Sentry-Trace", "4b4d2878507b43d3af7dd8c4ab7a96d9-3cc6fd1337d243de"},
+            { headerName, headerValue},
             { "Baggage", "sentry-trace_id=4b4d2878507b43d3af7dd8c4ab7a96d9, sentry-public_key=eb18e953812b41c3aeb042e666fd3b5c"},
         };
         _ = request.Headers.Returns(fakeHeaders);
@@ -710,19 +712,21 @@ public class SentryMiddlewareTests
         _fixture.Hub.Received().ContinueTrace(Arg.Any<SentryTraceHeader>(), Arg.Any<BaggageHeader>());
 
         Assert.NotNull(capturedTraceHeader);
-        Assert.Equal("4b4d2878507b43d3af7dd8c4ab7a96d9", capturedTraceHeader.TraceId.ToString());
+        Assert.Equal(expectedTraceId, capturedTraceHeader.TraceId.ToString());
         Assert.NotNull(capturedBaggageHeader);
         Assert.Equal("sentry-trace_id=4b4d2878507b43d3af7dd8c4ab7a96d9, sentry-public_key=eb18e953812b41c3aeb042e666fd3b5c", capturedBaggageHeader.ToString());
     }
 
-    [Fact]
-    public async Task InvokeAsync_RequestContainsSentryHeaders_AddsHeadersAndTransactionContextToItems()
+    [Theory]
+    [InlineData("Sentry-Trace", "4b4d2878507b43d3af7dd8c4ab7a96d9-3cc6fd1337d243de", "4b4d2878507b43d3af7dd8c4ab7a96d9")]
+    [InlineData("traceparent", "00-4b4d2878507b43d3af7dd8c4ab7a96d8-3cc6fd1337d243de-00", "4b4d2878507b43d3af7dd8c4ab7a96d8")]
+    public async Task InvokeAsync_RequestContainsSentryHeaders_AddsHeadersAndTransactionContextToItems(string headerName, string headerValue, string expectedTraceId)
     {
         var sut = _fixture.GetSut();
         var request = Substitute.For<HttpRequest>();
         var fakeHeaders = new HeaderDictionary
         {
-            { "Sentry-Trace", "4b4d2878507b43d3af7dd8c4ab7a96d9-3cc6fd1337d243de"},
+            { headerName, headerValue},
             { "Baggage", "sentry-trace_id=4b4d2878507b43d3af7dd8c4ab7a96d9, sentry-public_key=eb18e953812b41c3aeb042e666fd3b5c"},
         };
         var contextItems = new Dictionary<object, object>();
@@ -741,7 +745,7 @@ public class SentryMiddlewareTests
 
         var traceHeader = contextItems[SentryMiddleware.TraceHeaderItemKey] as SentryTraceHeader;
         Assert.NotNull(traceHeader);
-        Assert.Equal("4b4d2878507b43d3af7dd8c4ab7a96d9", traceHeader.TraceId.ToString());
+        Assert.Equal(expectedTraceId, traceHeader.TraceId.ToString());
         var baggageHeader = contextItems[SentryMiddleware.BaggageHeaderItemKey] as BaggageHeader;
         Assert.NotNull(baggageHeader);
         Assert.Equal("sentry-trace_id=4b4d2878507b43d3af7dd8c4ab7a96d9, sentry-public_key=eb18e953812b41c3aeb042e666fd3b5c", baggageHeader.ToString());
@@ -749,14 +753,16 @@ public class SentryMiddlewareTests
         Assert.NotNull(transactionContext);
     }
 
-    [Fact]
-    public async Task InvokeAsync_InvokingWithTheSameContextTwice_DoesNotThrow()
+    [Theory]
+    [InlineData("Sentry-Trace", "4b4d2878507b43d3af7dd8c4ab7a96d9-3cc6fd1337d243de")]
+    [InlineData("traceparent", "00-4b4d2878507b43d3af7dd8c4ab7a96d8-3cc6fd1337d243de-01")]
+    public async Task InvokeAsync_InvokingWithTheSameContextTwice_DoesNotThrow(string headerName, string headerValue)
     {
         var sut = _fixture.GetSut();
         var request = Substitute.For<HttpRequest>();
         var fakeHeaders = new HeaderDictionary
         {
-            { "Sentry-Trace", "4b4d2878507b43d3af7dd8c4ab7a96d9-3cc6fd1337d243de"},
+            { headerName, headerValue},
             { "Baggage", "sentry-trace_id=4b4d2878507b43d3af7dd8c4ab7a96d9, sentry-public_key=eb18e953812b41c3aeb042e666fd3b5c"},
         };
         var contextItems = new Dictionary<object, object>();
