@@ -106,7 +106,12 @@ public static class SentryClientExtensions
 
     internal static SentryOptions? SentryOptionsForTestingOnly { get; set; }
 
-    internal static SentryOptions? GetSentryOptions(this ISentryClient clientOrHub) =>
+    /// <summary>
+    /// Gets internal SentryOptions - not meant for external use
+    /// </summary>
+    /// <param name="clientOrHub"></param>
+    /// <returns></returns>
+    public static SentryOptions? GetSentryOptions(this ISentryClient clientOrHub) =>
         clientOrHub switch
         {
             SentryClient client => client.Options,
