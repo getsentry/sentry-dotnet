@@ -29,24 +29,21 @@
     <InternalsVisibleTo Include="Sentry.Maui.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
-  <!-- Dependencies for AndroidMavenLibrary references
-       Note: versions match what was shipped with net8.0-android34.0 in:
-       https://www.nuget.org/packages/Microsoft.Maui.Core/8.0.3#dependencies-body-tab
+  <!-- Dependencies for AndroidMavenLibrary references that are the minimum versions Sentry.JavaSdk needs-->
+  <ItemGroup>
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.2.0" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.2.0" />
+    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.3.2" />
 
-       Transitive dependencies from this main nuget which we use will pull in Java8 Common and AndroidX.Core
-       -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net8'))">
-    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.6.1.3" />
+    <!--sentry needs 1.9.24 which was not released on nuget-->
+    <PackageReference Include="Xamarin.Kotlin.StdLib.Jdk8" Version="2.0.0" />
   </ItemGroup>
 
-  <!-- Dependencies for AndroidMavenLibrary references
-       Note: versions match what was shipped with net9.0-android35.0 in:
-       https://www.nuget.org/packages/Microsoft.Maui.Core/9.0.0#dependencies-body-tab
-
-       Transitive dependencies from this main nuget which we use will pull in Java8 Common and AndroidX.Core
-       -->
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net9'))">
-    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.8.5.1" />
+  <ItemGroup>
+    <!--android team said the logic for detecting versions has 'issues', but the nuget packages above will satify these requirements further in the build process-->
+    <AndroidIgnoredJavaDependency Include="androidx.core:core:1.3.2" />
+    <AndroidIgnoredJavaDependency Include="androidx.lifecycle:lifecycle-process:2.2.0" />
+    <AndroidIgnoredJavaDependency Include="androidx.lifecycle:lifecycle-common-java8:2.2.0" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework.StartsWith('net8'))">
