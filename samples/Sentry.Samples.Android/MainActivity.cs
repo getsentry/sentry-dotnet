@@ -21,6 +21,12 @@ public class MainActivity : Activity
             // Enable Native Android SDK ANR detection
             options.Native.AnrEnabled = true;
 
+            // Currently experimental support is only available on Android
+            options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate = 1.0;
+            options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate = 1.0;
+            options.Native.ExperimentalOptions.SessionReplay.MaskAllImages = false;
+            options.Native.ExperimentalOptions.SessionReplay.MaskAllText = false;
+
             options.SetBeforeSend(evt =>
             {
                 if (evt.Exception?.Message.Contains("Something you don't care want logged?") ?? false)
