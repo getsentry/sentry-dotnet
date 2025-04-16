@@ -666,7 +666,7 @@ public class SentrySdkTests : IDisposable
             .Select(m => m.ToString()!
                 .Replace($"({typeof(ISentryClient).FullName}", "(")
                 .Replace("(, ", "("));
-        
+
         var sentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
         var values = clientExtensions.Except(sentrySdk.Select(m => m.ToString()));
         Assert.Empty(values);
