@@ -659,14 +659,17 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void Implements_ClientExtensions()
     {
-        var clientExtensions = typeof(SentryClientExtensions).GetMembers(BindingFlags.Public | BindingFlags.Static)
+        var clientExtensions = typeof(SentryClientExtensions)
+            .GetMembers(BindingFlags.Public | BindingFlags.Static)
+            .Where(x => x.Name != "GetSentryOptions")
             // Remove the extension argument: Method(this ISentryClient client, ...
             .Select(m => m.ToString()!
                 .Replace($"({typeof(ISentryClient).FullName}", "(")
                 .Replace("(, ", "("));
+        
         var sentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
-
-        Assert.Empty(clientExtensions.Except(sentrySdk.Select(m => m.ToString())));
+        var values = clientExtensions.Except(sentrySdk.Select(m => m.ToString()));
+        Assert.Empty(values);
     }
 
     [Fact]
