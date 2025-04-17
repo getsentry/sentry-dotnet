@@ -13,7 +13,7 @@ public class CtMvvmMauiElementEventBinder : IMauiElementEventBinder
     /// </summary>
     /// <param name="element"></param>
     /// <param name="addBreadcrumb"></param>
-    public void Bind(VisualElement element, Action<BreadcrumbEvent> addBreadcrumb)  => Iterate(element, true);
+    public void Bind(VisualElement element, Action<BreadcrumbEvent> addBreadcrumb) => Iterate(element, true);
 
     /// <summary>
     /// Unbinds from the element

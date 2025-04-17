@@ -1,4 +1,4 @@
-﻿using Sentry.Maui.CommunityToolkitMvvm;
+using Sentry.Maui.CommunityToolkitMvvm;
 
 namespace Sentry.Maui;
 
