@@ -39,7 +39,7 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
     }
 
 
-    void SetHooks(IGestureRecognizer recognizer, bool add)
+    private void SetHooks(IGestureRecognizer recognizer, bool add)
     {
         switch (recognizer)
         {
@@ -152,7 +152,41 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
     ));
 
 
+
+<<<<<<< TODO: Unmerged change from project 'Sentry.Maui(net8.0-android34.0)', Before:
     static IEnumerable<(string Key, string Value)> ToPointerData(PointerEventArgs e) =>
+    [
+        // some of the data here may have some challenges being pulled out
+        #if ANDROID
+        ("MotionEventAction", e.PlatformArgs?.MotionEvent.Action.ToString() ?? String.Empty)
+=======
+    private static IEnumerable<(string Key, string Value)> ToPointerData(PointerEventArgs e) =>
+    [
+        // some of the data here may have some challenges being pulled out
+        #if ANDROID
+        ("MotionEventAction", e.PlatformArgs?.MotionEvent.Action.ToString() ?? string.Empty)
+>>>>>>> After
+
+<<<<<<< TODO: Unmerged change from project 'Sentry.Maui(net8.0-ios17.0)', Before:
+    static IEnumerable<(string Key, string Value)> ToPointerData(PointerEventArgs e) =>
+    [
+        // some of the data here may have some challenges being pulled out
+        #if ANDROID
+        ("MotionEventAction", e.PlatformArgs?.MotionEvent.Action.ToString() ?? String.Empty)
+        //("MotionEventActionButton", e.PlatformArgs?.MotionEvent.ActionButton.ToString() ?? String.Empty)
+        #elif IOS
+        ("State", e.PlatformArgs?.GestureRecognizer.State.ToString() ?? String.Empty)
+=======
+    private static IEnumerable<(string Key, string Value)> ToPointerData(PointerEventArgs e) =>
+    [
+        // some of the data here may have some challenges being pulled out
+        #if ANDROID
+        ("MotionEventAction", e.PlatformArgs?.MotionEvent.Action.ToString() ?? String.Empty)
+        //("MotionEventActionButton", e.PlatformArgs?.MotionEvent.ActionButton.ToString() ?? String.Empty)
+        #elif IOS
+        ("State", e.PlatformArgs?.GestureRecognizer.State.ToString() ?? string.Empty)
+>>>>>>> After
+    private static IEnumerable<(string Key, string Value)> ToPointerData(PointerEventArgs e) =>
     [
         // some of the data here may have some challenges being pulled out
         #if ANDROID
