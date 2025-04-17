@@ -81,7 +81,7 @@ public class SentryMauiOptions : SentryLoggingOptions
     /// if this callback return false the capture will not take place
     /// </remarks>
     /// <code>
-    /// 
+    ///
     ///options.SetBeforeCapture((@event, hint) =>
     ///{
     ///    // Return true to capture or false to prevent the capture

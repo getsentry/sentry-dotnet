@@ -1,4 +1,6 @@
-﻿namespace Microsoft.Maui.Hosting
+﻿[assembly: Microsoft.Maui.Controls.XmlnsDefinition("http://schemas.sentry.io/maui", "Sentry.Maui")]
+[assembly: Microsoft.Maui.Controls.XmlnsPrefix("http://schemas.sentry.io/maui", "sentry")]
+namespace Microsoft.Maui.Hosting
 {
     public static class SentryMauiAppBuilderExtensions
     {
@@ -35,6 +37,17 @@ namespace Sentry.Maui
         public bool IncludeTextInBreadcrumbs { get; set; }
         public bool IncludeTitleInBreadcrumbs { get; set; }
         public void SetBeforeScreenshotCapture(System.Func<Sentry.SentryEvent, Sentry.SentryHint, bool> beforeCapture) { }
+    }
+    public static class SessionReplay
+    {
+        public static readonly Microsoft.Maui.Controls.BindableProperty MaskProperty;
+        public static Sentry.Maui.SessionReplayMaskMode GetMask(Microsoft.Maui.Controls.BindableObject view) { }
+        public static void SetMask(Microsoft.Maui.Controls.BindableObject view, Sentry.Maui.SessionReplayMaskMode value) { }
+    }
+    public enum SessionReplayMaskMode
+    {
+        Mask = 0,
+        Unmask = 1,
     }
 }
 namespace Sentry.Maui.Internal

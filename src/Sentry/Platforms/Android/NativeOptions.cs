@@ -272,6 +272,18 @@ public partial class SentryOptions
             public double? SessionSampleRate { get; set; }
             public bool MaskAllImages { get; set; } = true;
             public bool MaskAllText { get; set; } = true;
+            internal HashSet<Type> MaskedControls { get; } = [];
+            internal HashSet<Type> UnmaskedControls { get; } = [];
+
+            public void MaskControlsOfType<T>()
+            {
+                MaskedControls.Add(typeof(T));
+            }
+
+            public void UnmaskControlsOfType<T>()
+            {
+                UnmaskedControls.Add(typeof(T));
+            }
         }
 
         /// <summary>
