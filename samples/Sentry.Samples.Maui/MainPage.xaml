@@ -32,7 +32,7 @@
             <Button
                 x:Name="CounterBtn"
                 Text="Click me"
-                sentry:SessionReplay.Mask="sentry-unmask"
+                sentry:SessionReplay.Mask="Unmask"
                 SemanticProperties.Hint="Counts the number of times you click."
                 Clicked="OnCounterClicked"
                 HorizontalOptions="Center" />
@@ -40,7 +40,7 @@
             <Button
                 x:Name="ThrowAndCaptureBtn"
                 Text="Throw and Capture Exception"
-                sentry:SessionReplay.Mask="sentry-unmask"
+                sentry:SessionReplay.Mask="Unmask"
                 SemanticProperties.Hint="Throws an exception and captures it."
                 Clicked="OnCapturedExceptionClicked"
                 HorizontalOptions="Center" />
@@ -48,7 +48,7 @@
             <Button
                 x:Name="ThrowUnhandledBtn"
                 Text="Throw Unhandled .NET Exception (Crash)"
-                sentry:SessionReplay.Mask="sentry-unmask"
+                sentry:SessionReplay.Mask="Unmask"
                 SemanticProperties.Hint="Throws an unhandled .NET exception, crashing the app."
                 Clicked="OnUnhandledExceptionClicked"
                 HorizontalOptions="Center" />
@@ -56,6 +56,7 @@
             <Button
                 x:Name="ThrowBackgroundUnhandledBtn"
                 Text="Throw Unhandled .NET Exception on Background Thread (Crash)"
+                sentry:SessionReplay.Mask="Unmask"
                 SemanticProperties.Hint="Throws an unhandled .NET exception on a background thread, crashing the app."
                 Clicked="OnBackgroundThreadUnhandledExceptionClicked"
                 HorizontalOptions="Center" />
@@ -63,7 +64,7 @@
             <Button
                 x:Name="JavaCrashBtn"
                 Text="Throw Java Exception (Crash)"
-                sentry:SessionReplay.Mask="sentry-unmask"
+                sentry:SessionReplay.Mask="Unmask"
                 SemanticProperties.Hint="Throws an unhandled Java exception, crashing the app."
                 Clicked="OnJavaCrashClicked"
                 HorizontalOptions="Center" />
@@ -71,7 +72,7 @@
             <Button
                 x:Name="NativeCrashBtn"
                 Text="Cause Native Crash"
-                sentry:SessionReplay.Mask="sentry-unmask"
+                sentry:SessionReplay.Mask="Unmask"
                 SemanticProperties.Hint="Performs an invalid native operation, crashing the app."
                 Clicked="OnNativeCrashClicked"
                 HorizontalOptions="Center" />
@@ -79,7 +80,7 @@
             <Button
                 x:Name="FeedbackBtn"
                 Text="Submit Feedback"
-                sentry:SessionReplay.Mask="sentry-unmask"
+                sentry:SessionReplay.Mask="Unmask"
                 SemanticProperties.Hint="Provides a form that can be used to capture open feedback from the user."
                 Clicked="OnFeedbackClicked"
                 HorizontalOptions="Center" />

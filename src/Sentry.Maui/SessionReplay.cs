@@ -16,22 +16,22 @@ public static class SessionReplay
     public static readonly BindableProperty MaskProperty =
         BindableProperty.CreateAttached(
             "Mask",
-            typeof(string),
+            typeof(SessionReplayMaskMode),
             typeof(SessionReplay),
-            defaultValue: "sentry-mask", // default: masked
+            defaultValue: SessionReplayMaskMode.Mask,
             propertyChanged: OnMaskChanged);
 
     /// <summary>
     /// Gets the value of the Mask property for a view
     /// </summary>
-    public static string GetMask(BindableObject view) => (string)view.GetValue(MaskProperty);
+    public static SessionReplayMaskMode GetMask(BindableObject view) => (SessionReplayMaskMode)view.GetValue(MaskProperty);
 
     /// <summary>
     /// Sets the value of the Mask property for a view. .
     /// </summary>
     /// <param name="view">The view element to mask or unmask</param>
     /// <param name="value">The value to assign. Can be either "sentry-mask" or "sentry-unmask".</param>
-    public static void SetMask(BindableObject view, string value) => view.SetValue(MaskProperty, value);
+    public static void SetMask(BindableObject view, SessionReplayMaskMode value) => view.SetValue(MaskProperty, value);
 
     private static void OnMaskChanged(BindableObject bindable, object oldValue, object newValue)
     {
@@ -40,15 +40,18 @@ public static class SessionReplay
             {
                 ve.HandlerChanged += (s, e) =>
                 {
-                    if (ve.Handler?.PlatformView is View nativeView && newValue is string maskSetting)
+                    if (ve.Handler?.PlatformView is not View nativeView ||
+                        newValue is not SessionReplayMaskMode maskSetting)
                     {
-                        if (string.IsNullOrEmpty(maskSetting))
-                        {
-                            return;
-                        }
-                        // "sentry-unmask" if true; remove tag if false
-                        nativeView.Tag = maskSetting;
+                        return;
                     }
+
+                    nativeView.Tag = maskSetting switch
+                    {
+                        SessionReplayMaskMode.Mask => "sentry-mask",
+                        SessionReplayMaskMode.Unmask => "sentry-unmask",
+                        _ => nativeView.Tag
+                    };
                 };
             }
 #endif
