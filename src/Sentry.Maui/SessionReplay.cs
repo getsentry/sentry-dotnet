@@ -1,5 +1,9 @@
 #if __ANDROID__
 using View = Android.Views.View;
+using Android.Views;
+using Java.Lang;
+using Microsoft.Maui.Handlers;
+using Microsoft.Maui.Platform;
 #endif
 
 namespace Sentry.Maui;
