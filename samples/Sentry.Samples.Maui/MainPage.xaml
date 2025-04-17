@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:sentry="http://schemas.sentry.io/maui"
              x:Class="Sentry.Samples.Maui.MainPage">
 
     <ScrollView>
@@ -38,6 +39,7 @@
             <Button
                 x:Name="ThrowAndCaptureBtn"
                 Text="Throw and Capture Exception"
+                sentry:SessionReplay.Mask="sentry-unmask"
                 SemanticProperties.Hint="Throws an exception and captures it."
                 Clicked="OnCapturedExceptionClicked"
                 HorizontalOptions="Center" />
@@ -45,6 +47,7 @@
             <Button
                 x:Name="ThrowUnhandledBtn"
                 Text="Throw Unhandled .NET Exception (Crash)"
+                sentry:SessionReplay.Mask="sentry-unmask"
                 SemanticProperties.Hint="Throws an unhandled .NET exception, crashing the app."
                 Clicked="OnUnhandledExceptionClicked"
                 HorizontalOptions="Center" />
@@ -59,6 +62,7 @@
             <Button
                 x:Name="JavaCrashBtn"
                 Text="Throw Java Exception (Crash)"
+                sentry:SessionReplay.Mask="sentry-unmask"
                 SemanticProperties.Hint="Throws an unhandled Java exception, crashing the app."
                 Clicked="OnJavaCrashClicked"
                 HorizontalOptions="Center" />
@@ -66,6 +70,7 @@
             <Button
                 x:Name="NativeCrashBtn"
                 Text="Cause Native Crash"
+                sentry:SessionReplay.Mask="sentry-unmask"
                 SemanticProperties.Hint="Performs an invalid native operation, crashing the app."
                 Clicked="OnNativeCrashClicked"
                 HorizontalOptions="Center" />
@@ -73,6 +78,7 @@
             <Button
                 x:Name="FeedbackBtn"
                 Text="Submit Feedback"
+                sentry:SessionReplay.Mask="sentry-unmask"
                 SemanticProperties.Hint="Provides a form that can be used to capture open feedback from the user."
                 Clicked="OnFeedbackClicked"
                 HorizontalOptions="Center" />

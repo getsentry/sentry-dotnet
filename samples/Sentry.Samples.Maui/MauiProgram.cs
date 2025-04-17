@@ -29,8 +29,10 @@ public static class MauiProgram
                 // Currently experimental support is only available on Android
                 options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate = 1.0;
                 options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate = 1.0;
-                options.Native.ExperimentalOptions.SessionReplay.MaskAllImages = false;
-                options.Native.ExperimentalOptions.SessionReplay.MaskAllText = false;
+                // Mask all images and text by default.
+                // This can be overridden for individual view elements (see MainPage.xaml for an example)
+                options.Native.ExperimentalOptions.SessionReplay.MaskAllImages = true;
+                options.Native.ExperimentalOptions.SessionReplay.MaskAllText = true;
 #endif
 
                 options.SetBeforeScreenshotCapture((@event, hint) =>
