@@ -20,6 +20,9 @@
 - Bump Cocoa SDK from v8.39.0 to v8.46.0 ([#4103](https://github.com/getsentry/sentry-dotnet/pull/4103))
     - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8460)
     - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.46.0)
+- Bump Native SDK from v0.8.3 to v0.8.4 ([#4122](https://github.com/getsentry/sentry-dotnet/pull/4122))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#084)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.8.3...0.8.4)
 
 ## 5.5.1
 
