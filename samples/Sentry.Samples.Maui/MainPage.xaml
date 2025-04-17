@@ -32,6 +32,7 @@
             <Button
                 x:Name="CounterBtn"
                 Text="Click me"
+                sentry:SessionReplay.Mask="sentry-unmask"
                 SemanticProperties.Hint="Counts the number of times you click."
                 Clicked="OnCounterClicked"
                 HorizontalOptions="Center" />
