@@ -471,6 +471,7 @@ namespace Sentry
         public static void Flush(this Sentry.ISentryClient client) { }
         public static void Flush(this Sentry.ISentryClient client, System.TimeSpan timeout) { }
         public static System.Threading.Tasks.Task FlushAsync(this Sentry.ISentryClient client) { }
+        public static Sentry.SentryOptions? GetSentryOptions(this Sentry.ISentryClient clientOrHub) { }
     }
     public static class SentryConstants
     {
