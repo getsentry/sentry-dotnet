@@ -5,7 +5,7 @@
 ### Features
 
 - Reintroduced experimental support for Session Replay on Android ([#4097](https://github.com/getsentry/sentry-dotnet/pull/4097))
-- Custom masking for SessionReplay in MAUI Android apps ([#4121](https://github.com/getsentry/sentry-dotnet/pull/4121))
+- Custom SessionReplay masks in MAUI Android apps ([#4121](https://github.com/getsentry/sentry-dotnet/pull/4121))
 
 ### Fixes
 
