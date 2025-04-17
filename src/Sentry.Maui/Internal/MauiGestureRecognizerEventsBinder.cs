@@ -10,41 +10,32 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
     /// <summary>
     /// Searches VisualElement for gesture recognizers to bind to
     /// </summary>
-    public void Bind(VisualElement element, Action<BreadcrumbEvent> addBreadcrumb)
-    {
-        _addBreadcrumb ??= addBreadcrumb;
-        if (element is IGestureRecognizers recognizers)
-        {
-            foreach (var recognizer in recognizers.GestureRecognizers)
-            {
-                SetHooks(recognizer, true);
-            }
-        }
-    }
-
+    public void Bind(VisualElement element, Action<BreadcrumbEvent> addBreadcrumb)  => TryBind(element, true);
 
     /// <summary>
     /// Searches VisualElement for gesture recognizers to unbind from
     /// </summary>
     /// <param name="element"></param>
-    public void UnBind(VisualElement element)
+    public void UnBind(VisualElement element) => TryBind(element, false);
+
+    private void TryBind(VisualElement element, bool bind)
     {
         if (element is IGestureRecognizers recognizers)
         {
             foreach (var recognizer in recognizers.GestureRecognizers)
             {
-                SetHooks(recognizer, false);
+                SetHooks(recognizer, bind);
             }
         }
     }
 
 
-    private void SetHooks(IGestureRecognizer recognizer, bool add)
+    private void SetHooks(IGestureRecognizer recognizer, bool bind)
     {
         switch (recognizer)
         {
             case TapGestureRecognizer tap:
-                if (add)
+                if (bind)
                 {
                     tap.Tapped += OnTapGesture;
                 }
@@ -55,7 +46,7 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
                 break;
 
             case SwipeGestureRecognizer swipe:
-                if (add)
+                if (bind)
                 {
                     swipe.Swiped += OnSwipeGesture;
                 }
@@ -66,7 +57,7 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
                 break;
 
             case PinchGestureRecognizer pinch:
-                if (add)
+                if (bind)
                 {
                     pinch.PinchUpdated += OnPinchGesture;
                 }
@@ -77,7 +68,7 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
                 break;
 
             case DragGestureRecognizer drag:
-                if (add)
+                if (bind)
                 {
                     drag.DragStarting += OnDragStartingGesture;
                     drag.DropCompleted += OnDropCompletedGesture;
@@ -90,7 +81,7 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
                 break;
 
             case PanGestureRecognizer pan:
-                if (add)
+                if (bind)
                 {
                     pan.PanUpdated += OnPanGesture;
                 }
@@ -101,7 +92,7 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
                 break;
 
             case PointerGestureRecognizer pointer:
-                if (add)
+                if (bind)
                 {
                     pointer.PointerEntered += OnPointerEnteredGesture;
                     pointer.PointerExited += OnPointerExitedGesture;
@@ -151,32 +142,6 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
         ToPointerData(e)
     ));
 
-
-
-<<<<<<< TODO: Unmerged change from project 'Sentry.Maui(net8.0-android34.0)', Before:
-    static IEnumerable<(string Key, string Value)> ToPointerData(PointerEventArgs e) =>
-    [
-        // some of the data here may have some challenges being pulled out
-        #if ANDROID
-        ("MotionEventAction", e.PlatformArgs?.MotionEvent.Action.ToString() ?? String.Empty)
-=======
-    private static IEnumerable<(string Key, string Value)> ToPointerData(PointerEventArgs e) =>
-    [
-        // some of the data here may have some challenges being pulled out
-        #if ANDROID
-        ("MotionEventAction", e.PlatformArgs?.MotionEvent.Action.ToString() ?? string.Empty)
->>>>>>> After
-
-<<<<<<< TODO: Unmerged change from project 'Sentry.Maui(net8.0-ios17.0)', Before:
-    static IEnumerable<(string Key, string Value)> ToPointerData(PointerEventArgs e) =>
-    [
-        // some of the data here may have some challenges being pulled out
-        #if ANDROID
-        ("MotionEventAction", e.PlatformArgs?.MotionEvent.Action.ToString() ?? String.Empty)
-        //("MotionEventActionButton", e.PlatformArgs?.MotionEvent.ActionButton.ToString() ?? String.Empty)
-        #elif IOS
-        ("State", e.PlatformArgs?.GestureRecognizer.State.ToString() ?? String.Empty)
-=======
     private static IEnumerable<(string Key, string Value)> ToPointerData(PointerEventArgs e) =>
     [
         // some of the data here may have some challenges being pulled out
@@ -184,16 +149,7 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
         ("MotionEventAction", e.PlatformArgs?.MotionEvent.Action.ToString() ?? String.Empty)
         //("MotionEventActionButton", e.PlatformArgs?.MotionEvent.ActionButton.ToString() ?? String.Empty)
         #elif IOS
-        ("State", e.PlatformArgs?.GestureRecognizer.State.ToString() ?? string.Empty)
->>>>>>> After
-    private static IEnumerable<(string Key, string Value)> ToPointerData(PointerEventArgs e) =>
-    [
-        // some of the data here may have some challenges being pulled out
-        #if ANDROID
-        ("MotionEventAction", e.PlatformArgs?.MotionEvent.Action.ToString() ?? String.Empty)
-        //("MotionEventActionButton", e.PlatformArgs?.MotionEvent.ActionButton.ToString() ?? String.Empty)
-        #elif IOS
-        ("State", e.PlatformArgs?.GestureRecognizer.State.ToString() ?? String.Empty)
+        ("State", e.PlatformArgs?.GestureRecognizer.State.ToString() ?? String.Empty),
         //("ButtonMask", e.PlatformArgs?.GestureRecognizer.ButtonMask.ToString() ?? String.Empty)
         #endif
     ];
