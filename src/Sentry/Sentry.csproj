@@ -106,10 +106,6 @@
     This file contains targets that are invoked during the end-user's build.
     The same file is included twice, so it ends up being used for both direct and transitive package references to Sentry.
   -->
-  <ItemGroup>
-    <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="buildTransitive\Sentry.targets" />
-    <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="build\Sentry.targets" />
-  </ItemGroup>
 
   <ItemGroup>
     <Using Include="Sentry.Protocol.Envelopes.ISerializable" Alias="ISerializable" />
@@ -195,4 +191,17 @@
     <InternalsVisibleTo Include="Sentry.Analyzers.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="buildTransitive\Sentry.targets" />
+    <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="build\Sentry.targets" />
+    <None Include="buildTransitive\Sentry.Analyzers.targets" Pack="true" PackagePath="buildTransitive\Sentry.Analyzers.targets" />
+    <None Include="buildTransitive\Sentry.Analyzers.targets" Pack="true" PackagePath="build\Sentry.Analyzers.targets" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Sentry.Analyzers\bin\Release\netstandard2.0\Sentry.Analyzers.dll"
+          Pack="true"
+          PackagePath="analyzers/dotnet/cs"
+          Visible="false" />
+  </ItemGroup>
 </Project>
