@@ -5,20 +5,29 @@ namespace Sentry.Maui.Internal;
 /// </summary>
 public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
 {
-    private Action<BreadcrumbEvent> _addBreadcrumb = null!;
+    private static Action<BreadcrumbEvent>? _addBreadcrumb = null!;
 
     /// <summary>
     /// Searches VisualElement for gesture recognizers to bind to
     /// </summary>
-    public void Bind(VisualElement element, Action<BreadcrumbEvent> addBreadcrumb)  => TryBind(element, true);
+    public void Bind(VisualElement element, Action<BreadcrumbEvent> addBreadcrumb)
+    {
+        _addBreadcrumb ??= addBreadcrumb; // this is fine... it's the same callback for everyone and it never changes
+        TryBind(element, true);
+    }
+
 
     /// <summary>
     /// Searches VisualElement for gesture recognizers to unbind from
     /// </summary>
     /// <param name="element"></param>
-    public void UnBind(VisualElement element) => TryBind(element, false);
+    public void UnBind(VisualElement element)
+    {
+        _addBreadcrumb = null;
+        TryBind(element, false);
+    }
 
-    private void TryBind(VisualElement element, bool bind)
+    private static void TryBind(VisualElement element, bool bind)
     {
         if (element is IGestureRecognizers recognizers)
         {
@@ -30,7 +39,7 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
     }
 
 
-    private void SetHooks(IGestureRecognizer recognizer, bool bind)
+    private static void SetHooks(IGestureRecognizer recognizer, bool bind)
     {
         switch (recognizer)
         {
@@ -112,31 +121,31 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
         }
     }
 
-    private void OnPointerReleasedGesture(object? sender, PointerEventArgs e) => _addBreadcrumb.Invoke(new(
+    private static void OnPointerReleasedGesture(object? sender, PointerEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(PointerGestureRecognizer.PointerReleased),
         ToPointerData(e)
     ));
 
-    private void OnPointerPressedGesture(object? sender, PointerEventArgs e) => _addBreadcrumb.Invoke(new(
+    private static void OnPointerPressedGesture(object? sender, PointerEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(PointerGestureRecognizer.PointerPressed),
         ToPointerData(e)
     ));
 
-    private void OnPointerMovedGesture(object? sender, PointerEventArgs e) => _addBreadcrumb.Invoke(new(
+    private static void OnPointerMovedGesture(object? sender, PointerEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(PointerGestureRecognizer.PointerMoved),
         ToPointerData(e)
     ));
 
-    private void OnPointerExitedGesture(object? sender, PointerEventArgs e) => _addBreadcrumb.Invoke(new(
+    private static void OnPointerExitedGesture(object? sender, PointerEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(PointerGestureRecognizer.PointerExited),
         ToPointerData(e)
     ));
 
-    private void OnPointerEnteredGesture(object? sender, PointerEventArgs e) => _addBreadcrumb.Invoke(new(
+    private static void OnPointerEnteredGesture(object? sender, PointerEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(PointerGestureRecognizer.PointerEntered),
         ToPointerData(e)
@@ -154,7 +163,7 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
         #endif
     ];
 
-    private void OnPanGesture(object? sender, PanUpdatedEventArgs e) => _addBreadcrumb.Invoke(new(
+    private static void OnPanGesture(object? sender, PanUpdatedEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(PanGestureRecognizer.PanUpdated),
         [
@@ -165,18 +174,18 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
         ]
     ));
 
-    private void OnDropCompletedGesture(object? sender, DropCompletedEventArgs e) => _addBreadcrumb.Invoke(new(
+    private static void OnDropCompletedGesture(object? sender, DropCompletedEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(DragGestureRecognizer.DropCompleted)
     ));
 
-    private void OnDragStartingGesture(object? sender, DragStartingEventArgs e) => _addBreadcrumb.Invoke(new(
+    private static void OnDragStartingGesture(object? sender, DragStartingEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(DragGestureRecognizer.DragStarting)
     ));
 
 
-    private void OnPinchGesture(object? sender, PinchGestureUpdatedEventArgs e) => _addBreadcrumb.Invoke(new(
+    private static void OnPinchGesture(object? sender, PinchGestureUpdatedEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(PinchGestureRecognizer.PinchUpdated),
         [
@@ -186,13 +195,13 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
         ]
     ));
 
-    private void OnSwipeGesture(object? sender, SwipedEventArgs e) => _addBreadcrumb.Invoke(new(
+    private static void OnSwipeGesture(object? sender, SwipedEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(SwipeGestureRecognizer.Swiped),
         [("Direction", e.Direction.ToString())]
     ));
 
-    private void OnTapGesture(object? sender, TappedEventArgs e) => _addBreadcrumb.Invoke(new(
+    private static void OnTapGesture(object? sender, TappedEventArgs e) => _addBreadcrumb?.Invoke(new(
         sender,
         nameof(TapGestureRecognizer.Tapped),
         [("ButtonMask", e.Buttons.ToString())]
