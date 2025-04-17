@@ -23,7 +23,7 @@ public class CtMvvmMauiElementEventBinder : IMauiElementEventBinder
     public void UnBind(VisualElement element) => Iterate(element, false);
 
 
-    void Iterate(VisualElement element, bool bind)
+    private static void Iterate(VisualElement element, bool bind)
     {
         switch (element)
         {
@@ -34,14 +34,69 @@ public class CtMvvmMauiElementEventBinder : IMauiElementEventBinder
             case ImageButton imageButton:
                 TryBindTo(imageButton.Command, bind);
                 break;
-            
-        }
 
+            case CarouselView carousel:
+                TryBindTo(carousel.CurrentItemChangedCommand, bind);
+                TryBindTo(carousel.RemainingItemsThresholdReachedCommand, bind);
+                TryBindTo(carousel.PositionChangedCommand, bind);
+                break;
+
+            case CollectionView collectionView:
+                TryBindTo(collectionView.RemainingItemsThresholdReachedCommand, bind);
+                TryBindTo(collectionView.SelectionChangedCommand, bind);
+                break;
+
+            case Entry entry:
+                TryBindTo(entry.ReturnCommand, bind);
+                break;
+
+            case SearchBar searchBar:
+                TryBindTo(searchBar.SearchCommand, bind);
+                break;
+
+            default:
+                TryGestureBinding(element, bind);
+                break;
+        }
+    }
+
+    private static void TryGestureBinding(VisualElement element, bool bind)
+    {
         if (element is IGestureRecognizers gestureRecognizers)
         {
             foreach (var gestureRecognizer in gestureRecognizers.GestureRecognizers)
             {
+                TryBindTo(gestureRecognizer, bind);
             }
+        }
+    }
+
+    private static void TryBindTo(IGestureRecognizer recognizer, bool bind)
+    {
+        switch (recognizer)
+        {
+            case TapGestureRecognizer tap:
+                TryBindTo(tap.Command, bind);
+                break;
+
+            case SwipeGestureRecognizer swipe:
+                TryBindTo(swipe.Command, bind);
+                break;
+
+            // no commands
+            //case PinchGestureRecognizer pinch
+            //case PanGestureRecognizer pan
+            case DragGestureRecognizer drag:
+                TryBindTo(drag.DragStartingCommand, bind); // unlikely to ever be async
+                TryBindTo(drag.DropCompletedCommand, bind);
+                break;
+
+            case PointerGestureRecognizer pointer:
+                TryBindTo(pointer.PointerPressedCommand, bind);
+                TryBindTo(pointer.PointerReleasedCommand, bind);
+                TryBindTo(pointer.PointerEnteredCommand, bind); // unlikely to ever be async
+                TryBindTo(pointer.PointerExitedCommand, bind);
+                break;
         }
     }
 
@@ -67,11 +122,11 @@ public class CtMvvmMauiElementEventBinder : IMauiElementEventBinder
             var relay = (IAsyncRelayCommand)sender!;
             if (relay.IsRunning)
             {
-                // start span
+                // TODO: start span (transaction?)
             }
             else
             {
-                // finish span
+                // TODO: finish span (transaction?)
             }
         }
     }
