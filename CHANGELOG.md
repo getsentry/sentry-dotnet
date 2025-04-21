@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Option to disable the SentryNative integration ([#4107](https://github.com/getsentry/sentry-dotnet/pull/4107))
+
 ### Fixes
 
 - Prevent users from disabling AndroidEnableAssemblyCompression which leads to untrappable crash ([#4089](https://github.com/getsentry/sentry-dotnet/pull/4089))
