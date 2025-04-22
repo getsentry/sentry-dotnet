@@ -416,7 +416,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
     private void OnElementOnUnfocused(object? sender, FocusEventArgs _) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.Unfocused), SystemType, RenderingCategory);
 
-    private void OnElementLoaded(object? sender, EventArgs _)
+    internal void OnElementLoaded(object? sender, EventArgs _)
     {
         if (sender is not VisualElement element)
         {
