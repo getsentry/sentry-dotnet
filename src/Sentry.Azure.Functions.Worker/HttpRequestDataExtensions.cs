@@ -30,6 +30,31 @@ internal static class HttpRequestDataExtensions
         }
     }
 
+    public static W3CTraceHeader? TryGetW3CTraceHeader(this HttpRequestData context, IDiagnosticLogger? logger)
+    {
+        var traceHeaderValue = context.Headers.TryGetValues(W3CTraceHeader.HttpHeaderName, out var values)
+            ? values.FirstOrDefault()
+            : null;
+
+        if (traceHeaderValue is null)
+        {
+            logger?.LogDebug("Did not receive a Sentry trace header.");
+            return null;
+        }
+
+        logger?.LogDebug("Received Sentry trace header '{0}'.", traceHeaderValue);
+
+        try
+        {
+            return W3CTraceHeader.Parse(traceHeaderValue);
+        }
+        catch (Exception ex)
+        {
+            logger?.LogError(ex, "Invalid Sentry trace header '{0}'.", traceHeaderValue);
+            return null;
+        }
+    }
+
     public static BaggageHeader? TryGetBaggageHeader(this HttpRequestData context, IDiagnosticLogger? logger)
     {
         var baggageValue = context.Headers.TryGetValues(BaggageHeader.HttpHeaderName, out var value)

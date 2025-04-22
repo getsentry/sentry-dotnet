@@ -30,6 +30,7 @@
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\win-x64\sentry-native.lib" />
     <NativeLibrary Include="dbghelp.lib" />
     <NativeLibrary Include="winhttp.lib" />
+    <NativeLibrary Include="Gdi32.lib" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and '$(RuntimeIdentifier)' == 'linux-x64'">
