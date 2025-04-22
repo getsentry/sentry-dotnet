@@ -112,6 +112,7 @@ jobs:
         run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
 
       - name: Build
+        id: build
         run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
 
       - name: Upload build logs
