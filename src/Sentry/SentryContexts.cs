@@ -56,6 +56,11 @@ public sealed class SentryContexts : IDictionary<string, object>, ISentryJsonSer
     public OperatingSystem OperatingSystem => _innerDictionary.GetOrCreate<OperatingSystem>(OperatingSystem.Type);
 
     /// <summary>
+    /// Replay interface that contains information about the Session Replay (if any) related to the event.
+    /// </summary>
+    public Replay Replay => _innerDictionary.GetOrCreate<Replay>(Replay.Type);
+
+    /// <summary>
     /// Response interface that contains information on any HTTP response related to the event.
     /// </summary>
     public Response Response => _innerDictionary.GetOrCreate<Response>(Response.Type);
@@ -171,6 +176,10 @@ public sealed class SentryContexts : IDictionary<string, object>, ISentryJsonSer
             else if (string.Equals(type, OperatingSystem.Type, StringComparison.OrdinalIgnoreCase))
             {
                 result[name] = OperatingSystem.FromJson(value);
+            }
+            else if (string.Equals(type, Replay.Type, StringComparison.OrdinalIgnoreCase))
+            {
+                result[name] = Replay.FromJson(value);
             }
             else if (string.Equals(type, Response.Type, StringComparison.OrdinalIgnoreCase))
             {
