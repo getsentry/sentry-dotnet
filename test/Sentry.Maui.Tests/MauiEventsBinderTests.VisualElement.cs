@@ -1,6 +1,5 @@
 using Sentry.Maui.Internal;
 using Sentry.Maui.Tests.Mocks;
-using Application = Android.App.Application;
 #if __ANDROID__
 using View = Android.Views.View;
 #endif
