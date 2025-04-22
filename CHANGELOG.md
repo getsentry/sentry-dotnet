@@ -4,10 +4,12 @@
 
 ### Features
 
+- Option to disable the SentryNative integration ([#4107](https://github.com/getsentry/sentry-dotnet/pull/4107))
 - Reintroduced experimental support for Session Replay on Android ([#4097](https://github.com/getsentry/sentry-dotnet/pull/4097))
 
 ### Fixes
 
+- Ensure user exception data is not removed by AspNetCoreExceptionProcessor ([#4016](https://github.com/getsentry/sentry-dotnet/pull/4106))
 - Prevent users from disabling AndroidEnableAssemblyCompression which leads to untrappable crash ([#4089](https://github.com/getsentry/sentry-dotnet/pull/4089))
 - Added a `SentrySetCommitReleaseOptions` build property that can be specified separately from `SentryReleaseOptions` ([#4109](https://github.com/getsentry/sentry-dotnet/pull/4109))
 - Fixed MSVCRT build warning on Windows ([#4111](https://github.com/getsentry/sentry-dotnet/pull/4111))
@@ -15,6 +17,15 @@
 ### Features
 
 - If an incoming HTTP request has the `traceparent` header, it is now parsed and interpreted like the `sentry-trace` header. Outgoing requests now contain the `traceparent` header to facilitate integration with servesr that only support the [W3C Trace Context](https://www.w3.org/TR/trace-context/). ([#4084](https://github.com/getsentry/sentry-dotnet/pull/4084))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.39.0 to v8.46.0 ([#4103](https://github.com/getsentry/sentry-dotnet/pull/4103))
+    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8460)
+    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.46.0)
+- Bump Native SDK from v0.8.3 to v0.8.4 ([#4122](https://github.com/getsentry/sentry-dotnet/pull/4122))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#084)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.8.3...0.8.4)
 
 ## 5.5.1
 
