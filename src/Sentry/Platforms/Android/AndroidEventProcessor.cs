@@ -38,7 +38,7 @@ internal class AndroidEventProcessor : ISentryEventProcessor, IDisposable
             // TODO: We should really do this when creating the DSC, so that it gets propagated correctly
             // Check to see if a Replay ID is available
             var activeReplayId = Sentry.JavaSdk.ScopesAdapter.Instance?.Options?.ReplayController?.ReplayId?.ToSentryId();
-            if (activeReplayId is {} replayId && replayId != SentryId.Empty)
+            if (activeReplayId is { } replayId && replayId != SentryId.Empty)
             {
                 @event.Contexts.Replay.ReplayId = replayId;
             }
