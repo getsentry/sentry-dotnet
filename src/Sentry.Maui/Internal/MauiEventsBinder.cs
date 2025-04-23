@@ -437,14 +437,14 @@ internal class MauiEventsBinder : IMauiEventsBinder
             return;
         }
 
-        if (_options.Native.ExperimentalOptions.SessionReplay.MaskedControls.Contains(sender.GetType()))
+        if (_options.Native.ExperimentalOptions.SessionReplay.MaskedControls.FirstOrDefault(maskType => element.GetType().IsAssignableFrom(maskType)) is not null)
         {
-            nativeView.Tag = "sentry-mask";
+            nativeView.Tag = SessionReplayMaskMode.Mask.ToNativeTag();
             _options.LogDebug("OnElementLoaded: Successfully set sentry-mask tag on native view");
         }
-        else if (_options.Native.ExperimentalOptions.SessionReplay.UnmaskedControls.Contains(element.GetType()))
+        else if (_options.Native.ExperimentalOptions.SessionReplay.UnmaskedControls.FirstOrDefault(unmaskType => element.GetType().IsAssignableFrom(unmaskType)) is not null)
         {
-            nativeView.Tag = "sentry-unmask";
+            nativeView.Tag = SessionReplayMaskMode.Unmask.ToNativeTag();
             _options.LogDebug("OnElementLoaded: Successfully set sentry-unmask tag on native view");
         }
 #endif

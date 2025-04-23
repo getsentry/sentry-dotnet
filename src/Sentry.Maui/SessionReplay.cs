@@ -1,3 +1,5 @@
+
+using Sentry.Infrastructure;
 #if __ANDROID__
 using View = Android.Views.View;
 using Android.Views;
@@ -11,6 +13,9 @@ namespace Sentry.Maui;
 /// <summary>
 /// Contains custom <see cref="BindableProperty"/> definitions used to control the behaviour of the Sentry SessionReplay
 /// feature in MAUI apps.
+/// <remarks>
+/// NOTE: Session Replay is currently an experimental feature for MAUI and is subject to change.
+/// </remarks>
 /// </summary>
 public static class SessionReplay
 {
@@ -26,12 +31,12 @@ public static class SessionReplay
             propertyChanged: OnMaskChanged);
 
     /// <summary>
-    /// Gets the value of the Mask property for a view
+    /// Gets the value of the Mask property for a view.
     /// </summary>
     public static SessionReplayMaskMode GetMask(BindableObject view) => (SessionReplayMaskMode)view.GetValue(MaskProperty);
 
     /// <summary>
-    /// Sets the value of the Mask property for a view. .
+    /// Sets the value of the Mask property for a view.
     /// </summary>
     /// <param name="view">The view element to mask or unmask</param>
     /// <param name="value">The value to assign. Can be either "sentry-mask" or "sentry-unmask".</param>
@@ -50,12 +55,7 @@ public static class SessionReplay
                         return;
                     }
 
-                    nativeView.Tag = maskSetting switch
-                    {
-                        SessionReplayMaskMode.Mask => "sentry-mask",
-                        SessionReplayMaskMode.Unmask => "sentry-unmask",
-                        _ => nativeView.Tag
-                    };
+                    nativeView.Tag = maskSetting.ToNativeTag();
                 };
             }
 #endif
