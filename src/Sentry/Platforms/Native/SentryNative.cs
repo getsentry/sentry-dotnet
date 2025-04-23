@@ -14,7 +14,7 @@ internal static class SentryNative
 
 #if NET9_0_OR_GREATER
     // FeatureSwitchDefinition should help with trimming disabled code.
-    // This way, `Sentry.Native.IsEnabled` should be treated as a compile-time constant for trimmed apps.
+    // This way, `SentryNative.IsEnabled` should be treated as a compile-time constant for trimmed apps.
     [FeatureSwitchDefinition(SentryNativeIsEnabledSwitchName)]
 #endif
     private static bool IsEnabled => !AppContext.TryGetSwitch(SentryNativeIsEnabledSwitchName, out var isEnabled) || isEnabled;
