@@ -45,19 +45,46 @@ public static class SessionReplay
     private static void OnMaskChanged(BindableObject bindable, object oldValue, object newValue)
     {
 #if __ANDROID__
-            if (bindable is VisualElement ve)
-            {
-                ve.HandlerChanged += (s, e) =>
-                {
-                    if (ve.Handler?.PlatformView is not View nativeView ||
-                        newValue is not SessionReplayMaskMode maskSetting)
-                    {
-                        return;
-                    }
+        if (bindable is not VisualElement ve || newValue is not SessionReplayMaskMode maskSetting)
+        {
+            return;
+        }
 
-                    nativeView.Tag = maskSetting.ToNativeTag();
-                };
-            }
+        // This code looks pretty funky... just matching how funky MAUI is though.
+        // See https://github.com/getsentry/sentry-dotnet/pull/4121#discussion_r2054129378
+        ve.HandlerChanged -= OnMaskedElementHandlerChanged;
+        ve.HandlerChanged -= OnUnmaskedElementHandlerChanged;
+
+        if (maskSetting == SessionReplayMaskMode.Mask)
+        {
+            ve.HandlerChanged += OnMaskedElementHandlerChanged;
+        }
+        else if (maskSetting == SessionReplayMaskMode.Unmask)
+        {
+            ve.HandlerChanged += OnUnmaskedElementHandlerChanged;
+        }
 #endif
     }
+
+#if __ANDROID__
+    private static void OnMaskedElementHandlerChanged(object? sender, EventArgs _)
+    {
+        if ((sender as VisualElement)?.Handler?.PlatformView is not View nativeView)
+        {
+            return;
+        }
+
+        nativeView.Tag = SessionReplayMaskMode.Mask.ToNativeTag();
+    }
+
+    private static void OnUnmaskedElementHandlerChanged(object? sender, EventArgs _)
+    {
+        if ((sender as VisualElement)?.Handler?.PlatformView is not View nativeView)
+        {
+            return;
+        }
+
+        nativeView.Tag = SessionReplayMaskMode.Unmask.ToNativeTag();
+    }
+#endif
 }
