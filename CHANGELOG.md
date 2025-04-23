@@ -4,7 +4,7 @@
 
 ### Features
 
-- Option to disable the SentryNative integration ([#4107](https://github.com/getsentry/sentry-dotnet/pull/4107))
+- Option to disable the SentryNative integration ([#4107](https://github.com/getsentry/sentry-dotnet/pull/4107), [#4134](https://github.com/getsentry/sentry-dotnet/pull/4134))
 - Reintroduced experimental support for Session Replay on Android ([#4097](https://github.com/getsentry/sentry-dotnet/pull/4097))
 
 ### Fixes
