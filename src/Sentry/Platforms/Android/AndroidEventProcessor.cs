@@ -35,14 +35,6 @@ internal class AndroidEventProcessor : ISentryEventProcessor, IDisposable
         // Copy more information from the Android SDK
         if (_androidProcessor is { } androidProcessor)
         {
-            // TODO: We should really do this when creating the DSC, so that it gets propagated correctly
-            // Check to see if a Replay ID is available
-            var activeReplayId = Sentry.JavaSdk.ScopesAdapter.Instance?.Options?.ReplayController?.ReplayId?.ToSentryId();
-            if (activeReplayId is { } replayId && replayId != SentryId.Empty)
-            {
-                @event.Contexts.Replay.ReplayId = replayId;
-            }
-
             // TODO: Can we gather more data directly and remove this?
 
             // Run a fake event through the Android processor, so we can get context info from the Android SDK.

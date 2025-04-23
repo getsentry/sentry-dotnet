@@ -17,6 +17,7 @@
           QueryString: 
         },
         Contexts: {
+          replay: {},
           trace: {
             Operation: http.server,
             Origin: auto.http.aspnetcore,

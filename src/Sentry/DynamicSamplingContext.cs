@@ -28,7 +28,9 @@ internal class DynamicSamplingContext
         double? sampleRand = null,
         string? release = null,
         string? environment = null,
-        string? transactionName = null)
+        string? transactionName = null,
+        SentryId? replayId = null
+        )
     {
         // Validate and set required values
         if (traceId == SentryId.Empty)
@@ -86,6 +88,11 @@ internal class DynamicSamplingContext
         if (!string.IsNullOrWhiteSpace(transactionName))
         {
             items.Add("transaction", transactionName);
+        }
+
+        if (replayId is not null && replayId.Value != SentryId.Empty)
+        {
+            items.Add("replay_id", replayId.Value.ToString());
         }
 
         Items = items;
@@ -156,6 +163,7 @@ internal class DynamicSamplingContext
         var sampleRate = transaction.SampleRate!.Value;
         var sampleRand = transaction.SampleRand;
         var transactionName = transaction.NameSource.IsHighQuality() ? transaction.Name : null;
+        var replayId = transaction.Contexts.Replay.ReplayId;
 
         // These two may not have been set yet on the transaction, but we can get them directly.
         var release = options.SettingLocator.GetRelease();
@@ -169,7 +177,8 @@ internal class DynamicSamplingContext
             sampleRand,
             release,
             environment,
-            transactionName);
+            transactionName,
+            replayId);
     }
 
     public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options)
@@ -178,13 +187,15 @@ internal class DynamicSamplingContext
         var publicKey = options.ParsedDsn.PublicKey;
         var release = options.SettingLocator.GetRelease();
         var environment = options.SettingLocator.GetEnvironment();
+        var replayId = ReplayHelper.GetReplayId();
 
         return new DynamicSamplingContext(
             traceId,
             publicKey,
             null,
             release: release,
-            environment: environment);
+            environment: environment,
+            replayId: replayId);
     }
 }
 

@@ -78,6 +78,7 @@
             Request: {},
             Contexts: {
               key: value,
+              replay: {},
               trace: {
                 Operation: my operation,
                 Description: ,
