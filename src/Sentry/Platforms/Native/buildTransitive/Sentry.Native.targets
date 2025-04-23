@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <!-- When user sets <SentryNative>false</SentryNative> or <SentryNative>disable</SentryNative> in their project -->
-    <!-- SentryNative.IsEnabled should result in compile-time constant for trimmed applications -->
+    <!-- Sentry.Native.IsEnabled should result in compile-time constant for trimmed applications -->
     <!-- Effectively disabling native library -->
     <RuntimeHostConfigurationOption Include="Sentry.Native.IsEnabled"
                                     Condition="'$(SentryNative)' != 'false' and '$(SentryNative)' != 'disable'"
