@@ -68,7 +68,7 @@ public class BuildPropertySourceGeneratorTests
     }
 
 
-    static GeneratorDriver BuildDriver(Assembly metadataAssembly, params IEnumerable<(string Key, string Value)> buildProperties)
+    private static GeneratorDriver BuildDriver(Assembly metadataAssembly, params IEnumerable<(string Key, string Value)> buildProperties)
     {
         var metadataReference = MetadataReference.CreateFromFile(metadataAssembly.Location);
         var options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
@@ -85,11 +85,19 @@ public class BuildPropertySourceGeneratorTests
 
 file class MockAnalyzerConfigOptionsProvider(Dictionary<string, string> buildProperties) : AnalyzerConfigOptionsProvider
 {
-    readonly MockAnalyzerConfigOptions options = new (buildProperties);
+    private readonly MockAnalyzerConfigOptions options = new(buildProperties);
 
-    public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) => this.options;
+    public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) => options;
+
+<<<<<<< TODO: Unmerged change from project 'Sentry.Tests(net8.0)', Before:
     public override AnalyzerConfigOptions GetOptions(AdditionalText textFile)  => this.options;
     public override AnalyzerConfigOptions GlobalOptions => this.options;
+=======
+    public override AnalyzerConfigOptions GetOptions(AdditionalText textFile)  => options;
+    public override AnalyzerConfigOptions GlobalOptions => options;
+>>>>>>> After
+    public override AnalyzerConfigOptions GetOptions(AdditionalText textFile) => options;
+    public override AnalyzerConfigOptions GlobalOptions => options;
 }
 
 file class MockAnalyzerConfigOptions(Dictionary<string, string> values) : AnalyzerConfigOptions
