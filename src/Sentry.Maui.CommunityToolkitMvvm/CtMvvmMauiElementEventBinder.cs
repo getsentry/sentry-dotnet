@@ -50,6 +50,10 @@ public class CtMvvmMauiElementEventBinder : IMauiElementEventBinder
                 TryBindTo(entry.ReturnCommand, bind);
                 break;
 
+            case RefreshView refresh:
+                TryBindTo(refresh.Command, bind);
+                break;
+
             case SearchBar searchBar:
                 TryBindTo(searchBar.SearchCommand, bind);
                 break;
@@ -100,33 +104,47 @@ public class CtMvvmMauiElementEventBinder : IMauiElementEventBinder
         }
     }
 
+    static List<IAsyncRelayCommand> _refs = [];
     private static void TryBindTo(ICommand? command, bool bind)
     {
         if (command is IAsyncRelayCommand relayCommand)
         {
             if (bind)
             {
-                relayCommand.PropertyChanged += RelayCommandOnPropertyChanged;
+                // necessary for collectionview buttons
+                if (!_refs.Contains(relayCommand))
+                {
+                    _refs.Add(relayCommand);
+                    relayCommand.PropertyChanged += RelayCommandOnPropertyChanged;
+                }
             }
             else
             {
+                _refs.Remove(relayCommand);
                 relayCommand.PropertyChanged -= RelayCommandOnPropertyChanged;
             }
         }
     }
+
+    static ConcurrentDictionary<IAsyncRelayCommand, (ITransactionTracer Transaction, ISpan Span)> _contexts = new();
 
     private static void RelayCommandOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(IAsyncRelayCommand.IsRunning))
         {
             var relay = (IAsyncRelayCommand)sender!;
+
             if (relay.IsRunning)
             {
-                // TODO: start span (transaction?)
+                var transaction = SentrySdk.StartTransaction("ctmvvm", "asynccommand");
+                var span = transaction.StartChild("run");
+                _contexts.TryAdd(relay, (transaction, span));
             }
-            else
+            else if (_contexts.TryGetValue(relay, out var value))
             {
-                // TODO: finish span (transaction?)
+                value.Span.Finish();
+                value.Transaction.Finish();
+                _contexts.TryRemove(relay, out _);
             }
         }
     }
