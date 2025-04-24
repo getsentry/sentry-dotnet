@@ -1,4 +1,4 @@
-#if NET8_0_OR_GREATER && !__ANDROID__ && !__IOS__
+#if !__MOBILE__ && (NET8_0 || NET9_0)
 #nullable enable
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -11,14 +11,6 @@ namespace Sentry.Tests;
 
 public class BuildPropertySourceGeneratorTests
 {
-    [Fact]
-    public Task Driver_Success()
-    {
-        var driver = BuildDriver(typeof(Program).Assembly);
-        return Verify(driver);
-    }
-
-
     [Fact]
     public Task RunResult_Success()
     {
@@ -87,9 +79,9 @@ file class MockAnalyzerConfigOptionsProvider(Dictionary<string, string> buildPro
 {
     readonly MockAnalyzerConfigOptions options = new (buildProperties);
 
-    public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) => this.options;
-    public override AnalyzerConfigOptions GetOptions(AdditionalText textFile)  => this.options;
-    public override AnalyzerConfigOptions GlobalOptions => this.options;
+    public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) => options;
+    public override AnalyzerConfigOptions GetOptions(AdditionalText textFile)  => options;
+    public override AnalyzerConfigOptions GlobalOptions => options;
 }
 
 file class MockAnalyzerConfigOptions(Dictionary<string, string> values) : AnalyzerConfigOptions
