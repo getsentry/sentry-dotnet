@@ -104,7 +104,7 @@ public class CtMvvmMauiElementEventBinder : IMauiElementEventBinder
         }
     }
 
-    static List<IAsyncRelayCommand> _refs = [];
+    private static List<IAsyncRelayCommand> _refs = [];
     private static void TryBindTo(ICommand? command, bool bind)
     {
         if (command is IAsyncRelayCommand relayCommand)
@@ -126,7 +126,7 @@ public class CtMvvmMauiElementEventBinder : IMauiElementEventBinder
         }
     }
 
-    static ConcurrentDictionary<IAsyncRelayCommand, (ITransactionTracer Transaction, ISpan Span)> _contexts = new();
+    private static ConcurrentDictionary<IAsyncRelayCommand, (ITransactionTracer Transaction, ISpan Span)> _contexts = new();
 
     private static void RelayCommandOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
