@@ -80,7 +80,7 @@ file class MockAnalyzerConfigOptionsProvider(Dictionary<string, string> buildPro
     private readonly MockAnalyzerConfigOptions options = new(buildProperties);
 
     public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) => options;
-    public override AnalyzerConfigOptions GetOptions(AdditionalText textFile)  => options;
+    public override AnalyzerConfigOptions GetOptions(AdditionalText textFile) => options;
     public override AnalyzerConfigOptions GlobalOptions => options;
 }
 
