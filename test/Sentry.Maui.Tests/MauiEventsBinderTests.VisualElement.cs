@@ -49,34 +49,4 @@ public partial class MauiEventsBinderTests
         // Assert
         Assert.Single(_fixture.Scope.Breadcrumbs);
     }
-
-    [Fact]
-    public void OnElementLoaded_SenderIsNotVisualElement_LogsDebugAndReturns()
-    {
-        // Arrange
-        var element = new MockElement("element");
-
-        // Act
-        _fixture.Binder.OnElementLoaded(element, EventArgs.Empty);
-
-        // Assert
-        _fixture.Options.DiagnosticLogger.Received(1).LogDebug("OnElementLoaded: sender is not a VisualElement");
-    }
-
-    [Fact]
-    public void OnElementLoaded_HandlerIsNull_LogsDebugAndReturns()
-    {
-        // Arrange
-        var element = new MockVisualElement("element")
-        {
-            Handler = null
-        };
-
-        // Act
-        _fixture.Binder.OnElementLoaded(element, EventArgs.Empty);
-
-        // Assert
-        _fixture.Options.DiagnosticLogger.Received(1).LogDebug("OnElementLoaded: handler is null");
-    }
-
 }

@@ -1,9 +1,6 @@
 using Microsoft.Extensions.Options;
 using Microsoft.Maui.Platform;
 using Sentry.Extensibility;
-#if __ANDROID__
-using View = Android.Views.View;
-#endif
 
 namespace Sentry.Maui.Internal;
 
@@ -250,13 +247,11 @@ internal class MauiEventsBinder : IMauiEventsBinder
         {
             element.Focused += OnElementOnFocused;
             element.Unfocused += OnElementOnUnfocused;
-            element.Loaded += OnElementLoaded;
         }
         else
         {
             element.Focused -= OnElementOnFocused;
             element.Unfocused -= OnElementOnUnfocused;
-            element.Loaded -= OnElementLoaded;
         }
     }
 
@@ -415,40 +410,6 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     private void OnElementOnUnfocused(object? sender, FocusEventArgs _) =>
         _hub.AddBreadcrumbForEvent(_options, sender, nameof(VisualElement.Unfocused), SystemType, RenderingCategory);
-
-    internal void OnElementLoaded(object? sender, EventArgs _)
-    {
-        if (sender is not VisualElement element)
-        {
-            _options.LogDebug("OnElementLoaded: sender is not a VisualElement");
-            return;
-        }
-
-        var handler = element.Handler;
-        if (handler is null)
-        {
-            _options.LogDebug("OnElementLoaded: element.Handler is null");
-            return;
-        }
-
-#if __ANDROID__
-        if (element.Handler?.PlatformView is not View nativeView)
-        {
-            return;
-        }
-
-        if (_options.Native.ExperimentalOptions.SessionReplay.MaskedControls.FirstOrDefault(maskType => element.GetType().IsAssignableFrom(maskType)) is not null)
-        {
-            nativeView.Tag = SessionReplayMaskMode.Mask.ToNativeTag();
-            _options.LogDebug("OnElementLoaded: Successfully set sentry-mask tag on native view");
-        }
-        else if (_options.Native.ExperimentalOptions.SessionReplay.UnmaskedControls.FirstOrDefault(unmaskType => element.GetType().IsAssignableFrom(unmaskType)) is not null)
-        {
-            nativeView.Tag = SessionReplayMaskMode.Unmask.ToNativeTag();
-            _options.LogDebug("OnElementLoaded: Successfully set sentry-unmask tag on native view");
-        }
-#endif
-    }
 
     // Shell Events
 
