@@ -43,4 +43,11 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.1" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0' OR '$(TargetFramework)' == 'net8.0'">
+    <ProjectReference Include="..\..\src\Sentry.SourceGenerators\Sentry.SourceGenerators.csproj" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all"/>
+    <PackageReference Include="Verify.SourceGenerators" Version="2.5.0"/>
+  </ItemGroup>
+
 </Project>

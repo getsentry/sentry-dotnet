@@ -194,12 +194,12 @@
   <ItemGroup>
     <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="buildTransitive\Sentry.targets" />
     <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="build\Sentry.targets" />
-    <None Include="buildTransitive\Sentry.Analyzers.targets" Pack="true" PackagePath="buildTransitive\Sentry.Analyzers.targets" />
-    <None Include="buildTransitive\Sentry.Analyzers.targets" Pack="true" PackagePath="build\Sentry.Analyzers.targets" />
+    <None Include="buildTransitive\Sentry.SourceGenerators.targets" Pack="true" PackagePath="buildTransitive\Sentry.SourceGenerators.targets" />
+    <None Include="buildTransitive\Sentry.SourceGenerators.targets" Pack="true" PackagePath="build\Sentry.SourceGenerators.targets" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\Sentry.Analyzers\bin\Release\netstandard2.0\Sentry.Analyzers.dll"
+    <None Include="..\Sentry.SourceGenerators\bin\Release\netstandard2.0\Sentry.SourceGenerators.dll"
           Pack="true"
           PackagePath="analyzers/dotnet/cs"
           Visible="false" />
