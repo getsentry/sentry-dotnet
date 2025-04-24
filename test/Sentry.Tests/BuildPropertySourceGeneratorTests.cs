@@ -60,7 +60,7 @@ public class BuildPropertySourceGeneratorTests
     }
 
 
-    static GeneratorDriver BuildDriver(Assembly metadataAssembly, params IEnumerable<(string Key, string Value)> buildProperties)
+    private static GeneratorDriver BuildDriver(Assembly metadataAssembly, params IEnumerable<(string Key, string Value)> buildProperties)
     {
         var metadataReference = MetadataReference.CreateFromFile(metadataAssembly.Location);
         var options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
@@ -77,7 +77,7 @@ public class BuildPropertySourceGeneratorTests
 
 file class MockAnalyzerConfigOptionsProvider(Dictionary<string, string> buildProperties) : AnalyzerConfigOptionsProvider
 {
-    readonly MockAnalyzerConfigOptions options = new (buildProperties);
+    private readonly MockAnalyzerConfigOptions options = new(buildProperties);
 
     public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) => options;
     public override AnalyzerConfigOptions GetOptions(AdditionalText textFile)  => options;
