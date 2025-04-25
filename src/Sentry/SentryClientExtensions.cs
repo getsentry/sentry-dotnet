@@ -111,6 +111,7 @@ public static class SentryClientExtensions
     /// </summary>
     /// <param name="clientOrHub"></param>
     /// <returns></returns>
+    [Obsolete("This method is meant for external usage only")]
     public static SentryOptions? GetSentryOptions(this ISentryClient clientOrHub) =>
         clientOrHub switch
         {
