@@ -8,9 +8,21 @@
   Note:Target framework conditions should be kept synchronized with src/Sentry/buildTransitive/Sentry.Native.targets -->
 <Project>
 
+  <ItemGroup>
+    <!-- When user sets <SentryNative>false</SentryNative> or <SentryNative>disable</SentryNative> in their project -->
+    <!-- SentryNative.IsEnabled should result in compile-time constant for trimmed applications -->
+    <!-- Effectively disabling native library -->
+    <RuntimeHostConfigurationOption Include="Sentry.Native.IsEnabled"
+                                    Condition="'$(SentryNative)' != 'false' and '$(SentryNative)' != 'disable'"
+                                    Value="true"
+                                    Trim="true" />
+  </ItemGroup>
+
   <PropertyGroup>
     <!-- net8.0 or greater -->
     <FrameworkSupportsNative Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0')) and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">true</FrameworkSupportsNative>
+    <!-- Make it opt-out -->
+    <FrameworkSupportsNative Condition="'$(SentryNative)' == 'false' or '$(SentryNative)' == 'disable'">false</FrameworkSupportsNative>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and '$(RuntimeIdentifier)' == 'win-x64'">
