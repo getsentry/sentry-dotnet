@@ -220,7 +220,9 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     internal TransactionTracer(IHub hub, string name, string operation, TransactionNameSource nameSource = TransactionNameSource.Custom)
     {
         _hub = hub;
+#pragma warning disable CS0618
         _options = _hub.GetSentryOptions();
+#pragma warning restore CS0618
         Name = name;
         NameSource = nameSource;
         SpanId = SpanId.Create();
@@ -235,7 +237,9 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     internal TransactionTracer(IHub hub, ITransactionContext context, TimeSpan? idleTimeout = null)
     {
         _hub = hub;
+#pragma warning disable CS0618
         _options = _hub.GetSentryOptions();
+#pragma warning restore CS0618
         Name = context.Name;
         NameSource = context.NameSource;
         Operation = context.Operation;

@@ -99,7 +99,9 @@ public static class SentryClientExtensions
     /// <returns>A task to await for the flush operation.</returns>
     public static Task FlushAsync(this ISentryClient client)
     {
+#pragma warning disable CS0618
         var options = client.GetSentryOptions() ?? new SentryOptions();
+#pragma warning restore CS0618
         var timeout = options.FlushTimeout;
         return client.FlushAsync(timeout);
     }
