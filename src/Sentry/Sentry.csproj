@@ -22,6 +22,7 @@
 
   <ItemGroup Condition="'$(SolutionName)' == 'Sentry.Unity'">
     <InternalsVisibleTo Include="Sentry.Unity" />
+    <InternalsVisibleTo Include="Sentry.Unity.Tests" />
   </ItemGroup>
 
   <!-- Platform-specific props included here -->
