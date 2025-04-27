@@ -46,6 +46,7 @@
       SampleRate: 1.0,
       Request: {},
       Contexts: {
+        replay: {},
         trace: {
           Operation: my operation,
           Description: ,
