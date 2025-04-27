@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Work around iOS SHA1 bug ([#4143](https://github.com/getsentry/sentry-dotnet/pull/4143))
+
 ## 5.6.0
 
 ### Features
