@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Custom SessionReplay masks in MAUI Android apps ([#4121](https://github.com/getsentry/sentry-dotnet/pull/4121))
+
 ## 5.6.0
 
 ### Features
@@ -7,7 +13,6 @@
 - Option to disable the SentryNative integration ([#4107](https://github.com/getsentry/sentry-dotnet/pull/4107), [#4134](https://github.com/getsentry/sentry-dotnet/pull/4134))
   - To disable it, add this msbuild property: `<SentryNative>false</SentryNative>` 
 - Reintroduced experimental support for Session Replay on Android ([#4097](https://github.com/getsentry/sentry-dotnet/pull/4097))
-- Custom SessionReplay masks in MAUI Android apps ([#4121](https://github.com/getsentry/sentry-dotnet/pull/4121))
 
 ### Fixes
 
