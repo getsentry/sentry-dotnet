@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Custom SessionReplay masks in MAUI Android apps ([#4121](https://github.com/getsentry/sentry-dotnet/pull/4121))
+
 ## 5.6.0
 
 ### Features
