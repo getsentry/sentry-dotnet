@@ -19,8 +19,8 @@
   <!--  Build the Android test app in various configurations during the build of this test project. -->
   <Target Name="BuildTestAPKs" BeforeTargets="DispatchToInnerBuilds;BeforeBuild" Condition="'$(TargetPlatformIdentifier)' != 'android'">
     <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Restore" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net8.0-android" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net9.0-android" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net8.0-android" Condition="$(TargetFramework) == 'net8.0'" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net9.0-android" Condition="$(TargetFramework) == 'net9.0'" />
   </Target>
   <Target Name="_InnerBuildTestAPKs">
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=False;_Store=False;_Compressed=False" />
