@@ -29,7 +29,6 @@ public class MauiButtonEventsBinder : IMauiElementEventBinder
         }
     }
 
-
     private void OnButtonOnClicked(object? sender, EventArgs _)
         => addBreadcrumbCallback?.Invoke(new(sender, nameof(Button.Clicked)));
 
