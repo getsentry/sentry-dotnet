@@ -54,7 +54,7 @@ public class TraceTests
               "op": "op123",
               "origin": "auto.abc.def.ghi",
               "status": "aborted",
-              "": {
+              "data": {
                 "route": "home"
               }
             }
