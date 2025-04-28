@@ -9,7 +9,7 @@
 ### Fixes
 
 - Work around iOS SHA1 bug ([#4143](https://github.com/getsentry/sentry-dotnet/pull/4143))
-- Include `Data` set via `ITransactionTracer` in `SentryTransaction`([TODO](TODO))
+- Include `Data` set via `ITransactionTracer` in `SentryTransaction`([#4148](https://github.com/getsentry/sentry-dotnet/pull/4148))
 
 ## 5.6.0
 
