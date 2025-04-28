@@ -361,11 +361,13 @@ public class DynamicSamplingContextTests
             {
             },
         };
+        var replayId = SentryId.Create();
+        transaction.Contexts.Replay.ReplayId = replayId;
 
         var dsc = transaction.CreateDynamicSamplingContext(options);
 
         Assert.NotNull(dsc);
-        Assert.Equal(isSampled.HasValue ? 8 : 7, dsc.Items.Count);
+        Assert.Equal(isSampled.HasValue ? 9 : 8, dsc.Items.Count);
         Assert.Equal(traceId.ToString(), Assert.Contains("trace_id", dsc.Items));
         Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
         if (transaction.IsSampled is { } sampled)
@@ -381,11 +383,14 @@ public class DynamicSamplingContextTests
         Assert.Equal("foo@2.4.5", Assert.Contains("release", dsc.Items));
         Assert.Equal("staging", Assert.Contains("environment", dsc.Items));
         Assert.Equal("GET /person/{id}", Assert.Contains("transaction", dsc.Items));
+        Assert.Equal(replayId.ToString(), Assert.Contains("replay_id", dsc.Items));
     }
 
     [Fact]
     public void CreateFromPropagationContext_Valid_Complete()
     {
+        var replayId = ReplayHelper.TestReplayId.Value;
+        ReplayHelper.TestReplayIdResolver = () => replayId;
         var options = new SentryOptions { Dsn = "https://a@sentry.io/1", Release = "test-release", Environment = "test-environment" };
         var propagationContext = new SentryPropagationContext(
             SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1234"));
@@ -397,5 +402,6 @@ public class DynamicSamplingContextTests
         Assert.Equal("a", Assert.Contains("public_key", dsc.Items));
         Assert.Equal("test-release", Assert.Contains("release", dsc.Items));
         Assert.Equal("test-environment", Assert.Contains("environment", dsc.Items));
+        Assert.Equal(replayId.ToString(), Assert.Contains("replay_id", dsc.Items));
     }
 }
