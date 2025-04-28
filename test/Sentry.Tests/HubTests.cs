@@ -681,6 +681,56 @@ public partial class HubTests
     }
 
     [Fact]
+    public void StartTransaction_DynamicSamplingContextWithReplayId_InheritsReplayId()
+    {
+        // Arrange
+        var transactionContext = new TransactionContext("name", "operation");
+        var customContext = new Dictionary<string, object>();
+        var dsc = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sampled", "true"},
+            {"sentry-sample_rate", "0.5"}, // Required in the baggage header, but ignored by sampling logic
+            {"sentry-replay_id","bfd31b89a59d41c99d96dc2baf840ecd"}
+        }).CreateDynamicSamplingContext();
+
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext, customContext, dsc);
+
+        // Assert
+        var transactionTracer = ((TransactionTracer)transaction);
+        transactionTracer.IsSampled.Should().Be(true);
+        transactionTracer.DynamicSamplingContext.Should().Be(dsc);
+        transactionTracer.Contexts.Replay.ReplayId.Should().Be(SentryId.Parse("bfd31b89a59d41c99d96dc2baf840ecd"));
+    }
+
+    [Fact]
+    public void StartTransaction_NoDynamicSamplingContext_GeneratesReplayId()
+    {
+        // Arrange
+        var replayId = ReplayHelper.TestReplayId.Value;
+        ReplayHelper.TestReplayIdResolver = () => replayId;
+        var transactionContext = new TransactionContext("name", "operation");
+        var customContext = new Dictionary<string, object>();
+
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext, customContext);
+
+        // Assert
+        var transactionTracer = ((TransactionTracer)transaction);
+        transactionTracer.SampleRand.Should().NotBeNull();
+        transactionTracer.DynamicSamplingContext.Should().NotBeNull();
+        transactionTracer.DynamicSamplingContext!.Items.Should().ContainKey("replay_id");
+        transactionTracer.DynamicSamplingContext.Items["replay_id"].Should().Be(replayId!.Value.ToString());
+    }
+
+    [Fact]
     public void StartTransaction_NoDynamicSamplingContext_GeneratesSampleRand()
     {
         // Arrange
