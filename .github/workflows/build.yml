@@ -108,9 +108,14 @@ jobs:
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
 
+      - name: Restore .NET Dependencies
+        run: |
+          dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
+          dotnet restore ./test/AndroidTestApp/AndroidTestApp.csproj
+
       - name: Build
         id: build
-        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
+        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
 
       - name: Upload build logs
         if: ${{ steps.build.outcome != 'skipped' }}
