@@ -293,7 +293,8 @@ public class DynamicSamplingContextTests
             {"sentry-release", "test@1.0.0+abc"},
             {"sentry-environment", "production"},
             {"sentry-user_segment", "Group B"},
-            {"sentry-transaction", "GET /person/{id}"}
+            {"sentry-transaction", "GET /person/{id}"},
+            {"sentry-replay_id","bfd31b89a59d41c99d96dc2baf840ecd"}
         });
 
         var dsc = baggage.CreateDynamicSamplingContext();
@@ -309,6 +310,7 @@ public class DynamicSamplingContextTests
         Assert.Equal("production", Assert.Contains("environment", dsc.Items));
         Assert.Equal("Group B", Assert.Contains("user_segment", dsc.Items));
         Assert.Equal("GET /person/{id}", Assert.Contains("transaction", dsc.Items));
+        Assert.Equal("bfd31b89a59d41c99d96dc2baf840ecd", Assert.Contains("replay_id", dsc.Items));
     }
 
     [Fact]
