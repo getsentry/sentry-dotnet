@@ -6,7 +6,7 @@ namespace Sentry.Internal;
 
 internal static class ReplayHelper
 {
-    internal static Lazy<SentryId?> TestReplayId { get; }  = new(() => SentryId.Create());
+    internal static Lazy<SentryId?> TestReplayId { get; } = new(() => SentryId.Create());
 
     private static Func<SentryId?>? TestReplayIdResolver;
 
