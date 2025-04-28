@@ -38,6 +38,7 @@ public class TraceTests
             SpanId = SpanId.Parse("2000000000000000"),
             TraceId = SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8")
         };
+        trace.SetData("route", "home");
 
         // Act
         var actual = trace.ToJsonString(_testOutputLogger, indented: true);
@@ -52,7 +53,10 @@ public class TraceTests
               "trace_id": "75302ac48a024bde9a3b3734a82e36c8",
               "op": "op123",
               "origin": "auto.abc.def.ghi",
-              "status": "aborted"
+              "status": "aborted",
+              "": {
+                "route": "home"
+              }
             }
             """,
             actual);
@@ -72,6 +76,7 @@ public class TraceTests
             SpanId = SpanId.Parse("2000000000000000"),
             TraceId = SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8")
         };
+        trace.SetData("previous_route", "home");
 
         // Act
         var clone = trace.Clone();
@@ -84,6 +89,7 @@ public class TraceTests
         Assert.Equal(trace.ParentSpanId, clone.ParentSpanId);
         Assert.Equal(trace.SpanId, clone.SpanId);
         Assert.Equal(trace.TraceId, clone.TraceId);
+        Assert.Equal(trace.Data, clone.Data);
     }
 
     [Fact]
