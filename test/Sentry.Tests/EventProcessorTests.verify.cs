@@ -1,5 +1,8 @@
+using Sentry.Tests.Internals;
+
 namespace Sentry.Tests;
 
+[Collection("Replay collection")]
 public class EventProcessorTests
 {
     private readonly TestOutputDiagnosticLogger _logger;

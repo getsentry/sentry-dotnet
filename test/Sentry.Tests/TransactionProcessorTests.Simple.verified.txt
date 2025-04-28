@@ -9,10 +9,11 @@
         environment: production,
         public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
         release: release,
+        replay_id: Guid_2,
         sample_rand: {Scrubbed},
         sample_rate: 1,
         sampled: true,
-        trace_id: Guid_2,
+        trace_id: Guid_3,
         transaction: my transaction
       }
     },
@@ -36,7 +37,7 @@
               }
             },
             User: {
-              Id: Guid_3
+              Id: Guid_4
             },
             Environment: production
           }
@@ -46,7 +47,7 @@
   },
   {
     Header: {
-      event_id: Guid_4,
+      event_id: Guid_5,
       sdk: {
         name: sentry.dotnet
       },
@@ -54,10 +55,11 @@
         environment: production,
         public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
         release: release,
+        replay_id: Guid_2,
         sample_rand: {Scrubbed},
         sample_rate: 1,
         sampled: true,
-        trace_id: Guid_2,
+        trace_id: Guid_3,
         transaction: my transaction
       }
     },
@@ -87,7 +89,7 @@
               }
             },
             User: {
-              Id: Guid_3
+              Id: Guid_4
             },
             Environment: production,
             IsFinished: true

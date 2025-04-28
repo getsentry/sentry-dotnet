@@ -1,5 +1,8 @@
+using Sentry.Tests.Internals;
+
 namespace Sentry.Tests;
 
+[Collection("Replay collection")]
 public partial class TransactionProcessorTests
 {
     [Fact]

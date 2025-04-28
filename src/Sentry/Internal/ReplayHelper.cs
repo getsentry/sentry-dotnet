@@ -6,20 +6,24 @@ namespace Sentry.Internal;
 
 internal static class ReplayHelper
 {
+    internal static Lazy<SentryId?> TestReplayId { get; }  = new(() => SentryId.Create());
+
+    private static Func<SentryId?>? TestReplayIdResolver;
+
     /// <summary>
-    /// Function that resolves the replay ID - for use in tests only.
+    /// Initialises the test replay id resolver so that unit tests return a test id (rather than trying to resovle an
+    /// ID from static platform libraries).
     /// </summary>
-    internal static Func<SentryId?>? TestReplayIdResolver;
-    internal static Lazy<SentryId?> TestReplayId = new(() => SentryId.Create());
+    internal static void InitTestReplayId()
+    {
+        TestReplayIdResolver = () => TestReplayId.Value;
+    }
 
     internal static SentryId? GetReplayId()
     {
-        if (TestReplayIdResolver is {} resolver)
-        {
-            // This is a test, so we need to return a test ID
-            return resolver();
-        }
-        return ConcreteReplayIdResolver();
+        return TestReplayIdResolver is { } testIdResolver
+            ? testIdResolver()
+            : ConcreteReplayIdResolver();
     }
 
     private static SentryId? ConcreteReplayIdResolver()

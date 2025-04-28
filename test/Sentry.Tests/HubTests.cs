@@ -1,8 +1,10 @@
 using System.IO.Abstractions.TestingHelpers;
 using Sentry.Internal.Http;
+using Sentry.Tests.Internals;
 
 namespace Sentry.Tests;
 
+[Collection("Replay collection")]
 public partial class HubTests
 {
     private readonly ITestOutputHelper _output;
@@ -713,7 +715,6 @@ public partial class HubTests
     {
         // Arrange
         var replayId = ReplayHelper.TestReplayId.Value;
-        ReplayHelper.TestReplayIdResolver = () => replayId;
         var transactionContext = new TransactionContext("name", "operation");
         var customContext = new Dictionary<string, object>();
 
