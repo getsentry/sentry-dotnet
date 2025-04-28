@@ -244,6 +244,15 @@ public class SentryTransactionTests
 
             return o;
         });
+
+        using (_ = new AssertionScope())
+        {
+            KeyValuePair<string, string> expectedData = new("extra_key", "extra_value");
+            finalTransaction.Data.Should().ContainSingle().Which.Should().Be(expectedData);
+            finalTransaction.Contexts.Trace.Data.Should().ContainSingle().Which.Should().Be(expectedData);
+            actual.Data.Should().ContainSingle().Which.Should().Be(expectedData);
+            actual.Contexts.Trace.Data.Should().ContainSingle().Which.Should().Be(expectedData);
+        }
     }
 
     [Fact]
