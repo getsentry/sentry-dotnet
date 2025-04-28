@@ -19,7 +19,7 @@
   <!-- Target to ensure AndroidTestApp is restored -->
   <Target Name="EnsureAndroidTestAppRestored" Condition="'$(TargetPlatformIdentifier)' != 'android' and '$(AndroidTestAppRestored)' != 'true'">
     <!-- Only restore once. Spawn as a separate process to escape any "no-restore" arguments to the build -->
-    <Exec Command="dotnet restore ..\AndroidTestApp\AndroidTestApp.csproj --nologo" />
+    <Exec Command="dotnet restore ../AndroidTestApp/AndroidTestApp.csproj --nologo" />
     <PropertyGroup>
       <AndroidTestAppRestored>true</AndroidTestAppRestored>
     </PropertyGroup>
