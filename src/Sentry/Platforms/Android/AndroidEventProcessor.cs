@@ -1,5 +1,3 @@
-using Java.Lang;
-using Kotlin;
 using Sentry.Android.Extensions;
 using Sentry.Extensibility;
 using Sentry.JavaSdk.Android.Core;
