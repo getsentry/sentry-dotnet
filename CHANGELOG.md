@@ -23,6 +23,7 @@
 - Option to disable the SentryNative integration ([#4107](https://github.com/getsentry/sentry-dotnet/pull/4107), [#4134](https://github.com/getsentry/sentry-dotnet/pull/4134))
   - To disable it, add this msbuild property: `<SentryNative>false</SentryNative>` 
 - Reintroduced experimental support for Session Replay on Android ([#4097](https://github.com/getsentry/sentry-dotnet/pull/4097))
+- If an incoming HTTP request has the `traceparent` header, it is now parsed and interpreted like the `sentry-trace` header. Outgoing requests now contain the `traceparent` header to facilitate integration with servesr that only support the [W3C Trace Context](https://www.w3.org/TR/trace-context/). ([#4084](https://github.com/getsentry/sentry-dotnet/pull/4084))
 
 ### Fixes
 
@@ -30,10 +31,6 @@
 - Prevent users from disabling AndroidEnableAssemblyCompression which leads to untrappable crash ([#4089](https://github.com/getsentry/sentry-dotnet/pull/4089))
 - Added a `SentrySetCommitReleaseOptions` build property that can be specified separately from `SentryReleaseOptions` ([#4109](https://github.com/getsentry/sentry-dotnet/pull/4109))
 - Fixed MSVCRT build warning on Windows ([#4111](https://github.com/getsentry/sentry-dotnet/pull/4111))
-
-### Features
-
-- If an incoming HTTP request has the `traceparent` header, it is now parsed and interpreted like the `sentry-trace` header. Outgoing requests now contain the `traceparent` header to facilitate integration with servesr that only support the [W3C Trace Context](https://www.w3.org/TR/trace-context/). ([#4084](https://github.com/getsentry/sentry-dotnet/pull/4084))
 
 ### Dependencies
 
