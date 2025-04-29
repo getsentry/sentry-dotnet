@@ -287,7 +287,6 @@ public class SentrySpanProcessorTests : ActivitySourceTests
             transaction.Description.Should().Be(data.DisplayName);
             transaction.Status.Should().BeNull();
             transaction.StartTimestamp.Should().Be(data.StartTimeUtc);
-            _fixture.ScopeManager.Received(1).ConfigureScope(Arg.Any<Action<Scope>>());
         }
     }
 

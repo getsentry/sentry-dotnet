@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry;
 
@@ -9,6 +10,13 @@ internal class SentryPropagationContext
     public SpanId? ParentSpanId { get; }
 
     internal DynamicSamplingContext? _dynamicSamplingContext;
+
+    internal SentryId? GetReplayId()
+    {
+        return _dynamicSamplingContext?.Items.TryGetValue("replay_id", out var value) == true
+            ? SentryId.Parse(value)
+            : ReplayHelper.GetReplayId();
+    }
 
     public DynamicSamplingContext GetOrCreateDynamicSamplingContext(SentryOptions options)
     {
