@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+## Features
+
+- When setting a transaction on the scope, the SDK will attempt to sync the transaction's trace with the SDK on the native layer ([#4153](https://github.com/getsentry/sentry-dotnet/pull/4153)) 
+
 ## 5.6.0
 
 ### Features
