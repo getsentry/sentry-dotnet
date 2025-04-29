@@ -92,7 +92,7 @@ public class BuildPropertySourceGeneratorTests
 
 file class MockAnalyzerConfigOptionsProvider(Dictionary<string, string> buildProperties) : AnalyzerConfigOptionsProvider
 {
-    private readonly MockAnalyzerConfigOptions _options = new (buildProperties);
+    private readonly MockAnalyzerConfigOptions _options = new(buildProperties);
 
     public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) => _options;
     public override AnalyzerConfigOptions GetOptions(AdditionalText textFile) => _options;
