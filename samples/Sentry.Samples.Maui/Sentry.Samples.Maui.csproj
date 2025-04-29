@@ -113,5 +113,5 @@
   </ItemGroup>
 
   <!--In order to test our analyzers with this project, we manually reference our targets file.  User do not need to do this-->
-  <Import Project="..\..\src\Sentry\buildTransitive\Sentry.targets" />
+  <Import Project="..\..\src\Sentry\buildTransitive\Sentry.SourceGenerators.targets" />
 </Project>
