@@ -10,6 +10,12 @@
 
 - Work around iOS SHA1 bug ([#4143](https://github.com/getsentry/sentry-dotnet/pull/4143))
 
+### Dependencies
+
+- Bump CLI from v2.43.0 to v2.43.1 ([#4151](https://github.com/getsentry/sentry-dotnet/pull/4151))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2431)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.43.0...2.43.1)
+
 ## 5.6.0
 
 ### Features
