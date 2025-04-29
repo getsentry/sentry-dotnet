@@ -48,6 +48,21 @@ public class BuildPropertySourceGeneratorTests
     }
 
 
+    [Theory]
+    [InlineData("no", true)]
+    [InlineData("true", false)]
+    [InlineData("false", true)]
+    public void RunResult_SentryDisableSourceGenerator_Values(string value, bool sourceGenExpected)
+    {
+        var driver = BuildDriver(typeof(Program).Assembly, ("SentryDisableSourceGenerator", value), ("OutputType", "exe"));
+        var result = driver.GetRunResult().Results.FirstOrDefault();
+        result.Exception.Should().BeNull();
+
+        var generated = result.GeneratedSources.Any(x => x.HintName.Equals("__BuildProperties.g.cs"));
+        generated.Should().Be(sourceGenExpected);
+    }
+
+
     [Fact]
     public Task RunResult_Expect_None()
     {

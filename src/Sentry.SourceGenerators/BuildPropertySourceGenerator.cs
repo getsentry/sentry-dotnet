@@ -28,6 +28,9 @@ public class BuildPropertySourceGenerator : ISourceGenerator
         if (properties.Count == 0)
             return;
 
+        if (opts.TryGetValue("build_property.SentryDisableSourceGenerator", out var disable) && disable.Equals("true", StringComparison.InvariantCultureIgnoreCase))
+            return;
+
         // we only want to generate code where host setup takes place
         if (!opts.TryGetValue("build_property.outputtype", out var outputType))
             return;
