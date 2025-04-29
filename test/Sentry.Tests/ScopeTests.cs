@@ -326,16 +326,14 @@ public class ScopeTests
             ScopeObserver = observer,
             EnableScopeSync = enableScopeSync
         });
-        // First set a transaction
         var transaction = new TransactionTracer(DisabledHub.Instance, "test-transaction", "op");
         scope.Transaction = transaction;
-
-        // Clear received calls to observer
-        observer.ClearReceivedCalls();
 
         var expectedTraceId = scope.PropagationContext.TraceId;
         var expectedSpanId = scope.PropagationContext.SpanId;
         var expectedCount = enableScopeSync ? 1 : 0;
+
+        observer.ClearReceivedCalls();
 
         // Act
         scope.Transaction = null;
@@ -359,12 +357,11 @@ public class ScopeTests
         var transaction = new TransactionTracer(DisabledHub.Instance, "test-transaction", "op");
         scope.Transaction = transaction;
 
-        // Clear received calls to observer
-        observer.ClearReceivedCalls();
-
         var expectedTraceId = scope.PropagationContext.TraceId;
         var expectedSpanId = scope.PropagationContext.SpanId;
         var expectedCount = enableScopeSync ? 1 : 0;
+
+        observer.ClearReceivedCalls();
 
         // Act
         scope.ResetTransaction(transaction);
@@ -389,7 +386,6 @@ public class ScopeTests
         var differentTransaction = new TransactionTracer(DisabledHub.Instance, "different", "op");
         scope.Transaction = transaction;
 
-        // Clear received calls to observer
         observer.ClearReceivedCalls();
 
         // Act
