@@ -1,3 +1,5 @@
+using Sentry.CompilerServices;
+
 namespace Sentry.Internal;
 
 internal static class AotHelper
@@ -28,7 +30,7 @@ internal static class AotHelper
 
     private static bool Check(string key)
     {
-        if (SentrySdk.BuildVariables?.TryGetValue(key, out var aotValue) ?? false)
+        if (BuildProperties.Values?.TryGetValue(key, out var aotValue) ?? false)
         {
             if (bool.TryParse(aotValue, out var result))
             {

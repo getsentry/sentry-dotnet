@@ -18,7 +18,7 @@ public class BuildPropertySourceGeneratorTests
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(1);
-        result.GeneratedSources.First().HintName.Should().Be("__BuildVariables.g.cs");
+        result.GeneratedSources.First().HintName.Should().Be("__BuildProperties.g.cs");
         return Verify(result);
     }
 
@@ -31,7 +31,7 @@ public class BuildPropertySourceGeneratorTests
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(1);
-        result.GeneratedSources.First().HintName.Should().Be("__BuildVariables.g.cs");
+        result.GeneratedSources.First().HintName.Should().Be("__BuildProperties.g.cs");
         return Verify(result);
     }
 
@@ -43,7 +43,7 @@ public class BuildPropertySourceGeneratorTests
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(1);
-        result.GeneratedSources.First().HintName.Should().Be("__BuildVariables.g.cs");
+        result.GeneratedSources.First().HintName.Should().Be("__BuildProperties.g.cs");
         return Verify(result);
     }
 
