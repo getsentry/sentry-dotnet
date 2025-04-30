@@ -1,3 +1,4 @@
+using Sentry.Experimental;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
@@ -440,6 +441,19 @@ public sealed class Envelope : ISerializable, IDisposable
         var items = new[]
         {
             EnvelopeItem.FromClientReport(clientReport)
+        };
+
+        return new Envelope(header, items);
+    }
+
+    [Experimental(DiagnosticId.ExperimentalSentryLogs)]
+    internal static Envelope FromLog(SentryLog log)
+    {
+        var header = DefaultHeader;
+
+        var items = new[]
+        {
+            EnvelopeItem.FromLog(log)
         };
 
         return new Envelope(header, items);

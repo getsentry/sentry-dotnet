@@ -1,4 +1,6 @@
+using Sentry.Experimental;
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol.Metrics;
@@ -24,6 +26,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     internal const string TypeValueProfile = "profile";
     internal const string TypeValueMetric = "statsd";
     internal const string TypeValueCodeLocations = "metric_meta";
+    internal const string TypeValueLog = "log";
 
     private const string LengthKey = "length";
     private const string FileNameKey = "filename";
@@ -368,6 +371,19 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         };
 
         return new EnvelopeItem(header, new JsonSerializable(report));
+    }
+
+    [Experimental(DiagnosticId.ExperimentalSentryLogs)]
+    internal static EnvelopeItem FromLog(SentryLog log)
+    {
+        var header = new Dictionary<string, object?>(3, StringComparer.Ordinal)
+        {
+            [TypeKey] = TypeValueLog,
+            ["item_count"] = 1,
+            ["content_type"] = "application/vnd.sentry.items.log+json",
+        };
+
+        return new EnvelopeItem(header, new JsonSerializable(log));
     }
 
     private static async Task<Dictionary<string, object?>> DeserializeHeaderAsync(

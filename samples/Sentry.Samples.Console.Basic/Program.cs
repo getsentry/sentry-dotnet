@@ -9,6 +9,7 @@
  */
 
 using System.Net.Http;
+using Sentry.Experimental;
 using static System.Console;
 
 // Initialize the Sentry SDK.  (It is not necessary to dispose it.)
@@ -35,6 +36,16 @@ SentrySdk.Init(options =>
     options.TracesSampleRate = 1.0;
 });
 
+#pragma warning disable SENTRY0002
+SentryExperimentalSdk.CaptureLog(SentrySeverity.Trace, "Hello, World!");
+SentryExperimentalSdk.CaptureLog(SentrySeverity.Debug, "Hello, .NET!");
+SentryExperimentalSdk.CaptureLog(SentrySeverity.Info, "Information");
+SentryExperimentalSdk.CaptureLog(SentrySeverity.Warn, "Warning with one {0}", "parameter");
+SentryExperimentalSdk.CaptureLog(SentrySeverity.Error, "Error with {0} {1}", 2, "parameters");
+SentryExperimentalSdk.CaptureLog(SentrySeverity.Fatal, "Fatal {0} and {1}", true, false);
+#pragma warning restore SENTRY0002
+
+/*
 // This starts a new transaction and attaches it to the scope.
 var transaction = SentrySdk.StartTransaction("Program Main", "function");
 SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
@@ -96,3 +107,4 @@ async Task ThirdFunction()
         span.Finish();
     }
 }
+*/

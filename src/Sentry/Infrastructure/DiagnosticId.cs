@@ -8,4 +8,6 @@ internal static class DiagnosticId
     /// </summary>
     internal const string ExperimentalFeature = "SENTRY0001";
 #endif
+
+    internal const string ExperimentalSentryLogs = "SENTRY0002";
 }
