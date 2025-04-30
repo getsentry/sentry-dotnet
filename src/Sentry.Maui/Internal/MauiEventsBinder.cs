@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Options;
+using Microsoft.Maui.Platform;
+using Sentry.Extensibility;
 
 namespace Sentry.Maui.Internal;
 
