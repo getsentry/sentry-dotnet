@@ -13,11 +13,11 @@
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
-  <ItemGroup  Condition="$(TargetFramework.StartsWith('net8'))">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net8'))">
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
   </ItemGroup>
 
-  <ItemGroup  Condition="$(TargetFramework.StartsWith('net9'))">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net9'))">
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
   </ItemGroup>
 
