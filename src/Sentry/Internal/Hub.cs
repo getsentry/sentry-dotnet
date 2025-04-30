@@ -506,10 +506,7 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope) =>
-        CaptureFeedback(feedback, null, configureScope);
-
-    public void CaptureFeedback(SentryFeedback feedback, SentryHint? hint, Action<Scope> configureScope)
+    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
     {
         if (!IsEnabled)
         {
