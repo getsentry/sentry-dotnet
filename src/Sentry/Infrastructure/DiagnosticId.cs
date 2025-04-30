@@ -9,5 +9,12 @@ internal static class DiagnosticId
     internal const string ExperimentalFeature = "SENTRY0001";
 #endif
 
+    //TODO: QUESTION: Should we re-use the above for all [Experimental] features or have one ID per experimental feature?
     internal const string ExperimentalSentryLogs = "SENTRY0002";
+}
+
+//TODO: not sure about this type name
+internal static class UrlFormats
+{
+    internal const string ExperimentalSentryLogs = "https://github.com/getsentry/sentry-dotnet/issues/4132";
 }

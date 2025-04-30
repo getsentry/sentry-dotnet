@@ -280,6 +280,15 @@ public static partial class SentrySdk
     public static bool IsEnabled { [DebuggerStepThrough] get => CurrentHub.IsEnabled; }
 
     /// <summary>
+    /// Creates and sends logs to Sentry.
+    /// </summary>
+    //TODO: add to IHub or ISentryClient
+    // adding to interfaces is breaking, perhaps via a DIM but what about netstandard2.0 runtimes
+    // or are these interfaces intended to be extended as user code is not meant to implement them
+    [Experimental(DiagnosticId.ExperimentalSentryLogs, UrlFormat = UrlFormats.ExperimentalSentryLogs)]
+    public static SentryLogger Logger { get; } = new SentryLogger();
+
+    /// <summary>
     /// Creates a new scope that will terminate when disposed.
     /// </summary>
     /// <remarks>

@@ -37,13 +37,15 @@ SentrySdk.Init(options =>
 });
 
 #pragma warning disable SENTRY0002
-SentryExperimentalSdk.CaptureLog(SentrySeverity.Trace, "Hello, World!");
-SentryExperimentalSdk.CaptureLog(SentrySeverity.Debug, "Hello, .NET!");
-SentryExperimentalSdk.CaptureLog(SentrySeverity.Info, "Information");
-SentryExperimentalSdk.CaptureLog(SentrySeverity.Warn, "Warning with one {0}", "parameter");
-SentryExperimentalSdk.CaptureLog(SentrySeverity.Error, "Error with {0} {1}", 2, "parameters");
-SentryExperimentalSdk.CaptureLog(SentrySeverity.Fatal, "Fatal {0} and {1}", true, false);
+SentrySdk.Logger.Trace("Hello, World!", null, log => log.SetAttribute("trace", "trace"));
+SentrySdk.Logger.Debug("Hello, .NET!", null, log => log.SetAttribute("trace", "trace"));
+SentrySdk.Logger.Info("Information", null, log => log.SetAttribute("trace", "trace"));
+SentrySdk.Logger.Warn("Warning with one {0}", ["parameter"], log => log.SetAttribute("trace", "trace"));
+SentrySdk.Logger.Error("Error with {0} {1}", [2, "parameters"], log => log.SetAttribute("trace", "trace"));
+SentrySdk.Logger.Fatal("Fatal {0} and {1}", [true, false], log => log.SetAttribute("trace", "trace"));
 #pragma warning restore SENTRY0002
+
+await Task.Delay(5_000);
 
 /*
 // This starts a new transaction and attaches it to the scope.
