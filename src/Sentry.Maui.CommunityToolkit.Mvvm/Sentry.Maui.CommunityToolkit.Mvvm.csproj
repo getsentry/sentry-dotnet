@@ -10,6 +10,7 @@
 
     <!-- Skip warnings about including Microsoft.Maui.Controls... that should be done from the application -->
     <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+    <RootNamespace>Sentry.Maui.CommunityToolkitMvvm</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

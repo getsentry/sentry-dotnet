@@ -6,7 +6,7 @@ namespace Sentry.Maui.CommunityToolkitMvvm;
 /// <summary>
 /// Scans all elements for known commands that are implement
 /// </summary>
-public class CtMvvmMauiElementEventBinder : IMauiElementEventBinder
+public class CtMvvmMauiElementEventBinder(IHub hub) : IMauiElementEventBinder
 {
     /// <summary>
     /// Binds to the element
@@ -23,7 +23,7 @@ public class CtMvvmMauiElementEventBinder : IMauiElementEventBinder
     public void UnBind(VisualElement element) => Iterate(element, false);
 
 
-    private static void Iterate(VisualElement element, bool bind)
+    private void Iterate(VisualElement element, bool bind)
     {
         switch (element)
         {
@@ -64,7 +64,7 @@ public class CtMvvmMauiElementEventBinder : IMauiElementEventBinder
         }
     }
 
-    private static void TryGestureBinding(VisualElement element, bool bind)
+    private void TryGestureBinding(VisualElement element, bool bind)
     {
         if (element is IGestureRecognizers gestureRecognizers)
         {
@@ -75,7 +75,7 @@ public class CtMvvmMauiElementEventBinder : IMauiElementEventBinder
         }
     }
 
-    private static void TryBindTo(IGestureRecognizer recognizer, bool bind)
+    private void TryBindTo(IGestureRecognizer recognizer, bool bind)
     {
         switch (recognizer)
         {
@@ -104,31 +104,24 @@ public class CtMvvmMauiElementEventBinder : IMauiElementEventBinder
         }
     }
 
-    private static List<IAsyncRelayCommand> _refs = [];
-    private static void TryBindTo(ICommand? command, bool bind)
+    private void TryBindTo(ICommand? command, bool bind)
     {
         if (command is IAsyncRelayCommand relayCommand)
         {
+            // since events can retrigger binding pickups, we want to ensure we unhook any previous event handlers
+            // instead of storing a ref to know if we've already bound to an event or not
+            relayCommand.PropertyChanged -= RelayCommandOnPropertyChanged;
             if (bind)
             {
-                // necessary for collectionview buttons
-                if (!_refs.Contains(relayCommand))
-                {
-                    _refs.Add(relayCommand);
-                    relayCommand.PropertyChanged += RelayCommandOnPropertyChanged;
-                }
-            }
-            else
-            {
-                _refs.Remove(relayCommand);
-                relayCommand.PropertyChanged -= RelayCommandOnPropertyChanged;
+                relayCommand.PropertyChanged += RelayCommandOnPropertyChanged;
             }
         }
     }
 
-    private static ConcurrentDictionary<IAsyncRelayCommand, (ITransactionTracer Transaction, ISpan Span)> _contexts = new();
 
-    private static void RelayCommandOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    private readonly ConcurrentDictionary<IAsyncRelayCommand, ITransactionTracer> _contexts = new();
+
+    private void RelayCommandOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(IAsyncRelayCommand.IsRunning))
         {
@@ -136,14 +129,12 @@ public class CtMvvmMauiElementEventBinder : IMauiElementEventBinder
 
             if (relay.IsRunning)
             {
-                var transaction = SentrySdk.StartTransaction("ctmvvm", "asynccommand");
-                var span = transaction.StartChild("run");
-                _contexts.TryAdd(relay, (transaction, span));
+                var transaction = hub.StartTransaction("ctmvvm", "relay.command");
+                _contexts.TryAdd(relay, transaction);
             }
             else if (_contexts.TryGetValue(relay, out var value))
             {
-                value.Span.Finish();
-                value.Transaction.Finish();
+                value.Finish();
                 _contexts.TryRemove(relay, out _);
             }
         }

@@ -197,7 +197,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.TrimTest", "test\Sen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.MauiTrimTest", "test\Sentry.MauiTrimTest\Sentry.MauiTrimTest.csproj", "{DF92E098-822C-4B94-B96B-56BFB91FBB54}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Maui.CommunityToolkitMvvm", "src\Sentry.Maui.CommunityToolkitMvvm\Sentry.Maui.CommunityToolkitMvvm.csproj", "{E898F337-E982-46CC-8DA9-F8556AA7DD72}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Maui.CommunityToolkit.Mvvm", "src\Sentry.Maui.CommunityToolkit.Mvvm\Sentry.Maui.CommunityToolkit.Mvvm.csproj", "{E898F337-E982-46CC-8DA9-F8556AA7DD72}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
