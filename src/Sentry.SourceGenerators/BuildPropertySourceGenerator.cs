@@ -26,17 +26,26 @@ public class BuildPropertySourceGenerator : ISourceGenerator
         var opts = context.AnalyzerConfigOptions.GlobalOptions;
         var properties = opts.Keys.Where(x => x.StartsWith("build_property.")).ToList();
         if (properties.Count == 0)
+        {
             return;
+        }
 
-        if (opts.TryGetValue("build_property.SentryDisableSourceGenerator", out var disable) && disable.Equals("true", StringComparison.InvariantCultureIgnoreCase))
+        if (opts.TryGetValue("build_property.SentryDisableSourceGenerator", out var disable) &&
+            disable.Equals("true", StringComparison.InvariantCultureIgnoreCase))
+        {
             return;
+        }
 
         // we only want to generate code where host setup takes place
         if (!opts.TryGetValue("build_property.outputtype", out var outputType))
+        {
             return;
+        }
 
         if (!outputType.Equals("exe", StringComparison.InvariantCultureIgnoreCase))
+        {
             return;
+        }
 
         var sb = new StringBuilder();
         sb
@@ -49,9 +58,6 @@ public class BuildPropertySourceGenerator : ISourceGenerator
 // </auto-generated>
 
 #if NET8_0_OR_GREATER
-using System;
-using System.Collections.Generic;
-
 namespace Sentry;
 
 [global::System.Runtime.CompilerServices.CompilerGenerated]
