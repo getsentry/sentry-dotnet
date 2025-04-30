@@ -9,6 +9,17 @@
     <SentryAttributesFile>Sentry.Attributes$(MSBuildProjectExtension.Replace('proj', ''))</SentryAttributesFile>
   </PropertyGroup>
 
+  <Target Name="_SentryEnsureAndroidEnableAssemblyCompressionDisabled"
+          Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' AND '$(AndroidEnableAssemblyCompression)' == 'false'"
+          BeforeTargets="ResolveAssemblyReferences;Build;Rebuild">
+    <Error Text="Android projects using Sentry cannot build using AndroidEnableAssemblyCompression = false due to a Microsoft issue.  Please follow https://github.com/dotnet/android/issues/9752" />
+  </Target>
+
+  <ItemGroup Condition="$([System.OperatingSystem]::IsWindows())">
+    <!-- See: https://github.com/getsentry/sentry-dotnet/pull/4111 -->
+    <LinkerArg Include="/NODEFAULTLIB:MSVCRT" />
+  </ItemGroup>
+
   <Target Name="WriteSentryAttributes"
           Condition="$(Language) == 'VB' or $(Language) == 'C#' or $(Language) == 'F#'"
           BeforeTargets="BeforeCompile;CoreCompile"
@@ -98,7 +109,10 @@
 
       <SentryReleaseOptions Condition="'$(SentryOrg)' != ''">$(SentryReleaseOptions) --org $(SentryOrg)</SentryReleaseOptions>
       <SentryReleaseOptions Condition="'$(SentryProject)' != ''">$(SentryReleaseOptions) --project $(SentryProject)</SentryReleaseOptions>
+
       <SentrySetCommitOptions Condition="'$(SentrySetCommitOptions)' == ''">--auto</SentrySetCommitOptions>
+      <SentrySetCommitReleaseOptions Condition="'$(SentryOrg)' != ''">$(SentrySetCommitReleaseOptions) --org $(SentryOrg)</SentrySetCommitReleaseOptions>
+      <SentrySetCommitReleaseOptions Condition="'$(SentryProject)' != ''">$(SentrySetCommitReleaseOptions) --project $(SentryProject)</SentrySetCommitReleaseOptions>
 
       <SentryCLIUploadOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIUploadOptions) --org $(SentryOrg)</SentryCLIUploadOptions>
       <SentryCLIUploadOptions Condition="'$(SentryProject)' != ''">$(SentryCLIUploadOptions) --project $(SentryProject)</SentryCLIUploadOptions>
@@ -344,7 +358,7 @@
           Condition="'$(SentryCLI)' != '' and '$(SentrySetCommits)' == 'true'">
     <Message Importance="High" Text="Setting Sentry commits" />
     <Exec
-      Command="$(SentryCLIBaseCommand) releases set-commits $(SentrySetCommitOptions) $(_SentryRelease) $(SentryReleaseOptions)"
+      Command="$(SentryCLIBaseCommand) releases set-commits $(SentrySetCommitOptions) $(_SentryRelease) $(SentrySetCommitReleaseOptions)"
       IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
     </Exec>

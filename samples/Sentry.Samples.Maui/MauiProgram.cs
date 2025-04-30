@@ -25,6 +25,19 @@ public static class MauiProgram
                 options.Debug = true;
                 options.SampleRate = 1.0F;
 
+#if __ANDROID__
+                // Currently experimental support is only available on Android
+                options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate = 1.0;
+                options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate = 1.0;
+                // Mask all images and text by default. This can be overridden for individual view elements via the
+                // sentry:SessionReplay.Mask XML attribute (see MainPage.xaml for an example)
+                options.Native.ExperimentalOptions.SessionReplay.MaskAllImages = true;
+                options.Native.ExperimentalOptions.SessionReplay.MaskAllText = true;
+                // Alternatively the masking behaviour for entire classes of VisualElements can be configured here as
+                // an exception to the default behaviour.
+                options.Native.ExperimentalOptions.SessionReplay.UnmaskControlsOfType<Button>();
+#endif
+
                 options.SetBeforeScreenshotCapture((@event, hint) =>
                 {
                     Console.WriteLine("screenshot about to be captured.");

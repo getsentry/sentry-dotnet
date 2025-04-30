@@ -1,1 +1,5 @@
-Analyzer ensures that all file system access continues to be routed through the SDK’s custom wrappers. It is meant for consumption from `Sentry` itself, for development of the SDK. For details see [issue #3643.](https://github.com/getsentry/sentry-dotnet/issues/3643)
+Certain platforms, such as the Nintendo Switch, impose strict limitations on disk access. To support these platforms (i.e. allow the Unity SDK to fallback on preventing disk access OOTB) and prevent user projects from crashing, we introduced an option to opt-out of all disk-writing operations.
+
+We now route file system access through our `IFileSystem` wrapper. Depending on the configuration in options, the SDK uses either a ReadOnly or ReadWrite filesystem. This mechanism acts as a fallback to prevent regressions. SDK developers must explicitly check `Options.FileWriteDisable` before attempting any disk write operation. If a write attempt is made with disk access disabled, the filesystem simply returns false without further context.
+
+This analyzer ensures that all file system access continues to be routed through the SDK’s custom wrappers. It is meant for consumption from `Sentry` itself, for development of the SDK. For details see [issue #3643.](https://github.com/getsentry/sentry-dotnet/issues/3643)

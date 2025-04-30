@@ -5,39 +5,23 @@ namespace Sentry.Internal;
 ///
 /// See https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function#FNV_hash_parameters
 /// </summary>
-/// <remarks>
-/// We use a struct to avoid heap allocations.
-/// </remarks>
-internal struct FnvHash
+internal static class FnvHash
 {
-    public FnvHash()
-    {
-    }
-
     private const int Offset = unchecked((int)2166136261);
     private const int Prime = 16777619;
 
-    private int HashCode { get; set; } = Offset;
-
-    private void Combine(byte data)
+    internal static int ComputeHash(string input)
     {
-        unchecked
+        var hashCode = Offset;
+        foreach (var b in Encoding.UTF8.GetBytes(input))
         {
-            HashCode ^= data;
-            HashCode *= Prime;
-        }
-    }
-
-    private static int ComputeHash(byte[] data)
-    {
-        var result = new FnvHash();
-        foreach (var b in data)
-        {
-            result.Combine(b);
+            unchecked
+            {
+                hashCode ^= b;
+                hashCode *= Prime;
+            }
         }
 
-        return result.HashCode;
+        return hashCode;
     }
-
-    public static int ComputeHash(string data) => ComputeHash(Encoding.UTF8.GetBytes(data));
 }

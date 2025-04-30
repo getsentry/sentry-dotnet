@@ -952,7 +952,8 @@ public class SentryOptions
     /// <summary>
     /// A customizable list of <see cref="StringOrRegex"/> objects, each containing either a
     /// substring or regular expression pattern that can be used to control which outgoing HTTP requests
-    /// will have the <c>sentry-trace</c> and <c>baggage</c> headers propagated, for purposes of distributed tracing.
+    /// will have the <c>sentry-trace</c>, <c>traceparent</c>, and <c>baggage</c> headers propagated,
+    /// for purposes of distributed tracing.
     /// The default value contains a single value of <c>.*</c>, which matches everything.
     /// To disable propagation completely, clear this collection or set it to an empty collection.
     /// </summary>
@@ -1815,8 +1816,11 @@ public class SentryOptions
         {
             return null;
         }
-
+#if IOS || ANDROID // on iOS or Android the app is already sandboxed so there's no risk of sending data from 1 app to another Sentry's DSN
+        return Path.Combine(CacheDirectoryPath, "Sentry");
+#else
         return Path.Combine(CacheDirectoryPath, "Sentry", Dsn.GetHashString());
+#endif
     }
 
     internal string? TryGetProcessSpecificCacheDirectoryPath()
