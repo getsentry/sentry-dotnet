@@ -273,6 +273,10 @@ public class SamplingTransactionProfilerTests
         {
             using var hub = new Hub(options);
 
+            var factory = (options.TransactionProfilerFactory as SamplingTransactionProfilerFactory)!;
+            Skip.If(TestEnvironment.IsGitHubActions && factory.StartupTimedOut, "Session sometimes takes too long to start in CI.");
+            Assert.False(factory.StartupTimedOut);
+
             var clock = SentryStopwatch.StartNew();
             var tx = hub.StartTransaction("name", "op");
             RunForMs(RuntimeMs);
