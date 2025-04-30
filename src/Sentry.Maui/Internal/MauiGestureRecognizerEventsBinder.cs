@@ -1,7 +1,7 @@
 namespace Sentry.Maui.Internal;
 
 /// <summary>
-/// Binds to
+/// Detects and breadcrumbs any gesture recognizers attached to the visual element
 /// </summary>
 public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
 {
@@ -44,63 +44,59 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
         switch (recognizer)
         {
             case TapGestureRecognizer tap:
+                tap.Tapped -= OnTapGesture;
+
                 if (bind)
                 {
                     tap.Tapped += OnTapGesture;
                 }
-                else
-                {
-                    tap.Tapped -= OnTapGesture;
-                }
                 break;
 
             case SwipeGestureRecognizer swipe:
+                swipe.Swiped -= OnSwipeGesture;
+
                 if (bind)
                 {
                     swipe.Swiped += OnSwipeGesture;
                 }
-                else
-                {
-                    swipe.Swiped -= OnSwipeGesture;
-                }
                 break;
 
             case PinchGestureRecognizer pinch:
+                pinch.PinchUpdated -= OnPinchGesture;
+
                 if (bind)
                 {
                     pinch.PinchUpdated += OnPinchGesture;
                 }
-                else
-                {
-                    pinch.PinchUpdated -= OnPinchGesture;
-                }
                 break;
 
             case DragGestureRecognizer drag:
+                drag.DragStarting -= OnDragStartingGesture;
+                drag.DropCompleted -= OnDropCompletedGesture;
+
                 if (bind)
                 {
                     drag.DragStarting += OnDragStartingGesture;
                     drag.DropCompleted += OnDropCompletedGesture;
                 }
-                else
-                {
-                    drag.DragStarting -= OnDragStartingGesture;
-                    drag.DropCompleted -= OnDropCompletedGesture;
-                }
                 break;
 
             case PanGestureRecognizer pan:
+                pan.PanUpdated -= OnPanGesture;
+
                 if (bind)
                 {
                     pan.PanUpdated += OnPanGesture;
                 }
-                else
-                {
-                    pan.PanUpdated -= OnPanGesture;
-                }
                 break;
 
             case PointerGestureRecognizer pointer:
+                pointer.PointerEntered -= OnPointerEnteredGesture;
+                pointer.PointerExited -= OnPointerExitedGesture;
+                pointer.PointerMoved -= OnPointerMovedGesture;
+                pointer.PointerPressed -= OnPointerPressedGesture;
+                pointer.PointerReleased -= OnPointerReleasedGesture;
+
                 if (bind)
                 {
                     pointer.PointerEntered += OnPointerEnteredGesture;
@@ -108,14 +104,6 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
                     pointer.PointerMoved += OnPointerMovedGesture;
                     pointer.PointerPressed += OnPointerPressedGesture;
                     pointer.PointerReleased += OnPointerReleasedGesture;
-                }
-                else
-                {
-                    pointer.PointerEntered -= OnPointerEnteredGesture;
-                    pointer.PointerExited -= OnPointerExitedGesture;
-                    pointer.PointerMoved -= OnPointerMovedGesture;
-                    pointer.PointerPressed -= OnPointerPressedGesture;
-                    pointer.PointerReleased -= OnPointerReleasedGesture;
                 }
                 break;
         }
