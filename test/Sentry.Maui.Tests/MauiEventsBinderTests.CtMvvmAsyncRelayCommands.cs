@@ -31,7 +31,7 @@ public partial class MauiEventsBinderTests
 file partial class TestCtMvvmViewModel : ObservableObject
 {
     [RelayCommand]
-    async Task Test()
+    private async Task Test()
     {
         await Task.Delay(TimeSpan.FromSeconds(1));
     }
