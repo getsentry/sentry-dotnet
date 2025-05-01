@@ -100,4 +100,8 @@ public partial class MainPage
     {
         await Navigation.PushModalAsync(new SubmitFeedback());
     }
+
+    private void TapGestureRecognizer_OnTapped(object sender, TappedEventArgs e)
+    {
+    }
 }
