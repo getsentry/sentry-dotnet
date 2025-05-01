@@ -9,6 +9,7 @@
 ### Fixes
 
 - Work around iOS SHA1 bug ([#4143](https://github.com/getsentry/sentry-dotnet/pull/4143))
+- Fixes build error when building .NET Framwork applications using Sentry 5.6.0: `MSB4185 :The function "IsWindows" on type "System.OperatingSystem" is not available` ([#4160](https://github.com/getsentry/sentry-dotnet/pull/4160))
 
 ### Dependencies
 
