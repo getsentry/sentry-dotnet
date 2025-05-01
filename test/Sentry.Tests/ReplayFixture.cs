@@ -4,7 +4,7 @@ public class ReplayFixture
 {
     public ReplayFixture()
     {
-        ReplayHelper.InitTestReplayId();
+        ReplaySession.InitTestReplayId();
     }
 }
 
@@ -15,5 +15,6 @@ public class ReplayFixture
 [CollectionDefinition("Replay collection")]
 public class ReplayCollection : ICollectionFixture<ReplayFixture>
 {
+    public const string Name = "Replay collection";
     // TODO: When we upgrade to Xcode 3, it would be cleaner to use an AssemblyFixture
 }

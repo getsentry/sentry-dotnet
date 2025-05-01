@@ -1,5 +1,6 @@
 namespace Sentry.Tests.Protocol;
 
+[Collection(ReplayCollection.Name)]
 public class SentryTransactionTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
@@ -56,7 +57,7 @@ public class SentryTransactionTests
     }
 
     [Fact]
-    public void NewTransactionTracer_PropagationContextHasReplayId_SetsReplayContext()
+    public void NewTransactionTracer_PropagationContextHasReplayId_UsesActiveSessionReplayIdInstead()
     {
         // Arrange
         var hub = Substitute.For<IHub>();
@@ -78,7 +79,7 @@ public class SentryTransactionTests
         var actualTransaction = new TransactionTracer(hub, transactionContext);
 
         // Assert
-        actualTransaction.Contexts.Replay.ReplayId.Should().Be(SentryId.Parse("bfd31b89a59d41c99d96dc2baf840ecd"));
+        actualTransaction.Contexts.Replay.ReplayId.Should().Be(ReplaySession.TestReplayId.Value);
         Assert.NotEqual(DateTimeOffset.MinValue, actualTransaction.StartTimestamp);
     }
 

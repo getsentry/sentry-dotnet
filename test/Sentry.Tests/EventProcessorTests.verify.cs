@@ -2,7 +2,7 @@ using Sentry.Tests.Internals;
 
 namespace Sentry.Tests;
 
-[Collection("Replay collection")]
+[Collection(ReplayCollection.Name)]
 public class EventProcessorTests
 {
     private readonly TestOutputDiagnosticLogger _logger;

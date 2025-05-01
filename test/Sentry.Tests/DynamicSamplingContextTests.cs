@@ -2,7 +2,7 @@ using Sentry.Tests.Internals;
 
 namespace Sentry.Tests;
 
-[Collection("Replay collection")]
+[Collection(ReplayCollection.Name)]
 public class DynamicSamplingContextTests
 {
     [Fact]
@@ -273,11 +273,13 @@ public class DynamicSamplingContextTests
         var dsc = baggage.CreateDynamicSamplingContext();
 
         Assert.NotNull(dsc);
-        Assert.Equal(4, dsc.Items.Count);
+        Assert.Equal(5, dsc.Items.Count);
         Assert.Equal("43365712692146d08ee11a729dfbcaca", Assert.Contains("trace_id", dsc.Items));
         Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
         Assert.Equal("1.0", Assert.Contains("sample_rate", dsc.Items));
         Assert.Contains("sample_rand", dsc.Items);
+        // We add the replay_id automatically when we have an active replay session
+        Assert.Equal(ReplaySession.TestReplayId.Value!.ToString(), Assert.Contains("replay_id", dsc.Items));
     }
 
     [Fact]
@@ -310,7 +312,8 @@ public class DynamicSamplingContextTests
         Assert.Equal("production", Assert.Contains("environment", dsc.Items));
         Assert.Equal("Group B", Assert.Contains("user_segment", dsc.Items));
         Assert.Equal("GET /person/{id}", Assert.Contains("transaction", dsc.Items));
-        Assert.Equal("bfd31b89a59d41c99d96dc2baf840ecd", Assert.Contains("replay_id", dsc.Items));
+        // The replay_id doesn't get propagated when we have an active replay session of our own
+        Assert.Equal(ReplaySession.TestReplayId.Value!.ToString(), Assert.Contains("replay_id", dsc.Items));
     }
 
     [Fact]
@@ -325,7 +328,8 @@ public class DynamicSamplingContextTests
             {"sentry-release", "test@1.0.0+abc"},
             {"sentry-environment", "production"},
             {"sentry-user_segment", "Group B"},
-            {"sentry-transaction", "GET /person/{id}"}
+            {"sentry-transaction", "GET /person/{id}"},
+            {"sentry-replay_id", ReplaySession.TestReplayId.Value!.ToString()}
         });
 
         var dsc = original.CreateDynamicSamplingContext();
@@ -366,8 +370,6 @@ public class DynamicSamplingContextTests
             {
             },
         };
-        var replayId = SentryId.Create();
-        transaction.Contexts.Replay.ReplayId = replayId;
 
         var dsc = transaction.CreateDynamicSamplingContext(options);
 
@@ -388,13 +390,14 @@ public class DynamicSamplingContextTests
         Assert.Equal("foo@2.4.5", Assert.Contains("release", dsc.Items));
         Assert.Equal("staging", Assert.Contains("environment", dsc.Items));
         Assert.Equal("GET /person/{id}", Assert.Contains("transaction", dsc.Items));
-        Assert.Equal(replayId.ToString(), Assert.Contains("replay_id", dsc.Items));
+        // We add the replay_id automatically when we have an active replay session
+        Assert.Equal(ReplaySession.TestReplayId.Value!.ToString(), Assert.Contains("replay_id", dsc.Items));
     }
 
     [Fact]
     public void CreateFromPropagationContext_Valid_Complete()
     {
-        var replayId = ReplayHelper.TestReplayId.Value;
+        var replayId = ReplaySession.TestReplayId.Value;
         var options = new SentryOptions { Dsn = "https://a@sentry.io/1", Release = "test-release", Environment = "test-environment" };
         var propagationContext = new SentryPropagationContext(
             SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1234"));

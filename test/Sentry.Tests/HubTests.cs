@@ -4,7 +4,7 @@ using Sentry.Tests.Internals;
 
 namespace Sentry.Tests;
 
-[Collection("Replay collection")]
+[Collection(ReplayCollection.Name)]
 public partial class HubTests
 {
     private readonly ITestOutputHelper _output;
@@ -683,11 +683,10 @@ public partial class HubTests
     }
 
     [Fact]
-    public void StartTransaction_DynamicSamplingContextWithReplayId_InheritsReplayId()
+    public void StartTransaction_DynamicSamplingContextWithReplayId_UsesActiveReplaySessionId()
     {
         // Arrange
         var transactionContext = new TransactionContext("name", "operation");
-        var customContext = new Dictionary<string, object>();
         var dsc = BaggageHeader.Create(new List<KeyValuePair<string, string>>
         {
             {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
@@ -701,34 +700,35 @@ public partial class HubTests
         var hub = _fixture.GetSut();
 
         // Act
-        var transaction = hub.StartTransaction(transactionContext, customContext, dsc);
+        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>(), dsc);
 
         // Assert
         var transactionTracer = ((TransactionTracer)transaction);
         transactionTracer.IsSampled.Should().Be(true);
         transactionTracer.DynamicSamplingContext.Should().Be(dsc);
-        transactionTracer.Contexts.Replay.ReplayId.Should().Be(SentryId.Parse("bfd31b89a59d41c99d96dc2baf840ecd"));
+        transactionTracer.DynamicSamplingContext.Should().NotBeNull();
+        transactionTracer.DynamicSamplingContext!.Items.Should().ContainKey("replay_id");
+        // The replay_id doesn't get propagated when we have an active replay session of our own
+        transactionTracer.DynamicSamplingContext.Items["replay_id"].Should().Be(ReplaySession.TestReplayId.Value!.ToString());
     }
 
     [Fact]
-    public void StartTransaction_NoDynamicSamplingContext_GeneratesReplayId()
+    public void StartTransaction_NoDynamicSamplingContext_UsesActiveReplaySessionId()
     {
         // Arrange
-        var replayId = ReplayHelper.TestReplayId.Value;
         var transactionContext = new TransactionContext("name", "operation");
-        var customContext = new Dictionary<string, object>();
 
         var hub = _fixture.GetSut();
 
         // Act
-        var transaction = hub.StartTransaction(transactionContext, customContext);
+        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>());
 
         // Assert
         var transactionTracer = ((TransactionTracer)transaction);
         transactionTracer.SampleRand.Should().NotBeNull();
         transactionTracer.DynamicSamplingContext.Should().NotBeNull();
         transactionTracer.DynamicSamplingContext!.Items.Should().ContainKey("replay_id");
-        transactionTracer.DynamicSamplingContext.Items["replay_id"].Should().Be(replayId!.Value.ToString());
+        transactionTracer.DynamicSamplingContext.Items["replay_id"].Should().Be(ReplaySession.TestReplayId.Value!.ToString());
     }
 
     [Fact]

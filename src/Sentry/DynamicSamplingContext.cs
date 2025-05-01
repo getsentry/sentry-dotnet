@@ -28,8 +28,7 @@ internal class DynamicSamplingContext
         double? sampleRand = null,
         string? release = null,
         string? environment = null,
-        string? transactionName = null,
-        SentryId? replayId = null
+        string? transactionName = null
         )
     {
         // Validate and set required values
@@ -53,7 +52,7 @@ internal class DynamicSamplingContext
             throw new ArgumentOutOfRangeException(nameof(sampleRand), "Arg invalid if < 0.0 or >= 1.0");
         }
 
-        var items = new Dictionary<string, string>(capacity: 8)
+        var items = new Dictionary<string, string>(capacity: 9)
         {
             ["trace_id"] = traceId.ToString(),
             ["public_key"] = publicKey,
@@ -90,9 +89,9 @@ internal class DynamicSamplingContext
             items.Add("transaction", transactionName);
         }
 
-        if (replayId is not null && replayId.Value != SentryId.Empty)
+        if (ReplaySession.GetReplayId() is { } replayId && replayId != SentryId.Empty)
         {
-            items.Add("replay_id", replayId.Value.ToString());
+            items.Add("replay_id", replayId.ToString());
         }
 
         Items = items;
@@ -151,6 +150,14 @@ internal class DynamicSamplingContext
             }
             items.Add("sample_rand", rand.ToString("N4", CultureInfo.InvariantCulture));
         }
+
+        if (ReplaySession.GetReplayId() is { } replayId)
+        {
+            // Overwrite any existing value - the DSC is simply used as a transport mechanism so that SDKs can
+            // communicate the replayId to Sentry Relay (SDKs don't need to propagate the replayId to each other).
+            items["replay_id"] = replayId.ToString();
+        }
+
         return new DynamicSamplingContext(items);
     }
 
@@ -163,7 +170,6 @@ internal class DynamicSamplingContext
         var sampleRate = transaction.SampleRate!.Value;
         var sampleRand = transaction.SampleRand;
         var transactionName = transaction.NameSource.IsHighQuality() ? transaction.Name : null;
-        var replayId = transaction.Contexts.Replay.ReplayId;
 
         // These two may not have been set yet on the transaction, but we can get them directly.
         var release = options.SettingLocator.GetRelease();
@@ -177,8 +183,7 @@ internal class DynamicSamplingContext
             sampleRand,
             release,
             environment,
-            transactionName,
-            replayId);
+            transactionName);
     }
 
     public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options)
@@ -187,15 +192,13 @@ internal class DynamicSamplingContext
         var publicKey = options.ParsedDsn.PublicKey;
         var release = options.SettingLocator.GetRelease();
         var environment = options.SettingLocator.GetEnvironment();
-        var replayId = ReplayHelper.GetReplayId();
 
         return new DynamicSamplingContext(
             traceId,
             publicKey,
             null,
             release: release,
-            environment: environment,
-            replayId: replayId);
+            environment: environment);
     }
 }
 

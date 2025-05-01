@@ -15,7 +15,7 @@ internal class SentryPropagationContext
     {
         return _dynamicSamplingContext?.Items.TryGetValue("replay_id", out var value) == true
             ? SentryId.Parse(value)
-            : ReplayHelper.GetReplayId();
+            : ReplaySession.GetReplayId();
     }
 
     public DynamicSamplingContext GetOrCreateDynamicSamplingContext(SentryOptions options)

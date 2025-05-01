@@ -134,9 +134,7 @@ internal class Hub : IHub, IDisposable
                 : SampleRandHelper.GenerateSampleRand(context.TraceId.ToString())
         };
 
-        transaction.Contexts.Replay.ReplayId = dynamicSamplingContext?.Items.TryGetValue("replay_id", out var replayId) == true
-            ? SentryId.Parse(replayId)
-            : ReplayHelper.GetReplayId();
+        transaction.Contexts.Replay.ReplayId = ReplaySession.GetReplayId();
 
         // If the hub is disabled, we will always sample out.  In other words, starting a transaction
         // after disposing the hub will result in that transaction not being sent to Sentry.

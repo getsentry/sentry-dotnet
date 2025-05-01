@@ -4,7 +4,7 @@ using Sentry.Android.Extensions;
 
 namespace Sentry.Internal;
 
-internal static class ReplayHelper
+internal static class ReplaySession
 {
     internal static Lazy<SentryId?> TestReplayId { get; } = new(() => SentryId.Create());
 
@@ -19,14 +19,9 @@ internal static class ReplayHelper
         TestReplayIdResolver = () => TestReplayId.Value;
     }
 
-    internal static SentryId? GetReplayId()
-    {
-        return TestReplayIdResolver is { } testIdResolver
-            ? testIdResolver()
-            : ConcreteReplayIdResolver();
-    }
+    internal static SentryId? GetReplayId() => (TestReplayIdResolver ?? ReplayIdResolver)();
 
-    private static SentryId? ConcreteReplayIdResolver()
+    private static SentryId? ReplayIdResolver()
     {
 #if __ANDROID__
         // Check to see if a Replay ID is available
