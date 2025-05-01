@@ -3,7 +3,7 @@ using Sentry.Maui.CommunityToolkitMvvm;
 namespace Sentry.Maui;
 
 /// <summary>
-/// Methods to hook into MAUI & CommunityToolkit.Mvvm
+/// Methods to hook into MAUI and CommunityToolkit.Mvvm
 /// </summary>
 public static class MauiAppBuilderExtensions
 {

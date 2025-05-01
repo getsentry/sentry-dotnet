@@ -100,4 +100,9 @@ public partial class MainPage
     {
         await Navigation.PushModalAsync(new SubmitFeedback());
     }
+
+    private void CtMvvmBtn_OnClicked(object sender, EventArgs e)
+    {
+        Shell.Current.GoToAsync("ctmvvm");
+    }
 }
