@@ -29,6 +29,23 @@ public class HubAdapterTests : IDisposable
     }
 
     [Fact]
+    public void CaptureFeedback_MockInvoked()
+    {
+        var expected = new SentryFeedback("foo");
+        HubAdapter.Instance.CaptureFeedback(expected);
+        Hub.Received(1).CaptureFeedback(expected);
+    }
+
+    [Fact]
+    public void CaptureFeedback_WithScope_MockInvoked()
+    {
+        var expectedEvent = new SentryFeedback("foo");
+        var expectedScope = new Scope();
+        HubAdapter.Instance.CaptureFeedback(expectedEvent, expectedScope);
+        Hub.Received(1).CaptureFeedback(expectedEvent, expectedScope);
+    }
+
+    [Fact]
     public void CaptureException_MockInvoked()
     {
         var expected = new Exception();
