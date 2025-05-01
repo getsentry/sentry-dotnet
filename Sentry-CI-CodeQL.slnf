@@ -20,6 +20,7 @@
       "src\\Sentry.OpenTelemetry\\Sentry.OpenTelemetry.csproj",
       "src\\Sentry.Profiling\\Sentry.Profiling.csproj",
       "src\\Sentry.Serilog\\Sentry.Serilog.csproj",
+      "src\\Sentry.SourceGenerators\\Sentry.SourceGenerators.csproj",
       "src\\Sentry\\Sentry.csproj"
     ]
   }
