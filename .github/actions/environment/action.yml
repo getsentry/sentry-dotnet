@@ -64,7 +64,8 @@ runs:
 
     - name: Install .NET Workloads
       shell: bash
-      run: >
+      run: |
+        pwd
         dotnet workload install \
           wasm-tools wasm-tools-net8 maui-android \
           ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows macos' || '' }} \
