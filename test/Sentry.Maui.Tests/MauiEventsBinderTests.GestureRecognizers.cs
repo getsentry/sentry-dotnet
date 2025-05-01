@@ -75,7 +75,7 @@ public partial class MauiEventsBinderTests
     }
 
 
-    void TestGestureRecognizer(GestureRecognizer gesture, string eventName, object eventArgs)
+    private void TestGestureRecognizer(GestureRecognizer gesture, string eventName, object eventArgs)
     {
         var image = new Image();
         image.GestureRecognizers.Add(gesture);
