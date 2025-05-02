@@ -1,5 +1,3 @@
-#if !__MOBILE__ && (NET8_0 || NET9_0)
-#nullable enable
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -106,4 +104,3 @@ file class MockAnalyzerConfigOptions(Dictionary<string, string> values) : Analyz
 
     public override IEnumerable<string> Keys => values.Keys;
 }
-#endif
