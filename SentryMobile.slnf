@@ -18,6 +18,7 @@
       "test\\Sentry.Extensions.Logging.Tests\\Sentry.Extensions.Logging.Tests.csproj",
       "test\\Sentry.Maui.Device.TestApp\\Sentry.Maui.Device.TestApp.csproj",
       "test\\Sentry.Maui.Tests\\Sentry.Maui.Tests.csproj",
+      "test\\Sentry.Testing.CrashableApp\\Sentry.Testing.CrashableApp.csproj",
       "test\\Sentry.Testing\\Sentry.Testing.csproj",
       "test\\Sentry.Tests\\Sentry.Tests.csproj"
     ]

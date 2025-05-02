@@ -8,7 +8,8 @@ public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
-        var appBuilder = MauiApp.CreateBuilder()
+        var appBuilder = MauiApp
+            .CreateBuilder()
             .ConfigureLifecycleEvents(life =>
             {
 #if __ANDROID__
@@ -18,18 +19,7 @@ public static class MauiProgram
                 });
 #endif
             })
-            .UseXHarnessTestRunner(conf =>
-            {
-                conf.AddTestAssemblies([
-                    typeof(Sentry.Tests.SentrySdkTests).Assembly,
-                    typeof(Sentry.Extensions.Logging.Tests.LogLevelExtensionsTests).Assembly,
-                    typeof(Sentry.Maui.Tests.SentryMauiOptionsTests).Assembly,
-#if ANDROID
-                    typeof(Sentry.Android.AssemblyReader.Tests.AndroidAssemblyReaderTests).Assembly,
-#endif
-                ]);
-                conf.AddXunit();
-            })
+#if DEBUG
             .UseVisualTestRunner(conf =>
             {
                 conf.AddTestAssemblies([
@@ -42,7 +32,20 @@ public static class MauiProgram
                 ]);
                 conf.AddXunit();
             });
-
+#else
+            .UseXHarnessTestRunner(conf =>
+            {
+                conf.AddTestAssemblies([
+                    typeof(Sentry.Tests.SentrySdkTests).Assembly,
+                    typeof(Sentry.Extensions.Logging.Tests.LogLevelExtensionsTests).Assembly,
+                    typeof(Sentry.Maui.Tests.SentryMauiOptionsTests).Assembly,
+#if ANDROID
+                    typeof(Sentry.Android.AssemblyReader.Tests.AndroidAssemblyReaderTests).Assembly,
+#endif
+                ]);
+                conf.AddXunit();
+            });
+#endif
         return appBuilder.Build();
     }
 }

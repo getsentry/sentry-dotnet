@@ -36,7 +36,7 @@
 
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">13.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-    
+
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
 
     <!-- Avoid errors of Sentry.Testing not being a self-contained executable, while including it in a self-contained executable (this).
@@ -88,6 +88,8 @@
   <ItemGroup>
     <PackageReference Include="DeviceRunners.XHarness.Maui" Version="0.1.0-preview.1"/>
     <PackageReference Include="DeviceRunners.XHarness.Xunit" Version="0.1.0-preview.1"/>
+    <PackageReference Include="DeviceRunners.VisualRunners.Maui" Version="0.1.0-preview.1"/>
+    <PackageReference Include="DeviceRunners.VisualRunners.Xunit" Version="0.1.0-preview.1"/>
     <!-- Prevent downgrade of these packages for DeviceRunners.XHarness.Xunit 0.1.0-preview.1   -->
     <PackageReference Include="System.Net.Primitives" Version="4.3.0"/>
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0"/>
