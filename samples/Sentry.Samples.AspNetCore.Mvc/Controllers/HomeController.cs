@@ -202,7 +202,7 @@ public class HomeController(ILogger<HomeController> logger) : Controller
             hint.AddAttachment(memoryStream.ToArray(), feedback.Screenshot.FileName, AttachmentType.Default, "image/png");
         }
 
-        SentrySdk.CaptureFeedback(sentryFeedback, null, hint);
+        SentrySdk.CaptureFeedback(sentryFeedback, hint: hint);
         ViewBag.Message = "Feedback submitted successfully!";
         return View("Index");
     }

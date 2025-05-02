@@ -508,6 +508,26 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+    {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        try
+        {
+            var clonedScope = CurrentScope.Clone();
+            configureScope(clonedScope);
+
+            CaptureFeedback(feedback, clonedScope, hint);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to capture feedback");
+        }
+    }
+
     public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
     {
         if (!IsEnabled)
@@ -515,8 +535,15 @@ internal class Hub : IHub, IDisposable
             return;
         }
 
-        scope ??= CurrentScope;
-        CurrentClient.CaptureFeedback(feedback, scope, hint);
+        try
+        {
+            scope ??= CurrentScope;
+            CurrentClient.CaptureFeedback(feedback, scope, hint);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to capture feedback");
+        }
     }
 
 #if MEMORY_DUMP_SUPPORTED
