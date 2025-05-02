@@ -9,6 +9,7 @@
 ### Fixes
 
 - Work around iOS SHA1 bug ([#4143](https://github.com/getsentry/sentry-dotnet/pull/4143))
+- Prevent Auto Breadcrumbs Event Binder from leaking and rebinding events  ([#4159](https://github.com/getsentry/sentry-dotnet/pull/4159))
 
 ### Dependencies
 
