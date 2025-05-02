@@ -4,7 +4,7 @@ namespace Sentry.Tests;
 
 public class DynamicSamplingContextTests
 {
-    class Fixture
+    private class Fixture
     {
         public SentryId ActiveReplayId { get; } = SentryId.Create();
         public IReplaySession InactiveReplaySession { get; }
@@ -20,7 +20,7 @@ public class DynamicSamplingContextTests
         }
     }
 
-    Fixture _fixture = new();
+    private Fixture _fixture = new();
 
     [Fact]
     public void EmptyContext()

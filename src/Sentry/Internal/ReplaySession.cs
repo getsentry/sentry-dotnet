@@ -12,7 +12,7 @@ namespace Sentry.Internal;
 // replay id for all tests in a Test class... which makes it difficult to test alternate scenarios).
 internal interface IReplaySession
 {
-    SentryId? ActiveReplayId { get; }
+    public SentryId? ActiveReplayId { get; }
 }
 
 internal class ReplaySession : IReplaySession
@@ -27,7 +27,8 @@ internal class ReplaySession : IReplaySession
 
     public SentryId? ActiveReplayId
     {
-        get {
+        get
+        {
 #if __ANDROID__
             // Check to see if a Replay ID is available
             var replayId = JavaSdk.ScopesAdapter.Instance?.Options?.ReplayController?.ReplayId?.ToSentryId();
@@ -38,7 +39,7 @@ internal class ReplaySession : IReplaySession
         }
     }
 
-    private class DisabledReplaySession  : IReplaySession
+    private class DisabledReplaySession : IReplaySession
     {
         public SentryId? ActiveReplayId => null;
     }
