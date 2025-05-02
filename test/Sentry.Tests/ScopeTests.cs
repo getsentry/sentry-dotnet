@@ -290,6 +290,111 @@ public class ScopeTests
         scope.Span.Should().Be(secondSpan);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Transaction_Set_ObserverSetsTraceIfEnabled(bool enableScopeSync)
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = enableScopeSync
+        });
+        var transaction = new TransactionTracer(DisabledHub.Instance, "test-transaction", "op");
+        var expectedTraceId = transaction.TraceId;
+        var expectedSpanId = transaction.SpanId;
+        var expectedCount = enableScopeSync ? 1 : 0;
+
+        // Act
+        scope.Transaction = transaction;
+
+        // Assert
+        observer.Received(expectedCount).SetTrace(Arg.Is(expectedTraceId), Arg.Is(expectedSpanId));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Transaction_SetToNull_ObserverSetsTraceFromPropagationContextIfEnabled(bool enableScopeSync)
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = enableScopeSync
+        });
+        var transaction = new TransactionTracer(DisabledHub.Instance, "test-transaction", "op");
+        scope.Transaction = transaction;
+
+        var expectedTraceId = scope.PropagationContext.TraceId;
+        var expectedSpanId = scope.PropagationContext.SpanId;
+        var expectedCount = enableScopeSync ? 1 : 0;
+
+        observer.ClearReceivedCalls();
+
+        // Act
+        scope.Transaction = null;
+
+        // Assert
+        observer.Received(expectedCount).SetTrace(Arg.Is(expectedTraceId), Arg.Is(expectedSpanId));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ResetTransaction_MatchingTransaction_ObserverSetsTraceFromPropagationContextIfEnabled(bool enableScopeSync)
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = enableScopeSync
+        });
+        var transaction = new TransactionTracer(DisabledHub.Instance, "test-transaction", "op");
+        scope.Transaction = transaction;
+
+        var expectedTraceId = scope.PropagationContext.TraceId;
+        var expectedSpanId = scope.PropagationContext.SpanId;
+        var expectedCount = enableScopeSync ? 1 : 0;
+
+        observer.ClearReceivedCalls();
+
+        // Act
+        scope.ResetTransaction(transaction);
+
+        // Assert
+        observer.Received(expectedCount).SetTrace(Arg.Is(expectedTraceId), Arg.Is(expectedSpanId));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ResetTransaction_NonMatchingTransaction_ObserverNotCalled(bool enableScopeSync)
+    {
+        // Arrange
+        var observer = Substitute.For<IScopeObserver>();
+        var scope = new Scope(new SentryOptions
+        {
+            ScopeObserver = observer,
+            EnableScopeSync = enableScopeSync
+        });
+        var transaction = new TransactionTracer(DisabledHub.Instance, "test-transaction", "op");
+        var differentTransaction = new TransactionTracer(DisabledHub.Instance, "different", "op");
+        scope.Transaction = transaction;
+
+        observer.ClearReceivedCalls();
+
+        // Act
+        scope.ResetTransaction(differentTransaction);
+
+        // Assert
+        observer.DidNotReceive().SetTrace(Arg.Any<SentryId>(), Arg.Any<SpanId>());
+    }
+
     [Fact]
     public void AddAttachment_AddAttachments()
     {

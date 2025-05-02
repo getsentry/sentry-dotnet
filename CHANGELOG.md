@@ -2,8 +2,9 @@
 
 ## Unreleased
 
-### Features
+## Features
 
+- When setting a transaction on the scope, the SDK will attempt to sync the transaction's trace context with the SDK on the native layer. Finishing a transaction will now also start a new trace ([#4153](https://github.com/getsentry/sentry-dotnet/pull/4153)) 
 - Added `CaptureFeedback` overload with `configureScope` parameter ([#4073](https://github.com/getsentry/sentry-dotnet/pull/4073))
 - Custom SessionReplay masks in MAUI Android apps ([#4121](https://github.com/getsentry/sentry-dotnet/pull/4121))
 
