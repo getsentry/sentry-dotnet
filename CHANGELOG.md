@@ -4,12 +4,14 @@
 
 ### Features
 
+- Added `CaptureFeedback` overload with `configureScope` parameter ([#4073](https://github.com/getsentry/sentry-dotnet/pull/4073))
 - Custom SessionReplay masks in MAUI Android apps ([#4121](https://github.com/getsentry/sentry-dotnet/pull/4121))
 
 ### Fixes
 
 - Work around iOS SHA1 bug ([#4143](https://github.com/getsentry/sentry-dotnet/pull/4143))
 - Prevent Auto Breadcrumbs Event Binder from leaking and rebinding events  ([#4159](https://github.com/getsentry/sentry-dotnet/pull/4159))
+- Fixes build error when building .NET Framework applications using Sentry 5.6.0: `MSB4185 :The function "IsWindows" on type "System.OperatingSystem" is not available` ([#4160](https://github.com/getsentry/sentry-dotnet/pull/4160))
 
 ### Dependencies
 
