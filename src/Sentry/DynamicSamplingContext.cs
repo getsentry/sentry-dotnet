@@ -21,6 +21,7 @@ internal class DynamicSamplingContext
     public static readonly DynamicSamplingContext Empty = new(new Dictionary<string, string>().AsReadOnly());
 
     private DynamicSamplingContext(
+        IReplaySession replaySession,
         SentryId traceId,
         string publicKey,
         bool? sampled,
@@ -89,7 +90,7 @@ internal class DynamicSamplingContext
             items.Add("transaction", transactionName);
         }
 
-        if (ReplaySession.GetReplayId() is { } replayId && replayId != SentryId.Empty)
+        if (replaySession.ActiveReplayId is { } replayId && replayId != SentryId.Empty)
         {
             items.Add("replay_id", replayId.ToString());
         }
@@ -99,7 +100,19 @@ internal class DynamicSamplingContext
 
     public BaggageHeader ToBaggageHeader() => BaggageHeader.Create(Items, useSentryPrefix: true);
 
-    public static DynamicSamplingContext? CreateFromBaggageHeader(BaggageHeader baggage)
+    public DynamicSamplingContext WithReplayId(IReplaySession replaySession)
+    {
+        if (replaySession.ActiveReplayId is not { } replayId || replayId == SentryId.Empty)
+        {
+            return this;
+        }
+
+        var items = Items.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        items["replay_id"] = replayId.ToString();
+        return new DynamicSamplingContext(items);
+    }
+
+    public static DynamicSamplingContext? CreateFromBaggageHeader(BaggageHeader baggage, IReplaySession replaySession)
     {
         var items = baggage.GetSentryMembers();
 
@@ -151,7 +164,7 @@ internal class DynamicSamplingContext
             items.Add("sample_rand", rand.ToString("N4", CultureInfo.InvariantCulture));
         }
 
-        if (ReplaySession.GetReplayId() is { } replayId)
+        if (replaySession.ActiveReplayId is { } replayId)
         {
             // Overwrite any existing value - the DSC is simply used as a transport mechanism so that SDKs can
             // communicate the replayId to Sentry Relay (SDKs don't need to propagate the replayId to each other).
@@ -161,7 +174,7 @@ internal class DynamicSamplingContext
         return new DynamicSamplingContext(items);
     }
 
-    public static DynamicSamplingContext CreateFromTransaction(TransactionTracer transaction, SentryOptions options)
+    public static DynamicSamplingContext CreateFromTransaction(TransactionTracer transaction, SentryOptions options, IReplaySession replaySession)
     {
         // These should already be set on the transaction.
         var publicKey = options.ParsedDsn.PublicKey;
@@ -176,6 +189,7 @@ internal class DynamicSamplingContext
         var environment = options.SettingLocator.GetEnvironment();
 
         return new DynamicSamplingContext(
+            replaySession,
             traceId,
             publicKey,
             sampled,
@@ -186,7 +200,7 @@ internal class DynamicSamplingContext
             transactionName);
     }
 
-    public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options)
+    public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options, IReplaySession replaySession)
     {
         var traceId = propagationContext.TraceId;
         var publicKey = options.ParsedDsn.PublicKey;
@@ -194,6 +208,7 @@ internal class DynamicSamplingContext
         var environment = options.SettingLocator.GetEnvironment();
 
         return new DynamicSamplingContext(
+            replaySession,
             traceId,
             publicKey,
             null,
@@ -204,12 +219,12 @@ internal class DynamicSamplingContext
 
 internal static class DynamicSamplingContextExtensions
 {
-    public static DynamicSamplingContext? CreateDynamicSamplingContext(this BaggageHeader baggage)
-        => DynamicSamplingContext.CreateFromBaggageHeader(baggage);
+    public static DynamicSamplingContext? CreateDynamicSamplingContext(this BaggageHeader baggage, IReplaySession replaySession)
+        => DynamicSamplingContext.CreateFromBaggageHeader(baggage, replaySession);
 
-    public static DynamicSamplingContext CreateDynamicSamplingContext(this TransactionTracer transaction, SentryOptions options)
-        => DynamicSamplingContext.CreateFromTransaction(transaction, options);
+    public static DynamicSamplingContext CreateDynamicSamplingContext(this TransactionTracer transaction, SentryOptions options, IReplaySession replaySession)
+        => DynamicSamplingContext.CreateFromTransaction(transaction, options, replaySession);
 
-    public static DynamicSamplingContext CreateDynamicSamplingContext(this SentryPropagationContext propagationContext, SentryOptions options)
-        => DynamicSamplingContext.CreateFromPropagationContext(propagationContext, options);
+    public static DynamicSamplingContext CreateDynamicSamplingContext(this SentryPropagationContext propagationContext, SentryOptions options, IReplaySession replaySession)
+        => DynamicSamplingContext.CreateFromPropagationContext(propagationContext, options, replaySession);
 }

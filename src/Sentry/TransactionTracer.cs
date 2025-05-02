@@ -252,8 +252,6 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
             _instrumenter = transactionContext.Instrumenter;
             Origin = transactionContext.Origin;
         }
-        // If there is a ReplayId on the PropagationContext, set this in the Contexts
-        hub.ConfigureScope(s => Contexts.Replay.ReplayId = s.PropagationContext.GetReplayId());
 
         // Set idle timer only if an idle timeout has been provided directly
         if (idleTimeout.HasValue)

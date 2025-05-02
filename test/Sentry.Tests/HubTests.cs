@@ -4,7 +4,6 @@ using Sentry.Tests.Internals;
 
 namespace Sentry.Tests;
 
-[Collection(ReplayCollection.Name)]
 public partial class HubTests
 {
     private readonly ITestOutputHelper _output;
@@ -12,14 +11,11 @@ public partial class HubTests
     private class Fixture
     {
         public SentryOptions Options { get; }
-
         public ISentryClient Client { get; set; }
-
         public ISessionManager SessionManager { get; set; }
-
         public IInternalScopeManager ScopeManager { get; set; }
-
         public ISystemClock Clock { get; set; }
+        public IReplaySession ReplaySession { get; }
 
         public Fixture()
         {
@@ -31,9 +27,11 @@ public partial class HubTests
             };
 
             Client = Substitute.For<ISentryClient>();
+
+            ReplaySession = Substitute.For<IReplaySession>();
         }
 
-        public Hub GetSut() => new(Options, Client, SessionManager, Clock, ScopeManager);
+        public Hub GetSut() => new(Options, Client, SessionManager, Clock, ScopeManager, replaySession: ReplaySession);
     }
 
     private readonly Fixture _fixture = new();
@@ -175,7 +173,7 @@ public partial class HubTests
             {"sentry-trace_id", "75302ac48a024bde9a3b3734a82e36c8"},
             {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
             {"sentry-replay_id","bfd31b89a59d41c99d96dc2baf840ecd"}
-        }).CreateDynamicSamplingContext();
+        }).CreateDynamicSamplingContext(_fixture.ReplaySession);
 
         var transaction = hub.StartTransaction(
             transactionContext,
@@ -682,11 +680,16 @@ public partial class HubTests
         transaction.IsSampled.Should().BeTrue();
     }
 
-    [Fact]
-    public void StartTransaction_DynamicSamplingContextWithReplayId_UsesActiveReplaySessionId()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void StartTransaction_DynamicSamplingContextWithReplayId_UsesActiveReplaySessionId(bool replaySessionIsActive)
     {
         // Arrange
         var transactionContext = new TransactionContext("name", "operation");
+
+        var dummyReplaySession = Substitute.For<IReplaySession>();
+        dummyReplaySession.ActiveReplayId.Returns((SentryId?)null); // So the replay id in the baggage header is used
         var dsc = BaggageHeader.Create(new List<KeyValuePair<string, string>>
         {
             {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
@@ -694,9 +697,10 @@ public partial class HubTests
             {"sentry-sampled", "true"},
             {"sentry-sample_rate", "0.5"}, // Required in the baggage header, but ignored by sampling logic
             {"sentry-replay_id","bfd31b89a59d41c99d96dc2baf840ecd"}
-        }).CreateDynamicSamplingContext();
+        }).CreateDynamicSamplingContext(dummyReplaySession);
 
         _fixture.Options.TracesSampleRate = 1.0;
+        _fixture.ReplaySession.ActiveReplayId.Returns(replaySessionIsActive ? SentryId.Create() : null); // This one gets used by the SUT
         var hub = _fixture.GetSut();
 
         // Act
@@ -705,19 +709,33 @@ public partial class HubTests
         // Assert
         var transactionTracer = ((TransactionTracer)transaction);
         transactionTracer.IsSampled.Should().Be(true);
-        transactionTracer.DynamicSamplingContext.Should().Be(dsc);
         transactionTracer.DynamicSamplingContext.Should().NotBeNull();
-        transactionTracer.DynamicSamplingContext!.Items.Should().ContainKey("replay_id");
-        // The replay_id doesn't get propagated when we have an active replay session of our own
-        transactionTracer.DynamicSamplingContext.Items["replay_id"].Should().Be(ReplaySession.TestReplayId.Value!.ToString());
+        foreach (var dscItem in dsc!.Items)
+        {
+            if (dscItem.Key == "replay_id")
+            {
+                transactionTracer.DynamicSamplingContext!.Items["replay_id"].Should().Be(replaySessionIsActive
+                    // We overwrite the replay_id when we have an active replay session
+                    ? _fixture.ReplaySession.ActiveReplayId.ToString()
+                    // Otherwise we propagate whatever was in the baggage header
+                    : dscItem.Value);
+            }
+            else
+            {
+                transactionTracer.DynamicSamplingContext!.Items.Should()
+                    .Contain(kvp => kvp.Key == dscItem.Key && kvp.Value == dscItem.Value);
+            }
+        }
     }
 
-    [Fact]
-    public void StartTransaction_NoDynamicSamplingContext_UsesActiveReplaySessionId()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void StartTransaction_NoDynamicSamplingContext_UsesActiveReplaySessionId(bool replaySessionIsActive)
     {
         // Arrange
         var transactionContext = new TransactionContext("name", "operation");
-
+        _fixture.ReplaySession.ActiveReplayId.Returns(replaySessionIsActive ? SentryId.Create() : null);
         var hub = _fixture.GetSut();
 
         // Act
@@ -727,8 +745,15 @@ public partial class HubTests
         var transactionTracer = ((TransactionTracer)transaction);
         transactionTracer.SampleRand.Should().NotBeNull();
         transactionTracer.DynamicSamplingContext.Should().NotBeNull();
-        transactionTracer.DynamicSamplingContext!.Items.Should().ContainKey("replay_id");
-        transactionTracer.DynamicSamplingContext.Items["replay_id"].Should().Be(ReplaySession.TestReplayId.Value!.ToString());
+        if (replaySessionIsActive)
+        {
+            // We add the replay_id when we have an active replay session
+            transactionTracer.DynamicSamplingContext!.Items["replay_id"].Should().Be(_fixture.ReplaySession.ActiveReplayId.ToString());
+        }
+        else
+        {
+            transactionTracer.DynamicSamplingContext!.Items.Should().NotContainKey("replay_id");
+        }
     }
 
     [Fact]
@@ -756,12 +781,11 @@ public partial class HubTests
     {
         // Arrange
         var transactionContext = new TransactionContext("name", "operation");
-        var customContext = new Dictionary<string, object>();
 
         var hub = _fixture.GetSut();
 
         // Act
-        var transaction = hub.StartTransaction(transactionContext, customContext, DynamicSamplingContext.Empty);
+        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>(), DynamicSamplingContext.Empty);
 
         // Assert
         var transactionTracer = ((TransactionTracer)transaction);
@@ -776,7 +800,7 @@ public partial class HubTests
     {
         // Arrange
         var transactionContext = new TransactionContext("name", "operation");
-        var customContext = new Dictionary<string, object>();
+        var dummyReplaySession = Substitute.For<IReplaySession>();
         var dsc = BaggageHeader.Create(new List<KeyValuePair<string, string>>
         {
             {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
@@ -784,13 +808,13 @@ public partial class HubTests
             {"sentry-sampled", "true"},
             {"sentry-sample_rate", "0.5"}, // Required in the baggage header, but ignored by sampling logic
             {"sentry-sample_rand", "0.1234"}
-        }).CreateDynamicSamplingContext();
+        }).CreateDynamicSamplingContext(dummyReplaySession);
 
         _fixture.Options.TracesSampleRate = 0.4;
         var hub = _fixture.GetSut();
 
         // Act
-        var transaction = hub.StartTransaction(transactionContext, customContext, dsc);
+        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>(), dsc);
 
         // Assert
         var transactionTracer = ((TransactionTracer)transaction);
@@ -815,7 +839,7 @@ public partial class HubTests
             {"sentry-sampled", "true"},
             {"sentry-sample_rate", "0.5"},
             {"sentry-sample_rand", "0.1234"}
-        }).CreateDynamicSamplingContext();
+        }).CreateDynamicSamplingContext(_fixture.ReplaySession);
 
         _fixture.Options.TracesSampler = _ => sampleRate;
         var hub = _fixture.GetSut();
@@ -839,13 +863,14 @@ public partial class HubTests
         // Arrange
         var transactionContext = new TransactionContext("name", "operation");
         var customContext = new Dictionary<string, object>();
+        var dummyReplaySession = Substitute.For<IReplaySession>();
         var dsc = BaggageHeader.Create(new List<KeyValuePair<string, string>>
         {
             {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
             {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
             {"sentry-sample_rate", "0.5"}, // Static sampling ignores this and uses options.TracesSampleRate instead
             {"sentry-sample_rand", "0.1234"}
-        }).CreateDynamicSamplingContext();
+        }).CreateDynamicSamplingContext(dummyReplaySession);
 
         _fixture.Options.TracesSampleRate = sampleRate;
         var hub = _fixture.GetSut();

@@ -2,11 +2,29 @@ namespace Sentry.Tests;
 
 public class SentryPropagationContextTests
 {
+    class Fixture
+    {
+        public SentryId ActiveReplayId { get; } = SentryId.Create();
+        public IReplaySession InactiveReplaySession { get; }
+        public IReplaySession ActiveReplaySession { get; }
+
+        public Fixture()
+        {
+            ActiveReplaySession = Substitute.For<IReplaySession>();
+            ActiveReplaySession.ActiveReplayId.Returns(ActiveReplayId);
+
+            InactiveReplaySession = Substitute.For<IReplaySession>();
+            InactiveReplaySession.ActiveReplayId.Returns((SentryId?)null);
+        }
+    }
+
+    Fixture _fixture = new();
+
     [Fact]
     public void CopyConstructor_CreatesCopy()
     {
         var original = new SentryPropagationContext();
-        original.GetOrCreateDynamicSamplingContext(new SentryOptions { Dsn = ValidDsn });
+        original.GetOrCreateDynamicSamplingContext(new SentryOptions { Dsn = ValidDsn }, _fixture.InactiveReplaySession);
 
         var copy = new SentryPropagationContext(original);
 
@@ -22,7 +40,7 @@ public class SentryPropagationContextTests
         var propagationContext = new SentryPropagationContext();
 
         Assert.Null(propagationContext._dynamicSamplingContext); // Sanity check
-        _ = propagationContext.GetOrCreateDynamicSamplingContext(options);
+        _ = propagationContext.GetOrCreateDynamicSamplingContext(options, _fixture.InactiveReplaySession);
 
         Assert.NotNull(propagationContext._dynamicSamplingContext);
     }
@@ -32,9 +50,9 @@ public class SentryPropagationContextTests
     {
         var options = new SentryOptions { Dsn = ValidDsn };
         var propagationContext = new SentryPropagationContext();
-        var firstDynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(options);
+        var firstDynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(options, _fixture.InactiveReplaySession);
 
-        var secondDynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(options);
+        var secondDynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(options, _fixture.InactiveReplaySession);
 
         Assert.Same(firstDynamicSamplingContext, secondDynamicSamplingContext);
     }
@@ -42,7 +60,7 @@ public class SentryPropagationContextTests
     [Fact]
     public void CreateFromHeaders_HeadersNull_CreatesPropagationContextWithTraceAndSpanId()
     {
-        var propagationContext = SentryPropagationContext.CreateFromHeaders(null, null, null);
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(null, null, null, _fixture.InactiveReplaySession);
 
         Assert.NotEqual(propagationContext.TraceId, SentryId.Empty);
         Assert.NotEqual(propagationContext.SpanId, SpanId.Empty);
@@ -53,7 +71,7 @@ public class SentryPropagationContextTests
     {
         var traceHeader = new SentryTraceHeader(SentryId.Create(), SpanId.Create(), null);
 
-        var propagationContext = SentryPropagationContext.CreateFromHeaders(null, traceHeader, null);
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(null, traceHeader, null, _fixture.InactiveReplaySession);
 
         Assert.Equal(traceHeader.TraceId, propagationContext.TraceId);
         Assert.NotEqual(traceHeader.SpanId, propagationContext.SpanId); // Sanity check
@@ -71,7 +89,7 @@ public class SentryPropagationContextTests
             { "sentry-replay_id", "bfd31b89a59d41c99d96dc2baf840ecd" }
         });
 
-        var propagationContext = SentryPropagationContext.CreateFromHeaders(null, null, baggageHeader);
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(null, null, baggageHeader, _fixture.InactiveReplaySession);
 
         Assert.Null(propagationContext._dynamicSamplingContext);
     }
@@ -89,8 +107,8 @@ public class SentryPropagationContextTests
             { "sentry-replay_id", "bfd31b89a59d41c99d96dc2baf840ecd" }
         });
 
-        var propagationContext = SentryPropagationContext.CreateFromHeaders(null, traceHeader, baggageHeader);
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(null, traceHeader, baggageHeader, _fixture.InactiveReplaySession);
 
-        Assert.Equal(5, propagationContext.GetOrCreateDynamicSamplingContext(new SentryOptions()).Items.Count);
+        Assert.Equal(5, propagationContext.GetOrCreateDynamicSamplingContext(new SentryOptions(), _fixture.InactiveReplaySession).Items.Count);
     }
 }

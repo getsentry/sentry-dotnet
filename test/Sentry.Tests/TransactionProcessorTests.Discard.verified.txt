@@ -9,11 +9,10 @@
         environment: production,
         public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
         release: release,
-        replay_id: Guid_2,
         sample_rand: {Scrubbed},
         sample_rate: 1,
         sampled: true,
-        trace_id: Guid_3,
+        trace_id: Guid_2,
         transaction: my transaction
       }
     },
@@ -37,7 +36,7 @@
               }
             },
             User: {
-              Id: Guid_4
+              Id: Guid_3
             },
             Environment: production
           }

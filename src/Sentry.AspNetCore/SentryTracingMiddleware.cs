@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry.AspNetCore;
@@ -65,7 +66,8 @@ internal class SentryTracingMiddleware
             var baggageHeader = context.Items.TryGetValue(SentryMiddleware.BaggageHeaderItemKey, out var baggageHeaderObject)
                 ? baggageHeaderObject as BaggageHeader : null;
 
-            var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext();
+            // Note: We don't record Session Replays in ASP.NET core
+            var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext(ReplaySession.DisabledInstance);
 
             if (traceHeader is not null && baggageHeader is null)
             {

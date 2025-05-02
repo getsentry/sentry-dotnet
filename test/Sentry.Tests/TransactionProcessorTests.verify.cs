@@ -2,7 +2,6 @@ using Sentry.Tests.Internals;
 
 namespace Sentry.Tests;
 
-[Collection(ReplayCollection.Name)]
 public partial class TransactionProcessorTests
 {
     [Fact]

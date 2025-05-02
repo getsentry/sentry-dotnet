@@ -9,8 +9,7 @@
         environment: production,
         public_key: d4d82fc1c2c4032a83f3a29aa3a3aff,
         release: release,
-        replay_id: Guid_2,
-        trace_id: Guid_3
+        trace_id: Guid_2
       }
     },
     Items: [
@@ -33,7 +32,7 @@
               }
             },
             User: {
-              Id: Guid_4
+              Id: Guid_3
             },
             Environment: production
           }

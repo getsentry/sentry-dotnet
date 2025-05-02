@@ -1,6 +1,5 @@
 namespace Sentry.Tests.Protocol;
 
-[Collection(ReplayCollection.Name)]
 public class SentryTransactionTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;
@@ -62,6 +61,7 @@ public class SentryTransactionTests
         // Arrange
         var hub = Substitute.For<IHub>();
         var traceHeader = new SentryTraceHeader(SentryId.Create(), SpanId.Create(), null);
+        var replayContext = Substitute.For<IReplaySession>();
         var baggageHeader = BaggageHeader.Create(new List<KeyValuePair<string, string>>
         {
             { "sentry-sample_rate", "1.0" },
@@ -70,7 +70,7 @@ public class SentryTransactionTests
             { "sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff" },
             { "sentry-replay_id", "bfd31b89a59d41c99d96dc2baf840ecd" }
         });
-        var propagationContext = SentryPropagationContext.CreateFromHeaders(null, traceHeader, baggageHeader);
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(null, traceHeader, baggageHeader, replayContext);
         var scope = new Scope(hub.GetSentryOptions(), propagationContext);
         hub.ConfigureScope(Arg.Do<Action<Scope>>(callback => callback(scope)));
         var transactionContext = new TransactionContext("test-name", "test-operation");
@@ -79,7 +79,6 @@ public class SentryTransactionTests
         var actualTransaction = new TransactionTracer(hub, transactionContext);
 
         // Assert
-        actualTransaction.Contexts.Replay.ReplayId.Should().Be(ReplaySession.TestReplayId.Value);
         Assert.NotEqual(DateTimeOffset.MinValue, actualTransaction.StartTimestamp);
     }
 

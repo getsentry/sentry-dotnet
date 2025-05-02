@@ -18,6 +18,8 @@ public class SentrySpanProcessorTests : ActivitySourceTests
 
         public List<IOpenTelemetryEnricher> Enrichers { get; set; } = new();
 
+        private IReplaySession ReplaySession { get; } = Substitute.For<IReplaySession>();
+
         public Fixture()
         {
             Options = new SentryOptions
@@ -32,11 +34,11 @@ public class SentrySpanProcessorTests : ActivitySourceTests
 
         public Hub Hub { get; private set; }
 
-        public Hub GetHub() => Hub ??= new Hub(Options, Client, SessionManager, Clock, ScopeManager);
+        private Hub GetHub() => Hub ??= new Hub(Options, Client, SessionManager, Clock, ScopeManager, replaySession: ReplaySession);
 
         public SentrySpanProcessor GetSut(IHub hub = null)
         {
-            return new SentrySpanProcessor(hub ?? GetHub(), Enrichers);
+            return new SentrySpanProcessor(hub ?? GetHub(), Enrichers, ReplaySession);
         }
     }
 

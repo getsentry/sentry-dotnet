@@ -4,31 +4,42 @@ using Sentry.Android.Extensions;
 
 namespace Sentry.Internal;
 
-internal static class ReplaySession
+// TODO: This static class is pretty ugly... let's refactor it into an IReplaySession interface so that we can
+// inject a mock in unit tests. If no IReplaySession is provided to the various classes that need it then we can
+// fall back to a singleton instance of this class.
+//
+// We should be able to remove the ReplayFixture then as well (which is ugly - it forces us to initialise the test
+// replay id for all tests in a Test class... which makes it difficult to test alternate scenarios).
+internal interface IReplaySession
 {
-    internal static Lazy<SentryId?> TestReplayId { get; } = new(() => SentryId.Create());
+    SentryId? ActiveReplayId { get; }
+}
 
-    private static Func<SentryId?>? TestReplayIdResolver;
+internal class ReplaySession : IReplaySession
+{
+    public static readonly IReplaySession Instance = new ReplaySession();
 
-    /// <summary>
-    /// Initialises the test replay id resolver so that unit tests return a test id (rather than trying to resovle an
-    /// ID from static platform libraries).
-    /// </summary>
-    internal static void InitTestReplayId()
+    internal static readonly IReplaySession DisabledInstance = new DisabledReplaySession();
+
+    private ReplaySession()
     {
-        TestReplayIdResolver = () => TestReplayId.Value;
     }
 
-    internal static SentryId? GetReplayId() => (TestReplayIdResolver ?? ReplayIdResolver)();
-
-    private static SentryId? ReplayIdResolver()
+    public SentryId? ActiveReplayId
     {
+        get {
 #if __ANDROID__
-        // Check to see if a Replay ID is available
-        var replayId = JavaSdk.ScopesAdapter.Instance?.Options?.ReplayController?.ReplayId?.ToSentryId();
-        return (replayId is { } id && id != SentryId.Empty) ? id : null;
+            // Check to see if a Replay ID is available
+            var replayId = JavaSdk.ScopesAdapter.Instance?.Options?.ReplayController?.ReplayId?.ToSentryId();
+            return (replayId is { } id && id != SentryId.Empty) ? id : null;
 #else
-        return null;
+            return null;
 #endif
+        }
+    }
+
+    private class DisabledReplaySession  : IReplaySession
+    {
+        public SentryId? ActiveReplayId => null;
     }
 }
