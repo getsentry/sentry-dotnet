@@ -13,9 +13,10 @@ public partial class MauiEventsBinderTests
         var button = new Button();
         var page = new ContentPage();
         page.BindingContext = new TestCtMvvmViewModel();
-        page.Content.AddLogicalChild(button);
+        //page.Content.AddLogicalChild(button);
 
-        _fixture.Binder.HandlePageEvents(page);
+        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(page));
+        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
 
         // Act
         button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
@@ -28,7 +29,7 @@ public partial class MauiEventsBinderTests
     }
 }
 
-file partial class TestCtMvvmViewModel : ObservableObject
+public partial class TestCtMvvmViewModel : ObservableObject
 {
     [RelayCommand]
     private async Task Test()
