@@ -69,6 +69,11 @@ public sealed class Response : ISentryJsonSerializable, ICloneable<Response>, IU
     {
         foreach (var header in headers)
         {
+            // Always skip the Authorization header - we never want to capture this even if SendDefaultPii is true
+            if (header.Key.Equals("Authorization", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
             Headers.Add(
                 header.Key,
                 string.Join("; ", header.Value)
