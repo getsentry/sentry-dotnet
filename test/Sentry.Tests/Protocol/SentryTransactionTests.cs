@@ -594,6 +594,30 @@ public class SentryTransactionTests
     }
 
     [Fact]
+    public void Finish_ResetsScopeAndSetsNewPropagationContext()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var transaction = new TransactionTracer(hub, "test name", "test op");
+
+        Action<Scope> capturedAction = null;
+        hub.ConfigureScope(Arg.Do<Action<Scope>>(action => capturedAction = action));
+
+        // Act
+        transaction.Finish();
+
+        // Assert
+        hub.Received(1).ConfigureScope(Arg.Any<Action<Scope>>());
+
+        capturedAction.Should().NotBeNull(); // Sanity Check
+        var mockScope = Substitute.For<Scope>();
+        capturedAction(mockScope);
+
+        mockScope.Received(1).ResetTransaction(transaction);
+        mockScope.Received(1).SetPropagationContext(Arg.Any<SentryPropagationContext>());
+    }
+
+    [Fact]
     public void ISpan_GetTransaction_FromTransaction()
     {
         // Arrange
