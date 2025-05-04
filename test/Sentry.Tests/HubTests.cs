@@ -201,7 +201,12 @@ public partial class HubTests
         var exception = new Exception("error");
 
         var transaction = hub.StartTransaction("foo", "bar");
-        hub.ConfigureScope(scope => scope.Transaction = transaction);
+        SentryPropagationContext propagationContext = null;
+        hub.ConfigureScope(scope =>
+        {
+            scope.Transaction = transaction;
+            propagationContext = scope.PropagationContext;
+        });
 
         // Act
         hub.CaptureException(exception);
@@ -209,8 +214,8 @@ public partial class HubTests
         // Assert
         _fixture.Client.Received(1).CaptureEvent(
             Arg.Is<SentryEvent>(evt =>
-                evt.Contexts.Trace.TraceId == default &&
-                evt.Contexts.Trace.SpanId == default),
+                evt.Contexts.Trace.TraceId == propagationContext.TraceId &&
+                evt.Contexts.Trace.SpanId == propagationContext.SpanId),
             Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
