@@ -57,7 +57,7 @@ public sealed class Response : ISentryJsonSerializable, ICloneable<Response>, IU
     /// <remarks>
     /// If a header appears multiple times it needs to be merged according to the HTTP standard for header merging.
     /// </remarks>
-    public IDictionary<string, string> Headers => InternalHeaders ??= new ();
+    public IDictionary<string, string> Headers => InternalHeaders ??= new();
 
     /// <summary>
     /// Gets or sets the HTTP Status response code

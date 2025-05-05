@@ -82,7 +82,7 @@ public sealed class SentryRequest : ISentryJsonSerializable
     /// If a header appears multiple times it needs to be merged according to the HTTP standard for header merging.
     /// </remarks>
     /// <value>The headers.</value>
-    public IDictionary<string, string> Headers => InternalHeaders ??= new ();
+    public IDictionary<string, string> Headers => InternalHeaders ??= new();
 
     /// <summary>
     /// Gets or sets the optional environment data.
