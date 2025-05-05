@@ -58,11 +58,11 @@ public sealed class SentryLogger
     //      with which we could enforce on compile-time to only support string, boolean, integer, double
     private static void CaptureLog(SentrySeverity level, string template, object[]? parameters, Action<SentryLog>? configureLog)
     {
-        string message = String.Format(template, parameters ?? []);
+        var message = string.Format(template, parameters ?? []);
         SentryLog log = new(level, message);
         configureLog?.Invoke(log);
 
-        IHub hub = SentrySdk.CurrentHub;
+        var hub = SentrySdk.CurrentHub;
         _ = hub.CaptureEnvelope(Envelope.FromLog(log));
     }
 }
