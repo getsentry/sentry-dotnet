@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry;
@@ -31,7 +32,7 @@ public sealed class SentryRequest : ISentryJsonSerializable
 
     internal Dictionary<string, string>? InternalOther { get; private set; }
 
-    internal Dictionary<string, string>? InternalHeaders { get; private set; }
+    internal RedactedHeaders? InternalHeaders { get; private set; }
 
     /// <summary>
     /// Gets or sets the full request URL, if available.
@@ -81,7 +82,7 @@ public sealed class SentryRequest : ISentryJsonSerializable
     /// If a header appears multiple times it needs to be merged according to the HTTP standard for header merging.
     /// </remarks>
     /// <value>The headers.</value>
-    public IDictionary<string, string> Headers => InternalHeaders ??= new Dictionary<string, string>();
+    public IDictionary<string, string> Headers => InternalHeaders ??= new ();
 
     /// <summary>
     /// Gets or sets the optional environment data.
@@ -102,9 +103,10 @@ public sealed class SentryRequest : ISentryJsonSerializable
     {
         foreach (var header in headers)
         {
-            // Always skip the Authorization header - we never want to capture this even if SendDefaultPii is true
+            // Always redact the Authorization header
             if (header.Key.Equals("Authorization", StringComparison.OrdinalIgnoreCase))
             {
+                Headers.Add(header.Key, PiiExtensions.RedactedText);
                 continue;
             }
             Headers.Add(header.Key, string.Join("; ", header.Value));
@@ -181,7 +183,7 @@ public sealed class SentryRequest : ISentryJsonSerializable
         {
             InternalEnv = env?.WhereNotNullValue().ToDict(),
             InternalOther = other?.WhereNotNullValue().ToDict(),
-            InternalHeaders = headers?.WhereNotNullValue().ToDict(),
+            InternalHeaders = headers.Redact(),
             Url = url,
             Method = method,
             Data = data,

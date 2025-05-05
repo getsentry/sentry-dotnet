@@ -30,7 +30,7 @@ public sealed class Response : ISentryJsonSerializable, ICloneable<Response>, IU
     /// </summary>
     public const string Type = "response";
 
-    internal Dictionary<string, string>? InternalHeaders { get; private set; }
+    internal RedactedHeaders? InternalHeaders { get; private set; }
 
     /// <summary>
     /// Gets or sets the HTTP response body size.
@@ -57,7 +57,7 @@ public sealed class Response : ISentryJsonSerializable, ICloneable<Response>, IU
     /// <remarks>
     /// If a header appears multiple times it needs to be merged according to the HTTP standard for header merging.
     /// </remarks>
-    public IDictionary<string, string> Headers => InternalHeaders ??= new Dictionary<string, string>();
+    public IDictionary<string, string> Headers => InternalHeaders ??= new ();
 
     /// <summary>
     /// Gets or sets the HTTP Status response code
@@ -69,15 +69,13 @@ public sealed class Response : ISentryJsonSerializable, ICloneable<Response>, IU
     {
         foreach (var header in headers)
         {
-            // Always skip the Authorization header - we never want to capture this even if SendDefaultPii is true
+            // Always redact the Authorization header
             if (header.Key.Equals("Authorization", StringComparison.OrdinalIgnoreCase))
             {
+                Headers.Add(header.Key, PiiExtensions.RedactedText);
                 continue;
             }
-            Headers.Add(
-                header.Key,
-                string.Join("; ", header.Value)
-            );
+            Headers.Add(header.Key, string.Join("; ", header.Value));
         }
     }
 
@@ -149,7 +147,7 @@ public sealed class Response : ISentryJsonSerializable, ICloneable<Response>, IU
             BodySize = bodySize,
             Cookies = cookies,
             Data = data,
-            InternalHeaders = headers?.WhereNotNullValue().ToDict(),
+            InternalHeaders = headers.Redact(),
             StatusCode = statusCode
         };
     }
