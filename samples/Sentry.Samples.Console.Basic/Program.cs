@@ -36,14 +36,12 @@ SentrySdk.Init(options =>
     options.TracesSampleRate = 1.0;
 });
 
-#pragma warning disable SENTRY0002
 SentrySdk.Logger.Trace("Hello, World!", null, log => log.SetAttribute("trace", "trace"));
 SentrySdk.Logger.Debug("Hello, .NET!", null, log => log.SetAttribute("trace", "trace"));
 SentrySdk.Logger.Info("Information", null, log => log.SetAttribute("trace", "trace"));
 SentrySdk.Logger.Warn("Warning with one {0}", ["parameter"], log => log.SetAttribute("trace", "trace"));
 SentrySdk.Logger.Error("Error with {0} {1}", [2, "parameters"], log => log.SetAttribute("trace", "trace"));
 SentrySdk.Logger.Fatal("Fatal {0} and {1}", [true, false], log => log.SetAttribute("trace", "trace"));
-#pragma warning restore SENTRY0002
 
 await Task.Delay(5_000);
 

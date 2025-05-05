@@ -285,7 +285,7 @@ public static partial class SentrySdk
     //TODO: add to IHub or ISentryClient
     // adding to interfaces is breaking, perhaps via a DIM but what about netstandard2.0 runtimes
     // or are these interfaces intended to be extended as user code is not meant to implement them
-    [Experimental(DiagnosticId.ExperimentalSentryLogs, UrlFormat = UrlFormats.ExperimentalSentryLogs)]
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public static SentryLogger Logger { get; } = new SentryLogger();
 
     /// <summary>

@@ -373,7 +373,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         return new EnvelopeItem(header, new JsonSerializable(report));
     }
 
-    [Experimental(DiagnosticId.ExperimentalSentryLogs)]
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     internal static EnvelopeItem FromLog(SentryLog log)
     {
         var header = new Dictionary<string, object?>(3, StringComparer.Ordinal)

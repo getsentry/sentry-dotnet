@@ -6,7 +6,7 @@ using Sentry.Internal.Extensions;
 
 namespace Sentry.Experimental;
 
-[Experimental(DiagnosticId.ExperimentalSentryLogs)]
+[Experimental(DiagnosticId.ExperimentalFeature)]
 public sealed class SentryLog : ISentryJsonSerializable
 {
     private Dictionary<string, ValueTypePair>? _attributes;

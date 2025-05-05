@@ -446,7 +446,7 @@ public sealed class Envelope : ISerializable, IDisposable
         return new Envelope(header, items);
     }
 
-    [Experimental(DiagnosticId.ExperimentalSentryLogs)]
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     internal static Envelope FromLog(SentryLog log)
     {
         var header = DefaultHeader;

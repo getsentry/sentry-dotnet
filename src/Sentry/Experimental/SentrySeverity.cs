@@ -6,7 +6,7 @@ namespace Sentry.Experimental;
 
 //TODO: QUESTION: not sure about the name
 // this is a bit different to Sentry.SentryLevel and Sentry.BreadcrumbLevel
-[Experimental(DiagnosticId.ExperimentalSentryLogs)]
+[Experimental(DiagnosticId.ExperimentalFeature)]
 public enum SentrySeverity : short
 {
     Trace,
@@ -17,7 +17,7 @@ public enum SentrySeverity : short
     Fatal,
 }
 
-[Experimental(DiagnosticId.ExperimentalSentryLogs)]
+[Experimental(DiagnosticId.ExperimentalFeature)]
 internal static class SentrySeverityExtensions
 {
     internal static string ToLogString(this SentrySeverity severity)

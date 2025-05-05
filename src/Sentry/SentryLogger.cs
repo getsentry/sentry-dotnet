@@ -10,7 +10,7 @@ namespace Sentry;
 /// <summary>
 /// Creates and sends logs to Sentry.
 /// </summary>
-[Experimental(DiagnosticId.ExperimentalSentryLogs, UrlFormat = UrlFormats.ExperimentalSentryLogs)]
+[Experimental(DiagnosticId.ExperimentalFeature)]
 public sealed class SentryLogger
 {
     //TODO: QUESTION: Trace vs LogTrace
