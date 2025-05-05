@@ -472,17 +472,6 @@ internal static class JsonExtensions
         writer.WriteSerializableValue(value, logger);
     }
 
-    public static void WriteSerializable<TValue>(
-        this Utf8JsonWriter writer,
-        string propertyName,
-        TValue value,
-        IDiagnosticLogger? logger)
-        where TValue : struct, ISentryJsonSerializable
-    {
-        writer.WritePropertyName(propertyName);
-        value.WriteTo(writer, logger);
-    }
-
     public static void WriteDynamicValue(
         this Utf8JsonWriter writer,
         object? value,
