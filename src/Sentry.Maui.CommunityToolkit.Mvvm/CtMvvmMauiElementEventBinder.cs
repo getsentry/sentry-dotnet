@@ -130,6 +130,8 @@ public class CtMvvmMauiElementEventBinder(IHub hub) : IMauiElementEventBinder
             if (relay.IsRunning)
             {
                 var transaction = hub.StartTransaction("ctmvvm", "relay.command");
+                hub.ConfigureScope(x => x.Transaction ??= transaction);
+
                 _contexts.TryAdd(relay, transaction);
             }
             else if (_contexts.TryGetValue(relay, out var value))
