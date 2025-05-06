@@ -16,7 +16,7 @@ public partial class MauiEventsBinderTests
         };
         //_fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
         var binder = new CtMvvmMauiElementEventBinder(_fixture.Hub);
-        binder.Bind(button, _ => {});
+        binder.Bind(button, _ => { });
 
         button.Command.Execute(null!);
 
