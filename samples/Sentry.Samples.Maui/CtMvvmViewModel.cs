@@ -5,7 +5,7 @@ namespace Sentry.Samples.Maui;
 
 public partial class CtMvvmViewModel : ObservableObject
 {
-    // we auto-instrument how
+    // Sentry automatically creates spans for async relay commands
     [RelayCommand]
     private async Task Test()
     {
