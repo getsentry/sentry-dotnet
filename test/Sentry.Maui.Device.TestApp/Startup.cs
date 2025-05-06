@@ -32,18 +32,18 @@ public static class MauiProgram
                 conf.AddXunit();
             });
 
-//             .UseVisualTestRunner(conf =>
-//             {
-//                 conf.AddTestAssemblies([
-//                     typeof(Sentry.Tests.SentrySdkTests).Assembly,
-//                     typeof(Sentry.Extensions.Logging.Tests.LogLevelExtensionsTests).Assembly,
-//                     typeof(Sentry.Maui.Tests.SentryMauiOptionsTests).Assembly,
-// #if ANDROID
-//                     typeof(Sentry.Android.AssemblyReader.Tests.AndroidAssemblyReaderTests).Assembly,
-// #endif
-//                 ]);
-//                 conf.AddXunit();
-//             });
+        //             .UseVisualTestRunner(conf =>
+        //             {
+        //                 conf.AddTestAssemblies([
+        //                     typeof(Sentry.Tests.SentrySdkTests).Assembly,
+        //                     typeof(Sentry.Extensions.Logging.Tests.LogLevelExtensionsTests).Assembly,
+        //                     typeof(Sentry.Maui.Tests.SentryMauiOptionsTests).Assembly,
+        // #if ANDROID
+        //                     typeof(Sentry.Android.AssemblyReader.Tests.AndroidAssemblyReaderTests).Assembly,
+        // #endif
+        //                 ]);
+        //                 conf.AddXunit();
+        //             });
 
         return appBuilder.Build();
     }
