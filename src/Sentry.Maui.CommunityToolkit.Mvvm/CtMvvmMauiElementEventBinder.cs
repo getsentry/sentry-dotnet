@@ -119,7 +119,9 @@ public class CtMvvmMauiElementEventBinder(IHub hub) : IMauiElementEventBinder
     }
 
 
-    private readonly ConcurrentDictionary<IAsyncRelayCommand, ITransactionTracer> _contexts = new();
+    private readonly ConcurrentDictionary<IAsyncRelayCommand, ISpan> _contexts = new();
+    private const string SpanName = "ctmvvm";
+    private const string SpanOp = "relay.command";
 
     private void RelayCommandOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
@@ -129,14 +131,25 @@ public class CtMvvmMauiElementEventBinder(IHub hub) : IMauiElementEventBinder
 
             if (relay.IsRunning)
             {
-                var transaction = hub.StartTransaction("ctmvvm", "relay.command");
-                hub.ConfigureScope(x => x.Transaction ??= transaction);
-
-                _contexts.TryAdd(relay, transaction);
+                ISpan span = null!;
+                hub.ConfigureScope(scope =>
+                {
+                    scope.Transaction ??= hub.StartTransaction(SpanName, SpanOp);
+                    span = scope.Transaction.StartChild(SpanOp);
+                });
+                _contexts.TryAdd(relay, span);
             }
             else if (_contexts.TryGetValue(relay, out var value))
             {
                 value.Finish();
+                hub.ConfigureScope(scope =>
+                {
+                    if (scope.Transaction?.Name.Equals(SpanName) ?? false)
+                    {
+                        scope.Transaction.Finish();
+                        scope.Transaction = null;
+                    }
+                });
                 _contexts.TryRemove(relay, out _);
             }
         }

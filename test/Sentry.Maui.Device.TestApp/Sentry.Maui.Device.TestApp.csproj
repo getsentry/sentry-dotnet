@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks></TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android;net9.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios;net9.0-ios</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net8.0-android</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net8.0-ios</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net9.0-android</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net9.0-ios</TargetFrameworks>
     <!-- Pin target iOS version so that our tests don't break when new versions of Xcode are released.
       'net8.0-ios' resolves the latest version of the iOS SDK otherwise. -->
-    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">18</TargetPlatformVersion>
+
     <UseMaui>true</UseMaui>
     <!-- Currently broken on .NET 7, see
       - https://github.com/dotnet/maui/issues/18573
@@ -36,6 +37,7 @@
 
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">13.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">18</TargetPlatformVersion>
 
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
 
@@ -88,8 +90,8 @@
   <ItemGroup>
     <PackageReference Include="DeviceRunners.XHarness.Maui" Version="0.1.0-preview.1"/>
     <PackageReference Include="DeviceRunners.XHarness.Xunit" Version="0.1.0-preview.1"/>
-    <PackageReference Include="DeviceRunners.VisualRunners.Maui" Version="0.1.0-preview.1"/>
-    <PackageReference Include="DeviceRunners.VisualRunners.Xunit" Version="0.1.0-preview.1"/>
+    <PackageReference Include="DeviceRunners.VisualRunners.Maui" Version="0.1.0-preview.1" Condition="'$(Configuration)' == 'Debug'"/>
+    <PackageReference Include="DeviceRunners.VisualRunners.Xunit" Version="0.1.0-preview.1" Condition="'$(Configuration)' == 'Debug'"/>
     <!-- Prevent downgrade of these packages for DeviceRunners.XHarness.Xunit 0.1.0-preview.1   -->
     <PackageReference Include="System.Net.Primitives" Version="4.3.0"/>
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0"/>
