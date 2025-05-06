@@ -2,16 +2,17 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
-using Sentry.SourceGenerators;
 
-namespace Sentry.Tests;
+namespace Sentry.SourceGenerators.Tests;
 
 
 public class BuildPropertySourceGeneratorTests
 {
-    [Fact]
+    [SkippableFact]
     public Task RunResult_Success()
     {
+        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+
         var driver = BuildDriver(typeof(Program).Assembly, ("PublishAot", "false"), ("OutputType", "exe"));
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
@@ -21,9 +22,11 @@ public class BuildPropertySourceGeneratorTests
     }
 
 
-    [Fact]
+    [SkippableFact]
     public Task RunResult_BadStrings()
     {
+        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+
         // we're hijacking PublishAot to make life easy
         var driver = BuildDriver(typeof(Program).Assembly, ("My\\Key", "test\\test"), ("OutputType", "exe"));
         var result = driver.GetRunResult().Results.FirstOrDefault();
@@ -34,9 +37,11 @@ public class BuildPropertySourceGeneratorTests
     }
 
 
-    [Fact]
+    [SkippableFact]
     public Task RunResult_Publish_AotTrue()
     {
+        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+
         var driver = BuildDriver(typeof(Program).Assembly, ("PublishAot", "true"), ("OutputType", "exe"));
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
@@ -46,12 +51,14 @@ public class BuildPropertySourceGeneratorTests
     }
 
 
-    [Theory]
+    [SkippableTheory]
     [InlineData("no", true)]
     [InlineData("true", false)]
     [InlineData("false", true)]
     public void RunResult_SentryDisableSourceGenerator_Values(string value, bool sourceGenExpected)
     {
+        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+
         var driver = BuildDriver(typeof(Program).Assembly, ("SentryDisableSourceGenerator", value), ("OutputType", "exe"));
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
@@ -61,9 +68,11 @@ public class BuildPropertySourceGeneratorTests
     }
 
 
-    [Fact]
+    [SkippableFact]
     public Task RunResult_Expect_None()
     {
+        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+
         var driver = BuildDriver(typeof(Program).Assembly, ("PublishAot", "false"));
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
