@@ -19,20 +19,6 @@ public static class MauiProgram
                 });
 #endif
             })
-#if DEBUG
-            .UseVisualTestRunner(conf =>
-            {
-                conf.AddTestAssemblies([
-                    typeof(Sentry.Tests.SentrySdkTests).Assembly,
-                    typeof(Sentry.Extensions.Logging.Tests.LogLevelExtensionsTests).Assembly,
-                    typeof(Sentry.Maui.Tests.SentryMauiOptionsTests).Assembly,
-#if ANDROID
-                    typeof(Sentry.Android.AssemblyReader.Tests.AndroidAssemblyReaderTests).Assembly,
-#endif
-                ]);
-                conf.AddXunit();
-            });
-#else
             .UseXHarnessTestRunner(conf =>
             {
                 conf.AddTestAssemblies([
@@ -45,7 +31,20 @@ public static class MauiProgram
                 ]);
                 conf.AddXunit();
             });
-#endif
+
+//             .UseVisualTestRunner(conf =>
+//             {
+//                 conf.AddTestAssemblies([
+//                     typeof(Sentry.Tests.SentrySdkTests).Assembly,
+//                     typeof(Sentry.Extensions.Logging.Tests.LogLevelExtensionsTests).Assembly,
+//                     typeof(Sentry.Maui.Tests.SentryMauiOptionsTests).Assembly,
+// #if ANDROID
+//                     typeof(Sentry.Android.AssemblyReader.Tests.AndroidAssemblyReaderTests).Assembly,
+// #endif
+//                 ]);
+//                 conf.AddXunit();
+//             });
+
         return appBuilder.Build();
     }
 }
