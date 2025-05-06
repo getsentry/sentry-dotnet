@@ -10,16 +10,12 @@ public partial class MauiEventsBinderTests
     [Fact]
     public async Task AsyncRelayCommand_AddsSpan()
     {
-        var button = new Button();
-        var page = new ContentPage();
-        page.BindingContext = new TestCtMvvmViewModel();
-        //page.Content.AddLogicalChild(button);
+        var vm = new TestCtMvvmViewModel();
+        button.Command = vm.TestCommand;
 
-        _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(page));
         _fixture.Binder.OnApplicationOnDescendantAdded(null, new ElementEventArgs(button));
 
-        // Act
-        button.RaiseEvent(nameof(Button.Clicked), EventArgs.Empty);
+        button.Command.Execute(null!);
 
         // we need to wait for async command to run
         await Task.Delay(TimeSpan.FromSeconds(1.1));
