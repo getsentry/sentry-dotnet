@@ -42,5 +42,4 @@
   <ItemGroup Condition="'$(TargetFramework)' != 'net48'">
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.1" />
   </ItemGroup>
-
 </Project>
