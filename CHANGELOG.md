@@ -5,6 +5,7 @@
 ### Features
 
 - .NET MAUI integration with CommunityToolkit.Mvvm Async Relay Commands can now be auto spanned with the new package Sentry.Maui.CommunityToolkit.Mvvm ([#4125](https://github.com/getsentry/sentry-dotnet/pull/4125))
+
 ### Dependencies
 
 - Bump CLI from v2.43.1 to v2.44.0 ([#4169](https://github.com/getsentry/sentry-dotnet/pull/4169))
