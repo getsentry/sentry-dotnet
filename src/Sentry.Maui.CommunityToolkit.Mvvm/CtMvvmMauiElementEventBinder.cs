@@ -99,9 +99,9 @@ public class CtMvvmMauiElementEventBinder(IHub hub) : IMauiElementEventBinder
                 TryBindTo(pointer.PointerExitedCommand, bind);
                 break;
 
-            // no command bindings on these gestures, so they're left out
-            // PinchGestureRecognizer
-            // PanGestureRecognizer
+                // no command bindings on these gestures, so they're left out
+                // PinchGestureRecognizer
+                // PanGestureRecognizer
         }
     }
 
