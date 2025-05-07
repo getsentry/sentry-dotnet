@@ -103,10 +103,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Analyzers\Sentry.Analyzers.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"/>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
   </ItemGroup>
 
+  <!--In order to test our analyzers with this project, we manually reference our targets file.  User do not need to do this-->
+  <Import Project="..\..\src\Sentry\buildTransitive\Sentry.SourceGenerators.targets" />
 </Project>
