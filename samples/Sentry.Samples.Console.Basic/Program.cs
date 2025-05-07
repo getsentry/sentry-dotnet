@@ -34,16 +34,29 @@ SentrySdk.Init(options =>
 
     // This option tells Sentry to capture 100% of traces. You still need to start transactions and spans.
     options.TracesSampleRate = 1.0;
+
+    options.EnableLogs = true;
+    options.SetBeforeSendLog(static (SentryLog log) =>
+    {
+        //TODO: this feels a bit off ... perhaps a "TryGet{Type}Attribute" method group could help here instead of exposing the boxing object-TValue-based Dictionary`2
+        if (log.Attributes.TryGetValue("plan.type", out var attribute) && attribute is "enterprise")
+        {
+            return null;
+        }
+
+        return log.SeverityNumber is >= 17 and <= 20 ? log : null;
+    });
+    options.LogsSampleRate = 1.0f;
 });
 
-SentrySdk.Logger.Trace("Hello, World!", null, log => log.SetAttribute("trace", "trace"));
-SentrySdk.Logger.Debug("Hello, .NET!", null, log => log.SetAttribute("trace", "trace"));
-SentrySdk.Logger.Info("Information", null, log => log.SetAttribute("trace", "trace"));
-SentrySdk.Logger.Warn("Warning with one {0}", ["parameter"], log => log.SetAttribute("trace", "trace"));
-SentrySdk.Logger.Error("Error with {0} {1}", [2, "parameters"], log => log.SetAttribute("trace", "trace"));
-SentrySdk.Logger.Fatal("Fatal {0} and {1}", [true, false], log => log.SetAttribute("trace", "trace"));
+SentrySdk.Logger.Trace("Hello, World!", null, log => log.SetAttribute("trace-key", "trace-value"));
+SentrySdk.Logger.Debug("Hello, .NET!", null, log => log.SetAttribute("debug-key", "debug-value"));
+SentrySdk.Logger.Info("Information", null, log => log.SetAttribute("info-key", "info-value"));
+SentrySdk.Logger.Warn("Warning with one {0}", ["parameter"], log => log.SetAttribute("warn-key", "warn-value"));
+SentrySdk.Logger.Error("Error with {0} {1}", [2, "parameters"], log => log.SetAttribute("error-key", "error-value"));
+SentrySdk.Logger.Fatal("Fatal {0} and {1}", [true, false], log => log.SetAttribute("fatal-key", "fatal-value"));
 
-await Task.Delay(5_000);
+await Task.Delay(TimeSpan.FromSeconds(5));
 
 /*
 // This starts a new transaction and attaches it to the scope.

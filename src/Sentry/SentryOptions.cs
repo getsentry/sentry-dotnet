@@ -1,3 +1,4 @@
+using Sentry.Experimental;
 using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Infrastructure;
@@ -516,6 +517,55 @@ public class SentryOptions
     public void SetBeforeBreadcrumb(Func<Breadcrumb, Breadcrumb?> beforeBreadcrumb)
     {
         _beforeBreadcrumb = (breadcrumb, _) => beforeBreadcrumb(breadcrumb);
+    }
+
+    /// <summary>
+    /// When set to <see langword="true"/>, logs are sent to Sentry.
+    /// Defaults to <see langword="false"/>.
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public bool EnableLogs { get; set; } = false;
+
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    private Func<SentryLog, SentryLog?>? _beforeSendLog;
+
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    internal Func<SentryLog, SentryLog?>? BeforeSendLogInternal => _beforeSendLog;
+
+    /// <summary>
+    /// Sets a callback function to be invoked before sending the log to Sentry.
+    /// </summary>
+    /// <remarks>
+    /// It can be used to modify the log object before being sent to Sentry.
+    /// To prevent the log from being sent to Sentry, return <see langword="null"/>.
+    /// </remarks>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public void SetBeforeSendLog(Func<SentryLog, SentryLog?> beforeSendLog)
+    {
+        _beforeSendLog = beforeSendLog;
+    }
+
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    private float _logsSampleRate = 1.0f;
+
+    /// <summary>
+    /// A <see langword="float"/> between <c>0.0f</c> and <c>1.0f</c> that represents the probability that a log will be sent to Sentry.
+    /// Defaults to <c>1.0</c>.
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public float LogsSampleRate
+    {
+        get => _logsSampleRate;
+        set
+        {
+            if (value is < 0.0f or > 1.0f)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value,
+                    "The logs sample rate must be between 0.0 and 1.0, inclusive.");
+            }
+
+            _logsSampleRate = value;
+        }
     }
 
     private int _maxQueueItems = 30;
