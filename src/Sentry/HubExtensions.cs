@@ -52,6 +52,19 @@ public static class HubExtensions
         hub.StartTransaction(new TransactionContext(name, operation, traceHeader));
 
     /// <summary>
+    /// Starts a span or transaction if a transaction is not already active on the scope
+    /// </summary>
+    public static ISpan StartSpan(this IHub hub, string operation, string description)
+    {
+        ITransactionTracer? currentTransaction = null;
+        hub.ConfigureScope(s => currentTransaction = s.Transaction);
+        return currentTransaction is { } transaction
+            ? transaction.StartChild(operation, description)
+            : hub.StartTransaction(operation, description);
+    }
+
+
+    /// <summary>
     /// Adds a breadcrumb to the current scope.
     /// </summary>
     /// <param name="hub">The Hub which holds the scope stack.</param>

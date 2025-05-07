@@ -87,9 +87,6 @@ public class CtMvvmMauiElementEventBinder(IHub hub) : IMauiElementEventBinder
                 TryBindTo(swipe.Command, bind);
                 break;
 
-            // no commands
-            //case PinchGestureRecognizer pinch
-            //case PanGestureRecognizer pan
             case DragGestureRecognizer drag:
                 TryBindTo(drag.DragStartingCommand, bind); // unlikely to ever be async
                 TryBindTo(drag.DropCompletedCommand, bind);
@@ -101,6 +98,10 @@ public class CtMvvmMauiElementEventBinder(IHub hub) : IMauiElementEventBinder
                 TryBindTo(pointer.PointerEnteredCommand, bind); // unlikely to ever be async
                 TryBindTo(pointer.PointerExitedCommand, bind);
                 break;
+
+            // no command bindings on these gestures, so they're left out
+            // PinchGestureRecognizer
+            // PanGestureRecognizer
         }
     }
 
@@ -131,25 +132,12 @@ public class CtMvvmMauiElementEventBinder(IHub hub) : IMauiElementEventBinder
 
             if (relay.IsRunning)
             {
-                ISpan span = null!;
-                hub.ConfigureScope(scope =>
-                {
-                    scope.Transaction ??= hub.StartTransaction(SpanName, SpanOp);
-                    span = scope.Transaction.StartChild(SpanOp);
-                });
+                var span = hub.StartSpan(SpanName, SpanOp);
                 _contexts.TryAdd(relay, span);
             }
             else if (_contexts.TryGetValue(relay, out var value))
             {
                 value.Finish();
-                hub.ConfigureScope(scope =>
-                {
-                    if (scope.Transaction?.Name.Equals(SpanName) ?? false)
-                    {
-                        scope.Transaction.Finish();
-                        scope.Transaction = null;
-                    }
-                });
                 _contexts.TryRemove(relay, out _);
             }
         }
