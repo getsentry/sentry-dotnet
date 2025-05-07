@@ -69,7 +69,7 @@ public sealed class SentryLog : ISentryJsonSerializable
         _attributes[key] = new ValueTypePair(value, "boolean");
     }
 
-    public void SetAttribute(string key, int value)
+    public void SetAttribute(string key, long value)
     {
         _attributes ??= new Dictionary<string, ValueTypePair>();
         _attributes[key] = new ValueTypePair(value, "integer");
@@ -202,7 +202,7 @@ public sealed class SentryLog : ISentryJsonSerializable
         }
         else if (type == "integer")
         {
-            writer.WriteNumber("value", (int)value);
+            writer.WriteNumber("value", (long)value);
             writer.WriteString("type", type);
         }
         else if (type == "double")
@@ -233,9 +233,9 @@ public sealed class SentryLog : ISentryJsonSerializable
             writer.WriteBoolean("value", boolean);
             writer.WriteString("type", "boolean");
         }
-        else if (value is int int32)
+        else if (value is long int64)
         {
-            writer.WriteNumber("value", int32);
+            writer.WriteNumber("value", int64);
             writer.WriteString("type", "integer");
         }
         else if (value is double float64)

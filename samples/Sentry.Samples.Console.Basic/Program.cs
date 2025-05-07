@@ -49,12 +49,20 @@ SentrySdk.Init(options =>
     options.LogsSampleRate = 1.0f;
 });
 
-SentrySdk.Logger.Trace("Hello, World!", null, log => log.SetAttribute("trace-key", "trace-value"));
-SentrySdk.Logger.Debug("Hello, .NET!", null, log => log.SetAttribute("debug-key", "debug-value"));
-SentrySdk.Logger.Info("Information", null, log => log.SetAttribute("info-key", "info-value"));
-SentrySdk.Logger.Warn("Warning with one {0}", ["parameter"], log => log.SetAttribute("warn-key", "warn-value"));
-SentrySdk.Logger.Error("Error with {0} {1}", [2, "parameters"], log => log.SetAttribute("error-key", "error-value"));
-SentrySdk.Logger.Fatal("Fatal {0} and {1}", [true, false], log => log.SetAttribute("fatal-key", "fatal-value"));
+var configureLog = static (SentryLog log) =>
+{
+    log.SetAttribute("string-attribute", "value");
+    log.SetAttribute("boolean-attribute", true);
+    log.SetAttribute("integer-attribute", long.MaxValue);
+    log.SetAttribute("double-attribute", double.MaxValue);
+};
+
+SentrySdk.Logger.Trace("Hello, World!", null, configureLog);
+SentrySdk.Logger.Debug("Hello, .NET!", null, configureLog);
+SentrySdk.Logger.Info("Information", null, configureLog);
+SentrySdk.Logger.Warn("Warning with one {0}", ["parameter"], configureLog);
+SentrySdk.Logger.Error("Error with {0} {1}", [2, "parameters"], configureLog);
+SentrySdk.Logger.Fatal("Fatal {0} and {1}", [true, false], configureLog);
 
 await Task.Delay(TimeSpan.FromSeconds(5));
 
