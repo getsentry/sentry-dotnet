@@ -60,7 +60,7 @@ public static class HubExtensions
         hub.ConfigureScope(s => currentTransaction = s.Transaction);
         return currentTransaction is { } transaction
             ? transaction.StartChild(operation, description)
-            : hub.StartTransaction(operation, description);
+            : hub.StartTransaction(operation, description); // this is actually in the wrong order but changing it may break other things
     }
 
 

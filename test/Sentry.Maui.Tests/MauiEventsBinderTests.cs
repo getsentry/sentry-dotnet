@@ -1,3 +1,4 @@
+using NSubstitute;
 using Sentry.Maui.CommunityToolkitMvvm;
 using Sentry.Maui.Internal;
 
@@ -21,28 +22,9 @@ public partial class MauiEventsBinderTests
             Hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
                 .Do(c => c.Arg<Action<Scope>>()(Scope));
 
-            Hub.StartTransaction(default, default).ReturnsForAnyArgs(args =>
+            Hub.StartSpan(default, default).ReturnsForAnyArgs(args =>
             {
-                var spans = new List<ISpan>();
-
                 var tracer = Substitute.For<ITransactionTracer>();
-                tracer.Spans.Returns(spans);
-
-                // tracer.Name = (string)args[0];
-                // tracer.Operation = (string)args[1];
-                tracer.StartChild(Arg.Any<string>()).Returns(args =>
-                {
-                    var span = Substitute.For<ISpan>();
-                    span.Operation = (string)args[0];
-                    span.When(x => x.Finish()).Do(_ =>
-                    {
-                        span.Status = SpanStatus.Ok;
-                        span.EndTimestamp.Returns(DateTimeOffset.UtcNow);
-                    });
-                    spans.Add(span);
-                    return span;
-                });
-
                 return tracer;
             });
 

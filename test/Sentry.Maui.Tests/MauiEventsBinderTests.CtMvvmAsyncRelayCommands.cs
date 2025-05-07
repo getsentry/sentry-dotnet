@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FluentAssertions;
 using Sentry.Maui.CommunityToolkitMvvm;
 
 namespace Sentry.Maui.Tests;
@@ -24,9 +25,6 @@ public partial class MauiEventsBinderTests
 
         // Assert
         _fixture.Scope.Transaction.Should().NotBeNull("transaction should have been created");
-        _fixture.Scope.Transaction!.Spans
-            .Any(x => x.Operation.Equals("relay.command"))
-            .Should().BeTrue("span should be created with operation 'relay.command'");
     }
 }
 

@@ -133,6 +133,10 @@ public class CtMvvmMauiElementEventBinder(IHub hub) : IMauiElementEventBinder
             if (relay.IsRunning)
             {
                 var span = hub.StartSpan(SpanName, SpanOp);
+                if (span is ITransactionTracer transaction)
+                {
+                    hub.ConfigureScope(x => x.Transaction ??= transaction);
+                }
                 _contexts.TryAdd(relay, span);
             }
             else if (_contexts.TryGetValue(relay, out var value))

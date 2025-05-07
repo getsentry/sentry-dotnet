@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-<!--    <TargetFrameworks>$(TargetFrameworks);net8.0-android</TargetFrameworks>-->
-<!--    <TargetFrameworks>$(TargetFrameworks);net8.0-ios</TargetFrameworks>-->
+    <TargetFrameworks>$(TargetFrameworks);net8.0-android</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net8.0-ios</TargetFrameworks>
     <TargetFrameworks>$(TargetFrameworks);net9.0-android</TargetFrameworks>
     <TargetFrameworks>$(TargetFrameworks);net9.0-ios</TargetFrameworks>
     <!-- Pin target iOS version so that our tests don't break when new versions of Xcode are released.
