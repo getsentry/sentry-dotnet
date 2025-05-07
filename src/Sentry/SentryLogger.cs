@@ -1,6 +1,6 @@
-using Sentry.Experimental;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 
 //TODO: add XML docs

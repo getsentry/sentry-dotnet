@@ -4,7 +4,7 @@ using Sentry.Internal;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-namespace Sentry.Experimental;
+namespace Sentry.Protocol;
 
 [Experimental(DiagnosticId.ExperimentalFeature)]
 public sealed class SentryLog : ISentryJsonSerializable
@@ -25,7 +25,7 @@ public sealed class SentryLog : ISentryJsonSerializable
 
     public required SentryId TraceId { get; init; }
 
-    public SentrySeverity Level
+    private SentrySeverity Level
     {
         get => SentrySeverityExtensions.FromSeverityNumber(_severityNumber);
         set => _severityNumber = SentrySeverityExtensions.ToSeverityNumber(value);

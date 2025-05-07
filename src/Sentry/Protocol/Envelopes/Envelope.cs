@@ -1,4 +1,3 @@
-using Sentry.Experimental;
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;

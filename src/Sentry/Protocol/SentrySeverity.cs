@@ -2,12 +2,12 @@ using Sentry.Infrastructure;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-namespace Sentry.Experimental;
+namespace Sentry.Protocol;
 
 //TODO: QUESTION: not sure about the name
 // this is a bit different to Sentry.SentryLevel and Sentry.BreadcrumbLevel
 [Experimental(DiagnosticId.ExperimentalFeature)]
-public enum SentrySeverity : short
+internal enum SentrySeverity : short
 {
     Trace,
     Debug,
