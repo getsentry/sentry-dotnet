@@ -54,7 +54,7 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
-        // additional feature that hooks into the Sentry MAUI integration for auto-instrumenting async relay command
+        // Automatically create traces for async relay commands
         // in the MVVM Community Toolkit
         builder.Services.UseSentryCommunityToolkitIntegration();
 
