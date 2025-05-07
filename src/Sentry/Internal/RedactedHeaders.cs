@@ -4,10 +4,12 @@ namespace Sentry.Internal;
 
 internal class RedactedHeaders : IDictionary<string, string>
 {
+    private static readonly string[] SensitiveKeys = ["Authorization", "Proxy-Authorization"];
+
     private readonly Dictionary<string, string> _inner = new(StringComparer.OrdinalIgnoreCase);
 
     private static string Redact(string key, string value) =>
-        string.Equals(key, "Authorization", StringComparison.OrdinalIgnoreCase) ? "[Filtered]" : value;
+        SensitiveKeys.Contains(key, StringComparer.OrdinalIgnoreCase) ? "[Filtered]" : value;
 
     public string this[string key]
     {
