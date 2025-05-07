@@ -10,7 +10,7 @@ internal static class HttpHeadersExtensions
             ? string.Join("; ", values)
             : string.Empty;
 
-    internal static RedactedHeaders? Redact(this Dictionary<string, string?>? headers)
+    internal static RedactedHeaders? ToRedactedHeaders(this Dictionary<string, string?>? headers)
     {
         var items = headers?.WhereNotNullValue();
         if (items is null || !items.Any())

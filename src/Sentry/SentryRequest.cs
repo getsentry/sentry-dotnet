@@ -183,7 +183,7 @@ public sealed class SentryRequest : ISentryJsonSerializable
         {
             InternalEnv = env?.WhereNotNullValue().ToDict(),
             InternalOther = other?.WhereNotNullValue().ToDict(),
-            InternalHeaders = headers.Redact(),
+            InternalHeaders = headers.ToRedactedHeaders(),
             Url = url,
             Method = method,
             Data = data,

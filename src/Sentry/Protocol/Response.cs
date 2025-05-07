@@ -147,7 +147,7 @@ public sealed class Response : ISentryJsonSerializable, ICloneable<Response>, IU
             BodySize = bodySize,
             Cookies = cookies,
             Data = data,
-            InternalHeaders = headers.Redact(),
+            InternalHeaders = headers.ToRedactedHeaders(),
             StatusCode = statusCode
         };
     }
