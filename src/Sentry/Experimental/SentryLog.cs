@@ -92,7 +92,7 @@ public sealed class SentryLog : ISentryJsonSerializable
             SetAttribute("sentry.release", release);
         }
 
-        if (hub.GetSpan() is {} span && span.ParentSpanId.HasValue)
+        if (hub.GetSpan() is { } span && span.ParentSpanId.HasValue)
         {
             SetAttribute("sentry.trace.parent_span_id", span.ParentSpanId.Value.ToString());
         }
@@ -107,7 +107,7 @@ public sealed class SentryLog : ISentryJsonSerializable
         }
 
         SetAttribute("sentry.sdk.name", Constants.SdkName);
-        if (SdkVersion.Instance.Version is {} version)
+        if (SdkVersion.Instance.Version is { } version)
         {
             SetAttribute("sentry.sdk.version", version);
         }
