@@ -80,7 +80,7 @@ public sealed class SentryLogger
     {
         var hub = SentrySdk.CurrentHub;
 
-        if (hub.GetSentryOptions() is {} options)
+        if (hub.GetSentryOptions() is { } options)
         {
             return options.EnableLogs;
         }
@@ -116,7 +116,7 @@ public sealed class SentryLogger
 
         var scopeManager = (hub as Hub)?.ScopeManager;
         SentryId traceId;
-        if (hub.GetSpan() is {} span)
+        if (hub.GetSpan() is { } span)
         {
             traceId = span.TraceId;
         }
