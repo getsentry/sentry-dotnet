@@ -44,7 +44,7 @@ SentrySdk.Init(options =>
             return null;
         }
 
-        return log.Level is SentrySeverity.Error ? log : null;
+        return log.Level is LogSeverityLevel.Error ? log : null;
     });
     options.LogsSampleRate = 1.0f;
 });
