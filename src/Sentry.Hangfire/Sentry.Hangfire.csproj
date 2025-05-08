@@ -5,6 +5,7 @@
     <PackageTags>$(PackageTags);Hangfire</PackageTags>
     <TargetFrameworks>net9.0;net8.0;net462</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(EnableAot)' == 'true'">

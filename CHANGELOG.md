@@ -5,6 +5,7 @@
 ### Fixes
 
 - Redact Authorization headers before sending events to Sentry ([#4164](https://github.com/getsentry/sentry-dotnet/pull/4164))
+- Remove Strong Naming from Sentry.Hangfire ([#4099](https://github.com/getsentry/sentry-dotnet/pull/4099))
 - Update request size thresholds to match other SDKs ([#4177](https://github.com/getsentry/sentry-dotnet/pull/4177))
 
 ### Features
