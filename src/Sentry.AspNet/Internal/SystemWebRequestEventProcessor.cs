@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Reflection;
 
 namespace Sentry.AspNet.Internal;
@@ -54,12 +55,12 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor
 
         foreach (var key in context.Request.Headers.AllKeys)
         {
-            if (!_options.SendDefaultPii
-                // Don't add headers which might contain PII
-                && key is "Cookie" or "Authorization")
+            // Don't add cookies that might contain PII
+            if (!_options.SendDefaultPii && key is "Cookie")
             {
                 continue;
             }
+
             @event.Request.Headers[key] = context.Request.Headers[key];
         }
 

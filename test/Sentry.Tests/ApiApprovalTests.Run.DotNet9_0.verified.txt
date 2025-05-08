@@ -1286,6 +1286,14 @@ namespace Sentry.Ben.BlockingDetector
         public void Dispose() { }
     }
 }
+namespace Sentry.CompilerServices
+{
+    public static class BuildProperties
+    {
+        public static System.Collections.Generic.IReadOnlyDictionary<string, string>? Values { get; }
+        public static void Initialize(System.Collections.Generic.Dictionary<string, string> properties) { }
+    }
+}
 namespace Sentry.Extensibility
 {
     public abstract class BaseRequestPayloadExtractor : Sentry.Extensibility.IRequestPayloadExtractor
