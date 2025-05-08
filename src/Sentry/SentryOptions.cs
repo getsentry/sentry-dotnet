@@ -522,11 +522,11 @@ public class SentryOptions
     /// <summary>
     /// When set to <see langword="true"/>, logs are sent to Sentry.
     /// Defaults to <see langword="false"/>.
+    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public bool EnableLogs { get; set; } = false;
 
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     private Func<SentryLog, SentryLog?>? _beforeSendLog;
 
     [Experimental(DiagnosticId.ExperimentalFeature)]
@@ -534,6 +534,7 @@ public class SentryOptions
 
     /// <summary>
     /// Sets a callback function to be invoked before sending the log to Sentry.
+    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     /// <remarks>
     /// It can be used to modify the log object before being sent to Sentry.
@@ -545,12 +546,12 @@ public class SentryOptions
         _beforeSendLog = beforeSendLog;
     }
 
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     private float _logsSampleRate = 1.0f;
 
     /// <summary>
     /// A <see langword="float"/> between <c>0.0f</c> and <c>1.0f</c> that represents the probability that a log will be sent to Sentry.
     /// Defaults to <c>1.0</c>.
+    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public float LogsSampleRate

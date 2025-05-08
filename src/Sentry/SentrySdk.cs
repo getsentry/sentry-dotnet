@@ -282,10 +282,16 @@ public static partial class SentrySdk
 
     /// <summary>
     /// Creates and sends logs to Sentry.
+    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
-    //TODO: add to IHub or ISentryClient
-    // adding to interfaces is breaking, perhaps via a DIM but what about netstandard2.0 runtimes
-    // or are these interfaces intended to be extended as user code is not meant to implement them
+    /// <remarks>
+    /// Available options:
+    /// <list type="bullet">
+    /// <item><see cref="Sentry.SentryOptions.EnableLogs"/></item>
+    /// <item><see cref="Sentry.SentryOptions.SetBeforeSendLog(System.Func{Sentry.Protocol.SentryLog, Sentry.Protocol.SentryLog})"/></item>
+    /// <item><see cref="Sentry.SentryOptions.LogsSampleRate"/></item>
+    /// </list>
+    /// </remarks>
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public static SentryLogger Logger { get; } = new SentryLogger();
 

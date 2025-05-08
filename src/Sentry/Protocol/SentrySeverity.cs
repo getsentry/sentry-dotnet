@@ -1,19 +1,38 @@
 using Sentry.Infrastructure;
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 namespace Sentry.Protocol;
 
-//TODO: QUESTION: not sure about the name
-// this is a bit different to Sentry.SentryLevel and Sentry.BreadcrumbLevel
+/// <summary>
+/// The severity of the structured log.
+/// <para>This API is experimental and it may change in the future.</para>
+/// </summary>
+/// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
 [Experimental(DiagnosticId.ExperimentalFeature)]
-internal enum SentrySeverity : short
+public enum SentrySeverity : short
 {
+    /// <summary>
+    /// A fine-grained debugging event.
+    /// </summary>
     Trace,
+    /// <summary>
+    /// A debugging event.
+    /// </summary>
     Debug,
+    /// <summary>
+    /// An informational event.
+    /// </summary>
     Info,
+    /// <summary>
+    /// A warning event.
+    /// </summary>
     Warn,
+    /// <summary>
+    /// An error event.
+    /// </summary>
     Error,
+    /// <summary>
+    /// A fatal error such as application or system crash.
+    /// </summary>
     Fatal,
 }
 

@@ -375,6 +375,8 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     [Experimental(DiagnosticId.ExperimentalFeature)]
     internal static EnvelopeItem FromLog(SentryLog log)
     {
+        //TODO: allow batching Sentry logs
+        //see https://github.com/getsentry/sentry-dotnet/issues/4132
         var header = new Dictionary<string, object?>(3, StringComparer.Ordinal)
         {
             [TypeKey] = TypeValueLog,

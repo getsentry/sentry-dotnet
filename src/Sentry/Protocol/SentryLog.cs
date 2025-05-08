@@ -2,10 +2,12 @@ using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 namespace Sentry.Protocol;
 
+/// <summary>
+/// Represents the Sentry Log protocol.
+/// <para>This API is experimental and it may change in the future.</para>
+/// </summary>
 [Experimental(DiagnosticId.ExperimentalFeature)]
 public sealed class SentryLog : ISentryJsonSerializable
 {
@@ -21,18 +23,71 @@ public sealed class SentryLog : ISentryJsonSerializable
         Message = message;
     }
 
+    /// <summary>
+    /// The timestamp of the log.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    /// <remarks>
+    /// Sent as seconds since the Unix epoch.
+    /// </remarks>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public required DateTimeOffset Timestamp { get; init; }
 
+    /// <summary>
+    /// The trace id of the log.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public required SentryId TraceId { get; init; }
 
-    private SentrySeverity Level
+    /// <summary>
+    /// The severity level of the log.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public required SentrySeverity Level
     {
         get => SentrySeverityExtensions.FromSeverityNumber(_severityNumber);
-        set => _severityNumber = SentrySeverityExtensions.ToSeverityNumber(value);
+        init => _severityNumber = SentrySeverityExtensions.ToSeverityNumber(value);
     }
 
+    /// <summary>
+    /// The severity number of the log.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public int SeverityNumber
+    {
+        get => _severityNumber;
+        set
+        {
+            SentrySeverityExtensions.ThrowIfOutOfRange(value);
+            _severityNumber = value;
+        }
+    }
+
+    /// <summary>
+    /// The formatted log message.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public required string Message { get; init; }
 
+    /// <summary>
+    /// A dictionary of key-value pairs of arbitrary data attached to the log.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    /// <remarks>
+    /// Attributes must also declare the type of the value.
+    /// The following types are supported:
+    /// <list type="bullet">
+    /// <item><see cref="System.String"/></item>
+    /// <item><see cref="System.Boolean"/></item>
+    /// <item><see cref="System.Int64"/></item>
+    /// <item><see cref="System.Double"/></item>
+    /// </list>
+    /// </remarks>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public IReadOnlyDictionary<string, object> Attributes
     {
         get
@@ -43,38 +98,58 @@ public sealed class SentryLog : ISentryJsonSerializable
         }
     }
 
+    /// <summary>
+    /// The parameterized template string.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public string? Template { get; init; }
 
+    /// <summary>
+    /// The parameters to the template string.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public object[]? Parameters { get; init; }
 
-    public required int SeverityNumber
-    {
-        get => _severityNumber;
-        set
-        {
-            SentrySeverityExtensions.ThrowIfOutOfRange(value);
-            _severityNumber = value;
-        }
-    }
-
+    /// <summary>
+    /// Set a key-value pair of arbitrary data attached to the log.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public void SetAttribute(string key, string value)
     {
         _attributes ??= new Dictionary<string, ValueTypePair>();
         _attributes[key] = new ValueTypePair(value, "string");
     }
 
+    /// <summary>
+    /// Set a key-value pair of arbitrary data attached to the log.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public void SetAttribute(string key, bool value)
     {
         _attributes ??= new Dictionary<string, ValueTypePair>();
         _attributes[key] = new ValueTypePair(value, "boolean");
     }
 
+    /// <summary>
+    /// Set a key-value pair of arbitrary data attached to the log.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public void SetAttribute(string key, long value)
     {
         _attributes ??= new Dictionary<string, ValueTypePair>();
         _attributes[key] = new ValueTypePair(value, "integer");
     }
 
+    /// <summary>
+    /// Set a key-value pair of arbitrary data attached to the log.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public void SetAttribute(string key, double value)
     {
         _attributes ??= new Dictionary<string, ValueTypePair>();
@@ -113,6 +188,7 @@ public sealed class SentryLog : ISentryJsonSerializable
         }
     }
 
+    /// <inheritdoc />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         writer.WriteStartObject();

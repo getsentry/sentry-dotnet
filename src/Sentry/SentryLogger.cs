@@ -3,13 +3,11 @@ using Sentry.Internal;
 using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 
-//TODO: add XML docs
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 namespace Sentry;
 
 /// <summary>
 /// Creates and sends logs to Sentry.
+/// <para>This API is experimental and it may change in the future.</para>
 /// </summary>
 [Experimental(DiagnosticId.ExperimentalFeature)]
 public sealed class SentryLogger
@@ -21,8 +19,10 @@ public sealed class SentryLogger
         _randomValuesFactory = new SynchronizedRandomValuesFactory();
     }
 
-    //TODO: QUESTION: Trace vs LogTrace
-    // Trace() is from the Sentry Logs feature specs. LogTrace() would be more .NET idiomatic
+    /// <summary>
+    /// Creates and sends a structured log to Sentry, with severity <see cref="SentrySeverity.Trace"/>, when enabled and sampled.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
     public void Trace(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
     {
         if (IsEnabled())
@@ -31,9 +31,11 @@ public sealed class SentryLogger
         }
     }
 
-    //TODO: QUESTION: parameter name "template" vs "format"
-    // "template" from the "sentry.message.template" attributes of the envelope
-    // "format" as in System.String.Format to be more idiomatic
+    /// <summary>
+    /// Creates and sends a structured log to Sentry, with severity <see cref="SentrySeverity.Debug"/>, when enabled and sampled.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public void Debug(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
     {
         if (IsEnabled())
@@ -42,6 +44,11 @@ public sealed class SentryLogger
         }
     }
 
+    /// <summary>
+    /// Creates and sends a structured log to Sentry, with severity <see cref="SentrySeverity.Info"/>, when enabled and sampled.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public void Info(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
     {
         if (IsEnabled())
@@ -50,8 +57,11 @@ public sealed class SentryLogger
         }
     }
 
-    //TODO: QUESTION: Warn vs Warning
-    // Warn is from the Sentry Logs feature specs. Warning would be more .NET idiomatic
+    /// <summary>
+    /// Creates and sends a structured log to Sentry, with severity <see cref="SentrySeverity.Warn"/>, when enabled and sampled.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public void Warn(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
     {
         if (IsEnabled())
@@ -60,6 +70,11 @@ public sealed class SentryLogger
         }
     }
 
+    /// <summary>
+    /// Creates and sends a structured log to Sentry, with severity <see cref="SentrySeverity.Error"/>, when enabled and sampled.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public void Error(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
     {
         if (IsEnabled())
@@ -68,6 +83,11 @@ public sealed class SentryLogger
         }
     }
 
+    /// <summary>
+    /// Creates and sends a structured log to Sentry, with severity <see cref="SentrySeverity.Fatal"/>, when enabled and sampled.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public void Fatal(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
     {
         if (IsEnabled())
@@ -88,12 +108,6 @@ public sealed class SentryLogger
         return false;
     }
 
-    //TODO: consider ReadOnlySpan for TFMs where Span is available
-    //  or: utilize a custom [InterpolatedStringHandler] for modern TFMs
-    //      with which we may not be able to enforce on compile-time to only support string, boolean, integer, double
-    //      but we could have an Analyzer for that, indicating that Sentry does not support other types if used in the interpolated string
-    //  or: utilize a SourceGen, similar to the Microsoft.Extensions.Logging [LoggerMessage]
-    //      with which we could enforce on compile-time to only support string, boolean, integer, double
     private void CaptureLog(SentrySeverity level, string template, object[]? parameters, Action<SentryLog>? configureLog)
     {
         var timestamp = DateTimeOffset.UtcNow;
@@ -102,17 +116,13 @@ public sealed class SentryLogger
 
         if (hub.GetSentryOptions() is not { EnableLogs: true } options)
         {
-            //Logs disabled
             return;
         }
 
         if (!_randomValuesFactory.NextBool(options.LogsSampleRate))
         {
-            //Log sampled
             return;
         }
-
-        //process log (attach attributes)
 
         var scopeManager = (hub as Hub)?.ScopeManager;
         SentryId traceId;
@@ -146,7 +156,8 @@ public sealed class SentryLogger
         }
         catch (Exception e)
         {
-            //TODO: diagnostic log
+            //TODO: change to Diagnostic Logger (if enabled)
+            // see https://github.com/getsentry/sentry-dotnet/issues/4132
             Console.WriteLine(e);
             return;
         }
@@ -154,6 +165,7 @@ public sealed class SentryLogger
         if (configuredLog is not null)
         {
             //TODO: enqueue in Batch-Processor / Background-Worker
+            // see https://github.com/getsentry/sentry-dotnet/issues/4132
             _ = hub.CaptureEnvelope(Envelope.FromLog(configuredLog));
         }
     }

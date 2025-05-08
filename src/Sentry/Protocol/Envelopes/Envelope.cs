@@ -448,6 +448,8 @@ public sealed class Envelope : ISerializable, IDisposable
     [Experimental(DiagnosticId.ExperimentalFeature)]
     internal static Envelope FromLog(SentryLog log)
     {
+        //TODO: allow batching Sentry logs
+        //see https://github.com/getsentry/sentry-dotnet/issues/4132
         var header = DefaultHeader;
 
         var items = new[]
