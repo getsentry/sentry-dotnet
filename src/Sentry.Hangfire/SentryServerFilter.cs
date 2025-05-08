@@ -17,7 +17,9 @@ internal class SentryServerFilter : IServerFilter
     internal SentryServerFilter(IHub? hub, IDiagnosticLogger? logger)
     {
         _hub = hub ?? HubAdapter.Instance;
-        _logger = logger ?? _hub.GetSentryOptions()?.DiagnosticLogger;
+#pragma warning disable CS0618 // Type or member is obsolete
+        _logger = logger ?? _hub.GetInternalSentryOptions()?.DiagnosticLogger;
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     public void OnPerforming(PerformingContext context)
