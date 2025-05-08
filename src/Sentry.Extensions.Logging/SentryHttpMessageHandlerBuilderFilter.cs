@@ -14,9 +14,7 @@ internal class SentryHttpMessageHandlerBuilderFilter : IHttpMessageHandlerBuilde
         handlerBuilder =>
         {
             var hub = _getHub();
-#pragma warning disable CS0618
             var enableHandler = hub.GetSentryOptions()?.DisableSentryHttpMessageHandler == false;
-#pragma warning restore CS0618
             if (enableHandler && !handlerBuilder.AdditionalHandlers.Any(h => h is SentryHttpMessageHandler))
             {
                 handlerBuilder.AdditionalHandlers.Add(

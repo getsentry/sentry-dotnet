@@ -31,9 +31,7 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
     : base(hub, options, innerHandler)
     {
         _hub = hub ?? HubAdapter.Instance;
-#pragma warning disable CS0618
         _options = options ?? _hub.GetSentryOptions();
-#pragma warning restore CS0618
         _failedRequestHandler = failedRequestHandler;
         if (_options != null)
         {

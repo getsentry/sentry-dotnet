@@ -13,11 +13,9 @@ public class SentryHint
     /// <summary>
     /// Creates a new instance of <see cref="SentryHint"/>.
     /// </summary>
-#pragma warning disable CS0618
     public SentryHint() : this(SentrySdk.CurrentHub.GetSentryOptions())
     {
     }
-#pragma warning restore CS0618
 
     internal SentryHint(SentryOptions? options)
     {

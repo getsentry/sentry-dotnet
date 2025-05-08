@@ -99,22 +99,14 @@ public static class SentryClientExtensions
     /// <returns>A task to await for the flush operation.</returns>
     public static Task FlushAsync(this ISentryClient client)
     {
-#pragma warning disable CS0618
         var options = client.GetSentryOptions() ?? new SentryOptions();
-#pragma warning restore CS0618
         var timeout = options.FlushTimeout;
         return client.FlushAsync(timeout);
     }
 
     internal static SentryOptions? SentryOptionsForTestingOnly { get; set; }
 
-    /// <summary>
-    /// Gets internal SentryOptions - not meant for external use
-    /// </summary>
-    /// <param name="clientOrHub"></param>
-    /// <returns></returns>
-    [Obsolete("This method is meant for external usage only")]
-    public static SentryOptions? GetSentryOptions(this ISentryClient clientOrHub) =>
+    internal static SentryOptions? GetSentryOptions(this ISentryClient clientOrHub) =>
         clientOrHub switch
         {
             SentryClient client => client.Options,
@@ -122,4 +114,18 @@ public static class SentryClientExtensions
             HubAdapter => SentrySdk.CurrentOptions,
             _ => SentryOptionsForTestingOnly
         };
+
+    /// <summary>
+    /// <para>
+    /// Gets internal SentryOptions for integrations like Hangfire that don't support strong assembly names.
+    /// </para>
+    ///<remarks>
+    /// *** This is not meant for external use !!! ***
+    /// </remarks>>
+    /// </summary>
+    /// <param name="clientOrHub"></param>
+    /// <returns></returns>
+    [Obsolete("This method is meant for external usage only")]
+    public static SentryOptions? GetInternalSentryOptions(this ISentryClient clientOrHub) =>
+        clientOrHub.GetSentryOptions();
 }

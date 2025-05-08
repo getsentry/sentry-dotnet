@@ -18,9 +18,7 @@ public static partial class SentrySdk
 {
     internal static IHub CurrentHub = DisabledHub.Instance;
 
-#pragma warning disable CS0618
     internal static SentryOptions? CurrentOptions => CurrentHub.GetSentryOptions();
-#pragma warning restore CS0618
 
     /// <summary>
     /// Last event id recorded in the current scope.

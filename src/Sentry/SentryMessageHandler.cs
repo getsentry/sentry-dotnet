@@ -47,9 +47,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
     internal SentryMessageHandler(IHub? hub, SentryOptions? options, HttpMessageHandler? innerHandler = default)
     {
         _hub = hub ?? HubAdapter.Instance;
-#pragma warning disable CS0618
         _options = options ?? _hub.GetSentryOptions();
-#pragma warning restore CS0618
 
         // Only assign the inner handler if it is supplied.  We can't assign null or it will throw.
         // We also cannot assign a default value here, or it will throw when used with HttpMessageHandlerBuilderFilter.
