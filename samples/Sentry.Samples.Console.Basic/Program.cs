@@ -44,7 +44,7 @@ SentrySdk.Init(options =>
             return null;
         }
 
-        return log.SeverityNumber is >= 17 and <= 20 ? log : null;
+        return log.Level is SentrySeverity.Error ? log : null;
     });
     options.LogsSampleRate = 1.0f;
 });

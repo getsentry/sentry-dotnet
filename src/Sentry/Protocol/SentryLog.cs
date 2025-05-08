@@ -12,7 +12,7 @@ namespace Sentry.Protocol;
 public sealed class SentryLog : ISentryJsonSerializable
 {
     private Dictionary<string, ValueTypePair>? _attributes;
-    private int _severityNumber = -1;
+    private readonly SentrySeverity _severity;
 
     [SetsRequiredMembers]
     internal SentryLog(DateTimeOffset timestamp, SentryId traceId, SentrySeverity level, string message)
@@ -47,22 +47,11 @@ public sealed class SentryLog : ISentryJsonSerializable
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public required SentrySeverity Level
     {
-        get => SentrySeverityExtensions.FromSeverityNumber(_severityNumber);
-        init => _severityNumber = SentrySeverityExtensions.ToSeverityNumber(value);
-    }
-
-    /// <summary>
-    /// The severity number of the log.
-    /// <para>This API is experimental and it may change in the future.</para>
-    /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public int SeverityNumber
-    {
-        get => _severityNumber;
-        set
+        get => _severity;
+        init
         {
             SentrySeverityExtensions.ThrowIfOutOfRange(value);
-            _severityNumber = value;
+            _severity = value;
         }
     }
 
@@ -197,7 +186,14 @@ public sealed class SentryLog : ISentryJsonSerializable
 
         writer.WriteNumber("timestamp", Timestamp.ToUnixTimeSeconds());
         writer.WriteString("trace_id", TraceId);
-        writer.WriteString("level", Level.ToLogString());
+
+        var (severityText, severityNumber) = Level.ToSeverityTextAndOptionalNumber();
+        writer.WriteString("level", severityText);
+        if (severityNumber.HasValue)
+        {
+            writer.WriteNumber("severity_number", severityNumber.Value);
+        }
+
         writer.WriteString("body", Message);
 
         writer.WritePropertyName("attributes");
@@ -225,11 +221,6 @@ public sealed class SentryLog : ISentryJsonSerializable
         }
 
         writer.WriteEndObject();
-
-        if (SeverityNumber != -1)
-        {
-            writer.WriteNumber("severity_number", SeverityNumber);
-        }
 
         writer.WriteEndObject();
         writer.WriteEndArray();
