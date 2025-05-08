@@ -70,10 +70,10 @@ public sealed class SentryLog : ISentryJsonSerializable
     /// Attributes must also declare the type of the value.
     /// The following types are supported:
     /// <list type="bullet">
-    /// <item><see cref="System.String"/></item>
-    /// <item><see cref="System.Boolean"/></item>
-    /// <item><see cref="System.Int64"/></item>
-    /// <item><see cref="System.Double"/></item>
+    /// <item><see cref="string"/></item>
+    /// <item><see cref="bool"/></item>
+    /// <item><see cref="long"/></item>
+    /// <item><see cref="double"/></item>
     /// </list>
     /// </remarks>
     [Experimental(DiagnosticId.ExperimentalFeature)]
