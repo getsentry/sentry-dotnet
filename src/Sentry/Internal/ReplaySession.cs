@@ -13,8 +13,6 @@ internal class ReplaySession : IReplaySession
 {
     public static readonly IReplaySession Instance = new ReplaySession();
 
-    internal static readonly IReplaySession DisabledInstance = new DisabledReplaySession();
-
     private ReplaySession()
     {
     }
@@ -31,10 +29,5 @@ internal class ReplaySession : IReplaySession
             return null;
 #endif
         }
-    }
-
-    private class DisabledReplaySession : IReplaySession
-    {
-        public SentryId? ActiveReplayId => null;
     }
 }

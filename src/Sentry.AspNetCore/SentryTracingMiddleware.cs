@@ -67,7 +67,7 @@ internal class SentryTracingMiddleware
                 ? baggageHeaderObject as BaggageHeader : null;
 
             // Note: We don't record Session Replays in ASP.NET core
-            var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext(ReplaySession.DisabledInstance);
+            var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext(null);
 
             if (traceHeader is not null && baggageHeader is null)
             {
