@@ -396,8 +396,13 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
         EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
         _options?.LogDebug("Finished Transaction {0}.", SpanId);
 
-        // Clear the transaction from the scope
-        _hub.ConfigureScope(scope => scope.ResetTransaction(this));
+        // Clear the transaction from the scope and regenerate the Propagation Context
+        // We do this so new events don't have a trace context that is "older" than the transaction that just finished
+        _hub.ConfigureScope(scope =>
+        {
+            scope.ResetTransaction(this);
+            scope.SetPropagationContext(new SentryPropagationContext());
+        });
 
         // Client decides whether to discard this transaction based on sampling
         _hub.CaptureTransaction(new SentryTransaction(this));

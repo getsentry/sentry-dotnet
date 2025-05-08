@@ -555,6 +555,23 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
+    public void CaptureFeedback_WithConfiguredScope_ScopeCallbackGetsInvoked()
+    {
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+        });
+
+        var scopeCallbackWasInvoked = false;
+        SentrySdk.CaptureFeedback(new SentryFeedback("Foo"), _ => scopeCallbackWasInvoked = true);
+
+        Assert.True(scopeCallbackWasInvoked);
+    }
+
+    [Fact]
     public void CaptureException_WithConfiguredScope_ScopeCallbackGetsInvoked()
     {
         using var _ = SentrySdk.Init(o =>

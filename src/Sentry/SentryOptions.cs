@@ -1816,8 +1816,11 @@ public class SentryOptions
         {
             return null;
         }
-
+#if IOS || ANDROID // on iOS or Android the app is already sandboxed so there's no risk of sending data from 1 app to another Sentry's DSN
+        return Path.Combine(CacheDirectoryPath, "Sentry");
+#else
         return Path.Combine(CacheDirectoryPath, "Sentry", Dsn.GetHashString());
+#endif
     }
 
     internal string? TryGetProcessSpecificCacheDirectoryPath()
