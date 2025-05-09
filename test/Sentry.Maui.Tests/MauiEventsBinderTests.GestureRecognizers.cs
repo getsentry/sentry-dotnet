@@ -4,7 +4,7 @@ namespace Sentry.Maui.Tests;
 
 public partial class MauiEventsBinderTests
 {
-#if VISUAL_RUNNER || IOS
+#if VISUAL_RUNNER
     [Fact]
 #else
     [Fact(Skip = "Flaky Test in XHarness")]
@@ -19,7 +19,7 @@ public partial class MauiEventsBinderTests
         );
     }
 
-#if VISUAL_RUNNER || IOS
+#if VISUAL_RUNNER
     [Fact]
 #else
     [Fact(Skip = "Flaky Test in XHarness")]
@@ -34,7 +34,7 @@ public partial class MauiEventsBinderTests
         );
     }
 
-#if VISUAL_RUNNER || IOS
+#if VISUAL_RUNNER
     [Fact]
 #else
     [Fact(Skip = "Flaky Test in XHarness")]
@@ -48,7 +48,7 @@ public partial class MauiEventsBinderTests
         );
     }
 
-#if VISUAL_RUNNER || IOS
+#if VISUAL_RUNNER
     [Fact]
 #else
     [Fact(Skip = "Flaky Test in XHarness")]
@@ -62,7 +62,7 @@ public partial class MauiEventsBinderTests
         );
     }
 
-#if VISUAL_RUNNER || IOS
+#if VISUAL_RUNNER
     [Fact]
 #else
     [Fact(Skip = "Flaky Test in XHarness")]
@@ -76,7 +76,7 @@ public partial class MauiEventsBinderTests
         );
     }
 
-#if VISUAL_RUNNER || IOS
+#if VISUAL_RUNNER
     [Fact]
 #else
     [Fact(Skip = "Flaky Test in XHarness")]
@@ -90,7 +90,7 @@ public partial class MauiEventsBinderTests
         );
     }
 
-#if VISUAL_RUNNER || IOS
+#if VISUAL_RUNNER
     [Theory]
     [InlineData(nameof(PointerGestureRecognizer.PointerEntered))]
     [InlineData(nameof(PointerGestureRecognizer.PointerExited))]

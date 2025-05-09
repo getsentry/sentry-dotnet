@@ -1,16 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <!--set this to true to debug maui unit tests. make sure it is off for CI-->
-    <EnableVisualRunner>false</EnableVisualRunner>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(EnableVisualRunner)' == 'true'">
+  <PropertyGroup Condition="'$(EnableMauiDeviceTestVisualRunner)' == 'true'">
     <TargetFrameworks>net9.0-ios;net9.0-android</TargetFrameworks>
     <DefineConstants>$(DefineConstants);VISUAL_RUNNER</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(EnableVisualRunner)' != 'true'">
+  <PropertyGroup Condition="'$(EnableMauiDeviceTestVisualRunner)' != 'true'">
     <TargetFrameworks>$(TargetFrameworks);net8.0-android;net9.0-android</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios;net9.0-ios</TargetFrameworks>
     <!-- Currently broken on .NET 7, see
@@ -106,7 +101,7 @@
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0"/>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(EnableVisualRunner)' == 'true'">
+  <ItemGroup Condition="'$(EnableMauiDeviceTestVisualRunner)' == 'true'">
     <PackageReference Include="DeviceRunners.VisualRunners.Maui" Version="0.1.0-preview.1"/>
     <PackageReference Include="DeviceRunners.VisualRunners.Xunit" Version="0.1.0-preview.1"/>
   </ItemGroup>
