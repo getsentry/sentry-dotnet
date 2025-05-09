@@ -13,6 +13,7 @@
       "src\\Sentry.Extensions.Logging\\Sentry.Extensions.Logging.csproj",
       "src\\Sentry.Maui.CommunityToolkit.Mvvm\\Sentry.Maui.CommunityToolkit.Mvvm.csproj",
       "src\\Sentry.Maui\\Sentry.Maui.csproj",
+      "src\\Sentry.SourceGenerators\\Sentry.SourceGenerators.csproj",
       "src\\Sentry\\Sentry.csproj",
       "test\\Sentry.Android.AssemblyReader.Tests\\Sentry.Android.AssemblyReader.Tests.csproj",
       "test\\Sentry.Extensions.Logging.Tests\\Sentry.Extensions.Logging.Tests.csproj",

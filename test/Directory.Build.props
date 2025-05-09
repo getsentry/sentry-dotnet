@@ -11,8 +11,10 @@
     <NoWarn>$(NoWarn);SYSLIB0005;SYSLIB0012</NoWarn>
     <!-- Ignore "Naming rule violation: Missing suffix: 'Async'" -->
     <NoWarn>$(NoWarn);IDE1006</NoWarn>
-  </PropertyGroup>
 
+    <!--set this to true to enable the visual runner in the MAUI device tests - make sure it is false for CI-->
+    <EnableMauiDeviceTestVisualRunner>false</EnableMauiDeviceTestVisualRunner>
+  </PropertyGroup>
   <!--
     Workaround for Verify issue with scrubbing when running in Rider on Windows.
     Ensures that the volume label is upper cased ("C:" instead of "c:"), which is read

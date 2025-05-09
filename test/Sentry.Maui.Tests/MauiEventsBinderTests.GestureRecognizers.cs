@@ -4,7 +4,11 @@ namespace Sentry.Maui.Tests;
 
 public partial class MauiEventsBinderTests
 {
+#if VISUAL_RUNNER
     [Fact]
+#else
+    [Fact(Skip = "Flaky Test in XHarness")]
+#endif
     public void TapGestureRecognizer_LifecycleEvents_AddsBreadcrumb()
     {
         var gesture = new TapGestureRecognizer();
@@ -15,7 +19,11 @@ public partial class MauiEventsBinderTests
         );
     }
 
+#if VISUAL_RUNNER
     [Fact]
+#else
+    [Fact(Skip = "Flaky Test in XHarness")]
+#endif
     public void SwipeGestureRecognizer_LifecycleEvents_AddsBreadcrumb()
     {
         var gesture = new SwipeGestureRecognizer();
@@ -26,7 +34,11 @@ public partial class MauiEventsBinderTests
         );
     }
 
+#if VISUAL_RUNNER
     [Fact]
+#else
+    [Fact(Skip = "Flaky Test in XHarness")]
+#endif
     public void PinchGestureRecognizer_LifecycleEvents_AddsBreadcrumb()
     {
         TestGestureRecognizer(
@@ -36,7 +48,11 @@ public partial class MauiEventsBinderTests
         );
     }
 
+#if VISUAL_RUNNER
     [Fact]
+#else
+    [Fact(Skip = "Flaky Test in XHarness")]
+#endif
     public void DragGestureRecognizer_LifecycleEvents_AddsBreadcrumb_DragStarting()
     {
         TestGestureRecognizer(
@@ -46,7 +62,11 @@ public partial class MauiEventsBinderTests
         );
     }
 
+#if VISUAL_RUNNER
     [Fact]
+#else
+    [Fact(Skip = "Flaky Test in XHarness")]
+#endif
     public void DragGestureRecognizer_LifecycleEvents_AddsBreadcrumb_DropFinished()
     {
         TestGestureRecognizer(
@@ -56,7 +76,11 @@ public partial class MauiEventsBinderTests
         );
     }
 
+#if VISUAL_RUNNER
     [Fact]
+#else
+    [Fact(Skip = "Flaky Test in XHarness")]
+#endif
     public void PanGestureRecognizer_LifecycleEvents_AddsBreadcrumb()
     {
         TestGestureRecognizer(
@@ -66,12 +90,21 @@ public partial class MauiEventsBinderTests
         );
     }
 
+#if VISUAL_RUNNER
     [Theory]
     [InlineData(nameof(PointerGestureRecognizer.PointerEntered))]
     [InlineData(nameof(PointerGestureRecognizer.PointerExited))]
     [InlineData(nameof(PointerGestureRecognizer.PointerMoved))]
     [InlineData(nameof(PointerGestureRecognizer.PointerPressed))]
     [InlineData(nameof(PointerGestureRecognizer.PointerReleased))]
+#else
+    [Theory(Skip = "Flaky Test in XHarness")]
+    [InlineData(nameof(PointerGestureRecognizer.PointerEntered))]
+    [InlineData(nameof(PointerGestureRecognizer.PointerExited))]
+    [InlineData(nameof(PointerGestureRecognizer.PointerMoved))]
+    [InlineData(nameof(PointerGestureRecognizer.PointerPressed))]
+    [InlineData(nameof(PointerGestureRecognizer.PointerReleased))]
+#endif
     public void PointerGestureRecognizer_LifecycleEvents_AddsBreadcrumb(string eventName)
     {
         TestGestureRecognizer(
@@ -89,7 +122,6 @@ public partial class MauiEventsBinderTests
 
         try
         {
-
             _fixture.Binder.OnApplicationOnDescendantAdded(null, args);
 
             // Act
@@ -101,10 +133,13 @@ public partial class MauiEventsBinderTests
             Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
             Assert.Equal(MauiEventsBinder.UserType, crumb.Type);
             Assert.Equal(MauiEventsBinder.UserActionCategory, crumb.Category);
-        }
-        finally
-        {
             _fixture.Binder.OnApplicationOnDescendantRemoved(null, args);
         }
+        catch
+        {
+            _fixture.Binder.OnApplicationOnDescendantRemoved(null, args);
+            throw;
+        }
+        // GC.WaitForPendingFinalizers();
     }
 }

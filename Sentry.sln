@@ -104,6 +104,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry", "src\Sentry\Sentry.csproj", "{5F253D7F-BF27-46F5-9382-73A66EC247BF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{6987A1CC-608E-4868-A02C-09D30C8B7B2D}"
+	ProjectSection(SolutionItems) = preProject
+		test\Directory.Build.props = test\Directory.Build.props
+		test\Directory.Build.targets = test\Directory.Build.targets
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AndroidTestApp", "test\AndroidTestApp\AndroidTestApp.csproj", "{99E2D1A4-1853-49F9-96B6-59C70FA3DE3A}"
 EndProject
