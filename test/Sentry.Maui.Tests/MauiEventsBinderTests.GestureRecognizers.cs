@@ -15,7 +15,6 @@ public partial class MauiEventsBinderTests
         );
     }
 
-
     [Fact]
     public void SwipeGestureRecognizer_LifecycleEvents_AddsBreadcrumb()
     {
@@ -37,15 +36,23 @@ public partial class MauiEventsBinderTests
         );
     }
 
-    [Theory]
-    [InlineData(nameof(DragGestureRecognizer.DragStarting))]
-    [InlineData(nameof(DragGestureRecognizer.DropCompleted))]
-    public void DragGestureRecognizer_LifecycleEvents_AddsBreadcrumb(string eventName)
+    [Fact]
+    public void DragGestureRecognizer_LifecycleEvents_AddsBreadcrumb_DragStarting()
     {
         TestGestureRecognizer(
             new DragGestureRecognizer(),
-            eventName,
-            DragStartingEventArgs.Empty
+            nameof(DragGestureRecognizer.DragStarting),
+            new DragStartingEventArgs()
+        );
+    }
+
+    [Fact]
+    public void DragGestureRecognizer_LifecycleEvents_AddsBreadcrumb_DropFinished()
+    {
+        TestGestureRecognizer(
+            new DragGestureRecognizer(),
+            nameof(DragGestureRecognizer.DropCompleted),
+            new DropCompletedEventArgs()
         );
     }
 
@@ -70,28 +77,34 @@ public partial class MauiEventsBinderTests
         TestGestureRecognizer(
             new PointerGestureRecognizer(),
             eventName,
-            PointerEventArgs.Empty
+            new PointerEventArgs()
         );
     }
-
 
     private void TestGestureRecognizer(GestureRecognizer gesture, string eventName, object eventArgs)
     {
         var image = new Image();
         image.GestureRecognizers.Add(gesture);
-
         var args = new ElementEventArgs(image);
-        _fixture.Binder.OnApplicationOnDescendantAdded(null, args);
 
-        // Act
-        gesture.RaiseEvent(eventName, eventArgs);
+        try
+        {
 
-        // Assert
-        var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
-        Assert.Equal($"{gesture.GetType().Name}.{eventName}", crumb.Message);
-        Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
-        Assert.Equal(MauiEventsBinder.SystemType, crumb.Type);
-        Assert.Equal(MauiEventsBinder.LifecycleCategory, crumb.Category);
-        // crumb.Data.Should().Contain($"{gesture.GetType().Name}.Name", "tapgesturerecognizer");
+            _fixture.Binder.OnApplicationOnDescendantAdded(null, args);
+
+            // Act
+            gesture.RaiseEvent(eventName, eventArgs);
+
+            // Assert
+            var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
+            Assert.Equal($"{gesture.GetType().Name}.{eventName}", crumb.Message);
+            Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
+            Assert.Equal(MauiEventsBinder.UserType, crumb.Type);
+            Assert.Equal(MauiEventsBinder.UserActionCategory, crumb.Category);
+        }
+        finally
+        {
+            _fixture.Binder.OnApplicationOnDescendantRemoved(null, args);
+        }
     }
 }

@@ -1,17 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks></TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android;net9.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios;net9.0-ios</TargetFrameworks>
-    <!-- Pin target iOS version so that our tests don't break when new versions of Xcode are released.
-      'net8.0-ios' resolves the latest version of the iOS SDK otherwise. -->
-    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">18</TargetPlatformVersion>
-    <UseMaui>true</UseMaui>
+    <!--set this to true to debug maui unit tests. make sure it is off for CI-->
+    <EnableVisualRunner>false</EnableVisualRunner>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(EnableVisualRunner)' == 'true'">
+    <TargetFrameworks>net9.0-ios;net9.0-android</TargetFrameworks>
+    <DefineConstants>$(DefineConstants);VISUAL_RUNNER</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(EnableVisualRunner)' != 'true'">
+    <TargetFrameworks>$(TargetFrameworks);net8.0-android;net9.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios;net9.0-ios</TargetFrameworks>
     <!-- Currently broken on .NET 7, see
-      - https://github.com/dotnet/maui/issues/18573
-      - https://developercommunity.visualstudio.com/t/MAUI0000:-SystemMissingMethodException:/10505327?sort=newest&ftype=problem
-      <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks> -->
+  - https://github.com/dotnet/maui/issues/18573
+  - https://developercommunity.visualstudio.com/t/MAUI0000:-SystemMissingMethodException:/10505327?sort=newest&ftype=problem
+  <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks> -->
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <UseMaui>true</UseMaui>
 
     <OutputType>Exe</OutputType>
     <SingleProject>true</SingleProject>
@@ -36,7 +45,10 @@
 
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">13.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-    
+    <!-- Pin target iOS version so that our tests don't break when new versions of Xcode are released.
+      'net8.0-ios' resolves the latest version of the iOS SDK otherwise. -->
+    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">18</TargetPlatformVersion>
+
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
 
     <!-- Avoid errors of Sentry.Testing not being a self-contained executable, while including it in a self-contained executable (this).
@@ -88,9 +100,15 @@
   <ItemGroup>
     <PackageReference Include="DeviceRunners.XHarness.Maui" Version="0.1.0-preview.1"/>
     <PackageReference Include="DeviceRunners.XHarness.Xunit" Version="0.1.0-preview.1"/>
+
     <!-- Prevent downgrade of these packages for DeviceRunners.XHarness.Xunit 0.1.0-preview.1   -->
     <PackageReference Include="System.Net.Primitives" Version="4.3.0"/>
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(EnableVisualRunner)' == 'true'">
+    <PackageReference Include="DeviceRunners.VisualRunners.Maui" Version="0.1.0-preview.1"/>
+    <PackageReference Include="DeviceRunners.VisualRunners.Xunit" Version="0.1.0-preview.1"/>
   </ItemGroup>
 
   <ItemGroup>
