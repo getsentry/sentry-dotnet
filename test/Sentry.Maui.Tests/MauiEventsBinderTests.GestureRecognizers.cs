@@ -26,11 +26,11 @@ public partial class MauiEventsBinderTests
         );
     }
 
-    #if VISUAL_RUNNER
+#if VISUAL_RUNNER
     [Fact]
-    #else
+#else
     [Fact(Skip = "Flaky Test in XHarness")]
-    #endif
+#endif
     public void PinchGestureRecognizer_LifecycleEvents_AddsBreadcrumb()
     {
         TestGestureRecognizer(
