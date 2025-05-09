@@ -225,6 +225,20 @@ public class Scope : IEventLike
             try
             {
                 _transaction.Value = value;
+
+                if (Options.EnableScopeSync)
+                {
+                    if (_transaction.Value != null)
+                    {
+                        // If there is a transaction set we propagate the trace to the native layer
+                        Options.ScopeObserver?.SetTrace(_transaction.Value.TraceId, _transaction.Value.SpanId);
+                    }
+                    else
+                    {
+                        // If the transaction is being removed from the scope, reset and sync the trace as well
+                        Options.ScopeObserver?.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
+                    }
+                }
             }
             finally
             {
@@ -802,6 +816,11 @@ public class Scope : IEventLike
             if (ReferenceEquals(_transaction.Value, expectedCurrentTransaction))
             {
                 _transaction.Value = null;
+                if (Options.EnableScopeSync)
+                {
+                    // We have to restore the trace on the native layers to be in sync with the current scope
+                    Options.ScopeObserver?.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
+                }
             }
         }
         finally
