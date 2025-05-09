@@ -274,12 +274,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
         {
             SampleRate = transactionTracer.SampleRate;
             DynamicSamplingContext = transactionTracer.DynamicSamplingContext;
-            if (DynamicSamplingContext?.Items.TryGetValue("replay_id", out var replayId) == true)
-            {
-                // Sentry Relay should populate this from the DSC automatically, but just for good measure
-                tracer.Contexts.Replay.ReplayId = SentryId.Parse(replayId);
-            }
-
             TransactionProfiler = transactionTracer.TransactionProfiler;
             if (transactionTracer.HasMetrics)
             {

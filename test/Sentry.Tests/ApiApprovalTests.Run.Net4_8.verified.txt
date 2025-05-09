@@ -493,7 +493,6 @@ namespace Sentry
         public object this[string key] { get; set; }
         public System.Collections.Generic.ICollection<string> Keys { get; }
         public Sentry.Protocol.OperatingSystem OperatingSystem { get; }
-        public Sentry.Protocol.Replay Replay { get; }
         public Sentry.Protocol.Response Response { get; }
         public Sentry.Protocol.Runtime Runtime { get; }
         public Sentry.Protocol.Trace Trace { get; }
@@ -1748,17 +1747,6 @@ namespace Sentry.Protocol
         public string? Version { get; set; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? _) { }
         public static Sentry.Protocol.OperatingSystem FromJson(System.Text.Json.JsonElement json) { }
-    }
-    public sealed class Replay : Sentry.ISentryJsonSerializable
-    {
-        public const string Type = "replay";
-        public Replay() { }
-        public Sentry.SentryId? ReplayId { get; set; }
-        public Sentry.Protocol.Replay Clone() { }
-        public void UpdateFrom(Sentry.Protocol.Replay source) { }
-        public void UpdateFrom(object source) { }
-        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
-        public static Sentry.Protocol.Replay FromJson(System.Text.Json.JsonElement json) { }
     }
     public sealed class Response : Sentry.ISentryJsonSerializable
     {

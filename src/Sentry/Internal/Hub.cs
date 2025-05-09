@@ -473,7 +473,7 @@ internal class Hub : IHub, IDisposable
         {
             // We get the span linked to the event or fall back to the current span
             var span = GetLinkedSpan(evt) ?? scope.Span;
-            if (span is not null && span.IsSampled is not false)
+            if (span is not null)
             {
                 ApplyTraceContextToEvent(evt, span);
             }

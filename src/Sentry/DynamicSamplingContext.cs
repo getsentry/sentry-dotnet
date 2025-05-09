@@ -217,7 +217,7 @@ internal class DynamicSamplingContext
 
 internal static class DynamicSamplingContextExtensions
 {
-    public static DynamicSamplingContext? CreateDynamicSamplingContext(this BaggageHeader baggage, IReplaySession? replaySession)
+    public static DynamicSamplingContext? CreateDynamicSamplingContext(this BaggageHeader baggage, IReplaySession? replaySession = null)
         => DynamicSamplingContext.CreateFromBaggageHeader(baggage, replaySession);
 
     public static DynamicSamplingContext CreateDynamicSamplingContext(this TransactionTracer transaction, SentryOptions options, IReplaySession? replaySession)

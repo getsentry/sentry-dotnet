@@ -1,5 +1,3 @@
-using Sentry.Tests.Internals;
-
 namespace Sentry.Tests;
 
 public partial class TransactionProcessorTests

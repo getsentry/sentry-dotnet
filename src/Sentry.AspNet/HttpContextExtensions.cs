@@ -127,8 +127,7 @@ public static class HttpContextExtensions
         };
 
         // Set the Dynamic Sampling Context from the baggage header, if it exists
-        // Note: We don't record Session Replays in ASP.NET
-        var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext(null);
+        var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext();
 
         if (traceHeader is not null && baggageHeader is null)
         {

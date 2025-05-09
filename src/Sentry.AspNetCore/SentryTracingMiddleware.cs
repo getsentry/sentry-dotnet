@@ -65,9 +65,7 @@ internal class SentryTracingMiddleware
                 ? traceHeaderObject as SentryTraceHeader : null;
             var baggageHeader = context.Items.TryGetValue(SentryMiddleware.BaggageHeaderItemKey, out var baggageHeaderObject)
                 ? baggageHeaderObject as BaggageHeader : null;
-
-            // Note: We don't record Session Replays in ASP.NET core
-            var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext(null);
+            var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext();
 
             if (traceHeader is not null && baggageHeader is null)
             {

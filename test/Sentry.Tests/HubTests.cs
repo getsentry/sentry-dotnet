@@ -193,7 +193,7 @@ public partial class HubTests
     }
 
     [Fact]
-    public void CaptureException_ActiveSpanExistsOnScopeButIsSampledOut_EventIsNotLinkedToSpan()
+    public void CaptureException_ActiveSpanExistsOnScopeButIsSampledOut_EventIsLinkedToSpan()
     {
         // Arrange
         _fixture.Options.TracesSampleRate = 0.0;
@@ -201,12 +201,7 @@ public partial class HubTests
         var exception = new Exception("error");
 
         var transaction = hub.StartTransaction("foo", "bar");
-        SentryPropagationContext propagationContext = null;
-        hub.ConfigureScope(scope =>
-        {
-            scope.Transaction = transaction;
-            propagationContext = scope.PropagationContext;
-        });
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
 
         // Act
         hub.CaptureException(exception);
@@ -214,8 +209,8 @@ public partial class HubTests
         // Assert
         _fixture.Client.Received(1).CaptureEvent(
             Arg.Is<SentryEvent>(evt =>
-                evt.Contexts.Trace.TraceId == propagationContext.TraceId &&
-                evt.Contexts.Trace.SpanId == propagationContext.SpanId),
+                evt.Contexts.Trace.TraceId == transaction.TraceId &&
+                evt.Contexts.Trace.SpanId == transaction.SpanId),
             Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
