@@ -281,6 +281,21 @@ public static partial class SentrySdk
     public static bool IsEnabled { [DebuggerStepThrough] get => CurrentHub.IsEnabled; }
 
     /// <summary>
+    /// Creates and sends logs to Sentry.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    /// <remarks>
+    /// Available options:
+    /// <list type="bullet">
+    /// <item><see cref="Sentry.SentryOptions.EnableLogs"/></item>
+    /// <item><see cref="Sentry.SentryOptions.SetBeforeSendLog(System.Func{Sentry.Protocol.SentryLog, Sentry.Protocol.SentryLog})"/></item>
+    /// <item><see cref="Sentry.SentryOptions.LogsSampleRate"/></item>
+    /// </list>
+    /// </remarks>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public static SentryLogger Logger { get; } = new SentryLogger();
+
+    /// <summary>
     /// Creates a new scope that will terminate when disposed.
     /// </summary>
     /// <remarks>

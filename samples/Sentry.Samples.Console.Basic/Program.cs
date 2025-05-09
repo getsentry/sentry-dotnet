@@ -9,6 +9,7 @@
  */
 
 using System.Net.Http;
+using Sentry.Protocol;
 using static System.Console;
 
 // Initialize the Sentry SDK.  (It is not necessary to dispose it.)
@@ -33,8 +34,38 @@ SentrySdk.Init(options =>
 
     // This option tells Sentry to capture 100% of traces. You still need to start transactions and spans.
     options.TracesSampleRate = 1.0;
+
+    options.EnableLogs = true;
+    options.SetBeforeSendLog(static (SentryLog log) =>
+    {
+        if (log.TryGetAttribute("plan.type", out string? attribute) && attribute == "enterprise")
+        {
+            return null;
+        }
+
+        return log.Level is LogSeverityLevel.Error ? log : null;
+    });
+    options.LogsSampleRate = 1.0f;
 });
 
+var configureLog = static (SentryLog log) =>
+{
+    log.SetAttribute("string-attribute", "value");
+    log.SetAttribute("boolean-attribute", true);
+    log.SetAttribute("integer-attribute", long.MaxValue);
+    log.SetAttribute("double-attribute", double.MaxValue);
+};
+
+SentrySdk.Logger.Trace("Hello, World!", null, configureLog);
+SentrySdk.Logger.Debug("Hello, .NET!", null, configureLog);
+SentrySdk.Logger.Info("Information", null, configureLog);
+SentrySdk.Logger.Warn("Warning with one {0}", ["parameter"], configureLog);
+SentrySdk.Logger.Error("Error with {0} {1}", [2, "parameters"], configureLog);
+SentrySdk.Logger.Fatal("Fatal {0} and {1}", [true, false], configureLog);
+
+await Task.Delay(TimeSpan.FromSeconds(5));
+
+/*
 // This starts a new transaction and attaches it to the scope.
 var transaction = SentrySdk.StartTransaction("Program Main", "function");
 SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
@@ -96,3 +127,4 @@ async Task ThirdFunction()
         span.Finish();
     }
 }
+*/
