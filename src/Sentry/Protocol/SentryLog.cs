@@ -11,7 +11,7 @@ namespace Sentry.Protocol;
 [Experimental(DiagnosticId.ExperimentalFeature)]
 public sealed class SentryLog : ISentryJsonSerializable
 {
-    private Dictionary<string, ValueTypePair>? _attributes;
+    private readonly Dictionary<string, ValueTypePair> _attributes;
     private readonly LogSeverityLevel _level;
 
     [SetsRequiredMembers]
@@ -21,6 +21,7 @@ public sealed class SentryLog : ISentryJsonSerializable
         TraceId = traceId;
         Level = level;
         Message = message;
+        _attributes = new Dictionary<string, ValueTypePair>(7);
     }
 
     /// <summary>
@@ -63,31 +64,6 @@ public sealed class SentryLog : ISentryJsonSerializable
     public required string Message { get; init; }
 
     /// <summary>
-    /// A dictionary of key-value pairs of arbitrary data attached to the log.
-    /// <para>This API is experimental and it may change in the future.</para>
-    /// </summary>
-    /// <remarks>
-    /// Attributes must also declare the type of the value.
-    /// The following types are supported:
-    /// <list type="bullet">
-    /// <item><see cref="string"/></item>
-    /// <item><see cref="bool"/></item>
-    /// <item><see cref="long"/></item>
-    /// <item><see cref="double"/></item>
-    /// </list>
-    /// </remarks>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public IReadOnlyDictionary<string, object> Attributes
-    {
-        get
-        {
-            return _attributes is null
-                ? []
-                : _attributes.ToDictionary(static item => item.Key, item => item.Value.Value);
-        }
-    }
-
-    /// <summary>
     /// The parameterized template string.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
@@ -102,46 +78,126 @@ public sealed class SentryLog : ISentryJsonSerializable
     public object[]? Parameters { get; init; }
 
     /// <summary>
-    /// Set a key-value pair of arbitrary data attached to the log.
+    /// Gets the attribute value associated with the specified key when of type <see cref="string"/>.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    /// <remarks>
+    /// Returns <see langword="true"/> if the <see cref="SentryLog"/> contains an attribute with the specified key of type <see cref="string"/>.
+    /// Otherwise <see langword="false"/>.
+    /// </remarks>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public bool TryGetAttribute(string key, [NotNullWhen(true)] out string? value)
+    {
+        if (_attributes.TryGetValue(key, out var attribute) && attribute.Type == "string")
+        {
+            value = (string)attribute.Value;
+            return true;
+        }
+
+        value = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Gets the attribute value associated with the specified key when of type <see cref="bool"/>.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    /// <remarks>
+    /// Returns <see langword="true"/> if the <see cref="SentryLog"/> contains an attribute with the specified key of type <see cref="bool"/>.
+    /// Otherwise <see langword="false"/>.
+    /// </remarks>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public bool TryGetAttribute(string key, out bool value)
+    {
+        if (_attributes.TryGetValue(key, out var attribute) && attribute.Type == "boolean")
+        {
+            value = (bool)attribute.Value;
+            return true;
+        }
+
+        value = false;
+        return false;
+    }
+
+    /// <summary>
+    /// Gets the attribute value associated with the specified key when of type <see cref="long"/>.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    /// <remarks>
+    /// Returns <see langword="true"/> if the <see cref="SentryLog"/> contains an attribute with the specified key of type <see cref="long"/>.
+    /// Otherwise <see langword="false"/>.
+    /// </remarks>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public bool TryGetAttribute(string key, out long value)
+    {
+        if (_attributes.TryGetValue(key, out var attribute) && attribute.Type == "integer")
+        {
+            value = (long)attribute.Value;
+            return true;
+        }
+
+        value = 0L;
+        return false;
+    }
+
+    /// <summary>
+    /// Gets the attribute value associated with the specified key when of type <see cref="double"/>.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    /// <remarks>
+    /// Returns <see langword="true"/> if the <see cref="SentryLog"/> contains an attribute with the specified key of type <see cref="double"/>.
+    /// Otherwise <see langword="false"/>.
+    /// </remarks>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public bool TryGetAttribute(string key, out double value)
+    {
+        if (_attributes.TryGetValue(key, out var attribute) && attribute.Type == "double")
+        {
+            value = (double)attribute.Value;
+            return true;
+        }
+
+        value = 0.0;
+        return false;
+    }
+
+    /// <summary>
+    /// Set a key-value pair of <see cref="string"/> data attached to the log.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public void SetAttribute(string key, string value)
     {
-        _attributes ??= new Dictionary<string, ValueTypePair>();
         _attributes[key] = new ValueTypePair(value, "string");
     }
 
     /// <summary>
-    /// Set a key-value pair of arbitrary data attached to the log.
+    /// Set a key-value pair of <see cref="bool"/> data attached to the log.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public void SetAttribute(string key, bool value)
     {
-        _attributes ??= new Dictionary<string, ValueTypePair>();
         _attributes[key] = new ValueTypePair(value, "boolean");
     }
 
     /// <summary>
-    /// Set a key-value pair of arbitrary data attached to the log.
+    /// Set a key-value pair of <see cref="long"/> data attached to the log.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public void SetAttribute(string key, long value)
     {
-        _attributes ??= new Dictionary<string, ValueTypePair>();
         _attributes[key] = new ValueTypePair(value, "integer");
     }
 
     /// <summary>
-    /// Set a key-value pair of arbitrary data attached to the log.
+    /// Set a key-value pair of <see cref="double"/> data attached to the log.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public void SetAttribute(string key, double value)
     {
-        _attributes ??= new Dictionary<string, ValueTypePair>();
         _attributes[key] = new ValueTypePair(value, "double");
     }
 
@@ -212,12 +268,9 @@ public sealed class SentryLog : ISentryJsonSerializable
             }
         }
 
-        if (_attributes is not null)
+        foreach (var attribute in _attributes)
         {
-            foreach (var attribute in _attributes)
-            {
-                WriteAttribute(writer, attribute.Key, attribute.Value);
-            }
+            WriteAttribute(writer, attribute.Key, attribute.Value);
         }
 
         writer.WriteEndObject();

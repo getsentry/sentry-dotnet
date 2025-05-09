@@ -38,8 +38,7 @@ SentrySdk.Init(options =>
     options.EnableLogs = true;
     options.SetBeforeSendLog(static (SentryLog log) =>
     {
-        //TODO: this feels a bit off ... perhaps a "TryGet{Type}Attribute" method group could help here instead of exposing the boxing object-TValue-based Dictionary`2
-        if (log.Attributes.TryGetValue("plan.type", out var attribute) && attribute is "enterprise")
+        if (log.TryGetAttribute("plan.type", out string? attribute) && attribute == "enterprise")
         {
             return null;
         }
