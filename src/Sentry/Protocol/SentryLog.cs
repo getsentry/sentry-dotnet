@@ -201,7 +201,7 @@ public sealed class SentryLog : ISentryJsonSerializable
         _attributes[key] = new SentryAttribute(value, "double");
     }
 
-    internal void SetAttributes(IHub hub, IInternalScopeManager? scopeManager, SentryOptions options)
+    internal void SetAttributes(SentryOptions options, SpanId? parentSpanId)
     {
         var environment = options.SettingLocator.GetEnvironment();
         SetAttribute("sentry.environment", environment);
@@ -212,18 +212,9 @@ public sealed class SentryLog : ISentryJsonSerializable
             SetAttribute("sentry.release", release);
         }
 
-        if (hub.GetSpan() is { } span && span.ParentSpanId.HasValue)
+        if (parentSpanId.HasValue)
         {
-            SetAttribute("sentry.trace.parent_span_id", span.ParentSpanId.Value.ToString());
-        }
-        else if (scopeManager is not null)
-        {
-            var currentScope = scopeManager.GetCurrent().Key;
-            var parentSpanId = currentScope.PropagationContext.ParentSpanId;
-            if (parentSpanId.HasValue)
-            {
-                SetAttribute("sentry.trace.parent_span_id", parentSpanId.Value.ToString());
-            }
+            SetAttribute("sentry.trace.parent_span_id", parentSpanId.Value.ToString());
         }
 
         SetAttribute("sentry.sdk.name", Constants.SdkName);

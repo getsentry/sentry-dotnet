@@ -1,3 +1,4 @@
+using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Protocol;
@@ -125,20 +126,13 @@ public sealed class SentryLogger
         }
 
         var scopeManager = (hub as Hub)?.ScopeManager;
-        SentryId traceId;
-        if (hub.GetSpan() is { } span)
+
+        if (!TryGetTraceId(hub, scopeManager, out var traceId))
         {
-            traceId = span.TraceId;
+            options.DiagnosticLogger?.LogWarning("TraceId not found");
         }
-        else if (scopeManager is not null)
-        {
-            var currentScope = scopeManager.GetCurrent().Key;
-            traceId = currentScope.PropagationContext.TraceId;
-        }
-        else
-        {
-            traceId = SentryId.Empty;
-        }
+
+        _ = TryGetParentSpanId(hub, scopeManager, out var parentSpanId);
 
         var message = string.Format(template, parameters ?? []);
         SentryLog log = new(timestamp, traceId, level, message)
@@ -146,7 +140,7 @@ public sealed class SentryLogger
             Template = template,
             Parameters = ImmutableArray.Create(parameters),
         };
-        log.SetAttributes(hub, scopeManager, options);
+        log.SetAttributes(options, parentSpanId);
 
         SentryLog? configuredLog;
         try
@@ -168,5 +162,43 @@ public sealed class SentryLogger
             // see https://github.com/getsentry/sentry-dotnet/issues/4132
             _ = hub.CaptureEnvelope(Envelope.FromLog(configuredLog));
         }
+    }
+
+    private static bool TryGetTraceId(IHub hub, IInternalScopeManager? scopeManager, out SentryId traceId)
+    {
+        if (hub.GetSpan() is { } span)
+        {
+            traceId = span.TraceId;
+            return true;
+        }
+
+        if (scopeManager is not null)
+        {
+            var currentScope = scopeManager.GetCurrent().Key;
+            traceId = currentScope.PropagationContext.TraceId;
+            return true;
+        }
+
+        traceId = SentryId.Empty;
+        return false;
+    }
+
+    private static bool TryGetParentSpanId(IHub hub, IInternalScopeManager? scopeManager, out SpanId? parentSpanId)
+    {
+        if (hub.GetSpan() is { } span && span.ParentSpanId.HasValue)
+        {
+            parentSpanId = span.ParentSpanId;
+            return true;
+        }
+
+        if (scopeManager is not null)
+        {
+            var currentScope = scopeManager.GetCurrent().Key;
+            parentSpanId = currentScope.PropagationContext.ParentSpanId;
+            return true;
+        }
+
+        parentSpanId = null;
+        return false;
     }
 }
