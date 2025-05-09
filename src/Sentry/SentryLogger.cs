@@ -144,7 +144,7 @@ public sealed class SentryLogger
         SentryLog log = new(timestamp, traceId, level, message)
         {
             Template = template,
-            Parameters = parameters,
+            Parameters = ImmutableArray.Create(parameters),
         };
         log.SetAttributes(hub, scopeManager, options);
 

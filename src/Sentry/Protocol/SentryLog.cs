@@ -11,7 +11,7 @@ namespace Sentry.Protocol;
 [Experimental(DiagnosticId.ExperimentalFeature)]
 public sealed class SentryLog : ISentryJsonSerializable
 {
-    private readonly Dictionary<string, ValueTypePair> _attributes;
+    private readonly Dictionary<string, SentryAttribute> _attributes;
     private readonly LogSeverityLevel _level;
 
     [SetsRequiredMembers]
@@ -21,7 +21,7 @@ public sealed class SentryLog : ISentryJsonSerializable
         TraceId = traceId;
         Level = level;
         Message = message;
-        _attributes = new Dictionary<string, ValueTypePair>(7);
+        _attributes = new Dictionary<string, SentryAttribute>(7);
     }
 
     /// <summary>
@@ -75,7 +75,7 @@ public sealed class SentryLog : ISentryJsonSerializable
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    public object[]? Parameters { get; init; }
+    public ImmutableArray<object> Parameters { get; init; }
 
     /// <summary>
     /// Gets the attribute value associated with the specified key when of type <see cref="string"/>.
@@ -168,7 +168,7 @@ public sealed class SentryLog : ISentryJsonSerializable
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public void SetAttribute(string key, string value)
     {
-        _attributes[key] = new ValueTypePair(value, "string");
+        _attributes[key] = new SentryAttribute(value, "string");
     }
 
     /// <summary>
@@ -178,7 +178,7 @@ public sealed class SentryLog : ISentryJsonSerializable
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public void SetAttribute(string key, bool value)
     {
-        _attributes[key] = new ValueTypePair(value, "boolean");
+        _attributes[key] = new SentryAttribute(value, "boolean");
     }
 
     /// <summary>
@@ -188,7 +188,7 @@ public sealed class SentryLog : ISentryJsonSerializable
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public void SetAttribute(string key, long value)
     {
-        _attributes[key] = new ValueTypePair(value, "integer");
+        _attributes[key] = new SentryAttribute(value, "integer");
     }
 
     /// <summary>
@@ -198,7 +198,7 @@ public sealed class SentryLog : ISentryJsonSerializable
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public void SetAttribute(string key, double value)
     {
-        _attributes[key] = new ValueTypePair(value, "double");
+        _attributes[key] = new SentryAttribute(value, "double");
     }
 
     internal void SetAttributes(IHub hub, IInternalScopeManager? scopeManager, SentryOptions options)
@@ -257,20 +257,17 @@ public sealed class SentryLog : ISentryJsonSerializable
 
         if (Template is not null)
         {
-            WriteAttribute(writer, "sentry.message.template", Template, "string");
+            SentryAttributeSerializer.WriteAttribute(writer, "sentry.message.template", Template, "string");
         }
 
-        if (Parameters is not null)
+        for (var index = 0; index < Parameters.Length; index++)
         {
-            for (var index = 0; index < Parameters.Length; index++)
-            {
-                WriteAttribute(writer, $"sentry.message.parameters.{index}", Parameters[index], null);
-            }
+            SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameters.{index}", Parameters[index]);
         }
 
         foreach (var attribute in _attributes)
         {
-            WriteAttribute(writer, attribute.Key, attribute.Value);
+            SentryAttributeSerializer.WriteAttribute(writer, attribute.Key, attribute.Value);
         }
 
         writer.WriteEndObject();
@@ -279,98 +276,4 @@ public sealed class SentryLog : ISentryJsonSerializable
         writer.WriteEndArray();
         writer.WriteEndObject();
     }
-
-    private static void WriteAttribute(Utf8JsonWriter writer, string propertyName, ValueTypePair attribute)
-    {
-        writer.WritePropertyName(propertyName);
-        if (attribute.Type is not null)
-        {
-            WriteAttributeValue(writer, attribute.Value, attribute.Type);
-        }
-        else
-        {
-            WriteAttributeValue(writer, attribute.Value);
-        }
-    }
-
-    private static void WriteAttribute(Utf8JsonWriter writer, string propertyName, object value, string? type)
-    {
-        writer.WritePropertyName(propertyName);
-        if (type is not null)
-        {
-            WriteAttributeValue(writer, value, type);
-        }
-        else
-        {
-            WriteAttributeValue(writer, value);
-        }
-    }
-
-    private static void WriteAttributeValue(Utf8JsonWriter writer, object value, string type)
-    {
-        writer.WriteStartObject();
-
-        if (type == "string")
-        {
-            writer.WriteString("value", (string)value);
-            writer.WriteString("type", type);
-        }
-        else if (type == "boolean")
-        {
-            writer.WriteBoolean("value", (bool)value);
-            writer.WriteString("type", type);
-        }
-        else if (type == "integer")
-        {
-            writer.WriteNumber("value", (long)value);
-            writer.WriteString("type", type);
-        }
-        else if (type == "double")
-        {
-            writer.WriteNumber("value", (double)value);
-            writer.WriteString("type", type);
-        }
-        else
-        {
-            writer.WriteString("value", value.ToString());
-            writer.WriteString("type", "string");
-        }
-
-        writer.WriteEndObject();
-    }
-
-    private static void WriteAttributeValue(Utf8JsonWriter writer, object value)
-    {
-        writer.WriteStartObject();
-
-        if (value is string str)
-        {
-            writer.WriteString("value", str);
-            writer.WriteString("type", "string");
-        }
-        else if (value is bool boolean)
-        {
-            writer.WriteBoolean("value", boolean);
-            writer.WriteString("type", "boolean");
-        }
-        else if (value is long int64)
-        {
-            writer.WriteNumber("value", int64);
-            writer.WriteString("type", "integer");
-        }
-        else if (value is double float64)
-        {
-            writer.WriteNumber("value", float64);
-            writer.WriteString("type", "double");
-        }
-        else
-        {
-            writer.WriteString("value", value.ToString());
-            writer.WriteString("type", "string");
-        }
-
-        writer.WriteEndObject();
-    }
-
-    private record struct ValueTypePair(object Value, string? Type);
 }
