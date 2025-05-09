@@ -107,10 +107,6 @@
     This file contains targets that are invoked during the end-user's build.
     The same file is included twice, so it ends up being used for both direct and transitive package references to Sentry.
   -->
-  <ItemGroup>
-    <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="buildTransitive\Sentry.targets" />
-    <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="build\Sentry.targets" />
-  </ItemGroup>
 
   <ItemGroup>
     <Using Include="Sentry.Protocol.Envelopes.ISerializable" Alias="ISerializable" />
@@ -177,7 +173,6 @@
     <InternalsVisibleTo Include="Sentry.GraphQL.Client.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Google.Cloud.Functions" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Google.Cloud.Functions.Tests" PublicKey="$(SentryPublicKey)" />
-    <InternalsVisibleTo Include="Sentry.Hangfire" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Hangfire.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Log4Net" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Log4Net.Tests" PublicKey="$(SentryPublicKey)" />
@@ -196,4 +191,17 @@
     <InternalsVisibleTo Include="Sentry.Analyzers.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="buildTransitive\Sentry.targets" />
+    <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="build\Sentry.targets" />
+    <None Include="buildTransitive\Sentry.SourceGenerators.targets" Pack="true" PackagePath="buildTransitive\Sentry.SourceGenerators.targets" />
+    <None Include="buildTransitive\Sentry.SourceGenerators.targets" Pack="true" PackagePath="build\Sentry.SourceGenerators.targets" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Sentry.SourceGenerators\bin\Release\netstandard2.0\Sentry.SourceGenerators.dll"
+          Pack="true"
+          PackagePath="analyzers/dotnet/cs"
+          Visible="false" />
+  </ItemGroup>
 </Project>

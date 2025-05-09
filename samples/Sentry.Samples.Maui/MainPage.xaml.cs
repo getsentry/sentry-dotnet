@@ -105,4 +105,8 @@ public partial class MainPage
     {
         Shell.Current.GoToAsync("ctmvvm");
     }
+    
+    private void TapGestureRecognizer_OnTapped(object sender, TappedEventArgs e)
+    {
+    }
 }

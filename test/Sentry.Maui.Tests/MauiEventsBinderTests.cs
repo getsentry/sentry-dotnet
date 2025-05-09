@@ -40,7 +40,8 @@ public partial class MauiEventsBinderTests
                 [
                     new MauiButtonEventsBinder(),
                     new MauiImageButtonEventsBinder(),
-                    new CtMvvmMauiElementEventBinder(Hub)
+                    new CtMvvmMauiElementEventBinder(Hub),
+                    new MauiGestureRecognizerEventsBinder()
                 ]
             );
         }

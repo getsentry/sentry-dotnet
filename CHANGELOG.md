@@ -5,6 +5,15 @@
 ### Features
 
 - .NET MAUI integration with CommunityToolkit.Mvvm Async Relay Commands can now be auto spanned with the new package Sentry.Maui.CommunityToolkit.Mvvm ([#4125](https://github.com/getsentry/sentry-dotnet/pull/4125))
+### Fixes
+
+- Redact Authorization headers before sending events to Sentry ([#4164](https://github.com/getsentry/sentry-dotnet/pull/4164))
+- Remove Strong Naming from Sentry.Hangfire ([#4099](https://github.com/getsentry/sentry-dotnet/pull/4099))
+
+### Features
+
+- New source generator allows Sentry to see true build variables like PublishAot and PublishTrimmed to properly adapt checks in the Sentry SDK ([#4101](https://github.com/getsentry/sentry-dotnet/pull/4101))
+- Auto breadcrumbs now include all .NET MAUI gesture recognizer events ([#4124](https://github.com/getsentry/sentry-dotnet/pull/4124))
 
 ### Dependencies
 
