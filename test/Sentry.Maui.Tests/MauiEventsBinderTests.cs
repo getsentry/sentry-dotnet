@@ -20,14 +20,13 @@ public partial class MauiEventsBinderTests
         {
             Hub = Substitute.For<IHub>();
             Hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-                .Do(c => c.Arg<Action<Scope>>()(Scope));
+                .Do(c =>
+                {
+                    c.Arg<Action<Scope>>()(Scope);
 
-            Hub.StartSpan(default, default).ReturnsForAnyArgs(args =>
-            {
-                var tracer = Substitute.For<ITransactionTracer>();
-                return tracer;
-            });
+                });
 
+            Scope.Transaction = Substitute.For<ITransactionTracer>();
 
             Options.Debug = true;
             var logger = Substitute.For<IDiagnosticLogger>();
