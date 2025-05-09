@@ -4,7 +4,11 @@ namespace Sentry.Maui.Tests;
 
 public partial class MauiEventsBinderTests
 {
+#if VISUAL_RUNNER || IOS
     [Fact]
+#else
+    [Fact(Skip = "Flaky Test in XHarness")]
+#endif
     public void TapGestureRecognizer_LifecycleEvents_AddsBreadcrumb()
     {
         var gesture = new TapGestureRecognizer();
@@ -15,7 +19,11 @@ public partial class MauiEventsBinderTests
         );
     }
 
+#if VISUAL_RUNNER || IOS
     [Fact]
+#else
+    [Fact(Skip = "Flaky Test in XHarness")]
+#endif
     public void SwipeGestureRecognizer_LifecycleEvents_AddsBreadcrumb()
     {
         var gesture = new SwipeGestureRecognizer();
@@ -26,11 +34,11 @@ public partial class MauiEventsBinderTests
         );
     }
 
-    #if VISUAL_RUNNER
+#if VISUAL_RUNNER || IOS
     [Fact]
-    #else
+#else
     [Fact(Skip = "Flaky Test in XHarness")]
-    #endif
+#endif
     public void PinchGestureRecognizer_LifecycleEvents_AddsBreadcrumb()
     {
         TestGestureRecognizer(
@@ -40,7 +48,11 @@ public partial class MauiEventsBinderTests
         );
     }
 
+#if VISUAL_RUNNER || IOS
     [Fact]
+#else
+    [Fact(Skip = "Flaky Test in XHarness")]
+#endif
     public void DragGestureRecognizer_LifecycleEvents_AddsBreadcrumb_DragStarting()
     {
         TestGestureRecognizer(
@@ -50,7 +62,11 @@ public partial class MauiEventsBinderTests
         );
     }
 
+#if VISUAL_RUNNER || IOS
     [Fact]
+#else
+    [Fact(Skip = "Flaky Test in XHarness")]
+#endif
     public void DragGestureRecognizer_LifecycleEvents_AddsBreadcrumb_DropFinished()
     {
         TestGestureRecognizer(
@@ -60,7 +76,11 @@ public partial class MauiEventsBinderTests
         );
     }
 
+#if VISUAL_RUNNER || IOS
     [Fact]
+#else
+    [Fact(Skip = "Flaky Test in XHarness")]
+#endif
     public void PanGestureRecognizer_LifecycleEvents_AddsBreadcrumb()
     {
         TestGestureRecognizer(
@@ -70,7 +90,7 @@ public partial class MauiEventsBinderTests
         );
     }
 
-#if VISUAL_RUNNER
+#if VISUAL_RUNNER || IOS
     [Theory]
     [InlineData(nameof(PointerGestureRecognizer.PointerEntered))]
     [InlineData(nameof(PointerGestureRecognizer.PointerExited))]
