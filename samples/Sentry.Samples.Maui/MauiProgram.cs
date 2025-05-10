@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Sentry.Maui;
 
 namespace Sentry.Samples.Maui;
 
@@ -52,6 +53,10 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
+
+        // Automatically create traces for async relay commands
+        // in the MVVM Community Toolkit
+        builder.Services.UseSentryCommunityToolkitIntegration();
 
         // For this sample, we'll also register the main page for DI so we can inject a logger there.
         builder.Services.AddTransient<MainPage>();
