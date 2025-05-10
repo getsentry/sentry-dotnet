@@ -1,7 +1,7 @@
 namespace Sentry.Maui.Internal;
 
 /// <summary>
-/// Detects and breadcrumbs any gesture recognizers attached to the visual element
+/// Detects and adds breadcrumbs for any gesture recognizers attached to the visual element
 /// </summary>
 public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
 {
