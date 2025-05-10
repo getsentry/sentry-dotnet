@@ -28,7 +28,8 @@ public partial class MauiEventsBinderTests
                 options,
                 [
                     new MauiButtonEventsBinder(),
-                    new MauiImageButtonEventsBinder()
+                    new MauiImageButtonEventsBinder(),
+                    new MauiGestureRecognizerEventsBinder()
                 ]
             );
         }

@@ -58,6 +58,12 @@ namespace Sentry.Maui.Internal
         public void Bind(Microsoft.Maui.Controls.VisualElement element, System.Action<Sentry.Maui.BreadcrumbEvent> addBreadcrumb) { }
         public void UnBind(Microsoft.Maui.Controls.VisualElement element) { }
     }
+    public class MauiGestureRecognizerEventsBinder : Sentry.Maui.IMauiElementEventBinder
+    {
+        public MauiGestureRecognizerEventsBinder() { }
+        public void Bind(Microsoft.Maui.Controls.VisualElement element, System.Action<Sentry.Maui.BreadcrumbEvent> addBreadcrumb) { }
+        public void UnBind(Microsoft.Maui.Controls.VisualElement element) { }
+    }
     public class MauiImageButtonEventsBinder : Sentry.Maui.IMauiElementEventBinder
     {
         public MauiImageButtonEventsBinder() { }
