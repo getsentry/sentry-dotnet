@@ -46,7 +46,7 @@ public class ProtobufRequestExtractionDispatcher : IProtobufRequestPayloadExtrac
 
         switch (size)
         {
-            case RequestSize.Small when request.ContentLength < 1_000:
+            case RequestSize.Small when request.ContentLength < 4_000:
             case RequestSize.Medium when request.ContentLength < 10_000:
             case RequestSize.Always:
                 _options.Log(SentryLevel.Debug,

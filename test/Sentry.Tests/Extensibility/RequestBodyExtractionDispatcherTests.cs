@@ -51,10 +51,10 @@ public class RequestBodyExtractionDispatcherTests
 
     [Theory]
     [InlineData(RequestSize.None, 1, false)]
-    [InlineData(RequestSize.Small, 999, true)]
-    [InlineData(RequestSize.Small, 10_000, false)]
+    [InlineData(RequestSize.Small, 3_999, true)]
+    [InlineData(RequestSize.Small, 4_000, false)]
     [InlineData(RequestSize.Medium, 9999, true)]
-    [InlineData(RequestSize.Medium, 100_000, false)]
+    [InlineData(RequestSize.Medium, 10_000, false)]
     [InlineData(RequestSize.Always, int.MaxValue, true)] // 2 GB event? No problem...
     public void ExtractPayload_RequestSizeSmall_ContentLength(RequestSize requestSize, int contentLength, bool readBody)
     {
