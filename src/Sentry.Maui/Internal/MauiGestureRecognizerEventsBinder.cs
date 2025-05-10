@@ -141,13 +141,10 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
 
     private static IEnumerable<(string Key, string Value)> ToPointerData(PointerEventArgs e) =>
     [
-        // some of the data here may have some challenges being pulled out
         #if ANDROID
         ("MotionEventAction", e.PlatformArgs?.MotionEvent.Action.ToString() ?? string.Empty)
-        //("MotionEventActionButton", e.PlatformArgs?.MotionEvent.ActionButton.ToString() ?? String.Empty)
         #elif IOS
-        ("State", e.PlatformArgs?.GestureRecognizer.State.ToString() ?? string.Empty),
-        //("ButtonMask", e.PlatformArgs?.GestureRecognizer.ButtonMask.ToString() ?? String.Empty)
+        ("State", e.PlatformArgs?.GestureRecognizer.State.ToString() ?? string.Empty)
         #endif
     ];
 
