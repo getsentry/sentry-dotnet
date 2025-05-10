@@ -1,3 +1,5 @@
+using Sentry.Tests.Internals;
+
 namespace Sentry.Tests;
 
 public class EventProcessorTests
