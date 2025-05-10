@@ -10,12 +10,13 @@
 ### Fixes
 
 - Redact Authorization headers before sending events to Sentry ([#4164](https://github.com/getsentry/sentry-dotnet/pull/4164))
+- Remove Strong Naming from Sentry.Hangfire ([#4099](https://github.com/getsentry/sentry-dotnet/pull/4099))
 
 ### Dependencies
 
-- Bump CLI from v2.43.1 to v2.44.0 ([#4169](https://github.com/getsentry/sentry-dotnet/pull/4169))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2440)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.43.1...2.44.0)
+- Bump CLI from v2.43.1 to v2.45.0 ([#4169](https://github.com/getsentry/sentry-dotnet/pull/4169), [#4179](https://github.com/getsentry/sentry-dotnet/pull/4179))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2450)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.43.1...2.45.0)
 
 ## 5.7.0-beta.0
 

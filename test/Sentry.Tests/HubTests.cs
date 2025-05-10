@@ -1829,18 +1829,19 @@ public partial class HubTests
             options.CacheDirectoryPath = cacheDirectory.Path;
         }
 
+        var hub = new Hub(options);
+        var id = hub.CaptureEvent(new SentryEvent());
+
         // Act
         // Disposing the hub should flush the client and send the envelope.
         // If caching is enabled, it should flush the cache as well.
         // Either way, the envelope should be sent.
-        using (var hub = new Hub(options))
-        {
-            hub.CaptureEvent(new SentryEvent());
-        }
+        hub.Dispose();
 
         // Assert
         await transport.Received(1)
-            .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
+            .SendEnvelopeAsync(Arg.Is<Envelope>(env => (string)env.Header["event_id"] == id.ToString()),
+                Arg.Any<CancellationToken>());
     }
 
     private static Scope GetCurrentScope(Hub hub) => hub.ScopeManager.GetCurrent().Key;
