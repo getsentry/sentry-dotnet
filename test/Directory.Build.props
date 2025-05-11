@@ -12,8 +12,8 @@
     <!-- Ignore "Naming rule violation: Missing suffix: 'Async'" -->
     <NoWarn>$(NoWarn);IDE1006</NoWarn>
 
-    <!--set this to true to enable the visual runner in the MAUI device tests - make sure it is false for CI-->
-    <EnableMauiDeviceTestVisualRunner>false</EnableMauiDeviceTestVisualRunner>
+    <!-- Set this to true to enable the visual test runner in MAUI. This is flaky in CI and needs net9.0 or later -->
+    <EnableMauiDeviceTestVisualRunner>true</EnableMauiDeviceTestVisualRunner>
   </PropertyGroup>
   <!--
     Workaround for Verify issue with scrubbing when running in Rider on Windows.
