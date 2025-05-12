@@ -2,6 +2,7 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
+$IsLinuxMusl = $IsLinux -and (ldd --version 2>&1) -match 'musl'
 
 Describe 'Console apps (<framework>) - normal build' -ForEach @(
     @{ framework = "net8.0" }
@@ -107,7 +108,7 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
 
 Describe 'MAUI' -ForEach @(
     @{ framework = "net8.0" }
-) {
+) -Skip:$IsLinuxMusl {
     BeforeAll {
         RegisterLocalPackage 'Sentry.Android.AssemblyReader'
         RegisterLocalPackage 'Sentry.Bindings.Android'
