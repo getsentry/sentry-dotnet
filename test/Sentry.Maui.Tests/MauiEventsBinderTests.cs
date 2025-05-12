@@ -1,5 +1,4 @@
-using NSubstitute;
-using Sentry.Maui.CommunityToolkitMvvm;
+using Sentry.Maui.CommunityToolkit.Mvvm;
 using Sentry.Maui.Internal;
 
 namespace Sentry.Maui.Tests;
@@ -39,7 +38,7 @@ public partial class MauiEventsBinderTests
                 [
                     new MauiButtonEventsBinder(),
                     new MauiImageButtonEventsBinder(),
-                    new CtMvvmMauiElementEventBinder(Hub),
+                    new MauiCommunityToolkitMvvmEventsBinder(Hub),
                     new MauiGestureRecognizerEventsBinder()
                 ]
             );
