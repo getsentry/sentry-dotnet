@@ -55,12 +55,12 @@ var configureLog = static (SentryLog log) =>
     log.SetAttribute("double-attribute", double.MaxValue);
 };
 
-SentrySdk.Logger.Trace("Hello, World!", null, configureLog);
-SentrySdk.Logger.Debug("Hello, .NET!", null, configureLog);
-SentrySdk.Logger.Info("Information", null, configureLog);
-SentrySdk.Logger.Warn("Warning with one {0}", ["parameter"], configureLog);
-SentrySdk.Logger.Error("Error with {0} {1}", [2, "parameters"], configureLog);
-SentrySdk.Logger.Fatal("Fatal {0} and {1}", [true, false], configureLog);
+SentrySdk.Logger.LogTrace("Hello, World!", null, configureLog);
+SentrySdk.Logger.LogDebug("Hello, .NET!", null, configureLog);
+SentrySdk.Logger.LogInfo("Information", null, configureLog);
+SentrySdk.Logger.LogWarning("Warning with one {0}", ["parameter"], configureLog);
+SentrySdk.Logger.LogError("Error with {0} {1}", [2, "parameters"], configureLog);
+SentrySdk.Logger.LogFatal("Fatal {0} and {1}", [true, false], configureLog);
 
 await Task.Delay(TimeSpan.FromSeconds(5));
 

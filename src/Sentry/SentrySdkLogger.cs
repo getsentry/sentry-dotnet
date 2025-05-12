@@ -29,7 +29,7 @@ public sealed class SentrySdkLogger
     /// Creates and sends a structured log to Sentry, with severity <see cref="LogSeverityLevel.Trace"/>, when enabled and sampled.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
-    public void Trace(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
+    public void LogTrace(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
     {
         if (IsEnabled())
         {
@@ -42,7 +42,7 @@ public sealed class SentrySdkLogger
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    public void Debug(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
+    public void LogDebug(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
     {
         if (IsEnabled())
         {
@@ -55,7 +55,7 @@ public sealed class SentrySdkLogger
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    public void Info(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
+    public void LogInfo(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
     {
         if (IsEnabled())
         {
@@ -64,15 +64,15 @@ public sealed class SentrySdkLogger
     }
 
     /// <summary>
-    /// Creates and sends a structured log to Sentry, with severity <see cref="LogSeverityLevel.Warn"/>, when enabled and sampled.
+    /// Creates and sends a structured log to Sentry, with severity <see cref="LogSeverityLevel.Warning"/>, when enabled and sampled.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    public void Warn(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
+    public void LogWarning(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
     {
         if (IsEnabled())
         {
-            CaptureLog(LogSeverityLevel.Warn, template, parameters, configureLog);
+            CaptureLog(LogSeverityLevel.Warning, template, parameters, configureLog);
         }
     }
 
@@ -81,7 +81,7 @@ public sealed class SentrySdkLogger
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    public void Error(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
+    public void LogError(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
     {
         if (IsEnabled())
         {
@@ -94,7 +94,7 @@ public sealed class SentrySdkLogger
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    public void Fatal(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
+    public void LogFatal(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
     {
         if (IsEnabled())
         {

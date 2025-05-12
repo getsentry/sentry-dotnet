@@ -25,7 +25,7 @@ public enum LogSeverityLevel
     /// <summary>
     /// A warning event.
     /// </summary>
-    Warn = 13,
+    Warning = 13,
     /// <summary>
     /// An error event.
     /// </summary>
