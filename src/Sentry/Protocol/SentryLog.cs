@@ -12,10 +12,10 @@ namespace Sentry.Protocol;
 public sealed class SentryLog : ISentryJsonSerializable
 {
     private readonly Dictionary<string, SentryAttribute> _attributes;
-    private readonly LogSeverityLevel _level;
+    private readonly SentryLogLevel _level;
 
     [SetsRequiredMembers]
-    internal SentryLog(DateTimeOffset timestamp, SentryId traceId, LogSeverityLevel level, string message)
+    internal SentryLog(DateTimeOffset timestamp, SentryId traceId, SentryLogLevel level, string message)
     {
         Timestamp = timestamp;
         TraceId = traceId;
@@ -46,12 +46,12 @@ public sealed class SentryLog : ISentryJsonSerializable
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    public required LogSeverityLevel Level
+    public required SentryLogLevel Level
     {
         get => _level;
         init
         {
-            LogSeverityLevelExtensions.ThrowIfOutOfRange(value);
+            SentryLogLevelExtensions.ThrowIfOutOfRange(value);
             _level = value;
         }
     }

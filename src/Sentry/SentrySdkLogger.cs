@@ -26,19 +26,19 @@ public sealed class SentrySdkLogger
     }
 
     /// <summary>
-    /// Creates and sends a structured log to Sentry, with severity <see cref="LogSeverityLevel.Trace"/>, when enabled and sampled.
+    /// Creates and sends a structured log to Sentry, with severity <see cref="SentryLogLevel.Trace"/>, when enabled and sampled.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     public void LogTrace(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
     {
         if (IsEnabled())
         {
-            CaptureLog(LogSeverityLevel.Trace, template, parameters, configureLog);
+            CaptureLog(SentryLogLevel.Trace, template, parameters, configureLog);
         }
     }
 
     /// <summary>
-    /// Creates and sends a structured log to Sentry, with severity <see cref="LogSeverityLevel.Debug"/>, when enabled and sampled.
+    /// Creates and sends a structured log to Sentry, with severity <see cref="SentryLogLevel.Debug"/>, when enabled and sampled.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
@@ -46,12 +46,12 @@ public sealed class SentrySdkLogger
     {
         if (IsEnabled())
         {
-            CaptureLog(LogSeverityLevel.Debug, template, parameters, configureLog);
+            CaptureLog(SentryLogLevel.Debug, template, parameters, configureLog);
         }
     }
 
     /// <summary>
-    /// Creates and sends a structured log to Sentry, with severity <see cref="LogSeverityLevel.Info"/>, when enabled and sampled.
+    /// Creates and sends a structured log to Sentry, with severity <see cref="SentryLogLevel.Info"/>, when enabled and sampled.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
@@ -59,12 +59,12 @@ public sealed class SentrySdkLogger
     {
         if (IsEnabled())
         {
-            CaptureLog(LogSeverityLevel.Info, template, parameters, configureLog);
+            CaptureLog(SentryLogLevel.Info, template, parameters, configureLog);
         }
     }
 
     /// <summary>
-    /// Creates and sends a structured log to Sentry, with severity <see cref="LogSeverityLevel.Warning"/>, when enabled and sampled.
+    /// Creates and sends a structured log to Sentry, with severity <see cref="SentryLogLevel.Warning"/>, when enabled and sampled.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
@@ -72,12 +72,12 @@ public sealed class SentrySdkLogger
     {
         if (IsEnabled())
         {
-            CaptureLog(LogSeverityLevel.Warning, template, parameters, configureLog);
+            CaptureLog(SentryLogLevel.Warning, template, parameters, configureLog);
         }
     }
 
     /// <summary>
-    /// Creates and sends a structured log to Sentry, with severity <see cref="LogSeverityLevel.Error"/>, when enabled and sampled.
+    /// Creates and sends a structured log to Sentry, with severity <see cref="SentryLogLevel.Error"/>, when enabled and sampled.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
@@ -85,12 +85,12 @@ public sealed class SentrySdkLogger
     {
         if (IsEnabled())
         {
-            CaptureLog(LogSeverityLevel.Error, template, parameters, configureLog);
+            CaptureLog(SentryLogLevel.Error, template, parameters, configureLog);
         }
     }
 
     /// <summary>
-    /// Creates and sends a structured log to Sentry, with severity <see cref="LogSeverityLevel.Fatal"/>, when enabled and sampled.
+    /// Creates and sends a structured log to Sentry, with severity <see cref="SentryLogLevel.Fatal"/>, when enabled and sampled.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
@@ -98,7 +98,7 @@ public sealed class SentrySdkLogger
     {
         if (IsEnabled())
         {
-            CaptureLog(LogSeverityLevel.Fatal, template, parameters, configureLog);
+            CaptureLog(SentryLogLevel.Fatal, template, parameters, configureLog);
         }
     }
 
@@ -114,7 +114,7 @@ public sealed class SentrySdkLogger
         return false;
     }
 
-    private void CaptureLog(LogSeverityLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog)
+    private void CaptureLog(SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog)
     {
         var timestamp = _clock.GetUtcNow();
 

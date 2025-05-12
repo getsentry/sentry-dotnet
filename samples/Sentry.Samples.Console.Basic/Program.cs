@@ -43,7 +43,7 @@ SentrySdk.Init(options =>
             return null;
         }
 
-        return log.Level is LogSeverityLevel.Error ? log : null;
+        return log.Level is SentryLogLevel.Error ? log : null;
     });
 });
 

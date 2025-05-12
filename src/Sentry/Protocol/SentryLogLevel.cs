@@ -8,7 +8,7 @@ namespace Sentry.Protocol;
 /// </summary>
 /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
 [Experimental(DiagnosticId.ExperimentalFeature)]
-public enum LogSeverityLevel
+public enum SentryLogLevel
 {
     /// <summary>
     /// A fine-grained debugging event.
@@ -37,9 +37,9 @@ public enum LogSeverityLevel
 }
 
 [Experimental(DiagnosticId.ExperimentalFeature)]
-internal static class LogSeverityLevelExtensions
+internal static class SentryLogLevelExtensions
 {
-    internal static (string, int?) ToSeverityTextAndOptionalSeverityNumber(this LogSeverityLevel level)
+    internal static (string, int?) ToSeverityTextAndOptionalSeverityNumber(this SentryLogLevel level)
     {
         return (int)level switch
         {
@@ -59,7 +59,7 @@ internal static class LogSeverityLevelExtensions
         };
     }
 
-    internal static void ThrowIfOutOfRange(LogSeverityLevel level, [CallerArgumentExpression(nameof(level))] string? paramName = null)
+    internal static void ThrowIfOutOfRange(SentryLogLevel level, [CallerArgumentExpression(nameof(level))] string? paramName = null)
     {
         if ((int)level is < 1 or > 24)
         {
@@ -68,13 +68,13 @@ internal static class LogSeverityLevelExtensions
     }
 
     [DoesNotReturn]
-    private static void ThrowOutOfRange(LogSeverityLevel level, string? paramName)
+    private static void ThrowOutOfRange(SentryLogLevel level, string? paramName)
     {
         throw new ArgumentOutOfRangeException(paramName, level, "Severity must be between 1 (inclusive) and 24 (inclusive).");
     }
 
     [DoesNotReturn]
-    private static T ThrowOutOfRange<T>(LogSeverityLevel level, string? paramName)
+    private static T ThrowOutOfRange<T>(SentryLogLevel level, string? paramName)
     {
         throw new ArgumentOutOfRangeException(paramName, level, "Severity must be between 1 (inclusive) and 24 (inclusive).");
     }
