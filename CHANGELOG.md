@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Support musl on Linux ([#4188](https://github.com/getsentry/sentry-dotnet/pull/4188))
+
 ### Dependencies
 
 - Bump Native SDK from v0.8.4 to v0.8.5 ([#4189](https://github.com/getsentry/sentry-dotnet/pull/4189))
