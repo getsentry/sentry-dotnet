@@ -155,7 +155,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         foreach (var field in eventIds)
         {
             var eventId = (EventId)field.GetValue(null)!;
-            var isEfExceptionMessage = Sentry.Extensions.Logging.SentryLogger.IsEfExceptionMessage(eventId);
+            var isEfExceptionMessage = SentryLogger.IsEfExceptionMessage(eventId);
             var name = field.Name;
             if (name.EndsWith("Exception") ||
                 name.EndsWith("Error") ||
