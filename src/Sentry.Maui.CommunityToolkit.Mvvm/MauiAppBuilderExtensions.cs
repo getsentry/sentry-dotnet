@@ -26,7 +26,7 @@ public static class MauiAppBuilderExtensions
     /// <returns>The Service Collection</returns>
     public static IServiceCollection UseSentryCommunityToolkitIntegration(this IServiceCollection services)
     {
-        services.AddSingleton<IMauiElementEventBinder, CtMvvmMauiElementEventBinder>();
+        services.AddSingleton<IMauiElementEventBinder, MauiCommunityToolkitMvvmEventsBinder>();
         return services;
     }
 }

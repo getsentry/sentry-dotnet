@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using FluentAssertions;
-using Sentry.Maui.CommunityToolkitMvvm;
+using Sentry.Maui.CommunityToolkit.Mvvm;
 
 namespace Sentry.Maui.Tests;
 
@@ -15,7 +14,7 @@ public partial class MauiEventsBinderTests
         {
             Command = vm.TestCommand
         };
-        var binder = new CtMvvmMauiElementEventBinder(_fixture.Hub);
+        var binder = new MauiCommunityToolkitMvvmEventsBinder(_fixture.Hub);
         binder.Bind(button, _ => { });
 
         button.Command.Execute(null!);

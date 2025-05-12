@@ -1,12 +1,12 @@
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 
-namespace Sentry.Maui.CommunityToolkitMvvm;
+namespace Sentry.Maui.CommunityToolkit.Mvvm;
 
 /// <summary>
 /// Scans all elements for known commands that are implement
 /// </summary>
-public class CtMvvmMauiElementEventBinder(IHub hub) : IMauiElementEventBinder
+internal class MauiCommunityToolkitMvvmEventsBinder(IHub hub) : IMauiElementEventBinder
 {
     /// <summary>
     /// Binds to the element
