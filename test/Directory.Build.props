@@ -12,9 +12,11 @@
     <!-- Ignore "Naming rule violation: Missing suffix: 'Async'" -->
     <NoWarn>$(NoWarn);IDE1006</NoWarn>
 
-    <!-- Set this to true to enable the visual test runner in MAUI. This is flaky in CI and needs net9.0 or later -->
-    <EnableMauiDeviceTestVisualRunner>true</EnableMauiDeviceTestVisualRunner>
+    <!-- Visual tests need net9.0+ mobile and are flaky when using the headless runner on CI -->
+    <EnableMauiDeviceTestVisualRunner>false</EnableMauiDeviceTestVisualRunner>
+    <EnableMauiDeviceTestVisualRunner Condition="'$(TargetFrameworkIsNet9OrGreater)' == 'true' AND '$(PlatformIsMobile)' == 'true' AND '$(ContinuousIntegrationBuild)' != 'true'">true</EnableMauiDeviceTestVisualRunner>
   </PropertyGroup>
+
   <!--
     Workaround for Verify issue with scrubbing when running in Rider on Windows.
     Ensures that the volume label is upper cased ("C:" instead of "c:"), which is read
