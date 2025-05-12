@@ -11,6 +11,12 @@ runs:
         echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" >> $GITHUB_ENV
         echo "DOTNET_NOLOGO=1" >> $GITHUB_ENV
 
+    # Android SDK Build Tools are musl-incompatible
+    - name: Set Environment Variables for Alpine Linux
+      if: ${{ contains(matrix.container, 'alpine') }}
+      shell: bash
+      run: echo "NO_MOBILE=true" >> $GITHUB_ENV
+
     # See https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md#xcode
     - name: Pin the Xcode Version
       if: runner.os == 'macOS'
@@ -19,16 +25,19 @@ runs:
 
     # Needed for Android SDK setup step
     - uses: actions/setup-java@v3
+      if: ${{ !matrix.container }}
       with:
         distribution: 'temurin'
         java-version: '17'
 
     - name: Setup Android SDK
+      if: ${{ !matrix.container }}
       uses: android-actions/setup-android@07976c6290703d34c16d382cb36445f98bb43b1f # v3.2.0
       with:
         log-accepted-android-sdk-licenses: false
 
     - name: Set Java Version
+      if: ${{ !matrix.container }}
       uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
