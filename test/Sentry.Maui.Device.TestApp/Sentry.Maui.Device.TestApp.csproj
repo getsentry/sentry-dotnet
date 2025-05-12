@@ -1,17 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup Condition="'$(EnableMauiDeviceTestVisualRunner)' == 'true'">
-    <TargetFrameworks>net9.0-ios;net9.0-android</TargetFrameworks>
-    <DefineConstants>$(DefineConstants);VISUAL_RUNNER</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(EnableMauiDeviceTestVisualRunner)' != 'true'">
+  <PropertyGroup>
     <TargetFrameworks>$(TargetFrameworks);net8.0-android;net9.0-android</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios;net9.0-ios</TargetFrameworks>
-    <!-- Currently broken on .NET 7, see
-  - https://github.com/dotnet/maui/issues/18573
-  - https://developercommunity.visualstudio.com/t/MAUI0000:-SystemMissingMethodException:/10505327?sort=newest&ftype=problem
-  <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net7.0-maccatalyst</TargetFrameworks> -->
+    <DefineConstants Condition="'$(EnableMauiDeviceTestVisualRunner)' == 'true'">$(DefineConstants);VISUAL_RUNNER</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -95,6 +87,7 @@
   <ItemGroup>
     <PackageReference Include="DeviceRunners.XHarness.Maui" Version="0.1.0-preview.1"/>
     <PackageReference Include="DeviceRunners.XHarness.Xunit" Version="0.1.0-preview.1"/>
+
     <!-- Prevent downgrade of these packages for DeviceRunners.XHarness.Xunit 0.1.0-preview.1   -->
     <PackageReference Include="System.Net.Primitives" Version="4.3.0"/>
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0"/>

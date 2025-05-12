@@ -4,13 +4,12 @@ namespace Sentry.Maui.Tests;
 
 public partial class MauiEventsBinderTests
 {
-#if VISUAL_RUNNER
-    [Fact]
-#else
-    [Fact(Skip = "Flaky Test in XHarness")]
-#endif
+    [SkippableFact]
     public void TapGestureRecognizer_LifecycleEvents_AddsBreadcrumb()
     {
+#if !VISUAL_RUNNER
+        Skip.If(true, "Visual runner disabled");
+#endif
         var gesture = new TapGestureRecognizer();
         TestGestureRecognizer(
             gesture,
@@ -19,13 +18,12 @@ public partial class MauiEventsBinderTests
         );
     }
 
-#if VISUAL_RUNNER
-    [Fact]
-#else
-    [Fact(Skip = "Flaky Test in XHarness")]
-#endif
+    [SkippableFact]
     public void SwipeGestureRecognizer_LifecycleEvents_AddsBreadcrumb()
     {
+#if !VISUAL_RUNNER
+        Skip.If(true, "Visual runner disabled");
+#endif
         var gesture = new SwipeGestureRecognizer();
         TestGestureRecognizer(
             gesture,
@@ -34,13 +32,12 @@ public partial class MauiEventsBinderTests
         );
     }
 
-#if VISUAL_RUNNER
-    [Fact]
-#else
-    [Fact(Skip = "Flaky Test in XHarness")]
-#endif
+    [SkippableFact]
     public void PinchGestureRecognizer_LifecycleEvents_AddsBreadcrumb()
     {
+#if !VISUAL_RUNNER
+        Skip.If(true, "Visual runner disabled");
+#endif
         TestGestureRecognizer(
             new PinchGestureRecognizer(),
             nameof(PinchGestureRecognizer.PinchUpdated),
@@ -48,13 +45,12 @@ public partial class MauiEventsBinderTests
         );
     }
 
-#if VISUAL_RUNNER
-    [Fact]
-#else
-    [Fact(Skip = "Flaky Test in XHarness")]
-#endif
+    [SkippableFact]
     public void DragGestureRecognizer_LifecycleEvents_AddsBreadcrumb_DragStarting()
     {
+#if !VISUAL_RUNNER
+        Skip.If(true, "Visual runner disabled");
+#endif
         TestGestureRecognizer(
             new DragGestureRecognizer(),
             nameof(DragGestureRecognizer.DragStarting),
@@ -62,13 +58,12 @@ public partial class MauiEventsBinderTests
         );
     }
 
-#if VISUAL_RUNNER
-    [Fact]
-#else
-    [Fact(Skip = "Flaky Test in XHarness")]
-#endif
+    [SkippableFact]
     public void DragGestureRecognizer_LifecycleEvents_AddsBreadcrumb_DropFinished()
     {
+#if !VISUAL_RUNNER
+        Skip.If(true, "Visual runner disabled");
+#endif
         TestGestureRecognizer(
             new DragGestureRecognizer(),
             nameof(DragGestureRecognizer.DropCompleted),
@@ -76,13 +71,12 @@ public partial class MauiEventsBinderTests
         );
     }
 
-#if VISUAL_RUNNER
-    [Fact]
-#else
-    [Fact(Skip = "Flaky Test in XHarness")]
-#endif
+    [SkippableFact]
     public void PanGestureRecognizer_LifecycleEvents_AddsBreadcrumb()
     {
+#if !VISUAL_RUNNER
+        Skip.If(true, "Visual runner disabled");
+#endif
         TestGestureRecognizer(
             new PanGestureRecognizer(),
             nameof(PanGestureRecognizer.PanUpdated),
@@ -90,23 +84,17 @@ public partial class MauiEventsBinderTests
         );
     }
 
-#if VISUAL_RUNNER
-    [Theory]
+    [SkippableTheory]
     [InlineData(nameof(PointerGestureRecognizer.PointerEntered))]
     [InlineData(nameof(PointerGestureRecognizer.PointerExited))]
     [InlineData(nameof(PointerGestureRecognizer.PointerMoved))]
     [InlineData(nameof(PointerGestureRecognizer.PointerPressed))]
     [InlineData(nameof(PointerGestureRecognizer.PointerReleased))]
-#else
-    [Theory(Skip = "Flaky Test in XHarness")]
-    [InlineData(nameof(PointerGestureRecognizer.PointerEntered))]
-    [InlineData(nameof(PointerGestureRecognizer.PointerExited))]
-    [InlineData(nameof(PointerGestureRecognizer.PointerMoved))]
-    [InlineData(nameof(PointerGestureRecognizer.PointerPressed))]
-    [InlineData(nameof(PointerGestureRecognizer.PointerReleased))]
-#endif
     public void PointerGestureRecognizer_LifecycleEvents_AddsBreadcrumb(string eventName)
     {
+#if !VISUAL_RUNNER
+        Skip.If(true, "Visual runner disabled");
+#endif
         TestGestureRecognizer(
             new PointerGestureRecognizer(),
             eventName,
