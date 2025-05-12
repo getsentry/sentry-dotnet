@@ -16,10 +16,6 @@
     <EnableMauiDeviceTestVisualRunner>false</EnableMauiDeviceTestVisualRunner>
     <EnableMauiDeviceTestVisualRunner Condition="'$(TargetFrameworkIsNet9OrGreater)' == 'true' AND '$(PlatformIsMobile)' == 'true' AND '$(ContinuousIntegrationBuild)' != 'true'">true</EnableMauiDeviceTestVisualRunner>
   </PropertyGroup>
-
-    <!--set this to true to enable the visual runner in the MAUI device tests - make sure it is false for CI-->
-    <EnableMauiDeviceTestVisualRunner>false</EnableMauiDeviceTestVisualRunner>
-  </PropertyGroup>
   <!--
     Workaround for Verify issue with scrubbing when running in Rider on Windows.
     Ensures that the volume label is upper cased ("C:" instead of "c:"), which is read
