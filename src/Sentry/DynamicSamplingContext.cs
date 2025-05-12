@@ -164,8 +164,9 @@ internal class DynamicSamplingContext
 
         if (replaySession?.ActiveReplayId is { } replayId)
         {
-            // Overwrite any existing value - the DSC is simply used as a transport mechanism so that SDKs can
-            // communicate the replayId to Sentry Relay (SDKs don't need to propagate the replayId to each other).
+            // Any upstream replay_id will be propagated only if the current process hasn't started it's own replay session.
+            // Otherwise we have to overwrite this as it's the only way to communicate the replayId to Sentry Relay.
+            // In Mobile apps this should never be a problem.
             items["replay_id"] = replayId.ToString();
         }
 
