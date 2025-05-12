@@ -19,11 +19,13 @@ runs:
 
     # Needed for Android SDK setup step
     - uses: actions/setup-java@v3
+      if: ${{ !matrix.runner.container }}
       with:
         distribution: 'temurin'
         java-version: '17'
 
     - name: Setup Android SDK
+      if: ${{ !matrix.runner.container }}
       uses: android-actions/setup-android@07976c6290703d34c16d382cb36445f98bb43b1f # v3.2.0
       with:
         log-accepted-android-sdk-licenses: false
@@ -41,6 +43,7 @@ runs:
         cd -
 
     - name: Set Java Version
+      if: ${{ !matrix.runner.container }}
       uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
