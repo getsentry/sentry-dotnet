@@ -11,6 +11,10 @@
     <NoWarn>$(NoWarn);SYSLIB0005;SYSLIB0012</NoWarn>
     <!-- Ignore "Naming rule violation: Missing suffix: 'Async'" -->
     <NoWarn>$(NoWarn);IDE1006</NoWarn>
+
+    <!-- Visual tests need net9.0+ mobile and are flaky when using the headless runner on CI -->
+    <EnableMauiDeviceTestVisualRunner>false</EnableMauiDeviceTestVisualRunner>
+    <EnableMauiDeviceTestVisualRunner Condition="'$(TargetFrameworkIsNet9OrGreater)' == 'true' AND '$(PlatformIsMobile)' == 'true' AND '$(ContinuousIntegrationBuild)' != 'true'">true</EnableMauiDeviceTestVisualRunner>
   </PropertyGroup>
 
   <!--
