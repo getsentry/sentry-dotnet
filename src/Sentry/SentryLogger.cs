@@ -13,8 +13,16 @@ namespace Sentry;
 [Experimental(DiagnosticId.ExperimentalFeature)]
 public sealed class SentryLogger
 {
+    private readonly ISystemClock _clock;
+
     internal SentryLogger()
+        :this(SystemClock.Clock)
     {
+    }
+
+    internal SentryLogger(ISystemClock clock)
+    {
+        _clock = clock;
     }
 
     /// <summary>
@@ -108,7 +116,7 @@ public sealed class SentryLogger
 
     private void CaptureLog(LogSeverityLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog)
     {
-        var timestamp = DateTimeOffset.UtcNow;
+        var timestamp = _clock.GetUtcNow();
 
         var hub = SentrySdk.CurrentHub;
 
