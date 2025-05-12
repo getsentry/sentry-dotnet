@@ -289,7 +289,6 @@ public static partial class SentrySdk
     /// <list type="bullet">
     /// <item><see cref="Sentry.SentryOptions.EnableLogs"/></item>
     /// <item><see cref="Sentry.SentryOptions.SetBeforeSendLog(System.Func{Sentry.Protocol.SentryLog, Sentry.Protocol.SentryLog})"/></item>
-    /// <item><see cref="Sentry.SentryOptions.LogsSampleRate"/></item>
     /// </list>
     /// </remarks>
     [Experimental(DiagnosticId.ExperimentalFeature)]

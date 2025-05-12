@@ -546,29 +546,6 @@ public class SentryOptions
         _beforeSendLog = beforeSendLog;
     }
 
-    private float _logsSampleRate = 1.0f;
-
-    /// <summary>
-    /// A <see langword="float"/> between <c>0.0f</c> and <c>1.0f</c> that represents the probability that a log will be sent to Sentry.
-    /// Defaults to <c>1.0</c>.
-    /// <para>This API is experimental and it may change in the future.</para>
-    /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public float LogsSampleRate
-    {
-        get => _logsSampleRate;
-        set
-        {
-            if (value is < 0.0f or > 1.0f)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), value,
-                    "The logs sample rate must be between 0.0 and 1.0, inclusive.");
-            }
-
-            _logsSampleRate = value;
-        }
-    }
-
     private int _maxQueueItems = 30;
 
     /// <summary>

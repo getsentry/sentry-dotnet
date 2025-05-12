@@ -234,7 +234,7 @@ public sealed class SentryLog : ISentryJsonSerializable
         writer.WriteNumber("timestamp", Timestamp.ToUnixTimeSeconds());
         writer.WriteString("trace_id", TraceId);
 
-        var (severityText, severityNumber) = Level.ToSeverityTextAndOptionalNumber();
+        var (severityText, severityNumber) = Level.ToSeverityTextAndOptionalSeverityNumber();
         writer.WriteString("level", severityText);
         if (severityNumber.HasValue)
         {

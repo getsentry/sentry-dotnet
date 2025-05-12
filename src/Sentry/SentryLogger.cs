@@ -13,11 +13,8 @@ namespace Sentry;
 [Experimental(DiagnosticId.ExperimentalFeature)]
 public sealed class SentryLogger
 {
-    private readonly RandomValuesFactory _randomValuesFactory;
-
     internal SentryLogger()
     {
-        _randomValuesFactory = new SynchronizedRandomValuesFactory();
     }
 
     /// <summary>
@@ -116,11 +113,6 @@ public sealed class SentryLogger
         var hub = SentrySdk.CurrentHub;
 
         if (hub.GetSentryOptions() is not { EnableLogs: true } options)
-        {
-            return;
-        }
-
-        if (!_randomValuesFactory.NextBool(options.LogsSampleRate))
         {
             return;
         }

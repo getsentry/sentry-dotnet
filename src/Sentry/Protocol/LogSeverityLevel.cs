@@ -39,7 +39,7 @@ public enum LogSeverityLevel
 [Experimental(DiagnosticId.ExperimentalFeature)]
 internal static class LogSeverityLevelExtensions
 {
-    internal static (string, int?) ToSeverityTextAndOptionalNumber(this LogSeverityLevel level)
+    internal static (string, int?) ToSeverityTextAndOptionalSeverityNumber(this LogSeverityLevel level)
     {
         return (int)level switch
         {
