@@ -21,7 +21,7 @@ jobs:
         # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
         runner: [
           {os: ubuntu-22.04},
-          {os: ubuntu-latest, container: alpine:3.21, target: Linux-musl},
+          {os: ubuntu-latest, container: alpine:edge, target: Linux-musl},
           {os: windows-latest},
           {os: macos-15}
         ]
@@ -73,7 +73,7 @@ jobs:
         # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
         runner: [
           {os: ubuntu-22.04},
-          {os: ubuntu-latest, container: alpine:3.21, target: Linux-musl},
+          {os: ubuntu-latest, container: alpine:edge, target: Linux-musl},
           {os: windows-latest},
           {os: macos-15}
         ]
@@ -87,7 +87,7 @@ jobs:
         if: ${{ startsWith(matrix.runner.container, 'alpine') }}
         run: |
           apk update
-          apk add bash build-base cmake curl-dev git icu openjdk11 powershell sudo tar wget
+          apk add bash build-base cmake curl-dev git icu mono openjdk11 powershell sudo tar wget
           git config --global --add safe.directory $GITHUB_WORKSPACE
           # Grpc.Tools protoc is prebuilt with glibc (https://github.com/grpc/grpc/issues/24188#issuecomment-1403435551)
           apk add grpc-plugins
