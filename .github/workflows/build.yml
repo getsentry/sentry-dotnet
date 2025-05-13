@@ -221,6 +221,7 @@ jobs:
           apk add grpc-plugins
           echo "PROTOBUF_PROTOC=/usr/bin/protoc" >> $GITHUB_ENV
           echo "GRPC_PROTOC_PLUGIN=/usr/bin/grpc_csharp_plugin" >> $GITHUB_ENV
+          pwsh -Command Install-Module Pester -Force
 
       - uses: actions/checkout@v4
         with:
