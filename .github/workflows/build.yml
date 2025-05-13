@@ -194,17 +194,34 @@ jobs:
 
   integration-test:
     needs: build
-    name: Integration test (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
+    name: Integration test (${{ matrix.runner.container || matrix.runner.os }})
+    runs-on: ${{ matrix.runner.os }}
+    container: ${{ matrix.runner.container }}
 
     strategy:
       fail-fast: false
       matrix:
         # Pin ubuntu to ensure mono is installed
         # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
-        os: [ubuntu-22.04, windows-latest, macos-15]
+        runner: [
+          {os: ubuntu-22.04},
+          {os: ubuntu-latest, container: alpine:edge, target: Linux-musl},
+          {os: windows-latest},
+          {os: macos-15}
+        ]
 
     steps:
+      - name: Install build dependencies for Alpine Linux
+        if: ${{ startsWith(matrix.runner.container, 'alpine') }}
+        run: |
+          apk update
+          apk add bash build-base cmake curl-dev git icu mono openjdk11 powershell sudo tar wget
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          # Grpc.Tools protoc is prebuilt with glibc (https://github.com/grpc/grpc/issues/24188#issuecomment-1403435551)
+          apk add grpc-plugins
+          echo "PROTOBUF_PROTOC=/usr/bin/protoc" >> $GITHUB_ENV
+          echo "GRPC_PROTOC_PLUGIN=/usr/bin/grpc_csharp_plugin" >> $GITHUB_ENV
+
       - uses: actions/checkout@v4
         with:
           # We only check out what is absolutely necessary to reduce a chance of local files impacting
@@ -221,7 +238,7 @@ jobs:
           path: src
 
       - name: Install build dependencies
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && !matrix.runner.container
         run: |
           sudo apt update
           sudo apt install libcurl4-openssl-dev
