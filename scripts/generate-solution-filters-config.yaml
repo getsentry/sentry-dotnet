@@ -211,3 +211,20 @@ filterConfigs:
         - "**/*Bindings*"
         - "**/*DeviceTests*"
         - "**/*TestApp*"
+
+  # WIP: SentryNoMobile.slnf minus *Mac* for testing Linux musl CI w/o Android
+  - outputPath: Sentry-CI-Build-Linux-musl.slnf
+    solution: .generated.NoMobile.sln
+    include:
+      groups:
+        - "allProjects"
+    exclude:
+      groups:
+        - "artefacts"
+        - "trimTests"
+      patterns:
+        - "**/*Bindings*.csproj"
+        - "**/*Android*.csproj"
+        - "**/*Ios*.csproj"
+        - "**/*Mac*.csproj"
+        - "**/*Maui*.csproj"
