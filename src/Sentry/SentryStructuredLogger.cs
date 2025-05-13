@@ -11,16 +11,16 @@ namespace Sentry;
 /// <para>This API is experimental and it may change in the future.</para>
 /// </summary>
 [Experimental(DiagnosticId.ExperimentalFeature)]
-public sealed class SentrySdkLogger
+public sealed class SentryStructuredLogger
 {
     private readonly ISystemClock _clock;
 
-    internal SentrySdkLogger()
+    internal SentryStructuredLogger()
         : this(SystemClock.Clock)
     {
     }
 
-    internal SentrySdkLogger(ISystemClock clock)
+    internal SentryStructuredLogger(ISystemClock clock)
     {
         _clock = clock;
     }

@@ -292,7 +292,7 @@ public static partial class SentrySdk
     /// </list>
     /// </remarks>
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    public static SentrySdkLogger Logger { get; } = new SentrySdkLogger();
+    public static SentryStructuredLogger Logger { get; } = new SentryStructuredLogger();
 
     /// <summary>
     /// Creates a new scope that will terminate when disposed.
