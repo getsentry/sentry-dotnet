@@ -18,7 +18,7 @@ jobs:
       matrix:
         # Pin ubuntu to ensure mono is installed
         # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
-        os: [ubuntu-22.04, windows-latest, macos-15]
+        os: [ubuntu-22.04, windows-latest, windows-11-arm, macos-15]
 
     steps:
       - name: Checkout
@@ -56,7 +56,7 @@ jobs:
       matrix:
         # Pin ubuntu to ensure mono is installed
         # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
-        os: [ubuntu-22.04, windows-latest, macos-15]
+        os: [ubuntu-22.04, windows-latest, windows-11-arm, macos-15]
 
     steps:
       - name: Cancel Previous Runs
@@ -93,6 +93,7 @@ jobs:
           key: sentry-native-macOS-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
 
+      # This step is x64 specific?
       - name: Download sentry-native (Windows)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Windows') }}
         uses: actions/cache/restore@v4
@@ -161,7 +162,7 @@ jobs:
       matrix:
         # Pin ubuntu to ensure mono is installed
         # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
-        os: [ubuntu-22.04, windows-latest, macos-15]
+        os: [ubuntu-22.04, windows-latest, windows-11-arm, macos-15]
 
     steps:
       - uses: actions/checkout@v4
