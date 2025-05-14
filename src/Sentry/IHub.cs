@@ -27,7 +27,7 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// Available options:
     /// <list type="bullet">
     /// <item><see cref="Sentry.SentryOptions.EnableLogs"/></item>
-    /// <item><see cref="Sentry.SentryOptions.SetBeforeSendLog(System.Func{Sentry.Protocol.SentryLog, Sentry.Protocol.SentryLog})"/></item>
+    /// <item><see cref="Sentry.SentryOptions.SetBeforeSendLog(System.Func{SentryLog, SentryLog})"/></item>
     /// </list>
     /// </remarks>
     [Experimental(DiagnosticId.ExperimentalFeature)]

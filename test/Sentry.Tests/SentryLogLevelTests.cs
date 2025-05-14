@@ -1,4 +1,4 @@
-namespace Sentry.Tests.Protocol;
+namespace Sentry.Tests;
 
 /// <summary>
 /// <see href="https://develop.sentry.dev/sdk/telemetry/logs/"/>

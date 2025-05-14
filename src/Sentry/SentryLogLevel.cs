@@ -1,6 +1,6 @@
 using Sentry.Infrastructure;
 
-namespace Sentry.Protocol;
+namespace Sentry;
 
 /// <summary>
 /// The severity of the structured log.

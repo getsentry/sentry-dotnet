@@ -9,7 +9,6 @@
  */
 
 using System.Net.Http;
-using Sentry.Protocol;
 using static System.Console;
 
 // Initialize the Sentry SDK.  (It is not necessary to dispose it.)

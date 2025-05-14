@@ -1,7 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
-using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry;

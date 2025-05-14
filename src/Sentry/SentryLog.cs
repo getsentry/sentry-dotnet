@@ -1,8 +1,9 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Protocol;
 
-namespace Sentry.Protocol;
+namespace Sentry;
 
 /// <summary>
 /// Represents the Sentry Log protocol.
