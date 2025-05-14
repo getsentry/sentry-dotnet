@@ -20,12 +20,7 @@ public sealed class SentryStructuredLogger
     private readonly IInternalScopeManager? _scopeManager;
 
     internal SentryStructuredLogger(IHub hub)
-        : this(hub, SystemClock.Clock)
-    {
-    }
-
-    internal SentryStructuredLogger(IHub hub, ISystemClock clock)
-        : this(hub, (hub as Hub)?.ScopeManager, hub.GetSentryOptions(), clock)
+        : this(hub, (hub as Hub)?.ScopeManager, hub.GetSentryOptions(), SystemClock.Clock)
     {
     }
 

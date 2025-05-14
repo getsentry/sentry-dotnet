@@ -258,9 +258,12 @@ public sealed class SentryLog : ISentryJsonSerializable
             SentryAttributeSerializer.WriteAttribute(writer, "sentry.message.template", Template, "string");
         }
 
-        for (var index = 0; index < Parameters.Length; index++)
+        if (!Parameters.IsDefault)
         {
-            SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameters.{index}", Parameters[index]);
+            for (var index = 0; index < Parameters.Length; index++)
+            {
+                SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameters.{index}", Parameters[index]);
+            }
         }
 
         foreach (var attribute in _attributes)

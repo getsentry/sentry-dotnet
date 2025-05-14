@@ -57,13 +57,14 @@ internal class Hub : IHub, IDisposable
         client ??= new SentryClient(options, randomValuesFactory: _randomValuesFactory, sessionManager: _sessionManager);
 
         ScopeManager = scopeManager ?? new SentryScopeManager(options, client);
-        Logger = new SentryStructuredLogger(this);
 
         if (!options.IsGlobalModeEnabled)
         {
             // Push the first scope so the async local starts from here
             PushScope();
         }
+
+        Logger = new SentryStructuredLogger(this);
 
 #if MEMORY_DUMP_SUPPORTED
         if (options.HeapDumpOptions is not null)
