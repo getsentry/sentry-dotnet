@@ -8,6 +8,10 @@
     <UseMaui>true</UseMaui>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(EnableMauiDeviceTestVisualRunner)' == 'true'">
+    <DefineConstants>$(DefineConstants);VISUAL_RUNNER</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />

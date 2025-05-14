@@ -114,4 +114,18 @@ public static class SentryClientExtensions
             HubAdapter => SentrySdk.CurrentOptions,
             _ => SentryOptionsForTestingOnly
         };
+
+    /// <summary>
+    /// <para>
+    /// Gets internal SentryOptions for integrations like Hangfire that don't support strong assembly names.
+    /// </para>
+    ///<remarks>
+    /// *** This is not meant for external use !!! ***
+    /// </remarks>>
+    /// </summary>
+    /// <param name="clientOrHub"></param>
+    /// <returns></returns>
+    [Obsolete("This method is meant for external usage only")]
+    public static SentryOptions? GetInternalSentryOptions(this ISentryClient clientOrHub) =>
+        clientOrHub.GetSentryOptions();
 }

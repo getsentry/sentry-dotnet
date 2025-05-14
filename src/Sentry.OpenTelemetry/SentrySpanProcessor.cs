@@ -13,6 +13,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 {
     private readonly IHub _hub;
     internal readonly IEnumerable<IOpenTelemetryEnricher> _enrichers;
+    private readonly IReplaySession _replaySession;
     internal const string OpenTelemetryOrigin = "auto.otel";
 
     // ReSharper disable once MemberCanBePrivate.Global - Used by tests
@@ -38,7 +39,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     {
     }
 
-    internal SentrySpanProcessor(IHub hub, IEnumerable<IOpenTelemetryEnricher>? enrichers)
+    internal SentrySpanProcessor(IHub hub, IEnumerable<IOpenTelemetryEnricher>? enrichers, IReplaySession? replaySession = null)
     {
         _hub = hub;
         _realHub = new Lazy<Hub?>(() =>
@@ -57,7 +58,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 "You should use the TracerProviderBuilderExtensions to configure Sentry with OpenTelemetry");
         }
 
-        _enrichers = enrichers ?? Enumerable.Empty<IOpenTelemetryEnricher>();
+        _enrichers = enrichers ?? [];
+        _replaySession = replaySession ?? ReplaySession.Instance;
         _options = hub.GetSentryOptions();
 
         if (_options is null)
@@ -158,7 +160,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         };
 
         var baggageHeader = data.Baggage.AsBaggageHeader();
-        var dynamicSamplingContext = baggageHeader.CreateDynamicSamplingContext();
+        var dynamicSamplingContext = baggageHeader.CreateDynamicSamplingContext(_replaySession);
         var transaction = (TransactionTracer)_hub.StartTransaction(
             transactionContext, new Dictionary<string, object?>(), dynamicSamplingContext
         );
