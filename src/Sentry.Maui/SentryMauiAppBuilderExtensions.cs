@@ -55,10 +55,19 @@ public static class SentryMauiAppBuilderExtensions
         services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
         services.AddSingleton<Disposer>();
 
-        services.AddSingleton<IMauiElementEventBinder, MauiButtonEventsBinder>();
-        services.AddSingleton<IMauiElementEventBinder, MauiImageButtonEventsBinder>();
-        services.AddSingleton<IMauiElementEventBinder, MauiGestureRecognizerEventsBinder>();
-        services.AddSingleton<IMauiElementEventBinder, MauiVisualElementEventsBinder>();
+        // Resolve the configured options and register any element event binders from these
+        IServiceProvider serviceProvider = services.BuildServiceProvider();
+        var options = serviceProvider.GetService<IOptions<SentryMauiOptions>>()?.Value;
+        if (options == null)
+        {
+            throw new InvalidOperationException("SentryMauiOptions not found in service provider.");
+        }
+        foreach (var eventBinder in options.DefaultEventBinders)
+        {
+            eventBinder.Register(services);
+        }
+
+        // This is ultimately the class that enables all the MauiElementEventBinders above
         services.TryAddSingleton<IMauiEventsBinder, MauiEventsBinder>();
 
         services.AddSentry<SentryMauiOptions>();
