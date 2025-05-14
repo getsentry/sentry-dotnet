@@ -9,7 +9,7 @@ public partial class CtMvvmViewModel : ObservableObject
     [RelayCommand]
     private async Task Test()
     {
-        var rand = new Random().Next(1, 10);
-        await Task.Delay(TimeSpan.FromSeconds(rand));
+        var rand = new Random().Next(100, 1000);
+        await Task.Delay(TimeSpan.FromMilliseconds(rand));
     }
 }
