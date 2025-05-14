@@ -1,5 +1,6 @@
 namespace Sentry.Protocol;
 
+[DebuggerDisplay(@"\{ Value = {Value}, Type = {Type} \}")]
 internal readonly struct SentryAttribute
 {
     public SentryAttribute(object value, string type)

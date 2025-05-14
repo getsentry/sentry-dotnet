@@ -34,36 +34,20 @@ SentrySdk.Init(options =>
     // This option tells Sentry to capture 100% of traces. You still need to start transactions and spans.
     options.TracesSampleRate = 1.0;
 
+    // This option enables the (experimental) Sentry Logs.
     options.EnableLogs = true;
-    options.SetBeforeSendLog(static (SentryLog log) =>
+    options.SetBeforeSendLog(static log =>
     {
-        if (log.TryGetAttribute("plan.type", out string? attribute) && attribute == "enterprise")
+        if (log.TryGetAttribute("suppress", out bool attribute) && attribute)
         {
             return null;
         }
 
-        return log.Level is SentryLogLevel.Error ? log : null;
+        // Drop logs with level Info
+        return log.Level is SentryLogLevel.Info ? null : log;
     });
 });
 
-var configureLog = static (SentryLog log) =>
-{
-    log.SetAttribute("string-attribute", "value");
-    log.SetAttribute("boolean-attribute", true);
-    log.SetAttribute("integer-attribute", long.MaxValue);
-    log.SetAttribute("double-attribute", double.MaxValue);
-};
-
-SentrySdk.Logger.LogTrace("Hello, World!", null, configureLog);
-SentrySdk.Logger.LogDebug("Hello, .NET!", null, configureLog);
-SentrySdk.Logger.LogInfo("Information", null, configureLog);
-SentrySdk.Logger.LogWarning("Warning with one {0}", ["parameter"], configureLog);
-SentrySdk.Logger.LogError("Error with {0} {1}", [2, "parameters"], configureLog);
-SentrySdk.Logger.LogFatal("Fatal {0} and {1}", [true, false], configureLog);
-
-await Task.Delay(TimeSpan.FromSeconds(5));
-
-/*
 // This starts a new transaction and attaches it to the scope.
 var transaction = SentrySdk.StartTransaction("Program Main", "function");
 SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
@@ -85,6 +69,7 @@ async Task FirstFunction()
     var httpClient = new HttpClient(messageHandler, true);
     var html = await httpClient.GetStringAsync("https://example.com/");
     WriteLine(html);
+    SentrySdk.Logger.LogInfo("HTTP Request completed.");
 }
 
 async Task SecondFunction()
@@ -104,6 +89,8 @@ async Task SecondFunction()
         // This is an example of capturing a handled exception.
         SentrySdk.CaptureException(exception);
         span.Finish(exception);
+
+        SentrySdk.Logger.LogError("Error with message: {0}", [exception.Message], static log => log.SetAttribute("method", nameof(SecondFunction)));
     }
 
     span.Finish();
@@ -117,6 +104,8 @@ async Task ThirdFunction()
         // Simulate doing some work
         await Task.Delay(100);
 
+        SentrySdk.Logger.LogFatal("Crash imminent!", [], static log => log.SetAttribute("suppress", true));
+
         // This is an example of an unhandled exception.  It will be captured automatically.
         throw new InvalidOperationException("Something happened that crashed the app!");
     }
@@ -125,4 +114,3 @@ async Task ThirdFunction()
         span.Finish();
     }
 }
-*/
