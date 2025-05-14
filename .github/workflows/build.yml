@@ -21,7 +21,7 @@ jobs:
           - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
             target: Linux
           - os: ubuntu-latest
-            container: ghcr.io/jpnurmi/alpine:edge # TODO: getsentry
+            container: ghcr.io/jpnurmi/alpine:3.19 # TODO: getsentry
             target: Linux-musl
           - os: windows-latest
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
@@ -66,7 +66,7 @@ jobs:
           - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
             target: Linux
           - os: ubuntu-latest
-            container: ghcr.io/jpnurmi/alpine:edge # TODO: getsentry
+            container: ghcr.io/jpnurmi/alpine:3.21 # TODO: getsentry
             target: Linux-musl
           - os: windows-latest
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
@@ -186,7 +186,7 @@ jobs:
         include:
           - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
           - os: ubuntu-latest
-            container: ghcr.io/jpnurmi/alpine:edge # TODO: getsentry
+            container: ghcr.io/jpnurmi/alpine:3.21 # TODO: getsentry
             target: Linux-musl
           - os: windows-latest
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
