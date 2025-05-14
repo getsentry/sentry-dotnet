@@ -2,7 +2,7 @@ namespace Sentry.Maui;
 
 internal interface IMauiElementEventBinderRegistration
 {
-    void Register(IServiceCollection services);
+    public void Register(IServiceCollection services);
 }
 
 internal class MauiElementEventBinderRegistration<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TEventBinder> : IMauiElementEventBinderRegistration
