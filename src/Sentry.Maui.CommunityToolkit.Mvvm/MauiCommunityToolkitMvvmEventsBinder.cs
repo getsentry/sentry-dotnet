@@ -1,6 +1,6 @@
-using Sentry.Internal;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using Sentry.Internal;
 
 namespace Sentry.Maui.CommunityToolkit.Mvvm;
 
