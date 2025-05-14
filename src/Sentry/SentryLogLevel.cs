@@ -1,3 +1,4 @@
+using Sentry.Extensibility;
 using Sentry.Infrastructure;
 
 namespace Sentry;
@@ -39,10 +40,11 @@ public enum SentryLogLevel
 [Experimental(DiagnosticId.ExperimentalFeature)]
 internal static class SentryLogLevelExtensions
 {
-    internal static (string, int?) ToSeverityTextAndOptionalSeverityNumber(this SentryLogLevel level)
+    internal static (string, int?) ToSeverityTextAndOptionalSeverityNumber(this SentryLogLevel level, IDiagnosticLogger? logger)
     {
         return (int)level switch
         {
+            <= 0 => Underflow(level, logger),
             1 => ("trace", null),
             >= 2 and <= 4 => ("trace", (int)level),
             5 => ("debug", null),
@@ -55,27 +57,19 @@ internal static class SentryLogLevelExtensions
             >= 18 and <= 20 => ("error", (int)level),
             21 => ("fatal", null),
             >= 22 and <= 24 => ("fatal", (int)level),
-            _ => ThrowOutOfRange<(string, int?)>(level, nameof(level)),
+            >= 25 => Overflow(level, logger),
         };
     }
 
-    internal static void ThrowIfOutOfRange(SentryLogLevel level, [CallerArgumentExpression(nameof(level))] string? paramName = null)
+    private static (string, int?) Underflow(SentryLogLevel level, IDiagnosticLogger? logger)
     {
-        if ((int)level is < 1 or > 24)
-        {
-            ThrowOutOfRange(level, paramName);
-        }
+        logger?.LogDebug("Log level {0} out of range ... clamping to minimum value {1} ({2})", level, 1, "trace");
+        return ("trace", 1);
     }
 
-    [DoesNotReturn]
-    private static void ThrowOutOfRange(SentryLogLevel level, string? paramName)
+    private static (string, int?) Overflow(SentryLogLevel level, IDiagnosticLogger? logger)
     {
-        throw new ArgumentOutOfRangeException(paramName, level, "Severity must be between 1 (inclusive) and 24 (inclusive).");
-    }
-
-    [DoesNotReturn]
-    private static T ThrowOutOfRange<T>(SentryLogLevel level, string? paramName)
-    {
-        throw new ArgumentOutOfRangeException(paramName, level, "Severity must be between 1 (inclusive) and 24 (inclusive).");
+        logger?.LogDebug("Log level {0} out of range ... clamping to maximum value {1} ({2})", level, 24, "fatal");
+        return ("fatal", 24);
     }
 }

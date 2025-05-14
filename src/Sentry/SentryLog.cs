@@ -13,7 +13,6 @@ namespace Sentry;
 public sealed class SentryLog : ISentryJsonSerializable
 {
     private readonly Dictionary<string, SentryAttribute> _attributes;
-    private readonly SentryLogLevel _level;
 
     [SetsRequiredMembers]
     internal SentryLog(DateTimeOffset timestamp, SentryId traceId, SentryLogLevel level, string message)
@@ -47,15 +46,7 @@ public sealed class SentryLog : ISentryJsonSerializable
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    public required SentryLogLevel Level
-    {
-        get => _level;
-        init
-        {
-            SentryLogLevelExtensions.ThrowIfOutOfRange(value);
-            _level = value;
-        }
-    }
+    public required SentryLogLevel Level { get; init; }
 
     /// <summary>
     /// The formatted log message.
@@ -236,7 +227,7 @@ public sealed class SentryLog : ISentryJsonSerializable
 
         writer.WriteNumber("timestamp", Timestamp.ToUnixTimeSeconds());
 
-        var (severityText, severityNumber) = Level.ToSeverityTextAndOptionalSeverityNumber();
+        var (severityText, severityNumber) = Level.ToSeverityTextAndOptionalSeverityNumber(logger);
         writer.WriteString("level", severityText);
 
         writer.WriteString("body", Message);
