@@ -22,7 +22,7 @@ public class DisabledHub : IHub, IDisposable
 
     private DisabledHub()
     {
-        Logger = new SentryStructuredLogger(this);
+        Logger = SentryStructuredLogger.CreateDisabled(this);
     }
 
     /// <summary>

@@ -49,6 +49,7 @@ public class SentryStructuredLoggerTests
         }
 
         public SentryStructuredLogger GetSut() => new(Hub, ScopeManager, Options, Clock);
+        public SentryStructuredLogger GetDisabledSut() => SentryStructuredLogger.CreateDisabled(Hub);
     }
 
     private readonly Fixture _fixture;
@@ -210,6 +211,17 @@ public class SentryStructuredLoggerTests
     private static void Throw(SentryLog log)
     {
         throw new InvalidOperationException();
+    }
+
+    [Fact]
+    public void CreateDisabled_EvenWhenEnabled_DoesNotCaptureEnvelope()
+    {
+        _fixture.Options.EnableLogs = true;
+        var logger = _fixture.GetDisabledSut();
+
+        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
+
+        _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
     }
 }
 
