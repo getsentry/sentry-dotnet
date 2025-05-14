@@ -534,6 +534,7 @@ public class SentryOptions
 
     /// <summary>
     /// Sets a callback function to be invoked before sending the log to Sentry.
+    /// When the delegate throws an <see cref="Exception"/> during invocation, the log will not be captured.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     /// <remarks>
