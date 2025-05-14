@@ -11,9 +11,14 @@ public class SentryStructuredLoggerTests
     {
         public Fixture()
         {
+            DiagnosticLogger = new InMemoryDiagnosticLogger();
             Hub = Substitute.For<IHub>();
             ScopeManager = Substitute.For<IInternalScopeManager>();
-            Options = new SentryOptions();
+            Options = new SentryOptions
+            {
+                Debug = true,
+                DiagnosticLogger = DiagnosticLogger,
+            };
             Clock = new MockClock(new DateTimeOffset(2025, 04, 22, 14, 51, 00, TimeSpan.Zero));
             Span = Substitute.For<ISpan>();
             TraceId = SentryId.Create();
@@ -24,6 +29,7 @@ public class SentryStructuredLoggerTests
             Span.ParentSpanId.Returns(ParentSpanId);
         }
 
+        public InMemoryDiagnosticLogger DiagnosticLogger { get; }
         public IHub Hub { get; }
         public IInternalScopeManager ScopeManager { get; }
         public SentryOptions Options { get; }
@@ -145,6 +151,22 @@ public class SentryStructuredLoggerTests
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         invocations.Should().Be(1);
+    }
+
+    [Fact]
+    public void Log_InvalidFormat_DoesNotCaptureEnvelope()
+    {
+        _fixture.Options.EnableLogs = true;
+        var logger = _fixture.GetSut();
+
+        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}, {4}", ["string", true, 1, 2.2]);
+
+        _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
+        var entry = _fixture.DiagnosticLogger.Entries.Should().ContainSingle().Which;
+        entry.Level.Should().Be(SentryLevel.Error);
+        entry.Message.Should().Be("Template string does not match the provided argument.");
+        entry.Exception.Should().BeOfType<FormatException>();
+        entry.Args.Should().BeEmpty();
     }
 
     private static void ConfigureLog(SentryLog log)

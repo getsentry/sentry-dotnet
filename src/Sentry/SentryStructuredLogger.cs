@@ -127,7 +127,17 @@ public sealed class SentryStructuredLogger
 
         _ = TryGetParentSpanId(_hub, _scopeManager, out var parentSpanId);
 
-        var message = string.Format(CultureInfo.InvariantCulture, template, parameters ?? []);
+        string message;
+        try
+        {
+            message = string.Format(CultureInfo.InvariantCulture, template, parameters ?? []);
+        }
+        catch (FormatException e)
+        {
+            _options.DiagnosticLogger?.LogError(e, "Template string does not match the provided argument.");
+            return;
+        }
+
         SentryLog log = new(timestamp, traceId, level, message)
         {
             Template = template,
