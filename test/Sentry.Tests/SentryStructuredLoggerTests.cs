@@ -176,7 +176,7 @@ file static class AssertionExtensions
         log.Level.Should().Be(level);
         log.Message.Should().Be("Template string with arguments: string, True, 1, 2.2");
         log.Template.Should().Be("Template string with arguments: {0}, {1}, {2}, {3}");
-        log.Parameters.Should().BeEquivalentTo(new object[] { "string", true, 1, 2.2 } );
+        log.Parameters.Should().BeEquivalentTo(new object[] { "string", true, 1, 2.2 });
         log.ParentSpanId.Should().Be(fixture.ParentSpanId);
         log.TryGetAttribute("attribute-key", out string? value).Should().BeTrue();
         value.Should().Be("attribute-value");
