@@ -1,3 +1,4 @@
+using Sentry.Internal;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 
@@ -8,6 +9,11 @@ namespace Sentry.Maui.CommunityToolkit.Mvvm;
 /// </summary>
 internal class MauiCommunityToolkitMvvmEventsBinder(IHub hub) : IMauiElementEventBinder
 {
+    private const string SpanName = "ctmvvm";
+    private const string SpanOp = "relay.command";
+
+    private readonly object _propertyChangedLock = new();
+
     /// <summary>
     /// Binds to the element
     /// </summary>
@@ -107,43 +113,47 @@ internal class MauiCommunityToolkitMvvmEventsBinder(IHub hub) : IMauiElementEven
 
     private void TryBindTo(ICommand? command, bool bind)
     {
-        if (command is IAsyncRelayCommand relayCommand)
+        const string isSubscribedProperty = "IsSubscribedToPropertyChanged";
+
+        if (!bind || command is not IAsyncRelayCommand relayCommand)
         {
-            // since events can retrigger binding pickups, we want to ensure we unhook any previous event handlers
-            // instead of storing a ref to know if we've already bound to an event or not
-            relayCommand.PropertyChanged -= RelayCommandOnPropertyChanged;
-            if (bind)
+            return;
+        }
+
+        // since events can retrigger binding pickups, this ensures we don't hook up event handlers more than once.
+        if (!relayCommand.GetFused<bool>(isSubscribedProperty))
+        {
+            lock (_propertyChangedLock)
             {
-                relayCommand.PropertyChanged += RelayCommandOnPropertyChanged;
+                if (!relayCommand.GetFused<bool>(isSubscribedProperty))
+                {
+                    relayCommand.PropertyChanged += RelayCommandOnPropertyChanged;
+                    relayCommand.SetFused(isSubscribedProperty, true);
+                }
             }
         }
     }
 
-
-    private readonly ConcurrentDictionary<IAsyncRelayCommand, ISpan> _contexts = new();
-    private const string SpanName = "ctmvvm";
-    private const string SpanOp = "relay.command";
-
     private void RelayCommandOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(IAsyncRelayCommand.IsRunning))
+        if (e.PropertyName != nameof(IAsyncRelayCommand.IsRunning))
         {
-            var relay = (IAsyncRelayCommand)sender!;
+            return;
+        }
 
-            if (relay.IsRunning)
-            {
-                var span = hub.StartSpan(SpanName, SpanOp);
-                if (span is ITransactionTracer transaction)
-                {
-                    hub.ConfigureScope(x => x.Transaction ??= transaction);
-                }
-                _contexts.TryAdd(relay, span);
-            }
-            else if (_contexts.TryGetValue(relay, out var value))
-            {
-                value.Finish();
-                _contexts.TryRemove(relay, out _);
-            }
+        var relay = (IAsyncRelayCommand)sender!;
+        if (relay.IsRunning)
+        {
+            // Note that we may be creating a transaction here and if so we explicitly don't store it on
+            // Scope.Transaction, because Scope.Transaction is AsyncLocal<T> and MAUI Apps have a global scope. The
+            // results would be that we would store the transaction on the scope, but it would never be cleared again,
+            // since the next call to OnPropertyChanged for this RelayCommand will (likely) be from a different thread.
+            var span = hub.StartSpan(SpanName, SpanOp);
+            relay.SetFused(span);
+        }
+        else if (relay.GetFused<ISpan>() is { } span)
+        {
+            span.Finish();
         }
     }
 }
