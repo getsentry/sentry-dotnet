@@ -134,7 +134,6 @@ public sealed class SentryStructuredLogger
             Parameters = ImmutableArray.Create(parameters),
             ParentSpanId = parentSpanId,
         };
-        log.SetAttributes(_options);
 
         try
         {
@@ -147,6 +146,8 @@ public sealed class SentryStructuredLogger
             Console.WriteLine(e);
             return;
         }
+
+        log.SetAttributes(_options);
 
         var configuredLog = log;
         if (_options.BeforeSendLogInternal is { } beforeSendLog)

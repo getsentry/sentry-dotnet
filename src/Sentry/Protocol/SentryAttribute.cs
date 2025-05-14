@@ -80,6 +80,11 @@ internal static class SentryAttributeSerializer
             writer.WriteBoolean("value", boolean);
             writer.WriteString("type", "boolean");
         }
+        else if (value is int int32)
+        {
+            writer.WriteNumber("value", int32);
+            writer.WriteString("type", "integer");
+        }
         else if (value is long int64)
         {
             writer.WriteNumber("value", int64);

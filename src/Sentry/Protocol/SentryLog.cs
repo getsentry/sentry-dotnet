@@ -219,11 +219,6 @@ public sealed class SentryLog : ISentryJsonSerializable
             SetAttribute("sentry.release", release);
         }
 
-        if (ParentSpanId.HasValue)
-        {
-            SetAttribute("sentry.trace.parent_span_id", ParentSpanId.Value.ToString());
-        }
-
         SetAttribute("sentry.sdk.name", Constants.SdkName);
         if (SdkVersion.Instance.Version is { } version)
         {
@@ -239,16 +234,19 @@ public sealed class SentryLog : ISentryJsonSerializable
         writer.WriteStartObject();
 
         writer.WriteNumber("timestamp", Timestamp.ToUnixTimeSeconds());
-        writer.WriteString("trace_id", TraceId);
 
         var (severityText, severityNumber) = Level.ToSeverityTextAndOptionalSeverityNumber();
         writer.WriteString("level", severityText);
+
+        writer.WriteString("body", Message);
+
+        writer.WritePropertyName("trace_id");
+        TraceId.WriteTo(writer, logger);
+
         if (severityNumber.HasValue)
         {
             writer.WriteNumber("severity_number", severityNumber.Value);
         }
-
-        writer.WriteString("body", Message);
 
         writer.WritePropertyName("attributes");
         writer.WriteStartObject();
@@ -262,13 +260,23 @@ public sealed class SentryLog : ISentryJsonSerializable
         {
             for (var index = 0; index < Parameters.Length; index++)
             {
-                SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameters.{index}", Parameters[index]);
+                SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameter.{index}", Parameters[index]);
             }
         }
 
         foreach (var attribute in _attributes)
         {
             SentryAttributeSerializer.WriteAttribute(writer, attribute.Key, attribute.Value);
+        }
+
+        if (ParentSpanId.HasValue)
+        {
+            writer.WritePropertyName("sentry.trace.parent_span_id");
+            writer.WriteStartObject();
+            writer.WritePropertyName("value");
+            ParentSpanId.Value.WriteTo(writer, logger);
+            writer.WriteString("type", "string");
+            writer.WriteEndObject();
         }
 
         writer.WriteEndObject();
