@@ -164,14 +164,52 @@ public class SentryStructuredLoggerTests
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         var entry = _fixture.DiagnosticLogger.Entries.Should().ContainSingle().Which;
         entry.Level.Should().Be(SentryLevel.Error);
-        entry.Message.Should().Be("Template string does not match the provided argument.");
+        entry.Message.Should().Be("Template string does not match the provided argument. The Log will be dropped.");
         entry.Exception.Should().BeOfType<FormatException>();
+        entry.Args.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Log_InvalidConfigureLog_DoesNotCaptureEnvelope()
+    {
+        _fixture.Options.EnableLogs = true;
+        var logger = _fixture.GetSut();
+
+        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], Throw);
+
+        _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
+        var entry = _fixture.DiagnosticLogger.Entries.Should().ContainSingle().Which;
+        entry.Level.Should().Be(SentryLevel.Error);
+        entry.Message.Should().Be("The configureLog callback threw an exception. The Log will be dropped.");
+        entry.Exception.Should().BeOfType<InvalidOperationException>();
+        entry.Args.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Log_InvalidBeforeSendLog_DoesNotCaptureEnvelope()
+    {
+        _fixture.Options.EnableLogs = true;
+        _fixture.Options.SetBeforeSendLog(static (SentryLog log) => throw new InvalidOperationException());
+        var logger = _fixture.GetSut();
+
+        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2]);
+
+        _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
+        var entry = _fixture.DiagnosticLogger.Entries.Should().ContainSingle().Which;
+        entry.Level.Should().Be(SentryLevel.Error);
+        entry.Message.Should().Be("The BeforeSendLog callback threw an exception. The Log will be dropped.");
+        entry.Exception.Should().BeOfType<InvalidOperationException>();
         entry.Args.Should().BeEmpty();
     }
 
     private static void ConfigureLog(SentryLog log)
     {
         log.SetAttribute("attribute-key", "attribute-value");
+    }
+
+    private static void Throw(SentryLog log)
+    {
+        throw new InvalidOperationException();
     }
 }
 

@@ -134,7 +134,7 @@ public sealed class SentryStructuredLogger
         }
         catch (FormatException e)
         {
-            _options.DiagnosticLogger?.LogError(e, "Template string does not match the provided argument.");
+            _options.DiagnosticLogger?.LogError(e, "Template string does not match the provided argument. The Log will be dropped.");
             return;
         }
 
@@ -151,9 +151,7 @@ public sealed class SentryStructuredLogger
         }
         catch (Exception e)
         {
-            //TODO: change to Diagnostic Logger (if enabled)
-            // see https://github.com/getsentry/sentry-dotnet/issues/4132
-            Console.WriteLine(e);
+            _options.DiagnosticLogger?.LogError(e, "The configureLog callback threw an exception. The Log will be dropped.");
             return;
         }
 
@@ -168,9 +166,7 @@ public sealed class SentryStructuredLogger
             }
             catch (Exception e)
             {
-                //TODO: change to Diagnostic Logger (if enabled)
-                // see https://github.com/getsentry/sentry-dotnet/issues/4132
-                Console.WriteLine(e);
+                _options.DiagnosticLogger?.LogError(e, "The BeforeSendLog callback threw an exception. The Log will be dropped.");
                 return;
             }
         }
