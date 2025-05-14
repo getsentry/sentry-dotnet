@@ -78,6 +78,13 @@ public sealed class SentryLog : ISentryJsonSerializable
     public ImmutableArray<object> Parameters { get; init; }
 
     /// <summary>
+    /// The span id of the span that was active when the log was collected.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public SpanId? ParentSpanId { get; init; }
+
+    /// <summary>
     /// Gets the attribute value associated with the specified key when of type <see cref="string"/>.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
@@ -201,7 +208,7 @@ public sealed class SentryLog : ISentryJsonSerializable
         _attributes[key] = new SentryAttribute(value, "double");
     }
 
-    internal void SetAttributes(SentryOptions options, SpanId? parentSpanId)
+    internal void SetAttributes(SentryOptions options)
     {
         var environment = options.SettingLocator.GetEnvironment();
         SetAttribute("sentry.environment", environment);
@@ -212,9 +219,9 @@ public sealed class SentryLog : ISentryJsonSerializable
             SetAttribute("sentry.release", release);
         }
 
-        if (parentSpanId.HasValue)
+        if (ParentSpanId.HasValue)
         {
-            SetAttribute("sentry.trace.parent_span_id", parentSpanId.Value.ToString());
+            SetAttribute("sentry.trace.parent_span_id", ParentSpanId.Value.ToString());
         }
 
         SetAttribute("sentry.sdk.name", Constants.SdkName);

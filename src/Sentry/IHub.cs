@@ -1,3 +1,5 @@
+using Sentry.Infrastructure;
+
 namespace Sentry;
 
 /// <summary>
@@ -16,6 +18,20 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// Last event id recorded in the current scope.
     /// </summary>
     public SentryId LastEventId { get; }
+
+    /// <summary>
+    /// Creates and sends logs to Sentry.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    /// <remarks>
+    /// Available options:
+    /// <list type="bullet">
+    /// <item><see cref="Sentry.SentryOptions.EnableLogs"/></item>
+    /// <item><see cref="Sentry.SentryOptions.SetBeforeSendLog(System.Func{Sentry.Protocol.SentryLog, Sentry.Protocol.SentryLog})"/></item>
+    /// </list>
+    /// </remarks>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public SentryStructuredLogger Logger { get; }
 
     /// <summary>
     /// Starts a transaction.

@@ -57,6 +57,7 @@ internal class Hub : IHub, IDisposable
         client ??= new SentryClient(options, randomValuesFactory: _randomValuesFactory, sessionManager: _sessionManager);
 
         ScopeManager = scopeManager ?? new SentryScopeManager(options, client);
+        Logger = new SentryStructuredLogger(this);
 
         if (!options.IsGlobalModeEnabled)
         {
@@ -755,4 +756,7 @@ internal class Hub : IHub, IDisposable
     }
 
     public SentryId LastEventId => CurrentScope.LastEventId;
+
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public SentryStructuredLogger Logger { get; }
 }

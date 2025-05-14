@@ -1,3 +1,4 @@
+using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Protocol.Envelopes;
 using Sentry.Protocol.Metrics;
@@ -21,6 +22,7 @@ public class DisabledHub : IHub, IDisposable
 
     private DisabledHub()
     {
+        Logger = new SentryStructuredLogger(this);
     }
 
     /// <summary>
@@ -228,4 +230,11 @@ public class DisabledHub : IHub, IDisposable
     /// No-Op.
     /// </summary>
     public SentryId LastEventId => SentryId.Empty;
+
+    /// <summary>
+    /// Disabled Logger.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public SentryStructuredLogger Logger { get; }
 }
