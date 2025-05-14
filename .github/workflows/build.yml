@@ -40,7 +40,6 @@ jobs:
           enableCrossOsArchive: true
 
       - name: Remove unused applications
-        if: ${{ !matrix.container }}
         uses: ./.github/actions/freediskspace
 
       - name: Install build dependencies
@@ -83,7 +82,6 @@ jobs:
           fetch-depth: 2 # default is 1 and codecov needs > 1
 
       - name: Remove unused applications
-        if: ${{ !matrix.container }}
         uses: ./.github/actions/freediskspace
 
       # We use macOS for the final publishing build so we get all the iOS/macCatalyst targets in the packages
