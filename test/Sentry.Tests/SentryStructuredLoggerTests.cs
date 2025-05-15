@@ -1,7 +1,5 @@
 #nullable enable
 
-using Sentry.PlatformAbstractions;
-
 namespace Sentry.Tests;
 
 /// <summary>
@@ -61,7 +59,7 @@ public class SentryStructuredLoggerTests
         _fixture = new Fixture();
     }
 
-    [Theory]
+    [SkippableTheory(typeof(MissingMethodException))] //throws in .NETFramework on non-Windows for System.Collections.Immutable.ImmutableArray`1
     [InlineData(SentryLogLevel.Trace)]
     [InlineData(SentryLogLevel.Debug)]
     [InlineData(SentryLogLevel.Info)]
@@ -70,8 +68,6 @@ public class SentryStructuredLoggerTests
     [InlineData(SentryLogLevel.Fatal)]
     public void Log_Enabled_CapturesEnvelope(SentryLogLevel level)
     {
-        Skip.If(RuntimeInfo.GetRuntime().IsMono(), "System.MissingMethodException on System.Collections.Immutable.ImmutableArray`1");
-
         _fixture.Options.EnableLogs = true;
         var logger = _fixture.GetSut();
 
@@ -101,11 +97,9 @@ public class SentryStructuredLoggerTests
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
     }
 
-    [Fact]
+    [SkippableFact(typeof(MissingMethodException))] //throws in .NETFramework on non-Windows for System.Collections.Immutable.ImmutableArray`1
     public void Log_UseScopeManager_CapturesEnvelope()
     {
-        Skip.If(RuntimeInfo.GetRuntime().IsMono(), "System.MissingMethodException on System.Collections.Immutable.ImmutableArray`1");
-
         _fixture.UseScopeManager();
         _fixture.Options.EnableLogs = true;
         var logger = _fixture.GetSut();
@@ -119,11 +113,9 @@ public class SentryStructuredLoggerTests
         envelope.AssertEnvelope(_fixture, SentryLogLevel.Trace);
     }
 
-    [Fact]
+    [SkippableFact(typeof(MissingMethodException))] //throws in .NETFramework on non-Windows for System.Collections.Immutable.ImmutableArray`1
     public void Log_WithBeforeSendLog_InvokesCallback()
     {
-        Skip.If(RuntimeInfo.GetRuntime().IsMono(), "System.MissingMethodException on System.Collections.Immutable.ImmutableArray`1");
-
         var invocations = 0;
         SentryLog configuredLog = null!;
 
