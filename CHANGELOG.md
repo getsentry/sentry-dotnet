@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add experimental support for _Sentry Structured Logging_ via `SentrySdk.Logger` ([#4158](https://github.com/getsentry/sentry-dotnet/pull/4158))
+
 ## 5.7.0
 
 ### Features
