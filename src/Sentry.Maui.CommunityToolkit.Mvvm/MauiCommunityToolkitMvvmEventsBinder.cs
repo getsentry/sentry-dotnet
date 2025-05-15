@@ -111,7 +111,7 @@ internal class MauiCommunityToolkitMvvmEventsBinder(IHub hub) : IMauiElementEven
 
     private void TryBindTo(ICommand? command, bool bind)
     {
-        const string isSubscribedProperty = "IsSubscribedToPropertyChanged";
+        const string isSubscribedProperty = "IsSubscribed";
 
         if (!bind || command is not IAsyncRelayCommand relayCommand)
         {

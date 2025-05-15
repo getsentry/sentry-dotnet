@@ -1,4 +1,3 @@
-using Sentry.Maui.CommunityToolkit.Mvvm;
 using Sentry.Maui.Internal;
 
 namespace Sentry.Maui.Tests;
@@ -22,7 +21,6 @@ public partial class MauiEventsBinderTests
                 .Do(c =>
                 {
                     c.Arg<Action<Scope>>()(Scope);
-
                 });
 
             Scope.Transaction = Substitute.For<ITransactionTracer>();
@@ -38,7 +36,6 @@ public partial class MauiEventsBinderTests
                 [
                     new MauiButtonEventsBinder(),
                     new MauiImageButtonEventsBinder(),
-                    new MauiCommunityToolkitMvvmEventsBinder(Hub),
                     new MauiGestureRecognizerEventsBinder()
                 ]
             );

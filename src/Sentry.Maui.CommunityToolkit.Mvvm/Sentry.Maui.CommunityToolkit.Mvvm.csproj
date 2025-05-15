@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>MAUI and Community Toolkit integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
-    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+    <TargetFramework>net9.0</TargetFramework>
 
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -23,5 +23,6 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Sentry.Maui.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Maui.CommunityToolkit.Mvvm.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 </Project>
