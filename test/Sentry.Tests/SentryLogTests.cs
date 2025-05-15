@@ -12,11 +12,6 @@ public class SentryLogTests
     private static readonly SpanId? ParentSpanId = SpanId.Create();
 
     private static readonly ISystemClock Clock = new MockClock(Timestamp);
-    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
-    {
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        WriteIndented = true,
-    };
 
     private readonly IDiagnosticLogger _output;
 
@@ -49,7 +44,7 @@ public class SentryLogTests
 
         reader.EndOfStream.Should().BeTrue();
 
-        JsonSerializer.Serialize(header, JsonSerializerOptions).Should().Be($$"""
+        header.ToIndentedJsonString().Should().Be($$"""
         {
           "sdk": {
             "name": "{{SdkVersion.Instance.Name}}",
@@ -59,7 +54,7 @@ public class SentryLogTests
         }
         """);
 
-        JsonSerializer.Serialize(item, JsonSerializerOptions).Should().Match("""
+        item.ToIndentedJsonString().Should().Match("""
         {
           "type": "log",
           "item_count": 1,
@@ -68,7 +63,7 @@ public class SentryLogTests
         }
         """);
 
-        JsonSerializer.Serialize(payload, JsonSerializerOptions).Should().Be($$"""
+        payload.ToIndentedJsonString().Should().Be($$"""
         {
           "items": [
             {
@@ -132,7 +127,7 @@ public class SentryLogTests
 
         reader.EndOfStream.Should().BeTrue();
 
-        JsonSerializer.Serialize(item, JsonSerializerOptions).Should().Match("""
+        item.ToIndentedJsonString().Should().Match("""
         {
           "type": "log",
           "item_count": 1,
@@ -141,7 +136,7 @@ public class SentryLogTests
         }
         """);
 
-        JsonSerializer.Serialize(payload, JsonSerializerOptions).Should().Be($$"""
+        payload.ToIndentedJsonString().Should().Be($$"""
         {
           "items": [
             {
@@ -220,5 +215,24 @@ file static class JsonFormatterExtensions
     public static string Format(this DateTimeOffset value)
     {
         return value.ToString("yyyy-MM-ddTHH:mm:sszzz", DateTimeFormatInfo.InvariantInfo);
+    }
+}
+
+file static class JsonDocumentExtensions
+{
+    private static readonly bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+    private static readonly JsonSerializerOptions Options = new()
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        WriteIndented = true,
+    };
+
+    public static string ToIndentedJsonString(this JsonDocument document)
+    {
+        var json = JsonSerializer.Serialize(document, Options);
+
+        // Standardize on \n on all platforms, for consistency in tests.
+        return IsWindows ? json.Replace("\r\n", "\n") : json;
     }
 }
