@@ -43,6 +43,7 @@ public sealed class SentryStructuredLogger
     /// <param name="template">A formattable <see langword="string"/>. When incompatible with the <paramref name="parameters"/>, the log will not be captured. See <see href="https://learn.microsoft.com/dotnet/api/system.string.format">System.String.Format</see>.</param>
     /// <param name="parameters">The arguments to the <paramref name="template"/>. See <see href="https://learn.microsoft.com/dotnet/api/system.string.format">System.String.Format</see>.</param>
     /// <param name="configureLog">A delegate to set attributes on the <see cref="SentryLog"/>. When the delegate throws an <see cref="Exception"/> during invocation, the log will not be captured.</param>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public void LogTrace(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
     {
         if (IsEnabled)
