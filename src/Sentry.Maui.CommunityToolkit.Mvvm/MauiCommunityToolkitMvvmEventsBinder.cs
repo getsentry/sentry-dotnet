@@ -12,8 +12,6 @@ internal class MauiCommunityToolkitMvvmEventsBinder(IHub hub) : IMauiElementEven
     private const string SpanName = "ctmvvm";
     private const string SpanOp = "relay.command";
 
-    private readonly object _propertyChangedLock = new();
-
     /// <summary>
     /// Binds to the element
     /// </summary>
@@ -123,7 +121,7 @@ internal class MauiCommunityToolkitMvvmEventsBinder(IHub hub) : IMauiElementEven
         // since events can retrigger binding pickups, this ensures we don't hook up event handlers more than once.
         if (!relayCommand.GetFused<bool>(isSubscribedProperty))
         {
-            lock (_propertyChangedLock)
+            lock (relayCommand)
             {
                 if (!relayCommand.GetFused<bool>(isSubscribedProperty))
                 {
