@@ -221,20 +221,22 @@ file static class JsonFormatterExtensions
 
     public static string Format(this double value)
     {
-        // since .NET Core 3.0, the Floating-Point Formatter returns the shortest roundtrippable string, rather than the exact string
-        // e.g. on .NET Framework (Windows)
-        // * 2.2.ToString() -> 2.2000000000000002
-        // * 4.4.ToString() -> 4.4000000000000004
-        // see https://devblogs.microsoft.com/dotnet/floating-point-parsing-and-formatting-improvements-in-net-core-3-0/
-
-        if (!IsWindows)
+#if NETFRAMEWORK
+        if (IsWindows)
         {
-            return value.ToString(NumberFormatInfo.InvariantInfo);
-        }
+            // since .NET Core 3.0, the Floating-Point Formatter returns the shortest roundtrippable string, rather than the exact string
+            // e.g. on .NET Framework (Windows)
+            // * 2.2.ToString() -> 2.2000000000000002
+            // * 4.4.ToString() -> 4.4000000000000004
+            // see https://devblogs.microsoft.com/dotnet/floating-point-parsing-and-formatting-improvements-in-net-core-3-0/
 
-        var utf16Text = value.ToString("G17", NumberFormatInfo.InvariantInfo);
-        var utf8Bytes = Encoding.UTF8.GetBytes(utf16Text);
-        return Encoding.UTF8.GetString(utf8Bytes);
+            var utf16Text = value.ToString("G17", NumberFormatInfo.InvariantInfo);
+            var utf8Bytes = Encoding.UTF8.GetBytes(utf16Text);
+            return Encoding.UTF8.GetString(utf8Bytes);
+        }
+#endif
+
+        return value.ToString(NumberFormatInfo.InvariantInfo);
     }
 }
 
