@@ -163,7 +163,7 @@ public class SentryLogTests
                   "type": "integer"
                 },
                 "sentry.message.parameter.3": {
-                  "value": 2.2,
+                  "value": {{2.2.ToString(NumberFormatInfo.InvariantInfo)/*.NET Core 3.0+ returns the shortest roundtrippable string https://devblogs.microsoft.com/dotnet/floating-point-parsing-and-formatting-improvements-in-net-core-3-0/*/}},
                   "type": "double"
                 },
                 "string-attribute": {
@@ -179,7 +179,7 @@ public class SentryLogTests
                   "type": "integer"
                 },
                 "double-attribute": {
-                  "value": 4.4,
+                  "value": {{4.4.ToString(NumberFormatInfo.InvariantInfo)/*.NET Core 3.0+ returns the shortest roundtrippable string https://devblogs.microsoft.com/dotnet/floating-point-parsing-and-formatting-improvements-in-net-core-3-0/*/}},
                   "type": "double"
                 },
                 "sentry.environment": {
