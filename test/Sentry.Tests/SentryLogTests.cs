@@ -1,4 +1,5 @@
 using System.Text.Encodings.Web;
+using Sentry.PlatformAbstractions;
 
 namespace Sentry.Tests;
 
@@ -98,6 +99,8 @@ public class SentryLogTests
     [Fact]
     public void WriteTo_EnvelopeItem_MaximalSerializedSentryLog()
     {
+        Skip.If(RuntimeInfo.GetRuntime().IsMono(), "System.MissingMethodException on System.Collections.Immutable.ImmutableArray`1");
+
         var options = new SentryOptions
         {
             Environment = "my-environment",
