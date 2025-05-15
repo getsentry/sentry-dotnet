@@ -21,6 +21,7 @@ public sealed class SentryLog : ISentryJsonSerializable
         TraceId = traceId;
         Level = level;
         Message = message;
+        // 7 is the number of built-in attributes, so we start with that.
         _attributes = new Dictionary<string, SentryAttribute>(7);
     }
 
