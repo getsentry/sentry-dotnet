@@ -1,5 +1,3 @@
-using Sentry.Infrastructure;
-
 namespace Sentry;
 
 /// <summary>
@@ -30,7 +28,7 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// <item><see cref="Sentry.SentryOptions.SetBeforeSendLog(System.Func{SentryLog, SentryLog})"/></item>
     /// </list>
     /// </remarks>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
+    [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
     public SentryStructuredLogger Logger { get; }
 
     /// <summary>

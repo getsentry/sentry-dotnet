@@ -1,5 +1,4 @@
 using Sentry.Extensibility;
-using Sentry.Infrastructure;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol.Metrics;
@@ -372,7 +371,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         return new EnvelopeItem(header, new JsonSerializable(report));
     }
 
-    [Experimental(DiagnosticId.ExperimentalFeature)]
+    [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
     internal static EnvelopeItem FromLog(SentryLog log)
     {
         //TODO: allow batching Sentry logs

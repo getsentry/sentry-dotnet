@@ -7,7 +7,6 @@ using Sentry.Internal.Extensions;
 using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
 using Sentry.PlatformAbstractions;
-using Sentry.Protocol;
 using static Sentry.SentryConstants;
 
 #if HAS_DIAGNOSTIC_INTEGRATION
