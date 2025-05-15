@@ -163,7 +163,7 @@ public class SentryLogTests
                   "type": "integer"
                 },
                 "sentry.message.parameter.3": {
-                  "value": {{2.2.ToString(NumberFormatInfo.InvariantInfo)/*.NET Core 3.0+ returns the shortest roundtrippable string https://devblogs.microsoft.com/dotnet/floating-point-parsing-and-formatting-improvements-in-net-core-3-0/*/}},
+                  "value": {{2.2.Format()}},
                   "type": "double"
                 },
                 "string-attribute": {
@@ -179,7 +179,7 @@ public class SentryLogTests
                   "type": "integer"
                 },
                 "double-attribute": {
-                  "value": {{4.4.ToString(NumberFormatInfo.InvariantInfo)/*.NET Core 3.0+ returns the shortest roundtrippable string https://devblogs.microsoft.com/dotnet/floating-point-parsing-and-formatting-improvements-in-net-core-3-0/*/}},
+                  "value": {{4.4.Format()}},
                   "type": "double"
                 },
                 "sentry.environment": {
@@ -212,9 +212,29 @@ public class SentryLogTests
 
 file static class JsonFormatterExtensions
 {
+    private static readonly bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
     public static string Format(this DateTimeOffset value)
     {
         return value.ToString("yyyy-MM-ddTHH:mm:sszzz", DateTimeFormatInfo.InvariantInfo);
+    }
+
+    public static string Format(this double value)
+    {
+        // since .NET Core 3.0, the Floating-Point Formatter returns the shortest roundtrippable string, rather than the exact string
+        // e.g. on .NET Framework (Windows)
+        // * 2.2.ToString() -> 2.2000000000000002
+        // * 4.4.ToString() -> 4.4000000000000004
+        // see https://devblogs.microsoft.com/dotnet/floating-point-parsing-and-formatting-improvements-in-net-core-3-0/
+
+        if (!IsWindows)
+        {
+            return value.ToString(NumberFormatInfo.InvariantInfo);
+        }
+
+        var utf16Text = value.ToString("G17", NumberFormatInfo.InvariantInfo);
+        var utf8Bytes = Encoding.UTF8.GetBytes(utf16Text);
+        return Encoding.UTF8.GetString(utf8Bytes);
     }
 }
 
