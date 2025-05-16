@@ -7,6 +7,8 @@ internal class BindableSentryLoggingOptions : BindableSentryOptions
 {
     public LogLevel? MinimumBreadcrumbLevel { get; set; }
     public LogLevel? MinimumEventLevel { get; set; }
+    [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
+    public LogLevel? MinimumLogLevel { get; set; }
     public bool? InitializeSdk { get; set; }
 
     public void ApplyTo(SentryLoggingOptions options)
@@ -14,6 +16,7 @@ internal class BindableSentryLoggingOptions : BindableSentryOptions
         base.ApplyTo(options);
         options.MinimumBreadcrumbLevel = MinimumBreadcrumbLevel ?? options.MinimumBreadcrumbLevel;
         options.MinimumEventLevel = MinimumEventLevel ?? options.MinimumEventLevel;
+        options.MinimumLogLevel = MinimumLogLevel ?? options.MinimumLogLevel;
         options.InitializeSdk = InitializeSdk ?? options.InitializeSdk;
     }
 }

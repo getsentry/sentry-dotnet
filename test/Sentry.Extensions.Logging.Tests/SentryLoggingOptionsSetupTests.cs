@@ -25,6 +25,7 @@ public class SentryLoggingOptionsSetupTests
             Distribution = "FakeDistribution",
             Environment = "Test",
             Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647",
+            EnableLogs  = true,
             MaxQueueItems = 8,
             MaxCacheItems = 9,
             ShutdownTimeout = TimeSpan.FromSeconds(13),
@@ -55,6 +56,7 @@ public class SentryLoggingOptionsSetupTests
 
             MinimumBreadcrumbLevel = LogLevel.Debug,
             MinimumEventLevel = LogLevel.Error,
+            MinimumLogLevel = LogLevel.None,
             InitializeSdk = true
         };
         var config = new ConfigurationBuilder()
@@ -74,6 +76,7 @@ public class SentryLoggingOptionsSetupTests
                 ["Distribution"] = expected.Distribution,
                 ["Environment"] = expected.Environment,
                 ["Dsn"] = expected.Dsn,
+                ["EnableLogs"] = expected.EnableLogs.ToString(),
                 ["MaxQueueItems"] = expected.MaxQueueItems.ToString(),
                 ["MaxCacheItems"] = expected.MaxCacheItems.ToString(),
                 ["ShutdownTimeout"] = expected.ShutdownTimeout.ToString(),
@@ -105,6 +108,7 @@ public class SentryLoggingOptionsSetupTests
                 ["JsonPreserveReferences"] = expected.JsonPreserveReferences.ToString(),
                 ["MinimumBreadcrumbLevel"] = expected.MinimumBreadcrumbLevel.ToString(),
                 ["MinimumEventLevel"] = expected.MinimumEventLevel.ToString(),
+                ["MinimumLogLevel"] = expected.MinimumLogLevel.ToString(),
                 ["InitializeSdk"] = expected.InitializeSdk.ToString(),
             })
             .Build();
@@ -134,6 +138,7 @@ public class SentryLoggingOptionsSetupTests
             actual.Distribution.Should().Be(expected.Distribution);
             actual.Environment.Should().Be(expected.Environment);
             actual.Dsn.Should().Be(expected.Dsn);
+            actual.EnableLogs.Should().Be(expected.EnableLogs);
             actual.MaxQueueItems.Should().Be(expected.MaxQueueItems);
             actual.MaxCacheItems.Should().Be(expected.MaxCacheItems);
             actual.ShutdownTimeout.Should().Be(expected.ShutdownTimeout);
@@ -162,6 +167,7 @@ public class SentryLoggingOptionsSetupTests
 
             actual.MinimumBreadcrumbLevel.Should().Be(expected.MinimumBreadcrumbLevel);
             actual.MinimumEventLevel.Should().Be(expected.MinimumEventLevel);
+            actual.MinimumLogLevel.Should().Be(expected.MinimumLogLevel);
             actual.InitializeSdk.Should().Be(expected.InitializeSdk);
         }
     }

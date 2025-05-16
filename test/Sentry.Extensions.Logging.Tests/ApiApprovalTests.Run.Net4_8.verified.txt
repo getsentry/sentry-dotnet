@@ -41,6 +41,7 @@ namespace Sentry.Extensions.Logging
         public bool InitializeSdk { get; set; }
         public Microsoft.Extensions.Logging.LogLevel MinimumBreadcrumbLevel { get; set; }
         public Microsoft.Extensions.Logging.LogLevel MinimumEventLevel { get; set; }
+        public Microsoft.Extensions.Logging.LogLevel MinimumLogLevel { get; set; }
         public void ConfigureScope(System.Action<Sentry.Scope> action) { }
     }
     public static class SentryLoggingOptionsExtensions
