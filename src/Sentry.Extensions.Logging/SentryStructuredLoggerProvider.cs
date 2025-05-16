@@ -8,7 +8,7 @@ namespace Sentry.Extensions.Logging;
 /// </summary>
 [ProviderAlias("SentryLogs")]
 [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
-internal sealed class SentryStructuredLoggerProvider : ILoggerProvider
+internal class SentryStructuredLoggerProvider : ILoggerProvider
 {
     private readonly IOptions<SentryLoggingOptions> _options;
     private readonly IHub _hub;
