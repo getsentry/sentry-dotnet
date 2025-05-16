@@ -13,6 +13,7 @@ internal class Hub : IHub, IDisposable
     private readonly ISessionManager _sessionManager;
     private readonly SentryOptions _options;
     private readonly RandomValuesFactory _randomValuesFactory;
+    private readonly IReplaySession _replaySession;
 
 #if MEMORY_DUMP_SUPPORTED
     private readonly MemoryMonitor? _memoryMonitor;
@@ -39,7 +40,8 @@ internal class Hub : IHub, IDisposable
         ISessionManager? sessionManager = null,
         ISystemClock? clock = null,
         IInternalScopeManager? scopeManager = null,
-        RandomValuesFactory? randomValuesFactory = null)
+        RandomValuesFactory? randomValuesFactory = null,
+        IReplaySession? replaySession = null)
     {
         if (string.IsNullOrWhiteSpace(options.Dsn))
         {
@@ -55,7 +57,7 @@ internal class Hub : IHub, IDisposable
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
         _clock = clock ?? SystemClock.Clock;
         client ??= new SentryClient(options, randomValuesFactory: _randomValuesFactory, sessionManager: _sessionManager);
-
+        _replaySession = replaySession ?? ReplaySession.Instance;
         ScopeManager = scopeManager ?? new SentryScopeManager(options, client);
 
         if (!options.IsGlobalModeEnabled)
@@ -178,10 +180,10 @@ internal class Hub : IHub, IDisposable
             }
         }
 
-        // Use the provided DSC, or create one based on this transaction.
+        // Use the provided DSC (adding the active replayId if necessary), or create one based on this transaction.
         // DSC creation must be done AFTER the sampling decision has been made.
-        transaction.DynamicSamplingContext =
-            dynamicSamplingContext ?? transaction.CreateDynamicSamplingContext(_options);
+        transaction.DynamicSamplingContext = dynamicSamplingContext?.WithReplayId(_replaySession)
+            ?? transaction.CreateDynamicSamplingContext(_options, _replaySession);
 
         // A sampled out transaction still appears fully functional to the user
         // but will be dropped by the client and won't reach Sentry's servers.
@@ -224,7 +226,7 @@ internal class Hub : IHub, IDisposable
         }
 
         var propagationContext = CurrentScope.PropagationContext;
-        return propagationContext.GetOrCreateDynamicSamplingContext(_options).ToBaggageHeader();
+        return propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession).ToBaggageHeader();
     }
 
     public TransactionContext ContinueTrace(
@@ -254,7 +256,7 @@ internal class Hub : IHub, IDisposable
         string? name = null,
         string? operation = null)
     {
-        var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader);
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader, _replaySession);
         ConfigureScope(scope => scope.SetPropagationContext(propagationContext));
 
         return new TransactionContext(
@@ -382,7 +384,7 @@ internal class Hub : IHub, IDisposable
         evt.Contexts.Trace.TraceId = propagationContext.TraceId;
         evt.Contexts.Trace.SpanId = propagationContext.SpanId;
         evt.Contexts.Trace.ParentSpanId = propagationContext.ParentSpanId;
-        evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options);
+        evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession);
     }
 
     public bool CaptureEnvelope(Envelope envelope) => CurrentClient.CaptureEnvelope(envelope);
@@ -473,10 +475,7 @@ internal class Hub : IHub, IDisposable
             var span = GetLinkedSpan(evt) ?? scope.Span;
             if (span is not null)
             {
-                if (span.IsSampled is not false)
-                {
-                    ApplyTraceContextToEvent(evt, span);
-                }
+                ApplyTraceContextToEvent(evt, span);
             }
             else
             {
@@ -506,6 +505,26 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+    {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        try
+        {
+            var clonedScope = CurrentScope.Clone();
+            configureScope(clonedScope);
+
+            CaptureFeedback(feedback, clonedScope, hint);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to capture feedback");
+        }
+    }
+
     public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
     {
         if (!IsEnabled)
@@ -513,8 +532,15 @@ internal class Hub : IHub, IDisposable
             return;
         }
 
-        scope ??= CurrentScope;
-        CurrentClient.CaptureFeedback(feedback, scope, hint);
+        try
+        {
+            scope ??= CurrentScope;
+            CurrentClient.CaptureFeedback(feedback, scope, hint);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to capture feedback");
+        }
     }
 
 #if MEMORY_DUMP_SUPPORTED

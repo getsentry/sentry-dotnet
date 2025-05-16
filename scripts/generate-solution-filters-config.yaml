@@ -48,7 +48,6 @@ filterConfigs:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Maui.Device.TestApp.csproj"
-        - "**/*SourceGen.csproj"
 
   - outputPath: Sentry-CI-Build-macOS.slnf
     include:
@@ -64,7 +63,6 @@ filterConfigs:
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
-        - "**/*SourceGen.csproj"
 
   - outputPath: Sentry-CI-Build-Windows.slnf
     include:
@@ -84,7 +82,6 @@ filterConfigs:
         - "**/*Sentry.Maui.Device.TestApp.csproj"
         - "**/*Sentry.Samples.Android.csproj"
         - "**/*OpenTelemetry.AspNet.csproj"
-        - "**/*SourceGen.csproj"
 
   - outputPath: Sentry-CI-CodeQL.slnf
     include:
@@ -172,11 +169,13 @@ filterConfigs:
         - "samples/**/*Maui.csproj"
         - "src/**/Sentry.csproj"
         - "src/**/Sentry.Analyzers.csproj"
+        - "src/**/Sentry.SourceGenerators.csproj"
         - "src/**/*Android*.csproj"
         - "src/**/*Bindings.Android.csproj"
         - "src/**/*Bindings.Cocoa.csproj"
         - "src/**/Sentry.Extensions.Logging.csproj"
         - "src/**/Sentry.Maui.csproj"
+        - "test/**/Sentry.Testing.CrashableApp.csproj"
         - "test/**/Sentry.Android.AssemblyReader.Tests.csproj"
         - "test/**/Sentry.Extensions.Logging.Tests.csproj"
         - "test/**/Sentry.Maui.Device.TestApp.csproj"

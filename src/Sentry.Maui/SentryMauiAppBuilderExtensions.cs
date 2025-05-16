@@ -57,6 +57,8 @@ public static class SentryMauiAppBuilderExtensions
 
         services.AddSingleton<IMauiElementEventBinder, MauiButtonEventsBinder>();
         services.AddSingleton<IMauiElementEventBinder, MauiImageButtonEventsBinder>();
+        services.AddSingleton<IMauiElementEventBinder, MauiGestureRecognizerEventsBinder>();
+        services.AddSingleton<IMauiElementEventBinder, MauiVisualElementEventsBinder>();
         services.TryAddSingleton<IMauiEventsBinder, MauiEventsBinder>();
 
         services.AddSentry<SentryMauiOptions>();

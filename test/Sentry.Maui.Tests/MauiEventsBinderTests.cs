@@ -18,13 +18,18 @@ public partial class MauiEventsBinderTests
             hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
                 .Do(c => c.Arg<Action<Scope>>()(Scope));
 
+            Options.Debug = true;
+            var logger = Substitute.For<IDiagnosticLogger>();
+            logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+            Options.DiagnosticLogger = logger;
             var options = Microsoft.Extensions.Options.Options.Create(Options);
             Binder = new MauiEventsBinder(
                 hub,
                 options,
                 [
                     new MauiButtonEventsBinder(),
-                    new MauiImageButtonEventsBinder()
+                    new MauiImageButtonEventsBinder(),
+                    new MauiGestureRecognizerEventsBinder()
                 ]
             );
         }

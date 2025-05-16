@@ -1,12 +1,54 @@
 # Changelog
 
+## 5.7.0
+
+### Features
+
+- New source generator allows Sentry to see true build variables like PublishAot and PublishTrimmed to properly adapt checks in the Sentry SDK ([#4101](https://github.com/getsentry/sentry-dotnet/pull/4101))
+- Auto breadcrumbs now include all .NET MAUI gesture recognizer events ([#4124](https://github.com/getsentry/sentry-dotnet/pull/4124))
+- Associate replays with errors and traces on Android ([#4133](https://github.com/getsentry/sentry-dotnet/pull/4133))
+
+### Fixes
+
+- Redact Authorization headers before sending events to Sentry ([#4164](https://github.com/getsentry/sentry-dotnet/pull/4164))
+- Remove Strong Naming from Sentry.Hangfire ([#4099](https://github.com/getsentry/sentry-dotnet/pull/4099))
+- Increase `RequestSize.Small` threshold from 1 kB to 4 kB to match other SDKs ([#4177](https://github.com/getsentry/sentry-dotnet/pull/4177))
+
+### Dependencies
+
+- Bump CLI from v2.43.1 to v2.45.0 ([#4169](https://github.com/getsentry/sentry-dotnet/pull/4169), [#4179](https://github.com/getsentry/sentry-dotnet/pull/4179))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2450)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.43.1...2.45.0)
+
+## 5.7.0-beta.0
+
+### Features
+
+- When setting a transaction on the scope, the SDK will attempt to sync the transaction's trace context with the SDK on the native layer. Finishing a transaction will now also start a new trace ([#4153](https://github.com/getsentry/sentry-dotnet/pull/4153))
+- Added `CaptureFeedback` overload with `configureScope` parameter ([#4073](https://github.com/getsentry/sentry-dotnet/pull/4073))
+- Custom SessionReplay masks in MAUI Android apps ([#4121](https://github.com/getsentry/sentry-dotnet/pull/4121))
+
+### Fixes
+
+- Work around iOS SHA1 bug ([#4143](https://github.com/getsentry/sentry-dotnet/pull/4143))
+- Prevent Auto Breadcrumbs Event Binder from leaking and rebinding events  ([#4159](https://github.com/getsentry/sentry-dotnet/pull/4159))
+- Fixes build error when building .NET Framework applications using Sentry 5.6.0: `MSB4185 :The function "IsWindows" on type "System.OperatingSystem" is not available` ([#4160](https://github.com/getsentry/sentry-dotnet/pull/4160))
+- Added a `SentrySetCommitReleaseOptions` build property that can be specified separately from `SentryReleaseOptions` ([#4109](https://github.com/getsentry/sentry-dotnet/pull/4109))
+
+### Dependencies
+
+- Bump CLI from v2.43.0 to v2.43.1 ([#4151](https://github.com/getsentry/sentry-dotnet/pull/4151))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2431)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.43.0...2.43.1)
+
 ## 5.6.0
 
 ### Features
 
 - Option to disable the SentryNative integration ([#4107](https://github.com/getsentry/sentry-dotnet/pull/4107), [#4134](https://github.com/getsentry/sentry-dotnet/pull/4134))
-  - To disable it, add this msbuild property: `<SentryNative>false</SentryNative>` 
+  - To disable it, add this msbuild property: `<SentryNative>false</SentryNative>`
 - Reintroduced experimental support for Session Replay on Android ([#4097](https://github.com/getsentry/sentry-dotnet/pull/4097))
+- If an incoming HTTP request has the `traceparent` header, it is now parsed and interpreted like the `sentry-trace` header. Outgoing requests now contain the `traceparent` header to facilitate integration with servesr that only support the [W3C Trace Context](https://www.w3.org/TR/trace-context/). ([#4084](https://github.com/getsentry/sentry-dotnet/pull/4084))
 
 ### Fixes
 
@@ -14,10 +56,6 @@
 - Ensure user exception data is not removed by AspNetCoreExceptionProcessor ([#4016](https://github.com/getsentry/sentry-dotnet/pull/4106))
 - Prevent users from disabling AndroidEnableAssemblyCompression which leads to untrappable crash ([#4089](https://github.com/getsentry/sentry-dotnet/pull/4089))
 - Fixed MSVCRT build warning on Windows ([#4111](https://github.com/getsentry/sentry-dotnet/pull/4111))
-
-### Features
-
-- If an incoming HTTP request has the `traceparent` header, it is now parsed and interpreted like the `sentry-trace` header. Outgoing requests now contain the `traceparent` header to facilitate integration with servesr that only support the [W3C Trace Context](https://www.w3.org/TR/trace-context/). ([#4084](https://github.com/getsentry/sentry-dotnet/pull/4084))
 
 ### Dependencies
 

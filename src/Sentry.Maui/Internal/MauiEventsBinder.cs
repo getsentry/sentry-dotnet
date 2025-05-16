@@ -1,4 +1,6 @@
 using Microsoft.Extensions.Options;
+using Microsoft.Maui.Platform;
+using Sentry.Extensibility;
 
 namespace Sentry.Maui.Internal;
 
@@ -32,6 +34,9 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     public void HandleApplicationEvents(Application application, bool bind = true)
     {
+        // we always unbind first to ensure no previous hooks
+        UnbindApplication(application);
+
         if (bind)
         {
             // Attach element events to all existing descendants (skip the application itself)
@@ -63,22 +68,23 @@ internal class MauiEventsBinder : IMauiEventsBinder
             // https://docs.microsoft.com/dotnet/maui/user-interface/system-theme-changes#react-to-theme-changes
             application.RequestedThemeChanged += OnApplicationOnRequestedThemeChanged;
         }
-        else
-        {
-            application.DescendantAdded -= OnApplicationOnDescendantAdded;
-            application.DescendantRemoved -= OnApplicationOnDescendantRemoved;
+    }
 
-            HandleElementEvents(application, bind: false);
+    private void UnbindApplication(Application application)
+    {
+        application.DescendantAdded -= OnApplicationOnDescendantAdded;
+        application.DescendantRemoved -= OnApplicationOnDescendantRemoved;
 
-            // Navigation events
-            application.PageAppearing -= OnApplicationOnPageAppearing;
-            application.PageDisappearing -= OnApplicationOnPageDisappearing;
-            application.ModalPushed -= OnApplicationOnModalPushed;
-            application.ModalPopped -= OnApplicationOnModalPopped;
+        HandleElementEvents(application, bind: false);
 
-            // Theme changed event
-            application.RequestedThemeChanged -= OnApplicationOnRequestedThemeChanged;
-        }
+        // Navigation events
+        application.PageAppearing -= OnApplicationOnPageAppearing;
+        application.PageDisappearing -= OnApplicationOnPageDisappearing;
+        application.ModalPushed -= OnApplicationOnModalPushed;
+        application.ModalPopped -= OnApplicationOnModalPopped;
+
+        // Theme changed event
+        application.RequestedThemeChanged -= OnApplicationOnRequestedThemeChanged;
     }
 
     internal void OnApplicationOnDescendantAdded(object? _, ElementEventArgs e)
@@ -167,6 +173,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
 
     internal void HandleWindowEvents(Window window, bool bind = true)
     {
+        UnhookWindow(window);
         if (bind)
         {
             // Lifecycle Events
@@ -190,29 +197,39 @@ internal class MauiEventsBinder : IMauiEventsBinder
             window.ModalPopped += OnWindowOnModalPopped;
             window.PopCanceled += OnWindowOnPopCanceled;
         }
-        else
-        {
-            // Lifecycle events caused by user action
-            window.Activated -= OnWindowOnActivated;
-            window.Deactivated -= OnWindowOnDeactivated;
-            window.Stopped -= OnWindowOnStopped;
-            window.Resumed -= OnWindowOnResumed;
+    }
 
-            // System generated lifecycle events
-            window.Created -= OnWindowOnCreated;
-            window.Destroying -= OnWindowOnDestroying;
-            window.Backgrounding -= OnWindowOnBackgrounding;
-            window.DisplayDensityChanged -= OnWindowOnDisplayDensityChanged;
+    private void UnhookWindow(Window window)
+    {
+        // Lifecycle events caused by user action
+        window.Activated -= OnWindowOnActivated;
+        window.Deactivated -= OnWindowOnDeactivated;
+        window.Stopped -= OnWindowOnStopped;
+        window.Resumed -= OnWindowOnResumed;
 
-            // Navigation events
-            window.ModalPushed -= OnWindowOnModalPushed;
-            window.ModalPopped -= OnWindowOnModalPopped;
-            window.PopCanceled -= OnWindowOnPopCanceled;
-        }
+        // System generated lifecycle events
+        window.Created -= OnWindowOnCreated;
+        window.Destroying -= OnWindowOnDestroying;
+        window.Backgrounding -= OnWindowOnBackgrounding;
+        window.DisplayDensityChanged -= OnWindowOnDisplayDensityChanged;
+
+        // Navigation events
+        window.ModalPushed -= OnWindowOnModalPushed;
+        window.ModalPopped -= OnWindowOnModalPopped;
+        window.PopCanceled -= OnWindowOnPopCanceled;
     }
 
     internal void HandleElementEvents(Element element, bool bind = true)
     {
+        // we always unbind the element first to ensure we don't have any sticky or repeat hooks
+        // Rendering events
+        element.ChildAdded -= OnElementOnChildAdded;
+        element.ChildRemoved -= OnElementOnChildRemoved;
+        element.ParentChanged -= OnElementOnParentChanged;
+
+        // BindableObject events
+        element.BindingContextChanged -= OnElementOnBindingContextChanged;
+
         if (bind)
         {
             // Rendering events
@@ -227,34 +244,30 @@ internal class MauiEventsBinder : IMauiEventsBinder
             // BindableObject events
             element.BindingContextChanged += OnElementOnBindingContextChanged;
         }
-        else
-        {
-            // Rendering events
-            element.ChildAdded -= OnElementOnChildAdded;
-            element.ChildRemoved -= OnElementOnChildRemoved;
-            element.ParentChanged -= OnElementOnParentChanged;
-
-            // BindableObject events
-            element.BindingContextChanged -= OnElementOnBindingContextChanged;
-        }
     }
 
     internal void HandleVisualElementEvents(VisualElement element, bool bind = true)
     {
+        element.Focused -= OnElementOnFocused;
+        element.Unfocused -= OnElementOnUnfocused;
+
         if (bind)
         {
             element.Focused += OnElementOnFocused;
             element.Unfocused += OnElementOnUnfocused;
         }
-        else
-        {
-            element.Focused -= OnElementOnFocused;
-            element.Unfocused -= OnElementOnUnfocused;
-        }
     }
 
     internal void HandleShellEvents(Shell shell, bool bind = true)
     {
+        // Navigation events
+        // https://docs.microsoft.com/dotnet/maui/fundamentals/shell/navigation
+        shell.Navigating -= OnShellOnNavigating;
+        shell.Navigated -= OnShellOnNavigated;
+
+        // A Shell is also a Page
+        HandlePageEvents(shell, bind: false);
+
         if (bind)
         {
             // Navigation events
@@ -265,20 +278,23 @@ internal class MauiEventsBinder : IMauiEventsBinder
             // A Shell is also a Page
             HandlePageEvents(shell);
         }
-        else
-        {
-            // Navigation events
-            // https://docs.microsoft.com/dotnet/maui/fundamentals/shell/navigation
-            shell.Navigating -= OnShellOnNavigating;
-            shell.Navigated -= OnShellOnNavigated;
-
-            // A Shell is also a Page
-            HandlePageEvents(shell, bind: false);
-        }
     }
 
     internal void HandlePageEvents(Page page, bool bind = true)
     {
+        // Lifecycle events
+        // https://docs.microsoft.com/dotnet/maui/fundamentals/shell/lifecycle
+        page.Appearing -= OnPageOnAppearing;
+        page.Disappearing -= OnPageOnDisappearing;
+
+        // Navigation events
+        // https://github.com/dotnet/docs-maui/issues/583
+        page.NavigatedTo -= OnPageOnNavigatedTo;
+
+        // Layout changed event
+        // https://docs.microsoft.com/dotnet/api/xamarin.forms.ilayout.layoutchanged
+        page.LayoutChanged -= OnPageOnLayoutChanged;
+
         if (bind)
         {
             // Lifecycle events
@@ -293,21 +309,6 @@ internal class MauiEventsBinder : IMauiEventsBinder
             // Layout changed event
             // https://docs.microsoft.com/dotnet/api/xamarin.forms.ilayout.layoutchanged
             page.LayoutChanged += OnPageOnLayoutChanged;
-        }
-        else
-        {
-            // Lifecycle events
-            // https://docs.microsoft.com/dotnet/maui/fundamentals/shell/lifecycle
-            page.Appearing -= OnPageOnAppearing;
-            page.Disappearing -= OnPageOnDisappearing;
-
-            // Navigation events
-            // https://github.com/dotnet/docs-maui/issues/583
-            page.NavigatedTo -= OnPageOnNavigatedTo;
-
-            // Layout changed event
-            // https://docs.microsoft.com/dotnet/api/xamarin.forms.ilayout.layoutchanged
-            page.LayoutChanged -= OnPageOnLayoutChanged;
         }
     }
 

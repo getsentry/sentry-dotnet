@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Net.Http.Headers;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.AspNetCore;
@@ -135,10 +136,8 @@ public static class ScopeExtensions
         scope.Request.QueryString = context.Request.QueryString.ToString();
         foreach (var requestHeader in context.Request.Headers)
         {
-            if (!options.SendDefaultPii
-                // Don't add headers which might contain PII
-                && (requestHeader.Key == HeaderNames.Cookie
-                    || requestHeader.Key == HeaderNames.Authorization))
+            // Don't add cookies that might contain PII
+            if (!options.SendDefaultPii && requestHeader.Key == HeaderNames.Cookie)
             {
                 continue;
             }

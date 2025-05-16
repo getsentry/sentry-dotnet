@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry;
@@ -480,6 +481,13 @@ public static partial class SentrySdk
     [DebuggerStepThrough]
     public static SentryId CaptureMessage(string message, Action<Scope> configureScope, SentryLevel level = SentryLevel.Info)
         => CurrentHub.CaptureMessage(message, configureScope, level);
+
+    /// <summary>
+    /// Captures feedback from the user.
+    /// </summary>
+    [DebuggerStepThrough]
+    public static void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+        => CurrentHub.CaptureFeedback(feedback, configureScope, hint);
 
     /// <summary>
     /// Captures feedback from the user.
