@@ -63,7 +63,8 @@ public static class LoggingBuilderExtensions
         // Filtering of logs is handled in SentryStructuredLogger, using SentryOptions.MinimumLogLevel
         builder.AddFilter<SentryStructuredLoggerProvider>(static (string? categoryName, LogLevel logLevel) =>
         {
-            return categoryName is null || !categoryName.StartsWith("Sentry");
+            return categoryName is null
+                || categoryName != "Sentry.ISentryClient";
         });
 
         return builder;

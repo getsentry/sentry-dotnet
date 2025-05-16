@@ -100,7 +100,8 @@ public static class SentryWebHostBuilderExtensions
                 LogLevel.None);
             _ = logging.AddFilter<SentryAspNetCoreStructuredLoggerProvider>(static (string? categoryName, LogLevel logLevel) =>
             {
-                return categoryName is null || !categoryName.StartsWith("Sentry");
+                return categoryName is null
+                    || (categoryName != "Sentry.ISentryClient" && categoryName != "Sentry.AspNetCore.SentryMiddleware");
             });
 
             var sentryBuilder = logging.Services.AddSentry();

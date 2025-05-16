@@ -56,6 +56,12 @@ public static class SentryMauiAppBuilderExtensions
         services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
         services.AddSingleton<Disposer>();
 
+        builder.Logging.AddFilter<SentryMauiStructuredLoggerProvider>(static (string? categoryName, LogLevel logLevel) =>
+        {
+            return categoryName is null
+                || categoryName != "Sentry.ISentryClient";
+        });
+
         services.AddSingleton<IMauiElementEventBinder, MauiButtonEventsBinder>();
         services.AddSingleton<IMauiElementEventBinder, MauiImageButtonEventsBinder>();
         services.AddSingleton<IMauiElementEventBinder, MauiGestureRecognizerEventsBinder>();
