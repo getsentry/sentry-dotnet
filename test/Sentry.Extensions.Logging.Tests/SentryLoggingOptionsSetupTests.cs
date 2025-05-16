@@ -25,7 +25,7 @@ public class SentryLoggingOptionsSetupTests
             Distribution = "FakeDistribution",
             Environment = "Test",
             Dsn = "https://d4d82fc1c2c4032a83f3a29aa3a3aff@fake-sentry.io:65535/2147483647",
-            EnableLogs  = true,
+            EnableLogs = true,
             MaxQueueItems = 8,
             MaxCacheItems = 9,
             ShutdownTimeout = TimeSpan.FromSeconds(13),
