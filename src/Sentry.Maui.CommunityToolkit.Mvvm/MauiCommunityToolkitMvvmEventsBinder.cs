@@ -147,6 +147,11 @@ internal class MauiCommunityToolkitMvvmEventsBinder(IHub hub) : IMauiElementEven
             // results would be that we would store the transaction on the scope, but it would never be cleared again,
             // since the next call to OnPropertyChanged for this RelayCommand will (likely) be from a different thread.
             var span = hub.StartSpan(SpanName, SpanOp);
+            if (span is ITransactionTracer transaction)
+            {
+                hub.ConfigureScope(scope => scope.Transaction = transaction);
+            }
+
             relay.SetFused(span);
         }
         else if (relay.GetFused<ISpan>() is { } span)
