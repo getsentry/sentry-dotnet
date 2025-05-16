@@ -23,6 +23,7 @@ public static class MauiProgram
                 options.AttachScreenshot = true;
 
                 options.Debug = true;
+                options.EnableLogs = true;
                 options.SampleRate = 1.0F;
 
 #if __ANDROID__

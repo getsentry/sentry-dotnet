@@ -93,10 +93,16 @@ public static class SentryWebHostBuilderExtensions
             _ = logging.Services
                 .AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
             _ = logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
+            _ = logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>();
 
             _ = logging.AddFilter<SentryAspNetCoreLoggerProvider>(
                 "Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware",
                 LogLevel.None);
+            _ = logging.AddFilter<SentryAspNetCoreStructuredLoggerProvider>(static (string? categoryName, LogLevel logLevel) =>
+            {
+                return categoryName is null
+                    || (categoryName != "Sentry.ISentryClient" && categoryName != "Sentry.AspNetCore.SentryMiddleware");
+            });
 
             var sentryBuilder = logging.Services.AddSentry();
             configureSentry?.Invoke(context, sentryBuilder);
