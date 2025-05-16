@@ -110,6 +110,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+    <PackageReference Include="Microsoft.Maui.Essentials" Version="9.0.50" />
   </ItemGroup>
 
   <!--In order to test our analyzers with this project, we manually reference our targets file.  User do not need to do this-->
