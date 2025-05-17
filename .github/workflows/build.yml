@@ -11,20 +11,17 @@ on:
 
 jobs:
   build-sentry-native:
-    name: sentry-native (${{ matrix.os }}-${{ matrix.arch }})
+    name: sentry-native (${{ matrix.os }}${{ matrix.arch && format('-{0}', matrix.arch) || '' }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
-            arch: x64
           - os: windows-11-arm
             arch: arm64
           - os: windows-latest
-            arch: x64
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
-            arch: arm64
 
     steps:
       - name: Checkout
@@ -125,11 +122,11 @@ jobs:
         uses: ./.github/actions/buildnative
 
       - name: Restore .NET Dependencies
-        run: dotnet restore Sentry-CI-Build-${{ runner.os }}.slnf --nologo
+        run: dotnet restore Sentry-CI-Build-${{ matrix.arch && format('{0}-{1}', runner.os, matrix.arch) || runner.os }}.slnf --nologo
 
       - name: Build
         id: build
-        run: dotnet build Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
+        run: dotnet build Sentry-CI-Build-${{ matrix.arch && format('{0}-{1}', runner.os, matrix.arch) || runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
 
       - name: Upload build logs
         if: ${{ steps.build.outcome != 'skipped' }}
@@ -139,7 +136,7 @@ jobs:
           path: build.binlog
 
       - name: Test
-        run: dotnet test Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
+        run: dotnet test Sentry-CI-Build-${{ matrix.arch && format('{0}-{1}', runner.os, matrix.arch) || runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
 
       - name: Upload code coverage
         uses: codecov/codecov-action@ad3126e916f78f00edff4ed0317cf185271ccc2d
@@ -155,7 +152,7 @@ jobs:
 
       - name: Create NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
-        run: dotnet pack Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo
+        run: dotnet pack Sentry-CI-Build-${{ matrix.arch && format('{0}-{1}', runner.os, matrix.arch) || runner.os }}.slnf -c Release --no-build --nologo
 
       - name: Archive NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
