@@ -60,6 +60,7 @@
 
 ### Fixes
 
+- Relax Android Version Dependency and reference only Xamarin.AndroidX.Lifecycle.Process allowing other transitive libraries to pull our dependency versions forward ([#4100](https://github.com/getsentry/sentry-dotnet/pull/4100))
 - Ensure user exception data is not removed by AspNetCoreExceptionProcessor ([#4016](https://github.com/getsentry/sentry-dotnet/pull/4106))
 - Prevent users from disabling AndroidEnableAssemblyCompression which leads to untrappable crash ([#4089](https://github.com/getsentry/sentry-dotnet/pull/4089))
 - Fixed MSVCRT build warning on Windows ([#4111](https://github.com/getsentry/sentry-dotnet/pull/4111))
