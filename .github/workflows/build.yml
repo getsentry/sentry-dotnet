@@ -129,7 +129,7 @@ jobs:
         if: ${{ steps.build.outcome != 'skipped' }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ runner.os }}-build-logs
+          name: ${{ matrix.arch && format('{0}-{1}', runner.os, matrix.arch) || runner.os }}-build-logs
           path: build.binlog
 
       - name: Test
@@ -142,7 +142,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ runner.os }}-verify-test-results
+          name: ${{ matrix.arch && format('{0}-{1}', runner.os, matrix.arch) || runner.os }}-verify-test-results
           path: "**/*.received.*"
 
       # To save time and disk space, we only create and archive the NuGet packages when we're actually releasing.

@@ -103,6 +103,7 @@ filterConfigs:
         - "**/*OpenTelemetry.AspNet.csproj"
         # Depends on LocalDb which is x64
         - "**/*Sentry.DiagnosticSource.IntegrationTests.csproj"
+        - "**/*Sentry.EntityFramework.Tests.csproj"
 
   - outputPath: Sentry-CI-CodeQL.slnf
     include:

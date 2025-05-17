@@ -61,7 +61,6 @@
       "test\\Sentry.AspNetCore.TestUtils\\Sentry.AspNetCore.TestUtils.csproj",
       "test\\Sentry.Azure.Functions.Worker.Tests\\Sentry.Azure.Functions.Worker.Tests.csproj",
       "test\\Sentry.DiagnosticSource.Tests\\Sentry.DiagnosticSource.Tests.csproj",
-      "test\\Sentry.EntityFramework.Tests\\Sentry.EntityFramework.Tests.csproj",
       "test\\Sentry.Extensions.Logging.Tests\\Sentry.Extensions.Logging.Tests.csproj",
       "test\\Sentry.Google.Cloud.Functions.Tests\\Sentry.Google.Cloud.Functions.Tests.csproj",
       "test\\Sentry.Hangfire.Tests\\Sentry.Hangfire.Tests.csproj",
