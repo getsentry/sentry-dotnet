@@ -18,10 +18,10 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
+          - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
+          - os: windows-latest
           - os: windows-11-arm
             arch: arm64
-          - os: windows-latest
-          - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
 
     steps:
       - name: Checkout
@@ -61,12 +61,9 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
-            arch: x64
-          - os: windows-11-arm
-            arch: arm64
-          - os: windows-latest
-            arch: x64
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
+          - os: windows-latest
+          - os: windows-11-arm
             arch: arm64
 
     steps:
@@ -174,12 +171,9 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
-            arch: x64
-          - os: windows-11-arm
-            arch: arm64
-          - os: windows-latest
-            arch: x64
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
+          - os: windows-latest
+          - os: windows-11-arm
             arch: arm64
 
     steps:
