@@ -19,7 +19,7 @@ runs:
 
     # Needed for Android SDK setup step
     - uses: actions/setup-java@v3
-      if: ! (runner.os == 'Windows' && runner.arch == 'ARM64')
+      if: runner.os != 'Windows' && runner.arch != 'ARM64'
       with:
         distribution: 'temurin'
         java-version: '17'
