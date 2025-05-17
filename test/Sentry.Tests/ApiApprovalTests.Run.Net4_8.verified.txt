@@ -153,6 +153,7 @@ namespace Sentry
         public static Sentry.SentryId CaptureMessage(this Sentry.IHub hub, string message, System.Action<Sentry.Scope> configureScope, Sentry.SentryLevel level = 1) { }
         public static void LockScope(this Sentry.IHub hub) { }
         public static System.IDisposable PushAndLockScope(this Sentry.IHub hub) { }
+        public static Sentry.ISpan StartSpan(this Sentry.IHub hub, string operation, string description) { }
         public static Sentry.ITransactionTracer StartTransaction(this Sentry.IHub hub, Sentry.ITransactionContext context) { }
         public static Sentry.ITransactionTracer StartTransaction(this Sentry.IHub hub, string name, string operation) { }
         public static Sentry.ITransactionTracer StartTransaction(this Sentry.IHub hub, string name, string operation, Sentry.SentryTraceHeader traceHeader) { }

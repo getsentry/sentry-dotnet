@@ -18,12 +18,23 @@ public class SentryMauiOptions : SentryLoggingOptions
         // The user can change these. If you want to force a value, use SentryMauiOptionsSetup instead.
         // Also, some of these are already set in the base Sentry SDK, but since we don't yet have native targets
         // there for all MAUI targets, we'll set them again here.
-
         AutoSessionTracking = true;
         DetectStartupTime = StartupTimeDetectionMode.Fast;
 #if !PLATFORM_NEUTRAL
         CacheDirectoryPath = Microsoft.Maui.Storage.FileSystem.CacheDirectory;
 #endif
+        AddDefaultEventBinder<MauiButtonEventsBinder>();
+        AddDefaultEventBinder<MauiImageButtonEventsBinder>();
+        AddDefaultEventBinder<MauiGestureRecognizerEventsBinder>();
+        AddDefaultEventBinder<MauiVisualElementEventsBinder>();
+    }
+
+    internal List<IMauiElementEventBinderRegistration> DefaultEventBinders { get; } = [];
+
+    internal void AddDefaultEventBinder<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TEventBinder>()
+        where TEventBinder : class, IMauiElementEventBinder
+    {
+        DefaultEventBinders.Add(new MauiElementEventBinderRegistration<TEventBinder>());
     }
 
     /// <summary>

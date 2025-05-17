@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Sentry.Maui;
 
 namespace Sentry.Samples.Maui;
 
@@ -24,6 +25,14 @@ public static class MauiProgram
 
                 options.Debug = true;
                 options.SampleRate = 1.0F;
+
+                // The Sentry MVVM Community Toolkit integration automatically creates traces for async relay commands,
+                // but only if tracing is enabled. Here we capture all traces (in a production app you'd probably only
+                // capture a certain percentage)
+                options.TracesSampleRate = 1.0F;
+
+                // Automatically create traces for async relay commands in the MVVM Community Toolkit
+                options.AddCommunityToolkitIntegration();
 
 #if __ANDROID__
                 // Currently experimental support is only available on Android
