@@ -11,14 +11,20 @@ on:
 
 jobs:
   build-sentry-native:
-    name: sentry-native (${{ matrix.os }})
+    name: sentry-native (${{ matrix.os }}-${{ matrix.arch }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        # Pin ubuntu to ensure mono is installed
-        # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
-        os: [ubuntu-22.04, windows-latest, macos-15]
+        include:
+          - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
+            arch: x64
+          - os: windows-11-arm
+            arch: arm64
+          - os: windows-latest
+            arch: x64
+          - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
+            arch: arm64
 
     steps:
       - name: Checkout
@@ -31,6 +37,8 @@ jobs:
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-${{ runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          # This will fail since sentry-native doesn't yet build on arm64 so for now using the cached version of x64 to test CI passed this step
+          # key: sentry-native-${{ runner.os }}-${{ matrix.arch }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           enableCrossOsArchive: true
 
       - name: Remove unused applications
@@ -54,9 +62,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Pin ubuntu to ensure mono is installed
-        # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
-        os: [ubuntu-22.04, windows-latest, macos-15]
+        include:
+          - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
+            arch: x64
+          - os: windows-11-arm
+            arch: arm64
+          - os: windows-latest
+            arch: x64
+          - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
+            arch: arm64
 
     steps:
       - name: Cancel Previous Runs
@@ -93,6 +107,8 @@ jobs:
           key: sentry-native-macOS-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
 
+      # This step is x64 specific?
+      # Blocked by: https://github.com/getsentry/sentry-native/issues/880
       - name: Download sentry-native (Windows)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Windows') }}
         uses: actions/cache/restore@v4
@@ -135,13 +151,13 @@ jobs:
           name: ${{ runner.os }}-verify-test-results
           path: "**/*.received.*"
 
-      # To save time and disk space, we only create and archive the Nuget packages when we're actually releasing.
+      # To save time and disk space, we only create and archive the NuGet packages when we're actually releasing.
 
-      - name: Create Nuget Packages
+      - name: Create NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
         run: dotnet pack Sentry-CI-Build-${{ runner.os }}.slnf -c Release --no-build --nologo
 
-      - name: Archive Nuget Packages
+      - name: Archive NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
         uses: actions/upload-artifact@v4
         with:
@@ -159,9 +175,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Pin ubuntu to ensure mono is installed
-        # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
-        os: [ubuntu-22.04, windows-latest, macos-15]
+        include:
+          - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
+            arch: x64
+          - os: windows-11-arm
+            arch: arm64
+          - os: windows-latest
+            arch: x64
+          - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
+            arch: arm64
 
     steps:
       - uses: actions/checkout@v4
@@ -173,7 +195,7 @@ jobs:
             integration-test
             .github
 
-      - name: Fetch Nuget Packages
+      - name: Fetch NuGet Packages
         uses: actions/download-artifact@v4
         with:
           name: ${{ github.sha }}
