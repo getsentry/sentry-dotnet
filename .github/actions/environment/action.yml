@@ -40,7 +40,7 @@ runs:
 
     # Java 11 is needed by .NET Android
     - name: Install Java 11
-      if: runner.os != 'Windows' && runner.arch != 'ARM64'
+      if: ${{ !(runner.os == 'Windows' && runner.arch == 'ARM64') }}
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
