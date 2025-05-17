@@ -27,6 +27,7 @@ runs:
 
     - name: Install Java 17 on Windows ARM64
       if: runner.os == 'Windows' && runner.arch == 'ARM64'
+      shell: bash
       run: |
         curl -LO https://download.bell-sw.com/java/17.0.10+7/bellsoft-jdk17.0.10+7-windows-aarch64.zip
         unzip bellsoft-jdk17.0.10+7-windows-aarch64.zip -d jdk17
