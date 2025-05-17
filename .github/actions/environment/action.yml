@@ -20,7 +20,7 @@ runs:
     # Java 17 is needed for Android SDK setup step
     - name: Install Java 17
       uses: actions/setup-java@v4
-      if: runner.os != 'Windows' && runner.arch != 'ARM64'
+      if: ${{ !(runner.os == 'Windows' && runner.arch == 'ARM64') }}
       with:
         distribution: 'temurin'
         java-version: '17'
@@ -32,7 +32,6 @@ runs:
         distribution: 'microsoft'
         java-version: '17'
         architecture: 'aarch64'
-
 
     - name: Setup Android SDK
       uses: android-actions/setup-android@07976c6290703d34c16d382cb36445f98bb43b1f # v3.2.0
