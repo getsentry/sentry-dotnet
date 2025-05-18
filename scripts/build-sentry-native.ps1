@@ -29,11 +29,11 @@ try
 
         if ("Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
         {
-            $outDir += '/win-x64'
+            $outDir += '/win-arm64'
         } 
         else
         {
-            $outDir += '/win-arm64'
+            $outDir += '/win-x64'
         }
     }
     elseif ($IsLinux)
