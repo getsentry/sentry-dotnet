@@ -1,10 +1,16 @@
 # Changelog
 
-### Unreleased
+## Unreleased
 
 ### Feature
 
 - Support for Windows ARM64 with Native AOT ([#4187](https://github.com/getsentry/sentry-dotnet/pull/4187))
+
+### Dependencies
+
+- Bump Native SDK from v0.8.4 to v0.8.5 ([#4189](https://github.com/getsentry/sentry-dotnet/pull/4189))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#085)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.8.4...0.8.5)
 
 ## 5.7.0
 
