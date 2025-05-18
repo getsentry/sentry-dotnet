@@ -101,8 +101,9 @@ filterConfigs:
         - "**/*Sentry.Maui.Device.TestApp.csproj"
         - "**/*Sentry.Samples.Android.csproj"
         - "**/*OpenTelemetry.AspNet.csproj"
-        # Depends on LocalDb which is x64
+        # Depends on LocalDb or SQLitePCL which are x64
         - "**/*Sentry.DiagnosticSource.IntegrationTests.csproj"
+        - "**/*Sentry.DiagnosticSource.Tests.csproj"
         - "**/*Sentry.EntityFramework.Tests.csproj"
 
   - outputPath: Sentry-CI-CodeQL.slnf

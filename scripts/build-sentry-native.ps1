@@ -21,11 +21,20 @@ try
     }
     elseif ($IsWindows)
     {
-        $outDir += '/win-x64'
+        # TODO: Blocked on: https://github.com/getsentry/sentry-native/issues/880
         $additionalArgs += @('-C', 'src/Sentry/Platforms/Native/windows-config.cmake')
         $actualBuildDir = "$buildDir/RelWithDebInfo"
         $libPrefix = ''
         $libExtension = '.lib'
+
+        if ("Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
+        {
+            $outDir += '/win-x64'
+        } 
+        else
+        {
+            $outDir += '/win-arm64'
+        }
     }
     elseif ($IsLinux)
     {

@@ -1,5 +1,11 @@
 # Changelog
 
+### Unreleased
+
+### Feature
+
+- Support for Windows ARM64 with Native AOT ([#4187](https://github.com/getsentry/sentry-dotnet/pull/4187))
+
 ## 5.7.0
 
 ### Features
