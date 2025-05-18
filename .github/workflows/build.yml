@@ -33,9 +33,11 @@ jobs:
         id: cache
         with:
           path: src/Sentry/Platforms/Native/sentry-native
+          # TODO: Remove this in favor of the line below
           key: sentry-native-${{ runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           # This will fail since sentry-native doesn't yet build on arm64 so for now using the cached version of x64 to test CI passed this step
-          # key: sentry-native-${{ runner.os }}-${{ matrix.arch }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          # On Windows, it'll be either: Windows or Windows-arm64:
+          # key: sentry-native-${{ matrix.arch && format('{0}-{1}', runner.os, matrix.arch) || runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           enableCrossOsArchive: true
 
       - name: Remove unused applications
@@ -108,7 +110,7 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: src/Sentry/Platforms/Native/sentry-native
-          key: sentry-native-Windows-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-${{ matrix.arch && format('{0}-{1}', runner.os, matrix.arch) || runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
           enableCrossOsArchive: true
 
@@ -218,7 +220,7 @@ jobs:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
 
-      # We use macOS for the final publishing build so we get all the iOS/macCatalyst targets in the packages
+      # We use macOS for the final publishing build so we get all the iOS/Mac Catalyst targets in the packages
       - name: Set Environment Variables
         run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
 
