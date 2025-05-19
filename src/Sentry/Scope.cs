@@ -212,7 +212,9 @@ public class Scope : IEventLike
             _transactionLock.EnterReadLock();
             try
             {
-                return _transaction.Value;
+                // Workaround for https://github.com/getsentry/sentry-dotnet/pull/4125#discussion_r2087994417
+                // TODO: We should really find the root cause of this issue and address in a seprate PR
+                return _transaction.Value is { IsFinished: false } transaction ? transaction : null;
             }
             finally
             {

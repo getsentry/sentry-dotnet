@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>MAUI and Community Toolkit integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+    <TargetFramework>net9.0</TargetFramework>
+
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseMaui>true</UseMaui>
+
+    <!-- Skip warnings about including Microsoft.Maui.Controls... that should be done from the application -->
+    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+    <RootNamespace>Sentry.Maui.CommunityToolkit.Mvvm</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sentry.Maui\Sentry.Maui.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.Maui.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Maui.CommunityToolkit.Mvvm.Tests" PublicKey="$(SentryPublicKey)" />
+  </ItemGroup>
+</Project>
