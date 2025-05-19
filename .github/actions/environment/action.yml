@@ -11,6 +11,11 @@ runs:
         echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" >> $GITHUB_ENV
         echo "DOTNET_NOLOGO=1" >> $GITHUB_ENV
 
+    # zstd is needed for cross OS actions/cache but missing from windows-11-arm
+    - name: Install zstd on Windows ARM64
+      run: choco install zstandard
+      if: runner.os == 'Windows' && runner.arch == 'ARM64'
+
     # See https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md#xcode
     - name: Pin the Xcode Version
       if: runner.os == 'macOS'
