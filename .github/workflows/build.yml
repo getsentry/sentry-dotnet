@@ -85,6 +85,9 @@ jobs:
       - name: Remove unused applications
         uses: ./.github/actions/freediskspace
 
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
       # We use macOS for the final publishing build so we get all the iOS/macCatalyst targets in the packages
       - name: Set Environment Variables
         if: runner.os == 'macOS'
@@ -123,9 +126,6 @@ jobs:
           key: sentry-native-Windows-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
           enableCrossOsArchive: true
-
-      - name: Setup Environment
-        uses: ./.github/actions/environment
 
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
