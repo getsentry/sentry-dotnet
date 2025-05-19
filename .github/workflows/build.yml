@@ -33,11 +33,8 @@ jobs:
         id: cache
         with:
           path: src/Sentry/Platforms/Native/sentry-native
-          # TODO: Remove this in favor of the line below
-          key: sentry-native-${{ runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
-          # This will fail since sentry-native doesn't yet build on arm64 so for now using the cached version of x64 to test CI passed this step
           # On Windows, it'll be either: Windows or Windows-arm64:
-          # key: sentry-native-${{ matrix.arch && format('{0}-{1}', runner.os, matrix.arch) || runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-${{ matrix.arch && format('{0}-{1}', runner.os, matrix.arch) || runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           enableCrossOsArchive: true
 
       - name: Remove unused applications
@@ -103,14 +100,21 @@ jobs:
           key: sentry-native-macOS-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
 
-      # This step is x64 specific?
-      # Blocked by: https://github.com/getsentry/sentry-native/issues/880
       - name: Download sentry-native (Windows)
-        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Windows') }}
+        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Windows' && runner.arch == 'X64') }}
         uses: actions/cache/restore@v4
         with:
           path: src/Sentry/Platforms/Native/sentry-native
-          key: sentry-native-${{ matrix.arch && format('{0}-{1}', runner.os, matrix.arch) || runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-Windows-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+          enableCrossOsArchive: true
+
+      - name: Download sentry-native (Windows arm64)
+        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Windows' && runner.arch == 'ARM64') }}
+        uses: actions/cache/restore@v4
+        with:
+          path: src/Sentry/Platforms/Native/sentry-native
+          key: sentry-native-Windows-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
           enableCrossOsArchive: true
 
