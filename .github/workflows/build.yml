@@ -221,6 +221,7 @@ jobs:
 
 
   trim-analysis:
+    needs: build-sentry-native
     name: Trim analysis
     runs-on: macos-15
 
