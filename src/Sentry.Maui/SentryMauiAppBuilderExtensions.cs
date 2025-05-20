@@ -39,6 +39,7 @@ public static class SentryMauiAppBuilderExtensions
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="configureOptions">An action to configure the options.</param>
+    /// <param name="configureAppBuilder">Optional parameter that allows you to configure and add additional sentry services like MAUI element event binders</param>
     /// <returns>The <paramref name="builder"/>.</returns>
     public static MauiAppBuilder UseSentry(
         this MauiAppBuilder builder,
@@ -71,8 +72,8 @@ public static class SentryMauiAppBuilderExtensions
 
         if (configureAppBuilder != null)
         {
-            var builder = new SentryMauiAppBuilder(services);
-            configureAppBuilder.Invoke(builder);
+            var appBuilder = new SentryMauiAppBuilder(services);
+            configureAppBuilder.Invoke(appBuilder);
         }
 
         builder.RegisterMauiEventsBinder();
