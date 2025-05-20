@@ -22,8 +22,8 @@ public static class SentryMauiAppBuilderExtensions
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <returns>The <paramref name="builder"/>.</returns>
-    public static MauiAppBuilder UseSentry(this MauiAppBuilder builder)
-        => UseSentry(builder, (Action<SentryMauiOptions>?)null);
+    public static MauiAppBuilder UseSentry(this MauiAppBuilder builder, Action<SentryMauiAppBuilder>? configureAppBuilder = null)
+        => UseSentry(builder, (Action<SentryMauiOptions>?)null, configureAppBuilder);
 
     /// <summary>
     /// Uses Sentry integration.
@@ -31,8 +31,8 @@ public static class SentryMauiAppBuilderExtensions
     /// <param name="builder">The builder.</param>
     /// <param name="dsn">The DSN.</param>
     /// <returns>The <paramref name="builder"/>.</returns>
-    public static MauiAppBuilder UseSentry(this MauiAppBuilder builder, string dsn)
-        => builder.UseSentry(o => o.Dsn = dsn);
+    public static MauiAppBuilder UseSentry(this MauiAppBuilder builder, string dsn, Action<SentryMauiAppBuilder>? configureAppBuilder = null)
+        => builder.UseSentry(o => o.Dsn = dsn, configureAppBuilder: configureAppBuilder);
 
     /// <summary>
     /// Uses Sentry integration.
@@ -40,8 +40,11 @@ public static class SentryMauiAppBuilderExtensions
     /// <param name="builder">The builder.</param>
     /// <param name="configureOptions">An action to configure the options.</param>
     /// <returns>The <paramref name="builder"/>.</returns>
-    public static MauiAppBuilder UseSentry(this MauiAppBuilder builder,
-        Action<SentryMauiOptions>? configureOptions)
+    public static MauiAppBuilder UseSentry(
+        this MauiAppBuilder builder,
+        Action<SentryMauiOptions>? configureOptions,
+        Action<SentryMauiAppBuilder>? configureAppBuilder = null
+    )
     {
         var services = builder.Services;
 
@@ -56,19 +59,21 @@ public static class SentryMauiAppBuilderExtensions
         services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
         services.AddSingleton<Disposer>();
 
+        services.TryAddSingleton<IMauiElementEventBinder, MauiButtonEventsBinder>();
+        services.TryAddSingleton<IMauiElementEventBinder, MauiImageButtonEventsBinder>();
+        services.TryAddSingleton<IMauiElementEventBinder, MauiGestureRecognizerEventsBinder>();
+        services.TryAddSingleton<IMauiElementEventBinder, MauiVisualElementEventsBinder>();
         // Resolve the configured options and register any element event binders from these
-        IServiceProvider serviceProvider = services.BuildServiceProvider();
-        var options = serviceProvider.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
-        services.TryAddSingleton<SentryOptions>(options); // Ensure this doesn't get resolved again in AddSentry
-        foreach (var eventBinder in options.DefaultEventBinders)
-        {
-            eventBinder.Register(services);
-        }
 
         // This is ultimately the class that enables all the MauiElementEventBinders above
         services.TryAddSingleton<IMauiEventsBinder, MauiEventsBinder>();
-
         services.AddSentry<SentryMauiOptions>();
+
+        if (configureAppBuilder != null)
+        {
+            var builder = new SentryMauiAppBuilder(services);
+            configureAppBuilder.Invoke(builder);
+        }
 
         builder.RegisterMauiEventsBinder();
 
