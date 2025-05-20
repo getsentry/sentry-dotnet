@@ -21,7 +21,6 @@ try
     }
     elseif ($IsWindows)
     {
-        # TODO: Blocked on: https://github.com/getsentry/sentry-native/issues/880
         $additionalArgs += @('-C', 'src/Sentry/Platforms/Native/windows-config.cmake')
         $actualBuildDir = "$buildDir/RelWithDebInfo"
         $libPrefix = ''
