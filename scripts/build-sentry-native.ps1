@@ -29,7 +29,7 @@ try
         if ("Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
         {
             $outDir += '/win-arm64'
-        } 
+        }
         else
         {
             $outDir += '/win-x64'
