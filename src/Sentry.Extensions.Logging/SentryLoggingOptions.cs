@@ -11,7 +11,9 @@ public class SentryLoggingOptions : SentryOptions
     /// <summary>
     /// Gets or sets the minimum breadcrumb level.
     /// </summary>
-    /// <remarks>Events with this level or higher will be stored as <see cref="Breadcrumb"/></remarks>
+    /// <remarks>
+    /// Events with this level or higher will be stored as <see cref="Breadcrumb"/>.
+    /// </remarks>
     /// <value>
     /// The minimum breadcrumb level.
     /// </value>
@@ -21,12 +23,25 @@ public class SentryLoggingOptions : SentryOptions
     /// Gets or sets the minimum event level.
     /// </summary>
     /// <remarks>
-    /// Events with this level or higher will be sent to Sentry
+    /// Events with this level or higher will be sent to Sentry.
     /// </remarks>
     /// <value>
     /// The minimum event level.
     /// </value>
     public LogLevel MinimumEventLevel { get; set; } = LogLevel.Error;
+
+    /// <summary>
+    /// Gets or sets the minimum log level.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    /// <remarks>
+    /// Logs with this level or higher will be stored as <see cref="SentryLog"/>.
+    /// </remarks>
+    /// <value>
+    /// The minimum log level.
+    /// </value>
+    [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
+    public LogLevel MinimumLogLevel { get; set; } = LogLevel.Trace;
 
     /// <summary>
     /// Whether to initialize this SDK through this integration

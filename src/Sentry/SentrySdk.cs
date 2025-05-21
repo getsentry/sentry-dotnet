@@ -280,6 +280,10 @@ public static partial class SentrySdk
     /// </summary>
     public static bool IsEnabled { [DebuggerStepThrough] get => CurrentHub.IsEnabled; }
 
+    /// <inheritdoc cref="IHub.Logger" />
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public static SentryStructuredLogger Logger { [DebuggerStepThrough] get => CurrentHub.Logger; }
+
     /// <summary>
     /// Creates a new scope that will terminate when disposed.
     /// </summary>
