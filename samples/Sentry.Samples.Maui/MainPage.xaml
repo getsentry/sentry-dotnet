@@ -83,6 +83,13 @@
                 Clicked="OnFeedbackClicked"
                 HorizontalOptions="Center" />
 
+            <Button
+                x:Name="CtMvvmBtn"
+                Text="CommunityToolkit.Mvvm Integration"
+                SemanticProperties.Hint="Shows a test that auto-instrument async relay commands from the MVVM Community Toolkit."
+                Clicked="CtMvvmBtn_OnClicked"
+                HorizontalOptions="Center" />
+
         </VerticalStackLayout>
     </ScrollView>
 

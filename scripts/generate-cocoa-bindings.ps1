@@ -1,5 +1,3 @@
-# Reference: https://github.com/xamarin/xamarin-macios/blob/main/docs/website/binding_types_reference_guide.md
-
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
@@ -117,6 +115,41 @@ $Text = $Text -replace '\bpublic\b', 'internal'
 # Remove static CFunctions class
 $Text = $Text -replace '(?ms)\nstatic class CFunctions.*?}\n', ''
 
+# This enum resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
+$SentryLevel = @'
+
+[Native]
+internal enum SentryLevel : ulong
+{
+    None = 0,
+    Debug = 1,
+    Info = 2,
+    Warning = 3,
+    Error = 4,
+    Fatal = 5
+}
+'@
+
+# This enum resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
+$SentryTransactionNameSource = @'
+
+[Native]
+internal enum SentryTransactionNameSource : long
+{
+    Custom = 0,
+    Url = 1,
+    Route = 2,
+    View = 3,
+    Component = 4,
+    Task = 5
+}
+'@
+
+$Text += "`n$SentryLevel"
+$Text += "`n$SentryTransactionNameSource"
+
 # Add header and output file
 $Text = "$Header`n`n$Text"
 $Text | Out-File "$BindingsPath/$File"
@@ -146,9 +179,6 @@ $Text = $Text -replace '\bISentrySerializable\b', 'SentrySerializable'
 
 # Remove INSCopying due to https://github.com/xamarin/xamarin-macios/issues/17130
 $Text = $Text -replace ': INSCopying,', ':' -replace '\s?[:,] INSCopying', ''
-
-# Remove iOS attributes like [iOS (13, 0)]
-$Text = $Text -replace '\[iOS \(13, 0\)\]\n?', ''
 
 # Fix delegate argument names
 $Text = $Text -replace '(NSError) arg\d', '$1 error'
@@ -191,7 +221,7 @@ $Text = $Text -replace '\[Static\]\s*\[Internal\]\s*partial\s+interface\s+Consta
 
 # Update MethodToProperty translations
 $Text = $Text -replace '(Export \("get\w+"\)\]\n)\s*\[Verify \(MethodToProperty\)\]\n(.+ \{ get; \})', '$1$2'
-$Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+ (?:Hash|Value|DefaultIntegrations|AppStartMeasurementWithSpans|BaggageHttpHeader) \{ get; \})', '$1'
+$Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+ (?:Hash|Value|DefaultIntegrations) \{ get; \})', '$1'
 $Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+) \{ get; \}', '$1();'
 
 # Allow weakly typed NSArray
@@ -204,7 +234,7 @@ $Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\()\n\s*', '$1'
 # Remove default IsEqual implementation (already implemented by NSObject)
 $Text = $Text -replace '(?ms)\n?^ *// [^\n]*isEqual:.*?$.*?;\n', ''
 
-# Replace obsolete platform availability attributes
+# Replace obsolete platform avaialbility attributes
 $Text = $Text -replace '([\[,] )MacCatalyst \(', '$1Introduced (PlatformName.MacCatalyst, '
 $Text = $Text -replace '([\[,] )Mac \(', '$1Introduced (PlatformName.MacOSX, '
 $Text = $Text -replace '([\[,] )iOS \(', '$1Introduced (PlatformName.iOS, '
@@ -217,6 +247,7 @@ $Text = $Text -replace '(?m)(^\s*\/\/[^\r\n]*$\s*\[Export \("serialize"\)\]$\s*)
 
 $Text = $Text -replace '.*SentryEnvelope .*?[\s\S]*?\n\n', ''
 $Text = $Text -replace '.*typedef.*SentryOnAppStartMeasurementAvailable.*?[\s\S]*?\n\n', ''
+$Text = $Text -replace '\n.*SentryReplayBreadcrumbConverter.*?[\s\S]*?\);\n', ''
 
 $propertiesToRemove = @(
     'SentryAppStartMeasurement',
@@ -231,6 +262,41 @@ foreach ($property in $propertiesToRemove) {
     $Text = $Text -replace "\n.*property.*$property.*?[\s\S]*?\}\n", ''
 }
 
+# This interface resides in the Sentry-Swift.h
+# Appending it here so we don't need to import and create bindings for the entire header
+$SentryId = @'
+
+// @interface SentryId : NSObject
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry8SentryId")]
+[Internal]
+interface SentryId
+{
+    // @property (nonatomic, strong, class) SentryId * _Nonnull empty;
+    [Static]
+    [Export ("empty", ArgumentSemantic.Strong)]
+    SentryId Empty { get; set; }
+
+    // @property (readonly, copy, nonatomic) NSString * _Nonnull sentryIdString;
+    [Export ("sentryIdString")]
+    string SentryIdString { get; }
+
+    // -(instancetype _Nonnull)initWithUuid:(NSUUID * _Nonnull)uuid __attribute__((objc_designated_initializer));
+    [Export ("initWithUuid:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (NSUuid uuid);
+
+    // -(instancetype _Nonnull)initWithUUIDString:(NSString * _Nonnull)uuidString __attribute__((objc_designated_initializer));
+    [Export ("initWithUUIDString:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (string uuidString);
+
+    // @property (readonly, nonatomic) NSUInteger hash;
+    [Export ("hash")]
+    nuint Hash { get; }
+}
+'@
+
+$Text += "`n$SentryId"
 
 # Add header and output file
 $Text = "$Header`n`n$Text"
