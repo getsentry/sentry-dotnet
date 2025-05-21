@@ -135,7 +135,7 @@ jobs:
 
       - name: Build
         id: build
-        run: dotnet build Sentry.CI-Build-${{ matrix.target || runner.os }} -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
+        run: dotnet build Sentry-CI-Build-${{ matrix.target || runner.os }} -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
 
       - name: Upload build logs
         if: ${{ steps.build.outcome != 'skipped' }}
@@ -145,7 +145,7 @@ jobs:
           path: build.binlog
 
       - name: Test
-        run: dotnet test Sentry.CI-Build-${{ matrix.target || runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
+        run: dotnet test Sentry-CI-Build-${{ matrix.target || runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
 
       - name: Upload code coverage
         uses: codecov/codecov-action@ad3126e916f78f00edff4ed0317cf185271ccc2d
