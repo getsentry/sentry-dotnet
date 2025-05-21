@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net9.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net9.0-android35.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net9.0-ios18.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net9.0-maccatalyst18.0</TargetFrameworks>
+    <UseMaui>true</UseMaui>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(EnableMauiDeviceTestVisualRunner)' == 'true'">
+    <DefineConstants>$(DefineConstants);VISUAL_RUNNER</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sentry.Maui.CommunityToolkit.Mvvm\Sentry.Maui.CommunityToolkit.Mvvm.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Maui\Sentry.Maui.csproj" />
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+  </ItemGroup>
+
+</Project>
