@@ -135,7 +135,7 @@ jobs:
 
       - name: Build
         id: build
-        run: dotnet build Sentry-CI-Build-${{ matrix.target || runner.os }} -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
+        run: dotnet build Sentry-CI-Build-${{ matrix.target || runner.os }}.slnf -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
 
       - name: Upload build logs
         if: ${{ steps.build.outcome != 'skipped' }}
