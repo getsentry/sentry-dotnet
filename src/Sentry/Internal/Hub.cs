@@ -385,7 +385,7 @@ internal class Hub : IHub, IDisposable
         evt.Contexts.Trace.TraceId = span.TraceId;
         evt.Contexts.Trace.ParentSpanId = span.ParentSpanId;
 
-        if (span.GetTransaction().GetDynamicSamplingContext() is {} dsc)
+        if (span.GetTransaction().GetDynamicSamplingContext() is { } dsc)
         {
             evt.DynamicSamplingContext = dsc;
         }
