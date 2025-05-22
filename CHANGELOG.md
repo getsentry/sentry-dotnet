@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 5.8.0-alpha.0
 
 ### Features
 
@@ -9,6 +9,7 @@
   - `Sentry.AspNetCore`, enabled via `SentryAspNetCoreOptions.EnableLogs`
   - `Sentry.Extensions.Logging`, enabled via `SentryLoggingOptions.EnableLogs`
   - `Sentry.Maui`, enabled via `SentryMauiOptions.EnableLogs`
+
 ## 5.8.0
 
 ### Features
