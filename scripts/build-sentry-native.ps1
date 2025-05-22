@@ -37,7 +37,14 @@ try
     }
     elseif ($IsLinux)
     {
-        $outDir += '/linux-x64'
+        if ((ldd --version 2>&1) -match 'musl')
+        {
+            $outDir += '/linux-musl-x64'
+        }
+        else
+        {
+            $outDir += '/linux-x64'
+        }
     }
     else
     {

@@ -58,6 +58,10 @@ internal class FakeTransport : ITransport
                     return "./console-app/bin/Release/$framework/win-x64/publish/console-app.exe"
                 }
             }
+            elseif ((ldd --version 2>&1) -match 'musl')
+            {
+                return "./console-app/bin/Release/$framework/linux-musl-x64/publish/console-app"
+            }
             else
             {
                 return "./console-app/bin/Release/$framework/linux-x64/publish/console-app"
