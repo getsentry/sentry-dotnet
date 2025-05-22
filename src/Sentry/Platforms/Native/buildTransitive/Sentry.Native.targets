@@ -25,9 +25,9 @@
     <FrameworkSupportsNative Condition="'$(SentryNative)' == 'false' or '$(SentryNative)' == 'disable'">false</FrameworkSupportsNative>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and '$(RuntimeIdentifier)' == 'win-x64'">
+  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and ('$(RuntimeIdentifier)' == 'win-x64' or '$(RuntimeIdentifier)' == 'win-arm64')">
     <DirectPInvoke Include="sentry-native" />
-    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\win-x64\sentry-native.lib" />
+    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\$(RuntimeIdentifier)\sentry-native.lib" />
     <NativeLibrary Include="dbghelp.lib" />
     <NativeLibrary Include="winhttp.lib" />
     <NativeLibrary Include="Gdi32.lib" />
