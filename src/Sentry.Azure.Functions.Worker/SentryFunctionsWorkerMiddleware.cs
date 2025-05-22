@@ -123,10 +123,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
             TransactionNameCache.TryAdd(transactionNameKey, transactionName);
         }
 
-        // If both sentry-trace and traceparent headers are present, sentry-trace takes precedence.
-        // See: https://github.com/getsentry/team-sdks/issues/41
         var traceHeader = requestData.TryGetSentryTraceHeader(_logger);
-        traceHeader ??= requestData.TryGetW3CTraceHeader(_logger)?.SentryTraceHeader;
         var baggageHeader = requestData.TryGetBaggageHeader(_logger);
 
         return SentrySdk.ContinueTrace(traceHeader, baggageHeader, transactionName, Operation);

@@ -105,10 +105,7 @@ internal class SentryMiddleware : IMiddleware
                 context.Response.OnCompleted(() => hub.FlushAsync(_options.FlushTimeout));
             }
 
-            // If both sentry-trace and traceparent headers are present, sentry-trace takes precedence.
-            // See: https://github.com/getsentry/team-sdks/issues/41
             var traceHeader = context.TryGetSentryTraceHeader(_options);
-            traceHeader ??= context.TryGetW3CTraceHeader(_options)?.SentryTraceHeader;
             var baggageHeader = context.TryGetBaggageHeader(_options);
             var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader);
 
