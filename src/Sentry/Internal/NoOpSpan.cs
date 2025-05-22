@@ -13,10 +13,10 @@ internal class NoOpSpan : ISpan
     {
     }
 
-    public SpanId SpanId => SpanId.Empty;
+    public virtual SpanId SpanId => SpanId.Empty;
     public SpanId? ParentSpanId => SpanId.Empty;
-    public SentryId TraceId => SentryId.Empty;
-    public bool? IsSampled => default;
+    public virtual SentryId TraceId => SentryId.Empty;
+    public virtual bool? IsSampled => default;
     public IReadOnlyDictionary<string, string> Tags => ImmutableDictionary<string, string>.Empty;
     public IReadOnlyDictionary<string, object?> Extra => ImmutableDictionary<string, object?>.Empty;
     public IReadOnlyDictionary<string, object?> Data => ImmutableDictionary<string, object?>.Empty;
@@ -24,7 +24,7 @@ internal class NoOpSpan : ISpan
     public DateTimeOffset? EndTimestamp => default;
     public bool IsFinished => default;
 
-    public string Operation
+    public virtual string Operation
     {
         get => string.Empty;
         set { }
@@ -42,21 +42,21 @@ internal class NoOpSpan : ISpan
         set { }
     }
 
-    public ISpan StartChild(string operation) => this;
+    public virtual ISpan StartChild(string operation) => this;
 
-    public void Finish()
+    public virtual void Finish()
     {
     }
 
-    public void Finish(SpanStatus status)
+    public virtual void Finish(SpanStatus status)
     {
     }
 
-    public void Finish(Exception exception, SpanStatus status)
+    public virtual void Finish(Exception exception, SpanStatus status)
     {
     }
 
-    public void Finish(Exception exception)
+    public virtual void Finish(Exception exception)
     {
     }
 
@@ -76,7 +76,7 @@ internal class NoOpSpan : ISpan
     {
     }
 
-    public SentryTraceHeader GetTraceHeader() => SentryTraceHeader.Empty;
+    public virtual SentryTraceHeader GetTraceHeader() => SentryTraceHeader.Empty;
 
     public IReadOnlyDictionary<string, Measurement> Measurements => ImmutableDictionary<string, Measurement>.Empty;
 
