@@ -9,11 +9,14 @@
     <!-- List of runtime identifiers: https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.NETCore.Platforms/src/runtime.json -->
     <NativeLibRelativePath-win-x64>win-x64</NativeLibRelativePath-win-x64>
     <SentryNativeOutputDirectory-win-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-win-x64)\</SentryNativeOutputDirectory-win-x64>
+    <NativeLibRelativePath-win-arm64>win-arm64</NativeLibRelativePath-win-arm64>
+    <SentryNativeOutputDirectory-win-arm64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-win-arm64)\</SentryNativeOutputDirectory-win-arm64>
     <NativeLibRelativePath-linux-x64>linux-x64</NativeLibRelativePath-linux-x64>
     <SentryNativeOutputDirectory-linux-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-linux-x64)\</SentryNativeOutputDirectory-linux-x64>
     <NativeLibRelativePath-osx>osx</NativeLibRelativePath-osx>
     <SentryNativeOutputDirectory-osx>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-osx)\</SentryNativeOutputDirectory-osx>
-    <SentryNativeBuildOutputs Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib</SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'win-x64'">$(SentryNativeOutputDirectory-win-x64)lib$(SentryNativeLibraryName).lib</SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'win-arm64'">$(SentryNativeOutputDirectory-win-arm64)lib$(SentryNativeLibraryName).lib</SentryNativeBuildOutputs>
     <SentryNativeBuildOutputs Condition="$([MSBuild]::IsOsPlatform('Linux'))">$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a</SentryNativeBuildOutputs>
     <SentryNativeBuildOutputs Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a</SentryNativeBuildOutputs>
   </PropertyGroup>
@@ -25,10 +28,17 @@
   </ItemGroup>
 
   <!-- Packaging the native library -->
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('Windows'))">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(RuntimeIdentifier)' == 'win-x64'">
     <None Include="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-win-x64)</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(RuntimeIdentifier)' == 'win-arm64'">
+    <None Include="$(SentryNativeOutputDirectory-win-arm64)$(SentryNativeLibraryName).lib">
+      <Pack>true</Pack>
+      <PackagePath>\sentry-native\$(NativeLibRelativePath-win-arm64)</PackagePath>
     </None>
   </ItemGroup>
 
