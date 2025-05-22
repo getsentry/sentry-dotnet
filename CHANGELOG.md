@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Revert W3C traceparent support ([#4204](https://github.com/getsentry/sentry-dotnet/pull/4204))
+
 ## 5.8.0
 
 ### Features
