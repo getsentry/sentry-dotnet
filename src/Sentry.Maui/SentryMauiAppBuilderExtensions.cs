@@ -12,6 +12,25 @@ using Sentry.Maui.Internal;
 namespace Microsoft.Maui.Hosting;
 
 /// <summary>
+/// An enum
+/// </summary>
+public enum RegisterEventBinderMethod
+{
+    /// <summary>
+    /// Registers the services directly... unable to inject the MvvM integration this way
+    /// </summary>
+    Directly,
+    /// <summary>
+    /// Register with the service provider
+    /// </summary>
+    ServiceProvider,
+    /// <summary>
+    /// Instantiate the options directly and invoke the config callback on it
+    /// </summary>
+    InvokeConfigOptions
+}
+
+/// <summary>
 /// Sentry extensions for <see cref="MauiAppBuilder"/>.
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
@@ -39,9 +58,10 @@ public static class SentryMauiAppBuilderExtensions
     /// </summary>
     /// <param name="builder">The builder.</param>
     /// <param name="configureOptions">An action to configure the options.</param>
+    /// <param name="eventBinderRegistrationMethod"></param>
     /// <returns>The <paramref name="builder"/>.</returns>
     public static MauiAppBuilder UseSentry(this MauiAppBuilder builder,
-        Action<SentryMauiOptions>? configureOptions)
+        Action<SentryMauiOptions>? configureOptions, RegisterEventBinderMethod eventBinderRegistrationMethod = RegisterEventBinderMethod.ServiceProvider)
     {
         var services = builder.Services;
 
@@ -57,13 +77,42 @@ public static class SentryMauiAppBuilderExtensions
         services.AddSingleton<Disposer>();
 
         // Resolve the configured options and register any element event binders from these
-        IServiceProvider serviceProvider = services.BuildServiceProvider();
-        var options = serviceProvider.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
-        services.TryAddSingleton<SentryOptions>(options); // Ensure this doesn't get resolved again in AddSentry
-        foreach (var eventBinder in options.DefaultEventBinders)
+        switch (eventBinderRegistrationMethod)
         {
-            eventBinder.Register(services);
+            case RegisterEventBinderMethod.Directly:
+                services.AddSingleton<IMauiElementEventBinder, MauiButtonEventsBinder>();
+                services.AddSingleton<IMauiElementEventBinder, MauiImageButtonEventsBinder>();
+                services.AddSingleton<IMauiElementEventBinder, MauiGestureRecognizerEventsBinder>();
+                services.AddSingleton<IMauiElementEventBinder, MauiVisualElementEventsBinder>();
+                break;
+            case RegisterEventBinderMethod.InvokeConfigOptions:
+                var options = new SentryMauiOptions();
+                configureOptions?.Invoke(options);
+                services.TryAddSingleton<SentryOptions>(options); // Ensure this doesn't get resolved again in AddSentry
+                foreach (var eventBinder in options.DefaultEventBinders)
+                {
+                    eventBinder.Register(services);
+                }
+                break;
+            case RegisterEventBinderMethod.ServiceProvider:
+                IServiceProvider serviceProvider = services.BuildServiceProvider();
+                options = serviceProvider.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+                services.TryAddSingleton<SentryOptions>(options); // Ensure this doesn't get resolved again in AddSentry
+                foreach (var eventBinder in options.DefaultEventBinders)
+                {
+                    eventBinder.Register(services);
+                }
+                break;
         }
+
+        // // Resolve the configured options and register any element event binders from these
+        // IServiceProvider serviceProvider = services.BuildServiceProvider();
+        // var options = serviceProvider.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+        // services.TryAddSingleton<SentryOptions>(options); // Ensure this doesn't get resolved again in AddSentry
+        // foreach (var eventBinder in options.DefaultEventBinders)
+        // {
+        //     eventBinder.Register(services);
+        // }
 
         // This is ultimately the class that enables all the MauiElementEventBinders above
         services.TryAddSingleton<IMauiEventsBinder, MauiEventsBinder>();
