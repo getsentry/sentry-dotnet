@@ -1818,7 +1818,7 @@ public partial class HubTests
         else
         {
             transaction.Should().Be(NoOpTransaction.Instance);
-            _fixture.Client.DidNotReceive().CaptureTransaction(Arg.Any<SentryTransaction>(),Arg.Any<Scope>(), Arg.Any<SentryHint>());
+            _fixture.Client.DidNotReceive().CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
         }
     }
 
