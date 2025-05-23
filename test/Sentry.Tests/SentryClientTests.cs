@@ -960,11 +960,9 @@ public partial class SentryClientTests
         var client = _fixture.GetSut();
 
         var hub = Substitute.For<IHub>();
-        var transaction = new TransactionTracer(hub, "test name", "test operation");
+        var transaction = new UnsampledTransaction(hub, new TransactionContext("test name", "test operation"));
         transaction.StartChild("span1");
         transaction.StartChild("span2");
-        transaction.IsSampled = false; // <-- *** Sampled out ***
-        transaction.EndTimestamp = DateTimeOffset.Now;
 
         // Act
         client.CaptureTransaction(new SentryTransaction(transaction));
@@ -1262,7 +1260,6 @@ public partial class SentryClientTests
         var transaction = new TransactionTracer(hub, "test name", "test operation");
         transaction.StartChild("span1");
         transaction.StartChild("span2");
-        transaction.IsSampled = true;
         transaction.EndTimestamp = DateTimeOffset.Now; // finished
 
         // Act
@@ -1383,7 +1380,6 @@ public partial class SentryClientTests
         var transaction = new TransactionTracer(hub, "test name", "test operation");
         transaction.StartChild("span1");
         transaction.StartChild("span2");
-        transaction.IsSampled = true;
         transaction.EndTimestamp = DateTimeOffset.Now; // finished
 
         // Act

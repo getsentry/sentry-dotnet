@@ -50,10 +50,7 @@ public class SentryDiagnosticListenerTests
 
         public ITransactionTracer StartTransaction(IHub hub, ITransactionContext context)
         {
-            var transaction = new TransactionTracer(hub, context)
-            {
-                IsSampled = true
-            };
+            var transaction = new TransactionTracer(hub, context);
             var (currentScope, _) = ScopeManager.GetCurrent();
             currentScope.Transaction = transaction;
             return transaction;

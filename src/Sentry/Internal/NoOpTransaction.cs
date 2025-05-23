@@ -7,13 +7,13 @@ internal class NoOpTransaction : NoOpSpan, ITransactionTracer
 {
     public new static ITransactionTracer Instance { get; } = new NoOpTransaction();
 
-    private NoOpTransaction()
+    protected NoOpTransaction()
     {
     }
 
     public SdkVersion Sdk => SdkVersion.Instance;
 
-    public string Name
+    public virtual string Name
     {
         get => string.Empty;
         set { }
@@ -87,7 +87,7 @@ internal class NoOpTransaction : NoOpSpan, ITransactionTracer
         set { }
     }
 
-    public IReadOnlyCollection<ISpan> Spans => ImmutableList<ISpan>.Empty;
+    public virtual IReadOnlyCollection<ISpan> Spans => ImmutableList<ISpan>.Empty;
 
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => ImmutableList<Breadcrumb>.Empty;
 

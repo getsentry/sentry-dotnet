@@ -68,7 +68,7 @@ public class SentryTracingMiddlewareTests
 
         var sentryClient = Substitute.For<ISentryClient>();
 
-        var hub = new Hub(new SentryOptions { Dsn = ValidDsn }, sentryClient);
+        var hub = new Hub(new SentryOptions { Dsn = ValidDsn, TracesSampleRate = 1.0 }, sentryClient);
 
         var server = new TestServer(new WebHostBuilder()
             .UseDefaultServiceProvider(di => di.EnableValidation())
@@ -105,8 +105,10 @@ public class SentryTracingMiddlewareTests
         transaction.NameSource.Should().Be(TransactionNameSource.Route);
     }
 
-    [Fact]
-    public async Task Transaction_is_started_automatically_from_incoming_trace_header()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Transaction_is_started_automatically_from_incoming_trace_header(bool isSampled)
     {
         // Arrange
         var sentryClient = Substitute.For<ISentryClient>();
@@ -133,27 +135,41 @@ public class SentryTracingMiddlewareTests
         var client = server.CreateClient();
 
         // Act
+        var sentryTraceHeader = isSampled
+            ? "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-1"
+            : "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0";
+
         using var request = new HttpRequestMessage(HttpMethod.Get, "/person/13")
         {
             Headers =
             {
-                {"sentry-trace", "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"}
+                {"sentry-trace", sentryTraceHeader}
             }
         };
 
         await client.SendAsync(request);
 
         // Assert
-        sentryClient.Received(1).CaptureTransaction(Arg.Is<SentryTransaction>(t =>
-            t.Name == "GET /person/{id}" &&
-            t.NameSource == TransactionNameSource.Route &&
-            t.TraceId == SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8") &&
-            t.ParentSpanId == SpanId.Parse("1000000000000000") &&
-            t.IsSampled == false
-        ),
-        Arg.Any<Scope>(),
-        Arg.Any<SentryHint>()
-        );
+        if (isSampled)
+        {
+            sentryClient.Received(1).CaptureTransaction(Arg.Is<SentryTransaction>(t =>
+                    t.Name == "GET /person/{id}" &&
+                    t.NameSource == TransactionNameSource.Route &&
+                    t.TraceId == SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8") &&
+                    t.ParentSpanId == SpanId.Parse("1000000000000000") &&
+                    t.IsSampled == true
+                ),
+                Arg.Any<Scope>(),
+                Arg.Any<SentryHint>()
+            );
+        }
+        else
+        {
+            sentryClient.DidNotReceive().CaptureTransaction(Arg.Any<SentryTransaction>(),
+                Arg.Any<Scope>(),
+                Arg.Any<SentryHint>()
+            );
+        }
     }
 
     [Fact]

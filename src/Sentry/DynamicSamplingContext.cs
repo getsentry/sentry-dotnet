@@ -198,6 +198,31 @@ internal class DynamicSamplingContext
             replaySession);
     }
 
+    public static DynamicSamplingContext CreateFromUnsampledTransaction(UnsampledTransaction transaction, SentryOptions options, IReplaySession? replaySession)
+    {
+        // These should already be set on the transaction.
+        var publicKey = options.ParsedDsn.PublicKey;
+        var traceId = transaction.TraceId;
+        var sampled = transaction.IsSampled;
+        var sampleRate = transaction.SampleRate!.Value;
+        var sampleRand = transaction.SampleRand;
+        var transactionName = transaction.NameSource.IsHighQuality() ? transaction.Name : null;
+
+        // These two may not have been set yet on the transaction, but we can get them directly.
+        var release = options.SettingLocator.GetRelease();
+        var environment = options.SettingLocator.GetEnvironment();
+
+        return new DynamicSamplingContext(traceId,
+            publicKey,
+            sampled,
+            sampleRate,
+            sampleRand,
+            release,
+            environment,
+            transactionName,
+            replaySession);
+    }
+
     public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
     {
         var traceId = propagationContext.TraceId;
@@ -223,6 +248,9 @@ internal static class DynamicSamplingContextExtensions
 
     public static DynamicSamplingContext CreateDynamicSamplingContext(this TransactionTracer transaction, SentryOptions options, IReplaySession? replaySession)
         => DynamicSamplingContext.CreateFromTransaction(transaction, options, replaySession);
+
+    public static DynamicSamplingContext CreateDynamicSamplingContext(this UnsampledTransaction transaction, SentryOptions options, IReplaySession? replaySession)
+        => DynamicSamplingContext.CreateFromUnsampledTransaction(transaction, options, replaySession);
 
     public static DynamicSamplingContext CreateDynamicSamplingContext(this SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
         => DynamicSamplingContext.CreateFromPropagationContext(propagationContext, options, replaySession);

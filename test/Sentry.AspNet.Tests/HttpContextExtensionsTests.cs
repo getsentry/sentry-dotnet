@@ -11,7 +11,8 @@ public class HttpContextExtensionsTests
         using var _ = SentrySdk.UseHub(new Hub(
             new SentryOptions
             {
-                Dsn = ValidDsn
+                Dsn = ValidDsn,
+                TracesSampleRate = 1.0
             },
             Substitute.For<ISentryClient>()
         ));
@@ -57,7 +58,8 @@ public class HttpContextExtensionsTests
         using var _ = SentrySdk.UseHub(new Hub(
             new SentryOptions
             {
-                Dsn = ValidDsn
+                Dsn = ValidDsn,
+                TracesSampleRate = 1.0
             },
             Substitute.For<ISentryClient>()
         ));
@@ -81,6 +83,7 @@ public class HttpContextExtensionsTests
             new SentryOptions
             {
                 Dsn = ValidDsn,
+                TracesSampleRate = 1.0,
                 SendDefaultPii = true
             },
             Substitute.For<ISentryClient>()
@@ -102,6 +105,7 @@ public class HttpContextExtensionsTests
             new SentryOptions
             {
                 Dsn = ValidDsn,
+                TracesSampleRate = 1.0,
                 SendDefaultPii = true
             },
             Substitute.For<ISentryClient>()

@@ -146,7 +146,11 @@ internal class SentryTracingMiddleware
         }
         finally
         {
-            if (transaction is not null)
+            if (transaction is UnsampledTransaction)
+            {
+                transaction.Finish();
+            }
+            else if (transaction is TransactionTracer tracer)
             {
                 // The Transaction name was altered during the pipeline execution,
                 // That could be done by user interference or by some Event Capture
@@ -183,7 +187,7 @@ internal class SentryTracingMiddleware
                     if (!string.IsNullOrEmpty(customTransactionName))
                     {
                         transaction.Name = $"{method} {customTransactionName}";
-                        ((TransactionTracer)transaction).NameSource = TransactionNameSource.Custom;
+                        tracer.NameSource = TransactionNameSource.Custom;
                     }
                     else
                     {
@@ -191,7 +195,7 @@ internal class SentryTracingMiddleware
                         // e.g. "GET /pets/1"
                         var path = context.Request.Path;
                         transaction.Name = $"{method} {path}";
-                        ((TransactionTracer)transaction).NameSource = TransactionNameSource.Url;
+                        tracer.NameSource = TransactionNameSource.Url;
                     }
                 }
 
@@ -200,7 +204,7 @@ internal class SentryTracingMiddleware
                     transaction.Finish(status);
                 }
                 // Status code not yet changed to 500 but an exception does exist
-                // so lets avoid passing the misleading 200 down and close only with
+                // so let's avoid passing the misleading 200 down and close only with
                 // the exception instance that will be inferred as errored.
                 else if (status == SpanStatus.Ok)
                 {

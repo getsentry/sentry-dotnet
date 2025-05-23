@@ -376,12 +376,10 @@ public class DynamicSamplingContextTests
         Assert.Equal(original.Members, result.Members);
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    [InlineData(null)]
-    public void CreateFromTransaction(bool? isSampled)
+    [Fact]
+    public void CreateFromTransaction()
     {
+        // Arrange
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
@@ -399,9 +397,50 @@ public class DynamicSamplingContextTests
         {
             Name = "GET /person/{id}",
             NameSource = TransactionNameSource.Route,
-            IsSampled = isSampled,
             SampleRate = 0.5,
-            SampleRand = (isSampled ?? true) ? 0.4000 : 0.6000, // Lower than the sample rate means sampled == true
+            SampleRand = 0.4000, // Lower than the sample rate means sampled == true
+            User = new SentryUser(),
+        };
+
+        // Act
+        var dsc = transaction.CreateDynamicSamplingContext(options, _fixture.ActiveReplaySession);
+
+        // Assert
+        Assert.NotNull(dsc);
+        Assert.Equal(9, dsc.Items.Count);
+        Assert.Equal(traceId.ToString(), Assert.Contains("trace_id", dsc.Items));
+        Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
+        Assert.Equal("true", Assert.Contains("sampled", dsc.Items));
+        Assert.Equal("0.5", Assert.Contains("sample_rate", dsc.Items));
+        Assert.Equal("0.4000", Assert.Contains("sample_rand", dsc.Items));
+        Assert.Equal("foo@2.4.5", Assert.Contains("release", dsc.Items));
+        Assert.Equal("staging", Assert.Contains("environment", dsc.Items));
+        Assert.Equal("GET /person/{id}", Assert.Contains("transaction", dsc.Items));
+        // We add the replay_id automatically when we have an active replay session
+        Assert.Equal(_fixture.ActiveReplayId.ToString(), Assert.Contains("replay_id", dsc.Items));
+    }
+
+    [Fact]
+    public void CreateFromUnsampledTransaction()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            Release = "foo@2.4.5",
+            Environment = "staging"
+        };
+
+        var hub = Substitute.For<IHub>();
+        var ctx = Substitute.For<ITransactionContext>();
+        ctx.Name.Returns("GET /person/{id}");
+
+        var traceId = SentryId.Create();
+        ctx.TraceId.Returns(traceId);
+
+        var transaction = new UnsampledTransaction(hub, ctx)
+        {
+            SampleRate = 0.5,
+            SampleRand = 0.6000, // Lower than the sample rate means sampled == true
             User =
             {
             },
@@ -410,19 +449,12 @@ public class DynamicSamplingContextTests
         var dsc = transaction.CreateDynamicSamplingContext(options, _fixture.ActiveReplaySession);
 
         Assert.NotNull(dsc);
-        Assert.Equal(isSampled.HasValue ? 9 : 8, dsc.Items.Count);
+        Assert.Equal(9, dsc.Items.Count);
         Assert.Equal(traceId.ToString(), Assert.Contains("trace_id", dsc.Items));
         Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
-        if (transaction.IsSampled is { } sampled)
-        {
-            Assert.Equal(sampled ? "true" : "false", Assert.Contains("sampled", dsc.Items));
-        }
-        else
-        {
-            Assert.DoesNotContain("sampled", dsc.Items);
-        }
+        Assert.Equal("false", Assert.Contains("sampled", dsc.Items));
         Assert.Equal("0.5", Assert.Contains("sample_rate", dsc.Items));
-        Assert.Equal((isSampled ?? true) ? "0.4000" : "0.6000", Assert.Contains("sample_rand", dsc.Items));
+        Assert.Equal("0.6000", Assert.Contains("sample_rand", dsc.Items));
         Assert.Equal("foo@2.4.5", Assert.Contains("release", dsc.Items));
         Assert.Equal("staging", Assert.Contains("environment", dsc.Items));
         Assert.Equal("GET /person/{id}", Assert.Contains("transaction", dsc.Items));
