@@ -5,14 +5,11 @@ namespace Sentry.Maui;
 /// <summary>
 /// Methods to hook into MAUI and CommunityToolkit.Mvvm
 /// </summary>
-public static class SentryOptionsExtensions
+public static class SentryMauiAppBuilderExtensions
 {
     /// <summary>
     /// Automatically create traces for CommunityToolkit.Mvvm commands
     /// </summary>
-    public static SentryMauiOptions AddCommunityToolkitIntegration(this SentryMauiOptions options)
-    {
-        options.AddDefaultEventBinder<MauiCommunityToolkitMvvmEventsBinder>();
-        return options;
-    }
+    public static SentryMauiAppBuilder AddCommunityToolkitIntegration(this SentryMauiAppBuilder builder)
+        => builder.AddMauiElementBinder<MauiCommunityToolkitMvvmEventsBinder>();
 }
