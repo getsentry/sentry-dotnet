@@ -4,15 +4,13 @@ using Sentry.Maui;
 
 public class MvvmBenchmarks
 {
-    private MauiAppBuilder AppBuilder;
-
     [Params(RegisterEventBinderMethod.ServiceProvider, RegisterEventBinderMethod.InvokeConfigOptions, RegisterEventBinderMethod.Directly)]
     public RegisterEventBinderMethod ResolveOptionsWithServiceProvider;
 
-    [GlobalSetup]
-    public void Setup()
+    [Benchmark(Description = "Build MAUI App")]
+    public void BuildMauiAppBenchmark()
     {
-        AppBuilder = MauiApp.CreateBuilder()
+        var appBuilder = MauiApp.CreateBuilder()
             // This adds Sentry to your Maui application
             .UseSentry(options =>
             {
@@ -21,11 +19,6 @@ public class MvvmBenchmarks
                 // Automatically create traces for async relay commands in the MVVM Community Toolkit
                 options.AddCommunityToolkitIntegration();
             }, ResolveOptionsWithServiceProvider);
-    }
-
-    [Benchmark(Description = "Build MAUI App")]
-    public void BuildMauiAppBenchmark()
-    {
-        AppBuilder.Build();
+        appBuilder.Build();
     }
 }
