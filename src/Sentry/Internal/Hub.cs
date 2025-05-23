@@ -173,8 +173,8 @@ internal class Hub : IHub, IDisposable
                 SampleRand = sampleRand,
                 DynamicSamplingContext = dynamicSamplingContext // Default to the provided DSC
             };
-            // If no DSC was provided DSC, create one based on this transaction.
-            // DSC creation must be done AFTER the sampling decision has been made (it propagates sampling decisions).
+            // If no DSC was provided, create one based on this transaction.
+            // Must be done AFTER the sampling decision has been made (the DSC propagates sampling decisions).
             unsampledTransaction.DynamicSamplingContext ??= unsampledTransaction.CreateDynamicSamplingContext(_options, _replaySession);
             return unsampledTransaction;
         }
@@ -185,8 +185,8 @@ internal class Hub : IHub, IDisposable
             SampleRand = sampleRand,
             DynamicSamplingContext = dynamicSamplingContext // Default to the provided DSC
         };
-        // If no DSC was provided DSC, create one based on this transaction.
-        // DSC creation must be done AFTER the sampling decision has been made (it propagates sampling decisions).
+        // If no DSC was provided, create one based on this transaction.
+        // Must be done AFTER the sampling decision has been made (the DSC propagates sampling decisions).
         transaction.DynamicSamplingContext ??= transaction.CreateDynamicSamplingContext(_options, _replaySession);
 
         if (_options.TransactionProfilerFactory is { } profilerFactory &&
