@@ -11,13 +11,17 @@ on:
 
 jobs:
   build-sentry-native:
-    name: sentry-native (${{ matrix.os }})
+    name: sentry-native (${{ matrix.container || matrix.os }})
     runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
+          - os: ubuntu-latest
+            target: Linux-musl
+            container: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
           - os: windows-latest
           - os: windows-11-arm
@@ -44,10 +48,11 @@ jobs:
           enableCrossOsArchive: true
 
       - name: Remove unused applications
+        if: ${{ !matrix.container }}
         uses: ./.github/actions/freediskspace
 
       - name: Install build dependencies
-        if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'Linux'
+        if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'Linux' && !matrix.container
         run: |
           sudo apt update
           sudo apt install libcurl4-openssl-dev
@@ -58,14 +63,18 @@ jobs:
 
   build:
     needs: build-sentry-native
-    name: .NET (${{ matrix.os }})
+    name: .NET (${{ matrix.container || matrix.os }})
     runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
 
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
+          - os: ubuntu-latest
+            target: Linux-musl
+            container: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
           - os: windows-latest
           - os: windows-11-arm
@@ -83,6 +92,7 @@ jobs:
           fetch-depth: 2 # default is 1 and codecov needs > 1
 
       - name: Remove unused applications
+        if: ${{ !matrix.container }}
         uses: ./.github/actions/freediskspace
 
       - name: Setup Environment
@@ -94,11 +104,19 @@ jobs:
         run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
 
       - name: Download sentry-native (Linux)
-        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Linux') }}
+        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Linux' && !matrix.container) }}
         uses: actions/cache/restore@v4
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-Linux-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+
+      - name: Download sentry-native (Linux musl)
+        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.target == 'Linux-musl') }}
+        uses: actions/cache/restore@v4
+        with:
+          path: src/Sentry/Platforms/Native/sentry-native
+          key: sentry-native-Linux-musl-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
 
       - name: Download sentry-native (macOS)
@@ -128,6 +146,7 @@ jobs:
           enableCrossOsArchive: true
 
       - name: Build Native Dependencies
+        if: ${{ !matrix.container }}
         uses: ./.github/actions/buildnative
 
       - name: Restore .NET Dependencies
@@ -175,14 +194,17 @@ jobs:
 
   integration-test:
     needs: build
-    name: Integration test (${{ matrix.os }})
+    name: Integration test (${{ matrix.container || matrix.os }})
     runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
 
     strategy:
       fail-fast: false
       matrix:
         include:
           - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
+          - os: ubuntu-latest
+            container: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
           - os: windows-latest
           - os: windows-11-arm
@@ -204,7 +226,7 @@ jobs:
           path: src
 
       - name: Install build dependencies
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && !matrix.container
         run: |
           sudo apt update
           sudo apt install libcurl4-openssl-dev
