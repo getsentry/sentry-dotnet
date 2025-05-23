@@ -136,6 +136,7 @@ internal class Hub : IHub, IDisposable
             return NoOpTransaction.Instance;
         }
 
+        bool? isSampled = null;
         double? sampleRate = null;
         var sampleRand = dynamicSamplingContext?.Items.TryGetValue("sample_rand", out var dscsampleRand) ?? false
             ? double.Parse(dscsampleRand, NumberStyles.Float, CultureInfo.InvariantCulture)
@@ -155,17 +156,20 @@ internal class Hub : IHub, IDisposable
             if (tracesSampler(samplingContext) is { } samplerSampleRate)
             {
                 sampleRate = samplerSampleRate;
+                // The TracesSampler trumps all other sampling decisions (even the trace header)
+                isSampled = SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
             }
         }
 
-        // If the sampling decision isn't made by a trace sampler then fallback to Random sampling
+        // If the sampling decision isn't made by a trace sampler we check the trace header first (from the context) or
+        // finally fallback to Random sampling if the decision has been made by no other means
         sampleRate ??= _options.TracesSampleRate ?? 0.0;
-        var isSampled = SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
+        isSampled ??= context.IsSampled ?? SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
 
         // Make sure there is a replayId (if available) on the provided DSC (if any).
         dynamicSamplingContext = dynamicSamplingContext?.WithReplayId(_replaySession);
 
-        if (!isSampled)
+        if (isSampled is false)
         {
             var unsampledTransaction = new UnsampledTransaction(this, context)
             {
@@ -181,7 +185,6 @@ internal class Hub : IHub, IDisposable
 
         var transaction = new TransactionTracer(this, context)
         {
-            IsSampled = true,
             SampleRate = sampleRate,
             SampleRand = sampleRand,
             DynamicSamplingContext = dynamicSamplingContext // Default to the provided DSC

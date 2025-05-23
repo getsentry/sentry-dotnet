@@ -21,8 +21,8 @@ internal class NoOpSpan : ISpan
     public IReadOnlyDictionary<string, object?> Extra => ImmutableDictionary<string, object?>.Empty;
     public IReadOnlyDictionary<string, object?> Data => ImmutableDictionary<string, object?>.Empty;
     public DateTimeOffset StartTimestamp => default;
-    public DateTimeOffset? EndTimestamp => default;
-    public bool IsFinished => default;
+    public DateTimeOffset? EndTimestamp => null;
+    public virtual bool IsFinished => false;
 
     public virtual string Operation
     {

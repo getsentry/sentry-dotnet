@@ -15,15 +15,12 @@ public partial class SerializationTests
     public void Serialization_TransactionAndSpanData()
     {
         var hub = Substitute.For<IHub>();
-        var context = new TransactionContext("name", "operation", new SentryTraceHeader(SentryId.Empty, SpanId.Empty, false));
+        var context = new TransactionContext("name", "operation", new SentryTraceHeader(SentryId.Empty, SpanId.Empty, true));
         var transactionTracer = new TransactionTracer(hub, context);
         var span = transactionTracer.StartChild("childop");
         span.SetData("span1", "value1");
 
-        var transaction = new SentryTransaction(transactionTracer)
-        {
-            IsSampled = false
-        };
+        var transaction = new SentryTransaction(transactionTracer);
         transaction.SetData("transaction1", "transaction_value");
         var json = transaction.ToJsonString(_testOutputLogger);
         _testOutputLogger.LogDebug(json);

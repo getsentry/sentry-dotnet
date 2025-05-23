@@ -27,10 +27,15 @@ internal sealed class UnsampledTransaction : NoOpTransaction
 
     internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
 
+    private bool _isFinished;
+    public override bool IsFinished => _isFinished;
+
     public override IReadOnlyCollection<ISpan> Spans => _spans;
 
     public override SpanId SpanId => _context.SpanId;
+
     public override SentryId TraceId => _context.TraceId;
+
     public override bool? IsSampled => false;
 
     public double? SampleRate { get; set; }
@@ -53,8 +58,17 @@ internal sealed class UnsampledTransaction : NoOpTransaction
     {
         _options?.LogDebug("Finishing unsampled transaction");
 
-        // Clear the transaction from the scope
-        _hub.ConfigureScope(scope => scope.ResetTransaction(this));
+        // Ensure the transaction is really cleared from the scope
+        // See: https://github.com/getsentry/sentry-dotnet/issues/4198
+        _isFinished = true;
+
+        // Clear the transaction from the scope and regenerate the Propagation Context, so new events don't have a
+        // trace context that is "older" than the transaction that just finished
+        _hub.ConfigureScope(scope =>
+        {
+            scope.ResetTransaction(this);
+            scope.SetPropagationContext(new SentryPropagationContext());
+        });
 
         // Record the discarded events
         var spanCount = Spans.Count + 1; // 1 for each span + 1 for the transaction itself
@@ -83,5 +97,7 @@ internal sealed class UnsampledTransaction : NoOpTransaction
     private class UnsampledSpan(UnsampledTransaction transaction) : NoOpSpan
     {
         public override ISpan StartChild(string operation) => transaction.StartChild(operation);
+
+        public override bool? IsSampled => false;
     }
 }
