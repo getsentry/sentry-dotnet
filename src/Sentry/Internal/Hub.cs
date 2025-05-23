@@ -142,11 +142,7 @@ internal class Hub : IHub, IDisposable
             ? double.Parse(dscsampleRand, NumberStyles.Float, CultureInfo.InvariantCulture)
             : SampleRandHelper.GenerateSampleRand(context.TraceId.ToString());
 
-        // We will always sample out if tracing is explicitly disabled.
-        // Do not invoke the TracesSampler, evaluate the TracesSampleRate, and override any sampling decision
-        // that may have been already set (i.e.: from a sentry-trace header).
-        // Except when tracing is disabled, TracesSampler runs regardless of whether a decision
-        // has already been made, as it can be used to override it.
+        // TracesSampler runs regardless of whether a decision has already been made, as it can be used to override it.
         if (_options.TracesSampler is { } tracesSampler)
         {
             var samplingContext = new TransactionSamplingContext(
@@ -155,8 +151,8 @@ internal class Hub : IHub, IDisposable
 
             if (tracesSampler(samplingContext) is { } samplerSampleRate)
             {
-                sampleRate = samplerSampleRate;
                 // The TracesSampler trumps all other sampling decisions (even the trace header)
+                sampleRate = samplerSampleRate;
                 isSampled = SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
             }
         }
@@ -178,7 +174,7 @@ internal class Hub : IHub, IDisposable
                 DynamicSamplingContext = dynamicSamplingContext // Default to the provided DSC
             };
             // If no DSC was provided DSC, create one based on this transaction.
-            // DSC creation must be done AFTER the sampling decision has been made.
+            // DSC creation must be done AFTER the sampling decision has been made (it propagates sampling decisions).
             unsampledTransaction.DynamicSamplingContext ??= unsampledTransaction.CreateDynamicSamplingContext(_options, _replaySession);
             return unsampledTransaction;
         }
@@ -190,7 +186,7 @@ internal class Hub : IHub, IDisposable
             DynamicSamplingContext = dynamicSamplingContext // Default to the provided DSC
         };
         // If no DSC was provided DSC, create one based on this transaction.
-        // DSC creation must be done AFTER the sampling decision has been made.
+        // DSC creation must be done AFTER the sampling decision has been made (it propagates sampling decisions).
         transaction.DynamicSamplingContext ??= transaction.CreateDynamicSamplingContext(_options, _replaySession);
 
         if (_options.TransactionProfilerFactory is { } profilerFactory &&
