@@ -825,7 +825,7 @@ public class SentryOptions
     public TimeSpan InitCacheFlushTimeout { get; set; } = TimeSpan.FromSeconds(1);
 
     /// <summary>
-    /// Defaults tags to add to all events. (These are indexed by Sentry).
+    /// Default tags to add to all events. (These are indexed by Sentry).
     /// </summary>
     /// <remarks>
     /// If the key already exists in the event, it will not be overwritten by a default tag.
