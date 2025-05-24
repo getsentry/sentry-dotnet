@@ -57,9 +57,8 @@ public static class SentryMauiAppBuilderExtensions
         services.AddSingleton<Disposer>();
 
         // Resolve the configured options and register any element event binders from these
-        IServiceProvider serviceProvider = services.BuildServiceProvider();
-        var options = serviceProvider.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
-        services.TryAddSingleton<SentryOptions>(options); // Ensure this doesn't get resolved again in AddSentry
+        var options = new SentryMauiOptions();
+        configureOptions?.Invoke(options);
         foreach (var eventBinder in options.DefaultEventBinders)
         {
             eventBinder.Register(services);
