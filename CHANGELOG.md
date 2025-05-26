@@ -7,6 +7,7 @@
 - Support musl on Linux ([#4188](https://github.com/getsentry/sentry-dotnet/pull/4188))
 - Support for Windows ARM64 with Native AOT ([#4187](https://github.com/getsentry/sentry-dotnet/pull/4187))
 - Addressed potential performance issue with Sentry.Maui ([#4219](https://github.com/getsentry/sentry-dotnet/pull/4219))
+- Respect `SentryNative=false` at runtime ([#4220](https://github.com/getsentry/sentry-dotnet/pull/4220))
 
 ## 5.8.0
 

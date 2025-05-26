@@ -68,6 +68,20 @@ internal class FakeTransport : ITransport
             }
         }
 
+        function publishConsoleApp([bool]$SentryNative = $true)
+        {
+            dotnet publish console-app `
+                -c Release `
+                --nologo `
+                --framework $framework `
+                -p:SentryNative=$($SentryNative.ToString().ToLower()) `
+            | ForEach-Object { Write-Host $_ }
+            if ($LASTEXITCODE -ne 0)
+            {
+                throw 'Failed to publish the test app project.'
+            }
+        }
+
         function runConsoleApp([bool]$IsAOT = $true, [string]$CrashType = 'Managed', [string]$Dsn = 'http://key@127.0.0.1:9999/123')
         {
             if ($IsAOT)
@@ -75,11 +89,7 @@ internal class FakeTransport : ITransport
                 $executable = getConsoleAppPath
                 If (!(Test-Path $executable))
                 {
-                    dotnet publish console-app -c Release --nologo --framework $framework | ForEach-Object { Write-Host $_ }
-                    if ($LASTEXITCODE -ne 0)
-                    {
-                        throw 'Failed to publish the test app project.'
-                    }
+                    publishConsoleApp
                 }
             }
             else
@@ -90,7 +100,7 @@ internal class FakeTransport : ITransport
             Write-Host "::group::Executing $executable"
             try
             {
-                Invoke-Expression $executable | ForEach-Object {
+                Invoke-Expression "$executable 2>&1" | ForEach-Object {
                     Write-Host "  $_"
                     $_
                 }
@@ -120,8 +130,19 @@ internal class FakeTransport : ITransport
                 "console-app$exeExtension", "console-app$debugExtension") | Sort-Object -Unique)
     }
 
-    It "'dotnet publish' produces an app that's recognized as AOT by Sentry" {
-        runConsoleApp | Should -AnyElementMatch 'This looks like a Native AOT application build.'
+    It "'dotnet publish' produces an app that's recognized as AOT by Sentry (SentryNative=<_>)" -ForEach @($false, $true) {
+        publishConsoleApp $_
+        $output = runConsoleApp
+        $output | Should -AnyElementMatch 'This looks like a Native AOT application build.'
+        $output | Should -Not -AnyElementMatch 'System.DllNotFoundException: Unable to load (shared library|DLL) ''sentry-native'' or one of its dependencies'
+        if ($_)
+        {
+            $output | Should -AnyElementMatch 'Initializing sentry native'
+        }
+        else
+        {
+            $output | Should -Not -AnyElementMatch 'Initializing sentry native'
+        }
     }
 
     It "'dotnet run' produces an app that's recognized as JIT by Sentry" {
