@@ -13,8 +13,8 @@
     <!-- SentryNative.IsEnabled should result in compile-time constant for trimmed applications -->
     <!-- Effectively disabling native library -->
     <RuntimeHostConfigurationOption Include="Sentry.Native.IsEnabled"
-                                    Condition="'$(SentryNative)' != 'false' and '$(SentryNative)' != 'disable'"
-                                    Value="true"
+                                    Condition="'$(SentryNative)' == 'false' or '$(SentryNative)' == 'disable'"
+                                    Value="false"
                                     Trim="true" />
   </ItemGroup>
 
