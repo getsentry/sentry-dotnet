@@ -89,4 +89,29 @@ internal static class MonoAndroidHelper
     public const string MANGLED_ASSEMBLY_REGULAR_ASSEMBLY_MARKER = "lib_";
     public const string MANGLED_ASSEMBLY_SATELLITE_ASSEMBLY_MARKER = "lib-";
     public const string SATELLITE_CULTURE_END_MARKER_CHAR = "_";
+
+    /// <summary>
+    /// When an AAB file is deployed, the APK is split into multiple APKs so our modules can end up in a companion
+    /// architecture specific APK like split_config.arm64_v8a.apk. This method returns the path to that split_config APK
+    /// if it exists... otherwise we just return the original archive path.
+    /// </summary>
+    internal static string GetArchivePathForArchitecture(this string archivePath, AndroidTargetArch arch, DebugLogger? logger)
+    {
+        return ArchToAbiMap.TryGetValue(arch, out var abi)
+            ? GetArchivePathForAbi(archivePath, abi, logger)
+            : archivePath;
+    }
+
+    /// <summary>
+    /// When an AAB file is deployed, the APK is split into multiple APKs so our modules can end up in a companion
+    /// architecture specific APK like split_config.arm64_v8a.apk. This method returns the path to that split_config APK
+    /// if it exists... otherwise we just return the original archive path.
+    /// </summary>
+    internal static string GetArchivePathForAbi(this string archivePath, string abi, DebugLogger? logger)
+    {
+        var basePath = Path.GetDirectoryName(archivePath) ?? string.Empty;
+        var abiPart = abi.Replace("-", "_");
+        var splitFilePath = Path.Combine(basePath, $"split_config.{abiPart}.apk");
+        return splitFilePath;
+    }
 }

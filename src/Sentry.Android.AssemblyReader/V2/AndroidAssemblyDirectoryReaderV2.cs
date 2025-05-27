@@ -12,6 +12,7 @@ internal sealed class AndroidAssemblyDirectoryReaderV2 : IAndroidAssemblyReader
         Logger = logger;
         foreach (var abi in supportedAbis)
         {
+            logger?.Invoke("Adding {0} to supported architectures for Directory Reader", abi);
             SupportedArchitectures.Add(abi.AbiToDeviceArchitecture());
         }
         _archiveAssemblyHelper = new ArchiveAssemblyHelper(apkPath, logger);
@@ -25,11 +26,13 @@ internal sealed class AndroidAssemblyDirectoryReaderV2 : IAndroidAssemblyReader
             var stream = File.OpenRead(name);
             return new PEReader(stream);
         }
+        Logger?.Invoke("File {0} does not exist in the APK", name);
 
         foreach (var arch in SupportedArchitectures)
         {
             if (_archiveAssemblyHelper.ReadEntry($"assemblies/{name}", arch) is not { } memStream)
             {
+                Logger?.Invoke("Couldn't find entry {0} in the APK for the {1} architecture", name, arch);
                 continue;
             }
 
@@ -137,6 +140,7 @@ internal sealed class AndroidAssemblyDirectoryReaderV2 : IAndroidAssemblyReader
             var potentialEntries = TransformArchiveAssemblyPath(path, arch);
             if (potentialEntries == null || potentialEntries.Count == 0)
             {
+                _logger?.Invoke("No potential entries for path '{0}' with arch '{1}'", path, arch);
                 return null;
             }
 
@@ -145,6 +149,7 @@ internal sealed class AndroidAssemblyDirectoryReaderV2 : IAndroidAssemblyReader
             {
                 if (zip.GetEntry(assemblyPath) is not { } entry)
                 {
+                    _logger?.Invoke("No entry found for path '{0}' in archive '{1}'", assemblyPath, _archivePath);
                     continue;
                 }
 
