@@ -245,6 +245,23 @@ public class SentryOptions
         return factory.Create(this);
     }
 
+    internal HttpRequestMessage CreateHttpRequest(HttpContent content)
+    {
+        var authHeader =
+            $"Sentry sentry_version={SentryVersion}," +
+            $"sentry_client={SdkVersion.Instance.Name}/{SdkVersion.Instance.Version}," +
+            $"sentry_key={ParsedDsn.PublicKey}" +
+            (ParsedDsn.SecretKey is { } secretKey ? $",sentry_secret={secretKey}" : null);
+
+        return new HttpRequestMessage
+        {
+            RequestUri = ParsedDsn.GetEnvelopeEndpointUri(),
+            Method = HttpMethod.Post,
+            Headers = { { "X-Sentry-Auth", authHeader } },
+            Content = content
+        };
+    }
+
     /// <summary>
     /// Scope state processor.
     /// </summary>
