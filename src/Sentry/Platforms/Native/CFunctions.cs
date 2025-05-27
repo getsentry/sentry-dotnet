@@ -139,6 +139,14 @@ internal static class C
             }
         }
 
+        unsafe
+        {
+            var cTransport = sentry_transport_new(&nativeTransport);
+            sentry_transport_set_state(cTransport, GCHandle.ToIntPtr(GCHandle.Alloc(options)));
+            sentry_transport_set_free_func(cTransport, &nativeTransportFree);
+            sentry_options_set_transport(cOptions, cTransport);
+        }
+
         options.DiagnosticLogger?.LogDebug("Initializing sentry native");
         return 0 == sentry_init(cOptions);
     }
@@ -363,6 +371,66 @@ internal static class C
 
     [DllImport("sentry-native")]
     private static extern void sentry_options_set_auto_session_tracking(IntPtr options, int debug);
+
+    [DllImport("sentry-native")]
+    private static extern void sentry_options_set_transport(IntPtr options, IntPtr transport);
+
+    [DllImport("sentry-native")]
+    private static extern unsafe IntPtr sentry_transport_new(delegate* unmanaged/*[Cdecl]*/<IntPtr, IntPtr, void> sendFunc);
+
+    [DllImport("sentry-native")]
+    private static extern void sentry_transport_set_state(IntPtr transport, IntPtr state);
+
+    [DllImport("sentry-native")]
+    private static extern unsafe void sentry_transport_set_free_func(IntPtr transport, delegate* unmanaged/*[Cdecl]*/<IntPtr, void> freeFunc);
+
+    [DllImport("sentry-native")]
+    private static extern int sentry_envelope_write_to_file(IntPtr envelope, string path);
+
+    [DllImport("sentry-native")]
+    private static extern void sentry_envelope_free(IntPtr envelope);
+
+    [DllImport("sentry-native")]
+    private static extern void sentry_free(IntPtr ptr);
+
+    [UnmanagedCallersOnly]
+    private static void nativeTransport(IntPtr envelope, IntPtr state)
+    {
+        try
+        {
+            var options = GCHandle.FromIntPtr(state).Target as SentryOptions;
+            var cacheDirectoryPath = options?.TryGetProcessSpecificCacheDirectoryPath();
+            if (cacheDirectoryPath is null)
+            {
+                return;
+            }
+
+            var envelopePath = Path.Combine(cacheDirectoryPath, SentryId.Create() + ".envelope");
+            if (sentry_envelope_write_to_file(envelope, envelopePath) != 0)
+            {
+                options?.DiagnosticLogger?.LogError("Failed to write native envelope: {0}", envelopePath);
+            }
+            else
+            {
+                options?.DiagnosticLogger?.LogDebug("Wrote native envelope: {0}", envelopePath);
+            }
+        }
+        catch
+        {
+            // never allow an exception back to native code - it would crash the app
+        }
+        finally
+        {
+            sentry_envelope_free(envelope);
+        }
+    }
+
+    [UnmanagedCallersOnly]
+    private static void nativeTransportFree(IntPtr state)
+    {
+        var handle = GCHandle.FromIntPtr(state);
+        handle.Free();
+    }
 
     [DllImport("sentry-native")]
     private static extern unsafe void sentry_options_set_logger(IntPtr options, delegate* unmanaged/*[Cdecl]*/<int, IntPtr, IntPtr, IntPtr, void> logger, IntPtr userData);
