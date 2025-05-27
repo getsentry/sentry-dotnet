@@ -84,6 +84,16 @@ public class SentryClient : ISentryClient, IDisposable
     /// <inheritdoc />
     public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
     {
+
+        var processedFeedback = _options?.BeforeSendFeedbackInternal?.Invoke(feedback, hint);
+        if (processedFeedback is null)
+        {
+            _options?.DiagnosticLogger?.LogDebug("BeforeSendFeedback returned null, dropping feedback.");
+            return;
+        }
+
+        _transport.EnqueueFeedback(processedFeedback, hint);
+
         if (string.IsNullOrEmpty(feedback.Message))
         {
             _options.LogWarning("Feedback dropped due to empty message.");

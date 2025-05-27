@@ -442,6 +442,26 @@ public class SentryOptions
 
     internal Func<SentryEvent, SentryHint, SentryEvent?>? BeforeSendInternal => _beforeSend;
 
+    private Func<SentryFeedback, SentryHint?, SentryFeedback?>? _beforeSendFeedback;
+    internal Func<SentryFeedback, SentryHint?, SentryFeedback?>? BeforeSendFeedbackInternal => _beforeSendFeedback;
+
+
+    /// <summary>
+    /// Configures a callback to invoke before sending feedback to Sentry.
+    /// </summary>
+    public void SetBeforeSendFeedback(Func<SentryFeedback, SentryHint?, SentryFeedback?> beforeSendFeedback)
+    {
+        _beforeSendFeedback = beforeSendFeedback;
+    }
+
+    /// <summary>
+    /// Configures a callback to invoke before sending feedback to Sentry.
+    /// </summary>
+    public void SetBeforeSendFeedback(Func<SentryFeedback, SentryFeedback?> beforeSendFeedback)
+    {
+        _beforeSendFeedback = (feedback, _) => beforeSendFeedback(feedback);
+    }
+
     /// <summary>
     /// Configures a callback function to be invoked before sending an event to Sentry
     /// </summary>
