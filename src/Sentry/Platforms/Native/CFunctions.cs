@@ -1,7 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
-using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Native;
 
@@ -142,8 +141,9 @@ internal static class C
 
         unsafe
         {
+            var transport = new NativeHttpTransport(options, options.GetHttpClient());
             var cTransport = sentry_transport_new(&nativeTransport);
-            sentry_transport_set_state(cTransport, GCHandle.ToIntPtr(GCHandle.Alloc(options.Transport)));
+            sentry_transport_set_state(cTransport, GCHandle.ToIntPtr(GCHandle.Alloc(transport)));
             sentry_transport_set_free_func(cTransport, &nativeTransportFree);
             sentry_options_set_transport(cOptions, cTransport);
         }
@@ -395,24 +395,18 @@ internal static class C
     private static extern void sentry_free(IntPtr ptr);
 
     [UnmanagedCallersOnly]
-    private static void nativeTransport(IntPtr cEnvelope, IntPtr state)
+    private static void nativeTransport(IntPtr envelope, IntPtr state)
     {
         try
         {
-            var data = sentry_envelope_serialize(cEnvelope, out var size);
-
-            unsafe
+            var transport = GCHandle.FromIntPtr(state).Target as NativeHttpTransport;
+            if (transport is not null)
             {
-                // TODO: sentry_envelope_write_to_file?
-                using var stream = new UnmanagedMemoryStream((byte*)data, (long)size);
-                Envelope envelope = Envelope.DeserializeAsync(stream).GetAwaiter().GetResult();
-
-                var transport = GCHandle.FromIntPtr(state).Target as ITransport;
-                transport?.SendEnvelopeAsync(envelope).GetAwaiter().GetResult();
+                var data = sentry_envelope_serialize(envelope, out var size);
+                transport.SendData(data, (uint)size);
+                sentry_free(data);
             }
-
-            sentry_free(data);
-            sentry_envelope_free(cEnvelope);
+            sentry_envelope_free(envelope);
         }
         catch
         {

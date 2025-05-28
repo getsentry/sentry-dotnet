@@ -164,11 +164,15 @@ internal class FakeTransport : ITransport
         # The first run triggers a native error. This error is captured by sentry-native and stored stored for the next run.
         runConsoleApp $true 'Native' | Should -AnyElementMatch 'Triggering a deliberate exception'
 
-        # On the next run, we receive the native crash.
-        $output = runConsoleApp $true ''
-        $output | Should -AnyElementMatch "Native SDK reported: 'crashedLastRun': 'True'"
+        # On the next run, we use a mock Sentry HTTP server to receive the native crash.
+        $result = Invoke-SentryServer {
+            Param([string]$url)
+            runConsoleApp $true '' ($url.Replace('http://', 'http://key@') + '/0')
+        }
+        $result.HasErrors() | Should -BeFalse
+        $result.ScriptOutput | Should -AnyElementMatch "Native SDK reported: 'crashedLastRun': 'True'"
         $type = $IsWindows ? 'EXCEPTION_ACCESS_VIOLATION' : 'SIGSEGV'
-        $output | Should -AnyElementMatch "`"exception`":{`"values`":\[{`"type`":`"$type`""
+        $result.Envelopes() | Should -AnyElementMatch "`"exception`":{`"values`":\[{`"type`":`"$type`""
     }
 }
 
