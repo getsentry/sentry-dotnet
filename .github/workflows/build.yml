@@ -19,7 +19,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
-          - os: ubuntu-latest-4-cores-arm64
+          - os: ubuntu-22.04-arm
           - os: ubuntu-latest
             target: Linux-musl
             container: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
@@ -73,7 +73,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
-          - os: ubuntu-latest-4-cores-arm64
+          - os: ubuntu-22.04-arm
           - os: ubuntu-latest
             target: Linux-musl
             container: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
@@ -205,7 +205,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
-          - os: ubuntu-latest-4-cores-arm64
+          - os: ubuntu-22.04-arm
           - os: ubuntu-latest
             container: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
