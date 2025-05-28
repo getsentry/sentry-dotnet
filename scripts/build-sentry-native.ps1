@@ -37,7 +37,11 @@ try
     }
     elseif ($IsLinux)
     {
-        if ((ldd --version 2>&1) -match 'musl')
+        if ("Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
+        {
+            $outDir += '/linux-arm64'
+        }
+        elseif ((ldd --version 2>&1) -match 'musl')
         {
             $outDir += '/linux-musl-x64'
         }
