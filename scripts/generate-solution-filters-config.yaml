@@ -49,6 +49,21 @@ filterConfigs:
         - "**/*DeviceTests*.csproj"
         - "**/*Maui.Device.TestApp.csproj"
 
+  - outputPath: Sentry-CI-Build-Linux-arm64.slnf
+    include:
+      groups:
+        - "allProjects"
+    exclude:
+      groups:
+        - "macOnly"
+        - "windowsOnly"
+        - "artefacts"
+        - "trimTests"
+      patterns:
+        - "**/*Android*.csproj"
+        - "**/*DeviceTests*.csproj"
+        - "**/*Maui*.csproj"
+
   - outputPath: Sentry-CI-Build-Linux-musl.slnf
     include:
       groups:

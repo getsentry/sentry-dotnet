@@ -20,6 +20,7 @@ jobs:
         include:
           - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
           - os: ubuntu-22.04-arm
+            target: Linux-arm64
           - os: ubuntu-latest
             target: Linux-musl
             container: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
@@ -73,7 +74,9 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
+            target: Linux
           - os: ubuntu-22.04-arm
+            target: Linux-arm64
           - os: ubuntu-latest
             target: Linux-musl
             container: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
@@ -106,11 +109,19 @@ jobs:
         run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
 
       - name: Download sentry-native (Linux)
-        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Linux' && !matrix.container) }}
+        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.target == 'Linux') }}
         uses: actions/cache/restore@v4
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-Linux-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+
+      - name: Download sentry-native (Linux arm64)
+        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.target == 'Linux-arm64') }}
+        uses: actions/cache/restore@v4
+        with:
+          path: src/Sentry/Platforms/Native/sentry-native
+          key: sentry-native-Linux-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
 
       - name: Download sentry-native (Linux musl)
