@@ -51,8 +51,8 @@ public partial class SentryStackTraceFactoryTests
     // See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
     [Theory]
     [InlineData(StackTraceMode.Original, "AsyncWithWait_StackTrace { <lambda> }")]
-    [InlineData(StackTraceMode.Enhanced, "void SentryStackTraceFactoryTests.AsyncWithWait_StackTrace(StackTraceMode mode, string method)+() => { }")]
-    public async void AsyncWithWait_StackTrace(StackTraceMode mode, string method)
+    [InlineData(StackTraceMode.Enhanced, "Task SentryStackTraceFactoryTests.AsyncWithWait_StackTrace(StackTraceMode mode, string method)+() => { }")]
+    public async Task AsyncWithWait_StackTrace(StackTraceMode mode, string method)
     {
         _fixture.SentryOptions.StackTraceMode = mode;
         _fixture.SentryOptions.AttachStacktrace = true;

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0-maccatalyst</TargetFramework>
+    <TargetFramework>net8.0-maccatalyst17.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
@@ -44,6 +44,11 @@
   <ItemGroup>
     <!-- <PackageReference Include="Sentry" Version="..." /> -->
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.SourceGenerators\Sentry.SourceGenerators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"/>
   </ItemGroup>
 
+  <!--In order to test our analyzers with this project, we manually reference our targets file.  User do not need to do this-->
+  <Import Project="..\..\src\Sentry\buildTransitive\Sentry.SourceGenerators.targets" />
 </Project>

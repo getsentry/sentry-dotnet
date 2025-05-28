@@ -84,4 +84,14 @@ internal abstract class ScopeObserver : Sentry.IScopeObserver
     public abstract void SetUserImpl(SentryUser user);
 
     public abstract void UnsetUserImpl();
+
+    public void SetTrace(SentryId traceId, SpanId parentSpanId)
+    {
+        _options.DiagnosticLogger?.Log(
+            SentryLevel.Debug, "{0} Scope Sync - Setting Trace traceId:{1} parentSpanId:{2}", null,
+                _name, traceId, parentSpanId);
+        SetTraceImpl(traceId, parentSpanId);
+    }
+
+    public abstract void SetTraceImpl(SentryId traceId, SpanId parentSpanId);
 }

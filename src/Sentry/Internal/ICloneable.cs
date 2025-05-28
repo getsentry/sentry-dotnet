@@ -2,5 +2,5 @@ namespace Sentry.Internal;
 
 internal interface ICloneable<out T>
 {
-    T Clone();
+    public T Clone();
 }

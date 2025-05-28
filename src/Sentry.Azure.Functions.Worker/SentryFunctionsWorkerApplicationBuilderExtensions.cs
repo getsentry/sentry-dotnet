@@ -31,13 +31,37 @@ public static class SentryFunctionsWorkerApplicationBuilderExtensions
     /// </summary>
     public static IFunctionsWorkerApplicationBuilder UseSentry(
         this IFunctionsWorkerApplicationBuilder builder,
+        Action<SentryAzureFunctionsOptions>? optionsConfiguration)
+    {
+        if (builder is IHostApplicationBuilder appBuilder)
+        {
+            return builder.UseSentry(appBuilder.Configuration, optionsConfiguration);
+        }
+        throw new InvalidOperationException("Builder is not of type " + typeof(IHostApplicationBuilder));
+    }
+
+    /// <summary>
+    /// Uses Sentry integration.
+    /// </summary>
+    public static IFunctionsWorkerApplicationBuilder UseSentry(
+        this IFunctionsWorkerApplicationBuilder builder,
         HostBuilderContext context,
+        Action<SentryAzureFunctionsOptions>? optionsConfiguration)
+        => builder.UseSentry(context.Configuration, optionsConfiguration);
+
+
+    /// <summary>
+    /// Uses Sentry integration.
+    /// </summary>
+    public static IFunctionsWorkerApplicationBuilder UseSentry(
+        this IFunctionsWorkerApplicationBuilder builder,
+        IConfiguration configuration,
         Action<SentryAzureFunctionsOptions>? optionsConfiguration)
     {
         builder.UseMiddleware<SentryFunctionsWorkerMiddleware>();
 
         var services = builder.Services;
-        var section = context.Configuration.GetSection("Sentry");
+        var section = configuration.GetSection("Sentry");
 #if NET8_0_OR_GREATER
         services.AddSingleton<IConfigureOptions<SentryAzureFunctionsOptions>>(_ =>
             new SentryAzureFunctionsOptionsSetup(section)

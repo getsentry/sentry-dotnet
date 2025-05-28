@@ -3,7 +3,6 @@ using Sentry.Testing;
 
 namespace Sentry.Tests.Internals;
 
-[UsesVerify]
 public class MemoryInfoTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;

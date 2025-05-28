@@ -22,7 +22,7 @@ internal class EFConnectionDiagnosticSourceHelper : EFDiagnosticSourceHelper
                     span.Operation == Operation &&
                     TryGetConnectionId(span) == connectionId);
         }
-        Options.LogWarning("No correlation id found for {1}.", Operation);
+        Options.LogWarning("No correlation id found for {0}.", Operation);
         return null;
     }
 

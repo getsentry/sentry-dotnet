@@ -2,6 +2,7 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
+$IsLinuxMusl = $IsLinux -and (ldd --version 2>&1) -match 'musl'
 
 Describe 'Console apps (<framework>) - normal build' -ForEach @(
     @{ framework = "net8.0" }
@@ -107,7 +108,7 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
 
 Describe 'MAUI' -ForEach @(
     @{ framework = "net8.0" }
-) {
+) -Skip:$IsLinuxMusl {
     BeforeAll {
         RegisterLocalPackage 'Sentry.Android.AssemblyReader'
         RegisterLocalPackage 'Sentry.Bindings.Android'
@@ -119,10 +120,13 @@ Describe 'MAUI' -ForEach @(
         }
 
         $name = 'maui-app'
+        $androidTpv = '34.0'
+        $iosTpv = '17.0'
+
         DotnetNew 'maui' $name $framework
 
         # Workaround for the missing "ios" workload on Linux, see https://github.com/dotnet/maui/pull/18580
-        $tfs = $IsMacos ? "$framework-android;$framework-ios;$framework-maccatalyst" : "$framework-android"
+        $tfs = $IsMacos ? "$framework-android$androidTpv;$framework-ios$iosTpv;$framework-maccatalyst$iosTpv" : "$framework-android$androidTpv"
         (Get-Content $name/$name.csproj) -replace '<TargetFrameworks>[^<]+</TargetFrameworks>', "<TargetFrameworks>$tfs</TargetFrameworks>" | Set-Content $name/$name.csproj
 
         dotnet remove $name/$name.csproj package 'Microsoft.Extensions.Logging.Debug' | ForEach-Object { Write-Host $_ }
@@ -144,7 +148,7 @@ Describe 'MAUI' -ForEach @(
     }
 
     It "uploads symbols and sources for an Android build" {
-        $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-android"
+        $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-android$androidTpv"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'libsentry-android.so',
             'libsentry.so',
@@ -153,11 +157,11 @@ Describe 'MAUI' -ForEach @(
             'maui-app.pdb'
         )
         $result.ScriptOutput | Should -AnyElementMatch 'Uploaded a total of 1 new mapping files'
-        $result.ScriptOutput | Should -AnyElementMatch 'Found 17 debug information files \(1 with embedded sources\)'
+        $result.ScriptOutput | Should -AnyElementMatch 'Found 25 debug information files \(1 with embedded sources\)'
     }
 
     It "uploads symbols and sources for an iOS build" -Skip:(!$IsMacOS) {
-        $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-ios"
+        $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-ios$iosTpv"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'libmono-component-debugger.dylib',
             'libmono-component-diagnostics_tracing.dylib',

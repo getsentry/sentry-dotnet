@@ -1,6 +1,5 @@
 namespace Sentry.DiagnosticSource.IntegrationTests;
 
-[UsesVerify]
 public class SqlListenerTests : IClassFixture<LocalDbFixture>
 {
     private readonly LocalDbFixture _fixture;
@@ -50,6 +49,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
 
         var result = await Verify(transport.Payloads)
             .IgnoreMember<IEventLike>(_ => _.Environment)
+            .ScrubLinesWithReplace(line => line.Replace(LocalDbFixture.InstanceName, "SqlListenerTests"))
             .IgnoreStandardSentryMembers();
         Assert.DoesNotContain("SHOULD NOT APPEAR IN PAYLOAD", result.Text);
     }
@@ -118,6 +118,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
         var result = await Verify(transport.Payloads)
             .ScrubInlineGuids()
             .IgnoreMember<IEventLike>(_ => _.Environment)
+            .ScrubLinesWithReplace(line => line.Replace(LocalDbFixture.InstanceName, "SqlListenerTests"))
 
             // Really not sure why, but bytes received for this test varies randomly when run in CI
             // TODO: remove this and investigate
@@ -214,6 +215,7 @@ public class SqlListenerTests : IClassFixture<LocalDbFixture>
 
         var result = await Verify(transport.Payloads)
             .IgnoreMember<IEventLike>(_ => _.Environment)
+            .ScrubLinesWithReplace(line => line.Replace(LocalDbFixture.InstanceName, "SqlListenerTests"))
             .IgnoreStandardSentryMembers()
             .UniqueForRuntimeAndVersion();
         Assert.DoesNotContain("SHOULD NOT APPEAR IN PAYLOAD", result.Text);

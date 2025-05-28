@@ -38,7 +38,7 @@ internal abstract class SentryFailedRequestHandler : ISentryFailedRequestHandler
 
             // Ignore requests that don't match the FailedRequestTargets
             var requestString = uri.ToString();
-            if (!Options.FailedRequestTargets.ContainsMatch(requestString))
+            if (!Options.FailedRequestTargets.MatchesSubstringOrRegex(requestString))
             {
                 return;
             }

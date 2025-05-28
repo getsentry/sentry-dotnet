@@ -23,7 +23,7 @@ internal static class DeviceExtensions
         device.Name ??= d.Name;
         device.Family ??= d.Family;
         device.ModelId ??= d.ModelId;
-        device.BatteryLevel ??= d.BatteryLevel?.ShortValue();
+        device.BatteryLevel ??= d.BatteryLevel?.FloatValue();
         device.IsCharging ??= d.IsCharging()?.BooleanValue();
         device.IsOnline ??= d.IsOnline()?.BooleanValue();
         device.Orientation ??= d.Orientation?.ToDeviceOrientation();

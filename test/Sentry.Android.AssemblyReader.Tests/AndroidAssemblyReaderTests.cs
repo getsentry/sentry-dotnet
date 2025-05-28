@@ -1,15 +1,27 @@
+using Sentry.Android.AssemblyReader.V1;
+using Sentry.Android.AssemblyReader.V2;
+
 namespace Sentry.Android.AssemblyReader.Tests;
 
 public class AndroidAssemblyReaderTests
 {
     private readonly ITestOutputHelper _output;
 
+#if NET9_0
+    private static string TargetFramework => "net9.0";
+#elif NET8_0
+    private static string TargetFramework => "net8.0";
+#else
+    // Adding a new TFM to the project? Include it above
+#error "Target Framework not yet supported for AndroidAssemblyReader"
+#endif
+
     public AndroidAssemblyReaderTests(ITestOutputHelper output)
     {
         _output = output;
     }
 
-    private IAndroidAssemblyReader GetSut(bool isAssemblyStore, bool isCompressed)
+    private IAndroidAssemblyReader GetSut(bool isAot, bool isAssemblyStore, bool isCompressed)
     {
 #if ANDROID
         var logger = new TestOutputDiagnosticLogger(_output);
@@ -19,33 +31,55 @@ public class AndroidAssemblyReaderTests
             Path.GetFullPath(Path.Combine(
                 Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
                 "..", "..", "..", "TestAPKs",
-                $"android-Store={isAssemblyStore}-Compressed={isCompressed}.apk"));
+                $"{TargetFramework}-android-A={isAot}-S={isAssemblyStore}-C={isCompressed}.apk"));
 
         _output.WriteLine($"Checking if APK exists: {apkPath}");
         File.Exists(apkPath).Should().BeTrue();
 
+        // Note: This needs to match the RID used when publishing the test APK
         string[] supportedAbis = { "x86_64" };
         return AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis,
             logger: (message, args) => _output.WriteLine(message, args));
 #endif
     }
 
-    [SkippableTheory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public void CreatesCorrectReader(bool isAssemblyStore)
+    [SkippableFact]
+    public void CreatesCorrectStoreReader()
     {
 #if ANDROID
         Skip.If(true, "It's unknown whether the current Android app APK is an assembly store or not.");
 #endif
-        using var sut = GetSut(isAssemblyStore, isCompressed: true);
-        if (isAssemblyStore)
+        using var sut = GetSut(isAot: false, isAssemblyStore: true, isCompressed: true);
+        switch (TargetFramework)
         {
-            Assert.IsType<AssemblyReader.AndroidAssemblyStoreReader>(sut);
+            case "net9.0":
+                Assert.IsType<AndroidAssemblyStoreReaderV2>(sut);
+                break;
+            case "net8.0":
+                Assert.IsType<AndroidAssemblyStoreReaderV1>(sut);
+                break;
+            default:
+                throw new NotSupportedException($"Unsupported target framework: {TargetFramework}");
         }
-        else
+    }
+
+    [SkippableFact]
+    public void CreatesCorrectArchiveReader()
+    {
+#if ANDROID
+        Skip.If(true, "It's unknown whether the current Android app APK is an assembly store or not.");
+#endif
+        using var sut = GetSut(isAot: false, isAssemblyStore: false, isCompressed: true);
+        switch (TargetFramework)
         {
-            Assert.IsType<AssemblyReader.AndroidAssemblyDirectoryReader>(sut);
+            case "net9.0":
+                Assert.IsType<AndroidAssemblyDirectoryReaderV2>(sut);
+                break;
+            case "net8.0":
+                Assert.IsType<AndroidAssemblyDirectoryReaderV1>(sut);
+                break;
+            default:
+                throw new NotSupportedException($"Unsupported target framework: {TargetFramework}");
         }
     }
 
@@ -54,27 +88,32 @@ public class AndroidAssemblyReaderTests
     [InlineData(true)]
     public void ReturnsNullIfAssemblyDoesntExist(bool isAssemblyStore)
     {
-        using var sut = GetSut(isAssemblyStore, isCompressed: true);
+        using var sut = GetSut(isAot: false, isAssemblyStore, isCompressed: true);
         Assert.Null(sut.TryReadAssembly("NonExistent.dll"));
     }
 
+    public static IEnumerable<object[]> ReadsAssemblyPermutations =>
+#if NET8_0
+        from isAot in new[] { false }
+#else
+        from isAot in new[] { true, false }
+#endif
+        from isStore in new[] { true, false }
+        from isCompressed in new[] { true, false }
+        from assemblyName in new[] { "Mono.Android.dll", "System.Private.CoreLib.dll" }
+        select new object[] { isAot, isStore, isCompressed, assemblyName };
+
     [SkippableTheory]
-    [InlineData(false, true, "Mono.Android.dll")]
-    [InlineData(false, false, "Mono.Android.dll")]
-    [InlineData(false, true, "System.Runtime.dll")]
-    [InlineData(false, false, "System.Runtime.dll")]
-    [InlineData(true, true, "Mono.Android.dll")]
-    [InlineData(true, false, "Mono.Android.dll")]
-    [InlineData(true, true, "System.Runtime.dll")]
-    [InlineData(true, false, "System.Runtime.dll")]
-    public void ReadsAssembly(bool isAssemblyStore, bool isCompressed, string assemblyName)
+    [MemberData(nameof(ReadsAssemblyPermutations))]
+    public void ReadsAssembly(bool isAot, bool isAssemblyStore, bool isCompressed, string assemblyName)
     {
 #if ANDROID
-        // No need to run all combinations - we only test the current APK which is (likely) compressed assembly store.
+        // No need to run all combinations - we only test the current APK which is likely JIT compressed assembly store.
+        Skip.If(isAot);
         Skip.If(!isAssemblyStore);
         Skip.If(!isCompressed);
 #endif
-        using var sut = GetSut(isAssemblyStore, isCompressed);
+        using var sut = GetSut(isAot, isAssemblyStore, isCompressed);
 
         var peReader = sut.TryReadAssembly(assemblyName);
         Assert.NotNull(peReader);

@@ -7,7 +7,6 @@ using Xunit;
 
 namespace Sentry.Tests;
 
-[UsesVerify]
 public class MetricsSummaryTests
 {
     [Fact]

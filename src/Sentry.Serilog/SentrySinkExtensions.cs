@@ -34,7 +34,7 @@ public static class SentrySinkExtensions
     /// <param name="diagnosticLevel">The diagnostics level to be used. <seealso cref="SentryOptions.DiagnosticLevel"/></param>
     /// <param name="reportAssembliesMode">What mode to use for reporting referenced assemblies in each event sent to sentry. Defaults to <see cref="Sentry.ReportAssembliesMode.Version"/></param>
     /// <param name="deduplicateMode">What modes to use for event automatic de-duplication. <seealso cref="SentryOptions.DeduplicateMode"/></param>
-    /// <param name="defaultTags">Defaults tags to add to all events. <seealso cref="SentryOptions.DefaultTags"/></param>
+    /// <param name="defaultTags">Default tags to add to all events. <seealso cref="SentryOptions.DefaultTags"/></param>
     /// <returns><see cref="LoggerConfiguration"/></returns>
     /// <example>This sample shows how each item may be set from within a configuration file:
     /// <code>
@@ -325,6 +325,14 @@ public static class SentrySinkExtensions
             {
                 sentrySerilogOptions.DefaultTags.Add(tag.Key, tag.Value);
             }
+        }
+
+        // This only works when the SDK is initialized using the LoggerSinkConfiguration extensions. If the SDK is
+        // initialized using some other integration then the processor will need to be added manually to whichever
+        // options are used to initialize the SDK.
+        if (sentrySerilogOptions.InitializeSdk)
+        {
+            sentrySerilogOptions.ApplySerilogScopeToEvents();
         }
     }
 

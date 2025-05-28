@@ -10,5 +10,5 @@ public interface IExceptionFilter
     /// </summary>
     /// <param name="ex">The exception about to be captured.</param>
     /// <returns><c>true</c> if [the event should be filtered out]; otherwise, <c>false</c>.</returns>
-    bool Filter(Exception ex);
+    public bool Filter(Exception ex);
 }

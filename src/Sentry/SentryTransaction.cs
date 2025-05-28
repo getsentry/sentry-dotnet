@@ -10,7 +10,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry performance transaction.
 /// </summary>
-public class SentryTransaction : ITransactionData, ISentryJsonSerializable, ITraceContextInternal
+public class SentryTransaction : ITransactionData, ISentryJsonSerializable
 {
     /// <summary>
     /// Transaction's event ID.
@@ -180,12 +180,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable, ITra
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
 
     // Not readonly because of deserialization
-    private Dictionary<string, object?> _extra = new();
-
-    /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _extra;
-
-    // Not readonly because of deserialization
     private Dictionary<string, string> _tags = new();
 
     /// <inheritdoc />
@@ -270,7 +264,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable, ITra
         Sdk = tracer.Sdk;
         Fingerprint = tracer.Fingerprint;
         _breadcrumbs = tracer.Breadcrumbs.ToList();
-        _extra = tracer.Extra.ToDict();
         _tags = tracer.Tags.ToDict();
 
         _spans = FromTracerSpans(tracer);
@@ -339,8 +332,20 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable, ITra
         _breadcrumbs.Add(breadcrumb);
 
     /// <inheritdoc />
+    public IReadOnlyDictionary<string, object?> Data => _contexts.Trace.Data;
+
+    /// <inheritdoc />
+    [Obsolete("Use Data")]
+    public IReadOnlyDictionary<string, object?> Extra => _contexts.Trace.Data;
+
+    /// <inheritdoc />
+    [Obsolete("Use SetData")]
     public void SetExtra(string key, object? value) =>
-        _extra[key] = value;
+        SetData(key, value);
+
+    /// <inheritdoc />
+    public void SetData(string key, object? value) =>
+        _contexts.Trace.SetData(key, value);
 
     /// <inheritdoc />
     public void SetTag(string key, string value) =>
@@ -401,7 +406,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable, ITra
         writer.WriteSerializable("sdk", Sdk, logger);
         writer.WriteStringArrayIfNotEmpty("fingerprint", _fingerprint);
         writer.WriteArrayIfNotEmpty("breadcrumbs", _breadcrumbs, logger);
-        writer.WriteDictionaryIfNotEmpty("extra", _extra, logger);
         writer.WriteStringDictionaryIfNotEmpty("tags", _tags!);
         writer.WriteArrayIfNotEmpty("spans", _spans, logger);
         writer.WriteDictionaryIfNotEmpty("measurements", _measurements, logger);
@@ -459,7 +463,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable, ITra
             Sdk = sdk,
             _fingerprint = fingerprint,
             _breadcrumbs = breadcrumbs,
-            _extra = extra,
             _tags = tags,
             _measurements = measurements,
             _spans = spans

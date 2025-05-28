@@ -156,7 +156,14 @@ internal static class JsonExtensions
 
         foreach (var (name, value) in json.EnumerateObject())
         {
-            result[name] = value.GetString();
+            if (value.ValueKind == JsonValueKind.String)
+            {
+                result[name] = value.GetString();
+            }
+            else
+            {
+                result[name] = value.ToString();
+            }
         }
 
         return result;
@@ -211,6 +218,31 @@ internal static class JsonExtensions
         // Otherwise, let's get the value as a string and parse it ourselves.
         // Note that we already know this will succeed due to JsonValueKind.Number
         return double.Parse(json.ToString()!, CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>
+    /// Safety value to deal with native serialization - allows datetimeoffset to come in as a long or string value
+    /// </summary>
+    /// <param name="json"></param>
+    /// <param name="propertyName"></param>
+    /// <returns></returns>
+    public static DateTimeOffset? GetSafeDateTimeOffset(this JsonElement json, string propertyName)
+    {
+        DateTimeOffset? result = null;
+        var dtRaw = json.GetPropertyOrNull(propertyName);
+        if (dtRaw != null)
+        {
+            if (dtRaw.Value.ValueKind == JsonValueKind.Number)
+            {
+                var epoch = Convert.ToInt64(dtRaw.Value.GetDouble());
+                result = DateTimeOffset.FromUnixTimeSeconds(epoch);
+            }
+            else
+            {
+                result = dtRaw.Value.GetDateTimeOffset();
+            }
+        }
+        return result;
     }
 
     public static long? GetHexAsLong(this JsonElement json)
@@ -564,8 +596,8 @@ internal static class JsonExtensions
         return JitSerializeToUtf8Bytes();
 #endif
 
-        [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
-        [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = AotHelper.SuppressionJustification)]
+        [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
+        [UnconditionalSuppressMessage("AOT", "IL3050: RequiresDynamicCode", Justification = AotHelper.AvoidAtRuntime)]
         byte[] JitSerializeToUtf8Bytes() => JsonSerializer.SerializeToUtf8Bytes(value, SerializerOptions);
     }
 
@@ -586,8 +618,8 @@ internal static class JsonExtensions
 #endif
         return;
 
-        [UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = AotHelper.SuppressionJustification)]
-        [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
+        [UnconditionalSuppressMessage("AOT", "IL3050: RequiresDynamicCode", Justification = AotHelper.AvoidAtRuntime)]
+        [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
         void JitSerialize()
         {
             var options = preserveReferences ? AltSerializerOptions : SerializerOptions;

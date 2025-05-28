@@ -1,6 +1,8 @@
 namespace Sentry.Tests;
 #if NETFRAMEWORK
 using Sentry.PlatformAbstractions;
+#elif IOS || MACCATALYST
+using Sentry.Cocoa;
 #endif
 public partial class SentryOptionsTests
 {
@@ -33,15 +35,6 @@ public partial class SentryOptionsTests
     }
 
     [Fact]
-    public void EnableTracing_Default_Null()
-    {
-        var sut = new SentryOptions();
-#pragma warning disable CS0618 // Type or member is obsolete
-        Assert.Null(sut.EnableTracing);
-#pragma warning restore CS0618 // Type or member is obsolete
-    }
-
-    [Fact]
     public void TracesSampleRate_Default_Null()
     {
         var sut = new SentryOptions();
@@ -59,32 +52,6 @@ public partial class SentryOptionsTests
     public void IsPerformanceMonitoringEnabled_Default_False()
     {
         var sut = new SentryOptions();
-        Assert.False(sut.IsPerformanceMonitoringEnabled);
-    }
-
-    [Fact]
-    public void IsPerformanceMonitoringEnabled_EnableTracing_True()
-    {
-        var sut = new SentryOptions
-        {
-#pragma warning disable CS0618 // Type or member is obsolete
-            EnableTracing = true
-#pragma warning restore CS0618 // Type or member is obsolete
-        };
-
-        Assert.True(sut.IsPerformanceMonitoringEnabled);
-    }
-
-    [Fact]
-    public void IsPerformanceMonitoringEnabled_EnableTracing_False()
-    {
-        var sut = new SentryOptions
-        {
-#pragma warning disable CS0618 // Type or member is obsolete
-            EnableTracing = false
-#pragma warning restore CS0618 // Type or member is obsolete
-        };
-
         Assert.False(sut.IsPerformanceMonitoringEnabled);
     }
 
@@ -138,57 +105,6 @@ public partial class SentryOptionsTests
     }
 
     [Fact]
-    public void IsPerformanceMonitoringEnabled_EnableTracing_True_TracesSampleRate_Zero()
-    {
-        // Edge Case:
-        //   Tracing enabled, but sample rate set to zero, and no sampler function, should be treated as disabled.
-
-        var sut = new SentryOptions
-        {
-#pragma warning disable CS0618 // Type or member is obsolete
-            EnableTracing = true,
-#pragma warning restore CS0618 // Type or member is obsolete
-            TracesSampleRate = 0.0
-        };
-
-        Assert.False(sut.IsPerformanceMonitoringEnabled);
-    }
-
-    [Fact]
-    public void IsPerformanceMonitoringEnabled_EnableTracing_False_TracesSampleRate_One()
-    {
-        // Edge Case:
-        //   Tracing disabled should be treated as disabled regardless of sample rate set.
-
-        var sut = new SentryOptions
-        {
-#pragma warning disable CS0618 // Type or member is obsolete
-            EnableTracing = false,
-#pragma warning restore CS0618 // Type or member is obsolete
-            TracesSampleRate = 1.0
-        };
-
-        Assert.False(sut.IsPerformanceMonitoringEnabled);
-    }
-
-    [Fact]
-    public void IsPerformanceMonitoringEnabled_EnableTracing_False_TracesSampler_Provided()
-    {
-        // Edge Case:
-        //   Tracing disabled should be treated as disabled regardless of sampler function set.
-
-        var sut = new SentryOptions
-        {
-#pragma warning disable CS0618 // Type or member is obsolete
-            EnableTracing = false,
-#pragma warning restore CS0618 // Type or member is obsolete
-            TracesSampler = _ => null
-        };
-
-        Assert.False(sut.IsPerformanceMonitoringEnabled);
-    }
-
-    [Fact]
     public void ProfilesSampleRate_Default_Null()
     {
         var sut = new SentryOptions();
@@ -199,34 +115,6 @@ public partial class SentryOptionsTests
     public void IsProfilingEnabled_Default_False()
     {
         var sut = new SentryOptions();
-        Assert.False(sut.IsProfilingEnabled);
-    }
-
-    [Fact]
-    public void IsProfilingEnabled_EnableTracing_True()
-    {
-        var sut = new SentryOptions
-        {
-#pragma warning disable CS0618 // Type or member is obsolete
-            EnableTracing = true,
-#pragma warning restore CS0618 // Type or member is obsolete
-            ProfilesSampleRate = double.Epsilon
-        };
-
-        Assert.True(sut.IsProfilingEnabled);
-    }
-
-    [Fact]
-    public void IsProfilingEnabled_EnableTracing_False()
-    {
-        var sut = new SentryOptions
-        {
-#pragma warning disable CS0618 // Type or member is obsolete
-            EnableTracing = false,
-#pragma warning restore CS0618 // Type or member is obsolete
-            ProfilesSampleRate = double.Epsilon
-        };
-
         Assert.False(sut.IsProfilingEnabled);
     }
 
@@ -399,6 +287,16 @@ public partial class SentryOptionsTests
     }
 #endif
 
+#if IOS || MACCATALYST
+    [Fact]
+    public void DisableRuntimeMarshalManagedExceptionCapture_RemovesRuntimeMarshalManagedExceptionIntegration()
+    {
+        var sut = new SentryOptions();
+        sut.DisableRuntimeMarshalManagedExceptionCapture();
+        Assert.DoesNotContain(sut.Integrations,
+            p => p is RuntimeMarshalManagedExceptionIntegration);
+    }
+#else
     [Fact]
     public void DisableAppDomainUnhandledExceptionCapture_RemovesAppDomainUnhandledExceptionIntegration()
     {
@@ -407,6 +305,7 @@ public partial class SentryOptionsTests
         Assert.DoesNotContain(sut.Integrations,
             p => p is AppDomainUnhandledExceptionIntegration);
     }
+#endif
 
     [Fact]
     public void DisableTaskUnobservedTaskExceptionCapture_UnobservedTaskExceptionIntegration()
@@ -416,17 +315,6 @@ public partial class SentryOptionsTests
         Assert.DoesNotContain(sut.Integrations,
             p => p is UnobservedTaskExceptionIntegration);
     }
-
-#if NET8_0_OR_GREATER
-    [Fact]
-    public void DisableSystemDiagnosticsMetricsIntegration_RemovesSystemDiagnosticsMetricsIntegration()
-    {
-        var sut = new SentryOptions();
-        sut.DisableSystemDiagnosticsMetricsIntegration();
-        Assert.DoesNotContain(sut.Integrations,
-            p => p.GetType() == typeof(SystemDiagnosticsMetricsIntegration));
-    }
-#endif
 
     [Fact]
     public void AddIntegration_StoredInOptions()
@@ -706,12 +594,21 @@ public partial class SentryOptionsTests
         _ = Assert.IsType<DuplicateEventDetectionEventProcessor>(sut.GetAllEventProcessors().First());
     }
 
+#if IOS || MACCATALYST
+    [Fact]
+    public void Integrations_Includes_RuntimeMarshalManagedExceptionIntegration()
+    {
+        var sut = new SentryOptions();
+        Assert.Contains(sut.Integrations, i => i.GetType() == typeof(RuntimeMarshalManagedExceptionIntegration));
+    }
+#else
     [Fact]
     public void Integrations_Includes_AppDomainUnhandledExceptionIntegration()
     {
         var sut = new SentryOptions();
         Assert.Contains(sut.Integrations, i => i.GetType() == typeof(AppDomainUnhandledExceptionIntegration));
     }
+#endif
 
     [Fact]
     public void Integrations_Includes_AppDomainProcessExitIntegration()

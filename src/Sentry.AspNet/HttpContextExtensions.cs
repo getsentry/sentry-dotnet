@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Protocol;
 
 namespace Sentry.AspNet;
@@ -101,7 +102,7 @@ public static class HttpContextExtensions
             ["__HttpContext"] = httpContext,
         };
 
-        // Set the Dynamic Sampling Context from the baggage header, if it exists.
+        // Set the Dynamic Sampling Context from the baggage header, if it exists
         var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext();
 
         if (traceHeader is not null && baggageHeader is null)

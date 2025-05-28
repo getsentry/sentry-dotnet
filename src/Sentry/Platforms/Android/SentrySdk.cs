@@ -3,6 +3,7 @@ using Android.OS;
 using Sentry.Android;
 using Sentry.Android.Callbacks;
 using Sentry.Android.Extensions;
+using Sentry.Extensibility;
 using Sentry.JavaSdk.Android.Core;
 
 // Don't let the Sentry Android SDK auto-init, as we do that manually in SentrySdk.Init
@@ -20,34 +21,6 @@ public static partial class SentrySdk
 {
     private static AndroidContext AppContext { get; set; } = Application.Context;
 
-    /// <summary>
-    /// Initializes the SDK for Android, with an optional configuration options callback.
-    /// </summary>
-    /// <param name="context">The Android application context.</param>
-    /// <param name="configureOptions">The configuration options callback.</param>
-    /// <returns>An object that should be disposed when the application terminates.</returns>
-    [Obsolete("It is no longer required to provide the application context when calling Init. " +
-              "This method may be removed in a future major release.")]
-    public static IDisposable Init(AndroidContext context, Action<SentryOptions>? configureOptions)
-    {
-        AppContext = context;
-        return Init(configureOptions);
-    }
-
-    /// <summary>
-    /// Initializes the SDK for Android, using a configuration options instance.
-    /// </summary>
-    /// <param name="context">The Android application context.</param>
-    /// <param name="options">The configuration options instance.</param>
-    /// <returns>An object that should be disposed when the application terminates.</returns>
-    [Obsolete("It is no longer required to provide the application context when calling Init. " +
-              "This method may be removed in a future major release.")]
-    public static IDisposable Init(AndroidContext context, SentryOptions options)
-    {
-        AppContext = context;
-        return Init(options);
-    }
-
     private static void InitSentryAndroidSdk(SentryOptions options)
     {
         // Set default release and distribution
@@ -59,6 +32,7 @@ public static partial class SentrySdk
 
         // Define the configuration for the Android SDK
         SentryAndroidOptions? nativeOptions = null;
+
         var configuration = new OptionsConfigurationCallback(o =>
         {
             // Capture the android options reference on the outer scope
@@ -87,6 +61,7 @@ public static partial class SentrySdk
             o.ServerName = options.ServerName;
             o.SessionTrackingIntervalMillis = (long)options.AutoSessionTrackingInterval.TotalMilliseconds;
             o.ShutdownTimeoutMillis = (long)options.ShutdownTimeout.TotalMilliseconds;
+            o.SetNativeHandlerStrategy(JavaSdk.Android.Core.NdkHandlerStrategy.SentryHandlerStrategyDefault);
 
             if (options.CacheDirectoryPath is { } cacheDirectoryPath)
             {
@@ -117,9 +92,6 @@ public static partial class SentrySdk
             // These options we have behind feature flags
             if (options is { IsPerformanceMonitoringEnabled: true, Native.EnableTracing: true })
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                o.EnableTracing = (JavaBoolean?)options.EnableTracing;
-#pragma warning restore CS0618 // Type or member is obsolete
                 o.TracesSampleRate = (JavaDouble?)options.TracesSampleRate;
 
                 if (options.TracesSampler is { } tracesSampler)
@@ -128,9 +100,9 @@ public static partial class SentrySdk
                 }
             }
 
-            if (options.Native.EnableBeforeSend && options.BeforeSendInternal is { } beforeSend)
+            if (options.Android.SuppressSegfaults || (options.Native.EnableBeforeSend && options.BeforeSendInternal != null))
             {
-                o.BeforeSend = new BeforeSendCallback(beforeSend, options, o);
+                o.BeforeSend = new BeforeSendCallback(BeforeSendWrapper(options), options, o);
             }
 
             // These options are from SentryAndroidOptions
@@ -162,6 +134,13 @@ public static partial class SentrySdk
             // In-App Excludes and Includes to be passed to the Android SDK
             options.Native.InAppExcludes?.ForEach(o.AddInAppExclude);
             options.Native.InAppIncludes?.ForEach(o.AddInAppInclude);
+
+            o.SessionReplay.OnErrorSampleRate =
+                (JavaDouble?)options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate;
+            o.SessionReplay.SessionSampleRate =
+                (JavaDouble?)options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate;
+            o.SessionReplay.SetMaskAllImages(options.Native.ExperimentalOptions.SessionReplay.MaskAllImages);
+            o.SessionReplay.SetMaskAllText(options.Native.ExperimentalOptions.SessionReplay.MaskAllText);
 
             // These options are intentionally set and not exposed for modification
             o.EnableExternalConfiguration = false;
@@ -199,6 +178,26 @@ public static partial class SentrySdk
         options.ScopeObserver = new AndroidScopeObserver(options);
 
         // TODO: Pause/Resume
+    }
+
+    internal static Func<SentryEvent, SentryHint, SentryEvent?> BeforeSendWrapper(SentryOptions options)
+    {
+        return (evt, hint) =>
+        {
+            // Suppress SIGSEGV errors.
+            // See: https://github.com/getsentry/sentry-dotnet/pull/3903
+            if (options.Android.SuppressSegfaults
+                && evt.SentryExceptions?.FirstOrDefault() is { Type: "SIGSEGV", Value: "Segfault" })
+            {
+                options.LogDebug("Suppressing SIGSEGV (this will be thrown as a managed exception instead)");
+                return null;
+            }
+
+            // Call the user defined BeforeSend callback, if it's defined - otherwise return the event as-is
+            return (options.Native.EnableBeforeSend && options.BeforeSendInternal is { } beforeSend)
+                ? beforeSend(evt, hint)
+                : evt;
+        };
     }
 
     private static void AndroidEnvironment_UnhandledExceptionRaiser(object? _, RaiseThrowableEventArgs e)

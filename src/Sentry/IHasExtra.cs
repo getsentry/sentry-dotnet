@@ -8,12 +8,12 @@ public interface IHasExtra
     /// <summary>
     /// An arbitrary mapping of additional metadata to store with the event.
     /// </summary>
-    IReadOnlyDictionary<string, object?> Extra { get; }
+    public IReadOnlyDictionary<string, object?> Extra { get; }
 
     /// <summary>
     /// Sets an extra.
     /// </summary>
-    void SetExtra(string key, object? value);
+    public void SetExtra(string key, object? value);
 }
 
 /// <summary>

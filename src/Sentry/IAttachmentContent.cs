@@ -8,5 +8,5 @@ public interface IAttachmentContent
     /// <summary>
     /// Gets the stream that represents attachment content.
     /// </summary>
-    Stream GetStream();
+    public Stream GetStream();
 }

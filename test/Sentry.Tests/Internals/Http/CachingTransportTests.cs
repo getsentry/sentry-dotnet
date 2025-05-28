@@ -712,6 +712,43 @@ public class CachingTransportTests
     }
 
     [Fact]
+    public async Task FlushAsync_RejectedByServer_DiscardsEnvelope()
+    {
+        // Arrange
+        var listener = Substitute.For<INetworkStatusListener>();
+        listener.Online.Returns(_ => true);
+
+        using var cacheDirectory = new TempDirectory();
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _logger,
+            Debug = true,
+            CacheDirectoryPath = cacheDirectory.Path,
+            NetworkStatusListener = listener,
+            ClientReportRecorder = Substitute.For<IClientReportRecorder>()
+        };
+
+        using var envelope = Envelope.FromEvent(new SentryEvent());
+
+        var innerTransport = Substitute.For<ITransport>();
+        innerTransport.SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
+            .Returns(_ => throw new SocketException(32 /* Bad pipe exception */));
+        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+
+        // Act
+        await transport.SendEnvelopeAsync(envelope);
+        await transport.FlushAsync();
+
+        // Assert
+        foreach (var item in envelope.Items)
+        {
+            options.ClientReportRecorder.Received(1)
+                .RecordDiscardedEvent(DiscardReason.BufferOverflow, item.DataCategory);
+        }
+    }
+
+    [Fact]
     public async Task DoesntWriteSentAtHeaderToCacheFile()
     {
         // Arrange

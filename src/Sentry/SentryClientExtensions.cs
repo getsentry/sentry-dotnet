@@ -41,6 +41,15 @@ public static class SentryClientExtensions
     }
 
     /// <summary>
+    /// Captures feedback from the user.
+    /// </summary>
+    public static void CaptureFeedback(this ISentryClient client, string message, string? contactEmail = null,
+        string? name = null, string? replayId = null, string? url = null, SentryId? associatedEventId = null,
+        Scope? scope = null, SentryHint? hint = null)
+        => client.CaptureFeedback(new SentryFeedback(message, contactEmail, name, replayId, url, associatedEventId),
+            scope, hint);
+
+    /// <summary>
     /// Captures a user feedback.
     /// </summary>
     /// <param name="client"></param>
@@ -48,6 +57,7 @@ public static class SentryClientExtensions
     /// <param name="email">The user email.</param>
     /// <param name="comments">The user comments.</param>
     /// <param name="name">The optional username.</param>
+    [Obsolete("Use CaptureFeedback instead.")]
     public static void CaptureUserFeedback(this ISentryClient client, SentryId eventId, string email, string comments,
         string? name = null)
     {
@@ -104,4 +114,18 @@ public static class SentryClientExtensions
             HubAdapter => SentrySdk.CurrentOptions,
             _ => SentryOptionsForTestingOnly
         };
+
+    /// <summary>
+    /// <para>
+    /// Gets internal SentryOptions for integrations like Hangfire that don't support strong assembly names.
+    /// </para>
+    ///<remarks>
+    /// *** This is not meant for external use !!! ***
+    /// </remarks>>
+    /// </summary>
+    /// <param name="clientOrHub"></param>
+    /// <returns></returns>
+    [Obsolete("This method is meant for external usage only")]
+    public static SentryOptions? GetInternalSentryOptions(this ISentryClient clientOrHub) =>
+        clientOrHub.GetSentryOptions();
 }

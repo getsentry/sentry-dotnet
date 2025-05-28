@@ -7,7 +7,7 @@ internal class PrefixOrPatternMatcher(StringComparison comparison = StringCompar
 {
     public bool IsMatch(StringOrRegex stringOrRegex, string value)
     {
-        return (stringOrRegex._prefix != null && value.StartsWith(stringOrRegex._prefix, comparison)) ||
+        return (stringOrRegex._string != null && value.StartsWith(stringOrRegex._string, comparison)) ||
                stringOrRegex?._regex?.IsMatch(value) == true;
     }
 }

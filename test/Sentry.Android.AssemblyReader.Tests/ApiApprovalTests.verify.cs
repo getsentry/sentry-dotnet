@@ -1,6 +1,5 @@
 namespace Sentry.Android.AssemblyReader.Tests;
 
-[UsesVerify]
 public class ApiApprovalTests
 {
     [Fact]

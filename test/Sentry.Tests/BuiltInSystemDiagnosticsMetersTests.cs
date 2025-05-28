@@ -93,12 +93,12 @@ public class BuiltInSystemDiagnosticsMetersTests
 
 internal static class BuiltInSystemDiagnosticsMetersTestsExtensions
 {
-    internal static void ShouldMatchOnlyExactText(this SubstringOrRegexPattern pattern, string actual)
+    internal static void ShouldMatchOnlyExactText(this StringOrRegex pattern, string actual)
     {
         var withPrefix = "prefix" + actual;
         var withSuffix = actual + "suffix";
-        pattern.IsMatch(actual).Should().BeTrue();
-        pattern.IsMatch(withPrefix).Should().BeFalse();
-        pattern.IsMatch(withSuffix).Should().BeFalse();
+        SubstringOrPatternMatcher.Default.IsMatch(pattern, actual).Should().BeTrue();
+        SubstringOrPatternMatcher.Default.IsMatch(pattern, withPrefix).Should().BeFalse();
+        SubstringOrPatternMatcher.Default.IsMatch(pattern, withSuffix).Should().BeFalse();
     }
 }

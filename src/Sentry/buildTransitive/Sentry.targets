@@ -5,9 +5,28 @@
     <Using Include="Sentry" />
   </ItemGroup>
 
+  <ItemGroup>
+    <CompilerVisibleProperty Include="PublishAot" />
+    <CompilerVisibleProperty Include="UseDotNetNativeToolchain" />
+    <CompilerVisibleProperty Include="PublishTrimmed" />
+    <CompilerVisibleProperty Include="SentryDisableSourceGenerator" />
+    <CompilerVisibleProperty Include="Configuration" />
+  </ItemGroup>
+
   <PropertyGroup>
     <SentryAttributesFile>Sentry.Attributes$(MSBuildProjectExtension.Replace('proj', ''))</SentryAttributesFile>
   </PropertyGroup>
+
+  <Target Name="_SentryEnsureAndroidEnableAssemblyCompressionDisabled"
+          Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' AND '$(AndroidEnableAssemblyCompression)' == 'false'"
+          BeforeTargets="ResolveAssemblyReferences;Build;Rebuild">
+    <Error Text="Android projects using Sentry cannot build using AndroidEnableAssemblyCompression = false due to a Microsoft issue.  Please follow https://github.com/dotnet/android/issues/9752" />
+  </Target>
+
+  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <!-- See: https://github.com/getsentry/sentry-dotnet/pull/4111 -->
+    <LinkerArg Include="/NODEFAULTLIB:MSVCRT" />
+  </ItemGroup>
 
   <Target Name="WriteSentryAttributes"
           Condition="$(Language) == 'VB' or $(Language) == 'C#' or $(Language) == 'F#'"
@@ -98,7 +117,10 @@
 
       <SentryReleaseOptions Condition="'$(SentryOrg)' != ''">$(SentryReleaseOptions) --org $(SentryOrg)</SentryReleaseOptions>
       <SentryReleaseOptions Condition="'$(SentryProject)' != ''">$(SentryReleaseOptions) --project $(SentryProject)</SentryReleaseOptions>
+
       <SentrySetCommitOptions Condition="'$(SentrySetCommitOptions)' == ''">--auto</SentrySetCommitOptions>
+      <SentrySetCommitReleaseOptions Condition="'$(SentryOrg)' != ''">$(SentrySetCommitReleaseOptions) --org $(SentryOrg)</SentrySetCommitReleaseOptions>
+      <SentrySetCommitReleaseOptions Condition="'$(SentryProject)' != ''">$(SentrySetCommitReleaseOptions) --project $(SentryProject)</SentrySetCommitReleaseOptions>
 
       <SentryCLIUploadOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIUploadOptions) --org $(SentryOrg)</SentryCLIUploadOptions>
       <SentryCLIUploadOptions Condition="'$(SentryProject)' != ''">$(SentryCLIUploadOptions) --project $(SentryProject)</SentryCLIUploadOptions>
@@ -142,7 +164,10 @@
               See https://github.com/dotnet/sdk/issues/26324#issuecomment-1169236993
       Note 2: Target framework conditions should be kept synchronized with src/Sentry/Platforms/Native/buildTransitive/Sentry.Native.targets -->
   <PropertyGroup Condition="
-      $(TargetFramework.StartsWith('net8'))
+      !$(TargetFramework.StartsWith('net4'))
+      And !$(TargetFramework.StartsWith('netstandard2'))
+      And !$(TargetFramework.StartsWith('net6'))
+      And !$(TargetFramework.StartsWith('net7'))
       and '$(PublishDir)' != ''
       and '$(PublishAot)' == 'true'
       and '$(_IsPublishing)' == 'true'
@@ -330,7 +355,7 @@
           Condition="'$(SentryCLI)' != '' and '$(SentryCreateRelease)' == 'true'">
     <Message Importance="High" Text="Creating Sentry Release: $(_SentryRelease)" />
     <Exec
-      Command="$(SentryCLIBaseCommand) releases new '$(_SentryRelease)' $(SentryReleaseOptions)"
+      Command="$(SentryCLIBaseCommand) releases new $(_SentryRelease) $(SentryReleaseOptions)"
       IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
     </Exec>
@@ -341,7 +366,7 @@
           Condition="'$(SentryCLI)' != '' and '$(SentrySetCommits)' == 'true'">
     <Message Importance="High" Text="Setting Sentry commits" />
     <Exec
-      Command="$(SentryCLIBaseCommand) releases set-commits $(SentrySetCommitOptions) '$(_SentryRelease)' $(SentryReleaseOptions)"
+      Command="$(SentryCLIBaseCommand) releases set-commits $(SentrySetCommitOptions) $(_SentryRelease) $(SentrySetCommitReleaseOptions)"
       IgnoreExitCode="true" ContinueOnError="WarnAndContinue">
       <Output TaskParameter="ExitCode" PropertyName="_SentryCLIExitCode" />
     </Exec>

@@ -14,8 +14,8 @@ public class TracePropagationTargetTests
     public void SentryOptions_TracePropagationTargets_AddRemovesDefault()
     {
         var options = new SentryOptions();
-        options.TracePropagationTargets.Add(new SubstringOrRegexPattern("foo"));
-        options.TracePropagationTargets.Add(new SubstringOrRegexPattern("bar"));
+        options.TracePropagationTargets.Add(new StringOrRegex("foo"));
+        options.TracePropagationTargets.Add(new StringOrRegex("bar"));
 
         Assert.Equal(2, options.TracePropagationTargets.Count);
         Assert.Equal("foo", options.TracePropagationTargets[0].ToString());
@@ -28,9 +28,9 @@ public class TracePropagationTargetTests
         var options = new SentryOptions();
         var targets = new[]
         {
-            new SubstringOrRegexPattern(".*"),
-            new SubstringOrRegexPattern("foo"),
-            new SubstringOrRegexPattern("bar")
+            new StringOrRegex(".*"),
+            new StringOrRegex("foo"),
+            new StringOrRegex("bar")
         };
 
         options.TracePropagationTargets = targets;
@@ -45,9 +45,9 @@ public class TracePropagationTargetTests
     {
         var options = new SentryOptions();
 
-        var result1 = options.TracePropagationTargets.ContainsMatch("foo");
-        var result2 = options.TracePropagationTargets.ContainsMatch("");
-        var result3 = options.TracePropagationTargets.ContainsMatch(null!);
+        var result1 = options.TracePropagationTargets.MatchesSubstringOrRegex("foo");
+        var result2 = options.TracePropagationTargets.MatchesSubstringOrRegex("");
+        var result3 = options.TracePropagationTargets.MatchesSubstringOrRegex(null!);
 
         Assert.True(result1);
         Assert.True(result2);
@@ -59,12 +59,12 @@ public class TracePropagationTargetTests
     {
         var options = new SentryOptions
         {
-            TracePropagationTargets = new List<SubstringOrRegexPattern>()
+            TracePropagationTargets = new List<StringOrRegex>()
         };
 
-        var result1 = options.TracePropagationTargets.ContainsMatch("foo");
-        var result2 = options.TracePropagationTargets.ContainsMatch("");
-        var result3 = options.TracePropagationTargets.ContainsMatch(null!);
+        var result1 = options.TracePropagationTargets.MatchesSubstringOrRegex("foo");
+        var result2 = options.TracePropagationTargets.MatchesSubstringOrRegex("");
+        var result3 = options.TracePropagationTargets.MatchesSubstringOrRegex(null!);
 
         Assert.False(result1);
         Assert.False(result2);
@@ -76,7 +76,7 @@ public class TracePropagationTargetTests
     {
         var options = new SentryOptions
         {
-            TracePropagationTargets = new List<SubstringOrRegexPattern>
+            TracePropagationTargets = new List<StringOrRegex>
             {
                 new("foo"),
                 new("localhost"),
@@ -84,7 +84,7 @@ public class TracePropagationTargetTests
             }
         };
 
-        var result = options.TracePropagationTargets.ContainsMatch("http://localhost/abc/123");
+        var result = options.TracePropagationTargets.MatchesSubstringOrRegex("http://localhost/abc/123");
         Assert.True(result);
     }
 
@@ -93,7 +93,7 @@ public class TracePropagationTargetTests
     {
         var options = new SentryOptions
         {
-            TracePropagationTargets = new List<SubstringOrRegexPattern>
+            TracePropagationTargets = new List<StringOrRegex>
             {
                 new("foo"),
                 new("localhost"),
@@ -101,7 +101,7 @@ public class TracePropagationTargetTests
             }
         };
 
-        var result = options.TracePropagationTargets.ContainsMatch("http://localhost/foo/123");
+        var result = options.TracePropagationTargets.MatchesSubstringOrRegex("http://localhost/foo/123");
         Assert.True(result);
     }
 
@@ -110,7 +110,7 @@ public class TracePropagationTargetTests
     {
         var options = new SentryOptions
         {
-            TracePropagationTargets = new List<SubstringOrRegexPattern>
+            TracePropagationTargets = new List<StringOrRegex>
             {
                 new("foo"),
                 new("localhost"),
@@ -118,7 +118,7 @@ public class TracePropagationTargetTests
             }
         };
 
-        var result = options.TracePropagationTargets.ContainsMatch("https://sentry.io/abc/123");
+        var result = options.TracePropagationTargets.MatchesSubstringOrRegex("https://sentry.io/abc/123");
         Assert.False(result);
     }
 }

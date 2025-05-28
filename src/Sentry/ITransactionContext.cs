@@ -10,15 +10,15 @@ public interface ITransactionContext : ITraceContext
     /// <summary>
     /// Transaction name.
     /// </summary>
-    string Name { get; }
+    public string Name { get; }
 
     /// <summary>
     /// Whether the parent transaction of this transaction has been sampled.
     /// </summary>
-    bool? IsParentSampled { get; }
+    public bool? IsParentSampled { get; }
 
     /// <summary>
     /// The source of the transaction name.
     /// </summary>
-    TransactionNameSource NameSource { get; }
+    public TransactionNameSource NameSource { get; }
 }

@@ -53,6 +53,7 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
             not null when propertyType == typeof(bool) => true,
             not null when propertyType == typeof(string) => $"fake {propertyInfo.Name}",
             not null when propertyType == typeof(int) => 7,
+            not null when propertyType == typeof(short) => 7,
             not null when propertyType == typeof(long) => 7,
             not null when propertyType == typeof(float) => 0.3f,
             not null when propertyType == typeof(double) => 0.6,

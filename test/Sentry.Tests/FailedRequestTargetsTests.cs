@@ -26,7 +26,7 @@ public class FailedRequestTargetsTests
     public void SentryOptions_FailedRequestTargets_SetRemovesDefault()
     {
         var options = new SentryOptions();
-        var targets = new List<SubstringOrRegexPattern>
+        var targets = new List<StringOrRegex>
         {
             ".*",
             "foo",
@@ -45,9 +45,9 @@ public class FailedRequestTargetsTests
     {
         var options = new SentryOptions();
 
-        var result1 = options.FailedRequestTargets.ContainsMatch("foo");
-        var result2 = options.FailedRequestTargets.ContainsMatch("");
-        var result3 = options.FailedRequestTargets.ContainsMatch(null!);
+        var result1 = options.FailedRequestTargets.MatchesSubstringOrRegex("foo");
+        var result2 = options.FailedRequestTargets.MatchesSubstringOrRegex("");
+        var result3 = options.FailedRequestTargets.MatchesSubstringOrRegex(null!);
 
         Assert.True(result1);
         Assert.True(result2);
@@ -59,12 +59,12 @@ public class FailedRequestTargetsTests
     {
         var options = new SentryOptions
         {
-            FailedRequestTargets = new List<SubstringOrRegexPattern>()
+            FailedRequestTargets = new List<StringOrRegex>()
         };
 
-        var result1 = options.FailedRequestTargets.ContainsMatch("foo");
-        var result2 = options.FailedRequestTargets.ContainsMatch("");
-        var result3 = options.FailedRequestTargets.ContainsMatch(null!);
+        var result1 = options.FailedRequestTargets.MatchesSubstringOrRegex("foo");
+        var result2 = options.FailedRequestTargets.MatchesSubstringOrRegex("");
+        var result3 = options.FailedRequestTargets.MatchesSubstringOrRegex(null!);
 
         Assert.False(result1);
         Assert.False(result2);
@@ -76,7 +76,7 @@ public class FailedRequestTargetsTests
     {
         var options = new SentryOptions
         {
-            FailedRequestTargets = new List<SubstringOrRegexPattern>
+            FailedRequestTargets = new List<StringOrRegex>
             {
                 "foo",
                 "localhost",
@@ -84,7 +84,7 @@ public class FailedRequestTargetsTests
             }
         };
 
-        var result = options.FailedRequestTargets.ContainsMatch("http://localhost/abc/123");
+        var result = options.FailedRequestTargets.MatchesSubstringOrRegex("http://localhost/abc/123");
         Assert.True(result);
     }
 
@@ -93,7 +93,7 @@ public class FailedRequestTargetsTests
     {
         var options = new SentryOptions
         {
-            FailedRequestTargets = new List<SubstringOrRegexPattern>
+            FailedRequestTargets = new List<StringOrRegex>
             {
                 "foo",
                 "localhost",
@@ -101,7 +101,7 @@ public class FailedRequestTargetsTests
             }
         };
 
-        var result = options.FailedRequestTargets.ContainsMatch("http://localhost/foo/123");
+        var result = options.FailedRequestTargets.MatchesSubstringOrRegex("http://localhost/foo/123");
         Assert.True(result);
     }
 
@@ -110,7 +110,7 @@ public class FailedRequestTargetsTests
     {
         var options = new SentryOptions
         {
-            FailedRequestTargets = new List<SubstringOrRegexPattern>
+            FailedRequestTargets = new List<StringOrRegex>
             {
                 "foo",
                 "localhost",
@@ -118,7 +118,7 @@ public class FailedRequestTargetsTests
             }
         };
 
-        var result = options.FailedRequestTargets.ContainsMatch("https://sentry.io/abc/123");
+        var result = options.FailedRequestTargets.MatchesSubstringOrRegex("https://sentry.io/abc/123");
         Assert.False(result);
     }
 }

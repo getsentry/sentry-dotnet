@@ -18,6 +18,11 @@ internal class SentryMauiScreenshotProcessor : ISentryEventProcessorWithHint
 
     public SentryEvent? Process(SentryEvent @event, SentryHint hint)
     {
+        if (!_options.BeforeCaptureInternal?.Invoke(@event, hint) ?? false)
+        {
+            return @event;
+        }
+
         hint.Attachments.Add(new ScreenshotAttachment(_options));
         return @event;
     }

@@ -157,8 +157,18 @@ public sealed class Breadcrumb : ISentryJsonSerializable
         var type = json.GetPropertyOrNull("type")?.GetString();
         var data = json.GetPropertyOrNull("data")?.GetStringDictionaryOrNull();
         var category = json.GetPropertyOrNull("category")?.GetString();
-        var level = json.GetPropertyOrNull("level")?.GetString()?.ParseEnum<BreadcrumbLevel>() ?? default;
 
+        var levelString = json.GetPropertyOrNull("level")?.GetString();
+        var level = levelString?.ToUpper() switch
+        {
+            "DEBUG" => BreadcrumbLevel.Debug,
+            "INFO" => BreadcrumbLevel.Info,
+            "WARNING" => BreadcrumbLevel.Warning,
+            "ERROR" => BreadcrumbLevel.Error,
+            "CRITICAL" => BreadcrumbLevel.Critical,
+            "FATAL" => BreadcrumbLevel.Critical,
+            _ => default
+        };
         return new Breadcrumb(timestamp, message, type, data!, category, level);
     }
 }

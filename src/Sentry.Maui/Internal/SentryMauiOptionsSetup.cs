@@ -1,7 +1,9 @@
 using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+#if !PLATFORM_NEUTRAL
 using Microsoft.Maui.Networking;
+#endif
 using Sentry.Infrastructure;
 
 namespace Sentry.Maui.Internal;
@@ -13,7 +15,7 @@ internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
     public SentryMauiOptionsSetup(IConfiguration config)
     {
         ArgumentNullException.ThrowIfNull(config);
-        _config = config;
+        _config = config.GetSection("Sentry");
     }
 
     public void Configure(SentryMauiOptions options)

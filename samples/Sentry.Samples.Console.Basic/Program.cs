@@ -8,10 +8,10 @@
  * For more advanced features of the SDK, see Sentry.Samples.Console.Customized.
  */
 
-// Initialize the Sentry SDK.  (It is not necessary to dispose it.)
-
 using System.Net.Http;
+using static System.Console;
 
+// Initialize the Sentry SDK.  (It is not necessary to dispose it.)
 SentrySdk.Init(options =>
 {
     // You can set here in code, or you can set it in the SENTRY_DSN environment variable.
@@ -55,7 +55,7 @@ async Task FirstFunction()
     var messageHandler = new SentryHttpMessageHandler();
     var httpClient = new HttpClient(messageHandler, true);
     var html = await httpClient.GetStringAsync("https://example.com/");
-    Console.WriteLine(html);
+    WriteLine(html);
 }
 
 async Task SecondFunction()

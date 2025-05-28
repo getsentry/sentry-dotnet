@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
 using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
@@ -180,18 +185,71 @@ public class Scope : IEventLike
         }
     }
 
-    private ITransactionTracer? _transaction;
+    /// <summary>
+    /// <para>
+    /// Most of the properties on the Scope should have the same affinity as the Scope... For example, when using a
+    /// GlobalScopeStackContainer, anything you store on the scope will be applied to all events that get sent to Sentry
+    /// (no matter which thread they are sent from).
+    /// </para>
+    /// <para>
+    /// Transactions are an exception, however. We don't want spans from threads created on the UI thread to be added as
+    /// children of Transactions/Spans that get created on the background thread, or vice versa. As such,
+    /// Scope.Transaction is always stored as an AsyncLocal, regardless of the ScopeStackContainer implementation.
+    /// </para>
+    /// <para>
+    /// See https://github.com/getsentry/sentry-dotnet/issues/3590 for more information.
+    /// </para>
+    /// </summary>
+    private readonly AsyncLocal<ITransactionTracer?> _transaction = new();
 
     /// <summary>
-    /// Transaction.
+    /// The current Transaction
     /// </summary>
     public ITransactionTracer? Transaction
     {
-        get => _transaction;
-        set => _transaction = value;
+        get
+        {
+            _transactionLock.EnterReadLock();
+            try
+            {
+                // Workaround for https://github.com/getsentry/sentry-dotnet/pull/4125#discussion_r2087994417
+                // TODO: We should really find the root cause of this issue and address in a seprate PR
+                return _transaction.Value is { IsFinished: false } transaction ? transaction : null;
+            }
+            finally
+            {
+                _transactionLock.ExitReadLock();
+            }
+        }
+        set
+        {
+            _transactionLock.EnterWriteLock();
+            try
+            {
+                _transaction.Value = value;
+
+                if (Options.EnableScopeSync)
+                {
+                    if (_transaction.Value != null)
+                    {
+                        // If there is a transaction set we propagate the trace to the native layer
+                        Options.ScopeObserver?.SetTrace(_transaction.Value.TraceId, _transaction.Value.SpanId);
+                    }
+                    else
+                    {
+                        // If the transaction is being removed from the scope, reset and sync the trace as well
+                        Options.ScopeObserver?.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
+                    }
+                }
+            }
+            finally
+            {
+                _transactionLock.ExitWriteLock();
+            }
+        }
     }
 
-    internal SentryPropagationContext PropagationContext { get; set; }
+    internal SentryPropagationContext PropagationContext { get; private set; }
 
     internal SessionUpdate? SessionUpdate { get; set; }
 
@@ -307,7 +365,7 @@ public class Scope : IEventLike
     /// <inheritdoc />
     public void SetTag(string key, string value)
     {
-        if (Options.TagFilters.Any(x => x.IsMatch(key)))
+        if (Options.TagFilters.MatchesSubstringOrRegex(key))
         {
             return;
         }
@@ -333,6 +391,15 @@ public class Scope : IEventLike
     /// Adds an attachment.
     /// </summary>
     public void AddAttachment(SentryAttachment attachment) => _attachments.Add(attachment);
+
+    internal void SetPropagationContext(SentryPropagationContext propagationContext)
+    {
+        PropagationContext = propagationContext;
+        if (Options.EnableScopeSync)
+        {
+            Options.ScopeObserver?.SetTrace(propagationContext.TraceId, propagationContext.SpanId);
+        }
+    }
 
     /// <summary>
     /// Resets all the properties and collections within the scope to their default values.
@@ -738,6 +805,29 @@ public class Scope : IEventLike
                 Path.GetFileName(filePath),
                 contentType));
 
-    internal void ResetTransaction(ITransactionTracer? expectedCurrentTransaction) =>
-        Interlocked.CompareExchange(ref _transaction, null, expectedCurrentTransaction);
+    /// <summary>
+    /// We need this lock to prevent a potential race condition in <see cref="ResetTransaction"/>.
+    /// </summary>
+    private readonly ReaderWriterLockSlim _transactionLock = new();
+
+    internal void ResetTransaction(ITransactionTracer? expectedCurrentTransaction)
+    {
+        _transactionLock.EnterWriteLock();
+        try
+        {
+            if (ReferenceEquals(_transaction.Value, expectedCurrentTransaction))
+            {
+                _transaction.Value = null;
+                if (Options.EnableScopeSync)
+                {
+                    // We have to restore the trace on the native layers to be in sync with the current scope
+                    Options.ScopeObserver?.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
+                }
+            }
+        }
+        finally
+        {
+            _transactionLock.ExitWriteLock();
+        }
+    }
 }

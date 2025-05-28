@@ -14,7 +14,7 @@ public class SentryLoggingOptionsSetupTests
         {
             IsGlobalModeEnabled = true,
             EnableScopeSync = true,
-            TagFilters = new List<SubstringOrRegexPattern> { "tag1", "tag2" },
+            TagFilters = new List<StringOrRegex> { "tag1", "tag2" },
             SendDefaultPii = true,
             IsEnvironmentUser = true,
             ServerName = "FakeServerName",
@@ -40,14 +40,11 @@ public class SentryLoggingOptionsSetupTests
             CacheDirectoryPath = "~/test",
             CaptureFailedRequests = true,
             // FailedRequestStatusCodes = IList<HttpStatusCodeRange>,
-            FailedRequestTargets = new List<SubstringOrRegexPattern> { "target1", "target2" },
+            FailedRequestTargets = ["target1", "target2"],
             InitCacheFlushTimeout = TimeSpan.FromSeconds(27),
             // DefaultTags = Dictionary<string,string>,
-#pragma warning disable CS0618 // Type or member is obsolete
-            EnableTracing = true,
-#pragma warning restore CS0618 // Type or member is obsolete
             TracesSampleRate = 0.8f,
-            TracePropagationTargets = new List<SubstringOrRegexPattern> { "target3", "target4" },
+            TracePropagationTargets = new List<StringOrRegex> { "target3", "target4" },
             StackTraceMode = StackTraceMode.Enhanced,
             MaxAttachmentSize = 21478,
             DetectStartupTime = StartupTimeDetectionMode.Fast,
@@ -65,8 +62,8 @@ public class SentryLoggingOptionsSetupTests
             {
                 ["IsGlobalModeEnabled"] = expected.IsGlobalModeEnabled.ToString(),
                 ["EnableScopeSync"] = expected.EnableScopeSync.ToString(),
-                ["TagFilters:0"] = "tag1",
-                ["TagFilters:1"] = "tag2",
+                ["TagFilters:0"] = expected.TagFilters.First().ToString(),
+                ["TagFilters:1"] = expected.TagFilters.Last().ToString(),
                 ["SendDefaultPii"] = expected.SendDefaultPii.ToString(),
                 ["IsEnvironmentUser"] = expected.IsEnvironmentUser.ToString(),
                 ["ServerName"] = expected.ServerName,
@@ -96,9 +93,6 @@ public class SentryLoggingOptionsSetupTests
                 ["FailedRequestTargets:1"] = expected.FailedRequestTargets.Last().ToString(),
                 ["InitCacheFlushTimeout"] = expected.InitCacheFlushTimeout.ToString(),
                 ["DefaultTags"] = expected.DefaultTags.ToString(),
-#pragma warning disable CS0618 // Type or member is obsolete
-                ["EnableTracing"] = expected.EnableTracing.ToString(),
-#pragma warning restore CS0618 // Type or member is obsolete
                 ["TracesSampleRate"] = expected.TracesSampleRate.Value.ToString(CultureInfo.InvariantCulture),
                 ["TracePropagationTargets:0"] = expected.TracePropagationTargets.First().ToString(),
                 ["TracePropagationTargets:1"] = expected.TracePropagationTargets.Last().ToString(),
@@ -156,9 +150,6 @@ public class SentryLoggingOptionsSetupTests
             actual.CaptureFailedRequests.Should().Be(expected.CaptureFailedRequests);
             actual.FailedRequestTargets.Should().BeEquivalentTo(expected.FailedRequestTargets);
             actual.InitCacheFlushTimeout.Should().Be(expected.InitCacheFlushTimeout);
-#pragma warning disable CS0618 // Type or member is obsolete
-            actual.EnableTracing.Should().Be(expected.EnableTracing);
-#pragma warning restore CS0618 // Type or member is obsolete
             actual.TracesSampleRate.Should().Be(expected.TracesSampleRate);
             actual.TracePropagationTargets.Should().BeEquivalentTo(expected.TracePropagationTargets);
             actual.StackTraceMode.Should().Be(expected.StackTraceMode);

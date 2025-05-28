@@ -9,12 +9,12 @@ public interface IEventLike : IHasTags, IHasExtra
     /// A trail of events which happened prior to an issue.
     /// </summary>
     /// <seealso href="https://docs.sentry.io/platforms/dotnet/enriching-events/breadcrumbs/"/>
-    IReadOnlyCollection<Breadcrumb> Breadcrumbs { get; }
+    public IReadOnlyCollection<Breadcrumb> Breadcrumbs { get; }
 
     /// <summary>
     /// Adds a breadcrumb.
     /// </summary>
-    void AddBreadcrumb(Breadcrumb breadcrumb);
+    public void AddBreadcrumb(Breadcrumb breadcrumb);
 
     /// <summary>
     /// The release distribution of the application.
@@ -24,7 +24,7 @@ public interface IEventLike : IHasTags, IHasExtra
     /// <summary>
     /// Sentry level.
     /// </summary>
-    SentryLevel? Level { get; set; }
+    public SentryLevel? Level { get; set; }
 
     /// <summary>
     /// Gets or sets the HTTP.
@@ -32,7 +32,7 @@ public interface IEventLike : IHasTags, IHasExtra
     /// <value>
     /// The HTTP.
     /// </value>
-    SentryRequest Request { get; set; }
+    public SentryRequest Request { get; set; }
 
     /// <summary>
     /// Gets the structured Sentry context.
@@ -40,7 +40,7 @@ public interface IEventLike : IHasTags, IHasExtra
     /// <value>
     /// The contexts.
     /// </value>
-    SentryContexts Contexts { get; set; }
+    public SentryContexts Contexts { get; set; }
 
     /// <summary>
     /// Gets the user information.
@@ -48,18 +48,18 @@ public interface IEventLike : IHasTags, IHasExtra
     /// <value>
     /// The user.
     /// </value>
-    SentryUser User { get; set; }
+    public SentryUser User { get; set; }
 
     /// <summary>
     /// The release version of the application.
     /// </summary>
-    string? Release { get; set; }
+    public string? Release { get; set; }
 
     /// <summary>
     /// The environment name, such as 'production' or 'staging'.
     /// </summary>
     /// <remarks>Requires Sentry 8.0 or higher.</remarks>
-    string? Environment { get; set; }
+    public string? Environment { get; set; }
 
     /// <summary>
     /// The name of the transaction in which there was an event.
@@ -70,13 +70,13 @@ public interface IEventLike : IHasTags, IHasExtra
     /// rather than the actual request path. That is so GET /user/10 and /user/20
     /// (which have route template /user/{id}) are identified as the same transaction.
     /// </remarks>
-    string? TransactionName { get; set; }
+    public string? TransactionName { get; set; }
 
     /// <summary>
     /// SDK information.
     /// </summary>
     /// <remarks>New in Sentry version: 8.4</remarks>
-    SdkVersion Sdk { get; }
+    public SdkVersion Sdk { get; }
 
     /// <summary>
     /// A list of strings used to dictate the deduplication of this event.
@@ -88,7 +88,7 @@ public interface IEventLike : IHasTags, IHasExtra
     /// </remarks>
     /// <example> { "fingerprint": ["myrpc", "POST", "/foo.bar"] } </example>
     /// <example> { "fingerprint": ["{{ default }}", "http://example.com/my.url"] } </example>
-    IReadOnlyList<string> Fingerprint { get; set; }
+    public IReadOnlyList<string> Fingerprint { get; set; }
 }
 
 /// <summary>

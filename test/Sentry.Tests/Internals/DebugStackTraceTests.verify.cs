@@ -4,8 +4,6 @@
 
 namespace Other.Tests.Internals;
 
-[UsesVerify]
-
 public class DebugStackTraceTests
 {
     private class Fixture

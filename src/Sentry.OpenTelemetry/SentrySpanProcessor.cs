@@ -13,6 +13,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 {
     private readonly IHub _hub;
     internal readonly IEnumerable<IOpenTelemetryEnricher> _enrichers;
+    private readonly IReplaySession _replaySession;
     internal const string OpenTelemetryOrigin = "auto.otel";
 
     // ReSharper disable once MemberCanBePrivate.Global - Used by tests
@@ -38,7 +39,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     {
     }
 
-    internal SentrySpanProcessor(IHub hub, IEnumerable<IOpenTelemetryEnricher>? enrichers)
+    internal SentrySpanProcessor(IHub hub, IEnumerable<IOpenTelemetryEnricher>? enrichers, IReplaySession? replaySession = null)
     {
         _hub = hub;
         _realHub = new Lazy<Hub?>(() =>
@@ -57,7 +58,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 "You should use the TracerProviderBuilderExtensions to configure Sentry with OpenTelemetry");
         }
 
-        _enrichers = enrichers ?? Enumerable.Empty<IOpenTelemetryEnricher>();
+        _enrichers = enrichers ?? [];
+        _replaySession = replaySession ?? ReplaySession.Instance;
         _options = hub.GetSentryOptions();
 
         if (_options is null)
@@ -83,6 +85,14 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     /// <inheritdoc />
     public override void OnStart(Activity data)
     {
+        if (!_hub.IsEnabled)
+        {
+            // This would be unusual... it might happen if the SDK is closed while the processor is still running and
+            // we receive new telemetry. In this case, we can't log anything because our logger is disabled, so we just
+            // swallow it
+            return;
+        }
+
         if (data.ParentSpanId != default && _map.TryGetValue(data.ParentSpanId, out var mappedParent))
         {
             // Explicit ParentSpanId of another activity that we have already mapped
@@ -150,7 +160,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         };
 
         var baggageHeader = data.Baggage.AsBaggageHeader();
-        var dynamicSamplingContext = baggageHeader.CreateDynamicSamplingContext();
+        var dynamicSamplingContext = baggageHeader.CreateDynamicSamplingContext(_replaySession);
         var transaction = (TransactionTracer)_hub.StartTransaction(
             transactionContext, new Dictionary<string, object?>(), dynamicSamplingContext
         );
@@ -165,6 +175,22 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     /// <inheritdoc />
     public override void OnEnd(Activity data)
     {
+        if (!_hub.IsEnabled)
+        {
+            // This would be unusual... it might happen if the SDK is closed while the processor is still running and
+            // we receive new telemetry. In this case, we can't log anything because our logger is disabled, so we just
+            // swallow it
+            return;
+        }
+
+        // Skip any activities that are not recorded.
+        if (data is { Recorded: false })
+        {
+            _options?.DiagnosticLogger?.LogDebug("Ignoring unrecorded Activity {0}.", data.SpanId);
+            _map.TryRemove(data.SpanId, out _);
+            return;
+        }
+
         // Make a dictionary of the attributes (aka "tags") for faster lookup when used throughout the processor.
         var attributes = data.TagObjects.ToDict();
 
@@ -447,9 +473,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             Exception exception;
             try
             {
-                var type = Type.GetType(exceptionType)!;
-                exception = (Exception)Activator.CreateInstance(type, message)!;
-                exception.SetSentryMechanism("SentrySpanProcessor.ErrorSpan");
+                if (CreatePoorMansException(exceptionType, message) is not { } poorMansException)
+                {
+                    _options?.DiagnosticLogger?.LogWarning($"Unable to create poor man's exception with trimming enabled : {exceptionType}");
+                    continue;
+                }
+                exception = poorMansException;
             }
             catch
             {
@@ -474,5 +503,19 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 trace.TraceId = activity.TraceId.AsSentryId();
             });
         }
+    }
+
+    [UnconditionalSuppressMessage("Trimming", "IL2057", Justification = AotHelper.AvoidAtRuntime)]
+    private static Exception? CreatePoorMansException(string exceptionType, string message)
+    {
+        if (AotHelper.IsTrimmed)
+        {
+            return null;
+        }
+
+        var type = Type.GetType(exceptionType)!;
+        var exception = (Exception)Activator.CreateInstance(type, message)!;
+        exception.SetSentryMechanism("SentrySpanProcessor.ErrorSpan");
+        return exception;
     }
 }

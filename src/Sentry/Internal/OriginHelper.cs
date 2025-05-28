@@ -5,12 +5,15 @@ internal static partial class OriginHelper
     internal const string Manual = "manual";
     private const string ValidOriginPattern = @"^(auto|manual)(\.[\w]+){0,3}$";
 
-#if NET8_0_OR_GREATER
-    [GeneratedRegex(ValidOriginPattern, RegexOptions.Compiled)]
-    private static partial Regex ValidOriginRegEx();
-    private static readonly Regex ValidOrigin = ValidOriginRegEx();
+#if NET9_0_OR_GREATER
+    [GeneratedRegex(ValidOriginPattern)]
+    private static partial Regex ValidOrigin { get; }
+#elif NET8_0
+    [GeneratedRegex(ValidOriginPattern)]
+    private static partial Regex ValidOriginRegex();
+    private static readonly Regex ValidOrigin = ValidOriginRegex();
 #else
-    private static readonly Regex ValidOrigin = new (ValidOriginPattern, RegexOptions.Compiled);
+    private static readonly Regex ValidOrigin = new(ValidOriginPattern, RegexOptions.Compiled);
 #endif
 
     public static bool IsValidOrigin(string? value) => value == null || ValidOrigin.IsMatch(value);

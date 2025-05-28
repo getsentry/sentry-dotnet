@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry;
@@ -48,18 +49,14 @@ public static partial class SentrySdk
             options.LogWarning("The provided DSN that contains a secret key. This is not required and will be ignored.");
         }
 
-        if (AotHelper.IsNativeAot)
 #pragma warning disable CS0162 // Unreachable code detected
-        {
 #pragma warning disable 0162 // Unreachable code on old .NET frameworks
-            options.LogDebug("This looks like a Native AOT application build.");
+        options.LogDebug(AotHelper.IsTrimmed
+            ? "This looks like a Native AOT application build."
+            : "This doesn't look like a Native AOT application build."
+        );
 #pragma warning restore 0162
-        }
-        else
-        {
 #pragma warning restore CS0162 // Unreachable code detected
-            options.LogDebug("This doesn't look like a Native AOT application build.");
-        }
 
         // Initialize native platform SDKs here
         if (options.InitNativeSdks)
@@ -69,6 +66,9 @@ public static partial class SentrySdk
 #elif ANDROID
             InitSentryAndroidSdk(options);
 #elif NET8_0_OR_GREATER
+            // TODO: Is this working properly? Currently we don't have any way to check if the app is being compiled AOT
+            // All we know is whether trimming has been enabled or not. I think at the moment we'll be initialising
+            // SentryNative for managed applications when they've been trimmed!
             if (SentryNative.IsAvailable)
             {
                 InitNativeSdk(options);
@@ -94,7 +94,7 @@ public static partial class SentrySdk
         LogWarningIfProfilingMisconfigured(options, " on Android");
 #else
 #if NET8_0_OR_GREATER
-        if (AotHelper.IsNativeAot)
+        if (AotHelper.IsTrimmed)
         {
             LogWarningIfProfilingMisconfigured(options, " for NativeAOT");
         }
@@ -102,7 +102,7 @@ public static partial class SentrySdk
 #endif
         {
             LogWarningIfProfilingMisconfigured(options, ", because ProfilingIntegration from package Sentry.Profiling" +
-            " hasn't been registered. You can do that by calling 'options.AddIntegration(new ProfilingIntegration())'");
+            " hasn't been registered. You can do that by calling 'options.AddProfilingIntegration()'");
         }
 #endif
 
@@ -483,10 +483,35 @@ public static partial class SentrySdk
         => CurrentHub.CaptureMessage(message, configureScope, level);
 
     /// <summary>
+    /// Captures feedback from the user.
+    /// </summary>
+    [DebuggerStepThrough]
+    public static void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+        => CurrentHub.CaptureFeedback(feedback, configureScope, hint);
+
+    /// <summary>
+    /// Captures feedback from the user.
+    /// </summary>
+    [DebuggerStepThrough]
+    public static void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+        => CurrentHub.CaptureFeedback(feedback, scope, hint);
+
+    /// <summary>
+    /// Captures feedback from the user.
+    /// </summary>
+    [DebuggerStepThrough]
+    public static void CaptureFeedback(string message, string? contactEmail = null, string? name = null,
+        string? replayId = null, string? url = null, SentryId? associatedEventId = null, Scope? scope = null,
+        SentryHint? hint = null)
+        => CurrentHub.CaptureFeedback(new SentryFeedback(message, contactEmail, name, replayId, url, associatedEventId),
+            scope, hint);
+
+    /// <summary>
     /// Captures a user feedback.
     /// </summary>
     /// <param name="userFeedback">The user feedback to send to Sentry.</param>
     [DebuggerStepThrough]
+    [Obsolete("Use CaptureFeedback instead.")]
     public static void CaptureUserFeedback(UserFeedback userFeedback)
         => CurrentHub.CaptureUserFeedback(userFeedback);
 
@@ -498,6 +523,7 @@ public static partial class SentrySdk
     /// <param name="comments">The user comments.</param>
     /// <param name="name">The optional username.</param>
     [DebuggerStepThrough]
+    [Obsolete("Use CaptureFeedback instead.")]
     public static void CaptureUserFeedback(SentryId eventId, string email, string comments, string? name = null)
         => CurrentHub.CaptureUserFeedback(new UserFeedback(eventId, name, email, comments));
 
@@ -666,13 +692,6 @@ public static partial class SentrySdk
         string? name = null,
         string? operation = null)
         => CurrentHub.ContinueTrace(traceHeader, baggageHeader, name, operation);
-
-    /// <inheritdoc cref="IMetricAggregator"/>
-    [Obsolete("The SentrySdk.Metrics module is deprecated and will be removed in the next major release. " +
-              "Sentry will reject all metrics sent after October 7, 2024." +
-              "Learn more: https://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-to-Metrics")]
-    public static IMetricAggregator Metrics
-        => CurrentHub.Metrics;
 
     /// <inheritdoc cref="IHub.StartSession"/>
     [DebuggerStepThrough]

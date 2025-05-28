@@ -82,8 +82,8 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
     /// This method uses reflection to hook up an UnhandledExceptionHandler. When IsTrimmed is true, users will have
     /// follow our guidance to perform this initialization manually.
     /// </summary>
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
-    [UnconditionalSuppressMessage("Trimming", "IL2075:\'this\' argument does not satisfy \'DynamicallyAccessedMembersAttribute\' in call to target method. The return value of the source method does not have matching annotations.", Justification = AotHelper.SuppressionJustification)]
+    [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
+    [UnconditionalSuppressMessage("TrimAnalyzer", "IL2075: DynamicallyAccessedMembers", Justification = AotHelper.AvoidAtRuntime)]
     private void AttachEventHandler()
     {
         try
@@ -105,7 +105,7 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
         }
     }
 
-    [UnconditionalSuppressMessage("TrimAnalyzer", "IL2075", Justification = AotHelper.SuppressionJustification)]
+    [UnconditionalSuppressMessage("TrimAnalyzer", "IL2075: DynamicallyAccessedMembers", Justification = AotHelper.AvoidAtRuntime)]
     private void WinUIUnhandledExceptionHandler(object sender, object e)
     {
         bool handled;

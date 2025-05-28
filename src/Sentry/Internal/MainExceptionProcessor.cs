@@ -199,6 +199,9 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
             exception.Data.Remove(Mechanism.DescriptionKey);
         }
 
+        // Add HResult to mechanism data before adding exception data, so that it can be overridden.
+        mechanism.Data["HResult"] = $"0x{exception.HResult:X8}";
+
         // Copy remaining exception data to mechanism data.
         foreach (var key in exception.Data.Keys.OfType<string>())
         {

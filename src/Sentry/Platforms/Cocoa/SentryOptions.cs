@@ -1,4 +1,6 @@
 using ObjCRuntime;
+using Sentry.Cocoa;
+using Sentry.Extensibility;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry;
@@ -67,6 +69,23 @@ public partial class SentryOptions
         public bool EnableAppHangTracking { get; set; } = true;
 
         /// <summary>
+        /// IMPORTANT: This feature is experimental and may have bugs.
+        /// <br/>
+        /// As of version 8.39.0-beta.1 of the sentry-cocoa SDK, you can enable AppHangsV2, which is available on iOS and tvOS.
+        /// The main difference is that AppHangsV2 differentiates between fully-blocking and non-fully-blocking
+        /// app hangs, which you might choose to ignore. A fully-blocking app hang is when the main thread is stuck
+        /// completely, and the app can't render a single frame.
+        /// A non-fully-blocking app hang is when the app appears stuck to the user, but can still render a few frames.
+        /// Fully-blocking app hangs are more actionable because the stacktrace shows the exact blocking location on
+        /// the main thread. Non-fully-blocking app hangs can have a stacktrace that doesn't highlight the exact
+        /// blocking location, since the main thread isn't completely blocked.
+        /// </summary>
+        /// <remarks>
+        /// See https://docs.sentry.io/platforms/apple/configuration/app-hangs/#app-hangs-v2
+        /// </remarks>
+        public bool EnableAppHangTrackingV2 { get; set; } = false;
+
+        /// <summary>
         /// When enabled, the SDK adds breadcrumbs for various system events.
         /// The default value is <c>true</c> (enabled).
         /// </summary>
@@ -126,13 +145,16 @@ public partial class SentryOptions
         public bool EnableNetworkTracking { get; set; } = true;
 
         /// <summary>
-        /// Whether to enable watchdog termination tracking or not.
-        /// The default value is <c>true</c> (enabled).
+        /// Whether to enable watchdog termination tracking or not. NOT advised.
+        /// The default value is <c>false</c> (disabled).
         /// </summary>
         /// <remarks>
-        /// https://docs.sentry.io/platforms/apple/configuration/watchdog-terminations/
+        /// This feature is prone to false positives on .NET since it relies on heuristics that don't work in this environment.
         /// </remarks>
-        public bool EnableWatchdogTerminationTracking { get; set; } = true;
+        /// <seealso href="https://github.com/getsentry/sentry-dotnet/issues/3860" />
+        /// <seealso href="https://docs.sentry.io/platforms/apple/configuration/watchdog-terminations/" />
+        [Obsolete("See: https://github.com/getsentry/sentry-dotnet/issues/3860")]
+        public bool EnableWatchdogTerminationTracking { get; set; } = false;
 
         /// <summary>
         /// Whether the SDK should use swizzling or not.
@@ -175,6 +197,37 @@ public partial class SentryOptions
         /// </remarks>
         public NSUrlSessionDelegate? UrlSessionDelegate { get; set; } = null;
 
+        /// <summary>
+        /// <para>
+        /// Whether to suppress capturing SIGABRT errors in the Native SDK.
+        /// </para>
+        /// <para>
+        /// When managed code results in a NullReferenceException, this also causes a SIGABRT. Duplicate
+        /// events (one managed and one native) can be prevented by suppressing native SIGABRT, which may be
+        /// convenient.
+        /// </para>
+        /// <para>
+        /// Enabling this may prevent the capture of SIGABRT originating from native (not managed) code... so it may
+        /// prevent the capture of genuine native SIGABRT errors.
+        /// </para>
+        /// </summary>
+        public bool SuppressSignalAborts { get; set; } = false;
+
+        /// <summary>
+        /// <para>
+        /// Whether to suppress capturing EXC_BAD_ACCESS errors in the Native SDK.
+        /// </para>
+        /// <para>
+        /// When managed code results in a NullReferenceException, this also causes a EXC_BAD_ACCESS. Duplicate
+        /// events (one managed and one native) can be prevented by suppressing native EXC_BAD_ACCESS, which may be
+        /// convenient.
+        /// </para>
+        /// <para>
+        /// Enabling this may prevent the capture of EXC_BAD_ACCESS originating from native (not managed) code... so it may
+        /// prevent the capture of genuine native EXC_BAD_ACCESS errors.
+        /// </para>
+        /// </summary>
+        public bool SuppressExcBadAccess { get; set; } = false;
 
         // ---------- Other ----------
 
@@ -214,5 +267,39 @@ public partial class SentryOptions
             InAppIncludes ??= new List<string>();
             InAppIncludes.Add(prefix);
         }
+    }
+
+    // We actually add the profiling integration automatically in InitSentryCocoaSdk().
+    // However, if user calls AddProfilingIntegration() multiple times, we print a warning, as usual.
+    private bool _profilingIntegrationAddedByUser = false;
+
+    /// <summary>
+    /// Adds ProfilingIntegration to Sentry.
+    /// </summary>
+    /// <param name="startupTimeout">
+    /// Unused, only here so that the signature is the same as AddProfilingIntegration() from package Sentry.Profiling.
+    /// </param>
+    public void AddProfilingIntegration(TimeSpan startupTimeout = default)
+    {
+        if (HasIntegration<ProfilingIntegration>())
+        {
+            if (_profilingIntegrationAddedByUser)
+            {
+                DiagnosticLogger?.LogWarning($"{nameof(ProfilingIntegration)} has already been added. The second call to {nameof(AddProfilingIntegration)} will be ignored.");
+            }
+            return;
+        }
+
+        _profilingIntegrationAddedByUser = true;
+        AddIntegration(new ProfilingIntegration());
+    }
+
+    /// <summary>
+    /// Disables the Profiling integration.
+    /// </summary>
+    public void DisableProfilingIntegration()
+    {
+        _profilingIntegrationAddedByUser = false;
+        RemoveIntegration<ProfilingIntegration>();
     }
 }

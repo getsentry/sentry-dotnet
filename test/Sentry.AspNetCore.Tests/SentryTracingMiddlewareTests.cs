@@ -1,4 +1,3 @@
-#if NETCOREAPP3_1_OR_GREATER
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -285,6 +284,7 @@ public class SentryTracingMiddlewareTests
         const string incomingBaggage =
             "sentry-trace_id=75302ac48a024bde9a3b3734a82e36c8, " +
             "sentry-public_key=d4d82fc1c2c4032a83f3a29aa3a3aff, " +
+            "sentry-sample_rand=0.1234, " +
             "sentry-sample_rate=0.5, " +
             "foo-bar=abc123";
 
@@ -299,6 +299,7 @@ public class SentryTracingMiddlewareTests
                 "other-value=abc123, " +
                 "sentry-trace_id=75302ac48a024bde9a3b3734a82e36c8, " +
                 "sentry-public_key=d4d82fc1c2c4032a83f3a29aa3a3aff, " +
+                "sentry-sample_rand=0.1234, " +
                 "sentry-sample_rate=0.5";
         }
         else
@@ -382,6 +383,7 @@ public class SentryTracingMiddlewareTests
         const string baggage =
             "sentry-trace_id=75302ac48a024bde9a3b3734a82e36c8, " +
             "sentry-public_key=d4d82fc1c2c4032a83f3a29aa3a3aff, " +
+            "sentry-sample_rand=0.1234, " +
             "sentry-sample_rate=0.5";
 
         // Arrange
@@ -677,5 +679,3 @@ public class SentryTracingMiddlewareTests
         transaction.NameSource.Should().Be(TransactionNameSource.Url);
     }
 }
-
-#endif

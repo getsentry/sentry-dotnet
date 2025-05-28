@@ -1,6 +1,5 @@
 namespace Sentry.Tests.Protocol;
 
-[UsesVerify]
 public class ProfilerTests
 {
     private readonly IDiagnosticLogger _testOutputLogger;

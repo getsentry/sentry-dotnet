@@ -25,6 +25,8 @@ internal class TransactionContextFacade : ITransactionContext
 
     public string Operation => _context.Operation;
 
+    public string? Origin => _context.Origin;
+
     public string Description => _context.Description;
 
     // Note: SentrySpanContext.Status was removed from the Cocoa SDK in 8.0.0

@@ -5,7 +5,8 @@ using Sentry.Internal.OpenTelemetry;
 namespace Sentry;
 
 /// <summary>
-/// Special HTTP message handler that can be used to propagate Sentry headers and other contextual information.
+/// Special HTTP message handler that can be used to propagate Sentry headers and other contextual information. Will
+/// also create events for failed requests if <see cref="SentryOptions.CaptureFailedRequests"/> is enabled.
 /// </summary>
 public class SentryHttpMessageHandler : SentryMessageHandler
 {

@@ -1,20 +1,338 @@
 # Changelog
 
-## Unreleased
+## 5.8.1
+
+### Fixes
+
+- Revert W3C traceparent support ([#4204](https://github.com/getsentry/sentry-dotnet/pull/4204))
+- Support musl on Linux ([#4188](https://github.com/getsentry/sentry-dotnet/pull/4188))
+- Support for Windows ARM64 with Native AOT ([#4187](https://github.com/getsentry/sentry-dotnet/pull/4187))
+- Addressed potential performance issue with Sentry.Maui ([#4219](https://github.com/getsentry/sentry-dotnet/pull/4219))
+- Respect `SentryNative=false` at runtime ([#4220](https://github.com/getsentry/sentry-dotnet/pull/4220))
+
+## 5.8.0
 
 ### Features
 
-- Make `Sentry.AspNetCore.Blazor.WebAssembly` generally available. ([#3674](https://github.com/getsentry/sentry-dotnet/pull/3674))
+- .NET MAUI integration with CommunityToolkit.Mvvm Async Relay Commands can now be auto spanned with the new package Sentry.Maui.CommunityToolkit.Mvvm ([#4125](https://github.com/getsentry/sentry-dotnet/pull/4125))
+
+### Fixes
+
+- Revert "Bump Cocoa SDK from v8.39.0 to v8.46.0 (#4103)" ([#4202](https://github.com/getsentry/sentry-dotnet/pull/4202))
+  - IMPORTANT: Fixes multiple issues running versions 5.6.x and 5.7.x of the Sentry SDK for .NET on iOS (initialising the SDK and sending data to Sentry) 
+
+### Dependencies
+
+- Bump Native SDK from v0.8.4 to v0.8.5 ([#4189](https://github.com/getsentry/sentry-dotnet/pull/4189))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#085)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.8.4...0.8.5)
+
+## 5.7.0
+
+### Features
+
+- New source generator allows Sentry to see true build variables like PublishAot and PublishTrimmed to properly adapt checks in the Sentry SDK ([#4101](https://github.com/getsentry/sentry-dotnet/pull/4101))
+- Auto breadcrumbs now include all .NET MAUI gesture recognizer events ([#4124](https://github.com/getsentry/sentry-dotnet/pull/4124))
+- Associate replays with errors and traces on Android ([#4133](https://github.com/getsentry/sentry-dotnet/pull/4133))
+
+### Fixes
+
+- Redact Authorization headers before sending events to Sentry ([#4164](https://github.com/getsentry/sentry-dotnet/pull/4164))
+- Remove Strong Naming from Sentry.Hangfire ([#4099](https://github.com/getsentry/sentry-dotnet/pull/4099))
+- Increase `RequestSize.Small` threshold from 1 kB to 4 kB to match other SDKs ([#4177](https://github.com/getsentry/sentry-dotnet/pull/4177))
+
+### Dependencies
+
+- Bump CLI from v2.43.1 to v2.45.0 ([#4169](https://github.com/getsentry/sentry-dotnet/pull/4169), [#4179](https://github.com/getsentry/sentry-dotnet/pull/4179))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2450)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.43.1...2.45.0)
+
+## 5.7.0-beta.0
+
+### Features
+
+- When setting a transaction on the scope, the SDK will attempt to sync the transaction's trace context with the SDK on the native layer. Finishing a transaction will now also start a new trace ([#4153](https://github.com/getsentry/sentry-dotnet/pull/4153))
+- Added `CaptureFeedback` overload with `configureScope` parameter ([#4073](https://github.com/getsentry/sentry-dotnet/pull/4073))
+- Custom SessionReplay masks in MAUI Android apps ([#4121](https://github.com/getsentry/sentry-dotnet/pull/4121))
+
+### Fixes
+
+- Work around iOS SHA1 bug ([#4143](https://github.com/getsentry/sentry-dotnet/pull/4143))
+- Prevent Auto Breadcrumbs Event Binder from leaking and rebinding events  ([#4159](https://github.com/getsentry/sentry-dotnet/pull/4159))
+- Fixes build error when building .NET Framework applications using Sentry 5.6.0: `MSB4185 :The function "IsWindows" on type "System.OperatingSystem" is not available` ([#4160](https://github.com/getsentry/sentry-dotnet/pull/4160))
+- Added a `SentrySetCommitReleaseOptions` build property that can be specified separately from `SentryReleaseOptions` ([#4109](https://github.com/getsentry/sentry-dotnet/pull/4109))
+
+### Dependencies
+
+- Bump CLI from v2.43.0 to v2.43.1 ([#4151](https://github.com/getsentry/sentry-dotnet/pull/4151))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2431)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.43.0...2.43.1)
+
+## 5.6.0
+
+### Features
+
+- Option to disable the SentryNative integration ([#4107](https://github.com/getsentry/sentry-dotnet/pull/4107), [#4134](https://github.com/getsentry/sentry-dotnet/pull/4134))
+  - To disable it, add this msbuild property: `<SentryNative>false</SentryNative>`
+- Reintroduced experimental support for Session Replay on Android ([#4097](https://github.com/getsentry/sentry-dotnet/pull/4097))
+- If an incoming HTTP request has the `traceparent` header, it is now parsed and interpreted like the `sentry-trace` header. Outgoing requests now contain the `traceparent` header to facilitate integration with servesr that only support the [W3C Trace Context](https://www.w3.org/TR/trace-context/). ([#4084](https://github.com/getsentry/sentry-dotnet/pull/4084))
+
+### Fixes
+
+- Ensure user exception data is not removed by AspNetCoreExceptionProcessor ([#4016](https://github.com/getsentry/sentry-dotnet/pull/4106))
+- Prevent users from disabling AndroidEnableAssemblyCompression which leads to untrappable crash ([#4089](https://github.com/getsentry/sentry-dotnet/pull/4089))
+- Fixed MSVCRT build warning on Windows ([#4111](https://github.com/getsentry/sentry-dotnet/pull/4111))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.39.0 to v8.46.0 ([#4103](https://github.com/getsentry/sentry-dotnet/pull/4103))
+    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8460)
+    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.46.0)
+- Bump Native SDK from v0.8.3 to v0.8.4 ([#4122](https://github.com/getsentry/sentry-dotnet/pull/4122))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#084)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.8.3...0.8.4)
+
+## 5.5.1
+
+### Fixes
+
+- Fix UWP Net Native compilation ([#4085](https://github.com/getsentry/sentry-dotnet/pull/4085))
+- Sentry Java SDK dependencies are now detected and included in the Android bindings ([#4079](https://github.com/getsentry/sentry-dotnet/pull/4079))
+
+## 5.5.0
+
+### Features
+
+- The `IScopeObserver` now has an `SetTrace` that allows observing changes to the scope's trace context. The SDK uses this to propagate the `trace ID` to `sentry-native`. This allows Sentry to connect errors coming from all layers of your application ([#4026](https://github.com/getsentry/sentry-dotnet/pull/4026))
+- Exception.HResult is now included in the mechanism data for all exceptions ([#4029](https://github.com/getsentry/sentry-dotnet/pull/4029))
+
+### Dependencies
+
+- Bump Native SDK from v0.8.2 to v0.8.3 [#4072](https://github.com/getsentry/sentry-dotnet/pull/4072))
+    - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#083)
+    - [diff](https://github.com/getsentry/sentry-native/compare/0.8.2...0.8.3)
+
+### Fixes
+
+- Fixed symbolication and source context for net9.0-android ([#4033](https://github.com/getsentry/sentry-dotnet/pull/4033))
+- Single quotes added to the release name when using MS Build to create Sentry releases on Windows ([#4015](https://github.com/getsentry/sentry-dotnet/pull/4015))
+- Target `net9.0` on Sentry.Google.Cloud.Functions to avoid conflict with Sentry.AspNetCore ([#4039](https://github.com/getsentry/sentry-dotnet/pull/4039))
+- Changed default value for `SentryOptions.EnableAppHangTrackingV2` to `false` ([#4042](https://github.com/getsentry/sentry-dotnet/pull/4042))
+- Missing MAUI `Shell` navigation breadcrumbs on iOS ([#4006](https://github.com/getsentry/sentry-dotnet/pull/4006))
+- Prevent application crashes when capturing screenshots on iOS ([#4069](https://github.com/getsentry/sentry-dotnet/pull/4069))
+
+### Dependencies
+
+- Bump Native SDK from v0.8.1 to v0.8.2 ([#4050](https://github.com/getsentry/sentry-dotnet/pull/4050)
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#082)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.8.1...0.8.2)
+- Bump CLI from v2.42.2 to v2.43.0 ([#4036](https://github.com/getsentry/sentry-dotnet/pull/4036), [#4049](https://github.com/getsentry/sentry-dotnet/pull/4049), [#4060](https://github.com/getsentry/sentry-dotnet/pull/4060), [#4062](https://github.com/getsentry/sentry-dotnet/pull/4062))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2430)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.42.2...2.43.0)
+- Bump Java SDK from v7.20.1 to v8.6.0 ([#4075](https://github.com/getsentry/sentry-dotnet/pull/4075))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#860)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.20.1...8.6.0)
+
+## 5.4.0
+
+### Enhancements
+
+- Profiling: improve performance by subscribing only to necessary CLR events ([#3970](https://github.com/getsentry/sentry-dotnet/pull/3970))
+
+### Fixes
+
+- Unknown stack frames in profiles on .NET 8+ ([#3967](https://github.com/getsentry/sentry-dotnet/pull/3967))
+
+## 5.3.0
+
+### Features
+
+- User Feedback can now be captured without errors/exceptions. Note that these APIs replace the older UserFeedback APIs, which have now been marked as obsolete (and will be removed in a future major version bump) ([#3981](https://github.com/getsentry/sentry-dotnet/pull/3981))
+
+### Fixes
+
+- Using SentryOptions.Native.SuppressExcBadAccess and SentryOptions.Native.SuppressSignalAborts, users can now block duplicate errors from native due to dotnet NullReferenceExceptions - Defaults to false ([#3998](https://github.com/getsentry/sentry-dotnet/pull/3998))
+- Native iOS events are now exposed to the dotnet layer for users to hook through SentryOptions.BeforeSend and SentryOptions.OnCrashedLastRun ([#2102](https://github.com/getsentry/sentry-dotnet/pull/3958))
+- Prevent crashes from occurring on Android during OnBeforeSend ([#4022](https://github.com/getsentry/sentry-dotnet/pull/4022))
+
+### Dependencies
+
+- Bump Native SDK from v0.8.0 to v0.8.1 ([#4014](https://github.com/getsentry/sentry-dotnet/pull/4014))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#081)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.8.0...0.8.1)
+
+## 5.2.0
+
+### Features
+
+- Users can now register their own MAUI controls for breadcrumb creation ([#3997](https://github.com/getsentry/sentry-dotnet/pull/3997))
+- Serilog scope properties are now sent with Sentry events ([#3976](https://github.com/getsentry/sentry-dotnet/pull/3976))
+- The sample seed used for sampling decisions is now propagated, for use in downstream custom trace samplers ([#3951](https://github.com/getsentry/sentry-dotnet/pull/3951))
+- Add Azure Function UseSentry overloads for easier wire ups  ([#3971](https://github.com/getsentry/sentry-dotnet/pull/3971))
+
+### Fixes
+
+- Fix mismapped breadcrumb levels coming in from native to dotnet SDK ([#3993](https://github.com/getsentry/sentry-dotnet/pull/3993))
+- Deduplicate profiling stack frames ([#3969](https://github.com/getsentry/sentry-dotnet/pull/3969))
+
+### Dependencies
+
+- Bump CLI from v2.41.1 to v2.42.2 ([#3979](https://github.com/getsentry/sentry-dotnet/pull/3979), [#4002](https://github.com/getsentry/sentry-dotnet/pull/4002))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2422)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.41.1...2.42.2)
+- Bump Native SDK from v0.7.20 to v0.8.0 ([#4003](https://github.com/getsentry/sentry-dotnet/pull/4003))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#080)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.20...0.8.0)
+
+## 5.1.1
+
+### Fixes
+
+- Emit transaction.data inside contexts.trace.data ([#3936](https://github.com/getsentry/sentry-dotnet/pull/3936))
+- Native SIGSEGV errors resulting from managed NullReferenceExceptions are now suppressed on Android ([#3903](https://github.com/getsentry/sentry-dotnet/pull/3903))
+- OTel activities that are marked as not recorded are no longer sent to Sentry ([#3890](https://github.com/getsentry/sentry-dotnet/pull/3890))
+- Fixed envelopes with oversized attachments getting stuck in __processing ([#3938](https://github.com/getsentry/sentry-dotnet/pull/3938))
+- OperatingSystem will now return macOS as OS name instead of 'Darwin' as well as the proper version. ([#2710](https://github.com/getsentry/sentry-dotnet/pull/3956))
+- Ignore null value on CocoaScopeObserver.SetTag ([#3948](https://github.com/getsentry/sentry-dotnet/pull/3948))
+
+## 5.1.0
+
+### Significant change in behavior
+- The User.IpAddress is now only set to `{{auto}}` when `SendDefaultPii` is enabled. This change gives you control over IP address collection directly on the client ([#3893](https://github.com/getsentry/sentry-dotnet/pull/3893))
+
+### Features
+
+- .NET on iOS: Add experimental EnableAppHangTrackingV2 configuration flag to the options binding SDK ([#3877](https://github.com/getsentry/sentry-dotnet/pull/3877))
+- Added `SentryOptions.DisableSentryHttpMessageHandler`. Useful if you're using `OpenTelemetry.Instrumentation.Http` and ending up with duplicate spans. ([#3879](https://github.com/getsentry/sentry-dotnet/pull/3879))
+
+### Dependencies
+
+- Bump Native SDK from v0.7.17 to v0.7.18 ([#3891](https://github.com/getsentry/sentry-dotnet/pull/3891))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0718)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.17...0.7.18)
+### Fixes
+
+- Prevent Native EXC_BAD_ACCESS signal errors from being captured when managed NullRefrenceExceptions occur ([#3909](https://github.com/getsentry/sentry-dotnet/pull/3909))
+- Fixed duplicate SentryMauiEventProcessors ([#3905](https://github.com/getsentry/sentry-dotnet/pull/3905))
+- Fixed invalid string.Format index in Debug logs for the DiagnosticSource integration ([#3923](https://github.com/getsentry/sentry-dotnet/pull/3923))
+
+### Dependencies
+
+- Bump Native SDK from v0.7.17 to v0.7.20 ([#3891](https://github.com/getsentry/sentry-dotnet/pull/3891), [#3908](https://github.com/getsentry/sentry-dotnet/pull/3908), [#3929](https://github.com/getsentry/sentry-dotnet/pull/3929))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0720)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.17...0.7.20)
+- Bump Java SDK from v7.20.0 to v7.20.1 ([#3907](https://github.com/getsentry/sentry-dotnet/pull/3907))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7201)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.20.0...7.20.1)
+- Bump CLI from v2.40.0 to v2.41.1 ([#3910](https://github.com/getsentry/sentry-dotnet/pull/3910))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2411)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.40.0...2.41.1)
+
+## 5.0.1
+
+### Fixes
+
+- .NET Mobile: Disable and made obsolete the iOS Watchdog termination feature which is based on heuristics that don't work in .NET ([#3867](https://github.com/getsentry/sentry-dotnet/pull/3867))
+- .NET on Android: NullReferenceException handled by Mono cause the app to crash (PR #3694) ([#3871](https://github.com/getsentry/sentry-dotnet/pull/3871))
+
+### Dependencies
+
+- Bump Native SDK from v0.7.16 to v0.7.17 ([#3857](https://github.com/getsentry/sentry-dotnet/pull/3857))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0717)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.16...0.7.17)
+- Bump Java SDK from v7.19.0 to v7.20.0 ([#3866](https://github.com/getsentry/sentry-dotnet/pull/3866))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7200)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.19.0...7.20.0)
+- Bump CLI from v2.39.1 to v2.40.0 ([#3869](https://github.com/getsentry/sentry-dotnet/pull/3869))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2400)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.39.1...2.40.0)
+
+## 5.0.0
+
+### API Changes
+
+- Removed net6.0 and net7.0 TFMs as Microsoft has stopped supporting both of these now. If you need to target net6.0 or net7.0 then we recommend using version 4.x of the .NET SDK for Sentry. ([#3807](https://github.com/getsentry/sentry-dotnet/pull/3807))
+- Sentry's Experimental Metrics feature has been deprecated and removed from the SDK. ([#3718](https://github.com/getsentry/sentry-dotnet/pull/3718))
+- `SentryOptions.EnableTracing` has been removed. Instead, tracing should be enabled or disabled by setting the `SentryOptions.TracesSampleRate` or by using `SentryOptions.TracesSampler` to configure a sampling function ([#3569](https://github.com/getsentry/sentry-dotnet/pull/3569))
+- Temporarily removed experimental Session Replay support ([#3827](https://github.com/getsentry/sentry-dotnet/pull/3827))
+- You should no longer pass `AndroidContext` as an argument to `SentrySdk.Init` ([#3562](https://github.com/getsentry/sentry-dotnet/pull/3562))
+- The `SentryUser.Segment` property has been deprecated. Consider sending this as a tag or additional data instead ([#3563](https://github.com/getsentry/sentry-dotnet/pull/3563))
+- The ITraceContext now includes an [Origin](https://develop.sentry.dev/sdk/telemetry/traces/trace-origin/), which is set automatically and is primarily used internally by the Sentry server ([#3564](https://github.com/getsentry/sentry-dotnet/pull/3564))
+- `Device.BatteryLevel` and `Device.ProcessorFrequency` are now stored as floats rather than ints, to align with the Cocoa and Java SDKs ([#3567](https://github.com/getsentry/sentry-dotnet/pull/3567))
+- The `FailedRequestTargets`, `TagFilters` and `TracePropagationTargets` options have all been changed from `SubstringOrRegexPattern` to `IList<StringOrRegex>` ([#3566](https://github.com/getsentry/sentry-dotnet/pull/3566))
+- `Scope.Transaction` is now always stored as an `AsyncLocal` also in [Global Mode](https://docs.sentry.io/platforms/dotnet/configuration/options/#is-global-mode-enabled), to prevent auto-instrumented spans from the UI ending up parented to transactions from a background task (or vice versa). ([#3596](https://github.com/getsentry/sentry-dotnet/pull/3596))
+
+### Features
+- Added support for `.NET 9` ([#3699](https://github.com/getsentry/sentry-dotnet/pull/3699))
+- Heap dumps can be captured automatically when memory usage exceeds a configurable threshold. Note that this API is still experimental and may change based on user feedback. ([#3667](https://github.com/getsentry/sentry-dotnet/pull/3667))
+- libsentrysupplemental.so now supports 16 KB page sizes on Android ([#3723](https://github.com/getsentry/sentry-dotnet/pull/3723))
+- Added `SentryOptions` extension for profiling: `options.AddProfilingIntegration()` ([#3660](https://github.com/getsentry/sentry-dotnet/pull/3660))
+
+### Fixes
+- Address Trim warnings to enable AOT support, including support for MAUI specifically. ([#3841](https://github.com/getsentry/sentry-dotnet/pull/3841))
+- Fixed JNI Error when accessing Android device data from multiple threads ([#3802](https://github.com/getsentry/sentry-dotnet/pull/3802))
+- Android - fix bug that prevents logcat.log from getting attached to unhandled events (SIGSEGV Segfault) ([#3694](https://github.com/getsentry/sentry-dotnet/pull/3694))
+- Fixed ArgumentNullException in FormRequestPayloadExtractor when handling invalid form data on ASP.NET ([#3734](https://github.com/getsentry/sentry-dotnet/pull/3734))
+- Fixed NullReferenceException in SentryTraceHeader when parsing null or empty values ([#3757](https://github.com/getsentry/sentry-dotnet/pull/3757))
+- Fix "System.ArgumentOutOfRangeException: Specified argument was out of the range of valid values. (Parameter 'idData')" error propagating OpenTelemetry span ids ([#3850](https://github.com/getsentry/sentry-dotnet/pull/3850))
+- ArgumentNullException in FormRequestPayloadExtractor when handling invalid form data on ASP.NET ([#3734](https://github.com/getsentry/sentry-dotnet/pull/3734))
+- Fixed crash when using NLog with FailedRequestStatusCodes options in a Maui app with Trimming enabled ([#3743](https://github.com/getsentry/sentry-dotnet/pull/3743))
+
+### Dependencies
+
+- Bump CLI from v2.38.2 to v2.39.1 ([#3782](https://github.com/getsentry/sentry-dotnet/pull/3782)) ([#3799](https://github.com/getsentry/sentry-dotnet/pull/3799))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2391)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.38.2...2.39.1)
+- Bump Java SDK from v7.16.0 to v7.19.0 ([#3749](https://github.com/getsentry/sentry-dotnet/pull/3749), [#3771](https://github.com/getsentry/sentry-dotnet/pull/3771)) ([#3805](https://github.com/getsentry/sentry-dotnet/pull/3805), [#3844](https://github.com/getsentry/sentry-dotnet/pull/3844))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7190)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.16.0...7.19.0)
+- Bump Cocoa SDK from v8.36.0 to v8.39.0 ([#3727](https://github.com/getsentry/sentry-dotnet/pull/3727))
+    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8390)
+    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.36.0...8.39.0)
+- Bump Native SDK from v0.7.11 to v0.7.16 ([#3731](https://github.com/getsentry/sentry-dotnet/pull/3731), [#3770](https://github.com/getsentry/sentry-dotnet/pull/3770), [#3775](https://github.com/getsentry/sentry-dotnet/pull/3775), [#3779](https://github.com/getsentry/sentry-dotnet/pull/3779)) ([#3825](https://github.com/getsentry/sentry-dotnet/pull/3825))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0716)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.11...0.7.16)
+
+## 4.13.0
+
+### Features
+
+- Limited experimental support for Session Replay Recording on Android ([#3552](https://github.com/getsentry/sentry-dotnet/pull/3552))
+
+### Fixes
+
+- When using OTel and ASP.NET Core the SDK could try to process OTel spans after the SDK had been closed ([#3726](https://github.com/getsentry/sentry-dotnet/pull/3726))
+
+### Dependencies
+
+- Bump CLI from v2.38.1 to v2.38.2 ([#3728](https://github.com/getsentry/sentry-dotnet/pull/3728))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2382)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.38.1...2.38.2)
+
+## 4.12.2
 
 ### Fixes
 
 - Events from NDK on Android will report sdk.name `sentry.native.android.dotnet` ([#3682](https://github.com/getsentry/sentry-dotnet/pull/3682))
 
+### Features
+
+- Android - allow logcat attachments to be previewed in Sentry ([#3711](https://github.com/getsentry/sentry-dotnet/pull/3711))
+- Added a `SetBeforeScreenshotCapture` callback to the options: allowing the user to set an action before the screenshot is taken ([#3661](https://github.com/getsentry/sentry-dotnet/pull/3661))
+- Make `Sentry.AspNetCore.Blazor.WebAssembly` generally available. ([#3674](https://github.com/getsentry/sentry-dotnet/pull/3674))
+
 ### Dependencies
 
-- Bump Java SDK from v7.14.0 to v7.15.0 ([#3670](https://github.com/getsentry/sentry-dotnet/pull/3670))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7150)
-  - [diff](https://github.com/getsentry/sentry-java/compare/7.14.0...7.15.0)
+- Bump Java SDK from v7.14.0 to v7.16.0 ([#3670](https://github.com/getsentry/sentry-dotnet/pull/3670), [#3707](https://github.com/getsentry/sentry-dotnet/pull/3707))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#7160)
+  - [diff](https://github.com/getsentry/sentry-java/compare/7.14.0...7.16.0)
+- Bump CLI from v2.37.0 to v2.38.1 ([#3702](https://github.com/getsentry/sentry-dotnet/pull/3702), [#3720](https://github.com/getsentry/sentry-dotnet/pull/3720))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2381)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.37.0...2.38.1)
+- Bumped `System.Text.Json` from v6.0.8 to v6.0.10 ([#3704](https://github.com/getsentry/sentry-dotnet/pull/3704))
+- Bump Native SDK from v0.7.10 to v0.7.11 ([#3715](https://github.com/getsentry/sentry-dotnet/pull/3715))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0711)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.10...0.7.11)
 
 ## 4.12.1
 

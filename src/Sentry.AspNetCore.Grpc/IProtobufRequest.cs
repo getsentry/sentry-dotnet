@@ -8,10 +8,10 @@ public interface IProtobufRequest<TRequest>
     /// <summary>
     /// The content length.
     /// </summary>
-    long? ContentLength { get; }
+    public long? ContentLength { get; }
 
     /// <summary>
     /// The request message.
     /// </summary>
-    TRequest Request { get; }
+    public TRequest Request { get; }
 }

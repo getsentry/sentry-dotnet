@@ -1,6 +1,5 @@
 namespace Sentry.Tests.Protocol.Context;
 
-[UsesVerify]
 public class ContextCopyTests
 {
     [Fact]

@@ -32,6 +32,7 @@ public abstract class BaseRequestPayloadExtractorTests<TExtractor>
     {
         const int originalPosition = 100;
         _ = TestFixture.Stream.Position.Returns(originalPosition);
+        TestFixture.HttpRequestCore.ContentType.Returns(SupportedContentType);
 
         var sut = TestFixture.GetSut();
 
@@ -39,6 +40,8 @@ public abstract class BaseRequestPayloadExtractorTests<TExtractor>
 
         TestFixture.Stream.Received().Position = originalPosition;
     }
+
+    protected abstract string SupportedContentType { get; }
 
     [Fact]
     public void ExtractPayload_OriginalStream_NotClosed()

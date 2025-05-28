@@ -8,25 +8,30 @@ public interface IScopeObserver
     /// <summary>
     /// Adds a breadcrumb.
     /// </summary>
-    void AddBreadcrumb(Breadcrumb breadcrumb);
+    public void AddBreadcrumb(Breadcrumb breadcrumb);
 
     /// <summary>
     /// Sets an extra.
     /// </summary>
-    void SetExtra(string key, object? value);
+    public void SetExtra(string key, object? value);
 
     /// <summary>
     /// Sets a tag.
     /// </summary>
-    void SetTag(string key, string value);
+    public void SetTag(string key, string value);
 
     /// <summary>
     /// Removes a tag.
     /// </summary>
-    void UnsetTag(string key);
+    public void UnsetTag(string key);
 
     /// <summary>
     /// Sets the user information.
     /// </summary>
-    void SetUser(SentryUser? user);
+    public void SetUser(SentryUser? user);
+
+    /// <summary>
+    /// Sets the current trace
+    /// </summary>
+    public void SetTrace(SentryId traceId, SpanId parentSpanId);
 }

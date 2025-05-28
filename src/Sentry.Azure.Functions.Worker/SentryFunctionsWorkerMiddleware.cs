@@ -81,7 +81,8 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
         }
     }
 
-    [UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = AotHelper.SuppressionJustification)]
+    [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
+    [UnconditionalSuppressMessage("Trimming", "IL2075: DynamicallyAccessedMembers", Justification = AotHelper.AvoidAtRuntime)]
     private async Task<TransactionContext> StartOrContinueTraceAsync(FunctionContext context)
     {
         var transactionName = context.FunctionDefinition.Name;
@@ -101,7 +102,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
         // attribute. In that case the route name will always be /api/<FUNCTION_NAME>
         // If this is ever a problem for customers, we can potentially see if there are alternate ways to get this info
         // from route tables or something. We're not even sure if anyone will use this functionality for now though.
-        if (!AotHelper.IsNativeAot && !TransactionNameCache.TryGetValue(transactionNameKey, out transactionName))
+        if (!AotHelper.IsTrimmed && !TransactionNameCache.TryGetValue(transactionNameKey, out transactionName))
         {
             // Find the HTTP Trigger attribute via reflection
             var assembly = Assembly.LoadFrom(context.FunctionDefinition.PathToAssembly);

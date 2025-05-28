@@ -81,7 +81,7 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
             output.Seek(0, SeekOrigin.Begin);
             var bytes = output.ToArray();
 
-            hint.Attachments.Add(new SentryAttachment(AttachmentType.Default, new ByteAttachmentContent(bytes), "logcat.log", "text/logcat"));
+            hint.Attachments.Add(new SentryAttachment(AttachmentType.Default, new ByteAttachmentContent(bytes), "logcat.log", "text/plain"));
 
             //hint.AddAttachment($"{filesDir.Path}/{fileName}", AttachmentType.Default, "text/logcat");
 

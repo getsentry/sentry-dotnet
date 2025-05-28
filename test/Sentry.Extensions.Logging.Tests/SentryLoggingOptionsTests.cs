@@ -5,10 +5,6 @@ namespace Sentry.Extensions.Logging.Tests;
 
 public class SentryLoggingOptionsTests : BindableTests<SentryLoggingOptions>
 {
-    public SentryLoggingOptionsTests() : base(nameof(SentryLoggingOptions.ExperimentalMetrics))
-    {
-    }
-
     [Fact]
     public void BindableProperties_MatchOptionsProperties()
     {

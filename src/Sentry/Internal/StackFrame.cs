@@ -6,7 +6,7 @@ namespace Sentry.Internal;
 /// </summary>
 internal interface IStackFrame
 {
-    StackFrame? Frame { get; }
+    public StackFrame? Frame { get; }
 
     /// <summary>
     /// Returns a pointer to the base address of the native image that this stack frame is executing.
@@ -109,13 +109,11 @@ internal class RealStackFrame : IStackFrame
 
     public int GetILOffset() => _frame.GetILOffset();
 
-    [UnconditionalSuppressMessage("Trimming",
-        "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code",
-        Justification = AotHelper.SuppressionJustification)]
+    [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
     public MethodBase? GetMethod()
     {
 #pragma warning disable 0162 // Unreachable code on old .NET frameworks
-        return AotHelper.IsNativeAot ? null : _frame.GetMethod();
+        return AotHelper.IsTrimmed ? null : _frame.GetMethod();
 #pragma warning restore 0162
     }
 

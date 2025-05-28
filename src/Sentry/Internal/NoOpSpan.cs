@@ -5,7 +5,7 @@ namespace Sentry.Internal;
 /// <summary>
 /// Span class to use when we can't return null but a request to create a span couldn't be completed.
 /// </summary>
-internal class NoOpSpan : ISpan, ITraceContextInternal
+internal class NoOpSpan : ISpan
 {
     public static ISpan Instance { get; } = new NoOpSpan();
 
@@ -19,6 +19,7 @@ internal class NoOpSpan : ISpan, ITraceContextInternal
     public bool? IsSampled => default;
     public IReadOnlyDictionary<string, string> Tags => ImmutableDictionary<string, string>.Empty;
     public IReadOnlyDictionary<string, object?> Extra => ImmutableDictionary<string, object?>.Empty;
+    public IReadOnlyDictionary<string, object?> Data => ImmutableDictionary<string, object?>.Empty;
     public DateTimeOffset StartTimestamp => default;
     public DateTimeOffset? EndTimestamp => default;
     public bool IsFinished => default;
@@ -68,6 +69,10 @@ internal class NoOpSpan : ISpan, ITraceContextInternal
     }
 
     public void SetExtra(string key, object? value)
+    {
+    }
+
+    public void SetData(string key, object? value)
     {
     }
 

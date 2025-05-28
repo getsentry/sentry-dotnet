@@ -34,7 +34,7 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
                     span.Operation == Operation &&
                     TryGetCommandId(span) == commandId);
         }
-        Options.LogWarning("No correlation id found for {1}.", Operation);
+        Options.LogWarning("No correlation id found for {0}.", Operation);
         return null;
     }
 
@@ -49,6 +49,6 @@ internal class EFCommandDiagnosticSourceHelper : EFDiagnosticSourceHelper
             }
             return;
         }
-        Options.LogWarning("No correlation id can be set for {1}.", Operation);
+        Options.LogWarning("No correlation id can be set for {0}.", Operation);
     }
 }

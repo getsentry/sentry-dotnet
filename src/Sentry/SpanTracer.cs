@@ -85,10 +85,17 @@ public class SpanTracer : IBaseTracer, ISpan
     private readonly ConcurrentDictionary<string, object?> _data = new();
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _data;
+    public IReadOnlyDictionary<string, object?> Data => _data;
 
     /// <inheritdoc />
-    public void SetExtra(string key, object? value) => _data[key] = value;
+    public void SetData(string key, object? value) =>
+        _data[key] = value;
+
+    /// <inheritdoc />
+    public IReadOnlyDictionary<string, object?> Extra => Data;
+
+    /// <inheritdoc />
+    public void SetExtra(string key, object? value) => SetData(key, value);
 
     internal Func<bool>? IsFiltered { get; set; }
 

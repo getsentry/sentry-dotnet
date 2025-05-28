@@ -7,6 +7,8 @@
     public static class SentryFunctionsWorkerApplicationBuilderExtensions
     {
         public static Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder UseSentry(this Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder builder, Microsoft.Extensions.Hosting.HostBuilderContext context) { }
+        public static Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder UseSentry(this Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder builder, System.Action<Sentry.Azure.Functions.Worker.SentryAzureFunctionsOptions>? optionsConfiguration) { }
+        public static Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder UseSentry(this Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder builder, Microsoft.Extensions.Configuration.IConfiguration configuration, System.Action<Sentry.Azure.Functions.Worker.SentryAzureFunctionsOptions>? optionsConfiguration) { }
         public static Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder UseSentry(this Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder builder, Microsoft.Extensions.Hosting.HostBuilderContext context, System.Action<Sentry.Azure.Functions.Worker.SentryAzureFunctionsOptions>? optionsConfiguration) { }
         public static Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder UseSentry(this Microsoft.Azure.Functions.Worker.IFunctionsWorkerApplicationBuilder builder, Microsoft.Extensions.Hosting.HostBuilderContext context, string dsn) { }
     }

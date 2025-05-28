@@ -33,8 +33,7 @@
                 }
               },
               User: {
-                Id: Guid_3,
-                IpAddress: {{auto}}
+                Id: Guid_3
               },
               Environment: production
             }
@@ -75,8 +74,7 @@
                 }
               },
               User: {
-                Id: Guid_3,
-                IpAddress: {{auto}}
+                Id: Guid_3
               },
               Environment: production
             }

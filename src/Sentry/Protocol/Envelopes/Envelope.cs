@@ -248,31 +248,78 @@ public sealed class Envelope : ISerializable, IDisposable
                     continue;
                 }
 
-                try
-                {
-                    // We pull the stream out here so we can length check
-                    // to avoid adding an invalid attachment
-                    var stream = attachment.Content.GetStream();
-                    if (stream.TryGetLength() != 0)
-                    {
-                        items.Add(EnvelopeItem.FromAttachment(attachment, stream));
-                    }
-                    else
-                    {
-                        // We would normally dispose the stream when we dispose the envelope item
-                        // But in this case, we need to explicitly dispose here or we will be leaving
-                        // the stream open indefinitely.
-                        stream.Dispose();
-
-                        logger?.LogWarning("Did not add '{0}' to envelope because the stream was empty.",
-                            attachment.FileName);
-                    }
-                }
-                catch (Exception exception)
-                {
-                    logger?.LogError(exception, "Failed to add attachment: {0}.", attachment.FileName);
-                }
+                AddEnvelopeItemFromAttachment(items, attachment, logger);
             }
+        }
+
+        if (sessionUpdate is not null)
+        {
+            items.Add(EnvelopeItem.FromSession(sessionUpdate));
+        }
+
+        return new Envelope(eventId, header, items);
+    }
+
+    private static void AddEnvelopeItemFromAttachment(List<EnvelopeItem> items, SentryAttachment attachment,
+        IDiagnosticLogger? logger)
+    {
+        try
+        {
+            // We pull the stream out here so we can length check
+            // to avoid adding an invalid attachment
+            var stream = attachment.Content.GetStream();
+            if (stream.TryGetLength() != 0)
+            {
+                items.Add(EnvelopeItem.FromAttachment(attachment, stream));
+            }
+            else
+            {
+                // We would normally dispose the stream when we dispose the envelope item
+                // But in this case, we need to explicitly dispose here or we will be leaving
+                // the stream open indefinitely.
+                stream.Dispose();
+
+                logger?.LogWarning("Did not add '{0}' to envelope because the stream was empty.",
+                    attachment.FileName);
+            }
+        }
+        catch (Exception exception)
+        {
+            logger?.LogError(exception, "Failed to add attachment: {0}.", attachment.FileName);
+        }
+    }
+
+    /// <summary>
+    /// Creates an envelope that contains a single feedback event.
+    /// </summary>
+    public static Envelope FromFeedback(
+        SentryEvent @event,
+        IDiagnosticLogger? logger = null,
+        IReadOnlyCollection<SentryAttachment>? attachments = null,
+        SessionUpdate? sessionUpdate = null)
+    {
+        if (@event.Contexts.Feedback == null)
+        {
+            throw new ArgumentException("Unable to create envelope - the event does not contain any feedback.");
+        }
+
+        var eventId = @event.EventId;
+        var header = CreateHeader(eventId, @event.DynamicSamplingContext);
+
+        var items = new List<EnvelopeItem>
+        {
+            EnvelopeItem.FromFeedback(@event)
+        };
+
+        if (attachments is { Count: > 0 })
+        {
+            if (attachments.Count > 1)
+            {
+                logger?.LogWarning("Feedback can only contain one attachment. Discarding {0} additional attachments.",
+                    attachments.Count - 1);
+            }
+
+            AddEnvelopeItemFromAttachment(items, attachments.First(), logger);
         }
 
         if (sessionUpdate is not null)
@@ -286,6 +333,7 @@ public sealed class Envelope : ISerializable, IDisposable
     /// <summary>
     /// Creates an envelope that contains a single user feedback.
     /// </summary>
+    [Obsolete("Use FromFeedback instead.")]
     public static Envelope FromUserFeedback(UserFeedback sentryUserFeedback)
     {
         var eventId = sentryUserFeedback.EventId;

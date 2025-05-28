@@ -10,11 +10,6 @@ public static partial class SentrySdk
     private static void InitSentryCocoaSdk(SentryOptions options)
     {
         options.LogDebug("Initializing native SDK");
-        // Workaround for https://github.com/xamarin/xamarin-macios/issues/15252
-        ObjCRuntime.Runtime.MarshalManagedException += (_, args) =>
-        {
-            args.ExceptionMode = ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode;
-        };
 
         // Set default release and distribution
         options.Release ??= GetDefaultReleaseString();
@@ -75,13 +70,6 @@ public static partial class SentrySdk
         // These options we have behind feature flags
         if (options is { IsPerformanceMonitoringEnabled: true, Native.EnableTracing: true })
         {
-#pragma warning disable CS0618 // Type or member is obsolete
-            if (options.EnableTracing != null)
-            {
-                nativeOptions.EnableTracing = options.EnableTracing.Value;
-            }
-#pragma warning restore CS0618 // Type or member is obsolete
-
             nativeOptions.TracesSampleRate = options.TracesSampleRate;
 
             if (options.TracesSampler is { } tracesSampler)
@@ -98,29 +86,27 @@ public static partial class SentrySdk
             }
         }
 
-        // TODO: Finish SentryEventExtensions to enable these
+        nativeOptions.BeforeSend = evt => ProcessOnBeforeSend(options, evt)!;
 
-        // if (options.Native.EnableBeforeSend && options.BeforeSend is { } beforeSend)
-        // {
-        //     nativeOptions.BeforeSend = evt =>
-        //     {
-        //         var sentryEvent = evt.ToSentryEvent(nativeOptions);
-        //         var result = beforeSend(sentryEvent)?.ToCocoaSentryEvent(options, nativeOptions);
-        //
-        //         // Note: Nullable result is allowed but delegate is generated incorrectly
-        //         // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
-        //         return result!;
-        //     };
-        // }
-
-        // if (options.Native.OnCrashedLastRun is { } onCrashedLastRun)
-        // {
-        //     nativeOptions.OnCrashedLastRun = evt =>
-        //     {
-        //         var sentryEvent = evt.ToSentryEvent(nativeOptions);
-        //         onCrashedLastRun(sentryEvent);
-        //     };
-        // }
+        if (options.OnCrashedLastRun is { } onCrashedLastRun)
+        {
+            nativeOptions.OnCrashedLastRun = evt =>
+            {
+                // because we delegate to user code, we need to protect anything that could happen in this event
+                try
+                {
+                    var sentryEvent = evt.ToSentryEvent();
+                    if (sentryEvent != null)
+                    {
+                        onCrashedLastRun(sentryEvent);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    options.LogError(ex, "Crashed Last Run Error");
+                }
+            };
+        }
 
         // These options are from Cocoa's SentryOptions
         nativeOptions.AttachScreenshot = options.Native.AttachScreenshot;
@@ -128,13 +114,16 @@ public static partial class SentrySdk
         nativeOptions.IdleTimeout = options.Native.IdleTimeout.TotalSeconds;
         nativeOptions.Dist = options.Distribution;
         nativeOptions.EnableAppHangTracking = options.Native.EnableAppHangTracking;
+        nativeOptions.EnableAppHangTrackingV2 = options.Native.EnableAppHangTrackingV2;
         nativeOptions.EnableAutoBreadcrumbTracking = options.Native.EnableAutoBreadcrumbTracking;
         nativeOptions.EnableAutoPerformanceTracing = options.Native.EnableAutoPerformanceTracing;
         nativeOptions.EnableCoreDataTracing = options.Native.EnableCoreDataTracing;
         nativeOptions.EnableFileIOTracing = options.Native.EnableFileIOTracing;
         nativeOptions.EnableNetworkBreadcrumbs = options.Native.EnableNetworkBreadcrumbs;
         nativeOptions.EnableNetworkTracking = options.Native.EnableNetworkTracking;
+#pragma warning disable CS0618 // Type or member is obsolete
         nativeOptions.EnableWatchdogTerminationTracking = options.Native.EnableWatchdogTerminationTracking;
+#pragma warning restore CS0618 // Type or member is obsolete
         nativeOptions.EnableSwizzling = options.Native.EnableSwizzling;
         nativeOptions.EnableUIViewControllerTracing = options.Native.EnableUIViewControllerTracing;
         nativeOptions.EnableUserInteractionTracing = options.Native.EnableUserInteractionTracing;
@@ -154,32 +143,6 @@ public static partial class SentrySdk
         // nativeOptions.DefaultIntegrations
         // nativeOptions.EnableProfiling  (deprecated)
 
-        // When we have an unhandled managed exception, we send that to Sentry twice - once managed and once native.
-        // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
-        // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
-        // This is partially due to our setting ObjCRuntime.MarshalManagedExceptionMode.UnwindNativeCode above.
-        // Thankfully, we can see Xamarin's unhandled exception handler on the stack trace, so we can filter them out.
-        // Here is the function that calls abort(), which we will use as a filter:
-        // https://github.com/xamarin/xamarin-macios/blob/c55fbdfef95028ba03d0f7a35aebca03bd76f852/runtime/runtime.m#L1114-L1122
-        nativeOptions.BeforeSend = evt =>
-        {
-            // There should only be one exception on the event in this case
-            if (evt.Exceptions?.Length == 1)
-            {
-                // It will match the following characteristics
-                var ex = evt.Exceptions[0];
-                if (ex.Type == "SIGABRT" && ex.Value == "Signal 6, Code 0" &&
-                    ex.Stacktrace?.Frames.Any(f => f.Function == "xamarin_unhandled_exception_handler") is true)
-                {
-                    // Don't sent it
-                    return null!;
-                }
-            }
-
-            // Other event, send as normal
-            return evt;
-        };
-
         // Set hybrid SDK name
         SentryCocoaHybridSdk.SetSdkName("sentry.cocoa.dotnet");
 
@@ -192,12 +155,11 @@ public static partial class SentrySdk
         options.EnableScopeSync = true;
         options.ScopeObserver = new CocoaScopeObserver(options);
 
-        if (options.IsProfilingEnabled)
+        // Note: don't use AddProfilingIntegration as it would print a warning if user used it too.
+        if (!options.HasIntegration<ProfilingIntegration>())
         {
-            options.LogDebug("Profiling is enabled, attaching native SDK profiler factory");
-            options.TransactionProfilerFactory ??= new CocoaProfilerFactory(options);
+            options.AddIntegration(new ProfilingIntegration());
         }
-
         // TODO: Pause/Resume
     }
 
@@ -224,5 +186,70 @@ public static partial class SentrySdk
         }
 
         return nativeRanges;
+    }
+
+    internal static CocoaSdk.SentryEvent? ProcessOnBeforeSend(SentryOptions options, CocoaSdk.SentryEvent evt)
+    {
+        // When we have an unhandled managed exception, we send that to Sentry twice - once managed and once native.
+        // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
+        // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
+
+        // There should only be one exception on the event in this case
+        if ((options.Native.SuppressSignalAborts || options.Native.SuppressExcBadAccess) && evt.Exceptions?.Length == 1)
+        {
+            // It will match the following characteristics
+            var ex = evt.Exceptions[0];
+
+            // Thankfully, sometimes we can see Xamarin's unhandled exception handler on the stack trace, so we can filter
+            // them out. Here is the function that calls abort(), which we will use as a filter:
+            // https://github.com/xamarin/xamarin-macios/blob/c55fbdfef95028ba03d0f7a35aebca03bd76f852/runtime/runtime.m#L1114-L1122
+            if (options.Native.SuppressSignalAborts && ex.Type == "SIGABRT" && ex.Value == "Signal 6, Code 0" &&
+                ex.Stacktrace?.Frames.Any(f => f.Function == "xamarin_unhandled_exception_handler") is true)
+            {
+                // Don't send it
+                options.LogDebug("Discarded {0} error ({1}). Captured as  managed exception instead.", ex.Type,
+                    ex.Value);
+                return null!;
+            }
+
+            // Similar workaround for NullReferenceExceptions. We don't have any easy way to know whether the
+            // exception is managed code (compiled to native) or original native code though.
+            // See: https://github.com/getsentry/sentry-dotnet/issues/3776
+            if (options.Native.SuppressExcBadAccess && ex.Type == "EXC_BAD_ACCESS")
+            {
+                // Don't send it
+                options.LogDebug("Discarded {0} error ({1}). Captured as  managed exception instead.", ex.Type,
+                    ex.Value);
+                return null!;
+            }
+        }
+
+        // we run our SIGABRT checks first before handing over to user events
+        // because we delegate to user code, we need to protect anything that could happen in this event
+        if (options.BeforeSendInternal == null)
+            return evt;
+
+        try
+        {
+            var sentryEvent = evt.ToSentryEvent();
+            if (sentryEvent == null)
+                return evt;
+
+            var result = options.BeforeSendInternal(sentryEvent, null!);
+            if (result == null)
+                return null!;
+
+            // we only support a subset of mutated data to be passed back to the native SDK at this time
+            result.CopyToCocoaSentryEvent(evt);
+
+            // Note: Nullable result is allowed but delegate is generated incorrectly
+            // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
+            return evt!;
+        }
+        catch (Exception ex)
+        {
+            options.LogError(ex, "Before Send Error");
+            return evt;
+        }
     }
 }

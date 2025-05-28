@@ -2,7 +2,6 @@ using VerifyTests;
 
 namespace Sentry.Tests.Protocol;
 
-[UsesVerify]
 public partial class MeasurementTests
 {
     [Fact]

@@ -1,3 +1,6 @@
+using System.Diagnostics;
+using Sentry.Maui;
+
 namespace Sentry.Samples.Maui;
 
 public static class MauiProgram
@@ -22,6 +25,35 @@ public static class MauiProgram
 
                 options.Debug = true;
                 options.SampleRate = 1.0F;
+
+                // The Sentry MVVM Community Toolkit integration automatically creates traces for async relay commands,
+                // but only if tracing is enabled. Here we capture all traces (in a production app you'd probably only
+                // capture a certain percentage)
+                options.TracesSampleRate = 1.0F;
+
+                // Automatically create traces for async relay commands in the MVVM Community Toolkit
+                options.AddCommunityToolkitIntegration();
+
+#if __ANDROID__
+                // Currently experimental support is only available on Android
+                options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate = 1.0;
+                options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate = 1.0;
+                // Mask all images and text by default. This can be overridden for individual view elements via the
+                // sentry:SessionReplay.Mask XML attribute (see MainPage.xaml for an example)
+                options.Native.ExperimentalOptions.SessionReplay.MaskAllImages = true;
+                options.Native.ExperimentalOptions.SessionReplay.MaskAllText = true;
+                // Alternatively the masking behaviour for entire classes of VisualElements can be configured here as
+                // an exception to the default behaviour.
+                options.Native.ExperimentalOptions.SessionReplay.UnmaskControlsOfType<Button>();
+#endif
+
+                options.SetBeforeScreenshotCapture((@event, hint) =>
+                {
+                    Console.WriteLine("screenshot about to be captured.");
+
+                    // Return true to capture or false to prevent the capture
+                    return true;
+                });
             })
 
             .ConfigureFonts(fonts =>

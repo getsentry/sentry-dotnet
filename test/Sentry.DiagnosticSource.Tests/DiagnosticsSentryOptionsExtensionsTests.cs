@@ -4,8 +4,6 @@ namespace Sentry.DiagnosticSource.Tests;
 
 #nullable enable
 
-[UsesVerify]
-
 public class DiagnosticsSentryOptionsExtensionsTests
 {
     private readonly InMemoryDiagnosticLogger _logger = new();

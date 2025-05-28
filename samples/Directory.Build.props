@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <!-- Workaround for hang on compile issue.  See https://github.com/xamarin/xamarin-macios/issues/17825#issuecomment-1478568270. -->
-  <PropertyGroup Condition="'$(Configuration)' == 'Release' And '$(TargetFramework)' == 'net7.0-ios' And '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'Arm64'">
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">
     <MtouchUseLlvm>false</MtouchUseLlvm>
   </PropertyGroup>
 </Project>

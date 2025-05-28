@@ -1,6 +1,5 @@
 namespace Sentry.Log4Net.Tests;
 
-[UsesVerify]
 public class ApiApprovalTests
 {
     [Fact]

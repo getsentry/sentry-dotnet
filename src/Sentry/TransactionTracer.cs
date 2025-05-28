@@ -100,6 +100,8 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     /// </summary>
     public double? SampleRate { get; internal set; }
 
+    internal double? SampleRand { get; set; }
+
     /// <inheritdoc />
     public SentryLevel? Level { get; set; }
 
@@ -157,10 +159,15 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     /// <inheritdoc />
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
 
-    private readonly ConcurrentDictionary<string, object?> _extra = new();
+    private readonly ConcurrentDictionary<string, object?> _data = new();
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Extra => _extra;
+    [Obsolete("Use Data")]
+    public IReadOnlyDictionary<string, object?> Extra => _data;
+
+    /// <inheritdoc />
+    public IReadOnlyDictionary<string, object?> Data => _data;
+
 
     private readonly ConcurrentDictionary<string, string> _tags = new();
 
@@ -270,7 +277,11 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     public void AddBreadcrumb(Breadcrumb breadcrumb) => _breadcrumbs.Add(breadcrumb);
 
     /// <inheritdoc />
-    public void SetExtra(string key, object? value) => _extra[key] = value;
+    [Obsolete("Use SetData")]
+    public void SetExtra(string key, object? value) => _data[key] = value;
+
+    /// <inheritdoc />
+    public void SetData(string key, object? value) => _data[key] = value;
 
     /// <inheritdoc />
     public void SetTag(string key, string value) => _tags[key] = value;
@@ -381,8 +392,13 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
         EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
         _options?.LogDebug("Finished Transaction {0}.", SpanId);
 
-        // Clear the transaction from the scope
-        _hub.ConfigureScope(scope => scope.ResetTransaction(this));
+        // Clear the transaction from the scope and regenerate the Propagation Context
+        // We do this so new events don't have a trace context that is "older" than the transaction that just finished
+        _hub.ConfigureScope(scope =>
+        {
+            scope.ResetTransaction(this);
+            scope.SetPropagationContext(new SentryPropagationContext());
+        });
 
         // Client decides whether to discard this transaction based on sampling
         _hub.CaptureTransaction(new SentryTransaction(this));

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using Sentry.Internal.Http;
+using Sentry.Maui.Internal;
 using MauiConstants = Sentry.Maui.Internal.Constants;
 
 namespace Sentry.Maui.Tests;
@@ -28,6 +29,24 @@ public partial class SentryMauiAppBuilderExtensionsTests
     }
 
     private readonly Fixture _fixture = new();
+
+    [Fact]
+    public void UseSentry_RegistersEventProcessorOnlyOnce()
+    {
+        // Arrange
+        var builder = _fixture.Builder;
+        builder.Services.Configure<SentryMauiOptions>(options =>
+        {
+            options.Dsn = ValidDsn;
+        });
+
+        // Act
+        using var app = builder.UseSentry().Build();
+
+        // Assert
+        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
+        options.EventProcessors.Should().ContainSingle(t => t.Type == typeof(SentryMauiEventProcessor));
+    }
 
     [Fact]
     public void CanUseSentry_WithConfigurationOnly()

@@ -82,6 +82,42 @@ public class SentryClient : ISentryClient, IDisposable
     }
 
     /// <inheritdoc />
+    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    {
+        if (string.IsNullOrEmpty(feedback.Message))
+        {
+            _options.LogWarning("Feedback dropped due to empty message.");
+            return;
+        }
+
+        scope ??= new Scope(_options);
+        hint ??= new SentryHint();
+        hint.AddAttachmentsFromScope(scope);
+
+        _options.LogInfo("Capturing feedback: '{0}'.", feedback.Message);
+
+        var evt = new SentryEvent { Level = SentryLevel.Info };
+        evt.Contexts.Feedback = feedback;
+        // type: 'feedback',
+
+        // Evaluate and copy before invoking the callback
+        scope.Evaluate();
+        scope.Apply(evt);
+
+        if (scope.Level != null && scope.Level != SentryLevel.Info)
+        {
+            // Level on scope takes precedence over the one on event
+            _options.LogInfo("Overriding level set on feedback event '{0}' with level set on scope '{1}'.", evt.Level, scope.Level);
+            evt.Level = scope.Level;
+        }
+
+        var attachments = hint.Attachments.ToList();
+        var envelope = Envelope.FromFeedback(evt, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
+        CaptureEnvelope(envelope);
+    }
+
+    /// <inheritdoc />
+    [Obsolete("Use CaptureFeedback instead.")]
     public void CaptureUserFeedback(UserFeedback userFeedback)
     {
         if (userFeedback.EventId.Equals(SentryId.Empty))
@@ -176,6 +212,9 @@ public class SentryClient : ISentryClient, IDisposable
         CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
     }
 
+#if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
+#endif
     private SentryTransaction? BeforeSendTransaction(SentryTransaction transaction, SentryHint hint)
     {
         if (_options.BeforeSendTransactionInternal is null)
@@ -191,7 +230,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            if (!AotHelper.IsNativeAot)
+            if (!AotHelper.IsTrimmed)
             {
                 // Attempt to demystify exceptions before adding them as breadcrumbs.
                 e.Demystify();
@@ -415,6 +454,9 @@ public class SentryClient : ISentryClient, IDisposable
         return false;
     }
 
+#if NET6_0_OR_GREATER
+    [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
+#endif
     private SentryEvent? BeforeSend(SentryEvent? @event, SentryHint hint)
     {
         if (_options.BeforeSendInternal == null)
@@ -429,7 +471,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            if (!AotHelper.IsNativeAot)
+            if (!AotHelper.IsTrimmed)
             {
                 // Attempt to demystify exceptions before adding them as breadcrumbs.
                 e.Demystify();

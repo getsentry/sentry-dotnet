@@ -67,6 +67,12 @@ internal sealed class CocoaScopeObserver : IScopeObserver
 
     public void SetTag(string key, string value)
     {
+        if (value is null)
+        {
+            _options.LogDebug("Tag with key '{0}' was null. Use Unset to remove tags instead.", key);
+            return;
+        }
+
         try
         {
             SentryCocoaSdk.ConfigureScope(scope => scope.SetTagValue(value, key));
@@ -100,5 +106,10 @@ internal sealed class CocoaScopeObserver : IScopeObserver
         {
             _innerObserver?.SetUser(user);
         }
+    }
+
+    public void SetTrace(SentryId traceId, SpanId parentSpanId)
+    {
+        // TODO: Missing corresponding functionality on the Cocoa SDK
     }
 }

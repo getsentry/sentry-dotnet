@@ -1,6 +1,5 @@
 namespace Sentry.Extensions.Logging.Tests;
 
-[UsesVerify]
 public class ApiApprovalTests
 {
     [Fact]

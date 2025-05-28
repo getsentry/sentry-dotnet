@@ -95,4 +95,18 @@ public partial class MainPage
             CancellationToken cancellationToken)
             => throw new Exception();
     }
+
+    private async void OnFeedbackClicked(object sender, EventArgs e)
+    {
+        await Navigation.PushModalAsync(new SubmitFeedback());
+    }
+
+    private void CtMvvmBtn_OnClicked(object sender, EventArgs e)
+    {
+        Shell.Current.GoToAsync("ctmvvm");
+    }
+
+    private void TapGestureRecognizer_OnTapped(object sender, TappedEventArgs e)
+    {
+    }
 }

@@ -227,6 +227,22 @@ public sealed class HubAdapter : IHub
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
+    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+        => SentrySdk.CaptureFeedback(feedback, configureScope, hint);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+        => SentrySdk.CaptureFeedback(feedback, scope, hint);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public SentryId CaptureEvent(SentryEvent evt, Action<Scope> configureScope)
         => SentrySdk.CaptureEvent(evt, configureScope);
 
@@ -287,18 +303,12 @@ public sealed class HubAdapter : IHub
     public Task FlushAsync(TimeSpan timeout)
         => SentrySdk.FlushAsync(timeout);
 
-    /// <inheritdoc cref="IMetricAggregator"/>
-    [Obsolete("The SentrySdk.Metrics module is deprecated and will be removed in the next major release. " +
-              "Sentry will reject all metrics sent after October 7, 2024." +
-              "Learn more: https://sentry.zendesk.com/hc/en-us/articles/26369339769883-Upcoming-API-Changes-to-Metrics")]
-    public IMetricAggregator Metrics
-        => SentrySdk.Metrics;
-
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>
     /// </summary>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
+    [Obsolete("Use CaptureFeedback instead.")]
     public void CaptureUserFeedback(UserFeedback sentryUserFeedback)
         => SentrySdk.CaptureUserFeedback(sentryUserFeedback);
 }

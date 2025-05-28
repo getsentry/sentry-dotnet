@@ -4,7 +4,6 @@ using Sentry.Internal.DiagnosticSource;
 
 namespace Sentry.DiagnosticSource.Tests;
 
-[UsesVerify]
 public class ApiApprovalTests
 {
     [Fact]

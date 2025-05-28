@@ -40,7 +40,7 @@
                       FileName: IntegrationTests.verify.cs,
                       Function: Task IntegrationTests.Simple(),
                       Module: null,
-                      LineNumber: 48,
+                      LineNumber: 52,
                       ColumnNumber: 17,
                       AbsolutePath: {ProjectDirectory}IntegrationTests.verify.cs,
                       ContextLine: null,
@@ -59,7 +59,10 @@
                   Type: generic,
                   Handled: true,
                   Synthetic: false,
-                  IsExceptionGroup: false
+                  IsExceptionGroup: false,
+                  Data: {
+                    HResult: 0x80131500
+                  }
                 }
               }
             ],

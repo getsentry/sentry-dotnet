@@ -1,6 +1,5 @@
 namespace Sentry.AspNetCore.Grpc.Tests;
 
-[UsesVerify]
 public class ApiApprovalTests
 {
     [Fact]

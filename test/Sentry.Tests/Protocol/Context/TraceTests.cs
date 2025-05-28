@@ -85,4 +85,15 @@ public class TraceTests
         Assert.Equal(trace.SpanId, clone.SpanId);
         Assert.Equal(trace.TraceId, clone.TraceId);
     }
+
+    [Fact]
+    public void SpanId_LeadingZero_ToStringValid()
+    {
+        // Arrange
+        const string spanIdInput = "0ecd6f15f72015cb";
+        var spanId = new SpanId(spanIdInput);
+
+        // Assert
+        Assert.Equal(spanIdInput, spanId.ToString());
+    }
 }

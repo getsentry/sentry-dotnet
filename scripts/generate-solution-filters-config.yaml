@@ -24,6 +24,13 @@ groupConfigs:
   windowsOnly:
     # .NET Framework projects
     - "**/*.AspNet.csproj"
+  artefacts:
+    # Any projects in the obj or bin directories
+    - "**/obj/**/*.csproj"
+    - "**/bin/**/*.csproj"
+  trimTests:
+    - "**/Sentry.TrimTest.csproj"
+    - "**/Sentry.MauiTrimTest.csproj"
 
 filterConfigs:
 
@@ -35,12 +42,27 @@ filterConfigs:
       groups:
         - "macOnly"
         - "windowsOnly"
+        - "artefacts"
+        - "trimTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Maui.Device.TestApp.csproj"
-        - "**/*SourceGen.csproj"
-        - "**/*TestUtils*.csproj"
+
+  - outputPath: Sentry-CI-Build-Linux-musl.slnf
+    include:
+      groups:
+        - "allProjects"
+    exclude:
+      groups:
+        - "macOnly"
+        - "windowsOnly"
+        - "artefacts"
+        - "trimTests"
+      patterns:
+        - "**/*Android*.csproj"
+        - "**/*DeviceTests*.csproj"
+        - "**/*Maui*.csproj"
 
   - outputPath: Sentry-CI-Build-macOS.slnf
     include:
@@ -50,11 +72,12 @@ filterConfigs:
         - "modules/perfview/**/TraceEvent.csproj"
         - "modules/perfview/**/FastSerialization.csproj"
     exclude:
+      groups:
+        - "artefacts"
+        - "trimTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
-        - "**/*SourceGen.csproj"
-        - "**/Sentry.Samples.Android.csproj"
 
   - outputPath: Sentry-CI-Build-Windows.slnf
     include:
@@ -66,19 +89,45 @@ filterConfigs:
     exclude:
       groups:
         - "macOnly"
+        - "artefacts"
+        - "trimTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Sentry.Maui.Device.TestApp.csproj"
         - "**/*Sentry.Samples.Android.csproj"
         - "**/*OpenTelemetry.AspNet.csproj"
-        - "**/*SourceGen.csproj"
+
+  - outputPath: Sentry-CI-Build-Windows-arm64.slnf
+    include:
+      groups:
+        - "allProjects"
+      patterns:
+        - "modules/perfview/**/TraceEvent.csproj"
+        - "modules/perfview/**/FastSerialization.csproj"
+    exclude:
+      groups:
+        - "macOnly"
+        - "artefacts"
+        - "trimTests"
+      patterns:
+        - "**/*AndroidTestApp.csproj"
+        - "**/*DeviceTests*.csproj"
+        - "**/*Sentry.Maui.Device.TestApp.csproj"
+        - "**/*Sentry.Samples.Android.csproj"
+        - "**/*OpenTelemetry.AspNet.csproj"
+        # Depends on LocalDb or SQLitePCL which are x64
+        - "**/*Sentry.DiagnosticSource.IntegrationTests.csproj"
+        - "**/*Sentry.DiagnosticSource.Tests.csproj"
+        - "**/*Sentry.EntityFramework.Tests.csproj"
 
   - outputPath: Sentry-CI-CodeQL.slnf
     include:
       groups:
         - "allProjects"
     exclude:
+      groups:
+          - "artefacts"
       patterns:
         - "**/Sentry.Bindings*.csproj"
         - "benchmarks/**/*.csproj"
@@ -96,11 +145,13 @@ filterConfigs:
         - "**/Sentry.OpenTelemetry.csproj"
         - "**/Sentry.Serilog.csproj"
         - "**/Sentry.csproj"
+        - "**/Sentry.Analyzers.csproj"
         - "**/Sentry.Hangfire.csproj"
         - "**/Sentry.Samples.Hangfire.csproj"
         - "**/Sentry.Testing.csproj"
         - "**/Sentry.Testing.CrashableApp.csproj"
         - "**/Sentry.Tests.csproj"
+        - "**/Sentry.Analyzers.Tests.csproj"
 
   - outputPath: Sentry.Azure.Functions.slnf
     include:
@@ -109,9 +160,14 @@ filterConfigs:
         - "**/Sentry.Samples.Console.Basic.csproj"
         - "**/Sentry.Extensions.Logging.csproj"
         - "**/Sentry.csproj"
+        - "**/Sentry.Analyzers.csproj"
         - "**/Sentry.Testing.csproj"
         - "**/Sentry.Testing.CrashableApp.csproj"
         - "**/Sentry.Tests.csproj"
+        - "**/Sentry.Analyzers.Tests.csproj"
+    exclude:
+      groups:
+        - "artefacts"
 
   - outputPath: SentryCore.slnf
     solution: .generated.NoMobile.sln
@@ -119,14 +175,15 @@ filterConfigs:
       patterns:
         - "**/Sentry.Benchmarks.csproj"
         - "**/Sentry.Samples.Console.Basic.csproj"
-        - "**/Sentry.Samples.Console.Metrics.csproj"
         - "**/Sentry.Samples.Console.Profiling.csproj"
         - "**/Sentry.Profiling.csproj"
         - "**/Sentry.csproj"
+        - "**/Sentry.Analyzers.csproj"
         - "**/Sentry.Profiling.Tests.csproj"
         - "**/Sentry.Testing.csproj"
         - "**/Sentry.Testing.CrashableApp.csproj"
         - "**/Sentry.Tests.csproj"
+        - "**/Sentry.Analyzers.Tests.csproj"
 
   - outputPath: SentryDiagnosticSource.slnf
     solution: .generated.NoMobile.sln
@@ -134,10 +191,12 @@ filterConfigs:
       patterns:
         - "**/*DiagnosticSource*.csproj"
         - "**/Sentry.csproj"
+        - "**/Sentry.Analyzers.csproj"
         - "**/Sentry.Extensions.Logging.csproj"
         - "**/Sentry.Testing.csproj"
         - "**/Sentry.Testing.CrashableApp.csproj"
         - "**/Sentry.Tests.csproj"
+        - "**/Sentry.Analyzers.Tests.csproj"
 
   - outputPath: SentryMobile.slnf
     include:
@@ -147,17 +206,23 @@ filterConfigs:
         - "samples/**/*MacCatalyst.csproj"
         - "samples/**/*Maui.csproj"
         - "src/**/Sentry.csproj"
+        - "src/**/Sentry.Analyzers.csproj"
+        - "src/**/Sentry.SourceGenerators.csproj"
         - "src/**/*Android*.csproj"
         - "src/**/*Bindings.Android.csproj"
         - "src/**/*Bindings.Cocoa.csproj"
         - "src/**/Sentry.Extensions.Logging.csproj"
         - "src/**/Sentry.Maui.csproj"
+        - "src/**/Sentry.Maui.CommunityToolkit.Mvvm.csproj"
+        - "test/**/Sentry.Testing.CrashableApp.csproj"
         - "test/**/Sentry.Android.AssemblyReader.Tests.csproj"
         - "test/**/Sentry.Extensions.Logging.Tests.csproj"
         - "test/**/Sentry.Maui.Device.TestApp.csproj"
+        - "test/**/Sentry.Testing.CrashableApp.csproj"
         - "test/**/Sentry.Maui.Tests.csproj"
         - "test/**/Sentry.Testing.csproj"
         - "test/**/Sentry.Tests.csproj"
+        - "src/**/Sentry.Analyzers.Tests.csproj"
 
   - outputPath: SentryNoMobile.slnf
     solution: .generated.NoMobile.sln
@@ -165,6 +230,9 @@ filterConfigs:
       groups:
         - "allProjects"
     exclude:
+      groups:
+        - "artefacts"
+        - "trimTests"
       patterns:
         - "**/*Bindings*.csproj"
         - "**/*Android*.csproj"
@@ -176,6 +244,8 @@ filterConfigs:
       groups:
         - "allProjects"
     exclude:
+      groups:
+        - "trimTests"
       patterns:
         - "samples/**/*"
         - "**/*Bindings*"

@@ -27,3 +27,6 @@ test/**/*.apk
 /tools/
 *.log
 .sentry-native
+
+# Download cache for Cocoa SDK
+modules/sentry-cocoa

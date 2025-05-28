@@ -41,7 +41,7 @@ public readonly struct SpanId : IEquatable<SpanId>, ISentryJsonSerializable
     public override int GetHashCode() => StringComparer.Ordinal.GetHashCode(_value);
 
     /// <inheritdoc />
-    public override string ToString() => _value.ToString("x8");
+    public override string ToString() => _value.ToString("x8").PadLeft(16, '0');
 
     /// <summary>
     /// Generates a new Sentry ID.

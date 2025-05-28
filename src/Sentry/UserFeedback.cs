@@ -6,6 +6,7 @@ namespace Sentry;
 /// <summary>
 /// Sentry User Feedback.
 /// </summary>
+[Obsolete("Use SentryFeedback instead.")]
 public sealed class UserFeedback : ISentryJsonSerializable
 {
     /// <summary>

@@ -142,12 +142,18 @@ internal static class Program
 
             var eventId = SentrySdk.CaptureMessage("Some warning!", SentryLevel.Warning);
 
-            // Send an user feedback linked to the warning.
+            // Send feedback linked to the warning.
             var timestamp = DateTime.Now.Ticks;
             var user = $"user{timestamp}";
             var email = $"user{timestamp}@user{timestamp}.com";
-
-            SentrySdk.CaptureUserFeedback(new UserFeedback(eventId, user, email, "this is a sample user feedback"));
+            SentrySdk.CaptureFeedback(new SentryFeedback(
+                message: "this is a sample user feedback",
+                contactEmail: email,
+                name: user,
+                replayId: null,
+                url: null,
+                associatedEventId: eventId
+            ));
 
             var error = new Exception("Attempting to send this multiple times");
 

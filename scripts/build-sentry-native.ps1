@@ -21,15 +21,30 @@ try
     }
     elseif ($IsWindows)
     {
-        $outDir += '/win-x64'
         $additionalArgs += @('-C', 'src/Sentry/Platforms/Native/windows-config.cmake')
         $actualBuildDir = "$buildDir/RelWithDebInfo"
         $libPrefix = ''
         $libExtension = '.lib'
+
+        if ("Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
+        {
+            $outDir += '/win-arm64'
+        }
+        else
+        {
+            $outDir += '/win-x64'
+        }
     }
     elseif ($IsLinux)
     {
-        $outDir += '/linux-x64'
+        if ((ldd --version 2>&1) -match 'musl')
+        {
+            $outDir += '/linux-musl-x64'
+        }
+        else
+        {
+            $outDir += '/linux-x64'
+        }
     }
     else
     {

@@ -18,6 +18,40 @@ internal static partial class MetricHelper
     private static readonly DateTimeOffset UnixEpoch = new DateTimeOffset(1970, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
 #endif
 
+#if NET9_0_OR_GREATER
+    [GeneratedRegex(InvalidMetricKeyOrNameCharactersPattern)]
+    private static partial Regex InvalidMetricKeyOrNameCharacters { get; }
+
+    [GeneratedRegex(InvalidTagKeyCharactersPattern)]
+    private static partial Regex InvalidTagKeyCharacters { get; }
+
+    [GeneratedRegex(InvalidMetricUnitCharactersPattern)]
+    private static partial Regex InvalidMetricUnitCharacters { get; }
+#elif NET8_0
+    [GeneratedRegex(InvalidMetricKeyOrNameCharactersPattern)]
+    private static partial Regex InvalidMetricKeyOrNameCharacters();
+
+    [GeneratedRegex(InvalidTagKeyCharactersPattern)]
+    private static partial Regex InvalidTagKeyCharacters();
+
+    [GeneratedRegex(InvalidMetricUnitCharactersPattern)]
+    private static partial Regex InvalidMetricUnitCharacters();
+#else
+    private static readonly Regex InvalidMetricKeyOrNameCharacters = new(InvalidMetricKeyOrNameCharactersPattern, RegexOptions.Compiled);
+    private static readonly Regex InvalidTagKeyCharacters = new(InvalidTagKeyCharactersPattern, RegexOptions.Compiled);
+    private static readonly Regex InvalidMetricUnitCharacters = new(InvalidMetricUnitCharactersPattern, RegexOptions.Compiled);
+#endif
+
+#if NET8_0
+    internal static string SanitizeMetricKeyOrName(string input) => InvalidMetricKeyOrNameCharacters().Replace(input, "_");
+    internal static string SanitizeTagKey(string input) => InvalidTagKeyCharacters().Replace(input, "");
+    internal static string SanitizeMetricUnit(string input) => InvalidMetricUnitCharacters().Replace(input, "");
+#else
+    internal static string SanitizeMetricKeyOrName(string input) => InvalidMetricKeyOrNameCharacters.Replace(input, "_");
+    internal static string SanitizeTagKey(string input) => InvalidTagKeyCharacters.Replace(input, "");
+    internal static string SanitizeMetricUnit(string input) => InvalidMetricUnitCharacters.Replace(input, "");
+#endif
+
     internal static long GetDayBucketKey(this DateTimeOffset timestamp)
     {
         var utc = timestamp.ToUniversalTime();
@@ -42,29 +76,6 @@ internal static partial class MetricHelper
     internal static DateTimeOffset GetCutoff() => DateTimeOffset.UtcNow
         .Subtract(TimeSpan.FromSeconds(RollupInSeconds))
         .Subtract(TimeSpan.FromMilliseconds(FlushShift));
-
-#if NET7_0_OR_GREATER
-    [GeneratedRegex(InvalidMetricKeyOrNameCharactersPattern, RegexOptions.Compiled)]
-    private static partial Regex InvalidMetricKeyOrNameCharacters();
-    internal static string SanitizeMetricKeyOrName(string input) => InvalidMetricKeyOrNameCharacters().Replace(input, "_");
-
-    [GeneratedRegex(InvalidTagKeyCharactersPattern, RegexOptions.Compiled)]
-    private static partial Regex InvalidTagKeyCharacters();
-    internal static string SanitizeTagKey(string input) => InvalidTagKeyCharacters().Replace(input, "");
-
-    [GeneratedRegex(InvalidMetricUnitCharactersPattern, RegexOptions.Compiled)]
-    private static partial Regex InvalidMetricUnitCharacters();
-    internal static string SanitizeMetricUnit(string input) => InvalidMetricUnitCharacters().Replace(input, "");
-#else
-    private static readonly Regex InvalidMetricKeyOrNameCharacters = new(InvalidMetricKeyOrNameCharactersPattern, RegexOptions.Compiled);
-    internal static string SanitizeMetricKeyOrName(string input) => InvalidMetricKeyOrNameCharacters.Replace(input, "_");
-
-    private static readonly Regex InvalidTagKeyCharacters = new(InvalidTagKeyCharactersPattern, RegexOptions.Compiled);
-    internal static string SanitizeTagKey(string input) => InvalidTagKeyCharacters.Replace(input, "");
-
-    private static readonly Regex InvalidMetricUnitCharacters = new(InvalidMetricUnitCharactersPattern, RegexOptions.Compiled);
-    internal static string SanitizeMetricUnit(string input) => InvalidMetricUnitCharacters.Replace(input, "");
-#endif
 
     private static readonly Lazy<KeyValuePair<string, string>[]> LazyTagValueReplacements = new(() =>
     [

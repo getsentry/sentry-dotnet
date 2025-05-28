@@ -10,7 +10,8 @@ on:
 jobs:
   list-vulnerable-packages:
     name: List vulnerable packages
-    runs-on: macos-latest
+    # Pin macos to get the version of XCode that we need: https://github.com/actions/runner-images/issues/10703
+    runs-on: macos-15
 
     steps:
       - name: Checkout

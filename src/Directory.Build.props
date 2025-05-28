@@ -35,14 +35,9 @@
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
-  <!-- Only compile with IsAotCompatible on .NET 8.0 and later -->
-  <PropertyGroup Condition="$(TargetFramework.StartsWith('net8'))">
-    <!-- `FrameworkSupportsAot` is a custom property we use to centralise this logic for enabling `IsAotCompatible`. As
-    of very recently, this logic is fairly simple (net8.0 or later) but it's historically been more complex and very
-    volatile (as we learn more about the constraints of targeting AOT compilation). We may be able to remove this custom
-    property once we have confidence that this logic is unlikely to change again.
-    -->
-    <FrameworkSupportsAot>true</FrameworkSupportsAot>
+  <!-- Centralise logic for enabling `IsAotCompatible`. We use this to disable Aot for the device tests, for example -->
+  <PropertyGroup Condition="'$(EnableAot)' == '' And ($(TargetFramework.StartsWith('net8')) Or $(TargetFramework.StartsWith('net9')))">
+    <EnableAot>true</EnableAot>
   </PropertyGroup>
 
   <PropertyGroup>

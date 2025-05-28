@@ -1,6 +1,5 @@
 namespace Sentry.Serilog.Tests;
 
-[UsesVerify]
 public class ApiApprovalTests
 {
     [Fact]

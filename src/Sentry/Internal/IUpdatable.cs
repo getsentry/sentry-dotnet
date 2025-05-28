@@ -3,10 +3,10 @@ namespace Sentry.Internal;
 internal interface IUpdatable<in T> : IUpdatable
     where T : IUpdatable<T>
 {
-    void UpdateFrom(T source);
+    public void UpdateFrom(T source);
 }
 
 internal interface IUpdatable
 {
-    void UpdateFrom(object source);
+    public void UpdateFrom(object source);
 }

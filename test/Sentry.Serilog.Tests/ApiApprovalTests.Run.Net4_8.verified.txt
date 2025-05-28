@@ -1,6 +1,11 @@
 ﻿[assembly: System.CLSCompliant(true)]
 namespace Sentry.Serilog
 {
+    public static class SentryOptionExtensions
+    {
+        public static T ApplySerilogScopeToEvents<T>(this T options)
+            where T : Sentry.SentryOptions { }
+    }
     public class SentrySerilogOptions : Sentry.SentryOptions
     {
         public SentrySerilogOptions() { }

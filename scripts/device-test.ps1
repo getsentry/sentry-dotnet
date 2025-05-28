@@ -5,7 +5,8 @@ param(
     [String] $Platform,
 
     [Switch] $Build,
-    [Switch] $Run
+    [Switch] $Run,
+    [String] $Tfm
 )
 
 Set-StrictMode -Version latest
@@ -21,13 +22,16 @@ $CI = Test-Path env:CI
 Push-Location $PSScriptRoot/..
 try
 {
-    $tfm = 'net7.0-'
+    if (!$Tfm)
+    {
+        $Tfm = 'net9.0'
+    }
     $arch = (!$IsWindows -and $(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
     if ($Platform -eq 'android')
     {
-        $tfm += 'android'
+        $Tfm += '-android'
         $group = 'android'
-        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/android-$arch"
+        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$Tfm/android-$arch"
         $arguments = @(
             '--app', "$buildDir/io.sentry.dotnet.maui.device.testapp-Signed.apk",
             '--package-name', 'io.sentry.dotnet.maui.device.testapp',
@@ -43,9 +47,11 @@ try
     }
     elseif ($Platform -eq 'ios')
     {
-        $tfm += 'ios'
+        $Tfm += '-ios'
         $group = 'apple'
-        $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$tfm/iossimulator-$arch"
+        # Always use x64 on iOS, since arm64 doesn't support JIT, which is required for tests using NSubstitute
+        $arch = 'x64'
+        $buildDir = "test/Sentry.Maui.Device.TestApp/bin/Release/$Tfm/iossimulator-$arch"
         $envValue = $CI ? 'true' : 'false'
         $arguments = @(
             '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
@@ -57,7 +63,8 @@ try
 
     if ($Build)
     {
-        dotnet build -f $tfm -c Release test/Sentry.Maui.Device.TestApp
+        # We disable AOT for device tests: https://github.com/nsubstitute/NSubstitute/issues/834
+        dotnet build -f $Tfm -c Release -p:EnableAot=false -p:NoSymbolStrip=true test/Sentry.Maui.Device.TestApp
         if ($LASTEXITCODE -ne 0)
         {
             throw 'Failed to build Sentry.Maui.Device.TestApp'
@@ -69,7 +76,7 @@ try
         if (!(Get-Command xharness -ErrorAction SilentlyContinue))
         {
             Push-Location ($CI ? $env:RUNNER_TEMP : $IsWindows ? $env:TMP : $IsMacos ? $env:TMPDIR : '/temp')
-            dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '9.*-*' `
+            dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '10.0.0-prerelease*' `
                 --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
             Pop-Location
         }

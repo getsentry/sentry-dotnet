@@ -1,5 +1,17 @@
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using FluentAssertions;
+using NSubstitute;
+using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Http;
 using Sentry.Internal.ScopeStack;
+using Sentry.Protocol.Envelopes;
+using Sentry.Testing;
+using Xunit;
+using Xunit.Abstractions;
 using static Sentry.Internal.Constants;
 
 namespace Sentry.Tests;
@@ -543,6 +555,23 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
+    public void CaptureFeedback_WithConfiguredScope_ScopeCallbackGetsInvoked()
+    {
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+        });
+
+        var scopeCallbackWasInvoked = false;
+        SentrySdk.CaptureFeedback(new SentryFeedback("Foo"), _ => scopeCallbackWasInvoked = true);
+
+        Assert.True(scopeCallbackWasInvoked);
+    }
+
+    [Fact]
     public void CaptureException_WithConfiguredScope_ScopeCallbackGetsInvoked()
     {
         using var _ = SentrySdk.Init(o =>
@@ -647,14 +676,18 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void Implements_ClientExtensions()
     {
-        var clientExtensions = typeof(SentryClientExtensions).GetMembers(BindingFlags.Public | BindingFlags.Static)
+        string[] excludedMembers = [nameof(SentryClientExtensions.GetSentryOptions), nameof(SentryClientExtensions.GetInternalSentryOptions)];
+        var clientExtensions = typeof(SentryClientExtensions)
+            .GetMembers(BindingFlags.Public | BindingFlags.Static)
+            .Where(x => !excludedMembers.Contains(x.Name))
             // Remove the extension argument: Method(this ISentryClient client, ...
             .Select(m => m.ToString()!
                 .Replace($"({typeof(ISentryClient).FullName}", "(")
                 .Replace("(, ", "("));
-        var sentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
 
-        Assert.Empty(clientExtensions.Except(sentrySdk.Select(m => m.ToString())));
+        var sentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
+        var values = clientExtensions.Except(sentrySdk.Select(m => m.ToString()));
+        Assert.Empty(values);
     }
 
     [Fact]
@@ -830,6 +863,80 @@ public class SentrySdkTests : IDisposable
             Arg.Any<Exception>(),
             Arg.Any<object[]>());
     }
+
+#if __IOS__
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ProcessOnBeforeSend_NativeErrorSuppression(bool suppressNativeErrors)
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _logger,
+            IsGlobalModeEnabled = true,
+            Debug = true,
+            AutoSessionTracking = false,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>(),
+            InitNativeSdks = false,
+        };
+        options.Native.SuppressExcBadAccess = suppressNativeErrors;
+
+        var called = false;
+        options.SetBeforeSend(e =>
+        {
+            called = true;
+            return e;
+        });
+        var evt = new Sentry.CocoaSdk.SentryEvent();
+        var ex = new Sentry.CocoaSdk.SentryException("Not checked", "EXC_BAD_ACCESS");
+        evt.Exceptions = [ex];
+        var result = SentrySdk.ProcessOnBeforeSend(options, evt);
+
+        if (suppressNativeErrors)
+        {
+            called.Should().BeFalse();
+            result.Should().BeNull();
+        }
+        else
+        {
+            called.Should().BeTrue();
+            result.Exceptions.First().Type.Should().Be("EXC_BAD_ACCESS");
+        }
+    }
+
+    [Fact]
+    public void ProcessOnBeforeSend_OptionsBeforeOnSendRuns()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _logger,
+            IsGlobalModeEnabled = true,
+            Debug = true,
+            AutoSessionTracking = false,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>(),
+            InitNativeSdks = false
+        };
+
+        var native = new Sentry.CocoaSdk.SentryEvent();
+        native.ServerName = "server name";
+        native.Dist = "dist";
+        native.Logger = "logger";
+        native.ReleaseName = "release name";
+        native.Environment = "environment";
+        native.Transaction = "transaction name";
+
+        options.SetBeforeSend(e =>
+        {
+            e.TransactionName = "dotnet";
+            return e;
+        });
+        var result = SentrySdk.ProcessOnBeforeSend(options, native);
+        result.Should().NotBeNull();
+        result.Transaction.Should().Be("dotnet");
+    }
+#endif
 
     public void Dispose()
     {

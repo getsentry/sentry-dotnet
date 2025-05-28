@@ -1,6 +1,5 @@
 namespace Sentry.AspNet.Tests;
 
-[UsesVerify]
 public class ApiApprovalTests
 {
     [Fact]

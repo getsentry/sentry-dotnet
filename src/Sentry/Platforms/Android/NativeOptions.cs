@@ -260,5 +260,35 @@ public partial class SentryOptions
         /// be stripped away during the round-tripping between the two SDKs.  Use with caution.
         /// </remarks>
         public bool EnableBeforeSend { get; set; } = false;
+
+        public class NativeExperimentalOptions
+        {
+            public NativeSentryReplayOptions SessionReplay { get; set; } = new();
+        }
+
+        public class NativeSentryReplayOptions
+        {
+            public double? OnErrorSampleRate { get; set; }
+            public double? SessionSampleRate { get; set; }
+            public bool MaskAllImages { get; set; } = true;
+            public bool MaskAllText { get; set; } = true;
+            internal HashSet<Type> MaskedControls { get; } = [];
+            internal HashSet<Type> UnmaskedControls { get; } = [];
+
+            public void MaskControlsOfType<T>()
+            {
+                MaskedControls.Add(typeof(T));
+            }
+
+            public void UnmaskControlsOfType<T>()
+            {
+                UnmaskedControls.Add(typeof(T));
+            }
+        }
+
+        /// <summary>
+        /// ExperimentalOptions
+        /// </summary>
+        public NativeExperimentalOptions ExperimentalOptions { get; set; } = new();
     }
 }

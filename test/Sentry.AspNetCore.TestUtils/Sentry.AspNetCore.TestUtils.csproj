@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net7.0;net6.0;net48</TargetFrameworks>
+    <TargetFrameworks>net9.0;net8.0;net48</TargetFrameworks>
     <IsTestProject>false</IsTestProject>
   </PropertyGroup>
 
@@ -30,24 +30,15 @@
   <ItemGroup Condition="$(TargetFramework) == 'net48'">
     <PackageReference Include="Microsoft.AspNetCore" Version="2.1.7" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.1.1" />
+    <!-- https://github.com/advisories/GHSA-hxrm-9w7p-39cc -->
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.1.22" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.1.1" />
 
     <!-- This is needed because the version that is brought in transitively also has a vulnerability warning -->
     <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.1.25" />
-  </ItemGroup>
+    <!-- https://github.com/advisories/GHSA-vmch-3w2x-vhgq -->
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets" Version="2.1.40" />
 
-  <ItemGroup Condition="$(TargetFramework) == 'net6.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="6.0.19" />
-    <PackageReference Include="Verify.AspNetCore" Version="2.0.0" />
-    <PackageReference Include="Verify.Http" Version="4.3.2" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(TargetFramework) == 'net7.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="7.0.8" />
-    <PackageReference Include="Verify.AspNetCore" Version="3.4.1" />
-    <PackageReference Include="Verify.Http" Version="4.3.2" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework) == 'net8.0'">
@@ -55,6 +46,13 @@
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="8.0.0" />
     <PackageReference Include="Verify.AspNetCore" Version="3.4.1" />
     <PackageReference Include="Verify.Http" Version="4.3.2" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework) == 'net9.0'">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="9.0.0" />
+    <PackageReference Include="Verify.AspNetCore" Version="4.0.0" />
+    <PackageReference Include="Verify.Http" Version="6.4.1" />
   </ItemGroup>
 
   <ItemGroup>

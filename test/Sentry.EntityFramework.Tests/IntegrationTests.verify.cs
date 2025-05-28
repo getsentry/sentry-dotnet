@@ -1,12 +1,11 @@
 #if NETFRAMEWORK
 namespace Sentry.EntityFramework.Tests;
 
-[UsesVerify]
 [Collection("Sequential")]
 public class IntegrationTests
 {
     // needs to be a variable to stop EF from inlining it as a constant
-    static string shouldNotAppearInPayload = "SHOULD NOT APPEAR IN PAYLOAD";
+    private static string shouldNotAppearInPayload = "SHOULD NOT APPEAR IN PAYLOAD";
 
     [SkippableFact]
     public async Task Simple()

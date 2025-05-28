@@ -1,6 +1,5 @@
 namespace Sentry.Tests.Internals;
 
-[UsesVerify]
 public partial class MainExceptionProcessorTests
 {
     [Fact]

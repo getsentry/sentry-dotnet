@@ -2,5 +2,5 @@ namespace Sentry.Internal.ScopeStack;
 
 internal interface IScopeStackContainer
 {
-    KeyValuePair<Scope, ISentryClient>[]? Stack { get; set; }
+    public KeyValuePair<Scope, ISentryClient>[]? Stack { get; set; }
 }

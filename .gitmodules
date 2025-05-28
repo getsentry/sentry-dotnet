@@ -1,9 +1,6 @@
 [submodule "modules/Ben.Demystifier"]
 	path = modules/Ben.Demystifier
 	url = https://github.com/getsentry/Ben.Demystifier
-[submodule "modules/sentry-cocoa"]
-	path = modules/sentry-cocoa
-	url = https://github.com/getsentry/sentry-cocoa.git
 [submodule "modules/perfview"]
 	path = modules/perfview
 	url = https://github.com/getsentry/perfview.git

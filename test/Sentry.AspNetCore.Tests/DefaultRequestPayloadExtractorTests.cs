@@ -2,6 +2,8 @@ namespace Sentry.AspNetCore.Tests;
 
 public class DefaultRequestPayloadExtractorTests : BaseRequestPayloadExtractorTests<DefaultRequestPayloadExtractor>
 {
+    protected override string SupportedContentType => string.Empty;
+
     [Fact]
     public void ExtractPayload_StringData_ReadCorrectly()
     {

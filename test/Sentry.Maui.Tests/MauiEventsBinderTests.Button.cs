@@ -15,7 +15,8 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "button"
         };
-        _fixture.Binder.HandleButtonEvents(button);
+        var el = new ElementEventArgs(button);
+        _fixture.Binder.OnApplicationOnDescendantAdded(null, el);
 
         // Act
         button.RaiseEvent(eventName, EventArgs.Empty);
@@ -40,11 +41,13 @@ public partial class MauiEventsBinderTests
         {
             StyleId = "button"
         };
-        _fixture.Binder.HandleButtonEvents(button);
+        var el = new ElementEventArgs(button);
+        _fixture.Binder.OnApplicationOnDescendantAdded(null, el);
+
         button.RaiseEvent(eventName, EventArgs.Empty);
         Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
 
-        _fixture.Binder.HandleButtonEvents(button, bind: false);
+        _fixture.Binder.OnApplicationOnDescendantRemoved(null, el);
 
         // Act
         button.RaiseEvent(eventName, EventArgs.Empty);

@@ -1,11 +1,15 @@
+using Sentry.PlatformAbstractions;
+
 namespace Sentry.NLog.Tests;
 
-[UsesVerify]
 public class IntegrationTests
 {
-    [Fact]
+    [SkippableFact]
     public Task Simple()
     {
+        // See: https://github.com/getsentry/sentry-dotnet/issues/3823
+        Skip.If(RuntimeInfo.GetRuntime().IsMono() && TestEnvironment.IsGitHubActions, "Missing DebugImage in CI for Mono");
+
         var transport = new RecordingTransport();
 
         var configuration = new LoggingConfiguration();
