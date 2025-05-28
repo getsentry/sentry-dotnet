@@ -41,22 +41,58 @@
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=True;_Compressed=False" />
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=True;_Compressed=True" />
   </Target>
+
   <Target Name="_BuildTestAPK">
     <PropertyGroup>
       <_ConfigString>A=$(_Aot)-S=$(_Store)-C=$(_Compressed)</_ConfigString>
-      <SourceAPK>..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk</SourceAPK>
+      <_AndroidTestAppOutputDir>..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)</_AndroidTestAppOutputDir>
+      <SourceAPK>$(_AndroidTestAppOutputDir)\com.companyname.AndroidTestApp-Signed.apk</SourceAPK>
+    </PropertyGroup>
+
+    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;PublishAot=$(_Aot);_IsPublishing=true;RuntimeIdentifier=android-x64;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('$(SourceAPK)')" />
+  </Target>
+
+  <Target Name="_CopyTestAPKNet8" AfterTargets="_BuildTestAPK" Condition="$(TargetFramework.StartsWith('net8'))">
+    <PropertyGroup>
       <DestinationAPK>TestAPKs\$(TargetFramework)-$(_ConfigString).apk</DestinationAPK>
     </PropertyGroup>
-    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;PublishAot=$(_Aot);_IsPublishing=true;RuntimeIdentifier=android-x64;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('$(DestinationAPK)')" />
-
-    <Message Text="Copying APK from $(SourceAPK) to $(DestinationAPK)" Importance="high" />
     <Copy SourceFiles="$(SourceAPK)" DestinationFiles="$(DestinationAPK)" Condition="!Exists('$(DestinationAPK)')" />
+  </Target>
 
+  <Target Name="_CopyTestAPKNet9" AfterTargets="_BuildTestAPK" Condition="$(TargetFramework.StartsWith('net9'))">
     <PropertyGroup>
-      <DestinationAPKExists Condition="Exists('$(DestinationAPK)')">True</DestinationAPKExists>
-      <DestinationAPKExists Condition="!Exists('$(DestinationAPK)')">False</DestinationAPKExists>
+      <_ToolsFolder>tools</_ToolsFolder>
+      <_BundleToolVersion>1.18.1</_BundleToolVersion>
+      <_BundleToolFile>bundletool-$(_BundleToolVersion).jar</_BundleToolFile>
+      <_BundleToolPath>$(_ToolsFolder)\$(_BundleToolFile)</_BundleToolPath>
+      <_SourceAab>$(_AndroidTestAppOutputDir)\com.companyname.AndroidTestApp-Signed.aab</_SourceAab>
+      <_SplitApksZip>$(_AndroidTestAppOutputDir)\split_config.apks</_SplitApksZip>
+      <_SplitApksDir>$(_AndroidTestAppOutputDir)\apks</_SplitApksDir>
     </PropertyGroup>
-    <Message Text="APK copy result: Exists('$(DestinationAPK)') = $(DestinationAPKExists)" Importance="high" />
+
+    <DownloadFile
+      SourceUrl="https://github.com/google/bundletool/releases/download/$(_BundleToolVersion)/bundletool-all-$(_BundleToolVersion).jar"
+      DestinationFolder="$(_ToolsFolder)"
+      DestinationFileName="$(_BundleToolFile)"
+      Condition="!Exists('$(_BundleToolPath)')"
+      Retries="3"
+    />
+
+    <Exec Command="java -jar $(_BundleToolPath) build-apks --device-spec=device-spec.json --bundle=$(_SourceAab) --output=$(_SplitApksZip)" Condition="Exists('$(_SourceAab)') and !Exists('$(_SplitApksZip)')" />
+
+    <ItemGroup>
+      <_ApksToExtract Include="$(_SplitApksZip)" />
+    </ItemGroup>
+
+    <Unzip SourceFiles="@(_ApksToExtract)"
+           DestinationFolder="$(_SplitApksDir)\"
+           Condition="'@(_ApksToExtract)' != ''" />
+
+    <ItemGroup>
+      <_SplitApks Include="$(_SplitApksDir)\splits\*.apk" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_SplitApks)" DestinationFolder="TestAPKs\$(TargetFramework)-$(_ConfigString)\" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>

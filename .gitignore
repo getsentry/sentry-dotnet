@@ -25,6 +25,7 @@ mono_crash.*.json
 test_output/
 test/**/*.apk
 /tools/
+/test/Sentry.Android.AssemblyReader.Tests/tools
 *.log
 .sentry-native
 
