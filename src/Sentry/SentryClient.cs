@@ -15,6 +15,7 @@ namespace Sentry;
 /// <inheritdoc cref="IDisposable" />
 public class SentryClient : ISentryClient, IDisposable
 {
+    private readonly ITransport _transport;
     private readonly SentryOptions _options;
     private readonly ISessionManager _sessionManager;
     private readonly RandomValuesFactory _randomValuesFactory;
