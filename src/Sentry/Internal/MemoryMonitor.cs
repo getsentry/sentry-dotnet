@@ -100,7 +100,37 @@ internal sealed class MemoryMonitor : IDisposable
             return;
         }
 
+
+        const long maxDumpSizeInBytes = 20 * 1024 * 1024; 
+
+        var fileInfo = new FileInfo(dumpFile);
+        if (fileInfo.Length > maxDumpSizeInBytes)
+        {
+            _options.LogWarning($"Memory dump file is too large ({fileInfo.Length} bytes). and will not be attached to the Sentry event.");
+    
+            try
+            {
+                File.Delete(dumpFile);
+            }
+            catch (Exception ex)
+            {
+                _options.LogError($"Error deleting memory dump file: {ex.Message}");
+            }
+
+            return;
+        }
+
+
         _onDumpCollected(dumpFile);
+
+        try
+        {
+            File.Delete(dumpFile);
+        }
+        catch (Exception ex)
+        {
+            _options.LogError($"Error deleting memory dump file after sending to Sentry: {ex.Message}");
+        }
     }
 
     /// <summary>
