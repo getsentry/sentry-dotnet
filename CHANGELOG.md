@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fixed symbolication for net9.0-android applications in Release config ([#4221](https://github.com/getsentry/sentry-dotnet/pull/4221))
+
 ## 5.8.1
 
 ### Fixes
