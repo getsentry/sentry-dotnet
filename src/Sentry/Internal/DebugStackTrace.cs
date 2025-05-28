@@ -261,6 +261,10 @@ internal class DebugStackTrace : SentryStackTrace
 #elif __IOS__ || MACCATALYST
         _nativeDebugImages ??= Sentry.Cocoa.C.LoadDebugImages(_options.DiagnosticLogger);
 #else
+        if (!SentryNative.IsAvailable)
+        {
+            _nativeDebugImages ??= new();
+        }
         _nativeDebugImages ??= Sentry.Native.C.LoadDebugImages(_options.DiagnosticLogger);
 #endif
 

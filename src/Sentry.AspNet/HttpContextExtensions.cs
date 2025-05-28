@@ -34,27 +34,6 @@ public static class HttpContextExtensions
         }
     }
 
-    private static W3CTraceHeader? TryGetW3CTraceHeader(HttpContext context, SentryOptions? options)
-    {
-        var value = context.Request.Headers.Get(W3CTraceHeader.HttpHeaderName);
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return null;
-        }
-
-        options?.LogDebug("Received Sentry trace header '{0}'.", value);
-
-        try
-        {
-            return W3CTraceHeader.Parse(value);
-        }
-        catch (Exception ex)
-        {
-            options?.LogError(ex, "Invalid Sentry trace header '{0}'.", value);
-            return null;
-        }
-    }
-
     private static BaggageHeader? TryGetBaggageHeader(HttpContext context, SentryOptions? options)
     {
         var value = context.Request.Headers.Get(BaggageHeader.HttpHeaderName);
@@ -86,10 +65,7 @@ public static class HttpContextExtensions
     {
         var options = SentrySdk.CurrentOptions;
 
-        // If both sentry-trace and traceparent headers are present, sentry-trace takes precedence.
-        // See: https://github.com/getsentry/team-sdks/issues/41
         var traceHeader = TryGetSentryTraceHeader(httpContext, options);
-        traceHeader ??= TryGetW3CTraceHeader(httpContext, options)?.SentryTraceHeader;
         var baggageHeader = TryGetBaggageHeader(httpContext, options);
 
         var method = httpContext.Request.HttpMethod;
