@@ -1,10 +1,16 @@
 # Changelog
 
-### Unreleased
+## Unreleased
 
 ### Fixes
 
 - Revert W3C traceparent support ([#4204](https://github.com/getsentry/sentry-dotnet/pull/4204))
+
+### Dependencies
+
+- Bump CLI from v2.45.0 to v2.46.0 ([#4226](https://github.com/getsentry/sentry-dotnet/pull/4226))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2460)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.45.0...2.46.0)
 
 ## 5.8.1
 
