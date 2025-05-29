@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 5.8.2-beta.1
 
 ### Fixes
 
