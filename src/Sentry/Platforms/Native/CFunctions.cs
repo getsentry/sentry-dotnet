@@ -141,9 +141,8 @@ internal static class C
 
         unsafe
         {
-            var transport = new NativeHttpTransport(options, options.GetHttpClient());
             var cTransport = sentry_transport_new(&nativeTransport);
-            sentry_transport_set_state(cTransport, GCHandle.ToIntPtr(GCHandle.Alloc(transport)));
+            sentry_transport_set_state(cTransport, GCHandle.ToIntPtr(GCHandle.Alloc(options)));
             sentry_transport_set_free_func(cTransport, &nativeTransportFree);
             sentry_options_set_transport(cOptions, cTransport);
         }
@@ -399,18 +398,27 @@ internal static class C
     {
         try
         {
-            var transport = GCHandle.FromIntPtr(state).Target as NativeHttpTransport;
-            if (transport is not null)
+            var options = GCHandle.FromIntPtr(state).Target as SentryOptions;
+            if (options is not null)
             {
                 var data = sentry_envelope_serialize(envelope, out var size);
-                transport.SendData(data, (uint)size);
+                var content = new StringContent(Marshal.PtrToStringAnsi(data, (int)size));
                 sentry_free(data);
+
+                using var client = options.GetHttpClient();
+                using var request = options.CreateRequest(content);
+                // TODO: fix integration-test/sentry-server.py with gzip compression
+                // client.SendAsync(request).GetAwaiter().GetResult();
+                client.Send(request);
             }
-            sentry_envelope_free(envelope);
         }
         catch
         {
             // never allow an exception back to native code - it would crash the app
+        }
+        finally
+        {
+            sentry_envelope_free(envelope);
         }
     }
 
