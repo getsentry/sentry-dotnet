@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Reduced memory pressure when sampling less than 100% of traces/transactions ([#4212](https://github.com/getsentry/sentry-dotnet/pull/4212))
+
 ### Fixes
 
 - Support Linux arm64 on Native AOT ([#3700](https://github.com/getsentry/sentry-dotnet/pull/3700))
