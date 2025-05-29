@@ -147,7 +147,7 @@ internal sealed class AndroidAssemblyDirectoryReaderV2 : IAndroidAssemblyReader
             }
 
             // First we check the base.apk
-            if (ReadEntryFromApk(_archivePath) is {} baseEntry)
+            if (ReadEntryFromApk(_archivePath) is { } baseEntry)
             {
                 _logger?.Invoke("Found entry '{0}' in base archive '{1}'", path, _archivePath);
                 return baseEntry;
