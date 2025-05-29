@@ -11,9 +11,10 @@ runs:
         echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" >> $GITHUB_ENV
         echo "DOTNET_NOLOGO=1" >> $GITHUB_ENV
 
+    # Android SDK Tools are arm64-incompatible
     # Android SDK Build Tools are musl-incompatible
     - name: Set Environment Variables for Alpine Linux
-      if: ${{ contains(matrix.container, 'alpine') }}
+      if: ${{ (runner.os == 'Linux' && runner.arch == 'ARM64') || contains(matrix.container, 'alpine') }}
       shell: bash
       run: echo "NO_MOBILE=true" >> $GITHUB_ENV
 
@@ -39,7 +40,7 @@ runs:
         java-version: '17'
 
     - name: Setup Android SDK
-      if: ${{ !matrix.container }}
+      if: ${{ (runner.os != 'Linux' || runner.arch != 'ARM64') && !matrix.container }}
       uses: android-actions/setup-android@07976c6290703d34c16d382cb36445f98bb43b1f # v3.2.0
       with:
         log-accepted-android-sdk-licenses: false

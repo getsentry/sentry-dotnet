@@ -8,14 +8,29 @@
 
 ### Fixes
 
+- Support Linux arm64 on Native AOT ([#3700](https://github.com/getsentry/sentry-dotnet/pull/3700))
+- Revert W3C traceparent support ([#4204](https://github.com/getsentry/sentry-dotnet/pull/4204))
+
+### Dependencies
+
+- Bump CLI from v2.45.0 to v2.46.0 ([#4226](https://github.com/getsentry/sentry-dotnet/pull/4226))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2460)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.45.0...2.46.0)
+
+## 5.8.1
+
+### Fixes
+
 - Support musl on Linux ([#4188](https://github.com/getsentry/sentry-dotnet/pull/4188))
+- Support for Windows ARM64 with Native AOT ([#4187](https://github.com/getsentry/sentry-dotnet/pull/4187))
+- Addressed potential performance issue with Sentry.Maui ([#4219](https://github.com/getsentry/sentry-dotnet/pull/4219))
+- Respect `SentryNative=false` at runtime ([#4220](https://github.com/getsentry/sentry-dotnet/pull/4220))
 
 ## 5.8.0
 
 ### Features
 
 - .NET MAUI integration with CommunityToolkit.Mvvm Async Relay Commands can now be auto spanned with the new package Sentry.Maui.CommunityToolkit.Mvvm ([#4125](https://github.com/getsentry/sentry-dotnet/pull/4125))
-- Support for Windows ARM64 with Native AOT ([#4187](https://github.com/getsentry/sentry-dotnet/pull/4187))
 
 ### Fixes
 

@@ -825,7 +825,7 @@ public class SentryOptions
     public TimeSpan InitCacheFlushTimeout { get; set; } = TimeSpan.FromSeconds(1);
 
     /// <summary>
-    /// Defaults tags to add to all events. (These are indexed by Sentry).
+    /// Default tags to add to all events. (These are indexed by Sentry).
     /// </summary>
     /// <remarks>
     /// If the key already exists in the event, it will not be overwritten by a default tag.
@@ -952,8 +952,7 @@ public class SentryOptions
     /// <summary>
     /// A customizable list of <see cref="StringOrRegex"/> objects, each containing either a
     /// substring or regular expression pattern that can be used to control which outgoing HTTP requests
-    /// will have the <c>sentry-trace</c>, <c>traceparent</c>, and <c>baggage</c> headers propagated,
-    /// for purposes of distributed tracing.
+    /// will have the <c>sentry-trace</c> and <c>baggage</c> headers propagated, for purposes of distributed tracing.
     /// The default value contains a single value of <c>.*</c>, which matches everything.
     /// To disable propagation completely, clear this collection or set it to an empty collection.
     /// </summary>
