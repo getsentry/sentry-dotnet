@@ -4,6 +4,7 @@
 
 ### Fixes
 
+- Support Linux arm64 on Native AOT ([#3700](https://github.com/getsentry/sentry-dotnet/pull/3700))
 - Revert W3C traceparent support ([#4204](https://github.com/getsentry/sentry-dotnet/pull/4204))
 
 ### Dependencies
