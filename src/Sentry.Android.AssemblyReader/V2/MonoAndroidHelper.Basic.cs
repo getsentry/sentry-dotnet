@@ -95,18 +95,6 @@ internal static class MonoAndroidHelper
     /// architecture specific APK like split_config.arm64_v8a.apk. This method returns the path to that split_config APK
     /// if it exists... otherwise we just return the original archive path.
     /// </summary>
-    internal static string GetArchivePathForArchitecture(this string archivePath, AndroidTargetArch arch, DebugLogger? logger)
-    {
-        return ArchToAbiMap.TryGetValue(arch, out var abi)
-            ? GetArchivePathForAbi(archivePath, abi, logger)
-            : archivePath;
-    }
-
-    /// <summary>
-    /// When an AAB file is deployed, the APK is split into multiple APKs so our modules can end up in a companion
-    /// architecture specific APK like split_config.arm64_v8a.apk. This method returns the path to that split_config APK
-    /// if it exists... otherwise we just return the original archive path.
-    /// </summary>
     internal static string GetArchivePathForAbi(this string archivePath, string abi, DebugLogger? logger)
     {
         var basePath = Path.GetDirectoryName(archivePath) ?? string.Empty;
