@@ -23,6 +23,16 @@ public interface ISentryScopeManager
     public Task ConfigureScopeAsync(Func<Scope, Task> configureScope);
 
     /// <summary>
+    /// Sets a tag on the current scope.
+    /// </summary>
+    public void SetTag(string key, string value);
+
+    /// <summary>
+    /// Removes a tag from the current scope.
+    /// </summary>
+    public void UnsetTag(string key);
+
+    /// <summary>
     /// Binds the client to the current scope.
     /// </summary>
     /// <param name="client">The client.</param>

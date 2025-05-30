@@ -111,6 +111,10 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    public void SetTag(string key, string value) => ScopeManager.SetTag(key, value);
+
+    public void UnsetTag(string key) => ScopeManager.UnsetTag(key);
+
     public IDisposable PushScope() => ScopeManager.PushScope();
 
     public IDisposable PushScope<TState>(TState state) => ScopeManager.PushScope(state);
