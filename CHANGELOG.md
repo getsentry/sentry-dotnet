@@ -8,6 +8,7 @@
 
 ### Fixes
 
+- Fixed symbolication for net9.0-android applications in Release config ([#4221](https://github.com/getsentry/sentry-dotnet/pull/4221))
 - Support Linux arm64 on Native AOT ([#3700](https://github.com/getsentry/sentry-dotnet/pull/3700))
 - Revert W3C traceparent support ([#4204](https://github.com/getsentry/sentry-dotnet/pull/4204))
 

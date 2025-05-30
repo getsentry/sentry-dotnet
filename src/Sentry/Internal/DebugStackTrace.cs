@@ -249,6 +249,7 @@ internal class DebugStackTrace : SentryStackTrace
             return null;
         }
 
+        _options.LogDebug("Attempting to get debug image for native AOT Frame");
         var imageAddress = stackFrame.GetNativeImageBase();
         var frame = ParseNativeAOTToString(stackFrame.ToString());
         frame.ImageAddress = imageAddress;
