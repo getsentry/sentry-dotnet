@@ -5,6 +5,7 @@
 ### Features
 
 - Reduced memory pressure when sampling less than 100% of traces/transactions ([#4212](https://github.com/getsentry/sentry-dotnet/pull/4212))
+- Add SentrySdk.SetTag ([#4232](https://github.com/getsentry/sentry-dotnet/pull/4232))
 
 ### Fixes
 
