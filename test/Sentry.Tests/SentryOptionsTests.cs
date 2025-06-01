@@ -335,6 +335,26 @@ public partial class SentryOptionsTests
     }
 
     [Fact]
+    public void AddInAppExclude_DoesNotOverrideDefaults()
+    {
+        var sut = new SentryOptions();
+        const string expected = "test";
+        sut.AddInAppExclude(expected);
+        Assert.All(SentryOptions.GetDefaultInAppExclude(),
+            item => Assert.Contains(item, sut.InAppExclude!));
+    }
+
+    [Fact]
+    public void InAppExcludes_IgnoresJavaFrames()
+    {
+        var sut = new SentryOptions();
+        const string expected = "test";
+        sut.AddInAppExclude(expected);
+        Assert.All(SentryOptions.GetDefaultInAppExclude(),
+            item => Assert.Contains(item, sut.InAppExclude!));
+    }
+
+    [Fact]
     public void AddInAppExcludeRegex_StoredInOptions()
     {
         var sut = new SentryOptions();

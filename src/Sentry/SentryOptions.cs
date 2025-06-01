@@ -1292,48 +1292,7 @@ public class SentryOptions
         Native = new NativeOptions(this);
 #endif
 
-        InAppExclude = new() {
-                "System",
-                "Mono",
-                "Sentry",
-                "Microsoft",
-                "MS", // MS.Win32, MS.Internal, etc: Desktop apps
-                "ABI.Microsoft", // MAUI
-                "WinRT", // WinRT, UWP, WinUI
-                "UIKit", // iOS / MacCatalyst
-                "Newtonsoft.Json",
-                "FSharp",
-                "Serilog",
-                "Giraffe",
-                "NLog",
-                "Npgsql",
-                "RabbitMQ",
-                "Hangfire",
-                "IdentityServer4",
-                "AWSSDK",
-                "Polly",
-                "Swashbuckle",
-                "FluentValidation",
-                "Autofac",
-                "Stackexchange.Redis",
-                "Dapper",
-                "RestSharp",
-                "SkiaSharp",
-                "IdentityModel",
-                "SqlitePclRaw",
-                "Xamarin",
-                "Android", // Ex: Android.Runtime.JNINativeWrapper...
-                "Google",
-                "MongoDB",
-                "Remotion.Linq",
-                "AutoMapper",
-                "Nest",
-                "Owin",
-                "MediatR",
-                "ICSharpCode",
-                "Grpc",
-                "ServiceStack"
-        };
+        InAppExclude = GetDefaultInAppExclude();
 
 #if DEBUG
         InAppInclude = new()
@@ -1827,4 +1786,49 @@ public class SentryOptions
         // In the future, this will most likely contain process ID
         return TryGetDsnSpecificCacheDirectoryPath();
     }
+
+    internal static List<StringOrRegex> GetDefaultInAppExclude() =>
+    [
+        "System",
+        "Mono",
+        "Sentry",
+        "Microsoft",
+        "MS", // MS.Win32, MS.Internal, etc: Desktop apps
+        "ABI.Microsoft", // MAUI
+        "WinRT", // WinRT, UWP, WinUI
+        "UIKit", // iOS / MacCatalyst
+        "Newtonsoft.Json",
+        "FSharp",
+        "Serilog",
+        "Giraffe",
+        "NLog",
+        "Npgsql",
+        "RabbitMQ",
+        "Hangfire",
+        "IdentityServer4",
+        "AWSSDK",
+        "Polly",
+        "Swashbuckle",
+        "FluentValidation",
+        "Autofac",
+        "Stackexchange.Redis",
+        "Dapper",
+        "RestSharp",
+        "SkiaSharp",
+        "IdentityModel",
+        "SqlitePclRaw",
+        "Xamarin",
+        "Android", // Ex: Android.Runtime.JNINativeWrapper...
+        "Google",
+        "MongoDB",
+        "Remotion.Linq",
+        "AutoMapper",
+        "Nest",
+        "Owin",
+        "MediatR",
+        "ICSharpCode",
+        "Grpc",
+        "ServiceStack",
+        "Java.Interop",
+    ];
 }
