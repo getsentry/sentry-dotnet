@@ -12,7 +12,7 @@ public static class Program
 
     // DSN used by the example: 'UsingCodeConfiguration'.
     // #### ADD YOUR DSN HERE:
-    private static readonly string DsnSample = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+    private static readonly string DsnSample = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.us.sentry.io/5428537";
 
     private static void Main()
     {

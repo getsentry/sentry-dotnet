@@ -14,7 +14,7 @@ public static class MauiProgram
             .UseSentry(options =>
             {
                 // The DSN is the only required option.
-                options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+                options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.us.sentry.io/5428537";
 
                 // By default, we will send the last 100 breadcrumbs with each event.
                 // If you want to see everything we can capture from MAUI, you may wish to use a larger value.

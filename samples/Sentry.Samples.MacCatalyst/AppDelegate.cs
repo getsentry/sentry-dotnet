@@ -14,7 +14,7 @@ public class AppDelegate : UIApplicationDelegate
         // Init the Sentry SDK
         SentrySdk.Init(options =>
         {
-            options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+            options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.us.sentry.io/5428537";
             options.Debug = true;
         });
 
