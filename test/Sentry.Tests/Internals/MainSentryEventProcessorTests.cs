@@ -62,7 +62,6 @@ public class MainSentryEventProcessorTests
 
         _ = sut.Process(evt);
         var memory = (MemoryInfo)evt.Contexts[MainSentryEventProcessor.MemoryInfoKey];
-        Assert.NotEqual(0, memory.TotalAvailableMemoryBytes);
         Assert.NotEqual(0, memory.HighMemoryLoadThresholdBytes);
         Assert.NotEqual(0, memory.TotalAvailableMemoryBytes);
     }
