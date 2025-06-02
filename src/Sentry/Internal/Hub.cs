@@ -99,11 +99,35 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    public void ConfigureScope<TArg>(Action<Scope, TArg> configureScope, TArg arg)
+    {
+        try
+        {
+            ScopeManager.ConfigureScope(configureScope, arg);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to ConfigureScope");
+        }
+    }
+
     public async Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
     {
         try
         {
             await ScopeManager.ConfigureScopeAsync(configureScope).ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to ConfigureScopeAsync");
+        }
+    }
+
+    public async Task ConfigureScopeAsync<TArg>(Func<Scope, TArg, Task> configureScope, TArg arg)
+    {
+        try
+        {
+            await ScopeManager.ConfigureScopeAsync(configureScope, arg).ConfigureAwait(false);
         }
         catch (Exception e)
         {
