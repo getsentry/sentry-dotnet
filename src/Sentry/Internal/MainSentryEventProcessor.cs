@@ -163,10 +163,10 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
     {
 #if NETCOREAPP3_0_OR_GREATER
         var memory = GC.GetGCMemoryInfo();
-        var allocatedBytes = GC.GetTotalAllocatedBytes();
+        var totalAllocatedBytes = GC.GetTotalAllocatedBytes();
 #if NET5_0_OR_GREATER
         contexts[MemoryInfoKey] = new MemoryInfo(
-            allocatedBytes,
+            totalAllocatedBytes,
             memory.FragmentedBytes,
             memory.HeapSizeBytes,
             memory.HighMemoryLoadThresholdBytes,
@@ -183,7 +183,7 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
             memory.PauseDurations.ToArray());
 #else
             contexts[MemoryInfoKey] = new MemoryInfo(
-            allocatedBytes,
+            totalAllocatedBytes,
             memory.FragmentedBytes,
             memory.HeapSizeBytes,
             memory.HighMemoryLoadThresholdBytes,
