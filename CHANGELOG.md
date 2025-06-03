@@ -6,6 +6,10 @@
 
 - Rename MemoryInfo.AllocatedBytes to MemoryInfo.TotalAllocatedBytes ([#4243](https://github.com/getsentry/sentry-dotnet/pull/4243))
 
+### Fixes
+
+- InvalidCastException in SentrySpanProcessor ([#4245](https://github.com/getsentry/sentry-dotnet/pull/4245))
+
 ## 5.9.0
 
 ### Features
