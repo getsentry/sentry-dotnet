@@ -133,12 +133,15 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             Instrumenter = Instrumenter.OpenTelemetry
         };
 
-        var span = (SpanTracer)parentSpan.StartChild(context);
-        span.Origin = OpenTelemetryOrigin;
-        span.StartTimestamp = data.StartTimeUtc;
-        // Used to filter out spans that are not recorded when finishing a transaction.
+        var span = parentSpan.StartChild(context);
+        if (span is SpanTracer spanTracer)
+        {
+            spanTracer.Origin = OpenTelemetryOrigin;
+            spanTracer.StartTimestamp = data.StartTimeUtc;
+            // Used to filter out spans that are not recorded when finishing a transaction.
+            spanTracer.IsFiltered = () => span.GetFused<Activity>() is { IsAllDataRequested: false, Recorded: false };
+        }
         span.SetFused(data);
-        span.IsFiltered = () => span.GetFused<Activity>() is { IsAllDataRequested: false, Recorded: false };
         _map[data.SpanId] = span;
     }
 

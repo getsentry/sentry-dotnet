@@ -145,11 +145,14 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         }
     }
 
-    [Fact]
-    public void OnStart_WithParentSpanId_StartsChildSpan()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void OnStart_WithParentSpanId_StartsChildSpan(bool isSampled)
     {
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.Options.TracesSampleRate = isSampled ? 1.0 : 0.0;
         var sut = _fixture.GetSut();
 
         using var parent = Tracer.StartActivity("Parent");
@@ -164,16 +167,23 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         Assert.True(sut._map.TryGetValue(data.SpanId, out var span));
         using (new AssertionScope())
         {
-            span.Should().BeOfType<SpanTracer>();
+            span.IsSampled.Should().Be(isSampled);
             span.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
+            if (!isSampled)
+            {
+                span.Should().BeOfType<UnsampledSpan>();
+                return;
+            }
+
             if (span is not SpanTracer spanTracer)
             {
                 Assert.Fail("Span is not a span tracer");
                 return;
             }
+
+            span.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
             using (new AssertionScope())
             {
-                spanTracer.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
                 spanTracer.ParentSpanId.Should().Be(data.ParentSpanId.AsSentrySpanId());
                 spanTracer.TraceId.Should().Be(data.TraceId.AsSentryId());
                 spanTracer.Operation.Should().Be(data.OperationName);
