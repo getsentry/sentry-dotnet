@@ -48,7 +48,7 @@ public class SentryLoggerProvider : ILoggerProvider
         if (hub.IsEnabled)
         {
             _scope = hub.PushScope();
-            hub.ConfigureScope(s =>
+            hub.ConfigureScope(static s =>
             {
                 if (s.Sdk is { } sdk)
                 {

@@ -296,7 +296,7 @@ internal class Hub : IHub, IDisposable
         string? operation = null)
     {
         var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader, _replaySession);
-        ConfigureScope(scope => scope.SetPropagationContext(propagationContext));
+        ConfigureScope(static (scope, propagationContext) => scope.SetPropagationContext(propagationContext), propagationContext);
 
         return new TransactionContext(
             name: name ?? string.Empty,
