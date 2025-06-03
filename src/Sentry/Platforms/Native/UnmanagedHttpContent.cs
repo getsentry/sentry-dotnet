@@ -52,7 +52,7 @@ internal sealed class UnmanagedHttpContent : SerializableHttpContent
     protected override bool TryComputeLength(out long length)
     {
         length = _length;
-        return false;
+        return true;
     }
 
     protected override void Dispose(bool disposing)
