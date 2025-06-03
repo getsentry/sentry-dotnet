@@ -391,7 +391,7 @@ internal static class C
     private static extern void sentry_envelope_free(IntPtr envelope);
 
     [DllImport("sentry-native")]
-    private static extern void sentry_free(IntPtr ptr);
+    internal static extern void sentry_free(IntPtr ptr);
 
     [UnmanagedCallersOnly]
     private static void nativeTransport(IntPtr envelope, IntPtr state)
@@ -402,8 +402,7 @@ internal static class C
             if (options is not null)
             {
                 var data = sentry_envelope_serialize(envelope, out var size);
-                var content = new StringContent(Marshal.PtrToStringAnsi(data, (int)size));
-                sentry_free(data);
+                using var content = new UnmanagedHttpContent(data, (int)size, options.DiagnosticLogger);
 
                 using var client = options.GetHttpClient();
                 using var request = options.CreateHttpRequest(content);
