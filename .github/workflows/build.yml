@@ -194,7 +194,7 @@ jobs:
       # To save time and disk space, we only create and archive the NuGet packages when we're actually releasing.
 
       - name: Create NuGet Packages
-        if: env.CI_PUBLISHING_BUILD == 'true' || matrix.no-mobile == 'true'
+        if: env.CI_PUBLISHING_BUILD == 'true' || matrix.no-mobile
         run: dotnet pack Sentry-CI-Build-${{ matrix.target || runner.os }}.slnf -c Release --no-build --nologo
 
       - name: Archive NuGet Packages
@@ -210,7 +210,7 @@ jobs:
       # Run integration tests right away for fast feedback on those platforms
       # that don't need full packages for mobile.
       - name: Integration Test
-        if: ${{ matrix.no-mobile == 'true' }}
+        if: ${{ matrix.no-mobile }}
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         with:
           path: integration-test
