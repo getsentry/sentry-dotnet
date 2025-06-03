@@ -426,7 +426,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         span.Should().BeOfType<UnsampledSpan>();
 
         // There's nothing else to assert here, as long as calling OnEnd does not throw an exception,
-        // UnsampleSpan.Finish() is basically a no-op.
+        // UnsampledSpan.Finish() is basically a no-op.
     }
 
     [Fact]

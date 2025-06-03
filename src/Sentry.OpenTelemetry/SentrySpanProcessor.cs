@@ -139,9 +139,9 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             spanTracer.Origin = OpenTelemetryOrigin;
             spanTracer.StartTimestamp = data.StartTimeUtc;
             // Used to filter out spans that are not recorded when finishing a transaction.
-            spanTracer.IsFiltered = () => span.GetFused<Activity>() is { IsAllDataRequested: false, Recorded: false };
+            spanTracer.SetFused(data);
+            spanTracer.IsFiltered = () => spanTracer.GetFused<Activity>() is { IsAllDataRequested: false, Recorded: false };
         }
-        span.SetFused(data);
         _map[data.SpanId] = span;
     }
 
@@ -248,8 +248,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
             // Spans set otel attributes in extras (passed to Sentry as "data" on the span).
             // Resource attributes do not need to be set, as they would be identical as those set on the transaction.
-            span.SetExtras(attributes);
-            span.SetExtra("otel.kind", data.Kind);
+            spanTracer.SetExtras(attributes);
+            spanTracer.SetExtra("otel.kind", data.Kind);
         }
 
         // In ASP.NET Core the middleware finishes up (and the scope gets popped) before the activity is ended.  So we
