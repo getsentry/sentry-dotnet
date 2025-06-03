@@ -7,7 +7,7 @@ namespace Sentry.Internal;
 
 internal sealed class MemoryInfo : ISentryJsonSerializable
 {
-    public long AllocatedBytes { get; }
+    public long TotalAllocatedBytes { get; }
     public long FragmentedBytes { get; }
     public long HeapSizeBytes { get; }
     public long HighMemoryLoadThresholdBytes { get; }
@@ -26,7 +26,7 @@ internal sealed class MemoryInfo : ISentryJsonSerializable
     public bool Concurrent { get; }
 
     public MemoryInfo(
-        long allocatedBytes,
+        long totalAllocatedBytes,
         long fragmentedBytes,
         long heapSizeBytes,
         long highMemoryLoadThresholdBytes,
@@ -42,7 +42,7 @@ internal sealed class MemoryInfo : ISentryJsonSerializable
         bool concurrent,
         TimeSpan[] pauseDurations)
     {
-        AllocatedBytes = allocatedBytes;
+        TotalAllocatedBytes = totalAllocatedBytes;
         FragmentedBytes = fragmentedBytes;
         HeapSizeBytes = heapSizeBytes;
         HighMemoryLoadThresholdBytes = highMemoryLoadThresholdBytes;
@@ -60,14 +60,14 @@ internal sealed class MemoryInfo : ISentryJsonSerializable
     }
 #else
     public MemoryInfo(
-        long allocatedBytes,
+        long totalAllocatedBytes,
         long fragmentedBytes,
         long heapSizeBytes,
         long highMemoryLoadThresholdBytes,
         long totalAvailableMemoryBytes,
         long memoryLoadBytes)
     {
-        AllocatedBytes = allocatedBytes;
+        TotalAllocatedBytes = totalAllocatedBytes;
         FragmentedBytes = fragmentedBytes;
         HeapSizeBytes = heapSizeBytes;
         HighMemoryLoadThresholdBytes = highMemoryLoadThresholdBytes;
@@ -80,7 +80,7 @@ internal sealed class MemoryInfo : ISentryJsonSerializable
         //WriteNumberIfNotZero since on OS that dont implement all props, those props are stubbed out to zero
         writer.WriteStartObject();
 
-        writer.WriteNumberIfNotZero("allocated_bytes", AllocatedBytes);
+        writer.WriteNumberIfNotZero("total_allocated_bytes", TotalAllocatedBytes);
         writer.WriteNumberIfNotZero("fragmented_bytes", FragmentedBytes);
         writer.WriteNumberIfNotZero("heap_size_bytes", HeapSizeBytes);
         writer.WriteNumberIfNotZero("high_memory_load_threshold_bytes", HighMemoryLoadThresholdBytes);

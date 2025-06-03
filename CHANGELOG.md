@@ -1,6 +1,12 @@
 # Changelog
 
-### Unreleased
+## Unreleased
+
+### Features
+
+- Rename MemoryInfo.AllocatedBytes to MemoryInfo.TotalAllocatedBytes ([#4243](https://github.com/getsentry/sentry-dotnet/pull/4243))
+
+### Fixes
 
 - Fix InApp Exclude for frames without Module by checking against frame's Package ([#4236](https://github.com/getsentry/sentry-dotnet/pull/4236))
 
