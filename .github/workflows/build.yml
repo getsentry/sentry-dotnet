@@ -207,6 +207,13 @@ jobs:
             src/**/Release/*.nupkg
             src/**/Release/*.snupkg
 
+      # TODO: remove (https://github.com/getsentry/sentry-dotnet/pull/4222)
+      - name: Install build dependencies
+        if: runner.os == 'Linux' && !matrix.container
+        run: |
+          sudo apt update
+          sudo apt install libcurl4-openssl-dev
+
       # Run integration tests right away for fast feedback on those platforms
       # that don't need full packages for mobile.
       - name: Integration Test
