@@ -201,6 +201,10 @@ public sealed class SentryStackFrame : ISentryJsonSerializable
         {
             ConfigureAppFrame(options, Module, LazyModuleMatcher.Value);
         }
+        else if (!string.IsNullOrEmpty(Package))
+        {
+            ConfigureAppFrame(options, Package, LazyModuleMatcher.Value);
+        }
         else if (!string.IsNullOrEmpty(Function))
         {
             ConfigureAppFrame(options, Function, LazyFunctionMatcher.Value);

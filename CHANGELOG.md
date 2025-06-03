@@ -9,6 +9,7 @@
 ### Fixes
 
 - InvalidCastException in SentrySpanProcessor ([#4245](https://github.com/getsentry/sentry-dotnet/pull/4245))
+- Fix InApp Exclude for frames without Module by checking against frame's Package ([#4236](https://github.com/getsentry/sentry-dotnet/pull/4236))
 
 ## 5.9.0
 
