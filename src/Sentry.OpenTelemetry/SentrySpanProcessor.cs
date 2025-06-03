@@ -241,10 +241,10 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             // Transactions set otel attributes (and resource attributes) as context.
             transaction.Contexts["otel"] = GetOtelContext(attributes);
         }
-        else
+        else if (span is SpanTracer spanTracer)
         {
             // Use the end timestamp from the activity data.
-            ((SpanTracer)span).EndTimestamp = data.StartTimeUtc + data.Duration;
+            spanTracer.EndTimestamp = data.StartTimeUtc + data.Duration;
 
             // Spans set otel attributes in extras (passed to Sentry as "data" on the span).
             // Resource attributes do not need to be set, as they would be identical as those set on the transaction.
