@@ -57,6 +57,20 @@ public sealed class HubAdapter : IHub
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
+    public void SetTag(string key, string value)
+        => SentrySdk.SetTag(key, value);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    public void UnsetTag(string key)
+        => SentrySdk.UnsetTag(key);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
     public IDisposable PushScope()
         => SentrySdk.PushScope();
 

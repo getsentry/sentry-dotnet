@@ -12,9 +12,10 @@ internal sealed class AndroidAssemblyDirectoryReaderV2 : IAndroidAssemblyReader
         Logger = logger;
         foreach (var abi in supportedAbis)
         {
+            logger?.Invoke("Adding {0} to supported architectures for Directory Reader", abi);
             SupportedArchitectures.Add(abi.AbiToDeviceArchitecture());
         }
-        _archiveAssemblyHelper = new ArchiveAssemblyHelper(apkPath, logger);
+        _archiveAssemblyHelper = new ArchiveAssemblyHelper(apkPath, logger, supportedAbis);
     }
 
     public PEReader? TryReadAssembly(string name)
@@ -25,11 +26,13 @@ internal sealed class AndroidAssemblyDirectoryReaderV2 : IAndroidAssemblyReader
             var stream = File.OpenRead(name);
             return new PEReader(stream);
         }
+        Logger?.Invoke("File {0} does not exist in the APK", name);
 
         foreach (var arch in SupportedArchitectures)
         {
             if (_archiveAssemblyHelper.ReadEntry($"assemblies/{name}", arch) is not { } memStream)
             {
+                Logger?.Invoke("Couldn't find entry {0} in the APK for the {1} architecture", name, arch);
                 continue;
             }
 
@@ -56,8 +59,9 @@ internal sealed class AndroidAssemblyDirectoryReaderV2 : IAndroidAssemblyReader
 
         private readonly string _archivePath;
         private readonly DebugLogger? _logger;
+        private readonly IList<string> _supportedAbis;
 
-        public ArchiveAssemblyHelper(string archivePath, DebugLogger? logger)
+        public ArchiveAssemblyHelper(string archivePath, DebugLogger? logger, IList<string> supportedAbis)
         {
             if (string.IsNullOrEmpty(archivePath))
             {
@@ -66,6 +70,7 @@ internal sealed class AndroidAssemblyDirectoryReaderV2 : IAndroidAssemblyReader
 
             _archivePath = archivePath;
             _logger = logger;
+            _supportedAbis = supportedAbis;
         }
 
         public MemoryStream? ReadEntry(string path, AndroidTargetArch arch = AndroidTargetArch.None, bool uncompressIfNecessary = false)
@@ -137,23 +142,52 @@ internal sealed class AndroidAssemblyDirectoryReaderV2 : IAndroidAssemblyReader
             var potentialEntries = TransformArchiveAssemblyPath(path, arch);
             if (potentialEntries == null || potentialEntries.Count == 0)
             {
+                _logger?.Invoke("No potential entries for path '{0}' with arch '{1}'", path, arch);
                 return null;
             }
 
-            using var zip = ZipFile.OpenRead(_archivePath);
-            foreach (var assemblyPath in potentialEntries)
+            // First we check the base.apk
+            if (ReadEntryFromApk(_archivePath) is { } baseEntry)
             {
-                if (zip.GetEntry(assemblyPath) is not { } entry)
-                {
-                    continue;
-                }
-
-                var ret = entry.Extract();
-                ret.Flush();
-                return ret;
+                _logger?.Invoke("Found entry '{0}' in base archive '{1}'", path, _archivePath);
+                return baseEntry;
             }
 
+            // Otherwise check in the device specific APKs
+            foreach (var supportedAbi in _supportedAbis)
+            {
+                var splitFilePath = _archivePath.GetArchivePathForAbi(supportedAbi, _logger);
+                if (!File.Exists(splitFilePath))
+                {
+                    _logger?.Invoke("No split config detected at: '{0}'", splitFilePath);
+                }
+                else if (ReadEntryFromApk(splitFilePath) is { } splitEntry)
+                {
+                    return splitEntry;
+                }
+            }
+
+            // Finally admit defeat
             return null;
+
+            MemoryStream? ReadEntryFromApk(string archivePath)
+            {
+                using var zip = ZipFile.OpenRead(archivePath);
+                foreach (var assemblyPath in potentialEntries)
+                {
+                    if (zip.GetEntry(assemblyPath) is not { } entry)
+                    {
+                        _logger?.Invoke("No entry found for path '{0}' in archive '{1}'", assemblyPath, archivePath);
+                        continue;
+                    }
+
+                    var ret = entry.Extract();
+                    ret.Flush();
+                    return ret;
+                }
+
+                return null;
+            }
         }
 
         /// <summary>

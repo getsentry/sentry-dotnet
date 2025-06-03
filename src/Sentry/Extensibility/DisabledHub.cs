@@ -39,6 +39,20 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
+    public void SetTag(string key, string value)
+    {
+    }
+
+    /// <summary>
+    /// No-Op.
+    /// </summary>
+    public void UnsetTag(string key)
+    {
+    }
+
+    /// <summary>
+    /// No-Op.
+    /// </summary>
     public IDisposable PushScope() => this;
 
     /// <summary>

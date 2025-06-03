@@ -848,11 +848,23 @@ public partial class HubTests
         var transaction = hub.StartTransaction(transactionContext, customContext, dsc);
 
         // Assert
-        var transactionTracer = ((TransactionTracer)transaction);
-        transactionTracer.IsSampled.Should().Be(expectedIsSampled);
-        transactionTracer.SampleRate.Should().Be(sampleRate);
-        transactionTracer.SampleRand.Should().Be(0.1234);
-        transactionTracer.DynamicSamplingContext.Should().Be(dsc);
+        if (expectedIsSampled)
+        {
+            transaction.Should().BeOfType<TransactionTracer>();
+            var transactionTracer = ((TransactionTracer)transaction);
+            transactionTracer.IsSampled.Should().Be(true);
+            transactionTracer.SampleRate.Should().Be(sampleRate);
+            transactionTracer.SampleRand.Should().Be(0.1234);
+            transactionTracer.DynamicSamplingContext.Should().Be(dsc);
+        }
+        else
+        {
+            transaction.Should().BeOfType<UnsampledTransaction>();
+            var unsampledTransaction = ((UnsampledTransaction)transaction);
+            unsampledTransaction.SampleRate.Should().Be(sampleRate);
+            unsampledTransaction.SampleRand.Should().Be(0.1234);
+            unsampledTransaction.DynamicSamplingContext.Should().Be(dsc);
+        }
     }
 
     [Theory]
@@ -879,11 +891,23 @@ public partial class HubTests
         var transaction = hub.StartTransaction(transactionContext, customContext, dsc);
 
         // Assert
-        var transactionTracer = ((TransactionTracer)transaction);
-        transactionTracer.IsSampled.Should().Be(expectedIsSampled);
-        transactionTracer.SampleRate.Should().Be(sampleRate);
-        transactionTracer.SampleRand.Should().Be(0.1234);
-        transactionTracer.DynamicSamplingContext.Should().Be(dsc);
+        if (expectedIsSampled)
+        {
+            transaction.Should().BeOfType<TransactionTracer>();
+            var transactionTracer = ((TransactionTracer)transaction);
+            transactionTracer.IsSampled.Should().Be(expectedIsSampled);
+            transactionTracer.SampleRate.Should().Be(sampleRate);
+            transactionTracer.SampleRand.Should().Be(0.1234);
+            transactionTracer.DynamicSamplingContext.Should().Be(dsc);
+        }
+        else
+        {
+            transaction.Should().BeOfType<UnsampledTransaction>();
+            var unsampledTransaction = ((UnsampledTransaction)transaction);
+            unsampledTransaction.SampleRate.Should().Be(sampleRate);
+            unsampledTransaction.SampleRand.Should().Be(0.1234);
+            unsampledTransaction.DynamicSamplingContext.Should().Be(dsc);
+        }
     }
 
     [Fact]
@@ -1059,26 +1083,25 @@ public partial class HubTests
         transaction.IsSampled.Should().BeFalse();
     }
 
-    [Fact]
-    public void GetTraceHeader_ReturnsHeaderForActiveSpan()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void GetTraceHeader_ReturnsHeaderForActiveSpan(bool isSampled)
     {
         // Arrange
+        _fixture.Options.TracesSampleRate = isSampled ? 1 : 0;
         var hub = _fixture.GetSut();
         var transaction = hub.StartTransaction("foo", "bar");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
 
         // Act
-        hub.ConfigureScope(scope =>
-        {
-            scope.Transaction = transaction;
+        var header = hub.GetTraceHeader();
 
-            var header = hub.GetTraceHeader();
-
-            // Assert
-            header.Should().NotBeNull();
-            header.SpanId.Should().Be(transaction.SpanId);
-            header.TraceId.Should().Be(transaction.TraceId);
-            header.IsSampled.Should().Be(transaction.IsSampled);
-        });
+        // Assert
+        header.Should().NotBeNull();
+        header.SpanId.Should().Be(transaction.SpanId);
+        header.TraceId.Should().Be(transaction.TraceId);
+        header.IsSampled.Should().Be(transaction.IsSampled);
     }
 
     [Fact]
@@ -1101,24 +1124,37 @@ public partial class HubTests
         header.IsSampled.Should().BeNull();
     }
 
-    [Fact]
-    public void GetBaggage_SpanActive_ReturnsBaggageFromSpan()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void GetBaggage_SpanActive_ReturnsBaggageFromSpan(bool isSampled)
     {
         // Arrange
+        _fixture.Options.TracesSampleRate = isSampled ? 1 : 0;
         var hub = _fixture.GetSut();
-        var transaction = hub.StartTransaction("test-name", "_");
+
+        var expectedBaggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "0.0"}
+        });
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.ActiveReplayId.Returns((SentryId?)null);
+        var dsc = expectedBaggage.CreateDynamicSamplingContext(replaySession);
+
+        var transaction = hub.StartTransaction(new TransactionContext("name", "op"),
+            new Dictionary<string, object>(), dsc);
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
 
         // Act
-        hub.ConfigureScope(scope =>
-        {
-            scope.Transaction = transaction;
+        var baggage = hub.GetBaggage();
 
-            var baggage = hub.GetBaggage();
-
-            // Assert
-            baggage.Should().NotBeNull();
-            Assert.Contains("test-name", baggage!.ToString());
-        });
+        // Assert
+        baggage.Should().NotBeNull();
+        Assert.Equal("43365712692146d08ee11a729dfbcaca", Assert.Contains("trace_id", dsc.Items));
+        Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
+        Assert.Equal("0.0", Assert.Contains("sample_rate", dsc.Items));
     }
 
     [Fact]
@@ -1786,7 +1822,16 @@ public partial class HubTests
         transaction.Finish();
 
         // Assert
-        _fixture.Client.Received().CaptureTransaction(Arg.Is<SentryTransaction>(t => t.IsSampled == enabled), Arg.Any<Scope>(), Arg.Any<SentryHint>());
+        if (enabled)
+        {
+            _fixture.Client.Received().CaptureTransaction(Arg.Is<SentryTransaction>(t => t.IsSampled == enabled),
+                Arg.Any<Scope>(), Arg.Any<SentryHint>());
+        }
+        else
+        {
+            transaction.Should().Be(NoOpTransaction.Instance);
+            _fixture.Client.DidNotReceive().CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
+        }
     }
 
     [Fact]

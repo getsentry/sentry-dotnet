@@ -468,6 +468,57 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
+    public void SetTag_SetsTagOnCurrentScope()
+    {
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+        });
+
+        const string key = "key";
+        const string value = "value";
+
+        SentrySdk.SetTag(key, value);
+
+        string actual = null;
+        SentrySdk.ConfigureScope(s => actual = s.Tags[key]);
+
+        Assert.Equal(value, actual);
+    }
+
+    [Fact]
+    public void SetTag_NotInit_NoOp() => SentrySdk.SetTag("key", "value");
+
+    [Fact]
+    public void UnsetTag_UnsetsTagOnCurrentScope()
+    {
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+        });
+
+        const string key = "key";
+        const string value = "value";
+
+        SentrySdk.SetTag(key, value);
+        SentrySdk.UnsetTag(key);
+
+        bool? containsKey = null;
+        SentrySdk.ConfigureScope(s => containsKey = s.Tags.ContainsKey(key));
+
+        Assert.True(containsKey is false);
+    }
+
+    [Fact]
+    public void UnsetTag_NotInit_NoOp() => SentrySdk.UnsetTag("key");
+
+    [Fact]
     public void CaptureEvent_WithConfiguredScope_ScopeAppliesToEvent()
     {
         const string expected = "test";

@@ -249,6 +249,7 @@ internal class DebugStackTrace : SentryStackTrace
             return null;
         }
 
+        _options.LogDebug("Attempting to get debug image for native AOT Frame");
         var imageAddress = stackFrame.GetNativeImageBase();
         var frame = ParseNativeAOTToString(stackFrame.ToString());
         frame.ImageAddress = imageAddress;
@@ -260,6 +261,10 @@ internal class DebugStackTrace : SentryStackTrace
 #elif __IOS__ || MACCATALYST
         _nativeDebugImages ??= Sentry.Cocoa.C.LoadDebugImages(_options.DiagnosticLogger);
 #else
+        if (!SentryNative.IsAvailable)
+        {
+            _nativeDebugImages ??= new();
+        }
         _nativeDebugImages ??= Sentry.Native.C.LoadDebugImages(_options.DiagnosticLogger);
 #endif
 

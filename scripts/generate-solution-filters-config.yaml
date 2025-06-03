@@ -49,6 +49,36 @@ filterConfigs:
         - "**/*DeviceTests*.csproj"
         - "**/*Maui.Device.TestApp.csproj"
 
+  - outputPath: Sentry-CI-Build-Linux-arm64.slnf
+    include:
+      groups:
+        - "allProjects"
+    exclude:
+      groups:
+        - "macOnly"
+        - "windowsOnly"
+        - "artefacts"
+        - "trimTests"
+      patterns:
+        - "**/*Android*.csproj"
+        - "**/*DeviceTests*.csproj"
+        - "**/*Maui*.csproj"
+
+  - outputPath: Sentry-CI-Build-Linux-musl.slnf
+    include:
+      groups:
+        - "allProjects"
+    exclude:
+      groups:
+        - "macOnly"
+        - "windowsOnly"
+        - "artefacts"
+        - "trimTests"
+      patterns:
+        - "**/*Android*.csproj"
+        - "**/*DeviceTests*.csproj"
+        - "**/*Maui*.csproj"
+
   - outputPath: Sentry-CI-Build-macOS.slnf
     include:
       groups:
@@ -82,6 +112,29 @@ filterConfigs:
         - "**/*Sentry.Maui.Device.TestApp.csproj"
         - "**/*Sentry.Samples.Android.csproj"
         - "**/*OpenTelemetry.AspNet.csproj"
+
+  - outputPath: Sentry-CI-Build-Windows-arm64.slnf
+    include:
+      groups:
+        - "allProjects"
+      patterns:
+        - "modules/perfview/**/TraceEvent.csproj"
+        - "modules/perfview/**/FastSerialization.csproj"
+    exclude:
+      groups:
+        - "macOnly"
+        - "artefacts"
+        - "trimTests"
+      patterns:
+        - "**/*AndroidTestApp.csproj"
+        - "**/*DeviceTests*.csproj"
+        - "**/*Sentry.Maui.Device.TestApp.csproj"
+        - "**/*Sentry.Samples.Android.csproj"
+        - "**/*OpenTelemetry.AspNet.csproj"
+        # Depends on LocalDb or SQLitePCL which are x64
+        - "**/*Sentry.DiagnosticSource.IntegrationTests.csproj"
+        - "**/*Sentry.DiagnosticSource.Tests.csproj"
+        - "**/*Sentry.EntityFramework.Tests.csproj"
 
   - outputPath: Sentry-CI-CodeQL.slnf
     include:

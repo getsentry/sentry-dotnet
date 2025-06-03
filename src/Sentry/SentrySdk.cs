@@ -393,6 +393,20 @@ public static partial class SentrySdk
     public static Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
         => CurrentHub.ConfigureScopeAsync(configureScope);
 
+    /// <summary>
+    /// Sets a tag on the current scope.
+    /// </summary>
+    [DebuggerStepThrough]
+    public static void SetTag(string key, string value)
+        => CurrentHub.SetTag(key, value);
+
+    /// <summary>
+    /// Removes a tag from the current scope.
+    /// </summary>
+    [DebuggerStepThrough]
+    public static void UnsetTag(string key)
+        => CurrentHub.UnsetTag(key);
+
     /// <inheritdoc cref="ISentryClient.CaptureEnvelope"/>
     [DebuggerStepThrough]
     [EditorBrowsable(EditorBrowsableState.Never)]
