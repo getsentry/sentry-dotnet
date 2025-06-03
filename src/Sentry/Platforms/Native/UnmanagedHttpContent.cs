@@ -2,7 +2,7 @@ using Sentry.Extensibility;
 
 namespace Sentry.Native;
 
-internal class UnmanagedHttpContent : SerializableHttpContent
+internal sealed class UnmanagedHttpContent : SerializableHttpContent
 {
     private readonly IntPtr _content;
     private readonly int _length = 0;
