@@ -15,14 +15,18 @@ internal sealed class UnmanagedHttpContent : SerializableHttpContent
         _logger = logger;
     }
 
-    protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context)
+    protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
     {
         try
         {
+            UnmanagedMemoryStream unmanagedStream;
             unsafe
             {
-                using var unmanagedStream = new UnmanagedMemoryStream((byte*)_content.ToPointer(), _length);
-                return unmanagedStream.CopyToAsync(stream);
+                unmanagedStream = new UnmanagedMemoryStream((byte*)_content.ToPointer(), _length);
+            }
+            using (unmanagedStream)
+            {
+                await unmanagedStream.CopyToAsync(stream).ConfigureAwait(false);
             }
         }
         catch (Exception e)
