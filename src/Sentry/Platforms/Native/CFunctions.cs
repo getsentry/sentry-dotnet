@@ -396,9 +396,9 @@ internal static class C
     [UnmanagedCallersOnly]
     private static void nativeTransport(IntPtr envelope, IntPtr state)
     {
+        var options = GCHandle.FromIntPtr(state).Target as SentryOptions;
         try
         {
-            var options = GCHandle.FromIntPtr(state).Target as SentryOptions;
             if (options is not null)
             {
                 var data = sentry_envelope_serialize(envelope, out var size);
@@ -409,9 +409,10 @@ internal static class C
                 client.SendAsync(request).GetAwaiter().GetResult();
             }
         }
-        catch
+        catch (Exception e)
         {
             // never allow an exception back to native code - it would crash the app
+            options?.DiagnosticLogger?.LogError(e, "Exception in native transport callback. The native envelope will not be sent.");
         }
         finally
         {
