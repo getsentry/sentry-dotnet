@@ -223,6 +223,58 @@ public class SentryStackFrameTests
     }
 
     [Fact]
+    public void ConfigureAppFrame_WithDefaultOptions_NotBuiltInIgnoredMarkedAsInApp()
+    {
+        var options = new SentryOptions();
+        var sut = new SentryStackFrame
+        {
+            Function = "async void MainActivity.OnCreate(Bundle savedInstanceState)+(?) =\\u003E { }",
+            Package = "SymbolCollector.Android, Version=1.23.0.0, Culture=neutral, PublicKeyToken=null"
+        };
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        Assert.True(sut.InApp);
+    }
+
+    [Fact]
+    public void ConfigureAppFrame_WithDefaultOptions_JavaPackageNotInApp()
+    {
+        var options = new SentryOptions();
+        var sut = new SentryStackFrame
+        {
+            Function = "void StaticMethods.CallStaticVoidMethod(JniObjectReference, JniMethodInfo, JniArgumentValue*)",
+            Package = "Java.Interop, Version=9.0.0.0, Culture=neutral, PublicKeyToken=84e04ff9cfb79065"
+        };
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        Assert.False(sut.InApp);
+    }
+
+    [Fact]
+    public void ConfigureAppFrame_WithDefaultOptions_SystemPackageNotInApp()
+    {
+        var options = new SentryOptions();
+        var sut = new SentryStackFrame
+        {
+            Function = "void Interop.ThrowExceptionForIoErrno(ErrorInfo errorInfo, string path, bool isDirError)",
+            Package = "System.Private.CoreLib, Version=9.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e",
+            FileName = "Interop.IOErrors.cs",
+        };
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        Assert.False(sut.InApp);
+    }
+
+    [Fact]
     public void ConfigureAppFrame_InAppAlreadySet_InAppIgnored()
     {
         // Arrange

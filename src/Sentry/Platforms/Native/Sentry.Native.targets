@@ -9,12 +9,21 @@
     <!-- List of runtime identifiers: https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.NETCore.Platforms/src/runtime.json -->
     <NativeLibRelativePath-win-x64>win-x64</NativeLibRelativePath-win-x64>
     <SentryNativeOutputDirectory-win-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-win-x64)\</SentryNativeOutputDirectory-win-x64>
+    <NativeLibRelativePath-win-arm64>win-arm64</NativeLibRelativePath-win-arm64>
+    <SentryNativeOutputDirectory-win-arm64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-win-arm64)\</SentryNativeOutputDirectory-win-arm64>
     <NativeLibRelativePath-linux-x64>linux-x64</NativeLibRelativePath-linux-x64>
     <SentryNativeOutputDirectory-linux-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-linux-x64)\</SentryNativeOutputDirectory-linux-x64>
+    <NativeLibRelativePath-linux-musl-x64>linux-musl-x64</NativeLibRelativePath-linux-musl-x64>
+    <SentryNativeOutputDirectory-linux-musl-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-linux-musl-x64)\</SentryNativeOutputDirectory-linux-musl-x64>
+    <NativeLibRelativePath-linux-arm64>linux-arm64</NativeLibRelativePath-linux-arm64>
+    <SentryNativeOutputDirectory-linux-arm64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-linux-arm64)\</SentryNativeOutputDirectory-linux-arm64>
     <NativeLibRelativePath-osx>osx</NativeLibRelativePath-osx>
     <SentryNativeOutputDirectory-osx>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-osx)\</SentryNativeOutputDirectory-osx>
-    <SentryNativeBuildOutputs Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib</SentryNativeBuildOutputs>
-    <SentryNativeBuildOutputs Condition="$([MSBuild]::IsOsPlatform('Linux'))">$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a</SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'win-x64'">$(SentryNativeOutputDirectory-win-x64)lib$(SentryNativeLibraryName).lib</SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'win-arm64'">$(SentryNativeOutputDirectory-win-arm64)lib$(SentryNativeLibraryName).lib</SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'linux-x64'">$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a</SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'linux-musl-x64'">$(SentryNativeOutputDirectory-linux-musl-x64)lib$(SentryNativeLibraryName).a</SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'linux-arm64'">$(SentryNativeOutputDirectory-linux-arm64)lib$(SentryNativeLibraryName).a</SentryNativeBuildOutputs>
     <SentryNativeBuildOutputs Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a</SentryNativeBuildOutputs>
   </PropertyGroup>
 
@@ -25,17 +34,38 @@
   </ItemGroup>
 
   <!-- Packaging the native library -->
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('Windows'))">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(RuntimeIdentifier)' == 'win-x64'">
     <None Include="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-win-x64)</PackagePath>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('Linux'))">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(RuntimeIdentifier)' == 'win-arm64'">
+    <None Include="$(SentryNativeOutputDirectory-win-arm64)$(SentryNativeLibraryName).lib">
+      <Pack>true</Pack>
+      <PackagePath>\sentry-native\$(NativeLibRelativePath-win-arm64)</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(RuntimeIdentifier)' == 'linux-x64'">
     <None Include="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-x64)</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(RuntimeIdentifier)' == 'linux-musl-x64'">
+    <None Include="$(SentryNativeOutputDirectory-linux-musl-x64)lib$(SentryNativeLibraryName).a">
+      <Pack>true</Pack>
+      <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-musl-x64)</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(RuntimeIdentifier)' == 'linux-arm64'">
+    <None Include="$(SentryNativeOutputDirectory-linux-arm64)lib$(SentryNativeLibraryName).a">
+      <Pack>true</Pack>
+      <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-arm64)</PackagePath>
     </None>
   </ItemGroup>
 

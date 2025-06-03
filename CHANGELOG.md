@@ -9,6 +9,43 @@
   - `Sentry.AspNetCore`, enabled via `SentryAspNetCoreOptions.EnableLogs`
   - `Sentry.Extensions.Logging`, enabled via `SentryLoggingOptions.EnableLogs`
   - `Sentry.Maui`, enabled via `SentryMauiOptions.EnableLogs`
+## Unreleased
+
+### Features
+
+- Rename MemoryInfo.AllocatedBytes to MemoryInfo.TotalAllocatedBytes ([#4243](https://github.com/getsentry/sentry-dotnet/pull/4243))
+
+### Fixes
+
+- Fix InApp Exclude for frames without Module by checking against frame's Package ([#4236](https://github.com/getsentry/sentry-dotnet/pull/4236))
+
+## 5.9.0
+
+### Features
+
+- Reduced memory pressure when sampling less than 100% of traces/transactions ([#4212](https://github.com/getsentry/sentry-dotnet/pull/4212))
+- Add SentrySdk.SetTag ([#4232](https://github.com/getsentry/sentry-dotnet/pull/4232))
+
+### Fixes
+
+- Fixed symbolication for net9.0-android applications in Release config ([#4221](https://github.com/getsentry/sentry-dotnet/pull/4221))
+- Support Linux arm64 on Native AOT ([#3700](https://github.com/getsentry/sentry-dotnet/pull/3700))
+- Revert W3C traceparent support ([#4204](https://github.com/getsentry/sentry-dotnet/pull/4204))
+
+### Dependencies
+
+- Bump CLI from v2.45.0 to v2.46.0 ([#4226](https://github.com/getsentry/sentry-dotnet/pull/4226))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2460)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.45.0...2.46.0)
+
+## 5.8.1
+
+### Fixes
+
+- Support musl on Linux ([#4188](https://github.com/getsentry/sentry-dotnet/pull/4188))
+- Support for Windows ARM64 with Native AOT ([#4187](https://github.com/getsentry/sentry-dotnet/pull/4187))
+- Addressed potential performance issue with Sentry.Maui ([#4219](https://github.com/getsentry/sentry-dotnet/pull/4219))
+- Respect `SentryNative=false` at runtime ([#4220](https://github.com/getsentry/sentry-dotnet/pull/4220))
 
 ## 5.8.0
 

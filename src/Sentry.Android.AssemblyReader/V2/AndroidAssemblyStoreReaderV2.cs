@@ -13,16 +13,35 @@ internal class AndroidAssemblyStoreReaderV2 : IAndroidAssemblyReader
 
     public static bool TryReadStore(string inputFile, IList<string> supportedAbis, DebugLogger? logger, [NotNullWhen(true)] out AndroidAssemblyStoreReaderV2? reader)
     {
-        var (explorers, errorMessage) = AssemblyStoreExplorer.Open(inputFile, logger);
-        if (errorMessage != null)
-        {
-            logger?.Invoke(errorMessage);
-            reader = null;
-            return false;
-        }
-
         List<AssemblyStoreExplorer> supportedExplorers = [];
-        if (explorers is not null)
+
+        // First we check the base.apk for an assembly store
+        var (explorers, errorMessage) = AssemblyStoreExplorer.Open(inputFile, logger);
+        if (explorers is null)
+        {
+            logger?.Invoke("Unable to read store information for {0}: {1}", inputFile, errorMessage);
+
+            // Check for assembly stores in any device specific APKs
+            foreach (var supportedAbi in supportedAbis)
+            {
+                var splitFilePath = inputFile.GetArchivePathForAbi(supportedAbi, logger);
+                if (!File.Exists(splitFilePath))
+                {
+                    logger?.Invoke("No split config detected at: '{0}'", splitFilePath);
+                    continue;
+                }
+                (explorers, errorMessage) = AssemblyStoreExplorer.Open(splitFilePath, logger);
+                if (explorers is not null)
+                {
+                    supportedExplorers.AddRange(explorers); // If the error is null then this is not null
+                }
+                else
+                {
+                    logger?.Invoke("Unable to read store information for {0}: {1}", splitFilePath, errorMessage);
+                }
+            }
+        }
+        else
         {
             foreach (var explorer in explorers)
             {

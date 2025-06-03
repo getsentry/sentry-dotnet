@@ -85,15 +85,7 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     }
 
     /// <inheritdoc />
-    public bool? IsSampled
-    {
-        get => Contexts.Trace.IsSampled;
-        internal set
-        {
-            Contexts.Trace.IsSampled = value;
-            SampleRate ??= value == null ? null : value.Value ? 1.0 : 0.0;
-        }
-    }
+    public bool? IsSampled => true; // Implicitly if we instantiate this class then the transaction is sampled in
 
     /// <summary>
     /// The sample rate used for this transaction.
@@ -234,6 +226,7 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     /// </summary>
     internal TransactionTracer(IHub hub, ITransactionContext context, TimeSpan? idleTimeout = null)
     {
+        Debug.Assert(context.IsSampled ?? true, "context.IsSampled should always be true when creating a TransactionTracer");
         _hub = hub;
         _options = _hub.GetSentryOptions();
         Name = context.Name;
@@ -244,7 +237,6 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
         TraceId = context.TraceId;
         Description = context.Description;
         Status = context.Status;
-        IsSampled = context.IsSampled;
         StartTimestamp = _stopwatch.StartDateTimeOffset;
 
         if (context is TransactionContext transactionContext)

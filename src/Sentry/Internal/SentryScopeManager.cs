@@ -44,6 +44,18 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         return configureScope?.Invoke(scope) ?? Task.CompletedTask;
     }
 
+    public void SetTag(string key, string value)
+    {
+        var (scope, _) = GetCurrent();
+        scope.SetTag(key, value);
+    }
+
+    public void UnsetTag(string key)
+    {
+        var (scope, _) = GetCurrent();
+        scope.UnsetTag(key);
+    }
+
     public IDisposable PushScope() => PushScope<object>(null);
 
     public IDisposable PushScope<TState>(TState? state)

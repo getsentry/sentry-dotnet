@@ -248,6 +248,8 @@ namespace Sentry
         System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope);
         System.IDisposable PushScope();
         System.IDisposable PushScope<TState>(TState state);
+        void SetTag(string key, string value);
+        void UnsetTag(string key);
     }
     public interface ISentryScopeStateProcessor
     {
@@ -876,12 +878,14 @@ namespace Sentry
         public static System.IDisposable PushScope() { }
         public static System.IDisposable PushScope<TState>(TState state) { }
         public static void ResumeSession() { }
+        public static void SetTag(string key, string value) { }
         public static void StartSession() { }
         public static Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context) { }
         public static Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext) { }
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation) { }
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, string? description) { }
+        public static void UnsetTag(string key) { }
     }
     public class SentrySession : Sentry.ISentrySession
     {
@@ -1392,8 +1396,10 @@ namespace Sentry.Extensibility
         public System.IDisposable PushScope() { }
         public System.IDisposable PushScope<TState>(TState state) { }
         public void ResumeSession() { }
+        public void SetTag(string key, string value) { }
         public void StartSession() { }
         public Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext) { }
+        public void UnsetTag(string key) { }
     }
     public class FormRequestPayloadExtractor : Sentry.Extensibility.BaseRequestPayloadExtractor
     {
@@ -1439,8 +1445,10 @@ namespace Sentry.Extensibility
         public System.IDisposable PushScope() { }
         public System.IDisposable PushScope<TState>(TState state) { }
         public void ResumeSession() { }
+        public void SetTag(string key, string value) { }
         public void StartSession() { }
         public Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext) { }
+        public void UnsetTag(string key) { }
     }
     public interface IBackgroundWorker
     {
