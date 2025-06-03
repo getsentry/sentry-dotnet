@@ -77,11 +77,9 @@ jobs:
             target: Linux
           - os: ubuntu-22.04-arm
             target: Linux-arm64
-            no-mobile: true
           - os: ubuntu-latest
             target: Linux-musl
             container: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
-            no-mobile: true
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
           - os: windows-latest
           - os: windows-11-arm
@@ -194,7 +192,6 @@ jobs:
       # To save time and disk space, we only create and archive the NuGet packages when we're actually releasing.
 
       - name: Create NuGet Packages
-        if: env.CI_PUBLISHING_BUILD == 'true' || matrix.no-mobile
         run: dotnet pack Sentry-CI-Build-${{ matrix.target || runner.os }}.slnf -c Release --no-build --nologo
 
       - name: Archive NuGet Packages
@@ -207,17 +204,15 @@ jobs:
             src/**/Release/*.nupkg
             src/**/Release/*.snupkg
 
-      # TODO: remove (https://github.com/getsentry/sentry-dotnet/pull/4222)
       - name: Install build dependencies
         if: runner.os == 'Linux' && !matrix.container
         run: |
           sudo apt update
           sudo apt install libcurl4-openssl-dev
 
-      # Run integration tests right away for fast feedback on those platforms
-      # that don't need full packages for mobile.
+      # Run integration tests as soon as possible for non-publishing builds
       - name: Integration Test
-        if: ${{ matrix.no-mobile }}
+        if: env.CI_PUBLISHING_BUILD != 'true'
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         with:
           path: integration-test
@@ -231,10 +226,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
-          - os: windows-latest
-          - os: windows-11-arm
 
     steps:
       - uses: actions/checkout@v4
@@ -251,12 +243,6 @@ jobs:
         with:
           name: ${{ github.sha }}
           path: src
-
-      - name: Install build dependencies
-        if: runner.os == 'Linux' && !matrix.container
-        run: |
-          sudo apt update
-          sudo apt install libcurl4-openssl-dev
 
       - name: Setup Environment
         uses: ./.github/actions/environment
