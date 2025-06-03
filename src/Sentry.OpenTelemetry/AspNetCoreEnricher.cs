@@ -10,13 +10,13 @@ internal class AspNetCoreEnricher : IOpenTelemetryEnricher
     {
         if (options?.SendDefaultPii is true)
         {
-            hub.ConfigureScope(scope =>
+            hub.ConfigureScope(static (scope, enricher) =>
             {
-                if (!scope.HasUser() && _userFactory.Create() is { } user)
+                if (!scope.HasUser() && enricher._userFactory.Create() is { } user)
                 {
                     scope.User = user;
                 }
-            });
+            }, this);
         }
     }
 }
