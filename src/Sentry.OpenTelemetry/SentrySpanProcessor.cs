@@ -161,16 +161,18 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         var baggageHeader = data.Baggage.AsBaggageHeader();
         var dynamicSamplingContext = baggageHeader.CreateDynamicSamplingContext(_replaySession);
-        var transaction = (TransactionTracer)_hub.StartTransaction(
+        var transaction = _hub.StartTransaction(
             transactionContext, new Dictionary<string, object?>(), dynamicSamplingContext
         );
-        transaction.Contexts.Trace.Origin = OpenTelemetryOrigin;
-        transaction.StartTimestamp = data.StartTimeUtc;
+        if (transaction is TransactionTracer tracer)
+        {
+            tracer.Contexts.Trace.Origin = OpenTelemetryOrigin;
+            tracer.StartTimestamp = data.StartTimeUtc;
+        }
         _hub.ConfigureScope(scope => scope.Transaction = transaction);
         transaction.SetFused(data);
         _map[data.SpanId] = transaction;
     }
-
 
     /// <inheritdoc />
     public override void OnEnd(Activity data)

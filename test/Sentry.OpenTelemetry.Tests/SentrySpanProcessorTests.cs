@@ -256,11 +256,14 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         }
     }
 
-    [Fact]
-    public void OnStart_WithoutParentSpanId_StartsNewTransaction()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void OnStart_WithoutParentSpanId_StartsNewTransaction(bool isSampled)
     {
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        _fixture.Options.TracesSampleRate = isSampled ? 1.0 : 0.0;
         _fixture.ScopeManager = Substitute.For<IInternalScopeManager>();
         var scope = new Scope();
         var clientScope = new KeyValuePair<Scope, ISentryClient>(scope, _fixture.Client);
@@ -274,21 +277,39 @@ public class SentrySpanProcessorTests : ActivitySourceTests
 
         // Assert
         Assert.True(sut._map.TryGetValue(data.SpanId, out var span));
-        if (span is not TransactionTracer transaction)
+        if (isSampled)
         {
-            Assert.Fail("Span is not a transaction tracer");
-            return;
+            if (span is not TransactionTracer transaction)
+            {
+                Assert.Fail("Span is not a transaction tracer");
+                return;
+            }
+
+            using (new AssertionScope())
+            {
+                transaction.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
+                transaction.ParentSpanId.Should().Be(new ActivitySpanId().AsSentrySpanId());
+                transaction.TraceId.Should().Be(data.TraceId.AsSentryId());
+                transaction.Name.Should().Be(data.DisplayName);
+                transaction.Operation.Should().Be(data.OperationName);
+                transaction.Description.Should().Be(data.DisplayName);
+                transaction.Status.Should().BeNull();
+                transaction.StartTimestamp.Should().Be(data.StartTimeUtc);
+            }
         }
-        using (new AssertionScope())
+        else
         {
-            transaction.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
-            transaction.ParentSpanId.Should().Be(new ActivitySpanId().AsSentrySpanId());
-            transaction.TraceId.Should().Be(data.TraceId.AsSentryId());
-            transaction.Name.Should().Be(data.DisplayName);
-            transaction.Operation.Should().Be(data.OperationName);
-            transaction.Description.Should().Be(data.DisplayName);
-            transaction.Status.Should().BeNull();
-            transaction.StartTimestamp.Should().Be(data.StartTimeUtc);
+            if (span is not UnsampledTransaction transaction)
+            {
+                Assert.Fail("Span is not an unsampled transaction");
+                return;
+            }
+
+            using (new AssertionScope())
+            {
+                transaction.SpanId.Should().Be(data.SpanId.AsSentrySpanId());
+                transaction.TraceId.Should().Be(data.TraceId.AsSentryId());
+            }
         }
     }
 
