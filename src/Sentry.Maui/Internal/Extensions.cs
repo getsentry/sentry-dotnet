@@ -53,21 +53,26 @@ internal static class Extensions
         // The element ID seems to be mostly useless noise
         //data.Add(prefix + nameof(element.Id), element.Id.ToString());
 
-        if (element.StyleId != null)
+        if (element.AutomationId is { } automationId)
+        {
+            data.Add(prefix + nameof(Element.AutomationId), automationId);
+        }
+
+        if (element.StyleId is { } styleId)
         {
             // The StyleId correlates to the element's name if one is set in XAML
             // TODO: Is there a better way to get this?
-            data.Add(prefix + "Name", element.StyleId);
+            data.Add(prefix + "Name", styleId);
         }
 
-        if (options.IncludeTitleInBreadcrumbs && element is ITitledElement { Title: { } } titledElement)
+        if (options.IncludeTitleInBreadcrumbs && element is ITitledElement { Title: { } title })
         {
-            data.Add(prefix + nameof(titledElement.Title), titledElement.Title);
+            data.Add(prefix + nameof(ITitledElement.Title), title);
         }
 
-        if (options.IncludeTextInBreadcrumbs && element is IText { Text: { } } textElement)
+        if (options.IncludeTextInBreadcrumbs && element is IText { Text: { } text })
         {
-            data.Add(prefix + nameof(textElement.Text), textElement.Text);
+            data.Add(prefix + nameof(IText.Text), text);
         }
     }
 
