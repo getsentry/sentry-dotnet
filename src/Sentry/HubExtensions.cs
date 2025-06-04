@@ -242,9 +242,14 @@ public static class HubExtensions
             _ => hub.StartTransaction(context, customSamplingContext)
         };
 
-    internal static ITransactionTracer? GetTransaction(this IHub hub)
+    internal static ITransactionTracer ? GetTransaction(this IHub hub)
     {
-        ITransactionTracer? transaction = null;
+        if (hub is Hub fullHub)
+        {
+            return fullHub.ScopeManager.GetCurrent().Key.Transaction;
+        }
+
+        ITransactionTracer ? transaction = null;
         hub.ConfigureScope(scope => transaction = scope.Transaction);
         return transaction;
     }
