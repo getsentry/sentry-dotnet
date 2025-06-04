@@ -70,15 +70,21 @@ public static class SpanExtensions
 
     internal static ISpan StartChild(this ISpan span, SpanContext context)
     {
-        var transaction = span.GetTransaction() as TransactionTracer;
-        if (transaction?.StartChild(context.SpanId, span.SpanId, context.Operation, context.Instrumenter)
-            is not SpanTracer childSpan)
+        var transaction = span.GetTransaction();
+        if (transaction is TransactionTracer transactionTracer)
         {
-            return NoOpSpan.Instance;
+            var child = transactionTracer.StartChild(context.SpanId, span.SpanId, context.Operation, context.Instrumenter);
+            if (child is SpanTracer childTracer)
+            {
+                childTracer.Description = context.Description;
+                return childTracer;
+            }
         }
-
-        childSpan.Description = context.Description;
-        return childSpan;
+        if (transaction is UnsampledTransaction unsampledTransaction)
+        {
+            return unsampledTransaction.StartChild(context.Operation, context.SpanId);
+        }
+        return NoOpSpan.Instance;
     }
 
     /// <summary>
@@ -88,7 +94,8 @@ public static class SpanExtensions
         span switch
         {
             ITransactionTracer transaction => transaction,
-            SpanTracer tracer => tracer.Transaction,
+            UnsampledSpan unsampledSpan => unsampledSpan.Transaction,
+            SpanTracer spanTracer => spanTracer.Transaction,
             _ => throw new ArgumentOutOfRangeException(nameof(span), span, null)
         };
 
