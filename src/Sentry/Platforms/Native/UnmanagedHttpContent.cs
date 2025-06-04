@@ -19,15 +19,8 @@ internal sealed class UnmanagedHttpContent : SerializableHttpContent
     {
         try
         {
-            UnmanagedMemoryStream unmanagedStream;
-            unsafe
-            {
-                unmanagedStream = new UnmanagedMemoryStream((byte*)_content.ToPointer(), _length);
-            }
-            using (unmanagedStream)
-            {
-                await unmanagedStream.CopyToAsync(stream).ConfigureAwait(false);
-            }
+            using var unmanagedStream = CreateStream();
+            await unmanagedStream.CopyToAsync(stream).ConfigureAwait(false);
         }
         catch (Exception e)
         {
@@ -40,11 +33,8 @@ internal sealed class UnmanagedHttpContent : SerializableHttpContent
     {
         try
         {
-            unsafe
-            {
-                using var unmanagedStream = new UnmanagedMemoryStream((byte*)_content.ToPointer(), _length);
-                unmanagedStream.CopyTo(stream);
-            }
+            using var unmanagedStream = CreateStream();
+            unmanagedStream.CopyTo(stream);
         }
         catch (Exception e)
         {
@@ -63,5 +53,10 @@ internal sealed class UnmanagedHttpContent : SerializableHttpContent
     {
         C.sentry_free(_content);
         base.Dispose(disposing);
+    }
+
+    private unsafe UnmanagedMemoryStream CreateStream()
+    {
+        return new UnmanagedMemoryStream((byte*)_content.ToPointer(), _length);
     }
 }
