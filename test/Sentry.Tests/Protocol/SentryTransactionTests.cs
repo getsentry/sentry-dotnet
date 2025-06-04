@@ -582,18 +582,18 @@ public class SentryTransactionTests
         var hub = Substitute.For<IHub>();
         var transaction = new TransactionTracer(hub, "test name", "test op");
 
-        Action<Scope> capturedAction = null;
-        hub.ConfigureScope(Arg.Do<Action<Scope>>(action => capturedAction = action));
+        Action<Scope, TransactionTracer> capturedAction = null;
+        hub.ConfigureScope(Arg.Do<Action<Scope, TransactionTracer>>(action => capturedAction = action), Arg.Any<TransactionTracer>());
 
         // Act
         transaction.Finish();
 
         // Assert
-        hub.Received(1).ConfigureScope(Arg.Any<Action<Scope>>());
+        hub.Received(1).ConfigureScope(Arg.Any<Action<Scope, TransactionTracer>>(), Arg.Any<TransactionTracer>());
 
         capturedAction.Should().NotBeNull(); // Sanity Check
         var mockScope = Substitute.For<Scope>();
-        capturedAction(mockScope);
+        capturedAction(mockScope, transaction);
 
         mockScope.Received(1).ResetTransaction(transaction);
         mockScope.Received(1).SetPropagationContext(Arg.Any<SentryPropagationContext>());
