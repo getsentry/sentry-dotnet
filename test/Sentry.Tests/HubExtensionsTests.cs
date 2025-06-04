@@ -7,8 +7,7 @@ public class HubExtensionsTests
 
     public HubExtensionsTests()
     {
-        Sut.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-            .Do(c => c.Arg<Action<Scope>>()(Scope));
+        Sut.SubstituteConfigureScope(Scope);
     }
 
     [Fact]

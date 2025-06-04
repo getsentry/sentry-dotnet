@@ -31,8 +31,7 @@ public class SentryMiddlewareTests
         public Fixture()
         {
             Scope = new();
-            Hub.When(hub => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
-                .Do(callback => callback.Arg<Action<Scope>>().Invoke(Scope));
+            Hub.SubstituteConfigureScope(Scope);
 
             Hub.When(hub => hub.CaptureEvent(Arg.Any<SentryEvent>(), Arg.Any<Scope>()))
                 .Do(_ => Scope.Evaluate());
@@ -157,23 +156,16 @@ public class SentryMiddlewareTests
     [Fact]
     public async Task InvokeAsync_LocksScope_BeforeConfiguringScope()
     {
-        var verified = false;
-        var scope = new Scope();
-        _fixture.Hub
-            .When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-            .Do(Callback
-                .First(c => c.ArgAt<Action<Scope>>(0)(scope))
-                .Then(_ =>
-                {
-                    Assert.True(scope.Locked);
-                    verified = true;
-                }));
+        var scopeLocked = false;
+        _fixture.Hub.When(h => h.PushAndLockScope()).Do(_ => scopeLocked = true);
+        _fixture.Hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
+            .Do(_ => Assert.True(scopeLocked));
 
         var sut = _fixture.GetSut();
 
         await sut.InvokeAsync(_fixture.HttpContext, _fixture.RequestDelegate);
 
-        Assert.True(verified);
+        _fixture.Hub.Received().ConfigureScope(Arg.Any<Action<Scope>>());
     }
 
     [Fact]
@@ -182,8 +174,7 @@ public class SentryMiddlewareTests
         const string expectedTraceIdentifier = "trace id";
         _ = _fixture.HttpContext.TraceIdentifier.Returns(expectedTraceIdentifier);
         var scope = new Scope();
-        _fixture.Hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-            .Do(c => c.Arg<Action<Scope>>()(scope));
+        _fixture.Hub.SubstituteConfigureScope(scope);
 
         var sut = _fixture.GetSut();
 
@@ -200,8 +191,7 @@ public class SentryMiddlewareTests
         const string expectedTraceIdentifier = "trace id";
         _ = _fixture.HttpContext.TraceIdentifier.Returns(expectedTraceIdentifier);
         var scope = new Scope();
-        _fixture.Hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-            .Do(c => c.Arg<Action<Scope>>()(scope));
+        _fixture.Hub.SubstituteConfigureScope(scope);
 
         var sut = _fixture.GetSut();
 
@@ -664,7 +654,7 @@ public class SentryMiddlewareTests
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         var scope = new Scope();
-        _fixture.Hub.ConfigureScope(Arg.Do<Action<Scope>>(action => action.Invoke(scope)));
+        _fixture.Hub.SubstituteConfigureScope(scope);
         var sut = _fixture.GetSut();
         var activity = new Activity("test").Start();
 
