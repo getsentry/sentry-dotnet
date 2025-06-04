@@ -18,6 +18,7 @@
 
 - Rename MemoryInfo.AllocatedBytes to MemoryInfo.TotalAllocatedBytes ([#4243](https://github.com/getsentry/sentry-dotnet/pull/4243))
 - Replace libcurl with .NET HttpClient for sentry-native ([#4222](https://github.com/getsentry/sentry-dotnet/pull/4222))
+- Added non allocating SentrySdk.ConfigureScope overload ([#4244](https://github.com/getsentry/sentry-dotnet/pull/4244))
 
 ### Fixes
 
