@@ -4,7 +4,7 @@ namespace Sentry.Native;
 
 internal sealed class UnmanagedHttpContent : SerializableHttpContent
 {
-    private readonly IntPtr _content;
+    private IntPtr _content;
     private readonly int _length = 0;
     private readonly IDiagnosticLogger? _logger;
 
@@ -52,6 +52,7 @@ internal sealed class UnmanagedHttpContent : SerializableHttpContent
     protected override void Dispose(bool disposing)
     {
         C.sentry_free(_content);
+        _content = IntPtr.Zero;
         base.Dispose(disposing);
     }
 
