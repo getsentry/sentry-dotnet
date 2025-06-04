@@ -22,7 +22,7 @@ internal sealed class UnmanagedHttpContent : SerializableHttpContent
 
     protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
     {
-        ObjectDisposedException.ThrowIf(_content == IntPtr.Zero, this);
+        ThrowIfObjectDisposed();
         try
         {
             using var unmanagedStream = CreateStream();
@@ -37,7 +37,7 @@ internal sealed class UnmanagedHttpContent : SerializableHttpContent
 
     protected override void SerializeToStream(Stream stream, TransportContext? context, CancellationToken cancellationToken)
     {
-        ObjectDisposedException.ThrowIf(_content == IntPtr.Zero, this);
+        ThrowIfObjectDisposed();
         try
         {
             using var unmanagedStream = CreateStream();
@@ -66,5 +66,13 @@ internal sealed class UnmanagedHttpContent : SerializableHttpContent
     private unsafe UnmanagedMemoryStream CreateStream()
     {
         return new UnmanagedMemoryStream((byte*)_content.ToPointer(), _length);
+    }
+
+    private void ThrowIfObjectDisposed()
+    {
+        if (_content == IntPtr.Zero)
+        {
+            throw new ObjectDisposedException(GetType().FullName);
+        }
     }
 }
