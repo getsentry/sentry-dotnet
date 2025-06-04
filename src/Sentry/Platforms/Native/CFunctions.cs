@@ -376,13 +376,13 @@ internal static class C
     private static extern void sentry_options_set_transport(IntPtr options, IntPtr transport);
 
     [DllImport("sentry-native")]
-    private static extern unsafe IntPtr sentry_transport_new(delegate* unmanaged/*[Cdecl]*/<IntPtr, IntPtr, void> sendFunc);
+    private static extern unsafe IntPtr sentry_transport_new(delegate* unmanaged<IntPtr, IntPtr, void> sendFunc);
 
     [DllImport("sentry-native")]
     private static extern void sentry_transport_set_state(IntPtr transport, IntPtr state);
 
     [DllImport("sentry-native")]
-    private static extern unsafe void sentry_transport_set_free_func(IntPtr transport, delegate* unmanaged/*[Cdecl]*/<IntPtr, void> freeFunc);
+    private static extern unsafe void sentry_transport_set_free_func(IntPtr transport, delegate* unmanaged<IntPtr, void> freeFunc);
 
     [DllImport("sentry-native")]
     private static extern IntPtr sentry_envelope_serialize(IntPtr envelope, out UIntPtr sizeOut);
@@ -406,8 +406,17 @@ internal static class C
 
                 using var client = options.GetHttpClient();
                 using var request = options.CreateHttpRequest(content);
-                client.SendAsync(request).GetAwaiter().GetResult();
+#if NET5_0_OR_GREATER
+                var response = client.Send(request);
+#else
+                var response = client.SendAsync(request).GetAwaiter().GetResult();
+#endif
+                response.EnsureSuccessStatusCode();
             }
+        }
+        catch (HttpRequestException e)
+        {
+            options?.DiagnosticLogger?.LogError(e, "Failed to send native envelope.");
         }
         catch (Exception e)
         {

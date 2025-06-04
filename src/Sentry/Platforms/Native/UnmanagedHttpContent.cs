@@ -15,6 +15,11 @@ internal sealed class UnmanagedHttpContent : SerializableHttpContent
         _logger = logger;
     }
 
+    ~UnmanagedHttpContent()
+    {
+        Dispose(false);
+    }
+
     protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
     {
         try
@@ -51,8 +56,8 @@ internal sealed class UnmanagedHttpContent : SerializableHttpContent
 
     protected override void Dispose(bool disposing)
     {
-        C.sentry_free(_content);
-        _content = IntPtr.Zero;
+        IntPtr content = Interlocked.Exchange(ref _content, IntPtr.Zero);
+        C.sentry_free(content);
         base.Dispose(disposing);
     }
 
