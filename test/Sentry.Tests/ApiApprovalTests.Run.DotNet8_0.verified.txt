@@ -1011,7 +1011,7 @@ namespace Sentry
         public static Sentry.SentryStackTrace FromJson(System.Text.Json.JsonElement json) { }
     }
     [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
-    public sealed class SentryStructuredLogger
+    public abstract class SentryStructuredLogger
     {
         [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void LogDebug(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }

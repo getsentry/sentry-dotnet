@@ -965,7 +965,7 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryStackTrace FromJson(System.Text.Json.JsonElement json) { }
     }
-    public sealed class SentryStructuredLogger
+    public abstract class SentryStructuredLogger
     {
         public void LogDebug(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }
         public void LogError(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }
