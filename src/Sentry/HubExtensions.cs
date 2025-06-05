@@ -155,7 +155,7 @@ public static class HubExtensions
         }
 
         hub.ConfigureScope(
-            static(s, arg) => s.AddBreadcrumb(arg.breadcrumb, arg.hint ?? new SentryHint()),
+            static (s, arg) => s.AddBreadcrumb(arg.breadcrumb, arg.hint ?? new SentryHint()),
             (breadcrumb, hint));
     }
 
@@ -242,14 +242,14 @@ public static class HubExtensions
             _ => hub.StartTransaction(context, customSamplingContext)
         };
 
-    internal static ITransactionTracer ? GetTransaction(this IHub hub)
+    internal static ITransactionTracer? GetTransaction(this IHub hub)
     {
         if (hub is Hub fullHub)
         {
             return fullHub.ScopeManager.GetCurrent().Key.Transaction;
         }
 
-        ITransactionTracer ? transaction = null;
+        ITransactionTracer? transaction = null;
         hub.ConfigureScope(scope => transaction = scope.Transaction);
         return transaction;
     }
