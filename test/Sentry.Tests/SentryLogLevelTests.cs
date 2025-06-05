@@ -12,6 +12,22 @@ public class SentryLogLevelTests
         _logger = new InMemoryDiagnosticLogger();
     }
 
+#if NET7_0_OR_GREATER
+    [Fact]
+    public void Enum_GetValuesAsUnderlyingType_LowestSeverityNumberPerSeverityRange()
+    {
+        var values = Enum.GetValuesAsUnderlyingType<SentryLogLevel>();
+
+        Assert.Collection(values.OfType<int>(),
+            element => Assert.Equal(1, element),
+            element => Assert.Equal(5, element),
+            element => Assert.Equal(9, element),
+            element => Assert.Equal(13, element),
+            element => Assert.Equal(17, element),
+            element => Assert.Equal(21, element));
+    }
+#endif
+
     [Theory]
     [MemberData(nameof(SeverityTextAndSeverityNumber))]
     public void SeverityTextAndSeverityNumber_WithinRange_MatchesProtocol(int level, string text, int? number)
