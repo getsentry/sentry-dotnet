@@ -15,12 +15,12 @@ namespace Sentry.Maui
     {
         public BreadcrumbEvent(object? Sender, string EventName, [System.Runtime.CompilerServices.TupleElementNames(new string[] {
                 "Key",
-                "Value"})] params System.Collections.Generic.IEnumerable<System.ValueTuple<string, string>>[] ExtraData) { }
+                "Value"})] params System.ValueTuple<string, string>[] ExtraData) { }
         public string EventName { get; init; }
         [System.Runtime.CompilerServices.TupleElementNames(new string[] {
                 "Key",
                 "Value"})]
-        public System.Collections.Generic.IEnumerable<System.ValueTuple<string, string>>[] ExtraData { get; init; }
+        public System.ValueTuple<string, string>[] ExtraData { get; init; }
         public object? Sender { get; init; }
     }
     public interface IMauiElementEventBinder

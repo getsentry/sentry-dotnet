@@ -31,5 +31,5 @@ public interface IMauiElementEventBinder
 public record BreadcrumbEvent(
     object? Sender,
     string EventName,
-    params IEnumerable<(string Key, string Value)>[] ExtraData
+    params (string Key, string Value)[] ExtraData
 );
