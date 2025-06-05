@@ -443,7 +443,7 @@ public class SentrySdkTests : IDisposable
     public void ConfigureScope_SyncWithArg_CallbackNeverInvoked()
     {
         var invoked = false;
-        SentrySdk.ConfigureScope((_,_) => invoked = true, "arg");
+        SentrySdk.ConfigureScope((_, _) => invoked = true, "arg");
         Assert.False(invoked);
     }
 
@@ -461,7 +461,7 @@ public class SentrySdkTests : IDisposable
         const string key = "key";
         const string arg = "arg";
 
-        SentrySdk.ConfigureScope((s,a) => s.SetTag(key, a), arg);
+        SentrySdk.ConfigureScope((s, a) => s.SetTag(key, a), arg);
 
         string actual = null;
         SentrySdk.ConfigureScope(s => actual = s.Tags[key]);
@@ -705,7 +705,7 @@ public class SentrySdkTests : IDisposable
     public async Task ConfigureScope_AsyncWithArg_CallbackNeverInvoked()
     {
         var invoked = false;
-        await SentrySdk.ConfigureScopeAsync((_,_) =>
+        await SentrySdk.ConfigureScopeAsync((_, _) =>
         {
             invoked = true;
             return Task.CompletedTask;
