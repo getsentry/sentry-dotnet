@@ -198,12 +198,6 @@ jobs:
             src/**/Release/*.nupkg
             src/**/Release/*.snupkg
 
-      - name: Install build dependencies
-        if: runner.os == 'Linux' && !matrix.container
-        run: |
-          sudo apt update
-          sudo apt install libcurl4-openssl-dev
-
       # Run integration tests as soon as possible for non-publishing builds
       - name: Integration Test
         if: env.CI_PUBLISHING_BUILD != 'true'
