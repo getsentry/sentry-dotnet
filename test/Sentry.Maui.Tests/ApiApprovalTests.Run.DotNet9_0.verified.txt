@@ -13,15 +13,20 @@ namespace Sentry.Maui
 {
     public class BreadcrumbEvent : System.IEquatable<Sentry.Maui.BreadcrumbEvent>
     {
-        public BreadcrumbEvent(object? Sender, string EventName, [System.Runtime.CompilerServices.TupleElementNames(new string[] {
+        [System.Obsolete("Use the simpler constructor with params (string Key, string Value)[] extraData in" +
+            "stead.")]
+        public BreadcrumbEvent(object? sender, string eventName, [System.Runtime.CompilerServices.TupleElementNames(new string[] {
                 "Key",
-                "Value"})] params System.ValueTuple<string, string>[] ExtraData) { }
-        public string EventName { get; init; }
+                "Value"})] System.Collections.Generic.IEnumerable<System.ValueTuple<string, string>>[] extraData) { }
+        public BreadcrumbEvent(object? sender, string eventName, [System.Runtime.CompilerServices.TupleElementNames(new string[] {
+                "Key",
+                "Value"})] params System.ValueTuple<string, string>[] extraData) { }
+        public string EventName { get; }
         [System.Runtime.CompilerServices.TupleElementNames(new string[] {
                 "Key",
                 "Value"})]
-        public System.ValueTuple<string, string>[] ExtraData { get; init; }
-        public object? Sender { get; init; }
+        public System.ValueTuple<string, string>[] ExtraData { get; }
+        public object? Sender { get; }
     }
     public interface IMauiElementEventBinder
     {
