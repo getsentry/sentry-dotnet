@@ -71,6 +71,18 @@ public class HubAdapterTests : IDisposable
     }
 
     [Fact]
+    public void Logger_MockInvoked()
+    {
+        var logger = new InMemorySentryStructuredLogger();
+        Hub.Logger.Returns(logger);
+
+        HubAdapter.Instance.Logger.LogWarning("Message");
+
+        Assert.Collection(logger.Entries,
+            element => element.AssertEqual(SentryLogLevel.Warning, "Message"));
+    }
+
+    [Fact]
     public void EndSession_CrashedStatus_MockInvoked()
     {
         var expected = SessionEndStatus.Crashed;
