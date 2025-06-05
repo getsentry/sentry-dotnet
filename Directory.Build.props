@@ -109,6 +109,7 @@
   <!-- Helpful properties used elsewhere -->
   <PropertyGroup>
     <TargetFrameworkVersion>$([MSBuild]::GetTargetFrameworkVersion($(TargetFramework)))</TargetFrameworkVersion>
-    <TargetFrameworkIsNet9OrGreater Condition="$([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 9.0))">true</TargetFrameworkIsNet9OrGreater>
+    <IsNet8OrGreater Condition="$([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 8.0))">true</IsNet8OrGreater>
+    <IsNet9OrGreater Condition="$([MSBuild]::VersionGreaterThanOrEquals($(TargetFrameworkVersion), 9.0))">true</IsNet9OrGreater>
   </PropertyGroup>
 </Project>
