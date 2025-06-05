@@ -37,7 +37,7 @@ public sealed class HubAdapter : IHub
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    public SentryStructuredLogger Logger { [DebuggerStepThrough] get => SentrySdk.Logger; }
+    public SentryStructuredLogger Logger { [DebuggerStepThrough] get => SentrySdk.Experimental.Logger; }
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.

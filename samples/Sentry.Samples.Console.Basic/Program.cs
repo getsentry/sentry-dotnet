@@ -71,7 +71,7 @@ async Task FirstFunction()
     var httpClient = new HttpClient(messageHandler, true);
     var html = await httpClient.GetStringAsync("https://example.com/");
     WriteLine(html);
-    SentrySdk.Logger.LogInfo("HTTP Request completed.");
+    SentrySdk.Experimental.Logger.LogInfo("HTTP Request completed.");
 }
 
 async Task SecondFunction()
@@ -92,7 +92,7 @@ async Task SecondFunction()
         SentrySdk.CaptureException(exception);
         span.Finish(exception);
 
-        SentrySdk.Logger.LogError("Error with message: {0}", [exception.Message], static log => log.SetAttribute("method", nameof(SecondFunction)));
+        SentrySdk.Experimental.Logger.LogError("Error with message: {0}", [exception.Message], static log => log.SetAttribute("method", nameof(SecondFunction)));
     }
 
     span.Finish();
@@ -106,7 +106,7 @@ async Task ThirdFunction()
         // Simulate doing some work
         await Task.Delay(100);
 
-        SentrySdk.Logger.LogFatal("Crash imminent!", [], static log => log.SetAttribute("suppress", true));
+        SentrySdk.Experimental.Logger.LogFatal("Crash imminent!", [], static log => log.SetAttribute("suppress", true));
 
         // This is an example of an unhandled exception.  It will be captured automatically.
         throw new InvalidOperationException("Something happened that crashed the app!");
