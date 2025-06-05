@@ -36,8 +36,8 @@ SentrySdk.Init(options =>
     options.TracesSampleRate = 1.0;
 
     // This option enables Sentry Logs created via SentrySdk.Logger.
-    options.EnableLogs = true;
-    options.SetBeforeSendLog(static log =>
+    options.Experimental.EnableLogs = true;
+    options.Experimental.SetBeforeSendLog(static log =>
     {
         // A demonstration of how you can drop logs based on some attribute they have
         if (log.TryGetAttribute("suppress", out bool attribute) && attribute)

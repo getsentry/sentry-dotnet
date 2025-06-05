@@ -20,7 +20,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
         _options = options;
         _clock = clock;
 
-        _isEnabled = options is { EnableLogs: true };
+        _isEnabled = options is { Experimental.EnableLogs: true };
     }
 
     private protected override void CaptureLog(SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog)
@@ -70,7 +70,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
         log.SetAttributes(_options);
 
         var configuredLog = log;
-        if (_options.BeforeSendLogInternal is { } beforeSendLog)
+        if (_options.Experimental.BeforeSendLogInternal is { } beforeSendLog)
         {
             try
             {
