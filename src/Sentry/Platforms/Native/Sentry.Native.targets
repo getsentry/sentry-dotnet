@@ -34,42 +34,42 @@
   </ItemGroup>
 
   <!-- Packaging the native library -->
-  <ItemGroup Condition="Exists('$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib')">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or Exists('$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib')">
     <None Include="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-win-x64)</PackagePath>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="Exists('$(SentryNativeOutputDirectory-win-arm64)$(SentryNativeLibraryName).lib')">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or Exists('$(SentryNativeOutputDirectory-win-arm64)$(SentryNativeLibraryName).lib')">
     <None Include="$(SentryNativeOutputDirectory-win-arm64)$(SentryNativeLibraryName).lib">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-win-arm64)</PackagePath>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="Exists('$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a')">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or Exists('$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a')">
     <None Include="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-x64)</PackagePath>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="Exists('$(SentryNativeOutputDirectory-linux-musl-x64)lib$(SentryNativeLibraryName).a')">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or Exists('$(SentryNativeOutputDirectory-linux-musl-x64)lib$(SentryNativeLibraryName).a')">
     <None Include="$(SentryNativeOutputDirectory-linux-musl-x64)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-musl-x64)</PackagePath>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="Exists('$(SentryNativeOutputDirectory-linux-arm64)lib$(SentryNativeLibraryName).a')">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or Exists('$(SentryNativeOutputDirectory-linux-arm64)lib$(SentryNativeLibraryName).a')">
     <None Include="$(SentryNativeOutputDirectory-linux-arm64)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-arm64)</PackagePath>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="Exists('$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a')">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or Exists('$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a')">
     <None Include="$(SentryNativeOutputDirectory-osx)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-osx)</PackagePath>
