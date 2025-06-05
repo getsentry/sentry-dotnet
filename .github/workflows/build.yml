@@ -183,8 +183,6 @@ jobs:
           name: ${{ matrix.target || runner.os }}-verify-test-results
           path: "**/*.received.*"
 
-      # To save time and disk space, we only create and archive the NuGet packages when we're actually releasing.
-
       - name: Create NuGet Packages
         run: dotnet pack Sentry-CI-Build-${{ matrix.target || runner.os }}.slnf -c Release --no-build --nologo
 
@@ -198,44 +196,7 @@ jobs:
             src/**/Release/*.nupkg
             src/**/Release/*.snupkg
 
-      # Run integration tests as soon as possible for non-publishing builds
       - name: Integration Test
-        if: env.CI_PUBLISHING_BUILD != 'true'
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
-        with:
-          path: integration-test
-
-  integration-test:
-    needs: build
-    name: Integration test (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          # We only check out what is absolutely necessary to reduce a chance of local files impacting
-          # integration tests, e.g. Directory.Build.props, nuget.config, ...
-          sparse-checkout: |
-            Directory.Build.props
-            integration-test
-            .github
-
-      - name: Fetch NuGet Packages
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ github.sha }}
-          path: src
-
-      - name: Setup Environment
-        uses: ./.github/actions/environment
-
-      - name: Test
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         with:
           path: integration-test
