@@ -7,6 +7,39 @@ namespace Sentry;
 /// The severity of the structured log.
 /// <para>This API is experimental and it may change in the future.</para>
 /// </summary>
+/// <remarks>
+/// The named constants use the value of the lowest severity number per severity level:
+/// <list type="table">
+///   <listheader>
+///     <term>SeverityNumber</term>
+///     <description>SeverityText</description>
+///   </listheader>
+///   <item>
+///     <term>1-4</term>
+///     <description>Trace</description>
+///   </item>
+///   <item>
+///     <term>5-8</term>
+///     <description>Debug</description>
+///   </item>
+///   <item>
+///     <term>9-12</term>
+///     <description>Info</description>
+///   </item>
+///   <item>
+///     <term>13-16</term>
+///     <description>Warn</description>
+///   </item>
+///   <item>
+///     <term>17-20</term>
+///     <description>Error</description>
+///   </item>
+///   <item>
+///     <term>21-24</term>
+///     <description>Fatal</description>
+///   </item>
+/// </list>
+/// </remarks>
 /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
 [Experimental(DiagnosticId.ExperimentalFeature)]
 public enum SentryLogLevel

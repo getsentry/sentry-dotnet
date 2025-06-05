@@ -3,6 +3,7 @@
  * - Error Monitoring (both handled and unhandled exceptions)
  * - Performance Tracing (Transactions / Spans)
  * - Release Health (Sessions)
+ * - Logs
  * - MSBuild integration for Source Context (see the csproj)
  *
  * For more advanced features of the SDK, see Sentry.Samples.Console.Customized.
@@ -34,7 +35,7 @@ SentrySdk.Init(options =>
     // This option tells Sentry to capture 100% of traces. You still need to start transactions and spans.
     options.TracesSampleRate = 1.0;
 
-    // This option enables the (experimental) Sentry Logs.
+    // This option enables Sentry Logs created via SentrySdk.Logger.
     options.EnableLogs = true;
     options.SetBeforeSendLog(static log =>
     {
