@@ -53,12 +53,6 @@ jobs:
         if: ${{ !matrix.container }}
         uses: ./.github/actions/freediskspace
 
-      - name: Install build dependencies
-        if: steps.cache.outputs.cache-hit != 'true' && runner.os == 'Linux' && !matrix.container
-        run: |
-          sudo apt update
-          sudo apt install libcurl4-openssl-dev
-
       - run: scripts/build-sentry-native.ps1
         if: steps.cache.outputs.cache-hit != 'true'
         shell: pwsh
