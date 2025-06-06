@@ -1,14 +1,16 @@
 # Changelog
 
-## Unreleased
+## 5.10.0
 
 ### Features
 
 - Add experimental support for _Sentry Structured Logging_ via `SentrySdk.Logger` ([#4158](https://github.com/getsentry/sentry-dotnet/pull/4158))
 - Rename MemoryInfo.AllocatedBytes to MemoryInfo.TotalAllocatedBytes ([#4243](https://github.com/getsentry/sentry-dotnet/pull/4243))
+- Replace libcurl with .NET HttpClient for sentry-native ([#4222](https://github.com/getsentry/sentry-dotnet/pull/4222))
 
 ### Fixes
 
+- InvalidCastException in SentrySpanProcessor when using the Sentry.OpenTelemetry integration ([#4245](https://github.com/getsentry/sentry-dotnet/pull/4245))
 - Fix InApp Exclude for frames without Module by checking against frame's Package ([#4236](https://github.com/getsentry/sentry-dotnet/pull/4236))
 
 ## 5.9.0

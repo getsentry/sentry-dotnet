@@ -94,10 +94,10 @@ internal sealed class UnsampledTransaction : NoOpTransaction
         return span;
     }
 
-    private class UnsampledSpan(UnsampledTransaction transaction) : NoOpSpan
+    public ISpan StartChild(string operation, SpanId spanId)
     {
-        public override ISpan StartChild(string operation) => transaction.StartChild(operation);
-
-        public override bool? IsSampled => false;
+        var span = new UnsampledSpan(this, spanId);
+        _spans.Add(span);
+        return span;
     }
 }
