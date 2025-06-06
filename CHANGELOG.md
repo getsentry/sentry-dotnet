@@ -5,7 +5,7 @@
 ### Dependencies
 
 - Bump the version of the .NET SDK that we use from 9.0.203 to 9.0.300 ([#4259](https://github.com/getsentry/sentry-dotnet/pull/4259))
-  - Note that this also required we bump various Java depdendencies (since version 9.0.300 of the Android workload requires newer versions of the these)
+  - Note that this also required we bump various Java dependencies (since version 9.0.300 of the Android workload requires newer versions of the these)
   - See https://docs.sentry.io/platforms/dotnet/troubleshooting/#detected-package-version-outside-of-dependency-constraint if you see NU1605, NU1608 and/or NU1107 warnings after upgrading   
 
 ## 5.10.0
