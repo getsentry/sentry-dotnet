@@ -4,47 +4,9 @@ namespace Sentry.Maui.Tests;
 
 public partial class MauiEventsBinderTests
 {
-    private class Fixture
-    {
-        public IHub Hub { get; }
+    private readonly MauiEventsBinderFixture _fixture = new();
 
-        public MauiEventsBinder Binder { get; }
-
-        public Scope Scope { get; } = new();
-
-        public SentryMauiOptions Options { get; } = new();
-
-        public Fixture()
-        {
-            Hub = Substitute.For<IHub>();
-            Hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-                .Do(c =>
-                {
-                    c.Arg<Action<Scope>>()(Scope);
-                });
-
-            Scope.Transaction = Substitute.For<ITransactionTracer>();
-
-            Options.Debug = true;
-            var logger = Substitute.For<IDiagnosticLogger>();
-            logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-            Options.DiagnosticLogger = logger;
-            var options = Microsoft.Extensions.Options.Options.Create(Options);
-            Binder = new MauiEventsBinder(
-                Hub,
-                options,
-                [
-                    new MauiButtonEventsBinder(),
-                    new MauiImageButtonEventsBinder(),
-                    new MauiGestureRecognizerEventsBinder()
-                ]
-            );
-        }
-    }
-
-    private readonly Fixture _fixture = new();
-
-    // Tests are in partial class files for better organization
+    // Most of the tests for this class are in separate partial class files for better organisation
 
     [Fact]
     public void OnBreadcrumbCreateCallback_CreatesBreadcrumb()
