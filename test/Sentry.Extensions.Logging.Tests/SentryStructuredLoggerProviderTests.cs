@@ -8,10 +8,9 @@ public class SentryStructuredLoggerProviderTests
     [Fact]
     public void SmokeTest()
     {
-        IOptions<SentryLoggingOptions> options = Options.Create(new SentryLoggingOptions
-        {
-            EnableLogs = true,
-        });
+        var loggingOptions = new SentryLoggingOptions();
+        loggingOptions.Experimental.EnableLogs = true;
+        IOptions<SentryLoggingOptions> options = Options.Create(loggingOptions);
         IHub hub = Substitute.For<IHub>();
 
         var provider = new SentryStructuredLoggerProvider(options, hub);

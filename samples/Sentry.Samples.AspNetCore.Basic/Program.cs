@@ -13,8 +13,8 @@ builder.WebHost.UseSentry(options =>
     options.Debug = true;
 #endif
 
-    // This option enables the (experimental) Sentry Logs.
-    options.EnableLogs = true;
+    // This option enables Logs sent to Sentry.
+    options.Experimental.EnableLogs = true;
 });
 
 var app = builder.Build();

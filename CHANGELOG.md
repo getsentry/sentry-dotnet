@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Moved experimental _Sentry Structured Logger_ from `SentrySdk.Logger` to `SentrySdk.Experimental.Logger` ([#4158](https://github.com/getsentry/sentry-dotnet/pull/4158))
+- Moved experimental options for _Sentry Structured Logging_ ([#4193](https://github.com/getsentry/sentry-dotnet/pull/4193))
+  - `Sentry.AspNetCore`: from `SentryAspNetCoreOptions.EnableLogs` to `SentryAspNetCoreOptions.Experimental.EnableLogs`
+  - `Sentry.Extensions.Logging`: from `SentryLoggingOptions.EnableLogs` to `SentryLoggingOptions.Experimental.EnableLogs`
+  - `Sentry.Maui`: from `SentryMauiOptions.EnableLogs` to `SentryMauiOptions.Experimental.EnableLogs`
+
 ## 5.8.0-alpha.0
 
 ### Features
@@ -9,8 +17,6 @@
   - `Sentry.AspNetCore`, enabled via `SentryAspNetCoreOptions.EnableLogs`
   - `Sentry.Extensions.Logging`, enabled via `SentryLoggingOptions.EnableLogs`
   - `Sentry.Maui`, enabled via `SentryMauiOptions.EnableLogs`
-## Unreleased
-- Add experimental support for _Sentry Structured Logging_ via `SentrySdk.Experimental.Logger` ([#4158](https://github.com/getsentry/sentry-dotnet/pull/4158))
 
 ## 5.10.0
 

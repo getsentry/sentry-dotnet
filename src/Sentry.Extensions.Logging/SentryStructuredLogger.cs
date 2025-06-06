@@ -24,9 +24,9 @@ internal sealed class SentryStructuredLogger : ILogger
     public bool IsEnabled(LogLevel logLevel)
     {
         return _hub.IsEnabled
-            && _options.EnableLogs
+            && _options.Experimental.EnableLogs
             && logLevel != LogLevel.None
-            && logLevel >= _options.MinimumLogLevel;
+            && logLevel >= _options.ExperimentalLogging.MinimumLogLevel;
     }
 
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)

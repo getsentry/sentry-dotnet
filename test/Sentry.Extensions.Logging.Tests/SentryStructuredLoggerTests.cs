@@ -9,14 +9,14 @@ public class SentryStructuredLoggerTests
     [Fact]
     public void SmokeTest()
     {
+        InMemorySentryStructuredLogger inMemory = new();
+
         string categoryName = "CategoryName";
-        SentryLoggingOptions options = new()
-        {
-            EnableLogs = true,
-        };
+        SentryLoggingOptions options = new();
+        options.Experimental.EnableLogs = true;
         IHub hub = Substitute.For<IHub>();
         hub.IsEnabled.Returns(true);
-        hub.Logger.Returns(Sentry.SentryStructuredLogger.CreateDisabled(hub));
+        hub.Logger.Returns(inMemory);
 
         var logger = new SentryStructuredLogger(categoryName, options, hub);
 

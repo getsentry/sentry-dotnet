@@ -31,19 +31,6 @@ public class SentryLoggingOptions : SentryOptions
     public LogLevel MinimumEventLevel { get; set; } = LogLevel.Error;
 
     /// <summary>
-    /// Gets or sets the minimum log level.
-    /// <para>This API is experimental and it may change in the future.</para>
-    /// </summary>
-    /// <remarks>
-    /// Logs with this level or higher will be stored as <see cref="SentryLog"/>.
-    /// </remarks>
-    /// <value>
-    /// The minimum log level.
-    /// </value>
-    [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
-    public LogLevel MinimumLogLevel { get; set; } = LogLevel.Trace;
-
-    /// <summary>
     /// Whether to initialize this SDK through this integration
     /// </summary>
     public bool InitializeSdk { get; set; } = true;
@@ -63,4 +50,39 @@ public class SentryLoggingOptions : SentryOptions
     /// List of callbacks to be invoked when initializing the SDK
     /// </summary>
     internal Action<Scope>[] ConfigureScopeCallbacks { get; set; } = Array.Empty<Action<Scope>>();
+
+    /// <summary>
+    /// Experimental Sentry Logging features.
+    /// </summary>
+    /// <remarks>
+    /// This and related experimental APIs may change in the future.
+    /// </remarks>
+    [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
+    public SentryLoggingExperimentalOptions ExperimentalLogging { get; set; } = new();
+
+    /// <summary>
+    /// Experimental Sentry Logging options.
+    /// </summary>
+    /// <remarks>
+    /// This and related experimental APIs may change in the future.
+    /// </remarks>
+    [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
+    public sealed class SentryLoggingExperimentalOptions
+    {
+        internal SentryLoggingExperimentalOptions()
+        {
+        }
+
+        /// <summary>
+        /// Gets or sets the minimum log level.
+        /// <para>This API is experimental and it may change in the future.</para>
+        /// </summary>
+        /// <remarks>
+        /// Logs with this level or higher will be stored as <see cref="SentryLog"/>.
+        /// </remarks>
+        /// <value>
+        /// The minimum log level.
+        /// </value>
+        public LogLevel MinimumLogLevel { get; set; } = LogLevel.Trace;
+    }
 }
