@@ -1,10 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add experimental support for _Sentry Structured Logging_ via `SentrySdk.Experimental.Logger` ([#4158](https://github.com/getsentry/sentry-dotnet/pull/4158))
+
 ## 5.10.0
 
 ### Features
 
-- Add experimental support for _Sentry Structured Logging_ via `SentrySdk.Logger` ([#4158](https://github.com/getsentry/sentry-dotnet/pull/4158))
 - Rename MemoryInfo.AllocatedBytes to MemoryInfo.TotalAllocatedBytes ([#4243](https://github.com/getsentry/sentry-dotnet/pull/4243))
 - Replace libcurl with .NET HttpClient for sentry-native ([#4222](https://github.com/getsentry/sentry-dotnet/pull/4222))
 
