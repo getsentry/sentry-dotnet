@@ -7,6 +7,39 @@ namespace Sentry;
 /// The severity of the structured log.
 /// <para>This API is experimental and it may change in the future.</para>
 /// </summary>
+/// <remarks>
+/// The named constants use the value of the lowest severity number per severity level:
+/// <list type="table">
+///   <listheader>
+///     <term>SeverityNumber</term>
+///     <description>SeverityText</description>
+///   </listheader>
+///   <item>
+///     <term>1-4</term>
+///     <description>Trace</description>
+///   </item>
+///   <item>
+///     <term>5-8</term>
+///     <description>Debug</description>
+///   </item>
+///   <item>
+///     <term>9-12</term>
+///     <description>Info</description>
+///   </item>
+///   <item>
+///     <term>13-16</term>
+///     <description>Warn</description>
+///   </item>
+///   <item>
+///     <term>17-20</term>
+///     <description>Error</description>
+///   </item>
+///   <item>
+///     <term>21-24</term>
+///     <description>Fatal</description>
+///   </item>
+/// </list>
+/// </remarks>
 /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
 [Experimental(DiagnosticId.ExperimentalFeature)]
 public enum SentryLogLevel
@@ -59,17 +92,44 @@ internal static class SentryLogLevelExtensions
             >= 22 and <= 24 => ("fatal", (int)level),
             >= 25 => Overflow(level, logger),
         };
+
+        static (string, int?) Underflow(SentryLogLevel level, IDiagnosticLogger? logger)
+        {
+            logger?.LogDebug("Log level {0} out of range ... clamping to minimum value {1} ({2})", level, 1, "trace");
+            return ("trace", 1);
+        }
+
+        static (string, int?) Overflow(SentryLogLevel level, IDiagnosticLogger? logger)
+        {
+            logger?.LogDebug("Log level {0} out of range ... clamping to maximum value {1} ({2})", level, 24, "fatal");
+            return ("fatal", 24);
+        }
     }
 
-    private static (string, int?) Underflow(SentryLogLevel level, IDiagnosticLogger? logger)
+    internal static SentryLogLevel FromValue(int value, IDiagnosticLogger? logger)
     {
-        logger?.LogDebug("Log level {0} out of range ... clamping to minimum value {1} ({2})", level, 1, "trace");
-        return ("trace", 1);
-    }
+        return value switch
+        {
+            <= 0 => Underflow(value, logger),
+            >= 1 and <= 4 => SentryLogLevel.Trace,
+            >= 5 and <= 8 => SentryLogLevel.Debug,
+            >= 9 and <= 12 => SentryLogLevel.Info,
+            >= 13 and <= 16 => SentryLogLevel.Warning,
+            >= 17 and <= 20 => SentryLogLevel.Error,
+            >= 21 and <= 24 => SentryLogLevel.Fatal,
+            >= 25 => Overflow(value, logger),
+        };
 
-    private static (string, int?) Overflow(SentryLogLevel level, IDiagnosticLogger? logger)
-    {
-        logger?.LogDebug("Log level {0} out of range ... clamping to maximum value {1} ({2})", level, 24, "fatal");
-        return ("fatal", 24);
+        static SentryLogLevel Underflow(int value, IDiagnosticLogger? logger)
+        {
+            logger?.LogDebug("Log number {0} out of range ... clamping to minimum level {1}", value, SentryLogLevel.Trace);
+            return SentryLogLevel.Trace;
+        }
+
+        static SentryLogLevel Overflow(int value, IDiagnosticLogger? logger)
+        {
+            logger?.LogDebug("Log number {0} out of range ... clamping to maximum level {1}", value, SentryLogLevel.Fatal);
+            return SentryLogLevel.Fatal;
+        }
     }
 }

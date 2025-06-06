@@ -139,6 +139,14 @@ internal static class C
             }
         }
 
+        unsafe
+        {
+            var cTransport = sentry_transport_new(&nativeTransport);
+            sentry_transport_set_state(cTransport, GCHandle.ToIntPtr(GCHandle.Alloc(options)));
+            sentry_transport_set_free_func(cTransport, &nativeTransportFree);
+            sentry_options_set_transport(cOptions, cTransport);
+        }
+
         options.DiagnosticLogger?.LogDebug("Initializing sentry native");
         return 0 == sentry_init(cOptions);
     }
@@ -363,6 +371,70 @@ internal static class C
 
     [DllImport("sentry-native")]
     private static extern void sentry_options_set_auto_session_tracking(IntPtr options, int debug);
+
+    [DllImport("sentry-native")]
+    private static extern void sentry_options_set_transport(IntPtr options, IntPtr transport);
+
+    [DllImport("sentry-native")]
+    private static extern unsafe IntPtr sentry_transport_new(delegate* unmanaged<IntPtr, IntPtr, void> sendFunc);
+
+    [DllImport("sentry-native")]
+    private static extern void sentry_transport_set_state(IntPtr transport, IntPtr state);
+
+    [DllImport("sentry-native")]
+    private static extern unsafe void sentry_transport_set_free_func(IntPtr transport, delegate* unmanaged<IntPtr, void> freeFunc);
+
+    [DllImport("sentry-native")]
+    private static extern IntPtr sentry_envelope_serialize(IntPtr envelope, out UIntPtr sizeOut);
+
+    [DllImport("sentry-native")]
+    private static extern void sentry_envelope_free(IntPtr envelope);
+
+    [DllImport("sentry-native")]
+    internal static extern void sentry_free(IntPtr ptr);
+
+    [UnmanagedCallersOnly]
+    private static void nativeTransport(IntPtr envelope, IntPtr state)
+    {
+        var options = GCHandle.FromIntPtr(state).Target as SentryOptions;
+        try
+        {
+            if (options is not null)
+            {
+                var data = sentry_envelope_serialize(envelope, out var size);
+                using var content = new UnmanagedHttpContent(data, (int)size, options.DiagnosticLogger);
+
+                using var client = options.GetHttpClient();
+                using var request = options.CreateHttpRequest(content);
+#if NET5_0_OR_GREATER
+                var response = client.Send(request);
+#else
+                var response = client.SendAsync(request).GetAwaiter().GetResult();
+#endif
+                response.EnsureSuccessStatusCode();
+            }
+        }
+        catch (HttpRequestException e)
+        {
+            options?.DiagnosticLogger?.LogError(e, "Failed to send native envelope.");
+        }
+        catch (Exception e)
+        {
+            // never allow an exception back to native code - it would crash the app
+            options?.DiagnosticLogger?.LogError(e, "Exception in native transport callback. The native envelope will not be sent.");
+        }
+        finally
+        {
+            sentry_envelope_free(envelope);
+        }
+    }
+
+    [UnmanagedCallersOnly]
+    private static void nativeTransportFree(IntPtr state)
+    {
+        var handle = GCHandle.FromIntPtr(state);
+        handle.Free();
+    }
 
     [DllImport("sentry-native")]
     private static extern unsafe void sentry_options_set_logger(IntPtr options, delegate* unmanaged/*[Cdecl]*/<int, IntPtr, IntPtr, IntPtr, void> logger, IntPtr userData);

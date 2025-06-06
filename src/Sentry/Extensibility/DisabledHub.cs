@@ -21,7 +21,6 @@ public class DisabledHub : IHub, IDisposable
 
     private DisabledHub()
     {
-        Logger = SentryStructuredLogger.CreateDisabled(this);
     }
 
     /// <summary>
@@ -249,5 +248,5 @@ public class DisabledHub : IHub, IDisposable
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
-    public SentryStructuredLogger Logger { get; }
+    public SentryStructuredLogger Logger => DisabledSentryStructuredLogger.Instance;
 }

@@ -750,11 +750,11 @@ namespace Sentry
         public bool DisableSentryHttpMessageHandler { get; set; }
         public string? Distribution { get; set; }
         public string? Dsn { get; set; }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
-        public bool EnableLogs { get; set; }
         public bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }
         public string? Environment { get; set; }
+        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
+        public Sentry.SentryOptions.SentryExperimentalOptions Experimental { get; set; }
         public System.Collections.Generic.IList<Sentry.HttpStatusCodeRange> FailedRequestStatusCodes { get; set; }
         public System.Collections.Generic.IList<Sentry.StringOrRegex> FailedRequestTargets { get; set; }
         public System.TimeSpan FlushTimeout { get; set; }
@@ -837,11 +837,15 @@ namespace Sentry
         public void SetBeforeBreadcrumb(System.Func<Sentry.Breadcrumb, Sentry.SentryHint, Sentry.Breadcrumb?> beforeBreadcrumb) { }
         public void SetBeforeSend(System.Func<Sentry.SentryEvent, Sentry.SentryEvent?> beforeSend) { }
         public void SetBeforeSend(System.Func<Sentry.SentryEvent, Sentry.SentryHint, Sentry.SentryEvent?> beforeSend) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
-        public void SetBeforeSendLog(System.Func<Sentry.SentryLog, Sentry.SentryLog?> beforeSendLog) { }
         public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryTransaction?> beforeSendTransaction) { }
         public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryHint, Sentry.SentryTransaction?> beforeSendTransaction) { }
         public Sentry.SentryOptions UseStackTraceFactory(Sentry.Extensibility.ISentryStackTraceFactory sentryStackTraceFactory) { }
+        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
+        public sealed class SentryExperimentalOptions
+        {
+            public bool EnableLogs { get; set; }
+            public void SetBeforeSendLog(System.Func<Sentry.SentryLog, Sentry.SentryLog?> beforeSendLog) { }
+        }
     }
     public sealed class SentryPackage : Sentry.ISentryJsonSerializable
     {
@@ -873,8 +877,6 @@ namespace Sentry
     {
         public static bool IsEnabled { get; }
         public static Sentry.SentryId LastEventId { get; }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
-        public static Sentry.SentryStructuredLogger Logger { get; }
         public static void AddBreadcrumb(Sentry.Breadcrumb breadcrumb, Sentry.SentryHint? hint = null) { }
         public static void AddBreadcrumb(string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public static void AddBreadcrumb(Sentry.Infrastructure.ISystemClock? clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
@@ -931,6 +933,11 @@ namespace Sentry
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, string? description) { }
         public static void UnsetTag(string key) { }
+        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
+        public static class Experimental
+        {
+            public static Sentry.SentryStructuredLogger Logger { get; }
+        }
     }
     public class SentrySession : Sentry.ISentrySession
     {
@@ -1011,7 +1018,7 @@ namespace Sentry
         public static Sentry.SentryStackTrace FromJson(System.Text.Json.JsonElement json) { }
     }
     [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
-    public sealed class SentryStructuredLogger
+    public abstract class SentryStructuredLogger
     {
         [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void LogDebug(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }

@@ -133,12 +133,15 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             Instrumenter = Instrumenter.OpenTelemetry
         };
 
-        var span = (SpanTracer)parentSpan.StartChild(context);
-        span.Origin = OpenTelemetryOrigin;
-        span.StartTimestamp = data.StartTimeUtc;
-        // Used to filter out spans that are not recorded when finishing a transaction.
-        span.SetFused(data);
-        span.IsFiltered = () => span.GetFused<Activity>() is { IsAllDataRequested: false, Recorded: false };
+        var span = parentSpan.StartChild(context);
+        if (span is SpanTracer spanTracer)
+        {
+            spanTracer.Origin = OpenTelemetryOrigin;
+            spanTracer.StartTimestamp = data.StartTimeUtc;
+            // Used to filter out spans that are not recorded when finishing a transaction.
+            spanTracer.SetFused(data);
+            spanTracer.IsFiltered = () => spanTracer.GetFused<Activity>() is { IsAllDataRequested: false, Recorded: false };
+        }
         _map[data.SpanId] = span;
     }
 
@@ -161,16 +164,18 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         var baggageHeader = data.Baggage.AsBaggageHeader();
         var dynamicSamplingContext = baggageHeader.CreateDynamicSamplingContext(_replaySession);
-        var transaction = (TransactionTracer)_hub.StartTransaction(
+        var transaction = _hub.StartTransaction(
             transactionContext, new Dictionary<string, object?>(), dynamicSamplingContext
         );
-        transaction.Contexts.Trace.Origin = OpenTelemetryOrigin;
-        transaction.StartTimestamp = data.StartTimeUtc;
+        if (transaction is TransactionTracer tracer)
+        {
+            tracer.Contexts.Trace.Origin = OpenTelemetryOrigin;
+            tracer.StartTimestamp = data.StartTimeUtc;
+        }
         _hub.ConfigureScope(scope => scope.Transaction = transaction);
         transaction.SetFused(data);
         _map[data.SpanId] = transaction;
     }
-
 
     /// <inheritdoc />
     public override void OnEnd(Activity data)
@@ -236,15 +241,15 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             // Transactions set otel attributes (and resource attributes) as context.
             transaction.Contexts["otel"] = GetOtelContext(attributes);
         }
-        else
+        else if (span is SpanTracer spanTracer)
         {
             // Use the end timestamp from the activity data.
-            ((SpanTracer)span).EndTimestamp = data.StartTimeUtc + data.Duration;
+            spanTracer.EndTimestamp = data.StartTimeUtc + data.Duration;
 
             // Spans set otel attributes in extras (passed to Sentry as "data" on the span).
             // Resource attributes do not need to be set, as they would be identical as those set on the transaction.
-            span.SetExtras(attributes);
-            span.SetExtra("otel.kind", data.Kind);
+            spanTracer.SetExtras(attributes);
+            spanTracer.SetExtra("otel.kind", data.Kind);
         }
 
         // In ASP.NET Core the middleware finishes up (and the scope gets popped) before the activity is ended.  So we

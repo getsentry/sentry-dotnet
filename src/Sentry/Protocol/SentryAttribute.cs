@@ -17,7 +17,7 @@ internal static class SentryAttributeSerializer
 {
     internal static void WriteAttribute(Utf8JsonWriter writer, string propertyName, SentryAttribute attribute)
     {
-        Debug.Assert(attribute.Type is not null);
+        Debug.Assert(attribute.Value is not null && attribute.Type is not null, $"The ValueType {nameof(attribute)} may have been assigned 'default', for which static flow analysis does not report nullable warnings.");
         writer.WritePropertyName(propertyName);
         WriteAttributeValue(writer, attribute.Value, attribute.Type);
     }

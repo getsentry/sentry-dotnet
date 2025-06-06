@@ -1,4 +1,5 @@
 using System.Text.Encodings.Web;
+using Sentry.PlatformAbstractions;
 
 namespace Sentry.Tests;
 
@@ -212,8 +213,6 @@ public class SentryLogTests
 
 file static class JsonFormatterExtensions
 {
-    private static readonly bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-
     public static string Format(this DateTimeOffset value)
     {
         return value.ToString("yyyy-MM-ddTHH:mm:sszzz", DateTimeFormatInfo.InvariantInfo);
@@ -221,8 +220,7 @@ file static class JsonFormatterExtensions
 
     public static string Format(this double value)
     {
-#if NETFRAMEWORK
-        if (IsWindows)
+        if (SentryRuntime.Current.IsNetFx() || SentryRuntime.Current.IsMono())
         {
             // since .NET Core 3.0, the Floating-Point Formatter returns the shortest roundtrippable string, rather than the exact string
             // e.g. on .NET Framework (Windows)
@@ -234,7 +232,6 @@ file static class JsonFormatterExtensions
             var utf8Bytes = Encoding.UTF8.GetBytes(utf16Text);
             return Encoding.UTF8.GetString(utf8Bytes);
         }
-#endif
 
         return value.ToString(NumberFormatInfo.InvariantInfo);
     }

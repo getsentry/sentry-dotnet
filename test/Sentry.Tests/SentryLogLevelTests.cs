@@ -12,6 +12,22 @@ public class SentryLogLevelTests
         _logger = new InMemoryDiagnosticLogger();
     }
 
+#if NET7_0_OR_GREATER
+    [Fact]
+    public void Enum_GetValuesAsUnderlyingType_LowestSeverityNumberPerSeverityRange()
+    {
+        var values = Enum.GetValuesAsUnderlyingType<SentryLogLevel>();
+
+        Assert.Collection(values.OfType<int>(),
+            element => Assert.Equal(1, element),
+            element => Assert.Equal(5, element),
+            element => Assert.Equal(9, element),
+            element => Assert.Equal(13, element),
+            element => Assert.Equal(17, element),
+            element => Assert.Equal(21, element));
+    }
+#endif
+
     [Theory]
     [MemberData(nameof(SeverityTextAndSeverityNumber))]
     public void SeverityTextAndSeverityNumber_WithinRange_MatchesProtocol(int level, string text, int? number)
@@ -74,6 +90,63 @@ public class SentryLogLevelTests
             { 22, "fatal", 22 },
             { 23, "fatal", 23 },
             { 24, "fatal", 24 },
+        };
+    }
+
+    [Theory]
+    [MemberData(nameof(Create))]
+    public void Create_WithinRange_UsesLowestSeverityNumberOfRange(int value, SentryLogLevel level)
+    {
+        var @enum = SentryLogLevelExtensions.FromValue(value, _logger);
+
+        Assert.Equal(level, @enum);
+        Assert.Empty(_logger.Entries);
+    }
+
+    [Theory]
+    [InlineData(0, SentryLogLevel.Trace, "minimum")]
+    [InlineData(25, SentryLogLevel.Fatal, "maximum")]
+    public void Create_OutOfRange_ClampValue(int value, SentryLogLevel level, string clamp)
+    {
+        var @enum = SentryLogLevelExtensions.FromValue(value, _logger);
+
+        Assert.Equal(level, @enum);
+        var entry = Assert.Single(_logger.Entries);
+        Assert.Multiple(
+            () => Assert.Equal(SentryLevel.Debug, entry.Level),
+            () => Assert.Equal($$"""Log number {0} out of range ... clamping to {{clamp}} level {1}""", entry.Message),
+            () => Assert.Null(entry.Exception),
+            () => Assert.Equal([value, level], entry.Args));
+    }
+
+    public static TheoryData<int, SentryLogLevel> Create()
+    {
+        return new TheoryData<int, SentryLogLevel>
+        {
+            { 1, SentryLogLevel.Trace },
+            { 2, SentryLogLevel.Trace },
+            { 3, SentryLogLevel.Trace },
+            { 4, SentryLogLevel.Trace },
+            { 5, SentryLogLevel.Debug },
+            { 6, SentryLogLevel.Debug },
+            { 7, SentryLogLevel.Debug },
+            { 8, SentryLogLevel.Debug },
+            { 9, SentryLogLevel.Info },
+            { 10, SentryLogLevel.Info },
+            { 11, SentryLogLevel.Info },
+            { 12, SentryLogLevel.Info },
+            { 13, SentryLogLevel.Warning },
+            { 14, SentryLogLevel.Warning },
+            { 15, SentryLogLevel.Warning },
+            { 16, SentryLogLevel.Warning },
+            { 17, SentryLogLevel.Error },
+            { 18, SentryLogLevel.Error },
+            { 19, SentryLogLevel.Error },
+            { 20, SentryLogLevel.Error },
+            { 21, SentryLogLevel.Fatal },
+            { 22, SentryLogLevel.Fatal },
+            { 23, SentryLogLevel.Fatal },
+            { 24, SentryLogLevel.Fatal },
         };
     }
 }

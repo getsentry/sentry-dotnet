@@ -20,8 +20,6 @@ internal partial class BindableSentryOptions
     public string? Distribution { get; set; }
     public string? Environment { get; set; }
     public string? Dsn { get; set; }
-    [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
-    public bool? EnableLogs { get; set; }
     public int? MaxQueueItems { get; set; }
     public int? MaxCacheItems { get; set; }
     public TimeSpan? ShutdownTimeout { get; set; }
@@ -55,6 +53,15 @@ internal partial class BindableSentryOptions
     public bool? EnableSpotlight { get; set; }
     public string? SpotlightUrl { get; set; }
 
+    [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
+    public BindableSentryExperimentalOptions Experimental { get; set; } = new();
+
+    [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
+    internal sealed class BindableSentryExperimentalOptions
+    {
+        public bool? EnableLogs { get; set; }
+    }
+
     public void ApplyTo(SentryOptions options)
     {
         options.IsGlobalModeEnabled = IsGlobalModeEnabled ?? options.IsGlobalModeEnabled;
@@ -70,7 +77,6 @@ internal partial class BindableSentryOptions
         options.Distribution = Distribution ?? options.Distribution;
         options.Environment = Environment ?? options.Environment;
         options.Dsn = Dsn ?? options.Dsn;
-        options.EnableLogs = EnableLogs ?? options.EnableLogs;
         options.MaxQueueItems = MaxQueueItems ?? options.MaxQueueItems;
         options.MaxCacheItems = MaxCacheItems ?? options.MaxCacheItems;
         options.ShutdownTimeout = ShutdownTimeout ?? options.ShutdownTimeout;
@@ -102,6 +108,8 @@ internal partial class BindableSentryOptions
         options.JsonPreserveReferences = JsonPreserveReferences ?? options.JsonPreserveReferences;
         options.EnableSpotlight = EnableSpotlight ?? options.EnableSpotlight;
         options.SpotlightUrl = SpotlightUrl ?? options.SpotlightUrl;
+
+        options.Experimental.EnableLogs = Experimental.EnableLogs ?? options.Experimental.EnableLogs;
 
 #if ANDROID
         Android.ApplyTo(options.Android);

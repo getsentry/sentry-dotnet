@@ -187,20 +187,8 @@ public abstract class HttpTransportBase
             throw new InvalidOperationException("The DSN is expected to be set at this point.");
         }
 
-        var dsn = Dsn.Parse(_options.Dsn);
-        var authHeader =
-            $"Sentry sentry_version={_options.SentryVersion}," +
-            $"sentry_client={SdkVersion.Instance.Name}/{SdkVersion.Instance.Version}," +
-            $"sentry_key={dsn.PublicKey}" +
-            (dsn.SecretKey is { } secretKey ? $",sentry_secret={secretKey}" : null);
-
-        return new HttpRequestMessage
-        {
-            RequestUri = dsn.GetEnvelopeEndpointUri(),
-            Method = HttpMethod.Post,
-            Headers = { { "X-Sentry-Auth", authHeader } },
-            Content = new EnvelopeHttpContent(envelope, _options.DiagnosticLogger, _clock)
-        };
+        var content = new EnvelopeHttpContent(envelope, _options.DiagnosticLogger, _clock);
+        return _options.CreateHttpRequest(content);
     }
 
     /// <summary>

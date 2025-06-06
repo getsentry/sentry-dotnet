@@ -245,6 +245,23 @@ public class SentryOptions
         return factory.Create(this);
     }
 
+    internal HttpRequestMessage CreateHttpRequest(HttpContent content)
+    {
+        var authHeader =
+            $"Sentry sentry_version={SentryVersion}," +
+            $"sentry_client={SdkVersion.Instance.Name}/{SdkVersion.Instance.Version}," +
+            $"sentry_key={ParsedDsn.PublicKey}" +
+            (ParsedDsn.SecretKey is { } secretKey ? $",sentry_secret={secretKey}" : null);
+
+        return new HttpRequestMessage
+        {
+            RequestUri = ParsedDsn.GetEnvelopeEndpointUri(),
+            Method = HttpMethod.Post,
+            Headers = { { "X-Sentry-Auth", authHeader } },
+            Content = content
+        };
+    }
+
     /// <summary>
     /// Scope state processor.
     /// </summary>
@@ -516,34 +533,6 @@ public class SentryOptions
     public void SetBeforeBreadcrumb(Func<Breadcrumb, Breadcrumb?> beforeBreadcrumb)
     {
         _beforeBreadcrumb = (breadcrumb, _) => beforeBreadcrumb(breadcrumb);
-    }
-
-    /// <summary>
-    /// When set to <see langword="true"/>, logs are sent to Sentry.
-    /// Defaults to <see langword="false"/>.
-    /// <para>This API is experimental and it may change in the future.</para>
-    /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public bool EnableLogs { get; set; } = false;
-
-    private Func<SentryLog, SentryLog?>? _beforeSendLog;
-
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    internal Func<SentryLog, SentryLog?>? BeforeSendLogInternal => _beforeSendLog;
-
-    /// <summary>
-    /// Sets a callback function to be invoked before sending the log to Sentry.
-    /// When the delegate throws an <see cref="Exception"/> during invocation, the log will not be captured.
-    /// <para>This API is experimental and it may change in the future.</para>
-    /// </summary>
-    /// <remarks>
-    /// It can be used to modify the log object before being sent to Sentry.
-    /// To prevent the log from being sent to Sentry, return <see langword="null"/>.
-    /// </remarks>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public void SetBeforeSendLog(Func<SentryLog, SentryLog?> beforeSendLog)
-    {
-        _beforeSendLog = beforeSendLog;
     }
 
     private int _maxQueueItems = 30;
@@ -1859,4 +1848,54 @@ public class SentryOptions
         "ServiceStack",
         "Java.Interop",
     ];
+
+    /// <summary>
+    /// Experimental Sentry features.
+    /// </summary>
+    /// <remarks>
+    /// This and related experimental APIs may change in the future.
+    /// </remarks>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public SentryExperimentalOptions Experimental { get; set; } = new();
+
+    /// <summary>
+    /// Experimental Sentry SDK options.
+    /// </summary>
+    /// <remarks>
+    /// This and related experimental APIs may change in the future.
+    /// </remarks>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public sealed class SentryExperimentalOptions
+    {
+        internal SentryExperimentalOptions()
+        {
+        }
+
+        /// <summary>
+        /// When set to <see langword="true"/>, logs are sent to Sentry.
+        /// Defaults to <see langword="false"/>.
+        /// <para>This API is experimental and it may change in the future.</para>
+        /// </summary>
+        /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
+        public bool EnableLogs { get; set; } = false;
+
+        private Func<SentryLog, SentryLog?>? _beforeSendLog;
+
+        internal Func<SentryLog, SentryLog?>? BeforeSendLogInternal => _beforeSendLog;
+
+        /// <summary>
+        /// Sets a callback function to be invoked before sending the log to Sentry.
+        /// When the delegate throws an <see cref="Exception"/> during invocation, the log will not be captured.
+        /// <para>This API is experimental and it may change in the future.</para>
+        /// </summary>
+        /// <remarks>
+        /// It can be used to modify the log object before being sent to Sentry.
+        /// To prevent the log from being sent to Sentry, return <see langword="null"/>.
+        /// </remarks>
+        /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
+        public void SetBeforeSendLog(Func<SentryLog, SentryLog?> beforeSendLog)
+        {
+            _beforeSendLog = beforeSendLog;
+        }
+    }
 }
