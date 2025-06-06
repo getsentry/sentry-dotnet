@@ -11,7 +11,7 @@ namespace Microsoft.Maui.Hosting
 }
 namespace Sentry.Maui
 {
-    public class BreadcrumbEvent : System.IEquatable<Sentry.Maui.BreadcrumbEvent>
+    public sealed class BreadcrumbEvent
     {
         [System.Obsolete("Use the simpler constructor with params (string Key, string Value)[] extraData in" +
             "stead.")]

@@ -3,7 +3,7 @@ namespace Sentry.Maui;
 /// <summary>
 /// Argument to the OnBreadcrumbCreateCallback
 /// </summary>
-public record BreadcrumbEvent
+public sealed class BreadcrumbEvent
 {
     /// <summary>
     /// The sender of the event, usually the control that triggered it.
