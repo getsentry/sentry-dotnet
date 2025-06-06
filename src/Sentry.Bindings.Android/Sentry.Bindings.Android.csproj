@@ -43,14 +43,13 @@
   </ItemGroup>
 
   <!-- Dependencies for AndroidMavenLibrary references
-       Note: versions match what was shipped with net9.0-android35.0 in:
-       https://www.nuget.org/packages/Microsoft.Maui.Core/9.0.0#dependencies-body-tab
+       Matching what was shipped in the 9.0.300 workloads to avoid NU1608 warnings
        -->
   <ItemGroup Condition="$(TargetFramework.StartsWith('net9'))">
-    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.8.5.1" />
-    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.8.5.1" />
-    <!-- MAUI 9 references this version indirectly via Xamarin.AndroidX.SwipeRefreshLayout (>= 1.1.0.24)   -->
-    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.13.1.5" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.8.7.2" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.8.7.2" />
+    <!-- MAUI 9 references this version indirectly via Xamarin.AndroidX.SwipeRefreshLayout   -->
+    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.15.0.2" />
     <!-- We need 1.9.24 but there's no NuGet package for that version... the lowest version we can use is 2.0.0 -->
     <PackageReference Include="Xamarin.Kotlin.StdLib.Jdk8" Version="2.0.0" />
   </ItemGroup>
