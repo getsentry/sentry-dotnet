@@ -242,4 +242,11 @@ public class DisabledHub : IHub, IDisposable
     /// No-Op.
     /// </summary>
     public SentryId LastEventId => SentryId.Empty;
+
+    /// <summary>
+    /// Disabled Logger.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
+    public SentryStructuredLogger Logger => DisabledSentryStructuredLogger.Instance;
 }

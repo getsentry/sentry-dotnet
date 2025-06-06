@@ -1420,6 +1420,42 @@ public partial class HubTests
     }
 
     [Fact]
+    public void Logger_IsDisabled_DoesNotCaptureLog()
+    {
+        // Arrange
+        Assert.False(_fixture.Options.Experimental.EnableLogs);
+        var hub = _fixture.GetSut();
+
+        // Act
+        hub.Logger.LogWarning("Message");
+
+        // Assert
+        _fixture.Client.Received(0).CaptureEnvelope(
+            Arg.Is<Envelope>(envelope =>
+                envelope.Items.Single(item => item.Header["type"].Equals("log")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
+            )
+        );
+    }
+
+    [Fact]
+    public void Logger_IsEnabled_DoesCaptureLog()
+    {
+        // Arrange
+        _fixture.Options.Experimental.EnableLogs = true;
+        var hub = _fixture.GetSut();
+
+        // Act
+        hub.Logger.LogWarning("Message");
+
+        // Assert
+        _fixture.Client.Received(1).CaptureEnvelope(
+            Arg.Is<Envelope>(envelope =>
+                envelope.Items.Single(item => item.Header["type"].Equals("log")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
+            )
+        );
+    }
+
+    [Fact]
     public void Dispose_IsEnabled_SetToFalse()
     {
         // Arrange
