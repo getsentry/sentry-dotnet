@@ -130,10 +130,7 @@ internal class SentryTracingMiddleware
 
         // Expose the transaction on the scope so that the user
         // can retrieve it and start child spans off of it.
-        hub.ConfigureScope(scope =>
-        {
-            scope.Transaction = transaction;
-        });
+        hub.ConfigureScope(static (scope, transaction) => scope.Transaction = transaction, transaction);
 
         Exception? exception = null;
         try

@@ -56,13 +56,10 @@ public static class HubExtensions
     /// </summary>
     public static ISpan StartSpan(this IHub hub, string operation, string description)
     {
-        ITransactionTracer? currentTransaction = null;
-        hub.ConfigureScope(s => currentTransaction = s.Transaction);
-        return currentTransaction is { } transaction
+        return hub.GetTransaction() is { } transaction
             ? transaction.StartChild(operation, description)
             : hub.StartTransaction(operation, description); // this is actually in the wrong order but changing it may break other things
     }
-
 
     /// <summary>
     /// Adds a breadcrumb to the current scope.
@@ -158,8 +155,8 @@ public static class HubExtensions
         }
 
         hub.ConfigureScope(
-            s => s.AddBreadcrumb(breadcrumb, hint ?? new SentryHint())
-            );
+            static (s, arg) => s.AddBreadcrumb(arg.breadcrumb, arg.hint ?? new SentryHint()),
+            (breadcrumb, hint));
     }
 
     /// <summary>
@@ -175,13 +172,13 @@ public static class HubExtensions
     /// like Loggers which guarantee log messages are not lost.
     /// </remarks>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static void LockScope(this IHub hub) => hub.ConfigureScope(c => c.Locked = true);
+    public static void LockScope(this IHub hub) => hub.ConfigureScope(static s => s.Locked = true);
 
     /// <summary>
     /// Unlocks the current scope to allow subsequent calls to <see cref="ISentryScopeManager.PushScope"/> create new scopes.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static void UnlockScope(this IHub hub) => hub.ConfigureScope(c => c.Locked = false);
+    public static void UnlockScope(this IHub hub) => hub.ConfigureScope(static s => s.Locked = false);
 
     private sealed class LockedScope : IDisposable
     {
@@ -247,6 +244,11 @@ public static class HubExtensions
 
     internal static ITransactionTracer? GetTransaction(this IHub hub)
     {
+        if (hub is Hub fullHub)
+        {
+            return fullHub.ScopeManager.GetCurrent().Key.Transaction;
+        }
+
         ITransactionTracer? transaction = null;
         hub.ConfigureScope(scope => transaction = scope.Transaction);
         return transaction;

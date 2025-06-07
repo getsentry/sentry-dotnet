@@ -23,7 +23,7 @@ public class SentryTargetTests
             Hub.IsEnabled.Returns(true);
             HubAccessor = () => Hub;
             Scope = new Scope(new SentryOptions());
-            Hub.ConfigureScope(Arg.Invoke(Scope));
+            Hub.SubstituteConfigureScope(Scope);
         }
 
         public Target GetTarget(bool asyncTarget = false)

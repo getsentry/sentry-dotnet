@@ -8,7 +8,7 @@ public class SentryQueryLoggerTests
         var scope = new Scope(new SentryOptions());
         var hub = Substitute.For<IHub>();
         hub.IsEnabled.Returns(true);
-        hub.ConfigureScope(Arg.Invoke(scope));
+        hub.SubstituteConfigureScope(scope);
 
         var expected = new
         {

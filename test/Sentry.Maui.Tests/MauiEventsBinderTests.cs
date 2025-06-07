@@ -17,11 +17,7 @@ public partial class MauiEventsBinderTests
         public Fixture()
         {
             Hub = Substitute.For<IHub>();
-            Hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-                .Do(c =>
-                {
-                    c.Arg<Action<Scope>>()(Scope);
-                });
+            Hub.SubstituteConfigureScope(Scope);
 
             Scope.Transaction = Substitute.For<ITransactionTracer>();
 

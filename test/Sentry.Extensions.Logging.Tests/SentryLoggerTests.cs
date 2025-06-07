@@ -14,7 +14,7 @@ public class SentryLoggerTests
         public Fixture()
         {
             _ = Hub.IsEnabled.Returns(true);
-            Hub.ConfigureScope(Arg.Invoke(Scope));
+            Hub.SubstituteConfigureScope(Scope);
         }
 
         public SentryLogger GetSut() => new(CategoryName, Options, new MockClock(), Hub);

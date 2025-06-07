@@ -16,7 +16,7 @@ public class SentryAppenderTests
         public Fixture()
         {
             HubAccessor = () => Hub;
-            Hub.ConfigureScope(Arg.Invoke(Scope));
+            Hub.SubstituteConfigureScope(Scope);
             InitAction = s =>
             {
                 DsnReceivedOnInit = s;

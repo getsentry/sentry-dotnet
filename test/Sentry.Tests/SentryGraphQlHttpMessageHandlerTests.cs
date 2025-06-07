@@ -83,8 +83,7 @@ public class SentryGraphQlHttpMessageHandlerTests
 
         var scope = new Scope();
         var hub = Substitute.For<IHub>();
-        hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-            .Do(c => c.Arg<Action<Scope>>()(scope));
+        hub.SubstituteConfigureScope(scope);
 
         var query = ValidQuery;
         var request = SentryGraphQlTestHelpers.GetRequestQuery(query, url);

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Added non allocating SentrySdk.ConfigureScope overload ([#4244](https://github.com/getsentry/sentry-dotnet/pull/4244))
+
 ### Dependencies
 
 - Bump Native SDK from v0.8.5 to v0.9.0 ([#4260](https://github.com/getsentry/sentry-dotnet/pull/4260))
