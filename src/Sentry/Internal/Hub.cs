@@ -107,7 +107,7 @@ internal class Hub : IHub, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError(e, "Failure to ConfigureScope");
+            _options.LogError(e, "Failure to ConfigureScope<TArg>");
         }
     }
 
@@ -131,7 +131,7 @@ internal class Hub : IHub, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError(e, "Failure to ConfigureScopeAsync");
+            _options.LogError(e, "Failure to ConfigureScopeAsync<TArg>");
         }
     }
 
