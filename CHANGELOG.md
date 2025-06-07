@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Added non-allocating `ConfigureScope` and `ConfigureScopeAsync` overloads ([#4244](https://github.com/getsentry/sentry-dotnet/pull/4244))
+
 ### Fixes
 
 - The HTTP instrumentation uses the span created for the outgoing request in the sentry-trace header, fixing the parent-child relationship between client and server ([#4264](https://github.com/getsentry/sentry-dotnet/pull/4264))
@@ -18,7 +22,6 @@
 
 - Rename MemoryInfo.AllocatedBytes to MemoryInfo.TotalAllocatedBytes ([#4243](https://github.com/getsentry/sentry-dotnet/pull/4243))
 - Replace libcurl with .NET HttpClient for sentry-native ([#4222](https://github.com/getsentry/sentry-dotnet/pull/4222))
-- Added non allocating SentrySdk.ConfigureScope overload ([#4244](https://github.com/getsentry/sentry-dotnet/pull/4244))
 
 ### Fixes
 
