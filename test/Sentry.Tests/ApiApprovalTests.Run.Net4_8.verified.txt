@@ -1,5 +1,4 @@
-﻿[assembly: System.CLSCompliant(true)]
-namespace Sentry
+﻿namespace Sentry
 {
     public enum AttachmentType
     {
@@ -663,7 +662,6 @@ namespace Sentry
     public class SentryOptions
     {
         public SentryOptions() { }
-        [System.CLSCompliant(false)]
         public System.Func<string, System.Reflection.PortableExecutable.PEReader?>? AssemblyReader { get; set; }
         public bool AttachStacktrace { get; set; }
         public bool AutoSessionTracking { get; set; }
@@ -1060,7 +1058,6 @@ namespace Sentry
         public static void SetMeasurement(this Sentry.ISpanData spanData, string name, double value, Sentry.MeasurementUnit unit = default) { }
         public static void SetMeasurement(this Sentry.ISpanData spanData, string name, int value, Sentry.MeasurementUnit unit = default) { }
         public static void SetMeasurement(this Sentry.ISpanData spanData, string name, long value, Sentry.MeasurementUnit unit = default) { }
-        [System.CLSCompliant(false)]
         public static void SetMeasurement(this Sentry.ISpanData spanData, string name, ulong value, Sentry.MeasurementUnit unit = default) { }
     }
     public static class SpanExtensions

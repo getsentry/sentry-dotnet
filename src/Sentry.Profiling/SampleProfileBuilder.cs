@@ -30,7 +30,7 @@ internal class SampleProfileBuilder
     private readonly Dictionary<int, int> _threadIndexes = new();
 
     // TODO make downsampling conditional once this is available: https://github.com/dotnet/runtime/issues/82939
-    private readonly Downsampler _downsampler = new();
+    // private readonly Downsampler _downsampler = new();
 
     public SampleProfileBuilder(SentryOptions options, TraceLog traceLog)
     {
@@ -61,10 +61,10 @@ internal class SampleProfileBuilder
             return;
         }
 
-        if (!_downsampler.ShouldSample(threadIndex, timestampMs))
-        {
-            return;
-        }
+        // if (!_downsampler.ShouldSample(threadIndex, timestampMs))
+        // {
+        //     return;
+        // }
 
         var stackIndex = AddStackTrace(callStackIndex);
         if (stackIndex < 0)
@@ -204,7 +204,7 @@ internal class SampleProfileBuilder
             });
             value = Profile.Threads.Count - 1;
             _threadIndexes[key] = value;
-            _downsampler.NewThreadAdded(_threadIndexes[key]);
+            // _downsampler.NewThreadAdded(_threadIndexes[key]);
         }
 
         return value;

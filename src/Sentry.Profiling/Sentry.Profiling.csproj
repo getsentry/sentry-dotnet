@@ -31,9 +31,9 @@
     <None Include="$(MSBuildThisFileDirectory)buildTransitive\Sentry.Profiling.targets" Pack="true" PackagePath="build\Sentry.Profiling.targets" />
   </ItemGroup>
   <ItemGroup>
-    <ProfilingDependency Include="..\..\modules\perfview\src\FastSerialization\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.FastSerialization.dll" />
+<!--    <ProfilingDependency Include="..\..\modules\perfview\src\FastSerialization\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.FastSerialization.dll" />-->
     <ProfilingDependency Include="..\..\modules\perfview\src\TraceEvent\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.Tracing.TraceEvent.dll" />
-    <ProfilingDependency Include="..\..\modules\perfview\src\FastSerialization\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.FastSerialization.pdb" />
+<!--    <ProfilingDependency Include="..\..\modules\perfview\src\FastSerialization\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.FastSerialization.pdb" />-->
     <ProfilingDependency Include="..\..\modules\perfview\src\TraceEvent\bin\$(Configuration)\netstandard2.0\Microsoft.Diagnostics.Tracing.TraceEvent.pdb" />
   </ItemGroup>
   <ItemGroup>

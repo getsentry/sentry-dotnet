@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <!--Generate xml docs for all projects under 'src'-->
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+<!--    <GenerateDocumentationFile>true</GenerateDocumentationFile>-->
 
     <Authors>Sentry Team and Contributors</Authors>
     <Company>Sentry.io</Company>

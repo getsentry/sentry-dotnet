@@ -3,7 +3,6 @@
   <PropertyGroup>
     <Description>Official SDK for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
     <NoWarn Condition="'$(TargetFramework)' == 'netstandard2.0'">$(NoWarn);RS0017</NoWarn>
-    <CLSCompliant Condition="'$(TargetPlatformIdentifier)' == ''">true</CLSCompliant>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -50,7 +49,42 @@
     </Compile>
     <Compile Remove="..\..\modules\Ben.Demystifier\**\obj\**" />
   </ItemGroup>
+  <ItemGroup Condition="!$(TargetFramework.StartsWith('netstandard')) and !$(TargetFramework.StartsWith('net4'))">
+    <Compile Include="..\..\modules\perfview\src\HeapDump\**\*.cs"
+             Link="perfview\HeapDump\%(RecursiveDir)\%(Filename)%(Extension)"
+             Nullable="disable" />
+    <Compile Include="..\..\modules\perfview\src\MemoryGraph\**\*.cs"
+             Link="perfview\MemoryGraph\%(RecursiveDir)\%(Filename)%(Extension)"
+             Nullable="disable" />
+    <Compile Include="..\..\modules\perfview\src\Utilities\XmlUtilities.cs"
+             Link="perfview\Utilities\%(RecursiveDir)\%(Filename)%(Extension)"
+             Nullable="disable" />
+    <Compile Include="..\..\modules\perfview\src\Utilities\EnvironmentUtilities.cs"
+             Link="perfview\Utilities\%(RecursiveDir)\%(Filename)%(Extension)"
+             Nullable="disable" />
+    <Compile Include="..\..\modules\perfview\src\Utilities\StringUtilities.cs"
+             Link="perfview\Utilities\%(RecursiveDir)\%(Filename)%(Extension)"
+             Nullable="disable" />
+    <!-- Will probably conflict with Sentry.Profiling -->
+    <Compile Include="..\..\modules\perfview\src\FastSerialization\**\*.cs"
+             Link="perfview\FastSerialization\%(RecursiveDir)\%(Filename)%(Extension)"
+             Nullable="disable" />
+    <Compile Include="..\..\modules\perfview\src\HeapDumpCommon\DotNetHeapInfo.cs"
+             Link="perfview\HeapDumpCommon\%(RecursiveDir)\%(Filename)%(Extension)"
+             Nullable="disable" />
 
+    <Compile Remove="..\..\modules\perfview\src\HeapDump\**\GCHeapDumper.cs" />
+    <Compile Remove="..\..\modules\perfview\src\HeapDump\**\Program.cs" />
+    <Compile Remove="..\..\modules\perfview\src\HeapDump\Properties\*.cs" />
+    <Compile Remove="..\..\modules\perfview\src\HeapDump\Utilities\*.cs" />
+    <Compile Remove="..\..\modules\perfview\**\obj\**" />
+  </ItemGroup>
+<!--  <Compile Include="..\MemoryGraph\graph.cs">-->
+<!--    <Link>MemoryGraph\graph.cs</Link>-->
+<!--  </Compile>-->
+<!--  <Compile Include="..\MemoryGraph\MemoryGraph.cs">-->
+<!--    <Link>MemoryGraph\MemoryGraph.cs</Link>-->
+<!--  </Compile>-->
   <!-- Ben.Demystifier also needs System.Reflection.Metadata 5.0.0 or higher on all platforms. -->
   <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4'))">
     <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />

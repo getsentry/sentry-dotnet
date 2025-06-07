@@ -63,10 +63,6 @@ public static class SpanDataExtensions
         spanData.SetMeasurement(name, new Measurement(value, unit));
 
     /// <inheritdoc cref="SetMeasurement(Sentry.ISpanData,string,int,Sentry.MeasurementUnit)" />
-#if !__MOBILE__
-    // ulong parameter is not CLS compliant
-    [CLSCompliant(false)]
-#endif
     public static void SetMeasurement(this ISpanData spanData, string name, ulong value,
         MeasurementUnit unit = default) =>
         spanData.SetMeasurement(name, new Measurement(value, unit));
