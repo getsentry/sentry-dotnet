@@ -16,7 +16,7 @@ public static class SamplesShared
     /// </para>
     /// </summary>
 #if !CI_BUILD
-    #error Sign up for a free Sentry Account and enter your DSN here
+#error Sign up for a free Sentry Account and enter your DSN here
 #endif
     public const string Dsn = "ENTER_YOUR_DSN_HERE";
 #endif

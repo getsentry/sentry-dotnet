@@ -17,9 +17,9 @@ public class AppDelegate : UIApplicationDelegate
         SentrySdk.Init(options =>
         {
 #if !SENTRY_DSN_DEFINED_IN_ENV
-                // You must specify a DSN. On mobile platforms, this should be done in code here.
-                // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
-                options.Dsn = SamplesShared.Dsn;
+            // You must specify a DSN. On mobile platforms, this should be done in code here.
+            // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+            options.Dsn = SamplesShared.Dsn;
 #else
             // To make things easier for the SDK maintainers our samples check for a SENTRY_DSN environment variable
             // and write this (as a constant) into an EnvironmentVariables class. Generally, you won't want to do
