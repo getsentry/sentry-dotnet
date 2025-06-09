@@ -2,7 +2,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.UseSentry(o =>
 {
-    o.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+#if !SENTRY_DSN_DEFINED_IN_ENV
+    // A DSN is required. You can set here in code, in the SENTRY_DSN environment variable or in your appsettings.json
+    // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+    o.Dsn = SamplesShared.Dsn;
+#endif
     o.AddProfilingIntegration();
     o.ProfilesSampleRate = 0.1;
     o.TracesSampleRate = 1.0;

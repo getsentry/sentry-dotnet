@@ -67,6 +67,11 @@
     <DefineConstants>$(DefineConstants);CI_BUILD</DefineConstants>
   </PropertyGroup>
 
+  <!-- So we know at build time whether the DSN has been provided in an environment variable or not -->
+  <PropertyGroup Condition=" '$(SENTRY_DSN)' != '' ">
+    <DefineConstants>$(DefineConstants);SENTRY_DSN_DEFINED_IN_ENV</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="UnoptimizedAssemblyDetector" Version="0.1.1" PrivateAssets="All" />
     <PackageReference Include="Roslynator.Analyzers" Version="4.9.0" PrivateAssets="All" />
