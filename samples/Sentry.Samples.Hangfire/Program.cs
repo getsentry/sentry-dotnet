@@ -14,8 +14,10 @@ public static class Program
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()
             .UseMemoryStorage(new MemoryStorageOptions())
-            // Note to run this sample you'll need to specify a Sentry DSN, either by configuring it in the
+            // *********************************************************************************************
+            // NOTE: to run this sample you'll need to specify a Sentry DSN, either by configuring it in the
             // appsettings.json file or by setting the SENTRY_DSN environment variable.
+            // *********************************************************************************************
             .UseSentry() // <- Add Sentry to automatically send check-ins
         );
 
