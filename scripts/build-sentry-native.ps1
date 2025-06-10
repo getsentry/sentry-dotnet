@@ -2,29 +2,38 @@ param([switch] $Clean)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+function Get-Runtime-Identifier
+{
+    if ($IsMacOS)
+    {
+        return 'osx'
+    }
+    elseif ($IsLinux -and (ldd --version 2>&1) -match 'musl')
+    {
+        return 'linux-musl-x64'
+    }
+    else
+    {
+        return [System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier
+    }
+}
+
 function Build-Sentry-Native
 {
     param([switch] $Static)
 
     $submodule = 'modules/sentry-native'
     $package = 'src/Sentry/Platforms/Native'
-    $rid = if ($IsMacOS)
-    {
-        'osx'
-    }
-    else {
-        [System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier
-    }
 
     if ($Static)
     {
         $buildDir = "$submodule/build/static"
-        $outDir = "$package/static/$rid/native"
+        $outDir = "$package/static/$(Get-Runtime-Identifier)/native"
     }
     else
     {
         $buildDir = "$submodule/build/shared"
-        $outDir = "$package/runtimes/$rid/native"
+        $outDir = "$package/runtimes/$(Get-Runtime-Identifier)/native"
     }
     $actualBuildDir = $buildDir
 
