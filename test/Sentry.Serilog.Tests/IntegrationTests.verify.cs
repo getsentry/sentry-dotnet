@@ -77,6 +77,7 @@ public class IntegrationTests
                 _.Dsn = ValidDsn;
                 _.Debug = true;
                 _.AttachStacktrace = false;
+                _.InitNativeSdks = false;
                 _.Release = "test-release";
             });
 

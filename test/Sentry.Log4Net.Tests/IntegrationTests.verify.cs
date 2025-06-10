@@ -48,6 +48,7 @@ public class IntegrationTests
             Transport = transport,
             Dsn = ValidDsn,
             AttachStacktrace = false,
+            InitNativeSdks = false,
             Release = "test-release"
         };
 

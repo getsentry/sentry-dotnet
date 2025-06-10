@@ -81,6 +81,7 @@ public class IntegrationTests
                 options.Transport = transport;
                 options.Dsn = ValidDsn;
                 options.AttachStacktrace = false;
+                options.InitNativeSdks = false;
                 options.Release = "test-release";
             });
 
