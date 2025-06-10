@@ -160,14 +160,15 @@ internal class FakeTransport : ITransport
         runConsoleApp $_ 'Managed' | Should -AnyElementMatch '{"type":"System.ApplicationException","value":"This exception was caused deliberately by SentrySdk.CauseCrash\(CrashType.Managed\)."'
     }
 
-    It 'Produces the expected exception (Native)' {
+    It 'Produces the expected exception (Native, AOT=<_>)' -ForEach @($false, $true) {
+        publishConsoleApp $_
         # The first run triggers a native error. This error is captured by sentry-native and stored stored for the next run.
-        runConsoleApp $true 'Native' | Should -AnyElementMatch 'Triggering a deliberate exception'
+        runConsoleApp $_ 'Native' | Should -AnyElementMatch 'Triggering a deliberate exception'
 
         # On the next run, we use a mock Sentry HTTP server to receive the native crash.
         $result = Invoke-SentryServer {
             Param([string]$url)
-            runConsoleApp $true '' ($url.Replace('http://', 'http://key@') + '/0')
+            runConsoleApp $_ '' ($url.Replace('http://', 'http://key@') + '/0')
         }
         $result.HasErrors() | Should -BeFalse
         $result.ScriptOutput | Should -AnyElementMatch "Native SDK reported: 'crashedLastRun': 'True'"

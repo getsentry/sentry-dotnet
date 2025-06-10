@@ -40,6 +40,10 @@
     <Compile Remove="**\Native\**\*" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetPlatformIdentifier)' == 'android'">
+    <AndroidNativeLibrary Remove="Platforms\Native\runtimes\**\*" />
+  </ItemGroup>
+
   <!--
     Ben.Demystifier is compiled directly into Sentry.
     Note: It uses Microsoft.Bcl.AsyncInterfaces, which we get transitively from System.Text.Json.

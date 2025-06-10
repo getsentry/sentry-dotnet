@@ -23,7 +23,7 @@ internal static class SentryNative
 
     static SentryNative()
     {
-        IsAvailableCore = AotHelper.IsTrimmed && !SentryRuntime.Current.IsBrowserWasm();
+        IsAvailableCore = !SentryRuntime.Current.IsBrowserWasm();
     }
 #else
     // This is a compile-time const so that the irrelevant code is removed during compilation.

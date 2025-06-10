@@ -27,7 +27,7 @@
 
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and ('$(RuntimeIdentifier)' == 'win-x64' or '$(RuntimeIdentifier)' == 'win-arm64')">
     <DirectPInvoke Include="sentry-native" />
-    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\$(RuntimeIdentifier)\sentry-native.lib" />
+    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\static\$(RuntimeIdentifier)\native\sentry-native.lib" />
     <NativeLibrary Include="dbghelp.lib" />
     <NativeLibrary Include="winhttp.lib" />
     <NativeLibrary Include="Gdi32.lib" />
@@ -35,7 +35,7 @@
 
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and ('$(RuntimeIdentifier)' == 'linux-x64' or '$(RuntimeIdentifier)' == 'linux-arm64')">
     <DirectPInvoke Include="sentry-native" />
-    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\$(RuntimeIdentifier)\libsentry-native.a" />
+    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\static\$(RuntimeIdentifier)\native\libsentry-native.a" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and '$(RuntimeIdentifier)' == 'linux-musl-x64'">
@@ -43,11 +43,11 @@
     <!-- When musl is detected, static sentry-native links to static libunwind -->
     <LinkerArg Include="-Wl,-Bstatic -Wl,--whole-archive -lunwind -Wl,--no-whole-archive -Wl,-Bdynamic" />
     <NativeSystemLibrary Include="lzma" />
-    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\linux-musl-x64\libsentry-native.a" />
+    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\static\$(RuntimeIdentifier)\native\libsentry-native.a" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and ('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64')">
     <DirectPInvoke Include="sentry-native" />
-    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\osx\libsentry-native.a" />
+    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\static\osx\native\libsentry-native.a" />
   </ItemGroup>
 </Project>

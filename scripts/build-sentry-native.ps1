@@ -2,22 +2,39 @@ param([switch] $Clean)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-Push-Location $PSScriptRoot/..
-try
+function Build-Sentry-Native
 {
+    param([switch] $Static)
+
     $submodule = 'modules/sentry-native'
-    $outDir = 'src/Sentry/Platforms/Native/sentry-native'
-    $buildDir = "$submodule/build"
+    $package = 'src/Sentry/Platforms/Native'
+    $rid = if ($IsMacOS)
+    {
+        'osx'
+    }
+    else {
+        [System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier
+    }
+
+    if ($Static)
+    {
+        $buildDir = "$submodule/build/static"
+        $outDir = "$package/static/$rid/native"
+    }
+    else
+    {
+        $buildDir = "$submodule/build/shared"
+        $outDir = "$package/runtimes/$rid/native"
+    }
     $actualBuildDir = $buildDir
 
     $additionalArgs = @()
-    $libPrefix = 'lib'
-    $libExtension = '.a'
     if ($IsMacOS)
     {
-        $outDir += '/osx'
         $additionalArgs += @('-D', 'CMAKE_OSX_ARCHITECTURES=arm64;x86_64')
         $additionalArgs += @('-D', 'CMAKE_OSX_DEPLOYMENT_TARGET=12.0')
+        $libPrefix = 'lib'
+        $libExtension = if ($Static) { '.a' } else { '.dylib' }
     }
     elseif ($IsWindows)
     {
@@ -25,30 +42,11 @@ try
         $actualBuildDir = "$buildDir/RelWithDebInfo"
         $libPrefix = ''
         $libExtension = '.lib'
-
-        if ("Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
-        {
-            $outDir += '/win-arm64'
-        }
-        else
-        {
-            $outDir += '/win-x64'
-        }
     }
     elseif ($IsLinux)
     {
-        if ("Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
-        {
-            $outDir += '/linux-arm64'
-        }
-        elseif ((ldd --version 2>&1) -match 'musl')
-        {
-            $outDir += '/linux-musl-x64'
-        }
-        else
-        {
-            $outDir += '/linux-x64'
-        }
+        $libPrefix = 'lib'
+        $libExtension = if ($Static) { '.a' } else { '.so' }
     }
     else
     {
@@ -62,12 +60,16 @@ try
         Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $buildDir
     }
 
+    if ($Static)
+    {
+        $additionalArgs += @('-D', 'SENTRY_BUILD_SHARED_LIBS=0')
+    }
+
     cmake `
         -S $submodule `
         -B $buildDir `
         -D CMAKE_BUILD_TYPE=RelWithDebInfo `
         -D SENTRY_SDK_NAME=sentry.native.dotnet `
-        -D SENTRY_BUILD_SHARED_LIBS=0 `
         -D SENTRY_BACKEND=inproc `
         -D SENTRY_TRANSPORT=none `
         $additionalArgs
@@ -89,6 +91,13 @@ try
 
     # Touch the file to mark it as up-to-date for MSBuild
     (Get-Item $outFile).LastWriteTime = Get-Date
+}
+
+Push-Location $PSScriptRoot/..
+try
+{
+    Build-Sentry-Native
+    Build-Sentry-Native -Static
 }
 finally
 {
