@@ -50,7 +50,7 @@ function Build-Sentry-Native
         $additionalArgs += @('-C', 'src/Sentry/Platforms/Native/windows-config.cmake')
         $actualBuildDir = "$buildDir/RelWithDebInfo"
         $libPrefix = ''
-        $libExtension = '.lib'
+        $libExtension = if ($Static) { '.lib' } else { '.dll' }
     }
     elseif ($IsLinux)
     {
