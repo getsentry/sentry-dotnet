@@ -41,7 +41,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(HostRuntimeIdentifier)' == 'win-arm64'">
-    <None Include="$(SentryNativeOutputDirectory)\runtimes\win-arm64\native\sentry-native.lib">
+    <None Include="$(SentryNativeOutputDirectory)\runtimes\win-arm64\native\sentry-native.dll">
       <Pack>true</Pack>
       <PackagePath>\runtimes\win-arm64\native</PackagePath>
     </None>
