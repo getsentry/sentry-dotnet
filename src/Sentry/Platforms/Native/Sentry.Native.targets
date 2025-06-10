@@ -30,7 +30,7 @@
 
   <!-- Packaging the native library (NOTE: $(RuntimeIdentifier) is not set) -->
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(HostRuntimeIdentifier)' == 'win-x64'">
-    <None Include="$(SentryNativeOutputDirectory)\runtimes\win-x64\native\sentry-native.lib">
+    <None Include="$(SentryNativeOutputDirectory)\runtimes\win-x64\native\sentry-native.dll">
       <Pack>true</Pack>
       <PackagePath>\runtimes\win-x64\native</PackagePath>
       <Link>%(Filename)%(Extension)</Link>
