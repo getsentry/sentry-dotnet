@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add experimental support for _Sentry Structured Logging_ via `SentrySdk.Experimental.Logger` ([#4158](https://github.com/getsentry/sentry-dotnet/pull/4158))
+
 ### Fixes
 
 - The HTTP instrumentation uses the span created for the outgoing request in the sentry-trace header, fixing the parent-child relationship between client and server ([#4264](https://github.com/getsentry/sentry-dotnet/pull/4264))
