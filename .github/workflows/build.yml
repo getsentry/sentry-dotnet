@@ -167,6 +167,14 @@ jobs:
           fail-on-cache-miss: true
           enableCrossOsArchive: true
 
+      - name: Native Libraries
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target || runner.os }}-native-libraries
+          path: |
+            src/Sentry/Platforms/Native/runtimes
+            src/Sentry/Platforms/Native/static
+
       - name: Build Native Dependencies
         if: ${{ !matrix.container }}
         uses: ./.github/actions/buildnative
