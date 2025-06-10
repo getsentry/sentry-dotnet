@@ -42,6 +42,7 @@ public partial class MauiEventsBinderTests
         _fixture.Binder.HandleElementEvents(parent);
 
         var child = new MockElement("child");
+        child.AutomationId = "child-automation-id";
 
         parent.RaiseEvent(eventName, new ElementEventArgs(child));
         Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check
