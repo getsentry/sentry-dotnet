@@ -6,7 +6,10 @@ var host = new HostBuilder()
     {
         builder.UseSentry(host, options =>
         {
-            options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+#if !SENTRY_DSN_DEFINED_IN_ENV
+            // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+            options.Dsn = SamplesShared.Dsn;
+#endif
             options.TracesSampleRate = 1.0;
             options.Debug = true;
         });
