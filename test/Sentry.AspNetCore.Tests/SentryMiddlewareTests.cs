@@ -168,12 +168,15 @@ public class SentryMiddlewareTests
                     verified = true;
                 }));
 
-        _fixture.Hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope, Arg.AnyType>>(), Arg.Any<Arg.AnyType>()))
-           .Do(Callback.First(c => c.InvokeGenericConfigureScopeMethod(scope)).Then(_ =>
-           {
-               Assert.True(scope.Locked);
-               verified = true;
-           }));
+        _fixture.Hub
+            .When(h => h.ConfigureScope(Arg.Any<Action<Scope, Arg.AnyType>>(), Arg.Any<Arg.AnyType>()))
+            .Do(Callback
+                .First(c => c.InvokeGenericConfigureScopeMethod(scope))
+                .Then(_ =>
+                {
+                    Assert.True(scope.Locked);
+                    verified = true;
+                }));
 
         var sut = _fixture.GetSut();
 
