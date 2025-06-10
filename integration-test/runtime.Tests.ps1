@@ -127,14 +127,17 @@ internal class FakeTransport : ITransport
         runConsoleApp | Should -AnyElementMatch '"stacktrace":{"frames":\[{"image_addr":"0x[a-f0-9]+","instruction_addr":"0x[a-f0-9]+"}'
     }
 
-    It 'publish directory contains expected files' {
+    It 'publish directory contains expected files (AOT=<_>)' -ForEach @($true, $false) {
+        publishConsoleApp $_
         $path = getConsoleAppPath
         Test-Path $path | Should -BeTrue
         $items = Get-ChildItem -Path (Get-Item $path).DirectoryName
         $exeExtension = $IsWindows ? '.exe' : ''
         $debugExtension = $IsWindows ? '.pdb' : $IsMacOS ? '.dSYM' : '.dbg'
+        $libPrefix = $IsWindows ? '' : 'lib'
+        $libExtension = $IsWindows ? '.dll' : $IsMacOS ? '.dylib' : '.so'
         $items | ForEach-Object { $_.Name } | Sort-Object -Unique | Should -Be (@(
-                "console-app$exeExtension", "console-app$debugExtension") | Sort-Object -Unique)
+                "console-app$exeExtension", "console-app$debugExtension", "${libPrefix}sentry-native${libExtension}") | Sort-Object -Unique)
     }
 
     It "'dotnet publish' produces an app that's recognized as AOT by Sentry (SentryNative=<_>)" -ForEach @($false, $true) {

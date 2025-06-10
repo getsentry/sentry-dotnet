@@ -63,10 +63,11 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
         {
             # On macOS, only the dwarf is uploaded from dSYM so it has the same name as the actual executable.
             $debugExtension = $IsLinux ? '.dbg' : ''
+            $libExtension = $IsLinux ? '.so' : '.dylib'
             $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be (@(
-                    'console-app', "console-app$debugExtension") | Sort-Object -Unique)
-            $result.ScriptOutput | Should -AnyElementMatch 'Found 2 debug information files'
-            $result.ScriptOutput | Should -AnyElementMatch 'Resolved source code for 1 debug information file'
+                    'console-app', "console-app$debugExtension", "libsentry-native$libExtension") | Sort-Object -Unique)
+            $result.ScriptOutput | Should -AnyElementMatch 'Found 3 debug information files'
+            $result.ScriptOutput | Should -AnyElementMatch 'Resolved source code for 2 debug information file'
         }
     }
 
@@ -82,9 +83,10 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
         {
             # On macOS, only the dwarf is uploaded from dSYM so it has the same name as the actual executable.
             $debugExtension = $IsLinux ? '.dbg' : ''
+            $libExtension = $IsLinux ? '.so' : '.dylib'
             $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be (@(
-                    'console-app', "console-app$debugExtension") | Sort-Object -Unique)
-            $result.ScriptOutput | Should -AnyElementMatch 'Found 2 debug information files'
+                    'console-app', "console-app$debugExtension", "libsentry-native$libExtension") | Sort-Object -Unique)
+            $result.ScriptOutput | Should -AnyElementMatch 'Found 3 debug information files'
         }
     }
 
