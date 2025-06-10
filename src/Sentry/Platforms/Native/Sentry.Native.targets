@@ -95,13 +95,13 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('OSX'))">
-    <None Include="$(SentryNativeOutputDirectory)\runtimes\osx\libsentry-native.dylib">
+    <None Include="$(SentryNativeOutputDirectory)\runtimes\osx\native\libsentry-native.dylib">
       <Pack>true</Pack>
       <PackagePath>\runtimes\osx\native</PackagePath>
       <Link>%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="$(SentryNativeOutputDirectory)\static\osx\libsentry-native.a">
+    <None Include="$(SentryNativeOutputDirectory)\static\osx\native\libsentry-native.a">
       <Pack>true</Pack>
       <PackagePath>\static\osx\native</PackagePath>
     </None>
