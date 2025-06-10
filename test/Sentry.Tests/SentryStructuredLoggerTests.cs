@@ -5,7 +5,7 @@ namespace Sentry.Tests;
 /// <summary>
 /// <see href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
 /// </summary>
-public class SentryStructuredLoggerTests
+public partial class SentryStructuredLoggerTests
 {
     internal sealed class Fixture
     {
@@ -50,6 +50,38 @@ public class SentryStructuredLoggerTests
 
         public SentryStructuredLogger GetDefaultSut() => new DefaultSentryStructuredLogger(Hub, ScopeManager, Options, Clock);
         public SentryStructuredLogger GetDisabledSut() => new DisabledSentryStructuredLogger();
+
+        public void AssertEnvelope(Envelope envelope, SentryLogLevel level)
+        {
+            envelope.Header.Should().ContainSingle().Which.Key.Should().Be("sdk");
+            var item = envelope.Items.Should().ContainSingle().Which;
+
+            var log = item.Payload.Should().BeOfType<JsonSerializable>().Which.Source.Should().BeOfType<SentryLog>().Which;
+            AssertLog(log, level);
+
+            Assert.Collection(item.Header,
+                element => Assert.Equal(CreateHeader("type", "log"), element),
+                element => Assert.Equal(CreateHeader("item_count", 1), element),
+                element => Assert.Equal(CreateHeader("content_type", "application/vnd.sentry.items.log+json"), element));
+        }
+
+        public void AssertLog(SentryLog log, SentryLogLevel level)
+        {
+            log.Timestamp.Should().Be(Clock.GetUtcNow());
+            log.TraceId.Should().Be(TraceId);
+            log.Level.Should().Be(level);
+            log.Message.Should().Be("Template string with arguments: string, True, 1, 2.2");
+            log.Template.Should().Be("Template string with arguments: {0}, {1}, {2}, {3}");
+            log.Parameters.Should().BeEquivalentTo(new object[] { "string", true, 1, 2.2 });
+            log.ParentSpanId.Should().Be(ParentSpanId);
+            log.TryGetAttribute("attribute-key", out string? value).Should().BeTrue();
+            value.Should().Be("attribute-value");
+        }
+
+        private static KeyValuePair<string, object?> CreateHeader(string name, object? value)
+        {
+            return new KeyValuePair<string, object?>(name, value);
+        }
     }
 
     private readonly Fixture _fixture;
@@ -57,44 +89,6 @@ public class SentryStructuredLoggerTests
     public SentryStructuredLoggerTests()
     {
         _fixture = new Fixture();
-    }
-
-    [SkippableTheory(typeof(MissingMethodException))] //throws in .NETFramework on non-Windows for System.Collections.Immutable.ImmutableArray`1
-    [InlineData(SentryLogLevel.Trace)]
-    [InlineData(SentryLogLevel.Debug)]
-    [InlineData(SentryLogLevel.Info)]
-    [InlineData(SentryLogLevel.Warning)]
-    [InlineData(SentryLogLevel.Error)]
-    [InlineData(SentryLogLevel.Fatal)]
-    public void Log_Enabled_CapturesEnvelope(SentryLogLevel level)
-    {
-        _fixture.Options.Experimental.EnableLogs = true;
-        var logger = _fixture.GetDefaultSut();
-
-        Envelope envelope = null!;
-        _fixture.Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => envelope = arg));
-
-        logger.Log(level, "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
-
-        _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
-        envelope.AssertEnvelope(_fixture, level);
-    }
-
-    [Theory]
-    [InlineData(SentryLogLevel.Trace)]
-    [InlineData(SentryLogLevel.Debug)]
-    [InlineData(SentryLogLevel.Info)]
-    [InlineData(SentryLogLevel.Warning)]
-    [InlineData(SentryLogLevel.Error)]
-    [InlineData(SentryLogLevel.Fatal)]
-    public void Log_Disabled_DoesNotCaptureEnvelope(SentryLogLevel level)
-    {
-        _fixture.Options.Experimental.EnableLogs.Should().BeFalse();
-        var logger = _fixture.GetDefaultSut();
-
-        logger.Log(level, "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
-
-        _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
     }
 
     [SkippableFact(typeof(MissingMethodException))] //throws in .NETFramework on non-Windows for System.Collections.Immutable.ImmutableArray`1
@@ -110,7 +104,7 @@ public class SentryStructuredLoggerTests
         logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
 
         _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
-        envelope.AssertEnvelope(_fixture, SentryLogLevel.Trace);
+        _fixture.AssertEnvelope(envelope, SentryLogLevel.Trace);
     }
 
     [SkippableFact(typeof(MissingMethodException))] //throws in .NETFramework on non-Windows for System.Collections.Immutable.ImmutableArray`1
@@ -132,7 +126,7 @@ public class SentryStructuredLoggerTests
 
         _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
         invocations.Should().Be(1);
-        configuredLog.AssertLog(_fixture, SentryLogLevel.Trace);
+        _fixture.AssertLog(configuredLog, SentryLogLevel.Trace);
     }
 
     [Fact]
@@ -222,70 +216,5 @@ public class SentryStructuredLoggerTests
         logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
-    }
-}
-
-file static class AssertionExtensions
-{
-    public static void AssertEnvelope(this Envelope envelope, SentryStructuredLoggerTests.Fixture fixture, SentryLogLevel level)
-    {
-        envelope.Header.Should().ContainSingle().Which.Key.Should().Be("sdk");
-        var item = envelope.Items.Should().ContainSingle().Which;
-
-        var log = item.Payload.Should().BeOfType<JsonSerializable>().Which.Source.Should().BeOfType<SentryLog>().Which;
-        AssertLog(log, fixture, level);
-
-        Assert.Collection(item.Header,
-            element => Assert.Equal(CreateHeader("type", "log"), element),
-            element => Assert.Equal(CreateHeader("item_count", 1), element),
-            element => Assert.Equal(CreateHeader("content_type", "application/vnd.sentry.items.log+json"), element));
-    }
-
-    public static void AssertLog(this SentryLog log, SentryStructuredLoggerTests.Fixture fixture, SentryLogLevel level)
-    {
-        log.Timestamp.Should().Be(fixture.Clock.GetUtcNow());
-        log.TraceId.Should().Be(fixture.TraceId);
-        log.Level.Should().Be(level);
-        log.Message.Should().Be("Template string with arguments: string, True, 1, 2.2");
-        log.Template.Should().Be("Template string with arguments: {0}, {1}, {2}, {3}");
-        log.Parameters.Should().BeEquivalentTo(new object[] { "string", true, 1, 2.2 });
-        log.ParentSpanId.Should().Be(fixture.ParentSpanId);
-        log.TryGetAttribute("attribute-key", out string? value).Should().BeTrue();
-        value.Should().Be("attribute-value");
-    }
-
-    private static KeyValuePair<string, object?> CreateHeader(string name, object? value)
-    {
-        return new KeyValuePair<string, object?>(name, value);
-    }
-}
-
-file static class SentryStructuredLoggerExtensions
-{
-    public static void Log(this SentryStructuredLogger logger, SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog)
-    {
-        switch (level)
-        {
-            case SentryLogLevel.Trace:
-                logger.LogTrace(template, parameters, configureLog);
-                break;
-            case SentryLogLevel.Debug:
-                logger.LogDebug(template, parameters, configureLog);
-                break;
-            case SentryLogLevel.Info:
-                logger.LogInfo(template, parameters, configureLog);
-                break;
-            case SentryLogLevel.Warning:
-                logger.LogWarning(template, parameters, configureLog);
-                break;
-            case SentryLogLevel.Error:
-                logger.LogError(template, parameters, configureLog);
-                break;
-            case SentryLogLevel.Fatal:
-                logger.LogFatal(template, parameters, configureLog);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(level), level, null);
-        }
     }
 }
