@@ -11,6 +11,13 @@ var builder = WebApplication.CreateBuilder(args);
 // See: https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-8.0
 builder.WebHost.UseSentry(options =>
     {
+#if !SENTRY_DSN_DEFINED_IN_ENV
+        // A DSN is required. You can set here in code, via the SENTRY_DSN environment variable or in your
+        // appsettings.json file.
+        // See https://docs.sentry.io/platforms/dotnet/guides/aspnetcore/#configure
+        options.Dsn = SamplesShared.Dsn;
+#endif
+
         // Tracks the release which sent the event and enables more features: https://docs.sentry.io/learn/releases/
         // If not explicitly set here, the SDK attempts to read it from: AssemblyInformationalVersionAttribute and AssemblyVersion
         // TeamCity: %build.vcs.number%, VSTS: BUILD_SOURCEVERSION, Travis-CI: TRAVIS_COMMIT, AppVeyor: APPVEYOR_REPO_COMMIT, CircleCI: CIRCLE_SHA1

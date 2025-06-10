@@ -132,9 +132,12 @@ public class SentrySdkTests : IDisposable
         }
     }
 
-    [Fact]
+    [SkippableFact]
     public void Init_EmptyDsn_LogsWarning()
     {
+#if SENTRY_DSN_DEFINED_IN_ENV
+        Skip.If(true, "This test only works when the DSN is not configured as an environment variable.");
+#endif
         var options = new SentryOptions
         {
             Dsn = SentryConstants.DisableSdkDsnValue,
