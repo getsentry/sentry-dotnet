@@ -33,6 +33,8 @@
     <None Include="$(SentryNativeOutputDirectory)\runtimes\win-x64\native\sentry-native.lib">
       <Pack>true</Pack>
       <PackagePath>\runtimes\win-x64\native</PackagePath>
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="$(SentryNativeOutputDirectory)\static\win-x64\native\sentry-native.lib">
       <Pack>true</Pack>
@@ -44,6 +46,8 @@
     <None Include="$(SentryNativeOutputDirectory)\runtimes\win-arm64\native\sentry-native.dll">
       <Pack>true</Pack>
       <PackagePath>\runtimes\win-arm64\native</PackagePath>
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="$(SentryNativeOutputDirectory)\static\win-arm64\native\sentry-native.lib">
       <Pack>true</Pack>
@@ -55,6 +59,8 @@
     <None Include="$(SentryNativeOutputDirectory)\runtimes\linux-x64\native\libsentry-native.so">
       <Pack>true</Pack>
       <PackagePath>\runtimes\linux-x64\native</PackagePath>
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="$(SentryNativeOutputDirectory)\static\linux-x64\native\libsentry-native.a">
       <Pack>true</Pack>
@@ -66,6 +72,8 @@
     <None Include="$(SentryNativeOutputDirectory)\runtimes\linux-musl-x64\native\libsentry-native.so">
       <Pack>true</Pack>
       <PackagePath>\runtimes\linux-musl-x64\native</PackagePath>
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="$(SentryNativeOutputDirectory)\static\linux-musl-x64\native\libsentry-native.a">
       <Pack>true</Pack>
@@ -77,6 +85,8 @@
     <None Include="$(SentryNativeOutputDirectory)\runtimes\linux-arm64\native\libsentry-native.so">
       <Pack>true</Pack>
       <PackagePath>\runtimes\linux-arm64\native</PackagePath>
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="$(SentryNativeOutputDirectory)\static\linux-arm64\native\libsentry-native.a">
       <Pack>true</Pack>
@@ -88,6 +98,8 @@
     <None Include="$(SentryNativeOutputDirectory)\runtimes\osx\libsentry-native.dylib">
       <Pack>true</Pack>
       <PackagePath>\runtimes\osx\native</PackagePath>
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="$(SentryNativeOutputDirectory)\static\osx\libsentry-native.a">
       <Pack>true</Pack>
