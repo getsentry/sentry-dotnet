@@ -6,16 +6,10 @@ namespace Sentry;
 
 public static partial class SentrySdk
 {
-    private static int IsInitialized = 0;
     private static readonly Dictionary<string, bool> PerDirectoryCrashInfo = new();
 
     private static void InitNativeSdk(SentryOptions options)
     {
-        if (Interlocked.Exchange(ref IsInitialized, 1) != 0)
-        {
-            return;
-        }
-
         if (!C.Init(options))
         {
             options.DiagnosticLogger?
@@ -62,12 +56,5 @@ public static partial class SentrySdk
         options.CrashedLastRun = () => crashedLastRun;
     }
 
-    internal static void CloseNativeSdk()
-    {
-        if (Interlocked.Exchange(ref IsInitialized, 0) == 0)
-        {
-            return;
-        }
-        C.Close();
-    }
+    internal static void CloseNativeSdk() => C.Close();
 }
