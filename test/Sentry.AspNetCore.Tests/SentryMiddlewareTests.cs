@@ -159,15 +159,14 @@ public class SentryMiddlewareTests
         var verified = false;
         var scope = new Scope();
         _fixture.Hub
-                .When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-                .Do(
-                    Callback
-                        .First(c => c.ArgAt<Action<Scope>>(0).Invoke(scope))
-                        .Then(_ =>
-                              {
-                                  Assert.True(scope.Locked);
-                                  verified = true;
-                              }));
+            .When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
+            .Do(Callback
+                .First(c => c.ArgAt<Action<Scope>>(0).Invoke(scope))
+                .Then(_ =>
+                {
+                    Assert.True(scope.Locked);
+                    verified = true;
+                }));
 
         _fixture.Hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope, Arg.AnyType>>(), Arg.Any<Arg.AnyType>()))
            .Do(Callback.First(c => c.InvokeGenericConfigureScopeMethod(scope)).Then(_ =>
