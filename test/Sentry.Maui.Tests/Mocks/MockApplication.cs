@@ -1,3 +1,4 @@
+using Foundation;
 using Microsoft.Maui.Controls.Internals;
 
 namespace Sentry.Maui.Tests.Mocks;
@@ -39,11 +40,19 @@ public class MockApplication : Application
     public static MockApplication Create()
     {
         // The base constructor will try to set the mock as the current application, which we don't want in tests.
-
         lock (LockObj)
         {
             var previous = Current;
-            var application = new MockApplication();
+            MockApplication application = null;
+#if __IOS__
+            // Ensure the constructor is called on the main thread
+            if (!NSThread.IsMain)
+            {
+                NSRunLoop.Main.InvokeOnMainThread(() => application = new MockApplication());
+            }
+#else
+            application = new MockApplication();
+#endif
             Current = previous;
             return application;
         }
