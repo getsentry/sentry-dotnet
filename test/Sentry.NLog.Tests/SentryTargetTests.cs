@@ -23,7 +23,7 @@ public class SentryTargetTests
             Hub.IsEnabled.Returns(true);
             HubAccessor = () => Hub;
             Scope = new Scope(new SentryOptions());
-            Hub.ConfigureScope(Arg.Invoke(Scope));
+            Hub.SubstituteConfigureScope(Scope);
         }
 
         public Target GetTarget(bool asyncTarget = false)
@@ -476,9 +476,12 @@ public class SentryTargetTests
         await hub.Received().FlushAsync(Arg.Any<TimeSpan>());
     }
 
-    [Fact]
+    [SkippableFact]
     public void InitializeTarget_InitializesSdk()
     {
+#if SENTRY_DSN_DEFINED_IN_ENV
+        Skip.If(true, "This test only works when the DSN is not configured as an environment variable.");
+#endif
         _fixture.Options.Dsn = Sentry.SentryConstants.DisableSdkDsnValue;
         _fixture.SdkDisposeHandle = null;
         _fixture.Options.InitializeSdk = true;

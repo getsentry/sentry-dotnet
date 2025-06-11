@@ -14,9 +14,11 @@ internal static class Program
             // Other overloads exist, for example, configure the SDK with only the DSN or no parameters at all.
             .WriteTo.Sentry(options =>
             {
-                // You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+#if !SENTRY_DSN_DEFINED_IN_ENV
+                // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
                 // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
-                options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+                options.Dsn = SamplesShared.Dsn;
+#endif
 
                 // Debug and higher are stored as breadcrumbs (default os Information)
                 options.MinimumBreadcrumbLevel = LogEventLevel.Debug;

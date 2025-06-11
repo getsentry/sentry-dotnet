@@ -4,7 +4,25 @@
 
 ### Features
 
+- Added non-allocating `ConfigureScope` and `ConfigureScopeAsync` overloads ([#4244](https://github.com/getsentry/sentry-dotnet/pull/4244))
+
+### Fixes
+
+- The HTTP instrumentation uses the span created for the outgoing request in the sentry-trace header, fixing the parent-child relationship between client and server ([#4264](https://github.com/getsentry/sentry-dotnet/pull/4264))
+
+### Dependencies
+
+- Bump Native SDK from v0.8.5 to v0.9.0 ([#4260](https://github.com/getsentry/sentry-dotnet/pull/4260))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#090)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.8.5...0.9.0)
+
+## 5.10.0
+
+### Features
+
 - Rename MemoryInfo.AllocatedBytes to MemoryInfo.TotalAllocatedBytes ([#4243](https://github.com/getsentry/sentry-dotnet/pull/4243))
+- Replace libcurl with .NET HttpClient for sentry-native ([#4222](https://github.com/getsentry/sentry-dotnet/pull/4222))
+- Add .NET MAUI `AutomationId` element information to breadcrumbs ([#4248](https://github.com/getsentry/sentry-dotnet/pull/4248)) 
 
 ### Fixes
 

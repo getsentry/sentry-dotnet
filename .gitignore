@@ -27,6 +27,7 @@ test/**/*.apk
 /tools/
 *.log
 .sentry-native
+**/EnvironmentVariables.g.cs
 
 # Download cache for Cocoa SDK
 modules/sentry-cocoa

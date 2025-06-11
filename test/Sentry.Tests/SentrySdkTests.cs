@@ -132,9 +132,12 @@ public class SentrySdkTests : IDisposable
         }
     }
 
-    [Fact]
+    [SkippableFact]
     public void Init_EmptyDsn_LogsWarning()
     {
+#if SENTRY_DSN_DEFINED_IN_ENV
+        Skip.If(true, "This test only works when the DSN is not configured as an environment variable.");
+#endif
         var options = new SentryOptions
         {
             Dsn = SentryConstants.DisableSdkDsnValue,
@@ -436,6 +439,36 @@ public class SentrySdkTests : IDisposable
         Assert.False(invoked);
     }
 
+    [Fact]
+    public void ConfigureScope_SyncWithArg_CallbackNeverInvoked()
+    {
+        var invoked = false;
+        SentrySdk.ConfigureScope((_, _) => invoked = true, "arg");
+        Assert.False(invoked);
+    }
+
+    [Fact]
+    public void ConfigureScope_SyncWithArg_ArgIsUsed()
+    {
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+        });
+
+        const string key = "key";
+        const string arg = "arg";
+
+        SentrySdk.ConfigureScope((s, a) => s.SetTag(key, a), arg);
+
+        string actual = null;
+        SentrySdk.ConfigureScope(s => actual = s.Tags[key]);
+
+        Assert.Equal(arg, actual);
+    }
+
     [SkippableFact]
     public async Task ConfigureScope_OnTask_PropagatedToCaller()
     {
@@ -666,6 +699,48 @@ public class SentrySdkTests : IDisposable
             return Task.CompletedTask;
         });
         Assert.False(invoked);
+    }
+
+    [Fact]
+    public async Task ConfigureScope_AsyncWithArg_CallbackNeverInvoked()
+    {
+        var invoked = false;
+        await SentrySdk.ConfigureScopeAsync((_, _) =>
+        {
+            invoked = true;
+            return Task.CompletedTask;
+        }, "arg");
+        Assert.False(invoked);
+    }
+
+    [Fact]
+    public async Task ConfigureScope_AsyncWithArg_ArgIsUsed()
+    {
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+        });
+
+        const string key = "key";
+        const string arg = "arg";
+
+        await SentrySdk.ConfigureScopeAsync((s, a) =>
+        {
+            s.SetTag(key, a);
+            return Task.CompletedTask;
+        }, arg);
+
+        string actual = null;
+        await SentrySdk.ConfigureScopeAsync(s =>
+        {
+            actual = s.Tags[key];
+            return Task.CompletedTask;
+        });
+
+        Assert.Equal(arg, actual);
     }
 
     [Fact]

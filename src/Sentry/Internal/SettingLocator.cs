@@ -1,3 +1,4 @@
+using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Internal;
@@ -36,11 +37,23 @@ internal class SettingLocator
 
         if (!string.IsNullOrEmpty(_options.Dsn))
         {
+            _options.LogDebug("DSN read from options: {0}", _options.Dsn);
             return _options.Dsn;
         }
 
-        var dsn = GetEnvironmentVariable(Constants.DsnEnvironmentVariable)
-                  ?? AssemblyForAttributes?.GetCustomAttribute<DsnAttribute>()?.Dsn;
+        var dsn = GetEnvironmentVariable(Constants.DsnEnvironmentVariable);
+        if (dsn is not null)
+        {
+            _options.LogDebug("DSN read from environment variable: {0}", dsn);
+        }
+
+        dsn ??= AssemblyForAttributes?.GetCustomAttribute<DsnAttribute>()?.Dsn;
+        if (dsn is not null)
+        {
+            _options.LogDebug("DSN read from assembly attribute: {0}", dsn);
+        }
+
+        _options.LogDebug("AssemblyForAttributes is {0}", AssemblyForAttributes?.FullName);
 
         // If there has been no DSN provided (`null`) and none has been found in the environment we consider this a
         // failed configuration and throw

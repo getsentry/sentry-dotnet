@@ -25,10 +25,14 @@ public class Program
                 }));
 
         // Add Sentry integration
-        // It can be defined via configuration (including `appsettings.json`, as we do here)
+        // It can be defined via configuration (including `appsettings.json`)
         // or coded explicitly, via parameter like:
         // .UseSentry("dsn") or .UseSentry(o => o.Dsn = ""; o.Release = "1.0"; ...)
-        builder.WebHost.UseSentry();
+#if !SENTRY_DSN_DEFINED_IN_ENV
+        builder.WebHost.UseSentry(SamplesShared.Dsn);
+#else
+        builder.WebHost.UseSentry(EnvironmentVariables.Dsn);
+#endif
 
         // The App:
         var webApplication = builder.Build();
