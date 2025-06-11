@@ -25,7 +25,7 @@
 
   <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
     <!-- See: https://github.com/getsentry/sentry-dotnet/pull/4111 -->
-    <!-- <LinkerArg Include="/NODEFAULTLIB:MSVCRT" /> -->
+    <LinkerArg Include="/NODEFAULTLIB:MSVCRT" />
   </ItemGroup>
 
   <Target Name="WriteSentryAttributes"
