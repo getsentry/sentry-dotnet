@@ -19,11 +19,7 @@ public class MauiCommunityToolkitMvvmEventsBinderTests
         public Fixture()
         {
             Hub = Substitute.For<IHub>();
-            Hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-                .Do(c =>
-                {
-                    c.Arg<Action<Scope>>()(Scope);
-                });
+            Hub.SubstituteConfigureScope(Scope);
 
             Options.Debug = true;
             var logger = Substitute.For<IDiagnosticLogger>();

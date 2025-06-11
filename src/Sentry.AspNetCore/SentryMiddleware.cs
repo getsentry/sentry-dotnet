@@ -118,7 +118,7 @@ internal class SentryMiddleware : IMiddleware
             context.Items.TryAdd(BaggageHeaderItemKey, baggageHeader);
             context.Items.TryAdd(TransactionContextItemKey, transactionContext);
 
-            hub.ConfigureScope(scope =>
+            hub.ConfigureScope(static (scope, arg) =>
             {
                 // At the point lots of stuff from the request are not yet filled
                 // Identity for example is added later on in the pipeline
@@ -131,16 +131,16 @@ internal class SentryMiddleware : IMiddleware
                 // when the event fires.  Use `activeScope`, not `scope` or `hub`.
                 scope.OnEvaluating += (_, activeScope) =>
                 {
-                    SyncOptionsScope(activeScope);
-                    PopulateScope(context, activeScope);
+                    arg.middleware.SyncOptionsScope(activeScope);
+                    arg.middleware.PopulateScope(arg.context, activeScope);
                 };
-            });
+            }, (middleware: this, context));
 
             // Pre-create the Sentry Event ID and save it on the scope it so it's available throughout the pipeline,
             // even if there's no event actually being sent to Sentry.  This allows for things like a custom exception
             // handler page to access the event ID, enabling user feedback, etc.
             var eventId = SentryId.Create();
-            hub.ConfigureScope(scope => scope.LastEventId = eventId);
+            hub.ConfigureScope(static (scope, eventId) => scope.LastEventId = eventId, eventId);
 
             try
             {
@@ -167,7 +167,7 @@ internal class SentryMiddleware : IMiddleware
                 {
                     // The middleware pipeline finishes up before the Otel Activity.OnEnd callback is invoked so we need
                     // so save a copy of the scope that can be restored by our SentrySpanProcessor
-                    hub.ConfigureScope(scope => activity.SetFused(scope));
+                    hub.ConfigureScope(static (scope, activity) => activity.SetFused(scope), activity);
                 }
 
                 // When an exception was handled by other component (i.e: UseExceptionHandler feature).
@@ -179,12 +179,12 @@ internal class SentryMiddleware : IMiddleware
                         "The web server likely returned a customized error page as a result of this exception.";
 
 #if NET6_0_OR_GREATER
-                    hub.ConfigureScope(scope =>
+                    hub.ConfigureScope(static (scope, arg) =>
                     {
                         scope.ExceptionProcessors.Add(
-                            new ExceptionHandlerFeatureProcessor(originalMethod, exceptionFeature)
+                            new ExceptionHandlerFeatureProcessor(arg.originalMethod, arg.exceptionFeature)
                             );
-                    });
+                    }, (originalMethod, exceptionFeature));
 #endif
                     CaptureException(exceptionFeature.Error, eventId, "IExceptionHandlerFeature", description);
                 }
