@@ -1,4 +1,6 @@
+#if __IOS__
 using Foundation;
+#endif
 using Microsoft.Maui.Controls.Internals;
 
 namespace Sentry.Maui.Tests.Mocks;
