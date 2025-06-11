@@ -30,7 +30,8 @@
 
   <!-- Packaging the native library (NOTE: $(RuntimeIdentifier) is not set) -->
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(HostRuntimeIdentifier)' == 'win-x64'">
-    <None Include="$(SentryNativeOutputDirectory)\runtimes\win-x64\native\sentry-native.dll" Condition="'$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformIdentifier)' == 'windows'">
+    <None Include="$(SentryNativeOutputDirectory)\runtimes\win-x64\native\sentry-native.dll"
+          Condition="'$(HostRuntimeIdentifier)' == 'win-x64' and ('$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformIdentifier)' == 'windows')">
       <Pack>true</Pack>
       <PackagePath>\runtimes\win-x64\native</PackagePath>
       <Link>%(Filename)%(Extension)</Link>
@@ -43,7 +44,8 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(HostRuntimeIdentifier)' == 'win-arm64'">
-    <None Include="$(SentryNativeOutputDirectory)\runtimes\win-arm64\native\sentry-native.dll" Condition="'$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformIdentifier)' == 'windows'">
+    <None Include="$(SentryNativeOutputDirectory)\runtimes\win-arm64\native\sentry-native.dll"
+          Condition="'$(HostRuntimeIdentifier)' == 'win-arm64' and ('$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformIdentifier)' == 'windows')">
       <Pack>true</Pack>
       <PackagePath>\runtimes\win-arm64\native</PackagePath>
       <Link>%(Filename)%(Extension)</Link>
@@ -56,7 +58,8 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(HostRuntimeIdentifier)' == 'linux-x64'">
-    <None Include="$(SentryNativeOutputDirectory)\runtimes\linux-x64\native\libsentry-native.so" Condition="'$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformIdentifier)' == 'linux'">
+    <None Include="$(SentryNativeOutputDirectory)\runtimes\linux-x64\native\libsentry-native.so"
+          Condition="'$(HostRuntimeIdentifier)' == 'linux-x64' and ('$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformIdentifier)' == 'linux')">
       <Pack>true</Pack>
       <PackagePath>\runtimes\linux-x64\native</PackagePath>
       <Link>%(Filename)%(Extension)</Link>
@@ -69,7 +72,8 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(HostRuntimeIdentifier)' == 'linux-musl-x64'">
-    <None Include="$(SentryNativeOutputDirectory)\runtimes\linux-musl-x64\native\libsentry-native.so" Condition="'$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformIdentifier)' == 'linux'">
+    <None Include="$(SentryNativeOutputDirectory)\runtimes\linux-musl-x64\native\libsentry-native.so"
+          Condition="'$(HostRuntimeIdentifier)' == 'linux-musl-x64' and ('$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformIdentifier)' == 'linux')">
       <Pack>true</Pack>
       <PackagePath>\runtimes\linux-musl-x64\native</PackagePath>
       <Link>%(Filename)%(Extension)</Link>
@@ -82,7 +86,8 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(HostRuntimeIdentifier)' == 'linux-arm64'">
-    <None Include="$(SentryNativeOutputDirectory)\runtimes\linux-arm64\native\libsentry-native.so" Condition="'$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformIdentifier)' == 'linux'">
+    <None Include="$(SentryNativeOutputDirectory)\runtimes\linux-arm64\native\libsentry-native.so"
+          Condition="'$(HostRuntimeIdentifier)' == 'linux-arm64' and ('$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformIdentifier)' == 'linux')">
       <Pack>true</Pack>
       <PackagePath>\runtimes\linux-arm64\native</PackagePath>
       <Link>%(Filename)%(Extension)</Link>
@@ -95,7 +100,8 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('OSX'))">
-    <None Include="$(SentryNativeOutputDirectory)\runtimes\osx\native\libsentry-native.dylib" Condition="'$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformIdentifier)' == 'macos'">
+    <None Include="$(SentryNativeOutputDirectory)\runtimes\osx\native\libsentry-native.dylib"
+          Condition="$([MSBuild]::IsOsPlatform('OSX')) and ('$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformIdentifier)' == 'macos')">
       <Pack>true</Pack>
       <PackagePath>\runtimes\osx\native</PackagePath>
       <Link>%(Filename)%(Extension)</Link>
