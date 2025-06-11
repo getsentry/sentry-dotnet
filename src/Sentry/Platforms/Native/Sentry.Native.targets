@@ -30,7 +30,7 @@
 
   <!-- Packaging the native library (NOTE: $(RuntimeIdentifier) is not set) -->
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(HostRuntimeIdentifier)' == 'win-x64'">
-    <None Include="$(SentryNativeOutputDirectory)\runtimes\win-x64\native\sentry-native.dll">
+    <None Include="$(SentryNativeOutputDirectory)\runtimes\win-x64\native\sentry-native.dll" Condition="'$(HostRuntimeIdentifier)' == 'win-x64'">
       <Pack>true</Pack>
       <PackagePath>\runtimes\win-x64\native</PackagePath>
       <Link>%(Filename)%(Extension)</Link>
@@ -43,7 +43,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(HostRuntimeIdentifier)' == 'win-arm64'">
-    <None Include="$(SentryNativeOutputDirectory)\runtimes\win-arm64\native\sentry-native.dll">
+    <None Include="$(SentryNativeOutputDirectory)\runtimes\win-arm64\native\sentry-native.dll" Condition="'$(HostRuntimeIdentifier)' == 'win-arm64'">
       <Pack>true</Pack>
       <PackagePath>\runtimes\win-arm64\native</PackagePath>
       <Link>%(Filename)%(Extension)</Link>
@@ -56,7 +56,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(HostRuntimeIdentifier)' == 'linux-x64'">
-    <None Include="$(SentryNativeOutputDirectory)\runtimes\linux-x64\native\libsentry-native.so">
+    <None Include="$(SentryNativeOutputDirectory)\runtimes\linux-x64\native\libsentry-native.so" Condition="'$(HostRuntimeIdentifier)' == 'linux-x64'">
       <Pack>true</Pack>
       <PackagePath>\runtimes\linux-x64\native</PackagePath>
       <Link>%(Filename)%(Extension)</Link>
@@ -69,7 +69,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(HostRuntimeIdentifier)' == 'linux-musl-x64'">
-    <None Include="$(SentryNativeOutputDirectory)\runtimes\linux-musl-x64\native\libsentry-native.so">
+    <None Include="$(SentryNativeOutputDirectory)\runtimes\linux-musl-x64\native\libsentry-native.so" Condition="'$(HostRuntimeIdentifier)' == 'linux-musl-x64'">
       <Pack>true</Pack>
       <PackagePath>\runtimes\linux-musl-x64\native</PackagePath>
       <Link>%(Filename)%(Extension)</Link>
@@ -82,7 +82,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(HostRuntimeIdentifier)' == 'linux-arm64'">
-    <None Include="$(SentryNativeOutputDirectory)\runtimes\linux-arm64\native\libsentry-native.so">
+    <None Include="$(SentryNativeOutputDirectory)\runtimes\linux-arm64\native\libsentry-native.so" Condition="'$(HostRuntimeIdentifier)' == 'linux-arm64'">
       <Pack>true</Pack>
       <PackagePath>\runtimes\linux-arm64\native</PackagePath>
       <Link>%(Filename)%(Extension)</Link>
@@ -95,7 +95,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or $([MSBuild]::IsOsPlatform('OSX'))">
-    <None Include="$(SentryNativeOutputDirectory)\runtimes\osx\native\libsentry-native.dylib">
+    <None Include="$(SentryNativeOutputDirectory)\runtimes\osx\native\libsentry-native.dylib" Condition="$([MSBuild]::IsOsPlatform('OSX'))">
       <Pack>true</Pack>
       <PackagePath>\runtimes\osx\native</PackagePath>
       <Link>%(Filename)%(Extension)</Link>
