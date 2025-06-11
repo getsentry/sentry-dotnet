@@ -1,4 +1,8 @@
-param([switch] $Clean)
+param(
+    [switch] $Clean,
+    [switch] $Static,
+    [string] $Framework
+)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
@@ -18,21 +22,20 @@ function Get-Runtime-Identifier
     }
 }
 
-function Build-Sentry-Native
+Push-Location $PSScriptRoot/..
+try
 {
-    param([switch] $Static)
-
     $submodule = 'modules/sentry-native'
     $package = 'src/Sentry/Platforms/Native'
 
     if ($Static)
     {
-        $buildDir = "$submodule/build/static"
+        $buildDir = "$submodule/build/$Framework/static"
         $outDir = "$package/static/$(Get-Runtime-Identifier)/native"
     }
     else
     {
-        $buildDir = "$submodule/build/shared"
+        $buildDir = "$submodule/build/$Framework/shared"
         $outDir = "$package/runtimes/$(Get-Runtime-Identifier)/native"
     }
     $actualBuildDir = $buildDir
@@ -100,13 +103,6 @@ function Build-Sentry-Native
 
     # Touch the file to mark it as up-to-date for MSBuild
     (Get-Item $outFile).LastWriteTime = Get-Date
-}
-
-Push-Location $PSScriptRoot/..
-try
-{
-    Build-Sentry-Native
-    Build-Sentry-Native -Static
 }
 finally
 {

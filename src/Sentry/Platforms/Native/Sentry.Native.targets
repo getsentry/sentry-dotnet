@@ -16,8 +16,8 @@
       $(SentryNativeOutputDirectory)\static\$(RuntimeIdentifier)\native\libsentry-native.a
     </SentryNativeBuildOutputs>
     <SentryNativeBuildOutputs Condition="$([MSBuild]::IsOsPlatform('OSX'))">
-      $(SentryNativeOutputDirectory)\runtimes\$(RuntimeIdentifier)\native\libsentry-native.dylib;
-      $(SentryNativeOutputDirectory)\static\$(RuntimeIdentifier)\native\libsentry-native.a
+      $(SentryNativeOutputDirectory)\runtimes\osx\native\libsentry-native.dylib;
+      $(SentryNativeOutputDirectory)\static\osx\native\libsentry-native.a
     </SentryNativeBuildOutputs>
     <HostRuntimeIdentifier>$([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier)</HostRuntimeIdentifier>
   </PropertyGroup>
@@ -127,6 +127,7 @@
     Inputs="$(SentryNativeBuildInputs)"
     Outputs="$(SentryNativeBuildOutputs)">
     <!-- We want a "-Clean" because if the build script changes, previous cmake cache may contain invalid defines. -->
-    <Exec Command="pwsh $(SentryNativeBuildScript) -Clean" />
+    <Exec Command="pwsh $(SentryNativeBuildScript) -Clean -Framework:$(TargetFramework)" />
+    <Exec Command="pwsh $(SentryNativeBuildScript) -Static -Framework:$(TargetFramework)" />
   </Target>
 </Project>
