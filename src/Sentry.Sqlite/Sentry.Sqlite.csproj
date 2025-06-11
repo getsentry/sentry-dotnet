@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+      <TargetFramework>net9.0</TargetFramework>
+      <ImplicitUsings>enable</ImplicitUsings>
+      <Nullable>enable</Nullable>
+      <Description>Experimental Microsoft.Data.Sqlite integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+      <PackageTags>$(PackageTags);Sqlite</PackageTags>
+    </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sentry\Sentry.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.6" />
+    <PackageReference Include="SQLitePCLRaw.core" Version="2.1.11" />
+  </ItemGroup>
+
+</Project>
