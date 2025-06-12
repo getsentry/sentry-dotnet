@@ -67,14 +67,14 @@ runs:
       with:
         dotnet-version: |
           8.0.x
-          9.0.203
+          9.0.301
 
     - name: Install .NET Workloads
       shell: bash
       run: |
         pwd
         dotnet workload install \
-          wasm-tools wasm-tools-net8 maui-android \
+          wasm-tools wasm-tools-net8 maui-android android mobile-librarybuilder \
           ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows macos' || '' }} \
           ${{ runner.os == 'Windows' && 'maui-ios maui-maccatalyst maui-windows' || '' }} \
           --temp-dir "${{ runner.temp }}" \
