@@ -128,6 +128,5 @@
     Outputs="$(SentryNativeBuildOutputs)">
     <!-- We want a "-Clean" because if the build script changes, previous cmake cache may contain invalid defines. -->
     <Exec Command="pwsh $(SentryNativeBuildScript) -Clean -Framework:$(TargetFramework)" />
-    <Exec Command="pwsh $(SentryNativeBuildScript) -Static -Framework:$(TargetFramework)" />
   </Target>
 </Project>

@@ -1,6 +1,5 @@
 param(
     [switch] $Clean,
-    [switch] $Static,
     [string] $Framework
 )
 Set-StrictMode -Version Latest
@@ -22,9 +21,10 @@ function Get-Runtime-Identifier
     }
 }
 
-Push-Location $PSScriptRoot/..
-try
+function Build-Sentry-Native
 {
+    param([switch] $Static)
+
     $submodule = 'modules/sentry-native'
     $package = 'src/Sentry/Platforms/Native'
 
@@ -103,6 +103,13 @@ try
 
     # Touch the file to mark it as up-to-date for MSBuild
     (Get-Item $outFile).LastWriteTime = Get-Date
+}
+
+Push-Location $PSScriptRoot/..
+try
+{
+    Build-Sentry-Native
+    Build-Sentry-Native -Static
 }
 finally
 {
