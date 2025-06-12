@@ -2,11 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
-  </PropertyGroup>
-
-  <!-- Running these tests on Mono fail -->
-  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('windows'))">
-    <TargetFrameworks>$(TargetFrameworks);net48</TargetFrameworks>
+    <!-- These tests fail on Mono -->
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TargetFrameworks);net48</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
