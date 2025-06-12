@@ -10,7 +10,7 @@ public class SentrySqliteCommand : SqliteCommand
     /// <inheritdoc cref="SqliteCommand.ExecuteNonQuery"/>
     public override int ExecuteNonQuery()
     {
-        var span = TransactionTracer?.StartChild("db.query", this.CommandText);
+        var span = TransactionTracer?.StartChild("db.query", CommandText);
         try
         {
             return base.ExecuteNonQuery();
@@ -24,7 +24,7 @@ public class SentrySqliteCommand : SqliteCommand
     /// <inheritdoc cref="SqliteCommand.ExecuteScalar"/>
     public override object? ExecuteScalar()
     {
-        var span = TransactionTracer?.StartChild("db.query", this.CommandText);
+        var span = TransactionTracer?.StartChild("db.query", CommandText);
         try
         {
             return base.ExecuteScalar();
