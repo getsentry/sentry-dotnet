@@ -19,7 +19,15 @@ public sealed class BreadcrumbEvent
     /// Any extra data to be included in the breadcrumb. This would typically be event specific information (for example
     /// it could include the X, Y coordinates of a tap event).
     /// </summary>
-    public (string Key, string Value)[] ExtraData { get; }
+    public IEnumerable<KeyValuePair<string, string>> ExtraData { get; }
+
+    /// <summary>
+    /// Creates a new BreadcrumbEvent
+    /// </summary>
+    public BreadcrumbEvent(object? sender, string eventName)
+        : this(sender, eventName, Array.Empty<KeyValuePair<string, string>>())
+    {
+    }
 
     /// <summary>
     /// Creates a new BreadcrumbEvent
@@ -27,11 +35,22 @@ public sealed class BreadcrumbEvent
     public BreadcrumbEvent(
         object? sender,
         string eventName,
-        params (string Key, string Value)[] extraData)
+        params IEnumerable<KeyValuePair<string, string>> extraData)
     {
         Sender = sender;
         EventName = eventName;
         ExtraData = extraData;
+    }
+
+    /// <summary>
+    /// Creates a new BreadcrumbEvent
+    /// </summary>
+    public BreadcrumbEvent(
+        object? sender,
+        string eventName,
+        params IEnumerable<(string key, string value)> extraData) : this(sender, eventName, extraData.Select(
+            e => new KeyValuePair<string, string>(e.key, e.value)))
+    {
     }
 
     /// <summary>
@@ -40,11 +59,13 @@ public sealed class BreadcrumbEvent
     /// <param name="sender"></param>
     /// <param name="eventName"></param>
     /// <param name="extraData"></param>
-    [Obsolete("Use the simpler constructor with params (string Key, string Value)[] extraData instead.")]
+    [Obsolete("Use one of the other simpler constructors instead.")]
     public BreadcrumbEvent(
         object? sender,
         string eventName,
-        IEnumerable<(string Key, string Value)>[] extraData) : this(sender, eventName, extraData.SelectMany(e => e).ToArray())
+        IEnumerable<(string Key, string Value)>[] extraData) : this(sender, eventName, extraData.SelectMany(
+            x => x.Select(pair => new KeyValuePair<string, string>(pair.Key, pair.Value)))
+        )
     {
     }
 }

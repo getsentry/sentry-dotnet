@@ -13,19 +13,17 @@ namespace Sentry.Maui
 {
     public sealed class BreadcrumbEvent
     {
-        [System.Obsolete("Use the simpler constructor with params (string Key, string Value)[] extraData in" +
-            "stead.")]
+        public BreadcrumbEvent(object? sender, string eventName) { }
+        public BreadcrumbEvent(object? sender, string eventName, [System.Runtime.CompilerServices.ParamCollection] System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> extraData) { }
+        public BreadcrumbEvent(object? sender, string eventName, [System.Runtime.CompilerServices.ParamCollection] [System.Runtime.CompilerServices.TupleElementNames(new string[] {
+                "key",
+                "value"})] System.Collections.Generic.IEnumerable<System.ValueTuple<string, string>> extraData) { }
+        [System.Obsolete("Use one of the other simpler constructors instead.")]
         public BreadcrumbEvent(object? sender, string eventName, [System.Runtime.CompilerServices.TupleElementNames(new string[] {
                 "Key",
                 "Value"})] System.Collections.Generic.IEnumerable<System.ValueTuple<string, string>>[] extraData) { }
-        public BreadcrumbEvent(object? sender, string eventName, [System.Runtime.CompilerServices.TupleElementNames(new string[] {
-                "Key",
-                "Value"})] params System.ValueTuple<string, string>[] extraData) { }
         public string EventName { get; }
-        [System.Runtime.CompilerServices.TupleElementNames(new string[] {
-                "Key",
-                "Value"})]
-        public System.ValueTuple<string, string>[] ExtraData { get; }
+        public System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> ExtraData { get; }
         public object? Sender { get; }
     }
     public interface IMauiElementEventBinder

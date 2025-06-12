@@ -28,7 +28,7 @@ public partial class MauiEventsBinderTests
             Assert.Equal(MauiEventsBinder.UserType, crumb.Type);
             Assert.Equal(MauiEventsBinder.UserActionCategory, crumb.Category);
             Assert.NotNull(crumb.Data);
-            Assert.Equal(breadcrumbEvent.ExtraData.Length, crumb.Data.Count);
+            Assert.Equal(breadcrumbEvent.ExtraData.Count(), crumb.Data.Count);
             foreach (var (key, value) in breadcrumbEvent.ExtraData)
             {
                 crumb.Data.Should().Contain(kvp => kvp.Key == key && kvp.Value == value);
