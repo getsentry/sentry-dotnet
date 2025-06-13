@@ -1848,4 +1848,35 @@ public class SentryOptions
         "ServiceStack",
         "Java.Interop",
     ];
+
+    /// <summary>
+    /// Gets or sets a value indicating whether continuous profiling is enabled.
+    /// </summary>
+    /// <remarks>
+    /// When enabled, the SDK will collect CPU profiles continuously at a fixed interval, regardless of transactions.
+    /// This is useful for monitoring long-running applications like web servers.
+    /// 
+    /// Note that this is different from transaction-based profiling, which only collects profiles during transactions.
+    /// You can enable both continuous and transaction-based profiling at the same time.
+    /// </remarks>
+    public bool IsContinuousProfilingEnabled { get; set; }
+
+    /// <summary>
+    /// Gets or sets the interval at which continuous profiles are collected and sent.
+    /// </summary>
+    /// <remarks>
+    /// The default value is 5 minutes. This interval determines how often the SDK will collect and send profiles
+    /// when continuous profiling is enabled.
+    /// 
+    /// A shorter interval will provide more granular data but will also increase the amount of data sent to Sentry.
+    /// A longer interval will reduce the data volume but might miss short-lived performance issues.
+    /// </remarks>
+    public TimeSpan ContinuousProfilingInterval { get; set; } = TimeSpan.FromMinutes(5);
+
+    /// <summary>
+    /// Gets the cancellation token that is triggered when the SDK is shutting down.
+    /// </summary>
+    public CancellationToken ShutdownToken => _shutdownTokenSource.Token;
+
+    private readonly CancellationTokenSource _shutdownTokenSource = new();
 }
