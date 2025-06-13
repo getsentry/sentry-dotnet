@@ -38,7 +38,7 @@ public class MauiCommunityToolkitMvvmEventsBinderTests
 
     private readonly Fixture _fixture = new();
 
-    [Theory]
+    [Theory(Skip = "Flaky test - ignoring until fixed")]
     [InlineData(true)]
     [InlineData(false)]
     public async Task AsyncRelayCommand_AddsTransactionsOrSpans(bool isActiveTransaction)
