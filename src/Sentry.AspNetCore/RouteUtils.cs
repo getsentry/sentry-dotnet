@@ -108,8 +108,8 @@ internal static class RouteUtils
 
     // Internal for testing.
     internal static bool RouteHasMvcParameters(string route)
-        => route.Contains("{controller=") ||
-           route.Contains("{action=") ||
-           route.Contains("{version:") ||
-           route.Contains("{area=");
+        => route.Contains("{controller=", StringComparison.Ordinal) ||
+           route.Contains("{action=", StringComparison.Ordinal) ||
+           route.Contains("{version:", StringComparison.Ordinal) ||
+           route.Contains("{area=", StringComparison.Ordinal);
 }
