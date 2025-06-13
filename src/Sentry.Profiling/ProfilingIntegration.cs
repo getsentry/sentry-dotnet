@@ -1,14 +1,18 @@
+using System.Diagnostics;
 using Sentry.Extensibility;
 using Sentry.Integrations;
+using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Profiling;
 
 /// <summary>
 /// Enables transaction performance profiling.
 /// </summary>
-public class ProfilingIntegration : ISdkIntegration
+public class ProfilingIntegration : ISdkIntegration, IDisposable
 {
     private TimeSpan _startupTimeout;
+    private ContinuousSamplingProfilerFactory? _continuousProfilerFactory;
+    private ContinuousSamplingProfiler? _continuousProfiler;
 
     /// <summary>
     /// Initializes the profiling integration.
@@ -36,6 +40,53 @@ public class ProfilingIntegration : ISdkIntegration
             try
             {
                 options.TransactionProfilerFactory ??= new SamplingTransactionProfilerFactory(options, _startupTimeout);
+
+                if (options.IsContinuousProfilingEnabled)
+                {
+                    _continuousProfilerFactory = new ContinuousSamplingProfilerFactory(options, _startupTimeout);
+                    _continuousProfiler = _continuousProfilerFactory.Start();
+
+                    if (_continuousProfiler is not null)
+                    {
+                        // Register a background task to collect and send profiles periodically
+                        Task.Run(async () =>
+                        {
+                            while (!options.ShutdownToken.IsCancellationRequested)
+                            {
+                                try
+                                {
+                                    await Task.Delay(options.ContinuousProfilingInterval, options.ShutdownToken).ConfigureAwait(false);
+
+                                    if (_continuousProfiler is not null)
+                                    {
+                                        _continuousProfiler.Stop();
+                                        var profile = await _continuousProfiler.CollectAsync().ConfigureAwait(false);
+                                        var envelope = new Envelope(
+                                            new Dictionary<string, object?>(),
+                                            new[]
+                                            {
+                                                new EnvelopeItem(
+                                                    new Dictionary<string, object?>
+                                                    {
+                                                        { "type", "profile" }
+                                                    },
+                                                    profile)
+                                            });
+
+                                        hub.CaptureEnvelope(envelope);
+
+                                        // Start a new profiler for the next interval
+                                        _continuousProfiler = _continuousProfilerFactory.Start();
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    options.LogError(e, "Error during continuous profiling.");
+                                }
+                            }
+                        }, options.ShutdownToken);
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -46,5 +97,14 @@ public class ProfilingIntegration : ISdkIntegration
         {
             options.LogInfo("Profiling Integration is disabled because profiling is disabled by configuration.");
         }
+    }
+
+    /// <summary>
+    /// Disposes the profiling integration and stops any active profilers.
+    /// </summary>
+    public void Dispose()
+    {
+        _continuousProfiler?.Dispose();
+        _continuousProfilerFactory?.Dispose();
     }
 }

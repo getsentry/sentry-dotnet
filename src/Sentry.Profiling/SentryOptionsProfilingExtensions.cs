@@ -34,6 +34,20 @@ public static class SentryOptionsProfilingExtensions
     }
 
     /// <summary>
+    /// Enables continuous profiling in Sentry.
+    /// </summary>
+    /// <param name="options">The Sentry options.</param>
+    /// <param name="interval">The interval at which profiles are collected and sent. Defaults to 5 minutes.</param>
+    public static void EnableContinuousProfiling(this SentryOptions options, TimeSpan? interval = null)
+    {
+        options.IsContinuousProfilingEnabled = true;
+        if (interval.HasValue)
+        {
+            options.ContinuousProfilingInterval = interval.Value;
+        }
+    }
+
+    /// <summary>
     /// Disables the Profiling integration.
     /// </summary>
     /// <param name="options">The SentryOptions to remove the integration from.</param>
