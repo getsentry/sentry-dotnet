@@ -100,4 +100,4 @@ internal class ContinuousSamplingProfiler : IDisposable
     {
         Stop();
     }
-} 
+}

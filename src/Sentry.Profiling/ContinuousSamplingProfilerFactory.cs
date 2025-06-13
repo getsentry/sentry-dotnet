@@ -80,4 +80,4 @@ internal class ContinuousSamplingProfilerFactory : IDisposable
             _sessionTask.Result.Dispose();
         }
     }
-} 
+}

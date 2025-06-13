@@ -64,4 +64,4 @@ internal class ContinuousProfileInfo : ISentryJsonSerializable
 
         writer.WriteEndObject();
     }
-} 
+}
