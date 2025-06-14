@@ -132,7 +132,14 @@ internal class MauiEventsBinder : IMauiEventsBinder
             breadcrumb.Sender,
             breadcrumb.EventName,
             UserType,
-            UserActionCategory
+            UserActionCategory,
+            extra =>
+            {
+                foreach (var (key, value) in breadcrumb.ExtraData)
+                {
+                    extra[key] = value;
+                }
+            }
         );
     }
 
