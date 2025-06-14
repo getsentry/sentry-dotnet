@@ -14,7 +14,7 @@
 
     <!-- Visual tests need net9.0+ mobile and are flaky when using the headless runner on CI -->
     <EnableMauiDeviceTestVisualRunner>false</EnableMauiDeviceTestVisualRunner>
-    <EnableMauiDeviceTestVisualRunner Condition="'$(TargetFrameworkIsNet9OrGreater)' == 'true' AND '$(PlatformIsMobile)' == 'true' AND '$(ContinuousIntegrationBuild)' != 'true'">true</EnableMauiDeviceTestVisualRunner>
+    <EnableMauiDeviceTestVisualRunner Condition="'$(IsNet9OrGreater)' == 'true' AND '$(PlatformIsMobile)' == 'true' AND '$(ContinuousIntegrationBuild)' != 'true'">true</EnableMauiDeviceTestVisualRunner>
   </PropertyGroup>
   <!--
     Workaround for Verify issue with scrubbing when running in Rider on Windows.
