@@ -86,7 +86,7 @@
        built already on each native platform and fetched for the final .net build. -->
   <Target Name="_BuildSentryNativeSDK"
     BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
-    Condition="('$(TargetFramework)' == 'net8.0' or '$(TargetFramework)' == 'net9.0') and '$(CI)' != 'true'"
+    Condition="'$(IsNet8OrGreater)' == 'true' and '$(CI)' != 'true'"
     Inputs="$(SentryNativeBuildInputs)"
     Outputs="$(SentryNativeBuildOutputs)">
     <!-- We want a "-Clean" because if the build script changes, previous cmake cache may contain invalid defines. -->
