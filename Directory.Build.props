@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <VersionPrefix>5.9.0</VersionPrefix>
+    <VersionPrefix>5.11.0-alpha.1</VersionPrefix>
     <LangVersion>13</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -65,6 +65,11 @@
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <DefineConstants>$(DefineConstants);CI_BUILD</DefineConstants>
+  </PropertyGroup>
+
+  <!-- So we know at build time whether the DSN has been provided in an environment variable or not -->
+  <PropertyGroup Condition=" '$(SENTRY_DSN)' != '' ">
+    <DefineConstants>$(DefineConstants);SENTRY_DSN_DEFINED_IN_ENV</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

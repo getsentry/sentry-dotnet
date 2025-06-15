@@ -64,11 +64,11 @@ internal sealed class UnsampledTransaction : NoOpTransaction
 
         // Clear the transaction from the scope and regenerate the Propagation Context, so new events don't have a
         // trace context that is "older" than the transaction that just finished
-        _hub.ConfigureScope(scope =>
+        _hub.ConfigureScope(static (scope, transactionTracer) =>
         {
-            scope.ResetTransaction(this);
+            scope.ResetTransaction(transactionTracer);
             scope.SetPropagationContext(new SentryPropagationContext());
-        });
+        }, this);
 
         // Record the discarded events
         var spanCount = Spans.Count + 1; // 1 for each span + 1 for the transaction itself
