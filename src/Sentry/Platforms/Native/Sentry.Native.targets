@@ -76,7 +76,7 @@
     </None>
   </ItemGroup>
 
-  <Target Name="CleanNativeSDK" BeforeTargets="CoreClean" Condition="'$(TargetFramework)' == 'net8.0' or '$(TargetFramework)' == 'net9.0'">
+  <Target Name="CleanNativeSDK" BeforeTargets="CoreClean" Condition="'$(IsNet8OrGreater)' == 'true'">
     <Message Text="Inside Custom Clean" Importance="high"/>
     <RemoveDir Directories="$(SentryNativeOutputDirectory)" />
     <RemoveDir Directories="$(SentryNativeSourceDirectory)build" />
