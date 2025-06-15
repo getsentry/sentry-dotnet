@@ -18,8 +18,8 @@
     -->
     <EnableWindowsTargeting Condition="$([MSBuild]::IsOSPlatform('OSX'))">true</EnableWindowsTargeting>
 
-    <!-- We'll need to package this only on OSX, so we get the iOS native support. -->
-    <IsPackable Condition="!$([MSBuild]::IsOSPlatform('OSX'))">false</IsPackable>
+    <!-- We'll need to package this only for builds including mobile targets. -->
+    <IsPackable Condition="'$(NO_MOBILE)' == 'true'">false</IsPackable>
 
     <!--
       Imports MAUI dependencies.
