@@ -466,6 +466,40 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     }
 
     [Fact]
+    public void OnEnd_Transaction_DoesNotClearResponseStatusCode()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        var data = Tracer.StartActivity(
+            name: "test operation",
+            kind: ActivityKind.Server,
+            parentContext: default,
+            new Dictionary<string, object>()
+        );
+        sut.OnStart(data);
+
+        sut._map.TryGetValue(data.SpanId, out var span);
+        (span as TransactionTracer)!.Contexts.Response.StatusCode = 200;
+
+        // Act
+        sut.OnEnd(data);
+
+        // Assert
+        if (span is not TransactionTracer transaction)
+        {
+            Assert.Fail("Span is not a transaction tracer");
+            return;
+        }
+
+        using (new AssertionScope())
+        {
+            transaction.Contexts.Response.StatusCode.Should().Be(200);
+        }
+    }
+
+    [Fact]
     public void OnEnd_Span_SetsResponseStatusCode()
     {
         // Arrange
@@ -494,14 +528,14 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         // Assert
         if (span is not SpanTracer spanTracer)
         {
-            Assert.Fail("Span is not a transaction tracer");
+            Assert.Fail("Span is not a span tracer");
             return;
         }
 
         using (new AssertionScope())
         {
-            spanTracer.Tags.TryGetValue("HTTP Response Status Code", out var responseStatusCode)
-                .Should().BeTrue();
+            spanTracer.Tags.TryGetValue(OtelSemanticConventions.AttributeHttpResponseStatusCode,
+                    out var responseStatusCode).Should().BeTrue();
             responseStatusCode.Should().Be("404");
         }
     }

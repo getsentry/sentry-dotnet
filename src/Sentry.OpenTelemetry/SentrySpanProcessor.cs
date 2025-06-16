@@ -236,7 +236,10 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         {
             transaction.Name = description;
             transaction.NameSource = source;
-            transaction.Contexts.Response.StatusCode = statusCode;
+            if (statusCode is { } responseStatusCode)
+            {
+                transaction.Contexts.Response.StatusCode = responseStatusCode;
+            }
 
             // Use the end timestamp from the activity data.
             transaction.EndTimestamp = data.StartTimeUtc + data.Duration;
@@ -256,7 +259,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             if (statusCode is { } responseStatusCode)
             {
                 // Set this as a tag so that it's searchable in Sentry
-                span.SetTag("HTTP Response Status Code", responseStatusCode.ToString());
+                span.SetTag(OtelSemanticConventions.AttributeHttpResponseStatusCode, responseStatusCode.ToString());
             }
         }
 
