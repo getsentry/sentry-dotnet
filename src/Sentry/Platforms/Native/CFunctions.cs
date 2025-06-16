@@ -81,7 +81,7 @@ internal static class C
 
     public static bool Init(SentryOptions options)
     {
-        _isWindows = System.OperatingSystem.IsWindows();
+        // _isWindows = System.OperatingSystem.IsWindows();
         var cOptions = sentry_options_new();
 
         // Note: DSN is not null because options.IsValid() must have returned true for this to be called.
@@ -124,20 +124,20 @@ internal static class C
             sentry_options_set_database_path(cOptions, dir);
         }
 
-        if (options.DiagnosticLogger is null)
-        {
-            _logger?.LogDebug("Unsetting the current native logger");
-            _logger = null;
-        }
-        else
-        {
-            options.DiagnosticLogger.LogDebug($"{(_logger is null ? "Setting a" : "Replacing the")} native logger");
-            _logger = options.DiagnosticLogger;
-            unsafe
-            {
-                sentry_options_set_logger(cOptions, &nativeLog, IntPtr.Zero);
-            }
-        }
+        // if (options.DiagnosticLogger is null)
+        // {
+        //     _logger?.LogDebug("Unsetting the current native logger");
+        //     _logger = null;
+        // }
+        // else
+        // {
+        //     options.DiagnosticLogger.LogDebug($"{(_logger is null ? "Setting a" : "Replacing the")} native logger");
+        //     _logger = options.DiagnosticLogger;
+        //     unsafe
+        //     {
+        //         sentry_options_set_logger(cOptions, &nativeLog, IntPtr.Zero);
+        //     }
+        // }
 
         unsafe
         {
@@ -436,130 +436,130 @@ internal static class C
         handle.Free();
     }
 
-    [DllImport("sentry-native")]
-    private static extern unsafe void sentry_options_set_logger(IntPtr options, delegate* unmanaged/*[Cdecl]*/<int, IntPtr, IntPtr, IntPtr, void> logger, IntPtr userData);
+    // [DllImport("sentry-native")]
+    // private static extern unsafe void sentry_options_set_logger(IntPtr options, delegate* unmanaged/*[Cdecl]*/<int, IntPtr, IntPtr, IntPtr, void> logger, IntPtr userData);
 
-    // The logger we should forward native messages to. This is referenced by nativeLog() which in turn for.
-    private static IDiagnosticLogger? _logger;
-    private static bool _isWindows = false;
+    // // The logger we should forward native messages to. This is referenced by nativeLog() which in turn for.
+    // private static IDiagnosticLogger? _logger;
+    // private static bool _isWindows = false;
 
-    // This method is called from the C library and forwards incoming messages to the currently set _logger.
-    // [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]  //  error CS3016: Arrays as attribute arguments is not CLS-complian
-    [UnmanagedCallersOnly]
-    private static void nativeLog(int cLevel, IntPtr format, IntPtr args, IntPtr userData)
-    {
-        try
-        {
-            nativeLogImpl(cLevel, format, args, userData);
-        }
-        catch
-        {
-            // never allow an exception back to native code - it would crash the app
-        }
-    }
+    // // This method is called from the C library and forwards incoming messages to the currently set _logger.
+    // // [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]  //  error CS3016: Arrays as attribute arguments is not CLS-complian
+    // [UnmanagedCallersOnly]
+    // private static void nativeLog(int cLevel, IntPtr format, IntPtr args, IntPtr userData)
+    // {
+    //     try
+    //     {
+    //         nativeLogImpl(cLevel, format, args, userData);
+    //     }
+    //     catch
+    //     {
+    //         // never allow an exception back to native code - it would crash the app
+    //     }
+    // }
 
-    private static void nativeLogImpl(int cLevel, IntPtr format, IntPtr args, IntPtr userData)
-    {
-        var logger = _logger;
-        if (logger is null || format == IntPtr.Zero || args == IntPtr.Zero)
-        {
-            return;
-        }
+    // private static void nativeLogImpl(int cLevel, IntPtr format, IntPtr args, IntPtr userData)
+    // {
+    //     var logger = _logger;
+    //     if (logger is null || format == IntPtr.Zero || args == IntPtr.Zero)
+    //     {
+    //         return;
+    //     }
 
-        // see sentry.h: sentry_level_e
-        var level = cLevel switch
-        {
-            -1 => SentryLevel.Debug,
-            0 => SentryLevel.Info,
-            1 => SentryLevel.Warning,
-            2 => SentryLevel.Error,
-            3 => SentryLevel.Fatal,
-            _ => SentryLevel.Info,
-        };
+    //     // see sentry.h: sentry_level_e
+    //     var level = cLevel switch
+    //     {
+    //         -1 => SentryLevel.Debug,
+    //         0 => SentryLevel.Info,
+    //         1 => SentryLevel.Warning,
+    //         2 => SentryLevel.Error,
+    //         3 => SentryLevel.Fatal,
+    //         _ => SentryLevel.Info,
+    //     };
 
-        if (!logger.IsEnabled(level))
-        {
-            return;
-        }
+    //     if (!logger.IsEnabled(level))
+    //     {
+    //         return;
+    //     }
 
-        string? message = null;
-        try
-        {
-            // We cannot access C var-arg (va_list) in c# thus we pass it back to vsnprintf to do the formatting.
-            if (_isWindows)
-            {
-                var formattedLength = 1 + vsnprintf_windows(IntPtr.Zero, UIntPtr.Zero, format, args);
-                WithAllocatedPtr(formattedLength, buffer =>
-                {
-                    vsnprintf_windows(buffer, (UIntPtr)formattedLength, format, args);
-                    message = Marshal.PtrToStringAnsi(buffer);
-                });
-            }
-            else
-            {
-                // For Linux/macOS, we must make a copy of the VaList to be able to pass it back...
-                var argsStruct = Marshal.PtrToStructure<VaListLinux64>(args);
-                var formattedLength = 0;
-                WithMarshalledStruct(argsStruct, argsPtr =>
-                    formattedLength = 1 + vsnprintf_linux(IntPtr.Zero, UIntPtr.Zero, format, argsPtr)
-                );
+    //     string? message = null;
+    //     try
+    //     {
+    //         // We cannot access C var-arg (va_list) in c# thus we pass it back to vsnprintf to do the formatting.
+    //         if (_isWindows)
+    //         {
+    //             var formattedLength = 1 + vsnprintf_windows(IntPtr.Zero, UIntPtr.Zero, format, args);
+    //             WithAllocatedPtr(formattedLength, buffer =>
+    //             {
+    //                 vsnprintf_windows(buffer, (UIntPtr)formattedLength, format, args);
+    //                 message = Marshal.PtrToStringAnsi(buffer);
+    //             });
+    //         }
+    //         else
+    //         {
+    //             // For Linux/macOS, we must make a copy of the VaList to be able to pass it back...
+    //             var argsStruct = Marshal.PtrToStructure<VaListLinux64>(args);
+    //             var formattedLength = 0;
+    //             WithMarshalledStruct(argsStruct, argsPtr =>
+    //                 formattedLength = 1 + vsnprintf_linux(IntPtr.Zero, UIntPtr.Zero, format, argsPtr)
+    //             );
 
-                WithAllocatedPtr(formattedLength, buffer =>
-                WithMarshalledStruct(argsStruct, argsPtr =>
-                {
-                    vsnprintf_linux(buffer, (UIntPtr)formattedLength, format, argsPtr);
-                    message = Marshal.PtrToStringAnsi(buffer);
-                }));
-            }
-        }
-        catch (Exception err)
-        {
-            logger.LogError(err, "Exception in native log forwarder.");
-        }
+    //             WithAllocatedPtr(formattedLength, buffer =>
+    //             WithMarshalledStruct(argsStruct, argsPtr =>
+    //             {
+    //                 vsnprintf_linux(buffer, (UIntPtr)formattedLength, format, argsPtr);
+    //                 message = Marshal.PtrToStringAnsi(buffer);
+    //             }));
+    //         }
+    //     }
+    //     catch (Exception err)
+    //     {
+    //         logger.LogError(err, "Exception in native log forwarder.");
+    //     }
 
-        // If previous failed, try to at least print the unreplaced message pattern
-        message ??= Marshal.PtrToStringAnsi(format);
+    //     // If previous failed, try to at least print the unreplaced message pattern
+    //     message ??= Marshal.PtrToStringAnsi(format);
 
-        if (message != null)
-        {
-            logger.Log(level, $"[native] {message}");
-        }
-    }
+    //     if (message != null)
+    //     {
+    //         logger.Log(level, $"[native] {message}");
+    //     }
+    // }
 
-    [DllImport("msvcrt", EntryPoint = "vsnprintf")]
-    private static extern int vsnprintf_windows(IntPtr buffer, UIntPtr bufferSize, IntPtr format, IntPtr args);
+    // [DllImport("msvcrt", EntryPoint = "vsnprintf")]
+    // private static extern int vsnprintf_windows(IntPtr buffer, UIntPtr bufferSize, IntPtr format, IntPtr args);
 
-    [DllImport("libc", EntryPoint = "vsnprintf")]
-    private static extern int vsnprintf_linux(IntPtr buffer, UIntPtr bufferSize, IntPtr format, IntPtr args);
+    // [DllImport("libc", EntryPoint = "vsnprintf")]
+    // private static extern int vsnprintf_linux(IntPtr buffer, UIntPtr bufferSize, IntPtr format, IntPtr args);
 
-    // https://stackoverflow.com/a/4958507/2386130
-    [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    private struct VaListLinux64
-    {
-        private uint _gp_offset;
-        private uint _fp_offset;
-        private IntPtr _overflow_arg_area;
-        private IntPtr _reg_save_area;
-    }
+    // // https://stackoverflow.com/a/4958507/2386130
+    // [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    // private struct VaListLinux64
+    // {
+    //     private uint _gp_offset;
+    //     private uint _fp_offset;
+    //     private IntPtr _overflow_arg_area;
+    //     private IntPtr _reg_save_area;
+    // }
 
-    private static void WithAllocatedPtr(int size, Action<IntPtr> action)
-    {
-        var ptr = IntPtr.Zero;
-        try
-        {
-            ptr = Marshal.AllocHGlobal(size);
-            action(ptr);
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(ptr);
-        }
-    }
+    // private static void WithAllocatedPtr(int size, Action<IntPtr> action)
+    // {
+    //     var ptr = IntPtr.Zero;
+    //     try
+    //     {
+    //         ptr = Marshal.AllocHGlobal(size);
+    //         action(ptr);
+    //     }
+    //     finally
+    //     {
+    //         Marshal.FreeHGlobal(ptr);
+    //     }
+    // }
 
-    private static void WithMarshalledStruct<T>(T structure, Action<IntPtr> action) where T : notnull =>
-        WithAllocatedPtr(Marshal.SizeOf(structure), ptr =>
-        {
-            Marshal.StructureToPtr(structure, ptr, false);
-            action(ptr);
-        });
+    // private static void WithMarshalledStruct<T>(T structure, Action<IntPtr> action) where T : notnull =>
+    //     WithAllocatedPtr(Marshal.SizeOf(structure), ptr =>
+    //     {
+    //         Marshal.StructureToPtr(structure, ptr, false);
+    //         action(ptr);
+    //     });
 }
