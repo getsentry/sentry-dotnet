@@ -1,7 +1,7 @@
 using System.IO.Abstractions.TestingHelpers;
 using Sentry.Internal.Http;
-using Sentry.Tests.Internals;
 using Sentry.Protocol;
+using Sentry.Tests.Internals;
 
 namespace Sentry.Tests;
 
