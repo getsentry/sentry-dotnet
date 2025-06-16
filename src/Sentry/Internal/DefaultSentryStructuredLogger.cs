@@ -11,25 +11,18 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
     private readonly SentryOptions _options;
     private readonly ISystemClock _clock;
 
-    private readonly bool _isEnabled;
-
     internal DefaultSentryStructuredLogger(IHub hub, IInternalScopeManager scopeManager, SentryOptions options, ISystemClock clock)
     {
+        Debug.Assert(options is { Experimental.EnableLogs: true });
+
         _hub = hub;
         _scopeManager = scopeManager;
         _options = options;
         _clock = clock;
-
-        _isEnabled = options is { Experimental.EnableLogs: true };
     }
 
     private protected override void CaptureLog(SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog)
     {
-        if (!_isEnabled)
-        {
-            return;
-        }
-
         var timestamp = _clock.GetUtcNow();
 
         if (!TryGetTraceId(_hub, _scopeManager, out var traceId))

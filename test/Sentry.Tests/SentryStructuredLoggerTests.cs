@@ -48,8 +48,7 @@ public class SentryStructuredLoggerTests
             ScopeManager.GetCurrent().Returns(scopeAndClient);
         }
 
-        public SentryStructuredLogger GetDefaultSut() => new DefaultSentryStructuredLogger(Hub, ScopeManager, Options, Clock);
-        public SentryStructuredLogger GetDisabledSut() => new DisabledSentryStructuredLogger();
+        public SentryStructuredLogger GetSut() => SentryStructuredLogger.Create(Hub, ScopeManager, Options, Clock);
     }
 
     private readonly Fixture _fixture;
@@ -64,8 +63,8 @@ public class SentryStructuredLoggerTests
     {
         _fixture.Options.Experimental.EnableLogs = true;
 
-        var instance = SentryStructuredLogger.Create(_fixture.Hub, _fixture.ScopeManager, _fixture.Options, _fixture.Clock);
-        var other = SentryStructuredLogger.Create(_fixture.Hub, _fixture.ScopeManager, _fixture.Options, _fixture.Clock);
+        var instance = _fixture.GetSut();
+        var other = _fixture.GetSut();
 
         instance.Should().BeOfType<DefaultSentryStructuredLogger>();
         instance.Should().NotBeSameAs(other);
@@ -76,8 +75,8 @@ public class SentryStructuredLoggerTests
     {
         _fixture.Options.Experimental.EnableLogs.Should().BeFalse();
 
-        var instance = SentryStructuredLogger.Create(_fixture.Hub, _fixture.ScopeManager, _fixture.Options, _fixture.Clock);
-        var other = SentryStructuredLogger.Create(_fixture.Hub, _fixture.ScopeManager, _fixture.Options, _fixture.Clock);
+        var instance = _fixture.GetSut();
+        var other = _fixture.GetSut();
 
         instance.Should().BeOfType<DisabledSentryStructuredLogger>();
         instance.Should().BeSameAs(other);
@@ -93,7 +92,7 @@ public class SentryStructuredLoggerTests
     public void Log_Enabled_CapturesEnvelope(SentryLogLevel level)
     {
         _fixture.Options.Experimental.EnableLogs = true;
-        var logger = _fixture.GetDefaultSut();
+        var logger = _fixture.GetSut();
 
         Envelope envelope = null!;
         _fixture.Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => envelope = arg));
@@ -114,7 +113,7 @@ public class SentryStructuredLoggerTests
     public void Log_Disabled_DoesNotCaptureEnvelope(SentryLogLevel level)
     {
         _fixture.Options.Experimental.EnableLogs.Should().BeFalse();
-        var logger = _fixture.GetDefaultSut();
+        var logger = _fixture.GetSut();
 
         logger.Log(level, "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
 
@@ -126,7 +125,7 @@ public class SentryStructuredLoggerTests
     {
         _fixture.UseScopeManager();
         _fixture.Options.Experimental.EnableLogs = true;
-        var logger = _fixture.GetDefaultSut();
+        var logger = _fixture.GetSut();
 
         Envelope envelope = null!;
         _fixture.Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => envelope = arg));
@@ -150,7 +149,7 @@ public class SentryStructuredLoggerTests
             configuredLog = log;
             return log;
         });
-        var logger = _fixture.GetDefaultSut();
+        var logger = _fixture.GetSut();
 
         logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
 
@@ -170,7 +169,7 @@ public class SentryStructuredLoggerTests
             invocations++;
             return null;
         });
-        var logger = _fixture.GetDefaultSut();
+        var logger = _fixture.GetSut();
 
         logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
 
@@ -182,7 +181,7 @@ public class SentryStructuredLoggerTests
     public void Log_InvalidFormat_DoesNotCaptureEnvelope()
     {
         _fixture.Options.Experimental.EnableLogs = true;
-        var logger = _fixture.GetDefaultSut();
+        var logger = _fixture.GetSut();
 
         logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}, {4}", ["string", true, 1, 2.2]);
 
@@ -198,9 +197,9 @@ public class SentryStructuredLoggerTests
     public void Log_InvalidConfigureLog_DoesNotCaptureEnvelope()
     {
         _fixture.Options.Experimental.EnableLogs = true;
-        var logger = _fixture.GetDefaultSut();
+        var logger = _fixture.GetSut();
 
-        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], Throw);
+        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], static (SentryLog log) => throw new InvalidOperationException());
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         var entry = _fixture.DiagnosticLogger.Entries.Should().ContainSingle().Which;
@@ -215,7 +214,7 @@ public class SentryStructuredLoggerTests
     {
         _fixture.Options.Experimental.EnableLogs = true;
         _fixture.Options.Experimental.SetBeforeSendLog(static (SentryLog log) => throw new InvalidOperationException());
-        var logger = _fixture.GetDefaultSut();
+        var logger = _fixture.GetSut();
 
         logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2]);
 
@@ -230,22 +229,6 @@ public class SentryStructuredLoggerTests
     private static void ConfigureLog(SentryLog log)
     {
         log.SetAttribute("attribute-key", "attribute-value");
-    }
-
-    private static void Throw(SentryLog log)
-    {
-        throw new InvalidOperationException();
-    }
-
-    [Fact]
-    public void CreateDisabled_EvenWhenEnabled_DoesNotCaptureEnvelope()
-    {
-        _fixture.Options.Experimental.EnableLogs = true;
-        var logger = _fixture.GetDisabledSut();
-
-        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
-
-        _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
     }
 }
 
