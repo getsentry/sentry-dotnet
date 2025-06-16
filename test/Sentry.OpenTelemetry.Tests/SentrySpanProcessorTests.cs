@@ -453,12 +453,14 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         sut.OnEnd(data);
 
         // Assert
-        if (span is not TransactionTracer transaction) {
+        if (span is not TransactionTracer transaction)
+        {
             Assert.Fail("Span is not a transaction tracer");
             return;
         }
 
-        using (new AssertionScope()) {
+        using (new AssertionScope())
+        {
             transaction.Contexts.Response.StatusCode.Should().Be(404);
         }
     }
@@ -490,12 +492,14 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         sut.OnEnd(data);
 
         // Assert
-        if (span is not SpanTracer spanTracer) {
+        if (span is not SpanTracer spanTracer)
+        {
             Assert.Fail("Span is not a transaction tracer");
             return;
         }
 
-        using (new AssertionScope()) {
+        using (new AssertionScope())
+        {
             spanTracer.Tags.TryGetValue("HTTP Response Status Code", out var responseStatusCode)
                 .Should().BeTrue();
             responseStatusCode.Should().Be("404");
