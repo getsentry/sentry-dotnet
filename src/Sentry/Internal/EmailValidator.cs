@@ -11,7 +11,7 @@ internal static partial class EmailValidator
 
 #if NET9_0_OR_GREATER
     [GeneratedRegex(EmailPattern)]
-    private static partial Regex EmailRegex { get; }
+    private static partial Regex Email { get; }
 #elif NET8_0
     [GeneratedRegex(EmailPattern)]
     private static partial Regex EmailRegex();
@@ -32,10 +32,6 @@ internal static partial class EmailValidator
             return true;
         }
 
-#if NET9_0_OR_GREATER
-        return EmailRegex.IsMatch(email);
-#else
         return Email.IsMatch(email);
-#endif
     }
 }

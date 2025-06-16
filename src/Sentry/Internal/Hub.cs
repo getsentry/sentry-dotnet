@@ -553,7 +553,7 @@ internal class Hub : IHub, IDisposable
 
         try
         {
-            if (!EmailValidator.IsValidEmail(feedback.ContactEmail))
+            if (!string.IsNullOrWhiteSpace(feedback.ContactEmail) && !EmailValidator.IsValidEmail(feedback.ContactEmail))
             {
                 _options.LogWarning("Feedback dropped due to invalid email format: '{0}'", feedback.ContactEmail);
                 return;
