@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Ben.BlockingDetector;
 
 namespace Sentry.Internal;
 
@@ -10,8 +11,13 @@ internal sealed class GarbageCollectionMonitor
     private const int MaxGenerationThreshold = 10;
     private const int LargeObjectHeapThreshold = 10;
 
-    public static Task Start(Action onGarbageCollected, CancellationToken cancellationToken, IGCImplementation? gc = null) =>
-        Task.Run(() => MonitorGarbageCollection(onGarbageCollected, cancellationToken, gc), cancellationToken);
+    public static Task Start(Action onGarbageCollected, CancellationToken cancellationToken, IGCImplementation? gc = null)
+    {
+        using (new SuppressBlockingDetection())
+        {
+            return Task.Run(() => MonitorGarbageCollection(onGarbageCollected, cancellationToken, gc), cancellationToken);
+        }
+    }
 
     private static void MonitorGarbageCollection(Action onGarbageCollected, CancellationToken cancellationToken, IGCImplementation? gc = null)
     {

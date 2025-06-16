@@ -1,6 +1,8 @@
+using System.Text.Json;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
+using Sentry.Ben.BlockingDetector;
 
 namespace Sentry.Internal.Http;
 
@@ -98,7 +100,10 @@ internal class CachingTransport : ITransport, IDisposable
         if (startWorker)
         {
             _options.LogDebug("Starting CachingTransport worker.");
-            _worker = Task.Run(CachedTransportBackgroundTaskAsync);
+            using (new SuppressBlockingDetection())
+            {
+                _worker = Task.Run(CachedTransportBackgroundTaskAsync);
+            }
         }
         else
         {

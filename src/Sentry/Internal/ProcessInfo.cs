@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Ben.BlockingDetector;
 
 namespace Sentry.Internal;
 
@@ -95,20 +96,23 @@ internal class ProcessInfo
             // This method will give a better precision to the StartupTime at a cost
             // of calling Process.GetCurrentProcess, on a thread pool thread.
             var preciseStartupTimeFunc = findPreciseStartupTime ?? GetStartupTime;
-            PreciseAppStartupTask = Task.Run(() =>
+            using (new SuppressBlockingDetection())
             {
-                try
+                PreciseAppStartupTask = Task.Run(() =>
                 {
-                    StartupTime = preciseStartupTimeFunc();
-                }
-                catch (Exception e)
-                {
-                    options.LogError(e, "Failure getting precise App startup time.");
-                    //Ignore any exception and stay with the less-precise DateTime.UtcNow value.
-                }
-            }).ContinueWith(_ =>
-                // Let the actual task get collected
-                PreciseAppStartupTask = Task.CompletedTask);
+                    try
+                    {
+                        StartupTime = preciseStartupTimeFunc();
+                    }
+                    catch (Exception e)
+                    {
+                        options.LogError(e, "Failure getting precise App startup time.");
+                        //Ignore any exception and stay with the less-precise DateTime.UtcNow value.
+                    }
+                }).ContinueWith(_ =>
+                    // Let the actual task get collected
+                    PreciseAppStartupTask = Task.CompletedTask);
+            }
 #endif
         }
     }

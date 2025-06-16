@@ -1,5 +1,6 @@
 using System.IO.Abstractions.TestingHelpers;
 using Sentry.Internal.Http;
+using Sentry.Ben.BlockingDetector;
 using BackgroundWorker = Sentry.Internal.BackgroundWorker;
 
 namespace Sentry.Tests.Internals;
@@ -520,5 +521,39 @@ public class BackgroundWorkerTests
         // Assert
         _fixture.Logger.Received(1)
             .Log(SentryLevel.Debug, "CachingTransport received request to flush the cache.");
+    }
+
+    [Fact]
+    public void Ctor_SuppressesBlockingDetection_WhenCreatingTask()
+    {
+        // Arrange
+        var listenerState = Substitute.For<ITaskBlockingListenerState>();
+        var monitor = Substitute.For<IBlockingMonitor>();
+        var context = new DetectBlockingSynchronizationContext(monitor);
+        
+        // Mock the current sync context to our test context
+        SynchronizationContext.SetSynchronizationContext(context);
+        
+        // Mock the TaskBlockingListener to return our test state
+        var originalDefaultState = TaskBlockingListener.DefaultState;
+        TaskBlockingListener.DefaultState = listenerState;
+        
+        try
+        {
+            // Act
+            using var sut = _fixture.GetSut();
+            
+            // Assert
+            // Verify that suppression was called when creating the task
+            listenerState.Received(1).Suppress();
+            // Verify that restoration was called when exiting the using block
+            listenerState.Received(1).Restore();
+        }
+        finally
+        {
+            // Cleanup
+            TaskBlockingListener.DefaultState = originalDefaultState;
+            SynchronizationContext.SetSynchronizationContext(null);
+        }
     }
 }
