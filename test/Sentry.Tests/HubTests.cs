@@ -1,6 +1,7 @@
 using System.IO.Abstractions.TestingHelpers;
 using Sentry.Internal.Http;
 using Sentry.Tests.Internals;
+using Sentry.Protocol;
 
 namespace Sentry.Tests;
 
@@ -1742,7 +1743,7 @@ public partial class HubTests
             hub.Dispose();
         }
 
-        var feedback = new UserFeedback(SentryId.Create(), "foo", "bar", "baz");
+        var feedback = new UserFeedback(SentryId.Create(), "foo", "bar@example.com", "baz");
 
         // Act
         hub.CaptureUserFeedback(feedback);
@@ -1890,6 +1891,102 @@ public partial class HubTests
     }
 
     private static Scope GetCurrentScope(Hub hub) => hub.ScopeManager.GetCurrent().Key;
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("test@example.com")]
+    [InlineData("user.name@domain.com")]
+    [InlineData("user+tag@example.com")]
+    public void CaptureFeedback_ValidEmail_FeedbackRegistered(string email)
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        var feedback = new SentryFeedback("Test feedback", email);
+
+        // Act
+        hub.CaptureFeedback(feedback);
+
+        // Assert
+        _fixture.Client.Received(1).CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
+    }
+
+    [Theory]
+    [InlineData("invalid-email")]
+    [InlineData("missing@domain")]
+    [InlineData("@missing-local.com")]
+    [InlineData("spaces in@email.com")]
+    public void CaptureFeedback_InvalidEmail_FeedbackDropped(string email)
+    {
+        // Arrange
+        _fixture.Options.Debug = true;
+        _fixture.Options.DiagnosticLogger = Substitute.For<IDiagnosticLogger>();
+        _fixture.Options.DiagnosticLogger!.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        var hub = _fixture.GetSut();
+        var feedback = new SentryFeedback("Test feedback", email);
+
+        // Act
+        hub.CaptureFeedback(feedback);
+
+        // Assert
+        _fixture.Client.DidNotReceive().CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
+        _fixture.Options.DiagnosticLogger.Received(1).Log(
+            SentryLevel.Warning,
+            Arg.Is<string>(s => s.Contains("invalid email format")),
+            null,
+            Arg.Any<object[]>());
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("test@example.com")]
+    [InlineData("user.name@domain.com")]
+    [InlineData("user+tag@example.com")]
+    public void CaptureUserFeedback_ValidEmail_FeedbackRegistered(string email)
+    {
+#pragma warning disable CS0618 // Type or member is obsolete
+        // Arrange
+        var hub = _fixture.GetSut();
+        var feedback = new UserFeedback(SentryId.Create(), "Test name", email, "Test comment");
+
+        // Act
+        hub.CaptureUserFeedback(feedback);
+
+        // Assert
+        _fixture.Client.Received(1).CaptureUserFeedback(Arg.Any<UserFeedback>());
+#pragma warning restore CS0618 // Type or member is obsolete
+    }
+
+    [Theory]
+    [InlineData("invalid-email")]
+    [InlineData("missing@domain")]
+    [InlineData("@missing-local.com")]
+    [InlineData("spaces in@email.com")]
+    public void CaptureUserFeedback_InvalidEmail_FeedbackDropped(string email)
+    {
+#pragma warning disable CS0618 // Type or member is obsolete
+        // Arrange
+        _fixture.Options.Debug = true;
+        _fixture.Options.DiagnosticLogger = Substitute.For<IDiagnosticLogger>();
+        _fixture.Options.DiagnosticLogger!.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        var hub = _fixture.GetSut();
+        var feedback = new UserFeedback(SentryId.Create(), "Test name", email, "Test comment");
+
+        // Act
+        hub.CaptureUserFeedback(feedback);
+
+        // Assert
+        _fixture.Client.DidNotReceive().CaptureUserFeedback(Arg.Any<UserFeedback>());
+        _fixture.Options.DiagnosticLogger.Received(1).Log(
+            SentryLevel.Warning,
+            Arg.Is<string>(s => s.Contains("invalid email format")),
+            null,
+            Arg.Any<object[]>());
+#pragma warning restore CS0618 // Type or member is obsolete
+    }
 }
 
 #if NET6_0_OR_GREATER
