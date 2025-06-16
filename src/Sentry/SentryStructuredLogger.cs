@@ -14,7 +14,7 @@ public abstract class SentryStructuredLogger
     {
         return options.Experimental.EnableLogs
             ? new DefaultSentryStructuredLogger(hub, scopeManager, options, clock)
-            : DisabledSentryStructuredLogger.Instance;
+            : NoOpSentryStructuredLogger.Instance;
     }
 
     private protected SentryStructuredLogger()

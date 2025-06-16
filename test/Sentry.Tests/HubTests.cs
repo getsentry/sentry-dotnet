@@ -1435,7 +1435,7 @@ public partial class HubTests
                 envelope.Items.Single(item => item.Header["type"].Equals("log")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
             )
         );
-        hub.Logger.Should().BeOfType<DisabledSentryStructuredLogger>();
+        hub.Logger.Should().BeOfType<NoOpSentryStructuredLogger>();
     }
 
     [Fact]
@@ -1468,7 +1468,7 @@ public partial class HubTests
         _fixture.Options.Experimental.EnableLogs = true;
 
         // Assert
-        hub.Logger.Should().BeOfType<DisabledSentryStructuredLogger>();
+        hub.Logger.Should().BeOfType<NoOpSentryStructuredLogger>();
     }
 
     [Fact]

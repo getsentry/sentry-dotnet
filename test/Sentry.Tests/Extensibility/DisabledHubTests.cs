@@ -38,5 +38,5 @@ public class DisabledHubTests
 
     [Fact]
     public void Logger_IsDisabled()
-        => Assert.IsType<DisabledSentryStructuredLogger>(DisabledHub.Instance.Logger);
+        => Assert.IsType<NoOpSentryStructuredLogger>(DisabledHub.Instance.Logger);
 }

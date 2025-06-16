@@ -78,7 +78,7 @@ public class SentryStructuredLoggerTests
         var instance = _fixture.GetSut();
         var other = _fixture.GetSut();
 
-        instance.Should().BeOfType<DisabledSentryStructuredLogger>();
+        instance.Should().BeOfType<NoOpSentryStructuredLogger>();
         instance.Should().BeSameAs(other);
     }
 
