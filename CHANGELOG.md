@@ -6,6 +6,7 @@
 
 - Added non-allocating `ConfigureScope` and `ConfigureScopeAsync` overloads ([#4244](https://github.com/getsentry/sentry-dotnet/pull/4244))
 - Add .NET MAUI `AutomationId` element information to breadcrumbs ([#4248](https://github.com/getsentry/sentry-dotnet/pull/4248))
+- The HTTP Response Status Code for spans instrumented using OpenTelemetry is now searchable ([#4283](https://github.com/getsentry/sentry-dotnet/pull/4283))
 
 ### Fixes
 
