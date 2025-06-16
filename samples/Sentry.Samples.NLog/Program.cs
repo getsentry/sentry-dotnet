@@ -10,10 +10,6 @@ public static class Program
 {
     // Modify the configuration file NLog.config to affect 'UsingNLogConfigFile'
 
-    // DSN used by the example: 'UsingCodeConfiguration'.
-    // #### ADD YOUR DSN HERE:
-    private static readonly string DsnSample = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
-
     private static void Main()
     {
         try
@@ -106,10 +102,12 @@ public static class Program
         _ = config
             .AddSentry(options =>
             {
-                // If DSN is not set, the SDK will look for an environment variable called SENTRY_DSN. If
-                // nothing is found, SDK is disabled.
-                options.Dsn = DsnSample;
-
+#if !SENTRY_DSN_DEFINED_IN_ENV
+                // A DSN is required. You can set here in code, in the SENTRY_DSN environment variable or in the
+                // NLog.config file.
+                // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+                options.Dsn = SamplesShared.Dsn;
+#endif
                 options.Layout = "${message}";
                 options.BreadcrumbLayout = "${logger}: ${message}"; // Optionally specify a separate format for breadcrumbs
 

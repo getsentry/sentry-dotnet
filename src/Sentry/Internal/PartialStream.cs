@@ -60,7 +60,8 @@ internal class PartialStream : Stream
             _innerStream.Position = innerPosition;
         }
 
-        var read = await _innerStream.ReadAsync(buffer, offset, actualCount, cancellationToken)
+        // See https://github.com/getsentry/sentry-dotnet/issues/3101
+        var read = await _innerStream.ReadAsync(buffer.AsMemory(offset, actualCount), cancellationToken)
             .ConfigureAwait(false);
 
         if (_length != null)

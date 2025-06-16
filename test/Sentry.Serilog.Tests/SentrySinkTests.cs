@@ -14,7 +14,7 @@ public class SentrySinkTests
         {
             Hub.IsEnabled.Returns(true);
             HubAccessor = () => Hub;
-            Hub.ConfigureScope(Arg.Invoke(Scope));
+            Hub.SubstituteConfigureScope(Scope);
         }
 
         public SentrySink GetSut()

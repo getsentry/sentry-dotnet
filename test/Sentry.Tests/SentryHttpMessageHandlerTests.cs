@@ -214,8 +214,7 @@ public class SentryHttpMessageHandlerTests
         // Arrange
         var scope = new Scope();
         var hub = Substitute.For<IHub>();
-        hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-            .Do(c => c.Arg<Action<Scope>>()(scope));
+        hub.SubstituteConfigureScope(scope);
 
         var url = "https://localhost/";
 
@@ -496,8 +495,7 @@ public class SentryHttpMessageHandlerTests
         // Arrange
         var scope = new Scope();
         var hub = Substitute.For<IHub>();
-        hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-            .Do(c => c.Arg<Action<Scope>>()(scope));
+        hub.SubstituteConfigureScope(scope);
 
         var url = "https://localhost/";
 

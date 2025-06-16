@@ -258,7 +258,9 @@ namespace Sentry
     {
         void BindClient(Sentry.ISentryClient client);
         void ConfigureScope(System.Action<Sentry.Scope> configureScope);
+        void ConfigureScope<TArg>(System.Action<Sentry.Scope, TArg> configureScope, TArg arg);
         System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope);
+        System.Threading.Tasks.Task ConfigureScopeAsync<TArg>(System.Func<Sentry.Scope, TArg, System.Threading.Tasks.Task> configureScope, TArg arg);
         System.IDisposable PushScope();
         System.IDisposable PushScope<TState>(TState state);
         void SetTag(string key, string value);
@@ -906,7 +908,9 @@ namespace Sentry
         public static void CauseCrash(Sentry.CrashType crashType) { }
         public static void Close() { }
         public static void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
+        public static void ConfigureScope<TArg>(System.Action<Sentry.Scope, TArg> configureScope, TArg arg) { }
         public static System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
+        public static System.Threading.Tasks.Task ConfigureScopeAsync<TArg>(System.Func<Sentry.Scope, TArg, System.Threading.Tasks.Task> configureScope, TArg arg) { }
         public static Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null) { }
         public static Sentry.TransactionContext ContinueTrace(string? traceHeader, string? baggageHeader, string? name = null, string? operation = null) { }
         public static void EndSession(Sentry.SessionEndStatus status = 0) { }
@@ -1443,7 +1447,9 @@ namespace Sentry.Extensibility
         [System.Obsolete("Use CaptureFeedback instead.")]
         public void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
         public void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
+        public void ConfigureScope<TArg>(System.Action<Sentry.Scope, TArg> configureScope, TArg arg) { }
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
+        public System.Threading.Tasks.Task ConfigureScopeAsync<TArg>(System.Func<Sentry.Scope, TArg, System.Threading.Tasks.Task> configureScope, TArg arg) { }
         public Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null) { }
         public Sentry.TransactionContext ContinueTrace(string? traceHeader, string? baggageHeader, string? name = null, string? operation = null) { }
         public void Dispose() { }
@@ -1494,7 +1500,9 @@ namespace Sentry.Extensibility
         [System.Obsolete("Use CaptureFeedback instead.")]
         public void CaptureUserFeedback(Sentry.UserFeedback sentryUserFeedback) { }
         public void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
+        public void ConfigureScope<TArg>(System.Action<Sentry.Scope, TArg> configureScope, TArg arg) { }
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
+        public System.Threading.Tasks.Task ConfigureScopeAsync<TArg>(System.Func<Sentry.Scope, TArg, System.Threading.Tasks.Task> configureScope, TArg arg) { }
         public Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null) { }
         public Sentry.TransactionContext ContinueTrace(string? traceHeader, string? baggageHeader, string? name = null, string? operation = null) { }
         public void EndSession(Sentry.SessionEndStatus status = 0) { }

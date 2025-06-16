@@ -101,6 +101,18 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    public void ConfigureScope<TArg>(Action<Scope, TArg> configureScope, TArg arg)
+    {
+        try
+        {
+            ScopeManager.ConfigureScope(configureScope, arg);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to ConfigureScope<TArg>");
+        }
+    }
+
     public async Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
     {
         try
@@ -110,6 +122,18 @@ internal class Hub : IHub, IDisposable
         catch (Exception e)
         {
             _options.LogError(e, "Failure to ConfigureScopeAsync");
+        }
+    }
+
+    public async Task ConfigureScopeAsync<TArg>(Func<Scope, TArg, Task> configureScope, TArg arg)
+    {
+        try
+        {
+            await ScopeManager.ConfigureScopeAsync(configureScope, arg).ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to ConfigureScopeAsync<TArg>");
         }
     }
 
@@ -274,7 +298,7 @@ internal class Hub : IHub, IDisposable
         string? operation = null)
     {
         var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader, _replaySession);
-        ConfigureScope(scope => scope.SetPropagationContext(propagationContext));
+        ConfigureScope(static (scope, propagationContext) => scope.SetPropagationContext(propagationContext), propagationContext);
 
         return new TransactionContext(
             name: name ?? string.Empty,
