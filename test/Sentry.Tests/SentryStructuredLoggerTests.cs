@@ -59,6 +59,30 @@ public class SentryStructuredLoggerTests
         _fixture = new Fixture();
     }
 
+    [Fact]
+    public void Create_Enabled_NewDefaultInstance()
+    {
+        _fixture.Options.Experimental.EnableLogs = true;
+
+        var instance = SentryStructuredLogger.Create(_fixture.Hub, _fixture.ScopeManager, _fixture.Options, _fixture.Clock);
+        var other = SentryStructuredLogger.Create(_fixture.Hub, _fixture.ScopeManager, _fixture.Options, _fixture.Clock);
+
+        instance.Should().BeOfType<DefaultSentryStructuredLogger>();
+        instance.Should().NotBeSameAs(other);
+    }
+
+    [Fact]
+    public void Create_Disabled_CachedDisabledInstance()
+    {
+        _fixture.Options.Experimental.EnableLogs.Should().BeFalse();
+
+        var instance = SentryStructuredLogger.Create(_fixture.Hub, _fixture.ScopeManager, _fixture.Options, _fixture.Clock);
+        var other = SentryStructuredLogger.Create(_fixture.Hub, _fixture.ScopeManager, _fixture.Options, _fixture.Clock);
+
+        instance.Should().BeOfType<DisabledSentryStructuredLogger>();
+        instance.Should().BeSameAs(other);
+    }
+
     [SkippableTheory(typeof(MissingMethodException))] //throws in .NETFramework on non-Windows for System.Collections.Immutable.ImmutableArray`1
     [InlineData(SentryLogLevel.Trace)]
     [InlineData(SentryLogLevel.Debug)]

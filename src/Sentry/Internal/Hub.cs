@@ -66,7 +66,7 @@ internal class Hub : IHub, IDisposable
             PushScope();
         }
 
-        Logger = new DefaultSentryStructuredLogger(this, ScopeManager, options, _clock);
+        Logger = SentryStructuredLogger.Create(this, ScopeManager, options, _clock);
 
 #if MEMORY_DUMP_SUPPORTED
         if (options.HeapDumpOptions is not null)

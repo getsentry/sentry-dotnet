@@ -1435,6 +1435,7 @@ public partial class HubTests
                 envelope.Items.Single(item => item.Header["type"].Equals("log")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
             )
         );
+        hub.Logger.Should().BeOfType<DisabledSentryStructuredLogger>();
     }
 
     [Fact]
@@ -1453,6 +1454,7 @@ public partial class HubTests
                 envelope.Items.Single(item => item.Header["type"].Equals("log")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
             )
         );
+        hub.Logger.Should().BeOfType<DefaultSentryStructuredLogger>();
     }
 
     [Fact]
