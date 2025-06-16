@@ -1930,12 +1930,13 @@ public partial class HubTests
         hub.CaptureFeedback(feedback);
 
         // Assert
-        _fixture.Client.DidNotReceive().CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
         _fixture.Options.DiagnosticLogger.Received(1).Log(
             SentryLevel.Warning,
             Arg.Is<string>(s => s.Contains("invalid email format")),
             null,
             Arg.Any<object[]>());
+        _fixture.Client.Received(1).CaptureFeedback(Arg.Is<SentryFeedback>(f => f.ContactEmail.IsNull()),
+            Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
     [Theory]
@@ -1979,12 +1980,12 @@ public partial class HubTests
         hub.CaptureUserFeedback(feedback);
 
         // Assert
-        _fixture.Client.DidNotReceive().CaptureUserFeedback(Arg.Any<UserFeedback>());
         _fixture.Options.DiagnosticLogger.Received(1).Log(
             SentryLevel.Warning,
             Arg.Is<string>(s => s.Contains("invalid email format")),
             null,
             Arg.Any<object[]>());
+        _fixture.Client.Received(1).CaptureUserFeedback(Arg.Is<UserFeedback>(f => f.Email.IsNull()));
 #pragma warning restore CS0618 // Type or member is obsolete
     }
 }

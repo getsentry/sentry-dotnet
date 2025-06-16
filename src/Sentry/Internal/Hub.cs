@@ -553,12 +553,6 @@ internal class Hub : IHub, IDisposable
 
         try
         {
-            if (!string.IsNullOrWhiteSpace(feedback.ContactEmail) && !EmailValidator.IsValidEmail(feedback.ContactEmail))
-            {
-                _options.LogWarning("Feedback dropped due to invalid email format: '{0}'", feedback.ContactEmail);
-                return;
-            }
-
             var clonedScope = CurrentScope.Clone();
             configureScope(clonedScope);
 
@@ -581,8 +575,8 @@ internal class Hub : IHub, IDisposable
         {
             if (!string.IsNullOrWhiteSpace(feedback.ContactEmail) && !EmailValidator.IsValidEmail(feedback.ContactEmail))
             {
-                _options.LogWarning("Feedback dropped due to invalid email format: '{0}'", feedback.ContactEmail);
-                return;
+                _options.LogWarning("Feedback email scrubbed due to invalid email format: '{0}'", feedback.ContactEmail);
+                feedback.ContactEmail = null;
             }
 
             scope ??= CurrentScope;
@@ -634,8 +628,12 @@ internal class Hub : IHub, IDisposable
         {
             if (!string.IsNullOrWhiteSpace(userFeedback.Email) && !EmailValidator.IsValidEmail(userFeedback.Email))
             {
-                _options.LogWarning("User feedback dropped due to invalid email format: '{0}'", userFeedback.Email);
-                return;
+                _options.LogWarning("Feedback email scrubbed due to invalid email format: '{0}'", userFeedback.Email);
+                userFeedback = new UserFeedback(
+                    userFeedback.EventId,
+                    userFeedback.Name,
+                    null, // Scrubbed email
+                    userFeedback.Comments);
             }
 
             CurrentClient.CaptureUserFeedback(userFeedback);
