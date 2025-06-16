@@ -1,8 +1,8 @@
+using Sentry.Ben.BlockingDetector;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 using Sentry.Internal.Http;
 using Sentry.Protocol.Envelopes;
-using Sentry.Ben.BlockingDetector;
 
 namespace Sentry.Internal;
 

@@ -1,8 +1,8 @@
 using System.Text.Json;
+using Sentry.Ben.BlockingDetector;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
-using Sentry.Ben.BlockingDetector;
 
 namespace Sentry.Internal.Http;
 

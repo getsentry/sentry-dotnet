@@ -1,6 +1,6 @@
 using System.IO.Abstractions.TestingHelpers;
-using Sentry.Internal.Http;
 using Sentry.Ben.BlockingDetector;
+using Sentry.Internal.Http;
 using BackgroundWorker = Sentry.Internal.BackgroundWorker;
 
 namespace Sentry.Tests.Internals;
@@ -530,19 +530,19 @@ public class BackgroundWorkerTests
         var listenerState = Substitute.For<ITaskBlockingListenerState>();
         var monitor = Substitute.For<IBlockingMonitor>();
         var context = new DetectBlockingSynchronizationContext(monitor);
-        
+
         // Mock the current sync context to our test context
         SynchronizationContext.SetSynchronizationContext(context);
-        
+
         // Mock the TaskBlockingListener to return our test state
         var originalDefaultState = TaskBlockingListener.DefaultState;
         TaskBlockingListener.DefaultState = listenerState;
-        
+
         try
         {
             // Act
             using var sut = _fixture.GetSut();
-            
+
             // Assert
             // Verify that suppression was called when creating the task
             listenerState.Received(1).Suppress();

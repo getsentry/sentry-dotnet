@@ -1,6 +1,6 @@
+using Sentry.Ben.BlockingDetector;
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Ben.BlockingDetector;
 
 namespace Sentry.Profiling;
 

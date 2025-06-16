@@ -1,5 +1,5 @@
-using Sentry.Extensibility;
 using Sentry.Ben.BlockingDetector;
+using Sentry.Extensibility;
 
 namespace Sentry.Internal;
 
