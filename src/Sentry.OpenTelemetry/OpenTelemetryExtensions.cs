@@ -7,18 +7,21 @@ internal static class OpenTelemetryExtensions
 {
     public static SpanId AsSentrySpanId(this ActivitySpanId id) => SpanId.Parse(id.ToHexString());
 
-    public static ActivitySpanId AsActivitySpanId(this SpanId id) => ActivitySpanId.CreateFromString(id.ToString().AsSpan());
+    public static ActivitySpanId AsActivitySpanId(this SpanId id) =>
+        ActivitySpanId.CreateFromString(id.ToString().AsSpan());
 
     public static SentryId AsSentryId(this ActivityTraceId id) => SentryId.Parse(id.ToHexString());
 
-    public static ActivityTraceId AsActivityTraceId(this SentryId id) => ActivityTraceId.CreateFromString(id.ToString().AsSpan());
+    public static ActivityTraceId AsActivityTraceId(this SentryId id) =>
+        ActivityTraceId.CreateFromString(id.ToString().AsSpan());
 
-    public static BaggageHeader AsBaggageHeader(this IEnumerable<KeyValuePair<string, string?>> baggage, bool useSentryPrefix = false) =>
+    public static BaggageHeader AsBaggageHeader(this IEnumerable<KeyValuePair<string, string?>> baggage,
+        bool useSentryPrefix = false) =>
         BaggageHeader.Create(
             baggage.Where(member => member.Value != null)
-                        .Select(kvp => (KeyValuePair<string, string>)kvp!),
+                .Select(kvp => (KeyValuePair<string, string>)kvp!),
             useSentryPrefix
-            );
+        );
 
     /// <summary>
     /// The names that OpenTelemetry gives to attributes, by convention, have changed over time so we often need to
@@ -40,6 +43,7 @@ internal static class OpenTelemetryExtensions
                 return value;
             }
         }
+
         return default;
     }
 
@@ -47,11 +51,21 @@ internal static class OpenTelemetryExtensions
         attributes.GetFirstMatchingAttribute<string>(
             OtelSemanticConventions.AttributeHttpRequestMethod,
             OtelSemanticConventions.AttributeHttpMethod // Fallback pre-1.5.0
-            );
+        );
 
     public static string? UrlFullAttribute(this IDictionary<string, object?> attributes) =>
         attributes.GetFirstMatchingAttribute<string>(
             OtelSemanticConventions.AttributeUrlFull,
             OtelSemanticConventions.AttributeHttpUrl // Fallback pre-1.5.0
-            );
+        );
+
+    public static short? HttpResponseStatusCodeAttribute(this IDictionary<string, object?> attributes)
+    {
+        var statusCode = attributes.GetFirstMatchingAttribute<int?>(
+            OtelSemanticConventions.AttributeHttpResponseStatusCode
+        );
+        return statusCode is >= short.MinValue and <= short.MaxValue
+            ? (short)statusCode.Value
+            : null;
+    }
 }
