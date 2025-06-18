@@ -74,7 +74,7 @@ public class SentryStructuredLoggerTests
         instance.Should().BeSameAs(other);
     }
 
-    [SkippableTheory(typeof(MissingMethodException))] //throws in .NETFramework on non-Windows for System.Collections.Immutable.ImmutableArray`1
+    [Theory]
     [InlineData(SentryLogLevel.Trace)]
     [InlineData(SentryLogLevel.Debug)]
     [InlineData(SentryLogLevel.Info)]
@@ -112,7 +112,7 @@ public class SentryStructuredLoggerTests
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
     }
 
-    [SkippableFact(typeof(MissingMethodException))] //throws in .NETFramework on non-Windows for System.Collections.Immutable.ImmutableArray`1
+    [Fact]
     public void Log_WithoutTraceHeader_CapturesEnvelope()
     {
         _fixture.WithoutTraceHeader();
@@ -128,7 +128,7 @@ public class SentryStructuredLoggerTests
         envelope.AssertEnvelope(_fixture, SentryLogLevel.Trace);
     }
 
-    [SkippableFact(typeof(MissingMethodException))] //throws in .NETFramework on non-Windows for System.Collections.Immutable.ImmutableArray`1
+    [Fact]
     public void Log_WithBeforeSendLog_InvokesCallback()
     {
         var invocations = 0;

@@ -96,7 +96,7 @@ public class SentryLogTests
         """);
     }
 
-    [SkippableFact(typeof(MissingMethodException))] //throws in .NETFramework on non-Windows for System.Collections.Immutable.ImmutableArray`1
+    [Fact]
     public void WriteTo_EnvelopeItem_MaximalSerializedSentryLog()
     {
         var options = new SentryOptions
