@@ -25,5 +25,5 @@ internal static partial class EmailValidator
     /// </summary>
     /// <param name="email">The email address to validate.</param>
     /// <returns>True if the email is valid, false otherwise.</returns>
-    public static bool IsValidEmail(string email) =>  Email.IsMatch(email);
+    public static bool IsValidEmail(string email) => Email.IsMatch(email);
 }
