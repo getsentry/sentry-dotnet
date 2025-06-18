@@ -260,5 +260,5 @@ public class DisabledHub : IHub, IDisposable
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
-    public SentryStructuredLogger Logger => NoOpSentryStructuredLogger.Instance;
+    public SentryStructuredLogger Logger => DisabledSentryStructuredLogger.Instance;
 }
