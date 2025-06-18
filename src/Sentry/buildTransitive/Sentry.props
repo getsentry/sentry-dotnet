@@ -3,7 +3,7 @@
   <!-- Helpful properties used elsewhere -->
   <PropertyGroup Condition="'$(TargetFramework)' != ''">
     <_SentryTargetFrameworkVersion>$([MSBuild]::GetTargetFrameworkVersion($(TargetFramework)))</_SentryTargetFrameworkVersion>
-    <IsNet8OrGreater>$([MSBuild]::VersionGreaterThanOrEquals($(_SentryTargetFrameworkVersion), 8.0))</IsNet8OrGreater>
-    <IsNet9OrGreater>$([MSBuild]::VersionGreaterThanOrEquals($(_SentryTargetFrameworkVersion), 9.0))</IsNet9OrGreater>
+    <_SentryIsNet8OrGreater>$([MSBuild]::VersionGreaterThanOrEquals($(_SentryTargetFrameworkVersion), 8.0))</_SentryIsNet8OrGreater>
+    <_SentryIsNet9OrGreater>$([MSBuild]::VersionGreaterThanOrEquals($(_SentryTargetFrameworkVersion), 9.0))</_SentryIsNet9OrGreater>
   </PropertyGroup>
 </Project>
