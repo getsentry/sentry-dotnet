@@ -21,15 +21,3 @@ public interface IMauiElementEventBinder
     /// <param name="element"></param>
     public void UnBind(VisualElement element);
 }
-
-/// <summary>
-/// Breadcrumb arguments
-/// </summary>
-/// <param name="Sender"></param>
-/// <param name="EventName"></param>
-/// <param name="ExtraData"></param>
-public record BreadcrumbEvent(
-    object? Sender,
-    string EventName,
-    params IEnumerable<(string Key, string Value)>[] ExtraData
-);
