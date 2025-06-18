@@ -20,7 +20,7 @@
 
   <PropertyGroup>
     <!-- net8.0 or greater -->
-    <FrameworkSupportsNative Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0')) and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">true</FrameworkSupportsNative>
+    <FrameworkSupportsNative Condition="'$(_SentryIsNet8OrGreater)' == 'true' and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">true</FrameworkSupportsNative>
     <!-- Make it opt-out -->
     <FrameworkSupportsNative Condition="'$(SentryNative)' == 'false' or '$(SentryNative)' == 'disable'">false</FrameworkSupportsNative>
   </PropertyGroup>
