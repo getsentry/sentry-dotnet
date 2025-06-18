@@ -573,6 +573,12 @@ internal class Hub : IHub, IDisposable
 
         try
         {
+            if (!string.IsNullOrWhiteSpace(feedback.ContactEmail) && !EmailValidator.IsValidEmail(feedback.ContactEmail))
+            {
+                _options.LogWarning("Feedback email scrubbed due to invalid email format: '{0}'", feedback.ContactEmail);
+                feedback.ContactEmail = null;
+            }
+
             scope ??= CurrentScope;
             CurrentClient.CaptureFeedback(feedback, scope, hint);
         }
@@ -620,6 +626,16 @@ internal class Hub : IHub, IDisposable
 
         try
         {
+            if (!string.IsNullOrWhiteSpace(userFeedback.Email) && !EmailValidator.IsValidEmail(userFeedback.Email))
+            {
+                _options.LogWarning("Feedback email scrubbed due to invalid email format: '{0}'", userFeedback.Email);
+                userFeedback = new UserFeedback(
+                    userFeedback.EventId,
+                    userFeedback.Name,
+                    null, // Scrubbed email
+                    userFeedback.Comments);
+            }
+
             CurrentClient.CaptureUserFeedback(userFeedback);
         }
         catch (Exception e)
