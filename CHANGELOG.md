@@ -11,7 +11,7 @@
 
 - The HTTP instrumentation uses the span created for the outgoing request in the sentry-trace header, fixing the parent-child relationship between client and server ([#4264](https://github.com/getsentry/sentry-dotnet/pull/4264))
 - InvalidOperationException sending attachments on Android with LLVM enabled ([#4276](https://github.com/getsentry/sentry-dotnet/pull/4276))
-- When CaptureFeedback methods are called with invalid email addresses, a warning is now logged if Debug mode is enabled (explaining why the feedback has been dropped) ([#4284](https://github.com/getsentry/sentry-dotnet/pull/4284))
+- When CaptureFeedback methods are called with invalid email addresses, the email address will be removed and, if Debug mode is enabled, a warning will be logged. This is done to avoid losing the Feedback altogether (Sentry would reject Feedback that has an invalid email address) ([#4284](https://github.com/getsentry/sentry-dotnet/pull/4284))
 
 ### Dependencies
 
