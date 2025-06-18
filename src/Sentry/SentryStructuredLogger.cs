@@ -10,10 +10,10 @@ namespace Sentry;
 [Experimental(DiagnosticId.ExperimentalFeature)]
 public abstract class SentryStructuredLogger
 {
-    internal static SentryStructuredLogger Create(IHub hub, IInternalScopeManager scopeManager, SentryOptions options, ISystemClock clock)
+    internal static SentryStructuredLogger Create(IHub hub, SentryOptions options, ISystemClock clock)
     {
         return options.Experimental.EnableLogs
-            ? new DefaultSentryStructuredLogger(hub, scopeManager, options, clock)
+            ? new DefaultSentryStructuredLogger(hub, options, clock)
             : DisabledSentryStructuredLogger.Instance;
     }
 

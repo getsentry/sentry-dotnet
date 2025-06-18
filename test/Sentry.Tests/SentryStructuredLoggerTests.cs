@@ -13,42 +13,34 @@ public class SentryStructuredLoggerTests
         {
             DiagnosticLogger = new InMemoryDiagnosticLogger();
             Hub = Substitute.For<IHub>();
-            ScopeManager = Substitute.For<IInternalScopeManager>();
             Options = new SentryOptions
             {
                 Debug = true,
                 DiagnosticLogger = DiagnosticLogger,
             };
             Clock = new MockClock(new DateTimeOffset(2025, 04, 22, 14, 51, 00, TimeSpan.Zero));
-            Span = Substitute.For<ISpan>();
             TraceId = SentryId.Create();
             ParentSpanId = SpanId.Create();
 
-            Hub.GetSpan().Returns(Span);
-            Span.TraceId.Returns(TraceId);
-            Span.ParentSpanId.Returns(ParentSpanId);
+            var traceHeader = new SentryTraceHeader(TraceId, ParentSpanId.Value, null);
+            Hub.GetTraceHeader().Returns(traceHeader);
         }
 
         public InMemoryDiagnosticLogger DiagnosticLogger { get; }
         public IHub Hub { get; }
-        public IInternalScopeManager ScopeManager { get; }
         public SentryOptions Options { get; }
         public ISystemClock Clock { get; }
-        public ISpan Span { get; }
-        public SentryId TraceId { get; }
-        public SpanId? ParentSpanId { get; }
+        public SentryId TraceId { get; private set; }
+        public SpanId? ParentSpanId { get; private set; }
 
-        public void UseScopeManager()
+        public void WithoutTraceHeader()
         {
-            Hub.GetSpan().Returns((ISpan?)null);
-
-            var propagationContext = new SentryPropagationContext(TraceId, ParentSpanId!.Value);
-            var scope = new Scope(Options, propagationContext);
-            var scopeAndClient = new KeyValuePair<Scope, ISentryClient>(scope, null!);
-            ScopeManager.GetCurrent().Returns(scopeAndClient);
+            Hub.GetTraceHeader().Returns((SentryTraceHeader?)null);
+            TraceId = SentryId.Empty;
+            ParentSpanId = SpanId.Empty;
         }
 
-        public SentryStructuredLogger GetSut() => SentryStructuredLogger.Create(Hub, ScopeManager, Options, Clock);
+        public SentryStructuredLogger GetSut() => SentryStructuredLogger.Create(Hub, Options, Clock);
     }
 
     private readonly Fixture _fixture;
@@ -121,9 +113,9 @@ public class SentryStructuredLoggerTests
     }
 
     [SkippableFact(typeof(MissingMethodException))] //throws in .NETFramework on non-Windows for System.Collections.Immutable.ImmutableArray`1
-    public void Log_UseScopeManager_CapturesEnvelope()
+    public void Log_WithoutTraceHeader_CapturesEnvelope()
     {
-        _fixture.UseScopeManager();
+        _fixture.WithoutTraceHeader();
         _fixture.Options.Experimental.EnableLogs = true;
         var logger = _fixture.GetSut();
 
