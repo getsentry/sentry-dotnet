@@ -218,6 +218,43 @@ jobs:
         with:
           path: integration-test
 
+  native-aot-docker:
+    needs: build
+    name: Native AOT in Docker
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Fetch NuGet Packages
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ github.sha }}
+          path: src
+
+      - name: Setup Local Source
+        run: |
+          mkdir local-packages
+          cp src/Sentry/bin/Release/Sentry.*.nupkg local-packages/
+          dotnet nuget add source $PWD/local-packages --name local-packages
+          dotnet nuget list source
+
+      - name: Setup Project
+        run: |
+          dotnet new console --aot
+          dotnet add package Sentry --prerelease --source ./local-packages
+          cat > Program.cs <<'EOF'
+          SentrySdk.Init(options =>
+          {
+              options.Dsn = "https://foo@sentry.invalid/42";
+              options.Debug = true;
+          });
+          Console.WriteLine("Hello, Sentry!");
+          EOF
+
+      - name: Publish Project
+        run: dotnet publish -p:EnableSdkContainerSupport=true -t:PublishContainer
+
+      - name: Run Docker Container
+        run: docker run --rm helloworld
 
   trim-analysis:
     needs: build-sentry-native
