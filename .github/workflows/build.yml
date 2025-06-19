@@ -208,6 +208,8 @@ jobs:
           # Disable cone mode to avoid individual top-level files being checkout out
           # e.g. nuget.config, ...
           sparse-checkout-cone-mode: false
+          # Retain src/**/Release/*.(s)nupkg
+          clean: false
 
       - name: Fetch NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
