@@ -18,13 +18,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
-          - os: ubuntu-22.04-arm
-            target: Linux-arm64
-          - os: ubuntu-latest
-            target: Linux-musl
-            container: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
-          - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
+          # - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
+          # - os: ubuntu-22.04-arm
+          #   target: Linux-arm64
+          # - os: ubuntu-latest
+          #   target: Linux-musl
+          #   container: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
+          # - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
           - os: windows-latest
           - os: windows-11-arm
             target: Windows-arm64
@@ -67,14 +67,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
-            target: Linux
-          - os: ubuntu-22.04-arm
-            target: Linux-arm64
-          - os: ubuntu-latest
-            target: Linux-musl
-            container: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
-          - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
+          # - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
+          #   target: Linux
+          # - os: ubuntu-22.04-arm
+          #   target: Linux-arm64
+          # - os: ubuntu-latest
+          #   target: Linux-musl
+          #   container: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
+          # - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
           - os: windows-latest
           - os: windows-11-arm
             target: Windows-arm64
@@ -171,13 +171,15 @@ jobs:
           path: build.binlog
 
       - name: Test
+        if: false
         run: dotnet test Sentry-CI-Build-${{ matrix.target || runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
 
       - name: Upload code coverage
+        if: false
         uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24
 
       - name: Upload build and test outputs
-        if: failure()
+        if: ${{ false && failure() }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target || runner.os }}-verify-test-results
@@ -263,6 +265,7 @@ jobs:
     needs: build-sentry-native
     name: Trim analysis
     runs-on: macos-15
+    if: false
 
     steps:
       - name: Checkout

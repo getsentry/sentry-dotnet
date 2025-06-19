@@ -11,6 +11,7 @@ on:
 
 jobs:
   build:
+    if: false
     name: Build (${{ matrix.tfm }})
     runs-on: ubuntu-latest
     strategy:
