@@ -218,6 +218,11 @@ jobs:
           name: ${{ github.sha }}
           path: src
 
+      - name: Integration test
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
+        with:
+          path: integration-test
+
       - name: Dump MSBuild
         run: |
           dotnet msbuild console-app.csproj -pp:console-app.msbuild
@@ -228,11 +233,6 @@ jobs:
         with:
           name: ${{ matrix.target || runner.os }}-msbuild
           path: integration-test/console-app/console-app.msbuild
-
-      - name: Integration test
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
-        with:
-          path: integration-test
 
 
   trim-analysis:
