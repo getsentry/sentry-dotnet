@@ -197,14 +197,16 @@ jobs:
             src/**/Release/*.snupkg
 
       - name: Sparse checkout
-        if: env.CI_PUBLISHING_BUILD == 'true'
         uses: actions/checkout@v4
         with:
           # We only check out what is absolutely necessary to reduce a chance of local files impacting
-          # integration tests, e.g. Directory.Build.props, nuget.config, ...
+          # integration tests
           sparse-checkout: |
             integration-test
             .github
+          # Disable cone mode to avoid individual top-level files being checkout out
+          # e.g. Directory.Build.props, nuget.config, ...
+          sparse-checkout-cone-mode: false
 
       - name: Fetch NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
