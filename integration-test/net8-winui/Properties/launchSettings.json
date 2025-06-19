@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "winui-app": {
+      "commandName": "Project"
+    }
+  }
+}
