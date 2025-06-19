@@ -227,7 +227,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.target || runner.os }}-console-app.binlog
-          path: integration-test/console-app/console-app.binlog
+          path: integration-test/console-app.binlog
+          if-no-files-found: error
 
 
   trim-analysis:
