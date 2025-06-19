@@ -50,4 +50,13 @@
     <DirectPInvoke Include="sentry-native" />
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\osx\libsentry-native.a" />
   </ItemGroup>
+
+  <Target Name="_LinkSentryNative" BeforeTargets="LinkNative">
+    <Message Text="### SentryNative: '$(SentryNative)'" Importance="high" />
+    <Message Text="### TargetFramework: '$(TargetFramework)'" Importance="high" />
+    <Message Text="### _SentryIsNet8OrGreater: '$(_SentryIsNet8OrGreater)'" Importance="high" />
+    <Message Text="### _SentryIsNet9OrGreater: '$(_SentryIsNet9OrGreater)'" Importance="high" />
+    <Message Text="### OutputType: '$(OutputType)'" Importance="high" />
+    <Message Text="### FrameworkSupportsNative: '$(FrameworkSupportsNative)'" Importance="high" />
+  </Target>
 </Project>
