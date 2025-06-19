@@ -218,6 +218,17 @@ jobs:
           name: ${{ github.sha }}
           path: src
 
+      - name: Dump MSBuild
+        run: |
+          dotnet msbuild console-app.csproj -pp:console-app.msbuild
+        working-directory: integration-test/console-app
+
+      - name: Upload MSBuild
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target || runner.os }}-msbuild
+          path: integration-test/console-app/console-app.msbuild
+
       - name: Integration test
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         with:
