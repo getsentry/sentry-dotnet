@@ -45,7 +45,9 @@ jobs:
       - uses: actions/cache@v4
         id: cache
         with:
-          path: src/Sentry/Platforms/Native/sentry-native
+          path: |
+            src/Sentry/Platforms/Native/sentry-native
+            src/Sentry/Platforms/Native/runtimes
           key: sentry-native-${{ matrix.target || runner.os }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           enableCrossOsArchive: true
 
@@ -138,7 +140,9 @@ jobs:
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Windows' && runner.arch == 'X64') }}
         uses: actions/cache/restore@v4
         with:
-          path: src/Sentry/Platforms/Native/sentry-native
+          path: |
+            src/Sentry/Platforms/Native/sentry-native
+            src/Sentry/Platforms/Native/runtimes
           key: sentry-native-Windows-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
           enableCrossOsArchive: true
@@ -147,7 +151,9 @@ jobs:
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (runner.os == 'Windows' && runner.arch == 'ARM64') }}
         uses: actions/cache/restore@v4
         with:
-          path: src/Sentry/Platforms/Native/sentry-native
+          path: |
+            src/Sentry/Platforms/Native/sentry-native
+            src/Sentry/Platforms/Native/runtimes
           key: sentry-native-Windows-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
           enableCrossOsArchive: true

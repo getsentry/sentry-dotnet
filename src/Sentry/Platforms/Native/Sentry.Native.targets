@@ -6,6 +6,7 @@
     <SentryNativeBuildScript>../../scripts/build-sentry-native.ps1</SentryNativeBuildScript>
     <SentryNativeBuildInputs>../../.git/modules/modules/sentry-native/HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets;$(SentryNativeBuildScript)</SentryNativeBuildInputs>
     <SentryNativeOutputDirectory>$(MSBuildThisFileDirectory)sentry-native\</SentryNativeOutputDirectory>
+    <SentryNativeRuntimeDirectory>$(MSBuildThisFileDirectory)runtimes\</SentryNativeRuntimeDirectory>
     <!-- List of runtime identifiers: https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.NETCore.Platforms/src/runtime.json -->
     <NativeLibRelativePath-win-x64>win-x64</NativeLibRelativePath-win-x64>
     <SentryNativeOutputDirectory-win-x64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-win-x64)\</SentryNativeOutputDirectory-win-x64>
@@ -19,8 +20,14 @@
     <SentryNativeOutputDirectory-linux-arm64>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-linux-arm64)\</SentryNativeOutputDirectory-linux-arm64>
     <NativeLibRelativePath-osx>osx</NativeLibRelativePath-osx>
     <SentryNativeOutputDirectory-osx>$(SentryNativeOutputDirectory)$(NativeLibRelativePath-osx)\</SentryNativeOutputDirectory-osx>
-    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'win-x64'">$(SentryNativeOutputDirectory-win-x64)lib$(SentryNativeLibraryName).lib</SentryNativeBuildOutputs>
-    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'win-arm64'">$(SentryNativeOutputDirectory-win-arm64)lib$(SentryNativeLibraryName).lib</SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+      $(SentryNativeOutputDirectory-win-x64)lib$(SentryNativeLibraryName).lib
+      $(SentryNativeRuntimeDirectory)win-x64\native\lib$(SentryNativeLibraryName).dll
+    </SentryNativeBuildOutputs>
+    <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'win-arm64'">
+      $(SentryNativeOutputDirectory-win-arm64)lib$(SentryNativeLibraryName).lib
+      $(SentryNativeRuntimeDirectory)win-arm64\native\lib$(SentryNativeLibraryName).dll
+    </SentryNativeBuildOutputs>
     <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'linux-x64'">$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a</SentryNativeBuildOutputs>
     <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'linux-musl-x64'">$(SentryNativeOutputDirectory-linux-musl-x64)lib$(SentryNativeLibraryName).a</SentryNativeBuildOutputs>
     <SentryNativeBuildOutputs Condition="'$(RuntimeIdentifier)' == 'linux-arm64'">$(SentryNativeOutputDirectory-linux-arm64)lib$(SentryNativeLibraryName).a</SentryNativeBuildOutputs>
@@ -39,12 +46,26 @@
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-win-x64)</PackagePath>
     </None>
+    <None Include="$(SentryNativeRuntimeDirectory)win-x64\native\$(SentryNativeLibraryName).dll"
+          Condition="'$(NETCoreSdkRuntimeIdentifier)' == 'win-x64' and ('$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformIdentifier)' == 'windows')">
+      <Pack>true</Pack>
+      <PackagePath>\runtimes\win-x64\native</PackagePath>
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'win-arm64'">
     <None Include="$(SentryNativeOutputDirectory-win-arm64)$(SentryNativeLibraryName).lib">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-win-arm64)</PackagePath>
+    </None>
+    <None Include="$(SentryNativeRuntimeDirectory)win-arm64\native\$(SentryNativeLibraryName).dll"
+          Condition="'$(NETCoreSdkRuntimeIdentifier)' == 'win-arm64' and ('$(TargetPlatformIdentifier)' == '' or '$(TargetPlatformIdentifier)' == 'windows')">
+      <Pack>true</Pack>
+      <PackagePath>\runtimes\win-arm64\native</PackagePath>
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
@@ -79,7 +100,9 @@
   <Target Name="CleanNativeSDK" BeforeTargets="CoreClean" Condition="'$(_SentryIsNet8OrGreater)' == 'true'">
     <Message Text="Inside Custom Clean" Importance="high"/>
     <RemoveDir Directories="$(SentryNativeOutputDirectory)" />
+    <RemoveDir Directories="$(SentryNativeRuntimeDirectory)" />
     <RemoveDir Directories="$(SentryNativeSourceDirectory)build" />
+    <RemoveDir Directories="$(SentryNativeSourceDirectory)build-shared" />
   </Target>
 
   <!-- Build the Sentry Native SDK (this only runs on local machines because in CI we expect the SDK to be
