@@ -170,11 +170,11 @@ jobs:
           name: ${{ matrix.target || runner.os }}-build-logs
           path: build.binlog
 
-      # - name: Test
-      #   run: dotnet test Sentry-CI-Build-${{ matrix.target || runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
+      - name: Test
+        run: dotnet test Sentry-CI-Build-${{ matrix.target || runner.os }}.slnf -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
 
-      # - name: Upload code coverage
-      #   uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24
+      - name: Upload code coverage
+        uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24
 
       - name: Upload build and test outputs
         if: failure()
@@ -197,19 +197,14 @@ jobs:
             src/**/Release/*.snupkg
 
       - name: Sparse checkout
+        if: env.CI_PUBLISHING_BUILD == 'true'
         uses: actions/checkout@v4
         with:
           # We only check out what is absolutely necessary to reduce a chance of local files impacting
-          # integration tests
+          # integration tests, e.g. Directory.Build.props, nuget.config, ...
           sparse-checkout: |
-            Directory.Build.props
             integration-test
             .github
-          # Disable cone mode to avoid individual top-level files being checkout out
-          # e.g. nuget.config, ...
-          sparse-checkout-cone-mode: false
-          # Retain src/**/Release/*.(s)nupkg
-          clean: false
 
       - name: Fetch NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
@@ -222,13 +217,6 @@ jobs:
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         with:
           path: integration-test
-
-      - name: Upload MSBuild
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.target || runner.os }}-console-app.binlog
-          path: integration-test/console-app.binlog
-          if-no-files-found: error
 
 
   trim-analysis:
