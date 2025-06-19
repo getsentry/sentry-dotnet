@@ -224,6 +224,10 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0
+
       - name: Fetch NuGet Packages
         uses: actions/download-artifact@v4
         with:
@@ -239,7 +243,7 @@ jobs:
 
       - name: Setup Project
         run: |
-          dotnet new console --aot
+          dotnet new console --aot -n hello-sentry
           dotnet add package Sentry --prerelease --source ./local-packages
           cat > Program.cs <<'EOF'
           SentrySdk.Init(options =>
@@ -253,9 +257,9 @@ jobs:
       - name: Publish Project
         run: dotnet publish -p:EnableSdkContainerSupport=true -t:PublishContainer
 
-      - name: Run Docker Container
-        run: docker run --rm helloworld
-
+      - name: Run Container
+        run: docker run hello-sentry
+  
   trim-analysis:
     needs: build-sentry-native
     name: Trim analysis
