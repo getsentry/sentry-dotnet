@@ -14,6 +14,7 @@
 - ExtraData not captured for Breadcrumbs in MauiEventsBinder ([#4254](https://github.com/getsentry/sentry-dotnet/pull/4254))
     - NOTE: Required breaking changes to the public API of `Sentry.Maui.BreadcrumbEvent`, while keeping an _Obsolete_ constructor for backward compatibility.
 - InvalidOperationException sending attachments on Android with LLVM enabled ([#4276](https://github.com/getsentry/sentry-dotnet/pull/4276))
+- Source context for class libraries when running on Android in Release mode ([#4294](https://github.com/getsentry/sentry-dotnet/pull/4294))
 
 ### Dependencies
 
