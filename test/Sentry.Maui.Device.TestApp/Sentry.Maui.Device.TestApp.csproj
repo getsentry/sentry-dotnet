@@ -103,7 +103,7 @@
     <ProjectReference Include="..\Sentry.Tests\Sentry.Tests.csproj"/>
     <ProjectReference Include="..\Sentry.Extensions.Logging.Tests\Sentry.Extensions.Logging.Tests.csproj"/>
     <ProjectReference Include="..\Sentry.Maui.Tests\Sentry.Maui.Tests.csproj"/>
-    <ProjectReference Include="..\Sentry.Maui.CommunityToolkit.Mvvm.Tests\Sentry.Maui.CommunityToolkit.Mvvm.Tests.csproj" Condition="'$(TargetFrameworkIsNet9OrGreater)' == 'true'"/>
+    <ProjectReference Include="..\Sentry.Maui.CommunityToolkit.Mvvm.Tests\Sentry.Maui.CommunityToolkit.Mvvm.Tests.csproj" Condition="'$(_SentryIsNet9OrGreater)' == 'true'"/>
   </ItemGroup>
 
 </Project>
