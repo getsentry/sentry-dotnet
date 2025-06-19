@@ -202,10 +202,11 @@ jobs:
           # We only check out what is absolutely necessary to reduce a chance of local files impacting
           # integration tests
           sparse-checkout: |
+            Directory.Build.props
             integration-test
             .github
           # Disable cone mode to avoid individual top-level files being checkout out
-          # e.g. Directory.Build.props, nuget.config, ...
+          # e.g. nuget.config, ...
           sparse-checkout-cone-mode: false
 
       - name: Fetch NuGet Packages
