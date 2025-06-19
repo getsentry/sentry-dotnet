@@ -223,16 +223,11 @@ jobs:
         with:
           path: integration-test
 
-      - name: Dump MSBuild
-        run: |
-          dotnet msbuild console-app.csproj -pp:console-app.msbuild
-        working-directory: integration-test/console-app
-
       - name: Upload MSBuild
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.target || runner.os }}-msbuild
-          path: integration-test/console-app/console-app.msbuild
+          name: ${{ matrix.target || runner.os }}-console-app.binlog
+          path: integration-test/console-app/console-app.binlog
 
 
   trim-analysis:

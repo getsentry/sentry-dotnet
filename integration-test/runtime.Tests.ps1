@@ -78,6 +78,7 @@ internal class FakeTransport : ITransport
         function publishConsoleApp([bool]$SentryNative = $true)
         {
             dotnet publish console-app `
+                -bl:console-app.binlog `
                 -c Release `
                 --nologo `
                 --framework $framework `
