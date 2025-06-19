@@ -218,9 +218,9 @@ jobs:
         with:
           path: integration-test
 
-      - name: Container test
-        if: ${{ runner.os == 'Linux' && !matrix.container }}
-        uses: ./.github/actions/testcontainer
+      - name: AOT test
+        shell: pwsh
+        run: scripts/aot-test.ps1
 
   trim-analysis:
     needs: build-sentry-native
