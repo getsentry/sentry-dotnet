@@ -218,48 +218,10 @@ jobs:
         with:
           path: integration-test
 
-  native-aot-docker:
-    needs: build
-    name: Native AOT in Docker
-    runs-on: ubuntu-22.04
+      - name: Container test
+        if: ${{ runner.os == 'Linux' && !matrix.container }}
+        uses: ./.github/actions/testcontainer
 
-    steps:
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 9.0
-
-      - name: Fetch NuGet Packages
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ github.sha }}
-          path: src
-
-      - name: Setup Local Source
-        run: |
-          mkdir local-packages
-          cp src/Sentry/bin/Release/Sentry.*.nupkg local-packages/
-          dotnet nuget add source $PWD/local-packages --name local-packages
-          dotnet nuget list source
-
-      - name: Setup Project
-        run: |
-          dotnet new console --aot -n hello-sentry
-          dotnet add package Sentry --prerelease --source ./local-packages
-          cat > Program.cs <<'EOF'
-          SentrySdk.Init(options =>
-          {
-              options.Dsn = "https://foo@sentry.invalid/42";
-              options.Debug = true;
-          });
-          Console.WriteLine("Hello, Sentry!");
-          EOF
-
-      - name: Publish Project
-        run: dotnet publish -p:EnableSdkContainerSupport=true -t:PublishContainer
-
-      - name: Run Container
-        run: docker run hello-sentry
-  
   trim-analysis:
     needs: build-sentry-native
     name: Trim analysis
