@@ -76,9 +76,18 @@ internal static class SentryAttributeSerializer
         // covering most built-in types of .NET with C# language support
         // for `net7.0` or greater, we could utilize "Generic Math" in the future, if there is demand
         // see documentation for supported types: https://develop.sentry.dev/sdk/telemetry/logs/
-        if (value is string str)
+        if (value is string @string)
         {
-            writer.WriteString("value", str);
+            writer.WriteString("value", @string);
+            writer.WriteString("type", "string");
+        }
+        else if (value is char @char)
+        {
+#if NET7_0_OR_GREATER
+            writer.WriteString("value", new ReadOnlySpan<char>(in @char));
+#else
+            writer.WriteString("value", MemoryMarshal.CreateReadOnlySpan(ref @char, 1));
+#endif
             writer.WriteString("type", "string");
         }
         else if (value is bool boolean)

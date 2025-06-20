@@ -215,7 +215,7 @@ public class SentryLogTests
     }
 
     [Fact]
-    public void WriteTo_Numerics_AsIntegerAndDouble()
+    public void WriteTo_Parameters_AsAttributes()
     {
         var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Trace, "message")
         {
@@ -234,6 +234,9 @@ public class SentryLogTests
                 1f,
                 2d,
                 3m,
+                true,
+                'c',
+                "string",
                 KeyValuePair.Create("key", "value"),
             ],
         };
@@ -261,7 +264,10 @@ public class SentryLogTests
             property => property.AssertAttributeDouble("sentry.message.parameter.10", json => json.GetSingle(), 1f),
             property => property.AssertAttributeDouble("sentry.message.parameter.11", json => json.GetDouble(), 2d),
             property => property.AssertAttributeString("sentry.message.parameter.12", json => json.GetString(), 3m.ToString(NumberFormatInfo.InvariantInfo)),
-            property => property.AssertAttributeString("sentry.message.parameter.13", json => json.GetString(), "[key, value]")
+            property => property.AssertAttributeBoolean("sentry.message.parameter.13", json => json.GetBoolean(), true),
+            property => property.AssertAttributeString("sentry.message.parameter.14", json => json.GetString(), "c"),
+            property => property.AssertAttributeString("sentry.message.parameter.15", json => json.GetString(), "string"),
+            property => property.AssertAttributeString("sentry.message.parameter.16", json => json.GetString(), "[key, value]")
         );
         Assert.Collection(_output.Entries,
             entry => entry.Message.Should().Match("*ulong*is not supported*overflow*"),
