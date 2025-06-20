@@ -19,7 +19,7 @@ Describe 'Publish' {
         $localPackages = Join-Path $tempDir "packages"
         New-Item -ItemType Directory -Path $localPackages -Force | Out-Null
         Copy-Item $package $localPackages
-        $localConfig = Join-Path $tempDir "nuget.conf"
+        $localConfig = Join-Path $tempDir "nuget.config"
         Copy-Item $PSScriptRoot/nuget.config $localConfig
         dotnet nuget list source --configfile $localConfig | Write-Host
         Write-Host "::endgroup::"
