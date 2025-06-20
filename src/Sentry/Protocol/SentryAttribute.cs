@@ -85,8 +85,10 @@ internal static class SentryAttributeSerializer
         {
 #if NET7_0_OR_GREATER
             writer.WriteString("value", new ReadOnlySpan<char>(in @char));
-#else
+#elif (NET5_0_OR_GREATER || NETCOREAPP2_1_OR_GREATER  || NETSTANDARD2_1_OR_GREATER)
             writer.WriteString("value", MemoryMarshal.CreateReadOnlySpan(ref @char, 1));
+#else
+            writer.WriteString("value", @char.ToString(CultureInfo.InvariantCulture));
 #endif
             writer.WriteString("type", "string");
         }
