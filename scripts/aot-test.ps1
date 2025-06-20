@@ -36,7 +36,7 @@ $rid = (Get-ChildItem -Path "bin/Release/$tfm" -Directory | Select-Object -First
 & "bin/Release/$tfm/$rid/publish/hello-sentry"
 
 # Test Container
-if ($IsLinux) {
+if ($IsLinux -and (Get-Command docker -ErrorAction SilentlyContinue)) {
   dotnet publish -p:EnableSdkContainerSupport=true -t:PublishContainer
   docker run hello-sentry
 }
