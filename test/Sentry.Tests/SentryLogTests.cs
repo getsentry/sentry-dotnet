@@ -215,7 +215,7 @@ public class SentryLogTests
     }
 
     [Fact]
-    public void WriteTo_Parameters_AsAttributes()
+    public void WriteTo_MessageParameters_AsAttributes()
     {
         var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Trace, "message")
         {
@@ -269,6 +269,66 @@ public class SentryLogTests
             property => property.AssertAttributeString("sentry.message.parameter.14", json => json.GetString(), "c"),
             property => property.AssertAttributeString("sentry.message.parameter.15", json => json.GetString(), "string"),
             property => property.AssertAttributeString("sentry.message.parameter.16", json => json.GetString(), "[key, value]")
+        );
+        Assert.Collection(_output.Entries,
+            entry => entry.Message.Should().Match("*ulong*is not supported*overflow*"),
+            entry => entry.Message.Should().Match("*nuint*is not supported*64-bit*"),
+            entry => entry.Message.Should().Match("*decimal*is not supported*overflow*"),
+            entry => entry.Message.Should().Match("*System.Collections.Generic.KeyValuePair`2[System.String,System.String]*is not supported*ToString*"),
+            entry => entry.Message.Should().Match("*null*is not supported*ignored*")
+        );
+    }
+
+    [Fact]
+    public void WriteTo_Attributes_AsJson()
+    {
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Trace, "message");
+        log.SetAttribute("sbyte.MinValue", sbyte.MinValue);
+        log.SetAttribute("byte.MaxValue", byte.MaxValue);
+        log.SetAttribute("short.MinValue", short.MinValue);
+        log.SetAttribute("ushort.MaxValue", ushort.MaxValue);
+        log.SetAttribute("int.MinValue", int.MinValue);
+        log.SetAttribute("uint.MaxValue", uint.MaxValue);
+        log.SetAttribute("long.MinValue", long.MinValue);
+        log.SetAttribute("ulong.MaxValue", ulong.MaxValue);
+        log.SetAttribute("nint.MinValue", nint.MinValue);
+        log.SetAttribute("nuint.MaxValue", nuint.MaxValue);
+        log.SetAttribute("float", 1f);
+        log.SetAttribute("double", 2d);
+        //log.SetAttribute("decimal", 3m); //not supported
+        log.SetAttribute("bool", true);
+        log.SetAttribute("char", 'c');
+        log.SetAttribute("string", "string");
+        //log.SetAttribute("object", KeyValuePair.Create("key", "value")); //not supported
+        log.SetAttribute("null", null!);
+
+        ArrayBufferWriter<byte> bufferWriter = new();
+        Utf8JsonWriter writer = new(bufferWriter);
+        log.WriteTo(writer, _output);
+        writer.Flush();
+
+        var document = JsonDocument.Parse(bufferWriter.WrittenMemory);
+        var items = document.RootElement.GetProperty("items");
+        items.GetArrayLength().Should().Be(1);
+        var attributes = items[0].GetProperty("attributes");
+        Assert.Collection(attributes.EnumerateObject().ToArray(),
+            property => property.AssertAttributeInteger("sbyte", json => json.GetSByte(), sbyte.MinValue),
+            property => property.AssertAttributeInteger("byte", json => json.GetByte(), byte.MaxValue),
+            property => property.AssertAttributeInteger("short", json => json.GetInt16(), short.MinValue),
+            property => property.AssertAttributeInteger("ushort", json => json.GetUInt16(), ushort.MaxValue),
+            property => property.AssertAttributeInteger("int", json => json.GetInt32(), int.MinValue),
+            property => property.AssertAttributeInteger("uint", json => json.GetUInt32(), uint.MaxValue),
+            property => property.AssertAttributeInteger("long", json => json.GetInt64(), long.MinValue),
+            property => property.AssertAttributeString("ulong", json => json.GetString(), ulong.MaxValue.ToString(NumberFormatInfo.InvariantInfo)),
+            property => property.AssertAttributeInteger("nint", json => json.GetInt64(), nint.MinValue),
+            property => property.AssertAttributeString("nuint", json => json.GetString(), nuint.MaxValue.ToString(NumberFormatInfo.InvariantInfo)),
+            property => property.AssertAttributeDouble("float", json => json.GetSingle(), 1f),
+            property => property.AssertAttributeDouble("double", json => json.GetDouble(), 2d),
+            property => property.AssertAttributeString("decimal", json => json.GetString(), 3m.ToString(NumberFormatInfo.InvariantInfo)),
+            property => property.AssertAttributeBoolean("bool", json => json.GetBoolean(), true),
+            property => property.AssertAttributeString("char", json => json.GetString(), "c"),
+            property => property.AssertAttributeString("string", json => json.GetString(), "string"),
+            property => property.AssertAttributeString("object", json => json.GetString(), "[key, value]")
         );
         Assert.Collection(_output.Entries,
             entry => entry.Message.Should().Match("*ulong*is not supported*overflow*"),
