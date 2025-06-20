@@ -44,6 +44,6 @@ Write-Host "::endgroup::"
 if ($IsLinux -and (Get-Command docker -ErrorAction SilentlyContinue)) {
   Write-Host "::group::Test PublishContainer"
   dotnet publish -p:EnableSdkContainerSupport=true -t:PublishContainer -v:detailed
-  docker run hello-sentry
+  docker run --rm hello-sentry
   Write-Host "::endgroup::"
 }
