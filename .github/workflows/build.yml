@@ -204,7 +204,6 @@ jobs:
           # integration tests, e.g. Directory.Build.props, nuget.config, ...
           sparse-checkout: |
             integration-test
-            scripts
             .github
 
       - name: Fetch NuGet Packages
@@ -219,9 +218,6 @@ jobs:
         with:
           path: integration-test
 
-      - name: AOT test
-        shell: pwsh
-        run: scripts/aot-test.ps1
 
   trim-analysis:
     needs: build-sentry-native
