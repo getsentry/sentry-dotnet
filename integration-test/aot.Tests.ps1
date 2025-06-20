@@ -21,7 +21,9 @@ Describe 'Publish' {
         Copy-Item $package $localPackages
         $localConfig = Join-Path $tempDir "nuget.config"
         Copy-Item $PSScriptRoot/nuget.config $localConfig
-        dotnet nuget list source --configfile $localConfig | Write-Host
+        $env:NUGET_PACKAGES = Join-Path $tempDir "nuget"
+        New-Item -ItemType Directory -Path $env:NUGET_PACKAGES -Force | Out-Null
+        dotnet nuget list source | Write-Host
         Write-Host "::endgroup::"
 
         Write-Host "::group::Create test project"
