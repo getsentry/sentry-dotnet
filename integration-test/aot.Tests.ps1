@@ -10,7 +10,8 @@ Describe 'Publish' {
             throw "No NuGet package found in src/Sentry/bin/Release."
         }
 
-        $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())
+        $tempDir = Resolve-Path ([System.IO.Path]::GetTempPath())
+        $tempDir = Join-Path $tempDir ([System.IO.Path]::GetRandomFileName())
         New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
         Set-Location $tempDir
         Write-Host "Testing $package in $tempDir"
@@ -21,6 +22,7 @@ Describe 'Publish' {
         Copy-Item $package $localPackages
         $localConfig = Join-Path $tempDir "nuget.config"
         Copy-Item $PSScriptRoot/nuget.config $localConfig
+        (Get-Content $localConfig) -replace '\./packages', $localPackages | Set-Content $localConfig
         $env:NUGET_PACKAGES = Join-Path $tempDir "nuget"
         New-Item -ItemType Directory -Path $env:NUGET_PACKAGES -Force | Out-Null
         dotnet nuget list source | Write-Host
