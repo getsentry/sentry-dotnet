@@ -204,6 +204,7 @@ jobs:
           # integration tests, e.g. Directory.Build.props, nuget.config, ...
           sparse-checkout: |
             integration-test
+            scripts
             .github
 
       - name: Fetch NuGet Packages
