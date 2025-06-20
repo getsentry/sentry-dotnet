@@ -18,6 +18,13 @@
                                     Trim="true" />
   </ItemGroup>
 
+  <!-- Helpful properties copied from Sentry.props -->
+  <PropertyGroup Condition="'$(TargetFramework)' != ''">
+    <_SentryTargetFrameworkVersion>$([MSBuild]::GetTargetFrameworkVersion($(TargetFramework)))</_SentryTargetFrameworkVersion>
+    <_SentryIsNet8OrGreater>$([MSBuild]::VersionGreaterThanOrEquals($(_SentryTargetFrameworkVersion), 8.0))</_SentryIsNet8OrGreater>
+    <_SentryIsNet9OrGreater>$([MSBuild]::VersionGreaterThanOrEquals($(_SentryTargetFrameworkVersion), 9.0))</_SentryIsNet9OrGreater>
+  </PropertyGroup>
+
   <PropertyGroup>
     <!-- net8.0 or greater -->
     <FrameworkSupportsNative Condition="'$(_SentryIsNet8OrGreater)' == 'true' and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">true</FrameworkSupportsNative>

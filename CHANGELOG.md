@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Fix linking of libsentry-native to avoid DllNotFoundException in Native AOT applications ([#4298](https://github.com/getsentry/sentry-dotnet/pull/4298))
+
 ## 5.11.0
 
 ### Features
