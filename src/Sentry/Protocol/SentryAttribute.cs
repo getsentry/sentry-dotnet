@@ -32,6 +32,12 @@ internal static class SentryAttributeSerializer
 
     internal static void WriteAttribute(Utf8JsonWriter writer, string propertyName, object value, IDiagnosticLogger? logger)
     {
+        if (value is null)
+        {
+            logger?.LogWarning("'null' is not supported by Sentry-Attributes and will be ignored.");
+            return;
+        }
+
         writer.WritePropertyName(propertyName);
         WriteAttributeValue(writer, value, logger);
     }
@@ -174,7 +180,6 @@ internal static class SentryAttributeSerializer
         }
         else
         {
-            //TODO: test null
             writer.WriteString("value", value.ToString());
             writer.WriteString("type", "string");
 

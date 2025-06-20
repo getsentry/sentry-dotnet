@@ -238,6 +238,7 @@ public class SentryLogTests
                 'c',
                 "string",
                 KeyValuePair.Create("key", "value"),
+                null,
             ],
         };
 
@@ -273,7 +274,8 @@ public class SentryLogTests
             entry => entry.Message.Should().Match("*ulong*is not supported*overflow*"),
             entry => entry.Message.Should().Match("*nuint*is not supported*64-bit*"),
             entry => entry.Message.Should().Match("*decimal*is not supported*overflow*"),
-            entry => entry.Message.Should().Match("*System.Collections.Generic.KeyValuePair`2[System.String,System.String]*is not supported*ToString*")
+            entry => entry.Message.Should().Match("*System.Collections.Generic.KeyValuePair`2[System.String,System.String]*is not supported*ToString*"),
+            entry => entry.Message.Should().Match("*null*is not supported*ignored*")
         );
     }
 }
