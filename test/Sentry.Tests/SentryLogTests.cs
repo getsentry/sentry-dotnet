@@ -14,7 +14,7 @@ public class SentryLogTests
 
     private static readonly ISystemClock Clock = new MockClock(Timestamp);
 
-    private readonly IDiagnosticLogger _output;
+    private readonly TestOutputDiagnosticLogger _output;
 
     public SentryLogTests(ITestOutputHelper output)
     {
@@ -94,6 +94,8 @@ public class SentryLogTests
           ]
         }
         """);
+
+        _output.Entries.Should().BeEmpty();
     }
 
     [Fact]
@@ -208,6 +210,103 @@ public class SentryLogTests
           ]
         }
         """);
+
+        _output.Entries.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void WriteTo_Numerics_AsIntegerAndDouble()
+    {
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Trace, "message")
+        {
+            Parameters =
+            [
+                sbyte.MinValue,
+                byte.MaxValue,
+                short.MinValue,
+                ushort.MaxValue,
+                int.MinValue,
+                uint.MaxValue,
+                long.MinValue,
+                ulong.MaxValue,
+                nint.MinValue,
+                nuint.MaxValue,
+                1f,
+                2d,
+                3m,
+                KeyValuePair.Create("key", "value"),
+            ],
+        };
+
+        ArrayBufferWriter<byte> bufferWriter = new();
+        Utf8JsonWriter writer = new(bufferWriter);
+        log.WriteTo(writer, _output);
+        writer.Flush();
+
+        var document = JsonDocument.Parse(bufferWriter.WrittenMemory);
+        var items = document.RootElement.GetProperty("items");
+        items.GetArrayLength().Should().Be(1);
+        var attributes = items[0].GetProperty("attributes");
+        Assert.Collection(attributes.EnumerateObject().ToArray(),
+            property => property.AssertAttributeInteger("sentry.message.parameter.0", json => json.GetSByte(), sbyte.MinValue),
+            property => property.AssertAttributeInteger("sentry.message.parameter.1", json => json.GetByte(), byte.MaxValue),
+            property => property.AssertAttributeInteger("sentry.message.parameter.2", json => json.GetInt16(), short.MinValue),
+            property => property.AssertAttributeInteger("sentry.message.parameter.3", json => json.GetUInt16(), ushort.MaxValue),
+            property => property.AssertAttributeInteger("sentry.message.parameter.4", json => json.GetInt32(), int.MinValue),
+            property => property.AssertAttributeInteger("sentry.message.parameter.5", json => json.GetUInt32(), uint.MaxValue),
+            property => property.AssertAttributeInteger("sentry.message.parameter.6", json => json.GetInt64(), long.MinValue),
+            property => property.AssertAttributeString("sentry.message.parameter.7", json => json.GetString(), ulong.MaxValue.ToString(NumberFormatInfo.InvariantInfo)),
+            property => property.AssertAttributeInteger("sentry.message.parameter.8", json => json.GetInt64(), nint.MinValue),
+            property => property.AssertAttributeString("sentry.message.parameter.9", json => json.GetString(), nuint.MaxValue.ToString(NumberFormatInfo.InvariantInfo)),
+            property => property.AssertAttributeDouble("sentry.message.parameter.10", json => json.GetSingle(), 1f),
+            property => property.AssertAttributeDouble("sentry.message.parameter.11", json => json.GetDouble(), 2d),
+            property => property.AssertAttributeString("sentry.message.parameter.12", json => json.GetString(), 3m.ToString(NumberFormatInfo.InvariantInfo)),
+            property => property.AssertAttributeString("sentry.message.parameter.13", json => json.GetString(), "[key, value]")
+        );
+        Assert.Collection(_output.Entries,
+            entry => entry.Message.Should().Match("*ulong*is not supported*overflow*"),
+            entry => entry.Message.Should().Match("*nuint*is not supported*64-bit*"),
+            entry => entry.Message.Should().Match("*decimal*is not supported*overflow*"),
+            entry => entry.Message.Should().Match("*System.Collections.Generic.KeyValuePair`2[System.String,System.String]*is not supported*ToString*")
+        );
+    }
+}
+
+file static class AssertExtensions
+{
+    public static void AssertAttributeString<T>(this JsonProperty attribute, string name, Func<JsonElement, T> getValue, T value)
+    {
+        attribute.AssertAttribute(name, "string", getValue, value);
+    }
+
+    public static void AssertAttributeBoolean<T>(this JsonProperty attribute, string name, Func<JsonElement, T> getValue, T value)
+    {
+        attribute.AssertAttribute(name, "boolean", getValue, value);
+    }
+
+    public static void AssertAttributeInteger<T>(this JsonProperty attribute, string name, Func<JsonElement, T> getValue, T value)
+    {
+        attribute.AssertAttribute(name, "integer", getValue, value);
+    }
+
+    public static void AssertAttributeDouble<T>(this JsonProperty attribute, string name, Func<JsonElement, T> getValue, T value)
+    {
+        attribute.AssertAttribute(name, "double", getValue, value);
+    }
+
+    private static void AssertAttribute<T>(this JsonProperty attribute, string name, string type, Func<JsonElement, T> getValue, T value)
+    {
+        Assert.Equal(name, attribute.Name);
+        Assert.Collection(attribute.Value.EnumerateObject().ToArray(),
+            property =>
+            {
+                Assert.Equal("value", property.Name);
+                Assert.Equal(value, getValue(property.Value));
+            }, property =>
+            {
+                Assert.Equal("type", property.Name);
+                Assert.Equal(type, property.Value.GetString());
+            });
     }
 }
 

@@ -246,20 +246,20 @@ public sealed class SentryLog : ISentryJsonSerializable
 
         if (Template is not null)
         {
-            SentryAttributeSerializer.WriteAttribute(writer, "sentry.message.template", Template, "string");
+            SentryAttributeSerializer.WriteAttribute(writer, "sentry.message.template", Template, "string", logger);
         }
 
         if (!Parameters.IsDefault)
         {
             for (var index = 0; index < Parameters.Length; index++)
             {
-                SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameter.{index}", Parameters[index]);
+                SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameter.{index}", Parameters[index], logger);
             }
         }
 
         foreach (var attribute in _attributes)
         {
-            SentryAttributeSerializer.WriteAttribute(writer, attribute.Key, attribute.Value);
+            SentryAttributeSerializer.WriteAttribute(writer, attribute.Key, attribute.Value, logger);
         }
 
         if (ParentSpanId.HasValue)
