@@ -5,19 +5,23 @@ if (-not $package) {
 }
 
 $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())
+New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
+Set-Location $tempDir
 Write-Host "Testing $package in $tempDir"
+Write-Host "::group::.NET info"
 dotnet --info
+Write-Host "::endgroup::"
 
-# Setup local NuGet source
+Write-Host "::group::Setup local NuGet source"
 $localPackages = Join-Path $tempDir "packages"
 New-Item -ItemType Directory -Path $localPackages -Force | Out-Null
 Copy-Item $package $localPackages
 $localConfig = Join-Path $tempDir "nuget.conf"
 Copy-Item $PSScriptRoot/../integration-test/nuget.config $localConfig
 dotnet nuget list source --configfile $localConfig
+Write-Host "::endgroup::"
 
-# Setup test project
-Set-Location $tempDir
+Write-Host "::group::Create test project"
 dotnet new console --aot --name hello-sentry --output .
 dotnet add package Sentry --prerelease --source $localPackages
 @"
@@ -28,15 +32,18 @@ SentrySdk.Init(options =>
 });
 Console.WriteLine("Hello, Sentry!");
 "@ | Set-Content Program.cs
+Write-Host "::endgroup::"
 
-# Test AOT
-dotnet publish
+Write-Host "::group::Test PublishAot"
+dotnet publish -c Release -v:detailed
 $tfm = (Get-ChildItem -Path "bin/Release" -Directory | Select-Object -First 1).Name
 $rid = (Get-ChildItem -Path "bin/Release/$tfm" -Directory | Select-Object -First 1).Name
 & "bin/Release/$tfm/$rid/publish/hello-sentry"
+Write-Host "::endgroup::"
 
-# Test Container
 if ($IsLinux -and (Get-Command docker -ErrorAction SilentlyContinue)) {
-  dotnet publish -p:EnableSdkContainerSupport=true -t:PublishContainer
+  Write-Host "::group::Test PublishContainer"
+  dotnet publish -p:EnableSdkContainerSupport=true -t:PublishContainer -v:detailed
   docker run hello-sentry
+  Write-Host "::endgroup::"
 }
