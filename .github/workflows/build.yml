@@ -188,6 +188,10 @@ jobs:
       - name: Create NuGet Packages
         run: dotnet pack Sentry-CI-Build-${{ matrix.target || runner.os }}.slnf -c Release --no-build --nologo
 
+      - name: Inspect NuGet Packages
+        shell: bash
+        run: unzip -l src/Sentry/bin/Release/Sentry.*.nupkg
+
       - name: Archive NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
         uses: actions/upload-artifact@v4
