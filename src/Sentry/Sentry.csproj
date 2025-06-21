@@ -202,10 +202,17 @@
     <None Include="buildTransitive\Sentry.SourceGenerators.targets" Pack="true" PackagePath="build\Sentry.SourceGenerators.targets" />
   </ItemGroup>
 
+  <!-- Build and Pack (without reference to) Sentry Generator. -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackSentryGenerator</TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
   <ItemGroup>
-    <None Include="..\Sentry.SourceGenerators\bin\Release\netstandard2.0\Sentry.SourceGenerators.dll"
-          Pack="true"
-          PackagePath="analyzers/dotnet/cs"
-          Visible="false" />
+    <ProjectReference Include="..\Sentry.SourceGenerators\Sentry.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" PrivateAssets="all" SetTargetFramework="TargetFramework=netstandard2.0" />
   </ItemGroup>
+  <Target Name="PackSentryGenerator">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="$(OutputPath)\Sentry.SourceGenerators.dll" PackagePath="analyzers/dotnet/cs" BuildAction="None" />
+    </ItemGroup>
+  </Target>
+
 </Project>
