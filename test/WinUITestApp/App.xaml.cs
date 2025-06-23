@@ -1,7 +1,7 @@
-using Microsoft.UI.Xaml;
-using Sentry.Protocol;
 using System.Security;
+using Microsoft.UI.Xaml;
 using Sentry;
+using Sentry.Protocol;
 
 namespace winui_app
 {

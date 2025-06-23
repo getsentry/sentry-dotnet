@@ -1,6 +1,6 @@
 using Microsoft.UI.Xaml;
-using Windows.Graphics;
 using Sentry;
+using Windows.Graphics;
 
 namespace winui_app
 {
