@@ -183,10 +183,7 @@ jobs:
           name: ${{ matrix.target || runner.os }}-verify-test-results
           path: "**/*.received.*"
 
-      # To save time and disk space, we only create and archive the NuGet packages when we're actually releasing.
-
       - name: Create NuGet Packages
-        if: env.CI_PUBLISHING_BUILD == 'true'
         run: dotnet pack Sentry-CI-Build-${{ matrix.target || runner.os }}.slnf -c Release --no-build --nologo
 
       - name: Archive NuGet Packages
@@ -199,44 +196,24 @@ jobs:
             src/**/Release/*.nupkg
             src/**/Release/*.snupkg
 
-  integration-test:
-    needs: build
-    name: Integration test (${{ matrix.container || matrix.os }})
-    runs-on: ${{ matrix.os }}
-    container: ${{ matrix.container }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
-          - os: ubuntu-22.04-arm
-          - os: ubuntu-latest
-            container: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
-          - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
-          - os: windows-latest
-          - os: windows-11-arm
-
-    steps:
-      - uses: actions/checkout@v4
+      - name: Sparse checkout
+        if: env.CI_PUBLISHING_BUILD == 'true'
+        uses: actions/checkout@v4
         with:
           # We only check out what is absolutely necessary to reduce a chance of local files impacting
           # integration tests, e.g. Directory.Build.props, nuget.config, ...
           sparse-checkout: |
-            Directory.Build.props
             integration-test
             .github
 
       - name: Fetch NuGet Packages
+        if: env.CI_PUBLISHING_BUILD == 'true'
         uses: actions/download-artifact@v4
         with:
           name: ${{ github.sha }}
           path: src
 
-      - name: Setup Environment
-        uses: ./.github/actions/environment
-
-      - name: Test
+      - name: Integration test
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         with:
           path: integration-test

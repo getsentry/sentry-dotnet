@@ -1,16 +1,26 @@
 # Changelog
 
-## Unreleased
+## 5.11.1
+
+### Fixes
+
+- Fix linking of libsentry-native to avoid DllNotFoundException in Native AOT applications ([#4298](https://github.com/getsentry/sentry-dotnet/pull/4298))
+
+## 5.11.0
 
 ### Features
 
 - Added non-allocating `ConfigureScope` and `ConfigureScopeAsync` overloads ([#4244](https://github.com/getsentry/sentry-dotnet/pull/4244))
 - Add .NET MAUI `AutomationId` element information to breadcrumbs ([#4248](https://github.com/getsentry/sentry-dotnet/pull/4248))
+- The HTTP Response Status Code for spans instrumented using OpenTelemetry is now searchable ([#4283](https://github.com/getsentry/sentry-dotnet/pull/4283))
 
 ### Fixes
 
 - The HTTP instrumentation uses the span created for the outgoing request in the sentry-trace header, fixing the parent-child relationship between client and server ([#4264](https://github.com/getsentry/sentry-dotnet/pull/4264))
+- ExtraData not captured for Breadcrumbs in MauiEventsBinder ([#4254](https://github.com/getsentry/sentry-dotnet/pull/4254))
+    - NOTE: Required breaking changes to the public API of `Sentry.Maui.BreadcrumbEvent`, while keeping an _Obsolete_ constructor for backward compatibility.
 - InvalidOperationException sending attachments on Android with LLVM enabled ([#4276](https://github.com/getsentry/sentry-dotnet/pull/4276))
+- When CaptureFeedback methods are called with invalid email addresses, the email address will be removed and, if Debug mode is enabled, a warning will be logged. This is done to avoid losing the Feedback altogether (Sentry would reject Feedback that has an invalid email address) ([#4284](https://github.com/getsentry/sentry-dotnet/pull/4284))
 
 ### Dependencies
 

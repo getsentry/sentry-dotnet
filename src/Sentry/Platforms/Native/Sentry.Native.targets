@@ -33,36 +33,36 @@
     <None Include="$(MSBuildThisFileDirectory)buildTransitive\Sentry.Native.targets" Pack="true" PackagePath="build\Sentry.Native.targets" />
   </ItemGroup>
 
-  <!-- Packaging the native library -->
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(RuntimeIdentifier)' == 'win-x64'">
+  <!-- Packaging the native library (NOTE: $(RuntimeIdentifier) is not set) -->
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier)' == 'win-x64'">
     <None Include="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-win-x64)</PackagePath>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(RuntimeIdentifier)' == 'win-arm64'">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier)' == 'win-arm64'">
     <None Include="$(SentryNativeOutputDirectory-win-arm64)$(SentryNativeLibraryName).lib">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-win-arm64)</PackagePath>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(RuntimeIdentifier)' == 'linux-x64'">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier)' == 'linux-x64'">
     <None Include="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-x64)</PackagePath>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(RuntimeIdentifier)' == 'linux-musl-x64'">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier)' == 'linux-musl-x64'">
     <None Include="$(SentryNativeOutputDirectory-linux-musl-x64)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-musl-x64)</PackagePath>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(RuntimeIdentifier)' == 'linux-arm64'">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier)' == 'linux-arm64'">
     <None Include="$(SentryNativeOutputDirectory-linux-arm64)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-arm64)</PackagePath>
@@ -76,7 +76,7 @@
     </None>
   </ItemGroup>
 
-  <Target Name="CleanNativeSDK" BeforeTargets="CoreClean" Condition="'$(TargetFramework)' == 'net8.0' or '$(TargetFramework)' == 'net9.0'">
+  <Target Name="CleanNativeSDK" BeforeTargets="CoreClean" Condition="'$(_SentryIsNet8OrGreater)' == 'true'">
     <Message Text="Inside Custom Clean" Importance="high"/>
     <RemoveDir Directories="$(SentryNativeOutputDirectory)" />
     <RemoveDir Directories="$(SentryNativeSourceDirectory)build" />
@@ -86,7 +86,7 @@
        built already on each native platform and fetched for the final .net build. -->
   <Target Name="_BuildSentryNativeSDK"
     BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
-    Condition="('$(TargetFramework)' == 'net8.0' or '$(TargetFramework)' == 'net9.0') and '$(CI)' != 'true'"
+    Condition="'$(_SentryIsNet8OrGreater)' == 'true' and '$(CI)' != 'true'"
     Inputs="$(SentryNativeBuildInputs)"
     Outputs="$(SentryNativeBuildOutputs)">
     <!-- We want a "-Clean" because if the build script changes, previous cmake cache may contain invalid defines. -->
