@@ -25,6 +25,7 @@ groupConfigs:
     # .NET Framework projects
     - "**/*.AspNet.csproj"
     - "**/*.AspNet.Tests.csproj"
+    - "**/*WinUITestApp.csproj"
   artefacts:
     # Any projects in the obj or bin directories
     - "**/obj/**/*.csproj"
@@ -95,6 +96,7 @@ filterConfigs:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*.AspNet.Tests.csproj"
+        - "**/*WinUITestApp.csproj"
 
   - outputPath: Sentry-CI-Build-Windows.slnf
     include:
@@ -255,6 +257,7 @@ filterConfigs:
         - "**/*Android*.csproj"
         - "**/*Ios*.csproj"
         - "**/*Maui*.csproj"
+        - "**/*WinUI*.csproj"
 
   - outputPath: SentryNoSamples.slnf
     include:
