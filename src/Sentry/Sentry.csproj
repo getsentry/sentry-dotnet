@@ -202,16 +202,17 @@
     <None Include="buildTransitive\Sentry.SourceGenerators.targets" Pack="true" PackagePath="build\Sentry.SourceGenerators.targets" />
   </ItemGroup>
 
-  <!-- Build and Pack (without reference to) Sentry Generator. -->
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage);PackSentryGenerator</TargetsForTfmSpecificContentInPackage>
-  </PropertyGroup>
+  <!-- Build and Pack (without dependency to) Sentry Generator (as Analyzer). -->
   <ItemGroup>
-    <ProjectReference Include="..\Sentry.SourceGenerators\Sentry.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" PrivateAssets="all" SetTargetFramework="TargetFramework=netstandard2.0" />
+    <ProjectReference Include="..\Sentry.SourceGenerators\Sentry.SourceGenerators.csproj" OutputItemType="" ReferenceOutputAssembly="false" PrivateAssets="all" SetTargetFramework="TargetFramework=netstandard2.0" SentryAnalyzersPack="true" />
   </ItemGroup>
-  <Target Name="PackSentryGenerator">
+  <!-- See https://github.com/ViktorHofer/PackAsAnalyzer -->
+  <Target Name="_SentryPackAnalyzers" BeforeTargets="GenerateNuspec;_GetPackageFiles">
+    <MSBuild Projects="@(ProjectReference->WithMetadataValue('SentryAnalyzersPack', 'true'))" Targets="GetTargetPath">
+      <Output TaskParameter="TargetOutputs" ItemName="_SentryAnalyzersPackagePath" />
+    </MSBuild>
     <ItemGroup>
-      <TfmSpecificPackageFile Include="$(OutputPath)\Sentry.SourceGenerators.dll" PackagePath="analyzers/dotnet/cs" BuildAction="None" />
+      <None Include="@(_SentryAnalyzersPackagePath)" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
   </Target>
 
