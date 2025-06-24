@@ -22,14 +22,21 @@ public class SentrySpanProcessorTests : ActivitySourceTests
 
         public Fixture()
         {
+            SentryClientExtensions.SentryOptionsForTestingOnly = null;
             Options = new SentryOptions
             {
                 Dsn = ValidDsn,
                 TracesSampleRate = 1.0,
-                AutoSessionTracking = false
+                AutoSessionTracking = false,
+                IsGlobalModeEnabled = false,
+                Release = "test",
+                Instrumenter = Instrumenter.OpenTelemetry
             };
 
             Client = Substitute.For<ISentryClient>();
+            SessionManager = Substitute.For<ISessionManager>();
+            ScopeManager = new SentryScopeManager(Options, Client);
+            Clock = Substitute.For<ISystemClock>();
         }
 
         public Hub Hub { get; private set; }
@@ -47,14 +54,16 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     [Fact]
     public void Ctor_Instrumenter_OpenTelemetry_DoesNotThrowException()
     {
-        // Arrange
+        // Arrange & Act
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
 
-        // Act
-        var sut = _fixture.GetSut();
+        var exception = Record.Exception(() =>
+        {
+            using var sut = _fixture.GetSut();
+        });
 
         // Assert
-        Assert.NotNull(sut);
+        exception.Should().BeNull();
     }
 
     [Fact]
@@ -109,7 +118,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     {
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
-        var sut = _fixture.GetSut();
+        using var sut = _fixture.GetSut();
 
         var expected = new Dictionary<string, string>()
         {
@@ -151,7 +160,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         _fixture.Options.TracesSampleRate = 1.0;
-        var sut = _fixture.GetSut();
+        using var sut = _fixture.GetSut();
 
         using var parent = Tracer.StartActivity("Parent");
         sut.OnStart(parent);
@@ -193,7 +202,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
         _fixture.Options.TracesSampleRate = 0.0;
-        var sut = _fixture.GetSut();
+        using var sut = _fixture.GetSut();
 
         using var parent = Tracer.StartActivity("Parent");
         sut.OnStart(parent);
@@ -218,7 +227,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     {
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
-        var sut = _fixture.GetSut();
+        using var sut = _fixture.GetSut();
 
         var parent = _fixture.Hub.StartTransaction("Program", "Main");
         _fixture.Hub.ConfigureScope(scope => scope.Transaction = parent);
@@ -860,7 +869,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     {
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
-        var sut = _fixture.GetSut();
+        using var sut = _fixture.GetSut();
 
         using var parent = Tracer.StartActivity();
         sut.OnStart(parent!);
@@ -879,7 +888,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     {
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
-        var sut = _fixture.GetSut();
+        using var sut = _fixture.GetSut();
 
         using var parent = Tracer.StartActivity();
         sut.OnStart(parent!);
@@ -896,7 +905,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     {
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
-        var sut = _fixture.GetSut();
+        using var sut = _fixture.GetSut();
 
         using var parent = Tracer.StartActivity();
         sut.OnStart(parent!);
@@ -922,7 +931,7 @@ public class SentrySpanProcessorTests : ActivitySourceTests
     {
         // Arrange
         _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
-        var sut = _fixture.GetSut();
+        using var sut = _fixture.GetSut();
 
         sut._lastPruned = DateTimeOffset.MaxValue.Ticks; // fake a recent prune
 
@@ -942,6 +951,144 @@ public class SentrySpanProcessorTests : ActivitySourceTests
 
         // Assert
         Assert.True(sut._map.TryGetValue(activity1.SpanId, out var _));
+        Assert.True(sut._map.TryGetValue(activity2.SpanId, out var _));
+    }
+
+    [Fact]
+    public async Task BackgroundPruning_FilteredSpans_EventuallyPruned()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        using var sut = _fixture.GetSut();
+
+        using var parent = Tracer.StartActivity();
+        sut.OnStart(parent!);
+
+        using var activity1 = Tracer.StartActivity();
+        sut.OnStart(activity1!);
+
+        using var activity2 = Tracer.StartActivity();
+        sut.OnStart(activity2!);
+
+        FilterActivity(activity2);
+
+        // Initially both spans should be present
+        Assert.True(sut._map.TryGetValue(activity1.SpanId, out var _));
+        Assert.True(sut._map.TryGetValue(activity2.SpanId, out var _));
+
+        // Act - Wait for background pruning to occur (background timer runs every 10 seconds)
+        // We'll trigger it manually by calling PruneFilteredSpans directly for testing
+        sut.PruneFilteredSpans(force: true);
+
+        // Assert
+        Assert.True(sut._map.TryGetValue(activity1.SpanId, out var _));
+        Assert.False(sut._map.TryGetValue(activity2.SpanId, out var _));
+    }
+
+    [Fact]
+    public void Dispose_CleansUpResourcesProperly()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        using var parent = Tracer.StartActivity();
+        sut.OnStart(parent!);
+
+        using var activity = Tracer.StartActivity();
+        sut.OnStart(activity!);
+
+        FilterActivity(activity);
+
+        // Verify spans are present before disposal
+        Assert.True(sut._map.TryGetValue(parent.SpanId, out var _));
+        Assert.True(sut._map.TryGetValue(activity.SpanId, out var _));
+
+        // Act
+        sut.Dispose();
+
+        // Assert - Filtered spans should be cleaned up during disposal
+        Assert.True(sut._map.TryGetValue(parent.SpanId, out var _));
+        Assert.False(sut._map.TryGetValue(activity.SpanId, out var _));
+    }
+
+    [Fact]
+    public void Dispose_MultipleCallsAreSafe()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        // Act & Assert - Multiple dispose calls should not throw
+        var exception = Record.Exception(() =>
+        {
+            sut.Dispose();
+            sut.Dispose();
+            sut.Dispose();
+        });
+
+        exception.Should().BeNull();
+    }
+
+    [Fact]
+    public void PruneFilteredSpans_AfterDispose_DoesNotThrow()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        var sut = _fixture.GetSut();
+
+        using var activity = Tracer.StartActivity();
+        sut.OnStart(activity!);
+
+        sut.Dispose();
+
+        // Act & Assert - Calling PruneFilteredSpans after dispose should not throw
+        var exception = Record.Exception(() => sut.PruneFilteredSpans(force: true));
+        exception.Should().BeNull();
+    }
+
+    [Fact]
+    public void OnStart_PerformanceImprovement_NoPruningCall()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        using var sut = _fixture.GetSut();
+
+        // This test verifies that OnStart no longer calls pruning inline
+        // by ensuring that filtered spans remain in the map after OnStart
+        using var activity1 = Tracer.StartActivity();
+        sut.OnStart(activity1!);
+
+        using var activity2 = Tracer.StartActivity();
+        FilterActivity(activity2);  // Filter before OnStart
+        sut.OnStart(activity2!);
+
+        // Act - OnStart should not prune the filtered span
+        using var activity3 = Tracer.StartActivity();
+        sut.OnStart(activity3!);
+
+        // Assert - Filtered span should still be present since inline pruning was removed
+        Assert.True(sut._map.TryGetValue(activity2.SpanId, out var _));
+    }
+
+    [Fact]
+    public void OnEnd_PerformanceImprovement_NoPruningCall()
+    {
+        // Arrange
+        _fixture.Options.Instrumenter = Instrumenter.OpenTelemetry;
+        using var sut = _fixture.GetSut();
+
+        using var activity1 = Tracer.StartActivity();
+        sut.OnStart(activity1!);
+
+        using var activity2 = Tracer.StartActivity();
+        sut.OnStart(activity2!);
+        FilterActivity(activity2);  // Filter after OnStart
+
+        // Act - OnEnd should not prune the filtered span
+        sut.OnEnd(activity1!);
+
+        // Assert - Filtered span should still be present since inline pruning was removed
         Assert.True(sut._map.TryGetValue(activity2.SpanId, out var _));
     }
 

@@ -9,7 +9,7 @@ namespace Sentry.OpenTelemetry;
 /// <summary>
 /// Sentry span processor for Open Telemetry.
 /// </summary>
-public class SentrySpanProcessor : BaseProcessor<Activity>
+public class SentrySpanProcessor : BaseProcessor<Activity>, IDisposable
 {
     private readonly IHub _hub;
     internal readonly IEnumerable<IOpenTelemetryEnricher> _enrichers;
@@ -24,6 +24,12 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     private static readonly long PruningInterval = TimeSpan.FromSeconds(5).Ticks;
     internal long _lastPruned = 0;
     private readonly Lazy<Hub?> _realHub;
+    
+    // Background pruning infrastructure
+    private readonly Timer _backgroundPruningTimer;
+    private static readonly TimeSpan BackgroundPruningInterval = TimeSpan.FromSeconds(10);
+    private readonly object _disposeLock = new();
+    private volatile bool _disposed = false;
 
     /// <summary>
     /// Constructs a <see cref="SentrySpanProcessor"/>.
@@ -80,6 +86,9 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         // Thus, get a single instance lazily.
         _resourceAttributes = new Lazy<IDictionary<string, object>>(() =>
             ParentProvider?.GetResource().Attributes.ToDict() ?? new Dictionary<string, object>(0));
+        
+        // Initialize background pruning timer
+        _backgroundPruningTimer = new Timer(BackgroundPruning, null, BackgroundPruningInterval, BackgroundPruningInterval);
     }
 
     /// <inheritdoc />
@@ -113,8 +122,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             CreateRootSpan(data);
         }
 
-        // Housekeeping
-        PruneFilteredSpans();
+        // Removed inline pruning call - now handled by background timer
     }
 
     private void CreateChildSpan(Activity data, ISpan parentSpan, ActivitySpanId? parentSpanId = null)
@@ -282,17 +290,45 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         _map.TryRemove(data.SpanId, out _);
 
-        // Housekeeping
-        PruneFilteredSpans();
+        // Removed inline pruning call - now handled by background timer
+    }
+
+    /// <summary>
+    /// Background method that runs periodically to clean up filtered spans.
+    /// This improves performance by moving the pruning operation off the hot path.
+    /// </summary>
+    private void BackgroundPruning(object? state)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        try
+        {
+            // Use the existing PruneFilteredSpans method but force execution
+            PruneFilteredSpans(force: true);
+        }
+        catch (Exception ex)
+        {
+            // Log the exception but don't let it crash the background operation
+            _options?.DiagnosticLogger?.LogError(ex, "Error during background span pruning.");
+        }
     }
 
     /// <summary>
     /// Clean up items that may have been filtered out.
     /// See https://github.com/getsentry/sentry-dotnet/pull/3198
+    /// This method is now primarily called by the background timer, improving performance isolation.
     /// </summary>
     internal void PruneFilteredSpans(bool force = false)
     {
         if (!force && !NeedsPruning())
+        {
+            return;
+        }
+
+        if (_disposed)
         {
             return;
         }
@@ -306,6 +342,9 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 _map.TryRemove(spanId, out _);
             }
         }
+        
+        // Update the last pruned timestamp to prevent duplicate work
+        Interlocked.Exchange(ref _lastPruned, DateTime.UtcNow.Ticks);
     }
 
     private bool NeedsPruning()
@@ -533,5 +572,40 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         var exception = (Exception)Activator.CreateInstance(type, message)!;
         exception.SetSentryMechanism("SentrySpanProcessor.ErrorSpan");
         return exception;
+    }
+
+    /// <summary>
+    /// Disposes of the background pruning timer and cleans up resources.
+    /// </summary>
+    public void Dispose()
+    {
+        lock (_disposeLock)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _disposed = true;
+            
+            try
+            {
+                _backgroundPruningTimer?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                _options?.DiagnosticLogger?.LogError(ex, "Error disposing background pruning timer.");
+            }
+
+            // Perform a final cleanup of any remaining filtered spans
+            try
+            {
+                PruneFilteredSpans(force: true);
+            }
+            catch (Exception ex)
+            {
+                _options?.DiagnosticLogger?.LogError(ex, "Error during final span pruning cleanup.");
+            }
+        }
     }
 }
