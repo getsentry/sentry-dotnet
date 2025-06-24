@@ -31,6 +31,13 @@ public static class Program
                 builder.AddGrpc();
                 builder.AddSentryOptions(options =>
                 {
+#if !SENTRY_DSN_DEFINED_IN_ENV
+                    // A DSN is required. You can set here in code, via the SENTRY_DSN environment variable or in your
+                    // appsettings.json file.
+                    // See https://docs.sentry.io/platforms/dotnet/guides/aspnetcore/#configure
+                    options.Dsn = SamplesShared.Dsn;
+#endif
+
                     // The parameter 'options' here has values populated through the configuration system.
                     // That includes 'appsettings.json', environment variables and anything else
                     // defined on the ConfigurationBuilder.

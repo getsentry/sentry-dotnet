@@ -174,8 +174,7 @@ public class HubAdapterTests : IDisposable
         const BreadcrumbLevel level = BreadcrumbLevel.Critical;
 
         var scope = new Scope();
-        Hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-            .Do(c => c.Arg<Action<Scope>>()(scope));
+        Hub.SubstituteConfigureScope(scope);
 
         action(message, category, type, data, level);
 

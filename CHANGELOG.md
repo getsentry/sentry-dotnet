@@ -1,6 +1,12 @@
 # Changelog
 
-## Unreleased
+## 5.11.1
+
+### Fixes
+
+- Fix linking of libsentry-native to avoid DllNotFoundException in Native AOT applications ([#4298](https://github.com/getsentry/sentry-dotnet/pull/4298))
+
+## 5.11.0
 
 - Moved experimental _Sentry Structured Logger_ from `SentrySdk.Logger` to `SentrySdk.Experimental.Logger` ([#4158](https://github.com/getsentry/sentry-dotnet/pull/4158))
 - Moved experimental options for _Sentry Structured Logging_ ([#4193](https://github.com/getsentry/sentry-dotnet/pull/4193))
@@ -17,6 +23,27 @@
   - `Sentry.AspNetCore`, enabled via `SentryAspNetCoreOptions.EnableLogs`
   - `Sentry.Extensions.Logging`, enabled via `SentryLoggingOptions.EnableLogs`
   - `Sentry.Maui`, enabled via `SentryMauiOptions.EnableLogs`
+- Add experimental support for [_Sentry Structured Logging_](https://docs.sentry.io/product/explore/logs/) via `SentrySdk.Experimental.Logger` ([#4158](https://github.com/getsentry/sentry-dotnet/pull/4158))
+- Added non-allocating `ConfigureScope` and `ConfigureScopeAsync` overloads ([#4244](https://github.com/getsentry/sentry-dotnet/pull/4244))
+- Add .NET MAUI `AutomationId` element information to breadcrumbs ([#4248](https://github.com/getsentry/sentry-dotnet/pull/4248))
+- The HTTP Response Status Code for spans instrumented using OpenTelemetry is now searchable ([#4283](https://github.com/getsentry/sentry-dotnet/pull/4283))
+
+### Fixes
+
+- The HTTP instrumentation uses the span created for the outgoing request in the sentry-trace header, fixing the parent-child relationship between client and server ([#4264](https://github.com/getsentry/sentry-dotnet/pull/4264))
+- ExtraData not captured for Breadcrumbs in MauiEventsBinder ([#4254](https://github.com/getsentry/sentry-dotnet/pull/4254))
+    - NOTE: Required breaking changes to the public API of `Sentry.Maui.BreadcrumbEvent`, while keeping an _Obsolete_ constructor for backward compatibility.
+- InvalidOperationException sending attachments on Android with LLVM enabled ([#4276](https://github.com/getsentry/sentry-dotnet/pull/4276))
+- When CaptureFeedback methods are called with invalid email addresses, the email address will be removed and, if Debug mode is enabled, a warning will be logged. This is done to avoid losing the Feedback altogether (Sentry would reject Feedback that has an invalid email address) ([#4284](https://github.com/getsentry/sentry-dotnet/pull/4284))
+
+### Dependencies
+
+- Bump the version of the .NET SDK that we use from 9.0.203 to 9.0.301 ([#4272](https://github.com/getsentry/sentry-dotnet/pull/4272))
+  - Note that this also required we bump various Java dependencies (since version 9.0.300 of the Android workload requires newer versions of the these)
+  - See https://docs.sentry.io/platforms/dotnet/troubleshooting/#detected-package-version-outside-of-dependency-constraint if you see NU1605, NU1608 and/or NU1107 warnings after upgrading   
+- Bump Native SDK from v0.8.5 to v0.9.0 ([#4260](https://github.com/getsentry/sentry-dotnet/pull/4260))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#090)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.8.5...0.9.0)
 
 ## 5.10.0
 

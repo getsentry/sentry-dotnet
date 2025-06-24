@@ -172,7 +172,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             tracer.Contexts.Trace.Origin = OpenTelemetryOrigin;
             tracer.StartTimestamp = data.StartTimeUtc;
         }
-        _hub.ConfigureScope(scope => scope.Transaction = transaction);
+        _hub.ConfigureScope(static (scope, transaction) => scope.Transaction = transaction, transaction);
         transaction.SetFused(data);
         _map[data.SpanId] = transaction;
     }
@@ -230,10 +230,16 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         span.Operation = operation;
         span.Description = description;
 
+        // Handle HTTP response status code specially
+        var statusCode = attributes.HttpResponseStatusCodeAttribute();
         if (span is TransactionTracer transaction)
         {
             transaction.Name = description;
             transaction.NameSource = source;
+            if (statusCode is { } responseStatusCode)
+            {
+                transaction.Contexts.Response.StatusCode = responseStatusCode;
+            }
 
             // Use the end timestamp from the activity data.
             transaction.EndTimestamp = data.StartTimeUtc + data.Duration;
@@ -250,6 +256,11 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             // Resource attributes do not need to be set, as they would be identical as those set on the transaction.
             spanTracer.SetExtras(attributes);
             spanTracer.SetExtra("otel.kind", data.Kind);
+            if (statusCode is { } responseStatusCode)
+            {
+                // Set this as a tag so that it's searchable in Sentry
+                span.SetTag(OtelSemanticConventions.AttributeHttpResponseStatusCode, responseStatusCode.ToString());
+            }
         }
 
         // In ASP.NET Core the middleware finishes up (and the scope gets popped) before the activity is ended.  So we

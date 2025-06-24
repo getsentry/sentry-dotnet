@@ -139,7 +139,7 @@ public class MauiGestureRecognizerEventsBinder : IMauiElementEventBinder
         ToPointerData(e)
     ));
 
-    private static IEnumerable<(string Key, string Value)> ToPointerData(PointerEventArgs e) =>
+    private static (string Key, string Value)[] ToPointerData(PointerEventArgs e) =>
     [
         #if ANDROID
         ("MotionEventAction", e.PlatformArgs?.MotionEvent.Action.ToString() ?? string.Empty)

@@ -66,7 +66,7 @@ internal class Hub : IHub, IDisposable
             PushScope();
         }
 
-        Logger = new DefaultSentryStructuredLogger(this, ScopeManager, options, _clock);
+        Logger = SentryStructuredLogger.Create(this, options, _clock);
 
 #if MEMORY_DUMP_SUPPORTED
         if (options.HeapDumpOptions is not null)
@@ -101,6 +101,18 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    public void ConfigureScope<TArg>(Action<Scope, TArg> configureScope, TArg arg)
+    {
+        try
+        {
+            ScopeManager.ConfigureScope(configureScope, arg);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to ConfigureScope<TArg>");
+        }
+    }
+
     public async Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
     {
         try
@@ -110,6 +122,18 @@ internal class Hub : IHub, IDisposable
         catch (Exception e)
         {
             _options.LogError(e, "Failure to ConfigureScopeAsync");
+        }
+    }
+
+    public async Task ConfigureScopeAsync<TArg>(Func<Scope, TArg, Task> configureScope, TArg arg)
+    {
+        try
+        {
+            await ScopeManager.ConfigureScopeAsync(configureScope, arg).ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to ConfigureScopeAsync<TArg>");
         }
     }
 
@@ -274,7 +298,7 @@ internal class Hub : IHub, IDisposable
         string? operation = null)
     {
         var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader, _replaySession);
-        ConfigureScope(scope => scope.SetPropagationContext(propagationContext));
+        ConfigureScope(static (scope, propagationContext) => scope.SetPropagationContext(propagationContext), propagationContext);
 
         return new TransactionContext(
             name: name ?? string.Empty,
@@ -551,6 +575,12 @@ internal class Hub : IHub, IDisposable
 
         try
         {
+            if (!string.IsNullOrWhiteSpace(feedback.ContactEmail) && !EmailValidator.IsValidEmail(feedback.ContactEmail))
+            {
+                _options.LogWarning("Feedback email scrubbed due to invalid email format: '{0}'", feedback.ContactEmail);
+                feedback.ContactEmail = null;
+            }
+
             scope ??= CurrentScope;
             CurrentClient.CaptureFeedback(feedback, scope, hint);
         }
@@ -598,6 +628,16 @@ internal class Hub : IHub, IDisposable
 
         try
         {
+            if (!string.IsNullOrWhiteSpace(userFeedback.Email) && !EmailValidator.IsValidEmail(userFeedback.Email))
+            {
+                _options.LogWarning("Feedback email scrubbed due to invalid email format: '{0}'", userFeedback.Email);
+                userFeedback = new UserFeedback(
+                    userFeedback.EventId,
+                    userFeedback.Name,
+                    null, // Scrubbed email
+                    userFeedback.Comments);
+            }
+
             CurrentClient.CaptureUserFeedback(userFeedback);
         }
         catch (Exception e)

@@ -394,13 +394,46 @@ public static partial class SentrySdk
         => CurrentHub.ConfigureScope(configureScope);
 
     /// <summary>
-    /// Configures the scope asynchronously.
+    /// Configures the scope through the callback.
+    /// <example>
+    /// <code>
+    /// object someValue = ...;
+    /// SentrySdk.ConfigureScope(static (scope, arg) => scope.SetExtra("key", arg), someValue);
+    /// </code>
+    /// </example>
     /// </summary>
     /// <param name="configureScope">The configure scope callback.</param>
-    /// <returns>The Id of the event.</returns>
+    /// <param name="arg">The argument to pass to the configure scope callback.</param>
+    public static void ConfigureScope<TArg>(Action<Scope, TArg> configureScope, TArg arg)
+        => CurrentHub.ConfigureScope(configureScope, arg);
+
+    /// <summary>
+    /// Configures the scope through the callback asynchronously.
+    /// </summary>
+    /// <param name="configureScope">The configure scope callback.</param>
+    /// <returns>A task that completes when the callback is done or a completed task if the SDK is disabled.</returns>
     [DebuggerStepThrough]
     public static Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
         => CurrentHub.ConfigureScopeAsync(configureScope);
+
+    /// <summary>
+    /// Configures the scope through the callback asynchronously.
+    /// <example>
+    /// <code>
+    /// object someValue = ...;
+    /// SentrySdk.ConfigureScopeAsync(static async (scope, arg) =>
+    /// {
+    ///     scope.SetExtra("key", arg);
+    /// }, someValue);
+    /// </code>
+    /// </example>
+    /// </summary>
+    /// <param name="configureScope">The configure scope callback.</param>
+    /// <param name="arg">The argument to pass to the configure scope callback.</param>
+    /// <returns>A task that completes when the callback is done or a completed task if the SDK is disabled.</returns>
+    [DebuggerStepThrough]
+    public static Task ConfigureScopeAsync<TArg>(Func<Scope, TArg, Task> configureScope, TArg arg)
+        => CurrentHub.ConfigureScopeAsync(configureScope, arg);
 
     /// <summary>
     /// Sets a tag on the current scope.

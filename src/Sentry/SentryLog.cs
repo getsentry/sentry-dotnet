@@ -78,17 +78,72 @@ public sealed class SentryLog : ISentryJsonSerializable
     public SpanId? ParentSpanId { get; init; }
 
     /// <summary>
-    /// Gets the attribute value associated with the specified key when of type <see cref="string"/>.
+    /// Gets the attribute value associated with the specified key.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     /// <remarks>
-    /// Returns <see langword="true"/> if the <see cref="SentryLog"/> contains an attribute with the specified key of type <see cref="string"/>.
+    /// Returns <see langword="true"/> if the <see cref="SentryLog"/> contains an attribute with the specified key and it's value is not <see langword="null"/>.
     /// Otherwise <see langword="false"/>.
+    /// Supported types:
+    /// <list type="table">
+    ///   <listheader>
+    ///     <term>Type</term>
+    ///     <description>Range</description>
+    ///   </listheader>
+    ///   <item>
+    ///     <term>string</term>
+    ///     <description><see langword="string"/> and <see langword="char"/></description>
+    ///   </item>
+    ///   <item>
+    ///     <term>boolean</term>
+    ///     <description><see langword="false"/> and <see langword="true"/></description>
+    ///   </item>
+    ///   <item>
+    ///     <term>integer</term>
+    ///     <description>64-bit signed integral numeric types</description>
+    ///   </item>
+    ///   <item>
+    ///     <term>double</term>
+    ///     <description>64-bit floating-point numeric types</description>
+    ///   </item>
+    /// </list>
+    /// Unsupported types:
+    /// <list type="table">
+    ///   <listheader>
+    ///     <term>Type</term>
+    ///     <description>Result</description>
+    ///   </listheader>
+    ///   <item>
+    ///     <term><see langword="object"/></term>
+    ///     <description><c>ToString</c> as <c>"type": "string"</c></description>
+    ///   </item>
+    ///   <item>
+    ///     <term>Collections</term>
+    ///     <description><c>ToString</c> as <c>"type": "string"</c></description>
+    ///   </item>
+    ///   <item>
+    ///     <term><see langword="null"/></term>
+    ///     <description>ignored</description>
+    ///   </item>
+    /// </list>
     /// </remarks>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    public bool TryGetAttribute(string key, [NotNullWhen(true)] out string? value)
+    public bool TryGetAttribute(string key, [NotNullWhen(true)] out object? value)
     {
-        if (_attributes.TryGetValue(key, out var attribute) && attribute.Type == "string")
+        if (_attributes.TryGetValue(key, out var attribute) && attribute.Type == "object" && attribute.Value is not null)
+        {
+            value = attribute.Value;
+            return true;
+        }
+
+        value = null;
+        return false;
+    }
+
+    internal bool TryGetAttribute(string key, [NotNullWhen(true)] out string? value)
+    {
+        if (_attributes.TryGetValue(key, out var attribute) && attribute.Type == "string" && attribute.Value is not null)
         {
             value = (string)attribute.Value;
             return true;
@@ -99,109 +154,21 @@ public sealed class SentryLog : ISentryJsonSerializable
     }
 
     /// <summary>
-    /// Gets the attribute value associated with the specified key when of type <see cref="bool"/>.
+    /// Set a key-value pair of data attached to the log.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
-    /// <remarks>
-    /// Returns <see langword="true"/> if the <see cref="SentryLog"/> contains an attribute with the specified key of type <see cref="bool"/>.
-    /// Otherwise <see langword="false"/>.
-    /// </remarks>
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    public bool TryGetAttribute(string key, out bool value)
+    public void SetAttribute(string key, object value)
     {
-        if (_attributes.TryGetValue(key, out var attribute) && attribute.Type == "boolean")
-        {
-            value = (bool)attribute.Value;
-            return true;
-        }
-
-        value = false;
-        return false;
+        _attributes[key] = new SentryAttribute(value);
     }
 
-    /// <summary>
-    /// Gets the attribute value associated with the specified key when of type <see cref="long"/>.
-    /// <para>This API is experimental and it may change in the future.</para>
-    /// </summary>
-    /// <remarks>
-    /// Returns <see langword="true"/> if the <see cref="SentryLog"/> contains an attribute with the specified key of type <see cref="long"/>.
-    /// Otherwise <see langword="false"/>.
-    /// </remarks>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public bool TryGetAttribute(string key, out long value)
-    {
-        if (_attributes.TryGetValue(key, out var attribute) && attribute.Type == "integer")
-        {
-            value = (long)attribute.Value;
-            return true;
-        }
-
-        value = 0L;
-        return false;
-    }
-
-    /// <summary>
-    /// Gets the attribute value associated with the specified key when of type <see cref="double"/>.
-    /// <para>This API is experimental and it may change in the future.</para>
-    /// </summary>
-    /// <remarks>
-    /// Returns <see langword="true"/> if the <see cref="SentryLog"/> contains an attribute with the specified key of type <see cref="double"/>.
-    /// Otherwise <see langword="false"/>.
-    /// </remarks>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public bool TryGetAttribute(string key, out double value)
-    {
-        if (_attributes.TryGetValue(key, out var attribute) && attribute.Type == "double")
-        {
-            value = (double)attribute.Value;
-            return true;
-        }
-
-        value = 0.0;
-        return false;
-    }
-
-    /// <summary>
-    /// Set a key-value pair of <see cref="string"/> data attached to the log.
-    /// <para>This API is experimental and it may change in the future.</para>
-    /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public void SetAttribute(string key, string value)
+    internal void SetAttribute(string key, string value)
     {
         _attributes[key] = new SentryAttribute(value, "string");
     }
 
-    /// <summary>
-    /// Set a key-value pair of <see cref="bool"/> data attached to the log.
-    /// <para>This API is experimental and it may change in the future.</para>
-    /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public void SetAttribute(string key, bool value)
-    {
-        _attributes[key] = new SentryAttribute(value, "boolean");
-    }
-
-    /// <summary>
-    /// Set a key-value pair of <see cref="long"/> data attached to the log.
-    /// <para>This API is experimental and it may change in the future.</para>
-    /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public void SetAttribute(string key, long value)
-    {
-        _attributes[key] = new SentryAttribute(value, "integer");
-    }
-
-    /// <summary>
-    /// Set a key-value pair of <see cref="double"/> data attached to the log.
-    /// <para>This API is experimental and it may change in the future.</para>
-    /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public void SetAttribute(string key, double value)
-    {
-        _attributes[key] = new SentryAttribute(value, "double");
-    }
-
-    internal void SetAttributes(SentryOptions options)
+    internal void SetDefaultAttributes(SentryOptions options)
     {
         var environment = options.SettingLocator.GetEnvironment();
         SetAttribute("sentry.environment", environment);
@@ -246,20 +213,20 @@ public sealed class SentryLog : ISentryJsonSerializable
 
         if (Template is not null)
         {
-            SentryAttributeSerializer.WriteAttribute(writer, "sentry.message.template", Template, "string");
+            SentryAttributeSerializer.WriteStringAttribute(writer, "sentry.message.template", Template);
         }
 
         if (!Parameters.IsDefault)
         {
             for (var index = 0; index < Parameters.Length; index++)
             {
-                SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameter.{index}", Parameters[index]);
+                SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameter.{index}", Parameters[index], logger);
             }
         }
 
         foreach (var attribute in _attributes)
         {
-            SentryAttributeSerializer.WriteAttribute(writer, attribute.Key, attribute.Value);
+            SentryAttributeSerializer.WriteAttribute(writer, attribute.Key, attribute.Value, logger);
         }
 
         if (ParentSpanId.HasValue)

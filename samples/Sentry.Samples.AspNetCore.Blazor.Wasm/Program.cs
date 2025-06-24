@@ -6,7 +6,11 @@ try
     var builder = WebAssemblyHostBuilder.CreateDefault(args);
     builder.UseSentry(options =>
     {
-        options.Dsn = "https://eb18e953812b41c3aeb042e666fd3b5c@o447951.ingest.sentry.io/5428537";
+#if !SENTRY_DSN_DEFINED_IN_ENV
+        // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+        // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+        options.Dsn = SamplesShared.Dsn;
+#endif
         options.Debug = true;
     });
 

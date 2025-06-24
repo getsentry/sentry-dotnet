@@ -2,8 +2,10 @@ using Sentry.Maui.Internal;
 
 namespace Sentry.Maui.Tests;
 
-public partial class MauiEventsBinderTests
+public class MauiGestureRecognizerEventsBinderTests
 {
+    private readonly MauiEventsBinderFixture _fixture = new(new MauiGestureRecognizerEventsBinder());
+
     [SkippableFact]
     public void TapGestureRecognizer_LifecycleEvents_AddsBreadcrumb()
     {

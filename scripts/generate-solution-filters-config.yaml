@@ -24,6 +24,7 @@ groupConfigs:
   windowsOnly:
     # .NET Framework projects
     - "**/*.AspNet.csproj"
+    - "**/*.AspNet.Tests.csproj"
   artefacts:
     # Any projects in the obj or bin directories
     - "**/obj/**/*.csproj"
@@ -93,6 +94,7 @@ filterConfigs:
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
+        - "**/*.AspNet.Tests.csproj"
 
   - outputPath: Sentry-CI-Build-Windows.slnf
     include:

@@ -34,6 +34,40 @@ public class SentryHttpMessageHandlerTests
     }
 
     [Fact]
+    public async Task SendAsync_SentryTraceHeaderNotSet_SetsHeader_ToCorrectParent()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+
+        const string rootTraceHeader = "75302ac48a024bde9a3b3734a82e36c8-1000000000000000-1";
+        hub.GetTraceHeader().ReturnsForAnyArgs(
+            SentryTraceHeader.Parse(rootTraceHeader));
+        var parentSpan = Substitute.For<ISpan>();
+        parentSpan.GetTraceHeader().ReturnsForAnyArgs(
+            SentryTraceHeader.Parse(rootTraceHeader));
+        hub.GetSpan().ReturnsForAnyArgs(parentSpan);
+        const string httpSpanTraceHeader = "75302ac48a024bde9a3b3734a82e36c8-2000000000000000-1";
+        var httpSpan = Substitute.For<ISpan>();
+        httpSpan.GetTraceHeader().ReturnsForAnyArgs(
+            SentryTraceHeader.Parse(httpSpanTraceHeader));
+        parentSpan.StartChild(Arg.Any<string>()).ReturnsForAnyArgs(httpSpan);
+
+        using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
+        using var sentryHandler = new SentryHttpMessageHandler(innerHandler, hub);
+        using var client = new HttpClient(sentryHandler);
+
+        // Act
+        await client.GetAsync("https://localhost/");
+
+        using var request = innerHandler.GetRequests().Single();
+
+        // Assert
+        request.Headers.Should().Contain(h =>
+            h.Key == "sentry-trace" &&
+            string.Concat(h.Value) == httpSpanTraceHeader);
+    }
+
+    [Fact]
     public async Task SendAsync_SentryTraceHeaderNotSet_SetsHeader_WhenUrlMatchesPropagationOptions()
     {
         // Arrange
@@ -180,8 +214,7 @@ public class SentryHttpMessageHandlerTests
         // Arrange
         var scope = new Scope();
         var hub = Substitute.For<IHub>();
-        hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-            .Do(c => c.Arg<Action<Scope>>()(scope));
+        hub.SubstituteConfigureScope(scope);
 
         var url = "https://localhost/";
 
@@ -462,8 +495,7 @@ public class SentryHttpMessageHandlerTests
         // Arrange
         var scope = new Scope();
         var hub = Substitute.For<IHub>();
-        hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-            .Do(c => c.Arg<Action<Scope>>()(scope));
+        hub.SubstituteConfigureScope(scope);
 
         var url = "https://localhost/";
 

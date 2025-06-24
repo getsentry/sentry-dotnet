@@ -1,4 +1,5 @@
 using Sentry.Infrastructure;
+using Sentry.Internal;
 
 namespace Sentry;
 
@@ -9,6 +10,13 @@ namespace Sentry;
 [Experimental(DiagnosticId.ExperimentalFeature)]
 public abstract class SentryStructuredLogger
 {
+    internal static SentryStructuredLogger Create(IHub hub, SentryOptions options, ISystemClock clock)
+    {
+        return options.Experimental.EnableLogs
+            ? new DefaultSentryStructuredLogger(hub, options, clock)
+            : DisabledSentryStructuredLogger.Instance;
+    }
+
     private protected SentryStructuredLogger()
     {
     }

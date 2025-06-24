@@ -26,15 +26,21 @@ public class SentryWebHostBuilderExtensionsIntegrationTests : AspNetSentrySdkTes
         }
     }
 
-    [Fact]
+    [SkippableFact]
     public void UseSentry_NoDsnProvided_ThrowsException()
     {
+#if SENTRY_DSN_DEFINED_IN_ENV
+        Skip.If(true, "This test only works when the DSN is not configured as an environment variable.");
+#endif
         Assert.Throws<ArgumentNullException>(() => _webHostBuilder.UseSentry().Build());
     }
 
-    [Fact]
+    [SkippableFact]
     public void UseSentry_DisableDsnString_DisabledSdk()
     {
+#if SENTRY_DSN_DEFINED_IN_ENV
+        Skip.If(true, "This test only works when the DSN is not configured as an environment variable.");
+#endif
         _ = _webHostBuilder.UseSentry(Sentry.SentryConstants.DisableSdkDsnValue)
             .Build();
 

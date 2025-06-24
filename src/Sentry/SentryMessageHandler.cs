@@ -86,7 +86,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
         var span = ProcessRequest(request, method, url);
         try
         {
-            PropagateTraceHeaders(request, url);
+            PropagateTraceHeaders(request, url, span);
             var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
             HandleResponse(response, span, method, url);
             return response;
@@ -108,7 +108,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
         var span = ProcessRequest(request, method, url);
         try
         {
-            PropagateTraceHeaders(request, url);
+            PropagateTraceHeaders(request, url, span);
             var response = base.Send(request, cancellationToken);
             HandleResponse(response, span, method, url);
             return response;
@@ -121,7 +121,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
     }
 #endif
 
-    private void PropagateTraceHeaders(HttpRequestMessage request, string url)
+    private void PropagateTraceHeaders(HttpRequestMessage request, string url, ISpan? parentSpan)
     {
         // Assign a default inner handler for convenience the first time this is used.
         // We can't do this in a constructor, or it will throw when used with HttpMessageHandlerBuilderFilter.
@@ -135,15 +135,17 @@ public abstract class SentryMessageHandler : DelegatingHandler
 
         if (_options?.TracePropagationTargets.MatchesSubstringOrRegex(url) is true or null)
         {
-            AddSentryTraceHeader(request);
+            AddSentryTraceHeader(request, parentSpan);
             AddBaggageHeader(request);
         }
     }
 
-    private void AddSentryTraceHeader(HttpRequestMessage request)
+    private void AddSentryTraceHeader(HttpRequestMessage request, ISpan? parentSpan)
     {
         // Set trace header if it hasn't already been set
-        if (!request.Headers.Contains(SentryTraceHeader.HttpHeaderName) && _hub.GetTraceHeader() is { } traceHeader)
+        if (!request.Headers.Contains(SentryTraceHeader.HttpHeaderName) &&
+            // Use the span created by this integration as parent, instead of its own parent
+            (parentSpan?.GetTraceHeader() ?? _hub.GetTraceHeader()) is { } traceHeader)
         {
             request.Headers.Add(SentryTraceHeader.HttpHeaderName, traceHeader.ToString());
         }
