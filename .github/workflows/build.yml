@@ -218,6 +218,46 @@ jobs:
         with:
           path: integration-test
 
+  msbuild:
+    needs: build-sentry-native
+    name: MSBuild
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Download sentry-native (Windows)
+        uses: actions/cache/restore@v4
+        with:
+          path: src/Sentry/Platforms/Native/sentry-native
+          key: sentry-native-Windows-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+          enableCrossOsArchive: true
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
+      - name: Build Native Dependencies
+        uses: ./.github/actions/buildnative
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce # v2
+
+      - name: Run MSBuild
+        id: msbuild
+        run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build -p:Configuration=Release --nologo -v:minimal -flp:logfile=msbuild.log -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
+
+      - name: Upload logs
+        if: ${{ steps.msbuild.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target || runner.os }}-msbuild-logs
+          path: |
+            msbuild.log
+            msbuild.binlog
 
   trim-analysis:
     needs: build-sentry-native
