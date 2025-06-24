@@ -631,14 +631,8 @@ namespace Sentry
         public string? Template { get; init; }
         public System.DateTimeOffset Timestamp { get; init; }
         public Sentry.SentryId TraceId { get; init; }
-        public void SetAttribute(string key, bool value) { }
-        public void SetAttribute(string key, double value) { }
-        public void SetAttribute(string key, long value) { }
-        public void SetAttribute(string key, string value) { }
-        public bool TryGetAttribute(string key, out bool value) { }
-        public bool TryGetAttribute(string key, out double value) { }
-        public bool TryGetAttribute(string key, out long value) { }
-        public bool TryGetAttribute(string key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? value) { }
+        public void SetAttribute(string key, object value) { }
+        public bool TryGetAttribute(string key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out object? value) { }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
     }
     public enum SentryLogLevel

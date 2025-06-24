@@ -658,21 +658,9 @@ namespace Sentry
         [System.Runtime.CompilerServices.RequiredMember]
         public Sentry.SentryId TraceId { get; init; }
         [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
-        public void SetAttribute(string key, bool value) { }
+        public void SetAttribute(string key, object value) { }
         [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
-        public void SetAttribute(string key, double value) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
-        public void SetAttribute(string key, long value) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
-        public void SetAttribute(string key, string value) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
-        public bool TryGetAttribute(string key, out bool value) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
-        public bool TryGetAttribute(string key, out double value) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
-        public bool TryGetAttribute(string key, out long value) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
-        public bool TryGetAttribute(string key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? value) { }
+        public bool TryGetAttribute(string key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out object? value) { }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
     }
     [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
