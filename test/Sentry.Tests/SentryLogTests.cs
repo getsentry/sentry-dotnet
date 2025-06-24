@@ -31,7 +31,7 @@ public class SentryLogTests
         };
 
         var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Trace, "message");
-        log.SetAttributes(options);
+        log.SetDefaultAttributes(options);
 
         var envelope = Envelope.FromLog(log);
 
@@ -117,7 +117,7 @@ public class SentryLogTests
         log.SetAttribute("boolean-attribute", true);
         log.SetAttribute("integer-attribute", 3);
         log.SetAttribute("double-attribute", 4.4);
-        log.SetAttributes(options);
+        log.SetDefaultAttributes(options);
 
         var envelope = EnvelopeItem.FromLog(log);
 

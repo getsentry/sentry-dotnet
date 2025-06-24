@@ -168,7 +168,7 @@ public sealed class SentryLog : ISentryJsonSerializable
         _attributes[key] = new SentryAttribute(value, "string");
     }
 
-    internal void SetAttributes(SentryOptions options)
+    internal void SetDefaultAttributes(SentryOptions options)
     {
         var environment = options.SettingLocator.GetEnvironment();
         SetAttribute("sentry.environment", environment);
