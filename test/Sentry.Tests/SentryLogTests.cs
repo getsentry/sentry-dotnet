@@ -214,6 +214,7 @@ public class SentryLogTests
         _output.Entries.Should().BeEmpty();
     }
 
+#if (NETCOREAPP3_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER) //System.Buffers.ArrayBufferWriter<T>
     [Fact]
     public void WriteTo_MessageParameters_AsAttributes()
     {
@@ -243,7 +244,7 @@ public class SentryLogTests
         };
 
         ArrayBufferWriter<byte> bufferWriter = new();
-        Utf8JsonWriter writer = new(bufferWriter);
+        using Utf8JsonWriter writer = new(bufferWriter);
         log.WriteTo(writer, _output);
         writer.Flush();
 
@@ -278,7 +279,9 @@ public class SentryLogTests
             entry => entry.Message.Should().Match("*null*is not supported*ignored*")
         );
     }
+#endif
 
+#if (NETCOREAPP3_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER) //System.Buffers.ArrayBufferWriter<T>
     [Fact]
     public void WriteTo_Attributes_AsJson()
     {
@@ -303,7 +306,7 @@ public class SentryLogTests
         log.SetAttribute("null", null!);
 
         ArrayBufferWriter<byte> bufferWriter = new();
-        Utf8JsonWriter writer = new(bufferWriter);
+        using Utf8JsonWriter writer = new(bufferWriter);
         log.WriteTo(writer, _output);
         writer.Flush();
 
@@ -338,6 +341,7 @@ public class SentryLogTests
             entry => entry.Message.Should().Match("*null*is not supported*ignored*")
         );
     }
+#endif
 }
 
 file static class AssertExtensions
