@@ -163,7 +163,7 @@ public sealed class SentryLog : ISentryJsonSerializable
         _attributes[key] = new SentryAttribute(value);
     }
 
-    private void SetAttribute(string key, string value)
+    internal void SetAttribute(string key, string value)
     {
         _attributes[key] = new SentryAttribute(value, "string");
     }
