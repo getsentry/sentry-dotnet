@@ -5,32 +5,51 @@ namespace Sentry.Protocol;
 [DebuggerDisplay(@"\{ Value = {Value}, Type = {Type} \}")]
 internal readonly struct SentryAttribute
 {
+    internal static SentryAttribute CreateString(object value) => new(value, "string");
+    internal static SentryAttribute CreateBoolean(object value) => new(value, "boolean");
+    internal static SentryAttribute CreateInteger(object value) => new(value, "integer");
+    internal static SentryAttribute CreateDouble(object value) => new(value, "double");
+
+    public SentryAttribute(object value)
+    {
+        Value = value;
+        Type = null;
+    }
+
     public SentryAttribute(object value, string type)
     {
         Value = value;
         Type = type;
     }
 
-    public object Value { get; }
-    public string Type { get; }
+    public object? Value { get; }
+    public string? Type { get; }
 }
 
 internal static class SentryAttributeSerializer
 {
+    internal static void WriteStringAttribute(Utf8JsonWriter writer, string propertyName, string value)
+    {
+        writer.WritePropertyName(propertyName);
+        writer.WriteStartObject();
+        writer.WriteString("value", value);
+        writer.WriteString("type", "string");
+        writer.WriteEndObject();
+    }
+
     internal static void WriteAttribute(Utf8JsonWriter writer, string propertyName, SentryAttribute attribute, IDiagnosticLogger? logger)
     {
-        Debug.Assert(attribute.Value is not null && attribute.Type is not null, $"The ValueType {nameof(attribute)} may have been assigned 'default', for which static flow analysis does not report nullable warnings.");
+        if (attribute.Value is null)
+        {
+            logger?.LogWarning("'null' is not supported by Sentry-Attributes and will be ignored.");
+            return;
+        }
+
         writer.WritePropertyName(propertyName);
         WriteAttributeValue(writer, attribute.Value, attribute.Type, logger);
     }
 
-    internal static void WriteAttribute(Utf8JsonWriter writer, string propertyName, object value, string type, IDiagnosticLogger? logger)
-    {
-        writer.WritePropertyName(propertyName);
-        WriteAttributeValue(writer, value, type, logger);
-    }
-
-    internal static void WriteAttribute(Utf8JsonWriter writer, string propertyName, object value, IDiagnosticLogger? logger)
+    internal static void WriteAttribute(Utf8JsonWriter writer, string propertyName, object? value, IDiagnosticLogger? logger)
     {
         if (value is null)
         {
@@ -42,37 +61,19 @@ internal static class SentryAttributeSerializer
         WriteAttributeValue(writer, value, logger);
     }
 
-    private static void WriteAttributeValue(Utf8JsonWriter writer, object value, string type, IDiagnosticLogger? logger)
+    private static void WriteAttributeValue(Utf8JsonWriter writer, object value, string? type, IDiagnosticLogger? logger)
     {
-        writer.WriteStartObject();
-
         if (type == "string")
         {
+            writer.WriteStartObject();
             writer.WriteString("value", (string)value);
             writer.WriteString("type", type);
-        }
-        else if (type == "boolean")
-        {
-            writer.WriteBoolean("value", (bool)value);
-            writer.WriteString("type", type);
-        }
-        else if (type == "integer")
-        {
-            writer.WriteNumber("value", (long)value);
-            writer.WriteString("type", type);
-        }
-        else if (type == "double")
-        {
-            writer.WriteNumber("value", (double)value);
-            writer.WriteString("type", type);
+            writer.WriteEndObject();
         }
         else
         {
-            writer.WriteString("value", value.ToString());
-            writer.WriteString("type", "string");
+            WriteAttributeValue(writer, value, logger);
         }
-
-        writer.WriteEndObject();
     }
 
     private static void WriteAttributeValue(Utf8JsonWriter writer, object value, IDiagnosticLogger? logger)

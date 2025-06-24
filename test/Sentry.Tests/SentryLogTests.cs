@@ -286,23 +286,23 @@ public class SentryLogTests
     public void WriteTo_Attributes_AsJson()
     {
         var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Trace, "message");
-        log.SetAttribute("sbyte.MinValue", sbyte.MinValue);
-        log.SetAttribute("byte.MaxValue", byte.MaxValue);
-        log.SetAttribute("short.MinValue", short.MinValue);
-        log.SetAttribute("ushort.MaxValue", ushort.MaxValue);
-        log.SetAttribute("int.MinValue", int.MinValue);
-        log.SetAttribute("uint.MaxValue", uint.MaxValue);
-        log.SetAttribute("long.MinValue", long.MinValue);
-        log.SetAttribute("ulong.MaxValue", ulong.MaxValue);
-        log.SetAttribute("nint.MinValue", nint.MinValue);
-        log.SetAttribute("nuint.MaxValue", nuint.MaxValue);
+        log.SetAttribute("sbyte", sbyte.MinValue);
+        log.SetAttribute("byte", byte.MaxValue);
+        log.SetAttribute("short", short.MinValue);
+        log.SetAttribute("ushort", ushort.MaxValue);
+        log.SetAttribute("int", int.MinValue);
+        log.SetAttribute("uint", uint.MaxValue);
+        log.SetAttribute("long", long.MinValue);
+        log.SetAttribute("ulong", ulong.MaxValue);
+        log.SetAttribute("nint", nint.MinValue);
+        log.SetAttribute("nuint", nuint.MaxValue);
         log.SetAttribute("float", 1f);
         log.SetAttribute("double", 2d);
-        //log.SetAttribute("decimal", 3m); //not supported
+        log.SetAttribute("decimal", 3m);
         log.SetAttribute("bool", true);
         log.SetAttribute("char", 'c');
         log.SetAttribute("string", "string");
-        //log.SetAttribute("object", KeyValuePair.Create("key", "value")); //not supported
+        log.SetAttribute("object", KeyValuePair.Create("key", "value"));
         log.SetAttribute("null", null!);
 
         ArrayBufferWriter<byte> bufferWriter = new();
