@@ -34,35 +34,35 @@
   </ItemGroup>
 
   <!-- Packaging the native library (NOTE: $(RuntimeIdentifier) is not set) -->
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier)' == 'win-x64'">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'win-x64'">
     <None Include="$(SentryNativeOutputDirectory-win-x64)$(SentryNativeLibraryName).lib">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-win-x64)</PackagePath>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier)' == 'win-arm64'">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'win-arm64'">
     <None Include="$(SentryNativeOutputDirectory-win-arm64)$(SentryNativeLibraryName).lib">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-win-arm64)</PackagePath>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier)' == 'linux-x64'">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'linux-x64'">
     <None Include="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-x64)</PackagePath>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier)' == 'linux-musl-x64'">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'linux-musl-x64'">
     <None Include="$(SentryNativeOutputDirectory-linux-musl-x64)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-musl-x64)</PackagePath>
     </None>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$([System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier)' == 'linux-arm64'">
+  <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'linux-arm64'">
     <None Include="$(SentryNativeOutputDirectory-linux-arm64)lib$(SentryNativeLibraryName).a">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-arm64)</PackagePath>
