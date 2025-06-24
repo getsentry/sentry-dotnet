@@ -206,8 +206,9 @@
   <ItemGroup>
     <ProjectReference Include="..\Sentry.SourceGenerators\Sentry.SourceGenerators.csproj" OutputItemType="" ReferenceOutputAssembly="false" PrivateAssets="all" SetTargetFramework="TargetFramework=netstandard2.0" SentryAnalyzersPack="true" />
   </ItemGroup>
-  <!-- See https://github.com/ViktorHofer/PackAsAnalyzer -->
-  <Target Name="_SentryPackAnalyzers" BeforeTargets="GenerateNuspec;_GetPackageFiles">
+  <!-- See https://learn.microsoft.com/dotnet/core/project-sdk/overview -->
+  <!-- See also https://github.com/ViktorHofer/PackAsAnalyzer -->
+  <Target Name="_SentryPackAnalyzers" BeforeTargets="_GetPackageFiles">
     <MSBuild Projects="@(ProjectReference->WithMetadataValue('SentryAnalyzersPack', 'true'))" Targets="GetTargetPath">
       <Output TaskParameter="TargetOutputs" ItemName="_SentryAnalyzersPackagePath" />
     </MSBuild>
