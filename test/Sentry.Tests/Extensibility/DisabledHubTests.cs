@@ -35,4 +35,8 @@ public class DisabledHubTests
 
     [Fact]
     public async Task FlushAsync_NoOp() => await DisabledHub.Instance.FlushAsync();
+
+    [Fact]
+    public void Logger_IsDisabled()
+        => Assert.IsType<DisabledSentryStructuredLogger>(DisabledHub.Instance.Logger);
 }

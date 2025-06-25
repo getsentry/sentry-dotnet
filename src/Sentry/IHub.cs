@@ -18,6 +18,20 @@ public interface IHub : ISentryClient, ISentryScopeManager
     public SentryId LastEventId { get; }
 
     /// <summary>
+    /// Creates and sends logs to Sentry.
+    /// <para>This API is experimental and it may change in the future.</para>
+    /// </summary>
+    /// <remarks>
+    /// Available options:
+    /// <list type="bullet">
+    /// <item><see cref="Sentry.SentryOptions.SentryExperimentalOptions.EnableLogs"/></item>
+    /// <item><see cref="Sentry.SentryOptions.SentryExperimentalOptions.SetBeforeSendLog(System.Func{SentryLog, SentryLog})"/></item>
+    /// </list>
+    /// </remarks>
+    [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
+    public SentryStructuredLogger Logger { get; }
+
+    /// <summary>
     /// Starts a transaction.
     /// </summary>
     public ITransactionTracer StartTransaction(
