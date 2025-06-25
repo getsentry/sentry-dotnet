@@ -52,7 +52,8 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
             return;
         }
 
-        log.SetDefaultAttributes(_options);
+        var scope = _hub.GetScope();
+        log.SetDefaultAttributes(_options, scope?.Sdk ?? SdkVersion.Instance);
 
         var configuredLog = log;
         if (_options.Experimental.BeforeSendLogInternal is { } beforeSendLog)

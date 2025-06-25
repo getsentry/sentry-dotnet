@@ -1,6 +1,5 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Internal;
 using Sentry.Protocol;
 
 namespace Sentry;
@@ -131,7 +130,7 @@ public sealed class SentryLog : ISentryJsonSerializable
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public bool TryGetAttribute(string key, [NotNullWhen(true)] out object? value)
     {
-        if (_attributes.TryGetValue(key, out var attribute) && attribute.Type == "object" && attribute.Value is not null)
+        if (_attributes.TryGetValue(key, out var attribute) && attribute.Value is not null)
         {
             value = attribute.Value;
             return true;
@@ -168,7 +167,7 @@ public sealed class SentryLog : ISentryJsonSerializable
         _attributes[key] = new SentryAttribute(value, "string");
     }
 
-    internal void SetDefaultAttributes(SentryOptions options)
+    internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk)
     {
         var environment = options.SettingLocator.GetEnvironment();
         SetAttribute("sentry.environment", environment);
@@ -179,8 +178,11 @@ public sealed class SentryLog : ISentryJsonSerializable
             SetAttribute("sentry.release", release);
         }
 
-        SetAttribute("sentry.sdk.name", Constants.SdkName);
-        if (SdkVersion.Instance.Version is { } version)
+        if (sdk.Name is { } name)
+        {
+            SetAttribute("sentry.sdk.name", name);
+        }
+        if (sdk.Version is { } version)
         {
             SetAttribute("sentry.sdk.version", version);
         }

@@ -42,7 +42,7 @@ SentrySdk.Init(options =>
     options.Experimental.SetBeforeSendLog(static log =>
     {
         // A demonstration of how you can drop logs based on some attribute they have
-        if (log.TryGetAttribute("suppress", out bool attribute) && attribute)
+        if (log.TryGetAttribute("suppress", out var attribute) && attribute is true)
         {
             return null;
         }
