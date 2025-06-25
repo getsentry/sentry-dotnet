@@ -698,7 +698,7 @@ public static partial class SentrySdk
         => CurrentHub.BindException(exception, span);
 
     /// <summary>
-    /// Gets the currently active transaction
+    /// Gets the currently active transaction.
     /// </summary>
     [DebuggerStepThrough]
     public static ITransactionTracer? GetTransaction() => CurrentHub.GetTransaction();
