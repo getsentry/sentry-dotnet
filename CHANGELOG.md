@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Added StartSpan and GetTransaction methods to the SentrySdk ([#4303](https://github.com/getsentry/sentry-dotnet/pull/4303))
+
 ## 5.11.2
 
 ### Fixes
