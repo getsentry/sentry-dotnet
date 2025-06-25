@@ -66,6 +66,8 @@ internal class Hub : IHub, IDisposable
             PushScope();
         }
 
+        Logger = SentryStructuredLogger.Create(this, options, _clock);
+
 #if MEMORY_DUMP_SUPPORTED
         if (options.HeapDumpOptions is not null)
         {
@@ -800,4 +802,7 @@ internal class Hub : IHub, IDisposable
     }
 
     public SentryId LastEventId => CurrentScope.LastEventId;
+
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public SentryStructuredLogger Logger { get; }
 }
