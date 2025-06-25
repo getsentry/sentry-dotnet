@@ -19,8 +19,7 @@ builder.WebHost.UseSentry(options =>
 
 var app = builder.Build();
 
-// An example ASP.NET Core middleware that throws an
-// exception when serving a request to path: /throw
+// An example ASP.NET Core endpoint that throws an exception when serving a request to path: /throw
 app.MapGet("/throw/{message?}", context =>
 {
     var exceptionMessage = context.GetRouteValue("message") as string;
@@ -46,6 +45,25 @@ app.MapGet("/throw/{message?}", context =>
     // as exemplified above.
     throw new Exception(
         exceptionMessage ?? "An exception thrown from the ASP.NET Core pipeline");
+});
+
+// Demonstrates how to add tracing in custom middleware
+app.Use(async (context, next) =>
+{
+    var span = SentrySdk.StartSpan("CustomMiddlewareSpan", "middleware");
+    try
+    {
+        var log = context.RequestServices.GetRequiredService<ILoggerFactory>()
+            .CreateLogger<Program>();
+
+        log.LogInformation("Just chilling for a bit...");
+        await Task.Delay(TimeSpan.FromMilliseconds(50)); // Simulate some work
+    }
+    finally
+    {
+        span.Finish();
+    }
+    await next();
 });
 
 app.Run();
