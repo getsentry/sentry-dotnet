@@ -5,6 +5,10 @@
 ### Features
 
 - Add experimental support for [Sentry Structured Logging](https://docs.sentry.io/product/explore/logs/) via `SentrySdk.Experimental.Logger` ([#4158](https://github.com/getsentry/sentry-dotnet/pull/4158))
+- Add experimental integrations of [Sentry Structured Logging](https://docs.sentry.io/product/explore/logs/) ([#4193](https://github.com/getsentry/sentry-dotnet/pull/4193))
+    - `Sentry.AspNetCore`, enabled via `SentryAspNetCoreOptions.Experimental.EnableLogs`
+    - `Sentry.Extensions.Logging`, enabled via `SentryLoggingOptions.Experimental.EnableLogs`
+    - `Sentry.Maui`, enabled via `SentryMauiOptions.Experimental.EnableLogs`
 
 ## 5.11.2
 

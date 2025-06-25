@@ -52,9 +52,16 @@ public static class SentryMauiAppBuilderExtensions
 
         services.AddLogging();
         services.AddSingleton<ILoggerProvider, SentryMauiLoggerProvider>();
+        services.AddSingleton<ILoggerProvider, SentryMauiStructuredLoggerProvider>();
         services.AddSingleton<IMauiInitializeService, SentryMauiInitializer>();
         services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
         services.AddSingleton<Disposer>();
+
+        builder.Logging.AddFilter<SentryMauiStructuredLoggerProvider>(static (string? categoryName, LogLevel logLevel) =>
+        {
+            return categoryName is null
+                || categoryName != "Sentry.ISentryClient";
+        });
 
         // Resolve the configured options and register any element event binders from these
         var options = new SentryMauiOptions();
