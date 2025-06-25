@@ -1,6 +1,5 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Internal;
 using Sentry.Protocol;
 
 namespace Sentry;
@@ -131,7 +130,7 @@ public sealed class SentryLog : ISentryJsonSerializable
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public bool TryGetAttribute(string key, [NotNullWhen(true)] out object? value)
     {
-        if (_attributes.TryGetValue(key, out var attribute) && attribute.Type == "object" && attribute.Value is not null)
+        if (_attributes.TryGetValue(key, out var attribute) && attribute.Value is not null)
         {
             value = attribute.Value;
             return true;

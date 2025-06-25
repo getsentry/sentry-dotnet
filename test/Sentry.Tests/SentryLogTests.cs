@@ -22,6 +22,51 @@ public class SentryLogTests
     }
 
     [Fact]
+    public void Protocol_Default_VerifyAttributes()
+    {
+        var options = new SentryOptions
+        {
+            Environment = "my-environment",
+            Release = "my-release",
+        };
+        var sdk = new SdkVersion
+        {
+            Name = "Sentry.Test.SDK",
+            Version = "1.2.3-test+Sentry"
+        };
+
+        var log = new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message")
+        {
+            Template = "template",
+            Parameters = ImmutableArray.Create<object>("params"),
+            ParentSpanId = ParentSpanId,
+        };
+        log.SetAttribute("attribute", "value");
+        log.SetDefaultAttributes(options, sdk);
+
+        log.Timestamp.Should().Be(Timestamp);
+        log.TraceId.Should().Be(TraceId);
+        log.Level.Should().Be((SentryLogLevel)24);
+        log.Message.Should().Be("message");
+        log.Template.Should().Be("template");
+        log.Parameters.Should().BeEquivalentTo(["params"]);
+        log.ParentSpanId.Should().Be(ParentSpanId);
+
+        log.TryGetAttribute("attribute", out object attribute).Should().BeTrue();
+        attribute.Should().Be("value");
+        log.TryGetAttribute("sentry.environment", out string environment).Should().BeTrue();
+        environment.Should().Be(options.Environment);
+        log.TryGetAttribute("sentry.release", out string release).Should().BeTrue();
+        release.Should().Be(options.Release);
+        log.TryGetAttribute("sentry.sdk.name", out string name).Should().BeTrue();
+        name.Should().Be(sdk.Name);
+        log.TryGetAttribute("sentry.sdk.version", out string version).Should().BeTrue();
+        version.Should().Be(sdk.Version);
+        log.TryGetAttribute("not-found", out object notFound).Should().BeFalse();
+        notFound.Should().BeNull();
+    }
+
+    [Fact]
     public void WriteTo_Envelope_MinimalSerializedSentryLog()
     {
         var options = new SentryOptions
