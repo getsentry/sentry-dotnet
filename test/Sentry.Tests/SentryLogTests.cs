@@ -31,7 +31,7 @@ public class SentryLogTests
         };
 
         var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Trace, "message");
-        log.SetDefaultAttributes(options);
+        log.SetDefaultAttributes(options, new SdkVersion());
 
         var envelope = Envelope.FromLog(log);
 
@@ -80,14 +80,6 @@ public class SentryLogTests
                 "sentry.release": {
                   "value": "my-release",
                   "type": "string"
-                },
-                "sentry.sdk.name": {
-                  "value": "{{SdkVersion.Instance.Name}}",
-                  "type": "string"
-                },
-                "sentry.sdk.version": {
-                  "value": "{{SdkVersion.Instance.Version}}",
-                  "type": "string"
                 }
               }
             }
@@ -117,7 +109,7 @@ public class SentryLogTests
         log.SetAttribute("boolean-attribute", true);
         log.SetAttribute("integer-attribute", 3);
         log.SetAttribute("double-attribute", 4.4);
-        log.SetDefaultAttributes(options);
+        log.SetDefaultAttributes(options, new SdkVersion { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" });
 
         var envelope = EnvelopeItem.FromLog(log);
 
@@ -194,11 +186,11 @@ public class SentryLogTests
                   "type": "string"
                 },
                 "sentry.sdk.name": {
-                  "value": "{{SdkVersion.Instance.Name}}",
+                  "value": "Sentry.Test.SDK",
                   "type": "string"
                 },
                 "sentry.sdk.version": {
-                  "value": "{{SdkVersion.Instance.Version}}",
+                  "value": "1.2.3-test+Sentry",
                   "type": "string"
                 },
                 "sentry.trace.parent_span_id": {
