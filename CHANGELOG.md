@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.11.2
+
+### Fixes
+
+- Unsampled spans no longer propagate empty trace headers ([#4302](https://github.com/getsentry/sentry-dotnet/pull/4302))
+
 ## 5.11.1
 
 ### Fixes
