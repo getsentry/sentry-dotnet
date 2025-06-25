@@ -56,7 +56,14 @@ internal static class HttpContextExtensions
 
         try
         {
-            return SentryTraceHeader.Parse(value!);
+            var traceHeader = SentryTraceHeader.Parse(value!);
+            if (traceHeader?.TraceId != SentryId.Empty)
+            {
+                return traceHeader;
+            }
+
+            options?.LogWarning("Sentry trace header '{0}' has an empty trace ID.", value);
+            return null;
         }
         catch (Exception ex)
         {
