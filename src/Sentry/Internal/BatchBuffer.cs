@@ -7,6 +7,8 @@ internal sealed class BatchBuffer<T>
 
     public BatchBuffer(int capacity)
     {
+        ThrowIfNegativeOrZero(capacity, nameof(capacity));
+
         _array = new T[capacity];
         _count = 0;
     }
@@ -18,11 +20,10 @@ internal sealed class BatchBuffer<T>
 
     internal bool TryAdd(T item)
     {
-        var count = Interlocked.Increment(ref _count);
-
-        if (count <= _array.Length)
+        if (_count < _array.Length)
         {
-            _array[count - 1] = item;
+            _array[_count] = item;
+            _count++;
             return true;
         }
 
@@ -58,5 +59,18 @@ internal sealed class BatchBuffer<T>
         var array = ToArray();
         Clear();
         return array;
+    }
+
+    private static void ThrowIfNegativeOrZero(int capacity, string paramName)
+    {
+        if (capacity <= 0)
+        {
+            ThrowNegativeOrZero(capacity, paramName);
+        }
+    }
+
+    private static void ThrowNegativeOrZero(int capacity, string paramName)
+    {
+        throw new ArgumentOutOfRangeException(paramName, capacity, "Argument must neither be negative nor zero.");
     }
 }

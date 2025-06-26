@@ -1,4 +1,5 @@
 using System.Timers;
+using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 
 #if NET9_0_OR_GREATER
@@ -12,21 +13,22 @@ namespace Sentry.Internal;
 internal sealed class BatchProcessor : IDisposable
 {
     private readonly IHub _hub;
-    private readonly System.Timers.Timer _timer;
+    private readonly BatchProcessorTimer _timer;
     private readonly BatchBuffer<SentryLog> _logs;
     private readonly Lock _lock;
 
     private DateTime _lastFlush = DateTime.MinValue;
 
     public BatchProcessor(IHub hub, int batchCount, TimeSpan batchInterval)
+        : this(hub, batchCount, new TimersBatchProcessorTimer(batchInterval))
+    {
+    }
+
+    public BatchProcessor(IHub hub, int batchCount, BatchProcessorTimer timer)
     {
         _hub = hub;
 
-        _timer = new System.Timers.Timer(batchInterval.TotalMilliseconds)
-        {
-            AutoReset = false,
-            Enabled = false,
-        };
+        _timer = timer;
         _timer.Elapsed += IntervalElapsed;
 
         _logs = new BatchBuffer<SentryLog>(batchCount);
@@ -63,7 +65,7 @@ internal sealed class BatchProcessor : IDisposable
         _lastFlush = DateTime.UtcNow;
 
         var logs = _logs.ToArrayAndClear();
-        _ = _hub.CaptureEnvelope(Envelope.FromLogs(logs));
+        _ = _hub.CaptureEnvelope(Envelope.FromLog(new StructuredLog(logs)));
     }
 
     private void IntervalElapsed(object? sender, ElapsedEventArgs e)

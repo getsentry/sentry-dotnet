@@ -446,13 +446,13 @@ public sealed class Envelope : ISerializable, IDisposable
     }
 
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    internal static Envelope FromLogs(SentryLog[] logs)
+    internal static Envelope FromLog(StructuredLog log)
     {
         var header = DefaultHeader;
 
         var items = new[]
         {
-            EnvelopeItem.FromLogs(logs),
+            EnvelopeItem.FromLog(log),
         };
 
         return new Envelope(header, items);

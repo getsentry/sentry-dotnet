@@ -4,7 +4,8 @@ using Sentry.PlatformAbstractions;
 namespace Sentry.Tests;
 
 /// <summary>
-/// <see href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
+/// See <see href="https://develop.sentry.dev/sdk/telemetry/logs/"/>.
+/// See also <see cref="Sentry.Tests.Protocol.StructuredLogTests"/>.
 /// </summary>
 public class SentryLogTests
 {
@@ -78,7 +79,7 @@ public class SentryLogTests
         var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Trace, "message");
         log.SetDefaultAttributes(options, new SdkVersion());
 
-        var envelope = Envelope.FromLogs([log]);
+        var envelope = Envelope.FromLog(new StructuredLog(log));
 
         using var stream = new MemoryStream();
         envelope.Serialize(stream, _output, Clock);
@@ -156,7 +157,7 @@ public class SentryLogTests
         log.SetAttribute("double-attribute", 4.4);
         log.SetDefaultAttributes(options, new SdkVersion { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" });
 
-        var envelope = EnvelopeItem.FromLogs([log]);
+        var envelope = EnvelopeItem.FromLog(new StructuredLog(log));
 
         using var stream = new MemoryStream();
         envelope.Serialize(stream, _output);

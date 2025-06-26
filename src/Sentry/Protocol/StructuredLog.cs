@@ -6,11 +6,17 @@ internal sealed class StructuredLog : ISentryJsonSerializable
 {
     private readonly SentryLog[] _items;
 
+    public StructuredLog(SentryLog log)
+    {
+        _items = [log];
+    }
+
     public StructuredLog(SentryLog[] logs)
     {
         _items = logs;
     }
 
+    public int Length => _items.Length;
     public ReadOnlySpan<SentryLog> Items => _items;
 
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)

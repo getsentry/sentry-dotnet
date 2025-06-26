@@ -372,16 +372,15 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     }
 
     [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
-    internal static EnvelopeItem FromLogs(SentryLog[] logs)
+    internal static EnvelopeItem FromLog(StructuredLog log)
     {
         var header = new Dictionary<string, object?>(3, StringComparer.Ordinal)
         {
             [TypeKey] = TypeValueLog,
-            ["item_count"] = logs.Length,
+            ["item_count"] = log.Length,
             ["content_type"] = "application/vnd.sentry.items.log+json",
         };
 
-        var log = new StructuredLog(logs);
         return new EnvelopeItem(header, new JsonSerializable(log));
     }
 

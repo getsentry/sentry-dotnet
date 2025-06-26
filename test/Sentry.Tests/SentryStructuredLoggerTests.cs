@@ -221,6 +221,18 @@ public class SentryStructuredLoggerTests
         entry.Args.Should().BeEmpty();
     }
 
+    [Fact]
+    public void Dispose_Log_Throws()
+    {
+        _fixture.Options.Experimental.EnableLogs = true;
+        var logger = _fixture.GetSut();
+
+        logger.Dispose();
+        var log = () => logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
+
+        Assert.Throws<ObjectDisposedException>(log);
+    }
+
     private static void ConfigureLog(SentryLog log)
     {
         log.SetAttribute("attribute-key", "attribute-value");
