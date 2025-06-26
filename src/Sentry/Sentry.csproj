@@ -212,6 +212,7 @@
     <MSBuild Projects="@(ProjectReference->WithMetadataValue('SentryAnalyzersPack', 'true'))" Targets="GetTargetPath">
       <Output TaskParameter="TargetOutputs" ItemName="_SentryAnalyzersPackagePath" />
     </MSBuild>
+    <Error Text="No analyzer assemblies found to pack." Condition="'@(_SentryAnalyzersPackagePath)' == ''" />
     <ItemGroup>
       <None Include="@(_SentryAnalyzersPackagePath)" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
