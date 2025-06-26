@@ -78,7 +78,7 @@ public class SentryLogTests
         var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Trace, "message");
         log.SetDefaultAttributes(options, new SdkVersion());
 
-        var envelope = Envelope.FromLog(log);
+        var envelope = Envelope.FromLogs([log]);
 
         using var stream = new MemoryStream();
         envelope.Serialize(stream, _output, Clock);
@@ -156,7 +156,7 @@ public class SentryLogTests
         log.SetAttribute("double-attribute", 4.4);
         log.SetDefaultAttributes(options, new SdkVersion { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" });
 
-        var envelope = EnvelopeItem.FromLog(log);
+        var envelope = EnvelopeItem.FromLogs([log]);
 
         using var stream = new MemoryStream();
         envelope.Serialize(stream, _output);
@@ -286,9 +286,7 @@ public class SentryLogTests
         writer.Flush();
 
         var document = JsonDocument.Parse(bufferWriter.WrittenMemory);
-        var items = document.RootElement.GetProperty("items");
-        items.GetArrayLength().Should().Be(1);
-        var attributes = items[0].GetProperty("attributes");
+        var attributes = document.RootElement.GetProperty("attributes");
         Assert.Collection(attributes.EnumerateObject().ToArray(),
             property => property.AssertAttributeInteger("sentry.message.parameter.0", json => json.GetSByte(), sbyte.MinValue),
             property => property.AssertAttributeInteger("sentry.message.parameter.1", json => json.GetByte(), byte.MaxValue),
@@ -348,9 +346,7 @@ public class SentryLogTests
         writer.Flush();
 
         var document = JsonDocument.Parse(bufferWriter.WrittenMemory);
-        var items = document.RootElement.GetProperty("items");
-        items.GetArrayLength().Should().Be(1);
-        var attributes = items[0].GetProperty("attributes");
+        var attributes = document.RootElement.GetProperty("attributes");
         Assert.Collection(attributes.EnumerateObject().ToArray(),
             property => property.AssertAttributeInteger("sbyte", json => json.GetSByte(), sbyte.MinValue),
             property => property.AssertAttributeInteger("byte", json => json.GetByte(), byte.MaxValue),

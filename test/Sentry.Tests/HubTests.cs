@@ -1444,6 +1444,7 @@ public partial class HubTests
     {
         // Arrange
         _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.Experimental.InternalBatchSize = 1;
         var hub = _fixture.GetSut();
 
         // Act

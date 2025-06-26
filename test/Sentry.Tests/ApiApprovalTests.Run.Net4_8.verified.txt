@@ -622,7 +622,7 @@ namespace Sentry
         [System.Runtime.Serialization.EnumMember(Value="fatal")]
         Fatal = 4,
     }
-    public sealed class SentryLog : Sentry.ISentryJsonSerializable
+    public sealed class SentryLog
     {
         public Sentry.SentryLogLevel Level { get; init; }
         public string Message { get; init; }
@@ -633,7 +633,6 @@ namespace Sentry
         public Sentry.SentryId TraceId { get; init; }
         public void SetAttribute(string key, object value) { }
         public bool TryGetAttribute(string key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out object? value) { }
-        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
     }
     public enum SentryLogLevel
     {
@@ -796,6 +795,8 @@ namespace Sentry
         public sealed class SentryExperimentalOptions
         {
             public bool EnableLogs { get; set; }
+            public int InternalBatchSize { get; set; }
+            public System.TimeSpan InternalBatchTimeout { get; set; }
             public void SetBeforeSendLog(System.Func<Sentry.SentryLog, Sentry.SentryLog?> beforeSendLog) { }
         }
     }
@@ -970,8 +971,10 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryStackTrace FromJson(System.Text.Json.JsonElement json) { }
     }
-    public abstract class SentryStructuredLogger
+    public abstract class SentryStructuredLogger : System.IDisposable
     {
+        public void Dispose() { }
+        protected virtual void Dispose(bool disposing) { }
         public void LogDebug(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }
         public void LogError(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }
         public void LogFatal(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }

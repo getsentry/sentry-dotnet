@@ -445,17 +445,14 @@ public sealed class Envelope : ISerializable, IDisposable
         return new Envelope(header, items);
     }
 
-    // TODO: This is temporary. We don't expect single log messages to become an envelope by themselves since batching is needed
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    internal static Envelope FromLog(SentryLog log)
+    internal static Envelope FromLogs(SentryLog[] logs)
     {
-        //TODO: allow batching Sentry logs
-        //see https://github.com/getsentry/sentry-dotnet/issues/4132
         var header = DefaultHeader;
 
         var items = new[]
         {
-            EnvelopeItem.FromLog(log)
+            EnvelopeItem.FromLogs(logs),
         };
 
         return new Envelope(header, items);

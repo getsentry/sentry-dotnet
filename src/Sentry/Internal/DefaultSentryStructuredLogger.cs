@@ -1,6 +1,5 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal;
 
@@ -10,6 +9,8 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
     private readonly SentryOptions _options;
     private readonly ISystemClock _clock;
 
+    private readonly BatchProcessor _batchProcessor;
+
     internal DefaultSentryStructuredLogger(IHub hub, SentryOptions options, ISystemClock clock)
     {
         Debug.Assert(options is { Experimental.EnableLogs: true });
@@ -17,6 +18,24 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
         _hub = hub;
         _options = options;
         _clock = clock;
+
+        _batchProcessor = new BatchProcessor(hub, ClampBatchCount(options.Experimental.InternalBatchSize), ClampBatchInterval(options.Experimental.InternalBatchTimeout));
+    }
+
+    private static int ClampBatchCount(int batchCount)
+    {
+        return batchCount <= 0
+            ? 1
+            : batchCount > 1_000_000
+                ? 1_000_000
+                : batchCount;
+    }
+
+    private static TimeSpan ClampBatchInterval(TimeSpan batchInterval)
+    {
+        return batchInterval.TotalMilliseconds is <= 0 or > int.MaxValue
+            ? TimeSpan.FromMilliseconds(int.MaxValue)
+            : batchInterval;
     }
 
     private protected override void CaptureLog(SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog)
@@ -71,9 +90,17 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
 
         if (configuredLog is not null)
         {
-            //TODO: enqueue in Batch-Processor / Background-Worker
-            // see https://github.com/getsentry/sentry-dotnet/issues/4132
-            _ = _hub.CaptureEnvelope(Envelope.FromLog(configuredLog));
+            _batchProcessor.Enqueue(configuredLog);
         }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _batchProcessor.Dispose();
+        }
+
+        base.Dispose(disposing);
     }
 }
