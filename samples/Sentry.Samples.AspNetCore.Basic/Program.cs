@@ -58,10 +58,12 @@ app.Use(async (context, next) =>
 
         log.LogInformation("Just chilling for a bit...");
         await Task.Delay(TimeSpan.FromMilliseconds(50)); // Simulate some work
-    }
-    finally
-    {
         span.Finish();
+    }
+    catch (Exception e)
+    {
+        span.Finish(e);
+        throw;
     }
     await next();
 });
