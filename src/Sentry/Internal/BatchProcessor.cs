@@ -10,6 +10,15 @@ using Lock = object;
 
 namespace Sentry.Internal;
 
+/// <summary>
+/// The Sentry Batch Processor.
+/// This implementation is not complete yet.
+/// Also, the specification is still work in progress.
+/// </summary>
+/// <remarks>
+/// Sentry Specification: <see href="https://develop.sentry.dev/sdk/telemetry/spans/batch-processor/"/>.
+/// OpenTelemetry spec: <see href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/batchprocessor/README.md"/>.
+/// </remarks>
 internal sealed class BatchProcessor : IDisposable
 {
     private readonly IHub _hub;

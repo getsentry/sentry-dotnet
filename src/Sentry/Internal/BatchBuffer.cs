@@ -1,5 +1,9 @@
 namespace Sentry.Internal;
 
+/// <summary>
+/// A slim wrapper over an <see cref="System.Array"/>,
+/// intended for buffering.
+/// </summary>
 internal sealed class BatchBuffer<T>
 {
     private readonly T[] _array;

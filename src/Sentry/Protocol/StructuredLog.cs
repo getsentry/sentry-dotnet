@@ -2,6 +2,13 @@ using Sentry.Extensibility;
 
 namespace Sentry.Protocol;
 
+/// <summary>
+/// Represents the Sentry Log protocol.
+/// </summary>
+/// <remarks>
+/// Sentry Docs: <see href="https://docs.sentry.io/product/explore/logs/"/>.
+/// Sentry Developer Documentation: <see href="https://develop.sentry.dev/sdk/telemetry/logs/"/>.
+/// </remarks>
 internal sealed class StructuredLog : ISentryJsonSerializable
 {
     private readonly SentryLog[] _items;
