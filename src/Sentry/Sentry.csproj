@@ -203,16 +203,18 @@
   </ItemGroup>
 
   <!-- Build and Pack (without dependency to) Roslyn Components / Compiler Extensions (as "analyzers"). -->
+  <!-- See https://learn.microsoft.com/dotnet/core/project-sdk/overview -->
+  <!-- See also https://github.com/ViktorHofer/PackAsAnalyzer -->
   <ItemGroup>
     <ProjectReference Include="..\Sentry.SourceGenerators\Sentry.SourceGenerators.csproj" OutputItemType="" ReferenceOutputAssembly="false" PrivateAssets="all" SetTargetFramework="TargetFramework=netstandard2.0" SentryAnalyzersPack="true" />
   </ItemGroup>
-  <!-- See https://learn.microsoft.com/dotnet/core/project-sdk/overview -->
-  <!-- See also https://github.com/ViktorHofer/PackAsAnalyzer -->
   <Target Name="_SentryPackAnalyzers" BeforeTargets="_GetPackageFiles">
+    <Message Text="Target: '_SentryPackAnalyzers' with Analyzer-Projects: '@(ProjectReference->WithMetadataValue('SentryAnalyzersPack', 'true'))'" Importance="high" />
     <MSBuild Projects="@(ProjectReference->WithMetadataValue('SentryAnalyzersPack', 'true'))" Targets="GetTargetPath">
       <Output TaskParameter="TargetOutputs" ItemName="_SentryAnalyzersPackagePath" />
     </MSBuild>
     <Error Text="No analyzer assemblies found to pack." Condition="'@(_SentryAnalyzersPackagePath)' == ''" />
+    <Message Text="Packing Analyzers: '@(_SentryAnalyzersPackagePath)'" Importance="high" />
     <ItemGroup>
       <None Include="@(_SentryAnalyzersPackagePath)" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     </ItemGroup>
