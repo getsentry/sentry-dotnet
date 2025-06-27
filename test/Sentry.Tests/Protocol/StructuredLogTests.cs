@@ -46,12 +46,8 @@ public class StructuredLogTests
     {
         var log = new StructuredLog([]);
 
-        ArrayBufferWriter<byte> bufferWriter = new();
-        using Utf8JsonWriter writer = new(bufferWriter);
-        log.WriteTo(writer, _output);
-        writer.Flush();
+        var document = log.ToJsonDocument(_output);
 
-        var document = JsonDocument.Parse(bufferWriter.WrittenMemory);
         Assert.Equal("""{"items":[]}""", document.RootElement.ToString());
     }
 
