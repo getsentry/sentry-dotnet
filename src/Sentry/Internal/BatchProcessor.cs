@@ -2,12 +2,6 @@ using System.Timers;
 using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 
-#if NET9_0_OR_GREATER
-using Lock = System.Threading.Lock;
-#else
-using Lock = object;
-#endif
-
 namespace Sentry.Internal;
 
 /// <summary>
@@ -24,7 +18,7 @@ internal sealed class BatchProcessor : IDisposable
     private readonly IHub _hub;
     private readonly BatchProcessorTimer _timer;
     private readonly BatchBuffer<SentryLog> _logs;
-    private readonly Lock _lock;
+    private readonly object _lock;
 
     private DateTime _lastFlush = DateTime.MinValue;
 
@@ -41,7 +35,7 @@ internal sealed class BatchProcessor : IDisposable
         _timer.Elapsed += IntervalElapsed;
 
         _logs = new BatchBuffer<SentryLog>(batchCount);
-        _lock = new Lock();
+        _lock = new object();
     }
 
     internal void Enqueue(SentryLog log)
