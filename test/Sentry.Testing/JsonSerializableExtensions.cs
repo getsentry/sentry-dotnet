@@ -49,8 +49,8 @@ internal static class JsonSerializableExtensions
     public static JsonDocument ToJsonDocument(this ISentryJsonSerializable serializable, IDiagnosticLogger? logger = null) =>
         WriteToJsonDocument(writer => writer.WriteSerializableValue(serializable, logger));
 
-    public static JsonDocument ToJsonDocument(this object @object, IDiagnosticLogger? logger = null) =>
-        WriteToJsonDocument(writer => writer.WriteDynamicValue(@object, logger));
+    public static JsonDocument ToJsonDocument<T>(this T @object, Action<T, Utf8JsonWriter, IDiagnosticLogger?> serialize, IDiagnosticLogger? logger = null) where T : class =>
+        WriteToJsonDocument(writer => serialize.Invoke(@object, writer, logger));
 
     private static JsonDocument WriteToJsonDocument(Action<Utf8JsonWriter> writeAction)
     {
