@@ -38,25 +38,25 @@ internal class OpenTelemetryExceptionListener : IDisposable
         DateTimeOffset eventTimestamp)
     {
 #if NET9_0_OR_GREATER
-            if (GetFullException(activity, exceptionType, message, eventTimestamp) is { } fullException)
-            {
-                return fullException;
-            }
+        if (GetFullException(activity, exceptionType, message, eventTimestamp) is { } fullException)
+        {
+            return fullException;
+        }
 #endif
-            // At the moment, OTEL only gives us `exception.type`, `exception.message`, and `exception.stacktrace`...
-            // So the best we can do is a poor man's exception (no accurate symbolication or anything)
-            try
+        // At the moment, OTEL only gives us `exception.type`, `exception.message`, and `exception.stacktrace`...
+        // So the best we can do is a poor man's exception (no accurate symbolication or anything)
+        try
+        {
+            if (CreatePoorMansException(exceptionType, message) is { } poorMansException)
             {
-                if (CreatePoorMansException(exceptionType, message) is { } poorMansException)
-                {
-                    return poorMansException;
-                }
+                return poorMansException;
             }
-            catch
-            {
-                _logger?.LogError($"Failed to create poor man's exception for type : {exceptionType}");
-            }
-            return null;
+        }
+        catch
+        {
+            _logger?.LogError($"Failed to create poor man's exception for type : {exceptionType}");
+        }
+        return null;
     }
 
     private static Exception? GetFullException(Activity activity, string exceptionType, string message,
