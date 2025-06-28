@@ -73,9 +73,6 @@ runs:
       shell: bash
       run: |
         pwd
-        dotnet workload install \
-          wasm-tools wasm-tools-net8 maui-android android mobile-librarybuilder \
-          ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows macos' || '' }} \
-          ${{ runner.os == 'Windows' && 'maui-ios maui-maccatalyst maui-windows' || '' }} \
+        dotnet workload restore \
           --temp-dir "${{ runner.temp }}" \
           --skip-sign-check
