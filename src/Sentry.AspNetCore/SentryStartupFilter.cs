@@ -23,7 +23,7 @@ public class SentryStartupFilter : IStartupFilter
         // ensure that the RequestDecompression middleware gets called before Sentry's middleware. The last middleware
         // added is the first one to be executed.
         var options = app.ApplicationServices.GetService<IOptions<SentryAspNetCoreOptions>>();
-        if (options?.Value is { } o&& o.MaxRequestBodySize != RequestSize.None
+        if (options?.Value is { } o && o.MaxRequestBodySize != RequestSize.None
             && app.ApplicationServices.GetService<IRequestDecompressionProvider>() is not null)
         {
             app.UseRequestDecompression();
