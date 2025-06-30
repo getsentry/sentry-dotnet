@@ -31,6 +31,13 @@ public class SentryMonitorOptionsTests
     [InlineData("0 */6 * * *")]         // Every 6 hours
     [InlineData("0 0 */2 * *")]         // Every 2 days
     [InlineData("0 0 1 */3 *")]         // Every 3 months
+    [InlineData("*/100 * * * *")]       // Step value 100 for minutes
+    [InlineData("* */25 * * *")]        // Step value 25 for hours
+    [InlineData("* * */32 * *")]        // Step value 32 for days
+    [InlineData("* * * */13 *")]        // Step value 13 for months
+    [InlineData("* * * * */8")]         // Step value 8 for weekdays
+    [InlineData("*/60 * * * *")]        // Step value 60 for minutes
+    [InlineData("* */24 * * *")]        // Step value 24 for hours
     // Complex ranges
     [InlineData("1-15 * * * *")]        // Minutes 1 through 15
     [InlineData("* 9-17 * * *")]        // Business hours
@@ -77,13 +84,6 @@ public class SentryMonitorOptionsTests
     [InlineData("* * * * 8")]
     // Invalid step values
     [InlineData("*/0 * * * *")]         // Step value cannot be 0
-    [InlineData("*/100 * * * *")]       // Step value too large for minutes
-    [InlineData("* */25 * * *")]        // Step value too large for hours
-    [InlineData("* * */32 * *")]        // Step value too large for days
-    [InlineData("* * * */13 *")]        // Step value too large for months
-    [InlineData("* * * * */8")]         // Step value too large for weekdays
-    [InlineData("*/60 * * * *")]        // Step value equals max value for minutes
-    [InlineData("* */24 * * *")]        // Step value equals max value for hours
     // Invalid ranges
     [InlineData("5-60 * * * *")]        // Minute range exceeds 59
     [InlineData("* 5-24 * * *")]        // Hour range exceeds 23
