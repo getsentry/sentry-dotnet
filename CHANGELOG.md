@@ -6,6 +6,10 @@
 
 - Added StartSpan and GetTransaction methods to the SentrySdk ([#4303](https://github.com/getsentry/sentry-dotnet/pull/4303))
 
+### Fixes
+
+- When Sentry is configured to capture Request bodies in ASP.NET Core, the uncompressed content is not captured when RequestDecompression middleware is enabled. Previously the request bodies were being captured prior to decompression ([#4315](https://github.com/getsentry/sentry-dotnet/pull/4315))
+
 ### Dependencies
 
 - Bump Native SDK from v0.9.0 to v0.9.1 ([#4309](https://github.com/getsentry/sentry-dotnet/pull/4309))
