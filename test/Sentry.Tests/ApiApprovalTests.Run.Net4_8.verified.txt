@@ -871,6 +871,7 @@ namespace Sentry
         public static Sentry.BaggageHeader? GetBaggage() { }
         public static Sentry.ISpan? GetSpan() { }
         public static Sentry.SentryTraceHeader? GetTraceHeader() { }
+        public static Sentry.ITransactionTracer? GetTransaction() { }
         public static System.IDisposable Init() { }
         public static System.IDisposable Init(Sentry.SentryOptions options) { }
         public static System.IDisposable Init(System.Action<Sentry.SentryOptions>? configureOptions) { }
@@ -881,6 +882,7 @@ namespace Sentry
         public static void ResumeSession() { }
         public static void SetTag(string key, string value) { }
         public static void StartSession() { }
+        public static Sentry.ISpan StartSpan(string operation, string description) { }
         public static Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context) { }
         public static Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext) { }
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation) { }
