@@ -32,7 +32,7 @@ internal sealed class BatchProcessor : IDisposable
         _hub = hub;
 
         _timer = timer;
-        _timer.Elapsed += IntervalElapsed;
+        _timer.Elapsed += OnIntervalElapsed;
 
         _logs = new BatchBuffer<SentryLog>(batchCount);
         _lock = new object();
@@ -48,11 +48,11 @@ internal sealed class BatchProcessor : IDisposable
 
     private void EnqueueCore(SentryLog log)
     {
-        var empty = _logs.IsEmpty;
+        var isFirstLog = _logs.IsEmpty;
         var added = _logs.TryAdd(log);
         Debug.Assert(added, $"Since we currently have no lock-free scenario, it's unexpected to exceed the {nameof(BatchBuffer<SentryLog>)}'s capacity.");
 
-        if (empty && !_logs.IsFull)
+        if (isFirstLog && !_logs.IsFull)
         {
             _timer.Enabled = true;
         }
@@ -71,7 +71,7 @@ internal sealed class BatchProcessor : IDisposable
         _ = _hub.CaptureEnvelope(Envelope.FromLog(new StructuredLog(logs)));
     }
 
-    private void IntervalElapsed(object? sender, ElapsedEventArgs e)
+    private void OnIntervalElapsed(object? sender, ElapsedEventArgs e)
     {
         _timer.Enabled = false;
 
@@ -87,7 +87,7 @@ internal sealed class BatchProcessor : IDisposable
     public void Dispose()
     {
         _timer.Enabled = false;
-        _timer.Elapsed -= IntervalElapsed;
+        _timer.Elapsed -= OnIntervalElapsed;
         _timer.Dispose();
     }
 }
