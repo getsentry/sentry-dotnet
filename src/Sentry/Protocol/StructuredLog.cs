@@ -13,11 +13,6 @@ internal sealed class StructuredLog : ISentryJsonSerializable
 {
     private readonly SentryLog[] _items;
 
-    public StructuredLog(SentryLog log)
-    {
-        _items = [log];
-    }
-
     public StructuredLog(SentryLog[] logs)
     {
         _items = logs;

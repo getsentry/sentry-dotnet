@@ -79,7 +79,7 @@ public class SentryLogTests
         var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Trace, "message");
         log.SetDefaultAttributes(options, new SdkVersion());
 
-        var envelope = Envelope.FromLog(new StructuredLog(log));
+        var envelope = Envelope.FromLog(new StructuredLog([log]));
 
         using var stream = new MemoryStream();
         envelope.Serialize(stream, _output, Clock);
@@ -157,7 +157,7 @@ public class SentryLogTests
         log.SetAttribute("double-attribute", 4.4);
         log.SetDefaultAttributes(options, new SdkVersion { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" });
 
-        var envelope = EnvelopeItem.FromLog(new StructuredLog(log));
+        var envelope = EnvelopeItem.FromLog(new StructuredLog([log]));
 
         using var stream = new MemoryStream();
         envelope.Serialize(stream, _output);
