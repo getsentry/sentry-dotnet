@@ -189,8 +189,21 @@ public static partial class SentrySdk
         return nativeRanges;
     }
 
+    [DebuggerStepThrough]
     internal static CocoaSdk.SentryEvent? ProcessOnBeforeSend(SentryOptions options, CocoaSdk.SentryEvent evt)
+        => ProcessOnBeforeSend(options, evt, CurrentHub);
+
+    /// <summary>
+    /// This overload allows us to inject an IHub for testing. During normal execution, the CurrentHub is used.
+    /// However, since this class is static, there's no easy alternative way to inject this when executing tests.
+    /// </summary>
+    internal static CocoaSdk.SentryEvent? ProcessOnBeforeSend(SentryOptions options, CocoaSdk.SentryEvent evt, IHub hub)
     {
+        if (hub is DisabledHub)
+        {
+            return evt;
+        }
+
         // When we have an unhandled managed exception, we send that to Sentry twice - once managed and once native.
         // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
         // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
@@ -233,10 +246,9 @@ public static partial class SentrySdk
             // so we need to manually invoke any managed event processors here in order for them to be applied to Native
             // events.
             ImmutableArray<ISentryEventProcessor> manualProcessors = default;
-            ConfigureScope(scope => manualProcessors = [
-                    ..scope.GetAllEventProcessors()
-                        .Where(p => p is not MainSentryEventProcessor)
-                ]
+            hub.ConfigureScope(scope => manualProcessors = scope.GetAllEventProcessors()
+                .Where(p => p is not MainSentryEventProcessor)
+                .ToImmutableArray()
             );
             if (manualProcessors.Length == 0 && options.BeforeSendInternal is null)
             {
