@@ -243,13 +243,10 @@ public static partial class SentrySdk
         try
         {
             // Normally the event processors would be invoked by the SentryClient, but the Cocoa SDK has its own client,
-            // so we need to manually invoke any managed event processors here in order for them to be applied to Native
-            // events.
-            ImmutableArray<ISentryEventProcessor> manualProcessors = default;
-            hub.ConfigureScope(scope => manualProcessors = scope.GetAllEventProcessors()
+            // so we need to manually invoke any managed event processors here to apply them to Native events.
+            var manualProcessors = GetEventProcessors()
                 .Where(p => p is not MainSentryEventProcessor)
-                .ToImmutableArray()
-            );
+                .ToImmutableArray();
             if (manualProcessors.Length == 0 && options.BeforeSendInternal is null)
             {
                 return evt;
@@ -279,6 +276,17 @@ public static partial class SentrySdk
         {
             options.LogError(ex, "Error running managed event processors for native event");
             return evt;
+        }
+
+        IEnumerable<ISentryEventProcessor> GetEventProcessors()
+        {
+            if (hub is Hub fullHub)
+            {
+                return fullHub.ScopeManager.GetCurrent().Key.GetAllEventProcessors();
+            }
+            IEnumerable<ISentryEventProcessor>? eventProcessors = null;
+            hub.ConfigureScope(scope => eventProcessors = scope.GetAllEventProcessors());
+            return eventProcessors ?? [];
         }
     }
 }
