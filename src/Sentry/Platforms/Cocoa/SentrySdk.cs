@@ -1,6 +1,7 @@
 using Sentry.Cocoa;
 using Sentry.Cocoa.Extensions;
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry;
@@ -224,31 +225,47 @@ public static partial class SentrySdk
             }
         }
 
-        // we run our SIGABRT checks first before handing over to user events
-        // because we delegate to user code, we need to protect anything that could happen in this event
-        if (options.BeforeSendInternal == null)
-            return evt;
-
+        // We run our SIGABRT checks first before running managed processors.
+        // Because we delegate to user code, we need to catch/log exceptions.
         try
         {
-            var sentryEvent = evt.ToSentryEvent();
-            if (sentryEvent == null)
+            // Normally the event processors would be invoked by the SentryClient, but the Cocoa SDK has its own client,
+            // so we need to manually invoke any managed event processors here in order for them to be applied to Native
+            // events.
+            ImmutableArray<ISentryEventProcessor> manualProcessors = default;
+            ConfigureScope(scope => manualProcessors = [
+                    ..scope.GetAllEventProcessors()
+                        .Where(p => p is not MainSentryEventProcessor)
+                ]
+            );
+            if (manualProcessors.Length == 0 && options.BeforeSendInternal is null)
+            {
                 return evt;
+            }
 
-            var result = options.BeforeSendInternal(sentryEvent, null!);
-            if (result == null)
-                return null!;
+            var sentryEvent = evt.ToSentryEvent();
+            var eventHelper = new SentryEventHelper(options);
+            if (eventHelper.ProcessEvent(sentryEvent, manualProcessors, null) is not { } processedEvent)
+            {
+                return null;
+            }
+
+            processedEvent = eventHelper.DoBeforeSend(processedEvent, new SentryHint());
+            if (processedEvent == null)
+            {
+                return null;
+            }
 
             // we only support a subset of mutated data to be passed back to the native SDK at this time
-            result.CopyToCocoaSentryEvent(evt);
+            processedEvent.CopyToCocoaSentryEvent(evt);
 
-            // Note: Nullable result is allowed but delegate is generated incorrectly
+            // Note: A nullable result is allowed, but delegate is generated incorrectly
             // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
             return evt!;
         }
         catch (Exception ex)
         {
-            options.LogError(ex, "Before Send Error");
+            options.LogError(ex, "Error running managed event processors for native event");
             return evt;
         }
     }
