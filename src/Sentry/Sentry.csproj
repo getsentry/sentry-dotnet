@@ -206,11 +206,12 @@
   <!-- See https://learn.microsoft.com/dotnet/core/project-sdk/overview -->
   <!-- See also https://github.com/ViktorHofer/PackAsAnalyzer -->
   <ItemGroup>
-    <ProjectReference Include="..\Sentry.SourceGenerators\Sentry.SourceGenerators.csproj" OutputItemType="" ReferenceOutputAssembly="false" PrivateAssets="all" SetTargetFramework="TargetFramework=netstandard2.0" SentryAnalyzersPack="true" />
+    <SentryAnalyzerProjectReference Include="..\Sentry.SourceGenerators\Sentry.SourceGenerators.csproj" />
   </ItemGroup>
-  <Target Name="_SentryPackAnalyzers" BeforeTargets="_GetPackageFiles">
-    <Message Text="Target: '_SentryPackAnalyzers' with Analyzer-Projects: '@(ProjectReference->WithMetadataValue('SentryAnalyzersPack', 'true'))'" Importance="high" />
-    <MSBuild Projects="@(ProjectReference->WithMetadataValue('SentryAnalyzersPack', 'true'))" Targets="GetTargetPath">
+  <Target Name="_SentryPackAnalyzers" BeforeTargets="GenerateNuspec;_GetPackageFiles">
+    <Message Text="Target: '_SentryPackAnalyzers' with Analyzer-Projects: '@(SentryAnalyzerProjectReference)'" Importance="high" />
+    <MSBuild Projects="@(SentryAnalyzerProjectReference)" Properties="Configuration=$(Configuration);TargetFramework=netstandard2.0"/>
+    <MSBuild Projects="@(SentryAnalyzerProjectReference)" Properties="Configuration=$(Configuration);TargetFramework=netstandard2.0" Targets="GetTargetPath">
       <Output TaskParameter="TargetOutputs" ItemName="_SentryAnalyzersPackagePath" />
     </MSBuild>
     <Error Text="No analyzer assemblies found to pack." Condition="'@(_SentryAnalyzersPackagePath)' == ''" />
