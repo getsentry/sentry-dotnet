@@ -100,9 +100,20 @@ internal class AndroidAssemblyStoreReaderV2 : IAndroidAssemblyReader
             return assembly;
         }
 
+        // If the assembly name ends with .dll or .exe, try to find it without the extension.
         if ((IsFileType(".dll") || IsFileType(".exe")) && FindBestAssembly(name[..^4], out assembly))
         {
             return assembly;
+        }
+
+        // Conversely, if there is no extension, try to find it with one of those extensions
+        // See: https://github.com/getsentry/sentry-dotnet/issues/4278#issuecomment-2986009125
+        if (!(IsFileType(".dll") && !IsFileType(".exe")))
+        {
+            if (FindBestAssembly(name + ".dll", out assembly) || FindBestAssembly(name + ".exe", out assembly))
+            {
+                return assembly;
+            }
         }
 
         return null;
@@ -119,10 +130,12 @@ internal class AndroidAssemblyStoreReaderV2 : IAndroidAssemblyReader
         {
             if (explorer.AssembliesByName?.TryGetValue(name, out var assembly) is true)
             {
+                _logger?.Invoke("Found best assembly {0} in APK AssemblyStore for target arch {1}", name, explorer.TargetArch);
                 explorerAssembly = new(explorer, assembly);
                 return true;
             }
         }
+        _logger?.Invoke("No best assembly for {0} in APK AssemblyStore", name);
         explorerAssembly = null;
         return false;
     }
