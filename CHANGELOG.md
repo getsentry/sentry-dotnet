@@ -6,6 +6,10 @@
 
 - Added StartSpan and GetTransaction methods to the SentrySdk ([#4303](https://github.com/getsentry/sentry-dotnet/pull/4303))
 
+### Fixes
+
+- Custom ISentryEventProcessors are now run for native iOS events ([#4318](https://github.com/getsentry/sentry-dotnet/pull/4318))
+
 ### Dependencies
 
 - Bump Native SDK from v0.9.0 to v0.9.1 ([#4309](https://github.com/getsentry/sentry-dotnet/pull/4309))
