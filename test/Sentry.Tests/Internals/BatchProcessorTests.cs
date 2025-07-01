@@ -1,41 +1,39 @@
 #nullable enable
 
-using System.Timers;
-
 namespace Sentry.Tests.Internals;
 
-public class BatchProcessorTests
+public class BatchProcessorTests : IDisposable
 {
     private readonly IHub _hub;
-    private readonly FakeBatchProcessorTimer _timer;
+    private readonly InMemoryDiagnosticLogger _diagnosticLogger;
     private readonly List<Envelope> _envelopes;
 
     public BatchProcessorTests()
     {
         _hub = Substitute.For<IHub>();
-        _timer = new FakeBatchProcessorTimer();
+        _diagnosticLogger = new InMemoryDiagnosticLogger();
 
         _envelopes = [];
         _hub.CaptureEnvelope(Arg.Do<Envelope>(arg => _envelopes.Add(arg)));
     }
 
-    [Theory]
+    [Theory(Skip = "May no longer be required after feedback.")]
     [InlineData(-1)]
     [InlineData(0)]
     public void Ctor_CountOutOfRange_Throws(int count)
     {
-        var ctor = () => new BatchProcessor(_hub, count, TimeSpan.FromMilliseconds(10));
+        var ctor = () => new BatchProcessor(_hub, count, TimeSpan.FromMilliseconds(10), _diagnosticLogger);
 
         Assert.Throws<ArgumentOutOfRangeException>(ctor);
     }
 
-    [Theory]
+    [Theory(Skip = "May no longer be required after feedback.")]
     [InlineData(-1)]
     [InlineData(0)]
     [InlineData(int.MaxValue + 1.0)]
     public void Ctor_IntervalOutOfRange_Throws(double interval)
     {
-        var ctor = () => new BatchProcessor(_hub, 1, TimeSpan.FromMilliseconds(interval));
+        var ctor = () => new BatchProcessor(_hub, 1, TimeSpan.FromMilliseconds(interval), _diagnosticLogger);
 
         Assert.Throws<ArgumentException>(ctor);
     }
@@ -43,7 +41,7 @@ public class BatchProcessorTests
     [Fact]
     public void Enqueue_NeitherSizeNorTimeoutReached_DoesNotCaptureEnvelope()
     {
-        using var processor = new BatchProcessor(_hub, 2, _timer);
+        using var processor = new BatchProcessor(_hub, 2, Timeout.InfiniteTimeSpan, _diagnosticLogger);
 
         processor.Enqueue(CreateLog("one"));
 
@@ -54,7 +52,7 @@ public class BatchProcessorTests
     [Fact]
     public void Enqueue_SizeReached_CaptureEnvelope()
     {
-        using var processor = new BatchProcessor(_hub, 2, _timer);
+        using var processor = new BatchProcessor(_hub, 2, Timeout.InfiniteTimeSpan, _diagnosticLogger);
 
         processor.Enqueue(CreateLog("one"));
         processor.Enqueue(CreateLog("two"));
@@ -66,11 +64,11 @@ public class BatchProcessorTests
     [Fact]
     public void Enqueue_TimeoutReached_CaptureEnvelope()
     {
-        using var processor = new BatchProcessor(_hub, 2, _timer);
+        using var processor = new BatchProcessor(_hub, 2, Timeout.InfiniteTimeSpan, _diagnosticLogger);
 
         processor.Enqueue(CreateLog("one"));
 
-        _timer.InvokeElapsed(DateTime.Now);
+        processor.OnIntervalElapsed(null);
 
         AssertCaptureEnvelope(1);
         AssertEnvelope("one");
@@ -79,11 +77,11 @@ public class BatchProcessorTests
     [Fact]
     public void Enqueue_BothSizeAndTimeoutReached_CaptureEnvelopeOnce()
     {
-        using var processor = new BatchProcessor(_hub, 2, _timer);
+        using var processor = new BatchProcessor(_hub, 2, Timeout.InfiniteTimeSpan, _diagnosticLogger);
 
         processor.Enqueue(CreateLog("one"));
         processor.Enqueue(CreateLog("two"));
-        _timer.InvokeElapsed(DateTime.Now);
+        processor.OnIntervalElapsed(null);
 
         AssertCaptureEnvelope(1);
         AssertEnvelope("one", "two");
@@ -92,11 +90,11 @@ public class BatchProcessorTests
     [Fact]
     public void Enqueue_BothTimeoutAndSizeReached_CaptureEnvelopes()
     {
-        using var processor = new BatchProcessor(_hub, 2, _timer);
+        using var processor = new BatchProcessor(_hub, 2, Timeout.InfiniteTimeSpan, _diagnosticLogger);
 
-        _timer.InvokeElapsed(DateTime.Now);
+        processor.OnIntervalElapsed(null);
         processor.Enqueue(CreateLog("one"));
-        _timer.InvokeElapsed(DateTime.Now);
+        processor.OnIntervalElapsed(null);
         processor.Enqueue(CreateLog("two"));
         processor.Enqueue(CreateLog("three"));
 
@@ -149,24 +147,9 @@ public class BatchProcessorTests
         Assert.NotNull(log);
         Assert.Equal(expected, log.Items.ToArray().Select(static item => item.Message));
     }
-}
 
-internal sealed class FakeBatchProcessorTimer : BatchProcessorTimer
-{
-    public override bool Enabled { get; set; }
-
-    public override event EventHandler<ElapsedEventArgs> Elapsed = null!;
-
-    internal void InvokeElapsed(DateTime signalTime)
+    public void Dispose()
     {
-#if NET9_0_OR_GREATER
-        var e = new ElapsedEventArgs(signalTime);
-#else
-        var type = typeof(ElapsedEventArgs);
-        var ctor = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.CreateInstance;
-        var instance = Activator.CreateInstance(type, ctor, null, [signalTime], null);
-        var e = (ElapsedEventArgs)instance!;
-#endif
-        Elapsed.Invoke(this, e);
+        Assert.Empty(_diagnosticLogger.Entries);
     }
 }

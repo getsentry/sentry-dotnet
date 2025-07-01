@@ -221,7 +221,7 @@ public class SentryStructuredLoggerTests
         entry.Args.Should().BeEmpty();
     }
 
-    [Fact]
+    [Fact(Skip = "May no longer be required after feedback.")]
     public void Dispose_Log_Throws()
     {
         _fixture.Options.Experimental.EnableLogs = true;

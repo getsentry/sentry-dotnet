@@ -1,4 +1,4 @@
-using System.Timers;
+using Sentry.Extensibility;
 using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 
@@ -16,23 +16,21 @@ namespace Sentry.Internal;
 internal sealed class BatchProcessor : IDisposable
 {
     private readonly IHub _hub;
-    private readonly BatchProcessorTimer _timer;
+    private readonly TimeSpan _batchInterval;
+    private readonly IDiagnosticLogger? _diagnosticLogger;
+    private readonly Timer _timer;
     private readonly BatchBuffer<SentryLog> _logs;
     private readonly object _lock;
 
     private DateTime _lastFlush = DateTime.MinValue;
 
-    public BatchProcessor(IHub hub, int batchCount, TimeSpan batchInterval)
-        : this(hub, batchCount, new TimersBatchProcessorTimer(batchInterval))
-    {
-    }
-
-    public BatchProcessor(IHub hub, int batchCount, BatchProcessorTimer timer)
+    public BatchProcessor(IHub hub, int batchCount, TimeSpan batchInterval, IDiagnosticLogger? diagnosticLogger)
     {
         _hub = hub;
+        _batchInterval = batchInterval;
+        _diagnosticLogger = diagnosticLogger;
 
-        _timer = timer;
-        _timer.Elapsed += OnIntervalElapsed;
+        _timer = new Timer(OnIntervalElapsed, this, Timeout.Infinite, Timeout.Infinite);
 
         _logs = new BatchBuffer<SentryLog>(batchCount);
         _lock = new object();
@@ -54,11 +52,11 @@ internal sealed class BatchProcessor : IDisposable
 
         if (isFirstLog && !_logs.IsFull)
         {
-            _timer.Enabled = true;
+            EnableTimer();
         }
         else if (_logs.IsFull)
         {
-            _timer.Enabled = false;
+            DisableTimer();
             Flush();
         }
     }
@@ -71,23 +69,31 @@ internal sealed class BatchProcessor : IDisposable
         _ = _hub.CaptureEnvelope(Envelope.FromLog(new StructuredLog(logs)));
     }
 
-    private void OnIntervalElapsed(object? sender, ElapsedEventArgs e)
+    internal void OnIntervalElapsed(object? state)
     {
-        _timer.Enabled = false;
-
         lock (_lock)
         {
-            if (!_logs.IsEmpty && e.SignalTime > _lastFlush)
+            if (!_logs.IsEmpty && DateTime.UtcNow > _lastFlush)
             {
                 Flush();
             }
         }
     }
 
+    private void EnableTimer()
+    {
+        var updated = _timer.Change(_batchInterval, Timeout.InfiniteTimeSpan);
+        Debug.Assert(updated, "Timer was not successfully enabled.");
+    }
+
+    private void DisableTimer()
+    {
+        var updated = _timer.Change(Timeout.Infinite, Timeout.Infinite);
+        Debug.Assert(updated, "Timer was not successfully disabled.");
+    }
+
     public void Dispose()
     {
-        _timer.Enabled = false;
-        _timer.Elapsed -= OnIntervalElapsed;
         _timer.Dispose();
     }
 }
