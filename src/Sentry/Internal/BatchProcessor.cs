@@ -18,9 +18,12 @@ internal sealed class BatchProcessor : IDisposable
     private readonly IHub _hub;
     private readonly TimeSpan _batchInterval;
     private readonly IDiagnosticLogger? _diagnosticLogger;
+
     private readonly Timer _timer;
-    private readonly BatchBuffer<SentryLog> _logs;
-    private readonly object _lock;
+    private readonly object _timerCallbackLock;
+    private readonly BatchBuffer<SentryLog> _buffer1;
+    private readonly BatchBuffer<SentryLog> _buffer2;
+    private volatile BatchBuffer<SentryLog> _activeBuffer;
 
     private DateTime _lastFlush = DateTime.MinValue;
 
@@ -31,51 +34,75 @@ internal sealed class BatchProcessor : IDisposable
         _diagnosticLogger = diagnosticLogger;
 
         _timer = new Timer(OnIntervalElapsed, this, Timeout.Infinite, Timeout.Infinite);
+        _timerCallbackLock = new object();
 
-        _logs = new BatchBuffer<SentryLog>(batchCount);
-        _lock = new object();
+        _buffer1 = new BatchBuffer<SentryLog>(batchCount);
+        _buffer2 = new BatchBuffer<SentryLog>(batchCount);
+        _activeBuffer = _buffer1;
     }
 
     internal void Enqueue(SentryLog log)
     {
-        lock (_lock)
+        var activeBuffer = _activeBuffer;
+
+        if (!TryEnqueue(activeBuffer, log))
         {
-            EnqueueCore(log);
+            activeBuffer = activeBuffer == _buffer1 ? _buffer2 : _buffer1;
+            if (!TryEnqueue(activeBuffer, log))
+            {
+                _diagnosticLogger?.LogInfo("Log Buffer full ... dropping log");
+            }
         }
     }
 
-    private void EnqueueCore(SentryLog log)
+    private bool TryEnqueue(BatchBuffer<SentryLog> buffer, SentryLog log)
     {
-        var isFirstLog = _logs.IsEmpty;
-        var added = _logs.TryAdd(log);
-        Debug.Assert(added, $"Since we currently have no lock-free scenario, it's unexpected to exceed the {nameof(BatchBuffer<SentryLog>)}'s capacity.");
+        if (buffer.TryAdd(log, out var count))
+        {
+            if (count == 1) // is first of buffer
+            {
+                EnableTimer();
+            }
 
-        if (isFirstLog && !_logs.IsFull)
-        {
-            EnableTimer();
+            if (count == buffer.Capacity) // is buffer full
+            {
+                // swap active buffer atomically
+                var currentActiveBuffer = _activeBuffer;
+                var newActiveBuffer = ReferenceEquals(currentActiveBuffer, _buffer1) ? _buffer2 : _buffer1;
+                if (Interlocked.CompareExchange(ref _activeBuffer, newActiveBuffer, currentActiveBuffer) == currentActiveBuffer)
+                {
+                    DisableTimer();
+                    Flush(buffer, count);
+                }
+            }
+
+            return true;
         }
-        else if (_logs.IsFull)
-        {
-            DisableTimer();
-            Flush();
-        }
+
+        return false;
     }
 
-    private void Flush()
+    private void Flush(BatchBuffer<SentryLog> buffer, int count)
     {
         _lastFlush = DateTime.UtcNow;
 
-        var logs = _logs.ToArrayAndClear();
+        var logs = buffer.ToArrayAndClear(count);
         _ = _hub.CaptureEnvelope(Envelope.FromLog(new StructuredLog(logs)));
     }
 
     internal void OnIntervalElapsed(object? state)
     {
-        lock (_lock)
+        lock (_timerCallbackLock)
         {
-            if (!_logs.IsEmpty && DateTime.UtcNow > _lastFlush)
+            var currentActiveBuffer = _activeBuffer;
+
+            if (!currentActiveBuffer.IsEmpty && DateTime.UtcNow > _lastFlush)
             {
-                Flush();
+                var newActiveBuffer = ReferenceEquals(currentActiveBuffer, _buffer1) ? _buffer2 : _buffer1;
+                if (Interlocked.CompareExchange(ref _activeBuffer, newActiveBuffer, currentActiveBuffer) == currentActiveBuffer)
+                {
+                    Flush(currentActiveBuffer, -1);
+                }
             }
         }
     }

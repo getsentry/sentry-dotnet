@@ -102,6 +102,32 @@ public class BatchProcessorTests : IDisposable
         AssertEnvelopes(["one"], ["two", "three"]);
     }
 
+    [Fact]
+    public async Task Enqueue_Concurrency_CaptureEnvelopes()
+    {
+        using var processor = new BatchProcessor(_hub, 100, Timeout.InfiniteTimeSpan, _diagnosticLogger);
+        using var sync = new ManualResetEvent(false);
+
+        var tasks = new Task[5];
+        for (var i = 0; i < tasks.Length; i++)
+        {
+            tasks[i] = Task.Factory.StartNew(static state =>
+            {
+                var (sync, taskIndex, processor) = ((ManualResetEvent, int, BatchProcessor))state!;
+                sync.WaitOne(5_000);
+                for (var i = 0; i < 100; i++)
+                {
+                    processor.Enqueue(CreateLog($"{taskIndex}-{i}"));
+                }
+            }, (sync, i, processor));
+        }
+
+        sync.Set();
+        await Task.WhenAll(tasks);
+
+        AssertCaptureEnvelope(5 * 100 / 100);
+    }
+
     private static SentryLog CreateLog(string message)
     {
         return new SentryLog(DateTimeOffset.MinValue, SentryId.Empty, SentryLogLevel.Trace, message);

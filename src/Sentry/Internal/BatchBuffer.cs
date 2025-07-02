@@ -4,77 +4,88 @@ namespace Sentry.Internal;
 /// A slim wrapper over an <see cref="System.Array"/>,
 /// intended for buffering.
 /// </summary>
+/// <remarks>
+/// <para><see cref="Capacity"/> is thread-safe.</para>
+/// <para><see cref="TryAdd(T, out int)"/> is thread-safe.</para>
+/// <para><see cref="ToArrayAndClear()"/> is not thread-safe.</para>
+/// <para><see cref="ToArrayAndClear(int)"/> is not thread-safe.</para>
+/// </remarks>
 internal sealed class BatchBuffer<T>
 {
     private readonly T[] _array;
-    private int _count;
+    private int _additions;
 
     public BatchBuffer(int capacity)
     {
-        ThrowIfNegativeOrZero(capacity, nameof(capacity));
+        ThrowIfLessThanTwo(capacity, nameof(capacity));
 
         _array = new T[capacity];
-        _count = 0;
+        _additions = 0;
     }
 
-    internal int Count => _count;
+    //internal int Count => _count;
     internal int Capacity => _array.Length;
-    internal bool IsEmpty => _count == 0 && _array.Length != 0;
-    internal bool IsFull => _count == _array.Length;
+    internal bool IsEmpty => _additions == 0;
+    internal bool IsFull => _additions >= _array.Length;
 
-    internal bool TryAdd(T item)
+    internal bool TryAdd(T item, out int count)
     {
-        if (_count < _array.Length)
+        count = Interlocked.Increment(ref _additions);
+
+        if (count <= _array.Length)
         {
-            _array[_count] = item;
-            _count++;
+            _array[count - 1] = item;
             return true;
         }
 
         return false;
     }
 
-    internal T[] ToArray()
+    internal T[] ToArrayAndClear()
     {
-        if (_count == 0)
+        return ToArrayAndClear(_additions);
+    }
+
+    internal T[] ToArrayAndClear(int length)
+    {
+        var array = ToArray(length);
+        Clear(length);
+        return array;
+    }
+
+    private T[] ToArray(int length)
+    {
+        if (length == 0)
         {
             return Array.Empty<T>();
         }
 
-        var array = new T[_count];
-        Array.Copy(_array, array, _count);
+        var array = new T[length];
+        Array.Copy(_array, array, length);
         return array;
     }
 
-    internal void Clear()
+    private void Clear(int length)
     {
-        if (_count == 0)
+        if (length == 0)
         {
             return;
         }
 
-        var count = _count;
-        _count = 0;
-        Array.Clear(_array, 0, count);
+        _additions = 0;
+        Array.Clear(_array, 0, length);
     }
 
-    internal T[] ToArrayAndClear()
+    private static void ThrowIfLessThanTwo(int capacity, string paramName)
     {
-        var array = ToArray();
-        Clear();
-        return array;
-    }
-
-    private static void ThrowIfNegativeOrZero(int capacity, string paramName)
-    {
-        if (capacity <= 0)
+        if (capacity < 2)
         {
-            ThrowNegativeOrZero(capacity, paramName);
+            ThrowLessThanTwo(capacity, paramName);
         }
     }
 
-    private static void ThrowNegativeOrZero(int capacity, string paramName)
+    private static void ThrowLessThanTwo(int capacity, string paramName)
     {
-        throw new ArgumentOutOfRangeException(paramName, capacity, "Argument must neither be negative nor zero.");
+        throw new ArgumentOutOfRangeException(paramName, capacity, "Argument must be at least two.");
     }
 }
