@@ -61,12 +61,12 @@ public partial class SentryOptions
         /// <summary>
         /// When enabled, the SDK tracks when the application stops responding for a specific amount of
         /// time defined by the <see cref="AppHangTimeoutInterval"/> option.
-        /// The default value is <c>true</c> (enabled).
+        /// The default value is <c>false</c> (disabled).
         /// </summary>
         /// <remarks>
         /// See https://docs.sentry.io/platforms/apple/configuration/app-hangs/
         /// </remarks>
-        public bool EnableAppHangTracking { get; set; } = true;
+        public bool EnableAppHangTracking { get; set; } = false;
 
         /// <summary>
         /// IMPORTANT: This feature is experimental and may have bugs.
