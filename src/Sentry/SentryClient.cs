@@ -19,7 +19,6 @@ public class SentryClient : ISentryClient, IDisposable
     private readonly ISessionManager _sessionManager;
     private readonly RandomValuesFactory _randomValuesFactory;
     private readonly Enricher _enricher;
-    private readonly SentryEventHelper _eventHelper;
 
     internal IBackgroundWorker Worker { get; }
 
@@ -48,7 +47,6 @@ public class SentryClient : ISentryClient, IDisposable
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
         _enricher = new Enricher(options);
-        _eventHelper = new SentryEventHelper(options);
 
         options.SetupLogging(); // Only relevant if this client wasn't created as a result of calling Init
 
@@ -350,12 +348,12 @@ public class SentryClient : ISentryClient, IDisposable
             }
         }
 
-        if (_eventHelper.ProcessEvent(@event, scope.GetAllEventProcessors(), hint) is not { } processedEvent)
+        if (SentryEventHelper.ProcessEvent(@event, scope.GetAllEventProcessors(), hint, _options) is not { } processedEvent)
         {
             return SentryId.Empty;  // Dropped by an event processor
         }
 
-        processedEvent = _eventHelper.DoBeforeSend(processedEvent, hint);
+        processedEvent = SentryEventHelper.DoBeforeSend(processedEvent, hint, _options);
         if (processedEvent == null)
         {
             return SentryId.Empty; // Dropped by BeforeSend callback

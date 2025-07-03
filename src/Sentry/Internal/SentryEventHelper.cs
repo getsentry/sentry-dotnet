@@ -2,9 +2,9 @@ using Sentry.Extensibility;
 
 namespace Sentry.Internal;
 
-internal class SentryEventHelper(SentryOptions options)
+internal static class SentryEventHelper
 {
-    public SentryEvent? ProcessEvent(SentryEvent? evt, IEnumerable<ISentryEventProcessor> processors, SentryHint? hint)
+    public static SentryEvent? ProcessEvent(SentryEvent? evt, IEnumerable<ISentryEventProcessor> processors, SentryHint? hint, SentryOptions options)
     {
         if (evt == null)
         {
@@ -12,7 +12,7 @@ internal class SentryEventHelper(SentryOptions options)
         }
 
         var processedEvent = evt;
-        var effectiveHint = hint ?? new SentryHint();
+        var effectiveHint = hint ?? new SentryHint(options);
 
         foreach (var processor in processors)
         {
@@ -30,7 +30,7 @@ internal class SentryEventHelper(SentryOptions options)
 #if NET6_0_OR_GREATER
     [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
 #endif
-    public SentryEvent? DoBeforeSend(SentryEvent? @event, SentryHint hint)
+    public static SentryEvent? DoBeforeSend(SentryEvent? @event, SentryHint hint, SentryOptions options)
     {
         if (@event is null || options.BeforeSendInternal is null)
         {

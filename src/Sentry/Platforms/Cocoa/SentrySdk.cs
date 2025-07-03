@@ -244,22 +244,21 @@ public static partial class SentrySdk
         {
             // Normally the event processors would be invoked by the SentryClient, but the Cocoa SDK has its own client,
             // so we need to manually invoke any managed event processors here to apply them to Native events.
-            var manualProcessors = GetEventProcessors()
+            var manualProcessors = GetEventProcessors(hub)
                 .Where(p => p is not MainSentryEventProcessor)
-                .ToImmutableArray();
+                .ToArray();
             if (manualProcessors.Length == 0 && options.BeforeSendInternal is null)
             {
                 return evt;
             }
 
             var sentryEvent = evt.ToSentryEvent();
-            var eventHelper = new SentryEventHelper(options);
-            if (eventHelper.ProcessEvent(sentryEvent, manualProcessors, null) is not { } processedEvent)
+            if (SentryEventHelper.ProcessEvent(sentryEvent, manualProcessors, null, options) is not { } processedEvent)
             {
                 return null;
             }
 
-            processedEvent = eventHelper.DoBeforeSend(processedEvent, new SentryHint());
+            processedEvent = SentryEventHelper.DoBeforeSend(processedEvent, new SentryHint(), options);
             if (processedEvent == null)
             {
                 return null;
@@ -270,7 +269,7 @@ public static partial class SentrySdk
 
             // Note: A nullable result is allowed, but delegate is generated incorrectly
             // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
-            return evt!;
+            return evt;
         }
         catch (Exception ex)
         {
@@ -278,7 +277,7 @@ public static partial class SentrySdk
             return evt;
         }
 
-        IEnumerable<ISentryEventProcessor> GetEventProcessors()
+        static IEnumerable<ISentryEventProcessor> GetEventProcessors(IHub hub)
         {
             if (hub is Hub fullHub)
             {
