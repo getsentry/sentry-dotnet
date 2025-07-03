@@ -348,26 +348,15 @@ public class SentryClient : ISentryClient, IDisposable
             }
         }
 
-        var processedEvent = @event;
-
-        foreach (var processor in scope.GetAllEventProcessors())
+        if (SentryEventHelper.ProcessEvent(@event, scope.GetAllEventProcessors(), hint, _options) is not { } processedEvent)
         {
-            processedEvent = processor.DoProcessEvent(processedEvent, hint);
-
-            if (processedEvent == null)
-            {
-                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
-                _options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
-                return SentryId.Empty;
-            }
+            return SentryId.Empty;  // Dropped by an event processor
         }
 
-        processedEvent = BeforeSend(processedEvent, hint);
-        if (processedEvent == null) // Rejected event
+        processedEvent = SentryEventHelper.DoBeforeSend(processedEvent, hint, _options);
+        if (processedEvent == null)
         {
-            _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
-            _options.LogInfo("Event dropped by BeforeSend callback.");
-            return SentryId.Empty;
+            return SentryId.Empty; // Dropped by BeforeSend callback
         }
 
         var hasTerminalException = processedEvent.HasTerminalException();
@@ -452,48 +441,6 @@ public class SentryClient : ISentryClient, IDisposable
             Worker.QueuedItems);
 
         return false;
-    }
-
-#if NET6_0_OR_GREATER
-    [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
-#endif
-    private SentryEvent? BeforeSend(SentryEvent? @event, SentryHint hint)
-    {
-        if (_options.BeforeSendInternal == null)
-        {
-            return @event;
-        }
-
-        _options.LogDebug("Calling the BeforeSend callback");
-        try
-        {
-            @event = _options.BeforeSendInternal?.Invoke(@event!, hint);
-        }
-        catch (Exception e)
-        {
-            if (!AotHelper.IsTrimmed)
-            {
-                // Attempt to demystify exceptions before adding them as breadcrumbs.
-                e.Demystify();
-            }
-
-            _options.LogError(e, "The BeforeSend callback threw an exception. It will be added as breadcrumb and continue.");
-            var data = new Dictionary<string, string>
-            {
-                {"message", e.Message}
-            };
-            if (e.StackTrace is not null)
-            {
-                data.Add("stackTrace", e.StackTrace);
-            }
-            @event?.AddBreadcrumb(
-                "BeforeSend callback failed.",
-                category: "SentryClient",
-                data: data,
-                level: BreadcrumbLevel.Error);
-        }
-
-        return @event;
     }
 
     /// <summary>
