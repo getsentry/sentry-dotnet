@@ -267,8 +267,6 @@ public static partial class SentrySdk
             // we only support a subset of mutated data to be passed back to the native SDK at this time
             processedEvent.CopyToCocoaSentryEvent(evt);
 
-            // Note: A nullable result is allowed, but delegate is generated incorrectly
-            // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
             return evt;
         }
         catch (Exception ex)
