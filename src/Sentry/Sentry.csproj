@@ -24,7 +24,6 @@
   <ItemGroup Condition="'$(SolutionName)' == 'Sentry.Unity'">
     <InternalsVisibleTo Include="Sentry.Unity" />
     <InternalsVisibleTo Include="Sentry.Unity.Tests" />
-    <Compile Remove="path/to/file"></Compile>
   </ItemGroup>
 
   <!-- Platform-specific props included here -->
