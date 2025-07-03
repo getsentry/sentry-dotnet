@@ -1,9 +1,10 @@
-// Adapted from: https://github.com/dotnet/aspnetcore/blob/c18e93a9a2e2949e1a9c880da16abf0837aa978f/src/Shared/SizeLimitedStream.cs
+// Copied from: https://github.com/dotnet/aspnetcore/blob/c18e93a9a2e2949e1a9c880da16abf0837aa978f/src/Shared/SizeLimitedStream.cs
+// The only changes are the namespace and the addition of this comment
 
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Sentry.AspNetCore.Internal.RequestDecompression;
+namespace Sentry.AspNetCore.RequestDecompression;
 
 #nullable enable
 

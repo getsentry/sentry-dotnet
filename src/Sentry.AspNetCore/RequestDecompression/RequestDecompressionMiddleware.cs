@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.RequestDecompression;
 using Microsoft.Extensions.Logging;
 
-namespace Sentry.AspNetCore.Internal.RequestDecompression;
+namespace Sentry.AspNetCore.RequestDecompression;
 
 /// <summary>
 /// Enables HTTP request decompression.
