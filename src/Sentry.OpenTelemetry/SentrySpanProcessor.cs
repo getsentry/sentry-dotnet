@@ -13,6 +13,9 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 {
     private readonly IHub _hub;
     internal readonly IEnumerable<IOpenTelemetryEnricher> _enrichers;
+#if NET9_0_OR_GREATER
+    private readonly OpenTelemetryExceptionListener _exceptionListener;
+#endif
     private readonly IReplaySession _replaySession;
     internal const string OpenTelemetryOrigin = "auto.otel";
 
@@ -59,6 +62,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         }
 
         _enrichers = enrichers ?? [];
+        _exceptionListener = new OpenTelemetryExceptionListener(_options?.DiagnosticLogger);
         _replaySession = replaySession ?? ReplaySession.Instance;
         _options = hub.GetSentryOptions();
 
@@ -271,14 +275,22 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             var hub = _realHub.Value;
             hub?.RestoreScope(savedScope);
         }
-        GenerateSentryErrorsFromOtelSpan(data, attributes);
+        var exception = GenerateSentryErrorsFromOtelSpan(data, attributes);
 
         var status = GetSpanStatus(data.Status, attributes);
         foreach (var enricher in _enrichers)
         {
             enricher.Enrich(span, data, _hub, _options);
         }
-        span.Finish(status);
+
+        if (exception is not null)
+        {
+            span.Finish(exception);
+        }
+        else
+        {
+            span.Finish(status);
+        }
 
         _map.TryRemove(data.SpanId, out _);
 
@@ -462,23 +474,15 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         return otelContext;
     }
 
-    private void GenerateSentryErrorsFromOtelSpan(Activity activity, IDictionary<string, object?> spanAttributes)
+    private Exception? GenerateSentryErrorsFromOtelSpan(Activity activity, IDictionary<string, object?> spanAttributes)
     {
+        Exception? firstException = null;
         // https://develop.sentry.dev/sdk/performance/opentelemetry/#step-7-define-generatesentryerrorsfromotelspan
         // https://opentelemetry.io/docs/specs/otel/trace/semantic_conventions/exceptions/
-        foreach (var @event in activity.Events.Where(e => e.Name == OtelSemanticConventions.AttributeExceptionEventName))
+        foreach (var @event in
+                 activity.Events.Where(e => e.Name == OtelSemanticConventions.AttributeExceptionEventName))
         {
             var eventAttributes = @event.Tags.ToDict();
-            // This would be where we would ideally implement full exception capture. That's not possible at the
-            // moment since the full exception isn't yet available via the OpenTelemetry API.
-            // See https://github.com/open-telemetry/opentelemetry-dotnet/issues/2439#issuecomment-1577314568
-            // if (!eventAttributes.TryGetTypedValue("exception", out Exception exception))
-            // {
-            //      continue;
-            // }
-
-            // At the moment, OTEL only gives us `exception.type`, `exception.message`, and `exception.stacktrace`...
-            // So the best we can do is a poor man's exception (no accurate symbolication or anything)
             if (!eventAttributes.TryGetTypedValue(OtelSemanticConventions.AttributeExceptionType, out string exceptionType))
             {
                 continue;
@@ -486,27 +490,16 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             eventAttributes.TryGetTypedValue(OtelSemanticConventions.AttributeExceptionMessage, out string message);
             eventAttributes.TryGetTypedValue(OtelSemanticConventions.AttributeExceptionStacktrace, out string stackTrace);
 
-            Exception exception;
-            try
+            if (_exceptionListener.GetEventException(activity, exceptionType, message, @event.Timestamp) is not { } exception)
             {
-                if (CreatePoorMansException(exceptionType, message) is not { } poorMansException)
-                {
-                    _options?.DiagnosticLogger?.LogWarning($"Unable to create poor man's exception with trimming enabled : {exceptionType}");
-                    continue;
-                }
-                exception = poorMansException;
-            }
-            catch
-            {
-                _options?.DiagnosticLogger?.LogError($"Failed to create poor man's exception for type : {exceptionType}");
                 continue;
             }
+            firstException ??= exception;
 
             // TODO: Validate that our `DuplicateEventDetectionEventProcessor` prevents this from doubling exceptions
             // that are also caught by other means, such as our AspNetCore middleware, etc.
             // (When options.RecordException = true is set on AddAspNetCoreInstrumentation...)
             // Also, in such cases - how will we get the otel scope and trace context on the other one?
-
             var sentryEvent = new SentryEvent(exception, @event.Timestamp);
             var otelContext = GetOtelContext(spanAttributes);
             otelContext.Add("stack_trace", stackTrace);
@@ -519,6 +512,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 trace.TraceId = activity.TraceId.AsSentryId();
             });
         }
+
+        return firstException;
     }
 
     [UnconditionalSuppressMessage("Trimming", "IL2057", Justification = AotHelper.AvoidAtRuntime)]
