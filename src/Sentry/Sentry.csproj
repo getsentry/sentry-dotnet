@@ -18,11 +18,13 @@
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     <!-- To be able to make the internals visible, since we're not signing the assembly for Unity -->
     <SignAssembly>false</SignAssembly>
+    <DefineConstants>$(DefineConstants);SENTRY_UNITY</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(SolutionName)' == 'Sentry.Unity'">
     <InternalsVisibleTo Include="Sentry.Unity" />
     <InternalsVisibleTo Include="Sentry.Unity.Tests" />
+    <Compile Remove="path/to/file"></Compile>
   </ItemGroup>
 
   <!-- Platform-specific props included here -->

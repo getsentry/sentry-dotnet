@@ -6,6 +6,13 @@ using Sentry.Protocol.Envelopes;
 
 namespace Sentry;
 
+
+#if SENTRY_UNITY
+/// <summary>
+/// please, don't
+/// </summary>
+internal
+#else
 /// <summary>
 /// Sentry SDK entrypoint.
 /// </summary>
@@ -14,7 +21,9 @@ namespace Sentry;
 /// It allows safe static access to a client and scope management.
 /// When the SDK is uninitialized, calls to this class result in no-op so no callbacks are invoked.
 /// </remarks>
-public static partial class SentrySdk
+public
+#endif
+    static partial class SentrySdk
 {
     internal static IHub CurrentHub = DisabledHub.Instance;
 
