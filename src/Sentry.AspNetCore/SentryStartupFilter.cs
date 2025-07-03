@@ -17,8 +17,6 @@ public class SentryStartupFilter : IStartupFilter
     /// </summary>
     public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => app =>
     {
-        app.UseSentry();
-
         // If we are capturing request bodies and the user has configured request body decompression, we need to
         // ensure that the RequestDecompression middleware gets called before Sentry's middleware. The last middleware
         // added is the first one to be executed.
@@ -26,8 +24,12 @@ public class SentryStartupFilter : IStartupFilter
         if (options?.Value is { } o && o.MaxRequestBodySize != RequestSize.None
             && app.ApplicationServices.GetService<IRequestDecompressionProvider>() is not null)
         {
-            app.UseRequestDecompression();
+            // We've vendored in a custom implementation of RequestDecompressionMiddleware to ensure we can capture
+            // any exceptions that might occur during decompression.
+            app.UseMiddleware<Internal.RequestDecompression.RequestDecompressionMiddleware>();
         }
+
+        app.UseSentry();
 
         next(app);
     };

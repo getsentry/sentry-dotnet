@@ -122,15 +122,15 @@ public class SentryAspNetCoreOptions : SentryLoggingOptions
 
             if (hostingEnvironment.IsProduction())
             {
-                Environment = Internal.Constants.ProductionEnvironmentSetting;
+                Environment = Sentry.Internal.Constants.ProductionEnvironmentSetting;
             }
             else if (hostingEnvironment.IsStaging())
             {
-                Environment = Internal.Constants.StagingEnvironmentSetting;
+                Environment = Sentry.Internal.Constants.StagingEnvironmentSetting;
             }
             else if (hostingEnvironment.IsDevelopment())
             {
-                Environment = Internal.Constants.DevelopmentEnvironmentSetting;
+                Environment = Sentry.Internal.Constants.DevelopmentEnvironmentSetting;
             }
             else
             {
