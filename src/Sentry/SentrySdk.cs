@@ -6,11 +6,11 @@ using Sentry.Protocol.Envelopes;
 
 namespace Sentry;
 
-
 #if SENTRY_UNITY
 /// <summary>
-/// please, don't
+/// Internal Sentry SDK entrypoint.
 /// </summary>
+/// <remarks>Use `Sentry.Unity.SentrySdk` instead.</remarks>
 internal
 #else
 /// <summary>
