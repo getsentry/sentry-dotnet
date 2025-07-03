@@ -1,8 +1,8 @@
 namespace Sentry.Internal;
 
 /// <summary>
-/// A slim wrapper over an <see cref="System.Array"/>,
-/// intended for buffering.
+/// A slim wrapper over an <see cref="System.Array"/>, intended for buffering.
+/// <para>Requires a minimum capacity of 2.</para>
 /// </summary>
 /// <remarks>
 /// <para><see cref="Capacity"/> is thread-safe.</para>
@@ -23,7 +23,6 @@ internal sealed class BatchBuffer<T>
         _additions = 0;
     }
 
-    //internal int Count => _count;
     internal int Capacity => _array.Length;
     internal bool IsEmpty => _additions == 0;
     internal bool IsFull => _additions >= _array.Length;
@@ -43,7 +42,13 @@ internal sealed class BatchBuffer<T>
 
     internal T[] ToArrayAndClear()
     {
-        return ToArrayAndClear(_additions);
+        var additions = _additions;
+        var length = _array.Length;
+        if (additions < length)
+        {
+            length = additions;
+        }
+        return ToArrayAndClear(length);
     }
 
     internal T[] ToArrayAndClear(int length)
