@@ -1,16 +1,10 @@
-using System.IO.Compression;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.RequestDecompression;
-using Xunit;
+using Sentry.AspNetCore.TestUtils;
 
 namespace Sentry.AspNetCore.Tests.RequestDecompressionMiddleware;
 
@@ -20,15 +14,18 @@ public class RequestDecompressionMiddlewareTests
     {
         private TestServer _server;
         private HttpClient _client;
-        private IRequestDecompressionProvider provider;
+        private IRequestDecompressionProvider _provider;
+        public Action<SentryAspNetCoreOptions> ConfigureOptions;
 
-        private IWebHostBuilder Builder => new WebHostBuilder()
+        private IWebHostBuilder GetBuilder()
+        {
+            return new WebHostBuilder()
                 .ConfigureServices(services =>
                 {
                     services.AddRouting();
-                    if (provider is not null)
+                    if (_provider is not null)
                     {
-                        services.AddSingleton(provider);
+                        services.AddSingleton(_provider);
                     }
                     else
                     {
@@ -39,6 +36,10 @@ public class RequestDecompressionMiddlewareTests
                 {
                     o.Dsn = ValidDsn;
                     o.MaxRequestBodySize = RequestSize.Always;
+                    if (ConfigureOptions is not null)
+                    {
+                        ConfigureOptions(o);
+                    }
                 })
                 .Configure(app =>
                 {
@@ -53,13 +54,14 @@ public class RequestDecompressionMiddlewareTests
                         });
                     });
                 });
+        }
 
         public void FakeDecompressionError()
         {
-            provider = new FlakyDecompressionProvider();
+            _provider = new FlakyDecompressionProvider();
         }
 
-        class FlakyDecompressionProvider : IRequestDecompressionProvider
+        private class FlakyDecompressionProvider : IRequestDecompressionProvider
         {
             public Stream GetDecompressionStream(HttpContext context)
             {
@@ -70,7 +72,7 @@ public class RequestDecompressionMiddlewareTests
 
         public HttpClient GetSut()
         {
-            _server = new TestServer(Builder);
+            _server = new TestServer(GetBuilder());
             _client = _server.CreateClient();
             return _client;
         }
@@ -82,7 +84,22 @@ public class RequestDecompressionMiddlewareTests
         }
     }
 
-    private readonly Fixture _fixture = new Fixture();
+    private readonly Fixture _fixture = new ();
+
+    [Fact]
+    public async Task AddRequestDecompression_PlainBodyContent_IsUnaltered()
+    {
+        var client = _fixture.GetSut();
+
+        var json = "{\"Foo\":\"Bar\"}";
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var response = await client.PostAsync("/echo", content);
+        var responseBody = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(json, responseBody);
+    }
 
     [Fact]
     public async Task AddRequestDecompression_CompressedBodyContent_IsDecompressed()
@@ -103,18 +120,55 @@ public class RequestDecompressionMiddlewareTests
     }
 
     [Fact]
-    public async Task AddRequestDecompression_PlainBodyContent_IsUnaltered()
+    public async Task DecompressionError_SentryCapturesException()
     {
+        // Arrange
+        SentryEvent exceptionEvent = null;
+        var exceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
+        exceptionProcessor.Process(Arg.Any<Exception>(), Arg.Do<SentryEvent>(
+            evt => exceptionEvent = evt
+        ));
+
+        var sentry = FakeSentryServer.CreateServer();
+        var sentryHttpClient = sentry.CreateClient();
+        _fixture.ConfigureOptions = options =>
+        {
+            options.SentryHttpClientFactory = new DelegateHttpClientFactory(_ => sentryHttpClient);
+            options.AddExceptionProcessor(exceptionProcessor);
+        };
+        _fixture.FakeDecompressionError();
         var client = _fixture.GetSut();
 
         var json = "{\"Foo\":\"Bar\"}";
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var gzipped = CompressGzip(json);
+        var content = new ByteArrayContent(gzipped);
+        content.Headers.Add("Content-Encoding", "gzip");
+        content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-        var response = await client.PostAsync("/echo", content);
-        var responseBody = await response.Content.ReadAsStringAsync();
+        // Act
+        try
+        {
+            var _ = await client.PostAsync("/echo", content);
+        }
+        catch
+        {
+            // We're expecting an exception here... what we're interested in is what happens on the server
+        }
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equal(json, responseBody);
+        // Assert
+        exceptionEvent.Should().NotBeNull();
+        using (new AssertionScope())
+        {
+            exceptionEvent.Tags.Should().Contain(kvp =>
+                kvp.Key == "RequestPath" &&
+                kvp.Value == "/echo"
+            );
+            exceptionEvent.Exception.Should().NotBeNull();
+            if (exceptionEvent.Exception is not null)
+            {
+                exceptionEvent.Exception.Message.Should().Be("Flaky decompression error");
+            }
+        }
     }
 
     private static byte[] CompressGzip(string str)
