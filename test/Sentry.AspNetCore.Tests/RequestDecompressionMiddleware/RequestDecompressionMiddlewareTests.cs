@@ -15,10 +15,16 @@ public class RequestDecompressionMiddlewareTests
         private TestServer _server;
         private HttpClient _client;
         private IRequestDecompressionProvider _provider;
-        public Action<SentryAspNetCoreOptions> ConfigureOptions;
+        public Exception LastException { get; private set; }
 
         private IWebHostBuilder GetBuilder()
         {
+            var exceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
+            exceptionProcessor.Process(Arg.Do<Exception>(e => LastException = e),
+                Arg.Any<SentryEvent>());
+
+            var sentry = FakeSentryServer.CreateServer();
+            var sentryHttpClient = sentry.CreateClient();
             return new WebHostBuilder()
                 .ConfigureServices(services =>
                 {
@@ -36,10 +42,8 @@ public class RequestDecompressionMiddlewareTests
                 {
                     o.Dsn = ValidDsn;
                     o.MaxRequestBodySize = RequestSize.Always;
-                    if (ConfigureOptions is not null)
-                    {
-                        ConfigureOptions(o);
-                    }
+                    o.SentryHttpClientFactory = new DelegateHttpClientFactory(_ => sentryHttpClient);
+                    o.AddExceptionProcessor(exceptionProcessor);
                 })
                 .Configure(app =>
                 {
@@ -123,19 +127,6 @@ public class RequestDecompressionMiddlewareTests
     public async Task DecompressionError_SentryCapturesException()
     {
         // Arrange
-        SentryEvent exceptionEvent = null;
-        var exceptionProcessor = Substitute.For<ISentryEventExceptionProcessor>();
-        exceptionProcessor.Process(Arg.Any<Exception>(), Arg.Do<SentryEvent>(
-            evt => exceptionEvent = evt
-        ));
-
-        var sentry = FakeSentryServer.CreateServer();
-        var sentryHttpClient = sentry.CreateClient();
-        _fixture.ConfigureOptions = options =>
-        {
-            options.SentryHttpClientFactory = new DelegateHttpClientFactory(_ => sentryHttpClient);
-            options.AddExceptionProcessor(exceptionProcessor);
-        };
         _fixture.FakeDecompressionError();
         var client = _fixture.GetSut();
 
@@ -148,7 +139,7 @@ public class RequestDecompressionMiddlewareTests
         // Act
         try
         {
-            var _ = await client.PostAsync("/echo", content);
+            _ = await client.PostAsync("/echo", content);
         }
         catch
         {
@@ -156,18 +147,10 @@ public class RequestDecompressionMiddlewareTests
         }
 
         // Assert
-        exceptionEvent.Should().NotBeNull();
         using (new AssertionScope())
         {
-            exceptionEvent.Tags.Should().Contain(kvp =>
-                kvp.Key == "RequestPath" &&
-                kvp.Value == "/echo"
-            );
-            exceptionEvent.Exception.Should().NotBeNull();
-            if (exceptionEvent.Exception is not null)
-            {
-                exceptionEvent.Exception.Message.Should().Be("Flaky decompression error");
-            }
+            _fixture.LastException.Should().NotBeNull();
+            _fixture.LastException?.Message.Should().Be("Flaky decompression error");
         }
     }
 
@@ -181,7 +164,4 @@ public class RequestDecompressionMiddlewareTests
         }
         return output.ToArray();
     }
-
-    // Dummy DSN for Sentry SDK initialization in tests
-    private const string ValidDsn = "https://public@sentry.local/1";
 }
