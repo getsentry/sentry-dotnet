@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.RequestDecompression;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Sentry.AspNetCore.TestUtils;
 
 namespace Sentry.AspNetCore.Tests.RequestDecompressionMiddleware;
@@ -88,7 +88,7 @@ public class RequestDecompressionMiddlewareTests
         }
     }
 
-    private readonly Fixture _fixture = new ();
+    private readonly Fixture _fixture = new();
 
     [Fact]
     public async Task AddRequestDecompression_PlainBodyContent_IsUnaltered()
