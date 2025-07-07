@@ -15,7 +15,7 @@ internal class Hub : IHub, IDisposable
     private readonly SentryOptions _options;
     private readonly RandomValuesFactory _randomValuesFactory;
     private readonly IReplaySession _replaySession;
-    private readonly List<ISdkIntegrationCleanup> _integrationsToCleanup = new();
+    private readonly List<ITidySdkIntegration> _integrationsToCleanup = new();
 
 #if MEMORY_DUMP_SUPPORTED
     private readonly MemoryMonitor? _memoryMonitor;
@@ -86,9 +86,9 @@ internal class Hub : IHub, IDisposable
         {
             options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
             integration.Register(this, options);
-            if (integration is ISdkIntegrationCleanup cleanupIntegration)
+            if (integration is ITidySdkIntegration tidyIntegration)
             {
-                _integrationsToCleanup.Add(cleanupIntegration);
+                _integrationsToCleanup.Add(tidyIntegration);
             }
         }
     }

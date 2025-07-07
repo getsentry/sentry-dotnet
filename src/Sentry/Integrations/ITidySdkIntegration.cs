@@ -5,7 +5,7 @@ namespace Sentry.Integrations;
 /// allows us to add some cleanup logic as an internal interface. We can move this to <see cref="ISdkIntegration"/>
 /// in the next major release.
 /// </summary>
-internal interface ISdkIntegrationCleanup
+internal interface ITidySdkIntegration: ISdkIntegration
 {
     /// <summary>
     /// Performs any necessary cleanup for the integration

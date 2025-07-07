@@ -1988,6 +1988,80 @@ public partial class HubTests
         _fixture.Client.Received(1).CaptureUserFeedback(Arg.Is<UserFeedback>(f => f.Email.IsNull()));
 #pragma warning restore CS0618 // Type or member is obsolete
     }
+
+    [Fact]
+    public void Dispose_IntegrationsWithCleanup_CleanupCalled()
+    {
+        // Arrange
+        var cleaned = new List<ITidySdkIntegration>();
+        var integration1 = Substitute.For<ITidySdkIntegration>();
+        integration1.When(i => i.Cleanup()).Do(_ => cleaned.Add(integration1));
+        var integration2 = Substitute.For<ITidySdkIntegration>();
+        integration2.When(i => i.Cleanup()).Do(_ => cleaned.Add(integration2));
+        var integration3 = Substitute.For<ISdkIntegration>();
+        _fixture.Options.AddIntegration(integration1);
+        _fixture.Options.AddIntegration(integration2);
+        _fixture.Options.AddIntegration(integration3);
+        var hub = _fixture.GetSut();
+
+        // Act
+        hub.Dispose();
+
+        // Assert
+        cleaned.Should().Contain(integration1);
+        cleaned.Should().Contain(integration2);
+    }
+
+    [Fact]
+    public void Dispose_CleanupThrowsException_ExceptionHandledAndLogged()
+    {
+        // Arrange
+        var cleaned = new List<ITidySdkIntegration>();
+        var integration1 = Substitute.For<ITidySdkIntegration>();
+        integration1.When(i => i.Cleanup()).Do(_ => cleaned.Add(integration1));
+        var integration2 = Substitute.For<ITidySdkIntegration>();
+        integration2.When(i => i.Cleanup()).Do(_ => throw new InvalidOperationException("Cleanup failed"));
+        var integration3 = Substitute.For<ITidySdkIntegration>();
+        integration3.When(i => i.Cleanup()).Do(_ => cleaned.Add(integration3));
+        _fixture.Options.AddIntegration(integration1);
+        _fixture.Options.AddIntegration(integration2);
+        _fixture.Options.AddIntegration(integration3);
+        _fixture.Options.Debug = true;
+        _fixture.Options.DiagnosticLogger = Substitute.For<IDiagnosticLogger>();
+        _fixture.Options.DiagnosticLogger!.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        var hub = _fixture.GetSut();
+
+        // Act
+        hub.Dispose();
+
+        // Assert
+        cleaned.Should().Contain(integration1);
+        cleaned.Should().NotContain(integration2);
+        cleaned.Should().Contain(integration3);
+        _fixture.Options.DiagnosticLogger.Received(1).Log(
+            SentryLevel.Error,
+            Arg.Is<string>(s => s.Contains("Failure to cleanup integration")),
+            Arg.Any<InvalidOperationException>(),
+            Arg.Any<object[]>());
+    }
+
+    [Fact]
+    public void Dispose_CalledMultipleTimes_CleanupCalledOnlyOnce()
+    {
+        // Arrange
+        var cleaned = 0;
+        var integration = Substitute.For<ITidySdkIntegration>();
+        integration.When(i => i.Cleanup()).Do(_ => cleaned++);
+        _fixture.Options.AddIntegration(integration);
+        var hub = _fixture.GetSut();
+
+        // Act
+        hub.Dispose();
+        hub.Dispose();
+
+        // Assert
+        cleaned.Should().Be(1);
+    }
 }
 
 #if NET6_0_OR_GREATER

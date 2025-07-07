@@ -3,7 +3,7 @@ using Sentry.Internal;
 
 namespace Sentry.Integrations;
 
-internal class AppDomainProcessExitIntegration : ISdkIntegration, ISdkIntegrationCleanup
+internal class AppDomainProcessExitIntegration : ITidySdkIntegration
 {
     private readonly IAppDomain _appDomain;
     private IHub? _hub;
