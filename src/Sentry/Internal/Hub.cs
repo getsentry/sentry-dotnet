@@ -782,7 +782,7 @@ internal class Hub : IHub, IDisposable
         {
             try
             {
-                    integration.Cleanup();
+                integration.Cleanup();
             }
             catch (Exception e)
             {
