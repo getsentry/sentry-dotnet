@@ -4,7 +4,7 @@
 
 ### API changes
 
-- App Hang Tracking for iOS is now disabled by default. You'll need to enable this manually if you want to use it in your applications. ([#4320](https://github.com/getsentry/sentry-dotnet/pull/4320))
+- App Hang Tracking for iOS is now disabled by default, until this functionality is more stable. If you want to use it in your applications then you'll need to enable this manually. ([#4320](https://github.com/getsentry/sentry-dotnet/pull/4320))
 
 ### Features
 
