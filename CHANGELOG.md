@@ -13,6 +13,7 @@
 ### Fixes
 
 - Crontab validation when capturing checkins ([#4314](https://github.com/getsentry/sentry-dotnet/pull/4314))
+- Native AOT: link to static `lzma` on Linux/MUSL ([#4326](https://github.com/getsentry/sentry-dotnet/pull/4326))
 
 ### Dependencies
 
