@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### API changes
+
+- App Hang Tracking for iOS is now disabled by default, until this functionality is more stable. If you want to use it in your applications then you'll need to enable this manually. ([#4320](https://github.com/getsentry/sentry-dotnet/pull/4320))
+
 ### Features
 
 - Added StartSpan and GetTransaction methods to the SentrySdk ([#4303](https://github.com/getsentry/sentry-dotnet/pull/4303))
