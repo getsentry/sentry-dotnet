@@ -106,11 +106,11 @@ internal class AndroidAssemblyStoreReaderV2 : IAndroidAssemblyReader
             return assembly;
         }
 
-        // Conversely, if there is no extension, try to find it with one of those extensions
+        // Conversely, if there is no extension, try with the dll extension (sometimes required for class libraries).
         // See: https://github.com/getsentry/sentry-dotnet/issues/4278#issuecomment-2986009125
         if (!(IsFileType(".dll") && !IsFileType(".exe")))
         {
-            if (FindBestAssembly(name + ".dll", out assembly) || FindBestAssembly(name + ".exe", out assembly))
+            if (FindBestAssembly(name + ".dll", out assembly))
             {
                 return assembly;
             }
