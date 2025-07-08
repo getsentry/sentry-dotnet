@@ -10,7 +10,7 @@
 
   <Target Name="GenerateSharedDsnConstant"
           BeforeTargets="BeforeCompile"
-          Condition=" '$(SENTRY_DSN)' != '' and '$(PlatformIsMobile)' == 'true'">
+          Condition="'$(SENTRY_DSN)' != ''">
 
     <Message Text="Generating shared EnvironmentVariables.g.cs with embedded DSN..." Importance="High" />
 
@@ -25,7 +25,7 @@ namespace Sentry.Samples%3B
 internal static class EnvironmentVariables
 {
     /// &lt;summary&gt;
-    /// To make things easier for the SDK maintainers we have a custom build target that writes the
+    /// To make things easier for the SDK maintainers, we have a custom build target that writes the
     /// SENTRY_DSN environment variable into an EnvironmentVariables class that is available for mobile
     /// targets. This allows us to share one DSN defined in the ENV across desktop and mobile samples.
     /// Generally, you won't want to do this in your own mobile projects though - you should set the DSN
