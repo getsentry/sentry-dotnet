@@ -1,6 +1,7 @@
 using Sentry.Cocoa;
 using Sentry.Cocoa.Extensions;
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 // ReSharper disable once CheckNamespace
 namespace Sentry;
@@ -188,8 +189,21 @@ public static partial class SentrySdk
         return nativeRanges;
     }
 
+    [DebuggerStepThrough]
     internal static CocoaSdk.SentryEvent? ProcessOnBeforeSend(SentryOptions options, CocoaSdk.SentryEvent evt)
+        => ProcessOnBeforeSend(options, evt, CurrentHub);
+
+    /// <summary>
+    /// This overload allows us to inject an IHub for testing. During normal execution, the CurrentHub is used.
+    /// However, since this class is static, there's no easy alternative way to inject this when executing tests.
+    /// </summary>
+    internal static CocoaSdk.SentryEvent? ProcessOnBeforeSend(SentryOptions options, CocoaSdk.SentryEvent evt, IHub hub)
     {
+        if (hub is DisabledHub)
+        {
+            return evt;
+        }
+
         // When we have an unhandled managed exception, we send that to Sentry twice - once managed and once native.
         // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
         // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
@@ -224,32 +238,52 @@ public static partial class SentrySdk
             }
         }
 
-        // we run our SIGABRT checks first before handing over to user events
-        // because we delegate to user code, we need to protect anything that could happen in this event
-        if (options.BeforeSendInternal == null)
-            return evt;
-
+        // We run our SIGABRT checks first before running managed processors.
+        // Because we delegate to user code, we need to catch/log exceptions.
         try
         {
-            var sentryEvent = evt.ToSentryEvent();
-            if (sentryEvent == null)
+            // Normally the event processors would be invoked by the SentryClient, but the Cocoa SDK has its own client,
+            // so we need to manually invoke any managed event processors here to apply them to Native events.
+            var manualProcessors = GetEventProcessors(hub)
+                .Where(p => p is not MainSentryEventProcessor)
+                .ToArray();
+            if (manualProcessors.Length == 0 && options.BeforeSendInternal is null)
+            {
                 return evt;
+            }
 
-            var result = options.BeforeSendInternal(sentryEvent, null!);
-            if (result == null)
-                return null!;
+            var sentryEvent = evt.ToSentryEvent();
+            if (SentryEventHelper.ProcessEvent(sentryEvent, manualProcessors, null, options) is not { } processedEvent)
+            {
+                return null;
+            }
+
+            processedEvent = SentryEventHelper.DoBeforeSend(processedEvent, new SentryHint(), options);
+            if (processedEvent == null)
+            {
+                return null;
+            }
 
             // we only support a subset of mutated data to be passed back to the native SDK at this time
-            result.CopyToCocoaSentryEvent(evt);
+            processedEvent.CopyToCocoaSentryEvent(evt);
 
-            // Note: Nullable result is allowed but delegate is generated incorrectly
-            // See https://github.com/xamarin/xamarin-macios/issues/15299#issuecomment-1201863294
-            return evt!;
+            return evt;
         }
         catch (Exception ex)
         {
-            options.LogError(ex, "Before Send Error");
+            options.LogError(ex, "Error running managed event processors for native event");
             return evt;
+        }
+
+        static IEnumerable<ISentryEventProcessor> GetEventProcessors(IHub hub)
+        {
+            if (hub is Hub fullHub)
+            {
+                return fullHub.ScopeManager.GetCurrent().Key.GetAllEventProcessors();
+            }
+            IEnumerable<ISentryEventProcessor>? eventProcessors = null;
+            hub.ConfigureScope(scope => eventProcessors = scope.GetAllEventProcessors());
+            return eventProcessors ?? [];
         }
     }
 }
