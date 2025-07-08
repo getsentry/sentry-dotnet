@@ -23,4 +23,27 @@ public static class BuildProperties
     {
         Values ??= properties.AsReadOnly();
     }
+
+    /// <summary>
+    /// Tries to retrieve a boolean value from the build properties.
+    /// </summary>
+    /// <param name="key">The item key</param>
+    /// <param name="value">The value (if any)</param>
+    /// <returns>True if the key was found, false otherwise</returns>
+    public static bool TryGetBoolean(string key, out bool value)
+    {
+        value = false;
+        if (!(Values?.TryGetValue(key, out var foundValue) ?? false))
+        {
+            return false;
+        }
+
+        if (!bool.TryParse(foundValue, out var result))
+        {
+            return false;
+        }
+
+        value = result;
+        return true;
+    }
 }
