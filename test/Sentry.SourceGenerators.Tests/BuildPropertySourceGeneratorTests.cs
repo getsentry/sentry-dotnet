@@ -41,7 +41,7 @@ public class BuildPropertySourceGeneratorTests
     {
         Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
 
-        var driver = BuildDriver(typeof(Program).Assembly, ("PublishAot", "true"), ("OutputType", "exe"));
+        var driver = BuildDriver(typeof(Program).Assembly, ("PublishAot", "true"), ("OutputType", "exe"), ("Configuration", "Release"));
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(1);

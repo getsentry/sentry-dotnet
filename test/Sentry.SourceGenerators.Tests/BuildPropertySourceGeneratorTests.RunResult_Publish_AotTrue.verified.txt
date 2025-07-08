@@ -16,6 +16,7 @@ public static class BuildVariableInitializer
         global::Sentry.CompilerServices.BuildProperties.Initialize(new global::System.Collections.Generic.Dictionary<string, string> {
 			{"PublishAot", "true"},
 			{"OutputType", "exe"},
+			{"Configuration", "Release"},
 		});
 	}
 }
