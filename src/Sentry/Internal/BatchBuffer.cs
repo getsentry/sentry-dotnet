@@ -5,16 +5,19 @@ namespace Sentry.Internal;
 /// <para>Requires a minimum capacity of 2.</para>
 /// </summary>
 /// <remarks>
-/// <para><see cref="Capacity"/> is thread-safe.</para>
-/// <para><see cref="TryAdd(T, out int)"/> is thread-safe.</para>
-/// <para><see cref="ToArrayAndClear()"/> is not thread-safe.</para>
-/// <para><see cref="ToArrayAndClear(int)"/> is not thread-safe.</para>
+/// Not all members are thread-safe.
+/// See individual members for notes on thread safety.
 /// </remarks>
 internal sealed class BatchBuffer<T>
 {
     private readonly T[] _array;
     private int _additions;
 
+    /// <summary>
+    /// Create a new buffer.
+    /// </summary>
+    /// <param name="capacity">Length of new the buffer.</param>
+    /// <exception cref="ArgumentOutOfRangeException">When <paramref name="capacity"/> is less than <see langword="2"/>.</exception>
     public BatchBuffer(int capacity)
     {
         ThrowIfLessThanTwo(capacity, nameof(capacity));
@@ -23,10 +26,39 @@ internal sealed class BatchBuffer<T>
         _additions = 0;
     }
 
+    /// <summary>
+    /// Maximum number of elements that can be added to the buffer.
+    /// </summary>
+    /// <remarks>
+    /// This property is thread-safe.
+    /// </remarks>
     internal int Capacity => _array.Length;
+
+    /// <summary>
+    /// Have any elements been added to the buffer?
+    /// </summary>
+    /// <remarks>
+    /// This property is not thread-safe.
+    /// </remarks>
     internal bool IsEmpty => _additions == 0;
+
+    /// <summary>
+    /// Have <see cref="Capacity"/> number of elements been added to the buffer?
+    /// </summary>
+    /// <remarks>
+    /// This property is not thread-safe.
+    /// </remarks>
     internal bool IsFull => _additions >= _array.Length;
 
+    /// <summary>
+    /// Attempt to atomically add one element to the buffer.
+    /// </summary>
+    /// <param name="item">Element attempted to be added atomically.</param>
+    /// <param name="count">When this method returns <see langword="true"/>, is set to the Length at which the <paramref name="item"/> was added at.</param>
+    /// <returns><see langword="true"/> when <paramref name="item"/> was added atomically; <see langword="false"/> when <paramref name="item"/> was not added.</returns>
+    /// <remarks>
+    /// This method is thread-safe.
+    /// </remarks>
     internal bool TryAdd(T item, out int count)
     {
         count = Interlocked.Increment(ref _additions);
@@ -40,6 +72,13 @@ internal sealed class BatchBuffer<T>
         return false;
     }
 
+    /// <summary>
+    /// Returns a new Array consisting of the elements successfully added.
+    /// </summary>
+    /// <returns>An Array with Length of successful additions.</returns>
+    /// <remarks>
+    /// This method is not thread-safe.
+    /// </remarks>
     internal T[] ToArrayAndClear()
     {
         var additions = _additions;
@@ -51,6 +90,14 @@ internal sealed class BatchBuffer<T>
         return ToArrayAndClear(length);
     }
 
+    /// <summary>
+    /// Returns a new Array consisting of <paramref name="length"/> elements successfully added.
+    /// </summary>
+    /// <param name="length">The Length of the buffer a new Array is created from.</param>
+    /// <returns>An Array with Length of <paramref name="length"/>.</returns>
+    /// <remarks>
+    /// This method is not thread-safe.
+    /// </remarks>
     internal T[] ToArrayAndClear(int length)
     {
         var array = ToArray(length);

@@ -59,7 +59,7 @@ internal sealed class BatchProcessor : IDisposable
     {
         if (buffer.TryAdd(log, out var count))
         {
-            if (count == 1) // is first of buffer
+            if (count == 1) // is first element added to buffer after flushed
             {
                 EnableTimer();
             }
@@ -82,6 +82,14 @@ internal sealed class BatchProcessor : IDisposable
         return false;
     }
 
+    private void Flush(BatchBuffer<SentryLog> buffer)
+    {
+        _lastFlush = DateTime.UtcNow;
+
+        var logs = buffer.ToArrayAndClear();
+        _ = _hub.CaptureEnvelope(Envelope.FromLog(new StructuredLog(logs)));
+    }
+
     private void Flush(BatchBuffer<SentryLog> buffer, int count)
     {
         _lastFlush = DateTime.UtcNow;
@@ -101,7 +109,7 @@ internal sealed class BatchProcessor : IDisposable
                 var newActiveBuffer = ReferenceEquals(currentActiveBuffer, _buffer1) ? _buffer2 : _buffer1;
                 if (Interlocked.CompareExchange(ref _activeBuffer, newActiveBuffer, currentActiveBuffer) == currentActiveBuffer)
                 {
-                    Flush(currentActiveBuffer, -1);
+                    Flush(currentActiveBuffer);
                 }
             }
         }
