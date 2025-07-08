@@ -17,12 +17,12 @@ internal static class AotHelper
     [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AvoidAtRuntime)]
     private static bool CheckIsTrimmed()
     {
-        if (TryGetBoolean("publishtrimmed", out var trimmed))
+        if (TryGetBoolean("PublishTrimmed", out var trimmed))
         {
             return trimmed;
         }
 
-        if (TryGetBoolean("publishaot", out var aot))
+        if (TryGetBoolean("PublishAot", out var aot))
         {
             return aot;
         }
