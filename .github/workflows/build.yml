@@ -11,9 +11,9 @@ on:
 
 jobs:
   build-sentry-native:
-    name: sentry-native (${{ matrix.container || matrix.os }})
+    name: sentry-native (${{ matrix.container.image || matrix.os }})
     runs-on: ${{ matrix.os }}
-    container: ${{ matrix.container }}
+    container: ${{ matrix.container.image }}
     strategy:
       fail-fast: false
       matrix:
@@ -23,7 +23,8 @@ jobs:
             target: Linux-arm64
           - os: ubuntu-latest
             target: Linux-musl
-            container: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
+            container:
+              image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
           - os: windows-latest
           - os: windows-11-arm
@@ -59,7 +60,7 @@ jobs:
 
   build:
     needs: build-sentry-native
-    name: .NET (${{ matrix.container || matrix.os }})
+    name: .NET (${{ matrix.container.image || matrix.os }})
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
 
@@ -73,7 +74,10 @@ jobs:
             target: Linux-arm64
           - os: ubuntu-latest
             target: Linux-musl
-            container: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
+            container:
+              image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
+              volumes:
+                - /var/run/docker.sock:/var/run/docker.sock
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
           - os: windows-latest
           - os: windows-11-arm
