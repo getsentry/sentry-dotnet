@@ -8,7 +8,7 @@
 
 ### Fixes
 
-- When Sentry is configured to capture Request bodies in ASP.NET Core, the uncompressed content is not captured when RequestDecompression middleware is enabled. Previously the request bodies were being captured prior to decompression ([#4315](https://github.com/getsentry/sentry-dotnet/pull/4315))
+- Sentry now correctly decompresses Request bodies in ASP.NET Core when RequestDecompression middleware is enabled. Previously the compressed request bodies were being captured ([#4315](https://github.com/getsentry/sentry-dotnet/pull/4315))
 - Crontab validation when capturing checkins ([#4314](https://github.com/getsentry/sentry-dotnet/pull/4314))
 
 ### Dependencies
