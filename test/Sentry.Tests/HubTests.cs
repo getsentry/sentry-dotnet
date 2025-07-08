@@ -1989,16 +1989,42 @@ public partial class HubTests
 #pragma warning restore CS0618 // Type or member is obsolete
     }
 
+    private class TestDisposableIntegration: ISdkIntegration, IDisposable
+    {
+        public int Registered { get; private set; }
+        public int Disposed { get; private set; }
+
+        public void Register(IHub hub, SentryOptions options)
+        {
+            Registered++;
+        }
+
+        protected virtual void Cleanup()
+        {
+            Disposed++;
+        }
+
+        public void Dispose()
+        {
+            Cleanup();
+        }
+    }
+
+    private class TestFlakyDisposableIntegration : TestDisposableIntegration
+    {
+        protected override void Cleanup()
+        {
+            throw new InvalidOperationException("Cleanup failed");
+        }
+    }
+
     [Fact]
     public void Dispose_IntegrationsWithCleanup_CleanupCalled()
     {
         // Arrange
-        var cleaned = new List<ITidySdkIntegration>();
-        var integration1 = Substitute.For<ITidySdkIntegration>();
-        integration1.When(i => i.Cleanup()).Do(_ => cleaned.Add(integration1));
-        var integration2 = Substitute.For<ITidySdkIntegration>();
-        integration2.When(i => i.Cleanup()).Do(_ => cleaned.Add(integration2));
-        var integration3 = Substitute.For<ISdkIntegration>();
+        var integration1 = new TestDisposableIntegration();
+        var integration2 = Substitute.For<ISdkIntegration>();
+        var integration3 = new TestDisposableIntegration();
         _fixture.Options.AddIntegration(integration1);
         _fixture.Options.AddIntegration(integration2);
         _fixture.Options.AddIntegration(integration3);
@@ -2008,21 +2034,17 @@ public partial class HubTests
         hub.Dispose();
 
         // Assert
-        cleaned.Should().Contain(integration1);
-        cleaned.Should().Contain(integration2);
+        integration1.Disposed.Should().Be(1);
+        integration3.Disposed.Should().Be(1);
     }
 
     [Fact]
     public void Dispose_CleanupThrowsException_ExceptionHandledAndLogged()
     {
         // Arrange
-        var cleaned = new List<ITidySdkIntegration>();
-        var integration1 = Substitute.For<ITidySdkIntegration>();
-        integration1.When(i => i.Cleanup()).Do(_ => cleaned.Add(integration1));
-        var integration2 = Substitute.For<ITidySdkIntegration>();
-        integration2.When(i => i.Cleanup()).Do(_ => throw new InvalidOperationException("Cleanup failed"));
-        var integration3 = Substitute.For<ITidySdkIntegration>();
-        integration3.When(i => i.Cleanup()).Do(_ => cleaned.Add(integration3));
+        var integration1 = new TestDisposableIntegration();
+        var integration2 = new TestFlakyDisposableIntegration();
+        var integration3 = new TestDisposableIntegration();
         _fixture.Options.AddIntegration(integration1);
         _fixture.Options.AddIntegration(integration2);
         _fixture.Options.AddIntegration(integration3);
@@ -2035,12 +2057,12 @@ public partial class HubTests
         hub.Dispose();
 
         // Assert
-        cleaned.Should().Contain(integration1);
-        cleaned.Should().NotContain(integration2);
-        cleaned.Should().Contain(integration3);
+        integration1.Disposed.Should().Be(1);
+        integration2.Disposed.Should().Be(0);
+        integration3.Disposed.Should().Be(1);
         _fixture.Options.DiagnosticLogger.Received(1).Log(
             SentryLevel.Error,
-            Arg.Is<string>(s => s.Contains("Failure to cleanup integration")),
+            Arg.Is<string>(s => s.Contains("Failed to dispose integration")),
             Arg.Any<InvalidOperationException>(),
             Arg.Any<object[]>());
     }
@@ -2049,9 +2071,7 @@ public partial class HubTests
     public void Dispose_CalledMultipleTimes_CleanupCalledOnlyOnce()
     {
         // Arrange
-        var cleaned = 0;
-        var integration = Substitute.For<ITidySdkIntegration>();
-        integration.When(i => i.Cleanup()).Do(_ => cleaned++);
+        var integration = new TestDisposableIntegration();
         _fixture.Options.AddIntegration(integration);
         var hub = _fixture.GetSut();
 
@@ -2060,7 +2080,7 @@ public partial class HubTests
         hub.Dispose();
 
         // Assert
-        cleaned.Should().Be(1);
+        integration.Disposed.Should().Be(1);
     }
 }
 

@@ -3,7 +3,7 @@ using Sentry.Internal;
 
 namespace Sentry.Integrations;
 
-internal class AppDomainProcessExitIntegration : ITidySdkIntegration
+internal class AppDomainProcessExitIntegration : ISdkIntegration, IDisposable
 {
     private readonly IAppDomain _appDomain;
     private IHub? _hub;
@@ -25,7 +25,7 @@ internal class AppDomainProcessExitIntegration : ITidySdkIntegration
         (_hub as IDisposable)?.Dispose();
     }
 
-    public void Cleanup()
+    public void Dispose()
     {
         _appDomain.ProcessExit -= HandleProcessExit;
     }

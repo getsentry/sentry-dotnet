@@ -15,7 +15,7 @@ internal class Hub : IHub, IDisposable
     private readonly SentryOptions _options;
     private readonly RandomValuesFactory _randomValuesFactory;
     private readonly IReplaySession _replaySession;
-    private readonly List<ITidySdkIntegration> _integrationsToCleanup = new();
+    private readonly List<IDisposable> _integrationsToCleanup = new();
 
 #if MEMORY_DUMP_SUPPORTED
     private readonly MemoryMonitor? _memoryMonitor;
@@ -86,9 +86,9 @@ internal class Hub : IHub, IDisposable
         {
             options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
             integration.Register(this, options);
-            if (integration is ITidySdkIntegration tidyIntegration)
+            if (integration is IDisposable disposableIntegration)
             {
-                _integrationsToCleanup.Add(tidyIntegration);
+                _integrationsToCleanup.Add(disposableIntegration);
             }
         }
     }
@@ -782,11 +782,11 @@ internal class Hub : IHub, IDisposable
         {
             try
             {
-                integration.Cleanup();
+                integration.Dispose();
             }
             catch (Exception e)
             {
-                _options.LogError("Failure to cleanup integration {0}: {1}", integration.GetType().Name, e);
+                _options.LogError("Failed to dispose integration {0}: {1}", integration.GetType().Name, e);
             }
         }
 
