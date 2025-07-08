@@ -15,6 +15,7 @@
 - Custom ISentryEventProcessors are now run for native iOS events ([#4318](https://github.com/getsentry/sentry-dotnet/pull/4318))
 - Crontab validation when capturing checkins ([#4314](https://github.com/getsentry/sentry-dotnet/pull/4314))
 - Source context for class libraries when running on Android in Release mode ([#4294](https://github.com/getsentry/sentry-dotnet/pull/4294))
+- Native AOT: link to static `lzma` on Linux/MUSL ([#4326](https://github.com/getsentry/sentry-dotnet/pull/4326))
 
 ### Dependencies
 

@@ -3,6 +3,8 @@ name: Build Alpine Linux Docker image
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     paths:
       - '.github/alpine/*'
 
