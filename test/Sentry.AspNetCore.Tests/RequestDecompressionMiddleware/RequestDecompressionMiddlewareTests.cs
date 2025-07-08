@@ -8,7 +8,7 @@ using Sentry.AspNetCore.TestUtils;
 
 namespace Sentry.AspNetCore.Tests.RequestDecompressionMiddleware;
 
-public class RequestDecompressionMiddlewareTests
+public class RequestDecompressionMiddlewareTests : IDisposable
 {
     private class Fixture : IDisposable
     {
@@ -60,7 +60,7 @@ public class RequestDecompressionMiddlewareTests
                 });
         }
 
-        public void FakeDecompressionError()
+        public void UseFakeDecompressionProvider()
         {
             _provider = new FlakyDecompressionProvider();
         }
@@ -89,6 +89,11 @@ public class RequestDecompressionMiddlewareTests
     }
 
     private readonly Fixture _fixture = new();
+
+    public void Dispose()
+    {
+        _fixture.Dispose();
+    }
 
     [Fact]
     public async Task AddRequestDecompression_PlainBodyContent_IsUnaltered()
@@ -127,7 +132,7 @@ public class RequestDecompressionMiddlewareTests
     public async Task DecompressionError_SentryCapturesException()
     {
         // Arrange
-        _fixture.FakeDecompressionError();
+        _fixture.UseFakeDecompressionProvider();
         var client = _fixture.GetSut();
 
         var json = "{\"Foo\":\"Bar\"}";
