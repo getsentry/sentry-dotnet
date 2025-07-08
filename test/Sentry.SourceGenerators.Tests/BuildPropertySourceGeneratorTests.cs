@@ -5,7 +5,6 @@ using Microsoft.VisualStudio.TestPlatform.TestHost;
 
 namespace Sentry.SourceGenerators.Tests;
 
-
 public class BuildPropertySourceGeneratorTests
 {
     [SkippableFact]
@@ -18,9 +17,9 @@ public class BuildPropertySourceGeneratorTests
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(1);
         result.GeneratedSources.First().HintName.Should().Be("__BuildProperties.g.cs");
-        return Verify(result);
+        var source = result.GeneratedSources.First().SourceText.ToString();
+        return Verify(source);
     }
-
 
     [SkippableFact]
     public Task RunResult_BadStrings()
@@ -33,9 +32,9 @@ public class BuildPropertySourceGeneratorTests
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(1);
         result.GeneratedSources.First().HintName.Should().Be("__BuildProperties.g.cs");
-        return Verify(result);
+        var source = result.GeneratedSources.First().SourceText.ToString();
+        return Verify(source);
     }
-
 
     [SkippableFact]
     public Task RunResult_Publish_AotTrue()
@@ -47,9 +46,9 @@ public class BuildPropertySourceGeneratorTests
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(1);
         result.GeneratedSources.First().HintName.Should().Be("__BuildProperties.g.cs");
-        return Verify(result);
+        var source = result.GeneratedSources.First().SourceText.ToString();
+        return Verify(source);
     }
-
 
     [SkippableTheory]
     [InlineData("no", true)]
@@ -67,7 +66,6 @@ public class BuildPropertySourceGeneratorTests
         generated.Should().Be(sourceGenExpected);
     }
 
-
     [SkippableFact]
     public Task RunResult_Expect_None()
     {
@@ -80,7 +78,6 @@ public class BuildPropertySourceGeneratorTests
 
         return Verify(result);
     }
-
 
     private static GeneratorDriver BuildDriver(Assembly metadataAssembly, params IEnumerable<(string Key, string Value)> buildProperties)
     {
