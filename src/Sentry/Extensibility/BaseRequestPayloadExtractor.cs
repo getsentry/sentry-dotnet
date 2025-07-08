@@ -23,24 +23,22 @@ public abstract class BaseRequestPayloadExtractor : IRequestPayloadExtractor
             return null;
         }
 
-        // When RequestDecompression is enabled, the RequestDecompressionMiddleware will store a SizeLimitedStream
-        // in the request body after decompression. Seek operations throw an exception, but we can still read the stream
-        var originalPosition = request.Body.CanSeek ? request.Body.Position : 0;
+        if (!request.Body.CanSeek)
+        {
+            // When RequestDecompression is enabled, the RequestDecompressionMiddleware will store a SizeLimitedStream
+            // in the request body after decompression. Seek operations throw an exception, but we can still read the stream
+            return DoExtractPayLoad(request);
+        }
+
+        var  originalPosition = request.Body.Position;
         try
         {
-            if (request.Body.CanSeek)
-            {
-                request.Body.Position = 0;
-            }
-
+            request.Body.Position = 0;
             return DoExtractPayLoad(request);
         }
         finally
         {
-            if (request.Body.CanSeek)
-            {
-                request.Body.Position = originalPosition;
-            }
+            request.Body.Position = originalPosition;
         }
     }
 

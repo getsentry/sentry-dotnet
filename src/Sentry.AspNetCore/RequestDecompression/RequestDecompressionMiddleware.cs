@@ -100,7 +100,7 @@ internal sealed partial class RequestDecompressionMiddleware
         const string description =
             "An exception was captured and then re-thrown, when attempting to decompress the request body." +
             "The web server likely returned a 5xx error code as a result of this exception.";
-        e.SetSentryMechanism("RequestDecompressionMiddleware", description, handled: false);
+        e.SetSentryMechanism(nameof(RequestDecompressionMiddleware), description, handled: false);
         _hub.CaptureException(e);
         ExceptionDispatchInfo.Capture(e).Throw();
     }
