@@ -1989,7 +1989,7 @@ public partial class HubTests
 #pragma warning restore CS0618 // Type or member is obsolete
     }
 
-    private class TestDisposableIntegration: ISdkIntegration, IDisposable
+    private class TestDisposableIntegration : ISdkIntegration, IDisposable
     {
         public int Registered { get; private set; }
         public int Disposed { get; private set; }
