@@ -59,10 +59,10 @@ $$"""
 namespace Sentry.Generated
 {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("{{GeneratedCodeText.Tool}}", "{{GeneratedCodeText.Version}}")]
-    public static class BuildPropertyInitializer
+    internal static class BuildPropertyInitializer
     {
         [global::System.Runtime.CompilerServices.ModuleInitializer]
-        public static void Initialize()
+        internal static void Initialize()
         {
             global::Sentry.CompilerServices.BuildProperties.Initialize(new global::System.Collections.Generic.Dictionary<string, string>(global::System.StringComparer.OrdinalIgnoreCase)
             {
