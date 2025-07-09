@@ -53,6 +53,9 @@ $$"""
 // </auto-generated>
 
 #if NET5_0_OR_GREATER
+
+#nullable enable
+
 namespace Sentry.Generated
 {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("{{GeneratedCodeText.Tool}}", "{{GeneratedCodeText.Version}}")]
