@@ -52,7 +52,7 @@ public sealed class BuildPropertySourceGenerator : ISourceGenerator
 // </auto-generated>
 
 #if NET8_0_OR_GREATER
-namespace Sentry;
+namespace Sentry.Generated;
 
 [global::System.Runtime.CompilerServices.CompilerGenerated]
 public static class BuildVariableInitializer

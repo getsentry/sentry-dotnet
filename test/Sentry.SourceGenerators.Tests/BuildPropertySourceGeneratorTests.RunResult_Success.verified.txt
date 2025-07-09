@@ -5,7 +5,7 @@
       SyntaxTree: {
         FilePath: Sentry.SourceGenerators/Sentry.SourceGenerators.BuildPropertySourceGenerator/__BuildProperties.g.cs,
         Encoding: utf-8,
-        Length: 668,
+        Length: 678,
         HasCompilationUnitRoot: true,
         Options: {
           LanguageVersion: CSharp12,
@@ -24,7 +24,7 @@
 // </auto-generated>
 
 #if NET8_0_OR_GREATER
-namespace Sentry;
+namespace Sentry.Generated;
 
 [global::System.Runtime.CompilerServices.CompilerGenerated]
 public static class BuildVariableInitializer
@@ -40,7 +40,7 @@ public static class BuildVariableInitializer
 }
 #endif
 ,
-        Length: 668,
+        Length: 678,
         ChecksumAlgorithm: Sha1,
         CanBeEmbedded: true,
         Container: {},
@@ -141,222 +141,222 @@ public static class BuildVariableInitializer
           {
             LineNumber: 7,
             Start: 198,
-            End: 215,
-            EndIncludingLineBreak: 216,
+            End: 225,
+            EndIncludingLineBreak: 226,
             Span: {
               Start: 198,
-              Length: 17
+              Length: 27
             },
             SpanIncludingLineBreak: {
               Start: 198,
-              Length: 18
+              Length: 28
             }
           },
           {
             LineNumber: 8,
-            Start: 216,
-            End: 216,
-            EndIncludingLineBreak: 217,
+            Start: 226,
+            End: 226,
+            EndIncludingLineBreak: 227,
             Span: {
-              Start: 216
+              Start: 226
             },
             SpanIncludingLineBreak: {
-              Start: 216,
+              Start: 226,
               Length: 1
             }
           },
           {
             LineNumber: 9,
-            Start: 217,
-            End: 276,
-            EndIncludingLineBreak: 277,
+            Start: 227,
+            End: 286,
+            EndIncludingLineBreak: 287,
             Span: {
-              Start: 217,
+              Start: 227,
               Length: 59
             },
             SpanIncludingLineBreak: {
-              Start: 217,
+              Start: 227,
               Length: 60
             }
           },
           {
             LineNumber: 10,
-            Start: 277,
-            End: 321,
-            EndIncludingLineBreak: 322,
+            Start: 287,
+            End: 331,
+            EndIncludingLineBreak: 332,
             Span: {
-              Start: 277,
+              Start: 287,
               Length: 44
             },
             SpanIncludingLineBreak: {
-              Start: 277,
+              Start: 287,
               Length: 45
             }
           },
           {
             LineNumber: 11,
-            Start: 322,
-            End: 323,
-            EndIncludingLineBreak: 324,
+            Start: 332,
+            End: 333,
+            EndIncludingLineBreak: 334,
             Span: {
-              Start: 322,
+              Start: 332,
               Length: 1
             },
             SpanIncludingLineBreak: {
-              Start: 322,
+              Start: 332,
               Length: 2
             }
           },
           {
             LineNumber: 12,
-            Start: 324,
-            End: 387,
-            EndIncludingLineBreak: 388,
+            Start: 334,
+            End: 397,
+            EndIncludingLineBreak: 398,
             Span: {
-              Start: 324,
+              Start: 334,
               Length: 63
             },
             SpanIncludingLineBreak: {
-              Start: 324,
+              Start: 334,
               Length: 64
             }
           },
           {
             LineNumber: 13,
-            Start: 388,
-            End: 423,
-            EndIncludingLineBreak: 424,
+            Start: 398,
+            End: 433,
+            EndIncludingLineBreak: 434,
             Span: {
-              Start: 388,
+              Start: 398,
               Length: 35
             },
             SpanIncludingLineBreak: {
-              Start: 388,
+              Start: 398,
               Length: 36
             }
           },
           {
             LineNumber: 14,
-            Start: 424,
-            End: 429,
-            EndIncludingLineBreak: 430,
+            Start: 434,
+            End: 439,
+            EndIncludingLineBreak: 440,
             Span: {
-              Start: 424,
+              Start: 434,
               Length: 5
             },
             SpanIncludingLineBreak: {
-              Start: 424,
+              Start: 434,
               Length: 6
             }
           },
           {
             LineNumber: 15,
-            Start: 430,
-            End: 611,
-            EndIncludingLineBreak: 612,
+            Start: 440,
+            End: 621,
+            EndIncludingLineBreak: 622,
             Span: {
-              Start: 430,
+              Start: 440,
               Length: 181
             },
             SpanIncludingLineBreak: {
-              Start: 430,
+              Start: 440,
               Length: 182
             }
           },
           {
             LineNumber: 16,
-            Start: 612,
-            End: 621,
-            EndIncludingLineBreak: 622,
+            Start: 622,
+            End: 631,
+            EndIncludingLineBreak: 632,
             Span: {
-              Start: 612,
+              Start: 622,
               Length: 9
             },
             SpanIncludingLineBreak: {
-              Start: 612,
+              Start: 622,
               Length: 10
             }
           },
           {
             LineNumber: 17,
-            Start: 622,
-            End: 649,
-            EndIncludingLineBreak: 650,
+            Start: 632,
+            End: 659,
+            EndIncludingLineBreak: 660,
             Span: {
-              Start: 622,
+              Start: 632,
               Length: 27
             },
             SpanIncludingLineBreak: {
-              Start: 622,
+              Start: 632,
               Length: 28
             }
           },
           {
             LineNumber: 18,
-            Start: 650,
-            End: 655,
-            EndIncludingLineBreak: 656,
+            Start: 660,
+            End: 665,
+            EndIncludingLineBreak: 666,
             Span: {
-              Start: 650,
+              Start: 660,
               Length: 5
             },
             SpanIncludingLineBreak: {
-              Start: 650,
+              Start: 660,
               Length: 6
             }
           },
           {
             LineNumber: 19,
-            Start: 656,
-            End: 658,
-            EndIncludingLineBreak: 659,
+            Start: 666,
+            End: 668,
+            EndIncludingLineBreak: 669,
             Span: {
-              Start: 656,
+              Start: 666,
               Length: 2
             },
             SpanIncludingLineBreak: {
-              Start: 656,
+              Start: 666,
               Length: 3
             }
           },
           {
             LineNumber: 20,
-            Start: 659,
-            End: 660,
-            EndIncludingLineBreak: 661,
+            Start: 669,
+            End: 670,
+            EndIncludingLineBreak: 671,
             Span: {
-              Start: 659,
+              Start: 669,
               Length: 1
             },
             SpanIncludingLineBreak: {
-              Start: 659,
+              Start: 669,
               Length: 2
             }
           },
           {
             LineNumber: 21,
-            Start: 661,
-            End: 667,
-            EndIncludingLineBreak: 668,
+            Start: 671,
+            End: 677,
+            EndIncludingLineBreak: 678,
             Span: {
-              Start: 661,
+              Start: 671,
               Length: 6
             },
             SpanIncludingLineBreak: {
-              Start: 661,
+              Start: 671,
               Length: 7
             }
           },
           {
             LineNumber: 22,
-            Start: 668,
-            End: 668,
-            EndIncludingLineBreak: 668,
+            Start: 678,
+            End: 678,
+            EndIncludingLineBreak: 678,
             Span: {
-              Start: 668
+              Start: 678
             },
             SpanIncludingLineBreak: {
-              Start: 668
+              Start: 678
             }
           }
         ]
