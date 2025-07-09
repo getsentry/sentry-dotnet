@@ -7,6 +7,8 @@ namespace Sentry.SourceGenerators.Tests;
 
 public class BuildPropertySourceGeneratorTests
 {
+    private static readonly string s_hintName = "Sentry.Generated.BuildPropertyInitializer.g.cs";
+
     [SkippableFact]
     public Task RunResult_Success()
     {
@@ -16,7 +18,7 @@ public class BuildPropertySourceGeneratorTests
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(1);
-        result.GeneratedSources.First().HintName.Should().Be("__BuildProperties.g.cs");
+        result.GeneratedSources.First().HintName.Should().Be(s_hintName);
         return Verify(result);
     }
 
@@ -30,7 +32,7 @@ public class BuildPropertySourceGeneratorTests
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(1);
-        result.GeneratedSources.First().HintName.Should().Be("__BuildProperties.g.cs");
+        result.GeneratedSources.First().HintName.Should().Be(s_hintName);
         return Verify(result);
     }
 
@@ -43,7 +45,7 @@ public class BuildPropertySourceGeneratorTests
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(1);
-        result.GeneratedSources.First().HintName.Should().Be("__BuildProperties.g.cs");
+        result.GeneratedSources.First().HintName.Should().Be(s_hintName);
         return Verify(result);
     }
 
@@ -74,7 +76,7 @@ public class BuildPropertySourceGeneratorTests
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
 
-        var generated = result.GeneratedSources.Any(x => x.HintName.Equals("__BuildProperties.g.cs"));
+        var generated = result.GeneratedSources.Any(x => x.HintName.Equals(s_hintName));
         generated.Should().Be(sourceGenExpected);
     }
 
@@ -90,7 +92,7 @@ public class BuildPropertySourceGeneratorTests
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
 
-        var generated = result.GeneratedSources.Any(x => x.HintName.Equals("__BuildProperties.g.cs"));
+        var generated = result.GeneratedSources.Any(x => x.HintName.Equals(s_hintName));
         generated.Should().Be(sourceGenExpected);
     }
 

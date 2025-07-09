@@ -85,7 +85,7 @@ public static class BuildPropertyInitializer
             .AppendLine("}")
             .AppendLine("#endif");
 
-        context.AddSource("__BuildProperties.g.cs", sb.ToString());
+        context.AddSource("Sentry.Generated.BuildPropertyInitializer.g.cs", sb.ToString());
     }
 
     private static string EscapeString(string value) => value.Replace("\\", "\\\\");

@@ -3,7 +3,7 @@
   GeneratedSources: [
     {
       SyntaxTree: {
-        FilePath: Sentry.SourceGenerators/Sentry.SourceGenerators.BuildPropertySourceGenerator/__BuildProperties.g.cs,
+        FilePath: Sentry.SourceGenerators/Sentry.SourceGenerators.BuildPropertySourceGenerator/Sentry.Generated.BuildPropertyInitializer.g.cs,
         Encoding: utf-8,
         Length: 680,
         HasCompilationUnitRoot: true,
@@ -361,7 +361,7 @@ public static class BuildPropertyInitializer
           }
         ]
       },
-      HintName: __BuildProperties.g.cs
+      HintName: Sentry.Generated.BuildPropertyInitializer.g.cs
     }
   ],
   Diagnostics: null
