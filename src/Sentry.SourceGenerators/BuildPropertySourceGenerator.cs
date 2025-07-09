@@ -53,7 +53,7 @@ public sealed class BuildPropertySourceGenerator : ISourceGenerator
 // regenerated.
 // </auto-generated>
 
-#if NET8_0_OR_GREATER
+#if NET5_0_OR_GREATER
 namespace Sentry.Generated
 {
     [global::System.Runtime.CompilerServices.CompilerGenerated]
