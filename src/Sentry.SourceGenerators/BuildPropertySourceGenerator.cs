@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis;
 
 namespace Sentry.SourceGenerators;
 
-
 /// <summary>
 /// Generates the necessary msbuild variables
 /// </summary>
@@ -92,7 +91,6 @@ public static class BuildVariableInitializer
 
         context.AddSource("__BuildProperties.g.cs", sb.ToString());
     }
-
 
     private static string EscapeString(string value) => value.Replace("\\", "\\\\");
 }
