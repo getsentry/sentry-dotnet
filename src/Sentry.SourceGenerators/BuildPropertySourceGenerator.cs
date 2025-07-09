@@ -54,16 +54,16 @@ public sealed class BuildPropertySourceGenerator : ISourceGenerator
 // </auto-generated>
 
 #if NET8_0_OR_GREATER
-namespace Sentry.Generated;
-
-[global::System.Runtime.CompilerServices.CompilerGenerated]
-public static class BuildPropertyInitializer
+namespace Sentry.Generated
 {
-    [global::System.Runtime.CompilerServices.ModuleInitializer]
-    public static void Initialize()
+    [global::System.Runtime.CompilerServices.CompilerGenerated]
+    public static class BuildPropertyInitializer
     {
-        global::Sentry.CompilerServices.BuildProperties.Initialize(new global::System.Collections.Generic.Dictionary<string, string>(global::System.StringComparer.OrdinalIgnoreCase)
+        [global::System.Runtime.CompilerServices.ModuleInitializer]
+        public static void Initialize()
         {
+            global::Sentry.CompilerServices.BuildProperties.Initialize(new global::System.Collections.Generic.Dictionary<string, string>(global::System.StringComparer.OrdinalIgnoreCase)
+            {
 
 """
             );
@@ -75,14 +75,15 @@ public static class BuildPropertyInitializer
                 var pn = EscapeString(property.Replace("build_property.", ""));
                 var ev = EscapeString(value);
                 sb
-                    .Append($"{tabString}{tabString}{tabString}{{")
+                    .Append($"{tabString}{tabString}{tabString}{tabString}{{")
                     .Append($"\"{pn}\", \"{ev}\"")
                     .AppendLine("},");
             }
         }
 
         sb
-            .AppendLine($"{tabString}{tabString}}});") // close dictionary
+            .AppendLine($"{tabString}{tabString}{tabString}}});") // close dictionary
+            .AppendLine($"{tabString}{tabString}}}")
             .AppendLine($"{tabString}}}")
             .AppendLine("}")
             .AppendLine("#endif");
