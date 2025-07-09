@@ -3,31 +3,38 @@ using Sentry.Internal.Http;
 
 namespace Sentry.Tests.Internals.Http;
 
-public class CachingTransportTests
+public class CachingTransportTests : IDisposable
 {
     private readonly TestOutputDiagnosticLogger _logger;
+    private readonly TempDirectory _cacheDirectory;
+    private readonly SentryOptions _options;
 
     public CachingTransportTests(ITestOutputHelper testOutputHelper)
     {
         _logger = Substitute.ForPartsOf<TestOutputDiagnosticLogger>(testOutputHelper);
+        _cacheDirectory = new TempDirectory();
+        _options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _logger,
+            Debug = true,
+            CacheDirectoryPath = _cacheDirectory.Path,
+            NetworkStatusListener = FakeReliableNetworkStatusListener.Instance
+        };
+    }
+
+    public void Dispose()
+    {
+        _cacheDirectory.Dispose();
     }
 
     [Fact]
     public async Task WithAttachment()
     {
         // Arrange
-        using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path
-        };
-
         string httpContent = null;
         Exception exception = null;
-        var innerTransport = new HttpTransport(options, new HttpClient(new CallbackHttpClientHandler(async message =>
+        var innerTransport = new HttpTransport(_options, new HttpClient(new CallbackHttpClientHandler(async message =>
          {
              try
              {
@@ -39,7 +46,7 @@ public class CachingTransportTests
              }
          })));
 
-        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
 
         const string attachmentContent = "test-attachment";
         var tempFile = Path.GetTempFileName();
@@ -76,17 +83,8 @@ public class CachingTransportTests
     public async Task WorksInBackground()
     {
         // Arrange
-        using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path
-        };
-
         using var innerTransport = new FakeTransport();
-        await using var transport = CachingTransport.Create(innerTransport, options);
+        await using var transport = CachingTransport.Create(innerTransport, _options);
 
         // Attach to the EnvelopeSent event. We'll wait for that below.
         // ReSharper disable once AccessToDisposedClosure
@@ -108,16 +106,6 @@ public class CachingTransportTests
     public async Task ShouldNotLogOperationCanceledExceptionWhenIsCancellationRequested()
     {
         // Arrange
-        using var cacheDirectory = new TempDirectory();
-
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            CacheDirectoryPath = cacheDirectory.Path,
-            Debug = true
-        };
-
         var capturingCompletionSource = new TaskCompletionSource<object>();
         var cancelingCompletionSource = new TaskCompletionSource<object>();
 
@@ -132,7 +120,7 @@ public class CachingTransportTests
                 throw new OperationCanceledException();
             });
 
-        await using var transport = CachingTransport.Create(innerTransport, options);
+        await using var transport = CachingTransport.Create(innerTransport, _options);
         using var envelope = Envelope.FromEvent(new SentryEvent());
         await transport.SendEnvelopeAsync(envelope);
 
@@ -151,7 +139,6 @@ public class CachingTransportTests
     public async Task ShouldLogOperationCanceledExceptionWhenNotIsCancellationRequested()
     {
         // Arrange
-        using var cacheDirectory = new TempDirectory();
         var loggerCompletionSource = new TaskCompletionSource<object>();
 
         _logger
@@ -161,14 +148,6 @@ public class CachingTransportTests
                     Arg.Any<OperationCanceledException>(),
                     Arg.Any<object[]>()))
             .Do(_ => loggerCompletionSource.SetResult(null));
-
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            CacheDirectoryPath = cacheDirectory.Path,
-            Debug = true
-        };
 
         var innerTransport = Substitute.For<ITransport>();
 
@@ -181,7 +160,7 @@ public class CachingTransportTests
                 return new OperationCanceledException();
             });
 
-        await using var transport = CachingTransport.Create(innerTransport, options);
+        await using var transport = CachingTransport.Create(innerTransport, _options);
         using var envelope = Envelope.FromEvent(new SentryEvent());
         await transport.SendEnvelopeAsync(envelope);
 
@@ -196,17 +175,8 @@ public class CachingTransportTests
     public async Task EnvelopeReachesInnerTransport()
     {
         // Arrange
-        using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path
-        };
-
         using var innerTransport = new FakeTransport();
-        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
 
         // Act
         using var envelope = Envelope.FromEvent(new SentryEvent());
@@ -222,46 +192,27 @@ public class CachingTransportTests
     public async Task MaintainsLimit()
     {
         // Arrange
-        using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path,
-            MaxCacheItems = 2
-        };
-
         var innerTransport = Substitute.For<ITransport>();
-        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
 
         // Act
-        for (var i = 0; i < options.MaxCacheItems + 2; i++)
+        for (var i = 0; i < _options.MaxCacheItems + 2; i++)
         {
             using var envelope = Envelope.FromEvent(new SentryEvent());
             await transport.SendEnvelopeAsync(envelope);
         }
 
         // Assert
-        transport.GetCacheLength().Should().BeLessOrEqualTo(options.MaxCacheItems);
+        transport.GetCacheLength().Should().BeLessOrEqualTo(_options.MaxCacheItems);
     }
 
     [Fact]
     public async Task AwareOfExistingFiles()
     {
         // Arrange
-        using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path
-        };
-
         // Send some envelopes with a failing transport to make sure they all stay in cache
         var initialInnerTransport = new FakeFailingTransport();
-        await using var initialTransport = CachingTransport.Create(initialInnerTransport, options, startWorker: false);
+        await using var initialTransport = CachingTransport.Create(initialInnerTransport, _options, startWorker: false);
 
         for (var i = 0; i < 3; i++)
         {
@@ -276,7 +227,7 @@ public class CachingTransportTests
 
         // Creating the transport should move files from processing during initialization.
         using var innerTransport = new FakeTransport();
-        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
 
         // Flushing the worker will ensure all files are processed.
         await transport.FlushAsync();
@@ -289,55 +240,38 @@ public class CachingTransportTests
     public async Task Handle_Malformed_Envelopes_Gracefully()
     {
         // Arrange
-        using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path,
-        };
         var cacheDirectoryPath =
-            options.TryGetProcessSpecificCacheDirectoryPath() ??
+            _options.TryGetProcessSpecificCacheDirectoryPath() ??
             throw new InvalidOperationException("Cache directory or DSN is not set.");
         var processingDirectoryPath = Path.Combine(cacheDirectoryPath, "__processing");
         var fileName = $"{Guid.NewGuid()}.envelope";
         var filePath = Path.Combine(processingDirectoryPath, fileName);
 
-        options.FileSystem.CreateDirectory(processingDirectoryPath);   // Create the processing directory
-        options.FileSystem.CreateFileForWriting(filePath, out var file);
+        _options.FileSystem.CreateDirectory(processingDirectoryPath);   // Create the processing directory
+        _options.FileSystem.CreateFileForWriting(filePath, out var file);
         file.Dispose(); // Make a malformed envelope... just an empty file
-        options.FileSystem.FileExists(filePath).Should().BeTrue();
+        _options.FileSystem.FileExists(filePath).Should().BeTrue();
 
         // Act
         using var innerTransport = new FakeTransport();
-        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
         await transport.FlushAsync(); // Flush the worker to process
 
         // Assert
-        options.FileSystem.FileExists(filePath).Should().BeFalse();
+        _options.FileSystem.FileExists(filePath).Should().BeFalse();
     }
 
     [Fact]
     public async Task NonTransientExceptionShouldLog()
     {
         // Arrange
-        using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path
-        };
-
         var innerTransport = Substitute.For<ITransport>();
 
         innerTransport
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
             .Returns(_ => Task.FromException(new Exception("The Message")));
 
-        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
 
         // Act
         using var envelope = Envelope.FromEvent(new SentryEvent());
@@ -358,15 +292,6 @@ public class CachingTransportTests
     public async Task DoesNotRetryOnNonTransientExceptions()
     {
         // Arrange
-        using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path
-        };
-
         var innerTransport = Substitute.For<ITransport>();
         var isFailing = true;
 
@@ -378,7 +303,7 @@ public class CachingTransportTests
                     ? Task.FromException(new InvalidOperationException())
                     : Task.CompletedTask);
 
-        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
 
         // Act
         for (var i = 0; i < 3; i++)
@@ -403,15 +328,7 @@ public class CachingTransportTests
     public async Task RecordsDiscardedEventOnNonTransientExceptions()
     {
         // Arrange
-        using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path,
-            ClientReportRecorder = Substitute.For<IClientReportRecorder>()
-        };
+        _options.ClientReportRecorder = Substitute.For<IClientReportRecorder>();
 
 
         var innerTransport = Substitute.For<ITransport>();
@@ -419,7 +336,7 @@ public class CachingTransportTests
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
             .Returns(_ => Task.FromException(new InvalidOperationException()));
 
-        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
 
         // Act
         using var envelope = Envelope.FromEvent(new SentryEvent());
@@ -427,7 +344,7 @@ public class CachingTransportTests
         await transport.FlushAsync();
 
         // Test that we recorded the discarded event
-        options.ClientReportRecorder.Received(1)
+        _options.ClientReportRecorder.Received(1)
             .RecordDiscardedEvent(DiscardReason.CacheOverflow, DataCategory.Error);
     }
 
@@ -435,22 +352,13 @@ public class CachingTransportTests
     public async Task RoundtripsClientReports()
     {
         // Arrange
-        using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path
-        };
-
         var timestamp = DateTimeOffset.UtcNow;
         var clock = new MockClock(timestamp);
-        var recorder = new ClientReportRecorder(options, clock);
-        options.ClientReportRecorder = recorder;
+        var recorder = new ClientReportRecorder(_options, clock);
+        _options.ClientReportRecorder = recorder;
 
         var innerTransport = new FakeTransportWithRecorder(recorder);
-        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
 
         // Act
         recorder.RecordDiscardedEvent(DiscardReason.BeforeSend, DataCategory.Error);
@@ -481,18 +389,9 @@ public class CachingTransportTests
     public async Task RestoresDiscardedEventCounts()
     {
         // Arrange
-        using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path
-        };
-
-        var recorder = (ClientReportRecorder)options.ClientReportRecorder;
+        var recorder = (ClientReportRecorder)_options.ClientReportRecorder;
         var innerTransport = new FakeTransportWithRecorder(recorder);
-        await using var transport = CachingTransport.Create(innerTransport, options,
+        await using var transport = CachingTransport.Create(innerTransport, _options,
             startWorker: false, failStorage: true);
 
         // some arbitrary discarded events ahead of time
@@ -534,17 +433,9 @@ public class CachingTransportTests
     public async Task TestNetworkException(Exception exception)
     {
         // Arrange - network unavailable
-        using var cacheDirectory = new TempDirectory();
         var pingHost = Substitute.For<IPing>();
         pingHost.IsAvailableAsync(Arg.Any<CancellationToken>()).Returns(Task.FromResult(true));
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path,
-            NetworkStatusListener = new PollingNetworkStatusListener(pingHost)
-        };
+        _options.NetworkStatusListener = new PollingNetworkStatusListener(pingHost);
 
         var receivedException = new Exception();
         var innerTransport = Substitute.For<ITransport>();
@@ -553,7 +444,7 @@ public class CachingTransportTests
             .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
             .Returns(_ => Task.FromException(exception));
 
-        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
 
         using var envelope = Envelope.FromEvent(new SentryEvent());
         await transport.SendEnvelopeAsync(envelope);
@@ -570,7 +461,7 @@ public class CachingTransportTests
 
         // Assert
         receivedException.Should().Be(exception);
-        var files = options.FileSystem.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).ToArray();
+        var files = _options.FileSystem.EnumerateFiles(_options.CacheDirectoryPath!, "*", SearchOption.AllDirectories).ToArray();
         files.Should().NotBeEmpty();
 
         // Arrange - network recovery
@@ -584,7 +475,7 @@ public class CachingTransportTests
 
         // Assert
         receivedException.Should().Be(exception);
-        files = options.FileSystem.EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories).ToArray();
+        files = _options.FileSystem.EnumerateFiles(_options.CacheDirectoryPath, "*", SearchOption.AllDirectories).ToArray();
         files.Should().NotContain(file => file.Contains("__processing", StringComparison.OrdinalIgnoreCase));
     }
 
@@ -597,18 +488,10 @@ public class CachingTransportTests
         listener.WaitForNetworkOnlineAsync(Arg.Any<CancellationToken>())
             .Throws(new Exception("We should not be waiting for the network status if we know it's online."));
 
-        using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path,
-            NetworkStatusListener = listener
-        };
+        _options.NetworkStatusListener = listener;
 
         using var innerTransport = new FakeTransport();
-        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
 
         // Act
         using var envelope = Envelope.FromEvent(new SentryEvent());
@@ -634,18 +517,10 @@ public class CachingTransportTests
                 return Task.Delay(Timeout.Infinite, callInfo.Arg<CancellationToken>());
             });
 
-        using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path,
-            NetworkStatusListener = listener
-        };
+        _options.NetworkStatusListener = listener;
 
         using var innerTransport = new FakeTransport();
-        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
         using var cts = new CancellationTokenSource();
         try
         {
@@ -688,18 +563,10 @@ public class CachingTransportTests
                 return Task.CompletedTask;
             });
 
-        using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path,
-            NetworkStatusListener = listener
-        };
+        _options.NetworkStatusListener = listener;
 
         using var innerTransport = new FakeTransport();
-        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
 
         // Act
         using var envelope = Envelope.FromEvent(new SentryEvent());
@@ -718,23 +585,15 @@ public class CachingTransportTests
         var listener = Substitute.For<INetworkStatusListener>();
         listener.Online.Returns(_ => true);
 
-        using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path,
-            NetworkStatusListener = listener,
-            ClientReportRecorder = Substitute.For<IClientReportRecorder>()
-        };
+        _options.NetworkStatusListener = listener;
+        _options.ClientReportRecorder = Substitute.For<IClientReportRecorder>();
 
         using var envelope = Envelope.FromEvent(new SentryEvent());
 
         var innerTransport = Substitute.For<ITransport>();
         innerTransport.SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>())
             .Returns(_ => throw new SocketException(32 /* Bad pipe exception */));
-        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
 
         // Act
         await transport.SendEnvelopeAsync(envelope);
@@ -743,7 +602,7 @@ public class CachingTransportTests
         // Assert
         foreach (var item in envelope.Items)
         {
-            options.ClientReportRecorder.Received(1)
+            _options.ClientReportRecorder.Received(1)
                 .RecordDiscardedEvent(DiscardReason.BufferOverflow, item.DataCategory);
         }
     }
@@ -752,19 +611,10 @@ public class CachingTransportTests
     public async Task DoesntWriteSentAtHeaderToCacheFile()
     {
         // Arrange
-        using var cacheDirectory = new TempDirectory();
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            Debug = true,
-            CacheDirectoryPath = cacheDirectory.Path,
-            // This keeps all writing-to-file operations in memory instead of actually writing to disk
-            FileSystem = new FakeFileSystem()
-        };
+        _options.FileSystem = new FakeFileSystem(); // Keeps file write operations in memory instead of writing to disk
 
         var innerTransport = Substitute.For<ITransport>();
-        await using var transport = CachingTransport.Create(innerTransport, options, startWorker: false);
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
 
         using var envelope = Envelope.FromEvent(new SentryEvent());
 
@@ -772,11 +622,30 @@ public class CachingTransportTests
         await transport.SendEnvelopeAsync(envelope);
 
         // Assert
-        var filePath = options.FileSystem
-            .EnumerateFiles(cacheDirectory.Path, "*", SearchOption.AllDirectories)
+        var filePath = _options.FileSystem
+            .EnumerateFiles(_options.CacheDirectoryPath!, "*", SearchOption.AllDirectories)
             .Single();
 
-        var contents = options.FileSystem.ReadAllTextFromFile(filePath);
+        var contents = _options.FileSystem.ReadAllTextFromFile(filePath);
         Assert.DoesNotContain("sent_at", contents);
+    }
+}
+
+/// <summary>
+/// We don't want the real network status to affect the reliability of our tests
+/// </summary>
+file class FakeReliableNetworkStatusListener : INetworkStatusListener
+{
+    public static readonly FakeReliableNetworkStatusListener Instance = new();
+
+    private FakeReliableNetworkStatusListener()
+    {
+    }
+
+    public bool Online => true;
+
+    public Task WaitForNetworkOnlineAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
     }
 }
