@@ -9,6 +9,7 @@
 ### Features
 
 - Added StartSpan and GetTransaction methods to the SentrySdk ([#4303](https://github.com/getsentry/sentry-dotnet/pull/4303))
+- `SentryOptions.Debug` now defaults to `true` for Debug build configurations ([#4330](https://github.com/getsentry/sentry-dotnet/pull/4330))
 
 ### Fixes
 
