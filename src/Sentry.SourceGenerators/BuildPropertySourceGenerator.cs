@@ -8,7 +8,7 @@ namespace Sentry.SourceGenerators;
 /// Generates the necessary msbuild variables
 /// </summary>
 [Generator(LanguageNames.CSharp)]
-public class BuildPropertySourceGenerator : ISourceGenerator
+public sealed class BuildPropertySourceGenerator : ISourceGenerator
 {
     /// <summary>
     /// Initialize the source gen
