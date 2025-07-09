@@ -22,6 +22,8 @@ public sealed class BuildPropertySourceGenerator : ISourceGenerator
     /// </summary>
     public void Execute(GeneratorExecutionContext context)
     {
+        const string tabString = "    ";
+
         var opts = context.AnalyzerConfigOptions.GlobalOptions;
         var properties = opts.Keys.Where(x => x.StartsWith("build_property.")).ToList();
         if (properties.Count == 0)
@@ -73,15 +75,15 @@ public static class BuildPropertyInitializer
                 var pn = EscapeString(property.Replace("build_property.", ""));
                 var ev = EscapeString(value);
                 sb
-                    .Append("\t\t\t{")
+                    .Append($"{tabString}{tabString}{tabString}{{")
                     .Append($"\"{pn}\", \"{ev}\"")
                     .AppendLine("},");
             }
         }
 
         sb
-            .AppendLine("\t\t});") // close dictionary
-            .AppendLine("\t}")
+            .AppendLine($"{tabString}{tabString}}});") // close dictionary
+            .AppendLine($"{tabString}}}")
             .AppendLine("}")
             .AppendLine("#endif");
 
