@@ -55,7 +55,7 @@ public sealed class BuildPropertySourceGenerator : ISourceGenerator
 namespace Sentry.Generated;
 
 [global::System.Runtime.CompilerServices.CompilerGenerated]
-public static class BuildVariableInitializer
+public static class BuildPropertyInitializer
 {
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
