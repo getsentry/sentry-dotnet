@@ -675,4 +675,17 @@ public partial class SentryOptionsTests
         installationId2.Should().Be(installationId1);
         logger.Received(0).Log(SentryLevel.Debug, "Resolved installation ID '{0}'.", null, Arg.Any<string>());
     }
+
+#if NET8_0_OR_GREATER
+    [Fact]
+    public void Debug_AutoDebug()
+    {
+        var sut = new SentryOptions();
+#if DEBUG
+        Assert.True(sut.Debug);
+#else
+        Assert.False(sut.Debug);
+#endif
+    }
+#endif
 }
