@@ -60,7 +60,8 @@ public static class BuildVariableInitializer
     [global::System.Runtime.CompilerServices.ModuleInitializer]
     public static void Initialize()
     {
-        global::Sentry.CompilerServices.BuildProperties.Initialize(new global::System.Collections.Generic.Dictionary<string, string> {
+        global::Sentry.CompilerServices.BuildProperties.Initialize(new global::System.Collections.Generic.Dictionary<string, string>(global::System.StringComparer.OrdinalIgnoreCase)
+        {
 
 """
             );
