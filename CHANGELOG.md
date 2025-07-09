@@ -16,6 +16,7 @@
 - Custom ISentryEventProcessors are now run for native iOS events ([#4318](https://github.com/getsentry/sentry-dotnet/pull/4318))
 - Crontab validation when capturing checkins ([#4314](https://github.com/getsentry/sentry-dotnet/pull/4314))
 - Native AOT: link to static `lzma` on Linux/MUSL ([#4326](https://github.com/getsentry/sentry-dotnet/pull/4326))
+- AppDomain.CurrentDomain.ProcessExit hook is now removed on shutdown ([#4323](https://github.com/getsentry/sentry-dotnet/pull/4323))
 
 ### Dependencies
 
