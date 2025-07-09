@@ -36,12 +36,7 @@ public class BuildPropertySourceGenerator : ISourceGenerator
         }
 
         // we only want to generate code where host setup takes place
-        if (!opts.TryGetValue("build_property.outputtype", out var outputType))
-        {
-            return;
-        }
-
-        if (!outputType.Equals("exe", StringComparison.InvariantCultureIgnoreCase))
+        if (!context.Compilation.Options.OutputKind.IsExe())
         {
             return;
         }
