@@ -1304,6 +1304,7 @@ namespace Sentry.CompilerServices
     {
         public static System.Collections.Generic.IReadOnlyDictionary<string, string>? Values { get; }
         public static void Initialize(System.Collections.Generic.Dictionary<string, string> properties) { }
+        public static bool TryGetBoolean(string key, out bool value) { }
     }
 }
 namespace Sentry.Extensibility
