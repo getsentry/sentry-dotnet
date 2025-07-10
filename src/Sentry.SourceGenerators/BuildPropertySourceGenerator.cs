@@ -61,7 +61,7 @@ namespace Sentry.Generated
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("{{GeneratedCodeText.Tool}}", "{{GeneratedCodeText.Version}}")]
     internal static class BuildPropertyInitializer
     {
-        [global::System.Runtime.CompilerServices.ModuleInitializer]
+        [global::System.Runtime.CompilerServices.ModuleInitializerAttribute]
         internal static void Initialize()
         {
             global::Sentry.CompilerServices.BuildProperties.Initialize(new global::System.Collections.Generic.Dictionary<string, string>(global::System.StringComparer.OrdinalIgnoreCase)
