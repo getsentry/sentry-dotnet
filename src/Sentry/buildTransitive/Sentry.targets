@@ -6,9 +6,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <CompilerVisibleProperty Include="_IsPublishing" />
     <CompilerVisibleProperty Include="PublishAot" />
-    <CompilerVisibleProperty Include="UseDotNetNativeToolchain" />
     <CompilerVisibleProperty Include="PublishTrimmed" />
+    <CompilerVisibleProperty Include="PublishSelfContained" />
+    <CompilerVisibleProperty Include="UseDotNetNativeToolchain" />
     <CompilerVisibleProperty Include="SentryDisableSourceGenerator" />
     <CompilerVisibleProperty Include="Configuration" />
   </ItemGroup>

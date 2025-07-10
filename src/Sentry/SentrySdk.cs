@@ -51,6 +51,7 @@ public static partial class SentrySdk
 
 #pragma warning disable CS0162 // Unreachable code detected
 #pragma warning disable 0162 // Unreachable code on old .NET frameworks
+        AotHelper.CheckIsTrimmed(options.DiagnosticLogger);
         options.LogDebug(AotHelper.IsTrimmed
             ? "This looks like a Native AOT application build."
             : "This doesn't look like a Native AOT application build."
