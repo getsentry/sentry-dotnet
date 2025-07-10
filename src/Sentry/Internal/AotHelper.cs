@@ -39,7 +39,7 @@ internal static class AotHelper
         }
 
         // fallback check
-        logger?.LogDebug($"Stacktrace fallback");
+        logger?.LogDebug("Stacktrace fallback");
         var stackTrace = new StackTrace(false);
         return stackTrace.GetFrame(0)?.GetMethod() is null;
     }
