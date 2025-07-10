@@ -17,6 +17,7 @@ internal sealed class BatchProcessor : IDisposable
 {
     private readonly IHub _hub;
     private readonly TimeSpan _batchInterval;
+    private readonly IClientReportRecorder _clientReportRecorder;
     private readonly IDiagnosticLogger? _diagnosticLogger;
 
     private readonly Timer _timer;
@@ -27,10 +28,11 @@ internal sealed class BatchProcessor : IDisposable
 
     private DateTime _lastFlush = DateTime.MinValue;
 
-    public BatchProcessor(IHub hub, int batchCount, TimeSpan batchInterval, IDiagnosticLogger? diagnosticLogger)
+    public BatchProcessor(IHub hub, int batchCount, TimeSpan batchInterval, IClientReportRecorder clientReportRecorder, IDiagnosticLogger? diagnosticLogger)
     {
         _hub = hub;
         _batchInterval = batchInterval;
+        _clientReportRecorder = clientReportRecorder;
         _diagnosticLogger = diagnosticLogger;
 
         _timer = new Timer(OnIntervalElapsed, this, Timeout.Infinite, Timeout.Infinite);
@@ -50,6 +52,7 @@ internal sealed class BatchProcessor : IDisposable
             activeBuffer = activeBuffer == _buffer1 ? _buffer2 : _buffer1;
             if (!TryEnqueue(activeBuffer, log))
             {
+                _clientReportRecorder.RecordDiscardedEvent(DiscardReason.Backpressure, DataCategory.Default, 1);
                 _diagnosticLogger?.LogInfo("Log Buffer full ... dropping log");
             }
         }
