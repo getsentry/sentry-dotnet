@@ -15,7 +15,6 @@ internal static class AotHelper
         IsTrimmed = CheckIsTrimmed();
     }
 
-
     [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AvoidAtRuntime)]
     internal static bool CheckIsTrimmed(IDiagnosticLogger? logger = null)
     {

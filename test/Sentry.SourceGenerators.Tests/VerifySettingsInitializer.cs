@@ -1,5 +1,3 @@
-using System.CodeDom.Compiler;
-
 namespace Sentry.SourceGenerators.Tests;
 
 internal static class VerifySettingsInitializer
@@ -12,7 +10,6 @@ internal static class VerifySettingsInitializer
         VerifierSettings.AddScrubber(VersionScrubber);
     }
 
-    [GeneratedCode("", "")]
     private static void VersionScrubber(StringBuilder text)
     {
         if (s_assemblyName.Version is not null)
