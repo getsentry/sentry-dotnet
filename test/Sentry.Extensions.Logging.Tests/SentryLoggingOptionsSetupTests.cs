@@ -109,8 +109,8 @@ public class SentryLoggingOptionsSetupTests
                 ["MinimumEventLevel"] = expected.MinimumEventLevel.ToString(),
                 ["InitializeSdk"] = expected.InitializeSdk.ToString(),
 
-                ["EnableLogs"] = expected.Experimental.EnableLogs.ToString(),
-                ["MinimumLogLevel"] = expected.ExperimentalLogging.MinimumLogLevel.ToString(),
+                ["Experimental:EnableLogs"] = expected.Experimental.EnableLogs.ToString(),
+                ["ExperimentalLogging:MinimumLogLevel"] = expected.ExperimentalLogging.MinimumLogLevel.ToString(),
             })
             .Build();
 
