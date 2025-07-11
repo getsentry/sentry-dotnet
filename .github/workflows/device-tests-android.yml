@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tfm: [net8.0, net9.0]
+        tfm: [net9.0]
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
@@ -39,14 +39,6 @@ jobs:
       - name: Build Android Test App
         run: pwsh ./scripts/device-test.ps1 android -Build -Tfm ${{ matrix.tfm }}
 
-      - name: Upload Android Test App (net8.0)
-        if: matrix.tfm == 'net8.0'
-        uses: actions/upload-artifact@v4
-        with:
-          name: device-test-android-net8.0
-          if-no-files-found: error
-          path: test/Sentry.Maui.Device.TestApp/bin/Release/net8.0-android/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
-
       - name: Upload Android Test App (net9.0)
         if: matrix.tfm == 'net9.0'
         uses: actions/upload-artifact@v4
@@ -65,7 +57,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tfm: [net8.0, net9.0]
+        tfm: [net9.0]
         # We run against both an older and a newer API
         api-level: [27, 33]
     env:
