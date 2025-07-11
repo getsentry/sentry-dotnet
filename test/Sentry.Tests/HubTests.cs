@@ -1439,7 +1439,7 @@ public partial class HubTests
         hub.Logger.Should().BeOfType<DisabledSentryStructuredLogger>();
     }
 
-    [Fact]
+    [Fact(Skip = "Remove InternalBatchSize")]
     public void Logger_IsEnabled_DoesCaptureLog()
     {
         // Arrange

@@ -1,6 +1,8 @@
 using Sentry.Extensibility;
+using Sentry.Infrastructure;
 using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
+using Sentry.Threading;
 
 namespace Sentry.Internal;
 
@@ -17,6 +19,7 @@ internal sealed class BatchProcessor : IDisposable
 {
     private readonly IHub _hub;
     private readonly TimeSpan _batchInterval;
+    private readonly ISystemClock _clock;
     private readonly IClientReportRecorder _clientReportRecorder;
     private readonly IDiagnosticLogger? _diagnosticLogger;
 
@@ -25,22 +28,25 @@ internal sealed class BatchProcessor : IDisposable
     private readonly BatchBuffer<SentryLog> _buffer1;
     private readonly BatchBuffer<SentryLog> _buffer2;
     private volatile BatchBuffer<SentryLog> _activeBuffer;
+    private readonly NonReentrantLock _swapLock;
 
-    private DateTime _lastFlush = DateTime.MinValue;
+    private DateTimeOffset _lastFlush = DateTimeOffset.MinValue;
 
-    public BatchProcessor(IHub hub, int batchCount, TimeSpan batchInterval, IClientReportRecorder clientReportRecorder, IDiagnosticLogger? diagnosticLogger)
+    public BatchProcessor(IHub hub, int batchCount, TimeSpan batchInterval, ISystemClock clock, IClientReportRecorder clientReportRecorder, IDiagnosticLogger? diagnosticLogger)
     {
         _hub = hub;
         _batchInterval = batchInterval;
+        _clock = clock;
         _clientReportRecorder = clientReportRecorder;
         _diagnosticLogger = diagnosticLogger;
 
         _timer = new Timer(OnIntervalElapsed, this, Timeout.Infinite, Timeout.Infinite);
         _timerCallbackLock = new object();
 
-        _buffer1 = new BatchBuffer<SentryLog>(batchCount);
-        _buffer2 = new BatchBuffer<SentryLog>(batchCount);
+        _buffer1 = new BatchBuffer<SentryLog>(batchCount, "Buffer 1");
+        _buffer2 = new BatchBuffer<SentryLog>(batchCount, "Buffer 2");
         _activeBuffer = _buffer1;
+        _swapLock = new NonReentrantLock();
     }
 
     internal void Enqueue(SentryLog log)
@@ -49,7 +55,7 @@ internal sealed class BatchProcessor : IDisposable
 
         if (!TryEnqueue(activeBuffer, log))
         {
-            activeBuffer = activeBuffer == _buffer1 ? _buffer2 : _buffer1;
+            activeBuffer = ReferenceEquals(activeBuffer, _buffer1) ? _buffer2 : _buffer1;
             if (!TryEnqueue(activeBuffer, log))
             {
                 _clientReportRecorder.RecordDiscardedEvent(DiscardReason.Backpressure, DataCategory.Default, 1);
@@ -69,14 +75,12 @@ internal sealed class BatchProcessor : IDisposable
 
             if (count == buffer.Capacity) // is buffer full
             {
-                // swap active buffer atomically
+                using var flushScope = buffer.EnterFlushScope();
+                DisableTimer();
+
                 var currentActiveBuffer = _activeBuffer;
-                var newActiveBuffer = ReferenceEquals(currentActiveBuffer, _buffer1) ? _buffer2 : _buffer1;
-                if (Interlocked.CompareExchange(ref _activeBuffer, newActiveBuffer, currentActiveBuffer) == currentActiveBuffer)
-                {
-                    DisableTimer();
-                    Flush(buffer, count);
-                }
+                _ = TrySwapBuffer(currentActiveBuffer);
+                Flush(buffer, count);
             }
 
             return true;
@@ -87,7 +91,8 @@ internal sealed class BatchProcessor : IDisposable
 
     private void Flush(BatchBuffer<SentryLog> buffer)
     {
-        _lastFlush = DateTime.UtcNow;
+        buffer.WaitAddCompleted();
+        _lastFlush = _clock.GetUtcNow();
 
         var logs = buffer.ToArrayAndClear();
         _ = _hub.CaptureEnvelope(Envelope.FromLog(new StructuredLog(logs)));
@@ -95,7 +100,8 @@ internal sealed class BatchProcessor : IDisposable
 
     private void Flush(BatchBuffer<SentryLog> buffer, int count)
     {
-        _lastFlush = DateTime.UtcNow;
+        buffer.WaitAddCompleted();
+        _lastFlush = _clock.GetUtcNow();
 
         var logs = buffer.ToArrayAndClear(count);
         _ = _hub.CaptureEnvelope(Envelope.FromLog(new StructuredLog(logs)));
@@ -107,13 +113,10 @@ internal sealed class BatchProcessor : IDisposable
         {
             var currentActiveBuffer = _activeBuffer;
 
-            if (!currentActiveBuffer.IsEmpty && DateTime.UtcNow > _lastFlush)
+            if (!currentActiveBuffer.IsEmpty && _clock.GetUtcNow() > _lastFlush)
             {
-                var newActiveBuffer = ReferenceEquals(currentActiveBuffer, _buffer1) ? _buffer2 : _buffer1;
-                if (Interlocked.CompareExchange(ref _activeBuffer, newActiveBuffer, currentActiveBuffer) == currentActiveBuffer)
-                {
-                    Flush(currentActiveBuffer);
-                }
+                _ = TrySwapBuffer(currentActiveBuffer);
+                Flush(currentActiveBuffer);
             }
         }
     }
@@ -128,6 +131,20 @@ internal sealed class BatchProcessor : IDisposable
     {
         var updated = _timer.Change(Timeout.Infinite, Timeout.Infinite);
         Debug.Assert(updated, "Timer was not successfully disabled.");
+    }
+
+    private bool TrySwapBuffer(BatchBuffer<SentryLog> currentActiveBuffer)
+    {
+        if (_swapLock.TryEnter())
+        {
+            var newActiveBuffer = ReferenceEquals(currentActiveBuffer, _buffer1) ? _buffer2 : _buffer1;
+            var previousActiveBuffer = Interlocked.CompareExchange(ref _activeBuffer, newActiveBuffer, currentActiveBuffer);
+
+            _swapLock.Exit();
+            return previousActiveBuffer == currentActiveBuffer;
+        }
+
+        return false;
     }
 
     public void Dispose()

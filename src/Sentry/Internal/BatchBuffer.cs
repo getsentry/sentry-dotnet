@@ -1,3 +1,5 @@
+using Sentry.Threading;
+
 namespace Sentry.Internal;
 
 /// <summary>
@@ -8,23 +10,38 @@ namespace Sentry.Internal;
 /// Not all members are thread-safe.
 /// See individual members for notes on thread safety.
 /// </remarks>
-internal sealed class BatchBuffer<T>
+[DebuggerDisplay("Name = {Name}, Capacity = {Capacity}, IsEmpty = {IsEmpty}, IsFull = {IsFull}, IsAddInProgress = {IsAddInProgress}")]
+internal sealed class BatchBuffer<T> : IDisposable
 {
     private readonly T[] _array;
     private int _additions;
+    private readonly CounterEvent _addCounter;
+    private readonly NonReentrantLock _addLock;
 
     /// <summary>
     /// Create a new buffer.
     /// </summary>
-    /// <param name="capacity">Length of new the buffer.</param>
+    /// <param name="capacity">Length of the new buffer.</param>
+    /// <param name="name">Name of the new buffer.</param>
     /// <exception cref="ArgumentOutOfRangeException">When <paramref name="capacity"/> is less than <see langword="2"/>.</exception>
-    public BatchBuffer(int capacity)
+    public BatchBuffer(int capacity, string? name = null)
     {
         ThrowIfLessThanTwo(capacity, nameof(capacity));
+        Name = name ?? "default";
 
         _array = new T[capacity];
         _additions = 0;
+        _addCounter = new CounterEvent();
+        _addLock = new NonReentrantLock();
     }
+
+    /// <summary>
+    /// Name of the buffer.
+    /// </summary>
+    /// <remarks>
+    /// This property is thread-safe.
+    /// </remarks>
+    internal string Name { get; }
 
     /// <summary>
     /// Maximum number of elements that can be added to the buffer.
@@ -50,6 +67,29 @@ internal sealed class BatchBuffer<T>
     /// </remarks>
     internal bool IsFull => _additions >= _array.Length;
 
+    internal FlushScope EnterFlushScope()
+    {
+        if (_addLock.TryEnter())
+        {
+            return new FlushScope(this);
+        }
+
+        Debug.Fail("The FlushScope should not have been entered again, before the previously entered FlushScope has exited.");
+        return new FlushScope();
+    }
+
+    private void ExitFlushScope()
+    {
+        _addLock.Exit();
+    }
+
+    internal bool IsAddInProgress => !_addCounter.IsSet;
+
+    internal void WaitAddCompleted()
+    {
+        _addCounter.Wait();
+    }
+
     /// <summary>
     /// Attempt to atomically add one element to the buffer.
     /// </summary>
@@ -61,6 +101,14 @@ internal sealed class BatchBuffer<T>
     /// </remarks>
     internal bool TryAdd(T item, out int count)
     {
+        if (_addLock.IsEntered)
+        {
+            count = 0;
+            return false;
+        }
+
+        using var scope = _addCounter.EnterScope();
+
         count = Interlocked.Increment(ref _additions);
 
         if (count <= _array.Length)
@@ -100,6 +148,7 @@ internal sealed class BatchBuffer<T>
     /// </remarks>
     internal T[] ToArrayAndClear(int length)
     {
+        Debug.Assert(_addCounter.IsSet);
         var array = ToArray(length);
         Clear(length);
         return array;
@@ -139,5 +188,30 @@ internal sealed class BatchBuffer<T>
     private static void ThrowLessThanTwo(int capacity, string paramName)
     {
         throw new ArgumentOutOfRangeException(paramName, capacity, "Argument must be at least two.");
+    }
+
+    public void Dispose()
+    {
+        _addCounter.Dispose();
+    }
+
+    internal ref struct FlushScope : IDisposable
+    {
+        private BatchBuffer<T>? _lockObj;
+
+        internal FlushScope(BatchBuffer<T> lockObj)
+        {
+            _lockObj = lockObj;
+        }
+
+        public void Dispose()
+        {
+            var lockObj = _lockObj;
+            if (lockObj is not null)
+            {
+                _lockObj = null;
+                lockObj.ExitFlushScope();
+            }
+        }
     }
 }

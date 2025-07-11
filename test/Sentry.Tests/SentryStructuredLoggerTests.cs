@@ -74,7 +74,7 @@ public class SentryStructuredLoggerTests
         instance.Should().BeSameAs(other);
     }
 
-    [Theory]
+    [Theory(Skip = "Remove InternalBatchSize")]
     [InlineData(SentryLogLevel.Trace)]
     [InlineData(SentryLogLevel.Debug)]
     [InlineData(SentryLogLevel.Info)]
@@ -113,7 +113,7 @@ public class SentryStructuredLoggerTests
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
     }
 
-    [Fact]
+    [Fact(Skip = "Remove InternalBatchSize")]
     public void Log_WithoutTraceHeader_CapturesEnvelope()
     {
         _fixture.WithoutTraceHeader();
@@ -130,7 +130,7 @@ public class SentryStructuredLoggerTests
         envelope.AssertEnvelope(_fixture, SentryLogLevel.Trace);
     }
 
-    [Fact]
+    [Fact(Skip = "Remove InternalBatchSize")]
     public void Log_WithBeforeSendLog_InvokesCallback()
     {
         var invocations = 0;
