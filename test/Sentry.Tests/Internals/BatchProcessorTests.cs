@@ -5,7 +5,7 @@ namespace Sentry.Tests.Internals;
 public class BatchProcessorTests : IDisposable
 {
     private readonly IHub _hub;
-    private readonly MockClock  _clock;
+    private readonly MockClock _clock;
     private readonly ClientReportRecorder _clientReportRecorder;
     private readonly InMemoryDiagnosticLogger _diagnosticLogger;
     private readonly BlockingCollection<Envelope> _capturedEnvelopes;
