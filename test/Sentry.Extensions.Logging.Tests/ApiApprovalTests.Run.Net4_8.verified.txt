@@ -38,10 +38,15 @@ namespace Sentry.Extensions.Logging
     public class SentryLoggingOptions : Sentry.SentryOptions
     {
         public SentryLoggingOptions() { }
+        public Sentry.Extensions.Logging.SentryLoggingOptions.SentryLoggingExperimentalOptions ExperimentalLogging { get; set; }
         public bool InitializeSdk { get; set; }
         public Microsoft.Extensions.Logging.LogLevel MinimumBreadcrumbLevel { get; set; }
         public Microsoft.Extensions.Logging.LogLevel MinimumEventLevel { get; set; }
         public void ConfigureScope(System.Action<Sentry.Scope> action) { }
+        public sealed class SentryLoggingExperimentalOptions
+        {
+            public Microsoft.Extensions.Logging.LogLevel MinimumLogLevel { get; set; }
+        }
     }
     public static class SentryLoggingOptionsExtensions
     {
