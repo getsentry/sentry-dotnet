@@ -61,6 +61,17 @@ public static class DiagnosticLoggerExtensions
     /// <summary>
     /// Log a debug message.
     /// </summary>
+    public static void LogDebug<TArg, TArg2, TArg3>(
+        this IDiagnosticLogger logger,
+        string message,
+        TArg arg,
+        TArg2 arg2,
+        TArg3 arg3)
+        => logger.LogIfEnabled(SentryLevel.Debug, null, message, arg, arg2, arg3);
+
+    /// <summary>
+    /// Log a debug message.
+    /// </summary>
     internal static void LogDebug<TArg, TArg2, TArg3>(
         this SentryOptions options,
         string message,
@@ -232,6 +243,17 @@ public static class DiagnosticLoggerExtensions
         TArg arg,
         TArg2 arg2)
         => options.DiagnosticLogger?.LogIfEnabled(SentryLevel.Warning, null, message, arg, arg2);
+
+    /// <summary>
+    /// Log a warning message.
+    /// </summary>
+    public static void LogWarning<TArg, TArg2, TArg3>(
+        this IDiagnosticLogger logger,
+        string message,
+        TArg arg,
+        TArg2 arg2,
+        TArg3 arg3)
+        => logger.LogIfEnabled(SentryLevel.Warning, null, message, arg, arg2, arg3);
 
     /// <summary>
     /// Log a warning message.

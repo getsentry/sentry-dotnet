@@ -1848,4 +1848,54 @@ public class SentryOptions
         "ServiceStack",
         "Java.Interop",
     ];
+
+    /// <summary>
+    /// Experimental Sentry features.
+    /// </summary>
+    /// <remarks>
+    /// This and related experimental APIs may change in the future.
+    /// </remarks>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public SentryExperimentalOptions Experimental { get; set; } = new();
+
+    /// <summary>
+    /// Experimental Sentry SDK options.
+    /// </summary>
+    /// <remarks>
+    /// This and related experimental APIs may change in the future.
+    /// </remarks>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public sealed class SentryExperimentalOptions
+    {
+        internal SentryExperimentalOptions()
+        {
+        }
+
+        /// <summary>
+        /// When set to <see langword="true"/>, logs are sent to Sentry.
+        /// Defaults to <see langword="false"/>.
+        /// <para>This API is experimental and it may change in the future.</para>
+        /// </summary>
+        /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
+        public bool EnableLogs { get; set; } = false;
+
+        private Func<SentryLog, SentryLog?>? _beforeSendLog;
+
+        internal Func<SentryLog, SentryLog?>? BeforeSendLogInternal => _beforeSendLog;
+
+        /// <summary>
+        /// Sets a callback function to be invoked before sending the log to Sentry.
+        /// When the delegate throws an <see cref="Exception"/> during invocation, the log will not be captured.
+        /// <para>This API is experimental and it may change in the future.</para>
+        /// </summary>
+        /// <remarks>
+        /// It can be used to modify the log object before being sent to Sentry.
+        /// To prevent the log from being sent to Sentry, return <see langword="null"/>.
+        /// </remarks>
+        /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
+        public void SetBeforeSendLog(Func<SentryLog, SentryLog?> beforeSendLog)
+        {
+            _beforeSendLog = beforeSendLog;
+        }
+    }
 }
