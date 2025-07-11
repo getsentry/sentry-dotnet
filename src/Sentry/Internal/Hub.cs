@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Integrations;
 using Sentry.Protocol.Envelopes;
 using Sentry.Protocol.Metrics;
 
@@ -14,6 +15,7 @@ internal class Hub : IHub, IDisposable
     private readonly SentryOptions _options;
     private readonly RandomValuesFactory _randomValuesFactory;
     private readonly IReplaySession _replaySession;
+    private readonly List<IDisposable> _integrationsToCleanup = new();
 
 #if MEMORY_DUMP_SUPPORTED
     private readonly MemoryMonitor? _memoryMonitor;
@@ -84,6 +86,10 @@ internal class Hub : IHub, IDisposable
         {
             options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
             integration.Register(this, options);
+            if (integration is IDisposable disposableIntegration)
+            {
+                _integrationsToCleanup.Add(disposableIntegration);
+            }
         }
     }
 
@@ -770,6 +776,18 @@ internal class Hub : IHub, IDisposable
         if (Interlocked.Exchange(ref _isEnabled, 0) != 1)
         {
             return;
+        }
+
+        foreach (var integration in _integrationsToCleanup)
+        {
+            try
+            {
+                integration.Dispose();
+            }
+            catch (Exception e)
+            {
+                _options.LogError("Failed to dispose integration {0}: {1}", integration.GetType().Name, e);
+            }
         }
 
 #if MEMORY_DUMP_SUPPORTED

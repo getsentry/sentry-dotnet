@@ -7,29 +7,19 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
+  <PropertyGroup>
     <TargetFrameworks>net9.0;net8.0;netstandard2.1;netstandard2.0;net462</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net9.0-android35.0;net8.0-android34.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net9.0-ios18.0;net8.0-ios17.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net9.0-maccatalyst18.0;net8.0-maccatalyst17.0</TargetFrameworks>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(SolutionName)' == 'Sentry.Unity'">
-    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-    <!-- To be able to make the internals visible, since we're not signing the assembly for Unity -->
-    <SignAssembly>false</SignAssembly>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(SolutionName)' == 'Sentry.Unity'">
-    <InternalsVisibleTo Include="Sentry.Unity" />
-    <InternalsVisibleTo Include="Sentry.Unity.Tests" />
-  </ItemGroup>
-
+  
   <!-- Platform-specific props included here -->
   <Import Project="Platforms\Android\Sentry.Android.props" Condition="'$(TargetPlatformIdentifier)' == 'android'" />
   <Import Project="Platforms\Cocoa\Sentry.Cocoa.props" Condition="'$(TargetPlatformIdentifier)' == 'ios' Or '$(TargetPlatformIdentifier)' == 'maccatalyst'" />
   <Import Project="Platforms\Native\Sentry.Native.targets"
         Condition="'$(TargetPlatformIdentifier)' != 'android' and '$(TargetPlatformIdentifier)' != 'ios' and '$(TargetPlatformIdentifier)' != 'maccatalyst'"/>
+  <Import Project="Platforms\Unity\Sentry.Unity.props" Condition="'$(SolutionName)' == 'Sentry.Unity'"/>
 
   <PropertyGroup Condition="'$(EnableAot)' == 'true'">
     <IsAotCompatible>true</IsAotCompatible>
