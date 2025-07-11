@@ -47,9 +47,8 @@
 
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and '$(RuntimeIdentifier)' == 'linux-musl-x64'">
     <DirectPInvoke Include="sentry-native" />
-    <!-- When musl is detected, static sentry-native links to static libunwind -->
-    <LinkerArg Include="-Wl,-Bstatic -Wl,--whole-archive -lunwind -Wl,--no-whole-archive -Wl,-Bdynamic" />
-    <NativeSystemLibrary Include="lzma" />
+    <!-- When musl is detected, static sentry-native links to static libunwind, which depends on liblzma -->
+    <LinkerArg Include="-Wl,-Bstatic -Wl,--whole-archive -lunwind -Wl,--no-whole-archive -llzma -Wl,-Bdynamic" />
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\linux-musl-x64\libsentry-native.a" />
   </ItemGroup>
 

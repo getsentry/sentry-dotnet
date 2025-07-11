@@ -9,6 +9,31 @@
     - `Sentry.AspNetCore`, enabled via `SentryAspNetCoreOptions.Experimental.EnableLogs`
     - `Sentry.Extensions.Logging`, enabled via `SentryLoggingOptions.Experimental.EnableLogs`
     - `Sentry.Maui`, enabled via `SentryMauiOptions.Experimental.EnableLogs`
+### API changes
+
+- App Hang Tracking for iOS is now disabled by default, until this functionality is more stable. If you want to use it in your applications then you'll need to enable this manually. ([#4320](https://github.com/getsentry/sentry-dotnet/pull/4320))
+
+### Features
+
+- Add experimental support for [Sentry Structured Logging](https://docs.sentry.io/product/explore/logs/) via `SentrySdk.Experimental.Logger` ([#4158](https://github.com/getsentry/sentry-dotnet/pull/4158))
+- Added StartSpan and GetTransaction methods to the SentrySdk ([#4303](https://github.com/getsentry/sentry-dotnet/pull/4303))
+
+### Fixes
+
+- Sentry now decompresses Request bodies in ASP.NET Core when RequestDecompression middleware is enabled ([#4315](https://github.com/getsentry/sentry-dotnet/pull/4315))
+- Custom ISentryEventProcessors are now run for native iOS events ([#4318](https://github.com/getsentry/sentry-dotnet/pull/4318))
+- Crontab validation when capturing checkins ([#4314](https://github.com/getsentry/sentry-dotnet/pull/4314))
+- Native AOT: link to static `lzma` on Linux/MUSL ([#4326](https://github.com/getsentry/sentry-dotnet/pull/4326))
+- AppDomain.CurrentDomain.ProcessExit hook is now removed on shutdown ([#4323](https://github.com/getsentry/sentry-dotnet/pull/4323))
+
+### Dependencies
+
+- Bump Native SDK from v0.9.0 to v0.9.1 ([#4309](https://github.com/getsentry/sentry-dotnet/pull/4309))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#091)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.9.0...0.9.1)
+- Bump CLI from v2.46.0 to v2.47.0 ([#4332](https://github.com/getsentry/sentry-dotnet/pull/4332))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2470)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.46.0...2.47.0)
 
 ## 5.11.2
 

@@ -6,6 +6,7 @@ using Sentry.Protocol.Envelopes;
 
 namespace Sentry;
 
+#if !SENTRY_UNITY
 /// <summary>
 /// Sentry SDK entrypoint.
 /// </summary>
@@ -14,7 +15,9 @@ namespace Sentry;
 /// It allows safe static access to a client and scope management.
 /// When the SDK is uninitialized, calls to this class result in no-op so no callbacks are invoked.
 /// </remarks>
-public static partial class SentrySdk
+public
+#endif
+static partial class SentrySdk
 {
     internal static IHub CurrentHub = DisabledHub.Instance;
 
@@ -648,6 +651,12 @@ public static partial class SentrySdk
             configureMonitorOptions);
 
     /// <summary>
+    /// Starts a transaction if there is not already one active on the scope, otherwise starts a new child span on the
+    /// currently active transaction.
+    /// </summary>
+    public static ISpan StartSpan(string operation, string description) => CurrentHub.StartSpan(operation, description);
+
+    /// <summary>
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
@@ -705,7 +714,13 @@ public static partial class SentrySdk
         => CurrentHub.BindException(exception, span);
 
     /// <summary>
-    /// Gets the last active span.
+    /// Gets the currently active transaction.
+    /// </summary>
+    [DebuggerStepThrough]
+    public static ITransactionTracer? GetTransaction() => CurrentHub.GetTransaction();
+
+    /// <summary>
+    /// Gets the last active span
     /// </summary>
     [DebuggerStepThrough]
     public static ISpan? GetSpan()

@@ -3,7 +3,7 @@ using Sentry.Internal;
 
 namespace Sentry.Integrations;
 
-internal class AppDomainProcessExitIntegration : ISdkIntegration
+internal class AppDomainProcessExitIntegration : ISdkIntegration, IDisposable
 {
     private readonly IAppDomain _appDomain;
     private IHub? _hub;
@@ -23,5 +23,10 @@ internal class AppDomainProcessExitIntegration : ISdkIntegration
     {
         _options?.LogInfo("AppDomain process exited: Disposing SDK.");
         (_hub as IDisposable)?.Dispose();
+    }
+
+    public void Dispose()
+    {
+        _appDomain.ProcessExit -= HandleProcessExit;
     }
 }

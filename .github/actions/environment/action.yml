@@ -14,9 +14,15 @@ runs:
     # Android SDK Tools are arm64-incompatible
     # Android SDK Build Tools are musl-incompatible
     - name: Set Environment Variables for Alpine Linux
-      if: ${{ (runner.os == 'Linux' && runner.arch == 'ARM64') || contains(matrix.container, 'alpine') }}
+      if: ${{ (runner.os == 'Linux' && runner.arch == 'ARM64') || contains(matrix.container.image, 'alpine') }}
       shell: bash
       run: echo "NO_MOBILE=true" >> $GITHUB_ENV
+
+    # Allow sudoless Docker in integration tests
+    - name: Prepare Docker on Alpine Linux
+      if: ${{ contains(matrix.container.image, 'alpine') }}
+      shell: bash
+      run: sudo chmod 666 /var/run/docker.sock
 
     # zstd is needed for cross OS actions/cache but missing from windows-11-arm
     # https://github.com/actions/partner-runner-images/issues/99
@@ -73,9 +79,6 @@ runs:
       shell: bash
       run: |
         pwd
-        dotnet workload install \
-          wasm-tools wasm-tools-net8 maui-android android mobile-librarybuilder \
-          ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows macos' || '' }} \
-          ${{ runner.os == 'Windows' && 'maui-ios maui-maccatalyst maui-windows' || '' }} \
+        dotnet workload restore \
           --temp-dir "${{ runner.temp }}" \
           --skip-sign-check
