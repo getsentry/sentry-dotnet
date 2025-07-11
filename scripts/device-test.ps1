@@ -59,6 +59,9 @@ try
             '--launch-timeout', '00:10:00',
             '--set-env', 'CI=$envValue'
         )
+        if ($CI) {
+            $arguments += '--reset-simulator'
+        }
     }
 
     if ($Build)
