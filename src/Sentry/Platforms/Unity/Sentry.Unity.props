@@ -1,0 +1,15 @@
+<Project>
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+    <!-- To be able to make the internals visible, since we're not signing the assembly for Unity -->
+    <SignAssembly>false</SignAssembly>
+    <DefineConstants>$(DefineConstants);SENTRY_UNITY</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.Unity" />
+    <InternalsVisibleTo Include="Sentry.Unity.Tests" />
+  </ItemGroup>
+
+</Project>

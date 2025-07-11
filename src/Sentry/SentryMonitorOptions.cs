@@ -51,14 +51,21 @@ public enum SentryMonitorInterval
 /// </summary>
 public partial class SentryMonitorOptions : ISentryJsonSerializable
 {
-    // Breakdown of the validation
-    // ^(\*|([0-5]?\d))                 Minute  0 - 59
-    // (\s+)(\*|([01]?\d|2[0-3]))       Hour    0 - 23
-    // (\s+)(\*|([1-9]|[12]\d|3[01]))   Day     1 - 31
-    // (\s+)(\*|([1-9]|1[0-2]))         Month   1 - 12
-    // (\s+)(\*|([0-7]))                Weekday 0 - 7
-    // $                                End of string
-    private const string ValidCrontabPattern = @"^(\*|([0-5]?\d))(\s+)(\*|([01]?\d|2[0-3]))(\s+)(\*|([1-9]|[12]\d|3[01]))(\s+)(\*|([1-9]|1[0-2]))(\s+)(\*|([0-7]))$";
+    // Breakdown of the validation regex pattern:
+    // For each time field (minute, hour, day, month, weekday):
+    // - Allows * for "any value"
+    // - Allows */n for step values where n must be any positive integer (except zero)
+    // - Allows single values within their valid ranges
+    // - Allows ranges (e.g., 8-10)
+    // - Allows lists of values and ranges (e.g., 6,8,9 or 8-10,12-14)
+    //
+    // Valid ranges for each field:
+    // - Minutes: 0-59
+    // - Hours: 0-23
+    // - Days: 1-31
+    // - Months: 1-12
+    // - Weekdays: 0-7 (0 and 7 both represent Sunday)
+    private const string ValidCrontabPattern = @"^(\*|(\*\/([1-9][0-9]*))|([0-5]?\d)(-[0-5]?\d)?)(,([0-5]?\d)(-[0-5]?\d)?)*(\s+)(\*|(\*\/([1-9][0-9]*))|([01]?\d|2[0-3])(-([01]?\d|2[0-3]))?)((,([01]?\d|2[0-3])(-([01]?\d|2[0-3]))?)*)?(\s+)(\*|(\*\/([1-9][0-9]*))|([1-9]|[12]\d|3[01])(-([1-9]|[12]\d|3[01]))?)((,([1-9]|[12]\d|3[01])(-([1-9]|[12]\d|3[01]))?)*)?(\s+)(\*|(\*\/([1-9][0-9]*))|([1-9]|1[0-2])(-([1-9]|1[0-2]))?)((,([1-9]|1[0-2])(-([1-9]|1[0-2]))?)*)?(\s+)(\*|(\*\/([1-9][0-9]*))|[0-7](-[0-7])?)((,[0-7](-[0-7])?)*)?$";
 
     private SentryMonitorScheduleType _type = SentryMonitorScheduleType.None;
     private string? _crontab;
