@@ -10,6 +10,8 @@ public class BatchProcessorTests : IDisposable
     private readonly InMemoryDiagnosticLogger _diagnosticLogger;
     private readonly BlockingCollection<Envelope> _capturedEnvelopes;
 
+    private int _expectedDiagnosticLogs;
+
     public BatchProcessorTests()
     {
         var options = new SentryOptions();
@@ -21,6 +23,8 @@ public class BatchProcessorTests : IDisposable
 
         _capturedEnvelopes = [];
         _hub.CaptureEnvelope(Arg.Do<Envelope>(arg => _capturedEnvelopes.Add(arg)));
+
+        _expectedDiagnosticLogs = 0;
     }
 
     [Theory(Skip = "May no longer be required after feedback.")]
@@ -149,9 +153,8 @@ public class BatchProcessorTests : IDisposable
             var discardedEvent = Assert.Single(clientReport.DiscardedEvents);
             Assert.Equal(new DiscardReasonWithCategory(DiscardReason.Backpressure, DataCategory.Default), discardedEvent.Key);
 
-            Assert.Equal(_diagnosticLogger.Entries.Count, discardedEvent.Value);
             droppedLogs = discardedEvent.Value;
-            _diagnosticLogger.Entries.Clear();
+            _expectedDiagnosticLogs = discardedEvent.Value;
         }
 
         var actualInvocations = tasks.Length * logsPerTask;
@@ -211,6 +214,6 @@ public class BatchProcessorTests : IDisposable
 
     public void Dispose()
     {
-        Assert.Empty(_diagnosticLogger.Entries);
+        Assert.Equal(_expectedDiagnosticLogs, _diagnosticLogger.Entries.Count);
     }
 }
