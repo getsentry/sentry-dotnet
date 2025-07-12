@@ -1,13 +1,21 @@
 # Changelog
 
-## Unreleased
+## 5.12.0-alpha.0
 
+### Features
+
+- Add experimental support for [Sentry Structured Logging](https://docs.sentry.io/product/explore/logs/) via `SentrySdk.Experimental.Logger` ([#4158](https://github.com/getsentry/sentry-dotnet/pull/4158))
+- Add experimental integrations of [Sentry Structured Logging](https://docs.sentry.io/product/explore/logs/) ([#4193](https://github.com/getsentry/sentry-dotnet/pull/4193))
+    - `Sentry.AspNetCore`, enabled via `SentryAspNetCoreOptions.Experimental.EnableLogs`
+    - `Sentry.Extensions.Logging`, enabled via `SentryLoggingOptions.Experimental.EnableLogs`
+    - `Sentry.Maui`, enabled via `SentryMauiOptions.Experimental.EnableLogs`
 ### API changes
 
 - App Hang Tracking for iOS is now disabled by default, until this functionality is more stable. If you want to use it in your applications then you'll need to enable this manually. ([#4320](https://github.com/getsentry/sentry-dotnet/pull/4320))
 
 ### Features
 
+- Add experimental support for [Sentry Structured Logging](https://docs.sentry.io/product/explore/logs/) via `SentrySdk.Experimental.Logger` ([#4158](https://github.com/getsentry/sentry-dotnet/pull/4158))
 - Added StartSpan and GetTransaction methods to the SentrySdk ([#4303](https://github.com/getsentry/sentry-dotnet/pull/4303))
 
 ### Fixes

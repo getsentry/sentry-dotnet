@@ -445,6 +445,19 @@ public sealed class Envelope : ISerializable, IDisposable
         return new Envelope(header, items);
     }
 
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    internal static Envelope FromLog(StructuredLog log)
+    {
+        var header = DefaultHeader;
+
+        var items = new[]
+        {
+            EnvelopeItem.FromLog(log),
+        };
+
+        return new Envelope(header, items);
+    }
+
     private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(
         Stream stream,
         CancellationToken cancellationToken = default)
