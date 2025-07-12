@@ -47,7 +47,8 @@ public static partial class SentrySdk
             o.DiagnosticLevel = options.DiagnosticLevel.ToJavaSentryLevel();
             o.Dist = options.Distribution;
             o.Dsn = options.Dsn;
-            o.EnableAutoSessionTracking = options.AutoSessionTracking;
+            // Hardcode to false because .NET SDK manages sessions itself
+            o.EnableAutoSessionTracking = false;
             o.Environment = options.Environment;
             o.FlushTimeoutMillis = (long)options.InitCacheFlushTimeout.TotalMilliseconds;
             o.MaxAttachmentSize = options.MaxAttachmentSize;
