@@ -17,12 +17,16 @@
 - Crontab validation when capturing checkins ([#4314](https://github.com/getsentry/sentry-dotnet/pull/4314))
 - Source context for class libraries when running on Android in Release mode ([#4294](https://github.com/getsentry/sentry-dotnet/pull/4294))
 - Native AOT: link to static `lzma` on Linux/MUSL ([#4326](https://github.com/getsentry/sentry-dotnet/pull/4326))
+- AppDomain.CurrentDomain.ProcessExit hook is now removed on shutdown ([#4323](https://github.com/getsentry/sentry-dotnet/pull/4323))
 
 ### Dependencies
 
 - Bump Native SDK from v0.9.0 to v0.9.1 ([#4309](https://github.com/getsentry/sentry-dotnet/pull/4309))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#091)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.9.0...0.9.1)
+- Bump CLI from v2.46.0 to v2.47.0 ([#4332](https://github.com/getsentry/sentry-dotnet/pull/4332))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2470)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.46.0...2.47.0)
 
 ## 5.11.2
 
