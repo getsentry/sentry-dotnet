@@ -80,11 +80,11 @@ public class SentrySpan : ISpanData, ISentryJsonSerializable
         (_data ??= new Dictionary<string, object?>())[key] = value;
 
     /// <inheritdoc />
-    [Obsolete("Use SetData")]
+    [Obsolete("Use Data")]
     public IReadOnlyDictionary<string, object?> Extra => Data;
 
     /// <inheritdoc />
-    [Obsolete("Use Data")]
+    [Obsolete("Use SetData")]
     public void SetExtra(string key, object? value) => SetData(key, value);
 
     /// <summary>
