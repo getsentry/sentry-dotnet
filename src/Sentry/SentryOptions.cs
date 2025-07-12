@@ -1,3 +1,4 @@
+using Sentry.CompilerServices;
 using Sentry.Extensibility;
 using Sentry.Http;
 using Sentry.Infrastructure;
@@ -1324,6 +1325,18 @@ public class SentryOptions
         );
 
         NetworkStatusListener = new PollingNetworkStatusListener(this);
+
+#if NET8_0_OR_GREATER
+        // If source generators are available, we can detect the user's build configuration and use this
+        // to infer whether to enable debug mode by default.
+        // See: https://develop.sentry.dev/sdk/expected-features/#auto-debug-mode
+        string? buildConfig = null;
+        BuildProperties.Values?.TryGetValue("Configuration", out buildConfig);
+        if (buildConfig == "Debug")
+        {
+            Debug = true;
+        }
+#endif
     }
 
     /// <summary>

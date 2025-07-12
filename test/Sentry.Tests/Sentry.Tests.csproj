@@ -44,4 +44,12 @@
   <ItemGroup Condition="'$(TargetFramework)' != 'net48'">
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.1" />
   </ItemGroup>
+
+  <!-- These are needed to test the AutoDebug functionality in SentryOptions on net8.0 targets and greater -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sentry.SourceGenerators\Sentry.SourceGenerators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"/>
+  </ItemGroup>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\src\Sentry\buildTransitive\Sentry.SourceGenerators.targets" />
 </Project>

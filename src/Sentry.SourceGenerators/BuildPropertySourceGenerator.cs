@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis;
 
 namespace Sentry.SourceGenerators;
 
-
 /// <summary>
 /// Generates the necessary msbuild variables
 /// </summary>
