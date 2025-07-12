@@ -12,6 +12,7 @@
 
 ### Fixes
 
+- Avoid double reporting sessions on iOS and Android apps ([#4341](https://github.com/getsentry/sentry-dotnet/pull/4341))
 - Sentry now decompresses Request bodies in ASP.NET Core when RequestDecompression middleware is enabled ([#4315](https://github.com/getsentry/sentry-dotnet/pull/4315))
 - Custom ISentryEventProcessors are now run for native iOS events ([#4318](https://github.com/getsentry/sentry-dotnet/pull/4318))
 - Crontab validation when capturing checkins ([#4314](https://github.com/getsentry/sentry-dotnet/pull/4314))
