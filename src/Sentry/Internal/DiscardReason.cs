@@ -11,6 +11,7 @@ internal readonly struct DiscardReason : IEnumeration<DiscardReason>
     public static DiscardReason QueueOverflow = new("queue_overflow");
     public static DiscardReason RateLimitBackoff = new("ratelimit_backoff");
     public static DiscardReason SampleRate = new("sample_rate");
+    public static DiscardReason Backpressure = new("backpressure");
 
     private readonly string _value;
 
