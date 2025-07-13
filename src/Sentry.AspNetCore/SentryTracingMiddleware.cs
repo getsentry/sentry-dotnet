@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Sentry.AspNetCore.Extensions;
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry.AspNetCore;
@@ -64,7 +65,6 @@ internal class SentryTracingMiddleware
                 ? traceHeaderObject as SentryTraceHeader : null;
             var baggageHeader = context.Items.TryGetValue(SentryMiddleware.BaggageHeaderItemKey, out var baggageHeaderObject)
                 ? baggageHeaderObject as BaggageHeader : null;
-
             var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext();
 
             if (traceHeader is not null && baggageHeader is null)
@@ -130,10 +130,7 @@ internal class SentryTracingMiddleware
 
         // Expose the transaction on the scope so that the user
         // can retrieve it and start child spans off of it.
-        hub.ConfigureScope(scope =>
-        {
-            scope.Transaction = transaction;
-        });
+        hub.ConfigureScope(static (scope, transaction) => scope.Transaction = transaction, transaction);
 
         Exception? exception = null;
         try
@@ -146,7 +143,11 @@ internal class SentryTracingMiddleware
         }
         finally
         {
-            if (transaction is not null)
+            if (transaction is UnsampledTransaction)
+            {
+                transaction.Finish();
+            }
+            else if (transaction is TransactionTracer tracer)
             {
                 // The Transaction name was altered during the pipeline execution,
                 // That could be done by user interference or by some Event Capture
@@ -183,7 +184,7 @@ internal class SentryTracingMiddleware
                     if (!string.IsNullOrEmpty(customTransactionName))
                     {
                         transaction.Name = $"{method} {customTransactionName}";
-                        ((TransactionTracer)transaction).NameSource = TransactionNameSource.Custom;
+                        tracer.NameSource = TransactionNameSource.Custom;
                     }
                     else
                     {
@@ -191,7 +192,7 @@ internal class SentryTracingMiddleware
                         // e.g. "GET /pets/1"
                         var path = context.Request.Path;
                         transaction.Name = $"{method} {path}";
-                        ((TransactionTracer)transaction).NameSource = TransactionNameSource.Url;
+                        tracer.NameSource = TransactionNameSource.Url;
                     }
                 }
 
@@ -200,7 +201,7 @@ internal class SentryTracingMiddleware
                     transaction.Finish(status);
                 }
                 // Status code not yet changed to 500 but an exception does exist
-                // so lets avoid passing the misleading 200 down and close only with
+                // so let's avoid passing the misleading 200 down and close only with
                 // the exception instance that will be inferred as errored.
                 else if (status == SpanStatus.Ok)
                 {

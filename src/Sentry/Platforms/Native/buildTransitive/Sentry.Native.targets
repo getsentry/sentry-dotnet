@@ -13,36 +13,47 @@
     <!-- SentryNative.IsEnabled should result in compile-time constant for trimmed applications -->
     <!-- Effectively disabling native library -->
     <RuntimeHostConfigurationOption Include="Sentry.Native.IsEnabled"
-                                    Condition="'$(SentryNative)' != 'false' and '$(SentryNative)' != 'disable'"
-                                    Value="true"
+                                    Condition="'$(SentryNative)' == 'false' or '$(SentryNative)' == 'disable'"
+                                    Value="false"
                                     Trim="true" />
   </ItemGroup>
 
+  <!-- Helpful properties copied from Sentry.props -->
+  <PropertyGroup Condition="'$(TargetFramework)' != ''">
+    <_SentryTargetFrameworkVersion>$([MSBuild]::GetTargetFrameworkVersion($(TargetFramework)))</_SentryTargetFrameworkVersion>
+    <_SentryIsNet8OrGreater>$([MSBuild]::VersionGreaterThanOrEquals($(_SentryTargetFrameworkVersion), 8.0))</_SentryIsNet8OrGreater>
+    <_SentryIsNet9OrGreater>$([MSBuild]::VersionGreaterThanOrEquals($(_SentryTargetFrameworkVersion), 9.0))</_SentryIsNet9OrGreater>
+  </PropertyGroup>
+
   <PropertyGroup>
     <!-- net8.0 or greater -->
-    <FrameworkSupportsNative Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0')) and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">true</FrameworkSupportsNative>
+    <FrameworkSupportsNative Condition="'$(_SentryIsNet8OrGreater)' == 'true' and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">true</FrameworkSupportsNative>
     <!-- Make it opt-out -->
     <FrameworkSupportsNative Condition="'$(SentryNative)' == 'false' or '$(SentryNative)' == 'disable'">false</FrameworkSupportsNative>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and '$(RuntimeIdentifier)' == 'win-x64'">
+  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and ('$(RuntimeIdentifier)' == 'win-x64' or '$(RuntimeIdentifier)' == 'win-arm64')">
     <DirectPInvoke Include="sentry-native" />
-    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\win-x64\sentry-native.lib" />
+    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\$(RuntimeIdentifier)\sentry-native.lib" />
     <NativeLibrary Include="dbghelp.lib" />
     <NativeLibrary Include="winhttp.lib" />
     <NativeLibrary Include="Gdi32.lib" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and '$(RuntimeIdentifier)' == 'linux-x64'">
+  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and ('$(RuntimeIdentifier)' == 'linux-x64' or '$(RuntimeIdentifier)' == 'linux-arm64')">
     <DirectPInvoke Include="sentry-native" />
-    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\linux-x64\libsentry-native.a" />
-    <!-- See: https://github.com/dotnet/runtime/issues/97414 -->
-    <NativeSystemLibrary Include="curl" />
+    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\$(RuntimeIdentifier)\libsentry-native.a" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and '$(RuntimeIdentifier)' == 'linux-musl-x64'">
+    <DirectPInvoke Include="sentry-native" />
+    <!-- When musl is detected, static sentry-native links to static libunwind, which depends on liblzma -->
+    <LinkerArg Include="-Wl,-Bstatic -Wl,--whole-archive -lunwind -Wl,--no-whole-archive -llzma -Wl,-Bdynamic" />
+    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\linux-musl-x64\libsentry-native.a" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and ('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64')">
     <DirectPInvoke Include="sentry-native" />
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\osx\libsentry-native.a" />
-    <NativeSystemLibrary Include="curl" />
   </ItemGroup>
 </Project>

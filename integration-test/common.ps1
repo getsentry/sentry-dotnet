@@ -85,7 +85,7 @@ BeforeAll {
         }
 
         # We need to remove the package from cache or it won't re resolved properly
-        Remove-Item -Path ~/.nuget/packages/$name/$packageVersion -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path ~/.nuget/packages/$($name.ToLower())/$packageVersion -Recurse -Force -ErrorAction SilentlyContinue
     }
 
     Remove-Item -Path "$PSScriptRoot/packages" -Recurse -Force -ErrorAction SilentlyContinue

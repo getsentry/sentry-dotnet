@@ -56,28 +56,14 @@ internal static class HttpContextExtensions
 
         try
         {
-            return SentryTraceHeader.Parse(value!);
-        }
-        catch (Exception ex)
-        {
-            options?.LogError(ex, "Invalid Sentry trace header '{0}'.", value);
+            var traceHeader = SentryTraceHeader.Parse(value!);
+            if (traceHeader?.TraceId != SentryId.Empty)
+            {
+                return traceHeader;
+            }
+
+            options?.LogWarning("Sentry trace header '{0}' has an empty trace ID.", value);
             return null;
-        }
-    }
-
-    public static W3CTraceHeader? TryGetW3CTraceHeader(this HttpContext context, SentryOptions? options)
-    {
-        var value = context.Request.Headers.GetValueOrDefault(W3CTraceHeader.HttpHeaderName);
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return null;
-        }
-
-        options?.LogDebug("Received Sentry trace header '{0}'.", value);
-
-        try
-        {
-            return W3CTraceHeader.Parse(value!);
         }
         catch (Exception ex)
         {

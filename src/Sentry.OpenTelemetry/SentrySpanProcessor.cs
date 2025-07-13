@@ -13,6 +13,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 {
     private readonly IHub _hub;
     internal readonly IEnumerable<IOpenTelemetryEnricher> _enrichers;
+    private readonly IReplaySession _replaySession;
     internal const string OpenTelemetryOrigin = "auto.otel";
 
     // ReSharper disable once MemberCanBePrivate.Global - Used by tests
@@ -38,7 +39,7 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
     {
     }
 
-    internal SentrySpanProcessor(IHub hub, IEnumerable<IOpenTelemetryEnricher>? enrichers)
+    internal SentrySpanProcessor(IHub hub, IEnumerable<IOpenTelemetryEnricher>? enrichers, IReplaySession? replaySession = null)
     {
         _hub = hub;
         _realHub = new Lazy<Hub?>(() =>
@@ -57,7 +58,8 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
                 "You should use the TracerProviderBuilderExtensions to configure Sentry with OpenTelemetry");
         }
 
-        _enrichers = enrichers ?? Enumerable.Empty<IOpenTelemetryEnricher>();
+        _enrichers = enrichers ?? [];
+        _replaySession = replaySession ?? ReplaySession.Instance;
         _options = hub.GetSentryOptions();
 
         if (_options is null)
@@ -131,12 +133,15 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             Instrumenter = Instrumenter.OpenTelemetry
         };
 
-        var span = (SpanTracer)parentSpan.StartChild(context);
-        span.Origin = OpenTelemetryOrigin;
-        span.StartTimestamp = data.StartTimeUtc;
-        // Used to filter out spans that are not recorded when finishing a transaction.
-        span.SetFused(data);
-        span.IsFiltered = () => span.GetFused<Activity>() is { IsAllDataRequested: false, Recorded: false };
+        var span = parentSpan.StartChild(context);
+        if (span is SpanTracer spanTracer)
+        {
+            spanTracer.Origin = OpenTelemetryOrigin;
+            spanTracer.StartTimestamp = data.StartTimeUtc;
+            // Used to filter out spans that are not recorded when finishing a transaction.
+            spanTracer.SetFused(data);
+            spanTracer.IsFiltered = () => spanTracer.GetFused<Activity>() is { IsAllDataRequested: false, Recorded: false };
+        }
         _map[data.SpanId] = span;
     }
 
@@ -158,17 +163,19 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         };
 
         var baggageHeader = data.Baggage.AsBaggageHeader();
-        var dynamicSamplingContext = baggageHeader.CreateDynamicSamplingContext();
-        var transaction = (TransactionTracer)_hub.StartTransaction(
+        var dynamicSamplingContext = baggageHeader.CreateDynamicSamplingContext(_replaySession);
+        var transaction = _hub.StartTransaction(
             transactionContext, new Dictionary<string, object?>(), dynamicSamplingContext
         );
-        transaction.Contexts.Trace.Origin = OpenTelemetryOrigin;
-        transaction.StartTimestamp = data.StartTimeUtc;
-        _hub.ConfigureScope(scope => scope.Transaction = transaction);
+        if (transaction is TransactionTracer tracer)
+        {
+            tracer.Contexts.Trace.Origin = OpenTelemetryOrigin;
+            tracer.StartTimestamp = data.StartTimeUtc;
+        }
+        _hub.ConfigureScope(static (scope, transaction) => scope.Transaction = transaction, transaction);
         transaction.SetFused(data);
         _map[data.SpanId] = transaction;
     }
-
 
     /// <inheritdoc />
     public override void OnEnd(Activity data)
@@ -223,10 +230,16 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
         span.Operation = operation;
         span.Description = description;
 
+        // Handle HTTP response status code specially
+        var statusCode = attributes.HttpResponseStatusCodeAttribute();
         if (span is TransactionTracer transaction)
         {
             transaction.Name = description;
             transaction.NameSource = source;
+            if (statusCode is { } responseStatusCode)
+            {
+                transaction.Contexts.Response.StatusCode = responseStatusCode;
+            }
 
             // Use the end timestamp from the activity data.
             transaction.EndTimestamp = data.StartTimeUtc + data.Duration;
@@ -234,15 +247,20 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
             // Transactions set otel attributes (and resource attributes) as context.
             transaction.Contexts["otel"] = GetOtelContext(attributes);
         }
-        else
+        else if (span is SpanTracer spanTracer)
         {
             // Use the end timestamp from the activity data.
-            ((SpanTracer)span).EndTimestamp = data.StartTimeUtc + data.Duration;
+            spanTracer.EndTimestamp = data.StartTimeUtc + data.Duration;
 
             // Spans set otel attributes in extras (passed to Sentry as "data" on the span).
             // Resource attributes do not need to be set, as they would be identical as those set on the transaction.
-            span.SetExtras(attributes);
-            span.SetExtra("otel.kind", data.Kind);
+            spanTracer.SetExtras(attributes);
+            spanTracer.SetExtra("otel.kind", data.Kind);
+            if (statusCode is { } responseStatusCode)
+            {
+                // Set this as a tag so that it's searchable in Sentry
+                span.SetTag(OtelSemanticConventions.AttributeHttpResponseStatusCode, responseStatusCode.ToString());
+            }
         }
 
         // In ASP.NET Core the middleware finishes up (and the scope gets popped) before the activity is ended.  So we

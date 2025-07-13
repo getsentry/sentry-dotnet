@@ -10,17 +10,42 @@ namespace Sentry;
 public interface ISentryScopeManager
 {
     /// <summary>
-    /// Configures the current scope.
+    /// Configures the current scope through the callback.
     /// </summary>
-    /// <param name="configureScope">The configure scope.</param>
+    /// <param name="configureScope">The configure scope callback.</param>
     public void ConfigureScope(Action<Scope> configureScope);
 
     /// <summary>
-    /// Asynchronously configure the current scope.
+    /// Configures the current scope through the callback.
     /// </summary>
-    /// <param name="configureScope">The configure scope.</param>
+    /// <param name="configureScope">The configure scope callback.</param>
+    /// <param name="arg">The argument to pass to the configure scope callback.</param>
+    public void ConfigureScope<TArg>(Action<Scope, TArg> configureScope, TArg arg);
+
+    /// <summary>
+    /// Configures the current scope through the callback asynchronously.
+    /// </summary>
+    /// <param name="configureScope">The configure scope callback.</param>
     /// <returns>A task that completes when the callback is done or a completed task if the SDK is disabled.</returns>
     public Task ConfigureScopeAsync(Func<Scope, Task> configureScope);
+
+    /// <summary>
+    /// Configures the current scope through the callback asynchronously.
+    /// </summary>
+    /// <param name="configureScope">The configure scope callback.</param>
+    /// <param name="arg">The argument to pass to the configure scope callback.</param>
+    /// <returns>A task that completes when the callback is done or a completed task if the SDK is disabled.</returns>
+    public Task ConfigureScopeAsync<TArg>(Func<Scope, TArg, Task> configureScope, TArg arg);
+
+    /// <summary>
+    /// Sets a tag on the current scope.
+    /// </summary>
+    public void SetTag(string key, string value);
+
+    /// <summary>
+    /// Removes a tag from the current scope.
+    /// </summary>
+    public void UnsetTag(string key);
 
     /// <summary>
     /// Binds the client to the current scope.

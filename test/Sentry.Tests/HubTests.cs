@@ -1,5 +1,7 @@
 using System.IO.Abstractions.TestingHelpers;
 using Sentry.Internal.Http;
+using Sentry.Protocol;
+using Sentry.Tests.Internals;
 
 namespace Sentry.Tests;
 
@@ -10,14 +12,11 @@ public partial class HubTests
     private class Fixture
     {
         public SentryOptions Options { get; }
-
         public ISentryClient Client { get; set; }
-
         public ISessionManager SessionManager { get; set; }
-
         public IInternalScopeManager ScopeManager { get; set; }
-
         public ISystemClock Clock { get; set; }
+        public IReplaySession ReplaySession { get; }
 
         public Fixture()
         {
@@ -29,9 +28,11 @@ public partial class HubTests
             };
 
             Client = Substitute.For<ISentryClient>();
+
+            ReplaySession = Substitute.For<IReplaySession>();
         }
 
-        public Hub GetSut() => new(Options, Client, SessionManager, Clock, ScopeManager);
+        public Hub GetSut() => new(Options, Client, SessionManager, Clock, ScopeManager, replaySession: ReplaySession);
     }
 
     private readonly Fixture _fixture = new();
@@ -173,7 +174,7 @@ public partial class HubTests
             {"sentry-trace_id", "75302ac48a024bde9a3b3734a82e36c8"},
             {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
             {"sentry-replay_id","bfd31b89a59d41c99d96dc2baf840ecd"}
-        }).CreateDynamicSamplingContext();
+        }).CreateDynamicSamplingContext(_fixture.ReplaySession);
 
         var transaction = hub.StartTransaction(
             transactionContext,
@@ -193,7 +194,7 @@ public partial class HubTests
     }
 
     [Fact]
-    public void CaptureException_ActiveSpanExistsOnScopeButIsSampledOut_EventIsNotLinkedToSpan()
+    public void CaptureException_ActiveSpanExistsOnScopeButIsSampledOut_EventIsLinkedToSpan()
     {
         // Arrange
         _fixture.Options.TracesSampleRate = 0.0;
@@ -209,8 +210,8 @@ public partial class HubTests
         // Assert
         _fixture.Client.Received(1).CaptureEvent(
             Arg.Is<SentryEvent>(evt =>
-                evt.Contexts.Trace.TraceId == default &&
-                evt.Contexts.Trace.SpanId == default),
+                evt.Contexts.Trace.TraceId == transaction.TraceId &&
+                evt.Contexts.Trace.SpanId == transaction.SpanId),
             Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
@@ -680,6 +681,82 @@ public partial class HubTests
         transaction.IsSampled.Should().BeTrue();
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void StartTransaction_DynamicSamplingContextWithReplayId_UsesActiveReplaySessionId(bool replaySessionIsActive)
+    {
+        // Arrange
+        var transactionContext = new TransactionContext("name", "operation");
+
+        var dummyReplaySession = Substitute.For<IReplaySession>();
+        dummyReplaySession.ActiveReplayId.Returns((SentryId?)null); // So the replay id in the baggage header is used
+        var dsc = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sampled", "true"},
+            {"sentry-sample_rate", "0.5"}, // Required in the baggage header, but ignored by sampling logic
+            {"sentry-replay_id","bfd31b89a59d41c99d96dc2baf840ecd"}
+        }).CreateDynamicSamplingContext(dummyReplaySession);
+
+        _fixture.Options.TracesSampleRate = 1.0;
+        _fixture.ReplaySession.ActiveReplayId.Returns(replaySessionIsActive ? SentryId.Create() : null); // This one gets used by the SUT
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>(), dsc);
+
+        // Assert
+        var transactionTracer = ((TransactionTracer)transaction);
+        transactionTracer.IsSampled.Should().Be(true);
+        transactionTracer.DynamicSamplingContext.Should().NotBeNull();
+        foreach (var dscItem in dsc!.Items)
+        {
+            if (dscItem.Key == "replay_id")
+            {
+                transactionTracer.DynamicSamplingContext!.Items["replay_id"].Should().Be(replaySessionIsActive
+                    // We overwrite the replay_id when we have an active replay session
+                    ? _fixture.ReplaySession.ActiveReplayId.ToString()
+                    // Otherwise we propagate whatever was in the baggage header
+                    : dscItem.Value);
+            }
+            else
+            {
+                transactionTracer.DynamicSamplingContext!.Items.Should()
+                    .Contain(kvp => kvp.Key == dscItem.Key && kvp.Value == dscItem.Value);
+            }
+        }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void StartTransaction_NoDynamicSamplingContext_UsesActiveReplaySessionId(bool replaySessionIsActive)
+    {
+        // Arrange
+        var transactionContext = new TransactionContext("name", "operation");
+        _fixture.ReplaySession.ActiveReplayId.Returns(replaySessionIsActive ? SentryId.Create() : null);
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>());
+
+        // Assert
+        var transactionTracer = ((TransactionTracer)transaction);
+        transactionTracer.SampleRand.Should().NotBeNull();
+        transactionTracer.DynamicSamplingContext.Should().NotBeNull();
+        if (replaySessionIsActive)
+        {
+            // We add the replay_id when we have an active replay session
+            transactionTracer.DynamicSamplingContext!.Items["replay_id"].Should().Be(_fixture.ReplaySession.ActiveReplayId.ToString());
+        }
+        else
+        {
+            transactionTracer.DynamicSamplingContext!.Items.Should().NotContainKey("replay_id");
+        }
+    }
+
     [Fact]
     public void StartTransaction_NoDynamicSamplingContext_GeneratesSampleRand()
     {
@@ -705,12 +782,11 @@ public partial class HubTests
     {
         // Arrange
         var transactionContext = new TransactionContext("name", "operation");
-        var customContext = new Dictionary<string, object>();
 
         var hub = _fixture.GetSut();
 
         // Act
-        var transaction = hub.StartTransaction(transactionContext, customContext, DynamicSamplingContext.Empty);
+        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>(), DynamicSamplingContext.Empty);
 
         // Assert
         var transactionTracer = ((TransactionTracer)transaction);
@@ -725,7 +801,7 @@ public partial class HubTests
     {
         // Arrange
         var transactionContext = new TransactionContext("name", "operation");
-        var customContext = new Dictionary<string, object>();
+        var dummyReplaySession = Substitute.For<IReplaySession>();
         var dsc = BaggageHeader.Create(new List<KeyValuePair<string, string>>
         {
             {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
@@ -733,13 +809,13 @@ public partial class HubTests
             {"sentry-sampled", "true"},
             {"sentry-sample_rate", "0.5"}, // Required in the baggage header, but ignored by sampling logic
             {"sentry-sample_rand", "0.1234"}
-        }).CreateDynamicSamplingContext();
+        }).CreateDynamicSamplingContext(dummyReplaySession);
 
         _fixture.Options.TracesSampleRate = 0.4;
         var hub = _fixture.GetSut();
 
         // Act
-        var transaction = hub.StartTransaction(transactionContext, customContext, dsc);
+        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>(), dsc);
 
         // Assert
         var transactionTracer = ((TransactionTracer)transaction);
@@ -764,7 +840,7 @@ public partial class HubTests
             {"sentry-sampled", "true"},
             {"sentry-sample_rate", "0.5"},
             {"sentry-sample_rand", "0.1234"}
-        }).CreateDynamicSamplingContext();
+        }).CreateDynamicSamplingContext(_fixture.ReplaySession);
 
         _fixture.Options.TracesSampler = _ => sampleRate;
         var hub = _fixture.GetSut();
@@ -773,11 +849,23 @@ public partial class HubTests
         var transaction = hub.StartTransaction(transactionContext, customContext, dsc);
 
         // Assert
-        var transactionTracer = ((TransactionTracer)transaction);
-        transactionTracer.IsSampled.Should().Be(expectedIsSampled);
-        transactionTracer.SampleRate.Should().Be(sampleRate);
-        transactionTracer.SampleRand.Should().Be(0.1234);
-        transactionTracer.DynamicSamplingContext.Should().Be(dsc);
+        if (expectedIsSampled)
+        {
+            transaction.Should().BeOfType<TransactionTracer>();
+            var transactionTracer = ((TransactionTracer)transaction);
+            transactionTracer.IsSampled.Should().Be(true);
+            transactionTracer.SampleRate.Should().Be(sampleRate);
+            transactionTracer.SampleRand.Should().Be(0.1234);
+            transactionTracer.DynamicSamplingContext.Should().Be(dsc);
+        }
+        else
+        {
+            transaction.Should().BeOfType<UnsampledTransaction>();
+            var unsampledTransaction = ((UnsampledTransaction)transaction);
+            unsampledTransaction.SampleRate.Should().Be(sampleRate);
+            unsampledTransaction.SampleRand.Should().Be(0.1234);
+            unsampledTransaction.DynamicSamplingContext.Should().Be(dsc);
+        }
     }
 
     [Theory]
@@ -788,13 +876,14 @@ public partial class HubTests
         // Arrange
         var transactionContext = new TransactionContext("name", "operation");
         var customContext = new Dictionary<string, object>();
+        var dummyReplaySession = Substitute.For<IReplaySession>();
         var dsc = BaggageHeader.Create(new List<KeyValuePair<string, string>>
         {
             {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
             {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
             {"sentry-sample_rate", "0.5"}, // Static sampling ignores this and uses options.TracesSampleRate instead
             {"sentry-sample_rand", "0.1234"}
-        }).CreateDynamicSamplingContext();
+        }).CreateDynamicSamplingContext(dummyReplaySession);
 
         _fixture.Options.TracesSampleRate = sampleRate;
         var hub = _fixture.GetSut();
@@ -803,11 +892,23 @@ public partial class HubTests
         var transaction = hub.StartTransaction(transactionContext, customContext, dsc);
 
         // Assert
-        var transactionTracer = ((TransactionTracer)transaction);
-        transactionTracer.IsSampled.Should().Be(expectedIsSampled);
-        transactionTracer.SampleRate.Should().Be(sampleRate);
-        transactionTracer.SampleRand.Should().Be(0.1234);
-        transactionTracer.DynamicSamplingContext.Should().Be(dsc);
+        if (expectedIsSampled)
+        {
+            transaction.Should().BeOfType<TransactionTracer>();
+            var transactionTracer = ((TransactionTracer)transaction);
+            transactionTracer.IsSampled.Should().Be(expectedIsSampled);
+            transactionTracer.SampleRate.Should().Be(sampleRate);
+            transactionTracer.SampleRand.Should().Be(0.1234);
+            transactionTracer.DynamicSamplingContext.Should().Be(dsc);
+        }
+        else
+        {
+            transaction.Should().BeOfType<UnsampledTransaction>();
+            var unsampledTransaction = ((UnsampledTransaction)transaction);
+            unsampledTransaction.SampleRate.Should().Be(sampleRate);
+            unsampledTransaction.SampleRand.Should().Be(0.1234);
+            unsampledTransaction.DynamicSamplingContext.Should().Be(dsc);
+        }
     }
 
     [Fact]
@@ -983,26 +1084,25 @@ public partial class HubTests
         transaction.IsSampled.Should().BeFalse();
     }
 
-    [Fact]
-    public void GetTraceHeader_ReturnsHeaderForActiveSpan()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void GetTraceHeader_ReturnsHeaderForActiveSpan(bool isSampled)
     {
         // Arrange
+        _fixture.Options.TracesSampleRate = isSampled ? 1 : 0;
         var hub = _fixture.GetSut();
         var transaction = hub.StartTransaction("foo", "bar");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
 
         // Act
-        hub.ConfigureScope(scope =>
-        {
-            scope.Transaction = transaction;
+        var header = hub.GetTraceHeader();
 
-            var header = hub.GetTraceHeader();
-
-            // Assert
-            header.Should().NotBeNull();
-            header.SpanId.Should().Be(transaction.SpanId);
-            header.TraceId.Should().Be(transaction.TraceId);
-            header.IsSampled.Should().Be(transaction.IsSampled);
-        });
+        // Assert
+        header.Should().NotBeNull();
+        header.SpanId.Should().Be(transaction.SpanId);
+        header.TraceId.Should().Be(transaction.TraceId);
+        header.IsSampled.Should().Be(transaction.IsSampled);
     }
 
     [Fact]
@@ -1025,24 +1125,37 @@ public partial class HubTests
         header.IsSampled.Should().BeNull();
     }
 
-    [Fact]
-    public void GetBaggage_SpanActive_ReturnsBaggageFromSpan()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void GetBaggage_SpanActive_ReturnsBaggageFromSpan(bool isSampled)
     {
         // Arrange
+        _fixture.Options.TracesSampleRate = isSampled ? 1 : 0;
         var hub = _fixture.GetSut();
-        var transaction = hub.StartTransaction("test-name", "_");
+
+        var expectedBaggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "0.0"}
+        });
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.ActiveReplayId.Returns((SentryId?)null);
+        var dsc = expectedBaggage.CreateDynamicSamplingContext(replaySession);
+
+        var transaction = hub.StartTransaction(new TransactionContext("name", "op"),
+            new Dictionary<string, object>(), dsc);
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
 
         // Act
-        hub.ConfigureScope(scope =>
-        {
-            scope.Transaction = transaction;
+        var baggage = hub.GetBaggage();
 
-            var baggage = hub.GetBaggage();
-
-            // Assert
-            baggage.Should().NotBeNull();
-            Assert.Contains("test-name", baggage!.ToString());
-        });
+        // Assert
+        baggage.Should().NotBeNull();
+        Assert.Equal("43365712692146d08ee11a729dfbcaca", Assert.Contains("trace_id", dsc.Items));
+        Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
+        Assert.Equal("0.0", Assert.Contains("sample_rate", dsc.Items));
     }
 
     [Fact]
@@ -1599,6 +1712,27 @@ public partial class HubTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
+    public void CaptureFeedback_ConfigureScope_ScopeApplied(bool enabled)
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        if (!enabled)
+        {
+            hub.Dispose();
+        }
+
+        var feedback = new SentryFeedback("Test feedback");
+
+        // Act
+        hub.CaptureFeedback(feedback, s => s.SetTag("foo", "bar"));
+
+        // Assert
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Is<Scope>(s => s.Tags["foo"] == "bar"), Arg.Any<SentryHint>());
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
     public void CaptureUserFeedback_HubEnabled(bool enabled)
     {
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -1609,7 +1743,7 @@ public partial class HubTests
             hub.Dispose();
         }
 
-        var feedback = new UserFeedback(SentryId.Create(), "foo", "bar", "baz");
+        var feedback = new UserFeedback(SentryId.Create(), "foo", "bar@example.com", "baz");
 
         // Act
         hub.CaptureUserFeedback(feedback);
@@ -1689,7 +1823,16 @@ public partial class HubTests
         transaction.Finish();
 
         // Assert
-        _fixture.Client.Received().CaptureTransaction(Arg.Is<SentryTransaction>(t => t.IsSampled == enabled), Arg.Any<Scope>(), Arg.Any<SentryHint>());
+        if (enabled)
+        {
+            _fixture.Client.Received().CaptureTransaction(Arg.Is<SentryTransaction>(t => t.IsSampled == enabled),
+                Arg.Any<Scope>(), Arg.Any<SentryHint>());
+        }
+        else
+        {
+            transaction.Should().Be(NoOpTransaction.Instance);
+            _fixture.Client.DidNotReceive().CaptureTransaction(Arg.Any<SentryTransaction>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
+        }
     }
 
     [Fact]
@@ -1732,21 +1875,213 @@ public partial class HubTests
             options.CacheDirectoryPath = cacheDirectory.Path;
         }
 
+        var hub = new Hub(options);
+        var id = hub.CaptureEvent(new SentryEvent());
+
         // Act
         // Disposing the hub should flush the client and send the envelope.
         // If caching is enabled, it should flush the cache as well.
         // Either way, the envelope should be sent.
-        using (var hub = new Hub(options))
-        {
-            hub.CaptureEvent(new SentryEvent());
-        }
+        hub.Dispose();
 
         // Assert
         await transport.Received(1)
-            .SendEnvelopeAsync(Arg.Any<Envelope>(), Arg.Any<CancellationToken>());
+            .SendEnvelopeAsync(Arg.Is<Envelope>(env => (string)env.Header["event_id"] == id.ToString()),
+                Arg.Any<CancellationToken>());
     }
 
     private static Scope GetCurrentScope(Hub hub) => hub.ScopeManager.GetCurrent().Key;
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("test@example.com")]
+    [InlineData("user.name@domain.com")]
+    [InlineData("user+tag@example.com")]
+    public void CaptureFeedback_ValidEmail_FeedbackRegistered(string email)
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        var feedback = new SentryFeedback("Test feedback", email);
+
+        // Act
+        hub.CaptureFeedback(feedback);
+
+        // Assert
+        _fixture.Client.Received(1).CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
+    }
+
+    [Theory]
+    [InlineData("invalid-email")]
+    [InlineData("missing@domain")]
+    [InlineData("@missing-local.com")]
+    [InlineData("spaces in@email.com")]
+    public void CaptureFeedback_InvalidEmail_FeedbackDropped(string email)
+    {
+        // Arrange
+        _fixture.Options.Debug = true;
+        _fixture.Options.DiagnosticLogger = Substitute.For<IDiagnosticLogger>();
+        _fixture.Options.DiagnosticLogger!.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        var hub = _fixture.GetSut();
+        var feedback = new SentryFeedback("Test feedback", email);
+
+        // Act
+        hub.CaptureFeedback(feedback);
+
+        // Assert
+        _fixture.Options.DiagnosticLogger.Received(1).Log(
+            SentryLevel.Warning,
+            Arg.Is<string>(s => s.Contains("invalid email format")),
+            null,
+            Arg.Any<object[]>());
+        _fixture.Client.Received(1).CaptureFeedback(Arg.Is<SentryFeedback>(f => f.ContactEmail.IsNull()),
+            Arg.Any<Scope>(), Arg.Any<SentryHint>());
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("test@example.com")]
+    [InlineData("user.name@domain.com")]
+    [InlineData("user+tag@example.com")]
+    public void CaptureUserFeedback_ValidEmail_FeedbackRegistered(string email)
+    {
+#pragma warning disable CS0618 // Type or member is obsolete
+        // Arrange
+        var hub = _fixture.GetSut();
+        var feedback = new UserFeedback(SentryId.Create(), "Test name", email, "Test comment");
+
+        // Act
+        hub.CaptureUserFeedback(feedback);
+
+        // Assert
+        _fixture.Client.Received(1).CaptureUserFeedback(Arg.Any<UserFeedback>());
+#pragma warning restore CS0618 // Type or member is obsolete
+    }
+
+    [Theory]
+    [InlineData("invalid-email")]
+    [InlineData("missing@domain")]
+    [InlineData("@missing-local.com")]
+    [InlineData("spaces in@email.com")]
+    public void CaptureUserFeedback_InvalidEmail_FeedbackDropped(string email)
+    {
+#pragma warning disable CS0618 // Type or member is obsolete
+        // Arrange
+        _fixture.Options.Debug = true;
+        _fixture.Options.DiagnosticLogger = Substitute.For<IDiagnosticLogger>();
+        _fixture.Options.DiagnosticLogger!.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        var hub = _fixture.GetSut();
+        var feedback = new UserFeedback(SentryId.Create(), "Test name", email, "Test comment");
+
+        // Act
+        hub.CaptureUserFeedback(feedback);
+
+        // Assert
+        _fixture.Options.DiagnosticLogger.Received(1).Log(
+            SentryLevel.Warning,
+            Arg.Is<string>(s => s.Contains("invalid email format")),
+            null,
+            Arg.Any<object[]>());
+        _fixture.Client.Received(1).CaptureUserFeedback(Arg.Is<UserFeedback>(f => f.Email.IsNull()));
+#pragma warning restore CS0618 // Type or member is obsolete
+    }
+
+    private class TestDisposableIntegration : ISdkIntegration, IDisposable
+    {
+        public int Registered { get; private set; }
+        public int Disposed { get; private set; }
+
+        public void Register(IHub hub, SentryOptions options)
+        {
+            Registered++;
+        }
+
+        protected virtual void Cleanup()
+        {
+            Disposed++;
+        }
+
+        public void Dispose()
+        {
+            Cleanup();
+        }
+    }
+
+    private class TestFlakyDisposableIntegration : TestDisposableIntegration
+    {
+        protected override void Cleanup()
+        {
+            throw new InvalidOperationException("Cleanup failed");
+        }
+    }
+
+    [Fact]
+    public void Dispose_IntegrationsWithCleanup_CleanupCalled()
+    {
+        // Arrange
+        var integration1 = new TestDisposableIntegration();
+        var integration2 = Substitute.For<ISdkIntegration>();
+        var integration3 = new TestDisposableIntegration();
+        _fixture.Options.AddIntegration(integration1);
+        _fixture.Options.AddIntegration(integration2);
+        _fixture.Options.AddIntegration(integration3);
+        var hub = _fixture.GetSut();
+
+        // Act
+        hub.Dispose();
+
+        // Assert
+        integration1.Disposed.Should().Be(1);
+        integration3.Disposed.Should().Be(1);
+    }
+
+    [Fact]
+    public void Dispose_CleanupThrowsException_ExceptionHandledAndLogged()
+    {
+        // Arrange
+        var integration1 = new TestDisposableIntegration();
+        var integration2 = new TestFlakyDisposableIntegration();
+        var integration3 = new TestDisposableIntegration();
+        _fixture.Options.AddIntegration(integration1);
+        _fixture.Options.AddIntegration(integration2);
+        _fixture.Options.AddIntegration(integration3);
+        _fixture.Options.Debug = true;
+        _fixture.Options.DiagnosticLogger = Substitute.For<IDiagnosticLogger>();
+        _fixture.Options.DiagnosticLogger!.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+        var hub = _fixture.GetSut();
+
+        // Act
+        hub.Dispose();
+
+        // Assert
+        integration1.Disposed.Should().Be(1);
+        integration2.Disposed.Should().Be(0);
+        integration3.Disposed.Should().Be(1);
+        _fixture.Options.DiagnosticLogger.Received(1).Log(
+            SentryLevel.Error,
+            Arg.Is<string>(s => s.Contains("Failed to dispose integration")),
+            Arg.Any<InvalidOperationException>(),
+            Arg.Any<object[]>());
+    }
+
+    [Fact]
+    public void Dispose_CalledMultipleTimes_CleanupCalledOnlyOnce()
+    {
+        // Arrange
+        var integration = new TestDisposableIntegration();
+        _fixture.Options.AddIntegration(integration);
+        var hub = _fixture.GetSut();
+
+        // Act
+        hub.Dispose();
+        hub.Dispose();
+
+        // Assert
+        integration.Disposed.Should().Be(1);
+    }
 }
 
 #if NET6_0_OR_GREATER

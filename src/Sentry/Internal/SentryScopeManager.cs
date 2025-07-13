@@ -38,10 +38,34 @@ internal sealed class SentryScopeManager : IInternalScopeManager
         configureScope?.Invoke(scope);
     }
 
+    public void ConfigureScope<TArg>(Action<Scope, TArg>? configureScope, TArg arg)
+    {
+        var (scope, _) = GetCurrent();
+        configureScope?.Invoke(scope, arg);
+    }
+
     public Task ConfigureScopeAsync(Func<Scope, Task>? configureScope)
     {
         var (scope, _) = GetCurrent();
         return configureScope?.Invoke(scope) ?? Task.CompletedTask;
+    }
+
+    public Task ConfigureScopeAsync<TArg>(Func<Scope, TArg, Task>? configureScope, TArg arg)
+    {
+        var (scope, _) = GetCurrent();
+        return configureScope?.Invoke(scope, arg) ?? Task.CompletedTask;
+    }
+
+    public void SetTag(string key, string value)
+    {
+        var (scope, _) = GetCurrent();
+        scope.SetTag(key, value);
+    }
+
+    public void UnsetTag(string key)
+    {
+        var (scope, _) = GetCurrent();
+        scope.UnsetTag(key);
     }
 
     public IDisposable PushScope() => PushScope<object>(null);

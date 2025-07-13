@@ -82,9 +82,12 @@ public class SettingLocatorTests
         Assert.Same(expected, actual);
     }
 
-    [Fact]
+    [SkippableFact]
     public void GetDsn_WithEmptyString_DoesNotThrow()
     {
+#if SENTRY_DSN_DEFINED_IN_ENV
+        Skip.If(true, "This test only works when the DSN is not configured as an environment variable.");
+#endif
         var options = new SentryOptions { Dsn = DisableSdkDsnValue };
 
         var dsn = options.SettingLocator.GetDsn();
@@ -163,9 +166,12 @@ public class SettingLocatorTests
         Assert.Equal(validDsn1, options.Dsn);
     }
 
-    [Fact]
+    [SkippableFact]
     public void GetDsn_WithNoValueAnywhere_ThrowsException()
     {
+#if SENTRY_DSN_DEFINED_IN_ENV
+        Skip.If(true, "This test only works when the DSN is not configured as an environment variable.");
+#endif
         var options = new SentryOptions();
 
         Assert.Throws<ArgumentNullException>(() => options.SettingLocator.GetDsn());

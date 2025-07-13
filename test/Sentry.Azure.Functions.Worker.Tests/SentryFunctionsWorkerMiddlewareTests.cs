@@ -65,6 +65,7 @@ public class SentryFunctionsWorkerMiddlewareTests
     [Fact]
     public async Task Transaction_PropertiesAreSet()
     {
+        // Arrange
         var functionContext = Substitute.For<FunctionContext>();
         var functionDefinition = Substitute.For<FunctionDefinition>();
         functionContext.FunctionDefinition.Returns(functionDefinition);
@@ -72,10 +73,11 @@ public class SentryFunctionsWorkerMiddlewareTests
 
         var sut = _fixture.GetSut();
 
+        // Act
         await sut.Invoke(functionContext, context => HttpFunction(null, context));
 
+        // Assert
         var transaction = _fixture.Transaction;
-
         transaction.Should().NotBeNull();
         transaction.Name.Should().Be(functionDefinition.Name);
         transaction.Operation.Should().Be("function");

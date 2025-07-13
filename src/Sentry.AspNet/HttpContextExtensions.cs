@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Protocol;
 
 namespace Sentry.AspNet;
@@ -25,27 +26,6 @@ public static class HttpContextExtensions
         try
         {
             return SentryTraceHeader.Parse(value);
-        }
-        catch (Exception ex)
-        {
-            options?.LogError(ex, "Invalid Sentry trace header '{0}'.", value);
-            return null;
-        }
-    }
-
-    private static W3CTraceHeader? TryGetW3CTraceHeader(HttpContext context, SentryOptions? options)
-    {
-        var value = context.Request.Headers.Get(W3CTraceHeader.HttpHeaderName);
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return null;
-        }
-
-        options?.LogDebug("Received Sentry trace header '{0}'.", value);
-
-        try
-        {
-            return W3CTraceHeader.Parse(value);
         }
         catch (Exception ex)
         {
@@ -85,10 +65,7 @@ public static class HttpContextExtensions
     {
         var options = SentrySdk.CurrentOptions;
 
-        // If both sentry-trace and traceparent headers are present, sentry-trace takes precedence.
-        // See: https://github.com/getsentry/team-sdks/issues/41
         var traceHeader = TryGetSentryTraceHeader(httpContext, options);
-        traceHeader ??= TryGetW3CTraceHeader(httpContext, options)?.SentryTraceHeader;
         var baggageHeader = TryGetBaggageHeader(httpContext, options);
 
         var method = httpContext.Request.HttpMethod;
@@ -125,7 +102,7 @@ public static class HttpContextExtensions
             ["__HttpContext"] = httpContext,
         };
 
-        // Set the Dynamic Sampling Context from the baggage header, if it exists.
+        // Set the Dynamic Sampling Context from the baggage header, if it exists
         var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext();
 
         if (traceHeader is not null && baggageHeader is null)

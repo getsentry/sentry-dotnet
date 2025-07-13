@@ -1,5 +1,6 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Integrations;
 using Sentry.Protocol.Envelopes;
 using Sentry.Protocol.Metrics;
 
@@ -13,6 +14,8 @@ internal class Hub : IHub, IDisposable
     private readonly ISessionManager _sessionManager;
     private readonly SentryOptions _options;
     private readonly RandomValuesFactory _randomValuesFactory;
+    private readonly IReplaySession _replaySession;
+    private readonly List<IDisposable> _integrationsToCleanup = new();
 
 #if MEMORY_DUMP_SUPPORTED
     private readonly MemoryMonitor? _memoryMonitor;
@@ -39,7 +42,8 @@ internal class Hub : IHub, IDisposable
         ISessionManager? sessionManager = null,
         ISystemClock? clock = null,
         IInternalScopeManager? scopeManager = null,
-        RandomValuesFactory? randomValuesFactory = null)
+        RandomValuesFactory? randomValuesFactory = null,
+        IReplaySession? replaySession = null)
     {
         if (string.IsNullOrWhiteSpace(options.Dsn))
         {
@@ -55,7 +59,7 @@ internal class Hub : IHub, IDisposable
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
         _clock = clock ?? SystemClock.Clock;
         client ??= new SentryClient(options, randomValuesFactory: _randomValuesFactory, sessionManager: _sessionManager);
-
+        _replaySession = replaySession ?? ReplaySession.Instance;
         ScopeManager = scopeManager ?? new SentryScopeManager(options, client);
 
         if (!options.IsGlobalModeEnabled)
@@ -82,6 +86,10 @@ internal class Hub : IHub, IDisposable
         {
             options.LogDebug("Registering integration: '{0}'.", integration.GetType().Name);
             integration.Register(this, options);
+            if (integration is IDisposable disposableIntegration)
+            {
+                _integrationsToCleanup.Add(disposableIntegration);
+            }
         }
     }
 
@@ -97,6 +105,18 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    public void ConfigureScope<TArg>(Action<Scope, TArg> configureScope, TArg arg)
+    {
+        try
+        {
+            ScopeManager.ConfigureScope(configureScope, arg);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to ConfigureScope<TArg>");
+        }
+    }
+
     public async Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
     {
         try
@@ -108,6 +128,22 @@ internal class Hub : IHub, IDisposable
             _options.LogError(e, "Failure to ConfigureScopeAsync");
         }
     }
+
+    public async Task ConfigureScopeAsync<TArg>(Func<Scope, TArg, Task> configureScope, TArg arg)
+    {
+        try
+        {
+            await ScopeManager.ConfigureScopeAsync(configureScope, arg).ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to ConfigureScopeAsync<TArg>");
+        }
+    }
+
+    public void SetTag(string key, string value) => ScopeManager.SetTag(key, value);
+
+    public void UnsetTag(string key) => ScopeManager.UnsetTag(key);
 
     public IDisposable PushScope() => ScopeManager.PushScope();
 
@@ -127,61 +163,72 @@ internal class Hub : IHub, IDisposable
         IReadOnlyDictionary<string, object?> customSamplingContext,
         DynamicSamplingContext? dynamicSamplingContext)
     {
-        var transaction = new TransactionTracer(this, context)
-        {
-            SampleRand = dynamicSamplingContext?.Items.TryGetValue("sample_rand", out var sampleRand) ?? false
-                ? double.Parse(sampleRand, NumberStyles.Float, CultureInfo.InvariantCulture)
-                : SampleRandHelper.GenerateSampleRand(context.TraceId.ToString())
-        };
-
         // If the hub is disabled, we will always sample out.  In other words, starting a transaction
         // after disposing the hub will result in that transaction not being sent to Sentry.
-        // Additionally, we will always sample out if tracing is explicitly disabled.
-        // Do not invoke the TracesSampler, evaluate the TracesSampleRate, and override any sampling decision
-        // that may have been already set (i.e.: from a sentry-trace header).
         if (!IsEnabled)
         {
-            transaction.IsSampled = false;
-            transaction.SampleRate = 0.0;
+            return NoOpTransaction.Instance;
         }
-        else
+
+        bool? isSampled = null;
+        double? sampleRate = null;
+        var sampleRand = dynamicSamplingContext?.Items.TryGetValue("sample_rand", out var dscsampleRand) ?? false
+            ? double.Parse(dscsampleRand, NumberStyles.Float, CultureInfo.InvariantCulture)
+            : SampleRandHelper.GenerateSampleRand(context.TraceId.ToString());
+
+        // TracesSampler runs regardless of whether a decision has already been made, as it can be used to override it.
+        if (_options.TracesSampler is { } tracesSampler)
         {
-            // Except when tracing is disabled, TracesSampler runs regardless of whether a decision
-            // has already been made, as it can be used to override it.
-            if (_options.TracesSampler is { } tracesSampler)
-            {
-                var samplingContext = new TransactionSamplingContext(
-                    context,
-                    customSamplingContext);
+            var samplingContext = new TransactionSamplingContext(
+                context,
+                customSamplingContext);
 
-                if (tracesSampler(samplingContext) is { } sampleRate)
-                {
-                    transaction.IsSampled = SampleRandHelper.IsSampled(transaction.SampleRand.Value, sampleRate);
-                    transaction.SampleRate = sampleRate;
-                }
-            }
-
-            // Random sampling runs only if the sampling decision hasn't been made already.
-            if (transaction.IsSampled == null)
+            if (tracesSampler(samplingContext) is { } samplerSampleRate)
             {
-                var sampleRate = _options.TracesSampleRate ?? 0.0;
-                transaction.IsSampled = SampleRandHelper.IsSampled(transaction.SampleRand.Value, sampleRate);
-                transaction.SampleRate = sampleRate;
-            }
-
-            if (transaction.IsSampled is true &&
-                _options.TransactionProfilerFactory is { } profilerFactory &&
-                _randomValuesFactory.NextBool(_options.ProfilesSampleRate ?? 0.0))
-            {
-                // TODO cancellation token based on Hub being closed?
-                transaction.TransactionProfiler = profilerFactory.Start(transaction, CancellationToken.None);
+                // The TracesSampler trumps all other sampling decisions (even the trace header)
+                sampleRate = samplerSampleRate;
+                isSampled = SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
             }
         }
 
-        // Use the provided DSC, or create one based on this transaction.
-        // DSC creation must be done AFTER the sampling decision has been made.
-        transaction.DynamicSamplingContext =
-            dynamicSamplingContext ?? transaction.CreateDynamicSamplingContext(_options);
+        // If the sampling decision isn't made by a trace sampler we check the trace header first (from the context) or
+        // finally fallback to Random sampling if the decision has been made by no other means
+        sampleRate ??= _options.TracesSampleRate ?? 0.0;
+        isSampled ??= context.IsSampled ?? SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
+
+        // Make sure there is a replayId (if available) on the provided DSC (if any).
+        dynamicSamplingContext = dynamicSamplingContext?.WithReplayId(_replaySession);
+
+        if (isSampled is false)
+        {
+            var unsampledTransaction = new UnsampledTransaction(this, context)
+            {
+                SampleRate = sampleRate,
+                SampleRand = sampleRand,
+                DynamicSamplingContext = dynamicSamplingContext // Default to the provided DSC
+            };
+            // If no DSC was provided, create one based on this transaction.
+            // Must be done AFTER the sampling decision has been made (the DSC propagates sampling decisions).
+            unsampledTransaction.DynamicSamplingContext ??= unsampledTransaction.CreateDynamicSamplingContext(_options, _replaySession);
+            return unsampledTransaction;
+        }
+
+        var transaction = new TransactionTracer(this, context)
+        {
+            SampleRate = sampleRate,
+            SampleRand = sampleRand,
+            DynamicSamplingContext = dynamicSamplingContext // Default to the provided DSC
+        };
+        // If no DSC was provided, create one based on this transaction.
+        // Must be done AFTER the sampling decision has been made (the DSC propagates sampling decisions).
+        transaction.DynamicSamplingContext ??= transaction.CreateDynamicSamplingContext(_options, _replaySession);
+
+        if (_options.TransactionProfilerFactory is { } profilerFactory &&
+            _randomValuesFactory.NextBool(_options.ProfilesSampleRate ?? 0.0))
+        {
+            // TODO cancellation token based on Hub being closed?
+            transaction.TransactionProfiler = profilerFactory.Start(transaction, CancellationToken.None);
+        }
 
         // A sampled out transaction still appears fully functional to the user
         // but will be dropped by the client and won't reach Sentry's servers.
@@ -218,13 +265,13 @@ internal class Hub : IHub, IDisposable
     public BaggageHeader GetBaggage()
     {
         var span = GetSpan();
-        if (span?.GetTransaction() is TransactionTracer { DynamicSamplingContext: { IsEmpty: false } dsc })
+        if (span?.GetTransaction().GetDynamicSamplingContext() is { IsEmpty: false } dsc)
         {
             return dsc.ToBaggageHeader();
         }
 
         var propagationContext = CurrentScope.PropagationContext;
-        return propagationContext.GetOrCreateDynamicSamplingContext(_options).ToBaggageHeader();
+        return propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession).ToBaggageHeader();
     }
 
     public TransactionContext ContinueTrace(
@@ -254,8 +301,8 @@ internal class Hub : IHub, IDisposable
         string? name = null,
         string? operation = null)
     {
-        var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader);
-        ConfigureScope(scope => scope.SetPropagationContext(propagationContext));
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(_options.DiagnosticLogger, traceHeader, baggageHeader, _replaySession);
+        ConfigureScope(static (scope, propagationContext) => scope.SetPropagationContext(propagationContext), propagationContext);
 
         return new TransactionContext(
             name: name ?? string.Empty,
@@ -371,9 +418,9 @@ internal class Hub : IHub, IDisposable
         evt.Contexts.Trace.TraceId = span.TraceId;
         evt.Contexts.Trace.ParentSpanId = span.ParentSpanId;
 
-        if (span.GetTransaction() is TransactionTracer transactionTracer)
+        if (span.GetTransaction().GetDynamicSamplingContext() is { } dsc)
         {
-            evt.DynamicSamplingContext = transactionTracer.DynamicSamplingContext;
+            evt.DynamicSamplingContext = dsc;
         }
     }
 
@@ -382,7 +429,7 @@ internal class Hub : IHub, IDisposable
         evt.Contexts.Trace.TraceId = propagationContext.TraceId;
         evt.Contexts.Trace.SpanId = propagationContext.SpanId;
         evt.Contexts.Trace.ParentSpanId = propagationContext.ParentSpanId;
-        evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options);
+        evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession);
     }
 
     public bool CaptureEnvelope(Envelope envelope) => CurrentClient.CaptureEnvelope(envelope);
@@ -473,10 +520,7 @@ internal class Hub : IHub, IDisposable
             var span = GetLinkedSpan(evt) ?? scope.Span;
             if (span is not null)
             {
-                if (span.IsSampled is not false)
-                {
-                    ApplyTraceContextToEvent(evt, span);
-                }
+                ApplyTraceContextToEvent(evt, span);
             }
             else
             {
@@ -506,6 +550,26 @@ internal class Hub : IHub, IDisposable
         }
     }
 
+    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+    {
+        if (!IsEnabled)
+        {
+            return;
+        }
+
+        try
+        {
+            var clonedScope = CurrentScope.Clone();
+            configureScope(clonedScope);
+
+            CaptureFeedback(feedback, clonedScope, hint);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to capture feedback");
+        }
+    }
+
     public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
     {
         if (!IsEnabled)
@@ -513,8 +577,21 @@ internal class Hub : IHub, IDisposable
             return;
         }
 
-        scope ??= CurrentScope;
-        CurrentClient.CaptureFeedback(feedback, scope, hint);
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(feedback.ContactEmail) && !EmailValidator.IsValidEmail(feedback.ContactEmail))
+            {
+                _options.LogWarning("Feedback email scrubbed due to invalid email format: '{0}'", feedback.ContactEmail);
+                feedback.ContactEmail = null;
+            }
+
+            scope ??= CurrentScope;
+            CurrentClient.CaptureFeedback(feedback, scope, hint);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to capture feedback");
+        }
     }
 
 #if MEMORY_DUMP_SUPPORTED
@@ -555,6 +632,16 @@ internal class Hub : IHub, IDisposable
 
         try
         {
+            if (!string.IsNullOrWhiteSpace(userFeedback.Email) && !EmailValidator.IsValidEmail(userFeedback.Email))
+            {
+                _options.LogWarning("Feedback email scrubbed due to invalid email format: '{0}'", userFeedback.Email);
+                userFeedback = new UserFeedback(
+                    userFeedback.EventId,
+                    userFeedback.Name,
+                    null, // Scrubbed email
+                    userFeedback.Comments);
+            }
+
             CurrentClient.CaptureUserFeedback(userFeedback);
         }
         catch (Exception e)
@@ -625,15 +712,6 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public ISpan StartSpan(string operation, string description)
-    {
-        ITransactionTracer? currentTransaction = null;
-        ConfigureScope(s => currentTransaction = s.Transaction);
-        return currentTransaction is { } transaction
-            ? transaction.StartChild(operation, description)
-            : this.StartTransaction(operation, description);
-    }
-
     public void CaptureSession(SessionUpdate sessionUpdate)
     {
         if (!IsEnabled)
@@ -698,6 +776,18 @@ internal class Hub : IHub, IDisposable
         if (Interlocked.Exchange(ref _isEnabled, 0) != 1)
         {
             return;
+        }
+
+        foreach (var integration in _integrationsToCleanup)
+        {
+            try
+            {
+                integration.Dispose();
+            }
+            catch (Exception e)
+            {
+                _options.LogError("Failed to dispose integration {0}: {1}", integration.GetType().Name, e);
+            }
         }
 
 #if MEMORY_DUMP_SUPPORTED

@@ -43,8 +43,36 @@ public sealed class HubAdapter : IHub
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
+    public void ConfigureScope<TArg>(Action<Scope, TArg> configureScope, TArg arg)
+        => SentrySdk.ConfigureScope(configureScope, arg);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
     public Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
         => SentrySdk.ConfigureScopeAsync(configureScope);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    public Task ConfigureScopeAsync<TArg>(Func<Scope, TArg, Task> configureScope, TArg arg)
+        => SentrySdk.ConfigureScopeAsync(configureScope, arg);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    public void SetTag(string key, string value)
+        => SentrySdk.SetTag(key, value);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    public void UnsetTag(string key)
+        => SentrySdk.UnsetTag(key);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
@@ -221,6 +249,14 @@ public sealed class HubAdapter : IHub
     [EditorBrowsable(EditorBrowsableState.Never)]
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope, SentryHint? hint = null)
         => SentrySdk.CaptureEvent(evt, scope, hint);
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+        => SentrySdk.CaptureFeedback(feedback, configureScope, hint);
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.

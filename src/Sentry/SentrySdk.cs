@@ -1,10 +1,12 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Internal;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry;
 
+#if !SENTRY_UNITY
 /// <summary>
 /// Sentry SDK entrypoint.
 /// </summary>
@@ -13,7 +15,9 @@ namespace Sentry;
 /// It allows safe static access to a client and scope management.
 /// When the SDK is uninitialized, calls to this class result in no-op so no callbacks are invoked.
 /// </remarks>
-public static partial class SentrySdk
+public
+#endif
+static partial class SentrySdk
 {
     internal static IHub CurrentHub = DisabledHub.Instance;
 
@@ -50,6 +54,7 @@ public static partial class SentrySdk
 
 #pragma warning disable CS0162 // Unreachable code detected
 #pragma warning disable 0162 // Unreachable code on old .NET frameworks
+        AotHelper.CheckIsTrimmed(options.DiagnosticLogger);
         options.LogDebug(AotHelper.IsTrimmed
             ? "This looks like a Native AOT application build."
             : "This doesn't look like a Native AOT application build."
@@ -380,13 +385,60 @@ public static partial class SentrySdk
         => CurrentHub.ConfigureScope(configureScope);
 
     /// <summary>
-    /// Configures the scope asynchronously.
+    /// Configures the scope through the callback.
+    /// <example>
+    /// <code>
+    /// object someValue = ...;
+    /// SentrySdk.ConfigureScope(static (scope, arg) => scope.SetExtra("key", arg), someValue);
+    /// </code>
+    /// </example>
     /// </summary>
     /// <param name="configureScope">The configure scope callback.</param>
-    /// <returns>The Id of the event.</returns>
+    /// <param name="arg">The argument to pass to the configure scope callback.</param>
+    public static void ConfigureScope<TArg>(Action<Scope, TArg> configureScope, TArg arg)
+        => CurrentHub.ConfigureScope(configureScope, arg);
+
+    /// <summary>
+    /// Configures the scope through the callback asynchronously.
+    /// </summary>
+    /// <param name="configureScope">The configure scope callback.</param>
+    /// <returns>A task that completes when the callback is done or a completed task if the SDK is disabled.</returns>
     [DebuggerStepThrough]
     public static Task ConfigureScopeAsync(Func<Scope, Task> configureScope)
         => CurrentHub.ConfigureScopeAsync(configureScope);
+
+    /// <summary>
+    /// Configures the scope through the callback asynchronously.
+    /// <example>
+    /// <code>
+    /// object someValue = ...;
+    /// SentrySdk.ConfigureScopeAsync(static async (scope, arg) =>
+    /// {
+    ///     scope.SetExtra("key", arg);
+    /// }, someValue);
+    /// </code>
+    /// </example>
+    /// </summary>
+    /// <param name="configureScope">The configure scope callback.</param>
+    /// <param name="arg">The argument to pass to the configure scope callback.</param>
+    /// <returns>A task that completes when the callback is done or a completed task if the SDK is disabled.</returns>
+    [DebuggerStepThrough]
+    public static Task ConfigureScopeAsync<TArg>(Func<Scope, TArg, Task> configureScope, TArg arg)
+        => CurrentHub.ConfigureScopeAsync(configureScope, arg);
+
+    /// <summary>
+    /// Sets a tag on the current scope.
+    /// </summary>
+    [DebuggerStepThrough]
+    public static void SetTag(string key, string value)
+        => CurrentHub.SetTag(key, value);
+
+    /// <summary>
+    /// Removes a tag from the current scope.
+    /// </summary>
+    [DebuggerStepThrough]
+    public static void UnsetTag(string key)
+        => CurrentHub.UnsetTag(key);
 
     /// <inheritdoc cref="ISentryClient.CaptureEnvelope"/>
     [DebuggerStepThrough]
@@ -480,6 +532,13 @@ public static partial class SentrySdk
     [DebuggerStepThrough]
     public static SentryId CaptureMessage(string message, Action<Scope> configureScope, SentryLevel level = SentryLevel.Info)
         => CurrentHub.CaptureMessage(message, configureScope, level);
+
+    /// <summary>
+    /// Captures feedback from the user.
+    /// </summary>
+    [DebuggerStepThrough]
+    public static void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+        => CurrentHub.CaptureFeedback(feedback, configureScope, hint);
 
     /// <summary>
     /// Captures feedback from the user.
@@ -580,6 +639,12 @@ public static partial class SentrySdk
             configureMonitorOptions);
 
     /// <summary>
+    /// Starts a transaction if there is not already one active on the scope, otherwise starts a new child span on the
+    /// currently active transaction.
+    /// </summary>
+    public static ISpan StartSpan(string operation, string description) => CurrentHub.StartSpan(operation, description);
+
+    /// <summary>
     /// Starts a transaction.
     /// </summary>
     [DebuggerStepThrough]
@@ -637,7 +702,13 @@ public static partial class SentrySdk
         => CurrentHub.BindException(exception, span);
 
     /// <summary>
-    /// Gets the last active span.
+    /// Gets the currently active transaction.
+    /// </summary>
+    [DebuggerStepThrough]
+    public static ITransactionTracer? GetTransaction() => CurrentHub.GetTransaction();
+
+    /// <summary>
+    /// Gets the last active span
     /// </summary>
     [DebuggerStepThrough]
     public static ISpan? GetSpan()

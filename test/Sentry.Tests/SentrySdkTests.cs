@@ -132,9 +132,12 @@ public class SentrySdkTests : IDisposable
         }
     }
 
-    [Fact]
+    [SkippableFact]
     public void Init_EmptyDsn_LogsWarning()
     {
+#if SENTRY_DSN_DEFINED_IN_ENV
+        Skip.If(true, "This test only works when the DSN is not configured as an environment variable.");
+#endif
         var options = new SentryOptions
         {
             Dsn = SentryConstants.DisableSdkDsnValue,
@@ -436,6 +439,36 @@ public class SentrySdkTests : IDisposable
         Assert.False(invoked);
     }
 
+    [Fact]
+    public void ConfigureScope_SyncWithArg_CallbackNeverInvoked()
+    {
+        var invoked = false;
+        SentrySdk.ConfigureScope((_, _) => invoked = true, "arg");
+        Assert.False(invoked);
+    }
+
+    [Fact]
+    public void ConfigureScope_SyncWithArg_ArgIsUsed()
+    {
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+        });
+
+        const string key = "key";
+        const string arg = "arg";
+
+        SentrySdk.ConfigureScope((s, a) => s.SetTag(key, a), arg);
+
+        string actual = null;
+        SentrySdk.ConfigureScope(s => actual = s.Tags[key]);
+
+        Assert.Equal(arg, actual);
+    }
+
     [SkippableFact]
     public async Task ConfigureScope_OnTask_PropagatedToCaller()
     {
@@ -466,6 +499,57 @@ public class SentrySdkTests : IDisposable
             SentrySdk.AddBreadcrumb(expected);
         }
     }
+
+    [Fact]
+    public void SetTag_SetsTagOnCurrentScope()
+    {
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+        });
+
+        const string key = "key";
+        const string value = "value";
+
+        SentrySdk.SetTag(key, value);
+
+        string actual = null;
+        SentrySdk.ConfigureScope(s => actual = s.Tags[key]);
+
+        Assert.Equal(value, actual);
+    }
+
+    [Fact]
+    public void SetTag_NotInit_NoOp() => SentrySdk.SetTag("key", "value");
+
+    [Fact]
+    public void UnsetTag_UnsetsTagOnCurrentScope()
+    {
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+        });
+
+        const string key = "key";
+        const string value = "value";
+
+        SentrySdk.SetTag(key, value);
+        SentrySdk.UnsetTag(key);
+
+        bool? containsKey = null;
+        SentrySdk.ConfigureScope(s => containsKey = s.Tags.ContainsKey(key));
+
+        Assert.True(containsKey is false);
+    }
+
+    [Fact]
+    public void UnsetTag_NotInit_NoOp() => SentrySdk.UnsetTag("key");
 
     [Fact]
     public void CaptureEvent_WithConfiguredScope_ScopeAppliesToEvent()
@@ -555,6 +639,23 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
+    public void CaptureFeedback_WithConfiguredScope_ScopeCallbackGetsInvoked()
+    {
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+        });
+
+        var scopeCallbackWasInvoked = false;
+        SentrySdk.CaptureFeedback(new SentryFeedback("Foo"), _ => scopeCallbackWasInvoked = true);
+
+        Assert.True(scopeCallbackWasInvoked);
+    }
+
+    [Fact]
     public void CaptureException_WithConfiguredScope_ScopeCallbackGetsInvoked()
     {
         using var _ = SentrySdk.Init(o =>
@@ -598,6 +699,48 @@ public class SentrySdkTests : IDisposable
             return Task.CompletedTask;
         });
         Assert.False(invoked);
+    }
+
+    [Fact]
+    public async Task ConfigureScope_AsyncWithArg_CallbackNeverInvoked()
+    {
+        var invoked = false;
+        await SentrySdk.ConfigureScopeAsync((_, _) =>
+        {
+            invoked = true;
+            return Task.CompletedTask;
+        }, "arg");
+        Assert.False(invoked);
+    }
+
+    [Fact]
+    public async Task ConfigureScope_AsyncWithArg_ArgIsUsed()
+    {
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.AutoSessionTracking = false;
+            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
+            o.InitNativeSdks = false;
+        });
+
+        const string key = "key";
+        const string arg = "arg";
+
+        await SentrySdk.ConfigureScopeAsync((s, a) =>
+        {
+            s.SetTag(key, a);
+            return Task.CompletedTask;
+        }, arg);
+
+        string actual = null;
+        await SentrySdk.ConfigureScopeAsync(s =>
+        {
+            actual = s.Tags[key];
+            return Task.CompletedTask;
+        });
+
+        Assert.Equal(arg, actual);
     }
 
     [Fact]
@@ -659,14 +802,18 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void Implements_ClientExtensions()
     {
-        var clientExtensions = typeof(SentryClientExtensions).GetMembers(BindingFlags.Public | BindingFlags.Static)
+        string[] excludedMembers = [nameof(SentryClientExtensions.GetSentryOptions), nameof(SentryClientExtensions.GetInternalSentryOptions)];
+        var clientExtensions = typeof(SentryClientExtensions)
+            .GetMembers(BindingFlags.Public | BindingFlags.Static)
+            .Where(x => !excludedMembers.Contains(x.Name))
             // Remove the extension argument: Method(this ISentryClient client, ...
             .Select(m => m.ToString()!
                 .Replace($"({typeof(ISentryClient).FullName}", "(")
                 .Replace("(, ", "("));
-        var sentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
 
-        Assert.Empty(clientExtensions.Except(sentrySdk.Select(m => m.ToString())));
+        var sentrySdk = typeof(SentrySdk).GetMembers(BindingFlags.Public | BindingFlags.Static);
+        var values = clientExtensions.Except(sentrySdk.Select(m => m.ToString()));
+        Assert.Empty(values);
     }
 
     [Fact]
@@ -849,6 +996,7 @@ public class SentrySdkTests : IDisposable
     [InlineData(false)]
     public void ProcessOnBeforeSend_NativeErrorSuppression(bool suppressNativeErrors)
     {
+        // Arrange
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
@@ -867,11 +1015,20 @@ public class SentrySdkTests : IDisposable
             called = true;
             return e;
         });
+
+        var scope = new Scope(options);
+        var hub = Substitute.For<IHub>();
+        hub.When(h => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
+            .Do(callback => callback.Arg<Action<Scope>>().Invoke(scope));
+
         var evt = new Sentry.CocoaSdk.SentryEvent();
         var ex = new Sentry.CocoaSdk.SentryException("Not checked", "EXC_BAD_ACCESS");
         evt.Exceptions = [ex];
-        var result = SentrySdk.ProcessOnBeforeSend(options, evt);
 
+        // Act
+        var result = SentrySdk.ProcessOnBeforeSend(options, evt, hub);
+
+        // Assert
         if (suppressNativeErrors)
         {
             called.Should().BeFalse();
@@ -887,6 +1044,7 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void ProcessOnBeforeSend_OptionsBeforeOnSendRuns()
     {
+        // Arrange
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
@@ -905,20 +1063,69 @@ public class SentrySdkTests : IDisposable
         native.ReleaseName = "release name";
         native.Environment = "environment";
         native.Transaction = "transaction name";
-
         options.SetBeforeSend(e =>
         {
             e.TransactionName = "dotnet";
             return e;
         });
-        var result = SentrySdk.ProcessOnBeforeSend(options, native);
+
+        var scope = new Scope(options);
+        var hub = Substitute.For<IHub>();
+        hub.When(h => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
+            .Do(callback => callback.Arg<Action<Scope>>().Invoke(scope));
+
+        // Act
+        var result = SentrySdk.ProcessOnBeforeSend(options, native, hub);
+
+        // Assert
         result.Should().NotBeNull();
         result.Transaction.Should().Be("dotnet");
+    }
+
+    [Fact]
+    public void ProcessOnBeforeSend_EventProcessorsInvoked()
+    {
+        // Arrange
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _logger,
+            IsGlobalModeEnabled = true,
+            Debug = true,
+            AutoSessionTracking = false,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>(),
+            InitNativeSdks = false,
+        };
+        var eventProcessor = new TestEventProcessor();
+        options.AddEventProcessor(eventProcessor);
+
+        var scope = new Scope(options);
+        var hub = Substitute.For<IHub>();
+        hub.When(h => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
+            .Do(callback => callback.Arg<Action<Scope>>().Invoke(scope));
+
+        var native = new Sentry.CocoaSdk.SentryEvent();
+
+        // Act
+        SentrySdk.ProcessOnBeforeSend(options, native, hub);
+
+        // Assert
+        eventProcessor.Invoked.Should().BeTrue();
     }
 #endif
 
     public void Dispose()
     {
         SentrySdk.Close();
+    }
+}
+
+file class TestEventProcessor : ISentryEventProcessor
+{
+    public bool Invoked { get; private set; }
+    public SentryEvent Process(SentryEvent @event)
+    {
+        Invoked = true;
+        return @event;
     }
 }

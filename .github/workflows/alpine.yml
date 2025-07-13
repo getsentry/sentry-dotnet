@@ -1,0 +1,40 @@
+name: Build Alpine Linux Docker image
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/alpine/*'
+
+jobs:
+  build:
+    name: Build sentry-dotnet-alpine:${{ matrix.version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version:
+          - "3.21"
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build ghcr.io/${{ github.repository_owner }}/sentry-dotnet-alpine:${{ matrix.version }}
+        run: docker build --build-arg BASE=alpine:${{ matrix.version }} -t ghcr.io/${{ github.repository_owner }}/sentry-dotnet-alpine:${{ matrix.version }} .
+        working-directory: .github/alpine
+
+      - name: Push ghcr.io/${{ github.repository_owner }}/sentry-dotnet-alpine:${{ matrix.version }}
+        run: docker push ghcr.io/${{ github.repository_owner }}/sentry-dotnet-alpine:${{ matrix.version }}
+        working-directory: .github/alpine

@@ -15,7 +15,11 @@
                 sentry:SessionReplay.Mask="Unmask"
                 SemanticProperties.Description="Cute dot net bot waving hi to you!"
                 HeightRequest="200"
-                HorizontalOptions="Center" />
+                HorizontalOptions="Center">
+                <Image.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped" />
+                </Image.GestureRecognizers>
+            </Image>
 
             <Label
                 Text="Hello, World!"
@@ -77,6 +81,13 @@
                 Text="Submit Feedback"
                 SemanticProperties.Hint="Provides a form that can be used to capture open feedback from the user."
                 Clicked="OnFeedbackClicked"
+                HorizontalOptions="Center" />
+
+            <Button
+                x:Name="CtMvvmBtn"
+                Text="CommunityToolkit.Mvvm Integration"
+                SemanticProperties.Hint="Shows a test that auto-instrument async relay commands from the MVVM Community Toolkit."
+                Clicked="CtMvvmBtn_OnClicked"
                 HorizontalOptions="Center" />
 
         </VerticalStackLayout>

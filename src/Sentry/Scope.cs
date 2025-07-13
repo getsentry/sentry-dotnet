@@ -212,7 +212,9 @@ public class Scope : IEventLike
             _transactionLock.EnterReadLock();
             try
             {
-                return _transaction.Value;
+                // Workaround for https://github.com/getsentry/sentry-dotnet/pull/4125#discussion_r2087994417
+                // TODO: We should really find the root cause of this issue and address in a seprate PR
+                return _transaction.Value is { IsFinished: false } transaction ? transaction : null;
             }
             finally
             {
@@ -225,6 +227,20 @@ public class Scope : IEventLike
             try
             {
                 _transaction.Value = value;
+
+                if (Options.EnableScopeSync)
+                {
+                    if (_transaction.Value != null)
+                    {
+                        // If there is a transaction set we propagate the trace to the native layer
+                        Options.ScopeObserver?.SetTrace(_transaction.Value.TraceId, _transaction.Value.SpanId);
+                    }
+                    else
+                    {
+                        // If the transaction is being removed from the scope, reset and sync the trace as well
+                        Options.ScopeObserver?.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
+                    }
+                }
             }
             finally
             {
@@ -802,6 +818,11 @@ public class Scope : IEventLike
             if (ReferenceEquals(_transaction.Value, expectedCurrentTransaction))
             {
                 _transaction.Value = null;
+                if (Options.EnableScopeSync)
+                {
+                    // We have to restore the trace on the native layers to be in sync with the current scope
+                    Options.ScopeObserver?.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
+                }
             }
         }
         finally

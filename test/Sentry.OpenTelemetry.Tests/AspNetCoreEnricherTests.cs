@@ -9,7 +9,7 @@ public class AspNetCoreEnricherTests
         var scope = new Scope();
         var options = new SentryOptions { SendDefaultPii = true };
         var hub = Substitute.For<IHub>();
-        hub.ConfigureScope(Arg.Do<Action<Scope>>(action => action(scope)));
+        hub.SubstituteConfigureScope(scope);
 
         var user = new SentryUser { Id = "foo" };
         var userFactory = Substitute.For<ISentryUserFactory>();

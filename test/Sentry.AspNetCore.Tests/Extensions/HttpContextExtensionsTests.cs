@@ -78,5 +78,20 @@ public class HttpContextExtensionsTests
         // Assert
         Assert.Equal(expectedName, filteredRoute);
     }
+
+    [Fact]
+    public void TryGetSentryTraceHeader_WithEmptyTraceId_ReturnsNull()
+    {
+        // Arrange
+        var httpContext = Fixture.GetSut();
+        var options = new SentryOptions();
+        httpContext.Request.Headers.Append(SentryTraceHeader.HttpHeaderName, "00000000000000000000000000000000-1000000000000000-1");
+
+        // Act
+        var header = httpContext.TryGetSentryTraceHeader(options);
+
+        // Assert
+        Assert.Null(header);
+    }
 }
 #endif

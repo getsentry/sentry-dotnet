@@ -24,7 +24,7 @@ try
 {
     if (!$Tfm)
     {
-        $Tfm = 'net8.0'
+        $Tfm = 'net9.0'
     }
     $arch = (!$IsWindows -and $(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
     if ($Platform -eq 'android')
@@ -76,7 +76,7 @@ try
         if (!(Get-Command xharness -ErrorAction SilentlyContinue))
         {
             Push-Location ($CI ? $env:RUNNER_TEMP : $IsWindows ? $env:TMP : $IsMacos ? $env:TMPDIR : '/temp')
-            dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '10.0.0-prerelease*' `
+            dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '10.0.0-prerelease.25330.2' `
                 --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
             Pop-Location
         }

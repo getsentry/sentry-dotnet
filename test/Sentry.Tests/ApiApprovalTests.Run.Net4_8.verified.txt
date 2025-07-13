@@ -153,6 +153,7 @@ namespace Sentry
         public static Sentry.SentryId CaptureMessage(this Sentry.IHub hub, string message, System.Action<Sentry.Scope> configureScope, Sentry.SentryLevel level = 1) { }
         public static void LockScope(this Sentry.IHub hub) { }
         public static System.IDisposable PushAndLockScope(this Sentry.IHub hub) { }
+        public static Sentry.ISpan StartSpan(this Sentry.IHub hub, string operation, string description) { }
         public static Sentry.ITransactionTracer StartTransaction(this Sentry.IHub hub, Sentry.ITransactionContext context) { }
         public static Sentry.ITransactionTracer StartTransaction(this Sentry.IHub hub, string name, string operation) { }
         public static Sentry.ITransactionTracer StartTransaction(this Sentry.IHub hub, string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
@@ -200,6 +201,7 @@ namespace Sentry
         void BindException(System.Exception exception, Sentry.ISpan span);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.SentryHint? hint, System.Action<Sentry.Scope> configureScope);
+        void CaptureFeedback(Sentry.SentryFeedback feedback, System.Action<Sentry.Scope> configureScope, Sentry.SentryHint? hint = null);
         Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null);
         Sentry.TransactionContext ContinueTrace(string? traceHeader, string? baggageHeader, string? name = null, string? operation = null);
         void EndSession(Sentry.SessionEndStatus status = 0);
@@ -242,9 +244,13 @@ namespace Sentry
     {
         void BindClient(Sentry.ISentryClient client);
         void ConfigureScope(System.Action<Sentry.Scope> configureScope);
+        void ConfigureScope<TArg>(System.Action<Sentry.Scope, TArg> configureScope, TArg arg);
         System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope);
+        System.Threading.Tasks.Task ConfigureScopeAsync<TArg>(System.Func<Sentry.Scope, TArg, System.Threading.Tasks.Task> configureScope, TArg arg);
         System.IDisposable PushScope();
         System.IDisposable PushScope<TState>(TState state);
+        void SetTag(string key, string value);
+        void UnsetTag(string key);
     }
     public interface ISentryScopeStateProcessor
     {
@@ -471,6 +477,8 @@ namespace Sentry
         public static void Flush(this Sentry.ISentryClient client) { }
         public static void Flush(this Sentry.ISentryClient client, System.TimeSpan timeout) { }
         public static System.Threading.Tasks.Task FlushAsync(this Sentry.ISentryClient client) { }
+        [System.Obsolete("This method is meant for external usage only")]
+        public static Sentry.SentryOptions? GetInternalSentryOptions(this Sentry.ISentryClient clientOrHub) { }
     }
     public static class SentryConstants
     {
@@ -805,6 +813,7 @@ namespace Sentry
         public static Sentry.SentryId CaptureException(System.Exception exception) { }
         public static Sentry.SentryId CaptureException(System.Exception exception, System.Action<Sentry.Scope> configureScope) { }
         public static void CaptureFeedback(Sentry.SentryFeedback feedback, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
+        public static void CaptureFeedback(Sentry.SentryFeedback feedback, System.Action<Sentry.Scope> configureScope, Sentry.SentryHint? hint = null) { }
         public static void CaptureFeedback(string message, string? contactEmail = null, string? name = null, string? replayId = null, string? url = null, Sentry.SentryId? associatedEventId = default, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public static Sentry.SentryId CaptureMessage(string message, Sentry.SentryLevel level = 1) { }
         public static Sentry.SentryId CaptureMessage(string message, System.Action<Sentry.Scope> configureScope, Sentry.SentryLevel level = 1) { }
@@ -820,7 +829,9 @@ namespace Sentry
         public static void CauseCrash(Sentry.CrashType crashType) { }
         public static void Close() { }
         public static void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
+        public static void ConfigureScope<TArg>(System.Action<Sentry.Scope, TArg> configureScope, TArg arg) { }
         public static System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
+        public static System.Threading.Tasks.Task ConfigureScopeAsync<TArg>(System.Func<Sentry.Scope, TArg, System.Threading.Tasks.Task> configureScope, TArg arg) { }
         public static Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null) { }
         public static Sentry.TransactionContext ContinueTrace(string? traceHeader, string? baggageHeader, string? name = null, string? operation = null) { }
         public static void EndSession(Sentry.SessionEndStatus status = 0) { }
@@ -831,6 +842,7 @@ namespace Sentry
         public static Sentry.BaggageHeader? GetBaggage() { }
         public static Sentry.ISpan? GetSpan() { }
         public static Sentry.SentryTraceHeader? GetTraceHeader() { }
+        public static Sentry.ITransactionTracer? GetTransaction() { }
         public static System.IDisposable Init() { }
         public static System.IDisposable Init(Sentry.SentryOptions options) { }
         public static System.IDisposable Init(System.Action<Sentry.SentryOptions>? configureOptions) { }
@@ -839,12 +851,15 @@ namespace Sentry
         public static System.IDisposable PushScope() { }
         public static System.IDisposable PushScope<TState>(TState state) { }
         public static void ResumeSession() { }
+        public static void SetTag(string key, string value) { }
         public static void StartSession() { }
+        public static Sentry.ISpan StartSpan(string operation, string description) { }
         public static Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context) { }
         public static Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext) { }
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation) { }
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, string? description) { }
+        public static void UnsetTag(string key) { }
     }
     public class SentrySession : Sentry.ISentrySession
     {
@@ -866,7 +881,7 @@ namespace Sentry
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Data { get; }
         public string? Description { get; set; }
         public System.DateTimeOffset? EndTimestamp { get; }
-        [System.Obsolete("Use SetData")]
+        [System.Obsolete("Use Data")]
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
         public bool IsFinished { get; }
         public bool? IsSampled { get; }
@@ -881,7 +896,7 @@ namespace Sentry
         public Sentry.SentryId TraceId { get; }
         public Sentry.SentryTraceHeader GetTraceHeader() { }
         public void SetData(string key, object? value) { }
-        [System.Obsolete("Use Data")]
+        [System.Obsolete("Use SetData")]
         public void SetExtra(string key, object? value) { }
         public void SetMeasurement(string name, Sentry.Protocol.Measurement measurement) { }
         public void SetTag(string key, string value) { }
@@ -1264,6 +1279,14 @@ namespace Sentry.Ben.BlockingDetector
         public void Dispose() { }
     }
 }
+namespace Sentry.CompilerServices
+{
+    public static class BuildProperties
+    {
+        public static System.Collections.Generic.IReadOnlyDictionary<string, string>? Values { get; }
+        public static void Initialize(System.Collections.Generic.Dictionary<string, string> properties) { }
+    }
+}
 namespace Sentry.Extensibility
 {
     public abstract class BaseRequestPayloadExtractor : Sentry.Extensibility.IRequestPayloadExtractor
@@ -1315,13 +1338,16 @@ namespace Sentry.Extensibility
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.SentryHint? hint, System.Action<Sentry.Scope> configureScope) { }
         public void CaptureFeedback(Sentry.SentryFeedback feedback, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
+        public void CaptureFeedback(Sentry.SentryFeedback feedback, System.Action<Sentry.Scope> configureScope, Sentry.SentryHint? hint = null) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.SentryHint? hint) { }
         [System.Obsolete("Use CaptureFeedback instead.")]
         public void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
         public void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
+        public void ConfigureScope<TArg>(System.Action<Sentry.Scope, TArg> configureScope, TArg arg) { }
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
+        public System.Threading.Tasks.Task ConfigureScopeAsync<TArg>(System.Func<Sentry.Scope, TArg, System.Threading.Tasks.Task> configureScope, TArg arg) { }
         public Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null) { }
         public Sentry.TransactionContext ContinueTrace(string? traceHeader, string? baggageHeader, string? name = null, string? operation = null) { }
         public void Dispose() { }
@@ -1334,8 +1360,10 @@ namespace Sentry.Extensibility
         public System.IDisposable PushScope() { }
         public System.IDisposable PushScope<TState>(TState state) { }
         public void ResumeSession() { }
+        public void SetTag(string key, string value) { }
         public void StartSession() { }
         public Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext) { }
+        public void UnsetTag(string key) { }
     }
     public class FormRequestPayloadExtractor : Sentry.Extensibility.BaseRequestPayloadExtractor
     {
@@ -1361,13 +1389,16 @@ namespace Sentry.Extensibility
         public Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.SentryHint? hint, System.Action<Sentry.Scope> configureScope) { }
         public Sentry.SentryId CaptureException(System.Exception exception) { }
         public void CaptureFeedback(Sentry.SentryFeedback feedback, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
+        public void CaptureFeedback(Sentry.SentryFeedback feedback, System.Action<Sentry.Scope> configureScope, Sentry.SentryHint? hint = null) { }
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.SentryHint? hint) { }
         [System.Obsolete("Use CaptureFeedback instead.")]
         public void CaptureUserFeedback(Sentry.UserFeedback sentryUserFeedback) { }
         public void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
+        public void ConfigureScope<TArg>(System.Action<Sentry.Scope, TArg> configureScope, TArg arg) { }
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
+        public System.Threading.Tasks.Task ConfigureScopeAsync<TArg>(System.Func<Sentry.Scope, TArg, System.Threading.Tasks.Task> configureScope, TArg arg) { }
         public Sentry.TransactionContext ContinueTrace(Sentry.SentryTraceHeader? traceHeader, Sentry.BaggageHeader? baggageHeader, string? name = null, string? operation = null) { }
         public Sentry.TransactionContext ContinueTrace(string? traceHeader, string? baggageHeader, string? name = null, string? operation = null) { }
         public void EndSession(Sentry.SessionEndStatus status = 0) { }
@@ -1379,8 +1410,10 @@ namespace Sentry.Extensibility
         public System.IDisposable PushScope() { }
         public System.IDisposable PushScope<TState>(TState state) { }
         public void ResumeSession() { }
+        public void SetTag(string key, string value) { }
         public void StartSession() { }
         public Sentry.ITransactionTracer StartTransaction(Sentry.ITransactionContext context, System.Collections.Generic.IReadOnlyDictionary<string, object?> customSamplingContext) { }
+        public void UnsetTag(string key) { }
     }
     public interface IBackgroundWorker
     {

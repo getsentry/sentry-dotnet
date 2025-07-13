@@ -11,17 +11,20 @@ namespace Microsoft.Maui.Hosting
 }
 namespace Sentry.Maui
 {
-    public class BreadcrumbEvent : System.IEquatable<Sentry.Maui.BreadcrumbEvent>
+    public sealed class BreadcrumbEvent
     {
-        public BreadcrumbEvent(object? Sender, string EventName, [System.Runtime.CompilerServices.TupleElementNames(new string[] {
+        public BreadcrumbEvent(object? sender, string eventName) { }
+        public BreadcrumbEvent(object? sender, string eventName, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> extraData) { }
+        public BreadcrumbEvent(object? sender, string eventName, [System.Runtime.CompilerServices.TupleElementNames(new string[] {
+                "key",
+                "value"})] System.Collections.Generic.IEnumerable<System.ValueTuple<string, string>> extraData) { }
+        [System.Obsolete("Use one of the other simpler constructors instead.")]
+        public BreadcrumbEvent(object? sender, string eventName, [System.Runtime.CompilerServices.TupleElementNames(new string[] {
                 "Key",
-                "Value"})] params System.Collections.Generic.IEnumerable<System.ValueTuple<string, string>>[] ExtraData) { }
-        public string EventName { get; init; }
-        [System.Runtime.CompilerServices.TupleElementNames(new string[] {
-                "Key",
-                "Value"})]
-        public System.Collections.Generic.IEnumerable<System.ValueTuple<string, string>>[] ExtraData { get; init; }
-        public object? Sender { get; init; }
+                "Value"})] System.Collections.Generic.IEnumerable<System.ValueTuple<string, string>>[] extraData) { }
+        public string EventName { get; }
+        public System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> ExtraData { get; }
+        public object? Sender { get; }
     }
     public interface IMauiElementEventBinder
     {
@@ -55,6 +58,12 @@ namespace Sentry.Maui.Internal
     public class MauiButtonEventsBinder : Sentry.Maui.IMauiElementEventBinder
     {
         public MauiButtonEventsBinder() { }
+        public void Bind(Microsoft.Maui.Controls.VisualElement element, System.Action<Sentry.Maui.BreadcrumbEvent> addBreadcrumb) { }
+        public void UnBind(Microsoft.Maui.Controls.VisualElement element) { }
+    }
+    public class MauiGestureRecognizerEventsBinder : Sentry.Maui.IMauiElementEventBinder
+    {
+        public MauiGestureRecognizerEventsBinder() { }
         public void Bind(Microsoft.Maui.Controls.VisualElement element, System.Action<Sentry.Maui.BreadcrumbEvent> addBreadcrumb) { }
         public void UnBind(Microsoft.Maui.Controls.VisualElement element) { }
     }

@@ -11,39 +11,52 @@ runs:
         echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" >> $GITHUB_ENV
         echo "DOTNET_NOLOGO=1" >> $GITHUB_ENV
 
+    # Android SDK Tools are arm64-incompatible
+    # Android SDK Build Tools are musl-incompatible
+    - name: Set Environment Variables for Alpine Linux
+      if: ${{ (runner.os == 'Linux' && runner.arch == 'ARM64') || contains(matrix.container.image, 'alpine') }}
+      shell: bash
+      run: echo "NO_MOBILE=true" >> $GITHUB_ENV
+
+    # Allow sudoless Docker in integration tests
+    - name: Prepare Docker on Alpine Linux
+      if: ${{ contains(matrix.container.image, 'alpine') }}
+      shell: bash
+      run: sudo chmod 666 /var/run/docker.sock
+
+    # zstd is needed for cross OS actions/cache but missing from windows-11-arm
+    # https://github.com/actions/partner-runner-images/issues/99
+    - name: Install zstd on Windows ARM64
+      if: runner.os == 'Windows' && runner.arch == 'ARM64'
+      shell: pwsh
+      run: choco install zstandard
+
     # See https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md#xcode
     - name: Pin the Xcode Version
       if: runner.os == 'macOS'
       shell: bash
-      run: sudo xcode-select --switch /Applications/Xcode_16.2.app
+      run: sudo xcode-select --switch /Applications/Xcode_16.4.app
 
-    # Needed for Android SDK setup step
-    - uses: actions/setup-java@v3
+    # Java 17 is needed for Android SDK setup step
+    - name: Install Java 17
+      if: ${{ !matrix.container }}
+      uses: actions/setup-java@v4
       with:
-        distribution: 'temurin'
+        distribution: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && 'microsoft' || 'temurin' }}
         java-version: '17'
 
     - name: Setup Android SDK
+      if: ${{ (runner.os != 'Linux' || runner.arch != 'ARM64') && !matrix.container }}
       uses: android-actions/setup-android@07976c6290703d34c16d382cb36445f98bb43b1f # v3.2.0
       with:
         log-accepted-android-sdk-licenses: false
 
-    # https://github.com/actions/runner-images/issues/10814
-    - name: Workaround build-tools issue
-      if: runner.os == 'macOS'
-      shell: bash
-      run: |
-        curl https://dl.google.com/android/repository/build-tools_r35_macosx.zip > $ANDROID_HOME/build-tools_r35_macosx.zip
-        cd $ANDROID_HOME
-        mkdir -p build-tools
-        unzip build-tools_r35_macosx.zip
-        mv android-15 build-tools/35.0.0
-        cd -
-
-    - name: Set Java Version
-      uses: actions/setup-java@v3
+    # Java 11 is needed by .NET Android
+    - name: Install Java 11
+      if: ${{ !matrix.container }}
+      uses: actions/setup-java@v4
       with:
-        distribution: 'temurin'
+        distribution: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && 'microsoft' || 'temurin' }}
         java-version: '11'
 
     - name: Install Mono
@@ -60,14 +73,12 @@ runs:
       with:
         dotnet-version: |
           8.0.x
-          9.0.203
+          9.0.301
 
     - name: Install .NET Workloads
       shell: bash
-      run: >
-        dotnet workload install \
-          wasm-tools wasm-tools-net8 maui-android \
-          ${{ runner.os == 'macOS' && 'maui-ios maui-maccatalyst maui-windows macos' || '' }} \
-          ${{ runner.os == 'Windows' && 'maui-ios maui-maccatalyst maui-windows' || '' }} \
+      run: |
+        pwd
+        dotnet workload restore \
           --temp-dir "${{ runner.temp }}" \
           --skip-sign-check

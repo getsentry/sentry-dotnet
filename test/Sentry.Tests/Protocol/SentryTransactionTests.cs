@@ -56,6 +56,33 @@ public class SentryTransactionTests
     }
 
     [Fact]
+    public void NewTransactionTracer_PropagationContextHasReplayId_UsesActiveSessionReplayIdInstead()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var traceHeader = new SentryTraceHeader(SentryId.Create(), SpanId.Create(), null);
+        var replayContext = Substitute.For<IReplaySession>();
+        var baggageHeader = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            { "sentry-sample_rate", "1.0" },
+            { "sentry-sample_rand", "0.1234" },
+            { "sentry-trace_id", "75302ac48a024bde9a3b3734a82e36c8" },
+            { "sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff" },
+            { "sentry-replay_id", "bfd31b89a59d41c99d96dc2baf840ecd" }
+        });
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(null, traceHeader, baggageHeader, replayContext);
+        var scope = new Scope(hub.GetSentryOptions(), propagationContext);
+        hub.ConfigureScope(Arg.Do<Action<Scope>>(callback => callback(scope)));
+        var transactionContext = new TransactionContext("test-name", "test-operation");
+
+        // Act
+        var actualTransaction = new TransactionTracer(hub, transactionContext);
+
+        // Assert
+        Assert.NotEqual(DateTimeOffset.MinValue, actualTransaction.StartTimestamp);
+    }
+
+    [Fact]
     public void Redact_Redacts_Urls()
     {
         // Arrange
@@ -242,6 +269,13 @@ public class SentryTransactionTests
                 ctx.Subject.Should().BeCloseTo(ctx.Expectation, TimeSpan.FromMilliseconds(1))
             ).WhenTypeIs<DateTimeOffset>();
 
+            // IsSampled isn't ever serialised, since we'd never send an unsampled transaction to Sentry
+            // See: https://develop.sentry.dev/sdk/data-model/event-payloads/contexts/#trace-context
+            // Note the absence of any `sampled` member for the Trace Context interface, which is where
+            // SentryTransaction derives it's value for IsSampled from
+            o.Excluding(ctx => ctx.Path == "Contexts[trace].IsSampled");
+            o.Excluding(x => x.IsSampled);
+
             return o;
         });
 
@@ -331,10 +365,7 @@ public class SentryTransactionTests
     public void StartChild_Limit_Maintained()
     {
         // Arrange
-        var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op")
-        {
-            IsSampled = true
-        };
+        var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op");
 
         // Act
         var spans = Enumerable
@@ -348,29 +379,10 @@ public class SentryTransactionTests
     }
 
     [Fact]
-    public void StartChild_SamplingInherited_Null()
-    {
-        // Arrange
-        var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op")
-        {
-            IsSampled = null
-        };
-
-        // Act
-        var child = transaction.StartChild("child op", "child desc");
-
-        // Assert
-        child.IsSampled.Should().BeNull();
-    }
-
-    [Fact]
     public void StartChild_SamplingInherited_True()
     {
         // Arrange
-        var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op")
-        {
-            IsSampled = true
-        };
+        var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op");
 
         // Act
         var child = transaction.StartChild("child op", "child desc");
@@ -383,10 +395,7 @@ public class SentryTransactionTests
     public void StartChild_SamplingInherited_False()
     {
         // Arrange
-        var transaction = new TransactionTracer(DisabledHub.Instance, "my name", "my op")
-        {
-            IsSampled = false
-        };
+        var transaction = new UnsampledTransaction(DisabledHub.Instance, new TransactionContext("n", "o"));
 
         // Act
         var child = transaction.StartChild("child op", "child desc");
@@ -588,6 +597,30 @@ public class SentryTransactionTests
 
         // Assert
         span.Status.Should().Be(SpanStatus.DataLoss);
+    }
+
+    [Fact]
+    public void Finish_ResetsScopeAndSetsNewPropagationContext()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var transaction = new TransactionTracer(hub, "test name", "test op");
+
+        Action<Scope, TransactionTracer> capturedAction = null;
+        hub.ConfigureScope(Arg.Do<Action<Scope, TransactionTracer>>(action => capturedAction = action), Arg.Any<TransactionTracer>());
+
+        // Act
+        transaction.Finish();
+
+        // Assert
+        hub.Received(1).ConfigureScope(Arg.Any<Action<Scope, TransactionTracer>>(), Arg.Any<TransactionTracer>());
+
+        capturedAction.Should().NotBeNull(); // Sanity Check
+        var mockScope = Substitute.For<Scope>();
+        capturedAction(mockScope, transaction);
+
+        mockScope.Received(1).ResetTransaction(transaction);
+        mockScope.Received(1).SetPropagationContext(Arg.Any<SentryPropagationContext>());
     }
 
     [Fact]

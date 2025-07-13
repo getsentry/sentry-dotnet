@@ -1,5 +1,5 @@
 ﻿{
-  allocated_bytes: 1,
+  total_allocated_bytes: 1,
   fragmented_bytes: 2,
   heap_size_bytes: 3,
   high_memory_load_threshold_bytes: 4,

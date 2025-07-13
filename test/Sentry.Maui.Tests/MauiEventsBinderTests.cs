@@ -4,37 +4,35 @@ namespace Sentry.Maui.Tests;
 
 public partial class MauiEventsBinderTests
 {
-    private class Fixture
+    private readonly MauiEventsBinderFixture _fixture = new();
+
+    // Most of the tests for this class are in separate partial class files for better organisation
+
+    [Fact]
+    public void OnBreadcrumbCreateCallback_CreatesBreadcrumb()
     {
-        public MauiEventsBinder Binder { get; }
-
-        public Scope Scope { get; } = new();
-
-        public SentryMauiOptions Options { get; } = new();
-
-        public Fixture()
-        {
-            var hub = Substitute.For<IHub>();
-            hub.When(h => h.ConfigureScope(Arg.Any<Action<Scope>>()))
-                .Do(c => c.Arg<Action<Scope>>()(Scope));
-
-            Options.Debug = true;
-            var logger = Substitute.For<IDiagnosticLogger>();
-            logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-            Options.DiagnosticLogger = logger;
-            var options = Microsoft.Extensions.Options.Options.Create(Options);
-            Binder = new MauiEventsBinder(
-                hub,
-                options,
-                [
-                    new MauiButtonEventsBinder(),
-                    new MauiImageButtonEventsBinder()
-                ]
+        // Arrange
+        var breadcrumbEvent = new BreadcrumbEvent(new object(), "TestName",
+            ("key1", "value1"), ("key2", "value2")
             );
+
+        // Act
+        _fixture.Binder.OnBreadcrumbCreateCallback(breadcrumbEvent);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            var crumb = Assert.Single(_fixture.Scope.Breadcrumbs);
+            Assert.Equal("Object.TestName", crumb.Message);
+            Assert.Equal(BreadcrumbLevel.Info, crumb.Level);
+            Assert.Equal(MauiEventsBinder.UserType, crumb.Type);
+            Assert.Equal(MauiEventsBinder.UserActionCategory, crumb.Category);
+            Assert.NotNull(crumb.Data);
+            Assert.Equal(breadcrumbEvent.ExtraData.Count(), crumb.Data.Count);
+            foreach (var (key, value) in breadcrumbEvent.ExtraData)
+            {
+                crumb.Data.Should().Contain(kvp => kvp.Key == key && kvp.Value == value);
+            }
         }
     }
-
-    private readonly Fixture _fixture = new();
-
-    // Tests are in partial class files for better organization
 }

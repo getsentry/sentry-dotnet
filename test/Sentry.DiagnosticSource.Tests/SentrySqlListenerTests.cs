@@ -37,7 +37,11 @@ public class SentrySqlListenerTests
 
     private class Fixture
     {
-        internal TransactionTracer Tracer { get; }
+        private TransactionTracer GetSampledTransaction() => new TransactionTracer(Hub, "foo", "bar");
+
+        private UnsampledTransaction GetUnsampledTransaction() => new UnsampledTransaction(Hub, new TransactionContext("foo", "bar"));
+
+        internal ITransactionTracer Tracer { get; }
 
         public InMemoryDiagnosticLogger Logger { get; }
 
@@ -46,7 +50,7 @@ public class SentrySqlListenerTests
         public IReadOnlyCollection<ISpan> Spans => Tracer?.Spans;
         public IHub Hub { get; }
 
-        public Fixture()
+        public Fixture(bool isSampled = true)
         {
             Logger = new InMemoryDiagnosticLogger();
 
@@ -59,10 +63,7 @@ public class SentrySqlListenerTests
             };
 
             Hub = Substitute.For<IHub>();
-            Tracer = new TransactionTracer(Hub, "foo", "bar")
-            {
-                IsSampled = true
-            };
+            Tracer = isSampled ? GetSampledTransaction() : GetUnsampledTransaction();
 
             var scope = new Scope
             {
@@ -74,13 +75,12 @@ public class SentrySqlListenerTests
         }
     }
 
-    private readonly Fixture _fixture = new();
-
     [Fact]
     public void OnNext_UnknownKey_SpanNotInvoked()
     {
         // Assert
-        var hub = _fixture.Hub;
+        var fixture = new Fixture();
+        var hub = fixture.Hub;
         var interceptor = new SentrySqlListener(hub, new SentryOptions());
 
         // Act
@@ -98,11 +98,12 @@ public class SentrySqlListenerTests
     public void OnNext_KnownKey_GetSpanInvoked(string key, bool addConnectionSpan)
     {
         // Arrange
-        var hub = _fixture.Hub;
+        var fixture = new Fixture();
+        var hub = fixture.Hub;
         var interceptor = new SentrySqlListener(hub, new SentryOptions());
         if (addConnectionSpan)
         {
-            _fixture.Tracer.StartChild("abc").SetExtra(SqlKeys.DbConnectionId, Guid.Empty);
+            fixture.Tracer.StartChild("abc").SetExtra(SqlKeys.DbConnectionId, Guid.Empty);
         }
 
         // Act
@@ -119,10 +120,10 @@ public class SentrySqlListenerTests
                 }));
 
         // Assert
-        var spans = _fixture.Spans.Where(s => s.Operation != "abc");
+        var spans = fixture.Spans.Where(s => s.Operation != "abc");
         Assert.NotEmpty(spans);
 
-        var firstSpan = _fixture.Spans.OrderByDescending(x => x.StartTimestamp).First();
+        var firstSpan = fixture.Spans.OrderByDescending(x => x.StartTimestamp).First();
         Assert.True(GetValidator(key)(firstSpan));
     }
 
@@ -132,8 +133,8 @@ public class SentrySqlListenerTests
     public void OnNext_KnownButNotSampled_SpanNotCreated(string key)
     {
         // Arrange
-        var hub = _fixture.Hub;
-        _fixture.Tracer.IsSampled = false;
+        var fixture = new Fixture(false);
+        var hub = fixture.Hub;
         var interceptor = new SentrySqlListener(hub, new SentryOptions());
 
         // Act
@@ -149,7 +150,7 @@ public class SentrySqlListenerTests
                     }
                 }));
 
-        Assert.Empty(_fixture.Tracer.Spans);
+        Assert.Empty(fixture.Tracer.Spans);
     }
 
     [Theory]
@@ -162,7 +163,8 @@ public class SentrySqlListenerTests
         string connectionCloseKey, string queryStartKey, string queryEndKey)
     {
         // Arrange
-        var hub = _fixture.Hub;
+        var fixture = new Fixture();
+        var hub = fixture.Hub;
         var interceptor = new SentrySqlListener(hub, new SentryOptions());
         var query = "SELECT * FROM ...";
         var connectionId = Guid.NewGuid();
@@ -223,21 +225,21 @@ public class SentrySqlListenerTests
                 }));
 
         // Assert
-        _fixture.Spans.Should().HaveCount(2);
-        var connectionSpan = _fixture.Spans.First(s => GetValidator(connectionOpenKey)(s));
-        var commandSpan = _fixture.Spans.First(s => GetValidator(queryStartKey)(s));
+        fixture.Spans.Should().HaveCount(2);
+        var connectionSpan = fixture.Spans.First(s => GetValidator(connectionOpenKey)(s));
+        var commandSpan = fixture.Spans.First(s => GetValidator(queryStartKey)(s));
 
         // Validate if all spans were finished.
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
-        Assert.All(_fixture.Spans, span =>
+        Assert.All(fixture.Spans, span =>
         {
             Assert.True(span.IsFinished);
             Assert.Equal(SpanStatus.Ok, span.Status);
         });
 
         // Check connections between spans.
-        Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(_fixture.Tracer.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
+        Assert.Equal(fixture.Tracer.SpanId, commandSpan.ParentSpanId);
 
         // Validate descriptions and extra data is set correctly
         Assert.Equal(query, commandSpan.Description);
@@ -266,7 +268,8 @@ public class SentrySqlListenerTests
         string connectionCloseKey, string queryStartKey, string queryEndKey)
     {
         // Arrange
-        var hub = _fixture.Hub;
+        var fixture = new Fixture();
+        var hub = fixture.Hub;
         var interceptor = new SentrySqlListener(hub, new SentryOptions());
         var query = "SELECT * FROM ...";
         var connectionId = Guid.NewGuid();
@@ -275,7 +278,7 @@ public class SentrySqlListenerTests
         var queryOperationId = Guid.NewGuid();
 
         // Act
-        var childSpan = _fixture.Tracer.StartChild("Child Span");
+        var childSpan = fixture.Tracer.StartChild("Child Span");
         interceptor.OnNext(
             new(connectionOpenKey,
                 new
@@ -317,13 +320,13 @@ public class SentrySqlListenerTests
         childSpan.Finish();
 
         // Assert
-        _fixture.Spans.Should().HaveCount(3);
-        var connectionSpan = _fixture.Spans.First(s => GetValidator(connectionOpenKey)(s));
-        var commandSpan = _fixture.Spans.First(s => GetValidator(queryStartKey)(s));
+        fixture.Spans.Should().HaveCount(3);
+        var connectionSpan = fixture.Spans.First(s => GetValidator(connectionOpenKey)(s));
+        var commandSpan = fixture.Spans.First(s => GetValidator(queryStartKey)(s));
 
         // Validate if all spans were finished.
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
-        Assert.All(_fixture.Spans, span =>
+        Assert.All(fixture.Spans, span =>
         {
             Assert.True(span.IsFinished);
             Assert.Equal(SpanStatus.Ok, span.Status);
@@ -345,7 +348,8 @@ public class SentrySqlListenerTests
         string connectionUpdate, string connectionClose)
     {
         // Arrange
-        var hub = _fixture.Hub;
+        var fixture = new Fixture();
+        var hub = fixture.Hub;
         var interceptor = new SentrySqlListener(hub, new SentryOptions());
         var connectionId = Guid.NewGuid();
         var connectionOperationIds = new List<Guid>
@@ -381,11 +385,11 @@ public class SentrySqlListenerTests
         }
 
         // Assert
-        _fixture.Spans.Should().HaveCount(2);
+        fixture.Spans.Should().HaveCount(2);
 
         // Validate if all spans were finished.
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
-        Assert.All(_fixture.Spans, span =>
+        Assert.All(fixture.Spans, span =>
         {
             Assert.True(span.IsFinished);
             Assert.Equal(SpanStatus.Ok, span.Status);
@@ -403,7 +407,8 @@ public class SentrySqlListenerTests
         string connectionUpdate, string connectionClose, string executeBeforeKey, string executeAfterKey)
     {
         // Arrange
-        var hub = _fixture.Hub;
+        var fixture = new Fixture();
+        var hub = fixture.Hub;
         var interceptor = new SentrySqlListener(hub, new SentryOptions());
         var query = "SELECT * FROM ...";
         var connectionId = Guid.NewGuid();
@@ -454,21 +459,21 @@ public class SentrySqlListenerTests
                 }));
 
         // Assert
-        _fixture.Spans.Should().HaveCount(2);
-        var connectionSpan = _fixture.Spans.First(s => GetValidator(connectionBeforeKey)(s));
-        var commandSpan = _fixture.Spans.First(s => GetValidator(executeBeforeKey)(s));
+        fixture.Spans.Should().HaveCount(2);
+        var connectionSpan = fixture.Spans.First(s => GetValidator(connectionBeforeKey)(s));
+        var commandSpan = fixture.Spans.First(s => GetValidator(executeBeforeKey)(s));
 
         // Validate if all spans were finished.
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
-        Assert.All(_fixture.Spans, span =>
+        Assert.All(fixture.Spans, span =>
         {
             Assert.True(span.IsFinished);
             Assert.Equal(SpanStatus.Ok, span.Status);
         });
 
         // Check connections between spans.
-        Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(_fixture.Tracer.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
+        Assert.Equal(fixture.Tracer.SpanId, commandSpan.ParentSpanId);
 
         Assert.Equal(query, commandSpan.Description);
     }
@@ -497,8 +502,9 @@ public class SentrySqlListenerTests
     {
         _ = testNumber;
         // Arrange
-        var hub = _fixture.Hub;
-        var interceptor = new SentrySqlListener(hub, _fixture.Options);
+        var fixture = new Fixture();
+        var hub = fixture.Hub;
+        var interceptor = new SentrySqlListener(hub, fixture.Options);
         var maxItems = 8;
         var query = "SELECT * FROM ...";
         var connectionsIds = Enumerable.Range(0, maxItems).Select(_ => Guid.NewGuid()).ToList();
@@ -543,13 +549,13 @@ public class SentrySqlListenerTests
 
         // Assert
         // 1 connection span and 1 query span, executed twice for 11 threads.
-        _fixture.Spans.Should().HaveCount(2 * 2 * maxItems);
+        fixture.Spans.Should().HaveCount(2 * 2 * maxItems);
 
-        var openSpans = _fixture.Spans.Where(span => !span.IsFinished);
-        var closedSpans = _fixture.Spans.Where(span => span.IsFinished);
-        var connectionSpans = _fixture.Spans.Where(span => span.Operation is "db.connection").ToList();
+        var openSpans = fixture.Spans.Where(span => !span.IsFinished);
+        var closedSpans = fixture.Spans.Where(span => span.IsFinished);
+        var connectionSpans = fixture.Spans.Where(span => span.Operation is "db.connection").ToList();
         var closedConnectionSpans = connectionSpans.Where(span => span.IsFinished).ToList();
-        var querySpans = _fixture.Spans.Where(span => span.Operation is "db.query").ToList();
+        var querySpans = fixture.Spans.Where(span => span.Operation is "db.query").ToList();
 
         // We have two connections per thread, despite having the same ConnectionId, both will be closed.
         closedConnectionSpans.Should().HaveCount(2 * maxItems);
@@ -565,27 +571,28 @@ public class SentrySqlListenerTests
         {
             Assert.NotNull(connectionSpan.Extra[SqlKeys.DbConnectionId]);
             Assert.NotNull(connectionSpan.Extra[SqlKeys.DbOperationId]);
-            Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
+            Assert.Equal(fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
         });
 
         // Assert all Query spans have the correct ParentId Set and record the Connection Id.
         Assert.All(querySpans, querySpan =>
         {
             Assert.True(querySpan.IsFinished);
-            Assert.Equal(_fixture.Tracer.SpanId, querySpan.ParentSpanId);
+            Assert.Equal(fixture.Tracer.SpanId, querySpan.ParentSpanId);
 
             var queryConnectionId = querySpan.Extra.TryGetValue<string, Guid?>(SqlKeys.DbConnectionId);
             queryConnectionId.Should().NotBeNull();
         });
 
-        _fixture.Logger.Entries.Should().BeEmpty();
+        fixture.Logger.Entries.Should().BeEmpty();
     }
 
     [Fact]
     public void OnNext_HappyPathWithError_TransactionWithErroredCommand()
     {
         // Arrange
-        var hub = _fixture.Hub;
+        var fixture = new Fixture();
+        var hub = fixture.Hub;
         var interceptor = new SentrySqlListener(hub, new SentryOptions());
         var query = "SELECT * FROM ...";
         var connectionId = Guid.NewGuid();
@@ -635,10 +642,10 @@ public class SentrySqlListenerTests
                 }));
 
         // Assert
-        _fixture.Spans.Should().HaveCount(2);
+        fixture.Spans.Should().HaveCount(2);
 
-        var connectionSpan = _fixture.Spans.First(s => GetValidator(SqlMicrosoftWriteConnectionOpenBeforeCommand)(s));
-        var commandSpan = _fixture.Spans.First(s => GetValidator(SqlMicrosoftBeforeExecuteCommand)(s));
+        var connectionSpan = fixture.Spans.First(s => GetValidator(SqlMicrosoftWriteConnectionOpenBeforeCommand)(s));
+        var commandSpan = fixture.Spans.First(s => GetValidator(SqlMicrosoftBeforeExecuteCommand)(s));
 
         Assert.True(connectionSpan.IsFinished);
         Assert.Equal(SpanStatus.Ok, connectionSpan.Status);
@@ -648,8 +655,8 @@ public class SentrySqlListenerTests
         Assert.Equal(SpanStatus.InternalError, commandSpan.Status);
 
         // Check connections between spans.
-        Assert.Equal(_fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
-        Assert.Equal(_fixture.Tracer.SpanId, commandSpan.ParentSpanId);
+        Assert.Equal(fixture.Tracer.SpanId, connectionSpan.ParentSpanId);
+        Assert.Equal(fixture.Tracer.SpanId, commandSpan.ParentSpanId);
 
         Assert.Equal(query, commandSpan.Description);
     }
@@ -658,7 +665,8 @@ public class SentrySqlListenerTests
     public void OnNext_ThrowsException_ExceptionIsolated()
     {
         // Arrange
-        var hub = _fixture.Hub;
+        var fixture = new Fixture();
+        var hub = fixture.Hub;
         var interceptor = new SentrySqlListener(hub, new SentryOptions());
         var exceptionReceived = false;
 

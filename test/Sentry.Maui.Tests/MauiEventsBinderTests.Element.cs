@@ -15,6 +15,7 @@ public partial class MauiEventsBinderTests
         _fixture.Binder.HandleElementEvents(parent);
 
         var child = new MockElement("child");
+        child.AutomationId = "child-automation-id";
 
         // Act
         parent.RaiseEvent(eventName, new ElementEventArgs(child));
@@ -28,6 +29,7 @@ public partial class MauiEventsBinderTests
         crumb.Data.Should().Contain($"{nameof(MockElement)}.Name", "parent");
         crumb.Data.Should().Contain("Element", nameof(MockElement));
         crumb.Data.Should().Contain("Element.Name", "child");
+        crumb.Data.Should().Contain("Element.AutomationId", "child-automation-id");
     }
 
     [Theory]
@@ -40,6 +42,7 @@ public partial class MauiEventsBinderTests
         _fixture.Binder.HandleElementEvents(parent);
 
         var child = new MockElement("child");
+        child.AutomationId = "child-automation-id";
 
         parent.RaiseEvent(eventName, new ElementEventArgs(child));
         Assert.Single(_fixture.Scope.Breadcrumbs); // Sanity check

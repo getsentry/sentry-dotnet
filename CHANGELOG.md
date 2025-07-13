@@ -2,32 +2,183 @@
 
 ## Unreleased
 
+### API changes
+
+- App Hang Tracking for iOS is now disabled by default, until this functionality is more stable. If you want to use it in your applications then you'll need to enable this manually. ([#4320](https://github.com/getsentry/sentry-dotnet/pull/4320))
+
 ### Features
 
+- Added StartSpan and GetTransaction methods to the SentrySdk ([#4303](https://github.com/getsentry/sentry-dotnet/pull/4303))
+
+### Fixes
+
+- Avoid double reporting sessions on iOS and Android apps ([#4341](https://github.com/getsentry/sentry-dotnet/pull/4341))
+- Sentry now decompresses Request bodies in ASP.NET Core when RequestDecompression middleware is enabled ([#4315](https://github.com/getsentry/sentry-dotnet/pull/4315))
+- Custom ISentryEventProcessors are now run for native iOS events ([#4318](https://github.com/getsentry/sentry-dotnet/pull/4318))
+- Crontab validation when capturing checkins ([#4314](https://github.com/getsentry/sentry-dotnet/pull/4314))
+- Fixed an issue with the way Sentry detects build settings. This was causing Sentry to produce code that could fail at runtime in AOT compiled applications. ([#4333](https://github.com/getsentry/sentry-dotnet/pull/4333))
+- Native AOT: link to static `lzma` on Linux/MUSL ([#4326](https://github.com/getsentry/sentry-dotnet/pull/4326))
+- AppDomain.CurrentDomain.ProcessExit hook is now removed on shutdown ([#4323](https://github.com/getsentry/sentry-dotnet/pull/4323))
+- Include `Data` set via `ITransactionTracer` in `SentryTransaction`([#4148](https://github.com/getsentry/sentry-dotnet/pull/4148))
+
+### Dependencies
+
+- Bump Native SDK from v0.9.0 to v0.9.1 ([#4309](https://github.com/getsentry/sentry-dotnet/pull/4309))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#091)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.9.0...0.9.1)
+- Bump CLI from v2.46.0 to v2.47.0 ([#4332](https://github.com/getsentry/sentry-dotnet/pull/4332))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2470)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.46.0...2.47.0)
+
+## 5.11.2
+
+### Fixes
+
+- Unsampled spans no longer propagate empty trace headers ([#4302](https://github.com/getsentry/sentry-dotnet/pull/4302))
+
+## 5.11.1
+
+### Fixes
+
+- Fix linking of libsentry-native to avoid DllNotFoundException in Native AOT applications ([#4298](https://github.com/getsentry/sentry-dotnet/pull/4298))
+
+## 5.11.0
+
+### Features
+
+- Added non-allocating `ConfigureScope` and `ConfigureScopeAsync` overloads ([#4244](https://github.com/getsentry/sentry-dotnet/pull/4244))
+- Add .NET MAUI `AutomationId` element information to breadcrumbs ([#4248](https://github.com/getsentry/sentry-dotnet/pull/4248))
+- The HTTP Response Status Code for spans instrumented using OpenTelemetry is now searchable ([#4283](https://github.com/getsentry/sentry-dotnet/pull/4283))
+
+### Fixes
+
+- The HTTP instrumentation uses the span created for the outgoing request in the sentry-trace header, fixing the parent-child relationship between client and server ([#4264](https://github.com/getsentry/sentry-dotnet/pull/4264))
+- ExtraData not captured for Breadcrumbs in MauiEventsBinder ([#4254](https://github.com/getsentry/sentry-dotnet/pull/4254))
+    - NOTE: Required breaking changes to the public API of `Sentry.Maui.BreadcrumbEvent`, while keeping an _Obsolete_ constructor for backward compatibility.
+- InvalidOperationException sending attachments on Android with LLVM enabled ([#4276](https://github.com/getsentry/sentry-dotnet/pull/4276))
+- When CaptureFeedback methods are called with invalid email addresses, the email address will be removed and, if Debug mode is enabled, a warning will be logged. This is done to avoid losing the Feedback altogether (Sentry would reject Feedback that has an invalid email address) ([#4284](https://github.com/getsentry/sentry-dotnet/pull/4284))
+
+### Dependencies
+
+- Bump the version of the .NET SDK that we use from 9.0.203 to 9.0.301 ([#4272](https://github.com/getsentry/sentry-dotnet/pull/4272))
+  - Note that this also required we bump various Java dependencies (since version 9.0.300 of the Android workload requires newer versions of the these)
+  - See https://docs.sentry.io/platforms/dotnet/troubleshooting/#detected-package-version-outside-of-dependency-constraint if you see NU1605, NU1608 and/or NU1107 warnings after upgrading   
+- Bump Native SDK from v0.8.5 to v0.9.0 ([#4260](https://github.com/getsentry/sentry-dotnet/pull/4260))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#090)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.8.5...0.9.0)
+
+## 5.10.0
+
+### Features
+
+- Rename MemoryInfo.AllocatedBytes to MemoryInfo.TotalAllocatedBytes ([#4243](https://github.com/getsentry/sentry-dotnet/pull/4243))
+- Replace libcurl with .NET HttpClient for sentry-native ([#4222](https://github.com/getsentry/sentry-dotnet/pull/4222))
+
+### Fixes
+
+- InvalidCastException in SentrySpanProcessor when using the Sentry.OpenTelemetry integration ([#4245](https://github.com/getsentry/sentry-dotnet/pull/4245))
+- Fix InApp Exclude for frames without Module by checking against frame's Package ([#4236](https://github.com/getsentry/sentry-dotnet/pull/4236))
+
+## 5.9.0
+
+### Features
+
+- Reduced memory pressure when sampling less than 100% of traces/transactions ([#4212](https://github.com/getsentry/sentry-dotnet/pull/4212))
+- Add SentrySdk.SetTag ([#4232](https://github.com/getsentry/sentry-dotnet/pull/4232))
+
+### Fixes
+
+- Fixed symbolication for net9.0-android applications in Release config ([#4221](https://github.com/getsentry/sentry-dotnet/pull/4221))
+- Support Linux arm64 on Native AOT ([#3700](https://github.com/getsentry/sentry-dotnet/pull/3700))
+- Revert W3C traceparent support ([#4204](https://github.com/getsentry/sentry-dotnet/pull/4204))
+
+### Dependencies
+
+- Bump CLI from v2.45.0 to v2.46.0 ([#4226](https://github.com/getsentry/sentry-dotnet/pull/4226))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2460)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.45.0...2.46.0)
+
+## 5.8.1
+
+### Fixes
+
+- Support musl on Linux ([#4188](https://github.com/getsentry/sentry-dotnet/pull/4188))
+- Support for Windows ARM64 with Native AOT ([#4187](https://github.com/getsentry/sentry-dotnet/pull/4187))
+- Addressed potential performance issue with Sentry.Maui ([#4219](https://github.com/getsentry/sentry-dotnet/pull/4219))
+- Respect `SentryNative=false` at runtime ([#4220](https://github.com/getsentry/sentry-dotnet/pull/4220))
+
+## 5.8.0
+
+### Features
+
+- .NET MAUI integration with CommunityToolkit.Mvvm Async Relay Commands can now be auto spanned with the new package Sentry.Maui.CommunityToolkit.Mvvm ([#4125](https://github.com/getsentry/sentry-dotnet/pull/4125))
+
+### Fixes
+
+- Revert "Bump Cocoa SDK from v8.39.0 to v8.46.0 (#4103)" ([#4202](https://github.com/getsentry/sentry-dotnet/pull/4202))
+  - IMPORTANT: Fixes multiple issues running versions 5.6.x and 5.7.x of the Sentry SDK for .NET on iOS (initialising the SDK and sending data to Sentry) 
+
+### Dependencies
+
+- Bump Native SDK from v0.8.4 to v0.8.5 ([#4189](https://github.com/getsentry/sentry-dotnet/pull/4189))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#085)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.8.4...0.8.5)
+
+## 5.7.0
+
+### Features
+
+- New source generator allows Sentry to see true build variables like PublishAot and PublishTrimmed to properly adapt checks in the Sentry SDK ([#4101](https://github.com/getsentry/sentry-dotnet/pull/4101))
+- Auto breadcrumbs now include all .NET MAUI gesture recognizer events ([#4124](https://github.com/getsentry/sentry-dotnet/pull/4124))
+- Associate replays with errors and traces on Android ([#4133](https://github.com/getsentry/sentry-dotnet/pull/4133))
+
+### Fixes
+
+- Redact Authorization headers before sending events to Sentry ([#4164](https://github.com/getsentry/sentry-dotnet/pull/4164))
+- Remove Strong Naming from Sentry.Hangfire ([#4099](https://github.com/getsentry/sentry-dotnet/pull/4099))
+- Increase `RequestSize.Small` threshold from 1 kB to 4 kB to match other SDKs ([#4177](https://github.com/getsentry/sentry-dotnet/pull/4177))
+
+### Dependencies
+
+- Bump CLI from v2.43.1 to v2.45.0 ([#4169](https://github.com/getsentry/sentry-dotnet/pull/4169), [#4179](https://github.com/getsentry/sentry-dotnet/pull/4179))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2450)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.43.1...2.45.0)
+
+## 5.7.0-beta.0
+
+### Features
+
+- When setting a transaction on the scope, the SDK will attempt to sync the transaction's trace context with the SDK on the native layer. Finishing a transaction will now also start a new trace ([#4153](https://github.com/getsentry/sentry-dotnet/pull/4153))
+- Added `CaptureFeedback` overload with `configureScope` parameter ([#4073](https://github.com/getsentry/sentry-dotnet/pull/4073))
 - Custom SessionReplay masks in MAUI Android apps ([#4121](https://github.com/getsentry/sentry-dotnet/pull/4121))
 
 ### Fixes
 
 - Work around iOS SHA1 bug ([#4143](https://github.com/getsentry/sentry-dotnet/pull/4143))
-- Include `Data` set via `ITransactionTracer` in `SentryTransaction`([#4148](https://github.com/getsentry/sentry-dotnet/pull/4148))
+- Prevent Auto Breadcrumbs Event Binder from leaking and rebinding events  ([#4159](https://github.com/getsentry/sentry-dotnet/pull/4159))
+- Fixes build error when building .NET Framework applications using Sentry 5.6.0: `MSB4185 :The function "IsWindows" on type "System.OperatingSystem" is not available` ([#4160](https://github.com/getsentry/sentry-dotnet/pull/4160))
+- Added a `SentrySetCommitReleaseOptions` build property that can be specified separately from `SentryReleaseOptions` ([#4109](https://github.com/getsentry/sentry-dotnet/pull/4109))
+
+### Dependencies
+
+- Bump CLI from v2.43.0 to v2.43.1 ([#4151](https://github.com/getsentry/sentry-dotnet/pull/4151))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2431)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.43.0...2.43.1)
 
 ## 5.6.0
 
 ### Features
 
 - Option to disable the SentryNative integration ([#4107](https://github.com/getsentry/sentry-dotnet/pull/4107), [#4134](https://github.com/getsentry/sentry-dotnet/pull/4134))
-  - To disable it, add this msbuild property: `<SentryNative>false</SentryNative>` 
+  - To disable it, add this msbuild property: `<SentryNative>false</SentryNative>`
 - Reintroduced experimental support for Session Replay on Android ([#4097](https://github.com/getsentry/sentry-dotnet/pull/4097))
+- If an incoming HTTP request has the `traceparent` header, it is now parsed and interpreted like the `sentry-trace` header. Outgoing requests now contain the `traceparent` header to facilitate integration with servesr that only support the [W3C Trace Context](https://www.w3.org/TR/trace-context/). ([#4084](https://github.com/getsentry/sentry-dotnet/pull/4084))
 
 ### Fixes
 
 - Ensure user exception data is not removed by AspNetCoreExceptionProcessor ([#4016](https://github.com/getsentry/sentry-dotnet/pull/4106))
 - Prevent users from disabling AndroidEnableAssemblyCompression which leads to untrappable crash ([#4089](https://github.com/getsentry/sentry-dotnet/pull/4089))
 - Fixed MSVCRT build warning on Windows ([#4111](https://github.com/getsentry/sentry-dotnet/pull/4111))
-
-### Features
-
-- If an incoming HTTP request has the `traceparent` header, it is now parsed and interpreted like the `sentry-trace` header. Outgoing requests now contain the `traceparent` header to facilitate integration with servesr that only support the [W3C Trace Context](https://www.w3.org/TR/trace-context/). ([#4084](https://github.com/getsentry/sentry-dotnet/pull/4084))
 
 ### Dependencies
 

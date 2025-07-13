@@ -1,7 +1,27 @@
+using Sentry.Tests.Internals;
+
 namespace Sentry.Tests;
 
 public class DynamicSamplingContextTests
 {
+    private class Fixture
+    {
+        public SentryId ActiveReplayId { get; } = SentryId.Create();
+        public IReplaySession InactiveReplaySession { get; }
+        public IReplaySession ActiveReplaySession { get; }
+
+        public Fixture()
+        {
+            ActiveReplaySession = Substitute.For<IReplaySession>();
+            ActiveReplaySession.ActiveReplayId.Returns(ActiveReplayId);
+
+            InactiveReplaySession = Substitute.For<IReplaySession>();
+            InactiveReplaySession.ActiveReplayId.Returns((SentryId?)null);
+        }
+    }
+
+    private Fixture _fixture = new();
+
     [Fact]
     public void EmptyContext()
     {
@@ -19,7 +39,7 @@ public class DynamicSamplingContextTests
             {"sentry-sample_rate", "1.0"}
         });
 
-        var dsc = baggage.CreateDynamicSamplingContext();
+        var dsc = baggage.CreateDynamicSamplingContext(_fixture.InactiveReplaySession);
 
         Assert.Null(dsc);
     }
@@ -34,7 +54,7 @@ public class DynamicSamplingContextTests
             {"sentry-sample_rate", "1.0"}
         });
 
-        var dsc = baggage.CreateDynamicSamplingContext();
+        var dsc = baggage.CreateDynamicSamplingContext(_fixture.InactiveReplaySession);
 
         Assert.Null(dsc);
     }
@@ -49,7 +69,7 @@ public class DynamicSamplingContextTests
             {"sentry-sample_rate", "1.0"}
         });
 
-        var dsc = baggage.CreateDynamicSamplingContext();
+        var dsc = baggage.CreateDynamicSamplingContext(_fixture.InactiveReplaySession);
 
         Assert.Null(dsc);
     }
@@ -63,7 +83,7 @@ public class DynamicSamplingContextTests
             {"sentry-sample_rate", "1.0"}
         });
 
-        var dsc = baggage.CreateDynamicSamplingContext();
+        var dsc = baggage.CreateDynamicSamplingContext(_fixture.InactiveReplaySession);
 
         Assert.Null(dsc);
     }
@@ -78,7 +98,7 @@ public class DynamicSamplingContextTests
             {"sentry-sample_rate", "1.0"}
         });
 
-        var dsc = baggage.CreateDynamicSamplingContext();
+        var dsc = baggage.CreateDynamicSamplingContext(_fixture.InactiveReplaySession);
 
         Assert.Null(dsc);
     }
@@ -92,7 +112,7 @@ public class DynamicSamplingContextTests
             {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"}
         });
 
-        var dsc = baggage.CreateDynamicSamplingContext();
+        var dsc = baggage.CreateDynamicSamplingContext(_fixture.InactiveReplaySession);
 
         Assert.Null(dsc);
     }
@@ -107,7 +127,7 @@ public class DynamicSamplingContextTests
             {"sentry-sample_rate", "not-a-number"}
         });
 
-        var dsc = baggage.CreateDynamicSamplingContext();
+        var dsc = baggage.CreateDynamicSamplingContext(_fixture.InactiveReplaySession);
 
         Assert.Null(dsc);
     }
@@ -122,7 +142,7 @@ public class DynamicSamplingContextTests
             {"sentry-sample_rate", "-0.1"}
         });
 
-        var dsc = baggage.CreateDynamicSamplingContext();
+        var dsc = baggage.CreateDynamicSamplingContext(_fixture.InactiveReplaySession);
 
         Assert.Null(dsc);
     }
@@ -137,7 +157,7 @@ public class DynamicSamplingContextTests
             {"sentry-sample_rate", "1.1"}
         });
 
-        var dsc = baggage.CreateDynamicSamplingContext();
+        var dsc = baggage.CreateDynamicSamplingContext(_fixture.InactiveReplaySession);
 
         Assert.Null(dsc);
     }
@@ -153,7 +173,7 @@ public class DynamicSamplingContextTests
             {"sentry-sample_rand", "not-a-number"},
         });
 
-        var dsc = baggage.CreateDynamicSamplingContext();
+        var dsc = baggage.CreateDynamicSamplingContext(_fixture.InactiveReplaySession);
 
         Assert.Null(dsc);
     }
@@ -169,7 +189,7 @@ public class DynamicSamplingContextTests
             {"sentry-sample_rand", "-0.1"}
         });
 
-        var dsc = baggage.CreateDynamicSamplingContext();
+        var dsc = baggage.CreateDynamicSamplingContext(_fixture.InactiveReplaySession);
 
         Assert.Null(dsc);
     }
@@ -185,7 +205,7 @@ public class DynamicSamplingContextTests
             {"sentry-sample_rand", "1.0"} // Must be less than 1
         });
 
-        var dsc = baggage.CreateDynamicSamplingContext();
+        var dsc = baggage.CreateDynamicSamplingContext(_fixture.InactiveReplaySession);
 
         Assert.Null(dsc);
     }
@@ -200,7 +220,7 @@ public class DynamicSamplingContextTests
             {"sentry-sample_rate", "0.5"}
         });
 
-        var dsc = baggage.CreateDynamicSamplingContext();
+        var dsc = baggage.CreateDynamicSamplingContext(_fixture.InactiveReplaySession);
 
         using var scope = new AssertionScope();
         Assert.NotNull(dsc);
@@ -223,7 +243,7 @@ public class DynamicSamplingContextTests
             {"sentry-sampled", sampled},
         });
 
-        var dsc = baggage.CreateDynamicSamplingContext();
+        var dsc = baggage.CreateDynamicSamplingContext(_fixture.InactiveReplaySession);
 
         using var scope = new AssertionScope();
         Assert.NotNull(dsc);
@@ -252,13 +272,15 @@ public class DynamicSamplingContextTests
             {"sentry-sampled", "foo"},
         });
 
-        var dsc = baggage.CreateDynamicSamplingContext();
+        var dsc = baggage.CreateDynamicSamplingContext(_fixture.InactiveReplaySession);
 
         Assert.Null(dsc);
     }
 
-    [Fact]
-    public void CreateFromBaggage_Valid_Minimum()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CreateFromBaggage_Valid_Minimum(bool replaySessionIsActive)
     {
         var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
         {
@@ -267,18 +289,29 @@ public class DynamicSamplingContextTests
             {"sentry-sample_rate", "1.0"}
         });
 
-        var dsc = baggage.CreateDynamicSamplingContext();
+        var dsc = baggage.CreateDynamicSamplingContext(replaySessionIsActive ? _fixture.ActiveReplaySession : _fixture.InactiveReplaySession);
 
         Assert.NotNull(dsc);
-        Assert.Equal(4, dsc.Items.Count);
+        Assert.Equal(replaySessionIsActive ? 5 : 4, dsc.Items.Count);
         Assert.Equal("43365712692146d08ee11a729dfbcaca", Assert.Contains("trace_id", dsc.Items));
         Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
         Assert.Equal("1.0", Assert.Contains("sample_rate", dsc.Items));
         Assert.Contains("sample_rand", dsc.Items);
+        if (replaySessionIsActive)
+        {
+            // We add the replay_id automatically when we have an active replay session
+            Assert.Equal(_fixture.ActiveReplayId.ToString(), Assert.Contains("replay_id", dsc.Items));
+        }
+        else
+        {
+            Assert.DoesNotContain("replay_id", dsc.Items);
+        }
     }
 
-    [Fact]
-    public void CreateFromBaggage_Valid_Complete()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void CreateFromBaggage_Valid_Complete(bool replaySessionIsActive)
     {
         var baggage = BaggageHeader.Create(new List<KeyValuePair<string, string>>
         {
@@ -290,10 +323,11 @@ public class DynamicSamplingContextTests
             {"sentry-release", "test@1.0.0+abc"},
             {"sentry-environment", "production"},
             {"sentry-user_segment", "Group B"},
-            {"sentry-transaction", "GET /person/{id}"}
+            {"sentry-transaction", "GET /person/{id}"},
+            {"sentry-replay_id","bfd31b89a59d41c99d96dc2baf840ecd"}
         });
 
-        var dsc = baggage.CreateDynamicSamplingContext();
+        var dsc = baggage.CreateDynamicSamplingContext(replaySessionIsActive ? _fixture.ActiveReplaySession : _fixture.InactiveReplaySession);
 
         Assert.NotNull(dsc);
         Assert.Equal(baggage.Members.Count, dsc.Items.Count);
@@ -306,6 +340,16 @@ public class DynamicSamplingContextTests
         Assert.Equal("production", Assert.Contains("environment", dsc.Items));
         Assert.Equal("Group B", Assert.Contains("user_segment", dsc.Items));
         Assert.Equal("GET /person/{id}", Assert.Contains("transaction", dsc.Items));
+        if (replaySessionIsActive)
+        {
+            // We overwrite the replay_id when we have an active replay session
+            Assert.Equal(_fixture.ActiveReplayId.ToString(), Assert.Contains("replay_id", dsc.Items));
+        }
+        else
+        {
+            // If we don't have any active replay session of our own then we propagate whatever was in the baggage header
+            Assert.Equal("bfd31b89a59d41c99d96dc2baf840ecd", Assert.Contains("replay_id", dsc.Items));
+        }
     }
 
     [Fact]
@@ -320,10 +364,11 @@ public class DynamicSamplingContextTests
             {"sentry-release", "test@1.0.0+abc"},
             {"sentry-environment", "production"},
             {"sentry-user_segment", "Group B"},
-            {"sentry-transaction", "GET /person/{id}"}
+            {"sentry-transaction", "GET /person/{id}"},
+            {"sentry-replay_id", _fixture.ActiveReplayId.ToString()}
         });
 
-        var dsc = original.CreateDynamicSamplingContext();
+        var dsc = original.CreateDynamicSamplingContext(_fixture.ActiveReplaySession);
 
         var result = dsc?.ToBaggageHeader();
 
@@ -331,12 +376,10 @@ public class DynamicSamplingContextTests
         Assert.Equal(original.Members, result.Members);
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    [InlineData(null)]
-    public void CreateFromTransaction(bool? isSampled)
+    [Fact]
+    public void CreateFromTransaction()
     {
+        // Arrange
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
@@ -354,48 +397,95 @@ public class DynamicSamplingContextTests
         {
             Name = "GET /person/{id}",
             NameSource = TransactionNameSource.Route,
-            IsSampled = isSampled,
             SampleRate = 0.5,
-            SampleRand = (isSampled ?? true) ? 0.4000 : 0.6000, // Lower than the sample rate means sampled == true
+            SampleRand = 0.4000, // Lower than the sample rate means sampled == true
+            User = new SentryUser(),
+        };
+
+        // Act
+        var dsc = transaction.CreateDynamicSamplingContext(options, _fixture.ActiveReplaySession);
+
+        // Assert
+        Assert.NotNull(dsc);
+        Assert.Equal(9, dsc.Items.Count);
+        Assert.Equal(traceId.ToString(), Assert.Contains("trace_id", dsc.Items));
+        Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
+        Assert.Equal("true", Assert.Contains("sampled", dsc.Items));
+        Assert.Equal("0.5", Assert.Contains("sample_rate", dsc.Items));
+        Assert.Equal("0.4000", Assert.Contains("sample_rand", dsc.Items));
+        Assert.Equal("foo@2.4.5", Assert.Contains("release", dsc.Items));
+        Assert.Equal("staging", Assert.Contains("environment", dsc.Items));
+        Assert.Equal("GET /person/{id}", Assert.Contains("transaction", dsc.Items));
+        // We add the replay_id automatically when we have an active replay session
+        Assert.Equal(_fixture.ActiveReplayId.ToString(), Assert.Contains("replay_id", dsc.Items));
+    }
+
+    [Fact]
+    public void CreateFromUnsampledTransaction()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            Release = "foo@2.4.5",
+            Environment = "staging"
+        };
+
+        var hub = Substitute.For<IHub>();
+        var ctx = Substitute.For<ITransactionContext>();
+        ctx.Name.Returns("GET /person/{id}");
+
+        var traceId = SentryId.Create();
+        ctx.TraceId.Returns(traceId);
+
+        var transaction = new UnsampledTransaction(hub, ctx)
+        {
+            SampleRate = 0.5,
+            SampleRand = 0.6000, // Lower than the sample rate means sampled == true
             User =
             {
             },
         };
 
-        var dsc = transaction.CreateDynamicSamplingContext(options);
+        var dsc = transaction.CreateDynamicSamplingContext(options, _fixture.ActiveReplaySession);
 
         Assert.NotNull(dsc);
-        Assert.Equal(isSampled.HasValue ? 8 : 7, dsc.Items.Count);
+        Assert.Equal(9, dsc.Items.Count);
         Assert.Equal(traceId.ToString(), Assert.Contains("trace_id", dsc.Items));
         Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
-        if (transaction.IsSampled is { } sampled)
-        {
-            Assert.Equal(sampled ? "true" : "false", Assert.Contains("sampled", dsc.Items));
-        }
-        else
-        {
-            Assert.DoesNotContain("sampled", dsc.Items);
-        }
+        Assert.Equal("false", Assert.Contains("sampled", dsc.Items));
         Assert.Equal("0.5", Assert.Contains("sample_rate", dsc.Items));
-        Assert.Equal((isSampled ?? true) ? "0.4000" : "0.6000", Assert.Contains("sample_rand", dsc.Items));
+        Assert.Equal("0.6000", Assert.Contains("sample_rand", dsc.Items));
         Assert.Equal("foo@2.4.5", Assert.Contains("release", dsc.Items));
         Assert.Equal("staging", Assert.Contains("environment", dsc.Items));
         Assert.Equal("GET /person/{id}", Assert.Contains("transaction", dsc.Items));
+        // We add the replay_id automatically when we have an active replay session
+        Assert.Equal(_fixture.ActiveReplayId.ToString(), Assert.Contains("replay_id", dsc.Items));
     }
 
-    [Fact]
-    public void CreateFromPropagationContext_Valid_Complete()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CreateFromPropagationContext_Valid_Complete(bool replaySessionIsActive)
     {
         var options = new SentryOptions { Dsn = "https://a@sentry.io/1", Release = "test-release", Environment = "test-environment" };
         var propagationContext = new SentryPropagationContext(
             SentryId.Parse("43365712692146d08ee11a729dfbcaca"), SpanId.Parse("1234"));
 
-        var dsc = propagationContext.CreateDynamicSamplingContext(options);
+        var dsc = propagationContext.CreateDynamicSamplingContext(options, replaySessionIsActive ? _fixture.ActiveReplaySession : _fixture.InactiveReplaySession);
 
         Assert.NotNull(dsc);
         Assert.Equal("43365712692146d08ee11a729dfbcaca", Assert.Contains("trace_id", dsc.Items));
         Assert.Equal("a", Assert.Contains("public_key", dsc.Items));
         Assert.Equal("test-release", Assert.Contains("release", dsc.Items));
         Assert.Equal("test-environment", Assert.Contains("environment", dsc.Items));
+        if (replaySessionIsActive)
+        {
+            // We add the replay_id automatically when we have an active replay session
+            Assert.Equal(_fixture.ActiveReplayId.ToString(), Assert.Contains("replay_id", dsc.Items));
+        }
+        else
+        {
+            Assert.DoesNotContain("replay_id", dsc.Items);
+        }
     }
 }

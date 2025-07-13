@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 
 namespace Sentry;
 
@@ -10,12 +11,12 @@ internal class SentryPropagationContext
 
     internal DynamicSamplingContext? _dynamicSamplingContext;
 
-    public DynamicSamplingContext GetOrCreateDynamicSamplingContext(SentryOptions options)
+    public DynamicSamplingContext GetOrCreateDynamicSamplingContext(SentryOptions options, IReplaySession replaySession)
     {
         if (_dynamicSamplingContext is null)
         {
             options.LogDebug("Creating the Dynamic Sampling Context from the Propagation Context");
-            _dynamicSamplingContext = this.CreateDynamicSamplingContext(options);
+            _dynamicSamplingContext = this.CreateDynamicSamplingContext(options, replaySession);
         }
 
         return _dynamicSamplingContext;
@@ -47,7 +48,7 @@ internal class SentryPropagationContext
         _dynamicSamplingContext = other?._dynamicSamplingContext;
     }
 
-    public static SentryPropagationContext CreateFromHeaders(IDiagnosticLogger? logger, SentryTraceHeader? traceHeader, BaggageHeader? baggageHeader)
+    public static SentryPropagationContext CreateFromHeaders(IDiagnosticLogger? logger, SentryTraceHeader? traceHeader, BaggageHeader? baggageHeader, IReplaySession replaySession)
     {
         logger?.LogDebug("Creating a propagation context from headers.");
 
@@ -57,7 +58,7 @@ internal class SentryPropagationContext
             return new SentryPropagationContext();
         }
 
-        var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext();
+        var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext(replaySession);
         return new SentryPropagationContext(traceHeader.TraceId, traceHeader.SpanId, dynamicSamplingContext);
     }
 }

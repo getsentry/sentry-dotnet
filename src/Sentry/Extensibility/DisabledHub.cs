@@ -33,7 +33,33 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
+    public void ConfigureScope<TArg>(Action<Scope, TArg> configureScope, TArg arg)
+    {
+    }
+
+    /// <summary>
+    /// No-Op.
+    /// </summary>
     public Task ConfigureScopeAsync(Func<Scope, Task> configureScope) => Task.CompletedTask;
+
+    /// <summary>
+    /// No-Op.
+    /// </summary>
+    public Task ConfigureScopeAsync<TArg>(Func<Scope, TArg, Task> configureScope, TArg arg) => Task.CompletedTask;
+
+    /// <summary>
+    /// No-Op.
+    /// </summary>
+    public void SetTag(string key, string value)
+    {
+    }
+
+    /// <summary>
+    /// No-Op.
+    /// </summary>
+    public void UnsetTag(string key)
+    {
+    }
 
     /// <summary>
     /// No-Op.
@@ -146,6 +172,13 @@ public class DisabledHub : IHub, IDisposable
     /// No-Op.
     /// </summary>
     public SentryId CaptureEvent(SentryEvent evt, Scope? scope = null, SentryHint? hint = null) => SentryId.Empty;
+
+    /// <summary>
+    /// No-Op.
+    /// </summary>
+    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+    {
+    }
 
     /// <summary>
     /// No-Op.
