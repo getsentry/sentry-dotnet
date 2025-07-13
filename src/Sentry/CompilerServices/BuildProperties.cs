@@ -10,7 +10,7 @@ public static class BuildProperties
     /// <summary>
     /// The Build Variables generated from you csproj file and initialized by the Sentry Source Generated Module Initializer
     /// </summary>
-    public static IReadOnlyDictionary<string, string>? Values { get; private set; }
+    internal static IReadOnlyDictionary<string, string>? Values { get; set; }
 
     /// <summary>
     /// This is called by a Sentry Source-Generator module initializers to help us determine things like

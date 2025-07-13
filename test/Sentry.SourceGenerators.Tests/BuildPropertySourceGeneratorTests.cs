@@ -7,7 +7,7 @@ namespace Sentry.SourceGenerators.Tests;
 
 public class BuildPropertySourceGeneratorTests
 {
-    private static readonly string s_hintName = "Sentry.Generated.BuildPropertyInitializer.g.cs";
+    private const string HintName = "Sentry.Generated.BuildPropertyInitializer.g.cs";
 
     [SkippableFact]
     public Task RunResult_Success()
@@ -18,8 +18,9 @@ public class BuildPropertySourceGeneratorTests
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(1);
-        result.GeneratedSources.First().HintName.Should().Be(s_hintName);
-        return Verify(result);
+        result.GeneratedSources.First().HintName.Should().Be(HintName);
+        var source = result.GeneratedSources.First().SourceText.ToString();
+        return Verify(source);
     }
 
     [SkippableFact]
@@ -32,8 +33,9 @@ public class BuildPropertySourceGeneratorTests
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(1);
-        result.GeneratedSources.First().HintName.Should().Be(s_hintName);
-        return Verify(result);
+        result.GeneratedSources.First().HintName.Should().Be(HintName);
+        var source = result.GeneratedSources.First().SourceText.ToString();
+        return Verify(source);
     }
 
     [SkippableFact]
@@ -45,8 +47,9 @@ public class BuildPropertySourceGeneratorTests
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(1);
-        result.GeneratedSources.First().HintName.Should().Be(s_hintName);
-        return Verify(result);
+        result.GeneratedSources.First().HintName.Should().Be(HintName);
+        var source = result.GeneratedSources.First().SourceText.ToString();
+        return Verify(source);
     }
 
     [SkippableFact]
@@ -76,7 +79,7 @@ public class BuildPropertySourceGeneratorTests
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
 
-        var generated = result.GeneratedSources.Any(x => x.HintName.Equals(s_hintName));
+        var generated = result.GeneratedSources.Any(x => x.HintName.Equals(HintName));
         generated.Should().Be(sourceGenExpected);
     }
 
@@ -92,12 +95,12 @@ public class BuildPropertySourceGeneratorTests
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
 
-        var generated = result.GeneratedSources.Any(x => x.HintName.Equals(s_hintName));
+        var generated = result.GeneratedSources.Any(x => x.HintName.Equals(HintName));
         generated.Should().Be(sourceGenExpected);
     }
 
     [SkippableFact]
-    public Task RunResult_Expect_None()
+    public void RunResult_Expect_None()
     {
         Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
 
@@ -105,8 +108,6 @@ public class BuildPropertySourceGeneratorTests
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(0);
-
-        return Verify(result);
     }
 
     private static GeneratorDriver BuildDriver(OutputKind outputKind, Assembly metadataAssembly, params IEnumerable<(string Key, string Value)> buildProperties)
