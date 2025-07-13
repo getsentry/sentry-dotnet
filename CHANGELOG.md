@@ -12,10 +12,12 @@
 
 ### Fixes
 
+- Avoid double reporting sessions on iOS and Android apps ([#4341](https://github.com/getsentry/sentry-dotnet/pull/4341))
 - Sentry now decompresses Request bodies in ASP.NET Core when RequestDecompression middleware is enabled ([#4315](https://github.com/getsentry/sentry-dotnet/pull/4315))
 - Custom ISentryEventProcessors are now run for native iOS events ([#4318](https://github.com/getsentry/sentry-dotnet/pull/4318))
 - Crontab validation when capturing checkins ([#4314](https://github.com/getsentry/sentry-dotnet/pull/4314))
 - Source context for class libraries when running on Android in Release mode ([#4294](https://github.com/getsentry/sentry-dotnet/pull/4294))
+- Fixed an issue with the way Sentry detects build settings. This was causing Sentry to produce code that could fail at runtime in AOT compiled applications. ([#4333](https://github.com/getsentry/sentry-dotnet/pull/4333))
 - Native AOT: link to static `lzma` on Linux/MUSL ([#4326](https://github.com/getsentry/sentry-dotnet/pull/4326))
 - AppDomain.CurrentDomain.ProcessExit hook is now removed on shutdown ([#4323](https://github.com/getsentry/sentry-dotnet/pull/4323))
 
