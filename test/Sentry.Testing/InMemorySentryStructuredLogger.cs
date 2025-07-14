@@ -6,6 +6,7 @@ public sealed class InMemorySentryStructuredLogger : SentryStructuredLogger
 {
     public List<LogEntry> Entries { get; } = new();
 
+    /// <inheritdoc />
     private protected override void CaptureLog(SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog)
     {
         Entries.Add(LogEntry.Create(level, template, parameters));
