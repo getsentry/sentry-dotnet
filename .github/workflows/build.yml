@@ -27,6 +27,12 @@ jobs:
             rid: linux-musl-x64
             container:
               image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
+          - os: ubuntu-24.04-arm
+            rid: linux-musl-arm64
+            container:
+              image: ghcr.io/jpnurmi/sentry-dotnet-alpine:3.21 # TODO: getsentry
+              volumes:
+                - /tmp/node20:/__e/node20
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
             rid: macos # universal (osx-arm64 + osx-x64)
           - os: windows-latest
@@ -35,6 +41,16 @@ jobs:
             rid: win-arm64
 
     steps:
+      ### TODO: clean up
+      - name: Prepare Node.js for non-x64 Alpine Linux
+        if: ${{ contains(matrix.container.image, 'alpine') && runner.arch != 'X64' }}
+        shell: bash
+        run: |
+          sudo mkdir -p /__e/node20/bin
+          sudo ln -sf /usr/bin/node /__e/node20/bin/node
+          sudo ln -sf /usr/bin/npm /__e/node20/bin/npm
+          sudo sed -i 's/ID=alpine/ID=unknown/' /usr/lib/os-release
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -83,6 +99,14 @@ jobs:
               image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
               volumes:
                 - /var/run/docker.sock:/var/run/docker.sock
+          - os: ubuntu-24.04-arm
+            rid: linux-musl-arm64
+            slnf: Sentry-CI-Build-Linux-musl.slnf
+            container:
+              image: ghcr.io/jpnurmi/sentry-dotnet-alpine:3.21 # TODO: getsentry
+              volumes:
+                - /tmp/node20:/__e/node20
+                - /var/run/docker.sock:/var/run/docker.sock
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
             rid: macos # universal (osx-arm64 + osx-x64)
             slnf: Sentry-CI-Build-macOS.slnf
@@ -94,6 +118,16 @@ jobs:
             slnf: Sentry-CI-Build-Windows-arm64.slnf
 
     steps:
+      ### TODO: clean up
+      - name: Prepare Node.js for non-x64 Alpine Linux
+        if: ${{ contains(matrix.container.image, 'alpine') && runner.arch != 'X64' }}
+        shell: bash
+        run: |
+          sudo mkdir -p /__e/node20/bin
+          sudo ln -sf /usr/bin/node /__e/node20/bin/node
+          sudo ln -sf /usr/bin/npm /__e/node20/bin/npm
+          sudo sed -i 's/ID=alpine/ID=unknown/' /usr/lib/os-release
+
       - name: Cancel Previous Runs
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
@@ -138,6 +172,14 @@ jobs:
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-linux-musl-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+
+      - name: Download sentry-native (linux-musl-arm64)
+        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'linux-musl-arm64') }}
+        uses: actions/cache/restore@v4
+        with:
+          path: src/Sentry/Platforms/Native/sentry-native
+          key: sentry-native-linux-musl-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
 
       - name: Download sentry-native (macos)
