@@ -64,6 +64,13 @@ internal sealed class BatchProcessor : IDisposable
         }
     }
 
+    internal void Flush()
+    {
+        DisableTimer();
+        Flush(_buffer1);
+        Flush(_buffer2);
+    }
+
     private bool TryEnqueue(BatchBuffer<SentryLog> buffer, SentryLog log)
     {
         if (buffer.TryAdd(log, out var count))
@@ -75,7 +82,7 @@ internal sealed class BatchProcessor : IDisposable
 
             if (count == buffer.Capacity) // is buffer full
             {
-                using var flushScope = buffer.EnterFlushScope();
+                using var flushScope = buffer.TryEnterFlushScope(out var lockTaken);
                 DisableTimer();
 
                 var currentActiveBuffer = _activeBuffer;
@@ -113,7 +120,9 @@ internal sealed class BatchProcessor : IDisposable
         {
             var currentActiveBuffer = _activeBuffer;
 
-            if (!currentActiveBuffer.IsEmpty && _clock.GetUtcNow() > _lastFlush)
+            using var scope = currentActiveBuffer.TryEnterFlushScope(out var lockTaken);
+
+            if (lockTaken && !currentActiveBuffer.IsEmpty && _clock.GetUtcNow() > _lastFlush)
             {
                 _ = TrySwapBuffer(currentActiveBuffer);
                 Flush(currentActiveBuffer);

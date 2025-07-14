@@ -10,7 +10,7 @@ namespace Sentry.Internal;
 /// Not all members are thread-safe.
 /// See individual members for notes on thread safety.
 /// </remarks>
-[DebuggerDisplay("Name = {Name}, Capacity = {Capacity}, IsEmpty = {IsEmpty}, IsFull = {IsFull}, IsAddInProgress = {IsAddInProgress}")]
+[DebuggerDisplay("Name = {Name}, Capacity = {Capacity}, IsEmpty = {IsEmpty}, IsFull = {IsFull}, AddCount = {AddCount}")]
 internal sealed class BatchBuffer<T> : IDisposable
 {
     private readonly T[] _array;
@@ -67,24 +67,50 @@ internal sealed class BatchBuffer<T> : IDisposable
     /// </remarks>
     internal bool IsFull => _additions >= _array.Length;
 
-    internal FlushScope EnterFlushScope()
+    /// <summary>
+    /// Number of <see cref="TryAdd"/> operations in progress.
+    /// </summary>
+    /// <remarks>
+    /// This property is used for debugging only.
+    /// </remarks>
+    private int AddCount => _addCounter.Count;
+
+    /// <summary>
+    /// Enters a <see cref="FlushScope"/> used to ensure that only a single flush operation is in progress.
+    /// </summary>
+    /// <returns>A <see cref="FlushScope"/> that must be disposed to exit.</returns>
+    /// <remarks>
+    /// This method is thread-safe.
+    /// </remarks>
+    internal FlushScope TryEnterFlushScope(out bool lockTaken)
     {
         if (_addLock.TryEnter())
         {
+            lockTaken = true;
             return new FlushScope(this);
         }
 
-        Debug.Fail("The FlushScope should not have been entered again, before the previously entered FlushScope has exited.");
+        lockTaken = false;
         return new FlushScope();
     }
 
+    /// <summary>
+    /// Exits the <see cref="FlushScope"/> through <see cref="FlushScope.Dispose"/>.
+    /// </summary>
+    /// <remarks>
+    /// This method is thread-safe.
+    /// </remarks>
     private void ExitFlushScope()
     {
         _addLock.Exit();
     }
 
-    internal bool IsAddInProgress => !_addCounter.IsSet;
-
+    /// <summary>
+    /// Blocks the current thread until all <see cref="TryAdd"/> operations have completed.
+    /// </summary>
+    /// <remarks>
+    /// This method is thread-safe.
+    /// </remarks>
     internal void WaitAddCompleted()
     {
         _addCounter.Wait();
@@ -177,6 +203,12 @@ internal sealed class BatchBuffer<T> : IDisposable
         Array.Clear(_array, 0, length);
     }
 
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        _addCounter.Dispose();
+    }
+
     private static void ThrowIfLessThanTwo(int capacity, string paramName)
     {
         if (capacity < 2)
@@ -190,11 +222,6 @@ internal sealed class BatchBuffer<T> : IDisposable
         throw new ArgumentOutOfRangeException(paramName, capacity, "Argument must be at least two.");
     }
 
-    public void Dispose()
-    {
-        _addCounter.Dispose();
-    }
-
     internal ref struct FlushScope : IDisposable
     {
         private BatchBuffer<T>? _lockObj;
@@ -203,6 +230,8 @@ internal sealed class BatchBuffer<T> : IDisposable
         {
             _lockObj = lockObj;
         }
+
+        internal bool IsEntered => _lockObj is not null;
 
         public void Dispose()
         {

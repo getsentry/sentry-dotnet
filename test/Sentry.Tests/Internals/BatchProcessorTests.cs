@@ -112,16 +112,17 @@ public class BatchProcessorTests : IDisposable
         AssertEnvelopes(["one"], ["two", "three"]);
     }
 
-    [Fact(Skip = "TODO")]
+    [Fact]
     public async Task Enqueue_Concurrency_CaptureEnvelopes()
     {
         const int batchCount = 3;
+        const int maxDegreeOfParallelism = 5;
         const int logsPerTask = 100;
 
         using var processor = new BatchProcessor(_hub, batchCount, Timeout.InfiniteTimeSpan, _clock, _clientReportRecorder, _diagnosticLogger);
         using var sync = new ManualResetEvent(false);
 
-        var tasks = new Task[5];
+        var tasks = new Task[maxDegreeOfParallelism];
         for (var i = 0; i < tasks.Length; i++)
         {
             tasks[i] = Task.Factory.StartNew(static state =>
@@ -137,6 +138,7 @@ public class BatchProcessorTests : IDisposable
 
         sync.Set();
         await Task.WhenAll(tasks).WaitAsync(TimeSpan.FromSeconds(5));
+        processor.Flush();
         _capturedEnvelopes.CompleteAdding();
 
         var capturedLogs = _capturedEnvelopes

@@ -796,6 +796,7 @@ internal class Hub : IHub, IDisposable
         _memoryMonitor?.Dispose();
 #endif
 
+        Logger.Flush();
         Logger.Dispose();
 
         try

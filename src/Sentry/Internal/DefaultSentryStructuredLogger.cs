@@ -38,6 +38,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
             : batchInterval;
     }
 
+    /// <inheritdoc />
     private protected override void CaptureLog(SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog)
     {
         var timestamp = _clock.GetUtcNow();
@@ -94,6 +95,13 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
         }
     }
 
+    /// <inheritdoc />
+    protected internal override void Flush()
+    {
+        _batchProcessor.Flush();
+    }
+
+    /// <inheritdoc />
     protected override void Dispose(bool disposing)
     {
         if (disposing)

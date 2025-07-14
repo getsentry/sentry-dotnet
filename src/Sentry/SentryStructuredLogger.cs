@@ -21,6 +21,14 @@ public abstract class SentryStructuredLogger : IDisposable
     {
     }
 
+    /// <summary>
+    /// Buffers a <see href="https://develop.sentry.dev/sdk/telemetry/logs">Sentry Log</see> message
+    /// via the associated <see href="https://develop.sentry.dev/sdk/telemetry/spans/batch-processor">Batch Processor</see>.
+    /// </summary>
+    /// <param name="level">The severity level of the log.</param>
+    /// <param name="template">The parameterized template string.</param>
+    /// <param name="parameters">The parameters to the <paramref name="template"/> string.</param>
+    /// <param name="configureLog">A configuration callback. Will be removed in a future version.</param>
     private protected abstract void CaptureLog(SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog);
 
     /// <summary>
@@ -99,6 +107,14 @@ public abstract class SentryStructuredLogger : IDisposable
     public void LogFatal(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
     {
         CaptureLog(SentryLogLevel.Fatal, template, parameters, configureLog);
+    }
+
+    /// <summary>
+    /// When overridden in a derived <see langword="class"/>,
+    /// clears all buffers for this logger and causes any buffered logs to be sent by the underlying <see cref="ISentryClient"/>.
+    /// </summary>
+    protected internal virtual void Flush()
+    {
     }
 
     /// <inheritdoc />
