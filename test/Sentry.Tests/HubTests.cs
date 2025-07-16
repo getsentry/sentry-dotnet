@@ -1733,6 +1733,32 @@ public partial class HubTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
+    public void CaptureAttachment_HubEnabled(bool enabled)
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        if (!enabled)
+        {
+            hub.Dispose();
+        }
+
+        var eventId = SentryId.Create();
+        var attachment = new SentryAttachment(
+            AttachmentType.Default,
+            new StreamAttachmentContent(new MemoryStream(Encoding.UTF8.GetBytes("test content"))),
+            "test.txt",
+            "text/plain");
+
+        // Act
+        var result = hub.CaptureAttachment(eventId, attachment);
+
+        // Assert
+        result.Should().Be(enabled);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
     public void CaptureUserFeedback_HubEnabled(bool enabled)
     {
 #pragma warning disable CS0618 // Type or member is obsolete

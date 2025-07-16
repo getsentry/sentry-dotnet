@@ -1090,4 +1090,64 @@ public class EnvelopeTests
         Assert.Contains("""{"foo":"2020-01-01T00:00:00+01:00"}""", serialized1);
         Assert.Contains("""{"foo":"2020-01-01T00:00:00\u002B01:00"}""", serialized2);
     }
+
+    [Fact]
+    public void FromAttachment_ValidAttachment_CreatesEnvelope()
+    {
+        // Arrange
+        var eventId = SentryId.Create();
+        var attachment = new SentryAttachment(
+            AttachmentType.Default,
+            new StreamAttachmentContent(new MemoryStream(Encoding.UTF8.GetBytes("test content"))),
+            "test.txt",
+            "text/plain");
+
+        // Act
+        using var envelope = Envelope.FromAttachment(eventId, attachment);
+
+        // Assert
+        envelope.TryGetEventId().Should().Be(eventId);
+        envelope.Items.Should().HaveCount(1);
+        envelope.Items[0].Header["type"].Should().Be("attachment");
+        envelope.Items[0].Header["filename"].Should().Be("test.txt");
+        envelope.Items[0].Header["content_type"].Should().Be("text/plain");
+    }
+
+    [Fact]
+    public void FromAttachment_NullAttachment_DoesNotIncludeAttachment()
+    {
+        // Arrange
+        var eventId = SentryId.Create();
+        var attachment = new SentryAttachment(
+            AttachmentType.Default,
+            new StreamAttachmentContent(Stream.Null),
+            "test.txt",
+            "text/plain");
+
+        // Act
+        using var envelope = Envelope.FromAttachment(eventId, attachment);
+
+        // Assert
+        envelope.TryGetEventId().Should().Be(eventId);
+        envelope.Items.Should().HaveCount(0);
+    }
+
+    [Fact]
+    public void FromAttachment_EmptyAttachmentStream_DoesNotIncludeAttachment()
+    {
+        // Arrange
+        var eventId = SentryId.Create();
+        var attachment = new SentryAttachment(
+            AttachmentType.Default,
+            new StreamAttachmentContent(new MemoryStream()),
+            "test.txt",
+            "text/plain");
+
+        // Act
+        using var envelope = Envelope.FromAttachment(eventId, attachment);
+
+        // Assert
+        envelope.TryGetEventId().Should().Be(eventId);
+        envelope.Items.Should().HaveCount(0);
+    }
 }
