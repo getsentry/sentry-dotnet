@@ -182,7 +182,7 @@ jobs:
         run: dotnet build ${{ matrix.slnf }} -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
 
       - name: Upload build logs
-        if: ${{ steps.build.outcome != 'skipped' }}
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.rid }}-build-logs
@@ -269,7 +269,7 @@ jobs:
         run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build -p:Configuration=Release --nologo -v:minimal -flp:logfile=msbuild.log -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
 
       - name: Upload logs
-        if: ${{ steps.msbuild.outcome != 'skipped' }}
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }}-msbuild-logs
