@@ -557,6 +557,11 @@ static partial class SentrySdk
         => CurrentHub.CaptureFeedback(new SentryFeedback(message, contactEmail, name, replayId, url, associatedEventId),
             scope, hint);
 
+    /// <inheritdoc cref="IHub.CaptureAttachment"/>
+    [DebuggerStepThrough]
+    internal static bool CaptureAttachment(SentryId eventId, SentryAttachment attachment)
+        => CurrentHub.CaptureAttachment(eventId, attachment);
+
     /// <summary>
     /// Captures a user feedback.
     /// </summary>

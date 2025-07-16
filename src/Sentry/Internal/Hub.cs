@@ -817,5 +817,24 @@ internal class Hub : IHub, IDisposable
 #endif
     }
 
+    public bool CaptureAttachment(SentryId eventId, SentryAttachment attachment)
+    {
+        if (!IsEnabled)
+        {
+            return false;
+        }
+
+        try
+        {
+            var envelope = Envelope.FromAttachment(eventId, attachment, _options.DiagnosticLogger);
+            return CaptureEnvelope(envelope);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to capture attachment");
+            return false;
+        }
+    }
+
     public SentryId LastEventId => CurrentScope.LastEventId;
 }

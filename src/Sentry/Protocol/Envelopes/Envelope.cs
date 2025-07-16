@@ -445,6 +445,24 @@ public sealed class Envelope : ISerializable, IDisposable
         return new Envelope(header, items);
     }
 
+    /// <summary>
+    /// Creates an envelope that contains only an attachment for an existing event.
+    /// </summary>
+    public static Envelope FromAttachment(SentryId eventId, SentryAttachment attachment, IDiagnosticLogger? logger = null)
+    {
+        var header = CreateHeader(eventId);
+        var items = new List<EnvelopeItem>();
+
+        // Safety check, in case the user forcefully added a null attachment.
+        if (attachment.IsNull())
+        {
+            logger?.LogWarning("Encountered a null attachment.  Skipping.");
+        }
+
+        AddEnvelopeItemFromAttachment(items, attachment, logger);
+        return new Envelope(eventId, header, items);
+    }
+
     private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(
         Stream stream,
         CancellationToken cancellationToken = default)
