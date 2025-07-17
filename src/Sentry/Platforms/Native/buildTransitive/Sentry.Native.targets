@@ -13,7 +13,8 @@
     <!-- SentryNative.IsEnabled should result in compile-time constant for trimmed applications -->
     <!-- Effectively disabling native library -->
     <RuntimeHostConfigurationOption Include="Sentry.Native.IsEnabled"
-                                    Value="$(_SentryNativeEnabled)"
+                                    Condition="'$(FrameworkSupportsNative)' == 'true'"
+                                    Value="true"
                                     Trim="true" />
   </ItemGroup>
 
@@ -25,31 +26,17 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <!-- Windows -->
+    <FrameworkSupportsNative Condition="'$(RuntimeIdentifier)' == 'win-x64' or '$(RuntimeIdentifier)' == 'win-arm64'">true</FrameworkSupportsNative>
+    <!-- Linux -->
+    <FrameworkSupportsNative Condition="'$(RuntimeIdentifier)' == 'linux-x64' or '$(RuntimeIdentifier)' == 'linux-arm64' or '$(RuntimeIdentifier)' == 'linux-musl-x64'">true</FrameworkSupportsNative>
+    <!-- macOS -->
+    <FrameworkSupportsNative Condition="'$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64'">true</FrameworkSupportsNative>
     <!-- net8.0 or greater -->
-    <FrameworkSupportsNative Condition="'$(_SentryIsNet8OrGreater)' == 'true' and ('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">true</FrameworkSupportsNative>
+    <FrameworkSupportsNative Condition="'$(_SentryIsNet8OrGreater)' != 'true' or !('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">false</FrameworkSupportsNative>
     <!-- Make it opt-out -->
     <FrameworkSupportsNative Condition="'$(SentryNative)' == 'false' or '$(SentryNative)' == 'disable'">false</FrameworkSupportsNative>
   </PropertyGroup>
-
-  <!-- Whitelist supported runtimes -->
-  <Choose>
-    <When Condition="'$(FrameworkSupportsNative)' == 'true'">
-      <PropertyGroup>
-        <_SentryNativeEnabled>false</_SentryNativeEnabled>
-        <!-- Windows -->
-        <_SentryNativeEnabled Condition="'$(RuntimeIdentifier)' == 'win-x64' or '$(RuntimeIdentifier)' == 'win-arm64'">true</_SentryNativeEnabled>
-        <!-- Linux -->
-        <_SentryNativeEnabled Condition="'$(RuntimeIdentifier)' == 'linux-x64' or '$(RuntimeIdentifier)' == 'linux-arm64' or '$(RuntimeIdentifier)' == 'linux-musl-x64'">true</_SentryNativeEnabled>
-        <!-- macOS -->
-        <_SentryNativeEnabled Condition="'$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64'">true</_SentryNativeEnabled>
-      </PropertyGroup>
-    </When>
-    <Otherwise>
-      <PropertyGroup>
-        <_SentryNativeEnabled>false</_SentryNativeEnabled>
-      </PropertyGroup>
-    </Otherwise>
-  </Choose>
 
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and ('$(RuntimeIdentifier)' == 'win-x64' or '$(RuntimeIdentifier)' == 'win-arm64')">
     <DirectPInvoke Include="sentry-native" />
