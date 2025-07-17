@@ -23,10 +23,8 @@ jobs:
             rid: linux-x64
           - os: ubuntu-22.04-arm
             rid: linux-arm64
-            target: Linux-arm64
           - os: ubuntu-latest
             rid: linux-musl-x64
-            target: Linux-musl
             container:
               image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
@@ -35,7 +33,6 @@ jobs:
             rid: win-x64
           - os: windows-11-arm
             rid: win-arm64
-            target: Windows-arm64
 
     steps:
       - name: Checkout
@@ -251,11 +248,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Download sentry-native (Windows)
+      - name: Download sentry-native (win-x64)
         uses: actions/cache/restore@v4
         with:
           path: src/Sentry/Platforms/Native/sentry-native
-          key: sentry-native-Windows-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-win-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
           enableCrossOsArchive: true
 
