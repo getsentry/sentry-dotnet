@@ -58,8 +58,9 @@ jobs:
       fail-fast: false
       matrix:
         tfm: [net9.0]
-        # We run against both an older and a newer API
-        api-level: [27, 33]
+        # Must be 34+ for new apps and app updates as of August 31, 2024.
+        # See https://apilevels.com/
+        api-level: [34, 36]
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
