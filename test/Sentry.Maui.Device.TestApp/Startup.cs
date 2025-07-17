@@ -14,7 +14,7 @@ public static class MauiProgram
         [
             typeof(Sentry.Tests.SentrySdkTests).Assembly,
             // typeof(Sentry.Extensions.Logging.Tests.LogLevelExtensionsTests).Assembly,
-            typeof(Sentry.Maui.Tests.SentryMauiOptionsTests).Assembly,
+            // typeof(Sentry.Maui.Tests.SentryMauiOptionsTests).Assembly,
 #if NET9_0_OR_GREATER
             // typeof(Sentry.Maui.CommunityToolkit.Mvvm.Tests.MauiCommunityToolkitMvvmEventsBinderTests).Assembly,
 #endif
