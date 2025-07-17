@@ -92,7 +92,7 @@
   </Target>
 
   <!-- We want to build the sentry-native only once, BEFORE building TFM specific verions of the SDK -->
-  <!-- How to run a target exactly once: https://learn.microsoft.com/en-us/visualstudio/msbuild/run-target-exactly-once?view=vs-2022-->
+  <!-- How to run a target exactly once: https://learn.microsoft.com/visualstudio/msbuild/run-target-exactly-once-->
   <Target Name="_BuildSentryNativeSDKBeforeOuterBuild"
     Condition="'$(_SentryIsNet8OrGreater)' == 'true' and '$(CI)' != 'true'"
     DependsOnTargets="_BuildSentryNativeSDK"
