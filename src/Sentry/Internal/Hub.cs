@@ -757,6 +757,8 @@ internal class Hub : IHub, IDisposable
         return SentryId.Empty;
     }
 
+    // Internal capture method that allows the Unity SDK to send attachments after an already captured event.
+    // The preferred way of adding attachments is either on the scope or directly on the event.
     internal bool CaptureAttachment(SentryId eventId, SentryAttachment attachment)
     {
         if (!IsEnabled || eventId == SentryId.Empty)
