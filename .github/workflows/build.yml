@@ -182,11 +182,14 @@ jobs:
         run: dotnet build ${{ matrix.slnf }} -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
 
       - name: Upload build logs
-        if: ${{ steps.build.outcome != 'skipped' }}
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.rid }}-build-logs
-          path: build.binlog
+          path: |
+            build.log
+            build.binlog
+          if-no-files-found: ignore
 
       - name: Test
         run: dotnet test ${{ matrix.slnf }} -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
@@ -269,13 +272,14 @@ jobs:
         run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build -p:Configuration=Release --nologo -v:minimal -flp:logfile=msbuild.log -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
 
       - name: Upload logs
-        if: ${{ steps.msbuild.outcome != 'skipped' }}
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }}-msbuild-logs
           path: |
             msbuild.log
             msbuild.binlog
+          if-no-files-found: ignore
 
   trim-analysis:
     needs: build-sentry-native
