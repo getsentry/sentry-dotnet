@@ -42,37 +42,9 @@ internal class FakeTransport : ITransport
 
         function getConsoleAppPath()
         {
-            if ($IsMacOS)
-            {
-                $arch = $(uname -m) -eq 'arm64' ? 'arm64' : 'x64'
-                return "./console-app/bin/Release/$framework/osx-$arch/publish/console-app"
-            }
-            elseif ($IsWindows)
-            {
-                if ("Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
-                {
-                    return "./console-app/bin/Release/$framework/win-arm64/publish/console-app.exe"
-                }
-                else
-                {
-                    return "./console-app/bin/Release/$framework/win-x64/publish/console-app.exe"
-                }
-            }
-            else
-            {
-                if ("Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
-                {
-                    return "./console-app/bin/Release/$framework/linux-arm64/publish/console-app"
-                }
-                elseif ((ldd --version 2>&1) -match 'musl')
-                {
-                    return "./console-app/bin/Release/$framework/linux-musl-x64/publish/console-app"
-                }
-                else
-                {
-                    return "./console-app/bin/Release/$framework/linux-x64/publish/console-app"
-                }
-            }
+            $rid = [System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier
+            $suffix = if ($IsWindows) { '.exe' } else { '' }
+            return "./console-app/bin/Release/$framework/$rid/publish/console-app$suffix"
         }
 
         function publishConsoleApp([bool]$SentryNative = $true)

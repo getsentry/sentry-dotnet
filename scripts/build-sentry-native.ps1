@@ -25,30 +25,11 @@ try
         $actualBuildDir = "$buildDir/RelWithDebInfo"
         $libPrefix = ''
         $libExtension = '.lib'
-
-        if ("Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
-        {
-            $outDir += '/win-arm64'
-        }
-        else
-        {
-            $outDir += '/win-x64'
-        }
+        $outDir += '/' + [System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier
     }
     elseif ($IsLinux)
     {
-        if ("Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
-        {
-            $outDir += '/linux-arm64'
-        }
-        elseif ((ldd --version 2>&1) -match 'musl')
-        {
-            $outDir += '/linux-musl-x64'
-        }
-        else
-        {
-            $outDir += '/linux-x64'
-        }
+        $outDir += '/' + [System.Runtime.InteropServices.RuntimeInformation]::RuntimeIdentifier
     }
     else
     {
