@@ -295,7 +295,7 @@ jobs:
       - name: Set Environment Variables
         run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
 
-      - name: Download sentry-native (macOS)
+      - name: Download sentry-native (macos)
         uses: actions/cache/restore@v4
         with:
           path: src/Sentry/Platforms/Native/sentry-native
