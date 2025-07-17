@@ -183,11 +183,6 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
-    public bool CaptureAttachment(SentryId eventId, SentryAttachment attachment) => false;
-
-    /// <summary>
-    /// No-Op.
-    /// </summary>
     public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
     {
     }

@@ -656,29 +656,6 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
-    public void CaptureAttachment_WithValidParameters_ReturnsTrue()
-    {
-        using var _ = SentrySdk.Init(o =>
-        {
-            o.Dsn = ValidDsn;
-            o.AutoSessionTracking = false;
-            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitNativeSdks = false;
-        });
-
-        var eventId = SentryId.Create();
-        var attachment = new SentryAttachment(
-            AttachmentType.Default,
-            new StreamAttachmentContent(new MemoryStream(Encoding.UTF8.GetBytes("test content"))),
-            "test.txt",
-            "text/plain");
-
-        var result = SentrySdk.CaptureAttachment(eventId, attachment);
-
-        Assert.True(result);
-    }
-
-    [Fact]
     public void CaptureException_WithConfiguredScope_ScopeCallbackGetsInvoked()
     {
         using var _ = SentrySdk.Init(o =>

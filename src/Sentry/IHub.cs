@@ -124,12 +124,4 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// <param name="configureScope">Callback method to configure the scope.</param>
     /// <param name="hint">An optional hint providing high level context for the source of the event, including attachments</param>
     public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null);
-
-    /// <summary>
-    /// Captures an attachment for an existing event.
-    /// </summary>
-    /// <param name="eventId">The ID of the event to add the attachment to.</param>
-    /// <param name="attachment">The attachment.</param>
-    /// <returns>true if the enveloped was queued, false otherwise.</returns>
-    public bool CaptureAttachment(SentryId eventId, SentryAttachment attachment);
 }

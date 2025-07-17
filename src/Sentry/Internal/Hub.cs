@@ -757,6 +757,25 @@ internal class Hub : IHub, IDisposable
         return SentryId.Empty;
     }
 
+    internal bool CaptureAttachment(SentryId eventId, SentryAttachment attachment)
+    {
+        if (!IsEnabled || eventId == SentryId.Empty)
+        {
+            return false;
+        }
+
+        try
+        {
+            var envelope = Envelope.FromAttachment(eventId, attachment, _options.DiagnosticLogger);
+            return CaptureEnvelope(envelope);
+        }
+        catch (Exception e)
+        {
+            _options.LogError(e, "Failure to capture attachment");
+            return false;
+        }
+    }
+
     public async Task FlushAsync(TimeSpan timeout)
     {
         try
@@ -815,25 +834,6 @@ internal class Hub : IHub, IDisposable
             SentrySdk.CloseNativeSdk();
         }
 #endif
-    }
-
-    public bool CaptureAttachment(SentryId eventId, SentryAttachment attachment)
-    {
-        if (!IsEnabled)
-        {
-            return false;
-        }
-
-        try
-        {
-            var envelope = Envelope.FromAttachment(eventId, attachment, _options.DiagnosticLogger);
-            return CaptureEnvelope(envelope);
-        }
-        catch (Exception e)
-        {
-            _options.LogError(e, "Failure to capture attachment");
-            return false;
-        }
     }
 
     public SentryId LastEventId => CurrentScope.LastEventId;
