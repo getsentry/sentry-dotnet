@@ -31,15 +31,15 @@
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net9.0-android" Condition="$(TargetFramework) == 'net9.0'" />
   </Target>
   <Target Name="_InnerBuildTestAPKs">
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=False;_Store=False;_Compressed=False" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=False;_Store=False;_Compressed=True" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=False;_Store=True;_Compressed=False" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=False;_Store=True;_Compressed=True" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=False;_Store=False;_Compressed=False" BuildInParallel="false" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=False;_Store=False;_Compressed=True" BuildInParallel="false" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=False;_Store=True;_Compressed=False" BuildInParallel="false" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="_Aot=False;_Store=True;_Compressed=True" BuildInParallel="false" />
 
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=False;_Compressed=False" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=False;_Compressed=True" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=True;_Compressed=False" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=True;_Compressed=True" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=False;_Compressed=False" BuildInParallel="false" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=False;_Compressed=True" BuildInParallel="false" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=True;_Compressed=False" BuildInParallel="false" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=True;_Compressed=True" BuildInParallel="false" />
   </Target>
   <Target Name="_BuildTestAPK">
     <PropertyGroup>
