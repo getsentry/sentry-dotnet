@@ -1631,7 +1631,16 @@ public class SentryOptions
         => ExceptionProcessorsProviders.SelectMany(p => p());
 
     /// <summary>
+    /// <para>
     /// Use custom <see cref="ISentryStackTraceFactory" />.
+    /// </para>
+    /// <para>
+    /// By default, Sentry uses the <see cref="SentryStackTraceFactory"/> to create stack traces and this implementation
+    /// offers the most comprehensive functionality. However, full stack traces are not available in AOT compiled
+    /// applications. If you are compiling your applications AOT and the stack traces that you see in Sentry are not
+    /// informative enough, you could consider using the <see cref="SimpleStackTraceFactory" /> instead. This is not as
+    /// functional but is guaranteed to provide at least _something_ useful in AOT compiled applications.
+    /// </para>
     /// </summary>
     /// <param name="sentryStackTraceFactory">The stack trace factory.</param>
     public SentryOptions UseStackTraceFactory(ISentryStackTraceFactory sentryStackTraceFactory)
