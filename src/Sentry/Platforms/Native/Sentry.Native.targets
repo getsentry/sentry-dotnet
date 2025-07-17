@@ -85,8 +85,9 @@
   <!-- Build the Sentry Native SDK (this only runs on local machines because in CI we expect the SDK to be
        built already on each native platform and fetched for the final .net build. -->
   <Target Name="_BuildSentryNativeSDK"
-    BeforeTargets="DispatchToInnerBuilds"
+    BeforeTargets="DispatchToInnerBuilds;BeforeBuild"
     Condition="'$(_SentryIsNet8OrGreater)' == 'true' and '$(CI)' != 'true'"
+    Inputs="$(SentryNativeBuildInputs)"
     Outputs="$(SentryNativeBuildOutputs)">
     <!-- We want a "-Clean" because if the build script changes, previous cmake cache may contain invalid defines. -->
     <Exec Command="pwsh $(SentryNativeBuildScript) -Clean" />
