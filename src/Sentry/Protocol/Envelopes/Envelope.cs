@@ -448,7 +448,7 @@ public sealed class Envelope : ISerializable, IDisposable
     /// <summary>
     /// Creates an envelope that contains only an attachment for an existing event.
     /// </summary>
-    public static Envelope FromAttachment(SentryId eventId, SentryAttachment attachment, IDiagnosticLogger? logger = null)
+    internal static Envelope FromAttachment(SentryId eventId, SentryAttachment attachment, IDiagnosticLogger? logger = null)
     {
         var header = CreateHeader(eventId);
         var items = new List<EnvelopeItem>();
