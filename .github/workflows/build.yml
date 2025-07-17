@@ -187,6 +187,7 @@ jobs:
         with:
           name: ${{ matrix.rid }}-build-logs
           path: build.binlog
+          if-no-files-found: warn
 
       - name: Test
         run: dotnet test ${{ matrix.slnf }} -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
@@ -276,6 +277,7 @@ jobs:
           path: |
             msbuild.log
             msbuild.binlog
+          if-no-files-found: warn
 
   trim-analysis:
     needs: build-sentry-native
