@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Native AOT: don't load SentryNative on unsupported platforms ([#4347](https://github.com/getsentry/sentry-dotnet/pull/4347))
+
 ### Dependencies
 
 - Bump CLI from v2.47.0 to v2.47.1 ([#4348](https://github.com/getsentry/sentry-dotnet/pull/4348))
