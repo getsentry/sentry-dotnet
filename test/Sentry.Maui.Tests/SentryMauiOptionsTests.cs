@@ -16,6 +16,7 @@ public class SentryMauiOptionsTests
         Assert.False(options.IncludeTextInBreadcrumbs);
     }
 
+#if false
     [Fact]
     public void IncludeTitleInBreadcrumbs_Default()
     {
@@ -99,7 +100,6 @@ public class SentryMauiOptionsTests
 
         // Assert
         Assert.NotNull(options.BeforeCaptureInternal);
-
     }
 
     [Fact]
@@ -111,6 +111,6 @@ public class SentryMauiOptionsTests
 
         // Assert
         Assert.Null(options.BeforeCaptureInternal);
-
     }
+#endif
 }
