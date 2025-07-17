@@ -1302,7 +1302,6 @@ namespace Sentry.CompilerServices
 {
     public static class BuildProperties
     {
-        public static System.Collections.Generic.IReadOnlyDictionary<string, string>? Values { get; }
         public static void Initialize(System.Collections.Generic.Dictionary<string, string> properties) { }
     }
 }

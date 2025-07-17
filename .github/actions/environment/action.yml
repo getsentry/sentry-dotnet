@@ -46,9 +46,11 @@ runs:
         java-version: '17'
 
     - name: Setup Android SDK
-      if: ${{ (runner.os != 'Linux' || runner.arch != 'ARM64') && !matrix.container }}
+      if: ${{ !matrix.container }}
       uses: android-actions/setup-android@07976c6290703d34c16d382cb36445f98bb43b1f # v3.2.0
       with:
+        # Exclude "tools" because the emulator is not needed (nor available for Windows/Linux ARM64)
+        packages: platform-tools platforms;android-34 platforms;android-35 build-tools;36.0.0
         log-accepted-android-sdk-licenses: false
 
     # Java 11 is needed by .NET Android
