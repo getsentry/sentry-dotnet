@@ -16,6 +16,7 @@
 
 ### Features
 
+- Add experimental support for [Sentry Structured Logging](https://docs.sentry.io/product/explore/logs/) via `SentrySdk.Experimental.Logger` ([#4158](https://github.com/getsentry/sentry-dotnet/pull/4158))
 - Added StartSpan and GetTransaction methods to the SentrySdk ([#4303](https://github.com/getsentry/sentry-dotnet/pull/4303))
 
 ### Fixes
