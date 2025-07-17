@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Sentry now includes an EXPERIMENTAL SimpleStackTraceFactory. As the name suggests, this factory isn't as feature rich as the full `SentryStackTraceFactory`. However, it may provide better results if you are compiling your application AOT and not getting useful stack traces from the full stack trace factory. ([#4362](https://github.com/getsentry/sentry-dotnet/pull/4362))
+
 ### Dependencies
 
 - Bump CLI from v2.47.0 to v2.47.1 ([#4348](https://github.com/getsentry/sentry-dotnet/pull/4348))

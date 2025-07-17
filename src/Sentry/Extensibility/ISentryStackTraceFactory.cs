@@ -1,7 +1,7 @@
 namespace Sentry.Extensibility;
 
 /// <summary>
-/// Factory to <see cref="SentryStackTrace" /> from an <see cref="Exception" />.
+/// Factory to create a <see cref="SentryStackTrace" /> from an <see cref="Exception" />.
 /// </summary>
 public interface ISentryStackTraceFactory
 {
