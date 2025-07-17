@@ -19,7 +19,7 @@ public static class MauiProgram
             // typeof(Sentry.Maui.CommunityToolkit.Mvvm.Tests.MauiCommunityToolkitMvvmEventsBinderTests).Assembly,
 #endif
 #if ANDROID
-           // typeof(Sentry.Android.AssemblyReader.Tests.AndroidAssemblyReaderTests).Assembly,
+           typeof(Sentry.Android.AssemblyReader.Tests.AndroidAssemblyReaderTests).Assembly,
 #endif
         ]);
         var appBuilder = MauiApp.CreateBuilder()
