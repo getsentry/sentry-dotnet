@@ -6,6 +6,7 @@
 
 - Native AOT: don't load SentryNative on unsupported platforms ([#4347](https://github.com/getsentry/sentry-dotnet/pull/4347))
 - Fixed issue introduced in release 5.12.0 that might prevent other middleware or user code from reading request bodies ([#4373](https://github.com/getsentry/sentry-dotnet/pull/4373))
+- Native AOT support for `linux-musl-arm64` ([#4365](https://github.com/getsentry/sentry-dotnet/pull/4365))
 
 ### Dependencies
 
