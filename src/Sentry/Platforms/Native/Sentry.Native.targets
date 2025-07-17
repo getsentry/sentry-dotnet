@@ -1,10 +1,10 @@
 <Project>
 
   <PropertyGroup>
-    <SentryNativeSourceDirectory>..\..\modules\sentry-native\</SentryNativeSourceDirectory>
+    <SentryNativeSourceDirectory>$(MSBuildStartupDirectory)\modules\sentry-native\</SentryNativeSourceDirectory>
     <SentryNativeLibraryName>sentry-native</SentryNativeLibraryName>
-    <SentryNativeBuildScript>../../scripts/build-sentry-native.ps1</SentryNativeBuildScript>
-    <SentryNativeBuildInputs>../../.git/modules/modules/sentry-native/HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets;$(SentryNativeBuildScript)</SentryNativeBuildInputs>
+    <SentryNativeBuildScript>$(MSBuildStartupDirectory)/scripts/build-sentry-native.ps1</SentryNativeBuildScript>
+    <SentryNativeBuildInputs>$(MSBuildStartupDirectory)/.git/modules/modules/sentry-native/HEAD;$(MSBuildThisFileDirectory)Sentry.Native.targets;$(SentryNativeBuildScript)</SentryNativeBuildInputs>
     <SentryNativeOutputDirectory>$(MSBuildThisFileDirectory)sentry-native\</SentryNativeOutputDirectory>
     <!-- List of runtime identifiers: https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.NETCore.Platforms/src/runtime.json -->
     <NativeLibRelativePath-win-x64>win-x64</NativeLibRelativePath-win-x64>
