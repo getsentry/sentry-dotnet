@@ -82,6 +82,8 @@ internal static class C
     public static bool Init(SentryOptions options)
     {
         _isWindows = System.OperatingSystem.IsWindows();
+        _isArm64 = RuntimeInformation.OSArchitecture == Architecture.Arm64;
+
         var cOptions = sentry_options_new();
 
         // Note: DSN is not null because options.IsValid() must have returned true for this to be called.
@@ -442,6 +444,7 @@ internal static class C
     // The logger we should forward native messages to. This is referenced by nativeLog() which in turn for.
     private static IDiagnosticLogger? _logger;
     private static bool _isWindows = false;
+    private static bool _isArm64 = false;
 
     // This method is called from the C library and forwards incoming messages to the currently set _logger.
     // [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]  //  error CS3016: Arrays as attribute arguments is not CLS-complian
@@ -495,21 +498,14 @@ internal static class C
                     message = Marshal.PtrToStringAnsi(buffer);
                 });
             }
+            // For Linux/macOS, we must make a copy of the VaList to be able to pass it back...
+            else if (_isArm64)
+            {
+                message = FormatWithVaList<VaListArm64>(format, args);
+            }
             else
             {
-                // For Linux/macOS, we must make a copy of the VaList to be able to pass it back...
-                var argsStruct = Marshal.PtrToStructure<VaListLinux64>(args);
-                var formattedLength = 0;
-                WithMarshalledStruct(argsStruct, argsPtr =>
-                    formattedLength = 1 + vsnprintf_linux(IntPtr.Zero, UIntPtr.Zero, format, argsPtr)
-                );
-
-                WithAllocatedPtr(formattedLength, buffer =>
-                WithMarshalledStruct(argsStruct, argsPtr =>
-                {
-                    vsnprintf_linux(buffer, (UIntPtr)formattedLength, format, argsPtr);
-                    message = Marshal.PtrToStringAnsi(buffer);
-                }));
+                message = FormatWithVaList<VaListX64>(format, args);
             }
         }
         catch (Exception err)
@@ -534,12 +530,23 @@ internal static class C
 
     // https://stackoverflow.com/a/4958507/2386130
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    private struct VaListLinux64
+    private struct VaListX64
     {
         private uint _gp_offset;
         private uint _fp_offset;
         private IntPtr _overflow_arg_area;
         private IntPtr _reg_save_area;
+    }
+
+    // https://github.com/ARM-software/abi-aa/blob/main/aapcs64/aapcs64.rst#definition-of-va-list
+    [StructLayout(LayoutKind.Sequential)]
+    private struct VaListArm64
+    {
+        private IntPtr __stack;
+        private IntPtr __gr_top;
+        private IntPtr __vr_top;
+        private int __gr_offs;
+        private int __vr_offs;
     }
 
     private static void WithAllocatedPtr(int size, Action<IntPtr> action)
@@ -562,4 +569,23 @@ internal static class C
             Marshal.StructureToPtr(structure, ptr, false);
             action(ptr);
         });
+
+    private static string? FormatWithVaList<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)] T>(IntPtr format, IntPtr args) where T : struct
+    {
+        string? message = null;
+        var argsStruct = Marshal.PtrToStructure<T>(args);
+        var formattedLength = 0;
+        WithMarshalledStruct(argsStruct, argsPtr =>
+            formattedLength = 1 + vsnprintf_linux(IntPtr.Zero, UIntPtr.Zero, format, argsPtr)
+        );
+
+        WithAllocatedPtr(formattedLength, buffer =>
+        WithMarshalledStruct(argsStruct, argsPtr =>
+        {
+            vsnprintf_linux(buffer, (UIntPtr)formattedLength, format, argsPtr);
+            message = Marshal.PtrToStringAnsi(buffer);
+        }));
+
+        return message;
+    }
 }

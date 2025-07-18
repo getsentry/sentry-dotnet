@@ -60,11 +60,17 @@ internal class FakeTransport : ITransport
             }
             else
             {
-                if ("Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
+                $musl = (ldd --version 2>&1) -match 'musl'
+                $arm64 = "Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString())
+                if ($musl -and $arm64)
+                {
+                    return "./console-app/bin/Release/$framework/linux-musl-arm64/publish/console-app"
+                }
+                elseif ($arm64)
                 {
                     return "./console-app/bin/Release/$framework/linux-arm64/publish/console-app"
                 }
-                elseif ((ldd --version 2>&1) -match 'musl')
+                elseif ($musl)
                 {
                     return "./console-app/bin/Release/$framework/linux-musl-x64/publish/console-app"
                 }
