@@ -8,16 +8,6 @@
   Note:Target framework conditions should be kept synchronized with src/Sentry/buildTransitive/Sentry.Native.targets -->
 <Project>
 
-  <ItemGroup>
-    <!-- When user sets <SentryNative>false</SentryNative> or <SentryNative>disable</SentryNative> in their project -->
-    <!-- SentryNative.IsEnabled should result in compile-time constant for trimmed applications -->
-    <!-- Effectively disabling native library -->
-    <RuntimeHostConfigurationOption Include="Sentry.Native.IsEnabled"
-                                    Condition="'$(FrameworkSupportsNative)' == 'true'"
-                                    Value="true"
-                                    Trim="true" />
-  </ItemGroup>
-
   <!-- Helpful properties copied from Sentry.props -->
   <PropertyGroup Condition="'$(TargetFramework)' != ''">
     <_SentryTargetFrameworkVersion>$([MSBuild]::GetTargetFrameworkVersion($(TargetFramework)))</_SentryTargetFrameworkVersion>
@@ -38,6 +28,16 @@
     <FrameworkSupportsNative Condition="'$(SentryNative)' == 'true' or '$(SentryNative)' == 'enable'">true</FrameworkSupportsNative>
     <FrameworkSupportsNative Condition="'$(SentryNative)' == 'false' or '$(SentryNative)' == 'disable'">false</FrameworkSupportsNative>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- When user sets <SentryNative>false</SentryNative> or <SentryNative>disable</SentryNative> in their project -->
+    <!-- SentryNative.IsEnabled should result in compile-time constant for trimmed applications -->
+    <!-- Effectively disabling native library -->
+    <RuntimeHostConfigurationOption Include="Sentry.Native.IsEnabled"
+                                    Condition="'$(FrameworkSupportsNative)' == 'true'"
+                                    Value="true"
+                                    Trim="true" />
+  </ItemGroup>
 
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and ('$(RuntimeIdentifier)' == 'win-x64' or '$(RuntimeIdentifier)' == 'win-arm64')">
     <DirectPInvoke Include="sentry-native" />
