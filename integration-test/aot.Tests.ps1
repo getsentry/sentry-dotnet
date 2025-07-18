@@ -51,7 +51,7 @@ Console.WriteLine("Hello, Sentry!");
 
     It 'Aot' {
         $rid = $env:RuntimeIdentifier
-        if ($env:RuntimeIdentifier)
+        if ($rid)
         {
             dotnet publish -c Release -r $rid | Write-Host
         }
