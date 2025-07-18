@@ -27,9 +27,7 @@ runs:
     # zstd is needed for cross OS actions/cache but missing from windows-11-arm
     # https://github.com/actions/partner-runner-images/issues/99
     - name: Install zstd on Windows ARM64
-      if: runner.os == 'Windows' && runner.arch == 'ARM64'
-      shell: pwsh
-      run: choco install zstandard
+      uses: ./.github/actions/install-zstd
 
     # See https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md#xcode
     - name: Pin the Xcode Version
