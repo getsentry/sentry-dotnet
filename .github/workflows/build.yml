@@ -279,6 +279,47 @@ jobs:
             msbuild.binlog
           if-no-files-found: ignore
 
+  # Unsupported Native AOT runtimes should have SentryNative auto-disabled
+  # to avoid native library loading errors on startup.
+  unsupported-aot:
+    needs: build
+    name: Unsupported AOT (${{ matrix.rid }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04-arm
+            rid: linux-arm
+          - os: windows-latest
+            rid: win-x86
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
+      - name: Build Native Dependencies
+        uses: ./.github/actions/buildnative
+
+      - name: Fetch NuGet Packages
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ github.sha }}
+          path: src
+
+      - name: Test AOT
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
+        env:
+          RuntimeIdentifier: ${{ matrix.rid }}
+        with:
+          path: integration-test/aot.Tests.ps1
+
   trim-analysis:
     needs: build-sentry-native
     name: Trim analysis
