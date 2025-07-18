@@ -631,22 +631,3 @@ public class CachingTransportTests : IDisposable
         Assert.DoesNotContain("sent_at", contents);
     }
 }
-
-/// <summary>
-/// We don't want the real network status to affect the reliability of our tests
-/// </summary>
-file class FakeReliableNetworkStatusListener : INetworkStatusListener
-{
-    public static readonly FakeReliableNetworkStatusListener Instance = new();
-
-    private FakeReliableNetworkStatusListener()
-    {
-    }
-
-    public bool Online => true;
-
-    public Task WaitForNetworkOnlineAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
-}
