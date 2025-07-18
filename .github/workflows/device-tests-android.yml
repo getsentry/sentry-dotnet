@@ -92,7 +92,7 @@ jobs:
         with:
           api-level: ${{ matrix.api-level }}
           # We don't need the Google APIs, but the default images are not available for 32+
-          target: ${{ matrix.api-level >= 32 && 'google_apis' || 'default' }}
+          target: google_apis
           force-avd-creation: false
           ram-size: 2048M
           arch: x86_64
