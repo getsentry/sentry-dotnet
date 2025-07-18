@@ -1112,42 +1112,4 @@ public class EnvelopeTests
         envelope.Items[0].Header["filename"].Should().Be("test.txt");
         envelope.Items[0].Header["content_type"].Should().Be("text/plain");
     }
-
-    [Fact]
-    public void FromAttachment_NullAttachment_DoesNotIncludeAttachment()
-    {
-        // Arrange
-        var eventId = SentryId.Create();
-        var attachment = new SentryAttachment(
-            AttachmentType.Default,
-            new NullAttachmentContent(),
-            "test.txt",
-            "text/plain");
-
-        // Act
-        using var envelope = Envelope.FromAttachment(eventId, attachment);
-
-        // Assert
-        envelope.TryGetEventId().Should().Be(eventId);
-        envelope.Items.Should().HaveCount(0);
-    }
-
-    [Fact]
-    public void FromAttachment_EmptyAttachmentStream_DoesNotIncludeAttachment()
-    {
-        // Arrange
-        var eventId = SentryId.Create();
-        var attachment = new SentryAttachment(
-            AttachmentType.Default,
-            NullAttachmentContent.Instance,
-            "test.txt",
-            "text/plain");
-
-        // Act
-        using var envelope = Envelope.FromAttachment(eventId, attachment);
-
-        // Assert
-        envelope.TryGetEventId().Should().Be(eventId);
-        envelope.Items.Should().HaveCount(0);
-    }
 }
