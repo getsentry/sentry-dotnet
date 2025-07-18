@@ -192,6 +192,7 @@ public class CachingTransportTests : IDisposable
     public async Task MaintainsLimit()
     {
         // Arrange
+        _options.MaxCacheItems = 2;
         var innerTransport = Substitute.For<ITransport>();
         await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
 
