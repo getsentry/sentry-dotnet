@@ -50,11 +50,22 @@ Console.WriteLine("Hello, Sentry!");
     }
 
     It 'Aot' {
-        dotnet publish -c Release | Write-Host
+        $rid = $env:RuntimeIdentifier
+        if ($rid)
+        {
+            dotnet publish -c Release -r $rid | Write-Host
+        }
+        else
+        {
+            dotnet publish -c Release | Write-Host
+        }
         $LASTEXITCODE | Should -Be 0
 
         $tfm = (Get-ChildItem -Path "bin/Release" -Directory | Select-Object -First 1).Name
-        $rid = (Get-ChildItem -Path "bin/Release/$tfm" -Directory | Select-Object -First 1).Name
+        if (-not $rid)
+        {
+            $rid = (Get-ChildItem -Path "bin/Release/$tfm" -Directory | Select-Object -First 1).Name
+        }
         & "bin/Release/$tfm/$rid/publish/hello-sentry" | Write-Host
         $LASTEXITCODE | Should -Be 0
     }

@@ -17,7 +17,7 @@ internal static class SentryNative
     // This way, `SentryNative.IsEnabled` should be treated as a compile-time constant for trimmed apps.
     [FeatureSwitchDefinition(SentryNativeIsEnabledSwitchName)]
 #endif
-    private static bool IsEnabled => !AppContext.TryGetSwitch(SentryNativeIsEnabledSwitchName, out var isEnabled) || isEnabled;
+    private static bool IsEnabled => AppContext.TryGetSwitch(SentryNativeIsEnabledSwitchName, out var isEnabled) && isEnabled;
 
     internal static bool IsAvailable => IsEnabled && IsAvailableCore;
 
