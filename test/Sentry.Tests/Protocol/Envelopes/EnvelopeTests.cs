@@ -1120,7 +1120,7 @@ public class EnvelopeTests
         var eventId = SentryId.Create();
         var attachment = new SentryAttachment(
             AttachmentType.Default,
-            new StreamAttachmentContent(Stream.Null),
+            new NullAttachmentContent(),
             "test.txt",
             "text/plain");
 
