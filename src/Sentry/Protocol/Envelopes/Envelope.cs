@@ -453,12 +453,6 @@ public sealed class Envelope : ISerializable, IDisposable
         var header = CreateHeader(eventId);
         var items = new List<EnvelopeItem>();
 
-        // Safety check, in case the user forcefully added a null attachment.
-        if (attachment.IsNull())
-        {
-            logger?.LogWarning("Encountered a null attachment.  Skipping.");
-        }
-
         AddEnvelopeItemFromAttachment(items, attachment, logger);
         return new Envelope(eventId, header, items);
     }

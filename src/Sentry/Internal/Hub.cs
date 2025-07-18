@@ -1,6 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
 using Sentry.Integrations;
+using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 using Sentry.Protocol.Metrics;
 
@@ -761,7 +762,7 @@ internal class Hub : IHub, IDisposable
     // The preferred way of adding attachments is either on the scope or directly on the event.
     internal bool CaptureAttachment(SentryId eventId, SentryAttachment attachment)
     {
-        if (!IsEnabled || eventId == SentryId.Empty)
+        if (!IsEnabled || eventId == SentryId.Empty || attachment.IsNull())
         {
             return false;
         }
