@@ -1745,7 +1745,7 @@ public partial class HubTests
         _fixture.Client.CaptureEnvelope(Arg.Any<Envelope>()).Returns(true);
 
         var eventId = SentryId.Create();
-        var attachment = new SentryAttachment(AttachmentType.Default, new NullAttachmentContent(), "test.txt", "text/plain");
+        var attachment = new SentryAttachment(AttachmentType.Default, NullAttachmentContent.Instance, "test.txt", "text/plain");
 
         // Act
         var result = hub.CaptureAttachment(eventId, attachment);
@@ -1762,7 +1762,7 @@ public partial class HubTests
         var hub = _fixture.GetSut();
 
         var eventId = SentryId.Empty;
-        var attachment = new SentryAttachment(AttachmentType.Default, new NullAttachmentContent(), "test.txt", "text/plain");
+        var attachment = new SentryAttachment(AttachmentType.Default, NullAttachmentContent.Instance, "test.txt", "text/plain");
 
         // Act
         var result = hub.CaptureAttachment(eventId, attachment);
