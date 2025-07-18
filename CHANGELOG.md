@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Source context for class libraries when running on Android in Release mode ([#4294](https://github.com/getsentry/sentry-dotnet/pull/4294))
+
 ### Dependencies
 
 - Bump CLI from v2.47.0 to v2.47.1 ([#4348](https://github.com/getsentry/sentry-dotnet/pull/4348))
