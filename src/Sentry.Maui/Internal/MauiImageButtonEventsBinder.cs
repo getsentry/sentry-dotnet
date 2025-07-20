@@ -21,6 +21,7 @@ public class MauiImageButtonEventsBinder : IMauiElementEventBinder
     /// <inheritdoc />
     public void UnBind(VisualElement element)
     {
+        addBreadcrumbCallback = null;
         if (element is ImageButton image)
         {
             image.Clicked -= OnButtonOnClicked;
