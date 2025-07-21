@@ -172,8 +172,8 @@ internal class Hub : IHub, IDisposable
 
         bool? isSampled = null;
         double? sampleRate = null;
-        var sampleRand = dynamicSamplingContext?.Items.TryGetValue("sample_rand", out var dscsampleRand) ?? false
-            ? double.Parse(dscsampleRand, NumberStyles.Float, CultureInfo.InvariantCulture)
+        var sampleRand = dynamicSamplingContext?.Items.TryGetValue("sample_rand", out var dscSampleRand) ?? false
+            ? double.Parse(dscSampleRand, NumberStyles.Float, CultureInfo.InvariantCulture)
             : SampleRandHelper.GenerateSampleRand(context.TraceId.ToString());
 
         // TracesSampler runs regardless of whether a decision has already been made, as it can be used to override it.
@@ -195,6 +195,9 @@ internal class Hub : IHub, IDisposable
         // finally fallback to Random sampling if the decision has been made by no other means
         sampleRate ??= _options.TracesSampleRate ?? 0.0;
         isSampled ??= context.IsSampled ?? SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
+
+        // Ensure the actual sampleRate is set on the provided DSC (https://github.com/getsentry/team-sdks/issues/117)
+        dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(sampleRate.Value);
 
         // Make sure there is a replayId (if available) on the provided DSC (if any).
         dynamicSamplingContext = dynamicSamplingContext?.WithReplayId(_replaySession);
