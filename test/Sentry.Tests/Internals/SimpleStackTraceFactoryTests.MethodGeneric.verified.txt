@@ -1,0 +1,7 @@
+﻿{
+  FileName: Internals/SimpleStackTraceFactoryTests.cs,
+  Function: void SimpleStackTraceFactoryTests.GenericMethodThatThrows<T>(T value),
+  AbsolutePath: {ProjectDirectory}Internals/SimpleStackTraceFactoryTests.cs,
+  InApp: true,
+  AddressMode: rel:0
+}
