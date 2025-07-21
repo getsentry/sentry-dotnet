@@ -1218,9 +1218,13 @@ public partial class HubTests
 
         // Assert
         baggage.Should().NotBeNull();
-        Assert.Equal("43365712692146d08ee11a729dfbcaca", Assert.Contains("trace_id", dsc.Items));
-        Assert.Equal("d4d82fc1c2c4032a83f3a29aa3a3aff", Assert.Contains("public_key", dsc.Items));
-        Assert.Equal("0.0", Assert.Contains("sample_rate", dsc.Items));
+        var sampleRand = isSampled ? ((TransactionTracer)transaction).SampleRand : ((UnsampledTransaction)transaction).SampleRand;
+        baggage.Members.Should().Equal([
+            new KeyValuePair<string, string>("sentry-trace_id", "43365712692146d08ee11a729dfbcaca"),
+            new KeyValuePair<string, string>("sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"),
+            new KeyValuePair<string, string>("sentry-sample_rate", isSampled ? "1" : "0.0"),
+            new KeyValuePair<string, string>("sentry-sample_rand", sampleRand!.Value.ToString(CultureInfo.InvariantCulture)),
+        ]);
     }
 
     [Fact]
@@ -1237,7 +1241,7 @@ public partial class HubTests
 
         // Assert
         baggage.Should().NotBeNull();
-        Assert.Contains("43365712692146d08ee11a729dfbcaca", baggage!.ToString());
+        Assert.Contains("sentry-trace_id=43365712692146d08ee11a729dfbcaca", baggage!.ToString());
     }
 
     [Fact]
@@ -1286,6 +1290,12 @@ public partial class HubTests
         var transactionContext = hub.ContinueTrace((SentryTraceHeader)null, (BaggageHeader)null, "test-name", "test-operation");
 
         // Assert
+        hub.ScopeManager.ConfigureScope(scope =>
+        {
+            Assert.Null(scope.PropagationContext.ParentSpanId);
+            Assert.Null(scope.PropagationContext._dynamicSamplingContext);
+        });
+
         transactionContext.Name.Should().Be("test-name");
         transactionContext.Operation.Should().Be("test-operation");
         transactionContext.SpanId.Should().NotBeNull();
@@ -1334,6 +1344,12 @@ public partial class HubTests
         var transactionContext = hub.ContinueTrace((string)null, (string)null, "test-name");
 
         // Assert
+        hub.ScopeManager.ConfigureScope(scope =>
+        {
+            Assert.Null(scope.PropagationContext.ParentSpanId);
+            Assert.Null(scope.PropagationContext._dynamicSamplingContext);
+        });
+
         transactionContext.Name.Should().Be("test-name");
         transactionContext.Operation.Should().BeEmpty();
         transactionContext.SpanId.Should().NotBeNull();
