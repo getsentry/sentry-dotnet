@@ -113,6 +113,9 @@ public class AndroidAssemblyReaderTests
         Skip.If(!isAssemblyStore);
         Skip.If(!isCompressed);
 #endif
+
+        Skip.If(isAot && RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Android AOT is not supported on Windows");
+
         using var sut = GetSut(isAot, isAssemblyStore, isCompressed);
 
         var peReader = sut.TryReadAssembly(assemblyName);
