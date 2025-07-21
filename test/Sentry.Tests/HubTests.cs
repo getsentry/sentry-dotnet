@@ -66,13 +66,13 @@ public partial class HubTests
         var hub = _fixture.GetSut();
 
         // Act & assert
-        hub.ConfigureScope(s => Assert.False(s.Locked));
+        hub.ScopeManager.ConfigureScope(s => Assert.False(s.Locked));
         using (hub.PushAndLockScope())
         {
-            hub.ConfigureScope(s => Assert.True(s.Locked));
+            hub.ScopeManager.ConfigureScope(s => Assert.True(s.Locked));
         }
 
-        hub.ConfigureScope(s => Assert.False(s.Locked));
+        hub.ScopeManager.ConfigureScope(s => Assert.False(s.Locked));
     }
 
     [Fact]
@@ -1259,17 +1259,18 @@ public partial class HubTests
             {"sentry-sample_rate", "1.0"}
         });
 
-        hub.ConfigureScope(scope => scope.PropagationContext.TraceId.Should().Be("43365712692146d08ee11a729dfbcaca")); // Sanity check
+        hub.ScopeManager.ConfigureScope(scope => scope.PropagationContext.TraceId.Should().Be(SentryId.Parse("43365712692146d08ee11a729dfbcaca"))); // Sanity check
 
         // Act
         var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader, "test-name");
 
         // Assert
-        hub.ConfigureScope(scope =>
+        hub.ScopeManager.ConfigureScope(scope =>
         {
             scope.PropagationContext.TraceId.Should().Be(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"));
             scope.PropagationContext.ParentSpanId.Should().Be(SpanId.Parse("2000000000000000"));
             Assert.NotNull(scope.PropagationContext._dynamicSamplingContext);
+            scope.PropagationContext._dynamicSamplingContext.Items.Should().Contain(baggageHeader.GetSentryMembers());
         });
 
         transactionContext.TraceId.Should().Be(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"));
@@ -1306,17 +1307,18 @@ public partial class HubTests
         var traceHeader = "5bd5f6d346b442dd9177dce9302fd737-2000000000000000";
         var baggageHeader = "sentry-trace_id=5bd5f6d346b442dd9177dce9302fd737, sentry-public_key=49d0f7386ad645858ae85020e393bef3, sentry-sample_rate=1.0";
 
-        hub.ConfigureScope(scope => scope.PropagationContext.TraceId.Should().Be("43365712692146d08ee11a729dfbcaca")); // Sanity check
+        hub.ScopeManager.ConfigureScope(scope => scope.PropagationContext.TraceId.Should().Be(SentryId.Parse("43365712692146d08ee11a729dfbcaca"))); // Sanity check
 
         // Act
         var transactionContext = hub.ContinueTrace(traceHeader, baggageHeader, "test-name");
 
         // Assert
-        hub.ConfigureScope(scope =>
+        hub.ScopeManager.ConfigureScope(scope =>
         {
             scope.PropagationContext.TraceId.Should().Be(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"));
             scope.PropagationContext.ParentSpanId.Should().Be(SpanId.Parse("2000000000000000"));
             Assert.NotNull(scope.PropagationContext._dynamicSamplingContext);
+            scope.PropagationContext._dynamicSamplingContext.ToBaggageHeader().Members.Should().Contain(BaggageHeader.TryParse(baggageHeader)!.Members);
         });
 
         transactionContext.TraceId.Should().Be(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"));
@@ -1355,7 +1357,7 @@ public partial class HubTests
         transaction.Finish();
 
         // Assert
-        hub.ConfigureScope(scope => scope.Transaction.Should().BeNull());
+        hub.ScopeManager.ConfigureScope(scope => scope.Transaction.Should().BeNull());
     }
 
 #nullable enable
