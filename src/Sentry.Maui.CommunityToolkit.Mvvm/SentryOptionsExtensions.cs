@@ -12,7 +12,7 @@ public static class SentryOptionsExtensions
     /// </summary>
     public static SentryMauiOptions AddCommunityToolkitIntegration(this SentryMauiOptions options)
     {
-        options.InjectEventBinder<MauiCommunityToolkitMvvmEventsBinder>();
+        options.AddIntegrationEventBinder<MauiCommunityToolkitMvvmEventsBinder>();
         return options;
     }
 }

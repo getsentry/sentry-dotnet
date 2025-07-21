@@ -25,12 +25,12 @@ public class SentryMauiOptions : SentryLoggingOptions
 #endif
     }
 
-    internal List<IMauiElementEventBinderRegistration> InjectedEventBinders { get; } = [];
+    internal List<IMauiElementEventBinderRegistration> IntegrationEventBinders { get; } = [];
 
-    internal void InjectEventBinder<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TEventBinder>()
+    internal void AddIntegrationEventBinder<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TEventBinder>()
         where TEventBinder : class, IMauiElementEventBinder
     {
-        InjectedEventBinders.Add(new MauiElementEventBinderRegistration<TEventBinder>());
+        IntegrationEventBinders.Add(new MauiElementEventBinderRegistration<TEventBinder>());
     }
 
     /// <summary>
