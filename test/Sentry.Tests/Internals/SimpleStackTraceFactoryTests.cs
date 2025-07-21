@@ -2,29 +2,22 @@
 // Stack trace filters out Sentry frames by namespace
 namespace Other.Tests.Internals;
 
-// TODO: Create integration test to test this behaviour when publishing AOT apps
-// See https://github.com/getsentry/sentry-dotnet/pull/2732#discussion_r1371006441
+#if PLATFORM_NEUTRAL
+
 public class SimpleStackTraceFactoryTests
 {
-    private class Fixture
-    {
-        public SentryOptions SentryOptions { get; } = new();
-        public SentryStackTraceFactory GetSut() => new(SentryOptions);
-    }
-
-    private readonly Fixture _fixture = new();
-
     [Fact]
     public Task MethodGeneric()
     {
-        _fixture.SentryOptions.UseStackTraceFactory(new SimpleStackTraceFactory(_fixture.SentryOptions));
-
         // Arrange
-        var i = 5;
+        const int i = 5;
         var exception = Record.Exception(() => GenericMethodThatThrows(i));
 
-        _fixture.SentryOptions.AttachStacktrace = true;
-        var factory = _fixture.GetSut();
+        var options = new SentryOptions
+        {
+            AttachStacktrace = true
+        };
+        var factory = new SimpleStackTraceFactory(options);
 
         // Act
         var stackTrace = factory.Create(exception);
@@ -45,3 +38,5 @@ public class SimpleStackTraceFactoryTests
     private static void GenericMethodThatThrows<T>(T value) =>
         throw new Exception();
 }
+
+#endif
