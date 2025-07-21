@@ -13,7 +13,20 @@ namespace Sentry.Extensibility;
 public partial class SimpleStackTraceFactory : ISentryStackTraceFactory
 {
     private readonly SentryOptions _options;
+    private const string FullStackTraceLinePattern = @"at (?<Module>[^\.]+)\.(?<Function>.*?) in (?<FileName>.*?):line (?<LineNo>\d+)";
     private const string StackTraceLinePattern = @"at (.+)\.(.+) \+";
+
+#if NET9_0_OR_GREATER
+    [GeneratedRegex(FullStackTraceLinePattern)]
+    private static partial Regex FullStackTraceLine { get; }
+#elif NET8_0
+     private static readonly Regex FullStackTraceLine = FullStackTraceLineRegex();
+
+     [GeneratedRegex(FullStackTraceLinePattern)]
+     private static partial Regex FullStackTraceLineRegex();
+#else
+    private static readonly Regex FullStackTraceLine = new (FullStackTraceLinePattern, RegexOptions.Compiled);
+#endif
 
 #if NET9_0_OR_GREATER
     [GeneratedRegex(StackTraceLinePattern)]
@@ -48,23 +61,36 @@ public partial class SimpleStackTraceFactory : ISentryStackTraceFactory
         var lines = exception?.StackTrace?.Split(newlines, StringSplitOptions.RemoveEmptyEntries) ?? [];
         foreach (var line in lines)
         {
-            var match = StackTraceLine.Match(line);
-            if (match.Success)
+            var fullMatch = FullStackTraceLine.Match(line);
+            if (fullMatch.Success)
             {
                 frames.Add(new SentryStackFrame()
                 {
-                    Module = match.Groups[1].Value,
-                    Function = match.Groups[2].Value
+                    Module = fullMatch.Groups[1].Value,
+                    Function = fullMatch.Groups[2].Value,
+                    FileName = fullMatch.Groups[3].Value,
+                    LineNumber = int.Parse(fullMatch.Groups[4].Value),
                 });
+                continue;
             }
-            else
+
+            _options.LogDebug("Full stack frame match failed for: {0}", line);
+            var lineMatch = StackTraceLine.Match(line);
+            if (lineMatch.Success)
             {
-                _options.LogDebug("Regex match failed for: {0}", line);
                 frames.Add(new SentryStackFrame()
                 {
-                    Function = line
+                    Module = lineMatch.Groups[1].Value,
+                    Function = lineMatch.Groups[2].Value
                 });
+                continue;
             }
+
+            _options.LogDebug("Stack frame match failed for: {0}", line);
+            frames.Add(new SentryStackFrame()
+            {
+                Function = line
+            });
         }
 
         trace.Frames = frames;
