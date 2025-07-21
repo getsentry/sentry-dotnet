@@ -31,7 +31,7 @@ public class SimpleStackTraceFactoryTests
 
         // Assert;
         var frame = stackTrace!.Frames.Single(x => x.Function!.Contains("GenericMethodThatThrows"));
-        return Verifier.Verify(frame)
+        return Verify(frame)
             .IgnoreMembers<SentryStackFrame>(
             x => x.Package,
             x => x.LineNumber,
