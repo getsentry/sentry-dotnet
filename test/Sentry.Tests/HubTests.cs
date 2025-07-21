@@ -1176,7 +1176,7 @@ public partial class HubTests
     }
 
     [Fact]
-    public void ContinueTrace_SetsPropagationContextAndReturnsTransactionContext()
+    public void ContinueTrace_ReceivesHeaders_SetsPropagationContextAndReturnsTransactionContext()
     {
         // Arrange
         var hub = _fixture.GetSut();
@@ -1211,6 +1211,25 @@ public partial class HubTests
     }
 
     [Fact]
+    public void ContinueTrace_DoesNotReceiveHeaders_CreatesRootTrace()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transactionContext = hub.ContinueTrace((SentryTraceHeader)null, (BaggageHeader)null, "test-name", "test-operation");
+
+        // Assert
+        transactionContext.Name.Should().Be("test-name");
+        transactionContext.Operation.Should().Be("test-operation");
+        transactionContext.SpanId.Should().NotBeNull();
+        transactionContext.ParentSpanId.Should().BeNull();
+        transactionContext.TraceId.Should().NotBeNull();
+        transactionContext.IsSampled.Should().BeNull();
+        transactionContext.IsParentSampled.Should().BeNull();
+    }
+
+    [Fact]
     public void ContinueTrace_ReceivesHeadersAsStrings_SetsPropagationContextAndReturnsTransactionContext()
     {
         // Arrange
@@ -1239,21 +1258,22 @@ public partial class HubTests
     }
 
     [Fact]
-    public void ContinueTrace_DoesNotReceiveHeaders_CreatesRootTrace()
+    public void ContinueTrace_DoesNotReceiveHeadersAsStrings_CreatesRootTrace()
     {
         // Arrange
         var hub = _fixture.GetSut();
 
         // Act
-        var transactionContext = hub.ContinueTrace((string)null, null, "test-name");
+        var transactionContext = hub.ContinueTrace((string)null, (string)null, "test-name");
 
         // Assert
         transactionContext.Name.Should().Be("test-name");
-        transactionContext.SpanId.Should().NotBe(null);
-        transactionContext.ParentSpanId.Should().Be(null);
-        transactionContext.TraceId.Should().NotBe(null);
-        transactionContext.IsSampled.Should().Be(null);
-        transactionContext.IsParentSampled.Should().Be(null);
+        transactionContext.Operation.Should().BeEmpty();
+        transactionContext.SpanId.Should().NotBeNull();
+        transactionContext.ParentSpanId.Should().BeNull();
+        transactionContext.TraceId.Should().NotBeNull();
+        transactionContext.IsSampled.Should().BeNull();
+        transactionContext.IsParentSampled.Should().BeNull();
     }
 
     [Fact]
