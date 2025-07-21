@@ -196,7 +196,7 @@ internal class Hub : IHub, IDisposable
         sampleRate ??= _options.TracesSampleRate ?? 0.0;
         isSampled ??= context.IsSampled ?? SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
 
-        // Ensure the actual sampleRate is set on the provided DSC (https://github.com/getsentry/team-sdks/issues/117)
+        // Ensure the actual sampleRate is set on the provided DSC (https://github.com/getsentry/sentry-dotnet/pull/4374)
         dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(sampleRate.Value);
 
         // Make sure there is a replayId (if available) on the provided DSC (if any).
