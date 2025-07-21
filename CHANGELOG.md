@@ -5,12 +5,15 @@
 ### Features
 
 - Sentry now includes an EXPERIMENTAL SimpleStackTraceFactory. As the name suggests, this factory isn't as feature rich as the full `SentryStackTraceFactory`. However, it may provide better results if you are compiling your application AOT and not getting useful stack traces from the full stack trace factory. ([#4362](https://github.com/getsentry/sentry-dotnet/pull/4362))
+### Fixes
+
+- Native AOT: don't load SentryNative on unsupported platforms ([#4347](https://github.com/getsentry/sentry-dotnet/pull/4347))
 
 ### Dependencies
 
-- Bump CLI from v2.47.0 to v2.47.1 ([#4348](https://github.com/getsentry/sentry-dotnet/pull/4348))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2471)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.47.0...2.47.1)
+- Bump CLI from v2.47.0 to v2.50.0 ([#4348](https://github.com/getsentry/sentry-dotnet/pull/4348), [#4370](https://github.com/getsentry/sentry-dotnet/pull/4370))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2500)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.47.0...2.50.0)
 
 ## 5.12.0
 

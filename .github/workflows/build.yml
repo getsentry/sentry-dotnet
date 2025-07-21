@@ -8,6 +8,7 @@ on:
   pull_request:
     paths-ignore:
       - "**.md"
+  workflow_dispatch:
 
 jobs:
   build-sentry-native:
@@ -22,10 +23,8 @@ jobs:
             rid: linux-x64
           - os: ubuntu-22.04-arm
             rid: linux-arm64
-            target: Linux-arm64
           - os: ubuntu-latest
             rid: linux-musl-x64
-            target: Linux-musl
             container:
               image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
@@ -34,7 +33,6 @@ jobs:
             rid: win-x64
           - os: windows-11-arm
             rid: win-arm64
-            target: Windows-arm64
 
     steps:
       - name: Checkout
@@ -45,9 +43,7 @@ jobs:
       # zstd is needed for cross OS actions/cache but missing from windows-11-arm
       # https://github.com/actions/partner-runner-images/issues/99
       - name: Install zstd on Windows ARM64
-        if: runner.os == 'Windows' && runner.arch == 'ARM64'
-        shell: pwsh
-        run: choco install zstandard
+        uses: ./.github/actions/install-zstd
 
       - uses: actions/cache@v4
         id: cache
@@ -182,11 +178,14 @@ jobs:
         run: dotnet build ${{ matrix.slnf }} -c Release --no-restore --nologo -v:minimal -flp:logfile=build.log -p:CopyLocalLockFileAssemblies=true -bl:build.binlog
 
       - name: Upload build logs
-        if: ${{ steps.build.outcome != 'skipped' }}
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.rid }}-build-logs
-          path: build.binlog
+          path: |
+            build.log
+            build.binlog
+          if-no-files-found: ignore
 
       - name: Test
         run: dotnet test ${{ matrix.slnf }} -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
@@ -247,11 +246,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Download sentry-native (Windows)
+      - name: Download sentry-native (win-x64)
         uses: actions/cache/restore@v4
         with:
           path: src/Sentry/Platforms/Native/sentry-native
-          key: sentry-native-Windows-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          key: sentry-native-win-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
           enableCrossOsArchive: true
 
@@ -269,13 +268,55 @@ jobs:
         run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build -p:Configuration=Release --nologo -v:minimal -flp:logfile=msbuild.log -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
 
       - name: Upload logs
-        if: ${{ steps.msbuild.outcome != 'skipped' }}
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }}-msbuild-logs
           path: |
             msbuild.log
             msbuild.binlog
+          if-no-files-found: ignore
+
+  # Unsupported Native AOT runtimes should have SentryNative auto-disabled
+  # to avoid native library loading errors on startup.
+  unsupported-aot:
+    needs: build
+    name: Unsupported AOT (${{ matrix.rid }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04-arm
+            rid: linux-arm
+          - os: windows-latest
+            rid: win-x86
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
+      - name: Build Native Dependencies
+        uses: ./.github/actions/buildnative
+
+      - name: Fetch NuGet Packages
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ github.sha }}
+          path: src
+
+      - name: Test AOT
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
+        env:
+          RuntimeIdentifier: ${{ matrix.rid }}
+        with:
+          path: integration-test/aot.Tests.ps1
 
   trim-analysis:
     needs: build-sentry-native
@@ -293,7 +334,7 @@ jobs:
       - name: Set Environment Variables
         run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
 
-      - name: Download sentry-native (macOS)
+      - name: Download sentry-native (macos)
         uses: actions/cache/restore@v4
         with:
           path: src/Sentry/Platforms/Native/sentry-native

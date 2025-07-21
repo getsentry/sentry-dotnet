@@ -24,12 +24,18 @@ runs:
       shell: bash
       run: sudo chmod 666 /var/run/docker.sock
 
+    - name: Install Linux ARM 32-bit dependencies
+      if: ${{ matrix.rid == 'linux-arm' }}
+      shell: bash
+      run: |
+        sudo dpkg --add-architecture armhf
+        sudo apt-get update
+        sudo apt-get install -y gcc-arm-linux-gnueabihf libc6:armhf
+
     # zstd is needed for cross OS actions/cache but missing from windows-11-arm
     # https://github.com/actions/partner-runner-images/issues/99
     - name: Install zstd on Windows ARM64
-      if: runner.os == 'Windows' && runner.arch == 'ARM64'
-      shell: pwsh
-      run: choco install zstandard
+      uses: ./.github/actions/install-zstd
 
     # See https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md#xcode
     - name: Pin the Xcode Version
