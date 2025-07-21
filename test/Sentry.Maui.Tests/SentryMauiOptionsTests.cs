@@ -9,7 +9,6 @@ public class SentryMauiOptionsTests
         NetworkStatusListener = FakeReliableNetworkStatusListener.Instance
     };
 
-#if false
     [Fact]
     public void IncludeTextInBreadcrumbs_Default()
     {
@@ -101,7 +100,6 @@ public class SentryMauiOptionsTests
         // Assert
         Assert.NotNull(options.BeforeCaptureInternal);
     }
-#endif
 
     [Fact]
     public void BeforeCaptureScreenshot_NotSet()

@@ -23,18 +23,14 @@ public class SentryMauiOptions : SentryLoggingOptions
 #if !PLATFORM_NEUTRAL
         CacheDirectoryPath = Microsoft.Maui.Storage.FileSystem.CacheDirectory;
 #endif
-        AddDefaultEventBinder<MauiButtonEventsBinder>();
-        AddDefaultEventBinder<MauiImageButtonEventsBinder>();
-        AddDefaultEventBinder<MauiGestureRecognizerEventsBinder>();
-        AddDefaultEventBinder<MauiVisualElementEventsBinder>();
     }
 
-    internal List<IMauiElementEventBinderRegistration> DefaultEventBinders { get; } = [];
+    internal List<IMauiElementEventBinderRegistration> InjectedEventBinders { get; } = [];
 
-    internal void AddDefaultEventBinder<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TEventBinder>()
+    internal void InjectEventBinder<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] TEventBinder>()
         where TEventBinder : class, IMauiElementEventBinder
     {
-        DefaultEventBinders.Add(new MauiElementEventBinderRegistration<TEventBinder>());
+        InjectedEventBinders.Add(new MauiElementEventBinderRegistration<TEventBinder>());
     }
 
     /// <summary>
