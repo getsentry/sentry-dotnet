@@ -173,14 +173,13 @@ public partial class HubTests
             {"sentry-sample_rate", "1.0"},
             {"sentry-trace_id", "75302ac48a024bde9a3b3734a82e36c8"},
             {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
-            {"sentry-replay_id","bfd31b89a59d41c99d96dc2baf840ecd"}
+            {"sentry-replay_id", "bfd31b89a59d41c99d96dc2baf840ecd"}
         }).CreateDynamicSamplingContext(_fixture.ReplaySession);
 
         var transaction = hub.StartTransaction(
             transactionContext,
             new Dictionary<string, object>(),
-            dsc
-            );
+            dsc);
         transaction.Finish(exception);
 
         // Act
@@ -767,7 +766,7 @@ public partial class HubTests
             {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
             {"sentry-sampled", "true"},
             {"sentry-sample_rate", "0.5"}, // Required in the baggage header, but ignored by sampling logic
-            {"sentry-replay_id","bfd31b89a59d41c99d96dc2baf840ecd"}
+            {"sentry-replay_id", "bfd31b89a59d41c99d96dc2baf840ecd"}
         }).CreateDynamicSamplingContext(dummyReplaySession);
 
         _fixture.Options.TracesSampleRate = 1.0;
