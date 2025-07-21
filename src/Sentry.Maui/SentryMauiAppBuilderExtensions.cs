@@ -65,7 +65,7 @@ public static class SentryMauiAppBuilderExtensions
         // Resolve the configured options and register any event binders that have been injected by integrations
         var options = new SentryMauiOptions();
         configureOptions?.Invoke(options);
-        foreach (var eventBinder in options.InjectedEventBinders)
+        foreach (var eventBinder in options.IntegrationEventBinders)
         {
             eventBinder.Register(services);
         }
