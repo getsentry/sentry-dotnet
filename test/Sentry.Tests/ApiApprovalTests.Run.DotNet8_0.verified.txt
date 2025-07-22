@@ -1017,6 +1017,7 @@ namespace Sentry
     {
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
+        protected virtual void Flush() { }
         [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void LogDebug(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }
         [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]

@@ -1,151 +1,247 @@
+#nullable enable
+
 namespace Sentry.Tests.Internals;
 
 public class BatchBufferTests
 {
+    private sealed class Fixture
+    {
+        public int Capacity { get; set; } = 2;
+        public TimeSpan Timeout { get; set; } = System.Threading.Timeout.InfiniteTimeSpan;
+        public MockClock Clock { get; } = new();
+        public List<(BatchBuffer<string> Buffer, DateTimeOffset SignalTime)> TimeoutExceededInvocations { get; } = new();
+        public string? Name { get; set; }
+
+        public BatchBuffer<string> GetSut()
+        {
+            return new BatchBuffer<string>(Capacity, Timeout, Clock, OnTimeoutExceeded, Name);
+        }
+
+        private void OnTimeoutExceeded(BatchBuffer<string> buffer, DateTimeOffset signalTime)
+        {
+            TimeoutExceededInvocations.Add((buffer, signalTime));
+        }
+    }
+
+    private readonly Fixture _fixture = new();
+
     [Theory]
     [InlineData(-1)]
     [InlineData(0)]
     [InlineData(1)]
     public void Ctor_CapacityIsOutOfRange_Throws(int capacity)
     {
-        var ctor = () => new BatchBuffer<string>(capacity);
+        _fixture.Capacity = capacity;
+
+        var ctor = () => _fixture.GetSut();
 
         Assert.Throws<ArgumentOutOfRangeException>("capacity", ctor);
     }
 
-    [Fact]
-    public void TryAdd_CapacityTwo_CanAddTwice()
+    [Theory]
+    [InlineData(-2)]
+    [InlineData(0)]
+    public void Ctor_TimeoutIsOutOfRange_Throws(int millisecondsTimeout)
     {
-        var buffer = new BatchBuffer<string>(2);
-        AssertEmpty(buffer, 2);
+        _fixture.Timeout = TimeSpan.FromMilliseconds(millisecondsTimeout);
 
-        buffer.TryAdd("one", out var first).Should().BeTrue();
-        Assert.Equal(1, first);
-        AssertPartial(buffer, 2);
+        var ctor = () => _fixture.GetSut();
 
-        buffer.TryAdd("two", out var second).Should().BeTrue();
-        Assert.Equal(2, second);
-        AssertFull(buffer, 2);
-
-        buffer.TryAdd("three", out var third).Should().BeFalse();
-        Assert.Equal(3, third);
-        AssertFull(buffer, 2);
+        Assert.Throws<ArgumentOutOfRangeException>("timeout", ctor);
     }
 
     [Fact]
-    public void TryAdd_CapacityThree_CanAddThrice()
+    public void Add_CapacityTwo_CanAddTwice()
     {
-        var buffer = new BatchBuffer<string>(3);
-        AssertEmpty(buffer, 3);
+        _fixture.Capacity = 2;
+        using var buffer = _fixture.GetSut();
 
-        buffer.TryAdd("one", out var first).Should().BeTrue();
-        Assert.Equal(1, first);
-        AssertPartial(buffer, 3);
+        buffer.Capacity.Should().Be(2);
+        buffer.IsEmpty.Should().BeTrue();
 
-        buffer.TryAdd("two", out var second).Should().BeTrue();
-        Assert.Equal(2, second);
-        AssertPartial(buffer, 3);
+        buffer.Add("one").Should().Be(BatchBufferAddStatus.AddedFirst);
+        buffer.IsEmpty.Should().BeFalse();
 
-        buffer.TryAdd("three", out var third).Should().BeTrue();
-        Assert.Equal(3, third);
-        AssertFull(buffer, 3);
+        buffer.Add("two").Should().Be(BatchBufferAddStatus.AddedLast);
+        buffer.IsEmpty.Should().BeFalse();
 
-        buffer.TryAdd("four", out var fourth).Should().BeFalse();
-        Assert.Equal(4, fourth);
-        AssertFull(buffer, 3);
+        buffer.Add("three").Should().Be(BatchBufferAddStatus.IgnoredCapacityExceeded);
+        buffer.IsEmpty.Should().BeFalse();
+
+        buffer.Add("four").Should().Be(BatchBufferAddStatus.IgnoredCapacityExceeded);
+        buffer.IsEmpty.Should().BeFalse();
     }
 
     [Fact]
-    public void ToArrayAndClear_IsEmpty_EmptyArray()
+    public void Add_CapacityThree_CanAddThrice()
     {
-        var buffer = new BatchBuffer<string>(2);
+        _fixture.Capacity = 3;
+        using var buffer = _fixture.GetSut();
 
-        var array = buffer.ToArrayAndClear();
+        buffer.Capacity.Should().Be(3);
+        buffer.IsEmpty.Should().BeTrue();
 
-        Assert.Empty(array);
-        AssertEmpty(buffer, 2);
+        buffer.Add("one").Should().Be(BatchBufferAddStatus.AddedFirst);
+        buffer.IsEmpty.Should().BeFalse();
+
+        buffer.Add("two").Should().Be(BatchBufferAddStatus.Added);
+        buffer.IsEmpty.Should().BeFalse();
+
+        buffer.Add("three").Should().Be(BatchBufferAddStatus.AddedLast);
+        buffer.IsEmpty.Should().BeFalse();
+
+        buffer.Add("four").Should().Be(BatchBufferAddStatus.IgnoredCapacityExceeded);
+        buffer.IsEmpty.Should().BeFalse();
     }
 
     [Fact]
-    public void ToArrayAndClear_IsNotEmptyNorFull_PartialCopy()
+    public void Flush_IsEmpty_EmptyArray()
     {
-        var buffer = new BatchBuffer<string>(2);
-        buffer.TryAdd("one", out _).Should().BeTrue();
+        _fixture.Capacity = 2;
+        using var buffer = _fixture.GetSut();
 
-        var array = buffer.ToArrayAndClear();
+        using var flushScope = buffer.TryEnterFlushScope();
+        var array = flushScope.Flush();
 
-        Assert.Collection(array,
-            item => Assert.Equal("one", item));
-        AssertEmpty(buffer, 2);
+        array.Should().BeEmpty();
+        buffer.Capacity.Should().Be(2);
+        buffer.IsEmpty.Should().BeTrue();
     }
 
     [Fact]
-    public void ToArrayAndClear_IsFull_FullCopy()
+    public void Flush_IsNotEmptyNorFull_PartialCopy()
     {
-        var buffer = new BatchBuffer<string>(2);
-        buffer.TryAdd("one", out _).Should().BeTrue();
-        buffer.TryAdd("two", out _).Should().BeTrue();
+        _fixture.Capacity = 2;
+        using var buffer = _fixture.GetSut();
 
-        var array = buffer.ToArrayAndClear();
+        buffer.Add("one");
+        using var flushScope = buffer.TryEnterFlushScope();
+        var array = flushScope.Flush();
 
-        Assert.Collection(array,
-            item => Assert.Equal("one", item),
-            item => Assert.Equal("two", item));
-        AssertEmpty(buffer, 2);
+        array.Should().Equal(["one"]);
+        buffer.Capacity.Should().Be(2);
+        buffer.IsEmpty.Should().BeTrue();
     }
 
     [Fact]
-    public void ToArrayAndClear_CapacityExceeded_FullCopy()
+    public void Flush_IsFull_FullCopy()
     {
-        var buffer = new BatchBuffer<string>(2);
-        buffer.TryAdd("one", out _).Should().BeTrue();
-        buffer.TryAdd("two", out _).Should().BeTrue();
-        buffer.TryAdd("three", out _).Should().BeFalse();
+        _fixture.Capacity = 2;
+        using var buffer = _fixture.GetSut();
 
-        var array = buffer.ToArrayAndClear();
+        buffer.Add("one");
+        buffer.Add("two");
+        using var flushScope = buffer.TryEnterFlushScope();
+        var array = flushScope.Flush();
 
-        Assert.Collection(array,
-            item => Assert.Equal("one", item),
-            item => Assert.Equal("two", item));
-        AssertEmpty(buffer, 2);
+        array.Should().Equal(["one", "two"]);
+        buffer.Capacity.Should().Be(2);
+        buffer.IsEmpty.Should().BeTrue();
     }
 
     [Fact]
-    public void ToArrayAndClear_WithLength_PartialCopy()
+    public void Flush_CapacityExceeded_FullCopy()
     {
-        var buffer = new BatchBuffer<string>(2);
-        buffer.TryAdd("one", out _).Should().BeTrue();
-        buffer.TryAdd("two", out _).Should().BeTrue();
+        _fixture.Capacity = 2;
+        using var buffer = _fixture.GetSut();
 
-        var array = buffer.ToArrayAndClear(1);
+        buffer.Add("one");
+        buffer.Add("two");
+        buffer.Add("three");
+        using var flushScope = buffer.TryEnterFlushScope();
+        var array = flushScope.Flush();
 
-        Assert.Collection(array,
-            item => Assert.Equal("one", item));
-        AssertEmpty(buffer, 2);
+        array.Should().Equal(["one", "two"]);
+        buffer.Capacity.Should().Be(2);
+        buffer.IsEmpty.Should().BeTrue();
     }
 
-    private static void AssertEmpty<T>(BatchBuffer<T> buffer, int capacity)
+    [Fact]
+    public void Flush_DoubleFlush_SecondArrayIsEmpty()
     {
-        AssertProperties(buffer, capacity, true, false);
+        _fixture.Capacity = 2;
+        using var buffer = _fixture.GetSut();
+
+        buffer.Add("one");
+        buffer.Add("two");
+        using var flushScope = buffer.TryEnterFlushScope();
+        var first = flushScope.Flush();
+        var second = flushScope.Flush();
+
+        first.Should().Equal(["one", "two"]);
+        second.Should().BeEmpty();
     }
 
-    private static void AssertPartial<T>(BatchBuffer<T> buffer, int capacity)
+    [Fact]
+    public void Flush_SecondFlush_NoFlushNoClear()
     {
-        AssertProperties(buffer, capacity, false, false);
-    }
+        _fixture.Capacity = 2;
+        using var buffer = _fixture.GetSut();
 
-    private static void AssertFull<T>(BatchBuffer<T> buffer, int capacity)
-    {
-        AssertProperties(buffer, capacity, false, true);
-    }
+        buffer.Add("one");
+        buffer.Add("two");
 
-    private static void AssertProperties<T>(BatchBuffer<T> buffer, int capacity, bool empty, bool full)
-    {
-        using (new AssertionScope())
+        using (var flushScope = buffer.TryEnterFlushScope())
         {
-            buffer.Capacity.Should().Be(capacity);
-            buffer.IsEmpty.Should().Be(empty);
-            buffer.IsFull.Should().Be(full);
+            flushScope.IsEntered.Should().BeTrue();
+            buffer.IsEmpty.Should().BeFalse();
         }
+
+        using (var flushScope = buffer.TryEnterFlushScope())
+        {
+            flushScope.IsEntered.Should().BeTrue();
+            flushScope.Flush().Should().Equal(["one", "two"]);
+            buffer.IsEmpty.Should().BeTrue();
+        }
+    }
+
+    [Fact]
+    public void Flush_TryEnterFlushScopeTwice_CanOnlyEnterOnce()
+    {
+        _fixture.Capacity = 2;
+        using var buffer = _fixture.GetSut();
+
+        buffer.Add("one");
+        buffer.Add("two");
+        using var first = buffer.TryEnterFlushScope();
+        using var second = buffer.TryEnterFlushScope();
+
+        first.IsEntered.Should().BeTrue();
+        second.IsEntered.Should().BeFalse();
+
+        first.Flush().Should().Equal(["one", "two"]);
+        AssertFlushThrows<ObjectDisposedException>(second);
+    }
+
+    [Fact]
+    public void Flush_Disposed_Throws()
+    {
+        _fixture.Capacity = 2;
+        using var buffer = _fixture.GetSut();
+
+        buffer.Add("one");
+        buffer.Add("two");
+        var flushScope = buffer.TryEnterFlushScope();
+        flushScope.Dispose();
+
+        AssertFlushThrows<ObjectDisposedException>(flushScope);
+    }
+
+    // cannot use xUnit's Throws() nor Fluent Assertions' ThrowExactly() because the FlushScope is a ref struct
+    private static void AssertFlushThrows<T>(BatchBuffer<string>.FlushScope flushScope)
+        where T : Exception
+    {
+        Exception? exception = null;
+        try
+        {
+            flushScope.Flush();
+        }
+        catch (Exception e)
+        {
+            exception = e;
+        }
+
+        exception.Should().NotBeNull();
+        exception.Should().BeOfType<T>();
     }
 }

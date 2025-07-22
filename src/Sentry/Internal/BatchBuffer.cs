@@ -1,159 +1,156 @@
+using Sentry.Infrastructure;
 using Sentry.Threading;
 
 namespace Sentry.Internal;
 
 /// <summary>
-/// A slim wrapper over an <see cref="System.Array"/>, intended for buffering.
-/// <para>Requires a minimum capacity of 2.</para>
+/// A wrapper over an <see cref="System.Array"/>, intended for reusable buffering.
 /// </summary>
 /// <remarks>
-/// Not all members are thread-safe.
-/// See individual members for notes on thread safety.
+/// Must be attempted to flush via <see cref="TryEnterFlushScope"/> when either the <see cref="Capacity"/> is reached,
+/// or when the <see cref="_timeout"/> is exceeded.
 /// </remarks>
-[DebuggerDisplay("Name = {Name}, Capacity = {Capacity}, IsEmpty = {IsEmpty}, IsFull = {IsFull}, AddCount = {AddCount}")]
+[DebuggerDisplay("Name = {Name}, Capacity = {Capacity}, Additions = {_additions}, AddCount = {AddCount}")]
 internal sealed class BatchBuffer<T> : IDisposable
 {
     private readonly T[] _array;
     private int _additions;
-    private readonly CounterEvent _addCounter;
-    private readonly NonReentrantLock _addLock;
+    private readonly ScopedCountdownLock _addLock;
+
+    private readonly ISystemClock _clock;
+    private readonly Timer _timer;
+    private readonly TimeSpan _timeout;
+
+    private readonly Action<BatchBuffer<T>, DateTimeOffset> _timeoutExceededAction;
+
+    private DateTimeOffset _lastFlush = DateTimeOffset.MinValue;
 
     /// <summary>
     /// Create a new buffer.
     /// </summary>
     /// <param name="capacity">Length of the new buffer.</param>
+    /// <param name="timeout">When the timeout exceeds after an item has been added and the <paramref name="capacity"/> not yet been exceeded, <paramref name="timeoutExceededAction"/> is invoked.</param>
+    /// <param name="clock">The <see cref="ISystemClock"/> with which to interpret <paramref name="timeout"/>.</param>
+    /// <param name="timeoutExceededAction">The operation to execute when the <paramref name="timeout"/> exceeds if the buffer is neither empty nor full.</param>
     /// <param name="name">Name of the new buffer.</param>
-    /// <exception cref="ArgumentOutOfRangeException">When <paramref name="capacity"/> is less than <see langword="2"/>.</exception>
-    public BatchBuffer(int capacity, string? name = null)
+    public BatchBuffer(int capacity, TimeSpan timeout, ISystemClock clock, Action<BatchBuffer<T>, DateTimeOffset> timeoutExceededAction, string? name = null)
     {
         ThrowIfLessThanTwo(capacity, nameof(capacity));
-        Name = name ?? "default";
+        ThrowIfNegativeOrZero(timeout, nameof(timeout));
 
         _array = new T[capacity];
         _additions = 0;
-        _addCounter = new CounterEvent();
-        _addLock = new NonReentrantLock();
+        _addLock = new ScopedCountdownLock();
+
+        _clock = clock;
+        _timer = new Timer(OnIntervalElapsed, this, Timeout.Infinite, Timeout.Infinite);
+        _timeout = timeout;
+
+        _timeoutExceededAction = timeoutExceededAction;
+        Name = name ?? "default";
     }
 
     /// <summary>
     /// Name of the buffer.
     /// </summary>
-    /// <remarks>
-    /// This property is thread-safe.
-    /// </remarks>
     internal string Name { get; }
 
     /// <summary>
     /// Maximum number of elements that can be added to the buffer.
     /// </summary>
-    /// <remarks>
-    /// This property is thread-safe.
-    /// </remarks>
     internal int Capacity => _array.Length;
 
     /// <summary>
-    /// Have any elements been added to the buffer?
+    /// Gets a value indicating whether this buffer is empty.
     /// </summary>
-    /// <remarks>
-    /// This property is not thread-safe.
-    /// </remarks>
     internal bool IsEmpty => _additions == 0;
 
     /// <summary>
-    /// Have <see cref="Capacity"/> number of elements been added to the buffer?
-    /// </summary>
-    /// <remarks>
-    /// This property is not thread-safe.
-    /// </remarks>
-    internal bool IsFull => _additions >= _array.Length;
-
-    /// <summary>
-    /// Number of <see cref="TryAdd"/> operations in progress.
+    /// Number of <see cref="Add"/> operations in progress.
     /// </summary>
     /// <remarks>
     /// This property is used for debugging only.
     /// </remarks>
-    private int AddCount => _addCounter.Count;
+    private int AddCount => _addLock.Count;
+
+    /// <summary>
+    /// Attempt to atomically add one element to the buffer.
+    /// </summary>
+    /// <param name="item">Element attempted to be added atomically.</param>
+    /// <returns>An <see cref="BatchBufferAddStatus"/> describing the result of the operation.</returns>
+    internal BatchBufferAddStatus Add(T item)
+    {
+        using var scope = _addLock.TryEnterCounterScope();
+        if (!scope.IsEntered)
+        {
+            return BatchBufferAddStatus.IgnoredIsFlushing;
+        }
+
+        var count = Interlocked.Increment(ref _additions);
+
+        if (count == 1)
+        {
+            EnableTimer();
+            _array[count - 1] = item;
+            return BatchBufferAddStatus.AddedFirst;
+        }
+
+        if (count < _array.Length)
+        {
+            _array[count - 1] = item;
+            return BatchBufferAddStatus.Added;
+        }
+
+        if (count == _array.Length)
+        {
+            DisableTimer();
+            _array[count - 1] = item;
+            return BatchBufferAddStatus.AddedLast;
+        }
+
+        Debug.Assert(count > _array.Length);
+        return BatchBufferAddStatus.IgnoredCapacityExceeded;
+    }
 
     /// <summary>
     /// Enters a <see cref="FlushScope"/> used to ensure that only a single flush operation is in progress.
     /// </summary>
-    /// <returns>A <see cref="FlushScope"/> that must be disposed to exit.</returns>
     /// <remarks>
-    /// This method is thread-safe.
+    /// Must be disposed to exit.
     /// </remarks>
-    internal FlushScope TryEnterFlushScope(out bool lockTaken)
+    internal FlushScope TryEnterFlushScope()
     {
-        if (_addLock.TryEnter())
+        var scope = _addLock.TryEnterLockScope();
+        if (scope.IsEntered)
         {
-            lockTaken = true;
-            return new FlushScope(this);
+            return new FlushScope(this, scope);
         }
 
-        lockTaken = false;
         return new FlushScope();
     }
 
     /// <summary>
     /// Exits the <see cref="FlushScope"/> through <see cref="FlushScope.Dispose"/>.
     /// </summary>
-    /// <remarks>
-    /// This method is thread-safe.
-    /// </remarks>
     private void ExitFlushScope()
     {
-        _addLock.Exit();
+        Debug.Assert(_addLock.IsEngaged);
     }
 
     /// <summary>
-    /// Blocks the current thread until all <see cref="TryAdd"/> operations have completed.
+    /// Forces invocation of a Timeout of the active buffer.
     /// </summary>
-    /// <remarks>
-    /// This method is thread-safe.
-    /// </remarks>
-    internal void WaitAddCompleted()
+    internal void OnIntervalElapsed(object? state)
     {
-        _addCounter.Wait();
-    }
-
-    /// <summary>
-    /// Attempt to atomically add one element to the buffer.
-    /// </summary>
-    /// <param name="item">Element attempted to be added atomically.</param>
-    /// <param name="count">When this method returns <see langword="true"/>, is set to the Length at which the <paramref name="item"/> was added at.</param>
-    /// <returns><see langword="true"/> when <paramref name="item"/> was added atomically; <see langword="false"/> when <paramref name="item"/> was not added.</returns>
-    /// <remarks>
-    /// This method is thread-safe.
-    /// </remarks>
-    internal bool TryAdd(T item, out int count)
-    {
-        if (_addLock.IsEntered)
-        {
-            count = 0;
-            return false;
-        }
-
-        using var scope = _addCounter.EnterScope();
-
-        count = Interlocked.Increment(ref _additions);
-
-        if (count <= _array.Length)
-        {
-            _array[count - 1] = item;
-            return true;
-        }
-
-        return false;
+        var now = _clock.GetUtcNow();
+        _timeoutExceededAction(this, now);
     }
 
     /// <summary>
     /// Returns a new Array consisting of the elements successfully added.
     /// </summary>
     /// <returns>An Array with Length of successful additions.</returns>
-    /// <remarks>
-    /// This method is not thread-safe.
-    /// </remarks>
-    internal T[] ToArrayAndClear()
+    private T[] ToArrayAndClear()
     {
         var additions = _additions;
         var length = _array.Length;
@@ -169,12 +166,10 @@ internal sealed class BatchBuffer<T> : IDisposable
     /// </summary>
     /// <param name="length">The Length of the buffer a new Array is created from.</param>
     /// <returns>An Array with Length of <paramref name="length"/>.</returns>
-    /// <remarks>
-    /// This method is not thread-safe.
-    /// </remarks>
-    internal T[] ToArrayAndClear(int length)
+    private T[] ToArrayAndClear(int length)
     {
-        Debug.Assert(_addCounter.IsSet);
+        Debug.Assert(_addLock.IsSet);
+
         var array = ToArray(length);
         Clear(length);
         return array;
@@ -203,35 +198,87 @@ internal sealed class BatchBuffer<T> : IDisposable
         Array.Clear(_array, 0, length);
     }
 
+    private void EnableTimer()
+    {
+        var updated = _timer.Change(_timeout, Timeout.InfiniteTimeSpan);
+        Debug.Assert(updated, "Timer was not successfully enabled.");
+    }
+
+    private void DisableTimer()
+    {
+        var updated = _timer.Change(Timeout.Infinite, Timeout.Infinite);
+        Debug.Assert(updated, "Timer was not successfully disabled.");
+    }
+
     /// <inheritdoc />
     public void Dispose()
     {
-        _addCounter.Dispose();
+        _timer.Dispose();
+        _addLock.Dispose();
     }
 
-    private static void ThrowIfLessThanTwo(int capacity, string paramName)
+    private static void ThrowIfLessThanTwo(int value, string paramName)
     {
-        if (capacity < 2)
+        if (value < 2)
         {
-            ThrowLessThanTwo(capacity, paramName);
+            ThrowLessThanTwo(value, paramName);
+        }
+
+        static void ThrowLessThanTwo(int value, string paramName)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "Argument must be at least two.");
         }
     }
 
-    private static void ThrowLessThanTwo(int capacity, string paramName)
+    private static void ThrowIfNegativeOrZero(TimeSpan value, string paramName)
     {
-        throw new ArgumentOutOfRangeException(paramName, capacity, "Argument must be at least two.");
+        if (value <= TimeSpan.Zero && value != Timeout.InfiniteTimeSpan)
+        {
+            ThrowNegativeOrZero(value, paramName);
+        }
+
+        static void ThrowNegativeOrZero(TimeSpan value, string paramName)
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "Argument must be a non-negative and non-zero value.");
+        }
     }
 
+    /// <summary>
+    /// A scope than ensures only a single <see cref="Flush"/> operation is in progress,
+    /// and blocks the calling thread until all <see cref="Add"/> operations have finished.
+    /// When <see cref="IsEntered"/> is <see langword="true"/>, no more <see cref="Add"/> can be started,
+    /// which will then return <see cref="BatchBufferAddStatus.IgnoredIsFlushing"/> immediately.
+    /// </summary>
+    /// <remarks>
+    /// Only <see cref="Flush"/> when scope <see cref="IsEntered"/>.
+    /// </remarks>
     internal ref struct FlushScope : IDisposable
     {
         private BatchBuffer<T>? _lockObj;
+        private ScopedCountdownLock.LockScope _scope;
 
-        internal FlushScope(BatchBuffer<T> lockObj)
+        internal FlushScope(BatchBuffer<T> lockObj, ScopedCountdownLock.LockScope scope)
         {
             _lockObj = lockObj;
+            _scope = scope;
         }
 
-        internal bool IsEntered => _lockObj is not null;
+        internal bool IsEntered => _scope.IsEntered;
+
+        internal T[] Flush()
+        {
+            var lockObj = _lockObj;
+            if (lockObj is not null)
+            {
+                lockObj._lastFlush = lockObj._clock.GetUtcNow();
+                _scope.Wait();
+
+                var array = lockObj.ToArrayAndClear();
+                return array;
+            }
+
+            throw new ObjectDisposedException(nameof(FlushScope));
+        }
 
         public void Dispose()
         {
@@ -241,6 +288,17 @@ internal sealed class BatchBuffer<T> : IDisposable
                 _lockObj = null;
                 lockObj.ExitFlushScope();
             }
+
+            _scope.Dispose();
         }
     }
+}
+
+internal enum BatchBufferAddStatus : byte
+{
+    AddedFirst,
+    Added,
+    AddedLast,
+    IgnoredCapacityExceeded,
+    IgnoredIsFlushing,
 }

@@ -4,122 +4,115 @@ namespace Sentry.Tests.Internals;
 
 public class BatchProcessorTests : IDisposable
 {
-    private readonly IHub _hub;
-    private readonly MockClock _clock;
-    private readonly ClientReportRecorder _clientReportRecorder;
-    private readonly InMemoryDiagnosticLogger _diagnosticLogger;
-    private readonly BlockingCollection<Envelope> _capturedEnvelopes;
-
-    private int _expectedDiagnosticLogs;
-
-    public BatchProcessorTests()
+    private sealed class Fixture
     {
-        var options = new SentryOptions();
+        public IHub Hub { get; }
+        public MockClock Clock { get; }
+        public ClientReportRecorder ClientReportRecorder { get; }
+        public InMemoryDiagnosticLogger DiagnosticLogger { get; }
+        public BlockingCollection<Envelope> CapturedEnvelopes { get; }
 
-        _hub = Substitute.For<IHub>();
-        _clock = new MockClock();
-        _clientReportRecorder = new ClientReportRecorder(options, _clock);
-        _diagnosticLogger = new InMemoryDiagnosticLogger();
+        public int ExpectedDiagnosticLogs { get; set; }
 
-        _capturedEnvelopes = [];
-        _hub.CaptureEnvelope(Arg.Do<Envelope>(arg => _capturedEnvelopes.Add(arg)));
+        public Fixture()
+        {
+            var options = new SentryOptions();
 
-        _expectedDiagnosticLogs = 0;
+            Hub = Substitute.For<IHub>();
+            Clock = new MockClock();
+            ClientReportRecorder = new ClientReportRecorder(options, Clock);
+            DiagnosticLogger = new InMemoryDiagnosticLogger();
+
+            CapturedEnvelopes = [];
+            Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => CapturedEnvelopes.Add(arg)));
+
+            ExpectedDiagnosticLogs = 0;
+        }
+
+        public BatchProcessor GetSut(int batchCount)
+        {
+            return new BatchProcessor(Hub, batchCount, Timeout.InfiniteTimeSpan, Clock, ClientReportRecorder, DiagnosticLogger);
+        }
     }
 
-    [Theory(Skip = "May no longer be required after feedback.")]
-    [InlineData(-1)]
-    [InlineData(0)]
-    public void Ctor_CountOutOfRange_Throws(int count)
+    private readonly Fixture _fixture = new();
+
+    public void Dispose()
     {
-        var ctor = () => new BatchProcessor(_hub, count, TimeSpan.FromMilliseconds(10), _clock, _clientReportRecorder, _diagnosticLogger);
-
-        Assert.Throws<ArgumentOutOfRangeException>(ctor);
-    }
-
-    [Theory(Skip = "May no longer be required after feedback.")]
-    [InlineData(-1)]
-    [InlineData(0)]
-    [InlineData(int.MaxValue + 1.0)]
-    public void Ctor_IntervalOutOfRange_Throws(double interval)
-    {
-        var ctor = () => new BatchProcessor(_hub, 1, TimeSpan.FromMilliseconds(interval), _clock, _clientReportRecorder, _diagnosticLogger);
-
-        Assert.Throws<ArgumentException>(ctor);
+        Assert.Equal(_fixture.ExpectedDiagnosticLogs, _fixture.DiagnosticLogger.Entries.Count);
     }
 
     [Fact]
     public void Enqueue_NeitherSizeNorTimeoutReached_DoesNotCaptureEnvelope()
     {
-        using var processor = new BatchProcessor(_hub, 2, Timeout.InfiniteTimeSpan, _clock, _clientReportRecorder, _diagnosticLogger);
+        using var processor = _fixture.GetSut(2);
 
         processor.Enqueue(CreateLog("one"));
 
-        Assert.Empty(_capturedEnvelopes);
+        Assert.Empty(_fixture.CapturedEnvelopes);
         AssertEnvelope();
     }
 
     [Fact]
     public void Enqueue_SizeReached_CaptureEnvelope()
     {
-        using var processor = new BatchProcessor(_hub, 2, Timeout.InfiniteTimeSpan, _clock, _clientReportRecorder, _diagnosticLogger);
+        using var processor = _fixture.GetSut(2);
 
         processor.Enqueue(CreateLog("one"));
         processor.Enqueue(CreateLog("two"));
 
-        Assert.Single(_capturedEnvelopes);
+        Assert.Single(_fixture.CapturedEnvelopes);
         AssertEnvelope("one", "two");
     }
 
     [Fact]
     public void Enqueue_TimeoutReached_CaptureEnvelope()
     {
-        using var processor = new BatchProcessor(_hub, 2, Timeout.InfiniteTimeSpan, _clock, _clientReportRecorder, _diagnosticLogger);
+        using var processor = _fixture.GetSut(2);
 
         processor.Enqueue(CreateLog("one"));
+        processor.OnIntervalElapsed();
 
-        processor.OnIntervalElapsed(null);
-
-        Assert.Single(_capturedEnvelopes);
+        Assert.Single(_fixture.CapturedEnvelopes);
         AssertEnvelope("one");
     }
 
     [Fact]
     public void Enqueue_BothSizeAndTimeoutReached_CaptureEnvelopeOnce()
     {
-        using var processor = new BatchProcessor(_hub, 2, Timeout.InfiniteTimeSpan, _clock, _clientReportRecorder, _diagnosticLogger);
+        using var processor = _fixture.GetSut(2);
 
         processor.Enqueue(CreateLog("one"));
         processor.Enqueue(CreateLog("two"));
-        processor.OnIntervalElapsed(null);
+        processor.OnIntervalElapsed();
 
-        Assert.Single(_capturedEnvelopes);
+        Assert.Single(_fixture.CapturedEnvelopes);
         AssertEnvelope("one", "two");
     }
 
     [Fact]
     public void Enqueue_BothTimeoutAndSizeReached_CaptureEnvelopes()
     {
-        using var processor = new BatchProcessor(_hub, 2, Timeout.InfiniteTimeSpan, _clock, _clientReportRecorder, _diagnosticLogger);
+        using var processor = _fixture.GetSut(2);
 
-        processor.OnIntervalElapsed(null);
+        processor.OnIntervalElapsed();
         processor.Enqueue(CreateLog("one"));
-        processor.OnIntervalElapsed(null);
+        processor.OnIntervalElapsed();
         processor.Enqueue(CreateLog("two"));
         processor.Enqueue(CreateLog("three"));
 
-        Assert.Equal(2, _capturedEnvelopes.Count);
+        Assert.Equal(2, _fixture.CapturedEnvelopes.Count);
         AssertEnvelopes(["one"], ["two", "three"]);
     }
 
     [Fact]
     public async Task Enqueue_Concurrency_CaptureEnvelopes()
     {
-        const int batchCount = 3;
-        const int maxDegreeOfParallelism = 5;
-        const int logsPerTask = 100;
+        const int batchCount = 5;
+        const int maxDegreeOfParallelism = 10;
+        const int logsPerTask = 1_000;
 
-        using var processor = new BatchProcessor(_hub, batchCount, Timeout.InfiniteTimeSpan, _clock, _clientReportRecorder, _diagnosticLogger);
+        using var processor = _fixture.GetSut(batchCount);
         using var sync = new ManualResetEvent(false);
 
         var tasks = new Task[maxDegreeOfParallelism];
@@ -139,9 +132,9 @@ public class BatchProcessorTests : IDisposable
         sync.Set();
         await Task.WhenAll(tasks).WaitAsync(TimeSpan.FromSeconds(5));
         processor.Flush();
-        _capturedEnvelopes.CompleteAdding();
+        _fixture.CapturedEnvelopes.CompleteAdding();
 
-        var capturedLogs = _capturedEnvelopes
+        var capturedLogs = _fixture.CapturedEnvelopes
             .SelectMany(static envelope => envelope.Items)
             .Select(static item => item.Payload)
             .OfType<JsonSerializable>()
@@ -150,16 +143,16 @@ public class BatchProcessorTests : IDisposable
             .Sum(log => log.Items.Length);
         var droppedLogs = 0;
 
-        if (_clientReportRecorder.GenerateClientReport() is { } clientReport)
+        if (_fixture.ClientReportRecorder.GenerateClientReport() is { } clientReport)
         {
             var discardedEvent = Assert.Single(clientReport.DiscardedEvents);
             Assert.Equal(new DiscardReasonWithCategory(DiscardReason.Backpressure, DataCategory.Default), discardedEvent.Key);
 
             droppedLogs = discardedEvent.Value;
-            _expectedDiagnosticLogs = discardedEvent.Value;
+            _fixture.ExpectedDiagnosticLogs = discardedEvent.Value;
         }
 
-        var actualInvocations = tasks.Length * logsPerTask;
+        var actualInvocations = maxDegreeOfParallelism * logsPerTask;
         if (actualInvocations != capturedLogs + droppedLogs)
         {
             Assert.Fail($"""
@@ -180,11 +173,11 @@ public class BatchProcessorTests : IDisposable
     {
         if (expected.Length == 0)
         {
-            Assert.Empty(_capturedEnvelopes);
+            Assert.Empty(_fixture.CapturedEnvelopes);
             return;
         }
 
-        var envelope = Assert.Single(_capturedEnvelopes);
+        var envelope = Assert.Single(_fixture.CapturedEnvelopes);
         AssertEnvelope(envelope, expected);
     }
 
@@ -192,13 +185,13 @@ public class BatchProcessorTests : IDisposable
     {
         if (expected.Length == 0)
         {
-            Assert.Empty(_capturedEnvelopes);
+            Assert.Empty(_fixture.CapturedEnvelopes);
             return;
         }
 
-        Assert.Equal(expected.Length, _capturedEnvelopes.Count);
+        Assert.Equal(expected.Length, _fixture.CapturedEnvelopes.Count);
         var index = 0;
-        foreach (var capturedEnvelope in _capturedEnvelopes)
+        foreach (var capturedEnvelope in _fixture.CapturedEnvelopes)
         {
             AssertEnvelope(capturedEnvelope, expected[index]);
             index++;
@@ -212,10 +205,5 @@ public class BatchProcessorTests : IDisposable
         var log = payload.Source as StructuredLog;
         Assert.NotNull(log);
         Assert.Equal(expected, log.Items.ToArray().Select(static item => item.Message));
-    }
-
-    public void Dispose()
-    {
-        Assert.Equal(_expectedDiagnosticLogs, _diagnosticLogger.Entries.Count);
     }
 }
