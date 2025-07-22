@@ -113,13 +113,13 @@
       <_OSArchitecture>$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)</_OSArchitecture>
     </PropertyGroup>
     <ItemGroup>
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Darwin-arm64" FileHash="a7f9304278c893fb6c39f0a60bdefdb03902d355d78d978f4a5b7def264fcd9b" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Darwin-x86_64" FileHash="bcf56037d5a8da58aaead346f26e9ca36cb1b05efb170f44cefdab83cc90bdef" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Linux-aarch64" FileHash="6e06fc74b6449a3cdf3cbffaf4347ae2dd768efff04fa43a306d9ccea4ede54c" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Linux-i686" FileHash="fe55d031baf9d182338a0f40a443018cde535371a01a02c0eef60487ec03010a" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Linux-x86_64" FileHash="d51a6bc0fa076dcd3d4121b9c3f21999057a1727cbc4113f07e0acf8f17afe48" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Windows-i686.exe" FileHash="dc0df7dd659ba4c31eda0beb8c05b3f7106dd90b0f7eb5354533de4d20b042ee" />
-      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) != 'X86')" Include="sentry-cli-Windows-x86_64.exe" FileHash="4b117ad6871af32963a41f3cb3f1fa15674f2c03ca2ce89fe918cde4bfe2a979" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Darwin-arm64" FileHash="e06af6e72fd23b6d5a6b7baaab61767cb71fc6fea486c7f5498a08bfcd58eedd" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('OSX')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Darwin-x86_64" FileHash="a055429e5e671d35ccc020934dd0a2ec0572efc47656be29b4315f388653ec98" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'Arm64')" Include="sentry-cli-Linux-aarch64" FileHash="d9bc23158a30b4987dfc36494375aa86f1adcf1fb3dd2acb1245d3a4fae4179c" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Linux-i686" FileHash="29a843be810a8987216ce46c41edffe2e21813999888a4bdf5034ed3223ba541" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Linux')) And $(_OSArchitecture) == 'X64')" Include="sentry-cli-Linux-x86_64" FileHash="89b1b1cd10c16d817a70ee5bb6673ccdcc48936648f6f281b8d576a3044430c9" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) == 'X86')" Include="sentry-cli-Windows-i686.exe" FileHash="724eeacac294d2e902ec0f9444f47e1454d7d3743931a9af1bac298f908d6afc" />
+      <SentryCLIDownload Condition="'$(CI_PUBLISHING_BUILD)' == 'true' Or ($([MSBuild]::IsOSPlatform('Windows')) And $(_OSArchitecture) != 'X86')" Include="sentry-cli-Windows-x86_64.exe" FileHash="090fdd6d59c88436c0de98d91d930b4be2905e60f4f948396750fd33340fa62b" />
     </ItemGroup>
 
     <!-- Download the files -->
@@ -188,8 +188,6 @@
     <None Include="buildTransitive\Sentry.props" Pack="true" PackagePath="build\Sentry.props" />
     <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="buildTransitive\Sentry.targets" />
     <None Include="buildTransitive\Sentry.targets" Pack="true" PackagePath="build\Sentry.targets" />
-    <None Include="buildTransitive\Sentry.SourceGenerators.targets" Pack="true" PackagePath="buildTransitive\Sentry.SourceGenerators.targets" />
-    <None Include="buildTransitive\Sentry.SourceGenerators.targets" Pack="true" PackagePath="build\Sentry.SourceGenerators.targets" />
   </ItemGroup>
 
   <ItemGroup>
@@ -198,4 +196,5 @@
           PackagePath="analyzers/dotnet/cs"
           Visible="false" />
   </ItemGroup>
+
 </Project>

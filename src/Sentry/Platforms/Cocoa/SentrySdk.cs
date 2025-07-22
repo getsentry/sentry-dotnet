@@ -24,7 +24,8 @@ public static partial class SentrySdk
         nativeOptions.Debug = options.Debug;
         nativeOptions.DiagnosticLevel = options.DiagnosticLevel.ToCocoaSentryLevel();
         nativeOptions.Dsn = options.Dsn;
-        nativeOptions.EnableAutoSessionTracking = options.AutoSessionTracking;
+        // Hardcode to false because .NET SDK manages sessions itself
+        nativeOptions.EnableAutoSessionTracking = false;
         nativeOptions.EnableCaptureFailedRequests = options.CaptureFailedRequests;
         nativeOptions.FailedRequestStatusCodes = GetFailedRequestStatusCodes(options.FailedRequestStatusCodes);
         nativeOptions.MaxAttachmentSize = (nuint)options.MaxAttachmentSize;
