@@ -36,11 +36,10 @@
       <_TestAPK Include="2" Aot="False" Store="False" Compressed="True" />
       <_TestAPK Include="3" Aot="False" Store="True" Compressed="False" />
       <_TestAPK Include="4" Aot="False" Store="True" Compressed="True" />
-      <!-- Cross-OS native compilation is not supported on Windows (Microsoft.NETCore.Native.Publish.targets). -->
-      <_TestAPK Include="5" Aot="True" Store="False" Compressed="False" Condition="!$([MSBuild]::IsOSPlatform('Windows'))" />
-      <_TestAPK Include="6" Aot="True" Store="False" Compressed="True" Condition="!$([MSBuild]::IsOSPlatform('Windows'))" />
-      <_TestAPK Include="7" Aot="True" Store="True" Compressed="False" Condition="!$([MSBuild]::IsOSPlatform('Windows'))" />
-      <_TestAPK Include="8" Aot="True" Store="True" Compressed="True" Condition="!$([MSBuild]::IsOSPlatform('Windows'))" />
+      <_TestAPK Include="5" Aot="True" Store="False" Compressed="False" Condition="!$(TargetFramework.StartsWith('net8'))" />
+      <_TestAPK Include="6" Aot="True" Store="False" Compressed="True" Condition="!$(TargetFramework.StartsWith('net8'))" />
+      <_TestAPK Include="7" Aot="True" Store="True" Compressed="False" Condition="!$(TargetFramework.StartsWith('net8'))" />
+      <_TestAPK Include="8" Aot="True" Store="True" Compressed="True" Condition="!$(TargetFramework.StartsWith('net8'))" />
     </ItemGroup>
 
     <MSBuild Projects="$(MSBuildProjectFile)"
