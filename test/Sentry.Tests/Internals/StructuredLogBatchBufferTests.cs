@@ -2,22 +2,22 @@
 
 namespace Sentry.Tests.Internals;
 
-public class BatchBufferTests
+public class StructuredLogBatchBufferTests
 {
     private sealed class Fixture
     {
         public int Capacity { get; set; } = 2;
         public TimeSpan Timeout { get; set; } = System.Threading.Timeout.InfiniteTimeSpan;
         public MockClock Clock { get; } = new();
-        public List<(BatchBuffer<string> Buffer, DateTimeOffset SignalTime)> TimeoutExceededInvocations { get; } = new();
+        public List<(StructuredLogBatchBuffer Buffer, DateTimeOffset SignalTime)> TimeoutExceededInvocations { get; } = new();
         public string? Name { get; set; }
 
-        public BatchBuffer<string> GetSut()
+        public StructuredLogBatchBuffer GetSut()
         {
-            return new BatchBuffer<string>(Capacity, Timeout, Clock, OnTimeoutExceeded, Name);
+            return new StructuredLogBatchBuffer(Capacity, Timeout, Clock, OnTimeoutExceeded, Name);
         }
 
-        private void OnTimeoutExceeded(BatchBuffer<string> buffer, DateTimeOffset signalTime)
+        private void OnTimeoutExceeded(StructuredLogBatchBuffer buffer, DateTimeOffset signalTime)
         {
             TimeoutExceededInvocations.Add((buffer, signalTime));
         }
@@ -118,7 +118,7 @@ public class BatchBufferTests
         using var flushScope = buffer.TryEnterFlushScope();
         var array = flushScope.Flush();
 
-        array.Should().Equal(["one"]);
+        array.Messages().Should().Equal(["one"]);
         buffer.Capacity.Should().Be(2);
         buffer.IsEmpty.Should().BeTrue();
     }
@@ -134,7 +134,7 @@ public class BatchBufferTests
         using var flushScope = buffer.TryEnterFlushScope();
         var array = flushScope.Flush();
 
-        array.Should().Equal(["one", "two"]);
+        array.Messages().Should().Equal(["one", "two"]);
         buffer.Capacity.Should().Be(2);
         buffer.IsEmpty.Should().BeTrue();
     }
@@ -151,7 +151,7 @@ public class BatchBufferTests
         using var flushScope = buffer.TryEnterFlushScope();
         var array = flushScope.Flush();
 
-        array.Should().Equal(["one", "two"]);
+        array.Messages().Should().Equal(["one", "two"]);
         buffer.Capacity.Should().Be(2);
         buffer.IsEmpty.Should().BeTrue();
     }
@@ -168,7 +168,7 @@ public class BatchBufferTests
         var first = flushScope.Flush();
         var second = flushScope.Flush();
 
-        first.Should().Equal(["one", "two"]);
+        first.Messages().Should().Equal(["one", "two"]);
         second.Should().BeEmpty();
     }
 
@@ -190,7 +190,7 @@ public class BatchBufferTests
         using (var flushScope = buffer.TryEnterFlushScope())
         {
             flushScope.IsEntered.Should().BeTrue();
-            flushScope.Flush().Should().Equal(["one", "two"]);
+            flushScope.Flush().Messages().Should().Equal(["one", "two"]);
             buffer.IsEmpty.Should().BeTrue();
         }
     }
@@ -209,7 +209,7 @@ public class BatchBufferTests
         first.IsEntered.Should().BeTrue();
         second.IsEntered.Should().BeFalse();
 
-        first.Flush().Should().Equal(["one", "two"]);
+        first.Flush().Messages().Should().Equal(["one", "two"]);
         AssertFlushThrows<ObjectDisposedException>(second);
     }
 
@@ -228,7 +228,7 @@ public class BatchBufferTests
     }
 
     // cannot use xUnit's Throws() nor Fluent Assertions' ThrowExactly() because the FlushScope is a ref struct
-    private static void AssertFlushThrows<T>(BatchBuffer<string>.FlushScope flushScope)
+    private static void AssertFlushThrows<T>(StructuredLogBatchBuffer.FlushScope flushScope)
         where T : Exception
     {
         Exception? exception = null;
@@ -243,5 +243,19 @@ public class BatchBufferTests
 
         exception.Should().NotBeNull();
         exception.Should().BeOfType<T>();
+    }
+}
+
+file static class StructuredLogBatchBufferHelpers
+{
+    public static BatchBufferAddStatus Add(this StructuredLogBatchBuffer buffer, string item)
+    {
+        SentryLog log = new(DateTimeOffset.MinValue, SentryId.Empty, SentryLogLevel.Trace, item);
+        return buffer.Add(log);
+    }
+
+    public static string[] Messages(this SentryLog[] logs)
+    {
+        return logs.Select(static log => log.Message).ToArray();
     }
 }

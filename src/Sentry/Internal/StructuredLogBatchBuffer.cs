@@ -11,9 +11,9 @@ namespace Sentry.Internal;
 /// or when the <see cref="_timeout"/> is exceeded.
 /// </remarks>
 [DebuggerDisplay("Name = {Name}, Capacity = {Capacity}, Additions = {_additions}, AddCount = {AddCount}")]
-internal sealed class BatchBuffer<T> : IDisposable
+internal sealed class StructuredLogBatchBuffer : IDisposable
 {
-    private readonly T[] _array;
+    private readonly SentryLog[] _array;
     private int _additions;
     private readonly ScopedCountdownLock _addLock;
 
@@ -21,7 +21,7 @@ internal sealed class BatchBuffer<T> : IDisposable
     private readonly Timer _timer;
     private readonly TimeSpan _timeout;
 
-    private readonly Action<BatchBuffer<T>, DateTimeOffset> _timeoutExceededAction;
+    private readonly Action<StructuredLogBatchBuffer, DateTimeOffset> _timeoutExceededAction;
 
     private DateTimeOffset _lastFlush = DateTimeOffset.MinValue;
 
@@ -33,12 +33,12 @@ internal sealed class BatchBuffer<T> : IDisposable
     /// <param name="clock">The <see cref="ISystemClock"/> with which to interpret <paramref name="timeout"/>.</param>
     /// <param name="timeoutExceededAction">The operation to execute when the <paramref name="timeout"/> exceeds if the buffer is neither empty nor full.</param>
     /// <param name="name">Name of the new buffer.</param>
-    public BatchBuffer(int capacity, TimeSpan timeout, ISystemClock clock, Action<BatchBuffer<T>, DateTimeOffset> timeoutExceededAction, string? name = null)
+    public StructuredLogBatchBuffer(int capacity, TimeSpan timeout, ISystemClock clock, Action<StructuredLogBatchBuffer, DateTimeOffset> timeoutExceededAction, string? name = null)
     {
         ThrowIfLessThanTwo(capacity, nameof(capacity));
         ThrowIfNegativeOrZero(timeout, nameof(timeout));
 
-        _array = new T[capacity];
+        _array = new SentryLog[capacity];
         _additions = 0;
         _addLock = new ScopedCountdownLock();
 
@@ -78,7 +78,7 @@ internal sealed class BatchBuffer<T> : IDisposable
     /// </summary>
     /// <param name="item">Element attempted to be added atomically.</param>
     /// <returns>An <see cref="BatchBufferAddStatus"/> describing the result of the operation.</returns>
-    internal BatchBufferAddStatus Add(T item)
+    internal BatchBufferAddStatus Add(SentryLog item)
     {
         using var scope = _addLock.TryEnterCounterScope();
         if (!scope.IsEntered)
@@ -138,7 +138,7 @@ internal sealed class BatchBuffer<T> : IDisposable
     }
 
     /// <summary>
-    /// Forces invocation of a Timeout of the active buffer.
+    /// Callback when Timer has elapsed after first item has been added.
     /// </summary>
     internal void OnIntervalElapsed(object? state)
     {
@@ -150,7 +150,7 @@ internal sealed class BatchBuffer<T> : IDisposable
     /// Returns a new Array consisting of the elements successfully added.
     /// </summary>
     /// <returns>An Array with Length of successful additions.</returns>
-    private T[] ToArrayAndClear()
+    private SentryLog[] ToArrayAndClear()
     {
         var additions = _additions;
         var length = _array.Length;
@@ -166,7 +166,7 @@ internal sealed class BatchBuffer<T> : IDisposable
     /// </summary>
     /// <param name="length">The Length of the buffer a new Array is created from.</param>
     /// <returns>An Array with Length of <paramref name="length"/>.</returns>
-    private T[] ToArrayAndClear(int length)
+    private SentryLog[] ToArrayAndClear(int length)
     {
         Debug.Assert(_addLock.IsSet);
 
@@ -175,14 +175,14 @@ internal sealed class BatchBuffer<T> : IDisposable
         return array;
     }
 
-    private T[] ToArray(int length)
+    private SentryLog[] ToArray(int length)
     {
         if (length == 0)
         {
-            return Array.Empty<T>();
+            return Array.Empty<SentryLog>();
         }
 
-        var array = new T[length];
+        var array = new SentryLog[length];
         Array.Copy(_array, array, length);
         return array;
     }
@@ -254,10 +254,10 @@ internal sealed class BatchBuffer<T> : IDisposable
     /// </remarks>
     internal ref struct FlushScope : IDisposable
     {
-        private BatchBuffer<T>? _lockObj;
+        private StructuredLogBatchBuffer? _lockObj;
         private ScopedCountdownLock.LockScope _scope;
 
-        internal FlushScope(BatchBuffer<T> lockObj, ScopedCountdownLock.LockScope scope)
+        internal FlushScope(StructuredLogBatchBuffer lockObj, ScopedCountdownLock.LockScope scope)
         {
             _lockObj = lockObj;
             _scope = scope;
@@ -265,7 +265,7 @@ internal sealed class BatchBuffer<T> : IDisposable
 
         internal bool IsEntered => _scope.IsEntered;
 
-        internal T[] Flush()
+        internal SentryLog[] Flush()
         {
             var lockObj = _lockObj;
             if (lockObj is not null)

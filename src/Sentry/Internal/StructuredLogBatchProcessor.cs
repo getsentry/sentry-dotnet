@@ -35,9 +35,9 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
     private readonly IClientReportRecorder _clientReportRecorder;
     private readonly IDiagnosticLogger? _diagnosticLogger;
 
-    private readonly BatchBuffer<SentryLog> _buffer1;
-    private readonly BatchBuffer<SentryLog> _buffer2;
-    private volatile BatchBuffer<SentryLog> _activeBuffer;
+    private readonly StructuredLogBatchBuffer _buffer1;
+    private readonly StructuredLogBatchBuffer _buffer2;
+    private volatile StructuredLogBatchBuffer _activeBuffer;
 
     public StructuredLogBatchProcessor(IHub hub, int batchCount, TimeSpan batchInterval, ISystemClock clock, IClientReportRecorder clientReportRecorder, IDiagnosticLogger? diagnosticLogger)
     {
@@ -45,8 +45,8 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
         _clientReportRecorder = clientReportRecorder;
         _diagnosticLogger = diagnosticLogger;
 
-        _buffer1 = new BatchBuffer<SentryLog>(batchCount, batchInterval, clock, OnTimeoutExceeded, "Buffer 1");
-        _buffer2 = new BatchBuffer<SentryLog>(batchCount, batchInterval, clock, OnTimeoutExceeded, "Buffer 2");
+        _buffer1 = new StructuredLogBatchBuffer(batchCount, batchInterval, clock, OnTimeoutExceeded, "Buffer 1");
+        _buffer2 = new StructuredLogBatchBuffer(batchCount, batchInterval, clock, OnTimeoutExceeded, "Buffer 2");
         _activeBuffer = _buffer1;
     }
 
@@ -71,13 +71,16 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
         CaptureLogs(_buffer2);
     }
 
+    /// <summary>
+    /// Forces invocation of a Timeout of the active buffer.
+    /// </summary>
     internal void OnIntervalElapsed()
     {
         var activeBuffer = _activeBuffer;
         activeBuffer.OnIntervalElapsed(activeBuffer);
     }
 
-    private bool TryEnqueue(BatchBuffer<SentryLog> buffer, SentryLog log)
+    private bool TryEnqueue(StructuredLogBatchBuffer buffer, SentryLog log)
     {
         var status = buffer.Add(log);
 
@@ -91,14 +94,14 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
         return status is BatchBufferAddStatus.AddedFirst or BatchBufferAddStatus.Added;
     }
 
-    private bool TrySwapActiveBuffer(BatchBuffer<SentryLog> currentActiveBuffer)
+    private bool TrySwapActiveBuffer(StructuredLogBatchBuffer currentActiveBuffer)
     {
         var newActiveBuffer = ReferenceEquals(currentActiveBuffer, _buffer1) ? _buffer2 : _buffer1;
         var previousActiveBuffer = Interlocked.CompareExchange(ref _activeBuffer, newActiveBuffer, currentActiveBuffer);
         return previousActiveBuffer == currentActiveBuffer;
     }
 
-    private void CaptureLogs(BatchBuffer<SentryLog> buffer)
+    private void CaptureLogs(StructuredLogBatchBuffer buffer)
     {
         SentryLog[]? logs = null;
 
@@ -116,7 +119,7 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
         }
     }
 
-    private void OnTimeoutExceeded(BatchBuffer<SentryLog> buffer, DateTimeOffset signalTime)
+    private void OnTimeoutExceeded(StructuredLogBatchBuffer buffer, DateTimeOffset signalTime)
     {
         if (!buffer.IsEmpty)
         {
