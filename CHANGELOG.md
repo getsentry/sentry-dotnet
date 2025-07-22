@@ -5,6 +5,7 @@
 ### Fixes
 
 - Native AOT: don't load SentryNative on unsupported platforms ([#4347](https://github.com/getsentry/sentry-dotnet/pull/4347))
+- SentryTunnelMiddleware overwrites the X-Forwarded-For header ([#4375](https://github.com/getsentry/sentry-dotnet/pull/4375))
 
 ### Dependencies
 
