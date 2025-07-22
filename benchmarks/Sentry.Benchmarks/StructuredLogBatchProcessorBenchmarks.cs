@@ -6,9 +6,9 @@ using Sentry.Testing;
 
 namespace Sentry.Benchmarks;
 
-public class BatchProcessorBenchmarks
+public class StructuredLogBatchProcessorBenchmarks
 {
-    private BatchProcessor _batchProcessor;
+    private StructuredLogBatchProcessor _batchProcessor;
     private SentryLog _log;
 
     [Params(10, 100)]
@@ -25,7 +25,7 @@ public class BatchProcessorBenchmarks
         var clock = new MockClock();
         var clientReportRecorder = Substitute.For<IClientReportRecorder>();
         var diagnosticLogger = Substitute.For<IDiagnosticLogger>();
-        _batchProcessor = new BatchProcessor(hub, BatchCount, batchInterval, clock, clientReportRecorder, diagnosticLogger);
+        _batchProcessor = new StructuredLogBatchProcessor(hub, BatchCount, batchInterval, clock, clientReportRecorder, diagnosticLogger);
 
         _log = new SentryLog(DateTimeOffset.Now, SentryId.Empty, SentryLogLevel.Trace, "message");
     }

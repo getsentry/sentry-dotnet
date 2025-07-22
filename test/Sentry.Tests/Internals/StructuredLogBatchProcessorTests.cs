@@ -2,7 +2,7 @@
 
 namespace Sentry.Tests.Internals;
 
-public class BatchProcessorTests : IDisposable
+public class StructuredLogBatchProcessorTests : IDisposable
 {
     private sealed class Fixture
     {
@@ -29,9 +29,9 @@ public class BatchProcessorTests : IDisposable
             ExpectedDiagnosticLogs = 0;
         }
 
-        public BatchProcessor GetSut(int batchCount)
+        public StructuredLogBatchProcessor GetSut(int batchCount)
         {
-            return new BatchProcessor(Hub, batchCount, Timeout.InfiniteTimeSpan, Clock, ClientReportRecorder, DiagnosticLogger);
+            return new StructuredLogBatchProcessor(Hub, batchCount, Timeout.InfiniteTimeSpan, Clock, ClientReportRecorder, DiagnosticLogger);
         }
     }
 
@@ -120,7 +120,7 @@ public class BatchProcessorTests : IDisposable
         {
             tasks[i] = Task.Factory.StartNew(static state =>
             {
-                var (sync, logsPerTask, taskIndex, processor) = ((ManualResetEvent, int, int, BatchProcessor))state!;
+                var (sync, logsPerTask, taskIndex, processor) = ((ManualResetEvent, int, int, StructuredLogBatchProcessor))state!;
                 sync.WaitOne(5_000);
                 for (var i = 0; i < logsPerTask; i++)
                 {

@@ -9,7 +9,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
     private readonly SentryOptions _options;
     private readonly ISystemClock _clock;
 
-    private readonly BatchProcessor _batchProcessor;
+    private readonly StructuredLogBatchProcessor _batchProcessor;
 
     internal DefaultSentryStructuredLogger(IHub hub, SentryOptions options, ISystemClock clock)
     {
@@ -19,7 +19,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
         _options = options;
         _clock = clock;
 
-        _batchProcessor = new BatchProcessor(hub, ClampBatchCount(options.Experimental.InternalBatchSize), ClampBatchInterval(options.Experimental.InternalBatchTimeout), clock, _options.ClientReportRecorder, _options.DiagnosticLogger);
+        _batchProcessor = new StructuredLogBatchProcessor(hub, ClampBatchCount(options.Experimental.InternalBatchSize), ClampBatchInterval(options.Experimental.InternalBatchTimeout), clock, _options.ClientReportRecorder, _options.DiagnosticLogger);
     }
 
     private static int ClampBatchCount(int batchCount)

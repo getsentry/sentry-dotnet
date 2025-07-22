@@ -6,15 +6,30 @@ using Sentry.Protocol.Envelopes;
 namespace Sentry.Internal;
 
 /// <summary>
-/// The Sentry Batch Processor.
-/// This implementation is not complete yet.
-/// Also, the specification is still work in progress.
+/// The Batch Processor for Sentry Logs.
 /// </summary>
 /// <remarks>
-/// Sentry Specification: <see href="https://develop.sentry.dev/sdk/telemetry/spans/batch-processor/"/>.
-/// OpenTelemetry spec: <see href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/batchprocessor/README.md"/>.
+/// Used a double buffer strategy to achieve synchronous and lock-free adding.
+/// Switches the active buffer either when full or timeout exceeded (after first item added).
+/// Logs are dropped when both buffers are either full or being flushed.
+/// Flushing blocks the calling thread until all pending add operations have completed.
+/// <code>
+/// - Try to enqueue log into currently active buffer
+///   - when currently active buffer is full, try to enqueue log into the other buffer
+///   - when the other buffer is also full, or currently being flushed, then the log is dropped and a discarded event is recorded as a client report
+/// - Swap currently active buffer when
+///   - buffer is full
+///   - timeout has exceeded
+/// - Batch and Capture logs after swapping currently active buffer
+///   - wait until all pending add/enqueue operations have completed (required for timeout)
+///   - flush the buffer and capture an envelope containing the batched logs
+/// - After flush, logs can be enqueued again into the buffer
+/// </code>
 /// </remarks>
-internal sealed class BatchProcessor : IDisposable
+/// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/">Sentry Logs</seealso>
+/// <seealso href="https://develop.sentry.dev/sdk/telemetry/spans/batch-processor/">Sentry Batch Processor</seealso>
+/// <seealso href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/batchprocessor/README.md">OpenTelemetry Batch Processor</seealso>
+internal sealed class StructuredLogBatchProcessor : IDisposable
 {
     private readonly IHub _hub;
     private readonly IClientReportRecorder _clientReportRecorder;
@@ -24,7 +39,7 @@ internal sealed class BatchProcessor : IDisposable
     private readonly BatchBuffer<SentryLog> _buffer2;
     private volatile BatchBuffer<SentryLog> _activeBuffer;
 
-    public BatchProcessor(IHub hub, int batchCount, TimeSpan batchInterval, ISystemClock clock, IClientReportRecorder clientReportRecorder, IDiagnosticLogger? diagnosticLogger)
+    public StructuredLogBatchProcessor(IHub hub, int batchCount, TimeSpan batchInterval, ISystemClock clock, IClientReportRecorder clientReportRecorder, IDiagnosticLogger? diagnosticLogger)
     {
         _hub = hub;
         _clientReportRecorder = clientReportRecorder;
