@@ -32,47 +32,15 @@
   </Target>
   <Target Name="_InnerBuildTestAPKs">
     <ItemGroup>
-      <_TestAPK Include="1">
-        <Aot>False</Aot>
-        <Store>False</Store>
-        <Compressed>False</Compressed>
-      </_TestAPK>
-      <_TestAPK Include="2">
-        <Aot>False</Aot>
-        <Store>False</Store>
-        <Compressed>True</Compressed>
-      </_TestAPK>
-      <_TestAPK Include="3">
-        <Aot>False</Aot>
-        <Store>True</Store>
-        <Compressed>False</Compressed>
-      </_TestAPK>
-      <_TestAPK Include="4">
-        <Aot>False</Aot>
-        <Store>True</Store>
-        <Compressed>True</Compressed>
-      </_TestAPK>
-
-      <_TestAPK Include="5" Condition="!$([MSBuild]::IsOSPlatform('Windows'))">
-        <Aot>True</Aot>
-        <Store>False</Store>
-        <Compressed>False</Compressed>
-      </_TestAPK>
-      <_TestAPK Include="6" Condition="!$([MSBuild]::IsOSPlatform('Windows'))">
-        <Aot>True</Aot>
-        <Store>False</Store>
-        <Compressed>True</Compressed>
-      </_TestAPK>
-      <_TestAPK Include="7" Condition="!$([MSBuild]::IsOSPlatform('Windows'))">
-        <Aot>True</Aot>
-        <Store>True</Store>
-        <Compressed>False</Compressed>
-      </_TestAPK>
-      <_TestAPK Include="8" Condition="!$([MSBuild]::IsOSPlatform('Windows'))">
-        <Aot>True</Aot>
-        <Store>True</Store>
-        <Compressed>True</Compressed>
-      </_TestAPK>
+      <_TestAPK Include="1" Aot="False" Store="False" Compressed="False" />
+      <_TestAPK Include="2" Aot="False" Store="False" Compressed="True" />
+      <_TestAPK Include="3" Aot="False" Store="True" Compressed="False" />
+      <_TestAPK Include="4" Aot="False" Store="True" Compressed="True" />
+      <!-- Cross-OS native compilation is not supported on Windows (Microsoft.NETCore.Native.Publish.targets). -->
+      <_TestAPK Include="5" Aot="True" Store="False" Compressed="False" Condition="!$([MSBuild]::IsOSPlatform('Windows'))" />
+      <_TestAPK Include="6" Aot="True" Store="False" Compressed="True" Condition="!$([MSBuild]::IsOSPlatform('Windows'))" />
+      <_TestAPK Include="7" Aot="True" Store="True" Compressed="False" Condition="!$([MSBuild]::IsOSPlatform('Windows'))" />
+      <_TestAPK Include="8" Aot="True" Store="True" Compressed="True" Condition="!$([MSBuild]::IsOSPlatform('Windows'))" />
     </ItemGroup>
 
     <MSBuild Projects="$(MSBuildProjectFile)"
