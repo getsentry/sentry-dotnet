@@ -98,10 +98,14 @@ public class SentryTunnelMiddleware : IMiddleware
                     Method = HttpMethod.Post,
                     Content = new StreamContent(memoryStream),
                 };
+                var existingForwardedFor = context.Request.Headers["X-Forwarded-For"];
                 var clientIp = context.Connection?.RemoteIpAddress?.ToString();
                 if (clientIp != null)
                 {
-                    sentryRequest.Headers.Add("X-Forwarded-For", context.Connection?.RemoteIpAddress?.ToString());
+                    var forwardedFor = string.IsNullOrEmpty(existingForwardedFor)
+                        ? clientIp
+                        : $"{existingForwardedFor}, {clientIp}";
+                    sentryRequest.Headers.Add("X-Forwarded-For", forwardedFor);
                 }
                 var responseMessage = await client.SendAsync(sentryRequest).ConfigureAwait(false);
                 // We send the response back to the client, whatever it was
