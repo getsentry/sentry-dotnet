@@ -31,6 +31,7 @@
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net9.0-android" Condition="$(TargetFramework) == 'net9.0'" />
   </Target>
   <Target Name="_InnerBuildTestAPKs">
+    <!-- https://learn.microsoft.com/visualstudio/msbuild/msbuild-batching -->
     <ItemGroup>
       <_TestAPK Include="1" Properties="_Aot=False;_Store=False;_Compressed=False" />
       <_TestAPK Include="2" Properties="_Aot=False;_Store=False;_Compressed=True" />
