@@ -25,13 +25,13 @@
   <ItemGroup>
 <!--    <Compile Remove="ApiApprovalTests.verify.cs" />-->
 <!--    <Compile Remove="BindableSentryMauiOptionsTests.cs" />-->
+<!--    <Compile Remove="SentryMauiOptionsTests.cs" />-->
     <Compile Remove="BreadcrumbEventTests.cs" />
     <Compile Remove="SentryMauiAppBuilderExtensionsTests.cs" />
     <Compile Remove="SentryMauiAppBuilderExtensionsTests.Android.cs" />
     <Compile Remove="SentryMauiAppBuilderExtensionsTests.Cocoa.cs" />
-<!--    <Compile Remove="SentryMauiOptionsTests.cs" />-->
-    <Compile Remove="SentryMauiLogcatsTests.cs" />
-    <Compile Remove="SentryMauiScreenshotTests.cs" />
+<!--    <Compile Remove="SentryMauiLogcatsTests.cs" />-->
+<!--    <Compile Remove="SentryMauiScreenshotTests.cs" />-->
     <Compile Remove="MauiButtonEventsBinderTests.cs" />
     <Compile Remove="MauiEventsBinderFixture.cs" />
     <Compile Remove="MauiEventsBinderTests.Application.cs" />
