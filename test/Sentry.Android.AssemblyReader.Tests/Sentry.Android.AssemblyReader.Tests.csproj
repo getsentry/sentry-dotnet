@@ -32,20 +32,18 @@
   </Target>
   <Target Name="_InnerBuildTestAPKs">
     <ItemGroup>
-      <_TestAPK Include="1" Aot="False" Store="False" Compressed="False" />
-      <_TestAPK Include="2" Aot="False" Store="False" Compressed="True" />
-      <_TestAPK Include="3" Aot="False" Store="True" Compressed="False" />
-      <_TestAPK Include="4" Aot="False" Store="True" Compressed="True" />
-      <_TestAPK Include="5" Aot="True" Store="False" Compressed="False" Condition="!$(TargetFramework.StartsWith('net8'))" />
-      <_TestAPK Include="6" Aot="True" Store="False" Compressed="True" Condition="!$(TargetFramework.StartsWith('net8'))" />
-      <_TestAPK Include="7" Aot="True" Store="True" Compressed="False" Condition="!$(TargetFramework.StartsWith('net8'))" />
-      <_TestAPK Include="8" Aot="True" Store="True" Compressed="True" Condition="!$(TargetFramework.StartsWith('net8'))" />
+      <_TestAPK Include="1" Properties="_Aot=False;_Store=False;_Compressed=False" />
+      <_TestAPK Include="2" Properties="_Aot=False;_Store=False;_Compressed=True" />
+      <_TestAPK Include="3" Properties="_Aot=False;_Store=True;_Compressed=False" />
+      <_TestAPK Include="4" Properties="_Aot=False;_Store=True;_Compressed=True" />
+
+      <_TestAPK Include="5" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=False;_Compressed=False" />
+      <_TestAPK Include="6" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=False;_Compressed=True" />
+      <_TestAPK Include="7" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=True;_Compressed=False" />
+      <_TestAPK Include="8" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=True;_Compressed=True" />
     </ItemGroup>
 
-    <MSBuild Projects="$(MSBuildProjectFile)"
-             Targets="_BuildTestAPK"
-             Properties="_Aot=%(_TestAPK.Aot);_Store=%(_TestAPK.Store);_Compressed=%(_TestAPK.Compressed)"
-             BuildInParallel="false" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="%(_TestAPK.Properties)" BuildInParallel="false" />
   </Target>
   <Target Name="_BuildTestAPK">
     <PropertyGroup>

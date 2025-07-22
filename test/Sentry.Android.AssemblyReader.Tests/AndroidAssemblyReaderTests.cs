@@ -113,7 +113,6 @@ public class AndroidAssemblyReaderTests
         Skip.If(!isAssemblyStore);
         Skip.If(!isCompressed);
 #endif
-
         using var sut = GetSut(isAot, isAssemblyStore, isCompressed);
 
         var peReader = sut.TryReadAssembly(assemblyName);
