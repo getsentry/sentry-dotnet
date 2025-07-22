@@ -915,7 +915,7 @@ namespace Sentry
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Data { get; }
         public string? Description { get; set; }
         public System.DateTimeOffset? EndTimestamp { get; }
-        [System.Obsolete("Use SetData")]
+        [System.Obsolete("Use Data")]
         public System.Collections.Generic.IReadOnlyDictionary<string, object?> Extra { get; }
         public bool IsFinished { get; }
         public bool? IsSampled { get; }
@@ -930,7 +930,7 @@ namespace Sentry
         public Sentry.SentryId TraceId { get; }
         public Sentry.SentryTraceHeader GetTraceHeader() { }
         public void SetData(string key, object? value) { }
-        [System.Obsolete("Use Data")]
+        [System.Obsolete("Use SetData")]
         public void SetExtra(string key, object? value) { }
         public void SetMeasurement(string name, Sentry.Protocol.Measurement measurement) { }
         public void SetTag(string key, string value) { }
@@ -1329,7 +1329,6 @@ namespace Sentry.CompilerServices
 {
     public static class BuildProperties
     {
-        public static System.Collections.Generic.IReadOnlyDictionary<string, string>? Values { get; }
         public static void Initialize(System.Collections.Generic.Dictionary<string, string> properties) { }
     }
 }

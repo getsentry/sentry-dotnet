@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Fixes
+
+- Native AOT: don't load SentryNative on unsupported platforms ([#4347](https://github.com/getsentry/sentry-dotnet/pull/4347))
+
+### Dependencies
+
+- Bump CLI from v2.47.0 to v2.50.0 ([#4348](https://github.com/getsentry/sentry-dotnet/pull/4348), [#4370](https://github.com/getsentry/sentry-dotnet/pull/4370))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2500)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.47.0...2.50.0)
+
+## 5.12.0
+
 ### API changes
 
 - App Hang Tracking for iOS is now disabled by default, until this functionality is more stable. If you want to use it in your applications then you'll need to enable this manually. ([#4320](https://github.com/getsentry/sentry-dotnet/pull/4320))
@@ -13,9 +25,11 @@
 
 ### Fixes
 
+- Avoid double reporting sessions on iOS and Android apps ([#4341](https://github.com/getsentry/sentry-dotnet/pull/4341))
 - Sentry now decompresses Request bodies in ASP.NET Core when RequestDecompression middleware is enabled ([#4315](https://github.com/getsentry/sentry-dotnet/pull/4315))
 - Custom ISentryEventProcessors are now run for native iOS events ([#4318](https://github.com/getsentry/sentry-dotnet/pull/4318))
 - Crontab validation when capturing checkins ([#4314](https://github.com/getsentry/sentry-dotnet/pull/4314))
+- Fixed an issue with the way Sentry detects build settings. This was causing Sentry to produce code that could fail at runtime in AOT compiled applications. ([#4333](https://github.com/getsentry/sentry-dotnet/pull/4333))
 - Native AOT: link to static `lzma` on Linux/MUSL ([#4326](https://github.com/getsentry/sentry-dotnet/pull/4326))
 - AppDomain.CurrentDomain.ProcessExit hook is now removed on shutdown ([#4323](https://github.com/getsentry/sentry-dotnet/pull/4323))
 

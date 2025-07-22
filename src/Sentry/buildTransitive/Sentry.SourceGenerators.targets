@@ -1,9 +1,0 @@
-<Project>
-  <ItemGroup>
-    <CompilerVisibleProperty Include="PublishAot" />
-    <CompilerVisibleProperty Include="UseDotNetNativeToolchain" />
-    <CompilerVisibleProperty Include="PublishTrimmed" />
-    <CompilerVisibleProperty Include="SentryDisableSourceGenerator" />
-    <CompilerVisibleProperty Include="Configuration" />
-  </ItemGroup>
-</Project>
