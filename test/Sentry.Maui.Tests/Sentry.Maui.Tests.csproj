@@ -43,11 +43,12 @@
 <!--    <Compile Remove="MauiButtonEventsBinderTests.cs" />-->
 <!--    <Compile Remove="MauiImageButtonEventsBinderTests.cs" />-->
 
+<!--    <Compile Remove="MauiGestureRecognizerEventsBinderTests.cs" />-->
+
+<!--    <Compile Remove="MauiVisualElementEventsBinderTests.cs" />-->
+
     <Compile Remove="SentryMauiLogcatsTests.cs" />
     <Compile Remove="SentryMauiScreenshotTests.cs" />
-
-<!--    <Compile Remove="MauiGestureRecognizerEventsBinderTests.cs" />-->
-    <Compile Remove="MauiVisualElementEventsBinderTests.cs" />
   </ItemGroup>
 
 </Project>
