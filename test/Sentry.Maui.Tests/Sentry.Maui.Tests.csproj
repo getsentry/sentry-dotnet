@@ -32,9 +32,6 @@
 <!--    <Compile Remove="BreadcrumbEventTests.cs" />-->
 <!--    <Compile Remove="MauiNetworkStatusListenerTests.cs" />-->
 
-    <Compile Remove="SentryMauiLogcatsTests.cs" />
-    <Compile Remove="SentryMauiScreenshotTests.cs" />
-
 <!--    <Compile Remove="MauiEventsBinderTests.Application.cs" />-->
 <!--    <Compile Remove="MauiEventsBinderTests.Element.cs" />-->
 <!--    <Compile Remove="MauiEventsBinderTests.Page.cs" />-->
@@ -43,8 +40,11 @@
 <!--    <Compile Remove="MauiEventsBinderTests.Window.cs" />-->
 <!--    <Compile Remove="MauiEventsBinderTests.cs" />-->
 
-    <Compile Remove="MauiButtonEventsBinderTests.cs" />
-    <Compile Remove="MauiImageButtonEventsBinderTests.cs" />
+    <Compile Remove="SentryMauiLogcatsTests.cs" />
+    <Compile Remove="SentryMauiScreenshotTests.cs" />
+
+<!--    <Compile Remove="MauiButtonEventsBinderTests.cs" />-->
+<!--    <Compile Remove="MauiImageButtonEventsBinderTests.cs" />-->
     <Compile Remove="MauiGestureRecognizerEventsBinderTests.cs" />
     <Compile Remove="MauiVisualElementEventsBinderTests.cs" />
   </ItemGroup>
