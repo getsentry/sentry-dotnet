@@ -1494,9 +1494,9 @@ public partial class HubTests
         // Arrange
         _fixture.Options.Experimental.EnableLogs = true;
         var hub = _fixture.GetSut();
-        hub.Logger.LogWarning("Message");
 
         // Act
+        hub.Logger.LogWarning("Message");
         hub.Dispose();
 
         // Assert
