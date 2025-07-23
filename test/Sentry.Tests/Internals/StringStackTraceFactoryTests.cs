@@ -4,7 +4,7 @@ namespace Other.Tests.Internals;
 
 #if PLATFORM_NEUTRAL
 
-public class SimpleStackTraceFactoryTests
+public class StringStackTraceFactoryTests
 {
     [Fact]
     public Task MethodGeneric()
@@ -17,7 +17,7 @@ public class SimpleStackTraceFactoryTests
         {
             AttachStacktrace = true
         };
-        var factory = new SimpleStackTraceFactory(options);
+        var factory = new StringStackTraceFactory(options);
 
         // Act
         var stackTrace = factory.Create(exception);

@@ -1,5 +1,0 @@
-﻿{
-  FileName: {ProjectDirectory}Internals/SimpleStackTraceFactoryTests.cs,
-  Function: Tests.Internals.SimpleStackTraceFactoryTests.GenericMethodThatThrows[T](T value),
-  Module: Other
-}

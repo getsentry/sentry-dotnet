@@ -4,7 +4,7 @@
 
 ### Features
 
-- Sentry now includes an EXPERIMENTAL SimpleStackTraceFactory. As the name suggests, this factory isn't as feature rich as the full `SentryStackTraceFactory`. However, it may provide better results if you are compiling your application AOT and not getting useful stack traces from the full stack trace factory. ([#4362](https://github.com/getsentry/sentry-dotnet/pull/4362))
+- Sentry now includes an EXPERIMENTAL StringStackTraceFactory. As the name suggests, this factory isn't as feature rich as the full `SentryStackTraceFactory`. However, it may provide better results if you are compiling your application AOT and not getting useful stack traces from the full stack trace factory. ([#4362](https://github.com/getsentry/sentry-dotnet/pull/4362))
 ### Fixes
 
 - Native AOT: don't load SentryNative on unsupported platforms ([#4347](https://github.com/getsentry/sentry-dotnet/pull/4347))
