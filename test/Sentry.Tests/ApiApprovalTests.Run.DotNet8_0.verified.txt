@@ -1516,9 +1516,10 @@ namespace Sentry.Extensibility
         public SentryStackTraceFactory(Sentry.SentryOptions options) { }
         public Sentry.SentryStackTrace? Create(System.Exception? exception = null) { }
     }
-    public class SimpleStackTraceFactory : Sentry.Extensibility.ISentryStackTraceFactory
+    [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
+    public class StringStackTraceFactory : Sentry.Extensibility.ISentryStackTraceFactory
     {
-        public SimpleStackTraceFactory(Sentry.SentryOptions options) { }
+        public StringStackTraceFactory(Sentry.SentryOptions options) { }
         public Sentry.SentryStackTrace? Create(System.Exception? exception = null) { }
     }
 }
