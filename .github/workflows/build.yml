@@ -30,7 +30,7 @@ jobs:
           - os: ubuntu-24.04-arm
             rid: linux-musl-arm64
             container:
-              image: ghcr.io/jpnurmi/sentry-dotnet-alpine:3.21 # TODO: getsentry
+              image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
               volumes:
                 - /tmp/node20:/__e/node20
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
@@ -103,7 +103,7 @@ jobs:
             rid: linux-musl-arm64
             slnf: Sentry-CI-Build-Linux-musl.slnf
             container:
-              image: ghcr.io/jpnurmi/sentry-dotnet-alpine:3.21 # TODO: getsentry
+              image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
               volumes:
                 - /tmp/node20:/__e/node20
                 - /var/run/docker.sock:/var/run/docker.sock
