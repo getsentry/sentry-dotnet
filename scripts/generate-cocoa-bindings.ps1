@@ -28,8 +28,14 @@ if (!(Get-Command sharpie -ErrorAction SilentlyContinue))
 # Ensure Xamarin is installed (or sharpie won't produce expected output).
 if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/64bits/iOS/Xamarin.iOS.dll'))
 {
-    Write-Output 'Xamarin.iOS not found. Attempting to install via Homebrew.'
-    brew install --cask xamarin-ios
+    Write-Output 'Xamarin.iOS not found. Attempting to download from microsoft.com.'
+
+    $version = "16.4.0.23"
+    $url = "https://download.visualstudio.microsoft.com/download/pr/ceb0ea3f-4db8-46b4-8dc3-8049d27c0107/3960868aa9b1946a6c77668c3f3334ee/xamarin.ios-$version.pkg"
+    $pkg = Join-Path $env:TMPDIR "xamarin.ios-$version.pkg"
+    Invoke-WebRequest -Uri $url -OutFile $pkg
+    sudo installer -pkg $pkg -target /
+    Remove-Item $pkg -ErrorAction SilentlyContinue
 
     if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/64bits/iOS/Xamarin.iOS.dll'))
     {
