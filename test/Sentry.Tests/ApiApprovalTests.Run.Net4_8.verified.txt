@@ -795,8 +795,6 @@ namespace Sentry
         public sealed class SentryExperimentalOptions
         {
             public bool EnableLogs { get; set; }
-            public int InternalBatchSize { get; set; }
-            public System.TimeSpan InternalBatchTimeout { get; set; }
             public void SetBeforeSendLog(System.Func<Sentry.SentryLog, Sentry.SentryLog?> beforeSendLog) { }
         }
     }

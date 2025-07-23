@@ -113,7 +113,7 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
             }
         }
 
-        if (logs is not null)
+        if (logs is not null && logs.Length != 0)
         {
             _ = _hub.CaptureEnvelope(Envelope.FromLog(new StructuredLog(logs)));
         }

@@ -1897,22 +1897,5 @@ public class SentryOptions
         {
             _beforeSendLog = beforeSendLog;
         }
-
-        /// <summary>
-        /// This API will be removed in the future.
-        /// </summary>
-        /// <remarks>
-        /// Threshold of items in the buffer when sending all items, regardless of <see cref="InternalBatchTimeout"/>.
-        /// </remarks>
-        public int InternalBatchSize { get; set; } = 100;
-
-        /// <summary>
-        /// This API will be removed in the future.
-        /// </summary>
-        /// <remarks>
-        /// Time after which all items in the buffer are sent, regardless of <see cref="InternalBatchSize"/>.
-        /// <para>Must not exceed 30 seconds.</para>
-        /// </remarks>
-        public TimeSpan InternalBatchTimeout { get; set; } = TimeSpan.FromSeconds(5);
     }
 }

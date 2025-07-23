@@ -11,7 +11,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
 
     private readonly StructuredLogBatchProcessor _batchProcessor;
 
-    internal DefaultSentryStructuredLogger(IHub hub, SentryOptions options, ISystemClock clock)
+    internal DefaultSentryStructuredLogger(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
     {
         Debug.Assert(options is { Experimental.EnableLogs: true });
 
@@ -19,23 +19,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
         _options = options;
         _clock = clock;
 
-        _batchProcessor = new StructuredLogBatchProcessor(hub, ClampBatchCount(options.Experimental.InternalBatchSize), ClampBatchInterval(options.Experimental.InternalBatchTimeout), clock, _options.ClientReportRecorder, _options.DiagnosticLogger);
-    }
-
-    private static int ClampBatchCount(int batchCount)
-    {
-        return batchCount <= 0
-            ? 1
-            : batchCount > 1_000_000
-                ? 1_000_000
-                : batchCount;
-    }
-
-    private static TimeSpan ClampBatchInterval(TimeSpan batchInterval)
-    {
-        return batchInterval.TotalMilliseconds is <= 0 or > int.MaxValue
-            ? TimeSpan.FromMilliseconds(int.MaxValue)
-            : batchInterval;
+        _batchProcessor = new StructuredLogBatchProcessor(hub, batchCount, batchInterval, clock, _options.ClientReportRecorder, _options.DiagnosticLogger);
     }
 
     /// <inheritdoc />

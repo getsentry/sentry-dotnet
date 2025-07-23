@@ -19,6 +19,8 @@ public class SentryStructuredLoggerTests
                 DiagnosticLogger = DiagnosticLogger,
             };
             Clock = new MockClock(new DateTimeOffset(2025, 04, 22, 14, 51, 00, TimeSpan.Zero));
+            BatchSize = 2;
+            BatchTimeout = Timeout.InfiniteTimeSpan;
             TraceId = SentryId.Create();
             ParentSpanId = SpanId.Create();
 
@@ -30,6 +32,8 @@ public class SentryStructuredLoggerTests
         public IHub Hub { get; }
         public SentryOptions Options { get; }
         public ISystemClock Clock { get; }
+        public int BatchSize { get; set; }
+        public TimeSpan BatchTimeout { get; set; }
         public SentryId TraceId { get; private set; }
         public SpanId? ParentSpanId { get; private set; }
 
@@ -40,7 +44,7 @@ public class SentryStructuredLoggerTests
             ParentSpanId = SpanId.Empty;
         }
 
-        public SentryStructuredLogger GetSut() => SentryStructuredLogger.Create(Hub, Options, Clock);
+        public SentryStructuredLogger GetSut() => SentryStructuredLogger.Create(Hub, Options, Clock, BatchSize, BatchTimeout);
     }
 
     private readonly Fixture _fixture;
@@ -74,7 +78,7 @@ public class SentryStructuredLoggerTests
         instance.Should().BeSameAs(other);
     }
 
-    [Theory(Skip = "Remove InternalBatchSize")]
+    [Theory]
     [InlineData(SentryLogLevel.Trace)]
     [InlineData(SentryLogLevel.Debug)]
     [InlineData(SentryLogLevel.Info)]
@@ -84,13 +88,13 @@ public class SentryStructuredLoggerTests
     public void Log_Enabled_CapturesEnvelope(SentryLogLevel level)
     {
         _fixture.Options.Experimental.EnableLogs = true;
-        _fixture.Options.Experimental.InternalBatchSize = 1;
         var logger = _fixture.GetSut();
 
         Envelope envelope = null!;
         _fixture.Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => envelope = arg));
 
         logger.Log(level, "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
+        logger.Flush();
 
         _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
         envelope.AssertEnvelope(_fixture, level);
@@ -113,31 +117,30 @@ public class SentryStructuredLoggerTests
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
     }
 
-    [Fact(Skip = "Remove InternalBatchSize")]
+    [Fact]
     public void Log_WithoutTraceHeader_CapturesEnvelope()
     {
         _fixture.WithoutTraceHeader();
         _fixture.Options.Experimental.EnableLogs = true;
-        _fixture.Options.Experimental.InternalBatchSize = 1;
         var logger = _fixture.GetSut();
 
         Envelope envelope = null!;
         _fixture.Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => envelope = arg));
 
         logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
+        logger.Flush();
 
         _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
         envelope.AssertEnvelope(_fixture, SentryLogLevel.Trace);
     }
 
-    [Fact(Skip = "Remove InternalBatchSize")]
+    [Fact]
     public void Log_WithBeforeSendLog_InvokesCallback()
     {
         var invocations = 0;
         SentryLog configuredLog = null!;
 
         _fixture.Options.Experimental.EnableLogs = true;
-        _fixture.Options.Experimental.InternalBatchSize = 1;
         _fixture.Options.Experimental.SetBeforeSendLog((SentryLog log) =>
         {
             invocations++;
@@ -147,6 +150,7 @@ public class SentryStructuredLoggerTests
         var logger = _fixture.GetSut();
 
         logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
+        logger.Flush();
 
         _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
         invocations.Should().Be(1);
@@ -221,7 +225,7 @@ public class SentryStructuredLoggerTests
         entry.Args.Should().BeEmpty();
     }
 
-    [Fact(Skip = "May no longer be required after feedback.")]
+    [Fact]
     public void Dispose_Log_Throws()
     {
         _fixture.Options.Experimental.EnableLogs = true;

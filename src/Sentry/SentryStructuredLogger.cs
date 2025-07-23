@@ -11,9 +11,12 @@ namespace Sentry;
 public abstract class SentryStructuredLogger : IDisposable
 {
     internal static SentryStructuredLogger Create(IHub hub, SentryOptions options, ISystemClock clock)
+        => Create(hub, options, clock, 100, TimeSpan.FromSeconds(5));
+
+    internal static SentryStructuredLogger Create(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
     {
         return options.Experimental.EnableLogs
-            ? new DefaultSentryStructuredLogger(hub, options, clock)
+            ? new DefaultSentryStructuredLogger(hub, options, clock, batchCount, batchInterval)
             : DisabledSentryStructuredLogger.Instance;
     }
 
