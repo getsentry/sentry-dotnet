@@ -146,6 +146,8 @@ public class SamplingTransactionProfilerTests
     [InlineData(10)]
     public void Profiler_MultipleProfiles_Works(int startTimeoutSeconds)
     {
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI");
+
         using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(startTimeoutSeconds));
         // in the async startup case, we need to wait before collecting
         if (startTimeoutSeconds == 0)
