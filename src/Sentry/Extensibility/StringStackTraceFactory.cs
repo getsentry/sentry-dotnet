@@ -27,26 +27,22 @@ public partial class StringStackTraceFactory : ISentryStackTraceFactory
 
 #if NET9_0_OR_GREATER
     [GeneratedRegex(FullStackTraceLinePattern)]
-    private static partial Regex FullStackTraceLine { get; }
-#elif NET8_0
-     private static readonly Regex FullStackTraceLine = FullStackTraceLineRegex();
-
-     [GeneratedRegex(FullStackTraceLinePattern)]
-     private static partial Regex FullStackTraceLineRegex();
+    internal static partial Regex FullStackTraceLine { get; }
 #else
-    private static readonly Regex FullStackTraceLine = new (FullStackTraceLinePattern, RegexOptions.Compiled);
+    internal static readonly Regex FullStackTraceLine = FullStackTraceLineRegex();
+
+    [GeneratedRegex(FullStackTraceLinePattern)]
+    private static partial Regex FullStackTraceLineRegex();
 #endif
 
 #if NET9_0_OR_GREATER
     [GeneratedRegex(StackTraceLinePattern)]
     private static partial Regex StackTraceLine { get; }
-#elif NET8_0
-     private static readonly Regex StackTraceLine = StackTraceLineRegex();
-
-     [GeneratedRegex(StackTraceLinePattern)]
-     private static partial Regex StackTraceLineRegex();
 #else
-    private static readonly Regex StackTraceLine = new (StackTraceLinePattern, RegexOptions.Compiled);
+    private static readonly Regex StackTraceLine = StackTraceLineRegex();
+
+    [GeneratedRegex(StackTraceLinePattern)]
+    private static partial Regex StackTraceLineRegex();
 #endif
 
     /// <summary>
