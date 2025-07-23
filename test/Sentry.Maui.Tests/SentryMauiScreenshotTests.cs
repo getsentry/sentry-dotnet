@@ -53,7 +53,7 @@ public class SentryMauiScreenshotTests
         var builder = _fixture.Builder.UseSentry();
 
         // Act
-        using var app = builder.Build();
+        await using var app = builder.Build();
         var client = app.Services.GetRequiredService<ISentryClient>();
         var sentryId = client.CaptureException(new Exception());
         await client.FlushAsync();
@@ -94,12 +94,10 @@ public class SentryMauiScreenshotTests
         ));
 
         // Act
-        using var app = builder.Build();
+        await using var app = builder.Build();
         var client = app.Services.GetRequiredService<ISentryClient>();
         var sentryId = client.CaptureException(new Exception());
         await client.FlushAsync();
-
-        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
 
         var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
         envelope.Should().NotBeNull();
@@ -116,21 +114,20 @@ public class SentryMauiScreenshotTests
 #if __IOS__
         Skip.If(true, "Flaky on iOS");
 #endif
+#if ANDROID
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI on Android");
+#endif
 
         // Arrange
-        var builder = _fixture.Builder.UseSentry(options => options.SetBeforeScreenshotCapture((e, hint) =>
-            {
-                return false;
-            }
+        var builder = _fixture.Builder.UseSentry(options => options.SetBeforeScreenshotCapture(
+            (_, _) => false
         ));
 
         // Act
-        using var app = builder.Build();
+        await using var app = builder.Build();
         var client = app.Services.GetRequiredService<ISentryClient>();
         var sentryId = client.CaptureException(new Exception());
         await client.FlushAsync();
-
-        var options = app.Services.GetRequiredService<IOptions<SentryMauiOptions>>().Value;
 
         var envelope = _fixture.Transport.GetSentEnvelopes().FirstOrDefault(e => e.TryGetEventId() == sentryId);
         envelope.Should().NotBeNull();
@@ -157,10 +154,8 @@ public class SentryMauiScreenshotTests
 #endif
 
         // Arrange
-        var builder = _fixture.Builder.UseSentry(options => options.SetBeforeScreenshotCapture((e, hint) =>
-        {
-            return true;
-        }
+        var builder = _fixture.Builder.UseSentry(options => options.SetBeforeScreenshotCapture(
+            (_, _) => true
         ));
 
         // Act
@@ -184,19 +179,20 @@ public class SentryMauiScreenshotTests
         }
         else
         {
-        envelopeItem.Should().NotBeNull();
+            envelopeItem.Should().NotBeNull();
             envelopeItem!.TryGetFileName().Should().Be("screenshot.jpg");
         }
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task CaptureException_AttachScreenshot_Threadsafe()
     {
+#if ANDROID
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI on Android");
+#endif
+
         // Arrange
-        var builder = _fixture.Builder.UseSentry(options =>
-        {
-            options.AttachScreenshot = true;
-        });
+        var builder = _fixture.Builder.UseSentry(options => options.AttachScreenshot = true);
         await using var app = builder.Build();
         var client = app.Services.GetRequiredService<ISentryClient>();
 

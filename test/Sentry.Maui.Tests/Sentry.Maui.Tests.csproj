@@ -21,35 +21,4 @@
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
   </ItemGroup>
 
-  <!-- Disable all test files - comment out specific lines to re-enable tests -->
-  <ItemGroup>
-<!--    <Compile Remove="ApiApprovalTests.verify.cs" />-->
-<!--    <Compile Remove="BindableSentryMauiOptionsTests.cs" />-->
-<!--    <Compile Remove="SentryMauiOptionsTests.cs" />-->
-<!--    <Compile Remove="SentryMauiAppBuilderExtensionsTests.cs" />-->
-<!--    <Compile Remove="SentryMauiAppBuilderExtensionsTests.Android.cs" />-->
-<!--    <Compile Remove="SentryMauiAppBuilderExtensionsTests.Cocoa.cs" />-->
-<!--    <Compile Remove="BreadcrumbEventTests.cs" />-->
-<!--    <Compile Remove="MauiNetworkStatusListenerTests.cs" />-->
-
-<!--    <Compile Remove="MauiEventsBinderTests.Application.cs" />-->
-<!--    <Compile Remove="MauiEventsBinderTests.Element.cs" />-->
-<!--    <Compile Remove="MauiEventsBinderTests.Page.cs" />-->
-<!--    <Compile Remove="MauiEventsBinderTests.Shell.cs" />-->
-<!--    <Compile Remove="MauiEventsBinderTests.VisualElement.cs" />-->
-<!--    <Compile Remove="MauiEventsBinderTests.Window.cs" />-->
-<!--    <Compile Remove="MauiEventsBinderTests.cs" />-->
-
-<!--    <Compile Remove="MauiButtonEventsBinderTests.cs" />-->
-<!--    <Compile Remove="MauiImageButtonEventsBinderTests.cs" />-->
-
-<!--    <Compile Remove="MauiGestureRecognizerEventsBinderTests.cs" />-->
-
-<!--    <Compile Remove="MauiVisualElementEventsBinderTests.cs" />-->
-
-<!--    <Compile Remove="SentryMauiLogcatsTests.cs" />-->
-
-    <Compile Remove="SentryMauiScreenshotTests.cs" />
-  </ItemGroup>
-
 </Project>
