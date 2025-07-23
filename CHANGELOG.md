@@ -5,13 +5,14 @@
 ### Fixes
 
 - Native AOT: don't load SentryNative on unsupported platforms ([#4347](https://github.com/getsentry/sentry-dotnet/pull/4347))
+- Fixed issue introduced in release 5.12.0 that might prevent other middleware or user code from reading request bodies ([#4373](https://github.com/getsentry/sentry-dotnet/pull/4373))
 - SentryTunnelMiddleware overwrites the X-Forwarded-For header ([#4375](https://github.com/getsentry/sentry-dotnet/pull/4375))
 
 ### Dependencies
 
-- Bump CLI from v2.47.0 to v2.50.0 ([#4348](https://github.com/getsentry/sentry-dotnet/pull/4348), [#4370](https://github.com/getsentry/sentry-dotnet/pull/4370))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2500)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.47.0...2.50.0)
+- Bump CLI from v2.47.0 to v2.50.2 ([#4348](https://github.com/getsentry/sentry-dotnet/pull/4348), [#4370](https://github.com/getsentry/sentry-dotnet/pull/4370), [#4378](https://github.com/getsentry/sentry-dotnet/pull/4378))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2502)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.47.0...2.50.2)
 
 ## 5.12.0
 
