@@ -1,0 +1,26 @@
+name: Install zstd on Windows ARM64
+description: |
+  zstd is needed for cross OS actions/cache but missing from windows-11-arm
+  (https://github.com/actions/partner-runner-images/issues/99). Once the issue
+  is resolved, this action can be removed.
+inputs:
+  version:
+    description: 'zstd version'
+    required: false
+    default: '1.5.7'
+
+runs:
+  using: composite
+  steps:
+    - name: Install zstd
+      if: runner.os == 'Windows' && runner.arch == 'ARM64'
+      shell: pwsh
+      env:
+        ZSTD_VERSION: ${{ inputs.version }}
+      run: |
+        $url = "https://github.com/facebook/zstd/releases/download/v$env:ZSTD_VERSION/zstd-v$env:ZSTD_VERSION-win64.zip"
+        $installDir = "$env:RUNNER_TOOL_CACHE\zstd-v$env:ZSTD_VERSION-win64"
+        Invoke-WebRequest -OutFile "$env:TEMP\zstd.zip" -Uri $url
+        Expand-Archive -Path "$env:TEMP\zstd.zip" -DestinationPath $env:RUNNER_TOOL_CACHE -Force
+        echo "$installDir" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        & "$installDir\zstd.exe" --version
