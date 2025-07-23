@@ -47,7 +47,8 @@
 
 <!--    <Compile Remove="MauiVisualElementEventsBinderTests.cs" />-->
 
-    <Compile Remove="SentryMauiLogcatsTests.cs" />
+<!--    <Compile Remove="SentryMauiLogcatsTests.cs" />-->
+
     <Compile Remove="SentryMauiScreenshotTests.cs" />
   </ItemGroup>
 
