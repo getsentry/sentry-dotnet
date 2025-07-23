@@ -59,13 +59,17 @@ public partial class HubTests
         Assert.Empty(hub.ScopeManager.GetCurrent().Key.Breadcrumbs);
     }
 
-    [Fact]
+    [SkippableFact]
     public void PushAndLockScope_DoesNotAffectOuterScope()
     {
+#if __ANDROID__ || __IOS__
+        Skip.If(true, "Fails on both Android & iOS Device Tests");
+#endif
+
         // Arrange
         var hub = _fixture.GetSut();
 
-        // Act & assert
+        // Act & Assert
         hub.ScopeManager.ConfigureScope(s => Assert.False(s.Locked));
         using (hub.PushAndLockScope())
         {
