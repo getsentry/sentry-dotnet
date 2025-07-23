@@ -114,9 +114,6 @@ public class SentryMauiScreenshotTests
 #if __IOS__
         Skip.If(true, "Flaky on iOS");
 #endif
-#if ANDROID
-        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI on Android");
-#endif
 
         // Arrange
         var builder = _fixture.Builder.UseSentry(options => options.SetBeforeScreenshotCapture(
