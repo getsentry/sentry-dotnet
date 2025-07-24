@@ -47,9 +47,11 @@ public class IntegrationsTests : IDisposable
         var requestMessage = new HttpRequestMessage(new HttpMethod("POST"), "/tunnel")
         {
             Content = new StringContent(
-            @"{""sent_at"":""2021-01-01T00:00:00.000Z"",""sdk"":{""name"":""sentry.javascript.browser"",""version"":""6.8.0""},""dsn"":""https://dns@" + host + @"/1""}
-{""type"":""session""}
-{""sid"":""fda00e933162466c849962eaea0cfaff""}")
+                $$"""
+                  {"sent_at":"2021-01-01T00:00:00.000Z","sdk":{"name":"sentry.javascript.browser","version":"6.8.0"},"dsn":"https://dns@{{host}}/1"}
+                  {"type":"session"}
+                  {"sid":"fda00e933162466c849962eaea0cfaff"}
+                  """)
         };
         await _server.CreateClient().SendAsync(requestMessage);
 
@@ -61,9 +63,12 @@ public class IntegrationsTests : IDisposable
     {
         var requestMessage = new HttpRequestMessage(new HttpMethod("POST"), "/tunnel")
         {
-            Content = new StringContent(@"{}
-{""type"":""session""}
-{""sid"":""fda00e933162466c849962eaea0cfaff""}")
+            Content = new StringContent(
+                """
+                {}
+                {"type":"session"}
+                {"sid":"fda00e933162466c849962eaea0cfaff"}
+                """)
         };
         await _server.CreateClient().SendAsync(requestMessage);
 
@@ -75,9 +80,11 @@ public class IntegrationsTests : IDisposable
     {
         var requestMessage = new HttpRequestMessage(new HttpMethod("POST"), "/tunnel");
         requestMessage.Content = new StringContent(
-            @"{""sent_at"":""2021-01-01T00:00:00.000Z"",""sdk"":{""name"":""sentry.javascript.browser"",""version"":""6.8.0""},""dsn"":""https://dns@evil.com/1""}
-{""type"":""session""}
-{""sid"":""fda00e933162466c849962eaea0cfaff""}");
+            """
+            {"sent_at":"2021-01-01T00:00:00.000Z","sdk":{"name":"sentry.javascript.browser","version":"6.8.0"},"dsn":"https://dns@evil.com/1"}
+            {"type":"session"}
+            {"sid":"fda00e933162466c849962eaea0cfaff"}
+            """);
         await _server.CreateClient().SendAsync(requestMessage);
 
         Assert.Equal(0, _httpMessageHandler.NumberOfCalls);
@@ -89,9 +96,11 @@ public class IntegrationsTests : IDisposable
         var requestMessage = new HttpRequestMessage(new HttpMethod("POST"), "/tunnel")
         {
             Content = new StringContent(
-            @"{""sent_at"":""2021-01-01T00:00:00.000Z"",""sdk"":{""name"":""sentry.javascript.browser"",""version"":""6.8.0""},""dsn"":""https://dns@sentry.mywebsite.com/1""}
-{""type"":""session""}
-{""sid"":""fda00e933162466c849962eaea0cfaff""}")
+                """
+                {"sent_at":"2021-01-01T00:00:00.000Z","sdk":{"name":"sentry.javascript.browser","version":"6.8.0"},"dsn":"https://dns@sentry.mywebsite.com/1"}
+                {"type":"session"}
+                {"sid":"fda00e933162466c849962eaea0cfaff"}
+                """)
         };
         await _server.CreateClient().SendAsync(requestMessage);
 
@@ -105,9 +114,11 @@ public class IntegrationsTests : IDisposable
         var requestMessage = new HttpRequestMessage(new HttpMethod("POST"), "/tunnel")
         {
             Content = new StringContent(
-                @"{""sent_at"":""2021-01-01T00:00:00.000Z"",""sdk"":{""name"":""sentry.javascript.browser"",""version"":""6.8.0""},""dsn"":""https://dns@sentry.io/1""}
-{""type"":""session""}
-{""sid"":""fda00e933162466c849962eaea0cfaff""}")
+                """
+                {"sent_at":"2021-01-01T00:00:00.000Z","sdk":{"name":"sentry.javascript.browser","version":"6.8.0"},"dsn":"https://dns@sentry.io/1"}
+                {"type":"session"}
+                {"sid":"fda00e933162466c849962eaea0cfaff"}
+                """)
         };
         const string originalForwardedFor = "192.168.1.100, 10.0.0.1";
         requestMessage.Headers.Add("X-Forwarded-For", originalForwardedFor);
