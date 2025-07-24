@@ -59,13 +59,9 @@ public partial class HubTests
         Assert.Empty(hub.ScopeManager.GetCurrent().Key.Breadcrumbs);
     }
 
-    [SkippableFact]
+    [Fact]
     public void PushAndLockScope_DoesNotAffectOuterScope()
     {
-#if __ANDROID__ || __IOS__
-        Skip.If(true, "Fails on both Android & iOS Device Tests. See https://github.com/getsentry/sentry-dotnet/issues/4385.");
-#endif
-
         // Arrange
         var hub = _fixture.GetSut();
 
@@ -76,7 +72,14 @@ public partial class HubTests
             hub.ScopeManager.ConfigureScope(s => Assert.True(s.Locked));
         }
 
-        hub.ScopeManager.ConfigureScope(s => Assert.False(s.Locked));
+        if (_fixture.Options.IsGlobalModeEnabled)
+        {
+            hub.ScopeManager.ConfigureScope(s => Assert.True(s.Locked));
+        }
+        else
+        {
+            hub.ScopeManager.ConfigureScope(s => Assert.False(s.Locked));
+        }
     }
 
     [Fact]
