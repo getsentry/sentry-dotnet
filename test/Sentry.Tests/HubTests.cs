@@ -714,58 +714,25 @@ public partial class HubTests
         transactionTracer.DynamicSamplingContext.Should().BeSameAs(dsc);
     }
 
-    [Theory]
-    [InlineData(true, true)]
-    [InlineData(true, false)]
-    [InlineData(false, true)]
-    [InlineData(false, false)]
-    public void StartTransaction_DynamicSamplingContextWithSampleRate_UsesActualSampleRate(bool useTracesSampler, bool useTracesSampleRate)
-    {
-        // Arrange
-        var transactionContext = new TransactionContext("name", "operation");
-        var dsc = BaggageHeader.Create(new List<KeyValuePair<string, string>>
-        {
-            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
-            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
-            {"sentry-sample_rate", "0.5"},
-            {"sentry-sample_rand", "0.1234"},
-        }).CreateDynamicSamplingContext();
-
-        _fixture.Options.TracesSampler = useTracesSampler ? _ => 0.3 : _ => null;
-        _fixture.Options.TracesSampleRate = useTracesSampleRate ? 0.4 : null;
-
-        var hub = _fixture.GetSut();
-
-        // Act
-        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>(), dsc);
-
-        // Assert
-        if (useTracesSampler || useTracesSampleRate)
-        {
-            var expectedSampleRate = useTracesSampler ? 0.3 : 0.4;
-            var transactionTracer = transaction.Should().BeOfType<TransactionTracer>().Subject;
-            transactionTracer.SampleRate.Should().Be(expectedSampleRate);
-            transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(dsc);
-            transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(expectedSampleRate));
-        }
-        else
-        {
-            var unsampledTransaction = transaction.Should().BeOfType<UnsampledTransaction>().Subject;
-            unsampledTransaction.SampleRate.Should().Be(0.0);
-            unsampledTransaction.DynamicSamplingContext.Should().NotBeSameAs(dsc);
-            unsampledTransaction.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(0));
-        }
-    }
-
     [SkippableTheory]
-    [InlineData(null, 0.3)]
-    [InlineData(true, 1.0)]
-    [InlineData(false, 0.0)]
-    public void StartTransaction_DynamicSamplingContextWithForcedSampling_UsesForcedValue(bool? isSampled, double expectedSampleRate)
+    [InlineData(null, 0.3, 0.4, true, 0.3)]
+    [InlineData(null, 0.3, null, true, 0.3)]
+    [InlineData(null, null, 0.4, true, 0.4)]
+    [InlineData(null, null, null, false, 0.0)]
+    [InlineData(true, 0.3, 0.4, true, 0.3)]
+    [InlineData(true, 0.3, null, true, 0.3)]
+    [InlineData(true, null, 0.4, true, 0.4, 1.0)]
+    [InlineData(true, null, null, true, 0.0, 1.0)]
+    [InlineData(false, 0.3, 0.4, true, 0.3)]
+    [InlineData(false, 0.3, null, true, 0.3)]
+    [InlineData(false, null, 0.4, false, 0.4, 0.0)]
+    [InlineData(false, null, null, false, 0.0, 0.0)]
+    public void StartTransaction_DynamicSamplingContextWithSampleRate_OverwritesSampleRate(bool? isSampled, double? tracesSampler, double? tracesSampleRate, bool expectedIsSampled, double expectedSampleRate, double? expectedDscSampleRate = null)
     {
 #if DEBUG
-        Skip.If(isSampled is false, "Should return an 'UnsampledTransaction', not a 'TransactionTracer'. See https://github.com/getsentry/sentry-dotnet/issues/4386.");
+        Skip.If(isSampled is false && expectedIsSampled, $"Forced sampling via {nameof(ITransactionContext.IsSampled)} is not considered when {nameof(SentryOptions.TracesSampler)} is used, resulting in `Debug.Assert` of {nameof(TransactionTracer)} `.ctor`.");
 #endif
+        expectedDscSampleRate ??= expectedSampleRate;
 
         // Arrange
         var transactionContext = new TransactionContext("name", "operation", isSampled: isSampled);
@@ -777,8 +744,8 @@ public partial class HubTests
             {"sentry-sample_rand", "0.1234"},
         }).CreateDynamicSamplingContext();
 
-        _fixture.Options.TracesSampler = _ => 0.3;
-        _fixture.Options.TracesSampleRate = 0.4;
+        _fixture.Options.TracesSampler = _ => tracesSampler;
+        _fixture.Options.TracesSampleRate = tracesSampleRate;
 
         var hub = _fixture.GetSut();
 
@@ -786,10 +753,20 @@ public partial class HubTests
         var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>(), dsc);
 
         // Assert
-        var transactionTracer = transaction.Should().BeOfType<TransactionTracer>().Subject;
-        transactionTracer.SampleRate.Should().Be(0.3);
-        transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(dsc);
-        transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(expectedSampleRate));
+        if (expectedIsSampled)
+        {
+            var transactionTracer = transaction.Should().BeOfType<TransactionTracer>().Subject;
+            transactionTracer.SampleRate.Should().Be(expectedSampleRate);
+            transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(dsc);
+            transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(expectedDscSampleRate.Value));
+        }
+        else
+        {
+            var unsampledTransaction = transaction.Should().BeOfType<UnsampledTransaction>().Subject;
+            unsampledTransaction.SampleRate.Should().Be(expectedSampleRate);
+            unsampledTransaction.DynamicSamplingContext.Should().NotBeSameAs(dsc);
+            unsampledTransaction.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(expectedDscSampleRate.Value));
+        }
     }
 
     [Theory]
