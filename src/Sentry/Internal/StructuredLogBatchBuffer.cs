@@ -259,6 +259,7 @@ internal sealed class StructuredLogBatchBuffer : IDisposable
 
         internal FlushScope(StructuredLogBatchBuffer lockObj, ScopedCountdownLock.LockScope scope)
         {
+            Debug.Assert(scope.IsEntered);
             _lockObj = lockObj;
             _scope = scope;
         }
