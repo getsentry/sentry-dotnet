@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.AspNetCore;
@@ -98,13 +99,8 @@ public class SentryTunnelMiddleware : IMiddleware
                     Method = HttpMethod.Post,
                     Content = new StreamContent(memoryStream),
                 };
-                var existingForwardedFor = context.Request.Headers["X-Forwarded-For"];
-                var clientIp = context.Connection?.RemoteIpAddress?.ToString();
-                if (clientIp != null)
+                if (CreateXForwardedForHeader(context) is { } forwardedFor)
                 {
-                    var forwardedFor = string.IsNullOrEmpty(existingForwardedFor)
-                        ? clientIp
-                        : $"{existingForwardedFor}, {clientIp}";
                     sentryRequest.Headers.Add("X-Forwarded-For", forwardedFor);
                 }
                 var responseMessage = await client.SendAsync(sentryRequest).ConfigureAwait(false);
@@ -124,6 +120,25 @@ public class SentryTunnelMiddleware : IMiddleware
             response.StatusCode = StatusCodes.Status400BadRequest;
             await response.WriteAsync("Received empty body").ConfigureAwait(false);
         }
+    }
+
+    private static string? CreateXForwardedForHeader(HttpContext context)
+    {
+        var existingForwardedFor = context.Request.Headers["X-Forwarded-For"];
+        var clientIp = context.Connection?.RemoteIpAddress?.ToString();
+        if (clientIp is null)
+        {
+            return existingForwardedFor.Count > 0 ? existingForwardedFor.ToString() : null;
+        }
+
+        if (existingForwardedFor.Count == 0)
+        {
+            return clientIp;
+        }
+
+        return string.IsNullOrEmpty(existingForwardedFor)
+            ? clientIp
+            : $"{existingForwardedFor}, {clientIp}";
     }
 
     private bool IsHostAllowed(string host) =>
