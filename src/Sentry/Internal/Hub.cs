@@ -197,7 +197,7 @@ internal class Hub : IHub, IDisposable
         isSampled ??= context.IsSampled ?? SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
 
         // Ensure the actual sampleRate is set on the provided DSC (https://github.com/getsentry/sentry-dotnet/pull/4374)
-        dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(sampleRate.Value);
+        dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(context.IsSampled, sampleRate.Value);
 
         // Make sure there is a replayId (if available) on the provided DSC (if any).
         dynamicSamplingContext = dynamicSamplingContext?.WithReplayId(_replaySession);

@@ -63,7 +63,7 @@ public partial class HubTests
     public void PushAndLockScope_DoesNotAffectOuterScope()
     {
 #if __ANDROID__ || __IOS__
-        Skip.If(true, "Fails on both Android & iOS Device Tests");
+        Skip.If(true, "Fails on both Android & iOS Device Tests. See https://github.com/getsentry/sentry-dotnet/issues/4385.");
 #endif
 
         // Arrange
@@ -752,6 +752,41 @@ public partial class HubTests
             unsampledTransaction.DynamicSamplingContext.Should().NotBeSameAs(dsc);
             unsampledTransaction.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(0));
         }
+    }
+
+    [SkippableTheory]
+    [InlineData(null, 0.3)]
+    [InlineData(true, 1.0)]
+    [InlineData(false, 0.0)]
+    public void StartTransaction_DynamicSamplingContextWithForcedSampling_UsesForcedValue(bool? isSampled, double expectedSampleRate)
+    {
+#if DEBUG
+        Skip.If(isSampled is false, "Should return an 'UnsampledTransaction', not a 'TransactionTracer'. See https://github.com/getsentry/sentry-dotnet/issues/4386.");
+#endif
+
+        // Arrange
+        var transactionContext = new TransactionContext("name", "operation", isSampled: isSampled);
+        var dsc = BaggageHeader.Create(new List<KeyValuePair<string, string>>
+        {
+            {"sentry-trace_id", "43365712692146d08ee11a729dfbcaca"},
+            {"sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"},
+            {"sentry-sample_rate", "0.5"},
+            {"sentry-sample_rand", "0.1234"},
+        }).CreateDynamicSamplingContext();
+
+        _fixture.Options.TracesSampler = _ => 0.3;
+        _fixture.Options.TracesSampleRate = 0.4;
+
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>(), dsc);
+
+        // Assert
+        var transactionTracer = transaction.Should().BeOfType<TransactionTracer>().Subject;
+        transactionTracer.SampleRate.Should().Be(0.3);
+        transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(dsc);
+        transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(expectedSampleRate));
     }
 
     [Theory]

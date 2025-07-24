@@ -98,16 +98,23 @@ internal class DynamicSamplingContext
 
     public BaggageHeader ToBaggageHeader() => BaggageHeader.Create(Items, useSentryPrefix: true);
 
-    public DynamicSamplingContext WithSampleRate(double sampleRate)
+    public DynamicSamplingContext WithSampleRate(bool? isSampled, double sampleRate)
     {
         if (Items.TryGetValue("sample_rate", out var dscSampleRate))
         {
             if (double.TryParse(dscSampleRate, NumberStyles.Float, CultureInfo.InvariantCulture, out var rate))
             {
-                if (Math.Abs(rate - sampleRate) > double.Epsilon)
+                var newSampleRate = isSampled switch
+                {
+                    true => 1.0,
+                    false => 0.0,
+                    _ => sampleRate,
+                };
+
+                if (Math.Abs(rate - newSampleRate) > double.Epsilon)
                 {
                     var items = Items.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-                    items["sample_rate"] = sampleRate.ToString(CultureInfo.InvariantCulture);
+                    items["sample_rate"] = newSampleRate.ToString(CultureInfo.InvariantCulture);
                     return new DynamicSamplingContext(items);
                 }
             }
