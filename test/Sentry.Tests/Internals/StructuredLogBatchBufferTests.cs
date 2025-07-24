@@ -8,18 +8,18 @@ public class StructuredLogBatchBufferTests
     {
         public int Capacity { get; set; } = 2;
         public TimeSpan Timeout { get; set; } = System.Threading.Timeout.InfiniteTimeSpan;
-        public MockClock Clock { get; } = new();
-        public List<(StructuredLogBatchBuffer Buffer, DateTimeOffset SignalTime)> TimeoutExceededInvocations { get; } = new();
         public string? Name { get; set; }
+
+        public List<StructuredLogBatchBuffer> TimeoutExceededInvocations { get; } = [];
 
         public StructuredLogBatchBuffer GetSut()
         {
-            return new StructuredLogBatchBuffer(Capacity, Timeout, Clock, OnTimeoutExceeded, Name);
+            return new StructuredLogBatchBuffer(Capacity, Timeout, OnTimeoutExceeded, Name);
         }
 
-        private void OnTimeoutExceeded(StructuredLogBatchBuffer buffer, DateTimeOffset signalTime)
+        private void OnTimeoutExceeded(StructuredLogBatchBuffer buffer)
         {
-            TimeoutExceededInvocations.Add((buffer, signalTime));
+            TimeoutExceededInvocations.Add(buffer);
         }
     }
 
@@ -48,6 +48,19 @@ public class StructuredLogBatchBufferTests
         var ctor = () => _fixture.GetSut();
 
         Assert.Throws<ArgumentOutOfRangeException>("timeout", ctor);
+    }
+
+    [Fact]
+    public void Ctor()
+    {
+        _fixture.Capacity = 9;
+        _fixture.Name = nameof(Ctor);
+
+        using var buffer = _fixture.GetSut();
+
+        buffer.Capacity.Should().Be(_fixture.Capacity);
+        buffer.IsEmpty.Should().BeTrue();
+        buffer.Name.Should().Be(_fixture.Name);
     }
 
     [Fact]
@@ -225,6 +238,22 @@ public class StructuredLogBatchBufferTests
         flushScope.Dispose();
 
         AssertFlushThrows<ObjectDisposedException>(flushScope);
+    }
+
+    [Fact]
+    public void OnIntervalElapsed_Timeout_InvokesCallback()
+    {
+        _fixture.Timeout = Timeout.InfiniteTimeSpan;
+        using var buffer = _fixture.GetSut();
+
+        buffer.OnIntervalElapsed(null);
+        _fixture.TimeoutExceededInvocations.Should().HaveCount(1);
+
+        buffer.OnIntervalElapsed(null);
+        _fixture.TimeoutExceededInvocations.Should().HaveCount(2);
+
+        _fixture.TimeoutExceededInvocations[0].Should().BeSameAs(buffer);
+        _fixture.TimeoutExceededInvocations[1].Should().BeSameAs(buffer);
     }
 
     // cannot use xUnit's Throws() nor Fluent Assertions' ThrowExactly() because the FlushScope is a ref struct

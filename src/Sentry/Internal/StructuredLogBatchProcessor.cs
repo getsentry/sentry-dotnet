@@ -39,14 +39,14 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
     private readonly StructuredLogBatchBuffer _buffer2;
     private volatile StructuredLogBatchBuffer _activeBuffer;
 
-    public StructuredLogBatchProcessor(IHub hub, int batchCount, TimeSpan batchInterval, ISystemClock clock, IClientReportRecorder clientReportRecorder, IDiagnosticLogger? diagnosticLogger)
+    public StructuredLogBatchProcessor(IHub hub, int batchCount, TimeSpan batchInterval, IClientReportRecorder clientReportRecorder, IDiagnosticLogger? diagnosticLogger)
     {
         _hub = hub;
         _clientReportRecorder = clientReportRecorder;
         _diagnosticLogger = diagnosticLogger;
 
-        _buffer1 = new StructuredLogBatchBuffer(batchCount, batchInterval, clock, OnTimeoutExceeded, "Buffer 1");
-        _buffer2 = new StructuredLogBatchBuffer(batchCount, batchInterval, clock, OnTimeoutExceeded, "Buffer 2");
+        _buffer1 = new StructuredLogBatchBuffer(batchCount, batchInterval, OnTimeoutExceeded, "Buffer 1");
+        _buffer2 = new StructuredLogBatchBuffer(batchCount, batchInterval, OnTimeoutExceeded, "Buffer 2");
         _activeBuffer = _buffer1;
     }
 
@@ -86,7 +86,7 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
 
         if (status is BatchBufferAddStatus.AddedLast)
         {
-            TrySwapActiveBuffer(buffer);
+            SwapActiveBuffer(buffer);
             CaptureLogs(buffer);
             return true;
         }
@@ -94,11 +94,10 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
         return status is BatchBufferAddStatus.AddedFirst or BatchBufferAddStatus.Added;
     }
 
-    private bool TrySwapActiveBuffer(StructuredLogBatchBuffer currentActiveBuffer)
+    private void SwapActiveBuffer(StructuredLogBatchBuffer currentActiveBuffer)
     {
         var newActiveBuffer = ReferenceEquals(currentActiveBuffer, _buffer1) ? _buffer2 : _buffer1;
-        var previousActiveBuffer = Interlocked.CompareExchange(ref _activeBuffer, newActiveBuffer, currentActiveBuffer);
-        return previousActiveBuffer == currentActiveBuffer;
+        _ = Interlocked.CompareExchange(ref _activeBuffer, newActiveBuffer, currentActiveBuffer);
     }
 
     private void CaptureLogs(StructuredLogBatchBuffer buffer)
@@ -119,11 +118,11 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
         }
     }
 
-    private void OnTimeoutExceeded(StructuredLogBatchBuffer buffer, DateTimeOffset signalTime)
+    private void OnTimeoutExceeded(StructuredLogBatchBuffer buffer)
     {
         if (!buffer.IsEmpty)
         {
-            TrySwapActiveBuffer(buffer);
+            SwapActiveBuffer(buffer);
             CaptureLogs(buffer);
         }
     }

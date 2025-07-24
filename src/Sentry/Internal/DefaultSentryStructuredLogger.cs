@@ -19,7 +19,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
         _options = options;
         _clock = clock;
 
-        _batchProcessor = new StructuredLogBatchProcessor(hub, batchCount, batchInterval, clock, _options.ClientReportRecorder, _options.DiagnosticLogger);
+        _batchProcessor = new StructuredLogBatchProcessor(hub, batchCount, batchInterval, _options.ClientReportRecorder, _options.DiagnosticLogger);
     }
 
     /// <inheritdoc />

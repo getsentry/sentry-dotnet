@@ -6,8 +6,8 @@ public class StructuredLogBatchProcessorTests : IDisposable
 {
     private sealed class Fixture
     {
-        public IHub Hub { get; }
-        public MockClock Clock { get; }
+        private readonly IHub _hub;
+
         public ClientReportRecorder ClientReportRecorder { get; }
         public InMemoryDiagnosticLogger DiagnosticLogger { get; }
         public BlockingCollection<Envelope> CapturedEnvelopes { get; }
@@ -17,21 +17,21 @@ public class StructuredLogBatchProcessorTests : IDisposable
         public Fixture()
         {
             var options = new SentryOptions();
+            var clock = new MockClock();
 
-            Hub = Substitute.For<IHub>();
-            Clock = new MockClock();
-            ClientReportRecorder = new ClientReportRecorder(options, Clock);
+            _hub = Substitute.For<IHub>();
+            ClientReportRecorder = new ClientReportRecorder(options, clock);
             DiagnosticLogger = new InMemoryDiagnosticLogger();
 
             CapturedEnvelopes = [];
-            Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => CapturedEnvelopes.Add(arg)));
+            _hub.CaptureEnvelope(Arg.Do<Envelope>(arg => CapturedEnvelopes.Add(arg)));
 
             ExpectedDiagnosticLogs = 0;
         }
 
         public StructuredLogBatchProcessor GetSut(int batchCount)
         {
-            return new StructuredLogBatchProcessor(Hub, batchCount, Timeout.InfiniteTimeSpan, Clock, ClientReportRecorder, DiagnosticLogger);
+            return new StructuredLogBatchProcessor(_hub, batchCount, Timeout.InfiniteTimeSpan, ClientReportRecorder, DiagnosticLogger);
         }
     }
 

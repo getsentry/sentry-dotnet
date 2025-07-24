@@ -1,4 +1,3 @@
-using Sentry.Infrastructure;
 using Sentry.Threading;
 
 namespace Sentry.Internal;
@@ -17,23 +16,19 @@ internal sealed class StructuredLogBatchBuffer : IDisposable
     private int _additions;
     private readonly ScopedCountdownLock _addLock;
 
-    private readonly ISystemClock _clock;
     private readonly Timer _timer;
     private readonly TimeSpan _timeout;
 
-    private readonly Action<StructuredLogBatchBuffer, DateTimeOffset> _timeoutExceededAction;
-
-    private DateTimeOffset _lastFlush = DateTimeOffset.MinValue;
+    private readonly Action<StructuredLogBatchBuffer> _timeoutExceededAction;
 
     /// <summary>
     /// Create a new buffer.
     /// </summary>
     /// <param name="capacity">Length of the new buffer.</param>
     /// <param name="timeout">When the timeout exceeds after an item has been added and the <paramref name="capacity"/> not yet been exceeded, <paramref name="timeoutExceededAction"/> is invoked.</param>
-    /// <param name="clock">The <see cref="ISystemClock"/> with which to interpret <paramref name="timeout"/>.</param>
     /// <param name="timeoutExceededAction">The operation to execute when the <paramref name="timeout"/> exceeds if the buffer is neither empty nor full.</param>
     /// <param name="name">Name of the new buffer.</param>
-    public StructuredLogBatchBuffer(int capacity, TimeSpan timeout, ISystemClock clock, Action<StructuredLogBatchBuffer, DateTimeOffset> timeoutExceededAction, string? name = null)
+    public StructuredLogBatchBuffer(int capacity, TimeSpan timeout, Action<StructuredLogBatchBuffer> timeoutExceededAction, string? name = null)
     {
         ThrowIfLessThanTwo(capacity, nameof(capacity));
         ThrowIfNegativeOrZero(timeout, nameof(timeout));
@@ -42,7 +37,6 @@ internal sealed class StructuredLogBatchBuffer : IDisposable
         _additions = 0;
         _addLock = new ScopedCountdownLock();
 
-        _clock = clock;
         _timer = new Timer(OnIntervalElapsed, this, Timeout.Infinite, Timeout.Infinite);
         _timeout = timeout;
 
@@ -142,8 +136,7 @@ internal sealed class StructuredLogBatchBuffer : IDisposable
     /// </summary>
     internal void OnIntervalElapsed(object? state)
     {
-        var now = _clock.GetUtcNow();
-        _timeoutExceededAction(this, now);
+        _timeoutExceededAction(this);
     }
 
     /// <summary>
@@ -271,7 +264,6 @@ internal sealed class StructuredLogBatchBuffer : IDisposable
             var lockObj = _lockObj;
             if (lockObj is not null)
             {
-                lockObj._lastFlush = lockObj._clock.GetUtcNow();
                 _scope.Wait();
 
                 var array = lockObj.ToArrayAndClear();
