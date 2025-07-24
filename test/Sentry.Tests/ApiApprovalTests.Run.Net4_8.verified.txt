@@ -975,7 +975,7 @@ namespace Sentry
     {
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
-        protected virtual void Flush() { }
+        protected abstract void Flush();
         public void LogDebug(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }
         public void LogError(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }
         public void LogFatal(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }

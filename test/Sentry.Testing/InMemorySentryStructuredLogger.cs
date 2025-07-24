@@ -12,6 +12,12 @@ public sealed class InMemorySentryStructuredLogger : SentryStructuredLogger
         Entries.Add(LogEntry.Create(level, template, parameters));
     }
 
+    /// <inheritdoc />
+    protected internal override void Flush()
+    {
+        // no-op
+    }
+
     public sealed class LogEntry : IEquatable<LogEntry>
     {
         public static LogEntry Create(SentryLogLevel level, string template, object[]? parameters)

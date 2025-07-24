@@ -13,4 +13,10 @@ internal sealed class DisabledSentryStructuredLogger : SentryStructuredLogger
     {
         // disabled
     }
+
+    /// <inheritdoc />
+    protected internal override void Flush()
+    {
+        // disabled
+    }
 }

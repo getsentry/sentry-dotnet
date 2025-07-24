@@ -35,6 +35,11 @@ public abstract class SentryStructuredLogger : IDisposable
     private protected abstract void CaptureLog(SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog);
 
     /// <summary>
+    /// Clears all buffers for this logger and causes any buffered logs to be sent by the underlying <see cref="ISentryClient"/>.
+    /// </summary>
+    protected internal abstract void Flush();
+
+    /// <summary>
     /// Creates and sends a structured log to Sentry, with severity <see cref="SentryLogLevel.Trace"/>, when enabled and sampled.
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
@@ -110,14 +115,6 @@ public abstract class SentryStructuredLogger : IDisposable
     public void LogFatal(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
     {
         CaptureLog(SentryLogLevel.Fatal, template, parameters, configureLog);
-    }
-
-    /// <summary>
-    /// When overridden in a derived <see langword="class"/>,
-    /// clears all buffers for this logger and causes any buffered logs to be sent by the underlying <see cref="ISentryClient"/>.
-    /// </summary>
-    protected internal virtual void Flush()
-    {
     }
 
     /// <inheritdoc />
