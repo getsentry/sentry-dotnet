@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Sentry now includes an EXPERIMENTAL StringStackTraceFactory. This factory isn't as feature rich as the full `SentryStackTraceFactory`. However, it may provide better results if you are compiling your application AOT and not getting useful stack traces from the full stack trace factory. ([#4362](https://github.com/getsentry/sentry-dotnet/pull/4362))
+
 ### Fixes
 
 - Source context for class libraries when running on Android in Release mode ([#4294](https://github.com/getsentry/sentry-dotnet/pull/4294))
