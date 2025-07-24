@@ -34,8 +34,8 @@ internal sealed class ScopedCountdownLock : IDisposable
     internal int Count => _isEngaged == 1 ? _event.CurrentCount : _event.CurrentCount - 1;
 
     /// <summary>
-    /// Determines whether the event can be set/signaled by <see cref="Count"/> reaching <see langword="0"/>.
-    /// Returns <see langword="true"/> when a <see cref="LockScope"/> is active.
+    /// Returns <see langword="true"/> when a <see cref="LockScope"/> is active and the event can be set/signaled by <see cref="Count"/> reaching <see langword="0"/>.
+    /// Returns <see langword="false"/> when the <see cref="Count"/> can only reach the initial count of <see langword="1"/> when no <see cref="CounterScope"/> is active any longer.
     /// </summary>
     internal bool IsEngaged => _isEngaged == 1;
 
@@ -60,7 +60,7 @@ internal sealed class ScopedCountdownLock : IDisposable
     }
 
     /// <summary>
-    /// When successful, the lock <see cref="IsEngaged"/>, <see cref="Count"/> can reach <see langword="0"/> and the event be set/signaled.
+    /// When successful, the lock <see cref="IsEngaged"/>, <see cref="Count"/> can reach <see langword="0"/> when no <see cref="CounterScope"/> is active, and the event be set/signaled.
     /// Check via <see cref="LockScope.IsEntered"/> whether the Lock <see cref="IsEngaged"/>.
     /// Use <see cref="LockScope.Wait"/> to block until every active <see cref="CounterScope"/> has exited before performing the locked operation.
     /// After the locked operation has completed, disengage the Lock via <see cref="LockScope.Dispose"/>.
@@ -69,7 +69,7 @@ internal sealed class ScopedCountdownLock : IDisposable
     {
         if (Interlocked.CompareExchange(ref _isEngaged, 1, 0) == 0)
         {
-            _ = _event.Signal();
+            _ = _event.Signal(); // decrement the initial count of 1, so that the event can be set with the count reaching 0 when all 'CounterScope's have exited
             return new LockScope(this);
         }
 
@@ -80,7 +80,7 @@ internal sealed class ScopedCountdownLock : IDisposable
     {
         if (Interlocked.CompareExchange(ref _isEngaged, 0, 1) == 1)
         {
-            _event.Reset();
+            _event.Reset(); // reset the signaled event to the initial count of 1, so that new `CounterScope`s can be entered again
             return;
         }
 
