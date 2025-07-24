@@ -41,15 +41,10 @@ jobs:
             rid: win-arm64
 
     steps:
-      ### TODO: clean up
-      - name: Prepare Node.js for non-x64 Alpine Linux
-        if: ${{ contains(matrix.container.image, 'alpine') && runner.arch != 'X64' }}
-        shell: bash
+      - name: Initialize Alpine Linux
+        if: ${{ contains(matrix.container.image, 'alpine') }}
         run: |
-          sudo mkdir -p /__e/node20/bin
-          sudo ln -sf /usr/bin/node /__e/node20/bin/node
-          sudo ln -sf /usr/bin/npm /__e/node20/bin/npm
-          sudo sed -i 's/ID=alpine/ID=unknown/' /usr/lib/os-release
+          curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin /__e/node20/bin/
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -118,15 +113,10 @@ jobs:
             slnf: Sentry-CI-Build-Windows-arm64.slnf
 
     steps:
-      ### TODO: clean up
-      - name: Prepare Node.js for non-x64 Alpine Linux
-        if: ${{ contains(matrix.container.image, 'alpine') && runner.arch != 'X64' }}
-        shell: bash
+      - name: Initialize Alpine Linux
+        if: ${{ contains(matrix.container.image, 'alpine') }}
         run: |
-          sudo mkdir -p /__e/node20/bin
-          sudo ln -sf /usr/bin/node /__e/node20/bin/node
-          sudo ln -sf /usr/bin/npm /__e/node20/bin/npm
-          sudo sed -i 's/ID=alpine/ID=unknown/' /usr/lib/os-release
+          curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin /__e/node20/bin/
 
       - name: Cancel Previous Runs
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
