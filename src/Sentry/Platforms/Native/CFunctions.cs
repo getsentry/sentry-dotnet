@@ -81,9 +81,6 @@ internal static class C
 
     public static bool Init(SentryOptions options)
     {
-        _isWindows = System.OperatingSystem.IsWindows();
-        _isArm64 = RuntimeInformation.OSArchitecture == Architecture.Arm64;
-
         var cOptions = sentry_options_new();
 
         // Note: DSN is not null because options.IsValid() must have returned true for this to be called.
@@ -443,8 +440,9 @@ internal static class C
 
     // The logger we should forward native messages to. This is referenced by nativeLog() which in turn for.
     private static IDiagnosticLogger? _logger;
-    private static bool _isWindows = false;
-    private static bool _isArm64 = false;
+    private static bool _isWindows = System.OperatingSystem.IsWindows();
+    private static bool _isLinux = System.OperatingSystem.IsLinux();
+    private static bool _isArm64 = RuntimeInformation.OSArchitecture == Architecture.Arm64;
 
     // This method is called from the C library and forwards incoming messages to the currently set _logger.
     // [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]  //  error CS3016: Arrays as attribute arguments is not CLS-complian
@@ -499,7 +497,7 @@ internal static class C
                 });
             }
             // For Linux/macOS, we must make a copy of the VaList to be able to pass it back...
-            else if (_isArm64)
+            else if (_isLinux && _isArm64)
             {
                 message = FormatWithVaList<VaListArm64>(format, args);
             }
