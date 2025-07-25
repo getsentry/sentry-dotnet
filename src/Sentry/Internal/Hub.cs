@@ -819,6 +819,9 @@ internal class Hub : IHub, IDisposable
         _memoryMonitor?.Dispose();
 #endif
 
+        Logger.Flush();
+        Logger.Dispose();
+
         try
         {
             CurrentClient.FlushAsync(_options.ShutdownTimeout).ConfigureAwait(false).GetAwaiter().GetResult();

@@ -19,6 +19,8 @@ public class SentryStructuredLoggerTests
                 DiagnosticLogger = DiagnosticLogger,
             };
             Clock = new MockClock(new DateTimeOffset(2025, 04, 22, 14, 51, 00, TimeSpan.Zero));
+            BatchSize = 2;
+            BatchTimeout = Timeout.InfiniteTimeSpan;
             TraceId = SentryId.Create();
             ParentSpanId = SpanId.Create();
 
@@ -30,6 +32,8 @@ public class SentryStructuredLoggerTests
         public IHub Hub { get; }
         public SentryOptions Options { get; }
         public ISystemClock Clock { get; }
+        public int BatchSize { get; set; }
+        public TimeSpan BatchTimeout { get; set; }
         public SentryId TraceId { get; private set; }
         public SpanId? ParentSpanId { get; private set; }
 
@@ -40,7 +44,7 @@ public class SentryStructuredLoggerTests
             ParentSpanId = SpanId.Empty;
         }
 
-        public SentryStructuredLogger GetSut() => SentryStructuredLogger.Create(Hub, Options, Clock);
+        public SentryStructuredLogger GetSut() => SentryStructuredLogger.Create(Hub, Options, Clock, BatchSize, BatchTimeout);
     }
 
     private readonly Fixture _fixture;
@@ -90,6 +94,7 @@ public class SentryStructuredLoggerTests
         _fixture.Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => envelope = arg));
 
         logger.Log(level, "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
+        logger.Flush();
 
         _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
         envelope.AssertEnvelope(_fixture, level);
@@ -123,6 +128,7 @@ public class SentryStructuredLoggerTests
         _fixture.Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => envelope = arg));
 
         logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
+        logger.Flush();
 
         _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
         envelope.AssertEnvelope(_fixture, SentryLogLevel.Trace);
@@ -144,6 +150,7 @@ public class SentryStructuredLoggerTests
         var logger = _fixture.GetSut();
 
         logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
+        logger.Flush();
 
         _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
         invocations.Should().Be(1);
@@ -218,6 +225,18 @@ public class SentryStructuredLoggerTests
         entry.Args.Should().BeEmpty();
     }
 
+    [Fact]
+    public void Dispose_Log_Throws()
+    {
+        _fixture.Options.Experimental.EnableLogs = true;
+        var logger = _fixture.GetSut();
+
+        logger.Dispose();
+        var log = () => logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
+
+        Assert.Throws<ObjectDisposedException>(log);
+    }
+
     private static void ConfigureLog(SentryLog log)
     {
         log.SetAttribute("attribute-key", "attribute-value");
@@ -231,13 +250,20 @@ file static class AssertionExtensions
         envelope.Header.Should().ContainSingle().Which.Key.Should().Be("sdk");
         var item = envelope.Items.Should().ContainSingle().Which;
 
-        var log = item.Payload.Should().BeOfType<JsonSerializable>().Which.Source.Should().BeOfType<SentryLog>().Which;
+        var log = item.Payload.Should().BeOfType<JsonSerializable>().Which.Source.Should().BeOfType<StructuredLog>().Which;
         AssertLog(log, fixture, level);
 
         Assert.Collection(item.Header,
             element => Assert.Equal(CreateHeader("type", "log"), element),
             element => Assert.Equal(CreateHeader("item_count", 1), element),
             element => Assert.Equal(CreateHeader("content_type", "application/vnd.sentry.items.log+json"), element));
+    }
+
+    public static void AssertLog(this StructuredLog log, SentryStructuredLoggerTests.Fixture fixture, SentryLogLevel level)
+    {
+        var items = log.Items;
+        items.Length.Should().Be(1);
+        AssertLog(items[0], fixture, level);
     }
 
     public static void AssertLog(this SentryLog log, SentryStructuredLoggerTests.Fixture fixture, SentryLogLevel level)

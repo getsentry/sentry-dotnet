@@ -8,7 +8,14 @@ internal sealed class DisabledSentryStructuredLogger : SentryStructuredLogger
     {
     }
 
+    /// <inheritdoc />
     private protected override void CaptureLog(SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog)
+    {
+        // disabled
+    }
+
+    /// <inheritdoc />
+    protected internal override void Flush()
     {
         // disabled
     }

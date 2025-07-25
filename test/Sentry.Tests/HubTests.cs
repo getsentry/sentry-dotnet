@@ -1429,6 +1429,7 @@ public partial class HubTests
 
         // Act
         hub.Logger.LogWarning("Message");
+        hub.Logger.Flush();
 
         // Assert
         _fixture.Client.Received(0).CaptureEnvelope(
@@ -1448,6 +1449,7 @@ public partial class HubTests
 
         // Act
         hub.Logger.LogWarning("Message");
+        hub.Logger.Flush();
 
         // Assert
         _fixture.Client.Received(1).CaptureEnvelope(
@@ -1483,6 +1485,26 @@ public partial class HubTests
         _fixture.Options.Experimental.EnableLogs = false;
 
         // Assert
+        hub.Logger.Should().BeOfType<DefaultSentryStructuredLogger>();
+    }
+
+    [Fact]
+    public void Logger_Dispose_DoesCaptureLog()
+    {
+        // Arrange
+        _fixture.Options.Experimental.EnableLogs = true;
+        var hub = _fixture.GetSut();
+
+        // Act
+        hub.Logger.LogWarning("Message");
+        hub.Dispose();
+
+        // Assert
+        _fixture.Client.Received(1).CaptureEnvelope(
+            Arg.Is<Envelope>(envelope =>
+                envelope.Items.Single(item => item.Header["type"].Equals("log")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
+            )
+        );
         hub.Logger.Should().BeOfType<DefaultSentryStructuredLogger>();
     }
 

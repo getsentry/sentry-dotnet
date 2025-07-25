@@ -637,7 +637,7 @@ namespace Sentry
     }
     [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
     [System.Runtime.CompilerServices.RequiredMember]
-    public sealed class SentryLog : Sentry.ISentryJsonSerializable
+    public sealed class SentryLog
     {
         [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         [System.Runtime.CompilerServices.RequiredMember]
@@ -661,7 +661,6 @@ namespace Sentry
         public void SetAttribute(string key, object value) { }
         [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public bool TryGetAttribute(string key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out object? value) { }
-        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
     }
     [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
     public enum SentryLogLevel
@@ -1012,8 +1011,11 @@ namespace Sentry
         public static Sentry.SentryStackTrace FromJson(System.Text.Json.JsonElement json) { }
     }
     [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
-    public abstract class SentryStructuredLogger
+    public abstract class SentryStructuredLogger : System.IDisposable
     {
+        public void Dispose() { }
+        protected virtual void Dispose(bool disposing) { }
+        protected abstract void Flush();
         [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void LogDebug(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }
         [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
