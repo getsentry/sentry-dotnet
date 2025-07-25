@@ -11,6 +11,7 @@
 - Source context for class libraries when running on Android in Release mode ([#4294](https://github.com/getsentry/sentry-dotnet/pull/4294))
 - Native AOT: don't load SentryNative on unsupported platforms ([#4347](https://github.com/getsentry/sentry-dotnet/pull/4347))
 - Fixed issue introduced in release 5.12.0 that might prevent other middleware or user code from reading request bodies ([#4373](https://github.com/getsentry/sentry-dotnet/pull/4373))
+- SentryTunnelMiddleware overwrites the X-Forwarded-For header ([#4375](https://github.com/getsentry/sentry-dotnet/pull/4375))
 
 ### Dependencies
 
