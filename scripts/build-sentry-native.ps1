@@ -38,7 +38,7 @@ try
     elseif ($IsLinux)
     {
         $musl = (ldd --version 2>&1) -match 'musl'
-        $arm64 = ("Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
+        $arm64 = "Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString())
         if ($musl -and $arm64)
         {
             $outDir += '/linux-musl-arm64'
