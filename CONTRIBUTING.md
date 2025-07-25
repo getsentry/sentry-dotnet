@@ -85,7 +85,7 @@ _TLDR;_ when working with the Sentry codebase, you should use the solution filte
 
 _Full explanation:_ 
 
-The `Sentry.sln` solution contains all of the projects required to build Sentry, it's integrations and samples for every platform. However the repository contains various solution filters that will be more practical for day-to-day tasks.
+The `Sentry.sln` solution contains all of the projects required to build Sentry, it's integrations and samples for every platform. However, the repository contains various solution filters that will be more practical for day-to-day tasks.
 
 These solution filters get generated automatically by `/scripts/generate-solution-filters.ps1` so, although you can certainly create your own solution filters and manage these how you wish, don't try to modify any of the `*.slnf` files that are committed to source control. Instead, changes to these can be made by modifying `/scripts/generate-solution-filters-config.yml` and re-running the script that generates these.
 
