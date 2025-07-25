@@ -184,9 +184,9 @@ public class SentryMauiScreenshotTests
     [SkippableFact]
     public async Task CaptureException_AttachScreenshot_Threadsafe()
     {
- #if ANDROID
+#if ANDROID
          Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI on Android");
- #endif
+#endif
         // Arrange
         var builder = _fixture.Builder.UseSentry(options => options.AttachScreenshot = true);
         await using var app = builder.Build();
