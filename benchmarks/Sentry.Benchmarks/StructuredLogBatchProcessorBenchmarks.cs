@@ -2,7 +2,6 @@ using BenchmarkDotNet.Attributes;
 using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Testing;
 
 namespace Sentry.Benchmarks;
 
@@ -22,10 +21,9 @@ public class StructuredLogBatchProcessorBenchmarks
     {
         var hub = DisabledHub.Instance;
         var batchInterval = Timeout.InfiniteTimeSpan;
-        var clock = new MockClock();
         var clientReportRecorder = Substitute.For<IClientReportRecorder>();
         var diagnosticLogger = Substitute.For<IDiagnosticLogger>();
-        _batchProcessor = new StructuredLogBatchProcessor(hub, BatchCount, batchInterval, clock, clientReportRecorder, diagnosticLogger);
+        _batchProcessor = new StructuredLogBatchProcessor(hub, BatchCount, batchInterval, clientReportRecorder, diagnosticLogger);
 
         _log = new SentryLog(DateTimeOffset.Now, SentryId.Empty, SentryLogLevel.Trace, "message");
     }
