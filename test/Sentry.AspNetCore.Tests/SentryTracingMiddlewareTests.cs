@@ -316,7 +316,7 @@ public class SentryTracingMiddlewareTests
                 "sentry-trace_id=75302ac48a024bde9a3b3734a82e36c8, " +
                 "sentry-public_key=d4d82fc1c2c4032a83f3a29aa3a3aff, " +
                 "sentry-sample_rand=0.1234, " +
-                "sentry-sample_rate=0.5";
+                "sentry-sample_rate=1";
         }
         else
         {
@@ -395,12 +395,17 @@ public class SentryTracingMiddlewareTests
     [Fact]
     public async Task Baggage_header_sets_dynamic_sampling_context()
     {
-        // incoming baggage header
-        const string baggage =
+        const string incomingBaggageHeader =
             "sentry-trace_id=75302ac48a024bde9a3b3734a82e36c8, " +
             "sentry-public_key=d4d82fc1c2c4032a83f3a29aa3a3aff, " +
             "sentry-sample_rand=0.1234, " +
             "sentry-sample_rate=0.5";
+
+        const string expectedBaggageHeader =
+            "sentry-trace_id=75302ac48a024bde9a3b3734a82e36c8, " +
+            "sentry-public_key=d4d82fc1c2c4032a83f3a29aa3a3aff, " +
+            "sentry-sample_rand=0.1234, " +
+            "sentry-sample_rate=1";
 
         // Arrange
         TransactionTracer transaction = null;
@@ -440,7 +445,7 @@ public class SentryTracingMiddlewareTests
         {
             Headers =
             {
-                {"baggage", baggage}
+                {"baggage", incomingBaggageHeader}
             }
         };
 
@@ -449,7 +454,7 @@ public class SentryTracingMiddlewareTests
         // Assert
         var dsc = transaction?.DynamicSamplingContext;
         Assert.NotNull(dsc);
-        Assert.Equal(baggage, dsc.ToBaggageHeader().ToString());
+        Assert.Equal(expectedBaggageHeader, dsc.ToBaggageHeader().ToString());
     }
 
     [Fact]

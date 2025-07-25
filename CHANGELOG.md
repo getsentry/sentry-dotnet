@@ -8,6 +8,7 @@
 
 ### Fixes
 
+- Overwrite `sample_rate` of _Dynamic Sampling Context (DSC)_ when making sampling decisions ([#4374](https://github.com/getsentry/sentry-dotnet/pull/4374))
 - Source context for class libraries when running on Android in Release mode ([#4294](https://github.com/getsentry/sentry-dotnet/pull/4294))
 - Native AOT: don't load SentryNative on unsupported platforms ([#4347](https://github.com/getsentry/sentry-dotnet/pull/4347))
 - Fixed issue introduced in release 5.12.0 that might prevent other middleware or user code from reading request bodies ([#4373](https://github.com/getsentry/sentry-dotnet/pull/4373))
@@ -1252,7 +1253,7 @@ There are some functional differences when publishing Native AOT:
 
 ### Fixes
 
-- Resolved an isse where the SDK would throw an exception while attempting to set the DynamicSamplingContext but the context exists already. ([#2592](https://github.com/getsentry/sentry-dotnet/pull/2592))
+- Resolved an issue where the SDK would throw an exception while attempting to set the DynamicSamplingContext but the context exists already. ([#2592](https://github.com/getsentry/sentry-dotnet/pull/2592))
 
 ### Dependencies
 
