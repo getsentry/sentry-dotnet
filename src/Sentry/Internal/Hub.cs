@@ -189,23 +189,16 @@ internal class Hub : IHub, IDisposable
                 // The TracesSampler trumps all other sampling decisions (even the trace header)
                 sampleRate = samplerSampleRate;
                 isSampled = SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
-
-                // Ensure the actual sampleRate is set on the provided DSC (if any)
-                dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(null, sampleRate.Value);
             }
         }
 
         // If the sampling decision isn't made by a trace sampler we check the trace header first (from the context) or
         // finally fallback to Random sampling if the decision has been made by no other means
-        if (isSampled == null)
-        {
-            Debug.Assert(sampleRate == null);
-            sampleRate = _options.TracesSampleRate ?? 0.0;
-            isSampled = context.IsSampled ?? SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
+        sampleRate ??= _options.TracesSampleRate ?? 0.0;
+        isSampled ??= context.IsSampled ?? SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
 
-            // Ensure the actual sampleRate is set on the provided DSC (if any)
-            dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(context.IsSampled, sampleRate.Value);
-        }
+        // Ensure the actual sampleRate is set on the provided DSC (if any)
+        dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(sampleRate.Value);
 
         // Make sure there is a replayId (if available) on the provided DSC (if any).
         dynamicSamplingContext = dynamicSamplingContext?.WithReplayId(_replaySession);

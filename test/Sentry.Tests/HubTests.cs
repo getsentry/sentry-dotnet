@@ -721,18 +721,17 @@ public partial class HubTests
     [InlineData(null, null, null, false, 0.0)]
     [InlineData(true, 0.3, 0.4, true, 0.3)]
     [InlineData(true, 0.3, null, true, 0.3)]
-    [InlineData(true, null, 0.4, true, 0.4, 1.0)]
-    [InlineData(true, null, null, true, 0.0, 1.0)]
+    [InlineData(true, null, 0.4, true, 0.4)]
+    [InlineData(true, null, null, true, 0.0)]
     [InlineData(false, 0.3, 0.4, true, 0.3)]
     [InlineData(false, 0.3, null, true, 0.3)]
-    [InlineData(false, null, 0.4, false, 0.4, 0.0)]
-    [InlineData(false, null, null, false, 0.0, 0.0)]
-    public void StartTransaction_DynamicSamplingContextWithSampleRate_OverwritesSampleRate(bool? isSampled, double? tracesSampler, double? tracesSampleRate, bool expectedIsSampled, double expectedSampleRate, double? expectedDscSampleRate = null)
+    [InlineData(false, null, 0.4, false, 0.4)]
+    [InlineData(false, null, null, false, 0.0)]
+    public void StartTransaction_DynamicSamplingContextWithSampleRate_OverwritesSampleRate(bool? isSampled, double? tracesSampler, double? tracesSampleRate, bool expectedIsSampled, double expectedSampleRate)
     {
 #if DEBUG
         Skip.If(isSampled is false && expectedIsSampled, $"Forced sampling via {nameof(ITransactionContext.IsSampled)} is not considered when {nameof(SentryOptions.TracesSampler)} is used, resulting in `Debug.Assert` of {nameof(TransactionTracer)} `.ctor`.");
 #endif
-        expectedDscSampleRate ??= expectedSampleRate;
 
         // Arrange
         var transactionContext = new TransactionContext("name", "operation", isSampled: isSampled);
@@ -758,14 +757,14 @@ public partial class HubTests
             var transactionTracer = transaction.Should().BeOfType<TransactionTracer>().Subject;
             transactionTracer.SampleRate.Should().Be(expectedSampleRate);
             transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(dsc);
-            transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(expectedDscSampleRate.Value));
+            transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(expectedSampleRate));
         }
         else
         {
             var unsampledTransaction = transaction.Should().BeOfType<UnsampledTransaction>().Subject;
             unsampledTransaction.SampleRate.Should().Be(expectedSampleRate);
             unsampledTransaction.DynamicSamplingContext.Should().NotBeSameAs(dsc);
-            unsampledTransaction.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(expectedDscSampleRate.Value));
+            unsampledTransaction.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(expectedSampleRate));
         }
     }
 
