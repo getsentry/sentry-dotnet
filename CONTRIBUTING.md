@@ -28,7 +28,7 @@ For a big feature it's advised to raise an issue to discuss it first.
   - [.NET 9.0](https://dotnet.microsoft.com/download/dotnet/9.0)
   - [.NET 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
 
-  *Technically, you only need the full SDK installation for the latest version (9.0).  If you like, you can install the smaller ASP.NET Core Runtime packages for .NET 8.0. However, installing the full SDKs will also give you the runtimes.*
+  *Technically, you only need the full SDK installation for the latest version (9.0). If you like, you can install the smaller ASP.NET Core Runtime packages for .NET 8.0. However, installing the full SDKs will also give you the runtimes.*
 
 * [`pwsh`](https://github.com/PowerShell/PowerShell#get-powershell) Core version 6 or later on PATH.
 
