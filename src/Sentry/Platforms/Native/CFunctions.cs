@@ -441,7 +441,6 @@ internal static class C
     // The logger we should forward native messages to. This is referenced by nativeLog() which in turn for.
     private static IDiagnosticLogger? _logger;
     private static bool _isWindows = System.OperatingSystem.IsWindows();
-    private static bool _isLinux = System.OperatingSystem.IsLinux();
     private static bool _isArm64 = RuntimeInformation.OSArchitecture == Architecture.Arm64;
 
     // This method is called from the C library and forwards incoming messages to the currently set _logger.
@@ -497,7 +496,7 @@ internal static class C
                 });
             }
             // For Linux/macOS, we must make a copy of the VaList to be able to pass it back...
-            else if (_isLinux && _isArm64)
+            else if (_isArm64)
             {
                 message = FormatWithVaList<VaListArm64>(format, args);
             }
