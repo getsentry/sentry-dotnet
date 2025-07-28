@@ -714,6 +714,11 @@ public partial class HubTests
         transactionTracer.DynamicSamplingContext.Should().BeSameAs(dsc);
     }
 
+    // overwrite the 'sample_rate' of the Dynamic Sampling Context (DSC) when a sampling decisions is made in the downstream SDK
+    // 1. overwrite when 'TracesSampler' reaches a sampling decision
+    // 2. keep when a sampling decision has been made upstream (via 'TransactionContext.IsSampled')
+    // 3. overwrite when 'TracesSampleRate' reaches a sampling decision
+    // 4. keep otherwise
     [SkippableTheory]
     [InlineData(null, 0.3, 0.4, true, 0.3, true)]
     [InlineData(null, 0.3, null, true, 0.3, true)]
