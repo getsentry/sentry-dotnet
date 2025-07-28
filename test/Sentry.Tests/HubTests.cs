@@ -715,19 +715,19 @@ public partial class HubTests
     }
 
     [SkippableTheory]
-    [InlineData(null, 0.3, 0.4, true, 0.3)]
-    [InlineData(null, 0.3, null, true, 0.3)]
-    [InlineData(null, null, 0.4, true, 0.4)]
-    [InlineData(null, null, null, false, 0.0)]
-    [InlineData(true, 0.3, 0.4, true, 0.3)]
-    [InlineData(true, 0.3, null, true, 0.3)]
-    [InlineData(true, null, 0.4, true, 0.4)]
-    [InlineData(true, null, null, true, 0.0)]
-    [InlineData(false, 0.3, 0.4, true, 0.3)]
-    [InlineData(false, 0.3, null, true, 0.3)]
-    [InlineData(false, null, 0.4, false, 0.4)]
-    [InlineData(false, null, null, false, 0.0)]
-    public void StartTransaction_DynamicSamplingContextWithSampleRate_OverwritesSampleRate(bool? isSampled, double? tracesSampler, double? tracesSampleRate, bool expectedIsSampled, double expectedSampleRate)
+    [InlineData(null, 0.3, 0.4, true, 0.3, true)]
+    [InlineData(null, 0.3, null, true, 0.3, true)]
+    [InlineData(null, null, 0.4, true, 0.4, true)]
+    [InlineData(null, null, null, false, 0.0, false)]
+    [InlineData(true, 0.3, 0.4, true, 0.3, true)]
+    [InlineData(true, 0.3, null, true, 0.3, true)]
+    [InlineData(true, null, 0.4, true, 0.4, false)]
+    [InlineData(true, null, null, true, 0.0, false)]
+    [InlineData(false, 0.3, 0.4, true, 0.3, true)]
+    [InlineData(false, 0.3, null, true, 0.3, true)]
+    [InlineData(false, null, 0.4, false, 0.4, false)]
+    [InlineData(false, null, null, false, 0.0, false)]
+    public void StartTransaction_DynamicSamplingContextWithSampleRate_OverwritesSampleRate(bool? isSampled, double? tracesSampler, double? tracesSampleRate, bool expectedIsSampled, double expectedSampleRate, bool expectedDscOverwritten)
     {
 #if DEBUG
         Skip.If(isSampled is false && expectedIsSampled, $"Forced sampling via {nameof(ITransactionContext.IsSampled)} is not considered when {nameof(SentryOptions.TracesSampler)} is used, resulting in `Debug.Assert` of {nameof(TransactionTracer)} `.ctor`.");
@@ -756,15 +756,29 @@ public partial class HubTests
         {
             var transactionTracer = transaction.Should().BeOfType<TransactionTracer>().Subject;
             transactionTracer.SampleRate.Should().Be(expectedSampleRate);
-            transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(dsc);
-            transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(expectedSampleRate));
+            if (expectedDscOverwritten)
+            {
+                transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(dsc);
+                transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(expectedSampleRate));
+            }
+            else
+            {
+                transactionTracer.DynamicSamplingContext.Should().BeSameAs(dsc);
+            }
         }
         else
         {
             var unsampledTransaction = transaction.Should().BeOfType<UnsampledTransaction>().Subject;
             unsampledTransaction.SampleRate.Should().Be(expectedSampleRate);
-            unsampledTransaction.DynamicSamplingContext.Should().NotBeSameAs(dsc);
-            unsampledTransaction.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(expectedSampleRate));
+            if (expectedDscOverwritten)
+            {
+                unsampledTransaction.DynamicSamplingContext.Should().NotBeSameAs(dsc);
+                unsampledTransaction.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(expectedSampleRate));
+            }
+            else
+            {
+                unsampledTransaction.DynamicSamplingContext.Should().BeSameAs(dsc);
+            }
         }
     }
 

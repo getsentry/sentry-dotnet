@@ -188,17 +188,27 @@ internal class Hub : IHub, IDisposable
             {
                 // The TracesSampler trumps all other sampling decisions (even the trace header)
                 sampleRate = samplerSampleRate;
-                isSampled = SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
+                isSampled = SampleRandHelper.IsSampled(sampleRand, samplerSampleRate);
+
+                // Ensure the actual sampleRate is set on the provided DSC (if any) when the TracesSampler reached a sampling decision
+                dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(samplerSampleRate);
             }
         }
 
         // If the sampling decision isn't made by a trace sampler we check the trace header first (from the context) or
         // finally fallback to Random sampling if the decision has been made by no other means
-        sampleRate ??= _options.TracesSampleRate ?? 0.0;
-        isSampled ??= context.IsSampled ?? SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
+        if (sampleRate == null)
+        {
+            Debug.Assert(isSampled == null);
+            sampleRate = _options.TracesSampleRate ?? 0.0;
+            isSampled = context.IsSampled ?? SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
 
-        // Ensure the actual sampleRate is set on the provided DSC (if any)
-        dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(sampleRate.Value);
+            if (context.IsSampled is null && _options.TracesSampleRate is not null)
+            {
+                // Ensure the actual sampleRate is set on the provided DSC (if any) when not IsSampled upstream but the TracesSampleRate reached a sampling decision
+                dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(_options.TracesSampleRate.Value);
+            }
+        }
 
         // Make sure there is a replayId (if available) on the provided DSC (if any).
         dynamicSamplingContext = dynamicSamplingContext?.WithReplayId(_replaySession);
