@@ -86,17 +86,17 @@ jobs:
             slnf: Sentry-CI-Build-Linux.slnf
           - os: ubuntu-22.04-arm
             rid: linux-arm64
-            slnf: Sentry-CI-Build-Linux-arm64.slnf
+            slnf: Sentry-CI-Build-Linux-NoMobile.slnf
           - os: ubuntu-latest
             rid: linux-musl-x64
-            slnf: Sentry-CI-Build-Linux-musl.slnf
+            slnf: Sentry-CI-Build-Linux-NoMobile.slnf
             container:
               image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
               volumes:
                 - /var/run/docker.sock:/var/run/docker.sock
           - os: ubuntu-24.04-arm
             rid: linux-musl-arm64
-            slnf: Sentry-CI-Build-Linux-musl.slnf
+            slnf: Sentry-CI-Build-Linux-NoMobile.slnf
             container:
               image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
               volumes:
