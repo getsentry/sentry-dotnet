@@ -197,9 +197,8 @@ internal class Hub : IHub, IDisposable
 
         // If the sampling decision isn't made by a trace sampler we check the trace header first (from the context) or
         // finally fallback to Random sampling if the decision has been made by no other means
-        if (sampleRate == null)
+        if (isSampled == null)
         {
-            Debug.Assert(isSampled == null);
             sampleRate = _options.TracesSampleRate ?? 0.0;
             isSampled = context.IsSampled ?? SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
 
