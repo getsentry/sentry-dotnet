@@ -114,6 +114,15 @@ public class ScopedCountdownLockTests : IDisposable
         AssertDisengaged(false, 0);
     }
 
+    [Fact]
+    public void Dispose_UseAfterDispose_Throws()
+    {
+        _lock.Dispose();
+
+        Assert.Throws<ObjectDisposedException>(() => _lock.TryEnterCounterScope());
+        Assert.Throws<ObjectDisposedException>(() => _lock.TryEnterLockScope());
+    }
+
     private void AssertEngaged(bool isSet, int count)
     {
         using (new AssertionScope())

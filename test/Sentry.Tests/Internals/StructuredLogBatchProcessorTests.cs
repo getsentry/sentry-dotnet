@@ -25,8 +25,14 @@ public class StructuredLogBatchProcessorTests : IDisposable
 
             CapturedEnvelopes = [];
             _hub.CaptureEnvelope(Arg.Do<Envelope>(arg => CapturedEnvelopes.Add(arg)));
+            _hub.IsEnabled.Returns(true);
 
             ExpectedDiagnosticLogs = 0;
+        }
+
+        public void DisableHub()
+        {
+            _hub.IsEnabled.Returns(false);
         }
 
         public StructuredLogBatchProcessor GetSut(int batchCount)
@@ -162,6 +168,48 @@ public class StructuredLogBatchProcessorTests : IDisposable
                 which is a difference of {actualInvocations - capturedLogs - droppedLogs} logs.
                 """);
         }
+    }
+
+    [Fact]
+    public void Enqueue_HubDisabled_DoesNotCaptureEnvelope()
+    {
+        var processor = _fixture.GetSut(2);
+
+        processor.Enqueue(CreateLog("one"));
+        _fixture.DisableHub();
+        processor.Enqueue(CreateLog("two"));
+        Assert.Empty(_fixture.CapturedEnvelopes);
+
+        processor.Flush();
+        Assert.Single(_fixture.CapturedEnvelopes);
+        AssertEnvelope("one");
+    }
+
+    [Fact]
+    public void Flush_NeitherSizeNorTimeoutReached_CaptureEnvelope()
+    {
+        using var processor = _fixture.GetSut(2);
+
+        processor.Enqueue(CreateLog("one"));
+        processor.Flush();
+
+        Assert.Single(_fixture.CapturedEnvelopes);
+        AssertEnvelope("one");
+    }
+
+    [Fact]
+    public void Dispose_Enqueue_DoesNotCaptureEnvelope()
+    {
+        var processor = _fixture.GetSut(2);
+
+        processor.Enqueue(CreateLog("one"));
+        processor.Dispose();
+        processor.Enqueue(CreateLog("two"));
+        processor.Flush();
+
+        Assert.Empty(_fixture.CapturedEnvelopes);
+        AssertEnvelope();
+        _fixture.ExpectedDiagnosticLogs = 1;
     }
 
     private static SentryLog CreateLog(string message)

@@ -5,7 +5,7 @@ namespace Sentry.Tests;
 /// <summary>
 /// <see href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
 /// </summary>
-public class SentryStructuredLoggerTests
+public class SentryStructuredLoggerTests : IDisposable
 {
     internal sealed class Fixture
     {
@@ -23,6 +23,8 @@ public class SentryStructuredLoggerTests
             BatchTimeout = Timeout.InfiniteTimeSpan;
             TraceId = SentryId.Create();
             ParentSpanId = SpanId.Create();
+
+            Hub.IsEnabled.Returns(true);
 
             var traceHeader = new SentryTraceHeader(TraceId, ParentSpanId.Value, null);
             Hub.GetTraceHeader().Returns(traceHeader);
@@ -52,6 +54,11 @@ public class SentryStructuredLoggerTests
     public SentryStructuredLoggerTests()
     {
         _fixture = new Fixture();
+    }
+
+    public void Dispose()
+    {
+        _fixture.DiagnosticLogger.Entries.Should().BeEmpty();
     }
 
     [Fact]
@@ -185,7 +192,7 @@ public class SentryStructuredLoggerTests
         logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}, {4}", ["string", true, 1, 2.2]);
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
-        var entry = _fixture.DiagnosticLogger.Entries.Should().ContainSingle().Which;
+        var entry = _fixture.DiagnosticLogger.Dequeue();
         entry.Level.Should().Be(SentryLevel.Error);
         entry.Message.Should().Be("Template string does not match the provided argument. The Log will be dropped.");
         entry.Exception.Should().BeOfType<FormatException>();
@@ -201,7 +208,7 @@ public class SentryStructuredLoggerTests
         logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], static (SentryLog log) => throw new InvalidOperationException());
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
-        var entry = _fixture.DiagnosticLogger.Entries.Should().ContainSingle().Which;
+        var entry = _fixture.DiagnosticLogger.Dequeue();
         entry.Level.Should().Be(SentryLevel.Error);
         entry.Message.Should().Be("The configureLog callback threw an exception. The Log will be dropped.");
         entry.Exception.Should().BeOfType<InvalidOperationException>();
@@ -218,7 +225,7 @@ public class SentryStructuredLoggerTests
         logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2]);
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
-        var entry = _fixture.DiagnosticLogger.Entries.Should().ContainSingle().Which;
+        var entry = _fixture.DiagnosticLogger.Dequeue();
         entry.Level.Should().Be(SentryLevel.Error);
         entry.Message.Should().Be("The BeforeSendLog callback threw an exception. The Log will be dropped.");
         entry.Exception.Should().BeOfType<InvalidOperationException>();
@@ -226,15 +233,42 @@ public class SentryStructuredLoggerTests
     }
 
     [Fact]
-    public void Dispose_Log_Throws()
+    public void Flush_AfterLog_CapturesEnvelope()
+    {
+        _fixture.Options.Experimental.EnableLogs = true;
+        var logger = _fixture.GetSut();
+
+        Envelope envelope = null!;
+        _fixture.Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => envelope = arg));
+
+        logger.Flush();
+        _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
+        envelope.Should().BeNull();
+
+        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
+        _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
+        envelope.Should().BeNull();
+
+        logger.Flush();
+        _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
+        envelope.AssertEnvelope(_fixture, SentryLogLevel.Trace);
+    }
+
+    [Fact]
+    public void Dispose_BeforeLog_DoesNotCaptureEnvelope()
     {
         _fixture.Options.Experimental.EnableLogs = true;
         var logger = _fixture.GetSut();
 
         logger.Dispose();
-        var log = () => logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
+        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
 
-        Assert.Throws<ObjectDisposedException>(log);
+        _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
+        var entry = _fixture.DiagnosticLogger.Dequeue();
+        entry.Level.Should().Be(SentryLevel.Info);
+        entry.Message.Should().Be("Log Buffer full ... dropping log");
+        entry.Exception.Should().BeNull();
+        entry.Args.Should().BeEmpty();
     }
 
     private static void ConfigureLog(SentryLog log)

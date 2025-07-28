@@ -13,6 +13,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
 
     internal DefaultSentryStructuredLogger(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
     {
+        Debug.Assert(hub.IsEnabled);
         Debug.Assert(options is { Experimental.EnableLogs: true });
 
         _hub = hub;

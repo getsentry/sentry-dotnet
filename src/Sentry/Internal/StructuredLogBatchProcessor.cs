@@ -1,5 +1,4 @@
 using Sentry.Extensibility;
-using Sentry.Infrastructure;
 using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 
@@ -9,11 +8,14 @@ namespace Sentry.Internal;
 /// The Batch Processor for Sentry Logs.
 /// </summary>
 /// <remarks>
-/// Used a double buffer strategy to achieve synchronous and lock-free adding.
+/// Uses a double buffer strategy to achieve synchronous and lock-free adding.
 /// Switches the active buffer either when full or timeout exceeded (after first item added).
 /// Logs are dropped when both buffers are either full or being flushed.
+/// Logs are not enqueued when the Hub is disabled (Hub is being or has been disposed).
 /// Flushing blocks the calling thread until all pending add operations have completed.
 /// <code>
+/// Implementation:
+/// - When Hub is disabled (i.e. disposed), does not enqueue log
 /// - Try to enqueue log into currently active buffer
 ///   - when currently active buffer is full, try to enqueue log into the other buffer
 ///   - when the other buffer is also full, or currently being flushed, then the log is dropped and a discarded event is recorded as a client report
@@ -52,6 +54,11 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
 
     internal void Enqueue(SentryLog log)
     {
+        if (!_hub.IsEnabled)
+        {
+            return;
+        }
+
         var activeBuffer = _activeBuffer;
 
         if (!TryEnqueue(activeBuffer, log))
@@ -74,6 +81,9 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
     /// <summary>
     /// Forces invocation of a Timeout of the active buffer.
     /// </summary>
+    /// <remarks>
+    /// Intended for Testing only.
+    /// </remarks>
     internal void OnIntervalElapsed()
     {
         var activeBuffer = _activeBuffer;
@@ -84,14 +94,14 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
     {
         var status = buffer.Add(log);
 
-        if (status is BatchBufferAddStatus.AddedLast)
+        if (status is StructuredLogBatchBufferAddStatus.AddedLast)
         {
             SwapActiveBuffer(buffer);
             CaptureLogs(buffer);
             return true;
         }
 
-        return status is BatchBufferAddStatus.AddedFirst or BatchBufferAddStatus.Added;
+        return status is StructuredLogBatchBufferAddStatus.AddedFirst or StructuredLogBatchBufferAddStatus.Added;
     }
 
     private void SwapActiveBuffer(StructuredLogBatchBuffer currentActiveBuffer)

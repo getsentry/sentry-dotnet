@@ -7,6 +7,7 @@ namespace Sentry.Benchmarks;
 
 public class StructuredLogBatchProcessorBenchmarks
 {
+    private Hub _hub;
     private StructuredLogBatchProcessor _batchProcessor;
     private SentryLog _log;
 
@@ -19,12 +20,32 @@ public class StructuredLogBatchProcessorBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        var hub = DisabledHub.Instance;
-        var batchInterval = Timeout.InfiniteTimeSpan;
-        var clientReportRecorder = Substitute.For<IClientReportRecorder>();
-        var diagnosticLogger = Substitute.For<IDiagnosticLogger>();
-        _batchProcessor = new StructuredLogBatchProcessor(hub, BatchCount, batchInterval, clientReportRecorder, diagnosticLogger);
+        SentryOptions options = new()
+        {
+            Dsn = DsnSamples.ValidDsn,
+            Experimental =
+            {
+                EnableLogs = true,
+            },
+        };
 
+        var batchInterval = Timeout.InfiniteTimeSpan;
+
+        var clientReportRecorder = Substitute.For<IClientReportRecorder>();
+        clientReportRecorder
+            .When(static recorder => recorder.RecordDiscardedEvent(Arg.Any<DiscardReason>(), Arg.Any<DataCategory>(), Arg.Any<int>()))
+            .Throw<UnreachableException>();
+
+        var diagnosticLogger = Substitute.For<IDiagnosticLogger>();
+        diagnosticLogger
+            .When(static logger => logger.IsEnabled(Arg.Any<SentryLevel>()))
+            .Throw<UnreachableException>();
+        diagnosticLogger
+            .When(static logger => logger.Log(Arg.Any<SentryLevel>(), Arg.Any<string>(), Arg.Any<Exception>(), Arg.Any<object[]>()))
+            .Throw<UnreachableException>();
+
+        _hub = new Hub(options, DisabledHub.Instance);
+        _batchProcessor = new StructuredLogBatchProcessor(_hub, BatchCount, batchInterval, clientReportRecorder, diagnosticLogger);
         _log = new SentryLog(DateTimeOffset.Now, SentryId.Empty, SentryLogLevel.Trace, "message");
     }
 
@@ -42,5 +63,6 @@ public class StructuredLogBatchProcessorBenchmarks
     public void Cleanup()
     {
         _batchProcessor.Dispose();
+        _hub.Dispose();
     }
 }

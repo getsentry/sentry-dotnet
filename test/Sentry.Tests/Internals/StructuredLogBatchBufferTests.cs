@@ -72,16 +72,16 @@ public class StructuredLogBatchBufferTests
         buffer.Capacity.Should().Be(2);
         buffer.IsEmpty.Should().BeTrue();
 
-        buffer.Add("one").Should().Be(BatchBufferAddStatus.AddedFirst);
+        buffer.Add("one").Should().Be(StructuredLogBatchBufferAddStatus.AddedFirst);
         buffer.IsEmpty.Should().BeFalse();
 
-        buffer.Add("two").Should().Be(BatchBufferAddStatus.AddedLast);
+        buffer.Add("two").Should().Be(StructuredLogBatchBufferAddStatus.AddedLast);
         buffer.IsEmpty.Should().BeFalse();
 
-        buffer.Add("three").Should().Be(BatchBufferAddStatus.IgnoredCapacityExceeded);
+        buffer.Add("three").Should().Be(StructuredLogBatchBufferAddStatus.IgnoredCapacityExceeded);
         buffer.IsEmpty.Should().BeFalse();
 
-        buffer.Add("four").Should().Be(BatchBufferAddStatus.IgnoredCapacityExceeded);
+        buffer.Add("four").Should().Be(StructuredLogBatchBufferAddStatus.IgnoredCapacityExceeded);
         buffer.IsEmpty.Should().BeFalse();
     }
 
@@ -94,17 +94,46 @@ public class StructuredLogBatchBufferTests
         buffer.Capacity.Should().Be(3);
         buffer.IsEmpty.Should().BeTrue();
 
-        buffer.Add("one").Should().Be(BatchBufferAddStatus.AddedFirst);
+        buffer.Add("one").Should().Be(StructuredLogBatchBufferAddStatus.AddedFirst);
         buffer.IsEmpty.Should().BeFalse();
 
-        buffer.Add("two").Should().Be(BatchBufferAddStatus.Added);
+        buffer.Add("two").Should().Be(StructuredLogBatchBufferAddStatus.Added);
         buffer.IsEmpty.Should().BeFalse();
 
-        buffer.Add("three").Should().Be(BatchBufferAddStatus.AddedLast);
+        buffer.Add("three").Should().Be(StructuredLogBatchBufferAddStatus.AddedLast);
         buffer.IsEmpty.Should().BeFalse();
 
-        buffer.Add("four").Should().Be(BatchBufferAddStatus.IgnoredCapacityExceeded);
+        buffer.Add("four").Should().Be(StructuredLogBatchBufferAddStatus.IgnoredCapacityExceeded);
         buffer.IsEmpty.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Add_Flushing_CannotAdd()
+    {
+        _fixture.Capacity = 2;
+        var buffer = _fixture.GetSut();
+
+        var flushScope = buffer.TryEnterFlushScope();
+
+        buffer.Add("one").Should().Be(StructuredLogBatchBufferAddStatus.IgnoredIsFlushing);
+        buffer.IsEmpty.Should().BeTrue();
+
+        flushScope.Dispose();
+
+        buffer.Add("two").Should().Be(StructuredLogBatchBufferAddStatus.AddedFirst);
+        buffer.IsEmpty.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Add_Disposed_CannotAdd()
+    {
+        _fixture.Capacity = 2;
+        var buffer = _fixture.GetSut();
+
+        buffer.Dispose();
+
+        buffer.Add("one").Should().Be(StructuredLogBatchBufferAddStatus.IgnoredIsDisposed);
+        buffer.IsEmpty.Should().BeTrue();
     }
 
     [Fact]
@@ -227,7 +256,7 @@ public class StructuredLogBatchBufferTests
     }
 
     [Fact]
-    public void Flush_Disposed_Throws()
+    public void Flush_DisposedScope_Throws()
     {
         _fixture.Capacity = 2;
         using var buffer = _fixture.GetSut();
@@ -237,6 +266,19 @@ public class StructuredLogBatchBufferTests
         var flushScope = buffer.TryEnterFlushScope();
         flushScope.Dispose();
 
+        AssertFlushThrows<ObjectDisposedException>(flushScope);
+    }
+
+    [Fact]
+    public void Flush_DisposedBuffer_CannotEnter()
+    {
+        _fixture.Capacity = 2;
+        var buffer = _fixture.GetSut();
+
+        buffer.Dispose();
+        using var flushScope = buffer.TryEnterFlushScope();
+
+        flushScope.IsEntered.Should().BeFalse();
         AssertFlushThrows<ObjectDisposedException>(flushScope);
     }
 
@@ -254,6 +296,18 @@ public class StructuredLogBatchBufferTests
 
         _fixture.TimeoutExceededInvocations[0].Should().BeSameAs(buffer);
         _fixture.TimeoutExceededInvocations[1].Should().BeSameAs(buffer);
+    }
+
+    [Fact]
+    public void OnIntervalElapsed_Disposed_DoesNotInvokeCallback()
+    {
+        _fixture.Timeout = Timeout.InfiniteTimeSpan;
+        var buffer = _fixture.GetSut();
+
+        buffer.Dispose();
+        buffer.OnIntervalElapsed(null);
+
+        _fixture.TimeoutExceededInvocations.Should().BeEmpty();
     }
 
     // cannot use xUnit's Throws() nor Fluent Assertions' ThrowExactly() because the FlushScope is a ref struct
@@ -277,7 +331,7 @@ public class StructuredLogBatchBufferTests
 
 file static class StructuredLogBatchBufferHelpers
 {
-    public static BatchBufferAddStatus Add(this StructuredLogBatchBuffer buffer, string item)
+    public static StructuredLogBatchBufferAddStatus Add(this StructuredLogBatchBuffer buffer, string item)
     {
         SentryLog log = new(DateTimeOffset.MinValue, SentryId.Empty, SentryLogLevel.Trace, item);
         return buffer.Add(log);

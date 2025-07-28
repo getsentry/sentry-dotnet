@@ -44,6 +44,9 @@ internal sealed class ScopedCountdownLock : IDisposable
     /// Check via <see cref="CounterScope.IsEntered"/> whether the underlying <see cref="CountdownEvent"/> has not been set/signaled yet.
     /// To signal the underlying <see cref="CountdownEvent"/>, ensure <see cref="CounterScope.Dispose"/> is called.
     /// </summary>
+    /// <remarks>
+    /// Must be disposed to exit.
+    /// </remarks>
     internal CounterScope TryEnterCounterScope()
     {
         if (_event.TryAddCount(1))
@@ -60,11 +63,14 @@ internal sealed class ScopedCountdownLock : IDisposable
     }
 
     /// <summary>
-    /// When successful, the lock <see cref="IsEngaged"/>, <see cref="Count"/> can reach <see langword="0"/> when no <see cref="CounterScope"/> is active, and the event be set/signaled.
+    /// When successful, the lock <see cref="IsEngaged"/>, <see cref="Count"/> can reach <see langword="0"/> when no <see cref="CounterScope"/> is active, and the event can be set/signaled.
     /// Check via <see cref="LockScope.IsEntered"/> whether the Lock <see cref="IsEngaged"/>.
     /// Use <see cref="LockScope.Wait"/> to block until every active <see cref="CounterScope"/> has exited before performing the locked operation.
     /// After the locked operation has completed, disengage the Lock via <see cref="LockScope.Dispose"/>.
     /// </summary>
+    /// <remarks>
+    /// Must be disposed to exit.
+    /// </remarks>
     internal LockScope TryEnterLockScope()
     {
         if (Interlocked.CompareExchange(ref _isEngaged, 1, 0) == 0)
