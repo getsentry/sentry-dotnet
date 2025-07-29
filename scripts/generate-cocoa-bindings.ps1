@@ -45,6 +45,14 @@ Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
 $umbrellaHeader = "$CocoaSdkPath/Carthage/Headers/Sentry.h"
 Set-Content -Path $umbrellaHeader -Value ((Get-Content -Path $umbrellaHeader -Raw) -replace '<Sentry/([^>]+)>', '"$1"')
 
+# The headers are provided in the "new" style of `#import <Sentry/SomeHeader.h>` instead of `#import "SomeHeader.h"` which causes sharpie to fail resolve those headers
+$allHeaders = Get-ChildItem -Path "$CocoaSdkPath/Carthage/Headers" -Filter *.h -Recurse | Select-Object -ExpandProperty FullName
+foreach ($header in $allHeaders)
+{
+    Set-Content -Path $header -Value ((Get-Content -Path $header -Raw) -replace '<Sentry/([^>]+)>', '"$1"')
+    Set-Content -Path $header -Value ((Get-Content -Path $header -Raw) -replace 'import SENTRY_HEADER\(([^\)]+)\)', 'import "$1.h"')
+}
+
 # Generate bindings
 Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk $iPhoneSdkVersion `
@@ -207,7 +215,11 @@ $Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+) \{ get; \}', '$
 $Text = $Text -replace '\s*\[Verify \(StronglyTypedNSArray\)\]\n', ''
 
 # Fix broken line comment
-$Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\()\n\s*', '$1'
+#$Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\()\n\s*', '$1'
+$Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\([\s\S]*?\))', {
+    $attr = $_.Groups[1].Value -replace '\s+', ' '
+    $attr
+}
 
 # Remove default IsEqual implementation (already implemented by NSObject)
 $Text = $Text -replace '(?ms)\n?^ *// [^\n]*isEqual:.*?$.*?;\n', ''
@@ -230,14 +242,54 @@ $Text = $Text -replace '\n.*SentryReplayBreadcrumbConverter.*?[\s\S]*?\);\n', ''
 $propertiesToRemove = @(
     'SentryAppStartMeasurement',
     'SentryOnAppStartMeasurementAvailable',
-    'SentryMetricsAPI',
-    'SentryExperimentalOptions',
+    'SentryLogger',
+    'SessionReplay',
+    'ConfigureProfiling',
+    'ConfigureUserFeedback',
     'description',
     'enableMetricKitRawPayload'
 )
 
-foreach ($property in $propertiesToRemove) {
+foreach ($property in $propertiesToRemove)
+{
+    $OldText = $Text
     $Text = $Text -replace "\n.*property.*$property.*?[\s\S]*?\}\n", ''
+    if ($OldText -eq $Text)
+    {
+        Write-Warning "${File}: property '$property' not found."
+    }
+}
+
+$methodsToRemove = @(
+    'CaptureFeedback',
+    'CaptureUserFeedback',
+    'SentryProfilingConfigurationBlock',
+    'SentryUserFeedbackConfigurationBlock',
+    'SessionReplayMaskingOverlay'
+)
+
+foreach ($method in $methodsToRemove)
+{
+    $OldText = $Text
+    $Text = $Text -replace "(?ms)\n(\s*\[[^\]]+\]\s*\n)*\s*(delegate\s+\w+|\w+)\s+$method\s*\([^\)]*\)\s*;\s*", ""
+    if ($OldText -eq $Text)
+    {
+        Write-Warning "${File}: method '$method' not found."
+    }
+}
+
+$attributesToRemove = @(
+    'IOS',
+    'Unavailable'
+)
+
+foreach ($attr in $attributesToRemove)
+{
+    $Text = $Text -replace "(?m)^\s*\[$attr[^\]]*\]\s*\r?\n", ""
+    if ($OldText -eq $Text)
+    {
+        Write-Warning "${File}: method '$method' not found."
+    }
 }
 
 # This interface resides in the Sentry-Swift.h
