@@ -39,7 +39,7 @@ public class SentryLogTests
         var log = new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message")
         {
             Template = "template",
-            Parameters = ImmutableArray.Create<object>("params"),
+            Parameters = ImmutableArray.Create(new KeyValuePair<string, object>("param", "params")),
             ParentSpanId = ParentSpanId,
         };
         log.SetAttribute("attribute", "value");
@@ -50,7 +50,7 @@ public class SentryLogTests
         log.Level.Should().Be((SentryLogLevel)24);
         log.Message.Should().Be("message");
         log.Template.Should().Be("template");
-        log.Parameters.Should().BeEquivalentTo(["params"]);
+        log.Parameters.Should().BeEquivalentTo(new KeyValuePair<string, object>[] { new("param", "params"), });
         log.ParentSpanId.Should().Be(ParentSpanId);
 
         log.TryGetAttribute("attribute", out object attribute).Should().BeTrue();
@@ -148,7 +148,7 @@ public class SentryLogTests
         var log = new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message")
         {
             Template = "template",
-            Parameters = ImmutableArray.Create<object>("string", false, 1, 2.2),
+            Parameters = ImmutableArray.Create(new KeyValuePair<string, object>("0", "string"), new KeyValuePair<string, object>("1", false), new KeyValuePair<string, object>("2", 1), new KeyValuePair<string, object>("3", 2.2)),
             ParentSpanId = ParentSpanId,
         };
         log.SetAttribute("string-attribute", "string-value");
@@ -259,58 +259,55 @@ public class SentryLogTests
         {
             Parameters =
             [
-                sbyte.MinValue,
-                byte.MaxValue,
-                short.MinValue,
-                ushort.MaxValue,
-                int.MinValue,
-                uint.MaxValue,
-                long.MinValue,
-                ulong.MaxValue,
+                new KeyValuePair<string, object>("00", sbyte.MinValue),
+                new KeyValuePair<string, object>("01", byte.MaxValue),
+                new KeyValuePair<string, object>("02", short.MinValue),
+                new KeyValuePair<string, object>("03", ushort.MaxValue),
+                new KeyValuePair<string, object>("04", int.MinValue),
+                new KeyValuePair<string, object>("05", uint.MaxValue),
+                new KeyValuePair<string, object>("06", long.MinValue),
+                new KeyValuePair<string, object>("07", ulong.MaxValue),
 #if NET5_0_OR_GREATER
-                nint.MinValue,
-                nuint.MaxValue,
+                new KeyValuePair<string, object>("08", nint.MinValue),
+                new KeyValuePair<string, object>("09", nuint.MaxValue),
 #endif
-                1f,
-                2d,
-                3m,
-                true,
-                'c',
-                "string",
+                new KeyValuePair<string, object>("10", 1f),
+                new KeyValuePair<string, object>("11", 2d),
+                new KeyValuePair<string, object>("12", 3m),
+                new KeyValuePair<string, object>("13", true),
+                new KeyValuePair<string, object>("14", 'c'),
+                new KeyValuePair<string, object>("15", "string"),
 #if (NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
-                KeyValuePair.Create("key", "value"),
+                new KeyValuePair<string, object>("16", KeyValuePair.Create("key", "value")),
 #else
-                new KeyValuePair<string, string>("key", "value"),
+                new KeyValuePair<string, object>("16", new KeyValuePair<string, string>("key", "value")),
 #endif
-                null,
+                new KeyValuePair<string, object>("17", null),
             ],
         };
-
-        var currentParameterAttributeIndex = -1;
-        string GetNextParameterAttributeName() => $"sentry.message.parameter.{++currentParameterAttributeIndex}";
 
         var document = log.ToJsonDocument(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
         var attributes = document.RootElement.GetProperty("attributes");
         Assert.Collection(attributes.EnumerateObject().ToArray(),
-            property => property.AssertAttributeInteger(GetNextParameterAttributeName(), json => json.GetSByte(), sbyte.MinValue),
-            property => property.AssertAttributeInteger(GetNextParameterAttributeName(), json => json.GetByte(), byte.MaxValue),
-            property => property.AssertAttributeInteger(GetNextParameterAttributeName(), json => json.GetInt16(), short.MinValue),
-            property => property.AssertAttributeInteger(GetNextParameterAttributeName(), json => json.GetUInt16(), ushort.MaxValue),
-            property => property.AssertAttributeInteger(GetNextParameterAttributeName(), json => json.GetInt32(), int.MinValue),
-            property => property.AssertAttributeInteger(GetNextParameterAttributeName(), json => json.GetUInt32(), uint.MaxValue),
-            property => property.AssertAttributeInteger(GetNextParameterAttributeName(), json => json.GetInt64(), long.MinValue),
-            property => property.AssertAttributeString(GetNextParameterAttributeName(), json => json.GetString(), ulong.MaxValue.ToString(NumberFormatInfo.InvariantInfo)),
+            property => property.AssertAttributeInteger("sentry.message.parameter.00", json => json.GetSByte(), sbyte.MinValue),
+            property => property.AssertAttributeInteger("sentry.message.parameter.01", json => json.GetByte(), byte.MaxValue),
+            property => property.AssertAttributeInteger("sentry.message.parameter.02", json => json.GetInt16(), short.MinValue),
+            property => property.AssertAttributeInteger("sentry.message.parameter.03", json => json.GetUInt16(), ushort.MaxValue),
+            property => property.AssertAttributeInteger("sentry.message.parameter.04", json => json.GetInt32(), int.MinValue),
+            property => property.AssertAttributeInteger("sentry.message.parameter.05", json => json.GetUInt32(), uint.MaxValue),
+            property => property.AssertAttributeInteger("sentry.message.parameter.06", json => json.GetInt64(), long.MinValue),
+            property => property.AssertAttributeString("sentry.message.parameter.07", json => json.GetString(), ulong.MaxValue.ToString(NumberFormatInfo.InvariantInfo)),
 #if NET5_0_OR_GREATER
-            property => property.AssertAttributeInteger(GetNextParameterAttributeName(), json => json.GetInt64(), nint.MinValue),
-            property => property.AssertAttributeString(GetNextParameterAttributeName(), json => json.GetString(), nuint.MaxValue.ToString(NumberFormatInfo.InvariantInfo)),
+            property => property.AssertAttributeInteger("sentry.message.parameter.08", json => json.GetInt64(), nint.MinValue),
+            property => property.AssertAttributeString("sentry.message.parameter.09", json => json.GetString(), nuint.MaxValue.ToString(NumberFormatInfo.InvariantInfo)),
 #endif
-            property => property.AssertAttributeDouble(GetNextParameterAttributeName(), json => json.GetSingle(), 1f),
-            property => property.AssertAttributeDouble(GetNextParameterAttributeName(), json => json.GetDouble(), 2d),
-            property => property.AssertAttributeString(GetNextParameterAttributeName(), json => json.GetString(), 3m.ToString(NumberFormatInfo.InvariantInfo)),
-            property => property.AssertAttributeBoolean(GetNextParameterAttributeName(), json => json.GetBoolean(), true),
-            property => property.AssertAttributeString(GetNextParameterAttributeName(), json => json.GetString(), "c"),
-            property => property.AssertAttributeString(GetNextParameterAttributeName(), json => json.GetString(), "string"),
-            property => property.AssertAttributeString(GetNextParameterAttributeName(), json => json.GetString(), "[key, value]")
+            property => property.AssertAttributeDouble("sentry.message.parameter.10", json => json.GetSingle(), 1f),
+            property => property.AssertAttributeDouble("sentry.message.parameter.11", json => json.GetDouble(), 2d),
+            property => property.AssertAttributeString("sentry.message.parameter.12", json => json.GetString(), 3m.ToString(NumberFormatInfo.InvariantInfo)),
+            property => property.AssertAttributeBoolean("sentry.message.parameter.13", json => json.GetBoolean(), true),
+            property => property.AssertAttributeString("sentry.message.parameter.14", json => json.GetString(), "c"),
+            property => property.AssertAttributeString("sentry.message.parameter.15", json => json.GetString(), "string"),
+            property => property.AssertAttributeString("sentry.message.parameter.16", json => json.GetString(), "[key, value]")
         );
         Assert.Collection(_output.Entries,
             entry => entry.Message.Should().Match("*ulong*is not supported*overflow*"),

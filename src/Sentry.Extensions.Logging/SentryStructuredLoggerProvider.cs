@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sentry.Infrastructure;
 
 namespace Sentry.Extensions.Logging;
 
@@ -7,26 +8,41 @@ namespace Sentry.Extensions.Logging;
 /// Sentry Structured Logger Provider.
 /// </summary>
 [ProviderAlias("SentryLogs")]
-[Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
 internal class SentryStructuredLoggerProvider : ILoggerProvider
 {
-    private readonly IOptions<SentryLoggingOptions> _options;
+    private readonly SentryLoggingOptions _options;
     private readonly IHub _hub;
+    private readonly ISystemClock _clock;
+    private readonly SdkVersion _sdk;
 
-    // TODO: convert this comment into an automated test
-    // Constructor must be public for Microsoft.Extensions.DependencyInjection
     public SentryStructuredLoggerProvider(IOptions<SentryLoggingOptions> options, IHub hub)
+        : this(options.Value, hub, SystemClock.Clock, CreateSdkVersion())
+    {
+    }
+
+    internal SentryStructuredLoggerProvider(SentryLoggingOptions options, IHub hub, ISystemClock clock, SdkVersion sdk)
     {
         _options = options;
         _hub = hub;
+        _clock = clock;
+        _sdk = sdk;
     }
 
     public ILogger CreateLogger(string categoryName)
     {
-        return new SentryStructuredLogger(categoryName, _options.Value, _hub);
+        return new SentryStructuredLogger(categoryName, _options, _hub, _clock, _sdk);
     }
 
     public void Dispose()
     {
+    }
+
+    private static SdkVersion CreateSdkVersion()
+    {
+        return new SdkVersion
+        {
+            Name = Constants.SdkName,
+            Version = SentryLoggerProvider.NameAndVersion.Version,
+        };
     }
 }

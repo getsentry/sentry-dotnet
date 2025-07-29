@@ -40,10 +40,21 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
             return;
         }
 
+        ImmutableArray<KeyValuePair<string, object>> @params = default;
+        if (parameters is not null && parameters.Length != 0)
+        {
+            var builder = ImmutableArray.CreateBuilder<KeyValuePair<string, object>>(parameters.Length);
+            for (var index = 0; index < parameters.Length; index++)
+            {
+                builder.Add(new KeyValuePair<string, object>(index.ToString(), parameters[index]));
+            }
+            @params = builder.ToImmutable();
+        }
+
         SentryLog log = new(timestamp, traceHeader.TraceId, level, message)
         {
             Template = template,
-            Parameters = ImmutableArray.Create(parameters),
+            Parameters = @params,
             ParentSpanId = traceHeader.SpanId,
         };
 
@@ -60,7 +71,14 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
         var scope = _hub.GetScope();
         log.SetDefaultAttributes(_options, scope?.Sdk ?? SdkVersion.Instance);
 
+        CaptureLog(log);
+    }
+
+    /// <inheritdoc />
+    protected internal override void CaptureLog(SentryLog log)
+    {
         var configuredLog = log;
+
         if (_options.Experimental.BeforeSendLogInternal is { } beforeSendLog)
         {
             try
