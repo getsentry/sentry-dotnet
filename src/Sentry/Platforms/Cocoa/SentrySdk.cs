@@ -8,6 +8,11 @@ namespace Sentry;
 
 public static partial class SentrySdk
 {
+    internal static void SetCrashEventId(SentryId sentryId)
+    {
+        SentryCocoaHybridSdk.SetCrashEventID(sentryId.ToCocoaSentryId());
+    }
+
     private static void InitSentryCocoaSdk(SentryOptions options)
     {
         options.LogDebug("Initializing native SDK");

@@ -30,7 +30,7 @@ public sealed class SentryEvent : IEventLike, ISentryJsonSerializable
     /// Hexadecimal string representing a uuid4 value.
     /// The length is exactly 32 characters (no dashes!).
     /// </remarks>
-    public SentryId EventId { get; }
+    public SentryId EventId { get; set; }
 
     /// <summary>
     /// Indicates when the event was created.
