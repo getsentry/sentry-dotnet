@@ -2278,6 +2278,11 @@ interface PrivateSentrySDKOnly
     [Export ("setTrace:spanId:")]
     void SetTrace (SentryId traceId, SentrySpanId spanId);
 
+    // +(void)setCrashEventID:(SentryId * _Nonnull)crashEventId;
+    [Static]
+    [Export ("setCrashEventID:")]
+    void SetCrashEventID (SentryId crashEventId);
+
     // +(uint64_t)startProfilerForTrace:(SentryId * _Nonnull)traceId;
     [Static]
     [Export ("startProfilerForTrace:")]

@@ -37,6 +37,29 @@ internal class Hub : IHub, IDisposable
     private Scope CurrentScope => ScopeManager.GetCurrent().Key;
     private ISentryClient CurrentClient => ScopeManager.GetCurrent().Value;
 
+#if __IOS__
+    private readonly object _nextCrashEventIdSync = new();
+    private SentryId _nextCrashEventId = SentryId.Create();
+
+    private SentryId NextCrashEventId
+    {
+        get
+        {
+            lock (_nextCrashEventIdSync)
+            {
+                return _nextCrashEventId;
+            }
+        }
+        set
+        {
+            lock (_nextCrashEventIdSync)
+            {
+                _nextCrashEventId = value;
+            }
+        }
+    }
+#endif
+
     internal Hub(
         SentryOptions options,
         ISentryClient? client = null,
@@ -94,6 +117,10 @@ internal class Hub : IHub, IDisposable
                 _integrationsToCleanup.Add(disposableIntegration);
             }
         }
+
+#if __IOS__
+        SentrySdk.SetCrashEventId(NextCrashEventId);
+#endif
     }
 
     public void ConfigureScope(Action<Scope> configureScope)
@@ -528,6 +555,15 @@ internal class Hub : IHub, IDisposable
         {
             return SentryId.Empty;
         }
+
+#if __IOS__
+        if (evt.HasTerminalException())
+        {
+            evt.EventId = NextCrashEventId;
+            NextCrashEventId = SentryId.Create();
+            SentrySdk.SetCrashEventId(NextCrashEventId);
+        }
+#endif
 
         try
         {
