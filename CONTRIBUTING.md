@@ -44,8 +44,7 @@ For a big feature it's advised to raise an issue to discuss it first.
 
 To build any of `Sentry.Maui`, `Sentry.Maui.Tests`, or `Sentry.Samples.Maui`, you'll need to have the MAUI workloads installed. You can do so by running `dotnet workload restore` from the root of the SDK's repository (or `sudo dotnet workload restore` on macOS/Linux).
 
-See https://docs.microsoft.com/dotnet/maui/ for details. JetBrains also have a great blog post if you're developing on a 
-Mac: https://blog.jetbrains.com/dotnet/2022/05/25/macos-environment-setup-for-maui-development/
+See https://docs.microsoft.com/dotnet/maui/ for details. JetBrains also have a great blog post if you're developing on a Mac: https://blog.jetbrains.com/dotnet/2022/05/25/macos-environment-setup-for-maui-development/
 
 Basically, if you can build and run the `MyMauiApp` example you should also be able to build and run the Sentry MAUI sample app.
 
@@ -65,7 +64,7 @@ Although the files in `/src/Sentry/Platforms/` are part of the `Sentry` project,
 
 These `*.props` files are used to add platform-specific files, such as references to the binding projects for each native SDK. These binding projects are .NET wrappers around native Android or Cocoa SDK functions.
 
-Also note `/Directory.Build.targets` contains some [convention-based rules](https://github.com/getsentry/sentry-dotnet/blob/b1bfe1efc04eb4c911a85f1cf4cd2e5a176d7c8a/Directory.Build.targets#L17-L35) to exclude code that is not relevant for the target platform. Developers using Visual Studio will need to enable `Show All Files` in order to be able to see these files, when working with the solution.
+Also note `/Directory.Build.targets` contains some [convention-based rules](https://github.com/getsentry/sentry-dotnet/blob/4e7496b45465c5561767cfd8f2914740cc3dfdf6/Directory.Build.targets#L20-L37) to exclude code that is not relevant for the target platform. Developers using Visual Studio will need to enable `Show All Files` in order to be able to see these files, when working with the solution.
 
 ## Legacy ASP.NET solutions
 
@@ -116,7 +115,7 @@ Below that, you'll add heading 3 mentioned above. For example, if you're adding 
 
 ### Features
 
-* Attach screenshots when capturing errors on WPF (#PR number)
+- Attach screenshots when capturing errors on WPF (#PR number)
 ```
 
 There's a GitHub action check to verify if an entry was added. If the entry isn't a user-facing change, you can skip the verification with `#skip-changelog` written to the PR description. The bot writes a comment in the PR with a suggestion entry to the changelog based on the PR title.
