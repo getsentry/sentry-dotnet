@@ -1,6 +1,5 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal;
 
@@ -10,15 +9,21 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
     private readonly SentryOptions _options;
     private readonly ISystemClock _clock;
 
-    internal DefaultSentryStructuredLogger(IHub hub, SentryOptions options, ISystemClock clock)
+    private readonly StructuredLogBatchProcessor _batchProcessor;
+
+    internal DefaultSentryStructuredLogger(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
     {
+        Debug.Assert(hub.IsEnabled);
         Debug.Assert(options is { Experimental.EnableLogs: true });
 
         _hub = hub;
         _options = options;
         _clock = clock;
+
+        _batchProcessor = new StructuredLogBatchProcessor(hub, batchCount, batchInterval, _options.ClientReportRecorder, _options.DiagnosticLogger);
     }
 
+    /// <inheritdoc />
     private protected override void CaptureLog(SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog)
     {
         var timestamp = _clock.GetUtcNow();
@@ -71,9 +76,24 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
 
         if (configuredLog is not null)
         {
-            //TODO: enqueue in Batch-Processor / Background-Worker
-            // see https://github.com/getsentry/sentry-dotnet/issues/4132
-            _ = _hub.CaptureEnvelope(Envelope.FromLog(configuredLog));
+            _batchProcessor.Enqueue(configuredLog);
         }
+    }
+
+    /// <inheritdoc />
+    protected internal override void Flush()
+    {
+        _batchProcessor.Flush();
+    }
+
+    /// <inheritdoc />
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _batchProcessor.Dispose();
+        }
+
+        base.Dispose(disposing);
     }
 }

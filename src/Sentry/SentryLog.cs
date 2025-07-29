@@ -9,7 +9,7 @@ namespace Sentry;
 /// <para>This API is experimental and it may change in the future.</para>
 /// </summary>
 [Experimental(DiagnosticId.ExperimentalFeature)]
-public sealed class SentryLog : ISentryJsonSerializable
+public sealed class SentryLog
 {
     private readonly Dictionary<string, SentryAttribute> _attributes;
 
@@ -188,11 +188,8 @@ public sealed class SentryLog : ISentryJsonSerializable
         }
     }
 
-    /// <inheritdoc />
-    public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
+    internal void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
-        writer.WriteStartObject();
-        writer.WriteStartArray("items");
         writer.WriteStartObject();
 
         writer.WriteNumber("timestamp", Timestamp.ToUnixTimeSeconds());
@@ -241,10 +238,8 @@ public sealed class SentryLog : ISentryJsonSerializable
             writer.WriteEndObject();
         }
 
-        writer.WriteEndObject();
+        writer.WriteEndObject(); // attributes
 
-        writer.WriteEndObject();
-        writer.WriteEndArray();
         writer.WriteEndObject();
     }
 }
