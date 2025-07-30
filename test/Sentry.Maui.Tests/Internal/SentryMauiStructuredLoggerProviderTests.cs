@@ -1,23 +1,23 @@
 #nullable enable
 
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sentry.Maui.Internal;
 
-namespace Sentry.Extensions.Logging.Tests;
+namespace Sentry.Maui.Tests.Internal;
 
-public class SentryStructuredLoggerProviderTests
+public class SentryMauiStructuredLoggerProviderTests
 {
     private class Fixture
     {
-        public IOptions<SentryLoggingOptions> Options { get; }
+        public IOptions<SentryMauiOptions> Options { get; }
         public IHub Hub { get; }
         public MockClock Clock { get; }
         public SdkVersion Sdk { get; }
 
         public Fixture()
         {
-            var loggingOptions = new SentryLoggingOptions();
+            var loggingOptions = new SentryMauiOptions();
             loggingOptions.Experimental.EnableLogs = true;
 
             Options = Microsoft.Extensions.Options.Options.Create(loggingOptions);
@@ -32,9 +32,9 @@ public class SentryStructuredLoggerProviderTests
             Hub.IsEnabled.Returns(true);
         }
 
-        public SentryStructuredLoggerProvider GetSut()
+        public SentryMauiStructuredLoggerProvider GetSut()
         {
-            return new SentryStructuredLoggerProvider(Options.Value, Hub, Clock, Sdk);
+            return new SentryMauiStructuredLoggerProvider(Options.Value, Hub, Clock, Sdk);
         }
     }
 
@@ -45,14 +45,14 @@ public class SentryStructuredLoggerProviderTests
     {
         using var services = new ServiceCollection()
             .AddLogging()
-            .AddSingleton<ILoggerProvider, SentryStructuredLoggerProvider>()
+            .AddSingleton<ILoggerProvider, SentryMauiStructuredLoggerProvider>()
             .AddSingleton(_fixture.Options)
             .AddSingleton(_fixture.Hub)
             .BuildServiceProvider();
 
-        var logger = services.GetRequiredService<ILogger<SentryStructuredLoggerProviderTests>>();
+        var logger = services.GetRequiredService<ILogger<SentryMauiStructuredLoggerProviderTests>>();
 
-        logger.Should().BeOfType<Logger<SentryStructuredLoggerProviderTests>>();
+        logger.Should().BeOfType<Logger<SentryMauiStructuredLoggerProviderTests>>();
     }
 
     [Fact]
@@ -62,35 +62,35 @@ public class SentryStructuredLoggerProviderTests
 
         var logger = provider.CreateLogger("CategoryName");
 
-        logger.Should().BeOfType<SentryStructuredLogger>();
+        logger.Should().BeOfType<Sentry.Extensions.Logging.SentryStructuredLogger>();
     }
 
     [Fact]
     public void CreateLogger_DependencyInjection_CanLog()
     {
         SentryLog? capturedLog = null;
-        _fixture.Hub.Logger.Returns(Substitute.For<Sentry.SentryStructuredLogger>());
+        _fixture.Hub.Logger.Returns(Substitute.For<SentryStructuredLogger>());
         _fixture.Hub.Logger.CaptureLog(Arg.Do<SentryLog>(log => capturedLog = log));
 
         using var services = new ServiceCollection()
             .AddLogging()
-            .AddSingleton<ILoggerProvider, SentryStructuredLoggerProvider>()
+            .AddSingleton<ILoggerProvider, SentryMauiStructuredLoggerProvider>()
             .AddSingleton(_fixture.Options)
             .AddSingleton(_fixture.Hub)
             .BuildServiceProvider();
 
-        var logger = services.GetRequiredService<ILogger<SentryStructuredLoggerProviderTests>>();
+        var logger = services.GetRequiredService<ILogger<SentryMauiStructuredLoggerProviderTests>>();
         logger.LogInformation("message");
 
         Assert.NotNull(capturedLog);
         capturedLog.TryGetAttribute("microsoft.extensions.logging.category_name", out object? categoryName).Should().BeTrue();
-        categoryName.Should().Be(typeof(SentryStructuredLoggerProviderTests).FullName);
+        categoryName.Should().Be(typeof(SentryMauiStructuredLoggerProviderTests).FullName);
 
         capturedLog.TryGetAttribute("sentry.sdk.name", out object? name).Should().BeTrue();
-        name.Should().Be(Constants.SdkName);
+        name.Should().Be(Sentry.Maui.Internal.Constants.SdkName);
 
         capturedLog.TryGetAttribute("sentry.sdk.version", out object? version).Should().BeTrue();
-        version.Should().Be(SentryLoggerProvider.NameAndVersion.Version);
+        version.Should().Be(Sentry.Maui.Internal.Constants.SdkVersion);
     }
 
     [Fact]

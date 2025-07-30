@@ -4,20 +4,20 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Sentry.Extensions.Logging.Tests;
+namespace Sentry.AspNetCore.Tests;
 
-public class SentryStructuredLoggerProviderTests
+public class SentryAspNetCoreStructuredLoggerProviderTests
 {
     private class Fixture
     {
-        public IOptions<SentryLoggingOptions> Options { get; }
+        public IOptions<SentryAspNetCoreOptions> Options { get; }
         public IHub Hub { get; }
         public MockClock Clock { get; }
         public SdkVersion Sdk { get; }
 
         public Fixture()
         {
-            var loggingOptions = new SentryLoggingOptions();
+            var loggingOptions = new SentryAspNetCoreOptions();
             loggingOptions.Experimental.EnableLogs = true;
 
             Options = Microsoft.Extensions.Options.Options.Create(loggingOptions);
@@ -32,9 +32,9 @@ public class SentryStructuredLoggerProviderTests
             Hub.IsEnabled.Returns(true);
         }
 
-        public SentryStructuredLoggerProvider GetSut()
+        public SentryAspNetCoreStructuredLoggerProvider GetSut()
         {
-            return new SentryStructuredLoggerProvider(Options.Value, Hub, Clock, Sdk);
+            return new SentryAspNetCoreStructuredLoggerProvider(Options.Value, Hub, Clock, Sdk);
         }
     }
 
@@ -45,14 +45,14 @@ public class SentryStructuredLoggerProviderTests
     {
         using var services = new ServiceCollection()
             .AddLogging()
-            .AddSingleton<ILoggerProvider, SentryStructuredLoggerProvider>()
+            .AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>()
             .AddSingleton(_fixture.Options)
             .AddSingleton(_fixture.Hub)
             .BuildServiceProvider();
 
-        var logger = services.GetRequiredService<ILogger<SentryStructuredLoggerProviderTests>>();
+        var logger = services.GetRequiredService<ILogger<SentryAspNetCoreStructuredLoggerProviderTests>>();
 
-        logger.Should().BeOfType<Logger<SentryStructuredLoggerProviderTests>>();
+        logger.Should().BeOfType<Logger<SentryAspNetCoreStructuredLoggerProviderTests>>();
     }
 
     [Fact]
@@ -62,35 +62,35 @@ public class SentryStructuredLoggerProviderTests
 
         var logger = provider.CreateLogger("CategoryName");
 
-        logger.Should().BeOfType<SentryStructuredLogger>();
+        logger.Should().BeOfType<Sentry.Extensions.Logging.SentryStructuredLogger>();
     }
 
     [Fact]
     public void CreateLogger_DependencyInjection_CanLog()
     {
         SentryLog? capturedLog = null;
-        _fixture.Hub.Logger.Returns(Substitute.For<Sentry.SentryStructuredLogger>());
+        _fixture.Hub.Logger.Returns(Substitute.For<SentryStructuredLogger>());
         _fixture.Hub.Logger.CaptureLog(Arg.Do<SentryLog>(log => capturedLog = log));
 
         using var services = new ServiceCollection()
             .AddLogging()
-            .AddSingleton<ILoggerProvider, SentryStructuredLoggerProvider>()
+            .AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>()
             .AddSingleton(_fixture.Options)
             .AddSingleton(_fixture.Hub)
             .BuildServiceProvider();
 
-        var logger = services.GetRequiredService<ILogger<SentryStructuredLoggerProviderTests>>();
+        var logger = services.GetRequiredService<ILogger<SentryAspNetCoreStructuredLoggerProviderTests>>();
         logger.LogInformation("message");
 
         Assert.NotNull(capturedLog);
         capturedLog.TryGetAttribute("microsoft.extensions.logging.category_name", out object? categoryName).Should().BeTrue();
-        categoryName.Should().Be(typeof(SentryStructuredLoggerProviderTests).FullName);
+        categoryName.Should().Be(typeof(SentryAspNetCoreStructuredLoggerProviderTests).FullName);
 
         capturedLog.TryGetAttribute("sentry.sdk.name", out object? name).Should().BeTrue();
         name.Should().Be(Constants.SdkName);
 
         capturedLog.TryGetAttribute("sentry.sdk.version", out object? version).Should().BeTrue();
-        version.Should().Be(SentryLoggerProvider.NameAndVersion.Version);
+        version.Should().Be(SentryMiddleware.NameAndVersion.Version);
     }
 
     [Fact]
