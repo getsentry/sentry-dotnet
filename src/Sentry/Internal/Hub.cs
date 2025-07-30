@@ -173,8 +173,8 @@ internal class Hub : IHub, IDisposable
 
         bool? isSampled = null;
         double? sampleRate = null;
-        var sampleRand = dynamicSamplingContext?.Items.TryGetValue("sample_rand", out var dscsampleRand) ?? false
-            ? double.Parse(dscsampleRand, NumberStyles.Float, CultureInfo.InvariantCulture)
+        var sampleRand = dynamicSamplingContext?.Items.TryGetValue("sample_rand", out var dscSampleRand) ?? false
+            ? double.Parse(dscSampleRand, NumberStyles.Float, CultureInfo.InvariantCulture)
             : SampleRandHelper.GenerateSampleRand(context.TraceId.ToString());
 
         // TracesSampler runs regardless of whether a decision has already been made, as it can be used to override it.
@@ -188,14 +188,26 @@ internal class Hub : IHub, IDisposable
             {
                 // The TracesSampler trumps all other sampling decisions (even the trace header)
                 sampleRate = samplerSampleRate;
-                isSampled = SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
+                isSampled = SampleRandHelper.IsSampled(sampleRand, samplerSampleRate);
+
+                // Ensure the actual sampleRate is set on the provided DSC (if any) when the TracesSampler reached a sampling decision
+                dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(samplerSampleRate);
             }
         }
 
         // If the sampling decision isn't made by a trace sampler we check the trace header first (from the context) or
         // finally fallback to Random sampling if the decision has been made by no other means
-        sampleRate ??= _options.TracesSampleRate ?? 0.0;
-        isSampled ??= context.IsSampled ?? SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
+        if (isSampled == null)
+        {
+            sampleRate = _options.TracesSampleRate ?? 0.0;
+            isSampled = context.IsSampled ?? SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
+
+            if (context.IsSampled is null && _options.TracesSampleRate is not null)
+            {
+                // Ensure the actual sampleRate is set on the provided DSC (if any) when not IsSampled upstream but the TracesSampleRate reached a sampling decision
+                dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(_options.TracesSampleRate.Value);
+            }
+        }
 
         // Make sure there is a replayId (if available) on the provided DSC (if any).
         dynamicSamplingContext = dynamicSamplingContext?.WithReplayId(_replaySession);
