@@ -84,7 +84,7 @@ internal sealed class SentryStructuredLogger : ILogger
         SentryLog log = new(timestamp, traceHeader.TraceId, level, message)
         {
             Template = template,
-            Parameters = parameters.ToImmutable(),
+            Parameters = parameters.DrainToImmutable(),
             ParentSpanId = traceHeader.SpanId,
         };
 

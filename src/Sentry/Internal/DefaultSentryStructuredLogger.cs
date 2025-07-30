@@ -48,7 +48,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
             {
                 builder.Add(new KeyValuePair<string, object>(index.ToString(), parameters[index]));
             }
-            @params = builder.ToImmutable();
+            @params = builder.DrainToImmutable();
         }
 
         SentryLog log = new(timestamp, traceHeader.TraceId, level, message)
