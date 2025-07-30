@@ -734,10 +734,6 @@ public partial class HubTests
     [InlineData(false, null, null, false, 0.0, false)]
     public void StartTransaction_DynamicSamplingContextWithSampleRate_OverwritesSampleRate(bool? isSampled, double? tracesSampler, double? tracesSampleRate, bool expectedIsSampled, double expectedSampleRate, bool expectedDscOverwritten)
     {
-#if DEBUG
-        Skip.If(isSampled is false && expectedIsSampled, $"Forced sampling via {nameof(ITransactionContext.IsSampled)} is not considered when {nameof(SentryOptions.TracesSampler)} is used, resulting in `Debug.Assert` of {nameof(TransactionTracer)} `.ctor`.");
-#endif
-
         // Arrange
         var transactionContext = new TransactionContext("name", "operation", isSampled: isSampled);
         var dsc = BaggageHeader.Create(new List<KeyValuePair<string, string>>
