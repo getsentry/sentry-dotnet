@@ -56,8 +56,8 @@ internal static class LogLevelExtensions
             LogLevel.Warning => SentryLogLevel.Warning,
             LogLevel.Error => SentryLogLevel.Error,
             LogLevel.Critical => SentryLogLevel.Fatal,
-            LogLevel.None => SentryLogLevel.Trace,
-            _ => SentryLogLevel.Trace,
+            LogLevel.None => default,
+            _ => default,
         };
     }
 }

@@ -9,20 +9,24 @@ public class SentryStructuredLoggerTests : IDisposable
 {
     private class Fixture
     {
-        public string CategoryName { get; }
+        public string CategoryName { get; internal set; }
         public IOptions<SentryLoggingOptions> Options { get; }
         public IHub Hub { get; }
         public MockClock Clock { get; }
         public SdkVersion Sdk { get; }
 
         public Queue<SentryLog> CapturedLogs { get; } = new();
+        public InMemoryDiagnosticLogger DiagnosticLogger { get; } = new();
 
         public Fixture()
         {
-            var loggingOptions = new SentryLoggingOptions();
-            loggingOptions.Experimental.EnableLogs = true;
-            loggingOptions.Environment = "my-environment";
-            loggingOptions.Release = "my-release";
+            var loggingOptions = new SentryLoggingOptions
+            {
+                Debug = true,
+                DiagnosticLogger = DiagnosticLogger,
+                Environment = "my-environment",
+                Release = "my-release",
+            };
 
             CategoryName = nameof(CategoryName);
             Options = Microsoft.Extensions.Options.Options.Create(loggingOptions);
@@ -37,14 +41,14 @@ public class SentryStructuredLoggerTests : IDisposable
             var logger = Substitute.For<Sentry.SentryStructuredLogger>();
             logger.CaptureLog(Arg.Do<SentryLog>(log => CapturedLogs.Enqueue(log)));
             Hub.Logger.Returns(logger);
+
+            EnableHub(true);
+            EnableLogs(true);
+            SetMinimumLogLevel(default);
         }
 
-        public void EnableHub() => Hub.IsEnabled.Returns(true);
-        public void DisableHub() => Hub.IsEnabled.Returns(false);
-
-        public void EnableLogs() => Options.Value.Experimental.EnableLogs = true;
-        public void DisableLogs() => Options.Value.Experimental.EnableLogs = true;
-
+        public void EnableHub(bool isEnabled) => Hub.IsEnabled.Returns(isEnabled);
+        public void EnableLogs(bool isEnabled) => Options.Value.Experimental.EnableLogs = isEnabled;
         public void SetMinimumLogLevel(LogLevel logLevel) => Options.Value.ExperimentalLogging.MinimumLogLevel = logLevel;
 
         public void WithTraceHeader(SentryId traceId, SpanId parentSpanId)
@@ -64,6 +68,7 @@ public class SentryStructuredLoggerTests : IDisposable
     public void Dispose()
     {
         _fixture.CapturedLogs.Should().BeEmpty();
+        _fixture.DiagnosticLogger.Entries.Should().BeEmpty();
     }
 
     [Theory]
@@ -74,22 +79,19 @@ public class SentryStructuredLoggerTests : IDisposable
     [InlineData(LogLevel.Error, SentryLogLevel.Error)]
     [InlineData(LogLevel.Critical, SentryLogLevel.Fatal)]
     [InlineData(LogLevel.None, default(SentryLogLevel))]
-    public void Log_LogLevel_(LogLevel logLevel, SentryLogLevel expectedLevel)
+    public void Log_LogLevel_CaptureLog(LogLevel logLevel, SentryLogLevel expectedLevel)
     {
         var traceId = SentryId.Create();
         var parentSpanId = SpanId.Create();
-
-        _fixture.EnableHub();
-        _fixture.EnableLogs();
-        _fixture.SetMinimumLogLevel(logLevel);
         _fixture.WithTraceHeader(traceId, parentSpanId);
         var logger = _fixture.GetSut();
 
         EventId eventId = new(123, "EventName");
         Exception? exception = new InvalidOperationException("message");
         string? message = "Message with {Argument}.";
+        object?[] args = ["argument"];
 
-        logger.Log(logLevel, eventId, exception, message, "argument");
+        logger.Log(logLevel, eventId, exception, message, args);
 
         if (logLevel == LogLevel.None)
         {
@@ -115,15 +117,170 @@ public class SentryStructuredLoggerTests : IDisposable
     }
 
     [Fact]
-    public void IsEnabled_()
+    public void Log_LogLevelNone_DoesNotCaptureLog()
     {
         var logger = _fixture.GetSut();
+
+        logger.Log(LogLevel.None, new EventId(123, "EventName"), new InvalidOperationException("message"), "Message with {Argument}.", "argument");
+
+        _fixture.CapturedLogs.Should().BeEmpty();
     }
 
     [Fact]
-    public void BeginScope_()
+    public void Log_WithoutTraceHeader_CaptureLog()
     {
         var logger = _fixture.GetSut();
+
+        logger.Log(LogLevel.Information, new EventId(123, "EventName"), new InvalidOperationException("message"), "Message with {Argument}.", "argument");
+
+        var log = _fixture.CapturedLogs.Dequeue();
+        log.TraceId.Should().Be(SentryTraceHeader.Empty.TraceId);
+        log.ParentSpanId.Should().Be(SentryTraceHeader.Empty.SpanId);
+    }
+
+    [Fact]
+    public void Log_WithoutArguments_CaptureLog()
+    {
+        var logger = _fixture.GetSut();
+
+        logger.Log(LogLevel.Information, new EventId(123, "EventName"), new InvalidOperationException("message"), "Message.");
+
+        var log = _fixture.CapturedLogs.Dequeue();
+        log.Message.Should().Be("Message.");
+        log.Template.Should().Be("Message.");
+        log.Parameters.Should().BeEmpty();
+    }
+
+    [Fact]
+    [SuppressMessage("Reliability", "CA2017:Parameter count mismatch", Justification = "Tests")]
+    public void Log_ParameterCountMismatch_CaptureLog()
+    {
+        var logger = _fixture.GetSut();
+
+        logger.Log(LogLevel.Information, new EventId(123, "EventName"), new InvalidOperationException("message"), "Message with {Argument}.");
+
+        var log = _fixture.CapturedLogs.Dequeue();
+        log.Message.Should().Be("Message with {Argument}.");
+        log.Template.Should().Be("Message with {Argument}.");
+        log.Parameters.Should().BeEmpty();
+    }
+
+    [Fact]
+    [SuppressMessage("Reliability", "CA2017:Parameter count mismatch", Justification = "Tests")]
+    public void Log_ParameterCountMismatch_Throws()
+    {
+        var logger = _fixture.GetSut();
+
+        logger.Log(LogLevel.Information, new EventId(123, "EventName"), new InvalidOperationException("message"), "Message with {One}{Two}.", "One");
+
+        _fixture.CapturedLogs.Should().BeEmpty();
+        var entry = _fixture.DiagnosticLogger.Dequeue();
+        entry.Level.Should().Be(SentryLevel.Error);
+        entry.Message.Should().Be("Template string does not match the provided argument. The Log will be dropped.");
+        entry.Exception.Should().BeOfType<FormatException>();
+        entry.Args.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Log_WithoutCategoryName_CaptureLog()
+    {
+        _fixture.CategoryName = null!;
+        var logger = _fixture.GetSut();
+
+        logger.Log(LogLevel.Information, new EventId(123, "EventName"), new InvalidOperationException("message"), "Message with {Argument}.", "argument");
+
+        var log = _fixture.CapturedLogs.Dequeue();
+        log.TryGetAttribute("microsoft.extensions.logging.category_name", out object? _).Should().BeFalse();
+    }
+
+    [Fact]
+    public void Log_WithoutEvent_CaptureLog()
+    {
+        var logger = _fixture.GetSut();
+
+        logger.Log(LogLevel.Information, new InvalidOperationException("message"), "Message with {Argument}.", "argument");
+
+        var log = _fixture.CapturedLogs.Dequeue();
+        log.TryGetAttribute("microsoft.extensions.logging.event.id", out object? _).Should().BeFalse();
+        log.TryGetAttribute("microsoft.extensions.logging.event.name", out object? _).Should().BeFalse();
+    }
+
+    [Fact]
+    public void Log_WithoutEventId_CaptureLog()
+    {
+        var logger = _fixture.GetSut();
+
+        logger.Log(LogLevel.Information, new EventId(0, "EventName"), new InvalidOperationException("message"), "Message with {Argument}.", "argument");
+
+        var log = _fixture.CapturedLogs.Dequeue();
+        log.AssertAttribute("microsoft.extensions.logging.event.id", 0);
+        log.AssertAttribute("microsoft.extensions.logging.event.name", "EventName");
+    }
+
+    [Fact]
+    public void Log_WithoutEventName_CaptureLog()
+    {
+        var logger = _fixture.GetSut();
+
+        logger.Log(LogLevel.Information, new EventId(123), new InvalidOperationException("message"), "Message with {Argument}.", "argument");
+
+        var log = _fixture.CapturedLogs.Dequeue();
+        log.AssertAttribute("microsoft.extensions.logging.event.id", 123);
+        log.TryGetAttribute("microsoft.extensions.logging.event.name", out object? _).Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData(true, true, LogLevel.Warning, LogLevel.Warning, true)]
+    [InlineData(false, true, LogLevel.Warning, LogLevel.Warning, false)]
+    [InlineData(true, false, LogLevel.Warning, LogLevel.Warning, false)]
+    [InlineData(true, true, LogLevel.Information, LogLevel.Warning, true)]
+    [InlineData(true, true, LogLevel.Error, LogLevel.Warning, false)]
+    public void IsEnabled_HubOptionsMinimumLogLevel_Returns(bool isHubEnabled, bool isLogsEnabled, LogLevel minimumLogLevel, LogLevel actualLogLevel, bool expectedIsEnabled)
+    {
+        _fixture.EnableHub(isHubEnabled);
+        _fixture.EnableLogs(isLogsEnabled);
+        _fixture.SetMinimumLogLevel(minimumLogLevel);
+        var logger = _fixture.GetSut();
+
+        var isEnabled = logger.IsEnabled(actualLogLevel);
+        logger.Log(actualLogLevel, "message");
+
+        isEnabled.Should().Be(expectedIsEnabled);
+        if (expectedIsEnabled)
+        {
+            _fixture.CapturedLogs.Dequeue().Message.Should().Be("message");
+        }
+    }
+
+    [Fact]
+    public void BeginScope_Dispose_NoOp()
+    {
+        var logger = _fixture.GetSut();
+
+        string messageFormat = "Message with {Argument}.";
+        object?[] args = ["argument"];
+
+        logger.LogInformation("one");
+        using (var scope = logger.BeginScope(messageFormat, args))
+        {
+            logger.LogInformation("two");
+        }
+        logger.LogInformation("three");
+
+        _fixture.CapturedLogs.Dequeue().Message.Should().Be("one");
+        _fixture.CapturedLogs.Dequeue().Message.Should().Be("two");
+        _fixture.CapturedLogs.Dequeue().Message.Should().Be("three");
+    }
+
+    [Fact]
+    public void BeginScope_Shared_Same()
+    {
+        var logger = _fixture.GetSut();
+
+        using var scope1 = logger.BeginScope("Message with {Argument}.", "argument");
+        using var scope2 = logger.BeginScope("Message with {Argument}.", "argument");
+
+        scope1.Should().BeSameAs(scope2);
     }
 }
 

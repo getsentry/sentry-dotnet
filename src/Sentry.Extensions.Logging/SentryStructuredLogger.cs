@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Sentry.Extensibility;
 using Sentry.Infrastructure;
 
 namespace Sentry.Extensions.Logging;
@@ -44,7 +45,18 @@ internal sealed class SentryStructuredLogger : ILogger
         var traceHeader = _hub.GetTraceHeader() ?? SentryTraceHeader.Empty;
 
         var level = logLevel.ToSentryLogLevel();
-        var message = formatter.Invoke(state, exception);
+        Debug.Assert(level != default);
+
+        string message;
+        try
+        {
+            message = formatter.Invoke(state, exception);
+        }
+        catch (FormatException e)
+        {
+            _options.DiagnosticLogger?.LogError(e, "Template string does not match the provided argument. The Log will be dropped.");
+            return;
+        }
 
         string? template = null;
         var parameters = ImmutableArray.CreateBuilder<KeyValuePair<string, object>>();
