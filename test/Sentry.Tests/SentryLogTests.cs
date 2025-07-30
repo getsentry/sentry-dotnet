@@ -9,7 +9,7 @@ namespace Sentry.Tests;
 /// </summary>
 public class SentryLogTests
 {
-    private static readonly DateTimeOffset Timestamp = new(2025, 04, 22, 14, 51, 00, TimeSpan.FromHours(2));
+    private static readonly DateTimeOffset Timestamp = new(2025, 04, 22, 14, 51, 00, 789, TimeSpan.FromHours(2));
     private static readonly SentryId TraceId = SentryId.Create();
     private static readonly SpanId? ParentSpanId = SpanId.Create();
 
@@ -114,7 +114,7 @@ public class SentryLogTests
         {
           "items": [
             {
-              "timestamp": {{Timestamp.ToUnixTimeSeconds()}},
+              "timestamp": {{Timestamp.GetTimestamp()}},
               "level": "trace",
               "body": "message",
               "trace_id": "{{TraceId.ToString()}}",
@@ -181,7 +181,7 @@ public class SentryLogTests
         {
           "items": [
             {
-              "timestamp": {{Timestamp.ToUnixTimeSeconds()}},
+              "timestamp": {{Timestamp.GetTimestamp()}},
               "level": "fatal",
               "body": "message",
               "trace_id": "{{TraceId.ToString()}}",
@@ -422,11 +422,20 @@ file static class AssertExtensions
     }
 }
 
+file static class DateTimeOffsetExtensions
+{
+    public static string GetTimestamp(this DateTimeOffset value)
+    {
+        var timestamp = value.ToUnixTimeMilliseconds() / 1_000.0;
+        return timestamp.ToString(NumberFormatInfo.InvariantInfo);
+    }
+}
+
 file static class JsonFormatterExtensions
 {
     public static string Format(this DateTimeOffset value)
     {
-        return value.ToString("yyyy-MM-ddTHH:mm:sszzz", DateTimeFormatInfo.InvariantInfo);
+        return value.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz", DateTimeFormatInfo.InvariantInfo);
     }
 
     public static string Format(this double value)

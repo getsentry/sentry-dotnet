@@ -202,7 +202,11 @@ public sealed class SentryLog
     {
         writer.WriteStartObject();
 
-        writer.WriteNumber("timestamp", Timestamp.ToUnixTimeSeconds());
+#if NET9_0_OR_GREATER
+        writer.WriteNumber("timestamp", Timestamp.ToUnixTimeMilliseconds() / (double)TimeSpan.MillisecondsPerSecond);
+#else
+        writer.WriteNumber("timestamp", Timestamp.ToUnixTimeMilliseconds() / 1_000.0);
+#endif
 
         var (severityText, severityNumber) = Level.ToSeverityTextAndOptionalSeverityNumber(logger);
         writer.WriteString("level", severityText);

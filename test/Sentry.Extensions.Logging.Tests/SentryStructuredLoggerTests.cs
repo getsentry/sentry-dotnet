@@ -31,7 +31,7 @@ public class SentryStructuredLoggerTests : IDisposable
             CategoryName = nameof(CategoryName);
             Options = Microsoft.Extensions.Options.Options.Create(loggingOptions);
             Hub = Substitute.For<IHub>();
-            Clock = new MockClock(new DateTimeOffset(2025, 04, 22, 14, 51, 00, TimeSpan.Zero));
+            Clock = new MockClock(new DateTimeOffset(2025, 04, 22, 14, 51, 00, 789, TimeSpan.FromHours(2)));
             Sdk = new SdkVersion
             {
                 Name = "SDK Name",

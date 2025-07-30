@@ -18,7 +18,7 @@ public class SentryStructuredLoggerTests : IDisposable
                 Debug = true,
                 DiagnosticLogger = DiagnosticLogger,
             };
-            Clock = new MockClock(new DateTimeOffset(2025, 04, 22, 14, 51, 00, TimeSpan.Zero));
+            Clock = new MockClock(new DateTimeOffset(2025, 04, 22, 14, 51, 00, 789, TimeSpan.FromHours(2)));
             BatchSize = 2;
             BatchTimeout = Timeout.InfiniteTimeSpan;
             TraceId = SentryId.Create();
