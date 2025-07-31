@@ -11,7 +11,7 @@ public class InMemoryDiagnosticLogger : IDiagnosticLogger
         Entries.Enqueue(new Entry(logLevel, message, exception, args));
     }
 
-    internal Entry Dequeue()
+    public Entry Dequeue()
     {
         if (Entries.TryDequeue(out var entry))
         {

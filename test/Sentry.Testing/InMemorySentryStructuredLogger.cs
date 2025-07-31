@@ -13,6 +13,12 @@ public sealed class InMemorySentryStructuredLogger : SentryStructuredLogger
     }
 
     /// <inheritdoc />
+    protected internal override void CaptureLog(SentryLog log)
+    {
+        throw new NotSupportedException();
+    }
+
+    /// <inheritdoc />
     protected internal override void Flush()
     {
         // no-op

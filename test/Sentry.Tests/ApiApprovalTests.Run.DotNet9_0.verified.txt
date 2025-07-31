@@ -646,7 +646,7 @@ namespace Sentry
         [System.Runtime.CompilerServices.RequiredMember]
         public string Message { get; init; }
         [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
-        public System.Collections.Immutable.ImmutableArray<object> Parameters { get; init; }
+        public System.Collections.Immutable.ImmutableArray<System.Collections.Generic.KeyValuePair<string, object>> Parameters { get; init; }
         [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public Sentry.SpanId? ParentSpanId { get; init; }
         [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
@@ -1013,6 +1013,7 @@ namespace Sentry
     [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
     public abstract class SentryStructuredLogger : System.IDisposable
     {
+        protected abstract void CaptureLog(Sentry.SentryLog log);
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
         protected abstract void Flush();

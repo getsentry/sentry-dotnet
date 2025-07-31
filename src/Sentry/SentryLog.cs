@@ -67,7 +67,7 @@ public sealed class SentryLog
     /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    public ImmutableArray<object> Parameters { get; init; }
+    public ImmutableArray<KeyValuePair<string, object>> Parameters { get; init; }
 
     /// <summary>
     /// The span id of the span that was active when the log was collected.
@@ -167,6 +167,16 @@ public sealed class SentryLog
         _attributes[key] = new SentryAttribute(value, "string");
     }
 
+    internal void SetAttribute(string key, char value)
+    {
+        _attributes[key] = new SentryAttribute(value.ToString(), "string");
+    }
+
+    internal void SetAttribute(string key, int value)
+    {
+        _attributes[key] = new SentryAttribute(value, "integer");
+    }
+
     internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk)
     {
         var environment = options.SettingLocator.GetEnvironment();
@@ -192,7 +202,11 @@ public sealed class SentryLog
     {
         writer.WriteStartObject();
 
-        writer.WriteNumber("timestamp", Timestamp.ToUnixTimeSeconds());
+#if NET9_0_OR_GREATER
+        writer.WriteNumber("timestamp", Timestamp.ToUnixTimeMilliseconds() / (double)TimeSpan.MillisecondsPerSecond);
+#else
+        writer.WriteNumber("timestamp", Timestamp.ToUnixTimeMilliseconds() / 1_000.0);
+#endif
 
         var (severityText, severityNumber) = Level.ToSeverityTextAndOptionalSeverityNumber(logger);
         writer.WriteString("level", severityText);
@@ -217,9 +231,9 @@ public sealed class SentryLog
 
         if (!Parameters.IsDefault)
         {
-            for (var index = 0; index < Parameters.Length; index++)
+            foreach (var parameter in Parameters)
             {
-                SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameter.{index}", Parameters[index], logger);
+                SentryAttributeSerializer.WriteAttribute(writer, $"sentry.message.parameter.{parameter.Key}", parameter.Value, logger);
             }
         }
 

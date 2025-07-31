@@ -45,4 +45,19 @@ internal static class LogLevelExtensions
             _ => SentryLevel.Debug
         };
     }
+
+    public static SentryLogLevel ToSentryLogLevel(this LogLevel logLevel)
+    {
+        return logLevel switch
+        {
+            LogLevel.Trace => SentryLogLevel.Trace,
+            LogLevel.Debug => SentryLogLevel.Debug,
+            LogLevel.Information => SentryLogLevel.Info,
+            LogLevel.Warning => SentryLogLevel.Warning,
+            LogLevel.Error => SentryLogLevel.Error,
+            LogLevel.Critical => SentryLogLevel.Fatal,
+            LogLevel.None => default,
+            _ => default,
+        };
+    }
 }
