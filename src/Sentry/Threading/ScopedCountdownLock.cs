@@ -23,7 +23,7 @@ internal sealed class ScopedCountdownLock : IDisposable
 
     /// <summary>
     /// <see langword="true"/> if the event is set/signaled; otherwise, <see langword="false"/>.
-    /// When <see langword="true"/>, the active <see cref="LockScope"/> can <see cref="LockScope.Wait"/> until the <see cref="Count"/> reaches <see langword="0"/>.
+    /// When <see langword="true"/>, the active <see cref="LockScope"/> can <see cref="LockScope.Wait()"/> until the <see cref="Count"/> reaches <see langword="0"/>.
     /// </summary>
     internal bool IsSet => _event.IsSet;
 
@@ -65,7 +65,7 @@ internal sealed class ScopedCountdownLock : IDisposable
     /// <summary>
     /// When successful, the lock <see cref="IsEngaged"/>, <see cref="Count"/> can reach <see langword="0"/> when no <see cref="CounterScope"/> is active, and the event can be set/signaled.
     /// Check via <see cref="LockScope.IsEntered"/> whether the Lock <see cref="IsEngaged"/>.
-    /// Use <see cref="LockScope.Wait"/> to block until every active <see cref="CounterScope"/> has exited before performing the locked operation.
+    /// Use <see cref="LockScope.Wait()"/> to block until every active <see cref="CounterScope"/> has exited before performing the locked operation.
     /// After the locked operation has completed, disengage the Lock via <see cref="LockScope.Dispose"/>.
     /// </summary>
     /// <remarks>
@@ -133,13 +133,26 @@ internal sealed class ScopedCountdownLock : IDisposable
         internal bool IsEntered => _lockObj is not null;
 
         /// <summary>
-        /// Blocks the current thread until the current <see cref="Count"/> reaches <see langword="0"/> and the event is set/signaled.
+        /// Blocks the current thread indefinitely until the current <see cref="Count"/> reaches <see langword="0"/> and the event is set/signaled.
         /// The caller will return immediately if the event is currently in a set/signaled state.
         /// </summary>
         internal void Wait()
         {
             var lockObj = _lockObj;
-            lockObj?._event.Wait();
+            lockObj?._event.Wait(Timeout.Infinite, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Blocks the current thread until the current <see cref="Count"/> reaches <see langword="0"/> and the event is set/signaled.
+        /// The caller will return immediately if the event is currently in a set/signaled state.
+        /// Uses a <see cref="TimeSpan"/> to measure the <paramref name="timeout"/>.
+        /// </summary>
+        /// <param name="timeout">A <see cref="TimeSpan"/> that represents the number of milliseconds to wait, or a <see cref="TimeSpan"/> that represents <see langword="-1"/>  milliseconds to wait indefinitely.</param>
+        /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative number other than <see langword="-1"/> milliseconds, which represents an infinite time-out -or- <paramref name="timeout"/> is greater than <see cref="int.MaxValue"/>.</exception>
+        internal void Wait(TimeSpan timeout)
+        {
+            var lockObj = _lockObj;
+            lockObj?._event.Wait(timeout, CancellationToken.None);
         }
 
         public void Dispose()

@@ -786,6 +786,7 @@ internal class Hub : IHub, IDisposable
     {
         try
         {
+            Logger.Flush(TimeSpan.Zero);
             await CurrentClient.FlushAsync(timeout).ConfigureAwait(false);
         }
         catch (Exception e)
@@ -819,7 +820,7 @@ internal class Hub : IHub, IDisposable
         _memoryMonitor?.Dispose();
 #endif
 
-        Logger.Flush();
+        Logger.Flush(Timeout.InfiniteTimeSpan);
         Logger.Dispose();
 
         try

@@ -99,9 +99,9 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
     }
 
     /// <inheritdoc />
-    protected internal override void Flush()
+    protected internal override void Flush(TimeSpan timeout)
     {
-        _batchProcessor.Flush();
+        _batchProcessor.Flush(timeout);
     }
 
     /// <inheritdoc />

@@ -44,7 +44,9 @@ public abstract class SentryStructuredLogger : IDisposable
     /// <summary>
     /// Clears all buffers for this logger and causes any buffered logs to be sent by the underlying <see cref="ISentryClient"/>.
     /// </summary>
-    protected internal abstract void Flush();
+    /// <param name="timeout">Used to indicate when flush should be forced.</param>
+    /// <exception cref="System.ArgumentOutOfRangeException"><paramref name="timeout"/> is a negative number other than <see langword="-1"/> milliseconds, which represents an infinite time-out -or- <paramref name="timeout"/> is greater than <see cref="int.MaxValue"/>.</exception>
+    protected internal abstract void Flush(TimeSpan timeout);
 
     /// <summary>
     /// Creates and sends a structured log to Sentry, with severity <see cref="SentryLogLevel.Trace"/>, when enabled and sampled.

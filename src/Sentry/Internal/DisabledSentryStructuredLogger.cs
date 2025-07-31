@@ -21,7 +21,7 @@ internal sealed class DisabledSentryStructuredLogger : SentryStructuredLogger
     }
 
     /// <inheritdoc />
-    protected internal override void Flush()
+    protected internal override void Flush(TimeSpan timeout)
     {
         // disabled
     }
