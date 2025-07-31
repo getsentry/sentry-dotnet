@@ -52,6 +52,7 @@
       "src\\Sentry.Serilog\\Sentry.Serilog.csproj",
       "src\\Sentry.SourceGenerators\\Sentry.SourceGenerators.csproj",
       "src\\Sentry\\Sentry.csproj",
+      "test\\AndroidTestApp\\AndroidTestApp.csproj",
       "test\\Sentry.Analyzers.Tests\\Sentry.Analyzers.Tests.csproj",
       "test\\Sentry.Android.AssemblyReader.Tests\\Sentry.Android.AssemblyReader.Tests.csproj",
       "test\\Sentry.AspNetCore.Grpc.Tests\\Sentry.AspNetCore.Grpc.Tests.csproj",

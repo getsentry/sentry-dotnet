@@ -46,7 +46,6 @@ filterConfigs:
         - "artefacts"
         - "trimTests"
       patterns:
-        - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Maui.Device.TestApp.csproj"
 
@@ -78,7 +77,6 @@ filterConfigs:
         - "artefacts"
         - "trimTests"
       patterns:
-        - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*.AspNet.Tests.csproj"
 
@@ -95,7 +93,6 @@ filterConfigs:
         - "artefacts"
         - "trimTests"
       patterns:
-        - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Sentry.Maui.Device.TestApp.csproj"
         - "**/*Sentry.Samples.Android.csproj"
@@ -114,7 +111,6 @@ filterConfigs:
         - "artefacts"
         - "trimTests"
       patterns:
-        - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Sentry.Maui.Device.TestApp.csproj"
         - "**/*Sentry.Samples.Android.csproj"
