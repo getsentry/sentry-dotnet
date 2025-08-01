@@ -28,7 +28,7 @@
           BeforeTargets="DispatchToInnerBuilds" />
 
   <!--  Build the Android test app in various configurations during the build of this test project. -->
-  <Target Name="BuildTestAPKs" BeforeTargets="BeforeBuild" DependsOnTargets="EnsureAndroidTestAppRestored" Condition="'$(TargetPlatformIdentifier)' != 'android'">
+  <Target Name="BuildTestAPKs" BeforeTargets="BeforeBuild" Condition="'$(TargetPlatformIdentifier)' != 'android'">
     <!-- Restore exactly once: https://learn.microsoft.com/en-gb/visualstudio/msbuild/run-target-exactly-once -->
     <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="EnsureAndroidTestAppRestored" RemoveProperties="TargetFramework" />
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net8.0-android" Condition="$(TargetFramework) == 'net8.0'" />
