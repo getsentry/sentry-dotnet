@@ -3,7 +3,7 @@ using Sentry.Infrastructure;
 
 namespace Sentry.Internal;
 
-internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
+internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, IDisposable
 {
     private readonly IHub _hub;
     private readonly SentryOptions _options;
@@ -105,13 +105,8 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
     }
 
     /// <inheritdoc />
-    protected override void Dispose(bool disposing)
+    public void Dispose()
     {
-        if (disposing)
-        {
-            _batchProcessor.Dispose();
-        }
-
-        base.Dispose(disposing);
+        _batchProcessor.Dispose();
     }
 }
