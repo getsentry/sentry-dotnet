@@ -88,6 +88,9 @@ public class ScopedCountdownLockTests : IDisposable
         counterTwo.Dispose();
         AssertEngaged(false, 1);
 
+        // would block if the timeout was infinite because the engaged lock is not yet set
+        lockOne.Wait(TimeSpan.Zero);
+
         // exit last CounterScope ... count of engaged lock reaches zero ... sets the lock
         counterOne.Dispose();
         AssertEngaged(true, 0);
