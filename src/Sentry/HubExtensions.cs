@@ -259,4 +259,16 @@ public static class HubExtensions
         var transaction = hub.GetTransaction();
         return transaction?.IsSampled == true ? transaction : null;
     }
+
+    internal static Scope? GetScope(this IHub hub)
+    {
+        if (hub is Hub fullHub)
+        {
+            return fullHub.ScopeManager.GetCurrent().Key;
+        }
+
+        Scope? current = null;
+        hub.ConfigureScope(scope => current = scope);
+        return current;
+    }
 }

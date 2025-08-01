@@ -240,6 +240,7 @@ public class DebugStackTraceTests
             IP = 2,
         });
 
+        Assert.NotNull(frame);
         return VerifyJson(frame.ToJsonString());
     }
 #endif

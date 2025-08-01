@@ -11,6 +11,16 @@ public class InMemoryDiagnosticLogger : IDiagnosticLogger
         Entries.Enqueue(new Entry(logLevel, message, exception, args));
     }
 
+    internal Entry Dequeue()
+    {
+        if (Entries.TryDequeue(out var entry))
+        {
+            return entry;
+        }
+
+        throw new InvalidOperationException("Queue is empty.");
+    }
+
     public record Entry(
         SentryLevel Level,
         string Message,
