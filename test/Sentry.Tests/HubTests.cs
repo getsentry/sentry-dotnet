@@ -1489,6 +1489,31 @@ public partial class HubTests
     }
 
     [Fact]
+    public async Task Logger_FlushAsync_DoesCaptureLog()
+    {
+        // Arrange
+        _fixture.Options.Experimental.EnableLogs = true;
+        var hub = _fixture.GetSut();
+
+        // Act
+        hub.Logger.LogWarning("Message");
+        await hub.FlushAsync();
+
+        // Assert
+        _fixture.Client.Received(1).CaptureEnvelope(
+            Arg.Is<Envelope>(envelope =>
+                envelope.Items.Single(item => item.Header["type"].Equals("log")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
+            )
+        );
+        await _fixture.Client.Received(1).FlushAsync(
+            Arg.Is<TimeSpan>(timeout =>
+                timeout.Equals(_fixture.Options.FlushTimeout)
+            )
+        );
+        hub.Logger.Should().BeOfType<DefaultSentryStructuredLogger>();
+    }
+
+    [Fact]
     public void Logger_Dispose_DoesCaptureLog()
     {
         // Arrange
@@ -1503,6 +1528,11 @@ public partial class HubTests
         _fixture.Client.Received(1).CaptureEnvelope(
             Arg.Is<Envelope>(envelope =>
                 envelope.Items.Single(item => item.Header["type"].Equals("log")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
+            )
+        );
+        _fixture.Client.Received(1).FlushAsync(
+            Arg.Is<TimeSpan>(timeout =>
+                timeout.Equals(_fixture.Options.ShutdownTimeout)
             )
         );
         hub.Logger.Should().BeOfType<DefaultSentryStructuredLogger>();

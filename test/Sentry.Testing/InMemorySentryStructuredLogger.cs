@@ -19,7 +19,7 @@ public sealed class InMemorySentryStructuredLogger : SentryStructuredLogger
     }
 
     /// <inheritdoc />
-    protected internal override void Flush()
+    protected internal override void Flush(TimeSpan timeout)
     {
         // no-op
     }

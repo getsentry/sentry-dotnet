@@ -74,8 +74,13 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
 
     internal void Flush()
     {
-        CaptureLogs(_buffer1);
-        CaptureLogs(_buffer2);
+        Flush(Timeout.InfiniteTimeSpan);
+    }
+
+    internal void Flush(TimeSpan timeout)
+    {
+        CaptureLogs(_buffer1, timeout);
+        CaptureLogs(_buffer2, timeout);
     }
 
     /// <summary>
@@ -97,7 +102,7 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
         if (status is StructuredLogBatchBufferAddStatus.AddedLast)
         {
             SwapActiveBuffer(buffer);
-            CaptureLogs(buffer);
+            CaptureLogs(buffer, Timeout.InfiniteTimeSpan);
             return true;
         }
 
@@ -110,7 +115,7 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
         _ = Interlocked.CompareExchange(ref _activeBuffer, newActiveBuffer, currentActiveBuffer);
     }
 
-    private void CaptureLogs(StructuredLogBatchBuffer buffer)
+    private void CaptureLogs(StructuredLogBatchBuffer buffer, TimeSpan timeout)
     {
         SentryLog[]? logs = null;
 
@@ -118,7 +123,7 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
         {
             if (scope.IsEntered)
             {
-                logs = scope.Flush();
+                logs = scope.Flush(timeout);
             }
         }
 
@@ -133,7 +138,7 @@ internal sealed class StructuredLogBatchProcessor : IDisposable
         if (!buffer.IsEmpty)
         {
             SwapActiveBuffer(buffer);
-            CaptureLogs(buffer);
+            CaptureLogs(buffer, Timeout.InfiniteTimeSpan);
         }
     }
 

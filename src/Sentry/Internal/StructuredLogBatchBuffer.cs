@@ -8,6 +8,8 @@ namespace Sentry.Internal;
 /// <remarks>
 /// Must be attempted to flush via <see cref="TryEnterFlushScope"/> when either the <see cref="Capacity"/> is reached,
 /// or when the <see cref="_timeout"/> is exceeded.
+/// Utilizes a <see cref="ScopedCountdownLock"/>, basically used as an inverse <see cref="ReaderWriterLockSlim"/>,
+/// allowing multiple threads for <see cref="Add"/> or exclusive access for <see cref="FlushScope.Flush()"/>.
 /// </remarks>
 [DebuggerDisplay("Name = {Name}, Capacity = {Capacity}, Additions = {_additions}, AddCount = {AddCount}, IsDisposed = {_disposed}")]
 internal sealed class StructuredLogBatchBuffer : IDisposable
@@ -248,13 +250,13 @@ internal sealed class StructuredLogBatchBuffer : IDisposable
     }
 
     /// <summary>
-    /// A scope than ensures only a single <see cref="Flush"/> operation is in progress,
+    /// A scope than ensures only a single <see cref="Flush()"/> operation is in progress,
     /// and blocks the calling thread until all <see cref="Add"/> operations have finished.
     /// When <see cref="IsEntered"/> is <see langword="true"/>, no more <see cref="Add"/> can be started,
     /// which will then return <see cref="StructuredLogBatchBufferAddStatus.IgnoredIsFlushing"/> immediately.
     /// </summary>
     /// <remarks>
-    /// Only <see cref="Flush"/> when scope <see cref="IsEntered"/>.
+    /// Only <see cref="Flush()"/> when scope <see cref="IsEntered"/>.
     /// </remarks>
     internal ref struct FlushScope : IDisposable
     {
@@ -272,10 +274,15 @@ internal sealed class StructuredLogBatchBuffer : IDisposable
 
         internal SentryLog[] Flush()
         {
+            return Flush(Timeout.InfiniteTimeSpan);
+        }
+
+        internal SentryLog[] Flush(TimeSpan timeout)
+        {
             var lockObj = _lockObj;
             if (lockObj is not null)
             {
-                _scope.Wait();
+                _scope.Wait(timeout);
 
                 var array = lockObj.ToArrayAndClear();
                 return array;
