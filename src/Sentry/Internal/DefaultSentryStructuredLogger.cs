@@ -41,7 +41,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger
         }
 
         ImmutableArray<KeyValuePair<string, object>> @params = default;
-        if (parameters is not null && parameters.Length != 0)
+        if (parameters is { Length: > 0 })
         {
             var builder = ImmutableArray.CreateBuilder<KeyValuePair<string, object>>(parameters.Length);
             for (var index = 0; index < parameters.Length; index++)
