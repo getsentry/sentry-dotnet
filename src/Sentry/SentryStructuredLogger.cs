@@ -8,7 +8,7 @@ namespace Sentry;
 /// <para>This API is experimental and it may change in the future.</para>
 /// </summary>
 [Experimental(DiagnosticId.ExperimentalFeature)]
-public abstract class SentryStructuredLogger : IDisposable
+public abstract class SentryStructuredLogger
 {
     internal static SentryStructuredLogger Create(IHub hub, SentryOptions options, ISystemClock clock)
         => Create(hub, options, clock, 100, TimeSpan.FromSeconds(5));
@@ -122,20 +122,5 @@ public abstract class SentryStructuredLogger : IDisposable
     public void LogFatal(string template, object[]? parameters = null, Action<SentryLog>? configureLog = null)
     {
         CaptureLog(SentryLogLevel.Fatal, template, parameters, configureLog);
-    }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    /// <summary>
-    /// Override in inherited types to clean up managed and unmanaged resources.
-    /// </summary>
-    /// <param name="disposing">Invoked from <see cref="Dispose()"/> when <see langword="true"/>; Invoked from <c>Finalize</c> when <see langword="false"/>.</param>
-    protected virtual void Dispose(bool disposing)
-    {
     }
 }
