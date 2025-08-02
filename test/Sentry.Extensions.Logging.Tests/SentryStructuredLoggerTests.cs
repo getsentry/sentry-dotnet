@@ -153,6 +153,7 @@ public class SentryStructuredLoggerTests : IDisposable
 
     [Fact]
     [SuppressMessage("Reliability", "CA2017:Parameter count mismatch", Justification = "Tests")]
+    [SuppressMessage("ReSharper", "StructuredMessageTemplateProblem", Justification = "Tests")]
     public void Log_ParameterCountMismatch_CaptureLog()
     {
         var logger = _fixture.GetSut();
@@ -167,6 +168,7 @@ public class SentryStructuredLoggerTests : IDisposable
 
     [Fact]
     [SuppressMessage("Reliability", "CA2017:Parameter count mismatch", Justification = "Tests")]
+    [SuppressMessage("ReSharper", "StructuredMessageTemplateProblem", Justification = "Tests")]
     public void Log_ParameterCountMismatch_Throws()
     {
         var logger = _fixture.GetSut();
@@ -191,6 +193,19 @@ public class SentryStructuredLoggerTests : IDisposable
 
         var log = _fixture.CapturedLogs.Dequeue();
         log.TryGetAttribute("microsoft.extensions.logging.category_name", out object? _).Should().BeFalse();
+    }
+
+    [Fact]
+    public void Log_WithoutMessage_CaptureLog()
+    {
+        var logger = _fixture.GetSut();
+
+        logger.Log(LogLevel.Information, new InvalidOperationException("message"), null, Array.Empty<object?>());
+
+        var log = _fixture.CapturedLogs.Dequeue();
+        log.Message.Should().Be("[null]");
+        log.Template.Should().Be("[null]");
+        log.Parameters.Should().BeEmpty();
     }
 
     [Fact]
