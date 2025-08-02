@@ -847,6 +847,5 @@ internal class Hub : IHub, IDisposable
 
     public SentryId LastEventId => CurrentScope.LastEventId;
 
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public SentryStructuredLogger Logger { get; }
 }

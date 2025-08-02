@@ -53,10 +53,8 @@ internal partial class BindableSentryOptions
     public bool? EnableSpotlight { get; set; }
     public string? SpotlightUrl { get; set; }
 
-    [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
     public BindableSentryExperimentalOptions Experimental { get; set; } = new();
 
-    [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
     internal sealed class BindableSentryExperimentalOptions
     {
         public bool? EnableLogs { get; set; }

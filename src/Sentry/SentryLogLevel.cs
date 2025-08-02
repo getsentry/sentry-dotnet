@@ -70,7 +70,6 @@ public enum SentryLogLevel
     Fatal = 21,
 }
 
-[Experimental(DiagnosticId.ExperimentalFeature)]
 internal static class SentryLogLevelExtensions
 {
     internal static (string, int?) ToSeverityTextAndOptionalSeverityNumber(this SentryLogLevel level, IDiagnosticLogger? logger)
