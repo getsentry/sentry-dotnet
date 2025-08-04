@@ -28,12 +28,51 @@ if (!(Get-Command sharpie -ErrorAction SilentlyContinue))
 # Ensure Xamarin is installed (or sharpie won't produce expected output).
 if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/64bits/iOS/Xamarin.iOS.dll'))
 {
-    Write-Output 'Xamarin.iOS not found. Attempting to install via Homebrew.'
-    brew install --cask xamarin-ios
+    Write-Output 'Xamarin.iOS not found. Attempting to install manually.'
+    
+    # Download Xamarin.iOS package from Google Drive
+    $packageName = 'xamarin.ios-16.4.0.23.pkg'
+    $directDownloadUrl = 'https://drive.google.com/uc?export=download&id=1G8RXGVFuGMAoyo2vWGen6F8Qm5h-F4pX'
+    $downloadPath = "/tmp/$packageName"
+    
+    Write-Output "Downloading Xamarin.iOS package from Google Drive..."
+    
+    # Use curl to download the file (Google Drive direct download)
+    curl -L -o $downloadPath $directDownloadUrl
+    
+    if ($LASTEXITCODE -ne 0)
+    {
+        Write-Error "Failed to download Xamarin.iOS package. Exit code: $LASTEXITCODE"
+    }
+    
+    if (Test-Path $downloadPath)
+    {
+        Write-Output "Downloaded package to $downloadPath"
+        Write-Output "Installing Xamarin.iOS package..."
+        
+        # Install the package using installer command
+        installer -pkg $downloadPath -target /
+        
+        if ($LASTEXITCODE -ne 0)
+        {
+            Write-Error "Failed to install Xamarin.iOS package. Exit code: $LASTEXITCODE"
+        }
+        else
+        {
+            Write-Output "Xamarin.iOS package installed successfully"
+        }
+        
+        # Clean up downloaded file
+        Remove-Item $downloadPath -Force -ErrorAction SilentlyContinue
+    }
+    else
+    {
+        Write-Error "Downloaded package not found at $downloadPath"
+    }
 
     if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/64bits/iOS/Xamarin.iOS.dll'))
     {
-        Write-Error 'Xamarin.iOS not found. Try installing manually from: https://learn.microsoft.com/en-us/xamarin/ios/get-started/installation/.'
+        Write-Error 'Xamarin.iOS not found after installation.'
     }
 }
 
