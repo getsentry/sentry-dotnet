@@ -29,28 +29,28 @@ if (!(Get-Command sharpie -ErrorAction SilentlyContinue))
 if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/64bits/iOS/Xamarin.iOS.dll'))
 {
     Write-Output 'Xamarin.iOS not found. Attempting to install manually.'
-    
+
     # Download Xamarin.iOS package
     $packageName = 'xamarin.ios-16.4.0.23.pkg'
-    $directDownloadUrl = 'https://github.com/jamescrosswell/xamarin-ios/releases/download/16.4.0.23/Xamarin.iOS.16.4.0.23.pkg'
+    $directDownloadUrl = 'https://github.com/getsentry/sentry-dotnet/releases/download/1.0.0.0-xamarin-ios/Xamarin.iOS.16.4.0.23.pkg'
     $downloadPath = "/tmp/$packageName"
-    
+
     Write-Output "Downloading Xamarin.iOS package..."
     curl -L -o $downloadPath $directDownloadUrl
-    
+
     if ($LASTEXITCODE -ne 0)
     {
         Write-Error "Failed to download Xamarin.iOS package. Exit code: $LASTEXITCODE"
     }
-    
+
     if (Test-Path $downloadPath)
     {
         Write-Output "Downloaded package to $downloadPath"
         Write-Output "Installing Xamarin.iOS package..."
-        
+
         # Install the package using installer command (requires sudo)
         sudo installer -pkg $downloadPath -target /
-        
+
         if ($LASTEXITCODE -ne 0)
         {
             Write-Error "Failed to install Xamarin.iOS package. Exit code: $LASTEXITCODE"
@@ -59,7 +59,7 @@ if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/
         {
             Write-Output "Xamarin.iOS package installed successfully"
         }
-        
+
         # Clean up downloaded file
         Remove-Item $downloadPath -Force -ErrorAction SilentlyContinue
     }
@@ -84,23 +84,30 @@ Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
 #     `#import "SomeHeader.h"`
 # This causes sharpie to fail resolve those headers
 $filesToPatch = Get-ChildItem -Path "$CocoaSdkPath/Headers" -Filter *.h -Recurse | Select-Object -ExpandProperty FullName
-foreach ($file in $filesToPatch) {
-    if (Test-Path $file) {
+foreach ($file in $filesToPatch)
+{
+    if (Test-Path $file)
+    {
         $content = Get-Content -Path $file -Raw
         $content = $content -replace '<Sentry/([^>]+)>', '"$1"'
         Set-Content -Path $file -Value $content
-    } else {
+    }
+    else
+    {
         Write-Host "File not found: $file"
     }
 }
 $privateHeaderFile = "$CocoaSdkPath/PrivateHeaders/PrivatesHeader.h"
-if (Test-Path $privateHeaderFile) {
+if (Test-Path $privateHeaderFile)
+{
     $content = Get-Content -Path $privateHeaderFile -Raw
     $content = $content -replace '"SentryDefines.h"', '"../Headers/SentryDefines.h"'
     $content = $content -replace '"SentryProfilingConditionals.h"', '"../Headers/SentryProfilingConditionals.h"'
     Set-Content -Path $privateHeaderFile -Value $content
     Write-Host "Patched includes: $privateHeaderFile"
-} else {
+}
+else
+{
     Write-Host "File not found: $privateHeaderFile"
 }
 
@@ -295,7 +302,8 @@ $propertiesToRemove = @(
     'enableMetricKitRawPayload'
 )
 
-foreach ($property in $propertiesToRemove) {
+foreach ($property in $propertiesToRemove)
+{
     $Text = $Text -replace "\n.*property.*$property.*?[\s\S]*?\}\n", ''
 }
 
