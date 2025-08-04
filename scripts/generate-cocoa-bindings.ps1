@@ -34,6 +34,7 @@ if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/
     $packageName = 'xamarin.ios-16.4.0.23.pkg'
     $directDownloadUrl = 'https://github.com/getsentry/sentry-dotnet/releases/download/1.0.0.0-xamarin-ios/Xamarin.iOS.16.4.0.23.pkg'
     $downloadPath = "/tmp/$packageName"
+    $expectedSha256 = '3c3a2e3c5adebf7955934862b89c82e4771b0fd44dfcfebad0d160033a6e0a1a'
 
     Write-Output "Downloading Xamarin.iOS package..."
     curl -L -o $downloadPath $directDownloadUrl
@@ -42,6 +43,19 @@ if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/
     {
         Write-Error "Failed to download Xamarin.iOS package. Exit code: $LASTEXITCODE"
     }
+
+    # Verify checksum
+    Write-Output "Verifying package checksum..."
+    $actualSha256 = (Get-FileHash -Path $downloadPath -Algorithm SHA256).Hash.ToLower()
+    
+    if ($actualSha256 -ne $expectedSha256)
+    {
+        Write-Error "Checksum verification failed. Expected: $expectedSha256, Actual: $actualSha256"
+        Remove-Item $downloadPath -Force -ErrorAction SilentlyContinue
+        exit 1
+    }
+    
+    Write-Output "Checksum verification passed."
 
     if (Test-Path $downloadPath)
     {
