@@ -5,6 +5,7 @@
 ### Fixes
 
 - Update `sample_rate` of _Dynamic Sampling Context (DSC)_ when making sampling decisions ([#4374](https://github.com/getsentry/sentry-dotnet/pull/4374))
+- Crontabs now support day names (MON-FRI) and allow step values and ranges to be combined ([#4407](https://github.com/getsentry/sentry-dotnet/pull/4407))
 
 ## 5.13.0
 
