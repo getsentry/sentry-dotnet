@@ -53,7 +53,7 @@ public class SentryMonitorOptionsTests
     [InlineData("0 0 1 1 0")]           // Minimum values
     [InlineData("*/1 * * * *")]         // Step of 1
     [InlineData("* * 31 */2 *")]        // 31st of every other month
-    // Weekday names (GitHub issue #4372)
+    // Weekday names
     [InlineData("0 0 * * MON")]
     [InlineData("0 9 * * MON-FRI")]
     [InlineData("0 18 * * MON-FRI")]
