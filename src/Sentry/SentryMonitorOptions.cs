@@ -57,15 +57,17 @@ public partial class SentryMonitorOptions : ISentryJsonSerializable
     // - Allows */n for step values where n must be any positive integer (except zero)
     // - Allows single values within their valid ranges
     // - Allows ranges (e.g., 8-10)
+    // - Allows step values with ranges (e.g., 8-18/4)
     // - Allows lists of values and ranges (e.g., 6,8,9 or 8-10,12-14)
+    // - Allows weekday names (MON, TUE, WED, THU, FRI, SAT, SUN)
     //
     // Valid ranges for each field:
     // - Minutes: 0-59
     // - Hours: 0-23
     // - Days: 1-31
     // - Months: 1-12
-    // - Weekdays: 0-7 (0 and 7 both represent Sunday)
-    private const string ValidCrontabPattern = @"^(\*|(\*\/([1-9][0-9]*))|([0-5]?\d)(-[0-5]?\d)?)(,([0-5]?\d)(-[0-5]?\d)?)*(\s+)(\*|(\*\/([1-9][0-9]*))|([01]?\d|2[0-3])(-([01]?\d|2[0-3]))?)((,([01]?\d|2[0-3])(-([01]?\d|2[0-3]))?)*)?(\s+)(\*|(\*\/([1-9][0-9]*))|([1-9]|[12]\d|3[01])(-([1-9]|[12]\d|3[01]))?)((,([1-9]|[12]\d|3[01])(-([1-9]|[12]\d|3[01]))?)*)?(\s+)(\*|(\*\/([1-9][0-9]*))|([1-9]|1[0-2])(-([1-9]|1[0-2]))?)((,([1-9]|1[0-2])(-([1-9]|1[0-2]))?)*)?(\s+)(\*|(\*\/([1-9][0-9]*))|[0-7](-[0-7])?)((,[0-7](-[0-7])?)*)?$";
+    // - Weekdays: 0-7 (0 and 7 both represent Sunday) or MON-SUN
+    private const string ValidCrontabPattern = @"^(\*|(\*\/([1-9][0-9]*))|([0-5]?\d)(-[0-5]?\d)?(\/([1-9][0-9]*))?)(,(\*|(\*\/([1-9][0-9]*))|([0-5]?\d)(-[0-5]?\d)?(\/([1-9][0-9]*))?))*(\s+)(\*|(\*\/([1-9][0-9]*))|([01]?\d|2[0-3])(-([01]?\d|2[0-3]))?(\/([1-9][0-9]*))?)((,(\*|(\*\/([1-9][0-9]*))|([01]?\d|2[0-3])(-([01]?\d|2[0-3]))?(\/([1-9][0-9]*))?))*)?(\s+)(\*|(\*\/([1-9][0-9]*))|([1-9]|[12]\d|3[01])(-([1-9]|[12]\d|3[01]))?(\/([1-9][0-9]*))?)((,(\*|(\*\/([1-9][0-9]*))|([1-9]|[12]\d|3[01])(-([1-9]|[12]\d|3[01]))?(\/([1-9][0-9]*))?))*)?(\s+)(\*|(\*\/([1-9][0-9]*))|([1-9]|1[0-2])(-([1-9]|1[0-2]))?(\/([1-9][0-9]*))?)((,(\*|(\*\/([1-9][0-9]*))|([1-9]|1[0-2])(-([1-9]|1[0-2]))?(\/([1-9][0-9]*))?))*)?(\s+)(\*|(\*\/([1-9][0-9]*))|[0-7](-[0-7])?(\/([1-9][0-9]*))?|(MON|TUE|WED|THU|FRI|SAT|SUN)(-(MON|TUE|WED|THU|FRI|SAT|SUN))?(\/([1-9][0-9]*))?)((,(\*|(\*\/([1-9][0-9]*))|[0-7](-[0-7])?(\/([1-9][0-9]*))?|(MON|TUE|WED|THU|FRI|SAT|SUN)(-(MON|TUE|WED|THU|FRI|SAT|SUN))?(\/([1-9][0-9]*))?))*)?$";
 
     private SentryMonitorScheduleType _type = SentryMonitorScheduleType.None;
     private string? _crontab;
