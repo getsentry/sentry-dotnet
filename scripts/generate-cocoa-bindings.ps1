@@ -30,14 +30,12 @@ if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/
 {
     Write-Output 'Xamarin.iOS not found. Attempting to install manually.'
     
-    # Download Xamarin.iOS package from Google Drive
+    # Download Xamarin.iOS package
     $packageName = 'xamarin.ios-16.4.0.23.pkg'
-    $directDownloadUrl = 'https://drive.google.com/uc?export=download&id=1G8RXGVFuGMAoyo2vWGen6F8Qm5h-F4pX'
+    $directDownloadUrl = 'https://github.com/jamescrosswell/xamarin-ios/releases/download/16.4.0.23/Xamarin.iOS.16.4.0.23.pkg'
     $downloadPath = "/tmp/$packageName"
     
-    Write-Output "Downloading Xamarin.iOS package from Google Drive..."
-    
-    # Use curl to download the file (Google Drive direct download)
+    Write-Output "Downloading Xamarin.iOS package..."
     curl -L -o $downloadPath $directDownloadUrl
     
     if ($LASTEXITCODE -ne 0)
@@ -50,8 +48,8 @@ if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/
         Write-Output "Downloaded package to $downloadPath"
         Write-Output "Installing Xamarin.iOS package..."
         
-        # Install the package using installer command
-        installer -pkg $downloadPath -target /
+        # Install the package using installer command (requires sudo)
+        sudo installer -pkg $downloadPath -target /
         
         if ($LASTEXITCODE -ne 0)
         {
