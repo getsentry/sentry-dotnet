@@ -7,9 +7,11 @@
     <IsBindingProject>true</IsBindingProject>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
-    <SentryCocoaCache>..\..\modules\sentry-cocoa\</SentryCocoaCache>
+    <SentryCocoaCache>$(MSBuildThisFileDirectory)..\..\modules\sentry-cocoa\</SentryCocoaCache>
     <SentryCocoaFrameworkHeaders>$(SentryCocoaCache)Sentry.framework\</SentryCocoaFrameworkHeaders>
-    <SentryCocoaFramework>$(SentryCocoaCache)Sentry-Dynamic.xcframework</SentryCocoaFramework>
+    <SentryCocoaProperties>$([System.IO.File]::ReadAllText("$(MSBuildThisFileDirectory)../../modules/sentry-cocoa.properties"))</SentryCocoaProperties>
+    <SentryCocoaVersion>$([System.Text.RegularExpressions.Regex]::Match($(SentryCocoaProperties), 'version\s*=\s*([^\s]+)').Groups[1].Value)</SentryCocoaVersion>
+    <SentryCocoaFramework>$(SentryCocoaCache)Sentry-$(SentryCocoaVersion).xcframework</SentryCocoaFramework>
   </PropertyGroup>
 
   <!-- Build empty assemblies when not on macOS, to pass the solution build. -->
@@ -47,19 +49,14 @@
 
   <!-- Downloads and sets up the Cocoa SDK: dotnet msbuild /t:setupCocoaSDK src/Sentry.Bindings.Cocoa/Sentry.Bindings.Cocoa.csproj -->
   <Target Name="SetupCocoaSDK"
-          Condition="$([MSBuild]::IsOSPlatform('OSX')) And !Exists('$(SentryCocoaCache)Sentry-Dynamic.xcframework')"
+          Condition="$([MSBuild]::IsOSPlatform('OSX')) And !Exists('$(SentryCocoaFramework)')"
           BeforeTargets="BeforeBuild">
 
-    <PropertyGroup>
-      <PropertiesContent>$([System.IO.File]::ReadAllText("../../modules/sentry-cocoa.properties"))</PropertiesContent>
-      <CocoaVersion>$([System.Text.RegularExpressions.Regex]::Match($(PropertiesContent), 'version\s*=\s*([^\s]+)').Groups[1].Value)</CocoaVersion>
-    </PropertyGroup>
-
-    <Message Importance="High" Text="Setting up the Cocoa SDK version '$(CocoaVersion)'." />
+    <Message Importance="High" Text="Setting up the Cocoa SDK version '$(SentryCocoaVersion)'." />
 
     <!-- Clean cache if version does not exist to get rid of old versions -->
     <RemoveDir
-      Condition="!Exists('$(SentryCocoaCache)Sentry-Dynamic-$(CocoaVersion).xcframework.zip')"
+      Condition="!Exists('$(SentryCocoaFramework).zip')"
       Directories="$(SentryCocoaCache)" />
 
     <!-- Create cache directory -->
@@ -67,17 +64,17 @@
 
     <!-- Download the Cocoa SDK as pre-built .xcframework -->
     <Exec
-      Condition="!Exists('$(SentryCocoaCache)Sentry-Dynamic-$(CocoaVersion).xcframework.zip')"
-      Command="curl -L https://github.com/getsentry/sentry-cocoa/releases/download/$(CocoaVersion)/Sentry-Dynamic.xcframework.zip -o $(SentryCocoaCache)Sentry-Dynamic-$(CocoaVersion).xcframework.zip" />
+      Condition="!Exists('$(SentryCocoaFramework).zip')"
+      Command="curl -L https://github.com/getsentry/sentry-cocoa/releases/download/$(SentryCocoaVersion)/Sentry-Dynamic.xcframework.zip -o $(SentryCocoaFramework).zip" />
 
     <Exec
-      Condition="!Exists('$(SentryCocoaCache)Sentry-Dynamic.xcframework')"
-      Command="unzip -o $(SentryCocoaCache)Sentry-Dynamic-$(CocoaVersion).xcframework.zip -d $(SentryCocoaCache)" />
+      Condition="Exists('$(SentryCocoaFramework).zip') and !Exists('$(SentryCocoaFramework)')"
+      Command="unzip -o $(SentryCocoaFramework).zip -d $(SentryCocoaCache) &amp;&amp; mv $(SentryCocoaCache)Sentry-Dynamic.xcframework $(SentryCocoaFramework)" />
 
     <!-- Make a copy of the header files before we butcher these to suite objective sharpie -->
     <MakeDir Directories="$(SentryCocoaFrameworkHeaders)" />
     <ItemGroup>
-      <FilesToCopy Include="$(SentryCocoaCache)Sentry-Dynamic.xcframework\ios-arm64_arm64e\Sentry.framework\**\*" />
+      <FilesToCopy Include="$(SentryCocoaFramework)\ios-arm64_arm64e\Sentry.framework\**\*" />
     </ItemGroup>
     <Copy SourceFiles="@(FilesToCopy)"
           DestinationFolder="$(SentryCocoaFrameworkHeaders)%(RecursiveDir)"
