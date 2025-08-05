@@ -143,6 +143,13 @@ public class SentryMonitorOptionsTests
     [InlineData("0-30//15 * * * *")]    // Double slash
     [InlineData("0-30/15/ * * * *")]    // Trailing slash
     [InlineData("0-30/15- * * * *")]    // Incomplete range
+    // Invalid single value with step (should only allow step with * or ranges)
+    [InlineData("30/5 * * * *")]        // Single minute with step
+    [InlineData("* 8/2 * * *")]         // Single hour with step
+    [InlineData("* * 15/3 * *")]        // Single day with step
+    [InlineData("* * * 6/2 *")]         // Single month with step
+    [InlineData("* * * * 3/2")]         // Single weekday with step
+    [InlineData("* * * * MON/2")]       // Single weekday name with step
     public void CaptureCheckIn_InvalidCrontabSet_Throws(string crontab)
     {
         // Arrange
