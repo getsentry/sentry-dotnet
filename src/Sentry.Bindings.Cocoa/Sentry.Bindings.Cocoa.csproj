@@ -7,7 +7,7 @@
     <IsBindingProject>true</IsBindingProject>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
-    <SentryCocoaCache>$(MSBuildThisFileDirectory)..\..\modules\sentry-cocoa\</SentryCocoaCache>
+    <SentryCocoaCache>..\..\modules\sentry-cocoa\</SentryCocoaCache>
     <SentryCocoaFrameworkHeaders>$(SentryCocoaCache)Sentry.framework\</SentryCocoaFrameworkHeaders>
     <SentryCocoaProperties>$([System.IO.File]::ReadAllText("$(MSBuildThisFileDirectory)../../modules/sentry-cocoa.properties"))</SentryCocoaProperties>
     <SentryCocoaVersion>$([System.Text.RegularExpressions.Regex]::Match($(SentryCocoaProperties), 'version\s*=\s*([^\s]+)').Groups[1].Value)</SentryCocoaVersion>
@@ -48,9 +48,7 @@
   </ItemGroup>
 
   <!-- Downloads and sets up the Cocoa SDK: dotnet msbuild /t:setupCocoaSDK src/Sentry.Bindings.Cocoa/Sentry.Bindings.Cocoa.csproj -->
-  <Target Name="SetupCocoaSDK"
-          Condition="$([MSBuild]::IsOSPlatform('OSX')) And !Exists('$(SentryCocoaFramework)')"
-          BeforeTargets="BeforeBuild">
+  <Target Name="_SetupCocoaSDK">
 
     <Message Importance="High" Text="Setting up the Cocoa SDK version '$(SentryCocoaVersion)'." />
 
@@ -79,6 +77,18 @@
     <Copy SourceFiles="@(FilesToCopy)"
           DestinationFolder="$(SentryCocoaFrameworkHeaders)%(RecursiveDir)"
           SkipUnchangedFiles="true" />
+  </Target>
+
+  <!-- Setup exactly once: https://learn.microsoft.com/en-gb/visualstudio/msbuild/run-target-exactly-once -->
+  <Target Name="SetupCocoaSDKBeforeOuterBuild" DependsOnTargets="_SetupCocoaSDK"
+          Condition="$([MSBuild]::IsOSPlatform('OSX')) And !Exists('$(SentryCocoaFramework)')"
+          BeforeTargets="DispatchToInnerBuilds" />
+
+  <Target Name="SetupCocoaSDK"
+          BeforeTargets="BeforeBuild"
+          Condition="$([MSBuild]::IsOSPlatform('OSX')) And !Exists('$(SentryCocoaFramework)')">
+    <!-- Setup exactly once: https://learn.microsoft.com/en-gb/visualstudio/msbuild/run-target-exactly-once -->
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_SetupCocoaSDK" RemoveProperties="TargetFramework" />
   </Target>
 
   <Target Name="CleanCocoaSDK" AfterTargets="Clean" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
