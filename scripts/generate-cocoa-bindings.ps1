@@ -28,12 +28,63 @@ if (!(Get-Command sharpie -ErrorAction SilentlyContinue))
 # Ensure Xamarin is installed (or sharpie won't produce expected output).
 if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/64bits/iOS/Xamarin.iOS.dll'))
 {
-    Write-Output 'Xamarin.iOS not found. Attempting to install via Homebrew.'
-    brew install --cask xamarin-ios
+    Write-Output 'Xamarin.iOS not found. Attempting to install manually.'
+
+    # Download Xamarin.iOS package
+    $packageName = 'xamarin.ios-16.4.0.23.pkg'
+    $directDownloadUrl = 'https://github.com/getsentry/sentry-dotnet/releases/download/1.0.0.0-xamarin-ios/Xamarin.iOS.16.4.0.23.pkg'
+    $downloadPath = "/tmp/$packageName"
+    $expectedSha256 = '3c3a2e3c5adebf7955934862b89c82e4771b0fd44dfcfebad0d160033a6e0a1a'
+
+    Write-Output "Downloading Xamarin.iOS package..."
+    curl -L -o $downloadPath $directDownloadUrl
+
+    if ($LASTEXITCODE -ne 0)
+    {
+        Write-Error "Failed to download Xamarin.iOS package. Exit code: $LASTEXITCODE"
+    }
+
+    # Verify checksum
+    Write-Output "Verifying package checksum..."
+    $actualSha256 = (Get-FileHash -Path $downloadPath -Algorithm SHA256).Hash.ToLower()
+    
+    if ($actualSha256 -ne $expectedSha256)
+    {
+        Write-Error "Checksum verification failed. Expected: $expectedSha256, Actual: $actualSha256"
+        Remove-Item $downloadPath -Force -ErrorAction SilentlyContinue
+        exit 1
+    }
+    
+    Write-Output "Checksum verification passed."
+
+    if (Test-Path $downloadPath)
+    {
+        Write-Output "Downloaded package to $downloadPath"
+        Write-Output "Installing Xamarin.iOS package..."
+
+        # Install the package using installer command (requires sudo)
+        sudo installer -pkg $downloadPath -target /
+
+        if ($LASTEXITCODE -ne 0)
+        {
+            Write-Error "Failed to install Xamarin.iOS package. Exit code: $LASTEXITCODE"
+        }
+        else
+        {
+            Write-Output "Xamarin.iOS package installed successfully"
+        }
+
+        # Clean up downloaded file
+        Remove-Item $downloadPath -Force -ErrorAction SilentlyContinue
+    }
+    else
+    {
+        Write-Error "Downloaded package not found at $downloadPath"
+    }
 
     if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/64bits/iOS/Xamarin.iOS.dll'))
     {
-        Write-Error 'Xamarin.iOS not found. Try installing manually from: https://learn.microsoft.com/en-us/xamarin/ios/get-started/installation/.'
+        Write-Error 'Xamarin.iOS not found after installation.'
     }
 }
 
@@ -47,23 +98,30 @@ Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
 #     `#import "SomeHeader.h"`
 # This causes sharpie to fail resolve those headers
 $filesToPatch = Get-ChildItem -Path "$CocoaSdkPath/Headers" -Filter *.h -Recurse | Select-Object -ExpandProperty FullName
-foreach ($file in $filesToPatch) {
-    if (Test-Path $file) {
+foreach ($file in $filesToPatch)
+{
+    if (Test-Path $file)
+    {
         $content = Get-Content -Path $file -Raw
         $content = $content -replace '<Sentry/([^>]+)>', '"$1"'
         Set-Content -Path $file -Value $content
-    } else {
+    }
+    else
+    {
         Write-Host "File not found: $file"
     }
 }
 $privateHeaderFile = "$CocoaSdkPath/PrivateHeaders/PrivatesHeader.h"
-if (Test-Path $privateHeaderFile) {
+if (Test-Path $privateHeaderFile)
+{
     $content = Get-Content -Path $privateHeaderFile -Raw
     $content = $content -replace '"SentryDefines.h"', '"../Headers/SentryDefines.h"'
     $content = $content -replace '"SentryProfilingConditionals.h"', '"../Headers/SentryProfilingConditionals.h"'
     Set-Content -Path $privateHeaderFile -Value $content
     Write-Host "Patched includes: $privateHeaderFile"
-} else {
+}
+else
+{
     Write-Host "File not found: $privateHeaderFile"
 }
 
@@ -258,7 +316,8 @@ $propertiesToRemove = @(
     'enableMetricKitRawPayload'
 )
 
-foreach ($property in $propertiesToRemove) {
+foreach ($property in $propertiesToRemove)
+{
     $Text = $Text -replace "\n.*property.*$property.*?[\s\S]*?\}\n", ''
 }
 
