@@ -4,7 +4,7 @@
 
 ### Dependencies
 
-- Reapply "Bump Cocoa SDK from v8.39.0 to v8.46.0 (#4103)" ([#4412](https://github.com/getsentry/sentry-dotnet/pull/4412))
+- Reapply "Bump Cocoa SDK from v8.39.0 to v8.46.0 (#4103)" ([#4413](https://github.com/getsentry/sentry-dotnet/pull/4413))
     - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8460)
     - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.46.0)
 
