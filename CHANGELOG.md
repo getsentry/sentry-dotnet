@@ -6,6 +6,12 @@
 
 - Update `sample_rate` of _Dynamic Sampling Context (DSC)_ when making sampling decisions ([#4374](https://github.com/getsentry/sentry-dotnet/pull/4374))
 
+### Dependencies
+
+- Reapply "Bump Cocoa SDK from v8.39.0 to v8.46.0 (#4103)" ([#4412](https://github.com/getsentry/sentry-dotnet/pull/4412))
+    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8460)
+    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.46.0)
+
 ## 5.13.0
 
 ### Features
@@ -137,6 +143,11 @@
 ### Features
 
 - .NET MAUI integration with CommunityToolkit.Mvvm Async Relay Commands can now be auto spanned with the new package Sentry.Maui.CommunityToolkit.Mvvm ([#4125](https://github.com/getsentry/sentry-dotnet/pull/4125))
+
+### Fixes
+
+- Revert "Bump Cocoa SDK from v8.39.0 to v8.46.0 (#4103)" ([#4202](https://github.com/getsentry/sentry-dotnet/pull/4202))
+  - IMPORTANT: Fixes multiple issues running versions 5.6.x and 5.7.x of the Sentry SDK for .NET on iOS (initialising the SDK and sending data to Sentry) 
 
 ### Dependencies
 
