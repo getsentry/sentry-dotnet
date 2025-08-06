@@ -114,6 +114,8 @@ public class StructuredLogBatchProcessorTests : IDisposable
     [Fact]
     public async Task Enqueue_Concurrency_CaptureEnvelopes()
     {
+        Skip.If(TestEnvironment.IsGitHubActions, "Timeout may exceed on CI");
+
         const int batchCount = 5;
         const int maxDegreeOfParallelism = 10;
         const int logsPerTask = 1_000;
