@@ -111,7 +111,7 @@ public class StructuredLogBatchProcessorTests : IDisposable
         AssertEnvelopes(["one"], ["two", "three"]);
     }
 
-    [Fact]
+    [SkippableFact]
     public async Task Enqueue_Concurrency_CaptureEnvelopes()
     {
         Skip.If(TestEnvironment.IsGitHubActions, "Timeout may exceed on CI");
