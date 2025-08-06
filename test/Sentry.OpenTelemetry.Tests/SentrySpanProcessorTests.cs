@@ -141,7 +141,8 @@ public class SentrySpanProcessorTests : ActivitySourceTests
         {
             actual.Items["trace_id"].Should().Be(expected["trace_id"]);
             actual.Items["public_key"].Should().Be(expected["public_key"]);
-            actual.Items["sample_rate"].Should().Be(expected["sample_rate"]);
+            actual.Items["sample_rate"].Should().NotBe(expected["sample_rate"]);
+            actual.Items["sample_rate"].Should().Be(_fixture.Options.TracesSampleRate.ToString());
         }
     }
 

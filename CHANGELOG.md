@@ -9,13 +9,27 @@
 
 ### Fixes
 
+- Update `sample_rate` of _Dynamic Sampling Context (DSC)_ when making sampling decisions ([#4374](https://github.com/getsentry/sentry-dotnet/pull/4374))
+
+## 5.13.0
+
+### Features
+
+- Sentry now includes an EXPERIMENTAL StringStackTraceFactory. This factory isn't as feature rich as the full `SentryStackTraceFactory`. However, it may provide better results if you are compiling your application AOT and not getting useful stack traces from the full stack trace factory. ([#4362](https://github.com/getsentry/sentry-dotnet/pull/4362))
+
+### Fixes
+
+- Source context for class libraries when running on Android in Release mode ([#4294](https://github.com/getsentry/sentry-dotnet/pull/4294))
 - Native AOT: don't load SentryNative on unsupported platforms ([#4347](https://github.com/getsentry/sentry-dotnet/pull/4347))
+- Fixed issue introduced in release 5.12.0 that might prevent other middleware or user code from reading request bodies ([#4373](https://github.com/getsentry/sentry-dotnet/pull/4373))
+- SentryTunnelMiddleware overwrites the X-Forwarded-For header ([#4375](https://github.com/getsentry/sentry-dotnet/pull/4375))
+- Native AOT support for `linux-musl-arm64` ([#4365](https://github.com/getsentry/sentry-dotnet/pull/4365))
 
 ### Dependencies
 
-- Bump CLI from v2.47.0 to v2.50.0 ([#4348](https://github.com/getsentry/sentry-dotnet/pull/4348), [#4370](https://github.com/getsentry/sentry-dotnet/pull/4370))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2500)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.47.0...2.50.0)
+- Bump CLI from v2.47.0 to v2.50.2 ([#4348](https://github.com/getsentry/sentry-dotnet/pull/4348), [#4370](https://github.com/getsentry/sentry-dotnet/pull/4370), [#4378](https://github.com/getsentry/sentry-dotnet/pull/4378))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2502)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.47.0...2.50.2)
 
 ## 5.12.0
 
@@ -1249,7 +1263,7 @@ There are some functional differences when publishing Native AOT:
 
 ### Fixes
 
-- Resolved an isse where the SDK would throw an exception while attempting to set the DynamicSamplingContext but the context exists already. ([#2592](https://github.com/getsentry/sentry-dotnet/pull/2592))
+- Resolved an issue where the SDK would throw an exception while attempting to set the DynamicSamplingContext but the context exists already. ([#2592](https://github.com/getsentry/sentry-dotnet/pull/2592))
 
 ### Dependencies
 

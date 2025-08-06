@@ -1594,6 +1594,12 @@ namespace Sentry.Extensibility
         public SentryStackTraceFactory(Sentry.SentryOptions options) { }
         public Sentry.SentryStackTrace? Create(System.Exception? exception = null) { }
     }
+    [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
+    public class StringStackTraceFactory : Sentry.Extensibility.ISentryStackTraceFactory
+    {
+        public StringStackTraceFactory(Sentry.SentryOptions options) { }
+        public Sentry.SentryStackTrace? Create(System.Exception? exception = null) { }
+    }
 }
 namespace Sentry.Http
 {

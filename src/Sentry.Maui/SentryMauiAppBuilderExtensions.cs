@@ -52,21 +52,20 @@ public static class SentryMauiAppBuilderExtensions
 
         services.AddLogging();
         services.AddSingleton<ILoggerProvider, SentryMauiLoggerProvider>();
-        services.AddSingleton<ILoggerProvider, SentryMauiStructuredLoggerProvider>();
         services.AddSingleton<IMauiInitializeService, SentryMauiInitializer>();
         services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
         services.AddSingleton<Disposer>();
 
-        builder.Logging.AddFilter<SentryMauiStructuredLoggerProvider>(static (string? categoryName, LogLevel logLevel) =>
-        {
-            return categoryName is null
-                || categoryName != "Sentry.ISentryClient";
-        });
+        // Add default event binders
+        services.AddSingleton<IMauiElementEventBinder, MauiButtonEventsBinder>();
+        services.AddSingleton<IMauiElementEventBinder, MauiImageButtonEventsBinder>();
+        services.AddSingleton<IMauiElementEventBinder, MauiGestureRecognizerEventsBinder>();
+        services.AddSingleton<IMauiElementEventBinder, MauiVisualElementEventsBinder>();
 
-        // Resolve the configured options and register any element event binders from these
+        // Resolve the configured options and register any event binders that have been injected by integrations
         var options = new SentryMauiOptions();
         configureOptions?.Invoke(options);
-        foreach (var eventBinder in options.DefaultEventBinders)
+        foreach (var eventBinder in options.IntegrationEventBinders)
         {
             eventBinder.Register(services);
         }

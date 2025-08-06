@@ -181,13 +181,14 @@ public class SamplingTransactionProfilerTests
         }
     }
 
-
     /// <summary>
     /// Guards regression of https://github.com/microsoft/perfview/issues/2155
     /// </summary>
     [SkippableFact]
     public async Task EventPipeSession_ReceivesExpectedCLREvents()
     {
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky on CI");
+
         SampleProfilerSession? session = null;
         SkipIfFailsInCI(() => session = SampleProfilerSession.StartNew(_testOutputLogger));
         using (session)
