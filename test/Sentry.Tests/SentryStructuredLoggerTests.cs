@@ -18,7 +18,7 @@ public class SentryStructuredLoggerTests : IDisposable
                 Debug = true,
                 DiagnosticLogger = DiagnosticLogger,
             };
-            Clock = new MockClock(new DateTimeOffset(2025, 04, 22, 14, 51, 00, TimeSpan.Zero));
+            Clock = new MockClock(new DateTimeOffset(2025, 04, 22, 14, 51, 00, 789, TimeSpan.FromHours(2)));
             BatchSize = 2;
             BatchTimeout = Timeout.InfiniteTimeSpan;
             TraceId = SentryId.Create();
@@ -307,7 +307,7 @@ file static class AssertionExtensions
         log.Level.Should().Be(level);
         log.Message.Should().Be("Template string with arguments: string, True, 1, 2.2");
         log.Template.Should().Be("Template string with arguments: {0}, {1}, {2}, {3}");
-        log.Parameters.Should().BeEquivalentTo(new object[] { "string", true, 1, 2.2 });
+        log.Parameters.Should().BeEquivalentTo(new KeyValuePair<string, object>[] { new("0", "string"), new("1", true), new("2", 1), new("3", 2.2), });
         log.ParentSpanId.Should().Be(fixture.ParentSpanId);
         log.TryGetAttribute("attribute-key", out string? value).Should().BeTrue();
         value.Should().Be("attribute-value");

@@ -69,9 +69,19 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
             {
                 EnableLogs = true,
             },
+            not null when propertyType.FullName == "Sentry.Extensions.Logging.SentryLoggingOptions+SentryLoggingExperimentalOptions" => CreateSentryLoggingExperimentalOptions(),
             _ => throw new NotSupportedException($"Unsupported property type on property {propertyInfo.Name}")
         };
         return new KeyValuePair<PropertyInfo, object>(propertyInfo, value);
+    }
+
+    private static object CreateSentryLoggingExperimentalOptions()
+    {
+        var options = Activator.CreateInstance("Sentry.Extensions.Logging", "Sentry.Extensions.Logging.SentryLoggingOptions+SentryLoggingExperimentalOptions", false, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.CreateInstance, null, null, null, null);
+        var instance = options.Unwrap();
+        var property = instance.GetType().GetProperty("MinimumLogLevel", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+        property.SetValue(instance, int.MaxValue);
+        return instance;
     }
 
     private static IEnumerable<KeyValuePair<string, string>> ToConfigValues(KeyValuePair<PropertyInfo, object> item)
@@ -89,6 +99,11 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
         {
             var experimental = (SentryOptions.SentryExperimentalOptions)value;
             yield return new KeyValuePair<string, string>($"{prop.Name}:{nameof(SentryOptions.SentryExperimentalOptions.EnableLogs)}", Convert.ToString(experimental.EnableLogs, CultureInfo.InvariantCulture));
+        }
+        else if (propertyType.FullName == "Sentry.Extensions.Logging.SentryLoggingOptions+SentryLoggingExperimentalOptions")
+        {
+            var property = value.GetType().GetProperty("MinimumLogLevel");
+            yield return new KeyValuePair<string, string>($"{prop.Name}:MinimumLogLevel", Convert.ToString(property.GetValue(value), CultureInfo.InvariantCulture));
         }
         else
         {
@@ -125,6 +140,10 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
                     actualValue.Should().BeEquivalentTo(expectedValue);
                 }
                 else if (prop.PropertyType == typeof(SentryOptions.SentryExperimentalOptions))
+                {
+                    actualValue.Should().BeEquivalentTo(expectedValue);
+                }
+                else if (prop.PropertyType.FullName == "Sentry.Extensions.Logging.SentryLoggingOptions+SentryLoggingExperimentalOptions")
                 {
                     actualValue.Should().BeEquivalentTo(expectedValue);
                 }

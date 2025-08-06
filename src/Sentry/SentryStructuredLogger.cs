@@ -35,6 +35,13 @@ public abstract class SentryStructuredLogger : IDisposable
     private protected abstract void CaptureLog(SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog);
 
     /// <summary>
+    /// Buffers a <see href="https://develop.sentry.dev/sdk/telemetry/logs">Sentry Log</see> message
+    /// via the associated <see href="https://develop.sentry.dev/sdk/telemetry/spans/batch-processor">Batch Processor</see>.
+    /// </summary>
+    /// <param name="log">The log.</param>
+    protected internal abstract void CaptureLog(SentryLog log);
+
+    /// <summary>
     /// Clears all buffers for this logger and causes any buffered logs to be sent by the underlying <see cref="ISentryClient"/>.
     /// </summary>
     protected internal abstract void Flush();
