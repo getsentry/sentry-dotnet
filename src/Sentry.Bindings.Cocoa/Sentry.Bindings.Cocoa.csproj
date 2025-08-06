@@ -48,7 +48,8 @@
   </ItemGroup>
 
   <!-- Downloads and sets up the Cocoa SDK: dotnet msbuild /t:setupCocoaSDK src/Sentry.Bindings.Cocoa/Sentry.Bindings.Cocoa.csproj -->
-  <Target Name="_SetupCocoaSDK">
+  <Target Name="_SetupCocoaSDK"
+          Condition="$([MSBuild]::IsOSPlatform('OSX')) And !Exists('$(SentryCocoaFramework)')">
 
     <Message Importance="High" Text="Setting up the Cocoa SDK version '$(SentryCocoaVersion)'." />
 
