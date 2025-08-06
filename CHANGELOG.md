@@ -1,17 +1,19 @@
 # Changelog
 
-## 5.14.0-alpha.0
-
-### Fixes
-
-- Update `sample_rate` of _Dynamic Sampling Context (DSC)_ when making sampling decisions ([#4374](https://github.com/getsentry/sentry-dotnet/pull/4374))
-- Ensure the correct Sentry Cocoa SDK framework version is used on iOS ([#4411](https://github.com/getsentry/sentry-dotnet/pull/4411))
+## Unreleased
 
 ### Dependencies
 
 - Reapply "Bump Cocoa SDK from v8.39.0 to v8.46.0 (#4103)" ([#4412](https://github.com/getsentry/sentry-dotnet/pull/4412))
     - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8460)
     - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.46.0)
+
+## 5.14.0-alpha.0
+
+### Fixes
+
+- Update `sample_rate` of _Dynamic Sampling Context (DSC)_ when making sampling decisions ([#4374](https://github.com/getsentry/sentry-dotnet/pull/4374))
+- Ensure the correct Sentry Cocoa SDK framework version is used on iOS ([#4411](https://github.com/getsentry/sentry-dotnet/pull/4411))
 
 ## 5.13.0
 
