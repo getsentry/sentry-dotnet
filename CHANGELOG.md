@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Features
+
+- Add _experimental_ support for [Sentry Structured Logging](https://docs.sentry.io/product/explore/logs/) ([#4308](https://github.com/getsentry/sentry-dotnet/pull/4308))
+  - Structured-Logger API ([#4158](https://github.com/getsentry/sentry-dotnet/pull/4158))
+  - Buffering and Batching ([#4310](https://github.com/getsentry/sentry-dotnet/pull/4310))
+  - Integrations for `Sentry.Extensions.Logging`, `Sentry.AspNetCore` and `Sentry.Maui` ([#4193](https://github.com/getsentry/sentry-dotnet/pull/4193))
+
 ### Fixes
 
 - Update `sample_rate` of _Dynamic Sampling Context (DSC)_ when making sampling decisions ([#4374](https://github.com/getsentry/sentry-dotnet/pull/4374))

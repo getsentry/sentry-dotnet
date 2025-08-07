@@ -24,6 +24,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     internal const string TypeValueProfile = "profile";
     internal const string TypeValueMetric = "statsd";
     internal const string TypeValueCodeLocations = "metric_meta";
+    internal const string TypeValueLog = "log";
 
     private const string LengthKey = "length";
     private const string FileNameKey = "filename";
@@ -368,6 +369,18 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         };
 
         return new EnvelopeItem(header, new JsonSerializable(report));
+    }
+
+    internal static EnvelopeItem FromLog(StructuredLog log)
+    {
+        var header = new Dictionary<string, object?>(3, StringComparer.Ordinal)
+        {
+            [TypeKey] = TypeValueLog,
+            ["item_count"] = log.Length,
+            ["content_type"] = "application/vnd.sentry.items.log+json",
+        };
+
+        return new EnvelopeItem(header, new JsonSerializable(log));
     }
 
     private static async Task<Dictionary<string, object?>> DeserializeHeaderAsync(
