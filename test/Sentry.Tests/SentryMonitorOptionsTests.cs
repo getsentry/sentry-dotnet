@@ -19,13 +19,13 @@ public class SentryMonitorOptionsTests
             /	step values
     */
     [Theory]
-    [InlineData("* * * * *")]
-    [InlineData("0 0 1 1 *")]
-    [InlineData("0 0 1 * 0")]
-    [InlineData("59 23 31 12 7")]
-    [InlineData("0 */2 * * *")]
-    [InlineData("0 8-10 * * *")]
-    [InlineData("0 6,8,9 * * *")]
+    [InlineData("* * * * *")]           // Every minute
+    [InlineData("0 0 1 1 *")]           // At midnight on January 1st
+    [InlineData("0 0 1 * 0")]           // At midnight on the first day of the month if it's Sunday
+    [InlineData("59 23 31 12 7")]       // At 23:59 on December 31st if it's Saturday
+    [InlineData("0 */2 * * *")]         // Every 2 hours
+    [InlineData("0 8-10 * * *")]        // At 8, 9, and 10 AM every day
+    [InlineData("0 6,8,9 * * *")]       // At 6, 8, and 9 AM every day
     // Step values (*/n)
     [InlineData("*/15 * * * *")]        // Every 15 minutes
     [InlineData("0 */6 * * *")]         // Every 6 hours
@@ -54,12 +54,12 @@ public class SentryMonitorOptionsTests
     [InlineData("*/1 * * * *")]         // Step of 1
     [InlineData("* * 31 */2 *")]        // 31st of every other month
     // Weekday names
-    [InlineData("0 0 * * MON")]
-    [InlineData("0 9 * * MON-FRI")]
-    [InlineData("0 18 * * MON-FRI")]
-    [InlineData("0 0 * * MON-FRI")]
-    [InlineData("0 20 * * MON-FRI")]
-    // Step values with ranges 
+    [InlineData("0 0 * * MON")]         // Monday only (weekday name)
+    [InlineData("0 9 * * MON-FRI")]     // 9 AM, Monday to Friday (weekday range)
+    [InlineData("0 18 * * MON-FRI")]    // 6 PM, Monday to Friday (weekday range)
+    [InlineData("0 0 * * MON-FRI")]     // Midnight, Monday to Friday (weekday range)
+    [InlineData("0 20 * * MON-FRI")]    // 8 PM, Monday to Friday (weekday range)
+    // Step values with ranges
     [InlineData("0-30/15 * * * *")]     // Every 15 minutes from 0-30
     [InlineData("0-59/10 * * * *")]     // Every 10 minutes from 0-59
     [InlineData("0-45/5 * * * *")]      // Every 5 minutes from 0-45
@@ -101,14 +101,14 @@ public class SentryMonitorOptionsTests
     }
 
     [Theory]
-    [InlineData("")]
-    [InlineData("not a crontab")]
-    [InlineData("* * a * *")]
-    [InlineData("60 * * * *")]
-    [InlineData("* 24 * * *")]
-    [InlineData("* * 32 * *")]
-    [InlineData("* * * 13 *")]
-    [InlineData("* * * * 8")]
+    [InlineData("")]                    // Empty string
+    [InlineData("not a crontab")]       // Not a valid crontab format
+    [InlineData("* * a * *")]           // Invalid character for day-of-month
+    [InlineData("60 * * * *")]          // Minute value exceeds 59
+    [InlineData("* 24 * * *")]          // Hour value exceeds 23
+    [InlineData("* * 32 * *")]          // Day of month value exceeds 31
+    [InlineData("* * * 13 *")]          // Month value exceeds 12
+    [InlineData("* * * * 8")]           // Day of week value exceeds 7
     // Invalid step values
     [InlineData("*/0 * * * *")]         // Step value cannot be 0
     // Invalid ranges
