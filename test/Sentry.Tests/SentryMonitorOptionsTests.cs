@@ -80,6 +80,7 @@ public class SentryMonitorOptionsTests
     [InlineData("0-30/15 8-18/2 * * *")] // Every 15 min from 0-30, every 2 hours from 8-18
     [InlineData("0-45/5 9-17/1 1-15/3 * *")] // Complex combination
     [InlineData("*/10 8-18/4 1-31/7 1-12/3 MON-FRI/2")] // All fields with step values and ranges
+    [InlineData("1-2/3 * * * *")]       // Step value larger than range
     public void Interval_ValidCrontab_DoesNotThrow(string crontab)
     {
         // Arrange
