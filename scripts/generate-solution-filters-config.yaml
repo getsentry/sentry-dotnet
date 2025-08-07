@@ -96,6 +96,7 @@ filterConfigs:
         - "trimTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
+        - "**/*Sentry.Android.AssemblyReader.Tests.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Sentry.Maui.Device.TestApp.csproj"
         - "**/*Sentry.Samples.Android.csproj"
@@ -115,6 +116,7 @@ filterConfigs:
         - "trimTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
+        - "**/*Sentry.Android.AssemblyReader.Tests.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Sentry.Maui.Device.TestApp.csproj"
         - "**/*Sentry.Samples.Android.csproj"
