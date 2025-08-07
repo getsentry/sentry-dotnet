@@ -80,7 +80,7 @@
           SkipUnchangedFiles="true" />
   </Target>
 
-  <!-- Setup exactly once: https://learn.microsoft.com/en-gb/visualstudio/msbuild/run-target-exactly-once -->
+  <!-- Setup exactly once: https://learn.microsoft.com/visualstudio/msbuild/run-target-exactly-once -->
   <Target Name="SetupCocoaSDKBeforeOuterBuild" DependsOnTargets="_SetupCocoaSDK"
           Condition="$([MSBuild]::IsOSPlatform('OSX')) And !Exists('$(SentryCocoaFramework)')"
           BeforeTargets="DispatchToInnerBuilds" />
@@ -88,7 +88,7 @@
   <Target Name="SetupCocoaSDK"
           BeforeTargets="BeforeBuild"
           Condition="$([MSBuild]::IsOSPlatform('OSX')) And !Exists('$(SentryCocoaFramework)')">
-    <!-- Setup exactly once: https://learn.microsoft.com/en-gb/visualstudio/msbuild/run-target-exactly-once -->
+    <!-- Setup exactly once: https://learn.microsoft.com/visualstudio/msbuild/run-target-exactly-once -->
     <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_SetupCocoaSDK" RemoveProperties="TargetFramework" />
   </Target>
 
