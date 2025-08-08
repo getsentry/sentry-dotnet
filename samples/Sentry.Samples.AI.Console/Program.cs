@@ -1,5 +1,5 @@
-using Sentry.Extensions.AI;
 using Sentry.Extensibility;
+using Sentry.Extensions.AI;
 
 var services = new ServiceCollection();
 
