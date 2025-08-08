@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="Microsoft.Extensions.AI" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sentry.Extensions.AI\Sentry.Extensions.AI.csproj" />
+    <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
+  </ItemGroup>
+
+</Project>
+
