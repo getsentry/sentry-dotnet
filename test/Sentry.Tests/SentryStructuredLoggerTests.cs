@@ -260,7 +260,8 @@ public class SentryStructuredLoggerTests : IDisposable
         _fixture.Options.Experimental.EnableLogs = true;
         var logger = _fixture.GetSut();
 
-        logger.Dispose();
+        var defaultLogger = logger.Should().BeOfType<DefaultSentryStructuredLogger>().Which;
+        defaultLogger.Dispose();
         logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
