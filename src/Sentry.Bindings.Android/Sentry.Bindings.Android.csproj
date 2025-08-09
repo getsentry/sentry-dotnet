@@ -18,8 +18,6 @@
     <!-- BG8502: Interface invalidation - cascade effect from other binding issues -->
     <!-- BG8401/BG8400: Field/property conflicts - resolved individually in Metadata.xml where needed -->
     <NoWarn>$(NoWarn);BG8801;BG8C01;BG8701;BG8800;BG8700;BG8605;BG8606;BG8604;BG8502;BG8401;BG8400;BG8503;BG8C00</NoWarn>
-    
-    <!-- Any NEW Android binding warning types should break the build to ensure they're reviewed -->
   </PropertyGroup>
 
   <!-- Use a separate readme, and don't add the changelog to the nuget. -->
