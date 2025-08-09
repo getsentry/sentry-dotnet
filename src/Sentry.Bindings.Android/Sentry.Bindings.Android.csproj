@@ -6,6 +6,24 @@
     <!-- This gets resolved by the DownloadSentryAndroidSdk target -->
     <SentryNativeNdkVersion></SentryNativeNdkVersion>
     <Description>.NET Bindings for the Sentry Android SDK</Description>
+
+    <!-- Treat Android binding generator warnings as errors -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    
+    <!-- Android binding warnings - these are largely unavoidable due to Java interface circular dependencies -->
+    <!-- Only suppress warnings that are confirmed to be expected/unavoidable -->
+    <!-- BG8801: Invalid parameter types - caused by circular interface dependencies in Sentry Java SDK -->
+    <!-- BG8C01: Invalid base interface - interfaces reference types removed by Metadata.xml -->
+    <!-- BG8701: Invalid return types - return types reference unresolvable interfaces -->
+    <!-- BG8800/BG8700: Unknown/Invalid types - types intentionally removed by Metadata.xml -->
+    <!-- BG8605/BG8606: Missing Java types - Compose UI types not available in our binding context -->
+    <!-- BG8604: Missing ancestor types - nested types whose parents are removed -->
+    <!-- BG8502: Interface invalidation - cascade effect from other binding issues -->
+    <!-- BG8401/BG8400: Field/property conflicts - resolved individually in Metadata.xml where needed -->
+    <NoWarn>$(NoWarn);BG8801;BG8C01;BG8701;BG8800;BG8700;BG8605;BG8606;BG8604;BG8502;BG8401;BG8400;BG8503;BG8C00</NoWarn>
+    
+    <!-- Any NEW Android binding warning types should break the build to ensure they're reviewed -->
   </PropertyGroup>
 
   <!-- Use a separate readme, and don't add the changelog to the nuget. -->
