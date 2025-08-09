@@ -15,11 +15,11 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.EntityFramework\Sentry.EntityFramework.csproj" />
 
-    <PackageReference Include="EntityFramework" Version="6.5.1" />
-    <PackageReference Include="Effort.EF6" Version="2.2.16" />
+    <PackageReference Include="EntityFramework" />
+    <PackageReference Include="Effort.EF6" />
 
     <!-- this is needed because the version that is brought in transitively has a vulnerability warning -->
-    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+    <PackageReference Include="System.Drawing.Common" />
   </ItemGroup>
 
 </Project>

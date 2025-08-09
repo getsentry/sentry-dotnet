@@ -7,17 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GraphQL" Version="7.6.0" />
-    <PackageReference Include="GraphQL.Client" Version="6.0.0" />
-    <PackageReference Include="GraphQL.Client.Serializer.SystemTextJson" Version="6.0.0" />
-    <PackageReference Include="GraphQL.MicrosoftDI" Version="7.6.0" />
-    <PackageReference Include="GraphQL.Server.Transports.AspNetCore" Version="7.6.0" />
-    <PackageReference Include="GraphQL.Server.Ui.Altair" Version="7.6.0" />
-    <PackageReference Include="GraphQL.SystemTextJson" Version="7.6.0" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.8.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.8.1" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.8.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.0" />
+    <PackageReference Include="GraphQL" />
+    <PackageReference Include="GraphQL.Client" />
+    <PackageReference Include="GraphQL.Client.Serializer.SystemTextJson" />
+    <PackageReference Include="GraphQL.MicrosoftDI" />
+    <PackageReference Include="GraphQL.Server.Transports.AspNetCore" />
+    <PackageReference Include="GraphQL.Server.Ui.Altair" />
+    <PackageReference Include="GraphQL.SystemTextJson" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

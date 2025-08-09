@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EntityFramework" Version="6.5.1" />
-    <PackageReference Include="Effort.EF6" Version="2.2.16" />
-    <PackageReference Include="EfClassicLocalDb" Version="18.0.1" />
+    <PackageReference Include="EntityFramework" />
+    <PackageReference Include="Effort.EF6" />
+    <PackageReference Include="EfClassicLocalDb" />
 
     <ProjectReference Include="..\..\src\Sentry.EntityFramework\Sentry.EntityFramework.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />

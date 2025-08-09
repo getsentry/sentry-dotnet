@@ -43,7 +43,7 @@
 
   <!-- Ben.Demystifier also needs System.Reflection.Metadata 5.0.0 or higher on all platforms. -->
   <ItemGroup Condition="$(TargetFramework.StartsWith('netstandard')) or $(TargetFramework.StartsWith('net4'))">
-    <PackageReference Include="System.Reflection.Metadata" Version="5.0.0" />
+    <PackageReference Include="System.Reflection.Metadata" />
   </ItemGroup>
 
   <ItemGroup>
@@ -65,7 +65,7 @@
     https://github.com/SimonCropp/Polyfill
   -->
   <ItemGroup>
-    <PackageReference Include="Polyfill" Version="1.32.0" PrivateAssets="all" />
+    <PackageReference Include="Polyfill" PrivateAssets="all" />
   </ItemGroup>
 
   <!--
@@ -73,7 +73,7 @@
     This is used in Sentry.PlatformAbstractions.RuntimeInfo.  It's already built-in for all other targets.
   -->
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" />
   </ItemGroup>
 
   <!-- On .NET Framework, we need an assembly reference to System.Net.Http. -->
@@ -83,7 +83,7 @@
 
   <!-- Ensure at least version 6 of System.Text.Json so we have JsonSerializationContext available -->
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netstandard'))">
-    <PackageReference Include="System.Text.Json" Version="6.0.10" >
+    <PackageReference Include="System.Text.Json" >
       <!--
         Ignoring the vulnerability warning: https://github.com/advisories/GHSA-hh2w-p6rv-4g7w
         The app can/should pin to the latest version. We will bump once a patch on v6 (still LTS until Nov 24) is out

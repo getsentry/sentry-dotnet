@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Serilog" Version="2.12.0" />
-    <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Extensions.Logging" />
 
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
     <ProjectReference Include="..\..\src\Sentry.Serilog\Sentry.Serilog.csproj" />

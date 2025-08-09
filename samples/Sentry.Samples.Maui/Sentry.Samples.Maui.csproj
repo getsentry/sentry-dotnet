@@ -110,9 +110,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+    <PackageReference Include="Microsoft.Maui.Controls" />
     <!-- Check SDK users will be able to resolve the latest version of CommunityToolkit.Mvvm (our Integration targets 8.3.2 -->
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
+    <PackageReference Include="CommunityToolkit.Mvvm"/>
   </ItemGroup>
 
 </Project>

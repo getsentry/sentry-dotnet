@@ -1,0 +1,247 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <!-- ========================================== -->
+  <!-- ROOT LEVEL / GLOBAL PACKAGES -->
+  <!-- ========================================== -->
+  <ItemGroup Label="Global Analyzers">
+    <PackageVersion Include="Roslynator.Analyzers" Version="4.9.0" />
+    <PackageVersion Include="UnoptimizedAssemblyDetector" Version="0.1.1" />
+  </ItemGroup>
+
+  <!-- ========================================== -->
+  <!-- SOURCE PROJECT PACKAGES -->
+  <!-- ========================================== -->
+  <ItemGroup Label="Core Framework">
+    <PackageVersion Include="Polyfill" Version="1.32.0" />
+    <PackageVersion Include="System.Reflection.Metadata" Version="5.0.0" />
+    <PackageVersion Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+    <PackageVersion Include="System.Text.Json" Version="6.0.10" />
+    <PackageVersion Include="System.Net.Http" Version="4.3.4" />
+    <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
+  </ItemGroup>
+
+  <ItemGroup Label="Source Link">
+    <PackageVersion Include="SIL.ReleaseTasks" Version="2.5.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Code Analysis">
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Microsoft Extensions">
+    <!-- VERSION CONFLICTS DETECTED: Multiple versions for same package -->
+    <!-- Microsoft.Extensions.Configuration.Binder: 8.0.0, 8.0.1, 9.0.0 -->
+    <!-- Microsoft.Extensions.Http: 2.1.0, 8.0.0, 9.0.0 -->
+    <!-- Microsoft.Extensions.Logging.Configuration: 2.1.0, 8.0.0, 9.0.0 -->
+    
+    <!-- Using highest stable versions - REVIEW NEEDED -->
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Configuration" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="ASP.NET Core">
+    <!-- VERSION CONFLICTS DETECTED: Multiple AspNetCore package versions -->
+    <!-- Microsoft.AspNetCore.Components.WebAssembly: 8.0.3, 9.0.0 -->
+    <!-- Microsoft.AspNetCore.TestHost: 2.1.1, 8.0.0, 9.0.0 -->
+    
+    <!-- Using latest stable versions - REVIEW NEEDED -->
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.3" />
+    <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Hosting" Version="2.1.1" />
+    <PackageVersion Include="Microsoft.AspNetCore.Http" Version="2.1.22" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.1.25" />
+    <PackageVersion Include="Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets" Version="2.1.40" />
+    <PackageVersion Include="Microsoft.AspNetCore" Version="2.1.7" />
+  </ItemGroup>
+
+  <ItemGroup Label="Entity Framework">
+    <!-- VERSION CONFLICTS DETECTED: Multiple EF versions -->
+    <!-- EntityFramework: 6.2.0, 6.5.1 -->
+    <!-- Microsoft.EntityFrameworkCore: 3.1.32, 8.0.0, 9.0.0 -->
+    <!-- Microsoft.EntityFrameworkCore.SqlServer: 3.1.32, 8.0.0, 9.0.0 -->
+    <!-- Microsoft.EntityFrameworkCore.Sqlite: 3.1.32, 8.0.0, 9.0.0 -->
+    
+    <!-- Using latest stable versions - REVIEW NEEDED -->
+    <PackageVersion Include="EntityFramework" Version="6.5.1" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.6" />
+  </ItemGroup>
+
+  <ItemGroup Label="Android/Xamarin">
+    <!-- VERSION CONFLICTS DETECTED: Multiple Android package versions -->
+    <!-- Xamarin.AndroidX.Core: 1.10.1.2, 1.15.0.2 -->
+    <!-- Xamarin.AndroidX.Lifecycle.Common.Java8: 2.6.1.3, 2.8.7.2 -->
+    <!-- Xamarin.AndroidX.Lifecycle.Process: 2.6.1.3, 2.8.7.2 -->
+    
+    <!-- Using latest versions - REVIEW NEEDED -->
+    <PackageVersion Include="Xamarin.AndroidX.Core" Version="1.15.0.2" />
+    <PackageVersion Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.8.7.2" />
+    <PackageVersion Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.8.7.2" />
+    <PackageVersion Include="Xamarin.Kotlin.StdLib.Jdk8" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Third-Party Logging">
+    <!-- VERSION CONFLICTS DETECTED: Multiple logging framework versions -->
+    <!-- Serilog: 2.7.1, 2.10.0, 2.12.0 -->
+    <!-- NLog: 5.2.4 (consistent) -->
+    <!-- log4net: 2.0.12, 2.0.15 -->
+    
+    <!-- Using latest stable versions - REVIEW NEEDED -->
+    <PackageVersion Include="Serilog" Version="2.12.0" />
+    <PackageVersion Include="Serilog.AspNetCore" Version="6.1.0" />
+    <PackageVersion Include="Serilog.Extensions.Logging" Version="3.1.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="4.1.0" />
+    <PackageVersion Include="NLog" Version="5.2.4" />
+    <PackageVersion Include="log4net" Version="2.0.15" />
+  </ItemGroup>
+
+  <ItemGroup Label="Other Integrations">
+    <PackageVersion Include="Hangfire.AspNetCore" Version="1.8.12" />
+    <PackageVersion Include="Hangfire.Core" Version="1.8.12" />
+    <PackageVersion Include="Hangfire.MemoryStorage" Version="1.8.1" />
+    <PackageVersion Include="OpenTelemetry" Version="1.8.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Console" Version="1.6.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.8.0" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.8.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.8.1" />
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.8.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Specialized">
+    <PackageVersion Include="K4os.Compression.LZ4" Version="1.3.6" />
+    <PackageVersion Include="Microsoft.Diagnostics.NETCore.Client" Version="0.2.510501" />
+    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="MAUI">
+    <PackageVersion Include="Microsoft.Maui.Controls" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Maui.Core" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Maui.Essentials" Version="9.0.10" />
+  </ItemGroup>
+
+  <ItemGroup Label="Functions and Core">
+    <PackageVersion Include="Microsoft.NET.Sdk.Functions" Version="4.1.3" />
+    <PackageVersion Include="Microsoft.NETCore.Targets" Version="3.1.0" />
+  </ItemGroup>
+
+  <!-- ========================================== -->
+  <!-- TEST PROJECT PACKAGES -->
+  <!-- ========================================== -->
+  <ItemGroup Label="Testing Framework">
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.1" />
+    <PackageVersion Include="Xunit.SkippableFact" Version="1.5.23" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Testing Utilities">
+    <PackageVersion Include="NSubstitute" Version="5.3.0" />
+    <PackageVersion Include="FluentAssertions" Version="6.12.0" />
+    <PackageVersion Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="20.0.4" />
+    <PackageVersion Include="PublicApiGenerator" Version="11.1.0" />
+    <PackageVersion Include="GitHubActionsTestLogger" Version="2.3.3" />
+  </ItemGroup>
+
+  <ItemGroup Label="Verification Testing">
+    <PackageVersion Include="Verify.Xunit" Version="30.5.0" />
+    <PackageVersion Include="Verify.DiffPlex" Version="3.1.2" />
+    <PackageVersion Include="Verify.AspNetCore" Version="4.2.0" />
+    <PackageVersion Include="Verify.Http" Version="6.5.0" />
+    <PackageVersion Include="Verify.EntityFramework" Version="9.0.0" />
+    <PackageVersion Include="Verify.SourceGenerators" Version="2.5.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Test Specific Packages">
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" Version="1.1.2" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" Version="1.1.2" />
+    <PackageVersion Include="Azure.Identity" Version="1.11.4" />
+    <PackageVersion Include="LocalDb" Version="18.0.1" />
+    <PackageVersion Include="EfClassicLocalDb" Version="18.0.1" />
+    <PackageVersion Include="Effort.EF6" Version="2.2.16" />
+    <PackageVersion Include="System.Drawing.Common" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="MAUI Testing">
+    <PackageVersion Include="DeviceRunners.VisualRunners.Maui" Version="0.1.0-preview.5" />
+    <PackageVersion Include="DeviceRunners.VisualRunners.Xunit" Version="0.1.0-preview.5" />
+    <PackageVersion Include="DeviceRunners.XHarness.Maui" Version="0.1.0-preview.5" />
+    <PackageVersion Include="DeviceRunners.XHarness.Xunit" Version="0.1.0-preview.5" />
+    <PackageVersion Include="System.Private.Uri" Version="4.3.2" />
+  </ItemGroup>
+
+  <!-- ========================================== -->
+  <!-- SAMPLE PROJECT PACKAGES -->
+  <!-- ========================================== -->
+  <ItemGroup Label="Sample Dependencies">
+    <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageVersion Include="Google.Cloud.Functions.Hosting" Version="2.0.0" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.7.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Azure Functions">
+    <PackageVersion Include="Microsoft.Azure.Functions.Worker" Version="2.0.0" />
+    <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.0.13" />
+    <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Timer" Version="4.2.0" />
+    <PackageVersion Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="AWS Lambda">
+    <PackageVersion Include="Amazon.Lambda.AspNetCoreServer" Version="7.3.0" />
+    <PackageVersion Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.7" />
+  </ItemGroup>
+
+  <ItemGroup Label="gRPC">
+    <!-- VERSION CONFLICTS DETECTED: Multiple gRPC versions -->
+    <!-- Google.Protobuf: 3.22.5, 3.23.4 -->
+    <!-- Grpc.AspNetCore.Server: 2.40.0, 2.54.0, 2.55.0 -->
+    <!-- Grpc.Tools: 2.54.0 -->
+    
+    <!-- Using latest stable versions - REVIEW NEEDED -->
+    <PackageVersion Include="Google.Protobuf" Version="3.23.4" />
+    <PackageVersion Include="Grpc.AspNetCore.Server" Version="2.55.0" />
+    <PackageVersion Include="Grpc.AspNetCore.Server.Reflection" Version="2.55.0" />
+    <PackageVersion Include="Grpc.Net.Client" Version="2.54.0" />
+    <PackageVersion Include="Grpc.Tools" Version="2.54.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="GraphQL">
+    <PackageVersion Include="GraphQL" Version="7.6.0" />
+    <PackageVersion Include="GraphQL.Client" Version="6.0.0" />
+    <PackageVersion Include="GraphQL.Client.Serializer.SystemTextJson" Version="6.0.0" />
+    <PackageVersion Include="GraphQL.MicrosoftDI" Version="7.6.0" />
+    <PackageVersion Include="GraphQL.Server.Transports.AspNetCore" Version="7.6.0" />
+    <PackageVersion Include="GraphQL.Server.Ui.Altair" Version="7.6.0" />
+    <PackageVersion Include="GraphQL.SystemTextJson" Version="7.6.0" />
+  </ItemGroup>
+
+  <!-- ========================================== -->
+  <!-- BENCHMARK PROJECT PACKAGES -->
+  <!-- ========================================== -->
+  <ItemGroup Label="Benchmarking">
+    <!-- VERSION CONFLICTS DETECTED: BenchmarkDotNet versions -->
+    <!-- BenchmarkDotNet: 0.12.1, 0.13.12 -->
+    
+    <!-- Using latest version - REVIEW NEEDED -->
+    <PackageVersion Include="BenchmarkDotNet" Version="0.13.12" />
+    <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.12" />
+  </ItemGroup>
+
+</Project>
