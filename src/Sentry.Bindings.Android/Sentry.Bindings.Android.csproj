@@ -1,5 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <!-- Disable CPM for Android bindings to allow specialized dependency management -->
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    
     <TargetFrameworks>net8.0-android34.0;net9.0-android35.0</TargetFrameworks>
     <SentryAndroidSdkVersion>8.6.0</SentryAndroidSdkVersion>
     <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\$(TargetFramework)\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
@@ -27,6 +30,10 @@
     <InternalsVisibleTo Include="Sentry.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Extensions.Logging.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Maui.Tests" PublicKey="$(SentryPublicKey)" />
+    
+    <!-- Override inherited analyzer packages with explicit versions since CPM is disabled -->
+    <PackageReference Update="Roslynator.Analyzers" Version="4.9.0" />
+    <PackageReference Update="UnoptimizedAssemblyDetector" Version="0.1.1" />
   </ItemGroup>
 
   <!-- Dependencies for AndroidMavenLibrary references
@@ -34,24 +41,24 @@
        https://www.nuget.org/packages/Microsoft.Maui.Core/8.0.3#dependencies-body-tab
        -->
   <ItemGroup Condition="$(TargetFramework.StartsWith('net8'))">
-    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" />
-    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.8.7.2" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.8.7.2" />
     <!-- MAUI 8 references this version indirectly via Xamarin.AndroidX.SwipeRefreshLayout (>= 1.1.0.14)   -->
-    <PackageReference Include="Xamarin.AndroidX.Core" />
+    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.15.0.2" />
     <!-- We need 1.9.24 but there's no NuGet package for that version... the lowest version we can use is 2.0.0 -->
-    <PackageReference Include="Xamarin.Kotlin.StdLib.Jdk8" />
+    <PackageReference Include="Xamarin.Kotlin.StdLib.Jdk8" Version="2.0.0" />
   </ItemGroup>
 
   <!-- Dependencies for AndroidMavenLibrary references
        Matching what was shipped in the 9.0.300 workloads to avoid NU1608 warnings
        -->
   <ItemGroup Condition="$(TargetFramework.StartsWith('net9'))">
-    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" />
-    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.8.7.2" />
+    <PackageReference Include="Xamarin.AndroidX.Lifecycle.Common.Java8" Version="2.8.7.2" />
     <!-- MAUI 9 references this version indirectly via Xamarin.AndroidX.SwipeRefreshLayout   -->
-    <PackageReference Include="Xamarin.AndroidX.Core" />
+    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.15.0.2" />
     <!-- We need 1.9.24 but there's no NuGet package for that version... the lowest version we can use is 2.0.0 -->
-    <PackageReference Include="Xamarin.Kotlin.StdLib.Jdk8" />
+    <PackageReference Include="Xamarin.Kotlin.StdLib.Jdk8" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework.StartsWith('net8'))">
@@ -68,9 +75,9 @@
       Manifest="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).pom"
       JavaArtifact="io.sentry:sentry:$(SentryAndroidSdkVersion)"
     />
-    <AndroidMavenLibrary Include="io.sentry:sentry-android-core" />
-    <AndroidMavenLibrary Include="io.sentry:sentry-android-ndk" />
-    <AndroidMavenLibrary Include="io.sentry:sentry-android-replay" />
+    <AndroidMavenLibrary Include="io.sentry:sentry-android-core" Version="$(SentryAndroidSdkVersion)" />
+    <AndroidMavenLibrary Include="io.sentry:sentry-android-ndk" Version="$(SentryAndroidSdkVersion)" />
+    <AndroidMavenLibrary Include="io.sentry:sentry-android-replay" Version="$(SentryAndroidSdkVersion)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -139,7 +146,7 @@
       <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-native-ndk-$(SentryNativeNdkVersion).aar" />
     </ItemGroup>
     <ItemGroup Condition="'$(SentryNativeNdkVersion)' != '' And !$(TargetFramework.StartsWith('net8'))">
-      <AndroidMavenLibrary Include="io.sentry:sentry-native-ndk" />
+      <AndroidMavenLibrary Include="io.sentry:sentry-native-ndk" Version="$(SentryNativeNdkVersion)" />
     </ItemGroup>
   </Target>
 

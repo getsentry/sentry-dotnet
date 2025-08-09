@@ -42,7 +42,7 @@
     Use that instead of the ProjectReference.
   -->
   <ItemGroup>
-    <!-- <PackageReference Include="Sentry" /> -->
+    <!-- <PackageReference Include="Sentry" Version="..." /> -->
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
   </ItemGroup>
 

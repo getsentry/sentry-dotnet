@@ -46,6 +46,7 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
   </ItemGroup>
@@ -128,10 +129,10 @@
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="4.5.0" />
   </ItemGroup>
 
-  <ItemGroup Label="MAUI">
-    <PackageVersion Include="Microsoft.Maui.Controls" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.Maui.Core" Version="9.0.10" />
-    <PackageVersion Include="Microsoft.Maui.Essentials" Version="9.0.10" />
+  <!-- MAUI packages - Use VersionOverride for packages that need $(MauiVersion) variable -->
+  <ItemGroup Label="MAUI Core">
+    <PackageVersion Include="Microsoft.Maui.Controls" Version="9.0.51" />
+    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.51" />
   </ItemGroup>
 
   <ItemGroup Label="Functions and Core">

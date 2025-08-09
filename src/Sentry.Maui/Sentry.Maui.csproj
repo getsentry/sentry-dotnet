@@ -43,9 +43,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Controls" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="Sentry.Maui.CommunityToolkit.Mvvm" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Maui.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Maui.CommunityToolkit.Mvvm.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
+
+
 
 </Project>
