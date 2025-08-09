@@ -38,7 +38,7 @@ public class SentryChatClientTests
     public async Task CompleteStreamingAsync_CallsInnerClient()
     {
         var inner = Substitute.For<IChatClient>();
-        
+
         inner.CompleteStreamingAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
             .Returns(CreateTestStreamingUpdates());
 
@@ -54,7 +54,7 @@ public class SentryChatClientTests
         Assert.Equal(2, results.Count);
         Assert.Equal("Hello", results[0].Text);
         Assert.Equal(" World", results[1].Text);
-        
+
         inner.Received(1).CompleteStreamingAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>());
     }
 

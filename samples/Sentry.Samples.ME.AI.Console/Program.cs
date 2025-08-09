@@ -1,8 +1,8 @@
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensions.AI;
-using System.Runtime.CompilerServices;
 
 using var loggerFactory = LoggerFactory.Create(builder =>
 {
@@ -71,7 +71,7 @@ public class EchoChatClient : IChatClient
     {
         var lastMessage = messages.LastOrDefault()?.Text ?? "Hello from echo client!";
         var parts = new[] { "Echo: ", lastMessage.Substring(0, Math.Min(10, lastMessage.Length)), "...", " (streaming)" };
-        
+
         foreach (var part in parts)
         {
             await Task.Delay(100, cancellationToken); // Simulate streaming delay

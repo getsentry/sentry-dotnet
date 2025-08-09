@@ -1,7 +1,7 @@
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Sentry;
-using System.Runtime.CompilerServices;
 
 namespace Sentry.Extensions.AI;
 
@@ -154,13 +154,13 @@ internal sealed class SentryStreamingChatEnumerator : IAsyncEnumerator<Streaming
         try
         {
             var hasNext = await _innerEnumerator.MoveNextAsync().ConfigureAwait(false);
-            
+
             if (!hasNext && !_finished)
             {
                 _transaction.Finish(SpanStatus.Ok);
                 _finished = true;
             }
-            
+
             return hasNext;
         }
         catch (Exception ex)
