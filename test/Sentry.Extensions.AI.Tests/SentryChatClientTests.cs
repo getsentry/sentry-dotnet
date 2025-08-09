@@ -33,6 +33,37 @@ public class SentryChatClientTests
 
         Assert.Equal(metadata, client.Metadata);
     }
+
+    [Fact]
+    public async Task CompleteStreamingAsync_CallsInnerClient()
+    {
+        var inner = Substitute.For<IChatClient>();
+        
+        inner.CompleteStreamingAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
+            .Returns(CreateTestStreamingUpdates());
+
+        var hub = Substitute.For<IHub>();
+        var client = new SentryChatClient(inner, hub, agentName: "Agent", model: "gpt-4o-mini", system: "openai");
+
+        var results = new List<StreamingChatCompletionUpdate>();
+        await foreach (var update in client.CompleteStreamingAsync(new[] { new ChatMessage(ChatRole.User, "hi") }, null))
+        {
+            results.Add(update);
+        }
+
+        Assert.Equal(2, results.Count);
+        Assert.Equal("Hello", results[0].Text);
+        Assert.Equal(" World", results[1].Text);
+        
+        inner.Received(1).CompleteStreamingAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>());
+    }
+
+    private static async IAsyncEnumerable<StreamingChatCompletionUpdate> CreateTestStreamingUpdates()
+    {
+        yield return new StreamingChatCompletionUpdate { Text = "Hello" };
+        await Task.Yield(); // Make it actually async
+        yield return new StreamingChatCompletionUpdate { Text = " World" };
+    }
 }
 
 

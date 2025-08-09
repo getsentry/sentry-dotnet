@@ -2,6 +2,7 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensions.AI;
+using System.Runtime.CompilerServices;
 
 using var loggerFactory = LoggerFactory.Create(builder =>
 {
@@ -38,6 +39,20 @@ var response = await chat.CompleteAsync(new[]
 
 logger.LogInformation("Response: {ResponseText}", response.Message.Text);
 
+// Demonstrate streaming with Sentry instrumentation
+logger.LogInformation("Making streaming AI call with Sentry instrumentation...");
+
+var streamingResponse = new List<string>();
+await foreach (var update in chat.CompleteStreamingAsync(new[]
+{
+    new ChatMessage(ChatRole.User, "Say hello and goodbye with streaming")
+}))
+{
+    streamingResponse.Add(update.Text ?? "");
+}
+
+logger.LogInformation("Streaming Response: {StreamingText}", string.Join("", streamingResponse));
+
 logger.LogInformation("Microsoft.Extensions.AI sample completed! Check your Sentry dashboard for the trace data.");
 
 // Simple echo client for demonstration
@@ -52,9 +67,16 @@ public class EchoChatClient : IChatClient
         return Task.FromResult(new ChatCompletion(responseMessage));
     }
 
-    public IAsyncEnumerable<StreamingChatCompletionUpdate> CompleteStreamingAsync(IList<ChatMessage> messages, ChatOptions options = null, CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<StreamingChatCompletionUpdate> CompleteStreamingAsync(IList<ChatMessage> messages, ChatOptions options = null, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var lastMessage = messages.LastOrDefault()?.Text ?? "Hello from echo client!";
+        var parts = new[] { "Echo: ", lastMessage.Substring(0, Math.Min(10, lastMessage.Length)), "...", " (streaming)" };
+        
+        foreach (var part in parts)
+        {
+            await Task.Delay(100, cancellationToken); // Simulate streaming delay
+            yield return new StreamingChatCompletionUpdate { Text = part };
+        }
     }
 
     public TService GetService<TService>(object key = null) where TService : class => null;

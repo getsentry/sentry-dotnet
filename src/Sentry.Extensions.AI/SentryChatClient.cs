@@ -1,6 +1,7 @@
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Sentry;
+using System.Runtime.CompilerServices;
 
 namespace Sentry.Extensions.AI;
 
@@ -53,7 +54,7 @@ internal sealed class SentryChatClient : IChatClient
         }
         catch (Exception ex)
         {
-            transaction.Finish(SpanStatus.InternalError);
+            transaction.Finish(ex);
             _hub.CaptureException(ex);
             throw;
         }
@@ -61,8 +62,7 @@ internal sealed class SentryChatClient : IChatClient
 
     public IAsyncEnumerable<StreamingChatCompletionUpdate> CompleteStreamingAsync(IList<ChatMessage> messages, ChatOptions? options = null, CancellationToken cancellationToken = default)
     {
-        // For streaming, we wrap the enumerable but don't create spans for each chunk
-        return _innerClient.CompleteStreamingAsync(messages, options, cancellationToken);
+        return new SentryStreamingChatEnumerable(_innerClient.CompleteStreamingAsync(messages, options, cancellationToken), _hub, _agentName, _model, _system);
     }
 
     public TService? GetService<TService>(object? key = null) where TService : class
@@ -73,6 +73,122 @@ internal sealed class SentryChatClient : IChatClient
     public void Dispose()
     {
         _innerClient?.Dispose();
+    }
+}
+
+internal sealed class SentryStreamingChatEnumerable : IAsyncEnumerable<StreamingChatCompletionUpdate>
+{
+    private readonly IAsyncEnumerable<StreamingChatCompletionUpdate> _innerEnumerable;
+    private readonly IHub _hub;
+    private readonly string? _agentName;
+    private readonly string? _model;
+    private readonly string? _system;
+
+    public SentryStreamingChatEnumerable(
+        IAsyncEnumerable<StreamingChatCompletionUpdate> innerEnumerable,
+        IHub hub,
+        string? agentName,
+        string? model,
+        string? system)
+    {
+        _innerEnumerable = innerEnumerable;
+        _hub = hub;
+        _agentName = agentName;
+        _model = model;
+        _system = system;
+    }
+
+    public IAsyncEnumerator<StreamingChatCompletionUpdate> GetAsyncEnumerator(CancellationToken cancellationToken = default)
+    {
+        return new SentryStreamingChatEnumerator(_innerEnumerable.GetAsyncEnumerator(cancellationToken), _hub, _agentName, _model, _system);
+    }
+}
+
+internal sealed class SentryStreamingChatEnumerator : IAsyncEnumerator<StreamingChatCompletionUpdate>
+{
+    private readonly IAsyncEnumerator<StreamingChatCompletionUpdate> _innerEnumerator;
+    private readonly ISpan _transaction;
+    private readonly IHub _hub;
+    private bool _finished;
+
+    public SentryStreamingChatEnumerator(
+        IAsyncEnumerator<StreamingChatCompletionUpdate> innerEnumerator,
+        IHub hub,
+        string? agentName,
+        string? model,
+        string? system)
+    {
+        _innerEnumerator = innerEnumerator;
+        _hub = hub;
+
+        // Create the span/transaction
+        var operation = "gen_ai.invoke_agent";
+        var spanName = agentName is { Length: > 0 } ? $"invoke_agent {agentName}" : "invoke_agent";
+        _transaction = hub.GetSpan()?.StartChild(operation, spanName) ?? hub.StartTransaction(spanName, operation);
+
+        // Set the same tags as CompleteAsync
+        if (system is { Length: > 0 })
+        {
+            _transaction.SetTag("gen_ai.system", system);
+        }
+
+        if (model is { Length: > 0 })
+        {
+            _transaction.SetTag("gen_ai.request.model", model);
+        }
+
+        _transaction.SetTag("gen_ai.operation.name", "invoke_agent");
+        if (agentName is { Length: > 0 })
+        {
+            _transaction.SetTag("gen_ai.agent.name", agentName);
+        }
+
+        // Add streaming-specific tag
+        _transaction.SetTag("gen_ai.streaming", "true");
+    }
+
+    public StreamingChatCompletionUpdate Current => _innerEnumerator.Current;
+
+    public async ValueTask<bool> MoveNextAsync()
+    {
+        try
+        {
+            var hasNext = await _innerEnumerator.MoveNextAsync().ConfigureAwait(false);
+            
+            if (!hasNext && !_finished)
+            {
+                _transaction.Finish(SpanStatus.Ok);
+                _finished = true;
+            }
+            
+            return hasNext;
+        }
+        catch (Exception ex)
+        {
+            if (!_finished)
+            {
+                _transaction.Finish(ex);
+                _hub.CaptureException(ex);
+                _finished = true;
+            }
+            throw;
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await _innerEnumerator.DisposeAsync().ConfigureAwait(false);
+        }
+        finally
+        {
+            if (!_finished)
+            {
+                _transaction.Finish(SpanStatus.Ok);
+                _finished = true;
+            }
+        }
     }
 }
 
