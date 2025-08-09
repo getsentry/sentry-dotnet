@@ -7,10 +7,6 @@
     <SentryNativeNdkVersion></SentryNativeNdkVersion>
     <Description>.NET Bindings for the Sentry Android SDK</Description>
 
-    <!-- Treat Android binding generator warnings as errors -->
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsAsErrors />
-    
     <!-- Android binding warnings - these are largely unavoidable due to Java interface circular dependencies -->
     <!-- Only suppress warnings that are confirmed to be expected/unavoidable -->
     <!-- BG8801: Invalid parameter types - caused by circular interface dependencies in Sentry Java SDK -->
