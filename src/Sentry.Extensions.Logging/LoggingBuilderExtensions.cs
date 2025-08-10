@@ -51,12 +51,21 @@ public static class LoggingBuilderExtensions
 
         builder.Services.AddSingleton<IConfigureOptions<TOptions>, SentryLoggingOptionsSetup>();
         builder.Services.AddSingleton<ILoggerProvider, SentryLoggerProvider>();
+        builder.Services.AddSingleton<ILoggerProvider, SentryStructuredLoggerProvider>();
         builder.Services.AddSentry<TOptions>();
 
         // All logs should flow to the SentryLogger, regardless of level.
         // Filtering of events is handled in SentryLogger, using SentryOptions.MinimumEventLevel
         // Filtering of breadcrumbs is handled in SentryLogger, using SentryOptions.MinimumBreadcrumbLevel
         builder.AddFilter<SentryLoggerProvider>(_ => true);
+
+        // Logs from the SentryLogger should not flow to the SentryStructuredLogger as this may cause recursive invocations.
+        // Filtering of logs is handled in SentryStructuredLogger, using SentryOptions.MinimumLogLevel
+        builder.AddFilter<SentryStructuredLoggerProvider>(static (string? categoryName, LogLevel logLevel) =>
+        {
+            return categoryName is null
+                || categoryName != "Sentry.ISentryClient";
+        });
 
         return builder;
     }
