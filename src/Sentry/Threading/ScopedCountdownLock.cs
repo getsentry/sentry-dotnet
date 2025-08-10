@@ -75,7 +75,7 @@ internal sealed class ScopedCountdownLock : IDisposable
     {
         if (Interlocked.CompareExchange(ref _isEngaged, 1, 0) == 0)
         {
-            _ = _event.Signal(); // decrement the initial count of 1, so that the event can be set with the count reaching 0 when all 'CounterScope's have exited
+            _ = _event.Signal(); // decrement the initial count of 1, so that the event can be set with the count reaching 0 when all entered 'CounterScope' instances have exited
             return new LockScope(this);
         }
 
@@ -84,7 +84,7 @@ internal sealed class ScopedCountdownLock : IDisposable
 
     private void ExitLockScope()
     {
-        _event.Reset(); // reset the signaled event to the initial count of 1, so that new `CounterScope`s can be entered again
+        _event.Reset(); // reset the signaled event to the initial count of 1, so that new 'CounterScope' instances can be entered again
 
         if (Interlocked.CompareExchange(ref _isEngaged, 0, 1) != 1)
         {
