@@ -22,7 +22,7 @@ public class SentryMonitorOptionsTests
     [InlineData("* * * * *")]           // Every minute
     [InlineData("0 0 1 1 *")]           // At midnight on January 1st
     [InlineData("0 0 1 * 0")]           // At midnight on the first day of the month if it's Sunday
-    [InlineData("59 23 31 12 7")]       // At 23:59 on December 31st if it's Saturday
+    [InlineData("59 23 31 12 7")]       // At 23:59 on December 31st if it's Sunday
     [InlineData("0 */2 * * *")]         // Every 2 hours
     [InlineData("0 8-10 * * *")]        // At 8, 9, and 10 AM every day
     [InlineData("0 6,8,9 * * *")]       // At 6, 8, and 9 AM every day
@@ -69,11 +69,11 @@ public class SentryMonitorOptionsTests
     [InlineData("* * 1-15/3 * *")]      // Every 3 days from 1-15
     [InlineData("* * 1-31/7 * *")]      // Every 7 days from 1-31
     [InlineData("* * 10-20/2 * *")]     // Every 2 days from 10-20
-    [InlineData("* * * 1-6/2 *")]       // Every 2 months from 1-6
-    [InlineData("* * * 1-12/3 *")]      // Every 3 months from 1-12
-    [InlineData("* * * 3-9/1 *")]       // Every month from 3-9
+    [InlineData("* * * 1-6/2 *")]       // Every 2 months from January-June
+    [InlineData("* * * 1-12/3 *")]      // Every 3 months from January-December
+    [InlineData("* * * 3-9/1 *")]       // Every month from March-September
     [InlineData("* * * * 1-5/2")]       // Every 2 weekdays from 1-5 (Mon-Fri)
-    [InlineData("* * * * 0-6/3")]       // Every 3 days of week from 0-6
+    [InlineData("* * * * 0-6/3")]       // Every 3 days of week from (Sun-Sat)
     [InlineData("* * * * MON-FRI/2")]   // Every 2 weekdays from Mon-Fri
     [InlineData("* * * * MON-SUN/3")]   // Every 3 days from Mon-Sun
     // Complex combinations with step values and ranges
