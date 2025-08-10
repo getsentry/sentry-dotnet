@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Experimental _Structured Logs_:
+  - Ensure all buffered logs are sent to Sentry when the application terminates unexpectedly. ([#4425](https://github.com/getsentry/sentry-dotnet/pull/4425))
+
 ## 5.14.0
 
 ### Features
