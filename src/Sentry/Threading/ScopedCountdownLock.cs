@@ -138,7 +138,7 @@ internal sealed class ScopedCountdownLock : IDisposable
         internal void Wait()
         {
             var lockObj = _lockObj;
-            lockObj?._event.Wait();
+            lockObj?._event.Wait(Timeout.Infinite, CancellationToken.None);
         }
 
         public void Dispose()
