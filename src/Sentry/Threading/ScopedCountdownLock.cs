@@ -84,13 +84,12 @@ internal sealed class ScopedCountdownLock : IDisposable
 
     private void ExitLockScope()
     {
-        if (Interlocked.CompareExchange(ref _isEngaged, 0, 1) == 1)
-        {
-            _event.Reset(); // reset the signaled event to the initial count of 1, so that new `CounterScope`s can be entered again
-            return;
-        }
+        _event.Reset(); // reset the signaled event to the initial count of 1, so that new `CounterScope`s can be entered again
 
-        Debug.Fail("The Lock should have not been disengaged without being engaged first.");
+        if (Interlocked.CompareExchange(ref _isEngaged, 0, 1) != 1)
+        {
+            Debug.Fail("The Lock should have not been disengaged without being engaged first.");
+        }
     }
 
     /// <inheritdoc />
