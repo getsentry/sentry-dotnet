@@ -798,6 +798,7 @@ internal class Hub : IHub, IDisposable
     {
         try
         {
+            Logger.Flush();
             await CurrentClient.FlushAsync(timeout).ConfigureAwait(false);
         }
         catch (Exception e)
