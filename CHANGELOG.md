@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Experimental _Structured Logs_:
+  - Remove `IDisposable` from `SentryStructuredLogger`. Disposal is intended through the owning `IHub` instance. ([#4424](https://github.com/getsentry/sentry-dotnet/pull/4424)
+
 ## 5.14.0
 
 ### Features
