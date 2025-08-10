@@ -75,14 +75,14 @@ public partial class SentryMonitorOptions : ISentryJsonSerializable
     private SentryMonitorInterval? _unit;
 
 #if NET9_0_OR_GREATER
-    [GeneratedRegex(ValidCrontabPattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture)]
+    [GeneratedRegex(ValidCrontabPattern, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture)]
     private static partial Regex ValidCrontab { get; }
 #elif NET8_0
-    [GeneratedRegex(ValidCrontabPattern, RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture)]
+    [GeneratedRegex(ValidCrontabPattern, RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture)]
     private static partial Regex ValidCrontabRegex();
     private static readonly Regex ValidCrontab = ValidCrontabRegex();
 #else
-    private static readonly Regex ValidCrontab = new(ValidCrontabPattern, RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
+    private static readonly Regex ValidCrontab = new(ValidCrontabPattern, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
 #endif
 
     /// <summary>
