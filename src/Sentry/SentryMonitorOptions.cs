@@ -82,7 +82,7 @@ public partial class SentryMonitorOptions : ISentryJsonSerializable
     private static partial Regex ValidCrontabRegex();
     private static readonly Regex ValidCrontab = ValidCrontabRegex();
 #else
-    private static readonly Regex ValidCrontab = new(ValidCrontabPattern, RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
+    private static readonly Regex ValidCrontab = new(ValidCrontabPattern, RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture);
 #endif
 
     /// <summary>
