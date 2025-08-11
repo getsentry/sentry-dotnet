@@ -4,9 +4,9 @@
 
 ### Fixes
 
+- Crontabs now support day names (MON-SUN) and allow step values and ranges to be combined ([#4407](https://github.com/getsentry/sentry-dotnet/pull/4407))
 - Experimental _Structured Logs_:
   - Remove `IDisposable` from `SentryStructuredLogger`. Disposal is intended through the owning `IHub` instance. ([#4424](https://github.com/getsentry/sentry-dotnet/pull/4424))
-- Crontabs now support day names (MON-SUN) and allow step values and ranges to be combined ([#4407](https://github.com/getsentry/sentry-dotnet/pull/4407))
 
 ### Dependencies
 
