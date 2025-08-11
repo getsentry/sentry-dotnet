@@ -4,9 +4,9 @@
 
 ### Fixes
 
+- Crontabs now support day names (MON-SUN) and allow step values and ranges to be combined ([#4407](https://github.com/getsentry/sentry-dotnet/pull/4407))
 - Experimental _Structured Logs_:
   - Ensure all buffered logs are sent to Sentry when the application terminates unexpectedly. ([#4425](https://github.com/getsentry/sentry-dotnet/pull/4425))
-- Crontabs now support day names (MON-SUN) and allow step values and ranges to be combined ([#4407](https://github.com/getsentry/sentry-dotnet/pull/4407))
 
 ### Dependencies
 
