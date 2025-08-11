@@ -5,6 +5,8 @@
 ### Fixes
 
 - Crontabs now support day names (MON-SUN) and allow step values and ranges to be combined ([#4407](https://github.com/getsentry/sentry-dotnet/pull/4407))
+- Experimental _Structured Logs_:
+  - `InvalidOperationException` potentially thrown during a race condition in high volume logging scenarios ([#4428](https://github.com/getsentry/sentry-dotnet/pull/4428))
 
 ### Dependencies
 
