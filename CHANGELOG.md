@@ -4,7 +4,7 @@
 
 ### Fixes
 
-- Crontabs now support day names (MON-FRI) and allow step values and ranges to be combined ([#4407](https://github.com/getsentry/sentry-dotnet/pull/4407))
+- Crontabs now support day names (MON-SUN) and allow step values and ranges to be combined ([#4407](https://github.com/getsentry/sentry-dotnet/pull/4407))
 
 ## 5.14.0
 
