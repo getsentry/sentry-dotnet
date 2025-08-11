@@ -31,13 +31,13 @@ internal sealed class ScopedCountdownLock : IDisposable
     /// Gets the number of remaining <see cref="CounterScope"/> required to exit in order to set/signal the event while a <see cref="LockScope"/> is active.
     /// When <see langword="0"/> and while a <see cref="LockScope"/> is active, no more <see cref="CounterScope"/> can be entered.
     /// </summary>
-    internal int Count => IsEngaged ? _event.CurrentCount : _event.CurrentCount - 1;
+    internal int Count => _isEngaged == 1 ? _event.CurrentCount : _event.CurrentCount - 1;
 
     /// <summary>
     /// Returns <see langword="true"/> when a <see cref="LockScope"/> is active and the event can be set/signaled by <see cref="Count"/> reaching <see langword="0"/>.
     /// Returns <see langword="false"/> when the <see cref="Count"/> can only reach the initial count of <see langword="1"/> when no <see cref="CounterScope"/> is active any longer.
     /// </summary>
-    internal bool IsEngaged => Interlocked.CompareExchange(ref _isEngaged, 1, 1) == 1;
+    internal bool IsEngaged => _isEngaged == 1;
 
     /// <summary>
     /// No <see cref="CounterScope"/> will be entered when the <see cref="Count"/> has reached <see langword="0"/>, or while the lock is engaged via an active <see cref="LockScope"/>.
