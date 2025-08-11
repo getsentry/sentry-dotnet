@@ -96,6 +96,8 @@ filterConfigs:
         - "trimTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
+        # AssemblyReader tests are flaky on Windows: https://github.com/getsentry/sentry-dotnet/issues/4091
+        - "**/*Sentry.Android.AssemblyReader.Tests.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Sentry.Maui.Device.TestApp.csproj"
         - "**/*Sentry.Samples.Android.csproj"
@@ -115,6 +117,8 @@ filterConfigs:
         - "trimTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
+        # AssemblyReader tests are flaky on Windows: https://github.com/getsentry/sentry-dotnet/issues/4091
+        - "**/*Sentry.Android.AssemblyReader.Tests.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Sentry.Maui.Device.TestApp.csproj"
         - "**/*Sentry.Samples.Android.csproj"
