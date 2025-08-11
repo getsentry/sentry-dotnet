@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Crontabs now support day names (MON-SUN) and allow step values and ranges to be combined ([#4407](https://github.com/getsentry/sentry-dotnet/pull/4407))
+
+### Dependencies
+
+- Bump CLI from v2.50.2 to v2.51.0 ([#4419](https://github.com/getsentry/sentry-dotnet/pull/4419))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2510)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.50.2...2.51.0)
+
 ## 5.14.0
 
 ### Features
@@ -13,12 +25,6 @@
 
 - Update `sample_rate` of _Dynamic Sampling Context (DSC)_ when making sampling decisions ([#4374](https://github.com/getsentry/sentry-dotnet/pull/4374))
 - Ensure the correct Sentry Cocoa SDK framework version is used on iOS ([#4411](https://github.com/getsentry/sentry-dotnet/pull/4411))
-
-### Dependencies
-
-- Bump CLI from v2.50.2 to v2.51.0 ([#4419](https://github.com/getsentry/sentry-dotnet/pull/4419))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2510)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.50.2...2.51.0)
 
 ## 5.13.0
 
