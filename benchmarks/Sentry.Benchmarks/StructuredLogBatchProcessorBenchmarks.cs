@@ -46,6 +46,16 @@ public class StructuredLogBatchProcessorBenchmarks
         _batchProcessor.Flush();
     }
 
+    [Benchmark]
+    public void EnqueueAndFlush_Parallel()
+    {
+        _ = Parallel.For(0, OperationsPerInvoke, (int i) =>
+        {
+            _batchProcessor.Enqueue(_log);
+        });
+        _batchProcessor.Flush();
+    }
+
     [GlobalCleanup]
     public void Cleanup()
     {
