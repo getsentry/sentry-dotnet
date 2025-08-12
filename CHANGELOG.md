@@ -1,14 +1,6 @@
 # Changelog
 
-## 5.14.0-alpha.1
-
-### Dependencies
-
-- Reapply "Bump Cocoa SDK from v8.39.0 to v8.46.0 (#4103)" ([#4413](https://github.com/getsentry/sentry-dotnet/pull/4413))
-    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8460)
-    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.46.0)
-
-## 5.14.0-alpha.0
+## Unreleased
 
 ### Fixes
 
@@ -20,6 +12,9 @@
 - Bump CLI from v2.50.2 to v2.51.1 ([#4419](https://github.com/getsentry/sentry-dotnet/pull/4419), [#4435](https://github.com/getsentry/sentry-dotnet/pull/4435))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2511)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.50.2...2.51.1)
+- Reapply "Bump Cocoa SDK from v8.39.0 to v8.46.0 (#4103)" ([#4413](https://github.com/getsentry/sentry-dotnet/pull/4413))
+    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8460)
+    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.46.0)
 
 ## 5.14.0
 
