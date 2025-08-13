@@ -78,8 +78,13 @@ public class SentrySpanProcessor : BaseProcessor<Activity>
 
         // Resource attributes are consistent between spans, but not available during construction.
         // Thus, get a single instance lazily.
-        _resourceAttributes = new Lazy<IDictionary<string, object>>(() =>
-            ParentProvider?.GetResource().Attributes.ToDict() ?? new Dictionary<string, object>(0));
+        // _resourceAttributes = new Lazy<IDictionary<string, object>>(() => new Dictionary<string, object>());
+        _resourceAttributes = new Lazy<IDictionary<string, object>>(CreateResourceAttributes);
+    }
+
+    private IDictionary<string, object> CreateResourceAttributes()
+    {
+        return ParentProvider?.GetResource().Attributes.ToDict() ?? new Dictionary<string, object>(0);
     }
 
     /// <inheritdoc />
