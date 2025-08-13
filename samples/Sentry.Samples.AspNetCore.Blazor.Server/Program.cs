@@ -12,8 +12,8 @@ using Sentry.Samples.AspNetCore.Blazor.Server;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.TryAddSingleton<HubInstrumentationFilter>();
-builder.Services.PostConfigure((Action<HubOptions>) (options => options.AddFilter<HubInstrumentationFilter>()));
-builder.Services.Configure((Action<AspNetCoreTraceInstrumentationOptions>) (options => options.EnableAspNetCoreSignalRSupport = false));
+builder.Services.PostConfigure((Action<HubOptions>)(options => options.AddFilter<HubInstrumentationFilter>()));
+builder.Services.Configure((Action<AspNetCoreTraceInstrumentationOptions>)(options => options.EnableAspNetCoreSignalRSupport = false));
 
 // OpenTelemetry Configuration
 // See https://opentelemetry.io/docs/instrumentation/net/getting-started/
