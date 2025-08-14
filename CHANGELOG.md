@@ -7,6 +7,7 @@
 - Experimental _Structured Logs_:
   - Remove `IDisposable` from `SentryStructuredLogger`. Disposal is intended through the owning `IHub` instance. ([#4424](https://github.com/getsentry/sentry-dotnet/pull/4424))
   - Ensure all buffered logs are sent to Sentry when the application terminates unexpectedly. ([#4425](https://github.com/getsentry/sentry-dotnet/pull/4425))
+- Only detects custom session replay masks when necessary to avoid performance issues in MAUI apps with complex UIs ([#4445](https://github.com/getsentry/sentry-dotnet/pull/4445))
 
 ## 5.14.1
 
