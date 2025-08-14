@@ -15,7 +15,7 @@
     <!-- BG8800/BG8700: Unknown/Invalid types - types intentionally removed by Metadata.xml -->
     <!-- BG8605/BG8606: Missing Java types - Compose UI types not available in our binding context -->
     <!-- BG8604: Missing ancestor types - nested types whose parents are removed -->
-    <!-- BG8502: Interface invalidation - cascade effect from other binding issues -->
+    <!-- BG8502/BG8503: Interface invalidation - cascade effect from other binding issues -->
     <!-- BG8401/BG8400: Field/property conflicts - resolved individually in Metadata.xml where needed -->
     <!-- BG8C00: Base interface not found -->
     <NoWarn>$(NoWarn);BG8801;BG8C01;BG8701;BG8800;BG8700;BG8605;BG8606;BG8604;BG8502;BG8401;BG8400;BG8503;BG8C00</NoWarn>
