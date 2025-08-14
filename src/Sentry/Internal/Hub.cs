@@ -833,7 +833,7 @@ internal class Hub : IHub, IDisposable
 #endif
 
         Logger.Flush();
-        Logger.Dispose();
+        (Logger as IDisposable)?.Dispose(); // see Sentry.Internal.DefaultSentryStructuredLogger
 
         try
         {
