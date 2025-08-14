@@ -40,22 +40,6 @@ namespace Sentry
         [System.Runtime.Serialization.EnumMember(Value="critical")]
         Critical = 3,
     }
-    public static class BuiltInSystemDiagnosticsMeters
-    {
-        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreDiagnostics;
-        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreHeaderParsing;
-        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreHosting;
-        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreHttpConnections;
-        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreRateLimiting;
-        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreRouting;
-        public static readonly Sentry.StringOrRegex MicrosoftAspNetCoreServerKestrel;
-        public static readonly Sentry.StringOrRegex MicrosoftExtensionsDiagnosticsHealthChecks;
-        public static readonly Sentry.StringOrRegex MicrosoftExtensionsDiagnosticsResourceMonitoring;
-        public static readonly Sentry.StringOrRegex OpenTelemetryInstrumentationRuntime;
-        public static readonly Sentry.StringOrRegex SystemNetHttp;
-        public static readonly Sentry.StringOrRegex SystemNetNameResolution;
-        public static System.Collections.Generic.IList<Sentry.StringOrRegex> All { get; }
-    }
     public class ByteAttachmentContent : Sentry.IAttachmentContent
     {
         public ByteAttachmentContent(byte[] bytes) { }
@@ -111,13 +95,6 @@ namespace Sentry
         public static bool HasUser(this Sentry.IEventLike eventLike) { }
         public static void SetFingerprint(this Sentry.IEventLike eventLike, System.Collections.Generic.IEnumerable<string> fingerprint) { }
         public static void SetFingerprint(this Sentry.IEventLike eventLike, params string[] fingerprint) { }
-    }
-    public class ExperimentalMetricsOptions
-    {
-        public ExperimentalMetricsOptions() { }
-        public System.Collections.Generic.IList<Sentry.StringOrRegex> CaptureSystemDiagnosticsInstruments { get; set; }
-        public System.Collections.Generic.IList<Sentry.StringOrRegex> CaptureSystemDiagnosticsMeters { get; set; }
-        public bool EnableCodeLocations { get; set; }
     }
     public class FileAttachmentContent : Sentry.IAttachmentContent
     {
