@@ -6,6 +6,8 @@
 
 - Crontabs now support day names (MON-SUN) and allow step values and ranges to be combined ([#4407](https://github.com/getsentry/sentry-dotnet/pull/4407))
 - Ensure the correct Sentry Cocoa SDK framework version is used on iOS ([#4411](https://github.com/getsentry/sentry-dotnet/pull/4411))
+- Experimental _Structured Logs_:
+  - Remove `IDisposable` from `SentryStructuredLogger`. Disposal is intended through the owning `IHub` instance. ([#4424](https://github.com/getsentry/sentry-dotnet/pull/4424))
 
 ### Dependencies
 
