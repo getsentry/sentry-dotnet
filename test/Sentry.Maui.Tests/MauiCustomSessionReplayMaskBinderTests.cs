@@ -6,11 +6,11 @@ using View = Android.Views.View;
 
 namespace Sentry.Maui.Tests;
 
-public class MauiVisualElementEventsBinderTests
+public class MauiCustomSessionReplayMaskBinderTests
 {
     private class Fixture
     {
-        public MauiVisualElementEventsBinder Binder { get; }
+        public MauiCustomSessionReplayMaskBinder Binder { get; }
 
         public SentryMauiOptions Options { get; } = new();
 
@@ -21,7 +21,7 @@ public class MauiVisualElementEventsBinderTests
             logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
             Options.DiagnosticLogger = logger;
             var options = Microsoft.Extensions.Options.Options.Create(Options);
-            Binder = new MauiVisualElementEventsBinder(options);
+            Binder = new MauiCustomSessionReplayMaskBinder(options);
         }
     }
 
