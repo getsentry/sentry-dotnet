@@ -50,30 +50,30 @@
     <Using Include="Xunit.Abstractions" />
     <Using Condition="'$(TargetPlatformIdentifier)'==''" Include="VerifyXunit" />
 
-    <PackageReference Include="NSubstitute" Version="5.3.0" />
-    <PackageReference Include="FluentAssertions" Version="6.12.0" />
-    <PackageReference Include="xunit" Version="2.9.3" />
-    <PackageReference Include="Xunit.SkippableFact" Version="1.5.23" />
-    <PackageReference Include="GitHubActionsTestLogger" Version="2.3.3" />
-    <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="20.0.4" />
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="Xunit.SkippableFact" />
+    <PackageReference Include="GitHubActionsTestLogger" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" />
   </ItemGroup>
 
   <!-- only non-platform-specific projects should include these packages -->
   <ItemGroup Condition="'$(TargetPlatformIdentifier)'==''">
-    <PackageReference Include="Verify.Xunit" Version="30.5.0" />
-    <PackageReference Include="Verify.DiffPlex" Version="3.1.2" />
-    <PackageReference Include="PublicApiGenerator" Version="11.1.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.1" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Verify.Xunit" />
+    <PackageReference Include="Verify.DiffPlex" />
+    <PackageReference Include="PublicApiGenerator" />
+    <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="coverlet.collector" />
   </ItemGroup>
 
   <!-- these are needed because the versions that are brought in transitively have vulnerability warnings -->
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
+    <PackageReference Include="Newtonsoft.Json" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFramework) != 'net48'">
-    <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+    <PackageReference Include="System.Net.Http" />
+    <PackageReference Include="System.Text.RegularExpressions" />
   </ItemGroup>
 </Project>

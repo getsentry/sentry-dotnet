@@ -1,6 +1,7 @@
 <Project>
 
   <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <VersionPrefix>5.14.0</VersionPrefix>
     <LangVersion>13</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
@@ -71,8 +72,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="UnoptimizedAssemblyDetector" Version="0.1.1" PrivateAssets="All" />
-    <PackageReference Include="Roslynator.Analyzers" Version="4.9.0" PrivateAssets="All" />
+    <PackageReference Include="UnoptimizedAssemblyDetector" PrivateAssets="All" />
+    <PackageReference Include="Roslynator.Analyzers" PrivateAssets="All" />
   </ItemGroup>
 
   <!-- Import the root global usings, except for samples. -->
