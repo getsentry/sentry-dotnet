@@ -798,6 +798,7 @@ internal class Hub : IHub, IDisposable
     {
         try
         {
+            Logger.Flush();
             await CurrentClient.FlushAsync(timeout).ConfigureAwait(false);
         }
         catch (Exception e)
@@ -832,7 +833,7 @@ internal class Hub : IHub, IDisposable
 #endif
 
         Logger.Flush();
-        Logger.Dispose();
+        (Logger as IDisposable)?.Dispose(); // see Sentry.Internal.DefaultSentryStructuredLogger
 
         try
         {
