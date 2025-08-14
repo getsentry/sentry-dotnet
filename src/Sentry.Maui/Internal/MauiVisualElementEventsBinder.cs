@@ -12,22 +12,37 @@ namespace Sentry.Maui.Internal;
 internal class MauiVisualElementEventsBinder : IMauiElementEventBinder
 {
     private readonly SentryMauiOptions _options;
+    private readonly bool _isEnabled;
 
     public MauiVisualElementEventsBinder(IOptions<SentryMauiOptions> options)
     {
         _options = options.Value;
+#if __ANDROID__
+        var replayOptions = _options.Native.ExperimentalOptions.SessionReplay;
+        _isEnabled = (replayOptions.SessionSampleRate > 0.0 || replayOptions.OnErrorSampleRate > 0.0)
+            && replayOptions is not { MaskAllImages: true, MaskAllText: true }
+            && !replayOptions.DisableCustomSessionReplayMasks;
+#else
+        _isEnabled = false; // Session replay is only supported on Android for now
+#endif
     }
 
     /// <inheritdoc />
     public void Bind(VisualElement element, Action<BreadcrumbEvent> _)
     {
-        element.Loaded += OnElementLoaded;
+        if (_isEnabled)
+        {
+            element.Loaded += OnElementLoaded;
+        }
     }
 
     /// <inheritdoc />
     public void UnBind(VisualElement element)
     {
-        element.Loaded -= OnElementLoaded;
+        if (_isEnabled)
+        {
+            element.Loaded -= OnElementLoaded;
+        }
     }
 
     internal void OnElementLoaded(object? sender, EventArgs _)
