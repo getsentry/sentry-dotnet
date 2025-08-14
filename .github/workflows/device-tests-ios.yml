@@ -30,6 +30,11 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
 
+      # macOS 15 (Arm64) runners (and later) only include three most recent platform tools of installed Xcode versions
+      # see https://github.com/actions/runner-images/issues/12541
+      - name: Download Xcode components
+        run: xcodebuild -downloadPlatform iOS -exportPath ~/Downloads -buildVersion 18.0 -architectureVariant arm64
+
       - name: Build iOS Test App
         run: pwsh ./scripts/device-test.ps1 ios -Build
 
