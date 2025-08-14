@@ -257,7 +257,7 @@ jobs:
 
       - name: Fetch NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ github.sha }}
           path: src
@@ -338,7 +338,7 @@ jobs:
         uses: ./.github/actions/buildnative
 
       - name: Fetch NuGet Packages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ github.sha }}
           path: src
