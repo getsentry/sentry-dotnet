@@ -8,6 +8,12 @@
   - Remove `IDisposable` from `SentryStructuredLogger`. Disposal is intended through the owning `IHub` instance. ([#4424](https://github.com/getsentry/sentry-dotnet/pull/4424))
   - Ensure all buffered logs are sent to Sentry when the application terminates unexpectedly. ([#4425](https://github.com/getsentry/sentry-dotnet/pull/4425))
 
+### Dependencies
+
+- Reapply "Bump Cocoa SDK from v8.39.0 to v8.46.0 (#4103)" ([#4442](https://github.com/getsentry/sentry-dotnet/pull/4442))
+    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8460)
+    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.46.0)
+    
 ## 5.14.1
 
 ### Fixes
