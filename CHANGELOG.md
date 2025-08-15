@@ -8,6 +8,12 @@
   - Remove `IDisposable` from `SentryStructuredLogger`. Disposal is intended through the owning `IHub` instance. ([#4424](https://github.com/getsentry/sentry-dotnet/pull/4424))
   - Ensure all buffered logs are sent to Sentry when the application terminates unexpectedly. ([#4425](https://github.com/getsentry/sentry-dotnet/pull/4425))
 
+### Dependencies
+
+- Bump Native SDK from v0.9.1 to v0.10.0 ([#4436](https://github.com/getsentry/sentry-dotnet/pull/4436))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0100)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.9.1...0.10.0)
+
 ## 5.14.1
 
 ### Fixes
