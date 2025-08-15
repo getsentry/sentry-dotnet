@@ -30,7 +30,6 @@ public abstract class BaseRequestPayloadExtractor : IRequestPayloadExtractor
         try
         {
             request.Body.Position = 0;
-
             return DoExtractPayLoad(request);
         }
         finally

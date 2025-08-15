@@ -5,10 +5,10 @@ FROM ${BASE}
 RUN apk update
 
 # common
-RUN apk add bash build-base cmake curl git icu lsb-release-minimal sudo tar wget
+RUN apk add bash build-base cmake curl git icu lsb-release-minimal nodejs npm sudo tar wget
 
 # sentry-native
-RUN apk add curl-dev libunwind-dev libunwind-static linux-headers openssl-dev zlib-dev xz-dev
+RUN apk add curl-dev docker-cli libunwind-dev libunwind-static linux-headers openssl-dev zlib-dev xz-dev xz-static
 
 # sentry-dotnet
 RUN apk add grpc-plugins openjdk11 powershell

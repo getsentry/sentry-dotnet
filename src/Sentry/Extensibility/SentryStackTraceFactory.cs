@@ -14,11 +14,7 @@ public sealed class SentryStackTraceFactory : ISentryStackTraceFactory
     /// </summary>
     public SentryStackTraceFactory(SentryOptions options) => _options = options;
 
-    /// <summary>
-    /// Creates a <see cref="SentryStackTrace" /> from the optional <see cref="Exception" />.
-    /// </summary>
-    /// <param name="exception">The exception to create the stacktrace from.</param>
-    /// <returns>A Sentry stack trace.</returns>
+    /// <inheritdoc />
     public SentryStackTrace? Create(Exception? exception = null)
     {
         if (exception == null && !_options.AttachStacktrace)

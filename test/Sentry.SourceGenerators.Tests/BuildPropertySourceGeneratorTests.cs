@@ -5,22 +5,23 @@ using Microsoft.VisualStudio.TestPlatform.TestHost;
 
 namespace Sentry.SourceGenerators.Tests;
 
-
 public class BuildPropertySourceGeneratorTests
 {
+    private const string HintName = "Sentry.Generated.BuildPropertyInitializer.g.cs";
+
     [SkippableFact]
     public Task RunResult_Success()
     {
         Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
 
-        var driver = BuildDriver(typeof(Program).Assembly, ("PublishAot", "false"), ("OutputType", "exe"));
+        var driver = BuildDriver(OutputKind.ConsoleApplication, typeof(Program).Assembly, ("PublishAot", "false"));
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(1);
-        result.GeneratedSources.First().HintName.Should().Be("__BuildProperties.g.cs");
-        return Verify(result);
+        result.GeneratedSources.First().HintName.Should().Be(HintName);
+        var source = result.GeneratedSources.First().SourceText.ToString();
+        return Verify(source);
     }
-
 
     [SkippableFact]
     public Task RunResult_BadStrings()
@@ -28,28 +29,59 @@ public class BuildPropertySourceGeneratorTests
         Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
 
         // we're hijacking PublishAot to make life easy
-        var driver = BuildDriver(typeof(Program).Assembly, ("My\\Key", "test\\test"), ("OutputType", "exe"));
+        var driver = BuildDriver(OutputKind.ConsoleApplication, typeof(Program).Assembly, ("My\\Key", "test\\test"));
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(1);
-        result.GeneratedSources.First().HintName.Should().Be("__BuildProperties.g.cs");
-        return Verify(result);
+        result.GeneratedSources.First().HintName.Should().Be(HintName);
+        var source = result.GeneratedSources.First().SourceText.ToString();
+        return Verify(source);
     }
-
 
     [SkippableFact]
     public Task RunResult_Publish_AotTrue()
     {
         Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
 
-        var driver = BuildDriver(typeof(Program).Assembly, ("PublishAot", "true"), ("OutputType", "exe"));
+        var driver = BuildDriver(OutputKind.ConsoleApplication, typeof(Program).Assembly, ("PublishAot", "true"));
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(1);
-        result.GeneratedSources.First().HintName.Should().Be("__BuildProperties.g.cs");
-        return Verify(result);
+        result.GeneratedSources.First().HintName.Should().Be(HintName);
+        var source = result.GeneratedSources.First().SourceText.ToString();
+        return Verify(source);
     }
 
+    [SkippableFact]
+    public void RunResult_NoProperties_NoGeneratedSources()
+    {
+        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+
+        var driver = BuildDriver(OutputKind.ConsoleApplication, typeof(Program).Assembly);
+        var result = driver.GetRunResult().Results.FirstOrDefault();
+        result.Exception.Should().BeNull();
+
+        result.GeneratedSources.Should().BeEmpty();
+    }
+
+    [SkippableTheory]
+    [InlineData(OutputKind.ConsoleApplication, true)]
+    [InlineData(OutputKind.WindowsApplication, true)]
+    [InlineData(OutputKind.WindowsRuntimeApplication, true)]
+    [InlineData(OutputKind.DynamicallyLinkedLibrary, false)]
+    [InlineData(OutputKind.NetModule, false)]
+    [InlineData(OutputKind.WindowsRuntimeMetadata, false)]
+    public void RunResult_OutputType_Values(OutputKind outputKind, bool sourceGenExpected)
+    {
+        Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+
+        var driver = BuildDriver(outputKind, typeof(Program).Assembly, ("PublishTrimmed", "true"));
+        var result = driver.GetRunResult().Results.FirstOrDefault();
+        result.Exception.Should().BeNull();
+
+        var generated = result.GeneratedSources.Any(x => x.HintName.Equals(HintName));
+        generated.Should().Be(sourceGenExpected);
+    }
 
     [SkippableTheory]
     [InlineData("no", true)]
@@ -59,33 +91,29 @@ public class BuildPropertySourceGeneratorTests
     {
         Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
 
-        var driver = BuildDriver(typeof(Program).Assembly, ("SentryDisableSourceGenerator", value), ("OutputType", "exe"));
+        var driver = BuildDriver(OutputKind.ConsoleApplication, typeof(Program).Assembly, ("SentryDisableSourceGenerator", value));
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
 
-        var generated = result.GeneratedSources.Any(x => x.HintName.Equals("__BuildProperties.g.cs"));
+        var generated = result.GeneratedSources.Any(x => x.HintName.Equals(HintName));
         generated.Should().Be(sourceGenExpected);
     }
 
-
     [SkippableFact]
-    public Task RunResult_Expect_None()
+    public void RunResult_Expect_None()
     {
         Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
 
-        var driver = BuildDriver(typeof(Program).Assembly, ("PublishAot", "false"));
+        var driver = BuildDriver(OutputKind.DynamicallyLinkedLibrary, typeof(Program).Assembly, ("PublishAot", "false"));
         var result = driver.GetRunResult().Results.FirstOrDefault();
         result.Exception.Should().BeNull();
         result.GeneratedSources.Length.Should().Be(0);
-
-        return Verify(result);
     }
 
-
-    private static GeneratorDriver BuildDriver(Assembly metadataAssembly, params IEnumerable<(string Key, string Value)> buildProperties)
+    private static GeneratorDriver BuildDriver(OutputKind outputKind, Assembly metadataAssembly, params IEnumerable<(string Key, string Value)> buildProperties)
     {
         var metadataReference = MetadataReference.CreateFromFile(metadataAssembly.Location);
-        var options = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary);
+        var options = new CSharpCompilationOptions(outputKind);
         var compilation = CSharpCompilation.Create("TestAssembly", [], [metadataReference], options);
         var generator = new BuildPropertySourceGenerator();
 

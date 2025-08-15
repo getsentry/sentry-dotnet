@@ -445,6 +445,24 @@ public sealed class Envelope : ISerializable, IDisposable
         return new Envelope(header, items);
     }
 
+    /// <summary>
+    /// Creates an envelope that contains only an attachment for an existing event.
+    /// </summary>
+    internal static Envelope FromAttachment(SentryId eventId, SentryAttachment attachment, IDiagnosticLogger? logger = null) =>
+        new(eventId, CreateHeader(eventId), [EnvelopeItem.FromAttachment(attachment)]);
+
+    internal static Envelope FromLog(StructuredLog log)
+    {
+        var header = DefaultHeader;
+
+        var items = new[]
+        {
+            EnvelopeItem.FromLog(log),
+        };
+
+        return new Envelope(header, items);
+    }
+
     private static async Task<IReadOnlyDictionary<string, object?>> DeserializeHeaderAsync(
         Stream stream,
         CancellationToken cancellationToken = default)

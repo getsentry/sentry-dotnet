@@ -11,6 +11,7 @@ param(
 
 Set-StrictMode -Version latest
 $ErrorActionPreference = 'Stop'
+. $PSScriptRoot/ios-simulator-utils.ps1
 
 if (!$Build -and !$Run)
 {
@@ -57,8 +58,15 @@ try
             '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
             '--target', 'ios-simulator-64',
             '--launch-timeout', '00:10:00',
-            '--set-env', 'CI=$envValue'
+            '--set-env', "CI=$envValue"
         )
+
+        $udid = Get-IosSimulatorUdid -IosVersion '18.5' -Verbose
+        if ($udid) {
+            $arguments += @('--device', $udid)
+        } else {
+            Write-Host "No suitable simulator found; proceeding without a specific --device"
+        }
     }
 
     if ($Build)
@@ -76,7 +84,7 @@ try
         if (!(Get-Command xharness -ErrorAction SilentlyContinue))
         {
             Push-Location ($CI ? $env:RUNNER_TEMP : $IsWindows ? $env:TMP : $IsMacos ? $env:TMPDIR : '/temp')
-            dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '10.0.0-prerelease*' `
+            dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '10.0.0-prerelease.25412.1' `
                 --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
             Pop-Location
         }

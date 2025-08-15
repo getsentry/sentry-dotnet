@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
     <ProjectReference Include="..\..\src\Sentry.Profiling\Sentry.Profiling.csproj" />
     <ProjectReference Include="..\..\test\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>

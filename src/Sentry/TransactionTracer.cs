@@ -226,7 +226,6 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     /// </summary>
     internal TransactionTracer(IHub hub, ITransactionContext context, TimeSpan? idleTimeout = null)
     {
-        Debug.Assert(context.IsSampled ?? true, "context.IsSampled should always be true when creating a TransactionTracer");
         _hub = hub;
         _options = _hub.GetSentryOptions();
         Name = context.Name;

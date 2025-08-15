@@ -1,7 +1,7 @@
 # Contributing
 
 We love receiving PRs from the community with features and fixed.
-For big feature it's advised to raise an issue to discuss it first.
+For a big feature it's advised to raise an issue to discuss it first.
 
 # Guidelines
 
@@ -9,9 +9,9 @@ For big feature it's advised to raise an issue to discuss it first.
 * Feel free to start with a draft PR, while you work on it. You can ask pointed questions by reviewing your own code this way, while signaling to the reviewer that the PR isn't ready for review just yet.
 * Mark the PR ready for review once you've completed the change, including:
   * The description should link to relevant context such as tickets, discussions or previous PRs. Consider screenshots of the events in Sentry or other relevant visual things.
-  * Add tests that excercise your change. The repo has lots of examples of Unit and integration tests. Including device tests that run on Android and iOS.
+  * Add tests that verify your change. The repo has lots of examples of Unit and integration tests. Including device tests that run on Android and iOS.
   * CI should be green.
-  * The ideal state is where a reviewer approves it, and merges immediately. But on more complex changes, some back and forth through reviews is expected.
+  * The ideal state is where a reviewer approves and merges it immediately. But on more complex changes, some back and forth during reviews is expected.
 
 ## TLDR
 
@@ -28,7 +28,7 @@ For big feature it's advised to raise an issue to discuss it first.
   - [.NET 9.0](https://dotnet.microsoft.com/download/dotnet/9.0)
   - [.NET 8.0](https://dotnet.microsoft.com/download/dotnet/8.0)
 
-  *Technically, you only need the full SDK install for the latest version (9.0).  If you like, you can install the smaller ASP.NET Core Runtime packages for .NET 8.0. However, installing the full SDKs will also give you the runtimes.*
+  *Technically, you only need the full SDK installation for the latest version (9.0). If you like, you can install the smaller ASP.NET Core Runtime packages for .NET 8.0. However, installing the full SDKs will also give you the runtimes.*
 
 * [`pwsh`](https://github.com/PowerShell/PowerShell#get-powershell) Core version 6 or later on PATH.
 
@@ -42,7 +42,7 @@ For big feature it's advised to raise an issue to discuss it first.
 
 ## .NET MAUI Requirements
 
-To build any of `Sentry.Maui`, `Sentry.Maui.Tests`, or `Sentry.Samples.Maui`, we recommend you have .NET SDK 8 and have the MAUI workloads installed. You can do so by running `dotnet workload restore` (or `dotnet workload install maui`) from the root of the SDK's repository.
+To build any of `Sentry.Maui`, `Sentry.Maui.Tests`, or `Sentry.Samples.Maui`, you'll need to have the MAUI workloads installed. You can do so by running `dotnet workload restore` from the root of the SDK's repository (or `sudo dotnet workload restore` on macOS/Linux).
 
 See https://docs.microsoft.com/dotnet/maui/ for details. JetBrains also have a great blog post if you're developing on a Mac: https://blog.jetbrains.com/dotnet/2022/05/25/macos-environment-setup-for-maui-development/
 
@@ -64,7 +64,7 @@ Although the files in `/src/Sentry/Platforms/` are part of the `Sentry` project,
 
 These `*.props` files are used to add platform-specific files, such as references to the binding projects for each native SDK. These binding projects are .NET wrappers around native Android or Cocoa SDK functions.
 
-Also note `/Directory.Build.targets` contains some [convention based rules](https://github.com/getsentry/sentry-dotnet/blob/b1bfe1efc04eb4c911a85f1cf4cd2e5a176d7c8a/Directory.Build.targets#L17-L35) to exclude code that is not relevant for the target platform. Developers using Visual Studio will need to enable `Show All Files` in order to be able to see these files, when working with the solution.
+Also note `/Directory.Build.targets` contains some [convention-based rules](https://github.com/getsentry/sentry-dotnet/blob/4e7496b45465c5561767cfd8f2914740cc3dfdf6/Directory.Build.targets#L20-L37) to exclude code that is not relevant for the target platform. Developers using Visual Studio will need to enable `Show All Files` in order to be able to see these files, when working with the solution.
 
 ## Legacy ASP.NET solutions
 
@@ -80,11 +80,11 @@ When debugging a legacy ASP.NET application with project references to `Sentry.A
 
 ## Solution Filters
 
-_TLDR;_ when working with the the Sentry codebase, you should use the solution filters (not the solutions).
+_TLDR;_ when working with the Sentry codebase, you should use the solution filters (not the solutions).
 
 _Full explanation:_ 
 
-The `Sentry.sln` solution contains all of the projects required to build Sentry, it's integrations and samples for every platform. However the repository contains various solution filters that will be more practical for day to day tasks.
+The `Sentry.sln` solution contains all of the projects required to build Sentry, it's integrations and samples for every platform. However, the repository contains various solution filters that will be more practical for day-to-day tasks.
 
 These solution filters get generated automatically by `/scripts/generate-solution-filters.ps1` so, although you can certainly create your own solution filters and manage these how you wish, don't try to modify any of the `*.slnf` files that are committed to source control. Instead, changes to these can be made by modifying `/scripts/generate-solution-filters-config.yml` and re-running the script that generates these.
 
@@ -107,15 +107,15 @@ To help users see value in updating the SDK, we maintain a changelog file with e
 We add the heading in the first PR that's adding either a feature or fixes in the current release.
 After a release, the [changelog file will contain only the last release entries](https://github.com/getsentry/sentry-dotnet/blob/main/CHANGELOG.md).
 
-When you open a PR in such case, you need to add a heading 2 named `## Unreleased`, which is replaced during release with the version number chosen.
-Below that, you'll add the heading 3 mentioned above. For example, if you're adding a feature "Attach screenshots when capturing errors on WPF", right after a release, you'd add to the changelog:
+When you open a PR in such cases, you need to add a heading 2 named `## Unreleased`, which is replaced during release with the version number chosen.
+Below that, you'll add heading 3 mentioned above. For example, if you're adding a feature "Attach screenshots when capturing errors on WPF", right after a release, you'd add to the changelog:
 
 ```
 ## Unreleased
 
 ### Features
 
-* Attach screenshots when capturing errors on WPF (#PR number)
+- Attach screenshots when capturing errors on WPF (#PR number)
 ```
 
 There's a GitHub action check to verify if an entry was added. If the entry isn't a user-facing change, you can skip the verification with `#skip-changelog` written to the PR description. The bot writes a comment in the PR with a suggestion entry to the changelog based on the PR title.
@@ -160,11 +160,11 @@ This repo uses a variety of techniques to vendor in third party code without cre
 those is submodules.
 
 One of those submodules is Ben.Demystifier, which was originally written by Ben Adams. Attempts to contact Ben in recent 
-years have been unsuccessful so we've started maintaining a permanent fork of the project at:
+years have been unsuccessful, so we've started maintaining a permanent fork of the project at:
 - https://github.com/getsentry/Ben.Demystifier
 
 Any significant changes to the submodule should be made in a branch and merged into the submodule's `main` branch. 
-However, many of the members of Ben.Demystifier are public. That makes sense if people are using Ben.Demystifier as a 
+However, many of the Ben.Demystifier members are public. That makes sense if people are using Ben.Demystifier as a 
 library, but in this repo we want to keep those members internal.
 
 Once changes to Ben.Demystifier have been merged into the main branch then, the `internal` branch of Ben.Demystifier 

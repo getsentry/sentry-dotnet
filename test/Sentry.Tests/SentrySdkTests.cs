@@ -996,6 +996,7 @@ public class SentrySdkTests : IDisposable
     [InlineData(false)]
     public void ProcessOnBeforeSend_NativeErrorSuppression(bool suppressNativeErrors)
     {
+        // Arrange
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
@@ -1014,11 +1015,20 @@ public class SentrySdkTests : IDisposable
             called = true;
             return e;
         });
+
+        var scope = new Scope(options);
+        var hub = Substitute.For<IHub>();
+        hub.When(h => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
+            .Do(callback => callback.Arg<Action<Scope>>().Invoke(scope));
+
         var evt = new Sentry.CocoaSdk.SentryEvent();
         var ex = new Sentry.CocoaSdk.SentryException("Not checked", "EXC_BAD_ACCESS");
         evt.Exceptions = [ex];
-        var result = SentrySdk.ProcessOnBeforeSend(options, evt);
 
+        // Act
+        var result = SentrySdk.ProcessOnBeforeSend(options, evt, hub);
+
+        // Assert
         if (suppressNativeErrors)
         {
             called.Should().BeFalse();
@@ -1034,6 +1044,7 @@ public class SentrySdkTests : IDisposable
     [Fact]
     public void ProcessOnBeforeSend_OptionsBeforeOnSendRuns()
     {
+        // Arrange
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
@@ -1052,20 +1063,69 @@ public class SentrySdkTests : IDisposable
         native.ReleaseName = "release name";
         native.Environment = "environment";
         native.Transaction = "transaction name";
-
         options.SetBeforeSend(e =>
         {
             e.TransactionName = "dotnet";
             return e;
         });
-        var result = SentrySdk.ProcessOnBeforeSend(options, native);
+
+        var scope = new Scope(options);
+        var hub = Substitute.For<IHub>();
+        hub.When(h => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
+            .Do(callback => callback.Arg<Action<Scope>>().Invoke(scope));
+
+        // Act
+        var result = SentrySdk.ProcessOnBeforeSend(options, native, hub);
+
+        // Assert
         result.Should().NotBeNull();
         result.Transaction.Should().Be("dotnet");
+    }
+
+    [Fact]
+    public void ProcessOnBeforeSend_EventProcessorsInvoked()
+    {
+        // Arrange
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _logger,
+            IsGlobalModeEnabled = true,
+            Debug = true,
+            AutoSessionTracking = false,
+            BackgroundWorker = Substitute.For<IBackgroundWorker>(),
+            InitNativeSdks = false,
+        };
+        var eventProcessor = new TestEventProcessor();
+        options.AddEventProcessor(eventProcessor);
+
+        var scope = new Scope(options);
+        var hub = Substitute.For<IHub>();
+        hub.When(h => hub.ConfigureScope(Arg.Any<Action<Scope>>()))
+            .Do(callback => callback.Arg<Action<Scope>>().Invoke(scope));
+
+        var native = new Sentry.CocoaSdk.SentryEvent();
+
+        // Act
+        SentrySdk.ProcessOnBeforeSend(options, native, hub);
+
+        // Assert
+        eventProcessor.Invoked.Should().BeTrue();
     }
 #endif
 
     public void Dispose()
     {
         SentrySdk.Close();
+    }
+}
+
+file class TestEventProcessor : ISentryEventProcessor
+{
+    public bool Invoked { get; private set; }
+    public SentryEvent Process(SentryEvent @event)
+    {
+        Invoked = true;
+        return @event;
     }
 }

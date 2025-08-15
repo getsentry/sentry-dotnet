@@ -6,6 +6,7 @@ using Sentry.Protocol.Envelopes;
 
 namespace Sentry;
 
+#if !SENTRY_UNITY
 /// <summary>
 /// Sentry SDK entrypoint.
 /// </summary>
@@ -14,7 +15,9 @@ namespace Sentry;
 /// It allows safe static access to a client and scope management.
 /// When the SDK is uninitialized, calls to this class result in no-op so no callbacks are invoked.
 /// </remarks>
-public static partial class SentrySdk
+public
+#endif
+static partial class SentrySdk
 {
     internal static IHub CurrentHub = DisabledHub.Instance;
 
@@ -51,6 +54,7 @@ public static partial class SentrySdk
 
 #pragma warning disable CS0162 // Unreachable code detected
 #pragma warning disable 0162 // Unreachable code on old .NET frameworks
+        AotHelper.CheckIsTrimmed(options.DiagnosticLogger);
         options.LogDebug(AotHelper.IsTrimmed
             ? "This looks like a Native AOT application build."
             : "This doesn't look like a Native AOT application build."
@@ -279,6 +283,19 @@ public static partial class SentrySdk
     /// Whether the SDK is enabled or not.
     /// </summary>
     public static bool IsEnabled { [DebuggerStepThrough] get => CurrentHub.IsEnabled; }
+
+    /// <summary>
+    /// Experimental Sentry SDK features.
+    /// </summary>
+    /// <remarks>
+    /// This and related experimental APIs may change in the future.
+    /// </remarks>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public static class Experimental
+    {
+        /// <inheritdoc cref="IHub.Logger" />
+        public static SentryStructuredLogger Logger { [DebuggerStepThrough] get => CurrentHub.Logger; }
+    }
 
     /// <summary>
     /// Creates a new scope that will terminate when disposed.
