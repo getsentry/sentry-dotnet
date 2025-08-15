@@ -79,12 +79,12 @@ public class ScopedCountdownLockTests : IDisposable
         lockTwo.Dispose();
         AssertEngaged(false, 1);
 
-        // successfully enter another CounterScope ... lock is engaged but not yet set
+        // cannot enter another CounterScope as long as the lock is already engaged by a LockScope
         var counterTwo = _lock.TryEnterCounterScope();
-        counterTwo.IsEntered.Should().BeTrue();
-        AssertEngaged(false, 2);
+        counterTwo.IsEntered.Should().BeFalse();
+        AssertEngaged(false, 1);
 
-        // exit a CounterScope ... decrement the count
+        // no-op ... CounterScope is not entered
         counterTwo.Dispose();
         AssertEngaged(false, 1);
 
@@ -92,7 +92,7 @@ public class ScopedCountdownLockTests : IDisposable
         counterOne.Dispose();
         AssertEngaged(true, 0);
 
-        // cannot enter another CounterScope as long as the engaged lock is set
+        // cannot enter another CounterScope as long as the lock is engaged and set
         var counterThree = _lock.TryEnterCounterScope();
         counterThree.IsEntered.Should().BeFalse();
         AssertEngaged(true, 0);
@@ -102,11 +102,11 @@ public class ScopedCountdownLockTests : IDisposable
         // would block if the count of the engaged lock was not zero
         lockOne.Wait();
 
-        // exit the LockScope ... reset the lock
+        // exit the LockScope ... reset and disengage the lock
         lockOne.Dispose();
         AssertDisengaged(false, 0);
 
-        // can enter a CounterScope again ... the lock not set
+        // can enter a CounterScope again ... the lock is no longer set and no longer engaged
         var counterFour = _lock.TryEnterCounterScope();
         counterFour.IsEntered.Should().BeTrue();
         AssertDisengaged(false, 1);

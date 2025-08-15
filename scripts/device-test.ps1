@@ -37,6 +37,7 @@ try
             '--app', "$buildDir/io.sentry.dotnet.maui.device.testapp-Signed.apk",
             '--package-name', 'io.sentry.dotnet.maui.device.testapp',
             '--launch-timeout', '00:10:00',
+            '--timeout', '00:25:00',
             '--instrumentation', 'Sentry.Maui.Device.TestApp.SentryInstrumentation'
         )
 
@@ -58,6 +59,7 @@ try
             '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
             '--target', 'ios-simulator-64',
             '--launch-timeout', '00:10:00',
+            '--timeout', '00:25:00',
             '--set-env', "CI=$envValue"
         )
 
