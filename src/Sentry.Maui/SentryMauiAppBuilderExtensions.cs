@@ -67,7 +67,7 @@ public static class SentryMauiAppBuilderExtensions
         services.AddSingleton<IMauiElementEventBinder, MauiButtonEventsBinder>();
         services.AddSingleton<IMauiElementEventBinder, MauiImageButtonEventsBinder>();
         services.AddSingleton<IMauiElementEventBinder, MauiGestureRecognizerEventsBinder>();
-        services.AddSingleton<IMauiElementEventBinder, MauiVisualElementEventsBinder>();
+        services.AddSingleton<IMauiElementEventBinder, MauiCustomSessionReplayMaskBinder>();
 
         // Resolve the configured options and register any event binders that have been injected by integrations
         var options = new SentryMauiOptions();
