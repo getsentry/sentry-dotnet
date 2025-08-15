@@ -50,22 +50,8 @@ filterConfigs:
         - "**/*DeviceTests*.csproj"
         - "**/*Maui.Device.TestApp.csproj"
 
-  - outputPath: Sentry-CI-Build-Linux-arm64.slnf
-    include:
-      groups:
-        - "allProjects"
-    exclude:
-      groups:
-        - "macOnly"
-        - "windowsOnly"
-        - "artefacts"
-        - "trimTests"
-      patterns:
-        - "**/*Android*.csproj"
-        - "**/*DeviceTests*.csproj"
-        - "**/*Maui*.csproj"
-
-  - outputPath: Sentry-CI-Build-Linux-musl.slnf
+  - outputPath: Sentry-CI-Build-Linux-NoMobile.slnf
+    solution: .generated.NoMobile.sln
     include:
       groups:
         - "allProjects"
@@ -110,6 +96,8 @@ filterConfigs:
         - "trimTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
+        # AssemblyReader tests are flaky on Windows: https://github.com/getsentry/sentry-dotnet/issues/4091
+        - "**/*Sentry.Android.AssemblyReader.Tests.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Sentry.Maui.Device.TestApp.csproj"
         - "**/*Sentry.Samples.Android.csproj"
@@ -129,6 +117,8 @@ filterConfigs:
         - "trimTests"
       patterns:
         - "**/*AndroidTestApp.csproj"
+        # AssemblyReader tests are flaky on Windows: https://github.com/getsentry/sentry-dotnet/issues/4091
+        - "**/*Sentry.Android.AssemblyReader.Tests.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*Sentry.Maui.Device.TestApp.csproj"
         - "**/*Sentry.Samples.Android.csproj"

@@ -4,8 +4,49 @@
 
 ### Fixes
 
+- Experimental _Structured Logs_:
+  - Remove `IDisposable` from `SentryStructuredLogger`. Disposal is intended through the owning `IHub` instance. ([#4424](https://github.com/getsentry/sentry-dotnet/pull/4424))
+  - Ensure all buffered logs are sent to Sentry when the application terminates unexpectedly. ([#4425](https://github.com/getsentry/sentry-dotnet/pull/4425))
+
+## 5.14.1
+
+### Fixes
+
+- Crontabs now support day names (MON-SUN) and allow step values and ranges to be combined ([#4407](https://github.com/getsentry/sentry-dotnet/pull/4407))
+- Ensure the correct Sentry Cocoa SDK framework version is used on iOS ([#4411](https://github.com/getsentry/sentry-dotnet/pull/4411))
+
+### Dependencies
+
+- Bump CLI from v2.50.2 to v2.52.0 ([#4419](https://github.com/getsentry/sentry-dotnet/pull/4419), [#4435](https://github.com/getsentry/sentry-dotnet/pull/4435), [#4444](https://github.com/getsentry/sentry-dotnet/pull/4444))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2520)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.50.2...2.52.0)
+
+## 5.14.0
+
+### Features
+
+- Add _experimental_ support for [Sentry Structured Logging](https://docs.sentry.io/product/explore/logs/) ([#4308](https://github.com/getsentry/sentry-dotnet/pull/4308))
+  - Structured-Logger API ([#4158](https://github.com/getsentry/sentry-dotnet/pull/4158))
+  - Buffering and Batching ([#4310](https://github.com/getsentry/sentry-dotnet/pull/4310))
+  - Integrations for `Sentry.Extensions.Logging`, `Sentry.AspNetCore` and `Sentry.Maui` ([#4193](https://github.com/getsentry/sentry-dotnet/pull/4193))
+
+### Fixes
+
+- Update `sample_rate` of _Dynamic Sampling Context (DSC)_ when making sampling decisions ([#4374](https://github.com/getsentry/sentry-dotnet/pull/4374))
+
+## 5.13.0
+
+### Features
+
+- Sentry now includes an EXPERIMENTAL StringStackTraceFactory. This factory isn't as feature rich as the full `SentryStackTraceFactory`. However, it may provide better results if you are compiling your application AOT and not getting useful stack traces from the full stack trace factory. ([#4362](https://github.com/getsentry/sentry-dotnet/pull/4362))
+
+### Fixes
+
+- Source context for class libraries when running on Android in Release mode ([#4294](https://github.com/getsentry/sentry-dotnet/pull/4294))
 - Native AOT: don't load SentryNative on unsupported platforms ([#4347](https://github.com/getsentry/sentry-dotnet/pull/4347))
 - Fixed issue introduced in release 5.12.0 that might prevent other middleware or user code from reading request bodies ([#4373](https://github.com/getsentry/sentry-dotnet/pull/4373))
+- SentryTunnelMiddleware overwrites the X-Forwarded-For header ([#4375](https://github.com/getsentry/sentry-dotnet/pull/4375))
+- Native AOT support for `linux-musl-arm64` ([#4365](https://github.com/getsentry/sentry-dotnet/pull/4365))
 
 ### Dependencies
 
@@ -1245,7 +1286,7 @@ There are some functional differences when publishing Native AOT:
 
 ### Fixes
 
-- Resolved an isse where the SDK would throw an exception while attempting to set the DynamicSamplingContext but the context exists already. ([#2592](https://github.com/getsentry/sentry-dotnet/pull/2592))
+- Resolved an issue where the SDK would throw an exception while attempting to set the DynamicSamplingContext but the context exists already. ([#2592](https://github.com/getsentry/sentry-dotnet/pull/2592))
 
 ### Dependencies
 

@@ -27,6 +27,12 @@ jobs:
             rid: linux-musl-x64
             container:
               image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
+          - os: ubuntu-24.04-arm
+            rid: linux-musl-arm64
+            container:
+              image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
+              volumes:
+                - /tmp/node20:/__e/node20
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
             rid: macos # universal (osx-arm64 + osx-x64)
           - os: windows-latest
@@ -35,6 +41,11 @@ jobs:
             rid: win-arm64
 
     steps:
+      - name: Initialize Alpine Linux
+        if: ${{ contains(matrix.container.image, 'alpine') }}
+        run: |
+          curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin /__e/node20/bin/
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -75,13 +86,21 @@ jobs:
             slnf: Sentry-CI-Build-Linux.slnf
           - os: ubuntu-22.04-arm
             rid: linux-arm64
-            slnf: Sentry-CI-Build-Linux-arm64.slnf
+            slnf: Sentry-CI-Build-Linux-NoMobile.slnf
           - os: ubuntu-latest
             rid: linux-musl-x64
-            slnf: Sentry-CI-Build-Linux-musl.slnf
+            slnf: Sentry-CI-Build-Linux-NoMobile.slnf
             container:
               image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
               volumes:
+                - /var/run/docker.sock:/var/run/docker.sock
+          - os: ubuntu-24.04-arm
+            rid: linux-musl-arm64
+            slnf: Sentry-CI-Build-Linux-NoMobile.slnf
+            container:
+              image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
+              volumes:
+                - /tmp/node20:/__e/node20
                 - /var/run/docker.sock:/var/run/docker.sock
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
             rid: macos # universal (osx-arm64 + osx-x64)
@@ -94,6 +113,11 @@ jobs:
             slnf: Sentry-CI-Build-Windows-arm64.slnf
 
     steps:
+      - name: Initialize Alpine Linux
+        if: ${{ contains(matrix.container.image, 'alpine') }}
+        run: |
+          curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin /__e/node20/bin/
+
       - name: Cancel Previous Runs
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
@@ -138,6 +162,14 @@ jobs:
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-linux-musl-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
+          fail-on-cache-miss: true
+
+      - name: Download sentry-native (linux-musl-arm64)
+        if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'linux-musl-arm64') }}
+        uses: actions/cache/restore@v4
+        with:
+          path: src/Sentry/Platforms/Native/sentry-native
+          key: sentry-native-linux-musl-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           fail-on-cache-miss: true
 
       - name: Download sentry-native (macos)
@@ -225,7 +257,7 @@ jobs:
 
       - name: Fetch NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ github.sha }}
           path: src
@@ -306,7 +338,7 @@ jobs:
         uses: ./.github/actions/buildnative
 
       - name: Fetch NuGet Packages
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ${{ github.sha }}
           path: src
