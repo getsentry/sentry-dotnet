@@ -37,7 +37,7 @@ SentrySdk.Init(options =>
     // This option tells Sentry to capture 100% of traces. You still need to start transactions and spans.
     options.TracesSampleRate = 1.0;
 
-    // This option enables Sentry Logs created via SentrySdk.Logger.
+    // This option enables Sentry Logs created via SentrySdk.Experimental.Logger.
     options.Experimental.EnableLogs = true;
     options.Experimental.SetBeforeSendLog(static log =>
     {
@@ -94,7 +94,8 @@ async Task SecondFunction()
         SentrySdk.CaptureException(exception);
         span.Finish(exception);
 
-        SentrySdk.Experimental.Logger.LogError("Error with message: {0}", [exception.Message], static log => log.SetAttribute("method", nameof(SecondFunction)));
+        SentrySdk.Experimental.Logger.LogError(static log => log.SetAttribute("method", nameof(SecondFunction)),
+            "Error with message: {0}", exception.Message);
     }
 
     span.Finish();
@@ -108,7 +109,8 @@ async Task ThirdFunction()
         // Simulate doing some work
         await Task.Delay(100);
 
-        SentrySdk.Experimental.Logger.LogFatal("Crash imminent!", [], static log => log.SetAttribute("suppress", true));
+        SentrySdk.Experimental.Logger.LogFatal(static log => log.SetAttribute("suppress", true),
+            "Crash imminent!");
 
         // This is an example of an unhandled exception.  It will be captured automatically.
         throw new InvalidOperationException("Something happened that crashed the app!");

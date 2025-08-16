@@ -5,7 +5,7 @@ namespace Sentry.Tests;
 /// <summary>
 /// <see href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
 /// </summary>
-public class SentryStructuredLoggerTests : IDisposable
+public partial class SentryStructuredLoggerTests : IDisposable
 {
     internal sealed class Fixture
     {
@@ -28,6 +28,11 @@ public class SentryStructuredLoggerTests : IDisposable
 
             var traceHeader = new SentryTraceHeader(TraceId, ParentSpanId.Value, null);
             Hub.GetTraceHeader().Returns(traceHeader);
+
+            ExpectedAttributes = new Dictionary<string, string>(1)
+            {
+                { "attribute-key", "attribute-value" },
+            };
         }
 
         public InMemoryDiagnosticLogger DiagnosticLogger { get; }
@@ -38,6 +43,8 @@ public class SentryStructuredLoggerTests : IDisposable
         public TimeSpan BatchTimeout { get; set; }
         public SentryId TraceId { get; private set; }
         public SpanId? ParentSpanId { get; private set; }
+
+        public Dictionary<string, string> ExpectedAttributes { get; }
 
         public void WithoutTraceHeader()
         {
@@ -85,45 +92,6 @@ public class SentryStructuredLoggerTests : IDisposable
         instance.Should().BeSameAs(other);
     }
 
-    [Theory]
-    [InlineData(SentryLogLevel.Trace)]
-    [InlineData(SentryLogLevel.Debug)]
-    [InlineData(SentryLogLevel.Info)]
-    [InlineData(SentryLogLevel.Warning)]
-    [InlineData(SentryLogLevel.Error)]
-    [InlineData(SentryLogLevel.Fatal)]
-    public void Log_Enabled_CapturesEnvelope(SentryLogLevel level)
-    {
-        _fixture.Options.Experimental.EnableLogs = true;
-        var logger = _fixture.GetSut();
-
-        Envelope envelope = null!;
-        _fixture.Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => envelope = arg));
-
-        logger.Log(level, "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
-        logger.Flush();
-
-        _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
-        envelope.AssertEnvelope(_fixture, level);
-    }
-
-    [Theory]
-    [InlineData(SentryLogLevel.Trace)]
-    [InlineData(SentryLogLevel.Debug)]
-    [InlineData(SentryLogLevel.Info)]
-    [InlineData(SentryLogLevel.Warning)]
-    [InlineData(SentryLogLevel.Error)]
-    [InlineData(SentryLogLevel.Fatal)]
-    public void Log_Disabled_DoesNotCaptureEnvelope(SentryLogLevel level)
-    {
-        _fixture.Options.Experimental.EnableLogs.Should().BeFalse();
-        var logger = _fixture.GetSut();
-
-        logger.Log(level, "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
-
-        _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
-    }
-
     [Fact]
     public void Log_WithoutTraceHeader_CapturesEnvelope()
     {
@@ -134,11 +102,11 @@ public class SentryStructuredLoggerTests : IDisposable
         Envelope envelope = null!;
         _fixture.Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => envelope = arg));
 
-        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
+        logger.LogTrace(ConfigureLog, "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2]);
         logger.Flush();
 
         _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
-        envelope.AssertEnvelope(_fixture, SentryLogLevel.Trace);
+        _fixture.AssertEnvelope(envelope, SentryLogLevel.Trace);
     }
 
     [Fact]
@@ -156,12 +124,12 @@ public class SentryStructuredLoggerTests : IDisposable
         });
         var logger = _fixture.GetSut();
 
-        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
+        logger.LogTrace(ConfigureLog, "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2]);
         logger.Flush();
 
         _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
         invocations.Should().Be(1);
-        configuredLog.AssertLog(_fixture, SentryLogLevel.Trace);
+        _fixture.AssertLog(configuredLog, SentryLogLevel.Trace);
     }
 
     [Fact]
@@ -177,7 +145,7 @@ public class SentryStructuredLoggerTests : IDisposable
         });
         var logger = _fixture.GetSut();
 
-        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
+        logger.LogTrace(ConfigureLog, "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2]);
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         invocations.Should().Be(1);
@@ -205,7 +173,7 @@ public class SentryStructuredLoggerTests : IDisposable
         _fixture.Options.Experimental.EnableLogs = true;
         var logger = _fixture.GetSut();
 
-        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], static (SentryLog log) => throw new InvalidOperationException());
+        logger.LogTrace(static (SentryLog log) => throw new InvalidOperationException(), "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2]);
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         var entry = _fixture.DiagnosticLogger.Dequeue();
@@ -245,13 +213,13 @@ public class SentryStructuredLoggerTests : IDisposable
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         envelope.Should().BeNull();
 
-        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
+        logger.LogTrace(ConfigureLog, "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2]);
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         envelope.Should().BeNull();
 
         logger.Flush();
         _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
-        envelope.AssertEnvelope(_fixture, SentryLogLevel.Trace);
+        _fixture.AssertEnvelope(envelope, SentryLogLevel.Trace);
     }
 
     [Fact]
@@ -262,7 +230,7 @@ public class SentryStructuredLoggerTests : IDisposable
 
         var defaultLogger = logger.Should().BeOfType<DefaultSentryStructuredLogger>().Which;
         defaultLogger.Dispose();
-        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2], ConfigureLog);
+        logger.LogTrace(ConfigureLog, "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2]);
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         var entry = _fixture.DiagnosticLogger.Dequeue();
@@ -278,15 +246,15 @@ public class SentryStructuredLoggerTests : IDisposable
     }
 }
 
-file static class AssertionExtensions
+internal static class AssertionExtensions
 {
-    public static void AssertEnvelope(this Envelope envelope, SentryStructuredLoggerTests.Fixture fixture, SentryLogLevel level)
+    public static void AssertEnvelope(this SentryStructuredLoggerTests.Fixture fixture, Envelope envelope, SentryLogLevel level)
     {
         envelope.Header.Should().ContainSingle().Which.Key.Should().Be("sdk");
         var item = envelope.Items.Should().ContainSingle().Which;
 
         var log = item.Payload.Should().BeOfType<JsonSerializable>().Which.Source.Should().BeOfType<StructuredLog>().Which;
-        AssertLog(log, fixture, level);
+        AssertLog(fixture, log, level);
 
         Assert.Collection(item.Header,
             element => Assert.Equal(CreateHeader("type", "log"), element),
@@ -294,14 +262,20 @@ file static class AssertionExtensions
             element => Assert.Equal(CreateHeader("content_type", "application/vnd.sentry.items.log+json"), element));
     }
 
-    public static void AssertLog(this StructuredLog log, SentryStructuredLoggerTests.Fixture fixture, SentryLogLevel level)
+    public static void AssertEnvelopeWithoutAttributes(this SentryStructuredLoggerTests.Fixture fixture, Envelope envelope, SentryLogLevel level)
+    {
+        fixture.ExpectedAttributes.Clear();
+        AssertEnvelope(fixture, envelope, level);
+    }
+
+    public static void AssertLog(this SentryStructuredLoggerTests.Fixture fixture, StructuredLog log, SentryLogLevel level)
     {
         var items = log.Items;
         items.Length.Should().Be(1);
-        AssertLog(items[0], fixture, level);
+        AssertLog(fixture, items[0], level);
     }
 
-    public static void AssertLog(this SentryLog log, SentryStructuredLoggerTests.Fixture fixture, SentryLogLevel level)
+    public static void AssertLog(this SentryStructuredLoggerTests.Fixture fixture, SentryLog log, SentryLogLevel level)
     {
         log.Timestamp.Should().Be(fixture.Clock.GetUtcNow());
         log.TraceId.Should().Be(fixture.TraceId);
@@ -310,42 +284,16 @@ file static class AssertionExtensions
         log.Template.Should().Be("Template string with arguments: {0}, {1}, {2}, {3}");
         log.Parameters.Should().BeEquivalentTo(new KeyValuePair<string, object>[] { new("0", "string"), new("1", true), new("2", 1), new("3", 2.2), });
         log.ParentSpanId.Should().Be(fixture.ParentSpanId);
-        log.TryGetAttribute("attribute-key", out string? value).Should().BeTrue();
-        value.Should().Be("attribute-value");
+
+        foreach (var expectedAttribute in fixture.ExpectedAttributes)
+        {
+            log.TryGetAttribute(expectedAttribute.Key, out string? value).Should().BeTrue();
+            value.Should().Be(expectedAttribute.Value);
+        }
     }
 
     private static KeyValuePair<string, object?> CreateHeader(string name, object? value)
     {
         return new KeyValuePair<string, object?>(name, value);
-    }
-}
-
-file static class SentryStructuredLoggerExtensions
-{
-    public static void Log(this SentryStructuredLogger logger, SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog)
-    {
-        switch (level)
-        {
-            case SentryLogLevel.Trace:
-                logger.LogTrace(template, parameters, configureLog);
-                break;
-            case SentryLogLevel.Debug:
-                logger.LogDebug(template, parameters, configureLog);
-                break;
-            case SentryLogLevel.Info:
-                logger.LogInfo(template, parameters, configureLog);
-                break;
-            case SentryLogLevel.Warning:
-                logger.LogWarning(template, parameters, configureLog);
-                break;
-            case SentryLogLevel.Error:
-                logger.LogError(template, parameters, configureLog);
-                break;
-            case SentryLogLevel.Fatal:
-                logger.LogFatal(template, parameters, configureLog);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(level), level, null);
-        }
     }
 }
