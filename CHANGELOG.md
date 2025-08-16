@@ -2,11 +2,17 @@
 
 ## Unreleased
 
+### Features
+
+- Experimental _Structured Logs_:
+  - Shorten the `key` names of `Microsoft.Extensions.Logging` attributes ([#4450](https://github.com/getsentry/sentry-dotnet/pull/4450))
+
 ### Fixes
 
 - Experimental _Structured Logs_:
-  - Remove `IDisposable` from `SentryStructuredLogger`. Disposal is intended through the owning `IHub` instance. ([#4424](https://github.com/getsentry/sentry-dotnet/pull/4424))
-  - Ensure all buffered logs are sent to Sentry when the application terminates unexpectedly. ([#4425](https://github.com/getsentry/sentry-dotnet/pull/4425))
+  - Remove `IDisposable` from `SentryStructuredLogger`. Disposal is intended through the owning `IHub` instance ([#4424](https://github.com/getsentry/sentry-dotnet/pull/4424))
+  - Ensure all buffered logs are sent to Sentry when the application terminates unexpectedly ([#4425](https://github.com/getsentry/sentry-dotnet/pull/4425))
+  - `InvalidOperationException` potentially thrown during a race condition, especially in concurrent high-volume logging scenarios ([#4428](https://github.com/getsentry/sentry-dotnet/pull/4428))
 
 ### Dependencies
 

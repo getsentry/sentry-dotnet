@@ -1,5 +1,4 @@
 using BenchmarkDotNet.Attributes;
-using NSubstitute;
 using Sentry.Extensibility;
 using Sentry.Internal;
 
@@ -30,22 +29,10 @@ public class StructuredLogBatchProcessorBenchmarks
         };
 
         var batchInterval = Timeout.InfiniteTimeSpan;
-
-        var clientReportRecorder = Substitute.For<IClientReportRecorder>();
-        clientReportRecorder
-            .When(static recorder => recorder.RecordDiscardedEvent(Arg.Any<DiscardReason>(), Arg.Any<DataCategory>(), Arg.Any<int>()))
-            .Throw<UnreachableException>();
-
-        var diagnosticLogger = Substitute.For<IDiagnosticLogger>();
-        diagnosticLogger
-            .When(static logger => logger.IsEnabled(Arg.Any<SentryLevel>()))
-            .Throw<UnreachableException>();
-        diagnosticLogger
-            .When(static logger => logger.Log(Arg.Any<SentryLevel>(), Arg.Any<string>(), Arg.Any<Exception>(), Arg.Any<object[]>()))
-            .Throw<UnreachableException>();
+        var clientReportRecorder = new NullClientReportRecorder();
 
         _hub = new Hub(options, DisabledHub.Instance);
-        _batchProcessor = new StructuredLogBatchProcessor(_hub, BatchCount, batchInterval, clientReportRecorder, diagnosticLogger);
+        _batchProcessor = new StructuredLogBatchProcessor(_hub, BatchCount, batchInterval, clientReportRecorder, null);
         _log = new SentryLog(DateTimeOffset.Now, SentryId.Empty, SentryLogLevel.Trace, "message");
     }
 
@@ -59,10 +46,38 @@ public class StructuredLogBatchProcessorBenchmarks
         _batchProcessor.Flush();
     }
 
+    [Benchmark]
+    public void EnqueueAndFlush_Parallel()
+    {
+        _ = Parallel.For(0, OperationsPerInvoke, (int i) =>
+        {
+            _batchProcessor.Enqueue(_log);
+        });
+        _batchProcessor.Flush();
+    }
+
     [GlobalCleanup]
     public void Cleanup()
     {
         _batchProcessor.Dispose();
         _hub.Dispose();
+    }
+}
+
+file sealed class NullClientReportRecorder : IClientReportRecorder
+{
+    public void RecordDiscardedEvent(DiscardReason reason, DataCategory category, int quantity = 1)
+    {
+        // no-op
+    }
+
+    public ClientReport GenerateClientReport()
+    {
+        throw new UnreachableException();
+    }
+
+    public void Load(ClientReport report)
+    {
+        throw new UnreachableException();
     }
 }

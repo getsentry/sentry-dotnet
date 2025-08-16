@@ -40,7 +40,7 @@ internal sealed class ScopedCountdownLock : IDisposable
     internal bool IsEngaged => _isEngaged == 1;
 
     /// <summary>
-    /// No <see cref="CounterScope"/> will be entered when the <see cref="Count"/> has reached <see langword="0"/> while the lock is engaged via an active <see cref="LockScope"/>.
+    /// No <see cref="CounterScope"/> will be entered when the <see cref="Count"/> has reached <see langword="0"/>, or while the lock is engaged via an active <see cref="LockScope"/>.
     /// Check via <see cref="CounterScope.IsEntered"/> whether the underlying <see cref="CountdownEvent"/> has not been set/signaled yet.
     /// To signal the underlying <see cref="CountdownEvent"/>, ensure <see cref="CounterScope.Dispose"/> is called.
     /// </summary>
@@ -49,6 +49,11 @@ internal sealed class ScopedCountdownLock : IDisposable
     /// </remarks>
     internal CounterScope TryEnterCounterScope()
     {
+        if (IsEngaged)
+        {
+            return new CounterScope();
+        }
+
         if (_event.TryAddCount(1))
         {
             return new CounterScope(this);
@@ -59,6 +64,7 @@ internal sealed class ScopedCountdownLock : IDisposable
 
     private void ExitCounterScope()
     {
+        Debug.Assert(_event.CurrentCount >= 1);
         _ = _event.Signal();
     }
 
@@ -75,7 +81,8 @@ internal sealed class ScopedCountdownLock : IDisposable
     {
         if (Interlocked.CompareExchange(ref _isEngaged, 1, 0) == 0)
         {
-            _ = _event.Signal(); // decrement the initial count of 1, so that the event can be set with the count reaching 0 when all 'CounterScope's have exited
+            Debug.Assert(_event.CurrentCount >= 1);
+            _ = _event.Signal(); // decrement the initial count of 1, so that the event can be set with the count reaching 0 when all entered 'CounterScope' instances have exited
             return new LockScope(this);
         }
 
@@ -84,13 +91,13 @@ internal sealed class ScopedCountdownLock : IDisposable
 
     private void ExitLockScope()
     {
-        if (Interlocked.CompareExchange(ref _isEngaged, 0, 1) == 1)
-        {
-            _event.Reset(); // reset the signaled event to the initial count of 1, so that new `CounterScope`s can be entered again
-            return;
-        }
+        Debug.Assert(_event.IsSet);
+        _event.Reset(); // reset the signaled event to the initial count of 1, so that new 'CounterScope' instances can be entered again
 
-        Debug.Fail("The Lock should have not been disengaged without being engaged first.");
+        if (Interlocked.CompareExchange(ref _isEngaged, 0, 1) != 1)
+        {
+            Debug.Fail("The Lock should have not been disengaged without being engaged first.");
+        }
     }
 
     /// <inheritdoc />
@@ -139,7 +146,7 @@ internal sealed class ScopedCountdownLock : IDisposable
         internal void Wait()
         {
             var lockObj = _lockObj;
-            lockObj?._event.Wait();
+            lockObj?._event.Wait(Timeout.Infinite, CancellationToken.None);
         }
 
         public void Dispose()
