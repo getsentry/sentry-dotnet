@@ -83,7 +83,7 @@ public class SentryAspNetCoreStructuredLoggerProviderTests
         logger.LogInformation("message");
 
         Assert.NotNull(capturedLog);
-        capturedLog.TryGetAttribute("microsoft.extensions.logging.category_name", out object? categoryName).Should().BeTrue();
+        capturedLog.TryGetAttribute("category.name", out object? categoryName).Should().BeTrue();
         categoryName.Should().Be(typeof(SentryAspNetCoreStructuredLoggerProviderTests).FullName);
 
         capturedLog.TryGetAttribute("sentry.sdk.name", out object? name).Should().BeTrue();

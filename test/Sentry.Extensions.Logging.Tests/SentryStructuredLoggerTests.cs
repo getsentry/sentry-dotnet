@@ -111,9 +111,9 @@ public class SentryStructuredLoggerTests : IDisposable
         log.AssertAttribute("sentry.release", "my-release");
         log.AssertAttribute("sentry.sdk.name", "SDK Name");
         log.AssertAttribute("sentry.sdk.version", "SDK Version");
-        log.AssertAttribute("microsoft.extensions.logging.category_name", "CategoryName");
-        log.AssertAttribute("microsoft.extensions.logging.event.id", 123);
-        log.AssertAttribute("microsoft.extensions.logging.event.name", "EventName");
+        log.AssertAttribute("category.name", _fixture.CategoryName);
+        log.AssertAttribute("event.id", eventId.Id);
+        log.AssertAttribute("event.name", eventId.Name!);
     }
 
     [Fact]
@@ -192,7 +192,7 @@ public class SentryStructuredLoggerTests : IDisposable
         logger.Log(LogLevel.Information, new EventId(123, "EventName"), new InvalidOperationException("message"), "Message with {Argument}.", "argument");
 
         var log = _fixture.CapturedLogs.Dequeue();
-        log.TryGetAttribute("microsoft.extensions.logging.category_name", out object? _).Should().BeFalse();
+        log.TryGetAttribute("category.name", out object? _).Should().BeFalse();
     }
 
     [Fact]
@@ -216,8 +216,8 @@ public class SentryStructuredLoggerTests : IDisposable
         logger.Log(LogLevel.Information, new InvalidOperationException("message"), "Message with {Argument}.", "argument");
 
         var log = _fixture.CapturedLogs.Dequeue();
-        log.TryGetAttribute("microsoft.extensions.logging.event.id", out object? _).Should().BeFalse();
-        log.TryGetAttribute("microsoft.extensions.logging.event.name", out object? _).Should().BeFalse();
+        log.TryGetAttribute("event.id", out object? _).Should().BeFalse();
+        log.TryGetAttribute("event.name", out object? _).Should().BeFalse();
     }
 
     [Fact]
@@ -228,8 +228,8 @@ public class SentryStructuredLoggerTests : IDisposable
         logger.Log(LogLevel.Information, new EventId(0, "EventName"), new InvalidOperationException("message"), "Message with {Argument}.", "argument");
 
         var log = _fixture.CapturedLogs.Dequeue();
-        log.AssertAttribute("microsoft.extensions.logging.event.id", 0);
-        log.AssertAttribute("microsoft.extensions.logging.event.name", "EventName");
+        log.AssertAttribute("event.id", 0);
+        log.AssertAttribute("event.name", "EventName");
     }
 
     [Fact]
@@ -240,8 +240,8 @@ public class SentryStructuredLoggerTests : IDisposable
         logger.Log(LogLevel.Information, new EventId(123), new InvalidOperationException("message"), "Message with {Argument}.", "argument");
 
         var log = _fixture.CapturedLogs.Dequeue();
-        log.AssertAttribute("microsoft.extensions.logging.event.id", 123);
-        log.TryGetAttribute("microsoft.extensions.logging.event.name", out object? _).Should().BeFalse();
+        log.AssertAttribute("event.id", 123);
+        log.TryGetAttribute("event.name", out object? _).Should().BeFalse();
     }
 
     [Theory]
