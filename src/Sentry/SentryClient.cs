@@ -379,13 +379,13 @@ public class SentryClient : ISentryClient, IDisposable
             if (!_randomValuesFactory.NextBool(sampleRate))
             {
                 _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
-                _options.LogDebug("Event sampled.");
+                _options.LogDebug("Event sampled out.");
                 return SentryId.Empty;
             }
         }
         else
         {
-            _options.LogDebug("Event not sampled.");
+            _options.LogDebug("Event sampled in.");
         }
 
         if (!_options.SendDefaultPii)
