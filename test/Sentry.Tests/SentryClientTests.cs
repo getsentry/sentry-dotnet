@@ -624,17 +624,29 @@ public partial class SentryClientTests
     }
 
     [Theory]
-    [InlineData(0.25f)]
-    [InlineData(0.50f)]
-    [InlineData(0.75f)]
-    public void CaptureEvent_WithSampleRate_AppropriateDistribution(float sampleRate)
+    [InlineData(0.25f, 0)]
+    [InlineData(0.50f, 0)]
+    [InlineData(0.75f, 0)]
+    [InlineData(0.25f, 1)]
+    [InlineData(0.50f, 1)]
+    [InlineData(0.75f, 1)]
+    [InlineData(0.25f, 3)]
+    [InlineData(0.50f, 3)]
+    [InlineData(0.75f, 3)]
+    public void CaptureEvent_WithSampleRate_AppropriateDistribution(float sampleRate, int downsampleLevel)
     {
         // Arrange
+        var now = DateTimeOffset.UtcNow;
+        var clock = new MockClock(now);
+        var backpressureMonitor = new BackpressureMonitor(null, clock, startImmediately: false);
+        backpressureMonitor.SetDownsampleLevel(downsampleLevel);
+        _fixture.SentryOptions.SampleRate = sampleRate;
+        _fixture.SentryOptions.BackpressureMonitor = backpressureMonitor;
+
         const int numEvents = 1000;
         const double allowedRelativeDeviation = 0.15;
         const uint allowedDeviation = (uint)(allowedRelativeDeviation * numEvents);
-        var expectedSampled = (int)(sampleRate * numEvents);
-        _fixture.SentryOptions.SampleRate = sampleRate;
+        var expectedSampled = (int)(numEvents * sampleRate * backpressureMonitor.DownsampleFactor);
 
         // This test expects an approximate uniform distribution of random numbers, so we'll retry a few times.
         TestHelpers.RetryTest(maxAttempts: 3, _output, () =>
