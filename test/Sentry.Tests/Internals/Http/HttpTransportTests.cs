@@ -856,6 +856,7 @@ public partial class HttpTransportTests
                 () => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
             ));
 
+        using var backpressureMonitor = new BackpressureMonitor(null, _fakeClock, false);
         var options = new SentryOptions
         {
             Dsn = ValidDsn,
@@ -863,7 +864,7 @@ public partial class HttpTransportTests
             SendClientReports = false,
             ClientReportRecorder = Substitute.For<IClientReportRecorder>(),
             Debug = true,
-            BackpressureMonitor = new BackpressureMonitor(null, _fakeClock, false)
+            BackpressureMonitor = backpressureMonitor
         };
 
         var httpTransport = new HttpTransport(
@@ -876,7 +877,7 @@ public partial class HttpTransportTests
         await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
 
         // Assert
-        options.BackpressureMonitor.LastRateLimitEventTicks.Should().Be(_fakeClock.GetUtcNow().Ticks);
-        options.BackpressureMonitor.IsHealthy.Should().BeFalse();
+        backpressureMonitor.LastRateLimitEventTicks.Should().Be(_fakeClock.GetUtcNow().Ticks);
+        backpressureMonitor.IsHealthy.Should().BeFalse();
     }
 }
