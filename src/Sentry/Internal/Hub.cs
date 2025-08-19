@@ -44,8 +44,7 @@ internal class Hub : IHub, IDisposable
         ISystemClock? clock = null,
         IInternalScopeManager? scopeManager = null,
         RandomValuesFactory? randomValuesFactory = null,
-        IReplaySession? replaySession = null,
-        BackpressureMonitor? backpressureMonitor = null)
+        IReplaySession? replaySession = null)
     {
         if (string.IsNullOrWhiteSpace(options.Dsn))
         {
@@ -60,9 +59,10 @@ internal class Hub : IHub, IDisposable
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
         _clock = clock ?? SystemClock.Clock;
-        _options.BackpressureMonitor = _options.EnableBackpressureHandling
-            ? backpressureMonitor ?? new BackpressureMonitor(_options.DiagnosticLogger, clock)
-            : null;
+        if (_options.EnableBackpressureHandling && _options.BackpressureMonitor is null)
+        {
+            _options.BackpressureMonitor = new BackpressureMonitor(_options.DiagnosticLogger, clock);
+        }
         client ??= new SentryClient(options, randomValuesFactory: _randomValuesFactory, sessionManager: _sessionManager);
         _replaySession = replaySession ?? ReplaySession.Instance;
         ScopeManager = scopeManager ?? new SentryScopeManager(options, client);
