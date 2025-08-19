@@ -375,7 +375,9 @@ public class SentryClient : ISentryClient, IDisposable
 
         if (_options.SampleRate != null)
         {
-            if (!_randomValuesFactory.NextBool(_options.SampleRate.Value))
+            var downsampleFactor = _options.BackpressureMonitor.GetDownsampleFactor();
+            var sampleRate = _options.SampleRate.Value * downsampleFactor;
+            if (!_randomValuesFactory.NextBool(sampleRate))
             {
                 _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
                 _options.LogDebug("Event sampled.");

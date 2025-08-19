@@ -66,6 +66,7 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
         var eventId = envelope.TryGetEventId(_options.DiagnosticLogger);
         if (Interlocked.Increment(ref _currentItems) > _maxItems)
         {
+            _options.BackpressureMonitor?.RecordQueueOverflow();
             Interlocked.Decrement(ref _currentItems);
             _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.QueueOverflow, envelope);
             _options.LogInfo("Discarding envelope {0} because the queue is full.", eventId);

@@ -44,7 +44,8 @@ internal class Hub : IHub, IDisposable
         ISystemClock? clock = null,
         IInternalScopeManager? scopeManager = null,
         RandomValuesFactory? randomValuesFactory = null,
-        IReplaySession? replaySession = null)
+        IReplaySession? replaySession = null,
+        BackpressureMonitor? backpressureMonitor = null)
     {
         if (string.IsNullOrWhiteSpace(options.Dsn))
         {
@@ -59,6 +60,9 @@ internal class Hub : IHub, IDisposable
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
         _clock = clock ?? SystemClock.Clock;
+        _options.BackpressureMonitor = _options.EnableBackpressureHandling
+            ? backpressureMonitor ?? new BackpressureMonitor(_options.DiagnosticLogger, clock)
+            : null;
         client ??= new SentryClient(options, randomValuesFactory: _randomValuesFactory, sessionManager: _sessionManager);
         _replaySession = replaySession ?? ReplaySession.Instance;
         ScopeManager = scopeManager ?? new SentryScopeManager(options, client);
@@ -189,11 +193,11 @@ internal class Hub : IHub, IDisposable
             if (tracesSampler(samplingContext) is { } samplerSampleRate)
             {
                 // The TracesSampler trumps all other sampling decisions (even the trace header)
-                sampleRate = samplerSampleRate;
-                isSampled = SampleRandHelper.IsSampled(sampleRand, samplerSampleRate);
+                sampleRate = samplerSampleRate * _options.BackpressureMonitor.GetDownsampleFactor();
+                isSampled = SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
 
                 // Ensure the actual sampleRate is set on the provided DSC (if any) when the TracesSampler reached a sampling decision
-                dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(samplerSampleRate);
+                dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(sampleRate.Value);
             }
         }
 
@@ -201,13 +205,13 @@ internal class Hub : IHub, IDisposable
         // finally fallback to Random sampling if the decision has been made by no other means
         if (isSampled == null)
         {
-            sampleRate = _options.TracesSampleRate ?? 0.0;
+            sampleRate = (_options.TracesSampleRate ?? 0.0) * _options.BackpressureMonitor.GetDownsampleFactor();
             isSampled = context.IsSampled ?? SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
 
             if (context.IsSampled is null && _options.TracesSampleRate is not null)
             {
                 // Ensure the actual sampleRate is set on the provided DSC (if any) when not IsSampled upstream but the TracesSampleRate reached a sampling decision
-                dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(_options.TracesSampleRate.Value);
+                dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(sampleRate.Value);
             }
         }
 
