@@ -307,7 +307,6 @@ public class SentryClient : ISentryClient, IDisposable
     /// <returns>A task to await for the flush operation.</returns>
     public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
-    // TODO: this method needs to be refactored, it's really hard to analyze nullability
     private SentryId DoSendEvent(SentryEvent @event, SentryHint? hint, Scope? scope)
     {
         var filteredExceptions = ApplyExceptionFilters(@event.Exception);
