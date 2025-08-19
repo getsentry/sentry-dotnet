@@ -19,9 +19,8 @@ internal class MauiCustomSessionReplayMaskBinder : IMauiElementEventBinder
         _options = options.Value;
 #if __ANDROID__
         var replayOptions = _options.Native.ExperimentalOptions.SessionReplay;
-        _isEnabled = (replayOptions.SessionSampleRate > 0.0 || replayOptions.OnErrorSampleRate > 0.0)
-            && replayOptions is not { MaskAllImages: true, MaskAllText: true }
-            && !replayOptions.DisableCustomSessionReplayMasks;
+        var sessionReplayEnabled = replayOptions.OnErrorSampleRate > 0.0 || replayOptions.SessionSampleRate > 0.0;
+        _isEnabled = sessionReplayEnabled && !replayOptions.DisableCustomSessionReplayMasks;
 #else
         _isEnabled = false; // Session replay is only supported on Android for now
 #endif
