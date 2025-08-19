@@ -846,4 +846,37 @@ public partial class HttpTransportTests
         var expectedDiscardedSpanCount = transaction.Spans.Count + 1;
         options.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Span, expectedDiscardedSpanCount);
     }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_RateLimited_CallsBackpressureMonitor()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler(
+                () => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
+            ));
+
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _testOutputLogger,
+            SendClientReports = false,
+            ClientReportRecorder = Substitute.For<IClientReportRecorder>(),
+            Debug = true,
+            BackpressureMonitor = new BackpressureMonitor(null, _fakeClock, false)
+        };
+
+        var httpTransport = new HttpTransport(
+            options,
+            new HttpClient(httpHandler),
+            clock: _fakeClock
+        );
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+        // Assert
+        options.BackpressureMonitor.LastRateLimitEventTicks.Should().Be(_fakeClock.GetUtcNow().Ticks);
+        options.BackpressureMonitor.IsHealthy.Should().BeFalse();
+    }
 }
