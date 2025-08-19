@@ -707,7 +707,7 @@ public partial class SentryClientTests
 
         var logger = Substitute.For<IDiagnosticLogger>();
         logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-        logger.When(x => x.Log(Arg.Any<SentryLevel>(), Arg.Is("Event not sampled.")))
+        logger.When(x => x.Log(Arg.Any<SentryLevel>(), Arg.Is("Event sampled in.")))
             .Do(_ => processingOrder.Add("SampleRate"));
         _fixture.SentryOptions.DiagnosticLogger = logger;
         _fixture.SentryOptions.Debug = true;
