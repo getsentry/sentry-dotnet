@@ -6,6 +6,7 @@
 
 - Experimental _Structured Logs_:
   - Shorten the `key` names of `Microsoft.Extensions.Logging` attributes ([#4450](https://github.com/getsentry/sentry-dotnet/pull/4450))
+- Added an option for Automatic backpressure handling. When enabled this automatically reduces the sample rate when the SDK detects events being dropped. ([#4452](https://github.com/getsentry/sentry-dotnet/pull/4452))
 
 ### Fixes
 
