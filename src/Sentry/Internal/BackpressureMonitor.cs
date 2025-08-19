@@ -137,8 +137,8 @@ internal class BackpressureMonitor : IDisposable
         {
             var nowTicks = _clock.GetUtcNow().Ticks;
             var recentOverflowCutoff = nowTicks - RecencyThresholdTicks;
-            var rateLimitCutoff      = nowTicks - CheckIntervalTicks;
-            return LastQueueOverflowTicks  < recentOverflowCutoff && LastRateLimitEventTicks < rateLimitCutoff;
+            var rateLimitCutoff = nowTicks - CheckIntervalTicks;
+            return LastQueueOverflowTicks < recentOverflowCutoff && LastRateLimitEventTicks < rateLimitCutoff;
         }
     }
 

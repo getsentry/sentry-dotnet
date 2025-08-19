@@ -8,10 +8,10 @@ public class BackpressureMonitorTests
         public ISystemClock Clock { get; } = Substitute.For<ISystemClock>();
         public DateTimeOffset Now { get; set; } = DateTimeOffset.UtcNow;
 
-        public BackpressureMonitor GetSut() => new (Logger, Clock, startImmediately: false);
+        public BackpressureMonitor GetSut() => new(Logger, Clock, startImmediately: false);
     }
 
-    private readonly Fixture _fixture = new ();
+    private readonly Fixture _fixture = new();
 
     [Fact]
     public void DownsampleFactor_Initial_IsOne()
@@ -30,7 +30,7 @@ public class BackpressureMonitorTests
     [InlineData(0, 1.0)]
     [InlineData(1, 0.5)]
     [InlineData(2, 0.25)]
-    [InlineData(10, 1.0/1024)]
+    [InlineData(10, 1.0 / 1024)]
     public void DownsampleFactor_CalculatesCorrectly(int level, double expected)
     {
         // Arrange
