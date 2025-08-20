@@ -17,6 +17,7 @@ public static class SentrySinkExtensions
     /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb. <seealso cref="SentrySerilogOptions.MinimumBreadcrumbLevel"/></param>
     /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param>
     /// <param name="textFormatter">The Serilog text formatter. <seealso cref="ITextFormatter"/></param>
+    /// <param name="experimentalEnableLogs">Whether to send structured logs. <seealso cref="SentryOptions.SentryExperimentalOptions.EnableLogs"/></param>
     /// <param name="sendDefaultPii">Whether to include default Personal Identifiable information. <seealso cref="SentryOptions.SendDefaultPii"/></param>
     /// <param name="isEnvironmentUser">Whether to report the <see cref="System.Environment.UserName"/> as the User affected in the event. <seealso cref="SentryOptions.IsEnvironmentUser"/></param>
     /// <param name="serverName">Gets or sets the name of the server running the application. <seealso cref="SentryOptions.ServerName"/></param>
@@ -50,7 +51,8 @@ public static class SentrySinkExtensions
     ///                     "dsn": "https://MY-DSN@sentry.io",
     ///                     "minimumBreadcrumbLevel": "Verbose",
     ///                     "minimumEventLevel": "Error",
-    ///                     "outputTemplate": "{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}"///
+    ///                     "outputTemplate": "{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}",
+    ///                     "experimentalEnableLogs": true,
     ///                     "sendDefaultPii": false,
     ///                     "isEnvironmentUser": false,
     ///                     "serverName": "MyServerName",
@@ -86,6 +88,7 @@ public static class SentrySinkExtensions
         LogEventLevel? minimumEventLevel = null,
         IFormatProvider? formatProvider = null,
         ITextFormatter? textFormatter = null,
+        bool? experimentalEnableLogs = null,
         bool? sendDefaultPii = null,
         bool? isEnvironmentUser = null,
         string? serverName = null,
@@ -111,6 +114,7 @@ public static class SentrySinkExtensions
             minimumBreadcrumbLevel,
             formatProvider,
             textFormatter,
+            experimentalEnableLogs,
             sendDefaultPii,
             isEnvironmentUser,
             serverName,
@@ -143,6 +147,7 @@ public static class SentrySinkExtensions
     /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb. <seealso cref="SentrySerilogOptions.MinimumBreadcrumbLevel"/></param>
     /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param>
     /// <param name="textFormatter">The Serilog text formatter. <seealso cref="ITextFormatter"/></param>
+    /// <param name="experimentalEnableLogs">Whether to send structured logs. <seealso cref="SentryOptions.SentryExperimentalOptions.EnableLogs"/></param>
     /// <returns><see cref="LoggerConfiguration"/></returns>
     /// <example>This sample shows how each item may be set from within a configuration file:
     /// <code>
@@ -157,7 +162,8 @@ public static class SentrySinkExtensions
     ///                 "Args": {
     ///                     "minimumEventLevel": "Error",
     ///                     "minimumBreadcrumbLevel": "Verbose",
-    ///                     "outputTemplate": "{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}"///
+    ///                     "outputTemplate": "{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}",
+    ///                     "experimentalEnableLogs": true
     ///                 }
     ///             }
     ///         ]
@@ -170,7 +176,8 @@ public static class SentrySinkExtensions
         LogEventLevel? minimumEventLevel = null,
         LogEventLevel? minimumBreadcrumbLevel = null,
         IFormatProvider? formatProvider = null,
-        ITextFormatter? textFormatter = null
+        ITextFormatter? textFormatter = null,
+        bool? experimentalEnableLogs = null
         )
     {
         return loggerConfiguration.Sentry(o => ConfigureSentrySerilogOptions(o,
@@ -178,7 +185,8 @@ public static class SentrySinkExtensions
             minimumEventLevel,
             minimumBreadcrumbLevel,
             formatProvider,
-            textFormatter));
+            textFormatter,
+            experimentalEnableLogs));
     }
 
     internal static void ConfigureSentrySerilogOptions(
@@ -188,6 +196,7 @@ public static class SentrySinkExtensions
         LogEventLevel? minimumBreadcrumbLevel = null,
         IFormatProvider? formatProvider = null,
         ITextFormatter? textFormatter = null,
+        bool? experimentalEnableLogs = null,
         bool? sendDefaultPii = null,
         bool? isEnvironmentUser = null,
         string? serverName = null,
@@ -230,6 +239,11 @@ public static class SentrySinkExtensions
         if (textFormatter != null)
         {
             sentrySerilogOptions.TextFormatter = textFormatter;
+        }
+
+        if (experimentalEnableLogs.HasValue)
+        {
+            sentrySerilogOptions.Experimental.EnableLogs = experimentalEnableLogs.Value;
         }
 
         if (sendDefaultPii.HasValue)
@@ -354,7 +368,14 @@ public static class SentrySinkExtensions
             sdkDisposable = SentrySdk.Init(options);
         }
 
-        var minimumOverall = (LogEventLevel)Math.Min((int)options.MinimumBreadcrumbLevel, (int)options.MinimumEventLevel);
-        return loggerConfiguration.Sink(new SentrySink(options, sdkDisposable), minimumOverall);
+        if (options.Experimental.EnableLogs)
+        {
+            return loggerConfiguration.Sink(new SentrySink(options, sdkDisposable));
+        }
+        else
+        {
+            var minimumOverall = (LogEventLevel)Math.Min((int)options.MinimumBreadcrumbLevel, (int)options.MinimumEventLevel);
+            return loggerConfiguration.Sink(new SentrySink(options, sdkDisposable), minimumOverall);
+        }
     }
 }

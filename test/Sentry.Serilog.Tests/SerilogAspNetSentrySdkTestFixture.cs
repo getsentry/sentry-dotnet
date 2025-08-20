@@ -6,13 +6,23 @@ namespace Sentry.Serilog.Tests;
 public class SerilogAspNetSentrySdkTestFixture : AspNetSentrySdkTestFixture
 {
     protected List<SentryEvent> Events;
+    protected List<SentryLog> Logs;
 
     protected override void ConfigureBuilder(WebHostBuilder builder)
     {
         Events = new List<SentryEvent>();
         Configure = options =>
         {
-            options.SetBeforeSend((@event, _) => { Events.Add(@event); return @event; });
+            options.SetBeforeSend((@event, _) =>
+            {
+                Events.Add(@event);
+                return @event;
+            });
+            options.Experimental.SetBeforeSendLog(log =>
+            {
+                Logs.Add(log);
+                return log;
+            });
         };
 
         ConfigureApp = app =>
