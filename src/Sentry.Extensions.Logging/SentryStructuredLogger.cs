@@ -92,15 +92,15 @@ internal sealed class SentryStructuredLogger : ILogger
 
         if (_categoryName is not null)
         {
-            log.SetAttribute("microsoft.extensions.logging.category_name", _categoryName);
+            log.SetAttribute("category.name", _categoryName);
         }
         if (eventId.Name is not null || eventId.Id != 0)
         {
-            log.SetAttribute("microsoft.extensions.logging.event.id", eventId.Id);
+            log.SetAttribute("event.id", eventId.Id);
         }
         if (eventId.Name is not null)
         {
-            log.SetAttribute("microsoft.extensions.logging.event.name", eventId.Name);
+            log.SetAttribute("event.name", eventId.Name);
         }
 
         _hub.Logger.CaptureLog(log);
