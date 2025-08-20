@@ -743,6 +743,7 @@ public partial class HubTests
             {"sentry-sample_rate", "0.5"},
             {"sentry-sample_rand", "0.1234"},
         }).CreateDynamicSamplingContext();
+        var originalDsc = dsc?.Clone();
 
         _fixture.Options.TracesSampler = _ => tracesSampler;
         _fixture.Options.TracesSampleRate = tracesSampleRate;
@@ -759,12 +760,12 @@ public partial class HubTests
             transactionTracer.SampleRate.Should().Be(expectedSampleRate);
             if (expectedDscOverwritten)
             {
-                transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(dsc);
-                transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(expectedSampleRate));
+                transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
+                transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(originalDsc.CloneWithSampleRate(expectedSampleRate));
             }
             else
             {
-                transactionTracer.DynamicSamplingContext.Should().BeSameAs(dsc);
+                transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(originalDsc);
             }
         }
         else
@@ -773,12 +774,12 @@ public partial class HubTests
             unsampledTransaction.SampleRate.Should().Be(expectedSampleRate);
             if (expectedDscOverwritten)
             {
-                unsampledTransaction.DynamicSamplingContext.Should().NotBeSameAs(dsc);
-                unsampledTransaction.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(expectedSampleRate));
+                unsampledTransaction.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
+                unsampledTransaction.DynamicSamplingContext.Should().BeEquivalentTo(originalDsc.CloneWithSampleRate(expectedSampleRate));
             }
             else
             {
-                unsampledTransaction.DynamicSamplingContext.Should().BeSameAs(dsc);
+                unsampledTransaction.DynamicSamplingContext.Should().BeEquivalentTo(originalDsc);
             }
         }
     }
@@ -814,12 +815,12 @@ public partial class HubTests
         transactionTracer.IsSampled.Should().BeTrue();
         transactionTracer.DynamicSamplingContext.Should().NotBeNull();
 
-        var expectedDsc = dsc.ReplaceSampleRate(_fixture.Options.TracesSampleRate.Value);
+        var expectedDsc = dsc.CloneWithSampleRate(_fixture.Options.TracesSampleRate.Value);
         if (replaySessionIsActive)
         {
             // We overwrite the replay_id when we have an active replay session
             // Otherwise we propagate whatever was in the baggage header
-            expectedDsc = expectedDsc.ReplaceReplayId(_fixture.ReplaySession);
+            expectedDsc = expectedDsc.CloneWithReplayId(_fixture.ReplaySession);
         }
         transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(expectedDsc);
     }
@@ -905,6 +906,7 @@ public partial class HubTests
             {"sentry-sample_rate", "0.5"}, // Required in the baggage header, but ignored by sampling logic
             {"sentry-sample_rand", "0.1234"}
         }).CreateDynamicSamplingContext(dummyReplaySession);
+        var originalDsc = dsc.Clone();
 
         _fixture.Options.TracesSampleRate = 0.4;
         var hub = _fixture.GetSut();
@@ -917,8 +919,8 @@ public partial class HubTests
         transactionTracer.IsSampled.Should().BeTrue();
         transactionTracer.SampleRate.Should().Be(0.4);
         transactionTracer.SampleRand.Should().Be(0.1234);
-        transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(dsc);
-        transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(0.4));
+        transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
+        transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(originalDsc.CloneWithSampleRate(0.4));
     }
 
     [Theory]
@@ -937,6 +939,7 @@ public partial class HubTests
             {"sentry-sample_rate", "0.5"},
             {"sentry-sample_rand", "0.1234"}
         }).CreateDynamicSamplingContext(_fixture.ReplaySession);
+        var originalDsc = dsc.Clone();
 
         _fixture.Options.TracesSampler = _ => sampleRate;
         var hub = _fixture.GetSut();
@@ -951,8 +954,8 @@ public partial class HubTests
             transactionTracer.IsSampled.Should().BeTrue();
             transactionTracer.SampleRate.Should().Be(sampleRate);
             transactionTracer.SampleRand.Should().Be(0.1234);
-            transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(dsc);
-            transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(sampleRate));
+            transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
+            transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(originalDsc.CloneWithSampleRate(sampleRate));
         }
         else
         {
@@ -960,8 +963,8 @@ public partial class HubTests
             unsampledTransaction.IsSampled.Should().BeFalse();
             unsampledTransaction.SampleRate.Should().Be(sampleRate);
             unsampledTransaction.SampleRand.Should().Be(0.1234);
-            unsampledTransaction.DynamicSamplingContext.Should().NotBeSameAs(dsc);
-            unsampledTransaction.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(sampleRate));
+            unsampledTransaction.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
+            unsampledTransaction.DynamicSamplingContext.Should().BeEquivalentTo(originalDsc.CloneWithSampleRate(sampleRate));
         }
     }
 
@@ -981,6 +984,7 @@ public partial class HubTests
             {"sentry-sample_rate", "0.5"}, // Static sampling ignores this and uses options.TracesSampleRate instead
             {"sentry-sample_rand", "0.1234"}
         }).CreateDynamicSamplingContext(dummyReplaySession);
+        var originalDsc = dsc.Clone();
 
         _fixture.Options.TracesSampleRate = sampleRate;
         var hub = _fixture.GetSut();
@@ -995,8 +999,8 @@ public partial class HubTests
             transactionTracer.IsSampled.Should().BeTrue();
             transactionTracer.SampleRate.Should().Be(sampleRate);
             transactionTracer.SampleRand.Should().Be(0.1234);
-            transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(dsc);
-            transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(sampleRate));
+            transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
+            transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(originalDsc.CloneWithSampleRate(sampleRate));
         }
         else
         {
@@ -1004,8 +1008,8 @@ public partial class HubTests
             unsampledTransaction.IsSampled.Should().BeFalse();
             unsampledTransaction.SampleRate.Should().Be(sampleRate);
             unsampledTransaction.SampleRand.Should().Be(0.1234);
-            unsampledTransaction.DynamicSamplingContext.Should().NotBeSameAs(dsc);
-            unsampledTransaction.DynamicSamplingContext.Should().BeEquivalentTo(dsc.ReplaceSampleRate(sampleRate));
+            unsampledTransaction.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
+            unsampledTransaction.DynamicSamplingContext.Should().BeEquivalentTo(originalDsc.CloneWithSampleRate(sampleRate));
         }
     }
 
@@ -1255,7 +1259,7 @@ public partial class HubTests
         baggage.Members.Should().Equal([
             new KeyValuePair<string, string>("sentry-trace_id", "43365712692146d08ee11a729dfbcaca"),
             new KeyValuePair<string, string>("sentry-public_key", "d4d82fc1c2c4032a83f3a29aa3a3aff"),
-            new KeyValuePair<string, string>("sentry-sample_rate", isSampled ? "1" : "0.0"),
+            new KeyValuePair<string, string>("sentry-sample_rate", isSampled ? "1" : "0"),
             new KeyValuePair<string, string>("sentry-sample_rand", sampleRand!.Value.ToString(CultureInfo.InvariantCulture)),
         ]);
     }
@@ -2409,63 +2413,19 @@ internal partial class HubTestsJsonContext : JsonSerializerContext
 #nullable enable
 file static class DynamicSamplingContextExtensions
 {
-    public static DynamicSamplingContext ReplaceSampleRate(this DynamicSamplingContext? dsc, double sampleRate)
+    public static DynamicSamplingContext CloneWithSampleRate(this DynamicSamplingContext? dsc, double sampleRate)
     {
         Assert.NotNull(dsc);
-
-        var value = sampleRate.ToString(CultureInfo.InvariantCulture);
-        return dsc.Replace("sentry-sample_rate", value);
+        var newDsc = dsc.Clone();
+        newDsc.SetSampleRate(sampleRate);
+        return newDsc;
     }
 
-    public static DynamicSamplingContext ReplaceReplayId(this DynamicSamplingContext? dsc, IReplaySession replaySession)
+    public static DynamicSamplingContext CloneWithReplayId(this DynamicSamplingContext? dsc, IReplaySession replaySession)
     {
         Assert.NotNull(dsc);
-
-        if (!replaySession.ActiveReplayId.HasValue)
-        {
-            throw new InvalidOperationException($"No {nameof(IReplaySession.ActiveReplayId)}.");
-        }
-
-        var value = replaySession.ActiveReplayId.Value.ToString();
-        return dsc.Replace("sentry-replay_id", value);
-    }
-
-    private static DynamicSamplingContext Replace(this DynamicSamplingContext dsc, string key, string newValue)
-    {
-        var items = dsc.ToBaggageHeader().Members.ToList();
-        var index = items.FindSingleIndex(key);
-
-        var oldValue = items[index].Value;
-        if (oldValue == newValue)
-        {
-            throw new InvalidOperationException($"{key} already is {oldValue}.");
-        }
-
-        items[index] = new KeyValuePair<string, string>(key, newValue);
-
-        var baggage = BaggageHeader.Create(items);
-        var dynamicSamplingContext = DynamicSamplingContext.CreateFromBaggageHeader(baggage, null);
-        if (dynamicSamplingContext is null)
-        {
-            throw new InvalidOperationException($"Invalid {nameof(BaggageHeader)}: {baggage}");
-        }
-
-        return dynamicSamplingContext;
-    }
-
-    private static int FindSingleIndex(this List<KeyValuePair<string, string>> items, string key)
-    {
-        var index = items.FindIndex(item => item.Key == key);
-        if (index == -1)
-        {
-            throw new InvalidOperationException($"{key} not found.");
-        }
-
-        if (items.FindLastIndex(item => item.Key == key) != index)
-        {
-            throw new InvalidOperationException($"Duplicate {key} found.");
-        }
-
-        return index;
+        var newDsc = dsc.Clone();
+        newDsc.SetReplayId(replaySession);
+        return newDsc;
     }
 }
