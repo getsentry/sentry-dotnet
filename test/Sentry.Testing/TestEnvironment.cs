@@ -18,6 +18,4 @@ public static class TestEnvironment
 
     public static bool IsWinX64 => RuntimeInformation.OSArchitecture == Architecture.X64
                                    && RuntimeInformation.OSDescription.Contains("Windows");
-
-    public static bool IsLinux => RuntimeInformation.OSDescription.Contains("Linux");
 }

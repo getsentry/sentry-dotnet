@@ -117,7 +117,7 @@ public class SamplingTransactionProfilerTests
     [SkippableFact]
     public void Profiler_WithZeroStartupTimeout_CapturesAfterStartingAsynchronously()
     {
-        Skip.If(TestEnvironment.IsGitHubActions && (TestEnvironment.IsWinX64 || TestEnvironment.IsLinux),
+        Skip.If(TestEnvironment.IsGitHubActions && (TestEnvironment.IsWinX64 || RuntimeInformation.IsOSPlatform(OSPlatform.Linux)),
             "Flaky in CI on Windows X64 and Linux.");
 
         using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.Zero);
