@@ -8,7 +8,7 @@ public class SerilogAspNetSentrySdkTestFixture : AspNetSentrySdkTestFixture
     protected List<SentryEvent> Events;
     protected List<SentryLog> Logs;
 
-    protected bool ExperimentalEnableLogs { get; set; } = false;
+    protected bool ExperimentalEnableLogs { get; set; }
 
     protected override void ConfigureBuilder(WebHostBuilder builder)
     {

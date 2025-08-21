@@ -43,6 +43,7 @@ public class AspNetCoreIntegrationTests : SerilogAspNetSentrySdkTestFixture
         Handlers = new[] { handler };
         Build();
         await HttpClient.GetAsync(handler.Path);
+        ServiceProvider.GetRequiredService<IHub>().Logger.Flush();
 
         Assert.Empty(Logs);
     }
@@ -65,6 +66,7 @@ public class AspNetCoreIntegrationTests : SerilogAspNetSentrySdkTestFixture
         Handlers = new[] { handler };
         Build();
         await HttpClient.GetAsync(handler.Path);
+        ServiceProvider.GetRequiredService<IHub>().Logger.Flush();
 
         Assert.NotEmpty(Logs);
         Assert.Contains(Logs, log => log.Level == SentryLogLevel.Info && log.Message == "Hello, World!");
