@@ -62,13 +62,13 @@ public partial class SentrySinkTests
             .MinimumLevel.Verbose()
             .Enrich.WithProperty("Scalar-Property", 42)
             .Enrich.WithProperty("Sequence-Property", new[] { 41, 42, 43 })
-            .Enrich.WithProperty("Dictionary-Property", new Dictionary<string, string> { {"key", "value"} })
+            .Enrich.WithProperty("Dictionary-Property", new Dictionary<string, string> { { "key", "value" } })
             .Enrich.WithProperty("Structure-Property", (Number: 42, Text: "42"))
             .CreateLogger();
 
         logger.Write(LogEventLevel.Information,
             "Message with Scalar property {Scalar}, Sequence property: {Sequence}, Dictionary property: {Dictionary}, and Structure property: {Structure}.",
-            42, new[] { 41, 42, 43 }, new Dictionary<string, string> { {"key", "value"} }, (Number: 42, Text: "42"));
+            42, new[] { 41, 42, 43 }, new Dictionary<string, string> { { "key", "value" } }, (Number: 42, Text: "42"));
 
         var log = capturer.Logs.Should().ContainSingle().Which;
         log.Timestamp.Should().BeOnOrBefore(DateTimeOffset.Now);

@@ -125,8 +125,8 @@ public class IntegrationTests
         Log.Logger = configuration.CreateLogger();
 
         Log.Debug("Debug message with a Scalar property: {Scalar}", 42);
-        Log.Information("Information message with a Sequence property: {Sequence}", new object[] { new int[] { 41, 42, 43} });
-        Log.Warning("Warning message with a Dictionary property: {Dictionary}", new Dictionary<string, string> { {"key", "value"} });
+        Log.Information("Information message with a Sequence property: {Sequence}", new object[] { new int[] { 41, 42, 43 } });
+        Log.Warning("Warning message with a Dictionary property: {Dictionary}", new Dictionary<string, string> { { "key", "value" } });
         Log.Error("Error message with a Structure property: {Structure}", (Number: 42, Text: "42"));
 
         Log.CloseAndFlush();

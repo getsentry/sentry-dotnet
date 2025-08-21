@@ -1,5 +1,5 @@
-using Serilog.Parsing;
 using Sentry.Internal.Extensions;
+using Serilog.Parsing;
 
 namespace Sentry.Serilog;
 
