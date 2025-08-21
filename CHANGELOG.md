@@ -5,6 +5,7 @@
 ### Features
 
 - Experimental _Structured Logs_:
+  - Add integration for `Serilog` ([#4462](https://github.com/getsentry/sentry-dotnet/pull/4462))
   - Shorten the `key` names of `Microsoft.Extensions.Logging` attributes ([#4450](https://github.com/getsentry/sentry-dotnet/pull/4450))
 
 ### Fixes
@@ -17,8 +18,8 @@
 ### Dependencies
 
 - Reapply "Bump Cocoa SDK from v8.39.0 to v8.46.0 (#4103)" ([#4442](https://github.com/getsentry/sentry-dotnet/pull/4442))
-    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8460)
-    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.46.0)
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8460)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.46.0)
 - Bump Native SDK from v0.9.1 to v0.10.0 ([#4436](https://github.com/getsentry/sentry-dotnet/pull/4436))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0100)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.9.1...0.10.0)
