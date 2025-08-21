@@ -276,40 +276,39 @@ public partial class SentryOptions
             internal HashSet<Type> MaskedControls { get; } = [];
             internal HashSet<Type> UnmaskedControls { get; } = [];
 
-            internal bool IsCustomMaskingEnabled { get; private set; }
-
             internal bool IsSessionReplayEnabled => OnErrorSampleRate > 0.0 || SessionSampleRate > 0.0;
 
+            /// <summary>
+            /// Allows you to mask all controls of a particular type for session replay recordings.
+            /// </summary>
+            /// <typeparam name="T">The Type of control that should be masked</typeparam>
+            /// <remarks>
+            /// WARNING: In apps with complex user interfaces, consisting of hundreds of visual controls on a single
+            /// page, this option may cause performance issues. In such cases, consider applying SessionReplay.Mask
+            /// attributes to individual controls instead:
+            /// <code>sentry:SessionReplay.Mask="Mask"</code>
+            /// </remarks>
             public void MaskControlsOfType<T>()
             {
                 MaskedControls.Add(typeof(T));
             }
 
+            /// <summary>
+            /// Allows you to unmask all controls of a particular type for session replay recordings.
+            /// </summary>
+            /// <typeparam name="T">The Type of control that should be unmasked</typeparam>
+            /// <remarks>
+            /// WARNING: In apps with complex user interfaces, consisting of hundreds of visual controls on a single
+            /// page, this option may cause performance issues. In such cases, consider applying SessionReplay.Mask
+            /// attributes to individual controls instead:
+            /// <code>sentry:SessionReplay.Mask="Unmask"</code>
+            /// </remarks>
             public void UnmaskControlsOfType<T>()
             {
                 UnmaskedControls.Add(typeof(T));
             }
 
-            /// <summary>
-            /// <para>
-            /// The <see cref="MaskAllImages"/> and <see cref="MaskAllText"/> and <see cref="MaskControlsOfType"/>
-            /// options allow you to set the default masking behaviour for all visual elements of certain types.
-            /// </para>
-            /// <para>
-            /// This option enables the use of `sentry:SessionReplay.Mask` attributes to override the masking behaviour
-            /// of specific visual elemennts (for example masking a specific image even though images more generally are
-            /// not masked).
-            /// </para>
-            /// <remarks>
-            /// WARNING: In apps with complex user interfaces, consisting of hundreds of visual controls on a single
-            /// page, enabling this option may cause performance issues.
-            /// </remarks>
-            /// </summary>
-            public NativeSentryReplayOptions EnableCustomSessionReplayMasks()
-            {
-                IsCustomMaskingEnabled = true;
-                return this;
-            }
+            internal bool IsTypeMaskingUsed => MaskedControls.Count > 0 || UnmaskedControls.Count > 0;
         }
 
         /// <summary>

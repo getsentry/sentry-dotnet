@@ -74,7 +74,7 @@ public static class SentryMauiAppBuilderExtensions
         configureOptions?.Invoke(options);
 #if __ANDROID__
         var replayOptions = options.Native.ExperimentalOptions.SessionReplay;
-        if (replayOptions is { IsCustomMaskingEnabled: true, IsSessionReplayEnabled: true })
+        if (replayOptions is { IsSessionReplayEnabled: true, IsTypeMaskingUsed: true })
         {
             services.AddSingleton<IMauiElementEventBinder, MauiCustomSessionReplayMaskBinder>();
         }
