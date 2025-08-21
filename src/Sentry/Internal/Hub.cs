@@ -849,6 +849,12 @@ internal class Hub : IHub, IDisposable
         }
         //Don't dispose of ScopeManager since we want dangling transactions to still be able to access tags.
 
+        if (_options.BackpressureMonitor is { } backpressureMonitor)
+        {
+            _options.BackpressureMonitor = null;
+            backpressureMonitor.Dispose();
+        }
+
 #if __IOS__
             // TODO
 #elif ANDROID
