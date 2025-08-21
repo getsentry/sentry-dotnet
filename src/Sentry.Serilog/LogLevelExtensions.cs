@@ -47,7 +47,7 @@ internal static class SentryExtensions
     {
         return level switch
         {
-            LogEventLevel.Verbose => SentryLogLevel.Debug,
+            LogEventLevel.Verbose => SentryLogLevel.Trace,
             LogEventLevel.Debug => SentryLogLevel.Debug,
             LogEventLevel.Information => SentryLogLevel.Info,
             LogEventLevel.Warning => SentryLogLevel.Warning,

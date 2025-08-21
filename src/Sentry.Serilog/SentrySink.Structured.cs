@@ -5,6 +5,8 @@ namespace Sentry.Serilog;
 
 internal sealed partial class SentrySink
 {
+    private static readonly SdkVersion Sdk = CreateSdkVersion();
+
     private void CaptureStructuredLog(IHub hub, LogEvent logEvent, string formatted, string? template)
     {
         var traceHeader = hub.GetTraceHeader() ?? SentryTraceHeader.Empty;
@@ -17,8 +19,7 @@ internal sealed partial class SentrySink
             ParentSpanId = traceHeader.SpanId,
         };
 
-        var scope = hub.GetScope();
-        log.SetDefaultAttributes(_options, scope?.Sdk ?? SdkVersion.Instance);
+        log.SetDefaultAttributes(_options, Sdk);
 
         foreach (var attribute in attributes)
         {
@@ -46,14 +47,14 @@ internal sealed partial class SentrySink
         {
             if (propertyTokens.Exists(prop => prop.PropertyName == property.Key))
             {
-                if (TryGetLogEventProperty(property, out var parameter))
+                foreach (var parameter in GetLogEventProperties(property))
                 {
                     @params.Add(parameter);
                 }
             }
             else
             {
-                if (TryGetLogEventProperty(property, out var attribute))
+                foreach (var attribute in GetLogEventProperties(property))
                 {
                     attributes.Add(new KeyValuePair<string, object>($"property.{attribute.Key}", attribute.Value));
                 }
@@ -63,14 +64,27 @@ internal sealed partial class SentrySink
         parameters = @params.DrainToImmutable();
         return;
 
-        static bool TryGetLogEventProperty(KeyValuePair<string, LogEventPropertyValue> property, out KeyValuePair<string, object> value)
+        static IEnumerable<KeyValuePair<string, object>> GetLogEventProperties(KeyValuePair<string, LogEventPropertyValue> property)
         {
             if (property.Value is ScalarValue scalarValue)
             {
                 if (scalarValue.Value is not null)
                 {
-                    value = new KeyValuePair<string, object>(property.Key, scalarValue.Value);
-                    return true;
+                    yield return new KeyValuePair<string, object>(property.Key, scalarValue.Value);
+                }
+            }
+            else if (property.Value is SequenceValue sequenceValue)
+            {
+                if (sequenceValue.Elements.Count != 0)
+                {
+                    yield return new KeyValuePair<string, object>(property.Key, sequenceValue.ToString());
+                }
+            }
+            else if (property.Value is DictionaryValue dictionaryValue)
+            {
+                if (dictionaryValue.Elements.Count != 0)
+                {
+                    yield return new KeyValuePair<string, object>(property.Key, dictionaryValue.ToString());
                 }
             }
             else if (property.Value is StructureValue structureValue)
@@ -79,30 +93,23 @@ internal sealed partial class SentrySink
                 {
                     if (LogEventProperty.IsValidName(prop.Name))
                     {
-                        if (prop.Value is ScalarValue scalarProperty)
-                        {
-                            if (scalarProperty.Value is not null)
-                            {
-                                value = new KeyValuePair<string, object>($"{property.Key}.{prop.Name}", scalarProperty.Value);
-                                return true;
-                            }
-                        }
-                        else
-                        {
-                            value = new KeyValuePair<string, object>($"{property.Key}.{prop.Name}", prop.Value);
-                            return true;
-                        }
+                        yield return new KeyValuePair<string, object>($"{property.Key}.{prop.Name}", prop.Value.ToString());
                     }
                 }
             }
             else if (!property.Value.IsNull())
             {
-                value = new KeyValuePair<string, object>(property.Key, property.Value);
-                return true;
+                yield return new KeyValuePair<string, object>(property.Key, property.Value);
             }
-
-            value = default;
-            return false;
         }
+    }
+
+    private static SdkVersion CreateSdkVersion()
+    {
+        return new SdkVersion
+        {
+            Name = SdkName,
+            Version = NameAndVersion.Version,
+        };
     }
 }

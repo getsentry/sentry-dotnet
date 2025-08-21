@@ -1,6 +1,6 @@
 namespace Sentry.Serilog.Tests;
 
-public class SentrySinkTests
+public partial class SentrySinkTests
 {
     private class Fixture
     {

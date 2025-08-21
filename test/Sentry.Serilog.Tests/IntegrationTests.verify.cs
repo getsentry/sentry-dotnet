@@ -100,5 +100,45 @@ public class IntegrationTests
                 })
             .IgnoreStandardSentryMembers();
     }
+
+    [Fact]
+    public Task StructuredLogging()
+    {
+        var transport = new RecordingTransport();
+
+        var configuration = new LoggerConfiguration();
+        configuration.MinimumLevel.Debug();
+        var diagnosticLogger = new InMemoryDiagnosticLogger();
+        configuration.WriteTo.Sentry(
+            _ =>
+            {
+                _.MinimumEventLevel = (LogEventLevel)int.MaxValue;
+                _.Experimental.EnableLogs = true;
+                _.Transport = transport;
+                _.DiagnosticLogger = diagnosticLogger;
+                _.Dsn = ValidDsn;
+                _.Debug = true;
+                _.Environment = "test-environment";
+                _.Release = "test-release";
+            });
+
+        Log.Logger = configuration.CreateLogger();
+
+        Log.Debug("Debug message with a Scalar property: {Scalar}", 42);
+        Log.Information("Information message with a Sequence property: {Sequence}", new object[] { new int[] { 41, 42, 43} });
+        Log.Warning("Warning message with a Dictionary property: {Dictionary}", new Dictionary<string, string> { {"key", "value"} });
+        Log.Error("Error message with a Structure property: {Structure}", (Number: 42, Text: "42"));
+
+        Log.CloseAndFlush();
+
+        var envelopes = transport.Envelopes;
+        var logs = transport.Payloads.OfType<JsonSerializable>()
+            .Select(payload => payload.Source)
+            .OfType<StructuredLog>()
+            .Select(log => log.Items.ToArray());
+        var diagnostics = diagnosticLogger.Entries.Where(_ => _.Level >= SentryLevel.Warning);
+        return Verify(new { envelopes, logs, diagnostics })
+            .IgnoreStandardSentryMembers();
+    }
 }
 #endif
