@@ -22,6 +22,17 @@
 
     <!-- https://learn.microsoft.com/en-us/dotnet/core/compatibility/sdk/8.0/dotnet-restore-audit#version-introduced -->
     <WarningsNotAsErrors>NU1902;NU1903</WarningsNotAsErrors>
+
+    <!-- Centralized TFM versions -->
+    <LatestTfm>net10.0</LatestTfm>
+    <PreviousTfm>net9.0</PreviousTfm>
+    <LatestAndroidTfm>net10.0-android36.0</LatestAndroidTfm>
+    <PreviousAndroidTfm>net9.0-android35.0</PreviousAndroidTfm>
+    <LatestIosTfm>net10.0-ios18.5</LatestIosTfm>
+    <PreviousIosTfm>net9.0-ios18.0</PreviousIosTfm>
+    <LatestMacCatalystTfm>net10.0-maccatalyst18.5</LatestMacCatalystTfm>
+    <PreviousMacCatalystTfm>net9.0-maccatalyst18.0</PreviousMacCatalystTfm>
+    <PreviousWindowsTfm>net9.0-windows10.0.19041.0</PreviousWindowsTfm>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' != 'Release'">

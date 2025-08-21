@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net9.0;net10.0</TargetFrameworks>
     <!-- IMPORTANT: We must test with new TFMs as the store format changes with new versions of .NET -->
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android34.0;net9.0-android35.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net10.0-android36.0;net9.0-android35.0</TargetFrameworks>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
@@ -32,7 +32,7 @@
   <Target Name="BuildTestAPKs" BeforeTargets="BeforeBuild" Condition="'$(TargetPlatformIdentifier)' != 'android'">
     <!-- Restore exactly once: https://learn.microsoft.com/en-gb/visualstudio/msbuild/run-target-exactly-once -->
     <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="EnsureAndroidTestAppRestored" RemoveProperties="TargetFramework" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net8.0-android" Condition="$(TargetFramework) == 'net8.0'" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net10.0-android" Condition="$(TargetFramework) == 'net10.0'" />
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerBuildTestAPKs" Properties="TargetFramework=net9.0-android" Condition="$(TargetFramework) == 'net9.0'" />
   </Target>
   <Target Name="_InnerBuildTestAPKs">
