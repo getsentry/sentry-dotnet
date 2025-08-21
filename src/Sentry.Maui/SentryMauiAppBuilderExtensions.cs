@@ -67,11 +67,18 @@ public static class SentryMauiAppBuilderExtensions
         services.AddSingleton<IMauiElementEventBinder, MauiButtonEventsBinder>();
         services.AddSingleton<IMauiElementEventBinder, MauiImageButtonEventsBinder>();
         services.AddSingleton<IMauiElementEventBinder, MauiGestureRecognizerEventsBinder>();
-        services.AddSingleton<IMauiElementEventBinder, MauiCustomSessionReplayMaskBinder>();
 
-        // Resolve the configured options and register any event binders that have been injected by integrations
+        // Resolve the configured options and register any event binders that have been enabled via configuration or
+        // injected by integrations
         var options = new SentryMauiOptions();
         configureOptions?.Invoke(options);
+#if __ANDROID__
+        var replayOptions = options.Native.ExperimentalOptions.SessionReplay;
+        if (replayOptions is { IsCustomMaskingEnabled: true, IsSessionReplayEnabled: true })
+        {
+            services.AddSingleton<IMauiElementEventBinder, MauiCustomSessionReplayMaskBinder>();
+        }
+#endif
         foreach (var eventBinder in options.IntegrationEventBinders)
         {
             eventBinder.Register(services);
