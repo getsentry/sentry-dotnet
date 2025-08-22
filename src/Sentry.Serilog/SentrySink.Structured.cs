@@ -31,12 +31,12 @@ internal sealed partial class SentrySink
 
     private static void GetStructuredLoggingParametersAndAttributes(LogEvent logEvent, out ImmutableArray<KeyValuePair<string, object>> parameters, out List<KeyValuePair<string, object>> attributes)
     {
-        var propertyTokens = new List<PropertyToken>();
+        var propertyNames = new HashSet<string>();
         foreach (var token in logEvent.MessageTemplate.Tokens)
         {
             if (token is PropertyToken property)
             {
-                propertyTokens.Add(property);
+                propertyNames.Add(property.PropertyName);
             }
         }
 
@@ -45,7 +45,7 @@ internal sealed partial class SentrySink
 
         foreach (var property in logEvent.Properties)
         {
-            if (propertyTokens.Exists(prop => prop.PropertyName == property.Key))
+            if (propertyNames.Contains(property.Key))
             {
                 foreach (var parameter in GetLogEventProperties(property))
                 {
