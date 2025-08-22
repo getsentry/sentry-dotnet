@@ -102,7 +102,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
         Envelope envelope = null!;
         _fixture.Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => envelope = arg));
 
-        logger.LogTrace(ConfigureLog, "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2]);
+        logger.LogTrace(ConfigureLog, "Template string with arguments: {0}, {1}, {2}, {3}", "string", true, 1, 2.2);
         logger.Flush();
 
         _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
@@ -124,7 +124,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
         });
         var logger = _fixture.GetSut();
 
-        logger.LogTrace(ConfigureLog, "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2]);
+        logger.LogTrace(ConfigureLog, "Template string with arguments: {0}, {1}, {2}, {3}", "string", true, 1, 2.2);
         logger.Flush();
 
         _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
@@ -145,7 +145,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
         });
         var logger = _fixture.GetSut();
 
-        logger.LogTrace(ConfigureLog, "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2]);
+        logger.LogTrace(ConfigureLog, "Template string with arguments: {0}, {1}, {2}, {3}", "string", true, 1, 2.2);
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         invocations.Should().Be(1);
@@ -157,7 +157,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
         _fixture.Options.Experimental.EnableLogs = true;
         var logger = _fixture.GetSut();
 
-        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}, {4}", ["string", true, 1, 2.2]);
+        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}, {4}", "string", true, 1, 2.2);
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         var entry = _fixture.DiagnosticLogger.Dequeue();
@@ -173,7 +173,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
         _fixture.Options.Experimental.EnableLogs = true;
         var logger = _fixture.GetSut();
 
-        logger.LogTrace(static (SentryLog log) => throw new InvalidOperationException(), "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2]);
+        logger.LogTrace(static (SentryLog log) => throw new InvalidOperationException(), "Template string with arguments: {0}, {1}, {2}, {3}", "string", true, 1, 2.2);
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         var entry = _fixture.DiagnosticLogger.Dequeue();
@@ -190,7 +190,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
         _fixture.Options.Experimental.SetBeforeSendLog(static (SentryLog log) => throw new InvalidOperationException());
         var logger = _fixture.GetSut();
 
-        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2]);
+        logger.LogTrace("Template string with arguments: {0}, {1}, {2}, {3}", "string", true, 1, 2.2);
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         var entry = _fixture.DiagnosticLogger.Dequeue();
@@ -213,7 +213,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         envelope.Should().BeNull();
 
-        logger.LogTrace(ConfigureLog, "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2]);
+        logger.LogTrace(ConfigureLog, "Template string with arguments: {0}, {1}, {2}, {3}", "string", true, 1, 2.2);
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         envelope.Should().BeNull();
 
@@ -230,7 +230,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
 
         var defaultLogger = logger.Should().BeOfType<DefaultSentryStructuredLogger>().Which;
         defaultLogger.Dispose();
-        logger.LogTrace(ConfigureLog, "Template string with arguments: {0}, {1}, {2}, {3}", ["string", true, 1, 2.2]);
+        logger.LogTrace(ConfigureLog, "Template string with arguments: {0}, {1}, {2}, {3}", "string", true, 1, 2.2);
 
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         var entry = _fixture.DiagnosticLogger.Dequeue();
