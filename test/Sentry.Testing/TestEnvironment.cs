@@ -15,4 +15,7 @@ public static class TestEnvironment
             return isGitHubActions?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
         }
     }
+
+    public static bool IsWinX64 => RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                                   && RuntimeInformation.OSArchitecture == Architecture.X64;
 }
