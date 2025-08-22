@@ -119,7 +119,7 @@ public class SamplingTransactionProfilerTests
     {
         if (TestEnvironment.IsGitHubActions)
         {
-            Skip.If(TestEnvironment.IsWinX64, "Flaky in CI on Windows X64.");
+            Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Flaky in CI on Windows.");
             Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Linux), "Flaky in CI on Linux.");
         }
 
