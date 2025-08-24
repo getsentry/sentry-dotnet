@@ -10,17 +10,21 @@ body:
       options:
         - Sentry
         - Sentry.AspNetCore
+        - Sentry.AspNetCore.Blazor.WebAssembly
         - Sentry.AspNetCore.Grpc
         - Sentry.AspNet
+        - Sentry.Azure.Functions.Worker
         - Sentry.DiagnosticSource
         - Sentry.EntityFramework
         - Sentry.Extensions.Logging
         - Sentry.Google.Cloud.Functions
-        - Sentry.Log4net
+        - Sentry.Hangfire
+        - Sentry.Log4Net
         - Sentry.Maui
-        - Sentry.Nlog
+        - Sentry.NLog
+        - Sentry.OpenTelemetry
+        - Sentry.Profiling
         - Sentry.Serilog
-        - Sentry.Tunnel
         - Other
     validations:
       required: true
