@@ -13,7 +13,7 @@
   - Remove `IDisposable` from `SentryStructuredLogger`. Disposal is intended through the owning `IHub` instance ([#4424](https://github.com/getsentry/sentry-dotnet/pull/4424))
   - Ensure all buffered logs are sent to Sentry when the application terminates unexpectedly ([#4425](https://github.com/getsentry/sentry-dotnet/pull/4425))
   - `InvalidOperationException` potentially thrown during a race condition, especially in concurrent high-volume logging scenarios ([#4428](https://github.com/getsentry/sentry-dotnet/pull/4428))
-- Only detects custom session replay masks when necessary to avoid performance issues in MAUI apps with complex UIs ([#4445](https://github.com/getsentry/sentry-dotnet/pull/4445))
+- Only applies Session Replay masks to specific controls types when necessary, to avoid performance issues in MAUI apps with complex UIs ([#4445](https://github.com/getsentry/sentry-dotnet/pull/4445))
 
 ### Dependencies
 
