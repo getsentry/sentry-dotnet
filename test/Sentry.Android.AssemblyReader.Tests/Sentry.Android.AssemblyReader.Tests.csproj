@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net10.0</TargetFrameworks>
+    <TargetFrameworks>net9.0</TargetFrameworks>
     <!-- IMPORTANT: We must test with new TFMs as the store format changes with new versions of .NET -->
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net10.0-android36.0;net9.0-android35.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);$(LatestAndroidTfm);$(PreviousAndroidTfm)</TargetFrameworks>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
