@@ -5,6 +5,7 @@
 ### Features
 
 - Experimental _Structured Logs_:
+  - Redesign SDK Logger APIs to allow usage of `params` ([#4451](https://github.com/getsentry/sentry-dotnet/pull/4451))
   - Shorten the `key` names of `Microsoft.Extensions.Logging` attributes ([#4450](https://github.com/getsentry/sentry-dotnet/pull/4450))
 
 ### Fixes
