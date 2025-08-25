@@ -219,9 +219,6 @@ interface SentryRRWebEvent : SentrySerializable
     [Export ("initWithType:timestamp:data:")]
     [DesignatedInitializer]
     NativeHandle Constructor (SentryRRWebEventType type, NSDate timestamp, [NullAllowed] NSDictionary<NSString, NSObject> data);
-    // -(NSDictionary<NSString *,id> * _Nonnull)serialize __attribute__((warn_unused_result("")));
-    [Export ("serialize")]
-    new NSDictionary<NSString, NSObject> Serialize();
 }
 
 [BaseType(typeof(NSObject), Name = "_TtC6Sentry31SentryUserFeedbackConfiguration")]
