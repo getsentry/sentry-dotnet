@@ -105,7 +105,7 @@ internal class DynamicSamplingContext
         _items["sample_rate"] = sampleRate.ToString(CultureInfo.InvariantCulture);
     }
 
-    internal DynamicSamplingContext Clone() => new(new Dictionary<string, string>(Items));
+    internal DynamicSamplingContext Clone() => new(new Dictionary<string, string>(_items));
 
     public void SetReplayId(IReplaySession? replaySession)
     {
