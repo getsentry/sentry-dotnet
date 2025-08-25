@@ -25,7 +25,7 @@ public class DynamicSamplingContextTests
     [Fact]
     public void EmptyContext()
     {
-        var dsc = DynamicSamplingContext.Empty;
+        var dsc = DynamicSamplingContext.Empty();
 
         Assert.True(dsc.IsEmpty);
     }

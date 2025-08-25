@@ -113,7 +113,7 @@ public static class HttpContextExtensions
             // See:
             // https://develop.sentry.dev/sdk/performance/dynamic-sampling-context/#freezing-dynamic-sampling-context
             // https://develop.sentry.dev/sdk/performance/dynamic-sampling-context/#unified-propagation-mechanism
-            dynamicSamplingContext = DynamicSamplingContext.Empty;
+            dynamicSamplingContext = DynamicSamplingContext.Empty();
         }
 
         var transaction = SentrySdk.StartTransaction(transactionContext, customSamplingContext, dynamicSamplingContext);

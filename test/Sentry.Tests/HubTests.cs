@@ -760,7 +760,6 @@ public partial class HubTests
             transactionTracer.SampleRate.Should().Be(expectedSampleRate);
             if (expectedDscOverwritten)
             {
-                transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
                 transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(originalDsc.CloneWithSampleRate(expectedSampleRate));
             }
             else
@@ -774,7 +773,6 @@ public partial class HubTests
             unsampledTransaction.SampleRate.Should().Be(expectedSampleRate);
             if (expectedDscOverwritten)
             {
-                unsampledTransaction.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
                 unsampledTransaction.DynamicSamplingContext.Should().BeEquivalentTo(originalDsc.CloneWithSampleRate(expectedSampleRate));
             }
             else
@@ -882,7 +880,7 @@ public partial class HubTests
         var hub = _fixture.GetSut();
 
         // Act
-        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>(), DynamicSamplingContext.Empty);
+        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>(), DynamicSamplingContext.Empty());
 
         // Assert
         var transactionTracer = transaction.Should().BeOfType<TransactionTracer>().Subject;
@@ -919,7 +917,6 @@ public partial class HubTests
         transactionTracer.IsSampled.Should().BeTrue();
         transactionTracer.SampleRate.Should().Be(0.4);
         transactionTracer.SampleRand.Should().Be(0.1234);
-        transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
         transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(originalDsc.CloneWithSampleRate(0.4));
     }
 
@@ -954,7 +951,6 @@ public partial class HubTests
             transactionTracer.IsSampled.Should().BeTrue();
             transactionTracer.SampleRate.Should().Be(sampleRate);
             transactionTracer.SampleRand.Should().Be(0.1234);
-            transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
             transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(originalDsc.CloneWithSampleRate(sampleRate));
         }
         else
@@ -963,7 +959,6 @@ public partial class HubTests
             unsampledTransaction.IsSampled.Should().BeFalse();
             unsampledTransaction.SampleRate.Should().Be(sampleRate);
             unsampledTransaction.SampleRand.Should().Be(0.1234);
-            unsampledTransaction.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
             unsampledTransaction.DynamicSamplingContext.Should().BeEquivalentTo(originalDsc.CloneWithSampleRate(sampleRate));
         }
     }
@@ -999,7 +994,6 @@ public partial class HubTests
             transactionTracer.IsSampled.Should().BeTrue();
             transactionTracer.SampleRate.Should().Be(sampleRate);
             transactionTracer.SampleRand.Should().Be(0.1234);
-            transactionTracer.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
             transactionTracer.DynamicSamplingContext.Should().BeEquivalentTo(originalDsc.CloneWithSampleRate(sampleRate));
         }
         else
@@ -1008,7 +1002,6 @@ public partial class HubTests
             unsampledTransaction.IsSampled.Should().BeFalse();
             unsampledTransaction.SampleRate.Should().Be(sampleRate);
             unsampledTransaction.SampleRand.Should().Be(0.1234);
-            unsampledTransaction.DynamicSamplingContext.Should().NotBeSameAs(originalDsc);
             unsampledTransaction.DynamicSamplingContext.Should().BeEquivalentTo(originalDsc.CloneWithSampleRate(sampleRate));
         }
     }

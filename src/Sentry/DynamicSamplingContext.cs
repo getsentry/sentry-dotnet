@@ -9,16 +9,18 @@ namespace Sentry;
 /// <seealso href="https://develop.sentry.dev/sdk/performance/dynamic-sampling-context"/>
 internal class DynamicSamplingContext
 {
-    public Dictionary<string, string> Items { get; }
+    private readonly Dictionary<string, string> _items;
+
+    public IReadOnlyDictionary<string, string> Items => _items;
 
     public bool IsEmpty => Items.Count == 0;
 
-    private DynamicSamplingContext(Dictionary<string, string> items) => Items = items;
+    private DynamicSamplingContext(Dictionary<string, string> items) => _items = items;
 
     /// <summary>
     /// Gets an empty <see cref="DynamicSamplingContext"/> that can be used to "freeze" the DSC on a transaction.
     /// </summary>
-    public static DynamicSamplingContext Empty => new(new Dictionary<string, string>());
+    public static DynamicSamplingContext Empty() => new(new Dictionary<string, string>());
 
     private DynamicSamplingContext(SentryId traceId,
         string publicKey,
@@ -93,14 +95,14 @@ internal class DynamicSamplingContext
             items.Add("replay_id", replayId.ToString());
         }
 
-        Items = items;
+        _items = items;
     }
 
     public BaggageHeader ToBaggageHeader() => BaggageHeader.Create(Items, useSentryPrefix: true);
 
     public void SetSampleRate(double sampleRate)
     {
-        Items["sample_rate"] = sampleRate.ToString(CultureInfo.InvariantCulture);
+        _items["sample_rate"] = sampleRate.ToString(CultureInfo.InvariantCulture);
     }
 
     internal DynamicSamplingContext Clone() => new(new Dictionary<string, string>(Items));
@@ -109,7 +111,7 @@ internal class DynamicSamplingContext
     {
         if (replaySession?.ActiveReplayId is { } replayId && replayId != SentryId.Empty)
         {
-            Items["replay_id"] = replayId.ToString();
+            _items["replay_id"] = replayId.ToString();
         }
     }
 
