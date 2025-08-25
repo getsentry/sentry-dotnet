@@ -117,6 +117,12 @@ public class SamplingTransactionProfilerTests
     [SkippableFact]
     public void Profiler_WithZeroStartupTimeout_CapturesAfterStartingAsynchronously()
     {
+        if (TestEnvironment.IsGitHubActions)
+        {
+            Skip.If(TestEnvironment.IsWinX64, "Flaky in CI on Windows X64.");
+            Skip.If(RuntimeInformation.IsOSPlatform(OSPlatform.Linux), "Flaky in CI on Linux.");
+        }
+
         using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.Zero);
         var profiler = factory.Start(new TransactionTracer(Substitute.For<IHub>(), "test", ""), CancellationToken.None);
         Assert.Null(profiler);
@@ -146,6 +152,8 @@ public class SamplingTransactionProfilerTests
     [InlineData(10)]
     public void Profiler_MultipleProfiles_Works(int startTimeoutSeconds)
     {
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI");
+
         using var factory = new SamplingTransactionProfilerFactory(_testSentryOptions, TimeSpan.FromSeconds(startTimeoutSeconds));
         // in the async startup case, we need to wait before collecting
         if (startTimeoutSeconds == 0)

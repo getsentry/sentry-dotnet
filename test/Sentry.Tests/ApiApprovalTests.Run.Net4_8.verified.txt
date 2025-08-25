@@ -953,12 +953,18 @@ namespace Sentry
     {
         protected abstract void CaptureLog(Sentry.SentryLog log);
         protected abstract void Flush();
-        public void LogDebug(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }
-        public void LogError(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }
-        public void LogFatal(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }
-        public void LogInfo(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }
-        public void LogTrace(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }
-        public void LogWarning(string template, object[]? parameters = null, System.Action<Sentry.SentryLog>? configureLog = null) { }
+        public void LogDebug(string template, params object[] parameters) { }
+        public void LogDebug(System.Action<Sentry.SentryLog> configureLog, string template, params object[] parameters) { }
+        public void LogError(string template, params object[] parameters) { }
+        public void LogError(System.Action<Sentry.SentryLog> configureLog, string template, params object[] parameters) { }
+        public void LogFatal(string template, params object[] parameters) { }
+        public void LogFatal(System.Action<Sentry.SentryLog> configureLog, string template, params object[] parameters) { }
+        public void LogInfo(string template, params object[] parameters) { }
+        public void LogInfo(System.Action<Sentry.SentryLog> configureLog, string template, params object[] parameters) { }
+        public void LogTrace(string template, params object[] parameters) { }
+        public void LogTrace(System.Action<Sentry.SentryLog> configureLog, string template, params object[] parameters) { }
+        public void LogWarning(string template, params object[] parameters) { }
+        public void LogWarning(System.Action<Sentry.SentryLog> configureLog, string template, params object[] parameters) { }
     }
     public sealed class SentryThread : Sentry.ISentryJsonSerializable
     {
