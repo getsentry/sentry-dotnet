@@ -71,7 +71,7 @@ internal class BackpressureMonitor : IDisposable
             var newValue = oldValue + 1;
             if (Interlocked.CompareExchange(ref _downsampleLevel, newValue, oldValue) == oldValue)
             {
-                _logger?.LogDebug("System is under pressure, increasing downsample level to {DownsampleLevel}.", newValue);
+                _logger?.LogDebug("System is under pressure, increasing downsample level to {0}.", newValue);
             }
         }
     }
@@ -144,15 +144,26 @@ internal class BackpressureMonitor : IDisposable
 
     public void Dispose()
     {
-        _cts.Cancel();
         try
         {
-            WorkerTask.Wait();
+            try
+            {
+                _cts.Cancel();
+                WorkerTask.Wait();
+            }
+            catch (AggregateException ex) when (ex.InnerException is OperationCanceledException)
+            {
+                // Ignore cancellation
+            }
+            finally
+            {
+                _cts.Dispose();
+            }
         }
-        catch (AggregateException ex) when (ex.InnerException is OperationCanceledException)
+        catch (Exception ex)
         {
-            // Ignore cancellation
+            // We don't ever want this to throw
+            _logger?.LogDebug("Error in BackpressureMonitor.Dispose: {0}", ex);
         }
-        _cts.Dispose();
     }
 }
