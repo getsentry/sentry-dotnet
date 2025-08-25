@@ -18,11 +18,11 @@ internal sealed class AndroidAssemblyDirectoryReaderV1 : AndroidAssemblyReader, 
         var zipEntry = FindAssembly(name);
         if (zipEntry is null)
         {
-            Logger?.Invoke("Couldn't find assembly {0} in the APK", name);
+            Logger?.Invoke(DebugLoggerLevel.Debug, "Couldn't find assembly {0} in the APK", name);
             return null;
         }
 
-        Logger?.Invoke("Resolved assembly {0} in the APK at {1}", name, zipEntry.FullName);
+        Logger?.Invoke(DebugLoggerLevel.Debug, "Resolved assembly {0} in the APK at {1}", name, zipEntry.FullName);
 
         // We need a seekable stream for the PEReader (or even to check whether the DLL is compressed), so make a copy.
         var memStream = zipEntry.Extract();

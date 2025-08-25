@@ -44,7 +44,7 @@ internal static class AndroidHelpers
         {
             var supportedAbis = GetSupportedAbis();
             return AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis,
-                logger: (message, args) => logger?.Log(SentryLevel.Debug, message, args: args));
+                logger: (level, message, args) => logger?.Log((SentryLevel)level, message, args: args));
         }
         catch (Exception ex)
         {

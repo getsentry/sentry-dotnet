@@ -19,7 +19,7 @@ internal class AndroidAssemblyStoreReaderV2 : IAndroidAssemblyReader
         var (explorers, errorMessage) = AssemblyStoreExplorer.Open(inputFile, logger);
         if (explorers is null)
         {
-            logger?.Invoke("Unable to read store information for {0}: {1}", inputFile, errorMessage);
+            logger?.Invoke(DebugLoggerLevel.Debug, "Unable to read store information for {0}: {1}", inputFile, errorMessage);
 
             // Check for assembly stores in any device specific APKs
             foreach (var supportedAbi in supportedAbis)
@@ -27,7 +27,7 @@ internal class AndroidAssemblyStoreReaderV2 : IAndroidAssemblyReader
                 var splitFilePath = inputFile.GetArchivePathForAbi(supportedAbi, logger);
                 if (!File.Exists(splitFilePath))
                 {
-                    logger?.Invoke("No split config detected at: '{0}'", splitFilePath);
+                    logger?.Invoke(DebugLoggerLevel.Debug, "No split config detected at: '{0}'", splitFilePath);
                     continue;
                 }
                 (explorers, errorMessage) = AssemblyStoreExplorer.Open(splitFilePath, logger);
@@ -37,7 +37,7 @@ internal class AndroidAssemblyStoreReaderV2 : IAndroidAssemblyReader
                 }
                 else
                 {
-                    logger?.Invoke("Unable to read store information for {0}: {1}", splitFilePath, errorMessage);
+                    logger?.Invoke(DebugLoggerLevel.Debug, "Unable to read store information for {0}: {1}", splitFilePath, errorMessage);
                 }
             }
         }
@@ -62,7 +62,7 @@ internal class AndroidAssemblyStoreReaderV2 : IAndroidAssemblyReader
 
         if (supportedExplorers.Count == 0)
         {
-            logger?.Invoke("Could not find V2 AssemblyStoreExplorer for the supported ABIs: {0}", string.Join(", ", supportedAbis));
+            logger?.Invoke(DebugLoggerLevel.Debug, "Could not find V2 AssemblyStoreExplorer for the supported ABIs: {0}", string.Join(", ", supportedAbis));
             reader = null;
             return false;
         }
@@ -76,17 +76,17 @@ internal class AndroidAssemblyStoreReaderV2 : IAndroidAssemblyReader
         var explorerAssembly = TryFindAssembly(name);
         if (explorerAssembly is null)
         {
-            _logger?.Invoke("Couldn't find assembly {0} in the APK AssemblyStore", name);
+            _logger?.Invoke(DebugLoggerLevel.Debug, "Couldn't find assembly {0} in the APK AssemblyStore", name);
             return null;
         }
 
         var (explorer, storeItem) = explorerAssembly;
-        _logger?.Invoke("Resolved assembly {0} in the APK {1} AssemblyStore", name, storeItem.TargetArch);
+        _logger?.Invoke(DebugLoggerLevel.Debug, "Resolved assembly {0} in the APK {1} AssemblyStore", name, storeItem.TargetArch);
 
         var stream = explorer.ReadImageData(storeItem, false);
         if (stream is null)
         {
-            _logger?.Invoke("Couldn't access assembly {0} image stream", name);
+            _logger?.Invoke(DebugLoggerLevel.Debug, "Couldn't access assembly {0} image stream", name);
             return null;
         }
 
@@ -127,12 +127,12 @@ internal class AndroidAssemblyStoreReaderV2 : IAndroidAssemblyReader
         {
             if (explorer.AssembliesByName?.TryGetValue(name, out var assembly) is true)
             {
-                _logger?.Invoke("Found best assembly {0} in APK AssemblyStore for target arch {1}", name, explorer.TargetArch);
+                _logger?.Invoke(DebugLoggerLevel.Debug, "Found best assembly {0} in APK AssemblyStore for target arch {1}", name, explorer.TargetArch);
                 explorerAssembly = new(explorer, assembly);
                 return true;
             }
         }
-        _logger?.Invoke("No best assembly for {0} in APK AssemblyStore", name);
+        _logger?.Invoke(DebugLoggerLevel.Warning, "No best assembly for {0} in APK AssemblyStore", name);
         explorerAssembly = null;
         return false;
     }
