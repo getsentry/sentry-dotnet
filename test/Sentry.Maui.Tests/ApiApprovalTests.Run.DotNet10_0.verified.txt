@@ -1,0 +1,83 @@
+﻿[assembly: Microsoft.Maui.Controls.XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "Microsoft.Maui", AssemblyName="Microsoft.Maui")]
+[assembly: Microsoft.Maui.Controls.XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "Microsoft.Maui.Controls", AssemblyName="Microsoft.Maui.Controls")]
+[assembly: Microsoft.Maui.Controls.XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "Microsoft.Maui.Controls.Shapes", AssemblyName="Microsoft.Maui.Controls")]
+[assembly: Microsoft.Maui.Controls.XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "Microsoft.Maui.Controls.Xaml", AssemblyName="Microsoft.Maui.Controls.Xaml")]
+[assembly: Microsoft.Maui.Controls.XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "Microsoft.Maui.Graphics", AssemblyName="Microsoft.Maui.Graphics")]
+[assembly: Microsoft.Maui.Controls.XmlnsDefinition("http://schemas.microsoft.com/dotnet/maui/global", "http://schemas.microsoft.com/dotnet/2021/maui")]
+[assembly: Microsoft.Maui.Controls.XmlnsDefinition("http://schemas.sentry.io/maui", "Sentry.Maui")]
+[assembly: Microsoft.Maui.Controls.XmlnsPrefix("http://schemas.microsoft.com/dotnet/maui/global", "global")]
+[assembly: Microsoft.Maui.Controls.XmlnsPrefix("http://schemas.sentry.io/maui", "sentry")]
+namespace Microsoft.Maui.Hosting
+{
+    public static class SentryMauiAppBuilderExtensions
+    {
+        public static Microsoft.Maui.Hosting.MauiAppBuilder UseSentry(this Microsoft.Maui.Hosting.MauiAppBuilder builder) { }
+        public static Microsoft.Maui.Hosting.MauiAppBuilder UseSentry(this Microsoft.Maui.Hosting.MauiAppBuilder builder, System.Action<Sentry.Maui.SentryMauiOptions>? configureOptions) { }
+        public static Microsoft.Maui.Hosting.MauiAppBuilder UseSentry(this Microsoft.Maui.Hosting.MauiAppBuilder builder, string dsn) { }
+    }
+}
+namespace Sentry.Maui
+{
+    public sealed class BreadcrumbEvent
+    {
+        public BreadcrumbEvent(object? sender, string eventName) { }
+        public BreadcrumbEvent(object? sender, string eventName, [System.Runtime.CompilerServices.ParamCollection] System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> extraData) { }
+        public BreadcrumbEvent(object? sender, string eventName, [System.Runtime.CompilerServices.ParamCollection] [System.Runtime.CompilerServices.TupleElementNames(new string[] {
+                "key",
+                "value"})] System.Collections.Generic.IEnumerable<System.ValueTuple<string, string>> extraData) { }
+        [System.Obsolete("Use one of the other simpler constructors instead.")]
+        public BreadcrumbEvent(object? sender, string eventName, [System.Runtime.CompilerServices.TupleElementNames(new string[] {
+                "Key",
+                "Value"})] System.Collections.Generic.IEnumerable<System.ValueTuple<string, string>>[] extraData) { }
+        public string EventName { get; }
+        public System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> ExtraData { get; }
+        public object? Sender { get; }
+    }
+    public interface IMauiElementEventBinder
+    {
+        void Bind(Microsoft.Maui.Controls.VisualElement element, System.Action<Sentry.Maui.BreadcrumbEvent> addBreadcrumb);
+        void UnBind(Microsoft.Maui.Controls.VisualElement element);
+    }
+    public class SentryMauiOptions : Sentry.Extensions.Logging.SentryLoggingOptions
+    {
+        public SentryMauiOptions() { }
+        public bool AttachScreenshot { get; set; }
+        public bool CreateElementEventsBreadcrumbs { get; set; }
+        public bool IncludeBackgroundingStateInBreadcrumbs { get; set; }
+        public bool IncludeTextInBreadcrumbs { get; set; }
+        public bool IncludeTitleInBreadcrumbs { get; set; }
+        public void SetBeforeScreenshotCapture(System.Func<Sentry.SentryEvent, Sentry.SentryHint, bool> beforeCapture) { }
+    }
+    public static class SessionReplay
+    {
+        public static readonly Microsoft.Maui.Controls.BindableProperty MaskProperty;
+        public static Sentry.Maui.SessionReplayMaskMode GetMask(Microsoft.Maui.Controls.BindableObject view) { }
+        public static void SetMask(Microsoft.Maui.Controls.BindableObject view, Sentry.Maui.SessionReplayMaskMode value) { }
+    }
+    public enum SessionReplayMaskMode
+    {
+        Mask = 0,
+        Unmask = 1,
+    }
+}
+namespace Sentry.Maui.Internal
+{
+    public class MauiButtonEventsBinder : Sentry.Maui.IMauiElementEventBinder
+    {
+        public MauiButtonEventsBinder() { }
+        public void Bind(Microsoft.Maui.Controls.VisualElement element, System.Action<Sentry.Maui.BreadcrumbEvent> addBreadcrumb) { }
+        public void UnBind(Microsoft.Maui.Controls.VisualElement element) { }
+    }
+    public class MauiGestureRecognizerEventsBinder : Sentry.Maui.IMauiElementEventBinder
+    {
+        public MauiGestureRecognizerEventsBinder() { }
+        public void Bind(Microsoft.Maui.Controls.VisualElement element, System.Action<Sentry.Maui.BreadcrumbEvent> addBreadcrumb) { }
+        public void UnBind(Microsoft.Maui.Controls.VisualElement element) { }
+    }
+    public class MauiImageButtonEventsBinder : Sentry.Maui.IMauiElementEventBinder
+    {
+        public MauiImageButtonEventsBinder() { }
+        public void Bind(Microsoft.Maui.Controls.VisualElement element, System.Action<Sentry.Maui.BreadcrumbEvent> addBreadcrumb) { }
+        public void UnBind(Microsoft.Maui.Controls.VisualElement element) { }
+    }
+}
