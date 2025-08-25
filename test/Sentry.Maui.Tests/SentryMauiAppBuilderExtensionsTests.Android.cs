@@ -1,7 +1,7 @@
+using Android.Runtime;
 using Microsoft.Maui.LifecycleEvents;
 using Sentry.Maui.Internal;
 using Sentry.Maui.Tests.Mocks;
-using Android.Runtime;
 namespace Sentry.Maui.Tests;
 
 public partial class SentryMauiAppBuilderExtensionsTests
