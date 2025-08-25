@@ -6,11 +6,11 @@ using View = Android.Views.View;
 
 namespace Sentry.Maui.Tests;
 
-public class MauiVisualElementEventsBinderTests
+public class MauiSessionReplayMaskControlsOfTypeBinderTests
 {
     private class Fixture
     {
-        public MauiVisualElementEventsBinder Binder { get; }
+        public MauiSessionReplayMaskControlsOfTypeBinder ControlsOfTypeBinder { get; }
 
         public SentryMauiOptions Options { get; } = new();
 
@@ -21,7 +21,7 @@ public class MauiVisualElementEventsBinderTests
             logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
             Options.DiagnosticLogger = logger;
             var options = Microsoft.Extensions.Options.Options.Create(Options);
-            Binder = new MauiVisualElementEventsBinder(options);
+            ControlsOfTypeBinder = new MauiSessionReplayMaskControlsOfTypeBinder(options);
         }
     }
 
@@ -34,7 +34,7 @@ public class MauiVisualElementEventsBinderTests
         var element = new MockElement("element");
 
         // Act
-        _fixture.Binder.OnElementLoaded(element, EventArgs.Empty);
+        _fixture.ControlsOfTypeBinder.OnElementLoaded(element, EventArgs.Empty);
 
         // Assert
         _fixture.Options.DiagnosticLogger.Received(1).LogDebug("OnElementLoaded: sender is not a VisualElement");
@@ -50,7 +50,7 @@ public class MauiVisualElementEventsBinderTests
         };
 
         // Act
-        _fixture.Binder.OnElementLoaded(element, EventArgs.Empty);
+        _fixture.ControlsOfTypeBinder.OnElementLoaded(element, EventArgs.Empty);
 
         // Assert
         _fixture.Options.DiagnosticLogger.Received(1).LogDebug("OnElementLoaded: handler is null");

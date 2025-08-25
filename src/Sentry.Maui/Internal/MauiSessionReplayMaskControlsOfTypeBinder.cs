@@ -9,11 +9,11 @@ namespace Sentry.Maui.Internal;
 /// <summary>
 /// Masks or unmasks visual elements for session replay recordings
 /// </summary>
-internal class MauiVisualElementEventsBinder : IMauiElementEventBinder
+internal class MauiSessionReplayMaskControlsOfTypeBinder : IMauiElementEventBinder
 {
     private readonly SentryMauiOptions _options;
 
-    public MauiVisualElementEventsBinder(IOptions<SentryMauiOptions> options)
+    public MauiSessionReplayMaskControlsOfTypeBinder(IOptions<SentryMauiOptions> options)
     {
         _options = options.Value;
     }
