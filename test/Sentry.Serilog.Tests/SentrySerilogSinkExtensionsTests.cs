@@ -28,6 +28,7 @@ public class SentrySerilogSinkExtensionsTests
         public bool InitializeSdk { get; } = false;
         public LogEventLevel MinimumEventLevel { get; } = LogEventLevel.Verbose;
         public LogEventLevel MinimumBreadcrumbLevel { get; } = LogEventLevel.Fatal;
+        public bool ExperimentalEnableLogs { get; } = true;
 
         public static SentrySerilogOptions GetSut() => new();
     }
@@ -92,7 +93,7 @@ public class SentrySerilogSinkExtensionsTests
         var sut = Fixture.GetSut();
 
         SentrySinkExtensions.ConfigureSentrySerilogOptions(sut, _fixture.Dsn, _fixture.MinimumEventLevel,
-            _fixture.MinimumBreadcrumbLevel, null, null, _fixture.SendDefaultPii,
+            _fixture.MinimumBreadcrumbLevel, null, null, _fixture.ExperimentalEnableLogs, _fixture.SendDefaultPii,
             _fixture.IsEnvironmentUser, _fixture.ServerName, _fixture.AttachStackTrace, _fixture.MaxBreadcrumbs,
             _fixture.SampleRate, _fixture.Release, _fixture.Environment, _fixture.MaxQueueItems,
             _fixture.ShutdownTimeout, _fixture.DecompressionMethods, _fixture.RequestBodyCompressionLevel,
@@ -100,6 +101,7 @@ public class SentrySerilogSinkExtensionsTests
             _fixture.ReportAssembliesMode, _fixture.DeduplicateMode);
 
         // Compare individual properties
+        Assert.Equal(_fixture.ExperimentalEnableLogs, sut.Experimental.EnableLogs);
         Assert.Equal(_fixture.SendDefaultPii, sut.SendDefaultPii);
         Assert.Equal(_fixture.IsEnvironmentUser, sut.IsEnvironmentUser);
         Assert.Equal(_fixture.ServerName, sut.ServerName);
@@ -108,7 +110,7 @@ public class SentrySerilogSinkExtensionsTests
         Assert.Equal(_fixture.SampleRate, sut.SampleRate);
         Assert.Equal(_fixture.Release, sut.Release);
         Assert.Equal(_fixture.Environment, sut.Environment);
-        Assert.Equal(_fixture.Dsn, sut.Dsn!);
+        Assert.Equal(_fixture.Dsn, sut.Dsn);
         Assert.Equal(_fixture.MaxQueueItems, sut.MaxQueueItems);
         Assert.Equal(_fixture.ShutdownTimeout, sut.ShutdownTimeout);
         Assert.Equal(_fixture.DecompressionMethods, sut.DecompressionMethods);

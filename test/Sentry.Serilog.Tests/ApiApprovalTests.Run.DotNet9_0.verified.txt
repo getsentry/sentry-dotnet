@@ -21,7 +21,7 @@ namespace Serilog
     public static class SentrySinkExtensions
     {
         public static Serilog.LoggerConfiguration Sentry(this Serilog.Configuration.LoggerSinkConfiguration loggerConfiguration, System.Action<Sentry.Serilog.SentrySerilogOptions> configureOptions) { }
-        public static Serilog.LoggerConfiguration Sentry(this Serilog.Configuration.LoggerSinkConfiguration loggerConfiguration, Serilog.Events.LogEventLevel? minimumEventLevel = default, Serilog.Events.LogEventLevel? minimumBreadcrumbLevel = default, System.IFormatProvider? formatProvider = null, Serilog.Formatting.ITextFormatter? textFormatter = null) { }
+        public static Serilog.LoggerConfiguration Sentry(this Serilog.Configuration.LoggerSinkConfiguration loggerConfiguration, Serilog.Events.LogEventLevel? minimumEventLevel = default, Serilog.Events.LogEventLevel? minimumBreadcrumbLevel = default, System.IFormatProvider? formatProvider = null, Serilog.Formatting.ITextFormatter? textFormatter = null, bool? experimentalEnableLogs = default) { }
         public static Serilog.LoggerConfiguration Sentry(
                     this Serilog.Configuration.LoggerSinkConfiguration loggerConfiguration,
                     string dsn,
@@ -29,6 +29,7 @@ namespace Serilog
                     Serilog.Events.LogEventLevel? minimumEventLevel = default,
                     System.IFormatProvider? formatProvider = null,
                     Serilog.Formatting.ITextFormatter? textFormatter = null,
+                    bool? experimentalEnableLogs = default,
                     bool? sendDefaultPii = default,
                     bool? isEnvironmentUser = default,
                     string? serverName = null,

@@ -5,6 +5,7 @@ namespace Sentry.Testing;
 public sealed class InMemorySentryStructuredLogger : SentryStructuredLogger
 {
     public List<LogEntry> Entries { get; } = new();
+    public List<SentryLog> Logs { get; } = new();
 
     /// <inheritdoc />
     private protected override void CaptureLog(SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog)
@@ -15,7 +16,7 @@ public sealed class InMemorySentryStructuredLogger : SentryStructuredLogger
     /// <inheritdoc />
     protected internal override void CaptureLog(SentryLog log)
     {
-        throw new NotSupportedException();
+        Logs.Add(log);
     }
 
     /// <inheritdoc />
