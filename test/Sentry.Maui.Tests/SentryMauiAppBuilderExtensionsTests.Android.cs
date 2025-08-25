@@ -1,7 +1,7 @@
 using Microsoft.Maui.LifecycleEvents;
 using Sentry.Maui.Internal;
 using Sentry.Maui.Tests.Mocks;
-
+using Android.Runtime;
 namespace Sentry.Maui.Tests;
 
 public partial class SentryMauiAppBuilderExtensionsTests
@@ -29,17 +29,22 @@ public partial class SentryMauiAppBuilderExtensionsTests
         // Assert
         binder.Received(1).HandleApplicationEvents(application);
     }
-
     private class MockAndroidApplication : global::Android.App.Application, IPlatformApplication
     {
+        // Required JNI activation constructor for Android runtime types
+        public MockAndroidApplication(IntPtr handle, JniHandleOwnership transfer)
+            : base(handle, transfer)
+        {
+        }
+
         public MockAndroidApplication(IApplication application, IServiceProvider services)
         {
             Application = application;
             Services = services;
         }
-
         public IApplication Application { get; }
-
         public IServiceProvider Services { get; }
+
     }
+
 }

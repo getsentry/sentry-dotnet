@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);net8.0-android34.0;net9.0-android35.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-ios17.0;net9.0-ios18.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net8.0-maccatalyst17.0;net9.0-maccatalyst18.0</TargetFrameworks>
+    <TargetFrameworks>$(LatestTfm);$(PreviousTfm)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);$(LatestAndroidTfm);$(PreviousAndroidTfm)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);$(LatestIosTfm);$(PreviousIosTfm)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);$(LatestMacCatalystTfm);$(PreviousMacCatalystTfm)</TargetFrameworks>
     <!-- These tests fail on Mono -->
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TargetFrameworks);net48</TargetFrameworks>
   </PropertyGroup>
@@ -13,6 +13,10 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
     <ProjectReference Include="..\..\src\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0-preview.7.25380.108" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net48'">

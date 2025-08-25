@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>$(LatestTfm);$(PreviousTfm)</TargetFrameworks>
     <!-- These tests fail on Mono -->
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TargetFrameworks);net48</TargetFrameworks>
   </PropertyGroup>
@@ -11,13 +11,13 @@
     <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.6.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-    <!-- Use the net8.0 target to test netstandard2.1 -->
+  <ItemGroup Condition="'$(TargetFramework)' == '$(PreviousTfm)'">
+    <!-- Use the previous TFM to test netstandard2.1 -->
     <ProjectReference Include="..\..\src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj" AdditionalProperties="TargetFramework=netstandard2.1" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
-    <!-- Use default target framework resolution -->
+  <ItemGroup Condition="'$(TargetFramework)' != '$(PreviousTfm)'">
+    <!-- Use default target framework resolution for everything else -->
     <ProjectReference Include="..\..\src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj" />
   </ItemGroup>
 
