@@ -21,7 +21,7 @@ public partial class HttpTransportTests
     {
         // Arrange
         using var source = new CancellationTokenSource();
-        source.Cancel();
+        await source.CancelAsync();
         var token = source.Token;
 
         var httpHandler = Substitute.For<MockableHttpMessageHandler>();
@@ -36,17 +36,20 @@ public partial class HttpTransportTests
         var envelope = Envelope.FromEvent(
             new SentryEvent(eventId: SentryResponses.ResponseId));
 
-#if NET5_0_OR_GREATER
-        await Assert.ThrowsAsync<TaskCanceledException>(() => httpTransport.SendEnvelopeAsync(envelope, token));
-#else
         // Act
-        await httpTransport.SendEnvelopeAsync(envelope, token);
+        try
+        {
+            await httpTransport.SendEnvelopeAsync(envelope, token);
+        }
+        catch (TaskCanceledException)
+        {
+            // Swallow this
+        }
 
         // Assert
         await httpHandler
             .Received(1)
             .VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Is<CancellationToken>(c => c.IsCancellationRequested));
-#endif
     }
 
     [Fact]
