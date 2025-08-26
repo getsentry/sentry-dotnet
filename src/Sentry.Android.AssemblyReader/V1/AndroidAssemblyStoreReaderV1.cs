@@ -16,16 +16,16 @@ internal sealed class AndroidAssemblyStoreReaderV1 : AndroidAssemblyReader, IAnd
         var assembly = TryFindAssembly(name);
         if (assembly is null)
         {
-            Logger?.Invoke("Couldn't find assembly {0} in the APK AssemblyStore", name);
+            Logger?.Invoke(DebugLoggerLevel.Debug, "Couldn't find assembly {0} in the APK AssemblyStore", name);
             return null;
         }
 
-        Logger?.Invoke("Resolved assembly {0} in the APK {1} AssemblyStore", name, assembly.Store.Arch);
+        Logger?.Invoke(DebugLoggerLevel.Debug, "Resolved assembly {0} in the APK {1} AssemblyStore", name, assembly.Store.Arch);
 
         var stream = assembly.GetImage();
         if (stream is null)
         {
-            Logger?.Invoke("Couldn't access assembly {0} image stream", name);
+            Logger?.Invoke(DebugLoggerLevel.Debug, "Couldn't access assembly {0} image stream", name);
             return null;
         }
 
@@ -119,7 +119,7 @@ internal sealed class AndroidAssemblyStoreReaderV1 : AndroidAssemblyReader, IAnd
                 assembly.Hash64 = he.Hash;
                 if (assembly.RuntimeIndex != he.MappingIndex)
                 {
-                    _logger?.Invoke(
+                    _logger?.Invoke(DebugLoggerLevel.Debug,
                         $"assembly with hashes 0x{assembly.Hash32} and 0x{assembly.Hash64} has a different 32-bit runtime index ({assembly.RuntimeIndex}) than the 64-bit runtime index({he.MappingIndex})");
                 }
 
@@ -127,18 +127,18 @@ internal sealed class AndroidAssemblyStoreReaderV1 : AndroidAssemblyReader, IAnd
                 {
                     if (string.IsNullOrEmpty(assembly.Name))
                     {
-                        _logger?.Invoke(
+                        _logger?.Invoke(DebugLoggerLevel.Debug,
                             $"32-bit hash 0x{assembly.Hash32:x} did not match any assembly name in the manifest");
                         assembly.Name = me.Name;
                         if (string.IsNullOrEmpty(assembly.Name))
                         {
-                            _logger?.Invoke(
+                            _logger?.Invoke(DebugLoggerLevel.Debug,
                                 $"64-bit hash 0x{assembly.Hash64:x} did not match any assembly name in the manifest");
                         }
                     }
                     else if (!string.Equals(assembly.Name, me.Name, StringComparison.Ordinal))
                     {
-                        _logger?.Invoke(
+                        _logger?.Invoke(DebugLoggerLevel.Debug,
                             $"32-bit hash 0x{assembly.Hash32:x} maps to assembly name '{assembly.Name}', however 64-bit hash 0x{assembly.Hash64:x} for the same entry matches assembly name '{me.Name}'");
                     }
                 }
@@ -176,7 +176,7 @@ internal sealed class AndroidAssemblyStoreReaderV1 : AndroidAssemblyReader, IAnd
                 {
                     if (!Stores.TryGetValue(he.StoreId, out var storeList))
                     {
-                        _logger?.Invoke($"store with id {he.StoreId} not part of the set");
+                        _logger?.Invoke(DebugLoggerLevel.Debug, $"store with id {he.StoreId} not part of the set");
                         continue;
                     }
 
@@ -184,7 +184,7 @@ internal sealed class AndroidAssemblyStoreReaderV1 : AndroidAssemblyReader, IAnd
                     {
                         if (he.LocalStoreIndex >= (uint)store.Assemblies.Count)
                         {
-                            _logger?.Invoke(
+                            _logger?.Invoke(DebugLoggerLevel.Debug,
                                 $"{bitness}-bit index entry with hash 0x{he.Hash:x} has invalid store {store.StoreId} index {he.LocalStoreIndex} (maximum allowed is {store.Assemblies.Count})");
                             continue;
                         }

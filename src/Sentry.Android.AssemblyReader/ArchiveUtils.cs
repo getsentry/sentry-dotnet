@@ -43,7 +43,7 @@ internal static class ArchiveUtils
         Debug.Assert(inputStream.Position == payloadOffset);
         var inputLength = (int)(inputStream.Length - payloadOffset);
 
-        logger?.Invoke("Decompressing assembly ({0} bytes uncompressed) using LZ4", decompressedLength);
+        logger?.Invoke(DebugLoggerLevel.Debug, "Decompressing assembly ({0} bytes uncompressed) using LZ4", decompressedLength);
 
         var outputStream = new MemoryStream(decompressedLength);
 

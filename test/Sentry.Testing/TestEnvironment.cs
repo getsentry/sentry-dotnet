@@ -1,5 +1,3 @@
-using System;
-
 namespace Sentry.Testing;
 
 public static class TestEnvironment

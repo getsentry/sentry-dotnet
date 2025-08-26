@@ -41,7 +41,7 @@ public class AndroidAssemblyReaderTests
         // Note: This needs to match the RID used when publishing the test APK
         string[] supportedAbis = { "x86_64" };
         return AndroidAssemblyReaderFactory.Open(apkPath, supportedAbis,
-            logger: (message, args) => _output.WriteLine(message, args));
+            logger: (_, message, args) => _output.WriteLine(message, args));
 #endif
     }
 
