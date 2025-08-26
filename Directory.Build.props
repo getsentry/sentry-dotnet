@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <VersionPrefix>5.14.1</VersionPrefix>
+    <VersionSuffix>preview.7</VersionSuffix>
     <LangVersion>13</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
