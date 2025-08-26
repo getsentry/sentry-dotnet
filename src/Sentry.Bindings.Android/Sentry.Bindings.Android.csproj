@@ -56,11 +56,7 @@
 
   <!-- Starting with .NET 9 we can detect Java dependencies using POM files and AndroidMavenLibrary references -->
   <ItemGroup>
-    <AndroidLibrary
-      Include="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar"
-      Manifest="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).pom"
-      JavaArtifact="io.sentry:sentry:$(SentryAndroidSdkVersion)"
-    />
+    <AndroidMavenLibrary Include="io.sentry:sentry" Version="$(SentryAndroidSdkVersion)" />
     <AndroidMavenLibrary Include="io.sentry:sentry-android-core" Version="$(SentryAndroidSdkVersion)" />
     <AndroidMavenLibrary Include="io.sentry:sentry-android-ndk" Version="$(SentryAndroidSdkVersion)" />
     <AndroidMavenLibrary Include="io.sentry:sentry-android-replay" Version="$(SentryAndroidSdkVersion)" />
@@ -75,13 +71,6 @@
   </ItemGroup>
 
   <Target Name="DownloadSentryAndroidSdk" BeforeTargets="CollectPackageReferences">
-    <DownloadFile
-      SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry/$(SentryAndroidSdkVersion)/sentry-$(SentryAndroidSdkVersion).jar"
-      DestinationFolder="$(SentryAndroidSdkDirectory)"
-      Condition="!Exists('$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar')"
-      Retries="3"
-    />
-
     <!-- The native-ndk exists outside of the android-ndk now. We're downloading the POM file to get the version of the native-ndk. -->
     <DownloadFile
       SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-ndk/$(SentryAndroidSdkVersion)/sentry-android-ndk-$(SentryAndroidSdkVersion).pom"
