@@ -13,6 +13,12 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
     internal static readonly SdkVersion NameAndVersion
         = typeof(SentrySink).Assembly.GetNameAndVersion();
 
+    private static readonly SdkVersion Sdk = new()
+    {
+        Name = SdkName,
+        Version = NameAndVersion.Version,
+    };
+
     /// <summary>
     /// Serilog SDK name.
     /// </summary>

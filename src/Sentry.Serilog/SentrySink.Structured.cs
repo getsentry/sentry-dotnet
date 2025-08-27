@@ -5,8 +5,6 @@ namespace Sentry.Serilog;
 
 internal sealed partial class SentrySink
 {
-    private static readonly SdkVersion Sdk = CreateSdkVersion();
-
     private void CaptureStructuredLog(IHub hub, LogEvent logEvent, string formatted, string? template)
     {
         var traceHeader = hub.GetTraceHeader() ?? SentryTraceHeader.Empty;
@@ -102,14 +100,5 @@ internal sealed partial class SentrySink
                 yield return new KeyValuePair<string, object>(property.Key, property.Value);
             }
         }
-    }
-
-    private static SdkVersion CreateSdkVersion()
-    {
-        return new SdkVersion
-        {
-            Name = SdkName,
-            Version = NameAndVersion.Version,
-        };
     }
 }
