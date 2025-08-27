@@ -60,7 +60,13 @@ BeforeAll {
 
     function GetSentryPackageVersion()
     {
-        (Select-Xml -Path "$PSScriptRoot/../Directory.Build.props" -XPath "/Project/PropertyGroup/VersionPrefix").Node.InnerText
+        $proj = Join-Path $PSScriptRoot '..\src\Sentry\Sentry.csproj'
+        $version = dotnet msbuild $proj -nologo -property:Configuration=Release -getProperty:Version |
+                Select-Object -Last 1
+        if (-not $version -or [string]::IsNullOrWhiteSpace($version)) {
+            throw "Could not resolve package version from $proj"
+        }
+        return $version.Trim()
     }
 
     function RegisterLocalPackage([string] $name)

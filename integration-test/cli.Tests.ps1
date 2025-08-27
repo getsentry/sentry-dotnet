@@ -4,7 +4,7 @@ $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
 
 Describe 'Console apps (<framework>) - normal build' -ForEach @(
-    @{ framework = "net8.0" }
+    @{ framework = "net9.0" }
 ) {
     BeforeAll {
         DotnetNew 'console' 'console-app' $framework
@@ -40,7 +40,7 @@ Describe 'Console apps (<framework>) - normal build' -ForEach @(
 }
 
 Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
-    @{ framework = "net8.0" }
+    @{ framework = "net9.0" }
 ) {
     BeforeAll {
         DotnetNew 'console' 'console-app' $framework
@@ -106,7 +106,7 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
 }
 
 Describe 'MAUI' -ForEach @(
-    @{ framework = "net8.0" }
+    @{ framework = "net9.0" }
 ) -Skip:($env:NO_MOBILE -eq "true") {
     BeforeAll {
         RegisterLocalPackage 'Sentry.Android.AssemblyReader'
