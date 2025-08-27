@@ -15,11 +15,4 @@ public class SentrySerilogOptionsTests
         var sut = new SentrySerilogOptions();
         Assert.Equal(LogEventLevel.Error, sut.MinimumEventLevel);
     }
-
-    [Fact]
-    public void Ctor_EnableLogs_False()
-    {
-        var sut = new SentrySerilogOptions();
-        Assert.False(sut.Experimental.EnableLogs);
-    }
 }

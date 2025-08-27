@@ -93,15 +93,14 @@ public class SentrySerilogSinkExtensionsTests
         var sut = Fixture.GetSut();
 
         SentrySinkExtensions.ConfigureSentrySerilogOptions(sut, _fixture.Dsn, _fixture.MinimumEventLevel,
-            _fixture.MinimumBreadcrumbLevel, null, null, _fixture.ExperimentalEnableLogs, _fixture.SendDefaultPii,
+            _fixture.MinimumBreadcrumbLevel, null, null, _fixture.SendDefaultPii,
             _fixture.IsEnvironmentUser, _fixture.ServerName, _fixture.AttachStackTrace, _fixture.MaxBreadcrumbs,
             _fixture.SampleRate, _fixture.Release, _fixture.Environment, _fixture.MaxQueueItems,
             _fixture.ShutdownTimeout, _fixture.DecompressionMethods, _fixture.RequestBodyCompressionLevel,
             _fixture.RequestBodyCompressionBuffered, _fixture.Debug, _fixture.DiagnosticLevel,
-            _fixture.ReportAssembliesMode, _fixture.DeduplicateMode);
+            _fixture.ReportAssembliesMode, _fixture.DeduplicateMode, null, _fixture.ExperimentalEnableLogs);
 
         // Compare individual properties
-        Assert.Equal(_fixture.ExperimentalEnableLogs, sut.Experimental.EnableLogs);
         Assert.Equal(_fixture.SendDefaultPii, sut.SendDefaultPii);
         Assert.Equal(_fixture.IsEnvironmentUser, sut.IsEnvironmentUser);
         Assert.Equal(_fixture.ServerName, sut.ServerName);
@@ -120,6 +119,7 @@ public class SentrySerilogSinkExtensionsTests
         Assert.Equal(_fixture.DiagnosticLevel, sut.DiagnosticLevel);
         Assert.Equal(_fixture.ReportAssembliesMode, sut.ReportAssembliesMode);
         Assert.Equal(_fixture.DeduplicateMode, sut.DeduplicateMode);
+        Assert.Equal(_fixture.ExperimentalEnableLogs, sut.Experimental.EnableLogs);
         Assert.True(sut.InitializeSdk);
         Assert.Equal(_fixture.MinimumEventLevel, sut.MinimumEventLevel);
         Assert.Equal(_fixture.MinimumBreadcrumbLevel, sut.MinimumBreadcrumbLevel);
