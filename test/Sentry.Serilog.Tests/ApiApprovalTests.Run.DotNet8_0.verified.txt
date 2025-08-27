@@ -29,7 +29,6 @@ namespace Serilog
                     Serilog.Events.LogEventLevel? minimumEventLevel = default,
                     System.IFormatProvider? formatProvider = null,
                     Serilog.Formatting.ITextFormatter? textFormatter = null,
-                    bool? experimentalEnableLogs = default,
                     bool? sendDefaultPii = default,
                     bool? isEnvironmentUser = default,
                     string? serverName = null,
@@ -47,6 +46,7 @@ namespace Serilog
                     Sentry.SentryLevel? diagnosticLevel = default,
                     Sentry.ReportAssembliesMode? reportAssembliesMode = default,
                     Sentry.DeduplicateMode? deduplicateMode = default,
-                    System.Collections.Generic.Dictionary<string, string>? defaultTags = null) { }
+                    System.Collections.Generic.Dictionary<string, string>? defaultTags = null,
+                    bool? experimentalEnableLogs = default) { }
     }
 }
