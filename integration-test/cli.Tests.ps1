@@ -119,8 +119,20 @@ Describe 'MAUI' -ForEach @(
         }
 
         $name = 'maui-app'
-        $androidTpv = '34.0'
-        $iosTpv = '17.0'
+        # Resolve target platform versions based on the base TFM
+        switch ($framework) {
+            'net9.0' {
+                $androidTpv = '35.0'   # matches PreviousAndroidTfm (net9.0-android35.0)
+                $iosTpv      = '18.0'  # matches PreviousIosTfm / PreviousMacCatalystTfm
+            }
+            'net10.0' {
+                $androidTpv = '36.0'   # matches LatestAndroidTfm (net10.0-android36.0)
+                $iosTpv      = '26'    # aligns with ios26 / maccatalyst26 (no .0 in props)
+            }
+            default {
+                throw "Unsupported framework '$framework' for MAUI test platform versions."
+            }
+        }
 
         DotnetNew 'maui' $name $framework
 
