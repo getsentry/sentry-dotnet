@@ -55,15 +55,18 @@ public partial class MauiEventsBinderTests
 #endif
         var disabledBinder = new MauiSessionReplayMaskControlsOfTypeBinder(options2);
 
-        // Act
-        var fixture = new MauiEventsBinderFixture(enabledBinder, disabledBinder);
+        var buttonEventBinder = new MauiButtonEventsBinder();
 
-#if __ANDROID__
+        // Act
+        var fixture = new MauiEventsBinderFixture(buttonEventBinder, enabledBinder, disabledBinder);
+
         // Assert
-        _fixture.Binder._elementEventBinders.Should().BeEquivalentTo([enabledBinder]);
+#if __ANDROID__
+        var expectedBinders = new List<IMauiElementEventBinder> { buttonEventBinder, enabledBinder };
 #else
-        // Currently only Android supports Session Replay, so we don't register these binders on other platforms
-        _fixture.Binder._elementEventBinders.Should().BeEmpty();
+        // We only register MauiSessionReplayMaskControlsOfTypeBinder on platforms that support Session Replay
+        var expectedBinders = new List<IMauiElementEventBinder> { buttonEventBinder};
 #endif
+        fixture.Binder._elementEventBinders.Should().BeEquivalentTo(expectedBinders);
     }
 }
