@@ -65,7 +65,7 @@ public partial class MauiEventsBinderTests
         var expectedBinders = new List<IMauiElementEventBinder> { buttonEventBinder, enabledBinder };
 #else
         // We only register MauiSessionReplayMaskControlsOfTypeBinder on platforms that support Session Replay
-        var expectedBinders = new List<IMauiElementEventBinder> { buttonEventBinder};
+        var expectedBinders = new List<IMauiElementEventBinder> { buttonEventBinder };
 #endif
         fixture.Binder._elementEventBinders.Should().BeEquivalentTo(expectedBinders);
     }
