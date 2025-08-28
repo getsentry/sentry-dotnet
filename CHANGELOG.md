@@ -15,6 +15,7 @@
   - Ensure all buffered logs are sent to Sentry when the application terminates unexpectedly ([#4425](https://github.com/getsentry/sentry-dotnet/pull/4425))
   - `InvalidOperationException` potentially thrown during a race condition, especially in concurrent high-volume logging scenarios ([#4428](https://github.com/getsentry/sentry-dotnet/pull/4428))
 - Blocking calls are no longer treated as unhandled crashes ([#4458](https://github.com/getsentry/sentry-dotnet/pull/4458))
+- The SDK avoids redundant scope sync after transaction finish ([#4479](https://github.com/getsentry/sentry-dotnet/pull/4479))
 
 ### Dependencies
 
