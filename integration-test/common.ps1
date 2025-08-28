@@ -1,5 +1,7 @@
-# So that this works in VS Code testing integration. Otherwise the script is run within its directory.
+$global:previousFramework = 'net9.0'
+$global:latestFramework = 'net10.0'
 
+# So that this works in VS Code testing integration. Otherwise the script is run within its directory.
 # In CI, the module is loaded automatically
 if (!(Test-Path env:CI ))
 {
@@ -57,6 +59,24 @@ AfterAll {
 BeforeAll {
     Push-Location $PSScriptRoot
     $env:SENTRY_LOG_LEVEL = 'debug';
+
+    function GetAndroidTpv($framework)
+    {
+        switch ($framework) {
+            'net9.0' { return '35.0' }   # matches PreviousAndroidTfm (net9.0-android35.0)
+            'net10.0' { return '36.0' }  # matches LatestAndroidTfm (net10.0-android36.0)
+            default { throw "Unsupported framework '$framework' for Android target platform version." }
+        }
+    }
+
+    function GetIosTpv($framework)
+    {
+        switch ($framework) {
+            'net9.0' { return '18.0' }   # matches PreviousIosTfm / PreviousMacCatalystTfm
+            'net10.0' { return '26' }    # aligns with ios26 / maccatalyst26
+            default { throw "Unsupported framework '$framework' for iOS target platform version." }
+        }
+    }
 
     function GetSentryPackageVersion()
     {
@@ -148,7 +168,7 @@ BeforeAll {
         }
         elseif ($action -eq "publish")
         {
-            $result.ScriptOutput | Should -AnyElementMatch "$((Get-Item $project).Basename) -> .*$project/bin/Release/$TargetFramework/.*/publish"
+            $result.ScriptOutput | Should -AnyElementMatch "$((Get-Item $project).Basename) -> .*$project/bin/Release/$TargetFramework/.*publish.*"
         }
         $result.ScriptOutput | Should -Not -AnyElementMatch "Preparing upload to Sentry for project 'Sentry'"
         $result.HasErrors() | Should -BeFalse

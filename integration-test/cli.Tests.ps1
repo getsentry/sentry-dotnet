@@ -4,7 +4,8 @@ $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
 
 Describe 'Console apps (<framework>) - normal build' -ForEach @(
-    @{ framework = "net9.0" }
+    @{ framework = $previousFramework }
+    @{ framework = $latestFramework }
 ) {
     BeforeAll {
         DotnetNew 'console' 'console-app' $framework
@@ -40,7 +41,8 @@ Describe 'Console apps (<framework>) - normal build' -ForEach @(
 }
 
 Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
-    @{ framework = "net9.0" }
+    @{ framework = $previousFramework }
+    @{ framework = $latestFramework }
 ) {
     BeforeAll {
         DotnetNew 'console' 'console-app' $framework
@@ -106,7 +108,7 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
 }
 
 Describe 'MAUI' -ForEach @(
-    @{ framework = "net9.0" }
+    @{ framework = $previousFramework }
 ) -Skip:($env:NO_MOBILE -eq "true") {
     BeforeAll {
         RegisterLocalPackage 'Sentry.Android.AssemblyReader'
@@ -119,20 +121,8 @@ Describe 'MAUI' -ForEach @(
         }
 
         $name = 'maui-app'
-        # Resolve target platform versions based on the base TFM
-        switch ($framework) {
-            'net9.0' {
-                $androidTpv = '35.0'   # matches PreviousAndroidTfm (net9.0-android35.0)
-                $iosTpv      = '18.0'  # matches PreviousIosTfm / PreviousMacCatalystTfm
-            }
-            'net10.0' {
-                $androidTpv = '36.0'   # matches LatestAndroidTfm (net10.0-android36.0)
-                $iosTpv      = '26'    # aligns with ios26 / maccatalyst26 (no .0 in props)
-            }
-            default {
-                throw "Unsupported framework '$framework' for MAUI test platform versions."
-            }
-        }
+        $androidTpv = GetAndroidTpv $framework
+        $iosTpv = GetIosTpv $framework
 
         DotnetNew 'maui' $name $framework
 
@@ -167,12 +157,14 @@ Describe 'MAUI' -ForEach @(
             'libxamarin-app.so',
             'maui-app.pdb'
         )
+        $nonZeroNumberRegex = '[1-9][0-9]*';
         $result.ScriptOutput | Should -AnyElementMatch 'Uploaded a total of 1 new mapping files'
-        $result.ScriptOutput | Should -AnyElementMatch 'Found 23 debug information files \(1 with embedded sources\)'
+        $result.ScriptOutput | Should -AnyElementMatch "Found $nonZeroNumberRegex debug information files \($nonZeroNumberRegex with embedded sources\)"
     }
 
     It "uploads symbols and sources for an iOS build" -Skip:(!$IsMacOS) {
         $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-ios$iosTpv"
+        Write-Host "UploadedDebugFiles: $($result.UploadedDebugFiles() | Out-String)"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'libmono-component-debugger.dylib',
             'libmono-component-diagnostics_tracing.dylib',

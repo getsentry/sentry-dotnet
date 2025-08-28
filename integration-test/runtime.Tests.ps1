@@ -4,7 +4,8 @@ $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
 
 Describe 'Console app NativeAOT (<framework>)' -ForEach @(
-    @{ framework = 'net8.0' }
+    @{ framework = $previousFramework }
+    @{ framework = $latestFramework }
 ) {
     BeforeAll {
         $path = './console-app'
