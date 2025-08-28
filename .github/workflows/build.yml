@@ -32,6 +32,7 @@ jobs:
             container:
               image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
               volumes:
+                - /tmp/node20:/__e/node20
                 - /tmp/node24:/__e/node24
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
             rid: macos # universal (osx-arm64 + osx-x64)
@@ -44,7 +45,7 @@ jobs:
       - name: Initialize Alpine Linux
         if: ${{ contains(matrix.container.image, 'alpine') }}
         run: |
-          curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin /__e/node24/bin/
+          curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin
 
       - name: Checkout
         uses: actions/checkout@v5
@@ -100,6 +101,7 @@ jobs:
             container:
               image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
               volumes:
+                - /tmp/node20:/__e/node20
                 - /tmp/node24:/__e/node24
                 - /var/run/docker.sock:/var/run/docker.sock
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
@@ -116,7 +118,7 @@ jobs:
       - name: Initialize Alpine Linux
         if: ${{ contains(matrix.container.image, 'alpine') }}
         run: |
-          curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin /__e/node24/bin/
+          curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin
 
       - name: Cancel Previous Runs
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
