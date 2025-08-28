@@ -11,7 +11,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
 {
     private readonly IHub _hub;
     private readonly SentryMauiOptions _options;
-    private readonly IEnumerable<IMauiElementEventBinder> _elementEventBinders;
+    internal readonly IEnumerable<IMauiElementEventBinder> _elementEventBinders;
 
     // https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types
     // https://github.com/getsentry/sentry/blob/master/static/app/types/breadcrumbs.tsx

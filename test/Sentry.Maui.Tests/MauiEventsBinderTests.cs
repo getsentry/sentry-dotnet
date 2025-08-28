@@ -35,4 +35,35 @@ public partial class MauiEventsBinderTests
             }
         }
     }
+
+    [Fact]
+    public void ElementEventBinders_EnabledOnly()
+    {
+        // Arrange
+        var options1 = new SentryMauiOptions { Dsn = ValidDsn };
+#if __ANDROID__
+        options1.Native.ExperimentalOptions.SessionReplay.MaskControlsOfType<object>(); // force masking to be enabled
+        options1.Native.ExperimentalOptions.SessionReplay.SessionSampleRate = 1.0;
+        options1.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate = 1.0;
+#endif
+        var enabledBinder = new MauiSessionReplayMaskControlsOfTypeBinder(options1);
+
+        var options2 = new SentryMauiOptions { Dsn = ValidDsn };
+#if __ANDROID__
+        options2.Native.ExperimentalOptions.SessionReplay.SessionSampleRate = 0.0;
+        options2.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate = 0.0;
+#endif
+        var disabledBinder = new MauiSessionReplayMaskControlsOfTypeBinder(options2);
+
+        // Act
+        var fixture = new MauiEventsBinderFixture(enabledBinder, disabledBinder);
+
+#if __ANDROID__
+        // Assert
+        _fixture.Binder._elementEventBinders.Should().BeEquivalentTo([enabledBinder]);
+#else
+        // Currently only Android supports Session Replay, so we don't register these binders on other platforms
+        _fixture.Binder._elementEventBinders.Should().BeEmpty();
+#endif
+    }
 }
