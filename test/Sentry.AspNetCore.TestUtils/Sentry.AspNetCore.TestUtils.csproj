@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(PreviousTfm);$(LatestTfm)</TargetFrameworks>
+    <TargetFrameworks>$(CurrentTfms)</TargetFrameworks>
     <!-- These tests fail on Mono -->
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TargetFrameworks);net48</TargetFrameworks>
     <IsTestProject>false</IsTestProject>
@@ -41,6 +41,13 @@
     <!-- https://github.com/advisories/GHSA-vmch-3w2x-vhgq -->
     <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets" Version="2.1.40" />
 
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework) == 'net8.0'">
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="8.0.0" />
+    <PackageReference Include="Verify.AspNetCore" Version="3.4.1" />
+    <PackageReference Include="Verify.Http" Version="4.3.2" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework) == 'net9.0'">

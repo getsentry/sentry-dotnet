@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(LatestTfm);$(PreviousTfm)</TargetFrameworks>
+    <TargetFrameworks>$(CurrentTfms)</TargetFrameworks>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 

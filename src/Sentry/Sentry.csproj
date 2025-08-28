@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks>$(LatestTfm);$(PreviousTfm);netstandard2.1;netstandard2.0;net462</TargetFrameworks>
+    <TargetFrameworks>$(CurrentTfms);netstandard2.1;netstandard2.0;net462</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);$(LatestAndroidTfm);$(PreviousAndroidTfm)</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);$(LatestIosTfm);$(PreviousIosTfm)</TargetFrameworks>
     <TargetFrameworks Condition="'$(NO_MACCATALYST)' == '' And $([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);$(LatestMacCatalystTfm);$(PreviousMacCatalystTfm)</TargetFrameworks>
@@ -26,7 +26,7 @@
   </PropertyGroup>
 
   <!-- Only include Native bindings code for non-mobile and non-legacy TFMs -->
-  <ItemGroup Condition="'$(TargetFramework)' != '$(LatestTfm)' and '$(TargetFramework)' != '$(PreviousTfm)'">
+  <ItemGroup Condition="!$(CurrentTfms.Contains('$(TargetFramework)'))">
     <Compile Remove="**\Native\**\*" />
   </ItemGroup>
 

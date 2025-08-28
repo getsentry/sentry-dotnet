@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>$(LatestTfm);$(PreviousTfm);net48</TargetFrameworks>
+    <TargetFrameworks>$(CurrentTfms);net48</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
