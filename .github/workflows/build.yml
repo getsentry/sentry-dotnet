@@ -255,7 +255,6 @@ jobs:
           sparse-checkout: |
             integration-test
             .github
-            Directory.Build.props
 
       - name: Fetch NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
