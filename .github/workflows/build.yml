@@ -250,10 +250,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           # We only check out what is absolutely necessary to reduce a chance of local files impacting
-          # integration tests, e.g. Directory.Build.props, nuget.config, ...
+          # integration tests (nuget.config etc.)... But we need the root Directory.Build.props calculate 
+          # the package version
           sparse-checkout: |
             integration-test
             .github
+            Directory.Build.props
 
       - name: Fetch NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
