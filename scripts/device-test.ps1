@@ -56,7 +56,6 @@ try
         $buildDir = "test/Sentry.Maui.Device.TestApp/bin/Release/$Tfm/iossimulator-$arch"
         $envValue = $CI ? 'true' : 'false'
         $arguments = @(
-            '-v',
             '--app', "$buildDir/Sentry.Maui.Device.TestApp.app",
             '--target', 'ios-simulator-64',
             '--launch-timeout', '00:10:00',
