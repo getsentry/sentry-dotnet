@@ -101,7 +101,7 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
     }
 }
 
-Describe 'MAUI' -ForEach @(
+Describe 'MAUI (<framework>)' -ForEach @(
     @{ framework = $previousFramework }
 ) -Skip:($env:NO_MOBILE -eq "true") {
     BeforeAll {
