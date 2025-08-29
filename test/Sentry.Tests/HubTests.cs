@@ -714,6 +714,48 @@ public partial class HubTests
         transactionTracer.DynamicSamplingContext.Should().BeSameAs(dsc);
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void StartTransaction_Backpressure_Downsamples(bool usesTracesSampler)
+    {
+        // Arrange
+        var transactionContext = new TransactionContext("name", "operation");
+
+        var clock = new MockClock(DateTimeOffset.UtcNow);
+        var backpressureMonitor = new BackpressureMonitor(null, clock, startImmediately: false);
+        backpressureMonitor.SetDownsampleLevel(1);
+        _fixture.Options.BackpressureMonitor = backpressureMonitor;
+        var sampleRate = 0.5f;
+        var expectedDownsampledRate = sampleRate * backpressureMonitor.DownsampleFactor;
+        if (usesTracesSampler)
+        {
+            _fixture.Options.TracesSampler = _ => sampleRate;
+        }
+        else
+        {
+            _fixture.Options.TracesSampleRate = sampleRate;
+        }
+
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>());
+
+        switch (transaction)
+        {
+            // Assert
+            case TransactionTracer tracer:
+                tracer.SampleRate.Should().Be(expectedDownsampledRate);
+                break;
+            case UnsampledTransaction unsampledTransaction:
+                unsampledTransaction.SampleRate.Should().Be(expectedDownsampledRate);
+                break;
+            default:
+                throw new Exception("Unexpected transaction type.");
+        }
+    }
+
     // overwrite the 'sample_rate' of the Dynamic Sampling Context (DSC) when a sampling decisions is made in the downstream SDK
     // 1. overwrite when 'TracesSampler' reaches a sampling decision
     // 2. keep when a sampling decision has been made upstream (via 'TransactionContext.IsSampled')
