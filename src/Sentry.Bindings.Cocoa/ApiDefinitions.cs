@@ -412,6 +412,10 @@ interface SentryEnvelopeItemHeader : SentrySerializable
     [Export ("initWithType:length:filenname:contentType:")]
     NativeHandle Constructor (string type, nuint length, string filename, string contentType);
 
+    // -(instancetype _Nonnull)initWithType:(NSString * _Nonnull)type length:(NSUInteger)length contentType:(NSString * _Nonnull)contentType itemCount:(NSNumber * _Nonnull)itemCount;
+    [Export ("initWithType:length:contentType:itemCount:")]
+    NativeHandle Constructor (string type, nuint length, string contentType, NSNumber itemCount);
+
     // @property (readonly, copy, nonatomic) NSString * _Nonnull type;
     [Export ("type")]
     string Type { get; }
@@ -427,6 +431,10 @@ interface SentryEnvelopeItemHeader : SentrySerializable
     // @property (readonly, copy, nonatomic) NSString * _Nullable contentType;
     [NullAllowed, Export ("contentType")]
     string ContentType { get; }
+
+    // @property (readonly, copy, nonatomic) NSNumber * _Nullable itemCount;
+    [NullAllowed, Export ("itemCount", ArgumentSemantic.Copy)]
+    NSNumber ItemCount { get; }
 
     // @property (copy, nonatomic) NSString * _Nullable platform;
     [NullAllowed, Export ("platform")]
@@ -603,6 +611,20 @@ interface SentryException : SentrySerializable
     // -(instancetype _Nonnull)initWithValue:(NSString * _Nonnull)value type:(NSString * _Nonnull)type;
     [Export ("initWithValue:type:")]
     NativeHandle Constructor (string value, string type);
+}
+
+// @interface SentryFeedbackAPI : NSObject
+[BaseType (typeof(NSObject))]
+[Internal]
+interface SentryFeedbackAPI
+{
+    // -(void)showWidget __attribute__((availability(ios, introduced=13.0)));
+        [Export ("showWidget")]
+    void ShowWidget ();
+
+    // -(void)hideWidget __attribute__((availability(ios, introduced=13.0)));
+        [Export ("hideWidget")]
+    void HideWidget ();
 }
 
 // @interface SentryFrame : NSObject <SentrySerializable>
@@ -1026,6 +1048,23 @@ interface SentryHub
     // -(void)close;
     [Export ("close")]
     void Close ();
+}
+
+// @protocol SentryIntegrationProtocol <NSObject>
+[Protocol]
+[BaseType (typeof(NSObject))]
+[Internal]
+interface SentryIntegrationProtocol
+{
+    // @required -(BOOL)installWithOptions:(SentryOptions * _Nonnull)options __attribute__((swift_name("install(with:)")));
+    [Abstract]
+    [Export ("installWithOptions:")]
+    bool InstallWithOptions (SentryOptions options);
+
+    // @required -(void)uninstall;
+    [Abstract]
+    [Export ("uninstall")]
+    void Uninstall ();
 }
 
 // @interface SentryMeasurementUnit : NSObject <NSCopying>
@@ -1828,6 +1867,11 @@ interface SentrySDK
     [Static]
     [Export ("captureFeedback:")]
     void CaptureFeedback (SentryFeedback feedback);
+
+    // @property (readonly, nonatomic, class) API_AVAILABLE(ios(13.0)) SentryFeedbackAPI * feedback __attribute__((availability(ios, introduced=13.0)));
+        [Static]
+    [Export ("feedback")]
+    SentryFeedbackAPI Feedback { get; }
 
     // +(void)addBreadcrumb:(SentryBreadcrumb * _Nonnull)crumb __attribute__((swift_name("addBreadcrumb(_:)")));
     [Static]
