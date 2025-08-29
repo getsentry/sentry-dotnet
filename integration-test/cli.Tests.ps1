@@ -4,8 +4,7 @@ $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
 
 Describe 'Console apps (<framework>) - normal build' -ForEach @(
-    @{ framework = $previousFramework }
-    @{ framework = $latestFramework }
+    foreach ($fw in $currentFrameworks) { @{ framework = $fw } }
 ) {
     BeforeAll {
         DotnetNew 'console' 'console-app' $framework
@@ -41,8 +40,7 @@ Describe 'Console apps (<framework>) - normal build' -ForEach @(
 }
 
 Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
-    @{ framework = $previousFramework }
-    @{ framework = $latestFramework }
+    foreach ($fw in $currentFrameworks) { @{ framework = $fw } }
 ) {
     BeforeAll {
         DotnetNew 'console' 'console-app' $framework
@@ -94,10 +92,6 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
         $result = RunDotnetWithSentryCLI 'publish' 'console-app' $False $True $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'console-app'"
         $sourceBundle = 'console-app.src.zip'
-        if ($IsMacOS)
-        {
-            $sourceBundle = 'console-app.src.zip'
-        }
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @($sourceBundle)
     }
 

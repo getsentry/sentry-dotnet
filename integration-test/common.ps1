@@ -1,5 +1,7 @@
+$global:longTermFramework = 'net8.0'
 $global:previousFramework = 'net9.0'
 $global:latestFramework = 'net10.0'
+$global:currentFrameworks = @($longTermFramework, $previousFramework, $latestFramework)
 
 # So that this works in VS Code testing integration. Otherwise the script is run within its directory.
 # In CI, the module is loaded automatically
