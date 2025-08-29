@@ -191,10 +191,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\Sentry.SourceGenerators\bin\Release\netstandard2.0\Sentry.SourceGenerators.dll"
-          Pack="true"
-          PackagePath="analyzers/dotnet/cs"
-          Visible="false" />
+    <ProjectReference Include="..\Sentry.SourceGenerators\Sentry.SourceGenerators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"
+                      PrivateAssets="all"
+                      Pack="true"
+                      PackagePath="analyzers/dotnet/cs" />
   </ItemGroup>
-
 </Project>
