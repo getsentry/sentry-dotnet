@@ -248,6 +248,33 @@ interface SentryRRWebEvent : SentrySerializable
     new NSDictionary<NSString, NSObject> Serialize();
 }
 
+// @interface SentryUserFeedback : NSObject <SentrySerializable>
+[BaseType(typeof(NSObject))]
+[DisableDefaultCtor]
+[Internal]
+interface SentryUserFeedback : SentrySerializable
+{
+    // @property (nonatomic, readonly, strong) SentryId * _Nonnull eventId;
+    [Export("eventId", ArgumentSemantic.Strong)]
+    SentryId EventId { get; }
+
+    // @property (nonatomic, copy) NSString * _Nonnull name;
+    [Export("name")]
+    string Name { get; set; }
+
+    // @property (nonatomic, copy) NSString * _Nonnull email;
+    [Export("email")]
+    string Email { get; set; }
+
+    // @property (nonatomic, copy) NSString * _Nonnull comments;
+    [Export("comments")]
+    string Comments { get; set; }
+
+    // - (nonnull instancetype)initWithEventId:(SentryId * _Nonnull)eventId OBJC_DESIGNATED_INITIALIZER;
+    [Export("initWithEventId:")]
+    NativeHandle Constructor(SentryId eventId);
+}
+
 [BaseType(typeof(NSObject), Name = "_TtC6Sentry31SentryUserFeedbackConfiguration")]
 [DisableDefaultCtor]
 [Internal]

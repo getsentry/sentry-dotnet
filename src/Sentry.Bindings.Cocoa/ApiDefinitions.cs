@@ -384,7 +384,7 @@ interface SentryDsn
     [Export ("getHash")]
     string Hash { get; }
 
-    // -(NSURL * _Nonnull)getStoreEndpoint;
+    // -(NSURL * _Nonnull)getStoreEndpoint __attribute__((deprecated("This endpoint is no longer used")));
     [Export ("getStoreEndpoint")]
     NSUrl StoreEndpoint { get; }
 
@@ -569,13 +569,6 @@ interface SentryEvent : SentrySerializable
     // -(instancetype _Nonnull)initWithError:(NSError * _Nonnull)error;
     [Export ("initWithError:")]
     NativeHandle Constructor (NSError error);
-}
-
-// @interface SentryEventDecodable : SentryEvent
-[BaseType (typeof(SentryEvent))]
-[Internal]
-interface SentryEventDecodable
-{
 }
 
 // @interface SentryException : NSObject <SentrySerializable>
@@ -1652,6 +1645,10 @@ interface SentryOptions
     [Export ("spotlightUrl")]
     string SpotlightUrl { get; set; }
 
+    // @property (readonly, nonatomic) NSObject * _Nonnull _swiftExperimentalOptions;
+    [Export ("_swiftExperimentalOptions")]
+    NSObject _swiftExperimentalOptions { get; }
+
     // @property (copy, nonatomic) API_AVAILABLE(ios(13.0)) SentryUserFeedbackConfigurationBlock configureUserFeedback __attribute__((availability(ios, introduced=13.0)));
         [Export ("configureUserFeedback", ArgumentSemantic.Copy)]
     SentryUserFeedbackConfigurationBlock ConfigureUserFeedback { get; set; }
@@ -2379,33 +2376,6 @@ interface SentryUser : SentrySerializable
     // -(NSUInteger)hash;
     [Export ("hash")]
     nuint Hash { get; }
-}
-
-// @interface SentryUserFeedback : NSObject <SentrySerializable>
-[BaseType (typeof(NSObject))]
-[DisableDefaultCtor]
-[Internal]
-interface SentryUserFeedback : SentrySerializable
-{
-    // -(instancetype _Nonnull)initWithEventId:(SentryId * _Nonnull)eventId;
-    [Export ("initWithEventId:")]
-    NativeHandle Constructor (SentryId eventId);
-
-    // @property (readonly, nonatomic, strong) SentryId * _Nonnull eventId;
-    [Export ("eventId", ArgumentSemantic.Strong)]
-    SentryId EventId { get; }
-
-    // @property (copy, nonatomic) NSString * _Nonnull name;
-    [Export ("name")]
-    string Name { get; set; }
-
-    // @property (copy, nonatomic) NSString * _Nonnull email;
-    [Export ("email")]
-    string Email { get; set; }
-
-    // @property (copy, nonatomic) NSString * _Nonnull comments;
-    [Export ("comments")]
-    string Comments { get; set; }
 }
 
 // @interface SentryScreenFrames : NSObject <NSCopying>
