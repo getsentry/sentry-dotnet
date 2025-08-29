@@ -2,7 +2,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Maui.LifecycleEvents;
-using Sentry;
 using Sentry.Extensibility;
 using Sentry.Extensions.Logging.Extensions.DependencyInjection;
 using Sentry.Maui;
@@ -67,9 +66,9 @@ public static class SentryMauiAppBuilderExtensions
         services.AddSingleton<IMauiElementEventBinder, MauiButtonEventsBinder>();
         services.AddSingleton<IMauiElementEventBinder, MauiImageButtonEventsBinder>();
         services.AddSingleton<IMauiElementEventBinder, MauiGestureRecognizerEventsBinder>();
-        services.AddSingleton<IMauiElementEventBinder, MauiVisualElementEventsBinder>();
+        services.AddSingleton<IMauiElementEventBinder, MauiSessionReplayMaskControlsOfTypeBinder>();
 
-        // Resolve the configured options and register any event binders that have been injected by integrations
+        // Resolve options configured via the options callback and register any binders injected by integrations
         var options = new SentryMauiOptions();
         configureOptions?.Invoke(options);
         foreach (var eventBinder in options.IntegrationEventBinders)

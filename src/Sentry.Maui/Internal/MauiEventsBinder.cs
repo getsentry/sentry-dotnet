@@ -1,6 +1,4 @@
 using Microsoft.Extensions.Options;
-using Microsoft.Maui.Platform;
-using Sentry.Extensibility;
 
 namespace Sentry.Maui.Internal;
 
@@ -13,7 +11,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
 {
     private readonly IHub _hub;
     private readonly SentryMauiOptions _options;
-    private readonly IEnumerable<IMauiElementEventBinder> _elementEventBinders;
+    internal readonly IEnumerable<IMauiElementEventBinder> _elementEventBinders;
 
     // https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/#breadcrumb-types
     // https://github.com/getsentry/sentry/blob/master/static/app/types/breadcrumbs.tsx
@@ -29,7 +27,9 @@ internal class MauiEventsBinder : IMauiEventsBinder
     {
         _hub = hub;
         _options = options.Value;
-        _elementEventBinders = elementEventBinders;
+        _elementEventBinders = elementEventBinders.Where(b
+            => b is not MauiSessionReplayMaskControlsOfTypeBinder maskControlTypeBinder
+               || maskControlTypeBinder.IsEnabled);
     }
 
     public void HandleApplicationEvents(Application application, bool bind = true)
