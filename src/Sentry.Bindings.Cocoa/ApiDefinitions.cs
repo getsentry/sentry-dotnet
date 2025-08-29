@@ -384,7 +384,7 @@ interface SentryDsn
     [Export ("getHash")]
     string Hash { get; }
 
-    // -(NSURL * _Nonnull)getStoreEndpoint;
+    // -(NSURL * _Nonnull)getStoreEndpoint __attribute__((deprecated("This endpoint is no longer used")));
     [Export ("getStoreEndpoint")]
     NSUrl StoreEndpoint { get; }
 
@@ -412,6 +412,10 @@ interface SentryEnvelopeItemHeader : SentrySerializable
     [Export ("initWithType:length:filenname:contentType:")]
     NativeHandle Constructor (string type, nuint length, string filename, string contentType);
 
+    // -(instancetype _Nonnull)initWithType:(NSString * _Nonnull)type length:(NSUInteger)length contentType:(NSString * _Nonnull)contentType itemCount:(NSNumber * _Nonnull)itemCount;
+    [Export ("initWithType:length:contentType:itemCount:")]
+    NativeHandle Constructor (string type, nuint length, string contentType, NSNumber itemCount);
+
     // @property (readonly, copy, nonatomic) NSString * _Nonnull type;
     [Export ("type")]
     string Type { get; }
@@ -427,6 +431,14 @@ interface SentryEnvelopeItemHeader : SentrySerializable
     // @property (readonly, copy, nonatomic) NSString * _Nullable contentType;
     [NullAllowed, Export ("contentType")]
     string ContentType { get; }
+
+    // @property (readonly, copy, nonatomic) NSNumber * _Nullable itemCount;
+    [NullAllowed, Export ("itemCount", ArgumentSemantic.Copy)]
+    NSNumber ItemCount { get; }
+
+    // @property (copy, nonatomic) NSString * _Nullable platform;
+    [NullAllowed, Export ("platform")]
+    string Platform { get; set; }
 }
 
 partial interface Constants
@@ -559,13 +571,6 @@ interface SentryEvent : SentrySerializable
     NativeHandle Constructor (NSError error);
 }
 
-// @interface SentryEventDecodable : SentryEvent
-[BaseType (typeof(SentryEvent))]
-[Internal]
-interface SentryEventDecodable
-{
-}
-
 // @interface SentryException : NSObject <SentrySerializable>
 [BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
@@ -599,6 +604,20 @@ interface SentryException : SentrySerializable
     // -(instancetype _Nonnull)initWithValue:(NSString * _Nonnull)value type:(NSString * _Nonnull)type;
     [Export ("initWithValue:type:")]
     NativeHandle Constructor (string value, string type);
+}
+
+// @interface SentryFeedbackAPI : NSObject
+[BaseType (typeof(NSObject))]
+[Internal]
+interface SentryFeedbackAPI
+{
+    // -(void)showWidget __attribute__((availability(ios, introduced=13.0)));
+        [Export ("showWidget")]
+    void ShowWidget ();
+
+    // -(void)hideWidget __attribute__((availability(ios, introduced=13.0)));
+        [Export ("hideWidget")]
+    void HideWidget ();
 }
 
 // @interface SentryFrame : NSObject <SentrySerializable>
@@ -1022,6 +1041,23 @@ interface SentryHub
     // -(void)close;
     [Export ("close")]
     void Close ();
+}
+
+// @protocol SentryIntegrationProtocol <NSObject>
+[Protocol]
+[BaseType (typeof(NSObject))]
+[Internal]
+interface SentryIntegrationProtocol
+{
+    // @required -(BOOL)installWithOptions:(SentryOptions * _Nonnull)options __attribute__((swift_name("install(with:)")));
+    [Abstract]
+    [Export ("installWithOptions:")]
+    bool InstallWithOptions (SentryOptions options);
+
+    // @required -(void)uninstall;
+    [Abstract]
+    [Export ("uninstall")]
+    void Uninstall ();
 }
 
 // @interface SentryMeasurementUnit : NSObject <NSCopying>
@@ -1522,6 +1558,10 @@ interface SentryOptions
     [Export ("enableCoreDataTracing")]
     bool EnableCoreDataTracing { get; set; }
 
+    // @property (copy, nonatomic) SentryProfilingConfigurationBlock _Nullable configureProfiling;
+    [NullAllowed, Export ("configureProfiling", ArgumentSemantic.Copy)]
+    SentryProfilingConfigurationBlock ConfigureProfiling { get; set; }
+
     // @property (assign, nonatomic) BOOL enableAppLaunchProfiling;
     [Export ("enableAppLaunchProfiling")]
     bool EnableAppLaunchProfiling { get; set; }
@@ -1605,10 +1645,18 @@ interface SentryOptions
     [Export ("spotlightUrl")]
     string SpotlightUrl { get; set; }
 
+    // @property (readonly, nonatomic) NSObject * _Nonnull _swiftExperimentalOptions;
+    [Export ("_swiftExperimentalOptions")]
+    NSObject _swiftExperimentalOptions { get; }
+
     // @property (copy, nonatomic) API_AVAILABLE(ios(13.0)) SentryUserFeedbackConfigurationBlock configureUserFeedback __attribute__((availability(ios, introduced=13.0)));
         [Export ("configureUserFeedback", ArgumentSemantic.Copy)]
     SentryUserFeedbackConfigurationBlock ConfigureUserFeedback { get; set; }
 }
+
+// typedef void (^SentryProfilingConfigurationBlock)(SentryProfileOptions * _Nonnull);
+[Internal]
+delegate void SentryProfilingConfigurationBlock (SentryProfileOptions arg0);
 
 // @interface SentryReplayApi : NSObject
 [BaseType (typeof(NSObject))]
@@ -1816,6 +1864,11 @@ interface SentrySDK
     [Static]
     [Export ("captureFeedback:")]
     void CaptureFeedback (SentryFeedback feedback);
+
+    // @property (readonly, nonatomic, class) API_AVAILABLE(ios(13.0)) SentryFeedbackAPI * feedback __attribute__((availability(ios, introduced=13.0)));
+        [Static]
+    [Export ("feedback")]
+    SentryFeedbackAPI Feedback { get; }
 
     // +(void)addBreadcrumb:(SentryBreadcrumb * _Nonnull)crumb __attribute__((swift_name("addBreadcrumb(_:)")));
     [Static]
@@ -2325,33 +2378,6 @@ interface SentryUser : SentrySerializable
     nuint Hash { get; }
 }
 
-// @interface SentryUserFeedback : NSObject <SentrySerializable>
-[BaseType (typeof(NSObject))]
-[DisableDefaultCtor]
-[Internal]
-interface SentryUserFeedback : SentrySerializable
-{
-    // -(instancetype _Nonnull)initWithEventId:(SentryId * _Nonnull)eventId;
-    [Export ("initWithEventId:")]
-    NativeHandle Constructor (SentryId eventId);
-
-    // @property (readonly, nonatomic, strong) SentryId * _Nonnull eventId;
-    [Export ("eventId", ArgumentSemantic.Strong)]
-    SentryId EventId { get; }
-
-    // @property (copy, nonatomic) NSString * _Nonnull name;
-    [Export ("name")]
-    string Name { get; set; }
-
-    // @property (copy, nonatomic) NSString * _Nonnull email;
-    [Export ("email")]
-    string Email { get; set; }
-
-    // @property (copy, nonatomic) NSString * _Nonnull comments;
-    [Export ("comments")]
-    string Comments { get; set; }
-}
-
 // @interface SentryScreenFrames : NSObject <NSCopying>
 [BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
@@ -2435,6 +2461,11 @@ interface PrivateSentrySDKOnly
     [Static]
     [Export ("getExtraContext")]
     NSDictionary ExtraContext { get; }
+
+    // +(void)setTrace:(SentryId * _Nonnull)traceId spanId:(SentrySpanId * _Nonnull)spanId;
+    [Static]
+    [Export ("setTrace:spanId:")]
+    void SetTrace (SentryId traceId, SentrySpanId spanId);
 
     // +(uint64_t)startProfilerForTrace:(SentryId * _Nonnull)traceId;
     [Static]

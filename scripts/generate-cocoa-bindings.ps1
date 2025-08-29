@@ -96,6 +96,8 @@ Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
 
 ## Imports in the various header files are provided in the "new" style of:
 #     `#import <Sentry/SomeHeader.h>`
+# ...or:
+#     `#import SENTRY_HEADER(SentryHeader)`
 # ...instead of:
 #     `#import "SomeHeader.h"`
 # This causes sharpie to fail resolve those headers
@@ -106,6 +108,7 @@ foreach ($file in $filesToPatch)
     {
         $content = Get-Content -Path $file -Raw
         $content = $content -replace '<Sentry/([^>]+)>', '"$1"'
+        $content = $content -replace '#import SENTRY_HEADER\(([^)]+)\)', '#import "$1.h"'
         Set-Content -Path $file -Value $content
     }
     else
@@ -206,7 +209,7 @@ $Text = $Text -replace '\bISentrySerializable\b', 'SentrySerializable'
 $Text = $Text -replace ': INSCopying,', ':' -replace '\s?[:,] INSCopying', ''
 
 # Remove iOS attributes like [iOS (13, 0)]
-$Text = $Text -replace '\[iOS \(13, 0\)\]\n?', ''
+$Text = $Text -replace '\[iOS \(13,\s?0\)\]\n?', ''
 
 # Fix delegate argument names
 $Text = $Text -replace '(NSError) arg\d', '$1 error'

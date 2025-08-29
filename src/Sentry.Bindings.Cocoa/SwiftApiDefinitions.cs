@@ -66,6 +66,30 @@ interface SentryId
     nuint Hash { get; }
 }
 
+// @interface SentryProfileOptions : NSObject
+[BaseType(typeof(NSObject), Name = "_TtC6Sentry20SentryProfileOptions")]
+[DisableDefaultCtor]
+[Internal]
+interface SentryProfileOptions
+{
+    // @property(nonatomic) enum SentryProfileLifecycle lifecycle;
+    [Export("lifecycle", ArgumentSemantic.Assign)]
+    SentryProfileLifecycle Lifecycle { get; set; }
+
+    // @property(nonatomic) float sessionSampleRate;
+    [Export("sessionSampleRate")]
+    float SessionSampleRate { get; set; }
+
+    // @property(nonatomic) BOOL profileAppStarts;
+    [Export("profileAppStarts")]
+    bool ProfileAppStarts { get; set; }
+
+    // - (nonnull instancetype) init OBJC_DESIGNATED_INITIALIZER;
+    [Export("init")]
+    [DesignatedInitializer]
+    NativeHandle Constructor();
+}
+
 // @interface SentrySessionReplayIntegration : SentryBaseIntegration
 [BaseType (typeof(NSObject))]
 [Internal]
@@ -222,6 +246,33 @@ interface SentryRRWebEvent : SentrySerializable
     // -(NSDictionary<NSString *,id> * _Nonnull)serialize __attribute__((warn_unused_result("")));
     [Export ("serialize")]
     new NSDictionary<NSString, NSObject> Serialize();
+}
+
+// @interface SentryUserFeedback : NSObject <SentrySerializable>
+[BaseType(typeof(NSObject))]
+[DisableDefaultCtor]
+[Internal]
+interface SentryUserFeedback : SentrySerializable
+{
+    // @property (nonatomic, readonly, strong) SentryId * _Nonnull eventId;
+    [Export("eventId", ArgumentSemantic.Strong)]
+    SentryId EventId { get; }
+
+    // @property (nonatomic, copy) NSString * _Nonnull name;
+    [Export("name")]
+    string Name { get; set; }
+
+    // @property (nonatomic, copy) NSString * _Nonnull email;
+    [Export("email")]
+    string Email { get; set; }
+
+    // @property (nonatomic, copy) NSString * _Nonnull comments;
+    [Export("comments")]
+    string Comments { get; set; }
+
+    // - (nonnull instancetype)initWithEventId:(SentryId * _Nonnull)eventId OBJC_DESIGNATED_INITIALIZER;
+    [Export("initWithEventId:")]
+    NativeHandle Constructor(SentryId eventId);
 }
 
 [BaseType(typeof(NSObject), Name = "_TtC6Sentry31SentryUserFeedbackConfiguration")]
