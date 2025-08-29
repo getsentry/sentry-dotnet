@@ -9,6 +9,7 @@ namespace Sentry;
 /// <para>This API is experimental and it may change in the future.</para>
 /// </summary>
 [Experimental(DiagnosticId.ExperimentalFeature)]
+[DebuggerDisplay(@"SentryLog \{ Level = {Level}, Message = '{Message}' \}")]
 public sealed class SentryLog
 {
     private readonly Dictionary<string, SentryAttribute> _attributes;

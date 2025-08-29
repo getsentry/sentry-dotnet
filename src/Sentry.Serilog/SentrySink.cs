@@ -5,13 +5,19 @@ namespace Sentry.Serilog;
 /// </summary>
 /// <inheritdoc cref="IDisposable" />
 /// <inheritdoc cref="ILogEventSink" />
-internal sealed class SentrySink : ILogEventSink, IDisposable
+internal sealed partial class SentrySink : ILogEventSink, IDisposable
 {
     private readonly IDisposable? _sdkDisposable;
     private readonly SentrySerilogOptions _options;
 
     internal static readonly SdkVersion NameAndVersion
         = typeof(SentrySink).Assembly.GetNameAndVersion();
+
+    private static readonly SdkVersion Sdk = new()
+    {
+        Name = SdkName,
+        Version = NameAndVersion.Version,
+    };
 
     /// <summary>
     /// Serilog SDK name.
@@ -122,30 +128,33 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
             }
         }
 
-        if (logEvent.Level < _options.MinimumBreadcrumbLevel)
+        if (logEvent.Level >= _options.MinimumBreadcrumbLevel)
         {
-            return;
-        }
-
-        Dictionary<string, string>? data = null;
-        if (exception != null && !string.IsNullOrWhiteSpace(formatted))
-        {
-            // Exception.Message won't be used as Breadcrumb message
-            // Avoid losing it by adding as data:
-            data = new Dictionary<string, string>
+            Dictionary<string, string>? data = null;
+            if (exception != null && !string.IsNullOrWhiteSpace(formatted))
             {
-                {"exception_message", exception.Message}
-            };
+                // Exception.Message won't be used as Breadcrumb message
+                // Avoid losing it by adding as data:
+                data = new Dictionary<string, string>
+                {
+                    { "exception_message", exception.Message }
+                };
+            }
+
+            hub.AddBreadcrumb(
+                _clock,
+                string.IsNullOrWhiteSpace(formatted)
+                    ? exception?.Message ?? ""
+                    : formatted,
+                context,
+                data: data,
+                level: logEvent.Level.ToBreadcrumbLevel());
         }
 
-        hub.AddBreadcrumb(
-            _clock,
-            string.IsNullOrWhiteSpace(formatted)
-                ? exception?.Message ?? ""
-                : formatted,
-            context,
-            data: data,
-            level: logEvent.Level.ToBreadcrumbLevel());
+        if (_options.Experimental.EnableLogs)
+        {
+            CaptureStructuredLog(hub, logEvent, formatted, template);
+        }
     }
 
     private static bool IsSentryContext(string context) =>
