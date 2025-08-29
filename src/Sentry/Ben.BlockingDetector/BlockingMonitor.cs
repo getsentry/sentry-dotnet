@@ -70,7 +70,6 @@ namespace Sentry.Ben.BlockingDetector
                             Mechanism = new Mechanism
                             {
                                 Type = "BlockingCallDetector",
-                                Handled = false,
                                 Description = "Blocking calls can cause ThreadPool starvation.",
                                 Source = detectionSource.ToString()
                             },

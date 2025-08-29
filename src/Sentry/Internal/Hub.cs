@@ -197,7 +197,7 @@ internal class Hub : IHub, IDisposable
                 isSampled = SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
 
                 // Ensure the actual sampleRate is set on the provided DSC (if any) when the TracesSampler reached a sampling decision
-                dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(sampleRate.Value);
+                dynamicSamplingContext?.SetSampleRate(samplerSampleRate);
             }
         }
 
@@ -211,12 +211,12 @@ internal class Hub : IHub, IDisposable
             if (context.IsSampled is null && _options.TracesSampleRate is not null)
             {
                 // Ensure the actual sampleRate is set on the provided DSC (if any) when not IsSampled upstream but the TracesSampleRate reached a sampling decision
-                dynamicSamplingContext = dynamicSamplingContext?.WithSampleRate(sampleRate.Value);
+                dynamicSamplingContext?.SetSampleRate(_options.TracesSampleRate.Value);
             }
         }
 
         // Make sure there is a replayId (if available) on the provided DSC (if any).
-        dynamicSamplingContext = dynamicSamplingContext?.WithReplayId(_replaySession);
+        dynamicSamplingContext?.SetReplayId(_replaySession);
 
         if (isSampled is false)
         {
