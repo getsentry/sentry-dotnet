@@ -427,6 +427,10 @@ interface SentryEnvelopeItemHeader : SentrySerializable
     // @property (readonly, copy, nonatomic) NSString * _Nullable contentType;
     [NullAllowed, Export ("contentType")]
     string ContentType { get; }
+
+    // @property (copy, nonatomic) NSString * _Nullable platform;
+    [NullAllowed, Export ("platform")]
+    string Platform { get; set; }
 }
 
 partial interface Constants
@@ -1522,6 +1526,10 @@ interface SentryOptions
     [Export ("enableCoreDataTracing")]
     bool EnableCoreDataTracing { get; set; }
 
+    // @property (copy, nonatomic) SentryProfilingConfigurationBlock _Nullable configureProfiling;
+    [NullAllowed, Export ("configureProfiling", ArgumentSemantic.Copy)]
+    SentryProfilingConfigurationBlock ConfigureProfiling { get; set; }
+
     // @property (assign, nonatomic) BOOL enableAppLaunchProfiling;
     [Export ("enableAppLaunchProfiling")]
     bool EnableAppLaunchProfiling { get; set; }
@@ -1609,6 +1617,10 @@ interface SentryOptions
         [Export ("configureUserFeedback", ArgumentSemantic.Copy)]
     SentryUserFeedbackConfigurationBlock ConfigureUserFeedback { get; set; }
 }
+
+// typedef void (^SentryProfilingConfigurationBlock)(SentryProfileOptions * _Nonnull);
+[Internal]
+delegate void SentryProfilingConfigurationBlock (SentryProfileOptions arg0);
 
 // @interface SentryReplayApi : NSObject
 [BaseType (typeof(NSObject))]
@@ -2435,6 +2447,11 @@ interface PrivateSentrySDKOnly
     [Static]
     [Export ("getExtraContext")]
     NSDictionary ExtraContext { get; }
+
+    // +(void)setTrace:(SentryId * _Nonnull)traceId spanId:(SentrySpanId * _Nonnull)spanId;
+    [Static]
+    [Export ("setTrace:spanId:")]
+    void SetTrace (SentryId traceId, SentrySpanId spanId);
 
     // +(uint64_t)startProfilerForTrace:(SentryId * _Nonnull)traceId;
     [Static]

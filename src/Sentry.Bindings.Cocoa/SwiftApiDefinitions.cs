@@ -66,6 +66,30 @@ interface SentryId
     nuint Hash { get; }
 }
 
+// @interface SentryProfileOptions : NSObject
+[BaseType(typeof(NSObject), Name = "_TtC6Sentry20SentryProfileOptions")]
+[DisableDefaultCtor]
+[Internal]
+interface SentryProfileOptions
+{
+    // @property(nonatomic) enum SentryProfileLifecycle lifecycle;
+    [Export("lifecycle", ArgumentSemantic.Assign)]
+    SentryProfileLifecycle Lifecycle { get; set; }
+
+    // @property(nonatomic) float sessionSampleRate;
+    [Export("sessionSampleRate")]
+    float SessionSampleRate { get; set; }
+
+    // @property(nonatomic) BOOL profileAppStarts;
+    [Export("profileAppStarts")]
+    bool ProfileAppStarts { get; set; }
+
+    // - (nonnull instancetype) init OBJC_DESIGNATED_INITIALIZER;
+    [Export("init")]
+    [DesignatedInitializer]
+    NativeHandle Constructor();
+}
+
 // @interface SentrySessionReplayIntegration : SentryBaseIntegration
 [BaseType (typeof(NSObject))]
 [Internal]
