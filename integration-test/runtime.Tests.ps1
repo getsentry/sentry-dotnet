@@ -188,7 +188,7 @@ Describe 'Console app regression (missing System.Reflection.Metadata)' {
         dotnet remove ./net4-console/console-app.csproj package Sentry
     }
 
-    It 'Ensure System.Reflection.Metadata is not missing' {
+    It 'Ensure System.Reflection.Metadata is not missing' -Skip:(!$IsWindows) {
         $path = './net4-console'
         Remove-Item -Recurse -Force -Path @("$path/bin", "$path/obj") -ErrorAction SilentlyContinue
         AddPackageReference $path 'Sentry'
