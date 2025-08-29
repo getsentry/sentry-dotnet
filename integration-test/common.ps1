@@ -85,28 +85,14 @@ BeforeAll {
         $proj = Join-Path $PSScriptRoot '..\src\Sentry\Sentry.csproj'
         
         # Log diagnostic information
-        Write-Host "=== GetSentryPackageVersion Diagnostics ==="
-        Write-Host "PSScriptRoot: '$PSScriptRoot'"
-        Write-Host "Project path: '$proj'"
-        Write-Host "Current directory: '$(Get-Location)'"
-        
-        # Log MSBuild version information
-        Write-Host "=== MSBuild Version Info ==="
-        $msbuildVersions = Get-Command msbuild -ErrorAction SilentlyContinue | Select-Object Source, Version
-        Write-Host "MSBuild commands found: $($msbuildVersions | ConvertTo-Json)"
-        
-        $dotnetVersions = dotnet --list-sdks
-        Write-Host "Installed .NET SDKs: $dotnetVersions"
-        
-        $dotnetMsbuildVersion = dotnet msbuild -version 2>&1
-        Write-Host "dotnet msbuild version: $dotnetMsbuildVersion"
-        
-        # Log the actual command output
-        Write-Host "=== Running dotnet msbuild command ==="
+        Write-Host "=== GET PACKAGE VERSION ==="
         $rawOutput = dotnet msbuild $proj -nologo -property:Configuration=Release -getProperty:Version 2>&1
-        Write-Host "Raw output from dotnet msbuild: '$rawOutput'"
+        Write-Host "$rawOutput"
         Write-Host "Exit code: $LASTEXITCODE"
+        $dotnetMsbuildVersion = dotnet msbuild -version 2>&1
+        Write-Host "$dotnetMsbuildVersion"
         
+        # Now actually return the version from the msbuild output
         $version = $rawOutput | Select-Object -Last 1
         Write-Host "Selected version (last line): '$version'"
         
