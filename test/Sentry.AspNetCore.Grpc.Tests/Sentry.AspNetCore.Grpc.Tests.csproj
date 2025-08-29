@@ -7,7 +7,8 @@
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore.Server" Version="2.71.0" />
     <PackageReference Include="Grpc.Net.Client" Version="2.71.0" />
-    <PackageReference Include="Grpc.Tools" Version="2.72.0" PrivateAssets="All" />
+    <!-- We can't bump past 2.68.1 until this is fixed: https://github.com/grpc/grpc/issues/38538   -->
+    <PackageReference Include="Grpc.Tools" Version="2.68.1" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
