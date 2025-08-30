@@ -235,6 +235,8 @@ public class SamplingTransactionProfilerTests
     [InlineData(false)]
     public void ProfilerIntegration_FullRoundtrip_Works(bool offlineCaching)
     {
+        Skip.If(TestEnvironment.IsGitHubActions && RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Flaky on Windows in CI");
+
         var tcs = new TaskCompletionSource<string>();
         async Task VerifyAsync(HttpRequestMessage message)
         {

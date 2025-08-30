@@ -1,0 +1,14 @@
+﻿{
+  result: {
+    Status: 204 No Content,
+    Headers: {
+      Access-Control-Allow-Headers: origin,
+      Access-Control-Allow-Methods: GET,
+      Access-Control-Allow-Origin: *
+    },
+    Content: {
+      Headers: {}
+    }
+  },
+  Payloads: []
+}
