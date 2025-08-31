@@ -30,6 +30,13 @@ internal enum SentryLevel : ulong
 }
 
 [Native]
+internal enum SentryProfileLifecycle : long
+{
+    Manual = 0,
+    Trace = 1
+}
+
+[Native]
 internal enum SentryReplayQuality : long
 {
     Low = 0,
