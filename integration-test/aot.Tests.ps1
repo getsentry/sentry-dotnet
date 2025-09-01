@@ -42,7 +42,6 @@ Describe 'Publish' {
         $pg.AppendChild($cbi) | Out-Null
         $proj.Project.AppendChild($pg) | Out-Null
         $proj.Save($projPath)
-        Write-Host "Injected ContainerBaseImage PropertyGroup (Condition: starts with linux-musl)."
 
         # Minimal Program.cs
         @"
@@ -67,10 +66,12 @@ Console.WriteLine("Hello, Sentry!");
         $rid = $env:RuntimeIdentifier
         if ($rid)
         {
+            Write-Host "Environment RuntimeIdentifier: $rid"
             dotnet publish -c Release -r $rid | Write-Host
         }
         else
         {
+            Write-Host "Implicit RuntimeIdentifier"
             dotnet publish -c Release | Write-Host
         }
         $LASTEXITCODE | Should -Be 0
