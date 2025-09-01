@@ -49,14 +49,14 @@ if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/
     # Verify checksum
     Write-Output "Verifying package checksum..."
     $actualSha256 = (Get-FileHash -Path $downloadPath -Algorithm SHA256).Hash.ToLower()
-    
+
     if ($actualSha256 -ne $expectedSha256)
     {
         Write-Error "Checksum verification failed. Expected: $expectedSha256, Actual: $actualSha256"
         Remove-Item $downloadPath -Force -ErrorAction SilentlyContinue
         exit 1
     }
-    
+
     Write-Output "Checksum verification passed."
 
     if (Test-Path $downloadPath)
@@ -108,7 +108,7 @@ foreach ($file in $filesToPatch)
     {
         $content = Get-Content -Path $file -Raw
         $content = $content -replace '<Sentry/([^>]+)>', '"$1"'
-        $content = $content -replace '#import SENTRY_HEADER\(([^)]+)\)', '#import "$1.h"'
+        $content = $content -replace '#\s*import SENTRY_HEADER\(([^)]+)\)', '#import "$1.h"'
         Set-Content -Path $file -Value $content
     }
     else
@@ -209,7 +209,10 @@ $Text = $Text -replace '\bISentrySerializable\b', 'SentrySerializable'
 $Text = $Text -replace ': INSCopying,', ':' -replace '\s?[:,] INSCopying', ''
 
 # Remove iOS attributes like [iOS (13, 0)]
-$Text = $Text -replace '\[iOS \(13,\s?0\)\]\n?', ''
+$Text = $Text -replace '\[iOS \(13,\s?0\)\]\n?\s*', ''
+
+# Remove Unavailable attributes like [Unavailable (PlatformName.iOSAppExtension)]
+$Text = $Text -replace '\[Unavailable \(PlatformName\.\w+\)\]\n?\s*', ''
 
 # Fix delegate argument names
 $Text = $Text -replace '(NSError) arg\d', '$1 error'
@@ -259,8 +262,9 @@ $Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+) \{ get; \}', '$
 # We have some that accept either NSString or NSRegularExpression, which have no common type so they use NSObject
 $Text = $Text -replace '\s*\[Verify \(StronglyTypedNSArray\)\]\n', ''
 
-# Fix broken line comment
+# Fix broken multi-line comments
 $Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\()\n\s*', '$1'
+$Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)"\s*\r?\n\s*"', '$1 '
 
 # Remove default IsEqual implementation (already implemented by NSObject)
 $Text = $Text -replace '(?ms)\n?^ *// [^\n]*isEqual:.*?$.*?;\n', ''
