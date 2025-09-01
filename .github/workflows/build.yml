@@ -264,13 +264,23 @@ jobs:
           path: src
 
       - name: Integration test
+        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
-        env:
-          RuntimeIdentifier: ${{ matrix.rid }}
         with:
           path: integration-test
 
-  msbuild:
+      # For the linux-musl runtimes we have to pin the ContainerBaseImage for preview or RC builds, since
+      # these don't conform to the normal naming conventions and don't get resolved automatically. We do 
+      # by passing it as parameter to aot.Tests.ps1 via an environment variable
+      - name: Integration test (musl)
+        if: ${{ (matrix.rid == 'linux-musl-x64') || (matrix.rid == 'linux-musl-arm64') }}
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
+        env:
+          ContainerBaseImage: 'mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-alpine3.22'
+        with:
+          path: integration-test
+
+  ms-build:
     needs: build-sentry-native
     name: MSBuild
     runs-on: windows-latest
