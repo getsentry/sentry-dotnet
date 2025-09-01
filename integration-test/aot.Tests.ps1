@@ -31,6 +31,20 @@ Describe 'Publish' {
         Write-Host "::group::Create test project"
         dotnet new console --aot --name hello-sentry --output . | Write-Host
         dotnet add package Sentry --prerelease --source $localPackages | Write-Host
+
+        # Pin the ContainerBaseImage on linux-musl... otherwise the .NET 10 preview7 can't find it
+        $projPath = Join-Path (Get-Location) 'hello-sentry.csproj'
+        [xml]$proj = Get-Content $projPath
+        $pg = $proj.CreateElement('PropertyGroup')
+        $pg.SetAttribute('Condition', '$([System.String]::new(''$(RuntimeIdentifier)'').StartsWith(''linux-musl''))')
+        $cbi = $proj.CreateElement('ContainerBaseImage')
+        $cbi.InnerText = 'mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-alpine3.22'
+        $pg.AppendChild($cbi) | Out-Null
+        $proj.Project.AppendChild($pg) | Out-Null
+        $proj.Save($projPath)
+        Write-Host "Injected ContainerBaseImage PropertyGroup (Condition: starts with linux-musl)."
+
+        # Minimal Program.cs
         @"
 SentrySdk.Init(options =>
 {
