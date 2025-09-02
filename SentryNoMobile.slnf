@@ -24,7 +24,6 @@
       "samples\\Sentry.Samples.GraphQL.Server\\Sentry.Samples.GraphQL.Server.csproj",
       "samples\\Sentry.Samples.Hangfire\\Sentry.Samples.Hangfire.csproj",
       "samples\\Sentry.Samples.Log4Net\\Sentry.Samples.Log4Net.csproj",
-      "samples\\Sentry.Samples.MacCatalyst\\Sentry.Samples.MacCatalyst.csproj",
       "samples\\Sentry.Samples.MacOS\\Sentry.Samples.MacOS.csproj",
       "samples\\Sentry.Samples.ME.Logging\\Sentry.Samples.ME.Logging.csproj",
       "samples\\Sentry.Samples.NLog\\Sentry.Samples.NLog.csproj",
