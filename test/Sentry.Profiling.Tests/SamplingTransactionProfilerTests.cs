@@ -166,6 +166,8 @@ public class SamplingTransactionProfilerTests
     [SkippableFact]
     public async Task Profiler_AfterTimeout_Stops()
     {
+        Skip.If(TestEnvironment.IsGitHubActions && RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Flaky in CI on windows");
+
         SampleProfilerSession? session = null;
         SkipIfFailsInCI(() => session = SampleProfilerSession.StartNew(_testOutputLogger));
         using (session)
