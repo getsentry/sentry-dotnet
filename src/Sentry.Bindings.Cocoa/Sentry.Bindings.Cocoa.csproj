@@ -125,11 +125,12 @@
   <Target Name="_GenerateSentryCocoaBindings" AfterTargets="SetupCocoaSDK"
           Condition="$([MSBuild]::IsOSPlatform('OSX'))"
           Inputs="$(SentryCocoaBindingInputs)"
-          Outputs="ApiDefinitions.cs;StructsAndEnums.cs">
+          Outputs="ApiDefinitions.cs;StructsAndEnums.cs;SwiftApiDefinitions.cs;SwiftStructsAndEnums.cs">
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerGenerateSentryCocoaBindings" Properties="TargetFramework=once" />
   </Target>
   <Target Name="_InnerGenerateSentryCocoaBindings">
-    <Exec Command="pwsh ../../scripts/generate-cocoa-bindings.ps1" />
+    <!-- TODO: error NETSDK1045: The current .NET SDK does not support targeting .NET 10.0.  Either target .NET 9.0 or lower, or use a version of the .NET SDK that supports .NET 10.0. Download the .NET SDK from https://aka.ms/dotnet/download-->
+    <!-- <Exec Command="pwsh ../../scripts/generate-cocoa-bindings.ps1" /> -->
     <!-- See https://github.com/getsentry/sentry-dotnet/pull/2558 -->
     <Exec Condition="'$(GITHUB_ACTIONS)' == 'true'" Command="pwsh ../../scripts/dirty-check.ps1 -PathToCheck $(MSBuildThisFileDirectory)" />
   </Target>

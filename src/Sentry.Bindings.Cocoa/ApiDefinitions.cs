@@ -2243,6 +2243,22 @@ interface SentryScreenFrames
 [Internal]
 interface PrivateSentrySDKOnly
 {
+    // +(void)storeEnvelope:(SentryEnvelope * _Nonnull)envelope;
+    [Static]
+    [Export ("storeEnvelope:")]
+    void StoreEnvelope (SentryEnvelope envelope);
+
+    // +(void)captureEnvelope:(SentryEnvelope * _Nonnull)envelope;
+    [Static]
+    [Export ("captureEnvelope:")]
+    void CaptureEnvelope (SentryEnvelope envelope);
+
+    // +(SentryEnvelope * _Nullable)envelopeWithData:(NSData * _Nonnull)data;
+    [Static]
+    [Export ("envelopeWithData:")]
+    [return: NullAllowed]
+    SentryEnvelope EnvelopeWithData (NSData data);
+
     // +(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImages;
     [Static]
     [Export ("getDebugImages")]
