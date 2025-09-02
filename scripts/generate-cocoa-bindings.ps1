@@ -103,7 +103,8 @@ if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/
 }
 
 # Get iPhone SDK version
-$iPhoneSdkVersion = sharpie xcode -sdks | grep -o -m 1 'iphoneos\S*'
+$XcodePath = (xcode-select -p) -replace '/Contents/Developer$', ''
+$iPhoneSdkVersion = sharpie xcode -xcode $XcodePath -sdks | grep -o -m 1 'iphoneos\S*'
 Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
 
 ## Imports in the various header files are provided in the "new" style of:
@@ -141,12 +142,30 @@ else
 {
     Write-Host "File not found: $privateHeaderFile"
 }
+$swiftHeaderFile = "$HeadersPath/Sentry-Swift.h"
+if (Test-Path $swiftHeaderFile)
+{
+    $content = Get-Content -Path $swiftHeaderFile -Raw
+    # Replace module @imports with traditional #includes
+    $content = $content -replace '(?m)^#if\s+(__has_feature\(objc_modules\))', '#if 1 // $1'
+    $content = $content -replace '(?m)^@import\s+ObjectiveC;\s*\n', ''
+    $content = $content -replace '(?m)^@import\s+(\w+);', '#include <$1/$1.h>'
+    $content = $content -replace '(?m)^#import\s+"Sentry.h"\s*\n', ''
+
+    Set-Content -Path $swiftHeaderFile -Value $content
+    Write-Host "Patched includes: $swiftHeaderFile"
+}
+else
+{
+    Write-Host "File not found: $swiftHeaderFile"
+}
 
 # Generate bindings
 Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk $iPhoneSdkVersion `
     -scope "$CocoaSdkPath" `
     "$HeadersPath/Sentry.h" `
+    "$HeadersPath/Sentry-Swift.h" `
     "$PrivateHeadersPath/PrivateSentrySDKOnly.h" `
     -o $BindingsPath `
     -c -Wno-objc-property-no-attribute
@@ -214,8 +233,9 @@ $Text = $Text -replace 'using .+;\n\n', "$&namespace Sentry.CocoaSdk;`n`n"
 # Set Internal attributes on interfaces and delegates
 $Text = $Text -replace '(?m)^(partial interface|interface|delegate)\b', "[Internal]`n$&"
 
-# Fix ISentrySerializable usage
+# Fix interface usage
 $Text = $Text -replace '\bISentrySerializable\b', 'SentrySerializable'
+$Text = $Text -replace '\bISentryRedactOptions\b', 'SentryRedactOptions'
 
 # Remove INSCopying due to https://github.com/xamarin/xamarin-macios/issues/17130
 $Text = $Text -replace ': INSCopying,', ':' -replace '\s?[:,] INSCopying', ''
@@ -235,16 +255,21 @@ $Text = $Text -replace '(SentryBreadcrumb) arg\d', '$1 breadcrumb'
 $Text = $Text -replace '(SentrySpan) arg\d', '$1 span'
 $Text = $Text -replace '(SentryAppStartMeasurement) arg\d', '$1 appStartMeasurement'
 $Text = $Text -replace '(SentryLog) arg\d', '$1 log'
+$Text = $Text -replace '(SentryProfileOptions) arg\d', '$1 options'
 
 # Adjust nullable return delegates (though broken until this is fixed: https://github.com/xamarin/xamarin-macios/issues/17109)
 $Text = $Text -replace 'delegate \w+ Sentry(BeforeBreadcrumb|BeforeSendEvent|TracesSampler)Callback', "[return: NullAllowed]`n$&"
 
+# Rename SentryRRWebEvent protocol
+$Text = $Text -replace 'interface (SentryRRWebEvent) : SentrySerializable', 'interface I$1 : SentrySerializable'
+
 # Adjust protocols (some are models)
 $Text = $Text -replace '(?ms)(@protocol.+?)/\*.+?\*/', '$1'
 $Text = $Text -replace '(?ms)@protocol (SentrySerializable|SentrySpan).+?\[Protocol\]', "`$&`n[Model]"
+$Text = $Text -replace '(?ms)@protocol (SentryRedactOptions).+?\[Protocol \(Name = \"\w+\"\)\]', "`$&`n[Model]"
 
-# Adjust SentrySpan base type
-$Text = $Text -replace 'interface SentrySpan\b', "[BaseType (typeof(NSObject))]`n`$&"
+# Adjust base types
+$Text = $Text -replace 'interface (SentrySpan|SentryRedactOptions)\b', "[BaseType (typeof(NSObject))]`n`$&"
 
 # Fix string constants
 $Text = $Text -replace '(?m)(.*\n){2}^\s{4}NSString k.+?\n\n?', ''
@@ -279,9 +304,6 @@ $Text = $Text -replace '\s*\[Verify \(StronglyTypedNSArray\)\]\n', ''
 $Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\()\n\s*', '$1'
 $Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)"\s*\r?\n\s*"', '$1 '
 
-# Remove default IsEqual implementation (already implemented by NSObject)
-$Text = $Text -replace '(?ms)\n?^ *// [^\n]*isEqual:.*?$.*?;\n', ''
-
 # Replace obsolete platform availability attributes
 $Text = $Text -replace '([\[,] )MacCatalyst \(', '$1Introduced (PlatformName.MacCatalyst, '
 $Text = $Text -replace '([\[,] )Mac \(', '$1Introduced (PlatformName.MacOSX, '
@@ -290,24 +312,15 @@ $Text = $Text -replace '([\[,] )iOS \(', '$1Introduced (PlatformName.iOS, '
 # Make interface partial if we need to access private APIs.  Other parts will be defined in PrivateApiDefinitions.cs
 $Text = $Text -replace '(?m)^interface SentryScope', 'partial $&'
 
-$Text = $Text -replace '.*SentryEnvelope .*?[\s\S]*?\n\n', ''
 $Text = $Text -replace '.*typedef.*SentryOnAppStartMeasurementAvailable.*?[\s\S]*?\n\n', ''
-
-$propertiesToRemove = @(
-    'SentryAppStartMeasurement',
-    'SentryOnAppStartMeasurementAvailable',
-    'SentryMetricsAPI',
-    'SentryExperimentalOptions',
-    'description',
-    'enableMetricKitRawPayload'
-)
-
-foreach ($property in $propertiesToRemove)
-{
-    $Text = $Text -replace "\n.*property.*$property.*?[\s\S]*?\}\n", ''
-}
-
+$Text = $Text -replace 'NSDictionary<NSString, SentryStructuredLogAttribute>', 'NSDictionary<NSString, NSObject>'
 
 # Add header and output file
 $Text = "$Header`n`n$Text"
 $Text | Out-File "$BindingsPath/$File"
+
+################################################################################
+# Post-process ApiDefinitions.cs
+################################################################################
+Write-Output "Post-processing $BindingsPath/$File"
+& dotnet run --project "$RootPath/tools/Sentry.Bindings.Cocoa.PostProcessor/Sentry.Bindings.Cocoa.PostProcessor.csproj" -- "$BindingsPath/$File" | ForEach-Object { Write-Host $_ }

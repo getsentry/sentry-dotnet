@@ -42,9 +42,7 @@
     <!-- Set up the binding project. -->
     <ObjcBindingApiDefinition Include="ApiDefinitions.cs" />
     <ObjcBindingApiDefinition Include="PrivateApiDefinitions.cs" />
-    <ObjcBindingApiDefinition Include="SwiftApiDefinitions.cs" />
     <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
-    <ObjcBindingCoreSource Include="SwiftStructsAndEnums.cs" />
     <NativeReference Include="$(SentryCocoaFramework)" Kind="Framework" />
 
     <!-- Use a separate readme file in the nuget. -->
