@@ -15,11 +15,11 @@ internal class MauiSessionReplayMaskControlsOfTypeBinder : IMauiElementEventBind
 
     internal bool IsEnabled { get; }
 
-    public MauiSessionReplayMaskControlsOfTypeBinder(SentryMauiOptions options)
+    public MauiSessionReplayMaskControlsOfTypeBinder(IOptions<SentryMauiOptions> options)
     {
-        _options = options;
+        _options = options.Value;
 #if __ANDROID__
-        var replayOptions = options.Native.ExperimentalOptions.SessionReplay;
+        var replayOptions = _options.Native.ExperimentalOptions.SessionReplay;
         IsEnabled = replayOptions is { IsSessionReplayEnabled: true, IsTypeMaskingUsed: true };
 #else
         IsEnabled = false;

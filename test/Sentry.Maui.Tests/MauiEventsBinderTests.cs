@@ -46,14 +46,16 @@ public partial class MauiEventsBinderTests
         options1.Native.ExperimentalOptions.SessionReplay.SessionSampleRate = 1.0;
         options1.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate = 1.0;
 #endif
-        var enabledBinder = new MauiSessionReplayMaskControlsOfTypeBinder(options1);
+        var iOptions1 = Microsoft.Extensions.Options.Options.Create(options1);
+        var enabledBinder = new MauiSessionReplayMaskControlsOfTypeBinder(iOptions1);
 
         var options2 = new SentryMauiOptions { Dsn = ValidDsn };
 #if __ANDROID__
         options2.Native.ExperimentalOptions.SessionReplay.SessionSampleRate = 0.0;
         options2.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate = 0.0;
 #endif
-        var disabledBinder = new MauiSessionReplayMaskControlsOfTypeBinder(options2);
+        var iOptions2 = Microsoft.Extensions.Options.Options.Create(options2);
+        var disabledBinder = new MauiSessionReplayMaskControlsOfTypeBinder(iOptions2);
 
         var buttonEventBinder = new MauiButtonEventsBinder();
 

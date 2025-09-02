@@ -20,7 +20,8 @@ public class MauiSessionReplayMaskControlsOfTypeBinderTests
             var logger = Substitute.For<IDiagnosticLogger>();
             logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
             Options.DiagnosticLogger = logger;
-            ControlsOfTypeBinder = new MauiSessionReplayMaskControlsOfTypeBinder(Options);
+            var options = Microsoft.Extensions.Options.Options.Create(Options);
+            ControlsOfTypeBinder = new MauiSessionReplayMaskControlsOfTypeBinder(options);
         }
     }
 
@@ -72,7 +73,8 @@ public class MauiSessionReplayMaskControlsOfTypeBinderTests
         options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate = onErrorSampleRate;
 
         // Act
-        var binder = new MauiSessionReplayMaskControlsOfTypeBinder(options);
+        var iOptions = Microsoft.Extensions.Options.Options.Create(options);
+        var binder = new MauiSessionReplayMaskControlsOfTypeBinder(iOptions);
 
         // Assert
         binder.IsEnabled.Should().Be(true);
@@ -88,7 +90,8 @@ public class MauiSessionReplayMaskControlsOfTypeBinderTests
         // No sessionSampleRate or onErrorSampleRate set... so should be disabled
 
         // Act
-        var binder = new MauiSessionReplayMaskControlsOfTypeBinder(options);
+        var iOptions = Microsoft.Extensions.Options.Options.Create(options);
+        var binder = new MauiSessionReplayMaskControlsOfTypeBinder(iOptions);
 
         // Assert
         binder.IsEnabled.Should().Be(false);
@@ -105,7 +108,8 @@ public class MauiSessionReplayMaskControlsOfTypeBinderTests
         options.Native.ExperimentalOptions.SessionReplay.MaskedControls.Clear();
 
         // Act
-        var binder = new MauiSessionReplayMaskControlsOfTypeBinder(options);
+        var iOptions = Microsoft.Extensions.Options.Options.Create(options);
+        var binder = new MauiSessionReplayMaskControlsOfTypeBinder(iOptions);
 
         // Assert
         binder.IsEnabled.Should().Be(false);
