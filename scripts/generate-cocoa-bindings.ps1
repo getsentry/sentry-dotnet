@@ -49,14 +49,14 @@ if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/
     # Verify checksum
     Write-Output "Verifying package checksum..."
     $actualSha256 = (Get-FileHash -Path $downloadPath -Algorithm SHA256).Hash.ToLower()
-    
+
     if ($actualSha256 -ne $expectedSha256)
     {
         Write-Error "Checksum verification failed. Expected: $expectedSha256, Actual: $actualSha256"
         Remove-Item $downloadPath -Force -ErrorAction SilentlyContinue
         exit 1
     }
-    
+
     Write-Output "Checksum verification passed."
 
     if (Test-Path $downloadPath)
@@ -129,12 +129,29 @@ else
 {
     Write-Host "File not found: $privateHeaderFile"
 }
+$swiftHeaderFile = "$CocoaSdkPath/Headers/Sentry-Swift.h"
+if (Test-Path $swiftHeaderFile)
+{
+    $content = Get-Content -Path $swiftHeaderFile -Raw
+    # Replace module @imports with traditional #includes
+    $content = $content -replace '(?m)^#if\s+(__has_feature\(objc_modules\))', '#if 1 // $1'
+    $content = $content -replace '(?m)^@import\s+ObjectiveC;\s*\n', ''
+    $content = $content -replace '(?m)^@import\s+(\w+);', '#include <$1/$1.h>'
+    # TODO: blacklist/whitelist (un)necessary interfaces
+    Set-Content -Path $swiftHeaderFile -Value $content
+    Write-Host "Patched includes: $swiftHeaderFile"
+}
+else
+{
+    Write-Host "File not found: $swiftHeaderFile"
+}
 
 # Generate bindings
 Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk $iPhoneSdkVersion `
     -scope "$CocoaSdkPath" `
     "$CocoaSdkPath/Headers/Sentry.h" `
+    "$CocoaSdkPath/Headers/Sentry-Swift.h" `
     "$CocoaSdkPath/PrivateHeaders/PrivateSentrySDKOnly.h" `
     -o $BindingsPath `
     -c -Wno-objc-property-no-attribute
