@@ -101,7 +101,7 @@ public class GlobalSessionManagerTests : IDisposable
         Assert.False(_fixture.Options.FileSystem.FileExists(filePath));
     }
 
-    [Fact]
+    [SkippableFact]
     public void StartSession_CacheDirectoryNotProvided_InstallationIdFileCreated()
     {
         Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI");
