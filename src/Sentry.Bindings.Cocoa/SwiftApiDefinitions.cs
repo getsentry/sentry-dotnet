@@ -66,6 +66,37 @@ interface SentryId
     nuint Hash { get; }
 }
 
+// @interface SentryLog : NSObject
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry9SentryLog")]
+[DisableDefaultCtor]
+[Internal]
+interface SentryLog
+{
+    // @property (copy, nonatomic) NSDate * _Nonnull timestamp;
+    [Export ("timestamp", ArgumentSemantic.Copy)]
+    NSDate Timestamp { get; set; }
+
+    // @property (nonatomic, strong) SentryId * _Nonnull traceId;
+    [Export ("traceId", ArgumentSemantic.Strong)]
+    SentryId TraceId { get; set; }
+
+    // @property (nonatomic) enum SentryStructuredLogLevel level;
+    [Export ("level", ArgumentSemantic.Assign)]
+    SentryStructuredLogLevel Level { get; set; }
+
+    // @property (copy, nonatomic) NSString * _Nonnull body;
+    [Export ("body")]
+    string Body { get; set; }
+
+    // @property (copy, nonatomic) NSDictionary<NSString *,SentryStructuredLogAttribute *> * _Nonnull attributes;
+    [Export ("attributes", ArgumentSemantic.Copy)]
+    NSDictionary<NSString, NSObject> Attributes { get; set; }
+
+    // @property (nonatomic, strong) NSNumber * _Nullable severityNumber;
+    [NullAllowed, Export ("severityNumber", ArgumentSemantic.Strong)]
+    NSNumber SeverityNumber { get; set; }
+}
+
 // @interface SentryLogger : NSObject
 [BaseType (typeof(NSObject), Name = "_TtC6Sentry12SentryLogger")]
 [DisableDefaultCtor]

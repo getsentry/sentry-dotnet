@@ -30,6 +30,17 @@ internal enum SentryLevel : ulong
 }
 
 [Native]
+internal enum SentryStructuredLogLevel : long
+{
+    Trace = 0,
+    Debug = 1,
+    Info = 2,
+    Warn = 3,
+    Error = 4,
+    Fatal = 5
+}
+
+[Native]
 internal enum SentryProfileLifecycle : long
 {
     Manual = 0,
