@@ -5,11 +5,11 @@ namespace Sentry.Internal;
 
 /// <summary>
 /// <para>
-/// Monitors system health and calculates a DownsampleFactor that can be applied to events and transaction when the
+/// Monitors system health and calculates a DownsampleFactor that can be applied to events and transactions when the
 /// system is under load.
 /// </para>
 /// <para>
-/// The heath checks used by the monitor are:
+/// The health checks used by the monitor are:
 /// </para>
 /// <list type="number">
 ///     <item>if any events have been dropped due to queue being full in the last 2 seconds</item>
@@ -17,9 +17,10 @@ namespace Sentry.Internal;
 /// </list>
 /// This check is performed every 10 seconds. With each negative health check we halve tracesSampleRate up to 10 times, meaning the original tracesSampleRate is multiplied by 1, 1/2, 1/4, ... up to 1/1024 (~ 0.001%). Any positive health check resets to the original tracesSampleRate set in SentryOptions.
 /// </summary>
+/// <seealso href="https://develop.sentry.dev/sdk/telemetry/traces/backpressure/">Backpressure Management</seealso>
 internal class BackpressureMonitor : IDisposable
 {
-    private const int MaxDownsamples = 10;
+    internal const int MaxDownsamples = 10;
     private const int CheckIntervalInSeconds = 10;
     private const int RecentThresholdInSeconds = 2;
 
@@ -101,7 +102,6 @@ internal class BackpressureMonitor : IDisposable
             {
                 DoHealthCheck();
 
-                // Your periodic work here
                 await Task.Delay(TimeSpan.FromSeconds(CheckIntervalInSeconds), cancellationToken).ConfigureAwait(false);
             }
         }
@@ -146,24 +146,21 @@ internal class BackpressureMonitor : IDisposable
     {
         try
         {
-            try
-            {
                 _cts.Cancel();
                 WorkerTask.Wait();
-            }
-            catch (AggregateException ex) when (ex.InnerException is OperationCanceledException)
-            {
-                // Ignore cancellation
-            }
-            finally
-            {
-                _cts.Dispose();
-            }
+        }
+        catch (AggregateException ex) when (ex.InnerException is OperationCanceledException)
+        {
+            // Ignore cancellation
         }
         catch (Exception ex)
         {
-            // We don't ever want this to throw
-            _logger?.LogDebug("Error in BackpressureMonitor.Dispose: {0}", ex);
+            // Log rather than throw
+            _logger?.LogWarning("Error in BackpressureMonitor.Dispose: {0}", ex);
+        }
+        finally
+        {
+            _cts.Dispose();
         }
     }
 }

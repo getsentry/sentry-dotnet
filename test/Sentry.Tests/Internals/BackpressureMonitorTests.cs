@@ -112,7 +112,7 @@ public class BackpressureMonitorTests
     }
 
     [Fact]
-    public void DownsampleLevel_Increases_WhenUnhealthy()
+    public void DoHealthCheck_Unhealthy_DownsampleLevelIncreases()
     {
         // Arrange
         _fixture.Clock.GetUtcNow().Returns(_fixture.Now);
@@ -127,7 +127,26 @@ public class BackpressureMonitorTests
     }
 
     [Fact]
-    public void DownsampleLevel_Resets_WhenHealthy()
+    public void DoHealthCheck_Unhealthy_MaximumDownsampleLevelRespected()
+    {
+        // Arrange
+        _fixture.Clock.GetUtcNow().Returns(_fixture.Now);
+        using var monitor = _fixture.GetSut();
+        monitor.RecordQueueOverflow();
+
+        // Act
+        var overmax = BackpressureMonitor.MaxDownsamples + 1;
+        for (var i = 0; i <= overmax; i++)
+        {
+            monitor.DoHealthCheck();
+        }
+
+        // Assert
+        monitor.DownsampleLevel.Should().Be(BackpressureMonitor.MaxDownsamples);
+    }
+
+    [Fact]
+    public void DoHealthCheck_Healthy_DownsampleLevelResets()
     {
         // Arrange
         _fixture.Clock.GetUtcNow().Returns(_fixture.Now);
