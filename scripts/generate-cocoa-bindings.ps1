@@ -222,6 +222,7 @@ $Text = $Text -replace '(SentrySamplingContext) arg\d', '$1 samplingContext'
 $Text = $Text -replace '(SentryBreadcrumb) arg\d', '$1 breadcrumb'
 $Text = $Text -replace '(SentrySpan) arg\d', '$1 span'
 $Text = $Text -replace '(SentryAppStartMeasurement) arg\d', '$1 appStartMeasurement'
+$Text = $Text -replace '(SentryLog) arg\d', '$1 log'
 
 # Adjust nullable return delegates (though broken until this is fixed: https://github.com/xamarin/xamarin-macios/issues/17109)
 $Text = $Text -replace 'delegate \w+ Sentry(BeforeBreadcrumb|BeforeSendEvent|TracesSampler)Callback', "[return: NullAllowed]`n$&"

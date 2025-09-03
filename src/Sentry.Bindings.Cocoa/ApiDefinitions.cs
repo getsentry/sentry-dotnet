@@ -34,6 +34,10 @@ delegate SentryEvent SentryBeforeSendEventCallback (SentryEvent @event);
 [Internal]
 delegate SentrySpan SentryBeforeSendSpanCallback (SentrySpan span);
 
+// typedef SentryLog * _Nullable (^SentryBeforeSendLogCallback)(SentryLog * _Nonnull);
+[Internal]
+delegate SentryLog SentryBeforeSendLogCallback (SentryLog log);
+
 // typedef BOOL (^SentryBeforeCaptureScreenshotCallback)(SentryEvent * _Nonnull);
 [Internal]
 delegate bool SentryBeforeCaptureScreenshotCallback (SentryEvent @event);
@@ -611,11 +615,11 @@ interface SentryException : SentrySerializable
 [Internal]
 interface SentryFeedbackAPI
 {
-    // -(void)showWidget __attribute__((availability(ios, introduced=13.0)));
+    // -(void)showWidget __attribute__((availability(ios, introduced=13.0))) __attribute__((availability(macos_app_extension, unavailable))) __attribute__((availability(ios_app_extension, unavailable)));
     [Export ("showWidget")]
     void ShowWidget ();
 
-    // -(void)hideWidget __attribute__((availability(ios, introduced=13.0)));
+    // -(void)hideWidget __attribute__((availability(ios, introduced=13.0))) __attribute__((availability(macos_app_extension, unavailable))) __attribute__((availability(ios_app_extension, unavailable)));
     [Export ("hideWidget")]
     void HideWidget ();
 }
@@ -669,6 +673,18 @@ interface SentryFrame : SentrySerializable
     [NullAllowed, Export ("columnNumber", ArgumentSemantic.Copy)]
     NSNumber ColumnNumber { get; set; }
 
+    // @property (copy, nonatomic) NSString * _Nullable contextLine;
+    [NullAllowed, Export ("contextLine")]
+    string ContextLine { get; set; }
+
+    // @property (copy, nonatomic) NSArray<NSString *> * _Nullable preContext;
+    [NullAllowed, Export ("preContext", ArgumentSemantic.Copy)]
+    string[] PreContext { get; set; }
+
+    // @property (copy, nonatomic) NSArray<NSString *> * _Nullable postContext;
+    [NullAllowed, Export ("postContext", ArgumentSemantic.Copy)]
+    string[] PostContext { get; set; }
+
     // @property (copy, nonatomic) NSNumber * _Nullable inApp;
     [NullAllowed, Export ("inApp", ArgumentSemantic.Copy)]
     NSNumber InApp { get; set; }
@@ -676,6 +692,10 @@ interface SentryFrame : SentrySerializable
     // @property (copy, nonatomic) NSNumber * _Nullable stackStart;
     [NullAllowed, Export ("stackStart", ArgumentSemantic.Copy)]
     NSNumber StackStart { get; set; }
+
+    // @property (copy, nonatomic) NSDictionary<NSString *,id> * _Nullable vars;
+    [NullAllowed, Export ("vars", ArgumentSemantic.Copy)]
+    NSDictionary<NSString, NSObject> Vars { get; set; }
 }
 
 // @interface SentryGeo : NSObject <SentrySerializable, NSCopying>
@@ -1389,6 +1409,10 @@ interface SentryOptions
     [NullAllowed, Export ("beforeSendSpan", ArgumentSemantic.Copy)]
     SentryBeforeSendSpanCallback BeforeSendSpan { get; set; }
 
+    // @property (copy, nonatomic) SentryBeforeSendLogCallback _Nullable beforeSendLog;
+    [NullAllowed, Export ("beforeSendLog", ArgumentSemantic.Copy)]
+    SentryBeforeSendLogCallback BeforeSendLog { get; set; }
+
     // @property (copy, nonatomic) SentryBeforeBreadcrumbCallback _Nullable beforeBreadcrumb;
     [NullAllowed, Export ("beforeBreadcrumb", ArgumentSemantic.Copy)]
     SentryBeforeBreadcrumbCallback BeforeBreadcrumb { get; set; }
@@ -1405,8 +1429,8 @@ interface SentryOptions
     [NullAllowed, Export ("onCrashedLastRun", ArgumentSemantic.Copy)]
     SentryOnCrashedLastRunCallback OnCrashedLastRun { get; set; }
 
-    // @property (copy, nonatomic) NSArray<NSString *> * _Nullable integrations;
-    [NullAllowed, Export ("integrations", ArgumentSemantic.Copy)]
+    // @property (copy, nonatomic) DEPRECATED_MSG_ATTRIBUTE("Setting `SentryOptions.integrations` is deprecated. Integrations should be enabled or  disabled using their respective `SentryOptions.enable*` property.") NSArray<NSString *> * integrations __attribute__((deprecated("Setting `SentryOptions.integrations` is deprecated. Integrations should be enabled or disabled using their respective `SentryOptions.enable*` property.")));
+    [Export ("integrations", ArgumentSemantic.Copy)]
     string[] Integrations { get; set; }
 
     // +(NSArray<NSString *> * _Nonnull)defaultIntegrations;
@@ -2311,10 +2335,10 @@ interface PrivateSentrySDKOnly
     [Export ("captureViewHierarchy")]
     NSData CaptureViewHierarchy();
 
-    // +(void)setCurrentScreen:(NSString * _Nonnull)screenName;
+    // +(void)setCurrentScreen:(NSString * _Nullable)screenName;
     [Static]
     [Export ("setCurrentScreen:")]
-    void SetCurrentScreen (string screenName);
+    void SetCurrentScreen ([NullAllowed] string screenName);
 
     // +(UIView * _Nonnull)sessionReplayMaskingOverlay:(id<SentryRedactOptions> _Nonnull)options;
     [Static]

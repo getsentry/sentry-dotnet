@@ -27,9 +27,9 @@
 - Bump CLI from v2.52.0 to v2.53.0 ([#4486](https://github.com/getsentry/sentry-dotnet/pull/4486))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2530)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.52.0...2.53.0)
-- Bump sentry-cocoa from 8.46.0 to 8.54.0 ([#4483](https://github.com/getsentry/sentry-dotnet/pull/4483), [#4485](https://github.com/getsentry/sentry-dotnet/pull/4485))
-    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8540)
-    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.46.2...8.54.0)
+- Bump sentry-cocoa from 8.46.0 to 8.55.0 ([#4483](https://github.com/getsentry/sentry-dotnet/pull/4483), [#4485](https://github.com/getsentry/sentry-dotnet/pull/4485))
+    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8550)
+    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.46.2...8.55.0)
 
 ## 5.14.1
 
