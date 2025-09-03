@@ -146,8 +146,8 @@ internal class BackpressureMonitor : IDisposable
     {
         try
         {
-                _cts.Cancel();
-                WorkerTask.Wait();
+            _cts.Cancel();
+            WorkerTask.Wait();
         }
         catch (AggregateException ex) when (ex.InnerException is OperationCanceledException)
         {
