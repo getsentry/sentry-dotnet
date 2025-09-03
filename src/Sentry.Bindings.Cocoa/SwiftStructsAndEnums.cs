@@ -12,10 +12,8 @@ namespace Sentry.CocoaSdk;
 [Native]
 internal enum SentryFeedbackSource : long
 {
-    Unknown = 0,
-    User = 1,
-    System = 2,
-    Other = 3
+    Widget = 0,
+    Custom = 1
 }
 
 [Native]
