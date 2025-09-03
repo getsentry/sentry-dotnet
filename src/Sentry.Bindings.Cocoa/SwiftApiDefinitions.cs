@@ -66,6 +66,61 @@ interface SentryId
     nuint Hash { get; }
 }
 
+// @interface SentryLogger : NSObject
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry12SentryLogger")]
+[DisableDefaultCtor]
+[Internal]
+interface SentryLogger
+{
+    // -(void)trace:(NSString * _Nonnull)body;
+    [Export ("trace:")]
+    void Trace (string body);
+
+    // -(void)trace:(NSString * _Nonnull)body attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+    [Export ("trace:attributes:")]
+    void Trace (string body, NSDictionary<NSString, NSObject> attributes);
+
+    // -(void)debug:(NSString * _Nonnull)body;
+    [Export ("debug:")]
+    void Debug (string body);
+
+    // -(void)debug:(NSString * _Nonnull)body attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+    [Export ("debug:attributes:")]
+    void Debug (string body, NSDictionary<NSString, NSObject> attributes);
+
+    // -(void)info:(NSString * _Nonnull)body;
+    [Export ("info:")]
+    void Info (string body);
+
+    // -(void)info:(NSString * _Nonnull)body attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+    [Export ("info:attributes:")]
+    void Info (string body, NSDictionary<NSString, NSObject> attributes);
+
+    // -(void)warn:(NSString * _Nonnull)body;
+    [Export ("warn:")]
+    void Warn (string body);
+
+    // -(void)warn:(NSString * _Nonnull)body attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+    [Export ("warn:attributes:")]
+    void Warn (string body, NSDictionary<NSString, NSObject> attributes);
+
+    // -(void)error:(NSString * _Nonnull)body;
+    [Export ("error:")]
+    void Error (string body);
+
+    // -(void)error:(NSString * _Nonnull)body attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+    [Export ("error:attributes:")]
+    void Error (string body, NSDictionary<NSString, NSObject> attributes);
+
+    // -(void)fatal:(NSString * _Nonnull)body;
+    [Export ("fatal:")]
+    void Fatal (string body);
+
+    // -(void)fatal:(NSString * _Nonnull)body attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+    [Export ("fatal:attributes:")]
+    void Fatal (string body, NSDictionary<NSString, NSObject> attributes);
+}
+
 // @interface SentryProfileOptions : NSObject
 [BaseType(typeof(NSObject), Name = "_TtC6Sentry20SentryProfileOptions")]
 [DisableDefaultCtor]
@@ -254,219 +309,220 @@ interface SentryRRWebEvent : SentrySerializable
 [Internal]
 interface SentrySDK
 {
-    // @property (nonatomic, class, readonly, strong) id <SentrySpan> _Nullable span;
+    // @property (readonly, nonatomic, strong, class) id<SentrySpan> _Nullable span;
     [Static]
-    [NullAllowed, Export("span")]
+    [NullAllowed, Export ("span", ArgumentSemantic.Strong)]
     SentrySpan Span { get; }
 
-    // @property (nonatomic, class, readonly) BOOL isEnabled;
+    // @property (readonly, nonatomic, class) BOOL isEnabled;
     [Static]
-    [Export("isEnabled")]
+    [Export ("isEnabled")]
     bool IsEnabled { get; }
 
-    // @property (nonatomic, class, readonly, strong) SentryReplayApi * _Nonnull replay;
+    // @property (readonly, nonatomic, strong, class) SentryReplayApi * _Nonnull replay;
     [Static]
-    [Export("replay")]
+    [Export ("replay", ArgumentSemantic.Strong)]
     SentryReplayApi Replay { get; }
 
-    // @property (nonatomic, class, readonly, strong) SentryLogger * _Nonnull logger;
-
-    // + (void)startWithOptions:(SentryOptions * _Nonnull)options;
+    // @property (readonly, nonatomic, strong, class) SentryLogger * _Nonnull logger;
     [Static]
-    [Export("startWithOptions:")]
-    void StartWithOptions(SentryOptions options);
+    [Export ("logger", ArgumentSemantic.Strong)]
+    SentryLogger Logger { get; }
 
-    // + (void)startWithConfigureOptions:(void (^ _Nonnull)(SentryOptions * _Nonnull))configureOptions;
+    // +(void)startWithOptions:(SentryOptions * _Nonnull)options;
     [Static]
-    [Export("startWithConfigureOptions:")]
-    void StartWithConfigureOptions(Action<SentryOptions> configureOptions);
+    [Export ("startWithOptions:")]
+    void StartWithOptions (SentryOptions options);
 
-    // + (SentryId * _Nonnull)captureEvent:(SentryEvent * _Nonnull)event;
+    // +(void)startWithConfigureOptions:(void (^ _Nonnull)(SentryOptions * _Nonnull))configureOptions;
     [Static]
-    [Export("captureEvent:")]
-    SentryId CaptureEvent(SentryEvent @event);
+    [Export ("startWithConfigureOptions:")]
+    void StartWithConfigureOptions (Action<SentryOptions> configureOptions);
 
-    // + (SentryId * _Nonnull)captureEvent:(SentryEvent * _Nonnull)event withScope:(SentryScope * _Nonnull)scope;
+    // +(SentryId * _Nonnull)captureEvent:(SentryEvent * _Nonnull)event;
     [Static]
-    [Export("captureEvent:withScope:")]
-    SentryId CaptureEvent(SentryEvent @event, SentryScope scope);
+    [Export ("captureEvent:")]
+    SentryId CaptureEvent (SentryEvent @event);
 
-    // + (SentryId * _Nonnull)captureEvent:(SentryEvent * _Nonnull)event withScopeBlock:(void (^ _Nonnull)(SentryScope * _Nonnull))block;
+    // +(SentryId * _Nonnull)captureEvent:(SentryEvent * _Nonnull)event withScope:(SentryScope * _Nonnull)scope;
     [Static]
-    [Export("captureEvent:withScopeBlock:")]
-    SentryId CaptureEvent(SentryEvent @event, Action<SentryScope> block);
+    [Export ("captureEvent:withScope:")]
+    SentryId CaptureEvent (SentryEvent @event, SentryScope scope);
 
-    // + (id <SentrySpan> _Nonnull)startTransactionWithName:(NSString * _Nonnull)name operation:(NSString * _Nonnull)operation;
+    // +(SentryId * _Nonnull)captureEvent:(SentryEvent * _Nonnull)event withScopeBlock:(void (^ _Nonnull)(SentryScope * _Nonnull))block;
     [Static]
-    [Export("startTransactionWithName:operation:")]
-    SentrySpan StartTransactionWithName(string name, string operation);
+    [Export ("captureEvent:withScopeBlock:")]
+    SentryId CaptureEvent (SentryEvent @event, Action<SentryScope> block);
 
-    // + (id <SentrySpan> _Nonnull)startTransactionWithName:(NSString * _Nonnull)name operation:(NSString * _Nonnull)operation bindToScope:(BOOL)bindToScope;
+    // +(id<SentrySpan> _Nonnull)startTransactionWithName:(NSString * _Nonnull)name operation:(NSString * _Nonnull)operation;
     [Static]
-    [Export("startTransactionWithName:operation:bindToScope:")]
-    SentrySpan StartTransactionWithName(string name, string operation, bool bindToScope);
+    [Export ("startTransactionWithName:operation:")]
+    SentrySpan StartTransactionWithName (string name, string operation);
 
-    // + (id <SentrySpan> _Nonnull)startTransactionWithContext:(SentryTransactionContext * _Nonnull)transactionContext;
+    // +(id<SentrySpan> _Nonnull)startTransactionWithName:(NSString * _Nonnull)name operation:(NSString * _Nonnull)operation bindToScope:(BOOL)bindToScope;
     [Static]
-    [Export("startTransactionWithContext:")]
-    SentrySpan StartTransactionWithContext(SentryTransactionContext transactionContext);
+    [Export ("startTransactionWithName:operation:bindToScope:")]
+    SentrySpan StartTransactionWithName (string name, string operation, bool bindToScope);
 
-    // + (id <SentrySpan> _Nonnull)startTransactionWithContext:(SentryTransactionContext * _Nonnull)transactionContext bindToScope:(BOOL)bindToScope;
+    // +(id<SentrySpan> _Nonnull)startTransactionWithContext:(SentryTransactionContext * _Nonnull)transactionContext;
     [Static]
-    [Export("startTransactionWithContext:bindToScope:")]
-    SentrySpan StartTransactionWithContext(SentryTransactionContext transactionContext, bool bindToScope);
+    [Export ("startTransactionWithContext:")]
+    SentrySpan StartTransactionWithContext (SentryTransactionContext transactionContext);
 
-    // + (id <SentrySpan> _Nonnull)startTransactionWithContext:(SentryTransactionContext * _Nonnull)transactionContext bindToScope:(BOOL)bindToScope customSamplingContext:(NSDictionary<NSString *, id> * _Nonnull)customSamplingContext;
+    // +(id<SentrySpan> _Nonnull)startTransactionWithContext:(SentryTransactionContext * _Nonnull)transactionContext bindToScope:(BOOL)bindToScope;
     [Static]
-    [Export("startTransactionWithContext:bindToScope:customSamplingContext:")]
-    SentrySpan StartTransactionWithContext(SentryTransactionContext transactionContext, bool bindToScope, NSDictionary<NSString, NSObject> customSamplingContext);
+    [Export ("startTransactionWithContext:bindToScope:")]
+    SentrySpan StartTransactionWithContext (SentryTransactionContext transactionContext, bool bindToScope);
 
-    // + (id <SentrySpan> _Nonnull)startTransactionWithContext:(SentryTransactionContext * _Nonnull)transactionContext customSamplingContext:(NSDictionary<NSString *, id> * _Nonnull)customSamplingContext;
+    // +(id<SentrySpan> _Nonnull)startTransactionWithContext:(SentryTransactionContext * _Nonnull)transactionContext bindToScope:(BOOL)bindToScope customSamplingContext:(NSDictionary<NSString *,id> * _Nonnull)customSamplingContext;
+    [Static]
+    [Export ("startTransactionWithContext:bindToScope:customSamplingContext:")]
+    SentrySpan StartTransactionWithContext (SentryTransactionContext transactionContext, bool bindToScope, NSDictionary<NSString, NSObject> customSamplingContext);
+
+    // +(id<SentrySpan> _Nonnull)startTransactionWithContext:(SentryTransactionContext * _Nonnull)transactionContext customSamplingContext:(NSDictionary<NSString *,id> * _Nonnull)customSamplingContext;
     [Static]
     [Export ("startTransactionWithContext:customSamplingContext:")]
     SentrySpan StartTransactionWithContext (SentryTransactionContext transactionContext, NSDictionary<NSString, NSObject> customSamplingContext);
 
-    // + (SentryId * _Nonnull)captureError:(NSError * _Nonnull)error;
+    // +(SentryId * _Nonnull)captureError:(NSError * _Nonnull)error;
     [Static]
     [Export ("captureError:")]
     SentryId CaptureError (NSError error);
 
-    // + (SentryId * _Nonnull)captureError:(NSError * _Nonnull)error withScope:(SentryScope * _Nonnull)scope;
+    // +(SentryId * _Nonnull)captureError:(NSError * _Nonnull)error withScope:(SentryScope * _Nonnull)scope;
     [Static]
     [Export ("captureError:withScope:")]
     SentryId CaptureError (NSError error, SentryScope scope);
 
-    // + (SentryId * _Nonnull)captureError:(NSError * _Nonnull)error withScopeBlock:(void (^ _Nonnull)(SentryScope * _Nonnull))block;
+    // +(SentryId * _Nonnull)captureError:(NSError * _Nonnull)error withScopeBlock:(void (^ _Nonnull)(SentryScope * _Nonnull))block;
     [Static]
     [Export ("captureError:withScopeBlock:")]
     SentryId CaptureError (NSError error, Action<SentryScope> block);
 
-    // + (SentryId * _Nonnull)captureException:(NSException * _Nonnull)exception;
+    // +(SentryId * _Nonnull)captureException:(NSException * _Nonnull)exception;
     [Static]
     [Export ("captureException:")]
     SentryId CaptureException (NSException exception);
 
-    // + (SentryId * _Nonnull)captureException:(NSException * _Nonnull)exception withScope:(SentryScope * _Nonnull)scope;
+    // +(SentryId * _Nonnull)captureException:(NSException * _Nonnull)exception withScope:(SentryScope * _Nonnull)scope;
     [Static]
     [Export ("captureException:withScope:")]
     SentryId CaptureException (NSException exception, SentryScope scope);
 
-    // + (SentryId * _Nonnull)captureException:(NSException * _Nonnull)exception withScopeBlock:(void (^ _Nonnull)(SentryScope * _Nonnull))block;
+    // +(SentryId * _Nonnull)captureException:(NSException * _Nonnull)exception withScopeBlock:(void (^ _Nonnull)(SentryScope * _Nonnull))block;
     [Static]
     [Export ("captureException:withScopeBlock:")]
     SentryId CaptureException (NSException exception, Action<SentryScope> block);
 
-    // + (SentryId * _Nonnull)captureMessage:(NSString * _Nonnull)message;
+    // +(SentryId * _Nonnull)captureMessage:(NSString * _Nonnull)message;
     [Static]
     [Export ("captureMessage:")]
     SentryId CaptureMessage (string message);
 
-    // + (SentryId * _Nonnull)captureMessage:(NSString * _Nonnull)message withScope:(SentryScope * _Nonnull)scope;
+    // +(SentryId * _Nonnull)captureMessage:(NSString * _Nonnull)message withScope:(SentryScope * _Nonnull)scope;
     [Static]
     [Export ("captureMessage:withScope:")]
     SentryId CaptureMessage (string message, SentryScope scope);
 
-    // + (SentryId * _Nonnull)captureMessage:(NSString * _Nonnull)message withScopeBlock:(void (^ _Nonnull)(SentryScope * _Nonnull))block;
+    // +(SentryId * _Nonnull)captureMessage:(NSString * _Nonnull)message withScopeBlock:(void (^ _Nonnull)(SentryScope * _Nonnull))block;
     [Static]
     [Export ("captureMessage:withScopeBlock:")]
     SentryId CaptureMessage (string message, Action<SentryScope> block);
 
-    // + (void) captureUserFeedback:(SentryUserFeedback* _Nonnull) userFeedback SWIFT_DEPRECATED_MSG("Use SentrySDK.back or use or configure our new managed UX with SentryOptions.configureUserFeedback.");
+    // +(void)captureUserFeedback:(SentryUserFeedback * _Nonnull)userFeedback __attribute__((deprecated("Use SentrySDK.back or use or configure our new managed UX with SentryOptions.configureUserFeedback.")));
     [Static]
     [Export ("captureUserFeedback:")]
     void CaptureUserFeedback (SentryUserFeedback userFeedback);
 
-    // + (void)captureFeedback:(SentryFeedback * _Nonnull)feedback;
+    // +(void)captureFeedback:(SentryFeedback * _Nonnull)feedback;
     [Static]
     [Export ("captureFeedback:")]
     void CaptureFeedback (SentryFeedback feedback);
 
-    // @property (nonatomic, class, readonly, strong) SentryFeedbackAPI * _Nonnull feedback SWIFT_AVAILABILITY(ios,introduced=13.0);
+    // @property (readonly, nonatomic, strong, class) SentryFeedbackAPI * _Nonnull feedback __attribute__((availability(ios, introduced=13.0)));
     [Static]
-    [Export ("feedback")]
+    [Export ("feedback", ArgumentSemantic.Strong)]
     SentryFeedbackAPI Feedback { get; }
 
-    // + (void)addBreadcrumb:(SentryBreadcrumb * _Nonnull)crumb;
+    // +(void)addBreadcrumb:(SentryBreadcrumb * _Nonnull)crumb;
     [Static]
     [Export ("addBreadcrumb:")]
     void AddBreadcrumb (SentryBreadcrumb crumb);
 
-    // + (void)configureScope:(void (^ _Nonnull)(SentryScope * _Nonnull))callback;
+    // +(void)configureScope:(void (^ _Nonnull)(SentryScope * _Nonnull))callback;
     [Static]
     [Export ("configureScope:")]
     void ConfigureScope (Action<SentryScope> callback);
 
-    // @property (nonatomic, class, readonly) BOOL crashedLastRun;
+    // @property (readonly, nonatomic, class) BOOL crashedLastRun;
     [Static]
     [Export ("crashedLastRun")]
     bool CrashedLastRun { get; }
 
-    // property (nonatomic, class, readonly) BOOL detectedStartUpCrash;
+    // @property (readonly, nonatomic, class) BOOL detectedStartUpCrash;
     [Static]
     [Export ("detectedStartUpCrash")]
     bool DetectedStartUpCrash { get; }
 
-    // + (void)setUser:(SentryUser * _Nullable)user;
+    // +(void)setUser:(SentryUser * _Nullable)user;
     [Static]
     [Export ("setUser:")]
     void SetUser ([NullAllowed] SentryUser user);
 
-    // + (void)startSession;
+    // +(void)startSession;
     [Static]
     [Export ("startSession")]
     void StartSession ();
 
-    // + (void)endSession;
+    // +(void)endSession;
     [Static]
     [Export ("endSession")]
     void EndSession ();
 
-    // + (void)crash;
+    // +(void)crash;
     [Static]
     [Export ("crash")]
     void Crash ();
 
-    // + (void)reportFullyDisplayed;
+    // +(void)reportFullyDisplayed;
     [Static]
     [Export ("reportFullyDisplayed")]
     void ReportFullyDisplayed ();
 
-    // + (void)pauseAppHangTracking;
+    // +(void)pauseAppHangTracking;
     [Static]
     [Export ("pauseAppHangTracking")]
     void PauseAppHangTracking ();
 
-    // + (void)resumeAppHangTracking;
+    // +(void)resumeAppHangTracking;
     [Static]
     [Export ("resumeAppHangTracking")]
     void ResumeAppHangTracking ();
 
-    // + (void)flush:(NSTimeInterval)timeout;
+    // +(void)flush:(NSTimeInterval)timeout;
     [Static]
     [Export ("flush:")]
     void Flush (double timeout);
 
-    // + (void)close;
+    // +(void)close;
     [Static]
     [Export ("close")]
     void Close ();
 
-    // + (void)startProfiler;
+    // +(void)startProfiler;
     [Static]
     [Export ("startProfiler")]
     void StartProfiler ();
 
-    // + (void)stopProfiler;
+    // +(void)stopProfiler;
     [Static]
     [Export ("stopProfiler")]
     void StopProfiler ();
 
-    // + (void)clearLogger;
-
-    // - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-    [Export("init")]
-    [DesignatedInitializer]
-    IntPtr Constructor();
+    // +(void)clearLogger;
+    [Static]
+    [Export ("clearLogger")]
+    void ClearLogger ();
 }
 
 // @interface SentryUserFeedback : NSObject <SentrySerializable>
