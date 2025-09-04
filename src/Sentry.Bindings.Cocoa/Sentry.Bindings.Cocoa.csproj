@@ -66,16 +66,16 @@
     <!-- Download the Cocoa SDK as pre-built .xcframework -->
     <Exec
       Condition="!Exists('$(SentryCocoaFramework).zip')"
-      Command="curl -L https://github.com/getsentry/sentry-cocoa/releases/download/$(SentryCocoaVersion)/Sentry-Dynamic-WithARM64e.xcframework.zip -o $(SentryCocoaFramework).zip" />
+      Command="curl -L https://github.com/getsentry/sentry-cocoa/releases/download/$(SentryCocoaVersion)/Sentry-Dynamic.xcframework.zip -o $(SentryCocoaFramework).zip" />
 
     <Exec
       Condition="Exists('$(SentryCocoaFramework).zip') and !Exists('$(SentryCocoaFramework)')"
-      Command="unzip -o $(SentryCocoaFramework).zip -d $(SentryCocoaCache) &amp;&amp; mv $(SentryCocoaCache)Sentry-Dynamic-WithARM64e.xcframework $(SentryCocoaFramework)" />
+      Command="unzip -o $(SentryCocoaFramework).zip -d $(SentryCocoaCache) &amp;&amp; mv $(SentryCocoaCache)Sentry-Dynamic.xcframework $(SentryCocoaFramework)" />
 
     <!-- Make a copy of the header files before we butcher these to suite objective sharpie -->
     <MakeDir Directories="$(SentryCocoaFrameworkHeaders)" />
     <ItemGroup>
-      <FilesToCopy Include="$(SentryCocoaFramework)\ios-arm64_arm64e\Sentry.framework\**\*" />
+      <FilesToCopy Include="$(SentryCocoaFramework)\ios-arm64\Sentry.framework\**\*" />
     </ItemGroup>
     <Copy SourceFiles="@(FilesToCopy)"
           DestinationFolder="$(SentryCocoaFrameworkHeaders)%(RecursiveDir)"
