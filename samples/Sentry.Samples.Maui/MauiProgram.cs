@@ -45,15 +45,18 @@ public static class MauiProgram
                 options.AddCommunityToolkitIntegration();
 
 #if __ANDROID__
-                // Currently experimental support is only available on Android
+                // Currently, experimental support is only available on Android
                 options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate = 1.0;
                 options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate = 1.0;
                 // Mask all images and text by default. This can be overridden for individual view elements via the
                 // sentry:SessionReplay.Mask XML attribute (see MainPage.xaml for an example)
                 options.Native.ExperimentalOptions.SessionReplay.MaskAllImages = true;
                 options.Native.ExperimentalOptions.SessionReplay.MaskAllText = true;
-                // Alternatively the masking behaviour for entire classes of VisualElements can be configured here as
+                // Alternatively, the masking behaviour for entire classes of VisualElements can be configured here as
                 // an exception to the default behaviour.
+                // WARNING: In apps with complex user interfaces, consisting of hundreds of visual controls on a single
+                // page, this option may cause performance issues. In such cases, consider applying the
+                // sentry:SessionReplay.Mask="Unmask" attribute to individual controls instead.
                 options.Native.ExperimentalOptions.SessionReplay.UnmaskControlsOfType<Button>();
 #endif
 
