@@ -245,6 +245,27 @@ public class BackgroundWorkerTests
     }
 
     [Fact]
+    public void CaptureEvent_LimitReached_CallsBackpressureMonitor()
+    {
+        // Arrange
+        var clock = new MockClock(DateTimeOffset.UtcNow);
+        using var backpressureMonitor = new BackpressureMonitor(null, clock, false);
+        var envelope = Envelope.FromEvent(new SentryEvent());
+        _fixture.SentryOptions.MaxQueueItems = 1;
+        _fixture.SentryOptions.BackpressureMonitor = backpressureMonitor;
+
+        using var sut = _fixture.GetSut();
+        sut.EnqueueEnvelope(envelope, process: false);
+
+        // Act
+        sut.EnqueueEnvelope(envelope);
+
+        // Assert
+        backpressureMonitor.LastQueueOverflowTicks.Should().Be(clock.GetUtcNow().Ticks);
+        backpressureMonitor.IsHealthy.Should().BeFalse();
+    }
+
+    [Fact]
     public void CaptureEvent_DisposedWorker_ThrowsObjectDisposedException()
     {
         // Arrange
