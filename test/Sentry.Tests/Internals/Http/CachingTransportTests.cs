@@ -242,7 +242,7 @@ public class CachingTransportTests : IDisposable
     {
         // Arrange
         var cacheDirectoryPath =
-            _options.TryGetProcessSpecificCacheDirectoryPath() ??
+            _options.TryGetIsolatedCacheDirectoryPath() ??
             throw new InvalidOperationException("Cache directory or DSN is not set.");
         var processingDirectoryPath = Path.Combine(cacheDirectoryPath, "__processing");
         var fileName = $"{Guid.NewGuid()}.envelope";

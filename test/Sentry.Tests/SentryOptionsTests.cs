@@ -675,4 +675,46 @@ public partial class SentryOptionsTests
         installationId2.Should().Be(installationId1);
         logger.Received(0).Log(SentryLevel.Debug, "Resolved installation ID '{0}'.", null, Arg.Any<string>());
     }
+
+    [Fact]
+    public void TryGetIsolatedCacheDirectoryPath_NullCacheDirectory_ReturnsNull()
+    {
+        var o = new SentryOptions { CacheDirectoryPath = null, Dsn = ValidDsn };
+        Assert.Null(o.TryGetIsolatedCacheDirectoryPath());
+    }
+
+    [Fact]
+    public void TryGetIsolatedCacheDirectoryPath_MissingDsn_ReturnsNull()
+    {
+        var o = new SentryOptions { CacheDirectoryPath = "c:\\cache", Dsn = null };
+        Assert.Null(o.TryGetIsolatedCacheDirectoryPath());
+    }
+
+    [Theory]
+    [InlineData(5, null)]
+    [InlineData(5, 7)]
+    public void TryGetIsolatedCacheDirectoryPath_UniqueForDsnInitCountAndProcessIdUnlessMobile(int initCount, int? processId)
+    {
+        // Arrange
+        var initCounter = Substitute.For<IInitCounter>();
+        initCounter.Count.Returns(initCount);
+        var o = new SentryOptions
+        {
+            CacheDirectoryPath = "c:\\cache",
+            Dsn = ValidDsn,
+            InitCounter = initCounter,
+            ProcessIdResolver = () => processId
+        };
+
+        // Act
+        var path = o.TryGetIsolatedCacheDirectoryPath();
+
+        // Assert
+#if IOS || ANDROID
+        var expectedFolder = "Sentry";
+#else
+        var expectedFolder = $"{ValidDsn.GetHashCode()}_{processId ?? 0}_{initCount}";
+#endif
+        path.Should().EndWith(expectedFolder);
+    }
 }
