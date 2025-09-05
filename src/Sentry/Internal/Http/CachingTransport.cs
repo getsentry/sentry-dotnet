@@ -75,7 +75,7 @@ internal class CachingTransport : ITransport, IDisposable
             : 0; // just in case MaxCacheItems is set to an invalid value somehow (shouldn't happen)
 
         _isolatedCacheDirectoryPath =
-            options.TryGetProcessSpecificCacheDirectoryPath() ??
+            options.TryGetIsolatedCacheDirectoryPath() ??
             throw new InvalidOperationException("Cache directory or DSN is not set.");
 
         // Sanity check: This should never happen in the first place.

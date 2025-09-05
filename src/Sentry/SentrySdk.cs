@@ -32,6 +32,7 @@ static partial class SentrySdk
     {
         options.SetupLogging();
 
+        options.InitCounter.Increment();
         ProcessInfo.Instance ??= new ProcessInfo(options);
 
         // Locate the DSN
