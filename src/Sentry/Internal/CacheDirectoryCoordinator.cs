@@ -61,7 +61,8 @@ internal class CacheDirectoryCoordinator : IDisposable
             _disposed = true;
             if (_acquired)
             {
-                try { _semaphore.Release(); }
+                try
+                { _semaphore.Release(); }
                 catch (Exception ex) { _logger?.LogError("Error releasing the cache directory semaphore.", ex); }
             }
             _semaphore.Dispose();
@@ -80,7 +81,7 @@ internal static class CacheDirectoryHelper
 
     internal static string? TryGetIsolatedCacheDirectoryPath(this SentryOptions options)
     {
-        if (GetBaseCacheDirectoryPath(options) is not {} baseCacheDir || string.IsNullOrWhiteSpace(options.Dsn))
+        if (GetBaseCacheDirectoryPath(options) is not { } baseCacheDir || string.IsNullOrWhiteSpace(options.Dsn))
         {
             return null;
         }

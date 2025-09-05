@@ -209,7 +209,7 @@ internal class CachingTransport : ITransport, IDisposable
             if (coordinator.TryAcquire(TimeSpan.FromMilliseconds(100)))
             {
                 _options.LogDebug("Salvaging abandoned cache: {0}", dir);
-                foreach (var filePath in _fileSystem.EnumerateFiles (dir, "*.envelope", SearchOption.AllDirectories))
+                foreach (var filePath in _fileSystem.EnumerateFiles(dir, "*.envelope", SearchOption.AllDirectories))
                 {
                     var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
                     _options.LogDebug("Moving abandoned file back to cache: {0} to {1}.", filePath, destinationPath);
