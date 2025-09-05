@@ -22,8 +22,10 @@ internal class CachingTransport : ITransport, IDisposable
     private readonly ITransport _innerTransport;
     private readonly SentryOptions _options;
     private readonly bool _failStorage;
-    private readonly string _isolatedCacheDirectoryPath;
     private readonly int _keepCount;
+
+    private readonly CacheDirectoryCoordinator _cacheCoordinator;
+    private readonly string _isolatedCacheDirectoryPath;
 
     // When a file is getting processed, it's moved to a child directory
     // to avoid getting picked up by other threads.
@@ -45,6 +47,7 @@ internal class CachingTransport : ITransport, IDisposable
 
     private readonly CancellationTokenSource _workerCts = new();
     private Task _worker = null!;
+    private Task? _recycler = null;
 
     private ManualResetEventSlim? _initCacheResetEvent = new();
     private ManualResetEventSlim? _preInitCacheResetEvent = new();
@@ -77,6 +80,11 @@ internal class CachingTransport : ITransport, IDisposable
         _isolatedCacheDirectoryPath =
             options.TryGetIsolatedCacheDirectoryPath() ??
             throw new InvalidOperationException("Cache directory or DSN is not set.");
+        _cacheCoordinator = new CacheDirectoryCoordinator(_isolatedCacheDirectoryPath, options.DiagnosticLogger);
+        if (!_cacheCoordinator.TryAcquire(TimeSpan.FromMilliseconds(100)))
+        {
+            throw new InvalidOperationException("Cache directory already locked.");
+        }
 
         // Sanity check: This should never happen in the first place.
         // We check for `DisableFileWrite` before creating the CachingTransport.
@@ -99,6 +107,9 @@ internal class CachingTransport : ITransport, IDisposable
         {
             _options.LogDebug("Starting CachingTransport worker.");
             _worker = Task.Run(CachedTransportBackgroundTaskAsync);
+
+            // Start a recycler in the background so as not to block initialisation
+            // _recycler = Task.Run(SalvageAbandonedCacheSessions);
         }
         else
         {
@@ -178,6 +189,36 @@ internal class CachingTransport : ITransport, IDisposable
         _options.LogDebug("CachingTransport worker stopped.");
     }
 
+    private void SalvageAbandonedCacheSessions()
+    {
+        if (_options.GetBaseCacheDirectoryPath() is not { } baseCacheDir)
+        {
+            return;
+        }
+
+        const string searchPattern = $"{CacheDirectoryHelper.IsolatedCacheDirectoryPrefix}*";
+        foreach (var dir in _fileSystem.EnumerateDirectories(baseCacheDir, searchPattern))
+        {
+            if (string.Equals(dir, _isolatedCacheDirectoryPath, StringComparison.OrdinalIgnoreCase))
+            {
+                continue; // Ignore the current cache directory
+            }
+
+            _options.LogDebug("found abandoned cache: {0}", dir);
+            using var coordinator = new CacheDirectoryCoordinator(dir, _options.DiagnosticLogger);
+            if (coordinator.TryAcquire(TimeSpan.FromMilliseconds(100)))
+            {
+                _options.LogDebug("Salvaging abandoned cache: {0}", dir);
+                foreach (var filePath in _fileSystem.EnumerateFiles (dir, "*.envelope", SearchOption.AllDirectories))
+                {
+                    var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
+                    _options.LogDebug("Moving abandoned file back to cache: {0} to {1}.", filePath, destinationPath);
+                    MoveFileWithRetries(filePath, destinationPath, "abandoned");
+                }
+            }
+        }
+    }
+
     private void MoveUnprocessedFilesBackToCache()
     {
         // Processing directory may already contain some files left from previous session
@@ -194,42 +235,46 @@ internal class CachingTransport : ITransport, IDisposable
         {
             var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
             _options.LogDebug("Moving unprocessed file back to cache: {0} to {1}.", filePath, destinationPath);
+            MoveFileWithRetries(filePath, destinationPath, "unprocessed");
+        }
+    }
 
-            const int maxAttempts = 3;
-            for (var attempt = 1; attempt <= maxAttempts; attempt++)
+    private void MoveFileWithRetries(string filePath, string destinationPath, string moveType)
+    {
+        const int maxAttempts = 3;
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
             {
-                try
+                _fileSystem.MoveFile(filePath, destinationPath);
+                break;
+            }
+            catch (Exception ex)
+            {
+                if (!_fileSystem.FileExists(filePath))
                 {
-                    _fileSystem.MoveFile(filePath, destinationPath);
+                    _options.LogDebug(
+                        "Failed to move {2} file back to cache (attempt {0}), " +
+                        "but the file no longer exists so it must have been handled by another process: {1}",
+                        attempt, filePath, moveType);
                     break;
                 }
-                catch (Exception ex)
+
+                if (attempt < maxAttempts)
                 {
-                    if (!_fileSystem.FileExists(filePath))
-                    {
-                        _options.LogDebug(
-                            "Failed to move unprocessed file back to cache (attempt {0}), " +
-                            "but the file no longer exists so it must have been handled by another process: {1}",
-                            attempt, filePath);
-                        break;
-                    }
+                    _options.LogDebug(
+                        "Failed to move {2} file back to cache (attempt {0}, retrying.): {1}",
+                        attempt, filePath, moveType);
 
-                    if (attempt < maxAttempts)
-                    {
-                        _options.LogDebug(
-                            "Failed to move unprocessed file back to cache (attempt {0}, retrying.): {1}",
-                            attempt, filePath);
-
-                        Thread.Sleep(200); // give a small bit of time before retry
-                    }
-                    else
-                    {
-                        _options.LogError(ex,
-                            "Failed to move unprocessed file back to cache (attempt {0}, done.): {1}", attempt, filePath);
-                    }
-
-                    // note: we do *not* want to re-throw the exception
+                    Thread.Sleep(200); // give a small bit of time before retry
                 }
+                else
+                {
+                    _options.LogError(ex,
+                        "Failed to move {2} file back to cache (attempt {0}, done.): {1}", attempt, filePath, moveType);
+                }
+
+                // note: we do *not* want to re-throw the exception
             }
         }
     }
@@ -560,7 +605,9 @@ internal class CachingTransport : ITransport, IDisposable
         _workerSignal.Dispose();
         _workerCts.Dispose();
         _worker.Dispose();
+        _recycler?.Dispose();
         _cacheDirectoryLock.Dispose();
+        _cacheCoordinator.Dispose();
         _preInitCacheResetEvent?.Dispose();
         _initCacheResetEvent?.Dispose();
 

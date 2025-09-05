@@ -2,6 +2,9 @@ namespace Sentry.Internal;
 
 internal abstract class FileSystemBase : IFileSystem
 {
+    public IEnumerable<string> EnumerateDirectories(string path, string searchPattern) =>
+        Directory.EnumerateDirectories(path, searchPattern);
+
     public IEnumerable<string> EnumerateFiles(string path) => Directory.EnumerateFiles(path);
 
     public IEnumerable<string> EnumerateFiles(string path, string searchPattern) =>

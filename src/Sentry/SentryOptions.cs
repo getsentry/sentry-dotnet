@@ -1806,28 +1806,6 @@ public class SentryOptions
         }
     }
 
-    internal string? TryGetIsolatedCacheDirectoryPath()
-    {
-        if (string.IsNullOrWhiteSpace(CacheDirectoryPath))
-        {
-            return null;
-        }
-
-        // DSN must be set to use caching
-        if (string.IsNullOrWhiteSpace(Dsn))
-        {
-            return null;
-        }
-
-#if IOS || ANDROID // on iOS or Android the app is already sandboxed so there's no risk of sending data from 1 app to another Sentry's DSN
-        return Path.Combine(CacheDirectoryPath, "Sentry");
-#else
-        var processId = ProcessIdResolver.Invoke() ?? 0;
-        var stringBuilder = new StringBuilder().AppendJoin('_', Dsn.GetHashCode(), processId, InitCounter.Count);
-        return Path.Combine(CacheDirectoryPath, "Sentry", stringBuilder.ToString());
-#endif
-    }
-
     internal static List<StringOrRegex> GetDefaultInAppExclude() =>
     [
         "System",

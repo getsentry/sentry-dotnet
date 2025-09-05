@@ -268,8 +268,8 @@ public class SentrySdkTests : IDisposable
 
         // Force all instances to use the same cache path
         var initCounter = Substitute.For<IInitCounter>();
-        initCounter.Count.Returns(0);
-        Func<int?> processIdResolver = () => 1;
+        initCounter.Count.Returns(1);
+        Func<int?> processIdResolver = () => 42;
 
         // Pre-populate cache
         var initialInnerTransport = Substitute.For<ITransport>();
@@ -369,8 +369,10 @@ public class SentrySdkTests : IDisposable
         finally
         {
             // cleanup to avoid disposing/deleting the temp directory while the cache worker is still running
-            var cachingTransport = (CachingTransport)options!.Transport;
-            await cachingTransport!.StopWorkerAsync();
+            if (options!.Transport is CachingTransport cachingTransport)
+            {
+                await cachingTransport!.StopWorkerAsync();
+            }
         }
     }
 #endif

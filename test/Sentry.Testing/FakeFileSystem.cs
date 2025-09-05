@@ -6,6 +6,9 @@ internal class FakeFileSystem : IFileSystem
 {
     private readonly MockFileSystem _fileSystem = new();
 
+    public IEnumerable<string> EnumerateDirectories(string path, string searchPattern) =>
+        _fileSystem.Directory.EnumerateDirectories(path, searchPattern);
+
     public IEnumerable<string> EnumerateFiles(string path) => _fileSystem.Directory.EnumerateFiles(path);
 
     public IEnumerable<string> EnumerateFiles(string path, string searchPattern) =>
