@@ -33,7 +33,7 @@ internal class AssemblyStoreExplorer
         {
             foreach (var item in Assemblies)
             {
-                logger?.Invoke("Assembly {0} indexed from AssemblyStore {1}", item.Name, path);
+                logger?.Invoke(DebugLoggerLevel.Debug, "Assembly {0} indexed from AssemblyStore {1}", item.Name, path);
                 dict.Add(item.Name, item);
             }
         }

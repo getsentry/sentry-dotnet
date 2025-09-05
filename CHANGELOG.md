@@ -16,15 +16,22 @@
   - Ensure all buffered logs are sent to Sentry when the application terminates unexpectedly ([#4425](https://github.com/getsentry/sentry-dotnet/pull/4425))
   - `InvalidOperationException` potentially thrown during a race condition, especially in concurrent high-volume logging scenarios ([#4428](https://github.com/getsentry/sentry-dotnet/pull/4428))
 - Blocking calls are no longer treated as unhandled crashes ([#4458](https://github.com/getsentry/sentry-dotnet/pull/4458))
+- Only apply Session Replay masks to specific control types when necessary to avoid performance issues in MAUI apps with complex UIs ([#4445](https://github.com/getsentry/sentry-dotnet/pull/4445))
 
 ### Dependencies
 
 - Reapply "Bump Cocoa SDK from v8.39.0 to v8.46.0 (#4103)" ([#4442](https://github.com/getsentry/sentry-dotnet/pull/4442))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8460)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.46.0)
-- Bump Native SDK from v0.9.1 to v0.10.0 ([#4436](https://github.com/getsentry/sentry-dotnet/pull/4436))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0100)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.9.1...0.10.0)
+    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8460)
+    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.46.0)
+- Bump Native SDK from v0.9.1 to v0.10.1 ([#4436](https://github.com/getsentry/sentry-dotnet/pull/4436), [#4492](https://github.com/getsentry/sentry-dotnet/pull/4492))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0101)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.9.1...0.10.1)
+- Bump CLI from v2.52.0 to v2.53.0 ([#4486](https://github.com/getsentry/sentry-dotnet/pull/4486))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2530)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.52.0...2.53.0)
+- Bump Java SDK from v8.6.0 to v8.20.0 ([#4496](https://github.com/getsentry/sentry-dotnet/pull/4496))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8200)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.6.0...8.20.0)
 
 ## 5.14.1
 

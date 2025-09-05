@@ -106,7 +106,7 @@ internal partial class StoreReaderV2 : AssemblyStoreReader
                     ELFPayloadError.NoPayloadSection => $"Store '{StorePath}' does not contain the 'payload' section",
                     _ => $"Unknown ELF payload section error for store '{StorePath}': {error}"
                 };
-                Logger?.Invoke(message);
+                Logger?.Invoke(DebugLoggerLevel.Debug, message);
                 // Was originally:
                 // ```
                 // } else if (elfOffset >= 0) {
@@ -122,14 +122,14 @@ internal partial class StoreReaderV2 : AssemblyStoreReader
 
         if (magic != Utils.AssemblyStoreMagic)
         {
-            Logger?.Invoke("Store '{0}' has invalid header magic number.", StorePath);
+            Logger?.Invoke(DebugLoggerLevel.Debug, "Store '{0}' has invalid header magic number.", StorePath);
             return false;
         }
 
         uint version = reader.ReadUInt32();
         if (!supportedVersions.Contains(version))
         {
-            Logger?.Invoke("Store '{0}' has unsupported version 0x{1:x}", StorePath, version);
+            Logger?.Invoke(DebugLoggerLevel.Debug, "Store '{0}' has unsupported version 0x{1:x}", StorePath, version);
             return false;
         }
 

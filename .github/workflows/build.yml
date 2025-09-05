@@ -33,6 +33,7 @@ jobs:
               image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
               volumes:
                 - /tmp/node20:/__e/node20
+                - /tmp/node24:/__e/node24
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
             rid: macos # universal (osx-arm64 + osx-x64)
           - os: windows-latest
@@ -44,10 +45,10 @@ jobs:
       - name: Initialize Alpine Linux
         if: ${{ contains(matrix.container.image, 'alpine') }}
         run: |
-          curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin /__e/node20/bin/
+          curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - run: git submodule update --init modules/sentry-native
 
@@ -101,6 +102,7 @@ jobs:
               image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
               volumes:
                 - /tmp/node20:/__e/node20
+                - /tmp/node24:/__e/node24
                 - /var/run/docker.sock:/var/run/docker.sock
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
             rid: macos # universal (osx-arm64 + osx-x64)
@@ -116,14 +118,14 @@ jobs:
       - name: Initialize Alpine Linux
         if: ${{ contains(matrix.container.image, 'alpine') }}
         run: |
-          curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin /__e/node20/bin/
+          curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin
 
       - name: Cancel Previous Runs
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
@@ -223,7 +225,7 @@ jobs:
         run: dotnet test ${{ matrix.slnf }} -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
 
       - name: Upload code coverage
-        uses: codecov/codecov-action@18283e04ce6e62d37312384ff67231eb8fd56d24
+        uses: codecov/codecov-action@fdcc8476540edceab3de004e990f80d881c6cc00
 
       - name: Upload build and test outputs
         if: failure()
@@ -247,7 +249,7 @@ jobs:
 
       - name: Sparse checkout
         if: env.CI_PUBLISHING_BUILD == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # We only check out what is absolutely necessary to reduce a chance of local files impacting
           # integration tests, e.g. Directory.Build.props, nuget.config, ...
@@ -274,7 +276,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
 
@@ -327,7 +329,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
 
@@ -357,7 +359,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
@@ -396,7 +398,7 @@ jobs:
     if: ${{ !startsWith(github.ref_name, 'release/') }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
 
