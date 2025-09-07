@@ -79,22 +79,27 @@ internal static class CacheDirectoryHelper
             ? null
             : Path.Combine(options.CacheDirectoryPath, "Sentry");
 
-    internal static string? TryGetIsolatedCacheDirectoryPath(this SentryOptions options)
+    internal static string? GetIsolatedFolderName(this SentryOptions options)
     {
-        if (GetBaseCacheDirectoryPath(options) is not { } baseCacheDir || string.IsNullOrWhiteSpace(options.Dsn))
-        {
-            return null;
-        }
-
         var stringBuilder = new StringBuilder(IsolatedCacheDirectoryPrefix);
 #if IOS || ANDROID
         // On iOS or Android the app is already sandboxed, so there's no risk of sending data to another Sentry's DSN.
         // However, users may still initiate the SDK multiple times within the process, so we need an InitCounter
         stringBuilder.Append(options.InitCounter.Count);
 #else
+        if (string.IsNullOrWhiteSpace(options.Dsn))
+        {
+            return null;
+        }
         var processId = options.ProcessIdResolver.Invoke() ?? 0;
         stringBuilder.AppendJoin('_', options.Dsn.GetHashString(), processId, options.InitCounter.Count);
 #endif
-        return Path.Combine(baseCacheDir, stringBuilder.ToString());
+        return stringBuilder.ToString();
     }
+
+    internal static string? TryGetIsolatedCacheDirectoryPath(this SentryOptions options) =>
+        GetBaseCacheDirectoryPath(options) is not { } baseCacheDir
+        || GetIsolatedFolderName(options) is not { } isolatedFolderName
+            ? null
+            : Path.Combine(baseCacheDir, isolatedFolderName);
 }
