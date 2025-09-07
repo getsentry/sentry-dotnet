@@ -5,14 +5,15 @@ using Sentry.Protocol.Envelopes;
 namespace Sentry.Internal.Http;
 
 /// <summary>
-/// A transport that caches envelopes to disk and sends them in the background.
+/// Transport that caches envelopes to disk and sends them in the background.
 /// </summary>
 /// <remarks>
+/// <para>
 /// Note although this class has a <see cref="CachingTransport.DisposeAsync"/>
 /// method, it doesn't implement <see cref="IAsyncDisposable"/> as this caused
 /// a dependency issue with Log4Net in some situations.
-///
-/// See https://github.com/getsentry/sentry-dotnet/issues/3178
+/// </para>
+/// <para>See https://github.com/getsentry/sentry-dotnet/issues/3178</para>
 /// </remarks>
 internal class CachingTransport : ITransport, IDisposable
 {
