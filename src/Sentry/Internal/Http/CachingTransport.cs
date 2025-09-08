@@ -81,7 +81,7 @@ internal class CachingTransport : ITransport, IDisposable
         _isolatedCacheDirectoryPath =
             options.TryGetIsolatedCacheDirectoryPath() ??
             throw new InvalidOperationException("Cache directory or DSN is not set.");
-        _cacheCoordinator = new CacheDirectoryCoordinator(_isolatedCacheDirectoryPath, options.DiagnosticLogger);
+        _cacheCoordinator = new CacheDirectoryCoordinator(_isolatedCacheDirectoryPath, options.DiagnosticLogger, options.FileSystem);
         if (!_cacheCoordinator.TryAcquire(TimeSpan.FromMilliseconds(100)))
         {
             throw new InvalidOperationException("Cache directory already locked.");
@@ -99,18 +99,15 @@ internal class CachingTransport : ITransport, IDisposable
         // Restore any abandoned files from a previous session
         MoveUnprocessedFilesBackToCache();
 
-        // Ensure directories exist
-        _fileSystem.CreateDirectory(_isolatedCacheDirectoryPath);
         _fileSystem.CreateDirectory(_processingDirectoryPath);
 
-        // Start a worker, if one is needed
         if (startWorker)
         {
             _options.LogDebug("Starting CachingTransport worker.");
             _worker = Task.Run(CachedTransportBackgroundTaskAsync);
 
             // Start a recycler in the background so as not to block initialisation
-            // _recycler = Task.Run(SalvageAbandonedCacheSessions);
+            _recycler = Task.Run(SalvageAbandonedCacheSessions);
         }
         else
         {
@@ -206,7 +203,7 @@ internal class CachingTransport : ITransport, IDisposable
             }
 
             _options.LogDebug("found abandoned cache: {0}", dir);
-            using var coordinator = new CacheDirectoryCoordinator(dir, _options.DiagnosticLogger);
+            using var coordinator = new CacheDirectoryCoordinator(dir, _options.DiagnosticLogger, _options.FileSystem);
             if (coordinator.TryAcquire(TimeSpan.FromMilliseconds(100)))
             {
                 _options.LogDebug("Salvaging abandoned cache: {0}", dir);
@@ -324,7 +321,7 @@ internal class CachingTransport : ITransport, IDisposable
 
             // Make sure no files got stuck in the processing directory
             // See https://github.com/getsentry/sentry-dotnet/pull/3438#discussion_r1672524426
-            if (_options.NetworkStatusListener is { Online: false } listener)
+            if (_options.NetworkStatusListener is { Online: false })
             {
                 MoveUnprocessedFilesBackToCache();
             }

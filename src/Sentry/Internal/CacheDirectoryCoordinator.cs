@@ -6,48 +6,85 @@ namespace Sentry.Internal;
 internal class CacheDirectoryCoordinator : IDisposable
 {
     private readonly IDiagnosticLogger? _logger;
-    private readonly Semaphore _semaphore;
+    private readonly object _gate = new();
+
+    private FileStream? _lockStream;
+    private readonly string _lockFilePath;
+
     private bool _acquired;
     private bool _disposed;
-    private readonly Lock _gate = new();
 
-    public CacheDirectoryCoordinator(string cacheDir, IDiagnosticLogger? logger)
+    public CacheDirectoryCoordinator(string cacheDir, IDiagnosticLogger? logger, IFileSystem fileSystem)
     {
         _logger = logger;
-        var mutexName = BuildMutexName(cacheDir);
-        _semaphore = new Semaphore(1, 1, mutexName); // Named mutexes allow interprocess locks on all platforms
+        _lockFilePath = $"{cacheDir}.lock";
+
+        try
+        {
+            var baseDir = Path.GetDirectoryName(_lockFilePath);
+            if (!string.IsNullOrWhiteSpace(baseDir))
+            {
+                // Not normally necessary, but just in case
+                fileSystem.CreateDirectory(baseDir);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger?.LogError("Failed to ensure lock directory exists for cache coordinator.", ex);
+        }
     }
 
-    private static string BuildMutexName(string path)
-    {
-        var hash = path.GetHashString();
-        // Global\ prefix allows cross-session visibility on Windows Terminal Services
-        return $"Global\\SentryCache{hash}";
-    }
-
-    /// <summary>
-    /// Try to own this cache directory.
-    /// </summary>
-    /// <param name="timeout">How long to wait for the lock.</param>
-    /// <returns>True if acquired; false otherwise.</returns>
     public bool TryAcquire(TimeSpan timeout)
     {
         if (_acquired)
         {
             return true;
         }
+
         lock (_gate)
         {
             if (_acquired)
             {
                 return true;
             }
-            if (!_semaphore.WaitOne(timeout))
+
+            if (_disposed)
             {
                 return false;
             }
-            _acquired = true;
-            return true;
+
+            try
+            {
+                // Note that FileShare.None is implemented via advisory locks only on macOS/Linux... so it will stop
+                // other .NET processes from accessing the file but not other non-.NET processes. This should be fine
+                // in our case - we just want to avoid multiple instances of the SDK concurrently accessing the cache
+                _lockStream = new FileStream(
+                    _lockFilePath,
+                    FileMode.OpenOrCreate,
+                    FileAccess.ReadWrite,
+                    FileShare.None);
+
+                _acquired = true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogDebug("Unable to acquire cache directory lock", ex);
+            }
+            finally
+            {
+                if (!_acquired && _lockStream is not null)
+                {
+                    try { _lockStream.Dispose(); }
+                    catch
+                    {
+                        // Ignore
+                    }
+                    _lockStream = null;
+                }
+            }
+
+            return false;
         }
     }
 
@@ -56,16 +93,33 @@ internal class CacheDirectoryCoordinator : IDisposable
         lock (_gate)
         {
             if (_disposed)
+            {
                 return;
+            }
 
             _disposed = true;
+
             if (_acquired)
             {
                 try
-                { _semaphore.Release(); }
-                catch (Exception ex) { _logger?.LogError("Error releasing the cache directory semaphore.", ex); }
+                {
+                    _lockStream?.Close();
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogError("Error releasing the cache directory file lock.", ex);
+                }
             }
-            _semaphore.Dispose();
+
+            try
+            {
+                _lockStream?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError("Error disposing cache lock stream.", ex);
+            }
+            _lockStream = null;
         }
     }
 }
@@ -79,7 +133,7 @@ internal static class CacheDirectoryHelper
             ? null
             : Path.Combine(options.CacheDirectoryPath, "Sentry");
 
-    internal static string? GetIsolatedFolderName(this SentryOptions options)
+    private static string? GetIsolatedFolderName(this SentryOptions options)
     {
         var stringBuilder = new StringBuilder(IsolatedCacheDirectoryPrefix);
 #if IOS || ANDROID
