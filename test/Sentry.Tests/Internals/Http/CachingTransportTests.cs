@@ -624,8 +624,9 @@ public class CachingTransportTests : IDisposable
         await transport.SendEnvelopeAsync(envelope);
 
         // Assert
+        var isolatedCacheDir = _options.TryGetIsolatedCacheDirectoryPath();
         var filePath = _options.FileSystem
-            .EnumerateFiles(_options.CacheDirectoryPath!, "*", SearchOption.AllDirectories)
+            .EnumerateFiles(isolatedCacheDir!, "*", SearchOption.AllDirectories)
             .Single();
 
         var contents = _options.FileSystem.ReadAllTextFromFile(filePath);
