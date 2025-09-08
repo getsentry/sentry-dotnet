@@ -7,6 +7,7 @@
 - Experimental _Structured Logs_:
   - Redesign SDK Logger APIs to allow usage of `params` ([#4451](https://github.com/getsentry/sentry-dotnet/pull/4451))
   - Shorten the `key` names of `Microsoft.Extensions.Logging` attributes ([#4450](https://github.com/getsentry/sentry-dotnet/pull/4450))
+- Implement process and instance isolation so that multiple instances of the Sentry SDK can be instantiated inside the same process when using the Caching Transport ([#4498](https://github.com/getsentry/sentry-dotnet/pull/4498))
 
 ### Fixes
 
