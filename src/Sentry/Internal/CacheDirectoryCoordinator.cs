@@ -68,7 +68,8 @@ internal class CacheDirectoryCoordinator : IDisposable
             {
                 if (!_acquired && _lockStream is not null)
                 {
-                    try { _lockStream.Dispose(); }
+                    try
+                    { _lockStream.Dispose(); }
                     catch
                     {
                         // Ignore
