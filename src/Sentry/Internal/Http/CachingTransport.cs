@@ -82,7 +82,7 @@ internal class CachingTransport : ITransport, IDisposable
             options.TryGetIsolatedCacheDirectoryPath() ??
             throw new InvalidOperationException("Cache directory or DSN is not set.");
         _cacheCoordinator = new CacheDirectoryCoordinator(_isolatedCacheDirectoryPath, options.DiagnosticLogger, options.FileSystem);
-        if (!_cacheCoordinator.TryAcquire(TimeSpan.FromMilliseconds(100)))
+        if (!_cacheCoordinator.TryAcquire())
         {
             throw new InvalidOperationException("Cache directory already locked.");
         }
@@ -107,7 +107,7 @@ internal class CachingTransport : ITransport, IDisposable
             _worker = Task.Run(CachedTransportBackgroundTaskAsync);
 
             // Start a recycler in the background so as not to block initialisation
-            _recycler = Task.Run(SalvageAbandonedCacheSessions);
+            _recycler = Task.Run(() => SalvageAbandonedCacheSessions(_workerCts.Token), _workerCts.Token);
         }
         else
         {
@@ -187,7 +187,7 @@ internal class CachingTransport : ITransport, IDisposable
         _options.LogDebug("CachingTransport worker stopped.");
     }
 
-    private void SalvageAbandonedCacheSessions()
+    private void SalvageAbandonedCacheSessions(CancellationToken cancellationToken)
     {
         if (_options.GetBaseCacheDirectoryPath() is not { } baseCacheDir)
         {
@@ -197,6 +197,11 @@ internal class CachingTransport : ITransport, IDisposable
         const string searchPattern = $"{CacheDirectoryHelper.IsolatedCacheDirectoryPrefix}*";
         foreach (var dir in _fileSystem.EnumerateDirectories(baseCacheDir, searchPattern))
         {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return; // graceful exit on cancellation
+            }
+
             if (string.Equals(dir, _isolatedCacheDirectoryPath, StringComparison.OrdinalIgnoreCase))
             {
                 continue; // Ignore the current cache directory
@@ -204,15 +209,22 @@ internal class CachingTransport : ITransport, IDisposable
 
             _options.LogDebug("found abandoned cache: {0}", dir);
             using var coordinator = new CacheDirectoryCoordinator(dir, _options.DiagnosticLogger, _options.FileSystem);
-            if (coordinator.TryAcquire(TimeSpan.FromMilliseconds(100)))
+            if (!coordinator.TryAcquire())
             {
-                _options.LogDebug("Salvaging abandoned cache: {0}", dir);
-                foreach (var filePath in _fileSystem.EnumerateFiles(dir, "*.envelope", SearchOption.AllDirectories))
+                continue;
+            }
+
+            _options.LogDebug("Salvaging abandoned cache: {0}", dir);
+            foreach (var filePath in _fileSystem.EnumerateFiles(dir, "*.envelope", SearchOption.AllDirectories))
+            {
+                if (cancellationToken.IsCancellationRequested)
                 {
-                    var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
-                    _options.LogDebug("Moving abandoned file back to cache: {0} to {1}.", filePath, destinationPath);
-                    MoveFileWithRetries(filePath, destinationPath, "abandoned");
+                    return; // graceful exit on cancellation
                 }
+
+                var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
+                _options.LogDebug("Moving abandoned file back to cache: {0} to {1}.", filePath, destinationPath);
+                MoveFileWithRetries(filePath, destinationPath, "abandoned");
             }
         }
     }
@@ -582,6 +594,20 @@ internal class CachingTransport : ITransport, IDisposable
         return _worker;
     }
 
+    private Task StopRecyclerAsync()
+    {
+        if (_recycler?.IsCompleted != false)
+        {
+            // already stopped
+            return Task.CompletedTask;
+        }
+
+        // Stop worker and wait until it finishes
+        _options.LogDebug("Stopping CachingTransport worker.");
+        _workerCts.Cancel();
+        return _recycler;
+    }
+
     public Task FlushAsync(CancellationToken cancellationToken = default)
     {
         _options.LogDebug("CachingTransport received request to flush the cache.");
@@ -598,6 +624,15 @@ internal class CachingTransport : ITransport, IDisposable
         {
             // Don't throw inside dispose
             _options.LogError(ex, "Error stopping worker during dispose.");
+        }
+
+        try
+        {
+            await StopRecyclerAsync().ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _options.LogError(ex, "Error in recycler during dispose.");
         }
 
         _workerSignal.Dispose();

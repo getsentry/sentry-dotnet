@@ -36,7 +36,7 @@ internal class CacheDirectoryCoordinator : IDisposable
         }
     }
 
-    public bool TryAcquire(TimeSpan timeout)
+    public bool TryAcquire()
     {
         if (_acquired)
         {
