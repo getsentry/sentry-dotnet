@@ -33,6 +33,16 @@ internal class FakeFileSystem : IFileSystem
         return _fileSystem.Directory.Exists(path);
     }
 
+    public bool TryCreateLockFile(string path, out Stream fileStream)
+    {
+        fileStream = _fileSystem.FileStream.New(
+            path,
+            FileMode.OpenOrCreate,
+            FileAccess.ReadWrite,
+            FileShare.None);
+        return true;
+    }
+
     public bool DeleteDirectory(string path, bool recursive = false)
     {
         _fileSystem.Directory.Delete(path, recursive);

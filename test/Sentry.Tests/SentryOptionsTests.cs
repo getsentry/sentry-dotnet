@@ -713,7 +713,7 @@ public partial class SentryOptionsTests
 #if IOS || ANDROID
         var expectedFolder = "Sentry";
 #else
-        var expectedFolder = $"{ValidDsn.GetHashCode()}_{processId ?? 0}_{initCount}";
+        var expectedFolder = $"{ValidDsn.GetHashString()}_{processId ?? 0}_{initCount}";
 #endif
         path.Should().EndWith(expectedFolder);
     }

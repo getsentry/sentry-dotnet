@@ -23,6 +23,7 @@ internal interface IFileSystem
     public bool CreateDirectory(string path);
     public bool DeleteDirectory(string path, bool recursive = false);
     public bool CreateFileForWriting(string path, out Stream fileStream);
+    public bool TryCreateLockFile(string path, out Stream fileStream);
     public bool WriteAllTextToFile(string path, string contents);
     public bool MoveFile(string sourceFileName, string destFileName, bool overwrite = false);
     public bool DeleteFile(string path);

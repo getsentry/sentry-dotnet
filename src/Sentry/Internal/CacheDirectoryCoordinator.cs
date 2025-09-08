@@ -6,9 +6,10 @@ namespace Sentry.Internal;
 internal class CacheDirectoryCoordinator : IDisposable
 {
     private readonly IDiagnosticLogger? _logger;
+    private readonly IFileSystem _fileSystem;
     private readonly object _gate = new();
 
-    private FileStream? _lockStream;
+    private Stream? _lockStream;
     private readonly string _lockFilePath;
 
     private bool _acquired;
@@ -17,6 +18,7 @@ internal class CacheDirectoryCoordinator : IDisposable
     public CacheDirectoryCoordinator(string cacheDir, IDiagnosticLogger? logger, IFileSystem fileSystem)
     {
         _logger = logger;
+        _fileSystem = fileSystem;
         _lockFilePath = $"{cacheDir}.lock";
 
         try
@@ -55,17 +57,8 @@ internal class CacheDirectoryCoordinator : IDisposable
 
             try
             {
-                // Note that FileShare.None is implemented via advisory locks only on macOS/Linux... so it will stop
-                // other .NET processes from accessing the file but not other non-.NET processes. This should be fine
-                // in our case - we just want to avoid multiple instances of the SDK concurrently accessing the cache
-                _lockStream = new FileStream(
-                    _lockFilePath,
-                    FileMode.OpenOrCreate,
-                    FileAccess.ReadWrite,
-                    FileShare.None);
-
-                _acquired = true;
-                return true;
+                _acquired = _fileSystem.TryCreateLockFile(_lockFilePath, out _lockStream);
+                return _acquired;
             }
             catch (Exception ex)
             {

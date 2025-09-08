@@ -223,6 +223,7 @@ public class CachingTransportTests : IDisposable
 
         // Move them all to processing and leave them there (due to FakeFailingTransport)
         await initialTransport.FlushAsync();
+        await initialTransport.DisposeAsync();
 
         // Act
 

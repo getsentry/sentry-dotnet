@@ -26,6 +26,7 @@ internal abstract class FileSystemBase : IFileSystem
     public abstract bool CreateDirectory(string path);
     public abstract bool DeleteDirectory(string path, bool recursive = false);
     public abstract bool CreateFileForWriting(string path, out Stream fileStream);
+    public abstract bool TryCreateLockFile(string path, out Stream fileStream);
     public abstract bool WriteAllTextToFile(string path, string contents);
     public abstract bool MoveFile(string sourceFileName, string destFileName, bool overwrite = false);
     public abstract bool DeleteFile(string path);
