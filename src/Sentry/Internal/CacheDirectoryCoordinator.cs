@@ -127,7 +127,7 @@ internal static class CacheDirectoryHelper
             ? null
             : Path.Combine(options.CacheDirectoryPath, "Sentry");
 
-    private static string? GetIsolatedFolderName(this SentryOptions options)
+    internal static string? GetIsolatedFolderName(this SentryOptions options)
     {
         var stringBuilder = new StringBuilder(IsolatedCacheDirectoryPrefix);
 #if IOS || ANDROID

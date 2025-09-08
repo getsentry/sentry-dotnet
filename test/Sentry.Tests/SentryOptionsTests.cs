@@ -683,17 +683,28 @@ public partial class SentryOptionsTests
         Assert.Null(o.TryGetIsolatedCacheDirectoryPath());
     }
 
+#if IOS || ANDROID
     [Fact]
-    public void TryGetIsolatedCacheDirectoryPath_MissingDsn_ReturnsNull()
+    public void GetIsolatedFolderName_MissingDsn_UniquewForInitcount()
     {
         var o = new SentryOptions { CacheDirectoryPath = "c:\\cache", Dsn = null };
-        Assert.Null(o.TryGetIsolatedCacheDirectoryPath());
+        var folder =o.GetIsolatedFolderName();
+        Assert.Equal($"{CacheDirectoryHelper.IsolatedCacheDirectoryPrefix}{o.InitCounter.Count}", folder);
     }
+#else
+    [Fact]
+    public void GetIsolatedFolderName_MissingDsn__ReturnsNull()
+    {
+        var o = new SentryOptions { CacheDirectoryPath = "c:\\cache", Dsn = null };
+        var folder= o.GetIsolatedFolderName();
+        Assert.Null(folder);
+    }
+#endif
 
     [Theory]
     [InlineData(5, null)]
     [InlineData(5, 7)]
-    public void TryGetIsolatedCacheDirectoryPath_UniqueForDsnInitCountAndProcessIdUnlessMobile(int initCount, int? processId)
+    public void GetIsolatedFolderName_UniqueForDsnInitCountAndProcessId(int initCount, int? processId)
     {
         // Arrange
         var initCounter = Substitute.For<IInitCounter>();
@@ -707,14 +718,14 @@ public partial class SentryOptionsTests
         };
 
         // Act
-        var path = o.TryGetIsolatedCacheDirectoryPath();
+        var path = o.GetIsolatedFolderName();
 
         // Assert
 #if IOS || ANDROID
-        var expectedFolder = "Sentry";
+        var expectedFolder = $"{CacheDirectoryHelper.IsolatedCacheDirectoryPrefix}{initCount}";
 #else
-        var expectedFolder = $"{ValidDsn.GetHashString()}_{processId ?? 0}_{initCount}";
+        var expectedFolder = $"{CacheDirectoryHelper.IsolatedCacheDirectoryPrefix}{ValidDsn.GetHashString()}_{processId ?? 0}_{initCount}";
 #endif
-        path.Should().EndWith(expectedFolder);
+        path.Should().Be(expectedFolder);
     }
 }
