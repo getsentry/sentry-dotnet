@@ -696,7 +696,7 @@ public partial class SentryOptionsTests
     public void GetIsolatedFolderName_MissingDsn__ReturnsNull()
     {
         var o = new SentryOptions { CacheDirectoryPath = "c:\\cache", Dsn = null };
-        var folder= o.GetIsolatedFolderName();
+        var folder = o.GetIsolatedFolderName();
         Assert.Null(folder);
     }
 #endif
