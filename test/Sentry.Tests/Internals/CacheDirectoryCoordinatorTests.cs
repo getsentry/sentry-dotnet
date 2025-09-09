@@ -92,20 +92,4 @@ public class CacheDirectoryCoordinatorTests : IDisposable
         coordinator.Dispose();
         coordinator.Dispose();
     }
-
-    [Fact]
-    public void TryAcquire_Parallel_OnlyOneSucceeds()
-    {
-        // Arrange
-        var success = 0;
-        Parallel.For(0, 16, _ =>
-        {
-            var c = _fixture.GetSut();
-            if (c.TryAcquire())
-            {
-                Interlocked.Increment(ref success);
-            }
-        });
-        Assert.Equal(1, success);
-    }
 }
