@@ -1621,15 +1621,20 @@ public partial class SentryClientTests
     [Fact]
     public void Ctor_WrapsCustomTransportWhenCachePathOnOptions()
     {
+        // Arrange
         _fixture.SentryOptions.Dsn = ValidDsn;
         _fixture.SentryOptions.Transport = new FakeTransport();
         using var cacheDirectory = new TempDirectory();
         _fixture.SentryOptions.CacheDirectoryPath = cacheDirectory.Path;
 
+        // Act
         using var sut = new SentryClient(_fixture.SentryOptions);
 
+        // Assert
         var cachingTransport = Assert.IsType<CachingTransport>(_fixture.SentryOptions.Transport);
         _ = Assert.IsType<FakeTransport>(cachingTransport.InnerTransport);
+
+        cachingTransport.Dispose(); // Release cache lock so that the cacheDirectory can be removed
     }
 
     [Fact]
