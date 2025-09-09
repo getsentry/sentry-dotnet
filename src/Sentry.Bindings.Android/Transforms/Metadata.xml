@@ -85,6 +85,9 @@
     </method>
   </add-node>
 
+  <!-- Fix missing Integration interface -->
+  <attr path="/api/package[@name='io.sentry']/interface[@name='Integration']/method[@name='register']/parameter[@type='io.sentry.IScopes']" name="type">java.lang.Object</attr>
+
   <!--
     TODO: If we need this, figure out how to multi-target or late bind.
     This API uses FrameMetrics, which requires Android >= 24.0.  We currently target Android >= 21.0 which is the minimum supported by MAUI.

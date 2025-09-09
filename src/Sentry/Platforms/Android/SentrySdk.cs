@@ -155,6 +155,15 @@ public static partial class SentrySdk
 
             // Don't capture managed exceptions in the native SDK, since we already capture them in the managed SDK
             o.AddIgnoredExceptionForType(JavaClass.ForName("android.runtime.JavaProxyThrowable"));
+
+            var looper = AndroidLooper.MyLooper() ?? AndroidLooper.MainLooper;
+            var handler = new AndroidHandler(looper!);
+
+            var logger = new AndroidDiagnosticLogger(options.DiagnosticLogger);
+            var buildInfoProvider = new JavaSdk.Android.Core.BuildInfoProvider(logger);
+
+            o.AddIntegration(new NetworkBreadcrumbsIntegration(AppContext, buildInfoProvider).JavaCast<JavaSdk.IIntegration>());
+            o.AddIntegration(new SystemEventsBreadcrumbsIntegration(AppContext).JavaCast<JavaSdk.IIntegration>());
         });
 
         // Now initialize the Android SDK (with a logger only if we're debugging)
