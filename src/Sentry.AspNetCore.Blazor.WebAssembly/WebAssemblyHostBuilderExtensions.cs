@@ -45,9 +45,8 @@ public static class WebAssemblyHostBuilderExtensions
         }
 
         options.SetupLogging();
-        options.LogDebug("Profiling is Enabled in a Blazor WebAssembly application. " +
-                         "Profiling integration has been removed from this project. " +
-                         "Currently, profiling is not supported in Blazor WebAssembly applications. " +
+        options.LogDebug("Detected Sentry profiling initialization in Blazor WebAssembly." +
+                         "Sentry does not support Blazor WebAssembly profiling. Removing profiling integration." +
                          "Check https://github.com/getsentry/sentry-dotnet/issues/4506 for more information.");
         // Ensure project doesn't have Profiling Integration
         options.RemoveIntegration<ProfilingIntegration>();
