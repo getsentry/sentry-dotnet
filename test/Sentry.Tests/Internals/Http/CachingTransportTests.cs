@@ -632,4 +632,117 @@ public class CachingTransportTests : IDisposable
         var contents = _options.FileSystem.ReadAllTextFromFile(filePath);
         Assert.DoesNotContain("sent_at", contents);
     }
+
+    [Fact]
+    public async Task SalvageAbandonedCacheSessions_MovesEnvelopesFromOtherIsolatedDirectories()
+    {
+        // Arrange
+        using var innerTransport = new FakeTransport();
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
+
+        var currentIsolated = _options.TryGetIsolatedCacheDirectoryPath()!; // already validated during creation
+        var baseCacheDir = Directory.GetParent(currentIsolated)!.FullName;
+
+        // Create two abandoned isolated cache directories with envelope files (including in nested folder)
+        string CreateAbandonedDir(int index)
+        {
+            var abandoned = Path.Combine(baseCacheDir, $"isolated_abandoned_{index}");
+            _options.FileSystem.CreateDirectory(abandoned);
+            var nested = Path.Combine(abandoned, "nested");
+            _options.FileSystem.CreateDirectory(nested);
+
+            // root file
+            var rootFile = Path.Combine(abandoned, $"root_{index}.envelope");
+            if (_options.FileSystem.CreateFileForWriting(rootFile, out var s1))
+            {
+                s1.Dispose();
+            }
+            // nested file
+            var nestedFile = Path.Combine(nested, $"nested_{index}.envelope");
+            if (_options.FileSystem.CreateFileForWriting(nestedFile, out var s2))
+            {
+                s2.Dispose();
+            }
+            return abandoned;
+        }
+
+        CreateAbandonedDir(1);
+        CreateAbandonedDir(2);
+
+        // Act
+        transport.SalvageAbandonedCacheSessions(CancellationToken.None);
+
+        // Assert: All *.envelope files from abandoned dirs should now reside in the current isolated cache directory root
+        var movedFiles = _options.FileSystem
+            .EnumerateFiles(currentIsolated, "*.envelope", SearchOption.TopDirectoryOnly)
+            .Select(Path.GetFileName)
+            .ToArray();
+
+        movedFiles.Should().Contain(new[] { "root_1.envelope", "nested_1.envelope", "root_2.envelope", "nested_2.envelope" });
+
+        // Ensure abandoned directories no longer contain those files
+        var abandonedResidual = _options.FileSystem
+            .EnumerateFiles(baseCacheDir, "*.envelope", SearchOption.AllDirectories)
+            .Where(p => !p.StartsWith(currentIsolated, StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        abandonedResidual.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task SalvageAbandonedCacheSessions_IgnoresCurrentDirectory()
+    {
+        // Arrange
+        using var innerTransport = new FakeTransport();
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
+        var currentIsolated = _options.TryGetIsolatedCacheDirectoryPath()!;
+
+        var currentFile = Path.Combine(currentIsolated, "current.envelope");
+        if (_options.FileSystem.CreateFileForWriting(currentFile, out var stream))
+        {
+            stream.Dispose();
+        }
+        _options.FileSystem.FileExists(currentFile).Should().BeTrue();
+
+        // Act
+        transport.SalvageAbandonedCacheSessions(CancellationToken.None);
+
+        // Assert: File created in current directory should remain untouched
+        _options.FileSystem.FileExists(currentFile).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task SalvageAbandonedCacheSessions_SkipsDirectoriesWithActiveLock()
+    {
+        // Arrange
+        using var innerTransport = new FakeTransport();
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
+
+        var currentIsolated = _options.TryGetIsolatedCacheDirectoryPath()!;
+        var baseCacheDir = Directory.GetParent(currentIsolated)!.FullName;
+
+        // Create an abandoned directory that matches the search pattern and acquire its lock
+        var lockedDir = Path.Combine(baseCacheDir, "isolated_locked");
+        _options.FileSystem.CreateDirectory(lockedDir);
+        var lockedEnvelope = Path.Combine(lockedDir, "locked.envelope");
+        if (_options.FileSystem.CreateFileForWriting(lockedEnvelope, out var stream))
+        {
+            stream.Dispose();
+        }
+        // Acquire the lock so salvage can't take it
+        using (var coordinator = new CacheDirectoryCoordinator(lockedDir, _options.DiagnosticLogger, _options.FileSystem))
+        {
+            var acquired = coordinator.TryAcquire();
+            acquired.Should().BeTrue("test must hold the lock to validate skip behavior");
+
+            // Act
+            transport.SalvageAbandonedCacheSessions(CancellationToken.None);
+
+            // Assert: File should still be in locked abandoned directory and not in current directory
+            _options.FileSystem.FileExists(lockedEnvelope).Should().BeTrue();
+            var moved = _options.FileSystem
+                .EnumerateFiles(currentIsolated, "locked.envelope", SearchOption.TopDirectoryOnly)
+                .Any();
+            moved.Should().BeFalse();
+        }
+    }
 }

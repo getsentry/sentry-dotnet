@@ -187,7 +187,7 @@ internal class CachingTransport : ITransport, IDisposable
         _options.LogDebug("CachingTransport worker stopped.");
     }
 
-    private void SalvageAbandonedCacheSessions(CancellationToken cancellationToken)
+    internal void SalvageAbandonedCacheSessions(CancellationToken cancellationToken)
     {
         if (_options.GetBaseCacheDirectoryPath() is not { } baseCacheDir)
         {
