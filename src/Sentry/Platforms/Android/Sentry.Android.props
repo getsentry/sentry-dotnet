@@ -9,6 +9,8 @@
     <Using Include="Android.Runtime" />
     <Using Include="Android.Content.Context" Alias="AndroidContext" />
     <Using Include="Android.OS.Build" Alias="AndroidBuild" />
+    <Using Include="Android.OS.Looper" Alias="AndroidLooper" />
+    <Using Include="Android.OS.Handler" Alias="AndroidHandler" />
     <Using Include="Java.Lang.Boolean" Alias="JavaBoolean" />
     <Using Include="Java.Lang.Class" Alias="JavaClass" />
     <Using Include="Java.Lang.Double" Alias="JavaDouble" />
