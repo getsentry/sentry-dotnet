@@ -685,7 +685,7 @@ public partial class SentryOptionsTests
 
 #if IOS || ANDROID
     [Fact]
-    public void GetIsolatedFolderName_MissingDsn_UniquewForInitcount()
+    public void GetIsolatedFolderName_MissingDsn_UniqueForInitcount()
     {
         var o = new SentryOptions { CacheDirectoryPath = "c:\\cache", Dsn = null };
         var folder =o.GetIsolatedFolderName();
