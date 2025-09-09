@@ -85,8 +85,8 @@
     </method>
   </add-node>
 
-  <!-- Fix missing Integration interface -->
-  <attr path="/api/package[@name='io.sentry']/interface[@name='Integration']/method[@name='register']/parameter[@type='io.sentry.IScopes']" name="type">java.lang.Object</attr>
+  <!-- Remove problematic deprecated methods in the IScopes interface -->
+  <remove-node path="/api/package[@name='io.sentry']/interface[@name='IScopes']/method[@deprecated]" />
 
   <!--
     TODO: If we need this, figure out how to multi-target or late bind.
