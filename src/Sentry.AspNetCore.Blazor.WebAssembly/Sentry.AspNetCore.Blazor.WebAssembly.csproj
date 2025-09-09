@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
+    <ProjectReference Include="..\Sentry.Profiling\Sentry.Profiling.csproj" />
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
   </ItemGroup>
 

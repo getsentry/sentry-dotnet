@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Sentry;
+using Sentry.Extensibility;
 using Sentry.Extensions.Logging;
+using Sentry.Profiling;
 
 // ReSharper disable once CheckNamespace - Discoverability
 namespace Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -28,9 +30,27 @@ public static class WebAssemblyHostBuilderExtensions
             blazorOptions.RequestBodyCompressionLevel = CompressionLevel.NoCompression;
             // Since the WebAssemblyHost is a client-side application
             blazorOptions.IsGlobalModeEnabled = true;
+            // If profiling enabled, disable it.
+            RemoveBlazorProfilingIntegration(blazorOptions);
         });
 
         return builder;
+    }
+
+    private static void RemoveBlazorProfilingIntegration(SentryBlazorOptions options)
+    {
+        if (!options.IsProfilingEnabled)
+        {
+            return;
+        }
+
+        options.SetupLogging();
+        options.LogDebug("Profiling is Enabled in a Blazor WebAssembly application. " +
+                         "Profiling integration has been removed from this project. " +
+                         "Currently, profiling is not supported in Blazor WebAssembly applications. " +
+                         "Check https://github.com/getsentry/sentry-dotnet/issues/4506 for more information.");
+        // Ensure project doesn't have Profiling Integration
+        options.RemoveIntegration<ProfilingIntegration>();
     }
 }
 
