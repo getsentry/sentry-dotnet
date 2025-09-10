@@ -7,14 +7,14 @@ internal sealed partial class SentrySink
 {
     private void CaptureStructuredLog(IHub hub, LogEvent logEvent, string formatted, string? template)
     {
-        var traceHeader = hub.GetTraceHeader() ?? SentryTraceHeader.Empty;
+        GetTraceIdAndSpanId(hub, out var traceId, out var spanId);
         GetStructuredLoggingParametersAndAttributes(logEvent, out var parameters, out var attributes);
 
-        SentryLog log = new(logEvent.Timestamp, traceHeader.TraceId, logEvent.Level.ToSentryLogLevel(), formatted)
+        SentryLog log = new(logEvent.Timestamp, traceId, logEvent.Level.ToSentryLogLevel(), formatted)
         {
             Template = template,
             Parameters = parameters,
-            ParentSpanId = traceHeader.SpanId,
+            ParentSpanId = spanId,
         };
 
         log.SetDefaultAttributes(_options, Sdk);
@@ -25,6 +25,28 @@ internal sealed partial class SentrySink
         }
 
         hub.Logger.CaptureLog(log);
+    }
+
+    private static void GetTraceIdAndSpanId(IHub hub, out SentryId traceId, out SpanId? spanId)
+    {
+        var span = hub.GetSpan();
+        if (span is not null)
+        {
+            traceId = span.TraceId;
+            spanId = span.SpanId;
+            return;
+        }
+
+        var scope = hub.GetScope();
+        if (scope is not null)
+        {
+            traceId = scope.PropagationContext.TraceId;
+            spanId = scope.PropagationContext.SpanId;
+            return;
+        }
+
+        traceId = SentryId.Empty;
+        spanId = null;
     }
 
     private static void GetStructuredLoggingParametersAndAttributes(LogEvent logEvent, out ImmutableArray<KeyValuePair<string, object>> parameters, out List<KeyValuePair<string, object>> attributes)

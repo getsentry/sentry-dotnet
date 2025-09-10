@@ -43,9 +43,9 @@ public partial class SentrySinkTests
     }
 
     [Theory]
-    [InlineData(false)]
     [InlineData(true)]
-    public void Emit_StructuredLogging_LogEvent(bool withTraceHeader)
+    [InlineData(false)]
+    public void Emit_StructuredLogging_LogEvent(bool withActiveSpan)
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
@@ -53,8 +53,17 @@ public partial class SentrySinkTests
         _fixture.Options.Environment = "test-environment";
         _fixture.Options.Release = "test-release";
 
-        var traceHeader = new SentryTraceHeader(SentryId.Create(), SpanId.Create(), null);
-        _fixture.Hub.GetTraceHeader().Returns(withTraceHeader ? traceHeader : null);
+        if (withActiveSpan)
+        {
+            var span = Substitute.For<ISpan>();
+            span.TraceId.Returns(SentryId.Create());
+            span.SpanId.Returns(SpanId.Create());
+            _fixture.Hub.GetSpan().Returns(span);
+        }
+        else
+        {
+            _fixture.Hub.GetSpan().Returns((ISpan?)null);
+        }
 
         var sut = _fixture.GetSut();
         var logger = new LoggerConfiguration()
@@ -72,7 +81,7 @@ public partial class SentrySinkTests
 
         var log = capturer.Logs.Should().ContainSingle().Which;
         log.Timestamp.Should().BeOnOrBefore(DateTimeOffset.Now);
-        log.TraceId.Should().Be(withTraceHeader ? traceHeader.TraceId : SentryId.Empty);
+        log.TraceId.Should().Be(withActiveSpan ? _fixture.Hub.GetSpan()!.TraceId : _fixture.Scope.PropagationContext.TraceId);
         log.Level.Should().Be(SentryLogLevel.Info);
         log.Message.Should().Be("""Message with Scalar property 42, Sequence property: [41, 42, 43], Dictionary property: [("key": "value")], and Structure property: [42, "42"].""");
         log.Template.Should().Be("Message with Scalar property {Scalar}, Sequence property: {Sequence}, Dictionary property: {Dictionary}, and Structure property: {Structure}.");
@@ -81,7 +90,7 @@ public partial class SentrySinkTests
         log.Parameters[1].Should().BeEquivalentTo(new KeyValuePair<string, string>("Sequence", "[41, 42, 43]"));
         log.Parameters[2].Should().BeEquivalentTo(new KeyValuePair<string, string>("Dictionary", """[("key": "value")]"""));
         log.Parameters[3].Should().BeEquivalentTo(new KeyValuePair<string, string>("Structure", """[42, "42"]"""));
-        log.ParentSpanId.Should().Be(withTraceHeader ? traceHeader.SpanId : SpanId.Empty);
+        log.ParentSpanId.Should().Be(withActiveSpan ? _fixture.Hub.GetSpan()!.SpanId : _fixture.Scope.PropagationContext.SpanId);
 
         log.TryGetAttribute("sentry.environment", out object? environment).Should().BeTrue();
         environment.Should().Be("test-environment");
