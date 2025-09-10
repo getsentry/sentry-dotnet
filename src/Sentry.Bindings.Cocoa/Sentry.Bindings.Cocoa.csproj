@@ -75,7 +75,7 @@
     <!-- Make a copy of the header files before we butcher these to suite objective sharpie -->
     <MakeDir Directories="$(SentryCocoaFrameworkHeaders)" />
     <ItemGroup>
-      <FilesToCopy Include="$(SentryCocoaFramework)\ios-arm64_arm64e\Sentry.framework\**\*" />
+      <FilesToCopy Include="$(SentryCocoaFramework)\ios-arm64\Sentry.framework\**\*" />
     </ItemGroup>
     <Copy SourceFiles="@(FilesToCopy)"
           DestinationFolder="$(SentryCocoaFrameworkHeaders)%(RecursiveDir)"
