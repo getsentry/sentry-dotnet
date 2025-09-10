@@ -22,6 +22,28 @@ public partial class SentrySinkTests
     }
 
     [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Emit_StructuredLogging_UseHubOptionsOverSinkOptions(bool isEnabled)
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.Experimental.EnableLogs = true;
+
+        if (!isEnabled)
+        {
+            SentryClientExtensions.SentryOptionsForTestingOnly = null;
+        }
+
+        var sut = _fixture.GetSut();
+        var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();
+
+        logger.Write(LogEventLevel.Information, "Message");
+
+        capturer.Logs.Should().HaveCount(isEnabled ? 1 : 0);
+    }
+
+    [Theory]
     [InlineData(LogEventLevel.Verbose, SentryLogLevel.Trace)]
     [InlineData(LogEventLevel.Debug, SentryLogLevel.Debug)]
     [InlineData(LogEventLevel.Information, SentryLogLevel.Info)]

@@ -80,9 +80,11 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
 
     private bool IsEnabled(LogEvent logEvent)
     {
+        var options = _hubAccessor()?.GetSentryOptions();
+
         return logEvent.Level >= _options.MinimumEventLevel
             || logEvent.Level >= _options.MinimumBreadcrumbLevel
-            || _options.Experimental.EnableLogs;
+            || options?.Experimental.EnableLogs is true;
     }
 
     private void InnerEmit(LogEvent logEvent)
@@ -163,9 +165,10 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
                 level: logEvent.Level.ToBreadcrumbLevel());
         }
 
-        if (_options.Experimental.EnableLogs)
+        var options = hub.GetSentryOptions();
+        if (options?.Experimental.EnableLogs is true)
         {
-            CaptureStructuredLog(hub, logEvent, formatted, template);
+            CaptureStructuredLog(hub, options, logEvent, formatted, template);
         }
     }
 

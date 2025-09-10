@@ -15,6 +15,7 @@ public partial class SentrySinkTests
             Hub.IsEnabled.Returns(true);
             HubAccessor = () => Hub;
             Hub.SubstituteConfigureScope(Scope);
+            SentryClientExtensions.SentryOptionsForTestingOnly = Options;
         }
 
         public SentrySink GetSut()
