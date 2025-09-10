@@ -168,9 +168,6 @@ public static partial class SentrySdk
             SentryAndroid.Init(AppContext, configuration);
         }
 
-        // Don't capture Java Runtime exceptions in the managed SDK, since we already capture them in the native SDK
-        options.AddExceptionFilterForType<Java.Lang.RuntimeException>();
-
         // Set options for the managed SDK that depend on the Android SDK. (The user will not be able to modify these.)
         options.AddEventProcessor(new AndroidEventProcessor(nativeOptions!));
         if (options.Android.LogCatIntegration != LogCatIntegrationType.None)
@@ -180,6 +177,8 @@ public static partial class SentrySdk
         options.CrashedLastRun = () => JavaSdk.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
         options.EnableScopeSync = true;
         options.ScopeObserver = new AndroidScopeObserver(options);
+        // Don't capture Java Runtime exceptions in the managed SDK, since we already capture them in the native SDK
+        options.AddExceptionFilterForType<Java.Lang.RuntimeException>();
 
         // TODO: Pause/Resume
     }
