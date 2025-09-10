@@ -147,7 +147,6 @@ public static class SentrySinkExtensions
     /// <param name="minimumBreadcrumbLevel">Minimum log level to record a breadcrumb. <seealso cref="SentrySerilogOptions.MinimumBreadcrumbLevel"/></param>
     /// <param name="formatProvider">The Serilog format provider. <seealso cref="IFormatProvider"/></param>
     /// <param name="textFormatter">The Serilog text formatter. <seealso cref="ITextFormatter"/></param>
-    /// <param name="experimentalEnableLogs">Whether to send structured logs. <seealso cref="SentryOptions.SentryExperimentalOptions.EnableLogs"/></param>
     /// <returns><see cref="LoggerConfiguration"/></returns>
     /// <example>This sample shows how each item may be set from within a configuration file:
     /// <code>
@@ -162,8 +161,7 @@ public static class SentrySinkExtensions
     ///                 "Args": {
     ///                     "minimumEventLevel": "Error",
     ///                     "minimumBreadcrumbLevel": "Verbose",
-    ///                     "outputTemplate": "{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}",
-    ///                     "experimentalEnableLogs": true
+    ///                     "outputTemplate": "{Timestamp:o} [{Level:u3}] ({Application}/{MachineName}/{ThreadId}) {Message}{NewLine}{Exception}"
     ///                 }
     ///             }
     ///         ]
@@ -176,8 +174,7 @@ public static class SentrySinkExtensions
         LogEventLevel? minimumEventLevel = null,
         LogEventLevel? minimumBreadcrumbLevel = null,
         IFormatProvider? formatProvider = null,
-        ITextFormatter? textFormatter = null,
-        bool? experimentalEnableLogs = null
+        ITextFormatter? textFormatter = null
         )
     {
         return loggerConfiguration.Sentry(o => ConfigureSentrySerilogOptions(o,
@@ -185,8 +182,7 @@ public static class SentrySinkExtensions
             minimumEventLevel,
             minimumBreadcrumbLevel,
             formatProvider,
-            textFormatter,
-            experimentalEnableLogs: experimentalEnableLogs));
+            textFormatter));
     }
 
     internal static void ConfigureSentrySerilogOptions(
