@@ -364,14 +364,6 @@ public static class SentrySinkExtensions
             sdkDisposable = SentrySdk.Init(options);
         }
 
-        if (options.Experimental.EnableLogs)
-        {
-            return loggerConfiguration.Sink(new SentrySink(options, sdkDisposable));
-        }
-        else
-        {
-            var minimumOverall = (LogEventLevel)Math.Min((int)options.MinimumBreadcrumbLevel, (int)options.MinimumEventLevel);
-            return loggerConfiguration.Sink(new SentrySink(options, sdkDisposable), minimumOverall);
-        }
+        return loggerConfiguration.Sink(new SentrySink(options, sdkDisposable));
     }
 }

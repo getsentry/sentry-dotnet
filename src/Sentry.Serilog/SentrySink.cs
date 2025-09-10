@@ -56,6 +56,11 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
 
     public void Emit(LogEvent logEvent)
     {
+        if (!IsEnabled(logEvent))
+        {
+            return;
+        }
+
         if (isReentrant.Value)
         {
             _options.DiagnosticLogger?.LogError($"Reentrant log event detected. Logging when inside the scope of another log event can cause a StackOverflowException. LogEventInfo.Message: {logEvent.MessageTemplate.Text}");
@@ -71,6 +76,13 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
         {
             isReentrant.Value = false;
         }
+    }
+
+    private bool IsEnabled(LogEvent logEvent)
+    {
+        return logEvent.Level >= _options.MinimumEventLevel
+            || logEvent.Level >= _options.MinimumBreadcrumbLevel
+            || _options.Experimental.EnableLogs;
     }
 
     private void InnerEmit(LogEvent logEvent)
