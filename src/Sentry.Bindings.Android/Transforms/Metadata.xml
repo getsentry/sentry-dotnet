@@ -138,6 +138,7 @@
   <remove-node path="/api/package[@name='io.sentry.android.core.cache']/class[@name='AndroidEnvelopeCache']" />
   <remove-node path="/api/package[@name='io.sentry.android.core.internal.gestures']" />
   <remove-node path="/api/package[@name='io.sentry.android.core.performance']" />
+  <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='SentryUserFeedbackDialog.Builder']" />
 
   <remove-node path="/api/package[starts-with(@name,'io.sentry')]/*/method[@name='clone' and count(parameter)=0]" />
   <remove-node path="/api/package[starts-with(@name,'io.sentry')]/class/implements[@name='io.sentry.JsonDeserializer']" />
