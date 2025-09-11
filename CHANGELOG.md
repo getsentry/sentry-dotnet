@@ -1,11 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add (experimental) _Structured Logs_ integration for `Serilog` ([#4462](https://github.com/getsentry/sentry-dotnet/pull/4462))
+
 ## 5.15.0
 
 ### Features
 
 - Experimental _Structured Logs_:
-  - Add integration for `Serilog` ([#4462](https://github.com/getsentry/sentry-dotnet/pull/4462))
   - Redesign SDK Logger APIs to allow usage of `params` ([#4451](https://github.com/getsentry/sentry-dotnet/pull/4451))
   - Shorten the `key` names of `Microsoft.Extensions.Logging` attributes ([#4450](https://github.com/getsentry/sentry-dotnet/pull/4450))
 
