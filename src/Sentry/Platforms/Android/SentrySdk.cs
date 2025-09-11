@@ -177,6 +177,8 @@ public static partial class SentrySdk
         options.CrashedLastRun = () => JavaSdk.Sentry.IsCrashedLastRun()?.BooleanValue() is true;
         options.EnableScopeSync = true;
         options.ScopeObserver = new AndroidScopeObserver(options);
+        // Don't capture Java Runtime exceptions in the managed SDK, since we already capture them in the native SDK
+        options.AddExceptionFilterForType<Java.Lang.RuntimeException>();
 
         // TODO: Pause/Resume
     }

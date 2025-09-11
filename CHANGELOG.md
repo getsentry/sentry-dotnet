@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 5.15.0
 
 ### Features
 
@@ -17,6 +17,8 @@
   - `InvalidOperationException` potentially thrown during a race condition, especially in concurrent high-volume logging scenarios ([#4428](https://github.com/getsentry/sentry-dotnet/pull/4428))
 - Blocking calls are no longer treated as unhandled crashes ([#4458](https://github.com/getsentry/sentry-dotnet/pull/4458))
 - Only apply Session Replay masks to specific control types when necessary to avoid performance issues in MAUI apps with complex UIs ([#4445](https://github.com/getsentry/sentry-dotnet/pull/4445))
+- De-duplicate Java.Lang.RuntimeException on Android ([#4509](https://github.com/getsentry/sentry-dotnet/pull/4509))
+- Upload linked PDB to fix symbolication for Mac Catalyst ([#4503](https://github.com/getsentry/sentry-dotnet/pull/4503))
 
 ### Dependencies
 
@@ -29,9 +31,9 @@
 - Bump CLI from v2.52.0 to v2.53.0 ([#4486](https://github.com/getsentry/sentry-dotnet/pull/4486))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2530)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.52.0...2.53.0)
-- Bump Java SDK from v8.6.0 to v8.21.0 ([#4496](https://github.com/getsentry/sentry-dotnet/pull/4496), [#4502](https://github.com/getsentry/sentry-dotnet/pull/4502))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8210)
-  - [diff](https://github.com/getsentry/sentry-java/compare/8.6.0...8.21.0)
+- Bump Java SDK from v8.6.0 to v8.21.1 ([#4496](https://github.com/getsentry/sentry-dotnet/pull/4496), [#4502](https://github.com/getsentry/sentry-dotnet/pull/4502), [#4508](https://github.com/getsentry/sentry-dotnet/pull/4508))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8211)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.6.0...8.21.1)
 
 ## 5.14.1
 
