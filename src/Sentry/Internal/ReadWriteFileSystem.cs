@@ -25,6 +25,26 @@ internal class ReadWriteFileSystem : FileSystemBase
         return true;
     }
 
+    /// <summary>
+    /// Tries to create or open a file for exclusive access.
+    /// </summary>
+    /// <remarks>
+    /// This method can throw all of the same exceptions that the <see cref="FileStream"/> constructor can throw. The
+    /// caller is responsible for handling those exceptions.
+    /// </remarks>
+    public override bool TryCreateLockFile(string path, out Stream fileStream)
+    {
+        // Note that FileShare.None is implemented via advisory locks only on macOS/Linux... so it will stop
+        // other .NET processes from accessing the file but not other non-.NET processes. This should be fine
+        // in our case - we just want to avoid multiple instances of the SDK concurrently accessing the cache
+        fileStream = new FileStream(
+            path,
+            FileMode.OpenOrCreate,
+            FileAccess.ReadWrite,
+            FileShare.None);
+        return true;
+    }
+
     public override bool WriteAllTextToFile(string path, string contents)
     {
         File.WriteAllText(path, contents);
