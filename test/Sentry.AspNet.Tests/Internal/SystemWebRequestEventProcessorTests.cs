@@ -78,6 +78,7 @@ public class SystemWebRequestEventProcessorTests :
         var evt = new SentryEvent();
         evt.User.IpAddress = userIp;
 
+        Context = HttpContextBuilder.Build();
         _fixture.SentryOptions.SendDefaultPii = true;
         var sut = _fixture.GetSut();
 
