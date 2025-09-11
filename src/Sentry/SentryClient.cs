@@ -307,7 +307,6 @@ public class SentryClient : ISentryClient, IDisposable
     /// <returns>A task to await for the flush operation.</returns>
     public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
-    // TODO: this method needs to be refactored, it's really hard to analyze nullability
     private SentryId DoSendEvent(SentryEvent @event, SentryHint? hint, Scope? scope)
     {
         var filteredExceptions = ApplyExceptionFilters(@event.Exception);
@@ -375,16 +374,18 @@ public class SentryClient : ISentryClient, IDisposable
 
         if (_options.SampleRate != null)
         {
-            if (!_randomValuesFactory.NextBool(_options.SampleRate.Value))
+            var downsampleFactor = _options.BackpressureMonitor.GetDownsampleFactor();
+            var sampleRate = _options.SampleRate.Value * downsampleFactor;
+            if (!_randomValuesFactory.NextBool(sampleRate))
             {
                 _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
-                _options.LogDebug("Event sampled.");
+                _options.LogDebug("Event sampled out.");
                 return SentryId.Empty;
             }
         }
         else
         {
-            _options.LogDebug("Event not sampled.");
+            _options.LogDebug("Event sampled in.");
         }
 
         if (!_options.SendDefaultPii)

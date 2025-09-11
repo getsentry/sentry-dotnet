@@ -24,7 +24,7 @@ public abstract class HttpTransportBase
     // Using string instead of SentryId here so that we can use Interlocked.Exchange(...).
     private string? _lastDiscardedSessionInitId;
 
-    private string _typeName;
+    private readonly string _typeName;
 
     /// <summary>
     /// Constructor for this class.
@@ -256,6 +256,7 @@ public abstract class HttpTransportBase
         }
 
         var now = _clock.GetUtcNow();
+        _options.BackpressureMonitor?.RecordRateLimitHit(now);
 
         // Join to a string to handle both single-header and multi-header cases
         var rateLimitsEncoded = string.Join(",", rateLimitHeaderValues);
