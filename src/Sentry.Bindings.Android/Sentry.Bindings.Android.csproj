@@ -2,9 +2,10 @@
   <PropertyGroup>
     <TargetFrameworks>net8.0-android34.0;net9.0-android35.0</TargetFrameworks>
     <SentryAndroidSdkVersion>8.23.0</SentryAndroidSdkVersion>
+    <SentryLocalMavenRepo>$(HOME)/.m2/repository</SentryLocalMavenRepo>
     <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\$(TargetFramework)\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
     <!-- This gets resolved by the DownloadSentryAndroidSdk target -->
-    <SentryNativeNdkVersion></SentryNativeNdkVersion>
+    <SentryNativeNdkVersion>0.11.3</SentryNativeNdkVersion>
     <Description>.NET Bindings for the Sentry Android SDK</Description>
 
     <!-- Android binding warnings - these are largely unavoidable due to Java interface circular dependencies -->
@@ -67,15 +68,31 @@
     <PackageReference Include="Xamarin.Kotlin.StdLib.Jdk8" Version="2.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net8'))">
-    <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar" />
-    <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-core-$(SentryAndroidSdkVersion).aar" />
-    <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).aar" />
-    <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-android-replay-$(SentryAndroidSdkVersion).aar" />
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net8')) Or '$(SentryLocalMavenRepo)' != ''">
+    <AndroidLibrary
+      Include="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar"
+      Manifest="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).pom"
+      JavaArtifact="io.sentry:sentry:$(SentryAndroidSdkVersion)"
+    />
+    <AndroidLibrary
+      Include="$(SentryAndroidSdkDirectory)sentry-android-core-$(SentryAndroidSdkVersion).aar"
+      Manifest="$(SentryAndroidSdkDirectory)sentry-android-core-$(SentryAndroidSdkVersion).pom"
+      JavaArtifact="io.sentry:sentry-android-core:$(SentryAndroidSdkVersion)"
+    />
+    <AndroidLibrary
+      Include="$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).aar"
+      Manifest="$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).pom"
+      JavaArtifact="io.sentry:sentry-android-ndk:$(SentryAndroidSdkVersion)"
+    />
+    <AndroidLibrary
+      Include="$(SentryAndroidSdkDirectory)sentry-android-replay-$(SentryAndroidSdkVersion).aar"
+      Manifest="$(SentryAndroidSdkDirectory)sentry-android-replay-$(SentryAndroidSdkVersion).pom"
+      JavaArtifact="io.sentry:sentry-android-replay:$(SentryAndroidSdkVersion)"
+    />
   </ItemGroup>
 
   <!-- Starting with .NET 9 we can detect Java dependencies using POM files and AndroidMavenLibrary references -->
-  <ItemGroup Condition="!$(TargetFramework.StartsWith('net8'))">
+  <ItemGroup Condition="!$(TargetFramework.StartsWith('net8')) And '$(SentryLocalMavenRepo)' == ''">
     <AndroidLibrary
       Include="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).jar"
       Manifest="$(SentryAndroidSdkDirectory)sentry-$(SentryAndroidSdkVersion).pom"
@@ -94,7 +111,7 @@
     <AndroidNativeLibrary Include="..\..\lib\sentrysupplemental\bin\x86_64\libsentrysupplemental.so" Abi="x86_64" />
   </ItemGroup>
 
-  <Target Name="DownloadSentryAndroidSdk" BeforeTargets="CollectPackageReferences">
+  <Target Name="DownloadSentryAndroidSdk" BeforeTargets="CollectPackageReferences" Condition="'$(SentryLocalMavenRepo)' == ''">
     <DownloadFile
       SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-core/$(SentryAndroidSdkVersion)/sentry-android-core-$(SentryAndroidSdkVersion).aar"
       DestinationFolder="$(SentryAndroidSdkDirectory)"
@@ -153,6 +170,68 @@
     </ItemGroup>
     <ItemGroup Condition="'$(SentryNativeNdkVersion)' != '' And !$(TargetFramework.StartsWith('net8'))">
       <AndroidMavenLibrary Include="io.sentry:sentry-native-ndk" Version="$(SentryNativeNdkVersion)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="CopyLocalSentryAndroidSdk" BeforeTargets="CollectPackageReferences" Condition="'$(SentryLocalMavenRepo)' != ''">
+    <Copy
+      SourceFiles="$(SentryLocalMavenRepo)/io/sentry/sentry-android-core/$(SentryAndroidSdkVersion)/sentry-android-core-$(SentryAndroidSdkVersion).aar"
+      DestinationFolder="$(SentryAndroidSdkDirectory)"
+      SkipUnchangedFiles="true"
+    />
+    <Copy
+      SourceFiles="$(SentryLocalMavenRepo)/io/sentry/sentry-android-ndk/$(SentryAndroidSdkVersion)/sentry-android-ndk-$(SentryAndroidSdkVersion).aar"
+      DestinationFolder="$(SentryAndroidSdkDirectory)"
+      SkipUnchangedFiles="true"
+    />
+    <Copy
+      SourceFiles="$(SentryLocalMavenRepo)/io/sentry/sentry-android-replay/$(SentryAndroidSdkVersion)/sentry-android-replay-$(SentryAndroidSdkVersion).aar"
+      DestinationFolder="$(SentryAndroidSdkDirectory)"
+      SkipUnchangedFiles="true"
+    />
+    <Copy
+      SourceFiles="$(SentryLocalMavenRepo)/io/sentry/sentry/$(SentryAndroidSdkVersion)/sentry-$(SentryAndroidSdkVersion).jar"
+      DestinationFolder="$(SentryAndroidSdkDirectory)"
+      SkipUnchangedFiles="true"
+    />
+
+    <Copy
+      SourceFiles="$(SentryLocalMavenRepo)/io/sentry/sentry/$(SentryAndroidSdkVersion)/sentry-$(SentryAndroidSdkVersion).pom"
+      DestinationFolder="$(SentryAndroidSdkDirectory)"
+      SkipUnchangedFiles="true"
+    />
+    <Copy
+      SourceFiles="$(SentryLocalMavenRepo)/io/sentry/sentry-android-core/$(SentryAndroidSdkVersion)/sentry-android-core-$(SentryAndroidSdkVersion).pom"
+      DestinationFolder="$(SentryAndroidSdkDirectory)"
+      SkipUnchangedFiles="true"
+    />
+    <Copy
+      SourceFiles="$(SentryLocalMavenRepo)/io/sentry/sentry-android-ndk/$(SentryAndroidSdkVersion)/sentry-android-ndk-$(SentryAndroidSdkVersion).pom"
+      DestinationFolder="$(SentryAndroidSdkDirectory)"
+      SkipUnchangedFiles="true"
+    />
+    <Copy
+      SourceFiles="$(SentryLocalMavenRepo)/io/sentry/sentry-android-replay/$(SentryAndroidSdkVersion)/sentry-android-replay-$(SentryAndroidSdkVersion).pom"
+      DestinationFolder="$(SentryAndroidSdkDirectory)"
+      SkipUnchangedFiles="true"
+    />
+
+    <Copy
+      SourceFiles="$(SentryLocalMavenRepo)/io/sentry/sentry-native-ndk/$(SentryNativeNdkVersion)/sentry-native-ndk-$(SentryNativeNdkVersion).aar"
+      DestinationFolder="$(SentryAndroidSdkDirectory)"
+      SkipUnchangedFiles="true"
+    />
+    <Copy
+      SourceFiles="$(SentryLocalMavenRepo)/io/sentry/sentry-native-ndk/$(SentryNativeNdkVersion)/sentry-native-ndk-$(SentryNativeNdkVersion).pom"
+      DestinationFolder="$(SentryAndroidSdkDirectory)"
+      SkipUnchangedFiles="true"
+    />
+
+    <ItemGroup Condition="'$(SentryNativeNdkVersion)' != ''">
+      <AndroidLibrary Include="$(SentryAndroidSdkDirectory)sentry-native-ndk-$(SentryNativeNdkVersion).aar"
+        Manifest="$(SentryAndroidSdkDirectory)sentry-native-ndk-$(SentryNativeNdkVersion).pom"
+        JavaArtifact="io.sentry:sentry-native-ndk:$(SentryNativeNdkVersion)"
+      />
     </ItemGroup>
   </Target>
 
