@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- The SDK avoids redundant scope sync after transaction finish ([#4479](https://github.com/getsentry/sentry-dotnet/pull/4479))
+
 ## 5.15.0
 
 ### Features
