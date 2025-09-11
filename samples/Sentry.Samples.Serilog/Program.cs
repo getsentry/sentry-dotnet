@@ -25,6 +25,8 @@ internal static class Program
                 // Error and higher is sent as event (default is Error)
                 options.MinimumEventLevel = LogEventLevel.Error;
                 options.AttachStacktrace = true;
+                // send structured logs to Sentry
+                options.Experimental.EnableLogs = true;
                 // send PII like the username of the user logged in to the device
                 options.SendDefaultPii = true;
                 // Optional Serilog text formatter used to format LogEvent to string. If TextFormatter is set, FormatProvider is ignored.

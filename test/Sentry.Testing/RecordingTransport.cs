@@ -1,5 +1,7 @@
 using ISerializable = Sentry.Protocol.Envelopes.ISerializable;
 
+namespace Sentry.Testing;
+
 public class RecordingTransport : ITransport
 {
     private List<Envelope> _envelopes = new();

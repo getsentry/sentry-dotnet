@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add (experimental) _Structured Logs_ integration for `Serilog` ([#4462](https://github.com/getsentry/sentry-dotnet/pull/4462))
+
 ## 5.15.0
 
 ### Features
