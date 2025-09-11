@@ -12,10 +12,8 @@ namespace Sentry.CocoaSdk;
 [Native]
 internal enum SentryFeedbackSource : long
 {
-    Unknown = 0,
-    User = 1,
-    System = 2,
-    Other = 3
+    Widget = 0,
+    Custom = 1
 }
 
 [Native]
@@ -25,6 +23,17 @@ internal enum SentryLevel : ulong
     Debug = 1,
     Info = 2,
     Warning = 3,
+    Error = 4,
+    Fatal = 5
+}
+
+[Native]
+internal enum SentryStructuredLogLevel : long
+{
+    Trace = 0,
+    Debug = 1,
+    Info = 2,
+    Warn = 3,
     Error = 4,
     Fatal = 5
 }
