@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Do not overwrite user IP if it is set manually in ASP.NET sdk ([#4513](https://github.com/getsentry/sentry-dotnet/pull/4513))
+
 ## 5.15.0
 
 ### Features
