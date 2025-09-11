@@ -79,6 +79,8 @@ public class SystemWebRequestEventProcessorTests :
         evt.User.IpAddress = userIp;
 
         Context = HttpContextBuilder.Build();
+        // Ensure user is not null
+        Context.User = new GenericPrincipal(new GenericIdentity("TestUser"), null);
         _fixture.SentryOptions.SendDefaultPii = true;
         var sut = _fixture.GetSut();
 
