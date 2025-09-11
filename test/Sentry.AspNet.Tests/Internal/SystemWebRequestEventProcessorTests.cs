@@ -82,6 +82,6 @@ public class SystemWebRequestEventProcessorTests :
         var sut = _fixture.GetSut();
 
         var processedEvt = sut.Process(evt);
-        Assert.Same(processedEvt?.User.IpAddress, userIp);
+        Assert.Equal(userIp, processedEvt?.User.IpAddress);
     }
 }
