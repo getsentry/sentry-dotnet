@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- The SDK avoids redundant scope sync after transaction finish ([#4479](https://github.com/getsentry/sentry-dotnet/pull/4479))
+
 ## 5.15.0
 
 ### Features
@@ -15,7 +21,6 @@
   - Ensure all buffered logs are sent to Sentry when the application terminates unexpectedly ([#4425](https://github.com/getsentry/sentry-dotnet/pull/4425))
   - `InvalidOperationException` potentially thrown during a race condition, especially in concurrent high-volume logging scenarios ([#4428](https://github.com/getsentry/sentry-dotnet/pull/4428))
 - Blocking calls are no longer treated as unhandled crashes ([#4458](https://github.com/getsentry/sentry-dotnet/pull/4458))
-- The SDK avoids redundant scope sync after transaction finish ([#4479](https://github.com/getsentry/sentry-dotnet/pull/4479))
 - Only apply Session Replay masks to specific control types when necessary to avoid performance issues in MAUI apps with complex UIs ([#4445](https://github.com/getsentry/sentry-dotnet/pull/4445))
 - De-duplicate Java.Lang.RuntimeException on Android ([#4509](https://github.com/getsentry/sentry-dotnet/pull/4509))
 - Upload linked PDB to fix symbolication for Mac Catalyst ([#4503](https://github.com/getsentry/sentry-dotnet/pull/4503))
