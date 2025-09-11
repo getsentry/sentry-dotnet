@@ -70,4 +70,18 @@ public class SystemWebRequestEventProcessorTests :
         Assert.Same(expected, actual);
         Assert.Null(expected.Request.Data);
     }
+
+    [Fact]
+    public void Process_PresetUserIP_NotOverwritten()
+    {
+        const string userIp = "192.0.0.1";
+        var evt = new SentryEvent();
+        evt.User.IpAddress = userIp;
+
+        _fixture.SentryOptions.SendDefaultPii = true;
+        var sut = _fixture.GetSut();
+
+        var processedEvt = sut.Process(evt);
+        Assert.Same(processedEvt?.User.IpAddress, userIp);
+    }
 }

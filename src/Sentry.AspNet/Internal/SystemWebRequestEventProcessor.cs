@@ -73,7 +73,7 @@ internal class SystemWebRequestEventProcessor : ISentryEventProcessor
                 @event.User.Username = null;
             }
 
-            @event.User.IpAddress = context.Request.UserHostAddress;
+            @event.User.IpAddress ??= context.Request.UserHostAddress;
             if (context.User.Identity is { } identity)
             {
                 @event.User.Username = identity.Name;
