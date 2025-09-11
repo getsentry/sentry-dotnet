@@ -17,6 +17,7 @@
 - Blocking calls are no longer treated as unhandled crashes ([#4458](https://github.com/getsentry/sentry-dotnet/pull/4458))
 - Only apply Session Replay masks to specific control types when necessary to avoid performance issues in MAUI apps with complex UIs ([#4445](https://github.com/getsentry/sentry-dotnet/pull/4445))
 - De-duplicate Java.Lang.RuntimeException on Android ([#4509](https://github.com/getsentry/sentry-dotnet/pull/4509))
+- Upload linked PDB to fix symbolication for Mac Catalyst ([#4503](https://github.com/getsentry/sentry-dotnet/pull/4503))
 
 ### Dependencies
 
