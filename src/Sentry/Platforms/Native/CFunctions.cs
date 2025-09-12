@@ -10,6 +10,7 @@ namespace Sentry.Native;
 /// <see href="https://github.com/getsentry/sentry-native"/>
 internal static class C
 {
+#if !_SENTRY_BLAZOR_WASM
     internal static void SetValueIfNotNull(sentry_value_t obj, string key, string? value)
     {
         if (value is not null)
@@ -585,4 +586,5 @@ internal static class C
 
         return message;
     }
+#endif
 }
