@@ -1,5 +1,7 @@
 /*
  * Adapted from https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/tools/assembly-store-reader-mk2/AssemblyStore/StoreReader_V2.cs
+ * Updated from https://github.com/dotnet/android/blob/64018e13e53cec7246e54866b520d3284de344e0/tools/assembly-store-reader-mk2/AssemblyStore/StoreReader_V2.cs
+ *     - Adding support for AssemblyStore v3 format that shipped in .NET 10 (https://github.com/dotnet/android/pull/10249)
  * Original code licensed under the MIT License (https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/LICENSE.TXT)
  */
 
@@ -8,8 +10,13 @@ namespace Sentry.Android.AssemblyReader.V2;
 internal partial class StoreReaderV2 : AssemblyStoreReader
 {
     // Bit 31 is set for 64-bit platforms, cleared for the 32-bit ones
+#if NET9_0
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_64BIT = 0x80000002; // Must match the ASSEMBLY_STORE_FORMAT_VERSION native constant
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_32BIT = 0x00000002;
+#else
+    const uint ASSEMBLY_STORE_FORMAT_VERSION_64BIT = 0x80000003; // Must match the ASSEMBLY_STORE_FORMAT_VERSION native constant
+    const uint ASSEMBLY_STORE_FORMAT_VERSION_32BIT = 0x00000003;
+#endif
     private const uint ASSEMBLY_STORE_FORMAT_VERSION_MASK = 0xF0000000;
     private const uint ASSEMBLY_STORE_ABI_AARCH64 = 0x00010000;
     private const uint ASSEMBLY_STORE_ABI_ARM = 0x00020000;
@@ -178,7 +185,12 @@ internal partial class StoreReaderV2 : AssemblyStoreReader
             }
 
             uint descriptor_index = reader.ReadUInt32();
-            index.Add(new IndexEntry(name_hash, descriptor_index));
+#if NET10_0_OR_GREATER
+            bool ignore = reader.ReadByte () != 0;
+#else
+            bool ignore = false;
+#endif
+            index.Add(new IndexEntry(name_hash, descriptor_index, ignore));
         }
 
         var descriptors = new List<EntryDescriptor>();
@@ -218,7 +230,7 @@ internal partial class StoreReaderV2 : AssemblyStoreReader
         {
             if (!tempItems.TryGetValue(ie.descriptor_index, out TemporaryItem? item))
             {
-                item = new TemporaryItem(names[(int)ie.descriptor_index], descriptors[(int)ie.descriptor_index]);
+                item = new TemporaryItem(names[(int)ie.descriptor_index], descriptors[(int)ie.descriptor_index], ie.ignore);
                 tempItems.Add(ie.descriptor_index, item);
             }
             item.IndexEntries.Add(ie);
@@ -233,7 +245,7 @@ internal partial class StoreReaderV2 : AssemblyStoreReader
         foreach (var kvp in tempItems)
         {
             TemporaryItem ti = kvp.Value;
-            var item = new StoreItemV2(TargetArch, ti.Name, Is64Bit, ti.IndexEntries, ti.Descriptor);
+            var item = new StoreItemV2(TargetArch, ti.Name, Is64Bit, ti.IndexEntries, ti.Descriptor, ti.Ignored);
             storeItems.Add(item);
         }
         Assemblies = storeItems.AsReadOnly();
