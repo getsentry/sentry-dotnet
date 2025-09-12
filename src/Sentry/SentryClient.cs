@@ -15,6 +15,7 @@ namespace Sentry;
 /// <inheritdoc cref="IDisposable" />
 public class SentryClient : ISentryClient, IDisposable
 {
+    private readonly ITransport _transport;
     private readonly SentryOptions _options;
     private readonly ISessionManager _sessionManager;
     private readonly RandomValuesFactory _randomValuesFactory;
@@ -84,6 +85,16 @@ public class SentryClient : ISentryClient, IDisposable
     /// <inheritdoc />
     public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
     {
+
+        var processedFeedback = _options?.BeforeSendFeedbackInternal?.Invoke(feedback, hint);
+        if (processedFeedback is null)
+        {
+            _options?.DiagnosticLogger?.LogDebug("BeforeSendFeedback returned null, dropping feedback.");
+            return;
+        }
+
+        _transport.EnqueueFeedback(processedFeedback, hint);
+
         if (string.IsNullOrEmpty(feedback.Message))
         {
             _options.LogWarning("Feedback dropped due to empty message.");
