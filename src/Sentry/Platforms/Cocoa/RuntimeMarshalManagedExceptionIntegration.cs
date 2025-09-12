@@ -32,6 +32,11 @@ internal class RuntimeMarshalManagedExceptionIntegration : ISdkIntegration
 
         if (e.Exception is { } ex)
         {
+            // The Obj-C runtime is about to abort. Tag the upcoming duplicate native SIGABRT event for filtering it
+            // out in ProcessOnBeforeSend.
+            // TODO: define "_captured_by_sentry-dotnet" as a constant somewhere
+            SentryCocoaSdk.ConfigureScope(scope => scope.SetTagValue("SIGABRT", "_captured_by_sentry-dotnet"));
+
             ex.SetSentryMechanism(
                 "Runtime.MarshalManagedException",
                 "This exception was caught by the .NET Runtime Marshal Managed Exception global error handler. " +

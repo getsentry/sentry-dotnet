@@ -207,11 +207,12 @@ public partial class SentryOptions
         /// convenient.
         /// </para>
         /// <para>
+        /// TODO: Explain auto (null) vs. true vs. false.
         /// Enabling this may prevent the capture of SIGABRT originating from native (not managed) code... so it may
         /// prevent the capture of genuine native SIGABRT errors.
         /// </para>
         /// </summary>
-        public bool SuppressSignalAborts { get; set; } = false;
+        public bool? SuppressSignalAborts { get; set; } = null;
 
         /// <summary>
         /// <para>

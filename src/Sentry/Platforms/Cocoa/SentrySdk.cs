@@ -200,20 +200,23 @@ public static partial class SentrySdk
     /// </summary>
     internal static CocoaSdk.SentryEvent? ProcessOnBeforeSend(SentryOptions options, CocoaSdk.SentryEvent evt, IHub hub)
     {
-        if (hub is DisabledHub)
-        {
-            return evt;
-        }
-
         // When we have an unhandled managed exception, we send that to Sentry twice - once managed and once native.
         // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
         // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
 
         // There should only be one exception on the event in this case
-        if ((options.Native.SuppressSignalAborts || options.Native.SuppressExcBadAccess) && evt.Exceptions?.Length == 1)
+        if (evt.Exceptions?.Length == 1)
         {
             // It will match the following characteristics
             var ex = evt.Exceptions[0];
+
+            // TODO: define "_captured_by_sentry-dotnet" as a constant somewhere
+            if (options.Native.SuppressSignalAborts == null && ex.Type == evt.Tags?["_captured_by_sentry-dotnet"]?.ToString())
+            {
+                options.LogDebug("Discarded {0} error ({1}). Captured as managed exception instead.", ex.Type,
+                    ex.Value);
+                return null;
+            }
 
             // Thankfully, sometimes we can see Xamarin's unhandled exception handler on the stack trace, so we can filter
             // them out. Here is the function that calls abort(), which we will use as a filter:
@@ -237,6 +240,11 @@ public static partial class SentrySdk
                     ex.Value);
                 return null!;
             }
+        }
+
+        if (hub is DisabledHub)
+        {
+            return evt;
         }
 
         // We run our SIGABRT checks first before running managed processors.
