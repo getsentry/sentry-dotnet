@@ -9,6 +9,7 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
     private const string ExceptionDataKeyPrefix = "sentry:";
     internal const string ExceptionDataTagKey = ExceptionDataKeyPrefix + "tag:";
     internal const string ExceptionDataContextKey = ExceptionDataKeyPrefix + "context:";
+    internal const string ExceptionDataEventIdKey = ExceptionDataKeyPrefix + "event-id";
 
     private readonly SentryOptions _options;
     internal Func<ISentryStackTraceFactory> SentryStackTraceFactoryAccessor { get; }
@@ -120,6 +121,11 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
                          key.StartsWith(ExceptionDataContextKey, StringComparison.OrdinalIgnoreCase))
                 {
                     sentryEvent.Contexts[key[ExceptionDataContextKey.Length..]] = value;
+                    keysToRemove.Add(key);
+                }
+                else if (value is string eventId && key.Equals(ExceptionDataEventIdKey, StringComparison.OrdinalIgnoreCase))
+                {
+                    sentryEvent.EventId = SentryId.Parse(eventId);
                     keysToRemove.Add(key);
                 }
                 else if (key.StartsWith(ExceptionDataKeyPrefix, StringComparison.OrdinalIgnoreCase))

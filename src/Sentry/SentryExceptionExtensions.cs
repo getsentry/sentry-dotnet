@@ -1,3 +1,4 @@
+using Sentry;
 using Sentry.Internal;
 using Sentry.Protocol;
 
@@ -24,6 +25,14 @@ public static class SentryExceptionExtensions
     /// <param name="data">The context data.</param>
     public static void AddSentryContext(this Exception ex, string name, IReadOnlyDictionary<string, object> data)
         => ex.Data.Add($"{MainExceptionProcessor.ExceptionDataContextKey}{name}", data);
+
+    /// <summary>
+    /// Set event ID data that will be used for the event when the exception is captured.
+    /// </summary>
+    /// <param name="ex">The exception.</param>
+    /// <param name="id">The event ID.</param>
+    public static void SetSentryEventId(this Exception ex, SentryId id)
+        => ex.Data[MainExceptionProcessor.ExceptionDataEventIdKey] = id.ToString();
 
     /// <summary>
     /// Set mechanism information that will be included with the exception when it is captured.

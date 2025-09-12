@@ -7,6 +7,8 @@ namespace Sentry.Cocoa;
 /// <summary>
 /// When AOT Compiling iOS applications, the AppDomain UnhandledExceptionHandler doesn't fire. So instead we intercept
 /// the Runtime.RuntimeMarshalManagedException event.
+///
+/// https://learn.microsoft.com/en-us/dotnet/ios/advanced-concepts/exception-marshaling
 /// </summary>
 internal class RuntimeMarshalManagedExceptionIntegration : ISdkIntegration
 {
@@ -32,6 +34,12 @@ internal class RuntimeMarshalManagedExceptionIntegration : ISdkIntegration
 
         if (e.Exception is { } ex)
         {
+            // The Obj-C runtime is about to abort. Pre-generate an event ID for the managed exception and pass it down
+            // to the Cocoa SDK  to be used for the respective SIGABORT to prevent duplicate events for the same crash.
+            var eventId = SentryId.Create();
+            ex.SetSentryEventId(eventId);
+            SentrySdk.SetCrashEventId(eventId);
+
             ex.SetSentryMechanism(
                 "Runtime.MarshalManagedException",
                 "This exception was caught by the .NET Runtime Marshal Managed Exception global error handler. " +
