@@ -4,7 +4,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $RootPath = (Get-Item $PSScriptRoot).Parent.FullName
-$CocoaSdkPath = "$RootPath/modules/sentry-cocoa/Sentry.framework"
+$CocoaSdkPath = "$RootPath/modules/sentry-cocoa"
 $BindingsPath = "$RootPath/src/Sentry.Bindings.Cocoa"
 $BackupPath = "$BindingsPath/obj/_unpatched"
 
@@ -101,7 +101,7 @@ Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
 # ...instead of:
 #     `#import "SomeHeader.h"`
 # This causes sharpie to fail resolve those headers
-$filesToPatch = Get-ChildItem -Path "$CocoaSdkPath/Headers" -Filter *.h -Recurse | Select-Object -ExpandProperty FullName
+$filesToPatch = Get-ChildItem -Path "$CocoaSdkPath/Carthage/Headers" -Filter *.h -Recurse | Select-Object -ExpandProperty FullName
 foreach ($file in $filesToPatch)
 {
     if (Test-Path $file)
@@ -116,7 +116,7 @@ foreach ($file in $filesToPatch)
         Write-Host "File not found: $file"
     }
 }
-$privateHeaderFile = "$CocoaSdkPath/PrivateHeaders/PrivatesHeader.h"
+$privateHeaderFile = "$CocoaSdkPath/Carthage/Headers/PrivatesHeader.h"
 if (Test-Path $privateHeaderFile)
 {
     $content = Get-Content -Path $privateHeaderFile -Raw
@@ -133,9 +133,9 @@ else
 # Generate bindings
 Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk $iPhoneSdkVersion `
-    -scope "$CocoaSdkPath" `
-    "$CocoaSdkPath/Headers/Sentry.h" `
-    "$CocoaSdkPath/PrivateHeaders/PrivateSentrySDKOnly.h" `
+    -scope "$CocoaSdkPath/Carthage/Headers" `
+    "$CocoaSdkPath/Carthage/Headers/Sentry.h" `
+    "$CocoaSdkPath/Carthage/Headers/PrivateSentrySDKOnly.h" `
     -o $BindingsPath `
     -c -Wno-objc-property-no-attribute
 
