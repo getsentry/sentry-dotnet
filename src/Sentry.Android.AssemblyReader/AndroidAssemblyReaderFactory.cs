@@ -1,4 +1,3 @@
-using Sentry.Android.AssemblyReader.V1;
 using Sentry.Android.AssemblyReader.V2;
 
 namespace Sentry.Android.AssemblyReader;
@@ -19,28 +18,13 @@ public static class AndroidAssemblyReaderFactory
     {
         logger?.Invoke(DebugLoggerLevel.Debug, "Opening APK: {0}", apkPath);
 
-#if NET9_0
-        logger?.Invoke(DebugLoggerLevel.Debug, "Reading files using V2 APK layout.");
         if (AndroidAssemblyStoreReaderV2.TryReadStore(apkPath, supportedAbis, logger, out var readerV2))
         {
-            logger?.Invoke(DebugLoggerLevel.Debug, "APK uses AssemblyStore V2");
+            logger?.Invoke(DebugLoggerLevel.Debug, "APK uses AssemblyStore");
             return readerV2;
         }
 
         logger?.Invoke(DebugLoggerLevel.Debug, "APK doesn't use AssemblyStore");
         return new AndroidAssemblyDirectoryReaderV2(apkPath, supportedAbis, logger);
-#else
-        logger?.Invoke(DebugLoggerLevel.Debug, "Reading files using V1 APK layout.");
-
-        var zipArchive = ZipFile.OpenRead(apkPath);
-        if (zipArchive.GetEntry("assemblies/assemblies.manifest") is not null)
-        {
-            logger?.Invoke(DebugLoggerLevel.Debug, "APK uses AssemblyStore V1");
-            return new AndroidAssemblyStoreReaderV1(zipArchive, supportedAbis, logger);
-        }
-
-        logger?.Invoke(DebugLoggerLevel.Debug, "APK doesn't use AssemblyStore");
-        return new AndroidAssemblyDirectoryReaderV1(zipArchive, supportedAbis, logger);
-#endif
     }
 }
