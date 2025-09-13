@@ -41,7 +41,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DefineConstants Condition="'$(UsingMicrosoftNETSdkBlazorWebAssembly)'=='true'">$(DefineConstants);_SENTRY_BLAZOR_WASM</DefineConstants>
+    <DefineConstants Condition="'$(UsingSentryBlazorWebAssemblySdk)'=='true'">$(DefineConstants);_SENTRY_BLAZOR_WASM</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
