@@ -23,8 +23,6 @@
     <FrameworkSupportsNative Condition="'$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64'">true</FrameworkSupportsNative>
     <!-- net8.0 or greater -->
     <FrameworkSupportsNative Condition="'$(_SentryIsNet8OrGreater)' != 'true' or !('$(OutputType)' == 'Exe' or '$(OutputType)' == 'WinExe')">false</FrameworkSupportsNative>
-    <!-- blazor wasm -->
-    <FrameworkSupportsNative Condition="'$(UsingSentryBlazorWebAssemblySdk)' == 'true'">false</FrameworkSupportsNative>
     <!-- Make it opt-in/out -->
     <FrameworkSupportsNative Condition="'$(SentryNative)' == 'true' or '$(SentryNative)' == 'enable'">true</FrameworkSupportsNative>
     <FrameworkSupportsNative Condition="'$(SentryNative)' == 'false' or '$(SentryNative)' == 'disable'">false</FrameworkSupportsNative>

@@ -69,7 +69,7 @@ static partial class SentrySdk
             InitSentryCocoaSdk(options);
 #elif ANDROID
             InitSentryAndroidSdk(options);
-#elif NET8_0_OR_GREATER && !_SENTRY_BLAZOR_WASM
+#elif NET8_0_OR_GREATER
             // TODO: Is this working properly? Currently we don't have any way to check if the app is being compiled AOT
             // All we know is whether trimming has been enabled or not. I think at the moment we'll be initialising
             // SentryNative for managed applications when they've been trimmed!

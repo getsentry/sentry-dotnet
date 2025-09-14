@@ -41,10 +41,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DefineConstants Condition="'$(UsingSentryBlazorWebAssemblySdk)'=='true'">$(DefineConstants);_SENTRY_BLAZOR_WASM</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <!-- Used by SIL.ReleaseTasks below -->
     <ChangelogFile>$(MSBuildThisFileDirectory)..\CHANGELOG.md</ChangelogFile>
     <AppendToReleaseNotesProperty>
