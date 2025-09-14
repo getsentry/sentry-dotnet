@@ -7,9 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
-    <ProjectReference Include="..\Sentry\Sentry.csproj">
-      <AdditionalProperties>UsingSentryBlazorWebAssemblySdk=true</AdditionalProperties>
-    </ProjectReference>
+    <ProjectReference Include="..\Sentry\Sentry.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
