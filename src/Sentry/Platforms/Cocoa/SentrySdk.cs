@@ -200,11 +200,6 @@ public static partial class SentrySdk
     /// </summary>
     internal static CocoaSdk.SentryEvent? ProcessOnBeforeSend(SentryOptions options, CocoaSdk.SentryEvent evt, IHub hub)
     {
-        if (hub is DisabledHub)
-        {
-            return evt;
-        }
-
         // When we have an unhandled managed exception, we send that to Sentry twice - once managed and once native.
         // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
         // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
@@ -237,6 +232,11 @@ public static partial class SentrySdk
                     ex.Value);
                 return null!;
             }
+        }
+
+        if (hub is DisabledHub)
+        {
+            return evt;
         }
 
         // We run our SIGABRT checks first before running managed processors.
