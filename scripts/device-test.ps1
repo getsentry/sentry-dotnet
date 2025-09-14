@@ -1,3 +1,4 @@
+[CmdletBinding()] # -Verbose
 param(
     [Parameter(Position = 0, Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
