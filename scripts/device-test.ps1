@@ -94,6 +94,10 @@ try
         Remove-Item -Recurse -Force test_output -ErrorAction SilentlyContinue
         try
         {
+            if ($VerbosePreference)
+            {
+                $arguments += '-v'
+            }
             xharness $group test $arguments --output-directory=test_output
             if ($LASTEXITCODE -ne 0)
             {
