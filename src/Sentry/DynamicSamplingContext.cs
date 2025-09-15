@@ -9,16 +9,18 @@ namespace Sentry;
 /// <seealso href="https://develop.sentry.dev/sdk/performance/dynamic-sampling-context"/>
 internal class DynamicSamplingContext
 {
-    public IReadOnlyDictionary<string, string> Items { get; }
+    private readonly Dictionary<string, string> _items;
+
+    public IReadOnlyDictionary<string, string> Items => _items;
 
     public bool IsEmpty => Items.Count == 0;
 
-    private DynamicSamplingContext(IReadOnlyDictionary<string, string> items) => Items = items;
+    private DynamicSamplingContext(Dictionary<string, string> items) => _items = items;
 
     /// <summary>
     /// Gets an empty <see cref="DynamicSamplingContext"/> that can be used to "freeze" the DSC on a transaction.
     /// </summary>
-    public static readonly DynamicSamplingContext Empty = new(new Dictionary<string, string>().AsReadOnly());
+    public static DynamicSamplingContext Empty() => new(new Dictionary<string, string>());
 
     private DynamicSamplingContext(SentryId traceId,
         string publicKey,
@@ -93,39 +95,24 @@ internal class DynamicSamplingContext
             items.Add("replay_id", replayId.ToString());
         }
 
-        Items = items;
+        _items = items;
     }
 
     public BaggageHeader ToBaggageHeader() => BaggageHeader.Create(Items, useSentryPrefix: true);
 
-    public DynamicSamplingContext WithSampleRate(double sampleRate)
+    public void SetSampleRate(double sampleRate)
     {
-        if (Items.TryGetValue("sample_rate", out var dscSampleRate))
-        {
-            if (double.TryParse(dscSampleRate, NumberStyles.Float, CultureInfo.InvariantCulture, out var rate))
-            {
-                if (Math.Abs(rate - sampleRate) > double.Epsilon)
-                {
-                    var items = Items.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-                    items["sample_rate"] = sampleRate.ToString(CultureInfo.InvariantCulture);
-                    return new DynamicSamplingContext(items);
-                }
-            }
-        }
-
-        return this;
+        _items["sample_rate"] = sampleRate.ToString(CultureInfo.InvariantCulture);
     }
 
-    public DynamicSamplingContext WithReplayId(IReplaySession? replaySession)
-    {
-        if (replaySession?.ActiveReplayId is not { } replayId || replayId == SentryId.Empty)
-        {
-            return this;
-        }
+    internal DynamicSamplingContext Clone() => new(new Dictionary<string, string>(_items));
 
-        var items = Items.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-        items["replay_id"] = replayId.ToString();
-        return new DynamicSamplingContext(items);
+    public void SetReplayId(IReplaySession? replaySession)
+    {
+        if (replaySession?.ActiveReplayId is { } replayId && replayId != SentryId.Empty)
+        {
+            _items["replay_id"] = replayId.ToString();
+        }
     }
 
     public static DynamicSamplingContext? CreateFromBaggageHeader(BaggageHeader baggage, IReplaySession? replaySession)
