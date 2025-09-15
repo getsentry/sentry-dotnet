@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 6.0.0
+
+### BREAKING CHANGES
+
+- This release adds support for .NET 10 and drops support for net8.0-android, net8.0-ios, net8.0-maccatalyst and net8.0-windows10.0.19041.0 ([#4461](https://github.com/getsentry/sentry-dotnet/pull/4461))
+
 ## Unreleased
 
 ### Features
