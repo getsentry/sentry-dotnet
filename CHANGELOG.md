@@ -6,6 +6,7 @@
 
 - Fail when building Blazor WASM with Profiling. We don't support profiling in Blazor WebAssembly projects. ([#4512](https://github.com/getsentry/sentry-dotnet/pull/4512))
 - Do not overwrite user IP if it is set manually in ASP.NET sdk ([#4513](https://github.com/getsentry/sentry-dotnet/pull/4513))
+- Fix `SentryOptions.Native.SuppressSignalAborts` and `SuppressExcBadAccess` on iOS ([#4521](https://github.com/getsentry/sentry-dotnet/pull/4521))
 
 ## 5.15.0
 
