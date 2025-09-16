@@ -1494,6 +1494,10 @@ interface SentryOptions
     [Export ("attachScreenshot")]
     bool AttachScreenshot { get; set; }
 
+    // @property (nonatomic, strong) SentryViewScreenshotOptions * _Nonnull screenshot;
+    [Export ("screenshot", ArgumentSemantic.Strong)]
+    SentryViewScreenshotOptions Screenshot { get; set; }
+
     // @property (assign, nonatomic) BOOL attachViewHierarchy;
     [Export ("attachViewHierarchy")]
     bool AttachViewHierarchy { get; set; }

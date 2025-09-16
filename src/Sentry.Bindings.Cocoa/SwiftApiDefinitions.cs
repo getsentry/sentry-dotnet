@@ -750,6 +750,41 @@ interface SentryUserFeedbackWidgetConfiguration
 //     IntPtr Constructor();
 // }
 
+// @interface SentryViewScreenshotOptions : NSObject <SentryRedactOptions>
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry27SentryViewScreenshotOptions")]
+[Internal]
+interface SentryViewScreenshotOptions //: ISentryRedactOptions
+{
+    // @property (nonatomic) BOOL enableViewRendererV2;
+    [Export ("enableViewRendererV2")]
+    bool EnableViewRendererV2 { get; set; }
+
+    // @property (nonatomic) BOOL enableFastViewRendering;
+    [Export ("enableFastViewRendering")]
+    bool EnableFastViewRendering { get; set; }
+
+    // @property (nonatomic) BOOL maskAllImages;
+    [Export ("maskAllImages")]
+    bool MaskAllImages { get; set; }
+
+    // @property (nonatomic) BOOL maskAllText;
+    [Export ("maskAllText")]
+    bool MaskAllText { get; set; }
+
+    // @property (copy, nonatomic) NSArray<Class> * _Nonnull maskedViewClasses;
+    [Export ("maskedViewClasses", ArgumentSemantic.Copy)]
+    Class[] MaskedViewClasses { get; set; }
+
+    // @property (copy, nonatomic) NSArray<Class> * _Nonnull unmaskedViewClasses;
+    [Export ("unmaskedViewClasses", ArgumentSemantic.Copy)]
+    Class[] UnmaskedViewClasses { get; set; }
+
+    // -(instancetype _Nonnull)initWithEnableViewRendererV2:(BOOL)enableViewRendererV2 enableFastViewRendering:(BOOL)enableFastViewRendering maskAllText:(BOOL)maskAllText maskAllImages:(BOOL)maskAllImages maskedViewClasses:(NSArray<Class> * _Nonnull)maskedViewClasses unmaskedViewClasses:(NSArray<Class> * _Nonnull)unmaskedViewClasses __attribute__((objc_designated_initializer));
+    [Export ("initWithEnableViewRendererV2:enableFastViewRendering:maskAllText:maskAllImages:maskedViewClasses:unmaskedViewClasses:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (bool enableViewRendererV2, bool enableFastViewRendering, bool maskAllText, bool maskAllImages, Class[] maskedViewClasses, Class[] unmaskedViewClasses);
+}
+
 // @protocol SentryViewScreenshotProvider <NSObject>
 [Protocol (Name = "_TtP6Sentry28SentryViewScreenshotProvider_")]
 [Model]
