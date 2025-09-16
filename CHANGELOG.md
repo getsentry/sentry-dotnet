@@ -20,6 +20,7 @@
 - Bump Native SDK from v0.10.1 to v0.11.0 ([#4542](https://github.com/getsentry/sentry-dotnet/pull/4542))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0110)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.10.1...0.11.0)
+- In MAUI Android apps, generate and inject uuid to Apk and upload Proguard to Sentry with the uuid ([#4532](https://github.com/getsentry/sentry-dotnet/pull/4532))
 
 ## 5.15.0
 
