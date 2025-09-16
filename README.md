@@ -11,7 +11,7 @@ _Bad software is everywhere, and we're tired of it. Sentry is on a mission to he
 Sentry SDK for .NET
 ===========
 
-[![build](https://github.com/getsentry/sentry-dotnet/workflows/build/badge.svg?branch=main)](https://github.com/getsentry/sentry-dotnet/actions?query=branch%3Amain)
+[![build](https://github.com/getsentry/sentry-dotnet/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/getsentry/sentry-dotnet/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/getsentry/sentry-dotnet/branch/main/graph/badge.svg)](https://codecov.io/gh/getsentry/sentry-dotnet)
 [![Discord Chat](https://img.shields.io/discord/621778831602221064?logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/PXa5Apfe7K)
 
