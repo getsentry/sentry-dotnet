@@ -17,4 +17,9 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.3" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)buildTransitive\Sentry.AspNetCore.Blazor.WebAssembly.targets" Pack="true" PackagePath="buildTransitive\Sentry.AspNetCore.Blazor.WebAssembly.targets" />
+    <None Include="$(MSBuildThisFileDirectory)buildTransitive\Sentry.AspNetCore.Blazor.WebAssembly.targets" Pack="true" PackagePath="build\Sentry.AspNetCore.Blazor.WebAssembly.targets" />
+  </ItemGroup>
 </Project>
