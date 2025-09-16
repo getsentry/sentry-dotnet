@@ -7,6 +7,12 @@
 - Fail when building Blazor WASM with Profiling. We don't support profiling in Blazor WebAssembly projects. ([#4512](https://github.com/getsentry/sentry-dotnet/pull/4512))
 - Do not overwrite user IP if it is set manually in ASP.NET sdk ([#4513](https://github.com/getsentry/sentry-dotnet/pull/4513))
 
+### Dependencies
+
+- Bump Cocoa SDK from v8.55.1 to v8.56.0 ([#4528](https://github.com/getsentry/sentry-dotnet/pull/4528))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8560)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.55.1...8.56.0)
+
 ## 5.15.0
 
 ### Features
