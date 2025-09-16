@@ -12,8 +12,6 @@
     <SentryCocoaProperties>$([System.IO.File]::ReadAllText("$(MSBuildThisFileDirectory)../../modules/sentry-cocoa.properties"))</SentryCocoaProperties>
     <SentryCocoaVersion>$([System.Text.RegularExpressions.Regex]::Match($(SentryCocoaProperties), 'version\s*=\s*([^\s]+)').Groups[1].Value)</SentryCocoaVersion>
     <SentryCocoaFramework>$(SentryCocoaCache)Sentry-$(SentryCocoaVersion).xcframework</SentryCocoaFramework>
-    <!-- SentrySpan.g.cs: error CS0108: 'ISentrySpan.Serialize()' hides inherited member 'ISentrySerializable.Serialize()'. Use the new keyword if hiding was intended -->
-    <NoWarn>$(NoWarn);CS0108</NoWarn>
   </PropertyGroup>
 
   <!-- Build empty assemblies when not on macOS, to pass the solution build. -->

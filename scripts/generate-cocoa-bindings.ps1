@@ -279,7 +279,20 @@ $Text = $Text -replace '([\[,] )iOS \(', '$1Introduced (PlatformName.iOS, '
 $Text = $Text -replace '(?m)^interface SentryScope', 'partial $&'
 
 # Prefix SentryBreadcrumb.Serialize and SentryScope.Serialize with new (since these hide the base method)
-$Text = $Text -replace '(?m)(^\s*\/\/[^\r\n]*$\s*\[Export \("serialize"\)\]$\s*)(NSDictionary)', '${1}new $2'
+# $Text = $Text -replace '(?m)(^\s*\/\/[^\r\n]*$\s*\[Export \("serialize"\)\]$\s*)(NSDictionary)', '${1}new $2'
+
+# Ensure that all Serialize methods in SentryXxx types (except the base SentrySerializable.Serialize) are marked with 'new' to explicitly hide the base method.
+$script:occurrence = 0
+$Text = [regex]::Replace(
+    $Text,
+    '(?m)(^\s*\/\/[^\r\n]*$\s*(?:\[Abstract\]\s*)?\[Export \("serialize"\)\]$\s*)(NSDictionary)',
+    {
+        param($match)
+        $script:occurrence++
+        if ($script:occurrence -eq 1) { $match.Value }
+        else { $match.Groups[1].Value + 'new ' + $match.Groups[2].Value }
+    }
+)
 
 $Text = $Text -replace '.*SentryEnvelope .*?[\s\S]*?\n\n', ''
 $Text = $Text -replace '.*typedef.*SentryOnAppStartMeasurementAvailable.*?[\s\S]*?\n\n', ''

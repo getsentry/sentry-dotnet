@@ -934,7 +934,7 @@ interface SentrySpan : SentrySerializable
     // @required -(NSDictionary<NSString *,id> * _Nonnull)serialize;
     [Abstract]
     [Export ("serialize")]
-    NSDictionary<NSString, NSObject> Serialize();
+    new NSDictionary<NSString, NSObject> Serialize();
 }
 
 // @interface SentryHub : NSObject
