@@ -195,20 +195,15 @@ public static partial class SentrySdk
         => ProcessOnBeforeSend(options, evt, CurrentHub);
 
     /// <summary>
-    /// This overload allows us to inject an IHub for testing. During normal execution, the CurrentHub is used.
-    /// However, since this class is static, there's no easy alternative way to inject this when executing tests.
+    /// Apply suppression logic for redundant native `SIGABRT` and `EXC_BAD_ACCESS` crash events
+    /// that have already been captured as managed exceptions by the Sentry.NET SDK to avoid sending
+    /// duplicate events to Sentry - once managed and once native.
+    ///
+    /// The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
+    /// But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
     /// </summary>
-    internal static CocoaSdk.SentryEvent? ProcessOnBeforeSend(SentryOptions options, CocoaSdk.SentryEvent evt, IHub hub)
+    private static bool SuppressNativeCrash(SentryOptions options, CocoaSdk.SentryEvent evt)
     {
-        if (hub is DisabledHub)
-        {
-            return evt;
-        }
-
-        // When we have an unhandled managed exception, we send that to Sentry twice - once managed and once native.
-        // The managed exception is what a .NET developer would expect, and it is sent by the Sentry.NET SDK
-        // But we also get a native SIGABRT since it crashed the application, which is sent by the Sentry Cocoa SDK.
-
         // There should only be one exception on the event in this case
         if ((options.Native.SuppressSignalAborts || options.Native.SuppressExcBadAccess) && evt.Exceptions?.Length == 1)
         {
@@ -224,7 +219,7 @@ public static partial class SentrySdk
                 // Don't send it
                 options.LogDebug("Discarded {0} error ({1}). Captured as  managed exception instead.", ex.Type,
                     ex.Value);
-                return null!;
+                return true;
             }
 
             // Similar workaround for NullReferenceExceptions. We don't have any easy way to know whether the
@@ -235,8 +230,31 @@ public static partial class SentrySdk
                 // Don't send it
                 options.LogDebug("Discarded {0} error ({1}). Captured as  managed exception instead.", ex.Type,
                     ex.Value);
-                return null!;
+                return true;
             }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// This overload allows us to inject an IHub for testing. During normal execution, the CurrentHub is used.
+    /// However, since this class is static, there's no easy alternative way to inject this when executing tests.
+    /// </summary>
+    internal static CocoaSdk.SentryEvent? ProcessOnBeforeSend(SentryOptions options, CocoaSdk.SentryEvent evt, IHub hub)
+    {
+        // Redundant native crash events must be suppressed even if the SDK is
+        // disabled (or not yet fully initialized) to avoid sending duplicates.
+        // https://github.com/getsentry/sentry-dotnet/pull/4521#discussion_r2347616896
+        if (SuppressNativeCrash(options, evt))
+        {
+            return null!;
+        }
+
+        // If the SDK is disabled, there are no event processors or before send to run.
+        if (hub is DisabledHub)
+        {
+            return evt;
         }
 
         // We run our SIGABRT checks first before running managed processors.
