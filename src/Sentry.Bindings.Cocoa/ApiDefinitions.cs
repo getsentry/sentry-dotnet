@@ -225,7 +225,7 @@ interface SentryBreadcrumb : SentrySerializable
 
     // -(NSDictionary<NSString *,id> * _Nonnull)serialize;
     [Export ("serialize")]
-    new NSDictionary<NSString, NSObject> Serialize();
+    NSDictionary<NSString, NSObject> Serialize();
 
     // -(BOOL)isEqualToBreadcrumb:(SentryBreadcrumb * _Nonnull)breadcrumb;
     [Export ("isEqualToBreadcrumb:")]
@@ -1873,7 +1873,7 @@ partial interface SentryScope : SentrySerializable
 
     // -(NSDictionary<NSString *,id> * _Nonnull)serialize;
     [Export ("serialize")]
-    new NSDictionary<NSString, NSObject> Serialize();
+    NSDictionary<NSString, NSObject> Serialize();
 
     // -(void)setContextValue:(NSDictionary<NSString *,id> * _Nonnull)value forKey:(NSString * _Nonnull)key __attribute__((swift_name("setContext(value:key:)")));
     [Export ("setContextValue:forKey:")]
