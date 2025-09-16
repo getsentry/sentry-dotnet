@@ -642,7 +642,7 @@ interface SentrySession
 
     // -(NSDictionary<NSString *,id> * _Nonnull)serialize __attribute__((warn_unused_result("")));
     [Export ("serialize")]
-    new NSDictionary<NSString, NSObject> Serialize();
+    NSDictionary<NSString, NSObject> Serialize();
 
     // -(void)setFlagInit;
     [Export ("setFlagInit")]
