@@ -930,6 +930,11 @@ interface SentrySpan : SentrySerializable
     [Abstract]
     [NullAllowed, Export ("baggageHttpHeader")]
     string BaggageHttpHeader { get; }
+
+    // @required -(NSDictionary<NSString *,id> * _Nonnull)serialize;
+    [Abstract]
+    [Export ("serialize")]
+    NSDictionary<NSString, NSObject> Serialize();
 }
 
 // @interface SentryHub : NSObject
