@@ -5,6 +5,7 @@
 ### Features
 
 - Added an option for Automatic backpressure handling. When enabled this automatically reduces the sample rate when the SDK detects events being dropped. ([#4452](https://github.com/getsentry/sentry-dotnet/pull/4452))
+
 ### Fixes
 
 - Fail when building Blazor WASM with Profiling. We don't support profiling in Blazor WebAssembly projects. ([#4512](https://github.com/getsentry/sentry-dotnet/pull/4512))
