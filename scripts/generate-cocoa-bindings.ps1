@@ -116,7 +116,7 @@ foreach ($file in $filesToPatch)
         Write-Host "File not found: $file"
     }
 }
-$privateHeaderFile = "$CocoaSdkPath/Carthage/PrivateHeaders/PrivatesHeader.h"
+$privateHeaderFile = "$CocoaSdkPath/Carthage/Headers/PrivatesHeader.h"
 if (Test-Path $privateHeaderFile)
 {
     $content = Get-Content -Path $privateHeaderFile -Raw
