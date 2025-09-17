@@ -5,6 +5,17 @@
 ### Features
 
 - Added an option for Automatic backpressure handling. When enabled this automatically reduces the sample rate when the SDK detects events being dropped. ([#4452](https://github.com/getsentry/sentry-dotnet/pull/4452))
+### Fixes
+
+- Fail when building Blazor WASM with Profiling. We don't support profiling in Blazor WebAssembly projects. ([#4512](https://github.com/getsentry/sentry-dotnet/pull/4512))
+- Do not overwrite user IP if it is set manually in ASP.NET sdk ([#4513](https://github.com/getsentry/sentry-dotnet/pull/4513))
+- Fix `SentryOptions.Native.SuppressSignalAborts` and `SuppressExcBadAccess` on iOS ([#4521](https://github.com/getsentry/sentry-dotnet/pull/4521))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.55.1 to v8.56.0 ([#4528](https://github.com/getsentry/sentry-dotnet/pull/4528))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8560)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.55.1...8.56.0)
 
 ## 5.15.0
 
