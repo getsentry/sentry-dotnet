@@ -8,7 +8,7 @@ public class BackpressureMonitorTests
         public ISystemClock Clock { get; } = Substitute.For<ISystemClock>();
         public DateTimeOffset Now { get; set; } = DateTimeOffset.UtcNow;
 
-        public BackpressureMonitor GetSut() => new(Logger, Clock, startImmediately: false);
+        public BackpressureMonitor GetSut() => new(Logger, Clock, enablePeriodicHealthCheck: false);
     }
 
     private readonly Fixture _fixture = new();

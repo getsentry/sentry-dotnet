@@ -723,7 +723,7 @@ public partial class HubTests
         var transactionContext = new TransactionContext("name", "operation");
 
         var clock = new MockClock(DateTimeOffset.UtcNow);
-        var backpressureMonitor = new BackpressureMonitor(null, clock, startImmediately: false);
+        var backpressureMonitor = new BackpressureMonitor(null, clock, enablePeriodicHealthCheck: false);
         backpressureMonitor.SetDownsampleLevel(1);
         _fixture.Options.BackpressureMonitor = backpressureMonitor;
         var sampleRate = 0.5f;

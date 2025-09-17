@@ -35,24 +35,24 @@ internal class BackpressureMonitor : IDisposable
 
     private readonly CancellationTokenSource _cts = new();
 
-    private Task WorkerTask { get; }
+    private readonly Task _workerTask;
     internal int DownsampleLevel => _downsampleLevel;
     internal long LastQueueOverflowTicks => Interlocked.Read(ref _lastQueueOverflow);
     internal long LastRateLimitEventTicks => Interlocked.Read(ref _lastRateLimitEvent);
 
-    public BackpressureMonitor(IDiagnosticLogger? logger, ISystemClock? clock = null, bool startImmediately = true)
+    public BackpressureMonitor(IDiagnosticLogger? logger, ISystemClock? clock = null, bool enablePeriodicHealthCheck = true)
     {
         _logger = logger;
         _clock = clock ?? SystemClock.Clock;
 
-        if (startImmediately)
+        if (enablePeriodicHealthCheck)
         {
             _logger?.LogDebug("Starting BackpressureMonitor.");
-            WorkerTask = Task.Run(() => DoWorkAsync(_cts.Token));
+            _workerTask = Task.Run(() => DoWorkAsync(_cts.Token));
         }
         else
         {
-            WorkerTask = Task.CompletedTask;
+            _workerTask = Task.CompletedTask;
         }
     }
 
@@ -78,7 +78,7 @@ internal class BackpressureMonitor : IDisposable
     }
 
     /// <summary>
-    /// A multiplier that can be applied to  the SampleRate or TracesSampleRate to reduce the amount of data sent to
+    /// A multiplier that can be applied to the SampleRate or TracesSampleRate to reduce the amount of data sent to
     /// Sentry when the system is under pressure.
     /// </summary>
     public double DownsampleFactor
@@ -147,7 +147,7 @@ internal class BackpressureMonitor : IDisposable
         try
         {
             _cts.Cancel();
-            WorkerTask.Wait();
+            _workerTask.Wait();
         }
         catch (AggregateException ex) when (ex.InnerException is OperationCanceledException)
         {

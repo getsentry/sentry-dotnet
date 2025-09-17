@@ -638,7 +638,7 @@ public partial class SentryClientTests
         // Arrange
         var now = DateTimeOffset.UtcNow;
         var clock = new MockClock(now);
-        var backpressureMonitor = new BackpressureMonitor(null, clock, startImmediately: false);
+        using var backpressureMonitor = new BackpressureMonitor(null, clock, enablePeriodicHealthCheck: false);
         backpressureMonitor.SetDownsampleLevel(downsampleLevel);
         _fixture.SentryOptions.SampleRate = sampleRate;
         _fixture.SentryOptions.BackpressureMonitor = backpressureMonitor;

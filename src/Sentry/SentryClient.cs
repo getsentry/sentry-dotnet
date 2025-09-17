@@ -374,11 +374,16 @@ public class SentryClient : ISentryClient, IDisposable
 
         if (_options.SampleRate != null)
         {
+            var sampleRand = _randomValuesFactory.NextDouble();
+            var sampleRate = _options.SampleRate.Value;
             var downsampleFactor = _options.BackpressureMonitor.GetDownsampleFactor();
-            var sampleRate = _options.SampleRate.Value * downsampleFactor;
-            if (!_randomValuesFactory.NextBool(sampleRate))
+            var downsampledRate = _options.SampleRate.Value * downsampleFactor;
+            if (sampleRand >= downsampledRate)
             {
-                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
+                // If sampling out is only a result of the downsampling then we specify the reason as backpressure
+                // management... otherwise the event would have been sampled out anyway, so it's just regular sampling.
+                var reason = sampleRand < sampleRate ? DiscardReason.Backpressure : DiscardReason.SampleRate;
+                _options.ClientReportRecorder.RecordDiscardedEvent(reason, DataCategory.Error);
                 _options.LogDebug("Event sampled out.");
                 return SentryId.Empty;
             }
