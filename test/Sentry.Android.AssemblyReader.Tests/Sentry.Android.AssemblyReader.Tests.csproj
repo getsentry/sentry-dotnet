@@ -20,7 +20,7 @@
   <Target Name="EnsureAndroidTestAppRestored"
           Condition="!Exists('$(MSBuildProjectDirectory)\..\AndroidTestApp\obj\project.assets.json')">
     <Message Importance="high" Text="Restoring AndroidTestApp via MSBuild task..." />
-    <Exec Command="dotnet restore ../AndroidTestApp/AndroidTestApp.csproj --nologo" />
+    <Exec Command="dotnet restore ../AndroidTestApp/AndroidTestApp.csproj -f --nologo" />
   </Target>
 
   <!-- Restore exactly once: https://learn.microsoft.com/en-gb/visualstudio/msbuild/run-target-exactly-once -->
@@ -42,21 +42,10 @@
       <_TestAPK Include="2" Properties="_Aot=False;_Store=False;_Compressed=True" />
       <_TestAPK Include="3" Properties="_Aot=False;_Store=True;_Compressed=False" />
       <_TestAPK Include="4" Properties="_Aot=False;_Store=True;_Compressed=True" />
-<!--      TODO: Work out why this is failing
-                Microsoft.NET.Sdk.FrameworkReferenceResolution.targets(528, 5):
-                [NETSDK1112] The runtime pack for Microsoft.NETCore.App.Runtime.NativeAOT.linux-bionic-x64 was not downloaded.
-                Try running a NuGet restore with the RuntimeIdentifier 'linux-bionic-x64'.
-
-                If I run that restore command on the AndroidTestApp I get:
-                  Unable to find package Microsoft.NETCore.App.Runtime.Mono.linux-x64 with version (= 10.0.0-preview.7.25380.108)
-                  - Found 135 version(s) in nuget.org [ Nearest version: 9.0.0-preview.7.24405.7 ]
-
-                 Same again for net9. Looks like that package is deprecated (never even made it into net9.0).
--->
-<!--      <_TestAPK Include="5" Properties="_Aot=True;_Store=False;_Compressed=False" />-->
-<!--      <_TestAPK Include="6" Properties="_Aot=True;_Store=False;_Compressed=True" />-->
-<!--      <_TestAPK Include="7" Properties="_Aot=True;_Store=True;_Compressed=False" />-->
-<!--      <_TestAPK Include="8" Properties="_Aot=True;_Store=True;_Compressed=True" />-->
+      <_TestAPK Include="5" Properties="_Aot=True;_Store=False;_Compressed=False" />
+      <_TestAPK Include="6" Properties="_Aot=True;_Store=False;_Compressed=True" />
+      <_TestAPK Include="7" Properties="_Aot=True;_Store=True;_Compressed=False" />
+      <_TestAPK Include="8" Properties="_Aot=True;_Store=True;_Compressed=True" />
     </ItemGroup>
 
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="%(_TestAPK.Properties)" BuildInParallel="false" />
@@ -67,7 +56,8 @@
       <SourceAPK>..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk</SourceAPK>
       <DestinationAPK>TestAPKs\$(TargetFramework)-$(_ConfigString).apk</DestinationAPK>
     </PropertyGroup>
-    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;PublishAot=$(_Aot);_IsPublishing=true;RuntimeIdentifier=android-x64;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('$(DestinationAPK)')" />
+    <!-- Note we use RunAOTCompilation rather than PublishAot here - full NativeAOT compilation on Android is still experimental  -->
+    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;RunAOTCompilation=$(_Aot);UseNativeAot=false;_IsPublishing=true;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('$(DestinationAPK)')" />
 
     <Message Text="Copying APK from $(SourceAPK) to $(DestinationAPK)" Importance="high" />
     <Copy SourceFiles="$(SourceAPK)" DestinationFiles="$(DestinationAPK)" Condition="!Exists('$(DestinationAPK)')" />
