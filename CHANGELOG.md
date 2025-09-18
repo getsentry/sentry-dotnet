@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 5.15.1-maxpath.1
 
 ### Fixes
 
