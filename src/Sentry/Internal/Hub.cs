@@ -14,6 +14,7 @@ internal class Hub : IHub, IDisposable
     private readonly ISystemClock _clock;
     private readonly ISessionManager _sessionManager;
     private readonly SentryOptions _options;
+    private readonly ISampleRandHelper _sampleRandHelper;
     private readonly RandomValuesFactory _randomValuesFactory;
     private readonly IReplaySession _replaySession;
     private readonly List<IDisposable> _integrationsToCleanup = new();
@@ -44,7 +45,8 @@ internal class Hub : IHub, IDisposable
         ISystemClock? clock = null,
         IInternalScopeManager? scopeManager = null,
         RandomValuesFactory? randomValuesFactory = null,
-        IReplaySession? replaySession = null)
+        IReplaySession? replaySession = null,
+        ISampleRandHelper? sampleRandHelper = null)
     {
         if (string.IsNullOrWhiteSpace(options.Dsn))
         {
@@ -65,6 +67,7 @@ internal class Hub : IHub, IDisposable
         }
         client ??= new SentryClient(options, randomValuesFactory: _randomValuesFactory, sessionManager: _sessionManager);
         _replaySession = replaySession ?? ReplaySession.Instance;
+        _sampleRandHelper = sampleRandHelper ?? new SampleRandHelperAdapter();
         ScopeManager = scopeManager ?? new SentryScopeManager(options, client);
 
         if (!options.IsGlobalModeEnabled)
@@ -182,7 +185,7 @@ internal class Hub : IHub, IDisposable
         DiscardReason? discardReason = null;
         var sampleRand = dynamicSamplingContext?.Items.TryGetValue("sample_rand", out var dscSampleRand) ?? false
             ? double.Parse(dscSampleRand, NumberStyles.Float, CultureInfo.InvariantCulture)
-            : SampleRandHelper.GenerateSampleRand(context.TraceId.ToString());
+            : _sampleRandHelper.GenerateSampleRand(context.TraceId.ToString());
 
         // TracesSampler runs regardless of whether a decision has already been made, as it can be used to override it.
         if (_options.TracesSampler is { } tracesSampler)

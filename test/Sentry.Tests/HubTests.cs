@@ -17,6 +17,7 @@ public partial class HubTests
         public IInternalScopeManager ScopeManager { get; set; }
         public ISystemClock Clock { get; set; }
         public IReplaySession ReplaySession { get; }
+        public ISampleRandHelper SampleRandHelper { get; set; }
 
         public Fixture()
         {
@@ -32,7 +33,8 @@ public partial class HubTests
             ReplaySession = Substitute.For<IReplaySession>();
         }
 
-        public Hub GetSut() => new(Options, Client, SessionManager, Clock, ScopeManager, replaySession: ReplaySession);
+        public Hub GetSut() => new(Options, Client, SessionManager, Clock, ScopeManager, replaySession: ReplaySession,
+            sampleRandHelper: SampleRandHelper);
     }
 
     private readonly Fixture _fixture = new();
@@ -754,6 +756,42 @@ public partial class HubTests
             default:
                 throw new Exception("Unexpected transaction type.");
         }
+    }
+
+    [Theory]
+    [InlineData(true, 0.4f, "backpressure")]
+    [InlineData(true, 0.6f, "sample_rate")]
+    [InlineData(false, 0.4f, "backpressure")]
+    [InlineData(false, 0.6f, "sample_rate")]
+    public void StartTransaction_Backpressure_SetsDiscardReason(bool usesTracesSampler, double sampleRand, string discardReason)
+    {
+        // Arrange
+        var transactionContext = new TransactionContext("name", "operation");
+
+        var clock = new MockClock(DateTimeOffset.UtcNow);
+        _fixture.SampleRandHelper = Substitute.For<ISampleRandHelper>();
+        _fixture.SampleRandHelper.GenerateSampleRand(Arg.Any<string>()).Returns(sampleRand);
+        var backpressureMonitor = new BackpressureMonitor(null, clock, enablePeriodicHealthCheck: false);
+        backpressureMonitor.SetDownsampleLevel(1);
+        _fixture.Options.BackpressureMonitor = backpressureMonitor;
+        var sampleRate = 0.5f;
+        if (usesTracesSampler)
+        {
+            _fixture.Options.TracesSampler = _ => sampleRate;
+        }
+        else
+        {
+            _fixture.Options.TracesSampleRate = sampleRate;
+        }
+
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>());
+        transaction.Should().BeOfType<UnsampledTransaction>();
+        var unsampledTransaction = (UnsampledTransaction)transaction;
+        var expectedReason = new DiscardReason(discardReason);
+        unsampledTransaction.DiscardReason.Should().Be(expectedReason);
     }
 
     // overwrite the 'sample_rate' of the Dynamic Sampling Context (DSC) when a sampling decisions is made in the downstream SDK
