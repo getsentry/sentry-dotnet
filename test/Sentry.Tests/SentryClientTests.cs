@@ -17,6 +17,7 @@ public partial class SentryClientTests
 
         public IBackgroundWorker BackgroundWorker { get; set; } = Substitute.For<IBackgroundWorker, IDisposable>();
         public IClientReportRecorder ClientReportRecorder { get; } = Substitute.For<IClientReportRecorder>();
+        public RandomValuesFactory RandomValuesFactory { get; set; } = null;
         public ISessionManager SessionManager { get; set; } = Substitute.For<ISessionManager>();
 
         public Fixture()
@@ -27,7 +28,7 @@ public partial class SentryClientTests
 
         public SentryClient GetSut()
         {
-            var randomValuesFactory = new IsolatedRandomValuesFactory();
+            var randomValuesFactory = RandomValuesFactory ?? new IsolatedRandomValuesFactory();
             return new SentryClient(SentryOptions, BackgroundWorker, randomValuesFactory, SessionManager);
         }
     }
@@ -588,6 +589,30 @@ public partial class SentryClientTests
 
         _fixture.ClientReportRecorder.Received(1)
             .RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
+    }
+
+    [Theory]
+    [InlineData(0.6f, "sample_rate")] // Sample rand is greater than the sample rate
+    [InlineData(0.4f, "backpressure")] // Sample is dropped due to downsampling
+    public void CaptureEvent_SampleDrop_RecordsCorrectDiscardReason(double sampleRand, string discardReason)
+    {
+        // Arrange
+        _fixture.RandomValuesFactory = Substitute.For<RandomValuesFactory>();
+        _fixture.RandomValuesFactory.NextDouble().Returns(sampleRand);
+        _fixture.SentryOptions.SampleRate = 0.5f;
+        var logger = Substitute.For<IDiagnosticLogger>();
+        var backpressureMonitor = new BackpressureMonitor(logger, null, false);
+        backpressureMonitor.SetDownsampleLevel(1);
+        _fixture.SentryOptions.BackpressureMonitor = backpressureMonitor;
+        var sut = _fixture.GetSut();
+
+        // Act
+        var @event = new SentryEvent();
+        _ = sut.CaptureEvent(@event);
+
+        // Assert
+        var expectedReason = new DiscardReason(discardReason);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(expectedReason, DataCategory.Error);
     }
 
     [Fact]

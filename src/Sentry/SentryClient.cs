@@ -374,10 +374,9 @@ public class SentryClient : ISentryClient, IDisposable
 
         if (_options.SampleRate != null)
         {
-            var sampleRand = _randomValuesFactory.NextDouble();
             var sampleRate = _options.SampleRate.Value;
-            var downsampleFactor = _options.BackpressureMonitor.GetDownsampleFactor();
-            var downsampledRate = _options.SampleRate.Value * downsampleFactor;
+            var downsampledRate = sampleRate * _options.BackpressureMonitor.GetDownsampleFactor();
+            var sampleRand = _randomValuesFactory.NextDouble();
             if (sampleRand >= downsampledRate)
             {
                 // If sampling out is only a result of the downsampling then we specify the reason as backpressure

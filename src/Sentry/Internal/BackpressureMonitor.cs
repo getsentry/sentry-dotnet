@@ -86,7 +86,7 @@ internal class BackpressureMonitor : IDisposable
         get
         {
             var level = _downsampleLevel;
-            return 1d / (1 << level);
+            return 1d / (1 << level); // 1 / (2^level) = 1, 1/2, 1/4, 1/8, ...
         }
     }
 
