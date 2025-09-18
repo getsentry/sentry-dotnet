@@ -56,6 +56,12 @@
                 HorizontalOptions="Center" />
 
             <Button
+                x:Name="NreBtn"
+                Text="NRE"
+                Clicked="OnNreClicked"
+                HorizontalOptions="Center" />
+
+            <Button
                 x:Name="ThrowBackgroundUnhandledBtn"
                 Text="Throw Unhandled .NET Exception on Background Thread (Crash)"
                 SemanticProperties.Hint="Throws an unhandled .NET exception on a background thread, crashing the app."
