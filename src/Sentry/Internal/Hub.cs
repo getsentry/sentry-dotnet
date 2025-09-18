@@ -203,7 +203,7 @@ internal class Hub : IHub, IDisposable
                 {
                     // If sampling out is only a result of the downsampling then we specify the reason as backpressure
                     // management... otherwise the event would have been sampled out anyway, so it's just regular sampling.
-                    discardReason = sampleRand < samplerSampleRate ? DiscardReason.Backpressure  : DiscardReason.SampleRate;
+                    discardReason = sampleRand < samplerSampleRate ? DiscardReason.Backpressure : DiscardReason.SampleRate;
                 }
 
                 // Ensure the actual sampleRate is set on the provided DSC (if any) when the TracesSampler reached a sampling decision
@@ -222,7 +222,7 @@ internal class Hub : IHub, IDisposable
             {
                 // If sampling out is only a result of the downsampling then we specify the reason as backpressure
                 // management... otherwise the event would have been sampled out anyway, so it's just regular sampling.
-                discardReason = sampleRand < optionsSampleRate ? DiscardReason.Backpressure  : DiscardReason.SampleRate;
+                discardReason = sampleRand < optionsSampleRate ? DiscardReason.Backpressure : DiscardReason.SampleRate;
             }
 
             if (context.IsSampled is null && _options.TracesSampleRate is not null)
