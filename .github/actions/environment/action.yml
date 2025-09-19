@@ -76,7 +76,7 @@ runs:
         brew install mono || true
         brew link --overwrite mono
 
-    - name: Install Mono (Linux)
+    - name: Install Mono (Ubuntu)
       if: ${{ runner.os == 'Linux' && !matrix.container }}
       shell: bash
       run: |
