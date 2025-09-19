@@ -6,7 +6,7 @@
 
 - Fail when building Blazor WASM with Profiling. We don't support profiling in Blazor WebAssembly projects. ([#4512](https://github.com/getsentry/sentry-dotnet/pull/4512))
 - Do not overwrite user IP if it is set manually in ASP.NET sdk ([#4513](https://github.com/getsentry/sentry-dotnet/pull/4513))
-- In MAUI Android apps, generate and inject uuid to Apk and upload Proguard to Sentry with the uuid ([#4532](https://github.com/getsentry/sentry-dotnet/pull/4532))
+- In MAUI Android apps, generate and inject UUID to APK and upload Proguard to Sentry with the UUID ([#4532](https://github.com/getsentry/sentry-dotnet/pull/4532))
 - Fix `SentryOptions.Native.SuppressSignalAborts` and `SuppressExcBadAccess` on iOS ([#4521](https://github.com/getsentry/sentry-dotnet/pull/4521))
 
 ## 5.15.0
