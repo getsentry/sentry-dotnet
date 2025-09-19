@@ -266,6 +266,10 @@ jobs:
           name: ${{ github.sha }}
           path: src
 
+      - name: Install Mono (linux-arm64)
+        if: matrix.os == 'ubuntu-22.04-arm'
+        run: sudo apt-get update && sudo apt-get install -y mono-complete
+
       - name: Integration test
         uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         with:
