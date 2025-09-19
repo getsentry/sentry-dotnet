@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
+          - os: ubuntu-22.04
             rid: linux-x64
           - os: ubuntu-22.04-arm
             rid: linux-arm64
@@ -82,7 +82,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
+          - os: ubuntu-22.04
             rid: linux-x64
             slnf: Sentry-CI-Build-Linux.slnf
           - os: ubuntu-22.04-arm
