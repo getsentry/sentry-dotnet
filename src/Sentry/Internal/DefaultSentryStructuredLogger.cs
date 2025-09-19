@@ -53,7 +53,9 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
 
         SentryLog log = new(timestamp, traceHeader.TraceId, level, message)
         {
-            Template = template,
+            // the SDK MUST NOT attach a sentry.message.template attribute if there are no parameters
+            // https://develop.sentry.dev/sdk/telemetry/logs/#default-attributes
+            Template = parameters is { Length: > 0 } ? template : null,
             Parameters = @params,
             ParentSpanId = traceHeader.SpanId,
         };
