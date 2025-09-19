@@ -4,9 +4,9 @@ using BackgroundWorker = Sentry.Internal.BackgroundWorker;
 
 namespace Sentry.Tests;
 
-public partial class SentryClientTests
+public partial class SentryClientTests : IDisposable
 {
-    private class Fixture
+    private class Fixture : IDisposable
     {
         public SentryOptions SentryOptions { get; set; } = new()
         {
@@ -19,6 +19,7 @@ public partial class SentryClientTests
         public IClientReportRecorder ClientReportRecorder { get; } = Substitute.For<IClientReportRecorder>();
         public RandomValuesFactory RandomValuesFactory { get; set; } = null;
         public ISessionManager SessionManager { get; set; } = Substitute.For<ISessionManager>();
+        public BackpressureMonitor BackpressureMonitor { get; set; }
 
         public Fixture()
         {
@@ -29,8 +30,18 @@ public partial class SentryClientTests
         public SentryClient GetSut()
         {
             var randomValuesFactory = RandomValuesFactory ?? new IsolatedRandomValuesFactory();
-            return new SentryClient(SentryOptions, BackgroundWorker, randomValuesFactory, SessionManager);
+            return new SentryClient(SentryOptions, BackgroundWorker, randomValuesFactory, SessionManager, BackpressureMonitor);
         }
+
+        public void Dispose()
+        {
+            BackpressureMonitor?.Dispose();
+        }
+    }
+
+    public void Dispose()
+    {
+        _fixture.Dispose();
     }
 
     private readonly Fixture _fixture = new();
@@ -601,9 +612,8 @@ public partial class SentryClientTests
         _fixture.RandomValuesFactory.NextDouble().Returns(sampleRand);
         _fixture.SentryOptions.SampleRate = 0.5f;
         var logger = Substitute.For<IDiagnosticLogger>();
-        var backpressureMonitor = new BackpressureMonitor(logger, null, false);
-        backpressureMonitor.SetDownsampleLevel(1);
-        _fixture.SentryOptions.BackpressureMonitor = backpressureMonitor;
+        _fixture.BackpressureMonitor = new BackpressureMonitor(logger, null, false);
+        _fixture.BackpressureMonitor.SetDownsampleLevel(1);
         var sut = _fixture.GetSut();
 
         // Act
@@ -663,15 +673,14 @@ public partial class SentryClientTests
         // Arrange
         var now = DateTimeOffset.UtcNow;
         var clock = new MockClock(now);
-        using var backpressureMonitor = new BackpressureMonitor(null, clock, enablePeriodicHealthCheck: false);
-        backpressureMonitor.SetDownsampleLevel(downsampleLevel);
+        _fixture.BackpressureMonitor = new BackpressureMonitor(null, clock, enablePeriodicHealthCheck: false);
+        _fixture.BackpressureMonitor.SetDownsampleLevel(downsampleLevel);
         _fixture.SentryOptions.SampleRate = sampleRate;
-        _fixture.SentryOptions.BackpressureMonitor = backpressureMonitor;
 
         const int numEvents = 1000;
         const double allowedRelativeDeviation = 0.15;
         const uint allowedDeviation = (uint)(allowedRelativeDeviation * numEvents);
-        var expectedSampled = (int)(numEvents * sampleRate * backpressureMonitor.DownsampleFactor);
+        var expectedSampled = (int)(numEvents * sampleRate * _fixture.BackpressureMonitor.DownsampleFactor);
 
         // This test expects an approximate uniform distribution of random numbers, so we'll retry a few times.
         TestHelpers.RetryTest(maxAttempts: 3, _output, () =>

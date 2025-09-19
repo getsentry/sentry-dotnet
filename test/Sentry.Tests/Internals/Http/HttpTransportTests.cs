@@ -298,6 +298,7 @@ public partial class HttpTransportTests
                 Debug = true
             },
             new HttpClient(httpHandler),
+            null,
             clock: _fakeClock);
 
         // First request always goes through
@@ -382,6 +383,7 @@ public partial class HttpTransportTests
         var httpTransport = new HttpTransport(
             options,
             new HttpClient(httpHandler),
+            null,
             clock: _fakeClock
         );
 
@@ -863,13 +865,13 @@ public partial class HttpTransportTests
             DiagnosticLogger = _testOutputLogger,
             SendClientReports = false,
             ClientReportRecorder = Substitute.For<IClientReportRecorder>(),
-            Debug = true,
-            BackpressureMonitor = backpressureMonitor
+            Debug = true
         };
 
         var httpTransport = new HttpTransport(
             options,
             new HttpClient(httpHandler),
+            backpressureMonitor,
             clock: _fakeClock
         );
 

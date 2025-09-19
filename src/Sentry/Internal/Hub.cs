@@ -18,6 +18,7 @@ internal class Hub : IHub, IDisposable
     private readonly RandomValuesFactory _randomValuesFactory;
     private readonly IReplaySession _replaySession;
     private readonly List<IDisposable> _integrationsToCleanup = new();
+    private readonly BackpressureMonitor? _backpressureMonitor;
 
 #if MEMORY_DUMP_SUPPORTED
     private readonly MemoryMonitor? _memoryMonitor;
@@ -46,7 +47,8 @@ internal class Hub : IHub, IDisposable
         IInternalScopeManager? scopeManager = null,
         RandomValuesFactory? randomValuesFactory = null,
         IReplaySession? replaySession = null,
-        ISampleRandHelper? sampleRandHelper = null)
+        ISampleRandHelper? sampleRandHelper = null,
+        BackpressureMonitor? backpressureMonitor = null)
     {
         if (string.IsNullOrWhiteSpace(options.Dsn))
         {
@@ -61,9 +63,9 @@ internal class Hub : IHub, IDisposable
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
         _clock = clock ?? SystemClock.Clock;
-        if (_options.EnableBackpressureHandling && _options.BackpressureMonitor is null)
+        if (_options.EnableBackpressureHandling)
         {
-            _options.BackpressureMonitor = new BackpressureMonitor(_options.DiagnosticLogger, clock);
+            _backpressureMonitor = backpressureMonitor ?? new BackpressureMonitor(_options.DiagnosticLogger, clock);
         }
         client ??= new SentryClient(options, randomValuesFactory: _randomValuesFactory, sessionManager: _sessionManager);
         _replaySession = replaySession ?? ReplaySession.Instance;
@@ -197,7 +199,7 @@ internal class Hub : IHub, IDisposable
             if (tracesSampler(samplingContext) is { } samplerSampleRate)
             {
                 // The TracesSampler trumps all other sampling decisions (even the trace header)
-                sampleRate = samplerSampleRate * _options.BackpressureMonitor.GetDownsampleFactor();
+                sampleRate = samplerSampleRate * _backpressureMonitor.GetDownsampleFactor();
                 isSampled = SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
                 if (isSampled is false)
                 {
@@ -216,7 +218,7 @@ internal class Hub : IHub, IDisposable
         if (isSampled == null)
         {
             var optionsSampleRate = _options.TracesSampleRate ?? 0.0;
-            sampleRate = optionsSampleRate * _options.BackpressureMonitor.GetDownsampleFactor();
+            sampleRate = optionsSampleRate * _backpressureMonitor.GetDownsampleFactor();
             isSampled = context.IsSampled ?? SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
             if (isSampled is false)
             {
@@ -867,11 +869,7 @@ internal class Hub : IHub, IDisposable
         }
         //Don't dispose of ScopeManager since we want dangling transactions to still be able to access tags.
 
-        if (_options.BackpressureMonitor is { } backpressureMonitor)
-        {
-            _options.BackpressureMonitor = null;
-            backpressureMonitor.Dispose();
-        }
+        _backpressureMonitor?.Dispose();
 
 #if __IOS__
             // TODO

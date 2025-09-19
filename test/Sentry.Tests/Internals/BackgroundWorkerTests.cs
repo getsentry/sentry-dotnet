@@ -4,7 +4,7 @@ using BackgroundWorker = Sentry.Internal.BackgroundWorker;
 
 namespace Sentry.Tests.Internals;
 
-public class BackgroundWorkerTests
+public class BackgroundWorkerTests : IDisposable
 {
     private readonly Fixture _fixture;
 
@@ -13,7 +13,12 @@ public class BackgroundWorkerTests
         _fixture = new Fixture(outputHelper);
     }
 
-    private class Fixture
+    public void Dispose()
+    {
+        _fixture.Dispose();
+    }
+
+    private class Fixture : IDisposable
     {
         public IClientReportRecorder ClientReportRecorder { get; private set; } = Substitute.For<IClientReportRecorder>();
         public ITransport Transport { get; set; } = Substitute.For<ITransport>();
@@ -23,6 +28,7 @@ public class BackgroundWorkerTests
         public SentryOptions SentryOptions { get; set; } = new();
 
         private readonly TimeSpan _defaultShutdownTimeout;
+        public BackpressureMonitor BackpressureMonitor { get; set; }
 
         public Fixture(ITestOutputHelper outputHelper)
         {
@@ -39,7 +45,6 @@ public class BackgroundWorkerTests
                     var token = callInfo.Arg<CancellationToken>();
                     return token.IsCancellationRequested ? Task.FromCanceled(token) : Task.CompletedTask;
                 });
-
             SentryOptions.Dsn = ValidDsn;
             SentryOptions.Debug = true;
             SentryOptions.DiagnosticLogger = Logger;
@@ -54,6 +59,7 @@ public class BackgroundWorkerTests
             => new(
                 Transport,
                 SentryOptions,
+                BackpressureMonitor,
                 CancellationTokenSource,
                 Queue);
 
@@ -67,6 +73,11 @@ public class BackgroundWorkerTests
             ClientReportRecorder = new ClientReportRecorder(SentryOptions);
             SentryOptions.ClientReportRecorder = ClientReportRecorder;
             return ClientReportRecorder;
+        }
+
+        public void Dispose()
+        {
+            BackpressureMonitor?.Dispose();
         }
     }
 
@@ -249,10 +260,9 @@ public class BackgroundWorkerTests
     {
         // Arrange
         var clock = new MockClock(DateTimeOffset.UtcNow);
-        using var backpressureMonitor = new BackpressureMonitor(null, clock, false);
+        _fixture.BackpressureMonitor = new BackpressureMonitor(null, clock, false);
         var envelope = Envelope.FromEvent(new SentryEvent());
         _fixture.SentryOptions.MaxQueueItems = 1;
-        _fixture.SentryOptions.BackpressureMonitor = backpressureMonitor;
 
         using var sut = _fixture.GetSut();
         sut.EnqueueEnvelope(envelope, process: false);
@@ -261,8 +271,8 @@ public class BackgroundWorkerTests
         sut.EnqueueEnvelope(envelope);
 
         // Assert
-        backpressureMonitor.LastQueueOverflowTicks.Should().Be(clock.GetUtcNow().Ticks);
-        backpressureMonitor.IsHealthy.Should().BeFalse();
+        _fixture.BackpressureMonitor.LastQueueOverflowTicks.Should().Be(clock.GetUtcNow().Ticks);
+        _fixture.BackpressureMonitor.IsHealthy.Should().BeFalse();
     }
 
     [Fact]

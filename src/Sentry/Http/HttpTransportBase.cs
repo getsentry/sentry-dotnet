@@ -16,6 +16,7 @@ public abstract class HttpTransportBase
     internal const string DefaultErrorMessage = "No message";
 
     private readonly SentryOptions _options;
+    private readonly BackpressureMonitor? _backpressureMonitor;
     private readonly ISystemClock _clock;
     private readonly Func<string, string?> _getEnvironmentVariable;
 
@@ -37,6 +38,24 @@ public abstract class HttpTransportBase
         ISystemClock? clock = default)
     {
         _options = options;
+        _clock = clock ?? SystemClock.Clock;
+        _getEnvironmentVariable = getEnvironmentVariable ?? options.SettingLocator.GetEnvironmentVariable;
+        _typeName = GetType().Name;
+    }
+
+    /// <summary>
+    /// Constructor for this class.
+    /// </summary>
+    /// <param name="options">The Sentry options.</param>
+    /// <param name="backpressureMonitor">The Sentry options.</param>
+    /// <param name="getEnvironmentVariable">An optional method used to read environment variables.</param>
+    /// <param name="clock">An optional system clock - used for testing.</param>
+    internal HttpTransportBase(SentryOptions options, BackpressureMonitor? backpressureMonitor,
+        Func<string, string?>? getEnvironmentVariable = default,
+        ISystemClock? clock = default)
+    {
+        _options = options;
+        _backpressureMonitor = backpressureMonitor;
         _clock = clock ?? SystemClock.Clock;
         _getEnvironmentVariable = getEnvironmentVariable ?? options.SettingLocator.GetEnvironmentVariable;
         _typeName = GetType().Name;
@@ -256,7 +275,7 @@ public abstract class HttpTransportBase
         }
 
         var now = _clock.GetUtcNow();
-        _options.BackpressureMonitor?.RecordRateLimitHit(now);
+        _backpressureMonitor?.RecordRateLimitHit(now);
 
         // Join to a string to handle both single-header and multi-header cases
         var rateLimitsEncoded = string.Join(",", rateLimitHeaderValues);

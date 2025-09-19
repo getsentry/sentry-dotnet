@@ -5,11 +5,11 @@ using Sentry.Tests.Internals;
 
 namespace Sentry.Tests;
 
-public partial class HubTests
+public partial class HubTests : IDisposable
 {
     private readonly ITestOutputHelper _output;
 
-    private class Fixture
+    private class Fixture : IDisposable
     {
         public SentryOptions Options { get; }
         public ISentryClient Client { get; set; }
@@ -18,6 +18,7 @@ public partial class HubTests
         public ISystemClock Clock { get; set; }
         public IReplaySession ReplaySession { get; }
         public ISampleRandHelper SampleRandHelper { get; set; }
+        public BackpressureMonitor BackpressureMonitor { get; set; }
 
         public Fixture()
         {
@@ -27,14 +28,22 @@ public partial class HubTests
                 TracesSampleRate = 1.0,
                 AutoSessionTracking = false
             };
-
             Client = Substitute.For<ISentryClient>();
-
             ReplaySession = Substitute.For<IReplaySession>();
         }
 
+        public void Dispose()
+        {
+            BackpressureMonitor?.Dispose();
+        }
+
         public Hub GetSut() => new(Options, Client, SessionManager, Clock, ScopeManager, replaySession: ReplaySession,
-            sampleRandHelper: SampleRandHelper);
+            sampleRandHelper: SampleRandHelper, backpressureMonitor: BackpressureMonitor);
+    }
+
+    public void Dispose()
+    {
+        _fixture.Dispose();
     }
 
     private readonly Fixture _fixture = new();
@@ -725,11 +734,11 @@ public partial class HubTests
         var transactionContext = new TransactionContext("name", "operation");
 
         var clock = new MockClock(DateTimeOffset.UtcNow);
-        var backpressureMonitor = new BackpressureMonitor(null, clock, enablePeriodicHealthCheck: false);
-        backpressureMonitor.SetDownsampleLevel(1);
-        _fixture.Options.BackpressureMonitor = backpressureMonitor;
+        _fixture.Options.EnableBackpressureHandling = true;
+        _fixture.BackpressureMonitor = new BackpressureMonitor(null, clock, enablePeriodicHealthCheck: false);
+        _fixture.BackpressureMonitor.SetDownsampleLevel(1);
         var sampleRate = 0.5f;
-        var expectedDownsampledRate = sampleRate * backpressureMonitor.DownsampleFactor;
+        var expectedDownsampledRate = sampleRate * _fixture.BackpressureMonitor.DownsampleFactor;
         if (usesTracesSampler)
         {
             _fixture.Options.TracesSampler = _ => sampleRate;
@@ -771,9 +780,9 @@ public partial class HubTests
         var clock = new MockClock(DateTimeOffset.UtcNow);
         _fixture.SampleRandHelper = Substitute.For<ISampleRandHelper>();
         _fixture.SampleRandHelper.GenerateSampleRand(Arg.Any<string>()).Returns(sampleRand);
-        var backpressureMonitor = new BackpressureMonitor(null, clock, enablePeriodicHealthCheck: false);
-        backpressureMonitor.SetDownsampleLevel(1);
-        _fixture.Options.BackpressureMonitor = backpressureMonitor;
+        _fixture.Options.EnableBackpressureHandling = true;
+        _fixture.BackpressureMonitor = new BackpressureMonitor(null, clock, enablePeriodicHealthCheck: false);
+        _fixture.BackpressureMonitor.SetDownsampleLevel(1);
         var sampleRate = 0.5f;
         if (usesTracesSampler)
         {
