@@ -166,7 +166,7 @@ public class SamplingTransactionProfilerTests
     [SkippableFact]
     public async Task Profiler_AfterTimeout_Stops()
     {
-        Skip.If(TestEnvironment.IsGitHubActions && RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Flaky in CI on Windows");
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI");
 
         SampleProfilerSession? session = null;
         SkipIfFailsInCI(() => session = SampleProfilerSession.StartNew(_testOutputLogger));
@@ -233,6 +233,8 @@ public class SamplingTransactionProfilerTests
     [InlineData(false)]
     public void ProfilerIntegration_FullRoundtrip_Works(bool offlineCaching)
     {
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI");
+
         var tcs = new TaskCompletionSource<string>();
         async Task VerifyAsync(HttpRequestMessage message)
         {

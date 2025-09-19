@@ -32,6 +32,11 @@ groupConfigs:
   trimTests:
     - "**/Sentry.TrimTest.csproj"
     - "**/Sentry.MauiTrimTest.csproj"
+  mobileOnly:
+    - "**/*Android*.csproj"
+    - "**/*Ios*.csproj"
+    - "**/*MacCatalyst*.csproj"
+    - "**/*Maui*.csproj"
 
 filterConfigs:
 
@@ -61,6 +66,7 @@ filterConfigs:
         - "windowsOnly"
         - "artefacts"
         - "trimTests"
+        - "mobileOnly"
       patterns:
         - "**/*Android*.csproj"
         - "**/*DeviceTests*.csproj"
@@ -240,6 +246,7 @@ filterConfigs:
       groups:
         - "artefacts"
         - "trimTests"
+        - "mobileOnly"
       patterns:
         - "**/*Bindings*.csproj"
         - "**/*Android*.csproj"
