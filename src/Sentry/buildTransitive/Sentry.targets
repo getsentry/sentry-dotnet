@@ -18,7 +18,7 @@
 
   <PropertyGroup>
     <SentryAttributesFile>Sentry.Attributes$(MSBuildProjectExtension.Replace('proj', ''))</SentryAttributesFile>
-    <ProguardUuid>$([System.Guid]::NewGuid())</ProguardUuid>
+    <SentryProGuardUUID Condition="'$(SentryProGuardUUID)' == ''">$([System.Guid]::NewGuid())</SentryProGuardUUID>
   </PropertyGroup>
 
   <Target Name="_SentryEnsureAndroidEnableAssemblyCompressionDisabled"
@@ -126,17 +126,14 @@
       <SentrySetCommitReleaseOptions Condition="'$(SentryOrg)' != ''">$(SentrySetCommitReleaseOptions) --org $(SentryOrg)</SentrySetCommitReleaseOptions>
       <SentrySetCommitReleaseOptions Condition="'$(SentryProject)' != ''">$(SentrySetCommitReleaseOptions) --project $(SentryProject)</SentrySetCommitReleaseOptions>
 
-      <SentryProguardOptions Condition="'$(ProguardUuid)' != ''">$(SentryProguardOptions) --uuid &quot;$(ProguardUuid)&quot;</SentryProguardOptions>
-      <SentryProguardOptions Condition="'$(ApplicationId)' != ''">$(SentryProguardOptions) --app-id &quot;$(ApplicationId)&quot;</SentryProguardOptions>
-      <SentryProguardOptions Condition="'$(ApplicationDisplayVersion)' != ''">$(SentryProguardOptions) --version &quot;$(ApplicationDisplayVersion)&quot;</SentryProguardOptions>
-      <SentryProguardOptions Condition="'$(ApplicationVersion)' != ''">$(SentryProguardOptions) --version-code &quot;$(ApplicationVersion)&quot;</SentryProguardOptions>
-      <SentryProguardOptions Condition="'$(SentryProguardOptions.Trim())' != ''">$(SentryProguardOptions.trim())</SentryProguardOptions>
+      <_SentryCLIProGuardOptions Condition="'$(SentryProGuardUUID)' != ''">$(_SentryCLIProGuardOptions) --uuid &quot;$(SentryProGuardUUID)&quot;</_SentryCLIProGuardOptions>
+      <_SentryCLIProGuardOptions Condition="'$(_SentryCLIProGuardOptions.Trim())' != ''">$(_SentryCLIProGuardOptions.Trim())</_SentryCLIProGuardOptions>
 
       <SentryCLIUploadOptions Condition="'$(SentryOrg)' != ''">$(SentryCLIUploadOptions) --org $(SentryOrg)</SentryCLIUploadOptions>
       <SentryCLIUploadOptions Condition="'$(SentryProject)' != ''">$(SentryCLIUploadOptions) --project $(SentryProject)</SentryCLIUploadOptions>
       <SentryCLIDebugFilesUploadCommand>$(SentryCLIBaseCommand) debug-files upload</SentryCLIDebugFilesUploadCommand>
       <SentryCLIDebugFilesUploadCommand Condition="'$(SentryCLIUploadOptions.Trim())' != ''">$(SentryCLIDebugFilesUploadCommand) $(SentryCLIUploadOptions.Trim())</SentryCLIDebugFilesUploadCommand>
-      <SentryCLIProGuardMappingUploadCommand>$(SentryCLIBaseCommand) upload-proguard $(SentryProguardOptions)</SentryCLIProGuardMappingUploadCommand>
+      <SentryCLIProGuardMappingUploadCommand>$(SentryCLIBaseCommand) upload-proguard $(_SentryCLIProGuardOptions)</SentryCLIProGuardMappingUploadCommand>
       <SentryCLIProGuardMappingUploadCommand Condition="'$(SentryCLIUploadOptions.Trim())' != ''">$(SentryCLIProGuardMappingUploadCommand) $(SentryCLIUploadOptions.Trim())</SentryCLIProGuardMappingUploadCommand>
     </PropertyGroup>
 
@@ -276,14 +273,13 @@
 
   <Target Name="UpdateAndroidMetadata" BeforeTargets="GetAssemblyAttributes"
           Condition="
-            '$(TargetFramework)' != ''
-            and $(TargetFramework.Contains('-android'))
+            $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'
             and '$(SentryUploadAndroidProguardMapping)' == 'true'">
 
     <ItemGroup>
       <AssemblyAttribute Include="Android.App.MetaData">
         <_Parameter1>io.sentry.proguard-uuid</_Parameter1>
-        <Value>$(ProguardUuid)</Value>
+        <Value>$(SentryProGuardUUID)</Value>
       </AssemblyAttribute>
     </ItemGroup>
   </Target>
