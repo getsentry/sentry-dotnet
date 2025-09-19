@@ -69,7 +69,7 @@
            We're explicitly skipping uploads for Sentry projects because they interfere with CLI integration test asserts. -->
       <UseSentryCLI Condition="
         '$(UseSentryCLI)' == ''
-        and ('$(SentryUploadSymbols)' == 'true' or '$(SentryUploadSources)' == 'true' or $(SentryUploadAndroidProguardMapping) == 'true' or $(SentryCreateRelease) == 'true' or $(SentrySetCommits) == 'true')
+        and ('$(SentryUploadSymbols)' == 'true' or '$(SentryUploadSources)' == 'true' or $(SentryUploadAndroidProGuardMapping) == 'true' or $(SentryCreateRelease) == 'true' or $(SentrySetCommits) == 'true')
         and '$(MSBuildProjectName)' != 'Sentry'
         and !$(MSBuildProjectName.StartsWith('Sentry.'))">true</UseSentryCLI>
     </PropertyGroup>
@@ -274,7 +274,7 @@
   <Target Name="UpdateAndroidMetadata" BeforeTargets="GetAssemblyAttributes"
           Condition="
             $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'
-            and '$(SentryUploadAndroidProguardMapping)' == 'true'">
+            and '$(SentryUploadAndroidProGuardMapping)' == 'true'">
 
     <ItemGroup>
       <AssemblyAttribute Include="Android.App.MetaData">
@@ -284,9 +284,9 @@
     </ItemGroup>
   </Target>
 
-  <!-- Upload Android Proguard mapping file to Sentry after the build. -->
-  <Target Name="UploadAndroidProguardMappingFileToSentry" AfterTargets="Build" DependsOnTargets="PrepareSentryCLI"
-          Condition="'$(SentryCLI)' != '' and '$(SentryUploadAndroidProguardMapping)' == 'true' And '$(AndroidProguardMappingFile)' != ''">
+  <!-- Upload Android ProGuard mapping file to Sentry after the build. -->
+  <Target Name="UploadAndroidProGuardMappingFileToSentry" AfterTargets="Build" DependsOnTargets="PrepareSentryCLI"
+          Condition="'$(SentryCLI)' != '' and '$(SentryUploadAndroidProGuardMapping)' == 'true' And '$(AndroidProguardMappingFile)' != ''">
 
     <Message Importance="High" Text="Preparing to upload Android Proguard mapping to Sentry for '$(MSBuildProjectName)': $(AndroidProguardMappingFile))" />
 
