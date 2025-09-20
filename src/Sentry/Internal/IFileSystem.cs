@@ -10,6 +10,7 @@ internal interface IFileSystem
     // Note: This is not comprehensive.  If you need other filesystem methods, add to this interface,
     // then implement in both Sentry.Internal.FileSystem and Sentry.Testing.FakeFileSystem.
 
+    public IEnumerable<string> EnumerateDirectories(string path, string searchPattern);
     public IEnumerable<string> EnumerateFiles(string path);
     public IEnumerable<string> EnumerateFiles(string path, string searchPattern);
     public IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption);
@@ -22,6 +23,7 @@ internal interface IFileSystem
     public bool CreateDirectory(string path);
     public bool DeleteDirectory(string path, bool recursive = false);
     public bool CreateFileForWriting(string path, out Stream fileStream);
+    public bool TryCreateLockFile(string path, out Stream fileStream);
     public bool WriteAllTextToFile(string path, string contents);
     public bool MoveFile(string sourceFileName, string destFileName, bool overwrite = false);
     public bool DeleteFile(string path);
