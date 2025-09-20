@@ -2,6 +2,10 @@
 
 ## 5.15.1
 
+### Features
+
+- Add (experimental) _Structured Logs_ integration for `Serilog` ([#4462](https://github.com/getsentry/sentry-dotnet/pull/4462))
+
 ### Fixes
 
 - Fail when building Blazor WASM with Profiling. We don't support profiling in Blazor WebAssembly projects. ([#4512](https://github.com/getsentry/sentry-dotnet/pull/4512))
