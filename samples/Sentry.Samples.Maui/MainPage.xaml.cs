@@ -52,6 +52,24 @@ public partial class MainPage
 #pragma warning restore CS0618
     }
 
+    private void OnNreClicked(object sender, EventArgs e)
+    {
+        Console.WriteLine("### BEGIN OnNreClicked");
+        try
+        {
+            object obj = null;
+            obj.ToString();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"### CATCH {ex}");
+        }
+        finally
+        {
+            Console.WriteLine("### END OnNreClicked");
+        }
+    }
+
     private void OnBackgroundThreadUnhandledExceptionClicked(object sender, EventArgs e)
     {
 #pragma warning disable CS0618
