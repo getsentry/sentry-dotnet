@@ -156,7 +156,7 @@ internal class BackpressureMonitor : IDisposable
         catch (Exception ex)
         {
             // Log rather than throw
-            _logger?.LogWarning("Error in BackpressureMonitor.Dispose: {0}", ex);
+            _logger?.LogWarning(ex, "Error in BackpressureMonitor.Dispose");
         }
         finally
         {
