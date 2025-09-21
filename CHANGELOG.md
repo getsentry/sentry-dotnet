@@ -1,10 +1,12 @@
 # Changelog
 
-## 5.15.1
+## Unreleased
 
 ### Features
 
 - Added an option for Automatic backpressure handling. When enabled this automatically reduces the sample rate when the SDK detects events being dropped. ([#4452](https://github.com/getsentry/sentry-dotnet/pull/4452))
+
+## 5.15.1
 
 ### Fixes
 
