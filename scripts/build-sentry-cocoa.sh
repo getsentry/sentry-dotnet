@@ -54,13 +54,13 @@ echo "::endgroup::"
 
 # Copy headers - used for generating bindings
 mkdir Carthage/Headers
-find Carthage/Build-ios/Sentry.xcframework/ios-arm64 -name '*.h' -exec cp {} Carthage/Headers \;
+find Carthage/Build-ios/Sentry.xcframework/ios-arm64_arm64e -name '*.h' -exec cp {} Carthage/Headers \;
 
 # Remove anything we don't want to bundle in the nuget package.
 find Carthage/Build* \( -name Headers -o -name PrivateHeaders -o -name Modules \) -exec rm -rf {} +
 rm -rf Carthage/output-*
 
-cp ../../.git/modules/modules/sentry-cocoa/HEAD Carthage/.built-from-sha
+cp .git/HEAD Carthage/.built-from-sha
 echo ""
 
 popd >/dev/null
