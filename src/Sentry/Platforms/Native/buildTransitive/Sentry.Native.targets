@@ -7,6 +7,7 @@
 
   Note:Target framework conditions should be kept synchronized with src/Sentry/buildTransitive/Sentry.Native.targets -->
 <Project>
+
   <!-- Helpful properties copied from Sentry.props -->
   <PropertyGroup Condition="'$(TargetFramework)' != ''">
     <_SentryTargetFrameworkVersion>$([MSBuild]::GetTargetFrameworkVersion($(TargetFramework)))</_SentryTargetFrameworkVersion>

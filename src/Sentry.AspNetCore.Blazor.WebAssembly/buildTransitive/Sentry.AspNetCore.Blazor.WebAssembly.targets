@@ -1,8 +1,0 @@
-<Project>
-
-  <!-- Suppress WASM0001 warning for Blazor WebAssembly projects using AOT compilation -->
-  <!-- This warning is expected when using Sentry with Blazor WebAssembly AOT due to reflection usage -->
-  <PropertyGroup Condition="'$(UsingMicrosoftNETSdkBlazorWebAssembly)' == 'true'">
-    <NoWarn>$(NoWarn);WASM0001</NoWarn>
-  </PropertyGroup>
-</Project>
