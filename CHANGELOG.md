@@ -1,5 +1,7 @@
 # Changelog
 
+## Version 6.0.0
+
 ## 5.15.1
 
 ### Fixes
