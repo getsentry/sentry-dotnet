@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
+          - os: ubuntu-22.04
             rid: linux-x64
           - os: ubuntu-22.04-arm
             rid: linux-arm64
@@ -82,7 +82,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
+          - os: ubuntu-22.04
             rid: linux-x64
             slnf: Sentry-CI-Build-Linux.slnf
           - os: ubuntu-22.04-arm
@@ -267,7 +267,7 @@ jobs:
           path: src
 
       - name: Integration test
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
         with:
           path: integration-test
 
@@ -348,7 +348,7 @@ jobs:
           path: src
 
       - name: Test AOT
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
         env:
           RuntimeIdentifier: ${{ matrix.rid }}
         with:
