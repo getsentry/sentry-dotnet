@@ -12,7 +12,6 @@ on:
 
 jobs:
   build-sentry-native:
-    if: false
     name: sentry-native (${{ matrix.rid }})
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
@@ -74,7 +73,6 @@ jobs:
         shell: pwsh
 
   build:
-    if: false
     needs: build-sentry-native
     name: .NET (${{ matrix.rid }})
     runs-on: ${{ matrix.os }}
@@ -274,7 +272,6 @@ jobs:
           path: integration-test
 
   msbuild:
-    if: false
     needs: build-sentry-native
     name: MSBuild
     runs-on: windows-latest
@@ -319,7 +316,6 @@ jobs:
   # Unsupported Native AOT runtimes should have SentryNative auto-disabled
   # to avoid native library loading errors on startup.
   unsupported-aot:
-    if: false
     needs: build
     name: Unsupported AOT (${{ matrix.rid }})
     runs-on: ${{ matrix.os }}
@@ -359,7 +355,6 @@ jobs:
           path: integration-test/aot.Tests.ps1
 
   trim-analysis:
-    if: false
     needs: build-sentry-native
     name: Trim analysis
     runs-on: macos-15
@@ -402,7 +397,7 @@ jobs:
 
   test-solution-filters:
     runs-on: ubuntu-22.04
-    if: false
+    if: ${{ !startsWith(github.ref_name, 'release/') }}
 
     steps:
       - uses: actions/checkout@v5
