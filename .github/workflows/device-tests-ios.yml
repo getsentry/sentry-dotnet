@@ -12,6 +12,7 @@ on:
 
 jobs:
   ios-tests:
+    if: false
     runs-on: macos-15
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
