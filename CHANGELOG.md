@@ -6,6 +6,12 @@
 
 - In MAUI Android apps, generate and inject UUID to APK and upload ProGuard mapping to Sentry with the UUID ([#4532](https://github.com/getsentry/sentry-dotnet/pull/4532))
 
+### Dependencies
+
+- Bump Java SDK from v8.21.1 to v8.22.0 ([#4552](https://github.com/getsentry/sentry-dotnet/pull/4552))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8220)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.21.1...8.22.0)
+
 ## 5.15.1
 
 ### Fixes
