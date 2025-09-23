@@ -33,9 +33,9 @@ try
     {
         $Tfm += '-android'
         $group = 'android'
+        $command = 'run'
         $buildDir = $CI ? 'bin' : "test/Sentry.Maui.Device.TestApp/bin/Release/$Tfm/android-$arch"
         $arguments = @(
-            '--app', "$buildDir/io.sentry.dotnet.maui.device.testapp-Signed.apk",
             '--package-name', 'io.sentry.dotnet.maui.device.testapp',
             '--launch-timeout', '00:10:00',
             '--timeout', '00:25:00',
@@ -52,6 +52,7 @@ try
     {
         $Tfm += '-ios'
         $group = 'apple'
+        $command = 'test'
         # Always use x64 on iOS, since arm64 doesn't support JIT, which is required for tests using NSubstitute
         $arch = 'x64'
         $buildDir = "test/Sentry.Maui.Device.TestApp/bin/Release/$Tfm/iossimulator-$arch"
@@ -65,9 +66,12 @@ try
         )
 
         $udid = Get-IosSimulatorUdid -IosVersion '18.5' -Verbose
-        if ($udid) {
+        if ($udid)
+        {
             $arguments += @('--device', $udid)
-        } else {
+        }
+        else
+        {
             Write-Host "No suitable simulator found; proceeding without a specific --device"
         }
     }
@@ -95,11 +99,18 @@ try
         Remove-Item -Recurse -Force test_output -ErrorAction SilentlyContinue
         try
         {
+            if ($Platform -eq 'android')
+            {
+                xharness android install --app "$buildDir/io.sentry.dotnet.maui.device.testapp-Signed.apk" --package-name io.sentry.dotnet.maui.device.testapp --output-directory test_output
+                adb shell pm grant io.sentry.dotnet.maui.device.testapp android.permission.READ_EXTERNAL_STORAGE
+                adb shell pm grant io.sentry.dotnet.maui.device.testapp android.permission.WRITE_EXTERNAL_STORAGE
+            }
+
             if ($VerbosePreference)
             {
                 $arguments += '-v'
             }
-            xharness $group test $arguments --output-directory=test_output
+            xharness $group $command $arguments --output-directory=test_output
             if ($LASTEXITCODE -ne 0)
             {
                 throw 'xharness run failed with non-zero exit code'
