@@ -88,7 +88,7 @@
   <!-- Build the Sentry Cocoa SDK from source -->
   <Target Name="_BuildCocoaSDK"
           Condition="$([MSBuild]::IsOSPlatform('OSX')) And Exists('$(SentryCocoaCache).git')"
-          Inputs="..\..\modules\modules\sentry-cocoa\.git\HEAD" Outputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha">
+          Inputs="..\..\modules\sentry-cocoa\.git\HEAD" Outputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha">
 
     <Message Importance="High" Text="Building the Cocoa SDK from source." />
     <Exec Command="bash ../../scripts/build-sentry-cocoa.sh" IgnoreStandardErrorWarningFormat="true" />
