@@ -328,12 +328,18 @@ internal static class C
     // Blazor WASM interop generators.
     internal struct sentry_value_t
     {
-        internal ulong Bits { get; set; }
+        private ulong _bits;
+
+        internal ulong Bits
+        {
+            readonly get => _bits;
+            set => _bits = value;
+        }
 
         internal double Double
         {
-            readonly get => BitConverter.UInt64BitsToDouble(Bits);
-            set => Bits = BitConverter.DoubleToUInt64Bits(value);
+            readonly get => BitConverter.UInt64BitsToDouble(_bits);
+            set => _bits = BitConverter.DoubleToUInt64Bits(value);
         }
     }
 
