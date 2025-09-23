@@ -4,6 +4,7 @@
 
 ### Fixes
 
+- Upload linked PDBs to fix non-IL-stripped symbolication for iOS ([#4527](https://github.com/getsentry/sentry-dotnet/pull/4527))
 - In MAUI Android apps, generate and inject UUID to APK and upload ProGuard mapping to Sentry with the UUID ([#4532](https://github.com/getsentry/sentry-dotnet/pull/4532))
 
 ## 5.15.1

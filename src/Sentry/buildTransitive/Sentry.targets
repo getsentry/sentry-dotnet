@@ -221,7 +221,7 @@
 
     <PropertyGroup>
       <SentryCLIUploadItems>$(SentryCLIUploadDirectory)</SentryCLIUploadItems>
-      <SentryCLIUploadItems Condition="Exists('$(IntermediateOutputPath)linked/$(AssemblyName).pdb')">$(SentryCLIUploadItems) $(IntermediateOutputPath)linked/$(AssemblyName).pdb</SentryCLIUploadItems>
+      <SentryCLIUploadItems Condition="Exists('$(IntermediateOutputPath)linked')">$(SentryCLIUploadItems) $(IntermediateOutputPath)linked/*.pdb</SentryCLIUploadItems>
       <SentryCLIUploadItems Condition="'@(AndroidNativeSymbolFilesExceptDll)' != ''">$(SentryCLIUploadItems) @(AndroidNativeSymbolFilesExceptDll -> '%(Identity)', ' ')</SentryCLIUploadItems>
     </PropertyGroup>
 
