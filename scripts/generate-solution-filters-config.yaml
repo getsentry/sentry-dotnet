@@ -48,7 +48,7 @@ filterConfigs:
       patterns:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
-        - "**/*Maui.Device.TestApp.csproj"
+        - "**/*Maui.Device.*TestApp.csproj"
 
   - outputPath: Sentry-CI-Build-Linux-NoMobile.slnf
     solution: .generated.NoMobile.sln
@@ -81,6 +81,7 @@ filterConfigs:
         - "**/*AndroidTestApp.csproj"
         - "**/*DeviceTests*.csproj"
         - "**/*.AspNet.Tests.csproj"
+        - "**/*Maui.Device.IntegrationTestApp.csproj"
 
   - outputPath: Sentry-CI-Build-Windows.slnf
     include:
@@ -99,7 +100,7 @@ filterConfigs:
         # AssemblyReader tests are flaky on Windows: https://github.com/getsentry/sentry-dotnet/issues/4091
         - "**/*Sentry.Android.AssemblyReader.Tests.csproj"
         - "**/*DeviceTests*.csproj"
-        - "**/*Sentry.Maui.Device.TestApp.csproj"
+        - "**/*Sentry.Maui.Device.*TestApp.csproj"
         - "**/*Sentry.Samples.Android.csproj"
         - "**/*OpenTelemetry.AspNet.csproj"
 
@@ -120,7 +121,7 @@ filterConfigs:
         # AssemblyReader tests are flaky on Windows: https://github.com/getsentry/sentry-dotnet/issues/4091
         - "**/*Sentry.Android.AssemblyReader.Tests.csproj"
         - "**/*DeviceTests*.csproj"
-        - "**/*Sentry.Maui.Device.TestApp.csproj"
+        - "**/*Sentry.Maui.Device.*TestApp.csproj"
         - "**/*Sentry.Samples.Android.csproj"
         - "**/*OpenTelemetry.AspNet.csproj"
         # Depends on LocalDb or SQLitePCL which are x64
