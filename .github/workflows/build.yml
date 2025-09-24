@@ -267,7 +267,7 @@ jobs:
           path: src
 
       - name: Integration test
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
         with:
           path: integration-test
 
@@ -348,7 +348,7 @@ jobs:
           path: src
 
       - name: Test AOT
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
         env:
           RuntimeIdentifier: ${{ matrix.rid }}
         with:
