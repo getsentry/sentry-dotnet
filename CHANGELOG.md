@@ -8,6 +8,12 @@
 - In MAUI Android apps, generate and inject UUID to APK and upload ProGuard mapping to Sentry with the UUID ([#4532](https://github.com/getsentry/sentry-dotnet/pull/4532))
 - Fixed WASM0001 warning when building Blazor WebAssembly projects ([#4519](https://github.com/getsentry/sentry-dotnet/pull/4519))
 
+### Dependencies
+
+- Bump CLI from v2.54.0 to v2.55.0 ([#4556](https://github.com/getsentry/sentry-dotnet/pull/4556))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2550)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.54.0...2.55.0)
+
 ## 5.15.1
 
 ### Fixes
