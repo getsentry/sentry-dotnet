@@ -1,12 +1,5 @@
 name: build
 
-x-common-actions:
-  - &checkout actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5
-  - &cache actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4
-  - &cache-restore actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4
-  - &upload-artifact actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # tag: v4
-  - &download-artifact actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # tag: v5
-
 on:
   push:
     branches:
@@ -18,6 +11,22 @@ on:
   workflow_dispatch:
 
 jobs:
+  # This job won't actually run, it just defines reusable anchors
+  _common:
+    if: false  # prevents execution
+    runs-on: ubuntu-latest
+    steps:
+      - &checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5
+      - &cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4
+      - &cache-restore
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4
+      - &upload-artifact
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # tag: v4
+      - &download-artifact
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # tag: v5
+
   build-sentry-native:
     name: sentry-native (${{ matrix.rid }})
     runs-on: ${{ matrix.os }}

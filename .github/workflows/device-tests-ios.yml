@@ -1,9 +1,5 @@
 name: iOS Device Tests
 
-x-common-actions:
-  - &checkout actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5
-  - &upload-artifact actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # tag: v4
-
 on:
   push:
     branches:
@@ -15,6 +11,16 @@ on:
   workflow_dispatch:
 
 jobs:
+  # This job won't actually run, it just defines reusable anchors
+  _common:
+    if: false  # prevents execution
+    runs-on: ubuntu-latest
+    steps:
+      - &checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5
+      - &upload-artifact
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # tag: v4
+
   ios-tests:
     runs-on: macos-15
     env:
