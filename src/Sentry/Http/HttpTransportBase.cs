@@ -34,8 +34,8 @@ public abstract class HttpTransportBase
     /// <param name="getEnvironmentVariable">An optional method used to read environment variables.</param>
     /// <param name="clock">An optional system clock - used for testing.</param>
     protected HttpTransportBase(SentryOptions options,
-        Func<string, string?>? getEnvironmentVariable = default,
-        ISystemClock? clock = default)
+        Func<string, string?>? getEnvironmentVariable = null,
+        ISystemClock? clock = null)
     {
         _options = options;
         _clock = clock ?? SystemClock.Clock;
@@ -51,14 +51,11 @@ public abstract class HttpTransportBase
     /// <param name="getEnvironmentVariable">An optional method used to read environment variables.</param>
     /// <param name="clock">An optional system clock - used for testing.</param>
     internal HttpTransportBase(SentryOptions options, BackpressureMonitor? backpressureMonitor,
-        Func<string, string?>? getEnvironmentVariable = default,
-        ISystemClock? clock = default)
+        Func<string, string?>? getEnvironmentVariable = null,
+        ISystemClock? clock = null)
+        : this(options, getEnvironmentVariable, clock)
     {
-        _options = options;
         _backpressureMonitor = backpressureMonitor;
-        _clock = clock ?? SystemClock.Clock;
-        _getEnvironmentVariable = getEnvironmentVariable ?? options.SettingLocator.GetEnvironmentVariable;
-        _typeName = GetType().Name;
     }
 
     // Keep track of rate limits and their expiry dates.
