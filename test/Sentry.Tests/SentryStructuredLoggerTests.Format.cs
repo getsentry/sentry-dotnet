@@ -33,40 +33,6 @@ public partial class SentryStructuredLoggerTests
     [InlineData(SentryLogLevel.Warning)]
     [InlineData(SentryLogLevel.Error)]
     [InlineData(SentryLogLevel.Fatal)]
-    public void Log_NoParameters_TemplateNotSet(SentryLogLevel level)
-    {
-        // Arrange
-        _fixture.Options.Experimental.EnableLogs = true;
-        var logger = _fixture.GetSut();
-
-        Envelope envelope = null!;
-        _fixture.Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => envelope = arg));
-
-        // Act
-        logger.Log(level, "Template string without arguments");
-        logger.Flush();
-
-        // Assert
-        _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
-        var envelopeItem = envelope.Items.Should().ContainSingle().Which;
-        var log = envelopeItem.Payload.Should().BeOfType<JsonSerializable>().Which.Source.Should().BeOfType<StructuredLog>().Which;
-        log.Should().NotBeNull();
-        var items = log.Items;
-        items.Length.Should().Be(1);
-        var item = items[0];
-
-        // If there are no sentry.message.parameter.X attributes included in the log, then
-        // the SDK MUST NOT attach a sentry.message.template attribute.
-        item.Template.Should().BeNull();
-    }
-
-    [Theory]
-    [InlineData(SentryLogLevel.Trace)]
-    [InlineData(SentryLogLevel.Debug)]
-    [InlineData(SentryLogLevel.Info)]
-    [InlineData(SentryLogLevel.Warning)]
-    [InlineData(SentryLogLevel.Error)]
-    [InlineData(SentryLogLevel.Fatal)]
     public void Log_Disabled_DoesNotCaptureEnvelope(SentryLogLevel level)
     {
         _fixture.Options.Experimental.EnableLogs.Should().BeFalse();

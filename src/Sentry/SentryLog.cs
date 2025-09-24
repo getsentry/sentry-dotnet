@@ -224,7 +224,9 @@ public sealed class SentryLog
         writer.WritePropertyName("attributes");
         writer.WriteStartObject();
 
-        if (Template is not null)
+        // the SDK MUST NOT attach a sentry.message.template attribute if there are no parameters
+        // https://develop.sentry.dev/sdk/telemetry/logs/#default-attributes
+        if (Template is not null && Parameters is { Length: > 0 })
         {
             SentryAttributeSerializer.WriteStringAttribute(writer, "sentry.message.template", Template);
         }

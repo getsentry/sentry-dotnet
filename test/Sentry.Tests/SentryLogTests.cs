@@ -67,6 +67,31 @@ public class SentryLogTests
         notFound.Should().BeNull();
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void WriteTo_NoParameters_NoTemplate(bool hasParameters)
+    {
+        // Arrange
+        ImmutableArray<KeyValuePair<string,object>> parameters = hasParameters
+            ? [new KeyValuePair<string, object>("param", "params")]
+            : [];
+        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Debug, "message")
+        {
+            Template = "template",
+            Parameters = parameters,
+            ParentSpanId = ParentSpanId,
+        };
+
+        // Act
+        // var document = log.ToJsonString();
+        var document = log.ToJsonDocument(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
+        var attributes = document.RootElement.GetProperty("attributes");
+
+        // Assert
+        attributes.TryGetProperty("sentry.message.template", out _).Should().Be(hasParameters);
+    }
+
     [Fact]
     public void WriteTo_Envelope_MinimalSerializedSentryLog()
     {
