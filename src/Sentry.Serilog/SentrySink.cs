@@ -80,7 +80,7 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
 
     private bool IsEnabled(LogEvent logEvent)
     {
-        var options = _hubAccessor()?.GetSentryOptions();
+        var options = _hubAccessor().GetSentryOptions();
 
         return logEvent.Level >= _options.MinimumEventLevel
             || logEvent.Level >= _options.MinimumBreadcrumbLevel
