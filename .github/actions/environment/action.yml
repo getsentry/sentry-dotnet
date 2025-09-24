@@ -67,7 +67,7 @@ runs:
         distribution: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && 'microsoft' || 'temurin' }}
         java-version: '11'
 
-    - name: Install Mono
+    - name: Install Mono (macOS)
       if: runner.os == 'macOS'
       shell: bash
       # Attempt to install Mono, allowing it to fail silently
@@ -75,6 +75,14 @@ runs:
       run: |
         brew install mono || true
         brew link --overwrite mono
+
+    - name: Install Mono (Ubuntu)
+      if: ${{ runner.os == 'Linux' && !matrix.container }}
+      shell: bash
+      run: |
+        sudo apt install -y mono-devel
+        # restore perms for actions/setup-dotnet
+        sudo chmod -R a+rw /usr/share/dotnet
 
     - name: Install .NET SDK
       uses: actions/setup-dotnet@v4
