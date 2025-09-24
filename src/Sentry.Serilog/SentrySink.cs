@@ -165,6 +165,9 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
                 level: logEvent.Level.ToBreadcrumbLevel());
         }
 
+        // Read the options from the Hub, rather than the Sink's Serilog-Options, because 'EnableLogs' is declared in the base 'SentryOptions', rather than the derived 'SentrySerilogOptions'.
+        // In cases where Sentry's Serilog-Sink is added without a DSN (i.e., without initializing the SDK) and the SDK is initialized differently (e.g., through ASP.NET Core),
+        // then the 'EnableLogs' option of this Sink's Serilog-Options is default, but the Hub's Sentry-Options have the actual user-defined value configured.
         var options = hub.GetSentryOptions();
         if (options?.Experimental.EnableLogs is true)
         {
