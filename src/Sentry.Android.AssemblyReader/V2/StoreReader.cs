@@ -7,7 +7,7 @@
 
 namespace Sentry.Android.AssemblyReader.V2;
 
-internal partial class StoreReaderV2 : AssemblyStoreReader
+internal partial class StoreReader : AssemblyStoreReader
 {
     // Bit 31 is set for 64-bit platforms, cleared for the 32-bit ones
 #if NET9_0
@@ -35,7 +35,7 @@ internal partial class StoreReaderV2 : AssemblyStoreReader
     private Header? header;
     private ulong elfOffset = 0;
 
-    static StoreReaderV2()
+    static StoreReader()
     {
         var paths = new List<string> {
             GetArchPath (AndroidTargetArch.Arm64),
@@ -76,7 +76,7 @@ internal partial class StoreReaderV2 : AssemblyStoreReader
         }
     }
 
-    public StoreReaderV2(Stream store, string path, DebugLogger? logger)
+    public StoreReader(Stream store, string path, DebugLogger? logger)
         : base(store, path, logger)
     {
         supportedVersions = new HashSet<uint> {

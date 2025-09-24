@@ -51,10 +51,10 @@ public class AndroidAssemblyReaderTests
         switch (TargetFramework)
         {
             case "net10.0":
-                Assert.IsType<AndroidAssemblyStoreReaderV2>(sut);
+                Assert.IsType<AndroidAssemblyStoreReader>(sut);
                 break;
             case "net9.0":
-                Assert.IsType<AndroidAssemblyStoreReaderV2>(sut);
+                Assert.IsType<AndroidAssemblyStoreReader>(sut);
                 break;
             default:
                 throw new NotSupportedException($"Unsupported target framework: {TargetFramework}");
@@ -71,10 +71,10 @@ public class AndroidAssemblyReaderTests
         switch (TargetFramework)
         {
             case "net10.0":
-                Assert.IsType<AndroidAssemblyDirectoryReaderV2>(sut);
+                Assert.IsType<AndroidAssemblyDirectoryReader>(sut);
                 break;
             case "net9.0":
-                Assert.IsType<AndroidAssemblyDirectoryReaderV2>(sut);
+                Assert.IsType<AndroidAssemblyDirectoryReader>(sut);
                 break;
             default:
                 throw new NotSupportedException($"Unsupported target framework: {TargetFramework}");

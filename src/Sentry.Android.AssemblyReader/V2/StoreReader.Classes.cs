@@ -7,7 +7,7 @@
 
 namespace Sentry.Android.AssemblyReader.V2;
 
-internal partial class StoreReaderV2
+internal partial class StoreReader
 {
     private sealed class Header
     {

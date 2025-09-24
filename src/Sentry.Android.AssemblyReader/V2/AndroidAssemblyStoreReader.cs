@@ -1,17 +1,17 @@
 namespace Sentry.Android.AssemblyReader.V2;
 
-internal class AndroidAssemblyStoreReaderV2 : IAndroidAssemblyReader
+internal class AndroidAssemblyStoreReader : IAndroidAssemblyReader
 {
     private readonly IList<AssemblyStoreExplorer> _explorers;
     private readonly DebugLogger? _logger;
 
-    private AndroidAssemblyStoreReaderV2(IList<AssemblyStoreExplorer> explorers, DebugLogger? logger)
+    private AndroidAssemblyStoreReader(IList<AssemblyStoreExplorer> explorers, DebugLogger? logger)
     {
         _explorers = explorers;
         _logger = logger;
     }
 
-    public static bool TryReadStore(string inputFile, IList<string> supportedAbis, DebugLogger? logger, [NotNullWhen(true)] out AndroidAssemblyStoreReaderV2? reader)
+    public static bool TryReadStore(string inputFile, IList<string> supportedAbis, DebugLogger? logger, [NotNullWhen(true)] out AndroidAssemblyStoreReader? reader)
     {
         List<AssemblyStoreExplorer> supportedExplorers = [];
 
@@ -67,7 +67,7 @@ internal class AndroidAssemblyStoreReaderV2 : IAndroidAssemblyReader
             return false;
         }
 
-        reader = new AndroidAssemblyStoreReaderV2(supportedExplorers, logger);
+        reader = new AndroidAssemblyStoreReader(supportedExplorers, logger);
         return true;
     }
 
