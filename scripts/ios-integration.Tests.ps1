@@ -76,7 +76,7 @@ Describe 'MAUI app' {
 
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.ApplicationException`""
-        # TODO: add -Not after fixing redundant SIGABRT (#3954)
-        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"SIGABRT`""
+        # TODO: fix redundant SIGABRT (#3954)
+        { $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"SIGABRT`"" } | Should -Throw
     }
 }

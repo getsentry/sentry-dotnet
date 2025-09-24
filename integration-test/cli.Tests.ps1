@@ -1,7 +1,7 @@
 # This file contains test cases for https://pester.dev/
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-. $PSScriptRoot/common.ps1
+. $PSScriptRoot/setup.ps1
 
 Describe 'Console apps (<framework>) - normal build' -ForEach @(
     @{ framework = "net8.0" }
