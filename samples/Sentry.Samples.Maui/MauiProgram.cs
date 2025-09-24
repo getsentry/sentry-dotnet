@@ -30,12 +30,9 @@ public static class MauiProgram
                 options.MaxBreadcrumbs = 1000;
 
                 // Be aware that screenshots may contain PII
-                // TODO: separate integration test app
-                // options.AttachScreenshot = true;
+                options.AttachScreenshot = true;
 
                 options.Debug = true;
-                // TODO: separate integration test app
-                options.DiagnosticLevel = SentryLevel.Info;
                 options.Experimental.EnableLogs = true;
                 options.SampleRate = 1.0F;
 

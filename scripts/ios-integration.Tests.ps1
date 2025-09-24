@@ -12,7 +12,7 @@ Describe 'MAUI app' {
             Param([string]$url)
             $dsn = $url.Replace('http://', 'http://key@') + '/0'
 
-            Push-Location $PSScriptRoot/../samples/Sentry.Samples.Maui
+            Push-Location $PSScriptRoot/../test/Sentry.Maui.Device.IntegrationTestApp
             try
             {
                 $tfm = "net9.0-ios18.0"
@@ -26,47 +26,54 @@ Describe 'MAUI app' {
                     "--target=$target",
                     "--output-directory=integration_test_output"
                 )
-                if ($udid) {
+                if ($udid)
+                {
                     $arguments += @("--device=$udid")
-                } else {
+                }
+                else
+                {
                     Write-Host "No suitable simulator found; proceeding without a specific --device"
                 }
 
                 Write-Host "::group::Build"
-                $env:SENTRY_DSN = $dsn
-                dotnet build Sentry.Samples.Maui.csproj `
+                dotnet build Sentry.Maui.Device.IntegrationTestApp.csproj `
                     --configuration Release `
                     --framework $tfm `
                     --runtime $rid
                 | ForEach-Object { Write-Host $_ }
+                $LASTEXITCODE | Should -Be 0
                 Write-Host '::endgroup::'
 
                 Write-Host "::group::Install"
                 xharness apple install $arguments `
-                    --app bin/Release/$tfm/$rid/Sentry.Samples.Maui.app
+                    --app bin/Release/$tfm/$rid/Sentry.Maui.Device.IntegrationTestApp.app
                 | ForEach-Object { Write-Host $_ }
+                $LASTEXITCODE | Should -Be 0
                 Write-Host '::endgroup::'
 
                 Write-Host "::group::Crash"
                 xharness apple just-run $arguments `
-                    --app io.sentry.dotnet.samples.maui `
+                    --app io.sentry.dotnet.maui.device.integrationtestapp `
                     --set-env SENTRY_DSN=$dsn `
                     --set-env SENTRY_CRASH_TYPE=Managed
                 | ForEach-Object { Write-Host $_ }
+                $LASTEXITCODE | Should -Be 0
                 Write-Host '::endgroup::'
 
                 Write-Host "::group::Re-run"
                 xharness apple just-run $arguments `
-                    --app io.sentry.dotnet.samples.maui `
+                    --app io.sentry.dotnet.maui.device.integrationtestapp `
                     --set-env SENTRY_DSN=$dsn `
                     --set-env SENTRY_CRASH_TYPE=Exit
                 | ForEach-Object { Write-Host $_ }
+                $LASTEXITCODE | Should -Be 0
                 Write-Host '::endgroup::'
 
                 Write-Host "::group::Uninstall"
                 xharness apple uninstall $arguments `
-                    --app io.sentry.dotnet.samples.maui
+                    --app io.sentry.dotnet.maui.device.integrationtestapp
                 | ForEach-Object { Write-Host $_ }
+                $LASTEXITCODE | Should -Be 0
                 Write-Host '::endgroup::'
             }
             finally
