@@ -33,8 +33,8 @@ jobs:
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
 
-      - name: Checkout
-        uses: *checkout
+      - <<: *checkout
+        name: Checkout
         with:
           submodules: recursive
 
@@ -55,7 +55,7 @@ jobs:
 
       - name: Upload results
         if: success() || failure()
-        uses: *upload-artifact
+        <<: *upload-artifact
         with:
           name: device-test-ios-results
           path: test_output
