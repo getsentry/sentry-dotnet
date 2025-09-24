@@ -24,7 +24,7 @@ Describe 'MAUI app' {
                 $arguments = @(
                     "-v",
                     "--target=$target",
-                    "--output-directory=test_output"
+                    "--output-directory=integration_test_output"
                 )
                 if ($udid) {
                     $arguments += @("--device=$udid")
