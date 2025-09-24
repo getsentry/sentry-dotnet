@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Added `EnableBackpressureHandling` option for Automatic backpressure handling. When enabled this automatically reduces the sample rate when the SDK detects events being dropped. ([#4452](https://github.com/getsentry/sentry-dotnet/pull/4452))
+
 ### Fixes
 
 - Upload linked PDBs to fix non-IL-stripped symbolication for iOS ([#4527](https://github.com/getsentry/sentry-dotnet/pull/4527))

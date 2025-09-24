@@ -716,6 +716,7 @@ namespace Sentry
         public bool DisableSentryHttpMessageHandler { get; set; }
         public string? Distribution { get; set; }
         public string? Dsn { get; set; }
+        public bool EnableBackpressureHandling { get; set; }
         public bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }
         public string? Environment { get; set; }

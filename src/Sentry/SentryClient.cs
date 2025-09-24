@@ -16,6 +16,7 @@ namespace Sentry;
 public class SentryClient : ISentryClient, IDisposable
 {
     private readonly SentryOptions _options;
+    private readonly BackpressureMonitor? _backpressureMonitor;
     private readonly ISessionManager _sessionManager;
     private readonly RandomValuesFactory _randomValuesFactory;
     private readonly Enricher _enricher;
@@ -41,9 +42,11 @@ public class SentryClient : ISentryClient, IDisposable
         SentryOptions options,
         IBackgroundWorker? worker = null,
         RandomValuesFactory? randomValuesFactory = null,
-        ISessionManager? sessionManager = null)
+        ISessionManager? sessionManager = null,
+        BackpressureMonitor? backpressureMonitor = null)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
+        _backpressureMonitor = backpressureMonitor;
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
         _enricher = new Enricher(options);
@@ -52,7 +55,7 @@ public class SentryClient : ISentryClient, IDisposable
 
         if (worker == null)
         {
-            var composer = new SdkComposer(options);
+            var composer = new SdkComposer(options, backpressureMonitor);
             Worker = composer.CreateBackgroundWorker();
         }
         else
@@ -307,7 +310,6 @@ public class SentryClient : ISentryClient, IDisposable
     /// <returns>A task to await for the flush operation.</returns>
     public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
-    // TODO: this method needs to be refactored, it's really hard to analyze nullability
     private SentryId DoSendEvent(SentryEvent @event, SentryHint? hint, Scope? scope)
     {
         var filteredExceptions = ApplyExceptionFilters(@event.Exception);
@@ -375,16 +377,22 @@ public class SentryClient : ISentryClient, IDisposable
 
         if (_options.SampleRate != null)
         {
-            if (!_randomValuesFactory.NextBool(_options.SampleRate.Value))
+            var sampleRate = _options.SampleRate.Value;
+            var downsampledRate = sampleRate * _backpressureMonitor.GetDownsampleFactor();
+            var sampleRand = _randomValuesFactory.NextDouble();
+            if (sampleRand >= downsampledRate)
             {
-                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
-                _options.LogDebug("Event sampled.");
+                // If sampling out is only a result of the downsampling then we specify the reason as backpressure
+                // management... otherwise the event would have been sampled out anyway, so it's just regular sampling.
+                var reason = sampleRand < sampleRate ? DiscardReason.Backpressure : DiscardReason.SampleRate;
+                _options.ClientReportRecorder.RecordDiscardedEvent(reason, DataCategory.Error);
+                _options.LogDebug("Event sampled out.");
                 return SentryId.Empty;
             }
         }
         else
         {
-            _options.LogDebug("Event not sampled.");
+            _options.LogDebug("Event sampled in.");
         }
 
         if (!_options.SendDefaultPii)
