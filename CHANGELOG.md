@@ -11,41 +11,8 @@
 
 ### Fixes
 
-- Upload linked PDBs to fix non-IL-stripped symbolication for iOS ([#4527](https://github.com/getsentry/sentry-dotnet/pull/4527))
-- In MAUI Android apps, generate and inject UUID to APK and upload ProGuard mapping to Sentry with the UUID ([#4532](https://github.com/getsentry/sentry-dotnet/pull/4532))
-- Fixed WASM0001 warning when building Blazor WebAssembly projects ([#4519](https://github.com/getsentry/sentry-dotnet/pull/4519))
-
-### Dependencies
-
-- Bump Cocoa SDK from v8.56.0 to v8.56.1 ([#4555](https://github.com/getsentry/sentry-dotnet/pull/4555))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8561)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.56.0...8.56.1)
-- Bump Native SDK from v0.11.0 to v0.11.1 ([#4557](https://github.com/getsentry/sentry-dotnet/pull/4557))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0111)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.11.0...0.11.1)
-- Bump CLI from v2.54.0 to v2.55.0 ([#4556](https://github.com/getsentry/sentry-dotnet/pull/4556))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2550)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.54.0...2.55.0)
-
-## 5.15.1
-
-### Fixes
-
 - Fail when building Blazor WASM with Profiling. We don't support profiling in Blazor WebAssembly projects. ([#4512](https://github.com/getsentry/sentry-dotnet/pull/4512))
 - Do not overwrite user IP if it is set manually in ASP.NET sdk ([#4513](https://github.com/getsentry/sentry-dotnet/pull/4513))
-- Fix `SentryOptions.Native.SuppressSignalAborts` and `SuppressExcBadAccess` on iOS ([#4521](https://github.com/getsentry/sentry-dotnet/pull/4521))
-
-### Dependencies
-
-- Bump Cocoa SDK from v8.55.1 to v8.56.0 ([#4528](https://github.com/getsentry/sentry-dotnet/pull/4528))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8560)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.55.1...8.56.0)
-- Bump CLI from v2.53.0 to v2.54.0 ([#4541](https://github.com/getsentry/sentry-dotnet/pull/4541))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2540)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.53.0...2.54.0)
-- Bump Native SDK from v0.10.1 to v0.11.0 ([#4542](https://github.com/getsentry/sentry-dotnet/pull/4542))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0110)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.10.1...0.11.0)
 
 ## 5.15.0
 

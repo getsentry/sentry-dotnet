@@ -322,25 +322,14 @@ internal static class C
     [DllImport("sentry-native")]
     internal static extern void sentry_value_decref(sentry_value_t value);
 
-    // Mirrors the native `sentry_value_t` union (uint64_t or double).
-    // Implemented with a single ulong backing field and BitConverter
-    // to reinterpret values, since explicit unions cause issues with
-    // Blazor WASM interop generators.
+    // native union sentry_value_u/t
+    [StructLayout(LayoutKind.Explicit)]
     internal struct sentry_value_t
     {
-        private ulong _bits;
-
-        internal ulong Bits
-        {
-            readonly get => _bits;
-            set => _bits = value;
-        }
-
-        internal double Double
-        {
-            readonly get => BitConverter.UInt64BitsToDouble(_bits);
-            set => _bits = BitConverter.DoubleToUInt64Bits(value);
-        }
+        [FieldOffset(0)]
+        internal ulong _bits;
+        [FieldOffset(0)]
+        internal double _double;
     }
 
     [DllImport("sentry-native")]

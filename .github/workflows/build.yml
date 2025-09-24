@@ -19,7 +19,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
             rid: linux-x64
           - os: ubuntu-22.04-arm
             rid: linux-arm64
@@ -82,7 +82,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
+          - os: ubuntu-22.04 # Pin ubuntu to ensure mono is installed
             rid: linux-x64
             slnf: Sentry-CI-Build-Linux.slnf
           - os: ubuntu-22.04-arm
@@ -269,12 +269,12 @@ jobs:
 
       - name: Integration test
         if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         with:
           path: integration-test
 
       # For the linux-musl runtimes we have to pin the ContainerBaseImage for preview or RC builds, since
-      # these don't conform to the normal naming conventions and don't get resolved automatically. We do
+      # these don't conform to the normal naming conventions and don't get resolved automatically. We do 
       # by passing it as parameter to aot.Tests.ps1 via an environment variable
       - name: Integration test (musl)
         if: ${{ (matrix.rid == 'linux-musl-x64') || (matrix.rid == 'linux-musl-arm64') }}
@@ -361,7 +361,7 @@ jobs:
           path: src
 
       - name: Test AOT
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         env:
           RuntimeIdentifier: ${{ matrix.rid }}
         with:

@@ -1041,47 +1041,6 @@ public class SentrySdkTests : IDisposable
         }
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void ProcessOnBeforeSend_NativeErrorSuppressionBeforeHubInit(bool suppressNativeErrors)
-    {
-        // Arrange
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            DiagnosticLogger = _logger,
-            IsGlobalModeEnabled = true,
-            Debug = true,
-            AutoSessionTracking = false,
-            BackgroundWorker = Substitute.For<IBackgroundWorker>(),
-            InitNativeSdks = false,
-        };
-        options.Native.SuppressExcBadAccess = suppressNativeErrors;
-
-        var scope = new Scope(options);
-        // `SIGABRT` must be filtered out early on startup during
-        // the Cocoa SDK init before the Hub instance has been created
-        var hub = DisabledHub.Instance;
-
-        var evt = new Sentry.CocoaSdk.SentryEvent();
-        var ex = new Sentry.CocoaSdk.SentryException("Not checked", "EXC_BAD_ACCESS");
-        evt.Exceptions = [ex];
-
-        // Act
-        var result = SentrySdk.ProcessOnBeforeSend(options, evt, hub);
-
-        // Assert
-        if (suppressNativeErrors)
-        {
-            result.Should().BeNull();
-        }
-        else
-        {
-            result.Exceptions.First().Type.Should().Be("EXC_BAD_ACCESS");
-        }
-    }
-
     [Fact]
     public void ProcessOnBeforeSend_OptionsBeforeOnSendRuns()
     {
