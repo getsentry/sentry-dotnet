@@ -15,7 +15,7 @@ jobs:
       matrix:
         include:
           - name: Cocoa SDK
-            path: modules/sentry-cocoa.properties
+            path: modules/sentry-cocoa
           - name: Java SDK
             path: scripts/update-java.ps1
           - name: Native SDK
