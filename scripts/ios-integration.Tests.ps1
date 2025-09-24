@@ -1,10 +1,12 @@
 # This file contains test cases for https://pester.dev/
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-. $PSScriptRoot/ios-simulator-utils.ps1
 . $PSScriptRoot/../integration-test/common.ps1
 
 Describe 'MAUI app' {
+    BeforeAll {
+        . $PSScriptRoot/ios-simulator-utils.ps1
+    }
     It 'Produces the expected exceptions' {
         $result = Invoke-SentryServer {
             Param([string]$url)
