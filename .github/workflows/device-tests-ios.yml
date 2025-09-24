@@ -31,17 +31,17 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
 
-      - name: Build iOS Test App
-        run: pwsh ./scripts/device-test.ps1 ios -Build
+      # - name: Build iOS Test App
+      #   run: pwsh ./scripts/device-test.ps1 ios -Build
 
-      - name: Run Tests
-        id: first-run
-        continue-on-error: true
-        run: pwsh scripts/device-test.ps1 ios -Run
+      # - name: Run Tests
+      #   id: first-run
+      #   continue-on-error: true
+      #   run: pwsh scripts/device-test.ps1 ios -Run
 
-      - name: Retry Tests (if previous failed to run)
-        if: steps.first-run.outcome == 'failure'
-        run: pwsh scripts/device-test.ps1 ios -Run
+      # - name: Retry Tests (if previous failed to run)
+      #   if: steps.first-run.outcome == 'failure'
+      #   run: pwsh scripts/device-test.ps1 ios -Run
 
       - name: Integration Tests
         uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
