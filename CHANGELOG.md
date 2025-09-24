@@ -7,6 +7,7 @@
 - Upload linked PDBs to fix non-IL-stripped symbolication for iOS ([#4527](https://github.com/getsentry/sentry-dotnet/pull/4527))
 - In MAUI Android apps, generate and inject UUID to APK and upload ProGuard mapping to Sentry with the UUID ([#4532](https://github.com/getsentry/sentry-dotnet/pull/4532))
 - Fixed WASM0001 warning when building Blazor WebAssembly projects ([#4519](https://github.com/getsentry/sentry-dotnet/pull/4519))
+- Pin GitHub Actions to Commit-SHA ([#4562](https://github.com/getsentry/sentry-dotnet/pull/4562))
 
 ### Dependencies
 
