@@ -20,6 +20,12 @@
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2550)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.54.0...2.55.0)
 
+### Dependencies
+
+- Bump Java SDK from v8.21.1 to v8.22.0 ([#4552](https://github.com/getsentry/sentry-dotnet/pull/4552))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8220)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.21.1...8.22.0)
+
 ## 5.15.1
 
 ### Fixes
