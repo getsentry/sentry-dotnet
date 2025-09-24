@@ -70,15 +70,6 @@ internal enum SentryRRWebEventType : long
 }
 
 [Native]
-internal enum SentrySessionStatus : ulong
-{
-    Ok = 0,
-    Exited = 1,
-    Crashed = 2,
-    Abnormal = 3
-}
-
-[Native]
 internal enum SentryTransactionNameSource : long
 {
     Custom = 0,

@@ -225,7 +225,7 @@ interface SentryBreadcrumb : SentrySerializable
 
     // -(NSDictionary<NSString *,id> * _Nonnull)serialize;
     [Export ("serialize")]
-    NSDictionary<NSString, NSObject> Serialize();
+    new NSDictionary<NSString, NSObject> Serialize();
 
     // -(BOOL)isEqualToBreadcrumb:(SentryBreadcrumb * _Nonnull)breadcrumb;
     [Export ("isEqualToBreadcrumb:")]
@@ -930,11 +930,6 @@ interface SentrySpan : SentrySerializable
     [Abstract]
     [NullAllowed, Export ("baggageHttpHeader")]
     string BaggageHttpHeader { get; }
-
-    // @required -(NSDictionary<NSString *,id> * _Nonnull)serialize;
-    [Abstract]
-    [Export ("serialize")]
-    NSDictionary<NSString, NSObject> Serialize();
 }
 
 // @interface SentryHub : NSObject
@@ -1499,10 +1494,6 @@ interface SentryOptions
     [Export ("attachScreenshot")]
     bool AttachScreenshot { get; set; }
 
-    // @property (nonatomic, strong) SentryViewScreenshotOptions * _Nonnull screenshot;
-    [Export ("screenshot", ArgumentSemantic.Strong)]
-    SentryViewScreenshotOptions Screenshot { get; set; }
-
     // @property (assign, nonatomic) BOOL attachViewHierarchy;
     [Export ("attachViewHierarchy")]
     bool AttachViewHierarchy { get; set; }
@@ -1873,7 +1864,7 @@ partial interface SentryScope : SentrySerializable
 
     // -(NSDictionary<NSString *,id> * _Nonnull)serialize;
     [Export ("serialize")]
-    NSDictionary<NSString, NSObject> Serialize();
+    new NSDictionary<NSString, NSObject> Serialize();
 
     // -(void)setContextValue:(NSDictionary<NSString *,id> * _Nonnull)value forKey:(NSString * _Nonnull)key __attribute__((swift_name("setContext(value:key:)")));
     [Export ("setContextValue:forKey:")]

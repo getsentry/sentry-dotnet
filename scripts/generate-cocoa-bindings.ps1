@@ -278,6 +278,9 @@ $Text = $Text -replace '([\[,] )iOS \(', '$1Introduced (PlatformName.iOS, '
 # Make interface partial if we need to access private APIs.  Other parts will be defined in PrivateApiDefinitions.cs
 $Text = $Text -replace '(?m)^interface SentryScope', 'partial $&'
 
+# Prefix SentryBreadcrumb.Serialize and SentryScope.Serialize with new (since these hide the base method)
+$Text = $Text -replace '(?m)(^\s*\/\/[^\r\n]*$\s*\[Export \("serialize"\)\]$\s*)(NSDictionary)', '${1}new $2'
+
 $Text = $Text -replace '.*SentryEnvelope .*?[\s\S]*?\n\n', ''
 $Text = $Text -replace '.*typedef.*SentryOnAppStartMeasurementAvailable.*?[\s\S]*?\n\n', ''
 

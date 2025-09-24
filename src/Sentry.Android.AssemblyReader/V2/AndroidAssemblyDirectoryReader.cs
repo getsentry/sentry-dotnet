@@ -1,13 +1,13 @@
 namespace Sentry.Android.AssemblyReader.V2;
 
 // The "Old" app type - where each DLL is placed in the 'assemblies' directory as an individual file.
-internal sealed class AndroidAssemblyDirectoryReaderV2 : IAndroidAssemblyReader
+internal sealed class AndroidAssemblyDirectoryReader : IAndroidAssemblyReader
 {
     private DebugLogger? Logger { get; }
     private HashSet<AndroidTargetArch> SupportedArchitectures { get; } = new();
     private readonly ArchiveAssemblyHelper _archiveAssemblyHelper;
 
-    public AndroidAssemblyDirectoryReaderV2(string apkPath, IList<string> supportedAbis, DebugLogger? logger)
+    public AndroidAssemblyDirectoryReader(string apkPath, IList<string> supportedAbis, DebugLogger? logger)
     {
         Logger = logger;
         foreach (var abi in supportedAbis)
