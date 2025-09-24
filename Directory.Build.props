@@ -1,8 +1,8 @@
 <Project>
 
   <PropertyGroup>
-    <VersionPrefix>5.15.0</VersionPrefix>
-    <VersionSuffix>rc.1</VersionSuffix>
+    <VersionPrefix>6.0.0</VersionPrefix>
+    <VersionSuffix>prerelease</VersionSuffix>
     <LangVersion>13</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

@@ -8,6 +8,7 @@
 - Added support for v3 of the Android AssemblyStore format that is used in .NET 10 and dropped support for v1 that was used in .NET 8 ([#4516](https://github.com/getsentry/sentry-dotnet/pull/4516))
 
 ## Unreleased
+## 5.15.1
 
 ### Fixes
 
