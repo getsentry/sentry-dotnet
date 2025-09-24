@@ -25,6 +25,19 @@ public partial class MainPage
         NativeCrashBtn.IsVisible = false;
 #endif
         base.OnAppearing();
+
+#pragma warning disable CS0618
+        var crashTypeEnv = Environment.GetEnvironmentVariable("SENTRY_CRASH_TYPE");
+        if (Enum.TryParse<CrashType>(crashTypeEnv, ignoreCase: true, out var crashType))
+        {
+            SentrySdk.CauseCrash(crashType);
+        }
+        else if (crashTypeEnv.Equals("exit", StringComparison.OrdinalIgnoreCase))
+        {
+            SentrySdk.Flush();
+            Environment.Exit(0);
+        }
+#pragma warning restore CS0618
     }
 
     private void OnCounterClicked(object sender, EventArgs e)
