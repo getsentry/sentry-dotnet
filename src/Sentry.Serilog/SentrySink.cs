@@ -97,8 +97,7 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
             }
         }
 
-        var hub = _hubAccessor();
-        if (hub is null || !hub.IsEnabled)
+        if (_hubAccessor() is not { IsEnabled: true } hub)
         {
             return;
         }
