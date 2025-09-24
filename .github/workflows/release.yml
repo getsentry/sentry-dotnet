@@ -31,7 +31,7 @@ jobs:
           fetch-depth: 0
 
       - name: Prepare release ${{ github.event.inputs.version }}
-        uses: getsentry/action-prepare-release@v1
+        uses: getsentry/action-prepare-release@3cea80dc3938c0baf5ec4ce752ecb311f8780cdc # tag: v1
         env:
           GITHUB_TOKEN: ${{ steps.token.outputs.token }}
         with:
