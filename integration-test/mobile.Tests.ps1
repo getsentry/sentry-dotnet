@@ -33,7 +33,8 @@ Describe 'MAUI app' {
                 "-v",
                 "--target=ios-simulator-64",
                 "--device=$udid",
-                "--output-directory=integration_test_output"
+                "--output-directory=integration_test_output",
+                "--timeout=00:25:00"
             )
 
             Write-Host "::group::Build Sentry.Maui.Device.IntegrationTestApp.csproj"
