@@ -17,15 +17,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - &checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # tag: v5
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       - &cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
       - &cache-restore
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # tag: v4
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
       - &upload-artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # tag: v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
       - &download-artifact
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # tag: v5
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+      - &sentry-github-workflow
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
 
   build-sentry-native:
     name: sentry-native (${{ matrix.rid }})
@@ -267,7 +269,7 @@ jobs:
 
       - name: Sparse checkout
         if: env.CI_PUBLISHING_BUILD == 'true'
-        uses: *checkout
+        <<: *checkout
         with:
           # We only check out what is absolutely necessary to reduce a chance of local files impacting
           # integration tests, e.g. Directory.Build.props, nuget.config, ...
@@ -283,7 +285,7 @@ jobs:
           path: src
 
       - name: Integration test
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+        <<: *sentry-github-workflow
         with:
           path: integration-test
 
@@ -364,7 +366,7 @@ jobs:
           path: src
 
       - name: Test AOT
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+        <<: *sentry-github-workflow
         env:
           RuntimeIdentifier: ${{ matrix.rid }}
         with:
@@ -416,7 +418,7 @@ jobs:
     if: ${{ !startsWith(github.ref_name, 'release/') }}
 
     steps:
-      - uses: *checkout
+      - <<: *checkout
         with:
           submodules: recursive
 
