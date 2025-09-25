@@ -1881,7 +1881,6 @@ public class SentryOptions
         /// <summary>
         /// When set to <see langword="true"/>, logs are sent to Sentry.
         /// Defaults to <see langword="false"/>.
-        /// <para>This API is experimental and it may change in the future.</para>
         /// </summary>
         /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
         public bool EnableLogs { get; set; } = false;
@@ -1893,7 +1892,6 @@ public class SentryOptions
         /// <summary>
         /// Sets a callback function to be invoked before sending the log to Sentry.
         /// When the delegate throws an <see cref="Exception"/> during invocation, the log will not be captured.
-        /// <para>This API is experimental and it may change in the future.</para>
         /// </summary>
         /// <remarks>
         /// It can be used to modify the log object before being sent to Sentry.
