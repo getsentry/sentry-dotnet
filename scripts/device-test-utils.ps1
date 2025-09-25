@@ -18,7 +18,7 @@ function Get-IosSimulatorUdid {
             'com.apple.CoreSimulator.SimDeviceType.iPhone-16',
             'com.apple.CoreSimulator.SimDeviceType.iPhone-15'
         ),
-        [switch]$PreferredStates = @('Shutdown','Booted')
+        [string[]]$PreferredStates = @('Shutdown','Booted')
     )
 
     try {
