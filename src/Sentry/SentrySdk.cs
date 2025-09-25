@@ -290,7 +290,6 @@ static partial class SentrySdk
     /// <remarks>
     /// This and related experimental APIs may change in the future.
     /// </remarks>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public static class Experimental
     {
         /// <inheritdoc cref="IHub.Logger" />

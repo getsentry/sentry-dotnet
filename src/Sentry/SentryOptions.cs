@@ -1864,7 +1864,6 @@ public class SentryOptions
     /// <remarks>
     /// This and related experimental APIs may change in the future.
     /// </remarks>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public SentryExperimentalOptions Experimental { get; set; } = new();
 
     /// <summary>
@@ -1873,7 +1872,6 @@ public class SentryOptions
     /// <remarks>
     /// This and related experimental APIs may change in the future.
     /// </remarks>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public sealed class SentryExperimentalOptions
     {
         internal SentryExperimentalOptions()

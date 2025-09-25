@@ -187,7 +187,6 @@ namespace Sentry
     public interface IHub : Sentry.ISentryClient, Sentry.ISentryScopeManager
     {
         Sentry.SentryId LastEventId { get; }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         Sentry.SentryStructuredLogger Logger { get; }
         void BindException(System.Exception exception, Sentry.ISpan span);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope);
@@ -612,35 +611,24 @@ namespace Sentry
         [System.Runtime.Serialization.EnumMember(Value="fatal")]
         Fatal = 4,
     }
-    [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
     [System.Diagnostics.DebuggerDisplay("SentryLog \\{ Level = {Level}, Message = \'{Message}\' \\}")]
     [System.Runtime.CompilerServices.RequiredMember]
     public sealed class SentryLog
     {
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         [System.Runtime.CompilerServices.RequiredMember]
         public Sentry.SentryLogLevel Level { get; init; }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         [System.Runtime.CompilerServices.RequiredMember]
         public string Message { get; init; }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public System.Collections.Immutable.ImmutableArray<System.Collections.Generic.KeyValuePair<string, object>> Parameters { get; init; }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public Sentry.SpanId? ParentSpanId { get; init; }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public string? Template { get; init; }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         [System.Runtime.CompilerServices.RequiredMember]
         public System.DateTimeOffset Timestamp { get; init; }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         [System.Runtime.CompilerServices.RequiredMember]
         public Sentry.SentryId TraceId { get; init; }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void SetAttribute(string key, object value) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public bool TryGetAttribute(string key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out object? value) { }
     }
-    [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
     public enum SentryLogLevel
     {
         Trace = 1,
@@ -720,7 +708,6 @@ namespace Sentry
         public bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }
         public string? Environment { get; set; }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public Sentry.SentryOptions.SentryExperimentalOptions Experimental { get; set; }
         public System.Collections.Generic.IList<Sentry.HttpStatusCodeRange> FailedRequestStatusCodes { get; set; }
         public System.Collections.Generic.IList<Sentry.StringOrRegex> FailedRequestTargets { get; set; }
@@ -807,7 +794,6 @@ namespace Sentry
         public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryTransaction?> beforeSendTransaction) { }
         public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryHint, Sentry.SentryTransaction?> beforeSendTransaction) { }
         public Sentry.SentryOptions UseStackTraceFactory(Sentry.Extensibility.ISentryStackTraceFactory sentryStackTraceFactory) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public sealed class SentryExperimentalOptions
         {
             public bool EnableLogs { get; set; }
@@ -904,7 +890,6 @@ namespace Sentry
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, string? description) { }
         public static void UnsetTag(string key) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public static class Experimental
         {
             public static Sentry.SentryStructuredLogger Logger { get; }
@@ -988,34 +973,21 @@ namespace Sentry
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryStackTrace FromJson(System.Text.Json.JsonElement json) { }
     }
-    [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
     public abstract class SentryStructuredLogger
     {
         protected abstract void CaptureLog(Sentry.SentryLog log);
         protected abstract void Flush();
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void LogDebug(string template, params object[] parameters) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void LogDebug(System.Action<Sentry.SentryLog> configureLog, string template, params object[] parameters) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void LogError(string template, params object[] parameters) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void LogError(System.Action<Sentry.SentryLog> configureLog, string template, params object[] parameters) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void LogFatal(string template, params object[] parameters) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void LogFatal(System.Action<Sentry.SentryLog> configureLog, string template, params object[] parameters) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void LogInfo(string template, params object[] parameters) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void LogInfo(System.Action<Sentry.SentryLog> configureLog, string template, params object[] parameters) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void LogTrace(string template, params object[] parameters) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void LogTrace(System.Action<Sentry.SentryLog> configureLog, string template, params object[] parameters) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void LogWarning(string template, params object[] parameters) { }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public void LogWarning(System.Action<Sentry.SentryLog> configureLog, string template, params object[] parameters) { }
     }
     public sealed class SentryThread : Sentry.ISentryJsonSerializable
@@ -1410,7 +1382,6 @@ namespace Sentry.Extensibility
         public static readonly Sentry.Extensibility.DisabledHub Instance;
         public bool IsEnabled { get; }
         public Sentry.SentryId LastEventId { get; }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public Sentry.SentryStructuredLogger Logger { get; }
         public void BindClient(Sentry.ISentryClient client) { }
         public void BindException(System.Exception exception, Sentry.ISpan span) { }
@@ -1458,7 +1429,6 @@ namespace Sentry.Extensibility
         public static readonly Sentry.Extensibility.HubAdapter Instance;
         public bool IsEnabled { get; }
         public Sentry.SentryId LastEventId { get; }
-        [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public Sentry.SentryStructuredLogger Logger { get; }
         public void AddBreadcrumb(string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public void AddBreadcrumb(Sentry.Infrastructure.ISystemClock clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
