@@ -45,6 +45,7 @@ jobs:
 
       - name: Integration Tests
         id: first-integration-test-run
+        continue-on-error: true
         uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
         with:
           path: integration-test/mobile.Tests.ps1
