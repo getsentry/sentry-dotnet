@@ -2,23 +2,9 @@
 
 public partial class MainPage : ContentPage
 {
-    int count = 0;
-
     public MainPage()
     {
         InitializeComponent();
-    }
-
-    private void OnCounterClicked(object? sender, EventArgs e)
-    {
-        count++;
-
-        if (count == 1)
-            CounterBtn.Text = $"Clicked {count} time";
-        else
-            CounterBtn.Text = $"Clicked {count} times";
-
-        SemanticScreenReader.Announce(CounterBtn.Text);
     }
 
     protected override void OnAppearing()
@@ -31,11 +17,23 @@ public partial class MainPage : ContentPage
         {
             SentrySdk.CauseCrash(crashType);
         }
-        else if (crashTypeEnv?.Equals("exit", StringComparison.OrdinalIgnoreCase) == true)
-        {
-            SentrySdk.Flush();
-            Environment.Exit(0);
-        }
 #pragma warning restore CS0618
+
+        var testActionEnv = Environment.GetEnvironmentVariable("SENTRY_TEST_ACTION");
+        if (testActionEnv?.Equals("NullReferenceException", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            try
+            {
+                object? obj = null;
+                _ = obj.ToString();
+            }
+            catch (NullReferenceException ex)
+            {
+                SentrySdk.CaptureException(ex);
+            }
+        }
+
+        SentrySdk.Flush();
+        Environment.Exit(0);
     }
 }
