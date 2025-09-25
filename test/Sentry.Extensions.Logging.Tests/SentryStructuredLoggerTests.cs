@@ -111,6 +111,7 @@ public class SentryStructuredLoggerTests : IDisposable
         log.ParentSpanId.Should().Be(parentSpanId);
         log.AssertAttribute("sentry.environment", "my-environment");
         log.AssertAttribute("sentry.release", "my-release");
+        log.AssertAttribute("sentry.origin", "auto");
         log.AssertAttribute("sentry.sdk.name", "SDK Name");
         log.AssertAttribute("sentry.sdk.version", "SDK Version");
         log.AssertAttribute("category.name", _fixture.CategoryName);
