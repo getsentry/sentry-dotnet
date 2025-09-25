@@ -73,7 +73,7 @@ public class SentryLogTests
     public void WriteTo_NoParameters_NoTemplate(bool hasParameters)
     {
         // Arrange
-        ImmutableArray<KeyValuePair<string,object>> parameters = hasParameters
+        ImmutableArray<KeyValuePair<string, object>> parameters = hasParameters
             ? [new KeyValuePair<string, object>("param", "params")]
             : [];
         var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Debug, "message")
