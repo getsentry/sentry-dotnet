@@ -5,14 +5,18 @@ $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/../scripts/device-test-utils.ps1
 
 BeforeDiscovery {
-    Install-XHarness
-    $script:udid = Get-IosSimulatorUdid
+    # Prefer an already booted simulator (by device-tests-ios.yml in the CI,
+    # or a manually started one when testing locally), to avoid slowing down
+    # "normal" integration tests
+    $script:udid = Get-IosSimulatorUdid -PreferredStates @('Booted')
 }
 
 Describe 'MAUI app on iOS (<tfm>)' -ForEach @(
     @{ tfm = "net9.0-ios18.0" }
 ) -Skip:(-not $IsMacOS -or -not $script:udid) {
     BeforeAll {
+        Install-XHarness
+
         $arch = ($(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
         $rid = "iossimulator-$arch"
         $arguments = @(

@@ -14,10 +14,11 @@ function Get-IosSimulatorUdid {
     param(
         [string]$IosVersion = '18.5',
         [string[]]$PreferredDeviceTypes = @(
-        'com.apple.CoreSimulator.SimDeviceType.iPhone-XS',
-        'com.apple.CoreSimulator.SimDeviceType.iPhone-16',
-        'com.apple.CoreSimulator.SimDeviceType.iPhone-15'
-    )
+            'com.apple.CoreSimulator.SimDeviceType.iPhone-XS',
+            'com.apple.CoreSimulator.SimDeviceType.iPhone-16',
+            'com.apple.CoreSimulator.SimDeviceType.iPhone-15'
+        ),
+        [switch]$PreferredStates = @('Shutdown','Booted')
     )
 
     try {
@@ -71,7 +72,7 @@ function Get-IosSimulatorUdid {
         return $null
     }
 
-    $usable = $runtimeDevices | Where-Object { $_.isAvailable -and $_.state -in @('Shutdown','Booted') }
+    $usable = $runtimeDevices | Where-Object { $_.isAvailable -and $_.state -in $PreferredStates }
     if (-not $usable) {
         Write-Verbose "No available devices in runtime $runtimeKey"
         return $null
