@@ -10,15 +10,14 @@ on:
       - "**.md"
   workflow_dispatch:
 
-env:
-  DOTNET_CLI_TELEMETRY_OPTOUT: 1
-  DOTNET_NOLOGO: 1
-  NO_ANDROID: true
-  NO_MACCATALYST: true
-
 jobs:
   ios-tests:
     runs-on: macos-15
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_NOLOGO: 1
+      NO_ANDROID: true
+      NO_MACCATALYST: true
     steps:
       - name: Cancel Previous Runs
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
@@ -44,29 +43,7 @@ jobs:
         if: steps.first-test-run.outcome == 'failure'
         run: pwsh scripts/device-test.ps1 ios -Run
 
-      - name: Upload results
-        if: success() || failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: device-test-ios-results
-          path: test_output
-
-  ios-integration-tests:
-    runs-on: macos-15
-    steps:
-      - name: Cancel Previous Runs
-        if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
-        uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
-
-      - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          submodules: recursive
-
-      - name: Setup Environment
-        uses: ./.github/actions/environment
-
-      - name: Run Integration Tests
+      - name: Integration Tests
         id: first-integration-test-run
         uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
         with:
@@ -82,5 +59,7 @@ jobs:
         if: success() || failure()
         uses: actions/upload-artifact@v4
         with:
-          name: device-integration-test-ios-results
-          path: integration_test_output
+          name: device-test-ios-results
+          path: |
+            test_output
+            integration_test_output
