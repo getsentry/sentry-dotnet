@@ -257,4 +257,26 @@ public sealed class SentryLog
 
         writer.WriteEndObject();
     }
+
+    internal static void GetTraceIdAndSpanId(IHub hub, out SentryId traceId, out SpanId? spanId)
+    {
+        var span = hub.GetSpan();
+        if (span is not null)
+        {
+            traceId = span.TraceId;
+            spanId = span.SpanId;
+            return;
+        }
+
+        var scope = hub.GetScope();
+        if (scope is not null)
+        {
+            traceId = scope.PropagationContext.TraceId;
+            spanId = scope.PropagationContext.SpanId;
+            return;
+        }
+
+        traceId = SentryId.Empty;
+        spanId = null;
+    }
 }
