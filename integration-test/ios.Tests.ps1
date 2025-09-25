@@ -15,7 +15,6 @@ Describe 'MAUI app on iOS (<tfm>)' -ForEach @(
     BeforeAll {
         $arch = ($(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
         $rid = "iossimulator-$arch"
-
         $arguments = @(
             "-v",
             "--target=ios-simulator-64",
@@ -33,6 +32,24 @@ Describe 'MAUI app on iOS (<tfm>)' -ForEach @(
         | ForEach-Object { Write-Host $_ }
         $LASTEXITCODE | Should -Be 0
         Write-Host '::endgroup::'
+
+        function RunTestApp {
+            param(
+                [string] $Dsn,
+                [string] $CrashType='None',
+                [string] $TestAction='None'
+            )
+            $Dsn = $Dsn.Replace('http://', 'http://key@') + '/0'
+            Write-Host "::group::Run app (Crash=$CrashType, Action=$TestAction)"
+            xharness apple just-run $arguments `
+                --app io.sentry.dotnet.maui.device.integrationtestapp `
+                --set-env SENTRY_DSN=$Dsn `
+                --set-env SENTRY_CRASH_TYPE=$CrashType `
+                --set-env SENTRY_TEST_ACTION=$TestAction
+            | ForEach-Object { Write-Host $_ }
+            $LASTEXITCODE | Should -Be 0
+            Write-Host '::endgroup::'
+        }
     }
 
     AfterAll {
@@ -60,27 +77,8 @@ Describe 'MAUI app on iOS (<tfm>)' -ForEach @(
     It 'Managed crash' {
         $result = Invoke-SentryServer {
             param([string]$url)
-            $dsn = $url.Replace('http://', 'http://key@') + '/0'
-
-            Write-Host "Invoke-SentryServer arguments=$arguments"
-
-            Write-Host "::group::Cause managed crash"
-            xharness apple just-run $arguments `
-                --app io.sentry.dotnet.maui.device.integrationtestapp `
-                --set-env SENTRY_DSN=$dsn `
-                --set-env SENTRY_CRASH_TYPE=Managed
-            | ForEach-Object { Write-Host $_ }
-            $LASTEXITCODE | Should -Be 0
-            Write-Host '::endgroup::'
-
-            Write-Host "::group::Re-run"
-            xharness apple just-run $arguments `
-                --app io.sentry.dotnet.maui.device.integrationtestapp `
-                --set-env SENTRY_DSN=$dsn `
-                --set-env SENTRY_TEST_ACTION=Exit
-            | ForEach-Object { Write-Host $_ }
-            $LASTEXITCODE | Should -Be 0
-            Write-Host '::endgroup::'
+            RunTestApp -Dsn $url -CrashType "Managed"
+            RunTestApp -Dsn $url -TestAction "Exit"
         }
 
         $result.HasErrors() | Should -BeFalse
@@ -92,25 +90,8 @@ Describe 'MAUI app on iOS (<tfm>)' -ForEach @(
     It 'Native crash' {
         $result = Invoke-SentryServer {
             param([string]$url)
-            $dsn = $url.Replace('http://', 'http://key@') + '/0'
-
-            Write-Host "::group::Cause native crash"
-            xharness apple just-run $arguments `
-                --app io.sentry.dotnet.maui.device.integrationtestapp `
-                --set-env SENTRY_DSN=$dsn `
-                --set-env SENTRY_CRASH_TYPE=Native
-            | ForEach-Object { Write-Host $_ }
-            $LASTEXITCODE | Should -Be 0
-            Write-Host '::endgroup::'
-
-            Write-Host "::group::Re-run"
-            xharness apple just-run $arguments `
-                --app io.sentry.dotnet.maui.device.integrationtestapp `
-                --set-env SENTRY_DSN=$dsn `
-                --set-env SENTRY_TEST_ACTION=Exit
-            | ForEach-Object { Write-Host $_ }
-            $LASTEXITCODE | Should -Be 0
-            Write-Host '::endgroup::'
+            RunTestApp -Dsn $url -CrashType "Native"
+            RunTestApp -Dsn $url -TestAction "Exit"
         }
 
         $result.HasErrors() | Should -BeFalse
@@ -121,25 +102,8 @@ Describe 'MAUI app on iOS (<tfm>)' -ForEach @(
     It 'Null reference exception' {
         $result = Invoke-SentryServer {
             param([string]$url)
-            $dsn = $url.Replace('http://', 'http://key@') + '/0'
-
-            Write-Host "::group::Trigger null reference exception"
-            xharness apple just-run $arguments `
-                --app io.sentry.dotnet.maui.device.integrationtestapp `
-                --set-env SENTRY_DSN=$dsn `
-                --set-env SENTRY_TEST_ACTION=NullReferenceException
-            | ForEach-Object { Write-Host $_ }
-            $LASTEXITCODE | Should -Be 0
-            Write-Host '::endgroup::'
-
-            Write-Host "::group::Re-run"
-            xharness apple just-run $arguments `
-                --app io.sentry.dotnet.maui.device.integrationtestapp `
-                --set-env SENTRY_DSN=$dsn `
-                --set-env SENTRY_TEST_ACTION=Exit
-            | ForEach-Object { Write-Host $_ }
-            $LASTEXITCODE | Should -Be 0
-            Write-Host '::endgroup::'
+            RunTestApp -Dsn $url -TestAction "NullReferenceException"
+            RunTestApp -Dsn $url -TestAction "Exit"
         }
 
         $result.HasErrors() | Should -BeFalse
