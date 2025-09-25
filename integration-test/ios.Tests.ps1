@@ -1,7 +1,7 @@
 # This file contains test cases for https://pester.dev/
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-. $PSScriptRoot/common.ps1
+. $PSScriptRoot/pester.ps1
 . $PSScriptRoot/../scripts/device-test-utils.ps1
 
 BeforeDiscovery {
@@ -9,9 +9,10 @@ BeforeDiscovery {
     $script:udid = Get-IosSimulatorUdid
 }
 
-Describe 'MAUI app on iOS' -Skip:(-not $IsMacOS -or -not $script:udid) {
+Describe 'MAUI app on iOS (<tfm>)' -ForEach @(
+    @{ tfm = "net9.0-ios18.0" }
+) -Skip:(-not $IsMacOS -or -not $script:udid) {
     BeforeAll {
-        $tfm = "net9.0-ios18.0"
         $arch = ($(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
         $rid = "iossimulator-$arch"
 
@@ -57,8 +58,6 @@ Describe 'MAUI app on iOS' -Skip:(-not $IsMacOS -or -not $script:udid) {
     }
 
     It 'Managed crash' {
-        Write-Host "### ManagedCrash arguments=$arguments"
-
         $result = Invoke-SentryServer {
             param([string]$url)
             $dsn = $url.Replace('http://', 'http://key@') + '/0'
