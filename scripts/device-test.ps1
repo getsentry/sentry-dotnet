@@ -12,7 +12,7 @@ param(
 
 Set-StrictMode -Version latest
 $ErrorActionPreference = 'Stop'
-. $PSScriptRoot/ios-simulator-utils.ps1
+. $PSScriptRoot/device-test-utils.ps1
 
 if (!$Build -and !$Run)
 {
@@ -64,7 +64,7 @@ try
             '--set-env', "CI=$envValue"
         )
 
-        $udid = Get-IosSimulatorUdid -IosVersion '18.5' -Verbose
+        $udid = Get-IosSimulatorUdid -Verbose
         if ($udid) {
             $arguments += @('--device', $udid)
         } else {

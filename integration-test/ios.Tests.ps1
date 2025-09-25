@@ -1,31 +1,26 @@
 # This file contains test cases for https://pester.dev/
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
-. $PSScriptRoot/../integration-test/common.ps1
+. $PSScriptRoot/common.ps1
+. $PSScriptRoot/../scripts/device-test-utils.ps1
 
-Describe 'MAUI app' {
+BeforeDiscovery {
+    Install-XHarness
+    $script:udid = Get-IosSimulatorUdid
+}
+
+Describe 'MAUI app on iOS' -Skip:(-not $IsMacOS -or -not $script:udid) {
     BeforeAll {
-        . $PSScriptRoot/ios-simulator-utils.ps1
-
         $tfm = "net9.0-ios18.0"
-        $target = "ios-simulator-64"
         $arch = ($(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
         $rid = "iossimulator-$arch"
-        $udid = Get-IosSimulatorUdid -IosVersion '18.5' -Verbose
 
         $arguments = @(
             "-v",
-            "--target=$target",
+            "--target=ios-simulator-64",
+            "--device=$udid",
             "--output-directory=integration_test_output"
         )
-        if ($udid)
-        {
-            $arguments += @("--device=$udid")
-        }
-        else
-        {
-            Write-Host "No suitable simulator found; proceeding without a specific --device"
-        }
 
         Push-Location $PSScriptRoot/../test/Sentry.Maui.Device.IntegrationTestApp
 
@@ -37,6 +32,10 @@ Describe 'MAUI app' {
         | ForEach-Object { Write-Host $_ }
         $LASTEXITCODE | Should -Be 0
         Write-Host '::endgroup::'
+    }
+
+    AfterAll {
+        Pop-Location
     }
 
     BeforeEach {
@@ -57,14 +56,14 @@ Describe 'MAUI app' {
         Write-Host '::endgroup::'
     }
 
-    AfterAll {
-        Pop-Location
-    }
-
     It 'Managed crash' {
+        Write-Host "### ManagedCrash arguments=$arguments"
+
         $result = Invoke-SentryServer {
             param([string]$url)
             $dsn = $url.Replace('http://', 'http://key@') + '/0'
+
+            Write-Host "Invoke-SentryServer arguments=$arguments"
 
             Write-Host "::group::Cause managed crash"
             xharness apple just-run $arguments `
