@@ -89,6 +89,7 @@ internal sealed class SentryStructuredLogger : ILogger
         };
 
         log.SetDefaultAttributes(_options, _sdk);
+        log.SetOrigin("auto");
 
         if (_categoryName is not null)
         {
