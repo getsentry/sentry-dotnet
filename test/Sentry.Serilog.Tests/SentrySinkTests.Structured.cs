@@ -118,6 +118,8 @@ public partial class SentrySinkTests
         environment.Should().Be("test-environment");
         log.TryGetAttribute("sentry.release", out object? release).Should().BeTrue();
         release.Should().Be("test-release");
+        log.TryGetAttribute("sentry.origin", out object? origin).Should().BeTrue();
+        origin.Should().Be("auto");
         log.TryGetAttribute("sentry.sdk.name", out object? sdkName).Should().BeTrue();
         sdkName.Should().Be(SentrySink.SdkName);
         log.TryGetAttribute("sentry.sdk.version", out object? sdkVersion).Should().BeTrue();
