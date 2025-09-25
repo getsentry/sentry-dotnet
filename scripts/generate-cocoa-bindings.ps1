@@ -4,7 +4,19 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $RootPath = (Get-Item $PSScriptRoot).Parent.FullName
-$CocoaSdkPath = "$RootPath/modules/sentry-cocoa/Sentry.framework"
+$CocoaSdkPath = "$RootPath/modules/sentry-cocoa"
+if (Test-Path "$CocoaSdkPath/.git")
+{
+    # Cocoa SDK cloned to modules/sentry-cocoa for local development
+    $HeadersPath = "$CocoaSdkPath/Carthage/Headers"
+    $PrivateHeadersPath = "$CocoaSdkPath/Carthage/Headers"
+}
+else
+{
+    # Cocoa SDK downloaded from GitHub releases and extracted into modules/sentry-cocoa
+    $HeadersPath = "$CocoaSdkPath/Sentry.framework/Headers"
+    $PrivateHeadersPath = "$CocoaSdkPath/Sentry.framework/PrivateHeaders"
+}
 $BindingsPath = "$RootPath/src/Sentry.Bindings.Cocoa"
 $BackupPath = "$BindingsPath/obj/_unpatched"
 
@@ -101,7 +113,7 @@ Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
 # ...instead of:
 #     `#import "SomeHeader.h"`
 # This causes sharpie to fail resolve those headers
-$filesToPatch = Get-ChildItem -Path "$CocoaSdkPath/Headers" -Filter *.h -Recurse | Select-Object -ExpandProperty FullName
+$filesToPatch = Get-ChildItem -Path "$HeadersPath" -Filter *.h -Recurse | Select-Object -ExpandProperty FullName
 foreach ($file in $filesToPatch)
 {
     if (Test-Path $file)
@@ -116,7 +128,7 @@ foreach ($file in $filesToPatch)
         Write-Host "File not found: $file"
     }
 }
-$privateHeaderFile = "$CocoaSdkPath/PrivateHeaders/PrivatesHeader.h"
+$privateHeaderFile = "$PrivateHeadersPath/PrivatesHeader.h"
 if (Test-Path $privateHeaderFile)
 {
     $content = Get-Content -Path $privateHeaderFile -Raw
@@ -134,8 +146,8 @@ else
 Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk $iPhoneSdkVersion `
     -scope "$CocoaSdkPath" `
-    "$CocoaSdkPath/Headers/Sentry.h" `
-    "$CocoaSdkPath/PrivateHeaders/PrivateSentrySDKOnly.h" `
+    "$HeadersPath/Sentry.h" `
+    "$PrivateHeadersPath/PrivateSentrySDKOnly.h" `
     -o $BindingsPath `
     -c -Wno-objc-property-no-attribute
 
