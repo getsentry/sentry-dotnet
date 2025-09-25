@@ -15,6 +15,7 @@ Describe 'MAUI app on iOS (<tfm>)' -ForEach @(
     @{ tfm = "net9.0-ios18.0" }
 ) -Skip:(-not $IsMacOS -or -not $script:udid) {
     BeforeAll {
+        . $PSScriptRoot/../scripts/device-test-utils.ps1
         Install-XHarness
 
         $arch = ($(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
