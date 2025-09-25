@@ -37,7 +37,7 @@ SentrySdk.Init(options =>
     // This option tells Sentry to capture 100% of traces. You still need to start transactions and spans.
     options.TracesSampleRate = 1.0;
 
-    // This option enables Sentry Logs created via SentrySdk.Experimental.Logger.
+    // This option enables Sentry Logs created via SentrySdk.Logger.
     options.Experimental.EnableLogs = true;
     options.Experimental.SetBeforeSendLog(static log =>
     {
@@ -73,7 +73,7 @@ async Task FirstFunction()
     var httpClient = new HttpClient(messageHandler, true);
     var html = await httpClient.GetStringAsync("https://example.com/");
     WriteLine(html);
-    SentrySdk.Experimental.Logger.LogInfo("HTTP Request completed.");
+    SentrySdk.Logger.LogInfo("HTTP Request completed.");
 }
 
 async Task SecondFunction()
@@ -94,7 +94,7 @@ async Task SecondFunction()
         SentrySdk.CaptureException(exception);
         span.Finish(exception);
 
-        SentrySdk.Experimental.Logger.LogError(static log => log.SetAttribute("method", nameof(SecondFunction)),
+        SentrySdk.Logger.LogError(static log => log.SetAttribute("method", nameof(SecondFunction)),
             "Error with message: {0}", exception.Message);
     }
 
@@ -109,7 +109,7 @@ async Task ThirdFunction()
         // Simulate doing some work
         await Task.Delay(100);
 
-        SentrySdk.Experimental.Logger.LogFatal(static log => log.SetAttribute("suppress", true),
+        SentrySdk.Logger.LogFatal(static log => log.SetAttribute("suppress", true),
             "Crash imminent!");
 
         // This is an example of an unhandled exception.  It will be captured automatically.

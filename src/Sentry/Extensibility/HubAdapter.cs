@@ -35,7 +35,7 @@ public sealed class HubAdapter : IHub
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
-    public SentryStructuredLogger Logger { [DebuggerStepThrough] get => SentrySdk.Experimental.Logger; }
+    public SentryStructuredLogger Logger { [DebuggerStepThrough] get => SentrySdk.Logger; }
 
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
