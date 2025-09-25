@@ -63,7 +63,7 @@ Describe 'MAUI app' {
 
     It 'Managed crash' {
         $result = Invoke-SentryServer {
-            Param([string]$url)
+            param([string]$url)
             $dsn = $url.Replace('http://', 'http://key@') + '/0'
 
             Write-Host "::group::Cause managed crash"
@@ -93,7 +93,7 @@ Describe 'MAUI app' {
 
     It 'Native crash' {
         $result = Invoke-SentryServer {
-            Param([string]$url)
+            param([string]$url)
             $dsn = $url.Replace('http://', 'http://key@') + '/0'
 
             Write-Host "::group::Cause native crash"
@@ -117,12 +117,12 @@ Describe 'MAUI app' {
 
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"EXC_[A-Z_]+`""
-        $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"System.*Exception`""
+        $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
     }
 
     It 'Null reference exception' {
         $result = Invoke-SentryServer {
-            Param([string]$url)
+            param([string]$url)
             $dsn = $url.Replace('http://', 'http://key@') + '/0'
 
             Write-Host "::group::Trigger null reference exception"
