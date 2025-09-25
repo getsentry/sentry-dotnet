@@ -11,6 +11,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
+    <!-- Speed up CI build -->
+    <MtouchUseLlvm>false</MtouchUseLlvm>
+    <EnableAssemblyILStripping>false</EnableAssemblyILStripping>
+
     <!-- Display name -->
     <ApplicationTitle>Sentry.Maui.Device.IntegrationTestApp</ApplicationTitle>
 
