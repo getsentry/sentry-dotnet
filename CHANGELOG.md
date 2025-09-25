@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add (experimental) _Structured Logs_ integration for `Serilog` ([#4462](https://github.com/getsentry/sentry-dotnet/pull/4462))
+
 ### Fixes
 
 - Upload linked PDBs to fix non-IL-stripped symbolication for iOS ([#4527](https://github.com/getsentry/sentry-dotnet/pull/4527))
