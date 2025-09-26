@@ -1,0 +1,27 @@
+name: Cache
+description: Cache with pinned commit SHA
+inputs:
+  path:
+    description: 'Path to cache'
+    required: true
+  key:
+    description: 'Cache key'
+    required: true
+  restore-keys:
+    description: 'Restore keys'
+    required: false
+    default: ''
+  enableCrossOsArchive:
+    description: 'Enable cross-OS archive'
+    required: false
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - name: Cache
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      with:
+        path: ${{ inputs.path }}
+        key: ${{ inputs.key }}
+        restore-keys: ${{ inputs.restore-keys }}
+        enableCrossOsArchive: ${{ inputs.enableCrossOsArchive }}
