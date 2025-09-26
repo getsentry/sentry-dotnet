@@ -11,24 +11,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  # This job won't actually run, it just defines reusable anchors
-  _common:
-    if: false  # prevents execution
-    runs-on: ubuntu-latest
-    steps:
-      - &checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - &cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-      - &cache-restore
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-      - &upload-artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-      - &download-artifact
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
-      - &sentry-github-workflow
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
-
   build-sentry-native:
     name: sentry-native (${{ matrix.rid }})
     runs-on: ${{ matrix.os }}
@@ -66,7 +48,7 @@ jobs:
           curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin
 
       - name: Checkout
-        <<: *checkout
+        uses: ./.github/actions/checkout
 
       - run: git submodule update --init modules/sentry-native
 
@@ -76,7 +58,7 @@ jobs:
         uses: ./.github/actions/install-zstd
 
       - id: cache
-        <<: *cache
+        uses: ./.github/actions/cache
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-${{ matrix.rid }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -142,8 +124,8 @@ jobs:
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
 
-      - <<: *checkout
-        name: Checkout
+      - name: Checkout
+        uses: ./.github/actions/checkout
         with:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
@@ -162,7 +144,7 @@ jobs:
 
       - name: Download sentry-native (linux-x64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'linux-x64') }}
-        <<: *cache-restore
+        uses: ./.github/actions/cache-restore
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-linux-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -170,7 +152,7 @@ jobs:
 
       - name: Download sentry-native (linux-arm64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'linux-arm64') }}
-        <<: *cache-restore
+        uses: ./.github/actions/cache-restore
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-linux-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -178,7 +160,7 @@ jobs:
 
       - name: Download sentry-native (linux-musl-x64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'linux-musl-x64') }}
-        <<: *cache-restore
+        uses: ./.github/actions/cache-restore
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-linux-musl-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -186,7 +168,7 @@ jobs:
 
       - name: Download sentry-native (linux-musl-arm64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'linux-musl-arm64') }}
-        <<: *cache-restore
+        uses: ./.github/actions/cache-restore
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-linux-musl-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -194,7 +176,7 @@ jobs:
 
       - name: Download sentry-native (macos)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'macos') }}
-        <<: *cache-restore
+        uses: ./.github/actions/cache-restore
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-macos-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -202,7 +184,7 @@ jobs:
 
       - name: Download sentry-native (win-x64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'win-x64') }}
-        <<: *cache-restore
+        uses: ./.github/actions/cache-restore
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-win-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -211,7 +193,7 @@ jobs:
 
       - name: Download sentry-native (win-arm64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'win-arm64') }}
-        <<: *cache-restore
+        uses: ./.github/actions/cache-restore
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-win-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -231,7 +213,7 @@ jobs:
 
       - name: Upload build logs
         if: ${{ always() }}
-        <<: *upload-artifact
+        uses: ./.github/actions/upload-artifact
         with:
           name: ${{ matrix.rid }}-build-logs
           path: |
@@ -249,7 +231,7 @@ jobs:
 
       - name: Upload build and test outputs
         if: failure()
-        <<: *upload-artifact
+        uses: ./.github/actions/upload-artifact
         with:
           name: ${{ matrix.rid }}-verify-test-results
           path: "**/*.received.*"
@@ -259,7 +241,7 @@ jobs:
 
       - name: Archive NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
-        <<: *upload-artifact
+        uses: ./.github/actions/upload-artifact
         with:
           name: ${{ github.sha }}
           if-no-files-found: error
@@ -279,13 +261,13 @@ jobs:
 
       - name: Fetch NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
-        <<: *download-artifact
+        uses: ./.github/actions/download-artifact
         with:
           name: ${{ github.sha }}
           path: src
 
       - name: Integration test
-        <<: *sentry-github-workflow
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7
         with:
           path: integration-test
 
@@ -296,12 +278,12 @@ jobs:
 
     steps:
       - name: Checkout
-        <<: *checkout
+        uses: ./.github/actions/checkout
         with:
           submodules: recursive
 
       - name: Download sentry-native (win-x64)
-        <<: *cache-restore
+        uses: ./.github/actions/cache-restore
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-win-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -323,7 +305,7 @@ jobs:
 
       - name: Upload logs
         if: ${{ always() }}
-        <<: *upload-artifact
+        uses: ./.github/actions/upload-artifact
         with:
           name: ${{ runner.os }}-msbuild-logs
           path: |
@@ -349,7 +331,7 @@ jobs:
 
     steps:
       - name: Checkout
-        <<: *checkout
+        uses: ./.github/actions/checkout
         with:
           submodules: recursive
 
@@ -360,13 +342,13 @@ jobs:
         uses: ./.github/actions/buildnative
 
       - name: Fetch NuGet Packages
-        <<: *download-artifact
+        uses: ./.github/actions/download-artifact
         with:
           name: ${{ github.sha }}
           path: src
 
       - name: Test AOT
-        <<: *sentry-github-workflow
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7
         env:
           RuntimeIdentifier: ${{ matrix.rid }}
         with:
@@ -379,7 +361,7 @@ jobs:
 
     steps:
       - name: Checkout
-        <<: *checkout
+        uses: ./.github/actions/checkout
         with:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
@@ -389,7 +371,7 @@ jobs:
         run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
 
       - name: Download sentry-native (macos)
-        <<: *cache-restore
+        uses: ./.github/actions/cache-restore
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-macos-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
