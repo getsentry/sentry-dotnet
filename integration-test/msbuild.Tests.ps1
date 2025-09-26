@@ -11,8 +11,10 @@ Describe 'MSBuild app (<framework>)' -ForEach @(
     @{ framework = 'net9.0' }
 ) -Skip:(-not $IsWindows -or -not $HasMSBuild) {
     BeforeAll {
-        $path = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName()) 'msbuild-app'
+        $path = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())
+        Set-Location $path # temp cwd to avoid global.json
 
+        $path = Join-Path $path 'msbuild-app'
         DotnetNew 'console' $path $framework
         @'
 using Sentry;
