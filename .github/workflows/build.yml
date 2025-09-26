@@ -332,6 +332,7 @@ jobs:
         include:
           - name: VS 2022
           - name: VS 2019
+            dotnet-version: '5.0.x'
             vs-build-tools: 2019
             vs-version: '[16.0,17.0)'
 
@@ -341,13 +342,15 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Install .NET 5.0 SDK
+      - name: Setup Environment
+        if: ${{ !matrix.dotnet-version }}
+        uses: ./.github/actions/environment
+
+      - name: Install .NET SDK
+        if: ${{ matrix.dotnet-version }}
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '5.0.x'
-
-      - name: Setup Environment
-        uses: ./.github/actions/environment
+          dotnet-version: ${{ matrix.dotnet-version }}
 
       - name: Install VS Build Tools
         if: ${{ matrix.vs-build-tools }}
