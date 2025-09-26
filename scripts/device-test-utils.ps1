@@ -12,7 +12,7 @@ function Install-XHarness {
 function Get-IosSimulatorUdid {
     [CmdletBinding()]
     param(
-        [string]$IosVersion = '18.6',
+        [string]$IosVersion = '18.5',
         [string[]]$PreferredDeviceTypes = @(
             'com.apple.CoreSimulator.SimDeviceType.iPhone-XS',
             'com.apple.CoreSimulator.SimDeviceType.iPhone-16',
