@@ -27,7 +27,7 @@ jobs:
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
 
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           submodules: recursive
 
@@ -42,7 +42,7 @@ jobs:
 
       - name: Upload Android Test App (net9.0)
         if: matrix.tfm == 'net9.0'
-        uses: actions/upload-artifact@v4
+        uses: ./.github/actions/upload-artifact
         with:
           name: device-test-android-net9.0
           if-no-files-found: error
@@ -80,10 +80,10 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Download test app artifact
-        uses: actions/download-artifact@v5
+        uses: ./.github/actions/download-artifact
         with:
           name: device-test-android-${{ matrix.tfm }}
           path: bin
@@ -126,7 +126,7 @@ jobs:
 
       - name: Upload results
         if: success() || failure()
-        uses: actions/upload-artifact@v4
+        uses: ./.github/actions/upload-artifact
         with:
           name: device-test-android-${{ matrix.api-level }}-${{ matrix.tfm }}-results
           path: test_output

@@ -1,0 +1,22 @@
+name: Upload Artifact
+description: Upload artifact with pinned commit SHA
+inputs:
+  name:
+    description: 'Artifact name'
+    required: true
+  path:
+    description: 'Path to upload'
+    required: true
+  if-no-files-found:
+    description: 'What to do if no files are found'
+    required: false
+    default: 'warn'
+runs:
+  using: composite
+  steps:
+    - name: Upload Artifact
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.path }}
+        if-no-files-found: ${{ inputs.if-no-files-found }}
