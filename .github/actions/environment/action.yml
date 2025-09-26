@@ -87,9 +87,8 @@ runs:
     - name: Install .NET SDK
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: |
-          8.0.x
-          9.0.304
+        global-json-file: global.json
+        dotnet-version: 8.0.x
 
     - name: Install .NET Workloads
       shell: bash
