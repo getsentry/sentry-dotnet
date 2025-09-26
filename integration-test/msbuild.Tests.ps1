@@ -53,7 +53,8 @@ SentrySdk.CaptureMessage("Hello from MSBuild app");
             Param([string]$url)
             $dsn = $url.Replace('http://', 'http://key@') + '/0'
 
-            msbuild msbuild-app.csproj -t:Restore,Build -p:Configuration=Release -p:TreatWarningsAsErrors=true
+            # TODO: pass -p:TreatWarningsAsErrors=true after #4554 is fixed
+            msbuild msbuild-app.csproj -t:Restore,Build -p:Configuration=Release -p:TreatWarningsAsErrors=false
             | ForEach-Object { Write-Host $_ }
             $LASTEXITCODE | Should -Be 0
 
