@@ -15,13 +15,31 @@ inputs:
     description: 'Enable cross-OS archive'
     required: false
     default: 'false'
+  fail-on-cache-miss:
+    description: "Fail the job when no cache entry is found"
+    required: false
+    default: "false"
+  lookup-only:
+    description: "Only check if cache exists (no download)"
+    required: false
+    default: "false"
+outputs:
+  cache-hit:
+    description: "Exact key match? 'true'/'false', or empty on miss"
 runs:
   using: composite
   steps:
-    - name: Cache
+    - id: cache
+      name: Use pinned actions/cache
       uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       with:
         path: ${{ inputs.path }}
         key: ${{ inputs.key }}
-        restore-keys: ${{ inputs.restore-keys }}
+        restore-keys: ${{ inputs['restore-keys'] }}
         enableCrossOsArchive: ${{ inputs.enableCrossOsArchive }}
+        fail-on-cache-miss: ${{ inputs['fail-on-cache-miss'] }}
+        lookup-only: ${{ inputs['lookup-only'] }}
+    - name: Bubble outputs
+      shell: bash
+      run: |
+        echo "cache-hit=${{ steps.cache.outputs.cache-hit }}" >> "$GITHUB_OUTPUT"
