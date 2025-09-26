@@ -301,7 +301,7 @@ jobs:
 
       - name: Run MSBuild
         id: msbuild
-        run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build -p:Configuration=Release --nologo -v:minimal -flp:logfile=msbuild.log -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
+        run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build,Pack -p:Configuration=Release --nologo -v:minimal -flp:logfile=msbuild.log -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
 
       - name: Upload logs
         if: ${{ always() }}
