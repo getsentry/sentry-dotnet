@@ -38,6 +38,11 @@ Describe 'MAUI app' {
             )
 
             Write-Host "::group::Build Sentry.Maui.Device.IntegrationTestApp.csproj"
+
+            Write-Host "### CWD: $(Get-Location)"
+            Write-Host "### FILES:"
+            Get-ChildItem -Path . | ForEach-Object { Write-Host $_.Name }
+
             dotnet build Sentry.Maui.Device.IntegrationTestApp.csproj `
                 --configuration Release `
                 --framework $tfm `
