@@ -6,7 +6,7 @@ $ErrorActionPreference = 'Stop'
 $HasMSBuild = (Get-Command msbuild -ErrorAction SilentlyContinue)
 
 Describe 'MSBuild app (<framework>)' -ForEach @(
-    @{ framework = 'net5.0' },
+    @{ framework = 'net5.0'; msbuild = '16' },
     @{ framework = 'net8.0' },
     @{ framework = 'net9.0' }
 ) -Skip:(-not $IsWindows -or -not $HasMSBuild) {
@@ -28,10 +28,15 @@ SentrySdk.CaptureMessage("Hello from MSBuild app");
 
         Set-Location $path
 
-        function Test-NetSdkInstalled([string]$framework) {
+        function Test-NetSdk([string]$framework) {
             $version = $framework -replace 'net(\d+)\.0', '$1'
             $sdks = dotnet --list-sdks
             return $null -ne ($sdks | Where-Object { $_ -match "^$version\." })
+        }
+
+        function Test-MSBuild([string]$version) {
+            $output = & msbuild -version 2>&1 | Select-Object -Last 1
+            return $output -match "^$version\."
         }
     }
 
@@ -45,8 +50,11 @@ SentrySdk.CaptureMessage("Hello from MSBuild app");
     }
 
     It 'builds without warnings and is able to capture a message' {
-        if (-not (Test-NetSdkInstalled $framework)) {
+        if (-not (Test-NetSdk $framework)) {
             Set-ItResult -Skipped -Because "$framework is not installed"
+        }
+        if ($msbuild -and -not (Test-MSBuild $msbuild)) {
+            Set-ItResult -Skipped -Because "MSBuild $msbuild is not installed"
         }
 
         $result = Invoke-SentryServer {
