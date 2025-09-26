@@ -271,7 +271,7 @@ jobs:
         with:
           path: integration-test
 
-  msbuild:
+  msbuild-sentry:
     needs: build-sentry-native
     name: MSBuild
     runs-on: windows-latest
@@ -312,6 +312,64 @@ jobs:
             msbuild.log
             msbuild.binlog
           if-no-files-found: ignore
+
+      - name: Archive NuGet Packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: msbuild-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            src/**/Release/*.nupkg
+            src/**/Release/*.snupkg
+
+  msbuild-test:
+    needs: msbuild-sentry
+    name: MSBuild Test (${{ matrix.name }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: VS 2022
+          - name: VS 2019
+            vs-build-tools: 2019
+            vs-version: '[16.0,17.0)'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Install .NET 5.0 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '5.0.x'
+
+      - name: Install .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Install VS Build Tools
+        if: ${{ matrix.vs-build-tools }}
+        run: choco install visualstudio${{ matrix.vs-build-tools }}buildtools
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce # v2
+        with:
+          vs-version: ${{ matrix.vs-version }}
+
+      - name: Fetch NuGet Packages
+        uses: actions/download-artifact@v5
+        with:
+          name: msbuild-${{ github.sha }}
+          path: src
+
+      - name: Run MSBuild tests
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+        with:
+          path: integration-test/msbuild.Tests.ps1
 
   # Unsupported Native AOT runtimes should have SentryNative auto-disabled
   # to avoid native library loading errors on startup.
