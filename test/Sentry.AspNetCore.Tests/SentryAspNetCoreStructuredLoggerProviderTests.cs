@@ -93,7 +93,7 @@ public class SentryAspNetCoreStructuredLoggerProviderTests
         version.Should().Be(SentryMiddleware.NameAndVersion.Version);
 
         capturedLog.TryGetAttribute("sentry.origin", out object? origin).Should().BeTrue();
-        origin.Should().Be("auto.log.microsoft_extension");
+        origin.Should().Be("auto.log.microsoft_extensions");
     }
 
     [Fact]
