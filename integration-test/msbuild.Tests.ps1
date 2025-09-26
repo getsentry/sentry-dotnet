@@ -11,7 +11,8 @@ Describe 'MSBuild app (<framework>)' -ForEach @(
     @{ framework = 'net9.0' }
 ) -Skip:(-not $IsWindows -or -not $HasMSBuild) {
     BeforeAll {
-        $path = './msbuild-app'
+        $path = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName()) 'msbuild-app'
+
         DotnetNew 'console' $path $framework
         @'
 using Sentry;
@@ -25,13 +26,13 @@ SentrySdk.Init(options =>
 SentrySdk.CaptureMessage("Hello from MSBuild app");
 '@ | Out-File $path/Program.cs
 
+        Set-Location $path
+
         function Test-NetSdkInstalled([string]$framework) {
             $version = $framework -replace 'net(\d+)\.0', '$1'
             $sdks = dotnet --list-sdks
             return $null -ne ($sdks | Where-Object { $_ -match "^$version\." })
         }
-
-        Push-Location $path
     }
 
     BeforeEach {
