@@ -199,6 +199,11 @@ public sealed class SentryLog
         }
     }
 
+    internal void SetOrigin(string origin)
+    {
+        SetAttribute("sentry.origin", origin);
+    }
+
     internal void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         writer.WriteStartObject();
