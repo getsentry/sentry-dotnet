@@ -16,7 +16,7 @@ Describe 'MAUI app' {
         . $PSScriptRoot/../scripts/device-test-utils.ps1
         Install-XHarness
 
-        Push-Location $PSScriptRoot/../test/Sentry.Maui.Device.IntegrationTestApp
+        Push-Location $PSScriptRoot/mobile-app
     }
 
     AfterAll {
