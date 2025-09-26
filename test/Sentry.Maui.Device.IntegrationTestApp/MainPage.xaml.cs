@@ -25,7 +25,7 @@ public partial class MainPage : ContentPage
             try
             {
                 object? obj = null;
-                _ = obj.ToString();
+                _ = obj!.ToString();
             }
             catch (NullReferenceException ex)
             {
