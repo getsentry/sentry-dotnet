@@ -251,7 +251,7 @@ jobs:
 
       - name: Sparse checkout
         if: env.CI_PUBLISHING_BUILD == 'true'
-        <<: *checkout
+        uses: ./.github/actions/checkout
         with:
           # We only check out what is absolutely necessary to reduce a chance of local files impacting
           # integration tests, e.g. Directory.Build.props, nuget.config, ...
@@ -400,7 +400,7 @@ jobs:
     if: ${{ !startsWith(github.ref_name, 'release/') }}
 
     steps:
-      - <<: *checkout
+      - uses: ./.github/actions/checkout
         with:
           submodules: recursive
 
