@@ -38,11 +38,6 @@ Describe 'MAUI app' {
             )
 
             Write-Host "::group::Build Sentry.Maui.Device.IntegrationTestApp.csproj"
-
-            Write-Host "### CWD: $(Get-Location)"
-            Write-Host "### FILES:"
-            Get-ChildItem -Path . | ForEach-Object { Write-Host $_.Name }
-
             dotnet build Sentry.Maui.Device.IntegrationTestApp.csproj `
                 --configuration Release `
                 --framework $tfm `
@@ -51,11 +46,12 @@ Describe 'MAUI app' {
             $LASTEXITCODE | Should -Be 0
             Write-Host '::endgroup::'
 
-            function RunTestApp {
+            function RunTestApp
+            {
                 param(
                     [string] $Dsn,
-                    [string] $CrashType='None',
-                    [string] $TestAction='None'
+                    [string] $CrashType = 'None',
+                    [string] $TestAction = 'None'
                 )
                 $Dsn = $Dsn.Replace('http://', 'http://key@') + '/0'
                 Write-Host "::group::Run app (Crash=$CrashType, Action=$TestAction)"
