@@ -48,7 +48,7 @@ jobs:
           curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin
 
       - name: Checkout
-        uses: &checkout actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - run: git submodule update --init modules/sentry-native
 
@@ -125,7 +125,7 @@ jobs:
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # Tag: 0.12.1
 
       - name: Checkout
-        uses: *checkout # v5.0.0
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
@@ -251,7 +251,7 @@ jobs:
 
       - name: Sparse checkout
         if: env.CI_PUBLISHING_BUILD == 'true'
-        uses: *checkout # v5.0.0
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           # We only check out what is absolutely necessary to reduce a chance of local files impacting
           # integration tests, e.g. Directory.Build.props, nuget.config, ...
@@ -278,7 +278,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: *checkout # v5.0.0
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           submodules: recursive
 
@@ -331,7 +331,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: *checkout # v5.0.0
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           submodules: recursive
 
@@ -361,7 +361,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: *checkout # v5.0.0
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
@@ -400,7 +400,7 @@ jobs:
     if: ${{ !startsWith(github.ref_name, 'release/') }}
 
     steps:
-      - uses: *checkout # v5.0.0
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           submodules: recursive
 
