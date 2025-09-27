@@ -197,7 +197,7 @@ BeforeAll {
         if ($type -eq 'console')
         {
             AddPackageReference $name 'Sentry'
-            if (!$IsMacOS -or $framework -eq 'net8.0')
+            if ((!$IsMacOS -or $framework -eq 'net8.0') -and $framework -ne 'net5.0')
             {
                 @"
 <Project>
