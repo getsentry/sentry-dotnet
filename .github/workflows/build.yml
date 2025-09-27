@@ -293,11 +293,6 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
 
-      - name: Install .NET 5.0 SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '5.0.x'
-
       - name: Build Native Dependencies
         uses: ./.github/actions/buildnative
 
