@@ -88,9 +88,14 @@ runs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: |
-          5.0.x
           8.0.x
           9.0.304
+
+    - name: Install .NET 5.0 SDK
+      if: ${{ runner.os == 'Windows' || matrix.rid == 'linux-x64' }}
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 5.0.x
 
     - name: Install .NET Workloads
       shell: bash
