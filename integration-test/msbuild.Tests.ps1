@@ -10,7 +10,16 @@ Describe 'MSBuild app (<framework>)' -ForEach @(
 ) {
     BeforeAll {
         Write-Host "::group::Create app"
-        DotnetNew 'console' 'msbuild-app' $framework
+        $hasDotnetSdk = $true
+        try
+        {
+            DotnetNew 'console' 'msbuild-app' $framework
+        }
+        catch
+        {
+            $hasDotnetSdk = $false
+            return
+        }
         Push-Location msbuild-app
         @'
 using Sentry;
