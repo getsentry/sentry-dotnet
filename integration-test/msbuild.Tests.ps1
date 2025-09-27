@@ -9,16 +9,20 @@ Describe 'MSBuild app (<framework>)' -ForEach @(
     @{ framework = 'net9.0' }
 ) {
     BeforeAll {
-        Write-Host "::group::Create app"
         $hasDotnetSdk = $true
         try
         {
+            Write-Host "::group::Create test project"
             DotnetNew 'console' 'msbuild-app' $framework
         }
         catch
         {
             $hasDotnetSdk = $false
             return
+        }
+        finally
+        {
+            Write-Host "::endgroup::"
         }
         Push-Location msbuild-app
         @'
@@ -32,7 +36,6 @@ SentrySdk.Init(options =>
 
 SentrySdk.CaptureMessage("Hello from MSBuild app");
 '@ | Out-File Program.cs
-        Write-Host "::endgroup::"
 
         Write-Host "::group::Setup .NET SDK"
         if (Test-Path variable:sdk)
@@ -49,13 +52,15 @@ SentrySdk.CaptureMessage("Hello from MSBuild app");
 
         dotnet --version | ForEach-Object { Write-Host $_ }
         dotnet msbuild -version | ForEach-Object { Write-Host $_ }
-        $hasDotnetSdk = $LASTEXITCODE -eq 0
         Write-Host "::endgroup::"
     }
 
     AfterAll {
-        Pop-Location
-        Remove-Item -Recurse -Force msbuild-app
+        if ($hasDotnetSdk)
+        {
+            Pop-Location
+            Remove-Item msbuild-app -Recurse -Force -ErrorAction SilentlyContinue
+        }
     }
 
     It 'builds without warnings and is able to capture a message' {
