@@ -3,19 +3,31 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
 
-$HasMSBuild = (Get-Command msbuild -ErrorAction SilentlyContinue)
-
 Describe 'MSBuild app (<framework>)' -ForEach @(
-    @{ framework = 'net5.0'; msbuild = '16' },
-    @{ framework = 'net8.0' },
-    @{ framework = 'net9.0' }
-) -Skip:(-not $IsWindows -or -not $HasMSBuild) {
+    @{ framework = 'net5.0'; sdk = '5.0.400' },
+    @{ framework = 'net8.0'; sdk = '8.0.400' },
+    @{ framework = 'net9.0'; sdk = '9.0.300' }
+) -Skip:(-not $IsWindows) {
     BeforeAll {
-        $path = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())
-        Set-Location $path # temp cwd to avoid global.json
+        $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ([System.IO.Path]::GetRandomFileName())
+        New-Item -ItemType Directory -Path $tempDir | Out-Null
+        Push-Location $tempDir
+        @"
+{
+        "sdk": {
+                "version": "$sdk",
+                "rollForward": "latestFeature"
+        }
+}
+"@ | Out-File global.json
 
-        $path = Join-Path $path 'msbuild-app'
-        DotnetNew 'console' $path $framework
+        dotnet --version | ForEach-Object { Write-Host $_ }
+        dotnet msbuild -version | ForEach-Object { Write-Host $_ }
+        $hasDotnetSdk = $LASTEXITCODE -eq 0
+
+        if ($hasDotnetSdk) {
+            DotnetNew 'console' $tempDir/msbuild-app $framework
+            Set-Location $tempDir/msbuild-app
         @'
 using Sentry;
 
@@ -26,49 +38,28 @@ SentrySdk.Init(options =>
 });
 
 SentrySdk.CaptureMessage("Hello from MSBuild app");
-'@ | Out-File $path/Program.cs
-
-        Set-Location $path
-
-        function Test-NetSdk([string]$framework) {
-            $version = $framework -replace 'net(\d+)\.0', '$1'
-            $sdks = dotnet --list-sdks
-            return $null -ne ($sdks | Where-Object { $_ -match "^$version\." })
+'@ | Out-File Program.cs
         }
-
-        function Test-MSBuild([string]$version) {
-            $output = & msbuild -version 2>&1 | Select-Object -Last 1
-            return $output -match "^$version\."
-        }
-    }
-
-    BeforeEach {
-        Remove-Item "./bin/Release/$framework" -Recurse -ErrorAction SilentlyContinue
-        Remove-Item "./obj/Release/$framework" -Recurse -ErrorAction SilentlyContinue
     }
 
     AfterAll {
         Pop-Location
+        Remove-Item -Recurse -Force $tempDir
     }
 
     It 'builds without warnings and is able to capture a message' {
-        if (-not (Test-NetSdk $framework)) {
+        if (-not $hasDotnetSdk) {
             Set-ItResult -Skipped -Because "$framework is not installed"
         }
-        if ($msbuild -and -not (Test-MSBuild $msbuild)) {
-            Set-ItResult -Skipped -Because "MSBuild $msbuild is not installed"
-        }
+        # TODO: pass -p:TreatWarningsAsErrors=true after #4554 is fixed
+        dotnet msbuild msbuild-app.csproj -t:Restore,Build -p:Configuration=Release -p:TreatWarningsAsErrors=false
+        | ForEach-Object { Write-Host $_ }
+        $LASTEXITCODE | Should -Be 0
 
         $result = Invoke-SentryServer {
             Param([string]$url)
             $dsn = $url.Replace('http://', 'http://key@') + '/0'
-
-            # TODO: pass -p:TreatWarningsAsErrors=true after #4554 is fixed
-            msbuild msbuild-app.csproj -t:Restore,Build -p:Configuration=Release -p:TreatWarningsAsErrors=false
-            | ForEach-Object { Write-Host $_ }
-            $LASTEXITCODE | Should -Be 0
-
-            msbuild msbuild-app.csproj -t:Run -p:Configuration=Release -p:RunArguments=$dsn
+            dotnet msbuild msbuild-app.csproj -t:Run -p:Configuration=Release -p:RunArguments=$dsn
             | ForEach-Object { Write-Host $_ }
             $LASTEXITCODE | Should -Be 0
         }
