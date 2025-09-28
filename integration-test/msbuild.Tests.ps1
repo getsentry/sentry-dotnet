@@ -3,14 +3,28 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
 
+$IsARM64 = "Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString())
+
 # NOTE: These .NET versions are used to build a test app that consumes the Sentry
 # .NET SDK, and are not tied to the .NET version used to build the SDK itself.
 Describe 'MSBuild app (<framework>)' -ForEach @(
-    @{ framework = 'net5.0'; sdk = @{ version = '5.0.400' }; config = "$PSScriptRoot\nuget5.config" }
-    @{ framework = 'net8.0'; sdk = @{ version = '8.0.400' } },
-    @{ framework = 'net9.0' }
+    @{
+        framework = 'net5.0'
+        sdk       = '5.0.400'
+        # .NET 5.0 does not support ARM64 on macOS
+        skip      = ($IsMacOS -and $IsARM64)
+        # NuGet 5 does not support packageSourceMapping
+        config    = "$PSScriptRoot\nuget5.config"
+    },
+    @{ framework = 'net8.0'; sdk = '8.0.400' },
+    @{ framework = 'net9.0'; sdk = '9.0.300' }
 ) {
-    BeforeAll {
+    BeforeEach {
+        if (Get-Variable -Name skip -ValueOnly -ErrorAction SilentlyContinue)
+        {
+            return
+        }
+
         Write-Host "::group::Create test project"
         DotnetNew 'console' 'msbuild-app' $framework
         Write-Host "::endgroup::"
@@ -30,30 +44,30 @@ SentrySdk.CaptureMessage("Hello from MSBuild app");
         Write-Host "::group::Setup .NET SDK"
         if (Test-Path variable:sdk)
         {
+            # Pin to a specific SDK version to use MSBuild from that version
             @"
 {
     "sdk": {
-            "version": "$($sdk.version)",
+            "version": "$sdk",
             "rollForward": "latestFeature"
     }
 }
 "@ | Out-File global.json
         }
-
-        dotnet --version | ForEach-Object { Write-Host $_ }
-        dotnet msbuild -version | ForEach-Object { Write-Host $_ }
+        Write-Host "Using .NET SDK: $(dotnet --version)"
+        Write-Host "Using MSBuild version: $(dotnet msbuild -version)"
         Write-Host "::endgroup::"
     }
 
-    AfterAll {
+    AfterEach {
         Pop-Location
         Remove-Item msbuild-app -Recurse -Force -ErrorAction SilentlyContinue
     }
 
     It 'builds without warnings and is able to capture a message' {
-        if ($IsMacOS -and $framework -eq 'net5.0' -and "Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
+        if (Get-Variable -Name skip -ValueOnly -ErrorAction SilentlyContinue)
         {
-            Set-ItResult -Skipped -Because ".NET 5.0 SDK does not support ARM64 on macOS"
+            Set-ItResult -Skipped
             return
         }
 
@@ -66,21 +80,21 @@ SentrySdk.CaptureMessage("Hello from MSBuild app");
         $LASTEXITCODE | Should -Be 0
         Write-Host "::endgroup::"
 
-        Write-Host "::group::Build app"
+        Write-Host "::group::Build msbuild-app"
         # TODO: pass -p:TreatWarningsAsErrors=true after #4554 is fixed
         dotnet msbuild msbuild-app.csproj -t:Build -p:Configuration=Release -p:TreatWarningsAsErrors=false | ForEach-Object { Write-Host $_ }
         $LASTEXITCODE | Should -Be 0
         Write-Host "::endgroup::"
 
-        Write-Host "::group::Test app"
+        Write-Host "::group::Run msbuild-app"
         $result = Invoke-SentryServer {
             param([string]$url)
             $dsn = $url.Replace('http://', 'http://key@') + '/0'
             dotnet msbuild msbuild-app.csproj -t:Run -p:Configuration=Release -p:RunArguments=$dsn | ForEach-Object { Write-Host $_ }
             $LASTEXITCODE | Should -Be 0
         }
-        Write-Host "::endgroup::"
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"message`":`"Hello from MSBuild app`""
+        Write-Host "::endgroup::"
     }
 }
