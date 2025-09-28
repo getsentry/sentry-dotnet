@@ -5,6 +5,7 @@
 ### Features
 
 - Added `EnableBackpressureHandling` option for Automatic backpressure handling. When enabled this automatically reduces the sample rate when the SDK detects events being dropped. ([#4452](https://github.com/getsentry/sentry-dotnet/pull/4452))
+- Add (experimental) _Structured Logs_ integration for `Serilog` ([#4462](https://github.com/getsentry/sentry-dotnet/pull/4462))
 
 ### Fixes
 
@@ -23,6 +24,12 @@
 - Bump CLI from v2.54.0 to v2.55.0 ([#4556](https://github.com/getsentry/sentry-dotnet/pull/4556))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2550)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.54.0...2.55.0)
+
+### Dependencies
+
+- Bump Java SDK from v8.21.1 to v8.22.0 ([#4552](https://github.com/getsentry/sentry-dotnet/pull/4552))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8220)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.21.1...8.22.0)
 
 ## 5.15.1
 

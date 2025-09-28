@@ -5,13 +5,19 @@ namespace Sentry.Serilog;
 /// </summary>
 /// <inheritdoc cref="IDisposable" />
 /// <inheritdoc cref="ILogEventSink" />
-internal sealed class SentrySink : ILogEventSink, IDisposable
+internal sealed partial class SentrySink : ILogEventSink, IDisposable
 {
     private readonly IDisposable? _sdkDisposable;
     private readonly SentrySerilogOptions _options;
 
     internal static readonly SdkVersion NameAndVersion
         = typeof(SentrySink).Assembly.GetNameAndVersion();
+
+    private static readonly SdkVersion Sdk = new()
+    {
+        Name = SdkName,
+        Version = NameAndVersion.Version,
+    };
 
     /// <summary>
     /// Serilog SDK name.
@@ -50,6 +56,11 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
 
     public void Emit(LogEvent logEvent)
     {
+        if (!IsEnabled(logEvent))
+        {
+            return;
+        }
+
         if (isReentrant.Value)
         {
             _options.DiagnosticLogger?.LogError($"Reentrant log event detected. Logging when inside the scope of another log event can cause a StackOverflowException. LogEventInfo.Message: {logEvent.MessageTemplate.Text}");
@@ -67,6 +78,15 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
         }
     }
 
+    private bool IsEnabled(LogEvent logEvent)
+    {
+        var options = _hubAccessor().GetSentryOptions();
+
+        return logEvent.Level >= _options.MinimumEventLevel
+            || logEvent.Level >= _options.MinimumBreadcrumbLevel
+            || options?.Experimental.EnableLogs is true;
+    }
+
     private void InnerEmit(LogEvent logEvent)
     {
         if (logEvent.TryGetSourceContext(out var context))
@@ -77,8 +97,7 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
             }
         }
 
-        var hub = _hubAccessor();
-        if (hub is null || !hub.IsEnabled)
+        if (_hubAccessor() is not { IsEnabled: true } hub)
         {
             return;
         }
@@ -122,30 +141,37 @@ internal sealed class SentrySink : ILogEventSink, IDisposable
             }
         }
 
-        if (logEvent.Level < _options.MinimumBreadcrumbLevel)
+        if (logEvent.Level >= _options.MinimumBreadcrumbLevel)
         {
-            return;
-        }
-
-        Dictionary<string, string>? data = null;
-        if (exception != null && !string.IsNullOrWhiteSpace(formatted))
-        {
-            // Exception.Message won't be used as Breadcrumb message
-            // Avoid losing it by adding as data:
-            data = new Dictionary<string, string>
+            Dictionary<string, string>? data = null;
+            if (exception != null && !string.IsNullOrWhiteSpace(formatted))
             {
-                {"exception_message", exception.Message}
-            };
+                // Exception.Message won't be used as Breadcrumb message
+                // Avoid losing it by adding as data:
+                data = new Dictionary<string, string>
+                {
+                    { "exception_message", exception.Message }
+                };
+            }
+
+            hub.AddBreadcrumb(
+                _clock,
+                string.IsNullOrWhiteSpace(formatted)
+                    ? exception?.Message ?? ""
+                    : formatted,
+                context,
+                data: data,
+                level: logEvent.Level.ToBreadcrumbLevel());
         }
 
-        hub.AddBreadcrumb(
-            _clock,
-            string.IsNullOrWhiteSpace(formatted)
-                ? exception?.Message ?? ""
-                : formatted,
-            context,
-            data: data,
-            level: logEvent.Level.ToBreadcrumbLevel());
+        // Read the options from the Hub, rather than the Sink's Serilog-Options, because 'EnableLogs' is declared in the base 'SentryOptions', rather than the derived 'SentrySerilogOptions'.
+        // In cases where Sentry's Serilog-Sink is added without a DSN (i.e., without initializing the SDK) and the SDK is initialized differently (e.g., through ASP.NET Core),
+        // then the 'EnableLogs' option of this Sink's Serilog-Options is default, but the Hub's Sentry-Options have the actual user-defined value configured.
+        var options = hub.GetSentryOptions();
+        if (options?.Experimental.EnableLogs is true)
+        {
+            CaptureStructuredLog(hub, options, logEvent, formatted, template);
+        }
     }
 
     private static bool IsSentryContext(string context) =>

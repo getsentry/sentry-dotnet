@@ -1,0 +1,70 @@
+﻿{
+  envelopes: [
+    {
+      Header: {
+        sdk: {
+          name: sentry.dotnet
+        }
+      },
+      Items: [
+        {
+          Header: {
+            content_type: application/vnd.sentry.items.log+json,
+            item_count: 4,
+            type: log
+          },
+          Payload: {
+            Source: {
+              Length: 4
+            }
+          }
+        }
+      ]
+    }
+  ],
+  logs: [
+    [
+      {
+        Level: Debug,
+        Message: Debug message with a Scalar property: 42,
+        Template: Debug message with a Scalar property: {Scalar},
+        Parameters: [
+          {
+            Scalar: 42
+          }
+        ]
+      },
+      {
+        Level: Info,
+        Message: Information message with a Sequence property: [41, 42, 43],
+        Template: Information message with a Sequence property: {Sequence},
+        Parameters: [
+          {
+            Sequence: [41, 42, 43]
+          }
+        ]
+      },
+      {
+        Level: Warning,
+        Message: Warning message with a Dictionary property: [("key": "value")],
+        Template: Warning message with a Dictionary property: {Dictionary},
+        Parameters: [
+          {
+            Dictionary: [("key": "value")]
+          }
+        ]
+      },
+      {
+        Level: Error,
+        Message: Error message with a Structure property: [42, "42"],
+        Template: Error message with a Structure property: {Structure},
+        Parameters: [
+          {
+            Structure: [42, "42"]
+          }
+        ]
+      }
+    ]
+  ],
+  diagnostics: []
+}
