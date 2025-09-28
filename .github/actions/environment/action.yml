@@ -31,12 +31,17 @@ runs:
       run: |
         echo "https://dl-cdn.alpinelinux.org/alpine/v3.18/community" | sudo tee -a /etc/apk/repositories
         sudo apk update
-        sudo apk add sudo apk add openssl1.1-compat
+        sudo apk add openssl1.1-compat
+
     - name: Install libssl1 on Ubuntu
       if: ${{ runner.os == 'Linux' && !matrix.container.image }}
       shell: bash
       run: |
-        echo "deb http://security.ubuntu.com/ubuntu focal-security main" | sudo tee /etc/apt/sources.list.d/focal-security.list
+        if [ "$(dpkg --print-architecture)" = "arm64" ]; then
+          echo "deb http://ports.ubuntu.com/ubuntu-ports focal-security main" | sudo tee /etc/apt/sources.list.d/focal-security.list
+        else
+          echo "deb http://security.ubuntu.com/ubuntu focal-security main" | sudo tee /etc/apt/sources.list.d/focal-security.list
+        fi
         sudo apt-get update
         sudo apt-get install -y libssl1.1
 
