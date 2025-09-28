@@ -9,21 +9,9 @@ Describe 'MSBuild app (<framework>)' -ForEach @(
     @{ framework = 'net9.0' }
 ) {
     BeforeAll {
-        $hasDotnetSdk = $true
-        try
-        {
-            Write-Host "::group::Create test project"
-            DotnetNew 'console' 'msbuild-app' $framework
-        }
-        catch
-        {
-            $hasDotnetSdk = $false
-            return
-        }
-        finally
-        {
-            Write-Host "::endgroup::"
-        }
+        Write-Host "::group::Create test project"
+        DotnetNew 'console' 'msbuild-app' $framework
+        Write-Host "::endgroup::"
         Push-Location msbuild-app
         @'
 using Sentry;
@@ -56,17 +44,14 @@ SentrySdk.CaptureMessage("Hello from MSBuild app");
     }
 
     AfterAll {
-        if ($hasDotnetSdk)
-        {
-            Pop-Location
-            Remove-Item msbuild-app -Recurse -Force -ErrorAction SilentlyContinue
-        }
+        Pop-Location
+        Remove-Item msbuild-app -Recurse -Force -ErrorAction SilentlyContinue
     }
 
     It 'builds without warnings and is able to capture a message' {
-        if (!$hasDotnetSdk)
+        if ($IsMacOS -and $framework -eq 'net5.0' -and "Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()))
         {
-            Set-ItResult -Skipped -Because "$framework is not installed"
+            Set-ItResult -Skipped -Because ".NET 5.0 SDK does not support ARM64 on macOS"
             return
         }
 
