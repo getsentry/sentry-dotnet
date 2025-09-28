@@ -84,7 +84,6 @@ public class SentryLogTests
         };
 
         // Act
-        // var document = log.ToJsonString();
         var document = log.ToJsonDocument(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
         var attributes = document.RootElement.GetProperty("attributes");
 
