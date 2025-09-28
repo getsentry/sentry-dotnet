@@ -271,7 +271,7 @@ jobs:
         with:
           path: integration-test
 
-  msbuild-sentry:
+  msbuild:
     needs: build-sentry-native
     name: MSBuild
     runs-on: windows-latest
