@@ -64,10 +64,6 @@ jobs:
           key: sentry-native-${{ matrix.rid }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           enableCrossOsArchive: true
 
-      - name: Remove unused applications
-        if: ${{ !matrix.container }}
-        uses: ./.github/actions/freediskspace
-
       - run: scripts/build-sentry-native.ps1
         if: steps.cache.outputs.cache-hit != 'true'
         shell: pwsh

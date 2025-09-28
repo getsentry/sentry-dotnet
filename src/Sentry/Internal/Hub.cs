@@ -14,9 +14,11 @@ internal class Hub : IHub, IDisposable
     private readonly ISystemClock _clock;
     private readonly ISessionManager _sessionManager;
     private readonly SentryOptions _options;
+    private readonly ISampleRandHelper _sampleRandHelper;
     private readonly RandomValuesFactory _randomValuesFactory;
     private readonly IReplaySession _replaySession;
     private readonly List<IDisposable> _integrationsToCleanup = new();
+    private readonly BackpressureMonitor? _backpressureMonitor;
 
 #if MEMORY_DUMP_SUPPORTED
     private readonly MemoryMonitor? _memoryMonitor;
@@ -44,7 +46,9 @@ internal class Hub : IHub, IDisposable
         ISystemClock? clock = null,
         IInternalScopeManager? scopeManager = null,
         RandomValuesFactory? randomValuesFactory = null,
-        IReplaySession? replaySession = null)
+        IReplaySession? replaySession = null,
+        ISampleRandHelper? sampleRandHelper = null,
+        BackpressureMonitor? backpressureMonitor = null)
     {
         if (string.IsNullOrWhiteSpace(options.Dsn))
         {
@@ -59,8 +63,13 @@ internal class Hub : IHub, IDisposable
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
         _clock = clock ?? SystemClock.Clock;
-        client ??= new SentryClient(options, randomValuesFactory: _randomValuesFactory, sessionManager: _sessionManager);
+        if (_options.EnableBackpressureHandling)
+        {
+            _backpressureMonitor = backpressureMonitor ?? new BackpressureMonitor(_options.DiagnosticLogger, clock);
+        }
+        client ??= new SentryClient(options, randomValuesFactory: _randomValuesFactory, sessionManager: _sessionManager, backpressureMonitor: _backpressureMonitor);
         _replaySession = replaySession ?? ReplaySession.Instance;
+        _sampleRandHelper = sampleRandHelper ?? new SampleRandHelperAdapter();
         ScopeManager = scopeManager ?? new SentryScopeManager(options, client);
 
         if (!options.IsGlobalModeEnabled)
@@ -175,9 +184,10 @@ internal class Hub : IHub, IDisposable
 
         bool? isSampled = null;
         double? sampleRate = null;
+        DiscardReason? discardReason = null;
         var sampleRand = dynamicSamplingContext?.Items.TryGetValue("sample_rand", out var dscSampleRand) ?? false
             ? double.Parse(dscSampleRand, NumberStyles.Float, CultureInfo.InvariantCulture)
-            : SampleRandHelper.GenerateSampleRand(context.TraceId.ToString());
+            : _sampleRandHelper.GenerateSampleRand(context.TraceId.ToString());
 
         // TracesSampler runs regardless of whether a decision has already been made, as it can be used to override it.
         if (_options.TracesSampler is { } tracesSampler)
@@ -189,8 +199,14 @@ internal class Hub : IHub, IDisposable
             if (tracesSampler(samplingContext) is { } samplerSampleRate)
             {
                 // The TracesSampler trumps all other sampling decisions (even the trace header)
-                sampleRate = samplerSampleRate;
-                isSampled = SampleRandHelper.IsSampled(sampleRand, samplerSampleRate);
+                sampleRate = samplerSampleRate * _backpressureMonitor.GetDownsampleFactor();
+                isSampled = SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
+                if (isSampled is false)
+                {
+                    // If sampling out is only a result of the downsampling then we specify the reason as backpressure
+                    // management... otherwise the event would have been sampled out anyway, so it's just regular sampling.
+                    discardReason = sampleRand < samplerSampleRate ? DiscardReason.Backpressure : DiscardReason.SampleRate;
+                }
 
                 // Ensure the actual sampleRate is set on the provided DSC (if any) when the TracesSampler reached a sampling decision
                 dynamicSamplingContext?.SetSampleRate(samplerSampleRate);
@@ -201,8 +217,15 @@ internal class Hub : IHub, IDisposable
         // finally fallback to Random sampling if the decision has been made by no other means
         if (isSampled == null)
         {
-            sampleRate = _options.TracesSampleRate ?? 0.0;
+            var optionsSampleRate = _options.TracesSampleRate ?? 0.0;
+            sampleRate = optionsSampleRate * _backpressureMonitor.GetDownsampleFactor();
             isSampled = context.IsSampled ?? SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
+            if (isSampled is false)
+            {
+                // If sampling out is only a result of the downsampling then we specify the reason as backpressure
+                // management... otherwise the event would have been sampled out anyway, so it's just regular sampling.
+                discardReason = sampleRand < optionsSampleRate ? DiscardReason.Backpressure : DiscardReason.SampleRate;
+            }
 
             if (context.IsSampled is null && _options.TracesSampleRate is not null)
             {
@@ -220,6 +243,7 @@ internal class Hub : IHub, IDisposable
             {
                 SampleRate = sampleRate,
                 SampleRand = sampleRand,
+                DiscardReason = discardReason,
                 DynamicSamplingContext = dynamicSamplingContext // Default to the provided DSC
             };
             // If no DSC was provided, create one based on this transaction.
@@ -844,6 +868,8 @@ internal class Hub : IHub, IDisposable
             _options.LogError(e, "Failed to wait on disposing tasks to flush.");
         }
         //Don't dispose of ScopeManager since we want dangling transactions to still be able to access tags.
+
+        _backpressureMonitor?.Dispose();
 
 #if __IOS__
             // TODO
