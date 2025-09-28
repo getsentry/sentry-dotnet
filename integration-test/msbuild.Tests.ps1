@@ -3,6 +3,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
 
+# NOTE: These .NET versions are used to build a test app that consumes the Sentry
+# .NET SDK, and are not tied to the .NET version used to build the SDK itself.
 Describe 'MSBuild app (<framework>)' -ForEach @(
     @{ framework = 'net5.0'; sdk = @{ version = '5.0.400' }; config = "$PSScriptRoot\nuget5.config" }
     @{ framework = 'net8.0'; sdk = @{ version = '8.0.400' } },
