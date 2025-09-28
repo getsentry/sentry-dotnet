@@ -24,6 +24,22 @@ runs:
       shell: bash
       run: sudo chmod 666 /var/run/docker.sock
 
+    # Install old deprecated libssl1 for .NET 5.0 on Linux
+    - name: Install libssl1 on Alpine Linux
+      if: ${{ contains(matrix.container.image, 'alpine') }}
+      shell: bash
+      run: |
+        echo "https://dl-cdn.alpinelinux.org/alpine/v3.18/community" | sudo tee -a /etc/apk/repositories
+        sudo apk update
+        sudo apk add sudo apk add openssl1.1-compat
+    - name: Install libssl1 on Ubuntu
+      if: ${{ runner.os == 'Linux' && !matrix.container.image }}
+      shell: bash
+      run: |
+        echo "deb http://security.ubuntu.com/ubuntu focal-security main" | sudo tee /etc/apt/sources.list.d/focal-security.list
+        sudo apt-get update
+        sudo apt-get install -y libssl1.1
+
     - name: Install Linux ARM 32-bit dependencies
       if: ${{ matrix.rid == 'linux-arm' }}
       shell: bash
@@ -90,8 +106,9 @@ runs:
         global-json-file: global.json
         dotnet-version: 8.0.x
 
+    # .NET 5.0 does not support ARM64 on macOS
     - name: Install .NET 5.0 SDK
-      if: ${{ runner.os == 'Windows' || matrix.rid == 'linux-x64' }}
+      if: ${{ runner.os != 'macOS' }}
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 5.0.x
