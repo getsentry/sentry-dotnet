@@ -4,6 +4,7 @@
 
 ### Features
 
+- Added `EnableBackpressureHandling` option for Automatic backpressure handling. When enabled this automatically reduces the sample rate when the SDK detects events being dropped. ([#4452](https://github.com/getsentry/sentry-dotnet/pull/4452))
 - Add (experimental) _Structured Logs_ integration for `Serilog` ([#4462](https://github.com/getsentry/sentry-dotnet/pull/4462))
 
 ### Fixes

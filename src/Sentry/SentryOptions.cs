@@ -95,6 +95,12 @@ public class SentryOptions
     public bool EnableScopeSync { get; set; }
 
     /// <summary>
+    /// Enables or disables automatic backpressure handling. When enabled, the SDK will monitor system health and
+    /// reduce the sampling rate of events and transactions when the system is under load.
+    /// </summary>
+    public bool EnableBackpressureHandling { get; set; } = false;
+
+    /// <summary>
     /// This holds a reference to the current transport, when one is active.
     /// If set manually before initialization, the provided transport will be used instead of the default transport.
     /// </summary>
