@@ -154,7 +154,7 @@ BeforeAll {
         Push-Location $projectPath
         try
         {
-            dotnet restore | ForEach-Object { Write-Host $_ }
+            dotnet restore /p:CheckEolTargetFramework=false | ForEach-Object { Write-Host $_ }
             if ($LASTEXITCODE -ne 0)
             {
                 throw "Failed to restore the test app project."
@@ -175,7 +175,7 @@ BeforeAll {
     function DotnetNew([string] $type, [string] $name, [string] $framework)
     {
         Remove-Item -Path $name -Recurse -Force -ErrorAction SilentlyContinue
-        dotnet new $type --output $name --framework $framework | ForEach-Object { Write-Host $_ }
+        dotnet new $type --output $name --framework $framework --no-restore | ForEach-Object { Write-Host $_ }
         if ($LASTEXITCODE -ne 0)
         {
             throw "Failed to create the test app '$name' from template '$type'."
