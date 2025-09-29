@@ -15,13 +15,3 @@ To make sure we're not exposing any API from that library externally.
 Fork [getsentry/perfview](https://github.com/getsentry/perfview/).
 Tool from the .NET team which includes several utilities used for profiling .NET code. 
 We use that in our `Sentry.Profiling` package.
-
-### sentry-cocoa
-
-By default, `Sentry.Bindings.Cocoa` downloads a pre-built Sentry Cocoa SDK from
-GitHub Releases. The version is specified in `sentry-cocoa.properties`.
-
-If you want to build an unreleased Sentry Cocoa SDK version from source instead,
-replace the pre-built SDK with [getsentry/sentry-cocoa](https://github.com/getsentry/sentry-cocoa/)
-by cloning it into the `modules/sentry-cocoa` directory. To switch back to the
-pre-built SDK, delete the `modules/sentry-cocoa` directory.
