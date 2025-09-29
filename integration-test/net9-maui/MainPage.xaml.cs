@@ -1,4 +1,8 @@
-﻿namespace Sentry.Maui.Device.IntegrationTestApp;
+﻿#if ANDROID
+using Android.OS;
+#endif
+
+namespace Sentry.Maui.Device.IntegrationTestApp;
 
 public partial class MainPage : ContentPage
 {
@@ -12,14 +16,14 @@ public partial class MainPage : ContentPage
         base.OnAppearing();
 
 #pragma warning disable CS0618
-        var crashTypeEnv = Environment.GetEnvironmentVariable("SENTRY_CRASH_TYPE");
+        var crashTypeEnv = System.Environment.GetEnvironmentVariable("SENTRY_CRASH_TYPE");
         if (Enum.TryParse<CrashType>(crashTypeEnv, ignoreCase: true, out var crashType))
         {
             SentrySdk.CauseCrash(crashType);
         }
 #pragma warning restore CS0618
 
-        var testActionEnv = Environment.GetEnvironmentVariable("SENTRY_TEST_ACTION");
+        var testActionEnv = System.Environment.GetEnvironmentVariable("SENTRY_TEST_ACTION");
         if (testActionEnv?.Equals("NullReferenceException", StringComparison.OrdinalIgnoreCase) == true)
         {
             try
@@ -34,6 +38,10 @@ public partial class MainPage : ContentPage
         }
 
         SentrySdk.Flush();
-        Environment.Exit(0);
+#if ANDROID
+        Process.KillProcess(Process.MyPid());
+#elif IOS
+        System.Environment.Exit(0);
+#endif
     }
 }

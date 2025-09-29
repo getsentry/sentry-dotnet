@@ -12,6 +12,9 @@ public static class MauiProgram
             .UseMauiApp<App>()
             .UseSentry(options =>
             {
+#if ANDROID
+                options.Dsn = "{{SENTRY_DSN}}";
+#endif
                 options.Debug = true;
                 options.DiagnosticLevel = SentryLevel.Info;
             })

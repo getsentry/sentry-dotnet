@@ -1,4 +1,5 @@
 ﻿using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 
@@ -13,4 +14,11 @@ namespace Sentry.Maui.Device.IntegrationTestApp;
 )]
 public class MainActivity : MauiAppCompatActivity
 {
+    protected override void OnCreate(Bundle? savedInstanceState)
+    {
+        base.OnCreate(savedInstanceState);
+
+        System.Environment.SetEnvironmentVariable("SENTRY_CRASH_TYPE", Intent?.GetStringExtra("SENTRY_CRASH_TYPE"));
+        System.Environment.SetEnvironmentVariable("SENTRY_TEST_ACTION", Intent?.GetStringExtra("SENTRY_TEST_ACTION"));
+    }
 }
