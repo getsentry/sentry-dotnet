@@ -161,7 +161,7 @@ BeforeAll {
             }
 
             $packageVersion = GetSentryPackageVersion
-            dotnet add package $package --source $PSScriptRoot/packages --version $packageVersion | ForEach-Object { Write-Host $_ }
+            dotnet add package $package --source $PSScriptRoot/packages --version $packageVersion --no-restore | ForEach-Object { Write-Host $_ }
             if ($LASTEXITCODE -ne 0)
             {
                 throw "Failed to add package dependency to the test app project."
