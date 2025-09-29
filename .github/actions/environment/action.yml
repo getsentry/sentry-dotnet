@@ -24,28 +24,11 @@ runs:
       shell: bash
       run: sudo chmod 666 /var/run/docker.sock
 
-    # Install old deprecated libssl1 for .NET 5.0 on Alpine Linux
-    - name: Install libssl1 on Alpine Linux
-      if: ${{ contains(matrix.container.image, 'alpine') }}
+    # Install old deprecated libssl1 for .NET 5.0 on Linux
+    - name: Install libssl1 for NET 5.0 on Linux
+      if: ${{ runner.os == 'Linux' }}
       shell: bash
-      run: |
-        sudo apk add --repository=https://dl-cdn.alpinelinux.org/alpine/v3.18/community openssl1.1-compat
-
-    # Install old deprecated libssl1 for .NET 5.0 on Ubuntu
-    # https://github.com/actions/runner-images/blob/d43555be6577f2ac4e4f78bf683c520687891e1b/images/ubuntu/scripts/build/install-sqlpackage.sh#L11-L21
-    - name: Install libssl1 on Ubuntu
-      if: ${{ runner.os == 'Linux' && !matrix.container.image }}
-      shell: bash
-      run: |
-        if [ "$(dpkg --print-architecture)" = "arm64" ]; then
-          echo "deb http://ports.ubuntu.com/ubuntu-ports focal-security main" | sudo tee /etc/apt/sources.list.d/focal-security.list
-        else
-          echo "deb http://security.ubuntu.com/ubuntu focal-security main" | sudo tee /etc/apt/sources.list.d/focal-security.list
-        fi
-        sudo apt-get update
-        sudo apt-get install -y --no-install-recommends libssl1.1
-        sudo rm /etc/apt/sources.list.d/focal-security.list
-        sudo apt-get update
+      run: ./scripts/install-libssl1.sh
 
     - name: Install Linux ARM 32-bit dependencies
       if: ${{ matrix.rid == 'linux-arm' }}
