@@ -14,7 +14,7 @@ runs:
           echo "JAVA_HOME_11=$JAVA_HOME_11_X64" >> $GITHUB_ENV
         fi
 
-    - uses: actions/cache@v3
+    - uses: ./.github/actions/cache
       id: cache-c
       with:
         path: lib/sentrysupplemental/bin
@@ -35,7 +35,7 @@ runs:
       shell: cmd
       run: lib\sentrysupplemental\build.cmd
 
-    - uses: actions/cache@v3
+    - uses: ./.github/actions/cache
       id: cache-android
       with:
         path: lib/sentry-android-supplemental/bin
