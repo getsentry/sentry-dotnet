@@ -28,7 +28,7 @@ runs:
     - name: Install libssl1 for NET 5.0 on Linux
       if: ${{ runner.os == 'Linux' }}
       shell: bash
-      run: ./scripts/install-libssl1.sh
+      run: sudo ./scripts/install-libssl1.sh
 
     - name: Install Linux ARM 32-bit dependencies
       if: ${{ matrix.rid == 'linux-arm' }}
