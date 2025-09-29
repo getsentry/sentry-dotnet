@@ -161,7 +161,7 @@ BeforeAll {
             }
 
             $packageVersion = GetSentryPackageVersion
-            dotnet add package $package --source $PSScriptRoot/packages --version $packageVersion --no-restore | ForEach-Object { Write-Host $_ }
+            dotnet add package $package --source $PSScriptRoot/packages --version $packageVersion | ForEach-Object { Write-Host $_ }
             if ($LASTEXITCODE -ne 0)
             {
                 throw "Failed to add package dependency to the test app project."
@@ -175,7 +175,7 @@ BeforeAll {
     function DotnetNew([string] $type, [string] $name, [string] $framework)
     {
         Remove-Item -Path $name -Recurse -Force -ErrorAction SilentlyContinue
-        dotnet new $type --output $name --framework $framework --no-restore | ForEach-Object { Write-Host $_ }
+        dotnet new $type --output $name --framework $framework | ForEach-Object { Write-Host $_ }
         if ($LASTEXITCODE -ne 0)
         {
             throw "Failed to create the test app '$name' from template '$type'."
@@ -197,7 +197,7 @@ BeforeAll {
         if ($type -eq 'console')
         {
             AddPackageReference $name 'Sentry'
-            if ((!$IsMacOS -or $framework -eq 'net8.0') -and $framework -ne 'net5.0')
+            if (!$IsMacOS -or $framework -eq 'net8.0')
             {
                 @"
 <Project>

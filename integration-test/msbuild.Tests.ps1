@@ -31,7 +31,9 @@ Describe 'MSBuild app' {
     Context '(<framework>)' -ForEach $frameworks {
         BeforeEach {
             Write-Host "::group::Create msbuild-app"
-            DotnetNew 'console' 'msbuild-app' $framework
+            dotnet new console --no-restore --output msbuild-app --framework $framework | ForEach-Object { Write-Host $_ }
+            $LASTEXITCODE | Should -Be 0
+            AddPackageReference msbuild-app Sentry
             Push-Location msbuild-app
             @'
 using System.Runtime.InteropServices;
