@@ -78,7 +78,7 @@ SentrySdk.CaptureMessage($"Hello from MSBuild app");
             {
                 $config = "$PSScriptRoot/nuget.config"
             }
-            dotnet restore msbuild-app.csproj --configfile $config /p:CheckEolTargetFramework=false | ForEach-Object { Write-Host $_ }
+            dotnet restore msbuild-app.csproj --configfile $config -p:CheckEolTargetFramework=false | ForEach-Object { Write-Host $_ }
             $LASTEXITCODE | Should -Be 0
             Write-Host "::endgroup::"
 
