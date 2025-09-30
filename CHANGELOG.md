@@ -12,7 +12,7 @@
 - In MAUI Android apps, generate and inject UUID to APK and upload ProGuard mapping to Sentry with the UUID ([#4532](https://github.com/getsentry/sentry-dotnet/pull/4532))
 - Fixed WASM0001 warning when building Blazor WebAssembly projects ([#4519](https://github.com/getsentry/sentry-dotnet/pull/4519))
 
-### Experimental
+### API Changes
 
 - Remove `ExperimentalAttribute` from all _Structured Logs_ APIs, and remove `Experimental` property from `SentrySdk`, but keep `Experimental` property on `SentryOptions` ([#4567](https://github.com/getsentry/sentry-dotnet/pull/4567))
 
