@@ -129,7 +129,7 @@ jobs:
         with:
           repository: getsentry/github-workflows
           ref: a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
-          path: ../github-workflows
+          path: modules/github-workflows
 
       - name: Run Integration Tests
         id: first-integration-test-run
