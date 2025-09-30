@@ -81,6 +81,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          submodules: recursive
 
       - name: Download test app artifact
         uses: actions/download-artifact@v5
