@@ -48,13 +48,13 @@ jobs:
         continue-on-error: true
         uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
         with:
-          path: integration-test/mobile.Tests.ps1
+          path: integration-test/ios.Tests.ps1
 
       - name: Retry Integration Tests (if previous failed to run)
         if: steps.first-integration-test-run.outcome == 'failure'
         uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
         with:
-          path: integration-test/mobile.Tests.ps1
+          path: integration-test/ios.Tests.ps1
 
       - name: Upload results
         if: success() || failure()

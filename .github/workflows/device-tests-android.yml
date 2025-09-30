@@ -144,7 +144,7 @@ jobs:
           disk-size: ${{ env.ANDROID_EMULATOR_DISK_SIZE }}
           emulator-options: ${{ env.ANDROID_EMULATOR_OPTIONS }}
           disable-animations: false
-          script: pwsh integration-test/mobile.Tests.ps1
+          script: pwsh integration-test/android.Tests.ps1
 
       - name: Retry Integration Tests (if previous failed to run)
         if: steps.first-integration-test-run.outcome == 'failure'
@@ -159,7 +159,7 @@ jobs:
           disk-size: ${{ env.ANDROID_EMULATOR_DISK_SIZE }}
           emulator-options: ${{ env.ANDROID_EMULATOR_OPTIONS }}
           disable-animations: false
-          script: pwsh integration-test/mobile.Tests.ps1
+          script: pwsh integration-test/android.Tests.ps1
 
       - name: Upload results
         if: success() || failure()
