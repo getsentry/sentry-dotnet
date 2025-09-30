@@ -124,11 +124,12 @@ jobs:
           disable-animations: false
           script: pwsh scripts/device-test.ps1 android -Run -Tfm ${{ matrix.tfm }}
 
-      - name: Checkout
+      - name: Checkout github-workflows
         uses: actions/checkout@v5
         with:
           repository: getsentry/github-workflows
           ref: a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+          path: ../github-workflows
 
       - name: Run Integration Tests
         id: first-integration-test-run
