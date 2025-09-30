@@ -9,6 +9,21 @@ function Install-XHarness {
     }
 }
 
+function Get-AndroidEmulatorId {
+    if ($env:ANDROID_SERIAL)
+    {
+        return $env:ANDROID_SERIAL
+    }
+    try
+    {
+        return & adb devices | Select-String "device$" | ForEach-Object { ($_ -split "`t")[0] } | Select-Object -First 1
+    }
+    catch
+    {
+        return $null
+    }
+}
+
 function Get-IosSimulatorUdid {
     [CmdletBinding()]
     param(
