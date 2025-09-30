@@ -82,11 +82,9 @@ SentrySdk.CaptureMessage($"Hello from MSBuild app");
             $LASTEXITCODE | Should -Be 0
             Write-Host "::endgroup::"
 
-            Write-Host "::group::Build msbuild-app"
             # TODO: pass -p:TreatWarningsAsErrors=true after #4554 is fixed
             dotnet msbuild msbuild-app.csproj -t:Build -p:Configuration=Release -p:TreatWarningsAsErrors=false | ForEach-Object { Write-Host $_ }
             $LASTEXITCODE | Should -Be 0
-            Write-Host "::endgroup::"
 
             Write-Host "::group::Run msbuild-app"
             $result = Invoke-SentryServer {
