@@ -1,6 +1,6 @@
 namespace Sentry.Serilog.Tests;
 
-public class SentrySinkTests
+public partial class SentrySinkTests
 {
     private class Fixture
     {
@@ -15,6 +15,7 @@ public class SentrySinkTests
             Hub.IsEnabled.Returns(true);
             HubAccessor = () => Hub;
             Hub.SubstituteConfigureScope(Scope);
+            SentryClientExtensions.SentryOptionsForTestingOnly = Options;
         }
 
         public SentrySink GetSut()

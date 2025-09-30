@@ -9,6 +9,7 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
 {
     private readonly ITransport _transport;
     private readonly SentryOptions _options;
+    private readonly BackpressureMonitor? _backpressureMonitor;
     private readonly ConcurrentQueueLite<Envelope> _queue;
     private readonly int _maxItems;
     private readonly CancellationTokenSource _shutdownSource;
@@ -26,11 +27,13 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
     public BackgroundWorker(
         ITransport transport,
         SentryOptions options,
+        BackpressureMonitor? backpressureMonitor,
         CancellationTokenSource? shutdownSource = null,
         ConcurrentQueueLite<Envelope>? queue = null)
     {
         _transport = transport;
         _options = options;
+        _backpressureMonitor = backpressureMonitor;
         _queue = queue ?? new ConcurrentQueueLite<Envelope>();
         _maxItems = options.MaxQueueItems;
         _shutdownSource = shutdownSource ?? new CancellationTokenSource();
@@ -66,6 +69,7 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
         var eventId = envelope.TryGetEventId(_options.DiagnosticLogger);
         if (Interlocked.Increment(ref _currentItems) > _maxItems)
         {
+            _backpressureMonitor?.RecordQueueOverflow();
             Interlocked.Decrement(ref _currentItems);
             _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.QueueOverflow, envelope);
             _options.LogInfo("Discarding envelope {0} because the queue is full.", eventId);

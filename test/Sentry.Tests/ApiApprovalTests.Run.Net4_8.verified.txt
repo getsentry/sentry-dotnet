@@ -599,6 +599,7 @@ namespace Sentry
         [System.Runtime.Serialization.EnumMember(Value="fatal")]
         Fatal = 4,
     }
+    [System.Diagnostics.DebuggerDisplay("SentryLog \\{ Level = {Level}, Message = \'{Message}\' \\}")]
     public sealed class SentryLog
     {
         public Sentry.SentryLogLevel Level { get; init; }
@@ -686,6 +687,7 @@ namespace Sentry
         public bool DisableSentryHttpMessageHandler { get; set; }
         public string? Distribution { get; set; }
         public string? Dsn { get; set; }
+        public bool EnableBackpressureHandling { get; set; }
         public bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }
         public string? Environment { get; set; }

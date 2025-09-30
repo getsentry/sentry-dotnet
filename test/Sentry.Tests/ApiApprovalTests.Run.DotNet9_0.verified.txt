@@ -613,6 +613,7 @@ namespace Sentry
         Fatal = 4,
     }
     [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
+    [System.Diagnostics.DebuggerDisplay("SentryLog \\{ Level = {Level}, Message = \'{Message}\' \\}")]
     [System.Runtime.CompilerServices.RequiredMember]
     public sealed class SentryLog
     {
@@ -716,6 +717,7 @@ namespace Sentry
         public bool DisableSentryHttpMessageHandler { get; set; }
         public string? Distribution { get; set; }
         public string? Dsn { get; set; }
+        public bool EnableBackpressureHandling { get; set; }
         public bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }
         public string? Environment { get; set; }
