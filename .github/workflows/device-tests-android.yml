@@ -124,6 +124,9 @@ jobs:
           disable-animations: false
           script: pwsh scripts/device-test.ps1 android -Run -Tfm ${{ matrix.tfm }}
 
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
       - name: Checkout github-workflows
         uses: actions/checkout@v5
         with:
