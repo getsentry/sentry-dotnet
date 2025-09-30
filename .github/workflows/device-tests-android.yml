@@ -100,7 +100,7 @@ jobs:
         continue-on-error: true
         timeout-minutes: 40
         uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed # Tag: v2.34.0
-        with:
+        with: &android-emulator-test
           api-level: ${{ matrix.api-level }}
           target: ${{ env.ANDROID_EMULATOR_TARGET }}
           force-avd-creation: false
@@ -115,22 +115,13 @@ jobs:
         if: steps.first-test-run.outcome == 'failure'
         timeout-minutes: 40
         uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed # Tag: v2.34.0
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: ${{ env.ANDROID_EMULATOR_TARGET }}
-          force-avd-creation: false
-          ram-size: ${{ env.ANDROID_EMULATOR_RAM_SIZE }}
-          arch: ${{ env.ANDROID_EMULATOR_ARCH }}
-          disk-size: ${{ env.ANDROID_EMULATOR_DISK_SIZE }}
-          emulator-options: ${{ env.ANDROID_EMULATOR_OPTIONS }}
-          disable-animations: false
-          script: pwsh scripts/device-test.ps1 android -Run -Tfm ${{ matrix.tfm }}
+        with: *android-emulator-test
 
       - name: Setup Environment
         uses: ./.github/actions/environment
 
       - name: Select Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           distribution: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && 'microsoft' || 'temurin' }}
           java-version: '17'
@@ -146,8 +137,8 @@ jobs:
         id: first-integration-test-run
         continue-on-error: true
         timeout-minutes: 40
-        uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed # Tag: v2.34.0
-        with:
+        uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed # v2.34.0
+        with: &android-emulator-integration-test
           api-level: ${{ matrix.api-level }}
           target: ${{ env.ANDROID_EMULATOR_TARGET }}
           force-avd-creation: false
@@ -161,17 +152,8 @@ jobs:
       - name: Retry Integration Tests (if previous failed to run)
         if: steps.first-integration-test-run.outcome == 'failure'
         timeout-minutes: 40
-        uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed # Tag: v2.34.0
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: ${{ env.ANDROID_EMULATOR_TARGET }}
-          force-avd-creation: false
-          ram-size: ${{ env.ANDROID_EMULATOR_RAM_SIZE }}
-          arch: ${{ env.ANDROID_EMULATOR_ARCH }}
-          disk-size: ${{ env.ANDROID_EMULATOR_DISK_SIZE }}
-          emulator-options: ${{ env.ANDROID_EMULATOR_OPTIONS }}
-          disable-animations: false
-          script: pwsh integration-test/android.Tests.ps1
+        uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed # v2.34.0
+        with: *android-emulator-integration-test
 
       - name: Upload results
         if: success() || failure()
@@ -180,4 +162,4 @@ jobs:
           name: device-test-android-${{ matrix.api-level }}-${{ matrix.tfm }}-results
           path: |
             test_output
-            integration_test_output
+            integration-test/mobile-app/test_output

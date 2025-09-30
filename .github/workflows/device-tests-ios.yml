@@ -63,4 +63,4 @@ jobs:
           name: device-test-ios-results
           path: |
             test_output
-            integration_test_output
+            integration-test/mobile-app/test_output

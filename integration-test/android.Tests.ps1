@@ -48,7 +48,7 @@ Describe 'MAUI app' -ForEach @(
             xharness android install -v `
                 --app bin/Release/$tfm/$rid/io.sentry.dotnet.maui.device.integrationtestapp-Signed.apk `
                 --package-name io.sentry.dotnet.maui.device.integrationtestapp `
-                --output-directory=integration_test_output
+                --output-directory=test_output
             | ForEach-Object { Write-Host $_ }
             $LASTEXITCODE | Should -Be 0
             Write-Host '::endgroup::'

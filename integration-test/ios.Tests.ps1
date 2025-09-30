@@ -28,7 +28,7 @@ Describe 'iOS app (<tfm>)' -ForEach @(
             "-v",
             "--target=ios-simulator-64",
             "--device=$simulator",
-            "--output-directory=integration_test_output",
+            "--output-directory=test_output",
             "--timeout=00:10:00"
         )
 
