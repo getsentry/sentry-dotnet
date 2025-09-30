@@ -55,7 +55,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
             var scope = new Scope();
             Hub.SubstituteConfigureScope(scope);
             TraceId = scope.PropagationContext.TraceId;
-            ParentSpanId = scope.PropagationContext.SpanId;
+            ParentSpanId = null;
         }
 
         public SentryStructuredLogger GetSut() => SentryStructuredLogger.Create(Hub, Options, Clock, BatchSize, BatchTimeout);

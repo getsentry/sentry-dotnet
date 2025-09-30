@@ -1,13 +1,19 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
+using Sentry.Internal;
 using Sentry.Protocol;
 
 namespace Sentry;
 
 /// <summary>
-/// Represents the Sentry Log protocol.
+/// Represents a Sentry Structured Log.
 /// <para>This API is experimental and it may change in the future.</para>
 /// </summary>
+/// <remarks>
+/// Sentry Docs: <see href="https://docs.sentry.io/product/explore/logs/"/>.
+/// Sentry Developer Documentation: <see href="https://develop.sentry.dev/sdk/telemetry/logs/"/>.
+/// Sentry .NET SDK Docs: <see href="https://docs.sentry.io/platforms/dotnet/logs/"/>.
+/// </remarks>
 [Experimental(DiagnosticId.ExperimentalFeature)]
 [DebuggerDisplay(@"SentryLog \{ Level = {Level}, Message = '{Message}' \}")]
 public sealed class SentryLog
@@ -260,23 +266,26 @@ public sealed class SentryLog
 
     internal static void GetTraceIdAndSpanId(IHub hub, out SentryId traceId, out SpanId? spanId)
     {
-        var span = hub.GetSpan();
-        if (span is not null)
+        var activeSpan = hub.GetSpan();
+        if (activeSpan is not null)
         {
-            traceId = span.TraceId;
-            spanId = span.SpanId;
+            traceId = activeSpan.TraceId;
+            spanId = activeSpan.SpanId;
             return;
         }
+
+        // set "sentry.trace.parent_span_id" to the ID of the Span that was active when the Log was collected
+        // do not set "sentry.trace.parent_span_id" if there was no active Span
+        spanId = null;
 
         var scope = hub.GetScope();
         if (scope is not null)
         {
             traceId = scope.PropagationContext.TraceId;
-            spanId = scope.PropagationContext.SpanId;
             return;
         }
 
+        Debug.Assert(hub is not Hub, "In case of a 'full' Hub, there is always a Scope. Otherwise (disabled) there is no Scope, but this branch should be unreachable.");
         traceId = SentryId.Empty;
-        spanId = null;
     }
 }

@@ -384,7 +384,7 @@ public class SentryLogTests
     }
 
     [Fact]
-    public void GetTraceIdAndSpanId_WithActiveSpan_ReturnAsOut()
+    public void GetTraceIdAndSpanId_WithActiveSpan_HasBothTraceIdAndSpanId()
     {
         // Arrange
         var span = Substitute.For<ISpan>();
@@ -403,7 +403,7 @@ public class SentryLogTests
     }
 
     [Fact]
-    public void GetTraceIdAndSpanId_WithoutActiveSpan_ReturnAsOut()
+    public void GetTraceIdAndSpanId_WithoutActiveSpan_HasOnlyTraceIdButNoSpanId()
     {
         // Arrange
         var hub = Substitute.For<IHub>();
@@ -417,11 +417,11 @@ public class SentryLogTests
 
         // Assert
         traceId.Should().Be(scope.PropagationContext.TraceId);
-        spanId.Should().Be(scope.PropagationContext.SpanId);
+        spanId.Should().BeNull();
     }
 
     [Fact]
-    public void GetTraceIdAndSpanId_WithoutIds_ReturnAsOut()
+    public void GetTraceIdAndSpanId_WithoutIds_ShouldBeUnreachable()
     {
         // Arrange
         var hub = Substitute.For<IHub>();

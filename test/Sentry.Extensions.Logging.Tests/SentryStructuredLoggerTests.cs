@@ -140,7 +140,7 @@ public class SentryStructuredLoggerTests : IDisposable
 
         var log = _fixture.CapturedLogs.Dequeue();
         log.TraceId.Should().Be(scope.PropagationContext.TraceId);
-        log.ParentSpanId.Should().Be(scope.PropagationContext.SpanId);
+        log.ParentSpanId.Should().BeNull();
     }
 
     [Fact]
