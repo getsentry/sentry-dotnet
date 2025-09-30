@@ -8,6 +8,7 @@ on:
   pull_request:
     paths-ignore:
       - "**.md"
+  workflow_dispatch:
 
 jobs:
   build:
@@ -64,6 +65,12 @@ jobs:
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
+      # We don't need the Google APIs, but the default images are not available for 32+
+      ANDROID_EMULATOR_TARGET: google_apis
+      ANDROID_EMULATOR_RAM_SIZE: 2048M
+      ANDROID_EMULATOR_ARCH: x86_64
+      ANDROID_EMULATOR_DISK_SIZE: 4096M
+      ANDROID_EMULATOR_OPTIONS: -no-snapshot-save -no-window -accel on -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
     steps:
       # See https://github.blog/changelog/2023-02-23-hardware-accelerated-android-virtualization-on-actions-windows-and-linux-larger-hosted-runners/
       - name: Enable KVM group perms
@@ -82,22 +89,38 @@ jobs:
           path: bin
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # pin@v3
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # pin@v3
 
       # Cached AVD setup per https://github.com/ReactiveCircus/android-emulator-runner/blob/main/README.md
 
       - name: Run Tests
+        id: first-run
+        continue-on-error: true
         timeout-minutes: 40
         uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed # Tag: v2.34.0
         with:
           api-level: ${{ matrix.api-level }}
-          # We don't need the Google APIs, but the default images are not available for 32+
-          target: google_apis
+          target: ${{ env.ANDROID_EMULATOR_TARGET }}
           force-avd-creation: false
-          ram-size: 2048M
-          arch: x86_64
-          disk-size: 4096M
-          emulator-options: -no-snapshot-save -no-window -accel on -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          ram-size: ${{ env.ANDROID_EMULATOR_RAM_SIZE }}
+          arch: ${{ env.ANDROID_EMULATOR_ARCH }}
+          disk-size: ${{ env.ANDROID_EMULATOR_DISK_SIZE }}
+          emulator-options: ${{ env.ANDROID_EMULATOR_OPTIONS }}
+          disable-animations: false
+          script: pwsh scripts/device-test.ps1 android -Run -Tfm ${{ matrix.tfm }}
+
+      - name: Retry Tests (if previous failed to run)
+        if: steps.first-run.outcome == 'failure'
+        timeout-minutes: 40
+        uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed # Tag: v2.34.0
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: ${{ env.ANDROID_EMULATOR_TARGET }}
+          force-avd-creation: false
+          ram-size: ${{ env.ANDROID_EMULATOR_RAM_SIZE }}
+          arch: ${{ env.ANDROID_EMULATOR_ARCH }}
+          disk-size: ${{ env.ANDROID_EMULATOR_DISK_SIZE }}
+          emulator-options: ${{ env.ANDROID_EMULATOR_OPTIONS }}
           disable-animations: false
           script: pwsh scripts/device-test.ps1 android -Run -Tfm ${{ matrix.tfm }}
 
