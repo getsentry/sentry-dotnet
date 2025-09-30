@@ -4,8 +4,13 @@ using Sentry.Protocol;
 namespace Sentry;
 
 /// <summary>
-/// Represents the Sentry Log protocol.
+/// Represents a Sentry Structured Log.
 /// </summary>
+/// <remarks>
+/// Sentry Docs: <see href="https://docs.sentry.io/product/explore/logs/"/>.
+/// Sentry Developer Documentation: <see href="https://develop.sentry.dev/sdk/telemetry/logs/"/>.
+/// Sentry .NET SDK Docs: <see href="https://docs.sentry.io/platforms/dotnet/logs/"/>.
+/// </remarks>
 [DebuggerDisplay(@"SentryLog \{ Level = {Level}, Message = '{Message}' \}")]
 public sealed class SentryLog
 {
