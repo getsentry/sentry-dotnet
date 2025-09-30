@@ -98,7 +98,7 @@ runs:
 
     # .NET 5.0 does not support ARM64 on macOS
     - name: Install .NET 5.0 SDK
-      if: ${{ runner.os != 'macOS' }}
+      if: ${{ runner.os != 'macOS' || runner.arch != 'ARM64' }}
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 5.0.x
