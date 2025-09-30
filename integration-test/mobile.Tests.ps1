@@ -9,7 +9,11 @@ BeforeDiscovery {
     # has already been booted by iOS or Android Device Tests, or manually when
     # testing locally. This avoids slowing down the macOS build job further.
     $script:iosDevice = Get-IosSimulatorUdid -PreferredStates @('Booted')
-    $script:androidDevice = & adb devices | Select-String "device$" | ForEach-Object { ($_ -split "`t")[0] } | Select-Object -First 1
+    if ($env:ANDROID_SERIAL) {
+        $script:androidDevice = $env:ANDROID_SERIAL
+    } else {
+        $script:androidDevice = & adb devices | Select-String "device$" | ForEach-Object { ($_ -split "`t")[0] } | Select-Object -First 1
+    }
 }
 
 Describe 'MAUI app' {

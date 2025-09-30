@@ -2,7 +2,7 @@
 
 # So that this works in VS Code testing integration. Otherwise the script is run within its directory.
 # In CI, the module is loaded automatically
-if (!(Test-Path env:CI ))
+if (Test-Path $PSScriptRoot/../../github-workflows)
 {
     Import-Module $PSScriptRoot/../../github-workflows/sentry-cli/integration-test/action.psm1 -Force
 }
