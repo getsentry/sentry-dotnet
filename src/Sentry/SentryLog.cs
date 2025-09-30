@@ -6,14 +6,9 @@ using Sentry.Protocol;
 namespace Sentry;
 
 /// <summary>
-/// Represents a Sentry Structured Log.
+/// Represents the Sentry Log protocol.
 /// <para>This API is experimental and it may change in the future.</para>
 /// </summary>
-/// <remarks>
-/// Sentry Docs: <see href="https://docs.sentry.io/product/explore/logs/"/>.
-/// Sentry Developer Documentation: <see href="https://develop.sentry.dev/sdk/telemetry/logs/"/>.
-/// Sentry .NET SDK Docs: <see href="https://docs.sentry.io/platforms/dotnet/logs/"/>.
-/// </remarks>
 [Experimental(DiagnosticId.ExperimentalFeature)]
 [DebuggerDisplay(@"SentryLog \{ Level = {Level}, Message = '{Message}' \}")]
 public sealed class SentryLog
