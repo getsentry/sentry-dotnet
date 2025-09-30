@@ -226,7 +226,7 @@ public sealed class SentryLog
 
         // the SDK MUST NOT attach a sentry.message.template attribute if there are no parameters
         // https://develop.sentry.dev/sdk/telemetry/logs/#default-attributes
-        if (Template is not null && Parameters is { Length: > 0 })
+        if (Template is not null && !Parameters.IsDefaultOrEmpty)
         {
             SentryAttributeSerializer.WriteStringAttribute(writer, "sentry.message.template", Template);
         }
