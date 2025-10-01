@@ -144,6 +144,7 @@ Describe 'MAUI (<framework>)' -ForEach @(
 
     It "uploads symbols and sources for an Android build" {
         $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-android$androidTpv"
+        Write-Host "UploadedDebugFiles: $($result.UploadedDebugFiles() | Out-String)"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'libsentry-android.so',
             'libsentry.so',
