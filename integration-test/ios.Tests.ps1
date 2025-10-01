@@ -13,7 +13,7 @@ BeforeDiscovery {
 
 Describe 'iOS app (<tfm>)' -ForEach @(
     @{ tfm = "net9.0-ios18.0" }
-) -Skip:(-not $IsMacOS -or -not $script:simulator) {
+) -Skip:(-not $script:simulator) {
     BeforeAll {
         . $PSScriptRoot/../scripts/device-test-utils.ps1
         Install-XHarness
