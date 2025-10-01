@@ -29,9 +29,6 @@
 - Bump CLI from v2.54.0 to v2.56.0 ([#4556](https://github.com/getsentry/sentry-dotnet/pull/4556), [#4577](https://github.com/getsentry/sentry-dotnet/pull/4577))
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2560)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.54.0...2.56.0)
-
-### Dependencies
-
 - Bump Java SDK from v8.21.1 to v8.22.0 ([#4552](https://github.com/getsentry/sentry-dotnet/pull/4552))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8220)
   - [diff](https://github.com/getsentry/sentry-java/compare/8.21.1...8.22.0)
@@ -78,8 +75,8 @@
 ### Dependencies
 
 - Bump sentry-cocoa from 8.39.0 to 8.55.1 ([#4442](https://github.com/getsentry/sentry-dotnet/pull/4442), [#4483](https://github.com/getsentry/sentry-dotnet/pull/4483), [#4485](https://github.com/getsentry/sentry-dotnet/pull/4485))
-    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8551)
-    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.55.1)
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8551)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.55.1)
 - Bump Native SDK from v0.9.1 to v0.10.1 ([#4436](https://github.com/getsentry/sentry-dotnet/pull/4436), [#4492](https://github.com/getsentry/sentry-dotnet/pull/4492))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0101)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.9.1...0.10.1)
