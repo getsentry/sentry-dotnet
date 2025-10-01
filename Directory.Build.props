@@ -28,9 +28,10 @@
     <WarningsNotAsErrors>NU1902;NU1903</WarningsNotAsErrors>
 
     <!-- Centralized TFM versions -->
-    <CurrentTfms>net8.0;net9.0;net10.0</CurrentTfms>
     <LatestTfm>net10.0</LatestTfm>
     <PreviousTfm>net9.0</PreviousTfm>
+    <OldestTfm>net8.0</OldestTfm>
+    <CurrentTfms>net8.0;net9.0;net10.0</CurrentTfms>
     <LatestAndroidTfm>net10.0-android36.0</LatestAndroidTfm>
     <PreviousAndroidTfm>net9.0-android35.0</PreviousAndroidTfm>
     <LatestIosTfm>net9.0-ios26</LatestIosTfm>

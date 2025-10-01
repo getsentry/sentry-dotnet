@@ -299,7 +299,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
         page.NavigatedTo -= OnPageOnNavigatedTo;
 
         // Size changed event
-        // https://learn.microsoft.com/en-us/dotnet/api/microsoft.maui.controls.visualelement.sizechanged
+        // https://learn.microsoft.com/dotnet/api/microsoft.maui.controls.visualelement.sizechanged
         page.SizeChanged -= OnPageOnSizeChanged;
 
         if (bind)
@@ -314,7 +314,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
             page.NavigatedTo += OnPageOnNavigatedTo;
 
             // Size changed event
-            // https://learn.microsoft.com/en-us/dotnet/api/microsoft.maui.controls.visualelement.sizechanged
+            // https://learn.microsoft.com/dotnet/api/microsoft.maui.controls.visualelement.sizechanged
             page.SizeChanged += OnPageOnSizeChanged;
         }
     }
