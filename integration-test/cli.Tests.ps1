@@ -175,7 +175,6 @@ Describe 'MAUI (<framework>)' -ForEach @(
             'maui-app',
             'maui-app.pdb',
             'Microsoft.iOS.pdb',
-            'Microsoft.Maui.Controls.Compatibility.pdb',
             'Microsoft.Maui.Controls.pdb',
             'Microsoft.Maui.Controls.Xaml.pdb',
             'Microsoft.Maui.Essentials.pdb',
