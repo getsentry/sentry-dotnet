@@ -42,6 +42,8 @@ internal sealed class UnsampledTransaction : NoOpTransaction
 
     public double? SampleRand { get; set; }
 
+    public DiscardReason? DiscardReason { get; set; }
+
     public override string Name
     {
         get => _context.Name;
@@ -72,8 +74,9 @@ internal sealed class UnsampledTransaction : NoOpTransaction
 
         // Record the discarded events
         var spanCount = Spans.Count + 1; // 1 for each span + 1 for the transaction itself
-        _options?.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Transaction);
-        _options?.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Span, spanCount);
+        var discardReason = DiscardReason ?? Internal.DiscardReason.SampleRate;
+        _options?.ClientReportRecorder.RecordDiscardedEvent(discardReason, DataCategory.Transaction);
+        _options?.ClientReportRecorder.RecordDiscardedEvent(discardReason, DataCategory.Span, spanCount);
 
         _options?.LogDebug("Finished unsampled transaction");
     }

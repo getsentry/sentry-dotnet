@@ -64,10 +64,6 @@ jobs:
           key: sentry-native-${{ matrix.rid }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           enableCrossOsArchive: true
 
-      - name: Remove unused applications
-        if: ${{ !matrix.container }}
-        uses: ./.github/actions/freediskspace
-
       - run: scripts/build-sentry-native.ps1
         if: steps.cache.outputs.cache-hit != 'true'
         shell: pwsh
@@ -301,7 +297,12 @@ jobs:
 
       - name: Run MSBuild
         id: msbuild
-        run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build -p:Configuration=Release --nologo -v:minimal -flp:logfile=msbuild.log -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
+        run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build,Pack -p:Configuration=Release --nologo -v:minimal -flp:logfile=msbuild.log -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
+
+      - name: Test MSBuild
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+        with:
+          path: integration-test/msbuild.Tests.ps1
 
       - name: Upload logs
         if: ${{ always() }}

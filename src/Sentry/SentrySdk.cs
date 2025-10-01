@@ -316,7 +316,13 @@ static partial class SentrySdk
     public static IDisposable PushScope() => CurrentHub.PushScope();
 
     /// <summary>
+    /// <para>
     /// Binds the client to the current scope.
+    /// </para>
+    /// <para>
+    /// This might be used to bind a client with a different DSN or configuration (e.g. so that a particular thread or
+    /// part of the application sends events to a different Sentry project).
+    /// </para>
     /// </summary>
     /// <param name="client">The client.</param>
     [DebuggerStepThrough]
