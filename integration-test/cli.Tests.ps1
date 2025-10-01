@@ -152,9 +152,8 @@ Describe 'MAUI (<framework>)' -ForEach @(
             'libxamarin-app.so',
             'maui-app.pdb'
         )
-        $nonZeroNumberRegex = '[1-9][0-9]*';
         $result.ScriptOutput | Should -AnyElementMatch 'Uploaded a total of 1 new mapping files'
-        $result.ScriptOutput | Should -AnyElementMatch "Found $nonZeroNumberRegex debug information files \($nonZeroNumberRegex with embedded sources\)"
+        $result.ScriptOutput | Should -AnyElementMatch "Found 23 debug information files \(1 with embedded sources\)"
     }
 
     It "uploads symbols and sources for an iOS build" -Skip:(!$IsMacOS) {
@@ -184,7 +183,6 @@ Describe 'MAUI (<framework>)' -ForEach @(
             'Microsoft.Maui.pdb',
             'Sentry'
         )
-        $nonZeroNumberRegex = '[1-9][0-9]*';
-        $result.ScriptOutput | Should -AnyElementMatch "Found $nonZeroNumberRegex debug information files \($nonZeroNumberRegex with embedded sources\)"
+        $result.ScriptOutput | Should -AnyElementMatch "Found 77 debug information files \(8 with embedded sources\)"
     }
 }
