@@ -27,7 +27,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
     private protected override void CaptureLog(SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog)
     {
         var timestamp = _clock.GetUtcNow();
-        var traceHeader = _hub.GetTraceHeader() ?? SentryTraceHeader.Empty;
+        SentryLog.GetTraceIdAndSpanId(_hub, out var traceId, out var spanId);
 
         string message;
         try
@@ -51,11 +51,11 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
             @params = builder.DrainToImmutable();
         }
 
-        SentryLog log = new(timestamp, traceHeader.TraceId, level, message)
+        SentryLog log = new(timestamp, traceId, level, message)
         {
             Template = template,
             Parameters = @params,
-            ParentSpanId = traceHeader.SpanId,
+            ParentSpanId = spanId,
         };
 
         try

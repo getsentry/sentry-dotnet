@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Protocol;
 
 namespace Sentry;
@@ -242,5 +243,30 @@ public sealed class SentryLog
         writer.WriteEndObject(); // attributes
 
         writer.WriteEndObject();
+    }
+
+    internal static void GetTraceIdAndSpanId(IHub hub, out SentryId traceId, out SpanId? spanId)
+    {
+        var activeSpan = hub.GetSpan();
+        if (activeSpan is not null)
+        {
+            traceId = activeSpan.TraceId;
+            spanId = activeSpan.SpanId;
+            return;
+        }
+
+        // set "sentry.trace.parent_span_id" to the ID of the Span that was active when the Log was collected
+        // do not set "sentry.trace.parent_span_id" if there was no active Span
+        spanId = null;
+
+        var scope = hub.GetScope();
+        if (scope is not null)
+        {
+            traceId = scope.PropagationContext.TraceId;
+            return;
+        }
+
+        Debug.Assert(hub is not Hub, "In case of a 'full' Hub, there is always a Scope. Otherwise (disabled) there is no Scope, but this branch should be unreachable.");
+        traceId = SentryId.Empty;
     }
 }

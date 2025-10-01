@@ -112,7 +112,7 @@ public partial class SentrySinkTests
         log.Parameters[1].Should().BeEquivalentTo(new KeyValuePair<string, string>("Sequence", "[41, 42, 43]"));
         log.Parameters[2].Should().BeEquivalentTo(new KeyValuePair<string, string>("Dictionary", """[("key": "value")]"""));
         log.Parameters[3].Should().BeEquivalentTo(new KeyValuePair<string, string>("Structure", """[42, "42"]"""));
-        log.ParentSpanId.Should().Be(withActiveSpan ? _fixture.Hub.GetSpan()!.SpanId : _fixture.Scope.PropagationContext.SpanId);
+        log.ParentSpanId.Should().Be(withActiveSpan ? _fixture.Hub.GetSpan()!.SpanId : null);
 
         log.TryGetAttribute("sentry.environment", out object? environment).Should().BeTrue();
         environment.Should().Be("test-environment");
