@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bump Java SDK from v8.22.0 to v8.23.0 ([#4586](https://github.com/getsentry/sentry-dotnet/pull/4586))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8230)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.22.0...8.23.0)
+
 ## 5.16.0
 
 ### Features
