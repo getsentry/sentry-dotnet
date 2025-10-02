@@ -25,6 +25,7 @@ xcodebuild archive -project Sentry.xcodeproj \
     -archivePath ./Carthage/output-ios.xcarchive \
     SKIP_INSTALL=NO \
     BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+./scripts/remove-architectures.sh ./Carthage/output-ios.xcarchive arm64e
 xcodebuild archive -project Sentry.xcodeproj \
     -scheme Sentry \
     -configuration Release \
@@ -47,6 +48,7 @@ xcodebuild archive -project Sentry.xcodeproj \
     -archivePath ./Carthage/output-maccatalyst.xcarchive \
     SKIP_INSTALL=NO \
     BUILD_LIBRARY_FOR_DISTRIBUTION=YES
+./scripts/remove-architectures.sh ./Carthage/output-maccatalyst.xcarchive arm64e
 xcodebuild -create-xcframework \
     -framework ./Carthage/output-maccatalyst.xcarchive/Products/Library/Frameworks/Sentry.framework \
     -output ./Carthage/Build-maccatalyst/Sentry.xcframework
@@ -54,7 +56,7 @@ echo "::endgroup::"
 
 # Copy headers - used for generating bindings
 mkdir Carthage/Headers
-find Carthage/Build-ios/Sentry.xcframework/ios-arm64_arm64e -name '*.h' -exec cp {} Carthage/Headers \;
+find Carthage/Build-ios/Sentry.xcframework/ios-arm64 -name '*.h' -exec cp {} Carthage/Headers \;
 
 # Remove anything we don't want to bundle in the nuget package.
 find Carthage/Build* \( -name Headers -o -name PrivateHeaders -o -name Modules \) -exec rm -rf {} +
