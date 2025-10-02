@@ -156,4 +156,7 @@
   <remove-node path="/api/package[@name='io.sentry']/interface[@name='ISentryLifecycleToken']/method[@name='close']" />
   <!-- Remove QueueFile. The `.iterator` method has nullability issues -->
   <remove-node path="/api/package[@name='io.sentry.cache.tape']/class[@name='QueueFile']" />
+
+  <!-- Remove UpdateStatus to avoid CS0108 for conflicting _members fields in nested subclasses -->
+  <remove-node path="/api/package[@name='io.sentry']/class[@name='UpdateStatus']" />
 </metadata>
