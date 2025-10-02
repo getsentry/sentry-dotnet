@@ -15,16 +15,16 @@ public partial class MainPage : ContentPage
     {
         base.OnAppearing();
 
+        var testArg = System.Environment.GetEnvironmentVariable("SENTRY_TEST_ARG");
+
 #pragma warning disable CS0618
-        var crashTypeEnv = System.Environment.GetEnvironmentVariable("SENTRY_CRASH_TYPE");
-        if (Enum.TryParse<CrashType>(crashTypeEnv, ignoreCase: true, out var crashType))
+        if (Enum.TryParse<CrashType>(testArg, ignoreCase: true, out var crashType))
         {
             SentrySdk.CauseCrash(crashType);
         }
 #pragma warning restore CS0618
 
-        var testActionEnv = System.Environment.GetEnvironmentVariable("SENTRY_TEST_ACTION");
-        if (testActionEnv?.Equals("NullReferenceException", StringComparison.OrdinalIgnoreCase) == true)
+        if (testArg?.Equals("NullReferenceException", StringComparison.OrdinalIgnoreCase) == true)
         {
             try
             {
@@ -37,7 +37,7 @@ public partial class MainPage : ContentPage
             }
         }
 
-        SentrySdk.Flush();
+        SentrySdk.Close();
 #if ANDROID
         Process.KillProcess(Process.MyPid());
 #elif IOS

@@ -18,7 +18,6 @@ public class MainActivity : MauiAppCompatActivity
     {
         base.OnCreate(savedInstanceState);
 
-        System.Environment.SetEnvironmentVariable("SENTRY_CRASH_TYPE", Intent?.GetStringExtra("SENTRY_CRASH_TYPE"));
-        System.Environment.SetEnvironmentVariable("SENTRY_TEST_ACTION", Intent?.GetStringExtra("SENTRY_TEST_ACTION"));
+        System.Environment.SetEnvironmentVariable("SENTRY_TEST_ARG", Intent?.GetStringExtra("SENTRY_TEST_ARG"));
     }
 }

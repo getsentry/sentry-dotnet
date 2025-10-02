@@ -15,8 +15,8 @@ public static class MauiProgram
 #if ANDROID
                 options.Dsn = "{{SENTRY_DSN}}";
 #endif
-                options.Debug = true;
-                options.DiagnosticLevel = SentryLevel.Info;
+                options.Debug = false;
+                options.DiagnosticLevel = SentryLevel.Error;
             })
             .ConfigureFonts(fonts =>
             {

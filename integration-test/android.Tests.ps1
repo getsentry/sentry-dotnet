@@ -58,19 +58,17 @@ Describe 'MAUI app' -ForEach @(
         {
             param(
                 [string] $Dsn,
-                [string] $CrashType = 'None',
-                [string] $TestAction = 'None'
+                [string] $TestArg = 'None'
             )
 
             # Setup port forwarding for accessing sentry-server at 127.0.0.1:8000 from the emulator
             $port = $Dsn.Split(':')[2].Split('/')[0]
             xharness android adb -v -- reverse tcp:$port tcp:$port
 
-            Write-Host "::group::Run Android app"
+            Write-Host "::group::Run Android app (TestArg=$TestArg)"
             xharness android adb -v `
                 -- shell am start -S -n io.sentry.dotnet.maui.device.integrationtestapp/.MainActivity `
-                -e SENTRY_CRASH_TYPE $CrashType `
-                -e SENTRY_TEST_ACTION $TestAction
+                -e SENTRY_TEST_ARG $TestArg
             | ForEach-Object { Write-Host $_ }
             $LASTEXITCODE | Should -Be 0
 
@@ -111,8 +109,8 @@ Describe 'MAUI app' -ForEach @(
         $result = Invoke-SentryServer {
             param([string]$url)
             InstallAndroidApp -Dsn $url
-            RunAndroidApp -Dsn $url -CrashType "Managed"
-            RunAndroidApp -Dsn $url -TestAction "Exit"
+            RunAndroidApp -Dsn $url -TestArg "Managed"
+            RunAndroidApp -Dsn $url
         }
 
         $result.HasErrors() | Should -BeFalse
@@ -124,8 +122,8 @@ Describe 'MAUI app' -ForEach @(
         $result = Invoke-SentryServer {
             param([string]$url)
             InstallAndroidApp -Dsn $url
-            RunAndroidApp -Dsn $url -CrashType "Java"
-            RunAndroidApp -Dsn $url -TestAction "Exit"
+            RunAndroidApp -Dsn $url -TestArg "Java"
+            RunAndroidApp -Dsn $url
         }
 
         $result.HasErrors() | Should -BeFalse
@@ -137,8 +135,8 @@ Describe 'MAUI app' -ForEach @(
         $result = Invoke-SentryServer {
             param([string]$url)
             InstallAndroidApp -Dsn $url
-            RunAndroidApp -Dsn $url -TestAction "NullReferenceException"
-            RunAndroidApp -Dsn $url -TestAction "Exit"
+            RunAndroidApp -Dsn $url -TestArg "NullReferenceException"
+            RunAndroidApp -Dsn $url
         }
 
         $result.HasErrors() | Should -BeFalse

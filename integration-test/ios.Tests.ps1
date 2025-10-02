@@ -16,7 +16,6 @@ Describe 'iOS app (<tfm>)' -ForEach @(
 ) -Skip:(-not $script:simulator) {
     BeforeAll {
         . $PSScriptRoot/../scripts/device-test-utils.ps1
-        Install-XHarness
 
         Remove-Item -Path "$PSScriptRoot/mobile-app" -Recurse -Force -ErrorAction SilentlyContinue
         Copy-Item -Path "$PSScriptRoot/net9-maui" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
@@ -24,13 +23,6 @@ Describe 'iOS app (<tfm>)' -ForEach @(
 
         $arch = ($(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
         $rid = "iossimulator-$arch"
-        $arguments = @(
-            "-v",
-            "--target=ios-simulator-64",
-            "--device=$simulator",
-            "--output-directory=test_output",
-            "--timeout=00:10:00"
-        )
 
         Write-Host "::group::Build Sentry.Maui.Device.IntegrationTestApp.csproj"
         dotnet build Sentry.Maui.Device.IntegrationTestApp.csproj `
@@ -38,26 +30,47 @@ Describe 'iOS app (<tfm>)' -ForEach @(
             --framework $tfm `
             --runtime $rid
         | ForEach-Object { Write-Host $_ }
-        $LASTEXITCODE | Should -Be 0
         Write-Host '::endgroup::'
+        $LASTEXITCODE | Should -Be 0
+
+        function InstallIosApp
+        {
+            Write-Host "::group::Install bin/Release/$tfm/$rid/Sentry.Maui.Device.IntegrationTestApp.app"
+            xcrun simctl install $simulator `
+                bin/Release/$tfm/$rid/Sentry.Maui.Device.IntegrationTestApp.app
+            | ForEach-Object { Write-Host $_ }
+            Write-Host '::endgroup::'
+            $LASTEXITCODE | Should -Be 0
+        }
+
+        function UninstallIosApp
+        {
+            Write-Host "::group::Uninstall io.sentry.dotnet.maui.device.integrationtestapp"
+            xcrun simctl uninstall $simulator `
+                io.sentry.dotnet.maui.device.integrationtestapp
+            | ForEach-Object { Write-Host $_ }
+            Write-Host '::endgroup::'
+            $LASTEXITCODE | Should -Be 0
+        }
 
         function RunIosApp
         {
             param(
                 [string] $Dsn,
-                [string] $CrashType = 'None',
-                [string] $TestAction = 'None'
+                [string] $TestArg = 'None'
             )
             $Dsn = $Dsn.Replace('http://', 'http://key@') + '/0'
-            Write-Host "::group::Run app (Crash=$CrashType, Action=$TestAction)"
-            xharness apple just-run $arguments `
-                --app io.sentry.dotnet.maui.device.integrationtestapp `
-                --set-env SENTRY_DSN=$Dsn `
-                --set-env SENTRY_CRASH_TYPE=$CrashType `
-                --set-env SENTRY_TEST_ACTION=$TestAction
+            Write-Host "::group::Run iOS app (TestArg=$TestArg)"
+            xcrun simctl spawn $simulator launchctl setenv SENTRY_DSN $Dsn
+            xcrun simctl spawn $simulator launchctl setenv SENTRY_TEST_ARG $TestArg
+            xcrun simctl launch `
+                --console `
+                --terminate-running-process `
+                $simulator `
+                io.sentry.dotnet.maui.device.integrationtestapp
             | ForEach-Object { Write-Host $_ }
-            $LASTEXITCODE | Should -Be 0
             Write-Host '::endgroup::'
+            $LASTEXITCODE | Should -Be 0
         }
     }
 
@@ -66,28 +79,18 @@ Describe 'iOS app (<tfm>)' -ForEach @(
     }
 
     BeforeEach {
-        Write-Host "::group::Install bin/Release/$tfm/$rid/Sentry.Maui.Device.IntegrationTestApp.app"
-        xharness apple install $arguments `
-            --app bin/Release/$tfm/$rid/Sentry.Maui.Device.IntegrationTestApp.app
-        | ForEach-Object { Write-Host $_ }
-        $LASTEXITCODE | Should -Be 0
-        Write-Host '::endgroup::'
+        InstallIosApp
     }
 
     AfterEach {
-        Write-Host "::group::Uninstall io.sentry.dotnet.maui.device.integrationtestapp"
-        xharness apple uninstall $arguments `
-            --app io.sentry.dotnet.maui.device.integrationtestapp
-        | ForEach-Object { Write-Host $_ }
-        $LASTEXITCODE | Should -Be 0
-        Write-Host '::endgroup::'
+        UninstallIosApp
     }
 
     It 'captures managed crash' {
         $result = Invoke-SentryServer {
             param([string]$url)
-            RunIosApp -Dsn $url -CrashType "Managed"
-            RunIosApp -Dsn $url -TestAction "Exit"
+            RunIosApp -Dsn $url -TestArg "Managed"
+            RunIosApp -Dsn $url
         }
 
         $result.HasErrors() | Should -BeFalse
@@ -99,8 +102,8 @@ Describe 'iOS app (<tfm>)' -ForEach @(
     It 'captures native crash' {
         $result = Invoke-SentryServer {
             param([string]$url)
-            RunIosApp -Dsn $url -CrashType "Native"
-            RunIosApp -Dsn $url -TestAction "Exit"
+            RunIosApp -Dsn $url -TestArg "Native"
+            RunIosApp -Dsn $url
         }
 
         $result.HasErrors() | Should -BeFalse
@@ -111,8 +114,8 @@ Describe 'iOS app (<tfm>)' -ForEach @(
     It 'captures null reference exception' {
         $result = Invoke-SentryServer {
             param([string]$url)
-            RunIosApp -Dsn $url -TestAction "NullReferenceException"
-            RunIosApp -Dsn $url -TestAction "Exit"
+            RunIosApp -Dsn $url -TestArg "NullReferenceException"
+            RunIosApp -Dsn $url
         }
 
         $result.HasErrors() | Should -BeFalse
