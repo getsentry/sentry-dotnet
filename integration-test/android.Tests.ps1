@@ -41,8 +41,8 @@ Describe 'MAUI app' -ForEach @(
                 --framework $tfm `
                 --runtime $rid
             | ForEach-Object { Write-Host $_ }
-            $LASTEXITCODE | Should -Be 0
             Write-Host '::endgroup::'
+            $LASTEXITCODE | Should -Be 0
 
             Write-Host "::group::Install bin/Release/$tfm/$rid/io.sentry.dotnet.maui.device.integrationtestapp-Signed.apk"
             xharness android install -v `
@@ -50,8 +50,8 @@ Describe 'MAUI app' -ForEach @(
                 --package-name io.sentry.dotnet.maui.device.integrationtestapp `
                 --output-directory=test_output
             | ForEach-Object { Write-Host $_ }
-            $LASTEXITCODE | Should -Be 0
             Write-Host '::endgroup::'
+            $LASTEXITCODE | Should -Be 0
         }
 
         function RunAndroidApp
@@ -70,6 +70,7 @@ Describe 'MAUI app' -ForEach @(
                 -- shell am start -S -n io.sentry.dotnet.maui.device.integrationtestapp/.MainActivity `
                 -e SENTRY_TEST_ARG $TestArg
             | ForEach-Object { Write-Host $_ }
+            Write-Host '::endgroup::'
             $LASTEXITCODE | Should -Be 0
 
             do
@@ -83,7 +84,6 @@ Describe 'MAUI app' -ForEach @(
             } while ($procid -and $activity)
 
             xharness android adb -v -- reverse --remove tcp:$port
-            Write-Host '::endgroup::'
         }
 
         function UninstallAndroidApp
