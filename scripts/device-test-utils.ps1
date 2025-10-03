@@ -16,7 +16,7 @@ function Get-AndroidEmulatorId {
     }
     try
     {
-        return & adb devices | Select-String "device$" | ForEach-Object { ($_ -split "`t")[0] } | Select-Object -First 1
+        return & xharness android adb -- devices | Select-String "device$" | ForEach-Object { ($_ -split "`t")[0] } | Select-Object -First 1
     }
     catch
     {

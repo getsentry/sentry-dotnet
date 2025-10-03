@@ -8,6 +8,7 @@ BeforeDiscovery {
     # Skip Android integration tests unless an emulator has been already started
     # by Android Device Tests, or manually when testing locally. This avoids
     # slowing down non-Device Test CI builds further.
+    Install-XHarness
     $script:emulator = Get-AndroidEmulatorId
 }
 
@@ -15,9 +16,6 @@ Describe 'MAUI app' -ForEach @(
     @{ tfm = "net9.0-android35.0" }
 ) -Skip:(-not $script:emulator) {
     BeforeAll {
-        . $PSScriptRoot/../scripts/device-test-utils.ps1
-        Install-XHarness
-
         Remove-Item -Path "$PSScriptRoot/mobile-app" -Recurse -Force -ErrorAction SilentlyContinue
         Copy-Item -Path "$PSScriptRoot/net9-maui" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
         Push-Location $PSScriptRoot/mobile-app
