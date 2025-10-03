@@ -1,11 +1,13 @@
 /*
  * Adapted from https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/tools/assembly-store-reader-mk2/AssemblyStore/StoreReader_V2.Classes.cs
+ * Updated from https://github.com/dotnet/android/blob/64018e13e53cec7246e54866b520d3284de344e0/tools/assembly-store-reader-mk2/AssemblyStore/StoreReader_V2.Classes.cs
+ *     - Adding support for AssemblyStore v3 format that shipped in .NET 10 (https://github.com/dotnet/android/pull/10249)
  * Original code licensed under the MIT License (https://github.com/dotnet/android/blob/5ebcb1dd1503648391e3c0548200495f634d90c6/LICENSE.TXT)
  */
 
 namespace Sentry.Android.AssemblyReader.V2;
 
-internal partial class StoreReaderV2
+internal partial class StoreReader
 {
     private sealed class Header
     {
@@ -33,11 +35,13 @@ internal partial class StoreReaderV2
     {
         public readonly ulong name_hash;
         public readonly uint descriptor_index;
+        public readonly bool ignore;
 
-        public IndexEntry(ulong name_hash, uint descriptor_index)
+        public IndexEntry(ulong name_hash, uint descriptor_index, bool ignore)
         {
             this.name_hash = name_hash;
             this.descriptor_index = descriptor_index;
+            this.ignore = ignore;
         }
     }
 
@@ -57,8 +61,9 @@ internal partial class StoreReaderV2
 
     private sealed class StoreItemV2 : AssemblyStoreItem
     {
-        public StoreItemV2(AndroidTargetArch targetArch, string name, bool is64Bit, List<IndexEntry> indexEntries, EntryDescriptor descriptor)
-            : base(name, is64Bit, IndexToHashes(indexEntries))
+        public StoreItemV2(AndroidTargetArch targetArch, string name, bool is64Bit, List<IndexEntry> indexEntries,
+            EntryDescriptor descriptor, bool ignore)
+            : base(name, is64Bit, IndexToHashes(indexEntries), ignore)
         {
             DataOffset = descriptor.data_offset;
             DataSize = descriptor.data_size;
@@ -86,11 +91,13 @@ internal partial class StoreReaderV2
         public readonly string Name;
         public readonly List<IndexEntry> IndexEntries = new List<IndexEntry>();
         public readonly EntryDescriptor Descriptor;
+        public readonly bool Ignored;
 
-        public TemporaryItem(string name, EntryDescriptor descriptor)
+        public TemporaryItem(string name, EntryDescriptor descriptor, bool ignored)
         {
             Name = name;
             Descriptor = descriptor;
+            Ignored = ignored;
         }
     }
 }

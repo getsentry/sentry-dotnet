@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0</TargetFrameworks>
+    <TargetFrameworks>$(LatestTfm);$(PreviousTfm)</TargetFrameworks>
     <!-- IMPORTANT: We must test with new TFMs as the store format changes with new versions of .NET -->
     <TargetFrameworks Condition="'$(NO_ANDROID)' == ''">$(TargetFrameworks);$(LatestAndroidTfm);$(PreviousAndroidTfm)</TargetFrameworks>
     <Nullable>enable</Nullable>
@@ -20,7 +20,7 @@
   <Target Name="EnsureAndroidTestAppRestored"
           Condition="!Exists('$(MSBuildProjectDirectory)\..\AndroidTestApp\obj\project.assets.json')">
     <Message Importance="high" Text="Restoring AndroidTestApp via MSBuild task..." />
-    <Exec Command="dotnet restore ../AndroidTestApp/AndroidTestApp.csproj --nologo" />
+    <Exec Command="dotnet restore ../AndroidTestApp/AndroidTestApp.csproj -f --nologo" />
   </Target>
 
   <!-- Restore exactly once: https://learn.microsoft.com/en-gb/visualstudio/msbuild/run-target-exactly-once -->
@@ -42,11 +42,10 @@
       <_TestAPK Include="2" Properties="_Aot=False;_Store=False;_Compressed=True" />
       <_TestAPK Include="3" Properties="_Aot=False;_Store=True;_Compressed=False" />
       <_TestAPK Include="4" Properties="_Aot=False;_Store=True;_Compressed=True" />
-
-      <_TestAPK Include="5" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=False;_Compressed=False" />
-      <_TestAPK Include="6" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=False;_Compressed=True" />
-      <_TestAPK Include="7" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=True;_Compressed=False" />
-      <_TestAPK Include="8" Condition="!$(TargetFramework.StartsWith('net8'))" Properties="_Aot=True;_Store=True;_Compressed=True" />
+      <_TestAPK Include="5" Properties="_Aot=True;_Store=False;_Compressed=False" />
+      <_TestAPK Include="6" Properties="_Aot=True;_Store=False;_Compressed=True" />
+      <_TestAPK Include="7" Properties="_Aot=True;_Store=True;_Compressed=False" />
+      <_TestAPK Include="8" Properties="_Aot=True;_Store=True;_Compressed=True" />
     </ItemGroup>
 
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_BuildTestAPK" Properties="%(_TestAPK.Properties)" BuildInParallel="false" />
@@ -57,7 +56,8 @@
       <SourceAPK>..\AndroidTestApp\bin\$(TargetFramework)\$(_ConfigString)\com.companyname.AndroidTestApp-Signed.apk</SourceAPK>
       <DestinationAPK>TestAPKs\$(TargetFramework)-$(_ConfigString).apk</DestinationAPK>
     </PropertyGroup>
-    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;PublishAot=$(_Aot);_IsPublishing=true;RuntimeIdentifier=android-x64;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('$(DestinationAPK)')" />
+    <!-- Note we use RunAOTCompilation rather than PublishAot here - full NativeAOT compilation on Android is still experimental  -->
+    <MSBuild Projects="..\AndroidTestApp\AndroidTestApp.csproj" Targets="Build" Properties="Configuration=Release;RunAOTCompilation=$(_Aot);UseNativeAot=false;_IsPublishing=true;AndroidUseAssemblyStore=$(_Store);AndroidEnableAssemblyCompression=$(_Compressed);OutDir=bin\$(TargetFramework)\$(_ConfigString)\" Condition="!Exists('$(DestinationAPK)')" />
 
     <Message Text="Copying APK from $(SourceAPK) to $(DestinationAPK)" Importance="high" />
     <Copy SourceFiles="$(SourceAPK)" DestinationFiles="$(DestinationAPK)" Condition="!Exists('$(DestinationAPK)')" />
