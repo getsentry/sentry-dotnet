@@ -12,8 +12,19 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
     private readonly Timer? _idleTimer;
-    private long _cancelIdleTimeout;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
+
+#if NET9_0_OR_GREATER
+    private bool _cancelIdleTimeout;
+
+    const bool TRUE = true;
+    const bool FALSE = false;
+#else
+    private int _cancelIdleTimeout;
+
+    const int TRUE = 1;
+    const int FALSE = 0;
+#endif
 
     private readonly Instrumenter _instrumenter = Instrumenter.Sentry;
 
@@ -247,7 +258,7 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
         // Set idle timer only if an idle timeout has been provided directly
         if (idleTimeout.HasValue)
         {
-            _cancelIdleTimeout = 1;  // Timer will be cancelled once, atomically setting this back to 0
+            _cancelIdleTimeout = TRUE;  // Timer will be cancelled once, atomically setting this back to false
             _idleTimer = new Timer(state =>
             {
                 if (state is not TransactionTracer transactionTracer)
@@ -362,7 +373,7 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     public void Finish()
     {
         _options?.LogDebug("Attempting to finish Transaction {0}.", SpanId);
-        if (Interlocked.Exchange(ref _cancelIdleTimeout, 0) == 1)
+        if (Interlocked.Exchange(ref _cancelIdleTimeout, FALSE) == TRUE)
         {
             _options?.LogDebug("Disposing of idle timer for Transaction {0}.", SpanId);
             _idleTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);

@@ -6,13 +6,20 @@ namespace Sentry.Profiling;
 internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionProfilerFactory
 {
     // We only allow a single profile so let's keep track of the current status.
+#if NET9_0_OR_GREATER
+    internal bool _inProgress = FALSE;
+
+    const bool TRUE = true;
+    const bool FALSE = false;
+#else
     internal int _inProgress = FALSE;
+
+    const int TRUE = 1;
+    const int FALSE = 0;
+#endif
 
     // Whether the session startup took longer than the given timeout.
     internal bool StartupTimedOut { get; }
-
-    private const int TRUE = 1;
-    private const int FALSE = 0;
 
     // Stop profiling after the given number of milliseconds.
     private const int TIME_LIMIT_MS = 30_000;

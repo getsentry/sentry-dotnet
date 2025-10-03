@@ -13,12 +13,23 @@ namespace Sentry.Threading;
 internal sealed class ScopedCountdownLock : IDisposable
 {
     private readonly CountdownEvent _event;
+
+#if NET9_0_OR_GREATER
+    private volatile bool _isEngaged;
+
+    const bool TRUE = true;
+    const bool FALSE = false;
+#else
     private volatile int _isEngaged;
+
+    const int TRUE = 1;
+    const int FALSE = 0;
+#endif
 
     internal ScopedCountdownLock()
     {
         _event = new CountdownEvent(1);
-        _isEngaged = 0;
+        _isEngaged = FALSE;
     }
 
     /// <summary>
@@ -31,13 +42,13 @@ internal sealed class ScopedCountdownLock : IDisposable
     /// Gets the number of remaining <see cref="CounterScope"/> required to exit in order to set/signal the event while a <see cref="LockScope"/> is active.
     /// When <see langword="0"/> and while a <see cref="LockScope"/> is active, no more <see cref="CounterScope"/> can be entered.
     /// </summary>
-    internal int Count => _isEngaged == 1 ? _event.CurrentCount : _event.CurrentCount - 1;
+    internal int Count => _isEngaged == TRUE ? _event.CurrentCount : _event.CurrentCount - 1;
 
     /// <summary>
     /// Returns <see langword="true"/> when a <see cref="LockScope"/> is active and the event can be set/signaled by <see cref="Count"/> reaching <see langword="0"/>.
     /// Returns <see langword="false"/> when the <see cref="Count"/> can only reach the initial count of <see langword="1"/> when no <see cref="CounterScope"/> is active any longer.
     /// </summary>
-    internal bool IsEngaged => _isEngaged == 1;
+    internal bool IsEngaged => _isEngaged == TRUE;
 
     /// <summary>
     /// No <see cref="CounterScope"/> will be entered when the <see cref="Count"/> has reached <see langword="0"/>, or while the lock is engaged via an active <see cref="LockScope"/>.
@@ -79,7 +90,7 @@ internal sealed class ScopedCountdownLock : IDisposable
     /// </remarks>
     internal LockScope TryEnterLockScope()
     {
-        if (Interlocked.CompareExchange(ref _isEngaged, 1, 0) == 0)
+        if (Interlocked.CompareExchange(ref _isEngaged, TRUE, FALSE) == FALSE)
         {
             Debug.Assert(_event.CurrentCount >= 1);
             _ = _event.Signal(); // decrement the initial count of 1, so that the event can be set with the count reaching 0 when all entered 'CounterScope' instances have exited
@@ -94,7 +105,7 @@ internal sealed class ScopedCountdownLock : IDisposable
         Debug.Assert(_event.IsSet);
         _event.Reset(); // reset the signaled event to the initial count of 1, so that new 'CounterScope' instances can be entered again
 
-        if (Interlocked.CompareExchange(ref _isEngaged, 0, 1) != 1)
+        if (Interlocked.CompareExchange(ref _isEngaged, FALSE, TRUE) != TRUE)
         {
             Debug.Fail("The Lock should have not been disengaged without being engaged first.");
         }
