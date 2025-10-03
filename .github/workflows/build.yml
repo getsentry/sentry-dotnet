@@ -64,15 +64,11 @@ jobs:
           key: sentry-native-${{ matrix.rid }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
           enableCrossOsArchive: true
 
-      - name: Remove unused applications
-        if: ${{ !matrix.container }}
-        uses: ./.github/actions/freediskspace
-
       - run: scripts/build-sentry-native.ps1
         if: steps.cache.outputs.cache-hit != 'true'
         shell: pwsh
 
-  build:
+  build-sentry:
     needs: build-sentry-native
     name: .NET (${{ matrix.rid }})
     runs-on: ${{ matrix.os }}
@@ -254,7 +250,8 @@ jobs:
         uses: actions/checkout@v5
         with:
           # We only check out what is absolutely necessary to reduce a chance of local files impacting
-          # integration tests, e.g. Directory.Build.props, nuget.config, ...
+          # integration tests (nuget.config etc.)... But we need the root Directory.Build.props calculate
+          # the package version
           sparse-checkout: |
             integration-test
             .github
@@ -267,11 +264,23 @@ jobs:
           path: src
 
       - name: Integration test
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
+        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
         with:
           path: integration-test
 
-  msbuild:
+      # For the linux-musl runtimes we have to pin the ContainerBaseImage for preview or RC builds, since
+      # these don't conform to the normal naming conventions and don't get resolved automatically. We do
+      # by passing it as parameter to aot.Tests.ps1 via an environment variable
+      - name: Integration test (musl)
+        if: ${{ (matrix.rid == 'linux-musl-x64') || (matrix.rid == 'linux-musl-arm64') }}
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
+        env:
+          ContainerBaseImage: 'mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-alpine3.22'
+        with:
+          path: integration-test
+
+  ms-build:
     needs: build-sentry-native
     name: MSBuild
     runs-on: windows-latest
@@ -301,7 +310,12 @@ jobs:
 
       - name: Run MSBuild
         id: msbuild
-        run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build -p:Configuration=Release --nologo -v:minimal -flp:logfile=msbuild.log -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
+        run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build,Pack -p:Configuration=Release --nologo -v:minimal -flp:logfile=msbuild.log -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
+
+      - name: Test MSBuild
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+        with:
+          path: integration-test/msbuild.Tests.ps1
 
       - name: Upload logs
         if: ${{ always() }}
@@ -316,7 +330,7 @@ jobs:
   # Unsupported Native AOT runtimes should have SentryNative auto-disabled
   # to avoid native library loading errors on startup.
   unsupported-aot:
-    needs: build
+    needs: build-sentry
     name: Unsupported AOT (${{ matrix.rid }})
     runs-on: ${{ matrix.os }}
 
@@ -348,7 +362,7 @@ jobs:
           path: src
 
       - name: Test AOT
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
         env:
           RuntimeIdentifier: ${{ matrix.rid }}
         with:
@@ -384,7 +398,7 @@ jobs:
         uses: ./.github/actions/buildnative
 
       - name: Publish Test app (macOS)
-        run: dotnet publish test/Sentry.TrimTest/Sentry.TrimTest.csproj -c Release -r osx-arm64
+        run: dotnet publish test/Sentry.TrimTest/Sentry.TrimTest.csproj -c Release -r osx-arm64 -p:NO_MOBILE=true
 
       - name: Publish Test app (Android)
         run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net9.0-android35.0 -r android-arm64

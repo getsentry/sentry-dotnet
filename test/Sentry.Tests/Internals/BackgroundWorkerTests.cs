@@ -4,7 +4,7 @@ using BackgroundWorker = Sentry.Internal.BackgroundWorker;
 
 namespace Sentry.Tests.Internals;
 
-public class BackgroundWorkerTests
+public class BackgroundWorkerTests : IDisposable
 {
     private readonly Fixture _fixture;
 
@@ -13,7 +13,12 @@ public class BackgroundWorkerTests
         _fixture = new Fixture(outputHelper);
     }
 
-    private class Fixture
+    public void Dispose()
+    {
+        _fixture.Dispose();
+    }
+
+    private class Fixture : IDisposable
     {
         public IClientReportRecorder ClientReportRecorder { get; private set; } = Substitute.For<IClientReportRecorder>();
         public ITransport Transport { get; set; } = Substitute.For<ITransport>();
@@ -23,6 +28,7 @@ public class BackgroundWorkerTests
         public SentryOptions SentryOptions { get; set; } = new();
 
         private readonly TimeSpan _defaultShutdownTimeout;
+        public BackpressureMonitor BackpressureMonitor { get; set; }
 
         public Fixture(ITestOutputHelper outputHelper)
         {
@@ -39,7 +45,6 @@ public class BackgroundWorkerTests
                     var token = callInfo.Arg<CancellationToken>();
                     return token.IsCancellationRequested ? Task.FromCanceled(token) : Task.CompletedTask;
                 });
-
             SentryOptions.Dsn = ValidDsn;
             SentryOptions.Debug = true;
             SentryOptions.DiagnosticLogger = Logger;
@@ -54,6 +59,7 @@ public class BackgroundWorkerTests
             => new(
                 Transport,
                 SentryOptions,
+                BackpressureMonitor,
                 CancellationTokenSource,
                 Queue);
 
@@ -67,6 +73,11 @@ public class BackgroundWorkerTests
             ClientReportRecorder = new ClientReportRecorder(SentryOptions);
             SentryOptions.ClientReportRecorder = ClientReportRecorder;
             return ClientReportRecorder;
+        }
+
+        public void Dispose()
+        {
+            BackpressureMonitor?.Dispose();
         }
     }
 
@@ -242,6 +253,26 @@ public class BackgroundWorkerTests
         // Check that we counted a single discarded event with the correct information
         _fixture.ClientReportRecorder.Received(1)
             .RecordDiscardedEvent(DiscardReason.QueueOverflow, DataCategory.Error);
+    }
+
+    [Fact]
+    public void CaptureEvent_LimitReached_CallsBackpressureMonitor()
+    {
+        // Arrange
+        var clock = new MockClock(DateTimeOffset.UtcNow);
+        _fixture.BackpressureMonitor = new BackpressureMonitor(null, clock, false);
+        var envelope = Envelope.FromEvent(new SentryEvent());
+        _fixture.SentryOptions.MaxQueueItems = 1;
+
+        using var sut = _fixture.GetSut();
+        sut.EnqueueEnvelope(envelope, process: false);
+
+        // Act
+        sut.EnqueueEnvelope(envelope);
+
+        // Assert
+        _fixture.BackpressureMonitor.LastQueueOverflowTicks.Should().Be(clock.GetUtcNow().Ticks);
+        _fixture.BackpressureMonitor.IsHealthy.Should().BeFalse();
     }
 
     [Fact]

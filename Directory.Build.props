@@ -1,7 +1,8 @@
 <Project>
 
   <PropertyGroup>
-    <VersionPrefix>5.15.1</VersionPrefix>
+    <VersionPrefix>6.0.0</VersionPrefix>
+    <VersionSuffix>prerelease</VersionSuffix>
     <LangVersion>13</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -20,11 +21,27 @@
     <!-- We need to support old stuff. Applications should definitely address these advisory warnings though. -->
     <NoWarn>$(NoWarn);NU1902;NU1903</NoWarn>
 
+    <!-- For Xcode 26 support in .NET 10 -->
+    <NoWarn>$(NoWarn);XCODE_26_0_PREVIEW</NoWarn>
+
     <!-- https://learn.microsoft.com/en-us/dotnet/core/compatibility/sdk/8.0/dotnet-restore-audit#version-introduced -->
     <WarningsNotAsErrors>NU1902;NU1903</WarningsNotAsErrors>
+
+    <!-- Centralized TFM versions -->
+    <LatestTfm>net10.0</LatestTfm>
+    <PreviousTfm>net9.0</PreviousTfm>
+    <OldestTfm>net8.0</OldestTfm>
+    <CurrentTfms>net8.0;net9.0;net10.0</CurrentTfms>
+    <LatestAndroidTfm>net10.0-android36.0</LatestAndroidTfm>
+    <PreviousAndroidTfm>net9.0-android35.0</PreviousAndroidTfm>
+    <LatestIosTfm>net9.0-ios26</LatestIosTfm>
+    <PreviousIosTfm>net9.0-ios18.0</PreviousIosTfm>
+    <LatestMacCatalystTfm>net9.0-maccatalyst26</LatestMacCatalystTfm>
+    <PreviousMacCatalystTfm>net9.0-maccatalyst18.0</PreviousMacCatalystTfm>
+    <PreviousWindowsTfm>net9.0-windows10.0.19041.0</PreviousWindowsTfm>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' != 'Release'">
+  <PropertyGroup Condition="'$(Configuration)' != 'Release' And '$(VersionSuffix)' == ''">
     <VersionSuffix>dev</VersionSuffix>
   </PropertyGroup>
 
@@ -86,7 +103,7 @@
 
   <!-- Set the version and local path for Sentry CLI (downloaded in the restore phase of Sentry.csproj) -->
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
-    <SentryCLIVersion>2.54.0</SentryCLIVersion>
+    <SentryCLIVersion>2.55.0</SentryCLIVersion>
     <SentryCLIDirectory>$(MSBuildThisFileDirectory)tools\sentry-cli\$(SentryCLIVersion)\</SentryCLIDirectory>
   </PropertyGroup>
 

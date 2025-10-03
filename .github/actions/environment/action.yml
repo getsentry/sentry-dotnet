@@ -24,6 +24,12 @@ runs:
       shell: bash
       run: sudo chmod 666 /var/run/docker.sock
 
+    # Install old deprecated libssl1 for .NET 5.0 on Linux
+    - name: Install libssl1 for NET 5.0 on Linux
+      if: ${{ runner.os == 'Linux' }}
+      shell: bash
+      run: sudo ./scripts/install-libssl1.sh
+
     - name: Install Linux ARM 32-bit dependencies
       if: ${{ matrix.rid == 'linux-arm' }}
       shell: bash
@@ -56,7 +62,7 @@ runs:
       uses: android-actions/setup-android@07976c6290703d34c16d382cb36445f98bb43b1f # v3.2.0
       with:
         # Exclude "tools" because the emulator is not needed (nor available for Windows/Linux ARM64)
-        packages: platform-tools platforms;android-34 platforms;android-35 build-tools;36.0.0
+        packages: platform-tools platforms;android-35 platforms;android-36 build-tools;36.0.0
         log-accepted-android-sdk-licenses: false
 
     # Java 11 is needed by .NET Android
@@ -90,6 +96,15 @@ runs:
         dotnet-version: |
           8.0.x
           9.0.304
+          10.0.100-rc.1.25451.107
+        global-json-file: global.json
+
+    # .NET 5.0 does not support ARM64 on macOS
+    - name: Install .NET 5.0 SDK
+      if: ${{ runner.os != 'macOS' || runner.arch != 'ARM64' }}
+      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+      with:
+        dotnet-version: 5.0.x
 
     - name: Install .NET Workloads
       shell: bash

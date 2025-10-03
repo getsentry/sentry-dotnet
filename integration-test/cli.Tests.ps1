@@ -4,7 +4,7 @@ $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
 
 Describe 'Console apps (<framework>) - normal build' -ForEach @(
-    @{ framework = "net8.0" }
+    foreach ($fw in $currentFrameworks) { @{ framework = $fw } }
 ) {
     BeforeAll {
         DotnetNew 'console' 'console-app' $framework
@@ -40,7 +40,7 @@ Describe 'Console apps (<framework>) - normal build' -ForEach @(
 }
 
 Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
-    @{ framework = "net8.0" }
+    foreach ($fw in $currentFrameworks) { @{ framework = $fw } }
 ) {
     BeforeAll {
         DotnetNew 'console' 'console-app' $framework
@@ -92,10 +92,6 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
         $result = RunDotnetWithSentryCLI 'publish' 'console-app' $False $True $framework
         $result.ScriptOutput | Should -AnyElementMatch "Preparing upload to Sentry for project 'console-app'"
         $sourceBundle = 'console-app.src.zip'
-        if ($IsMacOS)
-        {
-            $sourceBundle = 'console-app.src.zip'
-        }
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @($sourceBundle)
     }
 
@@ -105,8 +101,8 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
     }
 }
 
-Describe 'MAUI' -ForEach @(
-    @{ framework = "net8.0" }
+Describe 'MAUI (<framework>)' -ForEach @(
+    @{ framework = $previousFramework }
 ) -Skip:($env:NO_MOBILE -eq "true") {
     BeforeAll {
         RegisterLocalPackage 'Sentry.Android.AssemblyReader'
@@ -119,8 +115,8 @@ Describe 'MAUI' -ForEach @(
         }
 
         $name = 'maui-app'
-        $androidTpv = '34.0'
-        $iosTpv = '17.0'
+        $androidTpv = GetAndroidTpv $framework
+        $iosTpv = GetIosTpv $framework
 
         DotnetNew 'maui' $name $framework
 
@@ -148,6 +144,7 @@ Describe 'MAUI' -ForEach @(
 
     It "uploads symbols and sources for an Android build" {
         $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-android$androidTpv"
+        Write-Host "UploadedDebugFiles: $($result.UploadedDebugFiles() | Out-String)"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'libsentry-android.so',
             'libsentry.so',
@@ -156,11 +153,12 @@ Describe 'MAUI' -ForEach @(
             'maui-app.pdb'
         )
         $result.ScriptOutput | Should -AnyElementMatch 'Uploaded a total of 1 new mapping files'
-        $result.ScriptOutput | Should -AnyElementMatch 'Found 25 debug information files \(1 with embedded sources\)'
+        $result.ScriptOutput | Should -AnyElementMatch "Found 23 debug information files \(1 with embedded sources\)"
     }
 
     It "uploads symbols and sources for an iOS build" -Skip:(!$IsMacOS) {
         $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-ios$iosTpv"
+        Write-Host "UploadedDebugFiles: $($result.UploadedDebugFiles() | Out-String)"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
             'libmono-component-debugger.dylib',
             'libmono-component-diagnostics_tracing.dylib',
@@ -176,9 +174,14 @@ Describe 'MAUI' -ForEach @(
             'libxamarin-dotnet.dylib',
             'maui-app',
             'maui-app.pdb',
+            'Microsoft.iOS.pdb',
+            'Microsoft.Maui.Controls.pdb',
+            'Microsoft.Maui.Controls.Xaml.pdb',
+            'Microsoft.Maui.Essentials.pdb',
+            'Microsoft.Maui.Graphics.pdb',
+            'Microsoft.Maui.pdb',
             'Sentry'
         )
-        $nonZeroNumberRegex = '[1-9][0-9]*';
-        $result.ScriptOutput | Should -AnyElementMatch "Found $nonZeroNumberRegex debug information files \($nonZeroNumberRegex with embedded sources\)"
+        $result.ScriptOutput | Should -AnyElementMatch "Found 77 debug information files \(8 with embedded sources\)"
     }
 }
