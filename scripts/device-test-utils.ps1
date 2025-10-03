@@ -1,4 +1,5 @@
-function Install-XHarness {
+function Install-XHarness
+{
     if (!(Get-Command xharness -ErrorAction SilentlyContinue))
     {
         $CI = Test-Path env:CI
@@ -9,8 +10,9 @@ function Install-XHarness {
     }
 }
 
-function Get-AndroidEmulatorId {
-    if ($env:ANDROID_SERIAL)
+function Get-AndroidEmulatorId
+{
+    if ((Test-Path env:CI) -or (Test-Path $env:ANDROID_SERIAL))
     {
         return $env:ANDROID_SERIAL
     }
