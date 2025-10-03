@@ -5,6 +5,7 @@ namespace Sentry.Android.AssemblyReader.Tests;
 public class AndroidAssemblyReaderTests
 {
     private readonly ITestOutputHelper _output;
+
 #if NET10_0
     private static string TargetFramework => "net10.0";
 #elif NET9_0
