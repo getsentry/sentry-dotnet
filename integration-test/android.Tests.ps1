@@ -78,8 +78,8 @@ Describe 'MAUI app' -ForEach @(
                 Write-Host "Waiting for app..."
                 Start-Sleep -Seconds 1
 
-                $procid = (& adb shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
-                $activity = (& adb shell dumpsys activity activities) -match "io\.sentry\.dotnet\.maui\.device\.integrationtestapp"
+                $procid = (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
+                $activity = (& xharness android adb -- shell dumpsys activity activities) -match "io\.sentry\.dotnet\.maui\.device\.integrationtestapp"
 
             } while ($procid -and $activity)
 
