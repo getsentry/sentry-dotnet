@@ -1,3 +1,4 @@
+using Sentry.Ben.BlockingDetector;
 using Sentry.Extensibility;
 using Sentry.Internal.Extensions;
 using Sentry.Internal.Http;
@@ -40,7 +41,10 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
         _queuedEnvelopeSemaphore = new SemaphoreSlim(0, _maxItems);
 
         options.LogDebug("Starting BackgroundWorker.");
-        WorkerTask = Task.Run(DoWorkAsync);
+        using (new SuppressBlockingDetection())
+        {
+            WorkerTask = Task.Run(DoWorkAsync);
+        }
     }
 
     /// <inheritdoc />
