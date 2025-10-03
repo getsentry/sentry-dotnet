@@ -32,7 +32,7 @@ Describe 'MAUI app' -ForEach @(
                 -replace '\{\{SENTRY_DSN\}\}', $dsn `
             | Set-Content MauiProgram.cs
 
-            $arch = ($(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
+            $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLower()
             $rid = "android-$arch"
 
             Write-Host "::group::Build Sentry.Maui.Device.IntegrationTestApp.csproj"

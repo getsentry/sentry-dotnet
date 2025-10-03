@@ -21,7 +21,7 @@ Describe 'iOS app (<tfm>)' -ForEach @(
         Copy-Item -Path "$PSScriptRoot/net9-maui" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
         Push-Location $PSScriptRoot/mobile-app
 
-        $arch = ($(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
+        $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLower()
         $rid = "iossimulator-$arch"
 
         Write-Host "::group::Build Sentry.Maui.Device.IntegrationTestApp.csproj"
