@@ -15,10 +15,10 @@ internal class HttpTransport : HttpTransportBase, ITransport
         _httpClient = httpClient;
     }
 
-    internal HttpTransport(SentryOptions options, HttpClient httpClient,
+    internal HttpTransport(SentryOptions options, HttpClient httpClient, BackpressureMonitor? backpressureMonitor,
         Func<string, string?>? getEnvironmentVariable = default,
         ISystemClock? clock = default)
-        : base(options, getEnvironmentVariable, clock)
+        : base(options, backpressureMonitor, getEnvironmentVariable, clock)
     {
         _httpClient = httpClient;
     }

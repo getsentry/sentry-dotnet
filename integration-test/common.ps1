@@ -154,7 +154,7 @@ BeforeAll {
         Push-Location $projectPath
         try
         {
-            dotnet restore | ForEach-Object { Write-Host $_ }
+            dotnet restore /p:CheckEolTargetFramework=false | ForEach-Object { Write-Host $_ }
             if ($LASTEXITCODE -ne 0)
             {
                 throw "Failed to restore the test app project."

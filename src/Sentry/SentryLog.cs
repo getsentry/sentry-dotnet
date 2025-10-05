@@ -1,14 +1,18 @@
 using Sentry.Extensibility;
-using Sentry.Infrastructure;
+using Sentry.Internal;
 using Sentry.Protocol;
 
 namespace Sentry;
 
 /// <summary>
-/// Represents the Sentry Log protocol.
-/// <para>This API is experimental and it may change in the future.</para>
+/// Represents a Sentry Structured Log.
 /// </summary>
-[Experimental(DiagnosticId.ExperimentalFeature)]
+/// <remarks>
+/// Sentry Docs: <see href="https://docs.sentry.io/product/explore/logs/"/>.
+/// Sentry Developer Documentation: <see href="https://develop.sentry.dev/sdk/telemetry/logs/"/>.
+/// Sentry .NET SDK Docs: <see href="https://docs.sentry.io/platforms/dotnet/logs/"/>.
+/// </remarks>
+[DebuggerDisplay(@"SentryLog \{ Level = {Level}, Message = '{Message}' \}")]
 public sealed class SentryLog
 {
     private readonly Dictionary<string, SentryAttribute> _attributes;
@@ -26,59 +30,44 @@ public sealed class SentryLog
 
     /// <summary>
     /// The timestamp of the log.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     /// <remarks>
     /// Sent as seconds since the Unix epoch.
     /// </remarks>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public required DateTimeOffset Timestamp { get; init; }
 
     /// <summary>
     /// The trace id of the log.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public required SentryId TraceId { get; init; }
 
     /// <summary>
     /// The severity level of the log.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public required SentryLogLevel Level { get; init; }
 
     /// <summary>
     /// The formatted log message.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public required string Message { get; init; }
 
     /// <summary>
     /// The parameterized template string.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public string? Template { get; init; }
 
     /// <summary>
     /// The parameters to the template string.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public ImmutableArray<KeyValuePair<string, object>> Parameters { get; init; }
 
     /// <summary>
     /// The span id of the span that was active when the log was collected.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public SpanId? ParentSpanId { get; init; }
 
     /// <summary>
     /// Gets the attribute value associated with the specified key.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     /// <remarks>
     /// Returns <see langword="true"/> if the <see cref="SentryLog"/> contains an attribute with the specified key and it's value is not <see langword="null"/>.
@@ -127,7 +116,6 @@ public sealed class SentryLog
     /// </list>
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public bool TryGetAttribute(string key, [NotNullWhen(true)] out object? value)
     {
         if (_attributes.TryGetValue(key, out var attribute) && attribute.Value is not null)
@@ -154,9 +142,7 @@ public sealed class SentryLog
 
     /// <summary>
     /// Set a key-value pair of data attached to the log.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public void SetAttribute(string key, object value)
     {
         _attributes[key] = new SentryAttribute(value);
@@ -224,7 +210,9 @@ public sealed class SentryLog
         writer.WritePropertyName("attributes");
         writer.WriteStartObject();
 
-        if (Template is not null)
+        // the SDK MUST NOT attach a sentry.message.template attribute if there are no parameters
+        // https://develop.sentry.dev/sdk/telemetry/logs/#default-attributes
+        if (Template is not null && !Parameters.IsDefaultOrEmpty)
         {
             SentryAttributeSerializer.WriteStringAttribute(writer, "sentry.message.template", Template);
         }
@@ -255,5 +243,30 @@ public sealed class SentryLog
         writer.WriteEndObject(); // attributes
 
         writer.WriteEndObject();
+    }
+
+    internal static void GetTraceIdAndSpanId(IHub hub, out SentryId traceId, out SpanId? spanId)
+    {
+        var activeSpan = hub.GetSpan();
+        if (activeSpan is not null)
+        {
+            traceId = activeSpan.TraceId;
+            spanId = activeSpan.SpanId;
+            return;
+        }
+
+        // set "sentry.trace.parent_span_id" to the ID of the Span that was active when the Log was collected
+        // do not set "sentry.trace.parent_span_id" if there was no active Span
+        spanId = null;
+
+        var scope = hub.GetScope();
+        if (scope is not null)
+        {
+            traceId = scope.PropagationContext.TraceId;
+            return;
+        }
+
+        Debug.Assert(hub is not Hub, "In case of a 'full' Hub, there is always a Scope. Otherwise (disabled) there is no Scope, but this branch should be unreachable.");
+        traceId = SentryId.Empty;
     }
 }

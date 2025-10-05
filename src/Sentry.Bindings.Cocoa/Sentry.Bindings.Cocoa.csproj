@@ -12,8 +12,15 @@
     <SentryCocoaProperties>$([System.IO.File]::ReadAllText("$(MSBuildThisFileDirectory)../../modules/sentry-cocoa.properties"))</SentryCocoaProperties>
     <SentryCocoaVersion>$([System.Text.RegularExpressions.Regex]::Match($(SentryCocoaProperties), 'version\s*=\s*([^\s]+)').Groups[1].Value)</SentryCocoaVersion>
     <SentryCocoaFramework>$(SentryCocoaCache)Sentry-$(SentryCocoaVersion).xcframework</SentryCocoaFramework>
+    <SentryCocoaBindingInputs>../../modules/sentry-cocoa.properties;../../scripts/generate-cocoa-bindings.ps1</SentryCocoaBindingInputs>
     <!-- SentrySpan.g.cs: error CS0108: 'ISentrySpan.Serialize()' hides inherited member 'ISentrySerializable.Serialize()'. Use the new keyword if hiding was intended -->
     <NoWarn>$(NoWarn);CS0108</NoWarn>
+  </PropertyGroup>
+
+  <!-- Override values for local Cocoa SDK builds -->
+  <PropertyGroup Condition="Exists('$(SentryCocoaCache).git')">
+    <SentryCocoaFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\Sentry.xcframework</SentryCocoaFramework>
+    <SentryCocoaBindingInputs>../../scripts/generate-cocoa-bindings.ps1;../../modules/sentry-cocoa/Carthage/.built-from-sha</SentryCocoaBindingInputs>
   </PropertyGroup>
 
   <!-- Build empty assemblies when not on macOS, to pass the solution build. -->
@@ -52,8 +59,8 @@
   </ItemGroup>
 
   <!-- Downloads and sets up the Cocoa SDK: dotnet msbuild /t:setupCocoaSDK src/Sentry.Bindings.Cocoa/Sentry.Bindings.Cocoa.csproj -->
-  <Target Name="_SetupCocoaSDK"
-          Condition="$([MSBuild]::IsOSPlatform('OSX')) And !Exists('$(SentryCocoaFramework)')">
+  <Target Name="_DownloadCocoaSDK"
+          Condition="$([MSBuild]::IsOSPlatform('OSX')) And !Exists('$(SentryCocoaCache).git') And !Exists('$(SentryCocoaFramework)')">
 
     <Message Importance="High" Text="Setting up the Cocoa SDK version '$(SentryCocoaVersion)'." />
 
@@ -84,14 +91,28 @@
           SkipUnchangedFiles="true" />
   </Target>
 
+  <!-- Build the Sentry Cocoa SDK from source -->
+  <Target Name="_BuildCocoaSDK"
+          Condition="$([MSBuild]::IsOSPlatform('OSX')) And Exists('$(SentryCocoaCache).git')"
+          Inputs="..\..\modules\sentry-cocoa\.git\HEAD;..\..\scripts\build-sentry-cocoa.sh" Outputs="..\..\modules\sentry-cocoa\Carthage\.built-from-sha">
+
+    <Message Importance="High" Text="Building the Cocoa SDK from source." />
+    <Exec Command="bash ../../scripts/build-sentry-cocoa.sh" IgnoreStandardErrorWarningFormat="true" />
+  </Target>
+
+  <!-- Choose between download and build -->
+  <Target Name="_SetupCocoaSDK"
+          DependsOnTargets="_DownloadCocoaSDK;_BuildCocoaSDK"
+          Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
+
   <!-- Setup exactly once: https://learn.microsoft.com/visualstudio/msbuild/run-target-exactly-once -->
   <Target Name="SetupCocoaSDKBeforeOuterBuild" DependsOnTargets="_SetupCocoaSDK"
-          Condition="$([MSBuild]::IsOSPlatform('OSX')) And !Exists('$(SentryCocoaFramework)')"
+          Condition="$([MSBuild]::IsOSPlatform('OSX'))"
           BeforeTargets="DispatchToInnerBuilds" />
 
   <Target Name="SetupCocoaSDK"
           BeforeTargets="BeforeBuild"
-          Condition="$([MSBuild]::IsOSPlatform('OSX')) And !Exists('$(SentryCocoaFramework)')">
+          Condition="$([MSBuild]::IsOSPlatform('OSX'))">
     <!-- Setup exactly once: https://learn.microsoft.com/visualstudio/msbuild/run-target-exactly-once -->
     <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_SetupCocoaSDK" RemoveProperties="TargetFramework" />
   </Target>
@@ -102,8 +123,8 @@
 
   <!-- Generate bindings -->
   <Target Name="_GenerateSentryCocoaBindings" AfterTargets="SetupCocoaSDK"
-          Condition="$([MSBuild]::IsOSPlatform('OSX')) and Exists('$(SentryCocoaFrameworkHeaders)')"
-          Inputs="../../modules/sentry-cocoa.properties;../../scripts/generate-cocoa-bindings.ps1"
+          Condition="$([MSBuild]::IsOSPlatform('OSX'))"
+          Inputs="$(SentryCocoaBindingInputs)"
           Outputs="ApiDefinitions.cs;StructsAndEnums.cs">
     <MSBuild Projects="$(MSBuildProjectFile)" Targets="_InnerGenerateSentryCocoaBindings" Properties="TargetFramework=once" />
   </Target>

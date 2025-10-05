@@ -20,7 +20,7 @@ public class BackgroundWorkerFlushBenchmarks
     [IterationSetup]
     public void IterationSetup()
     {
-        _backgroundWorker = new BackgroundWorker(new FakeTransport(), new SentryOptions { MaxQueueItems = 1000 });
+        _backgroundWorker = new BackgroundWorker(new FakeTransport(), new SentryOptions { MaxQueueItems = 1000 }, null);
         _event = new SentryEvent();
         _envelope = Envelope.FromEvent(_event);
 

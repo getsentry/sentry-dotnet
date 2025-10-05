@@ -171,3 +171,26 @@ Once changes to Ben.Demystifier have been merged into the main branch then, the 
 should be updated from the main branch and the `modules/make-internal.sh` script run again (if necessary). This repo 
 should reference the most recent commit on the `internal` branch of Ben.Demystifier then (functionally identical to the
 main branch - the only difference being the changes to member visibility).
+
+## Local Sentry Cocoa SDK checkout
+
+By default, `Sentry.Bindings.Cocoa` downloads a pre-built Sentry Cocoa SDK from
+GitHub Releases. The version is specified in `modules/sentry-cocoa.properties`.
+
+If you want to build an unreleased Sentry Cocoa SDK version from source instead,
+replace the pre-built SDK with [getsentry/sentry-cocoa](https://github.com/getsentry/sentry-cocoa/)
+by cloning it into the `modules/sentry-cocoa` directory:
+
+```sh
+$ rm -rf modules/sentry-cocoa
+$ gh repo clone getsentry/sentry-cocoa modules/sentry-cocoa
+$ dotnet build ... # uses modules/sentry-cocoa as is
+```
+
+To switch back to the pre-built SDK, delete the `modules/sentry-cocoa` directory
+and let the next build download the pre-built SDK again:
+
+```sh
+$ rm -rf modules/sentry-cocoa
+$ dotnet build ... # downloads pre-built Cocoa SDK into modules/sentry-cocoa
+```

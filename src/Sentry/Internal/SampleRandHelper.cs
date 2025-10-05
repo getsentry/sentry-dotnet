@@ -11,5 +11,16 @@ internal static class SampleRandHelper
         <= 0 => false,
         _ => sampleRand < rate
     };
+}
 
+[DebuggerStepThrough]
+internal class SampleRandHelperAdapter : ISampleRandHelper
+{
+    [DebuggerStepThrough]
+    public double GenerateSampleRand(string traceId) => SampleRandHelper.GenerateSampleRand(traceId);
+}
+
+internal interface ISampleRandHelper
+{
+    public double GenerateSampleRand(string traceId);
 }
