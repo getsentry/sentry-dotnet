@@ -12,7 +12,7 @@ function Install-XHarness
 
 function Get-AndroidEmulatorId
 {
-    if ((Test-Path env:CI) -or (Test-Path $env:ANDROID_SERIAL))
+    if ((Test-Path env:CI) -or (Test-Path env:ANDROID_SERIAL))
     {
         return $env:ANDROID_SERIAL
     }
