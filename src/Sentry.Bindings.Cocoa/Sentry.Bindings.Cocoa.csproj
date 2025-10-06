@@ -102,7 +102,7 @@
 
   <!-- Choose between download and build -->
   <Target Name="_SetupCocoaSDK"
-          DependsOnTargets="_DownloadCocoaSDK;_BuildCocoaSDK"
+          DependsOnTargets="_DownloadCocoaSDK;_BuildCocoaSDK;_GenerateSentryCocoaBindings;SanitizeSentryCocoaFramework"
           Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
 
   <!-- Setup exactly once: https://learn.microsoft.com/visualstudio/msbuild/run-target-exactly-once -->
@@ -122,7 +122,7 @@
   </Target>
 
   <!-- Generate bindings -->
-  <Target Name="_GenerateSentryCocoaBindings" AfterTargets="SetupCocoaSDK"
+  <Target Name="_GenerateSentryCocoaBindings"
           Condition="$([MSBuild]::IsOSPlatform('OSX'))"
           Inputs="$(SentryCocoaBindingInputs)"
           Outputs="ApiDefinitions.cs;StructsAndEnums.cs">
@@ -132,6 +132,13 @@
     <Exec Command="pwsh ../../scripts/generate-cocoa-bindings.ps1" />
     <!-- See https://github.com/getsentry/sentry-dotnet/pull/2558 -->
     <Exec Condition="'$(GITHUB_ACTIONS)' == 'true'" Command="pwsh ../../scripts/dirty-check.ps1 -PathToCheck $(MSBuildThisFileDirectory)" />
+  </Target>
+
+  <!-- Sanitize the xcframework before NativeReference resolution and packing -->
+  <Target Name="SanitizeSentryCocoaFramework"
+          Condition="$([MSBuild]::IsOSPlatform('OSX')) and Exists('$(SentryCocoaFramework)')">
+    <Message Importance="High" Text="Sanitizing $(SentryCocoaFramework): removing dSYMs, Headers, Modules, PrivateHeaders (including symlinks)." />
+    <Exec Command="find &quot;$(SentryCocoaFramework)&quot; -depth \( -name dSYMs -o -name Headers -o -name Modules -o -name PrivateHeaders \) -exec echo Removing {} \; -exec rm -rf {} + 2&gt;/dev/null || true" />
   </Target>
 
   <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15299 -->
