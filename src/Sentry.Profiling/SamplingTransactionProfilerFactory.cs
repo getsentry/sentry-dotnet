@@ -6,17 +6,7 @@ namespace Sentry.Profiling;
 internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionProfilerFactory
 {
     // We only allow a single profile so let's keep track of the current status.
-#if NET9_0_OR_GREATER
-    internal bool _inProgress = FALSE;
-
-    const bool TRUE = true;
-    const bool FALSE = false;
-#else
-    internal int _inProgress = FALSE;
-
-    const int TRUE = 1;
-    const int FALSE = 0;
-#endif
+    internal InterlockedBoolean _inProgress = false;
 
     // Whether the session startup took longer than the given timeout.
     internal bool StartupTimedOut { get; }
@@ -57,12 +47,12 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     public ITransactionProfiler? Start(ITransactionTracer _, CancellationToken cancellationToken)
     {
         // Start a profiler if one wasn't running yet.
-        if (!_errorLogged && Interlocked.Exchange(ref _inProgress, TRUE) == FALSE)
+        if (!_errorLogged && !_inProgress.Exchange(true))
         {
             if (!_sessionTask.IsCompleted)
             {
                 _options.LogWarning("Cannot start a sampling profiler, the session hasn't started yet.");
-                _inProgress = FALSE;
+                _inProgress = false;
                 return null;
             }
 
@@ -70,7 +60,7 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
             {
                 _options.LogWarning("Cannot start a sampling profiler because the session startup has failed. This is a permanent error and no future transactions will be sampled.");
                 _errorLogged = true;
-                _inProgress = FALSE;
+                _inProgress = false;
                 return null;
             }
 
@@ -79,13 +69,13 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
             {
                 return new SamplingTransactionProfiler(_options, _sessionTask.Result, TIME_LIMIT_MS, cancellationToken)
                 {
-                    OnFinish = () => _inProgress = FALSE
+                    OnFinish = () => _inProgress = false
                 };
             }
             catch (Exception e)
             {
                 _options.LogError(e, "Failed to start a profiler session.");
-                _inProgress = FALSE;
+                _inProgress = false;
             }
         }
         return null;

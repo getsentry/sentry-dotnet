@@ -56,27 +56,17 @@ internal class SampleProfilerSession : IDisposable
 
     public TraceLog TraceLog => EventSource.TraceLog;
 
-#if NET9_0_OR_GREATER
-    private static bool _throwOnNextStartupForTests = FALSE;
-
-    const bool TRUE = true;
-    const bool FALSE = false;
-#else
-    private static int _throwOnNextStartupForTests = FALSE;
-
-    const int TRUE = 1;
-    const int FALSE = 0;
-#endif
+    private static InterlockedBoolean _throwOnNextStartupForTests = false;
 
     internal static bool ThrowOnNextStartupForTests
     {
-        get { return _throwOnNextStartupForTests != FALSE; }
+        get { return _throwOnNextStartupForTests; }
         set
         {
             if (value)
-                Interlocked.CompareExchange(ref _throwOnNextStartupForTests, TRUE, FALSE);
+                _throwOnNextStartupForTests.CompareExchange(true, false);
             else
-                Interlocked.CompareExchange(ref _throwOnNextStartupForTests, FALSE, TRUE);
+                _throwOnNextStartupForTests.CompareExchange(false, true);
         }
     }
 
@@ -86,7 +76,7 @@ internal class SampleProfilerSession : IDisposable
         {
             var client = new DiagnosticsClient(Environment.ProcessId);
 
-            if (Interlocked.CompareExchange(ref _throwOnNextStartupForTests, FALSE, TRUE) == TRUE)
+            if (_throwOnNextStartupForTests.CompareExchange(false, true) == true)
             {
                 throw new Exception("Test exception");
             }

@@ -24,30 +24,16 @@ internal class Hub : IHub, IDisposable
     private readonly MemoryMonitor? _memoryMonitor;
 #endif
 
-#if NET9_0_OR_GREATER
-    private bool _isPersistedSessionRecovered;
-
-    const bool TRUE = true;
-    const bool FALSE = false;
-#else
-    private int _isPersistedSessionRecovered;
-
-    const int TRUE = 1;
-    const int FALSE = 0;
-#endif
+    private InterlockedBoolean _isPersistedSessionRecovered;
 
     // Internal for testability
     internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
 
     internal IInternalScopeManager ScopeManager { get; }
 
-#if NET9_0_OR_GREATER
-    private bool _isEnabled = TRUE;
-#else
-    private int _isEnabled = TRUE;
-#endif
+    private InterlockedBoolean _isEnabled = true;
 
-    public bool IsEnabled => _isEnabled != FALSE;
+    public bool IsEnabled => _isEnabled;
 
     internal SentryOptions Options => _options;
 
@@ -371,7 +357,7 @@ internal class Hub : IHub, IDisposable
     public void StartSession()
     {
         // Attempt to recover persisted session left over from previous run
-        if (Interlocked.Exchange(ref _isPersistedSessionRecovered, TRUE) != TRUE)
+        if (_isPersistedSessionRecovered.Exchange(true) != true)
         {
             try
             {
@@ -850,7 +836,7 @@ internal class Hub : IHub, IDisposable
     {
         _options.LogInfo("Disposing the Hub.");
 
-        if (Interlocked.Exchange(ref _isEnabled, FALSE) != TRUE)
+        if (!_isEnabled.Exchange(false))
         {
             return;
         }
