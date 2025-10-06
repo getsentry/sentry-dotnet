@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Partial workaround for MAX_PATH issues when building iOS applications from Windows ([#4533](https://github.com/getsentry/sentry-dotnet/pull/4533))
+
 ### Dependencies
 
 - Bump Java SDK from v8.22.0 to v8.23.0 ([#4586](https://github.com/getsentry/sentry-dotnet/pull/4586))
@@ -20,7 +24,6 @@
 
 ### Fixes
 
-- Partial workaround for MAX_PATH issues when building iOS applications from Windows ([#4533](https://github.com/getsentry/sentry-dotnet/pull/4533))
 - Templates are no longer sent with Structured Logs that have no parameters ([#4544](https://github.com/getsentry/sentry-dotnet/pull/4544))
 - Parent-Span-IDs are no longer sent with Structured Logs when recorded without an active Span ([#4565](https://github.com/getsentry/sentry-dotnet/pull/4565))
 - Upload linked PDBs to fix non-IL-stripped symbolication for iOS ([#4527](https://github.com/getsentry/sentry-dotnet/pull/4527))
