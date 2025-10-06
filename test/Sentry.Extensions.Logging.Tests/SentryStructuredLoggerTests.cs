@@ -51,10 +51,12 @@ public class SentryStructuredLoggerTests : IDisposable
         public void EnableLogs(bool isEnabled) => Options.Value.Experimental.EnableLogs = isEnabled;
         public void SetMinimumLogLevel(LogLevel logLevel) => Options.Value.ExperimentalLogging.MinimumLogLevel = logLevel;
 
-        public void WithTraceHeader(SentryId traceId, SpanId parentSpanId)
+        public void WithActiveSpan(SentryId traceId, SpanId parentSpanId)
         {
-            var traceHeader = new SentryTraceHeader(traceId, parentSpanId, null);
-            Hub.GetTraceHeader().Returns(traceHeader);
+            var span = Substitute.For<ISpan>();
+            span.TraceId.Returns(traceId);
+            span.SpanId.Returns(parentSpanId);
+            Hub.GetSpan().Returns(span);
         }
 
         public SentryStructuredLogger GetSut()
@@ -83,7 +85,7 @@ public class SentryStructuredLoggerTests : IDisposable
     {
         var traceId = SentryId.Create();
         var parentSpanId = SpanId.Create();
-        _fixture.WithTraceHeader(traceId, parentSpanId);
+        _fixture.WithActiveSpan(traceId, parentSpanId);
         var logger = _fixture.GetSut();
 
         EventId eventId = new(123, "EventName");
@@ -127,15 +129,18 @@ public class SentryStructuredLoggerTests : IDisposable
     }
 
     [Fact]
-    public void Log_WithoutTraceHeader_CaptureLog()
+    public void Log_WithoutActiveSpan_CaptureLog()
     {
+        var scope = new Scope(_fixture.Options.Value);
+        _fixture.Hub.GetSpan().Returns((ISpan?)null);
+        _fixture.Hub.SubstituteConfigureScope(scope);
         var logger = _fixture.GetSut();
 
         logger.Log(LogLevel.Information, new EventId(123, "EventName"), new InvalidOperationException("message"), "Message with {Argument}.", "argument");
 
         var log = _fixture.CapturedLogs.Dequeue();
-        log.TraceId.Should().Be(SentryTraceHeader.Empty.TraceId);
-        log.ParentSpanId.Should().Be(SentryTraceHeader.Empty.SpanId);
+        log.TraceId.Should().Be(scope.PropagationContext.TraceId);
+        log.ParentSpanId.Should().BeNull();
     }
 
     [Fact]
