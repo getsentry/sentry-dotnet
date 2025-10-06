@@ -12,7 +12,7 @@
     <SentryCocoaProperties>$([System.IO.File]::ReadAllText("$(MSBuildThisFileDirectory)../../modules/sentry-cocoa.properties"))</SentryCocoaProperties>
     <SentryCocoaVersion>$([System.Text.RegularExpressions.Regex]::Match($(SentryCocoaProperties), 'version\s*=\s*([^\s]+)').Groups[1].Value)</SentryCocoaVersion>
     <SentryCocoaFramework>$(SentryCocoaCache)Sentry-$(SentryCocoaVersion).xcframework</SentryCocoaFramework>
-    <SentryCocoaBindingInputs>../../modules/sentry-cocoa.properties;../../scripts/generate-cocoa-bindings.ps1</SentryCocoaBindingInputs>
+    <SentryCocoaBindingInputs>../../modules/sentry-cocoa.properties;../../scripts/generate-cocoa-bindings.ps1;$(SentryCocoaFrameworkHeaders)**/*.h</SentryCocoaBindingInputs>
     <!-- SentrySpan.g.cs: error CS0108: 'ISentrySpan.Serialize()' hides inherited member 'ISentrySerializable.Serialize()'. Use the new keyword if hiding was intended -->
     <NoWarn>$(NoWarn);CS0108</NoWarn>
   </PropertyGroup>
@@ -20,7 +20,7 @@
   <!-- Override values for local Cocoa SDK builds -->
   <PropertyGroup Condition="Exists('$(SentryCocoaCache).git')">
     <SentryCocoaFramework>$(SentryCocoaCache)Carthage\Build-$(TargetPlatformIdentifier)\Sentry.xcframework</SentryCocoaFramework>
-    <SentryCocoaBindingInputs>../../scripts/generate-cocoa-bindings.ps1;../../modules/sentry-cocoa/Carthage/.built-from-sha</SentryCocoaBindingInputs>
+    <SentryCocoaBindingInputs>../../scripts/generate-cocoa-bindings.ps1;../../modules/sentry-cocoa/Carthage/.built-from-sha;../../modules/sentry-cocoa/Carthage/**/*.h</SentryCocoaBindingInputs>
   </PropertyGroup>
 
   <!-- Build empty assemblies when not on macOS, to pass the solution build. -->
