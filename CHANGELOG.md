@@ -5,18 +5,6 @@
 - Remove unnecessary files from SentryCocoaFramework before packing ([#4602](https://github.com/getsentry/sentry-dotnet/pull/4602))
 
 ## 6.0.0-preview.1
-## Unreleased
-
-### Dependencies
-
-- Bump Java SDK from v8.22.0 to v8.23.0 ([#4586](https://github.com/getsentry/sentry-dotnet/pull/4586))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8230)
-  - [diff](https://github.com/getsentry/sentry-java/compare/8.22.0...8.23.0)
-- Bump Native SDK from v0.11.1 to v0.11.2 ([#4590](https://github.com/getsentry/sentry-dotnet/pull/4590))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0112)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.11.1...0.11.2)
-
-## 5.16.0
 
 ### BREAKING CHANGES
 
