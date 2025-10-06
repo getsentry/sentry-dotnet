@@ -93,6 +93,19 @@ Describe 'MAUI app' -ForEach @(
             $LASTEXITCODE | Should -Be 0
             Write-Host '::endgroup::'
         }
+
+        # Helper to dump server stderr if the test server reported errors
+        function Dump-ServerErrors {
+            param(
+                [Parameter(Mandatory)]
+                $Result
+            )
+            if ($Result.HasErrors()) {
+                Write-Host '::group::sentry-server stderr'
+                $Result.ServerStdErr | ForEach-Object { Write-Host $_ }
+                Write-Host '::endgroup::'
+            }
+        }
     }
 
     AfterAll {
@@ -111,6 +124,7 @@ Describe 'MAUI app' -ForEach @(
             RunAndroidApp -Dsn $url
         }
 
+        Dump-ServerErrors -Result $result
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.ApplicationException`""
         $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"SIGABRT`""
@@ -124,6 +138,7 @@ Describe 'MAUI app' -ForEach @(
             RunAndroidApp -Dsn $url
         }
 
+        Dump-ServerErrors -Result $result
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"RuntimeException`""
         $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
@@ -137,6 +152,7 @@ Describe 'MAUI app' -ForEach @(
             RunAndroidApp -Dsn $url
         }
 
+        Dump-ServerErrors -Result $result
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.NullReferenceException`""
         # TODO: fix redundant RuntimeException (#3954)
