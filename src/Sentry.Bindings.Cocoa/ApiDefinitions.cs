@@ -416,9 +416,9 @@ interface SentryEnvelopeItemHeader : SentrySerializable
     [Export ("initWithType:length:filenname:contentType:")]
     NativeHandle Constructor (string type, nuint length, string filename, string contentType);
 
-    // -(instancetype _Nonnull)initWithType:(NSString * _Nonnull)type length:(NSUInteger)length contentType:(NSString * _Nonnull)contentType itemCount:(NSNumber * _Nonnull)itemCount;
+    // -(instancetype _Nonnull)initWithType:(NSString * _Nonnull)type length:(NSUInteger)length contentType:(NSString * _Nullable)contentType itemCount:(NSNumber * _Nonnull)itemCount;
     [Export ("initWithType:length:contentType:itemCount:")]
-    NativeHandle Constructor (string type, nuint length, string contentType, NSNumber itemCount);
+    NativeHandle Constructor (string type, nuint length, [NullAllowed] string contentType, NSNumber itemCount);
 
     // @property (readonly, copy, nonatomic) NSString * _Nonnull type;
     [Export ("type")]
