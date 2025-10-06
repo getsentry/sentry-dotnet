@@ -284,18 +284,8 @@ static partial class SentrySdk
     /// </summary>
     public static bool IsEnabled { [DebuggerStepThrough] get => CurrentHub.IsEnabled; }
 
-    /// <summary>
-    /// Experimental Sentry SDK features.
-    /// </summary>
-    /// <remarks>
-    /// This and related experimental APIs may change in the future.
-    /// </remarks>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public static class Experimental
-    {
-        /// <inheritdoc cref="IHub.Logger" />
-        public static SentryStructuredLogger Logger { [DebuggerStepThrough] get => CurrentHub.Logger; }
-    }
+    /// <inheritdoc cref="IHub.Logger" />
+    public static SentryStructuredLogger Logger { [DebuggerStepThrough] get => CurrentHub.Logger; }
 
     /// <summary>
     /// Creates a new scope that will terminate when disposed.
@@ -316,7 +306,13 @@ static partial class SentrySdk
     public static IDisposable PushScope() => CurrentHub.PushScope();
 
     /// <summary>
+    /// <para>
     /// Binds the client to the current scope.
+    /// </para>
+    /// <para>
+    /// This might be used to bind a client with a different DSN or configuration (e.g. so that a particular thread or
+    /// part of the application sends events to a different Sentry project).
+    /// </para>
     /// </summary>
     /// <param name="client">The client.</param>
     [DebuggerStepThrough]
