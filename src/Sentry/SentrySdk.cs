@@ -284,18 +284,8 @@ static partial class SentrySdk
     /// </summary>
     public static bool IsEnabled { [DebuggerStepThrough] get => CurrentHub.IsEnabled; }
 
-    /// <summary>
-    /// Experimental Sentry SDK features.
-    /// </summary>
-    /// <remarks>
-    /// This and related experimental APIs may change in the future.
-    /// </remarks>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public static class Experimental
-    {
-        /// <inheritdoc cref="IHub.Logger" />
-        public static SentryStructuredLogger Logger { [DebuggerStepThrough] get => CurrentHub.Logger; }
-    }
+    /// <inheritdoc cref="IHub.Logger" />
+    public static SentryStructuredLogger Logger { [DebuggerStepThrough] get => CurrentHub.Logger; }
 
     /// <summary>
     /// Creates a new scope that will terminate when disposed.

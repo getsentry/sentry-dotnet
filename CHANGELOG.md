@@ -2,6 +2,13 @@
 
 ## 6.0.0-preview.1
 
+### BREAKING CHANGES
+
+- This release adds support for .NET 10 and drops support for net8.0-android, net8.0-ios, net8.0-maccatalyst and net8.0-windows10.0.19041.0 ([#4461](https://github.com/getsentry/sentry-dotnet/pull/4461))
+- Added support for v3 of the Android AssemblyStore format that is used in .NET 10 and dropped support for v1 that was used in .NET 8 ([#4583](https://github.com/getsentry/sentry-dotnet/pull/4583))
+
+## 5.16.0
+
 ### Features
 
 - Added `EnableBackpressureHandling` option for Automatic backpressure handling. When enabled this automatically reduces the sample rate when the SDK detects events being dropped. ([#4452](https://github.com/getsentry/sentry-dotnet/pull/4452))
@@ -9,9 +16,15 @@
 
 ### Fixes
 
+- Templates are no longer sent with Structured Logs that have no parameters ([#4544](https://github.com/getsentry/sentry-dotnet/pull/4544))
+- Parent-Span-IDs are no longer sent with Structured Logs when recorded without an active Span ([#4565](https://github.com/getsentry/sentry-dotnet/pull/4565))
 - Upload linked PDBs to fix non-IL-stripped symbolication for iOS ([#4527](https://github.com/getsentry/sentry-dotnet/pull/4527))
 - In MAUI Android apps, generate and inject UUID to APK and upload ProGuard mapping to Sentry with the UUID ([#4532](https://github.com/getsentry/sentry-dotnet/pull/4532))
 - Fixed WASM0001 warning when building Blazor WebAssembly projects ([#4519](https://github.com/getsentry/sentry-dotnet/pull/4519))
+
+### API Changes
+
+- Remove `ExperimentalAttribute` from all _Structured Logs_ APIs, and remove `Experimental` property from `SentrySdk`, but keep `Experimental` property on `SentryOptions` ([#4567](https://github.com/getsentry/sentry-dotnet/pull/4567))
 
 ### Dependencies
 
@@ -27,16 +40,12 @@
 
 ### Dependencies
 
+- Bump CLI from v2.54.0 to v2.56.0 ([#4556](https://github.com/getsentry/sentry-dotnet/pull/4556), [#4577](https://github.com/getsentry/sentry-dotnet/pull/4577))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2560)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.54.0...2.56.0)
 - Bump Java SDK from v8.21.1 to v8.22.0 ([#4552](https://github.com/getsentry/sentry-dotnet/pull/4552))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8220)
   - [diff](https://github.com/getsentry/sentry-java/compare/8.21.1...8.22.0)
-
-## Version 6.0.0
-
-### BREAKING CHANGES
-
-- This release adds support for .NET 10 and drops support for net8.0-android, net8.0-ios, net8.0-maccatalyst and net8.0-windows10.0.19041.0 ([#4461](https://github.com/getsentry/sentry-dotnet/pull/4461))
-- Added support for v3 of the Android AssemblyStore format that is used in .NET 10 and dropped support for v1 that was used in .NET 8 ([#4583](https://github.com/getsentry/sentry-dotnet/pull/4583))
 
 ## 5.15.1
 
@@ -80,8 +89,8 @@
 ### Dependencies
 
 - Bump sentry-cocoa from 8.39.0 to 8.55.1 ([#4442](https://github.com/getsentry/sentry-dotnet/pull/4442), [#4483](https://github.com/getsentry/sentry-dotnet/pull/4483), [#4485](https://github.com/getsentry/sentry-dotnet/pull/4485))
-    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8551)
-    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.55.1)
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8551)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.55.1)
 - Bump Native SDK from v0.9.1 to v0.10.1 ([#4436](https://github.com/getsentry/sentry-dotnet/pull/4436), [#4492](https://github.com/getsentry/sentry-dotnet/pull/4492))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0101)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.9.1...0.10.1)
