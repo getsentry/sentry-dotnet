@@ -85,7 +85,7 @@ Describe 'MAUI app' -ForEach @(
             }
             finally
             {
-                xharness android adb -v -- reverse --remove tcp:$port
+                xharness android adb -v -- reverse --remove-all
             }
         }
 
