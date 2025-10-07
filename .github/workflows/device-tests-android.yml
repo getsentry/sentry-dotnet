@@ -81,6 +81,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          submodules: recursive
 
       - name: Download test app artifact
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
@@ -94,11 +96,11 @@ jobs:
       # Cached AVD setup per https://github.com/ReactiveCircus/android-emulator-runner/blob/main/README.md
 
       - name: Run Tests
-        id: first-run
+        id: first-test-run
         continue-on-error: true
         timeout-minutes: 40
         uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed # v2.34.0
-        with:
+        with: &android-emulator-test
           api-level: ${{ matrix.api-level }}
           target: ${{ env.ANDROID_EMULATOR_TARGET }}
           force-avd-creation: false
@@ -110,10 +112,33 @@ jobs:
           script: pwsh scripts/device-test.ps1 android -Run -Tfm ${{ matrix.tfm }}
 
       - name: Retry Tests (if previous failed to run)
-        if: steps.first-run.outcome == 'failure'
+        if: steps.first-test-run.outcome == 'failure'
         timeout-minutes: 40
         uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed # v2.34.0
+        with: *android-emulator-test
+
+      - name: Setup Environment
+        uses: ./.github/actions/environment
+
+      - name: Select Java 17
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
+          distribution: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && 'microsoft' || 'temurin' }}
+          java-version: '17'
+
+      - name: Checkout github-workflows
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          repository: getsentry/github-workflows
+          ref: a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+          path: modules/github-workflows
+
+      - name: Run Integration Tests
+        id: first-integration-test-run
+        continue-on-error: true
+        timeout-minutes: 40
+        uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed # v2.34.0
+        with: &android-emulator-integration-test
           api-level: ${{ matrix.api-level }}
           target: ${{ env.ANDROID_EMULATOR_TARGET }}
           force-avd-creation: false
@@ -122,11 +147,19 @@ jobs:
           disk-size: ${{ env.ANDROID_EMULATOR_DISK_SIZE }}
           emulator-options: ${{ env.ANDROID_EMULATOR_OPTIONS }}
           disable-animations: false
-          script: pwsh scripts/device-test.ps1 android -Run -Tfm ${{ matrix.tfm }}
+          script: pwsh integration-test/android.Tests.ps1
+
+      - name: Retry Integration Tests (if previous failed to run)
+        if: steps.first-integration-test-run.outcome == 'failure'
+        timeout-minutes: 40
+        uses: reactivecircus/android-emulator-runner@1dcd0090116d15e7c562f8db72807de5e036a4ed # v2.34.0
+        with: *android-emulator-integration-test
 
       - name: Upload results
         if: success() || failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: device-test-android-${{ matrix.api-level }}-${{ matrix.tfm }}-results
-          path: test_output
+          path: |
+            test_output
+            integration-test/mobile-app/test_output

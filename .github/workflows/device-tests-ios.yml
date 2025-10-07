@@ -35,17 +35,32 @@ jobs:
         run: pwsh ./scripts/device-test.ps1 ios -Build
 
       - name: Run Tests
-        id: first-run
+        id: first-test-run
         continue-on-error: true
         run: pwsh scripts/device-test.ps1 ios -Run
 
       - name: Retry Tests (if previous failed to run)
-        if: steps.first-run.outcome == 'failure'
+        if: steps.first-test-run.outcome == 'failure'
         run: pwsh scripts/device-test.ps1 ios -Run
+
+      - name: Run Integration Tests
+        id: first-integration-test-run
+        continue-on-error: true
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+        with:
+          path: integration-test/ios.Tests.ps1
+
+      - name: Retry Integration Tests (if previous failed to run)
+        if: steps.first-integration-test-run.outcome == 'failure'
+        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+        with:
+          path: integration-test/ios.Tests.ps1
 
       - name: Upload results
         if: success() || failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: device-test-ios-results
-          path: test_output
+          path: |
+            test_output
+            integration-test/mobile-app/test_output
