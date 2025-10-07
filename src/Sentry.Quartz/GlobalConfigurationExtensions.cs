@@ -1,6 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Quartz;
 
 namespace Sentry.Quartz;
@@ -14,17 +11,14 @@ public static class GlobalConfigurationExtensions
     /// Uses Sentry
     /// </summary>
     /// <param name="configuration"></param>
-    /// <param name="services"></param>
     /// <param name="configure"></param>
     /// <returns></returns>
-    public static IServiceCollectionQuartzConfigurator UseSentry(this IServiceCollectionQuartzConfigurator configuration, IServiceCollection services, Action<SentryCronJobOptions> configure)
+    public static IServiceCollectionQuartzConfigurator UseSentry(this IServiceCollectionQuartzConfigurator configuration, Action<SentryCronJobOptions>? configure = null)
     {
-        services.AddOptions<SentryCronJobOptions>().PostConfigure(configure);
-
         configuration.AddJobListener<SentryCronJobListener>(sp =>
         {
-            var options = sp.GetRequiredService<IOptions<SentryCronJobOptions>>();
-
+            var options = new SentryCronJobOptions();
+            configure?.Invoke(options);
             return new SentryCronJobListener(options);
         });
 
@@ -35,15 +29,12 @@ public static class GlobalConfigurationExtensions
     /// For testing
     /// </summary>
     /// <param name="configuration"></param>
-    /// <param name="services"></param>
     /// <param name="hub"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    internal static IServiceCollectionQuartzConfigurator UseSentry(this IServiceCollectionQuartzConfigurator configuration, IServiceCollection services, IHub? hub, IOptions<SentryCronJobOptions> options)
+    internal static IServiceCollectionQuartzConfigurator UseSentry(this IServiceCollectionQuartzConfigurator configuration, IHub? hub, SentryCronJobOptions options)
     {
-        services.AddTransient<SentryCronJobListener>();
         configuration.AddJobListener(new SentryCronJobListener(options, hub));
-
         return configuration;
     }
 }
