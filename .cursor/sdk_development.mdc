@@ -1,0 +1,218 @@
+# Sentry .NET SDK Development Guidelines
+
+This document contains important patterns, conventions, and guidelines learned during SDK development to ensure consistency and avoid common pitfalls.
+
+## Project Structure & Conventions
+
+### Project Organization
+- **Source packages**: `src/Sentry.Extensions.*`
+- **Tests**: `test/Sentry.Extensions.*.Tests` 
+- **Samples**: `samples/Sentry.Samples.ME.*` (ME = Microsoft.Extensions)
+- **Solution file**: `Sentry.sln` in root
+
+### Naming Conventions
+- Extension packages for packages targeting Microsoft.Extensions.Technology: `Sentry.Extensions.{Technology}`
+- Sample projects for packages targeting Microsoft.Extensions.Technology: `Sentry.Samples.ME.{Technology}.{ProjectType}` 
+- Test projects: `{SourceProject}.Tests`
+
+## Directory.Build.props Pattern
+
+### Central Package Management
+- Some packages are managed centrally in `Directory.Build.props` files
+- Check existing projects of the same type (src/test/samples) for reference
+
+### Hierarchical Structure
+```
+/Directory.Build.props           # Root level
+/src/Directory.Build.props       # Source projects
+/test/Directory.Build.props      # Test projects  
+/samples/Directory.Build.props   # Sample projects
+```
+
+### Key Properties Set Centrally
+- `TargetFrameworks` 
+- Common package references
+- Build configurations
+- Analyzer references
+
+## Sample Project Guidelines
+
+### DSN Configuration Pattern
+**Always use conditional compilation for DSN in samples:**
+
+```csharp
+builder.AddSentry(options =>
+{
+#if !SENTRY_DSN_DEFINED_IN_ENV
+    // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+    // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+    options.Dsn = SamplesShared.Dsn;
+#endif
+    
+    // Other configuration...
+});
+```
+
+### Required Sample Files
+- **Don't exclude** `SamplesShared.cs` or `EnvironmentVariables.g.cs`
+- These provide proper DSN handling for CI/CD environments
+- The build system automatically defines `SENTRY_DSN_DEFINED_IN_ENV` when environment variable is set
+
+### Building and Running Samples
+```bash
+# Build (requires SENTRY_DSN environment variable)
+env SENTRY_DSN=your_dsn dotnet build samples/Project/Project.csproj
+
+# Run (requires SENTRY_DSN environment variable)  
+env SENTRY_DSN=your_dsn dotnet run --project samples/Project/Project.csproj
+```
+
+### Sample Project Structure
+Base sample projects on existing ones like `Sentry.Samples.ME.Logging`:
+- Target the same TFM (such as `net9.0`) as other projects, for consistency
+- Follow the same logging and configuration patterns
+
+## Extension Package Guidelines
+
+### Target Frameworks
+- Use `net9.0;net8.0` for new extension packages (or whatever is being used on other projects)
+- Follow existing patterns in similar extensions
+
+### Package References
+- Check `Directory.Build.props` for centrally managed versions
+- Avoid duplicating dependencies already brought in transitively
+- Use exact versions for preview packages (e.g., `Microsoft.Extensions.AI`)
+
+### Internal Visibility
+```xml
+<ItemGroup>
+  <InternalsVisibleTo Include="YourProject.Tests" PublicKey="$(SentryPublicKey)" />
+</ItemGroup>
+```
+
+### Hub Access Pattern
+**Always use automatic hub detection:**
+```csharp
+// ✅ Good - Automatic hub detection  
+public static IChatClient WithSentry(this IChatClient client, string? agentName = null)
+{
+    return new SentryChatClient(client, HubAdapter.Instance, agentName);
+}
+
+// ✅ Good - DI fallback pattern
+public static ChatClientBuilder UseSentry(this ChatClientBuilder builder, string? agentName = null) 
+{
+    return builder.Use((serviceProvider, inner) =>
+    {
+        var hub = serviceProvider.GetService<IHub>() ?? HubAdapter.Instance;
+        return new SentryChatClient(inner, hub, agentName);
+    });
+}
+
+// ❌ Avoid - Requiring manual hub passing, unless it's for testing so it can be injected. Then use a `internal` overload ctor.
+public static IChatClient WithSentry(this IChatClient client, IHub hub, string? agentName = null)
+```
+
+## Span and Transaction Guidelines
+
+### Exception Handling in Spans
+**Always pass exception reference to Finish():**
+```csharp
+try
+{
+    var result = await operation();
+    transaction.Finish(SpanStatus.Ok);
+    return result;
+}
+catch (Exception ex)
+{
+    transaction.Finish(ex);  // ✅ Pass exception reference
+    _hub.CaptureException(ex);
+    throw;
+}
+```
+
+
+## Testing Guidelines
+
+### Test Project Setup
+- Target same frameworks as source project
+- Reference source project, core Sentry project, and `Sentry.Testing`
+- Stay consist with other test projects, for example use `NSubstitute` for mocking
+
+### Test Structure
+```csharp
+[Fact]
+public async Task Operation_CallsInnerClient()
+{
+    // Arrange
+    var inner = Substitute.For<IInterface>();
+    var hub = Substitute.For<IHub>();
+    var client = new YourClient(inner, hub);
+    
+    // Act & Assert
+    await client.Method();
+    inner.Received(1).Method();
+}
+```
+
+### Async Enumerable Testing
+```csharp
+private static async IAsyncEnumerable<T> CreateTestEnumerable()
+{
+    yield return item1;
+    await Task.Yield(); // Make it actually async
+    yield return item2;
+}
+```
+
+## Build and Test Commands
+
+### Standard Build Commands
+```bash
+# Build entire solution
+dotnet build Sentry.sln
+
+# Build specific project
+dotnet build src/ProjectName/ProjectName.csproj
+
+# Run tests
+dotnet test test/ProjectName.Tests/ProjectName.Tests.csproj
+
+# Build samples (with environment variable)
+env SENTRY_DSN=placeholder dotnet build samples/SampleProject/SampleProject.csproj
+```
+
+### Target Framework Testing
+- Always test on both target frameworks (net8.0, net9.0)
+- CI builds will validate against all supported frameworks
+
+## Common Pitfalls to Avoid
+
+1. **Don't exclude shared sample files** - They provide proper DSN handling
+3. **Don't require manual hub passing** - Use automatic detection
+4. **Don't use `SpanStatus.InternalError`** - Pass exception reference
+5. **Don't forget `[EnumeratorCancellation]`** - For async enumerable parameters
+6. **Don't use `yield return` in try-catch** - Create wrapper classes instead
+
+## File Organization
+
+### Extension Structure
+```
+src/Sentry.Extensions.Technology/
+├── Sentry.Extensions.Technology.csproj
+├── Extensions/
+│   └── TechnologyExtensions.cs
+└── Internal/
+    ├── SentryWrapper.cs
+    └── SentryEnumerable.cs (if needed)
+```
+
+### Test Structure  
+```
+test/Sentry.Extensions.Technology.Tests/
+├── Sentry.Extensions.Technology.Tests.csproj
+└── WrapperTests.cs
+```
+
+This document should be updated as new patterns emerge and conventions evolve.
