@@ -6,18 +6,16 @@ using Sentry.Extensibility;
 
 namespace Sentry.Quartz;
 
-internal sealed partial class SentryCronJobListener : JobListenerSupport
+internal sealed class SentryCronJobListener : JobListenerSupport
 {
-    private readonly ILogger<SentryCronJobListener> _logger;
     private readonly SentryCronJobOptions _options;
     private readonly ConcurrentDictionary<string, SentryId> _fireInstanceId = new();
     private readonly ConcurrentDictionary<Type, SentryCronInformation> _sentryCronInformation = [];
     private readonly IHub _hub;
 
-    public SentryCronJobListener(ILogger<SentryCronJobListener> logger, IOptions<SentryCronJobOptions> options, IHub? hub = null)
+    public SentryCronJobListener(IOptions<SentryCronJobOptions> options, IHub? hub = null)
     {
         _hub = hub ?? HubAdapter.Instance;
-        _logger = logger;
         _options = options.Value;
     }
 
@@ -86,7 +84,7 @@ internal sealed partial class SentryCronJobListener : JobListenerSupport
                 if (!information.WarningShownForSecondsParameterIssue)
                 {
                     information.WarningShownForSecondsParameterIssue = true;
-                    LogUpdateCronMonitorGranularityWarning(monitorSlug, cron);
+                    GetLogger()?.LogWarning("Sentry Cron Monitor supports a minimum granularity of minutes. But for job {0} \"{1}\" was provided. The first field (seconds) will be ignored", monitorSlug, cron);
                 }
             }
             cronParts = cronParts[1..6];
@@ -99,13 +97,14 @@ internal sealed partial class SentryCronJobListener : JobListenerSupport
         }
         catch (ArgumentException ex)
         {
-            LogUpdateCronMonitorError(ex, monitorSlug, cron);
+            GetLogger()?.LogError(ex, "Sentry Cron Monitor update failed for job {0}. Cron expression \"{1}\" is invalid", monitorSlug, cron);
         }
     }
 
-    [LoggerMessage(LogLevel.Warning, """Sentry Cron Monitor supports a minimum granularity of minutes. But for job {MonitorSlug} "{CronExpression}" was provided. The first field (seconds) will be ignored""")]
-    private partial void LogUpdateCronMonitorGranularityWarning(string monitorSlug, string cronExpression);
-
-    [LoggerMessage(LogLevel.Error, """Sentry Cron Monitor update failed for job {MonitorSlug}. Cron expression "{CronExpression}" is invalid""")]
-    private partial void LogUpdateCronMonitorError(Exception ex, string monitorSlug, string cronExpression);
+    private IDiagnosticLogger? GetLogger()
+    {
+#pragma warning disable CS0618 // Type or member is obsolete
+        return _hub.GetInternalSentryOptions()?.DiagnosticLogger;
+#pragma warning restore CS0618 // Type or member is obsolete
+    }
 }
