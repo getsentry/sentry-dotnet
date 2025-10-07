@@ -12,64 +12,82 @@ if (args.Length != 1)
 var code = File.ReadAllText(args[0]);
 var tree = CSharpSyntaxTree.ParseText(code);
 var root = tree.GetCompilationUnitRoot();
-
-root = root?.RemoveNodes(
-    root.DescendantNodes()
-        .OfType<EnumDeclarationSyntax>()
-        .Where(c => !Whitelist.Enums.Contains(c.Identifier.Text)),
-    SyntaxRemoveOptions.KeepNoTrivia
-);
-
-root = root?.RemoveNodes(
+var filtered = root.RemoveNodes(
     root.DescendantNodes()
         .OfType<InterfaceDeclarationSyntax>()
         .Where(c => !Whitelist.Interfaces.Contains(c.Identifier.Text)),
     SyntaxRemoveOptions.KeepNoTrivia
 );
-
-File.WriteAllText(args[0], root?.ToFullString());
+File.WriteAllText(args[0], filtered?.ToFullString());
 
 internal static class Whitelist
 {
-    public static readonly HashSet<string> Enums = new()
-    {
-        "SentryFeedbackSource",
-        "SentryLevel",
-        "SentryStructuredLogLevel",
-        "SentryProfileLifecycle",
-        "SentryReplayQuality",
-        "SentryReplayType",
-        "SentryRRWebEventType",
-        "SentrySessionStatus",
-        "SentryTransactionNameSource",
-    };
-
     public static readonly HashSet<string> Interfaces = new()
     {
-        "SentryAppState",
+        "Constants",
+        "PrivateSentrySDKOnly",
+        "SentryAttachment",
+        "SentryBaggage",
+        "SentryBreadcrumb",
+        "SentryClient",
         "SentryClientReport",
         "SentryCurrentDateProvider",
+        "SentryDebugImageProvider",
+        "SentryDebugMeta",
         "SentryDiscardedEvent",
+        "SentryDsn",
         "SentryEnvelope",
         "SentryEnvelopeHeader",
         "SentryEnvelopeItem",
+        "SentryEnvelopeItemHeader",
+        "SentryEvent",
+        "SentryException",
         "SentryFeedback",
+        "SentryFeedbackAPI",
         "SentryFormElementOutlineStyle",
+        "SentryFrame",
+        "SentryGeo",
+        "SentryHttpStatusCodeRange",
+        "SentryHub",
         "SentryId",
+        "SentryIntegrationProtocol",
         "SentryLog",
         "SentryLogger",
+        "SentryMeasurementUnit",
+        "SentryMeasurementUnitDuration",
+        "SentryMeasurementUnitFraction",
+        "SentryMeasurementUnitInformation",
+        "SentryMechanism",
+        "SentryMechanismMeta",
+        "SentryMessage",
+        "SentryNSError",
+        "SentryOptions",
         "SentryProfileOptions",
         "SentryRedactOptions",
+        "SentryReplayApi",
         "SentryReplayBreadcrumbConverter",
         "SentryReplayEvent",
         "SentryReplayOptions",
         "SentryReplayRecording",
+        "SentryRequest",
         "SentryRRWebEvent",
+        "SentrySamplingContext",
+        "SentryScope",
+        "SentryScreenFrames",
         "SentrySDK",
         "SentrySdkInfo",
         "SentrySDKSettings",
-        "SentrySerializationSwift",
+        "SentrySerializable",
         "SentrySession",
+        "SentrySpan",
+        "SentrySpanContext",
+        "SentrySpanId",
+        "SentryStacktrace",
+        "SentryThread",
+        "SentryTraceContext",
+        "SentryTraceHeader",
+        "SentryTransactionContext",
+        "SentryUser",
         "SentryUserFeedback",
         "SentryUserFeedbackConfiguration",
         "SentryUserFeedbackFormConfiguration",

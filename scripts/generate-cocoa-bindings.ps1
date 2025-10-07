@@ -159,23 +159,14 @@ else
     Write-Host "File not found: $swiftHeaderFile"
 }
 
-# Generate Obj-C bindings
-Write-Output 'Generating Obj-C bindings with Objective Sharpie.'
-sharpie bind -sdk $iPhoneSdkVersion `
-    -scope "$CocoaSdkPath" `
-    "$HeadersPath/Sentry.h" `
-    "$PrivateHeadersPath/PrivateSentrySDKOnly.h" `
-    -o $BindingsPath `
-    -c -Wno-objc-property-no-attribute
-
-# Generate Swift bindings
-Write-Output 'Generating Swift bindings with Objective Sharpie.'
+# Generate bindings
+Write-Output 'Generating bindings with Objective Sharpie.'
 sharpie bind -sdk $iPhoneSdkVersion `
     -scope "$CocoaSdkPath" `
     "$HeadersPath/Sentry.h" `
     "$HeadersPath/Sentry-Swift.h" `
+    "$PrivateHeadersPath/PrivateSentrySDKOnly.h" `
     -o $BindingsPath `
-    -p Swift `
     -c -Wno-objc-property-no-attribute
 
 # Ensure backup path exists
@@ -197,189 +188,167 @@ $Header = @"
 ################################################################################
 # Patch StructsAndEnums.cs
 ################################################################################
-function Patch-StructsAndEnums([string] $File)
-{
-    Write-Output "Patching $BindingsPath/$File"
-    Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
-    $Text = Get-Content "$BindingsPath/$File" -Raw
+$File = 'StructsAndEnums.cs'
+Write-Output "Patching $BindingsPath/$File"
+Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
+$Text = Get-Content "$BindingsPath/$File" -Raw
 
-    # Tabs to spaces
-    $Text = $Text -replace '\t', '    '
+# Tabs to spaces
+$Text = $Text -replace '\t', '    '
 
-    # Trim extra newline at EOF
-    $Text = $Text -replace '\n$', ''
+# Trim extra newline at EOF
+$Text = $Text -replace '\n$', ''
 
-    # Insert namespace
-    $Text = $Text -replace 'using .+;\n\n', "$&namespace Sentry.CocoaSdk;`n`n"
+# Insert namespace
+$Text = $Text -replace 'using .+;\n\n', "$&namespace Sentry.CocoaSdk;`n`n"
 
-    # Public to internal
-    $Text = $Text -replace '\bpublic\b', 'internal'
+# Public to internal
+$Text = $Text -replace '\bpublic\b', 'internal'
 
-    # Remove static CFunctions class
-    $Text = $Text -replace '(?ms)\nstatic class CFunctions.*?}\n', ''
+# Remove static CFunctions class
+$Text = $Text -replace '(?ms)\nstatic class CFunctions.*?}\n', ''
 
-    # Add header and output file
-    $Text = "$Header`n`n$Text"
-    $Text | Out-File "$BindingsPath/$File"
-}
-
-Patch-StructsAndEnums 'StructsAndEnums.cs'
-Patch-StructsAndEnums 'SwiftStructsAndEnums.cs'
+# Add header and output file
+$Text = "$Header`n`n$Text"
+$Text | Out-File "$BindingsPath/$File"
 
 ################################################################################
 # Patch ApiDefinitions.cs
 ################################################################################
-function Patch-ApiDefinitions([string] $File, [switch] $RemoveDelegates = $false)
+$File = 'ApiDefinitions.cs'
+Write-Output "Patching $BindingsPath/$File"
+Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
+$Text = Get-Content "$BindingsPath/$File" -Raw
+
+# Tabs to spaces
+$Text = $Text -replace '\t', '    '
+
+# Trim extra newline at EOF
+$Text = $Text -replace '\n$', ''
+
+# Insert namespace
+$Text = $Text -replace 'using .+;\n\n', "$&namespace Sentry.CocoaSdk;`n`n"
+
+# Set Internal attributes on interfaces and delegates
+$Text = $Text -replace '(?m)^(partial interface|interface|delegate)\b', "[Internal]`n$&"
+
+# Fix ISentrySerializable usage
+$Text = $Text -replace '\bISentrySerializable\b', 'SentrySerializable'
+
+# Remove INSCopying due to https://github.com/xamarin/xamarin-macios/issues/17130
+$Text = $Text -replace ': INSCopying,', ':' -replace '\s?[:,] INSCopying', ''
+
+# Remove iOS attributes like [iOS (13, 0)]
+$Text = $Text -replace '\[iOS \(13,\s?0\)\]\n?\s*', ''
+
+# Remove Unavailable attributes like [Unavailable (PlatformName.iOSAppExtension)]
+$Text = $Text -replace '\[Unavailable \(PlatformName\.\w+\)\]\n?\s*', ''
+
+# Fix delegate argument names
+$Text = $Text -replace '(NSError) arg\d', '$1 error'
+$Text = $Text -replace '(NSHttpUrlResponse) arg\d', '$1 response'
+$Text = $Text -replace '(SentryEvent) arg\d', '$1 @event'
+$Text = $Text -replace '(SentrySamplingContext) arg\d', '$1 samplingContext'
+$Text = $Text -replace '(SentryBreadcrumb) arg\d', '$1 breadcrumb'
+$Text = $Text -replace '(SentrySpan) arg\d', '$1 span'
+$Text = $Text -replace '(SentryAppStartMeasurement) arg\d', '$1 appStartMeasurement'
+$Text = $Text -replace '(SentryLog) arg\d', '$1 log'
+
+# Adjust nullable return delegates (though broken until this is fixed: https://github.com/xamarin/xamarin-macios/issues/17109)
+$Text = $Text -replace 'delegate \w+ Sentry(BeforeBreadcrumb|BeforeSendEvent|TracesSampler)Callback', "[return: NullAllowed]`n$&"
+
+# Remove empty SentryRRWebEvent protocol
+$Text = $Text -replace '(?ms)\[Protocol\]\s*\[Internal\]\s*interface\s+SentryRRWebEvent\s*:\s*SentrySerializable[^\{]*\{[^\}]*\}', ''
+
+# Adjust protocols (some are models)
+$Text = $Text -replace '(?ms)(@protocol.+?)/\*.+?\*/', '$1'
+$Text = $Text -replace '(?ms)@protocol (SentrySerializable|SentrySpan).+?\[Protocol\]', "`$&`n[Model]"
+$Text = $Text -replace '(?ms)@protocol (SentryRedactOptions|SentryCurrentDateProvider).+?\[Protocol \(Name = \"\w+\"\)\]', "`$&`n[Model]"
+
+# Adjust base types
+$Text = $Text -replace 'interface (SentrySpan|SentryRedactOptions|SentryCurrentDateProvider)\b', "[BaseType (typeof(NSObject))]`n`$&"
+
+# Fix string constants
+$Text = $Text -replace '(?m)(.*\n){2}^\s{4}NSString k.+?\n\n?', ''
+$Text = $Text -replace '(?m)(.*\n){4}^partial interface Constants\n{\n}\n', ''
+$Text = $Text -replace '\[Verify \(ConstantsInterfaceAssociation\)\]\n', ''
+
+# Remove SentryVersionNumber
+$Text = $Text -replace '.*SentryVersionNumber.*\n?', ''
+
+# Remove SentryVersionString
+$Text = $Text -replace '.*SentryVersionString.*\n?', ''
+
+# Remove duplicate attributes
+$s = 'partial interface Constants'
+$t = $Text -split $s, 2
+$t[1] = $t[1] -replace "\[Static\]\n\[Internal\]\n$s", $s
+$Text = $t -join $s
+
+# Remove empty Constants block
+$Text = $Text -replace '\[Static\]\s*\[Internal\]\s*partial\s+interface\s+Constants\s\{[\s\n]*\}\n\n', ''
+
+# Update MethodToProperty translations
+$Text = $Text -replace '(Export \("get\w+"\)\]\n)\s*\[Verify \(MethodToProperty\)\]\n(.+ \{ get; \})', '$1$2'
+$Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+ (?:Hash|Value|DefaultIntegrations|AppStartMeasurementWithSpans|BaggageHttpHeader) \{ get; \})', '$1'
+$Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+) \{ get; \}', '$1();'
+
+# Allow weakly typed NSArray
+# We have some that accept either NSString or NSRegularExpression, which have no common type so they use NSObject
+$Text = $Text -replace '\s*\[Verify \(StronglyTypedNSArray\)\]\n', ''
+
+# Fix broken multi-line comments
+$Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\()\n\s*', '$1'
+$Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)"\s*\r?\n\s*"', '$1 '
+
+# Remove default IsEqual/CopyWithZone/Description implementations (already implemented by NSObject)
+$Text = $Text -replace '(?ms)\n?^ *// [^\n]*isEqual:.*?$.*?;\n', ''
+$Text = $Text -replace '(?ms)\n?^ *// [^\n]*copyWithZone:.*?$.*?;\n', ''
+
+# Replace obsolete platform availability attributes
+$Text = $Text -replace '([\[,] )MacCatalyst \(', '$1Introduced (PlatformName.MacCatalyst, '
+$Text = $Text -replace '([\[,] )Mac \(', '$1Introduced (PlatformName.MacOSX, '
+$Text = $Text -replace '([\[,] )iOS \(', '$1Introduced (PlatformName.iOS, '
+
+# Make interface partial if we need to access private APIs.  Other parts will be defined in PrivateApiDefinitions.cs
+$Text = $Text -replace '(?m)^interface SentryScope', 'partial $&'
+
+$Text = $Text -replace '.*typedef.*SentryOnAppStartMeasurementAvailable.*?[\s\S]*?\n\n', ''
+$Text = $Text -replace 'NSDictionary<NSString, SentryStructuredLogAttribute>', 'NSDictionary<NSString, NSObject>'
+
+# Comment out interfaces
+$Text = $Text -replace 'interface (\w+) : (ISentryRedactOptions|ISentryRRWebEvent)', 'interface $1 //: $2'
+
+$propertiesToRemove = @(
+    'SentryAppStartMeasurement',
+    'SentryOnAppStartMeasurementAvailable',
+    'SentryMetricsAPI',
+    'SentryExperimentalOptions',
+    'description',
+    'enableMetricKitRawPayload'
+)
+
+foreach ($property in $propertiesToRemove)
 {
-    Write-Output "Patching $BindingsPath/$File"
-    Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
-    $Text = Get-Content "$BindingsPath/$File" -Raw
-
-    # Tabs to spaces
-    $Text = $Text -replace '\t', '    '
-
-    # Trim extra newline at EOF
-    $Text = $Text -replace '\n$', ''
-
-    # Insert namespace
-    $Text = $Text -replace 'using .+;\n\n', "$&namespace Sentry.CocoaSdk;`n`n"
-
-    # Fix broken multi-line comments
-    $Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\()\n\s*', '$1'
-    $Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)"\s*\r?\n\s*"', '$1 '
-
-    if ($RemoveDelegates)
-    {
-        # Remove delegate definitions
-        $Text = $Text -replace '(?ms)// typedef[^\n]*\n(?:\[Internal\]\n)?delegate[^\{;]+;\n\n', ''
-    }
-
-    # Set Internal attributes on interfaces and delegates
-    $Text = $Text -replace '(?m)^(partial interface|interface|delegate)\b', "[Internal]`n$&"
-
-    # Fix ISentrySerializable usage
-    $Text = $Text -replace '\bISentrySerializable\b', 'SentrySerializable'
-
-    # Remove INSCopying due to https://github.com/xamarin/xamarin-macios/issues/17130
-    $Text = $Text -replace ': INSCopying,', ':' -replace '\s?[:,] INSCopying', ''
-
-    # Remove iOS attributes like [iOS (13, 0)]
-    $Text = $Text -replace '\[iOS \(13,\s?0\)\]\n?\s*', ''
-
-    # Remove Unavailable attributes like [Unavailable (PlatformName.iOSAppExtension)]
-    $Text = $Text -replace '\[Unavailable \(PlatformName\.\w+\)\]\n?\s*', ''
-
-    # Fix delegate argument names
-    $Text = $Text -replace '(NSError) arg\d', '$1 error'
-    $Text = $Text -replace '(NSHttpUrlResponse) arg\d', '$1 response'
-    $Text = $Text -replace '(SentryEvent) arg\d', '$1 @event'
-    $Text = $Text -replace '(SentrySamplingContext) arg\d', '$1 samplingContext'
-    $Text = $Text -replace '(SentryBreadcrumb) arg\d', '$1 breadcrumb'
-    $Text = $Text -replace '(SentrySpan) arg\d', '$1 span'
-    $Text = $Text -replace '(SentryAppStartMeasurement) arg\d', '$1 appStartMeasurement'
-    $Text = $Text -replace '(SentryLog) arg\d', '$1 log'
-
-    # Adjust nullable return delegates (though broken until this is fixed: https://github.com/xamarin/xamarin-macios/issues/17109)
-    $Text = $Text -replace 'delegate \w+ Sentry(BeforeBreadcrumb|BeforeSendEvent|TracesSampler)Callback', "[return: NullAllowed]`n$&"
-
-    # Remove empty SentryRRWebEvent protocol
-    $Text = $Text -replace '(?ms)\[Protocol\]\s*\[Internal\]\s*interface\s+SentryRRWebEvent\s*:\s*SentrySerializable[^\{]*\{[^\}]*\}', ''
-
-    # Adjust protocols (some are models)
-    $Text = $Text -replace '(?ms)(@protocol.+?)/\*.+?\*/', '$1'
-    $Text = $Text -replace '(?ms)@protocol (SentrySerializable|SentrySpan).+?\[Protocol\]', "`$&`n[Model]"
-    $Text = $Text -replace '(?ms)@protocol (SentryRedactOptions|SentryCurrentDateProvider).+?\[Protocol \(Name = \"\w+\"\)\]', "`$&`n[Model]"
-
-    # Adjust base types
-    $Text = $Text -replace 'interface (SentrySpan|SentryRedactOptions|SentryCurrentDateProvider)\b', "[BaseType (typeof(NSObject))]`n`$&"
-
-    # Fix string constants
-    $Text = $Text -replace '(?m)(.*\n){2}^\s{4}NSString k.+?\n\n?', ''
-    $Text = $Text -replace '(?m)(.*\n){4}^partial interface Constants\n{\n}\n', ''
-    $Text = $Text -replace '\[Verify \(ConstantsInterfaceAssociation\)\]\n', ''
-
-    # Remove SentryVersionNumber
-    $Text = $Text -replace '.*SentryVersionNumber.*\n?', ''
-
-    # Remove SentryVersionString
-    $Text = $Text -replace '.*SentryVersionString.*\n?', ''
-
-    # Remove duplicate attributes
-    $s = 'partial interface Constants'
-    $t = $Text -split $s, 2
-    $t[1] = $t[1] -replace "\[Static\]\n\[Internal\]\n$s", $s
-    $Text = $t -join $s
-
-    # Remove empty Constants block
-    $Text = $Text -replace '\[Static\]\s*\[Internal\]\s*partial\s+interface\s+Constants\s\{[\s\n]*\}\n\n', ''
-
-    # Update MethodToProperty translations
-    $Text = $Text -replace '(Export \("get\w+"\)\]\n)\s*\[Verify \(MethodToProperty\)\]\n(.+ \{ get; \})', '$1$2'
-    $Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+ (?:Hash|Value|DefaultIntegrations|AppStartMeasurementWithSpans|BaggageHttpHeader) \{ get; \})', '$1'
-    $Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+) \{ get; \}', '$1();'
-
-    # Allow weakly typed NSArray
-    # We have some that accept either NSString or NSRegularExpression, which have no common type so they use NSObject
-    $Text = $Text -replace '\s*\[Verify \(StronglyTypedNSArray\)\]\n', ''
-
-    # Remove default IsEqual/CopyWithZone/Description implementations (already implemented by NSObject)
-    $Text = $Text -replace '(?ms)\n?^ *// [^\n]*isEqual:.*?$.*?;\n', ''
-    $Text = $Text -replace '(?ms)\n?^ *// [^\n]*copyWithZone:.*?$.*?;\n', ''
-
-    # Replace obsolete platform availability attributes
-    $Text = $Text -replace '([\[,] )MacCatalyst \(', '$1Introduced (PlatformName.MacCatalyst, '
-    $Text = $Text -replace '([\[,] )Mac \(', '$1Introduced (PlatformName.MacOSX, '
-    $Text = $Text -replace '([\[,] )iOS \(', '$1Introduced (PlatformName.iOS, '
-
-    # Make interface partial if we need to access private APIs.  Other parts will be defined in PrivateApiDefinitions.cs
-    $Text = $Text -replace '(?m)^interface SentryScope', 'partial $&'
-
-    $Text = $Text -replace '.*typedef.*SentryOnAppStartMeasurementAvailable.*?[\s\S]*?\n\n', ''
-    $Text = $Text -replace 'NSDictionary<NSString, SentryStructuredLogAttribute>', 'NSDictionary<NSString, NSObject>'
-
-    # Comment out interfaces
-    $Text = $Text -replace 'interface (\w+) : (ISentryRedactOptions|ISentryRRWebEvent)', 'interface $1 //: $2'
-
-    $propertiesToRemove = @(
-        'SentryAppStartMeasurement',
-        'SentryOnAppStartMeasurementAvailable',
-        'SentryMetricsAPI',
-        'SentryExperimentalOptions',
-        'description',
-        'enableMetricKitRawPayload'
-    )
-
-    foreach ($property in $propertiesToRemove)
-    {
-        $Text = $Text -replace "\n.*property.*$property.*?[\s\S]*?\}\n", ''
-    }
-
-
-    # Add header and output file
-    $Text = "$Header`n`n$Text"
-    $Text | Out-File "$BindingsPath/$File"
+    $Text = $Text -replace "\n.*property.*$property.*?[\s\S]*?\}\n", ''
 }
 
-Patch-ApiDefinitions 'ApiDefinitions.cs'
-Patch-ApiDefinitions 'SwiftApiDefinitions.cs' -RemoveDelegates
+
+# Add header and output file
+$Text = "$Header`n`n$Text"
+$Text | Out-File "$BindingsPath/$File"
 
 ################################################################################
-# Post-process SwiftStructsAndEnums.cs and SwiftApiDefinitions.cs
+# Post-process ApiDefinitions.cs
 ################################################################################
 
-function PostProcess-SwiftBindings([string] $File)
+try
 {
-    try
-    {
-        Write-Output "Post-processing $BindingsPath/$File"
-        Push-Location $PSScriptRoot
-        & dotnet run "post-process-swift-bindings.cs" "$BindingsPath/$File" | ForEach-Object { Write-Host $_ }
-    }
-    finally
-    {
-        Pop-Location
-    }
+    Write-Output "Post-processing $BindingsPath/$File"
+    Push-Location $PSScriptRoot
+    & dotnet run "post-process-cocoa-bindings.cs" "$BindingsPath/$File" | ForEach-Object { Write-Host $_ }
 }
-
-PostProcess-SwiftBindings 'SwiftStructsAndEnums.cs'
-PostProcess-SwiftBindings 'SwiftApiDefinitions.cs'
+finally
+{
+    Pop-Location
+}
