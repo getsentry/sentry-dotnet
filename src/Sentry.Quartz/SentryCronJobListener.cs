@@ -26,9 +26,9 @@ internal sealed partial class SentryCronJobListener : JobListenerSupport
     public override Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken = default)
     {
         var jobType = context.JobInstance.GetType();
-        _sentryCronInformation.TryAdd(jobType, new SentryCronInformation(context.JobInstance));
+        var info = _sentryCronInformation.GetOrAdd(jobType, _ => new SentryCronInformation(context.JobInstance));
 
-        if (_sentryCronInformation.TryGetValue(jobType, out var info) && info.ShouldWriteStatusToSentry)
+        if (info.ShouldWriteStatusToSentry)
         {
             var sentryId = _hub.CaptureCheckIn(info.MonitorSlug, CheckInStatus.InProgress, configureMonitorOptions: options =>
             {
