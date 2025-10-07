@@ -21,13 +21,11 @@ public static class GlobalConfigurationExtensions
     {
         services.AddOptions<SentryCronJobOptions>().PostConfigure(configure);
 
-        services.AddTransient<SentryCronJobListener>();
         configuration.AddJobListener<SentryCronJobListener>(sp =>
         {
-            var logger = sp.GetRequiredService<ILogger<SentryCronJobListener>>();
             var options = sp.GetRequiredService<IOptions<SentryCronJobOptions>>();
 
-            return new SentryCronJobListener(logger, options);
+            return new SentryCronJobListener(options);
         });
 
         return configuration;
@@ -39,13 +37,12 @@ public static class GlobalConfigurationExtensions
     /// <param name="configuration"></param>
     /// <param name="services"></param>
     /// <param name="hub"></param>
-    /// <param name="logger"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    internal static IServiceCollectionQuartzConfigurator UseSentry(this IServiceCollectionQuartzConfigurator configuration, IServiceCollection services, IHub? hub, ILogger<SentryCronJobListener> logger, IOptions<SentryCronJobOptions> options)
+    internal static IServiceCollectionQuartzConfigurator UseSentry(this IServiceCollectionQuartzConfigurator configuration, IServiceCollection services, IHub? hub, IOptions<SentryCronJobOptions> options)
     {
         services.AddTransient<SentryCronJobListener>();
-        configuration.AddJobListener(new SentryCronJobListener(logger, options, hub));
+        configuration.AddJobListener(new SentryCronJobListener(options, hub));
 
         return configuration;
     }
