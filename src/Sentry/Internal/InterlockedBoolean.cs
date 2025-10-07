@@ -8,7 +8,7 @@ using TBool = int;
 
 internal struct InterlockedBoolean
 {
-    private volatile TBool _value;
+    internal volatile TBool _value;
 
 #if NET9_0_OR_GREATER
     private const TBool True = true;

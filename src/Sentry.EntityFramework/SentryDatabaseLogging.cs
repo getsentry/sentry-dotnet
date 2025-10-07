@@ -1,5 +1,7 @@
 namespace Sentry.EntityFramework;
 
+using Sentry.Internal;
+
 /// <summary>
 /// Sentry Database Logger
 /// </summary>
