@@ -59,29 +59,34 @@ Describe 'MAUI app' -ForEach @(
                 [string] $TestArg = 'None'
             )
 
-            # Setup port forwarding for accessing sentry-server at 127.0.0.1:8000 from the emulator
-            $port = $Dsn.Split(':')[2].Split('/')[0]
-            xharness android adb -v -- reverse tcp:$port tcp:$port
-
-            Write-Host "::group::Run Android app (TestArg=$TestArg)"
-            xharness android adb -v `
-                -- shell am start -S -n io.sentry.dotnet.maui.device.integrationtestapp/.MainActivity `
-                -e SENTRY_TEST_ARG $TestArg
-            | ForEach-Object { Write-Host $_ }
-            Write-Host '::endgroup::'
-            $LASTEXITCODE | Should -Be 0
-
-            do
+            try
             {
-                Write-Host "Waiting for app..."
-                Start-Sleep -Seconds 1
+                # Setup port forwarding for accessing sentry-server at 127.0.0.1:8000 from the emulator
+                $port = $Dsn.Split(':')[2].Split('/')[0]
+                xharness android adb -v -- reverse tcp:$port tcp:$port
 
-                $procid = (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
-                $activity = (& xharness android adb -- shell dumpsys activity activities) -match "io\.sentry\.dotnet\.maui\.device\.integrationtestapp"
+                Write-Host "::group::Run Android app (TestArg=$TestArg)"
+                xharness android adb -v `
+                    -- shell am start -S -n io.sentry.dotnet.maui.device.integrationtestapp/.MainActivity `
+                    -e SENTRY_TEST_ARG $TestArg
+                | ForEach-Object { Write-Host $_ }
+                Write-Host '::endgroup::'
+                $LASTEXITCODE | Should -Be 0
 
-            } while ($procid -and $activity)
+                do
+                {
+                    Write-Host "Waiting for app..."
+                    Start-Sleep -Seconds 1
 
-            xharness android adb -v -- reverse --remove tcp:$port
+                    $procid = (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
+                    $activity = (& xharness android adb -- shell dumpsys activity activities) -match "io\.sentry\.dotnet\.maui\.device\.integrationtestapp"
+
+                } while ($procid -and $activity)
+            }
+            finally
+            {
+                xharness android adb -v -- reverse --remove tcp:$port
+            }
         }
 
         function UninstallAndroidApp
