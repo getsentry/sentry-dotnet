@@ -13,10 +13,10 @@ internal sealed class SentryCronJobListener : JobListenerSupport
     private readonly ConcurrentDictionary<Type, SentryCronInformation> _sentryCronInformation = [];
     private readonly IHub _hub;
 
-    public SentryCronJobListener(IOptions<SentryCronJobOptions> options, IHub? hub = null)
+    public SentryCronJobListener(SentryCronJobOptions options, IHub? hub = null)
     {
         _hub = hub ?? HubAdapter.Instance;
-        _options = options.Value;
+        _options = options;
     }
 
     public override string Name { get; } = "Sentry Job Listener";
