@@ -115,7 +115,7 @@ public class InterlockedBooleanTests
         var sut = new InterlockedBoolean(initialState);
 
         // Act
-        var result = sut.CompareExchange(comparand, newValue);
+        var result = sut.CompareExchange(newValue, comparand);
 
         // Assert
         result.Should().Be(initialState);
