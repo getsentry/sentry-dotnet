@@ -11,7 +11,7 @@ public class BreadcrumbOverheadBenchmarks
     {
         { Message, Type }
     };
-    private const BreadcrumbLevel Level = BreadcrumbLevel.Critical;
+    private const BreadcrumbLevel Level = BreadcrumbLevel.Fatal;
 
     private IDisposable _sdk;
 

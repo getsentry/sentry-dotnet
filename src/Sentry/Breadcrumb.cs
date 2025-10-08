@@ -165,8 +165,8 @@ public sealed class Breadcrumb : ISentryJsonSerializable
             "INFO" => BreadcrumbLevel.Info,
             "WARNING" => BreadcrumbLevel.Warning,
             "ERROR" => BreadcrumbLevel.Error,
-            "CRITICAL" => BreadcrumbLevel.Critical,
-            "FATAL" => BreadcrumbLevel.Critical,
+            "CRITICAL" => BreadcrumbLevel.Fatal,
+            "FATAL" => BreadcrumbLevel.Fatal,
             _ => default
         };
         return new Breadcrumb(timestamp, message, type, data!, category, level);
