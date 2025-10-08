@@ -1,6 +1,6 @@
-namespace Sentry.Threading;
-
 using Sentry.Internal;
+
+namespace Sentry.Threading;
 
 /// <summary>
 /// A synchronization primitive that tracks the amount of <see cref="CounterScope"/>s held,

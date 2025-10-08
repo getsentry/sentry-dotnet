@@ -1,14 +1,17 @@
-namespace Sentry.Internal;
-
 #if NET9_0_OR_GREATER
-using TBool = bool;
+using TBool = System.Boolean;
 #else
-using TBool = int;
+using TBool = System.Int32;
 #endif
+
+namespace Sentry.Internal;
 
 internal struct InterlockedBoolean
 {
-    internal volatile TBool _value;
+    private volatile TBool _value;
+
+    [Browsable(false)]
+    internal TBool ValueForTests => _value;
 
 #if NET9_0_OR_GREATER
     private const TBool True = true;
@@ -20,11 +23,15 @@ internal struct InterlockedBoolean
 
     public InterlockedBoolean() { }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public InterlockedBoolean(bool value) { _value = value ? True : False; }
 
-    public static implicit operator bool(InterlockedBoolean? _this) => (_this != null) && (_this.Value._value != False);
-    public static implicit operator InterlockedBoolean(bool _this) => new InterlockedBoolean(_this);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator bool(InterlockedBoolean @this) => (@this._value != False);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator InterlockedBoolean(bool @this) => new InterlockedBoolean(@this);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Exchange(bool newValue)
     {
         TBool localNewValue = newValue ? True : False;
@@ -34,6 +41,7 @@ internal struct InterlockedBoolean
         return (localReturnValue != False);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool CompareExchange(bool value, bool comparand)
     {
         TBool localValue = value ? True : False;

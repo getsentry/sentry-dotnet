@@ -1,10 +1,10 @@
-namespace Sentry.Tests.Internals;
-
 #if NET9_0_OR_GREATER
-using TBool = bool;
+using TBool = System.Boolean;
 #else
-using TBool = int;
+using TBool = System.Int32;
 #endif
+
+namespace Sentry.Tests.Internals;
 
 public class InterlockedBooleanTests
 {
@@ -25,13 +25,13 @@ public class InterlockedBooleanTests
     public void InterlockedBoolean_Constructor_ConstructsExpected(bool value)
     {
         // Arrange
-        var tboolValue = ToTBool(value);
+        var expected = ToTBool(value);
 
         // Act
         var actual = new InterlockedBoolean(value);
 
         // Assert
-        actual._value.Should().Be(tboolValue);
+        actual.ValueForTests.Should().Be(expected);
     }
 
     [Theory]
@@ -41,12 +41,13 @@ public class InterlockedBooleanTests
     {
         // Arrange
         var sut = new InterlockedBoolean(value);
+        var expected = value;
 
         // Act
         bool actual = sut;
 
         // Assert
-        actual.Should().Be(value);
+        actual.Should().Be(expected);
     }
 
     [Theory]
@@ -55,13 +56,13 @@ public class InterlockedBooleanTests
     public void InterlockedBoolean_ImplicitFromBool_ReturnsExpected(bool value)
     {
         // Arrange
-        var tboolValue = ToTBool(value);
+        var expected = ToTBool(value);
 
         // Act
         InterlockedBoolean actual = value;
 
         // Assert
-        actual._value.Should().Be(tboolValue);
+        actual.ValueForTests.Should().Be(expected);
     }
 
     [Theory]
@@ -73,12 +74,13 @@ public class InterlockedBooleanTests
     {
         // Arrange
         var sut = new InterlockedBoolean(initialState);
+        var expected = initialState;
 
         // Act
         var result = sut.Exchange(newValue);
 
         // Assert
-        result.Should().Be(initialState);
+        result.Should().Be(expected);
     }
 
     [Theory]
@@ -91,13 +93,13 @@ public class InterlockedBooleanTests
         // Arrange
         var sut = new InterlockedBoolean(initialState);
 
-        var tboolNewValue = ToTBool(newValue);
+        var expected = ToTBool(newValue);
 
         // Act
         var result = sut.Exchange(newValue);
 
         // Assert
-        sut._value.Should().Be(tboolNewValue);
+        sut.ValueForTests.Should().Be(expected);
     }
 
     [Theory]
@@ -113,12 +115,13 @@ public class InterlockedBooleanTests
     {
         // Arrange
         var sut = new InterlockedBoolean(initialState);
+        var expected = initialState;
 
         // Act
         var result = sut.CompareExchange(newValue, comparand);
 
         // Assert
-        result.Should().Be(initialState);
+        result.Should().Be(expected);
     }
 
     [Theory]
@@ -135,7 +138,7 @@ public class InterlockedBooleanTests
         // Arrange
         var sut = new InterlockedBoolean(initialState);
 
-        var tboolExpected = ToTBool(
+        var expected = ToTBool(
             initialState == comparand
             ? newValue
             : initialState);
@@ -144,6 +147,6 @@ public class InterlockedBooleanTests
         sut.CompareExchange(newValue, comparand);
 
         // Assert
-        sut._value.Should().Be(tboolExpected);
+        sut.ValueForTests.Should().Be(expected);
     }
 }

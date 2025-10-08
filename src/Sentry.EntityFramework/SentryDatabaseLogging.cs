@@ -1,20 +1,20 @@
-namespace Sentry.EntityFramework;
-
 using Sentry.Internal;
+
+namespace Sentry.EntityFramework;
 
 /// <summary>
 /// Sentry Database Logger
 /// </summary>
 internal static class SentryDatabaseLogging
 {
-    private static InterlockedBoolean _init;
+    private static InterlockedBoolean Init;
 
     internal static SentryCommandInterceptor? UseBreadcrumbs(
         IQueryLogger? queryLogger = null,
         bool initOnce = true,
         IDiagnosticLogger? diagnosticLogger = null)
     {
-        if (initOnce && _init.Exchange(true))
+        if (initOnce && Init.Exchange(true))
         {
             diagnosticLogger?.LogWarning("{0}.{1} was already executed.",
                 nameof(SentryDatabaseLogging), nameof(UseBreadcrumbs));
