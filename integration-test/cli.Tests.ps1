@@ -182,6 +182,8 @@ Describe 'MAUI (<framework>)' -ForEach @(
             'Microsoft.Maui.pdb',
             'Sentry'
         )
-        $result.ScriptOutput | Should -AnyElementMatch "Found 77 debug information files \(8 with embedded sources\)"
+        # The specific number of debug information files seems to change with different SDK - so we just check for non-zero
+        $nonZeroNumberRegex = '[1-9][0-9]*';
+        $result.ScriptOutput | Should -AnyElementMatch "Found $nonZeroNumberRegex debug information files \($nonZeroNumberRegex with embedded sources\)"
     }
 }
