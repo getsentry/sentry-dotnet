@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### BREAKING CHANGES
+
+- SentryOptions.IsEnvironmentUser now defaults to false on MAUI. The means the User.Name will no longer be set, by default, to the name of the device ([#4606](https://github.com/getsentry/sentry-dotnet/pull/4606))
 - Remove unnecessary files from SentryCocoaFramework before packing ([#4602](https://github.com/getsentry/sentry-dotnet/pull/4602))
 
 ## 6.0.0-preview.1
