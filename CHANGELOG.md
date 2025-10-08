@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### BREAKING CHANGES
+
+- `BreadcrumbLevel.Critical` has been renamed to `BreadcrumbLevel.Fatal` for consistency with the other Sentry SDKs and the ([#4605](https://github.com/getsentry/sentry-dotnet/pull/4605))
+
 ## 6.0.0-preview.1
 
 ### BREAKING CHANGES
