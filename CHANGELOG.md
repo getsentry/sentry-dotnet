@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Remove unnecessary files from SentryCocoaFramework before packing ([#4602](https://github.com/getsentry/sentry-dotnet/pull/4602))
+
 ## 6.0.0-preview.1
 
 ### BREAKING CHANGES
