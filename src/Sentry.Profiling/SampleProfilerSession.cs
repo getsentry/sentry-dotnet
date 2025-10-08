@@ -61,13 +61,7 @@ internal class SampleProfilerSession : IDisposable
     internal static bool ThrowOnNextStartupForTests
     {
         get { return _throwOnNextStartupForTests; }
-        set
-        {
-            if (value)
-                _throwOnNextStartupForTests.CompareExchange(true, false);
-            else
-                _throwOnNextStartupForTests.CompareExchange(false, true);
-        }
+        set { _throwOnNextStartupForTests = value; }
     }
 
     public static SampleProfilerSession StartNew(IDiagnosticLogger? logger = null)

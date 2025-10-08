@@ -96,7 +96,7 @@ public class InterlockedBooleanTests
         var expected = ToTBool(newValue);
 
         // Act
-        var result = sut.Exchange(newValue);
+        var _ = sut.Exchange(newValue);
 
         // Assert
         sut.ValueForTests.Should().Be(expected);
