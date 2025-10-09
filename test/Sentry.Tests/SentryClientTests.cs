@@ -913,7 +913,7 @@ public partial class SentryClientTests : IDisposable
 
         // Act / Assert
         var result = sut.CaptureFeedback(feedback);
-        result.Should().NotBe(SentryId.Empty);
+        result.Should().Be(SentryId.Empty);
     }
 
     [Fact]
@@ -1581,12 +1581,12 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
-    public void Dispose_MultipleCalls_WorkerFlushedTwice()
+    public void Dispose_MultipleCalls_WorkerFlushedOnce()
     {
         var sut = _fixture.GetSut();
         sut.Dispose();
         sut.Dispose();
-        _fixture.BackgroundWorker?.Received(2).FlushAsync(_fixture.SentryOptions.ShutdownTimeout);
+        _fixture.BackgroundWorker?.Received(1).FlushAsync(_fixture.SentryOptions.ShutdownTimeout);
     }
 
     [Fact]

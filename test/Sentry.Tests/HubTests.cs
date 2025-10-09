@@ -2035,13 +2035,13 @@ public partial class HubTests : IDisposable
     {
         // Arrange
         var expectedId = enabled ? SentryId.Create() : SentryId.Empty;
+        var hub = _fixture.GetSut();
         if (enabled)
         {
             _fixture.Client.CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Any<Scope>(), Arg.Any<SentryHint>())
                 .Returns(expectedId);
         }
-        var hub = _fixture.GetSut();
-        if (!enabled)
+        else
         {
             hub.Dispose();
         }
