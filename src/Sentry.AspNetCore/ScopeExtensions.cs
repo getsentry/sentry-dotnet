@@ -22,7 +22,7 @@ public static class ScopeExtensions
     /// NOTE: The scope is applied to the event BEFORE running the event processors/exception processors.
     /// The main Sentry SDK has processors which run right before any additional processors to the Event
     /// </remarks>
-    public static void Populate(this Scope scope, HttpContext context, SentryAspNetCoreOptions options)
+    internal static void Populate(this Scope scope, HttpContext context, SentryAspNetCoreOptions options)
     {
         // Not to throw on code that ignores nullability warnings.
         if (scope.IsNull() || context.IsNull() || options.IsNull())
@@ -190,7 +190,7 @@ public static class ScopeExtensions
     /// </summary>
     /// <param name="scope">The scope.</param>
     /// <param name="activity">The activity.</param>
-    public static void Populate(this Scope scope, Activity activity)
+    internal static void Populate(this Scope scope, Activity activity)
     {
         // Not to throw on code that ignores nullability warnings.
         if (scope.IsNull() || activity.IsNull())
