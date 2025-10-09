@@ -6,6 +6,7 @@
 
 - SentryOptions.IsEnvironmentUser now defaults to false on MAUI. The means the User.Name will no longer be set, by default, to the name of the device ([#4606](https://github.com/getsentry/sentry-dotnet/pull/4606))
 - Remove unnecessary files from SentryCocoaFramework before packing ([#4602](https://github.com/getsentry/sentry-dotnet/pull/4602))
+- Backpressure handling is now enabled by default, meaning that the SDK will monitor system health and reduce the sampling rate of events and transactions when the system is under load. When the system is determined to be healthy again, the sampling rates are returned to their original levels. ([#4615](https://github.com/getsentry/sentry-dotnet/pull/4615))
 
 ## 6.0.0-preview.1
 
