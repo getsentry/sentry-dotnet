@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Remove unnecessary files from SentryCocoaFramework before packing ([#4602](https://github.com/getsentry/sentry-dotnet/pull/4602))
+- ScopeExtensions.Populate is now internal ([#4611](https://github.com/getsentry/sentry-dotnet/pull/4611))
 
 ## 6.0.0-preview.1
 
