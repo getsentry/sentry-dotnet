@@ -6,4 +6,6 @@ on:
 
 jobs:
   danger:
-    uses: getsentry/github-workflows/.github/workflows/danger.yml@1949ea01ec2da6139d1bcc306c372e6aea76fb72 # 2.13.1
+    runs-on: ubuntu-latest
+    steps:
+      - uses: getsentry/github-workflows/danger@v3
