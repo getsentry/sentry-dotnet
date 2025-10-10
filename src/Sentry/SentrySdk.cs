@@ -567,27 +567,6 @@ static partial class SentrySdk
             scope, hint);
 
     /// <summary>
-    /// Captures a user feedback.
-    /// </summary>
-    /// <param name="userFeedback">The user feedback to send to Sentry.</param>
-    [DebuggerStepThrough]
-    [Obsolete("Use CaptureFeedback instead.")]
-    public static void CaptureUserFeedback(UserFeedback userFeedback)
-        => CurrentHub.CaptureUserFeedback(userFeedback);
-
-    /// <summary>
-    /// Captures a user feedback.
-    /// </summary>
-    /// <param name="eventId">The event Id.</param>
-    /// <param name="email">The user email.</param>
-    /// <param name="comments">The user comments.</param>
-    /// <param name="name">The optional username.</param>
-    [DebuggerStepThrough]
-    [Obsolete("Use CaptureFeedback instead.")]
-    public static void CaptureUserFeedback(SentryId eventId, string email, string comments, string? name = null)
-        => CurrentHub.CaptureUserFeedback(new UserFeedback(eventId, name, email, comments));
-
-    /// <summary>
     /// Captures a transaction.
     /// </summary>
     /// <remarks>

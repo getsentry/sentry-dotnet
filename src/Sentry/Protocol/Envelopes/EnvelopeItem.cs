@@ -232,20 +232,6 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     }
 
     /// <summary>
-    /// Creates an <see cref="EnvelopeItem"/> from <paramref name="sentryUserFeedback"/>.
-    /// </summary>
-    [Obsolete("Use FromFeedback instead.")]
-    public static EnvelopeItem FromUserFeedback(UserFeedback sentryUserFeedback)
-    {
-        var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
-        {
-            [TypeKey] = TypeValueUserReport
-        };
-
-        return new EnvelopeItem(header, new JsonSerializable(sentryUserFeedback));
-    }
-
-    /// <summary>
     /// Creates an <see cref="EnvelopeItem"/> from <paramref name="transaction"/>.
     /// </summary>
     public static EnvelopeItem FromTransaction(SentryTransaction transaction)
@@ -415,18 +401,6 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
             var sentryEvent = Json.Parse(buffer, SentryEvent.FromJson);
 
             return new JsonSerializable(sentryEvent);
-        }
-
-        // User report
-        if (string.Equals(payloadType, TypeValueUserReport, StringComparison.OrdinalIgnoreCase))
-        {
-#pragma warning disable CS0618 // Type or member is obsolete
-            var bufferLength = (int)(payloadLength ?? stream.Length);
-            var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
-            var userFeedback = Json.Parse(buffer, UserFeedback.FromJson);
-#pragma warning restore CS0618 // Type or member is obsolete
-
-            return new JsonSerializable(userFeedback);
         }
 
         // Transaction

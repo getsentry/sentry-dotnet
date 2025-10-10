@@ -661,34 +661,6 @@ internal class Hub : IHub, IDisposable
     }
 #endif
 
-    [Obsolete("Use CaptureFeedback instead.")]
-    public void CaptureUserFeedback(UserFeedback userFeedback)
-    {
-        if (!IsEnabled)
-        {
-            return;
-        }
-
-        try
-        {
-            if (!string.IsNullOrWhiteSpace(userFeedback.Email) && !EmailValidator.IsValidEmail(userFeedback.Email))
-            {
-                _options.LogWarning("Feedback email scrubbed due to invalid email format: '{0}'", userFeedback.Email);
-                userFeedback = new UserFeedback(
-                    userFeedback.EventId,
-                    userFeedback.Name,
-                    null, // Scrubbed email
-                    userFeedback.Comments);
-            }
-
-            CurrentClient.CaptureUserFeedback(userFeedback);
-        }
-        catch (Exception e)
-        {
-            _options.LogError(e, "Failure to capture user feedback: {0}", userFeedback.EventId);
-        }
-    }
-
     public void CaptureTransaction(SentryTransaction transaction) => CaptureTransaction(transaction, null, null);
 
     public void CaptureTransaction(SentryTransaction transaction, Scope? scope, SentryHint? hint)

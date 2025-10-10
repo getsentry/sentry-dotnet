@@ -120,20 +120,6 @@ public class SentryClient : ISentryClient, IDisposable
     }
 
     /// <inheritdoc />
-    [Obsolete("Use CaptureFeedback instead.")]
-    public void CaptureUserFeedback(UserFeedback userFeedback)
-    {
-        if (userFeedback.EventId.Equals(SentryId.Empty))
-        {
-            // Ignore the user feedback if EventId is empty
-            _options.LogWarning("User feedback dropped due to empty id.");
-            return;
-        }
-
-        CaptureEnvelope(Envelope.FromUserFeedback(userFeedback));
-    }
-
-    /// <inheritdoc />
     public void CaptureTransaction(SentryTransaction transaction) => CaptureTransaction(transaction, null, null);
 
     /// <inheritdoc />

@@ -796,32 +796,6 @@ public class EnvelopeTests
     }
 
     [Fact]
-    public async Task Roundtrip_WithUserFeedback_Success()
-    {
-#pragma warning disable CS0618 // Type or member is obsolete
-        // Arrange
-        var feedback = new UserFeedback(
-            SentryId.Create(),
-            "Someone Nice",
-            "foo@bar.com",
-            "Everything is great!");
-
-        using var envelope = Envelope.FromUserFeedback(feedback);
-
-        using var stream = new MemoryStream();
-
-        // Act
-        await envelope.SerializeAsync(stream, _testOutputLogger);
-        stream.Seek(0, SeekOrigin.Begin);
-
-        using var envelopeRoundtrip = await Envelope.DeserializeAsync(stream);
-
-        // Assert
-        envelopeRoundtrip.Should().BeEquivalentTo(envelope);
-#pragma warning restore CS0618 // Type or member is obsolete
-    }
-
-    [Fact]
     public async Task Roundtrip_WithFeedback_Success()
     {
         // Arrange
