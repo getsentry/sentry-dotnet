@@ -40,6 +40,9 @@ indent_size = 2
 # Sort using and Import directives with System.* appearing first
 dotnet_sort_system_directives_first = true
 
+# Keep using directives at the top of the file, outside of the namespace
+csharp_using_directive_placement = outside_namespace
+
 # Avoid "this." and "Me." if not necessary
 dotnet_style_qualification_for_field = false : warning
 dotnet_style_qualification_for_property = false : warning
