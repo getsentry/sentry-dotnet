@@ -232,20 +232,6 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     }
 
     /// <summary>
-    /// Creates an <see cref="EnvelopeItem"/> from <paramref name="sentryUserFeedback"/>.
-    /// </summary>
-    [Obsolete("Use FromFeedback instead.")]
-    public static EnvelopeItem FromUserFeedback(UserFeedback sentryUserFeedback)
-    {
-        var header = new Dictionary<string, object?>(1, StringComparer.Ordinal)
-        {
-            [TypeKey] = TypeValueUserReport
-        };
-
-        return new EnvelopeItem(header, new JsonSerializable(sentryUserFeedback));
-    }
-
-    /// <summary>
     /// Creates an <see cref="EnvelopeItem"/> from <paramref name="transaction"/>.
     /// </summary>
     public static EnvelopeItem FromTransaction(SentryTransaction transaction)
