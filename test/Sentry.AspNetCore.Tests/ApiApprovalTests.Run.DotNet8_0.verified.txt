@@ -39,11 +39,6 @@ namespace Sentry.AspNetCore
         public static string? TryGetHttpPath(this Sentry.TransactionSamplingContext samplingContext) { }
         public static string? TryGetHttpRoute(this Sentry.TransactionSamplingContext samplingContext) { }
     }
-    public static class ScopeExtensions
-    {
-        public static void Populate(this Sentry.Scope scope, System.Diagnostics.Activity activity) { }
-        public static void Populate(this Sentry.Scope scope, Microsoft.AspNetCore.Http.HttpContext context, Sentry.AspNetCore.SentryAspNetCoreOptions options) { }
-    }
     [Microsoft.Extensions.Logging.ProviderAlias("Sentry")]
     public class SentryAspNetCoreLoggerProvider : Sentry.Extensions.Logging.SentryLoggerProvider
     {
