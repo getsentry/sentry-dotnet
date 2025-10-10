@@ -13,7 +13,7 @@ namespace Sentry.AspNetCore;
 /// Scope Extensions
 /// </summary>
 [EditorBrowsable(EditorBrowsableState.Never)]
-public static class ScopeExtensions
+internal static class ScopeExtensions
 {
     /// <summary>
     /// Populates the scope with the HTTP data
