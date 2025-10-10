@@ -76,7 +76,7 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
             return false;
         }
 
-        _options.LogDebug("Enqueuing envelope {0}", eventId);
+        _options.LogDebug("Enqueuing envelope: '{0}'", eventId);
         _queue.Enqueue(envelope);
 
         if (process)
