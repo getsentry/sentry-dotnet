@@ -106,6 +106,7 @@ public static class SentryClientExtensions
     /// <param name="clientOrHub"></param>
     /// <returns></returns>
     [Obsolete("WARNING: This method is meant for internal usage only")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public static SentryOptions? GetInternalSentryOptions(this ISentryClient clientOrHub) =>
         clientOrHub.GetSentryOptions();
 }

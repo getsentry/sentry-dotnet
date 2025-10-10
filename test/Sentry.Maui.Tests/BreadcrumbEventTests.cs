@@ -14,10 +14,8 @@ public class BreadcrumbEventTests
         var eventName = "TestEvent";
 
         // Act
-        IEnumerable<(string Key, string Value)>[] extraData = [[("key1", "value1")], [("key2", "value2")]];
-#pragma warning disable CS0618 // Type or member is obsolete
+        IEnumerable<(string Key, string Value)> extraData = [("key1", "value1"), ("key2", "value2")];
         var oldEvent = new BreadcrumbEvent(sender, eventName, extraData);
-#pragma warning restore CS0618 // Type or member is obsolete
         var newEvent = new BreadcrumbEvent(sender, eventName, ("key1", "value1"), ("key2", "value2"));
 
         // Assert

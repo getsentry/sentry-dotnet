@@ -403,18 +403,6 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
             return new JsonSerializable(sentryEvent);
         }
 
-        // User report
-        if (string.Equals(payloadType, TypeValueUserReport, StringComparison.OrdinalIgnoreCase))
-        {
-#pragma warning disable CS0618 // Type or member is obsolete
-            var bufferLength = (int)(payloadLength ?? stream.Length);
-            var buffer = await stream.ReadByteChunkAsync(bufferLength, cancellationToken).ConfigureAwait(false);
-            var userFeedback = Json.Parse(buffer, UserFeedback.FromJson);
-#pragma warning restore CS0618 // Type or member is obsolete
-
-            return new JsonSerializable(userFeedback);
-        }
-
         // Transaction
         if (string.Equals(payloadType, TypeValueTransaction, StringComparison.OrdinalIgnoreCase))
         {
