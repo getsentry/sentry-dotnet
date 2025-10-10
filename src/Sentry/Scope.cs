@@ -818,11 +818,7 @@ public class Scope : IEventLike
             if (ReferenceEquals(_transaction.Value, expectedCurrentTransaction))
             {
                 _transaction.Value = null;
-                if (Options.EnableScopeSync)
-                {
-                    // We have to restore the trace on the native layers to be in sync with the current scope
-                    Options.ScopeObserver?.SetTrace(PropagationContext.TraceId, PropagationContext.SpanId);
-                }
+                SetPropagationContext(new SentryPropagationContext());
             }
         }
         finally
