@@ -37,7 +37,7 @@ internal static class SentryEventHelper
             return @event;
         }
 
-        options.LogDebug("Calling the BeforeSend callback");
+        options.LogDebug("Calling the BeforeSend callback.");
         try
         {
             @event = options.BeforeSendInternal?.Invoke(@event, hint);
