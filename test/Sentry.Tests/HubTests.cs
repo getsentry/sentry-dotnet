@@ -309,7 +309,7 @@ public partial class HubTests : IDisposable
         using var assertionScope = new AssertionScope();
         var breadcrumb = scope.Breadcrumbs.Last();
         breadcrumb.Message.Should().Be(evt.Exception!.Message);
-        breadcrumb.Level.Should().Be(BreadcrumbLevel.Critical);
+        breadcrumb.Level.Should().Be(BreadcrumbLevel.Fatal);
         breadcrumb.Category.Should().Be("Exception");
     }
 
@@ -342,7 +342,7 @@ public partial class HubTests : IDisposable
             {
                 ["exception_message"] = evt.Exception!.Message
             });
-        breadcrumb.Level.Should().Be(BreadcrumbLevel.Critical);
+        breadcrumb.Level.Should().Be(BreadcrumbLevel.Fatal);
         breadcrumb.Category.Should().Be("Exception");
     }
 

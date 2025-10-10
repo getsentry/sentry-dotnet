@@ -171,7 +171,7 @@ public class HubAdapterTests : IDisposable
             {"Key", "value"},
             {"Key2", "value2"},
         };
-        const BreadcrumbLevel level = BreadcrumbLevel.Critical;
+        const BreadcrumbLevel level = BreadcrumbLevel.Fatal;
 
         var scope = new Scope();
         Hub.SubstituteConfigureScope(scope);

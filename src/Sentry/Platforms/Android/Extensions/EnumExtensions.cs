@@ -31,7 +31,7 @@ internal static class EnumExtensions
             "INFO" => BreadcrumbLevel.Info,
             "WARNING" => BreadcrumbLevel.Warning,
             "ERROR" => BreadcrumbLevel.Error,
-            "FATAL" => BreadcrumbLevel.Critical,
+            "FATAL" => BreadcrumbLevel.Fatal,
             _ => throw new ArgumentOutOfRangeException(nameof(level), level.Name(), message: default)
         };
 
@@ -42,7 +42,7 @@ internal static class EnumExtensions
             BreadcrumbLevel.Info => JavaSdk.SentryLevel.Info,
             BreadcrumbLevel.Warning => JavaSdk.SentryLevel.Warning,
             BreadcrumbLevel.Error => JavaSdk.SentryLevel.Error,
-            BreadcrumbLevel.Critical => JavaSdk.SentryLevel.Fatal,
+            BreadcrumbLevel.Fatal => JavaSdk.SentryLevel.Fatal,
             _ => throw new ArgumentOutOfRangeException(nameof(level), level, message: default)
         };
 
