@@ -82,7 +82,7 @@ internal class DebugStackTrace : SentryStackTrace
         // Frame indexes may be changed as well as _debugImageIndexByModule becoming invalid.
         if (_debugImagesMerged)
         {
-            _options.LogWarning("Cannot call MergeDebugImagesInto multiple times. Event: {0}", @event.EventId);
+            _options.LogWarning("Cannot call MergeDebugImagesInto multiple times. Event: '{0}'", @event.EventId);
             return;
         }
         _debugImagesMerged = true;

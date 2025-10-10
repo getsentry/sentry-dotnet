@@ -118,7 +118,7 @@ internal class GlobalSessionManager : ISessionManager
                 try
                 {
                     var contents = _options.FileSystem.ReadAllTextFromFile(filePath);
-                    _options.LogDebug("Deleting persisted session file with contents: {0}", contents);
+                    _options.LogDebug("Deleting persisted session file with contents: '{0}'", contents);
                 }
                 catch (Exception ex)
                 {

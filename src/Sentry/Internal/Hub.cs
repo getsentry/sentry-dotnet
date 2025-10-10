@@ -505,7 +505,7 @@ internal class Hub : IHub, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError(e, "Failure to store breadcrumb for exception event: {0}", evt.EventId);
+            _options.LogError(e, "Failure to store breadcrumb for exception event: '{0}'", evt.EventId);
         }
     }
 

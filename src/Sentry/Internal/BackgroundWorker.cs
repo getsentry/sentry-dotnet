@@ -177,7 +177,7 @@ internal class BackgroundWorker : IBackgroundWorker, IDisposable
                     }
                     finally
                     {
-                        _options.LogDebug("De-queueing event {0}", eventId);
+                        _options.LogDebug("De-queueing event '{0}'", eventId);
                         _queue.TryDequeue(out _);
                         Interlocked.Decrement(ref _currentItems);
                         OnFlushObjectReceived?.Invoke(envelope, EventArgs.Empty);
