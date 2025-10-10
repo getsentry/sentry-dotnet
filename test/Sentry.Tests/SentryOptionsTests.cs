@@ -14,6 +14,13 @@ public partial class SentryOptionsTests
     }
 
     [Fact]
+    public void EnableBackpressureHandling_Default_True()
+    {
+        var sut = new SentryOptions();
+        sut.EnableBackpressureHandling.Should().BeTrue();
+    }
+
+    [Fact]
     public void RequestBodyCompressionLevel_ByDefault_Optimal()
     {
         var sut = new SentryOptions();

@@ -98,7 +98,10 @@ public class SentryOptions
     /// Enables or disables automatic backpressure handling. When enabled, the SDK will monitor system health and
     /// reduce the sampling rate of events and transactions when the system is under load.
     /// </summary>
-    public bool EnableBackpressureHandling { get; set; } = false;
+    /// <remarks>
+    /// Defaults to true / enabled.
+    /// </remarks>
+    public bool EnableBackpressureHandling { get; set; } = true;
 
     /// <summary>
     /// This holds a reference to the current transport, when one is active.
