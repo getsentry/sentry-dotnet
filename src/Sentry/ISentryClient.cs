@@ -34,7 +34,8 @@ public interface ISentryClient
     /// <param name="feedback">The feedback to send to Sentry.</param>
     /// <param name="scope">An optional scope to be applied to the event.</param>
     /// <param name="hint">An optional hint providing high level context for the source of the event</param>
-    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null);
+    /// <returns>The SentryId of the captured feedback, if successful. SentryId.Empty if feedback capture fails.</returns>
+    public SentryId CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null);
 
     /// <summary>
     /// Captures a user feedback.

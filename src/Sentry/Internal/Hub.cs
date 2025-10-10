@@ -589,11 +589,11 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
     {
         if (!IsEnabled)
         {
-            return;
+            return SentryId.Empty;
         }
 
         try
@@ -601,19 +601,20 @@ internal class Hub : IHub, IDisposable
             var clonedScope = CurrentScope.Clone();
             configureScope(clonedScope);
 
-            CaptureFeedback(feedback, clonedScope, hint);
+            return CaptureFeedback(feedback, clonedScope, hint);
         }
         catch (Exception e)
         {
             _options.LogError(e, "Failure to capture feedback");
+            return SentryId.Empty;
         }
     }
 
-    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
     {
         if (!IsEnabled)
         {
-            return;
+            return SentryId.Empty;
         }
 
         try
@@ -625,11 +626,12 @@ internal class Hub : IHub, IDisposable
             }
 
             scope ??= CurrentScope;
-            CurrentClient.CaptureFeedback(feedback, scope, hint);
+            return CurrentClient.CaptureFeedback(feedback, scope, hint);
         }
         catch (Exception e)
         {
             _options.LogError(e, "Failure to capture feedback");
+            return SentryId.Empty;
         }
     }
 

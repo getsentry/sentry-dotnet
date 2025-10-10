@@ -2034,8 +2034,14 @@ public partial class HubTests : IDisposable
     public void CaptureFeedback_HubEnabled(bool enabled)
     {
         // Arrange
+        var expectedId = enabled ? SentryId.Create() : SentryId.Empty;
         var hub = _fixture.GetSut();
-        if (!enabled)
+        if (enabled)
+        {
+            _fixture.Client.CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Any<Scope>(), Arg.Any<SentryHint>())
+                .Returns(expectedId);
+        }
+        else
         {
             hub.Dispose();
         }
@@ -2043,9 +2049,10 @@ public partial class HubTests : IDisposable
         var feedback = new SentryFeedback("Test feedback");
 
         // Act
-        hub.CaptureFeedback(feedback);
+        var result = hub.CaptureFeedback(feedback);
 
         // Assert
+        result.Should().Be(expectedId);
         _fixture.Client.Received(enabled ? 1 : 0).CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 

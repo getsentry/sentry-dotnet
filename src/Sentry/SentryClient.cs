@@ -20,6 +20,7 @@ public class SentryClient : ISentryClient, IDisposable
     private readonly ISessionManager _sessionManager;
     private readonly RandomValuesFactory _randomValuesFactory;
     private readonly Enricher _enricher;
+    private volatile int _isDisposed = 0;
 
     internal IBackgroundWorker Worker { get; }
 
@@ -85,12 +86,12 @@ public class SentryClient : ISentryClient, IDisposable
     }
 
     /// <inheritdoc />
-    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
     {
         if (string.IsNullOrEmpty(feedback.Message))
         {
             _options.LogWarning("Feedback dropped due to empty message.");
-            return;
+            return SentryId.Empty;
         }
 
         scope ??= new Scope(_options);
@@ -116,7 +117,7 @@ public class SentryClient : ISentryClient, IDisposable
 
         var attachments = hint.Attachments.ToList();
         var envelope = Envelope.FromFeedback(evt, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
-        CaptureEnvelope(envelope);
+        return CaptureEnvelope(envelope) ? evt.EventId : SentryId.Empty;
     }
 
     /// <inheritdoc />
@@ -438,6 +439,12 @@ public class SentryClient : ISentryClient, IDisposable
     /// <inheritdoc cref="ISentryClient.CaptureEnvelope"/>
     public bool CaptureEnvelope(Envelope envelope)
     {
+        if (_isDisposed == 1)
+        {
+            _options.LogWarning("Enqueue envelope failed: disposed client");
+            return false;
+        }
+
         if (Worker.EnqueueEnvelope(envelope))
         {
             _options.LogInfo("Envelope queued up: '{0}'", envelope.TryGetEventId(_options.DiagnosticLogger));
@@ -456,6 +463,11 @@ public class SentryClient : ISentryClient, IDisposable
     /// </summary>
     public void Dispose()
     {
+        if (Interlocked.Exchange(ref _isDisposed, 1) == 1)
+        {
+            return;
+        }
+
         _options.LogDebug("Flushing SentryClient.");
 
         try
