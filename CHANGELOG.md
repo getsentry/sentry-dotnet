@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Structured Logs now have a `sentry.origin` attribute to so it's clearer where these come from ([#4566](https://github.com/getsentry/sentry-dotnet/pull/4566))
+
 ### Dependencies
 
 - Bump Java SDK from v8.22.0 to v8.23.0 ([#4586](https://github.com/getsentry/sentry-dotnet/pull/4586))
