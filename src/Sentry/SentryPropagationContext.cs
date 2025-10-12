@@ -15,7 +15,7 @@ internal class SentryPropagationContext
     {
         if (_dynamicSamplingContext is null)
         {
-            options.LogDebug("Creating the Dynamic Sampling Context from the Propagation Context");
+            options.LogDebug("Creating the Dynamic Sampling Context from the Propagation Context.");
             _dynamicSamplingContext = this.CreateDynamicSamplingContext(options, replaySession);
         }
 
