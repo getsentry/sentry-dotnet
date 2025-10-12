@@ -385,11 +385,7 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
 
         // Clear the transaction from the scope and regenerate the Propagation Context
         // We do this so new events don't have a trace context that is "older" than the transaction that just finished
-        _hub.ConfigureScope(static (scope, transactionTracer) =>
-        {
-            scope.ResetTransaction(transactionTracer);
-            scope.SetPropagationContext(new SentryPropagationContext());
-        }, this);
+        _hub.ConfigureScope(static (scope, transactionTracer) => scope.ResetTransaction(transactionTracer), this);
 
         // Client decides whether to discard this transaction based on sampling
         _hub.CaptureTransaction(new SentryTransaction(this));

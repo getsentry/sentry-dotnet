@@ -356,9 +356,6 @@ public class ScopeTests
         });
         var transaction = new TransactionTracer(DisabledHub.Instance, "test-transaction", "op");
         scope.Transaction = transaction;
-
-        var expectedTraceId = scope.PropagationContext.TraceId;
-        var expectedSpanId = scope.PropagationContext.SpanId;
         var expectedCount = enableScopeSync ? 1 : 0;
 
         observer.ClearReceivedCalls();
@@ -367,7 +364,8 @@ public class ScopeTests
         scope.ResetTransaction(transaction);
 
         // Assert
-        observer.Received(expectedCount).SetTrace(Arg.Is(expectedTraceId), Arg.Is(expectedSpanId));
+        observer.Received(expectedCount)
+            .SetTrace(Arg.Is(scope.PropagationContext.TraceId), Arg.Is(scope.PropagationContext.SpanId));
     }
 
     [Theory]
