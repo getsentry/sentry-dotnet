@@ -5,11 +5,11 @@
 ### BREAKING CHANGES
 
 - SentryOptions.IsEnvironmentUser now defaults to false on MAUI. The means the User.Name will no longer be set, by default, to the name of the device ([#4606](https://github.com/getsentry/sentry-dotnet/pull/4606))
-- Remove unnecessary files from SentryCocoaFramework before packing ([#4623](https://github.com/getsentry/sentry-dotnet/pull/4623))
+- Remove unnecessary files from SentryCocoaFramework before packing ([#4602](https://github.com/getsentry/sentry-dotnet/pull/4602))
 
 ### Fixes
 
-- The SDK avoids redundant scope sync after transaction finish ([#4479](https://github.com/getsentry/sentry-dotnet/pull/4479))
+- The SDK avoids redundant scope sync after transaction finish ([#4623](https://github.com/getsentry/sentry-dotnet/pull/4623))
 
 ## 6.0.0-preview.1
 
