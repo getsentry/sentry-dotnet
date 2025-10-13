@@ -85,4 +85,8 @@ internal class NoOpSpan : ISpan
     }
 
     public string? Origin { get; set; }
+
+    public void Dispose()
+    {
+    }
 }

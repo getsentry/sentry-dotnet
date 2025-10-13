@@ -6,10 +6,11 @@ namespace Sentry;
 /// <summary>
 /// Transaction span tracer.
 /// </summary>
-public class SpanTracer : IBaseTracer, ISpan
+public sealed class SpanTracer : IBaseTracer, ISpan
 {
     private readonly IHub _hub;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
+    private string? _origin;
 
     private readonly Instrumenter _instrumenter = Instrumenter.Sentry;
 
@@ -190,5 +191,13 @@ public class SpanTracer : IBaseTracer, ISpan
             _origin = value;
         }
     }
-    private string? _origin;
+
+    /// <summary>
+    /// Automatically finishes the span at the end of a <c>using</c> block. This is a convenience method only. Disposing
+    /// is not required (and analyser warnings are suppressed).
+    /// </summary>
+    public void Dispose()
+    {
+        Finish();
+    }
 }

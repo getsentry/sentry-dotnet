@@ -7,13 +7,14 @@ namespace Sentry;
 /// <summary>
 /// Transaction tracer.
 /// </summary>
-public class TransactionTracer : IBaseTracer, ITransactionTracer
+public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
     private readonly Timer? _idleTimer;
     private long _cancelIdleTimeout;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
+    private int _hasFinished = 0;
 
     private readonly Instrumenter _instrumenter = Instrumenter.Sentry;
 
@@ -361,6 +362,12 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     /// <inheritdoc />
     public void Finish()
     {
+        // TODO: Replace with InterlockedBoolean once this has been merged into version6
+        if (Interlocked.Exchange(ref _hasFinished, 1) == 1)
+        {
+            return;
+        }
+
         _options?.LogDebug("Attempting to finish Transaction {0}.", SpanId);
         if (Interlocked.Exchange(ref _cancelIdleTimeout, 0) == 1)
         {
@@ -434,5 +441,14 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
         _spans = new ConcurrentBag<ISpan>();
 #endif
         _activeSpanTracker.Clear();
+    }
+
+    /// <summary>
+    /// Automatically finishes the span at the end of a <c>using</c> block. This is a convenience method only. Disposing
+    /// is not required (and analyser warnings are suppressed).
+    /// </summary>
+    public void Dispose()
+    {
+        Finish();
     }
 }
