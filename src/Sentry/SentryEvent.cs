@@ -180,21 +180,38 @@ public sealed class SentryEvent : IEventLike, ISentryJsonSerializable
 
     internal bool HasException() => Exception is not null || SentryExceptions?.Any() == true;
 
-    internal bool HasTerminalException()
+    internal bool HasUnhandledException()
     {
-        // The exception is considered terminal if it is marked unhandled,
-        // UNLESS it comes from the UnobservedTaskExceptionIntegration
+        if (Exception?.Data[Mechanism.HandledKey] is false)
+        {
+            return true;
+        }
+
+        return SentryExceptions?.Any(e => e.Mechanism is { Handled: false }) ?? false;
+    }
+
+    internal bool HasUnhandledNonTerminalException()
+    {
+        // Generally, an unhandled exception is considered terminal.
+        // Exception: If it is an unhandled exception but the mechanism key is found in NonTerminalMechanismKeys
+        // I.e. captured through the UnobservedTaskExceptionIntegration, or the exception capture integrations in the Unity SDK
 
         if (Exception?.Data[Mechanism.HandledKey] is false)
         {
-            return Exception.Data[Mechanism.MechanismKey] as string != UnobservedTaskExceptionIntegration.MechanismKey;
+            if (Exception.Data[Mechanism.TerminalKey] is false)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         return SentryExceptions?.Any(e =>
-            e.Mechanism is { Handled: false } mechanism &&
-            mechanism.Type != UnobservedTaskExceptionIntegration.MechanismKey
+            e.Mechanism is { Handled: false } mechanism && mechanism.Data[Mechanism.TerminalKey] is false
         ) ?? false;
     }
+
+    internal bool HasTerminalException() => HasUnhandledException() && !HasUnhandledNonTerminalException();
 
     internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
 

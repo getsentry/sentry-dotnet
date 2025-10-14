@@ -223,7 +223,7 @@ public class SentryOptions
             }
         }
     }
-
+    
     internal List<IExceptionFilter>? ExceptionFilters { get; set; } = new();
 
     /// <summary>

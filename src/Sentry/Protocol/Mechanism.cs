@@ -29,6 +29,11 @@ public sealed class Mechanism : ISentryJsonSerializable
     /// </summary>
     public static readonly string DescriptionKey = "Sentry:Description";
 
+    /// <summary>
+    /// Key found inside of <c>Exception.Data</c> describing whether the exception is considered terminal
+    /// </summary>
+    public static readonly string TerminalKey = "Sentry:Terminal";
+
     internal Dictionary<string, object>? InternalData { get; private set; }
 
     internal Dictionary<string, object>? InternalMeta { get; private set; }

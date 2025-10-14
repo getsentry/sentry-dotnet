@@ -32,10 +32,12 @@ public static class SentryExceptionExtensions
     /// <param name="type">A required short string that identifies the mechanism.</param>
     /// <param name="description">An optional human-readable description of the mechanism.</param>
     /// <param name="handled">An optional flag indicating whether the exception was handled by the mechanism.</param>
+    /// <param name="terminal">An optional flag indicating whether the exception is considered terminal.</param>
     public static void SetSentryMechanism(this Exception ex, string type, string? description = null,
-        bool? handled = null)
+        bool? handled = null, bool terminal = true)
     {
         ex.Data[Mechanism.MechanismKey] = type;
+        ex.Data[Mechanism.TerminalKey] = terminal;
 
         if (string.IsNullOrWhiteSpace(description))
         {

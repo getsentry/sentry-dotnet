@@ -167,4 +167,136 @@ public partial class SentryEventTests
             evt.Tags["tag_key"].Should().Be(tagValue);
         }
     }
+
+    [Fact]
+    public void HasUnhandledException_WithUnhandledException_ReturnsTrue()
+    {
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("test", handled: false);
+        var evt = new SentryEvent(exception);
+
+        Assert.True(evt.HasUnhandledException());
+    }
+
+    [Fact]
+    public void HasUnhandledException_WithHandledException_ReturnsFalse()
+    {
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("test", handled: true);
+        var evt = new SentryEvent(exception);
+
+        Assert.False(evt.HasUnhandledException());
+    }
+
+    [Fact]
+    public void HasUnhandledException_WithSentryExceptions_Unhandled_ReturnsTrue()
+    {
+        var evt = new SentryEvent
+        {
+            SentryExceptions = new[]
+            {
+                new SentryException
+                {
+                    Mechanism = new Mechanism { Handled = false }
+                }
+            }
+        };
+
+        Assert.True(evt.HasUnhandledException());
+    }
+
+    [Fact]
+    public void HasUnhandledException_WithSentryExceptions_Handled_ReturnsFalse()
+    {
+        var evt = new SentryEvent
+        {
+            SentryExceptions = new[]
+            {
+                new SentryException
+                {
+                    Mechanism = new Mechanism { Handled = true }
+                }
+            }
+        };
+
+        Assert.False(evt.HasUnhandledException());
+    }
+
+    [Fact]
+    public void HasUnhandledNonTerminalException_WithNonTerminalMechanism_ReturnsTrue()
+    {
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("UnobservedTaskException", handled: false, terminal: false);
+        var evt = new SentryEvent(exception);
+
+        Assert.True(evt.HasUnhandledNonTerminalException());
+    }
+
+    [Fact]
+    public void HasUnhandledNonTerminalException_WithTerminalMechanism_ReturnsFalse()
+    {
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("AppDomain.UnhandledException", handled: false, terminal: true);
+        var evt = new SentryEvent(exception);
+
+        Assert.False(evt.HasUnhandledNonTerminalException());
+    }
+
+    [Fact]
+    public void HasUnhandledNonTerminalException_WithHandledException_ReturnsFalse()
+    {
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("UnobservedTaskException", handled: true);
+        var evt = new SentryEvent(exception);
+
+        Assert.False(evt.HasUnhandledNonTerminalException());
+    }
+
+    [Fact]
+    public void HasUnhandledNonTerminalException_NoMechanismKey_ReturnsFalse()
+    {
+        var exception = new Exception("test");
+        exception.Data[Mechanism.HandledKey] = false;
+        var evt = new SentryEvent(exception);
+
+        Assert.False(evt.HasUnhandledNonTerminalException());
+    }
+
+    [Fact]
+    public void HasTerminalException_WithTerminalUnhandledException_ReturnsTrue()
+    {
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("AppDomain.UnhandledException", handled: false, terminal: true);
+        var evt = new SentryEvent(exception);
+
+        Assert.True(evt.HasUnhandledNonTerminalException());
+    }
+
+    [Fact]
+    public void HasTerminalException_WithNonTerminalException_ReturnsFalse()
+    {
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("UnobservedTaskException", handled: false, terminal: false);
+        var evt = new SentryEvent(exception);
+
+        Assert.False(evt.HasUnhandledNonTerminalException());
+    }
+
+    [Fact]
+    public void HasTerminalException_WithHandledException_ReturnsFalse()
+    {
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("test", handled: true);
+        var evt = new SentryEvent(exception);
+
+        Assert.False(evt.HasUnhandledNonTerminalException());
+    }
+
+    [Fact]
+    public void HasTerminalException_NoException_ReturnsFalse()
+    {
+        var evt = new SentryEvent();
+
+        Assert.False(evt.HasUnhandledNonTerminalException());
+    }
 }
