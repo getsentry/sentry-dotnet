@@ -10,6 +10,7 @@
 ### Fixes
 
 - The SDK avoids redundant scope sync after transaction finish ([#4623](https://github.com/getsentry/sentry-dotnet/pull/4623))
+- sentry-native is now automatically disabled for WASM applications ([#4631](https://github.com/getsentry/sentry-dotnet/pull/4631))
 
 ## 6.0.0-preview.1
 
