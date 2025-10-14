@@ -194,7 +194,7 @@ public sealed class SpanTracer : IBaseTracer, ISpan
 
     /// <summary>
     /// Automatically finishes the span at the end of a <c>using</c> block. This is a convenience method only. Disposing
-    /// is not required (and analyser warnings are suppressed).
+    /// is not required.
     /// </summary>
     public void Dispose()
     {
