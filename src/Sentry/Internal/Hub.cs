@@ -501,7 +501,7 @@ internal class Hub : IHub, IDisposable
                     {"exception_message", exceptionMessage}
                 };
             }
-            scope.AddBreadcrumb(breadcrumbMessage, "Exception", data: data, level: BreadcrumbLevel.Critical);
+            scope.AddBreadcrumb(breadcrumbMessage, "Exception", data: data, level: BreadcrumbLevel.Fatal);
         }
         catch (Exception e)
         {
