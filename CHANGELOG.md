@@ -5,7 +5,8 @@
 ### BREAKING CHANGES
 
 - SentryOptions.IsEnvironmentUser now defaults to false on MAUI. The means the User.Name will no longer be set, by default, to the name of the device ([#4606](https://github.com/getsentry/sentry-dotnet/pull/4606))
-- Spans and Transactions now implement `IDispose` so that they can be used with `using` statements that will automatically finish the span when it passes out of scope, to be consistent with `Activity` classes when using OpenTelemetry ([#4627](https://github.com/getsentry/sentry-dotnet/pull/4627))
+- Spans and Transactions now implement `IDispose` so that they can be used with `using` statements/declarations that will automatically finish the span with a status of OK when it passes out of scope, if it has not already been finished, to be consistent with `Activity` classes when using OpenTelemetry ([#4627](https://github.com/getsentry/sentry-dotnet/pull/4627))
+- SpanTracer and TransactionTracer are still public but these are now `sealed` (see also [#4627](https://github.com/getsentry/sentry-dotnet/pull/4627))
 - Remove unnecessary files from SentryCocoaFramework before packing ([#4602](https://github.com/getsentry/sentry-dotnet/pull/4602))
 
 ### Fixes

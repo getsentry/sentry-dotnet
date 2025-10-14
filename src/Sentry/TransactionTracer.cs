@@ -440,9 +440,15 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     }
 
     /// <summary>
-    /// Automatically finishes the span at the end of a <c>using</c> block. This is a convenience method only. Disposing
-    /// is not required (and analyser warnings are suppressed).
+    /// <para>
+    /// Automatically finishes the transaction with a status of <see cref="SpanStatus.Ok" /> at the end of a
+    /// <c>using</c> block, if it has not already been finished.
+    /// </para>
+    /// <para>
+    /// This is the equivalent of calling <see cref="Finish()" /> when the transaction passes out of scope.
+    /// </para>
     /// </summary>
+    /// <remarks>This is a convenience method only. Disposing is not required.</remarks>
     public void Dispose()
     {
         Finish();
