@@ -72,6 +72,7 @@ public class MechanismTests
         yield return new object[] { (new Mechanism { Handled = true }, """{"type":"generic","handled":true}""") };
         yield return new object[] { (new Mechanism { Terminal = false }, """{"type":"generic","terminal":false}""") };
         yield return new object[] { (new Mechanism { Terminal = true }, """{"type":"generic","terminal":true}""") };
+        yield return new object[] { (new Mechanism { Terminal = null }, """{"type":"generic"}""") }; // null = default, not serialized
         yield return new object[] { (new Mechanism { Synthetic = true }, """{"type":"generic","synthetic":true}""") };
         yield return new object[] { (new Mechanism { HelpLink = "https://sentry.io/docs" }, """{"type":"generic","help_link":"https://sentry.io/docs"}""") };
         yield return new object[] { (new Mechanism { Description = "some desc" }, """{"type":"generic","description":"some desc"}""") };

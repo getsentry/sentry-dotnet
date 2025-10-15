@@ -12,7 +12,7 @@ internal class UnobservedTaskExceptionIntegration : ISdkIntegration
     internal UnobservedTaskExceptionIntegration(IAppDomain? appDomain = null)
         => _appDomain = appDomain ?? AppDomainAdapter.Instance;
 
-    public void Register(IHub hub, SentryOptions options)
+    public void Register(IHub hub, SentryOptions _)
     {
         _hub = hub;
         _appDomain.UnobservedTaskException += Handle;

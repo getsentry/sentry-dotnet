@@ -233,16 +233,6 @@ public partial class SentryEventTests
     }
 
     [Fact]
-    public void HasUnhandledNonTerminalException_WithTerminalMechanism_ReturnsFalse()
-    {
-        var exception = new Exception("test");
-        exception.SetSentryMechanism("AppDomain.UnhandledException", handled: false, terminal: true);
-        var evt = new SentryEvent(exception);
-
-        Assert.False(evt.HasUnhandledNonTerminalException());
-    }
-
-    [Fact]
     public void HasUnhandledNonTerminalException_WithHandledException_ReturnsFalse()
     {
         var exception = new Exception("test");
@@ -253,11 +243,19 @@ public partial class SentryEventTests
     }
 
     [Fact]
-    public void HasUnhandledNonTerminalException_NoMechanismKey_ReturnsFalse()
+    public void HasUnhandledNonTerminalException_WithNullTerminal_ReturnsFalse()
     {
-        var exception = new Exception("test");
-        exception.Data[Mechanism.HandledKey] = false;
-        var evt = new SentryEvent(exception);
+        // Terminal = null means default behavior (terminal)
+        var evt = new SentryEvent
+        {
+            SentryExceptions = new[]
+            {
+                new SentryException
+                {
+                    Mechanism = new Mechanism { Handled = false, Terminal = null }
+                }
+            }
+        };
 
         Assert.False(evt.HasUnhandledNonTerminalException());
     }

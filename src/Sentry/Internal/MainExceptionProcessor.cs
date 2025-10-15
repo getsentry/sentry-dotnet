@@ -189,7 +189,6 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
 
         if (exception.Data[Mechanism.TerminalKey] is bool terminal)
         {
-            // The mechanism terminal flag was set by an integration.
             mechanism.Terminal = terminal;
             exception.Data.Remove(Mechanism.TerminalKey);
         }
