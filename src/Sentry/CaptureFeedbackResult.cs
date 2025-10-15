@@ -42,13 +42,13 @@ public struct CaptureFeedbackResult
     /// </summary>
     /// <param name="errorReason"></param>
     /// <returns></returns>
-    public static implicit operator CaptureFeedbackResult(CaptureFeedbackErrorReason errorReason) => new (errorReason);
+    public static implicit operator CaptureFeedbackResult(CaptureFeedbackErrorReason errorReason) => new(errorReason);
 
     /// <summary>
     /// Implicitly converts a non-empty <see cref="SentryId"/> to a <see cref="CaptureFeedbackResult"/>
     /// </summary>
     /// <returns></returns>
-    public static implicit operator CaptureFeedbackResult(SentryId eventId) => new (eventId);
+    public static implicit operator CaptureFeedbackResult(SentryId eventId) => new(eventId);
 
     /// <summary>
     /// Returns true if feedback capture was successful, false otherwise.
