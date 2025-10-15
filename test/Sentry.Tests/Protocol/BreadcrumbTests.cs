@@ -108,6 +108,6 @@ public class BreadcrumbTests
         yield return new object[] { (new Breadcrumb(DateTimeOffset.MaxValue, type: "type"), """{"timestamp":"9999-12-31T23:59:59.999Z","type":"type"}""") };
         yield return new object[] { (new Breadcrumb(DateTimeOffset.MaxValue, data: new Dictionary<string, string> { { "key", "val" } }), """{"timestamp":"9999-12-31T23:59:59.999Z","data":{"key":"val"}}""") };
         yield return new object[] { (new Breadcrumb(DateTimeOffset.MaxValue, category: "category"), """{"timestamp":"9999-12-31T23:59:59.999Z","category":"category"}""") };
-        yield return new object[] { (new Breadcrumb(DateTimeOffset.MaxValue, level: BreadcrumbLevel.Critical), """{"timestamp":"9999-12-31T23:59:59.999Z","level":"critical"}""") };
+        yield return new object[] { (new Breadcrumb(DateTimeOffset.MaxValue, level: BreadcrumbLevel.Fatal), """{"timestamp":"9999-12-31T23:59:59.999Z","level":"fatal"}""") };
     }
 }
