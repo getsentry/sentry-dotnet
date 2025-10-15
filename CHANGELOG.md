@@ -19,6 +19,7 @@
 
 - This release adds support for .NET 10 and drops support for net8.0-android, net8.0-ios, net8.0-maccatalyst and net8.0-windows10.0.19041.0 ([#4461](https://github.com/getsentry/sentry-dotnet/pull/4461))
 - Added support for v3 of the Android AssemblyStore format that is used in .NET 10 and dropped support for v1 that was used in .NET 8 ([#4583](https://github.com/getsentry/sentry-dotnet/pull/4583))
+
 ## 5.16.1
 
 ### Fixes
