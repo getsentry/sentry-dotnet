@@ -134,8 +134,13 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// </summary>
     /// <param name="feedback">The feedback to send to Sentry.</param>
     /// <param name="configureScope">Callback method to configure the scope.</param>
-    /// <param name="hint">An optional hint providing high level context for the source of the event, including attachments</param>
-    /// <returns>The SentryId of the captured feedback, if successful. SentryId.Empty if feedback capture fails.</returns>
+    /// <param name="hint">
+    /// An optional hint providing high-level context for the source of the event, including attachments
+    /// </param>
+    /// <returns>
+    /// A <see cref="CaptureFeedbackResult"/> that will contain the Id of the new event (if successful) or an error code
+    /// indicating the reason for failure (if feedback capture fails).
+    /// </returns>
     public CaptureFeedbackResult CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope,
         SentryHint? hint = null);
 }
