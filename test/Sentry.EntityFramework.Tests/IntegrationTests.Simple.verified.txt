@@ -61,7 +61,7 @@
         {
           Message: my exception,
           Category: Exception,
-          Level: critical
+          Level: fatal
         }
       ],
       Spans: [

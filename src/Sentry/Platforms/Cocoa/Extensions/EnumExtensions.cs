@@ -22,7 +22,7 @@ internal static class EnumExtensions
             CocoaSdk.SentryLevel.Info => BreadcrumbLevel.Info,
             CocoaSdk.SentryLevel.Warning => BreadcrumbLevel.Warning,
             CocoaSdk.SentryLevel.Error => BreadcrumbLevel.Error,
-            CocoaSdk.SentryLevel.Fatal => BreadcrumbLevel.Critical,
+            CocoaSdk.SentryLevel.Fatal => BreadcrumbLevel.Fatal,
             _ => throw new ArgumentOutOfRangeException(nameof(level), level, null)
         };
 
@@ -33,7 +33,7 @@ internal static class EnumExtensions
             BreadcrumbLevel.Info => CocoaSdk.SentryLevel.Info,
             BreadcrumbLevel.Warning => CocoaSdk.SentryLevel.Warning,
             BreadcrumbLevel.Error => CocoaSdk.SentryLevel.Error,
-            BreadcrumbLevel.Critical => CocoaSdk.SentryLevel.Fatal,
+            BreadcrumbLevel.Fatal => CocoaSdk.SentryLevel.Fatal,
             _ => throw new ArgumentOutOfRangeException(nameof(level), level, message: default)
         };
 
