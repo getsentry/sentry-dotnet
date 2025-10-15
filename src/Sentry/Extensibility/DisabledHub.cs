@@ -154,6 +154,11 @@ public class DisabledHub : IHub, IDisposable
     }
 
     /// <summary>
+    /// Always returns false.
+    /// </summary>
+    public bool IsSessionActive => false;
+
+    /// <summary>
     /// No-Op.
     /// </summary>
     public void BindClient(ISentryClient client)

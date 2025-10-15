@@ -439,6 +439,8 @@ internal class Hub : IHub, IDisposable
     public void EndSession(SessionEndStatus status = SessionEndStatus.Exited) =>
         EndSession(_clock.GetUtcNow(), status);
 
+    public bool IsSessionActive => _sessionManager.IsSessionActive;
+
     private ISpan? GetLinkedSpan(SentryEvent evt)
     {
         // Find the span which is bound to the same exception

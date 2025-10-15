@@ -785,6 +785,9 @@ static partial class SentrySdk
     public static void ResumeSession()
         => CurrentHub.ResumeSession();
 
+    /// <inheritdoc cref="IHub.IsSessionActive"/>
+    public static bool IsSessionActive { [DebuggerStepThrough] get => CurrentHub.IsSessionActive; }
+
     /// <summary>
     /// Deliberately crashes an application, which is useful for testing and demonstration purposes.
     /// </summary>

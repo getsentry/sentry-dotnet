@@ -107,6 +107,11 @@ public interface IHub : ISentryClient, ISentryScopeManager
     public void EndSession(SessionEndStatus status = SessionEndStatus.Exited);
 
     /// <summary>
+    /// Returns whether there is currently an active session.
+    /// </summary>
+    public bool IsSessionActive { get; }
+
+    /// <summary>
     /// Captures an event with a configurable scope.
     /// </summary>
     /// <remarks>
