@@ -41,7 +41,7 @@ public class SpanTracerTests
     }
 
     [Fact]
-    public void Dispose_TransactionIsUnfinished_FinishesTransaction()
+    public void Dispose_IsUnfinished_FinishesTransaction()
     {
         // Arrange
         var hub = Substitute.For<IHub>();
@@ -55,7 +55,7 @@ public class SpanTracerTests
     }
 
     [Fact]
-    public void Dispose_TransactionIsFinsished_DoesNothing()
+    public void Dispose_IsFinsished_DoesNothing()
     {
         // Arrange
         var hub = Substitute.For<IHub>();
