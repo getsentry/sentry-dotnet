@@ -2034,12 +2034,14 @@ public partial class HubTests : IDisposable
     public void CaptureFeedback_HubEnabled(bool enabled)
     {
         // Arrange
-        var expectedId = enabled ? SentryId.Create() : SentryId.Empty;
+        var expectedResult = enabled
+            ? new CaptureFeedbackResult(SentryId.Create())
+            : new CaptureFeedbackResult(CaptureFeedbackErrorReason.DisabledHub);
         var hub = _fixture.GetSut();
         if (enabled)
         {
             _fixture.Client.CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Any<Scope>(), Arg.Any<SentryHint>())
-                .Returns(expectedId);
+                .Returns(expectedResult);
         }
         else
         {
@@ -2052,7 +2054,7 @@ public partial class HubTests : IDisposable
         var result = hub.CaptureFeedback(feedback);
 
         // Assert
-        result.Should().Be(expectedId);
+        result.Should().Be(expectedResult);
         _fixture.Client.Received(enabled ? 1 : 0).CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 

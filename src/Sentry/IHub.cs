@@ -136,5 +136,6 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// <param name="configureScope">Callback method to configure the scope.</param>
     /// <param name="hint">An optional hint providing high level context for the source of the event, including attachments</param>
     /// <returns>The SentryId of the captured feedback, if successful. SentryId.Empty if feedback capture fails.</returns>
-    public SentryId CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null);
+    public CaptureFeedbackResult CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope,
+        SentryHint? hint = null);
 }

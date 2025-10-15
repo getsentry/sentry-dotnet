@@ -86,12 +86,12 @@ public class SentryClient : ISentryClient, IDisposable
     }
 
     /// <inheritdoc />
-    public SentryId CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    public CaptureFeedbackResult CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
     {
         if (string.IsNullOrEmpty(feedback.Message))
         {
             _options.LogWarning("Feedback dropped due to empty message.");
-            return SentryId.Empty;
+            return CaptureFeedbackErrorReason.EmptyMessage;
         }
 
         scope ??= new Scope(_options);
@@ -117,7 +117,7 @@ public class SentryClient : ISentryClient, IDisposable
 
         var attachments = hint.Attachments.ToList();
         var envelope = Envelope.FromFeedback(evt, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
-        return CaptureEnvelope(envelope) ? evt.EventId : SentryId.Empty;
+        return CaptureEnvelope(envelope) ? evt.EventId : CaptureFeedbackErrorReason.UnknownError;
     }
 
     /// <inheritdoc />
@@ -441,7 +441,7 @@ public class SentryClient : ISentryClient, IDisposable
     {
         if (_isDisposed == 1)
         {
-            _options.LogWarning("Enqueue envelope failed: disposed client");
+            _options.LogWarning("Enqueue envelope failed. Client is disposed.");
             return false;
         }
 
