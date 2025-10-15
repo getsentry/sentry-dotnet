@@ -34,7 +34,7 @@ public static class SentryExceptionExtensions
     /// <param name="handled">An optional flag indicating whether the exception was handled by the mechanism.</param>
     /// <param name="terminal">An optional flag indicating whether the exception is considered terminal.</param>
     public static void SetSentryMechanism(this Exception ex, string type, string? description = null,
-        bool? handled = null, bool terminal = true)
+        bool? handled = null, bool? terminal = null)
     {
         ex.Data[Mechanism.MechanismKey] = type;
 
@@ -56,6 +56,13 @@ public static class SentryExceptionExtensions
             ex.Data[Mechanism.HandledKey] = handled;
         }
 
-        ex.Data[Mechanism.TerminalKey] = terminal;
+        if (terminal == null)
+        {
+            ex.Data.Remove(Mechanism.TerminalKey);
+        }
+        else
+        {
+            ex.Data[Mechanism.TerminalKey] = terminal;
+        }
     }
 }
