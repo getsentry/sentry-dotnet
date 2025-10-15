@@ -80,7 +80,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError(e, "An error occurred when capturing the event {0}.", @event.EventId);
+            _options.LogError(e, "An error occurred when capturing the event '{0}'.", @event.EventId);
             return SentryId.Empty;
         }
     }
@@ -452,7 +452,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
 
         _options.LogWarning(
-            "The attempt to queue the event failed. Items in queue: {0}",
+            "The attempt to queue the event failed. Items in queue: '{0}'",
             Worker.QueuedItems);
 
         return false;

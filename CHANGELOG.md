@@ -4,9 +4,15 @@
 
 ### BREAKING CHANGES
 
+- `BreadcrumbLevel.Critical` has been renamed to `BreadcrumbLevel.Fatal` for consistency with the other Sentry SDKs ([#4605](https://github.com/getsentry/sentry-dotnet/pull/4605))
 - SentryOptions.IsEnvironmentUser now defaults to false on MAUI. The means the User.Name will no longer be set, by default, to the name of the device ([#4606](https://github.com/getsentry/sentry-dotnet/pull/4606))
 - Remove unnecessary files from SentryCocoaFramework before packing ([#4602](https://github.com/getsentry/sentry-dotnet/pull/4602))
 - CaptureFeedback now returns a SentryId that can be used to determine whether the call succeeded or failed ([#4613](https://github.com/getsentry/sentry-dotnet/pull/4613))
+- ScopeExtensions.Populate is now internal ([#4611](https://github.com/getsentry/sentry-dotnet/pull/4611))
+
+### Fixes
+
+- The SDK avoids redundant scope sync after transaction finish ([#4623](https://github.com/getsentry/sentry-dotnet/pull/4623))
 
 ## 6.0.0-preview.1
 
