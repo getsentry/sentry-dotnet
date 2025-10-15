@@ -36,7 +36,7 @@ internal class GlobalSessionManager : ISessionManager
 
         // TODO: session file should really be process-isolated, but we
         // don't have a proper mechanism for that right now.
-        _persistenceDirectoryPath = options.TryGetDsnSpecificCacheDirectoryPath();
+        _persistenceDirectoryPath = options.TryGetIsolatedCacheDirectoryPath();
     }
 
     // Take pause timestamp directly instead of referencing _lastPauseTimestamp to avoid
