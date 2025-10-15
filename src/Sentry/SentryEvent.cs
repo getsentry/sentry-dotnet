@@ -193,7 +193,7 @@ public sealed class SentryEvent : IEventLike, ISentryJsonSerializable
     internal bool HasUnhandledNonTerminalException()
     {
         // Generally, an unhandled exception is considered terminal.
-        // Exception: If it is an unhandled exception but the mechanism key is found in NonTerminalMechanismKeys
+        // Exception: If it is an unhandled exception but the terminal flag is explicitly set to false.
         // I.e. captured through the UnobservedTaskExceptionIntegration, or the exception capture integrations in the Unity SDK
 
         if (Exception?.Data[Mechanism.HandledKey] is false)
@@ -207,7 +207,7 @@ public sealed class SentryEvent : IEventLike, ISentryJsonSerializable
         }
 
         return SentryExceptions?.Any(e =>
-            e.Mechanism is { Handled: false } mechanism && mechanism.Data[Mechanism.TerminalKey] is false
+            e.Mechanism is { Handled: false, Terminal: false }
         ) ?? false;
     }
 

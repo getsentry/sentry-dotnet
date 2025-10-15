@@ -269,7 +269,7 @@ public partial class SentryEventTests
         exception.SetSentryMechanism("AppDomain.UnhandledException", handled: false, terminal: true);
         var evt = new SentryEvent(exception);
 
-        Assert.True(evt.HasUnhandledNonTerminalException());
+        Assert.True(evt.HasTerminalException());
     }
 
     [Fact]
@@ -279,7 +279,7 @@ public partial class SentryEventTests
         exception.SetSentryMechanism("UnobservedTaskException", handled: false, terminal: false);
         var evt = new SentryEvent(exception);
 
-        Assert.False(evt.HasUnhandledNonTerminalException());
+        Assert.False(evt.HasTerminalException());
     }
 
     [Fact]
@@ -289,7 +289,7 @@ public partial class SentryEventTests
         exception.SetSentryMechanism("test", handled: true);
         var evt = new SentryEvent(exception);
 
-        Assert.False(evt.HasUnhandledNonTerminalException());
+        Assert.False(evt.HasTerminalException());
     }
 
     [Fact]
@@ -297,6 +297,6 @@ public partial class SentryEventTests
     {
         var evt = new SentryEvent();
 
-        Assert.False(evt.HasUnhandledNonTerminalException());
+        Assert.False(evt.HasTerminalException());
     }
 }

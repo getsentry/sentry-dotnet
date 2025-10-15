@@ -535,7 +535,7 @@ public partial class HubTests : IDisposable
         hub.ConfigureScope(scope => scope.Transaction = transaction);
 
         var exception = new Exception("test");
-        exception.SetSentryMechanism("test", handled: false);
+        exception.SetSentryMechanism("test", handled: false, terminal: true);
 
         // Act
         hub.CaptureEvent(new SentryEvent(exception));

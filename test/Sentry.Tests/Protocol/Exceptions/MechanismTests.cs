@@ -18,6 +18,7 @@ public class MechanismTests
             Description = "mechanism description",
             Source = "exception source",
             Handled = true,
+            Terminal = false,
             HelpLink = "https://helplink",
             Synthetic = true,
             IsExceptionGroup = true,
@@ -37,6 +38,7 @@ public class MechanismTests
               "source": "exception source",
               "help_link": "https://helplink",
               "handled": true,
+              "terminal": false,
               "synthetic": true,
               "is_exception_group": true,
               "exception_id": 123,
@@ -68,6 +70,8 @@ public class MechanismTests
         yield return new object[] { (new Mechanism { Type = "some type" }, """{"type":"some type"}""") };
         yield return new object[] { (new Mechanism { Handled = false }, """{"type":"generic","handled":false}""") };
         yield return new object[] { (new Mechanism { Handled = true }, """{"type":"generic","handled":true}""") };
+        yield return new object[] { (new Mechanism { Terminal = false }, """{"type":"generic","terminal":false}""") };
+        yield return new object[] { (new Mechanism { Terminal = true }, """{"type":"generic","terminal":true}""") };
         yield return new object[] { (new Mechanism { Synthetic = true }, """{"type":"generic","synthetic":true}""") };
         yield return new object[] { (new Mechanism { HelpLink = "https://sentry.io/docs" }, """{"type":"generic","help_link":"https://sentry.io/docs"}""") };
         yield return new object[] { (new Mechanism { Description = "some desc" }, """{"type":"generic","description":"some desc"}""") };

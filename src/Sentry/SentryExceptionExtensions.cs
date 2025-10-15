@@ -37,7 +37,6 @@ public static class SentryExceptionExtensions
         bool? handled = null, bool terminal = true)
     {
         ex.Data[Mechanism.MechanismKey] = type;
-        ex.Data[Mechanism.TerminalKey] = terminal;
 
         if (string.IsNullOrWhiteSpace(description))
         {
@@ -56,5 +55,7 @@ public static class SentryExceptionExtensions
         {
             ex.Data[Mechanism.HandledKey] = handled;
         }
+
+        ex.Data[Mechanism.TerminalKey] = terminal;
     }
 }
