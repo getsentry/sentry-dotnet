@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Do not allow multiple `sentry.proguard-uuid` metadata to be set in Android manifest ([#4647](https://github.com/getsentry/sentry-dotnet/pull/4647))
+
 ### Dependencies
 
 - Bump Java SDK from v8.22.0 to v8.23.0 ([#4586](https://github.com/getsentry/sentry-dotnet/pull/4586))
