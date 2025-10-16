@@ -13,7 +13,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     private readonly SentryOptions? _options;
     private readonly Timer? _idleTimer;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
-    private int _hasFinished = 0;
+    private InterlockedBoolean _hasFinished;
 
     private InterlockedBoolean _cancelIdleTimeout;
 
@@ -363,8 +363,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     /// <inheritdoc />
     public void Finish()
     {
-        // TODO: Replace with InterlockedBoolean once this has been merged into version6
-        if (Interlocked.Exchange(ref _hasFinished, 1) == 1)
+        if (_hasFinished.Exchange(true))
         {
             return;
         }
