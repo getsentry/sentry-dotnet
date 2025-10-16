@@ -915,7 +915,7 @@ public partial class SentryClientTests : IDisposable
         var result = sut.CaptureFeedback(feedback);
 
         // Assert
-        result.Succeededed.Should().BeFalse();
+        result.Succeeded.Should().BeFalse();
         result.ErrorReason.Should().Be(CaptureFeedbackErrorReason.UnknownError);
         result.EventId.Should().Be(SentryId.Empty);
     }
@@ -933,7 +933,7 @@ public partial class SentryClientTests : IDisposable
         //Assert
         _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
         // Assert
-        result.Succeededed.Should().BeFalse();
+        result.Succeeded.Should().BeFalse();
         result.ErrorReason.Should().Be(CaptureFeedbackErrorReason.EmptyMessage);
         result.EventId.Should().Be(SentryId.Empty);
     }

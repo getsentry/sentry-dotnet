@@ -57,7 +57,7 @@ namespace Sentry
         public Sentry.SentryId EventId;
         public CaptureFeedbackResult(Sentry.CaptureFeedbackErrorReason errorReason) { }
         public CaptureFeedbackResult(Sentry.SentryId eventId) { }
-        public bool Succeededed { get; }
+        public bool Succeeded { get; }
         public static Sentry.CaptureFeedbackResult op_Implicit(Sentry.CaptureFeedbackErrorReason errorReason) { }
         public static Sentry.CaptureFeedbackResult op_Implicit(Sentry.SentryId eventId) { }
     }

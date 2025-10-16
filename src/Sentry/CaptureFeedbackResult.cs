@@ -53,7 +53,7 @@ public struct CaptureFeedbackResult
     /// <summary>
     /// Returns true if feedback capture was successful, false otherwise.
     /// </summary>
-    public bool Succeededed => ErrorReason == null;
+    public bool Succeeded => ErrorReason == null;
 }
 
 /// <summary>
