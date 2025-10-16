@@ -872,7 +872,8 @@ internal class Hub : IHub, IDisposable
         }
         //Don't dispose of ScopeManager since we want dangling transactions to still be able to access tags.
 
-        _backpressureMonitor?.Dispose();
+        // Don't dispose of _backpressureMonitor since we want the client to continue to process envelopes without
+        // throwing an ObjectDisposedException.
 
 #if __IOS__
             // TODO

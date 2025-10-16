@@ -3,7 +3,7 @@ namespace Sentry;
 /// <summary>
 /// The result type of the <see cref="ISentryClient.CaptureFeedback"/> method
 /// </summary>
-public struct CaptureFeedbackResult
+public sealed class CaptureFeedbackResult
 {
     /// <summary>
     /// Creates a successful feedback capture result with the specified event Id.
@@ -17,6 +17,7 @@ public struct CaptureFeedbackResult
         }
 
         EventId = eventId;
+        ErrorReason = null;
     }
 
     /// <summary>
@@ -32,10 +33,10 @@ public struct CaptureFeedbackResult
     /// <summary>
     /// The Id of the captured feedback, if successful. <see cref="SentryId.Empty"/> if feedback capture fails.
     /// </summary>
-    public SentryId EventId;
+    public SentryId EventId { get; private init; }
 
     /// <inheritdoc cref="CaptureFeedbackErrorReason"/>
-    public CaptureFeedbackErrorReason? ErrorReason;
+    public CaptureFeedbackErrorReason? ErrorReason { get; }
 
     /// <summary>
     /// Implicitly converts a <see cref="CaptureFeedbackErrorReason"/> to a <see cref="CaptureFeedbackResult"/>
@@ -54,42 +55,38 @@ public struct CaptureFeedbackResult
     /// Returns true if feedback capture was successful, false otherwise.
     /// </summary>
     public bool Succeeded => ErrorReason == null;
-}
 
-/// <summary>
-/// Used to specify the reason why feedback capture failed, in the event of a failure
-/// </summary>
-public enum CaptureFeedbackErrorReason
-{
     /// <summary>
-    /// <para>
-    /// An unknown error occurred (enable debug mode and check the logs for details).
-    /// </para>
-    /// <para>
-    /// Possible causes:
-    /// <list type="bullet">
-    ///   <item>
-    ///     <description>An exception from the configureScope callback</description>
-    ///   </item>
-    ///   <item>
-    ///     <description>A transmission error when sending the envelope</description>
-    ///   </item>
-    ///   <item>
-    ///     <description>An attempt to send feedback while the application is shutting down</description>
-    ///   </item>
-    ///   <item>
-    ///     <description>Something more mysterious...</description>
-    ///   </item>
-    /// </list>
-    /// </para>
+    /// Determines whether the specified object is equal to the current object.
     /// </summary>
-    UnknownError,
+    public override bool Equals(object? obj) =>
+        obj is CaptureFeedbackResult other && Equals(other);
+
     /// <summary>
-    /// Sentry is disabled (very likely an empty DSN was provided when initialising the SDK).
+    /// Determines whether the specified <see cref="CaptureFeedbackResult"/> is equal to the current object.
     /// </summary>
-    DisabledHub,
+    public bool Equals(CaptureFeedbackResult? other) =>
+        other is not null &&
+        EventId.Equals(other.EventId) &&
+        Equals(ErrorReason, other.ErrorReason);
+
     /// <summary>
-    /// The <see cref="SentryFeedback.Message"/> message is empty.
+    /// Serves as the default hash function.
     /// </summary>
-    EmptyMessage,
+    public override int GetHashCode() =>
+        HashCode.Combine(EventId, ErrorReason);
+
+    /// <summary>
+    /// Determines whether two specified instances of <see cref="CaptureFeedbackResult"/> are equal.
+    /// Will return true if all of the members are equal.
+    /// </summary>
+    public static bool operator ==(CaptureFeedbackResult? left, CaptureFeedbackResult? right) =>
+        Equals(left, right);
+
+    /// <summary>
+    /// Determines whether two specified instances of <see cref="CaptureFeedbackResult"/> are not equal.
+    /// Will return true if any of the members are not equal.
+    /// </summary>
+    public static bool operator !=(CaptureFeedbackResult? left, CaptureFeedbackResult? right) =>
+        !Equals(left, right);
 }

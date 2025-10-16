@@ -20,7 +20,6 @@ public class SentryClient : ISentryClient, IDisposable
     private readonly ISessionManager _sessionManager;
     private readonly RandomValuesFactory _randomValuesFactory;
     private readonly Enricher _enricher;
-    private volatile int _isDisposed = 0;
 
     internal IBackgroundWorker Worker { get; }
 
@@ -439,12 +438,6 @@ public class SentryClient : ISentryClient, IDisposable
     /// <inheritdoc cref="ISentryClient.CaptureEnvelope"/>
     public bool CaptureEnvelope(Envelope envelope)
     {
-        if (_isDisposed == 1)
-        {
-            _options.LogWarning("Enqueue envelope failed. Client is disposed.");
-            return false;
-        }
-
         if (Worker.EnqueueEnvelope(envelope))
         {
             _options.LogInfo("Envelope queued up: '{0}'", envelope.TryGetEventId(_options.DiagnosticLogger));
@@ -463,11 +456,6 @@ public class SentryClient : ISentryClient, IDisposable
     /// </summary>
     public void Dispose()
     {
-        if (Interlocked.Exchange(ref _isDisposed, 1) == 1)
-        {
-            return;
-        }
-
         _options.LogDebug("Flushing SentryClient.");
 
         try
