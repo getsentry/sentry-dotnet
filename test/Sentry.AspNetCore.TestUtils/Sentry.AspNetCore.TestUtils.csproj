@@ -36,8 +36,10 @@
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.1.22" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="2.1.1" />
 
+    <!-- https://github.com/advisories/GHSA-5rrx-jjjq-q2r5 -->
     <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.3.6" />
-    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets" Version="2.3.0" />
+    <!-- https://github.com/advisories/GHSA-vmch-3w2x-vhgq -->
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets" Version="2.1.40" />
 
   </ItemGroup>
 

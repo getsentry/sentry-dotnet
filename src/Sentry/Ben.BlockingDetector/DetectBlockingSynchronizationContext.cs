@@ -10,8 +10,8 @@ namespace Sentry.Ben.BlockingDetector
 
         internal int _isSuppressed;
 
-        internal void Suppress() => Interlocked.Exchange(ref _isSuppressed, _isSuppressed + 1);
-        internal void Restore() => Interlocked.Exchange(ref _isSuppressed, _isSuppressed - 1);
+        internal void Suppress() => Interlocked.Increment(ref _isSuppressed);
+        internal void Restore() => Interlocked.Decrement(ref _isSuppressed);
 
         public DetectBlockingSynchronizationContext(IBlockingMonitor monitor)
         {
