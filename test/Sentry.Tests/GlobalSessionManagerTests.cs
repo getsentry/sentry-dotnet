@@ -1,13 +1,9 @@
-using System.IO.Abstractions.TestingHelpers;
-
 namespace Sentry.Tests;
 
-public class GlobalSessionManagerTests : IDisposable
+public class GlobalSessionManagerTests
 {
-    private class Fixture : IDisposable
+    private class Fixture
     {
-        public TempDirectory CacheDirectory;
-
         public InMemoryDiagnosticLogger Logger { get; }
 
         public SentryOptions Options { get; }
@@ -21,16 +17,14 @@ public class GlobalSessionManagerTests : IDisposable
             Clock.GetUtcNow().Returns(DateTimeOffset.Now);
             Logger = new InMemoryDiagnosticLogger();
 
-            CacheDirectory = new TempDirectory();
             Options = new SentryOptions
             {
                 Dsn = ValidDsn,
                 Release = "test",
                 Debug = true,
                 DiagnosticLogger = Logger,
-                CacheDirectoryPath = CacheDirectory.Path,
-                // This keeps all writing-to-file operations in memory instead of actually writing to disk
-                FileSystem = new FakeFileSystem()
+                CacheDirectoryPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()),
+                FileSystem = new FakeFileSystem() // Keep all fileIO operations in memory
             };
 
             configureOptions?.Invoke(Options);
@@ -41,8 +35,6 @@ public class GlobalSessionManagerTests : IDisposable
                 Options,
                 Clock,
                 PersistedSessionProvider);
-
-        public void Dispose() => CacheDirectory.Dispose();
     }
 
     private readonly Fixture _fixture = new();
@@ -104,22 +96,16 @@ public class GlobalSessionManagerTests : IDisposable
     [SkippableFact]
     public void StartSession_CacheDirectoryNotProvided_InstallationIdFileCreated()
     {
-        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI");
-
         // Arrange
         _fixture.Options.CacheDirectoryPath = null;
-        // Setting the test-cache directory to be properly disposed
-        _fixture.CacheDirectory = new TempDirectory(Path.Combine(
+        var filePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Sentry",
-            _fixture.Options.Dsn!.GetHashString()));
-
-        var sut = _fixture.GetSut();
-
-        var filePath = Path.Combine(_fixture.CacheDirectory.Path, ".installation");
+            _fixture.Options.Dsn!.GetHashString(),
+            ".installation");
 
         // Act
-        sut.StartSession();
+        _fixture.GetSut().StartSession();
 
         // Assert
         Assert.True(_fixture.Options.FileSystem.FileExists(filePath));
@@ -131,18 +117,15 @@ public class GlobalSessionManagerTests : IDisposable
         // Arrange
         _fixture.Options.DisableFileWrite = true;
         _fixture.Options.CacheDirectoryPath = null;
-        // Setting the test-cache directory to be properly disposed
-        _fixture.CacheDirectory = new TempDirectory(Path.Combine(
+
+        var filePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Sentry",
-            _fixture.Options.Dsn!.GetHashString()));
-
-        var sut = _fixture.GetSut();
-
-        var filePath = Path.Combine(_fixture.CacheDirectory.Path, ".installation");
+            _fixture.Options.Dsn!.GetHashString(),
+            ".installation");
 
         // Act
-        sut.StartSession();
+        _fixture.GetSut().StartSession();
 
         // Assert
         Assert.False(_fixture.Options.FileSystem.FileExists(filePath));
@@ -468,9 +451,6 @@ public class GlobalSessionManagerTests : IDisposable
         _fixture.Options.CrashedLastRun = () => true;
         var sut = _fixture.GetSut();
 
-        using var fixture = new Fixture(o =>
-            o.CrashedLastRun = () => true);
-
         sut.StartSession();
 
         // Act
@@ -558,9 +538,4 @@ public class GlobalSessionManagerTests : IDisposable
             DateTimeOffset.Now,
             1,
             null);
-
-    public void Dispose()
-    {
-        _fixture.Dispose();
-    }
 }
