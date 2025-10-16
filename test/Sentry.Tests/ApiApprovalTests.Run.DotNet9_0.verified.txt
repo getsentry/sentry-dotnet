@@ -61,8 +61,6 @@ namespace Sentry
         public bool Equals(Sentry.CaptureFeedbackResult? other) { }
         public override bool Equals(object? obj) { }
         public override int GetHashCode() { }
-        public static Sentry.CaptureFeedbackResult op_Implicit(Sentry.CaptureFeedbackErrorReason errorReason) { }
-        public static Sentry.CaptureFeedbackResult op_Implicit(Sentry.SentryId eventId) { }
         public static bool operator !=(Sentry.CaptureFeedbackResult? left, Sentry.CaptureFeedbackResult? right) { }
         public static bool operator ==(Sentry.CaptureFeedbackResult? left, Sentry.CaptureFeedbackResult? right) { }
     }

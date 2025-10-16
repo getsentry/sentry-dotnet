@@ -179,7 +179,7 @@ public class DisabledHub : IHub, IDisposable
     public CaptureFeedbackResult CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope,
         SentryHint? hint = null)
     {
-        return CaptureFeedbackErrorReason.DisabledHub;
+        return new CaptureFeedbackResult(CaptureFeedbackErrorReason.DisabledHub);
     }
 
     /// <summary>
@@ -187,7 +187,7 @@ public class DisabledHub : IHub, IDisposable
     /// </summary>
     public CaptureFeedbackResult CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
     {
-        return CaptureFeedbackErrorReason.DisabledHub;
+        return new CaptureFeedbackResult(CaptureFeedbackErrorReason.DisabledHub);
     }
 
     /// <summary>

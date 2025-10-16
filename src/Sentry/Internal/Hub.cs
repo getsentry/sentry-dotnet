@@ -594,7 +594,7 @@ internal class Hub : IHub, IDisposable
     {
         if (!IsEnabled)
         {
-            return CaptureFeedbackErrorReason.DisabledHub;
+            return new CaptureFeedbackResult(CaptureFeedbackErrorReason.DisabledHub);
         }
 
         try
@@ -607,7 +607,7 @@ internal class Hub : IHub, IDisposable
         catch (Exception e)
         {
             _options.LogError(e, "Failure to capture feedback");
-            return CaptureFeedbackErrorReason.UnknownError;
+            return new CaptureFeedbackResult(CaptureFeedbackErrorReason.UnknownError);
         }
     }
 
@@ -615,7 +615,7 @@ internal class Hub : IHub, IDisposable
     {
         if (!IsEnabled)
         {
-            return CaptureFeedbackErrorReason.DisabledHub;
+            return new CaptureFeedbackResult(CaptureFeedbackErrorReason.DisabledHub);
         }
 
         try
@@ -632,7 +632,7 @@ internal class Hub : IHub, IDisposable
         catch (Exception e)
         {
             _options.LogError(e, "Failure to capture feedback");
-            return CaptureFeedbackErrorReason.UnknownError;
+            return new CaptureFeedbackResult(CaptureFeedbackErrorReason.UnknownError);
         }
     }
 

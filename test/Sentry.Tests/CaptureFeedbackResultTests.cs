@@ -66,34 +66,6 @@ public class CaptureFeedbackResultTests
     }
 
     [Fact]
-    public void ImplicitOperator_FromSentryId_CreatesResultWithEventId()
-    {
-        // Arrange
-        var eventId = SentryId.Create();
-
-        // Act
-        CaptureFeedbackResult result = eventId;
-
-        // Assert
-        result.EventId.Should().Be(eventId);
-        result.ErrorReason.Should().BeNull();
-    }
-
-    [Fact]
-    public void ImplicitOperator_FromErrorReason_CreatesResultWithError()
-    {
-        // Arrange
-        var errorReason = CaptureFeedbackErrorReason.DisabledHub;
-
-        // Act
-        CaptureFeedbackResult result = errorReason;
-
-        // Assert
-        result.EventId.Should().Be(SentryId.Empty);
-        result.ErrorReason.Should().Be(errorReason);
-    }
-
-    [Fact]
     public void Equals_WithSameEventIdAndErrorReason_ReturnsTrue()
     {
         // Arrange
