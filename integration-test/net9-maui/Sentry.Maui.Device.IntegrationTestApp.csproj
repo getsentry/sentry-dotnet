@@ -10,6 +10,7 @@
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <SelfContained>true</SelfContained>
 
     <!-- Speed up CI build -->
     <MtouchUseLlvm>false</MtouchUseLlvm>
