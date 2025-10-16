@@ -25,10 +25,6 @@ namespace Sentry.Maui
         public BreadcrumbEvent(object? sender, string eventName, [System.Runtime.CompilerServices.ParamCollection] [System.Runtime.CompilerServices.TupleElementNames(new string[] {
                 "key",
                 "value"})] System.Collections.Generic.IEnumerable<System.ValueTuple<string, string>> extraData) { }
-        [System.Obsolete("Use one of the other simpler constructors instead.")]
-        public BreadcrumbEvent(object? sender, string eventName, [System.Runtime.CompilerServices.TupleElementNames(new string[] {
-                "Key",
-                "Value"})] System.Collections.Generic.IEnumerable<System.ValueTuple<string, string>>[] extraData) { }
         public string EventName { get; }
         public System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, string>> ExtraData { get; }
         public object? Sender { get; }

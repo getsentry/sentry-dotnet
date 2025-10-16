@@ -7,6 +7,9 @@
 - `BreadcrumbLevel.Critical` has been renamed to `BreadcrumbLevel.Fatal` for consistency with the other Sentry SDKs ([#4605](https://github.com/getsentry/sentry-dotnet/pull/4605))
 - SentryOptions.IsEnvironmentUser now defaults to false on MAUI. The means the User.Name will no longer be set, by default, to the name of the device ([#4606](https://github.com/getsentry/sentry-dotnet/pull/4606))
 - Remove unnecessary files from SentryCocoaFramework before packing ([#4602](https://github.com/getsentry/sentry-dotnet/pull/4602))
+- Removed obsolete APIs ([#4619](https://github.com/getsentry/sentry-dotnet/pull/4619))
+  - Removed the unusual constructor from `Sentry.Maui.BreadcrumbEvent` that had been marked as obsolete. That constructor expected a `IEnumerable<(string Key, string Value)>[]` argument (i.e. an array of IEnumerable of tuples). If you were using this constructor, you should instead use the alternate constructor that expects just an IEnumerable of tuples: `IEnumerable<(string Key, string Value)>`.
+  - Removed `SentrySdk.CaptureUserFeedback` and all associated members. Use the newer `SentrySdk.CaptureFeedback` instead.
 - Backpressure handling is now enabled by default, meaning that the SDK will monitor system health and reduce the sampling rate of events and transactions when the system is under load. When the system is determined to be healthy again, the sampling rates are returned to their original levels. ([#4615](https://github.com/getsentry/sentry-dotnet/pull/4615))
 - ScopeExtensions.Populate is now internal ([#4611](https://github.com/getsentry/sentry-dotnet/pull/4611))
 

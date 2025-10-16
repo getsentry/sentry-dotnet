@@ -37,13 +37,6 @@ public interface ISentryClient
     public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null);
 
     /// <summary>
-    /// Captures a user feedback.
-    /// </summary>
-    /// <param name="userFeedback">The user feedback to send to Sentry.</param>
-    [Obsolete("Use CaptureFeedback instead.")]
-    public void CaptureUserFeedback(UserFeedback userFeedback);
-
-    /// <summary>
     /// Captures a transaction.
     /// </summary>
     /// <remarks>
