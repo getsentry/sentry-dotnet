@@ -53,6 +53,9 @@ public class SentryLogTests
         log.Parameters.Should().BeEquivalentTo(new KeyValuePair<string, object>[] { new("param", "params"), });
         log.ParentSpanId.Should().Be(ParentSpanId);
 
+        // should only show up in sdk integrations
+        log.TryGetAttribute("sentry.origin", out object origin).Should().BeFalse();
+
         log.TryGetAttribute("attribute", out object attribute).Should().BeTrue();
         attribute.Should().Be("value");
         log.TryGetAttribute("sentry.environment", out string environment).Should().BeTrue();
