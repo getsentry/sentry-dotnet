@@ -176,15 +176,18 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// No-Op.
     /// </summary>
-    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+    public CaptureFeedbackResult CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope,
+        SentryHint? hint = null)
     {
+        return new CaptureFeedbackResult(CaptureFeedbackErrorReason.DisabledHub);
     }
 
     /// <summary>
     /// No-Op.
     /// </summary>
-    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    public CaptureFeedbackResult CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
     {
+        return new CaptureFeedbackResult(CaptureFeedbackErrorReason.DisabledHub);
     }
 
     /// <summary>

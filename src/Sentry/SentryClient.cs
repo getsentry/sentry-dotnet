@@ -85,12 +85,12 @@ public class SentryClient : ISentryClient, IDisposable
     }
 
     /// <inheritdoc />
-    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    public CaptureFeedbackResult CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
     {
         if (string.IsNullOrEmpty(feedback.Message))
         {
             _options.LogWarning("Feedback dropped due to empty message.");
-            return;
+            return new CaptureFeedbackResult(CaptureFeedbackErrorReason.EmptyMessage);
         }
 
         scope ??= new Scope(_options);
@@ -116,7 +116,9 @@ public class SentryClient : ISentryClient, IDisposable
 
         var attachments = hint.Attachments.ToList();
         var envelope = Envelope.FromFeedback(evt, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
-        CaptureEnvelope(envelope);
+        return CaptureEnvelope(envelope)
+            ? new CaptureFeedbackResult(evt.EventId)
+            : new CaptureFeedbackResult(CaptureFeedbackErrorReason.UnknownError);
     }
 
     /// <inheritdoc />
