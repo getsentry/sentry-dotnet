@@ -51,15 +51,18 @@ namespace Sentry
         DisabledHub = 1,
         EmptyMessage = 2,
     }
-    public struct CaptureFeedbackResult
+    public sealed class CaptureFeedbackResult
     {
-        public Sentry.CaptureFeedbackErrorReason? ErrorReason;
-        public Sentry.SentryId EventId;
         public CaptureFeedbackResult(Sentry.CaptureFeedbackErrorReason errorReason) { }
         public CaptureFeedbackResult(Sentry.SentryId eventId) { }
-        public bool Succeededed { get; }
-        public static Sentry.CaptureFeedbackResult op_Implicit(Sentry.CaptureFeedbackErrorReason errorReason) { }
-        public static Sentry.CaptureFeedbackResult op_Implicit(Sentry.SentryId eventId) { }
+        public Sentry.CaptureFeedbackErrorReason? ErrorReason { get; }
+        public Sentry.SentryId EventId { get; }
+        public bool Succeeded { get; }
+        public bool Equals(Sentry.CaptureFeedbackResult? other) { }
+        public override bool Equals(object? obj) { }
+        public override int GetHashCode() { }
+        public static bool operator !=(Sentry.CaptureFeedbackResult? left, Sentry.CaptureFeedbackResult? right) { }
+        public static bool operator ==(Sentry.CaptureFeedbackResult? left, Sentry.CaptureFeedbackResult? right) { }
     }
     public enum CheckInStatus
     {
