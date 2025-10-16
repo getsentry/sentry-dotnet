@@ -98,15 +98,14 @@ public class GlobalSessionManagerTests
     {
         // Arrange
         _fixture.Options.CacheDirectoryPath = null;
-
-        var sut = _fixture.GetSut();
         var filePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Sentry", _fixture.Options.Dsn!.GetHashString(),
+            "Sentry",
+            _fixture.Options.Dsn!.GetHashString(),
             ".installation");
 
         // Act
-        sut.StartSession();
+        _fixture.GetSut().StartSession();
 
         // Assert
         Assert.True(_fixture.Options.FileSystem.FileExists(filePath));
@@ -125,10 +124,8 @@ public class GlobalSessionManagerTests
             _fixture.Options.Dsn!.GetHashString(),
             ".installation");
 
-        var sut = _fixture.GetSut();
-
         // Act
-        sut.StartSession();
+        _fixture.GetSut().StartSession();
 
         // Assert
         Assert.False(_fixture.Options.FileSystem.FileExists(filePath));
