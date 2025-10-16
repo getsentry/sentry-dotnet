@@ -331,23 +331,6 @@ public sealed class Envelope : ISerializable, IDisposable
     }
 
     /// <summary>
-    /// Creates an envelope that contains a single user feedback.
-    /// </summary>
-    [Obsolete("Use FromFeedback instead.")]
-    public static Envelope FromUserFeedback(UserFeedback sentryUserFeedback)
-    {
-        var eventId = sentryUserFeedback.EventId;
-        var header = CreateHeader(eventId);
-
-        var items = new[]
-        {
-            EnvelopeItem.FromUserFeedback(sentryUserFeedback)
-        };
-
-        return new Envelope(eventId, header, items);
-    }
-
-    /// <summary>
     /// Creates an envelope that contains a single transaction.
     /// </summary>
     public static Envelope FromTransaction(SentryTransaction transaction)

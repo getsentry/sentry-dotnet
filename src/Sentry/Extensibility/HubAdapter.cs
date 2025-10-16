@@ -336,13 +336,4 @@ public sealed class HubAdapter : IHub
     [EditorBrowsable(EditorBrowsableState.Never)]
     public Task FlushAsync(TimeSpan timeout)
         => SentrySdk.FlushAsync(timeout);
-
-    /// <summary>
-    /// Forwards the call to <see cref="SentrySdk"/>
-    /// </summary>
-    [DebuggerStepThrough]
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("Use CaptureFeedback instead.")]
-    public void CaptureUserFeedback(UserFeedback sentryUserFeedback)
-        => SentrySdk.CaptureUserFeedback(sentryUserFeedback);
 }

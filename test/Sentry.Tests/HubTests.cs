@@ -2143,29 +2143,6 @@ public partial class HubTests : IDisposable
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void CaptureUserFeedback_HubEnabled(bool enabled)
-    {
-#pragma warning disable CS0618 // Type or member is obsolete
-        // Arrange
-        var hub = _fixture.GetSut();
-        if (!enabled)
-        {
-            hub.Dispose();
-        }
-
-        var feedback = new UserFeedback(SentryId.Create(), "foo", "bar@example.com", "baz");
-
-        // Act
-        hub.CaptureUserFeedback(feedback);
-
-        // Assert
-        _fixture.Client.Received(enabled ? 1 : 0).CaptureUserFeedback(Arg.Any<UserFeedback>());
-#pragma warning restore CS0618 // Type or member is obsolete
-    }
-
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
     public void CaptureSession_HubEnabled(bool enabled)
     {
         // Arrange
@@ -2347,56 +2324,6 @@ public partial class HubTests : IDisposable
             Arg.Any<object[]>());
         _fixture.Client.Received(1).CaptureFeedback(Arg.Is<SentryFeedback>(f => f.ContactEmail.IsNull()),
             Arg.Any<Scope>(), Arg.Any<SentryHint>());
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData(" ")]
-    [InlineData("test@example.com")]
-    [InlineData("user.name@domain.com")]
-    [InlineData("user+tag@example.com")]
-    public void CaptureUserFeedback_ValidEmail_FeedbackRegistered(string email)
-    {
-#pragma warning disable CS0618 // Type or member is obsolete
-        // Arrange
-        var hub = _fixture.GetSut();
-        var feedback = new UserFeedback(SentryId.Create(), "Test name", email, "Test comment");
-
-        // Act
-        hub.CaptureUserFeedback(feedback);
-
-        // Assert
-        _fixture.Client.Received(1).CaptureUserFeedback(Arg.Any<UserFeedback>());
-#pragma warning restore CS0618 // Type or member is obsolete
-    }
-
-    [Theory]
-    [InlineData("invalid-email")]
-    [InlineData("missing@domain")]
-    [InlineData("@missing-local.com")]
-    [InlineData("spaces in@email.com")]
-    public void CaptureUserFeedback_InvalidEmail_FeedbackDropped(string email)
-    {
-#pragma warning disable CS0618 // Type or member is obsolete
-        // Arrange
-        _fixture.Options.Debug = true;
-        _fixture.Options.DiagnosticLogger = Substitute.For<IDiagnosticLogger>();
-        _fixture.Options.DiagnosticLogger!.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-        var hub = _fixture.GetSut();
-        var feedback = new UserFeedback(SentryId.Create(), "Test name", email, "Test comment");
-
-        // Act
-        hub.CaptureUserFeedback(feedback);
-
-        // Assert
-        _fixture.Options.DiagnosticLogger.Received(1).Log(
-            SentryLevel.Warning,
-            Arg.Is<string>(s => s.Contains("invalid email format")),
-            null,
-            Arg.Any<object[]>());
-        _fixture.Client.Received(1).CaptureUserFeedback(Arg.Is<UserFeedback>(f => f.Email.IsNull()));
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     private class TestDisposableIntegration : ISdkIntegration, IDisposable

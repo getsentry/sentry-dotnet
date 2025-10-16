@@ -241,8 +241,6 @@ namespace Sentry
         void CaptureSession(Sentry.SessionUpdate sessionUpdate);
         void CaptureTransaction(Sentry.SentryTransaction transaction);
         void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.SentryHint? hint);
-        [System.Obsolete("Use CaptureFeedback instead.")]
-        void CaptureUserFeedback(Sentry.UserFeedback userFeedback);
         System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout);
     }
     public interface ISentryJsonSerializable
@@ -471,8 +469,6 @@ namespace Sentry
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.SentryHint? hint) { }
-        [System.Obsolete("Use CaptureFeedback instead.")]
-        public void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
         public void Dispose() { }
         public System.Threading.Tasks.Task FlushAsync(System.TimeSpan timeout) { }
     }
@@ -481,12 +477,10 @@ namespace Sentry
         public static Sentry.SentryId CaptureException(this Sentry.ISentryClient client, System.Exception ex) { }
         public static void CaptureFeedback(this Sentry.ISentryClient client, string message, string? contactEmail = null, string? name = null, string? replayId = null, string? url = null, Sentry.SentryId? associatedEventId = default, Sentry.Scope? scope = null, Sentry.SentryHint? hint = null) { }
         public static Sentry.SentryId CaptureMessage(this Sentry.ISentryClient client, string message, Sentry.SentryLevel level = 1) { }
-        [System.Obsolete("Use CaptureFeedback instead.")]
-        public static void CaptureUserFeedback(this Sentry.ISentryClient client, Sentry.SentryId eventId, string email, string comments, string? name = null) { }
         public static void Flush(this Sentry.ISentryClient client) { }
         public static void Flush(this Sentry.ISentryClient client, System.TimeSpan timeout) { }
         public static System.Threading.Tasks.Task FlushAsync(this Sentry.ISentryClient client) { }
-        [System.Obsolete("This method is meant for external usage only")]
+        [System.Obsolete("WARNING: This method is meant for internal usage only")]
         public static Sentry.SentryOptions? GetInternalSentryOptions(this Sentry.ISentryClient clientOrHub) { }
     }
     public static class SentryConstants
@@ -871,10 +865,6 @@ namespace Sentry
         public static void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public static void CaptureTransaction(Sentry.SentryTransaction transaction) { }
         public static void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.SentryHint? hint) { }
-        [System.Obsolete("Use CaptureFeedback instead.")]
-        public static void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
-        [System.Obsolete("Use CaptureFeedback instead.")]
-        public static void CaptureUserFeedback(Sentry.SentryId eventId, string email, string comments, string? name = null) { }
         [System.Obsolete("WARNING: This method deliberately causes a crash, and should not be used in a rea" +
             "l application.")]
         public static void CauseCrash(Sentry.CrashType crashType) { }
@@ -1308,17 +1298,6 @@ namespace Sentry
         public Sentry.ISpan StartChild(string operation) { }
         public void UnsetTag(string key) { }
     }
-    [System.Obsolete("Use SentryFeedback instead.")]
-    public sealed class UserFeedback : Sentry.ISentryJsonSerializable
-    {
-        public UserFeedback(Sentry.SentryId eventId, string? name, string? email, string? comments) { }
-        public string? Comments { get; }
-        public string? Email { get; }
-        public Sentry.SentryId EventId { get; }
-        public string? Name { get; }
-        public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
-        public static Sentry.UserFeedback FromJson(System.Text.Json.JsonElement json) { }
-    }
     public sealed class ViewHierarchy : Sentry.ISentryJsonSerializable
     {
         public ViewHierarchy(string renderingSystem) { }
@@ -1412,8 +1391,6 @@ namespace Sentry.Extensibility
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.SentryHint? hint) { }
-        [System.Obsolete("Use CaptureFeedback instead.")]
-        public void CaptureUserFeedback(Sentry.UserFeedback userFeedback) { }
         public void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
         public void ConfigureScope<TArg>(System.Action<Sentry.Scope, TArg> configureScope, TArg arg) { }
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
@@ -1464,8 +1441,6 @@ namespace Sentry.Extensibility
         public void CaptureSession(Sentry.SessionUpdate sessionUpdate) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction) { }
         public void CaptureTransaction(Sentry.SentryTransaction transaction, Sentry.Scope? scope, Sentry.SentryHint? hint) { }
-        [System.Obsolete("Use CaptureFeedback instead.")]
-        public void CaptureUserFeedback(Sentry.UserFeedback sentryUserFeedback) { }
         public void ConfigureScope(System.Action<Sentry.Scope> configureScope) { }
         public void ConfigureScope<TArg>(System.Action<Sentry.Scope, TArg> configureScope, TArg arg) { }
         public System.Threading.Tasks.Task ConfigureScopeAsync(System.Func<Sentry.Scope, System.Threading.Tasks.Task> configureScope) { }
@@ -1919,8 +1894,6 @@ namespace Sentry.Protocol.Envelopes
         public static Sentry.Protocol.Envelopes.Envelope FromFeedback(Sentry.SentryEvent @event, Sentry.Extensibility.IDiagnosticLogger? logger = null, System.Collections.Generic.IReadOnlyCollection<Sentry.SentryAttachment>? attachments = null, Sentry.SessionUpdate? sessionUpdate = null) { }
         public static Sentry.Protocol.Envelopes.Envelope FromSession(Sentry.SessionUpdate sessionUpdate) { }
         public static Sentry.Protocol.Envelopes.Envelope FromTransaction(Sentry.SentryTransaction transaction) { }
-        [System.Obsolete("Use FromFeedback instead.")]
-        public static Sentry.Protocol.Envelopes.Envelope FromUserFeedback(Sentry.UserFeedback sentryUserFeedback) { }
     }
     public sealed class EnvelopeItem : Sentry.Protocol.Envelopes.ISerializable, System.IDisposable
     {
@@ -1940,8 +1913,6 @@ namespace Sentry.Protocol.Envelopes
         public static Sentry.Protocol.Envelopes.EnvelopeItem FromFeedback(Sentry.SentryEvent @event) { }
         public static Sentry.Protocol.Envelopes.EnvelopeItem FromSession(Sentry.SessionUpdate sessionUpdate) { }
         public static Sentry.Protocol.Envelopes.EnvelopeItem FromTransaction(Sentry.SentryTransaction transaction) { }
-        [System.Obsolete("Use FromFeedback instead.")]
-        public static Sentry.Protocol.Envelopes.EnvelopeItem FromUserFeedback(Sentry.UserFeedback sentryUserFeedback) { }
     }
     public interface ISerializable
     {
