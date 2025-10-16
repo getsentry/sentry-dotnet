@@ -273,7 +273,7 @@
 
   <Target Name="UpdateAndroidMetadata"
           BeforeTargets="GetAssemblyAttributes"
-          Condition="'$(AndroidApplication)' == 'true'
+          Condition="'$(AndroidApplication)' == 'True'
             and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'
             and '$(SentryUploadAndroidProGuardMapping)' == 'true'">
     <ItemGroup>
