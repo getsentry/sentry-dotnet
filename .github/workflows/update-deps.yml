@@ -22,7 +22,7 @@ jobs:
             path: modules/sentry-native
           - name: CLI
             path: scripts/update-cli.ps1
-    uses: getsentry/github-workflows/.github/workflows/updater.yml@v2
+    uses: getsentry/github-workflows/.github/workflows/updater.yml@1949ea01ec2da6139d1bcc306c372e6aea76fb72 # v2.13.1
     with:
       name: ${{ matrix.name }}
       path: ${{ matrix.path }}

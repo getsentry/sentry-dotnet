@@ -6,7 +6,7 @@ runs:
 
     - name: Free Disk Space
       if: runner.os == 'Linux'
-      uses: jlumbroso/free-disk-space@f68fdb76e2ea636224182cfb7377ff9a1708f9b8
+      uses: jlumbroso/free-disk-space@f68fdb76e2ea636224182cfb7377ff9a1708f9b8 # v1.3.0
       with:
         android: false
         dotnet: false
