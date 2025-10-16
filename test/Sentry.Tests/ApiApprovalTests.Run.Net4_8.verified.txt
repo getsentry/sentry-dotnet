@@ -37,8 +37,8 @@ namespace Sentry
         Warning = 1,
         [System.Runtime.Serialization.EnumMember(Value="error")]
         Error = 2,
-        [System.Runtime.Serialization.EnumMember(Value="critical")]
-        Critical = 3,
+        [System.Runtime.Serialization.EnumMember(Value="fatal")]
+        Fatal = 3,
     }
     public class ByteAttachmentContent : Sentry.IAttachmentContent
     {

@@ -1,12 +1,41 @@
+function Install-XHarness
+{
+    if (!(Get-Command xharness -ErrorAction SilentlyContinue))
+    {
+        $CI = Test-Path env:CI
+        Push-Location ($CI ? $env:RUNNER_TEMP : $IsWindows ? $env:TMP : $IsMacos ? $env:TMPDIR : '/tmp')
+        dotnet tool install Microsoft.DotNet.XHarness.CLI --global --version '10.0.0-prerelease.25466.1' `
+            --add-source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-eng/nuget/v3/index.json
+        Pop-Location
+    }
+}
+
+function Get-AndroidEmulatorId
+{
+    if ((Test-Path env:CI) -or (Test-Path env:ANDROID_SERIAL))
+    {
+        return $env:ANDROID_SERIAL
+    }
+    try
+    {
+        return & xharness android adb -- devices | Select-String "device$" | ForEach-Object { ($_ -split "`t")[0] } | Select-Object -First 1
+    }
+    catch
+    {
+        return $null
+    }
+}
+
 function Get-IosSimulatorUdid {
     [CmdletBinding()]
     param(
         [string]$IosVersion = '18.5',
         [string[]]$PreferredDeviceTypes = @(
-        'com.apple.CoreSimulator.SimDeviceType.iPhone-XS',
-        'com.apple.CoreSimulator.SimDeviceType.iPhone-16',
-        'com.apple.CoreSimulator.SimDeviceType.iPhone-15'
-    )
+            'com.apple.CoreSimulator.SimDeviceType.iPhone-XS',
+            'com.apple.CoreSimulator.SimDeviceType.iPhone-16',
+            'com.apple.CoreSimulator.SimDeviceType.iPhone-15'
+        ),
+        [string[]]$PreferredStates = @('Shutdown','Booted')
     )
 
     try {
@@ -60,7 +89,7 @@ function Get-IosSimulatorUdid {
         return $null
     }
 
-    $usable = $runtimeDevices | Where-Object { $_.isAvailable -and $_.state -in @('Shutdown','Booted') }
+    $usable = $runtimeDevices | Where-Object { $_.isAvailable -and $_.state -in $PreferredStates }
     if (-not $usable) {
         Write-Verbose "No available devices in runtime $runtimeKey"
         return $null

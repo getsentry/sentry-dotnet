@@ -22,7 +22,7 @@ internal static class LogLevelExtensions
         {
             nameof(LogLevel.Debug) => BreadcrumbLevel.Debug,
             nameof(LogLevel.Error) => BreadcrumbLevel.Error,
-            nameof(LogLevel.Fatal) => BreadcrumbLevel.Critical,
+            nameof(LogLevel.Fatal) => BreadcrumbLevel.Fatal,
             nameof(LogLevel.Info) => BreadcrumbLevel.Info,
             nameof(LogLevel.Trace) => BreadcrumbLevel.Debug,
             nameof(LogLevel.Warn) => BreadcrumbLevel.Warning,
