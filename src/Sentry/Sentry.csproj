@@ -68,6 +68,14 @@
     <PackageReference Include="Polyfill" Version="1.32.0" PrivateAssets="all" />
   </ItemGroup>
 
+  <!--
+    On .NET Framework, we need a package reference to System.Runtime.InteropServices.RuntimeInformation.
+    This is used in Sentry.PlatformAbstractions.RuntimeInfo.  It's already built-in for all other targets.
+  -->
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+  </ItemGroup>
+
   <!-- On .NET Framework, we need an assembly reference to System.Net.Http. -->
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <Reference Include="System.Net.Http" />
