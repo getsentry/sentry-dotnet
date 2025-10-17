@@ -5,7 +5,9 @@
 // -----------------------------------------------------------------------------
 
 using System;
+using CoreFoundation;
 using Foundation;
+using MetricKit;
 using ObjCRuntime;
 using Sentry;
 using UIKit;
@@ -62,10 +64,6 @@ delegate NSNumber SentryTracesSamplerCallback (SentrySamplingContext samplingCon
 // typedef void (^SentrySpanCallback)(DEPRECATED_MSG_ATTRIBUTE("See `SentryScope.useSpan` for reasoning of deprecation.") id<SentrySpan>);
 [Internal]
 delegate void SentrySpanCallback (SentrySpan span);
-
-// typedef void (^SentryUserFeedbackConfigurationBlock)(SentryUserFeedbackConfiguration * _Nonnull);
-[Internal]
-delegate void SentryUserFeedbackConfigurationBlock (SentryUserFeedbackConfiguration arg0);
 
 // @interface SentryAttachment : NSObject
 [BaseType (typeof(NSObject))]
@@ -286,10 +284,6 @@ interface SentryClient
     [Export ("captureMessage:withScope:")]
     SentryId CaptureMessage (string message, SentryScope scope);
 
-    // -(void)captureUserFeedback:(SentryUserFeedback * _Nonnull)userFeedback __attribute__((swift_name("capture(userFeedback:)"))) __attribute__((deprecated("Use -[SentryClient captureFeedback:withScope:].")));
-    [Export ("captureUserFeedback:")]
-    void CaptureUserFeedback (SentryUserFeedback userFeedback);
-
     // -(void)captureFeedback:(SentryFeedback * _Nonnull)feedback withScope:(SentryScope * _Nonnull)scope __attribute__((swift_name("capture(feedback:scope:)")));
     [Export ("captureFeedback:withScope:")]
     void CaptureFeedback (SentryFeedback feedback, SentryScope scope);
@@ -395,54 +389,6 @@ interface SentryDsn
     // -(NSURL * _Nonnull)getEnvelopeEndpoint;
     [Export ("getEnvelopeEndpoint")]
     NSUrl EnvelopeEndpoint { get; }
-}
-
-// @interface SentryEnvelopeItemHeader : NSObject <SentrySerializable>
-[BaseType (typeof(NSObject))]
-[DisableDefaultCtor]
-[Internal]
-interface SentryEnvelopeItemHeader : SentrySerializable
-{
-    // -(instancetype _Nonnull)initWithType:(NSString * _Nonnull)type length:(NSUInteger)length __attribute__((objc_designated_initializer));
-    [Export ("initWithType:length:")]
-    [DesignatedInitializer]
-    NativeHandle Constructor (string type, nuint length);
-
-    // -(instancetype _Nonnull)initWithType:(NSString * _Nonnull)type length:(NSUInteger)length contentType:(NSString * _Nonnull)contentType;
-    [Export ("initWithType:length:contentType:")]
-    NativeHandle Constructor (string type, nuint length, string contentType);
-
-    // -(instancetype _Nonnull)initWithType:(NSString * _Nonnull)type length:(NSUInteger)length filenname:(NSString * _Nonnull)filename contentType:(NSString * _Nonnull)contentType;
-    [Export ("initWithType:length:filenname:contentType:")]
-    NativeHandle Constructor (string type, nuint length, string filename, string contentType);
-
-    // -(instancetype _Nonnull)initWithType:(NSString * _Nonnull)type length:(NSUInteger)length contentType:(NSString * _Nullable)contentType itemCount:(NSNumber * _Nonnull)itemCount;
-    [Export ("initWithType:length:contentType:itemCount:")]
-    NativeHandle Constructor (string type, nuint length, [NullAllowed] string contentType, NSNumber itemCount);
-
-    // @property (readonly, copy, nonatomic) NSString * _Nonnull type;
-    [Export ("type")]
-    string Type { get; }
-
-    // @property (readonly, nonatomic) NSUInteger length;
-    [Export ("length")]
-    nuint Length { get; }
-
-    // @property (readonly, copy, nonatomic) NSString * _Nullable filename;
-    [NullAllowed, Export ("filename")]
-    string Filename { get; }
-
-    // @property (readonly, copy, nonatomic) NSString * _Nullable contentType;
-    [NullAllowed, Export ("contentType")]
-    string ContentType { get; }
-
-    // @property (readonly, copy, nonatomic) NSNumber * _Nullable itemCount;
-    [NullAllowed, Export ("itemCount", ArgumentSemantic.Copy)]
-    NSNumber ItemCount { get; }
-
-    // @property (copy, nonatomic) NSString * _Nullable platform;
-    [NullAllowed, Export ("platform")]
-    string Platform { get; set; }
 }
 
 partial interface Constants
@@ -1014,10 +960,6 @@ interface SentryHub
     // -(SentryId * _Nonnull)captureMessage:(NSString * _Nonnull)message withScope:(SentryScope * _Nonnull)scope __attribute__((swift_name("capture(message:scope:)")));
     [Export ("captureMessage:withScope:")]
     SentryId CaptureMessage (string message, SentryScope scope);
-
-    // -(void)captureUserFeedback:(SentryUserFeedback * _Nonnull)userFeedback __attribute__((swift_name("capture(userFeedback:)"))) __attribute__((deprecated("Use -[SentryHub captureFeedback:].")));
-    [Export ("captureUserFeedback:")]
-    void CaptureUserFeedback (SentryUserFeedback userFeedback);
 
     // -(void)captureFeedback:(SentryFeedback * _Nonnull)feedback;
     [Export ("captureFeedback:")]
@@ -1681,15 +1623,11 @@ interface SentryOptions
     // @property (readonly, nonatomic) NSObject * _Nonnull _swiftExperimentalOptions;
     [Export ("_swiftExperimentalOptions")]
     NSObject _swiftExperimentalOptions { get; }
-
-    // @property (copy, nonatomic) API_AVAILABLE(ios(13.0)) SentryUserFeedbackConfigurationBlock configureUserFeedback __attribute__((availability(ios, introduced=13.0))) __attribute__((availability(macos_app_extension, unavailable))) __attribute__((availability(ios_app_extension, unavailable)));
-    [Export ("configureUserFeedback", ArgumentSemantic.Copy)]
-    SentryUserFeedbackConfigurationBlock ConfigureUserFeedback { get; set; }
 }
 
 // typedef void (^SentryProfilingConfigurationBlock)(SentryProfileOptions * _Nonnull);
 [Internal]
-delegate void SentryProfilingConfigurationBlock (SentryProfileOptions arg0);
+delegate void SentryProfilingConfigurationBlock (SentryProfileOptions options);
 
 // @interface SentryReplayApi : NSObject
 [BaseType (typeof(NSObject))]
@@ -2199,6 +2137,652 @@ interface SentryUser : SentrySerializable
     nuint Hash { get; }
 }
 
+// @interface SentryFeedback : NSObject
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry14SentryFeedback")]
+[DisableDefaultCtor]
+[Internal]
+interface SentryFeedback
+{
+    // @property (readonly, nonatomic, strong) SentryId * _Nonnull eventId;
+    [Export ("eventId", ArgumentSemantic.Strong)]
+    SentryId EventId { get; }
+
+    // -(instancetype _Nonnull)initWithMessage:(NSString * _Nonnull)message name:(NSString * _Nullable)name email:(NSString * _Nullable)email source:(enum SentryFeedbackSource)source associatedEventId:(SentryId * _Nullable)associatedEventId attachments:(NSArray<NSData *> * _Nullable)attachments __attribute__((objc_designated_initializer));
+    [Export ("initWithMessage:name:email:source:associatedEventId:attachments:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (string message, [NullAllowed] string name, [NullAllowed] string email, SentryFeedbackSource source, [NullAllowed] SentryId associatedEventId, [NullAllowed] NSData[] attachments);
+}
+
+// @interface SentryId : NSObject
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry8SentryId")]
+[Internal]
+interface SentryId
+{
+    // @property (readonly, nonatomic, strong, class) SentryId * _Nonnull empty;
+    [Static]
+    [Export ("empty", ArgumentSemantic.Strong)]
+    SentryId Empty { get; }
+
+    // @property (readonly, copy, nonatomic) NSString * _Nonnull sentryIdString;
+    [Export ("sentryIdString")]
+    string SentryIdString { get; }
+
+    // -(instancetype _Nonnull)initWithUuid:(NSUUID * _Nonnull)uuid __attribute__((objc_designated_initializer));
+    [Export ("initWithUuid:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (NSUuid uuid);
+
+    // -(instancetype _Nonnull)initWithUUIDString:(NSString * _Nonnull)uuidString __attribute__((objc_designated_initializer));
+    [Export ("initWithUUIDString:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (string uuidString);
+
+    // @property (readonly, nonatomic) NSUInteger hash;
+    [Export ("hash")]
+    nuint Hash { get; }
+}
+
+// @interface SentryLog : NSObject
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry9SentryLog")]
+[DisableDefaultCtor]
+[Internal]
+interface SentryLog
+{
+    // @property (copy, nonatomic) NSDate * _Nonnull timestamp;
+    [Export ("timestamp", ArgumentSemantic.Copy)]
+    NSDate Timestamp { get; set; }
+
+    // @property (nonatomic, strong) SentryId * _Nonnull traceId;
+    [Export ("traceId", ArgumentSemantic.Strong)]
+    SentryId TraceId { get; set; }
+
+    // @property (nonatomic) enum SentryStructuredLogLevel level;
+    [Export ("level", ArgumentSemantic.Assign)]
+    SentryStructuredLogLevel Level { get; set; }
+
+    // @property (copy, nonatomic) NSString * _Nonnull body;
+    [Export ("body")]
+    string Body { get; set; }
+
+    // @property (copy, nonatomic) NSDictionary<NSString *,SentryStructuredLogAttribute *> * _Nonnull attributes;
+    [Export ("attributes", ArgumentSemantic.Copy)]
+    NSDictionary<NSString, NSObject> Attributes { get; set; }
+
+    // @property (nonatomic, strong) NSNumber * _Nullable severityNumber;
+    [NullAllowed, Export ("severityNumber", ArgumentSemantic.Strong)]
+    NSNumber SeverityNumber { get; set; }
+}
+
+// @interface SentryLogger : NSObject
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry12SentryLogger")]
+[DisableDefaultCtor]
+[Internal]
+interface SentryLogger
+{
+    // -(void)trace:(NSString * _Nonnull)body;
+    [Export ("trace:")]
+    void Trace (string body);
+
+    // -(void)trace:(NSString * _Nonnull)body attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+    [Export ("trace:attributes:")]
+    void Trace (string body, NSDictionary<NSString, NSObject> attributes);
+
+    // -(void)debug:(NSString * _Nonnull)body;
+    [Export ("debug:")]
+    void Debug (string body);
+
+    // -(void)debug:(NSString * _Nonnull)body attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+    [Export ("debug:attributes:")]
+    void Debug (string body, NSDictionary<NSString, NSObject> attributes);
+
+    // -(void)info:(NSString * _Nonnull)body;
+    [Export ("info:")]
+    void Info (string body);
+
+    // -(void)info:(NSString * _Nonnull)body attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+    [Export ("info:attributes:")]
+    void Info (string body, NSDictionary<NSString, NSObject> attributes);
+
+    // -(void)warn:(NSString * _Nonnull)body;
+    [Export ("warn:")]
+    void Warn (string body);
+
+    // -(void)warn:(NSString * _Nonnull)body attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+    [Export ("warn:attributes:")]
+    void Warn (string body, NSDictionary<NSString, NSObject> attributes);
+
+    // -(void)error:(NSString * _Nonnull)body;
+    [Export ("error:")]
+    void Error (string body);
+
+    // -(void)error:(NSString * _Nonnull)body attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+    [Export ("error:attributes:")]
+    void Error (string body, NSDictionary<NSString, NSObject> attributes);
+
+    // -(void)fatal:(NSString * _Nonnull)body;
+    [Export ("fatal:")]
+    void Fatal (string body);
+
+    // -(void)fatal:(NSString * _Nonnull)body attributes:(NSDictionary<NSString *,id> * _Nonnull)attributes;
+    [Export ("fatal:attributes:")]
+    void Fatal (string body, NSDictionary<NSString, NSObject> attributes);
+}
+
+// @interface SentryProfileOptions : NSObject
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry20SentryProfileOptions")]
+[Internal]
+interface SentryProfileOptions
+{
+    // @property (nonatomic) enum SentryProfileLifecycle lifecycle;
+    [Export ("lifecycle", ArgumentSemantic.Assign)]
+    SentryProfileLifecycle Lifecycle { get; set; }
+
+    // @property (nonatomic) float sessionSampleRate;
+    [Export ("sessionSampleRate")]
+    float SessionSampleRate { get; set; }
+
+    // @property (nonatomic) BOOL profileAppStarts;
+    [Export ("profileAppStarts")]
+    bool ProfileAppStarts { get; set; }
+}
+
+// @protocol SentryRRWebEvent <SentrySerializable>
+[Protocol]
+[Internal]
+interface ISentryRRWebEvent : SentrySerializable
+{
+}
+
+// @interface SentryRRWebEvent : NSObject <SentryRRWebEvent>
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry16SentryRRWebEvent")]
+[DisableDefaultCtor]
+[Internal]
+interface SentryRRWebEvent : ISentryRRWebEvent
+{
+    // @property (readonly, copy, nonatomic) NSDictionary<NSString *,id> * _Nullable data;
+    [NullAllowed, Export ("data", ArgumentSemantic.Copy)]
+    NSDictionary<NSString, NSObject> Data { get; }
+
+    // -(NSDictionary<NSString *,id> * _Nonnull)serialize __attribute__((warn_unused_result("")));
+    [Export ("serialize")]
+    NSDictionary<NSString, NSObject> Serialize();
+}
+
+// @protocol SentryRedactOptions
+[Protocol (Name = "_TtP6Sentry19SentryRedactOptions_")]
+[Model]
+[Internal]
+[BaseType (typeof(NSObject))]
+interface SentryRedactOptions
+{
+    // @required @property (readonly, nonatomic) BOOL maskAllText;
+    [Abstract]
+    [Export ("maskAllText")]
+    bool MaskAllText { get; }
+
+    // @required @property (readonly, nonatomic) BOOL maskAllImages;
+    [Abstract]
+    [Export ("maskAllImages")]
+    bool MaskAllImages { get; }
+
+    // @required @property (readonly, copy, nonatomic) NSArray<Class> * _Nonnull maskedViewClasses;
+    [Abstract]
+    [Export ("maskedViewClasses", ArgumentSemantic.Copy)]
+    Class[] MaskedViewClasses { get; }
+
+    // @required @property (readonly, copy, nonatomic) NSArray<Class> * _Nonnull unmaskedViewClasses;
+    [Abstract]
+    [Export ("unmaskedViewClasses", ArgumentSemantic.Copy)]
+    Class[] UnmaskedViewClasses { get; }
+}
+
+// @protocol SentryReplayBreadcrumbConverter <NSObject>
+[Protocol (Name = "_TtP6Sentry31SentryReplayBreadcrumbConverter_")]
+[BaseType (typeof(NSObject), Name = "_TtP6Sentry31SentryReplayBreadcrumbConverter_")]
+[Internal]
+interface SentryReplayBreadcrumbConverter
+{
+    // @required -(id<SentryRRWebEvent> _Nullable)convertFrom:(SentryBreadcrumb * _Nonnull)breadcrumb __attribute__((warn_unused_result("")));
+    [Abstract]
+    [Export ("convertFrom:")]
+    [return: NullAllowed]
+    SentryRRWebEvent ConvertFrom (SentryBreadcrumb breadcrumb);
+}
+
+// @interface SentryReplayOptions : NSObject <SentryRedactOptions>
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry19SentryReplayOptions")]
+[Internal]
+interface SentryReplayOptions : SentryRedactOptions
+{
+    // @property (nonatomic) float sessionSampleRate;
+    [Export ("sessionSampleRate")]
+    float SessionSampleRate { get; set; }
+
+    // @property (nonatomic) float onErrorSampleRate;
+    [Export ("onErrorSampleRate")]
+    float OnErrorSampleRate { get; set; }
+
+    // @property (nonatomic) BOOL maskAllText;
+    [Export ("maskAllText")]
+    bool MaskAllText { get; set; }
+
+    // @property (nonatomic) BOOL maskAllImages;
+    [Export ("maskAllImages")]
+    bool MaskAllImages { get; set; }
+
+    // @property (nonatomic) enum SentryReplayQuality quality;
+    [Export ("quality", ArgumentSemantic.Assign)]
+    SentryReplayQuality Quality { get; set; }
+
+    // @property (copy, nonatomic) NSArray<Class> * _Nonnull maskedViewClasses;
+    [Export ("maskedViewClasses", ArgumentSemantic.Copy)]
+    Class[] MaskedViewClasses { get; set; }
+
+    // @property (copy, nonatomic) NSArray<Class> * _Nonnull unmaskedViewClasses;
+    [Export ("unmaskedViewClasses", ArgumentSemantic.Copy)]
+    Class[] UnmaskedViewClasses { get; set; }
+
+    // @property (nonatomic) BOOL enableExperimentalViewRenderer __attribute__((deprecated("", "enableViewRendererV2")));
+    [Export ("enableExperimentalViewRenderer")]
+    bool EnableExperimentalViewRenderer { get; set; }
+
+    // @property (nonatomic) BOOL enableViewRendererV2;
+    [Export ("enableViewRendererV2")]
+    bool EnableViewRendererV2 { get; set; }
+
+    // @property (nonatomic) BOOL enableFastViewRendering;
+    [Export ("enableFastViewRendering")]
+    bool EnableFastViewRendering { get; set; }
+
+    // @property (readonly, nonatomic) NSInteger replayBitRate;
+    [Export ("replayBitRate")]
+    nint ReplayBitRate { get; }
+
+    // @property (readonly, nonatomic) float sizeScale;
+    [Export ("sizeScale")]
+    float SizeScale { get; }
+
+    // @property (nonatomic) NSUInteger frameRate;
+    [Export ("frameRate")]
+    nuint FrameRate { get; set; }
+
+    // @property (nonatomic) NSTimeInterval errorReplayDuration;
+    [Export ("errorReplayDuration")]
+    double ErrorReplayDuration { get; set; }
+
+    // @property (nonatomic) NSTimeInterval sessionSegmentDuration;
+    [Export ("sessionSegmentDuration")]
+    double SessionSegmentDuration { get; set; }
+
+    // @property (nonatomic) NSTimeInterval maximumDuration;
+    [Export ("maximumDuration")]
+    double MaximumDuration { get; set; }
+
+    // -(instancetype _Nonnull)initWithDictionary:(NSDictionary<NSString *,id> * _Nonnull)dictionary;
+    [Export ("initWithDictionary:")]
+    NativeHandle Constructor (NSDictionary<NSString, NSObject> dictionary);
+
+    // -(instancetype _Nonnull)initWithSessionSampleRate:(float)sessionSampleRate onErrorSampleRate:(float)onErrorSampleRate maskAllText:(BOOL)maskAllText maskAllImages:(BOOL)maskAllImages enableViewRendererV2:(BOOL)enableViewRendererV2 enableFastViewRendering:(BOOL)enableFastViewRendering;
+    [Export ("initWithSessionSampleRate:onErrorSampleRate:maskAllText:maskAllImages:enableViewRendererV2:enableFastViewRendering:")]
+    NativeHandle Constructor (float sessionSampleRate, float onErrorSampleRate, bool maskAllText, bool maskAllImages, bool enableViewRendererV2, bool enableFastViewRendering);
+}
+
+// @interface SentrySDK : NSObject
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry9SentrySDK")]
+[Internal]
+interface SentrySDK
+{
+    // @property (readonly, nonatomic, strong, class) id<SentrySpan> _Nullable span;
+    [Static]
+    [NullAllowed, Export ("span", ArgumentSemantic.Strong)]
+    SentrySpan Span { get; }
+
+    // @property (readonly, nonatomic, class) BOOL isEnabled;
+    [Static]
+    [Export ("isEnabled")]
+    bool IsEnabled { get; }
+
+    // @property (readonly, nonatomic, strong, class) SentryReplayApi * _Nonnull replay;
+    [Static]
+    [Export ("replay", ArgumentSemantic.Strong)]
+    SentryReplayApi Replay { get; }
+
+    // @property (readonly, nonatomic, strong, class) SentryLogger * _Nonnull logger;
+    [Static]
+    [Export ("logger", ArgumentSemantic.Strong)]
+    SentryLogger Logger { get; }
+
+    // +(void)startWithOptions:(SentryOptions * _Nonnull)options;
+    [Static]
+    [Export ("startWithOptions:")]
+    void StartWithOptions (SentryOptions options);
+
+    // +(void)startWithConfigureOptions:(void (^ _Nonnull)(SentryOptions * _Nonnull))configureOptions;
+    [Static]
+    [Export ("startWithConfigureOptions:")]
+    void StartWithConfigureOptions (Action<SentryOptions> configureOptions);
+
+    // +(SentryId * _Nonnull)captureEvent:(SentryEvent * _Nonnull)event;
+    [Static]
+    [Export ("captureEvent:")]
+    SentryId CaptureEvent (SentryEvent @event);
+
+    // +(SentryId * _Nonnull)captureEvent:(SentryEvent * _Nonnull)event withScope:(SentryScope * _Nonnull)scope;
+    [Static]
+    [Export ("captureEvent:withScope:")]
+    SentryId CaptureEvent (SentryEvent @event, SentryScope scope);
+
+    // +(SentryId * _Nonnull)captureEvent:(SentryEvent * _Nonnull)event withScopeBlock:(void (^ _Nonnull)(SentryScope * _Nonnull))block;
+    [Static]
+    [Export ("captureEvent:withScopeBlock:")]
+    SentryId CaptureEvent (SentryEvent @event, Action<SentryScope> block);
+
+    // +(id<SentrySpan> _Nonnull)startTransactionWithName:(NSString * _Nonnull)name operation:(NSString * _Nonnull)operation;
+    [Static]
+    [Export ("startTransactionWithName:operation:")]
+    SentrySpan StartTransactionWithName (string name, string operation);
+
+    // +(id<SentrySpan> _Nonnull)startTransactionWithName:(NSString * _Nonnull)name operation:(NSString * _Nonnull)operation bindToScope:(BOOL)bindToScope;
+    [Static]
+    [Export ("startTransactionWithName:operation:bindToScope:")]
+    SentrySpan StartTransactionWithName (string name, string operation, bool bindToScope);
+
+    // +(id<SentrySpan> _Nonnull)startTransactionWithContext:(SentryTransactionContext * _Nonnull)transactionContext;
+    [Static]
+    [Export ("startTransactionWithContext:")]
+    SentrySpan StartTransactionWithContext (SentryTransactionContext transactionContext);
+
+    // +(id<SentrySpan> _Nonnull)startTransactionWithContext:(SentryTransactionContext * _Nonnull)transactionContext bindToScope:(BOOL)bindToScope;
+    [Static]
+    [Export ("startTransactionWithContext:bindToScope:")]
+    SentrySpan StartTransactionWithContext (SentryTransactionContext transactionContext, bool bindToScope);
+
+    // +(id<SentrySpan> _Nonnull)startTransactionWithContext:(SentryTransactionContext * _Nonnull)transactionContext bindToScope:(BOOL)bindToScope customSamplingContext:(NSDictionary<NSString *,id> * _Nonnull)customSamplingContext;
+    [Static]
+    [Export ("startTransactionWithContext:bindToScope:customSamplingContext:")]
+    SentrySpan StartTransactionWithContext (SentryTransactionContext transactionContext, bool bindToScope, NSDictionary<NSString, NSObject> customSamplingContext);
+
+    // +(id<SentrySpan> _Nonnull)startTransactionWithContext:(SentryTransactionContext * _Nonnull)transactionContext customSamplingContext:(NSDictionary<NSString *,id> * _Nonnull)customSamplingContext;
+    [Static]
+    [Export ("startTransactionWithContext:customSamplingContext:")]
+    SentrySpan StartTransactionWithContext (SentryTransactionContext transactionContext, NSDictionary<NSString, NSObject> customSamplingContext);
+
+    // +(SentryId * _Nonnull)captureError:(NSError * _Nonnull)error;
+    [Static]
+    [Export ("captureError:")]
+    SentryId CaptureError (NSError error);
+
+    // +(SentryId * _Nonnull)captureError:(NSError * _Nonnull)error withScope:(SentryScope * _Nonnull)scope;
+    [Static]
+    [Export ("captureError:withScope:")]
+    SentryId CaptureError (NSError error, SentryScope scope);
+
+    // +(SentryId * _Nonnull)captureError:(NSError * _Nonnull)error withScopeBlock:(void (^ _Nonnull)(SentryScope * _Nonnull))block;
+    [Static]
+    [Export ("captureError:withScopeBlock:")]
+    SentryId CaptureError (NSError error, Action<SentryScope> block);
+
+    // +(SentryId * _Nonnull)captureException:(NSException * _Nonnull)exception;
+    [Static]
+    [Export ("captureException:")]
+    SentryId CaptureException (NSException exception);
+
+    // +(SentryId * _Nonnull)captureException:(NSException * _Nonnull)exception withScope:(SentryScope * _Nonnull)scope;
+    [Static]
+    [Export ("captureException:withScope:")]
+    SentryId CaptureException (NSException exception, SentryScope scope);
+
+    // +(SentryId * _Nonnull)captureException:(NSException * _Nonnull)exception withScopeBlock:(void (^ _Nonnull)(SentryScope * _Nonnull))block;
+    [Static]
+    [Export ("captureException:withScopeBlock:")]
+    SentryId CaptureException (NSException exception, Action<SentryScope> block);
+
+    // +(SentryId * _Nonnull)captureMessage:(NSString * _Nonnull)message;
+    [Static]
+    [Export ("captureMessage:")]
+    SentryId CaptureMessage (string message);
+
+    // +(SentryId * _Nonnull)captureMessage:(NSString * _Nonnull)message withScope:(SentryScope * _Nonnull)scope;
+    [Static]
+    [Export ("captureMessage:withScope:")]
+    SentryId CaptureMessage (string message, SentryScope scope);
+
+    // +(SentryId * _Nonnull)captureMessage:(NSString * _Nonnull)message withScopeBlock:(void (^ _Nonnull)(SentryScope * _Nonnull))block;
+    [Static]
+    [Export ("captureMessage:withScopeBlock:")]
+    SentryId CaptureMessage (string message, Action<SentryScope> block);
+
+    // +(void)captureFeedback:(SentryFeedback * _Nonnull)feedback;
+    [Static]
+    [Export ("captureFeedback:")]
+    void CaptureFeedback (SentryFeedback feedback);
+
+    // @property (readonly, nonatomic, strong, class) SentryFeedbackAPI * _Nonnull feedback __attribute__((availability(ios, introduced=13.0)));
+    [Static]
+    [Export ("feedback", ArgumentSemantic.Strong)]
+    SentryFeedbackAPI Feedback { get; }
+
+    // +(void)addBreadcrumb:(SentryBreadcrumb * _Nonnull)crumb;
+    [Static]
+    [Export ("addBreadcrumb:")]
+    void AddBreadcrumb (SentryBreadcrumb crumb);
+
+    // +(void)configureScope:(void (^ _Nonnull)(SentryScope * _Nonnull))callback;
+    [Static]
+    [Export ("configureScope:")]
+    void ConfigureScope (Action<SentryScope> callback);
+
+    // @property (readonly, nonatomic, class) BOOL crashedLastRun;
+    [Static]
+    [Export ("crashedLastRun")]
+    bool CrashedLastRun { get; }
+
+    // @property (readonly, nonatomic, class) BOOL detectedStartUpCrash;
+    [Static]
+    [Export ("detectedStartUpCrash")]
+    bool DetectedStartUpCrash { get; }
+
+    // +(void)setUser:(SentryUser * _Nullable)user;
+    [Static]
+    [Export ("setUser:")]
+    void SetUser ([NullAllowed] SentryUser user);
+
+    // +(void)startSession;
+    [Static]
+    [Export ("startSession")]
+    void StartSession ();
+
+    // +(void)endSession;
+    [Static]
+    [Export ("endSession")]
+    void EndSession ();
+
+    // +(void)crash;
+    [Static]
+    [Export ("crash")]
+    void Crash ();
+
+    // +(void)reportFullyDisplayed;
+    [Static]
+    [Export ("reportFullyDisplayed")]
+    void ReportFullyDisplayed ();
+
+    // +(void)pauseAppHangTracking;
+    [Static]
+    [Export ("pauseAppHangTracking")]
+    void PauseAppHangTracking ();
+
+    // +(void)resumeAppHangTracking;
+    [Static]
+    [Export ("resumeAppHangTracking")]
+    void ResumeAppHangTracking ();
+
+    // +(void)flush:(NSTimeInterval)timeout;
+    [Static]
+    [Export ("flush:")]
+    void Flush (double timeout);
+
+    // +(void)close;
+    [Static]
+    [Export ("close")]
+    void Close ();
+
+    // +(void)startProfiler;
+    [Static]
+    [Export ("startProfiler")]
+    void StartProfiler ();
+
+    // +(void)stopProfiler;
+    [Static]
+    [Export ("stopProfiler")]
+    void StopProfiler ();
+
+    // +(void)clearLogger;
+    [Static]
+    [Export ("clearLogger")]
+    void ClearLogger ();
+}
+
+// @interface SentrySession : NSObject <NSCopying>
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry13SentrySession")]
+[DisableDefaultCtor]
+[Internal]
+interface SentrySession
+{
+    // -(instancetype _Nonnull)initWithReleaseName:(NSString * _Nonnull)releaseName distinctId:(NSString * _Nonnull)distinctId __attribute__((objc_designated_initializer));
+    [Export ("initWithReleaseName:distinctId:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (string releaseName, string distinctId);
+
+    // -(instancetype _Nullable)initWithJSONObject:(NSDictionary<NSString *,id> * _Nonnull)jsonObject __attribute__((objc_designated_initializer));
+    [Export ("initWithJSONObject:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (NSDictionary<NSString, NSObject> jsonObject);
+
+    // -(void)endSessionExitedWithTimestamp:(NSDate * _Nonnull)timestamp;
+    [Export ("endSessionExitedWithTimestamp:")]
+    void EndSessionExitedWithTimestamp (NSDate timestamp);
+
+    // -(void)endSessionCrashedWithTimestamp:(NSDate * _Nonnull)timestamp;
+    [Export ("endSessionCrashedWithTimestamp:")]
+    void EndSessionCrashedWithTimestamp (NSDate timestamp);
+
+    // -(void)endSessionAbnormalWithTimestamp:(NSDate * _Nonnull)timestamp;
+    [Export ("endSessionAbnormalWithTimestamp:")]
+    void EndSessionAbnormalWithTimestamp (NSDate timestamp);
+
+    // -(void)incrementErrors;
+    [Export ("incrementErrors")]
+    void IncrementErrors ();
+
+    // @property (readonly, copy, nonatomic) NSUUID * _Nonnull sessionId;
+    [Export ("sessionId", ArgumentSemantic.Copy)]
+    NSUuid SessionId { get; }
+
+    // @property (readonly, copy, nonatomic) NSDate * _Nonnull started;
+    [Export ("started", ArgumentSemantic.Copy)]
+    NSDate Started { get; }
+
+    // @property (readonly, nonatomic) enum SentrySessionStatus status;
+    [Export ("status")]
+    SentrySessionStatus Status { get; }
+
+    // @property (nonatomic) NSUInteger errors;
+    [Export ("errors")]
+    nuint Errors { get; set; }
+
+    // @property (readonly, nonatomic) NSUInteger sequence;
+    [Export ("sequence")]
+    nuint Sequence { get; }
+
+    // @property (readonly, copy, nonatomic) NSString * _Nonnull distinctId;
+    [Export ("distinctId")]
+    string DistinctId { get; }
+
+    // @property (readonly, nonatomic, strong) NSNumber * _Nullable flagInit;
+    [NullAllowed, Export ("flagInit", ArgumentSemantic.Strong)]
+    NSNumber FlagInit { get; }
+
+    // @property (readonly, copy, nonatomic) NSDate * _Nullable timestamp;
+    [NullAllowed, Export ("timestamp", ArgumentSemantic.Copy)]
+    NSDate Timestamp { get; }
+
+    // @property (readonly, nonatomic, strong) NSNumber * _Nullable duration;
+    [NullAllowed, Export ("duration", ArgumentSemantic.Strong)]
+    NSNumber Duration { get; }
+
+    // @property (readonly, copy, nonatomic) NSString * _Nullable releaseName;
+    [NullAllowed, Export ("releaseName")]
+    string ReleaseName { get; }
+
+    // @property (copy, nonatomic) NSString * _Nullable environment;
+    [NullAllowed, Export ("environment")]
+    string Environment { get; set; }
+
+    // @property (nonatomic, strong) SentryUser * _Nullable user;
+    [NullAllowed, Export ("user", ArgumentSemantic.Strong)]
+    SentryUser User { get; set; }
+
+    // @property (copy, nonatomic) NSString * _Nullable abnormalMechanism;
+    [NullAllowed, Export ("abnormalMechanism")]
+    string AbnormalMechanism { get; set; }
+
+    // -(NSDictionary<NSString *,id> * _Nonnull)serialize __attribute__((warn_unused_result("")));
+    [Export ("serialize")]
+    NSDictionary<NSString, NSObject> Serialize();
+
+    // -(void)setFlagInit;
+    [Export ("setFlagInit")]
+    void SetFlagInit ();
+}
+
+// @protocol SentryViewScreenshotProvider <NSObject>
+[Protocol (Name = "_TtP6Sentry28SentryViewScreenshotProvider_")]
+[BaseType (typeof(NSObject), Name = "_TtP6Sentry28SentryViewScreenshotProvider_")]
+[Internal]
+interface SentryViewScreenshotProvider
+{
+    // @required -(void)imageWithView:(UIView * _Nonnull)view onComplete:(void (^ _Nonnull)(UIImage * _Nonnull))onComplete;
+    [Abstract]
+    [Export ("imageWithView:onComplete:")]
+    void OnComplete (UIView view, Action<UIImage> onComplete);
+}
+
+// @interface SentryViewScreenshotOptions : NSObject <SentryRedactOptions>
+[BaseType (typeof(NSObject), Name = "_TtC6Sentry27SentryViewScreenshotOptions")]
+[Internal]
+interface SentryViewScreenshotOptions : SentryRedactOptions
+{
+    // @property (nonatomic) BOOL enableViewRendererV2;
+    [Export ("enableViewRendererV2")]
+    bool EnableViewRendererV2 { get; set; }
+
+    // @property (nonatomic) BOOL enableFastViewRendering;
+    [Export ("enableFastViewRendering")]
+    bool EnableFastViewRendering { get; set; }
+
+    // @property (nonatomic) BOOL maskAllImages;
+    [Export ("maskAllImages")]
+    bool MaskAllImages { get; set; }
+
+    // @property (nonatomic) BOOL maskAllText;
+    [Export ("maskAllText")]
+    bool MaskAllText { get; set; }
+
+    // @property (copy, nonatomic) NSArray<Class> * _Nonnull maskedViewClasses;
+    [Export ("maskedViewClasses", ArgumentSemantic.Copy)]
+    Class[] MaskedViewClasses { get; set; }
+
+    // @property (copy, nonatomic) NSArray<Class> * _Nonnull unmaskedViewClasses;
+    [Export ("unmaskedViewClasses", ArgumentSemantic.Copy)]
+    Class[] UnmaskedViewClasses { get; set; }
+
+    // -(instancetype _Nonnull)initWithEnableViewRendererV2:(BOOL)enableViewRendererV2 enableFastViewRendering:(BOOL)enableFastViewRendering maskAllText:(BOOL)maskAllText maskAllImages:(BOOL)maskAllImages maskedViewClasses:(NSArray<Class> * _Nonnull)maskedViewClasses unmaskedViewClasses:(NSArray<Class> * _Nonnull)unmaskedViewClasses __attribute__((objc_designated_initializer));
+    [Export ("initWithEnableViewRendererV2:enableFastViewRendering:maskAllText:maskAllImages:maskedViewClasses:unmaskedViewClasses:")]
+    [DesignatedInitializer]
+    NativeHandle Constructor (bool enableViewRendererV2, bool enableFastViewRendering, bool maskAllText, bool maskAllImages, Class[] maskedViewClasses, Class[] unmaskedViewClasses);
+}
+
 // @interface SentryScreenFrames : NSObject <NSCopying>
 [BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
@@ -2243,6 +2827,7 @@ interface SentryScreenFrames
 [Internal]
 interface PrivateSentrySDKOnly
 {
+
     // +(NSArray<SentryDebugMeta *> * _Nonnull)getDebugImages;
     [Static]
     [Export ("getDebugImages")]
