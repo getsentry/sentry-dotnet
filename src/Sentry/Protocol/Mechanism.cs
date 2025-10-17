@@ -30,9 +30,10 @@ public sealed class Mechanism : ISentryJsonSerializable
     public static readonly string DescriptionKey = "Sentry:Description";
 
     /// <summary>
-    /// Key found inside of <c>Exception.Data</c> describing whether the exception is considered terminal
+    /// Key found inside of <c>Exception.Data</c> describing whether the exception is considered terminal.
     /// </summary>
-    public static readonly string TerminalKey = "Sentry:Terminal";
+    /// <remarks> It's not prefixed with 'Sentry' so the MainExceptionProcessor does not remove it. </remarks>
+    public static readonly string TerminalKey = "Terminal";
 
     internal Dictionary<string, object>? InternalData { get; private set; }
 
@@ -80,28 +81,6 @@ public sealed class Mechanism : ISentryJsonSerializable
     /// Optional flag indicating whether the exception has been handled by the user (e.g. via try..catch).
     /// </summary>
     public bool? Handled { get; set; }
-
-    /// <summary>
-    /// Optional flag indicating whether the exception is terminal (causes application termination).
-    /// Only meaningful when <see cref="Handled"/> is <c>false</c>.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// This flag helps differentiate between unhandled exceptions that terminate the application
-    /// (e.g., uncaught exceptions on the main thread) and unhandled exceptions that don't
-    /// (e.g., unobserved task exceptions, Unity's LogException).
-    /// </para>
-    /// <para>
-    /// When <c>null</c> (default): Unhandled exceptions are assumed to be terminal.<br/>
-    /// When <c>true</c>: Explicitly marks the unhandled exception as terminal.<br/>
-    /// When <c>false</c>: Explicitly marks the unhandled exception as non-terminal.
-    /// </para>
-    /// <para>
-    /// This property should remain <c>null</c> when <see cref="Handled"/> is <c>true</c> or <c>null</c>,
-    /// as terminal state is only meaningful for unhandled exceptions.
-    /// </para>
-    /// </remarks>
-    public bool? Terminal { get; set; }
 
     /// <summary>
     /// Optional flag indicating whether the exception is synthetic.
@@ -160,7 +139,6 @@ public sealed class Mechanism : ISentryJsonSerializable
         writer.WriteStringIfNotWhiteSpace("source", Source);
         writer.WriteStringIfNotWhiteSpace("help_link", HelpLink);
         writer.WriteBooleanIfNotNull("handled", Handled);
-        writer.WriteBooleanIfNotNull("terminal", Terminal);
         writer.WriteBooleanIfTrue("synthetic", Synthetic);
         writer.WriteBooleanIfTrue("is_exception_group", IsExceptionGroup);
         writer.WriteNumberIfNotNull("exception_id", ExceptionId);
@@ -181,7 +159,6 @@ public sealed class Mechanism : ISentryJsonSerializable
         var source = json.GetPropertyOrNull("source")?.GetString();
         var helpLink = json.GetPropertyOrNull("help_link")?.GetString();
         var handled = json.GetPropertyOrNull("handled")?.GetBoolean();
-        var terminal = json.GetPropertyOrNull("terminal")?.GetBoolean();
         var synthetic = json.GetPropertyOrNull("synthetic")?.GetBoolean() ?? false;
         var isExceptionGroup = json.GetPropertyOrNull("is_exception_group")?.GetBoolean() ?? false;
         var exceptionId = json.GetPropertyOrNull("exception_id")?.GetInt32();
@@ -196,7 +173,6 @@ public sealed class Mechanism : ISentryJsonSerializable
             Source = source,
             HelpLink = helpLink,
             Handled = handled,
-            Terminal = terminal,
             Synthetic = synthetic,
             IsExceptionGroup = isExceptionGroup,
             ExceptionId = exceptionId,
@@ -208,7 +184,6 @@ public sealed class Mechanism : ISentryJsonSerializable
 
     internal bool IsDefaultOrEmpty() =>
         Handled is null &&
-        Terminal is null &&
         Synthetic == false &&
         IsExceptionGroup == false &&
         ExceptionId is null &&

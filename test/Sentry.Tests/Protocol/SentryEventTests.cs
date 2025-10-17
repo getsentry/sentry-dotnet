@@ -193,13 +193,7 @@ public partial class SentryEventTests
     {
         var evt = new SentryEvent
         {
-            SentryExceptions = new[]
-            {
-                new SentryException
-                {
-                    Mechanism = new Mechanism { Handled = false }
-                }
-            }
+            SentryExceptions = [new SentryException { Mechanism = new Mechanism { Handled = false } }]
         };
 
         Assert.True(evt.HasUnhandledException());
@@ -210,13 +204,7 @@ public partial class SentryEventTests
     {
         var evt = new SentryEvent
         {
-            SentryExceptions = new[]
-            {
-                new SentryException
-                {
-                    Mechanism = new Mechanism { Handled = true }
-                }
-            }
+            SentryExceptions = [new SentryException { Mechanism = new Mechanism { Handled = true } }]
         };
 
         Assert.False(evt.HasUnhandledException());
@@ -248,13 +236,7 @@ public partial class SentryEventTests
         // Terminal = null means default behavior (terminal)
         var evt = new SentryEvent
         {
-            SentryExceptions = new[]
-            {
-                new SentryException
-                {
-                    Mechanism = new Mechanism { Handled = false, Terminal = null }
-                }
-            }
+            SentryExceptions = [new SentryException { Mechanism = new Mechanism { Handled = false } }]
         };
 
         Assert.False(evt.HasUnhandledNonTerminalException());
