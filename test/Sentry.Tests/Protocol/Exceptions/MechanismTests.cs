@@ -73,8 +73,6 @@ public class MechanismTests
         yield return new object[] { (new Mechanism { Description = "some desc" }, """{"type":"generic","description":"some desc"}""") };
         yield return new object[] { (new Mechanism { Data = { new KeyValuePair<string, object>("data-key", "data-value") } }, """{"type":"generic","data":{"data-key":"data-value"}}""") };
         yield return new object[] { (new Mechanism { Meta = { new KeyValuePair<string, object>("meta-key", "meta-value") } }, """{"type":"generic","meta":{"meta-key":"meta-value"}}""") };
-        yield return new object[] { (new Mechanism { Data = { new KeyValuePair<string, object>(Mechanism.TerminalKey, true) } }, """{"type":"generic","data":{"Sentry:Terminal":true}}""") };
-        yield return new object[] { (new Mechanism { Data = { new KeyValuePair<string, object>(Mechanism.TerminalKey, false) } }, """{"type":"generic","data":{"Sentry:Terminal":false}}""") };
     }
 
     [Fact]

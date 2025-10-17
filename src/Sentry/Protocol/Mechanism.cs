@@ -30,9 +30,10 @@ public sealed class Mechanism : ISentryJsonSerializable
     public static readonly string DescriptionKey = "Sentry:Description";
 
     /// <summary>
-    /// Key found inside of <c>Exception.Data</c> describing whether the exception is considered terminal
+    /// Key found inside of <c>Exception.Data</c> describing whether the exception is considered terminal.
     /// </summary>
-    public static readonly string TerminalKey = "Sentry:Terminal";
+    /// <remarks> It's not prefixed with 'Sentry' so the MainExceptionProcessor does not remove it. </remarks>
+    public static readonly string TerminalKey = "Terminal";
 
     internal Dictionary<string, object>? InternalData { get; private set; }
 
