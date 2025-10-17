@@ -276,9 +276,6 @@
           BeforeTargets="GetAssemblyAttributes"
           Condition="'$(AndroidApplication)' == 'True'
             and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'
-          BeforeTargets="GetAssemblyAttributes"
-          Condition="'$(AndroidApplication)' == 'True'
-            and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'
             and '$(SentryUploadAndroidProGuardMapping)' == 'true'">
     <ItemGroup>
       <AssemblyAttribute Include="Android.App.MetaData">
