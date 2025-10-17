@@ -1,3 +1,4 @@
+
 namespace Sentry.Tests;
 
 internal static class SentryGraphQlTestHelpers
@@ -27,6 +28,7 @@ internal static class SentryGraphQlTestHelpers
         Content = content
     };
 
+    [RequiresUnreferencedCode("Calls System.Text.Json.JsonSerializer.Serialize<TValue>(TValue, JsonSerializerOptions)")]
     public static StringContent JsonContent(dynamic json)
     {
         var serialised = JsonSerializer.Serialize(json);

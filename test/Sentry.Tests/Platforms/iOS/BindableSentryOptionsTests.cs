@@ -1,4 +1,4 @@
-# if __IOS__
+#if __IOS__
 using Microsoft.Extensions.Configuration;
 
 namespace Sentry.Tests.Platforms.Cocoa;
@@ -18,6 +18,7 @@ public class BindableSentryOptionsTests : BindableTests<SentryOptions.NativeOpti
     }
 
     [Fact]
+    [RequiresUnreferencedCode()]
     public void ApplyTo_SetsOptionsFromConfig()
     {
         // Arrange

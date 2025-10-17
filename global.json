@@ -1,7 +1,7 @@
 {
   "sdk": {
-    "version": "10.0.100-rc.1.25451.107",
-    "workloadVersion": "10.0.100-rc.1.25458.2",
+    "version": "10.0.100-rc.2.25502.107",
+    "workloadVersion": "10.0.100-rc.2.25513.4",
     "rollForward": "disable",
     "allowPrerelease": false
   }

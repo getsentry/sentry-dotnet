@@ -1,3 +1,4 @@
+
 namespace Sentry.Tests.Internals;
 
 public class JsonTests
@@ -107,6 +108,7 @@ public class JsonTests
     }
 
     [Fact]
+    [RequiresUnreferencedCode()]
     public void WriteDynamicValue_ClassWithExceptionParameter_SerializedClassWithException()
     {
         // Arrange

@@ -13,6 +13,7 @@ public class SentryLoggingOptionsTests : BindableTests<SentryLoggingOptions>
     }
 
     [Fact]
+    [RequiresUnreferencedCode()]
     public void ApplyTo_SetsOptionsFromConfig()
     {
         // Arrange
