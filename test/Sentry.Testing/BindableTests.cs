@@ -4,7 +4,7 @@ using Sentry.Internal.DiagnosticSource;
 
 namespace Sentry.Testing;
 
-public abstract class BindableTests<TOptions>(params string[] skipProperties)
+public abstract class BindableTests<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TOptions>(params string[] skipProperties)
 {
     public class TextFixture
     {
@@ -43,7 +43,7 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
                 );
     }
 
-    protected IEnumerable<string> GetPropertyNames<T>() => typeof(T).GetProperties().Select(x => x.Name).ToList();
+    protected IEnumerable<string> GetPropertyNames<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>() => typeof(T).GetProperties().Select(x => x.Name).ToList();
 
     private static KeyValuePair<PropertyInfo, object> GetDummyBindableValue(PropertyInfo propertyInfo)
     {

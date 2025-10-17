@@ -546,6 +546,7 @@ file static class JsonDocumentExtensions
         WriteIndented = true,
     };
 
+    [RequiresUnreferencedCode("Calls System.Text.Json.JsonSerializer.Serialize<TValue>(TValue, JsonSerializerOptions)")]
     public static string ToIndentedJsonString(this JsonDocument document)
     {
         var json = JsonSerializer.Serialize(document, Options);
