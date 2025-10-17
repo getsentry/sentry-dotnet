@@ -104,6 +104,40 @@ public partial class MainExceptionProcessorTests
     }
 
     [Fact]
+    public void Process_ExceptionWith_TerminalTrue_StoresInMechanismData()
+    {
+        var sut = _fixture.GetSut();
+        var evt = new SentryEvent();
+        var exp = new Exception();
+
+        exp.Data.Add(Mechanism.TerminalKey, true);
+
+        sut.Process(exp, evt);
+
+        Assert.NotNull(evt.SentryExceptions);
+        var sentryException = evt.SentryExceptions.Single();
+        Assert.True(sentryException.Mechanism?.Data.ContainsKey(Mechanism.TerminalKey));
+        Assert.Equal(true, sentryException.Mechanism?.Data[Mechanism.TerminalKey]);
+    }
+
+    [Fact]
+    public void Process_ExceptionWith_TerminalFalse_StoresInMechanismData()
+    {
+        var sut = _fixture.GetSut();
+        var evt = new SentryEvent();
+        var exp = new Exception();
+
+        exp.Data.Add(Mechanism.TerminalKey, false);
+
+        sut.Process(exp, evt);
+
+        Assert.NotNull(evt.SentryExceptions);
+        var sentryException = evt.SentryExceptions.Single();
+        Assert.True(sentryException.Mechanism?.Data.ContainsKey(Mechanism.TerminalKey));
+        Assert.Equal(false, sentryException.Mechanism?.Data[Mechanism.TerminalKey]);
+    }
+
+    [Fact]
     public void CreateSentryException_DataHasObjectAsKey_ItemIgnored()
     {
         var sut = _fixture.GetSut();

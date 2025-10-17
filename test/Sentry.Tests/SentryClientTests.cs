@@ -1635,27 +1635,31 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
-    public void CaptureEvent_ActiveSession_UnhandledExceptionSessionEndedAsCrashed()
+    public void CaptureEvent_ActiveSessionAndUnhandledException_SessionEndedAsCrashed()
     {
         // Arrange
         var client = _fixture.GetSut();
+        var exception = new Exception();
+        exception.SetSentryMechanism("TestException", handled: false, terminal: true);
 
         // Act
-        client.CaptureEvent(new SentryEvent()
-        {
-            SentryExceptions = new[]
-            {
-                new SentryException
-                {
-                    Mechanism = new()
-                    {
-                        Handled = false
-                    }
-                }
-            }
-        });
-
+        client.CaptureEvent(new SentryEvent(exception));
         // Assert
         _fixture.SessionManager.Received().EndSession(SessionEndStatus.Crashed);
+    }
+
+    [Fact]
+    public void CaptureEvent_ActiveSessionAndNonTerminalUnhandledException_SessionEndedAsUnhandled()
+    {
+        // Arrange
+        var client = _fixture.GetSut();
+        var exception = new Exception();
+        exception.SetSentryMechanism("TestException", handled: false, terminal: false);
+
+        // Act
+        client.CaptureEvent(new SentryEvent(exception));
+
+        // Assert
+        _fixture.SessionManager.Received().EndSession(SessionEndStatus.Unhandled);
     }
 }

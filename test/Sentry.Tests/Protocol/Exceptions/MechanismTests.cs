@@ -74,4 +74,35 @@ public class MechanismTests
         yield return new object[] { (new Mechanism { Data = { new KeyValuePair<string, object>("data-key", "data-value") } }, """{"type":"generic","data":{"data-key":"data-value"}}""") };
         yield return new object[] { (new Mechanism { Meta = { new KeyValuePair<string, object>("meta-key", "meta-value") } }, """{"type":"generic","meta":{"meta-key":"meta-value"}}""") };
     }
+
+    [Fact]
+    public void SetSentryMechanism_WithTerminalTrue_StoresInExceptionData()
+    {
+        var exception = new Exception();
+        exception.SetSentryMechanism("test", handled: false, terminal: true);
+
+        Assert.True(exception.Data.Contains(Mechanism.TerminalKey));
+        Assert.Equal(true, exception.Data[Mechanism.TerminalKey]);
+    }
+
+    [Fact]
+    public void SetSentryMechanism_WithTerminalFalse_StoresInExceptionData()
+    {
+        var exception = new Exception();
+        exception.SetSentryMechanism("test", handled: false, terminal: false);
+
+        Assert.True(exception.Data.Contains(Mechanism.TerminalKey));
+        Assert.Equal(false, exception.Data[Mechanism.TerminalKey]);
+    }
+
+    [Fact]
+    public void SetSentryMechanism_WithTerminalNull_RemovesFromExceptionData()
+    {
+        var exception = new Exception();
+        exception.Data[Mechanism.TerminalKey] = true;
+
+        exception.SetSentryMechanism("test", handled: false, terminal: null);
+
+        Assert.False(exception.Data.Contains(Mechanism.TerminalKey));
+    }
 }

@@ -525,6 +525,84 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
+    public void CaptureEvent_TerminalUnhandledException_AbortsActiveTransaction()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+
+        var transaction = hub.StartTransaction("test", "operation");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("test", handled: false, terminal: true);
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(exception));
+
+        // Assert
+        transaction.Status.Should().Be(SpanStatus.Aborted);
+        transaction.IsFinished.Should().BeTrue();
+    }
+
+    [Fact]
+    public void CaptureEvent_NonTerminalUnhandledException_DoesNotAbortActiveTransaction()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+
+        var transaction = hub.StartTransaction("test", "operation");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("TestException", handled: false, terminal: false);
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(exception));
+
+        // Assert
+        transaction.IsFinished.Should().BeFalse();
+    }
+
+    [Fact]
+    public void CaptureEvent_HandledException_DoesNotAbortActiveTransaction()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+
+        var transaction = hub.StartTransaction("test", "operation");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("test", handled: true);
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(exception));
+
+        // Assert
+        transaction.IsFinished.Should().BeFalse();
+    }
+
+    [Fact]
+    public void CaptureEvent_EventWithoutException_DoesNotAbortActiveTransaction()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+
+        var transaction = hub.StartTransaction("test", "operation");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        // Act
+        hub.CaptureEvent(new SentryEvent { Message = "test message" });
+
+        // Assert
+        transaction.IsFinished.Should().BeFalse();
+    }
+
+    [Fact]
     public void AppDomainUnhandledExceptionIntegration_ActiveSession_UnhandledExceptionSessionEndedAsCrashed()
     {
         // Arrange
