@@ -18,7 +18,6 @@ public class MechanismTests
             Description = "mechanism description",
             Source = "exception source",
             Handled = true,
-            Terminal = false,
             HelpLink = "https://helplink",
             Synthetic = true,
             IsExceptionGroup = true,
@@ -38,7 +37,6 @@ public class MechanismTests
               "source": "exception source",
               "help_link": "https://helplink",
               "handled": true,
-              "terminal": false,
               "synthetic": true,
               "is_exception_group": true,
               "exception_id": 123,
@@ -70,13 +68,43 @@ public class MechanismTests
         yield return new object[] { (new Mechanism { Type = "some type" }, """{"type":"some type"}""") };
         yield return new object[] { (new Mechanism { Handled = false }, """{"type":"generic","handled":false}""") };
         yield return new object[] { (new Mechanism { Handled = true }, """{"type":"generic","handled":true}""") };
-        yield return new object[] { (new Mechanism { Terminal = false }, """{"type":"generic","terminal":false}""") };
-        yield return new object[] { (new Mechanism { Terminal = true }, """{"type":"generic","terminal":true}""") };
-        yield return new object[] { (new Mechanism { Terminal = null }, """{"type":"generic"}""") }; // null = default, not serialized
         yield return new object[] { (new Mechanism { Synthetic = true }, """{"type":"generic","synthetic":true}""") };
         yield return new object[] { (new Mechanism { HelpLink = "https://sentry.io/docs" }, """{"type":"generic","help_link":"https://sentry.io/docs"}""") };
         yield return new object[] { (new Mechanism { Description = "some desc" }, """{"type":"generic","description":"some desc"}""") };
         yield return new object[] { (new Mechanism { Data = { new KeyValuePair<string, object>("data-key", "data-value") } }, """{"type":"generic","data":{"data-key":"data-value"}}""") };
         yield return new object[] { (new Mechanism { Meta = { new KeyValuePair<string, object>("meta-key", "meta-value") } }, """{"type":"generic","meta":{"meta-key":"meta-value"}}""") };
+        yield return new object[] { (new Mechanism { Data = { new KeyValuePair<string, object>(Mechanism.TerminalKey, true) } }, """{"type":"generic","data":{"Sentry:Terminal":true}}""") };
+        yield return new object[] { (new Mechanism { Data = { new KeyValuePair<string, object>(Mechanism.TerminalKey, false) } }, """{"type":"generic","data":{"Sentry:Terminal":false}}""") };
+    }
+
+    [Fact]
+    public void SetSentryMechanism_WithTerminalTrue_StoresInExceptionData()
+    {
+        var exception = new Exception();
+        exception.SetSentryMechanism("test", handled: false, terminal: true);
+
+        Assert.True(exception.Data.Contains(Mechanism.TerminalKey));
+        Assert.Equal(true, exception.Data[Mechanism.TerminalKey]);
+    }
+
+    [Fact]
+    public void SetSentryMechanism_WithTerminalFalse_StoresInExceptionData()
+    {
+        var exception = new Exception();
+        exception.SetSentryMechanism("test", handled: false, terminal: false);
+
+        Assert.True(exception.Data.Contains(Mechanism.TerminalKey));
+        Assert.Equal(false, exception.Data[Mechanism.TerminalKey]);
+    }
+
+    [Fact]
+    public void SetSentryMechanism_WithTerminalNull_RemovesFromExceptionData()
+    {
+        var exception = new Exception();
+        exception.Data[Mechanism.TerminalKey] = true;
+
+        exception.SetSentryMechanism("test", handled: false, terminal: null);
+
+        Assert.False(exception.Data.Contains(Mechanism.TerminalKey));
     }
 }

@@ -187,12 +187,6 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
             mechanism.Handled = null;
         }
 
-        if (exception.Data[Mechanism.TerminalKey] is bool terminal)
-        {
-            mechanism.Terminal = terminal;
-            exception.Data.Remove(Mechanism.TerminalKey);
-        }
-
         if (exception.Data[Mechanism.MechanismKey] is string mechanismType)
         {
             mechanism.Type = mechanismType;
