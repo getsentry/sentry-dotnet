@@ -4,9 +4,7 @@ namespace Sentry.Extensions.AI;
 
 internal sealed class SentryChatClient(
     IChatClient innerClient,
-    IHub hub,
-    string? agentName,
-    string? system)
+    IHub hub)
     : DelegatingChatClient(innerClient)
 {
     public override async Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages,
@@ -14,13 +12,13 @@ internal sealed class SentryChatClient(
         CancellationToken cancellationToken = new())
     {
         const string operation = "gen_ai.chat";
-        var spanName = agentName is { Length: > 0 } ? $"chat {agentName}" : "chat";
+        var spanName = InnerClient.GetType().Name;
         var initialSpan = hub.GetSpan()?.StartChild(operation, spanName) ?? hub.StartTransaction(spanName, operation);
 
         try
         {
             var chatMessages = messages as ChatMessage[] ?? messages.ToArray();
-            SentryAISpanEnricher.EnrichWithRequest(initialSpan, chatMessages, options, agentName, system);
+            SentryAISpanEnricher.EnrichWithRequest(initialSpan, chatMessages, options);
 
             var response = await base.GetResponseAsync(chatMessages, options, cancellationToken).ConfigureAwait(false);
 
