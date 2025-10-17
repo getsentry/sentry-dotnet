@@ -52,20 +52,4 @@ public sealed class BreadcrumbEvent
             e => new KeyValuePair<string, string>(e.key, e.value)))
     {
     }
-
-    /// <summary>
-    /// This constructor remains for backward compatibility.
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="eventName"></param>
-    /// <param name="extraData"></param>
-    [Obsolete("Use one of the other simpler constructors instead.")]
-    public BreadcrumbEvent(
-        object? sender,
-        string eventName,
-        IEnumerable<(string Key, string Value)>[] extraData) : this(sender, eventName, extraData.SelectMany(
-            x => x.Select(pair => new KeyValuePair<string, string>(pair.Key, pair.Value)))
-        )
-    {
-    }
 }
