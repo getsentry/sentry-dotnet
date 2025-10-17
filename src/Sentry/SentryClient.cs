@@ -349,7 +349,7 @@ public class SentryClient : ISentryClient, IDisposable
 
         if (processedEvent.HasUnhandledNonTerminalException())
         {
-            _options.LogDebug("Marking session as having unhandled exception (non-terminal).");
+            _options.LogDebug("Marking session as 'Unhandled', due to unhandled exception.");
             _sessionManager.MarkSessionAsUnhandled();
         }
         else if (processedEvent.HasUnhandledException())

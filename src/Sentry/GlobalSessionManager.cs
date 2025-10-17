@@ -249,12 +249,11 @@ internal class GlobalSessionManager : ISessionManager
 
     private SessionUpdate EndSession(SentrySession session, DateTimeOffset timestamp, SessionEndStatus status)
     {
-        // If session has pending unhandled exception and we're ending normally (Exited),
-        // preserve the Unhandled status unless explicitly overridden with a more severe status
-        if (session.HasPendingUnhandledException && status == SessionEndStatus.Exited)
+        // If we're ending as 'Exited' but he session has a pending 'Unhandled', end as 'Unhandled'
+        if (status == SessionEndStatus.Exited && session.HasPendingUnhandledException)
         {
             status = SessionEndStatus.Unhandled;
-            _options.LogDebug("Ending session with Unhandled status (had pending exception)");
+            _options.LogDebug("Session ended as 'Unhandled' due to pending status.");
         }
 
         if (status == SessionEndStatus.Crashed)
@@ -381,16 +380,13 @@ internal class GlobalSessionManager : ISessionManager
     {
         if (_currentSession is not { } session)
         {
-            _options.LogDebug("No active session to mark as unhandled.");
+            _options.LogDebug("There is no session active. Skipping marking session as unhandled.");
             return;
         }
 
         session.MarkUnhandledException();
 
-        // Persist updated session state with pending flag
         var sessionUpdate = session.CreateUpdate(false, _clock.GetUtcNow());
         PersistSession(sessionUpdate, pendingUnhandled: true);
-
-        _options.LogDebug("Session marked with pending unhandled exception.");
     }
 }
