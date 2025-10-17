@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Do not allow multiple `sentry.proguard-uuid` metadata to be set in Android manifest ([#4647](https://github.com/getsentry/sentry-dotnet/pull/4647))
+
 ### Dependencies
 
 - Bump Cocoa SDK from v8.56.2 to v8.57.0 ([#4637](https://github.com/getsentry/sentry-dotnet/pull/4637))
