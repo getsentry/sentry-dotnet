@@ -5,7 +5,7 @@ namespace Sentry.Extensions.AI;
 /// <summary>
 /// Populates various span attributes specific to AI
 /// </summary>
-public static class SentryAISpanEnricher
+internal static class SentryAISpanEnricher
 {
     /// <summary>
     /// Enrich a span with request information
@@ -13,15 +13,11 @@ public static class SentryAISpanEnricher
     /// <param name="span">Span to enrich</param>
     /// <param name="messages">Messages</param>
     /// <param name="options">Options</param>
-    /// <param name="agentName">Agent's name</param>
-    /// <param name="system">The AI product (e.g. OpenAI, Anthropic, etc)</param>
-    public static void EnrichWithRequest(ISpan span, ChatMessage[] messages, ChatOptions? options, string? agentName, string? system)
+    internal static void EnrichWithRequest(ISpan span, ChatMessage[] messages, ChatOptions? options)
     {
+        // Currently, all top-level spans will start as "chat"
+        // The agent creation/invocation doesn't really work in Microsoft.Extensions.AI
         span.SetData("gen_ai.operation.name", "chat");
-        if (system is { Length: > 0 })
-        {
-            span.SetData("gen_ai.system", system);
-        }
 
         if (options?.ModelId is { } modelId)
         {
@@ -65,11 +61,6 @@ public static class SentryAISpanEnricher
         if (options?.PresencePenalty is { } presencePenalty)
         {
             span.SetData("gen_ai.request.presence_penalty", presencePenalty);
-        }
-
-        if (agentName is { Length: > 0 })
-        {
-            span.SetData("gen_ai.agent.name", agentName);
         }
     }
 
