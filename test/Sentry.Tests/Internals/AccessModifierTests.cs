@@ -1,4 +1,3 @@
-
 namespace Sentry.Tests.Internals;
 
 public class AccessModifierTests
@@ -6,7 +5,6 @@ public class AccessModifierTests
     private const string InternalsNamespace = "Sentry.Internal";
 
     [Fact]
-    [RequiresUnreferencedCode()]
     public void TypesInInternalsNamespace_AreNotPublic()
     {
         var types = typeof(ISentryClient).Assembly

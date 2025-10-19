@@ -1,4 +1,3 @@
-
 namespace Sentry.Testing;
 
 public static class SentryResponses
@@ -16,7 +15,6 @@ public static class SentryResponses
             Content = GetOkContent()
         };
 
-    [RequiresUnreferencedCode()]
     public static HttpResponseMessage GetJsonErrorResponse(HttpStatusCode code, string detail, string[] causes = null)
     {
         var responseContent = causes != null
