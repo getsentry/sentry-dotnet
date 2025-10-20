@@ -159,7 +159,7 @@ Describe 'MAUI app' -ForEach @(
 
         Dump-ServerErrors -Result $result
         $result.HasErrors() | Should -BeFalse
-        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"SIG[A-Z]+`"" # SIGILL, SIGTRAP
+        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"SIG[A-Z]+`"" # SIGILL (x86_64), SIGTRAP (arm64-v8a)
         $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
     }
 
