@@ -32,8 +32,10 @@ public sealed class Mechanism : ISentryJsonSerializable
     /// <summary>
     /// Key found inside of <c>Exception.Data</c> describing whether the exception is considered terminal.
     /// </summary>
-    /// <remarks> It's not prefixed with 'Sentry' so the MainExceptionProcessor does not remove it. </remarks>
-    public static readonly string TerminalKey = "Terminal";
+    /// <remarks>
+    /// This is an SDK-internal flag used for session tracking and is not sent to Sentry servers.
+    /// </remarks>
+    public static readonly string TerminalKey = "Sentry:Terminal";
 
     internal Dictionary<string, object>? InternalData { get; private set; }
 
@@ -143,7 +145,14 @@ public sealed class Mechanism : ISentryJsonSerializable
         writer.WriteBooleanIfTrue("is_exception_group", IsExceptionGroup);
         writer.WriteNumberIfNotNull("exception_id", ExceptionId);
         writer.WriteNumberIfNotNull("parent_id", ParentId);
-        writer.WriteDictionaryIfNotEmpty("data", InternalData!, logger);
+
+        // Filter out Terminal flag from Data before serialization (SDK-internal only)
+        var dataToSerialize = InternalData?.Count > 0
+            ? InternalData.Where(kvp => !kvp.Key.Equals(TerminalKey, StringComparison.OrdinalIgnoreCase))
+                          .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
+            : null;
+        writer.WriteDictionaryIfNotEmpty("data", dataToSerialize!, logger);
+
         writer.WriteDictionaryIfNotEmpty("meta", InternalMeta!, logger);
 
         writer.WriteEndObject();

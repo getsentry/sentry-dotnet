@@ -122,6 +122,11 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
                     sentryEvent.Contexts[key[ExceptionDataContextKey.Length..]] = value;
                     keysToRemove.Add(key);
                 }
+                else if (key.Equals(Mechanism.TerminalKey, StringComparison.OrdinalIgnoreCase))
+                {
+                    // Terminal is SDK-internal only, used for session tracking. Don't send to Sentry.
+                    // Skip it - will be removed during serialization in Mechanism.WriteTo()
+                }
                 else if (key.StartsWith(ExceptionDataKeyPrefix, StringComparison.OrdinalIgnoreCase))
                 {
                     sentryEvent.SetExtra($"Exception[{i}][{key}]", value);
@@ -201,6 +206,13 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
 
         // Add HResult to mechanism data before adding exception data, so that it can be overridden.
         mechanism.Data["HResult"] = $"0x{exception.HResult:X8}";
+
+        // Copy Terminal flag for internal processing, but remove it from Exception.Data
+        if (exception.Data[Mechanism.TerminalKey] is bool terminal)
+        {
+            mechanism.Data[Mechanism.TerminalKey] = terminal;
+            exception.Data.Remove(Mechanism.TerminalKey);
+        }
 
         // Copy remaining exception data to mechanism data.
         foreach (var key in exception.Data.Keys.OfType<string>())

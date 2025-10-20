@@ -210,7 +210,6 @@ public partial class SentryEventTests
     [Fact]
     public void GetExceptionType_UnhandledTerminalExceptionViaSentryExceptions_ReturnsUnhandled()
     {
-        // Terminal = null or true means default behavior (terminal)
         var evt = new SentryEvent
         {
             SentryExceptions = [new SentryException { Mechanism = new Mechanism { Handled = false } }]
