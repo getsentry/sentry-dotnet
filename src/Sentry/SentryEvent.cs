@@ -178,9 +178,37 @@ public sealed class SentryEvent : IEventLike, ISentryJsonSerializable
     /// <inheritdoc />
     public IReadOnlyDictionary<string, string> Tags => _tags ??= new Dictionary<string, string>();
 
-    internal bool HasException() => Exception is not null || SentryExceptions?.Any() == true;
+    internal enum ExceptionType
+    {
+        None,
+        Handled,
+        Unhandled,
+        UnhandledNonTerminal
+    }
 
-    internal bool HasUnhandledException()
+    internal ExceptionType GetExceptionType()
+    {
+        if (!HasException())
+        {
+            return ExceptionType.None;
+        }
+
+        if (HasUnhandledNonTerminalException())
+        {
+            return ExceptionType.UnhandledNonTerminal;
+        }
+
+        if (HasUnhandledException())
+        {
+            return ExceptionType.Unhandled;
+        }
+
+        return ExceptionType.Handled;
+    }
+
+    private bool HasException() => Exception is not null || SentryExceptions?.Any() == true;
+
+    private bool HasUnhandledException()
     {
         if (Exception?.Data[Mechanism.HandledKey] is false)
         {
@@ -190,7 +218,7 @@ public sealed class SentryEvent : IEventLike, ISentryJsonSerializable
         return SentryExceptions?.Any(e => e.Mechanism is { Handled: false }) ?? false;
     }
 
-    internal bool HasUnhandledNonTerminalException()
+    private bool HasUnhandledNonTerminalException()
     {
         // Generally, an unhandled exception is considered terminal.
         // Exception: If it is an unhandled exception but the terminal flag is explicitly set to false.
@@ -207,13 +235,9 @@ public sealed class SentryEvent : IEventLike, ISentryJsonSerializable
         }
 
         return SentryExceptions?.Any(e =>
-            e.Mechanism is { Handled: false } &&
-            e.Mechanism.Data.TryGetValue(Mechanism.TerminalKey, out var terminal) &&
-            terminal is false
+            e.Mechanism is { Handled: false, Terminal: false }
         ) ?? false;
     }
-
-    internal bool HasTerminalException() => HasUnhandledException() && !HasUnhandledNonTerminalException();
 
     internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
 

@@ -110,14 +110,14 @@ public partial class MainExceptionProcessorTests
         var evt = new SentryEvent();
         var exp = new Exception();
 
-        exp.Data.Add(Mechanism.TerminalKey, true);
+        exp.SetSentryMechanism("TestException", terminal: true);
 
         sut.Process(exp, evt);
 
         Assert.NotNull(evt.SentryExceptions);
         var sentryException = evt.SentryExceptions.Single();
-        Assert.True(sentryException.Mechanism?.Data.ContainsKey(Mechanism.TerminalKey));
-        Assert.Equal(true, sentryException.Mechanism?.Data[Mechanism.TerminalKey]);
+        Assert.NotNull(sentryException.Mechanism?.Terminal);
+        Assert.True(sentryException.Mechanism?.Terminal);
     }
 
     [Fact]
@@ -127,14 +127,13 @@ public partial class MainExceptionProcessorTests
         var evt = new SentryEvent();
         var exp = new Exception();
 
-        exp.Data.Add(Mechanism.TerminalKey, false);
+        exp.SetSentryMechanism("TestException", terminal: false);
 
         sut.Process(exp, evt);
 
         Assert.NotNull(evt.SentryExceptions);
         var sentryException = evt.SentryExceptions.Single();
-        Assert.True(sentryException.Mechanism?.Data.ContainsKey(Mechanism.TerminalKey));
-        Assert.Equal(false, sentryException.Mechanism?.Data[Mechanism.TerminalKey]);
+        Assert.False(sentryException.Mechanism?.Terminal);
     }
 
     [Fact]
