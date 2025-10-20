@@ -147,11 +147,22 @@ public sealed class Mechanism : ISentryJsonSerializable
         writer.WriteNumberIfNotNull("parent_id", ParentId);
 
         // Filter out Terminal flag from Data before serialization (SDK-internal only)
-        var dataToSerialize = InternalData?.Count > 0
-            ? InternalData.Where(kvp => !kvp.Key.Equals(TerminalKey, StringComparison.OrdinalIgnoreCase))
-                          .ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
-            : null;
-        writer.WriteDictionaryIfNotEmpty("data", dataToSerialize!, logger);
+        // Only create a filtered dictionary if Terminal actually exists
+        Dictionary<string, object>? dataToSerialize = null;
+        if (InternalData?.Count > 0)
+        {
+            if (InternalData.ContainsKey(TerminalKey))
+            {
+                dataToSerialize = InternalData
+                    .Where(kvp => !kvp.Key.Equals(TerminalKey, StringComparison.OrdinalIgnoreCase))
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            }
+            else
+            {
+                dataToSerialize = InternalData;
+            }
+        }
+        writer.WriteDictionaryIfNotEmpty("data", dataToSerialize, logger);
 
         writer.WriteDictionaryIfNotEmpty("meta", InternalMeta!, logger);
 

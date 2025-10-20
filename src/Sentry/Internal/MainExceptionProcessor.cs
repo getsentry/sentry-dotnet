@@ -124,8 +124,8 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
                 }
                 else if (key.Equals(Mechanism.TerminalKey, StringComparison.OrdinalIgnoreCase))
                 {
-                    // Terminal is SDK-internal only, used for session tracking. Don't send to Sentry.
-                    // Skip it - will be removed during serialization in Mechanism.WriteTo()
+                    // Terminal is SDK-internal only, used for session updates. Don't send to Sentry.
+                    // It will be except from serialization in Mechanism.WriteTo() as well
                 }
                 else if (key.StartsWith(ExceptionDataKeyPrefix, StringComparison.OrdinalIgnoreCase))
                 {
