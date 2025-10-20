@@ -250,7 +250,7 @@ internal class GlobalSessionManager : ISessionManager
     private SessionUpdate EndSession(SentrySession session, DateTimeOffset timestamp, SessionEndStatus status)
     {
         // If we're ending as 'Exited' but he session has a pending 'Unhandled', end as 'Unhandled'
-        if (status == SessionEndStatus.Exited && session.HasPendingUnhandledException)
+        if (status == SessionEndStatus.Exited && session.IsMarkedAsPendingUnhandled)
         {
             status = SessionEndStatus.Unhandled;
             _options.LogDebug("Session ended as 'Unhandled' due to pending status.");
