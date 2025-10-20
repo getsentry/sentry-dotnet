@@ -32,13 +32,17 @@ public interface ISentryClient
     /// Captures feedback from the user.
     /// </summary>
     /// <param name="feedback">The feedback to send to Sentry.</param>
-    /// <param name="scope">An optional scope to be applied to the event.</param>
-    /// <param name="hint">An optional hint providing high level context for the source of the event</param>
+    /// <param name="result">A <see cref="CaptureFeedbackResult"/> indicating either success or a specific error</param>
+    /// <param name="scope">An optional scope to be applied to the feedback event.</param>
+    /// <param name="hint">
+    /// An optional hint providing high-level context for the source of the event, including attachments
+    /// </param>
     /// <returns>
-    /// A <see cref="CaptureFeedbackResult"/> that will contain the Id of the new event (if successful) or an error code
-    /// indicating the reason for failure (if feedback capture fails).
+    /// A <see cref="SentryId"/> that will contain the Id of the new event (if successful) or
+    /// <see cref="SentryId.Empty"/> otherwise
     /// </returns>
-    public CaptureFeedbackResult CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null);
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result, Scope? scope = null,
+        SentryHint? hint = null);
 
     /// <summary>
     /// Captures a transaction.

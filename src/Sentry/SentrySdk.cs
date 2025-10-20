@@ -542,25 +542,33 @@ static partial class SentrySdk
     public static SentryId CaptureMessage(string message, Action<Scope> configureScope, SentryLevel level = SentryLevel.Info)
         => CurrentHub.CaptureMessage(message, configureScope, level);
 
-    /// <summary>
-    /// Captures feedback from the user.
-    /// </summary>
+    /// <inheritdoc cref="M:Sentry.IHub.CaptureFeedback(Sentry.SentryFeedback,System.Action{Sentry.Scope},Sentry.SentryHint)"/>
     [DebuggerStepThrough]
-    public static CaptureFeedbackResult CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+    public static SentryId CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
         => CurrentHub.CaptureFeedback(feedback, configureScope, hint);
 
-    /// <summary>
-    /// Captures feedback from the user.
-    /// </summary>
+    /// <inheritdoc cref="M:Sentry.IHub.CaptureFeedback(Sentry.SentryFeedback, out Sentry.CaptureFeedbackResult,System.Action{Sentry.Scope},Sentry.SentryHint)"/>
     [DebuggerStepThrough]
-    public static CaptureFeedbackResult CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    public static SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result,
+        Action<Scope> configureScope, SentryHint? hint = null)
+        => CurrentHub.CaptureFeedback(feedback, out result, configureScope, hint);
+
+    /// <inheritdoc cref="M:Sentry.ISentryClient.CaptureFeedback"/>
+    [DebuggerStepThrough]
+    public static SentryId CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
         => CurrentHub.CaptureFeedback(feedback, scope, hint);
+
+    /// <inheritdoc cref="M:Sentry.ISentryClient.CaptureFeedback"/>
+    [DebuggerStepThrough]
+    public static SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result,
+        Scope? scope = null, SentryHint? hint = null)
+        => CurrentHub.CaptureFeedback(feedback, out result, scope, hint);
 
     /// <summary>
     /// Captures feedback from the user.
     /// </summary>
     [DebuggerStepThrough]
-    public static void CaptureFeedback(string message, string? contactEmail = null, string? name = null,
+    public static SentryId CaptureFeedback(string message, string? contactEmail = null, string? name = null,
         string? replayId = null, string? url = null, SentryId? associatedEventId = null, Scope? scope = null,
         SentryHint? hint = null)
         => CurrentHub.CaptureFeedback(new SentryFeedback(message, contactEmail, name, replayId, url, associatedEventId),

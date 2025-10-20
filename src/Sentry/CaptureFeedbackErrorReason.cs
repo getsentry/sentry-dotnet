@@ -1,10 +1,14 @@
 namespace Sentry;
 
 /// <summary>
-/// Used to specify the reason why feedback capture failed, in the event of a failure
+/// Result code for <see cref="ISentryClient.CaptureFeedback"/> requests
 /// </summary>
-public enum CaptureFeedbackErrorReason
+public enum CaptureFeedbackResult
 {
+    /// <summary>
+    /// Feedback captured successfully.
+    /// </summary>
+    Success,
     /// <summary>
     /// <para>
     /// An unknown error occurred (enable debug mode and check the logs for details).

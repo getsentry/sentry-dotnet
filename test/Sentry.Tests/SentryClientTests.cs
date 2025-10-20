@@ -865,11 +865,11 @@ public partial class SentryClientTests : IDisposable
         sut.Dispose();
 
         // Act
-        var result = sut.CaptureFeedback(feedback);
+        var id = sut.CaptureFeedback(feedback, out var result);
 
         // Assert
-        result.Succeeded.Should().BeTrue();
-        result.EventId.Should().NotBeNull();
+        result.Should().Be(CaptureFeedbackResult.Success);
+        id.Should().NotBe(SentryId.Empty);
     }
 
     [Fact]
@@ -880,14 +880,12 @@ public partial class SentryClientTests : IDisposable
         var feedback = new SentryFeedback(string.Empty);
 
         //Act
-        var result = sut.CaptureFeedback(feedback);
+        var id = sut.CaptureFeedback(feedback, out var result);
 
         //Assert
         _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-        // Assert
-        result.Succeeded.Should().BeFalse();
-        result.ErrorReason.Should().Be(CaptureFeedbackErrorReason.EmptyMessage);
-        result.EventId.Should().Be(SentryId.Empty);
+        result.Should().Be(CaptureFeedbackResult.EmptyMessage);
+        id.Should().Be(SentryId.Empty);
     }
 
     [Fact]

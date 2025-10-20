@@ -590,12 +590,13 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public CaptureFeedbackResult CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope,
-        SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result,
+        Action<Scope> configureScope, SentryHint? hint = null)
     {
         if (!IsEnabled)
         {
-            return new CaptureFeedbackResult(CaptureFeedbackErrorReason.DisabledHub);
+            result = CaptureFeedbackResult.DisabledHub;
+            return SentryId.Empty;
         }
 
         try
@@ -603,20 +604,23 @@ internal class Hub : IHub, IDisposable
             var clonedScope = CurrentScope.Clone();
             configureScope(clonedScope);
 
-            return CaptureFeedback(feedback, clonedScope, hint);
+            return CaptureFeedback(feedback, out result, clonedScope, hint);
         }
         catch (Exception e)
         {
             _options.LogError(e, "Failure to capture feedback");
-            return new CaptureFeedbackResult(CaptureFeedbackErrorReason.UnknownError);
+            result = CaptureFeedbackResult.UnknownError;
+            return SentryId.Empty;
         }
     }
 
-    public CaptureFeedbackResult CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result, Scope? scope = null,
+        SentryHint? hint = null)
     {
         if (!IsEnabled)
         {
-            return new CaptureFeedbackResult(CaptureFeedbackErrorReason.DisabledHub);
+            result = CaptureFeedbackResult.DisabledHub;
+            return SentryId.Empty;
         }
 
         try
@@ -628,12 +632,13 @@ internal class Hub : IHub, IDisposable
             }
 
             scope ??= CurrentScope;
-            return CurrentClient.CaptureFeedback(feedback, scope, hint);
+            return CurrentClient.CaptureFeedback(feedback, out result, scope, hint);
         }
         catch (Exception e)
         {
             _options.LogError(e, "Failure to capture feedback");
-            return new CaptureFeedbackResult(CaptureFeedbackErrorReason.UnknownError);
+            result = CaptureFeedbackResult.UnknownError;
+            return SentryId.Empty;
         }
     }
 
