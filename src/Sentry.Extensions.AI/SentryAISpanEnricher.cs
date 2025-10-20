@@ -1,5 +1,5 @@
-using Microsoft.Extensions.AI;
 using System.Text.Json;
+using Microsoft.Extensions.AI;
 
 namespace Sentry.Extensions.AI;
 
@@ -122,13 +122,13 @@ internal static class SentryAISpanEnricher
         {
             foreach (var content in message.Contents)
             {
-                if (content is UsageContent {} usage)
+                if (content is UsageContent { } usage)
                 {
                     inputTokenCount += usage.Details.InputTokenCount ?? 0;
                     outputTokenCount += usage.Details.OutputTokenCount ?? 0;
                 }
             }
-            if (message.ModelId is { } modelId  )
+            if (message.ModelId is { } modelId)
             {
                 span.SetData("gen_ai.response.model_id", modelId);
             }

@@ -1,8 +1,8 @@
 #nullable enable
+using System.Text.Json;
 using Microsoft.Extensions.AI;
 using NSubstitute;
 using Sentry.Extensions.AI;
-using System.Text.Json;
 
 namespace Sentry.Extensions.AI.Tests;
 
