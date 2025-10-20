@@ -149,6 +149,20 @@ Describe 'MAUI app' -ForEach @(
         $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
     }
 
+    It 'Native crash' {
+        $result = Invoke-SentryServer {
+            param([string]$url)
+            InstallAndroidApp -Dsn $url
+            RunAndroidApp -Dsn $url -TestArg "Native"
+            RunAndroidApp -Dsn $url
+        }
+
+        Dump-ServerErrors -Result $result
+        $result.HasErrors() | Should -BeFalse
+        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"SIGILL`""
+        $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
+    }
+
     It 'Null reference exception' {
         $result = Invoke-SentryServer {
             param([string]$url)
