@@ -15,8 +15,7 @@ public class SentryChatClientTests
         inner.GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(chatResponse));
 
-        var hub = Substitute.For<IHub>();
-        var sentryChatClient = new SentryChatClient(inner, hub, agentName: "Agent", model: "gpt-4o-mini", system: "openai");
+        var sentryChatClient = new SentryChatClient(inner);
 
         var res = await sentryChatClient.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")], null);
 
@@ -30,10 +29,9 @@ public class SentryChatClientTests
         var inner = Substitute.For<IChatClient>();
 
         inner.GetStreamingResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
-            .Returns(CreateTestStreamingUpdates());
+            .Returns(CreateTestStreamingUpdatesAsync());
 
-        var hub = Substitute.For<IHub>();
-        var client = new SentryChatClient(inner, hub, agentName: "Agent", model: "gpt-4o-mini", system: "openai");
+        var client = new SentryChatClient(inner);
 
         var results = new List<ChatResponseUpdate>();
         await foreach (var update in client.GetStreamingResponseAsync([new ChatMessage(ChatRole.User, "hi")], null))
@@ -48,10 +46,10 @@ public class SentryChatClientTests
         inner.Received(1).GetStreamingResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>());
     }
 
-    private static async IAsyncEnumerable<ChatResponseUpdate> CreateTestStreamingUpdates()
+    private static async IAsyncEnumerable<ChatResponseUpdate> CreateTestStreamingUpdatesAsync()
     {
         yield return new ChatResponseUpdate(ChatRole.System, "Hello");
-        await Task.Yield(); // Make it actually async
+        await Task.Yield(); // Make it async
         yield return new ChatResponseUpdate(ChatRole.System, " World!");
     }
 }
