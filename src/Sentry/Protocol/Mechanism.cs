@@ -85,6 +85,15 @@ public sealed class Mechanism : ISentryJsonSerializable
     public bool? Handled { get; set; }
 
     /// <summary>
+    /// Optional flag indicating whether the exception is terminal (will crash the application).
+    /// When false, indicates a non-terminal unhandled exception (e.g., unobserved task exception).
+    /// </summary>
+    /// <remarks>
+    /// This is an SDK-internal flag used for session tracking and is not serialized to Sentry servers.
+    /// </remarks>
+    public bool? Terminal { get; internal set; }
+
+    /// <summary>
     /// Optional flag indicating whether the exception is synthetic.
     /// </summary>
     public bool Synthetic { get; set; }
@@ -141,29 +150,12 @@ public sealed class Mechanism : ISentryJsonSerializable
         writer.WriteStringIfNotWhiteSpace("source", Source);
         writer.WriteStringIfNotWhiteSpace("help_link", HelpLink);
         writer.WriteBooleanIfNotNull("handled", Handled);
+        // Note: Terminal is NOT serialized - it's SDK-internal only
         writer.WriteBooleanIfTrue("synthetic", Synthetic);
         writer.WriteBooleanIfTrue("is_exception_group", IsExceptionGroup);
         writer.WriteNumberIfNotNull("exception_id", ExceptionId);
         writer.WriteNumberIfNotNull("parent_id", ParentId);
-
-        // Filter out Terminal flag from Data before serialization (SDK-internal only)
-        // Only create a filtered dictionary if Terminal actually exists
-        Dictionary<string, object>? dataToSerialize = null;
-        if (InternalData?.Count > 0)
-        {
-            if (InternalData.ContainsKey(TerminalKey))
-            {
-                dataToSerialize = InternalData
-                    .Where(kvp => !kvp.Key.Equals(TerminalKey, StringComparison.OrdinalIgnoreCase))
-                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-            }
-            else
-            {
-                dataToSerialize = InternalData;
-            }
-        }
-        writer.WriteDictionaryIfNotEmpty("data", dataToSerialize, logger);
-
+        writer.WriteDictionaryIfNotEmpty("data", InternalData!, logger);
         writer.WriteDictionaryIfNotEmpty("meta", InternalMeta!, logger);
 
         writer.WriteEndObject();

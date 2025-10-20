@@ -235,9 +235,7 @@ public sealed class SentryEvent : IEventLike, ISentryJsonSerializable
         }
 
         return SentryExceptions?.Any(e =>
-            e.Mechanism is { Handled: false } &&
-            e.Mechanism.Data.TryGetValue(Mechanism.TerminalKey, out var terminal) &&
-            terminal is false
+            e.Mechanism is { Handled: false, Terminal: false }
         ) ?? false;
     }
 
