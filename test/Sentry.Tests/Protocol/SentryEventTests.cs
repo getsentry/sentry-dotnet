@@ -231,8 +231,7 @@ public partial class SentryEventTests
     [Fact]
     public void GetExceptionType_UnhandledNonTerminalExceptionViaSentryExceptions_ReturnsUnhandledNonTerminal()
     {
-        var mechanism = new Mechanism { Handled = false };
-        mechanism.Data[Mechanism.TerminalKey] = false;
+        var mechanism = new Mechanism { Handled = false, Terminal = false };
 
         var evt = new SentryEvent
         {

@@ -1786,6 +1786,7 @@ namespace Sentry.Protocol
         public int? ParentId { get; set; }
         public string? Source { get; set; }
         public bool Synthetic { get; set; }
+        public bool? Terminal { get; }
         public string Type { get; set; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Protocol.Mechanism FromJson(System.Text.Json.JsonElement json) { }
