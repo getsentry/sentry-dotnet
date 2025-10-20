@@ -1,4 +1,4 @@
-﻿using Anthropic.SDK;
+using Anthropic.SDK;
 using Anthropic.SDK.Constants;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;

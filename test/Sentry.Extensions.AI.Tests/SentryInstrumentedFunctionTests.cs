@@ -97,7 +97,7 @@ public class SentryInstrumentedFunctionTests
         Assert.IsType<JsonElement>(result);
         var jsonResult = (JsonElement)result;
         Assert.Equal("test output", jsonResult.GetString());
-        
+
         // The span should have recorded the ToString() output of the JsonElement
         // (This is testing the internal behavior that ToString() gets called for span data)
     }

@@ -1,6 +1,6 @@
 #nullable enable
-using Sentry.Extensions.AI;
 using Microsoft.Extensions.AI;
+using Sentry.Extensions.AI;
 
 namespace Sentry.Extensions.AI.Tests;
 

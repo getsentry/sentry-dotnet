@@ -8,9 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseSentry(options =>
 {
 #if !SENTRY_DSN_DEFINED_IN_ENV
-        // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
-        // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
-        options.Dsn = SamplesShared.Dsn;
+    // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+    // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+    options.Dsn = SamplesShared.Dsn;
 #endif
 
     options.Debug = true;
@@ -121,7 +121,8 @@ app.MapGet("/test", async (IChatClient chatClient, ILogger<Program> logger) =>
             "Please help me with the following tasks: 1) Find Alice's age, 2) Get weather in New York, 3) Calculate a complex result for number 15, 4) Get comprehensive info for Bob in London, and 5) Calculate average age for Alice, Bob, and Charlie (first get each person's age individually using GetPersonAge, then use CalculateAverageAge with those results). Please use the appropriate tools for each task and demonstrate tool chaining where needed.",
             options);
 
-        return Results.Ok(new {
+        return Results.Ok(new
+        {
             message = "AI test with multiple tools completed successfully",
             response = response.Messages?.FirstOrDefault()?.Text ?? "No response",
             timestamp = DateTime.UtcNow
