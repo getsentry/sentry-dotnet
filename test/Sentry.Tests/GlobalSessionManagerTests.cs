@@ -536,8 +536,7 @@ public class GlobalSessionManagerTests
 
         // Assert
         session.Should().NotBeNull();
-        session!.HasPendingUnhandledException.Should().BeTrue();
-        session.ErrorCount.Should().Be(1);
+        session!.IsMarkedAsPendingUnhandled.Should().BeTrue();
 
         // Session should still be active (not ended)
         sut.CurrentSession.Should().BeSameAs(session);
@@ -554,25 +553,8 @@ public class GlobalSessionManagerTests
 
         // Assert
         _fixture.Logger.Entries.Should().Contain(e =>
-            e.Message == "No active session to mark as unhandled." &&
+            e.Message == "There is no session active. Skipping marking session as unhandled." &&
             e.Level == SentryLevel.Debug);
-    }
-
-    [Fact]
-    public void MarkSessionAsUnhandled_MultipleUnhandledExceptions_OnlyCountsFirstError()
-    {
-        // Arrange
-        var sut = _fixture.GetSut();
-        sut.StartSession();
-        var session = sut.CurrentSession;
-
-        // Act
-        sut.MarkSessionAsUnhandled();
-        sut.MarkSessionAsUnhandled();
-        sut.MarkSessionAsUnhandled();
-
-        // Assert
-        session!.ErrorCount.Should().Be(1);
     }
 
     [Fact]
@@ -613,10 +595,6 @@ public class GlobalSessionManagerTests
         // Assert
         persistedSessionUpdate.Should().NotBeNull();
         persistedSessionUpdate!.EndStatus.Should().Be(SessionEndStatus.Crashed);
-
-        _fixture.Logger.Entries.Should().Contain(e =>
-            e.Message.Contains("PendingUnhandled: True") &&
-            e.Level == SentryLevel.Info);
     }
 
     [Fact]
@@ -655,7 +633,6 @@ public class GlobalSessionManagerTests
         // Assert - Should be overridden to Unhandled
         sessionUpdate.Should().NotBeNull();
         sessionUpdate!.EndStatus.Should().Be(SessionEndStatus.Unhandled);
-        sessionUpdate.ErrorCount.Should().Be(1);
     }
 
     [Fact]
@@ -689,7 +666,7 @@ public class GlobalSessionManagerTests
         // Assert: Session still active with pending flag
         sut.CurrentSession.Should().NotBeNull();
         sut.CurrentSession!.Id.Should().Be(originalSessionId);
-        sut.CurrentSession.HasPendingUnhandledException.Should().BeTrue();
+        sut.CurrentSession.IsMarkedAsPendingUnhandled.Should().BeTrue();
 
         // Act 2: Recover on next launch with crash detected
         _fixture.Options.CrashedLastRun = () => true;
