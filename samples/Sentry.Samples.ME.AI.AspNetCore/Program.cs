@@ -1,4 +1,3 @@
-#nullable enable
 using Anthropic.SDK;
 using Anthropic.SDK.Constants;
 using Microsoft.Extensions.AI;
