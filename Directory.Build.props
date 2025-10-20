@@ -114,6 +114,10 @@
     <MemoryDumpSupported Condition="!($(PlatformIsLegacy) == 'true' or $(PlatformIsMobile) == 'true')">true</MemoryDumpSupported>
 
     <DefineConstants Condition="'$(MemoryDumpSupported)' == 'true'">$(DefineConstants);MEMORY_DUMP_SUPPORTED</DefineConstants>
+
+    <!-- Workaround for this issue https://github.com/dotnet/sdk/issues/51265#issuecomment-3416621522 -->
+    <RestoreEnablePackagePruning Condition="'$(PlatformIsLegacy)' == 'true' "> false</RestoreEnablePackagePruning>
+
   </PropertyGroup>
 
   <!-- Public key of .assets/Sentry.snk - not a secret.  Used by other InternalsVisibleTo entries throughout the solution. -->
