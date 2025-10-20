@@ -578,7 +578,7 @@ internal class Hub : IHub, IDisposable
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
-                _options.LogDebug("Ending transaction as Aborted, due to terminal unhandled exception.");
+                _options.LogDebug("Ending transaction as Aborted, due to unhandled exception.");
                 transaction.Finish(SpanStatus.Aborted);
             }
 
