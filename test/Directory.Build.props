@@ -13,6 +13,8 @@
     <NoWarn>$(NoWarn);IDE1006</NoWarn>
     <!-- TODO: Migrate from WebHostBuilder to HostBuilder or WebApplicationBuilder -->
     <NoWarn>$(NoWarn);ASPDEPR004;ASPDEPR008</NoWarn>
+    <!-- Suppress trim/AOT analyzer diagnostics in test projects -->
+    <NoWarn>$(NoWarn);IL2026;IL2070;IL2075;IL2090</NoWarn>
 
     <!-- Visual tests need net9.0+ mobile and are flaky when using the headless runner on CI -->
     <EnableMauiDeviceTestVisualRunner>false</EnableMauiDeviceTestVisualRunner>
