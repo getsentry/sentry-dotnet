@@ -208,3 +208,10 @@ indent_style = unset
 insert_final_newline = false
 tab_width = unset
 trim_trailing_whitespace = false
+
+# Disable AOT analyser for test files
+[test/**/*.cs]
+dotnet_diagnostic.IL2026.severity = none
+dotnet_diagnostic.IL2070.severity = none
+dotnet_diagnostic.IL2075.severity = none
+dotnet_diagnostic.IL2090.severity = none
