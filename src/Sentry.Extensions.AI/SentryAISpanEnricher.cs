@@ -1,4 +1,5 @@
 using Microsoft.Extensions.AI;
+using System.Text.Json;
 
 namespace Sentry.Extensions.AI;
 
@@ -8,12 +9,13 @@ namespace Sentry.Extensions.AI;
 internal static class SentryAISpanEnricher
 {
     /// <summary>
-    /// Enrich a span with request information
+    /// Enriches a span with request information.
     /// </summary>
     /// <param name="span">Span to enrich</param>
     /// <param name="messages">Messages</param>
     /// <param name="options">Options</param>
-    internal static void EnrichWithRequest(ISpan span, ChatMessage[] messages, ChatOptions? options)
+    /// <param name="aiOptions">AI-specific options</param>
+    internal static void EnrichWithRequest(ISpan span, ChatMessage[] messages, ChatOptions? options, SentryAIOptions? aiOptions = null)
     {
         // Currently, all top-level spans will start as "chat"
         // The agent creation/invocation doesn't really work in Microsoft.Extensions.AI
@@ -28,7 +30,7 @@ internal static class SentryAISpanEnricher
             span.SetData("gen_ai.request.model", "Unknown model");
         }
 
-        if (messages is { Length: > 0 })
+        if (messages is { Length: > 0 } && (aiOptions?.IncludeAIRequestMessages ?? true))
         {
             span.SetData("gen_ai.request.messages", FormatRequestMessage(messages));
         }
@@ -65,9 +67,12 @@ internal static class SentryAISpanEnricher
     }
 
     /// <summary>
-    /// Enriches the <param name="span">span</param> using the <param name="response">response</param>.
+    /// Enriches the span with response information.
     /// </summary>
-    public static void EnrichWithResponse(ISpan span, ChatResponse response)
+    /// <param name="span">Span to enrich</param>
+    /// <param name="response">Chat response containing usage and content data</param>
+    /// <param name="aiOptions">AI-specific options</param>
+    internal static void EnrichWithResponse(ISpan span, ChatResponse response, SentryAIOptions? aiOptions = null)
     {
         if (response.Usage is { } usage)
         {
@@ -90,7 +95,7 @@ internal static class SentryAISpanEnricher
             }
         }
 
-        if (response.Text is { } responseText)
+        if (response.Text is { } responseText && (aiOptions?.IncludeAIResponseContent ?? true))
         {
             span.SetData("gen_ai.response.text", responseText);
         }
@@ -99,6 +104,47 @@ internal static class SentryAISpanEnricher
         {
             span.SetData("gen_ai.response.model_id", modelId);
         }
+    }
+
+    /// <summary>
+    /// Enriches the span using the list of streamed in <see cref="ChatResponseUpdate"/>.
+    /// </summary>
+    /// <param name="span">span to enrich</param>
+    /// <param name="messages">a list of <see cref="ChatResponseUpdate"/></param>
+    /// <param name="aiOptions">AI-specific options</param>
+    public static void EnrichWithStreamingResponse(ISpan span, List<ChatResponseUpdate> messages, SentryAIOptions? aiOptions = null)
+    {
+        var inputTokenCount = 0L;
+        var outputTokenCount = 0L;
+        var finalText = new StringBuilder();
+
+        foreach (var message in messages)
+        {
+            foreach (var content in message.Contents)
+            {
+                if (content is UsageContent {} usage)
+                {
+                    inputTokenCount += usage.Details.InputTokenCount ?? 0;
+                    outputTokenCount += usage.Details.OutputTokenCount ?? 0;
+                }
+            }
+            if (message.ModelId is { } modelId  )
+            {
+                span.SetData("gen_ai.response.model_id", modelId);
+            }
+            if (message.Text is { } responseText)
+            {
+                finalText.Append(responseText);
+            }
+        }
+
+        if (aiOptions?.IncludeAIResponseContent ?? true)
+        {
+            span.SetData("gen_ai.response.text", finalText.ToString());
+        }
+        span.SetData("gen_ai.usage.input_tokens", inputTokenCount);
+        span.SetData("gen_ai.usage.output_tokens", outputTokenCount);
+        span.SetData("gen_ai.usage.total_tokens", inputTokenCount + outputTokenCount);
     }
 
     private static string FormatAvailableTools(IList<AITool> tools) =>

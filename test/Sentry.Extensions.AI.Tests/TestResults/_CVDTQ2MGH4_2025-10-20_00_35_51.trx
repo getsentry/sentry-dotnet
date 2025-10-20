@@ -1,0 +1,863 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="4447b114-b909-48ae-bf34-b0f0ca39fead" name="@CVDTQ2MGH4 2025-10-20 00:35:51" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2025-10-20T00:35:51.1365830-04:00" queuing="2025-10-20T00:35:51.1365830-04:00" start="2025-10-20T00:35:50.5444630-04:00" finish="2025-10-20T00:35:51.1750040-04:00" />
+  <TestSettings name="default" id="4c907e79-91ef-4265-8d92-0565a547cf01">
+    <Deployment runDeploymentRoot="_CVDTQ2MGH4_2025-10-20_00_35_51" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="1adf8be5-5bb0-46ee-ab99-8aa7ccd28800" testId="5553cf67-c3a9-2355-8661-bd7b922a8095" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsMessages_WhenIncludeRequestMessagesIsTrue" computerName="CVDTQ2MGH4" duration="00:00:00.0001271" startTime="2025-10-20T00:35:51.1369790-04:00" endTime="2025-10-20T00:35:51.1371730-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1adf8be5-5bb0-46ee-ab99-8aa7ccd28800" />
+    <UnitTestResult executionId="93539010-c21e-4b07-8e85-1b9e7a1ce623" testId="a668f0c0-d834-673f-0855-a43a49192458" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_SetsModelId_WhenProvided" computerName="CVDTQ2MGH4" duration="00:00:00.0000896" startTime="2025-10-20T00:35:51.1211280-04:00" endTime="2025-10-20T00:35:51.1212810-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="93539010-c21e-4b07-8e85-1b9e7a1ce623" />
+    <UnitTestResult executionId="fd7bc376-adf1-457d-af79-de701fbde007" testId="7784a66f-9cf7-4945-cbc4-881faee565ce" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_DoesNotSetResponseText_WhenIncludeResponseContentIsFalse" computerName="CVDTQ2MGH4" duration="00:00:00.0001274" startTime="2025-10-20T00:35:51.1364640-04:00" endTime="2025-10-20T00:35:51.1366670-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fd7bc376-adf1-457d-af79-de701fbde007" />
+    <UnitTestResult executionId="4a40bedf-819b-4741-a7ff-7034e3473bf2" testId="a1c2944e-8323-7022-5f2b-9870cd310e41" testName="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_ChatOptions_DoesNotDoubleWrapSentryInstrumentedFunction" computerName="CVDTQ2MGH4" duration="00:00:00.0000883" startTime="2025-10-20T00:35:51.1107770-04:00" endTime="2025-10-20T00:35:51.1109350-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4a40bedf-819b-4741-a7ff-7034e3473bf2" />
+    <UnitTestResult executionId="7db23406-827d-4233-ad6c-48fa1ba78c14" testId="ec1fa19b-b6c9-d93f-8ff5-b1a2af964267" testName="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.IncludeResponseContent_CanBeSet" computerName="CVDTQ2MGH4" duration="00:00:00.0000343" startTime="2025-10-20T00:35:51.1455790-04:00" endTime="2025-10-20T00:35:51.1457440-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7db23406-827d-4233-ad6c-48fa1ba78c14" />
+    <UnitTestResult executionId="7938993a-3825-4e07-813a-f6983187445d" testId="392c3d85-43fa-afaf-2331-d63e7f21e843" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_SetsResponseText_WhenIncludeResponseContentIsTrue" computerName="CVDTQ2MGH4" duration="00:00:00.0001496" startTime="2025-10-20T00:35:51.1187720-04:00" endTime="2025-10-20T00:35:51.1190020-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7938993a-3825-4e07-813a-f6983187445d" />
+    <UnitTestResult executionId="ec9aef7f-03f7-451b-a86b-f1054fcdde44" testId="b3a9e239-1ca8-3b0e-a087-4455bfe3865c" testName="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_ChatOptions_HandlesMultipleFunctions" computerName="CVDTQ2MGH4" duration="00:00:00.0002117" startTime="2025-10-20T00:35:51.1110100-04:00" endTime="2025-10-20T00:35:51.1112870-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ec9aef7f-03f7-451b-a86b-f1054fcdde44" />
+    <UnitTestResult executionId="37d55d2e-517f-4349-8a2f-b891c1106f29" testId="9429f264-54d3-17d7-1715-b8108ebaa7b4" testName="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.AllPropertyCombinations_WorkCorrectly(includeRequest: False, includeResponse: False, initializeSdk: False)" computerName="CVDTQ2MGH4" duration="00:00:00.0000056" startTime="2025-10-20T00:35:51.1408430-04:00" endTime="2025-10-20T00:35:51.1409070-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="37d55d2e-517f-4349-8a2f-b891c1106f29" />
+    <UnitTestResult executionId="4e1f10ca-e649-419c-9334-ceba55349050" testId="b4f94cc6-9755-d4f6-5420-5847c696e96d" testName="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.AllPropertyCombinations_WorkCorrectly(includeRequest: False, includeResponse: True, initializeSdk: True)" computerName="CVDTQ2MGH4" duration="00:00:00.0012937" startTime="2025-10-20T00:35:51.1384020-04:00" endTime="2025-10-20T00:35:51.1397710-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4e1f10ca-e649-419c-9334-ceba55349050" />
+    <UnitTestResult executionId="ff3638c7-09d0-4aea-a0ac-09061fd01e24" testId="dfbefe52-2c1c-cd7b-53c3-9129446f634c" testName="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithComplexResult_SetsOutputAsString" computerName="CVDTQ2MGH4" duration="00:00:00.0007120" startTime="2025-10-20T00:35:51.0545730-04:00" endTime="2025-10-20T00:35:51.0554760-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ff3638c7-09d0-4aea-a0ac-09061fd01e24">
+      <Output>
+        <ErrorInfo>
+          <Message>NSubstitute.Exceptions.AmbiguousArgumentsException : Cannot determine argument specifications to use. Please use specifications for all arguments of the same type.
+Method signature:
+    InvokeCoreAsync(AIFunctionArguments, CancellationToken)
+Method arguments (possible arg matchers are indicated with '*'):
+    InvokeCoreAsync(AIFunctionArguments, *System.Threading.CancellationToken*)
+All queued specifications:
+    any AIFunctionArguments
+    any CancellationToken
+Matched argument specifications:
+    InvokeCoreAsync(AIFunctionArguments, ???)
+</Message>
+          <StackTrace>   at NSubstitute.Core.Arguments.ArgumentSpecificationsFactory.Create(IList`1 argumentSpecs, Object[] arguments, IParameterInfo[] parameterInfos, MethodInfo methodInfo, MatchArgs matchArgs)
+   at NSubstitute.Core.CallSpecificationFactory.CreateFrom(ICall call, MatchArgs matchArgs)
+   at NSubstitute.Routing.Handlers.RecordCallSpecificationHandler.Handle(ICall call)
+   at NSubstitute.Routing.Route.Handle(ICall call)
+   at NSubstitute.Core.CallRouter.Route(ICall call)
+   at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at Castle.Proxies.AIFunctionProxy.InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+   at Microsoft.Extensions.AI.AIFunction.InvokeAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+   at Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithComplexResult_SetsOutputAsString() in /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryInstrumentedFunctionTests.cs:line 113
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="262c19e8-3383-466f-b592-3af6e8a6552a" testId="4bcb2db7-80da-e3e2-fba4-ade908cbac25" testName="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_ChatOptions_IgnoresNonAIFunctionTools" computerName="CVDTQ2MGH4" duration="00:00:00.0013414" startTime="2025-10-20T00:35:51.1083410-04:00" endTime="2025-10-20T00:35:51.1097530-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="262c19e8-3383-466f-b592-3af6e8a6552a" />
+    <UnitTestResult executionId="22182872-f224-43eb-adb5-7d150bffe1a5" testId="0e7ba0d7-8640-06f9-182a-9d339e1d0c02" testName="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.AllPropertyCombinations_WorkCorrectly(includeRequest: False, includeResponse: False, initializeSdk: True)" computerName="CVDTQ2MGH4" duration="00:00:00.0000044" startTime="2025-10-20T00:35:51.1407340-04:00" endTime="2025-10-20T00:35:51.1407960-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="22182872-f224-43eb-adb5-7d150bffe1a5" />
+    <UnitTestResult executionId="a545fc45-9f0a-4520-b44c-608a88bd2739" testId="ed5d9d9d-7702-7201-3bd0-673ad663cdae" testName="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.AllPropertyCombinations_WorkCorrectly(includeRequest: True, includeResponse: True, initializeSdk: True)" computerName="CVDTQ2MGH4" duration="00:00:00.0001154" startTime="2025-10-20T00:35:51.1398340-04:00" endTime="2025-10-20T00:35:51.1400160-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a545fc45-9f0a-4520-b44c-608a88bd2739" />
+    <UnitTestResult executionId="7052b245-85e1-4401-a12e-9ac8dac71dbd" testId="edfb2d64-ad5a-7de7-e70b-cbff59f4c950" testName="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.AllPropertyCombinations_WorkCorrectly(includeRequest: True, includeResponse: False, initializeSdk: False)" computerName="CVDTQ2MGH4" duration="00:00:00.0000058" startTime="2025-10-20T00:35:51.1400720-04:00" endTime="2025-10-20T00:35:51.1401420-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7052b245-85e1-4401-a12e-9ac8dac71dbd" />
+    <UnitTestResult executionId="16a26b69-38d1-46e5-a583-79556c78f1a7" testId="b41f6021-383a-d928-8ca4-0fd332e9d7c2" testName="Sentry.Extensions.AI.Tests.SentryChatClientTests.CompleteAsync_CallsInnerClient" computerName="CVDTQ2MGH4" duration="00:00:00.0062489" startTime="2025-10-20T00:35:51.0875430-04:00" endTime="2025-10-20T00:35:51.0938930-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="16a26b69-38d1-46e5-a583-79556c78f1a7" />
+    <UnitTestResult executionId="c40695bc-a110-4f66-a3b8-76be78707589" testId="a1411ee4-03cc-3160-23ec-62d379e3663f" testName="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithoutParentSpan_CreatesTransaction" computerName="CVDTQ2MGH4" duration="00:00:00.0005872" startTime="2025-10-20T00:35:51.0506050-04:00" endTime="2025-10-20T00:35:51.0513540-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c40695bc-a110-4f66-a3b8-76be78707589">
+      <Output>
+        <ErrorInfo>
+          <Message>NSubstitute.Exceptions.AmbiguousArgumentsException : Cannot determine argument specifications to use. Please use specifications for all arguments of the same type.
+Method signature:
+    InvokeCoreAsync(AIFunctionArguments, CancellationToken)
+Method arguments (possible arg matchers are indicated with '*'):
+    InvokeCoreAsync(AIFunctionArguments, *System.Threading.CancellationToken*)
+All queued specifications:
+    any AIFunctionArguments
+    any CancellationToken
+Matched argument specifications:
+    InvokeCoreAsync(AIFunctionArguments, ???)
+</Message>
+          <StackTrace>   at NSubstitute.Core.Arguments.ArgumentSpecificationsFactory.Create(IList`1 argumentSpecs, Object[] arguments, IParameterInfo[] parameterInfos, MethodInfo methodInfo, MatchArgs matchArgs)
+   at NSubstitute.Core.CallSpecificationFactory.CreateFrom(ICall call, MatchArgs matchArgs)
+   at NSubstitute.Routing.Handlers.RecordCallSpecificationHandler.Handle(ICall call)
+   at NSubstitute.Routing.Route.Handle(ICall call)
+   at NSubstitute.Core.CallRouter.Route(ICall call)
+   at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at Castle.Proxies.AIFunctionProxy.InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+   at Microsoft.Extensions.AI.AIFunction.InvokeAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+   at Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithoutParentSpan_CreatesTransaction() in /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryInstrumentedFunctionTests.cs:line 45
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="af15d46c-512d-4a0d-87ab-dae4c49f5260" testId="acd71ff6-cf60-d3df-9838-85cc88c6d9a1" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsTemperature_WhenProvided" computerName="CVDTQ2MGH4" duration="00:00:00.0001372" startTime="2025-10-20T00:35:51.1353920-04:00" endTime="2025-10-20T00:35:51.1355940-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="af15d46c-512d-4a0d-87ab-dae4c49f5260" />
+    <UnitTestResult executionId="26645e66-6717-4707-96f6-f8b23b742a9a" testId="84d6b514-0700-14d2-e5a2-7b328a7e27fa" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsFrequencyPenalty_WhenProvided" computerName="CVDTQ2MGH4" duration="00:00:00.0001555" startTime="2025-10-20T00:35:51.1342990-04:00" endTime="2025-10-20T00:35:51.1345370-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="26645e66-6717-4707-96f6-f8b23b742a9a" />
+    <UnitTestResult executionId="e6f4139b-875c-4af4-923d-9e3ea32dab80" testId="dc43dbac-c392-5964-cd42-09fb42fb03c1" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithStreamingResponse_ConcatenatesResponseText" computerName="CVDTQ2MGH4" duration="00:00:00.0001061" startTime="2025-10-20T00:35:51.1380050-04:00" endTime="2025-10-20T00:35:51.1381770-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e6f4139b-875c-4af4-923d-9e3ea32dab80" />
+    <UnitTestResult executionId="d5b67371-dbe4-400f-865b-1efdbfd8f4c7" testId="1ca7e173-e19d-8580-5685-2dca9586fb0e" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_SetsUsageTokens_WhenUsageProvided" computerName="CVDTQ2MGH4" duration="00:00:00.0018213" startTime="2025-10-20T00:35:51.1161810-04:00" endTime="2025-10-20T00:35:51.1182580-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d5b67371-dbe4-400f-865b-1efdbfd8f4c7">
+      <Output>
+        <ErrorInfo>
+          <Message>NSubstitute.Exceptions.ReceivedCallsException : Expected to receive exactly 1 call matching:
+	SetData("gen_ai.usage.input_tokens", 10)
+Actually received no matching calls.
+Received 4 non-matching calls (non-matching arguments indicated with '*' characters):
+	SetData("gen_ai.usage.input_tokens", *10*)
+	SetData(*"gen_ai.usage.output_tokens"*, *20*)
+	SetData(*"gen_ai.usage.total_tokens"*, *30*)
+	SetData(*"gen_ai.response.text"*, *"Hello"*)
+</Message>
+          <StackTrace>   at NSubstitute.Core.ReceivedCallsExceptionThrower.Throw(ICallSpecification callSpecification, IEnumerable`1 matchingCalls, IEnumerable`1 nonMatchingCalls, Quantity requiredQuantity)
+   at NSubstitute.Routing.Handlers.CheckReceivedCallsHandler.Handle(ICall call)
+   at NSubstitute.Routing.Route.Handle(ICall call)
+   at NSubstitute.Core.CallRouter.Route(ICall call)
+   at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at Castle.Proxies.ObjectProxy_2.SetData(String key, Object value)
+   at Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_SetsUsageTokens_WhenUsageProvided() in /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryAISpanEnricherTests.cs:line 175
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="879f0300-3cdb-4dba-b2ca-54b06bfa79d8" testId="4da8a0a3-9cbb-004a-70e3-bcf16601a020" testName="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_ChatOptions_WithNullTools_ReturnsOriginalOptions" computerName="CVDTQ2MGH4" duration="00:00:00.0000271" startTime="2025-10-20T00:35:51.1079870-04:00" endTime="2025-10-20T00:35:51.1080780-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="879f0300-3cdb-4dba-b2ca-54b06bfa79d8" />
+    <UnitTestResult executionId="8e893c95-8074-4ed8-856b-64ea4e577ca5" testId="a03a5a24-7ffe-5f66-e81b-0b47bf83dbdf" testName="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_IChatClient_WithNullConfiguration_UsesDefaultConfiguration" computerName="CVDTQ2MGH4" duration="00:00:00.0005281" startTime="2025-10-20T00:35:51.1068190-04:00" endTime="2025-10-20T00:35:51.1074510-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8e893c95-8074-4ed8-856b-64ea4e577ca5" />
+    <UnitTestResult executionId="b4f27e94-68a9-4311-b7cf-a93c72511dd3" testId="3a84f686-1d60-f3e7-2242-3d8af5db297b" testName="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.Constructor_SetsDefaultValues" computerName="CVDTQ2MGH4" duration="00:00:00.0000462" startTime="2025-10-20T00:35:51.1453590-04:00" endTime="2025-10-20T00:35:51.1455000-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b4f27e94-68a9-4311-b7cf-a93c72511dd3" />
+    <UnitTestResult executionId="360fea46-127d-4c77-8982-e4ab6ef4e020" testId="627f7ca1-3ef4-a67f-49b0-30264416446f" testName="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.InitializeSdk_CanBeSet" computerName="CVDTQ2MGH4" duration="00:00:00.0000319" startTime="2025-10-20T00:35:51.1413410-04:00" endTime="2025-10-20T00:35:51.1414310-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="360fea46-127d-4c77-8982-e4ab6ef4e020" />
+    <UnitTestResult executionId="23822a8d-3b83-4348-860f-daab51f5a732" testId="a31999a4-1161-ca6d-a806-310c959e5764" testName="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_PreservesInnerFunctionName" computerName="CVDTQ2MGH4" duration="00:00:00.0018670" startTime="2025-10-20T00:35:51.0463350-04:00" endTime="2025-10-20T00:35:51.0485370-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="23822a8d-3b83-4348-860f-daab51f5a732">
+      <Output>
+        <ErrorInfo>
+          <Message>NSubstitute.Exceptions.AmbiguousArgumentsException : Cannot determine argument specifications to use. Please use specifications for all arguments of the same type.
+Method signature:
+    InvokeCoreAsync(AIFunctionArguments, CancellationToken)
+Method arguments (possible arg matchers are indicated with '*'):
+    InvokeCoreAsync(AIFunctionArguments, *System.Threading.CancellationToken*)
+All queued specifications:
+    any AIFunctionArguments
+    any CancellationToken
+Matched argument specifications:
+    InvokeCoreAsync(AIFunctionArguments, ???)
+</Message>
+          <StackTrace>   at NSubstitute.Core.Arguments.ArgumentSpecificationsFactory.Create(IList`1 argumentSpecs, Object[] arguments, IParameterInfo[] parameterInfos, MethodInfo methodInfo, MatchArgs matchArgs)
+   at NSubstitute.Core.CallSpecificationFactory.CreateFrom(ICall call, MatchArgs matchArgs)
+   at NSubstitute.Routing.Handlers.RecordCallSpecificationHandler.Handle(ICall call)
+   at NSubstitute.Routing.Route.Handle(ICall call)
+   at NSubstitute.Core.CallRouter.Route(ICall call)
+   at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at Castle.Proxies.AIFunctionProxy.InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+   at Microsoft.Extensions.AI.AIFunction.InvokeAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+   at Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_PreservesInnerFunctionName() in /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryInstrumentedFunctionTests.cs:line 135
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="a0ac6ee4-e5cd-4a21-ab51-3119ded73e09" testId="828b770f-853b-159e-4524-618d81bb2a82" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithStreamingResponse_SetsModelId_FromLastMessageWithModelId" computerName="CVDTQ2MGH4" duration="00:00:00.0001291" startTime="2025-10-20T00:35:51.1351220-04:00" endTime="2025-10-20T00:35:51.1353170-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a0ac6ee4-e5cd-4a21-ab51-3119ded73e09" />
+    <UnitTestResult executionId="da647c70-b872-4773-a7d0-b4f63f7f5526" testId="68a8b658-405d-1d36-ca0d-84e1e49cba1c" testName="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.AllPropertyCombinations_WorkCorrectly(includeRequest: False, includeResponse: True, initializeSdk: False)" computerName="CVDTQ2MGH4" duration="00:00:00.0000081" startTime="2025-10-20T00:35:51.1404900-04:00" endTime="2025-10-20T00:35:51.1405630-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="da647c70-b872-4773-a7d0-b4f63f7f5526" />
+    <UnitTestResult executionId="ec47d9e3-acfa-47de-9fa3-7b505af66a67" testId="ae327b53-2b22-2b29-b106-eec49bc98ec2" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsPresencePenalty_WhenProvided" computerName="CVDTQ2MGH4" duration="00:00:00.0001410" startTime="2025-10-20T00:35:51.1372560-04:00" endTime="2025-10-20T00:35:51.1374620-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ec47d9e3-acfa-47de-9fa3-7b505af66a67" />
+    <UnitTestResult executionId="7e240ee1-7d6c-4a9c-b45d-79d13ef8884d" testId="51cdcccd-3448-cee0-c36a-f3b47f12c505" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsUnknownModel_WhenModelIdNotProvided" computerName="CVDTQ2MGH4" duration="00:00:00.0000800" startTime="2025-10-20T00:35:51.1205760-04:00" endTime="2025-10-20T00:35:51.1207170-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7e240ee1-7d6c-4a9c-b45d-79d13ef8884d" />
+    <UnitTestResult executionId="c8434e0f-7d65-4c1d-b707-44745ca283d2" testId="9f10085a-199c-a283-23c9-bf3cb4682c44" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsBasicOperationName" computerName="CVDTQ2MGH4" duration="00:00:00.0000768" startTime="2025-10-20T00:35:51.1213540-04:00" endTime="2025-10-20T00:35:51.1214940-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c8434e0f-7d65-4c1d-b707-44745ca283d2" />
+    <UnitTestResult executionId="76df8c72-9788-41cb-bad9-48439dba57b1" testId="151f3e25-cc68-2d30-b0b2-e2ef6acde1bb" testName="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithParentSpan_CreatesChildSpan" computerName="CVDTQ2MGH4" duration="00:00:00.0006818" startTime="2025-10-20T00:35:51.0492880-04:00" endTime="2025-10-20T00:35:51.0501460-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="76df8c72-9788-41cb-bad9-48439dba57b1">
+      <Output>
+        <ErrorInfo>
+          <Message>NSubstitute.Exceptions.AmbiguousArgumentsException : Cannot determine argument specifications to use. Please use specifications for all arguments of the same type.
+Method signature:
+    InvokeCoreAsync(AIFunctionArguments, CancellationToken)
+Method arguments (possible arg matchers are indicated with '*'):
+    InvokeCoreAsync(AIFunctionArguments, *System.Threading.CancellationToken*)
+All queued specifications:
+    any AIFunctionArguments
+    any CancellationToken
+Matched argument specifications:
+    InvokeCoreAsync(AIFunctionArguments, ???)
+</Message>
+          <StackTrace>   at NSubstitute.Core.Arguments.ArgumentSpecificationsFactory.Create(IList`1 argumentSpecs, Object[] arguments, IParameterInfo[] parameterInfos, MethodInfo methodInfo, MatchArgs matchArgs)
+   at NSubstitute.Core.CallSpecificationFactory.CreateFrom(ICall call, MatchArgs matchArgs)
+   at NSubstitute.Routing.Handlers.RecordCallSpecificationHandler.Handle(ICall call)
+   at NSubstitute.Routing.Route.Handle(ICall call)
+   at NSubstitute.Core.CallRouter.Route(ICall call)
+   at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at Castle.Proxies.AIFunctionProxy.InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+   at Microsoft.Extensions.AI.AIFunction.InvokeAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+   at Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithParentSpan_CreatesChildSpan() in /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryInstrumentedFunctionTests.cs:line 19
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3206caee-4aba-4616-ad15-043bd45aabbd" testId="ecd7e7dd-9e98-8a95-f239-7db00bb2588d" testName="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.AllPropertyCombinations_WorkCorrectly(includeRequest: True, includeResponse: False, initializeSdk: True)" computerName="CVDTQ2MGH4" duration="00:00:00.0000049" startTime="2025-10-20T00:35:51.1406160-04:00" endTime="2025-10-20T00:35:51.1406840-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3206caee-4aba-4616-ad15-043bd45aabbd" />
+    <UnitTestResult executionId="5a0a9a84-3e2e-43f9-88d2-5a0d6b96cb8a" testId="ef1b8795-2d5a-a1b0-12fe-8eeebbd0707b" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_DoesNotSetMessages_WhenIncludeRequestMessagesIsFalse" computerName="CVDTQ2MGH4" duration="00:00:00.0001912" startTime="2025-10-20T00:35:51.1357230-04:00" endTime="2025-10-20T00:35:51.1360130-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5a0a9a84-3e2e-43f9-88d2-5a0d6b96cb8a" />
+    <UnitTestResult executionId="208b66e6-7705-4f04-97db-4561f09a134f" testId="eab920ec-3077-1f6d-10fc-458a11c1c4bd" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_DoesNotSetUsage_WhenUsageIsNull" computerName="CVDTQ2MGH4" duration="00:00:00.0005000" startTime="2025-10-20T00:35:51.1155170-04:00" endTime="2025-10-20T00:35:51.1160960-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="208b66e6-7705-4f04-97db-4561f09a134f" />
+    <UnitTestResult executionId="e2cb0470-d42b-4c8d-ae5d-6e8a59fa8f39" testId="cc932cdd-3f79-8605-a6d7-40611a0ef5d1" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsModelId_WhenProvided" computerName="CVDTQ2MGH4" duration="00:00:00.0001063" startTime="2025-10-20T00:35:51.1193740-04:00" endTime="2025-10-20T00:35:51.1195430-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e2cb0470-d42b-4c8d-ae5d-6e8a59fa8f39" />
+    <UnitTestResult executionId="d6b4e741-9a74-41d5-a32e-0050c015a875" testId="ae93880f-2ecd-ccdb-2f6a-fcbce18b93f5" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_SetsResponseText_WhenAIOptionsIsNull" computerName="CVDTQ2MGH4" duration="00:00:00.0000848" startTime="2025-10-20T00:35:51.1367530-04:00" endTime="2025-10-20T00:35:51.1369040-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d6b4e741-9a74-41d5-a32e-0050c015a875" />
+    <UnitTestResult executionId="c3e17e23-b08f-4de0-a63c-f0c1e6941c51" testId="e783a54c-e6bd-8860-1781-60f1b554ce97" testName="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.InheritsFromSentryOptions" computerName="CVDTQ2MGH4" duration="00:00:00.0000921" startTime="2025-10-20T00:35:51.1417010-04:00" endTime="2025-10-20T00:35:51.1418490-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c3e17e23-b08f-4de0-a63c-f0c1e6941c51" />
+    <UnitTestResult executionId="7e336425-f237-4e14-9d49-6eb206404e35" testId="35fba436-2403-7029-b0bc-5e38c6e4b75a" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_DoesNotSetMessages_WhenMessagesArrayIsEmpty" computerName="CVDTQ2MGH4" duration="00:00:00.0000915" startTime="2025-10-20T00:35:51.1203500-04:00" endTime="2025-10-20T00:35:51.1205040-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7e336425-f237-4e14-9d49-6eb206404e35" />
+    <UnitTestResult executionId="c597f54d-e49c-4ad4-a7a9-c48926517d23" testId="37aff03a-988a-2006-0d24-3ec4a9ddc16a" testName="Sentry.Extensions.AI.Tests.SentryChatClientTests.CompleteStreamingAsync_CallsInnerClient" computerName="CVDTQ2MGH4" duration="00:00:00.0255338" startTime="2025-10-20T00:35:51.0595840-04:00" endTime="2025-10-20T00:35:51.0865400-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c597f54d-e49c-4ad4-a7a9-c48926517d23" />
+    <UnitTestResult executionId="f892e020-1bf0-4a15-953c-1fc3d66516af" testId="a2279970-f54d-36c9-18e2-0a3bf3a4e1a5" testName="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_IChatClient_ReturnsWrappedClient" computerName="CVDTQ2MGH4" duration="00:00:00.0000595" startTime="2025-10-20T00:35:51.1081480-04:00" endTime="2025-10-20T00:35:51.1082700-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f892e020-1bf0-4a15-953c-1fc3d66516af" />
+    <UnitTestResult executionId="3bc8f670-d24e-4310-a63c-778f4e90714f" testId="792e8a59-9b1e-02d1-3547-d4154d2b968a" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsTools_WhenToolsProvided" computerName="CVDTQ2MGH4" duration="00:00:00.0125027" startTime="2025-10-20T00:35:51.1215670-04:00" endTime="2025-10-20T00:35:51.1341700-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3bc8f670-d24e-4310-a63c-778f4e90714f" />
+    <UnitTestResult executionId="92838f23-0bfd-43ec-849d-33a69d556eed" testId="36da383e-5216-1dd1-0633-b30476b7bf75" testName="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.AllPropertyCombinations_WorkCorrectly(includeRequest: True, includeResponse: True, initializeSdk: False)" computerName="CVDTQ2MGH4" duration="00:00:00.0000043" startTime="2025-10-20T00:35:51.1409520-04:00" endTime="2025-10-20T00:35:51.1410160-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="92838f23-0bfd-43ec-849d-33a69d556eed" />
+    <UnitTestResult executionId="5ab59f19-29d2-460d-87a6-1c1aced0e94c" testId="96bcf0ad-db0d-f78c-8841-24c10836b513" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_SetsPartialTokens_WhenOnlyInputTokensProvided" computerName="CVDTQ2MGH4" duration="00:00:00.0002542" startTime="2025-10-20T00:35:51.1196140-04:00" endTime="2025-10-20T00:35:51.1199890-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5ab59f19-29d2-460d-87a6-1c1aced0e94c">
+      <Output>
+        <ErrorInfo>
+          <Message>NSubstitute.Exceptions.ReceivedCallsException : Expected to receive exactly 1 call matching:
+	SetData("gen_ai.usage.input_tokens", 10)
+Actually received no matching calls.
+Received 2 non-matching calls (non-matching arguments indicated with '*' characters):
+	SetData("gen_ai.usage.input_tokens", *10*)
+	SetData(*"gen_ai.response.text"*, *"Hello"*)
+</Message>
+          <StackTrace>   at NSubstitute.Core.ReceivedCallsExceptionThrower.Throw(ICallSpecification callSpecification, IEnumerable`1 matchingCalls, IEnumerable`1 nonMatchingCalls, Quantity requiredQuantity)
+   at NSubstitute.Routing.Handlers.CheckReceivedCallsHandler.Handle(ICall call)
+   at NSubstitute.Routing.Route.Handle(ICall call)
+   at NSubstitute.Core.CallRouter.Route(ICall call)
+   at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at Castle.Proxies.ObjectProxy_2.SetData(String key, Object value)
+   at Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_SetsPartialTokens_WhenOnlyInputTokensProvided() in /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryAISpanEnricherTests.cs:line 203
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="c7f99d5d-be3d-4906-99e1-c1123efebd8f" testId="fa8763f3-ed37-46b6-e14d-45b00912eee7" testName="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_IChatClient_WithConfiguration_PassesConfigurationToWrapper" computerName="CVDTQ2MGH4" duration="00:00:00.0001875" startTime="2025-10-20T00:35:51.1098380-04:00" endTime="2025-10-20T00:35:51.1100940-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c7f99d5d-be3d-4906-99e1-c1123efebd8f" />
+    <UnitTestResult executionId="6d32fa7b-2c1a-4fc9-8516-4fe5653a0ce9" testId="5f424197-93dc-012c-e13b-a990d068b963" testName="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithCancellation_PropagatesCancellation" computerName="CVDTQ2MGH4" duration="00:00:00.0006185" startTime="2025-10-20T00:35:51.0570230-04:00" endTime="2025-10-20T00:35:51.0577960-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6d32fa7b-2c1a-4fc9-8516-4fe5653a0ce9">
+      <Output>
+        <ErrorInfo>
+          <Message>NSubstitute.Exceptions.AmbiguousArgumentsException : Cannot determine argument specifications to use. Please use specifications for all arguments of the same type.
+Method signature:
+    InvokeCoreAsync(AIFunctionArguments, CancellationToken)
+Method arguments (possible arg matchers are indicated with '*'):
+    InvokeCoreAsync(AIFunctionArguments, *System.Threading.CancellationToken*)
+All queued specifications:
+    any AIFunctionArguments
+    any CancellationToken
+Matched argument specifications:
+    InvokeCoreAsync(AIFunctionArguments, ???)
+</Message>
+          <StackTrace>   at NSubstitute.Core.Arguments.ArgumentSpecificationsFactory.Create(IList`1 argumentSpecs, Object[] arguments, IParameterInfo[] parameterInfos, MethodInfo methodInfo, MatchArgs matchArgs)
+   at NSubstitute.Core.CallSpecificationFactory.CreateFrom(ICall call, MatchArgs matchArgs)
+   at NSubstitute.Routing.Handlers.RecordCallSpecificationHandler.Handle(ICall call)
+   at NSubstitute.Routing.Route.Handle(ICall call)
+   at NSubstitute.Core.CallRouter.Route(ICall call)
+   at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at Castle.Proxies.AIFunctionProxy.InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+   at Microsoft.Extensions.AI.AIFunction.InvokeAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+   at Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithCancellation_PropagatesCancellation() in /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryInstrumentedFunctionTests.cs:line 160
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3dad082f-e889-4055-bc2e-78387721a30b" testId="af851512-e09b-05cb-e521-fdd87e38b42b" testName="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WhenInnerFunctionThrows_FinishesSpanWithException" computerName="CVDTQ2MGH4" duration="00:00:00.0803701" startTime="2025-10-20T00:35:50.9487820-04:00" endTime="2025-10-20T00:35:51.0391970-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3dad082f-e889-4055-bc2e-78387721a30b">
+      <Output>
+        <ErrorInfo>
+          <Message>NSubstitute.Exceptions.AmbiguousArgumentsException : Cannot determine argument specifications to use. Please use specifications for all arguments of the same type.
+Method signature:
+    InvokeCoreAsync(AIFunctionArguments, CancellationToken)
+Method arguments (possible arg matchers are indicated with '*'):
+    InvokeCoreAsync(AIFunctionArguments, *System.Threading.CancellationToken*)
+All queued specifications:
+    any AIFunctionArguments
+    any CancellationToken
+Matched argument specifications:
+    InvokeCoreAsync(AIFunctionArguments, ???)
+</Message>
+          <StackTrace>   at NSubstitute.Core.Arguments.ArgumentSpecificationsFactory.Create(IList`1 argumentSpecs, Object[] arguments, IParameterInfo[] parameterInfos, MethodInfo methodInfo, MatchArgs matchArgs)
+   at NSubstitute.Core.CallSpecificationFactory.CreateFrom(ICall call, MatchArgs matchArgs)
+   at NSubstitute.Routing.Handlers.RecordCallSpecificationHandler.Handle(ICall call)
+   at NSubstitute.Routing.Route.Handle(ICall call)
+   at NSubstitute.Core.CallRouter.Route(ICall call)
+   at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at Castle.Proxies.AIFunctionProxy.InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+   at Microsoft.Extensions.AI.AIFunction.InvokeAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+   at Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WhenInnerFunctionThrows_FinishesSpanWithException() in /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryInstrumentedFunctionTests.cs:line 68
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="7a881720-8ae5-4c50-a32a-e38472d4e489" testId="10bcaeb6-c20b-6a8a-4027-748a1cfe151e" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithStreamingResponse_AccumulatesTokenUsage" computerName="CVDTQ2MGH4" duration="00:00:00.0003255" startTime="2025-10-20T00:35:51.1375350-04:00" endTime="2025-10-20T00:35:51.1379260-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7a881720-8ae5-4c50-a32a-e38472d4e489" />
+    <UnitTestResult executionId="5d381f33-2237-4e6d-8844-9b774882fd04" testId="efe2ebc2-e6ab-4c94-197d-c09419222a7d" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsMessages_WhenAIOptionsIsNull" computerName="CVDTQ2MGH4" duration="00:00:00.0000946" startTime="2025-10-20T00:35:51.1346210-04:00" endTime="2025-10-20T00:35:51.1347870-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5d381f33-2237-4e6d-8844-9b774882fd04" />
+    <UnitTestResult executionId="9cb96eee-2144-4159-a01c-1e4b64bcfaff" testId="1c773253-8091-efb0-f12a-72613ed49ff2" testName="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_ChatOptions_WithEmptyTools_ReturnsOriginalOptions" computerName="CVDTQ2MGH4" duration="00:00:00.0002179" startTime="2025-10-20T00:35:51.1076160-04:00" endTime="2025-10-20T00:35:51.1079050-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9cb96eee-2144-4159-a01c-1e4b64bcfaff" />
+    <UnitTestResult executionId="2280643c-36f5-4ad8-b76f-c5c7c2fe9c7b" testId="3aee159b-a8f5-7545-489f-7b5997acc138" testName="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.IncludeRequestMessages_CanBeSet" computerName="CVDTQ2MGH4" duration="00:00:00.0000783" startTime="2025-10-20T00:35:51.1414980-04:00" endTime="2025-10-20T00:35:51.1416350-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2280643c-36f5-4ad8-b76f-c5c7c2fe9c7b" />
+    <UnitTestResult executionId="c93a1bed-fd59-4151-9baa-7d314687bfa1" testId="b7c7890c-80e8-1bd0-114d-1cb7ffdd8b97" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithStreamingResponse_DoesNotSetResponseText_WhenIncludeResponseContentIsFalse" computerName="CVDTQ2MGH4" duration="00:00:00.0001122" startTime="2025-10-20T00:35:51.1348670-04:00" endTime="2025-10-20T00:35:51.1350470-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c93a1bed-fd59-4151-9baa-7d314687bfa1" />
+    <UnitTestResult executionId="ba9c6256-a57e-4855-81c0-5d668107f780" testId="583ec369-322a-54f1-e99c-650ad5156272" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsTopP_WhenProvided" computerName="CVDTQ2MGH4" duration="00:00:00.0032852" startTime="2025-10-20T00:35:51.1120240-04:00" endTime="2025-10-20T00:35:51.1154140-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ba9c6256-a57e-4855-81c0-5d668107f780" />
+    <UnitTestResult executionId="7bf3eb12-650c-4d4f-8650-4fc06e82aeef" testId="ba199bb8-d424-d524-1d8d-da149d15eef3" testName="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_ChatOptions_WrapsAIFunctionsWithSentryInstrumentedFunction" computerName="CVDTQ2MGH4" duration="00:00:00.0004605" startTime="2025-10-20T00:35:51.1101690-04:00" endTime="2025-10-20T00:35:51.1106990-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7bf3eb12-650c-4d4f-8650-4fc06e82aeef" />
+    <UnitTestResult executionId="8a524061-f769-41c3-953f-877e5007a599" testId="ed283f2b-aa73-b878-e612-9aaba5ad0b51" testName="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.CanSetSentryOptionsProperties" computerName="CVDTQ2MGH4" duration="00:00:00.0001324" startTime="2025-10-20T00:35:51.1410850-04:00" endTime="2025-10-20T00:35:51.1412740-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8a524061-f769-41c3-953f-877e5007a599" />
+    <UnitTestResult executionId="455b03b1-2dcf-4460-95e3-363e9b4795b7" testId="ed177158-3c09-062f-0c4d-a136a6f1215b" testName="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithNullResult_DoesNotSetOutput" computerName="CVDTQ2MGH4" duration="00:00:00.0005724" startTime="2025-10-20T00:35:51.0558890-04:00" endTime="2025-10-20T00:35:51.0566150-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="455b03b1-2dcf-4460-95e3-363e9b4795b7">
+      <Output>
+        <ErrorInfo>
+          <Message>NSubstitute.Exceptions.AmbiguousArgumentsException : Cannot determine argument specifications to use. Please use specifications for all arguments of the same type.
+Method signature:
+    InvokeCoreAsync(AIFunctionArguments, CancellationToken)
+Method arguments (possible arg matchers are indicated with '*'):
+    InvokeCoreAsync(AIFunctionArguments, *System.Threading.CancellationToken*)
+All queued specifications:
+    any AIFunctionArguments
+    any CancellationToken
+Matched argument specifications:
+    InvokeCoreAsync(AIFunctionArguments, ???)
+</Message>
+          <StackTrace>   at NSubstitute.Core.Arguments.ArgumentSpecificationsFactory.Create(IList`1 argumentSpecs, Object[] arguments, IParameterInfo[] parameterInfos, MethodInfo methodInfo, MatchArgs matchArgs)
+   at NSubstitute.Core.CallSpecificationFactory.CreateFrom(ICall call, MatchArgs matchArgs)
+   at NSubstitute.Routing.Handlers.RecordCallSpecificationHandler.Handle(ICall call)
+   at NSubstitute.Routing.Route.Handle(ICall call)
+   at NSubstitute.Core.CallRouter.Route(ICall call)
+   at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+   at Castle.DynamicProxy.AbstractInvocation.Proceed()
+   at Castle.Proxies.AIFunctionProxy.InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+   at Microsoft.Extensions.AI.AIFunction.InvokeAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+   at Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithNullResult_DoesNotSetOutput() in /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryInstrumentedFunctionTests.cs:line 90
+--- End of stack trace from previous location ---</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="60b93eac-9a4a-4d3d-9934-28a96db873e1" testId="9bede207-1173-52b6-152f-687fe5328066" testName="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsMaxOutputTokens_WhenProvided" computerName="CVDTQ2MGH4" duration="00:00:00.0001443" startTime="2025-10-20T00:35:51.1190870-04:00" endTime="2025-10-20T00:35:51.1192980-04:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="60b93eac-9a4a-4d3d-9934-28a96db873e1" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_SetsPartialTokens_WhenOnlyInputTokensProvided" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="96bcf0ad-db0d-f78c-8841-24c10836b513">
+      <Execution id="5ab59f19-29d2-460d-87a6-1c1aced0e94c" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithResponse_SetsPartialTokens_WhenOnlyInputTokensProvided" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_ChatOptions_IgnoresNonAIFunctionTools" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="4bcb2db7-80da-e3e2-fba4-ade908cbac25">
+      <Execution id="262c19e8-3383-466f-b592-3af6e8a6552a" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests" name="WithSentry_ChatOptions_IgnoresNonAIFunctionTools" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_SetsResponseText_WhenIncludeResponseContentIsTrue" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="392c3d85-43fa-afaf-2331-d63e7f21e843">
+      <Execution id="7938993a-3825-4e07-813a-f6983187445d" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithResponse_SetsResponseText_WhenIncludeResponseContentIsTrue" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_IChatClient_WithNullConfiguration_UsesDefaultConfiguration" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="a03a5a24-7ffe-5f66-e81b-0b47bf83dbdf">
+      <Execution id="8e893c95-8074-4ed8-856b-64ea4e577ca5" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests" name="WithSentry_IChatClient_WithNullConfiguration_UsesDefaultConfiguration" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithParentSpan_CreatesChildSpan" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="151f3e25-cc68-2d30-b0b2-e2ef6acde1bb">
+      <Execution id="76df8c72-9788-41cb-bad9-48439dba57b1" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests" name="InvokeCoreAsync_WithParentSpan_CreatesChildSpan" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_ChatOptions_WrapsAIFunctionsWithSentryInstrumentedFunction" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="ba199bb8-d424-d524-1d8d-da149d15eef3">
+      <Execution id="7bf3eb12-650c-4d4f-8650-4fc06e82aeef" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests" name="WithSentry_ChatOptions_WrapsAIFunctionsWithSentryInstrumentedFunction" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsMessages_WhenAIOptionsIsNull" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="efe2ebc2-e6ab-4c94-197d-c09419222a7d">
+      <Execution id="5d381f33-2237-4e6d-8844-9b774882fd04" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithRequest_SetsMessages_WhenAIOptionsIsNull" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithStreamingResponse_ConcatenatesResponseText" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="dc43dbac-c392-5964-cd42-09fb42fb03c1">
+      <Execution id="e6f4139b-875c-4af4-923d-9e3ea32dab80" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithStreamingResponse_ConcatenatesResponseText" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_ChatOptions_WithEmptyTools_ReturnsOriginalOptions" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="1c773253-8091-efb0-f12a-72613ed49ff2">
+      <Execution id="9cb96eee-2144-4159-a01c-1e4b64bcfaff" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests" name="WithSentry_ChatOptions_WithEmptyTools_ReturnsOriginalOptions" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithNullResult_DoesNotSetOutput" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="ed177158-3c09-062f-0c4d-a136a6f1215b">
+      <Execution id="455b03b1-2dcf-4460-95e3-363e9b4795b7" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests" name="InvokeCoreAsync_WithNullResult_DoesNotSetOutput" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_SetsUsageTokens_WhenUsageProvided" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="1ca7e173-e19d-8580-5685-2dca9586fb0e">
+      <Execution id="d5b67371-dbe4-400f-865b-1efdbfd8f4c7" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithResponse_SetsUsageTokens_WhenUsageProvided" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsUnknownModel_WhenModelIdNotProvided" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="51cdcccd-3448-cee0-c36a-f3b47f12c505">
+      <Execution id="7e240ee1-7d6c-4a9c-b45d-79d13ef8884d" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithRequest_SetsUnknownModel_WhenModelIdNotProvided" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_DoesNotSetResponseText_WhenIncludeResponseContentIsFalse" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="7784a66f-9cf7-4945-cbc4-881faee565ce">
+      <Execution id="fd7bc376-adf1-457d-af79-de701fbde007" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithResponse_DoesNotSetResponseText_WhenIncludeResponseContentIsFalse" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithStreamingResponse_DoesNotSetResponseText_WhenIncludeResponseContentIsFalse" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="b7c7890c-80e8-1bd0-114d-1cb7ffdd8b97">
+      <Execution id="c93a1bed-fd59-4151-9baa-7d314687bfa1" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithStreamingResponse_DoesNotSetResponseText_WhenIncludeResponseContentIsFalse" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_IChatClient_WithConfiguration_PassesConfigurationToWrapper" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="fa8763f3-ed37-46b6-e14d-45b00912eee7">
+      <Execution id="c7f99d5d-be3d-4906-99e1-c1123efebd8f" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests" name="WithSentry_IChatClient_WithConfiguration_PassesConfigurationToWrapper" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_ChatOptions_HandlesMultipleFunctions" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="b3a9e239-1ca8-3b0e-a087-4455bfe3865c">
+      <Execution id="ec9aef7f-03f7-451b-a86b-f1054fcdde44" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests" name="WithSentry_ChatOptions_HandlesMultipleFunctions" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.AllPropertyCombinations_WorkCorrectly(includeRequest: False, includeResponse: False, initializeSdk: True)" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="0e7ba0d7-8640-06f9-182a-9d339e1d0c02">
+      <Execution id="22182872-f224-43eb-adb5-7d150bffe1a5" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIOptionsTests" name="AllPropertyCombinations_WorkCorrectly" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.CanSetSentryOptionsProperties" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="ed283f2b-aa73-b878-e612-9aaba5ad0b51">
+      <Execution id="8a524061-f769-41c3-953f-877e5007a599" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIOptionsTests" name="CanSetSentryOptionsProperties" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsPresencePenalty_WhenProvided" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="ae327b53-2b22-2b29-b106-eec49bc98ec2">
+      <Execution id="ec47d9e3-acfa-47de-9fa3-7b505af66a67" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithRequest_SetsPresencePenalty_WhenProvided" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsModelId_WhenProvided" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="cc932cdd-3f79-8605-a6d7-40611a0ef5d1">
+      <Execution id="e2cb0470-d42b-4c8d-ae5d-6e8a59fa8f39" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithRequest_SetsModelId_WhenProvided" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.IncludeRequestMessages_CanBeSet" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="3aee159b-a8f5-7545-489f-7b5997acc138">
+      <Execution id="2280643c-36f5-4ad8-b76f-c5c7c2fe9c7b" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIOptionsTests" name="IncludeRequestMessages_CanBeSet" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsTemperature_WhenProvided" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="acd71ff6-cf60-d3df-9838-85cc88c6d9a1">
+      <Execution id="af15d46c-512d-4a0d-87ab-dae4c49f5260" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithRequest_SetsTemperature_WhenProvided" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_IChatClient_ReturnsWrappedClient" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="a2279970-f54d-36c9-18e2-0a3bf3a4e1a5">
+      <Execution id="f892e020-1bf0-4a15-953c-1fc3d66516af" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests" name="WithSentry_IChatClient_ReturnsWrappedClient" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_DoesNotSetMessages_WhenMessagesArrayIsEmpty" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="35fba436-2403-7029-b0bc-5e38c6e4b75a">
+      <Execution id="7e336425-f237-4e14-9d49-6eb206404e35" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithRequest_DoesNotSetMessages_WhenMessagesArrayIsEmpty" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryChatClientTests.CompleteAsync_CallsInnerClient" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="b41f6021-383a-d928-8ca4-0fd332e9d7c2">
+      <Execution id="16a26b69-38d1-46e5-a583-79556c78f1a7" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryChatClientTests" name="CompleteAsync_CallsInnerClient" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.AllPropertyCombinations_WorkCorrectly(includeRequest: True, includeResponse: False, initializeSdk: False)" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="edfb2d64-ad5a-7de7-e70b-cbff59f4c950">
+      <Execution id="7052b245-85e1-4401-a12e-9ac8dac71dbd" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIOptionsTests" name="AllPropertyCombinations_WorkCorrectly" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_SetsResponseText_WhenAIOptionsIsNull" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="ae93880f-2ecd-ccdb-2f6a-fcbce18b93f5">
+      <Execution id="d6b4e741-9a74-41d5-a32e-0050c015a875" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithResponse_SetsResponseText_WhenAIOptionsIsNull" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.AllPropertyCombinations_WorkCorrectly(includeRequest: True, includeResponse: True, initializeSdk: False)" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="36da383e-5216-1dd1-0633-b30476b7bf75">
+      <Execution id="92838f23-0bfd-43ec-849d-33a69d556eed" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIOptionsTests" name="AllPropertyCombinations_WorkCorrectly" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.AllPropertyCombinations_WorkCorrectly(includeRequest: False, includeResponse: True, initializeSdk: True)" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="b4f94cc6-9755-d4f6-5420-5847c696e96d">
+      <Execution id="4e1f10ca-e649-419c-9334-ceba55349050" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIOptionsTests" name="AllPropertyCombinations_WorkCorrectly" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsTopP_WhenProvided" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="583ec369-322a-54f1-e99c-650ad5156272">
+      <Execution id="ba9c6256-a57e-4855-81c0-5d668107f780" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithRequest_SetsTopP_WhenProvided" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsFrequencyPenalty_WhenProvided" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="84d6b514-0700-14d2-e5a2-7b328a7e27fa">
+      <Execution id="26645e66-6717-4707-96f6-f8b23b742a9a" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithRequest_SetsFrequencyPenalty_WhenProvided" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithComplexResult_SetsOutputAsString" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="dfbefe52-2c1c-cd7b-53c3-9129446f634c">
+      <Execution id="ff3638c7-09d0-4aea-a0ac-09061fd01e24" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests" name="InvokeCoreAsync_WithComplexResult_SetsOutputAsString" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.AllPropertyCombinations_WorkCorrectly(includeRequest: False, includeResponse: False, initializeSdk: False)" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="9429f264-54d3-17d7-1715-b8108ebaa7b4">
+      <Execution id="37d55d2e-517f-4349-8a2f-b891c1106f29" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIOptionsTests" name="AllPropertyCombinations_WorkCorrectly" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithStreamingResponse_AccumulatesTokenUsage" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="10bcaeb6-c20b-6a8a-4027-748a1cfe151e">
+      <Execution id="7a881720-8ae5-4c50-a32a-e38472d4e489" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithStreamingResponse_AccumulatesTokenUsage" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.InitializeSdk_CanBeSet" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="627f7ca1-3ef4-a67f-49b0-30264416446f">
+      <Execution id="360fea46-127d-4c77-8982-e4ab6ef4e020" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIOptionsTests" name="InitializeSdk_CanBeSet" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_DoesNotSetUsage_WhenUsageIsNull" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="eab920ec-3077-1f6d-10fc-458a11c1c4bd">
+      <Execution id="208b66e6-7705-4f04-97db-4561f09a134f" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithResponse_DoesNotSetUsage_WhenUsageIsNull" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.IncludeResponseContent_CanBeSet" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="ec1fa19b-b6c9-d93f-8ff5-b1a2af964267">
+      <Execution id="7db23406-827d-4233-ad6c-48fa1ba78c14" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIOptionsTests" name="IncludeResponseContent_CanBeSet" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_ChatOptions_DoesNotDoubleWrapSentryInstrumentedFunction" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="a1c2944e-8323-7022-5f2b-9870cd310e41">
+      <Execution id="4a40bedf-819b-4741-a7ff-7034e3473bf2" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests" name="WithSentry_ChatOptions_DoesNotDoubleWrapSentryInstrumentedFunction" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_PreservesInnerFunctionName" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="a31999a4-1161-ca6d-a806-310c959e5764">
+      <Execution id="23822a8d-3b83-4348-860f-daab51f5a732" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests" name="InvokeCoreAsync_PreservesInnerFunctionName" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_DoesNotSetMessages_WhenIncludeRequestMessagesIsFalse" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="ef1b8795-2d5a-a1b0-12fe-8eeebbd0707b">
+      <Execution id="5a0a9a84-3e2e-43f9-88d2-5a0d6b96cb8a" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithRequest_DoesNotSetMessages_WhenIncludeRequestMessagesIsFalse" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.InheritsFromSentryOptions" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="e783a54c-e6bd-8860-1781-60f1b554ce97">
+      <Execution id="c3e17e23-b08f-4de0-a63c-f0c1e6941c51" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIOptionsTests" name="InheritsFromSentryOptions" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsMaxOutputTokens_WhenProvided" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="9bede207-1173-52b6-152f-687fe5328066">
+      <Execution id="60b93eac-9a4a-4d3d-9934-28a96db873e1" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithRequest_SetsMaxOutputTokens_WhenProvided" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryChatClientTests.CompleteStreamingAsync_CallsInnerClient" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="37aff03a-988a-2006-0d24-3ec4a9ddc16a">
+      <Execution id="c597f54d-e49c-4ad4-a7a9-c48926517d23" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryChatClientTests" name="CompleteStreamingAsync_CallsInnerClient" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.AllPropertyCombinations_WorkCorrectly(includeRequest: False, includeResponse: True, initializeSdk: False)" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="68a8b658-405d-1d36-ca0d-84e1e49cba1c">
+      <Execution id="da647c70-b872-4773-a7d0-b4f63f7f5526" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIOptionsTests" name="AllPropertyCombinations_WorkCorrectly" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_SetsModelId_WhenProvided" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="a668f0c0-d834-673f-0855-a43a49192458">
+      <Execution id="93539010-c21e-4b07-8e85-1b9e7a1ce623" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithResponse_SetsModelId_WhenProvided" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithoutParentSpan_CreatesTransaction" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="a1411ee4-03cc-3160-23ec-62d379e3663f">
+      <Execution id="c40695bc-a110-4f66-a3b8-76be78707589" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests" name="InvokeCoreAsync_WithoutParentSpan_CreatesTransaction" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithStreamingResponse_SetsModelId_FromLastMessageWithModelId" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="828b770f-853b-159e-4524-618d81bb2a82">
+      <Execution id="a0ac6ee4-e5cd-4a21-ab51-3119ded73e09" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithStreamingResponse_SetsModelId_FromLastMessageWithModelId" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithCancellation_PropagatesCancellation" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="5f424197-93dc-012c-e13b-a990d068b963">
+      <Execution id="6d32fa7b-2c1a-4fc9-8516-4fe5653a0ce9" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests" name="InvokeCoreAsync_WithCancellation_PropagatesCancellation" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsBasicOperationName" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="9f10085a-199c-a283-23c9-bf3cb4682c44">
+      <Execution id="c8434e0f-7d65-4c1d-b707-44745ca283d2" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithRequest_SetsBasicOperationName" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WhenInnerFunctionThrows_FinishesSpanWithException" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="af851512-e09b-05cb-e521-fdd87e38b42b">
+      <Execution id="3dad082f-e889-4055-bc2e-78387721a30b" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests" name="InvokeCoreAsync_WhenInnerFunctionThrows_FinishesSpanWithException" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests.WithSentry_ChatOptions_WithNullTools_ReturnsOriginalOptions" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="4da8a0a3-9cbb-004a-70e3-bcf16601a020">
+      <Execution id="879f0300-3cdb-4dba-b2ca-54b06bfa79d8" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIExtensionsTests" name="WithSentry_ChatOptions_WithNullTools_ReturnsOriginalOptions" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsMessages_WhenIncludeRequestMessagesIsTrue" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="5553cf67-c3a9-2355-8661-bd7b922a8095">
+      <Execution id="1adf8be5-5bb0-46ee-ab99-8aa7ccd28800" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithRequest_SetsMessages_WhenIncludeRequestMessagesIsTrue" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithRequest_SetsTools_WhenToolsProvided" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="792e8a59-9b1e-02d1-3547-d4154d2b968a">
+      <Execution id="3bc8f670-d24e-4310-a63c-778f4e90714f" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests" name="EnrichWithRequest_SetsTools_WhenToolsProvided" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.AllPropertyCombinations_WorkCorrectly(includeRequest: True, includeResponse: True, initializeSdk: True)" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="ed5d9d9d-7702-7201-3bd0-673ad663cdae">
+      <Execution id="a545fc45-9f0a-4520-b44c-608a88bd2739" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIOptionsTests" name="AllPropertyCombinations_WorkCorrectly" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.AllPropertyCombinations_WorkCorrectly(includeRequest: True, includeResponse: False, initializeSdk: True)" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="ecd7e7dd-9e98-8a95-f239-7db00bb2588d">
+      <Execution id="3206caee-4aba-4616-ad15-043bd45aabbd" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIOptionsTests" name="AllPropertyCombinations_WorkCorrectly" />
+    </UnitTest>
+    <UnitTest name="Sentry.Extensions.AI.Tests.SentryAIOptionsTests.Constructor_SetsDefaultValues" storage="/users/alexsohn/code/sentry-dotnet/test/sentry.extensions.ai.tests/bin/debug/net9.0/sentry.extensions.ai.tests.dll" id="3a84f686-1d60-f3e7-2242-3d8af5db297b">
+      <Execution id="b4f27e94-68a9-4311-b7cf-a93c72511dd3" />
+      <TestMethod codeBase="/Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/bin/Debug/net9.0/Sentry.Extensions.AI.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="Sentry.Extensions.AI.Tests.SentryAIOptionsTests" name="Constructor_SetsDefaultValues" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="5553cf67-c3a9-2355-8661-bd7b922a8095" executionId="1adf8be5-5bb0-46ee-ab99-8aa7ccd28800" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a668f0c0-d834-673f-0855-a43a49192458" executionId="93539010-c21e-4b07-8e85-1b9e7a1ce623" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7784a66f-9cf7-4945-cbc4-881faee565ce" executionId="fd7bc376-adf1-457d-af79-de701fbde007" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a1c2944e-8323-7022-5f2b-9870cd310e41" executionId="4a40bedf-819b-4741-a7ff-7034e3473bf2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ec1fa19b-b6c9-d93f-8ff5-b1a2af964267" executionId="7db23406-827d-4233-ad6c-48fa1ba78c14" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="392c3d85-43fa-afaf-2331-d63e7f21e843" executionId="7938993a-3825-4e07-813a-f6983187445d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b3a9e239-1ca8-3b0e-a087-4455bfe3865c" executionId="ec9aef7f-03f7-451b-a86b-f1054fcdde44" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9429f264-54d3-17d7-1715-b8108ebaa7b4" executionId="37d55d2e-517f-4349-8a2f-b891c1106f29" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b4f94cc6-9755-d4f6-5420-5847c696e96d" executionId="4e1f10ca-e649-419c-9334-ceba55349050" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dfbefe52-2c1c-cd7b-53c3-9129446f634c" executionId="ff3638c7-09d0-4aea-a0ac-09061fd01e24" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4bcb2db7-80da-e3e2-fba4-ade908cbac25" executionId="262c19e8-3383-466f-b592-3af6e8a6552a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0e7ba0d7-8640-06f9-182a-9d339e1d0c02" executionId="22182872-f224-43eb-adb5-7d150bffe1a5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ed5d9d9d-7702-7201-3bd0-673ad663cdae" executionId="a545fc45-9f0a-4520-b44c-608a88bd2739" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="edfb2d64-ad5a-7de7-e70b-cbff59f4c950" executionId="7052b245-85e1-4401-a12e-9ac8dac71dbd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b41f6021-383a-d928-8ca4-0fd332e9d7c2" executionId="16a26b69-38d1-46e5-a583-79556c78f1a7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a1411ee4-03cc-3160-23ec-62d379e3663f" executionId="c40695bc-a110-4f66-a3b8-76be78707589" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="acd71ff6-cf60-d3df-9838-85cc88c6d9a1" executionId="af15d46c-512d-4a0d-87ab-dae4c49f5260" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="84d6b514-0700-14d2-e5a2-7b328a7e27fa" executionId="26645e66-6717-4707-96f6-f8b23b742a9a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dc43dbac-c392-5964-cd42-09fb42fb03c1" executionId="e6f4139b-875c-4af4-923d-9e3ea32dab80" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1ca7e173-e19d-8580-5685-2dca9586fb0e" executionId="d5b67371-dbe4-400f-865b-1efdbfd8f4c7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4da8a0a3-9cbb-004a-70e3-bcf16601a020" executionId="879f0300-3cdb-4dba-b2ca-54b06bfa79d8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a03a5a24-7ffe-5f66-e81b-0b47bf83dbdf" executionId="8e893c95-8074-4ed8-856b-64ea4e577ca5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3a84f686-1d60-f3e7-2242-3d8af5db297b" executionId="b4f27e94-68a9-4311-b7cf-a93c72511dd3" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="627f7ca1-3ef4-a67f-49b0-30264416446f" executionId="360fea46-127d-4c77-8982-e4ab6ef4e020" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a31999a4-1161-ca6d-a806-310c959e5764" executionId="23822a8d-3b83-4348-860f-daab51f5a732" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="828b770f-853b-159e-4524-618d81bb2a82" executionId="a0ac6ee4-e5cd-4a21-ab51-3119ded73e09" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="68a8b658-405d-1d36-ca0d-84e1e49cba1c" executionId="da647c70-b872-4773-a7d0-b4f63f7f5526" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ae327b53-2b22-2b29-b106-eec49bc98ec2" executionId="ec47d9e3-acfa-47de-9fa3-7b505af66a67" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="51cdcccd-3448-cee0-c36a-f3b47f12c505" executionId="7e240ee1-7d6c-4a9c-b45d-79d13ef8884d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9f10085a-199c-a283-23c9-bf3cb4682c44" executionId="c8434e0f-7d65-4c1d-b707-44745ca283d2" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="151f3e25-cc68-2d30-b0b2-e2ef6acde1bb" executionId="76df8c72-9788-41cb-bad9-48439dba57b1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ecd7e7dd-9e98-8a95-f239-7db00bb2588d" executionId="3206caee-4aba-4616-ad15-043bd45aabbd" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ef1b8795-2d5a-a1b0-12fe-8eeebbd0707b" executionId="5a0a9a84-3e2e-43f9-88d2-5a0d6b96cb8a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="eab920ec-3077-1f6d-10fc-458a11c1c4bd" executionId="208b66e6-7705-4f04-97db-4561f09a134f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cc932cdd-3f79-8605-a6d7-40611a0ef5d1" executionId="e2cb0470-d42b-4c8d-ae5d-6e8a59fa8f39" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ae93880f-2ecd-ccdb-2f6a-fcbce18b93f5" executionId="d6b4e741-9a74-41d5-a32e-0050c015a875" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e783a54c-e6bd-8860-1781-60f1b554ce97" executionId="c3e17e23-b08f-4de0-a63c-f0c1e6941c51" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="35fba436-2403-7029-b0bc-5e38c6e4b75a" executionId="7e336425-f237-4e14-9d49-6eb206404e35" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="37aff03a-988a-2006-0d24-3ec4a9ddc16a" executionId="c597f54d-e49c-4ad4-a7a9-c48926517d23" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a2279970-f54d-36c9-18e2-0a3bf3a4e1a5" executionId="f892e020-1bf0-4a15-953c-1fc3d66516af" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="792e8a59-9b1e-02d1-3547-d4154d2b968a" executionId="3bc8f670-d24e-4310-a63c-778f4e90714f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="36da383e-5216-1dd1-0633-b30476b7bf75" executionId="92838f23-0bfd-43ec-849d-33a69d556eed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="96bcf0ad-db0d-f78c-8841-24c10836b513" executionId="5ab59f19-29d2-460d-87a6-1c1aced0e94c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fa8763f3-ed37-46b6-e14d-45b00912eee7" executionId="c7f99d5d-be3d-4906-99e1-c1123efebd8f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="5f424197-93dc-012c-e13b-a990d068b963" executionId="6d32fa7b-2c1a-4fc9-8516-4fe5653a0ce9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="af851512-e09b-05cb-e521-fdd87e38b42b" executionId="3dad082f-e889-4055-bc2e-78387721a30b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="10bcaeb6-c20b-6a8a-4027-748a1cfe151e" executionId="7a881720-8ae5-4c50-a32a-e38472d4e489" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="efe2ebc2-e6ab-4c94-197d-c09419222a7d" executionId="5d381f33-2237-4e6d-8844-9b774882fd04" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1c773253-8091-efb0-f12a-72613ed49ff2" executionId="9cb96eee-2144-4159-a01c-1e4b64bcfaff" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3aee159b-a8f5-7545-489f-7b5997acc138" executionId="2280643c-36f5-4ad8-b76f-c5c7c2fe9c7b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b7c7890c-80e8-1bd0-114d-1cb7ffdd8b97" executionId="c93a1bed-fd59-4151-9baa-7d314687bfa1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="583ec369-322a-54f1-e99c-650ad5156272" executionId="ba9c6256-a57e-4855-81c0-5d668107f780" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ba199bb8-d424-d524-1d8d-da149d15eef3" executionId="7bf3eb12-650c-4d4f-8650-4fc06e82aeef" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ed283f2b-aa73-b878-e612-9aaba5ad0b51" executionId="8a524061-f769-41c3-953f-877e5007a599" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ed177158-3c09-062f-0c4d-a136a6f1215b" executionId="455b03b1-2dcf-4460-95e3-363e9b4795b7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="9bede207-1173-52b6-152f-687fe5328066" executionId="60b93eac-9a4a-4d3d-9934-28a96db873e1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="56" executed="56" passed="47" failed="9" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.1+bf6400fd51 (64-bit .NET 9.0.8)
+[xUnit.net 00:00:00.05]   Discovering: Sentry.Extensions.AI.Tests
+[xUnit.net 00:00:00.07]   Discovered:  Sentry.Extensions.AI.Tests
+[xUnit.net 00:00:00.08]   Starting:    Sentry.Extensions.AI.Tests
+[xUnit.net 00:00:00.19]       NSubstitute.Exceptions.AmbiguousArgumentsException : Cannot determine argument specifications to use. Please use specifications for all arguments of the same type.
+[xUnit.net 00:00:00.19]       Method signature:
+[xUnit.net 00:00:00.19]           InvokeCoreAsync(AIFunctionArguments, CancellationToken)
+[xUnit.net 00:00:00.19]       Method arguments (possible arg matchers are indicated with '*'):
+[xUnit.net 00:00:00.19]           InvokeCoreAsync(AIFunctionArguments, *System.Threading.CancellationToken*)
+[xUnit.net 00:00:00.19]       All queued specifications:
+[xUnit.net 00:00:00.19]           any AIFunctionArguments
+[xUnit.net 00:00:00.19]           any CancellationToken
+[xUnit.net 00:00:00.19]       Matched argument specifications:
+[xUnit.net 00:00:00.19]           InvokeCoreAsync(AIFunctionArguments, ???)
+[xUnit.net 00:00:00.19]       
+[xUnit.net 00:00:00.19]       Stack Trace:
+[xUnit.net 00:00:00.19]            at NSubstitute.Core.Arguments.ArgumentSpecificationsFactory.Create(IList`1 argumentSpecs, Object[] arguments, IParameterInfo[] parameterInfos, MethodInfo methodInfo, MatchArgs matchArgs)
+[xUnit.net 00:00:00.19]            at NSubstitute.Core.CallSpecificationFactory.CreateFrom(ICall call, MatchArgs matchArgs)
+[xUnit.net 00:00:00.19]            at NSubstitute.Routing.Handlers.RecordCallSpecificationHandler.Handle(ICall call)
+[xUnit.net 00:00:00.19]            at NSubstitute.Routing.Route.Handle(ICall call)
+[xUnit.net 00:00:00.19]            at NSubstitute.Core.CallRouter.Route(ICall call)
+[xUnit.net 00:00:00.19]            at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.19]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.19]            at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.19]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.19]            at Castle.Proxies.AIFunctionProxy.InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.19]            at Microsoft.Extensions.AI.AIFunction.InvokeAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.19]         /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryInstrumentedFunctionTests.cs(68,0): at Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WhenInnerFunctionThrows_FinishesSpanWithException()
+[xUnit.net 00:00:00.19]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:00.20]       NSubstitute.Exceptions.AmbiguousArgumentsException : Cannot determine argument specifications to use. Please use specifications for all arguments of the same type.
+[xUnit.net 00:00:00.20]       Method signature:
+[xUnit.net 00:00:00.20]           InvokeCoreAsync(AIFunctionArguments, CancellationToken)
+[xUnit.net 00:00:00.20]       Method arguments (possible arg matchers are indicated with '*'):
+[xUnit.net 00:00:00.20]           InvokeCoreAsync(AIFunctionArguments, *System.Threading.CancellationToken*)
+[xUnit.net 00:00:00.20]       All queued specifications:
+[xUnit.net 00:00:00.20]           any AIFunctionArguments
+[xUnit.net 00:00:00.20]           any CancellationToken
+[xUnit.net 00:00:00.20]       Matched argument specifications:
+[xUnit.net 00:00:00.20]           InvokeCoreAsync(AIFunctionArguments, ???)
+[xUnit.net 00:00:00.20]       
+[xUnit.net 00:00:00.20]       Stack Trace:
+[xUnit.net 00:00:00.20]            at NSubstitute.Core.Arguments.ArgumentSpecificationsFactory.Create(IList`1 argumentSpecs, Object[] arguments, IParameterInfo[] parameterInfos, MethodInfo methodInfo, MatchArgs matchArgs)
+[xUnit.net 00:00:00.20]            at NSubstitute.Core.CallSpecificationFactory.CreateFrom(ICall call, MatchArgs matchArgs)
+[xUnit.net 00:00:00.20]            at NSubstitute.Routing.Handlers.RecordCallSpecificationHandler.Handle(ICall call)
+[xUnit.net 00:00:00.20]            at NSubstitute.Routing.Route.Handle(ICall call)
+[xUnit.net 00:00:00.20]            at NSubstitute.Core.CallRouter.Route(ICall call)
+[xUnit.net 00:00:00.20]            at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.20]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.20]            at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.20]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.20]            at Castle.Proxies.AIFunctionProxy.InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.20]            at Microsoft.Extensions.AI.AIFunction.InvokeAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.20]         /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryInstrumentedFunctionTests.cs(135,0): at Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_PreservesInnerFunctionName()
+[xUnit.net 00:00:00.20]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:00.20]       NSubstitute.Exceptions.AmbiguousArgumentsException : Cannot determine argument specifications to use. Please use specifications for all arguments of the same type.
+[xUnit.net 00:00:00.20]       Method signature:
+[xUnit.net 00:00:00.20]           InvokeCoreAsync(AIFunctionArguments, CancellationToken)
+[xUnit.net 00:00:00.20]       Method arguments (possible arg matchers are indicated with '*'):
+[xUnit.net 00:00:00.20]           InvokeCoreAsync(AIFunctionArguments, *System.Threading.CancellationToken*)
+[xUnit.net 00:00:00.20]       All queued specifications:
+[xUnit.net 00:00:00.20]           any AIFunctionArguments
+[xUnit.net 00:00:00.20]           any CancellationToken
+[xUnit.net 00:00:00.20]       Matched argument specifications:
+[xUnit.net 00:00:00.20]           InvokeCoreAsync(AIFunctionArguments, ???)
+[xUnit.net 00:00:00.20]       
+[xUnit.net 00:00:00.20]       Stack Trace:
+[xUnit.net 00:00:00.20]            at NSubstitute.Core.Arguments.ArgumentSpecificationsFactory.Create(IList`1 argumentSpecs, Object[] arguments, IParameterInfo[] parameterInfos, MethodInfo methodInfo, MatchArgs matchArgs)
+[xUnit.net 00:00:00.20]            at NSubstitute.Core.CallSpecificationFactory.CreateFrom(ICall call, MatchArgs matchArgs)
+[xUnit.net 00:00:00.20]            at NSubstitute.Routing.Handlers.RecordCallSpecificationHandler.Handle(ICall call)
+[xUnit.net 00:00:00.20]            at NSubstitute.Routing.Route.Handle(ICall call)
+[xUnit.net 00:00:00.20]            at NSubstitute.Core.CallRouter.Route(ICall call)
+[xUnit.net 00:00:00.20]            at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.20]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.20]            at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.20]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.20]            at Castle.Proxies.AIFunctionProxy.InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.20]            at Microsoft.Extensions.AI.AIFunction.InvokeAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.20]         /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryInstrumentedFunctionTests.cs(19,0): at Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithParentSpan_CreatesChildSpan()
+[xUnit.net 00:00:00.20]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:00.20]       NSubstitute.Exceptions.AmbiguousArgumentsException : Cannot determine argument specifications to use. Please use specifications for all arguments of the same type.
+[xUnit.net 00:00:00.20]       Method signature:
+[xUnit.net 00:00:00.20]           InvokeCoreAsync(AIFunctionArguments, CancellationToken)
+[xUnit.net 00:00:00.20]       Method arguments (possible arg matchers are indicated with '*'):
+[xUnit.net 00:00:00.20]           InvokeCoreAsync(AIFunctionArguments, *System.Threading.CancellationToken*)
+[xUnit.net 00:00:00.20]       All queued specifications:
+[xUnit.net 00:00:00.20]           any AIFunctionArguments
+[xUnit.net 00:00:00.20]           any CancellationToken
+[xUnit.net 00:00:00.20]       Matched argument specifications:
+[xUnit.net 00:00:00.20]           InvokeCoreAsync(AIFunctionArguments, ???)
+[xUnit.net 00:00:00.20]       
+[xUnit.net 00:00:00.20]       Stack Trace:
+[xUnit.net 00:00:00.20]            at NSubstitute.Core.Arguments.ArgumentSpecificationsFactory.Create(IList`1 argumentSpecs, Object[] arguments, IParameterInfo[] parameterInfos, MethodInfo methodInfo, MatchArgs matchArgs)
+[xUnit.net 00:00:00.20]            at NSubstitute.Core.CallSpecificationFactory.CreateFrom(ICall call, MatchArgs matchArgs)
+[xUnit.net 00:00:00.20]            at NSubstitute.Routing.Handlers.RecordCallSpecificationHandler.Handle(ICall call)
+[xUnit.net 00:00:00.20]            at NSubstitute.Routing.Route.Handle(ICall call)
+[xUnit.net 00:00:00.20]            at NSubstitute.Core.CallRouter.Route(ICall call)
+[xUnit.net 00:00:00.20]            at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.20]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.20]            at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.20]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.20]            at Castle.Proxies.AIFunctionProxy.InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.20]            at Microsoft.Extensions.AI.AIFunction.InvokeAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.20]         /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryInstrumentedFunctionTests.cs(45,0): at Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithoutParentSpan_CreatesTransaction()
+[xUnit.net 00:00:00.20]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:00.21]       NSubstitute.Exceptions.AmbiguousArgumentsException : Cannot determine argument specifications to use. Please use specifications for all arguments of the same type.
+[xUnit.net 00:00:00.21]       Method signature:
+[xUnit.net 00:00:00.21]           InvokeCoreAsync(AIFunctionArguments, CancellationToken)
+[xUnit.net 00:00:00.21]       Method arguments (possible arg matchers are indicated with '*'):
+[xUnit.net 00:00:00.21]           InvokeCoreAsync(AIFunctionArguments, *System.Threading.CancellationToken*)
+[xUnit.net 00:00:00.21]       All queued specifications:
+[xUnit.net 00:00:00.21]           any AIFunctionArguments
+[xUnit.net 00:00:00.21]           any CancellationToken
+[xUnit.net 00:00:00.21]       Matched argument specifications:
+[xUnit.net 00:00:00.21]           InvokeCoreAsync(AIFunctionArguments, ???)
+[xUnit.net 00:00:00.21]       
+[xUnit.net 00:00:00.21]       Stack Trace:
+[xUnit.net 00:00:00.21]            at NSubstitute.Core.Arguments.ArgumentSpecificationsFactory.Create(IList`1 argumentSpecs, Object[] arguments, IParameterInfo[] parameterInfos, MethodInfo methodInfo, MatchArgs matchArgs)
+[xUnit.net 00:00:00.21]            at NSubstitute.Core.CallSpecificationFactory.CreateFrom(ICall call, MatchArgs matchArgs)
+[xUnit.net 00:00:00.21]            at NSubstitute.Routing.Handlers.RecordCallSpecificationHandler.Handle(ICall call)
+[xUnit.net 00:00:00.21]            at NSubstitute.Routing.Route.Handle(ICall call)
+[xUnit.net 00:00:00.21]            at NSubstitute.Core.CallRouter.Route(ICall call)
+[xUnit.net 00:00:00.21]            at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.21]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.21]            at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.21]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.21]            at Castle.Proxies.AIFunctionProxy.InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.21]            at Microsoft.Extensions.AI.AIFunction.InvokeAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.21]         /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryInstrumentedFunctionTests.cs(113,0): at Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithComplexResult_SetsOutputAsString()
+[xUnit.net 00:00:00.21]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:00.21]       NSubstitute.Exceptions.AmbiguousArgumentsException : Cannot determine argument specifications to use. Please use specifications for all arguments of the same type.
+[xUnit.net 00:00:00.21]       Method signature:
+[xUnit.net 00:00:00.21]           InvokeCoreAsync(AIFunctionArguments, CancellationToken)
+[xUnit.net 00:00:00.21]       Method arguments (possible arg matchers are indicated with '*'):
+[xUnit.net 00:00:00.21]           InvokeCoreAsync(AIFunctionArguments, *System.Threading.CancellationToken*)
+[xUnit.net 00:00:00.21]       All queued specifications:
+[xUnit.net 00:00:00.21]           any AIFunctionArguments
+[xUnit.net 00:00:00.21]           any CancellationToken
+[xUnit.net 00:00:00.21]       Matched argument specifications:
+[xUnit.net 00:00:00.21]           InvokeCoreAsync(AIFunctionArguments, ???)
+[xUnit.net 00:00:00.21]       
+[xUnit.net 00:00:00.21]       Stack Trace:
+[xUnit.net 00:00:00.21]            at NSubstitute.Core.Arguments.ArgumentSpecificationsFactory.Create(IList`1 argumentSpecs, Object[] arguments, IParameterInfo[] parameterInfos, MethodInfo methodInfo, MatchArgs matchArgs)
+[xUnit.net 00:00:00.21]            at NSubstitute.Core.CallSpecificationFactory.CreateFrom(ICall call, MatchArgs matchArgs)
+[xUnit.net 00:00:00.21]            at NSubstitute.Routing.Handlers.RecordCallSpecificationHandler.Handle(ICall call)
+[xUnit.net 00:00:00.21]            at NSubstitute.Routing.Route.Handle(ICall call)
+[xUnit.net 00:00:00.21]            at NSubstitute.Core.CallRouter.Route(ICall call)
+[xUnit.net 00:00:00.21]            at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.21]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.21]            at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.21]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.21]            at Castle.Proxies.AIFunctionProxy.InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.21]            at Microsoft.Extensions.AI.AIFunction.InvokeAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.21]         /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryInstrumentedFunctionTests.cs(90,0): at Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithNullResult_DoesNotSetOutput()
+[xUnit.net 00:00:00.21]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:00.21]       NSubstitute.Exceptions.AmbiguousArgumentsException : Cannot determine argument specifications to use. Please use specifications for all arguments of the same type.
+[xUnit.net 00:00:00.21]       Method signature:
+[xUnit.net 00:00:00.21]           InvokeCoreAsync(AIFunctionArguments, CancellationToken)
+[xUnit.net 00:00:00.21]       Method arguments (possible arg matchers are indicated with '*'):
+[xUnit.net 00:00:00.21]           InvokeCoreAsync(AIFunctionArguments, *System.Threading.CancellationToken*)
+[xUnit.net 00:00:00.21]       All queued specifications:
+[xUnit.net 00:00:00.21]           any AIFunctionArguments
+[xUnit.net 00:00:00.21]           any CancellationToken
+[xUnit.net 00:00:00.21]       Matched argument specifications:
+[xUnit.net 00:00:00.21]           InvokeCoreAsync(AIFunctionArguments, ???)
+[xUnit.net 00:00:00.21]       
+[xUnit.net 00:00:00.21]       Stack Trace:
+[xUnit.net 00:00:00.21]            at NSubstitute.Core.Arguments.ArgumentSpecificationsFactory.Create(IList`1 argumentSpecs, Object[] arguments, IParameterInfo[] parameterInfos, MethodInfo methodInfo, MatchArgs matchArgs)
+[xUnit.net 00:00:00.21]            at NSubstitute.Core.CallSpecificationFactory.CreateFrom(ICall call, MatchArgs matchArgs)
+[xUnit.net 00:00:00.21]            at NSubstitute.Routing.Handlers.RecordCallSpecificationHandler.Handle(ICall call)
+[xUnit.net 00:00:00.21]            at NSubstitute.Routing.Route.Handle(ICall call)
+[xUnit.net 00:00:00.21]            at NSubstitute.Core.CallRouter.Route(ICall call)
+[xUnit.net 00:00:00.21]            at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.21]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.21]            at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.21]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.21]            at Castle.Proxies.AIFunctionProxy.InvokeCoreAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.21]            at Microsoft.Extensions.AI.AIFunction.InvokeAsync(AIFunctionArguments arguments, CancellationToken cancellationToken)
+[xUnit.net 00:00:00.21]         /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryInstrumentedFunctionTests.cs(160,0): at Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithCancellation_PropagatesCancellation()
+[xUnit.net 00:00:00.21]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:00.27]       NSubstitute.Exceptions.ReceivedCallsException : Expected to receive exactly 1 call matching:
+[xUnit.net 00:00:00.27]       	SetData("gen_ai.usage.input_tokens", 10)
+[xUnit.net 00:00:00.27]       Actually received no matching calls.
+[xUnit.net 00:00:00.27]       Received 4 non-matching calls (non-matching arguments indicated with '*' characters):
+[xUnit.net 00:00:00.27]       	SetData("gen_ai.usage.input_tokens", *10*)
+[xUnit.net 00:00:00.27]       	SetData(*"gen_ai.usage.output_tokens"*, *20*)
+[xUnit.net 00:00:00.27]       	SetData(*"gen_ai.usage.total_tokens"*, *30*)
+[xUnit.net 00:00:00.27]       	SetData(*"gen_ai.response.text"*, *"Hello"*)
+[xUnit.net 00:00:00.27]       
+[xUnit.net 00:00:00.27]       Stack Trace:
+[xUnit.net 00:00:00.27]            at NSubstitute.Core.ReceivedCallsExceptionThrower.Throw(ICallSpecification callSpecification, IEnumerable`1 matchingCalls, IEnumerable`1 nonMatchingCalls, Quantity requiredQuantity)
+[xUnit.net 00:00:00.27]            at NSubstitute.Routing.Handlers.CheckReceivedCallsHandler.Handle(ICall call)
+[xUnit.net 00:00:00.27]            at NSubstitute.Routing.Route.Handle(ICall call)
+[xUnit.net 00:00:00.27]            at NSubstitute.Core.CallRouter.Route(ICall call)
+[xUnit.net 00:00:00.27]            at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.27]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.27]            at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.27]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.27]            at Castle.Proxies.ObjectProxy_2.SetData(String key, Object value)
+[xUnit.net 00:00:00.27]         /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryAISpanEnricherTests.cs(175,0): at Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_SetsUsageTokens_WhenUsageProvided()
+[xUnit.net 00:00:00.27]            at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+[xUnit.net 00:00:00.27]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+[xUnit.net 00:00:00.27]       NSubstitute.Exceptions.ReceivedCallsException : Expected to receive exactly 1 call matching:
+[xUnit.net 00:00:00.27]       	SetData("gen_ai.usage.input_tokens", 10)
+[xUnit.net 00:00:00.27]       Actually received no matching calls.
+[xUnit.net 00:00:00.27]       Received 2 non-matching calls (non-matching arguments indicated with '*' characters):
+[xUnit.net 00:00:00.27]       	SetData("gen_ai.usage.input_tokens", *10*)
+[xUnit.net 00:00:00.27]       	SetData(*"gen_ai.response.text"*, *"Hello"*)
+[xUnit.net 00:00:00.27]       
+[xUnit.net 00:00:00.27]       Stack Trace:
+[xUnit.net 00:00:00.27]            at NSubstitute.Core.ReceivedCallsExceptionThrower.Throw(ICallSpecification callSpecification, IEnumerable`1 matchingCalls, IEnumerable`1 nonMatchingCalls, Quantity requiredQuantity)
+[xUnit.net 00:00:00.27]            at NSubstitute.Routing.Handlers.CheckReceivedCallsHandler.Handle(ICall call)
+[xUnit.net 00:00:00.27]            at NSubstitute.Routing.Route.Handle(ICall call)
+[xUnit.net 00:00:00.27]            at NSubstitute.Core.CallRouter.Route(ICall call)
+[xUnit.net 00:00:00.27]            at NSubstitute.Proxies.CastleDynamicProxy.CastleForwardingInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.27]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.27]            at NSubstitute.Proxies.CastleDynamicProxy.ProxyIdInterceptor.Intercept(IInvocation invocation)
+[xUnit.net 00:00:00.27]            at Castle.DynamicProxy.AbstractInvocation.Proceed()
+[xUnit.net 00:00:00.27]            at Castle.Proxies.ObjectProxy_2.SetData(String key, Object value)
+[xUnit.net 00:00:00.27]         /Users/alexsohn/code/sentry-dotnet/test/Sentry.Extensions.AI.Tests/SentryAISpanEnricherTests.cs(203,0): at Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_SetsPartialTokens_WhenOnlyInputTokensProvided()
+[xUnit.net 00:00:00.27]            at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+[xUnit.net 00:00:00.27]            at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)
+[xUnit.net 00:00:00.30]   Finished:    Sentry.Extensions.AI.Tests
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="CVDTQ2MGH4" outcome="Error" timestamp="2025-10-20T00:35:51.0407250-04:00">
+        <Text>[xUnit.net 00:00:00.19]     Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WhenInnerFunctionThrows_FinishesSpanWithException [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="CVDTQ2MGH4" outcome="Error" timestamp="2025-10-20T00:35:51.0488150-04:00">
+        <Text>[xUnit.net 00:00:00.20]     Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_PreservesInnerFunctionName [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="CVDTQ2MGH4" outcome="Error" timestamp="2025-10-20T00:35:51.0502880-04:00">
+        <Text>[xUnit.net 00:00:00.20]     Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithParentSpan_CreatesChildSpan [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="CVDTQ2MGH4" outcome="Error" timestamp="2025-10-20T00:35:51.0514650-04:00">
+        <Text>[xUnit.net 00:00:00.20]     Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithoutParentSpan_CreatesTransaction [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="CVDTQ2MGH4" outcome="Error" timestamp="2025-10-20T00:35:51.0555970-04:00">
+        <Text>[xUnit.net 00:00:00.21]     Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithComplexResult_SetsOutputAsString [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="CVDTQ2MGH4" outcome="Error" timestamp="2025-10-20T00:35:51.0567100-04:00">
+        <Text>[xUnit.net 00:00:00.21]     Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithNullResult_DoesNotSetOutput [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="CVDTQ2MGH4" outcome="Error" timestamp="2025-10-20T00:35:51.0579920-04:00">
+        <Text>[xUnit.net 00:00:00.21]     Sentry.Extensions.AI.Tests.SentryInstrumentedFunctionTests.InvokeCoreAsync_WithCancellation_PropagatesCancellation [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="CVDTQ2MGH4" outcome="Error" timestamp="2025-10-20T00:35:51.1397840-04:00">
+        <Text>[xUnit.net 00:00:00.27]     Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_SetsUsageTokens_WhenUsageProvided [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="CVDTQ2MGH4" outcome="Error" timestamp="2025-10-20T00:35:51.1398230-04:00">
+        <Text>[xUnit.net 00:00:00.27]     Sentry.Extensions.AI.Tests.SentryAISpanEnricherTests.EnrichWithResponse_SetsPartialTokens_WhenOnlyInputTokensProvided [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

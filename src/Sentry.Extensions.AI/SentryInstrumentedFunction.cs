@@ -18,11 +18,7 @@ internal sealed class SentryInstrumentedFunction(AIFunction innerFunction) : Del
 
         currSpan.SetData("gen_ai.operation.name", "execute_tool");
         currSpan.SetData("gen_ai.tool.name", Name);
-
-        if (Description is { } description)
-        {
-            currSpan.SetData("gen_ai.tool.description", description);
-        }
+        currSpan.SetData("gen_ai.tool.description", Description);
 
         currSpan.SetData("gen_ai.tool.input", arguments);
 
