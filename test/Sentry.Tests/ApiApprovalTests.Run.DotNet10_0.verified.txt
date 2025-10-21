@@ -186,6 +186,7 @@ namespace Sentry
     }
     public interface IHub : Sentry.ISentryClient, Sentry.ISentryScopeManager
     {
+        bool IsSessionActive { get; }
         Sentry.SentryId LastEventId { get; }
         Sentry.SentryStructuredLogger Logger { get; }
         void BindException(System.Exception exception, Sentry.ISpan span);
@@ -824,6 +825,7 @@ namespace Sentry
     public static class SentrySdk
     {
         public static bool IsEnabled { get; }
+        public static bool IsSessionActive { get; }
         public static Sentry.SentryId LastEventId { get; }
         public static Sentry.SentryStructuredLogger Logger { get; }
         public static void AddBreadcrumb(Sentry.Breadcrumb breadcrumb, Sentry.SentryHint? hint = null) { }
@@ -1359,6 +1361,7 @@ namespace Sentry.Extensibility
     {
         public static readonly Sentry.Extensibility.DisabledHub Instance;
         public bool IsEnabled { get; }
+        public bool IsSessionActive { get; }
         public Sentry.SentryId LastEventId { get; }
         public Sentry.SentryStructuredLogger Logger { get; }
         public void BindClient(Sentry.ISentryClient client) { }
@@ -1404,6 +1407,7 @@ namespace Sentry.Extensibility
     {
         public static readonly Sentry.Extensibility.HubAdapter Instance;
         public bool IsEnabled { get; }
+        public bool IsSessionActive { get; }
         public Sentry.SentryId LastEventId { get; }
         public Sentry.SentryStructuredLogger Logger { get; }
         public void AddBreadcrumb(string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
