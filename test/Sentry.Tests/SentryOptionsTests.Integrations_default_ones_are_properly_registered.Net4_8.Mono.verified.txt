@@ -6,9 +6,6 @@
     ]
   },
   {
-    Message: Starting BackpressureMonitor.
-  },
-  {
     Message: Registering integration: '{0}'.,
     Args: [
       AutoSessionTrackingIntegration
