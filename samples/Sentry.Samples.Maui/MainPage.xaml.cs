@@ -31,6 +31,17 @@ public partial class MainPage
     {
         _count++;
 
+        try
+        {
+            var s = default(string);
+            var c = s.Length;
+        }
+        catch (NullReferenceException)
+        {
+            // the exception is caught and handled in managed code. in AOT mode, execution
+            // should continue normally without sentry-native's crash handling kicking in
+        }
+
         if (_count == 1)
         {
             CounterBtn.Text = $"Clicked {_count} time";
