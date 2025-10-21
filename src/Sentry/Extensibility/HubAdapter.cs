@@ -40,6 +40,11 @@ public sealed class HubAdapter : IHub
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
+    public bool IsSessionActive { [DebuggerStepThrough] get => SentrySdk.IsSessionActive; }
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
     [DebuggerStepThrough]
     public void ConfigureScope(Action<Scope> configureScope)
         => SentrySdk.ConfigureScope(configureScope);

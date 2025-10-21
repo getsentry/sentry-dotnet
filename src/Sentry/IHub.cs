@@ -84,6 +84,11 @@ public interface IHub : ISentryClient, ISentryScopeManager
         string? operation = null);
 
     /// <summary>
+    /// Gets a value indicating whether there is an active session.
+    /// </summary>
+    public bool IsSessionActive { get; }
+
+    /// <summary>
     /// Starts a new session.
     /// </summary>
     public void StartSession();
