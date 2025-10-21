@@ -174,7 +174,6 @@ Describe 'MAUI app' -ForEach @(
         Dump-ServerErrors -Result $result
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.NullReferenceException`""
-        # TODO: fix redundant RuntimeException (#3954)
-        { $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"SIGSEGV`"" } | Should -Throw
+        $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"SIGSEGV`""
     }
 }
