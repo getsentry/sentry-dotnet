@@ -44,6 +44,7 @@ runs:
       uses: ./.github/actions/install-zstd
 
     # See https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md#xcode
+    # Also https://github.com/dotnet/macios/issues/21762#issuecomment-3424033859 (don't reference symlinks)
     - name: Pin the Xcode Version
       if: runner.os == 'macOS'
       shell: bash
@@ -113,45 +114,3 @@ runs:
         dotnet workload restore \
           --temp-dir "${{ runner.temp }}" \
           --skip-sign-check
-
-    - name: Inspect Xcode toolchain & actool
-      if: runner.os == 'macOS'
-      shell: bash
-      run: |
-        set -euxo pipefail
-
-        echo "## Selected developer dir"
-        xcode-select -p || true
-
-        echo "## Xcode version"
-        xcodebuild -version || true
-
-        echo "## Env (suspects):"
-        env | grep -E '^(DEVELOPER_DIR|SDKROOT|PATH)=' || true
-
-        echo "## Where is actool?"
-        /usr/bin/xcrun --find actool || true
-        /usr/bin/xcrun --sdk macosx --find actool || true
-        /usr/bin/xcrun --sdk iphoneos --find actool || true
-
-        echo "## Show SDK paths (what xcrun thinks):"
-        /usr/bin/xcrun --show-sdk-path --sdk macosx || true
-        /usr/bin/xcrun --show-sdk-path --sdk iphoneos || true
-
-        echo "## Does actool actually exist in the selected Xcode?"
-        if [[ -n "${DEVELOPER_DIR:-}" ]]; then
-          ls -l "${DEVELOPER_DIR}/usr/bin/actool" || true
-        else
-          # derive DEVELOPER_DIR from xcode-select -p
-          DEV=$(/usr/bin/xcode-select -p)
-          ls -l "${DEV}/usr/bin/actool" || true
-        fi
-
-        echo "## Try xcodebuild with an SDK *name* (not a path):"
-        /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -sdk macosx -find actool || true
-
-        echo "## If SDKROOT is set, it can confuse discovery; print then unset and retry:"
-        echo "SDKROOT=${SDKROOT:-<unset>}"
-        unset SDKROOT || true
-        /usr/bin/xcrun --find actool || true
-        /usr/bin/xcrun --sdk macosx --find actool || true
