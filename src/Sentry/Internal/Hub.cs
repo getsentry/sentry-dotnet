@@ -35,6 +35,8 @@ internal class Hub : IHub, IDisposable
 
     public bool IsEnabled => _isEnabled;
 
+    public bool IsSessionActive => _sessionManager.IsSessionActive;
+
     internal SentryOptions Options => _options;
 
     private Scope CurrentScope => ScopeManager.GetCurrent().Key;
