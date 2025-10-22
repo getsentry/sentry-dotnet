@@ -100,6 +100,11 @@ public class DisabledHub : IHub, IDisposable
     public BaggageHeader? GetBaggage() => null;
 
     /// <summary>
+    /// Returns null.
+    /// </summary>
+    public W3CTraceparentHeader? GetTraceparentHeader() => null;
+
+    /// <summary>
     /// Returns sampled out transaction context.
     /// </summary>
     public TransactionContext ContinueTrace(
