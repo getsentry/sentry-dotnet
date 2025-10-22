@@ -15,6 +15,9 @@
     <MtouchUseLlvm>false</MtouchUseLlvm>
     <EnableAssemblyILStripping>false</EnableAssemblyILStripping>
 
+    <!-- https://github.com/dotnet/android/wiki/Diagnose-Fast-Deployment-Issues -->
+    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+
     <!-- Display name -->
     <ApplicationTitle>Sentry.Maui.Device.IntegrationTestApp</ApplicationTitle>
 

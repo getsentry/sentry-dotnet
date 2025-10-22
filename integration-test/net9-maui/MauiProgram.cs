@@ -12,11 +12,12 @@ public static class MauiProgram
             .UseMauiApp<App>()
             .UseSentry(options =>
             {
-#if ANDROID
-                options.Dsn = "{{SENTRY_DSN}}";
-#endif
+                options.Dsn = System.Environment.GetEnvironmentVariable("SENTRY_DSN") ?? "http://key@127.0.0.1:8000/0";
                 options.Debug = false;
                 options.DiagnosticLevel = SentryLevel.Error;
+                // predictable crash envelopes only
+                options.SendClientReports = false;
+                options.AutoSessionTracking = false;
             })
             .ConfigureFonts(fonts =>
             {
