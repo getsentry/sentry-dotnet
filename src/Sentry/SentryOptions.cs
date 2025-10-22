@@ -1881,7 +1881,7 @@ public class SentryOptions
     /// <remarks>
     /// This and related experimental APIs may change in the future.
     /// </remarks>
-    public sealed class SentryExperimentalOptions
+    public class SentryExperimentalOptions
     {
         internal SentryExperimentalOptions()
         {
