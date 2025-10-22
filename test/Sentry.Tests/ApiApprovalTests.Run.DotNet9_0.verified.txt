@@ -791,7 +791,7 @@ namespace Sentry
         public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryTransaction?> beforeSendTransaction) { }
         public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryHint, Sentry.SentryTransaction?> beforeSendTransaction) { }
         public Sentry.SentryOptions UseStackTraceFactory(Sentry.Extensibility.ISentryStackTraceFactory sentryStackTraceFactory) { }
-        public sealed class SentryExperimentalOptions
+        public class SentryExperimentalOptions
         {
             public bool EnableLogs { get; set; }
             public void SetBeforeSendLog(System.Func<Sentry.SentryLog, Sentry.SentryLog?> beforeSendLog) { }
