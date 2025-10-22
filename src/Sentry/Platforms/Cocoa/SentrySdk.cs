@@ -145,6 +145,18 @@ public static partial class SentrySdk
         // nativeOptions.DefaultIntegrations
         // nativeOptions.EnableProfiling  (deprecated)
 
+        // Session Replay options for the Cocoa SDK
+        if (options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate is {} sessionSampleRate)
+        {
+            nativeOptions.SessionReplay.SessionSampleRate = (float)sessionSampleRate;
+        }
+        if (options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate is {} onErrorSampleRate)
+        {
+            nativeOptions.SessionReplay.OnErrorSampleRate = (float)onErrorSampleRate;
+        }
+        nativeOptions.SessionReplay.MaskAllImages = options.Native.ExperimentalOptions.SessionReplay.MaskAllImages;
+        nativeOptions.SessionReplay.MaskAllText = options.Native.ExperimentalOptions.SessionReplay.MaskAllText;
+
         // Set hybrid SDK name
         SentryCocoaHybridSdk.SetSdkName("sentry.cocoa.dotnet");
 
