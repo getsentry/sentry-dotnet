@@ -1005,7 +1005,7 @@ public class SentryOptions
     /// for interoperability with services that support OpenTelemetry standards.
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/telemetry/traces/#propagatetraceparent"/>
-    public bool PropagateTraceparent { get; set; } = false;
+    public bool PropagateTraceparent { get; set; }
 
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
 
