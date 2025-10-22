@@ -146,16 +146,17 @@ public static partial class SentrySdk
         // nativeOptions.EnableProfiling  (deprecated)
 
         // Session Replay options for the Cocoa SDK
-        if (options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate is {} sessionSampleRate)
+        if (options.Native.ExperimentalOptions.SessionReplay.IsSessionReplayEnabled)
         {
-            nativeOptions.SessionReplay.SessionSampleRate = (float)sessionSampleRate;
+            var sessionSampleRate = (float)(options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate ?? 0f);
+            var onErrorSampleRate = (float)(options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate ?? 0f);
+            nativeOptions.SessionReplay = new Sentry.CocoaSdk.SentryReplayOptions(sessionSampleRate, onErrorSampleRate,
+                options.Native.ExperimentalOptions.SessionReplay.MaskAllImages,
+                options.Native.ExperimentalOptions.SessionReplay.MaskAllText,
+                options.Native.ExperimentalOptions.SessionReplay.EnableViewRendererV2,
+                options.Native.ExperimentalOptions.SessionReplay.EnableFastViewRendering
+            );
         }
-        if (options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate is {} onErrorSampleRate)
-        {
-            nativeOptions.SessionReplay.OnErrorSampleRate = (float)onErrorSampleRate;
-        }
-        nativeOptions.SessionReplay.MaskAllImages = options.Native.ExperimentalOptions.SessionReplay.MaskAllImages;
-        nativeOptions.SessionReplay.MaskAllText = options.Native.ExperimentalOptions.SessionReplay.MaskAllText;
 
         // Set hybrid SDK name
         SentryCocoaHybridSdk.SetSdkName("sentry.cocoa.dotnet");

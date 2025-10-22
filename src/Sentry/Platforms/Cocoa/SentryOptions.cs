@@ -307,6 +307,25 @@ public partial class SentryOptions
             /// </summary>
             public bool MaskAllText { get; set; } = true;
 
+            /// <summary>
+            /// When enabled, reduces the impact of Session Replay on the main thread and potential frame drops. This is
+            /// the default and recommended setting, but if you are experiencing issues then you can opt out by setting
+            /// to <c>false</c>.
+            /// </summary>
+            /// <remarks>Defaults to <c>true</c></remarks>
+            public bool EnableViewRendererV2 { get; set; } = true;
+
+            /// <summary>
+            /// <para>
+            /// Enables faster rendering of views at the cost of some visual fidelity.
+            /// </para>
+            /// <para>
+            /// See: https://blog.sentry.io/boosting-session-replay-performance-on-ios-with-view-renderer-v2/
+            /// </para>
+            /// </summary>
+            /// <remarks>Defaults to <c>false</c></remarks>
+            public bool EnableFastViewRendering { get; set; } = false;
+
             internal bool IsSessionReplayEnabled => OnErrorSampleRate > 0.0 || SessionSampleRate > 0.0;
         }
 
