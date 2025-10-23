@@ -12,39 +12,37 @@ BeforeDiscovery {
     $script:emulator = Get-AndroidEmulatorId
 }
 
-Describe 'MAUI app' -ForEach @(
-    @{ tfm = "net9.0-android35.0" }
+Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
+    @{ tfm = "net9.0-android35.0"; configuration = "Release" }
+    @{ tfm = "net9.0-android35.0"; configuration = "Debug" }
 ) -Skip:(-not $script:emulator) {
     BeforeAll {
         Remove-Item -Path "$PSScriptRoot/mobile-app" -Recurse -Force -ErrorAction SilentlyContinue
         Copy-Item -Path "$PSScriptRoot/net9-maui" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
         Push-Location $PSScriptRoot/mobile-app
 
+        # replace {{SENTRY_DSN}} in MauiProgram.cs
+        (Get-Content MauiProgram.cs) `
+            -replace '\{\{SENTRY_DSN\}\}', 'http://key@127.0.0.1:8000/0' `
+        | Set-Content MauiProgram.cs
+
+        $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLower()
+        $rid = "android-$arch"
+
+        Write-Host "::group::Build Sentry.Maui.Device.IntegrationTestApp.csproj"
+        dotnet build Sentry.Maui.Device.IntegrationTestApp.csproj `
+            --configuration $configuration `
+            --framework $tfm `
+            --runtime $rid
+        | ForEach-Object { Write-Host $_ }
+        Write-Host '::endgroup::'
+        $LASTEXITCODE | Should -Be 0
+
         function InstallAndroidApp
         {
-            param([string] $Dsn)
-            $dsn = $Dsn.Replace('http://', 'http://key@') + '/0'
-
-            # replace {{SENTRY_DSN}} in MauiProgram.cs
-            (Get-Content MauiProgram.cs) `
-                -replace '\{\{SENTRY_DSN\}\}', $dsn `
-            | Set-Content MauiProgram.cs
-
-            $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLower()
-            $rid = "android-$arch"
-
-            Write-Host "::group::Build Sentry.Maui.Device.IntegrationTestApp.csproj"
-            dotnet build Sentry.Maui.Device.IntegrationTestApp.csproj `
-                --configuration Release `
-                --framework $tfm `
-                --runtime $rid
-            | ForEach-Object { Write-Host $_ }
-            Write-Host '::endgroup::'
-            $LASTEXITCODE | Should -Be 0
-
-            Write-Host "::group::Install bin/Release/$tfm/$rid/io.sentry.dotnet.maui.device.integrationtestapp-Signed.apk"
+            Write-Host "::group::Install bin/$configuration/$tfm/$rid/io.sentry.dotnet.maui.device.integrationtestapp-Signed.apk"
             xharness android install -v `
-                --app bin/Release/$tfm/$rid/io.sentry.dotnet.maui.device.integrationtestapp-Signed.apk `
+                --app bin/$configuration/$tfm/$rid/io.sentry.dotnet.maui.device.integrationtestapp-Signed.apk `
                 --package-name io.sentry.dotnet.maui.device.integrationtestapp `
                 --output-directory=test_output
             | ForEach-Object { Write-Host $_ }
@@ -58,35 +56,25 @@ Describe 'MAUI app' -ForEach @(
                 [string] $Dsn,
                 [string] $TestArg = 'None'
             )
+            Write-Host "::group::Run Android app (TestArg=$TestArg)"
+            $dsn = $Dsn.Replace('http://', 'http://key@') + '/0'
+            xharness android adb -v `
+                -- shell am start -S -n io.sentry.dotnet.maui.device.integrationtestapp/.MainActivity `
+                -e SENTRY_DSN $dsn `
+                -e SENTRY_TEST_ARG $TestArg
+            | ForEach-Object { Write-Host $_ }
+            Write-Host '::endgroup::'
+            $LASTEXITCODE | Should -Be 0
 
-            try
+            do
             {
-                # Setup port forwarding for accessing sentry-server at 127.0.0.1:8000 from the emulator
-                $port = $Dsn.Split(':')[2].Split('/')[0]
-                xharness android adb -v -- reverse tcp:$port tcp:$port
+                Write-Host "Waiting for app..."
+                Start-Sleep -Seconds 1
 
-                Write-Host "::group::Run Android app (TestArg=$TestArg)"
-                xharness android adb -v `
-                    -- shell am start -S -n io.sentry.dotnet.maui.device.integrationtestapp/.MainActivity `
-                    -e SENTRY_TEST_ARG $TestArg
-                | ForEach-Object { Write-Host $_ }
-                Write-Host '::endgroup::'
-                $LASTEXITCODE | Should -Be 0
+                $procid = (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
+                $activity = (& xharness android adb -- shell dumpsys activity activities) -match "io\.sentry\.dotnet\.maui\.device\.integrationtestapp"
 
-                do
-                {
-                    Write-Host "Waiting for app..."
-                    Start-Sleep -Seconds 1
-
-                    $procid = (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
-                    $activity = (& xharness android adb -- shell dumpsys activity activities) -match "io\.sentry\.dotnet\.maui\.device\.integrationtestapp"
-
-                } while ($procid -and $activity)
-            }
-            finally
-            {
-                xharness android adb -v -- reverse --remove-all
-            }
+            } while ($procid -and $activity)
         }
 
         function UninstallAndroidApp
@@ -111,20 +99,27 @@ Describe 'MAUI app' -ForEach @(
                 Write-Host '::endgroup::'
             }
         }
+
+        # Setup port forwarding for accessing sentry-server at 127.0.0.1:8000 from the emulator
+        xharness android adb -v -- reverse tcp:8000 tcp:8000
     }
 
     AfterAll {
         Pop-Location
+        xharness android adb -v -- reverse --remove tcp:8000
+    }
+
+    BeforeEach {
+        InstallAndroidApp
     }
 
     AfterEach {
         UninstallAndroidApp
     }
 
-    It 'Managed crash' {
+    It 'Managed crash (<configuration>)' {
         $result = Invoke-SentryServer {
             param([string]$url)
-            InstallAndroidApp -Dsn $url
             RunAndroidApp -Dsn $url -TestArg "Managed"
             RunAndroidApp -Dsn $url
         }
@@ -133,12 +128,12 @@ Describe 'MAUI app' -ForEach @(
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.ApplicationException`""
         $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"SIGABRT`""
+        $result.Envelopes() | Should -HaveCount 1
     }
 
-    It 'Java crash' {
+    It 'Java crash (<configuration>)' {
         $result = Invoke-SentryServer {
             param([string]$url)
-            InstallAndroidApp -Dsn $url
             RunAndroidApp -Dsn $url -TestArg "Java"
             RunAndroidApp -Dsn $url
         }
@@ -147,12 +142,12 @@ Describe 'MAUI app' -ForEach @(
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"RuntimeException`""
         $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
+        $result.Envelopes() | Should -HaveCount 1
     }
 
-    It 'Native crash' {
+    It 'Native crash (<configuration>)' {
         $result = Invoke-SentryServer {
             param([string]$url)
-            InstallAndroidApp -Dsn $url
             RunAndroidApp -Dsn $url -TestArg "Native"
             RunAndroidApp -Dsn $url
         }
@@ -161,12 +156,12 @@ Describe 'MAUI app' -ForEach @(
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"SIG[A-Z]+`"" # SIGILL (x86_64), SIGTRAP (arm64-v8a)
         $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
+        $result.Envelopes() | Should -HaveCount 1
     }
 
-    It 'Null reference exception' {
+    It 'Null reference exception (<configuration>)' {
         $result = Invoke-SentryServer {
             param([string]$url)
-            InstallAndroidApp -Dsn $url
             RunAndroidApp -Dsn $url -TestArg "NullReferenceException"
             RunAndroidApp -Dsn $url
         }
@@ -174,7 +169,12 @@ Describe 'MAUI app' -ForEach @(
         Dump-ServerErrors -Result $result
         $result.HasErrors() | Should -BeFalse
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.NullReferenceException`""
-        # TODO: fix redundant RuntimeException (#3954)
-        { $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"SIGSEGV`"" } | Should -Throw
+        # TODO: fix redundant SIGSEGV in Release (#3954)
+        if ($configuration -eq "Release") {
+            { $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"SIGSEGV`"" } | Should -Throw
+        } else {
+            $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"SIGSEGV`""
+            $result.Envelopes() | Should -HaveCount 1
+        }
     }
 }
