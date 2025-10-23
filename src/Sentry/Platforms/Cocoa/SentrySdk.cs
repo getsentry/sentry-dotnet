@@ -150,12 +150,12 @@ public static partial class SentrySdk
         {
             var sessionSampleRate = (float)(options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate ?? 0f);
             var onErrorSampleRate = (float)(options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate ?? 0f);
-            nativeOptions.SessionReplay = new Sentry.CocoaSdk.SentryReplayOptions(sessionSampleRate, onErrorSampleRate,
-                options.Native.ExperimentalOptions.SessionReplay.MaskAllImages,
-                options.Native.ExperimentalOptions.SessionReplay.MaskAllText,
-                options.Native.ExperimentalOptions.SessionReplay.EnableViewRendererV2,
-                options.Native.ExperimentalOptions.SessionReplay.EnableFastViewRendering
-            );
+            var cocoaReplayOptions = new Sentry.CocoaSdk.SentryReplayOptions();
+            cocoaReplayOptions.SessionSampleRate = sessionSampleRate;
+            cocoaReplayOptions.OnErrorSampleRate = onErrorSampleRate;
+            cocoaReplayOptions.MaskAllText = options.Native.ExperimentalOptions.SessionReplay.MaskAllText;
+            cocoaReplayOptions.MaskAllImages = options.Native.ExperimentalOptions.SessionReplay.MaskAllImages;
+            nativeOptions.SessionReplay = cocoaReplayOptions;
         }
 
         // Set hybrid SDK name
