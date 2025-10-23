@@ -7,20 +7,17 @@ internal sealed class SentryChatClient : DelegatingChatClient
 {
     private readonly HubAdapter _hub;
     private readonly SentryAIOptions _sentryAIOptions;
+    private static ISpan? RootSpan;
 
     public SentryChatClient(IChatClient client, Action<SentryAIOptions>? configure = null) : base(client)
     {
         _sentryAIOptions = new SentryAIOptions();
         configure?.Invoke(_sentryAIOptions);
 
-        if (_sentryAIOptions.InitializeSdk)
+        if (_sentryAIOptions.InitializeSdk && !SentrySdk.IsEnabled)
         {
-            if (!SentrySdk.IsEnabled || _sentryAIOptions.Dsn is not null)
-            {
-                // Initialize Sentry with our options/DSN
-                var hub = SentrySdk.InitHub(_sentryAIOptions);
-                SentrySdk.UseHub(hub);
-            }
+            var hub = SentrySdk.InitHub(_sentryAIOptions);
+            SentrySdk.UseHub(hub);
         }
 
         _hub = HubAdapter.Instance;
@@ -31,83 +28,87 @@ internal sealed class SentryChatClient : DelegatingChatClient
         ChatOptions? options = null,
         CancellationToken cancellationToken = new())
     {
-        var invokeSpanName = $"invoke_agent {InnerClient.GetType().Name}";
-        const string invokeOperation = "gen_ai.invoke_agent";
-        var outerSpan = StartSpanOrTransaction(invokeOperation, invokeSpanName);
-
-        const string chatOperation = "gen_ai.chat";
-        var chatSpanName = options is null || string.IsNullOrEmpty(options.ModelId) ? "chat unknown model" : $"chat {options.ModelId}";
-        var initialSpan = outerSpan.StartChild(chatOperation, chatSpanName);
+        var outerSpan = EnsureRootSpanExists();
+        var innerSpan = CreateChatSpan(options, outerSpan);
 
         try
         {
             var chatMessages = messages as ChatMessage[] ?? messages.ToArray();
-            SentryAISpanEnricher.EnrichWithRequest(initialSpan, chatMessages, options, _sentryAIOptions);
+            SentryAISpanEnricher.EnrichWithRequest(innerSpan, chatMessages, options, _sentryAIOptions);
 
             var response = await base.GetResponseAsync(chatMessages, options, cancellationToken).ConfigureAwait(false);
 
-            SentryAISpanEnricher.EnrichWithResponse(initialSpan, response, _sentryAIOptions);
-            initialSpan.Finish(SpanStatus.Ok);
-            outerSpan.Finish(SpanStatus.Ok);
+            SentryAISpanEnricher.EnrichWithResponse(innerSpan, response, _sentryAIOptions);
+            innerSpan.Finish(SpanStatus.Ok);
+
+            if (!ContainsFunctionCalls(response))
+            {
+                outerSpan.Finish(SpanStatus.Ok);
+                RootSpan = null;
+            }
+
             return response;
         }
         catch (Exception ex)
         {
-            initialSpan.Finish(ex);
+            innerSpan.Finish(ex);
             outerSpan.Finish(ex);
             _hub.CaptureException(ex);
+            RootSpan = null;
             throw;
         }
     }
 
     /// <inheritdoc cref="IChatClient"/>
-    public override IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> messages,
+    public override async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
-        CancellationToken cancellationToken = new())
+        [EnumeratorCancellation] CancellationToken cancellationToken = new())
     {
-        var invokeSpanName = $"invoke_agent {InnerClient.GetType().Name}";
-        const string invokeOperation = "gen_ai.invoke_agent";
-        var outerSpan = StartSpanOrTransaction(invokeOperation, invokeSpanName);
-
-        const string chatOperation = "gen_ai.chat";
-        var chatSpanName = options is null || string.IsNullOrEmpty(options.ModelId) ? "chat unknown model" : $"chat {options.ModelId}";
-        var initialSpan = outerSpan.StartChild(chatOperation, chatSpanName);
-
-        try
-        {
-            return InstrumentStreamingResponseAsync(messages, options, outerSpan, initialSpan, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            initialSpan.Finish(ex);
-            outerSpan.Finish(ex);
-            _hub.CaptureException(ex);
-            throw;
-        }
-    }
-
-    private async IAsyncEnumerable<ChatResponseUpdate> InstrumentStreamingResponseAsync(IEnumerable<ChatMessage> messages,
-        ChatOptions? options,
-        ISpan outerSpan,
-        ISpan span,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        var chatMessages = messages as ChatMessage[] ?? messages.ToArray();
-        SentryAISpanEnricher.EnrichWithRequest(span, chatMessages, options, _sentryAIOptions);
+        var outerSpan = EnsureRootSpanExists();
+        var innerSpan = CreateChatSpan(options, outerSpan);
 
         var responses = new List<ChatResponseUpdate>();
-        var originalStream = base.GetStreamingResponseAsync(chatMessages, options, cancellationToken);
+        var chatMessages = messages as ChatMessage[] ?? messages.ToArray();
+        var enumerator = base
+            .GetStreamingResponseAsync(chatMessages, options, cancellationToken)
+            .GetAsyncEnumerator(cancellationToken);
 
-        await foreach (var chunk in originalStream.ConfigureAwait(false))
+        while (true)
         {
-            responses.Add(chunk);
+            ChatResponseUpdate? current;
 
-            yield return chunk;
+            try
+            {
+                SentryAISpanEnricher.EnrichWithRequest(innerSpan, chatMessages, options, _sentryAIOptions);
+                var hasNext = await enumerator.MoveNextAsync().ConfigureAwait(false);
+                if (!hasNext)
+                {
+                    SentryAISpanEnricher.EnrichWithStreamingResponse(innerSpan, responses, _sentryAIOptions);
+                    innerSpan.Finish(SpanStatus.Ok);
+                    outerSpan.Finish(SpanStatus.Ok);
+
+                    if (!ContainsFunctionCalls(responses))
+                    {
+                        RootSpan = null;
+                    }
+
+                    yield break;
+                }
+
+                current = enumerator.Current;
+                responses.Add(enumerator.Current);
+            }
+            catch (Exception ex)
+            {
+                innerSpan.Finish(ex);
+                outerSpan.Finish(ex);
+                _hub.CaptureException(ex);
+                RootSpan = null;
+                throw;
+            }
+
+            yield return current;
         }
-
-        SentryAISpanEnricher.EnrichWithStreamingResponse(span, responses, _sentryAIOptions);
-        span.Finish(SpanStatus.Ok);
-        outerSpan.Finish(SpanStatus.Ok);
     }
 
     /// <summary>
@@ -128,5 +129,32 @@ internal sealed class SentryChatClient : DelegatingChatClient
         var newTransaction = _hub.StartTransaction(description, operation);
         _hub.ConfigureScope(scope => scope.Transaction = newTransaction);
         return newTransaction;
+    }
+
+    private static bool ContainsFunctionCalls(ChatResponse response) =>
+        response.Messages.Any(m => m.Contents?.OfType<FunctionCallContent>().Any() ?? false)
+        || response.FinishReason == ChatFinishReason.ToolCalls;
+
+    private static bool ContainsFunctionCalls(List<ChatResponseUpdate> responses) =>
+        responses.Any(m => m.Contents?.OfType<FunctionCallContent>().Any() ?? false)
+        || responses.Any(m => m.FinishReason == ChatFinishReason.ToolCalls);
+
+    private ISpan EnsureRootSpanExists()
+    {
+        var invokeSpanName = $"invoke_agent {InnerClient.GetType().Name}";
+        const string invokeOperation = "gen_ai.invoke_agent";
+        RootSpan ??= StartSpanOrTransaction(invokeOperation, invokeSpanName);
+        // In ME.AI, there's not really an agent name. In other SDKs we set this, so we should do so here
+        RootSpan.SetData("gen_ai.agent.name", $"{InnerClient.GetType().Name}");
+        return RootSpan;
+    }
+
+    private static ISpan CreateChatSpan(ChatOptions? options, ISpan outerSpan)
+    {
+        const string chatOperation = "gen_ai.chat";
+        var chatSpanName = options is null || string.IsNullOrEmpty(options.ModelId)
+            ? "chat unknown model"
+            : $"chat {options.ModelId}";
+        return outerSpan.StartChild(chatOperation, chatSpanName);
     }
 }

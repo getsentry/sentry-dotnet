@@ -1,5 +1,3 @@
-using Anthropic.SDK;
-using Anthropic.SDK.Constants;
 using Microsoft.Extensions.AI;
 using Sentry.Extensions.AI;
 
@@ -20,17 +18,20 @@ builder.WebHost.UseSentry(options =>
     options.Experimental.EnableLogs = true;
 });
 
-var client = new AnthropicClient().Messages
-    .AsBuilder()
-    .UseFunctionInvocation()
-    .Build()
+var openAIClient = new OpenAI.Chat.ChatClient("gpt-4o-mini", Environment.GetEnvironmentVariable("OPENAI_API_KEY"))
+    .AsIChatClient()
     .WithSentry(options =>
     {
-        options.IncludeAIRequestMessages = false;
-        options.IncludeAIResponseContent = false;
+        // In this case, we already initialized Sentry from ASP.NET WebHost creation, we don't need to initialize
+        options.IncludeAIRequestMessages = true;
+        options.IncludeAIResponseContent = true;
     });
 
-// Register the Claude API client and Sentry-instrumented chat client
+var client = new ChatClientBuilder(openAIClient)
+    .UseFunctionInvocation()
+    .Build();
+
+// Register the OpenAI API client and Sentry-instrumented chat client
 builder.Services.AddSingleton(client);
 
 var app = builder.Build();
@@ -41,7 +42,7 @@ app.MapGet("/test", async (IChatClient chatClient, ILogger<Program> logger) =>
     logger.LogInformation("Running AI test endpoint with multiple tools");
     var options = new ChatOptions
     {
-        ModelId = AnthropicModels.Claude3Haiku,
+        ModelId = "gpt-4o-mini",
         MaxOutputTokens = 1024,
         Tools = [
             // Tool 1: Quick response with minimal delay
@@ -117,14 +118,23 @@ app.MapGet("/test", async (IChatClient chatClient, ILogger<Program> logger) =>
 
     try
     {
-        var response = await chatClient.GetResponseAsync(
-            "Please help me with the following tasks: 1) Find Alice's age, 2) Get weather in New York, 3) Calculate a complex result for number 15, 4) Get comprehensive info for Bob in London, and 5) Calculate average age for Alice, Bob, and Charlie (first get each person's age individually using GetPersonAge, then use CalculateAverageAge with those results). Please use the appropriate tools for each task and demonstrate tool chaining where needed.",
-            options);
+        var streamingResponse = new List<string>();
+        await foreach (var update in chatClient.GetStreamingResponseAsync([
+            new ChatMessage(ChatRole.User, "Please help me with the following tasks: 1) Find Alice's age, 2) Get weather in New York, 3) Calculate a complex result for number 15, 4) Get comprehensive info for Bob in London, and 5) Calculate average age for Alice, Bob, and Charlie (first get each person's age individually using GetPersonAge, then use CalculateAverageAge with those results). Please use the appropriate tools for each task and demonstrate tool chaining where needed.")
+        ], options))
+        {
+            if (!string.IsNullOrEmpty(update.Text))
+            {
+                streamingResponse.Add(update.Text);
+            }
+        }
+
+        var fullResponse = string.Concat(streamingResponse);
 
         return Results.Ok(new
         {
-            message = "AI test with multiple tools completed successfully",
-            response = response.Messages?.FirstOrDefault()?.Text ?? "No response",
+            message = "AI test with multiple tools completed successfully (streaming)",
+            response = fullResponse,
             timestamp = DateTime.UtcNow
         });
     }

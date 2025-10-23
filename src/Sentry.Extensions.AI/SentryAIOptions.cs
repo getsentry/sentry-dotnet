@@ -17,6 +17,11 @@ public class SentryAIOptions : SentryOptions
     public bool IncludeAIResponseContent { get; set; } = true;
 
     /// <summary>
+    /// Name of the AI Agent
+    /// </summary>
+    public string AgentName { get; set; } = "Agent";
+
+    /// <summary>
     /// Whether to initialize the Sentry SDK through this integration.
     /// </summary>
     /// <remarks>

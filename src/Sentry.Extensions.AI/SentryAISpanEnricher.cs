@@ -25,9 +25,10 @@ internal static class SentryAISpanEnricher
         {
             span.SetData("gen_ai.request.model", modelId);
         }
-        else
+
+        if (aiOptions?.AgentName is { } agentName)
         {
-            span.SetData("gen_ai.request.model", "Unknown model");
+             span.SetData("gen_ai.agent.name", agentName);
         }
 
         if (messages is { Length: > 0 } && (aiOptions?.IncludeAIRequestMessages ?? true))
@@ -102,7 +103,7 @@ internal static class SentryAISpanEnricher
 
         if (response.ModelId is { } modelId)
         {
-            span.SetData("gen_ai.response.model_id", modelId);
+            span.SetData("gen_ai.response.model", modelId);
         }
     }
 

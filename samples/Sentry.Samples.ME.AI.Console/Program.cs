@@ -1,5 +1,3 @@
-using Anthropic.SDK;
-using Anthropic.SDK.Constants;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using Sentry.Extensions.AI;
@@ -9,11 +7,9 @@ var logger = loggerFactory.CreateLogger<Program>();
 
 logger.LogInformation("Starting Microsoft.Extensions.AI sample with Sentry instrumentation");
 
-// Create Claude API client and wrap it with Sentry instrumentation
-var client = new AnthropicClient().Messages
-    .AsBuilder()
-    .UseFunctionInvocation()
-    .Build()
+// Create OpenAI API client and wrap it with Sentry instrumentation
+var openAIClient = new OpenAI.Chat.ChatClient("gpt-4o-mini", Environment.GetEnvironmentVariable("OPENAI_API_KEY"))
+    .AsIChatClient()
     .WithSentry(options =>
     {
 #if !SENTRY_DSN_DEFINED_IN_ENV
@@ -27,16 +23,21 @@ var client = new AnthropicClient().Messages
         options.TracesSampleRate = 1;
 
         // AI-specific settings
-        options.IncludeAIRequestMessages = false;
-        options.IncludeAIResponseContent = false;
+        options.IncludeAIRequestMessages = true;
+        options.IncludeAIResponseContent = true;
+        // Since this is a simple console app without Sentry already set up, we need to initialize our SDK
         options.InitializeSdk = true;
     });
+
+var client = new ChatClientBuilder(openAIClient)
+    .UseFunctionInvocation()
+    .Build();
 
 logger.LogInformation("Making AI call with Sentry instrumentation and tools...");
 
 var options = new ChatOptions
 {
-    ModelId = AnthropicModels.Claude3Haiku,
+    ModelId = "gpt-4o-mini",
     MaxOutputTokens = 1024,
     Tools = [
         // Tool 1: Quick response with minimal delay
@@ -87,7 +88,7 @@ logger.LogInformation("Making streaming AI call with Sentry instrumentation...")
 
 var streamingOptions = new ChatOptions
 {
-    ModelId = AnthropicModels.Claude3Haiku,
+    ModelId = "gpt-4o-mini",
     MaxOutputTokens = 1024
 }.WithSentry();
 
