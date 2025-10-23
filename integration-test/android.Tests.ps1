@@ -21,6 +21,11 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         Copy-Item -Path "$PSScriptRoot/net9-maui" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
         Push-Location $PSScriptRoot/mobile-app
 
+        # replace {{SENTRY_DSN}} in MauiProgram.cs
+        (Get-Content MauiProgram.cs) `
+            -replace '\{\{SENTRY_DSN\}\}', 'http://key@127.0.0.1:8000/0' `
+        | Set-Content MauiProgram.cs
+
         $arch = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString().ToLower()
         $rid = "android-$arch"
 
