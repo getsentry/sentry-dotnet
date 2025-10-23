@@ -267,6 +267,72 @@ public partial class SentryOptions
             InAppIncludes ??= new List<string>();
             InAppIncludes.Add(prefix);
         }
+
+        /// <summary>
+        /// Options for experimental features in the native Sentry Cocoa SDK.
+        /// </summary>
+        public class NativeExperimentalOptions
+        {
+            /// <summary>
+            /// Session Replay options.
+            /// </summary>
+            public NativeSentryReplayOptions SessionReplay { get; set; } = new();
+        }
+
+        /// <summary>
+        /// Session Replay options for the native Sentry Cocoa SDK.
+        /// </summary>
+        public class NativeSentryReplayOptions
+        {
+            /// <summary>
+            /// The sample rate for sessions that had an error or crash.
+            /// Value must be between 0.0 and 1.0.
+            /// A value of 0.0 disables session replay for errored sessions.
+            /// A value of 1.0 captures session replay for all errored sessions.
+            /// </summary>
+            public double? OnErrorSampleRate { get; set; }
+            /// <summary>
+            /// The sample rate for all sessions.
+            /// Value must be between 0.0 and 1.0.
+            /// A value of 0.0 disables session replay for all sessions.
+            /// A value of 1.0 captures session replay for all sessions.
+            /// </summary>
+            public double? SessionSampleRate { get; set; }
+            /// <summary>
+            /// Whether to mask all images in the session replay by default.
+            /// </summary>
+            public bool MaskAllImages { get; set; } = true;
+            /// <summary>
+            /// Whether to mask all text in the session replay by default.
+            /// </summary>
+            public bool MaskAllText { get; set; } = true;
+
+            /// <summary>
+            /// When enabled, reduces the impact of Session Replay on the main thread and potential frame drops. This is
+            /// the default and recommended setting, but if you are experiencing issues then you can opt out by setting
+            /// to <c>false</c>.
+            /// </summary>
+            /// <remarks>Defaults to <c>true</c></remarks>
+            public bool EnableViewRendererV2 { get; set; } = true;
+
+            /// <summary>
+            /// <para>
+            /// Enables faster rendering of views at the cost of some visual fidelity.
+            /// </para>
+            /// <para>
+            /// See: https://blog.sentry.io/boosting-session-replay-performance-on-ios-with-view-renderer-v2/
+            /// </para>
+            /// </summary>
+            /// <remarks>Defaults to <c>false</c></remarks>
+            public bool EnableFastViewRendering { get; set; } = false;
+
+            internal bool IsSessionReplayEnabled => OnErrorSampleRate > 0.0 || SessionSampleRate > 0.0;
+        }
+
+        /// <summary>
+        /// ExperimentalOptions
+        /// </summary>
+        public NativeExperimentalOptions ExperimentalOptions { get; set; } = new();
     }
 
     // We actually add the profiling integration automatically in InitSentryCocoaSdk().

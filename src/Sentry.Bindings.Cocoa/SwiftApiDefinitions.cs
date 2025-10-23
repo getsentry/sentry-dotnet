@@ -258,6 +258,15 @@ interface SentryReplayBreadcrumbConverter
 [Internal]
 interface SentryReplayOptions //: ISentryRedactOptions
 {
+    [Export("initWithSessionSampleRate:onErrorSampleRate:maskAllText:maskAllImages:enableViewRendererV2:enableFastViewRendering:")]
+    [DesignatedInitializer]
+    IntPtr Constructor(float sessionSampleRate,
+        float onErrorSampleRate,
+        bool maskAllText,
+        bool maskAllImages,
+        bool enableViewRendererV2,
+        bool enableFastViewRendering);
+
     // @property (nonatomic) float sessionSampleRate;
     [Export ("sessionSampleRate")]
     float SessionSampleRate { get; set; }
@@ -298,10 +307,6 @@ interface SentryReplayOptions //: ISentryRedactOptions
     // @property (readonly, nonatomic) NSTimeInterval maximumDuration;
     [Export ("maximumDuration")]
     double MaximumDuration { get; }
-    // -(instancetype _Nonnull)initWithSessionSampleRate:(float)sessionSampleRate onErrorSampleRate:(float)onErrorSampleRate maskAllText:(BOOL)maskAllText maskAllImages:(BOOL)maskAllImages __attribute__((objc_designated_initializer));
-    [Export ("initWithSessionSampleRate:onErrorSampleRate:maskAllText:maskAllImages:")]
-    [DesignatedInitializer]
-    NativeHandle Constructor (float sessionSampleRate, float onErrorSampleRate, bool maskAllText, bool maskAllImages);
     // -(instancetype _Nonnull)initWithDictionary:(NSDictionary<NSString *,id> * _Nonnull)dictionary;
     [Export ("initWithDictionary:")]
     NativeHandle Constructor (NSDictionary<NSString, NSObject> dictionary);
