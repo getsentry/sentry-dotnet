@@ -7,6 +7,7 @@
 - `BreadcrumbLevel.Critical` has been renamed to `BreadcrumbLevel.Fatal` for consistency with the other Sentry SDKs ([#4605](https://github.com/getsentry/sentry-dotnet/pull/4605))
 - SentryOptions.IsEnvironmentUser now defaults to false on MAUI. The means the User.Name will no longer be set, by default, to the name of the device ([#4606](https://github.com/getsentry/sentry-dotnet/pull/4606))
 - Remove unnecessary files from SentryCocoaFramework before packing ([#4602](https://github.com/getsentry/sentry-dotnet/pull/4602))
+- CaptureFeedback now returns a `SentryId` and a `CaptureFeedbackResult` out parameter that indicate whether feedback was captured successfully and what the reason for failure was otherwise ([#4613](https://github.com/getsentry/sentry-dotnet/pull/4613))
 - Removed obsolete APIs ([#4619](https://github.com/getsentry/sentry-dotnet/pull/4619))
   - Removed the unusual constructor from `Sentry.Maui.BreadcrumbEvent` that had been marked as obsolete. That constructor expected a `IEnumerable<(string Key, string Value)>[]` argument (i.e. an array of IEnumerable of tuples). If you were using this constructor, you should instead use the alternate constructor that expects just an IEnumerable of tuples: `IEnumerable<(string Key, string Value)>`.
   - Removed `SentrySdk.CaptureUserFeedback` and all associated members. Use the newer `SentrySdk.CaptureFeedback` instead.

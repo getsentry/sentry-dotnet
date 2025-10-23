@@ -602,11 +602,13 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result,
+        Action<Scope> configureScope, SentryHint? hint = null)
     {
         if (!IsEnabled)
         {
-            return;
+            result = CaptureFeedbackResult.DisabledHub;
+            return SentryId.Empty;
         }
 
         try
@@ -614,19 +616,23 @@ internal class Hub : IHub, IDisposable
             var clonedScope = CurrentScope.Clone();
             configureScope(clonedScope);
 
-            CaptureFeedback(feedback, clonedScope, hint);
+            return CaptureFeedback(feedback, out result, clonedScope, hint);
         }
         catch (Exception e)
         {
             _options.LogError(e, "Failure to capture feedback");
+            result = CaptureFeedbackResult.UnknownError;
+            return SentryId.Empty;
         }
     }
 
-    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result, Scope? scope = null,
+        SentryHint? hint = null)
     {
         if (!IsEnabled)
         {
-            return;
+            result = CaptureFeedbackResult.DisabledHub;
+            return SentryId.Empty;
         }
 
         try
@@ -638,11 +644,13 @@ internal class Hub : IHub, IDisposable
             }
 
             scope ??= CurrentScope;
-            CurrentClient.CaptureFeedback(feedback, scope, hint);
+            return CurrentClient.CaptureFeedback(feedback, out result, scope, hint);
         }
         catch (Exception e)
         {
             _options.LogError(e, "Failure to capture feedback");
+            result = CaptureFeedbackResult.UnknownError;
+            return SentryId.Empty;
         }
     }
 
@@ -854,7 +862,8 @@ internal class Hub : IHub, IDisposable
         }
         //Don't dispose of ScopeManager since we want dangling transactions to still be able to access tags.
 
-        _backpressureMonitor?.Dispose();
+        // Don't dispose of _backpressureMonitor since we want the client to continue to process envelopes without
+        // throwing an ObjectDisposedException.
 
 #if __IOS__
             // TODO
