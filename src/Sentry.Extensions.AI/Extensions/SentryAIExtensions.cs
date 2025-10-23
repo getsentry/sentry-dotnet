@@ -27,7 +27,7 @@ public static class SentryAIExtensions
             var tool = options.Tools[i];
             if (tool is AIFunction fn and not SentryInstrumentedFunction)
             {
-                options.Tools[i] = new SentryInstrumentedFunction(fn);
+                options.Tools[i] = new SentryInstrumentedFunction(fn, options);
             }
         }
 
