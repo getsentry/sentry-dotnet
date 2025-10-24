@@ -104,6 +104,39 @@ public partial class MainExceptionProcessorTests
     }
 
     [Fact]
+    public void Process_ExceptionWith_TerminalTrue_StoresInMechanismData()
+    {
+        var sut = _fixture.GetSut();
+        var evt = new SentryEvent();
+        var exp = new Exception();
+
+        exp.SetSentryMechanism("TestException", terminal: true);
+
+        sut.Process(exp, evt);
+
+        Assert.NotNull(evt.SentryExceptions);
+        var sentryException = evt.SentryExceptions.Single();
+        Assert.NotNull(sentryException.Mechanism?.Terminal);
+        Assert.True(sentryException.Mechanism?.Terminal);
+    }
+
+    [Fact]
+    public void Process_ExceptionWith_TerminalFalse_StoresInMechanismData()
+    {
+        var sut = _fixture.GetSut();
+        var evt = new SentryEvent();
+        var exp = new Exception();
+
+        exp.SetSentryMechanism("TestException", terminal: false);
+
+        sut.Process(exp, evt);
+
+        Assert.NotNull(evt.SentryExceptions);
+        var sentryException = evt.SentryExceptions.Single();
+        Assert.False(sentryException.Mechanism?.Terminal);
+    }
+
+    [Fact]
     public void CreateSentryException_DataHasObjectAsKey_ItemIgnored()
     {
         var sut = _fixture.GetSut();
