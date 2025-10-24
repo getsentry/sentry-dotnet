@@ -1649,7 +1649,7 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
-    public void CaptureEvent_ActiveSessionAndNonTerminalUnhandledException_SessionEndedAsUnhandled()
+    public void CaptureEvent_ActiveSessionAndNonTerminalUnhandledException_SessionMarkedAsUnhandled()
     {
         // Arrange
         var client = _fixture.GetSut();
@@ -1660,6 +1660,6 @@ public partial class SentryClientTests : IDisposable
         client.CaptureEvent(new SentryEvent(exception));
 
         // Assert
-        _fixture.SessionManager.Received().EndSession(SessionEndStatus.Unhandled);
+        _fixture.SessionManager.Received().MarkSessionAsUnhandled();
     }
 }
