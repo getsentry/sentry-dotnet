@@ -60,6 +60,11 @@ public interface IHub : ISentryClient, ISentryScopeManager
     public BaggageHeader? GetBaggage();
 
     /// <summary>
+    /// Gets the W3C Trace Context traceparent header that allows tracing across services
+    /// </summary>
+    public W3CTraceparentHeader? GetTraceparentHeader();
+
+    /// <summary>
     /// Continues a trace based on HTTP header values provided as strings.
     /// </summary>
     /// <remarks>

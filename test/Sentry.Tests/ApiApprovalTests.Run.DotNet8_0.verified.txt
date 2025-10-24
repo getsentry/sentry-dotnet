@@ -198,6 +198,7 @@ namespace Sentry
         Sentry.BaggageHeader? GetBaggage();
         Sentry.ISpan? GetSpan();
         Sentry.SentryTraceHeader? GetTraceHeader();
+        Sentry.W3CTraceparentHeader? GetTraceparentHeader();
         void PauseSession();
         void ResumeSession();
         void StartSession();
@@ -718,6 +719,7 @@ namespace Sentry
         public int MaxQueueItems { get; set; }
         public Sentry.Extensibility.INetworkStatusListener? NetworkStatusListener { get; set; }
         public double? ProfilesSampleRate { get; set; }
+        public bool PropagateTraceparent { get; set; }
         public string? Release { get; set; }
         public Sentry.ReportAssembliesMode ReportAssembliesMode { get; set; }
         public bool RequestBodyCompressionBuffered { get; set; }
@@ -789,7 +791,7 @@ namespace Sentry
         public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryTransaction?> beforeSendTransaction) { }
         public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryHint, Sentry.SentryTransaction?> beforeSendTransaction) { }
         public Sentry.SentryOptions UseStackTraceFactory(Sentry.Extensibility.ISentryStackTraceFactory sentryStackTraceFactory) { }
-        public sealed class SentryExperimentalOptions
+        public class SentryExperimentalOptions
         {
             public bool EnableLogs { get; set; }
             public void SetBeforeSendLog(System.Func<Sentry.SentryLog, Sentry.SentryLog?> beforeSendLog) { }
@@ -864,6 +866,7 @@ namespace Sentry
         public static Sentry.BaggageHeader? GetBaggage() { }
         public static Sentry.ISpan? GetSpan() { }
         public static Sentry.SentryTraceHeader? GetTraceHeader() { }
+        public static Sentry.W3CTraceparentHeader? GetTraceparentHeader() { }
         public static Sentry.ITransactionTracer? GetTransaction() { }
         public static System.IDisposable Init() { }
         public static System.IDisposable Init(Sentry.SentryOptions options) { }
@@ -1299,6 +1302,14 @@ namespace Sentry
         protected abstract void WriteAdditionalProperties(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger);
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
     }
+    public class W3CTraceparentHeader
+    {
+        public W3CTraceparentHeader(Sentry.SentryId traceId, Sentry.SpanId spanId, bool? isSampled) { }
+        public bool? IsSampled { get; }
+        public Sentry.SpanId SpanId { get; }
+        public Sentry.SentryId TraceId { get; }
+        public override string ToString() { }
+    }
 }
 namespace Sentry.Ben.BlockingDetector
 {
@@ -1385,6 +1396,7 @@ namespace Sentry.Extensibility
         public Sentry.BaggageHeader? GetBaggage() { }
         public Sentry.ISpan? GetSpan() { }
         public Sentry.SentryTraceHeader? GetTraceHeader() { }
+        public Sentry.W3CTraceparentHeader? GetTraceparentHeader() { }
         public void PauseSession() { }
         public System.IDisposable PushScope() { }
         public System.IDisposable PushScope<TState>(TState state) { }
@@ -1434,6 +1446,7 @@ namespace Sentry.Extensibility
         public Sentry.BaggageHeader? GetBaggage() { }
         public Sentry.ISpan? GetSpan() { }
         public Sentry.SentryTraceHeader? GetTraceHeader() { }
+        public Sentry.W3CTraceparentHeader? GetTraceparentHeader() { }
         public void PauseSession() { }
         public System.IDisposable PushScope() { }
         public System.IDisposable PushScope<TState>(TState state) { }

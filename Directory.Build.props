@@ -34,9 +34,9 @@
     <CurrentTfms>net8.0;net9.0;net10.0</CurrentTfms>
     <LatestAndroidTfm>net10.0-android36.0</LatestAndroidTfm>
     <PreviousAndroidTfm>net9.0-android35.0</PreviousAndroidTfm>
-    <LatestIosTfm>net9.0-ios26</LatestIosTfm>
+    <LatestIosTfm>net10.0-ios26</LatestIosTfm>
     <PreviousIosTfm>net9.0-ios18.0</PreviousIosTfm>
-    <LatestMacCatalystTfm>net9.0-maccatalyst26</LatestMacCatalystTfm>
+    <LatestMacCatalystTfm>net10.0-maccatalyst26</LatestMacCatalystTfm>
     <PreviousMacCatalystTfm>net9.0-maccatalyst18.0</PreviousMacCatalystTfm>
     <PreviousWindowsTfm>net9.0-windows10.0.19041.0</PreviousWindowsTfm>
   </PropertyGroup>
@@ -114,6 +114,10 @@
     <MemoryDumpSupported Condition="!($(PlatformIsLegacy) == 'true' or $(PlatformIsMobile) == 'true')">true</MemoryDumpSupported>
 
     <DefineConstants Condition="'$(MemoryDumpSupported)' == 'true'">$(DefineConstants);MEMORY_DUMP_SUPPORTED</DefineConstants>
+
+    <!-- Workaround for this issue https://github.com/dotnet/sdk/issues/51265#issuecomment-3416621522 -->
+    <RestoreEnablePackagePruning Condition="'$(PlatformIsLegacy)' == 'true' "> false</RestoreEnablePackagePruning>
+
   </PropertyGroup>
 
   <!-- Public key of .assets/Sentry.snk - not a secret.  Used by other InternalsVisibleTo entries throughout the solution. -->
