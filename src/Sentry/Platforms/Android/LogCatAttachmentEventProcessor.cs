@@ -55,7 +55,7 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
             // Only send logcat logs if the event is unhandled if the integration is set to Unhandled
             if (_logCatIntegrationType == LogCatIntegrationType.Unhandled)
             {
-                if (exceptionType != SentryEvent.ExceptionType.Unhandled)
+                if (exceptionType != SentryEvent.ExceptionType.Unhandled && exceptionType != SentryEvent.ExceptionType.UnhandledNonTerminal)
                 {
                     return @event;
                 }
