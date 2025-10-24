@@ -355,7 +355,7 @@ public class SentryClient : ISentryClient, IDisposable
                 scope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Unhandled);
                 break;
 
-            case SentryEvent.ExceptionType.Unhandled:
+            case SentryEvent.ExceptionType.UnhandledTerminal:
                 _options.LogDebug("Ending session as 'Crashed', due to unhandled exception.");
                 scope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
                 break;

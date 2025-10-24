@@ -204,7 +204,7 @@ public partial class SentryEventTests
         exception.SetSentryMechanism("AppDomain.UnhandledException", handled: false, terminal: true);
         var evt = new SentryEvent(exception);
 
-        Assert.Equal(SentryEvent.ExceptionType.Unhandled, evt.GetExceptionType());
+        Assert.Equal(SentryEvent.ExceptionType.UnhandledTerminal, evt.GetExceptionType());
     }
 
     [Fact]
@@ -215,7 +215,7 @@ public partial class SentryEventTests
             SentryExceptions = [new SentryException { Mechanism = new Mechanism { Handled = false } }]
         };
 
-        Assert.Equal(SentryEvent.ExceptionType.Unhandled, evt.GetExceptionType());
+        Assert.Equal(SentryEvent.ExceptionType.UnhandledTerminal, evt.GetExceptionType());
     }
 
     [Fact]

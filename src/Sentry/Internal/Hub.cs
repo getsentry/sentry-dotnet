@@ -585,7 +585,7 @@ internal class Hub : IHub, IDisposable
             scope.LastEventId = id;
             scope.SessionUpdate = null;
 
-            if (evt.GetExceptionType() is SentryEvent.ExceptionType.Unhandled
+            if (evt.GetExceptionType() is SentryEvent.ExceptionType.UnhandledTerminal
                 && scope.Transaction is { } transaction)
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
