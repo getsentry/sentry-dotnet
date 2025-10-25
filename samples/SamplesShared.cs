@@ -15,9 +15,9 @@ public static class SamplesShared
     /// via configuration bindings (e.g. in an app.config or an appsettings.json file).
     /// </para>
     /// </summary>
-#if !CI_BUILD
-#error Sign up for a free Sentry Account and enter your DSN here
-#endif
+// #if !CI_BUILD
+// #error Sign up for a free Sentry Account and enter your DSN here
+// #endif
     public const string Dsn = "ENTER_YOUR_DSN_HERE";
 #endif
 }

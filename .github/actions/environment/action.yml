@@ -11,13 +11,6 @@ runs:
         echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" >> $GITHUB_ENV
         echo "DOTNET_NOLOGO=1" >> $GITHUB_ENV
 
-    # Android SDK Tools are arm64-incompatible
-    # Android SDK Build Tools are musl-incompatible
-    - name: Set Environment Variables for Alpine Linux
-      if: ${{ (runner.os == 'Linux' && runner.arch == 'ARM64') || contains(matrix.container.image, 'alpine') }}
-      shell: bash
-      run: echo "NO_MOBILE=true" >> $GITHUB_ENV
-
     # Allow sudoless Docker in integration tests
     - name: Prepare Docker on Alpine Linux
       if: ${{ contains(matrix.container.image, 'alpine') }}

@@ -105,8 +105,11 @@ Describe 'MAUI (<framework>)' -ForEach @(
     @{ framework = $previousFramework }
 ) -Skip:($env:NO_MOBILE -eq "true") {
     BeforeAll {
-        RegisterLocalPackage 'Sentry.Android.AssemblyReader'
-        RegisterLocalPackage 'Sentry.Bindings.Android'
+        if ($env:NO_ANDROID -ne "true")
+        {
+            RegisterLocalPackage 'Sentry.Android.AssemblyReader'
+            RegisterLocalPackage 'Sentry.Bindings.Android'
+        }
         RegisterLocalPackage 'Sentry.Extensions.Logging'
         RegisterLocalPackage 'Sentry.Maui'
         if ($IsMacOS)
