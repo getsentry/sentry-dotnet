@@ -12,7 +12,7 @@ on:
 
 jobs:
   build-sentry-native:
-    name: sentry-native (${{ matrix.rid }})
+    name: Native (${{ matrix.rid }})
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
     strategy:
@@ -70,7 +70,7 @@ jobs:
 
   build-sentry:
     needs: build-sentry-native
-    name: .NET (${{ matrix.rid }})
+    name: .NET (${{ matrix.alias || matrix.rid }})
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
 
@@ -84,6 +84,9 @@ jobs:
           - os: ubuntu-22.04-arm
             rid: linux-arm64
             slnf: Sentry-CI-Build-Linux-NoMobile.slnf
+            env:
+              # Android SDK Tools are arm64-incompatible
+              NO_MOBILE: true
           - os: ubuntu-latest
             rid: linux-musl-x64
             slnf: Sentry-CI-Build-Linux-NoMobile.slnf
@@ -91,6 +94,10 @@ jobs:
               image: ghcr.io/getsentry/sentry-dotnet-alpine:3.21
               volumes:
                 - /var/run/docker.sock:/var/run/docker.sock
+            env:
+              ContainerBaseImage: 'mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-alpine3.22'
+              # Android SDK Build Tools are musl-incompatible
+              NO_MOBILE: true
           - os: ubuntu-24.04-arm
             rid: linux-musl-arm64
             slnf: Sentry-CI-Build-Linux-NoMobile.slnf
@@ -100,15 +107,62 @@ jobs:
                 - /tmp/node20:/__e/node20
                 - /tmp/node24:/__e/node24
                 - /var/run/docker.sock:/var/run/docker.sock
+            env:
+              ContainerBaseImage: 'mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-alpine3.22'
+              # Android SDK Build Tools are musl-incompatible
+              NO_MOBILE: true
           - os: macos-15 # Pin macos to get the version of Xcode that we need: https://github.com/actions/runner-images/issues/10703
+            alias: macios
             rid: macos # universal (osx-arm64 + osx-x64)
             slnf: Sentry-CI-Build-macOS.slnf
+            env:
+              # We use macOS for the final publishing build so we get all the iOS/macCatalyst targets in the packages
+              CI_PUBLISHING_BUILD: true
           - os: windows-latest
             rid: win-x64
             slnf: Sentry-CI-Build-Windows.slnf
           - os: windows-11-arm
             rid: win-arm64
             slnf: Sentry-CI-Build-Windows-arm64.slnf
+          - os: macos-15
+            rid: macos
+            slnf: SentryNoMobile.slnf
+            env:
+              NO_MOBILE: true
+          - os: macos-15
+            alias: ios
+            rid: macos
+            slnf: SentryMobile-iOS.slnf
+            integration-test: integration-test/maui.Tests.ps1
+            env:
+              NO_ANDROID: true
+              NO_MACCATALYST: true
+              NO_WINDOWS: true
+          - os: macos-15
+            alias: maccatalyst
+            rid: macos
+            slnf: SentryMobile-MacCatalyst.slnf
+            integration-test: integration-test/maui.Tests.ps1
+            env:
+              NO_ANDROID: true
+              NO_IOS: true
+              NO_WINDOWS: true
+          - os: ubuntu-22.04
+            alias: android
+            rid: linux-x64
+            slnf: SentryMobile-Android.slnf
+            integration-test: integration-test/maui.Tests.ps1
+            env:
+              NO_IOS: true
+              NO_MACCATALYST: true
+              NO_WINDOWS: true
+    env:
+      CI_PUBLISHING_BUILD: ${{ matrix.env.CI_PUBLISHING_BUILD }}
+      NO_MOBILE: ${{ matrix.env.NO_MOBILE }}
+      NO_ANDROID: ${{ matrix.env.NO_ANDROID || matrix.env.NO_MOBILE }}
+      NO_IOS: ${{ matrix.env.NO_IOS || matrix.env.NO_MOBILE }}
+      NO_MACCATALYST: ${{ matrix.env.NO_MACCATALYST || matrix.env.NO_MOBILE }}
+      NO_WINDOWS: ${{ matrix.env.NO_WINDOWS || matrix.env.NO_MOBILE }}
 
     steps:
       - name: Initialize Alpine Linux
@@ -132,11 +186,6 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/environment
-
-      # We use macOS for the final publishing build so we get all the iOS/macCatalyst targets in the packages
-      - name: Set Environment Variables
-        if: runner.os == 'macOS'
-        run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
 
       - name: Download sentry-native (linux-x64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'linux-x64') }}
@@ -197,7 +246,7 @@ jobs:
           enableCrossOsArchive: true
 
       - name: Build Native Dependencies
-        if: ${{ !matrix.container }}
+        if: ${{ env.NO_ANDROID != 'true' }}
         uses: ./.github/actions/buildnative
 
       - name: Restore .NET Dependencies
@@ -211,7 +260,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ${{ matrix.rid }}-build-logs
+          name: ${{ matrix.alias || matrix.rid }}-build-logs
           path: |
             build.log
             build.binlog
@@ -229,17 +278,17 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ${{ matrix.rid }}-verify-test-results
+          name: ${{ matrix.alias || matrix.rid }}-verify-test-results
           path: "**/*.received.*"
 
       - name: Create NuGet Packages
         run: dotnet pack ${{ matrix.slnf }} -c Release --no-build --nologo
 
       - name: Archive NuGet Packages
-        if: env.CI_PUBLISHING_BUILD == 'true'
+        # if: env.CI_PUBLISHING_BUILD == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ${{ github.sha }}
+          name: ${{ matrix.alias || matrix.rid }}-${{ github.sha }}
           if-no-files-found: error
           path: |
             src/**/Release/*.nupkg
@@ -261,25 +310,18 @@ jobs:
         if: env.CI_PUBLISHING_BUILD == 'true'
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
-          name: ${{ github.sha }}
+          name: ${{ matrix.rid }}-${{ github.sha }}
           path: src
 
       - name: Integration test
-        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
         uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
-        with:
-          path: integration-test
-
-      # For the linux-musl runtimes we have to pin the ContainerBaseImage for preview or RC builds, since
-      # these don't conform to the normal naming conventions and don't get resolved automatically. We do
-      # by passing it as parameter to aot.Tests.ps1 via an environment variable
-      - name: Integration test (musl)
-        if: ${{ (matrix.rid == 'linux-musl-x64') || (matrix.rid == 'linux-musl-arm64') }}
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
         env:
-          ContainerBaseImage: 'mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-alpine3.22'
+          # For the linux-musl runtimes we have to pin the ContainerBaseImage for preview or RC builds, since
+          # these don't conform to the normal naming conventions and don't get resolved automatically. We do
+          # by passing it as parameter to aot.Tests.ps1 via an environment variable
+          ContainerBaseImage: ${{ matrix.env.ContainerBaseImage }}
         with:
-          path: integration-test
+          path: ${{ matrix.integration-test || 'integration-test' }}
 
   ms-build:
     needs: build-sentry-native

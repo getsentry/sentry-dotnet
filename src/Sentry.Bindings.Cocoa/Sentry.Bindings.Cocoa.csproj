@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk" Condition="'$(NO_IOS)' != 'true' Or '$(NO_MACCATALYST)' != 'true'">
 
   <PropertyGroup>
     <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == ''">$(PreviousIosTfm);$(PreviousMacCatalystTfm)</TargetFrameworks>

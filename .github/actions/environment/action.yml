@@ -11,13 +11,6 @@ runs:
         echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" >> $GITHUB_ENV
         echo "DOTNET_NOLOGO=1" >> $GITHUB_ENV
 
-    # Android SDK Tools are arm64-incompatible
-    # Android SDK Build Tools are musl-incompatible
-    - name: Set Environment Variables for Alpine Linux
-      if: ${{ (runner.os == 'Linux' && runner.arch == 'ARM64') || contains(matrix.container.image, 'alpine') }}
-      shell: bash
-      run: echo "NO_MOBILE=true" >> $GITHUB_ENV
-
     # Allow sudoless Docker in integration tests
     - name: Prepare Docker on Alpine Linux
       if: ${{ contains(matrix.container.image, 'alpine') }}
@@ -41,6 +34,7 @@ runs:
     # zstd is needed for cross OS actions/cache but missing from windows-11-arm
     # https://github.com/actions/partner-runner-images/issues/99
     - name: Install zstd on Windows ARM64
+      if: ${{ matrix.rid == 'win-arm64' }}
       uses: ./.github/actions/install-zstd
 
     # See https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md#xcode
@@ -52,14 +46,14 @@ runs:
 
     # Java 17 is needed for Android SDK setup step
     - name: Install Java 17
-      if: ${{ !matrix.container }}
+      if: ${{ env.NO_ANDROID != 'true' }}
       uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
       with:
         distribution: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && 'microsoft' || 'temurin' }}
         java-version: '17'
 
     - name: Setup Android SDK
-      if: ${{ !matrix.container }}
+      if: ${{ env.NO_ANDROID != 'true' }}
       uses: android-actions/setup-android@07976c6290703d34c16d382cb36445f98bb43b1f # v3.2.0
       with:
         # Exclude "tools" because the emulator is not needed (nor available for Windows/Linux ARM64)
@@ -68,7 +62,7 @@ runs:
 
     # Java 11 is needed by .NET Android
     - name: Install Java 11
-      if: ${{ !matrix.container }}
+      if: ${{ env.NO_ANDROID != 'true' }}
       uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
       with:
         distribution: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && 'microsoft' || 'temurin' }}

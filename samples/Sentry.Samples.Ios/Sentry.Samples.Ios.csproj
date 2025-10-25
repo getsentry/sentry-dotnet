@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk" Condition="'$(NO_IOS)' != 'true'">
 
   <PropertyGroup>
     <TargetFramework>net9.0-ios18.0</TargetFramework>
@@ -11,6 +11,10 @@
     <PublishAot>true</PublishAot>
     <!-- TODO: Remove once this issue has been addressed: https://github.com/dotnet/runtime/pull/109186 -->
     <WarningsNotAsErrors>IL3050;IL3053</WarningsNotAsErrors>
+
+    <!-- TODO: remove (temp speed up CI build) -->
+    <MtouchUseLlvm>false</MtouchUseLlvm>
+    <EnableAssemblyILStripping>false</EnableAssemblyILStripping>
   </PropertyGroup>
 
   <PropertyGroup>

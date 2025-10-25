@@ -247,6 +247,7 @@ filterConfigs:
         - "artefacts"
         - "trimTests"
         - "mobileOnly"
+        - "windowsOnly"
       patterns:
         - "**/*Bindings*.csproj"
         - "**/*Android*.csproj"
@@ -265,3 +266,69 @@ filterConfigs:
         - "**/*Bindings*"
         - "**/*DeviceTests*"
         - "**/*TestApp*"
+
+  - outputPath: SentryMobile-Android.slnf
+    include:
+      patterns:
+        - samples/**/*Android.csproj
+        - samples/**/*Maui.csproj
+        - src/**/Sentry.csproj
+        - src/**/Sentry.Analyzers.csproj
+        - src/**/Sentry.SourceGenerators.csproj
+        - src/**/*Android*.csproj
+        - src/**/*Bindings.Android.csproj
+        - src/**/Sentry.Extensions.Logging.csproj
+        - src/**/Sentry.Maui.csproj
+        - src/**/Sentry.Maui.CommunityToolkit.Mvvm.csproj
+        - test/**/Sentry.Testing.CrashableApp.csproj
+        - test/**/Sentry.Android.AssemblyReader.Tests.csproj
+        - test/**/Sentry.Extensions.Logging.Tests.csproj
+        - test/**/Sentry.Testing.CrashableApp.csproj
+        - test/**/Sentry.Maui.Tests.csproj
+        - test/**/Sentry.Testing.csproj
+        - test/**/Sentry.Tests.csproj
+        - src/**/Sentry.Analyzers.Tests.csproj
+    exclude:
+      patterns:
+        - test/**/Sentry.Maui.Device.TestApp.csproj
+
+  - outputPath: SentryMobile-iOS.slnf
+    include:
+      patterns:
+        - samples/**/*Ios.csproj
+        - samples/**/*Maui.csproj
+        - src/**/Sentry.csproj
+        - src/**/Sentry.Analyzers.csproj
+        - src/**/Sentry.SourceGenerators.csproj
+        - src/**/*Bindings.Cocoa.csproj
+        - src/**/Sentry.Extensions.Logging.csproj
+        - src/**/Sentry.Maui.csproj
+        - src/**/Sentry.Maui.CommunityToolkit.Mvvm.csproj
+        - test/**/Sentry.Testing.CrashableApp.csproj
+        - test/**/Sentry.Extensions.Logging.Tests.csproj
+        - test/**/Sentry.Maui.Device.TestApp.csproj
+        - test/**/Sentry.Testing.CrashableApp.csproj
+        - test/**/Sentry.Maui.Tests.csproj
+        - test/**/Sentry.Testing.csproj
+        - test/**/Sentry.Tests.csproj
+        - src/**/Sentry.Analyzers.Tests.csproj
+
+  - outputPath: SentryMobile-MacCatalyst.slnf
+    include:
+      patterns:
+        - samples/**/*MacCatalyst.csproj
+        - samples/**/*Maui.csproj
+        - src/**/Sentry.csproj
+        - src/**/Sentry.Analyzers.csproj
+        - src/**/Sentry.SourceGenerators.csproj
+        - src/**/*Bindings.Cocoa.csproj
+        - src/**/Sentry.Extensions.Logging.csproj
+        - src/**/Sentry.Maui.csproj
+        - src/**/Sentry.Maui.CommunityToolkit.Mvvm.csproj
+        - test/**/Sentry.Testing.CrashableApp.csproj
+        - test/**/Sentry.Extensions.Logging.Tests.csproj
+        - test/**/Sentry.Testing.CrashableApp.csproj
+        - test/**/Sentry.Maui.Tests.csproj
+        - test/**/Sentry.Testing.csproj
+        - test/**/Sentry.Tests.csproj
+        - src/**/Sentry.Analyzers.Tests.csproj

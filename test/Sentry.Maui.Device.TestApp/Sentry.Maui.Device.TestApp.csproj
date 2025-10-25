@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(TargetFrameworks);net9.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net9.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_ANDROID)' != 'true'">$(TargetFrameworks);net9.0-android</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX')) And '$(NO_IOS)' != 'true'">$(TargetFrameworks);net9.0-ios</TargetFrameworks>
+    <TargetFramework Condition="'$(TargetFrameworks)' == ''">net9.0-android</TargetFramework>
     <DefineConstants Condition="'$(EnableMauiDeviceTestVisualRunner)' == 'true'">$(DefineConstants);VISUAL_RUNNER</DefineConstants>
   </PropertyGroup>
 

@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(TargetFrameworks);net9.0-android35.0</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net9.0-ios18.0</TargetFrameworks>
-
+    <TargetFrameworks Condition="'$(NO_ANDROID)' != 'true'">$(TargetFrameworks);net9.0-android35.0</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX')) And '$(NO_IOS)' != 'true'">$(TargetFrameworks);net9.0-ios18.0</TargetFrameworks>
+    <TargetFramework Condition="'$(TargetFrameworks)' == ''">net9.0-android35</TargetFramework>
     <OutputType>Exe</OutputType>
     <RootNamespace>Sentry.Maui.Device.IntegrationTestApp</RootNamespace>
     <UseMaui>true</UseMaui>

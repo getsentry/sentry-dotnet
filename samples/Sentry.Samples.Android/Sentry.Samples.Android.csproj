@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk" Condition="'$(NO_ANDROID)' != 'true'">
   <PropertyGroup>
     <TargetFramework>net9.0-android35.0</TargetFramework>
     <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>

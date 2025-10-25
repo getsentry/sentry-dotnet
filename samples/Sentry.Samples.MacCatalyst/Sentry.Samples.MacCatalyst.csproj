@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk" Condition="'$(NO_MACCATALYST)' != 'true'">
 
   <PropertyGroup>
     <TargetFramework>net9.0-maccatalyst18.0</TargetFramework>
