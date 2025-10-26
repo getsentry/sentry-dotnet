@@ -78,7 +78,6 @@ internal sealed class SentryChatClient : DelegatingChatClient
 
             try
             {
-                SentryAISpanEnricher.EnrichWithRequest(innerSpan, chatMessages, options, _sentryAIOptions);
                 var hasNext = await enumerator.MoveNextAsync().ConfigureAwait(false);
                 if (!hasNext)
                 {
