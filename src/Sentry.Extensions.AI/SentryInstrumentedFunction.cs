@@ -14,8 +14,9 @@ internal sealed class SentryInstrumentedFunction(AIFunction innerFunction, ChatO
     {
         const string operation = "gen_ai.execute_tool";
         var spanName = $"execute_tool {Name}";
-        var parentSpan = _hub.GetSpan();
-        var currSpan = parentSpan?.StartChild(operation, spanName) ?? _hub.StartTransaction(spanName, operation);
+        var currSpan = SentryChatClient.RootSpan == null ?
+            _hub.StartSpan(operation, spanName) :
+            SentryChatClient.RootSpan.StartChild(operation, spanName);
 
         currSpan.SetData("gen_ai.request.model", aiOptions?.ModelId);
 

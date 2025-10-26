@@ -26,7 +26,7 @@ public class SentryAISpanEnricherTests
     }
 
     [Fact]
-    public void EnrichWithRequest_SetsModelId_WhenProvided()
+    public void EnrichWithRequest_SetsModel_WhenProvided()
     {
         var messages = new[] { new ChatMessage(ChatRole.User, "Hello") };
         var options = new ChatOptions { ModelId = "gpt-4" };
@@ -37,13 +37,13 @@ public class SentryAISpanEnricherTests
     }
 
     [Fact]
-    public void EnrichWithRequest_SetsUnknownModel_WhenModelIdNotProvided()
+    public void EnrichWithRequest_DoesntSetModel_WhenModelIdNotProvided()
     {
         var messages = new[] { new ChatMessage(ChatRole.User, "Hello") };
 
         SentryAISpanEnricher.EnrichWithRequest(_mockSpan, messages, null);
 
-        _mockSpan.Received(1).SetData("gen_ai.request.model", "Unknown model");
+        _mockSpan.DidNotReceive().SetData("gen_ai.request.model", Arg.Any<object>());
     }
 
     [Fact]
@@ -247,7 +247,7 @@ public class SentryAISpanEnricherTests
 
         SentryAISpanEnricher.EnrichWithResponse(_mockSpan, response);
 
-        _mockSpan.Received(1).SetData("gen_ai.response.model_id", "gpt-4-turbo");
+        _mockSpan.Received().SetData("gen_ai.response.model", "gpt-4-turbo");
     }
 
     [Fact]
