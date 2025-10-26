@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add support for `Microsoft.Extensions.AI` instrumentation ([#4657](https://github.com/getsentry/sentry-dotnet/pull/4657))
+
 ### Dependencies
 
 - Bump Java SDK from v8.22.0 to v8.23.0 ([#4586](https://github.com/getsentry/sentry-dotnet/pull/4586))
