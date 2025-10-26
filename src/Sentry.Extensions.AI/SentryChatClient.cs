@@ -7,7 +7,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
 {
     private readonly HubAdapter _hub;
     private readonly SentryAIOptions _sentryAIOptions;
-    private static ISpan? RootSpan;
+    internal static ISpan? RootSpan;
 
     public SentryChatClient(IChatClient client, Action<SentryAIOptions>? configure = null) : base(client)
     {
@@ -16,8 +16,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
 
         if (_sentryAIOptions.InitializeSdk && !SentrySdk.IsEnabled)
         {
-            var hub = SentrySdk.InitHub(_sentryAIOptions);
-            SentrySdk.UseHub(hub);
+            SentrySdk.Init(_sentryAIOptions);
         }
 
         _hub = HubAdapter.Instance;
@@ -111,41 +110,16 @@ internal sealed class SentryChatClient : DelegatingChatClient
         }
     }
 
-    /// <summary>
-    /// Starts a span or transaction based on whether there's an active transaction context.
-    /// </summary>
-    /// <param name="operation">The operation name</param>
-    /// <param name="description">The span/transaction description</param>
-    /// <returns>A child span of an existing transaction if available, else a new transaction</returns>
-    private ISpan StartSpanOrTransaction(string operation, string description)
-    {
-        var currentSpan = _hub.GetSpan();
-
-        if (currentSpan?.GetTransaction() != null)
-        {
-            return currentSpan.StartChild(operation, description);
-        }
-
-        var newTransaction = _hub.StartTransaction(description, operation);
-        _hub.ConfigureScope(scope => scope.Transaction = newTransaction);
-        return newTransaction;
-    }
-
-    private static bool ContainsFunctionCalls(ChatResponse response) =>
-        response.Messages.Any(m => m.Contents?.OfType<FunctionCallContent>().Any() ?? false)
-        || response.FinishReason == ChatFinishReason.ToolCalls;
-
-    private static bool ContainsFunctionCalls(List<ChatResponseUpdate> responses) =>
-        responses.Any(m => m.Contents?.OfType<FunctionCallContent>().Any() ?? false)
-        || responses.Any(m => m.FinishReason == ChatFinishReason.ToolCalls);
-
     private ISpan EnsureRootSpanExists()
     {
-        var invokeSpanName = $"invoke_agent {InnerClient.GetType().Name}";
-        const string invokeOperation = "gen_ai.invoke_agent";
-        RootSpan ??= StartSpanOrTransaction(invokeOperation, invokeSpanName);
-        // In ME.AI, there's not really an agent name. In other SDKs we set this, so we should do so here
-        RootSpan.SetData("gen_ai.agent.name", $"{InnerClient.GetType().Name}");
+        if (RootSpan == null)
+        {
+            var invokeSpanName = $"invoke_agent {InnerClient.GetType().Name}";
+            const string invokeOperation = "gen_ai.invoke_agent";
+            RootSpan = _hub.StartSpan(invokeOperation, invokeSpanName);
+            RootSpan.SetData("gen_ai.agent.name", $"{InnerClient.GetType().Name}");
+        }
+
         return RootSpan;
     }
 
@@ -157,4 +131,12 @@ internal sealed class SentryChatClient : DelegatingChatClient
             : $"chat {options.ModelId}";
         return outerSpan.StartChild(chatOperation, chatSpanName);
     }
+
+    private static bool ContainsFunctionCalls(ChatResponse response) =>
+        response.Messages.Any(m => m.Contents?.OfType<FunctionCallContent>().Any() ?? false)
+        || response.FinishReason == ChatFinishReason.ToolCalls;
+
+    private static bool ContainsFunctionCalls(List<ChatResponseUpdate> responses) =>
+        responses.Any(m => m.Contents?.OfType<FunctionCallContent>().Any() ?? false)
+        || responses.Any(m => m.FinishReason == ChatFinishReason.ToolCalls);
 }

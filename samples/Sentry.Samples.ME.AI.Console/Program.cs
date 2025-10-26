@@ -35,6 +35,10 @@ var client = new ChatClientBuilder(openAIClient)
 
 logger.LogInformation("Making AI call with Sentry instrumentation and tools...");
 
+// This starts a new transaction and attaches it to the scope.
+var transaction = SentrySdk.StartTransaction("Program Main", "function");
+SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
+
 var options = new ChatOptions
 {
     ModelId = "gpt-4o-mini",
@@ -108,6 +112,8 @@ Console.WriteLine(); // New line after streaming
 logger.LogInformation("Streaming Response completed: {StreamingText}", string.Concat(streamingResponse));
 
 logger.LogInformation("Microsoft.Extensions.AI sample completed! Check your Sentry dashboard for the trace data.");
+
+transaction.Finish();
 
 // Flush Sentry to ensure all transactions are sent before the app exits
 await SentrySdk.FlushAsync(TimeSpan.FromSeconds(2));
