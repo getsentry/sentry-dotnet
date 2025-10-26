@@ -28,7 +28,7 @@ internal static class SentryAISpanEnricher
 
         if (aiOptions?.AgentName is { } agentName)
         {
-             span.SetData("gen_ai.agent.name", agentName);
+            span.SetData("gen_ai.agent.name", agentName);
         }
 
         if (messages is { Length: > 0 } && (aiOptions?.IncludeAIRequestMessages ?? true))
