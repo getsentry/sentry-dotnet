@@ -3,7 +3,7 @@ using Sentry.Extensibility;
 
 namespace Sentry.Extensions.AI;
 
-internal sealed class SentryInstrumentedFunction(AIFunction innerFunction, ChatOptions? aiOptions = null)
+internal sealed class SentryInstrumentedFunction(AIFunction innerFunction, ChatOptions? options = null)
     : DelegatingAIFunction(innerFunction)
 {
     private readonly HubAdapter _hub = HubAdapter.Instance;
@@ -18,7 +18,7 @@ internal sealed class SentryInstrumentedFunction(AIFunction innerFunction, ChatO
             _hub.StartSpan(operation, spanName) :
             SentryChatClient.RootSpan.StartChild(operation, spanName);
 
-        currSpan.SetData("gen_ai.request.model", aiOptions?.ModelId);
+        currSpan.SetData("gen_ai.request.model", options?.ModelId);
 
         currSpan.SetData("gen_ai.operation.name", "execute_tool");
         currSpan.SetData("gen_ai.tool.name", Name);
