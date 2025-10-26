@@ -2,7 +2,7 @@ using Sentry.PlatformAbstractions;
 
 namespace Sentry.Tests.Internals;
 
-public class AgggregateExceptionTests
+public class AggregateExceptionTests
 {
     private static readonly string DefaultAggregateExceptionMessage = new AggregateException().Message;
 

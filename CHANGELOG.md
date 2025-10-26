@@ -6,6 +6,25 @@
 
 - Add support for `Microsoft.Extensions.AI` instrumentation ([#4657](https://github.com/getsentry/sentry-dotnet/pull/4657))
 
+### Fixes
+
+- Do not allow multiple `sentry.proguard-uuid` metadata to be set in Android manifest ([#4647](https://github.com/getsentry/sentry-dotnet/pull/4647))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.56.2 to v8.57.0 ([#4637](https://github.com/getsentry/sentry-dotnet/pull/4637))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8570)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.56.2...8.57.0)
+- Bump Native SDK from v0.11.2 to v0.11.3 ([#4636](https://github.com/getsentry/sentry-dotnet/pull/4636))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0113)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.11.2...0.11.3)
+
+## 5.16.1
+
+### Fixes
+
+- Structured Logs now have a `sentry.origin` attribute to so it's clearer where these come from ([#4566](https://github.com/getsentry/sentry-dotnet/pull/4566))
+
 ### Dependencies
 
 - Bump Java SDK from v8.22.0 to v8.23.0 ([#4586](https://github.com/getsentry/sentry-dotnet/pull/4586))
@@ -14,6 +33,9 @@
 - Bump Native SDK from v0.11.1 to v0.11.2 ([#4590](https://github.com/getsentry/sentry-dotnet/pull/4590))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0112)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.11.1...0.11.2)
+- Bump CLI from v2.56.0 to v2.56.1 ([#4625](https://github.com/getsentry/sentry-dotnet/pull/4625))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2561)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.56.0...2.56.1)
 
 ## 5.16.0
 
