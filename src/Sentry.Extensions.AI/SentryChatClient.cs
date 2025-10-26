@@ -71,6 +71,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
         var enumerator = base
             .GetStreamingResponseAsync(chatMessages, options, cancellationToken)
             .GetAsyncEnumerator(cancellationToken);
+        SentryAISpanEnricher.EnrichWithRequest(innerSpan, chatMessages, options, _sentryAIOptions);
 
         while (true)
         {
