@@ -16,6 +16,7 @@
 ### Features
 
 - Outbound HTTP requests now show in the Network tab for Android Session Replays ([#4860](https://github.com/getsentry/sentry-dotnet/pull/4860))
+- Allow configuring native signal handler strategy on Android ([#4676](https://github.com/getsentry/sentry-dotnet/pull/4676))
 
 ### Fixes
 

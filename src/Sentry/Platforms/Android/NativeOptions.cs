@@ -1,3 +1,5 @@
+using Sentry.Android;
+
 // ReSharper disable once CheckNamespace
 namespace Sentry;
 
@@ -151,6 +153,19 @@ public partial class SentryOptions
         /// See https://docs.sentry.io/platforms/android/performance/instrumentation/automatic-instrumentation/#user-interaction-instrumentation
         /// </remarks>
         public bool EnableUserInteractionTracing { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the strategy for how Sentry Native's signal handler interacts with the CLR/Mono
+        /// signal handler.
+        /// The default value is <c>SignalHandlerStrategy.Default</c> (enabled).
+        /// </summary>
+        /// <remarks>
+        /// When set to <see cref="Android.SignalHandlerStrategy.ChainAtStart"/>, .NET runtimes
+        /// 10.0.100–10.0.301 shipped in .NET SDKs 10.0.0–10.0.3 will crash. The issue was fixed in
+        /// <see href="https://github.com/dotnet/runtime/pull/123346">dotnet/runtime#123346</see>,
+        /// which shipped as .NET runtime 10.0.400 in .NET SDK 10.0.4.
+        /// </remarks>
+        public SignalHandlerStrategy SignalHandlerStrategy { get; set; } = SignalHandlerStrategy.Default;
 
         // ---------- From SentryOptions.java ----------
 
