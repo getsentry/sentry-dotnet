@@ -7,8 +7,15 @@ var logger = loggerFactory.CreateLogger<Program>();
 
 logger.LogInformation("Starting Microsoft.Extensions.AI sample with Sentry instrumentation");
 
+const string varName = "OPENAI_API_KEY";
+var openAiApiKey = Environment.GetEnvironmentVariable(varName);
+if (openAiApiKey == null)
+{
+    throw new InvalidOperationException($"Environment variable for OpenAI API key '{varName}' is not set.");
+}
+
 // Create OpenAI API client and wrap it with Sentry instrumentation
-var openAIClient = new OpenAI.Chat.ChatClient("gpt-4o-mini", Environment.GetEnvironmentVariable("OPENAI_API_KEY"))
+var openAiClient = new OpenAI.Chat.ChatClient("gpt-4o-mini", openAiApiKey)
     .AsIChatClient()
     .WithSentry(options =>
     {
@@ -29,7 +36,7 @@ var openAIClient = new OpenAI.Chat.ChatClient("gpt-4o-mini", Environment.GetEnvi
         options.InitializeSdk = true;
     });
 
-var client = new ChatClientBuilder(openAIClient)
+var client = new ChatClientBuilder(openAiClient)
     .UseFunctionInvocation()
     .Build();
 

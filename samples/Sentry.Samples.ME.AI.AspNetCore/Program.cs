@@ -1,3 +1,4 @@
+#nullable enable
 using Microsoft.Extensions.AI;
 using Sentry.Extensions.AI;
 
@@ -18,7 +19,16 @@ builder.WebHost.UseSentry(options =>
     options.Experimental.EnableLogs = true;
 });
 
-var openAIClient = new OpenAI.Chat.ChatClient("gpt-4o-mini", Environment.GetEnvironmentVariable("OPENAI_API_KEY"))
+// This sample uses Microsoft.Extensions.AI.OpenAI
+// Check whether OPENAI_API_KEY env var exists
+const string varName = "OPENAI_API_KEY";
+var openAiApiKey = Environment.GetEnvironmentVariable(varName);
+if (openAiApiKey == null)
+{
+    throw new InvalidOperationException($"Environment variable for OpenAI API key '{varName}' is not set.");
+}
+
+var openAiClient = new OpenAI.Chat.ChatClient("gpt-4o-mini", openAiApiKey)
     .AsIChatClient()
     .WithSentry(options =>
     {
@@ -27,7 +37,7 @@ var openAIClient = new OpenAI.Chat.ChatClient("gpt-4o-mini", Environment.GetEnvi
         options.IncludeAIResponseContent = true;
     });
 
-var client = new ChatClientBuilder(openAIClient)
+var client = new ChatClientBuilder(openAiClient)
     .UseFunctionInvocation()
     .Build();
 
