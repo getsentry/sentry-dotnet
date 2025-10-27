@@ -40,7 +40,11 @@ internal sealed class SentryChatClient : DelegatingChatClient
             SentryAISpanEnricher.EnrichWithResponse(innerSpan, response, _sentryAIOptions);
             innerSpan.Finish(SpanStatus.Ok);
 
-            if (!ContainsFunctionCalls(response))
+            // Only finish the outerSpan (RootSpan) if this response's finish reason is stop (not tool calls).
+            // This allows the RootSpan to persist throughout multiple `GetResponseAsync` calls
+            // happening before and after tool calls
+            var isResponseTerminal = response.FinishReason == ChatFinishReason.Stop;
+            if (isResponseTerminal)
             {
                 outerSpan.Finish(SpanStatus.Ok);
                 RootSpan = null;
@@ -72,11 +76,10 @@ internal sealed class SentryChatClient : DelegatingChatClient
             .GetStreamingResponseAsync(chatMessages, options, cancellationToken)
             .GetAsyncEnumerator(cancellationToken);
         SentryAISpanEnricher.EnrichWithRequest(innerSpan, chatMessages, options, _sentryAIOptions);
+        ChatResponseUpdate? current = null;
 
         while (true)
         {
-            ChatResponseUpdate? current;
-
             try
             {
                 var hasNext = await enumerator.MoveNextAsync().ConfigureAwait(false);
@@ -84,10 +87,14 @@ internal sealed class SentryChatClient : DelegatingChatClient
                 {
                     SentryAISpanEnricher.EnrichWithStreamingResponse(innerSpan, responses, _sentryAIOptions);
                     innerSpan.Finish(SpanStatus.Ok);
-                    outerSpan.Finish(SpanStatus.Ok);
 
-                    if (!ContainsFunctionCalls(responses))
+                    // Only if currentFinishReason is to stop, then we finish the RootSpan and set it to null.
+                    // This allows the RootSpan to persist throughout multiple `GetStreamingResponseAsync` calls
+                    // happening before and after tool calls
+                    var shouldFinishRootSpan = current?.FinishReason == ChatFinishReason.Stop;
+                    if (shouldFinishRootSpan)
                     {
+                        outerSpan.Finish(SpanStatus.Ok);
                         RootSpan = null;
                     }
 
@@ -131,12 +138,4 @@ internal sealed class SentryChatClient : DelegatingChatClient
             : $"chat {options.ModelId}";
         return outerSpan.StartChild(chatOperation, chatSpanName);
     }
-
-    private static bool ContainsFunctionCalls(ChatResponse response) =>
-        response.Messages.Any(m => m.Contents?.OfType<FunctionCallContent>().Any() ?? false)
-        || response.FinishReason == ChatFinishReason.ToolCalls;
-
-    private static bool ContainsFunctionCalls(List<ChatResponseUpdate> responses) =>
-        responses.Any(m => m.Contents?.OfType<FunctionCallContent>().Any() ?? false)
-        || responses.Any(m => m.FinishReason == ChatFinishReason.ToolCalls);
 }
