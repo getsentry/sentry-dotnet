@@ -64,7 +64,11 @@ public static partial class SentrySdk
             o.ServerName = options.ServerName;
             o.SessionTrackingIntervalMillis = (long)options.AutoSessionTrackingInterval.TotalMilliseconds;
             o.ShutdownTimeoutMillis = (long)options.ShutdownTimeout.TotalMilliseconds;
-            o.SetNativeHandlerStrategy(JavaSdk.Android.Core.NdkHandlerStrategy.SentryHandlerStrategyDefault);
+            o.SetNativeHandlerStrategy(options.Native.SignalHandlerStrategy switch
+            {
+                SignalHandlerStrategy.ChainAtStart => NdkHandlerStrategy.SentryHandlerStrategyChainAtStart,
+                _ => NdkHandlerStrategy.SentryHandlerStrategyDefault
+            });
 
             if (options.CacheDirectoryPath is { } cacheDirectoryPath)
             {
