@@ -209,6 +209,7 @@ BeforeAll {
       <SentryUploadAndroidProguardMapping>true</SentryUploadAndroidProguardMapping>
       <AndroidLinkTool Condition=`" '`$(AndroidLinkTool)' == '' `">r8</AndroidLinkTool>
       <AndroidDexTool Condition=`" '`$(AndroidDexTool)' == '' `">d8</AndroidDexTool>
+      <MtouchUseLlvm Condition=`"'`$(Configuration)' == 'Release'`">false</MtouchUseLlvm>
   </PropertyGroup>
 </Project>
 "@ | Out-File $name/Directory.Build.props
