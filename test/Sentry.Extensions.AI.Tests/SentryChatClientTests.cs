@@ -1,6 +1,5 @@
 #nullable enable
 using Microsoft.Extensions.AI;
-using Sentry.Extensions.AI;
 
 namespace Sentry.Extensions.AI.Tests;
 
@@ -20,7 +19,8 @@ public class SentryChatClientTests
         var res = await sentryChatClient.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")], null);
 
         Assert.Equal([message], res.Messages);
-        await inner.Received(1).GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>());
+        await inner.Received(1).GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
+            Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -28,7 +28,8 @@ public class SentryChatClientTests
     {
         var inner = Substitute.For<IChatClient>();
 
-        inner.GetStreamingResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
+        inner.GetStreamingResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
+                Arg.Any<CancellationToken>())
             .Returns(CreateTestStreamingUpdatesAsync());
 
         var client = new SentryChatClient(inner);
@@ -43,7 +44,8 @@ public class SentryChatClientTests
         Assert.Equal("Hello", results[0].Text);
         Assert.Equal(" World!", results[1].Text);
 
-        inner.Received(1).GetStreamingResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>());
+        inner.Received(1).GetStreamingResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
+            Arg.Any<CancellationToken>());
     }
 
     private static async IAsyncEnumerable<ChatResponseUpdate> CreateTestStreamingUpdatesAsync()
@@ -53,5 +55,3 @@ public class SentryChatClientTests
         yield return new ChatResponseUpdate(ChatRole.System, " World!");
     }
 }
-
-
