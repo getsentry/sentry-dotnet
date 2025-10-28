@@ -67,7 +67,8 @@ public class SentryAIExtensionsTests
     {
         // Arrange
         var mockFunction = Substitute.For<AIFunction>();
-        var alreadyInstrumentedFunction = new SentryInstrumentedFunction(mockFunction);
+        var mockOption = Substitute.For<ChatOptions>();
+        var alreadyInstrumentedFunction = new SentryInstrumentedFunction(mockFunction, mockOption);
 
         var options = new ChatOptions
         {
@@ -93,7 +94,8 @@ public class SentryAIExtensionsTests
         var mockFunction2 = Substitute.For<AIFunction>();
         mockFunction2.Name.Returns("Function2");
 
-        var alreadyInstrumentedFunction = new SentryInstrumentedFunction(mockFunction1);
+        var mockOption1 = Substitute.For<ChatOptions>();
+        var alreadyInstrumentedFunction = new SentryInstrumentedFunction(mockFunction1, mockOption1);
 
         var options = new ChatOptions
         {

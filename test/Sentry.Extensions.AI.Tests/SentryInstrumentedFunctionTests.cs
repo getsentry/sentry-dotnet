@@ -14,7 +14,8 @@ public class SentryInstrumentedFunctionTests
         // Arrange
         using var sentryDisposable = SentryHelpers.InitializeSdk();
         var testFunction = AIFunctionFactory.Create(() => "test result", "TestFunction", "Test function description");
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
+        var mockOption = Substitute.For<ChatOptions>();
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, mockOption);
         var arguments = new AIFunctionArguments();
 
         // Act
@@ -41,7 +42,8 @@ public class SentryInstrumentedFunctionTests
         // Arrange
         using var sentryDisposable = SentryHelpers.InitializeSdk();
         var testFunction = AIFunctionFactory.Create(object? () => null, "TestFunction", "Test function description");
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
+        var mockOption = Substitute.For<ChatOptions>();
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, mockOption);
         var arguments = new AIFunctionArguments();
 
         // Act
@@ -66,7 +68,8 @@ public class SentryInstrumentedFunctionTests
         using var sentryDisposable = SentryHelpers.InitializeSdk();
         var jsonNullElement = JsonSerializer.Deserialize<JsonElement>("null");
         var testFunction = AIFunctionFactory.Create(() => jsonNullElement, "TestFunction", "Test function description");
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
+        var mockOption = Substitute.For<ChatOptions>();
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, mockOption);
         var arguments = new AIFunctionArguments();
 
         // Act
@@ -86,7 +89,8 @@ public class SentryInstrumentedFunctionTests
         using var sentryDisposable = SentryHelpers.InitializeSdk();
         var jsonElement = JsonSerializer.Deserialize<JsonElement>("\"test output\"");
         var testFunction = AIFunctionFactory.Create(() => jsonElement, "TestFunction", "Test function description");
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
+        var mockOption = Substitute.For<ChatOptions>();
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, mockOption);
         var arguments = new AIFunctionArguments();
 
         // Act
@@ -109,7 +113,8 @@ public class SentryInstrumentedFunctionTests
         using var sentryDisposable = SentryHelpers.InitializeSdk();
         var resultObject = new { message = "test", count = 42 };
         var testFunction = AIFunctionFactory.Create(() => resultObject, "TestFunction", "Test function description");
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
+        var mockOption = Substitute.For<ChatOptions>();
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, mockOption);
         var arguments = new AIFunctionArguments();
 
         // Act
@@ -138,7 +143,8 @@ public class SentryInstrumentedFunctionTests
         using var sentryDisposable = SentryHelpers.InitializeSdk();
         var expectedException = new InvalidOperationException("Test exception");
         var testFunction = AIFunctionFactory.Create(new Func<object>(() => throw expectedException), "TestFunction", "Test function description");
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
+        var mockOption = Substitute.For<ChatOptions>();
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, mockOption);
         var arguments = new AIFunctionArguments();
 
         // Act & Assert
@@ -159,7 +165,8 @@ public class SentryInstrumentedFunctionTests
             return "result";
         }, "TestFunction", "Test function description");
 
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
+        var mockOption = Substitute.For<ChatOptions>();
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, mockOption);
         var arguments = new AIFunctionArguments();
         var cts = new CancellationTokenSource();
         cts.Cancel();
@@ -181,7 +188,8 @@ public class SentryInstrumentedFunctionTests
             return "result";
         }, "TestFunction", "Test function description");
 
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
+        var mockOption = Substitute.For<ChatOptions>();
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, mockOption);
         var arguments = new AIFunctionArguments { ["param1"] = "value1" };
 
         // Act
@@ -199,7 +207,8 @@ public class SentryInstrumentedFunctionTests
         var testFunction = AIFunctionFactory.Create(() => "test", "TestFunction", "Test function description");
 
         // Act
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
+        var mockOption = Substitute.For<ChatOptions>();
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, mockOption);
 
         // Assert
         Assert.Equal("TestFunction", sentryFunction.Name);
