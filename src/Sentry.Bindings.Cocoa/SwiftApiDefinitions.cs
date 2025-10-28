@@ -258,15 +258,6 @@ interface SentryReplayBreadcrumbConverter
 [Internal]
 interface SentryReplayOptions //: ISentryRedactOptions
 {
-    [Export("initWithSessionSampleRate:onErrorSampleRate:maskAllText:maskAllImages:enableViewRendererV2:enableFastViewRendering:")]
-    [DesignatedInitializer]
-    IntPtr Constructor(float sessionSampleRate,
-        float onErrorSampleRate,
-        bool maskAllText,
-        bool maskAllImages,
-        bool enableViewRendererV2,
-        bool enableFastViewRendering);
-
     // @property (nonatomic) float sessionSampleRate;
     [Export ("sessionSampleRate")]
     float SessionSampleRate { get; set; }
@@ -307,9 +298,6 @@ interface SentryReplayOptions //: ISentryRedactOptions
     // @property (readonly, nonatomic) NSTimeInterval maximumDuration;
     [Export ("maximumDuration")]
     double MaximumDuration { get; }
-    // -(instancetype _Nonnull)initWithDictionary:(NSDictionary<NSString *,id> * _Nonnull)dictionary;
-    [Export ("initWithDictionary:")]
-    NativeHandle Constructor (NSDictionary<NSString, NSObject> dictionary);
     */
 }
 

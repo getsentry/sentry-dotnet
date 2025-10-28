@@ -148,6 +148,10 @@ public static partial class SentrySdk
         // Session Replay options for the Cocoa SDK
         if (options.Native.ExperimentalOptions.SessionReplay.IsSessionReplayEnabled)
         {
+            // For replay to work on iOS, session tracking must be enabled in the Cocoa SDKt
+            options.AutoSessionTracking = false;
+            nativeOptions.EnableAutoSessionTracking = true;
+
             var sessionSampleRate = (float)(options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate ?? 0f);
             var onErrorSampleRate = (float)(options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate ?? 0f);
             var cocoaReplayOptions = new Sentry.CocoaSdk.SentryReplayOptions();
