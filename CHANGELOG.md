@@ -12,6 +12,17 @@
   - Removed `SentrySdk.CaptureUserFeedback` and all associated members. Use the newer `SentrySdk.CaptureFeedback` instead.
 - Backpressure handling is now enabled by default, meaning that the SDK will monitor system health and reduce the sampling rate of events and transactions when the system is under load. When the system is determined to be healthy again, the sampling rates are returned to their original levels. ([#4615](https://github.com/getsentry/sentry-dotnet/pull/4615))
 - ScopeExtensions.Populate is now internal ([#4611](https://github.com/getsentry/sentry-dotnet/pull/4611))
+- Add support for W3C traceparent header for outgoing requests ([#4661](https://github.com/getsentry/sentry-dotnet/pull/4661))
+  This feature is disabled by default. When enabled, outgoing requests will include the W3C traceparent header.
+  ```csharp
+  SentrySdk.Init(options =>
+  {
+      // ...
+      options.PropagateTraceparent = true;
+  });
+  ```
+
+  See https://develop.sentry.dev/sdk/telemetry/traces/distributed-tracing/#w3c-trace-context-header for more details.
 
 ### Features
 
