@@ -109,7 +109,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
                     }
                     else if (current?.FinishReason == ChatFinishReason.ToolCalls)
                     {
-                        WrapFunctionCallsInResponse(current, keyMessage);
+                        InjectMessageToFunctionCallArguments(current, keyMessage);
                     }
 
                     yield break;
@@ -176,7 +176,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
             return agentSpanDict;
         }
 
-        options.AdditionalProperties = new AdditionalPropertiesDictionary();
+        options.AdditionalProperties ??= new AdditionalPropertiesDictionary();
         options.AdditionalProperties.TryAdd(SentryAIConstants.OptionsAdditionalAttributeAgentSpanName, agentSpanDict);
         return agentSpanDict;
     }
@@ -209,7 +209,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
         }
     }
 
-    private static void WrapFunctionCallsInResponse(ChatResponseUpdate response, ChatMessage keyMessage)
+    private static void InjectMessageToFunctionCallArguments(ChatResponseUpdate response, ChatMessage keyMessage)
     {
         foreach (var content in response.Contents)
         {
