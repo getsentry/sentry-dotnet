@@ -22,6 +22,7 @@ public static class SentryAIExtensions
             return options;
         }
 
+        // We wrap tools here so we don't have to wrap them each time we grab the response
         for (var i = 0; i < options.Tools.Count; i++)
         {
             var tool = options.Tools[i];
@@ -30,6 +31,11 @@ public static class SentryAIExtensions
                 options.Tools[i] = new SentryInstrumentedFunction(fn, options);
             }
         }
+
+        // SentrySpanStore additional property will store the dictionary to keep track of which span is
+        // the "agent" span, which will persist through different chat/tool calls.
+        options.AdditionalProperties ??= new AdditionalPropertiesDictionary();
+        options.AdditionalProperties.TryAdd("SentryChatMessageAgentSpan", new ConcurrentDictionary<ChatMessage, ISpan>());
 
         return options;
     }
