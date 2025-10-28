@@ -7,6 +7,7 @@
 using System;
 using Foundation;
 using ObjCRuntime;
+using Sentry;
 using UIKit;
 
 namespace Sentry.CocoaSdk;
