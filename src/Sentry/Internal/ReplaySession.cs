@@ -28,12 +28,10 @@ internal class ReplaySession : IReplaySession
 #elif __IOS__
             string? nativeId = null;
             SentryCocoaSdk.ConfigureScope(scope => nativeId = scope.ReplayId);
-            if (nativeId is { } id)
-            {
-                return SentryId.Parse(id);
-            }
-#endif
+            return (nativeId is { } id) ? SentryId.Parse(id) : null;
+#else
             return null;
+#endif
         }
     }
 }
