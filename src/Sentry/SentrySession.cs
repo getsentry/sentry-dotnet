@@ -36,12 +36,12 @@ public class SentrySession : ISentrySession
     // Start at -1 so that the first increment puts it at 0
     private int _sequenceNumber = -1;
 
-    private int _isMarkedAsPendingUnhandled;
+    private InterlockedBoolean _isMarkedAsPendingUnhandled;
 
     /// <summary>
     /// Gets whether this session has an unhandled exception that hasn't been finalized yet.
     /// </summary>
-    internal bool IsMarkedAsPendingUnhandled => _isMarkedAsPendingUnhandled != 0;
+    internal bool IsMarkedAsPendingUnhandled => _isMarkedAsPendingUnhandled;
 
     internal SentrySession(
         SentryId id,
@@ -85,7 +85,7 @@ public class SentrySession : ISentrySession
     /// Marks the session as having an unhandled exception without ending it.
     /// This allows the session to continue and potentially escalate to Crashed if the app crashes.
     /// </summary>
-    internal void MarkUnhandledException() => Interlocked.Exchange(ref _isMarkedAsPendingUnhandled, 1);
+    internal void MarkUnhandledException() => _isMarkedAsPendingUnhandled.Exchange(true);
 
     internal SessionUpdate CreateUpdate(
         bool isInitial,
