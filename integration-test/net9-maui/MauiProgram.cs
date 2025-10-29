@@ -17,6 +17,9 @@ public static class MauiProgram
 #endif
                 options.Debug = false;
                 options.DiagnosticLevel = SentryLevel.Error;
+                // predictable crash envelopes only
+                options.SendClientReports = false;
+                options.AutoSessionTracking = false;
             })
             .ConfigureFonts(fonts =>
             {

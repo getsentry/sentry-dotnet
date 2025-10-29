@@ -995,6 +995,18 @@ public class SentryOptions
         set => _tracePropagationTargets = value.WithConfigBinding();
     }
 
+    /// <summary>
+    /// Whether to send W3C Trace Context traceparent headers in outgoing HTTP requests for distributed tracing.
+    /// When enabled, the SDK will send the <c>traceparent</c> header in addition to the <c>sentry-trace</c> header
+    /// for requests matching <see cref="TracePropagationTargets"/>.
+    /// </summary>
+    /// <remarks>
+    /// The default value is <c>false</c>. Set to <c>true</c> to enable W3C Trace Context propagation
+    /// for interoperability with services that support OpenTelemetry standards.
+    /// </remarks>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/traces/#propagatetraceparent"/>
+    public bool PropagateTraceparent { get; set; }
+
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
 
     private StackTraceMode? _stackTraceMode;
@@ -1881,7 +1893,7 @@ public class SentryOptions
     /// <remarks>
     /// This and related experimental APIs may change in the future.
     /// </remarks>
-    public sealed class SentryExperimentalOptions
+    public class SentryExperimentalOptions
     {
         internal SentryExperimentalOptions()
         {
