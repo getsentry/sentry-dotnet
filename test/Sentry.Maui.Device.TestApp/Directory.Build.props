@@ -4,6 +4,7 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
+    <MtouchUseLlvm Condition="'$(Configuration)' == 'Release'">false</MtouchUseLlvm>
   </PropertyGroup>
 
   <ItemGroup>
