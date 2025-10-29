@@ -25,7 +25,7 @@ var nodes = tree.GetCompilationUnitRoot()
         "Sentry*.IsEqual",
         // error CS0246: The type or namespace name '_NSZone' could not be found
         "Sentry*.CopyWithZone",
-        // SentryEnvelope* is blacklisted
+        // SentryEnvelope* is not whitelisted
         "PrivateSentrySDKOnly.CaptureEnvelope",
         "PrivateSentrySDKOnly.EnvelopeWithData",
         "PrivateSentrySDKOnly.StoreEnvelope",
@@ -33,6 +33,8 @@ var nodes = tree.GetCompilationUnitRoot()
         "Sentry*.CaptureUserFeedback"
     )
     .Blacklist<DelegateDeclarationSyntax>(
+        // SentryAppStartMeasurement is not whitelisted
+        "SentryOnAppStartMeasurementAvailable",
         // deprecated
         "SentryUserFeedbackConfigurationBlock"
     )

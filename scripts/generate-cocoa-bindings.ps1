@@ -284,7 +284,6 @@ $Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)"\s*\r?\n\s*"', '$1 '
 # Make interface partial if we need to access private APIs.  Other parts will be defined in PrivateApiDefinitions.cs
 $Text = $Text -replace '(?m)^interface SentryScope', 'partial $&'
 
-$Text = $Text -replace '.*typedef.*SentryOnAppStartMeasurementAvailable.*?[\s\S]*?\n\n', ''
 $Text = $Text -replace 'NSDictionary<NSString, SentryStructuredLogAttribute>', 'NSDictionary<NSString, NSObject>'
 
 # Add header and output file
