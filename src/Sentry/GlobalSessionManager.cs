@@ -299,7 +299,7 @@ internal class GlobalSessionManager : ISessionManager
 
         var now = _clock.GetUtcNow();
         _lastPauseTimestamp = now;
-        PersistSession(session.CreateUpdate(false, now), now);
+        PersistSession(session.CreateUpdate(false, now), now, session.IsMarkedAsPendingUnhandled);
     }
 
     public IReadOnlyList<SessionUpdate> ResumeSession()
