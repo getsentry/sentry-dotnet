@@ -12,28 +12,28 @@ var code = File.ReadAllText(args[0]);
 var tree = CSharpSyntaxTree.ParseText(code);
 var nodes = tree.GetCompilationUnitRoot()
     .Blacklist<MethodDeclarationSyntax>(
-        // NSObject
-        "IsEqual",
-        "CopyWithZone",
-        // PrivateSentrySDKOnly
-        "StoreEnvelope",
-        "CaptureEnvelope",
-        "EnvelopeWithData",
-        // SentryOptions
-        "CaptureUserFeedback"
+        // error CS0114: 'SentryXxx.IsEqual(NSObject?)' hides inherited member 'NSObject.IsEqual(NSObject?)'.
+        "Sentry*.IsEqual",
+        // error CS0246: The type or namespace name '_NSZone' could not be found
+        "Sentry*.CopyWithZone",
+        // SentryEnvelope* is blacklisted
+        "PrivateSentrySDKOnly.CaptureEnvelope",
+        "PrivateSentrySDKOnly.EnvelopeWithData",
+        "PrivateSentrySDKOnly.StoreEnvelope",
+        // deprecated
+        "Sentry*.CaptureUserFeedback"
     )
     .Blacklist<DelegateDeclarationSyntax>(
+        // deprecated
         "SentryUserFeedbackConfigurationBlock"
     )
     .Blacklist<PropertyDeclarationSyntax>(
-        "ConfigureUserFeedback",
-        "Description",
-        "EnableMetricKitRawPayload",
-        "AppStartMeasurement",
-        "AppStartMeasurementTimeoutInterval",
-        "OnAppStartMeasurementAvailable",
-        "SentryExperimentalOptions",
-        "SpanDescription"
+        // error CS0114: 'SentryXxx.Description' hides inherited member 'NSObject.Description'.
+        "Sentry*.Description",
+        // SentryAppStartMeasurement is not whitelisted
+        "PrivateSentrySDKOnly.*AppStartMeasurement*",
+        // deprecated
+        "SentryOptions.ConfigureUserFeedback"
     )
     .Whitelist<InterfaceDeclarationSyntax>(
         "Constants",
@@ -108,14 +108,60 @@ internal static class FilterExtensions
         };
     }
 
+    private static string GetQualifiedName(SyntaxNode node)
+    {
+        var identifier = GetIdentifier(node);
+        var parent = node.Parent;
+        while (parent != null)
+        {
+            if (parent is TypeDeclarationSyntax typeDecl)
+            {
+                return $"{typeDecl.Identifier.Text}.{identifier}";
+            }
+            parent = parent.Parent;
+        }
+        return identifier;
+    }
+
+    private static bool MatchesPattern(string name, string pattern)
+    {
+        if (pattern == name)
+        {
+            return true;
+        }
+
+        if (!pattern.Contains('*') && !pattern.Contains('?'))
+        {
+            return false;
+        }
+
+        var regexPattern = "^" + Regex.Escape(pattern)
+            .Replace("\\*", ".*")
+            .Replace("\\?", ".") + "$";
+        return Regex.IsMatch(name, regexPattern);
+    }
+
+    private static bool MatchesName(SyntaxNode node, string[] patterns)
+    {
+        var identifier = GetIdentifier(node);
+        var qualifiedName = GetQualifiedName(node);
+        foreach (var pattern in patterns)
+        {
+            if (MatchesPattern(identifier, pattern) || MatchesPattern(qualifiedName, pattern))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static CompilationUnitSyntax Blacklist<T>(
         this CompilationUnitSyntax root,
         params string[] names) where T : SyntaxNode
     {
-        var nameSet = new HashSet<string>(names);
         var nodesToRemove = root.DescendantNodes()
             .OfType<T>()
-            .Where(node => nameSet.Contains(GetIdentifier(node)));
+            .Where(node => MatchesName(node, names));
         return root.RemoveNodes(nodesToRemove, SyntaxRemoveOptions.KeepNoTrivia)!;
     }
 
@@ -123,10 +169,9 @@ internal static class FilterExtensions
         this CompilationUnitSyntax root,
         params string[] names) where T : SyntaxNode
     {
-        var nameSet = new HashSet<string>(names);
         var nodesToRemove = root.DescendantNodes()
             .OfType<T>()
-            .Where(node => !nameSet.Contains(GetIdentifier(node)));
+            .Where(node => !MatchesName(node, names));
         return root.RemoveNodes(nodesToRemove, SyntaxRemoveOptions.KeepNoTrivia)!;
     }
 }

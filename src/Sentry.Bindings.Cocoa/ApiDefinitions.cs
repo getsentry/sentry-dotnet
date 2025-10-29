@@ -719,6 +719,10 @@ interface SentrySpanContext : SentrySerializable
     [Export ("operation")]
     string Operation { get; }
 
+    // @property (readonly, copy, nonatomic) NSString * _Nullable spanDescription;
+    [NullAllowed, Export ("spanDescription")]
+    string SpanDescription { get; }
+
     // @property (copy, nonatomic) NSString * _Nonnull origin;
     [Export ("origin")]
     string Origin { get; set; }
@@ -776,6 +780,11 @@ interface SentrySpan : SentrySerializable
     [Abstract]
     [Export ("origin")]
     string Origin { get; set; }
+
+    // @required @property (copy, nonatomic) NSString * _Nullable spanDescription;
+    [Abstract]
+    [NullAllowed, Export ("spanDescription")]
+    string SpanDescription { get; set; }
 
     // @required @property (nonatomic) SentrySpanStatus status;
     [Abstract]
@@ -1599,6 +1608,11 @@ interface SentryOptions
     [NoWatch, NoTV, Introduced (PlatformName.MacCatalyst, 15, 0), Introduced (PlatformName.MacOSX, 12, 0), Introduced (PlatformName.iOS, 15, 0)]
     [Export ("enableMetricKit")]
     bool EnableMetricKit { get; set; }
+
+    // @property (assign, nonatomic) BOOL enableMetricKitRawPayload __attribute__((availability(ios, introduced=15.0))) __attribute__((availability(macos, introduced=12.0))) __attribute__((availability(maccatalyst, introduced=15.0))) __attribute__((availability(tvos, unavailable))) __attribute__((availability(watchos, unavailable)));
+    [NoWatch, NoTV, Introduced (PlatformName.MacCatalyst, 15, 0), Introduced (PlatformName.MacOSX, 12, 0), Introduced (PlatformName.iOS, 15, 0)]
+    [Export ("enableMetricKitRawPayload")]
+    bool EnableMetricKitRawPayload { get; set; }
 
     // @property (nonatomic) BOOL enableTimeToFullDisplayTracing;
     [Export ("enableTimeToFullDisplayTracing")]
@@ -2899,11 +2913,6 @@ interface PrivateSentrySDKOnly
     [Export ("options", ArgumentSemantic.Copy)]
     SentryOptions Options { get; }
 
-    // @property (assign, nonatomic, class) BOOL appStartMeasurementHybridSDKMode;
-    [Static]
-    [Export ("appStartMeasurementHybridSDKMode")]
-    bool AppStartMeasurementHybridSDKMode { get; set; }
-
     // @property (assign, nonatomic, class) BOOL framesTrackingMeasurementHybridSDKMode;
     [Static]
     [Export ("framesTrackingMeasurementHybridSDKMode")]
@@ -2978,11 +2987,6 @@ interface PrivateSentrySDKOnly
     [Static]
     [Export ("setReplayTags:")]
     void SetReplayTags (NSDictionary<NSString, NSObject> tags);
-
-    // +(NSDictionary<NSString *,id> * _Nullable)appStartMeasurementWithSpans;
-    [Static]
-    [NullAllowed, Export ("appStartMeasurementWithSpans")]
-    NSDictionary<NSString, NSObject> AppStartMeasurementWithSpans { get; }
 
     // +(SentryUser * _Nonnull)userWithDictionary:(NSDictionary * _Nonnull)dictionary;
     [Static]
