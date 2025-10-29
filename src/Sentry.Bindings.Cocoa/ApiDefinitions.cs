@@ -2208,10 +2208,6 @@ interface SentryLog
     [Export ("body")]
     string Body { get; set; }
 
-    // @property (copy, nonatomic) NSDictionary<NSString *,SentryStructuredLogAttribute *> * _Nonnull attributes;
-    [Export ("attributes", ArgumentSemantic.Copy)]
-    NSDictionary<NSString, NSObject> Attributes { get; set; }
-
     // @property (nonatomic, strong) NSNumber * _Nullable severityNumber;
     [NullAllowed, Export ("severityNumber", ArgumentSemantic.Strong)]
     NSNumber SeverityNumber { get; set; }

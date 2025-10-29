@@ -43,6 +43,8 @@ var nodes = tree.GetCompilationUnitRoot()
         "Sentry*.Description",
         // SentryAppStartMeasurement is not whitelisted
         "PrivateSentrySDKOnly.*AppStartMeasurement*",
+        // SentryStructuredLogAttribute is not whitelisted
+        "SentryLog.Attributes",
         // deprecated
         "SentryOptions.ConfigureUserFeedback"
     )
