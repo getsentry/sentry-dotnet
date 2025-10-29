@@ -106,6 +106,8 @@ if (!(Test-Path '/Library/Frameworks/Xamarin.iOS.framework/Versions/Current/lib/
 $XcodePath = (xcode-select -p) -replace '/Contents/Developer$', ''
 $iPhoneSdkVersion = sharpie xcode -xcode $XcodePath -sdks | grep -o -m 1 'iphoneos\S*'
 Write-Output "iPhoneSdkVersion: $iPhoneSdkVersion"
+$iPhoneSdkPath = xcrun --show-sdk-path --sdk $iPhoneSdkVersion
+Write-Output "iPhoneSdkPath: $iPhoneSdkPath"
 
 ## Imports in the various header files are provided in the "new" style of:
 #     `#import <Sentry/SomeHeader.h>`
@@ -168,7 +170,8 @@ sharpie bind -sdk $iPhoneSdkVersion `
     "$HeadersPath/Sentry-Swift.h" `
     "$PrivateHeadersPath/PrivateSentrySDKOnly.h" `
     -o $BindingsPath `
-    -c -Wno-objc-property-no-attribute
+    -c -Wno-objc-property-no-attribute `
+    -F"$iPhoneSdkPath/System/Library/SubFrameworks" # needed for UIUtilities.framework in Xcode 26+
 
 # Ensure backup path exists
 if (!(Test-Path $BackupPath))
