@@ -243,12 +243,6 @@ $Text = $Text -replace '\bISentryRedactOptions\b', 'SentryRedactOptions'
 # Remove INSCopying due to https://github.com/xamarin/xamarin-macios/issues/17130
 $Text = $Text -replace ': INSCopying,', ':' -replace '\s?[:,] INSCopying', ''
 
-# Remove iOS attributes like [iOS (13, 0)]
-$Text = $Text -replace '\[iOS \(13,\s?0\)\]\n?\s*', ''
-
-# Remove Unavailable attributes like [Unavailable (PlatformName.iOSAppExtension)]
-$Text = $Text -replace '\[Unavailable \(PlatformName\.\w+\)\]\n?\s*', ''
-
 # Fix delegate argument names
 $Text = $Text -replace '(NSError) arg\d', '$1 error'
 $Text = $Text -replace '(NSHttpUrlResponse) arg\d', '$1 response'
@@ -306,11 +300,6 @@ $Text = $Text -replace '\s*\[Verify \(StronglyTypedNSArray\)\]\n', ''
 # Fix broken multi-line comments
 $Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\()\n\s*', '$1'
 $Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)"\s*\r?\n\s*"', '$1 '
-
-# Replace obsolete platform availability attributes
-$Text = $Text -replace '([\[,] )MacCatalyst \(', '$1Introduced (PlatformName.MacCatalyst, '
-$Text = $Text -replace '([\[,] )Mac \(', '$1Introduced (PlatformName.MacOSX, '
-$Text = $Text -replace '([\[,] )iOS \(', '$1Introduced (PlatformName.iOS, '
 
 # Make interface partial if we need to access private APIs.  Other parts will be defined in PrivateApiDefinitions.cs
 $Text = $Text -replace '(?m)^interface SentryScope', 'partial $&'

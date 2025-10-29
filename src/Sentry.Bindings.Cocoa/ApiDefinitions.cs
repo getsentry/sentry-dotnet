@@ -561,11 +561,8 @@ interface SentryException : SentrySerializable
 [Internal]
 interface SentryFeedbackAPI
 {
-    // -(void)showWidget __attribute__((availability(ios, introduced=13.0))) __attribute__((availability(macos_app_extension, unavailable))) __attribute__((availability(ios_app_extension, unavailable)));
     [Export ("showWidget")]
     void ShowWidget ();
-
-    // -(void)hideWidget __attribute__((availability(ios, introduced=13.0))) __attribute__((availability(macos_app_extension, unavailable))) __attribute__((availability(ios_app_extension, unavailable)));
     [Export ("hideWidget")]
     void HideWidget ();
 }
@@ -1605,12 +1602,12 @@ interface SentryOptions
     [Export ("failedRequestTargets", ArgumentSemantic.Strong)]    NSObject[] FailedRequestTargets { get; set; }
 
     // @property (assign, nonatomic) BOOL enableMetricKit __attribute__((availability(ios, introduced=15.0))) __attribute__((availability(macos, introduced=12.0))) __attribute__((availability(maccatalyst, introduced=15.0))) __attribute__((availability(tvos, unavailable))) __attribute__((availability(watchos, unavailable)));
-    [NoWatch, NoTV, Introduced (PlatformName.MacCatalyst, 15, 0), Introduced (PlatformName.MacOSX, 12, 0), Introduced (PlatformName.iOS, 15, 0)]
+    [NoWatch, NoTV, MacCatalyst (15, 0)]
     [Export ("enableMetricKit")]
     bool EnableMetricKit { get; set; }
 
     // @property (assign, nonatomic) BOOL enableMetricKitRawPayload __attribute__((availability(ios, introduced=15.0))) __attribute__((availability(macos, introduced=12.0))) __attribute__((availability(maccatalyst, introduced=15.0))) __attribute__((availability(tvos, unavailable))) __attribute__((availability(watchos, unavailable)));
-    [NoWatch, NoTV, Introduced (PlatformName.MacCatalyst, 15, 0), Introduced (PlatformName.MacOSX, 12, 0), Introduced (PlatformName.iOS, 15, 0)]
+    [NoWatch, NoTV, MacCatalyst (15, 0)]
     [Export ("enableMetricKitRawPayload")]
     bool EnableMetricKitRawPayload { get; set; }
 
@@ -2570,8 +2567,6 @@ interface SentrySDK
     [Static]
     [Export ("captureFeedback:")]
     void CaptureFeedback (SentryFeedback feedback);
-
-    // @property (readonly, nonatomic, strong, class) SentryFeedbackAPI * _Nonnull feedback __attribute__((availability(ios, introduced=13.0)));
     [Static]
     [Export ("feedback", ArgumentSemantic.Strong)]
     SentryFeedbackAPI Feedback { get; }

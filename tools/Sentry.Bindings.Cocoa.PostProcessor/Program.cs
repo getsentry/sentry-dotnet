@@ -11,6 +11,15 @@ if (args.Length != 1)
 var code = File.ReadAllText(args[0]);
 var tree = CSharpSyntaxTree.ParseText(code);
 var nodes = tree.GetCompilationUnitRoot()
+    .Blacklist<AttributeSyntax>(
+        // error CS0246: The type or namespace name 'iOS' could not be found
+        "iOS",
+        // error CS0246: The type or namespace name 'Mac' could not be found
+        "Mac",
+        // error CS0117: 'PlatformName' does not contain a definition for 'iOSAppExtension'
+        "Unavailable"
+    )
+    .Blacklist<AttributeListSyntax>("")
     .Blacklist<MethodDeclarationSyntax>(
         // error CS0114: 'SentryXxx.IsEqual(NSObject?)' hides inherited member 'NSObject.IsEqual(NSObject?)'.
         "Sentry*.IsEqual",
@@ -104,6 +113,8 @@ internal static class FilterExtensions
             DelegateDeclarationSyntax del => del.Identifier.Text,
             MethodDeclarationSyntax method => method.Identifier.Text,
             PropertyDeclarationSyntax property => property.Identifier.Text,
+            AttributeSyntax attr => attr.Name.ToString(),
+            AttributeListSyntax list => string.Join(",", list.Attributes.Select(a => a.Name.ToString())),
             _ => throw new NotSupportedException(node.GetType().Name)
         };
     }
