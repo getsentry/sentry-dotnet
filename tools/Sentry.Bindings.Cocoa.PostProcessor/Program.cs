@@ -147,9 +147,10 @@ internal static class FilterExtensions
         var qualifiedName = GetQualifiedName(node);
         foreach (var pattern in patterns)
         {
-            if (MatchesPattern(identifier, pattern) || MatchesPattern(qualifiedName, pattern))
+            var actualPattern = pattern.TrimStart('!');
+            if (MatchesPattern(identifier, actualPattern) || MatchesPattern(qualifiedName, actualPattern))
             {
-                return true;
+                return !pattern.StartsWith('!');
             }
         }
         return false;
