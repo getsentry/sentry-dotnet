@@ -108,7 +108,30 @@ File.WriteAllText(args[0], nodes.ToFullString());
 
 internal static class FilterExtensions
 {
-    private static string GetIdentifier(SyntaxNode node)
+    public static CompilationUnitSyntax Blacklist<T>(
+        this CompilationUnitSyntax root,
+        params string[] names) where T : SyntaxNode
+    {
+        var nodesToRemove = root.DescendantNodes()
+            .OfType<T>()
+            .Where(node => names.Any(node.Matches));
+        return root.RemoveNodes(nodesToRemove, SyntaxRemoveOptions.KeepNoTrivia)!;
+    }
+
+    public static CompilationUnitSyntax Whitelist<T>(
+        this CompilationUnitSyntax root,
+        params string[] names) where T : SyntaxNode
+    {
+        var nodesToRemove = root.DescendantNodes()
+            .OfType<T>()
+            .Where(node => !names.Any(node.Matches));
+        return root.RemoveNodes(nodesToRemove, SyntaxRemoveOptions.KeepNoTrivia)!;
+    }
+}
+
+internal static class SyntaxNodeExtensions
+{
+    public static string GetIdentifier(this SyntaxNode node)
     {
         return node switch
         {
@@ -122,9 +145,25 @@ internal static class FilterExtensions
         };
     }
 
-    private static string GetQualifiedName(SyntaxNode node)
+    public static SyntaxNode WithIdentifier(this SyntaxNode node, string newName)
     {
-        var identifier = GetIdentifier(node);
+        var identifier = SyntaxFactory.Identifier(newName);
+        return node switch
+        {
+            InterfaceDeclarationSyntax iface => iface.WithIdentifier(identifier),
+            ClassDeclarationSyntax cls => cls.WithIdentifier(identifier),
+            StructDeclarationSyntax str => str.WithIdentifier(identifier),
+            EnumDeclarationSyntax enm => enm.WithIdentifier(identifier),
+            DelegateDeclarationSyntax del => del.WithIdentifier(identifier),
+            MethodDeclarationSyntax method => method.WithIdentifier(identifier),
+            PropertyDeclarationSyntax property => property.WithIdentifier(identifier),
+            _ => throw new NotSupportedException(node.GetType().Name)
+        };
+    }
+
+    public static string GetQualifiedName(this SyntaxNode node)
+    {
+        var identifier = node.GetIdentifier();
         var parent = node.Parent;
         while (parent != null)
         {
@@ -137,9 +176,22 @@ internal static class FilterExtensions
         return identifier;
     }
 
-    private static bool MatchesPattern(string name, string pattern)
+    public static bool Matches(this SyntaxNode node, string pattern)
     {
-        if (pattern == name)
+        var actualPattern = pattern.TrimStart('!');
+        if (node.GetIdentifier().Matches(actualPattern) || node.GetQualifiedName().Matches(actualPattern))
+        {
+            return !pattern.StartsWith('!');
+        }
+        return false;
+    }
+}
+
+internal static class StringExtensions
+{
+    public static bool Matches(this string str, string pattern)
+    {
+        if (pattern == str)
         {
             return true;
         }
@@ -149,44 +201,9 @@ internal static class FilterExtensions
             return false;
         }
 
-        var regexPattern = "^" + Regex.Escape(pattern)
+        var regex = "^" + Regex.Escape(pattern)
             .Replace("\\*", ".*")
             .Replace("\\?", ".") + "$";
-        return Regex.IsMatch(name, regexPattern);
-    }
-
-    private static bool MatchesName(SyntaxNode node, string[] patterns)
-    {
-        var identifier = GetIdentifier(node);
-        var qualifiedName = GetQualifiedName(node);
-        foreach (var pattern in patterns)
-        {
-            var actualPattern = pattern.TrimStart('!');
-            if (MatchesPattern(identifier, actualPattern) || MatchesPattern(qualifiedName, actualPattern))
-            {
-                return !pattern.StartsWith('!');
-            }
-        }
-        return false;
-    }
-
-    public static CompilationUnitSyntax Blacklist<T>(
-        this CompilationUnitSyntax root,
-        params string[] names) where T : SyntaxNode
-    {
-        var nodesToRemove = root.DescendantNodes()
-            .OfType<T>()
-            .Where(node => MatchesName(node, names));
-        return root.RemoveNodes(nodesToRemove, SyntaxRemoveOptions.KeepNoTrivia)!;
-    }
-
-    public static CompilationUnitSyntax Whitelist<T>(
-        this CompilationUnitSyntax root,
-        params string[] names) where T : SyntaxNode
-    {
-        var nodesToRemove = root.DescendantNodes()
-            .OfType<T>()
-            .Where(node => !MatchesName(node, names));
-        return root.RemoveNodes(nodesToRemove, SyntaxRemoveOptions.KeepNoTrivia)!;
+        return Regex.IsMatch(str, regex);
     }
 }
