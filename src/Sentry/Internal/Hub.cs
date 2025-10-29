@@ -316,6 +316,18 @@ internal class Hub : IHub, IDisposable
         return propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession).ToBaggageHeader();
     }
 
+    public W3CTraceparentHeader? GetTraceparentHeader()
+    {
+        if (GetSpan()?.GetTraceHeader() is { } traceHeader)
+        {
+            return new W3CTraceparentHeader(traceHeader.TraceId, traceHeader.SpanId, traceHeader.IsSampled);
+        }
+
+        // We fall back to the propagation context
+        var propagationContext = CurrentScope.PropagationContext;
+        return new W3CTraceparentHeader(propagationContext.TraceId, propagationContext.SpanId, null);
+    }
+
     public TransactionContext ContinueTrace(
         string? traceHeader,
         string? baggageHeader,
@@ -575,7 +587,7 @@ internal class Hub : IHub, IDisposable
             scope.LastEventId = id;
             scope.SessionUpdate = null;
 
-            if (evt.GetExceptionType() is SentryEvent.ExceptionType.Unhandled
+            if (evt.GetExceptionType() is SentryEvent.ExceptionType.UnhandledTerminal
                 && scope.Transaction is { } transaction)
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted

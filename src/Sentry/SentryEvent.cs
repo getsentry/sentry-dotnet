@@ -182,7 +182,7 @@ public sealed class SentryEvent : IEventLike, ISentryJsonSerializable
     {
         None,
         Handled,
-        Unhandled,
+        UnhandledTerminal,
         UnhandledNonTerminal
     }
 
@@ -200,7 +200,7 @@ public sealed class SentryEvent : IEventLike, ISentryJsonSerializable
 
         if (HasUnhandledException())
         {
-            return ExceptionType.Unhandled;
+            return ExceptionType.UnhandledTerminal;
         }
 
         return ExceptionType.Handled;

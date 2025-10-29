@@ -44,10 +44,11 @@ runs:
       uses: ./.github/actions/install-zstd
 
     # See https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md#xcode
+    # Also https://github.com/dotnet/macios/issues/21762#issuecomment-3424033859 (don't reference symlinks)
     - name: Pin the Xcode Version
       if: runner.os == 'macOS'
       shell: bash
-      run: sudo xcode-select --switch /Applications/Xcode_16.4.app
+      run: sudo xcode-select --switch /Applications/Xcode_26.0.1.app
 
     # Java 17 is needed for Android SDK setup step
     - name: Install Java 17
@@ -97,7 +98,7 @@ runs:
         dotnet-version: |
           8.0.x
           9.0.304
-          10.0.100-rc.1.25451.107
+          10.0.100-rc.2.25502.107
 
     # .NET 5.0 does not support ARM64 on macOS
     - name: Install .NET 5.0 SDK

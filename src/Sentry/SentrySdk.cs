@@ -717,6 +717,13 @@ static partial class SentrySdk
         => CurrentHub.GetBaggage();
 
     /// <summary>
+    /// Gets the W3C Trace Context traceparent header that allows tracing across services
+    /// </summary>
+    [DebuggerStepThrough]
+    public static W3CTraceparentHeader? GetTraceparentHeader()
+        => CurrentHub.GetTraceparentHeader();
+
+    /// <summary>
     /// Continues a trace based on HTTP header values provided as strings.
     /// </summary>
     /// <remarks>

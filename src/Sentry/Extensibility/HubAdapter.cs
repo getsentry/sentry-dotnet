@@ -149,6 +149,13 @@ public sealed class HubAdapter : IHub
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
     [DebuggerStepThrough]
+    public W3CTraceparentHeader? GetTraceparentHeader()
+        => SentrySdk.GetTraceparentHeader();
+
+    /// <summary>
+    /// Forwards the call to <see cref="SentrySdk"/>.
+    /// </summary>
+    [DebuggerStepThrough]
     public TransactionContext ContinueTrace(
         string? traceHeader,
         string? baggageHeader,
