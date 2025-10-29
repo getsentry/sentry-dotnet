@@ -45,7 +45,9 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
 
         try
         {
-            if (_logCatIntegrationType != LogCatIntegrationType.All && !@event.HasException())
+            var exceptionType = @event.GetExceptionType();
+
+            if (_logCatIntegrationType != LogCatIntegrationType.All && exceptionType == SentryEvent.ExceptionType.None)
             {
                 return @event;
             }
@@ -53,7 +55,7 @@ internal class LogCatAttachmentEventProcessor : ISentryEventProcessorWithHint
             // Only send logcat logs if the event is unhandled if the integration is set to Unhandled
             if (_logCatIntegrationType == LogCatIntegrationType.Unhandled)
             {
-                if (!@event.HasTerminalException())
+                if (exceptionType != SentryEvent.ExceptionType.UnhandledTerminal && exceptionType != SentryEvent.ExceptionType.UnhandledNonTerminal)
                 {
                     return @event;
                 }
