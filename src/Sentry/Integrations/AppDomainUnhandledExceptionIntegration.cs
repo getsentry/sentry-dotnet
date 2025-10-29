@@ -34,7 +34,7 @@ internal class AppDomainUnhandledExceptionIntegration : ISdkIntegration
                 "AppDomain.UnhandledException",
                 "This exception was caught by the .NET Application Domain global error handler. " +
                 "The application likely crashed as a result of this exception.",
-                handled: false);
+                SentryExceptionExtensions.ExceptionHandledState.UnhandledTerminal);
 
             // Call the internal implementation, so that we still capture even if the hub has been disabled.
             _hub?.CaptureExceptionInternal(ex);

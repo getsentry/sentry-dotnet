@@ -535,7 +535,7 @@ public partial class HubTests : IDisposable
         hub.ConfigureScope(scope => scope.Transaction = transaction);
 
         var exception = new Exception("test");
-        exception.SetSentryMechanism("test", handled: false, terminal: true);
+        exception.SetSentryMechanism("test", handledState: SentryExceptionExtensions.ExceptionHandledState.UnhandledTerminal);
 
         // Act
         hub.CaptureEvent(new SentryEvent(exception));
@@ -556,7 +556,7 @@ public partial class HubTests : IDisposable
         hub.ConfigureScope(scope => scope.Transaction = transaction);
 
         var exception = new Exception("test");
-        exception.SetSentryMechanism("TestException", handled: false, terminal: false);
+        exception.SetSentryMechanism("TestException", handledState: SentryExceptionExtensions.ExceptionHandledState.UnhandledNonTerminal);
 
         // Act
         hub.CaptureEvent(new SentryEvent(exception));
@@ -576,7 +576,7 @@ public partial class HubTests : IDisposable
         hub.ConfigureScope(scope => scope.Transaction = transaction);
 
         var exception = new Exception("test");
-        exception.SetSentryMechanism("test", handled: true);
+        exception.SetSentryMechanism("test", handledState: SentryExceptionExtensions.ExceptionHandledState.Handled);
 
         // Act
         hub.CaptureEvent(new SentryEvent(exception));

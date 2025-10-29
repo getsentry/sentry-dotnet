@@ -36,7 +36,7 @@ internal class RuntimeMarshalManagedExceptionIntegration : ISdkIntegration
                 "Runtime.MarshalManagedException",
                 "This exception was caught by the .NET Runtime Marshal Managed Exception global error handler. " +
                 "The application may have crashed as a result of this exception.",
-                handled: false);
+                handledState: SentryExceptionExtensions.ExceptionHandledState.UnhandledTerminal);
 
             // Call the internal implementation, so that we still capture even if the hub has been disabled.
             _hub?.CaptureExceptionInternal(ex);

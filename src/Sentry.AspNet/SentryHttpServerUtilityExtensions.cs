@@ -24,7 +24,7 @@ public static class SentryHttpServerUtilityExtensions
                 "HttpApplication.Application_Error",
                 "This exception was caught by the ASP.NET global error handler. " +
                 "The web server likely returned a 5xx error code as a result of this exception.",
-                handled: false);
+                handledState: SentryExceptionExtensions.ExceptionHandledState.UnhandledTerminal);
 
             return hub.CaptureException(exception);
         }

@@ -79,7 +79,7 @@ public class MechanismTests
     public void SetSentryMechanism_WithTerminalTrue_StoresInExceptionData()
     {
         var exception = new Exception();
-        exception.SetSentryMechanism("test", handled: false, terminal: true);
+        exception.SetSentryMechanism("test", handledState: SentryExceptionExtensions.ExceptionHandledState.UnhandledNonTerminal);
 
         Assert.True(exception.Data.Contains(Mechanism.TerminalKey));
         Assert.Equal(true, exception.Data[Mechanism.TerminalKey]);
@@ -89,20 +89,9 @@ public class MechanismTests
     public void SetSentryMechanism_WithTerminalFalse_StoresInExceptionData()
     {
         var exception = new Exception();
-        exception.SetSentryMechanism("test", handled: false, terminal: false);
+        exception.SetSentryMechanism("test", handledState: SentryExceptionExtensions.ExceptionHandledState.UnhandledNonTerminal);
 
         Assert.True(exception.Data.Contains(Mechanism.TerminalKey));
         Assert.Equal(false, exception.Data[Mechanism.TerminalKey]);
-    }
-
-    [Fact]
-    public void SetSentryMechanism_WithTerminalNull_RemovesFromExceptionData()
-    {
-        var exception = new Exception();
-        exception.Data[Mechanism.TerminalKey] = true;
-
-        exception.SetSentryMechanism("test", handled: false, terminal: null);
-
-        Assert.False(exception.Data.Contains(Mechanism.TerminalKey));
     }
 }

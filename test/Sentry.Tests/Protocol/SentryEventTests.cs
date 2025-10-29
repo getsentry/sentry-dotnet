@@ -180,7 +180,7 @@ public partial class SentryEventTests
     public void GetExceptionType_HandledException_ReturnsHandled()
     {
         var exception = new Exception("test");
-        exception.SetSentryMechanism("test", handled: true);
+        exception.SetSentryMechanism("test", handledState: SentryExceptionExtensions.ExceptionHandledState.Handled);
         var evt = new SentryEvent(exception);
 
         Assert.Equal(SentryEvent.ExceptionType.Handled, evt.GetExceptionType());
@@ -201,7 +201,8 @@ public partial class SentryEventTests
     public void GetExceptionType_UnhandledTerminalException_ReturnsUnhandled()
     {
         var exception = new Exception("test");
-        exception.SetSentryMechanism("AppDomain.UnhandledException", handled: false, terminal: true);
+        exception.SetSentryMechanism("AppDomain.UnhandledException",
+            handledState: SentryExceptionExtensions.ExceptionHandledState.UnhandledTerminal);
         var evt = new SentryEvent(exception);
 
         Assert.Equal(SentryEvent.ExceptionType.UnhandledTerminal, evt.GetExceptionType());
@@ -222,7 +223,7 @@ public partial class SentryEventTests
     public void GetExceptionType_UnhandledNonTerminalException_ReturnsUnhandledNonTerminal()
     {
         var exception = new Exception("test");
-        exception.SetSentryMechanism("UnobservedTaskException", handled: false, terminal: false);
+        exception.SetSentryMechanism("UnobservedTaskException", handledState: SentryExceptionExtensions.ExceptionHandledState.UnhandledNonTerminal);
         var evt = new SentryEvent(exception);
 
         Assert.Equal(SentryEvent.ExceptionType.UnhandledNonTerminal, evt.GetExceptionType());

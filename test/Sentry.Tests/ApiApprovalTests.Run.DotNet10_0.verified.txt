@@ -1928,5 +1928,12 @@ public static class SentryExceptionExtensions
 {
     public static void AddSentryContext(this System.Exception ex, string name, System.Collections.Generic.IReadOnlyDictionary<string, object> data) { }
     public static void AddSentryTag(this System.Exception ex, string name, string value) { }
-    public static void SetSentryMechanism(this System.Exception ex, string type, string? description = null, bool? handled = default, bool? terminal = default) { }
+    public static void SetSentryMechanism(this System.Exception ex, string type, string? description = null, SentryExceptionExtensions.ExceptionHandledState handledState = 0) { }
+    public enum ExceptionHandledState
+    {
+        None = 0,
+        Handled = 1,
+        UnhandledTerminal = 2,
+        UnhandledNonTerminal = 3,
+    }
 }

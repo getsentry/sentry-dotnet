@@ -211,7 +211,9 @@ public static partial class SentrySdk
             description += " The application likely crashed as a result of this exception.";
         }
 
-        e.Exception.SetSentryMechanism("UnhandledExceptionRaiser", description, e.Handled);
+        e.Exception.SetSentryMechanism("UnhandledExceptionRaiser", description, e.Handled
+            ? SentryExceptionExtensions.ExceptionHandledState.Handled
+            : SentryExceptionExtensions.ExceptionHandledState.UnhandledTerminal);
 
         CaptureException(e.Exception);
 

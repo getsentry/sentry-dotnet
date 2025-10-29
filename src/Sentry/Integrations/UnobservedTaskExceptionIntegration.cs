@@ -47,8 +47,7 @@ internal class UnobservedTaskExceptionIntegration : ISdkIntegration
             MechanismKey,
             "This exception was thrown from a task that was unobserved, such as from an async void method, or " +
             "a Task.Run that was not awaited. This exception was unhandled, but likely did not crash the application.",
-            handled: false,
-            terminal: false);
+            SentryExceptionExtensions.ExceptionHandledState.UnhandledNonTerminal);
 
         // Call the internal implementation, so that we still capture even if the hub has been disabled.
         _hub.CaptureExceptionInternal(ex);

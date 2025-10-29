@@ -129,7 +129,8 @@ internal class WinUIUnhandledExceptionIntegration : ISdkIntegration
             description += " The application likely crashed as a result of this exception.";
         }
 
-        exception.SetSentryMechanism("Microsoft.UI.Xaml.UnhandledException", description, handled);
+        exception.SetSentryMechanism("Microsoft.UI.Xaml.UnhandledException", description,
+            handled ? SentryExceptionExtensions.ExceptionHandledState.Handled : SentryExceptionExtensions.ExceptionHandledState.UnhandledTerminal);
 
         // Call the internal implementation, so that we still capture even if the hub has been disabled.
         _hub.CaptureExceptionInternal(exception);

@@ -93,7 +93,9 @@ internal sealed class SentryLogger : ILogger
         string? message,
         string category)
     {
-        exception?.SetSentryMechanism("SentryLogger", handled: !IsUnhandledWasmException(id));
+        exception?.SetSentryMechanism("SentryLogger", handledState: IsUnhandledWasmException(id)
+            ? SentryExceptionExtensions.ExceptionHandledState.UnhandledTerminal
+            : SentryExceptionExtensions.ExceptionHandledState.Handled);
         var @event = new SentryEvent(exception)
         {
             Logger = category,

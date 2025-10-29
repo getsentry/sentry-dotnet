@@ -50,7 +50,7 @@ internal class SentryFunctionsWorkerMiddleware : IFunctionsWorkerMiddleware
             exception.SetSentryMechanism(nameof(SentryFunctionsWorkerMiddleware),
                 "This exception was caught by the Sentry Functions middleware. " +
                 "The Function has thrown an exception that was not handled by the user code.",
-                handled: false);
+                SentryExceptionExtensions.ExceptionHandledState.UnhandledTerminal);
 
             unhandledException = exception;
 

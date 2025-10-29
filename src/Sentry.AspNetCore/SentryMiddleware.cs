@@ -216,7 +216,7 @@ internal class SentryMiddleware : IMiddleware
 
             void CaptureException(Exception e, SentryId evtId, string mechanism, string description)
             {
-                e.SetSentryMechanism(mechanism, description, handled: false);
+                e.SetSentryMechanism(mechanism, description, SentryExceptionExtensions.ExceptionHandledState.UnhandledTerminal);
 
                 var evt = new SentryEvent(e, eventId: evtId);
 

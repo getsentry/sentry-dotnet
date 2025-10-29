@@ -8,6 +8,32 @@ using Sentry.Protocol;
 public static class SentryExceptionExtensions
 {
     /// <summary>
+    /// The Handled State
+    /// </summary>
+    public enum ExceptionHandledState
+    {
+        /// <summary>
+        /// The mechanism did not specify the handled state
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// The exception was handled
+        /// </summary>
+        Handled,
+
+        /// <summary>
+        /// The exception was unhandled and terminal
+        /// </summary>
+        UnhandledTerminal,
+
+        /// <summary>
+        /// The exception was unhandled but non-terminal
+        /// </summary>
+        UnhandledNonTerminal
+    }
+
+    /// <summary>
     /// Set a tag that will be added to the event when the exception is captured.
     /// </summary>
     /// <param name="ex">The exception.</param>
@@ -31,10 +57,9 @@ public static class SentryExceptionExtensions
     /// <param name="ex">The exception.</param>
     /// <param name="type">A required short string that identifies the mechanism.</param>
     /// <param name="description">An optional human-readable description of the mechanism.</param>
-    /// <param name="handled">An optional flag indicating whether the exception was handled by the mechanism.</param>
-    /// <param name="terminal">An optional flag indicating whether the exception is considered terminal.</param>
+    /// <param name="handledState">An optional flag indicating whether the exception was handled by the mechanism.</param>
     public static void SetSentryMechanism(this Exception ex, string type, string? description = null,
-        bool? handled = null, bool? terminal = null)
+        ExceptionHandledState handledState = ExceptionHandledState.None)
     {
         ex.Data[Mechanism.MechanismKey] = type;
 
@@ -47,22 +72,22 @@ public static class SentryExceptionExtensions
             ex.Data[Mechanism.DescriptionKey] = description;
         }
 
-        if (handled == null)
+        switch (handledState)
         {
-            ex.Data.Remove(Mechanism.HandledKey);
-        }
-        else
-        {
-            ex.Data[Mechanism.HandledKey] = handled;
-        }
-
-        if (terminal == null)
-        {
-            ex.Data.Remove(Mechanism.TerminalKey);
-        }
-        else
-        {
-            ex.Data[Mechanism.TerminalKey] = terminal;
+            case ExceptionHandledState.None:
+                ex.Data.Remove(Mechanism.HandledKey);
+                break;
+            case ExceptionHandledState.Handled:
+                ex.Data[Mechanism.HandledKey] = true;
+                break;
+            case ExceptionHandledState.UnhandledTerminal:
+                ex.Data[Mechanism.HandledKey] = false;
+                ex.Data[Mechanism.TerminalKey] = true;
+                break;
+            case ExceptionHandledState.UnhandledNonTerminal:
+                ex.Data[Mechanism.HandledKey] = false;
+                ex.Data[Mechanism.TerminalKey] = false;
+                break;
         }
     }
 }

@@ -40,7 +40,8 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
         }
         catch (Exception exception)
         {
-            exception.SetSentryMechanism(MechanismType, "GraphQL Failed Request Handler", false);
+            exception.SetSentryMechanism(MechanismType, "GraphQL Failed Request Handler",
+                SentryExceptionExtensions.ExceptionHandledState.UnhandledTerminal);
 
             var @event = new SentryEvent(exception);
             var hint = new SentryHint(HintTypes.HttpResponseMessage, response);

@@ -110,7 +110,7 @@ public partial class MainExceptionProcessorTests
         var evt = new SentryEvent();
         var exp = new Exception();
 
-        exp.SetSentryMechanism("TestException", terminal: true);
+        exp.SetSentryMechanism("TestException", handledState: SentryExceptionExtensions.ExceptionHandledState.UnhandledTerminal);
 
         sut.Process(exp, evt);
 
@@ -127,7 +127,7 @@ public partial class MainExceptionProcessorTests
         var evt = new SentryEvent();
         var exp = new Exception();
 
-        exp.SetSentryMechanism("TestException", terminal: false);
+        exp.SetSentryMechanism("TestException", handledState: SentryExceptionExtensions.ExceptionHandledState.UnhandledNonTerminal);
 
         sut.Process(exp, evt);
 

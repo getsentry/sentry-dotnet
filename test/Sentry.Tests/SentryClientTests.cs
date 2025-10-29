@@ -801,7 +801,7 @@ public partial class SentryClientTests : IDisposable
         _fixture.SessionManager.StartSession();
 
         var exception = new Exception("test exception");
-        exception.SetSentryMechanism("test mechanism", handled: false);
+        exception.SetSentryMechanism("test mechanism", handledState: SentryExceptionExtensions.ExceptionHandledState.UnhandledTerminal);
         _fixture.GetSut().CaptureEvent(new SentryEvent(exception));
     }
 
@@ -1640,7 +1640,7 @@ public partial class SentryClientTests : IDisposable
         // Arrange
         var client = _fixture.GetSut();
         var exception = new Exception();
-        exception.SetSentryMechanism("TestException", handled: false, terminal: true);
+        exception.SetSentryMechanism("TestException", handledState: SentryExceptionExtensions.ExceptionHandledState.UnhandledTerminal);
 
         // Act
         client.CaptureEvent(new SentryEvent(exception));
@@ -1654,7 +1654,7 @@ public partial class SentryClientTests : IDisposable
         // Arrange
         var client = _fixture.GetSut();
         var exception = new Exception();
-        exception.SetSentryMechanism("TestException", handled: false, terminal: false);
+        exception.SetSentryMechanism("TestException", handledState: SentryExceptionExtensions.ExceptionHandledState.UnhandledNonTerminal);
 
         // Act
         client.CaptureEvent(new SentryEvent(exception));
