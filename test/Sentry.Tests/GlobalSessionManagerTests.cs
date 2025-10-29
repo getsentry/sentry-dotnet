@@ -523,6 +523,161 @@ public class GlobalSessionManagerTests
         TryRecoverPersistedSessionWithExceptionOnLastRun();
     }
 
+    [Fact]
+    public void MarkSessionAsUnhandled_ActiveSessionExists_MarksSessionAndPersists()
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+        sut.StartSession();
+        var session = sut.CurrentSession;
+
+        // Act
+        sut.MarkSessionAsUnhandled();
+
+        // Assert
+        session.Should().NotBeNull();
+        session!.IsMarkedAsPendingUnhandled.Should().BeTrue();
+
+        // Session should still be active (not ended)
+        sut.CurrentSession.Should().BeSameAs(session);
+    }
+
+    [Fact]
+    public void MarkSessionAsUnhandled_NoActiveSession_LogsDebug()
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+
+        // Act
+        sut.MarkSessionAsUnhandled();
+
+        // Assert
+        _fixture.Logger.Entries.Should().Contain(e =>
+            e.Message == "There is no session active. Skipping marking session as unhandled." &&
+            e.Level == SentryLevel.Debug);
+    }
+
+    [Fact]
+    public void TryRecoverPersistedSession_WithPendingUnhandledAndNoCrash_EndsAsUnhandled()
+    {
+        // Arrange
+        _fixture.Options.CrashedLastRun = () => false;
+        _fixture.PersistedSessionProvider = _ => new PersistedSessionUpdate(
+            AnySessionUpdate(),
+            pauseTimestamp: null,
+            pendingUnhandled: true);
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        var persistedSessionUpdate = sut.TryRecoverPersistedSession();
+
+        // Assert
+        persistedSessionUpdate.Should().NotBeNull();
+        persistedSessionUpdate!.EndStatus.Should().Be(SessionEndStatus.Unhandled);
+    }
+
+    [Fact]
+    public void TryRecoverPersistedSession_WithPendingUnhandledAndCrash_EscalatesToCrashed()
+    {
+        // Arrange
+        _fixture.Options.CrashedLastRun = () => true;
+        _fixture.PersistedSessionProvider = _ => new PersistedSessionUpdate(
+            AnySessionUpdate(),
+            pauseTimestamp: null,
+            pendingUnhandled: true);
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        var persistedSessionUpdate = sut.TryRecoverPersistedSession();
+
+        // Assert
+        persistedSessionUpdate.Should().NotBeNull();
+        persistedSessionUpdate!.EndStatus.Should().Be(SessionEndStatus.Crashed);
+    }
+
+    [Fact]
+    public void TryRecoverPersistedSession_WithPendingUnhandledAndPauseTimestamp_EscalatesToCrashedIfCrashed()
+    {
+        // Arrange - Session was paused AND had pending unhandled, then crashed
+        _fixture.Options.CrashedLastRun = () => true;
+        var pausedTimestamp = DateTimeOffset.Now;
+        _fixture.PersistedSessionProvider = _ => new PersistedSessionUpdate(
+            AnySessionUpdate(),
+            pausedTimestamp,
+            pendingUnhandled: true);
+
+        var sut = _fixture.GetSut();
+
+        // Act
+        var persistedSessionUpdate = sut.TryRecoverPersistedSession();
+
+        // Assert
+        // Crash takes priority over all other end statuses
+        persistedSessionUpdate.Should().NotBeNull();
+        persistedSessionUpdate!.EndStatus.Should().Be(SessionEndStatus.Crashed);
+    }
+
+    [Fact]
+    public void EndSession_WithPendingUnhandledException_PreservesUnhandledStatus()
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+        sut.StartSession();
+        sut.MarkSessionAsUnhandled();
+
+        // Act - Try to end normally with Exited status
+        var sessionUpdate = sut.EndSession(SessionEndStatus.Exited);
+
+        // Assert - Should be overridden to Unhandled
+        sessionUpdate.Should().NotBeNull();
+        sessionUpdate!.EndStatus.Should().Be(SessionEndStatus.Unhandled);
+    }
+
+    [Fact]
+    public void EndSession_WithPendingUnhandledAndCrashedStatus_UsesCrashedStatus()
+    {
+        // Arrange
+        var sut = _fixture.GetSut();
+        sut.StartSession();
+        sut.MarkSessionAsUnhandled();
+
+        // Act - Explicitly end with Crashed status
+        var sessionUpdate = sut.EndSession(SessionEndStatus.Crashed);
+
+        // Assert - Crashed status takes priority
+        sessionUpdate.Should().NotBeNull();
+        sessionUpdate!.EndStatus.Should().Be(SessionEndStatus.Crashed);
+        sessionUpdate.ErrorCount.Should().Be(1);
+    }
+
+    [Fact]
+    public void SessionEscalation_CompleteFlow_UnhandledThenCrash()
+    {
+        // Arrange - Simulate complete flow
+        var sut = _fixture.GetSut();
+        sut.StartSession();
+        var originalSessionId = sut.CurrentSession!.Id;
+
+        // Act 1: Mark as unhandled (game encounters exception but continues)
+        sut.MarkSessionAsUnhandled();
+
+        // Assert: Session still active with pending flag
+        sut.CurrentSession.Should().NotBeNull();
+        sut.CurrentSession!.Id.Should().Be(originalSessionId);
+        sut.CurrentSession.IsMarkedAsPendingUnhandled.Should().BeTrue();
+
+        // Act 2: Recover on next launch with crash detected
+        _fixture.Options.CrashedLastRun = () => true;
+        var recovered = sut.TryRecoverPersistedSession();
+
+        // Assert: Session escalated from Unhandled to Crashed
+        recovered.Should().NotBeNull();
+        recovered!.EndStatus.Should().Be(SessionEndStatus.Crashed);
+        recovered.Id.Should().Be(originalSessionId);
+    }
+
     // A session update (of which the state doesn't matter for the test):
     private static SessionUpdate AnySessionUpdate()
         => new(
