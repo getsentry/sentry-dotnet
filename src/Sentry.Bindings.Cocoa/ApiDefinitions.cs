@@ -391,13 +391,6 @@ interface SentryDsn
     NSUrl EnvelopeEndpoint { get; }
 }
 
-partial interface Constants
-{
-    // extern NSString *const _Nonnull SentryErrorDomain __attribute__((visibility("default")));
-    [Field ("SentryErrorDomain", "__Internal")]
-    NSString SentryErrorDomain { get; }
-}
-
 // @interface SentryEvent : NSObject <SentrySerializable>
 [BaseType (typeof(NSObject))]
 [Internal]

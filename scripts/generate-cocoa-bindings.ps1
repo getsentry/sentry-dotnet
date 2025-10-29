@@ -268,26 +268,6 @@ $Text = $Text -replace '(?ms)@protocol (SentryRedactOptions).+?\[Protocol \(Name
 # Adjust base types
 $Text = $Text -replace 'interface (SentrySpan|SentryRedactOptions)\b', "[BaseType (typeof(NSObject))]`n`$&"
 
-# Fix string constants
-$Text = $Text -replace '(?m)(.*\n){2}^\s{4}NSString k.+?\n\n?', ''
-$Text = $Text -replace '(?m)(.*\n){4}^partial interface Constants\n{\n}\n', ''
-$Text = $Text -replace '\[Verify \(ConstantsInterfaceAssociation\)\]\n', ''
-
-# Remove SentryVersionNumber
-$Text = $Text -replace '.*SentryVersionNumber.*\n?', ''
-
-# Remove SentryVersionString
-$Text = $Text -replace '.*SentryVersionString.*\n?', ''
-
-# Remove duplicate attributes
-$s = 'partial interface Constants'
-$t = $Text -split $s, 2
-$t[1] = $t[1] -replace "\[Static\]\n\[Internal\]\n$s", $s
-$Text = $t -join $s
-
-# Remove empty Constants block
-$Text = $Text -replace '\[Static\]\s*\[Internal\]\s*partial\s+interface\s+Constants\s\{[\s\n]*\}\n\n', ''
-
 # Update MethodToProperty translations
 $Text = $Text -replace '(Export \("get\w+"\)\]\n)\s*\[Verify \(MethodToProperty\)\]\n(.+ \{ get; \})', '$1$2'
 $Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+ (?:Hash|Value|DefaultIntegrations|AppStartMeasurementWithSpans|BaggageHttpHeader) \{ get; \})', '$1'

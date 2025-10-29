@@ -45,7 +45,6 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryOptions.ConfigureUserFeedback"
     )
     .Whitelist<InterfaceDeclarationSyntax>(
-        "Constants",
         "ISentryRRWebEvent",
         "PrivateSentrySDKOnly",
         "SentryAttachment",
