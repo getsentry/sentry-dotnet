@@ -265,7 +265,7 @@ public class SentryAISpanEnricherTests
             }
         };
 
-        SentryAISpanEnricher.EnrichWithStreamingResponse(_mockSpan, messages);
+        SentryAISpanEnricher.EnrichWithStreamingResponses(_mockSpan, messages);
 
         _mockSpan.Received(1).SetData("gen_ai.usage.input_tokens", 8L);
         _mockSpan.Received(1).SetData("gen_ai.usage.output_tokens", 15L);
@@ -282,7 +282,7 @@ public class SentryAISpanEnricherTests
             new(ChatRole.Assistant, "!")
         };
 
-        SentryAISpanEnricher.EnrichWithStreamingResponse(_mockSpan, messages);
+        SentryAISpanEnricher.EnrichWithStreamingResponses(_mockSpan, messages);
 
         _mockSpan.Received(1).SetData("gen_ai.response.text", "Hello world!");
     }
@@ -296,7 +296,7 @@ public class SentryAISpanEnricherTests
         };
         var aiOptions = new SentryAIOptions { IncludeAIResponseContent = false };
 
-        SentryAISpanEnricher.EnrichWithStreamingResponse(_mockSpan, messages, aiOptions);
+        SentryAISpanEnricher.EnrichWithStreamingResponses(_mockSpan, messages, aiOptions);
 
         _mockSpan.DidNotReceive().SetData("gen_ai.response.text", Arg.Any<string>());
     }
@@ -311,7 +311,7 @@ public class SentryAISpanEnricherTests
             new(ChatRole.Assistant, "!")
         };
 
-        SentryAISpanEnricher.EnrichWithStreamingResponse(_mockSpan, messages);
+        SentryAISpanEnricher.EnrichWithStreamingResponses(_mockSpan, messages);
 
         _mockSpan.Received(1).SetData("gen_ai.response.model_id", "gpt-4");
     }
