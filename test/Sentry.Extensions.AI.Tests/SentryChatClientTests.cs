@@ -16,7 +16,7 @@ public class SentryChatClientTests
 
         var sentryChatClient = new SentryChatClient(inner);
 
-        var res = await sentryChatClient.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")], null);
+        var res = await sentryChatClient.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")]);
 
         Assert.Equal([message], res.Messages);
         await inner.Received(1).GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
@@ -35,7 +35,7 @@ public class SentryChatClientTests
         var client = new SentryChatClient(inner);
 
         var results = new List<ChatResponseUpdate>();
-        await foreach (var update in client.GetStreamingResponseAsync([new ChatMessage(ChatRole.User, "hi")], null))
+        await foreach (var update in client.GetStreamingResponseAsync([new ChatMessage(ChatRole.User, "hi")]))
         {
             results.Add(update);
         }
