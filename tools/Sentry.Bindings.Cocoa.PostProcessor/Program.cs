@@ -11,6 +11,7 @@ if (args.Length != 1)
 var code = File.ReadAllText(args[0]);
 var tree = CSharpSyntaxTree.ParseText(code);
 var nodes = tree.GetCompilationUnitRoot()
+    .InsertNamespace("Sentry.CocoaSdk")
     .Blacklist<AttributeSyntax>(
         // error CS0246: The type or namespace name 'iOS' could not be found
         "iOS",
@@ -126,6 +127,20 @@ internal static class FilterExtensions
             .OfType<T>()
             .Where(node => !names.Any(node.Matches));
         return root.RemoveNodes(nodesToRemove, SyntaxRemoveOptions.KeepNoTrivia)!;
+    }
+
+    public static CompilationUnitSyntax InsertNamespace(
+        this CompilationUnitSyntax root,
+        string name)
+    {
+        var namespaceDeclaration = SyntaxFactory.FileScopedNamespaceDeclaration(SyntaxFactory.ParseName(name))
+            .WithNamespaceKeyword(SyntaxFactory.Token(SyntaxKind.NamespaceKeyword)
+                .WithLeadingTrivia(SyntaxFactory.EndOfLine("\n"))
+                .WithTrailingTrivia(SyntaxFactory.Space))
+            .WithTrailingTrivia(SyntaxFactory.EndOfLine("\n"));
+        return SyntaxFactory.CompilationUnit()
+            .WithUsings(root.Usings)
+            .AddMembers(namespaceDeclaration.WithMembers(root.Members));
     }
 }
 

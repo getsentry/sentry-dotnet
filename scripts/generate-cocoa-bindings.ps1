@@ -230,9 +230,6 @@ $Text = $Text -replace '\t', '    '
 # Trim extra newline at EOF
 $Text = $Text -replace '\n$', ''
 
-# Insert namespace
-$Text = $Text -replace 'using .+;\n\n', "$&namespace Sentry.CocoaSdk;`n`n"
-
 # Set Internal attributes on interfaces and delegates
 $Text = $Text -replace '(?m)^(partial interface|interface|delegate)\b', "[Internal]`n$&"
 
