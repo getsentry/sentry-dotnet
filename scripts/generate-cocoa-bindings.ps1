@@ -224,12 +224,6 @@ Write-Output "Patching $BindingsPath/$File"
 Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
 $Text = Get-Content "$BindingsPath/$File" -Raw
 
-# Tabs to spaces
-$Text = $Text -replace '\t', '    '
-
-# Trim extra newline at EOF
-$Text = $Text -replace '\n$', ''
-
 # Fix interface usage
 $Text = $Text -replace '\bISentrySerializable\b', 'SentrySerializable'
 $Text = $Text -replace '\bISentryRedactOptions\b', 'SentryRedactOptions'

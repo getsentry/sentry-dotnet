@@ -124,7 +124,8 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryViewScreenshotOptions",
         "SentryViewScreenshotProvider"
     );
-File.WriteAllText(args[0], nodes.ToFullString());
+
+File.WriteAllText(args[0], nodes.ToFullString().TabsToSpaces());
 
 internal static class FilterExtensions
 {
@@ -389,5 +390,10 @@ internal static class StringExtensions
             .Replace("\\*", ".*")
             .Replace("\\?", ".") + "$";
         return Regex.IsMatch(str, regex);
+    }
+
+    public static string TabsToSpaces(this string str, int spacesPerTab = 4)
+    {
+        return str.Replace("\t", new string(' ', spacesPerTab));
     }
 }
