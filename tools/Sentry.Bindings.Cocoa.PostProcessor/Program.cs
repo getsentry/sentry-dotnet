@@ -11,9 +11,24 @@ if (args.Length != 1)
 var code = File.ReadAllText(args[0]);
 var tree = CSharpSyntaxTree.ParseText(code);
 var nodes = tree.GetCompilationUnitRoot()
-    .InsertNamespace("Sentry.CocoaSdk")
-    // rename conflicting SentryRRWebEvent (protocol vs. interface)
+    .Namespace("Sentry.CocoaSdk")
+    // Set Internal attributes on all interfaces and delegates
+    .Attribute<InterfaceDeclarationSyntax>("Internal")
+    .Attribute<DelegateDeclarationSyntax>("Internal")
+    // Adjust protocols (some are models)
+    .Model("SentryRedactOptions")
+    .Model("SentrySerializable")
+    .Model("SentrySpan")
+    .Model("SentryRRWebEvent", false)
+    .Model("SentryReplayBreadcrumbConverter", false)
+    .Model("SentryViewScreenshotProvider", false)
+    // Adjust base types
+    .BaseType("SentrySpan", "NSObject")
+    .BaseType("SentryRedactOptions", "NSObject")
+    // Rename conflicting SentryRRWebEvent (protocol vs. interface)
     .Rename<InterfaceDeclarationSyntax>("SentryRRWebEvent", "ISentryRRWebEvent", iface => iface.HasAttribute("Protocol"))
+    // Adjust nullable return delegates (though broken until this is fixed: https://github.com/xamarin/xamarin-macios/issues/17109)
+    .Attribute<DelegateDeclarationSyntax>("return: NullAllowed", del => del.GetIdentifier() is "SentryBeforeBreadcrumbCallback" or "SentryBeforeSendEventCallback" or "SentryTracesSamplerCallback")
     .Blacklist<AttributeSyntax>(
         // error CS0246: The type or namespace name 'iOS' could not be found
         "iOS",
@@ -70,7 +85,6 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryHttpStatusCodeRange",
         "SentryHub",
         "SentryId",
-        "SentryIntegrationProtocol",
         "SentryLog",
         "SentryLogger",
         "SentryMeasurementUnit",
@@ -131,7 +145,7 @@ internal static class FilterExtensions
         return root.RemoveNodes(nodesToRemove, SyntaxRemoveOptions.KeepNoTrivia)!;
     }
 
-    public static CompilationUnitSyntax InsertNamespace(
+    public static CompilationUnitSyntax Namespace(
         this CompilationUnitSyntax root,
         string name)
     {
@@ -143,6 +157,60 @@ internal static class FilterExtensions
         return SyntaxFactory.CompilationUnit()
             .WithUsings(root.Usings)
             .AddMembers(namespaceDeclaration.WithMembers(root.Members));
+    }
+
+    public static CompilationUnitSyntax Attribute<T>(
+        this CompilationUnitSyntax root,
+        string name,
+        Func<T, bool>? predicate = null) where T : SyntaxNode
+    {
+        var nodesToUpdate = root.DescendantNodes()
+            .OfType<T>()
+            .Where(node => predicate == null || predicate(node))
+            .Where(node => !node.HasAttribute(name))
+            .ToList();
+
+        var attribute = SyntaxFactory.Attribute(SyntaxFactory.IdentifierName(name));
+        var attributeList = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(attribute));
+
+        var replacements = nodesToUpdate.ToDictionary(
+            node => node,
+            node => node.WithAttribute(attributeList));
+
+        return root.ReplaceNodes(replacements.Keys, (orig, _) => replacements[orig]);
+    }
+
+    public static CompilationUnitSyntax Model(
+        this CompilationUnitSyntax root,
+        string name,
+        bool isModel = true)
+    {
+        var iface = root.DescendantNodes()
+            .OfType<InterfaceDeclarationSyntax>()
+            .Where(i => i.GetIdentifier() == name)
+            .Where(i => i.HasAttribute("Protocol"))
+            .FirstOrDefault();
+
+        if (iface == null)
+        {
+            return root;
+        }
+
+        var trivia = SyntaxFactory.TriviaList(
+            iface.GetLeadingTrivia().Where(t =>
+                !(t.IsKind(SyntaxKind.MultiLineCommentTrivia) && t.ToString().Contains("[Model]"))));
+        var result = root.ReplaceNode(iface, iface.WithLeadingTrivia(trivia));
+        return isModel
+            ? result.Attribute<InterfaceDeclarationSyntax>("Model", i => i.GetIdentifier() == name)
+            : result;
+    }
+
+    public static CompilationUnitSyntax BaseType(
+        this CompilationUnitSyntax root,
+        string name,
+        string baseType)
+    {
+        return root.Attribute<InterfaceDeclarationSyntax>($"BaseType (typeof({baseType}))",  iface => iface.Matches(name));
     }
 
     public static CompilationUnitSyntax Rename<T>(
@@ -193,6 +261,57 @@ internal static class SyntaxNodeExtensions
             PropertyDeclarationSyntax property => property.WithIdentifier(identifier),
             _ => throw new NotSupportedException(node.GetType().Name)
         };
+    }
+
+    public static SyntaxNode WithAttribute(this SyntaxNode node, AttributeListSyntax attributeList)
+    {
+        var existingAttributes = node switch
+        {
+            InterfaceDeclarationSyntax iface => iface.AttributeLists,
+            ClassDeclarationSyntax cls => cls.AttributeLists,
+            StructDeclarationSyntax str => str.AttributeLists,
+            EnumDeclarationSyntax enm => enm.AttributeLists,
+            DelegateDeclarationSyntax del => del.AttributeLists,
+            MethodDeclarationSyntax method => method.AttributeLists,
+            PropertyDeclarationSyntax property => property.AttributeLists,
+            _ => throw new NotSupportedException(node.GetType().Name)
+        };
+
+        if (existingAttributes.Count > 0)
+        {
+            var listWithTrivia = attributeList.WithTrailingTrivia(SyntaxFactory.EndOfLine("\n"));
+            return node switch
+            {
+                InterfaceDeclarationSyntax iface => iface.AddAttributeLists(listWithTrivia),
+                ClassDeclarationSyntax cls => cls.AddAttributeLists(listWithTrivia),
+                StructDeclarationSyntax str => str.AddAttributeLists(listWithTrivia),
+                EnumDeclarationSyntax enm => enm.AddAttributeLists(listWithTrivia),
+                DelegateDeclarationSyntax del => del.AddAttributeLists(listWithTrivia),
+                MethodDeclarationSyntax method => method.AddAttributeLists(listWithTrivia),
+                PropertyDeclarationSyntax property => property.AddAttributeLists(listWithTrivia),
+                _ => throw new NotSupportedException(node.GetType().Name)
+            };
+        }
+        else
+        {
+            var listWithTrivia = attributeList
+                .WithLeadingTrivia(node.GetLeadingTrivia())
+                .WithTrailingTrivia(SyntaxFactory.EndOfLine("\n"));
+
+            var nodeWithoutLeadingTrivia = node.WithLeadingTrivia(SyntaxFactory.TriviaList());
+
+            return nodeWithoutLeadingTrivia switch
+            {
+                InterfaceDeclarationSyntax iface => iface.AddAttributeLists(listWithTrivia),
+                ClassDeclarationSyntax cls => cls.AddAttributeLists(listWithTrivia),
+                StructDeclarationSyntax str => str.AddAttributeLists(listWithTrivia),
+                EnumDeclarationSyntax enm => enm.AddAttributeLists(listWithTrivia),
+                DelegateDeclarationSyntax del => del.AddAttributeLists(listWithTrivia),
+                MethodDeclarationSyntax method => method.AddAttributeLists(listWithTrivia),
+                PropertyDeclarationSyntax property => property.AddAttributeLists(listWithTrivia),
+                _ => throw new NotSupportedException(node.GetType().Name)
+            };
+        }
     }
 
     public static string GetQualifiedName(this SyntaxNode node)

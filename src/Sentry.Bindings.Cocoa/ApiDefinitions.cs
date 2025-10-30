@@ -172,10 +172,10 @@ interface SentryBaggage
 
 // @protocol SentrySerializable <NSObject>
 [Protocol]
-[Model]
 [BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
+[Model]
 interface SentrySerializable
 {
     // @required -(NSDictionary<NSString *,id> * _Nonnull)serialize;
@@ -736,8 +736,8 @@ interface SentrySpanContext : SentrySerializable
 
 // @protocol SentrySpan <SentrySerializable>
 [Protocol]
-[Model]
 [Internal]
+[Model]
 [BaseType (typeof(NSObject))]
 interface SentrySpan : SentrySerializable
 {
@@ -1007,23 +1007,6 @@ interface SentryHub
     // -(void)close;
     [Export ("close")]
     void Close ();
-}
-
-// @protocol SentryIntegrationProtocol <NSObject>
-[Protocol]
-[BaseType (typeof(NSObject))]
-[Internal]
-interface SentryIntegrationProtocol
-{
-    // @required -(BOOL)installWithOptions:(SentryOptions * _Nonnull)options __attribute__((swift_name("install(with:)")));
-    [Abstract]
-    [Export ("installWithOptions:")]
-    bool InstallWithOptions (SentryOptions options);
-
-    // @required -(void)uninstall;
-    [Abstract]
-    [Export ("uninstall")]
-    void Uninstall ();
 }
 
 // @interface SentryMeasurementUnit : NSObject <NSCopying>
@@ -2310,8 +2293,8 @@ interface SentryRRWebEvent : ISentryRRWebEvent
 
 // @protocol SentryRedactOptions
 [Protocol (Name = "_TtP6Sentry19SentryRedactOptions_")]
-[Model]
 [Internal]
+[Model]
 [BaseType (typeof(NSObject))]
 interface SentryRedactOptions
 {

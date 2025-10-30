@@ -230,9 +230,6 @@ $Text = $Text -replace '\t', '    '
 # Trim extra newline at EOF
 $Text = $Text -replace '\n$', ''
 
-# Set Internal attributes on interfaces and delegates
-$Text = $Text -replace '(?m)^(partial interface|interface|delegate)\b', "[Internal]`n$&"
-
 # Fix interface usage
 $Text = $Text -replace '\bISentrySerializable\b', 'SentrySerializable'
 $Text = $Text -replace '\bISentryRedactOptions\b', 'SentryRedactOptions'
@@ -250,17 +247,6 @@ $Text = $Text -replace '(SentrySpan) arg\d', '$1 span'
 $Text = $Text -replace '(SentryAppStartMeasurement) arg\d', '$1 appStartMeasurement'
 $Text = $Text -replace '(SentryLog) arg\d', '$1 log'
 $Text = $Text -replace '(SentryProfileOptions) arg\d', '$1 options'
-
-# Adjust nullable return delegates (though broken until this is fixed: https://github.com/xamarin/xamarin-macios/issues/17109)
-$Text = $Text -replace 'delegate \w+ Sentry(BeforeBreadcrumb|BeforeSendEvent|TracesSampler)Callback', "[return: NullAllowed]`n$&"
-
-# Adjust protocols (some are models)
-$Text = $Text -replace '(?ms)(@protocol.+?)/\*.+?\*/', '$1'
-$Text = $Text -replace '(?ms)@protocol (SentrySerializable|SentrySpan).+?\[Protocol\]', "`$&`n[Model]"
-$Text = $Text -replace '(?ms)@protocol (SentryRedactOptions).+?\[Protocol \(Name = \"\w+\"\)\]', "`$&`n[Model]"
-
-# Adjust base types
-$Text = $Text -replace 'interface (SentrySpan|SentryRedactOptions)\b', "[BaseType (typeof(NSObject))]`n`$&"
 
 # Update MethodToProperty translations
 $Text = $Text -replace '(Export \("get\w+"\)\]\n)\s*\[Verify \(MethodToProperty\)\]\n(.+ \{ get; \})', '$1$2'
