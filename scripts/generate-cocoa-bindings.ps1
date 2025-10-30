@@ -254,9 +254,6 @@ $Text = $Text -replace '(SentryProfileOptions) arg\d', '$1 options'
 # Adjust nullable return delegates (though broken until this is fixed: https://github.com/xamarin/xamarin-macios/issues/17109)
 $Text = $Text -replace 'delegate \w+ Sentry(BeforeBreadcrumb|BeforeSendEvent|TracesSampler)Callback', "[return: NullAllowed]`n$&"
 
-# Rename SentryRRWebEvent protocol
-$Text = $Text -replace 'interface (SentryRRWebEvent) : SentrySerializable', 'interface I$1 : SentrySerializable'
-
 # Adjust protocols (some are models)
 $Text = $Text -replace '(?ms)(@protocol.+?)/\*.+?\*/', '$1'
 $Text = $Text -replace '(?ms)@protocol (SentrySerializable|SentrySpan).+?\[Protocol\]', "`$&`n[Model]"

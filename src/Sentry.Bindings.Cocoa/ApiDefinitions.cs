@@ -2289,7 +2289,7 @@ interface SentryProfileOptions
 // @protocol SentryRRWebEvent <SentrySerializable>
 [Protocol]
 [Internal]
-interface ISentryRRWebEvent : SentrySerializable
+interface ISentryRRWebEvent: SentrySerializable
 {
 }
 

@@ -12,6 +12,8 @@ var code = File.ReadAllText(args[0]);
 var tree = CSharpSyntaxTree.ParseText(code);
 var nodes = tree.GetCompilationUnitRoot()
     .InsertNamespace("Sentry.CocoaSdk")
+    // rename conflicting SentryRRWebEvent (protocol vs. interface)
+    .Rename<InterfaceDeclarationSyntax>("SentryRRWebEvent", "ISentryRRWebEvent", iface => iface.HasAttribute("Protocol"))
     .Blacklist<AttributeSyntax>(
         // error CS0246: The type or namespace name 'iOS' could not be found
         "iOS",
@@ -142,6 +144,23 @@ internal static class FilterExtensions
             .WithUsings(root.Usings)
             .AddMembers(namespaceDeclaration.WithMembers(root.Members));
     }
+
+    public static CompilationUnitSyntax Rename<T>(
+        this CompilationUnitSyntax root,
+        string oldName,
+        string newName,
+        Func<T, bool>? predicate = null) where T : SyntaxNode
+    {
+        var replacements = new Dictionary<SyntaxNode, SyntaxNode>();
+        foreach (var node in root.DescendantNodes().OfType<T>())
+        {
+            if (node.GetIdentifier() == oldName && (predicate == null || predicate(node)))
+            {
+                replacements[node] = node.WithIdentifier(newName);
+            }
+        }
+        return root.ReplaceNodes(replacements.Keys, (orig, _) => replacements[orig]);
+    }
 }
 
 internal static class SyntaxNodeExtensions
@@ -199,6 +218,32 @@ internal static class SyntaxNodeExtensions
             return !pattern.StartsWith('!');
         }
         return false;
+    }
+
+    public static bool HasAttribute(this SyntaxNode node, string attributeName)
+    {
+        return node switch
+        {
+            InterfaceDeclarationSyntax iface => iface.AttributeLists
+                .SelectMany(al => al.Attributes)
+                .Any(attr => attr.Name.ToString() == attributeName),
+            ClassDeclarationSyntax cls => cls.AttributeLists
+                .SelectMany(al => al.Attributes)
+                .Any(attr => attr.Name.ToString() == attributeName),
+            StructDeclarationSyntax str => str.AttributeLists
+                .SelectMany(al => al.Attributes)
+                .Any(attr => attr.Name.ToString() == attributeName),
+            EnumDeclarationSyntax enm => enm.AttributeLists
+                .SelectMany(al => al.Attributes)
+                .Any(attr => attr.Name.ToString() == attributeName),
+            MethodDeclarationSyntax method => method.AttributeLists
+                .SelectMany(al => al.Attributes)
+                .Any(attr => attr.Name.ToString() == attributeName),
+            PropertyDeclarationSyntax property => property.AttributeLists
+                .SelectMany(al => al.Attributes)
+                .Any(attr => attr.Name.ToString() == attributeName),
+            _ => false
+        };
     }
 }
 
