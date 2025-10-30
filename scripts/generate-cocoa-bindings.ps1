@@ -224,17 +224,6 @@ Write-Output "Patching $BindingsPath/$File"
 Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
 $Text = Get-Content "$BindingsPath/$File" -Raw
 
-# Fix delegate argument names
-$Text = $Text -replace '(NSError) arg\d', '$1 error'
-$Text = $Text -replace '(NSHttpUrlResponse) arg\d', '$1 response'
-$Text = $Text -replace '(SentryEvent) arg\d', '$1 @event'
-$Text = $Text -replace '(SentrySamplingContext) arg\d', '$1 samplingContext'
-$Text = $Text -replace '(SentryBreadcrumb) arg\d', '$1 breadcrumb'
-$Text = $Text -replace '(SentrySpan) arg\d', '$1 span'
-$Text = $Text -replace '(SentryAppStartMeasurement) arg\d', '$1 appStartMeasurement'
-$Text = $Text -replace '(SentryLog) arg\d', '$1 log'
-$Text = $Text -replace '(SentryProfileOptions) arg\d', '$1 options'
-
 # Update MethodToProperty translations
 $Text = $Text -replace '(Export \("get\w+"\)\]\n)\s*\[Verify \(MethodToProperty\)\]\n(.+ \{ get; \})', '$1$2'
 $Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+ (?:Hash|Value|DefaultIntegrations|AppStartMeasurementWithSpans|BaggageHttpHeader) \{ get; \})', '$1'
