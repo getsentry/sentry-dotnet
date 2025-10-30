@@ -237,9 +237,6 @@ $Text = $Text -replace '\s*\[Verify \(StronglyTypedNSArray\)\]\n', ''
 $Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\()\n\s*', '$1'
 $Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)"\s*\r?\n\s*"', '$1 '
 
-# Make interface partial if we need to access private APIs.  Other parts will be defined in PrivateApiDefinitions.cs
-$Text = $Text -replace '(?m)^interface SentryScope', 'partial $&'
-
 # Add header and output file
 $Text = "$Header`n`n$Text"
 $Text | Out-File "$BindingsPath/$File"

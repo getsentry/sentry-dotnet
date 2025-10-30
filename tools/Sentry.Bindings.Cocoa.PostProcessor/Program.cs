@@ -44,6 +44,7 @@ var nodes = tree.GetCompilationUnitRoot()
     .Rename<InterfaceDeclarationSyntax>("SentryRRWebEvent", "ISentryRRWebEvent", iface => iface.HasAttribute("Protocol"))
     // Adjust nullable return delegates (though broken until this is fixed: https://github.com/xamarin/xamarin-macios/issues/17109)
     .Attribute<DelegateDeclarationSyntax>("return: NullAllowed", del => del.GetIdentifier() is "SentryBeforeBreadcrumbCallback" or "SentryBeforeSendEventCallback" or "SentryTracesSamplerCallback")
+    .Partial("SentryScope")
     .Blacklist<AttributeSyntax>(
         // error CS0246: The type or namespace name 'iOS' could not be found
         "iOS",
@@ -245,6 +246,25 @@ internal static class FilterExtensions
             }
         }
         return root.ReplaceNodes(replacements.Keys, (orig, _) => replacements[orig]);
+    }
+
+    public static CompilationUnitSyntax Partial(
+        this CompilationUnitSyntax root,
+        string name)
+    {
+        var iface = root.DescendantNodes()
+            .OfType<InterfaceDeclarationSyntax>()
+            .FirstOrDefault(i => i.Matches(name));
+
+        if (iface == null)
+        {
+            return root;
+        }
+
+        return root.ReplaceNode(
+            iface,
+            iface.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingTrivia(SyntaxFactory.Space))
+        );
     }
 }
 
