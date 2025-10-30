@@ -35,6 +35,8 @@ internal class Hub : IHub, IDisposable
 
     public bool IsEnabled => _isEnabled;
 
+    public bool IsSessionActive => _sessionManager.IsSessionActive;
+
     internal SentryOptions Options => _options;
 
     private Scope CurrentScope => ScopeManager.GetCurrent().Key;
@@ -585,7 +587,8 @@ internal class Hub : IHub, IDisposable
             scope.LastEventId = id;
             scope.SessionUpdate = null;
 
-            if (evt.HasTerminalException() && scope.Transaction is { } transaction)
+            if (evt.GetExceptionType() is SentryEvent.ExceptionType.UnhandledTerminal
+                && scope.Transaction is { } transaction)
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.

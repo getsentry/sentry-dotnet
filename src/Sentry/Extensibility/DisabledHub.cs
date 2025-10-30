@@ -19,6 +19,11 @@ public class DisabledHub : IHub, IDisposable
     /// </summary>
     public bool IsEnabled => false;
 
+    /// <summary>
+    /// Always returns false.
+    /// </summary>
+    public bool IsSessionActive => false;
+
     private DisabledHub()
     {
     }

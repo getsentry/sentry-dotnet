@@ -174,6 +174,7 @@ namespace Sentry
     }
     public interface IHub : Sentry.ISentryClient, Sentry.ISentryScopeManager
     {
+        bool IsSessionActive { get; }
         Sentry.SentryId LastEventId { get; }
         Sentry.SentryStructuredLogger Logger { get; }
         void BindException(System.Exception exception, Sentry.ISpan span);
@@ -802,6 +803,7 @@ namespace Sentry
     public static class SentrySdk
     {
         public static bool IsEnabled { get; }
+        public static bool IsSessionActive { get; }
         public static Sentry.SentryId LastEventId { get; }
         public static Sentry.SentryStructuredLogger Logger { get; }
         public static void AddBreadcrumb(Sentry.Breadcrumb breadcrumb, Sentry.SentryHint? hint = null) { }
@@ -1041,8 +1043,9 @@ namespace Sentry
     public enum SessionEndStatus
     {
         Exited = 0,
-        Crashed = 1,
-        Abnormal = 2,
+        Unhandled = 1,
+        Crashed = 2,
+        Abnormal = 3,
     }
     public class SessionUpdate : Sentry.ISentryJsonSerializable, Sentry.ISentrySession
     {
@@ -1345,6 +1348,7 @@ namespace Sentry.Extensibility
     {
         public static readonly Sentry.Extensibility.DisabledHub Instance;
         public bool IsEnabled { get; }
+        public bool IsSessionActive { get; }
         public Sentry.SentryId LastEventId { get; }
         public Sentry.SentryStructuredLogger Logger { get; }
         public void BindClient(Sentry.ISentryClient client) { }
@@ -1391,6 +1395,7 @@ namespace Sentry.Extensibility
     {
         public static readonly Sentry.Extensibility.HubAdapter Instance;
         public bool IsEnabled { get; }
+        public bool IsSessionActive { get; }
         public Sentry.SentryId LastEventId { get; }
         public Sentry.SentryStructuredLogger Logger { get; }
         public void AddBreadcrumb(string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
@@ -1757,6 +1762,7 @@ namespace Sentry.Protocol
         public static readonly string DescriptionKey;
         public static readonly string HandledKey;
         public static readonly string MechanismKey;
+        public static readonly string TerminalKey;
         public Mechanism() { }
         public System.Collections.Generic.IDictionary<string, object> Data { get; }
         public string? Description { get; set; }
@@ -1768,6 +1774,7 @@ namespace Sentry.Protocol
         public int? ParentId { get; set; }
         public string? Source { get; set; }
         public bool Synthetic { get; set; }
+        public bool? Terminal { get; }
         public string Type { get; set; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.Protocol.Mechanism FromJson(System.Text.Json.JsonElement json) { }
@@ -1896,5 +1903,5 @@ public static class SentryExceptionExtensions
 {
     public static void AddSentryContext(this System.Exception ex, string name, System.Collections.Generic.IReadOnlyDictionary<string, object> data) { }
     public static void AddSentryTag(this System.Exception ex, string name, string value) { }
-    public static void SetSentryMechanism(this System.Exception ex, string type, string? description = null, bool? handled = default) { }
+    public static void SetSentryMechanism(this System.Exception ex, string type, string? description = null, bool? handled = default, bool? terminal = default) { }
 }

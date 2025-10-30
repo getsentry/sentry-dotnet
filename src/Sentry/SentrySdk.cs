@@ -751,6 +751,9 @@ static partial class SentrySdk
         string? operation = null)
         => CurrentHub.ContinueTrace(traceHeader, baggageHeader, name, operation);
 
+    /// <inheritdoc cref="IHub.IsSessionActive"/>
+    public static bool IsSessionActive { [DebuggerStepThrough] get => CurrentHub.IsSessionActive; }
+
     /// <inheritdoc cref="IHub.StartSession"/>
     [DebuggerStepThrough]
     public static void StartSession()

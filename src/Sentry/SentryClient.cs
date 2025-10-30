@@ -347,18 +347,23 @@ public class SentryClient : ISentryClient, IDisposable
             return SentryId.Empty; // Dropped by BeforeSend callback
         }
 
-        var hasTerminalException = processedEvent.HasTerminalException();
-        if (hasTerminalException)
+        var exceptionType = processedEvent.GetExceptionType();
+        switch (exceptionType)
         {
-            // Event contains a terminal exception -> end session as crashed
-            _options.LogDebug("Ending session as Crashed, due to unhandled exception.");
-            scope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
-        }
-        else if (processedEvent.HasException())
-        {
-            // Event contains a non-terminal exception -> report error
-            // (this might return null if the session has already reported errors before)
-            scope.SessionUpdate = _sessionManager.ReportError();
+            case SentryEvent.ExceptionType.UnhandledNonTerminal:
+                _options.LogDebug("Marking session as 'Unhandled', due to non-terminal unhandled exception.");
+                _sessionManager.MarkSessionAsUnhandled();
+                break;
+
+            case SentryEvent.ExceptionType.UnhandledTerminal:
+                _options.LogDebug("Ending session as 'Crashed', due to unhandled exception.");
+                scope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
+                break;
+
+            case SentryEvent.ExceptionType.Handled:
+                _options.LogDebug("Updating session by reporting an error.");
+                scope.SessionUpdate = _sessionManager.ReportError();
+                break;
         }
 
         if (_options.SampleRate != null)
