@@ -24,7 +24,7 @@ docs/docfx.zip
 mono_crash.*.json
 test_output/
 test/**/*.apk
-/tools/sentry-cli/
+/tools/
 *.log
 .sentry-native
 **/EnvironmentVariables.g.cs

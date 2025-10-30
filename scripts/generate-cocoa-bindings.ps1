@@ -179,13 +179,15 @@ if (!(Test-Path $BackupPath))
     New-Item -ItemType Directory -Path $BackupPath | Out-Null
 }
 
+Push-Location $PSScriptRoot
+
 ################################################################################
 # Patch StructsAndEnums.cs
 ################################################################################
 $File = 'StructsAndEnums.cs'
 Write-Output "Patching $BindingsPath/$File"
 Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
-& dotnet run --project "$RootPath/tools/Sentry.Bindings.Cocoa.PostProcessor/Sentry.Bindings.Cocoa.PostProcessor.csproj" -- "$BindingsPath/$File" | ForEach-Object { Write-Host $_ }
+& dotnet run "$PSScriptRoot/patch-cocoa-bindings.cs" "$BindingsPath/$File" | ForEach-Object { Write-Host $_ }
 
 ################################################################################
 # Patch ApiDefinitions.cs
@@ -193,4 +195,4 @@ Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
 $File = 'ApiDefinitions.cs'
 Write-Output "Patching $BindingsPath/$File"
 Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
-& dotnet run --project "$RootPath/tools/Sentry.Bindings.Cocoa.PostProcessor/Sentry.Bindings.Cocoa.PostProcessor.csproj" -- "$BindingsPath/$File" | ForEach-Object { Write-Host $_ }
+& dotnet run "$PSScriptRoot/patch-cocoa-bindings.cs" "$BindingsPath/$File" | ForEach-Object { Write-Host $_ }
