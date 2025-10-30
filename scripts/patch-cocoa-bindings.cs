@@ -28,11 +28,12 @@ code = Regex.Replace(code, @"(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)""\s*\r?\n\s*""",
 var tree = CSharpSyntaxTree.ParseText(code);
 var nodes = tree.GetCompilationUnitRoot()
     .Namespace("Sentry.CocoaSdk")
+    // Remove CFunctions class
     .Blacklist<ClassDeclarationSyntax>("CFunctions")
+    // Make enums, interfaces, and delegates internal
     .Access<EnumDeclarationSyntax>("Sentry*", SyntaxKind.InternalKeyword)
-    // Set Internal attributes on all interfaces and delegates
-    .Attribute<InterfaceDeclarationSyntax>("Internal")
-    .Attribute<DelegateDeclarationSyntax>("Internal")
+    .Attribute<InterfaceDeclarationSyntax>("*Sentry*", "Internal")
+    .Attribute<DelegateDeclarationSyntax>("Sentry*", "Internal")
     // Adjust protocols (some are models)
     .Model("SentryRedactOptions")
     .Model("SentrySerializable")
@@ -69,7 +70,9 @@ var nodes = tree.GetCompilationUnitRoot()
     // Rename conflicting SentryRRWebEvent (protocol vs. interface)
     .Rename<InterfaceDeclarationSyntax>("SentryRRWebEvent", "ISentryRRWebEvent", iface => iface.HasAttribute("Protocol"))
     // Adjust nullable return delegates (though broken until this is fixed: https://github.com/xamarin/xamarin-macios/issues/17109)
-    .Attribute<DelegateDeclarationSyntax>("return: NullAllowed", del => del.GetIdentifier() is "SentryBeforeBreadcrumbCallback" or "SentryBeforeSendEventCallback" or "SentryTracesSamplerCallback")
+    .Attribute<DelegateDeclarationSyntax>("SentryBeforeBreadcrumbCallback", "return: NullAllowed")
+    .Attribute<DelegateDeclarationSyntax>("SentryBeforeSendEventCallback", "return: NullAllowed")
+    .Attribute<DelegateDeclarationSyntax>("SentryTracesSamplerCallback", "return: NullAllowed")
     .Partial("SentryScope")
     .Blacklist<AttributeSyntax>(
         // error CS0246: The type or namespace name 'iOS' could not be found
@@ -206,16 +209,16 @@ internal static class FilterExtensions
 
     public static CompilationUnitSyntax Attribute<T>(
         this CompilationUnitSyntax root,
-        string name,
-        Func<T, bool>? predicate = null) where T : SyntaxNode
+        string typeName,
+        string attributeName) where T : SyntaxNode
     {
         var nodesToUpdate = root.DescendantNodes()
             .OfType<T>()
-            .Where(node => predicate == null || predicate(node))
-            .Where(node => !node.HasAttribute(name))
+            .Where(node => node.Matches(typeName))
+            .Where(node => !node.HasAttribute(attributeName))
             .ToList();
 
-        var attribute = SyntaxFactory.Attribute(SyntaxFactory.IdentifierName(name));
+        var attribute = SyntaxFactory.Attribute(SyntaxFactory.IdentifierName(attributeName));
         var attributeList = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(attribute));
 
         var replacements = nodesToUpdate.ToDictionary(
@@ -232,8 +235,8 @@ internal static class FilterExtensions
     {
         var iface = root.DescendantNodes()
             .OfType<InterfaceDeclarationSyntax>()
-            .Where(i => i.Matches(name))
-            .Where(i => i.HasAttribute("Protocol"))
+            .Where(node => node.Matches(name))
+            .Where(node => node.HasAttribute("Protocol"))
             .FirstOrDefault();
 
         if (iface == null)
@@ -246,7 +249,7 @@ internal static class FilterExtensions
                 !(t.IsKind(SyntaxKind.MultiLineCommentTrivia) && t.ToString().Contains("[Model]"))));
         var result = root.ReplaceNode(iface, iface.WithLeadingTrivia(trivia));
         return isModel
-            ? result.Attribute<InterfaceDeclarationSyntax>("Model", i => i.Matches(name))
+            ? result.Attribute<InterfaceDeclarationSyntax>(name, "Model")
             : result;
     }
 
@@ -255,7 +258,7 @@ internal static class FilterExtensions
         string name,
         string baseType)
     {
-        return root.Attribute<InterfaceDeclarationSyntax>($"BaseType (typeof({baseType}))", iface => iface.Matches(name));
+        return root.Attribute<InterfaceDeclarationSyntax>(name, $"BaseType (typeof({baseType}))");
     }
 
     public static CompilationUnitSyntax Rename<T>(
@@ -359,11 +362,10 @@ internal static class FilterExtensions
     public static CompilationUnitSyntax Access<T>(
         this CompilationUnitSyntax root,
         string name,
-        SyntaxKind modifier,
-        Func<T, bool>? predicate = null) where T : MemberDeclarationSyntax
+        SyntaxKind modifier) where T : MemberDeclarationSyntax
     {
         var nodes = root.DescendantNodes().OfType<T>()
-            .Where(node => node.Matches(name) && (predicate == null || predicate(node)));
+            .Where(node => node.Matches(name));
 
         return root.ReplaceNodes(nodes, (original, _) =>
             original.WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(modifier)))
