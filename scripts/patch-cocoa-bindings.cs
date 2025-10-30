@@ -56,17 +56,18 @@ var nodes = tree.GetCompilationUnitRoot()
     .Verify<PropertyDeclarationSyntax>("*Sentry*.*", "MethodToProperty") // TODO: replace broad pattern with one-by-one verification
     .Verify<PropertyDeclarationSyntax>("SentryOptions.*Targets", "StronglyTypedNSArray")
     // Fix delegate argument names
-    .Rename<ParameterSyntax>("arg*", "error", p => p.Type?.ToString() == "NSError")
-    .Rename<ParameterSyntax>("arg*", "response", p => p.Type?.ToString() == "NSHttpUrlResponse")
-    .Rename<ParameterSyntax>("arg*", "@event", p => p.Type?.ToString() == "SentryEvent")
-    .Rename<ParameterSyntax>("arg*", "samplingContext", p => p.Type?.ToString() == "SentrySamplingContext")
-    .Rename<ParameterSyntax>("arg*", "breadcrumb", p => p.Type?.ToString() == "SentryBreadcrumb")
-    .Rename<ParameterSyntax>("arg*", "span", p => p.Type?.ToString() == "SentrySpan")
-    .Rename<ParameterSyntax>("arg*", "log", p => p.Type?.ToString() == "SentryLog")
-    .Rename<ParameterSyntax>("arg*", "options", p => p.Type?.ToString() == "SentryProfileOptions")
+    .Rename<ParameterSyntax>("NSError arg*", "NSError error")
+    .Rename<ParameterSyntax>("NSHttpUrlResponse arg*", "NSHttpUrlResponse response")
+    .Rename<ParameterSyntax>("SentryEvent arg*", "SentryEvent @event")
+    .Rename<ParameterSyntax>("SentrySamplingContext arg*", "SentrySamplingContext samplingContext")
+    .Rename<ParameterSyntax>("SentryBreadcrumb arg*", "SentryBreadcrumb breadcrumb")
+    .Rename<ParameterSyntax>("SentrySpan arg*", "SentrySpan span")
+    .Rename<ParameterSyntax>("SentryLog arg*", "SentryLog log")
+    .Rename<ParameterSyntax>("SentryProfileOptions arg*", "SentryProfileOptions options")
     // Fix interface names
     .Rename<InterfaceDeclarationSyntax>("SentrySerializable", "ISentrySerializable")
     .Rename<InterfaceDeclarationSyntax>("SentryRedactOptions", "ISentryRedactOptions")
+    .Rename<ParameterSyntax>("SentryRedactOptions options", "ISentryRedactOptions options")
     // Rename conflicting SentryRRWebEvent (protocol vs. interface)
     .Rename<InterfaceDeclarationSyntax>("SentryRRWebEvent", "ISentryRRWebEvent", iface => iface.HasAttribute("Protocol"))
     // Adjust nullable return delegates (though broken until this is fixed: https://github.com/xamarin/xamarin-macios/issues/17109)
@@ -270,7 +271,12 @@ internal static class FilterExtensions
         var replacements = new Dictionary<SyntaxNode, SyntaxNode>();
         foreach (var node in root.DescendantNodes().OfType<T>())
         {
-            if (node.Matches(oldName) && (predicate == null || predicate(node)))
+            if (predicate != null && !predicate(node))
+            {
+                continue;
+            }
+
+            if (node.Matches(oldName))
             {
                 replacements[node] = node.WithIdentifier(newName);
             }
@@ -384,7 +390,7 @@ internal static class SyntaxNodeExtensions
             DelegateDeclarationSyntax del => del.Identifier.Text,
             MethodDeclarationSyntax method => method.Identifier.Text,
             PropertyDeclarationSyntax property => property.Identifier.Text,
-            ParameterSyntax param => param.Identifier.Text,
+            ParameterSyntax param => $"{param.Type} {param.Identifier.Text}",
             AttributeSyntax attr => attr.Name.ToString(),
             AttributeListSyntax list => string.Join(",", list.Attributes.Select(a => a.Name.ToString())),
             BaseTypeSyntax type => type.Type.ToString(),
@@ -397,16 +403,25 @@ internal static class SyntaxNodeExtensions
 
     public static SyntaxNode WithIdentifier(this SyntaxNode node, string newName)
     {
-        var oldIdentifier = node switch
+        if (node is ParameterSyntax param)
         {
-            TypeDeclarationSyntax type => type.Identifier,
-            DelegateDeclarationSyntax del => del.Identifier,
-            MethodDeclarationSyntax method => method.Identifier,
-            PropertyDeclarationSyntax property => property.Identifier,
-            ParameterSyntax param => param.Identifier,
-            _ => throw new NotSupportedException(node.GetType().Name)
-        };
-        var newIdentifier = SyntaxFactory.Identifier(newName).WithTrailingTrivia(oldIdentifier.TrailingTrivia);
+            var parts = newName.Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+            var newType = parts.Length > 1 ? parts[0] : param.Type?.ToString();
+            var newParamName = parts.Length > 1 ? parts[1] : parts[0];
+
+            var updated = param;
+            if (newType != null && newType != param.Type?.ToString())
+            {
+                updated = updated.WithType(SyntaxFactory.ParseTypeName(newType));
+            }
+            if (newParamName != param.Identifier.Text)
+            {
+                updated = updated.WithIdentifier(SyntaxFactory.Identifier(newParamName));
+            }
+            return updated;
+        }
+
+        var newIdentifier = SyntaxFactory.Identifier(newName);
         return node switch
         {
             InterfaceDeclarationSyntax iface => iface.WithIdentifier(newIdentifier),
@@ -416,7 +431,6 @@ internal static class SyntaxNodeExtensions
             DelegateDeclarationSyntax del => del.WithIdentifier(newIdentifier),
             MethodDeclarationSyntax method => method.WithIdentifier(newIdentifier),
             PropertyDeclarationSyntax property => property.WithIdentifier(newIdentifier),
-            ParameterSyntax param => param.WithIdentifier(newIdentifier),
             _ => throw new NotSupportedException(node.GetType().Name)
         };
     }

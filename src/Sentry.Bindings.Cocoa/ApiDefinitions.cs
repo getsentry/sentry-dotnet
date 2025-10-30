@@ -2915,7 +2915,7 @@ interface PrivateSentrySDKOnly
     // +(UIView * _Nonnull)sessionReplayMaskingOverlay:(id<SentryRedactOptions> _Nonnull)options;
     [Static]
     [Export("sessionReplayMaskingOverlay:")]
-    UIView SessionReplayMaskingOverlay(SentryRedactOptions options);
+    UIView SessionReplayMaskingOverlay(ISentryRedactOptions options);
 
     // +(void)configureSessionReplayWith:(id<SentryReplayBreadcrumbConverter> _Nullable)breadcrumbConverter screenshotProvider:(id<SentryViewScreenshotProvider> _Nullable)screenshotProvider;
     [Static]
