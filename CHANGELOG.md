@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 6.0.0-preview.2
 
 ### BREAKING CHANGES
 
