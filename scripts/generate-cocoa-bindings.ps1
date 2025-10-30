@@ -224,11 +224,6 @@ Write-Output "Patching $BindingsPath/$File"
 Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
 $Text = Get-Content "$BindingsPath/$File" -Raw
 
-# Update MethodToProperty translations
-$Text = $Text -replace '(Export \("get\w+"\)\]\n)\s*\[Verify \(MethodToProperty\)\]\n(.+ \{ get; \})', '$1$2'
-$Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+ (?:Hash|Value|DefaultIntegrations|AppStartMeasurementWithSpans|BaggageHttpHeader) \{ get; \})', '$1'
-$Text = $Text -replace '\[Verify \(MethodToProperty\)\]\n\s*(.+) \{ get; \}', '$1();'
-
 # Allow weakly typed NSArray
 # We have some that accept either NSString or NSRegularExpression, which have no common type so they use NSObject
 $Text = $Text -replace '\s*\[Verify \(StronglyTypedNSArray\)\]\n', ''

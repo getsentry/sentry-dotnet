@@ -28,6 +28,12 @@ var nodes = tree.GetCompilationUnitRoot()
     // Remove INSCopying due to https://github.com/xamarin/xamarin-macios/issues/17130
     .Blacklist<BaseTypeSyntax>("INSCopying")
     .Blacklist<BaseListSyntax>("")
+    // Fix/verify property-to-method conversions
+    .PropertyToMethod("Sentry*.Serialize")
+    .PropertyToMethod("SentrySpan.ToTraceHeader")
+    .PropertyToMethod("SentryTraceContext.ToBaggage")
+    .PropertyToMethod("PrivateSentrySDKOnly.Capture*")
+    .Blacklist<AttributeSyntax>("Verify") // TODO: MethodToProperty predicate
     // Fix delegate argument names
     .Rename<ParameterSyntax>("arg*", "error", p => p.Type?.ToString() == "NSError")
     .Rename<ParameterSyntax>("arg*", "response", p => p.Type?.ToString() == "NSHttpUrlResponse")
@@ -265,6 +271,43 @@ internal static class FilterExtensions
             iface,
             iface.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingTrivia(SyntaxFactory.Space))
         );
+    }
+
+    public static CompilationUnitSyntax PropertyToMethod(this CompilationUnitSyntax root, string pattern)
+    {
+        var properties = root.DescendantNodes()
+            .OfType<PropertyDeclarationSyntax>()
+            .Where(prop =>
+                prop.AttributeLists.SelectMany(a => a.Attributes)
+                    .Any(attr => attr.Name.ToString() == "Verify" && attr.ArgumentList?.Arguments.ToString().Contains("MethodToProperty") == true) &&
+                prop.AccessorList != null &&
+                prop.AccessorList.Accessors.Count == 1 &&
+                prop.AccessorList.Accessors[0].Kind() == SyntaxKind.GetAccessorDeclaration &&
+                prop.GetQualifiedName().Matches(pattern)
+            );
+
+        return root.ReplaceNodes(properties, (original, _) =>
+        {
+            var newAttributes = SyntaxFactory.List(
+                original.AttributeLists
+                    .Select(al => al.WithAttributes(
+                        SyntaxFactory.SeparatedList(
+                            al.Attributes.Where(attr =>
+                                !(attr.Name.ToString() == "Verify" && attr.ArgumentList?.Arguments.ToString().Contains("MethodToProperty") == true)
+                            )
+                        )
+                    ))
+                    .Where(al => al.Attributes.Count > 0)
+            );
+
+            return SyntaxFactory.MethodDeclaration(original.Type, SyntaxFactory.Identifier(original.Identifier.Text))
+                .WithModifiers(original.Modifiers)
+                .WithAttributeLists(newAttributes)
+                .WithParameterList(SyntaxFactory.ParameterList())
+                .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
+                .WithLeadingTrivia(original.GetLeadingTrivia())
+                .WithTrailingTrivia(original.GetTrailingTrivia());
+        });
     }
 }
 
