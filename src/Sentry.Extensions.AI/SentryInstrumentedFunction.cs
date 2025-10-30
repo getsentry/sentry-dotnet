@@ -13,7 +13,6 @@ internal sealed class SentryInstrumentedFunction(AIFunction innerFunction, ChatO
         CancellationToken cancellationToken)
     {
         var currSpan = InitToolSpan(arguments);
-        RemoveSentryArgs(ref arguments);
         try
         {
             var result = await base.InvokeCoreAsync(arguments, cancellationToken).ConfigureAwait(false);
@@ -35,34 +34,20 @@ internal sealed class SentryInstrumentedFunction(AIFunction innerFunction, ChatO
 
     private ISpan InitToolSpan(AIFunctionArguments arguments)
     {
-        const string operation = "gen_ai.execute_tool";
         var spanName = $"execute_tool {Name}";
-        ISpan currSpan;
+        var agentSpan = SentryAIUtil.GetActivitySpan();
 
-        if (arguments.TryGetValue(SentryAIConstants.KeyMessageFunctionArgumentDictKey,
-                out var keyMessage)
-            && keyMessage is ChatMessage message
-            && SentryChatClient.GetMessageToSpanDict(options).TryGetValue(message, out var agentSpan))
-        {
-            currSpan = agentSpan.StartChild(operation, spanName);
-        }
-        else
-        {
+        var currSpan = agentSpan != null
+            ? agentSpan.StartChild(SentryAIConstants.SpanAttributes.ToolCallOperation, spanName)
             // If we couldn't find the agent span, just attach it to the hub's current scope
-            currSpan = Hub.StartSpan(operation, spanName);
-        }
+            : Hub.StartSpan(SentryAIConstants.SpanAttributes.ToolCallOperation, spanName);
 
-        currSpan.SetData("gen_ai.request.model", options?.ModelId);
-        currSpan.SetData("gen_ai.operation.name", "execute_tool");
-        currSpan.SetData("gen_ai.tool.name", Name);
-        currSpan.SetData("gen_ai.tool.description", Description);
-        currSpan.SetData("gen_ai.tool.input", arguments);
+        currSpan.SetData(SentryAIConstants.SpanAttributes.RequestModel, options?.ModelId);
+        currSpan.SetData(SentryAIConstants.SpanAttributes.OperationName, "execute_tool");
+        currSpan.SetData(SentryAIConstants.SpanAttributes.ToolName, Name);
+        currSpan.SetData(SentryAIConstants.SpanAttributes.ToolDescription, Description);
+        currSpan.SetData(SentryAIConstants.SpanAttributes.ToolInput, arguments);
 
         return currSpan;
-    }
-
-    private static void RemoveSentryArgs(ref AIFunctionArguments arguments)
-    {
-        arguments.Remove(SentryAIConstants.KeyMessageFunctionArgumentDictKey);
     }
 }

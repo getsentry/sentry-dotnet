@@ -112,7 +112,7 @@ internal static class SentryAISpanEnricher
     /// <param name="span">span to enrich</param>
     /// <param name="messages">a list of <see cref="ChatResponseUpdate"/></param>
     /// <param name="aiOptions">AI-specific options</param>
-    public static void EnrichWithStreamingResponse(ISpan span, List<ChatResponseUpdate> messages, SentryAIOptions? aiOptions = null)
+    public static void EnrichWithStreamingResponses(ISpan span, List<ChatResponseUpdate> messages, SentryAIOptions? aiOptions = null)
     {
         var inputTokenCount = 0L;
         var outputTokenCount = 0L;
@@ -138,7 +138,7 @@ internal static class SentryAISpanEnricher
             }
         }
 
-        if (aiOptions?.IncludeAIResponseContent ?? true)
+        if (aiOptions?.IncludeAIResponseContent == true)
         {
             span.SetData("gen_ai.response.text", finalText.ToString());
         }
