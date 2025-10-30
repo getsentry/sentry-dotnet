@@ -2153,8 +2153,20 @@ public partial class HubTests : IDisposable
     public void CaptureFeedback_HubEnabled(bool enabled)
     {
         // Arrange
+        var expectedId = enabled ? SentryId.Create() : SentryId.Empty;
+        var expectedResult = enabled ? CaptureFeedbackResult.Success : CaptureFeedbackResult.DisabledHub;
         var hub = _fixture.GetSut();
-        if (!enabled)
+        if (enabled)
+        {
+            _fixture.Client.CaptureFeedback(Arg.Any<SentryFeedback>(), out Arg.Any<CaptureFeedbackResult>(),
+                    Arg.Any<Scope>(), Arg.Any<SentryHint>())
+                .Returns(callInfo =>
+                {
+                    callInfo[1] = expectedResult; // Set the out parameter
+                    return expectedId; // Return value of the method
+                });
+        }
+        else
         {
             hub.Dispose();
         }
@@ -2162,10 +2174,13 @@ public partial class HubTests : IDisposable
         var feedback = new SentryFeedback("Test feedback");
 
         // Act
-        hub.CaptureFeedback(feedback);
+        var id = hub.CaptureFeedback(feedback, out var result);
 
         // Assert
-        _fixture.Client.Received(enabled ? 1 : 0).CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
+        id.Should().Be(expectedId);
+        result.Should().Be(expectedResult);
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureFeedback(Arg.Any<SentryFeedback>(),
+            out Arg.Any<CaptureFeedbackResult>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
     [Theory]
