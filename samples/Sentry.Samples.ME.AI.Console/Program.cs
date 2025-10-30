@@ -103,21 +103,6 @@ var streamingOptions = new ChatOptions
     MaxOutputTokens = 1024
 }.WithSentry();
 
-var streamingResponse = new List<string>();
-await foreach (var update in client.GetStreamingResponseAsync([
-                   new ChatMessage(ChatRole.User, "Write a short poem about AI and monitoring. Keep it under 50 words.")
-               ], streamingOptions))
-{
-    if (!string.IsNullOrEmpty(update.Text))
-    {
-        Console.Write(update.Text);
-        streamingResponse.Add(update.Text);
-    }
-}
-
-Console.WriteLine(); // New line after streaming
-logger.LogInformation("Streaming Response completed: {StreamingText}", string.Concat(streamingResponse));
-
 logger.LogInformation("Microsoft.Extensions.AI sample completed! Check your Sentry dashboard for the trace data.");
 
 transaction.Finish();

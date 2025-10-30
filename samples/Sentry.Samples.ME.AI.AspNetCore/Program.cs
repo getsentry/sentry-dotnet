@@ -54,14 +54,15 @@ app.MapGet("/test", async (IChatClient chatClient, ILogger<Program> logger) =>
     {
         ModelId = "gpt-4o-mini",
         MaxOutputTokens = 1024,
-        Tools = [
-            // Tool 1: Quick response with minimal delay
+        Tools =
+        [
+            // Tool 1: Quick response with minimal delay, but throws an error when trying to get Alice's age
             AIFunctionFactory.Create(async (string personName) =>
             {
                 logger.LogInformation("GetPersonAge called for {PersonName}", personName);
                 await Task.Delay(100); // 100ms delay
-                return personName switch {
-                    "Alice" => "25",
+                return personName switch
+                {
                     "Bob" => "30",
                     "Charlie" => "35",
                     _ => "40"
@@ -73,7 +74,8 @@ app.MapGet("/test", async (IChatClient chatClient, ILogger<Program> logger) =>
             {
                 logger.LogInformation("GetWeather called for {Location}", location);
                 await Task.Delay(500); // 500ms delay
-                return location.ToLower() switch {
+                return location.ToLower() switch
+                {
                     "new york" => "Sunny, 72°F",
                     "london" => "Cloudy, 60°F",
                     "tokyo" => "Rainy, 68°F",
@@ -92,37 +94,42 @@ app.MapGet("/test", async (IChatClient chatClient, ILogger<Program> logger) =>
 
             // Tool 4: Tool that can reference other data
             AIFunctionFactory.Create(async (string personName, string location) =>
-            {
-                logger.LogInformation("GetPersonInfo called for {PersonName} in {Location}", personName, location);
-                await Task.Delay(300); // 300ms delay
-                var age = personName switch {
-                    "Alice" => "25",
-                    "Bob" => "30",
-                    "Charlie" => "35",
-                    _ => "40"
-                };
-                var weather = location.ToLower() switch {
-                    "new york" => "Sunny, 72°F",
-                    "london" => "Cloudy, 60°F",
-                    "tokyo" => "Rainy, 68°F",
-                    _ => "Unknown weather conditions"
-                };
-                return $"{personName} (age {age}) is experiencing {weather} weather in {location}";
-            }, "GetPersonInfo", "Gets comprehensive info about a person in a specific location by combining age and weather data. Takes about 300ms."),
+                {
+                    logger.LogInformation("GetPersonInfo called for {PersonName} in {Location}", personName, location);
+                    await Task.Delay(300); // 300ms delay
+                    var age = personName switch
+                    {
+                        "Alice" => "25",
+                        "Bob" => "30",
+                        "Charlie" => "35",
+                        _ => "40"
+                    };
+                    var weather = location.ToLower() switch
+                    {
+                        "new york" => "Sunny, 72°F",
+                        "london" => "Cloudy, 60°F",
+                        "tokyo" => "Rainy, 68°F",
+                        _ => "Unknown weather conditions"
+                    };
+                    return $"{personName} (age {age}) is experiencing {weather} weather in {location}";
+                }, "GetPersonInfo",
+                "Gets comprehensive info about a person in a specific location by combining age and weather data. Takes about 300ms."),
 
             // Tool 5: Data aggregation tool that requests individual ages
             AIFunctionFactory.Create(async (int[] ages) =>
-            {
-                logger.LogInformation("CalculateAverageAge called with ages: {Ages}", string.Join(", ", ages));
-                await Task.Delay(200); // 200ms delay for calculation
-                if (ages.Length == 0)
                 {
-                    return "No ages provided";
-                }
+                    logger.LogInformation("CalculateAverageAge called with ages: {Ages}", string.Join(", ", ages));
+                    await Task.Delay(200); // 200ms delay for calculation
+                    if (ages.Length == 0)
+                    {
+                        return "No ages provided";
+                    }
 
-                var average = ages.Average();
-                return $"Average age calculated: {average:F1} years from {ages.Length} people. Individual ages: {string.Join(", ", ages)}";
-            }, "CalculateAverageAge", "Calculates the average from a list of ages. You should first get individual ages using GetPersonAge, then use this tool to calculate the average. Takes about 200ms to complete.")
+                    var average = ages.Average();
+                    return
+                        $"Average age calculated: {average:F1} years from {ages.Length} people. Individual ages: {string.Join(", ", ages)}";
+                }, "CalculateAverageAge",
+                "Calculates the average from a list of ages. You should first get individual ages using GetPersonAge, then use this tool to calculate the average. Takes about 200ms to complete.")
         ]
     }.WithSentry();
 
@@ -130,7 +137,17 @@ app.MapGet("/test", async (IChatClient chatClient, ILogger<Program> logger) =>
     {
         var streamingResponse = new List<string>();
         await foreach (var update in chatClient.GetStreamingResponseAsync([
-            new ChatMessage(ChatRole.User, "Please help me with the following tasks: 1) Find Alice's age, 2) Get weather in New York, 3) Calculate a complex result for number 15, 4) Get comprehensive info for Bob in London, and 5) Calculate average age for Alice, Bob, and Charlie (first get each person's age individually using GetPersonAge, then use CalculateAverageAge with those results). Please use the appropriate tools for each task and demonstrate tool chaining where needed.")
+        new ChatMessage(ChatRole.User,
+            """
+            Please help me with the following tasks:
+            1) Find Alice's age,
+            2) Get weather in New York,
+            3) Calculate a complex result for number 15,
+            4) Get comprehensive info for Bob in London,
+            5) Calculate average age for Alice, Bob, and Charlie
+            (first get each person's age individually using GetPersonAge, then use CalculateAverageAge with those results).
+            Please use the appropriate tools for each task and demonstrate tool chaining where needed.
+            """)
         ], options))
         {
             if (!string.IsNullOrEmpty(update.Text))
