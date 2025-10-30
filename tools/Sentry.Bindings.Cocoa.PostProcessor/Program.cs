@@ -1,6 +1,8 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Formatting;
+using CodeFormatter = Microsoft.CodeAnalysis.Formatting.Formatter;
 
 if (args.Length != 1)
 {
@@ -145,7 +147,8 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryViewScreenshotProvider"
     );
 
-File.WriteAllText(args[0], nodes.ToFullString().TabsToSpaces());
+var formatted = CodeFormatter.Format(nodes, new AdhocWorkspace());
+File.WriteAllText(args[0], formatted.ToFullString());
 
 internal static class FilterExtensions
 {
@@ -473,10 +476,8 @@ internal static class StringExtensions
             return false;
         }
 
-        var regex = "^" + Regex.Escape(pattern)
-            .Replace("\\*", ".*")
-            .Replace("\\?", ".") + "$";
-        return Regex.IsMatch(str, regex);
+        var regex = Regex.Escape(pattern).Replace("\\*", ".*").Replace("\\?", ".");
+        return Regex.IsMatch(str, $"^{regex}$");
     }
 
     public static string TabsToSpaces(this string str, int spacesPerTab = 4)
