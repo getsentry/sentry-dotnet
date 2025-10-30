@@ -197,24 +197,15 @@ Write-Output "Patching $BindingsPath/$File"
 Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
 $Text = Get-Content "$BindingsPath/$File" -Raw
 
-# Tabs to spaces
-$Text = $Text -replace '\t', '    '
-
-# Trim extra newline at EOF
-$Text = $Text -replace '\n$', ''
-
-# Insert namespace
-$Text = $Text -replace 'using .+;\n\n', "$&namespace Sentry.CocoaSdk;`n`n"
-
-# Public to internal
-$Text = $Text -replace '\bpublic\b', 'internal'
-
-# Remove static CFunctions class
-$Text = $Text -replace '(?ms)\nstatic class CFunctions.*?}\n', ''
-
 # Add header and output file
 $Text = "$Header`n`n$Text"
 $Text | Out-File "$BindingsPath/$File"
+
+################################################################################
+# Post-process StructsAndEnums.cs
+################################################################################
+Write-Output "Post-processing $BindingsPath/$File"
+& dotnet run --project "$RootPath/tools/Sentry.Bindings.Cocoa.PostProcessor/Sentry.Bindings.Cocoa.PostProcessor.csproj" -- "$BindingsPath/$File" | ForEach-Object { Write-Host $_ }
 
 ################################################################################
 # Patch ApiDefinitions.cs

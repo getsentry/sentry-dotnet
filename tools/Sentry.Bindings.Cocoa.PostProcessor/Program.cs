@@ -18,6 +18,8 @@ code = Regex.Replace(code, @"(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)""\s*\r?\n\s*""",
 var tree = CSharpSyntaxTree.ParseText(code);
 var nodes = tree.GetCompilationUnitRoot()
     .Namespace("Sentry.CocoaSdk")
+    .Blacklist<ClassDeclarationSyntax>("CFunctions")
+    .Access<EnumDeclarationSyntax>("Sentry*", SyntaxKind.InternalKeyword)
     // Set Internal attributes on all interfaces and delegates
     .Attribute<InterfaceDeclarationSyntax>("Internal")
     .Attribute<DelegateDeclarationSyntax>("Internal")
@@ -343,6 +345,20 @@ internal static class FilterExtensions
                 return original.WithAttributeLists(SyntaxFactory.List(newAttrLists));
             });
     }
+
+    public static CompilationUnitSyntax Access<T>(
+        this CompilationUnitSyntax root,
+        string name,
+        SyntaxKind modifier,
+        Func<T, bool>? predicate = null) where T : MemberDeclarationSyntax
+    {
+        var nodes = root.DescendantNodes().OfType<T>()
+            .Where(node => node.Matches(name) && (predicate == null || predicate(node)));
+
+        return root.ReplaceNodes(nodes, (original, _) =>
+            original.WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(modifier)))
+        );
+    }
 }
 
 internal static class SyntaxNodeExtensions
@@ -352,6 +368,7 @@ internal static class SyntaxNodeExtensions
         return node switch
         {
             TypeDeclarationSyntax type => type.Identifier.Text,
+            EnumDeclarationSyntax type => type.Identifier.Text,
             DelegateDeclarationSyntax del => del.Identifier.Text,
             MethodDeclarationSyntax method => method.Identifier.Text,
             PropertyDeclarationSyntax property => property.Identifier.Text,
