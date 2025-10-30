@@ -176,7 +176,7 @@ interface SentryBaggage
 [DisableDefaultCtor]
 [Internal]
 [Model]
-interface ISentrySerializable
+interface SentrySerializable
 {
     // @required -(NSDictionary<NSString *,id> * _Nonnull)serialize;
     [Abstract]
@@ -187,7 +187,7 @@ interface ISentrySerializable
 // @interface SentryBreadcrumb : NSObject <SentrySerializable>
 [BaseType(typeof(NSObject))]
 [Internal]
-interface SentryBreadcrumb : ISentrySerializable
+interface SentryBreadcrumb : SentrySerializable
 {
     // @property (nonatomic) SentryLevel level;
     [Export("level", ArgumentSemantic.Assign)]
@@ -330,7 +330,7 @@ interface SentryDebugImageProvider
 // @interface SentryDebugMeta : NSObject <SentrySerializable>
 [BaseType(typeof(NSObject))]
 [Internal]
-interface SentryDebugMeta : ISentrySerializable
+interface SentryDebugMeta : SentrySerializable
 {
     // @property (copy, nonatomic) NSString * _Nullable uuid;
     [NullAllowed, Export("uuid")]
@@ -394,7 +394,7 @@ interface SentryDsn
 // @interface SentryEvent : NSObject <SentrySerializable>
 [BaseType(typeof(NSObject))]
 [Internal]
-interface SentryEvent : ISentrySerializable
+interface SentryEvent : SentrySerializable
 {
     // @property (nonatomic, strong) SentryId * _Nonnull eventId;
     [Export("eventId", ArgumentSemantic.Strong)]
@@ -518,7 +518,7 @@ interface SentryEvent : ISentrySerializable
 [BaseType(typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
-interface SentryException : ISentrySerializable
+interface SentryException : SentrySerializable
 {
     // @property (copy, nonatomic) NSString * _Nonnull value;
     [Export("value")]
@@ -563,7 +563,7 @@ interface SentryFeedbackAPI
 // @interface SentryFrame : NSObject <SentrySerializable>
 [BaseType(typeof(NSObject))]
 [Internal]
-interface SentryFrame : ISentrySerializable
+interface SentryFrame : SentrySerializable
 {
     // @property (copy, nonatomic) NSString * _Nullable symbolAddress;
     [NullAllowed, Export("symbolAddress")]
@@ -637,7 +637,7 @@ interface SentryFrame : ISentrySerializable
 // @interface SentryGeo : NSObject <SentrySerializable, NSCopying>
 [BaseType(typeof(NSObject))]
 [Internal]
-interface SentryGeo : ISentrySerializable
+interface SentryGeo : SentrySerializable
 {
     // @property (copy, atomic) NSString * _Nullable city;
     [NullAllowed, Export("city")]
@@ -687,7 +687,7 @@ interface SentryHttpStatusCodeRange
 [BaseType(typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
-interface SentrySpanContext : ISentrySerializable
+interface SentrySpanContext : SentrySerializable
 {
     // @property (readonly, nonatomic) SentryId * _Nonnull traceId;
     [Export("traceId")]
@@ -739,7 +739,7 @@ interface SentrySpanContext : ISentrySerializable
 [Internal]
 [Model]
 [BaseType (typeof(NSObject))]
-interface SentrySpan : ISentrySerializable
+interface SentrySpan : SentrySerializable
 {
     // @required @property (nonatomic, strong) SentryId * _Nonnull traceId;
     [Abstract]
@@ -1174,7 +1174,7 @@ interface SentryMeasurementUnitFraction
 [BaseType(typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
-interface SentryMechanism : ISentrySerializable
+interface SentryMechanism : SentrySerializable
 {
     // @property (copy, nonatomic) NSString * _Nonnull type;
     [Export("type")]
@@ -1212,7 +1212,7 @@ interface SentryMechanism : ISentrySerializable
 // @interface SentryMechanismMeta : NSObject <SentrySerializable>
 [BaseType(typeof(NSObject))]
 [Internal]
-interface SentryMechanismMeta : ISentrySerializable
+interface SentryMechanismMeta : SentrySerializable
 {
     // @property (nonatomic, strong) NSDictionary<NSString *,id> * _Nullable signal;
     [NullAllowed, Export("signal", ArgumentSemantic.Strong)]
@@ -1231,7 +1231,7 @@ interface SentryMechanismMeta : ISentrySerializable
 [BaseType(typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
-interface SentryMessage : ISentrySerializable
+interface SentryMessage : SentrySerializable
 {
     // -(instancetype _Nonnull)initWithFormatted:(NSString * _Nonnull)formatted;
     [Export("initWithFormatted:")]
@@ -1254,7 +1254,7 @@ interface SentryMessage : ISentrySerializable
 [BaseType(typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
-interface SentryNSError : ISentrySerializable
+interface SentryNSError : SentrySerializable
 {
     // @property (copy, nonatomic) NSString * _Nonnull domain;
     [Export("domain")]
@@ -1663,7 +1663,7 @@ interface SentryReplayApi
 // @interface SentryRequest : NSObject <SentrySerializable>
 [BaseType(typeof(NSObject))]
 [Internal]
-interface SentryRequest : ISentrySerializable
+interface SentryRequest : SentrySerializable
 {
     // @property (copy, nonatomic) NSNumber * _Nullable bodySize;
     [NullAllowed, Export("bodySize", ArgumentSemantic.Copy)]
@@ -1719,7 +1719,7 @@ interface SentrySamplingContext
 // @interface SentryScope : NSObject <SentrySerializable>
 [BaseType(typeof(NSObject))]
 [Internal]
-partial interface SentryScope : ISentrySerializable
+partial interface SentryScope : SentrySerializable
 {
     // @property (nonatomic, strong) id<SentrySpan> _Nullable span;
     [NullAllowed, Export("span", ArgumentSemantic.Strong)]
@@ -1858,7 +1858,7 @@ interface SentrySpanId
 [BaseType(typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
-interface SentryStacktrace : ISentrySerializable
+interface SentryStacktrace : SentrySerializable
 {
     // @property (nonatomic, strong) NSArray<SentryFrame *> * _Nonnull frames;
     [Export("frames", ArgumentSemantic.Strong)]
@@ -1885,7 +1885,7 @@ interface SentryStacktrace : ISentrySerializable
 [BaseType(typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
-interface SentryThread : ISentrySerializable
+interface SentryThread : SentrySerializable
 {
     // @property (copy, nonatomic) NSNumber * _Nonnull threadId;
     [Export("threadId", ArgumentSemantic.Copy)]
@@ -1919,7 +1919,7 @@ interface SentryThread : ISentrySerializable
 // @interface SentryTraceContext : NSObject <SentrySerializable>
 [BaseType(typeof(NSObject))]
 [Internal]
-interface SentryTraceContext : ISentrySerializable
+interface SentryTraceContext : SentrySerializable
 {
     // @property (readonly, nonatomic) SentryId * _Nonnull traceId;
     [Export("traceId")]
@@ -2079,7 +2079,7 @@ interface SentryTransactionContext
 // @interface SentryUser : NSObject <SentrySerializable, NSCopying>
 [BaseType(typeof(NSObject))]
 [Internal]
-interface SentryUser : ISentrySerializable
+interface SentryUser : SentrySerializable
 {
     // @property (copy, atomic) NSString * _Nullable userId;
     [NullAllowed, Export("userId")]
@@ -2274,7 +2274,7 @@ interface SentryProfileOptions
 // @protocol SentryRRWebEvent <SentrySerializable>
 [Protocol]
 [Internal]
-interface ISentryRRWebEvent : ISentrySerializable
+interface ISentryRRWebEvent : SentrySerializable
 {
 }
 
@@ -2298,7 +2298,7 @@ interface SentryRRWebEvent : ISentryRRWebEvent
 [Internal]
 [Model]
 [BaseType (typeof(NSObject))]
-interface ISentryRedactOptions
+interface SentryRedactOptions
 {
     // @required @property (readonly, nonatomic) BOOL maskAllText;
     [Abstract]
@@ -2337,7 +2337,7 @@ interface SentryReplayBreadcrumbConverter
 // @interface SentryReplayOptions : NSObject <SentryRedactOptions>
 [BaseType(typeof(NSObject), Name = "_TtC6Sentry19SentryReplayOptions")]
 [Internal]
-interface SentryReplayOptions : ISentryRedactOptions
+interface SentryReplayOptions : SentryRedactOptions
 {
     // @property (nonatomic) float sessionSampleRate;
     [Export("sessionSampleRate")]
@@ -2641,7 +2641,7 @@ interface SentryViewScreenshotProvider
 // @interface SentryViewScreenshotOptions : NSObject <SentryRedactOptions>
 [BaseType(typeof(NSObject), Name = "_TtC6Sentry27SentryViewScreenshotOptions")]
 [Internal]
-interface SentryViewScreenshotOptions : ISentryRedactOptions
+interface SentryViewScreenshotOptions : SentryRedactOptions
 {
     // @property (nonatomic) BOOL enableViewRendererV2;
     [Export("enableViewRendererV2")]
@@ -2822,7 +2822,7 @@ interface PrivateSentrySDKOnly
     // +(UIView * _Nonnull)sessionReplayMaskingOverlay:(id<SentryRedactOptions> _Nonnull)options;
     [Static]
     [Export("sessionReplayMaskingOverlay:")]
-    UIView SessionReplayMaskingOverlay(ISentryRedactOptions options);
+    UIView SessionReplayMaskingOverlay(SentryRedactOptions options);
 
     // +(void)configureSessionReplayWith:(id<SentryReplayBreadcrumbConverter> _Nullable)breadcrumbConverter screenshotProvider:(id<SentryViewScreenshotProvider> _Nullable)screenshotProvider;
     [Static]

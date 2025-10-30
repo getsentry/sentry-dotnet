@@ -65,9 +65,8 @@ var nodes = tree.GetCompilationUnitRoot()
     .Rename<ParameterSyntax>("SentryLog arg*", "SentryLog log")
     .Rename<ParameterSyntax>("SentryProfileOptions arg*", "SentryProfileOptions options")
     // Fix interface names
-    .Rename<InterfaceDeclarationSyntax>("SentrySerializable", "ISentrySerializable")
-    .Rename<InterfaceDeclarationSyntax>("SentryRedactOptions", "ISentryRedactOptions")
-    .Rename<ParameterSyntax>("SentryRedactOptions options", "ISentryRedactOptions options")
+    .Rename<BaseTypeSyntax>("ISentrySerializable", "SentrySerializable")
+    .Rename<BaseTypeSyntax>("ISentryRedactOptions", "SentryRedactOptions")
     // Rename conflicting SentryRRWebEvent (protocol vs. interface)
     .Rename<InterfaceDeclarationSyntax>("SentryRRWebEvent", "ISentryRRWebEvent", iface => iface.HasAttribute("Protocol"))
     // Adjust nullable return delegates (though broken until this is fixed: https://github.com/xamarin/xamarin-macios/issues/17109)
@@ -113,9 +112,7 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryOptions.ConfigureUserFeedback"
     )
     .Whitelist<InterfaceDeclarationSyntax>(
-        "ISentryRedactOptions",
         "ISentryRRWebEvent",
-        "ISentrySerializable",
         "PrivateSentrySDKOnly",
         "SentryAttachment",
         "SentryBaggage",
@@ -155,6 +152,7 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryScope",
         "SentryScreenFrames",
         "SentrySDK",
+        "SentrySerializable",
         "SentrySpan",
         "SentrySpanContext",
         "SentrySpanId",
@@ -416,6 +414,7 @@ internal static class SyntaxNodeExtensions
             DelegateDeclarationSyntax del => del.WithIdentifier(newIdentifier),
             MethodDeclarationSyntax method => method.WithIdentifier(newIdentifier),
             PropertyDeclarationSyntax property => property.WithIdentifier(newIdentifier),
+            SimpleBaseTypeSyntax type => type.WithType(SyntaxFactory.ParseTypeName(newName)),
             _ => throw new NotSupportedException(node.GetType().Name)
         };
     }
