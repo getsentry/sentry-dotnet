@@ -177,34 +177,30 @@ internal static class FilterExtensions
         this CompilationUnitSyntax root,
         params string[] names) where T : SyntaxNode
     {
-        var nodesToRemove = root.DescendantNodes()
+        var nodes = root.DescendantNodes()
             .OfType<T>()
             .Where(node => names.Any(node.Matches));
-        return root.RemoveNodes(nodesToRemove, SyntaxRemoveOptions.KeepNoTrivia)!;
+        return root.RemoveNodes(nodes, SyntaxRemoveOptions.KeepNoTrivia)!;
     }
 
     public static CompilationUnitSyntax Whitelist<T>(
         this CompilationUnitSyntax root,
         params string[] names) where T : SyntaxNode
     {
-        var nodesToRemove = root.DescendantNodes()
+        var nodes = root.DescendantNodes()
             .OfType<T>()
             .Where(node => !names.Any(node.Matches));
-        return root.RemoveNodes(nodesToRemove, SyntaxRemoveOptions.KeepNoTrivia)!;
+        return root.RemoveNodes(nodes, SyntaxRemoveOptions.KeepNoTrivia)!;
     }
 
     public static CompilationUnitSyntax Namespace(
         this CompilationUnitSyntax root,
         string name)
     {
-        var namespaceDeclaration = SyntaxFactory.FileScopedNamespaceDeclaration(SyntaxFactory.ParseName(name))
-            .WithNamespaceKeyword(SyntaxFactory.Token(SyntaxKind.NamespaceKeyword)
-                .WithLeadingTrivia(SyntaxFactory.EndOfLine("\n"))
-                .WithTrailingTrivia(SyntaxFactory.Space))
-            .WithTrailingTrivia(SyntaxFactory.EndOfLine("\n"));
+        var node = SyntaxFactory.FileScopedNamespaceDeclaration(SyntaxFactory.ParseName(name));
         return SyntaxFactory.CompilationUnit()
             .WithUsings(root.Usings)
-            .AddMembers(namespaceDeclaration.WithMembers(root.Members));
+            .AddMembers(node.WithMembers(root.Members));
     }
 
     public static CompilationUnitSyntax Attribute<T>(
@@ -212,16 +208,14 @@ internal static class FilterExtensions
         string typeName,
         string attributeName) where T : SyntaxNode
     {
-        var nodesToUpdate = root.DescendantNodes()
+        var nodes = root.DescendantNodes()
             .OfType<T>()
-            .Where(node => node.Matches(typeName))
-            .Where(node => !node.HasAttribute(attributeName))
-            .ToList();
+            .Where(node => node.Matches(typeName) && !node.HasAttribute(attributeName));
 
         var attribute = SyntaxFactory.Attribute(SyntaxFactory.IdentifierName(attributeName));
         var attributeList = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(attribute));
 
-        var replacements = nodesToUpdate.ToDictionary(
+        var replacements = nodes.ToDictionary(
             node => node,
             node => node.WithAttribute(attributeList));
 
@@ -233,21 +227,19 @@ internal static class FilterExtensions
         string name,
         bool isModel = true)
     {
-        var iface = root.DescendantNodes()
+        var node = root.DescendantNodes()
             .OfType<InterfaceDeclarationSyntax>()
-            .Where(node => node.Matches(name))
-            .Where(node => node.HasAttribute("Protocol"))
-            .FirstOrDefault();
+            .FirstOrDefault(node => node.Matches(name) && node.HasAttribute("Protocol"));
 
-        if (iface == null)
+        if (node == null)
         {
             return root;
         }
 
         var trivia = SyntaxFactory.TriviaList(
-            iface.GetLeadingTrivia().Where(t =>
+            node.GetLeadingTrivia().Where(t =>
                 !(t.IsKind(SyntaxKind.MultiLineCommentTrivia) && t.ToString().Contains("[Model]"))));
-        var result = root.ReplaceNode(iface, iface.WithLeadingTrivia(trivia));
+        var result = root.ReplaceNode(node, node.WithLeadingTrivia(trivia));
         return isModel
             ? result.Attribute<InterfaceDeclarationSyntax>(name, "Model")
             : result;
@@ -267,7 +259,7 @@ internal static class FilterExtensions
         string newName,
         Func<T, bool>? predicate = null) where T : SyntaxNode
     {
-        var replacements = new Dictionary<SyntaxNode, SyntaxNode>();
+        var nodes = new Dictionary<SyntaxNode, SyntaxNode>();
         foreach (var node in root.DescendantNodes().OfType<T>())
         {
             if (predicate != null && !predicate(node))
@@ -277,28 +269,28 @@ internal static class FilterExtensions
 
             if (node.Matches(oldName))
             {
-                replacements[node] = node.WithIdentifier(newName);
+                nodes[node] = node.WithIdentifier(newName);
             }
         }
-        return root.ReplaceNodes(replacements.Keys, (orig, _) => replacements[orig]);
+        return root.ReplaceNodes(nodes.Keys, (orig, _) => nodes[orig]);
     }
 
     public static CompilationUnitSyntax Partial(
         this CompilationUnitSyntax root,
         string name)
     {
-        var iface = root.DescendantNodes()
+        var node = root.DescendantNodes()
             .OfType<InterfaceDeclarationSyntax>()
             .FirstOrDefault(i => i.Matches(name));
 
-        if (iface == null)
+        if (node == null)
         {
             return root;
         }
 
         return root.ReplaceNode(
-            iface,
-            iface.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingTrivia(SyntaxFactory.Space))
+            node,
+            node.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingTrivia(SyntaxFactory.Space))
         );
     }
 
@@ -332,10 +324,7 @@ internal static class FilterExtensions
             return SyntaxFactory.MethodDeclaration(original.Type, SyntaxFactory.Identifier(original.Identifier.Text))
                 .WithModifiers(original.Modifiers)
                 .WithAttributeLists(newAttributes)
-                .WithParameterList(SyntaxFactory.ParameterList())
-                .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))
-                .WithLeadingTrivia(original.GetLeadingTrivia())
-                .WithTrailingTrivia(original.GetTrailingTrivia());
+                .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
         });
     }
 
@@ -384,18 +373,15 @@ internal static class SyntaxNodeExtensions
     {
         return node switch
         {
-            TypeDeclarationSyntax type => type.Identifier.Text,
-            EnumDeclarationSyntax type => type.Identifier.Text,
+            BaseTypeDeclarationSyntax type => type.Identifier.Text,
             DelegateDeclarationSyntax del => del.Identifier.Text,
             MethodDeclarationSyntax method => method.Identifier.Text,
             PropertyDeclarationSyntax property => property.Identifier.Text,
             ParameterSyntax param => $"{param.Type} {param.Identifier.Text}",
             AttributeSyntax attr => attr.Name.ToString(),
-            AttributeListSyntax list => string.Join(",", list.Attributes.Select(a => a.Name.ToString())),
+            AttributeListSyntax list => string.Join(" ", list.Attributes.Select(a => a.Name.ToString())),
             BaseTypeSyntax type => type.Type.ToString(),
-            BaseListSyntax list => string.Join(",", list.Types.Select(t => t.Type.ToString())),
-            FileScopedNamespaceDeclarationSyntax ns => ns.Name.ToString(),
-            NamespaceDeclarationSyntax ns => ns.Name.ToString(),
+            BaseListSyntax list => string.Join(" ", list.Types.Select(t => t.Type.ToString())),
             _ => throw new NotSupportedException(node.GetType().Name)
         };
     }
@@ -434,9 +420,9 @@ internal static class SyntaxNodeExtensions
         };
     }
 
-    public static SyntaxNode WithAttribute(this SyntaxNode node, AttributeListSyntax attributeList)
+    public static SyntaxList<AttributeListSyntax> GetAttributes(this SyntaxNode node)
     {
-        var existingAttributes = node switch
+        return node switch
         {
             InterfaceDeclarationSyntax iface => iface.AttributeLists,
             ClassDeclarationSyntax cls => cls.AttributeLists,
@@ -447,42 +433,29 @@ internal static class SyntaxNodeExtensions
             PropertyDeclarationSyntax property => property.AttributeLists,
             _ => throw new NotSupportedException(node.GetType().Name)
         };
+    }
+
+    public static SyntaxNode WithAttribute(this SyntaxNode node, AttributeListSyntax attributeList)
+    {
+        var existingAttributes = node.GetAttributes();
+        var add = new Func<SyntaxNode, AttributeListSyntax, SyntaxNode>((n, attr) => n switch
+        {
+            InterfaceDeclarationSyntax iface => iface.AddAttributeLists(attr),
+            ClassDeclarationSyntax cls => cls.AddAttributeLists(attr),
+            StructDeclarationSyntax str => str.AddAttributeLists(attr),
+            EnumDeclarationSyntax enm => enm.AddAttributeLists(attr),
+            DelegateDeclarationSyntax del => del.AddAttributeLists(attr),
+            MethodDeclarationSyntax method => method.AddAttributeLists(attr),
+            PropertyDeclarationSyntax property => property.AddAttributeLists(attr),
+            _ => throw new NotSupportedException(n.GetType().Name)
+        });
 
         if (existingAttributes.Count > 0)
         {
-            var listWithTrivia = attributeList.WithTrailingTrivia(SyntaxFactory.EndOfLine("\n"));
-            return node switch
-            {
-                InterfaceDeclarationSyntax iface => iface.AddAttributeLists(listWithTrivia),
-                ClassDeclarationSyntax cls => cls.AddAttributeLists(listWithTrivia),
-                StructDeclarationSyntax str => str.AddAttributeLists(listWithTrivia),
-                EnumDeclarationSyntax enm => enm.AddAttributeLists(listWithTrivia),
-                DelegateDeclarationSyntax del => del.AddAttributeLists(listWithTrivia),
-                MethodDeclarationSyntax method => method.AddAttributeLists(listWithTrivia),
-                PropertyDeclarationSyntax property => property.AddAttributeLists(listWithTrivia),
-                _ => throw new NotSupportedException(node.GetType().Name)
-            };
+            return add(node, attributeList);
         }
-        else
-        {
-            var listWithTrivia = attributeList
-                .WithLeadingTrivia(node.GetLeadingTrivia())
-                .WithTrailingTrivia(SyntaxFactory.EndOfLine("\n"));
 
-            var nodeWithoutLeadingTrivia = node.WithLeadingTrivia(SyntaxFactory.TriviaList());
-
-            return nodeWithoutLeadingTrivia switch
-            {
-                InterfaceDeclarationSyntax iface => iface.AddAttributeLists(listWithTrivia),
-                ClassDeclarationSyntax cls => cls.AddAttributeLists(listWithTrivia),
-                StructDeclarationSyntax str => str.AddAttributeLists(listWithTrivia),
-                EnumDeclarationSyntax enm => enm.AddAttributeLists(listWithTrivia),
-                DelegateDeclarationSyntax del => del.AddAttributeLists(listWithTrivia),
-                MethodDeclarationSyntax method => method.AddAttributeLists(listWithTrivia),
-                PropertyDeclarationSyntax property => property.AddAttributeLists(listWithTrivia),
-                _ => throw new NotSupportedException(node.GetType().Name)
-            };
-        }
+        return add(node.WithLeadingTrivia(SyntaxFactory.TriviaList()), attributeList.WithLeadingTrivia(node.GetLeadingTrivia()));
     }
 
     public static string GetQualifiedName(this SyntaxNode node)
@@ -553,10 +526,5 @@ internal static class StringExtensions
 
         var regex = Regex.Escape(pattern).Replace("\\*", ".*").Replace("\\?", ".");
         return Regex.IsMatch(str, $"^{regex}$");
-    }
-
-    public static string TabsToSpaces(this string str, int spacesPerTab = 4)
-    {
-        return str.Replace("\t", new string(' ', spacesPerTab));
     }
 }
