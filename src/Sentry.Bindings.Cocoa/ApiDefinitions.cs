@@ -637,8 +637,7 @@ interface SentryFrame : SentrySerializable
 // @interface SentryGeo : NSObject <SentrySerializable, NSCopying>
 [BaseType (typeof(NSObject))]
 [Internal]
-interface SentryGeo : SentrySerializable
-{
+interface SentryGeo : SentrySerializable{
     // @property (copy, atomic) NSString * _Nullable city;
     [NullAllowed, Export ("city")]
     string City { get; set; }
@@ -1013,8 +1012,7 @@ interface SentryHub
 [BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
-interface SentryMeasurementUnit
-{
+interface SentryMeasurementUnit {
     // -(instancetype _Nonnull)initWithUnit:(NSString * _Nonnull)unit;
     [Export ("initWithUnit:")]
     NativeHandle Constructor (string unit);
@@ -1832,8 +1830,7 @@ partial interface SentryScope : SentrySerializable
 // @interface SentrySpanId : NSObject <NSCopying>
 [BaseType (typeof(NSObject))]
 [Internal]
-interface SentrySpanId
-{
+interface SentrySpanId {
     // -(instancetype _Nonnull)initWithUUID:(NSUUID * _Nonnull)uuid;
     [Export ("initWithUUID:")]
     NativeHandle Constructor (NSUuid uuid);
@@ -2077,8 +2074,7 @@ interface SentryTransactionContext
 // @interface SentryUser : NSObject <SentrySerializable, NSCopying>
 [BaseType (typeof(NSObject))]
 [Internal]
-interface SentryUser : SentrySerializable
-{
+interface SentryUser : SentrySerializable{
     // @property (copy, atomic) NSString * _Nullable userId;
     [NullAllowed, Export ("userId")]
     string UserId { get; set; }
@@ -2628,8 +2624,7 @@ interface SentrySDK
 [BaseType (typeof(NSObject), Name = "_TtC6Sentry13SentrySession")]
 [DisableDefaultCtor]
 [Internal]
-interface SentrySession
-{
+interface SentrySession {
     // -(instancetype _Nonnull)initWithReleaseName:(NSString * _Nonnull)releaseName distinctId:(NSString * _Nonnull)distinctId __attribute__((objc_designated_initializer));
     [Export ("initWithReleaseName:distinctId:")]
     [DesignatedInitializer]
@@ -2768,8 +2763,7 @@ interface SentryViewScreenshotOptions : SentryRedactOptions
 [BaseType (typeof(NSObject))]
 [DisableDefaultCtor]
 [Internal]
-interface SentryScreenFrames
-{
+interface SentryScreenFrames {
     // -(instancetype _Nonnull)initWithTotal:(NSUInteger)total frozen:(NSUInteger)frozen slow:(NSUInteger)slow;
     [Export ("initWithTotal:frozen:slow:")]
     NativeHandle Constructor (nuint total, nuint frozen, nuint slow);

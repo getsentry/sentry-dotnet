@@ -25,6 +25,9 @@ var nodes = tree.GetCompilationUnitRoot()
     // Adjust base types
     .BaseType("SentrySpan", "NSObject")
     .BaseType("SentryRedactOptions", "NSObject")
+    // Remove INSCopying due to https://github.com/xamarin/xamarin-macios/issues/17130
+    .Blacklist<BaseTypeSyntax>("INSCopying")
+    .Blacklist<BaseListSyntax>("")
     // Rename conflicting SentryRRWebEvent (protocol vs. interface)
     .Rename<InterfaceDeclarationSyntax>("SentryRRWebEvent", "ISentryRRWebEvent", iface => iface.HasAttribute("Protocol"))
     // Adjust nullable return delegates (though broken until this is fixed: https://github.com/xamarin/xamarin-macios/issues/17109)
@@ -243,6 +246,8 @@ internal static class SyntaxNodeExtensions
             PropertyDeclarationSyntax property => property.Identifier.Text,
             AttributeSyntax attr => attr.Name.ToString(),
             AttributeListSyntax list => string.Join(",", list.Attributes.Select(a => a.Name.ToString())),
+            BaseTypeSyntax type => type.Type.ToString(),
+            BaseListSyntax list => string.Join(",", list.Types.Select(t => t.Type.ToString())),
             _ => throw new NotSupportedException(node.GetType().Name)
         };
     }

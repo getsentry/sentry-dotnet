@@ -234,9 +234,6 @@ $Text = $Text -replace '\n$', ''
 $Text = $Text -replace '\bISentrySerializable\b', 'SentrySerializable'
 $Text = $Text -replace '\bISentryRedactOptions\b', 'SentryRedactOptions'
 
-# Remove INSCopying due to https://github.com/xamarin/xamarin-macios/issues/17130
-$Text = $Text -replace ': INSCopying,', ':' -replace '\s?[:,] INSCopying', ''
-
 # Fix delegate argument names
 $Text = $Text -replace '(NSError) arg\d', '$1 error'
 $Text = $Text -replace '(NSHttpUrlResponse) arg\d', '$1 response'
