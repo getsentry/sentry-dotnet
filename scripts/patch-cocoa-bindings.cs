@@ -155,7 +155,6 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryScope",
         "SentryScreenFrames",
         "SentrySDK",
-        "SentrySession",
         "SentrySpan",
         "SentrySpanContext",
         "SentrySpanId",
