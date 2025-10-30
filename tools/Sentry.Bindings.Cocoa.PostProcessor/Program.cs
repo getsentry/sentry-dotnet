@@ -28,6 +28,9 @@ var nodes = tree.GetCompilationUnitRoot()
     // Remove INSCopying due to https://github.com/xamarin/xamarin-macios/issues/17130
     .Blacklist<BaseTypeSyntax>("INSCopying")
     .Blacklist<BaseListSyntax>("")
+    // Fix interface names
+    .Rename<InterfaceDeclarationSyntax>("SentrySerializable", "ISentrySerializable")
+    .Rename<InterfaceDeclarationSyntax>("SentryRedactOptions", "ISentryRedactOptions")
     // Rename conflicting SentryRRWebEvent (protocol vs. interface)
     .Rename<InterfaceDeclarationSyntax>("SentryRRWebEvent", "ISentryRRWebEvent", iface => iface.HasAttribute("Protocol"))
     // Adjust nullable return delegates (though broken until this is fixed: https://github.com/xamarin/xamarin-macios/issues/17109)
@@ -70,7 +73,9 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryOptions.ConfigureUserFeedback"
     )
     .Whitelist<InterfaceDeclarationSyntax>(
+        "ISentryRedactOptions",
         "ISentryRRWebEvent",
+        "ISentrySerializable",
         "PrivateSentrySDKOnly",
         "SentryAttachment",
         "SentryBaggage",
@@ -110,7 +115,6 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryScope",
         "SentryScreenFrames",
         "SentrySDK",
-        "SentrySerializable",
         "SentrySession",
         "SentrySpan",
         "SentrySpanContext",
@@ -255,16 +259,24 @@ internal static class SyntaxNodeExtensions
 
     public static SyntaxNode WithIdentifier(this SyntaxNode node, string newName)
     {
-        var identifier = SyntaxFactory.Identifier(newName);
+        var oldIdentifier = node switch
+        {
+            TypeDeclarationSyntax type => type.Identifier,
+            DelegateDeclarationSyntax del => del.Identifier,
+            MethodDeclarationSyntax method => method.Identifier,
+            PropertyDeclarationSyntax property => property.Identifier,
+            _ => throw new NotSupportedException(node.GetType().Name)
+        };
+        var newIdentifier = SyntaxFactory.Identifier(newName).WithTrailingTrivia(oldIdentifier.TrailingTrivia);
         return node switch
         {
-            InterfaceDeclarationSyntax iface => iface.WithIdentifier(identifier),
-            ClassDeclarationSyntax cls => cls.WithIdentifier(identifier),
-            StructDeclarationSyntax str => str.WithIdentifier(identifier),
-            EnumDeclarationSyntax enm => enm.WithIdentifier(identifier),
-            DelegateDeclarationSyntax del => del.WithIdentifier(identifier),
-            MethodDeclarationSyntax method => method.WithIdentifier(identifier),
-            PropertyDeclarationSyntax property => property.WithIdentifier(identifier),
+            InterfaceDeclarationSyntax iface => iface.WithIdentifier(newIdentifier),
+            ClassDeclarationSyntax cls => cls.WithIdentifier(newIdentifier),
+            StructDeclarationSyntax str => str.WithIdentifier(newIdentifier),
+            EnumDeclarationSyntax enm => enm.WithIdentifier(newIdentifier),
+            DelegateDeclarationSyntax del => del.WithIdentifier(newIdentifier),
+            MethodDeclarationSyntax method => method.WithIdentifier(newIdentifier),
+            PropertyDeclarationSyntax property => property.WithIdentifier(newIdentifier),
             _ => throw new NotSupportedException(node.GetType().Name)
         };
     }

@@ -224,10 +224,6 @@ Write-Output "Patching $BindingsPath/$File"
 Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
 $Text = Get-Content "$BindingsPath/$File" -Raw
 
-# Fix interface usage
-$Text = $Text -replace '\bISentrySerializable\b', 'SentrySerializable'
-$Text = $Text -replace '\bISentryRedactOptions\b', 'SentryRedactOptions'
-
 # Fix delegate argument names
 $Text = $Text -replace '(NSError) arg\d', '$1 error'
 $Text = $Text -replace '(NSHttpUrlResponse) arg\d', '$1 response'
