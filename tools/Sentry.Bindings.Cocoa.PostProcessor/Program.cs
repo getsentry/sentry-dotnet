@@ -30,12 +30,14 @@ var nodes = tree.GetCompilationUnitRoot()
     // Remove INSCopying due to https://github.com/xamarin/xamarin-macios/issues/17130
     .Blacklist<BaseTypeSyntax>("INSCopying")
     .Blacklist<BaseListSyntax>("")
-    // Fix/verify property-to-method conversions
+    // Fix property-to-method conversions
     .PropertyToMethod("Sentry*.Serialize")
     .PropertyToMethod("SentrySpan.ToTraceHeader")
     .PropertyToMethod("SentryTraceContext.ToBaggage")
     .PropertyToMethod("PrivateSentrySDKOnly.Capture*")
-    .Blacklist<AttributeSyntax>("Verify") // TODO: MethodToProperty predicate
+    // Verify
+    .Verify<PropertyDeclarationSyntax>("*Sentry*.*", "MethodToProperty") // TODO: replace broad pattern with one-by-one verification
+    .Verify<PropertyDeclarationSyntax>("SentryOptions.*Targets", "StronglyTypedNSArray")
     // Fix delegate argument names
     .Rename<ParameterSyntax>("arg*", "error", p => p.Type?.ToString() == "NSError")
     .Rename<ParameterSyntax>("arg*", "response", p => p.Type?.ToString() == "NSHttpUrlResponse")
@@ -237,7 +239,7 @@ internal static class FilterExtensions
         string name,
         string baseType)
     {
-        return root.Attribute<InterfaceDeclarationSyntax>($"BaseType (typeof({baseType}))",  iface => iface.Matches(name));
+        return root.Attribute<InterfaceDeclarationSyntax>($"BaseType (typeof({baseType}))", iface => iface.Matches(name));
     }
 
     public static CompilationUnitSyntax Rename<T>(
@@ -312,6 +314,31 @@ internal static class FilterExtensions
                 .WithTrailingTrivia(original.GetTrailingTrivia());
         });
     }
+
+    public static CompilationUnitSyntax Verify<T>(
+        this CompilationUnitSyntax root,
+        string typeName,
+        string verify) where T : MemberDeclarationSyntax
+    {
+        return root.ReplaceNodes(
+            root.DescendantNodes().OfType<T>().Where(node => node.Matches(typeName)),
+            (original, _) =>
+            {
+                var newAttrLists = original.AttributeLists
+                    .Select(al => al.WithAttributes(
+                        SyntaxFactory.SeparatedList(
+                            al.Attributes.Where(attr =>
+                                !(attr.Name.ToString() == "Verify" &&
+                                  attr.ArgumentList != null &&
+                                  attr.ArgumentList.Arguments.ToString().Matches(verify))
+                            )
+                        )
+                    ))
+                    .Where(al => al.Attributes.Count > 0);
+
+                return original.WithAttributeLists(SyntaxFactory.List(newAttrLists));
+            });
+    }
 }
 
 internal static class SyntaxNodeExtensions
@@ -329,6 +356,8 @@ internal static class SyntaxNodeExtensions
             AttributeListSyntax list => string.Join(",", list.Attributes.Select(a => a.Name.ToString())),
             BaseTypeSyntax type => type.Type.ToString(),
             BaseListSyntax list => string.Join(",", list.Types.Select(t => t.Type.ToString())),
+            FileScopedNamespaceDeclarationSyntax ns => ns.Name.ToString(),
+            NamespaceDeclarationSyntax ns => ns.Name.ToString(),
             _ => throw new NotSupportedException(node.GetType().Name)
         };
     }

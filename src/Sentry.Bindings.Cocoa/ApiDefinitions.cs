@@ -1564,7 +1564,8 @@ interface SentryOptions
     bool EnableAutoBreadcrumbTracking { get; set; }
 
     // @property (retain, nonatomic) NSArray * _Nonnull tracePropagationTargets;
-    [Export("tracePropagationTargets", ArgumentSemantic.Retain)] NSObject[] TracePropagationTargets { get; set; }
+    [Export("tracePropagationTargets", ArgumentSemantic.Retain)]
+    NSObject[] TracePropagationTargets { get; set; }
 
     // @property (assign, nonatomic) BOOL enableCaptureFailedRequests;
     [Export("enableCaptureFailedRequests")]
@@ -1575,7 +1576,8 @@ interface SentryOptions
     SentryHttpStatusCodeRange[] FailedRequestStatusCodes { get; set; }
 
     // @property (nonatomic, strong) NSArray * _Nonnull failedRequestTargets;
-    [Export("failedRequestTargets", ArgumentSemantic.Strong)] NSObject[] FailedRequestTargets { get; set; }
+    [Export("failedRequestTargets", ArgumentSemantic.Strong)]
+    NSObject[] FailedRequestTargets { get; set; }
 
     // @property (assign, nonatomic) BOOL enableMetricKit __attribute__((availability(ios, introduced=15.0))) __attribute__((availability(macos, introduced=12.0))) __attribute__((availability(maccatalyst, introduced=15.0))) __attribute__((availability(tvos, unavailable))) __attribute__((availability(watchos, unavailable)));
     [NoWatch, NoTV, MacCatalyst(15, 0)]

@@ -224,10 +224,6 @@ Write-Output "Patching $BindingsPath/$File"
 Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
 $Text = Get-Content "$BindingsPath/$File" -Raw
 
-# Allow weakly typed NSArray
-# We have some that accept either NSString or NSRegularExpression, which have no common type so they use NSObject
-$Text = $Text -replace '\s*\[Verify \(StronglyTypedNSArray\)\]\n', ''
-
 # Fix broken multi-line comments
 $Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\()\n\s*', '$1'
 $Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)"\s*\r?\n\s*"', '$1 '
