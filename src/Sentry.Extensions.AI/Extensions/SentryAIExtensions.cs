@@ -53,6 +53,7 @@ public static class SentryAIExtensions
     /// <returns>The instrumented <see cref="IChatClient"/></returns>
     public static IChatClient WithSentry(this IChatClient client, Action<SentryAIOptions>? configure = null)
     {
+        SentryAIActivityListener.Init();
         return new SentryChatClient(client, configure);
     }
 }
