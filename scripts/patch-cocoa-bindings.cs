@@ -423,10 +423,7 @@ internal static class SyntaxNodeExtensions
     {
         return node switch
         {
-            InterfaceDeclarationSyntax iface => iface.AttributeLists,
-            ClassDeclarationSyntax cls => cls.AttributeLists,
-            StructDeclarationSyntax str => str.AttributeLists,
-            EnumDeclarationSyntax enm => enm.AttributeLists,
+            BaseTypeDeclarationSyntax type => type.AttributeLists,
             DelegateDeclarationSyntax del => del.AttributeLists,
             MethodDeclarationSyntax method => method.AttributeLists,
             PropertyDeclarationSyntax property => property.AttributeLists,
@@ -439,10 +436,7 @@ internal static class SyntaxNodeExtensions
         var existingAttributes = node.GetAttributes();
         var add = new Func<SyntaxNode, AttributeListSyntax, SyntaxNode>((n, attr) => n switch
         {
-            InterfaceDeclarationSyntax iface => iface.AddAttributeLists(attr),
-            ClassDeclarationSyntax cls => cls.AddAttributeLists(attr),
-            StructDeclarationSyntax str => str.AddAttributeLists(attr),
-            EnumDeclarationSyntax enm => enm.AddAttributeLists(attr),
+            BaseTypeDeclarationSyntax type => type.AddAttributeLists(attr),
             DelegateDeclarationSyntax del => del.AddAttributeLists(attr),
             MethodDeclarationSyntax method => method.AddAttributeLists(attr),
             PropertyDeclarationSyntax property => property.AddAttributeLists(attr),
