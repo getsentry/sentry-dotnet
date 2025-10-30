@@ -169,7 +169,7 @@ var nodes = tree.GetCompilationUnitRoot()
     );
 
 var formatted = CodeFormatter.Format(nodes, new AdhocWorkspace());
-File.WriteAllText(args[0], formatted.ToFullString());
+File.WriteAllText(args[0], formatted.ToFullString() + "\n");
 
 internal static class FilterExtensions
 {
