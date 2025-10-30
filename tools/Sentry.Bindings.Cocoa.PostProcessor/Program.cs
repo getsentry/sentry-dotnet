@@ -11,6 +11,10 @@ if (args.Length != 1)
 }
 
 var code = File.ReadAllText(args[0]);
+// Fix broken multi-line comments
+code = Regex.Replace(code, @"(DEPRECATED_MSG_ATTRIBUTE\()\n\s*", "$1");
+code = Regex.Replace(code, @"(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)""\s*\r?\n\s*""", "$1 ");
+
 var tree = CSharpSyntaxTree.ParseText(code);
 var nodes = tree.GetCompilationUnitRoot()
     .Namespace("Sentry.CocoaSdk")

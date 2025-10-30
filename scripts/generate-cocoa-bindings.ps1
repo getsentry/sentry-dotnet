@@ -224,10 +224,6 @@ Write-Output "Patching $BindingsPath/$File"
 Copy-Item "$BindingsPath/$File" -Destination "$BackupPath/$File"
 $Text = Get-Content "$BindingsPath/$File" -Raw
 
-# Fix broken multi-line comments
-$Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\()\n\s*', '$1'
-$Text = $Text -replace '(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)"\s*\r?\n\s*"', '$1 '
-
 # Add header and output file
 $Text = "$Header`n`n$Text"
 $Text | Out-File "$BindingsPath/$File"
