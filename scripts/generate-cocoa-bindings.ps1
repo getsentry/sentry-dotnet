@@ -251,6 +251,11 @@ $Text = $Text -replace '(?m)(.*\n){2}^\s{4}NSString k.+?\n\n?', ''
 $Text = $Text -replace '(?m)(.*\n){4}^partial interface Constants\n{\n}\n', ''
 $Text = $Text -replace '\[Verify \(ConstantsInterfaceAssociation\)\]\n', ''
 
+# Patch experimental options type in `src/Sentry.Bindings.Cocoa/ApiDefinitions.cs`
+$pattern = 'NSObject\s+_swiftExperimentalOptions\s*\{\s*get;\s*\}'
+$replacement = 'SentryExperimentalOptions Experimental { get; }'
+$Text = $Text -replace $pattern, $replacement
+
 # Remove SentryVersionNumber
 $Text = $Text -replace '.*SentryVersionNumber.*\n?', ''
 

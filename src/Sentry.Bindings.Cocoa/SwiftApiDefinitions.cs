@@ -298,13 +298,6 @@ interface SentryReplayOptions //: ISentryRedactOptions
     // @property (readonly, nonatomic) NSTimeInterval maximumDuration;
     [Export ("maximumDuration")]
     double MaximumDuration { get; }
-    // -(instancetype _Nonnull)initWithSessionSampleRate:(float)sessionSampleRate onErrorSampleRate:(float)onErrorSampleRate maskAllText:(BOOL)maskAllText maskAllImages:(BOOL)maskAllImages __attribute__((objc_designated_initializer));
-    [Export ("initWithSessionSampleRate:onErrorSampleRate:maskAllText:maskAllImages:")]
-    [DesignatedInitializer]
-    NativeHandle Constructor (float sessionSampleRate, float onErrorSampleRate, bool maskAllText, bool maskAllImages);
-    // -(instancetype _Nonnull)initWithDictionary:(NSDictionary<NSString *,id> * _Nonnull)dictionary;
-    [Export ("initWithDictionary:")]
-    NativeHandle Constructor (NSDictionary<NSString, NSObject> dictionary);
     */
 }
 
@@ -890,4 +883,15 @@ interface SentryViewScreenshotProvider
     [Abstract]
     [Export ("imageWithView:onComplete:")]
     void OnComplete (UIView view, Action<UIImage> onComplete);
+}
+
+[BaseType(typeof(NSObject), Name = "_TtC6Sentry25SentryExperimentalOptions")]
+[DisableDefaultCtor]
+[Internal]
+interface SentryExperimentalOptions
+{
+    // csharp
+    // Add inside the existing SentryExperimentalOptions interface in `src/Sentry.Bindings.Cocoa/SwiftApiDefinitions.cs`
+    [Export("enableSessionReplayInUnreliableEnvironment")]
+    bool EnableSessionReplayInUnreliableEnvironment { get; set; }
 }
