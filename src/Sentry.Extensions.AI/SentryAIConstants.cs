@@ -66,7 +66,6 @@ internal static class SentryAIConstants
         internal const string ResponseText = "gen_ai.response.text";
         internal const string ResponseToolCalls = "gen_ai.response.tool_calls";
         internal const string ResponseModel = "gen_ai.response.model";
-        internal const string ResponseModelId = "gen_ai.response.model_id";
 
         // Usage attributes
         internal const string UsageInputTokens = "gen_ai.usage.input_tokens";

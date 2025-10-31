@@ -15,7 +15,7 @@ internal static class SentryAISpanEnricher
     /// <param name="options">Options</param>
     /// <param name="aiOptions">AI-specific options</param>
     internal static void EnrichWithRequest(ISpan span, ChatMessage[] messages, ChatOptions? options,
-        SentryAIOptions? aiOptions = null)
+        SentryAIOptions aiOptions)
     {
         // Currently, all spans will be "chat"
         span.SetData(SentryAIConstants.SpanAttributes.OperationName, "chat");
@@ -69,41 +69,16 @@ internal static class SentryAISpanEnricher
     /// <summary>
     /// Enriches the span with response information.
     /// </summary>
+    /// <remarks>
+    /// This function converts a <see cref="ChatResponse"/> to a list of <see cref="ChatResponseUpdate"/>, then
+    /// enriches the span with it.
+    /// </remarks>
     /// <param name="span">Span to enrich</param>
     /// <param name="response">Chat response containing usage and content data</param>
     /// <param name="aiOptions">AI-specific options</param>
-    internal static void EnrichWithResponse(ISpan span, ChatResponse response, SentryAIOptions? aiOptions = null)
+    internal static void EnrichWithResponse(ISpan span, ChatResponse response, SentryAIOptions aiOptions)
     {
-        if (response.Usage is { } usage)
-        {
-            var inputTokens = usage.InputTokenCount;
-            var outputTokens = usage.OutputTokenCount;
-
-            if (inputTokens.HasValue)
-            {
-                span.SetData(SentryAIConstants.SpanAttributes.UsageInputTokens, inputTokens.Value);
-            }
-
-            if (outputTokens.HasValue)
-            {
-                span.SetData(SentryAIConstants.SpanAttributes.UsageOutputTokens, outputTokens.Value);
-            }
-
-            if (inputTokens.HasValue && outputTokens.HasValue)
-            {
-                span.SetData(SentryAIConstants.SpanAttributes.UsageTotalTokens, inputTokens.Value + outputTokens.Value);
-            }
-        }
-
-        if (response.Text is { } responseText && (aiOptions?.IncludeAIResponseContent ?? true))
-        {
-            span.SetData(SentryAIConstants.SpanAttributes.ResponseText, responseText);
-        }
-
-        if (response.ModelId is { } modelId)
-        {
-            span.SetData(SentryAIConstants.SpanAttributes.ResponseModel, modelId);
-        }
+        EnrichWithStreamingResponses(span, [..response.ToChatResponseUpdates()], aiOptions);
     }
 
     /// <summary>
@@ -113,7 +88,7 @@ internal static class SentryAISpanEnricher
     /// <param name="messages">a list of <see cref="ChatResponseUpdate"/></param>
     /// <param name="aiOptions">AI-specific options</param>
     public static void EnrichWithStreamingResponses(ISpan span, List<ChatResponseUpdate> messages,
-        SentryAIOptions? aiOptions = null)
+        SentryAIOptions aiOptions)
     {
         var inputTokenCount = 0L;
         var outputTokenCount = 0L;
@@ -132,7 +107,7 @@ internal static class SentryAISpanEnricher
 
             if (message.ModelId is { } modelId)
             {
-                span.SetData(SentryAIConstants.SpanAttributes.ResponseModelId, modelId);
+                span.SetData(SentryAIConstants.SpanAttributes.ResponseModel, modelId);
             }
 
             if (message.Text is { } responseText)
@@ -142,7 +117,7 @@ internal static class SentryAISpanEnricher
 
             if (message.FinishReason == ChatFinishReason.ToolCalls)
             {
-                PopulateToolCallsInfo(message.Contents);
+                PopulateToolCallsInfo(message.Contents, span);
             }
         }
 
@@ -154,16 +129,15 @@ internal static class SentryAISpanEnricher
         span.SetData(SentryAIConstants.SpanAttributes.UsageInputTokens, inputTokenCount);
         span.SetData(SentryAIConstants.SpanAttributes.UsageOutputTokens, outputTokenCount);
         span.SetData(SentryAIConstants.SpanAttributes.UsageTotalTokens, inputTokenCount + outputTokenCount);
-        return;
+    }
 
-        void PopulateToolCallsInfo(IList<AIContent> contents)
+    private static void PopulateToolCallsInfo(IList<AIContent> contents, ISpan span)
+    {
+        var functionContents = contents.OfType<FunctionCallContent>().ToArray();
+        if (functionContents.Length > 0)
         {
-            var functionContents = contents.OfType<FunctionCallContent>().ToArray();
-            if (functionContents.Length > 0)
-            {
-                span.SetData(SentryAIConstants.SpanAttributes.ResponseToolCalls,
-                    FormatFunctionCallContent(functionContents));
-            }
+            span.SetData(SentryAIConstants.SpanAttributes.ResponseToolCalls,
+                FormatFunctionCallContent(functionContents));
         }
     }
 
