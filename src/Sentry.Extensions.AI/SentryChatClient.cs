@@ -49,7 +49,8 @@ internal sealed class SentryChatClient : DelegatingChatClient
         }
         finally
         {
-            // if options was null, we need to finish root span immediately
+            // if options was null, we need to finish root span immediately because no tool calls will be made
+            // therefore no consequent GetResponseAsync calls
             if (options == null)
             {
                 outerSpan?.Finish();
@@ -128,9 +129,8 @@ internal sealed class SentryChatClient : DelegatingChatClient
                 SentryAIConstants.SpanAttributes.InvokeAgentDescription);
         }
 
-        // In FunctionInvokingChatClient, we should be able to get the agent span from the current activity
+        // If FunctionInvokingChatClient wraps SentryChatClient, we should be able to get the agent span from the current activity
         // The activity we attached the span to may be an ancestor of the current activity, we must search the parents for the span
-        // If we have tools available but couldn't find a span from activities, we can't have a root agent span.
         var activeSpan = SentryAIUtil.GetActivitySpan();
         return activeSpan;
     }

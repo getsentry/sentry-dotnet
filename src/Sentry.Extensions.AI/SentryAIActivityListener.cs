@@ -15,7 +15,7 @@ internal static class SentryAIActivityListener
     {
         ShouldListenTo = s => s.Name.StartsWith(SentryAIConstants.SentryActivitySourceName),
         Sample = (ref ActivityCreationOptions<ActivityContext> options) =>
-            options.Name == SentryAIConstants.FICCActivityName ?
+            SentryAIConstants.FICCActivityNames.Contains(options.Name) ?
                 ActivitySamplingResult.AllDataAndRecorded : ActivitySamplingResult.None,
         ActivityStarted = a =>
         {
