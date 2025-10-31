@@ -50,13 +50,15 @@ var options = new ChatOptions
 {
     ModelId = "gpt-4o-mini",
     MaxOutputTokens = 1024,
-    Tools = [
+    Tools =
+    [
         // Tool 1: Quick response with minimal delay
         AIFunctionFactory.Create(async (string personName) =>
         {
             logger.LogInformation("GetPersonAge called for {PersonName}", personName);
             await Task.Delay(100); // 100ms delay
-            return personName switch {
+            return personName switch
+            {
                 "Alice" => "25",
                 "Bob" => "30",
                 "Charlie" => "35",
@@ -69,7 +71,8 @@ var options = new ChatOptions
         {
             logger.LogInformation("GetWeather called for {Location}", location);
             await Task.Delay(500); // 500ms delay
-            return location.ToLower() switch {
+            return location.ToLower() switch
+            {
                 "new york" => "Sunny, 72°F",
                 "london" => "Cloudy, 60°F",
                 "tokyo" => "Rainy, 68°F",
@@ -86,7 +89,7 @@ var options = new ChatOptions
             return $"Complex calculation result for {number}: {result}";
         }, "ComplexCalculation", "Performs a complex mathematical calculation. Takes about 1 second to complete.")
     ]
-}.WithSentry();
+};
 
 var response = await client.GetResponseAsync(
     "Please help me with the following tasks: 1) Find Alice's age, 2) Get weather in New York, and 3) Calculate a complex result for number 15. Please use the appropriate tools for each task.",
@@ -101,7 +104,7 @@ var streamingOptions = new ChatOptions
 {
     ModelId = "gpt-4o-mini",
     MaxOutputTokens = 1024
-}.WithSentry();
+};
 
 logger.LogInformation("Microsoft.Extensions.AI sample completed! Check your Sentry dashboard for the trace data.");
 

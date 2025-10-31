@@ -32,11 +32,6 @@ public static class SentryAIExtensions
             }
         }
 
-        // SentrySpanStore additional property will store the dictionary to keep track of which span is
-        // the "agent" span, which will persist through different chat/tool calls.
-        options.AdditionalProperties ??= new AdditionalPropertiesDictionary();
-        options.AdditionalProperties.TryAdd("SentryChatMessageAgentSpan", new ConcurrentDictionary<ChatMessage, ISpan>());
-
         return options;
     }
 

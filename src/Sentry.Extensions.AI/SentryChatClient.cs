@@ -29,6 +29,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
         var chatMessages = messages as ChatMessage[] ?? messages.ToArray();
         var outerSpan = TryGetRootSpan(options);
         var innerSpan = CreateChatSpan(outerSpan, options);
+        WrapTools(options);
 
         try
         {
@@ -68,6 +69,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
         var chatMessages = messages as ChatMessage[] ?? messages.ToArray();
         var outerSpan = TryGetRootSpan(options);
         var innerSpan = CreateChatSpan(outerSpan, options);
+        WrapTools(options);
 
         var hasNext = true;
         var responses = new List<ChatResponseUpdate>();
@@ -143,5 +145,21 @@ internal sealed class SentryChatClient : DelegatingChatClient
         return outerSpan is not null
             ? outerSpan.StartChild(SentryAIConstants.SpanAttributes.ChatOperation, chatSpanName)
             : _hub.StartSpan(SentryAIConstants.SpanAttributes.ChatOperation, chatSpanName);
+    }
+
+    private static void WrapTools(ChatOptions? options)
+    {
+        if (options?.Tools is null || options.Tools.Count == 0)
+        {
+            return;
+        }
+        // We wrap tools here so we don't have to wrap them each time we grab the response
+        for (var i = 0; i < options.Tools.Count; i++)
+        {
+            if (options.Tools[i] is AIFunction fn and not SentryInstrumentedFunction)
+            {
+                options.Tools[i] = new SentryInstrumentedFunction(fn, options);
+            }
+        }
     }
 }

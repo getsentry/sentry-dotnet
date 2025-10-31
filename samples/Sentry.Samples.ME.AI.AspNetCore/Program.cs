@@ -131,7 +131,7 @@ app.MapGet("/test", async (IChatClient chatClient, ILogger<Program> logger) =>
                 }, "CalculateAverageAge",
                 "Calculates the average from a list of ages. You should first get individual ages using GetPersonAge, then use this tool to calculate the average. Takes about 200ms to complete.")
         ]
-    }.WithSentry();
+    };
 
     try
     {
