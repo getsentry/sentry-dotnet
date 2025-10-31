@@ -232,12 +232,28 @@ internal static class FilterExtensions
         return root.RemoveByPredicate<MethodDeclarationSyntax>(node => node.Identifier.Matches(name) && node.HasParent(type));
     }
 
+    public static CompilationUnitSyntax KeepMethods(
+        this CompilationUnitSyntax root,
+        string type,
+        params string[] names)
+    {
+        return root.RemoveByPredicate<MethodDeclarationSyntax>(node => !names.Any(name => node.Identifier.Matches(name)) && node.HasParent(type));
+    }
+
     public static CompilationUnitSyntax RemoveProperty(
         this CompilationUnitSyntax root,
         string type,
         string name)
     {
         return root.RemoveByPredicate<PropertyDeclarationSyntax>(node => node.Identifier.Matches(name) && node.HasParent(type));
+    }
+
+    public static CompilationUnitSyntax KeepProperties(
+        this CompilationUnitSyntax root,
+        string type,
+        params string[] names)
+    {
+        return root.RemoveByPredicate<PropertyDeclarationSyntax>(node => !names.Any(name => node.Identifier.Matches(name)) && node.HasParent(type));
     }
 
     public static CompilationUnitSyntax WithAttribute(
