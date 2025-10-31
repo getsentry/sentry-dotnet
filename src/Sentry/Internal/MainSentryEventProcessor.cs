@@ -84,8 +84,7 @@ internal class MainSentryEventProcessor : ISentryEventProcessor
         @event.Distribution ??= Distribution;
 
         // If there's no current thread on the event and there is no exception with a stack trace, get the current stack trace
-        var hasCurrentThread = @event.SentryThreads?.Any(t => t.Current == true) == true;
-        if (@event.Exception?.StackTrace is null && !hasCurrentThread)
+        if (@event.Exception?.StackTrace is null && @event.SentryThreads?.Any(t => t.Current == true) != true)
         {
             var stackTrace = @event.SentryExceptions?.FirstOrDefault()?.Stacktrace
                             ?? SentryStackTraceFactoryAccessor().Create();
