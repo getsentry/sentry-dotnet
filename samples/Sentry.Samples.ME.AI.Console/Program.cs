@@ -89,7 +89,7 @@ var options = new ChatOptions
             return $"Complex calculation result for {number}: {result}";
         }, "ComplexCalculation", "Performs a complex mathematical calculation. Takes about 1 second to complete.")
     ]
-};
+}.WithSentryToolInstrumentation();
 
 var response = await client.GetResponseAsync(
     "Please help me with the following tasks: 1) Find Alice's age, 2) Get weather in New York, and 3) Calculate a complex result for number 15. Please use the appropriate tools for each task.",
