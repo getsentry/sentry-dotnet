@@ -504,12 +504,12 @@ internal static class WildcardExtensions
             return !negate;
         }
 
-        if (!pattern.Contains('*') && !pattern.Contains('?'))
+        if (!actual.Contains('*') && !actual.Contains('?'))
         {
             return negate;
         }
 
-        var regex = Regex.Escape(pattern).Replace("\\*", ".*").Replace("\\?", ".");
+        var regex = Regex.Escape(actual).Replace("\\*", ".*").Replace("\\?", ".");
         return Regex.IsMatch(str, $"^{regex}$") != negate;
     }
 }
