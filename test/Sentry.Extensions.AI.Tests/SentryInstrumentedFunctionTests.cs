@@ -1,8 +1,5 @@
 #nullable enable
 using Microsoft.Extensions.AI;
-using NSubstitute;
-using Sentry.Extensions.AI;
-using Sentry.Testing;
 
 namespace Sentry.Extensions.AI.Tests;
 
