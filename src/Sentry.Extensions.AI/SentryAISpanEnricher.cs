@@ -14,55 +14,55 @@ internal static class SentryAISpanEnricher
     /// <param name="messages">Messages</param>
     /// <param name="options">Options</param>
     /// <param name="aiOptions">AI-specific options</param>
-    internal static void EnrichWithRequest(ISpan span, ChatMessage[] messages, ChatOptions? options, SentryAIOptions? aiOptions = null)
+    internal static void EnrichWithRequest(ISpan span, ChatMessage[] messages, ChatOptions? options,
+        SentryAIOptions? aiOptions = null)
     {
-        // Currently, all top-level spans will start as "chat"
-        // The agent creation/invocation doesn't really work in Microsoft.Extensions.AI
-        span.SetData("gen_ai.operation.name", "chat");
+        // Currently, all spans will be "chat"
+        span.SetData(SentryAIConstants.SpanAttributes.OperationName, "chat");
 
         if (options?.ModelId is { } modelId)
         {
-            span.SetData("gen_ai.request.model", modelId);
+            span.SetData(SentryAIConstants.SpanAttributes.RequestModel, modelId);
         }
 
         if (aiOptions?.AgentName is { } agentName)
         {
-            span.SetData("gen_ai.agent.name", agentName);
+            span.SetData(SentryAIConstants.SpanAttributes.AgentName, agentName);
         }
 
         if (messages is { Length: > 0 } && (aiOptions?.IncludeAIRequestMessages ?? true))
         {
-            span.SetData("gen_ai.request.messages", FormatRequestMessage(messages));
+            span.SetData(SentryAIConstants.SpanAttributes.RequestMessages, FormatRequestMessage(messages));
         }
 
         if (options?.Tools is { } tools)
         {
-            span.SetData("gen_ai.request.available_tools", FormatAvailableTools(tools));
+            span.SetData(SentryAIConstants.SpanAttributes.RequestAvailableTools, FormatAvailableTools(tools));
         }
 
         if (options?.Temperature is { } temperature)
         {
-            span.SetData("gen_ai.request.temperature", temperature);
+            span.SetData(SentryAIConstants.SpanAttributes.RequestTemperature, temperature);
         }
 
         if (options?.MaxOutputTokens is { } maxOutputTokens)
         {
-            span.SetData("gen_ai.request.max_tokens", maxOutputTokens);
+            span.SetData(SentryAIConstants.SpanAttributes.RequestMaxTokens, maxOutputTokens);
         }
 
         if (options?.TopP is { } topP)
         {
-            span.SetData("gen_ai.request.top_p", topP);
+            span.SetData(SentryAIConstants.SpanAttributes.RequestTopP, topP);
         }
 
         if (options?.FrequencyPenalty is { } frequencyPenalty)
         {
-            span.SetData("gen_ai.request.frequency_penalty", frequencyPenalty);
+            span.SetData(SentryAIConstants.SpanAttributes.RequestFrequencyPenalty, frequencyPenalty);
         }
 
         if (options?.PresencePenalty is { } presencePenalty)
         {
-            span.SetData("gen_ai.request.presence_penalty", presencePenalty);
+            span.SetData(SentryAIConstants.SpanAttributes.RequestPresencePenalty, presencePenalty);
         }
     }
 
@@ -81,28 +81,28 @@ internal static class SentryAISpanEnricher
 
             if (inputTokens.HasValue)
             {
-                span.SetData("gen_ai.usage.input_tokens", inputTokens.Value);
+                span.SetData(SentryAIConstants.SpanAttributes.UsageInputTokens, inputTokens.Value);
             }
 
             if (outputTokens.HasValue)
             {
-                span.SetData("gen_ai.usage.output_tokens", outputTokens.Value);
+                span.SetData(SentryAIConstants.SpanAttributes.UsageOutputTokens, outputTokens.Value);
             }
 
             if (inputTokens.HasValue && outputTokens.HasValue)
             {
-                span.SetData("gen_ai.usage.total_tokens", inputTokens.Value + outputTokens.Value);
+                span.SetData(SentryAIConstants.SpanAttributes.UsageTotalTokens, inputTokens.Value + outputTokens.Value);
             }
         }
 
         if (response.Text is { } responseText && (aiOptions?.IncludeAIResponseContent ?? true))
         {
-            span.SetData("gen_ai.response.text", responseText);
+            span.SetData(SentryAIConstants.SpanAttributes.ResponseText, responseText);
         }
 
         if (response.ModelId is { } modelId)
         {
-            span.SetData("gen_ai.response.model", modelId);
+            span.SetData(SentryAIConstants.SpanAttributes.ResponseModel, modelId);
         }
     }
 
@@ -112,7 +112,8 @@ internal static class SentryAISpanEnricher
     /// <param name="span">span to enrich</param>
     /// <param name="messages">a list of <see cref="ChatResponseUpdate"/></param>
     /// <param name="aiOptions">AI-specific options</param>
-    public static void EnrichWithStreamingResponses(ISpan span, List<ChatResponseUpdate> messages, SentryAIOptions? aiOptions = null)
+    public static void EnrichWithStreamingResponses(ISpan span, List<ChatResponseUpdate> messages,
+        SentryAIOptions? aiOptions = null)
     {
         var inputTokenCount = 0L;
         var outputTokenCount = 0L;
@@ -128,30 +129,65 @@ internal static class SentryAISpanEnricher
                     outputTokenCount += usage.Details.OutputTokenCount ?? 0;
                 }
             }
+
             if (message.ModelId is { } modelId)
             {
-                span.SetData("gen_ai.response.model_id", modelId);
+                span.SetData(SentryAIConstants.SpanAttributes.ResponseModelId, modelId);
             }
+
             if (message.Text is { } responseText)
             {
                 finalText.Append(responseText);
+            }
+
+            if (message.FinishReason == ChatFinishReason.ToolCalls)
+            {
+                PopulateToolCallsInfo(message.Contents);
             }
         }
 
         if (aiOptions?.IncludeAIResponseContent == true)
         {
-            span.SetData("gen_ai.response.text", finalText.ToString());
+            span.SetData(SentryAIConstants.SpanAttributes.ResponseText, finalText.ToString());
         }
-        span.SetData("gen_ai.usage.input_tokens", inputTokenCount);
-        span.SetData("gen_ai.usage.output_tokens", outputTokenCount);
-        span.SetData("gen_ai.usage.total_tokens", inputTokenCount + outputTokenCount);
+
+        span.SetData(SentryAIConstants.SpanAttributes.UsageInputTokens, inputTokenCount);
+        span.SetData(SentryAIConstants.SpanAttributes.UsageOutputTokens, outputTokenCount);
+        span.SetData(SentryAIConstants.SpanAttributes.UsageTotalTokens, inputTokenCount + outputTokenCount);
+        return;
+
+        void PopulateToolCallsInfo(IList<AIContent> contents)
+        {
+            var functionContents = contents.OfType<FunctionCallContent>().ToArray();
+            if (functionContents.Length > 0)
+            {
+                span.SetData(SentryAIConstants.SpanAttributes.ResponseToolCalls,
+                    FormatFunctionCallContent(functionContents));
+            }
+        }
     }
 
     private static string FormatAvailableTools(IList<AITool> tools) =>
-        FormatAsJson(tools, tool => new { name = tool.Name, description = tool.Description });
+        FormatAsJson(tools, tool => new
+        {
+            name = tool.Name,
+            description = tool.Description
+        });
 
     private static string FormatRequestMessage(ChatMessage[] messages) =>
-        FormatAsJson(messages, message => new { role = message.Role, content = message.Text });
+        FormatAsJson(messages, message => new
+        {
+            role = message.Role,
+            content = message.Text
+        });
+
+    private static string FormatFunctionCallContent(FunctionCallContent[] content) =>
+        FormatAsJson(content, c => new
+        {
+            name = c.Name,
+            type = "function_call",
+            arguments = JsonSerializer.Serialize(c.Arguments)
+        });
 
     private static string FormatAsJson<T>(IEnumerable<T> items, Func<T, object> selector) =>
         JsonSerializer.Serialize(items.Select(selector));

@@ -19,7 +19,7 @@ internal sealed class SentryInstrumentedFunction(AIFunction innerFunction, ChatO
 
             if (result?.ToString() is { } resultString)
             {
-                currSpan.SetData("gen_ai.tool.output", resultString);
+                currSpan.SetData(SentryAIConstants.SpanAttributes.ToolOutput, resultString);
             }
 
             currSpan.Finish(SpanStatus.Ok);
