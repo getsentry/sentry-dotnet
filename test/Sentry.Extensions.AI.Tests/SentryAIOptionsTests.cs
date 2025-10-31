@@ -97,12 +97,13 @@ public class SentryAIOptionsTests
     public void AllPropertyCombinations_WorkCorrectly(bool includeRequest, bool includeResponse, bool initializeSdk)
     {
         // Arrange
-        var options = new SentryAIOptions();
-
-        // Act
-        options.IncludeAIRequestMessages = includeRequest;
-        options.IncludeAIResponseContent = includeResponse;
-        options.InitializeSdk = initializeSdk;
+        var options = new SentryAIOptions
+        {
+            // Act
+            IncludeAIRequestMessages = includeRequest,
+            IncludeAIResponseContent = includeResponse,
+            InitializeSdk = initializeSdk
+        };
 
         // Assert
         Assert.Equal(includeRequest, options.IncludeAIRequestMessages);
