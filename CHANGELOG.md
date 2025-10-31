@@ -50,6 +50,27 @@
 - This release adds support for .NET 10 and drops support for net8.0-android, net8.0-ios, net8.0-maccatalyst and net8.0-windows10.0.19041.0 ([#4461](https://github.com/getsentry/sentry-dotnet/pull/4461))
 - Added support for v3 of the Android AssemblyStore format that is used in .NET 10 and dropped support for v1 that was used in .NET 8 ([#4583](https://github.com/getsentry/sentry-dotnet/pull/4583))
 
+## 5.16.2
+
+### Fixes
+
+- Do not allow multiple `sentry.proguard-uuid` metadata to be set in Android manifest ([#4647](https://github.com/getsentry/sentry-dotnet/pull/4647))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.56.2 to v8.57.1 ([#4637](https://github.com/getsentry/sentry-dotnet/pull/4637), [#4680](https://github.com/getsentry/sentry-dotnet/pull/4680))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8571)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.56.2...8.57.1)
+- Bump Native SDK from v0.11.2 to v0.12.0 ([#4636](https://github.com/getsentry/sentry-dotnet/pull/4636), [#4678](https://github.com/getsentry/sentry-dotnet/pull/4678))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0120)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.11.2...0.12.0)
+- Bump Java SDK from v8.23.0 to v8.24.0 ([#4667](https://github.com/getsentry/sentry-dotnet/pull/4667))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8240)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.23.0...8.24.0)
+- Bump CLI from v2.56.1 to v2.57.0 ([#4668](https://github.com/getsentry/sentry-dotnet/pull/4668))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2570)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.56.1...2.57.0)
+
 ## 5.16.1
 
 ### Fixes
