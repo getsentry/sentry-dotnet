@@ -207,6 +207,22 @@ public static class HubExtensions
         hub.CaptureEvent(new SentryEvent(ex), configureScope);
 
     /// <summary>
+    /// Captures feedback from the user.
+    /// </summary>
+    /// <param name="hub">The Sentry hub.</param>
+    /// <param name="feedback">The feedback to send to Sentry.</param>
+    /// <param name="configureScope">Callback method to configure the scope.</param>
+    /// <param name="hint">
+    /// An optional hint providing high-level context for the source of the event, including attachments
+    /// </param>
+    /// <returns>
+    /// A <see cref="SentryId"/> that will contain the Id of the new event (if successful) or
+    /// <see cref="SentryId.Empty"/> otherwise
+    /// </returns>
+    public static SentryId CaptureFeedback(this IHub hub, SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+        => hub.CaptureFeedback(feedback, out _, configureScope, hint);
+
+    /// <summary>
     /// Captures a message with a configurable scope callback.
     /// </summary>
     /// <param name="hub">The Sentry hub.</param>

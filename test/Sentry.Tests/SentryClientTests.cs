@@ -864,8 +864,12 @@ public partial class SentryClientTests : IDisposable
         var sut = _fixture.GetSut();
         sut.Dispose();
 
-        // Act / Assert
-        sut.CaptureFeedback(feedback);
+        // Act
+        var id = sut.CaptureFeedback(feedback, out var result);
+
+        // Assert
+        result.Should().Be(CaptureFeedbackResult.Success);
+        id.Should().NotBe(SentryId.Empty);
     }
 
     [Fact]
@@ -876,10 +880,12 @@ public partial class SentryClientTests : IDisposable
         var feedback = new SentryFeedback(string.Empty);
 
         //Act
-        sut.CaptureFeedback(feedback);
+        var id = sut.CaptureFeedback(feedback, out var result);
 
         //Assert
         _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        result.Should().Be(CaptureFeedbackResult.EmptyMessage);
+        id.Should().Be(SentryId.Empty);
     }
 
     [Fact]
@@ -890,10 +896,11 @@ public partial class SentryClientTests : IDisposable
         var feedback = new SentryFeedback("Everything is great!");
 
         //Act
-        sut.CaptureFeedback(feedback);
+        var result = sut.CaptureFeedback(feedback);
 
         //Assert
         _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        result.Should().NotBe(SentryId.Empty);
     }
 
     [Fact]
@@ -912,9 +919,10 @@ public partial class SentryClientTests : IDisposable
             .Do(callback => envelope = callback.Arg<Envelope>());
 
         //Act
-        sut.CaptureFeedback(feedback, scope);
+        var result = sut.CaptureFeedback(feedback, scope);
 
         //Assert
+        result.Should().NotBe(SentryId.Empty);
         _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
         envelope.Should().NotBeNull();
         envelope.Items.Should().Contain(item => item.TryGetType() == EnvelopeItem.TypeValueFeedback);
@@ -934,9 +942,10 @@ public partial class SentryClientTests : IDisposable
         hint.Attachments.Add(AttachmentHelper.FakeAttachment("foo.txt"));
 
         //Act
-        sut.CaptureFeedback(feedback, null, hint);
+        var result = sut.CaptureFeedback(feedback, null, hint);
 
         //Assert
+        result.Should().NotBe(SentryId.Empty);
         _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
         sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
             envelope.Items.Count(item => item.TryGetType() == "attachment") == 1));

@@ -7,12 +7,13 @@ namespace Sentry;
 /// <summary>
 /// Transaction tracer.
 /// </summary>
-public class TransactionTracer : IBaseTracer, ITransactionTracer
+public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
     private readonly Timer? _idleTimer;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
+    private InterlockedBoolean _hasFinished;
 
     private InterlockedBoolean _cancelIdleTimeout;
 
@@ -362,6 +363,11 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     /// <inheritdoc />
     public void Finish()
     {
+        if (_hasFinished.Exchange(true))
+        {
+            return;
+        }
+
         _options?.LogDebug("Attempting to finish Transaction '{0}'.", SpanId);
         if (_cancelIdleTimeout.Exchange(false) == true)
         {
@@ -431,5 +437,20 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
         _spans = new ConcurrentBag<ISpan>();
 #endif
         _activeSpanTracker.Clear();
+    }
+
+    /// <summary>
+    /// <para>
+    /// Automatically finishes the transaction with a status of <see cref="SpanStatus.Ok" /> at the end of a
+    /// <c>using</c> block, if it has not already been finished.
+    /// </para>
+    /// <para>
+    /// This is the equivalent of calling <see cref="Finish()" /> when the transaction passes out of scope.
+    /// </para>
+    /// </summary>
+    /// <remarks>This is a convenience method only. Disposing is not required.</remarks>
+    public void Dispose()
+    {
+        Finish();
     }
 }
