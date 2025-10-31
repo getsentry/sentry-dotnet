@@ -78,7 +78,7 @@ internal static class SentryAISpanEnricher
     /// <param name="aiOptions">AI-specific options</param>
     internal static void EnrichWithResponse(ISpan span, ChatResponse response, SentryAIOptions aiOptions)
     {
-        EnrichWithStreamingResponses(span, [..response.ToChatResponseUpdates()], aiOptions);
+        EnrichWithStreamingResponses(span, [.. response.ToChatResponseUpdates()], aiOptions);
     }
 
     /// <summary>
