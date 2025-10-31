@@ -152,6 +152,10 @@ public static partial class SentrySdk
             options.AutoSessionTracking = false;
             nativeOptions.EnableAutoSessionTracking = true;
 
+            // SDK users must explicitly opt-in to Session Replay in unreliable environments
+            nativeOptions.Experimental.EnableSessionReplayInUnreliableEnvironment =
+                options.Native.ExperimentalOptions.SessionReplay.EnableSessionReplayInUnreliableEnvironment;
+
             var sessionSampleRate = (float)(options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate ?? 0f);
             var onErrorSampleRate = (float)(options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate ?? 0f);
             var cocoaReplayOptions = new Sentry.CocoaSdk.SentryReplayOptions();

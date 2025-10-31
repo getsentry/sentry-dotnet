@@ -1680,7 +1680,7 @@ interface SentryOptions
 
     // @property (readonly, nonatomic) NSObject * _Nonnull _swiftExperimentalOptions;
     [Export ("_swiftExperimentalOptions")]
-    NSObject _swiftExperimentalOptions { get; }
+    SentryExperimentalOptions Experimental { get; }
 
     // @property (copy, nonatomic) API_AVAILABLE(ios(13.0)) SentryUserFeedbackConfigurationBlock configureUserFeedback __attribute__((availability(ios, introduced=13.0))) __attribute__((availability(macos_app_extension, unavailable))) __attribute__((availability(ios_app_extension, unavailable)));
     [Export ("configureUserFeedback", ArgumentSemantic.Copy)]

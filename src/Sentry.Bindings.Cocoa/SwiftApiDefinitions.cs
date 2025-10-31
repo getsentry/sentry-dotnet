@@ -884,3 +884,14 @@ interface SentryViewScreenshotProvider
     [Export ("imageWithView:onComplete:")]
     void OnComplete (UIView view, Action<UIImage> onComplete);
 }
+
+[BaseType(typeof(NSObject), Name = "_TtC6Sentry25SentryExperimentalOptions")]
+[DisableDefaultCtor]
+[Internal]
+interface SentryExperimentalOptions
+{
+    // csharp
+    // Add inside the existing SentryExperimentalOptions interface in `src/Sentry.Bindings.Cocoa/SwiftApiDefinitions.cs`
+    [Export("enableSessionReplayInUnreliableEnvironment")]
+    bool EnableSessionReplayInUnreliableEnvironment { get; set; }
+}

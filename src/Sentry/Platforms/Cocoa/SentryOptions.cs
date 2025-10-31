@@ -285,6 +285,38 @@ public partial class SentryOptions
         public class NativeSentryReplayOptions
         {
             /// <summary>
+            /// <para>
+            /// Forces enabling of session replay in unreliable environments.
+            /// </para>
+            /// <para>
+            /// Due to internal changes with the release of Liquid Glass on iOS 26.0, the masking of text and images can
+            /// not be reliably guaranteed. Therefore the SDK uses a defensive programming approach to disable the
+            /// session replay integration by default, unless the environment is detected as reliable.
+            /// </para>
+            /// <para>
+            /// Indicators for reliable environments include:
+            /// <list type="bullet">
+            ///   <item>
+            ///     <description>Running on an older version of iOS that doesn't have Liquid Glass (iOS 18 or earlier)</description>
+            ///   </item>
+            ///   <item>
+            ///     <description><c>UIDesignRequiresCompatibility</c> is explicitly set to <c>YES</c> in <c>Info.plist</c></description>
+            ///   </item>
+            ///   <item>
+            ///     <description>The app was built with Xcode &lt; 26.0 (DTXcode &lt; 2600)</description>
+            ///   </item>
+            /// </list>
+            /// </para>
+            /// <para>
+            /// Important: This flag allows to re-enable the session replay integration on iOS 26.0 and later, but please be aware that text and images may not be masked as expected.
+            /// </para>
+            /// </summary>
+            /// <remarks>
+            /// See https://github.com/getsentry/sentry-cocoa/issues/6389
+            /// </remarks>
+            public bool EnableSessionReplayInUnreliableEnvironment { get; set; } = false;
+
+            /// <summary>
             /// The sample rate for sessions that had an error or crash.
             /// Value must be between 0.0 and 1.0.
             /// A value of 0.0 disables session replay for errored sessions.
