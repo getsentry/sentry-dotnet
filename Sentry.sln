@@ -221,7 +221,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{A8A9
 		scripts\build-sentry-cocoa.sh = scripts\build-sentry-cocoa.sh
 		scripts\update-project-xml.ps1 = scripts\update-project-xml.ps1
 		scripts\build-sentry-native.ps1 = scripts\build-sentry-native.ps1
-		scripts\ios-simulator-utils.ps1 = scripts\ios-simulator-utils.ps1
 		scripts\commit-formatted-code.sh = scripts\commit-formatted-code.sh
 		scripts\accept-verifier-changes.ps1 = scripts\accept-verifier-changes.ps1
 		scripts\generate-cocoa-bindings.ps1 = scripts\generate-cocoa-bindings.ps1
