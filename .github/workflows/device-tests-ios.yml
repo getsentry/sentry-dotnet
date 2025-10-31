@@ -37,21 +37,25 @@ jobs:
       - name: Run Tests
         id: first-test-run
         continue-on-error: true
+        timeout-minutes: 40
         run: pwsh scripts/device-test.ps1 ios -Run
 
       - name: Retry Tests (if previous failed to run)
         if: steps.first-test-run.outcome == 'failure'
+        timeout-minutes: 40
         run: pwsh scripts/device-test.ps1 ios -Run
 
       - name: Run Integration Tests
         id: first-integration-test-run
         continue-on-error: true
+        timeout-minutes: 40
         uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
         with:
           path: integration-test/ios.Tests.ps1
 
       - name: Retry Integration Tests (if previous failed to run)
         if: steps.first-integration-test-run.outcome == 'failure'
+        timeout-minutes: 40
         uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
         with:
           path: integration-test/ios.Tests.ps1
