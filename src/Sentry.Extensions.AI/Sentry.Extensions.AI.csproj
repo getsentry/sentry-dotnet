@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Using Include="Sentry.Extensibility" />
+    <Using Include="Sentry.Integrations" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Sentry\Sentry.csproj" />
   </ItemGroup>
 

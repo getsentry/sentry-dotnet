@@ -11,6 +11,28 @@ namespace Sentry.Extensions.AI;
 public static class SentryAIExtensions
 {
     /// <summary>
+    /// Wrap tool calls specified in <see cref="ChatOptions"/> with Sentry agent instrumentation
+    /// </summary>
+    /// <param name="options">The <see cref="ChatOptions"/> that contains the <see cref="AIFunction"/> to instrument</param>
+    public static ChatOptions WithSentryToolInstrumentation(this ChatOptions options)
+    {
+        if (options.Tools is null || options.Tools.Count == 0)
+        {
+            return options;
+        }
+
+        for (var i = 0; i < options.Tools.Count; i++)
+        {
+            if (options.Tools[i] is AIFunction fn and not SentryInstrumentedFunction)
+            {
+                options.Tools[i] = new SentryInstrumentedFunction(fn, options);
+            }
+        }
+
+        return options;
+    }
+
+    /// <summary>
     /// Wraps an IChatClient with Sentry agent instrumentation.
     /// </summary>
     /// <remarks>
