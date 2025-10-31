@@ -27,91 +27,82 @@ code = Regex.Replace(code, @"(DEPRECATED_MSG_ATTRIBUTE\([^)]*?)""\s*\r?\n\s*""",
 
 var tree = CSharpSyntaxTree.ParseText(code);
 var nodes = tree.GetCompilationUnitRoot()
-    .Namespace("Sentry.CocoaSdk")
-    // Remove CFunctions class
-    .Blacklist<ClassDeclarationSyntax>("CFunctions")
+    .WithNamespace("Sentry.CocoaSdk")
+    .RemoveClass("CFunctions")
     // Make enums, interfaces, and delegates internal
-    .Access<EnumDeclarationSyntax>("Sentry*", SyntaxKind.InternalKeyword)
-    .Attribute<InterfaceDeclarationSyntax>("*Sentry*", "Internal")
-    .Attribute<DelegateDeclarationSyntax>("Sentry*", "Internal")
+    .AsInternal("Sentry*", "internal")
+    .WithAttribute("*Sentry*", "Internal")
     // Adjust protocols (some are models)
-    .Model("SentryRedactOptions")
-    .Model("SentrySerializable")
-    .Model("SentrySpan")
-    .Model("SentryRRWebEvent", false)
-    .Model("SentryReplayBreadcrumbConverter", false)
-    .Model("SentryViewScreenshotProvider", false)
+    .VerifyModel("SentryRedactOptions")
+    .VerifyModel("SentrySerializable")
+    .VerifyModel("SentrySpan")
+    .RemoveComment("SentryRRWebEvent", "[Model]")
+    .RemoveComment("SentryReplayBreadcrumbConverter", "[Model]")
+    .RemoveComment("SentryViewScreenshotProvider", "[Model]")
     // Adjust base types
-    .BaseType("SentrySpan", "NSObject")
-    .BaseType("SentryRedactOptions", "NSObject")
+    .WithAttribute("SentrySpan", "BaseType (typeof(NSObject))")
+    .WithAttribute("SentryRedactOptions", "BaseType (typeof(NSObject))")
     // Remove INSCopying due to https://github.com/xamarin/xamarin-macios/issues/17130
-    .Blacklist<BaseTypeSyntax>("INSCopying")
-    .Blacklist<BaseListSyntax>("")
+    .RemoveBaseType("INSCopying")
     // Fix property-to-method conversions
-    .PropertyToMethod("Sentry*.Serialize")
-    .PropertyToMethod("SentrySpan.ToTraceHeader")
-    .PropertyToMethod("SentryTraceContext.ToBaggage")
-    .PropertyToMethod("PrivateSentrySDKOnly.Capture*")
-    // Verify
-    .Verify<PropertyDeclarationSyntax>("*Sentry*.*", "MethodToProperty") // TODO: replace broad pattern with one-by-one verification
-    .Verify<PropertyDeclarationSyntax>("SentryOptions.*Targets", "StronglyTypedNSArray")
+    .PropertyToMethod("Sentry*", "Serialize")
+    .PropertyToMethod("SentrySpan", "ToTraceHeader")
+    .PropertyToMethod("SentryTraceContext", "ToBaggage")
+    .PropertyToMethod("PrivateSentrySDKOnly", "Capture*")
+    // Verify the rest
+    .VerifyProperty("*Sentry*", "*", "MethodToProperty") // TODO: replace broad patterns with one-by-one verification
+    .VerifyProperty("SentryOptions", "*Targets", "StronglyTypedNSArray")
     // Fix delegate argument names
-    .Rename<ParameterSyntax>("NSError arg*", "NSError error")
-    .Rename<ParameterSyntax>("NSHttpUrlResponse arg*", "NSHttpUrlResponse response")
-    .Rename<ParameterSyntax>("SentryEvent arg*", "SentryEvent @event")
-    .Rename<ParameterSyntax>("SentrySamplingContext arg*", "SentrySamplingContext samplingContext")
-    .Rename<ParameterSyntax>("SentryBreadcrumb arg*", "SentryBreadcrumb breadcrumb")
-    .Rename<ParameterSyntax>("SentrySpan arg*", "SentrySpan span")
-    .Rename<ParameterSyntax>("SentryLog arg*", "SentryLog log")
-    .Rename<ParameterSyntax>("SentryProfileOptions arg*", "SentryProfileOptions options")
+    .RenameParameter("NSError", "arg*", "error")
+    .RenameParameter("NSHttpUrlResponse", "arg*", "response")
+    .RenameParameter("SentryEvent", "arg*", "@event")
+    .RenameParameter("SentrySamplingContext", "arg*", "samplingContext")
+    .RenameParameter("SentryBreadcrumb", "arg*", "breadcrumb")
+    .RenameParameter("SentrySpan", "arg*", "span")
+    .RenameParameter("SentryLog", "arg*", "log")
+    .RenameParameter("SentryProfileOptions", "arg*", "options")
     // Fix interface names
-    .Rename<BaseTypeSyntax>("ISentrySerializable", "SentrySerializable")
-    .Rename<BaseTypeSyntax>("ISentryRedactOptions", "SentryRedactOptions")
+    .RenameInterface("ISentrySerializable", "SentrySerializable")
+    .RenameInterface("ISentryRedactOptions", "SentryRedactOptions")
+    .RenameBaseType("ISentrySerializable", "SentrySerializable")
+    .RenameBaseType("ISentryRedactOptions", "SentryRedactOptions")
     // Rename conflicting SentryRRWebEvent (protocol vs. interface)
-    .Rename<InterfaceDeclarationSyntax>("SentryRRWebEvent", "ISentryRRWebEvent", iface => iface.HasAttribute("Protocol"))
+    .RenameProtocol("SentryRRWebEvent", "ISentryRRWebEvent")
     // Adjust nullable return delegates (though broken until this is fixed: https://github.com/xamarin/xamarin-macios/issues/17109)
-    .Attribute<DelegateDeclarationSyntax>("SentryBeforeBreadcrumbCallback", "return: NullAllowed")
-    .Attribute<DelegateDeclarationSyntax>("SentryBeforeSendEventCallback", "return: NullAllowed")
-    .Attribute<DelegateDeclarationSyntax>("SentryTracesSamplerCallback", "return: NullAllowed")
-    .Partial("SentryScope")
-    .Blacklist<AttributeSyntax>(
-        // error CS0246: The type or namespace name 'iOS' could not be found
-        "iOS",
-        // error CS0246: The type or namespace name 'Mac' could not be found
-        "Mac",
-        // error CS0117: 'PlatformName' does not contain a definition for 'iOSAppExtension'
-        "Unavailable"
-    )
-    .Blacklist<AttributeListSyntax>("")
-    .Blacklist<MethodDeclarationSyntax>(
-        // error CS0114: 'SentryXxx.IsEqual(NSObject?)' hides inherited member 'NSObject.IsEqual(NSObject?)'.
-        "Sentry*.IsEqual",
-        // error CS0246: The type or namespace name '_NSZone' could not be found
-        "Sentry*.CopyWithZone",
-        // SentryEnvelope* is not whitelisted
-        "PrivateSentrySDKOnly.CaptureEnvelope",
-        "PrivateSentrySDKOnly.EnvelopeWithData",
-        "PrivateSentrySDKOnly.StoreEnvelope",
-        // deprecated
-        "Sentry*.CaptureUserFeedback"
-    )
-    .Blacklist<DelegateDeclarationSyntax>(
-        // SentryAppStartMeasurement is not whitelisted
-        "SentryOnAppStartMeasurementAvailable",
-        // deprecated
-        "SentryUserFeedbackConfigurationBlock"
-    )
-    .Blacklist<PropertyDeclarationSyntax>(
-        // error CS0114: 'SentryXxx.Description' hides inherited member 'NSObject.Description'.
-        "Sentry*.Description",
-        // SentryAppStartMeasurement is not whitelisted
-        "PrivateSentrySDKOnly.*AppStartMeasurement*",
-        // SentryStructuredLogAttribute is not whitelisted
-        "SentryLog.Attributes",
-        // deprecated
-        "SentryOptions.ConfigureUserFeedback"
-    )
-    .Whitelist<InterfaceDeclarationSyntax>(
+    .WithAttribute("SentryBeforeBreadcrumbCallback", "return: NullAllowed")
+    .WithAttribute("SentryBeforeSendEventCallback", "return: NullAllowed")
+    .WithAttribute("SentryTracesSamplerCallback", "return: NullAllowed")
+    // For PrivateApiDefinitions.cs
+    .WithModifier("SentryScope", "partial")
+    // error CS0246: The type or namespace name 'iOS' could not be found
+    .RemoveAttribute("iOS")
+    // error CS0246: The type or namespace name 'Mac' could not be found
+    .RemoveAttribute("Mac")
+    // error CS0117: 'PlatformName' does not contain a definition for 'iOSAppExtension'
+    .RemoveAttribute("Unavailable")
+    // error CS0114: 'SentryXxx.IsEqual(NSObject?)' hides inherited member 'NSObject.IsEqual(NSObject?)'.
+    .RemoveMethod("Sentry*", "IsEqual")
+    // error CS0246: The type or namespace name '_NSZone' could not be found
+    .RemoveMethod("Sentry*", "CopyWithZone")
+    // SentryEnvelope* is not whitelisted
+    .RemoveMethod("PrivateSentrySDKOnly", "CaptureEnvelope")
+    .RemoveMethod("PrivateSentrySDKOnly", "EnvelopeWithData")
+    .RemoveMethod("PrivateSentrySDKOnly", "StoreEnvelope")
+    // deprecated
+    .RemoveMethod("Sentry*", "CaptureUserFeedback")
+    // SentryAppStartMeasurement is not whitelisted
+    .RemoveDelegate("SentryOnAppStartMeasurementAvailable")
+    // deprecated
+    .RemoveDelegate("SentryUserFeedbackConfigurationBlock")
+    // error CS0114: 'SentryXxx.Description' hides inherited member 'NSObject.Description'.
+    .RemoveProperty("Sentry*", "Description")
+    // SentryAppStartMeasurement is not whitelisted
+    .RemoveProperty("PrivateSentrySDKOnly", "*AppStartMeasurement*")
+    // SentryStructuredLogAttribute is not whitelisted
+    .RemoveProperty("SentryLog", "Attributes")
+    // deprecated
+    .RemoveProperty("SentryOptions", "ConfigureUserFeedback")
+    .KeepInterfaces(
         "ISentryRRWebEvent",
         "PrivateSentrySDKOnly",
         "SentryAttachment",
@@ -171,27 +162,17 @@ File.WriteAllText(args[0], formatted.ToFullString() + "\n");
 
 internal static class FilterExtensions
 {
-    public static CompilationUnitSyntax Blacklist<T>(
+    public static CompilationUnitSyntax KeepInterfaces(
         this CompilationUnitSyntax root,
-        params string[] names) where T : SyntaxNode
+        params string[] names)
     {
         var nodes = root.DescendantNodes()
-            .OfType<T>()
-            .Where(node => names.Any(node.Matches));
+            .OfType<InterfaceDeclarationSyntax>()
+            .Where(node => !names.Any(name => node.Identifier.Matches(name)));
         return root.RemoveNodes(nodes, SyntaxRemoveOptions.KeepNoTrivia)!;
     }
 
-    public static CompilationUnitSyntax Whitelist<T>(
-        this CompilationUnitSyntax root,
-        params string[] names) where T : SyntaxNode
-    {
-        var nodes = root.DescendantNodes()
-            .OfType<T>()
-            .Where(node => !names.Any(node.Matches));
-        return root.RemoveNodes(nodes, SyntaxRemoveOptions.KeepNoTrivia)!;
-    }
-
-    public static CompilationUnitSyntax Namespace(
+    public static CompilationUnitSyntax WithNamespace(
         this CompilationUnitSyntax root,
         string name)
     {
@@ -201,222 +182,210 @@ internal static class FilterExtensions
             .AddMembers(node.WithMembers(root.Members));
     }
 
-    public static CompilationUnitSyntax Attribute<T>(
+    private static CompilationUnitSyntax RemoveByPredicate<T>(
         this CompilationUnitSyntax root,
-        string typeName,
-        string attributeName) where T : SyntaxNode
+        Func<T, bool> predicate) where T : SyntaxNode
     {
         var nodes = root.DescendantNodes()
             .OfType<T>()
-            .Where(node => node.Matches(typeName) && !node.HasAttribute(attributeName));
-
-        var attribute = SyntaxFactory.Attribute(SyntaxFactory.IdentifierName(attributeName));
-        var attributeList = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(attribute));
-
-        var replacements = nodes.ToDictionary(
-            node => node,
-            node => node.WithAttribute(attributeList));
-
-        return root.ReplaceNodes(replacements.Keys, (orig, _) => replacements[orig]);
+            .Where(node => predicate(node));
+        return root.RemoveNodes(nodes, SyntaxRemoveOptions.KeepNoTrivia)!;
     }
 
-    public static CompilationUnitSyntax Model(
-        this CompilationUnitSyntax root,
-        string name,
-        bool isModel = true)
-    {
-        var node = root.DescendantNodes()
-            .OfType<InterfaceDeclarationSyntax>()
-            .FirstOrDefault(node => node.Matches(name) && node.HasAttribute("Protocol"));
-
-        if (node == null)
-        {
-            return root;
-        }
-
-        var trivia = SyntaxFactory.TriviaList(
-            node.GetLeadingTrivia().Where(t =>
-                !(t.IsKind(SyntaxKind.MultiLineCommentTrivia) && t.ToString().Contains("[Model]"))));
-        var result = root.ReplaceNode(node, node.WithLeadingTrivia(trivia));
-        return isModel
-            ? result.Attribute<InterfaceDeclarationSyntax>(name, "Model")
-            : result;
-    }
-
-    public static CompilationUnitSyntax BaseType(
-        this CompilationUnitSyntax root,
-        string name,
-        string baseType)
-    {
-        return root.Attribute<InterfaceDeclarationSyntax>(name, $"BaseType (typeof({baseType}))");
-    }
-
-    public static CompilationUnitSyntax Rename<T>(
-        this CompilationUnitSyntax root,
-        string oldName,
-        string newName,
-        Func<T, bool>? predicate = null) where T : SyntaxNode
-    {
-        var nodes = new Dictionary<SyntaxNode, SyntaxNode>();
-        foreach (var node in root.DescendantNodes().OfType<T>())
-        {
-            if (predicate != null && !predicate(node))
-            {
-                continue;
-            }
-
-            if (node.Matches(oldName))
-            {
-                nodes[node] = node.WithIdentifier(newName);
-            }
-        }
-        return root.ReplaceNodes(nodes.Keys, (orig, _) => nodes[orig]);
-    }
-
-    public static CompilationUnitSyntax Partial(
+    public static CompilationUnitSyntax RemoveClass(
         this CompilationUnitSyntax root,
         string name)
     {
-        var node = root.DescendantNodes()
-            .OfType<InterfaceDeclarationSyntax>()
-            .FirstOrDefault(i => i.Matches(name));
-
-        if (node == null)
-        {
-            return root;
-        }
-
-        return root.ReplaceNode(
-            node,
-            node.AddModifiers(SyntaxFactory.Token(SyntaxKind.PartialKeyword).WithTrailingTrivia(SyntaxFactory.Space))
-        );
+        return root.RemoveByPredicate<ClassDeclarationSyntax>(node => node.Identifier.Matches(name));
     }
 
-    public static CompilationUnitSyntax PropertyToMethod(this CompilationUnitSyntax root, string pattern)
+    public static CompilationUnitSyntax RemoveDelegate(
+        this CompilationUnitSyntax root,
+        string name)
     {
-        var properties = root.DescendantNodes()
+        return root.RemoveByPredicate<DelegateDeclarationSyntax>(node => node.Identifier.Matches(name));
+    }
+
+    public static CompilationUnitSyntax RemoveAttribute(
+        this CompilationUnitSyntax root,
+        string name)
+    {
+        return root
+            .RemoveByPredicate<AttributeSyntax>(node => node.Name.Matches(name))
+            .RemoveByPredicate<AttributeListSyntax>(node => node.Attributes.Count == 0);
+    }
+
+    public static CompilationUnitSyntax RemoveBaseType(
+        this CompilationUnitSyntax root,
+        string name)
+    {
+        return root
+            .RemoveByPredicate<BaseTypeSyntax>(node => node.Type.Matches(name))
+            .RemoveByPredicate<BaseListSyntax>(node => node.Types.Count == 0);
+    }
+
+    public static CompilationUnitSyntax RemoveMethod(
+        this CompilationUnitSyntax root,
+        string type,
+        string name)
+    {
+        return root.RemoveByPredicate<MethodDeclarationSyntax>(node => node.Identifier.Matches(name) && node.HasParent(type));
+    }
+
+    public static CompilationUnitSyntax RemoveProperty(
+        this CompilationUnitSyntax root,
+        string type,
+        string name)
+    {
+        return root.RemoveByPredicate<PropertyDeclarationSyntax>(node => node.Identifier.Matches(name) && node.HasParent(type));
+    }
+
+    public static CompilationUnitSyntax WithAttribute(
+        this CompilationUnitSyntax root,
+        string type,
+        string attribute)
+    {
+        var nodes = root.DescendantNodes()
+            .OfType<InterfaceDeclarationSyntax>()
+            .Where(node => node.Identifier.Matches(type) && !node.HasAttribute(attribute))
+            .Cast<SyntaxNode>()
+            .Concat(root.DescendantNodes()
+                .OfType<DelegateDeclarationSyntax>()
+                .Where(node => node.Identifier.Matches(type) && !node.HasAttribute(attribute)));
+        return root.ReplaceNodes(nodes, (node, _) => node.WithAttribute(attribute));
+    }
+
+    public static CompilationUnitSyntax AsInternal(
+        this CompilationUnitSyntax root,
+        string name,
+        string modifier)
+    {
+        var nodes = root.DescendantNodes()
+            .OfType<EnumDeclarationSyntax>()
+            .Where(node => node.Identifier.Matches(name));
+        return root.ReplaceNodes(nodes, (node, _) => node.WithModifier(modifier));
+    }
+
+    public static CompilationUnitSyntax WithModifier(
+        this CompilationUnitSyntax root,
+        string name,
+        string modifier)
+    {
+        var nodes = root.DescendantNodes()
+            .OfType<InterfaceDeclarationSyntax>()
+            .Where(node => node.Identifier.Matches(name));
+        return root.ReplaceNodes(nodes, (node, _) => node.WithModifier(modifier));
+    }
+
+    public static CompilationUnitSyntax VerifyModel(
+        this CompilationUnitSyntax root,
+        string name)
+    {
+        var nodes = root.DescendantNodes()
+            .OfType<InterfaceDeclarationSyntax>()
+            .Where(node => node.Identifier.Matches(name) && node.HasAttribute("Protocol"));
+        return root.ReplaceNodes(nodes, (node, _) => node.WithAttribute("Model").RemoveComment("[Model]"));
+    }
+
+    public static CompilationUnitSyntax RemoveComment(
+        this CompilationUnitSyntax root,
+        string name,
+        string comment)
+    {
+        var nodes = root.DescendantNodes()
+            .OfType<InterfaceDeclarationSyntax>()
+            .Where(node => node.Identifier.Matches(name) && node.HasComment(comment));
+        return root.ReplaceNodes(nodes, (node, _) => node.RemoveComment(comment));
+    }
+
+    public static CompilationUnitSyntax RenameBaseType(
+        this CompilationUnitSyntax root,
+        string from,
+        string to)
+    {
+        var nodes = root.DescendantNodes()
+            .OfType<BaseTypeSyntax>()
+            .Where(node => node.Type.Matches(from));
+        return root.ReplaceNodes(nodes, (node, _) => node.WithType(SyntaxFactory.ParseTypeName(to)));
+    }
+
+    public static CompilationUnitSyntax RenameInterface(
+        this CompilationUnitSyntax root,
+        string from,
+        string to)
+    {
+        var nodes = root.DescendantNodes()
+            .OfType<InterfaceDeclarationSyntax>()
+            .Where(node => node.Identifier.Matches(from));
+        return root.ReplaceNodes(nodes, (node, _) => node.WithIdentifier(SyntaxFactory.Identifier(to)));
+    }
+
+    public static CompilationUnitSyntax RenameProtocol(
+        this CompilationUnitSyntax root,
+        string from,
+        string to)
+    {
+        var nodes = root.DescendantNodes()
+            .OfType<InterfaceDeclarationSyntax>()
+            .Where(node => node.Identifier.Matches(from) && node.HasAttribute("Protocol"));
+        return root.ReplaceNodes(nodes, (node, _) => node.WithIdentifier(SyntaxFactory.Identifier(to)));
+    }
+
+    public static CompilationUnitSyntax RenameParameter(
+        this CompilationUnitSyntax root,
+        string type,
+        string from,
+        string to)
+    {
+        var nodes = root.DescendantNodes()
+            .OfType<ParameterSyntax>()
+            .Where(node => node.Identifier.Matches(from) && node.Type?.Matches(type) == true);
+        return root.ReplaceNodes(nodes, (node, _) => node.WithIdentifier(SyntaxFactory.Identifier(to)));
+    }
+
+    public static CompilationUnitSyntax PropertyToMethod(
+        this CompilationUnitSyntax root,
+        string type,
+        string name)
+    {
+        var nodes = root.DescendantNodes()
             .OfType<PropertyDeclarationSyntax>()
-            .Where(prop =>
-                prop.AttributeLists.SelectMany(a => a.Attributes)
-                    .Any(attr => attr.Name.ToString() == "Verify" && attr.ArgumentList?.Arguments.ToString().Contains("MethodToProperty") == true) &&
-                prop.AccessorList != null &&
-                prop.AccessorList.Accessors.Count == 1 &&
-                prop.AccessorList.Accessors[0].Kind() == SyntaxKind.GetAccessorDeclaration &&
-                prop.GetQualifiedName().Matches(pattern)
-            );
-
-        return root.ReplaceNodes(properties, (original, _) =>
+            .Where(node => node.Identifier.Matches(name) && node.HasParent(type) && node.HasAttribute("Verify", "MethodToProperty"));
+        return root.ReplaceNodes(nodes, (node, _) =>
         {
-            var newAttributes = SyntaxFactory.List(
-                original.AttributeLists
-                    .Select(al => al.WithAttributes(
-                        SyntaxFactory.SeparatedList(
-                            al.Attributes.Where(attr =>
-                                !(attr.Name.ToString() == "Verify" && attr.ArgumentList?.Arguments.ToString().Contains("MethodToProperty") == true)
-                            )
-                        )
-                    ))
-                    .Where(al => al.Attributes.Count > 0)
-            );
-
-            return SyntaxFactory.MethodDeclaration(original.Type, SyntaxFactory.Identifier(original.Identifier.Text))
-                .WithModifiers(original.Modifiers)
-                .WithAttributeLists(newAttributes)
+            var attributes = node.AttributeLists.RemoveAttribute("Verify", "MethodToProperty");
+            return SyntaxFactory.MethodDeclaration(node.Type, SyntaxFactory.Identifier(node.Identifier.Text))
+                .WithModifiers(node.Modifiers)
+                .WithAttributeLists(attributes)
                 .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
         });
     }
 
-    public static CompilationUnitSyntax Verify<T>(
+    public static CompilationUnitSyntax VerifyProperty(
         this CompilationUnitSyntax root,
-        string typeName,
-        string verify) where T : MemberDeclarationSyntax
+        string type,
+        string property,
+        string verify)
     {
-        return root.ReplaceNodes(
-            root.DescendantNodes().OfType<T>().Where(node => node.Matches(typeName)),
-            (original, _) =>
-            {
-                var newAttrLists = original.AttributeLists
-                    .Select(al => al.WithAttributes(
-                        SyntaxFactory.SeparatedList(
-                            al.Attributes.Where(attr =>
-                                !(attr.Name.ToString() == "Verify" &&
-                                  attr.ArgumentList != null &&
-                                  attr.ArgumentList.Arguments.ToString().Matches(verify))
-                            )
-                        )
-                    ))
-                    .Where(al => al.Attributes.Count > 0);
-
-                return original.WithAttributeLists(SyntaxFactory.List(newAttrLists));
-            });
-    }
-
-    public static CompilationUnitSyntax Access<T>(
-        this CompilationUnitSyntax root,
-        string name,
-        SyntaxKind modifier) where T : MemberDeclarationSyntax
-    {
-        var nodes = root.DescendantNodes().OfType<T>()
-            .Where(node => node.Matches(name));
-
-        return root.ReplaceNodes(nodes, (original, _) =>
-            original.WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(modifier)))
-        );
+        var nodes = root.DescendantNodes()
+            .OfType<PropertyDeclarationSyntax>()
+            .Where(node => node.Identifier.Matches(property) && node.HasParent(type));
+        return root.ReplaceNodes(nodes, (node, _) => node.WithAttributeLists(node.AttributeLists.RemoveAttribute("Verify", verify)));
     }
 }
 
 internal static class SyntaxNodeExtensions
 {
-    public static string GetIdentifier(this SyntaxNode node)
+    public static bool HasParent(this SyntaxNode node, string name)
     {
-        return node switch
-        {
-            BaseTypeDeclarationSyntax type => type.Identifier.Text,
-            DelegateDeclarationSyntax del => del.Identifier.Text,
-            MethodDeclarationSyntax method => method.Identifier.Text,
-            PropertyDeclarationSyntax property => property.Identifier.Text,
-            ParameterSyntax param => $"{param.Type} {param.Identifier.Text}",
-            AttributeSyntax attr => attr.Name.ToString(),
-            AttributeListSyntax list => string.Join(" ", list.Attributes.Select(a => a.Name.ToString())),
-            BaseTypeSyntax type => type.Type.ToString(),
-            BaseListSyntax list => string.Join(" ", list.Types.Select(t => t.Type.ToString())),
-            _ => throw new NotSupportedException(node.GetType().Name)
-        };
+        return node.Parent is TypeDeclarationSyntax parent && parent.Identifier.Matches(name);
     }
 
-    public static SyntaxNode WithIdentifier(this SyntaxNode node, string newName)
+    public static bool HasAttribute(this SyntaxNode node, string attribute, string? arguments = null)
     {
-        if (node is ParameterSyntax param)
-        {
-            var parts = newName.Trim().Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-            var newType = parts.Length > 1 ? parts[0] : param.Type?.ToString();
-            var newParamName = parts.Length > 1 ? parts[1] : parts[0];
-
-            var updated = param;
-            if (newType != null && newType != param.Type?.ToString())
-            {
-                updated = updated.WithType(SyntaxFactory.ParseTypeName(newType));
-            }
-            if (newParamName != param.Identifier.Text)
-            {
-                updated = updated.WithIdentifier(SyntaxFactory.Identifier(newParamName));
-            }
-            return updated;
-        }
-
-        var newIdentifier = SyntaxFactory.Identifier(newName);
-        return node switch
-        {
-            InterfaceDeclarationSyntax iface => iface.WithIdentifier(newIdentifier),
-            ClassDeclarationSyntax cls => cls.WithIdentifier(newIdentifier),
-            StructDeclarationSyntax str => str.WithIdentifier(newIdentifier),
-            EnumDeclarationSyntax enm => enm.WithIdentifier(newIdentifier),
-            DelegateDeclarationSyntax del => del.WithIdentifier(newIdentifier),
-            MethodDeclarationSyntax method => method.WithIdentifier(newIdentifier),
-            PropertyDeclarationSyntax property => property.WithIdentifier(newIdentifier),
-            SimpleBaseTypeSyntax type => type.WithType(SyntaxFactory.ParseTypeName(newName)),
-            _ => throw new NotSupportedException(node.GetType().Name)
-        };
+        return node.GetAttributes()
+            .SelectMany(al => al.Attributes)
+            .Any(attr => attr.Name.Matches(attribute) && (arguments == null || attr.ArgumentList?.Arguments.ToString().Contains(arguments) == true));
     }
 
     public static SyntaxList<AttributeListSyntax> GetAttributes(this SyntaxNode node)
@@ -431,8 +400,9 @@ internal static class SyntaxNodeExtensions
         };
     }
 
-    public static SyntaxNode WithAttribute(this SyntaxNode node, AttributeListSyntax attributeList)
+    public static SyntaxNode WithAttribute(this SyntaxNode node, string attribute)
     {
+        var attributes = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(SyntaxFactory.Attribute(SyntaxFactory.IdentifierName(attribute))));
         var existingAttributes = node.GetAttributes();
         var add = new Func<SyntaxNode, AttributeListSyntax, SyntaxNode>((n, attr) => n switch
         {
@@ -445,79 +415,85 @@ internal static class SyntaxNodeExtensions
 
         if (existingAttributes.Count > 0)
         {
-            return add(node, attributeList);
+            return add(node, attributes);
         }
 
-        return add(node.WithLeadingTrivia(SyntaxFactory.TriviaList()), attributeList.WithLeadingTrivia(node.GetLeadingTrivia()));
+        return add(node.WithLeadingTrivia(SyntaxFactory.TriviaList()), attributes.WithLeadingTrivia(node.GetLeadingTrivia()));
     }
 
-    public static string GetQualifiedName(this SyntaxNode node)
+    public static SyntaxNode WithModifier(this SyntaxNode node, string modifier)
     {
-        var identifier = node.GetIdentifier();
-        var parent = node.Parent;
-        while (parent != null)
-        {
-            if (parent is TypeDeclarationSyntax typeDecl)
-            {
-                return $"{typeDecl.Identifier.Text}.{identifier}";
-            }
-            parent = parent.Parent;
-        }
-        return identifier;
-    }
-
-    public static bool Matches(this SyntaxNode node, string pattern)
-    {
-        var actualPattern = pattern.TrimStart('!');
-        if (node.GetIdentifier().Matches(actualPattern) || node.GetQualifiedName().Matches(actualPattern))
-        {
-            return !pattern.StartsWith('!');
-        }
-        return false;
-    }
-
-    public static bool HasAttribute(this SyntaxNode node, string attributeName)
-    {
+        var modifiers = SyntaxFactory.TokenList(SyntaxFactory.ParseToken(modifier));
         return node switch
         {
-            InterfaceDeclarationSyntax iface => iface.AttributeLists
-                .SelectMany(al => al.Attributes)
-                .Any(attr => attr.Name.ToString() == attributeName),
-            ClassDeclarationSyntax cls => cls.AttributeLists
-                .SelectMany(al => al.Attributes)
-                .Any(attr => attr.Name.ToString() == attributeName),
-            StructDeclarationSyntax str => str.AttributeLists
-                .SelectMany(al => al.Attributes)
-                .Any(attr => attr.Name.ToString() == attributeName),
-            EnumDeclarationSyntax enm => enm.AttributeLists
-                .SelectMany(al => al.Attributes)
-                .Any(attr => attr.Name.ToString() == attributeName),
-            MethodDeclarationSyntax method => method.AttributeLists
-                .SelectMany(al => al.Attributes)
-                .Any(attr => attr.Name.ToString() == attributeName),
-            PropertyDeclarationSyntax property => property.AttributeLists
-                .SelectMany(al => al.Attributes)
-                .Any(attr => attr.Name.ToString() == attributeName),
-            _ => false
+            InterfaceDeclarationSyntax iface => iface.WithModifiers(modifiers),
+            EnumDeclarationSyntax enm => enm.WithModifiers(modifiers),
+            _ => throw new NotSupportedException(node.GetType().Name)
         };
+    }
+
+    public static bool HasComment(this SyntaxNode node, string comment)
+    {
+        var trivia = node.GetLeadingTrivia();
+        return trivia.Any(t =>
+            t.IsKind(SyntaxKind.MultiLineCommentTrivia) &&
+            t.ToString().Contains(comment));
+    }
+
+    public static SyntaxNode RemoveComment(this SyntaxNode node, string comment)
+    {
+        var trivia = SyntaxFactory.TriviaList(
+            node.GetLeadingTrivia().Where(t =>
+                !(t.IsKind(SyntaxKind.MultiLineCommentTrivia) && t.ToString().Contains(comment))));
+        return node.WithLeadingTrivia(trivia);
     }
 }
 
-internal static class StringExtensions
+internal static class AttributeListExtensions
 {
+    public static SyntaxList<AttributeListSyntax> RemoveAttribute(this SyntaxList<AttributeListSyntax> lists, string attribute, string? arguments = null)
+    {
+        var attributes = lists
+            .Select(al => al.WithAttributes(
+                SyntaxFactory.SeparatedList(al.Attributes.Where(attr => !(attr.Name.ToString() == attribute && (arguments == null || attr.ArgumentList?.Arguments.ToString().Contains(arguments) == true))))
+            ))
+            .Where(al => al.Attributes.Count > 0);
+        return SyntaxFactory.List(attributes);
+    }
+}
+
+internal static class WildcardExtensions
+{
+    public static bool Matches(this NameSyntax syntax, string pattern)
+    {
+        return syntax.ToString().Matches(pattern);
+    }
+
+    public static bool Matches(this TypeSyntax syntax, string pattern)
+    {
+        return syntax.ToString().Matches(pattern);
+    }
+
+    public static bool Matches(this SyntaxToken token, string pattern)
+    {
+        return token.Text.Matches(pattern);
+    }
+
     public static bool Matches(this string str, string pattern)
     {
-        if (pattern == str)
+        var negate = pattern.StartsWith('!');
+        var actual = pattern.TrimStart('!');
+        if (actual == str)
         {
-            return true;
+            return !negate;
         }
 
         if (!pattern.Contains('*') && !pattern.Contains('?'))
         {
-            return false;
+            return negate;
         }
 
         var regex = Regex.Escape(pattern).Replace("\\*", ".*").Replace("\\?", ".");
-        return Regex.IsMatch(str, $"^{regex}$");
+        return Regex.IsMatch(str, $"^{regex}$") != negate;
     }
 }
