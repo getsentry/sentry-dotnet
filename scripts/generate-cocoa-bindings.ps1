@@ -2,6 +2,7 @@
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $true
 
 $RootPath = (Get-Item $PSScriptRoot).Parent.FullName
 $CocoaSdkPath = "$RootPath/modules/sentry-cocoa"
