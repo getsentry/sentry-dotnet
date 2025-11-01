@@ -69,7 +69,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
         var outerSpan = TryGetRootSpan(options);
         var innerSpan = CreateChatSpan(outerSpan, options);
 
-        var hasNext = true;
+        var hasNext = false;
         var responses = new List<ChatResponseUpdate>();
         var enumerator = base
             .GetStreamingResponseAsync(chatMessages, options, cancellationToken)
