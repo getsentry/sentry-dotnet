@@ -47,7 +47,6 @@ public class SentryInstrumentedFunctionTests
         var result = await sentryFunction.InvokeAsync(arguments);
 
         // Assert
-        // AIFunctionFactory may return JsonElement with ValueKind.Null instead of actual null
         if (result is JsonElement jsonElement)
         {
             Assert.Equal(JsonValueKind.Null, jsonElement.ValueKind);
@@ -219,7 +218,7 @@ internal static class SentryHelpers
     {
         return SentrySdk.Init(options =>
         {
-            options.Dsn = "https://3f3a29aa3a3aff@fake-sentry.io:65535/2147483647";
+            options.Dsn = ValidDsn;
             options.TracesSampleRate = 1.0;
             options.Debug = false;
         });

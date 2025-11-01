@@ -121,7 +121,7 @@ internal static class SentryAISpanEnricher
             }
         }
 
-        if (aiOptions?.IncludeAIResponseContent == true)
+        if (aiOptions.IncludeAIResponseContent)
         {
             span.SetData(SentryAIConstants.SpanAttributes.ResponseText, finalText.ToString());
         }
@@ -141,19 +141,39 @@ internal static class SentryAISpanEnricher
         }
     }
 
-    private static string FormatAvailableTools(IList<AITool> tools) =>
-        FormatAsJson(tools, tool => new
+    private static string FormatAvailableTools(IList<AITool> tools)
+    {
+        try
         {
-            name = tool.Name,
-            description = tool.Description
-        });
+            var str = FormatAsJson(tools, tool => new
+            {
+                name = tool.Name,
+                description = tool.Description
+            });
+            return str;
+        }
+        catch
+        {
+            return "";
+        }
+    }
 
-    private static string FormatRequestMessage(ChatMessage[] messages) =>
-        FormatAsJson(messages, message => new
+    private static string FormatRequestMessage(ChatMessage[] messages)
+    {
+        try
         {
-            role = message.Role,
-            content = message.Text
-        });
+            var str = FormatAsJson(messages, message => new
+            {
+                role = message.Role,
+                content = message.Text
+            });
+            return str;
+        }
+        catch
+        {
+            return "";
+        }
+    }
 
     private static string FormatFunctionCallContent(FunctionCallContent[] content) =>
         FormatAsJson(content, c => new

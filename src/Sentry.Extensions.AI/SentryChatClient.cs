@@ -12,11 +12,18 @@ internal sealed class SentryChatClient : DelegatingChatClient
     public SentryChatClient(IChatClient client, Action<SentryAIOptions>? configure = null) : base(client)
     {
         _sentryAIOptions = new SentryAIOptions();
-        configure?.Invoke(_sentryAIOptions);
-
-        if (_sentryAIOptions.InitializeSdk && !SentrySdk.IsEnabled)
+        try
         {
-            SentrySdk.Init(_sentryAIOptions);
+            configure?.Invoke(_sentryAIOptions);
+
+            if (_sentryAIOptions.InitializeSdk && !SentrySdk.IsEnabled)
+            {
+                SentrySdk.Init(_sentryAIOptions);
+            }
+        }
+        catch (Exception ex)
+        {
+            SentrySdk.CaptureException(ex);
         }
     }
 
@@ -47,15 +54,6 @@ internal sealed class SentryChatClient : DelegatingChatClient
             _hub.CaptureException(ex);
             throw;
         }
-        finally
-        {
-            // if options was null, we need to finish root span immediately because no tool calls will be made
-            // therefore no consequent GetResponseAsync calls
-            if (options == null)
-            {
-                outerSpan?.Finish();
-            }
-        }
     }
 
     /// <inheritdoc cref="IChatClient"/>
@@ -69,7 +67,6 @@ internal sealed class SentryChatClient : DelegatingChatClient
         var outerSpan = TryGetRootSpan(options);
         var innerSpan = CreateChatSpan(outerSpan, options);
 
-        var hasNext = false;
         var responses = new List<ChatResponseUpdate>();
         var enumerator = base
             .GetStreamingResponseAsync(chatMessages, options, cancellationToken)
@@ -81,7 +78,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
             ChatResponseUpdate? current;
             try
             {
-                hasNext = await enumerator.MoveNextAsync().ConfigureAwait(false);
+                var hasNext = await enumerator.MoveNextAsync().ConfigureAwait(false);
 
                 if (!hasNext)
                 {
@@ -99,14 +96,6 @@ internal sealed class SentryChatClient : DelegatingChatClient
                 innerSpan.Finish(ex);
                 _hub.CaptureException(ex);
                 throw;
-            }
-            finally
-            {
-                // if options was null, and we don't have next text, we need to finish root span immediately
-                if (options == null && !hasNext)
-                {
-                    outerSpan?.Finish(SpanStatus.Ok);
-                }
             }
 
             yield return current;
