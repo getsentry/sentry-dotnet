@@ -1,20 +1,31 @@
 #nullable enable
+using Sentry.Extensions.AI;
 
 namespace Sentry.Extensions.AI.Tests;
 
 public class SentryAIActivityListenerTests
 {
-    private IHub Hub { get; }
-    private ActivitySource SentryActivitySource { get; }
-    private ISpan Span { get; }
-
-    public SentryAIActivityListenerTests()
+    private class Fixture
     {
-        Hub = Substitute.For<IHub>();
-        SentryActivitySource = SentryAIActivitySource.Instance;
-        Span = Substitute.For<ISpan>();
-        SentrySdk.UseHub(Hub);
+        private SentryOptions Options { get; }
+        public ISentryClient Client { get; }
+        public IHub Hub { get; set; }
+
+        public Fixture()
+        {
+            Options = new SentryOptions
+            {
+                Dsn = ValidDsn,
+                TracesSampleRate = 1.0,
+            };
+
+            Hub = Substitute.For<IHub>();
+            Client = Substitute.For<ISentryClient>();
+            SentrySdk.Init(Options);
+        }
     }
+
+    private readonly Fixture _fixture = new();
 
     [Fact]
     public void Init_AddsActivityListenerToActivitySource()
@@ -23,7 +34,7 @@ public class SentryAIActivityListenerTests
         SentryAIActivityListener.Init();
 
         // Assert
-        Assert.True(SentryActivitySource.HasListeners());
+        Assert.True(SentryAIActivitySource.Instance.HasListeners());
     }
 
     [Theory]
@@ -62,7 +73,7 @@ public class SentryAIActivityListenerTests
         SentryAIActivityListener.Init();
 
         // Act
-        using var activity = SentryActivitySource.StartActivity(activityName);
+        using var activity = SentryAIActivitySource.Instance.StartActivity(activityName);
 
         // Assert
         Assert.NotNull(activity);
@@ -80,7 +91,7 @@ public class SentryAIActivityListenerTests
         SentryAIActivityListener.Init();
 
         // Act
-        using var activity = SentryActivitySource.StartActivity(activityName);
+        using var activity = SentryAIActivitySource.Instance.StartActivity(activityName);
 
         // Assert
         // For non-FICC activity names, the activity may still be created but not recorded
@@ -88,5 +99,37 @@ public class SentryAIActivityListenerTests
         {
             Assert.False(activity.Recorded);
         }
+    }
+
+    [Fact]
+    public void Init_MultipleCalls_NoDuplicateListener_StartsOnlyOneTransaction()
+    {
+        // Arrange
+        var sent = 0;
+        using var _ = SentrySdk.Init(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.TracesSampleRate = 1.0;
+            // Count transactions just before they are sent:
+            o.SetBeforeSendTransaction(t =>
+            {
+                Interlocked.Increment(ref sent);
+                return t;
+            });
+        });
+
+        // Act
+        SentryAIActivityListener.Init();
+        SentryAIActivityListener.Init();
+        SentryAIActivityListener.Init();
+
+        var activity = SentryAIActivitySource.Instance.StartActivity(SentryAIConstants.FICCActivityNames[0]);
+
+        // Assert
+        Assert.NotNull(activity);
+        Assert.True(SentryAIActivitySource.Instance.HasListeners());
+        activity.Stop();
+
+        Assert.Equal(1, Volatile.Read(ref sent));
     }
 }
