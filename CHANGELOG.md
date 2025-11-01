@@ -2,6 +2,10 @@
 
 ## 5.16.2
 
+### Features
+
+- Add support for `Microsoft.Extensions.AI` instrumentation ([#4657](https://github.com/getsentry/sentry-dotnet/pull/4657))
+
 ### Fixes
 
 - Do not allow multiple `sentry.proguard-uuid` metadata to be set in Android manifest ([#4647](https://github.com/getsentry/sentry-dotnet/pull/4647))
