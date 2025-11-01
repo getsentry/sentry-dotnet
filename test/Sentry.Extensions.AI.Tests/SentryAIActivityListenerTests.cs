@@ -5,28 +5,6 @@ namespace Sentry.Extensions.AI.Tests;
 
 public class SentryAIActivityListenerTests
 {
-    private class Fixture
-    {
-        private SentryOptions Options { get; }
-        public ISentryClient Client { get; }
-        public IHub Hub { get; set; }
-
-        public Fixture()
-        {
-            Options = new SentryOptions
-            {
-                Dsn = ValidDsn,
-                TracesSampleRate = 1.0,
-            };
-
-            Hub = Substitute.For<IHub>();
-            Client = Substitute.For<ISentryClient>();
-            SentrySdk.Init(Options);
-        }
-    }
-
-    private readonly Fixture _fixture = new();
-
     [Fact]
     public void Init_AddsActivityListenerToActivitySource()
     {
