@@ -68,9 +68,15 @@ internal sealed class SentryChatClient : DelegatingChatClient
         var innerSpan = CreateChatSpan(outerSpan, options);
 
         var responses = new List<ChatResponseUpdate>();
-        var enumerator = base
+
+        // Incorrect Roslyn analyzer error when doing await using on IAsyncDisposable
+        // See: https://github.com/dotnet/roslyn-analyzers/issues/5712
+#pragma warning disable CA2007
+        await using var enumerator = base
             .GetStreamingResponseAsync(chatMessages, options, cancellationToken)
-            .GetAsyncEnumerator(cancellationToken);
+            .ConfigureAwait(false)
+            .GetAsyncEnumerator();
+#pragma warning restore CA2007
         SentryAISpanEnricher.EnrichWithRequest(innerSpan, chatMessages, options, _sentryAIOptions);
 
         while (true)
@@ -78,7 +84,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
             ChatResponseUpdate? current;
             try
             {
-                var hasNext = await enumerator.MoveNextAsync().ConfigureAwait(false);
+                var hasNext = await enumerator.MoveNextAsync();
 
                 if (!hasNext)
                 {

@@ -97,15 +97,6 @@ var response = await client.GetResponseAsync(
 
 logger.LogInformation("Response: {ResponseText}", response.Messages?.FirstOrDefault()?.Text ?? "No response");
 
-// Demonstrate streaming with Sentry instrumentation
-logger.LogInformation("Making streaming AI call with Sentry instrumentation...");
-
-var streamingOptions = new ChatOptions
-{
-    ModelId = "gpt-4o-mini",
-    MaxOutputTokens = 1024
-};
-
 logger.LogInformation("Microsoft.Extensions.AI sample completed! Check your Sentry dashboard for the trace data.");
 
 transaction.Finish();
