@@ -63,10 +63,10 @@ public class SentryAISpanEnricherTests
         var aiOptions = new SentryAIOptions();
 
         // Act
-        SentryAISpanEnricher.EnrichWithRequest(span, messages, chatOptions, aiOptions);
+        SentryAISpanEnricher.EnrichWithRequest(span, messages, chatOptions, aiOptions, SentryAIConstants.SpanOperations.Chat);
 
         // Assert
-        span.Data[SentryAIConstants.SpanAttributes.OperationName].Should().Be("chat");
+        span.Data[SentryAIConstants.SpanAttributes.OperationName].Should().Be(SentryAIConstants.SpanOperations.Chat);
         span.Data[SentryAIConstants.SpanAttributes.RequestModel].Should().Be("SentryAI");
         span.Data[SentryAIConstants.SpanAttributes.RequestTemperature].Should().Be(0.7f);
         span.Data[SentryAIConstants.SpanAttributes.RequestMaxTokens].Should().Be(1024);
@@ -92,10 +92,10 @@ public class SentryAISpanEnricherTests
         };
 
         // Act
-        SentryAISpanEnricher.EnrichWithRequest(span, messages, chatOptions, aiOptions);
+        SentryAISpanEnricher.EnrichWithRequest(span, messages, chatOptions, aiOptions,  SentryAIConstants.SpanOperations.Chat);
 
         // Assert
-        span.Data[SentryAIConstants.SpanAttributes.OperationName].Should().Be("chat");
+        span.Data[SentryAIConstants.SpanAttributes.OperationName].Should().Be(SentryAIConstants.SpanOperations.Chat);
         span.Data[SentryAIConstants.SpanAttributes.RequestModel].Should().Be("SentryAI");
         span.Data[SentryAIConstants.SpanAttributes.RequestTemperature].Should().Be(0.7f);
         span.Data[SentryAIConstants.SpanAttributes.RequestMaxTokens].Should().Be(1024);
@@ -121,10 +121,10 @@ public class SentryAISpanEnricherTests
         };
 
         // Act
-        SentryAISpanEnricher.EnrichWithRequest(span, messages, null, aiOptions);
+        SentryAISpanEnricher.EnrichWithRequest(span, messages, null, aiOptions, SentryAIConstants.SpanOperations.Chat);
 
         // Assert
-        span.Data[SentryAIConstants.SpanAttributes.OperationName].Should().Be("chat");
+        span.Data[SentryAIConstants.SpanAttributes.OperationName].Should().Be(SentryAIConstants.SpanOperations.Chat);
         span.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.RequestModel);
         span.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.RequestTemperature);
         span.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.RequestMaxTokens);

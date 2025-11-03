@@ -33,7 +33,10 @@ internal sealed class SentryChatClient : DelegatingChatClient
 
         try
         {
-            SentryAISpanEnricher.EnrichWithRequest(chatSpan, chatMessages, options, _sentryAIOptions);
+            SentryAISpanEnricher.EnrichWithRequest(chatSpan, chatMessages, options, _sentryAIOptions,
+                SentryAIConstants.SpanOperations.Chat);
+            SentryAISpanEnricher.EnrichWithRequest(agentSpan, chatMessages, options, _sentryAIOptions,
+                SentryAIConstants.SpanOperations.InvokeAgent);
 
             var response = await base.GetResponseAsync(chatMessages, options, cancellationToken).ConfigureAwait(false);
 
@@ -70,7 +73,10 @@ internal sealed class SentryChatClient : DelegatingChatClient
             .ConfigureAwait(false)
             .GetAsyncEnumerator();
 #pragma warning restore CA2007
-        SentryAISpanEnricher.EnrichWithRequest(chatSpan, chatMessages, options, _sentryAIOptions);
+        SentryAISpanEnricher.EnrichWithRequest(chatSpan, chatMessages, options, _sentryAIOptions,
+            SentryAIConstants.SpanOperations.Chat);
+        SentryAISpanEnricher.EnrichWithRequest(agentSpan, chatMessages, options, _sentryAIOptions,
+            SentryAIConstants.SpanOperations.InvokeAgent);
 
         while (true)
         {
@@ -106,7 +112,8 @@ internal sealed class SentryChatClient : DelegatingChatClient
             ? SentryAIActivitySource.Instance
             : base.GetService(serviceType, serviceKey);
 
-    private void AfterResponseCleanup(ISpan chatSpan, ISpan agentSpan, ChatOptions? options, Exception? exception = null)
+    private void AfterResponseCleanup(ISpan chatSpan, ISpan agentSpan, ChatOptions? options,
+        Exception? exception = null)
     {
         // If there was an exception, we finish all spans and return
         if (exception != null)
@@ -141,7 +148,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
 
         // If we couldn't find the Activity, then FICC is not wrapping SentryChatClient. Return a new span from the hub
         return activeSpan ?? _hub.StartSpan(SentryAIConstants.SpanAttributes.InvokeAgentOperation,
-                SentryAIConstants.SpanAttributes.InvokeAgentDescription);
+            SentryAIConstants.SpanAttributes.InvokeAgentDescription);
     }
 
     private ISpan CreateChatSpan(ISpan? agentSpan, ChatOptions? options)

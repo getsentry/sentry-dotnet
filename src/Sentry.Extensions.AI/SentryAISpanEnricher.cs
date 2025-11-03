@@ -10,15 +10,10 @@ internal static class SentryAISpanEnricher
     /// <summary>
     /// Enriches a span with request information.
     /// </summary>
-    /// <param name="span">Span to enrich</param>
-    /// <param name="messages">Messages</param>
-    /// <param name="options">Options</param>
-    /// <param name="aiOptions">AI-specific options</param>
     internal static void EnrichWithRequest(ISpan span, ChatMessage[] messages, ChatOptions? options,
-        SentryAIOptions aiOptions)
+        SentryAIOptions aiOptions, string operationName)
     {
-        // Currently, all spans will be "chat"
-        span.SetData(SentryAIConstants.SpanAttributes.OperationName, "chat");
+        span.SetData(SentryAIConstants.SpanAttributes.OperationName, operationName);
 
         if (options?.ModelId is { } modelId)
         {
@@ -30,7 +25,9 @@ internal static class SentryAISpanEnricher
             span.SetData(SentryAIConstants.SpanAttributes.AgentName, agentName);
         }
 
-        if (messages is { Length: > 0 } && (aiOptions?.RecordInputs ?? true))
+        if (operationName == SentryAIConstants.SpanOperations.Chat
+            && messages is { Length: > 0 }
+            && (aiOptions?.RecordInputs ?? true))
         {
             span.SetData(SentryAIConstants.SpanAttributes.RequestMessages, FormatRequestMessage(messages));
         }

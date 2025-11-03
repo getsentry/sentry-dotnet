@@ -57,4 +57,10 @@ internal static class SentryAIConstants
         internal const string ToolInput = "gen_ai.tool.input";
         internal const string ToolOutput = "gen_ai.tool.output";
     }
+
+    internal static class SpanOperations
+    {
+        internal const string Chat = "chat";
+        internal const string InvokeAgent = "invoke_agent";
+    }
 }
