@@ -28,13 +28,18 @@ public class SentryChatClientTests
     private readonly Fixture _fixture = new();
 
     [Fact]
-    public async Task CompleteAsync_CallsInnerClient()
+    public async Task CompleteAsync_CallsInnerClient_AndSetsData()
     {
         // Arrange
+        var transaction = _fixture.Hub.StartTransaction("test-nonstreaming", "test");
+        _fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
+        SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
+
         var inner = Substitute.For<IChatClient>();
         var sentryChatClient = new SentryChatClient(inner);
         var message = new ChatMessage(ChatRole.Assistant, "ok");
         var chatResponse = new ChatResponse(message);
+
         inner.GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(chatResponse));
 
@@ -45,6 +50,13 @@ public class SentryChatClientTests
         Assert.Equal([message], res.Messages);
         await inner.Received(1).GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
             Arg.Any<CancellationToken>());
+        var spans = transaction.Spans;
+        var chatSpan = spans.FirstOrDefault(s => s.Operation == SentryAIConstants.SpanAttributes.ChatOperation);
+        Assert.NotNull(chatSpan);
+        Assert.Equal(SpanStatus.Ok, chatSpan.Status);
+        Assert.True(chatSpan.IsFinished);
+        Assert.Equal("chat", chatSpan.Data[SentryAIConstants.SpanAttributes.OperationName]);
+        Assert.Equal("ok", chatSpan.Data[SentryAIConstants.SpanAttributes.ResponseText]);
     }
 
     [Fact]
@@ -52,7 +64,6 @@ public class SentryChatClientTests
     {
         // Arrange - Use Fixture Hub to start transaction
         var transaction = _fixture.Hub.StartTransaction("test-streaming", "test");
-
         _fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
 
