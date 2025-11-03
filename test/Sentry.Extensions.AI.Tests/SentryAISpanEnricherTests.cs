@@ -92,7 +92,7 @@ public class SentryAISpanEnricherTests
         };
 
         // Act
-        SentryAISpanEnricher.EnrichWithRequest(span, messages, chatOptions, aiOptions,  SentryAIConstants.SpanOperations.Chat);
+        SentryAISpanEnricher.EnrichWithRequest(span, messages, chatOptions, aiOptions, SentryAIConstants.SpanOperations.Chat);
 
         // Assert
         span.Data[SentryAIConstants.SpanAttributes.OperationName].Should().Be(SentryAIConstants.SpanOperations.Chat);
