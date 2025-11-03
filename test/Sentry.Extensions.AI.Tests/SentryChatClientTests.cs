@@ -47,16 +47,45 @@ public class SentryChatClientTests
         var res = await sentryChatClient.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")]);
 
         // Assert
-        Assert.Equal([message], res.Messages);
         await inner.Received(1).GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
             Arg.Any<CancellationToken>());
         var spans = transaction.Spans;
         var chatSpan = spans.FirstOrDefault(s => s.Operation == SentryAIConstants.SpanAttributes.ChatOperation);
+        Assert.Equal([message], res.Messages);
         Assert.NotNull(chatSpan);
         Assert.Equal(SpanStatus.Ok, chatSpan.Status);
         Assert.True(chatSpan.IsFinished);
         Assert.Equal("chat", chatSpan.Data[SentryAIConstants.SpanAttributes.OperationName]);
         Assert.Equal("ok", chatSpan.Data[SentryAIConstants.SpanAttributes.ResponseText]);
+    }
+
+    [Fact]
+    public async Task CompleteAsync_HandlesErrors_AndFinishesSpanWithException()
+    {
+        // Arrange
+        var transaction = _fixture.Hub.StartTransaction("test-nonstreaming", "test");
+        _fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
+        SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
+
+        var inner = Substitute.For<IChatClient>();
+        var sentryChatClient = new SentryChatClient(inner);
+        var expectedException = new InvalidOperationException("Streaming failed");
+
+        inner.GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
+            .Throws(expectedException);
+
+        // Act
+        var res = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            await sentryChatClient.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")]));
+
+        // Assert
+        var spans = transaction.Spans;
+        var chatSpan = spans.FirstOrDefault(s => s.Operation == SentryAIConstants.SpanAttributes.ChatOperation);
+        Assert.Equal(expectedException.Message, res.Message);
+        Assert.NotNull(chatSpan);
+        Assert.Equal(SpanStatus.InternalError, chatSpan.Status);
+        Assert.True(chatSpan.IsFinished);
+        Assert.Equal("chat", chatSpan.Data[SentryAIConstants.SpanAttributes.OperationName]);
     }
 
     [Fact]
@@ -119,11 +148,10 @@ public class SentryChatClientTests
             }
         });
 
-        Assert.Equal(expectedException.Message, actualException.Message);
-
         // Assert
         var spans = transaction.Spans;
         var chatSpan = spans.FirstOrDefault(s => s.Operation == SentryAIConstants.SpanAttributes.ChatOperation);
+        Assert.Equal(expectedException.Message, actualException.Message);
         Assert.NotNull(chatSpan);
         Assert.Equal(SpanStatus.InternalError, chatSpan.Status);
         Assert.True(chatSpan.IsFinished);

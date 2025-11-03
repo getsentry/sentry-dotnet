@@ -87,7 +87,7 @@ internal static class SentryAISpanEnricher
     /// <param name="span">span to enrich</param>
     /// <param name="messages">a list of <see cref="ChatResponseUpdate"/></param>
     /// <param name="aiOptions">AI-specific options</param>
-    public static void EnrichWithStreamingResponses(ISpan span, List<ChatResponseUpdate> messages,
+    internal static void EnrichWithStreamingResponses(ISpan span, List<ChatResponseUpdate> messages,
         SentryAIOptions aiOptions)
     {
         var inputTokenCount = 0L;
