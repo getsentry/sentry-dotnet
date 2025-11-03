@@ -143,46 +143,47 @@ internal static class SentryAISpanEnricher
 
     private static string FormatAvailableTools(IList<AITool> tools)
     {
-        try
+        return FormatAsJson(tools, tool => new
         {
-            var str = FormatAsJson(tools, tool => new
-            {
-                name = tool.Name,
-                description = tool.Description
-            });
-            return str;
-        }
-        catch
-        {
-            return "";
-        }
+            name = tool.Name,
+            description = tool.Description
+        });
     }
 
     private static string FormatRequestMessage(ChatMessage[] messages)
     {
-        try
+        return FormatAsJson(messages, message => new
         {
-            var str = FormatAsJson(messages, message => new
-            {
-                role = message.Role,
-                content = message.Text
-            });
-            return str;
-        }
-        catch
-        {
-            return "";
-        }
+            role = message.Role,
+            content = message.Text
+        });
     }
 
-    private static string FormatFunctionCallContent(FunctionCallContent[] content) =>
-        FormatAsJson(content, c => new
+    private static string FormatFunctionCallContent(FunctionCallContent[] content)
+    {
+        return FormatAsJson(content, c =>
         {
-            name = c.Name,
-            type = "function_call",
-            arguments = JsonSerializer.Serialize(c.Arguments)
-        });
+            string argumentsJson;
+            try
+            {
+                argumentsJson = JsonSerializer.Serialize(c.Arguments);
+            }
+            catch
+            {
+                argumentsJson = "{\"error\": \"serialization_failed\"}";
+            }
 
-    private static string FormatAsJson<T>(IEnumerable<T> items, Func<T, object> selector) =>
-        JsonSerializer.Serialize(items.Select(selector));
+            return new
+            {
+                name = c.Name,
+                type = "function_call",
+                arguments = argumentsJson
+            };
+        });
+    }
+
+    private static string FormatAsJson<T>(IEnumerable<T> items, Func<T, object> selector)
+    {
+        return JsonSerializer.Serialize(items.Select(selector));
+    }
 }

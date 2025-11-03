@@ -12,18 +12,12 @@ internal sealed class SentryChatClient : DelegatingChatClient
     public SentryChatClient(IChatClient client, Action<SentryAIOptions>? configure = null) : base(client)
     {
         _sentryAIOptions = new SentryAIOptions();
-        try
-        {
-            configure?.Invoke(_sentryAIOptions);
+        configure?.Invoke(_sentryAIOptions);
 
-            if (_sentryAIOptions.InitializeSdk && !SentrySdk.IsEnabled)
-            {
-                SentrySdk.Init(_sentryAIOptions);
-            }
-        }
-        catch (Exception ex)
+        // If user requested to initialize the SDK, and SDK is not enabled already, then use the options to init Sentry
+        if (_sentryAIOptions.InitializeSdk && !SentrySdk.IsEnabled)
         {
-            SentrySdk.CaptureException(ex);
+            SentrySdk.Init(_sentryAIOptions);
         }
     }
 
@@ -34,24 +28,23 @@ internal sealed class SentryChatClient : DelegatingChatClient
     {
         // Convert to array to avoid multiple enumeration
         var chatMessages = messages as ChatMessage[] ?? messages.ToArray();
-        var outerSpan = TryGetRootSpan(options);
-        var innerSpan = CreateChatSpan(outerSpan, options);
+        var agentSpan = TryGetAgentSpan(options);
+        var chatSpan = CreateChatSpan(agentSpan, options);
 
         try
         {
-            SentryAISpanEnricher.EnrichWithRequest(innerSpan, chatMessages, options, _sentryAIOptions);
+            SentryAISpanEnricher.EnrichWithRequest(chatSpan, chatMessages, options, _sentryAIOptions);
 
             var response = await base.GetResponseAsync(chatMessages, options, cancellationToken).ConfigureAwait(false);
 
-            SentryAISpanEnricher.EnrichWithResponse(innerSpan, response, _sentryAIOptions);
-            innerSpan.Finish(SpanStatus.Ok);
+            SentryAISpanEnricher.EnrichWithResponse(chatSpan, response, _sentryAIOptions);
+            AfterResponseCleanup(chatSpan, agentSpan, options);
 
             return response;
         }
         catch (Exception ex)
         {
-            innerSpan.Finish(ex);
-            _hub.CaptureException(ex);
+            AfterResponseCleanup(chatSpan, agentSpan, options, ex);
             throw;
         }
     }
@@ -64,20 +57,20 @@ internal sealed class SentryChatClient : DelegatingChatClient
     {
         // Convert to array to avoid multiple enumeration
         var chatMessages = messages as ChatMessage[] ?? messages.ToArray();
-        var outerSpan = TryGetRootSpan(options);
-        var innerSpan = CreateChatSpan(outerSpan, options);
+        var agentSpan = TryGetAgentSpan(options);
+        var chatSpan = CreateChatSpan(agentSpan, options);
 
         var responses = new List<ChatResponseUpdate>();
 
         // Incorrect Roslyn analyzer error when doing await using on IAsyncDisposable
-        // See: https://github.com/dotnet/roslyn-analyzers/issues/5712
+        // https://github.com/dotnet/roslyn-analyzers/issues/5712
 #pragma warning disable CA2007
         await using var enumerator = base
             .GetStreamingResponseAsync(chatMessages, options, cancellationToken)
             .ConfigureAwait(false)
             .GetAsyncEnumerator();
 #pragma warning restore CA2007
-        SentryAISpanEnricher.EnrichWithRequest(innerSpan, chatMessages, options, _sentryAIOptions);
+        SentryAISpanEnricher.EnrichWithRequest(chatSpan, chatMessages, options, _sentryAIOptions);
 
         while (true)
         {
@@ -88,8 +81,8 @@ internal sealed class SentryChatClient : DelegatingChatClient
 
                 if (!hasNext)
                 {
-                    SentryAISpanEnricher.EnrichWithStreamingResponses(innerSpan, responses, _sentryAIOptions);
-                    innerSpan.Finish(SpanStatus.Ok);
+                    SentryAISpanEnricher.EnrichWithStreamingResponses(chatSpan, responses, _sentryAIOptions);
+                    AfterResponseCleanup(chatSpan, agentSpan, options);
 
                     yield break;
                 }
@@ -99,8 +92,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
             }
             catch (Exception ex)
             {
-                innerSpan.Finish(ex);
-                _hub.CaptureException(ex);
+                AfterResponseCleanup(chatSpan, agentSpan, options, ex);
                 throw;
             }
 
@@ -114,29 +106,51 @@ internal sealed class SentryChatClient : DelegatingChatClient
             ? SentryAIActivitySource.Instance
             : base.GetService(serviceType, serviceKey);
 
-    private ISpan? TryGetRootSpan(ChatOptions? options)
+    private void AfterResponseCleanup(ISpan chatSpan, ISpan agentSpan, ChatOptions? options, Exception? exception = null)
     {
-        // if options is null, we are not doing tool calls, so it's safe to just return an invoke_agent span
+        // If there was an exception, we finish all spans and return
+        if (exception != null)
+        {
+            chatSpan.Finish(exception);
+            agentSpan.Finish(exception);
+            _hub.CaptureException(exception);
+            return;
+        }
+
+        chatSpan.Finish(SpanStatus.Ok);
+        // If we didn't have any tools available, we can just finish outer invoke_agent span.
+        if (options?.Tools == null)
+        {
+            agentSpan.Finish(SpanStatus.Ok);
+        }
+    }
+
+    private ISpan TryGetAgentSpan(ChatOptions? options)
+    {
+        // if tools list is null, we are not doing tool calls, so it's safe to just return an invoke_agent span
         // straight from the hub
-        if (options == null)
+        if (options?.Tools == null)
         {
             return _hub.StartSpan(SentryAIConstants.SpanAttributes.InvokeAgentOperation,
                 SentryAIConstants.SpanAttributes.InvokeAgentDescription);
         }
 
-        // If FunctionInvokingChatClient wraps SentryChatClient, we should be able to get the agent span from the current activity
+        // If FunctionInvokingChatClient(FICC) wraps SentryChatClient, we should be able to get the agent span from the current activity
         // The activity we attached the span to may be an ancestor of the current activity, we must search the parents for the span
         var activeSpan = SentryAIUtil.GetActivitySpan();
-        return activeSpan;
+
+        // If we couldn't find the Activity, then FICC is not wrapping SentryChatClient. Return a new span from the hub
+        return activeSpan ?? _hub.StartSpan(SentryAIConstants.SpanAttributes.InvokeAgentOperation,
+                SentryAIConstants.SpanAttributes.InvokeAgentDescription);
     }
 
-    private ISpan CreateChatSpan(ISpan? outerSpan, ChatOptions? options)
+    private ISpan CreateChatSpan(ISpan? agentSpan, ChatOptions? options)
     {
         var chatSpanName = options is null || string.IsNullOrEmpty(options.ModelId)
             ? "chat unknown model"
             : $"chat {options.ModelId}";
-        return outerSpan is not null
-            ? outerSpan.StartChild(SentryAIConstants.SpanAttributes.ChatOperation, chatSpanName)
+        return agentSpan is not null
+            ? agentSpan.StartChild(SentryAIConstants.SpanAttributes.ChatOperation, chatSpanName)
             : _hub.StartSpan(SentryAIConstants.SpanAttributes.ChatOperation, chatSpanName);
     }
 }

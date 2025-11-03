@@ -25,7 +25,8 @@ internal static class SentryAIActivityListener
         ActivityStopped = a =>
         {
             var currSpan = a.GetFused<ISpan>(SentryAIConstants.SentryActivitySpanAttributeName);
-            currSpan?.Finish(SpanStatus.Ok);
+            // Don't pass in OK status in case there was an exception
+            currSpan?.Finish();
         },
     };
 
