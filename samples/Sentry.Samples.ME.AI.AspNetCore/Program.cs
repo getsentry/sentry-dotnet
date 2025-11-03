@@ -131,8 +131,7 @@ app.MapGet("/test", async (IChatClient chatClient, ILogger<Program> logger) =>
                                1) Find Alice's age,
                                2) Get weather in New York,
                                3) Calculate a complex result for number 15,
-                               4) Get comprehensive info for Bob in London,
-                               5) Calculate average age for Alice, Bob, and Charlie
+                               4) Calculate average age for Alice, Bob, and Charlie
                                (first get each person's age individually using GetPersonAge, then use CalculateAverageAge with those results).
                                Please use the appropriate tools for each task and demonstrate tool chaining where needed.
                                """)

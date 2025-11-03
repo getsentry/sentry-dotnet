@@ -94,7 +94,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
                 }
 
                 current = enumerator.Current;
-                responses.Add(enumerator.Current);
+                responses.Add(current);
             }
             catch (Exception ex)
             {

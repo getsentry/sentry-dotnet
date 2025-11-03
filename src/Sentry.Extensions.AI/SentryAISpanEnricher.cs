@@ -140,7 +140,7 @@ internal static class SentryAISpanEnricher
 
     private static string FormatAvailableTools(IList<AITool> tools)
     {
-        return FormatAsJson(tools, tool => new
+        return FormatAsJsonList(tools, tool => new
         {
             name = tool.Name,
             description = tool.Description
@@ -149,16 +149,42 @@ internal static class SentryAISpanEnricher
 
     private static string FormatRequestMessage(ChatMessage[] messages)
     {
-        return FormatAsJson(messages, message => new
+        return FormatAsJsonList(messages, message =>
         {
-            role = message.Role,
-            content = message.Text
+            var content = message.Role == ChatRole.Tool ? FunctionCallToString(message.Contents) : message.Text;
+
+            return new
+            {
+                role = message.Role,
+                content
+            };
         });
+
+        object FunctionCallToString(IList<AIContent> toolContents)
+        {
+            List<object> callList = [];
+            foreach (var toolContent in toolContents)
+            {
+                if (toolContent is not FunctionResultContent functionResultContent)
+                {
+                    continue;
+                }
+
+                callList.Add(new
+                {
+                    call_id = functionResultContent.CallId,
+                    output = functionResultContent.Result,
+                    type = "function_call_output"
+                });
+            }
+
+            return callList;
+        }
     }
 
     private static string FormatFunctionCallContent(FunctionCallContent[] content)
     {
-        return FormatAsJson(content, c =>
+        return FormatAsJsonList(content, c =>
         {
             string argumentsJson;
             try
@@ -179,7 +205,7 @@ internal static class SentryAISpanEnricher
         });
     }
 
-    private static string FormatAsJson<T>(IEnumerable<T> items, Func<T, object> selector)
+    private static string FormatAsJsonList<T>(IEnumerable<T> items, Func<T, object> selector)
     {
         return JsonSerializer.Serialize(items.Select(selector));
     }
