@@ -19,14 +19,14 @@ internal static class SentryAIActivityListener
                 ActivitySamplingResult.AllDataAndRecorded : ActivitySamplingResult.None,
         ActivityStarted = a =>
         {
-            var currSpan = HubAdapter.Instance.StartSpan(SentryAIConstants.SpanAttributes.InvokeAgentOperation, SentryAIConstants.SpanAttributes.InvokeAgentDescription);
-            a.SetFused(SentryAIConstants.SentryActivitySpanAttributeName, currSpan);
+            var agentSpan = HubAdapter.Instance.StartSpan(SentryAIConstants.SpanAttributes.InvokeAgentOperation, SentryAIConstants.SpanAttributes.InvokeAgentDescription);
+            a.SetFused(SentryAIConstants.SentryActivitySpanAttributeName, agentSpan);
         },
         ActivityStopped = a =>
         {
-            var currSpan = a.GetFused<ISpan>(SentryAIConstants.SentryActivitySpanAttributeName);
+            var agentSpan = a.GetFused<ISpan>(SentryAIConstants.SentryActivitySpanAttributeName);
             // Don't pass in OK status in case there was an exception
-            currSpan?.Finish();
+            agentSpan?.Finish();
         },
     };
 
