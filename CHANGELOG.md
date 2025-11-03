@@ -13,6 +13,7 @@
 - The SDK now makes use of the new SessionEndStatus `Unhandled` when capturing an unhandled but non-terminal exception, i.e. through the UnobservedTaskExceptionIntegration ([#4633](https://github.com/getsentry/sentry-dotnet/pull/4633), [#4653](https://github.com/getsentry/sentry-dotnet/pull/4653))
 - The SDK now provides a `IsSessionActive` to allow checking the session state ([#4662](https://github.com/getsentry/sentry-dotnet/pull/4662))
 - The SDK now makes use of the new SessionEndStatus `Unhandled` when capturing an unhandled but non-terminal exception, i.e. through the UnobservedTaskExceptionIntegration ([#4633](https://github.com/getsentry/sentry-dotnet/pull/4633))
+- Added experimental support for Session Replay on iOS ([#4664](https://github.com/getsentry/sentry-dotnet/pull/4664))
 
 ## 6.0.0-preview.2
 
@@ -40,7 +41,6 @@
 
 ### Features
 
-- Added experimental support for Session Replay on iOS ([#4664](https://github.com/getsentry/sentry-dotnet/pull/4664))
 - The SDK now makes use of the new SessionEndStatus `Unhandled` when capturing an unhandled but non-terminal exception, i.e. through the UnobservedTaskExceptionIntegration ([#4633](https://github.com/getsentry/sentry-dotnet/pull/4633), [#4653](https://github.com/getsentry/sentry-dotnet/pull/4653))
 - The SDK now provides a `IsSessionActive` to allow checking the session state ([#4662](https://github.com/getsentry/sentry-dotnet/pull/4662))
 - The SDK now makes use of the new SessionEndStatus `Unhandled` when capturing an unhandled but non-terminal exception, i.e. through the UnobservedTaskExceptionIntegration ([#4633](https://github.com/getsentry/sentry-dotnet/pull/4633))
