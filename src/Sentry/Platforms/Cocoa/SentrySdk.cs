@@ -148,7 +148,7 @@ public static partial class SentrySdk
         // Session Replay options for the Cocoa SDK
         if (options.Native.ExperimentalOptions.SessionReplay.IsSessionReplayEnabled)
         {
-            // For replay to work on iOS, session tracking must be enabled in the Cocoa SDKt
+            // For replay to work on iOS, session tracking must be enabled in the Cocoa SDK
             options.AutoSessionTracking = false;
             nativeOptions.EnableAutoSessionTracking = true;
 
@@ -163,6 +163,8 @@ public static partial class SentrySdk
             cocoaReplayOptions.OnErrorSampleRate = onErrorSampleRate;
             cocoaReplayOptions.MaskAllText = options.Native.ExperimentalOptions.SessionReplay.MaskAllText;
             cocoaReplayOptions.MaskAllImages = options.Native.ExperimentalOptions.SessionReplay.MaskAllImages;
+            cocoaReplayOptions.EnableViewRendererV2 = options.Native.ExperimentalOptions.SessionReplay.EnableViewRendererV2;
+            cocoaReplayOptions.EnableFastViewRendering = options.Native.ExperimentalOptions.SessionReplay.EnableFastViewRendering;
             nativeOptions.SessionReplay = cocoaReplayOptions;
         }
 

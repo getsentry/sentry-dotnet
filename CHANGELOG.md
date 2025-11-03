@@ -39,12 +39,6 @@
 
   See https://develop.sentry.dev/sdk/telemetry/traces/distributed-tracing/#w3c-trace-context-header for more details.
 
-### Features
-
-- The SDK now makes use of the new SessionEndStatus `Unhandled` when capturing an unhandled but non-terminal exception, i.e. through the UnobservedTaskExceptionIntegration ([#4633](https://github.com/getsentry/sentry-dotnet/pull/4633), [#4653](https://github.com/getsentry/sentry-dotnet/pull/4653))
-- The SDK now provides a `IsSessionActive` to allow checking the session state ([#4662](https://github.com/getsentry/sentry-dotnet/pull/4662))
-- The SDK now makes use of the new SessionEndStatus `Unhandled` when capturing an unhandled but non-terminal exception, i.e. through the UnobservedTaskExceptionIntegration ([#4633](https://github.com/getsentry/sentry-dotnet/pull/4633))
-
 ### Fixes
 
 - The SDK avoids redundant scope sync after transaction finish ([#4623](https://github.com/getsentry/sentry-dotnet/pull/4623))
@@ -56,24 +50,6 @@
 
 - This release adds support for .NET 10 and drops support for net8.0-android, net8.0-ios, net8.0-maccatalyst and net8.0-windows10.0.19041.0 ([#4461](https://github.com/getsentry/sentry-dotnet/pull/4461))
 - Added support for v3 of the Android AssemblyStore format that is used in .NET 10 and dropped support for v1 that was used in .NET 8 ([#4583](https://github.com/getsentry/sentry-dotnet/pull/4583))
-- Bump Cocoa SDK from v8.56.2 to v8.57.0 ([#4637](https://github.com/getsentry/sentry-dotnet/pull/4637))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8570)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.56.2...8.57.0)
-- Bump Native SDK from v0.11.2 to v0.11.3 ([#4636](https://github.com/getsentry/sentry-dotnet/pull/4636))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0113)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.11.2...0.11.3)
-- Bump Cocoa SDK from v8.56.2 to v8.57.1 ([#4637](https://github.com/getsentry/sentry-dotnet/pull/4637), [#4680](https://github.com/getsentry/sentry-dotnet/pull/4680))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8571)
-  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.56.2...8.57.1)
-- Bump Native SDK from v0.11.2 to v0.12.0 ([#4636](https://github.com/getsentry/sentry-dotnet/pull/4636), [#4678](https://github.com/getsentry/sentry-dotnet/pull/4678))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0120)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.11.2...0.12.0)
-- Bump Java SDK from v8.23.0 to v8.24.0 ([#4667](https://github.com/getsentry/sentry-dotnet/pull/4667))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8240)
-  - [diff](https://github.com/getsentry/sentry-java/compare/8.23.0...8.24.0)
-- Bump CLI from v2.56.1 to v2.57.0 ([#4668](https://github.com/getsentry/sentry-dotnet/pull/4668))
-  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2570)
-  - [diff](https://github.com/getsentry/sentry-cli/compare/2.56.1...2.57.0)
 
 ## 5.16.2
 
