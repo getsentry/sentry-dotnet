@@ -47,7 +47,7 @@ internal sealed class SentryInstrumentedFunction(AIFunction innerFunction, ChatO
             // If we couldn't find the agent span, just attach it to the hub's current scope
             : HubAdapter.Instance.StartSpan(SentryAIConstants.SpanAttributes.ToolCallOperation, spanName);
 
-        currSpan.SetData(SentryAIConstants.SpanAttributes.RequestModel, options?.ModelId);
+        currSpan.SetData(SentryAIConstants.SpanAttributes.RequestModel, options.ModelId);
         currSpan.SetData(SentryAIConstants.SpanAttributes.OperationName, "execute_tool");
         currSpan.SetData(SentryAIConstants.SpanAttributes.ToolName, Name);
         currSpan.SetData(SentryAIConstants.SpanAttributes.ToolDescription, Description);

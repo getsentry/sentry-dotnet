@@ -29,8 +29,8 @@ public class SentryAIExtensionsTests
         var result = mockClient.WithSentry(options =>
             {
                 configureWasCalled = true;
-                options.IncludeAIRequestMessages = false;
-                options.IncludeAIResponseContent = false;
+                options.RecordInputs = false;
+                options.RecordOutputs = false;
             }
         );
 

@@ -11,8 +11,8 @@ public class SentryAIOptionsTests
         var options = new SentryAIOptions();
 
         // Assert
-        Assert.True(options.IncludeAIRequestMessages);
-        Assert.True(options.IncludeAIResponseContent);
+        Assert.True(options.RecordInputs);
+        Assert.True(options.RecordOutputs);
         Assert.False(options.InitializeSdk);
     }
 
@@ -23,11 +23,11 @@ public class SentryAIOptionsTests
         var options = new SentryAIOptions
         {
             // Act
-            IncludeAIRequestMessages = false
+            RecordInputs = false
         };
 
         // Assert
-        Assert.False(options.IncludeAIRequestMessages);
+        Assert.False(options.RecordInputs);
     }
 
     [Fact]
@@ -37,11 +37,11 @@ public class SentryAIOptionsTests
         var options = new SentryAIOptions
         {
             // Act
-            IncludeAIResponseContent = false
+            RecordOutputs = false
         };
 
         // Assert
-        Assert.False(options.IncludeAIResponseContent);
+        Assert.False(options.RecordOutputs);
     }
 
     [Fact]
@@ -99,14 +99,14 @@ public class SentryAIOptionsTests
         var options = new SentryAIOptions
         {
             // Act
-            IncludeAIRequestMessages = includeRequest,
-            IncludeAIResponseContent = includeResponse,
+            RecordInputs = includeRequest,
+            RecordOutputs = includeResponse,
             InitializeSdk = initializeSdk
         };
 
         // Assert
-        Assert.Equal(includeRequest, options.IncludeAIRequestMessages);
-        Assert.Equal(includeResponse, options.IncludeAIResponseContent);
+        Assert.Equal(includeRequest, options.RecordInputs);
+        Assert.Equal(includeResponse, options.RecordOutputs);
         Assert.Equal(initializeSdk, options.InitializeSdk);
     }
 }

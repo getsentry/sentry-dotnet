@@ -30,8 +30,8 @@ var openAiClient = new OpenAI.Chat.ChatClient("gpt-4o-mini", openAiApiKey)
         options.TracesSampleRate = 1;
 
         // AI-specific settings
-        options.IncludeAIRequestMessages = true;
-        options.IncludeAIResponseContent = true;
+        options.RecordInputs = true;
+        options.RecordOutputs = true;
         // Since this is a simple console app without Sentry already set up, we need to initialize our SDK
         options.InitializeSdk = true;
     });

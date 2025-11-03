@@ -7,14 +7,14 @@ namespace Sentry.Extensions.AI;
 public class SentryAIOptions : SentryOptions
 {
     /// <summary>
-    /// Whether to include LLM request messages in spans.
+    /// Whether to include request messages in spans.
     /// </summary>
-    public bool IncludeAIRequestMessages { get; set; } = true;
+    public bool RecordInputs { get; set; } = true;
 
     /// <summary>
-    /// Whether to include LLM response content in spans.
+    /// Whether to include response content in spans.
     /// </summary>
-    public bool IncludeAIResponseContent { get; set; } = true;
+    public bool RecordOutputs { get; set; } = true;
 
     /// <summary>
     /// Name of the AI Agent

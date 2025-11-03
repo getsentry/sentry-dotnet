@@ -30,7 +30,7 @@ internal static class SentryAISpanEnricher
             span.SetData(SentryAIConstants.SpanAttributes.AgentName, agentName);
         }
 
-        if (messages is { Length: > 0 } && (aiOptions?.IncludeAIRequestMessages ?? true))
+        if (messages is { Length: > 0 } && (aiOptions?.RecordInputs ?? true))
         {
             span.SetData(SentryAIConstants.SpanAttributes.RequestMessages, FormatRequestMessage(messages));
         }
@@ -121,7 +121,7 @@ internal static class SentryAISpanEnricher
             }
         }
 
-        if (aiOptions.IncludeAIResponseContent)
+        if (aiOptions.RecordOutputs)
         {
             span.SetData(SentryAIConstants.SpanAttributes.ResponseText, finalText.ToString());
         }
