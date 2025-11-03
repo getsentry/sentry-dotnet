@@ -140,6 +140,8 @@ public static class SentryMauiAppBuilderExtensions
 
                 lifecycle.OnStop(activity => SentryMauiEventProcessor.InForeground = false);
                 lifecycle.OnPause(activity => SentryMauiEventProcessor.InForeground = false);
+
+                AndroidActivityBreadcrumbsIntegration.Register(lifecycle);
             });
 #elif WINDOWS
             events.AddWindows(lifecycle =>

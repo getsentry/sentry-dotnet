@@ -26,6 +26,11 @@ internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
         _config.Bind(bindable);
         bindable.ApplyTo(options);
 
+#if __ANDROID__
+        // Disable Android Activity lifecycle breadcrumbs as Sentry.Maui already tracks these.
+        options.Native.EnableActivityLifecycleBreadcrumbs = false;
+#endif
+
 #if __ANDROID__ || __IOS__
         options.Native.AttachScreenshot = options.AttachScreenshot;
 #endif
