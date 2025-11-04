@@ -1,5 +1,4 @@
 using Microsoft.Extensions.AI;
-using Sentry.Extensibility;
 
 // ReSharper disable once CheckNamespace -- Discoverability
 namespace Sentry.Extensions.AI;
@@ -14,7 +13,7 @@ public static class SentryAIExtensions
     /// Wrap tool calls specified in <see cref="ChatOptions"/> with Sentry agent instrumentation
     /// </summary>
     /// <param name="options">The <see cref="ChatOptions"/> that contains the <see cref="AIFunction"/> to instrument</param>
-    public static ChatOptions WithSentryToolInstrumentation(this ChatOptions options)
+    public static ChatOptions AddSentryToolInstrumentation(this ChatOptions options)
     {
         if (options.Tools is null || options.Tools.Count == 0)
         {
@@ -43,7 +42,7 @@ public static class SentryAIExtensions
     /// <param name="client">The <see cref="IChatClient"/> to be instrumented</param>
     /// <param name="configure">The <see cref="SentryAIOptions"/> configuration</param>
     /// <returns>The instrumented <see cref="IChatClient"/></returns>
-    public static IChatClient WithSentry(this IChatClient client, Action<SentryAIOptions>? configure = null)
+    public static IChatClient AddSentry(this IChatClient client, Action<SentryAIOptions>? configure = null)
     {
         SentryAIActivityListener.Init();
         return new SentryChatClient(client, configure);

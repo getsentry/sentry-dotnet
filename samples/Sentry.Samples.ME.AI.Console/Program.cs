@@ -17,7 +17,7 @@ if (openAiApiKey == null)
 // Create OpenAI API client and wrap it with Sentry instrumentation
 var openAiClient = new OpenAI.Chat.ChatClient("gpt-4o-mini", openAiApiKey)
     .AsIChatClient()
-    .WithSentry(options =>
+    .AddSentry(options =>
     {
 #if !SENTRY_DSN_DEFINED_IN_ENV
         // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
@@ -89,7 +89,7 @@ var options = new ChatOptions
             return $"Complex calculation result for {number}: {result}";
         }, "ComplexCalculation", "Performs a complex mathematical calculation. Takes about 1 second to complete.")
     ]
-}.WithSentryToolInstrumentation();
+}.AddSentryToolInstrumentation();
 
 var response = await client.GetResponseAsync(
     "Please help me with the following tasks: 1) Find Alice's age, 2) Get weather in New York, and 3) Calculate a complex result for number 15. Please use the appropriate tools for each task.",

@@ -1,5 +1,3 @@
-using Microsoft.Extensions.AI;
-
 namespace Sentry.Extensions.AI;
 
 internal static class SentryAIConstants

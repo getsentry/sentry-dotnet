@@ -30,7 +30,7 @@ if (openAiApiKey == null)
 
 var openAiClient = new OpenAI.Chat.ChatClient("gpt-4o-mini", openAiApiKey)
     .AsIChatClient()
-    .WithSentry(options =>
+    .AddSentry(options =>
     {
         // In this case, we already initialized Sentry from ASP.NET WebHost creation, we don't need to initialize
         options.RecordInputs = true;
@@ -189,5 +189,5 @@ ChatOptions GetOptions(ILogger logger)
                 throw new TimeoutException("Mysterious tool called, but returned an error :(");
             }, "MysteriousTool", "May return an error...")
         ]
-    }.WithSentryToolInstrumentation();
+    }.AddSentryToolInstrumentation();
 }

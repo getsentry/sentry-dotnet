@@ -12,7 +12,7 @@ public class SentryAIExtensionsTests
         var mockClient = Substitute.For<IChatClient>();
 
         // Act
-        var result = mockClient.WithSentry();
+        var result = mockClient.AddSentry();
 
         // Assert
         Assert.IsType<SentryChatClient>(result);
@@ -26,7 +26,7 @@ public class SentryAIExtensionsTests
         var configureWasCalled = false;
 
         // Act
-        var result = mockClient.WithSentry(options =>
+        var result = mockClient.AddSentry(options =>
             {
                 configureWasCalled = true;
                 options.RecordInputs = false;
@@ -46,7 +46,7 @@ public class SentryAIExtensionsTests
         var mockClient = Substitute.For<IChatClient>();
 
         // Act
-        var result = mockClient.WithSentry(null);
+        var result = mockClient.AddSentry(null);
 
         // Assert
         Assert.IsType<SentryChatClient>(result);
