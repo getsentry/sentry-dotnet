@@ -9,12 +9,12 @@ internal static class SentryAIUtil
         var currActivity = Activity.Current;
         while (currActivity != null)
         {
-            if (currActivity?.GetFused<ISpan>(SentryAIConstants.SentryActivitySpanAttributeName) is { } span)
+            if (currActivity.GetFused<ISpan>(SentryAIConstants.SentryActivitySpanAttributeName) is { } span)
             {
                 return span;
             }
 
-            currActivity = currActivity?.Parent;
+            currActivity = currActivity.Parent;
         }
 
         return null;

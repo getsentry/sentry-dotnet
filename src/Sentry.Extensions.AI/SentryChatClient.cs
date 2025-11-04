@@ -1,6 +1,4 @@
 using Microsoft.Extensions.AI;
-using Sentry.Extensibility;
-using Sentry.Internal;
 
 namespace Sentry.Extensions.AI;
 
@@ -41,13 +39,13 @@ internal sealed class SentryChatClient : DelegatingChatClient
             var response = await base.GetResponseAsync(chatMessages, options, cancellationToken).ConfigureAwait(false);
 
             SentryAISpanEnricher.EnrichWithResponse(chatSpan, response, _sentryAIOptions);
-            AfterResponseCleanup(chatSpan, agentSpan, options);
+            AfterResponseCleanup(chatSpan, agentSpan);
 
             return response;
         }
         catch (Exception ex)
         {
-            AfterResponseCleanup(chatSpan, agentSpan, options, ex);
+            AfterResponseCleanup(chatSpan, agentSpan, ex);
             throw;
         }
     }
@@ -88,7 +86,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
                 if (!hasNext)
                 {
                     SentryAISpanEnricher.EnrichWithStreamingResponses(chatSpan, responses, _sentryAIOptions);
-                    AfterResponseCleanup(chatSpan, agentSpan, options);
+                    AfterResponseCleanup(chatSpan, agentSpan);
 
                     yield break;
                 }
@@ -98,7 +96,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
             }
             catch (Exception ex)
             {
-                AfterResponseCleanup(chatSpan, agentSpan, options, ex);
+                AfterResponseCleanup(chatSpan, agentSpan, ex);
                 throw;
             }
 
@@ -112,8 +110,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
             ? SentryAIActivitySource.Instance
             : base.GetService(serviceType, serviceKey);
 
-    private void AfterResponseCleanup(ISpan chatSpan, ISpan agentSpan, ChatOptions? options,
-        Exception? exception = null)
+    private void AfterResponseCleanup(ISpan chatSpan, ISpan agentSpan, Exception? exception = null)
     {
         // If there was an exception, we finish all spans and return
         if (exception != null)
