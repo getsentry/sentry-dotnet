@@ -41,75 +41,6 @@ var client = new ChatClientBuilder(openAiClient)
     .UseFunctionInvocation()
     .Build();
 
-ChatOptions GetOptions(ILogger logger)
-{
-    return new ChatOptions
-    {
-        ModelId = "gpt-4o-mini",
-        MaxOutputTokens = 1024,
-        Tools =
-        [
-            // Tool 1: Quick response with minimal delay, but throws an error when trying to get Alice's age
-            AIFunctionFactory.Create(async (string personName) =>
-            {
-                logger.LogInformation("GetPersonAge called for {PersonName}", personName);
-                await Task.Delay(100); // 100ms delay
-                return personName switch
-                {
-                    "Bob" => "30",
-                    "Charlie" => "35",
-                    _ => "40"
-                };
-            }, "GetPersonAge", "Gets the age of the person whose name is specified. Takes about 100ms to complete."),
-
-            // Tool 2: Medium delay tool for weather
-            AIFunctionFactory.Create(async (string location) =>
-            {
-                logger.LogInformation("GetWeather called for {Location}", location);
-                await Task.Delay(500); // 500ms delay
-                return location.ToLower() switch
-                {
-                    "new york" => "Sunny, 72°F",
-                    "london" => "Cloudy, 60°F",
-                    "tokyo" => "Rainy, 68°F",
-                    _ => "Unknown weather conditions"
-                };
-            }, "GetWeather", "Gets the current weather for a location. Takes about 500ms to complete."),
-
-            // Tool 3: Slow tool for complex calculation
-            AIFunctionFactory.Create(async (int number) =>
-            {
-                logger.LogInformation("ComplexCalculation called with {Number}", number);
-                await Task.Delay(1000); // 1000ms delay
-                var result = (number * number) + (number * 10);
-                return $"Complex calculation result for {number}: {result}";
-            }, "ComplexCalculation", "Performs a complex mathematical calculation. Takes about 1 second to complete."),
-
-            // Tool 4: Data aggregation tool that requests individual ages
-            AIFunctionFactory.Create(async (int[] ages) =>
-            {
-                logger.LogInformation("CalculateAverageAge called with ages: {Ages}", string.Join(", ", ages));
-                await Task.Delay(200); // 200ms delay for calculation
-                if (ages.Length == 0)
-                {
-                    return "No ages provided";
-                }
-
-                var average = ages.Average();
-                return $"Average age calculated: {average:F1} years from {ages.Length} people. Individual ages: {string.Join(", ", ages)}";
-            }, "CalculateAverageAge", "Calculates the average from a list of ages. You should first get individual ages using GetPersonAge, then use this tool to calculate the average. Takes about 200ms to complete."),
-
-            // Tool 5: Tool that will throw an error
-            AIFunctionFactory.Create(async () =>
-            {
-                logger.LogInformation("Mysterious tool called");
-                await Task.Delay(2000);
-                throw new TimeoutException("Mysterious tool called, but returned an error :(");
-            }, "MysteriousTool", "May return an error...")
-        ]
-    }.WithSentryToolInstrumentation();
-}
-
 // Register the OpenAI API client and Sentry-instrumented chat client
 builder.Services.AddSingleton(client);
 
@@ -190,3 +121,73 @@ app.MapGet("/throw", async (IChatClient chatClient, ILogger<Program> logger) =>
 });
 
 app.Run();
+return;
+
+ChatOptions GetOptions(ILogger logger)
+{
+    return new ChatOptions
+    {
+        ModelId = "gpt-4o-mini",
+        MaxOutputTokens = 1024,
+        Tools =
+        [
+            // Tool 1: Quick response with minimal delay, but throws an error when trying to get Alice's age
+            AIFunctionFactory.Create(async (string personName) =>
+            {
+                logger.LogInformation("GetPersonAge called for {PersonName}", personName);
+                await Task.Delay(100); // 100ms delay
+                return personName switch
+                {
+                    "Bob" => "30",
+                    "Charlie" => "35",
+                    _ => "40"
+                };
+            }, "GetPersonAge", "Gets the age of the person whose name is specified. Takes about 100ms to complete."),
+
+            // Tool 2: Medium delay tool for weather
+            AIFunctionFactory.Create(async (string location) =>
+            {
+                logger.LogInformation("GetWeather called for {Location}", location);
+                await Task.Delay(500); // 500ms delay
+                return location.ToLower() switch
+                {
+                    "new york" => "Sunny, 72°F",
+                    "london" => "Cloudy, 60°F",
+                    "tokyo" => "Rainy, 68°F",
+                    _ => "Unknown weather conditions"
+                };
+            }, "GetWeather", "Gets the current weather for a location. Takes about 500ms to complete."),
+
+            // Tool 3: Slow tool for complex calculation
+            AIFunctionFactory.Create(async (int number) =>
+            {
+                logger.LogInformation("ComplexCalculation called with {Number}", number);
+                await Task.Delay(1000); // 1000ms delay
+                var result = (number * number) + (number * 10);
+                return $"Complex calculation result for {number}: {result}";
+            }, "ComplexCalculation", "Performs a complex mathematical calculation. Takes about 1 second to complete."),
+
+            // Tool 4: Data aggregation tool that requests individual ages
+            AIFunctionFactory.Create(async (int[] ages) =>
+            {
+                logger.LogInformation("CalculateAverageAge called with ages: {Ages}", string.Join(", ", ages));
+                await Task.Delay(200); // 200ms delay for calculation
+                if (ages.Length == 0)
+                {
+                    return "No ages provided";
+                }
+
+                var average = ages.Average();
+                return $"Average age calculated: {average:F1} years from {ages.Length} people. Individual ages: {string.Join(", ", ages)}";
+            }, "CalculateAverageAge", "Calculates the average from a list of ages. You should first get individual ages using GetPersonAge, then use this tool to calculate the average. Takes about 200ms to complete."),
+
+            // Tool 5: Tool that will throw an error
+            AIFunctionFactory.Create(async () =>
+            {
+                logger.LogInformation("Mysterious tool called");
+                await Task.Delay(2000);
+                throw new TimeoutException("Mysterious tool called, but returned an error :(");
+            }, "MysteriousTool", "May return an error...")
+        ]
+    }.WithSentryToolInstrumentation();
+}
