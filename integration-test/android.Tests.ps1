@@ -191,7 +191,7 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
                     # Trigger BATTERY_CHANGED events by incrementing the battery level
                     $battery = [int](& xharness android adb -- shell dumpsys battery get level)
                     $battery = ($battery % 100) + 1
-                    xharness android adb -- shell dumpsys battery set level $battery
+                    & xharness android adb -- shell dumpsys battery set level $battery
                 }
             }
 
@@ -202,7 +202,7 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         }
         finally
         {
-            xharness android adb -- shell dumpsys battery reset
+            & xharness android adb -- shell dumpsys battery reset
         }
     }
 
@@ -215,9 +215,9 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
                 RunAndroidApp -Dsn $url -TestArg "NETWORK_CAPABILITIES_CHANGED" {
                     # Trigger NETWORK_CAPABILITIES_CHANGED events by toggling WiFi on/off
                     if ($wifi) {
-                        xharness android adb -- shell svc wifi enable
+                        & xharness android adb -- shell svc wifi enable
                     } else {
-                        xharness android adb -- shell svc wifi disable
+                        & xharness android adb -- shell svc wifi disable
                     }
                     $wifi = -not $wifi
                 }
@@ -230,7 +230,7 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         }
         finally
         {
-            xharness android adb -- shell svc wifi enable
+            & xharness android adb -- shell svc wifi enable
         }
     }
 }
