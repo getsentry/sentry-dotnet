@@ -54,7 +54,8 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         {
             param(
                 [string] $Dsn,
-                [string] $TestArg = 'None'
+                [string] $TestArg = 'None',
+                [ScriptBlock] $Callback = $null
             )
             Write-Host "::group::Run Android app (TestArg=$TestArg)"
             $dsn = $Dsn.Replace('http://', 'http://key@') + '/0'
@@ -73,7 +74,10 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
 
                 $procid = (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
                 $activity = (& xharness android adb -- shell dumpsys activity activities) -match "io\.sentry\.dotnet\.maui\.device\.integrationtestapp"
-
+                if ($procid -and $activity -and $Callback)
+                {
+                    & $Callback
+                }
             } while ($procid -and $activity)
         }
 
@@ -175,6 +179,60 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         } else {
             $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"SIGSEGV`""
             $result.Envelopes() | Should -HaveCount 1
+        }
+    }
+
+    It 'Delivers battery breadcrumbs in main thread (<configuration>)' {
+        try
+        {
+            $result = Invoke-SentryServer {
+                param([string]$url)
+                RunAndroidApp -Dsn $url -TestArg "BATTERY_CHANGED" {
+                    # Trigger BATTERY_CHANGED events by incrementing the battery level
+                    $battery = [int](& xharness android adb -- shell dumpsys battery get level)
+                    $battery = ($battery % 100) + 1
+                    xharness android adb -- shell dumpsys battery set level $battery
+                }
+            }
+
+            Dump-ServerErrors -Result $result
+            $result.HasErrors() | Should -BeFalse
+            $result.Envelopes() | ForEach-Object { Write-Host $_ }
+            $result.Envelopes() | Should -AnyElementMatch "`"type`":`"system`",`"thread_id`":1,`"category`":`"device.event`",`"action`":`"BATTERY_CHANGED`""
+            $result.Envelopes() | Should -HaveCount 1
+        }
+        finally
+        {
+            xharness android adb -- shell dumpsys battery reset
+        }
+    }
+
+    It 'Delivers network breadcrumbs in main thread (<configuration>)' {
+        try
+        {
+            $wifi = $false
+            $result = Invoke-SentryServer {
+                param([string]$url)
+                RunAndroidApp -Dsn $url -TestArg "NETWORK_CAPABILITIES_CHANGED" {
+                    # Trigger NETWORK_CAPABILITIES_CHANGED events by toggling WiFi on/off
+                    if ($wifi) {
+                        xharness android adb -- shell svc wifi enable
+                    } else {
+                        xharness android adb -- shell svc wifi disable
+                    }
+                    $wifi = -not $wifi
+                }
+            }
+
+            Dump-ServerErrors -Result $result
+            $result.HasErrors() | Should -BeFalse
+            $result.Envelopes() | ForEach-Object { Write-Host $_ }
+            $result.Envelopes() | Should -AnyElementMatch "`"type`":`"system`",`"thread_id`":1,`"category`":`"network.event`",`"action`":`"NETWORK_CAPABILITIES_CHANGED`""
+            $result.Envelopes() | Should -HaveCount 1
+        }
+        finally
+        {
+            xharness android adb -- adb shell svc wifi enable
         }
     }
 }

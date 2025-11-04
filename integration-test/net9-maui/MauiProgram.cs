@@ -20,6 +20,22 @@ public static class MauiProgram
                 // predictable crash envelopes only
                 options.SendClientReports = false;
                 options.AutoSessionTracking = false;
+
+                options.SetBeforeBreadcrumb((breadcrumb, hint) =>
+                {
+                    if (breadcrumb.Data?.TryGetValue("action", out string action) == true && App.HasTestArg(action))
+                    {
+                        SentrySdk.CaptureMessage(action, scope =>
+                        {
+                            scope.SetExtra("action", action);
+                            scope.SetExtra("category", breadcrumb.Category);
+                            scope.SetExtra("thread_id", Thread.CurrentThread.ManagedThreadId);
+                            scope.SetExtra("type", breadcrumb.Type);
+                        });
+                        App.Kill();
+                    }
+                    return breadcrumb;
+                });
             })
             .ConfigureFonts(fonts =>
             {
