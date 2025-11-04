@@ -105,7 +105,7 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
         var exception = logEvent.Exception;
         var template = logEvent.MessageTemplate.Text;
         var formatted = FormatLogEvent(logEvent);
-        var addedBreadcrumb = false;
+        var addedBreadcrumbForException = false;
 
         if (logEvent.Level >= _options.MinimumEventLevel)
         {
@@ -138,11 +138,11 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
             // Capturing exception events adds a breadcrumb automatically... we don't want to add another one
             if (exception != null)
             {
-                addedBreadcrumb = true;
+                addedBreadcrumbForException = true;
             }
         }
 
-        if (!addedBreadcrumb && logEvent.Level >= _options.MinimumBreadcrumbLevel)
+        if (!addedBreadcrumbForException && logEvent.Level >= _options.MinimumBreadcrumbLevel)
         {
             Dictionary<string, string>? data = null;
             if (exception != null && !string.IsNullOrWhiteSpace(formatted))
