@@ -23,7 +23,7 @@ public static class MauiProgram
 
                 options.SetBeforeBreadcrumb((breadcrumb, hint) =>
                 {
-                    if (breadcrumb.Data?.TryGetValue("action", out string action) == true && App.HasTestArg(action))
+                    if (breadcrumb.Data?.TryGetValue("action", out var action) == true && App.HasTestArg(action))
                     {
                         SentrySdk.CaptureMessage(action, scope =>
                         {
