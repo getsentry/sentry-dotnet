@@ -1,4 +1,3 @@
-using Sentry.Extensibility;
 using Sentry.Internal;
 
 namespace Sentry.Extensions.AI;
