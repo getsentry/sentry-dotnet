@@ -182,7 +182,7 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         }
     }
 
-    It 'Delivers battery breadcrumbs in main thread (<configuration>)' -Skip:($configuration -eq "Debug") {
+    It 'Delivers battery breadcrumbs in main thread (<configuration>)' -Skip:($configuration -eq "Release") {
         try
         {
             $result = Invoke-SentryServer {
@@ -206,7 +206,7 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         }
     }
 
-    It 'Delivers network breadcrumbs in main thread (<configuration>)' -Skip:($configuration -eq "Debug") {
+    It 'Delivers network breadcrumbs in main thread (<configuration>)' -Skip:($configuration -eq "Release") {
         try
         {
             $result = Invoke-SentryServer {
