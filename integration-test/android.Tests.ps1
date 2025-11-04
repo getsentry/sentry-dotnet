@@ -232,7 +232,7 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         }
         finally
         {
-            xharness android adb -- adb shell svc wifi enable
+            xharness android adb -- shell svc wifi enable
         }
     }
 }
