@@ -76,7 +76,7 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
                 $activity = (& xharness android adb -- shell dumpsys activity activities) -match "io\.sentry\.dotnet\.maui\.device\.integrationtestapp"
                 if ($procid -and $activity -and $Callback)
                 {
-                    & $Callback
+                    & $Callback | ForEach-Object { Write-Host $_ }
                 }
             } while ($procid -and $activity)
         }
@@ -191,7 +191,7 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
                     # Trigger BATTERY_CHANGED events by incrementing the battery level
                     $battery = [int](& xharness android adb -- shell dumpsys battery get level)
                     $battery = ($battery % 100) + 1
-                    & xharness android adb -- shell dumpsys battery set level $battery
+                    xharness android adb -v -- shell dumpsys battery set level $battery | ForEach-Object { Write-Host $_ }
                 }
             }
 
@@ -202,24 +202,23 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         }
         finally
         {
-            & xharness android adb -- shell dumpsys battery reset
+            xharness android adb -v -- shell dumpsys battery reset | ForEach-Object { Write-Host $_ }
         }
     }
 
     It 'Delivers network breadcrumbs in main thread (<configuration>)' {
         try
         {
-            $wifi = $false
             $result = Invoke-SentryServer {
                 param([string]$url)
                 RunAndroidApp -Dsn $url -TestArg "NETWORK_CAPABILITIES_CHANGED" {
                     # Trigger NETWORK_CAPABILITIES_CHANGED events by toggling WiFi on/off
-                    if ($wifi) {
-                        & xharness android adb -- shell svc wifi enable
+                    $wifi = (& xharness android adb -- shell settings get global wifi_on) -replace '\s', ''
+                    if ($wifi -eq '1') {
+                        xharness android adb -v -- shell svc wifi disable | ForEach-Object { Write-Host $_ }
                     } else {
-                        & xharness android adb -- shell svc wifi disable
+                        xharness android adb -v -- shell svc wifi enable | ForEach-Object { Write-Host $_ }
                     }
-                    $wifi = -not $wifi
                 }
             }
 
@@ -230,7 +229,7 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         }
         finally
         {
-            & xharness android adb -- shell svc wifi enable
+            xharness android adb -v -- shell svc wifi enable | ForEach-Object { Write-Host $_ }
         }
     }
 }
