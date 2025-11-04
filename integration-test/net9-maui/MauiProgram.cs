@@ -23,17 +23,7 @@ public static class MauiProgram
 
                 options.SetBeforeBreadcrumb((breadcrumb, hint) =>
                 {
-                    if (breadcrumb.Data?.TryGetValue("action", out var action) == true && App.HasTestArg(action))
-                    {
-                        SentrySdk.CaptureMessage(action, scope =>
-                        {
-                            scope.SetExtra("action", action);
-                            scope.SetExtra("category", breadcrumb.Category);
-                            scope.SetExtra("thread_id", Thread.CurrentThread.ManagedThreadId);
-                            scope.SetExtra("type", breadcrumb.Type);
-                        });
-                        App.Kill();
-                    }
+                    App.RecordBreadcrumb(breadcrumb);
                     return breadcrumb;
                 });
             })

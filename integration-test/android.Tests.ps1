@@ -54,8 +54,7 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         {
             param(
                 [string] $Dsn,
-                [string] $TestArg = 'None',
-                [ScriptBlock] $Callback = $null
+                [string] $TestArg = 'None'
             )
             Write-Host "::group::Run Android app (TestArg=$TestArg)"
             $dsn = $Dsn.Replace('http://', 'http://key@') + '/0'
@@ -74,10 +73,7 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
 
                 $procid = (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
                 $activity = (& xharness android adb -- shell dumpsys activity activities) -match "io\.sentry\.dotnet\.maui\.device\.integrationtestapp"
-                if ($procid -and $activity -and $Callback)
-                {
-                    & $Callback | ForEach-Object { Write-Host $_ }
-                }
+
             } while ($procid -and $activity)
         }
 
@@ -182,54 +178,27 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         }
     }
 
-    It 'Delivers battery breadcrumbs in main thread (<configuration>)' -Skip:($configuration -eq "Release") {
-        try
-        {
-            $result = Invoke-SentryServer {
-                param([string]$url)
-                RunAndroidApp -Dsn $url -TestArg "BATTERY_CHANGED" {
-                    # Trigger BATTERY_CHANGED events by incrementing the battery level
-                    $battery = [int](& xharness android adb -- shell dumpsys battery get level)
-                    $battery = ($battery % 100) + 1
-                    xharness android adb -v -- shell dumpsys battery set level $battery | ForEach-Object { Write-Host $_ }
-                }
-            }
+    It 'Delivers battery breadcrumbs in main thread (<configuration>)' {
+        $result = Invoke-SentryServer {
+            param([string]$url)
+            RunAndroidApp -Dsn $url -TestArg "BATTERY_CHANGED"
+        }
 
-            Dump-ServerErrors -Result $result
-            $result.HasErrors() | Should -BeFalse
-            $result.Envelopes() | Should -AnyElementMatch "`"type`":`"system`",`"thread_id`":1,`"category`":`"device.event`",`"action`":`"BATTERY_CHANGED`""
-            $result.Envelopes() | Should -HaveCount 1
-        }
-        finally
-        {
-            xharness android adb -v -- shell dumpsys battery reset | ForEach-Object { Write-Host $_ }
-        }
+        Dump-ServerErrors -Result $result
+        $result.HasErrors() | Should -BeFalse
+        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"system`",`"thread_id`":`"1`",`"category`":`"device.event`",`"action`":`"BATTERY_CHANGED`""
+        $result.Envelopes() | Should -HaveCount 1
     }
 
-    It 'Delivers network breadcrumbs in main thread (<configuration>)' -Skip:($configuration -eq "Release") {
-        try
-        {
-            $result = Invoke-SentryServer {
-                param([string]$url)
-                RunAndroidApp -Dsn $url -TestArg "NETWORK_CAPABILITIES_CHANGED" {
-                    # Trigger NETWORK_CAPABILITIES_CHANGED events by toggling WiFi on/off
-                    $wifi = (& xharness android adb -- shell settings get global wifi_on) -replace '\s', ''
-                    if ($wifi -eq '1') {
-                        xharness android adb -v -- shell svc wifi disable | ForEach-Object { Write-Host $_ }
-                    } else {
-                        xharness android adb -v -- shell svc wifi enable | ForEach-Object { Write-Host $_ }
-                    }
-                }
-            }
+    It 'Delivers network breadcrumbs in main thread (<configuration>)' {
+        $result = Invoke-SentryServer {
+            param([string]$url)
+            RunAndroidApp -Dsn $url -TestArg "NETWORK_CAPABILITIES_CHANGED"
+        }
 
-            Dump-ServerErrors -Result $result
-            $result.HasErrors() | Should -BeFalse
-            $result.Envelopes() | Should -AnyElementMatch "`"type`":`"system`",`"thread_id`":1,`"category`":`"network.event`",`"action`":`"NETWORK_CAPABILITIES_CHANGED`""
-            $result.Envelopes() | Should -HaveCount 1
-        }
-        finally
-        {
-            xharness android adb -v -- shell svc wifi enable | ForEach-Object { Write-Host $_ }
-        }
+        Dump-ServerErrors -Result $result
+        $result.HasErrors() | Should -BeFalse
+        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"system`",`"thread_id`":`"1`",`"category`":`"network.event`",`"action`":`"NETWORK_CAPABILITIES_CHANGED`""
+        $result.Envelopes() | Should -HaveCount 1
     }
 }

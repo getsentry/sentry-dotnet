@@ -29,11 +29,20 @@ public partial class MainPage : ContentPage
             {
                 SentrySdk.CaptureException(ex);
             }
-            App.Kill();
         }
-        else if (App.HasTestArg("None"))
+        else if (App.TryGetBreadcrumb(App.TestArg, out var breadcrumb) && breadcrumb.Data != null)
         {
-            App.Kill();
+            SentrySdk.CaptureMessage(App.TestArg, scope =>
+            {
+                scope.SetExtra("category", breadcrumb.Category);
+                foreach (var kvp in breadcrumb.Data)
+                {
+                    scope.SetExtra(kvp.Key, kvp.Value);
+                }
+                scope.SetExtra("type", breadcrumb.Type);
+            });
         }
+
+        App.Kill();
     }
 }
