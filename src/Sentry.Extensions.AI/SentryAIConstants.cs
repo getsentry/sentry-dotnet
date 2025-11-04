@@ -56,6 +56,9 @@ internal static class SentryAIConstants
         internal const string ToolDescription = "gen_ai.tool.description";
         internal const string ToolInput = "gen_ai.tool.input";
         internal const string ToolOutput = "gen_ai.tool.output";
+
+        // Misc..
+        internal const string Origin = "auto.ai.extensions";
     }
 
     internal static class SpanOperations

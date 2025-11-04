@@ -39,6 +39,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
             var response = await base.GetResponseAsync(chatMessages, options, cancellationToken).ConfigureAwait(false);
 
             SentryAISpanEnricher.EnrichWithResponse(chatSpan, response, _sentryAIOptions);
+            SentryAISpanEnricher.EnrichWithResponse(agentSpan, response, _sentryAIOptions);
             AfterResponseCleanup(chatSpan, agentSpan);
 
             return response;
@@ -86,6 +87,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
                 if (!hasNext)
                 {
                     SentryAISpanEnricher.EnrichWithStreamingResponses(chatSpan, responses, _sentryAIOptions);
+                    SentryAISpanEnricher.EnrichWithStreamingResponses(agentSpan, responses, _sentryAIOptions);
                     AfterResponseCleanup(chatSpan, agentSpan);
 
                     yield break;

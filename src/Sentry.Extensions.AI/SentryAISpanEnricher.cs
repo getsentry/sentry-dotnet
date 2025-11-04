@@ -1,4 +1,5 @@
 using Microsoft.Extensions.AI;
+using Sentry.Internal;
 
 namespace Sentry.Extensions.AI;
 
@@ -14,6 +15,7 @@ internal static class SentryAISpanEnricher
         SentryAIOptions aiOptions, string operationName)
     {
         span.SetData(SentryAIConstants.SpanAttributes.OperationName, operationName);
+        span.SetOrigin(SentryAIConstants.SpanAttributes.Origin);
 
         if (options?.ModelId is { } modelId)
         {
@@ -25,9 +27,9 @@ internal static class SentryAISpanEnricher
             span.SetData(SentryAIConstants.SpanAttributes.AgentName, agentName);
         }
 
-        if (operationName == SentryAIConstants.SpanOperations.Chat
-            && messages is { Length: > 0 }
-            && (aiOptions?.RecordInputs ?? true))
+        if (messages is { Length: > 0 }
+            && (aiOptions?.RecordInputs ?? true)
+            && !span.Data.TryGetValue(SentryAIConstants.SpanAttributes.RequestMessages, out _))
         {
             span.SetData(SentryAIConstants.SpanAttributes.RequestMessages, FormatRequestMessage(messages));
         }
@@ -112,7 +114,9 @@ internal static class SentryAISpanEnricher
                 finalText.Append(responseText);
             }
 
-            if (message.FinishReason == ChatFinishReason.ToolCalls)
+            // Only set tool call info in chat spans
+            if (message.FinishReason == ChatFinishReason.ToolCalls
+                && span.Operation == SentryAIConstants.SpanAttributes.ChatOperation)
             {
                 PopulateToolCallsInfo(message.Contents, span);
             }
