@@ -1,7 +1,6 @@
-using Microsoft.Extensions.AI;
+using Sentry.Extensions.AI;
 
-// ReSharper disable once CheckNamespace -- Discoverability
-namespace Sentry.Extensions.AI;
+namespace Microsoft.Extensions.AI;
 
 /// <summary>
 /// Extensions to instrument Microsoft.Extensions.AI builders with Sentry
