@@ -14,6 +14,10 @@
 - The SDK now provides a `IsSessionActive` to allow checking the session state ([#4662](https://github.com/getsentry/sentry-dotnet/pull/4662))
 - The SDK now makes use of the new SessionEndStatus `Unhandled` when capturing an unhandled but non-terminal exception, i.e. through the UnobservedTaskExceptionIntegration ([#4633](https://github.com/getsentry/sentry-dotnet/pull/4633))
 
+### Fixes
+
+- The `Serilog` integration captures _Structured Logs_ (when enabled) independently of captured Events and added Breadcrumbs ([#4691](https://github.com/getsentry/sentry-dotnet/pull/4691))
+
 ## 6.0.0-preview.2
 
 ### BREAKING CHANGES
