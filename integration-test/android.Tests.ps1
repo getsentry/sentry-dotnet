@@ -197,7 +197,6 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
 
             Dump-ServerErrors -Result $result
             $result.HasErrors() | Should -BeFalse
-            $result.Envelopes() | ForEach-Object { Write-Host $_ }
             $result.Envelopes() | Should -AnyElementMatch "`"type`":`"system`",`"thread_id`":1,`"category`":`"device.event`",`"action`":`"BATTERY_CHANGED`""
             $result.Envelopes() | Should -HaveCount 1
         }
@@ -226,7 +225,6 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
 
             Dump-ServerErrors -Result $result
             $result.HasErrors() | Should -BeFalse
-            $result.Envelopes() | ForEach-Object { Write-Host $_ }
             $result.Envelopes() | Should -AnyElementMatch "`"type`":`"system`",`"thread_id`":1,`"category`":`"network.event`",`"action`":`"NETWORK_CAPABILITIES_CHANGED`""
             $result.Envelopes() | Should -HaveCount 1
         }
