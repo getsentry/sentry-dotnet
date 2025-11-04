@@ -125,10 +125,15 @@ internal sealed class SentryChatClient : DelegatingChatClient
         }
 
         chatSpan.Finish(SpanStatus.Ok);
-        // If we didn't have any tools available, we can just finish outer invoke_agent span.
-        if (options?.Tools == null)
+
+        // If current activity is the one started by FunctionInvokingChatClient (FICC),
+        // our callback function will handle agentSpan finish. If not, we have to finish the span on our own.
+        // This solution won't work if the user created their custom version of FICC. However in that case, agentSpan
+        // will finish once the transaction it is attached to finishes.
+        if (Activity.Current is not { } currentActivity ||
+            !SentryAIConstants.FICCActivityNames.Contains(currentActivity.OperationName))
         {
-            agentSpan.Finish(SpanStatus.Ok);
+            agentSpan.Finish();
         }
     }
 
