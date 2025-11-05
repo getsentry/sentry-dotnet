@@ -23,7 +23,7 @@ public static class MauiProgram
 
                 options.SetBeforeBreadcrumb((breadcrumb, hint) =>
                 {
-                    App.RecordBreadcrumb(breadcrumb);
+                    App.ReceiveSystemBreadcrumb(breadcrumb);
                     return breadcrumb;
                 });
             })
