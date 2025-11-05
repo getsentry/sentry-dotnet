@@ -7,33 +7,20 @@ internal class CacheDirectoryCoordinator : IDisposable
 {
     private readonly IDiagnosticLogger? _logger;
     private readonly IFileSystem _fileSystem;
-    private readonly object _gate = new();
+    private readonly Lock _lock = new();
 
     private Stream? _lockStream;
     private readonly string _lockFilePath;
 
-    private bool _acquired;
-    private bool _disposed;
+    private volatile bool _acquired;
+    private volatile bool _disposed;
 
     public CacheDirectoryCoordinator(string cacheDir, IDiagnosticLogger? logger, IFileSystem fileSystem)
     {
         _logger = logger;
         _fileSystem = fileSystem;
+        // Note this creates a lock file in the cache directory's parent directory... not in the cache directory itself
         _lockFilePath = $"{cacheDir}.lock";
-
-        try
-        {
-            var baseDir = Path.GetDirectoryName(_lockFilePath);
-            if (!string.IsNullOrWhiteSpace(baseDir))
-            {
-                // Not normally necessary, but just in case
-                fileSystem.CreateDirectory(baseDir);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError("Failed to ensure lock directory exists for cache coordinator.", ex);
-        }
     }
 
     public bool TryAcquire()
@@ -43,7 +30,7 @@ internal class CacheDirectoryCoordinator : IDisposable
             return true;
         }
 
-        lock (_gate)
+        lock (_lock)
         {
             if (_acquired)
             {
@@ -57,6 +44,11 @@ internal class CacheDirectoryCoordinator : IDisposable
 
             try
             {
+                var baseDir = Path.GetDirectoryName(_lockFilePath);
+                if (!string.IsNullOrWhiteSpace(baseDir))
+                {
+                    _fileSystem.CreateDirectory(baseDir);
+                }
                 _acquired = _fileSystem.TryCreateLockFile(_lockFilePath, out _lockStream);
                 return _acquired;
             }
@@ -84,13 +76,13 @@ internal class CacheDirectoryCoordinator : IDisposable
 
     public void Dispose()
     {
-        lock (_gate)
+        if (_disposed)
         {
-            if (_disposed)
-            {
-                return;
-            }
+            return;
+        }
 
+        lock (_lock)
+        {
             _disposed = true;
 
             if (_acquired)
@@ -140,12 +132,13 @@ internal static class CacheDirectoryHelper
             return null;
         }
         var processId = options.ProcessIdResolver.Invoke() ?? 0;
-        stringBuilder.AppendJoin('_', options.Dsn.GetHashString(), processId, options.InitCounter.Count);
+        stringBuilder.AppendJoin('_', options.Dsn.GetHashString(), processId.ToString(),
+            options.InitCounter.Count.ToString());
 #endif
         return stringBuilder.ToString();
     }
 
-    internal static string? TryGetIsolatedCacheDirectoryPath(this SentryOptions options) =>
+    internal static string? GetIsolatedCacheDirectoryPath(this SentryOptions options) =>
         GetBaseCacheDirectoryPath(options) is not { } baseCacheDir
         || GetIsolatedFolderName(options) is not { } isolatedFolderName
             ? null

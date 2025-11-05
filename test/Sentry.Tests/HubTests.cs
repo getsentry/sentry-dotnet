@@ -2203,7 +2203,7 @@ public partial class HubTests
                 Arg.Any<CancellationToken>());
         if (options.Transport is CachingTransport cachingTransport)
         {
-            cachingTransport.Dispose(); // Release cache lock so that the cacheDirectory can be removed
+            await cachingTransport.DisposeAsync(); // Release cache lock so that the cacheDirectory can be removed
         }
     }
 

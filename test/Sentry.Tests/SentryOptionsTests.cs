@@ -680,7 +680,7 @@ public partial class SentryOptionsTests
     public void TryGetIsolatedCacheDirectoryPath_NullCacheDirectory_ReturnsNull()
     {
         var o = new SentryOptions { CacheDirectoryPath = null, Dsn = ValidDsn };
-        Assert.Null(o.TryGetIsolatedCacheDirectoryPath());
+        Assert.Null(o.GetIsolatedCacheDirectoryPath());
     }
 
 #if IOS || ANDROID

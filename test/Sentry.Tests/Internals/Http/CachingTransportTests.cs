@@ -243,7 +243,7 @@ public class CachingTransportTests : IDisposable
     {
         // Arrange
         var cacheDirectoryPath =
-            _options.TryGetIsolatedCacheDirectoryPath() ??
+            _options.GetIsolatedCacheDirectoryPath() ??
             throw new InvalidOperationException("Cache directory or DSN is not set.");
         var processingDirectoryPath = Path.Combine(cacheDirectoryPath, "__processing");
         var fileName = $"{Guid.NewGuid()}.envelope";
@@ -624,7 +624,7 @@ public class CachingTransportTests : IDisposable
         await transport.SendEnvelopeAsync(envelope);
 
         // Assert
-        var isolatedCacheDir = _options.TryGetIsolatedCacheDirectoryPath();
+        var isolatedCacheDir = _options.GetIsolatedCacheDirectoryPath();
         var filePath = _options.FileSystem
             .EnumerateFiles(isolatedCacheDir!, "*", SearchOption.AllDirectories)
             .Single();
@@ -640,7 +640,7 @@ public class CachingTransportTests : IDisposable
         using var innerTransport = new FakeTransport();
         await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
 
-        var currentIsolated = _options.TryGetIsolatedCacheDirectoryPath()!; // already validated during creation
+        var currentIsolated = _options.GetIsolatedCacheDirectoryPath()!; // already validated during creation
         var baseCacheDir = Directory.GetParent(currentIsolated)!.FullName;
 
         // Create two abandoned isolated cache directories with envelope files (including in nested folder)
@@ -694,7 +694,7 @@ public class CachingTransportTests : IDisposable
         // Arrange
         using var innerTransport = new FakeTransport();
         await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
-        var currentIsolated = _options.TryGetIsolatedCacheDirectoryPath()!;
+        var currentIsolated = _options.GetIsolatedCacheDirectoryPath()!;
 
         var currentFile = Path.Combine(currentIsolated, "current.envelope");
         if (_options.FileSystem.CreateFileForWriting(currentFile, out var stream))
@@ -717,7 +717,7 @@ public class CachingTransportTests : IDisposable
         using var innerTransport = new FakeTransport();
         await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
 
-        var currentIsolated = _options.TryGetIsolatedCacheDirectoryPath()!;
+        var currentIsolated = _options.GetIsolatedCacheDirectoryPath()!;
         var baseCacheDir = Directory.GetParent(currentIsolated)!.FullName;
 
         // Create an abandoned directory that matches the search pattern and acquire its lock

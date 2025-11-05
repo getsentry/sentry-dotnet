@@ -79,7 +79,7 @@ internal class CachingTransport : ITransport, IDisposable
             : 0; // just in case MaxCacheItems is set to an invalid value somehow (shouldn't happen)
 
         _isolatedCacheDirectoryPath =
-            options.TryGetIsolatedCacheDirectoryPath() ??
+            options.GetIsolatedCacheDirectoryPath() ??
             throw new InvalidOperationException("Cache directory or DSN is not set.");
         _cacheCoordinator = new CacheDirectoryCoordinator(_isolatedCacheDirectoryPath, options.DiagnosticLogger, options.FileSystem);
         if (!_cacheCoordinator.TryAcquire())
@@ -207,7 +207,7 @@ internal class CachingTransport : ITransport, IDisposable
                 continue; // Ignore the current cache directory
             }
 
-            _options.LogDebug("found abandoned cache: {0}", dir);
+            _options.LogDebug("Found abandoned cache: {0}", dir);
             using var coordinator = new CacheDirectoryCoordinator(dir, _options.DiagnosticLogger, _options.FileSystem);
             if (!coordinator.TryAcquire())
             {

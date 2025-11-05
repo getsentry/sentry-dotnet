@@ -6,18 +6,22 @@ public class CacheDirectoryCoordinatorTests : IDisposable
 
     public void Dispose()
     {
-        if (_fixture.FileSystem.FileExists(_fixture.CacheDirectoryPath))
-        {
-            _fixture.FileSystem.DeleteDirectory(_fixture.CacheDirectoryPath);
-        }
+       _fixture.CacheRoot.Dispose();
     }
 
     private class Fixture
     {
+        public readonly TempDirectory CacheRoot = new();
         public ReadWriteFileSystem FileSystem { get; } = new();
-        public string CacheDirectoryPath { get; } = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
 
-        public CacheDirectoryCoordinator GetSut() => new(CacheDirectoryPath, null, FileSystem);
+        public string CacheDirectoryPath { get; private set; }
+        private readonly string _isolatedDirectory = Guid.NewGuid().ToString("N");
+
+        public CacheDirectoryCoordinator GetSut()
+        {
+            CacheDirectoryPath = Path.Combine(CacheRoot.Path, _isolatedDirectory);
+            return new(CacheDirectoryPath, null, FileSystem);
+        }
     }
 
     [Fact]
