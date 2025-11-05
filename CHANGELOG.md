@@ -7,6 +7,7 @@
 - Spans and Transactions now implement `IDisposable` so that they can be used with `using` statements/declarations that will automatically finish the span with a status of OK when it passes out of scope, if it has not already been finished, to be consistent with `Activity` classes when using OpenTelemetry ([#4627](https://github.com/getsentry/sentry-dotnet/pull/4627))
 - SpanTracer and TransactionTracer are still public but these are now `sealed` (see also [#4627](https://github.com/getsentry/sentry-dotnet/pull/4627))
 - CaptureFeedback now returns a `SentryId` and a `CaptureFeedbackResult` out parameter that indicate whether feedback was captured successfully and what the reason for failure was otherwise ([#4613](https://github.com/getsentry/sentry-dotnet/pull/4613))
+- Depricated Sentry.Azure.Functions.Worker as very few people were using it and the functionality can easily be replaced with Open Telemetry. We've replaced our integration with a sample showing how to do this using our Open Telemetry package instead. ([#4693](https://github.com/getsentry/sentry-dotnet/pull/4693))
 
 ### Features
 
