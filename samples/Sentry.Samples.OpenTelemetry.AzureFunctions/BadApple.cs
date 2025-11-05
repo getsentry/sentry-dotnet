@@ -1,4 +1,4 @@
-namespace Sentry.Samples.Azure.Functions.Worker;
+namespace Sentry.Samples.OpenTelemetry.AzureFunctions;
 
 internal static class BadApple
 {
