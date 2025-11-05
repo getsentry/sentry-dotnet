@@ -9,6 +9,7 @@ internal partial class BindableSentryOptions
 {
     public bool? IsGlobalModeEnabled { get; set; }
     public bool? EnableScopeSync { get; set; }
+    public bool? EnableBackpressureHandling { get; set; }
     public List<string>? TagFilters { get; set; }
     public bool? SendDefaultPii { get; set; }
     public bool? IsEnvironmentUser { get; set; }
@@ -41,6 +42,7 @@ internal partial class BindableSentryOptions
     public bool? EnableTracing { get; set; }
     public double? TracesSampleRate { get; set; }
     public List<string>? TracePropagationTargets { get; set; }
+    public bool? PropagateTraceparent { get; set; }
     public double? ProfilesSampleRate { get; set; }
     public StackTraceMode? StackTraceMode { get; set; }
     public long? MaxAttachmentSize { get; set; }
@@ -64,6 +66,7 @@ internal partial class BindableSentryOptions
     {
         options.IsGlobalModeEnabled = IsGlobalModeEnabled ?? options.IsGlobalModeEnabled;
         options.EnableScopeSync = EnableScopeSync ?? options.EnableScopeSync;
+        options.EnableBackpressureHandling = EnableBackpressureHandling ?? options.EnableBackpressureHandling;
         options.TagFilters = TagFilters?.Select(s => new StringOrRegex(s)).ToList() ?? options.TagFilters;
         options.SendDefaultPii = SendDefaultPii ?? options.SendDefaultPii;
         options.IsEnvironmentUser = IsEnvironmentUser ?? options.IsEnvironmentUser;
@@ -96,6 +99,7 @@ internal partial class BindableSentryOptions
         options.TracesSampleRate = TracesSampleRate ?? options.TracesSampleRate;
         options.ProfilesSampleRate = ProfilesSampleRate ?? options.ProfilesSampleRate;
         options.TracePropagationTargets = TracePropagationTargets?.Select(s => new StringOrRegex(s)).ToList() ?? options.TracePropagationTargets;
+        options.PropagateTraceparent = PropagateTraceparent ?? options.PropagateTraceparent;
         options.StackTraceMode = StackTraceMode ?? options.StackTraceMode;
         options.MaxAttachmentSize = MaxAttachmentSize ?? options.MaxAttachmentSize;
         options.DetectStartupTime = DetectStartupTime ?? options.DetectStartupTime;

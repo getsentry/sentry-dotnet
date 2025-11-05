@@ -15,7 +15,7 @@ internal class DuplicateEventDetectionEventProcessor : ISentryEventProcessor
         {
             if (_capturedObjects.TryGetValue(@event, out _))
             {
-                _options.LogDebug("Same event instance detected and discarded. EventId: {0}", @event.EventId);
+                _options.LogDebug("Same event instance detected and discarded. EventId: '{0}'", @event.EventId);
                 return null;
             }
             _capturedObjects.Add(@event, null);
@@ -38,7 +38,7 @@ internal class DuplicateEventDetectionEventProcessor : ISentryEventProcessor
             {
                 if (debugLog)
                 {
-                    _options.LogDebug("Duplicate Exception: 'SameExceptionInstance'. Event {0} will be discarded.", eventId);
+                    _options.LogDebug("Duplicate Exception: 'SameExceptionInstance'. Event '{0}' will be discarded.", eventId);
                 }
                 return true;
             }
@@ -52,7 +52,7 @@ internal class DuplicateEventDetectionEventProcessor : ISentryEventProcessor
             var result = aex.InnerExceptions.Any(e => IsDuplicate(e, eventId, false));
             if (result)
             {
-                _options.LogDebug("Duplicate Exception: 'AggregateException'. Event {0} will be discarded.", eventId);
+                _options.LogDebug("Duplicate Exception: 'AggregateException'. Event '{0}' will be discarded.", eventId);
             }
 
             return result;
@@ -63,7 +63,7 @@ internal class DuplicateEventDetectionEventProcessor : ISentryEventProcessor
         {
             if (IsDuplicate(ex.InnerException, eventId, false))
             {
-                _options.LogDebug("Duplicate Exception: 'SameExceptionInstance'. Event {0} will be discarded.", eventId);
+                _options.LogDebug("Duplicate Exception: 'SameExceptionInstance'. Event '{0}' will be discarded.", eventId);
                 return true;
             }
         }

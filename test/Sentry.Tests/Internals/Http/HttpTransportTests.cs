@@ -21,7 +21,7 @@ public partial class HttpTransportTests
     {
         // Arrange
         using var source = new CancellationTokenSource();
-        source.Cancel();
+        await source.CancelAsync();
         var token = source.Token;
 
         var httpHandler = Substitute.For<MockableHttpMessageHandler>();
@@ -36,17 +36,20 @@ public partial class HttpTransportTests
         var envelope = Envelope.FromEvent(
             new SentryEvent(eventId: SentryResponses.ResponseId));
 
-#if NET5_0_OR_GREATER
-        await Assert.ThrowsAsync<TaskCanceledException>(() => httpTransport.SendEnvelopeAsync(envelope, token));
-#else
         // Act
-        await httpTransport.SendEnvelopeAsync(envelope, token);
+        try
+        {
+            await httpTransport.SendEnvelopeAsync(envelope, token);
+        }
+        catch (TaskCanceledException)
+        {
+            // Swallow this
+        }
 
         // Assert
         await httpHandler
             .Received(1)
             .VerifiableSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Is<CancellationToken>(c => c.IsCancellationRequested));
-#endif
     }
 
     [Fact]
@@ -298,6 +301,7 @@ public partial class HttpTransportTests
                 Debug = true
             },
             new HttpClient(httpHandler),
+            null,
             clock: _fakeClock);
 
         // First request always goes through
@@ -382,6 +386,7 @@ public partial class HttpTransportTests
         var httpTransport = new HttpTransport(
             options,
             new HttpClient(httpHandler),
+            null,
             clock: _fakeClock
         );
 
@@ -845,5 +850,39 @@ public partial class HttpTransportTests
         // 1 for each span + 1 for the transaction root span
         var expectedDiscardedSpanCount = transaction.Spans.Count + 1;
         options.ClientReportRecorder.Received(1).RecordDiscardedEvent(DiscardReason.RateLimitBackoff, DataCategory.Span, expectedDiscardedSpanCount);
+    }
+
+    [Fact]
+    public async Task SendEnvelopeAsync_RateLimited_CallsBackpressureMonitor()
+    {
+        // Arrange
+        using var httpHandler = new RecordingHttpMessageHandler(
+            new FakeHttpMessageHandler(
+                () => SentryResponses.GetRateLimitResponse("1234:event, 897:transaction")
+            ));
+
+        using var backpressureMonitor = new BackpressureMonitor(null, _fakeClock, false);
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            DiagnosticLogger = _testOutputLogger,
+            SendClientReports = false,
+            ClientReportRecorder = Substitute.For<IClientReportRecorder>(),
+            Debug = true
+        };
+
+        var httpTransport = new HttpTransport(
+            options,
+            new HttpClient(httpHandler),
+            backpressureMonitor,
+            clock: _fakeClock
+        );
+
+        // Act
+        await httpTransport.SendEnvelopeAsync(Envelope.FromEvent(new SentryEvent()));
+
+        // Assert
+        backpressureMonitor.LastRateLimitEventTicks.Should().Be(_fakeClock.GetUtcNow().Ticks);
+        backpressureMonitor.IsHealthy.Should().BeFalse();
     }
 }

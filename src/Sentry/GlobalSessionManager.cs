@@ -38,7 +38,7 @@ internal class GlobalSessionManager : ISessionManager
 
     // Take pause timestamp directly instead of referencing _lastPauseTimestamp to avoid
     // potential race conditions.
-    private void PersistSession(SessionUpdate update, DateTimeOffset? pauseTimestamp = null)
+    private void PersistSession(SessionUpdate update, DateTimeOffset? pauseTimestamp = null, bool pendingUnhandled = false)
     {
         _options.LogDebug("Persisting session (SID: '{0}') to a file.", update.Id);
 
@@ -66,7 +66,7 @@ internal class GlobalSessionManager : ISessionManager
 
             var filePath = Path.Combine(_persistenceDirectoryPath, PersistedSessionFileName);
 
-            var persistedSessionUpdate = new PersistedSessionUpdate(update, pauseTimestamp);
+            var persistedSessionUpdate = new PersistedSessionUpdate(update, pauseTimestamp, pendingUnhandled);
             if (!_options.FileSystem.CreateFileForWriting(filePath, out var file))
             {
                 _options.LogError("Failed to persist session file.");
@@ -115,7 +115,7 @@ internal class GlobalSessionManager : ISessionManager
                 try
                 {
                     var contents = _options.FileSystem.ReadAllTextFromFile(filePath);
-                    _options.LogDebug("Deleting persisted session file with contents: {0}", contents);
+                    _options.LogDebug("Deleting persisted session file with contents: '{0}'", contents);
                 }
                 catch (Exception ex)
                 {
@@ -158,7 +158,10 @@ internal class GlobalSessionManager : ISessionManager
                 status = _options.CrashedLastRun?.Invoke() switch
                 {
                     // Native crash (if native SDK enabled):
+                    // This takes priority - escalate to Crashed even if session had pending unhandled
                     true => SessionEndStatus.Crashed,
+                    // Had unhandled exception but didn't crash:
+                    _ when recoveredUpdate.PendingUnhandled => SessionEndStatus.Unhandled,
                     // Ended while on the background, healthy session:
                     _ when recoveredUpdate.PauseTimestamp is not null => SessionEndStatus.Exited,
                     // Possibly out of battery, killed by OS or user, solar flare:
@@ -182,9 +185,10 @@ internal class GlobalSessionManager : ISessionManager
                 // If there's a callback for native crashes, check that first.
                 status);
 
-            _options.LogInfo("Recovered session: EndStatus: {0}. PauseTimestamp: {1}",
+            _options.LogInfo("Recovered session: EndStatus: {0}. PauseTimestamp: {1}. PendingUnhandled: {2}",
                 sessionUpdate.EndStatus,
-                recoveredUpdate.PauseTimestamp);
+                recoveredUpdate.PauseTimestamp,
+                recoveredUpdate.PendingUnhandled);
 
             return sessionUpdate;
         }
@@ -242,6 +246,13 @@ internal class GlobalSessionManager : ISessionManager
 
     private SessionUpdate EndSession(SentrySession session, DateTimeOffset timestamp, SessionEndStatus status)
     {
+        // If we're ending as 'Exited' but he session has a pending 'Unhandled', end as 'Unhandled'
+        if (status == SessionEndStatus.Exited && session.IsMarkedAsPendingUnhandled)
+        {
+            status = SessionEndStatus.Unhandled;
+            _options.LogDebug("Session ended with pending 'Unhandled' (but not `Terminal`) exception.");
+        }
+
         if (status == SessionEndStatus.Crashed)
         {
             // increments the errors count, as crashed sessions should report a count of 1 per:
@@ -285,7 +296,7 @@ internal class GlobalSessionManager : ISessionManager
 
         var now = _clock.GetUtcNow();
         _lastPauseTimestamp = now;
-        PersistSession(session.CreateUpdate(false, now), now);
+        PersistSession(session.CreateUpdate(false, now), now, session.IsMarkedAsPendingUnhandled);
     }
 
     public IReadOnlyList<SessionUpdate> ResumeSession()
@@ -360,5 +371,19 @@ internal class GlobalSessionManager : ISessionManager
         }
 
         return session.CreateUpdate(false, _clock.GetUtcNow());
+    }
+
+    public void MarkSessionAsUnhandled()
+    {
+        if (_currentSession is not { } session)
+        {
+            _options.LogDebug("There is no session active. Skipping marking session as unhandled.");
+            return;
+        }
+
+        session.MarkUnhandledException();
+
+        var sessionUpdate = session.CreateUpdate(false, _clock.GetUtcNow());
+        PersistSession(sessionUpdate, pendingUnhandled: true);
     }
 }

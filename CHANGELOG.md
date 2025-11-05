@@ -5,6 +5,138 @@
 ### Features
 
 - Implement process and instance isolation so that multiple instances of the Sentry SDK can be instantiated inside the same process when using the Caching Transport ([#4498](https://github.com/getsentry/sentry-dotnet/pull/4498))
+### BREAKING CHANGES
+
+- Spans and Transactions now implement `IDisposable` so that they can be used with `using` statements/declarations that will automatically finish the span with a status of OK when it passes out of scope, if it has not already been finished, to be consistent with `Activity` classes when using OpenTelemetry ([#4627](https://github.com/getsentry/sentry-dotnet/pull/4627))
+- SpanTracer and TransactionTracer are still public but these are now `sealed` (see also [#4627](https://github.com/getsentry/sentry-dotnet/pull/4627))
+- CaptureFeedback now returns a `SentryId` and a `CaptureFeedbackResult` out parameter that indicate whether feedback was captured successfully and what the reason for failure was otherwise ([#4613](https://github.com/getsentry/sentry-dotnet/pull/4613))
+
+### Features
+
+- The SDK now makes use of the new SessionEndStatus `Unhandled` when capturing an unhandled but non-terminal exception, i.e. through the UnobservedTaskExceptionIntegration ([#4633](https://github.com/getsentry/sentry-dotnet/pull/4633), [#4653](https://github.com/getsentry/sentry-dotnet/pull/4653))
+- The SDK now provides a `IsSessionActive` to allow checking the session state ([#4662](https://github.com/getsentry/sentry-dotnet/pull/4662))
+- The SDK now makes use of the new SessionEndStatus `Unhandled` when capturing an unhandled but non-terminal exception, i.e. through the UnobservedTaskExceptionIntegration ([#4633](https://github.com/getsentry/sentry-dotnet/pull/4633))
+
+### Fixes
+
+- The `Serilog` integration captures _Structured Logs_ (when enabled) independently of captured Events and added Breadcrumbs ([#4691](https://github.com/getsentry/sentry-dotnet/pull/4691))
+
+## 6.0.0-preview.2
+
+### BREAKING CHANGES
+
+- `BreadcrumbLevel.Critical` has been renamed to `BreadcrumbLevel.Fatal` for consistency with the other Sentry SDKs ([#4605](https://github.com/getsentry/sentry-dotnet/pull/4605))
+- SentryOptions.IsEnvironmentUser now defaults to false on MAUI. The means the User.Name will no longer be set, by default, to the name of the device ([#4606](https://github.com/getsentry/sentry-dotnet/pull/4606))
+- Remove unnecessary files from SentryCocoaFramework before packing ([#4602](https://github.com/getsentry/sentry-dotnet/pull/4602))
+- Removed obsolete APIs ([#4619](https://github.com/getsentry/sentry-dotnet/pull/4619))
+  - Removed the unusual constructor from `Sentry.Maui.BreadcrumbEvent` that had been marked as obsolete. That constructor expected a `IEnumerable<(string Key, string Value)>[]` argument (i.e. an array of IEnumerable of tuples). If you were using this constructor, you should instead use the alternate constructor that expects just an IEnumerable of tuples: `IEnumerable<(string Key, string Value)>`.
+  - Removed `SentrySdk.CaptureUserFeedback` and all associated members. Use the newer `SentrySdk.CaptureFeedback` instead.
+- Backpressure handling is now enabled by default, meaning that the SDK will monitor system health and reduce the sampling rate of events and transactions when the system is under load. When the system is determined to be healthy again, the sampling rates are returned to their original levels. ([#4615](https://github.com/getsentry/sentry-dotnet/pull/4615))
+- ScopeExtensions.Populate is now internal ([#4611](https://github.com/getsentry/sentry-dotnet/pull/4611))
+- Add support for W3C traceparent header for outgoing requests ([#4661](https://github.com/getsentry/sentry-dotnet/pull/4661))
+  This feature is disabled by default. When enabled, outgoing requests will include the W3C traceparent header.
+  ```csharp
+  SentrySdk.Init(options =>
+  {
+      // ...
+      options.PropagateTraceparent = true;
+  });
+  ```
+
+  See https://develop.sentry.dev/sdk/telemetry/traces/distributed-tracing/#w3c-trace-context-header for more details.
+
+### Fixes
+
+- The SDK avoids redundant scope sync after transaction finish ([#4623](https://github.com/getsentry/sentry-dotnet/pull/4623))
+- sentry-native is now automatically disabled for WASM applications ([#4631](https://github.com/getsentry/sentry-dotnet/pull/4631))
+
+## 6.0.0-preview.1
+
+### BREAKING CHANGES
+
+- This release adds support for .NET 10 and drops support for net8.0-android, net8.0-ios, net8.0-maccatalyst and net8.0-windows10.0.19041.0 ([#4461](https://github.com/getsentry/sentry-dotnet/pull/4461))
+- Added support for v3 of the Android AssemblyStore format that is used in .NET 10 and dropped support for v1 that was used in .NET 8 ([#4583](https://github.com/getsentry/sentry-dotnet/pull/4583))
+
+## 5.16.2
+
+### Fixes
+
+- Do not allow multiple `sentry.proguard-uuid` metadata to be set in Android manifest ([#4647](https://github.com/getsentry/sentry-dotnet/pull/4647))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.56.2 to v8.57.1 ([#4637](https://github.com/getsentry/sentry-dotnet/pull/4637), [#4680](https://github.com/getsentry/sentry-dotnet/pull/4680))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8571)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.56.2...8.57.1)
+- Bump Native SDK from v0.11.2 to v0.12.0 ([#4636](https://github.com/getsentry/sentry-dotnet/pull/4636), [#4678](https://github.com/getsentry/sentry-dotnet/pull/4678))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0120)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.11.2...0.12.0)
+- Bump Java SDK from v8.23.0 to v8.24.0 ([#4667](https://github.com/getsentry/sentry-dotnet/pull/4667))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8240)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.23.0...8.24.0)
+- Bump CLI from v2.56.1 to v2.57.0 ([#4668](https://github.com/getsentry/sentry-dotnet/pull/4668))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2570)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.56.1...2.57.0)
+
+## 5.16.1
+
+### Fixes
+
+- Structured Logs now have a `sentry.origin` attribute to so it's clearer where these come from ([#4566](https://github.com/getsentry/sentry-dotnet/pull/4566))
+
+### Dependencies
+
+- Bump Java SDK from v8.22.0 to v8.23.0 ([#4586](https://github.com/getsentry/sentry-dotnet/pull/4586))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8230)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.22.0...8.23.0)
+- Bump Native SDK from v0.11.1 to v0.11.2 ([#4590](https://github.com/getsentry/sentry-dotnet/pull/4590))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0112)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.11.1...0.11.2)
+- Bump CLI from v2.56.0 to v2.56.1 ([#4625](https://github.com/getsentry/sentry-dotnet/pull/4625))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2561)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.56.0...2.56.1)
+
+## 5.16.0
+
+### Features
+
+- Added `EnableBackpressureHandling` option for Automatic backpressure handling. When enabled this automatically reduces the sample rate when the SDK detects events being dropped. ([#4452](https://github.com/getsentry/sentry-dotnet/pull/4452))
+- Add (experimental) _Structured Logs_ integration for `Serilog` ([#4462](https://github.com/getsentry/sentry-dotnet/pull/4462))
+
+### Fixes
+
+- Templates are no longer sent with Structured Logs that have no parameters ([#4544](https://github.com/getsentry/sentry-dotnet/pull/4544))
+- Parent-Span-IDs are no longer sent with Structured Logs when recorded without an active Span ([#4565](https://github.com/getsentry/sentry-dotnet/pull/4565))
+- Upload linked PDBs to fix non-IL-stripped symbolication for iOS ([#4527](https://github.com/getsentry/sentry-dotnet/pull/4527))
+- In MAUI Android apps, generate and inject UUID to APK and upload ProGuard mapping to Sentry with the UUID ([#4532](https://github.com/getsentry/sentry-dotnet/pull/4532))
+- Fixed WASM0001 warning when building Blazor WebAssembly projects ([#4519](https://github.com/getsentry/sentry-dotnet/pull/4519))
+
+### API Changes
+
+- Remove `ExperimentalAttribute` from all _Structured Logs_ APIs, and remove `Experimental` property from `SentrySdk`, but keep `Experimental` property on `SentryOptions` ([#4567](https://github.com/getsentry/sentry-dotnet/pull/4567))
+
+### Dependencies
+
+- Bump Cocoa SDK from v8.56.0 to v8.56.2 ([#4555](https://github.com/getsentry/sentry-dotnet/pull/4555), [#4572](https://github.com/getsentry/sentry-dotnet/pull/4572))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8562)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.56.0...8.56.2)
+- Bump Native SDK from v0.11.0 to v0.11.1 ([#4557](https://github.com/getsentry/sentry-dotnet/pull/4557))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0111)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.11.0...0.11.1)
+- Bump CLI from v2.54.0 to v2.55.0 ([#4556](https://github.com/getsentry/sentry-dotnet/pull/4556))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2550)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.54.0...2.55.0)
+
+### Dependencies
+
+- Bump CLI from v2.54.0 to v2.56.0 ([#4556](https://github.com/getsentry/sentry-dotnet/pull/4556), [#4577](https://github.com/getsentry/sentry-dotnet/pull/4577))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2560)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.54.0...2.56.0)
+- Bump Java SDK from v8.21.1 to v8.22.0 ([#4552](https://github.com/getsentry/sentry-dotnet/pull/4552))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8220)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.21.1...8.22.0)
+
+## 5.15.1
 
 ### Fixes
 
@@ -17,6 +149,12 @@
 - Bump Cocoa SDK from v8.55.1 to v8.56.0 ([#4528](https://github.com/getsentry/sentry-dotnet/pull/4528))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8560)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.55.1...8.56.0)
+- Bump CLI from v2.53.0 to v2.54.0 ([#4541](https://github.com/getsentry/sentry-dotnet/pull/4541))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2540)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.53.0...2.54.0)
+- Bump Native SDK from v0.10.1 to v0.11.0 ([#4542](https://github.com/getsentry/sentry-dotnet/pull/4542))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0110)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.10.1...0.11.0)
 
 ## 5.15.0
 
@@ -40,8 +178,8 @@
 ### Dependencies
 
 - Bump sentry-cocoa from 8.39.0 to 8.55.1 ([#4442](https://github.com/getsentry/sentry-dotnet/pull/4442), [#4483](https://github.com/getsentry/sentry-dotnet/pull/4483), [#4485](https://github.com/getsentry/sentry-dotnet/pull/4485))
-    - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8551)
-    - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.55.1)
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8551)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.39.0...8.55.1)
 - Bump Native SDK from v0.9.1 to v0.10.1 ([#4436](https://github.com/getsentry/sentry-dotnet/pull/4436), [#4492](https://github.com/getsentry/sentry-dotnet/pull/4492))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0101)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.9.1...0.10.1)

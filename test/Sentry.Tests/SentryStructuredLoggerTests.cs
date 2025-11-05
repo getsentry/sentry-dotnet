@@ -26,8 +26,10 @@ public partial class SentryStructuredLoggerTests : IDisposable
 
             Hub.IsEnabled.Returns(true);
 
-            var traceHeader = new SentryTraceHeader(TraceId, ParentSpanId.Value, null);
-            Hub.GetTraceHeader().Returns(traceHeader);
+            var span = Substitute.For<ISpan>();
+            span.TraceId.Returns(TraceId);
+            span.SpanId.Returns(ParentSpanId.Value);
+            Hub.GetSpan().Returns(span);
 
             ExpectedAttributes = new Dictionary<string, string>(1)
             {
@@ -46,11 +48,14 @@ public partial class SentryStructuredLoggerTests : IDisposable
 
         public Dictionary<string, string> ExpectedAttributes { get; }
 
-        public void WithoutTraceHeader()
+        public void WithoutActiveSpan()
         {
-            Hub.GetTraceHeader().Returns((SentryTraceHeader?)null);
-            TraceId = SentryId.Empty;
-            ParentSpanId = SpanId.Empty;
+            Hub.GetSpan().Returns((ISpan?)null);
+
+            var scope = new Scope();
+            Hub.SubstituteConfigureScope(scope);
+            TraceId = scope.PropagationContext.TraceId;
+            ParentSpanId = null;
         }
 
         public SentryStructuredLogger GetSut() => SentryStructuredLogger.Create(Hub, Options, Clock, BatchSize, BatchTimeout);
@@ -93,9 +98,9 @@ public partial class SentryStructuredLoggerTests : IDisposable
     }
 
     [Fact]
-    public void Log_WithoutTraceHeader_CapturesEnvelope()
+    public void Log_WithoutActiveSpan_CapturesEnvelope()
     {
-        _fixture.WithoutTraceHeader();
+        _fixture.WithoutActiveSpan();
         _fixture.Options.Experimental.EnableLogs = true;
         var logger = _fixture.GetSut();
 

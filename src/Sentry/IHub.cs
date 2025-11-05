@@ -19,7 +19,6 @@ public interface IHub : ISentryClient, ISentryScopeManager
 
     /// <summary>
     /// Creates and sends logs to Sentry.
-    /// <para>This API is experimental and it may change in the future.</para>
     /// </summary>
     /// <remarks>
     /// Available options:
@@ -28,7 +27,6 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// <item><see cref="Sentry.SentryOptions.SentryExperimentalOptions.SetBeforeSendLog(System.Func{SentryLog, SentryLog})"/></item>
     /// </list>
     /// </remarks>
-    [Experimental(Infrastructure.DiagnosticId.ExperimentalFeature)]
     public SentryStructuredLogger Logger { get; }
 
     /// <summary>
@@ -62,6 +60,11 @@ public interface IHub : ISentryClient, ISentryScopeManager
     public BaggageHeader? GetBaggage();
 
     /// <summary>
+    /// Gets the W3C Trace Context traceparent header that allows tracing across services
+    /// </summary>
+    public W3CTraceparentHeader? GetTraceparentHeader();
+
+    /// <summary>
     /// Continues a trace based on HTTP header values provided as strings.
     /// </summary>
     /// <remarks>
@@ -84,6 +87,11 @@ public interface IHub : ISentryClient, ISentryScopeManager
         BaggageHeader? baggageHeader,
         string? name = null,
         string? operation = null);
+
+    /// <summary>
+    /// Gets a value indicating whether there is an active session.
+    /// </summary>
+    public bool IsSessionActive { get; }
 
     /// <summary>
     /// Starts a new session.
@@ -135,7 +143,15 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// Captures feedback from the user.
     /// </summary>
     /// <param name="feedback">The feedback to send to Sentry.</param>
+    /// <param name="result">A <see cref="CaptureFeedbackResult"/> indicating either success or a specific error</param>
     /// <param name="configureScope">Callback method to configure the scope.</param>
-    /// <param name="hint">An optional hint providing high level context for the source of the event, including attachments</param>
-    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null);
+    /// <param name="hint">
+    /// An optional hint providing high-level context for the source of the event, including attachments
+    /// </param>
+    /// <returns>
+    /// A <see cref="SentryId"/> that will contain the Id of the new event (if successful) or
+    /// <see cref="SentryId.Empty"/> otherwise
+    /// </returns>
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result, Action<Scope> configureScope,
+        SentryHint? hint = null);
 }

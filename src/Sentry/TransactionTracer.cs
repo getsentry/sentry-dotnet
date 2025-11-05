@@ -7,13 +7,15 @@ namespace Sentry;
 /// <summary>
 /// Transaction tracer.
 /// </summary>
-public class TransactionTracer : IBaseTracer, ITransactionTracer
+public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 {
     private readonly IHub _hub;
     private readonly SentryOptions? _options;
     private readonly Timer? _idleTimer;
-    private long _cancelIdleTimeout;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
+    private InterlockedBoolean _hasFinished;
+
+    private InterlockedBoolean _cancelIdleTimeout;
 
     private readonly Instrumenter _instrumenter = Instrumenter.Sentry;
 
@@ -247,7 +249,7 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
         // Set idle timer only if an idle timeout has been provided directly
         if (idleTimeout.HasValue)
         {
-            _cancelIdleTimeout = 1;  // Timer will be cancelled once, atomically setting this back to 0
+            _cancelIdleTimeout = true;  // Timer will be cancelled once, atomically setting this back to false
             _idleTimer = new Timer(state =>
             {
                 if (state is not TransactionTracer transactionTracer)
@@ -361,10 +363,15 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
     /// <inheritdoc />
     public void Finish()
     {
-        _options?.LogDebug("Attempting to finish Transaction {0}.", SpanId);
-        if (Interlocked.Exchange(ref _cancelIdleTimeout, 0) == 1)
+        if (_hasFinished.Exchange(true))
         {
-            _options?.LogDebug("Disposing of idle timer for Transaction {0}.", SpanId);
+            return;
+        }
+
+        _options?.LogDebug("Attempting to finish Transaction '{0}'.", SpanId);
+        if (_cancelIdleTimeout.Exchange(false) == true)
+        {
+            _options?.LogDebug("Disposing of idle timer for Transaction '{0}'.", SpanId);
             _idleTimer?.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
             _idleTimer?.Dispose();
         }
@@ -374,22 +381,18 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
             // Normally we wouldn't start transactions for Sentry requests but when instrumenting with OpenTelemetry
             // we are only able to determine whether it's a sentry request or not when closing a span... we leave these
             // to be garbage collected and we don't want idle timers triggering on them
-            _options?.LogDebug("Transaction {0} is a Sentry Request. Don't complete.", SpanId);
+            _options?.LogDebug("Transaction '{0}' is a Sentry Request. Don't complete.", SpanId);
             return;
         }
 
         TransactionProfiler?.Finish();
         Status ??= SpanStatus.Ok;
         EndTimestamp ??= _stopwatch.CurrentDateTimeOffset;
-        _options?.LogDebug("Finished Transaction {0}.", SpanId);
+        _options?.LogDebug("Finished Transaction '{0}'.", SpanId);
 
         // Clear the transaction from the scope and regenerate the Propagation Context
         // We do this so new events don't have a trace context that is "older" than the transaction that just finished
-        _hub.ConfigureScope(static (scope, transactionTracer) =>
-        {
-            scope.ResetTransaction(transactionTracer);
-            scope.SetPropagationContext(new SentryPropagationContext());
-        }, this);
+        _hub.ConfigureScope(static (scope, transactionTracer) => scope.ResetTransaction(transactionTracer), this);
 
         // Client decides whether to discard this transaction based on sampling
         _hub.CaptureTransaction(new SentryTransaction(this));
@@ -434,5 +437,20 @@ public class TransactionTracer : IBaseTracer, ITransactionTracer
         _spans = new ConcurrentBag<ISpan>();
 #endif
         _activeSpanTracker.Clear();
+    }
+
+    /// <summary>
+    /// <para>
+    /// Automatically finishes the transaction with a status of <see cref="SpanStatus.Ok" /> at the end of a
+    /// <c>using</c> block, if it has not already been finished.
+    /// </para>
+    /// <para>
+    /// This is the equivalent of calling <see cref="Finish()" /> when the transaction passes out of scope.
+    /// </para>
+    /// </summary>
+    /// <remarks>This is a convenience method only. Disposing is not required.</remarks>
+    public void Dispose()
+    {
+        Finish();
     }
 }

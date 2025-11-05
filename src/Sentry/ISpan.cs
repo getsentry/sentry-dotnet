@@ -5,7 +5,7 @@ namespace Sentry;
 /// <summary>
 /// SpanTracer interface
 /// </summary>
-public interface ISpan : ISpanData
+public interface ISpan : ISpanData, IDisposable
 {
     /// <summary>
     /// Span description.

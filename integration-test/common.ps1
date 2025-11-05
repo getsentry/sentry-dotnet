@@ -1,54 +1,9 @@
-# So that this works in VS Code testing integration. Otherwise the script is run within its directory.
+. $PSScriptRoot/pester.ps1
 
-# In CI, the module is loaded automatically
-if (!(Test-Path env:CI ))
-{
-    Import-Module $PSScriptRoot/../../github-workflows/sentry-cli/integration-test/action.psm1 -Force
-}
-
-function ShouldAnyElementMatch ($ActualValue, [string]$ExpectedValue, [switch] $Negate, [string] $Because)
-{
-    <#
-    .SYNOPSIS
-        Asserts whether any item in the collection matches the expected value
-    .EXAMPLE
-        'foo','bar','foobar' | Should -AnyElementMatch 'oob'
-
-        This should pass because 'oob' is a substring of 'foobar'.
-    #>
-
-    $filtered = $ActualValue | Where-Object { $_ -match $ExpectedValue }
-    [bool] $succeeded = @($filtered).Count -gt 0
-    if ($Negate) { $succeeded = -not $succeeded }
-
-    if (-not $succeeded)
-    {
-        if ($Negate)
-        {
-            $failureMessage = "Expected string '$ExpectedValue' to match no elements in collection @($($ActualValue -join ', '))$(if($Because) { " because $Because"})."
-        }
-        else
-        {
-            $failureMessage = "Expected string '$ExpectedValue' to match any element in collection @($($ActualValue -join ', '))$(if($Because) { " because $Because"})."
-        }
-    }
-    else
-    {
-        $failureMessage = $null
-    }
-
-    return [pscustomobject]@{
-        Succeeded      = $succeeded
-        FailureMessage = $failureMessage
-    }
-}
-
-BeforeDiscovery {
-    Add-ShouldOperator -Name AnyElementMatch `
-        -InternalName 'ShouldAnyElementMatch' `
-        -Test ${function:ShouldAnyElementMatch} `
-        -SupportsArrayInput
-}
+$global:longTermFramework = 'net8.0'
+$global:previousFramework = 'net9.0'
+$global:latestFramework = 'net10.0'
+$global:currentFrameworks = @($longTermFramework, $previousFramework, $latestFramework)
 
 AfterAll {
     Pop-Location
@@ -58,9 +13,74 @@ BeforeAll {
     Push-Location $PSScriptRoot
     $env:SENTRY_LOG_LEVEL = 'debug';
 
+    function GetAndroidTpv($framework)
+    {
+        switch ($framework) {
+            'net9.0' { return '35.0' }   # matches PreviousAndroidTfm (net9.0-android35.0)
+            'net10.0' { return '36.0' }  # matches LatestAndroidTfm (net10.0-android36.0)
+            default { throw "Unsupported framework '$framework' for Android target platform version." }
+        }
+    }
+
+    function GetIosTpv($framework)
+    {
+        switch ($framework) {
+            'net9.0' { return '18.0' }   # matches PreviousIosTfm / PreviousMacCatalystTfm
+            'net10.0' { return '26' }    # aligns with ios26 / maccatalyst26
+            default { throw "Unsupported framework '$framework' for iOS target platform version." }
+        }
+    }
+
     function GetSentryPackageVersion()
     {
-        (Select-Xml -Path "$PSScriptRoot/../Directory.Build.props" -XPath "/Project/PropertyGroup/VersionPrefix").Node.InnerText
+        # Read version directly from Directory.Build.props
+        $propsFile = Join-Path $PSScriptRoot '..\Directory.Build.props'
+
+        if (-not (Test-Path $propsFile)) {
+            throw "Directory.Build.props not found at $propsFile"
+        }
+
+        # Parse the props file using PowerShell XML parsing
+        Write-Host "Parsing props file as XML..."
+        [xml]$propsXml = Get-Content $propsFile
+
+        # Look for VersionPrefix and VersionSuffix in PropertyGroup elements
+        $versionPrefix = ""
+        $versionSuffix = ""
+
+        foreach ($propGroup in $propsXml.Project.PropertyGroup) {
+            if ($propGroup.PSObject.Properties["VersionPrefix"]) {
+                $versionPrefix = $propGroup.VersionPrefix
+                Write-Host "Found VersionPrefix: '$versionPrefix'"
+            }
+
+            # For VersionSuffix, we need to be careful about conditions
+            # Only use VersionSuffix if it's not in a conditional PropertyGroup
+            # or if it's explicitly set (not the 'dev' fallback for non-Release)
+            if ($propGroup.PSObject.Properties["VersionSuffix"]) {
+                $condition = $null
+                if ($propGroup.PSObject.Properties["Condition"]) {
+                    $condition = $propGroup.Condition
+                    Write-Host "Ignoring VersionSuffix: '$($propGroup.VersionSuffix)' with condition: '$condition'"
+                    # Skip conditional VersionSuffix as we're building in Release mode
+                }
+                else {
+                    # No condition - this is the explicit VersionSuffix we want
+                    $versionSuffix = $propGroup.VersionSuffix
+                    Write-Host "Found VersionSuffix: '$versionSuffix'"
+                }
+            }
+        }
+
+        if (-not $versionPrefix) {
+            throw "Could not find VersionPrefix in $propsFile"
+        }
+
+        # Combine prefix and suffix
+        $fullVersion = if ($versionSuffix) { "$versionPrefix-$versionSuffix" } else { $versionPrefix }
+        Write-Host "Full Version: '$fullVersion'"
+
+        return $fullVersion
     }
 
     function RegisterLocalPackage([string] $name)
@@ -142,7 +162,7 @@ BeforeAll {
         }
         elseif ($action -eq "publish")
         {
-            $result.ScriptOutput | Should -AnyElementMatch "$((Get-Item $project).Basename) -> .*$project/bin/Release/$TargetFramework/.*/publish"
+            $result.ScriptOutput | Should -AnyElementMatch "$((Get-Item $project).Basename) -> .*$project/bin/Release/$TargetFramework/.*publish.*"
         }
         $result.ScriptOutput | Should -Not -AnyElementMatch "Preparing upload to Sentry for project 'Sentry'"
         $result.HasErrors() | Should -BeFalse
@@ -154,7 +174,7 @@ BeforeAll {
         Push-Location $projectPath
         try
         {
-            dotnet restore | ForEach-Object { Write-Host $_ }
+            dotnet restore /p:CheckEolTargetFramework=false | ForEach-Object { Write-Host $_ }
             if ($LASTEXITCODE -ne 0)
             {
                 throw "Failed to restore the test app project."
@@ -189,6 +209,7 @@ BeforeAll {
       <SentryUploadAndroidProguardMapping>true</SentryUploadAndroidProguardMapping>
       <AndroidLinkTool Condition=`" '`$(AndroidLinkTool)' == '' `">r8</AndroidLinkTool>
       <AndroidDexTool Condition=`" '`$(AndroidDexTool)' == '' `">d8</AndroidDexTool>
+      <MtouchUseLlvm Condition=`"'`$(Configuration)' == 'Release'`">false</MtouchUseLlvm>
   </PropertyGroup>
 </Project>
 "@ | Out-File $name/Directory.Build.props
@@ -197,16 +218,13 @@ BeforeAll {
         if ($type -eq 'console')
         {
             AddPackageReference $name 'Sentry'
-            if (!$IsMacOS -or $framework -eq 'net8.0')
-            {
-                @"
+            @"
 <Project>
   <PropertyGroup>
     <PublishAot>true</PublishAot>
   </PropertyGroup>
 </Project>
 "@ | Out-File $name/Directory.Build.props
-            }
         }
     }
 }

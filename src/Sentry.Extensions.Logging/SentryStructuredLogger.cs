@@ -42,7 +42,7 @@ internal sealed class SentryStructuredLogger : ILogger
         }
 
         var timestamp = _clock.GetUtcNow();
-        var traceHeader = _hub.GetTraceHeader() ?? SentryTraceHeader.Empty;
+        SentryLog.GetTraceIdAndSpanId(_hub, out var traceId, out var spanId);
 
         var level = logLevel.ToSentryLogLevel();
         Debug.Assert(level != default);
@@ -81,14 +81,15 @@ internal sealed class SentryStructuredLogger : ILogger
             }
         }
 
-        SentryLog log = new(timestamp, traceHeader.TraceId, level, message)
+        SentryLog log = new(timestamp, traceId, level, message)
         {
             Template = template,
             Parameters = parameters.DrainToImmutable(),
-            ParentSpanId = traceHeader.SpanId,
+            ParentSpanId = spanId,
         };
 
         log.SetDefaultAttributes(_options, _sdk);
+        log.SetOrigin("auto.log.extensions_logging");
 
         if (_categoryName is not null)
         {

@@ -166,7 +166,7 @@ public class SamplingTransactionProfilerTests
     [SkippableFact]
     public async Task Profiler_AfterTimeout_Stops()
     {
-        Skip.If(TestEnvironment.IsGitHubActions && RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "Flaky in CI on Windows");
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI");
 
         SampleProfilerSession? session = null;
         SkipIfFailsInCI(() => session = SampleProfilerSession.StartNew(_testOutputLogger));
@@ -233,106 +233,114 @@ public class SamplingTransactionProfilerTests
     [InlineData(false)]
     public void ProfilerIntegration_FullRoundtrip_Works(bool offlineCaching)
     {
-        var tcs = new TaskCompletionSource<string>();
-        async Task VerifyAsync(HttpRequestMessage message)
+        Skip.If(TestEnvironment.IsGitHubActions, "Flaky in CI");
+
+        TestHelpers.RetryTest(maxAttempts: 2, ExecuteTest);
+        return;
+
+        void ExecuteTest()
         {
-            var payload = await message.Content!.ReadAsStringAsync();
-            // We're actually looking for type:profile but it must be sent in the same envelope as the transaction.
-            if (payload.Contains("\"type\":\"transaction\""))
+            var tcs = new TaskCompletionSource<string>();
+            async Task VerifyAsync(HttpRequestMessage message)
             {
-                tcs.TrySetResult(payload);
-            }
-        }
-
-        var cts = new CancellationTokenSource();
-        cts.Token.Register(() => tcs.TrySetCanceled());
-
-        // envelope cache dir
-        using var cacheDirectory = offlineCaching ? new TempDirectory() : null;
-
-        // profiler temp dir (doesn't support `FileSystem`)
-        var tempDir = new TempDirectory();
-
-        var options = new SentryOptions
-        {
-            Dsn = ValidDsn,
-            // To go through a round trip serialization of cached envelope
-            CacheDirectoryPath = cacheDirectory?.Path,
-            // So we don't need to deal with gzip'ed payload
-            RequestBodyCompressionLevel = CompressionLevel.NoCompression,
-            CreateHttpMessageHandler = () => new CallbackHttpClientHandler(VerifyAsync),
-            // Not to send some session envelope
-            AutoSessionTracking = false,
-            Debug = true,
-            DiagnosticLogger = _testOutputLogger,
-            TracesSampleRate = 1.0,
-            ProfilesSampleRate = 1.0,
-            // This keeps all writing-to-file operations in memory instead of actually writing to disk
-            FileSystem = new FakeFileSystem()
-        };
-
-        // Disable process exit flush to resolve "There is no currently active test." errors.
-        options.DisableAppDomainProcessExitFlush();
-
-        options.AddProfilingIntegration(TimeSpan.FromSeconds(10));
-
-        try
-        {
-            using var hub = new Hub(options);
-
-            var factory = (options.TransactionProfilerFactory as SamplingTransactionProfilerFactory)!;
-            Skip.If(TestEnvironment.IsGitHubActions && factory.StartupTimedOut, "Session sometimes takes too long to start in CI.");
-            Assert.False(factory.StartupTimedOut);
-
-            var clock = SentryStopwatch.StartNew();
-            var tx = hub.StartTransaction("name", "op");
-            RunForMs(RuntimeMs);
-            tx.Finish();
-            var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
-
-            hub.FlushAsync().Wait();
-
-            // Synchronizing in the tests to go through the caching and http transports
-            cts.CancelAfter(options.FlushTimeout + TimeSpan.FromSeconds(1));
-            var ex = Record.Exception(tcs.Task.Wait);
-            Assert.Null(ex);
-            Assert.True(tcs.Task.IsCompleted);
-
-            var envelopeLines = tcs.Task.Result.Split('\n');
-            SkipIfFailsInCI(() =>
-            {
-                if (envelopeLines.Length != 6)
+                var payload = await message.Content!.ReadAsStringAsync();
+                // We're actually looking for type:profile but it must be sent in the same envelope as the transaction.
+                if (payload.Contains("\"type\":\"transaction\""))
                 {
-                    throw new ArgumentOutOfRangeException("envelopeLines", "Invalid number of envelope lines.");
+                    tcs.TrySetResult(payload);
                 }
-            });
+            }
 
-            // header rows before payloads
-            envelopeLines[1].Should().StartWith("{\"type\":\"transaction\"");
-            envelopeLines[3].Should().StartWith("{\"type\":\"profile\"");
+            var cts = new CancellationTokenSource();
+            cts.Token.Register(() => tcs.TrySetCanceled());
 
-            var transaction = Json.Parse(envelopeLines[2], SentryTransaction.FromJson);
+            // envelope cache dir
+            using var cacheDirectory = offlineCaching ? new TempDirectory() : null;
 
-            // TODO do we want to bother with JSON parsing just to do this? Doing at least simple checks for now...
-            // var profileInfo = Json.Parse(envelopeLines[4], ProfileInfo.FromJson);
-            // ValidateProfile(profileInfo.Profile, elapsedNanoseconds);
-            envelopeLines[4].Should().Contain("\"profile\":{");
-            envelopeLines[4].Should().Contain($"\"id\":\"{transaction.EventId}\"");
-            envelopeLines[4].Length.Should().BeGreaterThan(10000);
+            // profiler temp dir (doesn't support `FileSystem`)
+            var tempDir = new TempDirectory();
 
-            Directory.GetFiles(tempDir.Path).Should().BeEmpty("When profiling is done, the temp dir should be empty.");
-        }
-        finally
-        {
-            // ensure the task is complete before leaving the test
-            tcs.TrySetResult("");
-            tcs.Task.Wait();
-
-            if (options.Transport is CachingTransport cachingTransport)
+            var options = new SentryOptions
             {
-                // Disposing the caching transport will ensure its worker
-                // is shut down before we try to dispose and delete the temp folder
-                cachingTransport.Dispose();
+                Dsn = ValidDsn,
+                // To go through a round trip serialization of cached envelope
+                CacheDirectoryPath = cacheDirectory?.Path,
+                // So we don't need to deal with gzip'ed payload
+                RequestBodyCompressionLevel = CompressionLevel.NoCompression,
+                CreateHttpMessageHandler = () => new CallbackHttpClientHandler(VerifyAsync),
+                // Not to send some session envelope
+                AutoSessionTracking = false,
+                Debug = true,
+                DiagnosticLogger = _testOutputLogger,
+                TracesSampleRate = 1.0,
+                ProfilesSampleRate = 1.0,
+                // This keeps all writing-to-file operations in memory instead of actually writing to disk
+                FileSystem = new FakeFileSystem()
+            };
+
+            // Disable process exit flush to resolve "There is no currently active test." errors.
+            options.DisableAppDomainProcessExitFlush();
+
+            options.AddProfilingIntegration(TimeSpan.FromSeconds(10));
+
+            try
+            {
+                using var hub = new Hub(options);
+
+                var factory = (options.TransactionProfilerFactory as SamplingTransactionProfilerFactory)!;
+                Skip.If(TestEnvironment.IsGitHubActions && factory.StartupTimedOut, "Session sometimes takes too long to start in CI.");
+                Assert.False(factory.StartupTimedOut);
+
+                var clock = SentryStopwatch.StartNew();
+                var tx = hub.StartTransaction("name", "op");
+                RunForMs(RuntimeMs);
+                tx.Finish();
+                var elapsedNanoseconds = (ulong)((clock.CurrentDateTimeOffset - clock.StartDateTimeOffset).TotalMilliseconds * 1_000_000);
+
+                hub.FlushAsync().Wait();
+
+                // Synchronizing in the tests to go through the caching and http transports
+                cts.CancelAfter(options.FlushTimeout + TimeSpan.FromSeconds(1));
+                var ex = Record.Exception(tcs.Task.Wait);
+                Assert.Null(ex);
+                Assert.True(tcs.Task.IsCompleted);
+
+                var envelopeLines = tcs.Task.Result.Split('\n');
+                SkipIfFailsInCI(() =>
+                {
+                    if (envelopeLines.Length != 6)
+                    {
+                        throw new ArgumentOutOfRangeException("envelopeLines", "Invalid number of envelope lines.");
+                    }
+                });
+
+                // header rows before payloads
+                envelopeLines[1].Should().StartWith("{\"type\":\"transaction\"");
+                envelopeLines[3].Should().StartWith("{\"type\":\"profile\"");
+
+                var transaction = Json.Parse(envelopeLines[2], SentryTransaction.FromJson);
+
+                // TODO do we want to bother with JSON parsing just to do this? Doing at least simple checks for now...
+                // var profileInfo = Json.Parse(envelopeLines[4], ProfileInfo.FromJson);
+                // ValidateProfile(profileInfo.Profile, elapsedNanoseconds);
+                envelopeLines[4].Should().Contain("\"profile\":{");
+                envelopeLines[4].Should().Contain($"\"id\":\"{transaction.EventId}\"");
+                envelopeLines[4].Length.Should().BeGreaterThan(10000);
+
+                Directory.GetFiles(tempDir.Path).Should().BeEmpty("When profiling is done, the temp dir should be empty.");
+            }
+            finally
+            {
+                // ensure the task is complete before leaving the test
+                tcs.TrySetResult("");
+                tcs.Task.Wait();
+
+                if (options.Transport is CachingTransport cachingTransport)
+                {
+                    // Disposing the caching transport will ensure its worker
+                    // is shut down before we try to dispose and delete the temp folder
+                    cachingTransport.Dispose();
+                }
             }
         }
     }

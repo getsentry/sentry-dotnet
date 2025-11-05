@@ -16,6 +16,7 @@ namespace Sentry;
 public class SentryClient : ISentryClient, IDisposable
 {
     private readonly SentryOptions _options;
+    private readonly BackpressureMonitor? _backpressureMonitor;
     private readonly ISessionManager _sessionManager;
     private readonly RandomValuesFactory _randomValuesFactory;
     private readonly Enricher _enricher;
@@ -41,9 +42,11 @@ public class SentryClient : ISentryClient, IDisposable
         SentryOptions options,
         IBackgroundWorker? worker = null,
         RandomValuesFactory? randomValuesFactory = null,
-        ISessionManager? sessionManager = null)
+        ISessionManager? sessionManager = null,
+        BackpressureMonitor? backpressureMonitor = null)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
+        _backpressureMonitor = backpressureMonitor;
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
         _enricher = new Enricher(options);
@@ -52,7 +55,7 @@ public class SentryClient : ISentryClient, IDisposable
 
         if (worker == null)
         {
-            var composer = new SdkComposer(options);
+            var composer = new SdkComposer(options, backpressureMonitor);
             Worker = composer.CreateBackgroundWorker();
         }
         else
@@ -76,18 +79,20 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError(e, "An error occurred when capturing the event {0}.", @event.EventId);
+            _options.LogError(e, "An error occurred when capturing the event '{0}'.", @event.EventId);
             return SentryId.Empty;
         }
     }
 
     /// <inheritdoc />
-    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result,
+        Scope? scope = null, SentryHint? hint = null)
     {
         if (string.IsNullOrEmpty(feedback.Message))
         {
             _options.LogWarning("Feedback dropped due to empty message.");
-            return;
+            result = CaptureFeedbackResult.EmptyMessage;
+            return SentryId.Empty;
         }
 
         scope ??= new Scope(_options);
@@ -113,21 +118,13 @@ public class SentryClient : ISentryClient, IDisposable
 
         var attachments = hint.Attachments.ToList();
         var envelope = Envelope.FromFeedback(evt, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
-        CaptureEnvelope(envelope);
-    }
-
-    /// <inheritdoc />
-    [Obsolete("Use CaptureFeedback instead.")]
-    public void CaptureUserFeedback(UserFeedback userFeedback)
-    {
-        if (userFeedback.EventId.Equals(SentryId.Empty))
+        if (CaptureEnvelope(envelope))
         {
-            // Ignore the user feedback if EventId is empty
-            _options.LogWarning("User feedback dropped due to empty id.");
-            return;
+            result = CaptureFeedbackResult.Success;
+            return evt.EventId;
         }
-
-        CaptureEnvelope(Envelope.FromUserFeedback(userFeedback));
+        result = CaptureFeedbackResult.UnknownError;
+        return SentryId.Empty;
     }
 
     /// <inheritdoc />
@@ -307,7 +304,6 @@ public class SentryClient : ISentryClient, IDisposable
     /// <returns>A task to await for the flush operation.</returns>
     public Task FlushAsync(TimeSpan timeout) => Worker.FlushAsync(timeout);
 
-    // TODO: this method needs to be refactored, it's really hard to analyze nullability
     private SentryId DoSendEvent(SentryEvent @event, SentryHint? hint, Scope? scope)
     {
         var filteredExceptions = ApplyExceptionFilters(@event.Exception);
@@ -359,32 +355,43 @@ public class SentryClient : ISentryClient, IDisposable
             return SentryId.Empty; // Dropped by BeforeSend callback
         }
 
-        var hasTerminalException = processedEvent.HasTerminalException();
-        if (hasTerminalException)
+        var exceptionType = processedEvent.GetExceptionType();
+        switch (exceptionType)
         {
-            // Event contains a terminal exception -> end session as crashed
-            _options.LogDebug("Ending session as Crashed, due to unhandled exception.");
-            scope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
-        }
-        else if (processedEvent.HasException())
-        {
-            // Event contains a non-terminal exception -> report error
-            // (this might return null if the session has already reported errors before)
-            scope.SessionUpdate = _sessionManager.ReportError();
+            case SentryEvent.ExceptionType.UnhandledNonTerminal:
+                _options.LogDebug("Marking session as 'Unhandled', due to non-terminal unhandled exception.");
+                _sessionManager.MarkSessionAsUnhandled();
+                break;
+
+            case SentryEvent.ExceptionType.UnhandledTerminal:
+                _options.LogDebug("Ending session as 'Crashed', due to unhandled exception.");
+                scope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
+                break;
+
+            case SentryEvent.ExceptionType.Handled:
+                _options.LogDebug("Updating session by reporting an error.");
+                scope.SessionUpdate = _sessionManager.ReportError();
+                break;
         }
 
         if (_options.SampleRate != null)
         {
-            if (!_randomValuesFactory.NextBool(_options.SampleRate.Value))
+            var sampleRate = _options.SampleRate.Value;
+            var downsampledRate = sampleRate * _backpressureMonitor.GetDownsampleFactor();
+            var sampleRand = _randomValuesFactory.NextDouble();
+            if (sampleRand >= downsampledRate)
             {
-                _options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
-                _options.LogDebug("Event sampled.");
+                // If sampling out is only a result of the downsampling then we specify the reason as backpressure
+                // management... otherwise the event would have been sampled out anyway, so it's just regular sampling.
+                var reason = sampleRand < sampleRate ? DiscardReason.Backpressure : DiscardReason.SampleRate;
+                _options.ClientReportRecorder.RecordDiscardedEvent(reason, DataCategory.Error);
+                _options.LogDebug("Event sampled out.");
                 return SentryId.Empty;
             }
         }
         else
         {
-            _options.LogDebug("Event not sampled.");
+            _options.LogDebug("Event sampled in.");
         }
 
         if (!_options.SendDefaultPii)
@@ -437,7 +444,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
 
         _options.LogWarning(
-            "The attempt to queue the event failed. Items in queue: {0}",
+            "The attempt to queue the event failed. Items in queue: '{0}'",
             Worker.QueuedItems);
 
         return false;

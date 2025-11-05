@@ -66,7 +66,7 @@ internal static class Program
                 const string replaceBreadcrumb = "don't trust this breadcrumb";
                 if (hint.Items.TryGetValue(replaceBreadcrumb, out var replacementMessage))
                 {
-                    return new Breadcrumb((string)replacementMessage, null, null, null, BreadcrumbLevel.Critical);
+                    return new Breadcrumb((string)replacementMessage, null, null, null, BreadcrumbLevel.Fatal);
                 }
 
                 return crumb;

@@ -36,7 +36,7 @@
   </PropertyGroup>
 
   <!-- Centralise logic for enabling `IsAotCompatible`. We use this to disable Aot for the device tests, for example -->
-  <PropertyGroup Condition="'$(EnableAot)' == '' And ($(TargetFramework.StartsWith('net8')) Or $(TargetFramework.StartsWith('net9')))">
+  <PropertyGroup Condition="'$(EnableAot)' == '' And '$(_SentryIsNet8OrGreater)' == 'true'">
     <EnableAot>true</EnableAot>
   </PropertyGroup>
 

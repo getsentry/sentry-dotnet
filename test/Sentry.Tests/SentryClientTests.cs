@@ -4,9 +4,9 @@ using BackgroundWorker = Sentry.Internal.BackgroundWorker;
 
 namespace Sentry.Tests;
 
-public partial class SentryClientTests
+public partial class SentryClientTests : IDisposable
 {
-    private class Fixture
+    private class Fixture : IDisposable
     {
         public SentryOptions SentryOptions { get; set; } = new()
         {
@@ -17,7 +17,9 @@ public partial class SentryClientTests
 
         public IBackgroundWorker BackgroundWorker { get; set; } = Substitute.For<IBackgroundWorker, IDisposable>();
         public IClientReportRecorder ClientReportRecorder { get; } = Substitute.For<IClientReportRecorder>();
+        public RandomValuesFactory RandomValuesFactory { get; set; } = null;
         public ISessionManager SessionManager { get; set; } = Substitute.For<ISessionManager>();
+        public BackpressureMonitor BackpressureMonitor { get; set; }
 
         public Fixture()
         {
@@ -27,9 +29,19 @@ public partial class SentryClientTests
 
         public SentryClient GetSut()
         {
-            var randomValuesFactory = new IsolatedRandomValuesFactory();
-            return new SentryClient(SentryOptions, BackgroundWorker, randomValuesFactory, SessionManager);
+            var randomValuesFactory = RandomValuesFactory ?? new IsolatedRandomValuesFactory();
+            return new SentryClient(SentryOptions, BackgroundWorker, randomValuesFactory, SessionManager, BackpressureMonitor);
         }
+
+        public void Dispose()
+        {
+            BackpressureMonitor?.Dispose();
+        }
+    }
+
+    public void Dispose()
+    {
+        _fixture.Dispose();
     }
 
     private readonly Fixture _fixture = new();
@@ -590,6 +602,29 @@ public partial class SentryClientTests
             .RecordDiscardedEvent(DiscardReason.SampleRate, DataCategory.Error);
     }
 
+    [Theory]
+    [InlineData(0.6f, "sample_rate")] // Sample rand is greater than the sample rate
+    [InlineData(0.4f, "backpressure")] // Sample is dropped due to downsampling
+    public void CaptureEvent_SampleDrop_RecordsCorrectDiscardReason(double sampleRand, string discardReason)
+    {
+        // Arrange
+        _fixture.RandomValuesFactory = Substitute.For<RandomValuesFactory>();
+        _fixture.RandomValuesFactory.NextDouble().Returns(sampleRand);
+        _fixture.SentryOptions.SampleRate = 0.5f;
+        var logger = Substitute.For<IDiagnosticLogger>();
+        _fixture.BackpressureMonitor = new BackpressureMonitor(logger, null, false);
+        _fixture.BackpressureMonitor.SetDownsampleLevel(1);
+        var sut = _fixture.GetSut();
+
+        // Act
+        var @event = new SentryEvent();
+        _ = sut.CaptureEvent(@event);
+
+        // Assert
+        var expectedReason = new DiscardReason(discardReason);
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(expectedReason, DataCategory.Error);
+    }
+
     [Fact]
     public void CaptureEvent_SamplingHighest_SendsEvent()
     {
@@ -624,17 +659,28 @@ public partial class SentryClientTests
     }
 
     [Theory]
-    [InlineData(0.25f)]
-    [InlineData(0.50f)]
-    [InlineData(0.75f)]
-    public void CaptureEvent_WithSampleRate_AppropriateDistribution(float sampleRate)
+    [InlineData(0.25f, 0)]
+    [InlineData(0.50f, 0)]
+    [InlineData(0.75f, 0)]
+    [InlineData(0.25f, 1)]
+    [InlineData(0.50f, 1)]
+    [InlineData(0.75f, 1)]
+    [InlineData(0.25f, 3)]
+    [InlineData(0.50f, 3)]
+    [InlineData(0.75f, 3)]
+    public void CaptureEvent_WithSampleRate_AppropriateDistribution(float sampleRate, int downsampleLevel)
     {
         // Arrange
+        var now = DateTimeOffset.UtcNow;
+        var clock = new MockClock(now);
+        _fixture.BackpressureMonitor = new BackpressureMonitor(null, clock, enablePeriodicHealthCheck: false);
+        _fixture.BackpressureMonitor.SetDownsampleLevel(downsampleLevel);
+        _fixture.SentryOptions.SampleRate = sampleRate;
+
         const int numEvents = 1000;
         const double allowedRelativeDeviation = 0.15;
         const uint allowedDeviation = (uint)(allowedRelativeDeviation * numEvents);
-        var expectedSampled = (int)(sampleRate * numEvents);
-        _fixture.SentryOptions.SampleRate = sampleRate;
+        var expectedSampled = (int)(numEvents * sampleRate * _fixture.BackpressureMonitor.DownsampleFactor);
 
         // This test expects an approximate uniform distribution of random numbers, so we'll retry a few times.
         TestHelpers.RetryTest(maxAttempts: 3, _output, () =>
@@ -695,7 +741,7 @@ public partial class SentryClientTests
 
         var logger = Substitute.For<IDiagnosticLogger>();
         logger.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-        logger.When(x => x.Log(Arg.Any<SentryLevel>(), Arg.Is("Event not sampled.")))
+        logger.When(x => x.Log(Arg.Any<SentryLevel>(), Arg.Is("Event sampled in.")))
             .Do(_ => processingOrder.Add("SampleRate"));
         _fixture.SentryOptions.DiagnosticLogger = logger;
         _fixture.SentryOptions.Debug = true;
@@ -797,53 +843,6 @@ public partial class SentryClientTests
     }
 
     [Fact]
-    public void CaptureUserFeedback_EventIdEmpty_IgnoreUserFeedback()
-    {
-#pragma warning disable CS0618 // Type or member is obsolete
-        //Arrange
-        var sut = _fixture.GetSut();
-
-        //Act
-        sut.CaptureUserFeedback(
-            new UserFeedback(SentryId.Empty, "name", "email", "comment"));
-
-        //Assert
-        _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-#pragma warning restore CS0618 // Type or member is obsolete
-    }
-
-    [Fact]
-    public void CaptureUserFeedback_ValidUserFeedback_FeedbackRegistered()
-    {
-#pragma warning disable CS0618 // Type or member is obsolete
-        //Arrange
-        var sut = _fixture.GetSut();
-
-        //Act
-        sut.CaptureUserFeedback(
-            new UserFeedback(SentryId.Parse("4eb98e5f861a41019f270a7a27e84f02"), "name", "email", "comment"));
-
-        //Assert
-        _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
-#pragma warning restore CS0618 // Type or member is obsolete
-    }
-
-    [Fact]
-    public void CaptureUserFeedback_EventIdEmpty_FeedbackIgnored()
-    {
-#pragma warning disable CS0618 // Type or member is obsolete
-        //Arrange
-        var sut = _fixture.GetSut();
-
-        //Act
-        sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "name", "email", "comment"));
-
-        //Assert
-        _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-#pragma warning restore CS0618 // Type or member is obsolete
-    }
-
-    [Fact]
     public void Dispose_should_only_flush()
     {
         // Arrange
@@ -865,8 +864,12 @@ public partial class SentryClientTests
         var sut = _fixture.GetSut();
         sut.Dispose();
 
-        // Act / Assert
-        sut.CaptureFeedback(feedback);
+        // Act
+        var id = sut.CaptureFeedback(feedback, out var result);
+
+        // Assert
+        result.Should().Be(CaptureFeedbackResult.Success);
+        id.Should().NotBe(SentryId.Empty);
     }
 
     [Fact]
@@ -877,10 +880,12 @@ public partial class SentryClientTests
         var feedback = new SentryFeedback(string.Empty);
 
         //Act
-        sut.CaptureFeedback(feedback);
+        var id = sut.CaptureFeedback(feedback, out var result);
 
         //Assert
         _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        result.Should().Be(CaptureFeedbackResult.EmptyMessage);
+        id.Should().Be(SentryId.Empty);
     }
 
     [Fact]
@@ -891,10 +896,11 @@ public partial class SentryClientTests
         var feedback = new SentryFeedback("Everything is great!");
 
         //Act
-        sut.CaptureFeedback(feedback);
+        var result = sut.CaptureFeedback(feedback);
 
         //Assert
         _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        result.Should().NotBe(SentryId.Empty);
     }
 
     [Fact]
@@ -913,9 +919,10 @@ public partial class SentryClientTests
             .Do(callback => envelope = callback.Arg<Envelope>());
 
         //Act
-        sut.CaptureFeedback(feedback, scope);
+        var result = sut.CaptureFeedback(feedback, scope);
 
         //Assert
+        result.Should().NotBe(SentryId.Empty);
         _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
         envelope.Should().NotBeNull();
         envelope.Items.Should().Contain(item => item.TryGetType() == EnvelopeItem.TypeValueFeedback);
@@ -935,22 +942,13 @@ public partial class SentryClientTests
         hint.Attachments.Add(AttachmentHelper.FakeAttachment("foo.txt"));
 
         //Act
-        sut.CaptureFeedback(feedback, null, hint);
+        var result = sut.CaptureFeedback(feedback, null, hint);
 
         //Assert
+        result.Should().NotBe(SentryId.Empty);
         _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
         sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
             envelope.Items.Count(item => item.TryGetType() == "attachment") == 1));
-    }
-
-    [Fact]
-    public void CaptureUserFeedback_DisposedClient_DoesNotThrow()
-    {
-#pragma warning disable CS0618 // Type or member is obsolete
-        var sut = _fixture.GetSut();
-        sut.Dispose();
-        sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "name", "email", "comment"));
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Fact]
@@ -1651,27 +1649,31 @@ public partial class SentryClientTests
     }
 
     [Fact]
-    public void CaptureEvent_ActiveSession_UnhandledExceptionSessionEndedAsCrashed()
+    public void CaptureEvent_ActiveSessionAndUnhandledException_SessionEndedAsCrashed()
     {
         // Arrange
         var client = _fixture.GetSut();
+        var exception = new Exception();
+        exception.SetSentryMechanism("TestException", handled: false, terminal: true);
 
         // Act
-        client.CaptureEvent(new SentryEvent()
-        {
-            SentryExceptions = new[]
-            {
-                new SentryException
-                {
-                    Mechanism = new()
-                    {
-                        Handled = false
-                    }
-                }
-            }
-        });
-
+        client.CaptureEvent(new SentryEvent(exception));
         // Assert
         _fixture.SessionManager.Received().EndSession(SessionEndStatus.Crashed);
+    }
+
+    [Fact]
+    public void CaptureEvent_ActiveSessionAndNonTerminalUnhandledException_SessionMarkedAsUnhandled()
+    {
+        // Arrange
+        var client = _fixture.GetSut();
+        var exception = new Exception();
+        exception.SetSentryMechanism("TestException", handled: false, terminal: false);
+
+        // Act
+        client.CaptureEvent(new SentryEvent(exception));
+
+        // Assert
+        _fixture.SessionManager.Received().MarkSessionAsUnhandled();
     }
 }

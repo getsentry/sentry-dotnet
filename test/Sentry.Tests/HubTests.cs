@@ -6,11 +6,11 @@ using Sentry.Tests.Internals.Http;
 
 namespace Sentry.Tests;
 
-public partial class HubTests
+public partial class HubTests : IDisposable
 {
     private readonly ITestOutputHelper _output;
 
-    private class Fixture
+    private class Fixture : IDisposable
     {
         public SentryOptions Options { get; }
         public ISentryClient Client { get; set; }
@@ -18,6 +18,8 @@ public partial class HubTests
         public IInternalScopeManager ScopeManager { get; set; }
         public ISystemClock Clock { get; set; }
         public IReplaySession ReplaySession { get; }
+        public ISampleRandHelper SampleRandHelper { get; set; }
+        public BackpressureMonitor BackpressureMonitor { get; set; }
 
         public Fixture()
         {
@@ -27,13 +29,22 @@ public partial class HubTests
                 TracesSampleRate = 1.0,
                 AutoSessionTracking = false
             };
-
             Client = Substitute.For<ISentryClient>();
-
             ReplaySession = Substitute.For<IReplaySession>();
         }
 
-        public Hub GetSut() => new(Options, Client, SessionManager, Clock, ScopeManager, replaySession: ReplaySession);
+        public void Dispose()
+        {
+            BackpressureMonitor?.Dispose();
+        }
+
+        public Hub GetSut() => new(Options, Client, SessionManager, Clock, ScopeManager, replaySession: ReplaySession,
+            sampleRandHelper: SampleRandHelper, backpressureMonitor: BackpressureMonitor);
+    }
+
+    public void Dispose()
+    {
+        _fixture.Dispose();
     }
 
     private readonly Fixture _fixture = new();
@@ -299,7 +310,7 @@ public partial class HubTests
         using var assertionScope = new AssertionScope();
         var breadcrumb = scope.Breadcrumbs.Last();
         breadcrumb.Message.Should().Be(evt.Exception!.Message);
-        breadcrumb.Level.Should().Be(BreadcrumbLevel.Critical);
+        breadcrumb.Level.Should().Be(BreadcrumbLevel.Fatal);
         breadcrumb.Category.Should().Be("Exception");
     }
 
@@ -332,7 +343,7 @@ public partial class HubTests
             {
                 ["exception_message"] = evt.Exception!.Message
             });
-        breadcrumb.Level.Should().Be(BreadcrumbLevel.Critical);
+        breadcrumb.Level.Should().Be(BreadcrumbLevel.Fatal);
         breadcrumb.Category.Should().Be("Exception");
     }
 
@@ -512,6 +523,84 @@ public partial class HubTests
         _fixture.Client.Received(1).CaptureEvent(
             Arg.Any<SentryEvent>(),
             Arg.Any<Scope>(), Arg.Is<SentryHint>(h => h == hint));
+    }
+
+    [Fact]
+    public void CaptureEvent_TerminalUnhandledException_AbortsActiveTransaction()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+
+        var transaction = hub.StartTransaction("test", "operation");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("test", handled: false, terminal: true);
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(exception));
+
+        // Assert
+        transaction.Status.Should().Be(SpanStatus.Aborted);
+        transaction.IsFinished.Should().BeTrue();
+    }
+
+    [Fact]
+    public void CaptureEvent_NonTerminalUnhandledException_DoesNotAbortActiveTransaction()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+
+        var transaction = hub.StartTransaction("test", "operation");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("TestException", handled: false, terminal: false);
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(exception));
+
+        // Assert
+        transaction.IsFinished.Should().BeFalse();
+    }
+
+    [Fact]
+    public void CaptureEvent_HandledException_DoesNotAbortActiveTransaction()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+
+        var transaction = hub.StartTransaction("test", "operation");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        var exception = new Exception("test");
+        exception.SetSentryMechanism("test", handled: true);
+
+        // Act
+        hub.CaptureEvent(new SentryEvent(exception));
+
+        // Assert
+        transaction.IsFinished.Should().BeFalse();
+    }
+
+    [Fact]
+    public void CaptureEvent_EventWithoutException_DoesNotAbortActiveTransaction()
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = 1.0;
+        var hub = _fixture.GetSut();
+
+        var transaction = hub.StartTransaction("test", "operation");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        // Act
+        hub.CaptureEvent(new SentryEvent { Message = "test message" });
+
+        // Assert
+        transaction.IsFinished.Should().BeFalse();
     }
 
     [Fact]
@@ -713,6 +802,84 @@ public partial class HubTests
         var transactionTracer = transaction.Should().BeOfType<TransactionTracer>().Subject;
         transactionTracer.SampleRate.Should().Be(0.5);
         transactionTracer.DynamicSamplingContext.Should().BeSameAs(dsc);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void StartTransaction_Backpressure_Downsamples(bool usesTracesSampler)
+    {
+        // Arrange
+        var transactionContext = new TransactionContext("name", "operation");
+
+        var clock = new MockClock(DateTimeOffset.UtcNow);
+        _fixture.Options.EnableBackpressureHandling = true;
+        _fixture.BackpressureMonitor = new BackpressureMonitor(null, clock, enablePeriodicHealthCheck: false);
+        _fixture.BackpressureMonitor.SetDownsampleLevel(1);
+        var sampleRate = 0.5f;
+        var expectedDownsampledRate = sampleRate * _fixture.BackpressureMonitor.DownsampleFactor;
+        if (usesTracesSampler)
+        {
+            _fixture.Options.TracesSampler = _ => sampleRate;
+        }
+        else
+        {
+            _fixture.Options.TracesSampleRate = sampleRate;
+        }
+
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>());
+
+        switch (transaction)
+        {
+            // Assert
+            case TransactionTracer tracer:
+                tracer.SampleRate.Should().Be(expectedDownsampledRate);
+                break;
+            case UnsampledTransaction unsampledTransaction:
+                unsampledTransaction.SampleRate.Should().Be(expectedDownsampledRate);
+                break;
+            default:
+                throw new Exception("Unexpected transaction type.");
+        }
+    }
+
+    [Theory]
+    [InlineData(true, 0.4f, "backpressure")]
+    [InlineData(true, 0.6f, "sample_rate")]
+    [InlineData(false, 0.4f, "backpressure")]
+    [InlineData(false, 0.6f, "sample_rate")]
+    public void StartTransaction_Backpressure_SetsDiscardReason(bool usesTracesSampler, double sampleRand, string discardReason)
+    {
+        // Arrange
+        var transactionContext = new TransactionContext("name", "operation");
+
+        var clock = new MockClock(DateTimeOffset.UtcNow);
+        _fixture.SampleRandHelper = Substitute.For<ISampleRandHelper>();
+        _fixture.SampleRandHelper.GenerateSampleRand(Arg.Any<string>()).Returns(sampleRand);
+        _fixture.Options.EnableBackpressureHandling = true;
+        _fixture.BackpressureMonitor = new BackpressureMonitor(null, clock, enablePeriodicHealthCheck: false);
+        _fixture.BackpressureMonitor.SetDownsampleLevel(1);
+        var sampleRate = 0.5f;
+        if (usesTracesSampler)
+        {
+            _fixture.Options.TracesSampler = _ => sampleRate;
+        }
+        else
+        {
+            _fixture.Options.TracesSampleRate = sampleRate;
+        }
+
+        var hub = _fixture.GetSut();
+
+        // Act
+        var transaction = hub.StartTransaction(transactionContext, new Dictionary<string, object>());
+        transaction.Should().BeOfType<UnsampledTransaction>();
+        var unsampledTransaction = (UnsampledTransaction)transaction;
+        var expectedReason = new DiscardReason(discardReason);
+        unsampledTransaction.DiscardReason.Should().Be(expectedReason);
     }
 
     // overwrite the 'sample_rate' of the Dynamic Sampling Context (DSC) when a sampling decisions is made in the downstream SDK
@@ -1273,6 +1440,47 @@ public partial class HubTests
         // Assert
         baggage.Should().NotBeNull();
         Assert.Contains("sentry-trace_id=43365712692146d08ee11a729dfbcaca", baggage!.ToString());
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void GetTraceparentHeader_ReturnsHeaderForActiveSpan(bool isSampled)
+    {
+        // Arrange
+        _fixture.Options.TracesSampleRate = isSampled ? 1 : 0;
+        var hub = _fixture.GetSut();
+        var transaction = hub.StartTransaction("foo", "bar");
+        hub.ConfigureScope(scope => scope.Transaction = transaction);
+
+        // Act
+        var header = hub.GetTraceparentHeader();
+
+        // Assert
+        header.Should().NotBeNull();
+        header.SpanId.Should().Be(transaction.SpanId);
+        header.TraceId.Should().Be(transaction.TraceId);
+        header.IsSampled.Should().Be(transaction.IsSampled);
+    }
+
+    [Fact]
+    public void GetTraceparentHeader_NoSpanActive_ReturnsHeaderFromPropagationContext()
+    {
+        // Arrange
+        var hub = _fixture.GetSut();
+        var propagationContext = new SentryPropagationContext(
+            SentryId.Parse("75302ac48a024bde9a3b3734a82e36c8"),
+            SpanId.Parse("2000000000000000"));
+        hub.ConfigureScope(scope => scope.SetPropagationContext(propagationContext));
+
+        // Act
+        var header = hub.GetTraceparentHeader();
+
+        // Assert
+        header.Should().NotBeNull();
+        header.SpanId.Should().Be(propagationContext.SpanId);
+        header.TraceId.Should().Be(propagationContext.TraceId);
+        header.IsSampled.Should().BeNull();
     }
 
     [Fact]
@@ -1946,8 +2154,20 @@ public partial class HubTests
     public void CaptureFeedback_HubEnabled(bool enabled)
     {
         // Arrange
+        var expectedId = enabled ? SentryId.Create() : SentryId.Empty;
+        var expectedResult = enabled ? CaptureFeedbackResult.Success : CaptureFeedbackResult.DisabledHub;
         var hub = _fixture.GetSut();
-        if (!enabled)
+        if (enabled)
+        {
+            _fixture.Client.CaptureFeedback(Arg.Any<SentryFeedback>(), out Arg.Any<CaptureFeedbackResult>(),
+                    Arg.Any<Scope>(), Arg.Any<SentryHint>())
+                .Returns(callInfo =>
+                {
+                    callInfo[1] = expectedResult; // Set the out parameter
+                    return expectedId; // Return value of the method
+                });
+        }
+        else
         {
             hub.Dispose();
         }
@@ -1955,10 +2175,13 @@ public partial class HubTests
         var feedback = new SentryFeedback("Test feedback");
 
         // Act
-        hub.CaptureFeedback(feedback);
+        var id = hub.CaptureFeedback(feedback, out var result);
 
         // Assert
-        _fixture.Client.Received(enabled ? 1 : 0).CaptureFeedback(Arg.Any<SentryFeedback>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
+        id.Should().Be(expectedId);
+        result.Should().Be(expectedResult);
+        _fixture.Client.Received(enabled ? 1 : 0).CaptureFeedback(Arg.Any<SentryFeedback>(),
+            out Arg.Any<CaptureFeedbackResult>(), Arg.Any<Scope>(), Arg.Any<SentryHint>());
     }
 
     [Theory]
@@ -2041,29 +2264,6 @@ public partial class HubTests
         // Assert
         result.Should().Be(false);
         _fixture.Client.DidNotReceive().CaptureEnvelope(Arg.Any<Envelope>());
-    }
-
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void CaptureUserFeedback_HubEnabled(bool enabled)
-    {
-#pragma warning disable CS0618 // Type or member is obsolete
-        // Arrange
-        var hub = _fixture.GetSut();
-        if (!enabled)
-        {
-            hub.Dispose();
-        }
-
-        var feedback = new UserFeedback(SentryId.Create(), "foo", "bar@example.com", "baz");
-
-        // Act
-        hub.CaptureUserFeedback(feedback);
-
-        // Assert
-        _fixture.Client.Received(enabled ? 1 : 0).CaptureUserFeedback(Arg.Any<UserFeedback>());
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Theory]
@@ -2254,56 +2454,6 @@ public partial class HubTests
             Arg.Any<object[]>());
         _fixture.Client.Received(1).CaptureFeedback(Arg.Is<SentryFeedback>(f => f.ContactEmail.IsNull()),
             Arg.Any<Scope>(), Arg.Any<SentryHint>());
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData(" ")]
-    [InlineData("test@example.com")]
-    [InlineData("user.name@domain.com")]
-    [InlineData("user+tag@example.com")]
-    public void CaptureUserFeedback_ValidEmail_FeedbackRegistered(string email)
-    {
-#pragma warning disable CS0618 // Type or member is obsolete
-        // Arrange
-        var hub = _fixture.GetSut();
-        var feedback = new UserFeedback(SentryId.Create(), "Test name", email, "Test comment");
-
-        // Act
-        hub.CaptureUserFeedback(feedback);
-
-        // Assert
-        _fixture.Client.Received(1).CaptureUserFeedback(Arg.Any<UserFeedback>());
-#pragma warning restore CS0618 // Type or member is obsolete
-    }
-
-    [Theory]
-    [InlineData("invalid-email")]
-    [InlineData("missing@domain")]
-    [InlineData("@missing-local.com")]
-    [InlineData("spaces in@email.com")]
-    public void CaptureUserFeedback_InvalidEmail_FeedbackDropped(string email)
-    {
-#pragma warning disable CS0618 // Type or member is obsolete
-        // Arrange
-        _fixture.Options.Debug = true;
-        _fixture.Options.DiagnosticLogger = Substitute.For<IDiagnosticLogger>();
-        _fixture.Options.DiagnosticLogger!.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
-        var hub = _fixture.GetSut();
-        var feedback = new UserFeedback(SentryId.Create(), "Test name", email, "Test comment");
-
-        // Act
-        hub.CaptureUserFeedback(feedback);
-
-        // Assert
-        _fixture.Options.DiagnosticLogger.Received(1).Log(
-            SentryLevel.Warning,
-            Arg.Is<string>(s => s.Contains("invalid email format")),
-            null,
-            Arg.Any<object[]>());
-        _fixture.Client.Received(1).CaptureUserFeedback(Arg.Is<UserFeedback>(f => f.Email.IsNull()));
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     private class TestDisposableIntegration : ISdkIntegration, IDisposable

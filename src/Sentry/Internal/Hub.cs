@@ -14,23 +14,28 @@ internal class Hub : IHub, IDisposable
     private readonly ISystemClock _clock;
     private readonly ISessionManager _sessionManager;
     private readonly SentryOptions _options;
+    private readonly ISampleRandHelper _sampleRandHelper;
     private readonly RandomValuesFactory _randomValuesFactory;
     private readonly IReplaySession _replaySession;
     private readonly List<IDisposable> _integrationsToCleanup = new();
+    private readonly BackpressureMonitor? _backpressureMonitor;
 
 #if MEMORY_DUMP_SUPPORTED
     private readonly MemoryMonitor? _memoryMonitor;
 #endif
 
-    private int _isPersistedSessionRecovered;
+    private InterlockedBoolean _isPersistedSessionRecovered;
 
     // Internal for testability
     internal ConditionalWeakTable<Exception, ISpan> ExceptionToSpanMap { get; } = new();
 
     internal IInternalScopeManager ScopeManager { get; }
 
-    private int _isEnabled = 1;
-    public bool IsEnabled => _isEnabled == 1;
+    private InterlockedBoolean _isEnabled = true;
+
+    public bool IsEnabled => _isEnabled;
+
+    public bool IsSessionActive => _sessionManager.IsSessionActive;
 
     internal SentryOptions Options => _options;
 
@@ -44,7 +49,9 @@ internal class Hub : IHub, IDisposable
         ISystemClock? clock = null,
         IInternalScopeManager? scopeManager = null,
         RandomValuesFactory? randomValuesFactory = null,
-        IReplaySession? replaySession = null)
+        IReplaySession? replaySession = null,
+        ISampleRandHelper? sampleRandHelper = null,
+        BackpressureMonitor? backpressureMonitor = null)
     {
         if (string.IsNullOrWhiteSpace(options.Dsn))
         {
@@ -59,8 +66,13 @@ internal class Hub : IHub, IDisposable
         _randomValuesFactory = randomValuesFactory ?? new SynchronizedRandomValuesFactory();
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
         _clock = clock ?? SystemClock.Clock;
-        client ??= new SentryClient(options, randomValuesFactory: _randomValuesFactory, sessionManager: _sessionManager);
+        if (_options.EnableBackpressureHandling)
+        {
+            _backpressureMonitor = backpressureMonitor ?? new BackpressureMonitor(_options.DiagnosticLogger, clock);
+        }
+        client ??= new SentryClient(options, randomValuesFactory: _randomValuesFactory, sessionManager: _sessionManager, backpressureMonitor: _backpressureMonitor);
         _replaySession = replaySession ?? ReplaySession.Instance;
+        _sampleRandHelper = sampleRandHelper ?? new SampleRandHelperAdapter();
         ScopeManager = scopeManager ?? new SentryScopeManager(options, client);
 
         if (!options.IsGlobalModeEnabled)
@@ -175,9 +187,10 @@ internal class Hub : IHub, IDisposable
 
         bool? isSampled = null;
         double? sampleRate = null;
+        DiscardReason? discardReason = null;
         var sampleRand = dynamicSamplingContext?.Items.TryGetValue("sample_rand", out var dscSampleRand) ?? false
             ? double.Parse(dscSampleRand, NumberStyles.Float, CultureInfo.InvariantCulture)
-            : SampleRandHelper.GenerateSampleRand(context.TraceId.ToString());
+            : _sampleRandHelper.GenerateSampleRand(context.TraceId.ToString());
 
         // TracesSampler runs regardless of whether a decision has already been made, as it can be used to override it.
         if (_options.TracesSampler is { } tracesSampler)
@@ -189,8 +202,14 @@ internal class Hub : IHub, IDisposable
             if (tracesSampler(samplingContext) is { } samplerSampleRate)
             {
                 // The TracesSampler trumps all other sampling decisions (even the trace header)
-                sampleRate = samplerSampleRate;
-                isSampled = SampleRandHelper.IsSampled(sampleRand, samplerSampleRate);
+                sampleRate = samplerSampleRate * _backpressureMonitor.GetDownsampleFactor();
+                isSampled = SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
+                if (isSampled is false)
+                {
+                    // If sampling out is only a result of the downsampling then we specify the reason as backpressure
+                    // management... otherwise the event would have been sampled out anyway, so it's just regular sampling.
+                    discardReason = sampleRand < samplerSampleRate ? DiscardReason.Backpressure : DiscardReason.SampleRate;
+                }
 
                 // Ensure the actual sampleRate is set on the provided DSC (if any) when the TracesSampler reached a sampling decision
                 dynamicSamplingContext?.SetSampleRate(samplerSampleRate);
@@ -201,8 +220,15 @@ internal class Hub : IHub, IDisposable
         // finally fallback to Random sampling if the decision has been made by no other means
         if (isSampled == null)
         {
-            sampleRate = _options.TracesSampleRate ?? 0.0;
+            var optionsSampleRate = _options.TracesSampleRate ?? 0.0;
+            sampleRate = optionsSampleRate * _backpressureMonitor.GetDownsampleFactor();
             isSampled = context.IsSampled ?? SampleRandHelper.IsSampled(sampleRand, sampleRate.Value);
+            if (isSampled is false)
+            {
+                // If sampling out is only a result of the downsampling then we specify the reason as backpressure
+                // management... otherwise the event would have been sampled out anyway, so it's just regular sampling.
+                discardReason = sampleRand < optionsSampleRate ? DiscardReason.Backpressure : DiscardReason.SampleRate;
+            }
 
             if (context.IsSampled is null && _options.TracesSampleRate is not null)
             {
@@ -220,6 +246,7 @@ internal class Hub : IHub, IDisposable
             {
                 SampleRate = sampleRate,
                 SampleRand = sampleRand,
+                DiscardReason = discardReason,
                 DynamicSamplingContext = dynamicSamplingContext // Default to the provided DSC
             };
             // If no DSC was provided, create one based on this transaction.
@@ -289,6 +316,18 @@ internal class Hub : IHub, IDisposable
         return propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession).ToBaggageHeader();
     }
 
+    public W3CTraceparentHeader? GetTraceparentHeader()
+    {
+        if (GetSpan()?.GetTraceHeader() is { } traceHeader)
+        {
+            return new W3CTraceparentHeader(traceHeader.TraceId, traceHeader.SpanId, traceHeader.IsSampled);
+        }
+
+        // We fall back to the propagation context
+        var propagationContext = CurrentScope.PropagationContext;
+        return new W3CTraceparentHeader(propagationContext.TraceId, propagationContext.SpanId, null);
+    }
+
     public TransactionContext ContinueTrace(
         string? traceHeader,
         string? baggageHeader,
@@ -332,7 +371,7 @@ internal class Hub : IHub, IDisposable
     public void StartSession()
     {
         // Attempt to recover persisted session left over from previous run
-        if (Interlocked.Exchange(ref _isPersistedSessionRecovered, 1) != 1)
+        if (_isPersistedSessionRecovered.Exchange(true) != true)
         {
             try
             {
@@ -477,11 +516,11 @@ internal class Hub : IHub, IDisposable
                     {"exception_message", exceptionMessage}
                 };
             }
-            scope.AddBreadcrumb(breadcrumbMessage, "Exception", data: data, level: BreadcrumbLevel.Critical);
+            scope.AddBreadcrumb(breadcrumbMessage, "Exception", data: data, level: BreadcrumbLevel.Fatal);
         }
         catch (Exception e)
         {
-            _options.LogError(e, "Failure to store breadcrumb for exception event: {0}", evt.EventId);
+            _options.LogError(e, "Failure to store breadcrumb for exception event: '{0}'", evt.EventId);
         }
     }
 
@@ -548,7 +587,8 @@ internal class Hub : IHub, IDisposable
             scope.LastEventId = id;
             scope.SessionUpdate = null;
 
-            if (evt.HasTerminalException() && scope.Transaction is { } transaction)
+            if (evt.GetExceptionType() is SentryEvent.ExceptionType.UnhandledTerminal
+                && scope.Transaction is { } transaction)
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
@@ -565,11 +605,13 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result,
+        Action<Scope> configureScope, SentryHint? hint = null)
     {
         if (!IsEnabled)
         {
-            return;
+            result = CaptureFeedbackResult.DisabledHub;
+            return SentryId.Empty;
         }
 
         try
@@ -577,19 +619,23 @@ internal class Hub : IHub, IDisposable
             var clonedScope = CurrentScope.Clone();
             configureScope(clonedScope);
 
-            CaptureFeedback(feedback, clonedScope, hint);
+            return CaptureFeedback(feedback, out result, clonedScope, hint);
         }
         catch (Exception e)
         {
             _options.LogError(e, "Failure to capture feedback");
+            result = CaptureFeedbackResult.UnknownError;
+            return SentryId.Empty;
         }
     }
 
-    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result, Scope? scope = null,
+        SentryHint? hint = null)
     {
         if (!IsEnabled)
         {
-            return;
+            result = CaptureFeedbackResult.DisabledHub;
+            return SentryId.Empty;
         }
 
         try
@@ -601,11 +647,13 @@ internal class Hub : IHub, IDisposable
             }
 
             scope ??= CurrentScope;
-            CurrentClient.CaptureFeedback(feedback, scope, hint);
+            return CurrentClient.CaptureFeedback(feedback, out result, scope, hint);
         }
         catch (Exception e)
         {
             _options.LogError(e, "Failure to capture feedback");
+            result = CaptureFeedbackResult.UnknownError;
+            return SentryId.Empty;
         }
     }
 
@@ -636,34 +684,6 @@ internal class Hub : IHub, IDisposable
         }
     }
 #endif
-
-    [Obsolete("Use CaptureFeedback instead.")]
-    public void CaptureUserFeedback(UserFeedback userFeedback)
-    {
-        if (!IsEnabled)
-        {
-            return;
-        }
-
-        try
-        {
-            if (!string.IsNullOrWhiteSpace(userFeedback.Email) && !EmailValidator.IsValidEmail(userFeedback.Email))
-            {
-                _options.LogWarning("Feedback email scrubbed due to invalid email format: '{0}'", userFeedback.Email);
-                userFeedback = new UserFeedback(
-                    userFeedback.EventId,
-                    userFeedback.Name,
-                    null, // Scrubbed email
-                    userFeedback.Comments);
-            }
-
-            CurrentClient.CaptureUserFeedback(userFeedback);
-        }
-        catch (Exception e)
-        {
-            _options.LogError(e, "Failure to capture user feedback: {0}", userFeedback.EventId);
-        }
-    }
 
     public void CaptureTransaction(SentryTransaction transaction) => CaptureTransaction(transaction, null, null);
 
@@ -811,7 +831,7 @@ internal class Hub : IHub, IDisposable
     {
         _options.LogInfo("Disposing the Hub.");
 
-        if (Interlocked.Exchange(ref _isEnabled, 0) != 1)
+        if (!_isEnabled.Exchange(false))
         {
             return;
         }
@@ -844,6 +864,9 @@ internal class Hub : IHub, IDisposable
             _options.LogError(e, "Failed to wait on disposing tasks to flush.");
         }
         //Don't dispose of ScopeManager since we want dangling transactions to still be able to access tags.
+
+        // Don't dispose of _backpressureMonitor since we want the client to continue to process envelopes without
+        // throwing an ObjectDisposedException.
 
 #if __IOS__
             // TODO

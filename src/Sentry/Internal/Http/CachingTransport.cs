@@ -398,7 +398,7 @@ internal class CachingTransport : ITransport, IDisposable
 
                     try
                     {
-                        _options.LogDebug("Sending cached envelope: {0}",
+                        _options.LogDebug("Sending cached envelope: '{0}'",
                             envelope.TryGetEventId(_options.DiagnosticLogger));
 
                         await _innerTransport.SendEnvelopeAsync(envelope, cancellation).ConfigureAwait(false);
@@ -406,7 +406,7 @@ internal class CachingTransport : ITransport, IDisposable
                     // OperationCancel should not log an error
                     catch (OperationCanceledException ex)
                     {
-                        _options.LogDebug("Canceled sending cached envelope: {0}, retrying after a delay.", ex, file);
+                        _options.LogDebug("Canceled sending cached envelope: '{0}', retrying after a delay.", ex, file);
                         // Let the worker catch, log, wait a bit and retry.
                         throw;
                     }

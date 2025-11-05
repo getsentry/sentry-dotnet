@@ -95,6 +95,15 @@ public class SentryOptions
     public bool EnableScopeSync { get; set; }
 
     /// <summary>
+    /// Enables or disables automatic backpressure handling. When enabled, the SDK will monitor system health and
+    /// reduce the sampling rate of events and transactions when the system is under load.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to true / enabled.
+    /// </remarks>
+    public bool EnableBackpressureHandling { get; set; } = true;
+
+    /// <summary>
     /// This holds a reference to the current transport, when one is active.
     /// If set manually before initialization, the provided transport will be used instead of the default transport.
     /// </summary>
@@ -1004,6 +1013,18 @@ public class SentryOptions
         set => _tracePropagationTargets = value.WithConfigBinding();
     }
 
+    /// <summary>
+    /// Whether to send W3C Trace Context traceparent headers in outgoing HTTP requests for distributed tracing.
+    /// When enabled, the SDK will send the <c>traceparent</c> header in addition to the <c>sentry-trace</c> header
+    /// for requests matching <see cref="TracePropagationTargets"/>.
+    /// </summary>
+    /// <remarks>
+    /// The default value is <c>false</c>. Set to <c>true</c> to enable W3C Trace Context propagation
+    /// for interoperability with services that support OpenTelemetry standards.
+    /// </remarks>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/traces/#propagatetraceparent"/>
+    public bool PropagateTraceparent { get; set; }
+
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
 
     private StackTraceMode? _stackTraceMode;
@@ -1857,7 +1878,6 @@ public class SentryOptions
     /// <remarks>
     /// This and related experimental APIs may change in the future.
     /// </remarks>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
     public SentryExperimentalOptions Experimental { get; set; } = new();
 
     /// <summary>
@@ -1866,8 +1886,7 @@ public class SentryOptions
     /// <remarks>
     /// This and related experimental APIs may change in the future.
     /// </remarks>
-    [Experimental(DiagnosticId.ExperimentalFeature)]
-    public sealed class SentryExperimentalOptions
+    public class SentryExperimentalOptions
     {
         internal SentryExperimentalOptions()
         {
@@ -1876,7 +1895,6 @@ public class SentryOptions
         /// <summary>
         /// When set to <see langword="true"/>, logs are sent to Sentry.
         /// Defaults to <see langword="false"/>.
-        /// <para>This API is experimental and it may change in the future.</para>
         /// </summary>
         /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
         public bool EnableLogs { get; set; } = false;
@@ -1888,7 +1906,6 @@ public class SentryOptions
         /// <summary>
         /// Sets a callback function to be invoked before sending the log to Sentry.
         /// When the delegate throws an <see cref="Exception"/> during invocation, the log will not be captured.
-        /// <para>This API is experimental and it may change in the future.</para>
         /// </summary>
         /// <remarks>
         /// It can be used to modify the log object before being sent to Sentry.
