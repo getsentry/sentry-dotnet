@@ -18,7 +18,7 @@ internal sealed class CocoaScopeObserver : IScopeObserver
         _innerObserver = observer is CocoaScopeObserver ? null : observer;
     }
 
-    public void AddBreadcrumb(Breadcrumb breadcrumb)
+    public void AddBreadcrumb(Breadcrumb breadcrumb, SentryHint hint)
     {
         try
         {
@@ -27,7 +27,7 @@ internal sealed class CocoaScopeObserver : IScopeObserver
         }
         finally
         {
-            _innerObserver?.AddBreadcrumb(breadcrumb);
+            _innerObserver?.AddBreadcrumb(breadcrumb, hint);
         }
     }
 

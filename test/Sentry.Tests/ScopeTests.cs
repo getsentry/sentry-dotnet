@@ -686,14 +686,15 @@ public class ScopeTests
             EnableScopeSync = observerEnable
         });
         var breadcrumb = new Breadcrumb(message: "1234");
+        var hint = new SentryHint(key: "k", value: "v");
         var expectedCount = observerEnable ? 2 : 0;
 
         // Act
-        scope.AddBreadcrumb(breadcrumb);
-        scope.AddBreadcrumb(breadcrumb);
+        scope.AddBreadcrumb(breadcrumb, hint);
+        scope.AddBreadcrumb(breadcrumb, hint);
 
         // Assert
-        observer.Received(expectedCount).AddBreadcrumb(Arg.Is(breadcrumb));
+        observer.Received(expectedCount).AddBreadcrumb(Arg.Is(breadcrumb), Arg.Is(hint));
     }
 
     [Fact]

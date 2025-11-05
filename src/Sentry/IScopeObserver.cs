@@ -8,7 +8,7 @@ public interface IScopeObserver
     /// <summary>
     /// Adds a breadcrumb.
     /// </summary>
-    public void AddBreadcrumb(Breadcrumb breadcrumb);
+    public void AddBreadcrumb(Breadcrumb breadcrumb, SentryHint hint);
 
     /// <summary>
     /// Sets an extra.

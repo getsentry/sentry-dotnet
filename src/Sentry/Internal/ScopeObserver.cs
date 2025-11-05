@@ -17,15 +17,15 @@ internal abstract class ScopeObserver : Sentry.IScopeObserver
         _options = options;
     }
 
-    public void AddBreadcrumb(Breadcrumb breadcrumb)
+    public void AddBreadcrumb(Breadcrumb breadcrumb, SentryHint hint)
     {
         _options.DiagnosticLogger?.Log(SentryLevel.Debug,
             "{0} Scope Sync - Adding breadcrumb m:\"{1}\" l:\"{2}\"", null, _name,
             breadcrumb.Message, breadcrumb.Level);
-        AddBreadcrumbImpl(breadcrumb);
+        AddBreadcrumbImpl(breadcrumb, hint);
     }
 
-    public abstract void AddBreadcrumbImpl(Breadcrumb breadcrumb);
+    public abstract void AddBreadcrumbImpl(Breadcrumb breadcrumb, SentryHint hint);
 
     public void SetExtra(string key, object? value)
     {

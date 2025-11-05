@@ -10,7 +10,7 @@ internal class NativeScopeObserver : ScopeObserver
 {
     public NativeScopeObserver(SentryOptions options) : base("Native", options) { }
 
-    public override void AddBreadcrumbImpl(Breadcrumb breadcrumb)
+    public override void AddBreadcrumbImpl(Breadcrumb breadcrumb, SentryHint hint)
     {
         // see https://develop.sentry.dev/sdk/event-payloads/breadcrumbs/
         var crumb = C.sentry_value_new_breadcrumb(breadcrumb.Type, breadcrumb.Message);

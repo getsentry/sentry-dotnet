@@ -18,16 +18,17 @@ internal sealed class AndroidScopeObserver : IScopeObserver
         _innerObserver = observer is AndroidScopeObserver ? null : observer;
     }
 
-    public void AddBreadcrumb(Breadcrumb breadcrumb)
+    public void AddBreadcrumb(Breadcrumb breadcrumb, SentryHint hint)
     {
         try
         {
             var b = breadcrumb.ToJavaBreadcrumb();
-            JavaSdk.Sentry.AddBreadcrumb(b);
+            var h = hint.ToJavaHint();
+            JavaSdk.Sentry.AddBreadcrumb(b, h);
         }
         finally
         {
-            _innerObserver?.AddBreadcrumb(breadcrumb);
+            _innerObserver?.AddBreadcrumb(breadcrumb, hint);
         }
     }
 
