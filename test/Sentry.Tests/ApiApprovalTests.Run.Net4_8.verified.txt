@@ -203,7 +203,7 @@ namespace Sentry
     }
     public interface IScopeObserver
     {
-        void AddBreadcrumb(Sentry.Breadcrumb breadcrumb);
+        void AddBreadcrumb(Sentry.Breadcrumb breadcrumb, Sentry.SentryHint hint);
         void SetExtra(string key, object? value);
         void SetTag(string key, string value);
         void SetTrace(Sentry.SentryId traceId, Sentry.SpanId parentSpanId);
