@@ -201,4 +201,18 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"system`",`"thread_id`":`"1`",`"category`":`"network.event`",`"action`":`"NETWORK_CAPABILITIES_CHANGED`""
         $result.Envelopes() | Should -HaveCount 1
     }
+
+    It 'Lifecycle events (<configuration>)' {
+        $result = Invoke-SentryServer {
+            param([string]$url)
+            RunAndroidApp -Dsn $url -TestArg "Background"
+        }
+
+        Dump-ServerErrors -Result $result
+        $result.HasErrors() | Should -BeFalse
+        @('created', 'started', 'resumed', 'paused', 'stopped') | ForEach-Object {
+            $result.Envelopes() | Should -AnyElementMatch "`"type`":`"navigation`",`"data`":{`"screen`":`"MainActivity`",`"state`":`"$_`"},`"category`":`"ui.lifecycle`""
+        }
+        $result.Envelopes() | Should -HaveCount 1
+    }
 }

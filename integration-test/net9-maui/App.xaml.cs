@@ -91,6 +91,12 @@ public partial class App : Application
             CaptureSystemBreadcrumb(testArg, breadcrumb);
             Kill();
         }
+        else if (HasTestArg("Background"))
+        {
+#if ANDROID
+            Platform.CurrentActivity?.MoveTaskToBack(true);
+#endif
+        }
         else if (HasTestArg("None"))
         {
             Kill();
