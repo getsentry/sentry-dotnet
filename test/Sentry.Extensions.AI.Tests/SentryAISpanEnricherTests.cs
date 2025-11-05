@@ -66,15 +66,15 @@ public class SentryAISpanEnricherTests
         SentryAISpanEnricher.EnrichWithRequest(span, messages, chatOptions, aiOptions, SentryAIConstants.SpanOperations.Chat);
 
         // Assert
-        span.Data[SentryAIConstants.SpanAttributes.OperationName].Should().Be(SentryAIConstants.SpanOperations.Chat);
-        span.Data[SentryAIConstants.SpanAttributes.RequestModel].Should().Be("SentryAI");
-        span.Data[SentryAIConstants.SpanAttributes.RequestTemperature].Should().Be(0.7f);
-        span.Data[SentryAIConstants.SpanAttributes.RequestMaxTokens].Should().Be(1024);
-        span.Data[SentryAIConstants.SpanAttributes.RequestTopP].Should().Be(0.9f);
-        span.Data[SentryAIConstants.SpanAttributes.RequestFrequencyPenalty].Should().Be(0.5f);
-        span.Data[SentryAIConstants.SpanAttributes.RequestPresencePenalty].Should().Be(0.3f);
-        span.Data[SentryAIConstants.SpanAttributes.RequestMessages].Should().NotBeNull();
-        span.Data[SentryAIConstants.SpanAttributes.RequestAvailableTools].Should().NotBeNull();
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.OperationName).WhoseValue.Should().Be(SentryAIConstants.SpanOperations.Chat);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestModel).WhoseValue.Should().Be("SentryAI");
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestTemperature).WhoseValue.Should().Be(0.7f);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestMaxTokens).WhoseValue.Should().Be(1024);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestTopP).WhoseValue.Should().Be(0.9f);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestFrequencyPenalty).WhoseValue.Should().Be(0.5f);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestPresencePenalty).WhoseValue.Should().Be(0.3f);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestMessages).WhoseValue.Should().NotBeNull();
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestAvailableTools).WhoseValue.Should().NotBeNull();
     }
 
     [Fact]
@@ -95,15 +95,15 @@ public class SentryAISpanEnricherTests
         SentryAISpanEnricher.EnrichWithRequest(span, messages, chatOptions, aiOptions, SentryAIConstants.SpanOperations.Chat);
 
         // Assert
-        span.Data[SentryAIConstants.SpanAttributes.OperationName].Should().Be(SentryAIConstants.SpanOperations.Chat);
-        span.Data[SentryAIConstants.SpanAttributes.RequestModel].Should().Be("SentryAI");
-        span.Data[SentryAIConstants.SpanAttributes.RequestTemperature].Should().Be(0.7f);
-        span.Data[SentryAIConstants.SpanAttributes.RequestMaxTokens].Should().Be(1024);
-        span.Data[SentryAIConstants.SpanAttributes.RequestTopP].Should().Be(0.9f);
-        span.Data[SentryAIConstants.SpanAttributes.RequestFrequencyPenalty].Should().Be(0.5f);
-        span.Data[SentryAIConstants.SpanAttributes.RequestPresencePenalty].Should().Be(0.3f);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.OperationName).WhoseValue.Should().Be(SentryAIConstants.SpanOperations.Chat);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestModel).WhoseValue.Should().Be("SentryAI");
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestTemperature).WhoseValue.Should().Be(0.7f);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestMaxTokens).WhoseValue.Should().Be(1024);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestTopP).WhoseValue.Should().Be(0.9f);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestFrequencyPenalty).WhoseValue.Should().Be(0.5f);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestPresencePenalty).WhoseValue.Should().Be(0.3f);
         span.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.RequestMessages);
-        span.Data[SentryAIConstants.SpanAttributes.RequestAvailableTools].Should().NotBeNull();
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.RequestAvailableTools).WhoseValue.Should().NotBeNull();
     }
 
 
@@ -124,7 +124,7 @@ public class SentryAISpanEnricherTests
         SentryAISpanEnricher.EnrichWithRequest(span, messages, null, aiOptions, SentryAIConstants.SpanOperations.Chat);
 
         // Assert
-        span.Data[SentryAIConstants.SpanAttributes.OperationName].Should().Be(SentryAIConstants.SpanOperations.Chat);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.OperationName).WhoseValue.Should().Be(SentryAIConstants.SpanOperations.Chat);
         span.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.RequestModel);
         span.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.RequestTemperature);
         span.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.RequestMaxTokens);
@@ -136,12 +136,11 @@ public class SentryAISpanEnricherTests
     }
 
     [Fact]
-    public void EnrichWithResponse_SetsData()
+    public void ToolCallSpan_EnrichWithResponse_SetsData()
     {
         // Arrange
-        const string spanOp = "test_operation";
-        const string spanDesc = "test_description";
-        var span = _fixture.Hub.StartSpan(spanOp, spanDesc);
+        var transaction = _fixture.Hub.StartTransaction("test_transaction", "test");
+        var span = transaction.StartChild(SentryAIConstants.SpanAttributes.ChatOperation, "test_desc");
         var response = new ChatResponse([
             new ChatMessage(ChatRole.Assistant, [
                 new TextContent("Hello"),
@@ -163,18 +162,18 @@ public class SentryAISpanEnricherTests
         SentryAISpanEnricher.EnrichWithResponse(span, response, aiOptions);
 
         // Assert
-        span.Data[SentryAIConstants.SpanAttributes.ResponseText].Should().Be("Hello");
-        span.Data[SentryAIConstants.SpanAttributes.ResponseModel].Should().Be("response-model-id");
-        span.Data[SentryAIConstants.SpanAttributes.UsageInputTokens].Should().Be(50L);
-        span.Data[SentryAIConstants.SpanAttributes.UsageOutputTokens].Should().Be(25L);
-        span.Data[SentryAIConstants.SpanAttributes.UsageTotalTokens].Should().Be(75L);
-        span.Data[SentryAIConstants.SpanAttributes.ResponseToolCalls].Should().NotBeNull();
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ResponseText).WhoseValue.Should().Be("Hello");
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ResponseModel).WhoseValue.Should().Be("response-model-id");
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.UsageInputTokens).WhoseValue.Should().Be(50L);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.UsageOutputTokens).WhoseValue.Should().Be(25L);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.UsageTotalTokens).WhoseValue.Should().Be(75L);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ResponseToolCalls).WhoseValue.Should().NotBeNull();
     }
     [Fact]
     public void EnrichWithResponse_SetsData_WithoutResponseMessages_WhenDisabled()
     {
         // Arrange
-        const string spanOp = "test_operation";
+        const string spanOp = SentryAIConstants.SpanAttributes.ChatOperation;
         const string spanDesc = "test_description";
         var span = _fixture.Hub.StartSpan(spanOp, spanDesc);
         var response = new ChatResponse(TestMessages())
@@ -196,19 +195,18 @@ public class SentryAISpanEnricherTests
 
         // Assert
         span.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.ResponseText);
-        span.Data[SentryAIConstants.SpanAttributes.ResponseModel].Should().Be("response-model-id");
-        span.Data[SentryAIConstants.SpanAttributes.UsageInputTokens].Should().Be(50);
-        span.Data[SentryAIConstants.SpanAttributes.UsageOutputTokens].Should().Be(25);
-        span.Data[SentryAIConstants.SpanAttributes.UsageTotalTokens].Should().Be(75);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ResponseModel).WhoseValue.Should().Be("response-model-id");
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.UsageInputTokens).WhoseValue.Should().Be(50);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.UsageOutputTokens).WhoseValue.Should().Be(25);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.UsageTotalTokens).WhoseValue.Should().Be(75);
     }
 
     [Fact]
     public void EnrichWithStreamingResponses_SetsData()
     {
         // Arrange
-        const string spanOp = "test_operation";
-        const string spanDesc = "test_description";
-        var span = _fixture.Hub.StartSpan(spanOp, spanDesc);
+        var transaction = _fixture.Hub.StartTransaction("test_transaction", "test");
+        var span = transaction.StartChild(SentryAIConstants.SpanAttributes.ChatOperation, "test_desc");
 
         var streamingMessages = new List<ChatResponseUpdate>
         {
@@ -240,12 +238,12 @@ public class SentryAISpanEnricherTests
         SentryAISpanEnricher.EnrichWithStreamingResponses(span, streamingMessages, aiOptions);
 
         // Assert
-        span.Data[SentryAIConstants.SpanAttributes.ResponseText].Should().Be("Hello world!");
-        span.Data[SentryAIConstants.SpanAttributes.ResponseModel].Should().Be("streaming-model-id");
-        span.Data[SentryAIConstants.SpanAttributes.UsageInputTokens].Should().Be(25L);
-        span.Data[SentryAIConstants.SpanAttributes.UsageOutputTokens].Should().Be(13L);
-        span.Data[SentryAIConstants.SpanAttributes.UsageTotalTokens].Should().Be(38L);
-        span.Data[SentryAIConstants.SpanAttributes.ResponseToolCalls].Should().NotBeNull();
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ResponseText).WhoseValue.Should().Be("Hello world!");
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ResponseModel).WhoseValue.Should().Be("streaming-model-id");
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.UsageInputTokens).WhoseValue.Should().Be(25L);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.UsageOutputTokens).WhoseValue.Should().Be(13L);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.UsageTotalTokens).WhoseValue.Should().Be(38L);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ResponseToolCalls).WhoseValue.Should().NotBeNull();
     }
 
     [Fact]
@@ -275,9 +273,9 @@ public class SentryAISpanEnricherTests
 
         // Assert
         span.Data.Should().NotContainKey(SentryAIConstants.SpanAttributes.ResponseText);
-        span.Data[SentryAIConstants.SpanAttributes.ResponseModel].Should().Be("streaming-model-id");
-        span.Data[SentryAIConstants.SpanAttributes.UsageInputTokens].Should().Be(20L);
-        span.Data[SentryAIConstants.SpanAttributes.UsageOutputTokens].Should().Be(10L);
-        span.Data[SentryAIConstants.SpanAttributes.UsageTotalTokens].Should().Be(30L);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.ResponseModel).WhoseValue.Should().Be("streaming-model-id");
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.UsageInputTokens).WhoseValue.Should().Be(20L);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.UsageOutputTokens).WhoseValue.Should().Be(10L);
+        span.Data.Should().ContainKey(SentryAIConstants.SpanAttributes.UsageTotalTokens).WhoseValue.Should().Be(30L);
     }
 }
