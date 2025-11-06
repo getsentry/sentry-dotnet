@@ -9,7 +9,7 @@ internal sealed class SentryInstrumentedFunction(AIFunction innerFunction)
         AIFunctionArguments arguments,
         CancellationToken cancellationToken)
     {
-        var agentSpan = SentryAIUtil.GetActivitySpan();
+        var agentSpan = SentryAIUtil.GetFICCSpan();
         var toolSpan = InitToolSpan(agentSpan, arguments);
         try
         {

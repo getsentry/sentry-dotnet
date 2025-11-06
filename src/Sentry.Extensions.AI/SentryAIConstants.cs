@@ -14,9 +14,9 @@ internal static class SentryAIConstants
     internal const string SentryActivitySourceName = "Sentry.AgentMonitoring";
 
     /// <summary>
-    /// The string we use to retrieve the span from the <see cref="Activity"/> using a Fused property
+    /// The string we use to retrieve a Sentry span from the <see cref="Activity"/> using a Fused property
     /// </summary>
-    internal const string SentryActivitySpanAttributeName = "SentryCurrSpan";
+    internal const string SentryFICCSpanAttributeName = "SentryFICCSpan";
 
     internal static class SpanAttributes
     {

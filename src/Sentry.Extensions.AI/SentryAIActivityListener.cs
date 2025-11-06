@@ -21,11 +21,11 @@ internal static class SentryAIActivityListener
         ActivityStarted = activity =>
         {
             var agentSpan = Hub.StartSpan(SentryAIConstants.SpanAttributes.InvokeAgentOperation, SentryAIConstants.SpanAttributes.InvokeAgentDescription);
-            activity.SetFused(SentryAIConstants.SentryActivitySpanAttributeName, agentSpan);
+            activity.SetFused(SentryAIConstants.SentryFICCSpanAttributeName, agentSpan);
         },
         ActivityStopped = activity =>
         {
-            var agentSpan = activity.GetFused<ISpan>(SentryAIConstants.SentryActivitySpanAttributeName);
+            var agentSpan = activity.GetFused<ISpan>(SentryAIConstants.SentryFICCSpanAttributeName);
             // Don't pass in OK status in case there was an exception
             agentSpan?.Finish();
         }

@@ -148,7 +148,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
 
         // If FunctionInvokingChatClient(FICC) wraps SentryChatClient, we should be able to get the agent span from the current activity
         // The activity we attached the span to may be an ancestor of the current activity, we must search the parents for the span
-        var activeSpan = SentryAIUtil.GetActivitySpan();
+        var activeSpan = SentryAIUtil.GetFICCSpan();
 
         // If we couldn't find the Activity, then FICC is not wrapping SentryChatClient. Return a new span from the hub
         return activeSpan ?? _hub.StartSpan(SentryAIConstants.SpanAttributes.InvokeAgentOperation,

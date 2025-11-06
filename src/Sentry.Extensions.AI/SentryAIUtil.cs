@@ -4,12 +4,12 @@ namespace Sentry.Extensions.AI;
 
 internal static class SentryAIUtil
 {
-    internal static ISpan? GetActivitySpan()
+    internal static ISpan? GetFICCSpan()
     {
         var currActivity = Activity.Current;
         while (currActivity != null)
         {
-            if (currActivity.GetFused<ISpan>(SentryAIConstants.SentryActivitySpanAttributeName) is { } span)
+            if (currActivity.GetFused<ISpan>(SentryAIConstants.SentryFICCSpanAttributeName) is { } span)
             {
                 return span;
             }
