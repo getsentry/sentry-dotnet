@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
 
-namespace Sentry.SourceGenerators.Tests;
+namespace Sentry.Compiler.Extensions.Tests;
 
 public class BuildPropertySourceGeneratorTests
 {

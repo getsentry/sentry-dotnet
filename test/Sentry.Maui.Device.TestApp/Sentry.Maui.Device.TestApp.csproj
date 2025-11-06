@@ -100,7 +100,7 @@
     <ProjectReference Include="..\Sentry.Extensions.Logging.Tests\Sentry.Extensions.Logging.Tests.csproj"/>
     <ProjectReference Include="..\Sentry.Maui.Tests\Sentry.Maui.Tests.csproj"/>
     <ProjectReference Include="..\Sentry.Maui.CommunityToolkit.Mvvm.Tests\Sentry.Maui.CommunityToolkit.Mvvm.Tests.csproj" Condition="'$(_SentryIsNet9OrGreater)' == 'true'"/>
-    <ProjectReference Include="..\..\src\Sentry.SourceGenerators\Sentry.SourceGenerators.csproj"
+    <ProjectReference Include="..\..\src\Sentry.Compiler.Extensions\Sentry.Compiler.Extensions.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false"/>
   </ItemGroup>
