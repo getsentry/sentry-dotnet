@@ -301,4 +301,14 @@ internal static class AssertionExtensions
     {
         return new KeyValuePair<string, object?>(name, value);
     }
+
+    public static SentryLog ShouldContainSingleLog(this Envelope envelope)
+    {
+        var envelopeItem = envelope.Items.Should().ContainSingle().Which;
+        var serializable = envelopeItem.Payload.Should().BeOfType<JsonSerializable>().Which;
+        var log = serializable.Source.Should().BeOfType<StructuredLog>().Which;
+
+        log.Items.Length.Should().Be(1);
+        return log.Items[0];
+    }
 }
