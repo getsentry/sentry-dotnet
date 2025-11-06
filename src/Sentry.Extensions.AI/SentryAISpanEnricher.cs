@@ -189,12 +189,12 @@ internal static class SentryAISpanEnricher
 
     private static string FormatFunctionCallContent(FunctionCallContent[] content)
     {
-        return JsonSerializer.Serialize(content.Select(c =>
+        return JsonSerializer.Serialize(content.Select(functionCallContent =>
         {
             string argumentsJson;
             try
             {
-                argumentsJson = JsonSerializer.Serialize(c.Arguments);
+                argumentsJson = JsonSerializer.Serialize(functionCallContent.Arguments);
             }
             catch
             {
@@ -203,7 +203,7 @@ internal static class SentryAISpanEnricher
 
             return new
             {
-                name = c.Name,
+                name = functionCallContent.Name,
                 type = "function_call",
                 arguments = argumentsJson
             };
