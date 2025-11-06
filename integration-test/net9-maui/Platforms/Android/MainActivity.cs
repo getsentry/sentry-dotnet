@@ -20,16 +20,6 @@ public class MainActivity : MauiAppCompatActivity
 
         System.Environment.SetEnvironmentVariable("SENTRY_DSN", Intent?.GetStringExtra("SENTRY_DSN"));
         System.Environment.SetEnvironmentVariable("SENTRY_TEST_ARG", Intent?.GetStringExtra("SENTRY_TEST_ARG"));
-    }
-
-    protected override void OnStop()
-    {
-        base.OnStop();
-
-        if (App.HasTestArg("Background"))
-        {
-            SentrySdk.CaptureMessage("Background");
-            App.Kill();
-        }
+        System.Environment.SetEnvironmentVariable("SENTRY_TEST_CONDITION", Intent?.GetStringExtra("SENTRY_TEST_CONDITION"));
     }
 }

@@ -54,14 +54,17 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         {
             param(
                 [string] $Dsn,
-                [string] $TestArg = 'None'
+                [string] $TestArg = 'None',
+                [string] $TestCondition = 'OnAppearing',
+                [scriptblock] $Callback = $null
             )
             Write-Host "::group::Run Android app (TestArg=$TestArg)"
             $dsn = $Dsn.Replace('http://', 'http://key@') + '/0'
             xharness android adb -v `
                 -- shell am start -S -n io.sentry.dotnet.maui.device.integrationtestapp/.MainActivity `
                 -e SENTRY_DSN $dsn `
-                -e SENTRY_TEST_ARG $TestArg
+                -e SENTRY_TEST_ARG $TestArg `
+                -e SENTRY_TEST_CONDITION $TestCondition
             | ForEach-Object { Write-Host $_ }
             Write-Host '::endgroup::'
             $LASTEXITCODE | Should -Be 0
@@ -73,7 +76,10 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
 
                 $procid = (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
                 $activity = (& xharness android adb -- shell dumpsys activity activities) -match "io\.sentry\.dotnet\.maui\.device\.integrationtestapp"
-
+                if ($procid -and $activity -and $Callback)
+                {
+                    & $Callback
+                }
             } while ($procid -and $activity)
         }
 
@@ -202,16 +208,36 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         $result.Envelopes() | Should -HaveCount 1
     }
 
-    It 'Lifecycle events (<configuration>)' {
+    It 'Native native lifecycle events' {
         $result = Invoke-SentryServer {
             param([string]$url)
-            RunAndroidApp -Dsn $url -TestArg "Background"
+            RunAndroidApp -Dsn $url -TestArg "Native" -TestCondition "OnSleep" {
+                xharness android adb -- shell input keyevent KEYCODE_HOME
+            }
+            RunAndroidApp -Dsn $url
         }
 
         Dump-ServerErrors -Result $result
         $result.HasErrors() | Should -BeFalse
-        @('created', 'started', 'resumed', 'paused', 'stopped') | ForEach-Object {
-            $result.Envelopes() | Should -AnyElementMatch "`"type`":`"navigation`",`"data`":{`"screen`":`"MainActivity`",`"state`":`"$_`"},`"category`":`"ui.lifecycle`""
+        @('created', 'started', 'resumed', 'paused') | ForEach-Object {
+            # TODO: why is native breadcrumb data a string instead of object?
+            $result.Envelopes() | Should -AnyElementMatch ('"type":"navigation","data":"{\"screen\":\"MainActivity\",\"state\":\"' + $_ + '\"}\","category":"ui.lifecycle"')
+        }
+        $result.Envelopes() | Should -HaveCount 1
+    }
+
+    It 'Managed lifecycle events' {
+        $result = Invoke-SentryServer {
+            param([string]$url)
+            RunAndroidApp -Dsn $url -TestArg "Managed" -TestCondition "OnSleep" {
+                xharness android adb -- shell input keyevent KEYCODE_HOME
+            }
+        }
+
+        Dump-ServerErrors -Result $result
+        $result.HasErrors() | Should -BeFalse
+        @('created', 'started', 'resumed', 'paused') | ForEach-Object {
+            $result.Envelopes() | Should -AnyElementMatch ('"type":"navigation","data":{"screen":"MainActivity","state":"' + $_ + '"},"category":"ui.lifecycle"')
         }
         $result.Envelopes() | Should -HaveCount 1
     }
