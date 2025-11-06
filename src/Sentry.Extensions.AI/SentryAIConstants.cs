@@ -4,6 +4,7 @@ internal static class SentryAIConstants
 {
     /// <summary>
     /// The list of strings which FunctionInvokingChatClient(FICC) uses to start the tool call <see cref="Activity"/>.
+    /// These can be found in FunctionInvokingChatClient.cs in GetResponseAsync or GetStreamingResponseAsync function.
     /// </summary>
     internal static readonly string[] FICCActivityNames = ["orchestrate_tools", "FunctionInvokingChatClient.GetResponseAsync", "FunctionInvokingChatClient"];
 
