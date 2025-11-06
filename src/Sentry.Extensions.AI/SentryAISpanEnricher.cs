@@ -156,7 +156,7 @@ internal static class SentryAISpanEnricher
     {
         return FormatAsJsonList(messages, message =>
         {
-            var content = message.Role == ChatRole.Tool ? FunctionCallToString(message.Contents) : message.Text;
+            var content = message.Role == ChatRole.Tool ? FunctionResultToObject(message.Contents) : message.Text;
 
             return new
             {
@@ -165,7 +165,7 @@ internal static class SentryAISpanEnricher
             };
         });
 
-        object FunctionCallToString(IList<AIContent> toolContents)
+        object FunctionResultToObject(IList<AIContent> toolContents)
         {
             List<object> callList = [];
             foreach (var toolContent in toolContents)
