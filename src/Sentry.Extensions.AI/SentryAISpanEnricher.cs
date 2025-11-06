@@ -22,14 +22,15 @@ internal static class SentryAISpanEnricher
             span.SetData(SentryAIConstants.SpanAttributes.RequestModel, modelId);
         }
 
-        if (aiOptions?.AgentName is { } agentName)
+        if (aiOptions.AgentName is { } agentName)
         {
             span.SetData(SentryAIConstants.SpanAttributes.AgentName, agentName);
         }
 
         if (messages is { Length: > 0 }
-            && (aiOptions?.RecordInputs ?? true)
-            && !span.Data.TryGetValue(SentryAIConstants.SpanAttributes.RequestMessages, out _))
+            && aiOptions.RecordInputs
+            // Only add request messages if there is none currently
+            && !span.Data.ContainsKey(SentryAIConstants.SpanAttributes.RequestMessages))
         {
             span.SetData(SentryAIConstants.SpanAttributes.RequestMessages, FormatRequestMessage(messages));
         }
