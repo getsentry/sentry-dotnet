@@ -44,12 +44,10 @@ public class SentryStructuredLoggerTests : IDisposable
 
             EnableHub(true);
             EnableLogs(true);
-            SetMinimumLogLevel(default);
         }
 
         public void EnableHub(bool isEnabled) => Hub.IsEnabled.Returns(isEnabled);
         public void EnableLogs(bool isEnabled) => Options.Value.EnableLogs = isEnabled;
-        public void SetMinimumLogLevel(LogLevel logLevel) => Options.Value.ExperimentalLogging.MinimumLogLevel = logLevel;
 
         public void WithActiveSpan(SentryId traceId, SpanId parentSpanId)
         {
@@ -251,20 +249,18 @@ public class SentryStructuredLoggerTests : IDisposable
     }
 
     [Theory]
-    [InlineData(true, true, LogLevel.Warning, LogLevel.Warning, true)]
-    [InlineData(false, true, LogLevel.Warning, LogLevel.Warning, false)]
-    [InlineData(true, false, LogLevel.Warning, LogLevel.Warning, false)]
-    [InlineData(true, true, LogLevel.Information, LogLevel.Warning, true)]
-    [InlineData(true, true, LogLevel.Error, LogLevel.Warning, false)]
-    public void IsEnabled_HubOptionsMinimumLogLevel_Returns(bool isHubEnabled, bool isLogsEnabled, LogLevel minimumLogLevel, LogLevel actualLogLevel, bool expectedIsEnabled)
+    [InlineData(true, true, LogLevel.Information, true)]
+    [InlineData(false, true, LogLevel.Information, false)]
+    [InlineData(true, false, LogLevel.Information, false)]
+    [InlineData(true, true, LogLevel.None, false)]
+    public void IsEnabled_HubOptionsMinimumLogLevel_Returns(bool isHubEnabled, bool isLogsEnabled, LogLevel logLevel, bool expectedIsEnabled)
     {
         _fixture.EnableHub(isHubEnabled);
         _fixture.EnableLogs(isLogsEnabled);
-        _fixture.SetMinimumLogLevel(minimumLogLevel);
         var logger = _fixture.GetSut();
 
-        var isEnabled = logger.IsEnabled(actualLogLevel);
-        logger.Log(actualLogLevel, "message");
+        var isEnabled = logger.IsEnabled(logLevel);
+        logger.Log(logLevel, "message");
 
         isEnabled.Should().Be(expectedIsEnabled);
         if (expectedIsEnabled)

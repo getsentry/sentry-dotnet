@@ -22,7 +22,5 @@ internal class BindableSentryLoggingOptions : BindableSentryOptions
         options.MinimumBreadcrumbLevel = MinimumBreadcrumbLevel ?? options.MinimumBreadcrumbLevel;
         options.MinimumEventLevel = MinimumEventLevel ?? options.MinimumEventLevel;
         options.InitializeSdk = InitializeSdk ?? options.InitializeSdk;
-
-        options.ExperimentalLogging.MinimumLogLevel = ExperimentalLogging.MinimumLogLevel ?? options.ExperimentalLogging.MinimumLogLevel;
     }
 }
