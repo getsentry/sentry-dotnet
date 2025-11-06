@@ -23,7 +23,6 @@ using var loggerFactory = LoggerFactory.Create(builder =>
         // Optionally configure options: The default values are:
         options.MinimumBreadcrumbLevel = LogLevel.Information; // It requires at least this level to store breadcrumb
         options.MinimumEventLevel = LogLevel.Error; // This level or above will result in event sent to Sentry
-        options.ExperimentalLogging.MinimumLogLevel = LogLevel.Trace; // This level or above will result in log sent to Sentry
 
         // This option enables Logs sent to Sentry.
         options.EnableLogs = true;
