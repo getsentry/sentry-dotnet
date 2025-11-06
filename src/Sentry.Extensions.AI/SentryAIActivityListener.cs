@@ -7,6 +7,8 @@ namespace Sentry.Extensions.AI;
 /// </summary>
 internal static class SentryAIActivityListener
 {
+    private static IHub Hub = HubAdapter.Instance;
+
     /// <summary>
     /// Sentry's <see cref="ActivityListener"/> to tap into function invocation's Activity
     /// </summary>
@@ -18,7 +20,7 @@ internal static class SentryAIActivityListener
                 ActivitySamplingResult.AllDataAndRecorded : ActivitySamplingResult.None,
         ActivityStarted = activity =>
         {
-            var agentSpan = HubAdapter.Instance.StartSpan(SentryAIConstants.SpanAttributes.InvokeAgentOperation, SentryAIConstants.SpanAttributes.InvokeAgentDescription);
+            var agentSpan = Hub.StartSpan(SentryAIConstants.SpanAttributes.InvokeAgentOperation, SentryAIConstants.SpanAttributes.InvokeAgentDescription);
             activity.SetFused(SentryAIConstants.SentryActivitySpanAttributeName, agentSpan);
         },
         ActivityStopped = activity =>
@@ -32,8 +34,10 @@ internal static class SentryAIActivityListener
     /// <summary>
     /// Initializes Sentry's <see cref="ActivityListener"/> to tap into FunctionInvokingChatClient's Activity
     /// </summary>
-    internal static void Init()
+    /// <param name="hub">Optional IHub instance to use. If not provided, HubAdapter.Instance will be used.</param>
+    internal static void Init(IHub? hub = null)
     {
+        Hub = hub ?? HubAdapter.Instance;
         ActivitySource.AddActivityListener(FICCListener);
     }
 }
