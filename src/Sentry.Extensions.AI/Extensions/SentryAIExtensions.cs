@@ -14,12 +14,12 @@ public static class SentryAIExtensions
     /// <param name="options">The <see cref="ChatOptions"/> that contains the <see cref="AIFunction"/> to instrument</param>
     public static ChatOptions AddSentryToolInstrumentation(this ChatOptions options)
     {
-        if (options.Tools is null || options.Tools.Count == 0)
+        if (options.Tools is { Count: > 0 })
         {
             return options;
         }
 
-        for (var i = 0; i < options.Tools.Count; i++)
+        for (var i = 0; i < options.Tools?.Count; i++)
         {
             if (options.Tools[i] is AIFunction fn and not SentryInstrumentedFunction)
             {
