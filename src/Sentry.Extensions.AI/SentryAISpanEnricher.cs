@@ -145,16 +145,16 @@ internal static class SentryAISpanEnricher
 
     private static string FormatAvailableTools(IList<AITool> tools)
     {
-        return FormatAsJsonList(tools, tool => new
+        return JsonSerializer.Serialize(tools.Select(tool => new
         {
             name = tool.Name,
             description = tool.Description
-        });
+        }));
     }
 
     private static string FormatRequestMessage(ChatMessage[] messages)
     {
-        return FormatAsJsonList(messages, message =>
+        return JsonSerializer.Serialize(messages.Select(message =>
         {
             var content = message.Role == ChatRole.Tool ? FunctionResultToObject(message.Contents) : message.Text;
 
@@ -163,7 +163,7 @@ internal static class SentryAISpanEnricher
                 role = message.Role,
                 content
             };
-        });
+        }));
 
         object FunctionResultToObject(IList<AIContent> toolContents)
         {
@@ -189,7 +189,7 @@ internal static class SentryAISpanEnricher
 
     private static string FormatFunctionCallContent(FunctionCallContent[] content)
     {
-        return FormatAsJsonList(content, c =>
+        return JsonSerializer.Serialize(content.Select(c =>
         {
             string argumentsJson;
             try
@@ -207,11 +207,6 @@ internal static class SentryAISpanEnricher
                 type = "function_call",
                 arguments = argumentsJson
             };
-        });
-    }
-
-    private static string FormatAsJsonList<T>(IEnumerable<T> items, Func<T, object> selector)
-    {
-        return JsonSerializer.Serialize(items.Select(selector));
+        }));
     }
 }
