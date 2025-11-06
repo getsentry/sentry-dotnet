@@ -9,6 +9,7 @@ public partial class App : Application
 {
     private static readonly ConcurrentDictionary<string, Dictionary<string, string>> systemBreadcrumbs = new();
     private static string? testArg;
+    private static string? testCondition;
 
     public App()
     {
@@ -18,6 +19,11 @@ public partial class App : Application
     public static bool HasTestArg(string arg)
     {
         return string.Equals(testArg, arg, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool HasTestCondition(string condition)
+    {
+        return string.Equals(testCondition, condition, StringComparison.OrdinalIgnoreCase);
     }
 
     public static void ReceiveSystemBreadcrumb(Breadcrumb breadcrumb)
@@ -64,7 +70,26 @@ public partial class App : Application
     public static void OnAppearing()
     {
         testArg = System.Environment.GetEnvironmentVariable("SENTRY_TEST_ARG");
+        testCondition = System.Environment.GetEnvironmentVariable("SENTRY_TEST_CONDITION");
 
+        if (HasTestCondition("OnAppearing"))
+        {
+            RunTest();
+        }
+    }
+
+    protected override void OnSleep()
+    {
+        base.OnSleep();
+
+        if (HasTestCondition("OnSleep"))
+        {
+            RunTest();
+        }
+    }
+
+    private static void RunTest()
+    {
 #pragma warning disable CS0618
         if (Enum.TryParse<CrashType>(testArg, ignoreCase: true, out var crashType))
         {
