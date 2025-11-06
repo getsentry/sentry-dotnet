@@ -12,21 +12,21 @@ internal static class SentryAIActivityListener
     /// </summary>
     private static readonly ActivityListener FICCListener = new()
     {
-        ShouldListenTo = s => s.Name.StartsWith(SentryAIConstants.SentryActivitySourceName),
+        ShouldListenTo = source => source.Name.StartsWith(SentryAIConstants.SentryActivitySourceName),
         Sample = (ref ActivityCreationOptions<ActivityContext> options) =>
             SentryAIConstants.FICCActivityNames.Contains(options.Name) ?
                 ActivitySamplingResult.AllDataAndRecorded : ActivitySamplingResult.None,
-        ActivityStarted = a =>
+        ActivityStarted = activity =>
         {
             var agentSpan = HubAdapter.Instance.StartSpan(SentryAIConstants.SpanAttributes.InvokeAgentOperation, SentryAIConstants.SpanAttributes.InvokeAgentDescription);
-            a.SetFused(SentryAIConstants.SentryActivitySpanAttributeName, agentSpan);
+            activity.SetFused(SentryAIConstants.SentryActivitySpanAttributeName, agentSpan);
         },
-        ActivityStopped = a =>
+        ActivityStopped = activity =>
         {
-            var agentSpan = a.GetFused<ISpan>(SentryAIConstants.SentryActivitySpanAttributeName);
+            var agentSpan = activity.GetFused<ISpan>(SentryAIConstants.SentryActivitySpanAttributeName);
             // Don't pass in OK status in case there was an exception
             agentSpan?.Finish();
-        },
+        }
     };
 
     /// <summary>
