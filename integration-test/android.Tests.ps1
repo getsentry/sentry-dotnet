@@ -177,4 +177,28 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
             $result.Envelopes() | Should -HaveCount 1
         }
     }
+
+    It 'Delivers battery breadcrumbs in main thread (<configuration>)' {
+        $result = Invoke-SentryServer {
+            param([string]$url)
+            RunAndroidApp -Dsn $url -TestArg "BATTERY_CHANGED"
+        }
+
+        Dump-ServerErrors -Result $result
+        $result.HasErrors() | Should -BeFalse
+        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"system`",`"thread_id`":`"1`",`"category`":`"device.event`",`"action`":`"BATTERY_CHANGED`""
+        $result.Envelopes() | Should -HaveCount 1
+    }
+
+    It 'Delivers network breadcrumbs in main thread (<configuration>)' {
+        $result = Invoke-SentryServer {
+            param([string]$url)
+            RunAndroidApp -Dsn $url -TestArg "NETWORK_CAPABILITIES_CHANGED"
+        }
+
+        Dump-ServerErrors -Result $result
+        $result.HasErrors() | Should -BeFalse
+        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"system`",`"thread_id`":`"1`",`"category`":`"network.event`",`"action`":`"NETWORK_CAPABILITIES_CHANGED`""
+        $result.Envelopes() | Should -HaveCount 1
+    }
 }

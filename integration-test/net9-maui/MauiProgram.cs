@@ -20,6 +20,12 @@ public static class MauiProgram
                 // predictable crash envelopes only
                 options.SendClientReports = false;
                 options.AutoSessionTracking = false;
+
+                options.SetBeforeBreadcrumb((breadcrumb, hint) =>
+                {
+                    App.ReceiveSystemBreadcrumb(breadcrumb);
+                    return breadcrumb;
+                });
             })
             .ConfigureFonts(fonts =>
             {
