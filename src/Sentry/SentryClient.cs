@@ -51,10 +51,7 @@ public class SentryClient : ISentryClient, IDisposable
         _sessionManager = sessionManager ?? new GlobalSessionManager(options);
         _enricher = new Enricher(options);
 
-        if (options.DiagnosticLogger is null)
-        {
-            options.SetupLogging(); // Only relevant if this client wasn't created as a result of calling Init
-        }
+        options.SetupLogging(); // Only relevant if this client wasn't created as a result of calling Init
 
         if (worker == null)
         {
