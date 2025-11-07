@@ -209,6 +209,77 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.SourceGenerators.Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Maui.CommunityToolkit.Mvvm.Tests", "test\Sentry.Maui.CommunityToolkit.Mvvm.Tests\Sentry.Maui.CommunityToolkit.Mvvm.Tests.csproj", "{ADC91A84-6054-42EC-8241-0D717E4C7194}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{A8A97D6A-02C0-4808-9D62-DFFAB324A323}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\update-cli.ps1 = scripts\update-cli.ps1
+		scripts\bump-version.sh = scripts\bump-version.sh
+		scripts\device-test.ps1 = scripts\device-test.ps1
+		scripts\dirty-check.ps1 = scripts\dirty-check.ps1
+		scripts\update-java.ps1 = scripts\update-java.ps1
+		scripts\bump-version.ps1 = scripts\bump-version.ps1
+		scripts\parse-xunit2-xml.ps1 = scripts\parse-xunit2-xml.ps1
+		scripts\build-sentry-cocoa.sh = scripts\build-sentry-cocoa.sh
+		scripts\update-project-xml.ps1 = scripts\update-project-xml.ps1
+		scripts\build-sentry-native.ps1 = scripts\build-sentry-native.ps1
+		scripts\ios-simulator-utils.ps1 = scripts\ios-simulator-utils.ps1
+		scripts\commit-formatted-code.sh = scripts\commit-formatted-code.sh
+		scripts\accept-verifier-changes.ps1 = scripts\accept-verifier-changes.ps1
+		scripts\generate-cocoa-bindings.ps1 = scripts\generate-cocoa-bindings.ps1
+		scripts\generate-solution-filters.ps1 = scripts\generate-solution-filters.ps1
+		scripts\generate-solution-filters-config.yaml = scripts\generate-solution-filters-config.yaml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{EC6ADE8A-E557-4848-8F03-519039830B5F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{BFF081D8-7CC0-4069-99F5-5CA0D70B56AB}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build.yml = .github\workflows\build.yml
+		.github\workflows\alpine.yml = .github\workflows\alpine.yml
+		.github\workflows\danger.yml = .github\workflows\danger.yml
+		.github\workflows\release.yml = .github\workflows\release.yml
+		.github\workflows\format-code.yml = .github\workflows\format-code.yml
+		.github\workflows\update-deps.yml = .github\workflows\update-deps.yml
+		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
+		.github\workflows\vulnerabilities.yml = .github\workflows\vulnerabilities.yml
+		.github\workflows\device-tests-ios.yml = .github\workflows\device-tests-ios.yml
+		.github\workflows\device-tests-android.yml = .github\workflows\device-tests-android.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "actions", "actions", "{5D50D425-244F-4B79-B9F5-21D26DD52DC1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "environment", "environment", "{39216438-F347-427C-AB70-48DB1BA6E299}"
+	ProjectSection(SolutionItems) = preProject
+		.github\actions\environment\action.yml = .github\actions\environment\action.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "buildnative", "buildnative", "{A384A71C-A46F-49DB-B7FB-5DEEFC5E6CA3}"
+	ProjectSection(SolutionItems) = preProject
+		.github\actions\buildnative\action.yml = .github\actions\buildnative\action.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "freediskspace", "freediskspace", "{E34AA22F-B42E-4D4C-B96E-426AEBC2F367}"
+	ProjectSection(SolutionItems) = preProject
+		.github\actions\freediskspace\action.yml = .github\actions\freediskspace\action.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "install-zstd", "install-zstd", "{94A2DCA5-F298-41FB-913A-476668EF5786}"
+	ProjectSection(SolutionItems) = preProject
+		.github\actions\install-zstd\action.yml = .github\actions\install-zstd\action.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "integration-test", "integration-test", "{94CCDBEF-5867-4C24-A305-0C2AE738AF42}"
+	ProjectSection(SolutionItems) = preProject
+		integration-test\common.ps1 = integration-test\common.ps1
+		integration-test\aot.Tests.ps1 = integration-test\aot.Tests.ps1
+		integration-test\cli.Tests.ps1 = integration-test\cli.Tests.ps1
+		integration-test\runtime.Tests.ps1 = integration-test\runtime.Tests.ps1
+		integration-test\pester.ps1 = integration-test\pester.ps1
+		integration-test\ios.Tests.ps1 = integration-test\ios.Tests.ps1
+		integration-test\msbuild.Tests.ps1 = integration-test\msbuild.Tests.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "net4-console", "net4-console", "{33793113-C7B5-434D-B5C1-6CA1A9587842}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.ME.AI.Console", "samples\Sentry.Samples.ME.AI.Console\Sentry.Samples.ME.AI.Console.csproj", "{CE591593-E51C-498E-BC0D-5083C8197544}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Samples.ME.AI.AspNetCore", "samples\Sentry.Samples.ME.AI.AspNetCore\Sentry.Samples.ME.AI.AspNetCore.csproj", "{3D91128A-5695-4BAE-B939-5F5F7C56A679}"
@@ -1399,6 +1470,13 @@ Global
 		{C3CDF61C-3E28-441C-A9CE-011C89D11719} = {230B9384-90FD-4551-A5DE-1A5C197F25B6}
 		{3A76FF7D-2F32-4EA5-8999-2FFE3C7CB893} = {6987A1CC-608E-4868-A02C-09D30C8B7B2D}
 		{ADC91A84-6054-42EC-8241-0D717E4C7194} = {6987A1CC-608E-4868-A02C-09D30C8B7B2D}
+		{BFF081D8-7CC0-4069-99F5-5CA0D70B56AB} = {EC6ADE8A-E557-4848-8F03-519039830B5F}
+		{5D50D425-244F-4B79-B9F5-21D26DD52DC1} = {EC6ADE8A-E557-4848-8F03-519039830B5F}
+		{39216438-F347-427C-AB70-48DB1BA6E299} = {5D50D425-244F-4B79-B9F5-21D26DD52DC1}
+		{A384A71C-A46F-49DB-B7FB-5DEEFC5E6CA3} = {5D50D425-244F-4B79-B9F5-21D26DD52DC1}
+		{E34AA22F-B42E-4D4C-B96E-426AEBC2F367} = {5D50D425-244F-4B79-B9F5-21D26DD52DC1}
+		{94A2DCA5-F298-41FB-913A-476668EF5786} = {5D50D425-244F-4B79-B9F5-21D26DD52DC1}
+		{33793113-C7B5-434D-B5C1-6CA1A9587842} = {94CCDBEF-5867-4C24-A305-0C2AE738AF42}
 		{CE591593-E51C-498E-BC0D-5083C8197544} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
 		{3D91128A-5695-4BAE-B939-5F5F7C56A679} = {21B42F60-5802-404E-90F0-AEBCC56760C0}
 		{AE461926-00B8-4FDD-A41D-3C83C2D9A045} = {230B9384-90FD-4551-A5DE-1A5C197F25B6}
