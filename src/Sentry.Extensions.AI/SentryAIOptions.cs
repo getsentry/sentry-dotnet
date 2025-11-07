@@ -25,10 +25,6 @@ public class SentryAIOptions
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public sealed class SentryAIExperimentalOptions
     {
-        internal SentryAIExperimentalOptions()
-        {
-        }
-
         /// <summary>
         /// Whether to include request messages in spans.
         /// <para>This API is experimental, and it may change in the future.</para>
