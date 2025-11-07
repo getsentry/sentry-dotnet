@@ -681,7 +681,7 @@ public class CachingTransportTests : IDisposable
     }
 
     [Fact]
-    public async Task SalvageAbandonedCacheSessions_IgnoresCurrentDirectory()
+    public async Task SalvageAbandonedCacheSessions_CurrentDirectory_Skipped()
     {
         // Arrange
         using var innerTransport = new FakeTransport();
@@ -689,11 +689,7 @@ public class CachingTransportTests : IDisposable
         var currentIsolated = _options.GetIsolatedCacheDirectoryPath()!;
 
         var currentFile = Path.Combine(currentIsolated, "current.envelope");
-        if (_options.FileSystem.CreateFileForWriting(currentFile, out var stream))
-        {
-            await stream.DisposeAsync();
-        }
-        _options.FileSystem.FileExists(currentFile).Should().BeTrue();
+        _options.FileSystem.WriteAllTextToFile(currentFile, "dummy content");
 
         // Act
         transport.SalvageAbandonedCacheSessions(CancellationToken.None);
@@ -703,7 +699,7 @@ public class CachingTransportTests : IDisposable
     }
 
     [Fact]
-    public async Task SalvageAbandonedCacheSessions_SkipsDirectoriesWithActiveLock()
+    public async Task SalvageAbandonedCacheSessions_ActiveLock_Skipped()
     {
         // Arrange
         using var innerTransport = new FakeTransport();
@@ -716,10 +712,8 @@ public class CachingTransportTests : IDisposable
         var lockedDir = Path.Combine(baseCacheDir, "isolated_locked");
         _options.FileSystem.CreateDirectory(lockedDir);
         var lockedEnvelope = Path.Combine(lockedDir, "locked.envelope");
-        if (_options.FileSystem.CreateFileForWriting(lockedEnvelope, out var stream))
-        {
-            stream.Dispose();
-        }
+        _options.FileSystem.WriteAllTextToFile(lockedEnvelope, "dummy content");
+
         // Acquire the lock so salvage can't take it
         using (var coordinator = new CacheDirectoryCoordinator(lockedDir, _options.DiagnosticLogger, _options.FileSystem))
         {
