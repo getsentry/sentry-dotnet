@@ -6,7 +6,7 @@ public class CacheDirectoryCoordinatorTests : IDisposable
 
     public void Dispose()
     {
-       _fixture.CacheRoot.Dispose();
+        _fixture.CacheRoot.Dispose();
     }
 
     private class Fixture
