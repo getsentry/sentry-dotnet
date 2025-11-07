@@ -62,7 +62,7 @@ public class CacheDirectoryCoordinatorTests : IDisposable
     }
 
     [Fact]
-    public void TryAcquireMultiple_Released_Succeeds()
+    public void TryAcquire_AfterReleasedSut_Succeeds()
     {
         // Arrange
         var c1 = _fixture.GetSut();

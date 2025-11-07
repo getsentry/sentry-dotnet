@@ -17,6 +17,12 @@ namespace Sentry.Internal.Http;
 /// </remarks>
 internal class CachingTransport : ITransport, IDisposable
 {
+    internal const int ResultMigrationOk = 0;
+    internal const int ResultMigrationNoBaseCacheDir = 1;
+    internal const int ResultMigrationAlreadyMigrated = 2;
+    internal const int ResultMigrationLockNotAcquired = 3;
+    internal const int ResultMigrationCancelled = 4;
+
     private const string EnvelopeFileExt = "envelope";
     private const string ProcessingFolder = "__processing";
 
@@ -107,7 +113,11 @@ internal class CachingTransport : ITransport, IDisposable
             _worker = Task.Run(CachedTransportBackgroundTaskAsync);
 
             // Start a recycler in the background so as not to block initialisation
-            _recycler = Task.Run(() => SalvageAbandonedCacheSessions(_workerCts.Token), _workerCts.Token);
+            _recycler = Task.Run(() =>
+            {
+                SalvageAbandonedCacheSessions(_workerCts.Token);
+                MigrateVersion5Cache(_workerCts.Token);
+            }, _workerCts.Token);
         }
         else
         {
@@ -249,6 +259,65 @@ internal class CachingTransport : ITransport, IDisposable
         }
     }
 
+    /// <summary>
+    /// When migrating from version 5 to version 6, the cache directory structure changed.
+    /// In version 5, there were no isolated subdirectories.
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns>An integer return code to facillitate testing</returns>
+    internal int MigrateVersion5Cache(CancellationToken cancellationToken)
+    {
+        if (_options.GetBaseCacheDirectoryPath() is not { } baseCacheDir)
+        {
+            return ResultMigrationNoBaseCacheDir;
+        }
+
+        // This code needs to execute only once during the first initialization of version 6.
+        var markerFile = Path.Combine(baseCacheDir, ".migrated");
+        if (_fileSystem.FileExists(markerFile))
+        {
+            return ResultMigrationAlreadyMigrated;
+        }
+
+        var migrationLock = Path.Combine(baseCacheDir, "migration");
+        using var coordinator = new CacheDirectoryCoordinator(migrationLock, _options.DiagnosticLogger, _options.FileSystem);
+        if (!coordinator.TryAcquire())
+        {
+            return ResultMigrationLockNotAcquired;
+        }
+
+        const string searchPattern = $"*.{EnvelopeFileExt}";
+        var processingDirectoryPath = Path.Combine(baseCacheDir, ProcessingFolder);
+        foreach (var cacheDir in new[] { baseCacheDir, processingDirectoryPath })
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return ResultMigrationCancelled; // graceful exit on cancellation
+            }
+
+            if (!_fileSystem.DirectoryExists(cacheDir))
+            {
+                continue;
+            }
+
+            foreach (var filePath in _fileSystem.EnumerateFiles(cacheDir, searchPattern, SearchOption.TopDirectoryOnly))
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return ResultMigrationCancelled; // graceful exit on cancellation
+                }
+
+                var destinationPath = Path.Combine(_isolatedCacheDirectoryPath, Path.GetFileName(filePath));
+                _options.LogDebug("Migrating version 5 cache file: {0} to {1}.", filePath, destinationPath);
+                MoveFileWithRetries(filePath, destinationPath, "version 5");
+            }
+        }
+
+        // Leave a marker file so we don't try to migrate again
+        _fileSystem.WriteAllTextToFile(markerFile, "6.0.0");
+        return ResultMigrationOk;
+    }
+
     private void MoveFileWithRetries(string filePath, string destinationPath, string moveType)
     {
         const int maxAttempts = 3;
@@ -257,6 +326,7 @@ internal class CachingTransport : ITransport, IDisposable
             try
             {
                 _fileSystem.MoveFile(filePath, destinationPath);
+
                 break;
             }
             catch (Exception ex)
