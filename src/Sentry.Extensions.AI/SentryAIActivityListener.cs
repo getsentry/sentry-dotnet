@@ -7,7 +7,7 @@ namespace Sentry.Extensions.AI;
 /// </summary>
 internal static class SentryAIActivityListener
 {
-    private static IHub Hub = HubAdapter.Instance;
+    private static volatile IHub Hub = HubAdapter.Instance;
 
     /// <summary>
     /// Sentry's <see cref="ActivityListener"/> to tap into function invocation's Activity
