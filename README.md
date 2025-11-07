@@ -13,6 +13,7 @@ Sentry SDK for .NET
 
 [![build](https://github.com/getsentry/sentry-dotnet/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/getsentry/sentry-dotnet/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/getsentry/sentry-dotnet/branch/main/graph/badge.svg)](https://codecov.io/gh/getsentry/sentry-dotnet)
+[![X Follow](https://img.shields.io/twitter/follow/sentry?label=sentry&style=social)](https://x.com/intent/follow?screen_name=sentry)
 [![Discord Chat](https://img.shields.io/discord/621778831602221064?logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/PXa5Apfe7K)
 
 | Integrations                      | Downloads | NuGet Stable | NuGet Preview |                                                                                                  Documentation                                                                                                  |
