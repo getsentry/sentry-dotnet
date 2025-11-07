@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>$(CurrentTfms);netstandard2.0</TargetFrameworks>
     <PackageTags>$(PackageTags);Microsoft.Extensions.AI;AI;LLM</PackageTags>
     <Description>Microsoft.Extensions.AI integration for Sentry - captures AI Agent telemetry spans per Sentry AI Agents module.</Description>
   </PropertyGroup>
