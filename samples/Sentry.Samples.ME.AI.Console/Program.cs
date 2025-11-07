@@ -14,26 +14,28 @@ if (openAiApiKey == null)
     throw new InvalidOperationException($"Environment variable for OpenAI API key '{varName}' is not set.");
 }
 
+// Initialize Sentry SDK
+SentrySdk.Init(options =>
+{
+#if !SENTRY_DSN_DEFINED_IN_ENV
+    // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+    // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+    options.Dsn = SamplesShared.Dsn;
+#endif
+    options.Debug = true;
+    options.DiagnosticLevel = SentryLevel.Debug;
+    options.SampleRate = 1;
+    options.TracesSampleRate = 1;
+});
+
 // Create OpenAI API client and wrap it with Sentry instrumentation
 var openAiClient = new OpenAI.Chat.ChatClient("gpt-4o-mini", openAiApiKey)
     .AsIChatClient()
     .AddSentry(options =>
     {
-#if !SENTRY_DSN_DEFINED_IN_ENV
-        // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
-        // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
-        options.Dsn = SamplesShared.Dsn;
-#endif
-        options.Debug = true;
-        options.DiagnosticLevel = SentryLevel.Debug;
-        options.SampleRate = 1;
-        options.TracesSampleRate = 1;
-
         // AI-specific settings
         options.RecordInputs = true;
         options.RecordOutputs = true;
-        // Since this is a simple console app without Sentry already set up, we need to initialize our SDK
-        options.InitializeSdk = true;
     });
 
 var client = new ChatClientBuilder(openAiClient)

@@ -11,12 +11,6 @@ internal sealed class SentryChatClient : DelegatingChatClient
     {
         _sentryAIOptions = new SentryAIOptions();
         configure?.Invoke(_sentryAIOptions);
-
-        // If user requested to initialize the SDK, and SDK is not enabled already, then use the options to init Sentry
-        if (_sentryAIOptions.InitializeSdk && !SentrySdk.IsEnabled)
-        {
-            SentrySdk.Init(_sentryAIOptions);
-        }
     }
 
     /// <inheritdoc cref="IChatClient"/>
