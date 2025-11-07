@@ -764,7 +764,7 @@ public class CachingTransportTests : IDisposable
         var movedProc = Path.Combine(isolatedCacheDir, "v5_proc.envelope");
         _options.FileSystem.FileExists(movedRoot).Should().BeTrue();
         _options.FileSystem.FileExists(movedProc).Should().BeTrue();
-     }
+    }
 
     [Fact]
     public async Task MigrateVersion5Cache_AlreadyMigrated_Skipped()
