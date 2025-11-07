@@ -22,13 +22,13 @@ internal static class SentryAISpanEnricher
             span.SetData(SentryAIConstants.SpanAttributes.RequestModel, modelId);
         }
 
-        if (aiOptions.AgentName is { } agentName)
+        if (aiOptions.Experimental.AgentName is { } agentName)
         {
             span.SetData(SentryAIConstants.SpanAttributes.AgentName, agentName);
         }
 
         if (messages is { Length: > 0 }
-            && aiOptions.RecordInputs
+            && aiOptions.Experimental.RecordInputs
             // Only add request messages if there is none currently
             && !span.Data.ContainsKey(SentryAIConstants.SpanAttributes.RequestMessages))
         {
@@ -123,7 +123,7 @@ internal static class SentryAISpanEnricher
             }
         }
 
-        if (aiOptions.RecordOutputs)
+        if (aiOptions.Experimental.RecordOutputs)
         {
             span.SetData(SentryAIConstants.SpanAttributes.ResponseText, finalText.ToString());
         }

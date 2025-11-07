@@ -1,3 +1,5 @@
+using Sentry.Infrastructure;
+
 namespace Sentry.Extensions.AI;
 
 /// <summary>
@@ -6,17 +8,43 @@ namespace Sentry.Extensions.AI;
 public class SentryAIOptions
 {
     /// <summary>
-    /// Whether to include request messages in spans.
+    /// Experimental Sentry AI features.
     /// </summary>
-    public bool RecordInputs { get; set; } = true;
+    /// <remarks>
+    /// This and related experimental APIs may change in the future.
+    /// </remarks>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public SentryAIExperimentalOptions Experimental { get; set; } = new();
 
     /// <summary>
-    /// Whether to include response content in spans.
+    /// Experimental Sentry AI options.
     /// </summary>
-    public bool RecordOutputs { get; set; } = true;
+    /// <remarks>
+    /// This and related experimental APIs may change in the future.
+    /// </remarks>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
+    public sealed class SentryAIExperimentalOptions
+    {
+        internal SentryAIExperimentalOptions()
+        {
+        }
 
-    /// <summary>
-    /// Name of the AI Agent
-    /// </summary>
-    public string AgentName { get; set; } = "Agent";
+        /// <summary>
+        /// Whether to include request messages in spans.
+        /// <para>This API is experimental, and it may change in the future.</para>
+        /// </summary>
+        public bool RecordInputs { get; set; } = true;
+
+        /// <summary>
+        /// Whether to include response content in spans.
+        /// <para>This API is experimental, and it may change in the future.</para>
+        /// </summary>
+        public bool RecordOutputs { get; set; } = true;
+
+        /// <summary>
+        /// Name of the AI Agent
+        /// <para>This API is experimental, and it may change in the future.</para>
+        /// </summary>
+        public string AgentName { get; set; } = "Agent";
+    }
 }

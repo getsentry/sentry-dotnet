@@ -1,6 +1,5 @@
 #nullable enable
 using Microsoft.Extensions.AI;
-using Sentry.Extensions.AI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,8 +32,8 @@ var openAiClient = new OpenAI.Chat.ChatClient("gpt-4o-mini", openAiApiKey)
     .AddSentry(options =>
     {
         // In this case, we already initialized Sentry from ASP.NET WebHost creation, we don't need to initialize
-        options.RecordInputs = true;
-        options.RecordOutputs = true;
+        options.Experimental.RecordInputs = true;
+        options.Experimental.RecordOutputs = true;
     });
 
 var client = new ChatClientBuilder(openAiClient)

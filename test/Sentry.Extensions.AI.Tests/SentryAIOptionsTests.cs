@@ -11,8 +11,8 @@ public class SentryAIOptionsTests
         var options = new SentryAIOptions();
 
         // Assert
-        Assert.True(options.RecordInputs);
-        Assert.True(options.RecordOutputs);
+        Assert.True(options.Experimental.RecordInputs);
+        Assert.True(options.Experimental.RecordOutputs);
     }
 
     [Fact]
@@ -22,11 +22,14 @@ public class SentryAIOptionsTests
         var options = new SentryAIOptions
         {
             // Act
-            RecordInputs = false
+            Experimental =
+            {
+                RecordInputs = false
+            }
         };
 
         // Assert
-        Assert.False(options.RecordInputs);
+        Assert.False(options.Experimental.RecordInputs);
     }
 
     [Fact]
@@ -36,11 +39,14 @@ public class SentryAIOptionsTests
         var options = new SentryAIOptions
         {
             // Act
-            RecordOutputs = false
+            Experimental =
+            {
+                RecordOutputs = false
+            }
         };
 
         // Assert
-        Assert.False(options.RecordOutputs);
+        Assert.False(options.Experimental.RecordOutputs);
     }
 
     [Theory]
@@ -54,12 +60,15 @@ public class SentryAIOptionsTests
         var options = new SentryAIOptions
         {
             // Act
-            RecordInputs = includeRequest,
-            RecordOutputs = includeResponse
+            Experimental =
+            {
+                RecordInputs = includeRequest,
+                RecordOutputs = includeResponse
+            }
         };
 
         // Assert
-        Assert.Equal(includeRequest, options.RecordInputs);
-        Assert.Equal(includeResponse, options.RecordOutputs);
+        Assert.Equal(includeRequest, options.Experimental.RecordInputs);
+        Assert.Equal(includeResponse, options.Experimental.RecordOutputs);
     }
 }

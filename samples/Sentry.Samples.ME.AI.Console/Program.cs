@@ -1,6 +1,5 @@
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
-using Sentry.Extensions.AI;
 
 using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 var logger = loggerFactory.CreateLogger<Program>();
@@ -34,8 +33,8 @@ var openAiClient = new OpenAI.Chat.ChatClient("gpt-4o-mini", openAiApiKey)
     .AddSentry(options =>
     {
         // AI-specific settings
-        options.RecordInputs = true;
-        options.RecordOutputs = true;
+        options.Experimental.RecordInputs = true;
+        options.Experimental.RecordOutputs = true;
     });
 
 var client = new ChatClientBuilder(openAiClient)

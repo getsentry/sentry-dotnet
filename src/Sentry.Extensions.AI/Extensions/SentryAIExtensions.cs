@@ -1,4 +1,5 @@
 using Sentry.Extensions.AI;
+using Sentry.Infrastructure;
 
 namespace Microsoft.Extensions.AI;
 
@@ -11,7 +12,11 @@ public static class SentryAIExtensions
     /// <summary>
     /// Wrap tool calls specified in <see cref="ChatOptions"/> with Sentry agent instrumentation
     /// </summary>
+    /// <remarks>
+    /// This API is experimental, and it may change in the future.
+    /// </remarks>
     /// <param name="options">The <see cref="ChatOptions"/> that contains the <see cref="AIFunction"/> to instrument</param>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public static ChatOptions AddSentryToolInstrumentation(this ChatOptions options)
     {
         if (options.Tools is { Count: 0 })
@@ -34,13 +39,18 @@ public static class SentryAIExtensions
     /// Wraps an IChatClient with Sentry agent instrumentation.
     /// </summary>
     /// <remarks>
-    /// This method can be used either with an existing Sentry setup or as a standalone integration.
-    /// If Sentry is already initialized, it will use the existing configuration.
-    /// If not, it will initialize Sentry with the provided options.
+    /// <para>
+    /// This method has to be used with an existing Sentry setup. You need to initialize SentrySDK explicitly for
+    /// AI Agent monitoring to work properly.
+    /// </para>
+    /// <para>
+    /// This API is experimental, and it may change in the future.
+    /// </para>
     /// </remarks>
     /// <param name="client">The <see cref="IChatClient"/> to be instrumented</param>
     /// <param name="configure">The <see cref="SentryAIOptions"/> configuration</param>
     /// <returns>The instrumented <see cref="IChatClient"/></returns>
+    [Experimental(DiagnosticId.ExperimentalFeature)]
     public static IChatClient AddSentry(this IChatClient client, Action<SentryAIOptions>? configure = null)
     {
         SentryAIActivityListener.Init();

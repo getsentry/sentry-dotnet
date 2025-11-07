@@ -88,7 +88,10 @@ public class SentryAISpanEnricherTests
         var chatOptions = TestChatOptions();
         var aiOptions = new SentryAIOptions()
         {
-            RecordInputs = false
+            Experimental =
+            {
+                RecordInputs = false
+            }
         };
 
         // Act
@@ -117,7 +120,10 @@ public class SentryAISpanEnricherTests
         var messages = TestMessages();
         var aiOptions = new SentryAIOptions()
         {
-            RecordInputs = false
+            Experimental =
+            {
+                RecordInputs = false
+            }
         };
 
         // Act
@@ -187,7 +193,10 @@ public class SentryAISpanEnricherTests
         };
         var aiOptions = new SentryAIOptions()
         {
-            RecordOutputs = false
+            Experimental =
+            {
+                RecordOutputs = false
+            }
         };
 
         // Act
@@ -232,7 +241,7 @@ public class SentryAISpanEnricherTests
             }
         };
 
-        var aiOptions = new SentryAIOptions { RecordOutputs = true };
+        var aiOptions = new SentryAIOptions { Experimental = { RecordOutputs = true } };
 
         // Act
         SentryAISpanEnricher.EnrichWithStreamingResponses(span, streamingMessages, aiOptions);
@@ -266,7 +275,7 @@ public class SentryAISpanEnricherTests
             }
         };
 
-        var aiOptions = new SentryAIOptions { RecordOutputs = false };
+        var aiOptions = new SentryAIOptions { Experimental = { RecordOutputs = false } };
 
         // Act
         SentryAISpanEnricher.EnrichWithStreamingResponses(span, streamingMessages, aiOptions);
