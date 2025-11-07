@@ -18,6 +18,7 @@ namespace Sentry.Extensions.AI
         [System.Diagnostics.CodeAnalysis.Experimental("SENTRY0001")]
         public sealed class SentryAIExperimentalOptions
         {
+            public SentryAIExperimentalOptions() { }
             public string AgentName { get; set; }
             public bool RecordInputs { get; set; }
             public bool RecordOutputs { get; set; }
