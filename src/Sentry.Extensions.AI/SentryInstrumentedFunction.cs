@@ -2,9 +2,10 @@ using Microsoft.Extensions.AI;
 
 namespace Sentry.Extensions.AI;
 
-internal sealed class SentryInstrumentedFunction(AIFunction innerFunction)
+internal sealed class SentryInstrumentedFunction(AIFunction innerFunction, IHub? hub = null)
     : DelegatingAIFunction(innerFunction)
 {
+    private readonly IHub _hub = hub ?? HubAdapter.Instance;
     protected override async ValueTask<object?> InvokeCoreAsync(
         AIFunctionArguments arguments,
         CancellationToken cancellationToken)
@@ -26,12 +27,12 @@ internal sealed class SentryInstrumentedFunction(AIFunction innerFunction)
         catch (Exception ex)
         {
             toolSpan.Finish(SpanStatus.InternalError);
-            HubAdapter.Instance.CaptureException(ex);
+            _hub.CaptureException(ex);
             if (agentSpan != null)
             {
                 // We don't finish the agent span with the exception because there will be another call to LLM.
                 // Python SDK currently binds the exception to the agent span, so we do so here.
-                HubAdapter.Instance.BindException(ex, agentSpan);
+                _hub.BindException(ex, agentSpan);
             }
             throw;
         }
@@ -45,7 +46,7 @@ internal sealed class SentryInstrumentedFunction(AIFunction innerFunction)
         var currSpan = agentSpan != null
             ? agentSpan.StartChild(SentryAIConstants.SpanAttributes.ToolCallOperation, spanName)
             // If we couldn't find the agent span, just attach it to the hub's current scope
-            : HubAdapter.Instance.StartSpan(SentryAIConstants.SpanAttributes.ToolCallOperation, spanName);
+            : _hub.StartSpan(SentryAIConstants.SpanAttributes.ToolCallOperation, spanName);
 
         currSpan.SetData(SentryAIConstants.SpanAttributes.OperationName, "execute_tool");
         currSpan.SetData(SentryAIConstants.SpanAttributes.ToolName, Name);
