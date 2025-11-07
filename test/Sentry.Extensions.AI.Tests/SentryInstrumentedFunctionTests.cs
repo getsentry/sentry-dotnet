@@ -5,13 +5,24 @@ namespace Sentry.Extensions.AI.Tests;
 
 public class SentryInstrumentedFunctionTests
 {
+    private class Fixture
+    {
+        public IHub Hub { get; } = Substitute.For<IHub>();
+
+        public Fixture()
+        {
+            Hub.IsEnabled.Returns(true);
+        }
+    }
+
+    private readonly Fixture _fixture = new();
+
     [Fact]
     public async Task InvokeCoreAsync_WithValidFunction_ReturnsResult()
     {
         // Arrange
-        using var sentryDisposable = SentryHelpers.InitializeSdk();
         var testFunction = AIFunctionFactory.Create(() => "test result", "TestFunction", "Test function description");
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, _fixture.Hub);
         var arguments = new AIFunctionArguments();
 
         // Act
@@ -28,17 +39,20 @@ public class SentryInstrumentedFunctionTests
         {
             Assert.Equal("test result", result);
         }
+
         Assert.Equal("TestFunction", sentryFunction.Name);
         Assert.Equal("Test function description", sentryFunction.Description);
+        _fixture.Hub.Received(1).StartTransaction(
+            Arg.Any<ITransactionContext>(),
+            Arg.Any<IReadOnlyDictionary<string, object?>>());
     }
 
     [Fact]
     public async Task InvokeCoreAsync_WithNullResult_ReturnsNull()
     {
         // Arrange
-        using var sentryDisposable = SentryHelpers.InitializeSdk();
         var testFunction = AIFunctionFactory.Create(object? () => null, "TestFunction", "Test function description");
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, _fixture.Hub);
         var arguments = new AIFunctionArguments();
 
         // Act
@@ -53,16 +67,19 @@ public class SentryInstrumentedFunctionTests
         {
             Assert.Null(result);
         }
+
+        _fixture.Hub.Received(1).StartTransaction(
+            Arg.Any<ITransactionContext>(),
+            Arg.Any<IReadOnlyDictionary<string, object?>>());
     }
 
     [Fact]
     public async Task InvokeCoreAsync_WithJsonNullResult_ReturnsJsonElement()
     {
         // Arrange
-        using var sentryDisposable = SentryHelpers.InitializeSdk();
         var jsonNullElement = JsonSerializer.Deserialize<JsonElement>("null");
         var testFunction = AIFunctionFactory.Create(() => jsonNullElement, "TestFunction", "Test function description");
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, _fixture.Hub);
         var arguments = new AIFunctionArguments();
 
         // Act
@@ -73,16 +90,18 @@ public class SentryInstrumentedFunctionTests
         Assert.IsType<JsonElement>(result);
         var jsonResult = (JsonElement)result;
         Assert.Equal(JsonValueKind.Null, jsonResult.ValueKind);
+        _fixture.Hub.Received(1).StartTransaction(
+            Arg.Any<ITransactionContext>(),
+            Arg.Any<IReadOnlyDictionary<string, object?>>());
     }
 
     [Fact]
     public async Task InvokeCoreAsync_WithJsonElementResult_CallsToStringForSpanOutput()
     {
         // Arrange
-        using var sentryDisposable = SentryHelpers.InitializeSdk();
         var jsonElement = JsonSerializer.Deserialize<JsonElement>("\"test output\"");
         var testFunction = AIFunctionFactory.Create(() => jsonElement, "TestFunction", "Test function description");
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, _fixture.Hub);
         var arguments = new AIFunctionArguments();
 
         // Act
@@ -93,16 +112,22 @@ public class SentryInstrumentedFunctionTests
         Assert.IsType<JsonElement>(result);
         var jsonResult = (JsonElement)result;
         Assert.Equal("test output", jsonResult.GetString());
+        _fixture.Hub.Received(1).StartTransaction(
+            Arg.Any<ITransactionContext>(),
+            Arg.Any<IReadOnlyDictionary<string, object?>>());
     }
 
     [Fact]
     public async Task InvokeCoreAsync_WithComplexResult_ReturnsObject()
     {
         // Arrange
-        using var sentryDisposable = SentryHelpers.InitializeSdk();
-        var resultObject = new { message = "test", count = 42 };
+        var resultObject = new
+        {
+            message = "test",
+            count = 42
+        };
         var testFunction = AIFunctionFactory.Create(() => resultObject, "TestFunction", "Test function description");
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, _fixture.Hub);
         var arguments = new AIFunctionArguments();
 
         // Act
@@ -122,16 +147,20 @@ public class SentryInstrumentedFunctionTests
         {
             Assert.Equal(resultObject, result);
         }
+
+        _fixture.Hub.Received(1).StartTransaction(
+            Arg.Any<ITransactionContext>(),
+            Arg.Any<IReadOnlyDictionary<string, object?>>());
     }
 
     [Fact]
     public async Task InvokeCoreAsync_WhenFunctionThrows_PropagatesException()
     {
         // Arrange
-        using var sentryDisposable = SentryHelpers.InitializeSdk();
         var expectedException = new InvalidOperationException("Test exception");
-        var testFunction = AIFunctionFactory.Create(new Func<object>(() => throw expectedException), "TestFunction", "Test function description");
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
+        var testFunction = AIFunctionFactory.Create(new Func<object>(() => throw expectedException), "TestFunction",
+            "Test function description");
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, _fixture.Hub);
         var arguments = new AIFunctionArguments();
 
         // Act & Assert
@@ -139,20 +168,22 @@ public class SentryInstrumentedFunctionTests
             await sentryFunction.InvokeAsync(arguments));
 
         Assert.Equal(expectedException.Message, actualException.Message);
+        _fixture.Hub.Received(1).StartTransaction(
+            Arg.Any<ITransactionContext>(),
+            Arg.Any<IReadOnlyDictionary<string, object?>>());
     }
 
     [Fact]
     public async Task InvokeCoreAsync_WithCancellation_PropagatesCancellation()
     {
         // Arrange
-        using var sentryDisposable = SentryHelpers.InitializeSdk();
         var testFunction = AIFunctionFactory.Create((CancellationToken cancellationToken) =>
         {
             cancellationToken.ThrowIfCancellationRequested();
             return "result";
         }, "TestFunction", "Test function description");
 
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, _fixture.Hub);
         var arguments = new AIFunctionArguments();
         var cts = new CancellationTokenSource();
         await cts.CancelAsync();
@@ -160,13 +191,15 @@ public class SentryInstrumentedFunctionTests
         // Act & Assert
         await Assert.ThrowsAsync<OperationCanceledException>(async () =>
             await sentryFunction.InvokeAsync(arguments, cts.Token));
+        _fixture.Hub.Received(1).StartTransaction(
+            Arg.Any<ITransactionContext>(),
+            Arg.Any<IReadOnlyDictionary<string, object?>>());
     }
 
     [Fact]
     public async Task InvokeCoreAsync_WithParameters_PassesParametersCorrectly()
     {
         // Arrange
-        using var sentryDisposable = SentryHelpers.InitializeSdk();
         var receivedArguments = (AIFunctionArguments?)null;
         var testFunction = AIFunctionFactory.Create((AIFunctionArguments args) =>
         {
@@ -174,8 +207,11 @@ public class SentryInstrumentedFunctionTests
             return "result";
         }, "TestFunction", "Test function description");
 
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
-        var arguments = new AIFunctionArguments { ["param1"] = "value1" };
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, _fixture.Hub);
+        var arguments = new AIFunctionArguments
+        {
+            ["param1"] = "value1"
+        };
 
         // Act
         await sentryFunction.InvokeAsync(arguments);
@@ -183,6 +219,9 @@ public class SentryInstrumentedFunctionTests
         // Assert
         Assert.NotNull(receivedArguments);
         Assert.Equal("value1", receivedArguments["param1"]);
+        _fixture.Hub.Received(1).StartTransaction(
+            Arg.Any<ITransactionContext>(),
+            Arg.Any<IReadOnlyDictionary<string, object?>>());
     }
 
     [Fact]
@@ -192,23 +231,10 @@ public class SentryInstrumentedFunctionTests
         var testFunction = AIFunctionFactory.Create(() => "test", "TestFunction", "Test function description");
 
         // Act
-        var sentryFunction = new SentryInstrumentedFunction(testFunction);
+        var sentryFunction = new SentryInstrumentedFunction(testFunction, _fixture.Hub);
 
         // Assert
         Assert.Equal("TestFunction", sentryFunction.Name);
         Assert.Equal("Test function description", sentryFunction.Description);
-    }
-}
-
-internal static class SentryHelpers
-{
-    public static IDisposable InitializeSdk()
-    {
-        return SentrySdk.Init(options =>
-        {
-            options.Dsn = ValidDsn;
-            options.TracesSampleRate = 1.0;
-            options.Debug = false;
-        });
     }
 }
