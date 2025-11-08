@@ -129,6 +129,11 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.ApplicationException`""
         $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"SIGABRT`""
         $result.Envelopes() | Should -HaveCount 1
+
+        $payload = ($result.Envelopes()[0] -split '\\n' | Where-Object { $_ })[-1] | ConvertFrom-Json
+        $breadcrumbs = $payload.breadcrumbs | Where-Object { $_.category -eq 'app.lifecycle' }
+        $breadcrumbs | Should -HaveCount 1
+        $breadcrumbs[0].data.state | Should -Be 'foreground'
     }
 
     It 'Java crash (<configuration>)' {
@@ -143,6 +148,11 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"RuntimeException`""
         $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
         $result.Envelopes() | Should -HaveCount 1
+
+        $payload = ($result.Envelopes()[0] -split '\\n' | Where-Object { $_ })[-1] | ConvertFrom-Json
+        $breadcrumbs = $payload.breadcrumbs | Where-Object { $_.category -eq 'app.lifecycle' }
+        $breadcrumbs | Should -HaveCount 1
+        $breadcrumbs[0].data.state | Should -Be 'foreground'
     }
 
     It 'Native crash (<configuration>)' {
@@ -157,6 +167,13 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"SIG[A-Z]+`"" # SIGILL (x86_64), SIGTRAP (arm64-v8a)
         $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
         $result.Envelopes() | Should -HaveCount 1
+
+        $payload = ($result.Envelopes()[0] -split '\\n' | Where-Object { $_ })[-1] | ConvertFrom-Json
+        $breadcrumbs = $payload.breadcrumbs | Where-Object { $_.category -eq 'app.lifecycle' }
+        $breadcrumbs | ForEach-Object { Write-Host $_ | ConvertTo-Json -Depth 10 }
+        $breadcrumbs | Should -HaveCount 1
+        # TODO: should be "data":{"state":"foreground"}
+        $breadcrumbs[0].data.data | Should -Be '{"state":"foreground"}'
     }
 
     It 'Null reference exception (<configuration>)' {

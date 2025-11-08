@@ -5,6 +5,7 @@ namespace Sentry.Maui.Internal;
 internal interface IMauiEventsBinder
 {
     public void HandleApplicationEvents(Application application, bool bind = true);
+    public void HandleAppLifecycleEvent(bool inForeground);
 }
 
 internal class MauiEventsBinder : IMauiEventsBinder
@@ -18,6 +19,7 @@ internal class MauiEventsBinder : IMauiEventsBinder
     internal const string NavigationType = "navigation";
     internal const string SystemType = "system";
     internal const string UserType = "user";
+    internal const string AppLifecycleCategory = "app.lifecycle";
     internal const string LifecycleCategory = "ui.lifecycle";
     internal const string NavigationCategory = "navigation";
     internal const string RenderingCategory = "ui.rendering";
@@ -30,6 +32,25 @@ internal class MauiEventsBinder : IMauiEventsBinder
         _elementEventBinders = elementEventBinders.Where(b
             => b is not MauiSessionReplayMaskControlsOfTypeBinder maskControlTypeBinder
                || maskControlTypeBinder.IsEnabled);
+    }
+
+    public void HandleAppLifecycleEvent(bool inForeground)
+    {
+        if (!_options.CreateAppLifecycleEventsBreadcrumbs)
+        {
+            return;
+        }
+
+        var breadcrumb = new Breadcrumb(
+            string.Empty,
+            NavigationType,
+            new Dictionary<string, string>
+            {
+                ["state"] = inForeground ? "foreground" : "background"
+            },
+            AppLifecycleCategory);
+        var hint = new SentryHint(SentryHint.ObservableKey, false);
+        _hub.AddBreadcrumb(breadcrumb, hint);
     }
 
     public void HandleApplicationEvents(Application application, bool bind = true)

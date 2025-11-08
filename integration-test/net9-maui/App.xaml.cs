@@ -20,10 +20,22 @@ public partial class App : Application
         return string.Equals(testArg, arg, StringComparison.OrdinalIgnoreCase);
     }
 
-    public static void ReceiveSystemBreadcrumb(Breadcrumb breadcrumb)
+    public static void ReceiveBreadcrumb(Breadcrumb breadcrumb)
     {
-        if (breadcrumb.Type != "system" ||
-            breadcrumb.Data?.TryGetValue("action", out var action) != true ||
+        switch (breadcrumb)
+        {
+            case { Type: "system", Data: { } }:
+                ReceiveSystemBreadcrumb(breadcrumb);
+                break;
+            case { Type: "navigation", Category: "app.lifecycle" }:
+                ReceiveLifecycleBreadcrumb(breadcrumb);
+                break;
+        }
+    }
+
+    private static void ReceiveSystemBreadcrumb(Breadcrumb breadcrumb)
+    {
+        if (breadcrumb.Data?.TryGetValue("action", out var action) != true ||
             string.IsNullOrEmpty(action))
         {
             return;
@@ -39,11 +51,26 @@ public partial class App : Application
 
         if (HasTestArg(action))
         {
-            // received after OnAppearing
+            // received after foreground
             CaptureSystemBreadcrumb(action, systemBreadcrumbs[action]!);
             Kill();
         }
     }
+
+    private static void ReceiveLifecycleBreadcrumb(Breadcrumb breadcrumb)
+    {
+        if (breadcrumb.Data?.TryGetValue("state", out var state) != true ||
+            string.IsNullOrEmpty(state))
+        {
+            return;
+        }
+
+        if (state == "foreground")
+        {
+            SynchronizationContext.Current?.Post(async _ => RunTest(), null);
+        }
+    }
+
 
     public static void CaptureSystemBreadcrumb(string action, Dictionary<string, string> data)
     {
@@ -61,7 +88,7 @@ public partial class App : Application
         return new Window(new AppShell());
     }
 
-    public static void OnAppearing()
+    public static void RunTest()
     {
         testArg = System.Environment.GetEnvironmentVariable("SENTRY_TEST_ARG");
 
@@ -87,7 +114,7 @@ public partial class App : Application
         }
         else if (!string.IsNullOrEmpty(testArg) && systemBreadcrumbs.TryGetValue(testArg, out var breadcrumb))
         {
-            // received before OnAppearing
+            // received before foreground
             CaptureSystemBreadcrumb(testArg, breadcrumb);
             Kill();
         }

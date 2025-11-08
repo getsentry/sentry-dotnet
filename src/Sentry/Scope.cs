@@ -346,7 +346,7 @@ public class Scope : IEventLike
         }
 
         _breadcrumbs.Enqueue(breadcrumb);
-        if (Options.EnableScopeSync)
+        if (Options.EnableScopeSync && hint.IsObservable)
         {
             Options.ScopeObserver?.AddBreadcrumb(breadcrumb);
         }

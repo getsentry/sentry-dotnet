@@ -99,6 +99,11 @@ Describe 'iOS app (<tfm>, <configuration>)' -ForEach @(
         # TODO: fix redundant SIGABRT (#3954)
         { $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"SIGABRT`"" } | Should -Throw
         { $result.Envelopes() | Should -HaveCount 1 } | Should -Throw
+
+        $payload = ($result.Envelopes()[0] -split '\\n' | Where-Object { $_ })[-1] | ConvertFrom-Json
+        $breadcrumbs = $payload.breadcrumbs | Where-Object { $_.category -eq 'app.lifecycle' }
+        $breadcrumbs | Should -HaveCount 1
+        $breadcrumbs[0].data.state | Should -Be 'foreground'
     }
 
     It 'captures native crash (<configuration>)' {
@@ -112,6 +117,11 @@ Describe 'iOS app (<tfm>, <configuration>)' -ForEach @(
         $result.Envelopes() | Should -AnyElementMatch "`"type`":`"EXC_[A-Z_]+`""
         $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
         $result.Envelopes() | Should -HaveCount 1
+
+        $payload = ($result.Envelopes()[0] -split '\\n' | Where-Object { $_ })[-1] | ConvertFrom-Json
+        $breadcrumbs = $payload.breadcrumbs | Where-Object { $_.category -eq 'app.lifecycle' }
+        $breadcrumbs | Should -HaveCount 1
+        $breadcrumbs[0].data.state | Should -Be 'foreground'
     }
 
     It 'captures null reference exception (<configuration>)' {

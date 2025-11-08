@@ -9,6 +9,7 @@ public class SentryHint
     private readonly SentryOptions? _options;
     private readonly List<SentryAttachment> _attachments = new();
     private Dictionary<string, object?>? _items;
+    internal static readonly string ObservableKey = "Sentry:Observable";
 
     /// <summary>
     /// Creates a new instance of <see cref="SentryHint"/>.
@@ -32,6 +33,8 @@ public class SentryHint
     {
         Items[key] = value;
     }
+
+    internal bool IsObservable => _items?.TryGetValue(ObservableKey, out var value) != true || value is true;
 
     /// <summary>
     /// Attachments added to the Hint.

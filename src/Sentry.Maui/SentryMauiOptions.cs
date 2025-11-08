@@ -68,6 +68,13 @@ public class SentryMauiOptions : SentryLoggingOptions
     public bool CreateElementEventsBreadcrumbs { get; set; } = false;
 
     /// <summary>
+    /// Gets or sets whether the SDK automatically creates breadcrumbs for app lifecycle events
+    /// like 'foreground' and 'background'.
+    /// The default is <c>true</c>.
+    /// </summary>
+    public bool CreateAppLifecycleEventsBreadcrumbs { get; set; } = true;
+
+    /// <summary>
     /// Automatically attaches a screenshot of the app at the time of the event capture.
     /// </summary>
     /// <remarks>

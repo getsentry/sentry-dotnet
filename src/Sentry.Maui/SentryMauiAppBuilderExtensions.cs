@@ -124,9 +124,16 @@ public static class SentryMauiAppBuilderExtensions
                     SentryMauiEventProcessor.InForeground = false;
                 });
 
-                lifecycle.OnActivated(application => SentryMauiEventProcessor.InForeground = true);
-
-                lifecycle.DidEnterBackground(application => SentryMauiEventProcessor.InForeground = false);
+                lifecycle.OnActivated(application =>
+                {
+                    SentryMauiEventProcessor.InForeground = true;
+                    (application.Delegate as IPlatformApplication)?.HandleAppLifecycleEvent(true);
+                });
+                lifecycle.DidEnterBackground(application =>
+                {
+                    SentryMauiEventProcessor.InForeground = false;
+                    (application.Delegate as IPlatformApplication)?.HandleAppLifecycleEvent(false);
+                });
                 lifecycle.OnResignActivation(application => SentryMauiEventProcessor.InForeground = false);
             });
 #elif ANDROID
@@ -135,11 +142,19 @@ public static class SentryMauiAppBuilderExtensions
                 lifecycle.OnApplicationCreating(application => (application as IPlatformApplication)?.HandleMauiEvents());
                 lifecycle.OnDestroy(application => (application as IPlatformApplication)?.HandleMauiEvents(bind: false));
 
-                lifecycle.OnResume(activity => SentryMauiEventProcessor.InForeground = true);
+                lifecycle.OnResume(activity =>
+                {
+                    SentryMauiEventProcessor.InForeground = true;
+                    (activity.Application as IPlatformApplication)?.HandleAppLifecycleEvent(true);
+                });
                 lifecycle.OnStart(activity => SentryMauiEventProcessor.InForeground = true);
 
                 lifecycle.OnStop(activity => SentryMauiEventProcessor.InForeground = false);
-                lifecycle.OnPause(activity => SentryMauiEventProcessor.InForeground = false);
+                lifecycle.OnPause(activity =>
+                {
+                    SentryMauiEventProcessor.InForeground = false;
+                    (activity.Application as IPlatformApplication)?.HandleAppLifecycleEvent(false);
+                });
             });
 #elif WINDOWS
             events.AddWindows(lifecycle =>
@@ -149,6 +164,13 @@ public static class SentryMauiAppBuilderExtensions
             });
 #endif
         });
+    }
+
+    private static void HandleAppLifecycleEvent(this IPlatformApplication platformApplication, bool inForeground)
+    {
+        var services = platformApplication.Services;
+        var binder = services.GetRequiredService<IMauiEventsBinder>();
+        binder.HandleAppLifecycleEvent(inForeground);
     }
 
     private static void HandleMauiEvents(this IPlatformApplication platformApplication, bool bind = true)

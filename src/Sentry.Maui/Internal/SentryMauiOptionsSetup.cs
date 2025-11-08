@@ -30,6 +30,11 @@ internal class SentryMauiOptionsSetup : IConfigureOptions<SentryMauiOptions>
         options.Native.AttachScreenshot = options.AttachScreenshot;
 #endif
 
+// #if __ANDROID__
+//         // Disable app lifecycle breadcrumbs as Sentry.Maui already tracks these.
+//         options.Native.EnableAppLifecycleBreadcrumbs = false;
+// #endif
+
         // NOTE: Anything set here will overwrite options set by the user.
         //       For option defaults that can be changed, use the constructor in SentryMauiOptions instead.
 
