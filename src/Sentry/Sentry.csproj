@@ -193,7 +193,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sentry.SourceGenerators\Sentry.SourceGenerators.csproj"
+    <ProjectReference Include="..\Sentry.Compiler.Extensions\Sentry.Compiler.Extensions.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false"
                       PrivateAssets="all"

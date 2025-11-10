@@ -48,7 +48,7 @@ public class SentryStructuredLoggerTests : IDisposable
         }
 
         public void EnableHub(bool isEnabled) => Hub.IsEnabled.Returns(isEnabled);
-        public void EnableLogs(bool isEnabled) => Options.Value.Experimental.EnableLogs = isEnabled;
+        public void EnableLogs(bool isEnabled) => Options.Value.EnableLogs = isEnabled;
         public void SetMinimumLogLevel(LogLevel logLevel) => Options.Value.ExperimentalLogging.MinimumLogLevel = logLevel;
 
         public void WithActiveSpan(SentryId traceId, SpanId parentSpanId)

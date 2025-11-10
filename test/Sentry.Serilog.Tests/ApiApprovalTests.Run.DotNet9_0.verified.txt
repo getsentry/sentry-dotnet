@@ -47,6 +47,6 @@ namespace Serilog
                     Sentry.ReportAssembliesMode? reportAssembliesMode = default,
                     Sentry.DeduplicateMode? deduplicateMode = default,
                     System.Collections.Generic.Dictionary<string, string>? defaultTags = null,
-                    bool? experimentalEnableLogs = default) { }
+                    bool? enableLogs = default) { }
     }
 }

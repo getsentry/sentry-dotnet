@@ -9,6 +9,7 @@
       "src\\Sentry.AspNetCore.Grpc\\Sentry.AspNetCore.Grpc.csproj",
       "src\\Sentry.AspNetCore\\Sentry.AspNetCore.csproj",
       "src\\Sentry.Azure.Functions.Worker\\Sentry.Azure.Functions.Worker.csproj",
+      "src\\Sentry.Compiler.Extensions\\Sentry.Compiler.Extensions.csproj",
       "src\\Sentry.DiagnosticSource\\Sentry.DiagnosticSource.csproj",
       "src\\Sentry.EntityFramework\\Sentry.EntityFramework.csproj",
       "src\\Sentry.Extensions.AI\\Sentry.Extensions.AI.csproj",
@@ -22,7 +23,6 @@
       "src\\Sentry.OpenTelemetry\\Sentry.OpenTelemetry.csproj",
       "src\\Sentry.Profiling\\Sentry.Profiling.csproj",
       "src\\Sentry.Serilog\\Sentry.Serilog.csproj",
-      "src\\Sentry.SourceGenerators\\Sentry.SourceGenerators.csproj",
       "src\\Sentry\\Sentry.csproj"
     ]
   }

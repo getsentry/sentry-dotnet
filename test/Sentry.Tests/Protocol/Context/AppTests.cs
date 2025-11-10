@@ -20,6 +20,7 @@ public class AppTests
             Hash = "93fd0e9a",
             Name = "Sentry.Test.App",
             StartTime = DateTimeOffset.MaxValue,
+            Memory = 123456789,
             InForeground = true
         };
 
@@ -41,6 +42,7 @@ public class AppTests
             Name = "name",
             StartTime = DateTimeOffset.UtcNow,
             Version = "version",
+            Memory = 987654321,
             InForeground = false
         };
 
@@ -53,6 +55,7 @@ public class AppTests
         Assert.Equal(sut.Name, clone.Name);
         Assert.Equal(sut.StartTime, clone.StartTime);
         Assert.Equal(sut.Version, clone.Version);
+        Assert.Equal(sut.Memory, clone.Memory);
         Assert.Equal(sut.InForeground, clone.InForeground);
     }
 
@@ -75,6 +78,7 @@ public class AppTests
         yield return new object[] { (new App { StartTime = DateTimeOffset.MaxValue }, """{"type":"app","app_start_time":"9999-12-31T23:59:59.9999999+00:00"}""") };
         yield return new object[] { (new App { Version = "some version" }, """{"type":"app","app_version":"some version"}""") };
         yield return new object[] { (new App { Identifier = "some identifier" }, """{"type":"app","app_identifier":"some identifier"}""") };
+        yield return new object[] { (new App { Memory = 12345 }, """{"type":"app","app_memory":12345}""") };
         yield return new object[] { (new App { InForeground = true }, """{"type":"app","in_foreground":true}""") };
     }
 }

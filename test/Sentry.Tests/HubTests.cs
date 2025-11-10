@@ -1765,7 +1765,7 @@ public partial class HubTests : IDisposable
     public void Logger_IsDisabled_DoesNotCaptureLog()
     {
         // Arrange
-        Assert.False(_fixture.Options.Experimental.EnableLogs);
+        Assert.False(_fixture.Options.EnableLogs);
         var hub = _fixture.GetSut();
 
         // Act
@@ -1785,7 +1785,7 @@ public partial class HubTests : IDisposable
     public void Logger_IsEnabled_DoesCaptureLog()
     {
         // Arrange
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
         var hub = _fixture.GetSut();
 
         // Act
@@ -1805,11 +1805,11 @@ public partial class HubTests : IDisposable
     public void Logger_EnableAfterCreate_HasNoEffect()
     {
         // Arrange
-        Assert.False(_fixture.Options.Experimental.EnableLogs);
+        Assert.False(_fixture.Options.EnableLogs);
         var hub = _fixture.GetSut();
 
         // Act
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
 
         // Assert
         hub.Logger.Should().BeOfType<DisabledSentryStructuredLogger>();
@@ -1819,11 +1819,11 @@ public partial class HubTests : IDisposable
     public void Logger_DisableAfterCreate_HasNoEffect()
     {
         // Arrange
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
         var hub = _fixture.GetSut();
 
         // Act
-        _fixture.Options.Experimental.EnableLogs = false;
+        _fixture.Options.EnableLogs = false;
 
         // Assert
         hub.Logger.Should().BeOfType<DefaultSentryStructuredLogger>();
@@ -1833,7 +1833,7 @@ public partial class HubTests : IDisposable
     public async Task Logger_FlushAsync_DoesCaptureLog()
     {
         // Arrange
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
         var hub = _fixture.GetSut();
 
         // Act
@@ -1858,7 +1858,7 @@ public partial class HubTests : IDisposable
     public void Logger_Dispose_DoesCaptureLog()
     {
         // Arrange
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
         var hub = _fixture.GetSut();
 
         // Act
