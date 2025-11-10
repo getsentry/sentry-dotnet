@@ -15,7 +15,7 @@ builder.WebHost.UseSentry(options =>
     options.DiagnosticLevel = SentryLevel.Debug;
     options.SampleRate = 1;
     options.TracesSampleRate = 1.0;
-    options.Experimental.EnableLogs = true;
+    options.EnableLogs = true;
 });
 
 // This sample uses Microsoft.Extensions.AI.OpenAI
