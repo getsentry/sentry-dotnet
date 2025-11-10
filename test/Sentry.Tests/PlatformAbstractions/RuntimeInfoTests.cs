@@ -34,10 +34,14 @@ public class RuntimeInfoTests(ITestOutputHelper output)
         Parse(frameworkDescription);
 
         var actual = RuntimeInfo.GetRuntime();
-        Assert.NotNull(actual);
-        Assert.NotNull(actual.Name);
-        Assert.NotNull(actual.Version);
-        Assert.NotNull(actual.Raw);
+        actual.Should().NotBeNull("GetRuntime returned null");
+        actual.Name.Should().NotBeNull("Runtime Name is null");
+        actual.Version.Should().NotBeNull("Runtime Version is null");
+        actual.Raw.Should().NotBeNull("Runtime Raw is null");
+        // Assert.NotNull(actual);
+        // Assert.NotNull(actual.Name);
+        // Assert.NotNull(actual.Version);
+        // Assert.NotNull(actual.Raw);
 
 #if NET5_0_OR_GREATER
         Assert.Equal(".NET", actual.Name);
