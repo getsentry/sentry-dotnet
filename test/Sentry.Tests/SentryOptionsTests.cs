@@ -21,6 +21,13 @@ public partial class SentryOptionsTests
     }
 
     [Fact]
+    public void EnableLogs_Default_False()
+    {
+        var sut = new SentryOptions();
+        sut.EnableLogs.Should().BeFalse();
+    }
+
+    [Fact]
     public void RequestBodyCompressionLevel_ByDefault_Optimal()
     {
         var sut = new SentryOptions();
