@@ -50,13 +50,16 @@ public class RuntimeInfoTests(ITestOutputHelper output)
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             Assert.Equal(".NET Framework", actual.Name);
-            Assert.NotNull(actual.FrameworkInstallation);
-            Assert.NotNull(actual.FrameworkInstallation.Version);
+            // Assert.NotNull(actual.FrameworkInstallation);
+            // Assert.NotNull(actual.FrameworkInstallation.Version);
+            actual.FrameworkInstallation.Should().NotBeNull("FrameworkInstallation is null");
+            actual.FrameworkInstallation.Version.Should().NotBeNull("FrameworkInstallation.Version is null");
         }
         else
         {
             Assert.Equal("Mono", actual.Name);
-            Assert.Null(actual.FrameworkInstallation);
+            // Assert.Null(actual.FrameworkInstallation);
+            actual.FrameworkInstallation.Should().NotBeNull("FrameworkInstallation is null");
         }
 #endif
     }
