@@ -4,7 +4,7 @@ namespace Sentry.Internal;
 
 /// <summary>
 /// We know already, when starting a transaction, whether it's going to be sampled or not. When it's not sampled, we can
-/// avoid lots of unecessary processing. The only thing we need to track is the number of spans that would have been
+/// avoid lots of unnecessary processing. The only thing we need to track is the number of spans that would have been
 /// created (the client reports detailing discarded events includes this detail).
 /// </summary>
 internal sealed class UnsampledTransaction : NoOpTransaction
