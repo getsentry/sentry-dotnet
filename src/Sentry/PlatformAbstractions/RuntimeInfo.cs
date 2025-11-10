@@ -38,24 +38,20 @@ internal static class RuntimeInfo
 
     internal static SentryRuntime? Parse(string? rawRuntimeDescription, string? name = null)
     {
-        Console.WriteLine($"{nameof(rawRuntimeDescription)}: {rawRuntimeDescription}, {nameof(name)}: {name}");
         if (rawRuntimeDescription == null)
         {
-            Console.WriteLine("rawRuntimeDescription is null");
             return name == null ? null : new SentryRuntime(name);
         }
 
         var match = RuntimeParseRegex.Match(rawRuntimeDescription);
         if (match.Success)
         {
-            Console.WriteLine("Regex matched: " + match.Value);
             return new SentryRuntime(
                 name ?? (match.Groups["name"].Value == string.Empty ? null : match.Groups["name"].Value.Trim()),
                 match.Groups["version"].Value == string.Empty ? null : match.Groups["version"].Value.Trim(),
                 raw: rawRuntimeDescription);
         }
 
-        Console.WriteLine("No regex match");
         return new SentryRuntime(name, raw: rawRuntimeDescription);
     }
 

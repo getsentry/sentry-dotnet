@@ -2,11 +2,37 @@ using Sentry.PlatformAbstractions;
 
 namespace Sentry.Tests.PlatformAbstractions;
 
-public class RuntimeInfoTests
+public class RuntimeInfoTests(ITestOutputHelper output)
 {
     [Fact]
     public void GetRuntime_AllProperties()
     {
+        void Parse(string rawRuntimeDescription, string name = null)
+        {
+            Regex runtimeParseRegex = new(
+                @"^(?<name>(?:[A-Za-z.]\S*\s?)*)(?:\s|^|$)(?<version>\d\S*)?",
+                RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+            output.WriteLine($"{nameof(rawRuntimeDescription)}: {rawRuntimeDescription}, {nameof(name)}: {name}");
+            if (rawRuntimeDescription == null)
+            {
+                output.WriteLine("rawRuntimeDescription is null");
+                return;
+            }
+
+            var match = runtimeParseRegex.Match(rawRuntimeDescription);
+            if (match.Success)
+            {
+                output.WriteLine("Regex matched: " + match.Value);
+                return;
+            }
+
+            output.WriteLine("No regex match");
+        }
+
+        var frameworkDescription = RuntimeInformation.FrameworkDescription;
+        Parse(frameworkDescription);
+
         var actual = RuntimeInfo.GetRuntime();
         Assert.NotNull(actual);
         Assert.NotNull(actual.Name);
