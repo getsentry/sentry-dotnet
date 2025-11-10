@@ -11,7 +11,7 @@
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0121)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.12.0...0.12.1)
 - Bump Cocoa SDK from v8.57.1 to v8.57.2 ([#4704](https://github.com/getsentry/sentry-dotnet/pull/4704))
-  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/cursor/check-beforesend-background-thread-execution-5e30 main/CHANGELOG.md#8572)
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8572)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.57.1...8.57.2)
 
 ## 5.16.2
