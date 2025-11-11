@@ -34,7 +34,7 @@ public class RuntimeInfoTests(ITestOutputHelper output)
         else
         {
             Assert.Equal("Mono", actual.Name);
-            actual.FrameworkInstallation.Should().BeNull("FrameworkInstallation is null");
+            actual.FrameworkInstallation.Should().BeNull("FrameworkInstallation is not null");
         }
 #endif
     }
