@@ -3,6 +3,45 @@ namespace Sentry.Tests.Internals;
 public class UnsampledTransactionTests
 {
     [Fact]
+    public void Dispose_Unfinished_Finishes()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        ITransactionContext context = new TransactionContext("TestTransaction", "TestOperation",
+            new SentryTraceHeader(SentryId.Create(), SpanId.Create(), false)
+        );
+        var transaction = new UnsampledTransaction(hub, context);
+
+        // Act
+        transaction.Dispose();
+
+        // Assert
+        transaction.IsFinished.Should().BeTrue();
+        hub.Received(1).ConfigureScope(Arg.Any<Action<Scope, UnsampledTransaction>>(),
+            Arg.Is<UnsampledTransaction>(t => ReferenceEquals(t, transaction)));
+    }
+
+    [Fact]
+    public void Dispose_Finished_DoesNothing()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        ITransactionContext context = new TransactionContext("TestTransaction", "TestOperation",
+            new SentryTraceHeader(SentryId.Create(), SpanId.Create(), false)
+        );
+        var transaction = new UnsampledTransaction(hub, context);
+        transaction.Finish();
+
+        // Act
+        transaction.Dispose();
+
+        // Assert
+        transaction.IsFinished.Should().BeTrue();
+        hub.Received(1).ConfigureScope(Arg.Any<Action<Scope, UnsampledTransaction>>(),
+            Arg.Is<UnsampledTransaction>(t => ReferenceEquals(t, transaction)));
+    }
+
+    [Fact]
     public void StartChild_CreatesSpan_IsTrackedByParent()
     {
         // Arrange
