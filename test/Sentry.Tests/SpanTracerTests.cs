@@ -55,7 +55,7 @@ public class SpanTracerTests
     }
 
     [Fact]
-    public void Dispose_IsFinsished_DoesNothing()
+    public void Dispose_IsFinished_DoesNothing()
     {
         // Arrange
         var hub = Substitute.For<IHub>();
