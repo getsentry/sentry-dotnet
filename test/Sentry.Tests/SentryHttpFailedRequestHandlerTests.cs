@@ -36,26 +36,119 @@ public class SentryHttpFailedRequestHandlerTests
         sut.HandleResponse(response);
 
         // Assert
-        _hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        _hub.DidNotReceiveWithAnyArgs().CaptureEvent(null!);
     }
 
-    [Fact]
-    public void HandleResponse_EnabledButNotInRange_DontCapture()
+    [Theory]
+    [InlineData(100)] // Continue
+    [InlineData(101)] // Switching Protocols
+    [InlineData(199)] // Edge of informational range
+    [InlineData(200)] // OK
+    [InlineData(201)] // Created
+    [InlineData(299)] // Edge of success range
+    [InlineData(300)] // Multiple Choices
+    [InlineData(301)] // Moved Permanently
+    [InlineData(399)] // Edge of redirect range
+    [InlineData(400)] // Bad Request
+    [InlineData(401)] // Unauthorized
+    [InlineData(403)] // Forbidden
+    [InlineData(404)] // Not Found
+    [InlineData(499)] // Edge of client error range
+    [InlineData(600)] // Beyond standard range
+    public void HandleResponse_EnabledButNotInRange_DontCapture(int statusCode)
     {
         // Arrange
         var sut = GetSut(new SentryOptions
         {
             CaptureFailedRequests = true
+            // default FailedRequestStatusCodes = (500,599)
         });
 
-        var response = ForbiddenResponse(); // 403 is not in default range (500-599)
+        var response = new HttpResponseMessage((HttpStatusCode)statusCode);
         response.RequestMessage = new HttpRequestMessage();
 
         // Act
         sut?.HandleResponse(response);
 
         // Assert
-        _hub?.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        _hub?.DidNotReceiveWithAnyArgs().CaptureEvent(null!);
+    }
+
+    [Theory]
+    [InlineData(400)] // Bad Request - in range
+    [InlineData(401)] // Unauthorized - in range
+    [InlineData(404)] // Not Found - in range
+    [InlineData(499)] // Edge of range
+    public void HandleResponse_CustomRange_InRange_DoCapture(int statusCode)
+    {
+        // Arrange
+        var options = new SentryOptions
+        {
+            CaptureFailedRequests = true,
+            FailedRequestStatusCodes = new List<HttpStatusCodeRange> { (400, 499) }
+        };
+        var sut = GetSut(options);
+
+        var response = new HttpResponseMessage((HttpStatusCode)statusCode);
+        response.RequestMessage = new HttpRequestMessage();
+
+        // Act
+        sut.HandleResponse(response);
+
+        // Assert
+        _hub.ReceivedWithAnyArgs(1).CaptureEvent(null!);
+    }
+
+    [Theory]
+    [InlineData(200)] // OK - below range
+    [InlineData(399)] // Edge below range
+    [InlineData(500)] // Internal Server Error - above range
+    [InlineData(503)] // Service Unavailable - above range
+    public void HandleResponse_CustomRange_OutOfRange_DontCapture(int statusCode)
+    {
+        // Arrange
+        var options = new SentryOptions
+        {
+            CaptureFailedRequests = true,
+            FailedRequestStatusCodes = new List<HttpStatusCodeRange> { (400, 499) }
+        };
+        var sut = GetSut(options);
+
+        var response = new HttpResponseMessage((HttpStatusCode)statusCode);
+        response.RequestMessage = new HttpRequestMessage();
+
+        // Act
+        sut.HandleResponse(response);
+
+        // Assert
+        _hub.DidNotReceiveWithAnyArgs().CaptureEvent(null!);
+    }
+
+    [Theory]
+    [InlineData(200)] // OK
+    [InlineData(201)] // Created
+    [InlineData(204)] // No Content
+    [InlineData(299)] // Edge of success range
+    public void HandleResponse_RangeIncludesSuccess_SuccessNotCaptured(int statusCode)
+    {
+        // Arrange
+        var options = new SentryOptions
+        {
+            CaptureFailedRequests = true,
+            // Misconfigured to include success codes - they should still not be captured
+            FailedRequestStatusCodes = new List<HttpStatusCodeRange> { (200, 599) }
+        };
+        var sut = GetSut(options);
+
+        var response = new HttpResponseMessage((HttpStatusCode)statusCode);
+        response.RequestMessage = new HttpRequestMessage();
+
+        // Act
+        sut.HandleResponse(response);
+
+        // Assert
+        // Success codes should never be captured, even if in configured range
+        _hub.DidNotReceiveWithAnyArgs().CaptureEvent(null!);
     }
 
     [Fact]
@@ -76,7 +169,7 @@ public class SentryHttpFailedRequestHandlerTests
         sut.HandleResponse(response);
 
         // Assert
-        _hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        _hub.DidNotReceiveWithAnyArgs().CaptureEvent(null!);
     }
 
     [Fact]
@@ -97,7 +190,7 @@ public class SentryHttpFailedRequestHandlerTests
         sut.HandleResponse(response);
 
         // Assert
-        _hub.DidNotReceive().CaptureEvent(Arg.Any<SentryEvent>());
+        _hub.DidNotReceiveWithAnyArgs().CaptureEvent(null!);
     }
 
     [Fact]
@@ -117,9 +210,7 @@ public class SentryHttpFailedRequestHandlerTests
         sut.HandleResponse(response);
 
         // Assert
-        _hub.Received(1).CaptureEvent(
-            Arg.Any<SentryEvent>(),
-            Arg.Any<Scope>(), Arg.Any<SentryHint>());
+        _hub.ReceivedWithAnyArgs(1).CaptureEvent(null!);
     }
 
     [Fact]
@@ -263,6 +354,36 @@ public class SentryHttpFailedRequestHandlerTests
 
             // Response should be captured
             hint.Items[HintTypes.HttpResponseMessage].Should().Be(response);
+        }
+    }
+
+    [Fact]
+    public void HandleResponse_ExceptionHasStackTrace()
+    {
+        // Arrange
+        var options = new SentryOptions
+        {
+            CaptureFailedRequests = true
+        };
+        var sut = GetSut(options);
+
+        var response = InternalServerErrorResponse();
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://example.com/api/test");
+
+        // Act
+        SentryEvent @event = null;
+        ((ISentryClient)_hub).CaptureEvent(
+            Arg.Do<SentryEvent>(e => @event = e),
+            hint: Arg.Any<SentryHint>()
+            );
+        sut.HandleResponse(response);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            @event.Should().NotBeNull();
+            @event.Exception.Should().NotBeNull();
+            @event.Exception!.StackTrace.Should().NotBeNullOrWhiteSpace();
         }
     }
 }
