@@ -19,7 +19,7 @@ public static class SentryAIExtensions
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public static ChatOptions AddSentryToolInstrumentation(this ChatOptions options)
     {
-        if (options.Tools is { Count: 0 })
+        if (options.Tools is not { Count: > 0 })
         {
             return options;
         }
