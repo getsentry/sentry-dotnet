@@ -199,9 +199,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.MauiTrimTest", "test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Maui.CommunityToolkit.Mvvm", "src\Sentry.Maui.CommunityToolkit.Mvvm\Sentry.Maui.CommunityToolkit.Mvvm.csproj", "{E898F337-E982-46CC-8DA9-F8556AA7DD72}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.SourceGenerators", "src\Sentry.SourceGenerators\Sentry.SourceGenerators.csproj", "{C3CDF61C-3E28-441C-A9CE-011C89D11719}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Compiler.Extensions", "src\Sentry.Compiler.Extensions\Sentry.Compiler.Extensions.csproj", "{C3CDF61C-3E28-441C-A9CE-011C89D11719}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.SourceGenerators.Tests", "test\Sentry.SourceGenerators.Tests\Sentry.SourceGenerators.Tests.csproj", "{3A76FF7D-2F32-4EA5-8999-2FFE3C7CB893}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Compiler.Extensions.Tests", "test\Sentry.Compiler.Extensions.Tests\Sentry.Compiler.Extensions.Tests.csproj", "{3A76FF7D-2F32-4EA5-8999-2FFE3C7CB893}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentry.Maui.CommunityToolkit.Mvvm.Tests", "test\Sentry.Maui.CommunityToolkit.Mvvm.Tests\Sentry.Maui.CommunityToolkit.Mvvm.Tests.csproj", "{ADC91A84-6054-42EC-8241-0D717E4C7194}"
 EndProject

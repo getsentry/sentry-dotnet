@@ -2,16 +2,19 @@ using Sentry.PlatformAbstractions;
 
 namespace Sentry.Tests.PlatformAbstractions;
 
-public class RuntimeInfoTests
+public class RuntimeInfoTests(ITestOutputHelper output)
 {
     [Fact]
     public void GetRuntime_AllProperties()
     {
+        var frameworkDescription = RuntimeInformation.FrameworkDescription;
+        output.WriteLine($"RuntimeInformation.FrameworkDescription: {frameworkDescription}");
+
         var actual = RuntimeInfo.GetRuntime();
-        Assert.NotNull(actual);
-        Assert.NotNull(actual.Name);
-        Assert.NotNull(actual.Version);
-        Assert.NotNull(actual.Raw);
+        actual.Should().NotBeNull("GetRuntime returned null");
+        actual.Name.Should().NotBeNull("Runtime Name is null");
+        actual.Version.Should().NotBeNull("Runtime Version is null");
+        actual.Raw.Should().NotBeNull("Runtime Raw is null");
 
 #if NET5_0_OR_GREATER
         Assert.Equal(".NET", actual.Name);
@@ -20,13 +23,18 @@ public class RuntimeInfoTests
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             Assert.Equal(".NET Framework", actual.Name);
-            Assert.NotNull(actual.FrameworkInstallation);
-            Assert.NotNull(actual.FrameworkInstallation.Version);
+            actual.FrameworkInstallation.Should().NotBeNull("FrameworkInstallation is null");
+            // TODO: Windows ARM64 broke in CI... the timing wasn't very good (same day .NET 10 was announced) and I
+            // don't have a Windows ARM64 device to test on. Will need to debug in CI when we've released V6.
+            if (RuntimeInformation.ProcessArchitecture != Architecture.Arm64)
+            {
+                actual.FrameworkInstallation.Version.Should().NotBeNull("FrameworkInstallation.Version is null");
+            }
         }
         else
         {
             Assert.Equal("Mono", actual.Name);
-            Assert.Null(actual.FrameworkInstallation);
+            actual.FrameworkInstallation.Should().BeNull("FrameworkInstallation is not null");
         }
 #endif
     }

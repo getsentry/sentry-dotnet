@@ -1,4 +1,4 @@
-namespace Sentry.SourceGenerators;
+namespace Sentry.Compiler.Extensions;
 
 internal static class GeneratedCodeText
 {

@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace Sentry.SourceGenerators;
+namespace Sentry.Compiler.Extensions;
 
 internal static class OutputKindExtensions
 {

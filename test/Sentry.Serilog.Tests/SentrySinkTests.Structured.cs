@@ -11,7 +11,7 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.Experimental.EnableLogs = isEnabled;
+        _fixture.Options.EnableLogs = isEnabled;
 
         var sut = _fixture.GetSut();
         var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();
@@ -28,7 +28,7 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
 
         if (!isEnabled)
         {
@@ -54,7 +54,7 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
 
         var sut = _fixture.GetSut();
         var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();
@@ -71,7 +71,7 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
         _fixture.Options.Environment = "test-environment";
         _fixture.Options.Release = "test-release";
 
@@ -140,7 +140,7 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
 
         var sut = _fixture.GetSut();
         var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();
@@ -156,7 +156,7 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
 
         var sut = _fixture.GetSut();
         var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();

@@ -18,7 +18,7 @@ public class SentryAspNetCoreStructuredLoggerProviderTests
         public Fixture()
         {
             var loggingOptions = new SentryAspNetCoreOptions();
-            loggingOptions.Experimental.EnableLogs = true;
+            loggingOptions.EnableLogs = true;
 
             Options = Microsoft.Extensions.Options.Options.Create(loggingOptions);
             Hub = Substitute.For<IHub>();
