@@ -229,7 +229,7 @@ public class SentryHttpFailedRequestHandlerTests
 
         // Act
         SentryEvent @event = null;
-        ((ISentryClient)_hub).CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
+        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
         sut.HandleResponse(response);
 
         // Assert
@@ -259,10 +259,7 @@ public class SentryHttpFailedRequestHandlerTests
 
         // Act
         SentryEvent @event = null;
-        ((ISentryClient)_hub).CaptureEvent(
-            Arg.Do<SentryEvent>(e => @event = e),
-            hint: Arg.Any<SentryHint>()
-            );
+        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
         sut.HandleResponse(response);
 
         // Assert
@@ -309,10 +306,7 @@ public class SentryHttpFailedRequestHandlerTests
 
         // Act
         SentryEvent @event = null;
-        ((ISentryClient)_hub).CaptureEvent(
-            Arg.Do<SentryEvent>(e => @event = e),
-            hint: Arg.Any<SentryHint>()
-            );
+        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
         sut.HandleResponse(response);
 
         // Assert
@@ -341,10 +335,7 @@ public class SentryHttpFailedRequestHandlerTests
 
         // Act
         SentryHint hint = null;
-        ((ISentryClient)_hub).CaptureEvent(
-            Arg.Any<SentryEvent>(),
-            hint: Arg.Do<SentryHint>(h => hint = h)
-            );
+        _hub.CaptureEvent( Arg.Any<SentryEvent>(), hint: Arg.Do<SentryHint>(h => hint = h));
         sut.HandleResponse(response);
 
         // Assert
@@ -372,10 +363,7 @@ public class SentryHttpFailedRequestHandlerTests
 
         // Act
         SentryEvent @event = null;
-        ((ISentryClient)_hub).CaptureEvent(
-            Arg.Do<SentryEvent>(e => @event = e),
-            hint: Arg.Any<SentryHint>()
-            );
+        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
         sut.HandleResponse(response);
 
         // Assert
@@ -386,4 +374,35 @@ public class SentryHttpFailedRequestHandlerTests
             @event.Exception!.StackTrace.Should().NotBeNullOrWhiteSpace();
         }
     }
+
+#if NET6_0_OR_GREATER // This test is only valid on .NET 6+ where we can use SetRemoteStackTrace
+    [Fact]
+    public void HandleResponse_StackTraceIncludesCallerContext()
+    {
+        // Arrange
+        var options = new SentryOptions
+        {
+            CaptureFailedRequests = true
+        };
+        var sut = GetSut(options);
+
+        var response = InternalServerErrorResponse();
+        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://example.com/api/test");
+
+        // Act
+        SentryEvent @event = null;
+        _hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
+        sut.HandleResponse(response);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            @event.Should().NotBeNull();
+            @event.Exception.Should().NotBeNull();
+
+            // Stack trace should include this test method name, proving we captured caller context on .NET 6+
+            @event.Exception!.StackTrace.Should().Contain(nameof(HandleResponse_StackTraceIncludesCallerContext));
+        }
+    }
+#endif
 }
