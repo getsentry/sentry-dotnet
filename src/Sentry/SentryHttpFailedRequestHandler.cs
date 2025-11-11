@@ -15,7 +15,7 @@ internal class SentryHttpFailedRequestHandler : SentryFailedRequestHandler
     protected internal override void DoEnsureSuccessfulResponse([NotNull] HttpRequestMessage request, [NotNull] HttpResponseMessage response)
     {
         // Don't capture events for successful requests
-        if (!Options.FailedRequestStatusCodes.Any(range => range.Contains(response.StatusCode)))
+        if (!Options.FailedRequestStatusCodes.ContainsStatusCode(response.StatusCode))
         {
             return;
         }
