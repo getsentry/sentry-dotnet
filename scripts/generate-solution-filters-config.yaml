@@ -220,7 +220,7 @@ filterConfigs:
         - "samples/**/*Maui.csproj"
         - "src/**/Sentry.csproj"
         - "src/**/Sentry.Analyzers.csproj"
-        - "src/**/Sentry.SourceGenerators.csproj"
+        - "src/**/Sentry.Compiler.Extensions.csproj"
         - "src/**/*Android*.csproj"
         - "src/**/*Bindings.Android.csproj"
         - "src/**/*Bindings.Cocoa.csproj"

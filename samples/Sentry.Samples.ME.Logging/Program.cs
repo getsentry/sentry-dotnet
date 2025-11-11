@@ -26,8 +26,8 @@ using var loggerFactory = LoggerFactory.Create(builder =>
         options.ExperimentalLogging.MinimumLogLevel = LogLevel.Trace; // This level or above will result in log sent to Sentry
 
         // This option enables Logs sent to Sentry.
-        options.Experimental.EnableLogs = true;
-        options.Experimental.SetBeforeSendLog(static log =>
+        options.EnableLogs = true;
+        options.SetBeforeSendLog(static log =>
         {
             log.SetAttribute("attribute-key", "attribute-value");
             return log;

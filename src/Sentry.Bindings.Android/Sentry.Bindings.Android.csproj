@@ -19,6 +19,9 @@
     <!-- BG8401/BG8400: Field/property conflicts - resolved individually in Metadata.xml where needed -->
     <!-- BG8C00: Base interface not found -->
     <NoWarn>$(NoWarn);BG8801;BG8C01;BG8701;BG8800;BG8700;BG8605;BG8606;BG8604;BG8502;BG8401;BG8400;BG8503;BG8C00</NoWarn>
+
+    <!-- Disable parallel builds to avoid Maven cache conflicts: https://github.com/getsentry/sentry-dotnet/issues/4689 -->
+    <BuildInParallel>false</BuildInParallel>
   </PropertyGroup>
 
   <!-- Use a separate readme, and don't add the changelog to the nuget. -->
