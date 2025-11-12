@@ -3,10 +3,11 @@ namespace Sentry.Extensions.AI;
 internal static class SentryAIConstants
 {
     /// <summary>
-    /// The list of strings which FunctionInvokingChatClient(FICC) uses to start the tool call <see cref="Activity"/>.
-    /// These can be found in FunctionInvokingChatClient.cs in GetResponseAsync or GetStreamingResponseAsync function.
+    /// See:
+    /// https://github.com/dotnet/extensions/blob/f8f779a6ea004bb1f26649719ca77d63a9d9417c/src/Libraries/Microsoft.Extensions.AI/ChatCompletion/FunctionInvokingChatClient.cs#L272
     /// </summary>
-    internal static readonly string[] FICCActivityNames = ["orchestrate_tools", "FunctionInvokingChatClient.GetResponseAsync", "FunctionInvokingChatClient"];
+    internal static readonly string[] FICCActivityNames =
+        ["orchestrate_tools", "FunctionInvokingChatClient.GetResponseAsync", "FunctionInvokingChatClient"];
 
     /// <summary>
     /// The string we use to identify our <see cref="ActivitySource"/>.
