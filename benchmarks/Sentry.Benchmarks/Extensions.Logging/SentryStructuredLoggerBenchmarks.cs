@@ -22,16 +22,13 @@ public class SentryStructuredLoggerBenchmarks
         SentryLoggingOptions options = new()
         {
             Dsn = DsnSamples.ValidDsn,
-            Experimental =
-            {
-                EnableLogs = true,
-            },
+            EnableLogs = true,
             ExperimentalLogging =
             {
                 MinimumLogLevel = LogLevel.Information,
             }
         };
-        options.Experimental.SetBeforeSendLog((SentryLog log) =>
+        options.SetBeforeSendLog((SentryLog log) =>
         {
             _lastLog = log;
             return null;
