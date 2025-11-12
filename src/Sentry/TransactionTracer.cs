@@ -168,7 +168,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     /// <inheritdoc />
     public IReadOnlyDictionary<string, string> Tags => _tags;
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
     private readonly ConcurrentBag<ISpan> _spans = new();
 #else
     private ConcurrentBag<ISpan> _spans = new();
@@ -431,7 +431,7 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 
     private void ReleaseSpans()
     {
-#if NETSTANDARD2_1_OR_GREATER
+#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
         _spans.Clear();
 #else
         _spans = new ConcurrentBag<ISpan>();

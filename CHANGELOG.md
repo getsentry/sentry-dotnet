@@ -7,19 +7,25 @@
 - Spans and Transactions now implement `IDisposable` so that they can be used with `using` statements/declarations that will automatically finish the span with a status of OK when it passes out of scope, if it has not already been finished, to be consistent with `Activity` classes when using OpenTelemetry ([#4627](https://github.com/getsentry/sentry-dotnet/pull/4627))
 - SpanTracer and TransactionTracer are still public but these are now `sealed` (see also [#4627](https://github.com/getsentry/sentry-dotnet/pull/4627))
 - CaptureFeedback now returns a `SentryId` and a `CaptureFeedbackResult` out parameter that indicate whether feedback was captured successfully and what the reason for failure was otherwise ([#4613](https://github.com/getsentry/sentry-dotnet/pull/4613))
+- Deprecated `Sentry.Azure.Functions.Worker` as very few people were using it and the functionality can easily be replaced with OpenTelemetry. We've replaced our integration with a sample showing how to do this using our OpenTelemetry package instead. ([#4693](https://github.com/getsentry/sentry-dotnet/pull/4693))
+- UWP support has been dropped. Future efforts will likely focus on WinUI 3, in line with Microsoft's recommendations for building Windows UI apps. ([#4686](https://github.com/getsentry/sentry-dotnet/pull/4686))
+- The _Structured Logs_ APIs are now stable: removed `Experimental` from `SentryOptions` ([#4699](https://github.com/getsentry/sentry-dotnet/pull/4699))
 
 ### Features
 
+- Implemented instance isolation so that multiple instances of the Sentry SDK can be instantiated inside the same process when using the Caching Transport ([#4498](https://github.com/getsentry/sentry-dotnet/pull/4498))
 - The SDK now makes use of the new SessionEndStatus `Unhandled` when capturing an unhandled but non-terminal exception, i.e. through the UnobservedTaskExceptionIntegration ([#4633](https://github.com/getsentry/sentry-dotnet/pull/4633), [#4653](https://github.com/getsentry/sentry-dotnet/pull/4653))
 - The SDK now provides a `IsSessionActive` to allow checking the session state ([#4662](https://github.com/getsentry/sentry-dotnet/pull/4662))
 - The SDK now makes use of the new SessionEndStatus `Unhandled` when capturing an unhandled but non-terminal exception, i.e. through the UnobservedTaskExceptionIntegration ([#4633](https://github.com/getsentry/sentry-dotnet/pull/4633))
 - Added a new SDK `Sentry.Extensions.AI` which allows LLM usage instrumentation via `Microsoft.Extensions.AI` ([#4657](https://github.com/getsentry/sentry-dotnet/pull/4657))
+- Added experimental support for Session Replay on iOS ([#4664](https://github.com/getsentry/sentry-dotnet/pull/4664))
 - Extended the App context by `app_memory` that can hold the amount of memory used by the application in bytes. ([#4707](https://github.com/getsentry/sentry-dotnet/pull/4707))
 
 ### Fixes
 
 - The `Serilog` integration captures _Structured Logs_ (when enabled) independently of captured Events and added Breadcrumbs ([#4691](https://github.com/getsentry/sentry-dotnet/pull/4691))
 - Deliver system breadcrumbs in the main thread on Android ([#4671](https://github.com/getsentry/sentry-dotnet/pull/4671))
+- Memory leak when finishing an unsampled Transaction that has started unsampled Spans ([#4717](https://github.com/getsentry/sentry-dotnet/pull/4717))
 
 ## 6.0.0-preview.2
 

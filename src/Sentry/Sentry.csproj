@@ -83,7 +83,7 @@
 
   <!-- Ensure at least version 6 of System.Text.Json so we have JsonSerializationContext available -->
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netstandard'))">
-    <PackageReference Include="System.Text.Json" Version="6.0.10" >
+    <PackageReference Include="System.Text.Json" Version="8.0.5" >
       <!--
         Ignoring the vulnerability warning: https://github.com/advisories/GHSA-hh2w-p6rv-4g7w
         The app can/should pin to the latest version. We will bump once a patch on v6 (still LTS until Nov 24) is out
@@ -148,8 +148,6 @@
     <InternalsVisibleTo Include="Sentry.AspNetCore.Grpc.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNetCore.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNetCore.TestUtils" PublicKey="$(SentryPublicKey)" />
-    <InternalsVisibleTo Include="Sentry.Azure.Functions.Worker" PublicKey="$(SentryPublicKey)" />
-    <InternalsVisibleTo Include="Sentry.Azure.Functions.Worker.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Benchmarks" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.DiagnosticSource" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.DiagnosticSource.IntegrationTests" PublicKey="$(SentryPublicKey)" />

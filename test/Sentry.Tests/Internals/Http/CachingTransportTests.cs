@@ -1,4 +1,3 @@
-using System.IO.Abstractions.TestingHelpers;
 using Sentry.Internal.Http;
 
 namespace Sentry.Tests.Internals.Http;
@@ -223,6 +222,7 @@ public class CachingTransportTests : IDisposable
 
         // Move them all to processing and leave them there (due to FakeFailingTransport)
         await initialTransport.FlushAsync();
+        await initialTransport.DisposeAsync();
 
         // Act
 
@@ -242,7 +242,7 @@ public class CachingTransportTests : IDisposable
     {
         // Arrange
         var cacheDirectoryPath =
-            _options.TryGetProcessSpecificCacheDirectoryPath() ??
+            _options.GetIsolatedCacheDirectoryPath() ??
             throw new InvalidOperationException("Cache directory or DSN is not set.");
         var processingDirectoryPath = Path.Combine(cacheDirectoryPath, "__processing");
         var fileName = $"{Guid.NewGuid()}.envelope";
@@ -623,11 +623,235 @@ public class CachingTransportTests : IDisposable
         await transport.SendEnvelopeAsync(envelope);
 
         // Assert
+        var isolatedCacheDir = _options.GetIsolatedCacheDirectoryPath();
         var filePath = _options.FileSystem
-            .EnumerateFiles(_options.CacheDirectoryPath!, "*", SearchOption.AllDirectories)
+            .EnumerateFiles(isolatedCacheDir!, "*", SearchOption.AllDirectories)
             .Single();
 
         var contents = _options.FileSystem.ReadAllTextFromFile(filePath);
         Assert.DoesNotContain("sent_at", contents);
+    }
+
+    [Fact]
+    public async Task SalvageAbandonedCacheSessions_MovesEnvelopesFromOtherIsolatedDirectories()
+    {
+        // Arrange
+        using var innerTransport = new FakeTransport();
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
+
+        var currentIsolated = _options.GetIsolatedCacheDirectoryPath()!; // already validated during creation
+        var baseCacheDir = Directory.GetParent(currentIsolated)!.FullName;
+
+        // Create two abandoned isolated cache directories with envelope files (including in nested folder)
+        void CreateAbandonedDir(int index)
+        {
+            var abandoned = Path.Combine(baseCacheDir, $"isolated_abandoned_{index}");
+            _options.FileSystem.CreateDirectory(abandoned);
+            var nested = Path.Combine(abandoned, "nested");
+            _options.FileSystem.CreateDirectory(nested);
+
+            // root file
+            var rootFile = Path.Combine(abandoned, $"root_{index}.envelope");
+            _options.FileSystem.WriteAllTextToFile(rootFile, "dummy content");
+            // nested file
+            var nestedFile = Path.Combine(nested, $"nested_{index}.envelope");
+            _options.FileSystem.WriteAllTextToFile(nestedFile, "dummy content");
+        }
+
+        CreateAbandonedDir(1);
+        CreateAbandonedDir(2);
+
+        // Act
+        transport.SalvageAbandonedCacheSessions(CancellationToken.None);
+
+        // Assert: All *.envelope files from abandoned dirs should now reside in the current isolated cache directory root
+        var movedFiles = _options.FileSystem
+            .EnumerateFiles(currentIsolated, "*.envelope", SearchOption.TopDirectoryOnly)
+            .Select(Path.GetFileName)
+            .ToArray();
+
+        movedFiles.Should().Contain(new[] { "root_1.envelope", "nested_1.envelope", "root_2.envelope", "nested_2.envelope" });
+
+        // Ensure abandoned directories no longer contain those files
+        var abandonedResidual = _options.FileSystem
+            .EnumerateFiles(baseCacheDir, "*.envelope", SearchOption.AllDirectories)
+            .Where(p => !p.StartsWith(currentIsolated, StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        abandonedResidual.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task SalvageAbandonedCacheSessions_CurrentDirectory_Skipped()
+    {
+        // Arrange
+        using var innerTransport = new FakeTransport();
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
+        var currentIsolated = _options.GetIsolatedCacheDirectoryPath()!;
+
+        var currentFile = Path.Combine(currentIsolated, "current.envelope");
+        _options.FileSystem.WriteAllTextToFile(currentFile, "dummy content");
+
+        // Act
+        transport.SalvageAbandonedCacheSessions(CancellationToken.None);
+
+        // Assert: File created in current directory should remain untouched
+        _options.FileSystem.FileExists(currentFile).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task SalvageAbandonedCacheSessions_ActiveLock_Skipped()
+    {
+        // Arrange
+        using var innerTransport = new FakeTransport();
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
+
+        var currentIsolated = _options.GetIsolatedCacheDirectoryPath()!;
+        var baseCacheDir = Directory.GetParent(currentIsolated)!.FullName;
+
+        // Create an abandoned directory that matches the search pattern and acquire its lock
+        var lockedDir = Path.Combine(baseCacheDir, "isolated_locked");
+        _options.FileSystem.CreateDirectory(lockedDir);
+        var lockedEnvelope = Path.Combine(lockedDir, "locked.envelope");
+        _options.FileSystem.WriteAllTextToFile(lockedEnvelope, "dummy content");
+
+        // Acquire the lock so salvage can't take it
+        using (var coordinator = new CacheDirectoryCoordinator(lockedDir, _options.DiagnosticLogger, _options.FileSystem))
+        {
+            var acquired = coordinator.TryAcquire();
+            acquired.Should().BeTrue("test must hold the lock to validate skip behavior");
+
+            // Act
+            transport.SalvageAbandonedCacheSessions(CancellationToken.None);
+
+            // Assert: File should still be in locked abandoned directory and not in current directory
+            _options.FileSystem.FileExists(lockedEnvelope).Should().BeTrue();
+            var moved = _options.FileSystem
+                .EnumerateFiles(currentIsolated, "locked.envelope", SearchOption.TopDirectoryOnly)
+                .Any();
+            moved.Should().BeFalse();
+        }
+    }
+
+    [Fact]
+    public async Task MigrateVersion5Cache_MovesEnvelopesFromBaseAndProcessing()
+    {
+        // Arrange
+        using var innerTransport = new FakeTransport();
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
+
+        var isolatedCacheDir = _options.GetIsolatedCacheDirectoryPath()!;
+
+        var baseCacheDir = _options.GetBaseCacheDirectoryPath()!;
+        var rootFile = Path.Combine(baseCacheDir, "v5_root.envelope");
+        _options.FileSystem.CreateDirectory(baseCacheDir);
+        _options.FileSystem.WriteAllTextToFile(rootFile, "dummy content");
+
+        var processingDir = Path.Combine(baseCacheDir, "__processing");
+        var procFile = Path.Combine(processingDir, "v5_proc.envelope");
+        _options.FileSystem.CreateDirectory(processingDir);
+        _options.FileSystem.WriteAllTextToFile(procFile, "dummy content");
+
+        // Act
+        var result = transport.MigrateVersion5Cache(CancellationToken.None);
+
+        // Assert
+        result.Should().Be(CachingTransport.ResultMigrationOk);
+
+        var markerFile = Path.Combine(baseCacheDir, ".migrated");
+        _options.FileSystem.FileExists(markerFile).Should().BeTrue();
+        _options.FileSystem.FileExists(rootFile).Should().BeFalse();
+        _options.FileSystem.FileExists(procFile).Should().BeFalse();
+
+        var movedRoot = Path.Combine(isolatedCacheDir, "v5_root.envelope");
+        var movedProc = Path.Combine(isolatedCacheDir, "v5_proc.envelope");
+        _options.FileSystem.FileExists(movedRoot).Should().BeTrue();
+        _options.FileSystem.FileExists(movedProc).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task MigrateVersion5Cache_AlreadyMigrated_Skipped()
+    {
+        // Arrange
+        using var innerTransport = new FakeTransport();
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
+
+        var baseCacheDir = _options.GetBaseCacheDirectoryPath()!;
+        var rootFile = Path.Combine(baseCacheDir, "v5_root.envelope");
+        _options.FileSystem.CreateDirectory(baseCacheDir);
+        _options.FileSystem.WriteAllTextToFile(rootFile, "dummy content");
+
+        var processingDir = Path.Combine(baseCacheDir, "__processing");
+        var procFile = Path.Combine(processingDir, "v5_proc.envelope");
+        _options.FileSystem.CreateDirectory(processingDir);
+        _options.FileSystem.WriteAllTextToFile(procFile, "dummy content");
+
+        var marker = Path.Combine(baseCacheDir, ".migrated");
+        _options.FileSystem.WriteAllTextToFile(marker, "6.0.0");
+
+        // Act
+        var result = transport.MigrateVersion5Cache(CancellationToken.None);
+
+        // Assert
+        result.Should().Be(CachingTransport.ResultMigrationAlreadyMigrated);
+        _options.FileSystem.FileExists(rootFile).Should().BeTrue();
+        _options.FileSystem.FileExists(procFile).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task MigrateVersion5Cache_MigrationLockHeld_Skipped()
+    {
+        // Arrange
+        using var innerTransport = new FakeTransport();
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
+
+        var baseCacheDir = _options.GetBaseCacheDirectoryPath()!;
+        var rootFile = Path.Combine(baseCacheDir, "v5_root.envelope");
+        _options.FileSystem.CreateDirectory(baseCacheDir);
+        _options.FileSystem.WriteAllTextToFile(rootFile, "dummy content");
+
+        var processingDir = Path.Combine(baseCacheDir, "__processing");
+        var procFile = Path.Combine(processingDir, "v5_proc.envelope");
+        _options.FileSystem.CreateDirectory(processingDir);
+        _options.FileSystem.WriteAllTextToFile(procFile, "dummy content");
+
+        var migrationLockPath = Path.Combine(baseCacheDir, "migration");
+        using var coordinator = new CacheDirectoryCoordinator(migrationLockPath, _options.DiagnosticLogger, _options.FileSystem);
+        coordinator.TryAcquire().Should().BeTrue("test must hold the migration lock");
+
+        // Act
+        var result = transport.MigrateVersion5Cache(CancellationToken.None);
+
+        // Assert
+        result.Should().Be(CachingTransport.ResultMigrationLockNotAcquired);
+        _options.FileSystem.FileExists(rootFile).Should().BeTrue();
+        _options.FileSystem.FileExists(procFile).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task MigrateVersion5Cache_Cancelled_Skipped()
+    {
+        // Arrange
+        using var innerTransport = new FakeTransport();
+        await using var transport = CachingTransport.Create(innerTransport, _options, startWorker: false);
+
+        var baseCacheDir = _options.GetBaseCacheDirectoryPath()!;
+        var rootFile = Path.Combine(baseCacheDir, "v5_root.envelope");
+        _options.FileSystem.CreateDirectory(baseCacheDir);
+        _options.FileSystem.WriteAllTextToFile(rootFile, "dummy content");
+
+        var processingDir = Path.Combine(baseCacheDir, "__processing");
+        var procFile = Path.Combine(processingDir, "v5_proc.envelope");
+        _options.FileSystem.CreateDirectory(processingDir);
+        _options.FileSystem.WriteAllTextToFile(procFile, "dummy content");
+
+        // Act
+        using var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+        var result = transport.MigrateVersion5Cache(cts.Token);
+
+        // Assert
+        result.Should().Be(CachingTransport.ResultMigrationCancelled);
+        _options.FileSystem.FileExists(rootFile).Should().BeTrue();
+        _options.FileSystem.FileExists(procFile).Should().BeTrue();
     }
 }
