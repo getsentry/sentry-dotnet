@@ -65,10 +65,6 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
                     {$"key1", $"{propertyInfo.Name}value1"},
                     {$"key2", $"{propertyInfo.Name}value2"}
                 },
-            not null when propertyType == typeof(SentryOptions.SentryExperimentalOptions) => new SentryOptions.SentryExperimentalOptions
-            {
-                EnableLogs = true,
-            },
             not null when propertyType.FullName == "Sentry.Extensions.Logging.SentryLoggingOptions+SentryLoggingExperimentalOptions" => CreateSentryLoggingExperimentalOptions(),
             _ => throw new NotSupportedException($"Unsupported property type on property {propertyInfo.Name}")
         };
@@ -94,11 +90,6 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
             {
                 yield return new KeyValuePair<string, string>($"{prop.Name}:{kvp.Key}", kvp.Value);
             }
-        }
-        else if (propertyType == typeof(SentryOptions.SentryExperimentalOptions))
-        {
-            var experimental = (SentryOptions.SentryExperimentalOptions)value;
-            yield return new KeyValuePair<string, string>($"{prop.Name}:{nameof(SentryOptions.SentryExperimentalOptions.EnableLogs)}", Convert.ToString(experimental.EnableLogs, CultureInfo.InvariantCulture));
         }
         else if (propertyType.FullName == "Sentry.Extensions.Logging.SentryLoggingOptions+SentryLoggingExperimentalOptions")
         {
@@ -136,10 +127,6 @@ public abstract class BindableTests<TOptions>(params string[] skipProperties)
             {
                 var actualValue = actual.GetProperty(prop.Name);
                 if (prop.PropertyType == typeof(Dictionary<string, string>))
-                {
-                    actualValue.Should().BeEquivalentTo(expectedValue);
-                }
-                else if (prop.PropertyType == typeof(SentryOptions.SentryExperimentalOptions))
                 {
                     actualValue.Should().BeEquivalentTo(expectedValue);
                 }

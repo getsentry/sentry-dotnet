@@ -5,7 +5,7 @@
     <Using Include="Sentry" />
   </ItemGroup>
 
-  <!-- Consumed by Sentry.SourceGenerators -->
+  <!-- Consumed by Sentry.Compiler.Extensions -->
   <ItemGroup>
     <CompilerVisibleProperty Include="_IsPublishing" />
     <CompilerVisibleProperty Include="PublishAot" />

@@ -1,4 +1,4 @@
-namespace Sentry.SourceGenerators.Tests;
+namespace Sentry.Compiler.Extensions.Tests;
 
 internal static class VerifySettingsInitializer
 {

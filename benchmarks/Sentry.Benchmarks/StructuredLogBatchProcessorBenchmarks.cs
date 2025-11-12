@@ -22,10 +22,7 @@ public class StructuredLogBatchProcessorBenchmarks
         SentryOptions options = new()
         {
             Dsn = DsnSamples.ValidDsn,
-            Experimental =
-            {
-                EnableLogs = true,
-            },
+            EnableLogs = true,
         };
 
         var batchInterval = Timeout.InfiniteTimeSpan;

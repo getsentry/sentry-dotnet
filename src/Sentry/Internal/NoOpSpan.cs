@@ -88,5 +88,6 @@ internal class NoOpSpan : ISpan
 
     public void Dispose()
     {
+        Finish();
     }
 }

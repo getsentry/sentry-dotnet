@@ -711,10 +711,10 @@ namespace Sentry
         public string? Distribution { get; set; }
         public string? Dsn { get; set; }
         public bool EnableBackpressureHandling { get; set; }
+        public bool EnableLogs { get; set; }
         public bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }
         public string? Environment { get; set; }
-        public Sentry.SentryOptions.SentryExperimentalOptions Experimental { get; set; }
         public System.Collections.Generic.IList<Sentry.HttpStatusCodeRange> FailedRequestStatusCodes { get; set; }
         public System.Collections.Generic.IList<Sentry.StringOrRegex> FailedRequestTargets { get; set; }
         public System.TimeSpan FlushTimeout { get; set; }
@@ -798,14 +798,10 @@ namespace Sentry
         public void SetBeforeBreadcrumb(System.Func<Sentry.Breadcrumb, Sentry.SentryHint, Sentry.Breadcrumb?> beforeBreadcrumb) { }
         public void SetBeforeSend(System.Func<Sentry.SentryEvent, Sentry.SentryEvent?> beforeSend) { }
         public void SetBeforeSend(System.Func<Sentry.SentryEvent, Sentry.SentryHint, Sentry.SentryEvent?> beforeSend) { }
+        public void SetBeforeSendLog(System.Func<Sentry.SentryLog, Sentry.SentryLog?> beforeSendLog) { }
         public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryTransaction?> beforeSendTransaction) { }
         public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryHint, Sentry.SentryTransaction?> beforeSendTransaction) { }
         public Sentry.SentryOptions UseStackTraceFactory(Sentry.Extensibility.ISentryStackTraceFactory sentryStackTraceFactory) { }
-        public class SentryExperimentalOptions
-        {
-            public bool EnableLogs { get; set; }
-            public void SetBeforeSendLog(System.Func<Sentry.SentryLog, Sentry.SentryLog?> beforeSendLog) { }
-        }
     }
     public sealed class SentryPackage : Sentry.ISentryJsonSerializable
     {
@@ -1680,6 +1676,7 @@ namespace Sentry.Protocol
         public string? Hash { get; set; }
         public string? Identifier { get; set; }
         public bool? InForeground { get; set; }
+        public long? Memory { get; set; }
         public string? Name { get; set; }
         public System.DateTimeOffset? StartTime { get; set; }
         public string? Version { get; set; }
