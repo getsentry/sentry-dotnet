@@ -13,7 +13,6 @@ body:
         - Sentry.AspNetCore.Blazor.WebAssembly
         - Sentry.AspNetCore.Grpc
         - Sentry.AspNet
-        - Sentry.Azure.Functions.Worker
         - Sentry.DiagnosticSource
         - Sentry.EntityFramework
         - Sentry.Extensions.Logging
