@@ -30,6 +30,8 @@ static partial class SentrySdk
 
     internal static IHub InitHub(SentryOptions options)
     {
+        options.InitCounter.Increment();
+
         options.SetupLogging();
 
         ProcessInfo.Instance ??= new ProcessInfo(options);

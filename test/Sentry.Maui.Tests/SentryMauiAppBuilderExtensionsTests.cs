@@ -267,6 +267,10 @@ public partial class SentryMauiAppBuilderExtensionsTests
 
         // Assert
         Assert.Equal(cachePath, options.CacheDirectoryPath);
+        if (options.Transport is CachingTransport cachingTransport)
+        {
+            cachingTransport.Dispose(); // Release cache lock so that the cacheDirectory can be removed
+        }
     }
 
     [Fact]
