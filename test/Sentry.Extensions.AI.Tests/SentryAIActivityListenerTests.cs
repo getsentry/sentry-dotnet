@@ -19,7 +19,7 @@ public class SentryAIActivityListenerTests
     public SentryAIActivityListenerTests()
     {
         // Dispose ActivityListener before each test, otherwise the singleton instance will persist between tests
-        SentryAiActivityListener.Dispose();
+        new SentryAiActivityListener().Dispose();
     }
 
     [Fact]
