@@ -264,7 +264,7 @@ internal class CachingTransport : ITransport, IDisposable
     /// In version 5, there were no isolated subdirectories.
     /// </summary>
     /// <param name="cancellationToken"></param>
-    /// <returns>An integer return code to facillitate testing</returns>
+    /// <returns>An integer return code to facilitate testing.</returns>
     internal int MigrateVersion5Cache(CancellationToken cancellationToken)
     {
         if (_options.GetBaseCacheDirectoryPath() is not { } baseCacheDir)
@@ -672,7 +672,6 @@ internal class CachingTransport : ITransport, IDisposable
             return Task.CompletedTask;
         }
 
-        // Stop worker and wait until it finishes
         _options.LogDebug("Stopping CachingTransport worker.");
         _workerCts.Cancel();
         return _recycler;

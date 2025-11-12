@@ -695,7 +695,7 @@ public partial class SentryOptionsTests
     public void GetIsolatedFolderName_MissingDsn_UniqueForInitcount()
     {
         var o = new SentryOptions { CacheDirectoryPath = "c:\\cache", Dsn = null };
-        var folder =o.GetIsolatedFolderName();
+        var folder = o.GetIsolatedFolderName();
         Assert.Equal($"{CacheDirectoryHelper.IsolatedCacheDirectoryPrefix}{o.InitCounter.Count}", folder);
     }
 #else

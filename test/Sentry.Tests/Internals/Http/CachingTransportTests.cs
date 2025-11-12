@@ -752,9 +752,11 @@ public class CachingTransportTests : IDisposable
         _options.FileSystem.WriteAllTextToFile(procFile, "dummy content");
 
         // Act
-        transport.MigrateVersion5Cache(CancellationToken.None);
+        var result = transport.MigrateVersion5Cache(CancellationToken.None);
 
         // Assert
+        result.Should().Be(CachingTransport.ResultMigrationOk);
+
         var markerFile = Path.Combine(baseCacheDir, ".migrated");
         _options.FileSystem.FileExists(markerFile).Should().BeTrue();
         _options.FileSystem.FileExists(rootFile).Should().BeFalse();
