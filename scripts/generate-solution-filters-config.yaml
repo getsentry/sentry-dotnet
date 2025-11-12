@@ -166,22 +166,6 @@ filterConfigs:
         - "**/Sentry.Tests.csproj"
         - "**/Sentry.Analyzers.Tests.csproj"
 
-  - outputPath: Sentry.Azure.Functions.slnf
-    include:
-      patterns:
-        - "**/*Azure.Functions*.csproj"
-        - "**/Sentry.Samples.Console.Basic.csproj"
-        - "**/Sentry.Extensions.Logging.csproj"
-        - "**/Sentry.csproj"
-        - "**/Sentry.Analyzers.csproj"
-        - "**/Sentry.Testing.csproj"
-        - "**/Sentry.Testing.CrashableApp.csproj"
-        - "**/Sentry.Tests.csproj"
-        - "**/Sentry.Analyzers.Tests.csproj"
-    exclude:
-      groups:
-        - "artefacts"
-
   - outputPath: SentryCore.slnf
     solution: .generated.NoMobile.sln
     include:
