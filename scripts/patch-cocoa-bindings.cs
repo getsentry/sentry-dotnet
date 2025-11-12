@@ -114,6 +114,7 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryDsn",
         "SentryEvent",
         "SentryException",
+        "SentryExperimentalOptions",
         "SentryFeedback",
         "SentryFeedbackAPI",
         "SentryFrame",
@@ -155,7 +156,10 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryUser",
         "SentryViewScreenshotOptions",
         "SentryViewScreenshotProvider"
-    );
+    )
+    // Rename and retarget the experimental options property
+    .RenameProperty("SentryOptions", "_swiftExperimentalOptions", "Experimental")
+    .ChangePropertyType("SentryOptions", "Experimental", "SentryExperimentalOptions");
 
 var formatted = CodeFormatter.Format(nodes, new AdhocWorkspace());
 File.WriteAllText(args[0], formatted.ToFullString() + "\n");
@@ -388,6 +392,31 @@ internal static class FilterExtensions
             .Where(node => node.Identifier.Matches(property) && node.HasParent(type));
         return root.ReplaceNodes(nodes, (node, _) => node.WithAttributeLists(node.AttributeLists.RemoveAttribute("Verify", verify)));
     }
+
+    public static CompilationUnitSyntax RenameProperty(
+        this CompilationUnitSyntax root,
+        string type,
+        string from,
+        string to)
+    {
+        var nodes = root.DescendantNodes()
+            .OfType<PropertyDeclarationSyntax>()
+            .Where(node => node.Identifier.Matches(from) && node.HasParent(type));
+        return root.ReplaceNodes(nodes, (node, _) => node.WithIdentifier(SyntaxFactory.Identifier(to)));
+    }
+
+    public static CompilationUnitSyntax ChangePropertyType(
+        this CompilationUnitSyntax root,
+        string type,
+        string property,
+        string newType)
+    {
+        var nodes = root.DescendantNodes()
+            .OfType<PropertyDeclarationSyntax>()
+            .Where(node => node.Identifier.Matches(property) && node.HasParent(type));
+        return root.ReplaceNodes(nodes, (node, _) => node.WithType(SyntaxFactory.ParseTypeName(newType)));
+    }
+
 }
 
 internal static class SyntaxNodeExtensions

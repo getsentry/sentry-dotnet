@@ -1611,7 +1611,7 @@ interface SentryOptions
 
     // @property (readonly, nonatomic) NSObject * _Nonnull _swiftExperimentalOptions;
     [Export("_swiftExperimentalOptions")]
-    NSObject _swiftExperimentalOptions { get; }
+    SentryExperimentalOptions Experimental { get; }
 }
 
 // typedef void (^SentryProfilingConfigurationBlock)(SentryProfileOptions * _Nonnull);
@@ -2124,6 +2124,36 @@ interface SentryUser : SentrySerializable
     // -(NSUInteger)hash;
     [Export("hash")]
     nuint Hash { get; }
+}
+
+// @interface SentryExperimentalOptions : NSObject
+[BaseType(typeof(NSObject), Name = "_TtC6Sentry25SentryExperimentalOptions")]
+[Internal]
+interface SentryExperimentalOptions
+{
+    // @property (nonatomic) BOOL enableDataSwizzling;
+    [Export("enableDataSwizzling")]
+    bool EnableDataSwizzling { get; set; }
+
+    // @property (nonatomic) BOOL enableFileManagerSwizzling;
+    [Export("enableFileManagerSwizzling")]
+    bool EnableFileManagerSwizzling { get; set; }
+
+    // @property (nonatomic) BOOL enableUnhandledCPPExceptionsV2;
+    [Export("enableUnhandledCPPExceptionsV2")]
+    bool EnableUnhandledCPPExceptionsV2 { get; set; }
+
+    // @property (nonatomic) BOOL enableSessionReplayInUnreliableEnvironment;
+    [Export("enableSessionReplayInUnreliableEnvironment")]
+    bool EnableSessionReplayInUnreliableEnvironment { get; set; }
+
+    // @property (nonatomic) BOOL enableLogs;
+    [Export("enableLogs")]
+    bool EnableLogs { get; set; }
+
+    // -(void)validateOptions:(NSDictionary<NSString *,id> * _Nullable)options;
+    [Export("validateOptions:")]
+    void ValidateOptions([NullAllowed] NSDictionary<NSString, NSObject> options);
 }
 
 // @interface SentryFeedback : NSObject
