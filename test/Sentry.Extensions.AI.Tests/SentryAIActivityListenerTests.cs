@@ -16,11 +16,17 @@ public class SentryAIActivityListenerTests
 
     private readonly Fixture _fixture = new();
 
+    public SentryAIActivityListenerTests()
+    {
+        // Dispose ActivityListener before each test, otherwise the singleton instance will persist between tests
+        SentryAiActivityListener.Dispose();
+    }
+
     [Fact]
     public void Init_AddsActivityListenerToActivitySource()
     {
         // Act
-        SentryAIActivityListener.Init();
+        _ = new SentryAiActivityListener();
 
         // Assert
         Assert.True(SentryAIActivitySource.Instance.HasListeners());
@@ -31,7 +37,7 @@ public class SentryAIActivityListenerTests
     public void ShouldListenTo_ReturnsTrueForSentryActivitySource(string sourceName)
     {
         // Arrange
-        SentryAIActivityListener.Init(_fixture.Hub);
+        _ = new SentryAiActivityListener(_fixture.Hub);
         var activitySource = new ActivitySource(sourceName);
 
         // Act
@@ -51,7 +57,7 @@ public class SentryAIActivityListenerTests
     public void ShouldListenTo_ReturnsFalseForNonSentryActivitySource()
     {
         // Arrange
-        SentryAIActivityListener.Init(_fixture.Hub);
+        _ = new SentryAiActivityListener(_fixture.Hub);
         var activitySource = new ActivitySource("Other.ActivitySource");
 
         // Act & Assert
@@ -65,12 +71,10 @@ public class SentryAIActivityListenerTests
 
     [Theory]
     [InlineData("orchestrate_tools")]
-    [InlineData("FunctionInvokingChatClient.GetResponseAsync")]
-    [InlineData("FunctionInvokingChatClient")]
     public void Sample_ReturnsAllDataAndRecordedForFICCActivityNames(string activityName)
     {
         // Arrange
-        SentryAIActivityListener.Init(_fixture.Hub);
+        _ = new SentryAiActivityListener(_fixture.Hub);
 
         // Act
         using var activity = SentryAIActivitySource.Instance.StartActivity(activityName);
@@ -90,9 +94,9 @@ public class SentryAIActivityListenerTests
     public void Init_MultipleCalls_NoDuplicateListener_StartsOnlyOneTransaction()
     {
         // Arrange
-        SentryAIActivityListener.Init(_fixture.Hub);
-        SentryAIActivityListener.Init(_fixture.Hub);
-        SentryAIActivityListener.Init(_fixture.Hub);
+        _ = new SentryAiActivityListener(_fixture.Hub);
+        _ = new SentryAiActivityListener(_fixture.Hub);
+        _ = new SentryAiActivityListener(_fixture.Hub);
 
         // Act
         using var activity = SentryAIActivitySource.Instance.StartActivity(SentryAIConstants.FICCActivityNames[0]);

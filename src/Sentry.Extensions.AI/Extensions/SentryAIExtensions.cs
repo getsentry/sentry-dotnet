@@ -53,7 +53,8 @@ public static class SentryAIExtensions
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public static IChatClient AddSentry(this IChatClient client, Action<SentryAIOptions>? configure = null)
     {
-        SentryAIActivityListener.Init();
+        // The constructor automatically adds the listener, so we can discard the instance
+        _ = new SentryAiActivityListener();
         return new SentryChatClient(client, configure);
     }
 }
