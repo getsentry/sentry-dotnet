@@ -814,6 +814,24 @@ public class SentryOptions
     /// </summary>
     public string? CacheDirectoryPath { get; set; }
 
+    internal Func<int?> ProcessIdResolver
+    {
+        set => _processIdResolver = value;
+        get
+        {
+            return _processIdResolver ?? DefaultResolver;
+            int? DefaultResolver() => ProcessInfo.Instance?.GetId(this);
+        }
+    }
+    private Func<int?>? _processIdResolver;
+
+    internal IInitCounter InitCounter
+    {
+        get => _initCounter ?? Sentry.Internal.InitCounter.Instance;
+        set => _initCounter = value;
+    }
+    private IInitCounter? _initCounter;
+
     /// <summary>
     /// <para>The SDK will only capture HTTP Client errors if it is enabled.</para>
     /// <para><see cref="FailedRequestStatusCodes"/> can be used to configure which requests will be treated as failed.</para>

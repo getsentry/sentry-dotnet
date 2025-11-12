@@ -12,6 +12,7 @@
 
 ### Features
 
+- Implemented instance isolation so that multiple instances of the Sentry SDK can be instantiated inside the same process when using the Caching Transport ([#4498](https://github.com/getsentry/sentry-dotnet/pull/4498))
 - The SDK now makes use of the new SessionEndStatus `Unhandled` when capturing an unhandled but non-terminal exception, i.e. through the UnobservedTaskExceptionIntegration ([#4633](https://github.com/getsentry/sentry-dotnet/pull/4633), [#4653](https://github.com/getsentry/sentry-dotnet/pull/4653))
 - The SDK now provides a `IsSessionActive` to allow checking the session state ([#4662](https://github.com/getsentry/sentry-dotnet/pull/4662))
 - The SDK now makes use of the new SessionEndStatus `Unhandled` when capturing an unhandled but non-terminal exception, i.e. through the UnobservedTaskExceptionIntegration ([#4633](https://github.com/getsentry/sentry-dotnet/pull/4633))

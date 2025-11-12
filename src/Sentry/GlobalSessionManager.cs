@@ -33,10 +33,7 @@ internal class GlobalSessionManager : ISessionManager
         _clock = clock ?? SystemClock.Clock;
         _persistedSessionProvider = persistedSessionProvider
                                     ?? (filePath => Json.Load(_options.FileSystem, filePath, PersistedSessionUpdate.FromJson));
-
-        // TODO: session file should really be process-isolated, but we
-        // don't have a proper mechanism for that right now.
-        _persistenceDirectoryPath = options.TryGetDsnSpecificCacheDirectoryPath();
+        _persistenceDirectoryPath = options.GetIsolatedCacheDirectoryPath();
     }
 
     // Take pause timestamp directly instead of referencing _lastPauseTimestamp to avoid
