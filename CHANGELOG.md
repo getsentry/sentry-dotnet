@@ -62,6 +62,20 @@
 
 - This release adds support for .NET 10 and drops support for net8.0-android, net8.0-ios, net8.0-maccatalyst and net8.0-windows10.0.19041.0 ([#4461](https://github.com/getsentry/sentry-dotnet/pull/4461))
 - Added support for v3 of the Android AssemblyStore format that is used in .NET 10 and dropped support for v1 that was used in .NET 8 ([#4583](https://github.com/getsentry/sentry-dotnet/pull/4583))
+### Dependencies
+
+- Bump Java SDK from v8.24.0 to v8.25.0 ([#4679](https://github.com/getsentry/sentry-dotnet/pull/4679))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8250)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.24.0...8.25.0)
+- Bump Native SDK from v0.12.0 to v0.12.1 ([#4690](https://github.com/getsentry/sentry-dotnet/pull/4690))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0121)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.12.0...0.12.1)
+- Bump Cocoa SDK from v8.57.1 to v8.57.2 ([#4704](https://github.com/getsentry/sentry-dotnet/pull/4704))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8572)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.57.1...8.57.2)
+- Bump CLI from v2.57.0 to v2.58.1 ([#4705](https://github.com/getsentry/sentry-dotnet/pull/4705), [#4727](https://github.com/getsentry/sentry-dotnet/pull/4727))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2581)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.57.0...2.58.1)
 
 ## 5.16.2
 
