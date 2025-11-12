@@ -18,7 +18,7 @@ public class SentryMauiStructuredLoggerProviderTests
         public Fixture()
         {
             var loggingOptions = new SentryMauiOptions();
-            loggingOptions.Experimental.EnableLogs = true;
+            loggingOptions.EnableLogs = true;
 
             Options = Microsoft.Extensions.Options.Options.Create(loggingOptions);
             Hub = Substitute.For<IHub>();
@@ -91,6 +91,9 @@ public class SentryMauiStructuredLoggerProviderTests
 
         capturedLog.TryGetAttribute("sentry.sdk.version", out object? version).Should().BeTrue();
         version.Should().Be(Sentry.Maui.Internal.Constants.SdkVersion);
+
+        capturedLog.TryGetAttribute("sentry.origin", out object? origin).Should().BeTrue();
+        origin.Should().Be("auto.log.extensions_logging");
     }
 
     [Fact]

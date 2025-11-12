@@ -29,7 +29,7 @@ internal sealed class SentryStructuredLogger : ILogger
     public bool IsEnabled(LogLevel logLevel)
     {
         return _hub.IsEnabled
-            && _options.Experimental.EnableLogs
+            && _options.EnableLogs
             && logLevel != LogLevel.None
             && logLevel >= _options.ExperimentalLogging.MinimumLogLevel;
     }
