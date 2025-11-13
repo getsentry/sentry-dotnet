@@ -1,3 +1,4 @@
+using Sentry.Ben.BlockingDetector;
 using Sentry.Extensibility;
 using Sentry.Internal;
 
@@ -24,16 +25,19 @@ internal class SamplingTransactionProfilerFactory : IDisposable, ITransactionPro
     {
         _options = options;
 
-        _sessionTask = Task.Run(async () =>
+        using (new SuppressBlockingDetection())
         {
-            // This can block up to 30 seconds. The timeout is out of our hands.
-            var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
+            _sessionTask = Task.Run(async () =>
+            {
+                // This can block up to 30 seconds. The timeout is out of our hands.
+                var session = SampleProfilerSession.StartNew(options.DiagnosticLogger);
 
-            // This can block indefinitely.
-            await session.WaitForFirstEventAsync().ConfigureAwait(false);
+                // This can block indefinitely.
+                await session.WaitForFirstEventAsync().ConfigureAwait(false);
 
-            return session;
-        });
+                return session;
+            });
+        }
 
         Debug.Assert(TimeSpan.FromSeconds(0) == TimeSpan.Zero);
         if (startupTimeout != TimeSpan.Zero && !_sessionTask.Wait(startupTimeout))
