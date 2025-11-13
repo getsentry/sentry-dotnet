@@ -22,7 +22,7 @@ public class SentryAIExtensionsTests
     {
         // Arrange
         var mockClient = Substitute.For<IChatClient>();
-        using var listener = SentryAiActivityListener.CreateListener(_fixture.Hub);
+        using var listener = SentryAIActivityListener.CreateListener(_fixture.Hub);
 
         // Act
         var result = mockClient.AddSentry(listener);
@@ -36,7 +36,7 @@ public class SentryAIExtensionsTests
     {
         // Arrange
         var mockClient = Substitute.For<IChatClient>();
-        using var listener = SentryAiActivityListener.CreateListener(_fixture.Hub);
+        using var listener = SentryAIActivityListener.CreateListener(_fixture.Hub);
         var configureWasCalled = false;
 
         // Act
@@ -58,7 +58,7 @@ public class SentryAIExtensionsTests
     {
         // Arrange
         var mockClient = Substitute.For<IChatClient>();
-        using var listener = SentryAiActivityListener.CreateListener(_fixture.Hub);
+        using var listener = SentryAIActivityListener.CreateListener(_fixture.Hub);
 
         // Act
         var result = mockClient.AddSentry(listener, null);

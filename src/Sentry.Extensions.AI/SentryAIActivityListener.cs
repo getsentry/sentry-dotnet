@@ -5,7 +5,7 @@ namespace Sentry.Extensions.AI;
 /// <summary>
 /// Listens to FunctionInvokingChatClient's Activity
 /// </summary>
-internal static class SentryAiActivityListener
+internal static class SentryAIActivityListener
 {
     /// <summary>
     /// Singleton used outside of testing

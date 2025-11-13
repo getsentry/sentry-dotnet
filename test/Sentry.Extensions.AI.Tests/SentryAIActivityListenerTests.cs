@@ -23,7 +23,7 @@ public class SentryAIActivityListenerTests
         var source = SentryAIActivitySource.CreateSource();
 
         // Act
-        using var listener = SentryAiActivityListener.CreateListener(_fixture.Hub);
+        using var listener = SentryAIActivityListener.CreateListener(_fixture.Hub);
 
         // Assert
         Assert.True(source.HasListeners());
@@ -34,7 +34,7 @@ public class SentryAIActivityListenerTests
     {
         // Arrange
         var sourceName = SentryAIActivitySource.SentryActivitySourceName;
-        using var listener = SentryAiActivityListener.CreateListener(_fixture.Hub);
+        using var listener = SentryAIActivityListener.CreateListener(_fixture.Hub);
         var activitySource = new ActivitySource(sourceName);
 
         // Act
@@ -54,7 +54,7 @@ public class SentryAIActivityListenerTests
     public void ShouldListenTo_ReturnsFalseForNonSentryActivitySource()
     {
         // Arrange
-        using var listener = SentryAiActivityListener.CreateListener(_fixture.Hub);
+        using var listener = SentryAIActivityListener.CreateListener(_fixture.Hub);
         var activitySource = new ActivitySource("Other.ActivitySource");
 
         // Act & Assert
@@ -71,7 +71,7 @@ public class SentryAIActivityListenerTests
     {
         // Arrange
         var activityName = "orchestrate_tools";
-        using var listener = SentryAiActivityListener.CreateListener(_fixture.Hub);
+        using var listener = SentryAIActivityListener.CreateListener(_fixture.Hub);
         var source = SentryAIActivitySource.CreateSource();
 
         // Act

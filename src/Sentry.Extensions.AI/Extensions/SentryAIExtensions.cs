@@ -52,7 +52,7 @@ public static class SentryAIExtensions
     /// <returns>The instrumented <see cref="IChatClient"/></returns>
     [Experimental(DiagnosticId.ExperimentalFeature)]
     public static IChatClient AddSentry(this IChatClient client, Action<SentryAIOptions>? configure = null) =>
-        AddSentry(client, SentryAiActivityListener.Instance, configure);
+        AddSentry(client, SentryAIActivityListener.Instance, configure);
 
     /// <summary>
     /// Internal overload for testing
