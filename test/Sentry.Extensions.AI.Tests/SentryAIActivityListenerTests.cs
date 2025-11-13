@@ -16,28 +16,25 @@ public class SentryAIActivityListenerTests
 
     private readonly Fixture _fixture = new();
 
-    public SentryAIActivityListenerTests()
-    {
-        // Dispose ActivityListener before each test, otherwise the singleton instance will persist between tests
-        new SentryAiActivityListener().Dispose();
-    }
-
     [Fact]
     public void Init_AddsActivityListenerToActivitySource()
     {
+        // Arrange
+        var source = SentryAIActivitySource.CreateSource();
+
         // Act
-        _ = new SentryAiActivityListener();
+        using var listener = SentryAiActivityListener.CreateListener(_fixture.Hub);
 
         // Assert
-        Assert.True(SentryAIActivitySource.Instance.HasListeners());
+        Assert.True(source.HasListeners());
     }
 
-    [Theory]
-    [InlineData(SentryAIConstants.SentryActivitySourceName)]
-    public void ShouldListenTo_ReturnsTrueForSentryActivitySource(string sourceName)
+    [Fact]
+    public void ShouldListenTo_ReturnsTrueForSentryActivitySource()
     {
         // Arrange
-        _ = new SentryAiActivityListener(_fixture.Hub);
+        var sourceName = SentryAIActivitySource.SentryActivitySourceName;
+        using var listener = SentryAiActivityListener.CreateListener(_fixture.Hub);
         var activitySource = new ActivitySource(sourceName);
 
         // Act
@@ -57,7 +54,7 @@ public class SentryAIActivityListenerTests
     public void ShouldListenTo_ReturnsFalseForNonSentryActivitySource()
     {
         // Arrange
-        _ = new SentryAiActivityListener(_fixture.Hub);
+        using var listener = SentryAiActivityListener.CreateListener(_fixture.Hub);
         var activitySource = new ActivitySource("Other.ActivitySource");
 
         // Act & Assert
@@ -69,42 +66,22 @@ public class SentryAIActivityListenerTests
             Arg.Any<IReadOnlyDictionary<string, object?>>());
     }
 
-    [Theory]
-    [InlineData("orchestrate_tools")]
-    public void Sample_ReturnsAllDataAndRecordedForFICCActivityNames(string activityName)
+    [Fact]
+    public void Sample_ReturnsAllDataAndRecordedForFICCActivityNames()
     {
         // Arrange
-        _ = new SentryAiActivityListener(_fixture.Hub);
+        var activityName = "orchestrate_tools";
+        using var listener = SentryAiActivityListener.CreateListener(_fixture.Hub);
+        var source = SentryAIActivitySource.CreateSource();
 
         // Act
-        using var activity = SentryAIActivitySource.Instance.StartActivity(activityName);
+        using var activity = source.StartActivity(activityName);
 
         // Assert
         Assert.NotNull(activity);
         Assert.True(activity.IsAllDataRequested);
         Assert.Equal(ActivitySamplingResult.AllDataAndRecorded,
             activity.Recorded ? ActivitySamplingResult.AllDataAndRecorded : ActivitySamplingResult.None);
-
-        _fixture.Hub.Received(1).StartTransaction(
-            Arg.Any<ITransactionContext>(),
-            Arg.Any<IReadOnlyDictionary<string, object?>>());
-    }
-
-    [Fact]
-    public void Init_MultipleCalls_NoDuplicateListener_StartsOnlyOneTransaction()
-    {
-        // Arrange
-        _ = new SentryAiActivityListener(_fixture.Hub);
-        _ = new SentryAiActivityListener(_fixture.Hub);
-        _ = new SentryAiActivityListener(_fixture.Hub);
-
-        // Act
-        using var activity = SentryAIActivitySource.Instance.StartActivity(SentryAIConstants.FICCActivityNames[0]);
-
-        // Assert
-        Assert.NotNull(activity);
-        Assert.True(SentryAIActivitySource.Instance.HasListeners());
-        activity.Stop();
 
         _fixture.Hub.Received(1).StartTransaction(
             Arg.Any<ITransactionContext>(),

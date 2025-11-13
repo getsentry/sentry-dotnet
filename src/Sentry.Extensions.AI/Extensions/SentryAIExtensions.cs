@@ -51,10 +51,15 @@ public static class SentryAIExtensions
     /// <param name="configure">The <see cref="SentryAIOptions"/> configuration</param>
     /// <returns>The instrumented <see cref="IChatClient"/></returns>
     [Experimental(DiagnosticId.ExperimentalFeature)]
-    public static IChatClient AddSentry(this IChatClient client, Action<SentryAIOptions>? configure = null)
+    public static IChatClient AddSentry(this IChatClient client, Action<SentryAIOptions>? configure = null) =>
+        AddSentry(client, SentryAiActivityListener.Instance, configure);
+
+    /// <summary>
+    /// Internal overload for testing
+    /// </summary>
+    internal static IChatClient AddSentry(this IChatClient client, ActivityListener listener, Action<SentryAIOptions>? configure = null)
     {
-        // The constructor automatically adds the listener, so we can discard the instance
-        _ = new SentryAiActivityListener();
+        ActivitySource.AddActivityListener(listener);
         return new SentryChatClient(client, configure);
     }
 }

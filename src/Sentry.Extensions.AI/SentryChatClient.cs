@@ -4,11 +4,20 @@ namespace Sentry.Extensions.AI;
 
 internal sealed class SentryChatClient : DelegatingChatClient
 {
+    private readonly ActivitySource _activitySource;
     private readonly HubAdapter _hub = HubAdapter.Instance;
     private readonly SentryAIOptions _sentryAIOptions;
 
-    public SentryChatClient(IChatClient client, Action<SentryAIOptions>? configure = null) : base(client)
+    public SentryChatClient(IChatClient client, Action<SentryAIOptions>? configure = null) : this(null, client, configure)
     {
+    }
+
+    /// <summary>
+    /// Internal ovverride for testing
+    /// </summary>
+    internal SentryChatClient(ActivitySource? activitySource, IChatClient client, Action<SentryAIOptions>? configure = null) : base(client)
+    {
+        _activitySource = activitySource ?? SentryAIActivitySource.Instance;
         _sentryAIOptions = new SentryAIOptions();
         configure?.Invoke(_sentryAIOptions);
     }
@@ -102,9 +111,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
 
     /// <inheritdoc/>
     public override object? GetService(Type serviceType, object? serviceKey = null) =>
-        serviceType == typeof(ActivitySource)
-            ? SentryAIActivitySource.Instance
-            : base.GetService(serviceType, serviceKey);
+        serviceType == typeof(ActivitySource) ? _activitySource : base.GetService(serviceType, serviceKey);
 
     private void AfterResponseCleanup(ISpan chatSpan, ISpan agentSpan, Exception? exception = null)
     {

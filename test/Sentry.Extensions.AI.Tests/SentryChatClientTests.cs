@@ -8,8 +8,9 @@ public class SentryChatClientTests
     private class Fixture
     {
         private SentryOptions Options { get; }
-        public ISentryClient Client { get; }
-        public IHub Hub { get; set; }
+        public IHub Hub { get; }
+        public ActivitySource Source { get; } = SentryAIActivitySource.CreateSource();
+        public IChatClient InnerClient = Substitute.For<IChatClient>();
 
         public Fixture()
         {
@@ -21,8 +22,9 @@ public class SentryChatClientTests
 
             SentrySdk.Init(Options);
             Hub = SentrySdk.CurrentHub;
-            Client = Substitute.For<ISentryClient>();
         }
+
+        public SentryChatClient GetSut() => new SentryChatClient(Source, InnerClient);
     }
 
     private readonly Fixture _fixture = new();
@@ -35,20 +37,19 @@ public class SentryChatClientTests
         _fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
 
-        var inner = Substitute.For<IChatClient>();
-        var sentryChatClient = new SentryChatClient(inner);
         var message = new ChatMessage(ChatRole.Assistant, "ok");
         var chatResponse = new ChatResponse(message);
 
-        inner.GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
+        _fixture.InnerClient.GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(chatResponse));
+        var sentryChatClient = _fixture.GetSut();
 
         // Act
         var res = await sentryChatClient.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")]);
 
         // Assert
         Assert.Equal([message], res.Messages);
-        await inner.Received(1).GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
+        await _fixture.InnerClient.Received(1).GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
             Arg.Any<CancellationToken>());
 
         var chatSpan = transaction.Spans.FirstOrDefault(s => s.Operation == SentryAIConstants.SpanAttributes.ChatOperation);
@@ -74,11 +75,10 @@ public class SentryChatClientTests
         _fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
 
-        var inner = Substitute.For<IChatClient>();
-        var sentryChatClient = new SentryChatClient(inner);
+        var sentryChatClient = _fixture.GetSut();
         var expectedException = new InvalidOperationException("Streaming failed");
 
-        inner.GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
+        _fixture.InnerClient.GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
             .Throws(expectedException);
 
         // Act
@@ -110,21 +110,20 @@ public class SentryChatClientTests
         _fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
 
-        var inner = Substitute.For<IChatClient>();
-        inner.GetStreamingResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
+        _fixture.InnerClient.GetStreamingResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
                 Arg.Any<CancellationToken>())
             .Returns(CreateTestStreamingUpdatesAsync());
-        var client = new SentryChatClient(inner);
+        var sentryChatClient = _fixture.GetSut();
         var results = new List<ChatResponseUpdate>();
 
         // Act
-        await foreach (var update in client.GetStreamingResponseAsync([new ChatMessage(ChatRole.User, "hi")]))
+        await foreach (var update in sentryChatClient.GetStreamingResponseAsync([new ChatMessage(ChatRole.User, "hi")]))
         {
             results.Add(update);
         }
 
         // Assert
-        inner.Received(1).GetStreamingResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
+        _fixture.InnerClient.Received(1).GetStreamingResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
             Arg.Any<CancellationToken>());
         Assert.Equal(2, results.Count);
         Assert.Equal("Hello", results[0].Text);
@@ -154,17 +153,16 @@ public class SentryChatClientTests
         _fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
         SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
 
-        var inner = Substitute.For<IChatClient>();
         var expectedException = new InvalidOperationException("Streaming failed");
-        inner.GetStreamingResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
+        _fixture.InnerClient.GetStreamingResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
                 Arg.Any<CancellationToken>())
             .Returns(CreateFailingStreamingUpdatesAsync(expectedException));
-        var client = new SentryChatClient(inner);
+        var sentryChatClient = _fixture.GetSut();
 
         // Act
         var actualException = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
-            await foreach (var update in client.GetStreamingResponseAsync([new ChatMessage(ChatRole.User, "hi")]))
+            await foreach (var update in sentryChatClient.GetStreamingResponseAsync([new ChatMessage(ChatRole.User, "hi")]))
             {
                 // Should not reach here due to exception
             }

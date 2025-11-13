@@ -10,11 +10,6 @@ internal static class SentryAIConstants
         ["orchestrate_tools", "FunctionInvokingChatClient.GetResponseAsync", "FunctionInvokingChatClient"];
 
     /// <summary>
-    /// The string we use to identify our <see cref="ActivitySource"/>.
-    /// </summary>
-    internal const string SentryActivitySourceName = "Sentry.AgentMonitoring";
-
-    /// <summary>
     /// The string we use to retrieve a Sentry span from the <see cref="Activity"/> using a Fused property
     /// </summary>
     internal const string SentryFICCSpanAttributeName = "SentryFICCSpan";
