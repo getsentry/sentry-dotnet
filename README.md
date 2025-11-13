@@ -13,6 +13,7 @@ Sentry SDK for .NET
 
 [![build](https://github.com/getsentry/sentry-dotnet/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/getsentry/sentry-dotnet/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/getsentry/sentry-dotnet/branch/main/graph/badge.svg)](https://codecov.io/gh/getsentry/sentry-dotnet)
+[![X Follow](https://img.shields.io/twitter/follow/sentry?label=sentry&style=social)](https://x.com/intent/follow?screen_name=sentry)
 [![Discord Chat](https://img.shields.io/discord/621778831602221064?logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/PXa5Apfe7K)
 
 | Integrations                      | Downloads | NuGet Stable | NuGet Preview |                                                                                                  Documentation                                                                                                  |
@@ -39,7 +40,6 @@ Sentry SDK for .NET
 Sentry offers other integrations that are not part of this repository:
 
 * [Sentry.Unity](https://github.com/getsentry/sentry-unity): Unity integrations
-* [Sentry.Xamarin](https://github.com/getsentry/sentry-xamarin): Xamarin native and Xamarin.Forms integrations
 * [Sentry.PowerShell](https://github.com/getsentry/sentry-powershell/): SDK for PowerShell and PowerShell Core. It's available on the [PowerShell Gallery](https://www.powershellgallery.com/packages/Sentry/)
 
 Looking for something else? Let us know by [raising an issue](https://github.com/getsentry/sentry-dotnet/issues/new).
@@ -64,4 +64,4 @@ Consider taking a look at the __[samples](https://github.com/getsentry/sentry-do
 [![Discussions](https://img.shields.io/github/discussions/getsentry/sentry-dotnet.svg)](https://github.com/getsentry/sentry-dotnet/discussions)
 [![Discord Chat](https://img.shields.io/discord/621778831602221064?logo=discord&logoColor=ffffff&color=7389D8)](https://discord.gg/PXa5Apfe7K)
 [![Stack Overflow](https://img.shields.io/badge/stack%20overflow-sentry-green.svg)](http://stackoverflow.com/questions/tagged/sentry)
-[![Twitter Follow](https://img.shields.io/twitter/follow/getsentry?label=getsentry&style=social)](https://twitter.com/intent/follow?screen_name=getsentry)
+[![X Follow](https://img.shields.io/twitter/follow/sentry?label=sentry&style=social)](https://x.com/intent/follow?screen_name=sentry)
