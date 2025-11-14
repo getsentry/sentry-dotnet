@@ -33,6 +33,7 @@ static partial class SentrySdk
         options.InitCounter.Increment();
 
         options.SetupLogging();
+        options.LogDiagnosticWarning();
 
         ProcessInfo.Instance ??= new ProcessInfo(options);
 
