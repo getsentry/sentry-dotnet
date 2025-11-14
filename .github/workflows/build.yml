@@ -265,21 +265,22 @@ jobs:
           path: src
 
       - name: Integration test
-        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
+#       # Note that when upgsading .NET versions, linux-musl may need special handling... see comments below
+#        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
         uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
         with:
           path: integration-test
 
-      # For the linux-musl runtimes we have to pin the ContainerBaseImage for preview or RC builds, since
-      # these don't conform to the normal naming conventions and don't get resolved automatically. We do
-      # by passing it as parameter to aot.Tests.ps1 via an environment variable
-      - name: Integration test (musl)
-        if: ${{ (matrix.rid == 'linux-musl-x64') || (matrix.rid == 'linux-musl-arm64') }}
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
-        env:
-          ContainerBaseImage: 'mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-alpine3.22'
-        with:
-          path: integration-test
+#      # For the linux-musl runtimes we have to pin the ContainerBaseImage for preview or RC builds, since
+#      # these don't conform to the normal naming conventions and don't get resolved automatically. We do
+#      # by passing it as parameter to aot.Tests.ps1 via an environment variable
+#      - name: Integration test (musl)
+#        if: ${{ (matrix.rid == 'linux-musl-x64') || (matrix.rid == 'linux-musl-arm64') }}
+#        uses: getsentry/github-workflows/sentry-cli/integration-test/@v2
+#        env:
+#          ContainerBaseImage: 'mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-alpine3.22'
+#        with:
+#          path: integration-test
 
   ms-build:
     needs: build-sentry-native
