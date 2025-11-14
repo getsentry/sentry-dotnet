@@ -18,6 +18,7 @@ public class MainActivity : MauiAppCompatActivity
     {
         base.OnCreate(savedInstanceState);
 
+        System.Environment.SetEnvironmentVariable("SENTRY_DSN", Intent?.GetStringExtra("SENTRY_DSN"));
         System.Environment.SetEnvironmentVariable("SENTRY_TEST_ARG", Intent?.GetStringExtra("SENTRY_TEST_ARG"));
     }
 }

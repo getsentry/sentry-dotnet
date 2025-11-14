@@ -28,7 +28,7 @@ public class AspNetCoreIntegrationTests : SerilogAspNetSentrySdkTestFixture
     [Fact]
     public async Task StructuredLogging_Disabled()
     {
-        Assert.False(ExperimentalEnableLogs);
+        Assert.False(EnableLogs);
 
         var handler = new RequestHandler
         {
@@ -51,7 +51,7 @@ public class AspNetCoreIntegrationTests : SerilogAspNetSentrySdkTestFixture
     [Fact]
     public async Task StructuredLogging_Enabled()
     {
-        ExperimentalEnableLogs = true;
+        EnableLogs = true;
 
         var handler = new RequestHandler
         {

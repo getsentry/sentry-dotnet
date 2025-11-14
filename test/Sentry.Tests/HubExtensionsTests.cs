@@ -86,7 +86,7 @@ public class HubExtensionsTests
             {"Key", null},
             {"Key2", "value2"},
         };
-        const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Critical;
+        const BreadcrumbLevel expectedLevel = BreadcrumbLevel.Fatal;
 
         Sut.AddBreadcrumb(
             clock,

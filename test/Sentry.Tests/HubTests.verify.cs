@@ -51,7 +51,8 @@ public partial class HubTests
                     _.DebugFile.Contains("xunit.runner") ||
                     _.DebugFile.Contains("JetBrains.ReSharper.TestRunner") ||
                     _.DebugFile.Contains("Microsoft.TestPlatform") ||
-                    _.DebugFile.Contains("Microsoft.VisualStudio.TestPlatform.Common.pdb")
+                    _.DebugFile.Contains("Microsoft.VisualStudio.TestPlatform.Common.pdb") ||
+                    _.DebugFile.Contains("Sentry.Tests.pdb") // This module is only sometimes included in local environments
                 )
             );
     }

@@ -17,4 +17,6 @@ internal interface ISessionManager
     public IReadOnlyList<SessionUpdate> ResumeSession();
 
     public SessionUpdate? ReportError();
+
+    public void MarkSessionAsUnhandled();
 }

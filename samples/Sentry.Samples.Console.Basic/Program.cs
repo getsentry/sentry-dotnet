@@ -38,8 +38,8 @@ SentrySdk.Init(options =>
     options.TracesSampleRate = 1.0;
 
     // This option enables Sentry Logs created via SentrySdk.Logger.
-    options.Experimental.EnableLogs = true;
-    options.Experimental.SetBeforeSendLog(static log =>
+    options.EnableLogs = true;
+    options.SetBeforeSendLog(static log =>
     {
         // A demonstration of how you can drop logs based on some attribute they have
         if (log.TryGetAttribute("suppress", out var attribute) && attribute is true)
@@ -63,7 +63,7 @@ await ThirdFunction();
 
 // Always try to finish the transaction successfully.
 // Unhandled exceptions will fail the transaction automatically.
-// Optionally, you can try/catch the exception, and call transaction.Finish(exception) on failure.
+// Optionally, you can try/catch the exception and call transaction.Finish(exception) on failure.
 transaction.Finish();
 
 async Task FirstFunction()
@@ -79,7 +79,6 @@ async Task FirstFunction()
 async Task SecondFunction()
 {
     var span = transaction.StartChild("function", nameof(SecondFunction));
-
     try
     {
         // Simulate doing some work
@@ -97,26 +96,25 @@ async Task SecondFunction()
         SentrySdk.Logger.LogError(static log => log.SetAttribute("method", nameof(SecondFunction)),
             "Error with message: {0}", exception.Message);
     }
-
-    span.Finish();
-}
-
-async Task ThirdFunction()
-{
-    var span = transaction.StartChild("function", nameof(ThirdFunction));
-    try
-    {
-        // Simulate doing some work
-        await Task.Delay(100);
-
-        SentrySdk.Logger.LogFatal(static log => log.SetAttribute("suppress", true),
-            "Crash imminent!");
-
-        // This is an example of an unhandled exception.  It will be captured automatically.
-        throw new InvalidOperationException("Something happened that crashed the app!");
-    }
     finally
     {
         span.Finish();
     }
+}
+
+async Task ThirdFunction()
+{
+    // The `using` here ensures the span gets finished when we leave this method... This is unnecessary here,
+    // since the method always throws and the span will be finished automatically when the exception is captured,
+    // but this gives you another way to ensure spans are finished.
+    using var span = transaction.StartChild("function", nameof(ThirdFunction));
+
+    // Simulate doing some work
+    await Task.Delay(100);
+
+    SentrySdk.Logger.LogFatal(static log => log.SetAttribute("suppress", true),
+        "Crash imminent!");
+
+    // This is an example of an unhandled exception.  It will be captured automatically.
+    throw new InvalidOperationException("Something happened that crashed the app!");
 }
