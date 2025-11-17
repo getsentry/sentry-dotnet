@@ -99,10 +99,10 @@ public class HttpStatusCodeRangeExtensionsTests
     }
 
     [Theory]
-    [InlineData(200)]
-    [InlineData(399)]
-    [InlineData(476)]
-    [InlineData(500)]
+    [InlineData(200)] // Below first range
+    [InlineData(399)] // Below first range
+    [InlineData(476)] // Above second range
+    [InlineData(500)] // Above second range
     public void Contains_OverlappingRanges_OutsideUnion_ReturnsFalse(int statusCode)
     {
         // Arrange
