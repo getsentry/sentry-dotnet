@@ -55,7 +55,7 @@ public class SentryHttpFailedRequestHandlerTests
     [InlineData(404)] // Not Found
     [InlineData(499)] // Edge of client error range
     [InlineData(600)] // Beyond default range
-    public void HandleResponse_EnabledButNotInRange_DontCapture(int statusCode)
+    public void HandleResponse_EnabledButNotInDefaultRange_DontCapture(int statusCode)
     {
         // Arrange
         var sut = GetSut(new SentryOptions
@@ -192,8 +192,11 @@ public class SentryHttpFailedRequestHandlerTests
         _hub.DidNotReceiveWithAnyArgs().CaptureEvent(null!);
     }
 
-    [Fact]
-    public void HandleResponse_FailedRequest_DoCapture()
+    [Theory]
+    [InlineData(500)] // Internal Server Error - in range
+    [InlineData(503)] // Service Unavailable - in range
+    [InlineData(599)] // Edge of range
+    public void HandleResponse_FailedRequestInDefaultRange_DoCapture(int statusCode)
     {
         // Arrange
         var options = new SentryOptions
@@ -202,7 +205,7 @@ public class SentryHttpFailedRequestHandlerTests
         };
         var sut = GetSut(options);
 
-        var response = InternalServerErrorResponse();
+        var response = new HttpResponseMessage((HttpStatusCode)statusCode);
         response.RequestMessage = new HttpRequestMessage();
 
         // Act
@@ -213,7 +216,7 @@ public class SentryHttpFailedRequestHandlerTests
     }
 
     [Fact]
-    public void HandleResponse_FailedRequestNoPii_DoCaptureWithoutPii()
+    public void HandleResponse_FailedRequest_HasSanitizedUrl()
     {
         // Arrange
         var options = new SentryOptions
@@ -236,7 +239,7 @@ public class SentryHttpFailedRequestHandlerTests
     }
 
     [Fact]
-    public void HandleResponse_Capture_RequestAndResponse()
+    public void HandleResponse_FailedRequest_HasRequestAndResponse()
     {
         // Arrange
         var options = new SentryOptions
@@ -287,7 +290,7 @@ public class SentryHttpFailedRequestHandlerTests
     }
 
     [Fact]
-    public void HandleResponse_Capture_Default_SkipCookiesAndHeaders()
+    public void HandleResponse_FailedRequestNoPii_SkipsCookiesAndHeaders()
     {
         // Arrange
         var options = new SentryOptions
@@ -320,7 +323,7 @@ public class SentryHttpFailedRequestHandlerTests
     }
 
     [Fact]
-    public void HandleResponse_Hint_DoCaptureHint()
+    public void HandleResponse_FailedRequestWithHint_HasHint()
     {
         // Arrange
         var options = new SentryOptions
@@ -348,7 +351,7 @@ public class SentryHttpFailedRequestHandlerTests
     }
 
     [Fact]
-    public void HandleResponse_ExceptionHasStackTrace()
+    public void HandleResponse_FailedRequest_HasExceptionWithStackTrace()
     {
         // Arrange
         var options = new SentryOptions
@@ -376,7 +379,7 @@ public class SentryHttpFailedRequestHandlerTests
 
 #if NET6_0_OR_GREATER // This test is only valid on .NET 6+ where we can use SetRemoteStackTrace
     [Fact]
-    public void HandleResponse_StackTraceIncludesCallerContext()
+    public void HandleResponse_FailedRequest_ExceptionStackTraceHasCallerContext()
     {
         // Arrange
         var options = new SentryOptions
@@ -400,7 +403,7 @@ public class SentryHttpFailedRequestHandlerTests
             @event.Exception.Should().NotBeNull();
 
             // Stack trace should include this test method name, proving we captured caller context on .NET 6+
-            @event.Exception!.StackTrace.Should().Contain(nameof(HandleResponse_StackTraceIncludesCallerContext));
+            @event.Exception!.StackTrace.Should().Contain(nameof(HandleResponse_FailedRequest_ExceptionStackTraceHasCallerContext));
         }
     }
 #endif
