@@ -23,7 +23,7 @@ runs:
       if: runner.os == 'Linux'
       shell: bash
       run: |
-        df -h /dev/root
+        df -h /dev/root 2>/dev/null || df -h
         sudo rm -rf /usr/local/.ghcup
         sudo rm -rf /usr/local/julia1.10.5
         sudo rm -rf /usr/lib/heroku
@@ -32,4 +32,4 @@ runs:
         sudo apt-get remove -y '^mysql-.*' --fix-missing || echo "::warning::The command [sudo apt-get remove -y '^mysql-.*' --fix-missing] failed to complete successfully. Proceeding..."
         sudo apt-get autoremove -y || echo "::warning::The command [sudo apt-get autoremove -y] failed to complete successfully. Proceeding..."
         sudo apt-get clean || echo "::warning::The command [sudo apt-get clean] failed to complete successfully. Proceeding..."
-        df -h /dev/root
+        df -h /dev/root 2>/dev/null || df -h
