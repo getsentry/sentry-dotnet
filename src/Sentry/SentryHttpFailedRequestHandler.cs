@@ -24,6 +24,7 @@ internal class SentryHttpFailedRequestHandler : SentryFailedRequestHandler
 
         var statusCode = (int)response.StatusCode;
         // Match behavior of HttpResponseMessage.EnsureSuccessStatusCode
+        // See https://github.com/getsentry/sentry-dotnet/issues/2684
         if (statusCode >= 200 && statusCode <= 299)
         {
             return;
