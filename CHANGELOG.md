@@ -42,6 +42,7 @@
 - The `Serilog` integration captures _Structured Logs_ (when enabled) independently of captured Events and added Breadcrumbs ([#4691](https://github.com/getsentry/sentry-dotnet/pull/4691))
 - The SDK avoids redundant scope sync after transaction finish ([#4623](https://github.com/getsentry/sentry-dotnet/pull/4623))
 - sentry-native is now automatically disabled for WASM applications ([#4631](https://github.com/getsentry/sentry-dotnet/pull/4631))
+- Captured [Http Client Errors](https://docs.sentry.io/platforms/dotnet/guides/aspnet/configuration/http-client-errors/) on .NET 6+ now include a full stack trace in order to improve Issue grouping ([#4724](https://github.com/getsentry/sentry-dotnet/pull/4724))
 
 ### Dependencies
 
