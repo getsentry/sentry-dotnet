@@ -54,14 +54,13 @@ public class SentryHttpFailedRequestHandlerTests
     [InlineData(403)] // Forbidden
     [InlineData(404)] // Not Found
     [InlineData(499)] // Edge of client error range
-    [InlineData(600)] // Beyond standard range
+    [InlineData(600)] // Beyond default range
     public void HandleResponse_EnabledButNotInRange_DontCapture(int statusCode)
     {
         // Arrange
         var sut = GetSut(new SentryOptions
         {
             CaptureFailedRequests = true
-            // default FailedRequestStatusCodes = (500,599)
         });
 
         var response = new HttpResponseMessage((HttpStatusCode)statusCode);
@@ -79,7 +78,7 @@ public class SentryHttpFailedRequestHandlerTests
     [InlineData(401)] // Unauthorized - in range
     [InlineData(404)] // Not Found - in range
     [InlineData(499)] // Edge of range
-    public void HandleResponse_CustomRange_InRange_DoCapture(int statusCode)
+    public void HandleResponse_CustomRangeInRange_DoCapture(int statusCode)
     {
         // Arrange
         var options = new SentryOptions
@@ -104,7 +103,7 @@ public class SentryHttpFailedRequestHandlerTests
     [InlineData(399)] // Edge below range
     [InlineData(500)] // Internal Server Error - above range
     [InlineData(503)] // Service Unavailable - above range
-    public void HandleResponse_CustomRange_OutOfRange_DontCapture(int statusCode)
+    public void HandleResponse_CustomRangeOutOfRange_DontCapture(int statusCode)
     {
         // Arrange
         var options = new SentryOptions
@@ -129,7 +128,7 @@ public class SentryHttpFailedRequestHandlerTests
     [InlineData(201)] // Created
     [InlineData(204)] // No Content
     [InlineData(299)] // Edge of success range
-    public void HandleResponse_RangeIncludesSuccess_SuccessNotCaptured(int statusCode)
+    public void HandleResponse_RangeIncludesSuccess_DontCapture(int statusCode)
     {
         // Arrange
         var options = new SentryOptions
@@ -173,7 +172,7 @@ public class SentryHttpFailedRequestHandlerTests
     }
 
     [Fact]
-    public void HandleResponse_NoMatchingTarget_DontCapture()
+    public void HandleResponse_NoMatchingFailedRequestTarget_DontCapture()
     {
         // Arrange
         var options = new SentryOptions
@@ -194,7 +193,7 @@ public class SentryHttpFailedRequestHandlerTests
     }
 
     [Fact]
-    public void HandleResponse_Capture_FailedRequest()
+    public void HandleResponse_FailedRequest_DoCapture()
     {
         // Arrange
         var options = new SentryOptions
@@ -214,7 +213,7 @@ public class SentryHttpFailedRequestHandlerTests
     }
 
     [Fact]
-    public void HandleResponse_Capture_FailedRequest_No_Pii()
+    public void HandleResponse_FailedRequestNoPii_DoCaptureWithoutPii()
     {
         // Arrange
         var options = new SentryOptions
@@ -321,7 +320,7 @@ public class SentryHttpFailedRequestHandlerTests
     }
 
     [Fact]
-    public void HandleResponse_Hint_Response()
+    public void HandleResponse_Hint_DoCaptureHint()
     {
         // Arrange
         var options = new SentryOptions
