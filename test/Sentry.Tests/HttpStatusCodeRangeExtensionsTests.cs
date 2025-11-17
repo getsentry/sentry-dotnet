@@ -3,7 +3,7 @@ namespace Sentry.Tests;
 public class HttpStatusCodeRangeExtensionsTests
 {
     [Fact]
-    public void Contains_EmptyList_ReturnsFalse()
+    public void ContainsStatusCode_EmptyList_ReturnsFalse()
     {
         // Arrange
         var ranges = new List<HttpStatusCodeRange>();
@@ -19,7 +19,7 @@ public class HttpStatusCodeRangeExtensionsTests
     [InlineData(400)]
     [InlineData(450)]
     [InlineData(499)]
-    public void Contains_SingleRangeInRange_ReturnsTrue(int statusCode)
+    public void ContainsStatusCode_SingleRangeInRange_ReturnsTrue(int statusCode)
     {
         // Arrange
         var ranges = new List<HttpStatusCodeRange> { (400, 499) };
@@ -35,7 +35,7 @@ public class HttpStatusCodeRangeExtensionsTests
     [InlineData(200)]
     [InlineData(399)]
     [InlineData(500)]
-    public void Contains_SingleRangeOutOfRange_ReturnsFalse(int statusCode)
+    public void ContainsStatusCode_SingleRangeOutOfRange_ReturnsFalse(int statusCode)
     {
         // Arrange
         var ranges = new List<HttpStatusCodeRange> { (400, 499) };
@@ -52,7 +52,7 @@ public class HttpStatusCodeRangeExtensionsTests
     [InlineData(404)] // In first range
     [InlineData(500)] // In second range
     [InlineData(503)] // In second range
-    public void Contains_MultipleRangesInAnyRange_ReturnsTrue(int statusCode)
+    public void ContainsStatusCode_MultipleRangesInAnyRange_ReturnsTrue(int statusCode)
     {
         // Arrange
         var ranges = new List<HttpStatusCodeRange> { (400, 404), (500, 503) };
@@ -69,7 +69,7 @@ public class HttpStatusCodeRangeExtensionsTests
     [InlineData(405)] // Between ranges
     [InlineData(499)] // Between ranges
     [InlineData(504)] // Above ranges
-    public void Contains_MultipleRangesNotInAnyRange_ReturnsFalse(int statusCode)
+    public void ContainsStatusCode_MultipleRangesNotInAnyRange_ReturnsFalse(int statusCode)
     {
         // Arrange
         var ranges = new List<HttpStatusCodeRange> { (400, 404), (500, 503) };
@@ -86,7 +86,7 @@ public class HttpStatusCodeRangeExtensionsTests
     [InlineData(425)] // In overlap
     [InlineData(450)] // In overlap
     [InlineData(475)] // In second range only
-    public void Contains_OverlappingRangesInUnion_ReturnsTrue(int statusCode)
+    public void ContainsStatusCode_OverlappingRangesInUnion_ReturnsTrue(int statusCode)
     {
         // Arrange
         var ranges = new List<HttpStatusCodeRange> { (400, 450), (425, 475) };
@@ -103,7 +103,7 @@ public class HttpStatusCodeRangeExtensionsTests
     [InlineData(399)] // Below first range
     [InlineData(476)] // Above second range
     [InlineData(500)] // Above second range
-    public void Contains_OverlappingRangesOutsideUnion_ReturnsFalse(int statusCode)
+    public void ContainsStatusCode_OverlappingRangesOutsideUnion_ReturnsFalse(int statusCode)
     {
         // Arrange
         var ranges = new List<HttpStatusCodeRange> { (400, 450), (425, 475) };
@@ -116,7 +116,7 @@ public class HttpStatusCodeRangeExtensionsTests
     }
 
     [Fact]
-    public void Contains_SingleValueRangeExactMatch_ReturnsTrue()
+    public void ContainsStatusCode_SingleValueRangeExactMatch_ReturnsTrue()
     {
         // Arrange
         var ranges = new List<HttpStatusCodeRange> { 404 };
@@ -131,7 +131,7 @@ public class HttpStatusCodeRangeExtensionsTests
     [Theory]
     [InlineData(403)]
     [InlineData(405)]
-    public void Contains_SingleValueRangeNoMatch_ReturnsFalse(int statusCode)
+    public void ContainsStatusCode_SingleValueRangeNoMatch_ReturnsFalse(int statusCode)
     {
         // Arrange
         var ranges = new List<HttpStatusCodeRange> { 404 };
@@ -144,7 +144,7 @@ public class HttpStatusCodeRangeExtensionsTests
     }
 
     [Fact]
-    public void Contains_HttpStatusCodeEnumInRange_ReturnsTrue()
+    public void ContainsStatusCode_HttpStatusCodeEnumInRange_ReturnsTrue()
     {
         // Arrange
         var ranges = new List<HttpStatusCodeRange> { (400, 499) };
@@ -157,7 +157,7 @@ public class HttpStatusCodeRangeExtensionsTests
     }
 
     [Fact]
-    public void Contains_HttpStatusCodeEnumOutOfRange_ReturnsFalse()
+    public void ContainsStatusCode_HttpStatusCodeEnumOutOfRange_ReturnsFalse()
     {
         // Arrange
         var ranges = new List<HttpStatusCodeRange> { (400, 499) };
