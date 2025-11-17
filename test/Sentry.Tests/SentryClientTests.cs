@@ -52,6 +52,50 @@ public partial class SentryClientTests : IDisposable
         _output = output;
     }
 
+    [Fact]
+    public void Ctor_DebugTrue_CreatesConsoleDiagnosticLogger()
+    {
+        // Arrange
+        _fixture.SentryOptions.Debug = true;
+        _fixture.SentryOptions.DiagnosticLogger = null;
+
+        // Act
+        _ = _fixture.GetSut();
+
+        // Assert
+        Assert.NotNull(_fixture.SentryOptions.DiagnosticLogger);
+        Assert.IsType<ConsoleDiagnosticLogger>(_fixture.SentryOptions.DiagnosticLogger);
+    }
+
+    [Fact]
+    public void Ctor_DebugFalseButLoggerSet_SetsLoggerToNull()
+    {
+        // Arrange
+        _fixture.SentryOptions.Debug = false;
+        _fixture.SentryOptions.DiagnosticLogger = Substitute.For<IDiagnosticLogger>();
+
+        // Act
+        _ = _fixture.GetSut();
+
+        // Assert
+        Assert.Null(_fixture.SentryOptions.DiagnosticLogger);
+    }
+
+    [Fact]
+    public void Ctor_DebugTrueAndLoggerSet_KeepsExistingLogger()
+    {
+        // Arrange
+        var existingLogger = Substitute.For<IDiagnosticLogger>();
+        _fixture.SentryOptions.Debug = true;
+        _fixture.SentryOptions.DiagnosticLogger = existingLogger;
+
+        // Act
+        _ = _fixture.GetSut();
+
+        // Assert
+        Assert.Same(existingLogger, _fixture.SentryOptions.DiagnosticLogger);
+    }
+
     [Theory]
     [MemberData(nameof(GetExceptionFilterTestCases))]
     public void CaptureEvent_ExceptionFilteredForType(bool shouldFilter, Exception exception, params IExceptionFilter[] filters)
