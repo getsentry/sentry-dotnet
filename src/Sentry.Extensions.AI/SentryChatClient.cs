@@ -25,7 +25,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
     /// <inheritdoc cref="IChatClient"/>
     public override async Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
-        CancellationToken cancellationToken = new())
+        CancellationToken cancellationToken = default)
     {
         // Convert to array to avoid multiple enumeration
         var chatMessages = messages as ChatMessage[] ?? messages.ToArray();
@@ -58,7 +58,7 @@ internal sealed class SentryChatClient : DelegatingChatClient
     public override async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
         IEnumerable<ChatMessage> messages,
         ChatOptions? options = null,
-        [EnumeratorCancellation] CancellationToken cancellationToken = new())
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         // Convert to array to avoid multiple enumeration
         var chatMessages = messages as ChatMessage[] ?? messages.ToArray();
