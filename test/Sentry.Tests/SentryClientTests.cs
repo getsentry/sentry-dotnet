@@ -52,6 +52,50 @@ public partial class SentryClientTests : IDisposable
         _output = output;
     }
 
+    [Fact]
+    public void Ctor_DebugTrue_CreatesConsoleDiagnosticLogger()
+    {
+        // Arrange
+        _fixture.SentryOptions.Debug = true;
+        _fixture.SentryOptions.DiagnosticLogger = null;
+
+        // Act
+        _ = _fixture.GetSut();
+
+        // Assert
+        Assert.NotNull(_fixture.SentryOptions.DiagnosticLogger);
+        Assert.IsType<ConsoleDiagnosticLogger>(_fixture.SentryOptions.DiagnosticLogger);
+    }
+
+    [Fact]
+    public void Ctor_DebugFalseButLoggerSet_SetsLoggerToNull()
+    {
+        // Arrange
+        _fixture.SentryOptions.Debug = false;
+        _fixture.SentryOptions.DiagnosticLogger = Substitute.For<IDiagnosticLogger>();
+
+        // Act
+        _ = _fixture.GetSut();
+
+        // Assert
+        Assert.Null(_fixture.SentryOptions.DiagnosticLogger);
+    }
+
+    [Fact]
+    public void Ctor_DebugTrueAndLoggerSet_KeepsExistingLogger()
+    {
+        // Arrange
+        var existingLogger = Substitute.For<IDiagnosticLogger>();
+        _fixture.SentryOptions.Debug = true;
+        _fixture.SentryOptions.DiagnosticLogger = existingLogger;
+
+        // Act
+        _ = _fixture.GetSut();
+
+        // Assert
+        Assert.Same(existingLogger, _fixture.SentryOptions.DiagnosticLogger);
+    }
+
     [Theory]
     [MemberData(nameof(GetExceptionFilterTestCases))]
     public void CaptureEvent_ExceptionFilteredForType(bool shouldFilter, Exception exception, params IExceptionFilter[] filters)
@@ -843,53 +887,6 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
-    public void CaptureUserFeedback_EventIdEmpty_IgnoreUserFeedback()
-    {
-#pragma warning disable CS0618 // Type or member is obsolete
-        //Arrange
-        var sut = _fixture.GetSut();
-
-        //Act
-        sut.CaptureUserFeedback(
-            new UserFeedback(SentryId.Empty, "name", "email", "comment"));
-
-        //Assert
-        _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-#pragma warning restore CS0618 // Type or member is obsolete
-    }
-
-    [Fact]
-    public void CaptureUserFeedback_ValidUserFeedback_FeedbackRegistered()
-    {
-#pragma warning disable CS0618 // Type or member is obsolete
-        //Arrange
-        var sut = _fixture.GetSut();
-
-        //Act
-        sut.CaptureUserFeedback(
-            new UserFeedback(SentryId.Parse("4eb98e5f861a41019f270a7a27e84f02"), "name", "email", "comment"));
-
-        //Assert
-        _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
-#pragma warning restore CS0618 // Type or member is obsolete
-    }
-
-    [Fact]
-    public void CaptureUserFeedback_EventIdEmpty_FeedbackIgnored()
-    {
-#pragma warning disable CS0618 // Type or member is obsolete
-        //Arrange
-        var sut = _fixture.GetSut();
-
-        //Act
-        sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "name", "email", "comment"));
-
-        //Assert
-        _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
-#pragma warning restore CS0618 // Type or member is obsolete
-    }
-
-    [Fact]
     public void Dispose_should_only_flush()
     {
         // Arrange
@@ -911,8 +908,12 @@ public partial class SentryClientTests : IDisposable
         var sut = _fixture.GetSut();
         sut.Dispose();
 
-        // Act / Assert
-        sut.CaptureFeedback(feedback);
+        // Act
+        var id = sut.CaptureFeedback(feedback, out var result);
+
+        // Assert
+        result.Should().Be(CaptureFeedbackResult.Success);
+        id.Should().NotBe(SentryId.Empty);
     }
 
     [Fact]
@@ -923,10 +924,12 @@ public partial class SentryClientTests : IDisposable
         var feedback = new SentryFeedback(string.Empty);
 
         //Act
-        sut.CaptureFeedback(feedback);
+        var id = sut.CaptureFeedback(feedback, out var result);
 
         //Assert
         _ = sut.Worker.DidNotReceive().EnqueueEnvelope(Arg.Any<Envelope>());
+        result.Should().Be(CaptureFeedbackResult.EmptyMessage);
+        id.Should().Be(SentryId.Empty);
     }
 
     [Fact]
@@ -937,10 +940,11 @@ public partial class SentryClientTests : IDisposable
         var feedback = new SentryFeedback("Everything is great!");
 
         //Act
-        sut.CaptureFeedback(feedback);
+        var result = sut.CaptureFeedback(feedback);
 
         //Assert
         _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        result.Should().NotBe(SentryId.Empty);
     }
 
     [Fact]
@@ -959,9 +963,10 @@ public partial class SentryClientTests : IDisposable
             .Do(callback => envelope = callback.Arg<Envelope>());
 
         //Act
-        sut.CaptureFeedback(feedback, scope);
+        var result = sut.CaptureFeedback(feedback, scope);
 
         //Assert
+        result.Should().NotBe(SentryId.Empty);
         _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
         envelope.Should().NotBeNull();
         envelope.Items.Should().Contain(item => item.TryGetType() == EnvelopeItem.TypeValueFeedback);
@@ -981,22 +986,13 @@ public partial class SentryClientTests : IDisposable
         hint.Attachments.Add(AttachmentHelper.FakeAttachment("foo.txt"));
 
         //Act
-        sut.CaptureFeedback(feedback, null, hint);
+        var result = sut.CaptureFeedback(feedback, null, hint);
 
         //Assert
+        result.Should().NotBe(SentryId.Empty);
         _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
         sut.Worker.Received(1).EnqueueEnvelope(Arg.Is<Envelope>(envelope =>
             envelope.Items.Count(item => item.TryGetType() == "attachment") == 1));
-    }
-
-    [Fact]
-    public void CaptureUserFeedback_DisposedClient_DoesNotThrow()
-    {
-#pragma warning disable CS0618 // Type or member is obsolete
-        var sut = _fixture.GetSut();
-        sut.Dispose();
-        sut.CaptureUserFeedback(new UserFeedback(SentryId.Empty, "name", "email", "comment"));
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Fact]
@@ -1667,15 +1663,20 @@ public partial class SentryClientTests : IDisposable
     [Fact]
     public void Ctor_WrapsCustomTransportWhenCachePathOnOptions()
     {
+        // Arrange
         _fixture.SentryOptions.Dsn = ValidDsn;
         _fixture.SentryOptions.Transport = new FakeTransport();
         using var cacheDirectory = new TempDirectory();
         _fixture.SentryOptions.CacheDirectoryPath = cacheDirectory.Path;
 
+        // Act
         using var sut = new SentryClient(_fixture.SentryOptions);
 
+        // Assert
         var cachingTransport = Assert.IsType<CachingTransport>(_fixture.SentryOptions.Transport);
         _ = Assert.IsType<FakeTransport>(cachingTransport.InnerTransport);
+
+        cachingTransport.Dispose(); // Release cache lock so that the cacheDirectory can be removed
     }
 
     [Fact]
@@ -1692,27 +1693,31 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
-    public void CaptureEvent_ActiveSession_UnhandledExceptionSessionEndedAsCrashed()
+    public void CaptureEvent_ActiveSessionAndUnhandledException_SessionEndedAsCrashed()
     {
         // Arrange
         var client = _fixture.GetSut();
+        var exception = new Exception();
+        exception.SetSentryMechanism("TestException", handled: false, terminal: true);
 
         // Act
-        client.CaptureEvent(new SentryEvent()
-        {
-            SentryExceptions = new[]
-            {
-                new SentryException
-                {
-                    Mechanism = new()
-                    {
-                        Handled = false
-                    }
-                }
-            }
-        });
-
+        client.CaptureEvent(new SentryEvent(exception));
         // Assert
         _fixture.SessionManager.Received().EndSession(SessionEndStatus.Crashed);
+    }
+
+    [Fact]
+    public void CaptureEvent_ActiveSessionAndNonTerminalUnhandledException_SessionMarkedAsUnhandled()
+    {
+        // Arrange
+        var client = _fixture.GetSut();
+        var exception = new Exception();
+        exception.SetSentryMechanism("TestException", handled: false, terminal: false);
+
+        // Act
+        client.CaptureEvent(new SentryEvent(exception));
+
+        // Assert
+        _fixture.SessionManager.Received().MarkSessionAsUnhandled();
     }
 }

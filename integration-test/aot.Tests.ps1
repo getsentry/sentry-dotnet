@@ -51,19 +51,21 @@ Console.WriteLine("Hello, Sentry!");
 
     It 'Aot' {
         $rid = $env:RuntimeIdentifier
-        if ($rid)
-        {
-            dotnet publish -c Release -r $rid | Write-Host
+        $baseImage = $env:ContainerBaseImage
+        $publishArgs = @('-c', 'Release')
+        if ($rid) {
+            Write-Host "Environment RuntimeIdentifier: $rid"
+            $publishArgs += @('-r', $rid)
         }
-        else
-        {
-            dotnet publish -c Release | Write-Host
+        if ($baseImage) {
+            Write-Host "Using ContainerBaseImage: $baseImage"
+            $publishArgs += "-p:ContainerBaseImage=$baseImage"
         }
+        dotnet publish @publishArgs | Write-Host
         $LASTEXITCODE | Should -Be 0
 
         $tfm = (Get-ChildItem -Path "bin/Release" -Directory | Select-Object -First 1).Name
-        if (-not $rid)
-        {
+        if (-not $rid) {
             $rid = (Get-ChildItem -Path "bin/Release/$tfm" -Directory | Select-Object -First 1).Name
         }
         & "bin/Release/$tfm/$rid/publish/hello-sentry" | Write-Host

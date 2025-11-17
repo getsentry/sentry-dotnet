@@ -1,13 +1,15 @@
 name: "CodeQL"
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ main ]
-  schedule:
-    - cron: '22 5 * * 1'
+  workflow_dispatch:
+#  # Temporarily disabled. See https://github.com/getsentry/sentry-dotnet/issues/4736
+#  push:
+#    branches: [ main ]
+#  pull_request:
+#    # The branches below must be a subset of the branches above
+#    branches: [ main ]
+#  schedule:
+#    - cron: '22 5 * * 1'
 
 jobs:
   analyze:

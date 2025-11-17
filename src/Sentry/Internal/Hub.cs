@@ -35,6 +35,8 @@ internal class Hub : IHub, IDisposable
 
     public bool IsEnabled => _isEnabled;
 
+    public bool IsSessionActive => _sessionManager.IsSessionActive;
+
     internal SentryOptions Options => _options;
 
     private Scope CurrentScope => ScopeManager.GetCurrent().Key;
@@ -314,6 +316,18 @@ internal class Hub : IHub, IDisposable
         return propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession).ToBaggageHeader();
     }
 
+    public W3CTraceparentHeader? GetTraceparentHeader()
+    {
+        if (GetSpan()?.GetTraceHeader() is { } traceHeader)
+        {
+            return new W3CTraceparentHeader(traceHeader.TraceId, traceHeader.SpanId, traceHeader.IsSampled);
+        }
+
+        // We fall back to the propagation context
+        var propagationContext = CurrentScope.PropagationContext;
+        return new W3CTraceparentHeader(propagationContext.TraceId, propagationContext.SpanId, null);
+    }
+
     public TransactionContext ContinueTrace(
         string? traceHeader,
         string? baggageHeader,
@@ -502,11 +516,11 @@ internal class Hub : IHub, IDisposable
                     {"exception_message", exceptionMessage}
                 };
             }
-            scope.AddBreadcrumb(breadcrumbMessage, "Exception", data: data, level: BreadcrumbLevel.Critical);
+            scope.AddBreadcrumb(breadcrumbMessage, "Exception", data: data, level: BreadcrumbLevel.Fatal);
         }
         catch (Exception e)
         {
-            _options.LogError(e, "Failure to store breadcrumb for exception event: {0}", evt.EventId);
+            _options.LogError(e, "Failure to store breadcrumb for exception event: '{0}'", evt.EventId);
         }
     }
 
@@ -573,7 +587,8 @@ internal class Hub : IHub, IDisposable
             scope.LastEventId = id;
             scope.SessionUpdate = null;
 
-            if (evt.HasTerminalException() && scope.Transaction is { } transaction)
+            if (evt.GetExceptionType() is SentryEvent.ExceptionType.UnhandledTerminal
+                && scope.Transaction is { } transaction)
             {
                 // Event contains a terminal exception -> finish any current transaction as aborted
                 // Do this *after* the event was captured, so that the event is still linked to the transaction.
@@ -590,11 +605,13 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    public void CaptureFeedback(SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result,
+        Action<Scope> configureScope, SentryHint? hint = null)
     {
         if (!IsEnabled)
         {
-            return;
+            result = CaptureFeedbackResult.DisabledHub;
+            return SentryId.Empty;
         }
 
         try
@@ -602,19 +619,23 @@ internal class Hub : IHub, IDisposable
             var clonedScope = CurrentScope.Clone();
             configureScope(clonedScope);
 
-            CaptureFeedback(feedback, clonedScope, hint);
+            return CaptureFeedback(feedback, out result, clonedScope, hint);
         }
         catch (Exception e)
         {
             _options.LogError(e, "Failure to capture feedback");
+            result = CaptureFeedbackResult.UnknownError;
+            return SentryId.Empty;
         }
     }
 
-    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result, Scope? scope = null,
+        SentryHint? hint = null)
     {
         if (!IsEnabled)
         {
-            return;
+            result = CaptureFeedbackResult.DisabledHub;
+            return SentryId.Empty;
         }
 
         try
@@ -626,11 +647,13 @@ internal class Hub : IHub, IDisposable
             }
 
             scope ??= CurrentScope;
-            CurrentClient.CaptureFeedback(feedback, scope, hint);
+            return CurrentClient.CaptureFeedback(feedback, out result, scope, hint);
         }
         catch (Exception e)
         {
             _options.LogError(e, "Failure to capture feedback");
+            result = CaptureFeedbackResult.UnknownError;
+            return SentryId.Empty;
         }
     }
 
@@ -661,34 +684,6 @@ internal class Hub : IHub, IDisposable
         }
     }
 #endif
-
-    [Obsolete("Use CaptureFeedback instead.")]
-    public void CaptureUserFeedback(UserFeedback userFeedback)
-    {
-        if (!IsEnabled)
-        {
-            return;
-        }
-
-        try
-        {
-            if (!string.IsNullOrWhiteSpace(userFeedback.Email) && !EmailValidator.IsValidEmail(userFeedback.Email))
-            {
-                _options.LogWarning("Feedback email scrubbed due to invalid email format: '{0}'", userFeedback.Email);
-                userFeedback = new UserFeedback(
-                    userFeedback.EventId,
-                    userFeedback.Name,
-                    null, // Scrubbed email
-                    userFeedback.Comments);
-            }
-
-            CurrentClient.CaptureUserFeedback(userFeedback);
-        }
-        catch (Exception e)
-        {
-            _options.LogError(e, "Failure to capture user feedback: {0}", userFeedback.EventId);
-        }
-    }
 
     public void CaptureTransaction(SentryTransaction transaction) => CaptureTransaction(transaction, null, null);
 
@@ -870,7 +865,8 @@ internal class Hub : IHub, IDisposable
         }
         //Don't dispose of ScopeManager since we want dangling transactions to still be able to access tags.
 
-        _backpressureMonitor?.Dispose();
+        // Don't dispose of _backpressureMonitor since we want the client to continue to process envelopes without
+        // throwing an ObjectDisposedException.
 
 #if __IOS__
             // TODO

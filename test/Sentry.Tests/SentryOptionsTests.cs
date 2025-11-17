@@ -14,6 +14,20 @@ public partial class SentryOptionsTests
     }
 
     [Fact]
+    public void EnableBackpressureHandling_Default_True()
+    {
+        var sut = new SentryOptions();
+        sut.EnableBackpressureHandling.Should().BeTrue();
+    }
+
+    [Fact]
+    public void EnableLogs_Default_False()
+    {
+        var sut = new SentryOptions();
+        sut.EnableLogs.Should().BeFalse();
+    }
+
+    [Fact]
     public void RequestBodyCompressionLevel_ByDefault_Optimal()
     {
         var sut = new SentryOptions();
@@ -674,5 +688,58 @@ public partial class SentryOptionsTests
         // Assert
         installationId2.Should().Be(installationId1);
         logger.Received(0).Log(SentryLevel.Debug, "Resolved installation ID '{0}'.", null, Arg.Any<string>());
+    }
+
+    [Fact]
+    public void TryGetIsolatedCacheDirectoryPath_NullCacheDirectory_ReturnsNull()
+    {
+        var o = new SentryOptions { CacheDirectoryPath = null, Dsn = ValidDsn };
+        Assert.Null(o.GetIsolatedCacheDirectoryPath());
+    }
+
+#if IOS || ANDROID
+    [Fact]
+    public void GetIsolatedFolderName_MissingDsn_UniqueForInitcount()
+    {
+        var o = new SentryOptions { CacheDirectoryPath = "c:\\cache", Dsn = null };
+        var folder = o.GetIsolatedFolderName();
+        Assert.Equal($"{CacheDirectoryHelper.IsolatedCacheDirectoryPrefix}{o.InitCounter.Count}", folder);
+    }
+#else
+    [Fact]
+    public void GetIsolatedFolderName_MissingDsn__ReturnsNull()
+    {
+        var o = new SentryOptions { CacheDirectoryPath = "c:\\cache", Dsn = null };
+        var folder = o.GetIsolatedFolderName();
+        Assert.Null(folder);
+    }
+#endif
+
+    [Theory]
+    [InlineData(5, null)]
+    [InlineData(5, 7)]
+    public void GetIsolatedFolderName_UniqueForDsnInitCountAndProcessId(int initCount, int? processId)
+    {
+        // Arrange
+        var initCounter = Substitute.For<IInitCounter>();
+        initCounter.Count.Returns(initCount);
+        var o = new SentryOptions
+        {
+            CacheDirectoryPath = "c:\\cache",
+            Dsn = ValidDsn,
+            InitCounter = initCounter,
+            ProcessIdResolver = () => processId
+        };
+
+        // Act
+        var path = o.GetIsolatedFolderName();
+
+        // Assert
+#if IOS || ANDROID
+        var expectedFolder = $"{CacheDirectoryHelper.IsolatedCacheDirectoryPrefix}{initCount}";
+#else
+        var expectedFolder = $"{CacheDirectoryHelper.IsolatedCacheDirectoryPrefix}{ValidDsn.GetHashString()}_{processId ?? 0}_{initCount}";
+#endif
+        path.Should().Be(expectedFolder);
     }
 }

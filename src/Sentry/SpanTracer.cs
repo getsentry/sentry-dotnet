@@ -6,10 +6,11 @@ namespace Sentry;
 /// <summary>
 /// Transaction span tracer.
 /// </summary>
-public class SpanTracer : IBaseTracer, ISpan
+public sealed class SpanTracer : IBaseTracer, ISpan
 {
     private readonly IHub _hub;
     private readonly SentryStopwatch _stopwatch = SentryStopwatch.StartNew();
+    private string? _origin;
 
     private readonly Instrumenter _instrumenter = Instrumenter.Sentry;
 
@@ -190,5 +191,18 @@ public class SpanTracer : IBaseTracer, ISpan
             _origin = value;
         }
     }
-    private string? _origin;
+
+    /// <summary>
+    /// <para>
+    /// Automatically finishes the span with a status of <see cref="SpanStatus.Ok" /> at the end of a
+    /// <c>using</c> block, if it has not already been finished.
+    /// </para>
+    /// <para>
+    /// This is the equivalent of calling <see cref="Finish()" /> when the span passes out of scope.
+    /// </para>
+    /// /// </summary>
+    public void Dispose()
+    {
+        Finish();
+    }
 }

@@ -39,7 +39,6 @@
 
   <ItemGroup>
 <!--    The following packages are deliberately excluded from the TrimTest app because their dependencies do not support trimming -->
-<!--    Sentry.Azure.Functions.Worker: `Microsoft.Azure.Functions.Worker` produces [trim warnings](https://github.com/Azure/azure-functions-dotnet-worker/issues/2899) -->
 <!--    Sentry.Hangfire: Hangfire.Core produces trim warnings -->
 <!--    Sentry.Log4Net: log4net produces trim warnings -->
 <!--    Sentry.NLog: NLog produces AOT analysis errors -->
