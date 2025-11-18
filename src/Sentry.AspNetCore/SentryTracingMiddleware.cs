@@ -141,6 +141,7 @@ internal class SentryTracingMiddleware
         {
             exception = e;
             // Rethrow immediately so as not to disrupt the .net 10 pipeline behaviour
+            // See: https://github.com/getsentry/sentry-dotnet/issues/4735
             ExceptionDispatchInfo.Capture(e).Throw();
         }
         finally

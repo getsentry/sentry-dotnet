@@ -615,6 +615,60 @@ public class SentryTracingMiddlewareTests
     }
 
     [Fact]
+    public async Task ExceptionThrownAsync_DoesNotCrashKestrel()
+    {
+        var sentryClient = Substitute.For<ISentryClient>();
+        var options = new SentryAspNetCoreOptions
+        {
+            Dsn = ValidDsn,
+            TracesSampleRate = 1,
+            AutoRegisterTracing =  false
+        };
+
+        var hub = new Hub(options, sentryClient);
+
+        var server = new TestServer(new WebHostBuilder()
+            .UseSentry()
+            .ConfigureServices(services =>
+            {
+                services.RemoveAll(typeof(Func<IHub>));
+                services.AddSingleton<Func<IHub>>(() => hub);
+                services.AddRouting();
+            }).Configure(app =>
+            {
+                app.UseRouting();
+                app.UseSentryTracing();
+                app.UseEndpoints(routes =>
+                {
+                    routes.Map("/", _ => Task.CompletedTask);
+                    routes.Map("/crash", async _ =>
+                    {
+                        await Task.Yield();
+                        throw new Exception();
+                    });
+                });
+            }));
+
+        var client = server.CreateClient();
+
+        // Act
+        try
+        {
+            await client.GetStringAsync("/crash");
+        }
+        // Expected error.
+        catch
+        {
+            // ignored
+        }
+
+        // Assert
+        // Make sure Kestrel is still alive by making another request
+        var response =  await client.GetAsync("/");
+        response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
+    }
+
+    [Fact]
     public async Task Transaction_TransactionNameProviderSetSet_TransactionNameSet()
     {
         // Arrange
