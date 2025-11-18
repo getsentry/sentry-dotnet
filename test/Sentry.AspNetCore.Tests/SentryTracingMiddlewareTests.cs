@@ -622,7 +622,7 @@ public class SentryTracingMiddlewareTests
         {
             Dsn = ValidDsn,
             TracesSampleRate = 1,
-            AutoRegisterTracing =  false
+            AutoRegisterTracing = false
         };
 
         var hub = new Hub(options, sentryClient);
@@ -664,7 +664,7 @@ public class SentryTracingMiddlewareTests
 
         // Assert
         // Make sure Kestrel is still alive by making another request
-        var response =  await client.GetAsync("/");
+        var response = await client.GetAsync("/");
         response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
     }
 
