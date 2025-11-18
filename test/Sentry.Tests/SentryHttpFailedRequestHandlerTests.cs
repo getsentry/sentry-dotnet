@@ -377,7 +377,7 @@ public class SentryHttpFailedRequestHandlerTests
         }
     }
 
-#if NET6_0_OR_GREATER // This test is only valid on .NET 6+ where we can use SetRemoteStackTrace
+#if NET5_0_OR_GREATER // This test is only valid on .NET 5+ where we can use SetCurrentStackTrace
     [Fact]
     public void HandleResponse_FailedRequest_ExceptionStackTraceHasCallerContext()
     {
@@ -402,7 +402,7 @@ public class SentryHttpFailedRequestHandlerTests
             @event.Should().NotBeNull();
             @event.Exception.Should().NotBeNull();
 
-            // Stack trace should include this test method name, proving we captured caller context on .NET 6+
+            // Stack trace should include this test method name, proving we captured caller context on .NET 5+
             @event.Exception!.StackTrace.Should().Contain(nameof(HandleResponse_FailedRequest_ExceptionStackTraceHasCallerContext));
         }
     }
