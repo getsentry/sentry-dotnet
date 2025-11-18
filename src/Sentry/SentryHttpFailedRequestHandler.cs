@@ -37,7 +37,7 @@ internal class SentryHttpFailedRequestHandler : SentryFailedRequestHandler
                 statusCode)
             );
 
-#if NET6_0_OR_GREATER
+#if NET5_0_OR_GREATER
         // Add a full stack trace into the exception to improve Issue grouping,
         // see https://github.com/getsentry/sentry-dotnet/issues/3582
         ExceptionDispatchInfo.SetCurrentStackTrace(exception);
