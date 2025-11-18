@@ -621,8 +621,7 @@ public class SentryTracingMiddlewareTests
         var options = new SentryAspNetCoreOptions
         {
             Dsn = ValidDsn,
-            TracesSampleRate = 1,
-            AutoRegisterTracing = false
+            TracesSampleRate = 1
         };
 
         var hub = new Hub(options, sentryClient);
