@@ -337,7 +337,7 @@ public class SentryHttpFailedRequestHandlerTests
 
         // Act
         SentryHint hint = null;
-        _hub.CaptureEvent( Arg.Any<SentryEvent>(), hint: Arg.Do<SentryHint>(h => hint = h));
+        _hub.CaptureEvent(Arg.Any<SentryEvent>(), hint: Arg.Do<SentryHint>(h => hint = h));
         sut.HandleResponse(response);
 
         // Assert
