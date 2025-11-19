@@ -96,7 +96,7 @@ var response = await client.GetResponseAsync(
     "Please help me with the following tasks: 1) Find Alice's age, 2) Get weather in New York, and 3) Calculate a complex result for number 15. Please use the appropriate tools for each task.",
     options);
 
-logger.LogInformation("Response: {ResponseText}", response.Messages?.FirstOrDefault()?.Text ?? "No response");
+logger.LogInformation("Response: {ResponseText}", response.Messages.FirstOrDefault()?.Text ?? "No response");
 
 logger.LogInformation("Microsoft.Extensions.AI sample completed! Check your Sentry dashboard for the trace data.");
 
