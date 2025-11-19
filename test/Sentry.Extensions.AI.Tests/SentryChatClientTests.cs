@@ -2,14 +2,14 @@ using Microsoft.Extensions.AI;
 
 namespace Sentry.Extensions.AI.Tests;
 
-public class SentryChatClientTests
+public class SentryChatClientTests : IDisposable
 {
     private class Fixture
     {
         private SentryOptions Options { get; }
         public IHub Hub { get; }
         public ActivitySource Source { get; } = SentryAIActivitySource.CreateSource();
-        public IChatClient InnerClient = Substitute.For<IChatClient>();
+        public IChatClient InnerClient { get; } = Substitute.For<IChatClient>();
 
         public Fixture()
         {
@@ -19,14 +19,18 @@ public class SentryChatClientTests
                 TracesSampleRate = 1.0,
             };
 
-            SentrySdk.Init(Options);
-            Hub = SentrySdk.CurrentHub;
+            Hub = new Hub(Options);
         }
 
-        public SentryChatClient GetSut() => new SentryChatClient(Source, InnerClient);
+        public SentryChatClient GetSut() => new SentryChatClient(Source, Hub, InnerClient);
     }
 
     private readonly Fixture _fixture = new();
+
+    public void Dispose()
+    {
+        ((Hub)_fixture.Hub).Dispose();
+    }
 
     [Fact]
     public async Task CompleteAsync_CallsInnerClient_AndSetsData()
@@ -34,7 +38,6 @@ public class SentryChatClientTests
         // Arrange
         var transaction = _fixture.Hub.StartTransaction("test-nonstreaming", "test");
         _fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
-        SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
 
         var message = new ChatMessage(ChatRole.Assistant, "ok");
         var chatResponse = new ChatResponse(message);
@@ -72,7 +75,6 @@ public class SentryChatClientTests
         // Arrange
         var transaction = _fixture.Hub.StartTransaction("test-nonstreaming", "test");
         _fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
-        SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
 
         var sentryChatClient = _fixture.GetSut();
         var expectedException = new InvalidOperationException("Streaming failed");
@@ -104,10 +106,9 @@ public class SentryChatClientTests
     [Fact]
     public async Task CompleteStreamingAsync_CallsInnerClient_AndSetsSpanData()
     {
-        // Arrange - Use Fixture Hub to start transaction
+        // Arrange
         var transaction = _fixture.Hub.StartTransaction("test-streaming", "test");
         _fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
-        SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
 
         _fixture.InnerClient.GetStreamingResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
                 Arg.Any<CancellationToken>())
@@ -150,25 +151,28 @@ public class SentryChatClientTests
         // Arrange
         var transaction = _fixture.Hub.StartTransaction("test-streaming-error", "test");
         _fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
-        SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
 
         var expectedException = new InvalidOperationException("Streaming failed");
         _fixture.InnerClient.GetStreamingResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(),
                 Arg.Any<CancellationToken>())
             .Returns(CreateFailingStreamingUpdatesAsync(expectedException));
         var sentryChatClient = _fixture.GetSut();
+        var results = new List<ChatResponseUpdate>();
 
         // Act
         var actualException = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
             await foreach (var update in sentryChatClient.GetStreamingResponseAsync([new ChatMessage(ChatRole.User, "hi")]))
             {
-                // Should not reach here due to exception
+                results.Add(update);
             }
+            throw new UnreachableException("Should not reach here due to exception.");
         });
 
         // Assert
         Assert.Equal(expectedException.Message, actualException.Message);
+        var result = Assert.Single(results);
+        Assert.Equal("Hello", result.Text);
 
         var chatSpan = transaction.Spans.FirstOrDefault(s => s.Operation == SentryAIConstants.SpanAttributes.ChatOperation);
         var agentSpan = transaction.Spans.FirstOrDefault(s => s.Operation == SentryAIConstants.SpanAttributes.InvokeAgentOperation);
