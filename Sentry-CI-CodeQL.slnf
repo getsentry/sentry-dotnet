@@ -11,6 +11,7 @@
       "src\\Sentry.Compiler.Extensions\\Sentry.Compiler.Extensions.csproj",
       "src\\Sentry.DiagnosticSource\\Sentry.DiagnosticSource.csproj",
       "src\\Sentry.EntityFramework\\Sentry.EntityFramework.csproj",
+      "src\\Sentry.Extensions.AI\\Sentry.Extensions.AI.csproj",
       "src\\Sentry.Extensions.Logging\\Sentry.Extensions.Logging.csproj",
       "src\\Sentry.Google.Cloud.Functions\\Sentry.Google.Cloud.Functions.csproj",
       "src\\Sentry.Hangfire\\Sentry.Hangfire.csproj",
