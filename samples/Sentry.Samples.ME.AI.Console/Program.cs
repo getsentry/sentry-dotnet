@@ -101,6 +101,3 @@ logger.LogInformation("Response: {ResponseText}", response.Messages.FirstOrDefau
 logger.LogInformation("Microsoft.Extensions.AI sample completed! Check your Sentry dashboard for the trace data.");
 
 transaction.Finish();
-
-// Flush Sentry to ensure all transactions are sent before the app exits
-await SentrySdk.FlushAsync(TimeSpan.FromSeconds(2));
