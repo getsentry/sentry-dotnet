@@ -1,5 +1,3 @@
-#nullable enable
-
 namespace Sentry.Extensions.AI.Tests;
 
 public class SentryAIOptionsTests
