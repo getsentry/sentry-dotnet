@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(CurrentTfms)</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TargetFrameworks);net48</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
