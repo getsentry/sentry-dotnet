@@ -5,6 +5,7 @@
 ### Fixes
 
 - Sentry Tracing middleware crashed ASP.NET Core in .NET 10 in 6.0.0-rc.1 and earlier ([#4747](https://github.com/getsentry/sentry-dotnet/pull/4747))
+
 ### Dependencies
 
 - Bump Java SDK from v8.24.0 to v8.26.0 ([#4728](https://github.com/getsentry/sentry-dotnet/pull/4728))
