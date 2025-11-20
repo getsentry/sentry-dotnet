@@ -253,7 +253,7 @@ public class SentryStructuredLoggerTests : IDisposable
     [InlineData(false, true, LogLevel.Information, false)]
     [InlineData(true, false, LogLevel.Information, false)]
     [InlineData(true, true, LogLevel.None, false)]
-    public void IsEnabled_HubOptionsMinimumLogLevel_Returns(bool isHubEnabled, bool isLogsEnabled, LogLevel logLevel, bool expectedIsEnabled)
+    public void IsEnabled_HubAndOptions_Returns(bool isHubEnabled, bool isLogsEnabled, LogLevel logLevel, bool expectedIsEnabled)
     {
         _fixture.EnableHub(isHubEnabled);
         _fixture.EnableLogs(isLogsEnabled);

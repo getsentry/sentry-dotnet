@@ -9,13 +9,6 @@ internal class BindableSentryLoggingOptions : BindableSentryOptions
     public LogLevel? MinimumEventLevel { get; set; }
     public bool? InitializeSdk { get; set; }
 
-    public BindableSentryLoggingExperimentalOptions ExperimentalLogging { get; set; } = new();
-
-    internal sealed class BindableSentryLoggingExperimentalOptions
-    {
-        public LogLevel? MinimumLogLevel { get; set; }
-    }
-
     public void ApplyTo(SentryLoggingOptions options)
     {
         base.ApplyTo(options);
