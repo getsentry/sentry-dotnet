@@ -25,11 +25,11 @@ jobs:
       - name: Restore .NET Dependencies
         run: dotnet restore Sentry.sln --nologo
 
-      # The dotnet list package command doesn't change its exit code on detection, so tee to a file and scan it
+      # The dotnet package list command doesn't change its exit code on detection, so tee to a file and scan it
       # See https://github.com/NuGet/Home/issues/11315#issuecomment-1243055173
       - name: List vulnerable packages
         shell: bash
         run: |
-          dotnet list ${{ github.workspace }}/Sentry.sln package --vulnerable --include-transitive | tee vulnerable.txt
+          dotnet package list --project ${{ github.workspace }}/Sentry.sln --vulnerable --include-transitive | tee vulnerable.txt
           # https://github.com/getsentry/sentry-dotnet/issues/2814
           # ! grep 'has the following vulnerable packages' vulnerable.txt
