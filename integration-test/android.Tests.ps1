@@ -1,5 +1,5 @@
 param(
-    [string] $dotnet_version = "net9.0"
+    [string] $dotnet_version = "net10.0"
 )
 
 # This file contains test cases for https://pester.dev/
