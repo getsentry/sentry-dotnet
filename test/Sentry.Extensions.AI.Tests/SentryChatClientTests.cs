@@ -75,8 +75,14 @@ public class SentryChatClientTests : IDisposable
         // Arrange
         var transaction = _fixture.Hub.StartTransaction("test-nonstreaming", "test");
         _fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
-
+        // Simulate FunctionInvokingChatClient's Activity
+        SentryAIActivityListener.CreateListener(_fixture.Hub);
+        var FICCActivity = _fixture.Source.StartActivity(SentryAIConstants.FICCActivityNames[0]);
         var sentryChatClient = _fixture.GetSut();
+        var chatClientOption = new ChatOptions
+        {
+            Tools = []
+        };
         var expectedException = new InvalidOperationException("Streaming failed");
 
         _fixture.InnerClient.GetResponseAsync(Arg.Any<IList<ChatMessage>>(), Arg.Any<ChatOptions>(), Arg.Any<CancellationToken>())
@@ -84,7 +90,8 @@ public class SentryChatClientTests : IDisposable
 
         // Act
         var res = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-            await sentryChatClient.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")]));
+            await sentryChatClient.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")], chatClientOption));
+        FICCActivity?.Stop();
 
         // Assert
         Assert.Equal(expectedException.Message, res.Message);
