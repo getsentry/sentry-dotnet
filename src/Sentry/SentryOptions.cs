@@ -814,6 +814,24 @@ public class SentryOptions
     /// </summary>
     public string? CacheDirectoryPath { get; set; }
 
+    internal Func<int?> ProcessIdResolver
+    {
+        set => _processIdResolver = value;
+        get
+        {
+            return _processIdResolver ?? DefaultResolver;
+            int? DefaultResolver() => ProcessInfo.Instance?.GetId(this);
+        }
+    }
+    private Func<int?>? _processIdResolver;
+
+    internal IInitCounter InitCounter
+    {
+        get => _initCounter ?? Sentry.Internal.InitCounter.Instance;
+        set => _initCounter = value;
+    }
+    private IInitCounter? _initCounter;
+
     /// <summary>
     /// <para>The SDK will only capture HTTP Client errors if it is enabled.</para>
     /// <para><see cref="FailedRequestStatusCodes"/> can be used to configure which requests will be treated as failed.</para>
@@ -1816,16 +1834,7 @@ public class SentryOptions
             if (DiagnosticLogger == null)
             {
                 DiagnosticLogger = new ConsoleDiagnosticLogger(DiagnosticLevel);
-                DiagnosticLogger.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}",
-                    DiagnosticLevel);
-            }
-
-            if (SettingLocator.GetEnvironment().Equals("production", StringComparison.OrdinalIgnoreCase))
-            {
-                DiagnosticLogger.LogWarning("Sentry option 'Debug' is set to true while Environment is production. " +
-                                            "Be aware this can cause performance degradation and is not advised. " +
-                                            "See https://docs.sentry.io/platforms/dotnet/configuration/diagnostic-logger " +
-                                            "for more information");
+                DiagnosticLogger.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}", DiagnosticLevel);
             }
         }
         else
@@ -1834,29 +1843,15 @@ public class SentryOptions
         }
     }
 
-    internal string? TryGetDsnSpecificCacheDirectoryPath()
+    internal void LogDiagnosticWarning()
     {
-        if (string.IsNullOrWhiteSpace(CacheDirectoryPath))
+        if (Debug && DiagnosticLogger is not null && SettingLocator.GetEnvironment().Equals("production", StringComparison.OrdinalIgnoreCase))
         {
-            return null;
+            DiagnosticLogger.LogWarning("Sentry option 'Debug' is set to true while Environment is production. " +
+                                        "Be aware this can cause performance degradation and is not advised. " +
+                                        "See https://docs.sentry.io/platforms/dotnet/configuration/diagnostic-logger " +
+                                        "for more information");
         }
-
-        // DSN must be set to use caching
-        if (string.IsNullOrWhiteSpace(Dsn))
-        {
-            return null;
-        }
-#if IOS || ANDROID // on iOS or Android the app is already sandboxed so there's no risk of sending data from 1 app to another Sentry's DSN
-        return Path.Combine(CacheDirectoryPath, "Sentry");
-#else
-        return Path.Combine(CacheDirectoryPath, "Sentry", Dsn.GetHashString());
-#endif
-    }
-
-    internal string? TryGetProcessSpecificCacheDirectoryPath()
-    {
-        // In the future, this will most likely contain process ID
-        return TryGetDsnSpecificCacheDirectoryPath();
     }
 
     internal static List<StringOrRegex> GetDefaultInAppExclude() =>

@@ -145,6 +145,29 @@ public static partial class SentrySdk
         // nativeOptions.DefaultIntegrations
         // nativeOptions.EnableProfiling  (deprecated)
 
+        // Session Replay options for the Cocoa SDK
+        if (options.Native.ExperimentalOptions.SessionReplay.IsSessionReplayEnabled)
+        {
+            // For replay to work on iOS, session tracking must be enabled in the Cocoa SDK
+            options.AutoSessionTracking = false;
+            nativeOptions.EnableAutoSessionTracking = true;
+
+            // SDK users must explicitly opt-in to Session Replay in unreliable environments
+            nativeOptions.Experimental.EnableSessionReplayInUnreliableEnvironment =
+                options.Native.ExperimentalOptions.SessionReplay.EnableSessionReplayInUnreliableEnvironment;
+
+            var sessionSampleRate = (float)(options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate ?? 0f);
+            var onErrorSampleRate = (float)(options.Native.ExperimentalOptions.SessionReplay.OnErrorSampleRate ?? 0f);
+            var cocoaReplayOptions = new Sentry.CocoaSdk.SentryReplayOptions();
+            cocoaReplayOptions.SessionSampleRate = sessionSampleRate;
+            cocoaReplayOptions.OnErrorSampleRate = onErrorSampleRate;
+            cocoaReplayOptions.MaskAllText = options.Native.ExperimentalOptions.SessionReplay.MaskAllText;
+            cocoaReplayOptions.MaskAllImages = options.Native.ExperimentalOptions.SessionReplay.MaskAllImages;
+            cocoaReplayOptions.EnableViewRendererV2 = options.Native.ExperimentalOptions.SessionReplay.EnableViewRendererV2;
+            cocoaReplayOptions.EnableFastViewRendering = options.Native.ExperimentalOptions.SessionReplay.EnableFastViewRendering;
+            nativeOptions.SessionReplay = cocoaReplayOptions;
+        }
+
         // Set hybrid SDK name
         SentryCocoaHybridSdk.SetSdkName("sentry.cocoa.dotnet");
 

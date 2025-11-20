@@ -52,6 +52,50 @@ public partial class SentryClientTests : IDisposable
         _output = output;
     }
 
+    [Fact]
+    public void Ctor_DebugTrue_CreatesConsoleDiagnosticLogger()
+    {
+        // Arrange
+        _fixture.SentryOptions.Debug = true;
+        _fixture.SentryOptions.DiagnosticLogger = null;
+
+        // Act
+        _ = _fixture.GetSut();
+
+        // Assert
+        Assert.NotNull(_fixture.SentryOptions.DiagnosticLogger);
+        Assert.IsType<ConsoleDiagnosticLogger>(_fixture.SentryOptions.DiagnosticLogger);
+    }
+
+    [Fact]
+    public void Ctor_DebugFalseButLoggerSet_SetsLoggerToNull()
+    {
+        // Arrange
+        _fixture.SentryOptions.Debug = false;
+        _fixture.SentryOptions.DiagnosticLogger = Substitute.For<IDiagnosticLogger>();
+
+        // Act
+        _ = _fixture.GetSut();
+
+        // Assert
+        Assert.Null(_fixture.SentryOptions.DiagnosticLogger);
+    }
+
+    [Fact]
+    public void Ctor_DebugTrueAndLoggerSet_KeepsExistingLogger()
+    {
+        // Arrange
+        var existingLogger = Substitute.For<IDiagnosticLogger>();
+        _fixture.SentryOptions.Debug = true;
+        _fixture.SentryOptions.DiagnosticLogger = existingLogger;
+
+        // Act
+        _ = _fixture.GetSut();
+
+        // Assert
+        Assert.Same(existingLogger, _fixture.SentryOptions.DiagnosticLogger);
+    }
+
     [Theory]
     [MemberData(nameof(GetExceptionFilterTestCases))]
     public void CaptureEvent_ExceptionFilteredForType(bool shouldFilter, Exception exception, params IExceptionFilter[] filters)
@@ -1619,15 +1663,20 @@ public partial class SentryClientTests : IDisposable
     [Fact]
     public void Ctor_WrapsCustomTransportWhenCachePathOnOptions()
     {
+        // Arrange
         _fixture.SentryOptions.Dsn = ValidDsn;
         _fixture.SentryOptions.Transport = new FakeTransport();
         using var cacheDirectory = new TempDirectory();
         _fixture.SentryOptions.CacheDirectoryPath = cacheDirectory.Path;
 
+        // Act
         using var sut = new SentryClient(_fixture.SentryOptions);
 
+        // Assert
         var cachingTransport = Assert.IsType<CachingTransport>(_fixture.SentryOptions.Transport);
         _ = Assert.IsType<FakeTransport>(cachingTransport.InnerTransport);
+
+        cachingTransport.Dispose(); // Release cache lock so that the cacheDirectory can be removed
     }
 
     [Fact]

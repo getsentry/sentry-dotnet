@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <VersionPrefix>6.0.0-preview.2</VersionPrefix>
+    <VersionPrefix>6.0.0-rc.1</VersionPrefix>
     <VersionSuffix>prerelease</VersionSuffix>
     <LangVersion>13</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
@@ -20,9 +20,6 @@
 
     <!-- We need to support old stuff. Applications should definitely address these advisory warnings though. -->
     <NoWarn>$(NoWarn);NU1902;NU1903</NoWarn>
-
-    <!-- For Xcode 26 support in .NET 10 -->
-    <NoWarn>$(NoWarn);XCODE_26_0_PREVIEW</NoWarn>
 
     <!-- https://learn.microsoft.com/en-us/dotnet/core/compatibility/sdk/8.0/dotnet-restore-audit#version-introduced -->
     <WarningsNotAsErrors>NU1902;NU1903</WarningsNotAsErrors>
@@ -103,7 +100,7 @@
 
   <!-- Set the version and local path for Sentry CLI (downloaded in the restore phase of Sentry.csproj) -->
   <PropertyGroup Condition="'$(SolutionName)' != 'Sentry.Unity'">
-    <SentryCLIVersion>2.57.0</SentryCLIVersion>
+    <SentryCLIVersion>2.58.2</SentryCLIVersion>
     <SentryCLIDirectory>$(MSBuildThisFileDirectory)tools\sentry-cli\$(SentryCLIVersion)\</SentryCLIDirectory>
   </PropertyGroup>
 
