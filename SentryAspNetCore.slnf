@@ -11,6 +11,7 @@
       "samples\\Sentry.Samples.AspNetCore.WebAPI.Profiling\\Sentry.Samples.AspNetCore.WebAPI.Profiling.csproj",
       "samples\\Sentry.Samples.Aws.Lambda.AspNetCoreServer\\Sentry.Samples.Aws.Lambda.AspNetCoreServer.csproj",
       "samples\\Sentry.Samples.Hangfire\\Sentry.Samples.Hangfire.csproj",
+      "samples\\Sentry.Samples.ME.AI.AspNetCore\\Sentry.Samples.ME.AI.AspNetCore.csproj",
       "samples\\Sentry.Samples.OpenTelemetry.AspNetCore\\Sentry.Samples.OpenTelemetry.AspNetCore.csproj",
       "src\\Sentry.Analyzers\\Sentry.Analyzers.csproj",
       "src\\Sentry.AspNetCore.Blazor.WebAssembly\\Sentry.AspNetCore.Blazor.WebAssembly.csproj",

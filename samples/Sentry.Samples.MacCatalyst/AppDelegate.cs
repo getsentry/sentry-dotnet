@@ -11,7 +11,7 @@ public class AppDelegate : UIApplicationDelegate
         set;
     }
 
-    public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
+    public override bool FinishedLaunching(UIApplication application, NSDictionary? launchOptions)
     {
         // Init the Sentry SDK
         SentrySdk.Init(options =>

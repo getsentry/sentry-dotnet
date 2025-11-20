@@ -98,7 +98,10 @@ public class SentryOptions
     /// Enables or disables automatic backpressure handling. When enabled, the SDK will monitor system health and
     /// reduce the sampling rate of events and transactions when the system is under load.
     /// </summary>
-    public bool EnableBackpressureHandling { get; set; } = false;
+    /// <remarks>
+    /// Defaults to true / enabled.
+    /// </remarks>
+    public bool EnableBackpressureHandling { get; set; } = true;
 
     /// <summary>
     /// This holds a reference to the current transport, when one is active.
@@ -541,6 +544,31 @@ public class SentryOptions
         _beforeBreadcrumb = (breadcrumb, _) => beforeBreadcrumb(breadcrumb);
     }
 
+    /// <summary>
+    /// When set to <see langword="true"/>, logs are sent to Sentry.
+    /// Defaults to <see langword="false"/>.
+    /// </summary>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
+    public bool EnableLogs { get; set; } = false;
+
+    private Func<SentryLog, SentryLog?>? _beforeSendLog;
+
+    internal Func<SentryLog, SentryLog?>? BeforeSendLogInternal => _beforeSendLog;
+
+    /// <summary>
+    /// Sets a callback function to be invoked before sending the log to Sentry.
+    /// When the delegate throws an <see cref="Exception"/> during invocation, the log will not be captured.
+    /// </summary>
+    /// <remarks>
+    /// It can be used to modify the log object before being sent to Sentry.
+    /// To prevent the log from being sent to Sentry, return <see langword="null"/>.
+    /// </remarks>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
+    public void SetBeforeSendLog(Func<SentryLog, SentryLog?> beforeSendLog)
+    {
+        _beforeSendLog = beforeSendLog;
+    }
+
     private int _maxQueueItems = 30;
 
     /// <summary>
@@ -786,6 +814,24 @@ public class SentryOptions
     /// </summary>
     public string? CacheDirectoryPath { get; set; }
 
+    internal Func<int?> ProcessIdResolver
+    {
+        set => _processIdResolver = value;
+        get
+        {
+            return _processIdResolver ?? DefaultResolver;
+            int? DefaultResolver() => ProcessInfo.Instance?.GetId(this);
+        }
+    }
+    private Func<int?>? _processIdResolver;
+
+    internal IInitCounter InitCounter
+    {
+        get => _initCounter ?? Sentry.Internal.InitCounter.Instance;
+        set => _initCounter = value;
+    }
+    private IInitCounter? _initCounter;
+
     /// <summary>
     /// <para>The SDK will only capture HTTP Client errors if it is enabled.</para>
     /// <para><see cref="FailedRequestStatusCodes"/> can be used to configure which requests will be treated as failed.</para>
@@ -991,6 +1037,18 @@ public class SentryOptions
         get => _tracePropagationTargets;
         set => _tracePropagationTargets = value.WithConfigBinding();
     }
+
+    /// <summary>
+    /// Whether to send W3C Trace Context traceparent headers in outgoing HTTP requests for distributed tracing.
+    /// When enabled, the SDK will send the <c>traceparent</c> header in addition to the <c>sentry-trace</c> header
+    /// for requests matching <see cref="TracePropagationTargets"/>.
+    /// </summary>
+    /// <remarks>
+    /// The default value is <c>false</c>. Set to <c>true</c> to enable W3C Trace Context propagation
+    /// for interoperability with services that support OpenTelemetry standards.
+    /// </remarks>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/traces/#propagatetraceparent"/>
+    public bool PropagateTraceparent { get; set; }
 
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
 
@@ -1776,16 +1834,7 @@ public class SentryOptions
             if (DiagnosticLogger == null)
             {
                 DiagnosticLogger = new ConsoleDiagnosticLogger(DiagnosticLevel);
-                DiagnosticLogger.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}",
-                    DiagnosticLevel);
-            }
-
-            if (SettingLocator.GetEnvironment().Equals("production", StringComparison.OrdinalIgnoreCase))
-            {
-                DiagnosticLogger.LogWarning("Sentry option 'Debug' is set to true while Environment is production. " +
-                                            "Be aware this can cause performance degradation and is not advised. " +
-                                            "See https://docs.sentry.io/platforms/dotnet/configuration/diagnostic-logger " +
-                                            "for more information");
+                DiagnosticLogger.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}", DiagnosticLevel);
             }
         }
         else
@@ -1794,29 +1843,15 @@ public class SentryOptions
         }
     }
 
-    internal string? TryGetDsnSpecificCacheDirectoryPath()
+    internal void LogDiagnosticWarning()
     {
-        if (string.IsNullOrWhiteSpace(CacheDirectoryPath))
+        if (Debug && DiagnosticLogger is not null && SettingLocator.GetEnvironment().Equals("production", StringComparison.OrdinalIgnoreCase))
         {
-            return null;
+            DiagnosticLogger.LogWarning("Sentry option 'Debug' is set to true while Environment is production. " +
+                                        "Be aware this can cause performance degradation and is not advised. " +
+                                        "See https://docs.sentry.io/platforms/dotnet/configuration/diagnostic-logger " +
+                                        "for more information");
         }
-
-        // DSN must be set to use caching
-        if (string.IsNullOrWhiteSpace(Dsn))
-        {
-            return null;
-        }
-#if IOS || ANDROID // on iOS or Android the app is already sandboxed so there's no risk of sending data from 1 app to another Sentry's DSN
-        return Path.Combine(CacheDirectoryPath, "Sentry");
-#else
-        return Path.Combine(CacheDirectoryPath, "Sentry", Dsn.GetHashString());
-#endif
-    }
-
-    internal string? TryGetProcessSpecificCacheDirectoryPath()
-    {
-        // In the future, this will most likely contain process ID
-        return TryGetDsnSpecificCacheDirectoryPath();
     }
 
     internal static List<StringOrRegex> GetDefaultInAppExclude() =>
@@ -1863,50 +1898,4 @@ public class SentryOptions
         "ServiceStack",
         "Java.Interop",
     ];
-
-    /// <summary>
-    /// Experimental Sentry features.
-    /// </summary>
-    /// <remarks>
-    /// This and related experimental APIs may change in the future.
-    /// </remarks>
-    public SentryExperimentalOptions Experimental { get; set; } = new();
-
-    /// <summary>
-    /// Experimental Sentry SDK options.
-    /// </summary>
-    /// <remarks>
-    /// This and related experimental APIs may change in the future.
-    /// </remarks>
-    public sealed class SentryExperimentalOptions
-    {
-        internal SentryExperimentalOptions()
-        {
-        }
-
-        /// <summary>
-        /// When set to <see langword="true"/>, logs are sent to Sentry.
-        /// Defaults to <see langword="false"/>.
-        /// </summary>
-        /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
-        public bool EnableLogs { get; set; } = false;
-
-        private Func<SentryLog, SentryLog?>? _beforeSendLog;
-
-        internal Func<SentryLog, SentryLog?>? BeforeSendLogInternal => _beforeSendLog;
-
-        /// <summary>
-        /// Sets a callback function to be invoked before sending the log to Sentry.
-        /// When the delegate throws an <see cref="Exception"/> during invocation, the log will not be captured.
-        /// </summary>
-        /// <remarks>
-        /// It can be used to modify the log object before being sent to Sentry.
-        /// To prevent the log from being sent to Sentry, return <see langword="null"/>.
-        /// </remarks>
-        /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
-        public void SetBeforeSendLog(Func<SentryLog, SentryLog?> beforeSendLog)
-        {
-            _beforeSendLog = beforeSendLog;
-        }
-    }
 }

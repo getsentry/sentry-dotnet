@@ -79,18 +79,20 @@ public class SentryClient : ISentryClient, IDisposable
         }
         catch (Exception e)
         {
-            _options.LogError(e, "An error occurred when capturing the event {0}.", @event.EventId);
+            _options.LogError(e, "An error occurred when capturing the event '{0}'.", @event.EventId);
             return SentryId.Empty;
         }
     }
 
     /// <inheritdoc />
-    public void CaptureFeedback(SentryFeedback feedback, Scope? scope = null, SentryHint? hint = null)
+    public SentryId CaptureFeedback(SentryFeedback feedback, out CaptureFeedbackResult result,
+        Scope? scope = null, SentryHint? hint = null)
     {
         if (string.IsNullOrEmpty(feedback.Message))
         {
             _options.LogWarning("Feedback dropped due to empty message.");
-            return;
+            result = CaptureFeedbackResult.EmptyMessage;
+            return SentryId.Empty;
         }
 
         scope ??= new Scope(_options);
@@ -116,21 +118,13 @@ public class SentryClient : ISentryClient, IDisposable
 
         var attachments = hint.Attachments.ToList();
         var envelope = Envelope.FromFeedback(evt, _options.DiagnosticLogger, attachments, scope.SessionUpdate);
-        CaptureEnvelope(envelope);
-    }
-
-    /// <inheritdoc />
-    [Obsolete("Use CaptureFeedback instead.")]
-    public void CaptureUserFeedback(UserFeedback userFeedback)
-    {
-        if (userFeedback.EventId.Equals(SentryId.Empty))
+        if (CaptureEnvelope(envelope))
         {
-            // Ignore the user feedback if EventId is empty
-            _options.LogWarning("User feedback dropped due to empty id.");
-            return;
+            result = CaptureFeedbackResult.Success;
+            return evt.EventId;
         }
-
-        CaptureEnvelope(Envelope.FromUserFeedback(userFeedback));
+        result = CaptureFeedbackResult.UnknownError;
+        return SentryId.Empty;
     }
 
     /// <inheritdoc />
@@ -361,18 +355,23 @@ public class SentryClient : ISentryClient, IDisposable
             return SentryId.Empty; // Dropped by BeforeSend callback
         }
 
-        var hasTerminalException = processedEvent.HasTerminalException();
-        if (hasTerminalException)
+        var exceptionType = processedEvent.GetExceptionType();
+        switch (exceptionType)
         {
-            // Event contains a terminal exception -> end session as crashed
-            _options.LogDebug("Ending session as Crashed, due to unhandled exception.");
-            scope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
-        }
-        else if (processedEvent.HasException())
-        {
-            // Event contains a non-terminal exception -> report error
-            // (this might return null if the session has already reported errors before)
-            scope.SessionUpdate = _sessionManager.ReportError();
+            case SentryEvent.ExceptionType.UnhandledNonTerminal:
+                _options.LogDebug("Marking session as 'Unhandled', due to non-terminal unhandled exception.");
+                _sessionManager.MarkSessionAsUnhandled();
+                break;
+
+            case SentryEvent.ExceptionType.UnhandledTerminal:
+                _options.LogDebug("Ending session as 'Crashed', due to unhandled exception.");
+                scope.SessionUpdate = _sessionManager.EndSession(SessionEndStatus.Crashed);
+                break;
+
+            case SentryEvent.ExceptionType.Handled:
+                _options.LogDebug("Updating session by reporting an error.");
+                scope.SessionUpdate = _sessionManager.ReportError();
+                break;
         }
 
         if (_options.SampleRate != null)
@@ -445,7 +444,7 @@ public class SentryClient : ISentryClient, IDisposable
         }
 
         _options.LogWarning(
-            "The attempt to queue the event failed. Items in queue: {0}",
+            "The attempt to queue the event failed. Items in queue: '{0}'",
             Worker.QueuedItems);
 
         return false;

@@ -4,7 +4,7 @@ $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/common.ps1
 
 Describe 'Console app NativeAOT (<framework>)' -ForEach @(
-    @{ framework = 'net8.0' }
+    foreach ($fw in $currentFrameworks) { @{ framework = $fw } }
 ) {
     BeforeAll {
         $path = './console-app'
@@ -188,7 +188,7 @@ Describe 'Console app regression (missing System.Reflection.Metadata)' {
         dotnet remove ./net4-console/console-app.csproj package Sentry
     }
 
-    It 'Ensure System.Reflection.Metadata is not missing' {
+    It 'Ensure System.Reflection.Metadata is not missing' -Skip:(!$IsWindows) {
         $path = './net4-console'
         Remove-Item -Recurse -Force -Path @("$path/bin", "$path/obj") -ErrorAction SilentlyContinue
         AddPackageReference $path 'Sentry'

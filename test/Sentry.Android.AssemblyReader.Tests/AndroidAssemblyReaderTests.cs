@@ -1,4 +1,3 @@
-using Sentry.Android.AssemblyReader.V1;
 using Sentry.Android.AssemblyReader.V2;
 
 namespace Sentry.Android.AssemblyReader.Tests;
@@ -7,10 +6,10 @@ public class AndroidAssemblyReaderTests
 {
     private readonly ITestOutputHelper _output;
 
-#if NET9_0
+#if NET10_0
+    private static string TargetFramework => "net10.0";
+#elif NET9_0
     private static string TargetFramework => "net9.0";
-#elif NET8_0
-    private static string TargetFramework => "net8.0";
 #else
     // Adding a new TFM to the project? Include it above
 #error "Target Framework not yet supported for AndroidAssemblyReader"
@@ -52,11 +51,11 @@ public class AndroidAssemblyReaderTests
         using var sut = GetSut(isAot: false, isAssemblyStore: true, isCompressed: true);
         switch (TargetFramework)
         {
-            case "net9.0":
-                Assert.IsType<AndroidAssemblyStoreReaderV2>(sut);
+            case "net10.0":
+                Assert.IsType<AndroidAssemblyStoreReader>(sut);
                 break;
-            case "net8.0":
-                Assert.IsType<AndroidAssemblyStoreReaderV1>(sut);
+            case "net9.0":
+                Assert.IsType<AndroidAssemblyStoreReader>(sut);
                 break;
             default:
                 throw new NotSupportedException($"Unsupported target framework: {TargetFramework}");
@@ -72,11 +71,11 @@ public class AndroidAssemblyReaderTests
         using var sut = GetSut(isAot: false, isAssemblyStore: false, isCompressed: true);
         switch (TargetFramework)
         {
-            case "net9.0":
-                Assert.IsType<AndroidAssemblyDirectoryReaderV2>(sut);
+            case "net10.0":
+                Assert.IsType<AndroidAssemblyDirectoryReader>(sut);
                 break;
-            case "net8.0":
-                Assert.IsType<AndroidAssemblyDirectoryReaderV1>(sut);
+            case "net9.0":
+                Assert.IsType<AndroidAssemblyDirectoryReader>(sut);
                 break;
             default:
                 throw new NotSupportedException($"Unsupported target framework: {TargetFramework}");
@@ -93,11 +92,7 @@ public class AndroidAssemblyReaderTests
     }
 
     public static IEnumerable<object[]> ReadsAssemblyPermutations =>
-#if NET8_0
-        from isAot in new[] { false }
-#else
         from isAot in new[] { true, false }
-#endif
         from isStore in new[] { true, false }
         from isCompressed in new[] { true, false }
         from assemblyName in new[] { "Mono.Android.dll", "System.Private.CoreLib.dll" }

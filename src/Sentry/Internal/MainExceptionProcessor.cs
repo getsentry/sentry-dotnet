@@ -199,6 +199,12 @@ internal class MainExceptionProcessor : ISentryEventExceptionProcessor
             exception.Data.Remove(Mechanism.DescriptionKey);
         }
 
+        if (exception.Data[Mechanism.TerminalKey] is bool terminal)
+        {
+            mechanism.Terminal = terminal;
+            exception.Data.Remove(Mechanism.TerminalKey);
+        }
+
         // Add HResult to mechanism data before adding exception data, so that it can be overridden.
         mechanism.Data["HResult"] = $"0x{exception.HResult:X8}";
 

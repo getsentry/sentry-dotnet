@@ -156,6 +156,85 @@ public class SentryHttpMessageHandlerTests
     }
 
     [Fact]
+    public async Task SendAsync_W3C_TraceParent_NotSet_WhenPropagateTraceparentIsFalse()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+
+        hub.GetTraceHeader().ReturnsForAnyArgs(
+            SentryTraceHeader.Parse("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"));
+
+        var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
+        var options = new SentryOptions();
+        using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
+        using var sentryHandler = new SentryHttpMessageHandler(hub, options, innerHandler, failedRequestHandler);
+        using var client = new HttpClient(sentryHandler);
+
+        // Act
+        await client.GetAsync("https://localhost/");
+
+        using var request = innerHandler.GetRequests().Single();
+
+        // Assert
+        request.Headers.Should().NotContain(h => h.Key == "traceparent");
+    }
+
+    [Fact]
+    public async Task SendAsync_W3C_TraceParent_Set_WhenPropagateTraceparentIsTrue()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+
+        hub.GetTraceHeader().ReturnsForAnyArgs(
+            SentryTraceHeader.Parse("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"));
+
+        var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
+        var options = new SentryOptions();
+        options.PropagateTraceparent = true;
+        using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
+        using var sentryHandler = new SentryHttpMessageHandler(hub, options, innerHandler, failedRequestHandler);
+        using var client = new HttpClient(sentryHandler);
+
+        client.DefaultRequestHeaders.Add("sentry-trace", "foobar");
+
+        // Act
+        await client.GetAsync("https://localhost/");
+
+        using var request = innerHandler.GetRequests().Single();
+
+        // Assert
+        request.Headers.Should().Contain(h => h.Key == "traceparent" && h.Value.Single() == "00-75302ac48a024bde9a3b3734a82e36c8-1000000000000000-00");
+    }
+
+    [Fact]
+    public async Task SendAsync_W3C_TraceParent_NotSet_WhenPropagateTraceparentAlreadySet()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+
+        hub.GetTraceHeader().ReturnsForAnyArgs(
+            SentryTraceHeader.Parse("75302ac48a024bde9a3b3734a82e36c8-1000000000000000-0"));
+
+        var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
+        var options = new SentryOptions();
+        options.PropagateTraceparent = true;
+        using var innerHandler = new RecordingHttpMessageHandler(new FakeHttpMessageHandler());
+        using var sentryHandler = new SentryHttpMessageHandler(hub, options, innerHandler, failedRequestHandler);
+        using var client = new HttpClient(sentryHandler);
+
+        client.DefaultRequestHeaders.Add("sentry-trace", "foobar");
+        client.DefaultRequestHeaders.Add("traceparent", "existing-value");
+
+        // Act
+        await client.GetAsync("https://localhost/");
+
+        using var request = innerHandler.GetRequests().Single();
+
+        // Assert
+        request.Headers.Should().Contain(h => h.Key == "traceparent" && h.Value.Single() == "existing-value");
+    }
+
+    [Fact]
     public async Task SendAsync_TransactionOnScope_StartsNewSpan()
     {
         // Arrange

@@ -84,7 +84,7 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
 
         return logEvent.Level >= _options.MinimumEventLevel
             || logEvent.Level >= _options.MinimumBreadcrumbLevel
-            || options?.Experimental.EnableLogs is true;
+            || options?.EnableLogs is true;
     }
 
     private void InnerEmit(LogEvent logEvent)
@@ -105,6 +105,7 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
         var exception = logEvent.Exception;
         var template = logEvent.MessageTemplate.Text;
         var formatted = FormatLogEvent(logEvent);
+        var addedBreadcrumbForException = false;
 
         if (logEvent.Level >= _options.MinimumEventLevel)
         {
@@ -137,11 +138,11 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
             // Capturing exception events adds a breadcrumb automatically... we don't want to add another one
             if (exception != null)
             {
-                return;
+                addedBreadcrumbForException = true;
             }
         }
 
-        if (logEvent.Level >= _options.MinimumBreadcrumbLevel)
+        if (!addedBreadcrumbForException && logEvent.Level >= _options.MinimumBreadcrumbLevel)
         {
             Dictionary<string, string>? data = null;
             if (exception != null && !string.IsNullOrWhiteSpace(formatted))
@@ -168,7 +169,7 @@ internal sealed partial class SentrySink : ILogEventSink, IDisposable
         // In cases where Sentry's Serilog-Sink is added without a DSN (i.e., without initializing the SDK) and the SDK is initialized differently (e.g., through ASP.NET Core),
         // then the 'EnableLogs' option of this Sink's Serilog-Options is default, but the Hub's Sentry-Options have the actual user-defined value configured.
         var options = hub.GetSentryOptions();
-        if (options?.Experimental.EnableLogs is true)
+        if (options?.EnableLogs is true)
         {
             CaptureStructuredLog(hub, options, logEvent, formatted, template);
         }
