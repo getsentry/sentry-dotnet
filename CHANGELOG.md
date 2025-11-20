@@ -5,6 +5,10 @@
 ### Features
 
 - Added a new SDK `Sentry.Extensions.AI` which allows LLM usage instrumentation via `Microsoft.Extensions.AI` ([#4657](https://github.com/getsentry/sentry-dotnet/pull/4657))
+### Fixes
+
+- Captured [Http Client Errors](https://docs.sentry.io/platforms/dotnet/guides/aspnet/configuration/http-client-errors/) on .NET 5+ now include a full stack trace in order to improve Issue grouping ([#4724](https://github.com/getsentry/sentry-dotnet/pull/4724))
+- Sentry Tracing middleware crashed ASP.NET Core in .NET 10 in 6.0.0-rc.1 and earlier ([#4747](https://github.com/getsentry/sentry-dotnet/pull/4747))
 
 ### Dependencies
 
