@@ -27,11 +27,6 @@
     <Error Text="Android projects using Sentry cannot build using AndroidEnableAssemblyCompression = false due to a Microsoft issue.  Please follow https://github.com/dotnet/android/issues/9752" />
   </Target>
 
-  <ItemGroup Condition="$([MSBuild]::IsOSPlatform('Windows')) AND '$(UsingMicrosoftNETSdkBlazorWebAssembly)' != 'true'">
-    <!-- See: https://github.com/getsentry/sentry-dotnet/pull/4111 -->
-    <LinkerArg Include="/NODEFAULTLIB:MSVCRT" />
-  </ItemGroup>
-
   <Target Name="WriteSentryAttributes"
           Condition="$(Language) == 'VB' or $(Language) == 'C#' or $(Language) == 'F#'"
           BeforeTargets="BeforeCompile;CoreCompile"
