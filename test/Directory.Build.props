@@ -72,12 +72,9 @@
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
   </ItemGroup>
 
-  <!-- these are needed because the versions that are brought in transitively have vulnerability warnings -->
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
-  </ItemGroup>
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
   </ItemGroup>
+
 </Project>
