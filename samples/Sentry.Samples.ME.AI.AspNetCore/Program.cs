@@ -1,4 +1,3 @@
-#nullable enable
 using Microsoft.Extensions.AI;
 
 var builder = WebApplication.CreateBuilder(args);

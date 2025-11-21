@@ -5,19 +5,20 @@ namespace Sentry.Extensions.AI;
 internal sealed class SentryChatClient : DelegatingChatClient
 {
     private readonly ActivitySource _activitySource;
-    private readonly HubAdapter _hub = HubAdapter.Instance;
+    private readonly IHub _hub;
     private readonly SentryAIOptions _sentryAIOptions;
 
-    public SentryChatClient(IChatClient client, Action<SentryAIOptions>? configure = null) : this(null, client, configure)
+    public SentryChatClient(IChatClient client, Action<SentryAIOptions>? configure = null) : this(null, null, client, configure)
     {
     }
 
     /// <summary>
-    /// Internal ovverride for testing
+    /// Internal overload for testing
     /// </summary>
-    internal SentryChatClient(ActivitySource? activitySource, IChatClient client, Action<SentryAIOptions>? configure = null) : base(client)
+    internal SentryChatClient(ActivitySource? activitySource, IHub? hub, IChatClient client, Action<SentryAIOptions>? configure = null) : base(client)
     {
         _activitySource = activitySource ?? SentryAIActivitySource.Instance;
+        _hub = hub ?? HubAdapter.Instance;
         _sentryAIOptions = new SentryAIOptions();
         configure?.Invoke(_sentryAIOptions);
     }

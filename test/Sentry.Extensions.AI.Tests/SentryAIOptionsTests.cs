@@ -1,5 +1,3 @@
-#nullable enable
-
 namespace Sentry.Extensions.AI.Tests;
 
 public class SentryAIOptionsTests
@@ -7,12 +5,13 @@ public class SentryAIOptionsTests
     [Fact]
     public void Constructor_SetsDefaultValues()
     {
-        // Act
+        // Arrange & Act
         var options = new SentryAIOptions();
 
         // Assert
         Assert.True(options.Experimental.RecordInputs);
         Assert.True(options.Experimental.RecordOutputs);
+        Assert.Equal("Agent", options.Experimental.AgentName);
     }
 
     [Fact]

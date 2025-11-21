@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>$(CurrentTfms);netstandard2.0</TargetFrameworks>
     <PackageTags>$(PackageTags);Microsoft.Extensions.AI;AI;LLM</PackageTags>
-    <Description>Microsoft.Extensions.AI integration for Sentry - captures AI Agent telemetry spans per Sentry AI Agents module.</Description>
+    <Description>Official Microsoft.Extensions.AI integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
   </PropertyGroup>
 
   <ItemGroup>
