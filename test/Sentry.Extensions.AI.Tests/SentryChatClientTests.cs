@@ -76,8 +76,8 @@ public class SentryChatClientTests : IDisposable
         var transaction = _fixture.Hub.StartTransaction("test-nonstreaming", "test");
         _fixture.Hub.ConfigureScope(scope => scope.Transaction = transaction);
         // Simulate FunctionInvokingChatClient's Activity
-        SentryAIActivityListener.CreateListener(_fixture.Hub);
-        var FICCActivity = _fixture.Source.StartActivity(SentryAIConstants.FICCActivityNames[0]);
+        var listener = SentryAIActivityListener.CreateListener(_fixture.Hub);
+        var activity = _fixture.Source.StartActivity(SentryAIConstants.FICCActivityNames[0]);
         var sentryChatClient = _fixture.GetSut();
         var chatClientOption = new ChatOptions
         {
@@ -91,7 +91,8 @@ public class SentryChatClientTests : IDisposable
         // Act
         var res = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             await sentryChatClient.GetResponseAsync([new ChatMessage(ChatRole.User, "hi")], chatClientOption));
-        FICCActivity?.Stop();
+        activity?.Stop();
+        listener.Dispose();
 
         // Assert
         Assert.Equal(expectedException.Message, res.Message);
