@@ -1,3 +1,4 @@
+using System.Runtime.ExceptionServices;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol;
@@ -24,7 +25,7 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
         JsonElement? json = null;
         try
         {
-            json = GraphQLContentExtractor.ExtractResponseContentAsync(response, _options).Result;
+            json = GraphQLContentExtractor.ExtractResponseContentAsync(response, _options).GetAwaiter().GetResult();
             if (json is { } jsonElement)
             {
                 if (jsonElement.TryGetProperty("errors", out var errorsElement))
@@ -32,7 +33,16 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
                     // We just show the first error... maybe there's a better way to do this when multiple errors exist.
                     // We should check what the Java code is doing.
                     var errorMessage = errorsElement[0].GetProperty("message").GetString() ?? "GraphQL Error";
-                    throw new GraphQLHttpRequestException(errorMessage);
+                    var exception = new GraphQLHttpRequestException(errorMessage);
+
+#if NET5_0_OR_GREATER
+                    // Add a full stack trace into the exception to improve Issue grouping,
+                    // see https://github.com/getsentry/sentry-dotnet/issues/3582
+                    ExceptionDispatchInfo.SetCurrentStackTrace(exception);
+#endif
+                    // Wrap in a new exception to preserve the stack trace when thrown and caught.
+                    // The inner exception will have the full stack trace for better issue grouping.
+                    throw new GraphQLHttpRequestException(errorMessage, exception);
                 }
             }
             // No GraphQL errors, but we still might have an HTTP error status
