@@ -6,6 +6,7 @@ internal sealed class SentryInstrumentedFunction(AIFunction innerFunction, IHub?
     : DelegatingAIFunction(innerFunction)
 {
     private readonly IHub _hub = hub ?? HubAdapter.Instance;
+
     protected override async ValueTask<object?> InvokeCoreAsync(
         AIFunctionArguments arguments,
         CancellationToken cancellationToken)
