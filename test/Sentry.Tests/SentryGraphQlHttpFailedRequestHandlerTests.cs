@@ -211,9 +211,6 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
             // Ensure it's a GraphQL exception (not HTTP fallback)
             @event.Exception.Should().BeOfType<GraphQLHttpRequestException>();
             @event.Exception!.Message.Should().Be(DefaultErrorMessage);
-            @event.Exception!.InnerException.Should().NotBeNull("inner exception should have the stack trace");
-            @event.Exception!.InnerException.Should().BeOfType<GraphQLHttpRequestException>();
-            @event.Exception!.InnerException!.Message.Should().Be(DefaultErrorMessage);
 
             // Ensure the mechanism is set
             @event.Exception?.Data[Mechanism.MechanismKey].Should().Be(SentryGraphQLHttpFailedRequestHandler.MechanismType);
@@ -330,10 +327,9 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         {
             @event.Should().NotBeNull();
             @event.Exception.Should().NotBeNull();
-            @event.Exception!.InnerException.Should().NotBeNull();
 
-            // Inner exception's stack trace should include this test method name, proving we captured caller context on .NET 5+
-            @event.Exception!.InnerException!.StackTrace.Should().Contain(nameof(HandleResponse_GraphQLError_ExceptionStackTraceHasCallerContext));
+            // Exception's stack trace should include this test method name, proving we captured caller context on .NET 5+
+            @event.Exception!.StackTrace.Should().Contain(nameof(HandleResponse_GraphQLError_ExceptionStackTraceHasCallerContext));
         }
     }
 #endif
