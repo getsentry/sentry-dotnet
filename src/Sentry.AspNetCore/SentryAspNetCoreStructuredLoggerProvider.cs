@@ -8,7 +8,7 @@ namespace Sentry.AspNetCore;
 /// <summary>
 /// Structured Logger Provider for Sentry.
 /// </summary>
-[ProviderAlias("SentryLogs")]
+[ProviderAlias("Sentry")]
 internal sealed class SentryAspNetCoreStructuredLoggerProvider : SentryStructuredLoggerProvider
 {
     public SentryAspNetCoreStructuredLoggerProvider(IOptions<SentryAspNetCoreOptions> options, IHub hub)

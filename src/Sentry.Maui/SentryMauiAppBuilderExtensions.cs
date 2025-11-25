@@ -56,11 +56,10 @@ public static class SentryMauiAppBuilderExtensions
         services.AddSingleton<IConfigureOptions<SentryMauiOptions>, SentryMauiOptionsSetup>();
         services.AddSingleton<Disposer>();
 
-        builder.Logging.AddFilter<SentryMauiStructuredLoggerProvider>(static (string? categoryName, LogLevel logLevel) =>
-        {
-            return categoryName is null
-                || categoryName != "Sentry.ISentryClient";
-        });
+        // Add a delegate rule in order to ignore Configuration like "appsettings.json" and "appsettings.{HostEnvironment}.json"
+        builder.Logging.AddFilter<SentryMauiLoggerProvider>(_ => true);
+        // Add non-delegate rules in order to respect Configuration like "appsettings.json" and "appsettings.{HostEnvironment}.json"
+        builder.Logging.AddFilter<SentryMauiStructuredLoggerProvider>("Sentry.ISentryClient", LogLevel.None);
 
         // Add default event binders
         services.AddSingleton<IMauiElementEventBinder, MauiButtonEventsBinder>();

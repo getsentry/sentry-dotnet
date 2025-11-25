@@ -5,7 +5,7 @@ using Sentry.Infrastructure;
 
 namespace Sentry.Maui.Internal;
 
-[ProviderAlias("SentryLogs")]
+[ProviderAlias("Sentry")]
 internal sealed class SentryMauiStructuredLoggerProvider : SentryStructuredLoggerProvider
 {
     public SentryMauiStructuredLoggerProvider(IOptions<SentryMauiOptions> options, IHub hub)
