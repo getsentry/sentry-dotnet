@@ -1,4 +1,3 @@
-#nullable enable
 using Microsoft.Extensions.AI;
 
 namespace Sentry.Extensions.AI.Tests;
@@ -31,14 +30,8 @@ public class SentryInstrumentedFunctionTests
         // Assert
         // AIFunctionFactory returns JsonElement, so we need to check the actual content
         Assert.NotNull(result);
-        if (result is JsonElement jsonElement)
-        {
-            Assert.Equal("test result", jsonElement.GetString());
-        }
-        else
-        {
-            Assert.Equal("test result", result);
-        }
+        var jsonElement = Assert.IsType<JsonElement>(result);
+        Assert.Equal("test result", jsonElement.GetString());
 
         Assert.Equal("TestFunction", sentryFunction.Name);
         Assert.Equal("Test function description", sentryFunction.Description);
@@ -59,14 +52,9 @@ public class SentryInstrumentedFunctionTests
         var result = await sentryFunction.InvokeAsync(arguments);
 
         // Assert
-        if (result is JsonElement jsonElement)
-        {
-            Assert.Equal(JsonValueKind.Null, jsonElement.ValueKind);
-        }
-        else
-        {
-            Assert.Null(result);
-        }
+        Assert.NotNull(result);
+        var jsonElement = Assert.IsType<JsonElement>(result);
+        Assert.Equal(JsonValueKind.Null, jsonElement.ValueKind);
 
         _fixture.Hub.Received(1).StartTransaction(
             Arg.Any<ITransactionContext>(),
@@ -87,9 +75,9 @@ public class SentryInstrumentedFunctionTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.IsType<JsonElement>(result);
-        var jsonResult = (JsonElement)result;
+        var jsonResult = Assert.IsType<JsonElement>(result);
         Assert.Equal(JsonValueKind.Null, jsonResult.ValueKind);
+
         _fixture.Hub.Received(1).StartTransaction(
             Arg.Any<ITransactionContext>(),
             Arg.Any<IReadOnlyDictionary<string, object?>>());
@@ -109,9 +97,9 @@ public class SentryInstrumentedFunctionTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.IsType<JsonElement>(result);
-        var jsonResult = (JsonElement)result;
+        var jsonResult = Assert.IsType<JsonElement>(result);
         Assert.Equal("test output", jsonResult.GetString());
+
         _fixture.Hub.Received(1).StartTransaction(
             Arg.Any<ITransactionContext>(),
             Arg.Any<IReadOnlyDictionary<string, object?>>());
@@ -135,18 +123,11 @@ public class SentryInstrumentedFunctionTests
 
         // Assert
         Assert.NotNull(result);
-        if (result is JsonElement jsonElement)
-        {
-            // When AIFunction serializes objects, they become JsonElements
-            var message = jsonElement.GetProperty("message").GetString();
-            var count = jsonElement.GetProperty("count").GetInt32();
-            Assert.Equal("test", message);
-            Assert.Equal(42, count);
-        }
-        else
-        {
-            Assert.Equal(resultObject, result);
-        }
+        var jsonElement = Assert.IsType<JsonElement>(result);
+        var message = jsonElement.GetProperty("message").GetString();
+        var count = jsonElement.GetProperty("count").GetInt32();
+        Assert.Equal("test", message);
+        Assert.Equal(42, count);
 
         _fixture.Hub.Received(1).StartTransaction(
             Arg.Any<ITransactionContext>(),
@@ -191,6 +172,7 @@ public class SentryInstrumentedFunctionTests
         // Act & Assert
         await Assert.ThrowsAsync<OperationCanceledException>(async () =>
             await sentryFunction.InvokeAsync(arguments, cts.Token));
+
         _fixture.Hub.Received(1).StartTransaction(
             Arg.Any<ITransactionContext>(),
             Arg.Any<IReadOnlyDictionary<string, object?>>());
@@ -219,6 +201,7 @@ public class SentryInstrumentedFunctionTests
         // Assert
         Assert.NotNull(receivedArguments);
         Assert.Equal("value1", receivedArguments["param1"]);
+
         _fixture.Hub.Received(1).StartTransaction(
             Arg.Any<ITransactionContext>(),
             Arg.Any<IReadOnlyDictionary<string, object?>>());
