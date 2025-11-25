@@ -6,7 +6,7 @@ using Sentry.Infrastructure;
 namespace Sentry.AspNetCore;
 
 /// <summary>
-/// Structured Logger Provider for Sentry.
+/// Sentry Logger Provider for <see cref="SentryLog"/>.
 /// </summary>
 [ProviderAlias("Sentry")]
 internal sealed class SentryAspNetCoreStructuredLoggerProvider : SentryStructuredLoggerProvider

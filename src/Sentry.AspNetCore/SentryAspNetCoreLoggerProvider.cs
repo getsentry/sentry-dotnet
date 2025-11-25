@@ -6,10 +6,10 @@ using Sentry.Infrastructure;
 namespace Sentry.AspNetCore;
 
 /// <summary>
-/// Logger provider for Sentry.
+/// Sentry Logger Provider for <see cref="Breadcrumb"/> and <see cref="SentryEvent"/>.
 /// </summary>
 [ProviderAlias("Sentry")]
-public class SentryAspNetCoreLoggerProvider : SentryLoggerProvider
+internal sealed class SentryAspNetCoreLoggerProvider : SentryLoggerProvider
 {
     /// <summary>
     /// Creates a new instance of <see cref="SentryAspNetCoreLoggerProvider"/>

@@ -5,7 +5,7 @@ using Sentry.Infrastructure;
 namespace Sentry.Extensions.Logging;
 
 /// <summary>
-/// Sentry Structured Logger Provider.
+/// Sentry Logger Provider for <see cref="SentryLog"/>.
 /// </summary>
 [ProviderAlias("Sentry")]
 internal class SentryStructuredLoggerProvider : ILoggerProvider
