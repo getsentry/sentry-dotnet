@@ -67,11 +67,6 @@ public class BlazorSentryIntegration : IHostedService, IDisposable
             StartedAt = DateTimeOffset.UtcNow
         };
 
-        _sentryHub.ConfigureScope(scope =>
-        {
-            scope.SetTag("blazor.circuit_id", circuitId);
-        });
-
         _sentryHub.AddBreadcrumb(
             message: "Circuit opened",
             category: "blazor.circuit",
