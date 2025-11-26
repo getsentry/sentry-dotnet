@@ -36,9 +36,9 @@ internal class SentryGraphQLHttpFailedRequestHandler : SentryFailedRequestHandle
                     var exception = new GraphQLHttpRequestException(errorMessage);
 
 #if NET5_0_OR_GREATER
-    // Add a full stack trace into the exception to improve Issue grouping,
-    // see https://github.com/getsentry/sentry-dotnet/issues/3582
-    ExceptionDispatchInfo.Throw(ExceptionDispatchInfo.SetCurrentStackTrace(exception));
+                    // Add a full stack trace into the exception to improve Issue grouping,
+                    // see https://github.com/getsentry/sentry-dotnet/issues/3582
+                    ExceptionDispatchInfo.Throw(ExceptionDispatchInfo.SetCurrentStackTrace(exception));
 #else
                     // Where SetCurrentStackTrace is not available, just throw the Exception
                     throw exception;
