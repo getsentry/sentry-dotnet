@@ -154,4 +154,53 @@ public class LoggingTests
                     .SingleOrDefault(log => log.Length == 1)
                 != null));
     }
+
+    [SkippableFact]
+    public void Log_EventsAndBreadcrumbsIgnoreConfiguration_StructuredLogsRespectConfiguration()
+    {
+#if __IOS__
+        Skip.If(true, "Flaky on iOS");
+#endif
+
+        // Arrange
+        var worker = Substitute.For<IBackgroundWorker>();
+        var envelopes = new List<Envelope>(2);
+        worker.EnqueueEnvelope(Arg.Do<Envelope>(envelope => envelopes.Add(envelope)));
+
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging(builder => builder.AddSentry(o =>
+        {
+            o.Dsn = ValidDsn;
+            o.MinimumBreadcrumbLevel = LogLevel.Information;
+            o.MinimumEventLevel = LogLevel.Warning;
+            o.BackgroundWorker = worker;
+            o.InitNativeSdks = false;
+            o.EnableLogs = true;
+        }));
+        serviceCollection.Configure<LoggerFilterOptions>(options => options.AddFilter<SentryStructuredLoggerProvider>(CategoryName, LogLevel.Error));
+        using var serviceProvider = serviceCollection.BuildServiceProvider();
+        using var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
+
+        // Act
+        var logger = loggerFactory.CreateLogger(CategoryName);
+        logger.Log(LogLevel.Information, "test breadcrumb");
+        logger.Log(LogLevel.Warning, "test event");
+
+        var hub = serviceProvider.GetRequiredService<IHub>();
+        hub.Logger.Flush();
+
+        // Assert
+        Assert.Collection(envelopes,
+            element =>
+            {
+                var serializable = Assert.IsType<JsonSerializable>(element.Items.Single().Payload);
+                var @event = Assert.IsType<SentryEvent>(serializable.Source);
+                Assert.Equal(SentryLevel.Warning, @event.Level);
+                Assert.Equal("test event", @event.Message.Message);
+                var breadcrumb = Assert.Single(@event.Breadcrumbs);
+                Assert.Equal(BreadcrumbLevel.Info, breadcrumb.Level);
+                Assert.Equal("test breadcrumb", breadcrumb.Message);
+            }
+        );
+    }
 }
