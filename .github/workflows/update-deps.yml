@@ -28,5 +28,4 @@ jobs:
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.path }}
-          pr-strategy: update
-          api-token: ${{ secrets.CI_DEPLOY_KEY }}
+          ssh-key: ${{ secrets.CI_DEPLOY_KEY }}
