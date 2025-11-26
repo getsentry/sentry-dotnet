@@ -2,6 +2,10 @@ using Sentry.Extensibility;
 
 namespace Sentry.Samples.AspNetCore.Blazor.Server.Services;
 
+/// <summary>
+/// This event processor adds Blazor-specific context to Sentry events
+/// and improves transaction naming for Blazor SignalR requests.
+/// </summary>
 public class BlazorEventProcessor : ISentryEventProcessor
 {
     public SentryEvent Process(SentryEvent @event)

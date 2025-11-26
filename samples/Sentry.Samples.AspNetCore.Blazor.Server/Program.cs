@@ -1,5 +1,6 @@
 // Capture blazor bootstrapping errors
 
+using Microsoft.AspNetCore.Components.Server.Circuits;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Sentry.OpenTelemetry;
@@ -49,6 +50,7 @@ builder.WebHost.UseSentry(options =>
 // Services to integrate with Blazor lifecycle events
 builder.Services.AddSingleton<BlazorSentryIntegration>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<BlazorSentryIntegration>());
+builder.Services.AddScoped<CircuitHandler, SentryCircuitHandler>();
 #endif
 
 var app = builder.Build();
