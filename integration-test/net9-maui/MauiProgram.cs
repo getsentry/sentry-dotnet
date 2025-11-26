@@ -21,11 +21,16 @@ public static class MauiProgram
                 options.SendClientReports = false;
                 options.AutoSessionTracking = false;
 
-                options.SetBeforeBreadcrumb((breadcrumb, hint) =>
+                // Only check breadcrumbs for non-crash tests...
+                var testArg = System.Environment.GetEnvironmentVariable("SENTRY_TEST_ARG");
+                if (!Enum.TryParse<CrashType>(testArg, ignoreCase: true, out var crashType))
                 {
-                    App.ReceiveSystemBreadcrumb(breadcrumb);
-                    return breadcrumb;
-                });
+                    options.SetBeforeBreadcrumb((breadcrumb, hint) =>
+                    {
+                        App.ReceiveSystemBreadcrumb(breadcrumb);
+                        return breadcrumb;
+                    });
+                }
             })
             .ConfigureFonts(fonts =>
             {
