@@ -196,7 +196,7 @@ public class LoggingTests
                 var serializable = Assert.IsType<JsonSerializable>(element.Items.Single().Payload);
                 var @event = Assert.IsType<SentryEvent>(serializable.Source);
                 Assert.Equal(SentryLevel.Warning, @event.Level);
-                Assert.Equal("test event", @event.Message.Message);
+                Assert.Equal("test event", @event.Message!.Message);
                 var breadcrumb = Assert.Single(@event.Breadcrumbs);
                 Assert.Equal(BreadcrumbLevel.Info, breadcrumb.Level);
                 Assert.Equal("test breadcrumb", breadcrumb.Message);
