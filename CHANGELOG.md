@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Captured [GraphQL Client Errors](https://docs.sentry.io/platforms/dotnet/configuration/graphql-client-errors/) on .NET 5+ now include a full stack trace in order to improve Issue grouping ([#4762](https://github.com/getsentry/sentry-dotnet/pull/4762))
+
 ## 6.0.0-rc.2
 
 ### Features
@@ -9,7 +15,6 @@
 ### Fixes
 
 - Captured [Http Client Errors](https://docs.sentry.io/platforms/dotnet/guides/aspnet/configuration/http-client-errors/) on .NET 5+ now include a full stack trace in order to improve Issue grouping ([#4724](https://github.com/getsentry/sentry-dotnet/pull/4724))
-- Captured [GraphQL Client Errors](https://docs.sentry.io/platforms/dotnet/configuration/graphql-client-errors/) on .NET 5+ now include a full stack trace in order to improve Issue grouping ([#4762](https://github.com/getsentry/sentry-dotnet/pull/4762))
 - Sentry Tracing middleware crashed ASP.NET Core in .NET 10 in 6.0.0-rc.1 and earlier ([#4747](https://github.com/getsentry/sentry-dotnet/pull/4747))
 - Avoid appending `/NODEFAULTLIB:MSVCRT` to NativeAOT linker arguments on Windows when targetting non-Windows platforms (Android, Browser) ([#4760](https://github.com/getsentry/sentry-dotnet/pull/4760))
 
