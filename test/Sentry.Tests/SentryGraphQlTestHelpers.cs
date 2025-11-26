@@ -46,17 +46,20 @@ internal static class SentryGraphQlTestHelpers
 
     /// <summary>
     /// e.g.
-    /// "[{"message":"Query does not contain operation \u0027getAllNotes\u0027.","extensions":{"code":"INVALID_OPERATION","codes":["INVALID_OPERATION"]}}]"
+    /// "{"errors": [{"message":"Query does not contain operation \u0027getAllNotes\u0027.","extensions":{"code":"INVALID_OPERATION","codes":["INVALID_OPERATION"]}}]}"
     /// </summary>
     public static StringContent ErrorContent(string errorMessage, string errorCode) => JsonContent(
-        new dynamic[]
+        new
         {
-            new
+            errors = new dynamic[]
             {
-                message = errorMessage,
-                extensions = new {
-                    code = errorCode,
-                    codes = new dynamic[]{ errorCode }
+                new
+                {
+                    message = errorMessage,
+                    extensions = new {
+                        code = errorCode,
+                        codes = new dynamic[]{ errorCode }
+                    }
                 }
             }
         }

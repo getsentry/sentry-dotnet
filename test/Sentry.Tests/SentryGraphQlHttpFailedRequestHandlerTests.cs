@@ -3,6 +3,9 @@ namespace Sentry.Tests;
 public class SentryGraphQlHttpFailedRequestHandlerTests
 {
     private const string ValidQuery = "query getAllNotes { notes { id } }";
+    private const string DefaultErrorMessage = "Bad query";
+    private const string DefaultErrorCode = "BAD_OP";
+
     private static HttpResponseMessage ForbiddenResponse()
         => new(HttpStatusCode.Forbidden);
 
@@ -12,7 +15,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
     private HttpResponseMessage PreconditionFailedResponse()
         => new(HttpStatusCode.PreconditionFailed)
         {
-            Content = SentryGraphQlTestHelpers.ErrorContent("Bad query", "BAD_OP")
+            Content = SentryGraphQlTestHelpers.ErrorContent(DefaultErrorMessage, DefaultErrorCode)
         };
 
     [Fact]
@@ -81,7 +84,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
     }
 
     [Fact]
-    public void HandleResponse_NoError_BaseCapturesFailedRequests()
+    public void HandleResponse_NoGraphQLError_HttpHandlerFallbackCapturesFailedRequests()
     {
         // Arrange
         var hub = Substitute.For<IHub>();
@@ -91,16 +94,26 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         };
         var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
 
-        var response = InternalServerErrorResponse();
-        response.RequestMessage = new HttpRequestMessage();
+        // Response has valid JSON but no GraphQL errors - just HTTP error status
+        var response = new HttpResponseMessage(HttpStatusCode.InternalServerError)
+        {
+            Content = SentryGraphQlTestHelpers.JsonContent(new { data = "some response data" }),
+            RequestMessage = new HttpRequestMessage(HttpMethod.Post, "http://example.com/graphql")
+        };
 
         // Act
+        SentryEvent @event = null;
+        hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
         sut.HandleResponse(response);
 
         // Assert
         hub.Received(1).CaptureEvent(
             Arg.Any<SentryEvent>(),
             Arg.Any<Scope>(), Arg.Any<SentryHint>());
+
+        // Should fall back to HTTP handler, capturing HttpRequestException
+        @event.Exception.Should().BeOfType<HttpRequestException>();
+        @event.Exception!.Message.Should().NotBeNullOrWhiteSpace();
     }
 
     [Fact]
@@ -115,15 +128,21 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
 
         var response = PreconditionFailedResponse();
-        response.RequestMessage = new HttpRequestMessage();
+        response.RequestMessage = SentryGraphQlTestHelpers.GetRequestQuery(ValidQuery);
 
         // Act
+        SentryEvent @event = null;
+        hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
         sut.HandleResponse(response);
 
         // Assert
         hub.Received(1).CaptureEvent(
             Arg.Any<SentryEvent>(),
             Arg.Any<Scope>(), Arg.Any<SentryHint>());
+
+        // Verify it's actually a GraphQL error, not HTTP error fallback
+        @event.Exception.Should().BeOfType<GraphQLHttpRequestException>();
+        @event.Exception!.Message.Should().Be(DefaultErrorMessage);
     }
 
     [Fact]
@@ -139,7 +158,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
 
         var response = PreconditionFailedResponse();
         var uri = new Uri("http://admin:1234@localhost/test/path?query=string#fragment");
-        response.RequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+        response.RequestMessage = SentryGraphQlTestHelpers.GetRequestQuery(ValidQuery, uri.ToString());
 
         // Act
         SentryEvent @event = null;
@@ -147,6 +166,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         sut.HandleResponse(response);
 
         // Assert
+        @event.Exception.Should().BeOfType<GraphQLHttpRequestException>();
         @event.Request.Url.Should().Be("http://localhost/test/path?query=string"); // No admin:1234
         @event.Request.Data.Should().BeNull();
         var responseContext = @event.Contexts[Response.Type] as Response;
@@ -188,6 +208,10 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
         {
             @event.Should().NotBeNull();
 
+            // Ensure it's a GraphQL exception (not HTTP fallback)
+            @event.Exception.Should().BeOfType<GraphQLHttpRequestException>();
+            @event.Exception!.Message.Should().Be(DefaultErrorMessage);
+
             // Ensure the mechanism is set
             @event.Exception?.Data[Mechanism.MechanismKey].Should().Be(SentryGraphQLHttpFailedRequestHandler.MechanismType);
             @event.Exception?.Data[Mechanism.HandledKey].Should().Be(false);
@@ -205,7 +229,7 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
             responseContext?.StatusCode.Should().Be((short)response.StatusCode);
             responseContext?.BodySize.Should().Be(response.Content.Headers.ContentLength);
             responseContext?.Data?.ToString().Should().Be(
-                SentryGraphQlTestHelpers.ErrorContent("Bad query", "BAD_OP").ReadAsJson().ToString()
+                SentryGraphQlTestHelpers.ErrorContent(DefaultErrorMessage, DefaultErrorCode).ReadAsJson().ToString()
                 );
 
             @event.Contexts.Response.Headers.Should().ContainKey("myHeader");
@@ -249,4 +273,64 @@ public class SentryGraphQlHttpFailedRequestHandlerTests
             hint.Items[HintTypes.HttpResponseMessage].Should().Be(response);
         }
     }
+
+    [Fact]
+    public void HandleResponse_GraphQLError_HasExceptionWithStackTrace()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var options = new SentryOptions
+        {
+            CaptureFailedRequests = true
+        };
+        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
+
+        var response = PreconditionFailedResponse();
+        response.RequestMessage = SentryGraphQlTestHelpers.GetRequestQuery(ValidQuery);
+
+        // Act
+        SentryEvent @event = null;
+        hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
+        sut.HandleResponse(response);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            @event.Should().NotBeNull();
+            @event.Exception.Should().NotBeNull();
+            @event.Exception!.StackTrace.Should().NotBeNullOrWhiteSpace();
+        }
+    }
+
+#if NET5_0_OR_GREATER // This test is only valid on .NET 5+ where we can use SetCurrentStackTrace
+    [Fact]
+    public void HandleResponse_GraphQLError_ExceptionStackTraceHasCallerContext()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var options = new SentryOptions
+        {
+            CaptureFailedRequests = true
+        };
+        var sut = new SentryGraphQLHttpFailedRequestHandler(hub, options);
+
+        var response = PreconditionFailedResponse();
+        response.RequestMessage = SentryGraphQlTestHelpers.GetRequestQuery(ValidQuery);
+
+        // Act
+        SentryEvent @event = null;
+        hub.CaptureEvent(Arg.Do<SentryEvent>(e => @event = e), hint: Arg.Any<SentryHint>());
+        sut.HandleResponse(response);
+
+        // Assert
+        using (new AssertionScope())
+        {
+            @event.Should().NotBeNull();
+            @event.Exception.Should().NotBeNull();
+
+            // Exception's stack trace should include this test method name, proving we captured caller context on .NET 5+
+            @event.Exception!.StackTrace.Should().Contain(nameof(HandleResponse_GraphQLError_ExceptionStackTraceHasCallerContext));
+        }
+    }
+#endif
 }

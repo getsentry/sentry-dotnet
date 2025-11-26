@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixes
+
+- Captured [GraphQL Client Errors](https://docs.sentry.io/platforms/dotnet/configuration/graphql-client-errors/) on .NET 5+ now include a full stack trace in order to improve Issue grouping ([#4762](https://github.com/getsentry/sentry-dotnet/pull/4762))
+
 ## 6.0.0-rc.2
 
 ### Features
