@@ -1,15 +1,14 @@
-#nullable enable
 using Microsoft.Extensions.AI;
 
 namespace Sentry.Extensions.AI.Tests;
 
-public class SentryAISpanEnricherTests
+public class SentryAISpanEnricherTests : IDisposable
 {
     private class Fixture
     {
         private SentryOptions Options { get; }
         public ISentryClient Client { get; }
-        public Hub Hub { get; set; }
+        public Hub Hub { get; }
 
         public Fixture()
         {
@@ -25,6 +24,11 @@ public class SentryAISpanEnricherTests
     }
 
     private readonly Fixture _fixture = new();
+
+    public void Dispose()
+    {
+        _fixture.Hub.Dispose();
+    }
 
     private static ChatMessage[] TestMessages()
     {
