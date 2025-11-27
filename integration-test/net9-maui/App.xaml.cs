@@ -70,7 +70,6 @@ public partial class App : Application
         {
             SentrySdk.CauseCrash(crashType);
         }
-        else
 #pragma warning restore CS0618
 
         if (HasTestArg("NullReferenceException"))
