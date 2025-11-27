@@ -29,15 +29,18 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         var timestamp = _clock.GetUtcNow();
         SentryLog.GetTraceIdAndSpanId(_hub, out var traceId, out var spanId);
 
-        string message;
-        try
+        string message = template;
+        if (parameters is { Length: > 0 })
         {
-            message = string.Format(CultureInfo.InvariantCulture, template, parameters ?? []);
-        }
-        catch (FormatException e)
-        {
-            _options.DiagnosticLogger?.LogError(e, "Template string does not match the provided argument. The Log will be dropped.");
-            return;
+            try
+            {
+                message = string.Format(CultureInfo.InvariantCulture, template, parameters);
+            }
+            catch (FormatException e)
+            {
+                _options.DiagnosticLogger?.LogError(e, "Template string does not match the provided argument. The Log will be dropped.");
+                return;
+            }
         }
 
         ImmutableArray<KeyValuePair<string, object>> @params = default;
