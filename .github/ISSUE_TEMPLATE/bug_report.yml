@@ -15,6 +15,7 @@ body:
         - Sentry.AspNet
         - Sentry.DiagnosticSource
         - Sentry.EntityFramework
+        - Sentry.Extensions.AI
         - Sentry.Extensions.Logging
         - Sentry.Google.Cloud.Functions
         - Sentry.Hangfire
