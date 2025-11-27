@@ -21,13 +21,6 @@ builder.Services.AddOpenTelemetry()
         tracing.AddAspNetCoreInstrumentation();
         // Add Sentry as an exporter
         tracing.AddSentry();
-    })
-    .WithMetrics(metrics =>
-    {
-        metrics.AddMeter("Microsoft.AspNetCore.Components");
-        metrics.AddMeter("Microsoft.AspNetCore.Components.Lifecycle");
-        metrics.AddMeter("Microsoft.AspNetCore.Components.Server.Circuits");
-        metrics.AddAspNetCoreInstrumentation();
     });
 #endif
 
