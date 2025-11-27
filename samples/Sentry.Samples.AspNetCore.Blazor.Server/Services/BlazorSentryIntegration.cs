@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using Microsoft.AspNetCore.Components.Server.Circuits;
 
 namespace Sentry.Samples.AspNetCore.Blazor.Server.Services;
 

@@ -1,7 +1,6 @@
 // Capture blazor bootstrapping errors
 
 using Microsoft.AspNetCore.Components.Server.Circuits;
-using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Sentry.OpenTelemetry;
 using Sentry.Samples.AspNetCore.Blazor.Server.Services;

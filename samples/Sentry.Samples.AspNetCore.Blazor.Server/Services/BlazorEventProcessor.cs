@@ -21,8 +21,10 @@ public class BlazorEventProcessor : ISentryEventProcessor
             });
         }
 
-        // For transaction name, we need to set it through Contexts
-        var transactionName = @event.Contexts.Trace?.Operation;
+        // Improve transaction naming for Blazor SignalR requests.
+        // BlazorSentryIntegration.cs should have already changed the transaction name to something meaningful,
+        // but in case it didn't, we try to do it here based on available tags.
+        var transactionName = @event.TransactionName;
         if (!IsBlazorSignalRTransaction(transactionName))
         {
             return @event;
