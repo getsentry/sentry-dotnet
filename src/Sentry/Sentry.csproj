@@ -83,13 +83,7 @@
 
   <!-- Ensure at least version 6 of System.Text.Json so we have JsonSerializationContext available -->
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4')) or $(TargetFramework.StartsWith('netstandard'))">
-    <PackageReference Include="System.Text.Json" Version="8.0.5" >
-      <!--
-        Ignoring the vulnerability warning: https://github.com/advisories/GHSA-hh2w-p6rv-4g7w
-        The app can/should pin to the latest version. We will bump once a patch on v6 (still LTS until Nov 24) is out
-      -->
-      <NoWarn>NU1903</NoWarn>
-    </PackageReference>
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
 
   <!--
@@ -154,6 +148,8 @@
     <InternalsVisibleTo Include="Sentry.DiagnosticSource.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.EntityFramework" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.EntityFramework.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Extensions.AI" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.Extensions.AI.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Extensions.Logging" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Extensions.Logging.EfCore.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.Extensions.Logging.Tests" PublicKey="$(SentryPublicKey)" />

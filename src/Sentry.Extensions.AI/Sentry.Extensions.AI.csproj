@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(CurrentTfms);netstandard2.0</TargetFrameworks>
+    <PackageTags>$(PackageTags);Microsoft.Extensions.AI;AI;LLM</PackageTags>
+    <Description>Official Microsoft.Extensions.AI integration for Sentry - Open-source error tracking that helps developers monitor and fix crashes in real time.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="Sentry.Extensibility" />
+    <Using Include="Sentry.Integrations" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sentry\Sentry.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="9.7.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sentry.Extensions.AI.Tests" PublicKey="$(SentryPublicKey)" />
+  </ItemGroup>
+
+</Project>
