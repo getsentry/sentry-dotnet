@@ -54,6 +54,11 @@ public class BlazorSentryIntegration : IHostedService, IDisposable
     public Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Blazor Sentry activity listener stopping");
+
+        _cleanupTimer?.Dispose();
+        // Set to null to avoid potential double disposal which could happen during shutdown.
+        _cleanupTimer = null;
+
         return Task.CompletedTask;
     }
 
