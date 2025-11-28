@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sentry.Internal.Http;
 using Sentry.Maui.Internal;
@@ -332,5 +333,62 @@ public partial class SentryMauiAppBuilderExtensionsTests
 
         // Assert
         options.DiagnosticLogger.Should().BeOfType<TraceDiagnosticLogger>();
+    }
+
+    [Fact]
+    public void UseSentry_Logging_AddLoggerProviders()
+    {
+        // Arrange
+        var builder = _fixture.Builder;
+
+        // Act
+        builder.UseSentry((SentryMauiOptions options) =>
+        {
+            options.EnableLogs = true;
+            options.InitializeSdk = false;
+        });
+
+        using var serviceProvider = builder.Services.BuildServiceProvider();
+        var providers = serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>().ToArray();
+
+        // Assert
+        providers.Should().HaveCount(2);
+        providers[0].Should().BeOfType<SentryMauiLoggerProvider>();
+        providers[1].Should().BeOfType<SentryMauiStructuredLoggerProvider>();
+    }
+
+    [Fact]
+    public void UseSentry_Logging_AddLoggerFilterRules()
+    {
+        // Arrange
+        var builder = _fixture.Builder;
+
+        // Act
+        builder.UseSentry((SentryMauiOptions options) =>
+        {
+            options.EnableLogs = true;
+            options.InitializeSdk = false;
+        });
+
+        using var serviceProvider = builder.Services.BuildServiceProvider();
+        var loggerFilterOptions = serviceProvider.GetRequiredService<IOptions<LoggerFilterOptions>>().Value;
+
+        // Assert
+        loggerFilterOptions.Rules.Should().HaveCount(2);
+        var one = loggerFilterOptions.Rules[0];
+        var two = loggerFilterOptions.Rules[1];
+
+        one.ProviderName.Should().Be(typeof(SentryMauiLoggerProvider).FullName);
+        one.CategoryName.Should().BeNull();
+        one.LogLevel.Should().BeNull();
+        one.Filter.Should().NotBeNull();
+        one.Filter!.Invoke(null, null, LogLevel.None).Should().BeTrue();
+        one.Filter.Invoke("", "", LogLevel.None).Should().BeTrue();
+        one.Filter.Invoke("type", "category", LogLevel.None).Should().BeTrue();
+
+        two.ProviderName.Should().Be(typeof(SentryMauiStructuredLoggerProvider).FullName);
+        two.CategoryName.Should().Be(typeof(ISentryClient).FullName);
+        two.LogLevel.Should().Be(LogLevel.None);
+        two.Filter.Should().BeNull();
     }
 }

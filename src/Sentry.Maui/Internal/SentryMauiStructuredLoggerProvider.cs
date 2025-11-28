@@ -5,7 +5,10 @@ using Sentry.Infrastructure;
 
 namespace Sentry.Maui.Internal;
 
-[ProviderAlias("SentryLogs")]
+/// <summary>
+/// Sentry Logger Provider for <see cref="SentryLog"/>.
+/// </summary>
+[ProviderAlias("Sentry")]
 internal sealed class SentryMauiStructuredLoggerProvider : SentryStructuredLoggerProvider
 {
     public SentryMauiStructuredLoggerProvider(IOptions<SentryMauiOptions> options, IHub hub)

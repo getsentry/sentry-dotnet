@@ -57,10 +57,17 @@ public class SentryStartup : FunctionsStartup
 
         logging.Services.AddSingleton<IConfigureOptions<SentryAspNetCoreOptions>, SentryAspNetCoreOptionsSetup>();
         logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreLoggerProvider>();
+        logging.Services.AddSingleton<ILoggerProvider, SentryAspNetCoreStructuredLoggerProvider>();
 
-        logging.AddFilter<SentryAspNetCoreLoggerProvider>(
-            "Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware",
-            LogLevel.None);
+        // Add a delegate rule in order to ignore Configuration like "appsettings.json" and "appsettings.{HostEnvironment}.json"
+        logging.AddFilter<SentryAspNetCoreLoggerProvider>(static (string? categoryName, LogLevel logLevel) =>
+        {
+            return categoryName is null
+                   || categoryName != "Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware";
+        });
+        // Add non-delegate rules in order to respect Configuration like "appsettings.json" and "appsettings.{HostEnvironment}.json"
+        logging.AddFilter<SentryAspNetCoreStructuredLoggerProvider>("Sentry.ISentryClient", LogLevel.None);
+        logging.AddFilter<SentryAspNetCoreStructuredLoggerProvider>("Sentry.AspNetCore.SentryMiddleware", LogLevel.None);
 
         logging.Services.AddSentry();
     }
