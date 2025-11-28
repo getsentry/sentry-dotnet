@@ -104,7 +104,7 @@ public partial class App : Application
 #if ANDROID
         // prevent auto-restart
         Platform.CurrentActivity?.FinishAffinity();
-        System.Environment.Exit(0);
+        Process.KillProcess(Process.MyPid());
 #elif IOS
         System.Environment.Exit(0);
 #endif
