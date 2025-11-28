@@ -12,13 +12,18 @@ using Microsoft.Extensions.Logging;
 public class Function : IHttpFunction
 {
     private readonly ILogger<Function> _logger;
+
     public Function(ILogger<Function> logger) => _logger = logger;
 
     public Task HandleAsync(HttpContext context)
     {
         // Configure structured logging via appsettings.json (Logging:Sentry:LogLevel:)
         _logger.LogTrace("LogLevel.Trace is not configured to be sent as structured log");
+
+        // Logging integration by default keeps informational logs as Breadcrumb
         _logger.LogInformation("Useful info that is added to the breadcrumb list.");
+
+        // Results in an Event/Error in Sentry, including the Breadcrumb from above
         throw new Exception("Bad function");
     }
 }

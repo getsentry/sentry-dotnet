@@ -32,12 +32,13 @@ using var loggerFactory = LoggerFactory.Create(builder =>
             return log;
         });
 
-        // TODO: AddLogEntryFilter
         // Don't keep as a breadcrumb or send events for messages of level less than Critical with exception of type DivideByZeroException
         options.AddLogEntryFilter((_, level, _, exception) => level < LogLevel.Critical && exception is DivideByZeroException);
 
         options.ConfigureScope(s => s.SetTag("RootScope", "sent with all events"));
     });
+    // Don't send logs for messages of level less than Warning for category Program
+    builder.AddFilter(typeof(Program).FullName, LogLevel.Warning);
 });
 var logger = loggerFactory.CreateLogger<Program>();
 
