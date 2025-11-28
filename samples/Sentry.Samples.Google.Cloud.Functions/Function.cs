@@ -16,6 +16,7 @@ public class Function : IHttpFunction
 
     public Task HandleAsync(HttpContext context)
     {
+        // Configure structured logging via appsettings.json (Logging:Sentry:LogLevel:)
         _logger.LogTrace("LogLevel.Trace is not configured to be sent as structured log");
         _logger.LogInformation("Useful info that is added to the breadcrumb list.");
         throw new Exception("Bad function");
