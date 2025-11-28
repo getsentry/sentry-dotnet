@@ -19,7 +19,6 @@
     - use the intended `SentryLoggingOptions.MinimumBreadcrumbLevel`, `SentryLoggingOptions.MinimumEventLevel`, or add filter functions via `SentryLoggingOptionsExtensions.AddLogEntryFilter`
   - the Logger-Provider for _Structured Logs_ respects Logging-Configuration (e.g. via `appsettings.json`)
     - when enabled by `SentryOptions.EnableLogs`
-
 - Avoid appending `/NODEFAULTLIB:MSVCRT` to NativeAOT linker arguments on Windows when targetting non-Windows platforms (Android, Browser) ([#4760](https://github.com/getsentry/sentry-dotnet/pull/4760))
 
 ## 6.0.0-rc.2
