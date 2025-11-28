@@ -871,7 +871,7 @@ internal class Hub : IHub, IDisposable
 #if __IOS__
             // TODO
 #elif ANDROID
-            // TODO
+        JavaSdk.Sentry.Close();
 #elif NET8_0_OR_GREATER
         if (SentryNative.IsAvailable)
         {
