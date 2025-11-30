@@ -25,7 +25,8 @@ public static class MauiProgram
                 {
                     App.ReceiveSystemBreadcrumb(breadcrumb);
                     return breadcrumb;
-                });            })
+                });
+            })
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
