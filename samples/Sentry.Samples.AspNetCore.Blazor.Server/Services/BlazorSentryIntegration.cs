@@ -55,9 +55,7 @@ public class BlazorSentryIntegration : IHostedService, IDisposable
     {
         _logger.LogInformation("Blazor Sentry activity listener stopping");
 
-        _cleanupTimer?.Dispose();
-        // Set to null to avoid potential double disposal which could happen during shutdown.
-        _cleanupTimer = null;
+        Interlocked.Exchange(ref _cleanupTimer, null)?.Dispose();
 
         return Task.CompletedTask;
     }
@@ -298,7 +296,7 @@ public class BlazorSentryIntegration : IHostedService, IDisposable
 
     public void Dispose()
     {
-        _cleanupTimer?.Dispose();
+        Interlocked.Exchange(ref _cleanupTimer, null)?.Dispose();
         _listener.Dispose();
         _circuitContexts.Clear();
     }
