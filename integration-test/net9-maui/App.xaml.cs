@@ -72,7 +72,7 @@ public partial class App : Application
         }
 #pragma warning restore CS0618
 
-        else if (HasTestArg("NullReferenceException"))
+        if (HasTestArg("NullReferenceException"))
         {
             try
             {
