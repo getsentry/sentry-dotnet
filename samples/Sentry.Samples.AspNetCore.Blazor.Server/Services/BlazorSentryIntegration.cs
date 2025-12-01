@@ -56,6 +56,8 @@ public class BlazorSentryIntegration : IHostedService, IDisposable
         _logger.LogInformation("Blazor Sentry activity listener stopping");
 
         Interlocked.Exchange(ref _cleanupTimer, null)?.Dispose();
+        _listener.Dispose();
+        _circuitContexts.Clear();
 
         return Task.CompletedTask;
     }
