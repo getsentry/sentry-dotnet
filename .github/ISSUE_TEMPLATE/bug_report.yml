@@ -85,9 +85,9 @@ body:
         - Visual Studio Code (Windows)
         - Visual Studio Code (macOS)
         - Visual Studio Code (Linux)
-        - Rider 2025 (Windows)
-        - Rider 2025 (macOS)
-        - Rider 2025 (Linux)
+        - Rider 2025.x (Windows)
+        - Rider 2025.x (macOS)
+        - Rider 2025.x (Linux)
         - Other
     validations:
       required: true
