@@ -39,11 +39,6 @@ namespace Sentry.AspNetCore
         public static string? TryGetHttpPath(this Sentry.TransactionSamplingContext samplingContext) { }
         public static string? TryGetHttpRoute(this Sentry.TransactionSamplingContext samplingContext) { }
     }
-    [Microsoft.Extensions.Logging.ProviderAlias("Sentry")]
-    public class SentryAspNetCoreLoggerProvider : Sentry.Extensions.Logging.SentryLoggerProvider
-    {
-        public SentryAspNetCoreLoggerProvider(Microsoft.Extensions.Options.IOptions<Sentry.AspNetCore.SentryAspNetCoreOptions> options, Sentry.IHub hub) { }
-    }
     public class SentryAspNetCoreOptions : Sentry.Extensions.Logging.SentryLoggingOptions
     {
         public SentryAspNetCoreOptions() { }
@@ -54,11 +49,6 @@ namespace Sentry.AspNetCore
         public bool IncludeActivityData { get; set; }
         public Sentry.Extensibility.RequestSize MaxRequestBodySize { get; set; }
         public Sentry.AspNetCore.TransactionNameProvider? TransactionNameProvider { get; set; }
-    }
-    public class SentryAspNetCoreOptionsSetup : Microsoft.Extensions.Options.IConfigureOptions<Sentry.AspNetCore.SentryAspNetCoreOptions>
-    {
-        public SentryAspNetCoreOptionsSetup(Microsoft.Extensions.Logging.Configuration.ILoggerProviderConfiguration<Sentry.AspNetCore.SentryAspNetCoreLoggerProvider> providerConfiguration) { }
-        public void Configure(Sentry.AspNetCore.SentryAspNetCoreOptions options) { }
     }
     public static class SentryBuilderExtensions
     {

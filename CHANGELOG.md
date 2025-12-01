@@ -2,8 +2,23 @@
 
 ## Unreleased
 
+### BREAKING CHANGES
+
+- Remove `SentryLoggingOptions.ExperimentalLogging.MinimumLogLevel`. _Structured Logs_ can now be configured via the `"Sentry"` logging provider (e.g. in `appsettings.json` and `appsettings.{HostEnvironment}.json`) ([#4700](https://github.com/getsentry/sentry-dotnet/pull/4700))
+- All logging provider types are _internal_ now in order to ensure configuration as intended ([#4700](https://github.com/getsentry/sentry-dotnet/pull/4700))
+
+### Features
+
+- Add support for _Structured Logs_ in `Sentry.Google.Cloud.Functions` ([#4700](https://github.com/getsentry/sentry-dotnet/pull/4700))
+
 ### Fixes
 
+- Minimum Log-Level for _Structured Logs_, _Breadcrumbs_ and _Events_ in all Logging-Integrations ([#4700](https://github.com/getsentry/sentry-dotnet/pull/4700))
+  - for `Sentry.Extensions.Logging`, `Sentry.AspNetCore`, `Sentry.Maui` and `Sentry.Google.Cloud.Functions`
+  - the Logger-Provider for _Breadcrumbs_ and _Events_ ignores Logging-Configuration (e.g. via `appsettings.json`)
+    - use the intended `SentryLoggingOptions.MinimumBreadcrumbLevel`, `SentryLoggingOptions.MinimumEventLevel`, or add filter functions via `SentryLoggingOptionsExtensions.AddLogEntryFilter`
+  - the Logger-Provider for _Structured Logs_ respects Logging-Configuration (e.g. via `appsettings.json`)
+    - when enabled by `SentryOptions.EnableLogs`
 - Avoid appending `/NODEFAULTLIB:MSVCRT` to NativeAOT linker arguments on Windows when targetting non-Windows platforms (Android, Browser) ([#4760](https://github.com/getsentry/sentry-dotnet/pull/4760))
 
 ## 6.0.0-rc.2
