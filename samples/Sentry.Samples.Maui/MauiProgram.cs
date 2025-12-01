@@ -78,6 +78,7 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
+        // Configure Logging, including Structured Logs sent to Sentry (see 'EnableLogs = true')
         builder.Logging.AddFilter(null, LogLevel.Warning);
         builder.Logging.AddFilter("Sentry.Samples.Maui", LogLevel.Information);
 
