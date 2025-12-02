@@ -21,6 +21,12 @@
     - when enabled by `SentryOptions.EnableLogs`
 - Avoid appending `/NODEFAULTLIB:MSVCRT` to NativeAOT linker arguments on Windows when targetting non-Windows platforms (Android, Browser) ([#4760](https://github.com/getsentry/sentry-dotnet/pull/4760))
 
+### Dependencies
+
+- Bump Native SDK from v0.12.1 to v0.12.2 ([#4780](https://github.com/getsentry/sentry-dotnet/pull/4780))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0122)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.12.1...0.12.2)
+
 ## 6.0.0-rc.2
 
 ### Features
