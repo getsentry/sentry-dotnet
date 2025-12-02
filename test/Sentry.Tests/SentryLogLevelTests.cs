@@ -149,4 +149,48 @@ public class SentryLogLevelTests
             { 24, SentryLogLevel.Fatal },
         };
     }
+
+    [Theory]
+    [MemberData(nameof(Convert))]
+    public void Convert_FromSentryLogLevel_ToSentryLevel(int level, SentryLevel expected)
+    {
+        var @enum = (SentryLogLevel)level;
+
+        var actual = @enum.ToSentryLevel();
+
+        Assert.Equal(expected, actual);
+    }
+
+    public static TheoryData<int, SentryLevel> Convert()
+    {
+        return new TheoryData<int, SentryLevel>
+        {
+            { 0, SentryLevel.Debug },
+            { 1, SentryLevel.Debug },
+            { 2, SentryLevel.Debug },
+            { 3, SentryLevel.Debug },
+            { 4, SentryLevel.Debug },
+            { 5, SentryLevel.Debug },
+            { 6, SentryLevel.Debug },
+            { 7, SentryLevel.Debug },
+            { 8, SentryLevel.Debug },
+            { 9, SentryLevel.Info },
+            { 10, SentryLevel.Info },
+            { 11, SentryLevel.Info },
+            { 12, SentryLevel.Info },
+            { 13, SentryLevel.Warning },
+            { 14, SentryLevel.Warning },
+            { 15, SentryLevel.Warning },
+            { 16, SentryLevel.Warning },
+            { 17, SentryLevel.Error },
+            { 18, SentryLevel.Error },
+            { 19, SentryLevel.Error },
+            { 20, SentryLevel.Error },
+            { 21, SentryLevel.Fatal },
+            { 22, SentryLevel.Fatal },
+            { 23, SentryLevel.Fatal },
+            { 24, SentryLevel.Fatal },
+            { 25, SentryLevel.Fatal },
+        };
+    }
 }

@@ -72,6 +72,11 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         log.SetDefaultAttributes(_options, scope?.Sdk ?? SdkVersion.Instance);
 
         CaptureLog(log);
+
+        if (_options.Debug)
+        {
+            _options.DiagnosticLogger?.LogIfEnabled(level.ToSentryLevel(), null, message);
+        }
     }
 
     /// <inheritdoc />
