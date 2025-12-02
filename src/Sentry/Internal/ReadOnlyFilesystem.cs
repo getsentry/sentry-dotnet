@@ -17,12 +17,6 @@ internal class ReadOnlyFileSystem : FileSystemBase
         return false;
     }
 
-    public override bool TryCreateLockFile(string path, out Stream fileStream)
-    {
-        fileStream = Stream.Null;
-        return false;
-    }
-
     public override bool WriteAllTextToFile(string path, string contents) => false;
 
     public override bool MoveFile(string sourceFileName, string destFileName, bool overwrite = false) => false;
