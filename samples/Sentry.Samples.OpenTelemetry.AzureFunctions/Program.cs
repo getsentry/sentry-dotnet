@@ -12,7 +12,6 @@ var host = new HostBuilder()
         {
             builder
                 .AddSentry() // <-- Configure OpenTelemetry to send traces to Sentry
-                .AddAspNetCoreInstrumentation() // Instrument ASP.NET Core
                 .AddHttpClientInstrumentation(); // From OpenTelemetry.Instrumentation.Http... adds automatic tracing for outgoing HTTP requests
         });
     })
