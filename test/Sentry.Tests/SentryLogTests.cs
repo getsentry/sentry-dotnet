@@ -30,10 +30,13 @@ public class SentryLogTests
             Environment = "my-environment",
             Release = "my-release",
         };
-        var sdk = new SdkVersion
+        var scope = new Scope(options)
         {
-            Name = "Sentry.Test.SDK",
-            Version = "1.2.3-test+Sentry"
+            Sdk =
+            {
+                Name = "Sentry.Test.SDK",
+                Version = "1.2.3-test+Sentry",
+            }
         };
 
         var log = new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message")
@@ -43,7 +46,7 @@ public class SentryLogTests
             ParentSpanId = ParentSpanId,
         };
         log.SetAttribute("attribute", "value");
-        log.SetDefaultAttributes(options, sdk);
+        log.SetDefaultAttributes(options, scope);
 
         log.Timestamp.Should().Be(Timestamp);
         log.TraceId.Should().Be(TraceId);
@@ -63,9 +66,9 @@ public class SentryLogTests
         log.TryGetAttribute("sentry.release", out string release).Should().BeTrue();
         release.Should().Be(options.Release);
         log.TryGetAttribute("sentry.sdk.name", out string name).Should().BeTrue();
-        name.Should().Be(sdk.Name);
+        name.Should().Be(scope.Sdk.Name);
         log.TryGetAttribute("sentry.sdk.version", out string version).Should().BeTrue();
-        version.Should().Be(sdk.Version);
+        version.Should().Be(scope.Sdk.Version);
         log.TryGetAttribute("not-found", out object notFound).Should().BeFalse();
         notFound.Should().BeNull();
     }
@@ -81,18 +84,15 @@ public class SentryLogTests
             Release = "my-release",
             ServerName = hasAdditionalDefaultAttributes ? "my-server-address" : null,
         };
-        var sdk = new SdkVersion
-        {
-            Name = "Sentry.Test.SDK",
-            Version = "1.2.3-test+Sentry"
-        };
-
-        var replaySession = Substitute.For<IReplaySession>();
-        replaySession.ActiveReplayId.Returns(hasAdditionalDefaultAttributes ? SentryId.Create() : SentryId.Empty);
-        var hub = Substitute.For<IHub>();
         var scope = new Scope(options);
+
         if (hasAdditionalDefaultAttributes)
         {
+            options.Dsn = ValidDsn;
+            var replaySession = Substitute.For<IReplaySession>();
+            replaySession.ActiveReplayId.Returns(SentryId.Parse("f18176ecbb544e549fd23fbbe39064cc"));
+            _ = scope.PropagationContext.GetOrCreateDynamicSamplingContext(options, replaySession);
+
             scope.User = new SentryUser
             {
                 Id = "my-user-id",
@@ -107,7 +107,6 @@ public class SentryLogTests
             scope.Contexts.Device.Model = "my-device-model";
             scope.Contexts.Device.Family = "my-device-family";
         }
-        hub.SubstituteConfigureScope(scope);
 
         var log = new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message")
         {
@@ -116,7 +115,7 @@ public class SentryLogTests
             ParentSpanId = ParentSpanId,
         };
         log.SetAttribute("attribute", "value");
-        log.SetDefaultAttributes(options, sdk, replaySession, hub);
+        log.SetDefaultAttributes(options, scope);
 
         log.TryGetAttribute("sentry.replay_id", out string replayId).Should().Be(hasAdditionalDefaultAttributes);
         log.TryGetAttribute("user.id", out string userId).Should().Be(hasAdditionalDefaultAttributes);
@@ -133,7 +132,7 @@ public class SentryLogTests
 
         if (hasAdditionalDefaultAttributes)
         {
-            replayId.Should().Be(replaySession.ActiveReplayId.ToString());
+            replayId.Should().Be("f18176ecbb544e549fd23fbbe39064cc");
             userId.Should().Be("my-user-id");
             userName.Should().Be("my-user-name");
             userEmail.Should().Be("my-user-email");
@@ -181,9 +180,10 @@ public class SentryLogTests
             Release = "my-release",
             SendDefaultPii = false,
         };
+        var scope = new Scope(options);
 
         var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Trace, "message");
-        log.SetDefaultAttributes(options, new SdkVersion());
+        log.SetDefaultAttributes(options, scope);
 
         var envelope = Envelope.FromLog(new StructuredLog([log]));
 
@@ -251,13 +251,19 @@ public class SentryLogTests
             Release = "my-release",
             ServerName = "my-server-address",
         };
-
         var replaySession = Substitute.For<IReplaySession>();
         var replayId = SentryId.Create();
         replaySession.ActiveReplayId.Returns(replayId);
-        var hub = Substitute.For<IHub>();
-        var scope = new Scope(options)
+        var dynamicSamplingContext = DynamicSamplingContext.Empty();
+        dynamicSamplingContext.SetReplayId(replaySession);
+        var propagationContext = new SentryPropagationContext(TraceId, ParentSpanId!.Value, dynamicSamplingContext);
+        var scope = new Scope(options, propagationContext)
         {
+            Sdk =
+            {
+                Name = "Sentry.Test.SDK",
+                Version = "1.2.3-test+Sentry",
+            },
             User = new SentryUser
             {
                 Id = "my-user-id",
@@ -284,7 +290,6 @@ public class SentryLogTests
                 },
             },
         };
-        hub.SubstituteConfigureScope(scope);
 
         var log = new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message")
         {
@@ -296,7 +301,7 @@ public class SentryLogTests
         log.SetAttribute("boolean-attribute", true);
         log.SetAttribute("integer-attribute", 3);
         log.SetAttribute("double-attribute", 4.4);
-        log.SetDefaultAttributes(options, new SdkVersion { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" }, replaySession, hub);
+        log.SetDefaultAttributes(options, scope);
 
         var envelope = EnvelopeItem.FromLog(new StructuredLog([log]));
 

@@ -24,7 +24,7 @@ public sealed class SentryLog
         TraceId = traceId;
         Level = level;
         Message = message;
-        // we currently set up to 18 default attributes, 23 is the next prime number
+        // we currently set up to 18 default attributes, the next prime number is 23
         _attributes = new Dictionary<string, SentryAttribute>(23);
     }
 
@@ -163,12 +163,12 @@ public sealed class SentryLog
         _attributes[key] = new SentryAttribute(value, "integer");
     }
 
-    internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk)
+    internal void SetDefaultAttributes(SentryOptions options, Scope scope)
     {
-        SetDefaultAttributes(options, sdk, ReplaySession.Instance, SentrySdk.CurrentHub);
+        SetDefaultAttributes(options, scope, scope.Sdk);
     }
 
-    internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk, IReplaySession replaySession, IHub hub)
+    internal void SetDefaultAttributes(SentryOptions options, Scope? scope, SdkVersion sdk)
     {
         var environment = options.SettingLocator.GetEnvironment();
         SetAttribute("sentry.environment", environment);
@@ -188,67 +188,70 @@ public sealed class SentryLog
             SetAttribute("sentry.sdk.version", version);
         }
 
-        var replayId = replaySession.ActiveReplayId;
-        if (replayId.HasValue && replayId.Value != SentryId.Empty)
+        if (scope is null)
         {
-            SetAttribute("sentry.replay_id", replayId.Value.ToString());
+            return;
         }
 
-        var scope = hub.GetScope();
-        if (scope is not null)
+        if (scope.PropagationContext._dynamicSamplingContext is { } dynamicSamplingContext)
         {
-            if (scope.User.Id is { } userId)
+            if (dynamicSamplingContext.Items.TryGetValue("replay_id", out var replayId))
             {
-                SetAttribute("user.id", userId);
+                SetAttribute("sentry.replay_id", replayId);
             }
-            if (scope.User.Username is { } userName)
-            {
-                SetAttribute("user.name", userName);
-            }
-            if (scope.User.Email is { } userEmail)
-            {
-                SetAttribute("user.email", userEmail);
-            }
+        }
 
-            if (scope.Contexts.Browser.Name is { } browserName)
-            {
-                SetAttribute("browser.name", browserName);
-            }
-            if (scope.Contexts.Browser.Version is { } browserVersion)
-            {
-                SetAttribute("browser.version", browserVersion);
-            }
+        if (scope.User.Id is { } userId)
+        {
+            SetAttribute("user.id", userId);
+        }
+        if (scope.User.Username is { } userName)
+        {
+            SetAttribute("user.name", userName);
+        }
+        if (scope.User.Email is { } userEmail)
+        {
+            SetAttribute("user.email", userEmail);
+        }
 
-            var serverAddress = options.ServerName;
-            if (!string.IsNullOrEmpty(serverAddress))
-            {
-                SetAttribute("server.address", serverAddress);
-            }
-            else if (options.SendDefaultPii)
-            {
-                SetAttribute("server.address", Environment.MachineName);
-            }
+        if (scope.Contexts.Browser.Name is { } browserName)
+        {
+            SetAttribute("browser.name", browserName);
+        }
+        if (scope.Contexts.Browser.Version is { } browserVersion)
+        {
+            SetAttribute("browser.version", browserVersion);
+        }
 
-            if (scope.Contexts.OperatingSystem.Name is { } osName)
-            {
-                SetAttribute("os.name", osName);
-            }
-            if (scope.Contexts.OperatingSystem.Version is { } osVersion)
-            {
-                SetAttribute("os.version", osVersion);
-            }
-            if (scope.Contexts.Device.Brand is { } deviceBrand)
-            {
-                SetAttribute("device.brand", deviceBrand);
-            }
-            if (scope.Contexts.Device.Model is { } deviceModel)
-            {
-                SetAttribute("device.model", deviceModel);
-            }
-            if (scope.Contexts.Device.Family is { } deviceFamily)
-            {
-                SetAttribute("device.family", deviceFamily);
-            }
+        var serverAddress = options.ServerName;
+        if (!string.IsNullOrEmpty(serverAddress))
+        {
+            SetAttribute("server.address", serverAddress);
+        }
+        else if (options.SendDefaultPii)
+        {
+            SetAttribute("server.address", Environment.MachineName);
+        }
+
+        if (scope.Contexts.OperatingSystem.Name is { } osName)
+        {
+            SetAttribute("os.name", osName);
+        }
+        if (scope.Contexts.OperatingSystem.Version is { } osVersion)
+        {
+            SetAttribute("os.version", osVersion);
+        }
+        if (scope.Contexts.Device.Brand is { } deviceBrand)
+        {
+            SetAttribute("device.brand", deviceBrand);
+        }
+        if (scope.Contexts.Device.Model is { } deviceModel)
+        {
+            SetAttribute("device.model", deviceModel);
+        }
+        if (scope.Contexts.Device.Family is { } deviceFamily)
+        {
+            SetAttribute("device.family", deviceFamily);
         }
     }
 
