@@ -73,6 +73,84 @@ public class SentryLogTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
+    public void Protocol_Default_VerifyAdditionalAttributes(bool hasAdditionalDefaultAttributes)
+    {
+        var options = new SentryOptions
+        {
+            Environment = "my-environment",
+            Release = "my-release",
+            ServerName = hasAdditionalDefaultAttributes ? "my-server-address" : null,
+        };
+        var sdk = new SdkVersion
+        {
+            Name = "Sentry.Test.SDK",
+            Version = "1.2.3-test+Sentry"
+        };
+
+        var replaySession = Substitute.For<IReplaySession>();
+        replaySession.ActiveReplayId.Returns(hasAdditionalDefaultAttributes ? SentryId.Create() : SentryId.Empty);
+        var hub = Substitute.For<IHub>();
+        var scope = new Scope(options);
+        if (hasAdditionalDefaultAttributes)
+        {
+            scope.User = new SentryUser
+            {
+                Id = "my-user-id",
+                Username = "my-user-name",
+                Email = "my-user-email",
+            };
+            scope.Contexts.Browser.Name = "my-browser-name";
+            scope.Contexts.Browser.Version = "my-browser-version";
+            scope.Contexts.OperatingSystem.Name = "my-os-name";
+            scope.Contexts.OperatingSystem.Version = "my-os-version";
+            scope.Contexts.Device.Brand = "my-device-brand";
+            scope.Contexts.Device.Model = "my-device-model";
+            scope.Contexts.Device.Family = "my-device-family";
+        }
+        hub.SubstituteConfigureScope(scope);
+
+        var log = new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message")
+        {
+            Template = "template",
+            Parameters = ImmutableArray.Create(new KeyValuePair<string, object>("param", "params")),
+            ParentSpanId = ParentSpanId,
+        };
+        log.SetAttribute("attribute", "value");
+        log.SetDefaultAttributes(options, sdk, replaySession, hub);
+
+        log.TryGetAttribute("sentry.replay_id", out string replayId).Should().Be(hasAdditionalDefaultAttributes);
+        log.TryGetAttribute("user.id", out string userId).Should().Be(hasAdditionalDefaultAttributes);
+        log.TryGetAttribute("user.name", out string userName).Should().Be(hasAdditionalDefaultAttributes);
+        log.TryGetAttribute("user.email", out string userEmail).Should().Be(hasAdditionalDefaultAttributes);
+        log.TryGetAttribute("browser.name", out string browserName).Should().Be(hasAdditionalDefaultAttributes);
+        log.TryGetAttribute("browser.version", out string browserVersion).Should().Be(hasAdditionalDefaultAttributes);
+        log.TryGetAttribute("server.address", out string serverAddress).Should().Be(hasAdditionalDefaultAttributes);
+        log.TryGetAttribute("os.name", out string osName).Should().Be(hasAdditionalDefaultAttributes);
+        log.TryGetAttribute("os.version", out string osVersion).Should().Be(hasAdditionalDefaultAttributes);
+        log.TryGetAttribute("device.brand", out string deviceBrand).Should().Be(hasAdditionalDefaultAttributes);
+        log.TryGetAttribute("device.model", out string deviceModel).Should().Be(hasAdditionalDefaultAttributes);
+        log.TryGetAttribute("device.family", out string deviceFamily).Should().Be(hasAdditionalDefaultAttributes);
+
+        if (hasAdditionalDefaultAttributes)
+        {
+            replayId.Should().Be(replaySession.ActiveReplayId.ToString());
+            userId.Should().Be("my-user-id");
+            userName.Should().Be("my-user-name");
+            userEmail.Should().Be("my-user-email");
+            browserName.Should().Be("my-browser-name");
+            browserVersion.Should().Be("my-browser-version");
+            serverAddress.Should().Be("my-server-address");
+            osName.Should().Be("my-os-name");
+            osVersion.Should().Be("my-os-version");
+            deviceBrand.Should().Be("my-device-brand");
+            deviceModel.Should().Be("my-device-model");
+            deviceFamily.Should().Be("my-device-family");
+        }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
     public void WriteTo_NoParameters_NoTemplate(bool hasParameters)
     {
         // Arrange
@@ -101,6 +179,7 @@ public class SentryLogTests
         {
             Environment = "my-environment",
             Release = "my-release",
+            SendDefaultPii = false,
         };
 
         var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Trace, "message");
@@ -170,7 +249,42 @@ public class SentryLogTests
         {
             Environment = "my-environment",
             Release = "my-release",
+            ServerName = "my-server-address",
         };
+
+        var replaySession = Substitute.For<IReplaySession>();
+        var replayId = SentryId.Create();
+        replaySession.ActiveReplayId.Returns(replayId);
+        var hub = Substitute.For<IHub>();
+        var scope = new Scope(options)
+        {
+            User = new SentryUser
+            {
+                Id = "my-user-id",
+                Username = "my-user-name",
+                Email = "my-user-email",
+            },
+            Contexts = new SentryContexts
+            {
+                Browser =
+                {
+                    Name = "my-browser-name",
+                    Version = "my-browser-version",
+                },
+                OperatingSystem =
+                {
+                    Name = "my-os-name",
+                    Version = "my-os-version",
+                },
+                Device =
+                {
+                    Brand = "my-device-brand",
+                    Model = "my-device-model",
+                    Family = "my-device-family",
+                },
+            },
+        };
+        hub.SubstituteConfigureScope(scope);
 
         var log = new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message")
         {
@@ -182,7 +296,7 @@ public class SentryLogTests
         log.SetAttribute("boolean-attribute", true);
         log.SetAttribute("integer-attribute", 3);
         log.SetAttribute("double-attribute", 4.4);
-        log.SetDefaultAttributes(options, new SdkVersion { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" });
+        log.SetDefaultAttributes(options, new SdkVersion { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" }, replaySession, hub);
 
         var envelope = EnvelopeItem.FromLog(new StructuredLog([log]));
 
@@ -264,6 +378,54 @@ public class SentryLogTests
                 },
                 "sentry.sdk.version": {
                   "value": "1.2.3-test+Sentry",
+                  "type": "string"
+                },
+                "sentry.replay_id": {
+                  "value": "{{replayId.ToString()}}",
+                  "type": "string"
+                },
+                "user.id": {
+                  "value": "my-user-id",
+                  "type": "string"
+                },
+                "user.name": {
+                  "value": "my-user-name",
+                  "type": "string"
+                },
+                "user.email": {
+                  "value": "my-user-email",
+                  "type": "string"
+                },
+                "browser.name": {
+                  "value": "my-browser-name",
+                  "type": "string"
+                },
+                "browser.version": {
+                  "value": "my-browser-version",
+                  "type": "string"
+                },
+                "server.address": {
+                  "value": "my-server-address",
+                  "type": "string"
+                },
+                "os.name": {
+                  "value": "my-os-name",
+                  "type": "string"
+                },
+                "os.version": {
+                  "value": "my-os-version",
+                  "type": "string"
+                },
+                "device.brand": {
+                  "value": "my-device-brand",
+                  "type": "string"
+                },
+                "device.model": {
+                  "value": "my-device-model",
+                  "type": "string"
+                },
+                "device.family": {
+                  "value": "my-device-family",
                   "type": "string"
                 },
                 "sentry.trace.parent_span_id": {
