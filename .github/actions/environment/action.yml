@@ -109,6 +109,7 @@ runs:
     - name: Install .NET Workloads
       shell: bash
       run: |
+        set -euo pipefail
         pwd
         dotnet workload restore \
           --temp-dir "${{ runner.temp }}" \
@@ -116,3 +117,5 @@ runs:
         dotnet workload restore test/AndroidTestApp/AndroidTestApp.csproj \
           --temp-dir "${{ runner.temp }}" \
           --skip-sign-check
+        # Restore the Android test app explicitly to ensure runtime packs are available
+        dotnet restore test/AndroidTestApp/AndroidTestApp.csproj -r android-x64 --nologo || true
