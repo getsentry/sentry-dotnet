@@ -113,3 +113,6 @@ runs:
         dotnet workload restore \
           --temp-dir "${{ runner.temp }}" \
           --skip-sign-check
+        dotnet workload restore test/AndroidTestApp/AndroidTestApp.csproj \
+          --temp-dir "${{ runner.temp }}" \
+          --skip-sign-check
