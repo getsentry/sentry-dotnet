@@ -29,8 +29,10 @@ public class AppDelegate : UIApplicationDelegate
             options.Debug = true;
         });
 
+#pragma warning disable CA1422 // Validate platform compatibility
         // create a new window instance based on the screen size
         Window = new UIWindow(UIScreen.MainScreen.Bounds);
+#pragma warning disable CA1422 // Validate platform compatibility
 
         // create a UIViewController with a single UILabel
         var vc = new UIViewController();
