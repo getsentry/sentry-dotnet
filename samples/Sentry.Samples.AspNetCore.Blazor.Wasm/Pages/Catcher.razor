@@ -29,6 +29,6 @@
     private static class OtherStuffThrower
     {
         public static void DoSomething() => Thrower();
-        private static void Thrower() => throw null;
+        private static void Thrower() => throw null!;
     }
 }
