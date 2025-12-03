@@ -6,6 +6,7 @@
 
 - Remove `SentryLoggingOptions.ExperimentalLogging.MinimumLogLevel`. _Structured Logs_ can now be configured via the `"Sentry"` logging provider (e.g. in `appsettings.json` and `appsettings.{HostEnvironment}.json`) ([#4700](https://github.com/getsentry/sentry-dotnet/pull/4700))
 - All logging provider types are _internal_ now in order to ensure configuration as intended ([#4700](https://github.com/getsentry/sentry-dotnet/pull/4700))
+- Rename `SentryLog.ParentSpanId` to `SentryLog.SpanId` reflecting the protocol change ([#4778](https://github.com/getsentry/sentry-dotnet/pull/4778))
 
 ### Features
 
