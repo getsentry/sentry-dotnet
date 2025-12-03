@@ -211,7 +211,8 @@ public class BlazorSentryIntegration : IHostedService, IDisposable
         {
             scope.SetTag("error.type", errorType);
 
-            if (context == null) return;
+            if (context == null)
+                return;
 
             scope.TransactionName = context.CurrentRoute ?? "unknown";
             scope.SetTag("blazor.route", context.CurrentRoute ?? "unknown");
@@ -239,41 +240,49 @@ public class BlazorSentryIntegration : IHostedService, IDisposable
 
     private static (string? route, string? componentType) ParseNavigationDisplayName(string? displayName)
     {
-        if (string.IsNullOrEmpty(displayName)) return (null, null);
+        if (string.IsNullOrEmpty(displayName))
+            return (null, null);
 
         const string prefix = "Route ";
-        if (!displayName.StartsWith(prefix)) return (null, null);
+        if (!displayName.StartsWith(prefix))
+            return (null, null);
 
         var withoutPrefix = displayName[prefix.Length..];
         var arrowIndex = withoutPrefix.IndexOf(" -> ", StringComparison.Ordinal);
-        if (arrowIndex < 0) return (null, null);
+        if (arrowIndex < 0)
+            return (null, null);
 
         return (withoutPrefix[..arrowIndex], withoutPrefix[(arrowIndex + 4)..]);
     }
 
     private static (string? attributeName, string? componentType, string? methodName) ParseEventDisplayName(string? displayName)
     {
-        if (string.IsNullOrEmpty(displayName)) return (null, null, null);
+        if (string.IsNullOrEmpty(displayName))
+            return (null, null, null);
 
         const string prefix = "Event ";
-        if (!displayName.StartsWith(prefix)) return (null, null, null);
+        if (!displayName.StartsWith(prefix))
+            return (null, null, null);
 
         var withoutPrefix = displayName[prefix.Length..];
         var arrowIndex = withoutPrefix.IndexOf(" -> ", StringComparison.Ordinal);
-        if (arrowIndex < 0) return (null, null, null);
+        if (arrowIndex < 0)
+            return (null, null, null);
 
         var attributeName = withoutPrefix[..arrowIndex];
         var remainder = withoutPrefix[(arrowIndex + 4)..];
         var lastDot = remainder.LastIndexOf('.');
 
-        if (lastDot < 0) return (attributeName, remainder, null);
+        if (lastDot < 0)
+            return (attributeName, remainder, null);
 
         return (attributeName, remainder[..lastDot], remainder[(lastDot + 1)..]);
     }
 
     private static string GetShortTypeName(string? fullTypeName)
     {
-        if (string.IsNullOrEmpty(fullTypeName)) return "unknown";
+        if (string.IsNullOrEmpty(fullTypeName))
+            return "unknown";
         var lastDot = fullTypeName.LastIndexOf('.');
         return lastDot >= 0 ? fullTypeName[(lastDot + 1)..] : fullTypeName;
     }
