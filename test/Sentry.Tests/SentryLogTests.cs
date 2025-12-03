@@ -82,13 +82,13 @@ public class SentryLogTests
         {
             Environment = "my-environment",
             Release = "my-release",
-            ServerName = hasAdditionalDefaultAttributes ? "my-server-address" : null,
         };
         var scope = new Scope(options);
 
         if (hasAdditionalDefaultAttributes)
         {
             options.Dsn = ValidDsn;
+
             var replaySession = Substitute.For<IReplaySession>();
             replaySession.ActiveReplayId.Returns(SentryId.Parse("f18176ecbb544e549fd23fbbe39064cc"));
             _ = scope.PropagationContext.GetOrCreateDynamicSamplingContext(options, replaySession);
@@ -101,6 +101,7 @@ public class SentryLogTests
             };
             scope.Contexts.Browser.Name = "my-browser-name";
             scope.Contexts.Browser.Version = "my-browser-version";
+            options.ServerName = "my-server-address";
             scope.Contexts.OperatingSystem.Name = "my-os-name";
             scope.Contexts.OperatingSystem.Version = "my-os-version";
             scope.Contexts.Device.Brand = "my-device-brand";
@@ -114,7 +115,6 @@ public class SentryLogTests
             Parameters = ImmutableArray.Create(new KeyValuePair<string, object>("param", "params")),
             SpanId = SpanId,
         };
-        log.SetAttribute("attribute", "value");
         log.SetDefaultAttributes(options, scope);
 
         log.TryGetAttribute("sentry.replay_id", out string replayId).Should().Be(hasAdditionalDefaultAttributes);
@@ -302,6 +302,7 @@ public class SentryLogTests
         log.SetAttribute("integer-attribute", 3);
         log.SetAttribute("double-attribute", 4.4);
         log.SetDefaultAttributes(options, scope);
+        log.SetOrigin("auto.log.sentry_tests");
 
         var envelope = EnvelopeItem.FromLog(new StructuredLog([log]));
 
@@ -432,6 +433,10 @@ public class SentryLogTests
                 },
                 "device.family": {
                   "value": "my-device-family",
+                  "type": "string"
+                },
+                "sentry.origin": {
+                  "value": "auto.log.sentry_tests",
                   "type": "string"
                 }
               }
