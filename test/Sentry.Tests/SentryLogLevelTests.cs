@@ -152,45 +152,45 @@ public class SentryLogLevelTests
 
     [Theory]
     [MemberData(nameof(Convert))]
-    public void Convert_FromSentryLogLevel_ToSentryLevel(int level, SentryLevel expected)
+    public void Convert_FromSentryLogLevel_ToString(int level, string expected)
     {
         var @enum = (SentryLogLevel)level;
 
-        var actual = @enum.ToSentryLevel();
+        var actual = @enum.ToText();
 
         Assert.Equal(expected, actual);
     }
 
-    public static TheoryData<int, SentryLevel> Convert()
+    public static TheoryData<int, string> Convert()
     {
-        return new TheoryData<int, SentryLevel>
+        return new TheoryData<int, string>
         {
-            { 0, SentryLevel.Debug },
-            { 1, SentryLevel.Debug },
-            { 2, SentryLevel.Debug },
-            { 3, SentryLevel.Debug },
-            { 4, SentryLevel.Debug },
-            { 5, SentryLevel.Debug },
-            { 6, SentryLevel.Debug },
-            { 7, SentryLevel.Debug },
-            { 8, SentryLevel.Debug },
-            { 9, SentryLevel.Info },
-            { 10, SentryLevel.Info },
-            { 11, SentryLevel.Info },
-            { 12, SentryLevel.Info },
-            { 13, SentryLevel.Warning },
-            { 14, SentryLevel.Warning },
-            { 15, SentryLevel.Warning },
-            { 16, SentryLevel.Warning },
-            { 17, SentryLevel.Error },
-            { 18, SentryLevel.Error },
-            { 19, SentryLevel.Error },
-            { 20, SentryLevel.Error },
-            { 21, SentryLevel.Fatal },
-            { 22, SentryLevel.Fatal },
-            { 23, SentryLevel.Fatal },
-            { 24, SentryLevel.Fatal },
-            { 25, SentryLevel.Fatal },
+            { 0, "trace(<1)" },
+            { 1, "trace" },
+            { 2, "trace(2)" },
+            { 3, "trace(3)" },
+            { 4, "trace(4)" },
+            { 5, "debug" },
+            { 6, "debug(6)" },
+            { 7, "debug(7)" },
+            { 8, "debug(8)" },
+            { 9, "info" },
+            { 10, "info(10)" },
+            { 11, "info(11)" },
+            { 12, "info(12)" },
+            { 13, "warn" },
+            { 14, "warn(14)" },
+            { 15, "warn(15)" },
+            { 16, "warn(16)" },
+            { 17, "error" },
+            { 18, "error(18)" },
+            { 19, "error(19)" },
+            { 20, "error(20)" },
+            { 21, "fatal" },
+            { 22, "fatal(22)" },
+            { 23, "fatal(23)" },
+            { 24, "fatal(24)" },
+            { 25, "fatal(>24)" },
         };
     }
 }

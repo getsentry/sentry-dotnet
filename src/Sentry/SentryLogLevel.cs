@@ -129,15 +129,24 @@ internal static class SentryLogLevelExtensions
         }
     }
 
-    internal static SentryLevel ToSentryLevel(this SentryLogLevel level)
+    internal static string ToText(this SentryLogLevel level)
     {
         return (int)level switch
         {
-            <= 8 => SentryLevel.Debug,
-            >= 9 and <= 12 => SentryLevel.Info,
-            >= 13 and <= 16 => SentryLevel.Warning,
-            >= 17 and <= 20 => SentryLevel.Error,
-            >= 21 => SentryLevel.Fatal,
+            <= 0 => "trace(<1)",
+            1 => "trace",
+            >= 2 and <= 4 => $"trace({(int)level})",
+            5 => "debug",
+            >= 6 and <= 8 => $"debug({(int)level})",
+            9 => "info",
+            >= 10 and <= 12 => $"info({(int)level})",
+            13 => "warn",
+            >= 14 and <= 16 => $"warn({(int)level})",
+            17 => "error",
+            >= 18 and <= 20 => $"error({(int)level})",
+            21 => "fatal",
+            >= 22 and <= 24 => $"fatal({(int)level})",
+            >= 25 => "fatal(>24)",
         };
     }
 }
