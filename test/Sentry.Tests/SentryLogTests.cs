@@ -112,7 +112,7 @@ public class SentryLogTests
         {
             Template = "template",
             Parameters = ImmutableArray.Create(new KeyValuePair<string, object>("param", "params")),
-            ParentSpanId = ParentSpanId,
+            SpanId = SpanId,
         };
         log.SetAttribute("attribute", "value");
         log.SetDefaultAttributes(options, scope);
@@ -256,7 +256,7 @@ public class SentryLogTests
         replaySession.ActiveReplayId.Returns(replayId);
         var dynamicSamplingContext = DynamicSamplingContext.Empty();
         dynamicSamplingContext.SetReplayId(replaySession);
-        var propagationContext = new SentryPropagationContext(TraceId, ParentSpanId!.Value, dynamicSamplingContext);
+        var propagationContext = new SentryPropagationContext(TraceId, SpanId!.Value, dynamicSamplingContext);
         var scope = new Scope(options, propagationContext)
         {
             Sdk =
@@ -432,10 +432,6 @@ public class SentryLogTests
                 },
                 "device.family": {
                   "value": "my-device-family",
-                  "type": "string"
-                },
-                "sentry.trace.parent_span_id": {
-                  "value": "{{ParentSpanId.ToString()}}",
                   "type": "string"
                 }
               }
