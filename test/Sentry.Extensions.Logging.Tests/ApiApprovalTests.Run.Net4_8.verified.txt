@@ -28,25 +28,13 @@ namespace Sentry.Extensions.Logging
         public bool IsEnabled(Sentry.SentryLevel level) { }
         public void Log(Sentry.SentryLevel logLevel, string message, System.Exception? exception = null, params object?[] args) { }
     }
-    [Microsoft.Extensions.Logging.ProviderAlias("Sentry")]
-    public class SentryLoggerProvider : Microsoft.Extensions.Logging.ILoggerProvider, System.IDisposable
-    {
-        public SentryLoggerProvider(Microsoft.Extensions.Options.IOptions<Sentry.Extensions.Logging.SentryLoggingOptions> options, Sentry.IHub hub) { }
-        public Microsoft.Extensions.Logging.ILogger CreateLogger(string categoryName) { }
-        public void Dispose() { }
-    }
     public class SentryLoggingOptions : Sentry.SentryOptions
     {
         public SentryLoggingOptions() { }
-        public Sentry.Extensions.Logging.SentryLoggingOptions.SentryLoggingExperimentalOptions ExperimentalLogging { get; set; }
         public bool InitializeSdk { get; set; }
         public Microsoft.Extensions.Logging.LogLevel MinimumBreadcrumbLevel { get; set; }
         public Microsoft.Extensions.Logging.LogLevel MinimumEventLevel { get; set; }
         public void ConfigureScope(System.Action<Sentry.Scope> action) { }
-        public sealed class SentryLoggingExperimentalOptions
-        {
-            public Microsoft.Extensions.Logging.LogLevel MinimumLogLevel { get; set; }
-        }
     }
     public static class SentryLoggingOptionsExtensions
     {

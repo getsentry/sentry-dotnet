@@ -6,7 +6,6 @@ using Sentry.OpenTelemetry;
 
 using var tracerProvider = Sdk.CreateTracerProviderBuilder()
     .AddSentry() // <-- Configure OpenTelemetry to send traces to Sentry
-    .AddAspNetCoreInstrumentation() // From OpenTelemetry.Instrumentation.AspNetCore... adds automatic tracing for incoming requests
     .AddHttpClientInstrumentation() // From OpenTelemetry.Instrumentation.Http... adds automatic tracing for outgoing HTTP requests
     .Build();
 

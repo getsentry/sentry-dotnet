@@ -44,18 +44,16 @@ public class SentryStructuredLoggerTests : IDisposable
 
             EnableHub(true);
             EnableLogs(true);
-            SetMinimumLogLevel(default);
         }
 
         public void EnableHub(bool isEnabled) => Hub.IsEnabled.Returns(isEnabled);
         public void EnableLogs(bool isEnabled) => Options.Value.EnableLogs = isEnabled;
-        public void SetMinimumLogLevel(LogLevel logLevel) => Options.Value.ExperimentalLogging.MinimumLogLevel = logLevel;
 
-        public void WithActiveSpan(SentryId traceId, SpanId parentSpanId)
+        public void WithActiveSpan(SentryId traceId, SpanId spanId)
         {
             var span = Substitute.For<ISpan>();
             span.TraceId.Returns(traceId);
-            span.SpanId.Returns(parentSpanId);
+            span.SpanId.Returns(spanId);
             Hub.GetSpan().Returns(span);
         }
 
@@ -84,8 +82,8 @@ public class SentryStructuredLoggerTests : IDisposable
     public void Log_LogLevel_CaptureLog(LogLevel logLevel, SentryLogLevel expectedLevel)
     {
         var traceId = SentryId.Create();
-        var parentSpanId = SpanId.Create();
-        _fixture.WithActiveSpan(traceId, parentSpanId);
+        var spanId = SpanId.Create();
+        _fixture.WithActiveSpan(traceId, spanId);
         var logger = _fixture.GetSut();
 
         EventId eventId = new(123, "EventName");
@@ -108,7 +106,7 @@ public class SentryStructuredLoggerTests : IDisposable
         log.Message.Should().Be("Message with argument.");
         log.Template.Should().Be(message);
         log.Parameters.Should().BeEquivalentTo(new KeyValuePair<string, object>[] { new("Argument", "argument") });
-        log.ParentSpanId.Should().Be(parentSpanId);
+        log.SpanId.Should().Be(spanId);
         log.AssertAttribute("sentry.environment", "my-environment");
         log.AssertAttribute("sentry.release", "my-release");
         log.AssertAttribute("sentry.origin", "auto.log.extensions_logging");
@@ -141,7 +139,7 @@ public class SentryStructuredLoggerTests : IDisposable
 
         var log = _fixture.CapturedLogs.Dequeue();
         log.TraceId.Should().Be(scope.PropagationContext.TraceId);
-        log.ParentSpanId.Should().BeNull();
+        log.SpanId.Should().BeNull();
     }
 
     [Fact]
@@ -251,20 +249,18 @@ public class SentryStructuredLoggerTests : IDisposable
     }
 
     [Theory]
-    [InlineData(true, true, LogLevel.Warning, LogLevel.Warning, true)]
-    [InlineData(false, true, LogLevel.Warning, LogLevel.Warning, false)]
-    [InlineData(true, false, LogLevel.Warning, LogLevel.Warning, false)]
-    [InlineData(true, true, LogLevel.Information, LogLevel.Warning, true)]
-    [InlineData(true, true, LogLevel.Error, LogLevel.Warning, false)]
-    public void IsEnabled_HubOptionsMinimumLogLevel_Returns(bool isHubEnabled, bool isLogsEnabled, LogLevel minimumLogLevel, LogLevel actualLogLevel, bool expectedIsEnabled)
+    [InlineData(true, true, LogLevel.Information, true)]
+    [InlineData(false, true, LogLevel.Information, false)]
+    [InlineData(true, false, LogLevel.Information, false)]
+    [InlineData(true, true, LogLevel.None, false)]
+    public void IsEnabled_HubAndOptions_Returns(bool isHubEnabled, bool isLogsEnabled, LogLevel logLevel, bool expectedIsEnabled)
     {
         _fixture.EnableHub(isHubEnabled);
         _fixture.EnableLogs(isLogsEnabled);
-        _fixture.SetMinimumLogLevel(minimumLogLevel);
         var logger = _fixture.GetSut();
 
-        var isEnabled = logger.IsEnabled(actualLogLevel);
-        logger.Log(actualLogLevel, "message");
+        var isEnabled = logger.IsEnabled(logLevel);
+        logger.Log(logLevel, "message");
 
         isEnabled.Should().Be(expectedIsEnabled);
         if (expectedIsEnabled)
