@@ -84,7 +84,7 @@ internal sealed class SentryStructuredLogger : ILogger
         {
             Template = template,
             Parameters = parameters.DrainToImmutable(),
-            ParentSpanId = spanId,
+            SpanId = spanId,
         };
 
         log.SetDefaultAttributes(_options, _hub.GetScope(), _sdk);

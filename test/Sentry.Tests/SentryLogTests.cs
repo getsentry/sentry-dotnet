@@ -11,7 +11,7 @@ public class SentryLogTests
 {
     private static readonly DateTimeOffset Timestamp = new(2025, 04, 22, 14, 51, 00, 789, TimeSpan.FromHours(2));
     private static readonly SentryId TraceId = SentryId.Create();
-    private static readonly SpanId? ParentSpanId = SpanId.Create();
+    private static readonly SpanId? SpanId = Sentry.SpanId.Create();
 
     private static readonly ISystemClock Clock = new MockClock(Timestamp);
 
@@ -43,7 +43,7 @@ public class SentryLogTests
         {
             Template = "template",
             Parameters = ImmutableArray.Create(new KeyValuePair<string, object>("param", "params")),
-            ParentSpanId = ParentSpanId,
+            SpanId = SpanId,
         };
         log.SetAttribute("attribute", "value");
         log.SetDefaultAttributes(options, scope);
@@ -54,7 +54,7 @@ public class SentryLogTests
         log.Message.Should().Be("message");
         log.Template.Should().Be("template");
         log.Parameters.Should().BeEquivalentTo(new KeyValuePair<string, object>[] { new("param", "params"), });
-        log.ParentSpanId.Should().Be(ParentSpanId);
+        log.SpanId.Should().Be(SpanId);
 
         // should only show up in sdk integrations
         log.TryGetAttribute("sentry.origin", out object origin).Should().BeFalse();
@@ -160,7 +160,7 @@ public class SentryLogTests
         {
             Template = "template",
             Parameters = parameters,
-            ParentSpanId = ParentSpanId,
+            SpanId = SpanId,
         };
 
         // Act
@@ -295,7 +295,7 @@ public class SentryLogTests
         {
             Template = "template",
             Parameters = ImmutableArray.Create(new KeyValuePair<string, object>("0", "string"), new KeyValuePair<string, object>("1", false), new KeyValuePair<string, object>("2", 1), new KeyValuePair<string, object>("3", 2.2)),
-            ParentSpanId = ParentSpanId,
+            SpanId = SpanId,
         };
         log.SetAttribute("string-attribute", "string-value");
         log.SetAttribute("boolean-attribute", true);
@@ -331,6 +331,7 @@ public class SentryLogTests
               "level": "fatal",
               "body": "message",
               "trace_id": "{{TraceId.ToString()}}",
+              "span_id": "{{SpanId.ToString()}}",
               "severity_number": 24,
               "attributes": {
                 "sentry.message.template": {
@@ -583,7 +584,7 @@ public class SentryLogTests
         // Arrange
         var span = Substitute.For<ISpan>();
         span.TraceId.Returns(SentryId.Create());
-        span.SpanId.Returns(SpanId.Create());
+        span.SpanId.Returns(Sentry.SpanId.Create());
 
         var hub = Substitute.For<IHub>();
         hub.GetSpan().Returns(span);

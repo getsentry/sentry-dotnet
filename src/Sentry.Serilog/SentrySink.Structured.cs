@@ -14,7 +14,7 @@ internal sealed partial class SentrySink
         {
             Template = template,
             Parameters = parameters,
-            ParentSpanId = spanId,
+            SpanId = spanId,
         };
 
         log.SetDefaultAttributes(options, hub.GetScope(), Sdk);

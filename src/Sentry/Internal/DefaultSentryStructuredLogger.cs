@@ -55,7 +55,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         {
             Template = template,
             Parameters = @params,
-            ParentSpanId = spanId,
+            SpanId = spanId,
         };
 
         try
