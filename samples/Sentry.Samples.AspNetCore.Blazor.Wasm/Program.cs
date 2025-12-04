@@ -7,9 +7,16 @@ try
     var builder = WebAssemblyHostBuilder.CreateDefault(args);
     builder.UseSentry(options =>
     {
-#if SENTRY_DSN_DEFINED_IN_ENV
-        // A DSN is required. You can set here in code. Web browsers cannot read environment variables.
+#if !SENTRY_DSN_DEFINED_IN_ENV
+        // You must specify a DSN. On mobile platforms, this should be done in code here.
         // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+        options.Dsn = SamplesShared.Dsn;
+#else
+        // To make things easier for the SDK maintainers we have a custom build target that writes the
+        // SENTRY_DSN environment variable into an EnvironmentVariables class that is available for WASM
+        // targets. This allows us to share one DSN defined in the ENV across desktop and mobile samples.
+        // Generally, you won't want to do this in your own WASM applications - you should set the DSN
+        // in code as above
         options.Dsn = EnvironmentVariables.Dsn;
 #endif
         options.Debug = true;
