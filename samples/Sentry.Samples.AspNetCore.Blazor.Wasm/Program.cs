@@ -7,10 +7,10 @@ try
     var builder = WebAssemblyHostBuilder.CreateDefault(args);
     builder.UseSentry(options =>
     {
-#if !SENTRY_DSN_DEFINED_IN_ENV
-        // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+#if SENTRY_DSN_DEFINED_IN_ENV
+        // A DSN is required. You can set here in code. Web browsers cannot read environment variables.
         // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
-        options.Dsn = SamplesShared.Dsn;
+        options.Dsn = EnvironmentVariables.Dsn;
 #endif
         options.Debug = true;
     });
