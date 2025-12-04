@@ -12,8 +12,10 @@ targets:
       nuget:Sentry.AspNet:
       nuget:Sentry.DiagnosticSource:
       nuget:Sentry.EntityFramework:
+      nuget:Sentry.Extensions.AI:
       nuget:Sentry.Extensions.Logging:
       nuget:Sentry.Google.Cloud.Functions:
+      nuget:Sentry.Hangfire:
       nuget:Sentry.Log4Net:
       nuget:Sentry.Maui:
       nuget:Sentry.NLog:
