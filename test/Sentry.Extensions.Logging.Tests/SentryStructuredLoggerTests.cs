@@ -49,11 +49,11 @@ public class SentryStructuredLoggerTests : IDisposable
         public void EnableHub(bool isEnabled) => Hub.IsEnabled.Returns(isEnabled);
         public void EnableLogs(bool isEnabled) => Options.Value.EnableLogs = isEnabled;
 
-        public void WithActiveSpan(SentryId traceId, SpanId parentSpanId)
+        public void WithActiveSpan(SentryId traceId, SpanId spanId)
         {
             var span = Substitute.For<ISpan>();
             span.TraceId.Returns(traceId);
-            span.SpanId.Returns(parentSpanId);
+            span.SpanId.Returns(spanId);
             Hub.GetSpan().Returns(span);
         }
 
@@ -82,8 +82,8 @@ public class SentryStructuredLoggerTests : IDisposable
     public void Log_LogLevel_CaptureLog(LogLevel logLevel, SentryLogLevel expectedLevel)
     {
         var traceId = SentryId.Create();
-        var parentSpanId = SpanId.Create();
-        _fixture.WithActiveSpan(traceId, parentSpanId);
+        var spanId = SpanId.Create();
+        _fixture.WithActiveSpan(traceId, spanId);
         var logger = _fixture.GetSut();
 
         EventId eventId = new(123, "EventName");
@@ -106,7 +106,7 @@ public class SentryStructuredLoggerTests : IDisposable
         log.Message.Should().Be("Message with argument.");
         log.Template.Should().Be(message);
         log.Parameters.Should().BeEquivalentTo(new KeyValuePair<string, object>[] { new("Argument", "argument") });
-        log.ParentSpanId.Should().Be(parentSpanId);
+        log.SpanId.Should().Be(spanId);
         log.AssertAttribute("sentry.environment", "my-environment");
         log.AssertAttribute("sentry.release", "my-release");
         log.AssertAttribute("sentry.origin", "auto.log.extensions_logging");
@@ -139,7 +139,7 @@ public class SentryStructuredLoggerTests : IDisposable
 
         var log = _fixture.CapturedLogs.Dequeue();
         log.TraceId.Should().Be(scope.PropagationContext.TraceId);
-        log.ParentSpanId.Should().BeNull();
+        log.SpanId.Should().BeNull();
     }
 
     [Fact]
