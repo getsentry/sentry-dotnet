@@ -265,8 +265,10 @@ jobs:
           path: src
 
       - name: Integration test
-#       # Note that when upgsading .NET versions, linux-musl may need special handling... see comments below
+#       # Note that when upgrading .NET versions, linux-musl may need special handling... see comments below
 #        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
+        # TODO: Re-enable once we have resolved https://github.com/getsentry/sentry-dotnet/issues/4788
+        if: ${{ (matrix.rid != 'linux-musl-x64') }}
         uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
         with:
           path: integration-test
