@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
-    <!--<RunAOTCompilation>true</RunAOTCompilation>-->
+    <!--<RunAOTCompilation>true</RunAOTCompilation>--><!--see https://github.com/dotnet/runtime/issues/121975-->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">

@@ -22,7 +22,7 @@ try
     builder.Services.AddScoped(_ =>
         new HttpClient
         {
-            BaseAddress = new(builder.HostEnvironment.BaseAddress)
+            BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
         });
     await builder.Build().RunAsync();
 }
