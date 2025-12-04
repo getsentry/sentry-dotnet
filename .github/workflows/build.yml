@@ -48,7 +48,7 @@ jobs:
           curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin
 
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
 
       - run: git submodule update --init modules/sentry-native
 
@@ -121,7 +121,7 @@ jobs:
         uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # 0.12.1
 
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
@@ -247,7 +247,7 @@ jobs:
 
       - name: Sparse checkout
         if: env.CI_PUBLISHING_BUILD == 'true'
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           # We only check out what is absolutely necessary to reduce a chance of local files impacting
           # integration tests (nuget.config etc.)... But we need the root Directory.Build.props calculate
@@ -265,8 +265,10 @@ jobs:
           path: src
 
       - name: Integration test
-#       # Note that when upgsading .NET versions, linux-musl may need special handling... see comments below
+#       # Note that when upgrading .NET versions, linux-musl may need special handling... see comments below
 #        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
+        # TODO: Re-enable once we have resolved https://github.com/getsentry/sentry-dotnet/issues/4788
+        if: ${{ (matrix.rid != 'linux-musl-x64') }}
         uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
         with:
           path: integration-test
@@ -289,7 +291,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           submodules: recursive
 
@@ -347,7 +349,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           submodules: recursive
 
@@ -377,7 +379,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
@@ -416,7 +418,7 @@ jobs:
     if: ${{ !startsWith(github.ref_name, 'release/') }}
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
         with:
           submodules: recursive
 
