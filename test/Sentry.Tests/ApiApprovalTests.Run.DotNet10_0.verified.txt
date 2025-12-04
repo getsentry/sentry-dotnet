@@ -625,7 +625,7 @@ namespace Sentry
         [System.Runtime.CompilerServices.RequiredMember]
         public string Message { get; init; }
         public System.Collections.Immutable.ImmutableArray<System.Collections.Generic.KeyValuePair<string, object>> Parameters { get; init; }
-        public Sentry.SpanId? ParentSpanId { get; init; }
+        public Sentry.SpanId? SpanId { get; init; }
         public string? Template { get; init; }
         [System.Runtime.CompilerServices.RequiredMember]
         public System.DateTimeOffset Timestamp { get; init; }
