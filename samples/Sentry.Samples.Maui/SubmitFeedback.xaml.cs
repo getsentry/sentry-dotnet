@@ -29,13 +29,13 @@ public partial class SubmitFeedback : ContentPage
 
         if (string.IsNullOrWhiteSpace(message))
         {
-            await DisplayAlert("Validation Error", "Message is required.", "OK");
+            await DisplayAlertAsync("Validation Error", "Message is required.", "OK");
             return;
         }
 
         if (!IsValidEmail(contactEmail))
         {
-            await DisplayAlert("Validation Error", "Please enter a valid email address.", "OK");
+            await DisplayAlertAsync("Validation Error", "Please enter a valid email address.", "OK");
             return;
         }
 
@@ -50,7 +50,7 @@ public partial class SubmitFeedback : ContentPage
         var feedback = new SentryFeedback(message, contactEmail, name);
         SentrySdk.CaptureFeedback(feedback, hint: hint);
 
-        await DisplayAlert("Feedback Submitted", "Thank you for your feedback!", "OK");
+        await DisplayAlertAsync("Feedback Submitted", "Thank you for your feedback!", "OK");
         await Navigation.PopModalAsync();
     }
 
@@ -72,12 +72,12 @@ public partial class SubmitFeedback : ContentPage
             if (result != null)
             {
                 _screenshotPath = result.FullPath;
-                await DisplayAlert("Screenshot Attached", "Screenshot has been attached successfully.", "OK");
+                await DisplayAlertAsync("Screenshot Attached", "Screenshot has been attached successfully.", "OK");
             }
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", $"An error occurred while selecting the screenshot: {ex.Message}", "OK");
+            await DisplayAlertAsync("Error", $"An error occurred while selecting the screenshot: {ex.Message}", "OK");
         }
     }
 }
