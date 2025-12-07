@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(LatestAndroidTfm);$(PreviousAndroidTfm)</TargetFrameworks>
-    <SentryAndroidSdkVersion>8.27.1</SentryAndroidSdkVersion>
+    <SentryAndroidSdkVersion>8.28.0</SentryAndroidSdkVersion>
     <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\$(TargetFramework)\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
     <!-- This gets resolved by the DownloadSentryAndroidSdk target -->
     <SentryNativeNdkVersion></SentryNativeNdkVersion>
