@@ -25,7 +25,24 @@ using Cocona;
 // Central configuration/constants for the dev script.
 public static class DevConfig
 {
-    public const string DefaultSolution = "Sentry-CI-Build-macOS.slnf";
+    public static string DefaultSolution
+    {
+        get
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return "Sentry-CI-Build-Windows.slnf";
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return "Sentry-CI-Build-Linux.slnf";
+            }
+
+            // Fallback: macOS solution
+            return "Sentry-CI-Build-macOS.slnf";
+        }
+    }
 }
 
 public static class Program
