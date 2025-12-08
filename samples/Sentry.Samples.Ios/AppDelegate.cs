@@ -58,7 +58,8 @@ public class AppDelegate : UIApplicationDelegate
 #pragma warning disable CA1422 // Validate platform compatibility
         // create a new window instance based on the screen size
         Window = new UIWindow(UIScreen.MainScreen.Bounds);
-#pragma warning restore CA1422
+// TODO: Undomment this line... just testing this comment: https://github.com/getsentry/sentry-dotnet/pull/4782#issuecomment-3623881935
+// #pragma warning restore CA1422
 
         // determine control colours (SystemBackground requires iOS >= 13.0)
         var backgroundColor = UIDevice.CurrentDevice.CheckSystemVersion(13, 0)
