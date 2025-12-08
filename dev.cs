@@ -22,49 +22,18 @@ using Cocona;
 // This is intended to be run from the repo root so that git/dotnet
 // commands operate on this repository.
 
-// Central configuration/constants for the dev script.
-public static class DevConfig
+var builder = CoconaApp.CreateBuilder();
+builder.Services.AddSingleton<IDevProcessRunner>(sp =>
 {
-    public static string DefaultSolution
-    {
-        get
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return "Sentry-CI-Build-Windows.slnf";
-            }
+    var options = sp.GetRequiredService<GlobalOptions>();
+    return new DevProcessRunner(options.DryRun);
+});
+builder.Services.AddSingleton<GlobalOptions>();
+var app = builder.Build();
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                return "Sentry-CI-Build-Linux.slnf";
-            }
+app.AddCommands<DevCommands>();
 
-            // Fallback: macOS solution
-            return "Sentry-CI-Build-macOS.slnf";
-        }
-    }
-}
-
-public static class Program
-{
-    public static async Task Main(string[] args)
-    {
-        var builder = CoconaApp.CreateBuilder();
-
-        builder.Services.AddSingleton<IDevProcessRunner>(sp =>
-        {
-            var options = sp.GetRequiredService<GlobalOptions>();
-            return new DevProcessRunner(options.DryRun);
-        });
-
-        builder.Services.AddSingleton<GlobalOptions>();
-
-        var app = builder.Build();
-        app.AddCommands<DevCommands>();
-
-        await app.RunAsync();
-    }
-}
+await app.RunAsync();
 
 // ----------------- Options & Commands -----------------
 
@@ -244,5 +213,29 @@ public class DevProcessRunner : IDevProcessRunner
 
         await process.WaitForExitAsync();
         return process.ExitCode == 0;
+    }
+}
+
+
+// Central configuration/constants for the dev script.
+public static class DevConfig
+{
+    public static string DefaultSolution
+    {
+        get
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return "Sentry-CI-Build-Windows.slnf";
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return "Sentry-CI-Build-Linux.slnf";
+            }
+
+            // Fallback: macOS solution
+            return "Sentry-CI-Build-macOS.slnf";
+        }
     }
 }
