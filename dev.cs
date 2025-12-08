@@ -15,7 +15,7 @@ using Cocona;
 //   ./dev.cs subup
 //   ./dev.cs wrest
 //   ./dev.cs nrest
-//   ./dev.cs --dry-run cleanslate
+//   ./dev.cs cleanslate --dry-run
 //
 // This is intended to be run from the repo root so that git/dotnet
 // commands operate on this repository.
