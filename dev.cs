@@ -1,12 +1,10 @@
 #!/usr/bin/env dotnet
 #:package Cocona@2.2.0
-#:package Microsoft.Extensions.DependencyInjection@8.0.0
 
 #nullable enable
 
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Microsoft.Extensions.DependencyInjection;
 using Cocona;
 
 // Simple dev helper CLI implemented as a .NET file-based app using Cocona.
@@ -22,22 +20,15 @@ using Cocona;
 // This is intended to be run from the repo root so that git/dotnet
 // commands operate on this repository.
 
-var builder = CoconaApp.CreateBuilder();
-builder.Services.AddSingleton<IDevProcessRunner>(sp =>
-{
-    var options = sp.GetRequiredService<GlobalOptions>();
-    return new DevProcessRunner(options.DryRun);
-});
-builder.Services.AddSingleton<GlobalOptions>();
-var app = builder.Build();
+var app = CoconaApp.Create();
 
 app.AddCommands<DevCommands>();
 
-await app.RunAsync();
+app.Run();
 
 // ----------------- Options & Commands -----------------
 
-public class GlobalOptions
+public class GlobalOptions : ICommandParameterSet
 {
     [Option("dry-run", new[] { 'n' }, Description = "Print commands instead of executing them.")]
     public bool DryRun { get; set; }
@@ -45,16 +36,10 @@ public class GlobalOptions
 
 public class DevCommands
 {
-    private readonly IDevProcessRunner _runner;
-
-    public DevCommands(IDevProcessRunner runner)
-    {
-        _runner = runner;
-    }
-
     [Command("cleanslate", Description = "Clean repo, update submodules, and restore the solution.")]
     public async Task<int> CleanSlateAsync(
-        [Argument("solution", Description = "Solution file to restore. Defaults to Sentry-CI-Build-macOS.slnf if omitted.")] string? solution = null)
+        [Argument("solution", Description = "Solution file to restore. Defaults to platform-specific CI solution if omitted.")] string? solution = null,
+        GlobalOptions options = default!)
     {
         solution ??= DevConfig.DefaultSolution;
 
@@ -69,7 +54,7 @@ public class DevCommands
 
         foreach (var (description, fileName, arguments) in steps)
         {
-            int code = await _runner.RunStepAsync(description, fileName, arguments);
+            int code = await RunStepAsync(description, fileName, arguments, options.DryRun);
             if (code != 0)
             {
                 Console.Error.WriteLine($"[dev] Step '{description}' failed with exit code {code}.");
@@ -81,70 +66,53 @@ public class DevCommands
     }
 
     [Command("subup", Description = "Update git submodules recursively.")]
-    public Task<int> SubmoduleUpdateAsync()
+    public Task<int> SubmoduleUpdateAsync(GlobalOptions options = default!)
     {
         Console.WriteLine("[dev] Updating git submodules (recursive)");
-        return _runner.RunStepAsync("git submodule update", "git", "submodule update --recursive");
+        return RunStepAsync("git submodule update", "git", "submodule update --recursive", options.DryRun);
     }
 
     [Command("wrest", Description = "Run 'dotnet workload restore' (with sudo on Unix if available).")]
-    public async Task<int> WorkloadRestoreAsync()
+    public async Task<int> WorkloadRestoreAsync(GlobalOptions options = default!)
     {
         Console.WriteLine("[dev] Restoring dotnet workloads");
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             // No sudo on Windows
-            return await _runner.RunStepAsync("dotnet workload restore", "dotnet", "workload restore");
+            return await RunStepAsync("dotnet workload restore", "dotnet", "workload restore", options.DryRun);
         }
 
-        bool sudoAvailable = await _runner.IsCommandAvailableAsync("sudo");
+        bool sudoAvailable = await IsCommandAvailableAsync("sudo");
 
         if (sudoAvailable)
         {
-            return await _runner.RunStepAsync("sudo dotnet workload restore", "sudo", "dotnet workload restore");
+            return await RunStepAsync("sudo dotnet workload restore", "sudo", "dotnet workload restore", options.DryRun);
         }
 
         Console.WriteLine("[dev] 'sudo' not found; running 'dotnet workload restore' without sudo.");
-        return await _runner.RunStepAsync("dotnet workload restore", "dotnet", "workload restore");
+        return await RunStepAsync("dotnet workload restore", "dotnet", "workload restore", options.DryRun);
     }
 
     [Command("nrest", Description = "Restore the default CI solution.")]
     public Task<int> SolutionRestoreAsync(
-        [Argument("solution", Description = "Solution file to restore. Defaults to Sentry-CI-Build-macOS.slnf if omitted.")] string? solution = null)
+        [Argument("solution", Description = "Solution file to restore. Defaults to platform-specific CI solution if omitted.")] string? solution = null,
+        GlobalOptions options = default!)
     {
         solution ??= DevConfig.DefaultSolution;
         Console.WriteLine($"[dev] Restoring solution: {solution}");
-        return _runner.RunStepAsync("dotnet restore", "dotnet", $"restore \"{solution}\"");
-    }
-}
-
-// ----------------- Process helpers -----------------
-
-public interface IDevProcessRunner
-{
-    Task<int> RunStepAsync(string description, string fileName, string arguments);
-    Task<bool> IsCommandAvailableAsync(string command);
-}
-
-public class DevProcessRunner : IDevProcessRunner
-{
-    private readonly bool _dryRun;
-
-    public DevProcessRunner(bool dryRun)
-    {
-        _dryRun = dryRun;
+        return RunStepAsync("dotnet restore", "dotnet", $"restore \"{solution}\"", options.DryRun);
     }
 
-    public Task<int> RunStepAsync(string description, string fileName, string arguments)
+    private static async Task<int> RunStepAsync(string description, string fileName, string arguments, bool dryRun)
     {
         Console.WriteLine($"==> {description}: {fileName} {arguments}");
-        return RunProcessAsync(fileName, arguments);
+        return await RunProcessAsync(fileName, arguments, dryRun);
     }
 
-    private async Task<int> RunProcessAsync(string fileName, string arguments)
+    private static async Task<int> RunProcessAsync(string fileName, string arguments, bool dryRun)
     {
-        if (_dryRun)
+        if (dryRun)
         {
             Console.WriteLine($"[DRY RUN] {fileName} {arguments}");
             return 0;
@@ -180,7 +148,7 @@ public class DevProcessRunner : IDevProcessRunner
         return process.ExitCode;
     }
 
-    public async Task<bool> IsCommandAvailableAsync(string command)
+    private static async Task<bool> IsCommandAvailableAsync(string command)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
