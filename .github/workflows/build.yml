@@ -195,27 +195,6 @@ jobs:
           fail-on-cache-miss: true
           enableCrossOsArchive: true
 
-      # To avoid disk space issues on the alpine containers, we clean unused native builds
-      - name: Clean up unused native builds
-        if: ${{ contains(matrix.container.image, 'alpine') }}
-        run: |
-          echo "Disk usage before cleanup:"
-          df -h
-          echo "Native build sizes:"
-          du -sh src/Sentry/Platforms/Native/sentry-native/build-* 2>/dev/null || echo "No builds found yet"
-
-          # Keep only the current RID's native build, remove all others
-          if [ "${{ matrix.rid }}" = "linux-musl-x64" ]; then
-            find src/Sentry/Platforms/Native/sentry-native -type d -name "build-*" ! -name "*musl-x64*" -exec rm -rf {} + || true
-          elif [ "${{ matrix.rid }}" = "linux-musl-arm64" ]; then
-            find src/Sentry/Platforms/Native/sentry-native -type d -name "build-*" ! -name "*musl-arm64*" -exec rm -rf {} + || true
-          fi
-
-          echo "Disk usage after cleanup:"
-          df -h
-          echo "Remaining native builds:"
-          ls -lh src/Sentry/Platforms/Native/sentry-native/ 2>/dev/null || echo "Directory not found"
-
       - name: Build Native Dependencies
         if: ${{ !matrix.container }}
         uses: ./.github/actions/buildnative
@@ -236,6 +215,24 @@ jobs:
             build.log
             build.binlog
           if-no-files-found: ignore
+
+      - name: Free disk space before tests
+        if: ${{ contains(matrix.container.image, 'alpine') }}
+        run: |
+          echo "Disk usage before cleanup:"
+          df -h
+
+          # Remove build binlog (can be large)
+          rm -f build.binlog || true
+
+          # Clean NuGet cache to free space
+          dotnet nuget locals all --clear || true
+
+          # Remove obj directories (not needed for tests since we built with --no-build)
+          find . -type d -name "obj" -exec rm -rf {} + 2>/dev/null || true
+
+          echo "Disk usage after cleanup:"
+          df -h
 
       - name: Test
         run: dotnet test ${{ matrix.slnf }} -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
