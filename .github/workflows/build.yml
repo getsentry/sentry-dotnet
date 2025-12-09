@@ -222,14 +222,11 @@ jobs:
           echo "Disk usage before cleanup:"
           df -h
 
-          # Remove build binlog (can be large)
+          # Remove build binlog (can be large, often 100MB+)
           rm -f build.binlog || true
 
-          # Clean NuGet cache to free space
-          dotnet nuget locals all --clear || true
-
-          # Remove obj directories (not needed for tests since we built with --no-build)
-          find . -type d -name "obj" -exec rm -rf {} + 2>/dev/null || true
+          # Clean up NuGet HTTP cache (not the packages cache which is needed for pack)
+          dotnet nuget locals http-cache --clear || true
 
           echo "Disk usage after cleanup:"
           df -h
