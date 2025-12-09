@@ -48,7 +48,7 @@ public class DevCommands
         var steps = new (string Description, string FileName, string Arguments)[]
         {
             ("git clean", "git", "clean -dfx"),
-            ("git submodule update", "git", "submodule update --recursive"),
+            ("git submodule update", "git", "submodule update --init --recursive"),
             ("dotnet restore", "dotnet", $"restore \"{solution}\"")
         };
 
@@ -69,7 +69,7 @@ public class DevCommands
     public Task<int> SubmoduleUpdateAsync(GlobalOptions options = default!)
     {
         Console.WriteLine("[dev] Updating git submodules (recursive)");
-        return RunStepAsync("git submodule update", "git", "submodule update --recursive", options.DryRun);
+        return RunStepAsync("git submodule update", "git", "submodule update --init --recursive", options.DryRun);
     }
 
     [Command("wrest", Description = "Run 'dotnet workload restore' (with sudo on Unix if available).")]
