@@ -1263,9 +1263,6 @@ public class SentryOptions
     /// <remarks>
     /// This is for Sentry use only, and can change without a major version bump.
     /// </remarks>
-#if !__MOBILE__
-    [CLSCompliant(false)]
-#endif
     [EditorBrowsable(EditorBrowsableState.Never)]
     public Func<string, PEReader?>? AssemblyReader { get; set; }
 
