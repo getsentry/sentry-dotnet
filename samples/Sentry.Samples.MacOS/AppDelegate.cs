@@ -16,5 +16,8 @@ public class AppDelegate : NSApplicationDelegate
             options.Debug = true;
             options.TracesSampleRate = 1.0;
         });
+
+        // You can now capture messages and exceptions
+        SentrySdk.CaptureMessage("Hello from Sentry MacOS sample!");
     }
 }
