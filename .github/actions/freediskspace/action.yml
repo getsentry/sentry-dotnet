@@ -33,7 +33,7 @@ runs:
         sudo rm -rf /opt/hostedtoolcache/go || echo "::warning::Failed to remove Go"
         sudo rm -rf /opt/hostedtoolcache/Ruby || echo "::warning::Failed to remove Ruby"
 
-        # Remove multiple LLVM versions (keep only one if needed)
+        # Remove multiple LLVM versions
         sudo rm -rf /usr/lib/llvm-13 || echo "::warning::Failed to remove LLVM 13"
         sudo rm -rf /usr/lib/llvm-14 || echo "::warning::Failed to remove LLVM 14"
         sudo rm -rf /usr/lib/llvm-15 || echo "::warning::Failed to remove LLVM 15"
