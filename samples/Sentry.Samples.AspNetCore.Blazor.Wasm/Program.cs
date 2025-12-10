@@ -8,7 +8,7 @@ try
     builder.UseSentry(options =>
     {
 #if !SENTRY_DSN_DEFINED_IN_ENV
-        // You must specify a DSN. On mobile platforms, this should be done in code here.
+        // You must specify a DSN. On browser platforms, this should be done in code here.
         // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
         options.Dsn = SamplesShared.Dsn;
 #else
