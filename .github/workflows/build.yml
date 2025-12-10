@@ -127,6 +127,7 @@ jobs:
           fetch-depth: 2 # default is 1 and codecov needs > 1
 
       - name: Remove unused applications
+        if: ${{ !matrix.container }}
         uses: ./.github/actions/freediskspace
 
       - name: Setup Environment
