@@ -189,26 +189,6 @@ public class SentrySdkTests : IDisposable
     }
 
     [Fact]
-    public void Init_IncrementsInitCount()
-    {
-        // Arrange
-        var initCount = new InitCounter();
-
-        // Act
-        using var first = SentrySdk.Init(o =>
-        {
-            o.Dsn = ValidDsn;
-            o.AutoSessionTracking = false;
-            o.BackgroundWorker = Substitute.For<IBackgroundWorker>();
-            o.InitNativeSdks = false;
-            o.InitCounter = initCount;
-        });
-
-        // Assert
-        initCount.Count.Should().Be(1);
-    }
-
-    [Fact]
     public void Init_MultipleCalls_ReplacesHubWithLatest()
     {
         var first = SentrySdk.Init(o =>
@@ -266,11 +246,6 @@ public class SentrySdkTests : IDisposable
         using var cacheDirectory = new TempDirectory();
         var cachePath = cacheDirectory.Path;
 
-        // Force all instances to use the same cache path
-        var initCounter = Substitute.For<IInitCounter>();
-        initCounter.Count.Returns(1);
-        Func<int?> processIdResolver = () => 42;
-
         // Pre-populate cache
         var initialInnerTransport = Substitute.For<ITransport>();
         var initialTransport = CachingTransport.Create(
@@ -283,8 +258,6 @@ public class SentrySdkTests : IDisposable
                 CacheDirectoryPath = cachePath,
                 AutoSessionTracking = false,
                 InitNativeSdks = false,
-                InitCounter = initCounter,
-                ProcessIdResolver = processIdResolver
             },
             startWorker: false);
         await using (initialTransport)
@@ -335,8 +308,6 @@ public class SentrySdkTests : IDisposable
                 o.Debug = true;
                 o.DiagnosticLogger = _logger;
                 o.CacheDirectoryPath = cachePath;
-                o.InitCounter = initCounter;
-                o.ProcessIdResolver = processIdResolver;
                 o.InitCacheFlushTimeout = initFlushTimeout;
                 o.Transport = transport;
                 o.AutoSessionTracking = false;
@@ -369,10 +340,8 @@ public class SentrySdkTests : IDisposable
         finally
         {
             // cleanup to avoid disposing/deleting the temp directory while the cache worker is still running
-            if (options!.Transport is CachingTransport cachingTransport)
-            {
-                await cachingTransport!.StopWorkerAsync();
-            }
+            var cachingTransport = (CachingTransport)options!.Transport;
+            await cachingTransport!.StopWorkerAsync();
         }
     }
 #endif
