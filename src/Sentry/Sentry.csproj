@@ -189,7 +189,20 @@
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false"
                       PrivateAssets="all"
-                      Pack="true"
-                      PackagePath="analyzers/dotnet/cs" />
+                      SetTargetFramework="TargetFramework=netstandard2.0" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <BeforePack>$(BeforePack);PackSentryCompilerExtensions</BeforePack>
+  </PropertyGroup>
+
+  <Target Name="PackSentryCompilerExtensions">
+    <ItemGroup>
+      <None Include="..\Sentry.Compiler.Extensions\bin\$(Configuration)\netstandard2.0\Sentry.Compiler.Extensions.dll">
+        <Pack>true</Pack>
+        <PackagePath>analyzers\dotnet\roslyn4.3\cs</PackagePath>
+      </None>
+    </ItemGroup>
+  </Target>
+
 </Project>
