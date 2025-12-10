@@ -19,9 +19,7 @@ runs:
     #  514M	/usr/lib/llvm-15
     #  486M	/usr/lib/llvm-14
     #  448M	/usr/lib/llvm-13
-swap-storage: true
-
-- name: Remove unused applications
+    - name: Remove unused applications
       if: runner.os == 'Linux'
       shell: bash
       run: |
