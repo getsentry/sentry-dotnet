@@ -217,6 +217,21 @@ jobs:
             build.binlog
           if-no-files-found: ignore
 
+      - name: Free disk space before tests
+        if: ${{ contains(matrix.container.image, 'alpine') }}
+        run: |
+          echo "Disk usage before cleanup:"
+          df -h
+
+          # Remove build binlog (can be large, often 100MB+)
+          rm -f build.binlog || true
+
+          # Clean up NuGet HTTP cache (not the packages cache which is needed for pack)
+          dotnet nuget locals http-cache --clear || true
+
+          echo "Disk usage after cleanup:"
+          df -h
+
       - name: Test
         run: dotnet test ${{ matrix.slnf }} -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
 
