@@ -15,10 +15,6 @@ runs:
         docker-images: true
         swap-storage: true
 
-    # TODO: Do we need all of these or just one?
-    #  514M	/usr/lib/llvm-15
-    #  486M	/usr/lib/llvm-14
-    #  448M	/usr/lib/llvm-13
     - name: Remove unused applications
       if: runner.os == 'Linux'
       shell: bash
