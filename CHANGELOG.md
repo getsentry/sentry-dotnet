@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Features
+
+- Extended `SentryThread` by `Main` to allow indication whether the thread is considered the current main thread ([#4807](https://github.com/getsentry/sentry-dotnet/pull/4807))
+
+## 6.0.0
+
 ### BREAKING CHANGES
 
 - This release adds support for .NET 10 and drops support for net8.0-android, net8.0-ios, net8.0-maccatalyst and net8.0-windows10.0.19041.0 ([#4461](https://github.com/getsentry/sentry-dotnet/pull/4461))
@@ -45,25 +51,24 @@
 - Deliver system breadcrumbs in the main thread on Android ([#4671](https://github.com/getsentry/sentry-dotnet/pull/4671))
 - The `Serilog` integration captures _Structured Logs_ (when enabled) independently of captured Events and added Breadcrumbs ([#4691](https://github.com/getsentry/sentry-dotnet/pull/4691))
 - Minimum Log-Level for _Structured Logs_, _Breadcrumbs_ and _Events_ in all Logging-Integrations ([#4700](https://github.com/getsentry/sentry-dotnet/pull/4700))
-    - for `Sentry.Extensions.Logging`, `Sentry.AspNetCore`, `Sentry.Maui` and `Sentry.Google.Cloud.Functions`
-    - the Logger-Provider for _Breadcrumbs_ and _Events_ ignores Logging-Configuration (e.g. via `appsettings.json`)
-        - use the intended `SentryLoggingOptions.MinimumBreadcrumbLevel`, `SentryLoggingOptions.MinimumEventLevel`, or add filter functions via `SentryLoggingOptionsExtensions.AddLogEntryFilter`
-    - the Logger-Provider for _Structured Logs_ respects Logging-Configuration (e.g. via `appsettings.json`)
-        - when enabled by `SentryOptions.EnableLogs`
+  - for `Sentry.Extensions.Logging`, `Sentry.AspNetCore`, `Sentry.Maui` and `Sentry.Google.Cloud.Functions`
+  - the Logger-Provider for _Breadcrumbs_ and _Events_ ignores Logging-Configuration (e.g. via `appsettings.json`)
+    - use the intended `SentryLoggingOptions.MinimumBreadcrumbLevel`, `SentryLoggingOptions.MinimumEventLevel`, or add filter functions via `SentryLoggingOptionsExtensions.AddLogEntryFilter`
+  - the Logger-Provider for _Structured Logs_ respects Logging-Configuration (e.g. via `appsettings.json`)
+    - when enabled by `SentryOptions.EnableLogs`
 - Avoid appending `/NODEFAULTLIB:MSVCRT` to NativeAOT linker arguments on Windows when targetting non-Windows platforms (Android, Browser) ([#4760](https://github.com/getsentry/sentry-dotnet/pull/4760))
 - The SDK avoids redundant scope sync after transaction finish ([#4623](https://github.com/getsentry/sentry-dotnet/pull/4623))
 - sentry-native is now automatically disabled for WASM applications ([#4631](https://github.com/getsentry/sentry-dotnet/pull/4631))
 - Remove unnecessary files from SentryCocoaFramework before packing ([#4602](https://github.com/getsentry/sentry-dotnet/pull/4602))
 
-
 ### Dependencies
 
 - Bump Java SDK from v8.24.0 to v8.28.0 ([#4728](https://github.com/getsentry/sentry-dotnet/pull/4728), [#4761](https://github.com/getsentry/sentry-dotnet/pull/4761), [#4791](https://github.com/getsentry/sentry-dotnet/pull/4791))
-    - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8280)
-    - [diff](https://github.com/getsentry/sentry-java/compare/8.24.0...8.28.0)
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8280)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.24.0...8.28.0)
 - Bump Native SDK from v0.12.0 to v0.12.2 ([#4690](https://github.com/getsentry/sentry-dotnet/pull/4690), [#4737](https://github.com/getsentry/sentry-dotnet/pull/4737), [#4780](https://github.com/getsentry/sentry-dotnet/pull/4780))
-    - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0122)
-    - [diff](https://github.com/getsentry/sentry-native/compare/0.12.0...0.12.2)
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0122)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.12.0...0.12.2)
 - Bump Cocoa SDK from v8.57.1 to v8.57.3 ([#4704](https://github.com/getsentry/sentry-dotnet/pull/4704), [#4738](https://github.com/getsentry/sentry-dotnet/pull/4738))
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#8573)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.57.1...8.57.3)
