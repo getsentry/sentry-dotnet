@@ -30,6 +30,13 @@ public sealed class SentryThread : ISentryJsonSerializable
     public bool? Current { get; set; }
 
     /// <summary>
+    /// An optional flag to indicate whether the thread was responsible for rendering
+    /// the user interface. On mobile platforms this is oftentimes referred to as the
+    /// "main thread" or "ui thread".
+    /// </summary>
+    public bool? Main { get; set; }
+
+    /// <summary>
     /// Stack trace.
     /// </summary>
     /// <see href="https://develop.sentry.dev/sdk/event-payloads/stacktrace/"/>
@@ -44,6 +51,7 @@ public sealed class SentryThread : ISentryJsonSerializable
         writer.WriteStringIfNotWhiteSpace("name", Name);
         writer.WriteBooleanIfNotNull("crashed", Crashed);
         writer.WriteBooleanIfNotNull("current", Current);
+        writer.WriteBooleanIfNotNull("main", Main);
         writer.WriteSerializableIfNotNull("stacktrace", Stacktrace, logger);
 
         writer.WriteEndObject();
@@ -58,6 +66,7 @@ public sealed class SentryThread : ISentryJsonSerializable
         var name = json.GetPropertyOrNull("name")?.GetString();
         var crashed = json.GetPropertyOrNull("crashed")?.GetBoolean();
         var current = json.GetPropertyOrNull("current")?.GetBoolean();
+        var main = json.GetPropertyOrNull("main")?.GetBoolean();
         var stacktrace = json.GetPropertyOrNull("stacktrace")?.Pipe(SentryStackTrace.FromJson);
 
         return new SentryThread
@@ -66,6 +75,7 @@ public sealed class SentryThread : ISentryJsonSerializable
             Name = name,
             Crashed = crashed,
             Current = current,
+            Main = main,
             Stacktrace = stacktrace
         };
     }
