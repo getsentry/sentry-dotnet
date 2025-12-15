@@ -31,7 +31,7 @@ public sealed class SentryThread : ISentryJsonSerializable
 
     /// <summary>
     /// An optional flag to indicate whether the thread was responsible for rendering
-    /// the user interface. On mobile platforms this is oftentimes referred to as the
+    /// the user interface. On mobile and desktop platforms this is oftentimes referred to as the
     /// "main thread" or "ui thread".
     /// </summary>
     public bool? Main { get; set; }
