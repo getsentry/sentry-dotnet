@@ -996,6 +996,7 @@ namespace Sentry
         public bool? Crashed { get; set; }
         public bool? Current { get; set; }
         public int? Id { get; set; }
+        public bool? Main { get; set; }
         public string? Name { get; set; }
         public Sentry.SentryStackTrace? Stacktrace { get; set; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
