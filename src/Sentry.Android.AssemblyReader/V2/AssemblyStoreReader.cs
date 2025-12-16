@@ -11,6 +11,7 @@ internal abstract class AssemblyStoreReader
 
     private static readonly UTF8Encoding ReaderEncoding = new UTF8Encoding(false);
 
+    internal object StreamLock { get; } = new();
     protected Stream StoreStream { get; }
 
     public abstract string Description { get; }
@@ -50,28 +51,31 @@ internal abstract class AssemblyStoreReader
 
     public MemoryStream ReadEntryImageData(AssemblyStoreItem entry, bool uncompressIfNeeded = false)
     {
-        ulong startOffset = GetStoreStartDataOffset();
-        StoreStream.Seek((uint)startOffset + entry.DataOffset, SeekOrigin.Begin);
-        var stream = new MemoryStream();
-
-        if (uncompressIfNeeded)
+        lock (StreamLock)
         {
-            throw new NotImplementedException();
+            ulong startOffset = GetStoreStartDataOffset();
+            StoreStream.Seek((uint)startOffset + entry.DataOffset, SeekOrigin.Begin);
+            var stream = new MemoryStream();
+
+            if (uncompressIfNeeded)
+            {
+                throw new NotImplementedException();
+            }
+
+            const long BufferSize = 65535;
+            byte[] buffer = Utils.BytePool.Rent((int)BufferSize);
+            long remainingToRead = entry.DataSize;
+
+            while (remainingToRead > 0)
+            {
+                int nread = StoreStream.Read(buffer, 0, (int)Math.Min(BufferSize, remainingToRead));
+                stream.Write(buffer, 0, nread);
+                remainingToRead -= (long)nread;
+            }
+            stream.Flush();
+            stream.Seek(0, SeekOrigin.Begin);
+
+            return stream;
         }
-
-        const long BufferSize = 65535;
-        byte[] buffer = Utils.BytePool.Rent((int)BufferSize);
-        long remainingToRead = entry.DataSize;
-
-        while (remainingToRead > 0)
-        {
-            int nread = StoreStream.Read(buffer, 0, (int)Math.Min(BufferSize, remainingToRead));
-            stream.Write(buffer, 0, nread);
-            remainingToRead -= (long)nread;
-        }
-        stream.Flush();
-        stream.Seek(0, SeekOrigin.Begin);
-
-        return stream;
     }
 }
