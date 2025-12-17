@@ -91,7 +91,7 @@ internal partial class StoreReader : AssemblyStoreReader
 
     protected override ulong GetStoreStartDataOffset() => elfOffset;
 
-    protected override bool IsSupported()
+    protected internal override bool IsSupported()
     {
         lock (StreamLock)
         {
