@@ -8,7 +8,7 @@ public class StoreReaderTests
     public void IsSupported_Concurrent_IsThreadSafe()
     {
         // Arrange
-        var buffer = new byte[1024*1024];
+        var buffer = new byte[1024 * 1024];
         var memoryStream = new MemoryStream(buffer);
         var storeReader = new StoreReader(memoryStream, "testStore", null);
 
@@ -22,7 +22,7 @@ public class StoreReaderTests
     public void ReadEntryImageData_Concurrent_IsThreadSafe()
     {
         // Arrange
-        var buffer = new byte[1024*1024];
+        var buffer = new byte[1024 * 1024];
         var memoryStream = new MemoryStream(buffer);
         var storeReader = new StoreReader(memoryStream, "testStore", null);
         var entry = new StoreReader.StoreItemV2(
