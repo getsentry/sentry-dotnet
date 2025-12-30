@@ -1,4 +1,4 @@
-﻿[assembly: System.CLSCompliant(true)]
+[assembly: System.CLSCompliant(true)]
 namespace Sentry
 {
     public enum AttachmentType
@@ -681,6 +681,7 @@ namespace Sentry
         public System.Action<System.Net.Http.HttpClient>? ConfigureClient { get; set; }
         public System.Func<bool>? CrashedLastRun { get; set; }
         public System.Func<System.Net.Http.HttpMessageHandler>? CreateHttpMessageHandler { get; set; }
+        public int DbQuerySourceThresholdMs { get; set; }
         public bool Debug { get; set; }
         public System.Net.DecompressionMethods DecompressionMethods { get; set; }
         public Sentry.DeduplicateMode DeduplicateMode { get; set; }
@@ -693,6 +694,7 @@ namespace Sentry
         public string? Distribution { get; set; }
         public string? Dsn { get; set; }
         public bool EnableBackpressureHandling { get; set; }
+        public bool EnableDbQuerySource { get; set; }
         public bool EnableLogs { get; set; }
         public bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }

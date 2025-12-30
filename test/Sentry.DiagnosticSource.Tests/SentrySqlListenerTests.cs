@@ -59,7 +59,8 @@ public class SentrySqlListenerTests
                 Debug = true,
                 DiagnosticLogger = Logger,
                 DiagnosticLevel = SentryLevel.Debug,
-                TracesSampleRate = 1
+                TracesSampleRate = 1,
+                EnableDbQuerySource = false // Disable for tests that check logger entries
             };
 
             Hub = Substitute.For<IHub>();

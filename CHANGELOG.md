@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add query source capture for database spans to display the originating code location in Sentry's Queries module ([#4824](https://github.com/getsentry/sentry-dotnet/pull/4824))
+
 ## 6.0.0
 
 ### BREAKING CHANGES

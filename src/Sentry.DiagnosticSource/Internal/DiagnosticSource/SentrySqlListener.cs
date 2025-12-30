@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Internal.DiagnosticSource;
@@ -207,6 +208,10 @@ internal class SentrySqlListener : IObserver<KeyValuePair<string, object?>>
         }
 
         commandSpan.Description = value.GetStringProperty("Command.CommandText", _options.DiagnosticLogger);
+
+        // Add query source information before finishing the span
+        QuerySourceHelper.TryAddQuerySource(commandSpan, _options, skipFrames: 2);
+
         commandSpan.Finish(spanStatus);
     }
 

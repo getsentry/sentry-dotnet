@@ -340,6 +340,29 @@ public class SentryOptions
     public bool AttachStacktrace { get; set; } = true;
 
     /// <summary>
+    /// Whether to capture source code location information for database queries.
+    /// </summary>
+    /// <remarks>
+    /// When enabled, the SDK will attempt to capture the source file, line number, function name,
+    /// and namespace where database queries originate from. This information is displayed in
+    /// Sentry's Queries module to help identify slow queries in your code.
+    /// This feature requires debug symbols (PDB files) to be deployed with your application.
+    /// Only queries exceeding <see cref="DbQuerySourceThresholdMs"/> will have source location captured.
+    /// </remarks>
+    /// <seealso href="https://docs.sentry.io/product/insights/backend/queries/#query-sources"/>
+    public bool EnableDbQuerySource { get; set; } = true;
+
+    /// <summary>
+    /// The minimum duration (in milliseconds) a database query must take before its source location is captured.
+    /// </summary>
+    /// <remarks>
+    /// This threshold helps minimize performance overhead by only capturing source information for slow queries.
+    /// The default value is 100ms. Set to 0 to capture source for all queries.
+    /// This option only applies when <see cref="EnableDbQuerySource"/> is enabled.
+    /// </remarks>
+    public int DbQuerySourceThresholdMs { get; set; } = 100;
+
+    /// <summary>
     /// Gets or sets the maximum breadcrumbs.
     /// </summary>
     /// <remarks>
