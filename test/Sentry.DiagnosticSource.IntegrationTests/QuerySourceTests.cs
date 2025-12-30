@@ -19,7 +19,7 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
     public async Task EfCore_WithQuerySource_CapturesSourceLocation()
     {
         Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
-        
+
         var transport = new RecordingTransport();
         var options = new SentryOptions
         {
@@ -34,7 +34,7 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
         };
 
         await using var database = await _fixture.SqlInstance.Build();
-        
+
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("query source test", "test");
@@ -52,35 +52,35 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
 
         // Verify that query source information was captured
         Assert.NotEmpty(transport.Payloads);
-        
+
         var sentTransaction = transport.Payloads
             .OfType<SentryTransaction>()
             .FirstOrDefault();
-            
+
         Assert.NotNull(sentTransaction);
-        
+
         // Find the db.query span
         var querySpans = sentTransaction.Spans.Where(s => s.Operation == "db.query").ToList();
         Assert.NotEmpty(querySpans);
-        
+
         // At least one query span should have source location info
         var hasSourceInfo = querySpans.Any(span =>
             span.Data.ContainsKey("code.filepath") ||
             span.Data.ContainsKey("code.function") ||
             span.Data.ContainsKey("code.namespace"));
-            
+
         if (hasSourceInfo)
         {
             var spanWithSource = querySpans.First(span => span.Data.ContainsKey("code.function"));
-            
+
             // Verify the captured information looks reasonable
             Assert.True(spanWithSource.Data.ContainsKey("code.function"));
             var function = spanWithSource.Data["code.function"] as string;
             _logger.Log(SentryLevel.Debug, $"Captured function: {function}");
-            
+
             // The function should be from this test method or a continuation
             Assert.NotNull(function);
-            
+
             // Should also have file path and line number if PDB is available
             if (spanWithSource.Data.ContainsKey("code.filepath"))
             {
@@ -88,7 +88,7 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
                 _logger.Log(SentryLevel.Debug, $"Captured filepath: {filepath}");
                 Assert.Contains("QuerySourceTests.cs", filepath);
             }
-            
+
             if (spanWithSource.Data.ContainsKey("code.lineno"))
             {
                 var lineno = spanWithSource.Data["code.lineno"];
@@ -107,7 +107,7 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
     public async Task EfCore_QueryBelowThreshold_DoesNotCaptureSource()
     {
         Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
-        
+
         var transport = new RecordingTransport();
         var options = new SentryOptions
         {
@@ -122,7 +122,7 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
         };
 
         await using var database = await _fixture.SqlInstance.Build();
-        
+
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("query source test", "test");
@@ -141,12 +141,12 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
         var sentTransaction = transport.Payloads
             .OfType<SentryTransaction>()
             .FirstOrDefault();
-            
+
         Assert.NotNull(sentTransaction);
-        
+
         var querySpans = sentTransaction.Spans.Where(s => s.Operation == "db.query").ToList();
         Assert.NotEmpty(querySpans);
-        
+
         // None of the spans should have source info
         foreach (var span in querySpans)
         {
@@ -160,7 +160,7 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
     public async Task EfCore_QuerySourceDisabled_DoesNotCaptureSource()
     {
         Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
-        
+
         var transport = new RecordingTransport();
         var options = new SentryOptions
         {
@@ -174,7 +174,7 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
         };
 
         await using var database = await _fixture.SqlInstance.Build();
-        
+
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("query source test", "test");
@@ -193,12 +193,12 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
         var sentTransaction = transport.Payloads
             .OfType<SentryTransaction>()
             .FirstOrDefault();
-            
+
         Assert.NotNull(sentTransaction);
-        
+
         var querySpans = sentTransaction.Spans.Where(s => s.Operation == "db.query").ToList();
         Assert.NotEmpty(querySpans);
-        
+
         // None of the spans should have source info
         foreach (var span in querySpans)
         {
@@ -214,7 +214,7 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
     public async Task SqlClient_WithQuerySource_CapturesSourceLocation()
     {
         Skip.If(!RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
-        
+
         var transport = new RecordingTransport();
         var options = new SentryOptions
         {
@@ -229,7 +229,7 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
         };
 
         await using var database = await _fixture.SqlInstance.Build();
-        
+
         using (var hub = new Hub(options))
         {
             var transaction = hub.StartTransaction("query source test", "test");
@@ -248,17 +248,17 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
         var sentTransaction = transport.Payloads
             .OfType<SentryTransaction>()
             .FirstOrDefault();
-            
+
         Assert.NotNull(sentTransaction);
-        
+
         // Find the db.query span
         var querySpans = sentTransaction.Spans.Where(s => s.Operation == "db.query").ToList();
         Assert.NotEmpty(querySpans);
-        
+
         // At least one query span should have source location info (if PDB available)
         var hasSourceInfo = querySpans.Any(span =>
             span.Data.ContainsKey("code.function"));
-            
+
         if (hasSourceInfo)
         {
             var spanWithSource = querySpans.First(span => span.Data.ContainsKey("code.function"));

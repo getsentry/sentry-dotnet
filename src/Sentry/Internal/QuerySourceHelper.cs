@@ -26,7 +26,7 @@ internal static class QuerySourceHelper
         var duration = DateTimeOffset.UtcNow - span.StartTimestamp;
         if (duration.TotalMilliseconds < options.DbQuerySourceThresholdMs)
         {
-            options.LogDebug("Query duration {0}ms is below threshold {1}ms, skipping query source capture", 
+            options.LogDebug("Query duration {0}ms is below threshold {1}ms, skipping query source capture",
                 duration.TotalMilliseconds, options.DbQuerySourceThresholdMs);
             return;
         }

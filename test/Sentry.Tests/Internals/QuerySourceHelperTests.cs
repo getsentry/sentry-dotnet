@@ -65,11 +65,11 @@ public class QuerySourceHelperTests
         // Arrange
         var fixture = new Fixture();
         fixture.Options.DbQuerySourceThresholdMs = 0; // Capture all queries
-        
+
         // Simulate a slow query by starting the span earlier
         var transaction = new TransactionTracer(Substitute.For<IHub>(), "test", "test");
         var span = transaction.StartChild("db.query", "SELECT * FROM users");
-        
+
         // Wait a bit to ensure duration is above 0
         Thread.Sleep(5);
 
@@ -82,17 +82,17 @@ public class QuerySourceHelperTests
         if (span.Data.ContainsKey("code.filepath"))
         {
             span.Data.Should().ContainKey("code.function");
-            
+
             // Verify we logged something about finding the frame
-            fixture.Logger.Entries.Should().Contain(e => 
-                e.Message.Contains("Found in-app frame") || 
+            fixture.Logger.Entries.Should().Contain(e =>
+                e.Message.Contains("Found in-app frame") ||
                 e.Message.Contains("Added query source"));
         }
         else
         {
             // PDB not available - verify we logged about missing file info
-            fixture.Logger.Entries.Should().Contain(e => 
-                e.Message.Contains("No file info") || 
+            fixture.Logger.Entries.Should().Contain(e =>
+                e.Message.Contains("No file info") ||
                 e.Message.Contains("No in-app frame found"));
         }
     }
@@ -104,7 +104,7 @@ public class QuerySourceHelperTests
         var fixture = new Fixture();
         var span = Substitute.For<ISpan>();
         span.StartTimestamp.Returns(DateTimeOffset.UtcNow.AddSeconds(-1));
-        
+
         // Cause an exception when trying to set data
         span.When(x => x.SetData(Arg.Any<string>(), Arg.Any<object>()))
             .Do(_ => throw new InvalidOperationException("Test exception"));
@@ -112,10 +112,10 @@ public class QuerySourceHelperTests
         // Act & Assert - should not throw
         var action = () => QuerySourceHelper.TryAddQuerySource(span, fixture.Options);
         action.Should().NotThrow();
-        
+
         // Should log the error if PDB is available and source capture was attempted
         // On Android/without PDB, may just log about missing file info
-        fixture.Logger.Entries.Should().Contain(e => 
+        fixture.Logger.Entries.Should().Contain(e =>
             (e.Level == SentryLevel.Error && e.Message.Contains("Failed to capture query source")) ||
             (e.Level == SentryLevel.Debug && e.Message.Contains("No file info")));
     }
@@ -170,7 +170,7 @@ public class QuerySourceHelperTests
         // Arrange
         var fixture = new Fixture();
         fixture.Options.DbQuerySourceThresholdMs = 0;
-        
+
         // Only include the test namespace as in-app, explicitly exclude xunit
         fixture.Options.InAppInclude = new List<StringOrRegex> { "Sentry.Tests.*" };
         fixture.Options.InAppExclude = new List<StringOrRegex> { "Xunit.*" };
@@ -212,7 +212,7 @@ public class QuerySourceHelperTests
             span.Data.Should().ContainKey("code.lineno");
             span.Data.Should().ContainKey("code.function");
             span.Data.Should().ContainKey("code.namespace");
-            
+
             // Verify the values are reasonable
             span.Data["code.function"].Should().BeOfType<string>();
             span.Data["code.lineno"].Should().BeOfType<int>();
