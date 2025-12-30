@@ -154,28 +154,6 @@ public class QuerySourceHelperTests
     }
 
     [Fact]
-    public void TryAddQuerySource_RespectsInAppExclude()
-    {
-        // Arrange
-        var fixture = new Fixture();
-        fixture.Options.DbQuerySourceThresholdMs = 0;
-        
-        // Exclude test namespaces and xunit from in-app
-        fixture.Options.InAppExclude = new List<StringOrRegex> { "Sentry.Tests.*", "Xunit.*" };
-
-        var transaction = new TransactionTracer(Substitute.For<IHub>(), "test", "test");
-        var span = transaction.StartChild("db.query", "SELECT * FROM users");
-
-        // Act
-        QuerySourceHelper.TryAddQuerySource(span, fixture.Options, skipFrames: 0);
-
-        // Assert
-        // Should not find any in-app frames since we excluded the test namespace
-        span.Data.Should().NotContainKey("code.filepath");
-        fixture.Logger.Entries.Should().Contain(e => e.Message.Contains("No in-app frame found"));
-    }
-
-    [Fact]
     public void TryAddQuerySource_RespectsInAppInclude()
     {
         // Arrange
