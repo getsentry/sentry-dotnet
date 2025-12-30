@@ -52,17 +52,15 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
 
         // Verify that query source information was captured
         Assert.NotEmpty(transport.Payloads);
-        var envelope = transport.Payloads.First();
         
-        var transaction = envelope.Items
-            .Select(item => item.TryGetPayload<JsonSerializable>())
+        var sentTransaction = transport.Payloads
             .OfType<SentryTransaction>()
             .FirstOrDefault();
             
-        Assert.NotNull(transaction);
+        Assert.NotNull(sentTransaction);
         
         // Find the db.query span
-        var querySpans = transaction.Spans.Where(s => s.Operation == "db.query").ToList();
+        var querySpans = sentTransaction.Spans.Where(s => s.Operation == "db.query").ToList();
         Assert.NotEmpty(querySpans);
         
         // At least one query span should have source location info
@@ -140,15 +138,13 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
         }
 
         // Verify that query source information was NOT captured due to threshold
-        var envelope = transport.Payloads.First();
-        var transaction = envelope.Items
-            .Select(item => item.TryGetPayload<JsonSerializable>())
+        var sentTransaction = transport.Payloads
             .OfType<SentryTransaction>()
             .FirstOrDefault();
             
-        Assert.NotNull(transaction);
+        Assert.NotNull(sentTransaction);
         
-        var querySpans = transaction.Spans.Where(s => s.Operation == "db.query").ToList();
+        var querySpans = sentTransaction.Spans.Where(s => s.Operation == "db.query").ToList();
         Assert.NotEmpty(querySpans);
         
         // None of the spans should have source info
@@ -194,15 +190,13 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
         }
 
         // Verify that query source information was NOT captured
-        var envelope = transport.Payloads.First();
-        var transaction = envelope.Items
-            .Select(item => item.TryGetPayload<JsonSerializable>())
+        var sentTransaction = transport.Payloads
             .OfType<SentryTransaction>()
             .FirstOrDefault();
             
-        Assert.NotNull(transaction);
+        Assert.NotNull(sentTransaction);
         
-        var querySpans = transaction.Spans.Where(s => s.Operation == "db.query").ToList();
+        var querySpans = sentTransaction.Spans.Where(s => s.Operation == "db.query").ToList();
         Assert.NotEmpty(querySpans);
         
         // None of the spans should have source info
@@ -251,16 +245,14 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
         }
 
         // Verify that query source information was captured
-        var envelope = transport.Payloads.First();
-        var transaction = envelope.Items
-            .Select(item => item.TryGetPayload<JsonSerializable>())
+        var sentTransaction = transport.Payloads
             .OfType<SentryTransaction>()
             .FirstOrDefault();
             
-        Assert.NotNull(transaction);
+        Assert.NotNull(sentTransaction);
         
         // Find the db.query span
-        var querySpans = transaction.Spans.Where(s => s.Operation == "db.query").ToList();
+        var querySpans = sentTransaction.Spans.Where(s => s.Operation == "db.query").ToList();
         Assert.NotEmpty(querySpans);
         
         // At least one query span should have source location info (if PDB available)
