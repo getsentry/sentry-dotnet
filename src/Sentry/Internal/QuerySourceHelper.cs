@@ -13,6 +13,7 @@ internal static class QuerySourceHelper
     /// <param name="span">The span to add source information to.</param>
     /// <param name="options">The Sentry options.</param>
     /// <param name="skipFrames">Number of initial frames to skip (to exclude the helper itself).</param>
+    [UnconditionalSuppressMessage("Trimming", "IL2026: RequiresUnreferencedCode", Justification = AotHelper.AvoidAtRuntime)]
     public static void TryAddQuerySource(ISpan span, SentryOptions options, int skipFrames = 0)
     {
         // Check if feature is enabled
@@ -22,15 +23,10 @@ internal static class QuerySourceHelper
         }
 
         // Check duration threshold (span must be started)
-        if (span.StartTimestamp == null)
-        {
-            return;
-        }
-
-        var duration = DateTimeOffset.UtcNow - span.StartTimestamp.Value;
+        var duration = DateTimeOffset.UtcNow - span.StartTimestamp;
         if (duration.TotalMilliseconds < options.DbQuerySourceThresholdMs)
         {
-            options.LogDebug("Query duration {0}ms is below threshold {1}ms, skipping query source capture",
+            options.LogDebug("Query duration {0}ms is below threshold {1}ms, skipping query source capture", 
                 duration.TotalMilliseconds, options.DbQuerySourceThresholdMs);
             return;
         }
@@ -110,8 +106,9 @@ internal static class QuerySourceHelper
                 if (sentryFrame.InApp == true)
                 {
                     appFrame = sentryFrame;
-                    options.LogDebug("Found in-app frame: {0}:{1} in {2}.{3}",
-                        fileName, lineNumber, module, method.Name);
+                    var location = $"{fileName}:{lineNumber}";
+                    var methodFullName = $"{module}.{method.Name}";
+                    options.LogDebug("Found in-app frame: {0} in {1}", location, methodFullName);
                     break;
                 }
                 else
@@ -149,8 +146,8 @@ internal static class QuerySourceHelper
                 span.SetExtra("code.namespace", appFrame.Module);
             }
 
-            options.LogDebug("Added query source: {0}:{1} in {2}",
-                appFrame.FileName, appFrame.LineNumber, appFrame.Function);
+            var sourceLocation = $"{appFrame.FileName}:{appFrame.LineNumber}";
+            options.LogDebug("Added query source: {0} in {1}", sourceLocation, appFrame.Function);
         }
         catch (Exception ex)
         {
