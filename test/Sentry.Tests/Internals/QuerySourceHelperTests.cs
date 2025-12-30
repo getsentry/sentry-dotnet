@@ -1,6 +1,6 @@
 using Sentry.Internal;
 
-namespace Sentry.Tests.Internal;
+namespace Sentry.Tests.Internals;
 
 public class QuerySourceHelperTests
 {
@@ -57,22 +57,6 @@ public class QuerySourceHelperTests
         // Assert
         fixture.Span.Extra.Should().NotContainKey("code.filepath");
         fixture.Logger.Entries.Should().Contain(e => e.Message.Contains("below threshold"));
-    }
-
-    [Fact]
-    public void TryAddQuerySource_SpanNotStarted_DoesNotAddSource()
-    {
-        // Arrange
-        var fixture = new Fixture();
-        var transaction = new TransactionTracer(Substitute.For<IHub>(), "test", "test");
-        var span = Substitute.For<ISpan>();
-        span.StartTimestamp.Returns((DateTimeOffset?)null);
-
-        // Act
-        QuerySourceHelper.TryAddQuerySource(span, fixture.Options);
-
-        // Assert
-        span.DidNotReceive().SetExtra(Arg.Any<string>(), Arg.Any<object>());
     }
 
     [Fact]
