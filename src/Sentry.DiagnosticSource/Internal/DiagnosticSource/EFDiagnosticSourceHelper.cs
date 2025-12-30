@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Internal;
 using Sentry.Internal.Extensions;
 
 namespace Sentry.Internal.DiagnosticSource;
@@ -81,6 +82,9 @@ internal abstract class EFDiagnosticSourceHelper
             Options.LogWarning("Tried to close {0} span but no matching span could be found.", Operation);
             return;
         }
+
+        // Add query source information before finishing the span
+        QuerySourceHelper.TryAddQuerySource(sourceSpan, Options, skipFrames: 2);
 
         sourceSpan.Finish(status);
     }
