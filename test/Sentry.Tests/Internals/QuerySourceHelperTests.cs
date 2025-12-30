@@ -160,8 +160,8 @@ public class QuerySourceHelperTests
         var fixture = new Fixture();
         fixture.Options.DbQuerySourceThresholdMs = 0;
         
-        // Exclude this test namespace from in-app
-        fixture.Options.InAppExclude = new List<StringOrRegex> { "Sentry.Tests.*" };
+        // Exclude test namespaces and xunit from in-app
+        fixture.Options.InAppExclude = new List<StringOrRegex> { "Sentry.Tests.*", "Xunit.*" };
 
         var transaction = new TransactionTracer(Substitute.For<IHub>(), "test", "test");
         var span = transaction.StartChild("db.query", "SELECT * FROM users");
