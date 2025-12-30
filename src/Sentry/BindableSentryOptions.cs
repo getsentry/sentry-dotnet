@@ -15,6 +15,8 @@ internal partial class BindableSentryOptions
     public bool? IsEnvironmentUser { get; set; }
     public string? ServerName { get; set; }
     public bool? AttachStacktrace { get; set; }
+    public bool? EnableDbQuerySource { get; set; }
+    public int? DbQuerySourceThresholdMs { get; set; }
     public int? MaxBreadcrumbs { get; set; }
     public float? SampleRate { get; set; }
     public string? Release { get; set; }
@@ -66,6 +68,8 @@ internal partial class BindableSentryOptions
         options.IsEnvironmentUser = IsEnvironmentUser ?? options.IsEnvironmentUser;
         options.ServerName = ServerName ?? options.ServerName;
         options.AttachStacktrace = AttachStacktrace ?? options.AttachStacktrace;
+        options.EnableDbQuerySource = EnableDbQuerySource ?? options.EnableDbQuerySource;
+        options.DbQuerySourceThresholdMs = DbQuerySourceThresholdMs ?? options.DbQuerySourceThresholdMs;
         options.MaxBreadcrumbs = MaxBreadcrumbs ?? options.MaxBreadcrumbs;
         options.SampleRate = SampleRate ?? options.SampleRate;
         options.Release = Release ?? options.Release;

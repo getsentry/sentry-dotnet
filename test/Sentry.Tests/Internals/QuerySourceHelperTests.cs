@@ -95,15 +95,15 @@ public class QuerySourceHelperTests
         var span = Substitute.For<ISpan>();
         span.StartTimestamp.Returns(DateTimeOffset.UtcNow.AddSeconds(-1));
         
-        // Cause an exception when trying to set extra data
-        span.When(x => x.SetExtra(Arg.Any<string>(), Arg.Any<object>()))
+        // Cause an exception when trying to set data
+        span.When(x => x.SetData(Arg.Any<string>(), Arg.Any<object>()))
             .Do(_ => throw new InvalidOperationException("Test exception"));
 
         // Act & Assert - should not throw
         var action = () => QuerySourceHelper.TryAddQuerySource(span, fixture.Options);
         action.Should().NotThrow();
         
-        // Should log the error
+        // Should log the error (plus some debug entries from stack walking)
         fixture.Logger.Entries.Should().Contain(e => 
             e.Level == SentryLevel.Error && 
             e.Message.Contains("Failed to capture query source"));
