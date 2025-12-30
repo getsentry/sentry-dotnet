@@ -78,8 +78,8 @@ public class QuerySourceHelperTests
 
         // Assert
         // The test method itself should be captured as the source since it's in-app
-        span.Extra.Should().ContainKey("code.filepath");
-        span.Extra.Should().ContainKey("code.function");
+        span.Data.Should().ContainKey("code.filepath");
+        span.Data.Should().ContainKey("code.function");
         
         // Verify we logged something about finding the frame
         fixture.Logger.Entries.Should().Contain(e => 
@@ -124,7 +124,7 @@ public class QuerySourceHelperTests
 
         // Assert
         // Should skip any Sentry.* frames and find this test method
-        if (span.Extra.TryGetValue<string, string>("code.namespace") is { } ns)
+        if (span.Data.TryGetValue<string, string>("code.namespace") is { } ns)
         {
             ns.Should().NotStartWith("Sentry.");
         }
@@ -146,7 +146,7 @@ public class QuerySourceHelperTests
 
         // Assert
         // Should not capture EF Core or System.Data frames
-        if (span.Extra.TryGetValue<string, string>("code.namespace") is { } ns)
+        if (span.Data.TryGetValue<string, string>("code.namespace") is { } ns)
         {
             ns.Should().NotStartWith("Microsoft.EntityFrameworkCore");
             ns.Should().NotStartWith("System.Data");
@@ -171,7 +171,7 @@ public class QuerySourceHelperTests
 
         // Assert
         // Should not find any in-app frames since we excluded the test namespace
-        span.Extra.Should().NotContainKey("code.filepath");
+        span.Data.Should().NotContainKey("code.filepath");
         fixture.Logger.Entries.Should().Contain(e => e.Message.Contains("No in-app frame found"));
     }
 
@@ -193,8 +193,8 @@ public class QuerySourceHelperTests
 
         // Assert
         // Should find this test method as in-app since we explicitly included it
-        span.Extra.Should().ContainKey("code.filepath");
-        span.Extra.Should().ContainKey("code.function");
+        span.Data.Should().ContainKey("code.filepath");
+        span.Data.Should().ContainKey("code.function");
     }
 
     [Fact]
@@ -211,15 +211,15 @@ public class QuerySourceHelperTests
         QuerySourceHelper.TryAddQuerySource(span, fixture.Options, skipFrames: 0);
 
         // Assert - when PDB is available, should have all attributes
-        if (span.Extra.ContainsKey("code.filepath"))
+        if (span.Data.ContainsKey("code.filepath"))
         {
-            span.Extra.Should().ContainKey("code.lineno");
-            span.Extra.Should().ContainKey("code.function");
-            span.Extra.Should().ContainKey("code.namespace");
+            span.Data.Should().ContainKey("code.lineno");
+            span.Data.Should().ContainKey("code.function");
+            span.Data.Should().ContainKey("code.namespace");
             
             // Verify the values are reasonable
-            span.Extra["code.function"].Should().BeOfType<string>();
-            span.Extra["code.lineno"].Should().BeOfType<int>();
+            span.Data["code.function"].Should().BeOfType<string>();
+            span.Data["code.lineno"].Should().BeOfType<int>();
         }
     }
 }

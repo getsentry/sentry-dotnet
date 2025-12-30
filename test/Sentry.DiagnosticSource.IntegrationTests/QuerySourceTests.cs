@@ -65,33 +65,33 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
         
         // At least one query span should have source location info
         var hasSourceInfo = querySpans.Any(span =>
-            span.Extra.ContainsKey("code.filepath") ||
-            span.Extra.ContainsKey("code.function") ||
-            span.Extra.ContainsKey("code.namespace"));
+            span.Data.ContainsKey("code.filepath") ||
+            span.Data.ContainsKey("code.function") ||
+            span.Data.ContainsKey("code.namespace"));
             
         if (hasSourceInfo)
         {
-            var spanWithSource = querySpans.First(span => span.Extra.ContainsKey("code.function"));
+            var spanWithSource = querySpans.First(span => span.Data.ContainsKey("code.function"));
             
             // Verify the captured information looks reasonable
-            Assert.True(spanWithSource.Extra.ContainsKey("code.function"));
-            var function = spanWithSource.Extra["code.function"] as string;
+            Assert.True(spanWithSource.Data.ContainsKey("code.function"));
+            var function = spanWithSource.Data["code.function"] as string;
             _logger.Log(SentryLevel.Debug, $"Captured function: {function}");
             
             // The function should be from this test method or a continuation
             Assert.NotNull(function);
             
             // Should also have file path and line number if PDB is available
-            if (spanWithSource.Extra.ContainsKey("code.filepath"))
+            if (spanWithSource.Data.ContainsKey("code.filepath"))
             {
-                var filepath = spanWithSource.Extra["code.filepath"] as string;
+                var filepath = spanWithSource.Data["code.filepath"] as string;
                 _logger.Log(SentryLevel.Debug, $"Captured filepath: {filepath}");
                 Assert.Contains("QuerySourceTests.cs", filepath);
             }
             
-            if (spanWithSource.Extra.ContainsKey("code.lineno"))
+            if (spanWithSource.Data.ContainsKey("code.lineno"))
             {
-                var lineno = spanWithSource.Extra["code.lineno"];
+                var lineno = spanWithSource.Data["code.lineno"];
                 _logger.Log(SentryLevel.Debug, $"Captured lineno: {lineno}");
                 Assert.IsType<int>(lineno);
             }
@@ -150,9 +150,9 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
         // None of the spans should have source info
         foreach (var span in querySpans)
         {
-            Assert.False(span.Extra.ContainsKey("code.filepath"));
-            Assert.False(span.Extra.ContainsKey("code.function"));
-            Assert.False(span.Extra.ContainsKey("code.namespace"));
+            Assert.False(span.Data.ContainsKey("code.filepath"));
+            Assert.False(span.Data.ContainsKey("code.function"));
+            Assert.False(span.Data.ContainsKey("code.namespace"));
         }
     }
 
@@ -202,9 +202,9 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
         // None of the spans should have source info
         foreach (var span in querySpans)
         {
-            Assert.False(span.Extra.ContainsKey("code.filepath"));
-            Assert.False(span.Extra.ContainsKey("code.function"));
-            Assert.False(span.Extra.ContainsKey("code.namespace"));
+            Assert.False(span.Data.ContainsKey("code.filepath"));
+            Assert.False(span.Data.ContainsKey("code.function"));
+            Assert.False(span.Data.ContainsKey("code.namespace"));
         }
     }
 #endif
@@ -257,12 +257,12 @@ public class QuerySourceTests : IClassFixture<LocalDbFixture>
         
         // At least one query span should have source location info (if PDB available)
         var hasSourceInfo = querySpans.Any(span =>
-            span.Extra.ContainsKey("code.function"));
+            span.Data.ContainsKey("code.function"));
             
         if (hasSourceInfo)
         {
-            var spanWithSource = querySpans.First(span => span.Extra.ContainsKey("code.function"));
-            var function = spanWithSource.Extra["code.function"] as string;
+            var spanWithSource = querySpans.First(span => span.Data.ContainsKey("code.function"));
+            var function = spanWithSource.Data["code.function"] as string;
             Assert.NotNull(function);
             _logger.Log(SentryLevel.Debug, $"Captured SqlClient function: {function}");
         }

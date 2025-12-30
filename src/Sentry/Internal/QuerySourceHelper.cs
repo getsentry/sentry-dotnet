@@ -128,22 +128,22 @@ internal static class QuerySourceHelper
             {
                 // Make path relative if possible
                 var relativePath = MakeRelativePath(appFrame.FileName, options);
-                span.SetExtra("code.filepath", relativePath);
+                span.SetData("code.filepath", relativePath);
             }
 
             if (appFrame.LineNumber.HasValue)
             {
-                span.SetExtra("code.lineno", appFrame.LineNumber.Value);
+                span.SetData("code.lineno", appFrame.LineNumber.Value);
             }
 
             if (appFrame.Function != null)
             {
-                span.SetExtra("code.function", appFrame.Function);
+                span.SetData("code.function", appFrame.Function);
             }
 
             if (appFrame.Module != null)
             {
-                span.SetExtra("code.namespace", appFrame.Module);
+                span.SetData("code.namespace", appFrame.Module);
             }
 
             var sourceLocation = $"{appFrame.FileName}:{appFrame.LineNumber}";
