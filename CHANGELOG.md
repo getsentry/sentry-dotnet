@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Allow configuring native signal handler strategy on Android ([#4676](https://github.com/getsentry/sentry-dotnet/pull/4676))
+
 ### Fixes
 
 - The SDK now logs a `Warning` instead of an `Error` when being ratelimited ([#4927](https://github.com/getsentry/sentry-dotnet/pull/4927))
