@@ -6,6 +6,12 @@
 
 - Extended `SentryThread` by `Main` to allow indication whether the thread is considered the current main thread ([#4807](https://github.com/getsentry/sentry-dotnet/pull/4807))
 
+### Dependencies
+
+- Bump Cocoa SDK from v8.57.3 to v9.1.0 ([#4781](https://github.com/getsentry/sentry-dotnet/pull/4781))
+  - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#910)
+  - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.57.3...9.1.0)
+
 ## 6.0.0
 
 ### BREAKING CHANGES
