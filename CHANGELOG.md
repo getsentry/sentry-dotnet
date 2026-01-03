@@ -6,6 +6,12 @@
 
 - Extended `SentryThread` by `Main` to allow indication whether the thread is considered the current main thread ([#4807](https://github.com/getsentry/sentry-dotnet/pull/4807))
 
+### Dependencies
+
+- Bump CLI from v2.58.2 to v3.0.1 ([#4805](https://github.com/getsentry/sentry-dotnet/pull/4805))
+  - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#301)
+  - [diff](https://github.com/getsentry/sentry-cli/compare/2.58.2...3.0.1)
+
 ## 6.0.0
 
 ### BREAKING CHANGES
