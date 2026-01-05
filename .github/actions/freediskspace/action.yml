@@ -15,21 +15,44 @@ runs:
         docker-images: true
         swap-storage: true
 
-    # TODO: Do we need all of these or just one?
-    #  514M	/usr/lib/llvm-15
-    #  486M	/usr/lib/llvm-14
-    #  448M	/usr/lib/llvm-13
     - name: Remove unused applications
       if: runner.os == 'Linux'
       shell: bash
       run: |
-        df -h /dev/root
-        sudo rm -rf /usr/local/.ghcup
-        sudo rm -rf /usr/local/julia1.10.5
-        sudo rm -rf /usr/lib/heroku
-        sudo rm -rf /opt/hostedtoolcache/go
-        sudo rm -rf /opt/hostedtoolcache/Ruby
+        echo "Disk usage before cleanup:"
+        df -h /dev/root 2>/dev/null || df -h
+
+        # Remove language runtimes and tools
+        sudo rm -rf /usr/local/.ghcup || echo "::warning::Failed to remove .ghcup"
+        sudo rm -rf /usr/local/julia1.10.5 || echo "::warning::Failed to remove Julia"
+        sudo rm -rf /usr/lib/heroku || echo "::warning::Failed to remove Heroku"
+        sudo rm -rf /opt/hostedtoolcache/go || echo "::warning::Failed to remove Go"
+        sudo rm -rf /opt/hostedtoolcache/Ruby || echo "::warning::Failed to remove Ruby"
+
+        # Remove multiple LLVM versions
+        sudo rm -rf /usr/lib/llvm-13 || echo "::warning::Failed to remove LLVM 13"
+        sudo rm -rf /usr/lib/llvm-14 || echo "::warning::Failed to remove LLVM 14"
+        sudo rm -rf /usr/lib/llvm-15 || echo "::warning::Failed to remove LLVM 15"
+
+        # Remove Azure CLI
+        sudo rm -rf /opt/az || echo "::warning::Failed to remove Azure CLI"
+
+        # Remove unnecessary .NET SDKs (keep only what we need)
+        sudo rm -rf /usr/share/dotnet/sdk/6.* || echo "::warning::Failed to remove .NET SDK 6.x"
+        sudo rm -rf /usr/share/dotnet/sdk/7.* || echo "::warning::Failed to remove .NET SDK 7.x"
+
+        # Remove other large tools
+        sudo rm -rf /opt/hostedtoolcache/CodeQL || echo "::warning::Failed to remove CodeQL"
+        sudo rm -rf /usr/local/share/chromium || echo "::warning::Failed to remove Chromium"
+        sudo rm -rf /usr/local/share/chrome_driver || echo "::warning::Failed to remove Chrome Driver"
+        sudo rm -rf /usr/local/share/gecko_driver || echo "::warning::Failed to remove Gecko Driver"
+
+        # Clean up apt packages
         sudo apt-get remove -y '^mysql-.*' --fix-missing || echo "::warning::The command [sudo apt-get remove -y '^mysql-.*' --fix-missing] failed to complete successfully. Proceeding..."
+        sudo apt-get remove -y '^postgresql-.*' --fix-missing || echo "::warning::PostgreSQL removal failed"
+        sudo apt-get remove -y '^mongodb-.*' --fix-missing || echo "::warning::MongoDB removal failed"
         sudo apt-get autoremove -y || echo "::warning::The command [sudo apt-get autoremove -y] failed to complete successfully. Proceeding..."
         sudo apt-get clean || echo "::warning::The command [sudo apt-get clean] failed to complete successfully. Proceeding..."
-        df -h /dev/root
+
+        echo "Disk usage after cleanup:"
+        df -h /dev/root 2>/dev/null || df -h

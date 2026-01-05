@@ -58,7 +58,6 @@ public class SentryLoggingOptionsSetupTests
             MinimumEventLevel = LogLevel.Error,
             InitializeSdk = true
         };
-        expected.ExperimentalLogging.MinimumLogLevel = LogLevel.None;
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string>
             {
@@ -109,8 +108,6 @@ public class SentryLoggingOptionsSetupTests
                 ["MinimumBreadcrumbLevel"] = expected.MinimumBreadcrumbLevel.ToString(),
                 ["MinimumEventLevel"] = expected.MinimumEventLevel.ToString(),
                 ["InitializeSdk"] = expected.InitializeSdk.ToString(),
-
-                ["ExperimentalLogging:MinimumLogLevel"] = expected.ExperimentalLogging.MinimumLogLevel.ToString(),
             })
             .Build();
 
@@ -169,8 +166,6 @@ public class SentryLoggingOptionsSetupTests
             actual.MinimumBreadcrumbLevel.Should().Be(expected.MinimumBreadcrumbLevel);
             actual.MinimumEventLevel.Should().Be(expected.MinimumEventLevel);
             actual.InitializeSdk.Should().Be(expected.InitializeSdk);
-
-            actual.ExperimentalLogging.MinimumLogLevel.Should().Be(expected.ExperimentalLogging.MinimumLogLevel);
         }
     }
 }

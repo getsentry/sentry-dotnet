@@ -610,7 +610,7 @@ namespace Sentry
         public Sentry.SentryLogLevel Level { get; init; }
         public string Message { get; init; }
         public System.Collections.Immutable.ImmutableArray<System.Collections.Generic.KeyValuePair<string, object>> Parameters { get; init; }
-        public Sentry.SpanId? ParentSpanId { get; init; }
+        public Sentry.SpanId? SpanId { get; init; }
         public string? Template { get; init; }
         public System.DateTimeOffset Timestamp { get; init; }
         public Sentry.SentryId TraceId { get; init; }
@@ -972,6 +972,7 @@ namespace Sentry
         public bool? Crashed { get; set; }
         public bool? Current { get; set; }
         public int? Id { get; set; }
+        public bool? Main { get; set; }
         public string? Name { get; set; }
         public Sentry.SentryStackTrace? Stacktrace { get; set; }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }

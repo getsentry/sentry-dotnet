@@ -1,17 +1,20 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using OpenTelemetry;
 using OpenTelemetry.Trace;
 using Sentry.OpenTelemetry;
 
-using var tracerProvider = Sdk.CreateTracerProviderBuilder()
-    .AddSentry() // <-- Configure OpenTelemetry to send traces to Sentry
-    .AddAspNetCoreInstrumentation() // From OpenTelemetry.Instrumentation.AspNetCore... adds automatic tracing for incoming requests
-    .AddHttpClientInstrumentation() // From OpenTelemetry.Instrumentation.Http... adds automatic tracing for outgoing HTTP requests
-    .Build();
-
 var host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
+    .ConfigureServices(services =>
+    {
+        services.AddOpenTelemetry().WithTracing(builder =>
+        {
+            builder
+                .AddSentry() // <-- Configure OpenTelemetry to send traces to Sentry
+                .AddHttpClientInstrumentation(); // From OpenTelemetry.Instrumentation.Http... adds automatic tracing for outgoing HTTP requests
+        });
+    })
     .ConfigureLogging(logging =>
     {
         logging.AddSentry(options =>

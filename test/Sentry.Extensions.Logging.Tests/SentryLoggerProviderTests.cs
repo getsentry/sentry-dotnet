@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+
 namespace Sentry.Extensions.Logging.Tests;
 
 public class SentryLoggerProviderTests
@@ -10,6 +12,16 @@ public class SentryLoggerProviderTests
     }
 
     private readonly Fixture _fixture = new();
+
+    [Fact]
+    public void Type_CustomAttributes_HasProviderAliasAttribute()
+    {
+        var type = typeof(SentryLoggerProvider);
+
+        type.GetCustomAttributes<ProviderAliasAttribute>().Should()
+            .ContainSingle().Which
+            .Alias.Should().Be("Sentry");
+    }
 
     [Fact]
     public void CreateLogger_LoggerType_SentryLogger()

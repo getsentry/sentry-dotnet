@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using Sentry.Maui;
 
 namespace Sentry.Samples.Maui;
@@ -76,6 +77,10 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
+
+        // Configure Logging, including Structured Logs sent to Sentry (see 'EnableLogs = true')
+        builder.Logging.AddFilter(null, LogLevel.Warning);
+        builder.Logging.AddFilter("Sentry.Samples.Maui", LogLevel.Information);
 
         // For this sample, we'll also register the main page for DI so we can inject a logger there.
         builder.Services.AddTransient<MainPage>();

@@ -91,10 +91,12 @@ async Task SecondFunction()
     {
         // This is an example of capturing a handled exception.
         SentrySdk.CaptureException(exception);
-        span.Finish(exception);
 
+        // This is an example of capturing a structured log.
         SentrySdk.Logger.LogError(static log => log.SetAttribute("method", nameof(SecondFunction)),
             "Error with message: {0}", exception.Message);
+
+        span.Finish(exception);
     }
     finally
     {
@@ -112,9 +114,10 @@ async Task ThirdFunction()
     // Simulate doing some work
     await Task.Delay(100);
 
+    // This is an example of a structured log that is filtered via the 'SetBeforeSendLog' delegate above.
     SentrySdk.Logger.LogFatal(static log => log.SetAttribute("suppress", true),
         "Crash imminent!");
 
-    // This is an example of an unhandled exception.  It will be captured automatically.
+    // This is an example of an unhandled exception. It will be captured automatically.
     throw new InvalidOperationException("Something happened that crashed the app!");
 }

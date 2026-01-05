@@ -9,7 +9,7 @@ namespace Sentry.AspNetCore;
 /// Sets up ASP.NET Core option for Sentry.
 /// </summary>
 #if NETSTANDARD2_0
-public class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationOptions<SentryAspNetCoreOptions>
+internal sealed class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationOptions<SentryAspNetCoreOptions>
 {
     /// <summary>
     /// Creates a new instance of <see cref="SentryAspNetCoreOptionsSetup"/>.
@@ -32,7 +32,7 @@ public class SentryAspNetCoreOptionsSetup : ConfigureFromConfigurationOptions<Se
 }
 
 #else
-public class SentryAspNetCoreOptionsSetup : IConfigureOptions<SentryAspNetCoreOptions>
+internal sealed class SentryAspNetCoreOptionsSetup : IConfigureOptions<SentryAspNetCoreOptions>
 {
     private readonly IConfiguration _config;
 

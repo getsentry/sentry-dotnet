@@ -15,6 +15,7 @@ body:
         - Sentry.AspNet
         - Sentry.DiagnosticSource
         - Sentry.EntityFramework
+        - Sentry.Extensions.AI
         - Sentry.Extensions.Logging
         - Sentry.Google.Cloud.Functions
         - Sentry.Hangfire
@@ -48,7 +49,7 @@ body:
     attributes:
       label: .NET Version
       description: If using .NET Core, please copy the output of 'dotnet --version' here
-      placeholder: 9.0.200 ← should look like this
+      placeholder: 10.0.100 ← should look like this
     validations:
       required: true
 
@@ -81,11 +82,13 @@ body:
       label: Development Environment
       description: What development environment are you using
       options:
-        - Visual Studio v17.x
+        - Visual Studio v18.x
         - Visual Studio Code (Windows)
-        - Visual Studio Code (MacOS)
-        - Rider 2024 (Windows)
-        - Rider 2024 (MacOS)
+        - Visual Studio Code (macOS)
+        - Visual Studio Code (Linux)
+        - Rider 2025.x (Windows)
+        - Rider 2025.x (macOS)
+        - Rider 2025.x (Linux)
         - Other
     validations:
       required: true

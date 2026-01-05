@@ -2,7 +2,6 @@ using System.IO.Abstractions.TestingHelpers;
 using Sentry.Internal.Http;
 using Sentry.Protocol;
 using Sentry.Tests.Internals;
-using Sentry.Tests.Internals.Http;
 
 namespace Sentry.Tests;
 
@@ -2401,10 +2400,6 @@ public partial class HubTests : IDisposable
         await transport.Received(1)
             .SendEnvelopeAsync(Arg.Is<Envelope>(env => (string)env.Header["event_id"] == id.ToString()),
                 Arg.Any<CancellationToken>());
-        if (options.Transport is CachingTransport cachingTransport)
-        {
-            await cachingTransport.DisposeAsync(); // Release cache lock so that the cacheDirectory can be removed
-        }
     }
 
     private static Scope GetCurrentScope(Hub hub) => hub.ScopeManager.GetCurrent().Key;
