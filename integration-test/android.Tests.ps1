@@ -83,6 +83,14 @@ Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-
                 Start-Sleep -Seconds 1
 
                 $procid = (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
+                if ($procid)
+                {
+                    $logcat = & xharness android adb -- logcat -d -s "DOTNET:I" --pid=$procid
+                    if ($logcat -match "SENTRY_DOTNET_MAUI_INTEGRATION_TEST_DONE")
+                    {
+                        break
+                    }
+                }
                 $activity = (& xharness android adb -- shell dumpsys activity activities) -match "io\.sentry\.dotnet\.maui\.device\.integrationtestapp"
 
             } while ($procid -and $activity)
