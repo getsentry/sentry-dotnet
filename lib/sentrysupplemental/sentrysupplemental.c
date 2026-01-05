@@ -1,6 +1,8 @@
+#include <string.h>
+
 __attribute__((noinline))
 void crash()
 {
-    char *ptr = 0;
-    *ptr += 1;
+    static void *invalid_mem = (void *)1;
+    memset((char *)invalid_mem, 1, 100);
 }
