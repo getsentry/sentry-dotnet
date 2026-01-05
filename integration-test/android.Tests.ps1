@@ -67,6 +67,7 @@ Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-
                 [string] $Dsn,
                 [string] $TestArg = 'None'
             )
+
             Write-Host "::group::Run Android app (TestArg=$TestArg)"
             $dsn = $Dsn.Replace('http://', 'http://key@') + '/0'
             xharness android adb -v `
@@ -77,15 +78,21 @@ Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-
             Write-Host '::endgroup::'
             $LASTEXITCODE | Should -Be 0
 
+            function Get-AppPid
+            {
+                (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
+            }
+
+            $initialPid = Get-AppPid
             do
             {
                 Write-Host "Waiting for app..."
                 Start-Sleep -Seconds 1
 
-                $procid = (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
-                if ($procid)
+                $currentPid = Get-AppPid
+                if ($currentPid)
                 {
-                    $logcat = & xharness android adb -- logcat -d -s "DOTNET:I" --pid=$procid
+                    $logcat = & xharness android adb -- logcat -d -s "DOTNET:I" --pid=$currentPid
                     if ($logcat -match "SENTRY_DOTNET_MAUI_INTEGRATION_TEST_DONE")
                     {
                         break
@@ -93,7 +100,7 @@ Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-
                 }
                 $activity = (& xharness android adb -- shell dumpsys activity activities) -match "io\.sentry\.dotnet\.maui\.device\.integrationtestapp"
 
-            } while ($procid -and $activity)
+            } while ($currentPid -and $currentPid -eq $initialPid -and $activity)
         }
 
         function UninstallAndroidApp
