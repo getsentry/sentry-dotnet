@@ -67,7 +67,6 @@ Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-
                 [string] $Dsn,
                 [string] $TestArg = 'None'
             )
-
             Write-Host "::group::Run Android app (TestArg=$TestArg)"
             $dsn = $Dsn.Replace('http://', 'http://key@') + '/0'
             xharness android adb -v `
@@ -78,20 +77,24 @@ Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-
             Write-Host '::endgroup::'
             $LASTEXITCODE | Should -Be 0
 
-            function Get-AppPid
-            {
-                (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
-            }
-
-            $initialPid = Get-AppPid
+            $initialPid = $null
             do
             {
                 Write-Host "Waiting for app..."
-                Start-Sleep -Seconds 1
+                Start-Sleep -Milliseconds 100
 
-                $currentPid = Get-AppPid
+                $currentPid = (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
                 if ($currentPid)
                 {
+                    if (-not $initialPid)
+                    {
+                        $initialPid = $currentPid
+                    }
+                    if ($currentPid -ne $initialPid)
+                    {
+                        break
+                    }
+
                     $logcat = & xharness android adb -- logcat -d -s "DOTNET:I" --pid=$currentPid
                     if ($logcat -match "SENTRY_DOTNET_MAUI_INTEGRATION_TEST_DONE")
                     {
@@ -100,7 +103,7 @@ Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-
                 }
                 $activity = (& xharness android adb -- shell dumpsys activity activities) -match "io\.sentry\.dotnet\.maui\.device\.integrationtestapp"
 
-            } while ($currentPid -and $currentPid -eq $initialPid -and $activity)
+            } while ($currentPid -and $activity)
         }
 
         function UninstallAndroidApp
