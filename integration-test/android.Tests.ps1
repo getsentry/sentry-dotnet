@@ -77,10 +77,10 @@ Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-
             Write-Host '::endgroup::'
             $LASTEXITCODE | Should -Be 0
 
+            Write-Host "Waiting for app..."
             $initialPid = $null
             do
             {
-                Write-Host "Waiting for app..."
                 Start-Sleep -Milliseconds 100
 
                 $currentPid = (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
@@ -91,12 +91,6 @@ Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-
                         $initialPid = $currentPid
                     }
                     if ($currentPid -ne $initialPid)
-                    {
-                        break
-                    }
-
-                    $logcat = & xharness android adb -- logcat -d -s "DOTNET:I" --pid=$currentPid
-                    if ($logcat -match "SENTRY_DOTNET_MAUI_INTEGRATION_TEST_DONE")
                     {
                         break
                     }
