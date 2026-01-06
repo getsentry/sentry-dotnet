@@ -102,9 +102,7 @@ public partial class App : Application
         SentrySdk.Close();
 
 #if ANDROID
-        // prevent auto-restart
-        Platform.CurrentActivity?.FinishAffinity();
-        Process.KillProcess(Process.MyPid());
+        Console.WriteLine("SENTRY_DOTNET_MAUI_INTEGRATION_TEST_DONE");
 #elif IOS
         System.Environment.Exit(0);
 #endif
