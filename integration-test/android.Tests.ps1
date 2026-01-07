@@ -82,20 +82,23 @@ Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-
                 return (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
             }
 
-            Start-Sleep -Seconds 1
-            $initialPid = GetAppPid
-            if ($initialPid)
+            Write-Host "Waiting for app..."
+            $attempt = 0
+            do
             {
-                Write-Host "Waiting for app..."
-                do
-                {
-                    Start-Sleep -Milliseconds 100
+                if (++$attempt -ge 100) { throw "Timed out waiting for app start after ~30s." }
+                Start-Sleep -Milliseconds 100
+                $initialPid = GetAppPid
+            } while (!$initialPid)
 
-                    $currentPid = (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
-                    $activity = (& xharness android adb -- shell dumpsys activity activities) -match "io\.sentry\.dotnet\.maui\.device\.integrationtestapp"
-
-                } while ($currentPid -eq $initialPid -and $activity)
-            }
+            $attempt = 0
+            do
+            {
+                if (++$attempt -ge 100) { throw "Timed out waiting for app to finish after ~30s." }
+                Start-Sleep -Milliseconds 100
+                $currentPid = (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
+                $activity = (& xharness android adb -- shell dumpsys activity activities) -match "io\.sentry\.dotnet\.maui\.device\.integrationtestapp"
+            } while ($currentPid -eq $initialPid -and $activity)
         }
 
         function UninstallAndroidApp
