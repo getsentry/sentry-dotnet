@@ -137,7 +137,7 @@ if (Test-Path $privateHeaderFile)
 {
     $content = Get-Content -Path $privateHeaderFile -Raw
     $content = $content -replace '"SentryDefines.h"', '"../Headers/SentryDefines.h"'
-    $content = $content -replace '"SentryProfilingConditionals.h"', '"../Headers/SentryProfilingConditionals.h"'
+    $content = $content -replace '"SentryProfilingConditionals.h"', '"../PrivateHeaders/SentryProfilingConditionals.h"'
     Set-Content -Path $privateHeaderFile -Value $content
     Write-Host "Patched includes: $privateHeaderFile"
 }

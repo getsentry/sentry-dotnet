@@ -116,7 +116,6 @@ public static partial class SentrySdk
         nativeOptions.IdleTimeout = options.Native.IdleTimeout.TotalSeconds;
         nativeOptions.Dist = options.Distribution;
         nativeOptions.EnableAppHangTracking = options.Native.EnableAppHangTracking;
-        nativeOptions.EnableAppHangTrackingV2 = options.Native.EnableAppHangTrackingV2;
         nativeOptions.EnableAutoBreadcrumbTracking = options.Native.EnableAutoBreadcrumbTracking;
         nativeOptions.EnableAutoPerformanceTracing = options.Native.EnableAutoPerformanceTracing;
         nativeOptions.EnableCoreDataTracing = options.Native.EnableCoreDataTracing;
@@ -134,8 +133,7 @@ public static partial class SentrySdk
         // StitchAsyncCode removed from Cocoa SDK in 8.6.0 with https://github.com/getsentry/sentry-cocoa/pull/2973
         // nativeOptions.StitchAsyncCode = options.Native.StitchAsyncCode;
 
-        // In-App Excludes and Includes to be passed to the Cocoa SDK
-        options.Native.InAppExcludes?.ForEach(x => nativeOptions.AddInAppExclude(x));
+        // In-App Includes to be passed to the Cocoa SDK
         options.Native.InAppIncludes?.ForEach(x => nativeOptions.AddInAppInclude(x));
 
         // These options are intentionally not expose or modified

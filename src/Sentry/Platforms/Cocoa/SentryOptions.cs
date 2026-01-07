@@ -83,6 +83,7 @@ public partial class SentryOptions
         /// <remarks>
         /// See https://docs.sentry.io/platforms/apple/configuration/app-hangs/#app-hangs-v2
         /// </remarks>
+        [Obsolete("Use EnableAppHangTracking")]
         public bool EnableAppHangTrackingV2 { get; set; } = false;
 
         /// <summary>
@@ -237,7 +238,6 @@ public partial class SentryOptions
         /// </summary>
         public bool EnableTracing { get; set; } = false;
 
-        internal List<string>? InAppExcludes { get; private set; }
         internal List<string>? InAppIncludes { get; private set; }
 
         /// <summary>
@@ -248,10 +248,9 @@ public partial class SentryOptions
         /// <remarks>
         /// https://docs.sentry.io/platforms/apple/configuration/options/#in-app-exclude
         /// </remarks>
+        [Obsolete("This option had no effect and was removed.")]
         public void AddInAppExclude(string prefix)
         {
-            InAppExcludes ??= new List<string>();
-            InAppExcludes.Add(prefix);
         }
 
         /// <summary>

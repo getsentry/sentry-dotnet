@@ -12,12 +12,21 @@ using Sentry;
 namespace Sentry.CocoaSdk;
 
 [Native]
-internal enum SentryLogLevel : long
+internal enum SentryAttachmentType : long
 {
-    None = 1,
-    Error,
-    Debug,
-    Verbose
+    EventAttachment,
+    ViewHierarchy
+}
+
+[Native]
+internal enum SentryLevel : ulong
+{
+    None = 0,
+    Debug = 1,
+    Info = 2,
+    Warning = 3,
+    Error = 4,
+    Fatal = 5
 }
 
 [Native]
@@ -78,6 +87,15 @@ internal enum SentryANRType : long
 }
 
 [Native]
+internal enum SentryExtensionType : long
+{
+    Widget = 0,
+    Intent = 1,
+    Action = 2,
+    Share = 3
+}
+
+[Native]
 internal enum SentryFeedbackSource : long
 {
     Widget = 0,
@@ -85,18 +103,7 @@ internal enum SentryFeedbackSource : long
 }
 
 [Native]
-internal enum SentryLevel : ulong
-{
-    None = 0,
-    Debug = 1,
-    Info = 2,
-    Warning = 3,
-    Error = 4,
-    Fatal = 5
-}
-
-[Native]
-internal enum SentryStructuredLogLevel : long
+internal enum SentryLogLevel : long
 {
     Trace = 0,
     Debug = 1,
