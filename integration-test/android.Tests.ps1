@@ -94,12 +94,6 @@ Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-
                     {
                         break
                     }
-
-                    $logcat = & xharness android adb -- logcat -d -s "DOTNET:I" --pid=$currentPid
-                    if ($logcat -match "SENTRY_DOTNET_MAUI_INTEGRATION_TEST_DONE")
-                    {
-                        break
-                    }
                 }
                 $activity = (& xharness android adb -- shell dumpsys activity activities) -match "io\.sentry\.dotnet\.maui\.device\.integrationtestapp"
 
