@@ -1022,26 +1022,36 @@ namespace Sentry
     }
     public abstract class SentryTraceMetrics
     {
-        public void AddCounter<T>(string name, T value, Sentry.Scope? scope = null)
+        public void AddCounter<T>(string name, T value)
             where T :  struct { }
-        public void AddCounter<T>(string name, T value, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes = null, Sentry.Scope? scope = null)
+        public void AddCounter<T>(string name, T value, Sentry.Scope? scope)
+            where T :  struct { }
+        public void AddCounter<T>(string name, T value, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes, Sentry.Scope? scope = null)
             where T :  struct { }
         public void AddCounter<T>(string name, T value, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
             where T :  struct { }
         protected abstract void CaptureMetric<T>(Sentry.SentryMetric<T> metric)
             where T :  struct;
         protected abstract void Flush();
-        public void RecordDistribution<T>(string name, T value, string? unit = null, Sentry.Scope? scope = null)
+        public void RecordDistribution<T>(string name, T value)
+            where T :  struct { }
+        public void RecordDistribution<T>(string name, T value, string? unit)
+            where T :  struct { }
+        public void RecordDistribution<T>(string name, T value, string? unit, Sentry.Scope? scope)
+            where T :  struct { }
+        public void RecordDistribution<T>(string name, T value, string? unit, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes, Sentry.Scope? scope = null)
             where T :  struct { }
         public void RecordDistribution<T>(string name, T value, string? unit, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
             where T :  struct { }
-        public void RecordDistribution<T>(string name, T value, string? unit = null, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes = null, Sentry.Scope? scope = null)
+        public void RecordGauge<T>(string name, T value)
             where T :  struct { }
-        public void RecordGauge<T>(string name, T value, string? unit = null, Sentry.Scope? scope = null)
+        public void RecordGauge<T>(string name, T value, string? unit)
+            where T :  struct { }
+        public void RecordGauge<T>(string name, T value, string? unit, Sentry.Scope? scope)
+            where T :  struct { }
+        public void RecordGauge<T>(string name, T value, string? unit, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes, Sentry.Scope? scope = null)
             where T :  struct { }
         public void RecordGauge<T>(string name, T value, string? unit, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
-            where T :  struct { }
-        public void RecordGauge<T>(string name, T value, string? unit = null, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes = null, Sentry.Scope? scope = null)
             where T :  struct { }
     }
     public class SentryTransaction : Sentry.IEventLike, Sentry.IHasData, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISentryJsonSerializable, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
