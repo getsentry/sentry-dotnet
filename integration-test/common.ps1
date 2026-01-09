@@ -134,6 +134,7 @@ BeforeAll {
                     /p:SentryProject=project `
                     /p:SentryUrl=$url `
                     /p:SentryAuthToken=dummy `
+                    /p:SentryProGuardUUID=a5fb4278-bcb5-4464-8585-d811dc3c3959 `
                 | ForEach-Object {
                     if ($_ -match "^Time Elapsed ")
                     {
