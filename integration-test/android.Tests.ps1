@@ -77,14 +77,15 @@ Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-
             Write-Host '::endgroup::'
             $LASTEXITCODE | Should -Be 0
 
-            Write-Host "Waiting for app..."
-            $initialPid = $null
             do
             {
-                Start-Sleep -Milliseconds 100
-                $currentPid = (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
-                if (-not $initialPid) { $initialPid = $currentPid }
-            } while (-not $initialPid -or $currentPid -eq $initialPid)
+                Write-Host "Waiting for app..."
+                Start-Sleep -Seconds 1
+
+                $procid = (& xharness android adb -- shell pidof "io.sentry.dotnet.maui.device.integrationtestapp") -replace '\s', ''
+                $activity = (& xharness android adb -- shell dumpsys activity activities) -match "io\.sentry\.dotnet\.maui\.device\.integrationtestapp"
+
+            } while ($procid -and $activity)
         }
 
         function UninstallAndroidApp
