@@ -1,6 +1,5 @@
 using Sentry.Internal;
 using Sentry.Protocol.Envelopes;
-using Sentry.Protocol.Metrics;
 
 namespace Sentry.Extensibility;
 
@@ -267,4 +266,10 @@ public class DisabledHub : IHub, IDisposable
     /// Disabled Logger.
     /// </summary>
     public SentryStructuredLogger Logger => DisabledSentryStructuredLogger.Instance;
+
+    /// <summary>
+    /// Disabled Metrics.
+    /// </summary>
+    [Experimental("SENTRYTRACECONNECTEDMETRICS")]
+    public SentryTraceMetrics Metrics => DisabledSentryTraceMetrics.Instance;
 }

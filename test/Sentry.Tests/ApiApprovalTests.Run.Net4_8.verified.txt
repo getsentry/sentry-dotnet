@@ -185,6 +185,7 @@ namespace Sentry
         bool IsSessionActive { get; }
         Sentry.SentryId LastEventId { get; }
         Sentry.SentryStructuredLogger Logger { get; }
+        Sentry.SentryTraceMetrics Metrics { get; }
         void BindException(System.Exception exception, Sentry.ISpan span);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.SentryHint? hint, System.Action<Sentry.Scope> configureScope);
@@ -646,6 +647,26 @@ namespace Sentry
         protected abstract Sentry.ISpan? ProcessRequest(System.Net.Http.HttpRequestMessage request, string method, string url);
         protected override System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { }
     }
+    public enum SentryMetricType
+    {
+        Counter = 0,
+        Gauge = 1,
+        Distribution = 2,
+    }
+    [System.Diagnostics.DebuggerDisplay("SentryMetric \\{ Type = {Type}, Name = \'{Name}\', Value = {Value} \\}")]
+    public sealed class SentryMetric<T>
+        where T :  struct
+    {
+        public System.Collections.Generic.IReadOnlyDictionary<string, object> Attributes { get; }
+        public string Name { get; init; }
+        public Sentry.SpanId? SpanId { get; init; }
+        public System.DateTimeOffset Timestamp { get; init; }
+        public Sentry.SentryId TraceId { get; init; }
+        public Sentry.SentryMetricType Type { get; init; }
+        public string? Unit { get; init; }
+        public T Value { get; init; }
+        public void SetAttribute(string key, object value) { }
+    }
     public enum SentryMonitorInterval
     {
         Year = 0,
@@ -697,6 +718,7 @@ namespace Sentry
         public bool EnableScopeSync { get; set; }
         public bool EnableSpotlight { get; set; }
         public string? Environment { get; set; }
+        public Sentry.SentryOptions.ExperimentalSentryOptions Experimental { get; }
         public System.Collections.Generic.IList<Sentry.HttpStatusCodeRange> FailedRequestStatusCodes { get; set; }
         public System.Collections.Generic.IList<Sentry.StringOrRegex> FailedRequestTargets { get; set; }
         public System.TimeSpan FlushTimeout { get; set; }
@@ -778,6 +800,12 @@ namespace Sentry
         public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryTransaction?> beforeSendTransaction) { }
         public void SetBeforeSendTransaction(System.Func<Sentry.SentryTransaction, Sentry.SentryHint, Sentry.SentryTransaction?> beforeSendTransaction) { }
         public Sentry.SentryOptions UseStackTraceFactory(Sentry.Extensibility.ISentryStackTraceFactory sentryStackTraceFactory) { }
+        public class ExperimentalSentryOptions
+        {
+            public bool EnableMetrics { get; set; }
+            public void SetBeforeSendMetric<T>(System.Func<Sentry.SentryMetric<T>, Sentry.SentryMetric<T>?> beforeSendMetric)
+                where T :  struct { }
+        }
     }
     public sealed class SentryPackage : Sentry.ISentryJsonSerializable
     {
@@ -807,6 +835,7 @@ namespace Sentry
     }
     public static class SentrySdk
     {
+        public static Sentry.SentrySdk.ExperimentalSentrySdk Experimental { get; }
         public static bool IsEnabled { get; }
         public static bool IsSessionActive { get; }
         public static Sentry.SentryId LastEventId { get; }
@@ -870,6 +899,10 @@ namespace Sentry
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, Sentry.SentryTraceHeader traceHeader) { }
         public static Sentry.ITransactionTracer StartTransaction(string name, string operation, string? description) { }
         public static void UnsetTag(string key) { }
+        public sealed class ExperimentalSentrySdk
+        {
+            public Sentry.SentryTraceMetrics Metrics { get; }
+        }
     }
     public class SentrySession : Sentry.ISentrySession
     {
@@ -986,6 +1019,30 @@ namespace Sentry
         public Sentry.SentryId TraceId { get; }
         public override string ToString() { }
         public static Sentry.SentryTraceHeader? Parse(string value) { }
+    }
+    public abstract class SentryTraceMetrics
+    {
+        public void AddCounter<T>(string name, T value, Sentry.Scope? scope = null)
+            where T :  struct { }
+        public void AddCounter<T>(string name, T value, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes = null, Sentry.Scope? scope = null)
+            where T :  struct { }
+        public void AddCounter<T>(string name, T value, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
+        protected abstract void CaptureMetric<T>(Sentry.SentryMetric<T> metric)
+            where T :  struct;
+        protected abstract void Flush();
+        public void RecordDistribution<T>(string name, T value, string? unit = null, Sentry.Scope? scope = null)
+            where T :  struct { }
+        public void RecordDistribution<T>(string name, T value, string? unit, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
+        public void RecordDistribution<T>(string name, T value, string? unit = null, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes = null, Sentry.Scope? scope = null)
+            where T :  struct { }
+        public void RecordGauge<T>(string name, T value, string? unit = null, Sentry.Scope? scope = null)
+            where T :  struct { }
+        public void RecordGauge<T>(string name, T value, string? unit, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
+        public void RecordGauge<T>(string name, T value, string? unit = null, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes = null, Sentry.Scope? scope = null)
+            where T :  struct { }
     }
     public class SentryTransaction : Sentry.IEventLike, Sentry.IHasData, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISentryJsonSerializable, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
@@ -1361,6 +1418,7 @@ namespace Sentry.Extensibility
         public bool IsSessionActive { get; }
         public Sentry.SentryId LastEventId { get; }
         public Sentry.SentryStructuredLogger Logger { get; }
+        public Sentry.SentryTraceMetrics Metrics { get; }
         public void BindClient(Sentry.ISentryClient client) { }
         public void BindException(System.Exception exception, Sentry.ISpan span) { }
         public Sentry.SentryId CaptureCheckIn(string monitorSlug, Sentry.CheckInStatus status, Sentry.SentryId? sentryId = default, System.TimeSpan? duration = default, Sentry.Scope? scope = null, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
@@ -1408,6 +1466,7 @@ namespace Sentry.Extensibility
         public bool IsSessionActive { get; }
         public Sentry.SentryId LastEventId { get; }
         public Sentry.SentryStructuredLogger Logger { get; }
+        public Sentry.SentryTraceMetrics Metrics { get; }
         public void AddBreadcrumb(string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public void AddBreadcrumb(Sentry.Infrastructure.ISystemClock clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public void BindClient(Sentry.ISentryClient client) { }
