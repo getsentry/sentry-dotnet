@@ -10,6 +10,10 @@ on:
       - "**.md"
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   build-sentry-native:
     name: sentry-native (${{ matrix.rid }})
