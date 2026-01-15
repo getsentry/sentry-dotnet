@@ -39,7 +39,7 @@ public sealed class HubAdapter : IHub
     /// <summary>
     /// Forwards the call to <see cref="SentrySdk"/>.
     /// </summary>
-    [Experimental("SENTRYTRACECONNECTEDMETRICS")]
+    [Experimental("SENTRYTRACECONNECTEDMETRICS", UrlFormat = "https://github.com/getsentry/sentry-dotnet/discussions/4838")]
     public SentryTraceMetrics Metrics { [DebuggerStepThrough] get => SentrySdk.Experimental.Metrics; }
 
     /// <summary>

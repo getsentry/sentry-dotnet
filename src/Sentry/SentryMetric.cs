@@ -15,7 +15,7 @@ namespace Sentry;
 [DebuggerDisplay(@"SentryMetric \{ Type = {Type}, Name = '{Name}', Value = {Value} \}")]
 public sealed class SentryMetric<T> : ISentryMetric where T : struct
 {
-    private Dictionary<string, object>? _attributes;
+    private readonly Dictionary<string, SentryAttribute> _attributes;
 
     [SetsRequiredMembers]
     internal SentryMetric(DateTimeOffset timestamp, SentryId traceId, SentryMetricType type, string name, T value)
@@ -25,6 +25,8 @@ public sealed class SentryMetric<T> : ISentryMetric where T : struct
         Type = type;
         Name = name;
         Value = value;
+        // 7 is the number of built-in attributes, so we start with that.
+        _attributes = new Dictionary<string, SentryAttribute>(7);
     }
 
     /// <summary>
@@ -38,10 +40,6 @@ public sealed class SentryMetric<T> : ISentryMetric where T : struct
     /// <summary>
     /// The trace id of the metric.
     /// </summary>
-    /// <remarks>
-    /// The value should be 16 random bytes encoded as a hex string (32 characters long).
-    /// The trace id should be grabbed from the current propagation context in the SDK.
-    /// </remarks>
     public required SentryId TraceId { get; init; }
 
     /// <summary>
@@ -107,10 +105,6 @@ public sealed class SentryMetric<T> : ISentryMetric where T : struct
     /// <summary>
     /// The span id of the span that was active when the metric was emitted.
     /// </summary>
-    /// <remarks>
-    /// The value should be 8 random bytes encoded as a hex string (16 characters long).
-    /// The span id should be grabbed from the current active span in the SDK.
-    /// </remarks>
     public SpanId? SpanId { get; init; }
 
     /// <summary>
@@ -122,56 +116,114 @@ public sealed class SentryMetric<T> : ISentryMetric where T : struct
     public string? Unit { get; init; }
 
     /// <summary>
-    /// A dictionary of key-value pairs of arbitrary data attached to the metric.
+    /// Gets the attribute value associated with the specified key.
     /// </summary>
     /// <remarks>
-    /// Attributes must also declare the type of the value.
-    /// Supported Types:
+    /// Returns <see langword="true"/> if the <see cref="SentryMetric{T}"/> contains an attribute with the specified key which is of type <typeparamref name="TAttribute"/> and it's value is not <see langword="null"/>.
+    /// Otherwise <see langword="false"/>.
+    /// Supported types:
     /// <list type="table">
     ///   <listheader>
     ///     <term>Type</term>
-    ///     <description>Comment</description>
+    ///     <description>Range</description>
     ///   </listheader>
     ///   <item>
     ///     <term>string</term>
-    ///     <description></description>
+    ///     <description><see langword="string"/> and <see langword="char"/></description>
     ///   </item>
     ///   <item>
     ///     <term>boolean</term>
-    ///     <description></description>
+    ///     <description><see langword="false"/> and <see langword="true"/></description>
     ///   </item>
     ///   <item>
     ///     <term>integer</term>
-    ///     <description>64-bit signed integer</description>
+    ///     <description>64-bit signed integral numeric types</description>
     ///   </item>
     ///   <item>
     ///     <term>double</term>
-    ///     <description>64-bit floating point number</description>
+    ///     <description>64-bit floating-point numeric types</description>
     ///   </item>
     /// </list>
-    /// Integers should be 64-bit signed integers.
-    /// For 64-bit unsigned integers, use the string type to avoid overflow issues until unsigned integers are natively supported.
+    /// Unsupported types:
+    /// <list type="table">
+    ///   <listheader>
+    ///     <term>Type</term>
+    ///     <description>Result</description>
+    ///   </listheader>
+    ///   <item>
+    ///     <term><see langword="object"/></term>
+    ///     <description><c>ToString</c> as <c>"type": "string"</c></description>
+    ///   </item>
+    ///   <item>
+    ///     <term>Collections</term>
+    ///     <description><c>ToString</c> as <c>"type": "string"</c></description>
+    ///   </item>
+    ///   <item>
+    ///     <term><see langword="null"/></term>
+    ///     <description>ignored</description>
+    ///   </item>
+    /// </list>
     /// </remarks>
-    public IReadOnlyDictionary<string, object> Attributes
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
+    public bool TryGetAttribute<TAttribute>(string key, [MaybeNullWhen(false)] out TAttribute value)
     {
-        get
+        if (_attributes.TryGetValue(key, out var attribute) && attribute.Value is TAttribute attributeValue)
         {
-#if NET8_0_OR_GREATER
-            return _attributes ?? (IReadOnlyDictionary<string, object>)ReadOnlyDictionary<string, object>.Empty;
-#else
-            return _attributes ?? EmptyAttributes;
-#endif
+            value = attributeValue;
+            return true;
         }
+
+        value = default;
+        return false;
     }
 
     /// <summary>
     /// Set a key-value pair of data attached to the metric.
     /// </summary>
-    public void SetAttribute(string key, object value)
+    public void SetAttribute<TAttribute>(string key, TAttribute value) where TAttribute : notnull
     {
-        _attributes ??= new Dictionary<string, object>();
+        if (value is null)
+        {
+            return;
+        }
 
         _attributes[key] = new SentryAttribute(value);
+    }
+
+    internal void SetAttribute(string key, string value)
+    {
+        _attributes[key] = new SentryAttribute(value, "string");
+    }
+
+    internal void SetAttribute(string key, char value)
+    {
+        _attributes[key] = new SentryAttribute(value.ToString(), "string");
+    }
+
+    internal void SetAttribute(string key, int value)
+    {
+        _attributes[key] = new SentryAttribute(value, "integer");
+    }
+
+    internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk)
+    {
+        var environment = options.SettingLocator.GetEnvironment();
+        SetAttribute("sentry.environment", environment);
+
+        var release = options.SettingLocator.GetRelease();
+        if (release is not null)
+        {
+            SetAttribute("sentry.release", release);
+        }
+
+        if (sdk.Name is { } name)
+        {
+            SetAttribute("sentry.sdk.name", name);
+        }
+        if (sdk.Version is { } version)
+        {
+            SetAttribute("sentry.sdk.version", version);
+        }
     }
 
     internal void SetAttributes(IEnumerable<KeyValuePair<string, object>>? attributes)
@@ -181,30 +233,16 @@ public sealed class SentryMetric<T> : ISentryMetric where T : struct
             return;
         }
 
-        if (_attributes is null)
-        {
-            if (attributes.TryGetNonEnumeratedCount(out var count))
-            {
-                _attributes = new Dictionary<string, object>(count);
-            }
-            else
-            {
-                _attributes = new Dictionary<string, object>();
-            }
-        }
-        else
-        {
 #if NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER
-            if (attributes.TryGetNonEnumeratedCount(out var count))
-            {
-                _ = _attributes.EnsureCapacity(_attributes.Count + count);
-            }
-#endif
+        if (attributes.TryGetNonEnumeratedCount(out var count))
+        {
+            _ = _attributes.EnsureCapacity(_attributes.Count + count);
         }
+#endif
 
         foreach (var attribute in attributes)
         {
-            _attributes[attribute.Key] = attribute.Value;
+            _attributes[attribute.Key] = new SentryAttribute(attribute.Value);
         }
     }
 
@@ -215,20 +253,13 @@ public sealed class SentryMetric<T> : ISentryMetric where T : struct
             return;
         }
 
-        if (_attributes is null)
-        {
-            _attributes = new Dictionary<string, object>(attributes.Length);
-        }
-        else
-        {
 #if NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER
-            _ = _attributes.EnsureCapacity(_attributes.Count + attributes.Length);
+        _ = _attributes.EnsureCapacity(_attributes.Count + attributes.Length);
 #endif
-        }
 
         foreach (var attribute in attributes)
         {
-            _attributes[attribute.Key] = attribute.Value;
+            _attributes[attribute.Key] = new SentryAttribute(attribute.Value);
         }
     }
 
@@ -264,25 +295,18 @@ public sealed class SentryMetric<T> : ISentryMetric where T : struct
             writer.WriteString("unit", Unit);
         }
 
-        if (_attributes is not null && _attributes.Count != 0)
+        writer.WritePropertyName("attributes");
+        writer.WriteStartObject();
+
+        foreach (var attribute in _attributes)
         {
-            writer.WritePropertyName("attributes");
-            writer.WriteStartObject();
-
-            foreach (var attribute in _attributes)
-            {
-                SentryAttributeSerializer.WriteAttribute(writer, attribute.Key, attribute.Value, logger);
-            }
-
-            writer.WriteEndObject();
+            SentryAttributeSerializer.WriteAttribute(writer, attribute.Key, attribute.Value, logger);
         }
 
         writer.WriteEndObject();
-    }
 
-#if !NET8_0_OR_GREATER
-    private static IReadOnlyDictionary<string, object> EmptyAttributes { get; } = new ReadOnlyDictionary<string, object>(new Dictionary<string, object>());
-#endif
+        writer.WriteEndObject();
+    }
 }
 
 // TODO: remove after upgrading <LangVersion>14.0</LangVersion> and updating <PackageReference Include="Polyfill" />
@@ -316,24 +340,11 @@ file static class EnumerableExtensions
 
 file static class Utf8JsonWriterExtensions
 {
-    //TODO: Integers should be a 64-bit signed integer, while doubles should be a 64-bit floating point number.
     internal static void WriteMetricValue<T>(this Utf8JsonWriter writer, string propertyName, T value) where T : struct
     {
         var type = typeof(T);
 
-        if (type == typeof(byte))
-        {
-            writer.WriteNumber(propertyName, (byte)(object)value);
-        }
-        else if (type == typeof(short))
-        {
-            writer.WriteNumber(propertyName, (short)(object)value);
-        }
-        else if (type == typeof(int))
-        {
-            writer.WriteNumber(propertyName, (int)(object)value);
-        }
-        else if (type == typeof(long))
+        if (type == typeof(long))
         {
             writer.WriteNumber(propertyName, (long)(object)value);
         }
@@ -341,13 +352,21 @@ file static class Utf8JsonWriterExtensions
         {
             writer.WriteNumber(propertyName, (double)(object)value);
         }
+        else if (type == typeof(int))
+        {
+            writer.WriteNumber(propertyName, (int)(object)value);
+        }
         else if (type == typeof(float))
         {
             writer.WriteNumber(propertyName, (float)(object)value);
         }
-        else if (type == typeof(decimal))
+        else if (type == typeof(short))
         {
-            writer.WriteNumber(propertyName, (decimal)(object)value);
+            writer.WriteNumber(propertyName, (short)(object)value);
+        }
+        else if (type == typeof(byte))
+        {
+            writer.WriteNumber(propertyName, (byte)(object)value);
         }
         else
         {

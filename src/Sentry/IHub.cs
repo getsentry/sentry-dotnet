@@ -39,7 +39,7 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// <item><see cref="Sentry.SentryOptions.ExperimentalSentryOptions.SetBeforeSendMetric{T}(System.Func{SentryMetric{T}, SentryMetric{T}})"/></item>
     /// </list>
     /// </remarks>
-    [Experimental("SENTRYTRACECONNECTEDMETRICS")]
+    [Experimental("SENTRYTRACECONNECTEDMETRICS", UrlFormat = "https://github.com/getsentry/sentry-dotnet/discussions/4838")]
     public SentryTraceMetrics Metrics { get; }
 
     /// <summary>

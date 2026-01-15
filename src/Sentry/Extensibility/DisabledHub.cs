@@ -270,6 +270,6 @@ public class DisabledHub : IHub, IDisposable
     /// <summary>
     /// Disabled Metrics.
     /// </summary>
-    [Experimental("SENTRYTRACECONNECTEDMETRICS")]
+    [Experimental("SENTRYTRACECONNECTEDMETRICS", UrlFormat = "https://github.com/getsentry/sentry-dotnet/discussions/4838")]
     public SentryTraceMetrics Metrics => DisabledSentryTraceMetrics.Instance;
 }

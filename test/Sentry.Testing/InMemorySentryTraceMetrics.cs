@@ -55,6 +55,12 @@ public sealed class InMemorySentryTraceMetrics : SentryTraceMetrics
         public ImmutableDictionary<string, object> Attributes { get; }
         public Scope? Scope { get; }
 
+        public void AssertEqual(SentryMetricType type, string name, object value)
+        {
+            var expected = Create(type, name, value, null, null, null);
+            Assert.Equal(expected, this);
+        }
+
         public void AssertEqual(SentryMetricType type, string name, object value, string? unit, IEnumerable<KeyValuePair<string, object>>? attributes, Scope? scope)
         {
             var expected = Create(type, name, value, unit, attributes, scope);

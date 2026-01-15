@@ -27,20 +27,47 @@ internal sealed class DefaultSentryTraceMetrics : SentryTraceMetrics, IDisposabl
     /// <inheritdoc />
     private protected override void CaptureMetric<T>(SentryMetricType type, string name, T value, string? unit, IEnumerable<KeyValuePair<string, object>>? attributes, Scope? scope) where T : struct
     {
-        var metric = SentryMetric.Create(_hub, _clock, type, name, value, unit, attributes, scope);
+        if (!SentryMetric.IsSupported(typeof(T)))
+        {
+            _options.DiagnosticLogger?.LogWarning("{0} is unsupported type for Sentry Metrics. The only supported types are byte, short, int, long, float, and double.", typeof(T));
+            return;
+        }
+
+        if (string.IsNullOrEmpty(name))
+        {
+            _options.DiagnosticLogger?.LogWarning("Name of metrics cannot be null or empty. Metric-Type: {0}; Value-Type: {1}", type.ToString(), typeof(T));
+            return;
+        }
+
+        var metric = SentryMetric.Create(_hub, _options, _clock, type, name, value, unit, attributes, scope);
         CaptureMetric(metric);
     }
 
     /// <inheritdoc />
     private protected override void CaptureMetric<T>(SentryMetricType type, string name, T value, string? unit, ReadOnlySpan<KeyValuePair<string, object>> attributes, Scope? scope) where T : struct
     {
-        var metric = SentryMetric.Create(_hub, _clock, type, name, value, unit, attributes, scope);
+        if (!SentryMetric.IsSupported(typeof(T)))
+        {
+            _options.DiagnosticLogger?.LogWarning("{0} is unsupported type for Sentry Metrics. The only supported types are byte, short, int, long, float, and double.", typeof(T));
+            return;
+        }
+
+        if (string.IsNullOrEmpty(name))
+        {
+            _options.DiagnosticLogger?.LogWarning("Name of metrics cannot be null or empty. Metric-Type: {0}; Value-Type: {1}", type.ToString(), typeof(T));
+            return;
+        }
+
+        var metric = SentryMetric.Create(_hub, _options, _clock, type, name, value, unit, attributes, scope);
         CaptureMetric(metric);
     }
 
     /// <inheritdoc />
     protected internal override void CaptureMetric<T>(SentryMetric<T> metric) where T : struct
     {
+        Debug.Assert(SentryMetric.IsSupported(typeof(T)));
+        Debug.Assert(!string.IsNullOrEmpty(metric.Name));
+
         var configuredMetric = metric;
 
         if (_options.Experimental.BeforeSendMetricInternal is { } beforeSendMetric)

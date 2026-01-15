@@ -30,7 +30,7 @@ namespace Sentry.Internal;
 /// <seealso href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/batchprocessor/README.md">OpenTelemetry Batch Processor</seealso>
 /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/">Sentry Logs</seealso>
 /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/">Sentry Metrics</seealso>
-internal sealed class BatchProcessor<TItem> : IDisposable
+internal sealed class BatchProcessor<TItem> : IDisposable where TItem : notnull
 {
     private readonly IHub _hub;
     private readonly Action<IHub, TItem[]> _sendAction;
@@ -68,7 +68,7 @@ internal sealed class BatchProcessor<TItem> : IDisposable
             if (!TryEnqueue(activeBuffer, item))
             {
                 _clientReportRecorder.RecordDiscardedEvent(DiscardReason.Backpressure, DataCategory.Default, 1);
-                _diagnosticLogger?.LogInfo("{0}-Buffer full ... dropping {0}", typeof(TItem).Name);
+                _diagnosticLogger?.LogInfo("{0}-Buffer full ... dropping {0}", item.GetType().Name);
             }
         }
     }
