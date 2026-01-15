@@ -93,7 +93,7 @@ async Task FirstFunction()
     SentrySdk.Logger.LogInfo("HTTP Request completed.");
     SentrySdk.Experimental.Metrics.EmitCounter("sentry.samples.console.basic.http_requests_completed", 1);
     SentrySdk.Experimental.Metrics.EmitDistribution("sentry.samples.console.basic.http_request_duration", stopwatch.Elapsed.TotalSeconds, "second",
-        [new KeyValuePair<string, object>("http.request.method", HttpMethod.Get.Method), new KeyValuePair<string,object>("http.response.status_code", (int)HttpStatusCode.OK)]);
+        [new KeyValuePair<string, object>("http.request.method", HttpMethod.Get.Method), new KeyValuePair<string, object>("http.response.status_code", (int)HttpStatusCode.OK)]);
 }
 
 async Task SecondFunction()
