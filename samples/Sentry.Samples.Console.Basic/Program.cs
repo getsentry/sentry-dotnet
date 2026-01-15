@@ -9,6 +9,8 @@
  * For more advanced features of the SDK, see Sentry.Samples.Console.Customized.
  */
 
+using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
 using static System.Console;
 
@@ -50,6 +52,17 @@ SentrySdk.Init(options =>
         // Drop logs with level Info
         return log.Level is SentryLogLevel.Info ? null : log;
     });
+
+    // Sentry (trace-connected) Metrics via SentrySdk.Experimental.Metrics are enabled by default.
+    options.Experimental.SetBeforeSendMetric<int>(static metric =>
+    {
+        // A demonstration of how you can modify the metric object before sending it to Sentry
+        metric.SetAttribute("operating_system.platform", Environment.OSVersion.Platform.ToString());
+        metric.SetAttribute("operating_system.version", Environment.OSVersion.Version.ToString());
+
+        // Return null to drop the metric
+        return metric;
+    });
 });
 
 // This starts a new transaction and attaches it to the scope.
@@ -71,9 +84,16 @@ async Task FirstFunction()
     // This is an example of making an HttpRequest. A trace us automatically captured by Sentry for this.
     var messageHandler = new SentryHttpMessageHandler();
     var httpClient = new HttpClient(messageHandler, true);
+
+    var stopwatch = Stopwatch.StartNew();
     var html = await httpClient.GetStringAsync("https://example.com/");
+    stopwatch.Stop();
+
     WriteLine(html);
     SentrySdk.Logger.LogInfo("HTTP Request completed.");
+    SentrySdk.Experimental.Metrics.EmitCounter("sentry.samples.console.basic.http_requests_completed", 1);
+    SentrySdk.Experimental.Metrics.EmitDistribution("sentry.samples.console.basic.http_request_duration", stopwatch.Elapsed.TotalSeconds, "second",
+        [new KeyValuePair<string, object>("http.request.method", HttpMethod.Get.Method), new KeyValuePair<string,object>("http.response.status_code", (int)HttpStatusCode.OK)]);
 }
 
 async Task SecondFunction()
