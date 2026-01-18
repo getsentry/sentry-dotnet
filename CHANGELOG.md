@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 6.1.0-alpha.2
 
 ### BREAKING CHANGES
 
