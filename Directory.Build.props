@@ -1,8 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <VersionPrefix>6.0.0-rc.2</VersionPrefix>
-    <VersionSuffix>prerelease</VersionSuffix>
+    <VersionPrefix>6.0.0</VersionPrefix>
     <LangVersion>13</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
