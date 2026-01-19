@@ -61,19 +61,26 @@ public sealed class TraceConnectedMetricsAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        if (!method.Name.Equals("EmitCounter", StringComparison.Ordinal) &&
-            !method.Name.Equals("EmitGauge", StringComparison.Ordinal) &&
-            !method.Name.Equals("EmitDistribution", StringComparison.Ordinal))
-        {
-            return;
-        }
-
         if (method.ContainingAssembly is null || method.ContainingAssembly.Name != "Sentry")
         {
             return;
         }
 
         if (method.ContainingNamespace is null || method.ContainingNamespace.Name != "Sentry")
+        {
+            return;
+        }
+
+        string fullyQualifiedMetadataName;
+        if (method.Name is "EmitCounter" or "EmitGauge" or "EmitDistribution")
+        {
+            fullyQualifiedMetadataName = "Sentry.SentryTraceMetrics";
+        }
+        else if (method.Name is "SetBeforeSendMetric")
+        {
+            fullyQualifiedMetadataName = "Sentry.SentryOptions+ExperimentalSentryOptions";
+        }
+        else
         {
             return;
         }
@@ -89,7 +96,7 @@ public sealed class TraceConnectedMetricsAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        var sentryType = context.Compilation.GetTypeByMetadataName("Sentry.SentryTraceMetrics");
+        var sentryType = context.Compilation.GetTypeByMetadataName(fullyQualifiedMetadataName);
         if (sentryType is null)
         {
             return;

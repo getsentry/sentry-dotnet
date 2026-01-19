@@ -32,7 +32,12 @@ public class TraceConnectedMetricsAnalyzerTests
 
                     public class AnalyzerTest
                     {
-                        public void Test(IHub hub)
+                        public void Init(SentryOptions options)
+                        {
+                            options.Experimental.EnableMetrics = false;
+                        }
+
+                        public void Emit(IHub hub)
                         {
                             var metrics = SentrySdk.Experimental.Metrics;
 
@@ -74,7 +79,14 @@ public class TraceConnectedMetricsAnalyzerTests
 
                     public class AnalyzerTest
                     {
-                        public void Test(IHub hub)
+                        public void Init(SentryOptions options)
+                        {
+                            options.Experimental.SetBeforeSendMetric<byte>(static SentryMetric<byte>? (SentryMetric<byte> metric) => metric);
+                            options.Experimental.SetBeforeSendMetric<short>(BeforeSendMetric);
+                            options.Experimental.SetBeforeSendMetric<long>(OnBeforeSendMetric);
+                        }
+
+                        public void Emit(IHub hub)
                         {
                             var scope = new Scope(new SentryOptions());
                             var metrics = SentrySdk.Experimental.Metrics;
@@ -92,6 +104,16 @@ public class TraceConnectedMetricsAnalyzerTests
                             hub.Metrics.EmitDistribution("name", 3f);
                             SentrySdk.Experimental.Metrics.EmitDistribution<double>("name", 3.3d, "unit", [], scope);
                     #pragma warning restore SENTRYTRACECONNECTEDMETRICS
+                        }
+
+                        private static SentryMetric<T>? BeforeSendMetric<T>(SentryMetric<T> metric) where T : struct
+                        {
+                            return metric;
+                        }
+
+                        private static SentryMetric<long>? OnBeforeSendMetric(SentryMetric<long> metric)
+                        {
+                            return metric;
                         }
                     }
 
@@ -155,39 +177,60 @@ public class TraceConnectedMetricsAnalyzerTests
 
                     public class AnalyzerTest
                     {
-                        public void Test(IHub hub)
+                        public void Init(SentryOptions options)
+                        {
+                            {|#0:options.Experimental.SetBeforeSendMetric<sbyte>(static SentryMetric<sbyte>? (SentryMetric<sbyte> metric) => metric)|#0};
+                            {|#1:options.Experimental.SetBeforeSendMetric<ushort>(BeforeSendMetric)|#1};
+                            {|#2:options.Experimental.SetBeforeSendMetric<ulong>(OnBeforeSendMetric)|#2};
+                        }
+
+                        public void Emit(IHub hub)
                         {
                             var scope = new Scope(new SentryOptions());
                             var metrics = SentrySdk.Experimental.Metrics;
 
                     #pragma warning disable SENTRYTRACECONNECTEDMETRICS
-                            {|#0:metrics.EmitCounter("name", (uint)1)|#0};
-                            {|#1:hub.Metrics.EmitCounter("name", (StringComparison)1f)|#1};
-                            {|#2:SentrySdk.Experimental.Metrics.EmitCounter<decimal>("name", 1.1m, [], scope)|#2};
+                            {|#10:metrics.EmitCounter("name", (uint)1)|#10};
+                            {|#11:hub.Metrics.EmitCounter("name", (StringComparison)1f)|#11};
+                            {|#12:SentrySdk.Experimental.Metrics.EmitCounter<decimal>("name", 1.1m, [], scope)|#12};
 
-                            {|#3:metrics.EmitGauge("name", (uint)2)|#3};
-                            {|#4:hub.Metrics.EmitGauge("name", (StringComparison)2f)|#4};
-                            {|#5:SentrySdk.Experimental.Metrics.EmitGauge<decimal>("name", 2.2m, "unit", [], scope)|#5};
+                            {|#13:metrics.EmitGauge("name", (uint)2)|#13};
+                            {|#14:hub.Metrics.EmitGauge("name", (StringComparison)2f)|#14};
+                            {|#15:SentrySdk.Experimental.Metrics.EmitGauge<decimal>("name", 2.2m, "unit", [], scope)|#15};
 
-                            {|#6:metrics.EmitDistribution("name", (uint)3)|#6};
-                            {|#7:hub.Metrics.EmitDistribution("name", (StringComparison)3f)|#7};
-                            {|#8:SentrySdk.Experimental.Metrics.EmitDistribution<decimal>("name", 3.3m, "unit", [], scope)|#8};
+                            {|#16:metrics.EmitDistribution("name", (uint)3)|#16};
+                            {|#17:hub.Metrics.EmitDistribution("name", (StringComparison)3f)|#17};
+                            {|#18:SentrySdk.Experimental.Metrics.EmitDistribution<decimal>("name", 3.3m, "unit", [], scope)|#18};
                     #pragma warning restore SENTRYTRACECONNECTEDMETRICS
+                        }
+
+                        private static SentryMetric<T>? BeforeSendMetric<T>(SentryMetric<T> metric) where T : struct
+                        {
+                            return metric;
+                        }
+
+                        private static SentryMetric<ulong>? OnBeforeSendMetric(SentryMetric<ulong> metric)
+                        {
+                            return metric;
                         }
                     }
                     """
                 },
                 ExpectedDiagnostics =
                 {
-                    CreateDiagnostic(0, typeof(uint)),
-                    CreateDiagnostic(1, typeof(StringComparison)),
-                    CreateDiagnostic(2, typeof(decimal)),
-                    CreateDiagnostic(3, typeof(uint)),
-                    CreateDiagnostic(4, typeof(StringComparison)),
-                    CreateDiagnostic(5, typeof(decimal)),
-                    CreateDiagnostic(6, typeof(uint)),
-                    CreateDiagnostic(7, typeof(StringComparison)),
-                    CreateDiagnostic(8, typeof(decimal)),
+                    CreateDiagnostic(0, typeof(sbyte)),
+                    CreateDiagnostic(1, typeof(ushort)),
+                    CreateDiagnostic(2, typeof(ulong)),
+
+                    CreateDiagnostic(10, typeof(uint)),
+                    CreateDiagnostic(11, typeof(StringComparison)),
+                    CreateDiagnostic(12, typeof(decimal)),
+                    CreateDiagnostic(13, typeof(uint)),
+                    CreateDiagnostic(14, typeof(StringComparison)),
+                    CreateDiagnostic(15, typeof(decimal)),
+                    CreateDiagnostic(16, typeof(uint)),
+                    CreateDiagnostic(17, typeof(StringComparison)),
+                    CreateDiagnostic(18, typeof(decimal)),
                 },
             }
         };
