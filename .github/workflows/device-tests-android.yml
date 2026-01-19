@@ -129,7 +129,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           repository: getsentry/github-workflows
-          ref: a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+          ref: 95603f4efe938315ff0dd427a1f2bb40b1889a92 # 3.2.0
           path: modules/github-workflows
 
       - name: Run Integration Tests
