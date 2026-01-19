@@ -18,14 +18,22 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.1" PrivateAssets="all" />
   </ItemGroup>
 
+  <!--
+    We use Simon Cropp's Polyfill source-only package to access APIs in lower targets.
+    https://github.com/SimonCropp/Polyfill
+  -->
+  <ItemGroup>
+    <PackageReference Include="Polyfill" Version="1.32.0" PrivateAssets="all" />
+  </ItemGroup>
+
   <ItemGroup>
     <Using Remove="System.Text.Json" />
     <Using Remove="System.Text.Json.Serialization" />
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
-    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
+    <AdditionalFiles Remove="AnalyzerReleases.Shipped.md" />
+    <AdditionalFiles Remove="AnalyzerReleases.Unshipped.md" />
   </ItemGroup>
 
 </Project>

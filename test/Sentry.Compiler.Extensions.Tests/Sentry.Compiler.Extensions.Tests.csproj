@@ -19,4 +19,8 @@
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Using Remove="Sentry.*" />
+  </ItemGroup>
+
 </Project>
