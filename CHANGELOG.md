@@ -6,6 +6,15 @@
 
 - Extended `SentryThread` by `Main` to allow indication whether the thread is considered the current main thread ([#4807](https://github.com/getsentry/sentry-dotnet/pull/4807))
 
+### Dependencies
+
+- Bump Native SDK from v0.12.2 to v0.12.3 ([#4832](https://github.com/getsentry/sentry-dotnet/pull/4832))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0123)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.12.2...0.12.3)
+- Bump Java SDK from v8.28.0 to v8.29.0 ([#4817](https://github.com/getsentry/sentry-dotnet/pull/4817))
+  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8290)
+  - [diff](https://github.com/getsentry/sentry-java/compare/8.28.0...8.29.0)
+
 ## 6.0.0
 
 ### BREAKING CHANGES
