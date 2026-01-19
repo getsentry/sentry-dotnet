@@ -53,7 +53,7 @@ internal abstract class AssemblyStoreReader
     {
         lock (StreamLock)
         {
-            ulong startOffset = GetStoreStartDataOffset();
+            var startOffset = GetStoreStartDataOffset();
             StoreStream.Seek((uint)startOffset + entry.DataOffset, SeekOrigin.Begin);
             var stream = new MemoryStream();
 
@@ -62,18 +62,25 @@ internal abstract class AssemblyStoreReader
                 throw new NotImplementedException();
             }
 
-            const long BufferSize = 65535;
-            byte[] buffer = Utils.BytePool.Rent((int)BufferSize);
-            long remainingToRead = entry.DataSize;
-
-            while (remainingToRead > 0)
+            const long bufferSize = 65535;
+            var buffer = Utils.BytePool.Rent((int)bufferSize);
+            try
             {
-                int nread = StoreStream.Read(buffer, 0, (int)Math.Min(BufferSize, remainingToRead));
-                stream.Write(buffer, 0, nread);
-                remainingToRead -= (long)nread;
+                long remainingToRead = entry.DataSize;
+
+                while (remainingToRead > 0)
+                {
+                    var nread = StoreStream.Read(buffer, 0, (int)Math.Min(bufferSize, remainingToRead));
+                    stream.Write(buffer, 0, nread);
+                    remainingToRead -= (long)nread;
+                }
+                stream.Flush();
+                stream.Seek(0, SeekOrigin.Begin);
             }
-            stream.Flush();
-            stream.Seek(0, SeekOrigin.Begin);
+            finally
+            {
+                Utils.BytePool.Return(buffer);
+            }
 
             return stream;
         }
