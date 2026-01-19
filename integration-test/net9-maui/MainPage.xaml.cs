@@ -5,12 +5,10 @@ public partial class MainPage : ContentPage
     public MainPage()
     {
         InitializeComponent();
-    }
 
-    protected override void OnAppearing()
-    {
-        base.OnAppearing();
-
-        App.OnAppearing();
+        this.Loaded += (s, e) =>
+        {
+            App.OnAppearing();
+        };
     }
 }

@@ -6,9 +6,6 @@ internal class FakeFileSystem : IFileSystem
 {
     private readonly MockFileSystem _fileSystem = new();
 
-    public IEnumerable<string> EnumerateDirectories(string path, string searchPattern) =>
-        _fileSystem.Directory.EnumerateDirectories(path, searchPattern);
-
     public IEnumerable<string> EnumerateFiles(string path) => _fileSystem.Directory.EnumerateFiles(path);
 
     public IEnumerable<string> EnumerateFiles(string path, string searchPattern) =>
@@ -31,16 +28,6 @@ internal class FakeFileSystem : IFileSystem
     {
         _fileSystem.Directory.CreateDirectory(path);
         return _fileSystem.Directory.Exists(path);
-    }
-
-    public bool TryCreateLockFile(string path, out Stream fileStream)
-    {
-        fileStream = _fileSystem.FileStream.New(
-            path,
-            FileMode.OpenOrCreate,
-            FileAccess.ReadWrite,
-            FileShare.None);
-        return true;
     }
 
     public bool DeleteDirectory(string path, bool recursive = false)

@@ -41,6 +41,16 @@ public class SentryAspNetCoreStructuredLoggerProviderTests
     private readonly Fixture _fixture = new();
 
     [Fact]
+    public void Type_CustomAttributes_HasProviderAliasAttribute()
+    {
+        var type = typeof(SentryAspNetCoreStructuredLoggerProvider);
+
+        type.GetCustomAttributes<ProviderAliasAttribute>().Should()
+            .ContainSingle().Which
+            .Alias.Should().Be("Sentry");
+    }
+
+    [Fact]
     public void Ctor_DependencyInjection_CanCreate()
     {
         using var services = new ServiceCollection()
