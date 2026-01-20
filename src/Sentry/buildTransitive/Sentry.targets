@@ -362,7 +362,9 @@
     </SentryGetApplicationVersion>
 
     <Exec ConsoleToMSBuild="true"  Condition="'$(_SentryRelease)' == ''"
-          Command="sentry-cli releases propose-version">
+          Command="sentry-cli releases propose-version"
+          IgnoreExitCode="'$(SENTRY_ALLOW_FAILURE)' == 'true'"
+          ContinueOnError="WarnAndContinue">
       <Output TaskParameter="ConsoleOutput" PropertyName="_SentryRelease"/>
     </Exec>
 
