@@ -19,6 +19,7 @@
   <PropertyGroup>
     <SentryAttributesFile>Sentry.Attributes$(MSBuildProjectExtension.Replace('proj', ''))</SentryAttributesFile>
     <SentryProGuardUUID Condition="'$(SentryProGuardUUID)' == ''">$([System.Guid]::NewGuid())</SentryProGuardUUID>
+    <SentryAllowFailure Condition="'$(SENTRY_ALLOW_FAILURE)' == 'true'">true</SentryAllowFailure>
   </PropertyGroup>
 
   <Target Name="_SentryEnsureAndroidEnableAssemblyCompressionDisabled"
@@ -130,8 +131,6 @@
       <SentryCLIDebugFilesUploadCommand Condition="'$(SentryCLIUploadOptions.Trim())' != ''">$(SentryCLIDebugFilesUploadCommand) $(SentryCLIUploadOptions.Trim())</SentryCLIDebugFilesUploadCommand>
       <SentryCLIProGuardMappingUploadCommand>$(SentryCLIBaseCommand) upload-proguard $(_SentryCLIProGuardOptions)</SentryCLIProGuardMappingUploadCommand>
       <SentryCLIProGuardMappingUploadCommand Condition="'$(SentryCLIUploadOptions.Trim())' != ''">$(SentryCLIProGuardMappingUploadCommand) $(SentryCLIUploadOptions.Trim())</SentryCLIProGuardMappingUploadCommand>
-
-      <SentryAllowFailure Condition="'$(SENTRY_ALLOW_FAILURE)' == 'true'">true</SentryAllowFailure>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(SentryCLI)' != ''">
@@ -363,8 +362,8 @@
 
     <Exec ConsoleToMSBuild="true"  Condition="'$(_SentryRelease)' == ''"
           Command="sentry-cli releases propose-version"
-          IgnoreExitCode="'$(SENTRY_ALLOW_FAILURE)' == 'true'"
-          ContinueOnError="WarnAndContinue">
+          IgnoreExitCode="'$(SentryAllowFailure)' == 'true'"
+          ContinueOnError="'$(SentryAllowFailure)' == 'true'">
       <Output TaskParameter="ConsoleOutput" PropertyName="_SentryRelease"/>
     </Exec>
 
