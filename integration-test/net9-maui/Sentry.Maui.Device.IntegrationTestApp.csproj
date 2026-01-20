@@ -2,7 +2,10 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(TargetFrameworks);net9.0-android35.0;net10.0-android36.0</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net9.0-ios;net10.0-ios</TargetFrameworks>
+    <!-- Pin target iOS version so that our tests don't break when new versions of Xcode are released.
+         'netX.0-ios' resolves the latest version of the iOS SDK otherwise.
+    -->
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net9.0-ios18.0;net10.0-ios26.0</TargetFrameworks>
 
     <OutputType>Exe</OutputType>
     <RootNamespace>Sentry.Maui.Device.IntegrationTestApp</RootNamespace>
@@ -31,14 +34,6 @@
 
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-
-    <!-- Pin target iOS version so that our tests don't break when new versions of Xcode are released.
-      'netX.0-ios' resolves the latest version of the iOS SDK otherwise.
-      Note that this could be done by setting the TargetFramework to net9.0-ios18 or net10.0-ios26... either do one or
-      the other, but not both. I've done it this way to avoid changing scripts that assume the abbreviated TFM.
-      -->
-    <TargetPlatformVersion Condition="'$(TargetFramework)' == 'net9.0-ios'">18.0</TargetPlatformVersion>
-    <TargetPlatformVersion Condition="'$(TargetFramework)' == 'net10.0-ios'">26.0</TargetPlatformVersion>
 
   </PropertyGroup>
 
