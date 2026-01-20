@@ -130,6 +130,8 @@
       <SentryCLIDebugFilesUploadCommand Condition="'$(SentryCLIUploadOptions.Trim())' != ''">$(SentryCLIDebugFilesUploadCommand) $(SentryCLIUploadOptions.Trim())</SentryCLIDebugFilesUploadCommand>
       <SentryCLIProGuardMappingUploadCommand>$(SentryCLIBaseCommand) upload-proguard $(_SentryCLIProGuardOptions)</SentryCLIProGuardMappingUploadCommand>
       <SentryCLIProGuardMappingUploadCommand Condition="'$(SentryCLIUploadOptions.Trim())' != ''">$(SentryCLIProGuardMappingUploadCommand) $(SentryCLIUploadOptions.Trim())</SentryCLIProGuardMappingUploadCommand>
+
+      <SentryAllowFailure Condition="'$(SENTRY_ALLOW_FAILURE)' == 'true'">true</SentryAllowFailure>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(SentryCLI)' != ''">
@@ -141,7 +143,7 @@
       <Output TaskParameter="ConsoleOutput" PropertyName="_SentryCLIOutput" />
     </Exec>
 
-    <PropertyGroup Condition="'$(_SentryCLIExitCode)' != '0'">
+    <PropertyGroup Condition="'$(_SentryCLIExitCode)' != '0' and '$(SentryAllowFailure)' != 'true'">
       <_SentryCLIRequestFailed Condition="$(_SentryCLIOutput.Contains('API request failed'))">true</_SentryCLIRequestFailed>
     </PropertyGroup>
     <Warning Condition="'$(_SentryCLIRequestFailed)' != ''"
