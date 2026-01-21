@@ -11,7 +11,7 @@ internal abstract class AssemblyStoreReader
 
     private static readonly UTF8Encoding ReaderEncoding = new UTF8Encoding(false);
 
-    internal object StreamLock { get; } = new();
+    internal Lock StreamLock { get; } = new();
     protected Stream StoreStream { get; }
 
     public abstract string Description { get; }

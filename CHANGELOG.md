@@ -8,7 +8,7 @@
 
 ### Fixes
 
-- Fixed threadsafety issue on Android when multiple events are captured concurrently ([#4814](https://github.com/getsentry/sentry-dotnet/pull/4814))
+- Fixed thread-safety issue on Android when multiple events are captured concurrently ([#4814](https://github.com/getsentry/sentry-dotnet/pull/4814))
 
 ### Dependencies
 

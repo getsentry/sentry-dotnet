@@ -9,13 +9,14 @@ public class StoreReaderTests
     {
         // Arrange
         var buffer = new byte[1024 * 1024];
-        var memoryStream = new MemoryStream(buffer);
+        using var memoryStream = new MemoryStream(buffer);
         var storeReader = new StoreReader(memoryStream, "testStore", null);
 
         // Act
-        Parallel.For(0, 10, _ => storeReader.IsSupported());
+        var result = Parallel.For(0, 10, _ => storeReader.IsSupported());
 
-        // No Assert - test passes if no exceptions are thrown
+        // Test passes if no exceptions are thrown, but we can also assert completion
+        result.IsCompleted.Should().BeTrue();
     }
 
     [Fact]
@@ -23,7 +24,7 @@ public class StoreReaderTests
     {
         // Arrange
         var buffer = new byte[1024 * 1024];
-        var memoryStream = new MemoryStream(buffer);
+        using var memoryStream = new MemoryStream(buffer);
         var storeReader = new StoreReader(memoryStream, "testStore", null);
         var entry = new StoreReader.StoreItemV2(
             AndroidTargetArch.Arm64,
@@ -43,8 +44,9 @@ public class StoreReaderTests
             ignore: false);
 
         // Act
-        Parallel.For(0, 10, _ => storeReader.ReadEntryImageData(entry));
+        var result = Parallel.For(0, 10, _ => storeReader.ReadEntryImageData(entry));
 
-        // No Assert - test passes if no exceptions are thrown
+        // Test passes if no exceptions are thrown, but we can also assert completion
+        result.IsCompleted.Should().BeTrue();
     }
 }
