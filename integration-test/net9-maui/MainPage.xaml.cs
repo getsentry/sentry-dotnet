@@ -39,6 +39,8 @@ public partial class MainPage : ContentPage
 
         SentrySdk.Close();
 #if ANDROID
+        // prevent auto-restart
+        Platform.CurrentActivity?.FinishAffinity();
         Process.KillProcess(Process.MyPid());
 #elif IOS
         System.Environment.Exit(0);
