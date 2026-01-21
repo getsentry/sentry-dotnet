@@ -5,6 +5,7 @@
 ### Fixes
 
 - Deliver system breadcrumbs in the main thread on Android ([#4671](https://github.com/getsentry/sentry-dotnet/pull/4671))
+  - backported via ([#4856](https://github.com/getsentry/sentry-dotnet/pull/4856))
 
 ### Dependencies
 
