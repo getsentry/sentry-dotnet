@@ -1,9 +1,9 @@
 namespace Sentry.Tests.Internals;
 
-public class UnsampledSpanTests
+public class UnsampledTransactionTests
 {
     [Fact]
-    public void StartChild_IsUnsampledSpan_HasReferenceToUnsampledTransaction()
+    public void StartChild_CreatesSpan_IsTrackedByParent()
     {
         // Arrange
         var hub = Substitute.For<IHub>();
@@ -16,12 +16,12 @@ public class UnsampledSpanTests
         var unsampledSpan = transaction.StartChild("Foo");
 
         // Assert
-        Assert.IsType<UnsampledSpan>(unsampledSpan);
-        Assert.Same(transaction, unsampledSpan.GetTransaction());
+        var span = Assert.Single(transaction.Spans);
+        Assert.Same(unsampledSpan, span);
     }
 
     [Fact]
-    public void GetTraceHeader_CreatesHeaderFromUnsampledTransaction()
+    public void Finish_WithTrackedSpans_ClearsTrackedSpans()
     {
         // Arrange
         var hub = Substitute.For<IHub>();
@@ -29,14 +29,12 @@ public class UnsampledSpanTests
             new SentryTraceHeader(SentryId.Create(), SpanId.Create(), false)
         );
         var transaction = new UnsampledTransaction(hub, context);
-        var unsampledSpan = transaction.StartChild("Foo");
+        _ = transaction.StartChild("Foo");
 
         // Act
-        var traceHeader = unsampledSpan.GetTraceHeader();
+        transaction.Finish();
 
         // Assert
-        traceHeader.TraceId.Should().Be(context.TraceId);
-        traceHeader.SpanId.Should().Be(context.SpanId);
-        traceHeader.IsSampled.Should().Be(context.IsSampled);
+        Assert.Empty(transaction.Spans);
     }
 }

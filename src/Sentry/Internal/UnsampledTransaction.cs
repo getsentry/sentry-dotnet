@@ -4,7 +4,7 @@ namespace Sentry.Internal;
 
 /// <summary>
 /// We know already, when starting a transaction, whether it's going to be sampled or not. When it's not sampled, we can
-/// avoid lots of unecessary processing. The only thing we need to track is the number of spans that would have been
+/// avoid lots of unnecessary processing. The only thing we need to track is the number of spans that would have been
 /// created (the client reports detailing discarded events includes this detail).
 /// </summary>
 internal sealed class UnsampledTransaction : NoOpTransaction
@@ -12,7 +12,12 @@ internal sealed class UnsampledTransaction : NoOpTransaction
     // Although it's a little bit wasteful to create separate individual class instances here when all we're going to
     // report to sentry is the span count (in the client report), SDK users may refer to things like
     // `ITransaction.Spans.Count`, so we create an actual collection
+#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
     private readonly ConcurrentBag<ISpan> _spans = [];
+#else
+    private ConcurrentBag<ISpan> _spans = [];
+#endif
+
     private readonly IHub _hub;
     private readonly ITransactionContext _context;
     private readonly SentryOptions? _options;
@@ -79,6 +84,9 @@ internal sealed class UnsampledTransaction : NoOpTransaction
         _options?.ClientReportRecorder.RecordDiscardedEvent(discardReason, DataCategory.Span, spanCount);
 
         _options?.LogDebug("Finished unsampled transaction");
+
+        // Release tracked spans
+        ReleaseSpans();
     }
 
     public override void Finish(SpanStatus status) => Finish();
@@ -102,5 +110,14 @@ internal sealed class UnsampledTransaction : NoOpTransaction
         var span = new UnsampledSpan(this, spanId);
         _spans.Add(span);
         return span;
+    }
+
+    private void ReleaseSpans()
+    {
+#if NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER
+        _spans.Clear();
+#else
+        _spans = [];
+#endif
     }
 }
