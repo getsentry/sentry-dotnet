@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixes
+
+- Deliver system breadcrumbs in the main thread on Android ([#4671](https://github.com/getsentry/sentry-dotnet/pull/4671))
+
 ### Dependencies
 
 - Bump Java SDK from v8.24.0 to v8.25.0 ([#4679](https://github.com/getsentry/sentry-dotnet/pull/4679))
