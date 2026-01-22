@@ -1984,71 +1984,6 @@ interface SentryOptions
     string DefaultEnvironment { get; }
 }
 
-// @interface SentryAttribute : NSObject
-[BaseType(typeof(NSObject), Name = "_TtC6Sentry15SentryAttribute")]
-[DisableDefaultCtor]
-[Internal]
-interface SentryAttribute
-{
-    // @property (readonly, copy, nonatomic) NSString * _Nonnull type;
-    [Export("type")]
-    string Type { get; }
-
-    // @property (readonly, nonatomic) id _Nonnull value;
-    [Export("value")]
-    NSObject Value { get; }
-
-    // -(instancetype _Nonnull)initWithString:(NSString * _Nonnull)value __attribute__((objc_designated_initializer));
-    [Export("initWithString:")]
-    [DesignatedInitializer]
-    NativeHandle Constructor(string value);
-
-    // -(instancetype _Nonnull)initWithBoolean:(BOOL)value __attribute__((objc_designated_initializer));
-    [Export("initWithBoolean:")]
-    [DesignatedInitializer]
-    NativeHandle Constructor(bool value);
-
-    // -(instancetype _Nonnull)initWithInteger:(NSInteger)value __attribute__((objc_designated_initializer));
-    [Export("initWithInteger:")]
-    [DesignatedInitializer]
-    NativeHandle Constructor(nint value);
-
-    // -(instancetype _Nonnull)initWithDouble:(double)value __attribute__((objc_designated_initializer));
-    [Export("initWithDouble:")]
-    [DesignatedInitializer]
-    NativeHandle Constructor(double value);
-
-    // -(instancetype _Nonnull)initWithFloat:(float)value __attribute__((objc_designated_initializer));
-    [Export("initWithFloat:")]
-    [DesignatedInitializer]
-    NativeHandle Constructor(float value);
-
-    // -(instancetype _Nonnull)initWithStringArray:(NSArray<NSString *> * _Nonnull)values __attribute__((objc_designated_initializer));
-    [Export("initWithStringArray:")]
-    [DesignatedInitializer]
-    NativeHandle Constructor(string[] values);
-
-    // -(instancetype _Nonnull)initWithBooleanArray:(NSArray<NSNumber *> * _Nonnull)values __attribute__((objc_designated_initializer));
-    [Export("initWithBooleanArray:")]
-    [DesignatedInitializer]
-    NativeHandle Constructor(NSNumber[] values);
-
-    // -(instancetype _Nonnull)initWithIntegerArray:(NSArray<NSNumber *> * _Nonnull)values __attribute__((objc_designated_initializer));
-    [Export("initWithIntegerArray:")]
-    [DesignatedInitializer]
-    NativeHandle Constructor(NSNumber[] values);
-
-    // -(instancetype _Nonnull)initWithDoubleArray:(NSArray<NSNumber *> * _Nonnull)values __attribute__((objc_designated_initializer));
-    [Export("initWithDoubleArray:")]
-    [DesignatedInitializer]
-    NativeHandle Constructor(NSNumber[] values);
-
-    // -(instancetype _Nonnull)initWithFloatArray:(NSArray<NSNumber *> * _Nonnull)values __attribute__((objc_designated_initializer));
-    [Export("initWithFloatArray:")]
-    [DesignatedInitializer]
-    NativeHandle Constructor(NSNumber[] values);
-}
-
 // @interface SentryClient : NSObject
 [BaseType(typeof(NSObject), Name = "_TtC6Sentry12SentryClient")]
 [DisableDefaultCtor]
@@ -2396,10 +2331,6 @@ interface SentryLog
     // -(instancetype _Nonnull)initWithLevel:(enum SentryLogLevel)level body:(NSString * _Nonnull)body attributes:(NSDictionary<NSString *,SentryAttribute *> * _Nonnull)attributes;
     [Export("initWithLevel:body:attributes:")]
     NativeHandle Constructor(SentryLogLevel level, string body, NSDictionary<NSString, NSObject> attributes);
-
-    // -(void)setAttribute:(SentryAttribute * _Nullable)attribute forKey:(NSString * _Nonnull)key;
-    [Export("setAttribute:forKey:")]
-    void SetAttribute([NullAllowed] SentryAttribute attribute, string key);
 }
 
 // @interface SentryLogger : NSObject

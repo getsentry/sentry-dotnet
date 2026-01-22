@@ -88,6 +88,8 @@ var nodes = tree.GetCompilationUnitRoot()
     .RemoveMethod("Sentry*", "IsEqual")
     // error CS0246: The type or namespace name '_NSZone' could not be found
     .RemoveMethod("Sentry*", "CopyWithZone")
+    // error CS0111: Type 'SentryAttribute' already defines a member called 'Constructor' with the same parameter types
+    .RemoveMethod("SentryLog", "SetAttribute")
     // SentryEnvelope* is not whitelisted
     .RemoveMethod("PrivateSentrySDKOnly", "CaptureEnvelope")
     .RemoveMethod("PrivateSentrySDKOnly", "EnvelopeWithData")
@@ -112,7 +114,6 @@ var nodes = tree.GetCompilationUnitRoot()
         "ISentryRRWebEvent",
         "PrivateSentrySDKOnly",
         "SentryAttachment",
-        "SentryAttribute",
         "SentryBaggage",
         "SentryBreadcrumb",
         "SentryClient",
