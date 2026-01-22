@@ -75,7 +75,7 @@ var nodes = tree.GetCompilationUnitRoot()
     // Fix nullable return attributes
     .RemoveAttribute("PrivateSentrySDKOnly", "Capture*", "NullAllowed")
     .WithAttribute("PrivateSentrySDKOnly", "CaptureScreenshots", "return: NullAllowed")
-    .WithAttribute("PrivateSentrySDKOnly", "CaptureViewHierarchies", "return: NullAllowed")
+    .WithAttribute("PrivateSentrySDKOnly", "CaptureViewHierarchy", "return: NullAllowed")
     // For PrivateApiDefinitions.cs
     .WithModifier("SentryScope", "partial")
     // error CS0246: The type or namespace name 'iOS' could not be found

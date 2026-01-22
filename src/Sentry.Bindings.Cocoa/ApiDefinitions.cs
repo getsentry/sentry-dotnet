@@ -1579,6 +1579,7 @@ interface PrivateSentrySDKOnly
     // +(NSData * _Nullable)captureViewHierarchy;
     [Static]
     [Export("captureViewHierarchy")]
+    [return: NullAllowed]
     NSData CaptureViewHierarchy();
 
     // +(void)setCurrentScreen:(NSString * _Nullable)screenName;
