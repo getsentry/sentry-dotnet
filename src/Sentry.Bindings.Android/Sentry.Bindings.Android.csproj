@@ -7,6 +7,23 @@
     <SentryNativeNdkVersion></SentryNativeNdkVersion>
     <Description>.NET Bindings for the Sentry Android SDK</Description>
 
+    <!--
+      Optional dev override: point at a local clone/build of https://github.com/getsentry/sentry-java
+      Example:
+        dotnet build -p:LocalSentryJavaRepoDir=/Users/you/code/sentry/sentry-java
+
+      When set then references to local build outputs (jar/aar) will be used intstead of Maven, to reference the
+      Sentry SDK for Java, which is useful for development/testing.
+    -->
+    <LocalSentryJavaRepoDir Condition="'$(LocalSentryJavaRepoDir)' == ''"></LocalSentryJavaRepoDir>
+    <UseLocalSentryJava Condition="'$(LocalSentryJavaRepoDir)' != '' and Exists('$(LocalSentryJavaRepoDir)')">true</UseLocalSentryJava>
+
+    <!-- Default relative paths for local artifacts (can be overridden if needed) -->
+    <LocalSentryJarPath Condition="'$(LocalSentryJarPath)' == ''">$(LocalSentryJavaRepoDir)sentry/build/libs/sentry-$(SentryAndroidSdkVersion).jar</LocalSentryJarPath>
+    <LocalSentryAndroidCoreAarPath Condition="'$(LocalSentryAndroidCoreAarPath)' == ''">$(LocalSentryJavaRepoDir)sentry-android-core/build/outputs/aar/sentry-android-core-debug.aar</LocalSentryAndroidCoreAarPath>
+    <LocalSentryAndroidNdkAarPath Condition="'$(LocalSentryAndroidNdkAarPath)' == ''">$(LocalSentryJavaRepoDir)sentry-android-ndk/build/outputs/aar/sentry-android-ndk-debug.aar</LocalSentryAndroidNdkAarPath>
+    <LocalSentryAndroidReplayAarPath Condition="'$(LocalSentryAndroidReplayAarPath)' == ''">$(LocalSentryJavaRepoDir)sentry-android-replay/build/outputs/aar/sentry-android-replay-debug.aar</LocalSentryAndroidReplayAarPath>
+
     <!-- Android binding warnings - these are largely unavoidable due to Java interface circular dependencies -->
     <!-- Only suppress warnings that are confirmed to be expected/unavoidable -->
     <!-- BG8801: Invalid parameter types - caused by circular interface dependencies in Sentry Java SDK -->
@@ -73,11 +90,19 @@
   </ItemGroup>
 
   <!-- Starting with .NET 9 we can detect Java dependencies using POM files and AndroidMavenLibrary references -->
-  <ItemGroup>
+  <ItemGroup Condition="'$(UseLocalSentryJava)' != 'true'">
     <AndroidMavenLibrary Include="io.sentry:sentry" Version="$(SentryAndroidSdkVersion)" />
     <AndroidMavenLibrary Include="io.sentry:sentry-android-core" Version="$(SentryAndroidSdkVersion)" />
     <AndroidMavenLibrary Include="io.sentry:sentry-android-ndk" Version="$(SentryAndroidSdkVersion)" />
     <AndroidMavenLibrary Include="io.sentry:sentry-android-replay" Version="$(SentryAndroidSdkVersion)" />
+  </ItemGroup>
+
+  <!-- Resolve Java dependencies from local sentry-java build outputs instead, if appropriate -->
+  <ItemGroup Condition="'$(UseLocalSentryJava)' == 'true'">
+    <AndroidLibrary Include="$(LocalSentryJarPath)" />
+    <AndroidAarLibrary Include="$(LocalSentryAndroidCoreAarPath)" />
+    <AndroidAarLibrary Include="$(LocalSentryAndroidNdkAarPath)" />
+    <AndroidAarLibrary Include="$(LocalSentryAndroidReplayAarPath)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -88,7 +113,7 @@
     <AndroidNativeLibrary Include="..\..\lib\sentrysupplemental\bin\x86_64\libsentrysupplemental.so" Abi="x86_64" />
   </ItemGroup>
 
-  <Target Name="DownloadSentryAndroidSdk" BeforeTargets="CollectPackageReferences">
+  <Target Name="DownloadSentryAndroidSdk" BeforeTargets="CollectPackageReferences" Condition="'$(UseLocalSentryJava)' != 'true'">
     <!-- The native-ndk exists outside of the android-ndk now. We're downloading the POM file to get the version of the native-ndk. -->
     <DownloadFile
       SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-ndk/$(SentryAndroidSdkVersion)/sentry-android-ndk-$(SentryAndroidSdkVersion).pom"
