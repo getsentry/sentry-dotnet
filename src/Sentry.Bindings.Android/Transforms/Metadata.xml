@@ -24,6 +24,7 @@
   <attr path="/api/package[@name='io.sentry.android.core.internal.threaddump']" name="managedName">Sentry.JavaSdk.Android.Core.Internal.ThreadDump</attr>
   <attr path="/api/package[@name='io.sentry.android.core.internal.util']" name="managedName">Sentry.JavaSdk.Android.Core.Internal.Util</attr>
   <attr path="/api/package[@name='io.sentry.android.ndk']" name="managedName">Sentry.JavaSdk.Android.Ndk</attr>
+  <attr path="/api/package[@name='io.sentry.android.replay']" name="managedName">Sentry.JavaSdk.Android.Replay</attr>
   <attr path="/api/package[@name='io.sentry.android.supplemental']" name="managedName">Sentry.JavaSdk.Android.Supplemental</attr>
   <attr path="/api/package[@name='io.sentry.cache']" name="managedName">Sentry.JavaSdk.Cache</attr>
   <!-- Renaming 'clientreport' to 'clientreports' (plural) as a workaround for typename matching namespace: io.sentry.clientreport.clientreport -->
@@ -72,7 +73,7 @@
   </add-node>
 
   <!-- Fix missing compareTo(Object) method for EventProcessorAndOrder-->
-  <add-node path="/api/package[@name='io.sentry.internal.eventprocessor']/class[@name='EventProcessorAndOrder']">
+x  <add-node path="/api/package[@name='io.sentry.internal.eventprocessor']/class[@name='EventProcessorAndOrder']">
     <method name="compareTo" return="int" abstract="false" native="false" synchronized="false" static="false" final="false" deprecated="not deprecated" visibility="public">
         <parameter name="p0" type="java.lang.Object" />
     </method>
@@ -111,7 +112,7 @@
   -->
   <remove-node path="/api/package[@name='io.sentry']/interface[@name='BackfillingEventProcessor']" />
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AnrV2EventProcessor']" />
-  
+
   <!--
     SentryEvent.serialize() expects an parameter which implements IObjectWriter.
     JsonObjectWriter implements IObjectWriter in Java, but somehow this is not reflected in the generated binding.
@@ -162,7 +163,4 @@
 
   <!-- Remove UpdateStatus to avoid CS0108 for conflicting _members fields in nested subclasses -->
   <remove-node path="/api/package[@name='io.sentry']/class[@name='UpdateStatus']" />
-
-  <!-- error CS0050: Inconsistent accessibility: return type 'INetworkBody' is less accessible than method 'NetworkBody.FromXxx' -->
-  <remove-node path="/api/package[@name='io.sentry.util.network']/interface[@name='NetworkBody']" />
 </metadata>
