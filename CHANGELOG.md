@@ -6,6 +6,10 @@
 
 - Extended `SentryThread` by `Main` to allow indication whether the thread is considered the current main thread ([#4807](https://github.com/getsentry/sentry-dotnet/pull/4807))
 
+### Fixes
+
+- Allow Sentry failures from the Sentry CLI when SENTRY_ALLOW_FAILURE is set (#4852)
+
 ### Dependencies
 
 - Bump Native SDK from v0.12.2 to v0.12.3 ([#4832](https://github.com/getsentry/sentry-dotnet/pull/4832))
