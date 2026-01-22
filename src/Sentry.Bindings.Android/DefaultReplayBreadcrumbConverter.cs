@@ -6,7 +6,7 @@ namespace Sentry.JavaSdk.Android.Replay;
 
 // This partial augments the generated binding to implement the managed interface... to work arould
 // a problem with source generators for the bindings
-internal partial class DefaultReplayBreadcrumbConverter  : IReplayBreadcrumbConverter
+internal partial class DefaultReplayBreadcrumbConverter : IReplayBreadcrumbConverter
 {
 }
 #endif
