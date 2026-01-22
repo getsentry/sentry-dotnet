@@ -132,12 +132,12 @@ foreach ($file in $filesToPatch)
         Write-Host "File not found: $file"
     }
 }
-$privateHeaderFile = "$PrivateHeadersPath/PrivatesHeader.h"
+$privateHeaderFile = "$HeadersPath/PrivatesHeader.h"
 if (Test-Path $privateHeaderFile)
 {
     $content = Get-Content -Path $privateHeaderFile -Raw
     $content = $content -replace '"SentryDefines.h"', '"../Headers/SentryDefines.h"'
-    $content = $content -replace '"SentryProfilingConditionals.h"', '"../PrivateHeaders/SentryProfilingConditionals.h"'
+    $content = $content -replace '"SentryProfilingConditionals.h"', '"../Headers/SentryProfilingConditionals.h"'
     Set-Content -Path $privateHeaderFile -Value $content
     Write-Host "Patched includes: $privateHeaderFile"
 }
@@ -169,7 +169,7 @@ sharpie bind -sdk $iPhoneSdkVersion `
     -scope "$CocoaSdkPath" `
     "$HeadersPath/Sentry.h" `
     "$HeadersPath/Sentry-Swift.h" `
-    "$PrivateHeadersPath/PrivateSentrySDKOnly.h" `
+    "$HeadersPath/PrivateSentrySDKOnly.h" `
     -o $BindingsPath `
     -c -Wno-objc-property-no-attribute `
     -F"$iPhoneSdkPath/System/Library/SubFrameworks" # needed for UIUtilities.framework in Xcode 26+

@@ -77,6 +77,14 @@ internal enum SentrySpanStatus : ulong
 }
 
 [Native]
+internal enum SentryAppStartType : ulong
+{
+    Warm,
+    Cold,
+    Unknown
+}
+
+[Native]
 internal enum SentryANRType : long
 {
     FatalFullyBlocking = 0,
