@@ -21,6 +21,7 @@ internal sealed class UnsampledTransaction : NoOpTransaction
     private readonly IHub _hub;
     private readonly ITransactionContext _context;
     private readonly SentryOptions? _options;
+    private InterlockedBoolean _isFinished;
 
     public UnsampledTransaction(IHub hub, ITransactionContext context)
     {
@@ -32,7 +33,6 @@ internal sealed class UnsampledTransaction : NoOpTransaction
 
     internal DynamicSamplingContext? DynamicSamplingContext { get; set; }
 
-    private bool _isFinished;
     public override bool IsFinished => _isFinished;
 
     public override IReadOnlyCollection<ISpan> Spans => _spans;
@@ -63,11 +63,14 @@ internal sealed class UnsampledTransaction : NoOpTransaction
 
     public override void Finish()
     {
-        _options?.LogDebug("Finishing unsampled transaction");
-
         // Ensure the transaction is really cleared from the scope
         // See: https://github.com/getsentry/sentry-dotnet/issues/4198
-        _isFinished = true;
+        if (_isFinished.Exchange(true))
+        {
+            return;
+        }
+
+        _options?.LogDebug("Finishing unsampled transaction");
 
         // Clear the transaction from the scope and regenerate the Propagation Context, so new events don't have a
         // trace context that is "older" than the transaction that just finished
