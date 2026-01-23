@@ -6,6 +6,8 @@
 
 - Deliver system breadcrumbs in the main thread on Android ([#4671](https://github.com/getsentry/sentry-dotnet/pull/4671))
   - backported via ([#4856](https://github.com/getsentry/sentry-dotnet/pull/4856))
+- Memory leak when finishing an unsampled Transaction that has started unsampled Spans ([#4717](https://github.com/getsentry/sentry-dotnet/pull/4717))
+  - backported via ([#4853](https://github.com/getsentry/sentry-dotnet/pull/4853))
 
 ### Dependencies
 
