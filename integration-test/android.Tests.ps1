@@ -6,6 +6,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/pester.ps1
+. $PSScriptRoot/common.ps1
 . $PSScriptRoot/../scripts/device-test-utils.ps1
 
 BeforeDiscovery {
@@ -17,16 +18,12 @@ BeforeDiscovery {
 }
 
 $cases = @(
-    @{ Configuration = 'Release' }
-    @{ Configuration = 'Debug'   }
+    @{ configuration = 'Release' }
+    @{ configuration = 'Debug'   }
 )
 Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-not $script:emulator) {
     BeforeAll {
-        if ($dotnet_version -eq 'net9.0') {
-            $tfm = 'net9.0-android35.0'
-        } else {
-            $tfm = 'net10.0-android36.0'
-        }
+        $tfm = "$dotnet_version-android$(GetAndroidTpv $dotnet_version)"
 
         Remove-Item -Path "$PSScriptRoot/mobile-app" -Recurse -Force -ErrorAction SilentlyContinue
         Copy-Item -Path "$PSScriptRoot/net9-maui" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
