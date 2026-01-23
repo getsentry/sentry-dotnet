@@ -559,7 +559,7 @@ public abstract class HttpTransportBase
             string.Join(", ", errorCauses));
     }
 
-    private void LogRequestTooLarge(SentryId? eventId, string? responseDetail)
+    private void LogRequestTooLarge(SentryId? eventId, string responseDetail)
     {
         _options.LogError(
             "{0}: Sentry rejected the envelope '{1}' because it exceeded the maximum allowed size. " +
@@ -567,7 +567,7 @@ public abstract class HttpTransportBase
             "Server response: {2}",
             _typeName,
             eventId,
-            responseDetail ?? "No additional details provided");
+            responseDetail);
     }
 
     private static bool HasJsonContent(HttpContent content) =>
