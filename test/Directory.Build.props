@@ -55,7 +55,9 @@
     <Using Condition="'$(TargetPlatformIdentifier)'==''" Include="VerifyXunit" />
 
     <PackageReference Include="NSubstitute" Version="5.3.0" />
-    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <!-- FluentAssertions v8.0.0 changed license; see https://fluentassertions.com/releases/#800 -->
+    <PackageReference Include="FluentAssertions" Version="[7.2.0,8.0.0)" />
+    <PackageReference Include="FluentAssertions.Analyzers" Version="0.34.1" PrivateAssets="all" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="Xunit.SkippableFact" Version="1.5.23" />
     <PackageReference Include="GitHubActionsTestLogger" Version="2.3.3" />
