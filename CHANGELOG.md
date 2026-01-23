@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Fixes
+
+- Memory leak when finishing an unsampled Transaction that has started unsampled Spans ([#4717](https://github.com/getsentry/sentry-dotnet/pull/4717))
+  - backported via ([#4853](https://github.com/getsentry/sentry-dotnet/pull/4853))
+
 ### Dependencies
 
 - Bump Java SDK from v8.24.0 to v8.25.0 ([#4679](https://github.com/getsentry/sentry-dotnet/pull/4679))
