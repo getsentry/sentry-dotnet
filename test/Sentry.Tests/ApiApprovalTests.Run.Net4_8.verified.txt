@@ -607,13 +607,13 @@ namespace Sentry
     [System.Diagnostics.DebuggerDisplay("SentryLog \\{ Level = {Level}, Message = \'{Message}\' \\}")]
     public sealed class SentryLog
     {
-        public Sentry.SentryLogLevel Level { get; init; }
-        public string Message { get; init; }
+        public required Sentry.SentryLogLevel Level { get; init; }
+        public required string Message { get; init; }
         public System.Collections.Immutable.ImmutableArray<System.Collections.Generic.KeyValuePair<string, object>> Parameters { get; init; }
         public Sentry.SpanId? SpanId { get; init; }
         public string? Template { get; init; }
-        public System.DateTimeOffset Timestamp { get; init; }
-        public Sentry.SentryId TraceId { get; init; }
+        public required System.DateTimeOffset Timestamp { get; init; }
+        public required Sentry.SentryId TraceId { get; init; }
         public void SetAttribute(string key, object value) { }
         public bool TryGetAttribute(string key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out object? value) { }
     }
