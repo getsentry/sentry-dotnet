@@ -45,7 +45,7 @@ internal abstract class AssemblyStoreReader
 
     protected BinaryReader CreateReader() => new BinaryReader(StoreStream, ReaderEncoding, leaveOpen: true);
 
-    protected internal abstract bool IsSupported();
+    protected abstract bool IsSupported();
     protected abstract void Prepare();
     protected abstract ulong GetStoreStartDataOffset();
 

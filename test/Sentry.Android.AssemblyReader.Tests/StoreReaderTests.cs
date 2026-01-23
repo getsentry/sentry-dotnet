@@ -13,7 +13,7 @@ public class StoreReaderTests
         var storeReader = new StoreReader(memoryStream, "testStore", null);
 
         // Act
-        var result = Parallel.For(0, 10, _ => storeReader.IsSupported());
+        var result = Parallel.For(0, 10, _ => storeReader.GetTestAccessor().IsSupported());
 
         // Test passes if no exceptions are thrown, but we can also assert completion
         result.IsCompleted.Should().BeTrue();
