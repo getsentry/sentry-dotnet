@@ -27,7 +27,7 @@ jobs:
         uses: styfle/cancel-workflow-action@3155a141048f8f89c06b4cdae32e7853e97536bc # 0.13.0
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
 
@@ -80,7 +80,7 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
 
@@ -127,7 +127,7 @@ jobs:
           java-version: '17'
 
       - name: Checkout github-workflows
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: getsentry/github-workflows
           ref: a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
