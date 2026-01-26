@@ -72,6 +72,7 @@ public partial class SentryOptions
         /// IMPORTANT: App Hangs V2 is now the default.
         /// <br/>
         /// As of version 8.39.0-beta.1 of the sentry-cocoa SDK, you can enable AppHangsV2, which is available on iOS and tvOS.
+        /// Starting with version 9.0.0, App Hangs V2 is enabled by default.
         /// The main difference is that AppHangsV2 differentiates between fully-blocking and non-fully-blocking
         /// app hangs, which you might choose to ignore. A fully-blocking app hang is when the main thread is stuck
         /// completely, and the app can't render a single frame.
