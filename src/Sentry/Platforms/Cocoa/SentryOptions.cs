@@ -85,17 +85,7 @@ public partial class SentryOptions
         /// See https://docs.sentry.io/platforms/apple/configuration/app-hangs/#app-hangs-v2
         /// </remarks>
         [Obsolete("App Hangs V2 is now the default. Use EnableAppHangTracking instead.")]
-        public bool EnableAppHangTrackingV2
-        {
-            get => EnableAppHangTracking;
-            set
-            {
-                if (value)
-                {
-                    EnableAppHangTracking = true;
-                }
-            }
-        }
+        public bool EnableAppHangTrackingV2 { get => EnableAppHangTracking; set => EnableAppHangTracking = value; }
 
         /// <summary>
         /// When enabled, the SDK adds breadcrumbs for various system events.
