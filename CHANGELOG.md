@@ -8,6 +8,7 @@
 
 ### Fixes
 
+- The SDK now logs a specific error message when envelopes are rejected due to size limits (HTTP 413) ([#4863](https://github.com/getsentry/sentry-dotnet/pull/4863))
 - Fixed thread-safety issue on Android when multiple events are captured concurrently ([#4814](https://github.com/getsentry/sentry-dotnet/pull/4814))
 
 ### Dependencies
