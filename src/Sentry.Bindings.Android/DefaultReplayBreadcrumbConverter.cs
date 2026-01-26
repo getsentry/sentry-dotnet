@@ -4,9 +4,7 @@ using Sentry.JavaSdk;
 // ReSharper disable once CheckNamespace - match generated code namespace
 namespace Sentry.JavaSdk.Android.Replay;
 
-// This partial augments the generated binding to implement the managed interface... to work arould
-// a problem with source generators for the bindings
-internal partial class DefaultReplayBreadcrumbConverter : IReplayBreadcrumbConverter
-{
-}
+// This file used to try to "patch" the generated bindings via a partial class.
+// It caused build breaks when the generated Java binding shape changed.
+// Binding fixes should be done via Transforms/Metadata.xml instead.
 #endif
