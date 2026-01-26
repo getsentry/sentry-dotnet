@@ -69,7 +69,7 @@ public partial class SentryOptions
         public bool EnableAppHangTracking { get; set; } = false;
 
         /// <summary>
-        /// IMPORTANT: This feature is experimental and may have bugs.
+        /// IMPORTANT: App Hangs V2 is now the default.
         /// <br/>
         /// As of version 8.39.0-beta.1 of the sentry-cocoa SDK, you can enable AppHangsV2, which is available on iOS and tvOS.
         /// The main difference is that AppHangsV2 differentiates between fully-blocking and non-fully-blocking
