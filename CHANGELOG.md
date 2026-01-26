@@ -6,6 +6,11 @@
 
 - Extended `SentryThread` by `Main` to allow indication whether the thread is considered the current main thread ([#4807](https://github.com/getsentry/sentry-dotnet/pull/4807))
 
+### Fixes
+
+- The SDK now logs a specific error message when envelopes are rejected due to size limits (HTTP 413) ([#4863](https://github.com/getsentry/sentry-dotnet/pull/4863))
+- Fixed thread-safety issue on Android when multiple events are captured concurrently ([#4814](https://github.com/getsentry/sentry-dotnet/pull/4814))
+
 ### Dependencies
 
 - Bump Native SDK from v0.12.2 to v0.12.3 ([#4832](https://github.com/getsentry/sentry-dotnet/pull/4832))

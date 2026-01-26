@@ -55,20 +55,22 @@
     <Using Condition="'$(TargetPlatformIdentifier)'==''" Include="VerifyXunit" />
 
     <PackageReference Include="NSubstitute" Version="5.3.0" />
-    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <!-- FluentAssertions v8.0.0 changed license; see https://fluentassertions.com/releases/#800 -->
+    <PackageReference Include="FluentAssertions" Version="[7.2.0,8.0.0)" />
+    <PackageReference Include="FluentAssertions.Analyzers" Version="0.34.1" PrivateAssets="all" />
     <PackageReference Include="xunit" Version="2.9.3" />
-    <PackageReference Include="Xunit.SkippableFact" Version="1.5.23" />
+    <PackageReference Include="Xunit.SkippableFact" Version="1.5.61" />
     <PackageReference Include="GitHubActionsTestLogger" Version="2.3.3" />
-    <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="20.0.4" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.TestingHelpers" Version="22.1.0" />
   </ItemGroup>
 
   <!-- only non-platform-specific projects should include these packages -->
   <ItemGroup Condition="'$(TargetPlatformIdentifier)'==''">
-    <PackageReference Include="Verify.Xunit" Version="30.5.0" />
+    <PackageReference Include="Verify.Xunit" Version="31.0.5" />
     <PackageReference Include="Verify.DiffPlex" Version="3.1.2" />
     <PackageReference Include="PublicApiGenerator" Version="11.5.4" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.1" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
   </ItemGroup>
 
