@@ -73,7 +73,8 @@ var nodes = tree.GetCompilationUnitRoot()
     .WithAttribute("SentryBeforeSendEventCallback", "return: NullAllowed")
     .WithAttribute("SentryTracesSamplerCallback", "return: NullAllowed")
     // Fix nullable return attributes
-    .RemoveAttribute("PrivateSentrySDKOnly", "Capture*", "NullAllowed")
+    .RemoveAttribute("PrivateSentrySDKOnly", "CaptureScreenshots", "NullAllowed")
+    .RemoveAttribute("PrivateSentrySDKOnly", "CaptureViewHierarchy", "NullAllowed")
     .WithAttribute("PrivateSentrySDKOnly", "CaptureScreenshots", "return: NullAllowed")
     .WithAttribute("PrivateSentrySDKOnly", "CaptureViewHierarchy", "return: NullAllowed")
     // For PrivateApiDefinitions.cs
