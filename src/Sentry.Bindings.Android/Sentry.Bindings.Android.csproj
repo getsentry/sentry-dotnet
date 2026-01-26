@@ -19,7 +19,7 @@
       Note that you may need to check out specific branches/tags to match the version defined in SentryAndroidSdkVersion
       and the resulting native ndk version.
     -->
-    <UseLocalSentryMavenRepo>false</UseLocalSentryMavenRepo>
+    <UseLocalSentryMavenRepo>true</UseLocalSentryMavenRepo>
     <LocalSentryMavenRepoDir Condition="'$(LocalSentryMavenRepoDir)' == ''">$(HOME)/.m2/repository/</LocalSentryMavenRepoDir>
     <LocalSentryJarPath>$(LocalSentryMavenRepoDir)io/sentry/sentry/$(SentryAndroidSdkVersion)/sentry-$(SentryAndroidSdkVersion).jar</LocalSentryJarPath>
     <LocalSentryAndroidCoreAarPath>$(LocalSentryMavenRepoDir)io/sentry/sentry-android-core/$(SentryAndroidSdkVersion)/sentry-android-core-$(SentryAndroidSdkVersion).aar</LocalSentryAndroidCoreAarPath>
@@ -107,11 +107,11 @@
   <ItemGroup Condition="'$(UseLocalSentryMavenRepo)' == 'true'">
     <AndroidLibrary Include="$(LocalSentryJarPath)" Manifest="$(LocalSentryPomPath)"
                     JavaArtifact="io.sentry:sentry:$(SentryAndroidSdkVersion)" />
-    <AndroidAarLibrary Include="$(LocalSentryAndroidCoreAarPath)" Manifest="$(LocalSentryAndroidCorePomPath)"
+    <AndroidLibrary Include="$(LocalSentryAndroidCoreAarPath)" Manifest="$(LocalSentryAndroidCorePomPath)"
                        JavaArtifact="io.sentry:sentry-android-core:$(SentryAndroidSdkVersion)" />
-    <AndroidAarLibrary Include="$(LocalSentryAndroidNdkAarPath)" Manifest="$(LocalSentryAndroidNdkPomPath)"
+    <AndroidLibrary Include="$(LocalSentryAndroidNdkAarPath)" Manifest="$(LocalSentryAndroidNdkPomPath)"
                        JavaArtifact="io.sentry:sentry-android-ndk:$(SentryAndroidSdkVersion)" />
-    <AndroidAarLibrary Include="$(LocalSentryAndroidReplayAarPath)" Manifest="$(LocalSentryAndroidReplayPomPath)"
+    <AndroidLibrary Include="$(LocalSentryAndroidReplayAarPath)" Manifest="$(LocalSentryAndroidReplayPomPath)"
                        JavaArtifact="io.sentry:sentry-android-replay:$(SentryAndroidSdkVersion)" />
   </ItemGroup>
 
