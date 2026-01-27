@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.Extensions.Logging;
 
 namespace Sentry.Samples.Maui;
@@ -31,6 +32,19 @@ public partial class MainPage
     {
         _count++;
 
+        var span = SentrySdk.StartSpan("button.click", "ui.action");
+        try
+        {
+            SentrySdk.ConfigureScope(scope => scope.Transaction ??= span.GetTransaction());
+            // Make an HTTP request to demonstrate Sentry's automatic HTTP tracking
+            using var httpClient = new HttpClient(new SentryHttpMessageHandler());
+            httpClient.GetAsync("https://www.example.com/").GetAwaiter().GetResult();
+            span.Status = SpanStatus.Ok;
+        }
+        finally
+        {
+            span.Finish();
+        }
         if (_count == 1)
         {
             CounterBtn.Text = $"Clicked {_count} time";
