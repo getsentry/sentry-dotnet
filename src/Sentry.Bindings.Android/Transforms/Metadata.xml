@@ -111,7 +111,7 @@
   -->
   <remove-node path="/api/package[@name='io.sentry']/interface[@name='BackfillingEventProcessor']" />
   <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AnrV2EventProcessor']" />
-  
+
   <!--
     SentryEvent.serialize() expects an parameter which implements IObjectWriter.
     JsonObjectWriter implements IObjectWriter in Java, but somehow this is not reflected in the generated binding.
