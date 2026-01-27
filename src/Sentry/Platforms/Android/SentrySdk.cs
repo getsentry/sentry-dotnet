@@ -144,11 +144,6 @@ public static partial class SentrySdk
                 (JavaDouble?)options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate;
             o.SessionReplay.SetMaskAllImages(options.Native.ExperimentalOptions.SessionReplay.MaskAllImages);
             o.SessionReplay.SetMaskAllText(options.Native.ExperimentalOptions.SessionReplay.MaskAllText);
-            // Set the BreadcrumbConverter to the DefaultReplayBreadcrumbConverter
-            if (o.ReplayController is { } replayController)
-            {
-                replayController.BreadcrumbConverter = new Sentry.JavaSdk.Android.Replay.DefaultReplayBreadcrumbConverter(o);
-            }
 
             // These options are intentionally set and not exposed for modification
             o.EnableExternalConfiguration = false;
