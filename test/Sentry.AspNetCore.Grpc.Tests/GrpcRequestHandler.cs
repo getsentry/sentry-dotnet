@@ -9,10 +9,12 @@ public class GrpcRequestHandler<TRequest, TResponse>
 {
     public MethodDescriptor Method { get; set; }
 
+    private Func<TRequest, ServerCallContext, Task<TResponse>> _handler;
+
     public Func<TRequest, ServerCallContext, Task<TResponse>> Handler
     {
-        get => field ?? ((_, _) => Task.FromResult<TResponse>(null));
-        set;
+        get => _handler ?? ((_, _) => Task.FromResult<TResponse>(null));
+        set => _handler = value;
     }
 
     public TResponse Response { get; set; }

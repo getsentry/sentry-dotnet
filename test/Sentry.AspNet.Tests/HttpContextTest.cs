@@ -1,9 +1,10 @@
-#nullable enable
-
 namespace Sentry.AspNet.Tests;
 
-public abstract class HttpContextTest : IDisposable
+public abstract class HttpContextTest :
+    IDisposable
 {
+    private HttpContext _context;
+
     protected HttpContextTest()
     {
         HttpContext.Current = Context = HttpContextBuilder.Build();
@@ -11,8 +12,8 @@ public abstract class HttpContextTest : IDisposable
 
     public HttpContext Context
     {
-        get;
-        set => HttpContext.Current = field = value;
+        get => _context;
+        set => HttpContext.Current = _context = value;
     }
 
     public void Dispose()
