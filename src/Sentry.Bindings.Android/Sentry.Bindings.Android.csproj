@@ -145,14 +145,10 @@
   </Target>
 
   <Target Name="ResolveSentryNativeNdkFromLocalMaven" BeforeTargets="CollectPackageReferences" Condition="'$(UseLocalSentryMavenRepo)' == 'true'">
-    <PropertyGroup>
-      <_LocalAndroidNdkPom>$(LocalSentryMavenRepoDir)io/sentry/sentry-android-ndk/$(SentryAndroidSdkVersion)/sentry-android-ndk-$(SentryAndroidSdkVersion).pom</_LocalAndroidNdkPom>
-    </PropertyGroup>
-
     <XmlPeek
-      XmlInputPath="$(_LocalAndroidNdkPom)"
+      XmlInputPath="$(LocalSentryAndroidNdkPomPath)"
       Query="//*[local-name()='dependency' and .//*[local-name()='artifactId' and text()='sentry-native-ndk']]/*[local-name()='version']/text()"
-      Condition="Exists('$(_LocalAndroidNdkPom)')">
+      Condition="Exists('$(LocalSentryAndroidNdkPomPath)')">
       <Output TaskParameter="Result" PropertyName="SentryNativeNdkVersion" />
     </XmlPeek>
 
