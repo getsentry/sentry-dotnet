@@ -10,10 +10,10 @@ public class StoreReaderTests
         // Arrange
         var buffer = new byte[1024 * 1024];
         using var memoryStream = new MemoryStream(buffer);
-        var storeReader = new StoreReader(memoryStream, "testStore", null);
+        var storeReader = new TestStoreReader(memoryStream, "testStore", null);
 
         // Act
-        var result = Parallel.For(0, 10, _ => storeReader.GetTestAccessor().IsSupported());
+        var result = Parallel.For(0, 10, _ => storeReader.IsSupported());
 
         // Test passes if no exceptions are thrown, but we can also assert completion
         result.IsCompleted.Should().BeTrue();
@@ -48,5 +48,18 @@ public class StoreReaderTests
 
         // Test passes if no exceptions are thrown, but we can also assert completion
         result.IsCompleted.Should().BeTrue();
+    }
+}
+
+file sealed class TestStoreReader : StoreReader
+{
+    public TestStoreReader(Stream store, string path, DebugLogger? logger)
+        : base(store, path, logger)
+    {
+    }
+
+    public new bool IsSupported()
+    {
+        return base.IsSupported();
     }
 }
