@@ -5,7 +5,7 @@ using Sentry.JavaSdk;
 namespace Sentry.JavaSdk.Android.Replay;
 
 // Add IReplayBreadcrumbConverter interface to DefaultReplayBreadcrumbConverter, to work source generator issue
-internal partial class DefaultReplayBreadcrumbConverter  : IReplayBreadcrumbConverter
+internal partial class DefaultReplayBreadcrumbConverter : IReplayBreadcrumbConverter
 {
 }
 #endif
