@@ -506,7 +506,7 @@ public abstract class HttpTransportBase
             return;
         }
 
-        _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.NetworkError, envelope);
+        _options.ClientReportRecorder.RecordDiscardedEvents(DiscardReason.SendError, envelope);
 
         // Also restore any counts that were trying to be sent, so they are not lost.
         var clientReportItems = envelope.Items.Where(x => x.TryGetType() == "client_report");
@@ -519,6 +519,12 @@ public abstract class HttpTransportBase
 
     private void LogFailure(string responseString, HttpStatusCode responseStatusCode, SentryId? eventId)
     {
+        if (responseStatusCode == HttpStatusCode.RequestEntityTooLarge)
+        {
+            LogRequestTooLarge(eventId, responseString);
+            return;
+        }
+
         _options.LogError("{0}: Sentry rejected the envelope '{1}'. Status code: {2}. Error detail: {3}.",
             _typeName,
             eventId,
@@ -536,12 +542,32 @@ public abstract class HttpTransportBase
             responseJson.GetPropertyOrNull("causes")?.EnumerateArray().Select(j => j.GetString()).ToArray()
             ?? Array.Empty<string>();
 
+        if (responseStatusCode == HttpStatusCode.RequestEntityTooLarge)
+        {
+            var responseDetail = errorCauses.Length > 0
+                ? $"{errorMessage} ({string.Join(", ", errorCauses)})"
+                : errorMessage;
+            LogRequestTooLarge(eventId, responseDetail);
+            return;
+        }
+
         _options.LogError("{0}: Sentry rejected the envelope '{1}'. Status code: {2}. Error detail: {3}. Error causes: {4}.",
             _typeName,
             eventId,
             responseStatusCode,
             errorMessage,
             string.Join(", ", errorCauses));
+    }
+
+    private void LogRequestTooLarge(SentryId? eventId, string responseDetail)
+    {
+        _options.LogError(
+            "{0}: Sentry rejected the envelope '{1}' because it exceeded the maximum allowed size. " +
+            "Consider reducing attachment sizes, removing unnecessary data, or splitting large payloads into smaller requests. " +
+            "Server response: {2}",
+            _typeName,
+            eventId,
+            responseDetail);
     }
 
     private static bool HasJsonContent(HttpContent content) =>
