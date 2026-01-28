@@ -35,7 +35,8 @@ namespace ELFSharp.UImage
             Type = (ImageType)reader.ReadByte();
             Compression = (CompressionType)reader.ReadByte();
             var nameAsBytes = reader.ReadBytes(32);
-            Name = Encoding.UTF8.GetString(nameAsBytes.Reverse().SkipWhile(x => x == 0).Reverse().ToArray());
+            // See: https://learn.microsoft.com/dotnet/csharp/whats-new/breaking-changes/compiler%20breaking%20changes%20-%20dotnet%2010#enumerablereverse
+            Name = Encoding.UTF8.GetString(Enumerable.Reverse(nameAsBytes).SkipWhile(x => x == 0).Reverse().ToArray());
 
             if (multiFileImage)
             {
