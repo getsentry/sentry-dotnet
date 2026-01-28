@@ -15,6 +15,8 @@ public class SentryHttpMessageHandler : SentryMessageHandler
     private readonly ISentryFailedRequestHandler? _failedRequestHandler;
 
     internal const string HttpClientOrigin = "auto.http.client";
+    internal const string HttpStartTimestampKey = "http.start_timestamp";
+    internal const string HttpEndTimestampKey = "http.end_timestamp";
 
     /// <summary>
     /// Constructs an instance of <see cref="SentryHttpMessageHandler"/>.
@@ -93,8 +95,8 @@ public class SentryHttpMessageHandler : SentryMessageHandler
         {
             // Ensure the breadcrumb can be converted to RRWeb so that it shows up in the network tab in Session Replay.
             // See https://github.com/getsentry/sentry-java/blob/94bff8dc0a952ad8c1b6815a9eda5005e41b92c7/sentry-android-replay/src/main/java/io/sentry/android/replay/DefaultReplayBreadcrumbConverter.kt#L195-L199
-            breadcrumbData["http.start_timestamp"] = span.StartTimestamp.ToUnixTimeMilliseconds().ToString("F0", CultureInfo.InvariantCulture);
-            breadcrumbData["http.end_timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString("F0", CultureInfo.InvariantCulture);
+            breadcrumbData[HttpStartTimestampKey] = span.StartTimestamp.ToUnixTimeMilliseconds().ToString("F0", CultureInfo.InvariantCulture);
+            breadcrumbData[HttpEndTimestampKey] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString("F0", CultureInfo.InvariantCulture);
         }
         _hub.AddBreadcrumb(string.Empty, "http", "http", breadcrumbData);
 

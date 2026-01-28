@@ -8,9 +8,6 @@ internal class DotnetReplayBreadcrumbConverter(Sentry.JavaSdk.SentryOptions opti
 {
     private const string HttpCategory = "http";
 
-    private const string HttpStartTimestampKey = "http.start_timestamp";
-    private const string HttpEndTimestampKey = "http.end_timestamp";
-
     public override global::IO.Sentry.Rrweb.RRWebEvent? Convert(Sentry.JavaSdk.Breadcrumb breadcrumb)
     {
         // The Java converter expects httpStartTimestamp/httpEndTimestamp to be Double or Long.
@@ -20,8 +17,8 @@ internal class DotnetReplayBreadcrumbConverter(Sentry.JavaSdk.SentryOptions opti
         {
             if (breadcrumb is { Category: HttpCategory, Data: { } data })
             {
-                NormalizeTimestampField(data, HttpStartTimestampKey);
-                NormalizeTimestampField(data, HttpEndTimestampKey);
+                NormalizeTimestampField(data, SentryHttpMessageHandler.HttpStartTimestampKey);
+                NormalizeTimestampField(data, SentryHttpMessageHandler.HttpEndTimestampKey);
             }
         }
         catch
