@@ -72,6 +72,11 @@ var nodes = tree.GetCompilationUnitRoot()
     .WithAttribute("SentryBeforeBreadcrumbCallback", "return: NullAllowed")
     .WithAttribute("SentryBeforeSendEventCallback", "return: NullAllowed")
     .WithAttribute("SentryTracesSamplerCallback", "return: NullAllowed")
+    // Fix nullable return attributes
+    .RemoveAttribute("PrivateSentrySDKOnly", "CaptureScreenshots", "NullAllowed")
+    .RemoveAttribute("PrivateSentrySDKOnly", "CaptureViewHierarchy", "NullAllowed")
+    .WithAttribute("PrivateSentrySDKOnly", "CaptureScreenshots", "return: NullAllowed")
+    .WithAttribute("PrivateSentrySDKOnly", "CaptureViewHierarchy", "return: NullAllowed")
     // For PrivateApiDefinitions.cs
     .WithModifier("SentryScope", "partial")
     // error CS0246: The type or namespace name 'iOS' could not be found
@@ -84,24 +89,28 @@ var nodes = tree.GetCompilationUnitRoot()
     .RemoveMethod("Sentry*", "IsEqual")
     // error CS0246: The type or namespace name '_NSZone' could not be found
     .RemoveMethod("Sentry*", "CopyWithZone")
+    // error CS0111: Type 'SentryAttribute' already defines a member called 'Constructor' with the same parameter types
+    .RemoveMethod("SentryLog", "SetAttribute")
     // SentryEnvelope* is not whitelisted
     .RemoveMethod("PrivateSentrySDKOnly", "CaptureEnvelope")
     .RemoveMethod("PrivateSentrySDKOnly", "EnvelopeWithData")
     .RemoveMethod("PrivateSentrySDKOnly", "StoreEnvelope")
-    // deprecated
-    .RemoveMethod("Sentry*", "CaptureUserFeedback")
+    // SentryLoggerDelegate and SentryCurrentDateProvider are not whitelisted
+    .RemoveMethod("SentryLogger", "Constructor")
     // SentryAppStartMeasurement is not whitelisted
     .RemoveDelegate("SentryOnAppStartMeasurementAvailable")
-    // deprecated
+    // unused
     .RemoveDelegate("SentryUserFeedbackConfigurationBlock")
     // error CS0114: 'SentryXxx.Description' hides inherited member 'NSObject.Description'.
     .RemoveProperty("Sentry*", "Description")
     // SentryAppStartMeasurement is not whitelisted
     .RemoveProperty("PrivateSentrySDKOnly", "*AppStartMeasurement*")
-    // SentryStructuredLogAttribute is not whitelisted
-    .RemoveProperty("SentryLog", "Attributes")
-    // deprecated
+    // Minimize SentryDependencyContainer
+    .RemoveMethod("SentryDependencyContainer", "*")
+    .KeepProperties("SentryDependencyContainer", "SharedInstance", "DebugImageProvider")
+    // SentryUserFeedbackConfiguration is not whitelisted
     .RemoveProperty("SentryOptions", "ConfigureUserFeedback")
+    .RemoveProperty("SentryOptions", "UserFeedbackConfiguration")
     .KeepInterfaces(
         "ISentryRRWebEvent",
         "PrivateSentrySDKOnly",
@@ -111,6 +120,7 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryClient",
         "SentryDebugImageProvider",
         "SentryDebugMeta",
+        "SentryDependencyContainer",
         "SentryDsn",
         "SentryEvent",
         "SentryException",
@@ -129,6 +139,7 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryMeasurementUnitFraction",
         "SentryMeasurementUnitInformation",
         "SentryMechanism",
+        "SentryMechanismContext",
         "SentryMechanismMeta",
         "SentryMessage",
         "SentryNSError",
@@ -159,7 +170,9 @@ var nodes = tree.GetCompilationUnitRoot()
     )
     // Rename and retarget the experimental options property
     .RenameProperty("SentryOptions", "_swiftExperimentalOptions", "Experimental")
-    .ChangePropertyType("SentryOptions", "Experimental", "SentryExperimentalOptions");
+    .ChangePropertyType("SentryOptions", "Experimental", "SentryExperimentalOptions")
+    // error CS0311: The type 'SentryXxx' cannot be used as type parameter 'TValue' in the generic type or method 'NSDictionary<TKey, TValue>'.
+    .ChangeGenericTypeArgument("NSDictionary", "Sentry*", "NSObject");
 
 var formatted = CodeFormatter.Format(nodes, new AdhocWorkspace());
 File.WriteAllText(args[0], formatted.ToFullString() + "\n");
@@ -219,6 +232,19 @@ internal static class FilterExtensions
             .RemoveByPredicate<AttributeListSyntax>(node => node.Attributes.Count == 0);
     }
 
+    public static CompilationUnitSyntax RemoveAttribute(
+        this CompilationUnitSyntax root,
+        string type,
+        string name,
+        string attribute)
+    {
+        return root.RemoveByPredicate<AttributeSyntax>(node =>
+            node.Name.Matches(attribute) &&
+            node.Parent?.Parent is MethodDeclarationSyntax method &&
+            method.Identifier.Matches(name) &&
+            method.HasParent(type));
+    }
+
     public static CompilationUnitSyntax RemoveBaseType(
         this CompilationUnitSyntax root,
         string name)
@@ -272,6 +298,18 @@ internal static class FilterExtensions
             .Concat(root.DescendantNodes()
                 .OfType<DelegateDeclarationSyntax>()
                 .Where(node => node.Identifier.Matches(type) && !node.HasAttribute(attribute)));
+        return root.ReplaceNodes(nodes, (node, _) => node.WithAttribute(attribute));
+    }
+
+    public static CompilationUnitSyntax WithAttribute(
+        this CompilationUnitSyntax root,
+        string type,
+        string name,
+        string attribute)
+    {
+        var nodes = root.DescendantNodes()
+            .OfType<MethodDeclarationSyntax>()
+            .Where(node => node.Identifier.Matches(name) && node.HasParent(type) && !node.HasAttribute(attribute));
         return root.ReplaceNodes(nodes, (node, _) => node.WithAttribute(attribute));
     }
 
@@ -417,6 +455,22 @@ internal static class FilterExtensions
         return root.ReplaceNodes(nodes, (node, _) => node.WithType(SyntaxFactory.ParseTypeName(newType)));
     }
 
+    public static CompilationUnitSyntax ChangeGenericTypeArgument(
+        this CompilationUnitSyntax root,
+        string type,
+        string from,
+        string to)
+    {
+        var nodes = root.DescendantNodes()
+            .OfType<GenericNameSyntax>()
+            .Where(node => node.Identifier.Matches(type) && node.TypeArgumentList.Arguments.Any(arg => arg.Matches(from)));
+
+        return root.ReplaceNodes(nodes, (node, _) =>
+        {
+            var args = node.TypeArgumentList.Arguments.Select(arg => arg.Matches(from) ? SyntaxFactory.ParseTypeName(to) : arg);
+            return node.WithTypeArgumentList(node.TypeArgumentList.WithArguments(SyntaxFactory.SeparatedList(args)));
+        });
+    }
 }
 
 internal static class SyntaxNodeExtensions
