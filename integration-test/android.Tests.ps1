@@ -1,7 +1,12 @@
+param(
+    [string] $dotnet_version = "net10.0"
+)
+
 # This file contains test cases for https://pester.dev/
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/pester.ps1
+. $PSScriptRoot/common.ps1
 . $PSScriptRoot/../scripts/device-test-utils.ps1
 
 BeforeDiscovery {
@@ -12,11 +17,14 @@ BeforeDiscovery {
     $script:emulator = Get-AndroidEmulatorId
 }
 
-Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
-    @{ tfm = "net9.0-android35.0"; configuration = "Release" }
-    @{ tfm = "net9.0-android35.0"; configuration = "Debug" }
-) -Skip:(-not $script:emulator) {
+$cases = @(
+    @{ configuration = 'Release' }
+    @{ configuration = 'Debug'   }
+)
+Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-not $script:emulator) {
     BeforeAll {
+        $tfm = "$dotnet_version-android$(GetAndroidTpv $dotnet_version)"
+
         Remove-Item -Path "$PSScriptRoot/mobile-app" -Recurse -Force -ErrorAction SilentlyContinue
         Copy-Item -Path "$PSScriptRoot/net9-maui" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
         Push-Location $PSScriptRoot/mobile-app
@@ -126,9 +134,9 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
 
         Dump-ServerErrors -Result $result
         $result.HasErrors() | Should -BeFalse
-        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.ApplicationException`""
-        $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"SIGABRT`""
-        $result.Envelopes() | Should -HaveCount 1
+        $result.Events() | Should -AnyElementMatch "`"type`":`"System.ApplicationException`""
+        $result.Events() | Should -Not -AnyElementMatch "`"type`":`"SIGABRT`""
+        $result.Events() | Should -HaveCount 1
     }
 
     It 'Java crash (<configuration>)' {
@@ -140,9 +148,9 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
 
         Dump-ServerErrors -Result $result
         $result.HasErrors() | Should -BeFalse
-        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"RuntimeException`""
-        $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
-        $result.Envelopes() | Should -HaveCount 1
+        $result.Events() | Should -AnyElementMatch "`"type`":`"RuntimeException`""
+        $result.Events() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
+        $result.Events() | Should -HaveCount 1
     }
 
     It 'Native crash (<configuration>)' {
@@ -154,9 +162,9 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
 
         Dump-ServerErrors -Result $result
         $result.HasErrors() | Should -BeFalse
-        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"SIG[A-Z]+`"" # SIGILL (x86_64), SIGTRAP (arm64-v8a)
-        $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
-        $result.Envelopes() | Should -HaveCount 1
+        $result.Events() | Should -AnyElementMatch "`"type`":`"SIG[A-Z]+`"" # SIGILL (x86_64), SIGTRAP (arm64-v8a)
+        $result.Events() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
+        $result.Events() | Should -HaveCount 1
     }
 
     It 'Null reference exception (<configuration>)' {
@@ -168,13 +176,13 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
 
         Dump-ServerErrors -Result $result
         $result.HasErrors() | Should -BeFalse
-        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"System.NullReferenceException`""
+        $result.Events() | Should -AnyElementMatch "`"type`":`"System.NullReferenceException`""
         # TODO: fix redundant SIGSEGV in Release (#3954)
         if ($configuration -eq "Release") {
-            { $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"SIGSEGV`"" } | Should -Throw
+            { $result.Events() | Should -Not -AnyElementMatch "`"type`":`"SIGSEGV`"" } | Should -Throw
         } else {
-            $result.Envelopes() | Should -Not -AnyElementMatch "`"type`":`"SIGSEGV`""
-            $result.Envelopes() | Should -HaveCount 1
+            $result.Events() | Should -Not -AnyElementMatch "`"type`":`"SIGSEGV`""
+            $result.Events() | Should -HaveCount 1
         }
     }
 
@@ -186,8 +194,8 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
 
         Dump-ServerErrors -Result $result
         $result.HasErrors() | Should -BeFalse
-        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"system`",`"thread_id`":`"1`",`"category`":`"device.event`",`"action`":`"BATTERY_CHANGED`""
-        $result.Envelopes() | Should -HaveCount 1
+        $result.Events() | Should -AnyElementMatch "`"type`":`"system`",`"thread_id`":`"1`",`"category`":`"device.event`",`"action`":`"BATTERY_CHANGED`""
+        $result.Events() | Should -HaveCount 1
     }
 
     It 'Delivers network breadcrumbs in main thread (<configuration>)' {
@@ -198,7 +206,7 @@ Describe 'MAUI app (<tfm>, <configuration>)' -ForEach @(
 
         Dump-ServerErrors -Result $result
         $result.HasErrors() | Should -BeFalse
-        $result.Envelopes() | Should -AnyElementMatch "`"type`":`"system`",`"thread_id`":`"1`",`"category`":`"network.event`",`"action`":`"NETWORK_CAPABILITIES_CHANGED`""
-        $result.Envelopes() | Should -HaveCount 1
+        $result.Events() | Should -AnyElementMatch "`"type`":`"system`",`"thread_id`":`"1`",`"category`":`"network.event`",`"action`":`"NETWORK_CAPABILITIES_CHANGED`""
+        $result.Events() | Should -HaveCount 1
     }
 }
