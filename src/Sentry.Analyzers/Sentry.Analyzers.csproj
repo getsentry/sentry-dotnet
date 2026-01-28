@@ -26,6 +26,16 @@
     <ItemGroup>
       <PackageReference Include="Polyfill" Version="9.7.7" PrivateAssets="all" />
     </ItemGroup>
+    <Target Name="BeforePreparePolyfill" BeforeTargets="PreparePolyfill">
+      <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+        <PolyfillNoWarnIncorrectVersion>true</PolyfillNoWarnIncorrectVersion>
+      </PropertyGroup>
+    </Target>
+    <Target Name="AfterPreparePolyfill" AfterTargets="PreparePolyfill" DependsOnTargets="PreparePolyfill">
+      <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+        <DefineConstants>$([System.String]::Copy('$(DefineConstants)').Replace('FeatureMemory','').Replace(';;',';'))</DefineConstants>
+      </PropertyGroup>
+    </Target>
 
     <ItemGroup>
       <Using Remove="System.Text.Json" />
