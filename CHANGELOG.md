@@ -1,29 +1,11 @@
 # Changelog
 
-## 6.1.0-alpha.2
-
-### BREAKING CHANGES
-
-- Rename [Trace-connected Metrics](https://docs.sentry.io/product/explore/metrics/) APIs to avoid implying aggregation ([#4834](https://github.com/getsentry/sentry-dotnet/pull/4834))
-  - from `AddCounter` to `EmitCounter`
-  - from `RecordDistribution` to `EmitDistribution`
-  - from `RecordGauge` to `EmitGauge`
+## Unreleased
 
 ### Features
 
-- Validate [Trace-connected Metrics](https://docs.sentry.io/product/explore/metrics/) ([#4834](https://github.com/getsentry/sentry-dotnet/pull/4834))
-
-### Fixes
-
-- Attributes for [Trace-connected Metrics](https://docs.sentry.io/product/explore/metrics/) set via `SetBeforeSendLog` callback ([#4834](https://github.com/getsentry/sentry-dotnet/pull/4834))
-- Disallow unsupported 128-bit floating point numbers (i.e. `decimal`) for [Trace-connected Metrics](https://docs.sentry.io/product/explore/metrics/) ([#4834](https://github.com/getsentry/sentry-dotnet/pull/4834))
-
-## 6.1.0-alpha.1
-
-### Features
-
-- Extended `SentryThread` by `Main` to allow indication whether the thread is considered the current main thread ([#4807](https://github.com/getsentry/sentry-dotnet/pull/4807))
 - Add _experimental_ support for [Sentry trace-connected Metrics](https://docs.sentry.io/product/explore/metrics/) ([#4834](https://github.com/getsentry/sentry-dotnet/pull/4834))
+- Extended `SentryThread` by `Main` to allow indication whether the thread is considered the current main thread ([#4807](https://github.com/getsentry/sentry-dotnet/pull/4807))
 
 ### Fixes
 
@@ -34,11 +16,11 @@
 ### Dependencies
 
 - Bump Native SDK from v0.12.2 to v0.12.3 ([#4832](https://github.com/getsentry/sentry-dotnet/pull/4832))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0123)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.12.2...0.12.3)
+    - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0123)
+    - [diff](https://github.com/getsentry/sentry-native/compare/0.12.2...0.12.3)
 - Bump Java SDK from v8.28.0 to v8.29.0 ([#4817](https://github.com/getsentry/sentry-dotnet/pull/4817))
-  - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8290)
-  - [diff](https://github.com/getsentry/sentry-java/compare/8.28.0...8.29.0)
+    - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8290)
+    - [diff](https://github.com/getsentry/sentry-java/compare/8.28.0...8.29.0)
 
 ## 6.0.0
 
