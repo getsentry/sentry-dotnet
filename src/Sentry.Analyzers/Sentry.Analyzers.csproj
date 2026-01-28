@@ -24,7 +24,7 @@
       https://github.com/SimonCropp/Polyfill
     -->
     <ItemGroup>
-      <PackageReference Include="Polyfill" Version="1.32.0" PrivateAssets="all" />
+      <PackageReference Include="Polyfill" Version="9.7.7" PrivateAssets="all" />
     </ItemGroup>
 
     <ItemGroup>
