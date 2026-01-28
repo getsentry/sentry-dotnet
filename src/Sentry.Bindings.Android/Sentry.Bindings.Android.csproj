@@ -3,7 +3,7 @@
     <TargetFrameworks>$(LatestAndroidTfm);$(PreviousAndroidTfm)</TargetFrameworks>
     <SentryAndroidSdkVersion>8.29.0</SentryAndroidSdkVersion>
     <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\$(TargetFramework)\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
-    <!-- This gets resolved by the DownloadSentryAndroidSdk and ResolveSentryNativeNdkFromLocalMaven targets -->
+    <!-- This gets resolved by the DownloadSentryAndroidSdk unless using local maven references -->
     <SentryNativeNdkVersion></SentryNativeNdkVersion>
     <Description>.NET Bindings for the Sentry Android SDK</Description>
 
@@ -16,8 +16,10 @@
         cd $(LocalSentryJavaRepoDir) && ./gradlew publishToMavenLocal
         cd $(LocalSentryNativeRepoDir)/ndk && ./gradlew publishToMavenLocal
 
-      Note that you may need to check out specific branches/tags to match the version defined in SentryAndroidSdkVersion
-      and the resulting native ndk version.
+      Note:
+      1. Make sure the native-ndk-version you check out and build matches what the android sdk expects (or a fork of it)
+      2. You will need to manually set the `SentryNativeNdkVersion` property as this no longer gets resolved from
+         the POM files from the Java SDK when using local maven artifacts.
     -->
     <UseLocalSentryMavenRepo>false</UseLocalSentryMavenRepo>
     <LocalSentryMavenRepoDir Condition="'$(LocalSentryMavenRepoDir)' == ''">$([System.Environment]::GetFolderPath(SpecialFolder.UserProfile))/.m2/repository/</LocalSentryMavenRepoDir>
@@ -29,6 +31,8 @@
     <LocalSentryAndroidCorePomPath>$([System.String]::Copy($(LocalSentryAndroidCoreAarPath)).Replace('.aar', '.pom'))</LocalSentryAndroidCorePomPath>
     <LocalSentryAndroidNdkPomPath>$([System.String]::Copy($(LocalSentryAndroidNdkAarPath)).Replace('.aar', '.pom'))</LocalSentryAndroidNdkPomPath>
     <LocalSentryAndroidReplayPomPath>$([System.String]::Copy($(LocalSentryAndroidReplayAarPath)).Replace('.aar', '.pom'))</LocalSentryAndroidReplayPomPath>
+    <LocalSentryNativeNdkAarPath>$(LocalSentryMavenRepoDir)io/sentry/sentry-native-ndk/$(SentryNativeNdkVersion)/sentry-native-ndk-$(SentryNativeNdkVersion).aar</LocalSentryNativeNdkAarPath>
+    <LocalSentryNativeNdkPomPath>$([System.String]::Copy($(LocalSentryNativeNdkAarPath)).Replace('.aar', '.pom'))</LocalSentryNativeNdkPomPath>
 
     <!-- Android binding warnings - these are largely unavoidable due to Java interface circular dependencies -->
     <!-- Only suppress warnings that are confirmed to be expected/unavoidable -->
@@ -113,6 +117,8 @@
                        JavaArtifact="io.sentry:sentry-android-ndk:$(SentryAndroidSdkVersion)" />
     <AndroidLibrary Include="$(LocalSentryAndroidReplayAarPath)" Manifest="$(LocalSentryAndroidReplayPomPath)"
                        JavaArtifact="io.sentry:sentry-android-replay:$(SentryAndroidSdkVersion)" />
+    <AndroidLibrary Include="$(LocalSentryNativeNdkAarPath)" Manifest="$(LocalSentryNativeNdkPomPath)"
+                       JavaArtifact="io.sentry:sentry-native-ndk:$(SentryNativeNdkVersion)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -136,19 +142,6 @@
       XmlInputPath="$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).pom"
       Query="//*[local-name()='dependency' and .//*[local-name()='artifactId' and text()='sentry-native-ndk']]/*[local-name()='version']/text()"
       Condition="Exists('$(SentryAndroidSdkDirectory)sentry-android-ndk-$(SentryAndroidSdkVersion).pom')">
-      <Output TaskParameter="Result" PropertyName="SentryNativeNdkVersion" />
-    </XmlPeek>
-
-    <ItemGroup Condition="'$(SentryNativeNdkVersion)' != ''">
-      <AndroidMavenLibrary Include="io.sentry:sentry-native-ndk" Version="$(SentryNativeNdkVersion)" />
-    </ItemGroup>
-  </Target>
-
-  <Target Name="ResolveSentryNativeNdkFromLocalMaven" BeforeTargets="CollectPackageReferences" Condition="'$(UseLocalSentryMavenRepo)' == 'true'">
-    <XmlPeek
-      XmlInputPath="$(LocalSentryAndroidNdkPomPath)"
-      Query="//*[local-name()='dependency' and .//*[local-name()='artifactId' and text()='sentry-native-ndk']]/*[local-name()='version']/text()"
-      Condition="Exists('$(LocalSentryAndroidNdkPomPath)')">
       <Output TaskParameter="Result" PropertyName="SentryNativeNdkVersion" />
     </XmlPeek>
 
