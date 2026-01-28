@@ -1,36 +1,24 @@
 using Sentry.JavaSdk;
 using Sentry.JavaSdk.Android.Replay;
-using System.Globalization;
 
-// ReSharper disable once CheckNamespace - match generated code namespace
-namespace Sentry;
+namespace Sentry.Android;
 
-// Add IReplayBreadcrumbConverter interface to DefaultReplayBreadcrumbConverter, to work source generator issue
-internal class DotnetReplayBreadcrumbConverter : DefaultReplayBreadcrumbConverter, IReplayBreadcrumbConverter
+internal class DotnetReplayBreadcrumbConverter(Sentry.JavaSdk.SentryOptions options)
+    : DefaultReplayBreadcrumbConverter(options), IReplayBreadcrumbConverter
 {
     private const string HttpCategory = "http";
 
-    // Kotlin expects these keys to be Double or Long (ms)
     private const string HttpStartTimestampKey = "http.start_timestamp";
     private const string HttpEndTimestampKey = "http.end_timestamp";
 
-    public DotnetReplayBreadcrumbConverter(Sentry.JavaSdk.SentryOptions options) : base(options)
-    {
-    }
-
     public override global::IO.Sentry.Rrweb.RRWebEvent? Convert(Sentry.JavaSdk.Breadcrumb breadcrumb)
     {
-        if (breadcrumb is null)
-        {
-            return null;
-        }
-
         // The Java converter expects httpStartTimestamp/httpEndTimestamp to be Double or Long.
         // .NET breadcrumb data is always stored as strings. We convert these to numeric here so that the base.Convert()
         // method doesn't throw an exception.
         try
         {
-            if (breadcrumb.Category == HttpCategory && breadcrumb.Data is { } data)
+            if (breadcrumb is { Category: HttpCategory, Data: { } data })
             {
                 NormalizeTimestampField(data, HttpStartTimestampKey);
                 NormalizeTimestampField(data, HttpEndTimestampKey);
@@ -60,8 +48,6 @@ internal class DotnetReplayBreadcrumbConverter : DefaultReplayBreadcrumbConverte
             return;
         }
 
-        // Prefer integer milliseconds, but accept floating point too.
-        // Use invariant culture to avoid commas, etc.
         if (long.TryParse(str, NumberStyles.Integer, CultureInfo.InvariantCulture, out var asLong))
         {
             data[key] = Java.Lang.Long.ValueOf(asLong);
