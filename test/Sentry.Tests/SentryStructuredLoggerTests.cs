@@ -251,7 +251,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
     }
 }
 
-internal static class AssertionExtensions
+internal static class LoggerAssertionExtensions
 {
     public static void AssertEnvelope(this SentryStructuredLoggerTests.Fixture fixture, Envelope envelope, SentryLogLevel level)
     {
