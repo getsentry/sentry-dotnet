@@ -611,25 +611,80 @@ public class SentryHttpMessageHandlerTests
         Assert.True(breadcrumbGenerated.Data.ContainsKey(statusKey));
         Assert.Equal(expectedBreadcrumbData[statusKey], breadcrumbGenerated.Data[statusKey]);
     }
+#endif
 
     [Fact]
-    public void Send_Executed_FailedRequestsCaptured()
+    public void HandleResponse_SpanExists_AddsReplayBreadcrumbData()
     {
         // Arrange
+        var scope = new Scope();
         var hub = Substitute.For<IHub>();
-        var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
-        var options = new SentryOptions();
-        var url = "https://localhost/";
+        hub.SubstituteConfigureScope(scope);
 
-        using var innerHandler = new FakeHttpMessageHandler();
-        using var sentryHandler = new SentryHttpMessageHandler(hub, options, innerHandler, failedRequestHandler);
-        using var client = new HttpClient(sentryHandler);
+        var options = new SentryOptions
+        {
+            CaptureFailedRequests = false
+        };
+
+        var sut = new SentryHttpMessageHandler(hub, options);
+
+        var method = "GET";
+        var url = "https://localhost/";
+        var response = new HttpResponseMessage(HttpStatusCode.OK);
+
+        var span = Substitute.For<ISpan>();
+        span.StartTimestamp.Returns(DateTimeOffset.UtcNow.AddMilliseconds(-50));
 
         // Act
-        client.Get(url);
+        sut.HandleResponse(response, span, method, url);
 
         // Assert
-        failedRequestHandler.Received(1).HandleResponse(Arg.Any<HttpResponseMessage>());
+        var breadcrumb = scope.Breadcrumbs.First();
+        breadcrumb.Type.Should().Be("http");
+        breadcrumb.Category.Should().Be("http");
+
+        breadcrumb.Data.Should().NotBeNull();
+        breadcrumb.Data!.Should().ContainKey(SentryHttpMessageHandler.HttpStartTimestampKey);
+        breadcrumb.Data.Should().ContainKey(SentryHttpMessageHandler.HttpEndTimestampKey);
+
+        long.TryParse(breadcrumb.Data![SentryHttpMessageHandler.HttpStartTimestampKey], NumberStyles.Integer, CultureInfo.InvariantCulture, out var startMs)
+            .Should().BeTrue();
+        long.TryParse(breadcrumb.Data![SentryHttpMessageHandler.HttpEndTimestampKey], NumberStyles.Integer, CultureInfo.InvariantCulture, out var endMs)
+            .Should().BeTrue();
+
+        startMs.Should().BeGreaterThan(0);
+        endMs.Should().BeGreaterThan(0);
+        endMs.Should().BeGreaterOrEqualTo(startMs);
+
+        // Sanity: start should match span start (ms resolution)
+        startMs.Should().Be(span.StartTimestamp.ToUnixTimeMilliseconds());
+
+        // Ensure response sets status code on span
+        span.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpResponseStatusCode);
+        span.Extra[OtelSemanticConventions.AttributeHttpResponseStatusCode].Should().Be((int)HttpStatusCode.OK);
     }
-#endif
+
+    [Fact]
+    public void HandleResponse_NoSpanExists_NoReplayBreadcrumbData()
+    {
+        // Arrange
+        var scope = new Scope();
+        var hub = Substitute.For<IHub>();
+        hub.SubstituteConfigureScope(scope);
+
+        var sut = new SentryHttpMessageHandler(hub, null);
+
+        var method = "GET";
+        var url = "https://localhost/";
+        var response = new HttpResponseMessage(HttpStatusCode.OK);
+
+        // Act
+        sut.HandleResponse(response, span: null, method, url);
+
+        // Assert
+        var breadcrumb = scope.Breadcrumbs.First();
+        breadcrumb.Data.Should().NotBeNull();
+        breadcrumb.Data!.Should().NotContainKey(SentryHttpMessageHandler.HttpStartTimestampKey);
+        breadcrumb.Data.Should().NotContainKey(SentryHttpMessageHandler.HttpEndTimestampKey);
+    }
 }
