@@ -20,7 +20,7 @@
       and the resulting native ndk version.
     -->
     <UseLocalSentryMavenRepo>false</UseLocalSentryMavenRepo>
-    <LocalSentryMavenRepoDir Condition="'$(LocalSentryMavenRepoDir)' == ''">$(HOME)/.m2/repository/</LocalSentryMavenRepoDir>
+    <LocalSentryMavenRepoDir Condition="'$(LocalSentryMavenRepoDir)' == ''">$([System.Environment]::GetFolderPath(SpecialFolder.UserProfile))/.m2/repository/</LocalSentryMavenRepoDir>
     <LocalSentryJarPath>$(LocalSentryMavenRepoDir)io/sentry/sentry/$(SentryAndroidSdkVersion)/sentry-$(SentryAndroidSdkVersion).jar</LocalSentryJarPath>
     <LocalSentryAndroidCoreAarPath>$(LocalSentryMavenRepoDir)io/sentry/sentry-android-core/$(SentryAndroidSdkVersion)/sentry-android-core-$(SentryAndroidSdkVersion).aar</LocalSentryAndroidCoreAarPath>
     <LocalSentryAndroidNdkAarPath>$(LocalSentryMavenRepoDir)io/sentry/sentry-android-ndk/$(SentryAndroidSdkVersion)/sentry-android-ndk-$(SentryAndroidSdkVersion).aar</LocalSentryAndroidNdkAarPath>
