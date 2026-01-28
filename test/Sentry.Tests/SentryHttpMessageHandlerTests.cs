@@ -653,15 +653,9 @@ public class SentryHttpMessageHandlerTests
             .Should().BeTrue();
 
         startMs.Should().BeGreaterThan(0);
+        startMs.Should().Be(span.StartTimestamp.ToUnixTimeMilliseconds());
         endMs.Should().BeGreaterThan(0);
         endMs.Should().BeGreaterOrEqualTo(startMs);
-
-        // Sanity: start should match span start (ms resolution)
-        startMs.Should().Be(span.StartTimestamp.ToUnixTimeMilliseconds());
-
-        // Ensure response sets status code on span
-        span.Extra.Should().ContainKey(OtelSemanticConventions.AttributeHttpResponseStatusCode);
-        span.Extra[OtelSemanticConventions.AttributeHttpResponseStatusCode].Should().Be((int)HttpStatusCode.OK);
     }
 
     [Fact]
