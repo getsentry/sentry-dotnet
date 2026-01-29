@@ -4,6 +4,7 @@
  * - Performance Tracing (Transactions / Spans)
  * - Release Health (Sessions)
  * - Logs
+ * - Metrics
  * - MSBuild integration for Source Context (see the csproj)
  *
  * For more advanced features of the SDK, see Sentry.Samples.Console.Customized.
