@@ -117,16 +117,16 @@ namespace Sentry
         public HttpStatusCodeRange(int start, int end) { }
         public int End { get; init; }
         public int Start { get; init; }
-        public bool Contains(int statusCode) { }
         public bool Contains(System.Net.HttpStatusCode statusCode) { }
-        public static Sentry.HttpStatusCodeRange op_Implicit(int statusCode) { }
+        public bool Contains(int statusCode) { }
         public static Sentry.HttpStatusCodeRange op_Implicit(System.Net.HttpStatusCode statusCode) { }
-        public static Sentry.HttpStatusCodeRange op_Implicit([System.Runtime.CompilerServices.TupleElementNames(new string[] {
-                "Start",
-                "End"})] System.ValueTuple<int, int> range) { }
         public static Sentry.HttpStatusCodeRange op_Implicit([System.Runtime.CompilerServices.TupleElementNames(new string[] {
                 "start",
                 "end"})] System.ValueTuple<System.Net.HttpStatusCode, System.Net.HttpStatusCode> range) { }
+        public static Sentry.HttpStatusCodeRange op_Implicit([System.Runtime.CompilerServices.TupleElementNames(new string[] {
+                "Start",
+                "End"})] System.ValueTuple<int, int> range) { }
+        public static Sentry.HttpStatusCodeRange op_Implicit(int statusCode) { }
     }
     public static class HubExtensions
     {
@@ -381,8 +381,8 @@ namespace Sentry
         public Sentry.SentryUser User { get; set; }
         public void AddAttachment(Sentry.SentryAttachment attachment) { }
         public void AddAttachment(string filePath, Sentry.AttachmentType type = 0, string? contentType = null) { }
-        public void AddAttachment(byte[] data, string fileName, Sentry.AttachmentType type = 0, string? contentType = null) { }
         public void AddAttachment(System.IO.Stream stream, string fileName, Sentry.AttachmentType type = 0, string? contentType = null) { }
+        public void AddAttachment(byte[] data, string fileName, Sentry.AttachmentType type = 0, string? contentType = null) { }
         public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb) { }
         public void AddBreadcrumb(Sentry.Breadcrumb breadcrumb, Sentry.SentryHint hint) { }
         public void AddEventProcessor(Sentry.Extensibility.ISentryEventProcessor processor) { }
@@ -608,13 +608,13 @@ namespace Sentry
     [System.Diagnostics.DebuggerDisplay("SentryLog \\{ Level = {Level}, Message = \'{Message}\' \\}")]
     public sealed class SentryLog
     {
-        public Sentry.SentryLogLevel Level { get; init; }
-        public string Message { get; init; }
+        public required Sentry.SentryLogLevel Level { get; init; }
+        public required string Message { get; init; }
         public System.Collections.Immutable.ImmutableArray<System.Collections.Generic.KeyValuePair<string, object>> Parameters { get; init; }
         public Sentry.SpanId? SpanId { get; init; }
         public string? Template { get; init; }
-        public System.DateTimeOffset Timestamp { get; init; }
-        public Sentry.SentryId TraceId { get; init; }
+        public required System.DateTimeOffset Timestamp { get; init; }
+        public required Sentry.SentryId TraceId { get; init; }
         public void SetAttribute(string key, object value) { }
         public bool TryGetAttribute(string key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out object? value) { }
     }
@@ -763,11 +763,11 @@ namespace Sentry
         public void AddExceptionProcessor(Sentry.Extensibility.ISentryEventExceptionProcessor processor) { }
         public void AddExceptionProcessorProvider(System.Func<System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor>> processorProvider) { }
         public void AddExceptionProcessors(System.Collections.Generic.IEnumerable<Sentry.Extensibility.ISentryEventExceptionProcessor> processors) { }
-        public void AddInAppExclude(string prefix) { }
         public void AddInAppExclude(System.Text.RegularExpressions.Regex regex) { }
+        public void AddInAppExclude(string prefix) { }
         public void AddInAppExcludeRegex(string pattern) { }
-        public void AddInAppInclude(string prefix) { }
         public void AddInAppInclude(System.Text.RegularExpressions.Regex regex) { }
+        public void AddInAppInclude(string prefix) { }
         public void AddInAppIncludeRegex(string pattern) { }
         public void AddIntegration(Sentry.Integrations.ISdkIntegration integration) { }
         public void AddJsonConverter(System.Text.Json.Serialization.JsonConverter converter) { }
@@ -1294,13 +1294,13 @@ namespace Sentry
     [System.ComponentModel.TypeConverter(typeof(Sentry.StringOrRegexTypeConverter))]
     public class StringOrRegex
     {
-        public StringOrRegex(string stringOrRegex) { }
         public StringOrRegex(System.Text.RegularExpressions.Regex regex) { }
+        public StringOrRegex(string stringOrRegex) { }
         public override bool Equals(object? obj) { }
         public override int GetHashCode() { }
         public override string ToString() { }
-        public static Sentry.StringOrRegex op_Implicit(string stringOrRegex) { }
         public static Sentry.StringOrRegex op_Implicit(System.Text.RegularExpressions.Regex regex) { }
+        public static Sentry.StringOrRegex op_Implicit(string stringOrRegex) { }
     }
     public class TransactionContext : Sentry.SpanContext, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext
     {
