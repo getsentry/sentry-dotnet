@@ -1,4 +1,5 @@
 using Sentry.Extensibility;
+using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Protocol;
 
@@ -33,5 +34,10 @@ internal sealed class StructuredLog : ISentryJsonSerializable
 
         writer.WriteEndArray();
         writer.WriteEndObject();
+    }
+
+    internal static void Capture(IHub hub, SentryLog[] logs)
+    {
+        _ = hub.CaptureEnvelope(Envelope.FromLog(new StructuredLog(logs)));
     }
 }
