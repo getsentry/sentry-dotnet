@@ -194,3 +194,20 @@ and let the next build download the pre-built SDK again:
 $ rm -rf modules/sentry-cocoa
 $ dotnet build ... # downloads pre-built Cocoa SDK into modules/sentry-cocoa
 ```
+
+## Local Sentry Android SDK checkout
+
+Similarly, by default, `Sentry.Bindings.Android` downloads a pre-built Sentry Android SDK from
+Maven. The version is specified in the `SentryAndroidSdkVersion` build property in `Sentry.Bindings.Android.csproj`.
+
+If you want to build an unreleased Sentry Android SDK version from source instead,
+you'll need to clone both the sentry-java and the sentry-native repositories and publish these locally:
+```sh
+$ cd $(LocalSentryJavaRepoDir) && ./gradlew publishToMavenLocal
+$ cd $(LocalSentryNativeRepoDir)/ndk && ./gradlew publishToMavenLocal
+```
+
+You'll also need to set `<UseLocalSentryMavenRepo>true</UseLocalSentryMavenRepo>` and `<SentryNativeNdkVersion>{whatever_version_you_checked_out}</SentryNativeNdkVersion>`
+in the `Sentry.Bindings.Android.csproj`file.
+
+To switch back again, simply revert those two build properties to their original values.
