@@ -657,13 +657,13 @@ namespace Sentry
     public sealed class SentryMetric<T>
         where T :  struct
     {
-        public string Name { get; init; }
+        public required string Name { get; init; }
         public Sentry.SpanId? SpanId { get; init; }
-        public System.DateTimeOffset Timestamp { get; init; }
-        public Sentry.SentryId TraceId { get; init; }
-        public Sentry.SentryMetricType Type { get; init; }
+        public required System.DateTimeOffset Timestamp { get; init; }
+        public required Sentry.SentryId TraceId { get; init; }
+        public required Sentry.SentryMetricType Type { get; init; }
         public string? Unit { get; init; }
-        public T Value { get; init; }
+        public required T Value { get; init; }
         public void SetAttribute<TAttribute>(string key, TAttribute value)
             where TAttribute :  notnull { }
         public bool TryGetAttribute<TAttribute>(string key, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out TAttribute value) { }
@@ -1035,6 +1035,8 @@ namespace Sentry
             where T :  struct { }
         public void EmitDistribution<T>(string name, T value)
             where T :  struct { }
+        public void EmitDistribution<T>(string name, T value, Sentry.Scope? scope)
+            where T :  struct { }
         public void EmitDistribution<T>(string name, T value, string? unit)
             where T :  struct { }
         public void EmitDistribution<T>(string name, T value, string? unit, Sentry.Scope? scope)
@@ -1044,6 +1046,8 @@ namespace Sentry
         public void EmitDistribution<T>(string name, T value, string? unit, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
             where T :  struct { }
         public void EmitGauge<T>(string name, T value)
+            where T :  struct { }
+        public void EmitGauge<T>(string name, T value, Sentry.Scope? scope)
             where T :  struct { }
         public void EmitGauge<T>(string name, T value, string? unit)
             where T :  struct { }
