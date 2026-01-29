@@ -6,28 +6,18 @@ changelog:
     authors:
       - dependabot
   categories:
-    - title: New Features ✨
+    - title: Features ✨
       labels:
-        - "Changelog: Feature"
+        - "*"
       commit_patterns:
         - "^feat\\b"
-    - title: Bug Fixes 🐛
+    - title: Fixes 🐛
       labels:
-        - "Changelog: Bugfix"
+        - "*"
       commit_patterns:
         - "^(fix|bugfix)\\b"
-    - title: Deprecations 🏗️
+    - title: Dependencies ⬆️
       labels:
-        - "Changelog: Deprecation"
+        - "*"
       commit_patterns:
-        - "deprecat"  # deprecation, deprecated
-    - title: Documentation 📚
-      labels:
-        - "Changelog: Docs"
-      commit_patterns:
-        - "^docs?\\b"
-    - title: Internal Changes 🔧
-      labels:
-        - "Changelog: Internal"
-      commit_patterns:
-        - "^(build|ref|chore|ci|tests?)\\b"
+        - "^chore\\(deps(-dev)?\\)!?:\\s"
