@@ -3,7 +3,7 @@ using Sentry.Internal;
 
 namespace Sentry;
 
-internal static class SentryMetric
+public abstract partial class SentryMetric
 {
     internal static SentryMetric<T> Create<T>(IHub hub, SentryOptions options, ISystemClock clock, SentryMetricType type, string name, T value, string? unit, IEnumerable<KeyValuePair<string, object>>? attributes, Scope? scope) where T : struct
     {

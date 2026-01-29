@@ -21,7 +21,7 @@ internal sealed class DisabledSentryTraceMetrics : SentryTraceMetrics
     }
 
     /// <inheritdoc />
-    protected internal override void CaptureMetric<T>(SentryMetric<T> metric) where T : struct
+    private protected override void CaptureMetric<T>(SentryMetric<T> metric) where T : struct
     {
         // disabled
     }

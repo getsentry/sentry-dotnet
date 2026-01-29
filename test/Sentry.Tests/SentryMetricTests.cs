@@ -234,7 +234,7 @@ public class SentryMetricTests
     {
         var metric = new SentryMetric<byte>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
 
-        var document = metric.ToJsonDocument<ISentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
+        var document = metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
         var value = document.RootElement.GetProperty("value");
 
         value.ValueKind.Should().Be(JsonValueKind.Number);
@@ -249,7 +249,7 @@ public class SentryMetricTests
     {
         var metric = new SentryMetric<short>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
 
-        var document = metric.ToJsonDocument<ISentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
+        var document = metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
         var value = document.RootElement.GetProperty("value");
 
         value.ValueKind.Should().Be(JsonValueKind.Number);
@@ -264,7 +264,7 @@ public class SentryMetricTests
     {
         var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
 
-        var document = metric.ToJsonDocument<ISentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
+        var document = metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
         var value = document.RootElement.GetProperty("value");
 
         value.ValueKind.Should().Be(JsonValueKind.Number);
@@ -279,7 +279,7 @@ public class SentryMetricTests
     {
         var metric = new SentryMetric<long>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
 
-        var document = metric.ToJsonDocument<ISentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
+        var document = metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
         var value = document.RootElement.GetProperty("value");
 
         value.ValueKind.Should().Be(JsonValueKind.Number);
@@ -294,7 +294,7 @@ public class SentryMetricTests
     {
         var metric = new SentryMetric<float>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
 
-        var document = metric.ToJsonDocument<ISentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
+        var document = metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
         var value = document.RootElement.GetProperty("value");
 
         value.ValueKind.Should().Be(JsonValueKind.Number);
@@ -309,7 +309,7 @@ public class SentryMetricTests
     {
         var metric = new SentryMetric<double>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
 
-        var document = metric.ToJsonDocument<ISentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
+        var document = metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
         var value = document.RootElement.GetProperty("value");
 
         value.ValueKind.Should().Be(JsonValueKind.Number);
@@ -325,7 +325,7 @@ public class SentryMetricTests
     {
         var metric = new SentryMetric<decimal>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
 
-        var exception = Assert.ThrowsAny<Exception>(() => metric.ToJsonDocument<ISentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output));
+        var exception = Assert.ThrowsAny<Exception>(() => metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output));
         exception.Message.Should().Contain($"Unhandled Metric Type {typeof(decimal)}.");
         exception.Message.Should().Contain("This instruction should be unreachable.");
 
@@ -362,7 +362,7 @@ public class SentryMetricTests
 #endif
         metric.SetAttribute("null", null!);
 
-        var document = metric.ToJsonDocument<ISentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
+        var document = metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
         var attributes = document.RootElement.GetProperty("attributes");
         Assert.Collection(attributes.EnumerateObject().ToArray(),
             property => property.AssertAttributeInteger("sbyte", json => json.GetSByte(), sbyte.MinValue),

@@ -54,7 +54,7 @@ public abstract partial class SentryTraceMetrics
     /// </summary>
     /// <param name="metric">The metric.</param>
     /// <typeparam name="T">The numeric type of the metric.</typeparam>
-    protected internal abstract void CaptureMetric<T>(SentryMetric<T> metric) where T : struct;
+    private protected abstract void CaptureMetric<T>(SentryMetric<T> metric) where T : struct;
 
     /// <summary>
     /// Clears all buffers for this metrics and causes any buffered metrics to be sent by the underlying <see cref="ISentryClient"/>.

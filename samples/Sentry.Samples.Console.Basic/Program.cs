@@ -55,13 +55,21 @@ SentrySdk.Init(options =>
     });
 
     // Sentry (trace-connected) Metrics via SentrySdk.Experimental.Metrics are enabled by default.
-    options.Experimental.SetBeforeSendMetric<int>(static metric =>
+    options.Experimental.SetBeforeSendMetric(static metric =>
     {
-        // A demonstration of how you can modify the metric object before sending it to Sentry
-        metric.SetAttribute("operating_system.platform", Environment.OSVersion.Platform.ToString());
-        metric.SetAttribute("operating_system.version", Environment.OSVersion.Version.ToString());
+        if (metric.TryGetValue(out int integer) && integer < 0)
+        {
+            // Return null to drop the metric
+            return null;
+        }
 
-        // Return null to drop the metric
+        // A demonstration of how you can modify the metric object before sending it to Sentry
+        if (metric.Type is SentryMetricType.Counter)
+        {
+            metric.SetAttribute("operating_system.platform", Environment.OSVersion.Platform.ToString());
+            metric.SetAttribute("operating_system.version", Environment.OSVersion.Version.ToString());
+        }
+
         return metric;
     });
 });
@@ -95,10 +103,13 @@ async Task FirstFunction()
     // Info-Log filtered via "BeforeSendLog" callback
     SentrySdk.Logger.LogInfo("HTTP Request completed.");
 
-    // Metric modified via "BeforeSendMetric" callback for type "int" before sending it to Sentry
+    // Counter-Metric prevented from being sent to Sentry via "BeforeSendMetric" callback
+    SentrySdk.Experimental.Metrics.EmitCounter("sentry.samples.console.basic.ignore", -1);
+
+    // Counter-Metric modified before sending it to Sentry via "BeforeSendMetric" callback
     SentrySdk.Experimental.Metrics.EmitCounter("sentry.samples.console.basic.http_requests_completed", 1);
 
-    // Metric sent as is because no "BeforeSendMetric" is set for type "double"
+    // Distribution-Metric sent as is (see "BeforeSendMetric" callback)
     SentrySdk.Experimental.Metrics.EmitDistribution("sentry.samples.console.basic.http_request_duration", stopwatch.Elapsed.TotalSeconds, SentryUnits.Duration.Second,
         [new KeyValuePair<string, object>("http.request.method", HttpMethod.Get.Method), new KeyValuePair<string, object>("http.response.status_code", (int)HttpStatusCode.OK)]);
 }

@@ -118,10 +118,10 @@ public partial class SentryTraceMetricsTests : IDisposable
     public void Emit_WithBeforeSendMetric_InvokesCallback()
     {
         var invocations = 0;
-        SentryMetric<int> configuredMetric = null!;
+        SentryMetric configuredMetric = null!;
 
         Assert.True(_fixture.Options.Experimental.EnableMetrics);
-        _fixture.Options.Experimental.SetBeforeSendMetric<int>((SentryMetric<int> metric) =>
+        _fixture.Options.Experimental.SetBeforeSendMetric((SentryMetric metric) =>
         {
             invocations++;
             configuredMetric = metric;
@@ -143,7 +143,7 @@ public partial class SentryTraceMetricsTests : IDisposable
         var invocations = 0;
 
         Assert.True(_fixture.Options.Experimental.EnableMetrics);
-        _fixture.Options.Experimental.SetBeforeSendMetric<int>((SentryMetric<int> metric) =>
+        _fixture.Options.Experimental.SetBeforeSendMetric((SentryMetric metric) =>
         {
             invocations++;
             return null;
@@ -160,7 +160,7 @@ public partial class SentryTraceMetricsTests : IDisposable
     public void Emit_InvalidBeforeSendMetric_DoesNotCaptureEnvelope()
     {
         Assert.True(_fixture.Options.Experimental.EnableMetrics);
-        _fixture.Options.Experimental.SetBeforeSendMetric<int>(static (SentryMetric<int> metric) => throw new InvalidOperationException());
+        _fixture.Options.Experimental.SetBeforeSendMetric(static (SentryMetric metric) => throw new InvalidOperationException());
         var metrics = _fixture.GetSut();
 
         metrics.EmitCounter<int>("sentry_tests.sentry_trace_metrics_tests.counter", 1);
@@ -242,16 +242,17 @@ internal static class MetricsAssertionExtensions
         items.Length.Should().Be(1);
         var cast = items[0] as SentryMetric<T>;
         Assert.NotNull(cast);
-        AssertMetric(fixture, cast, type);
+        AssertMetric<T>(fixture, cast, type);
     }
 
-    public static void AssertMetric<T>(this SentryTraceMetricsTests.Fixture fixture, SentryMetric<T> metric, SentryMetricType type) where T : struct
+    public static void AssertMetric<T>(this SentryTraceMetricsTests.Fixture fixture, SentryMetric metric, SentryMetricType type) where T : struct
     {
+        metric.Should().BeOfType<SentryMetric<T>>();
         metric.Timestamp.Should().Be(fixture.Clock.GetUtcNow());
         metric.TraceId.Should().Be(fixture.TraceId);
         metric.Type.Should().Be(type);
         metric.Name.Should().Be("sentry_tests.sentry_trace_metrics_tests.counter");
-        metric.Value.Should().Be(1);
+        metric.Value.Should().BeOfType<T>().And.Be(1);
         metric.SpanId.Should().Be(fixture.SpanId);
         if (metric.Type is SentryMetricType.Gauge or SentryMetricType.Distribution)
         {
@@ -261,6 +262,9 @@ internal static class MetricsAssertionExtensions
         {
             metric.Unit.Should().BeNull();
         }
+
+        metric.TryGetValue<T>(out var match).Should().BeTrue();
+        match.Should().NotBe(default(T));
 
         foreach (var expectedAttribute in fixture.ExpectedAttributes)
         {

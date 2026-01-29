@@ -6,25 +6,23 @@ namespace Sentry;
 /// <summary>
 /// Represents a Sentry Trace-connected Metric.
 /// </summary>
-/// <typeparam name="T">The numeric type of the metric.</typeparam>
 /// <remarks>
 /// Sentry Docs: <see href="https://docs.sentry.io/product/explore/metrics/"/>.
 /// Sentry Developer Documentation: <see href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>.
 /// Sentry .NET SDK Docs: <see href="https://docs.sentry.io/platforms/dotnet/metrics/"/>.
 /// </remarks>
 [DebuggerDisplay(@"SentryMetric \{ Type = {Type}, Name = '{Name}', Value = {Value} \}")]
-public sealed class SentryMetric<T> : ISentryMetric where T : struct
+public abstract partial class SentryMetric
 {
     private readonly Dictionary<string, SentryAttribute> _attributes;
 
     [SetsRequiredMembers]
-    internal SentryMetric(DateTimeOffset timestamp, SentryId traceId, SentryMetricType type, string name, T value)
+    private protected SentryMetric(DateTimeOffset timestamp, SentryId traceId, SentryMetricType type, string name)
     {
         Timestamp = timestamp;
         TraceId = traceId;
         Type = type;
         Name = name;
-        Value = value;
         // 7 is the number of built-in attributes, so we start with that.
         _attributes = new Dictionary<string, SentryAttribute>(7);
     }
@@ -100,7 +98,8 @@ public sealed class SentryMetric<T> : ISentryMetric where T : struct
     ///   </item>
     /// </list>
     /// </remarks>
-    public required T Value { get; init; }
+    // Internal non-generic (boxed to object) read-only property for testing, and usage in DebuggerDisplayAttribute.
+    internal abstract object Value { get; }
 
     /// <summary>
     /// The span id of the span that was active when the metric was emitted.
@@ -116,10 +115,19 @@ public sealed class SentryMetric<T> : ISentryMetric where T : struct
     public string? Unit { get; init; }
 
     /// <summary>
+    /// Gets the metric value if it is of the specified type <typeparamref name="TValue"/>.
+    /// </summary>
+    /// <param name="value">When this method returns, contains the metric value, if it is of the specified type <typeparamref name="TValue"/>; otherwise, the <see langword="default"/> value for the type of the <paramref name="value"/> parameter. This parameter is passed uninitialized.</param>
+    /// <typeparam name="TValue">The numeric type of the metric.</typeparam>
+    /// <returns><see langword="true"/> if this <see cref="SentryMetric"/> is of type <typeparamref name="TValue"/>; otherwise, <see langword="false"/>.</returns>
+    /// <remarks>Supported numeric value types for <typeparamref name="TValue"/> are <see langword="byte"/>, <see langword="short"/>, <see langword="int"/>, <see langword="long"/>, <see langword="float"/>, and <see langword="double"/>.</remarks>
+    public abstract bool TryGetValue<TValue>(out TValue value) where TValue : struct;
+
+    /// <summary>
     /// Gets the attribute value associated with the specified key.
     /// </summary>
     /// <remarks>
-    /// Returns <see langword="true"/> if the <see cref="SentryMetric{T}"/> contains an attribute with the specified key which is of type <typeparamref name="TAttribute"/> and it's value is not <see langword="null"/>.
+    /// Returns <see langword="true"/> if this <see cref="SentryMetric"/> contains an attribute with the specified key which is of type <typeparamref name="TAttribute"/> and it's value is not <see langword="null"/>.
     /// Otherwise <see langword="false"/>.
     /// Supported types:
     /// <list type="table">
@@ -263,11 +271,13 @@ public sealed class SentryMetric<T> : ISentryMetric where T : struct
         }
     }
 
-    internal void Apply(Scope? scope)
+    private void Apply(Scope? scope)
     {
+        //TODO: https://github.com/getsentry/sentry-dotnet/issues/4882
     }
 
-    void ISentryMetric.WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
+    /// <inheritdoc cref="ISentryJsonSerializable.WriteTo(Utf8JsonWriter, IDiagnosticLogger)" />
+    internal void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         writer.WriteStartObject();
 
@@ -279,7 +289,7 @@ public sealed class SentryMetric<T> : ISentryMetric where T : struct
 
         writer.WriteString("type", Type.ToProtocolString(logger));
         writer.WriteString("name", Name);
-        writer.WriteMetricValue("value", Value);
+        WriteMetricValueTo(writer, logger);
 
         writer.WritePropertyName("trace_id");
         TraceId.WriteTo(writer, logger);
@@ -307,70 +317,6 @@ public sealed class SentryMetric<T> : ISentryMetric where T : struct
 
         writer.WriteEndObject();
     }
-}
 
-// TODO: remove after upgrading <LangVersion>14.0</LangVersion> and updating <PackageReference Include="Polyfill" />
-#if !NET6_0_OR_GREATER
-file static class EnumerableExtensions
-{
-    internal static bool TryGetNonEnumeratedCount<TSource>(this IEnumerable<TSource> source, out int count)
-    {
-        if (source is null)
-        {
-            throw new ArgumentNullException(nameof(source));
-        }
-
-        if (source is ICollection<TSource> genericCollection)
-        {
-            count = genericCollection.Count;
-            return true;
-        }
-
-        if (source is ICollection collection)
-        {
-            count = collection.Count;
-            return true;
-        }
-
-        count = 0;
-        return false;
-    }
-}
-#endif
-
-file static class Utf8JsonWriterExtensions
-{
-    internal static void WriteMetricValue<T>(this Utf8JsonWriter writer, string propertyName, T value) where T : struct
-    {
-        var type = typeof(T);
-
-        if (type == typeof(long))
-        {
-            writer.WriteNumber(propertyName, (long)(object)value);
-        }
-        else if (type == typeof(double))
-        {
-            writer.WriteNumber(propertyName, (double)(object)value);
-        }
-        else if (type == typeof(int))
-        {
-            writer.WriteNumber(propertyName, (int)(object)value);
-        }
-        else if (type == typeof(float))
-        {
-            writer.WriteNumber(propertyName, (float)(object)value);
-        }
-        else if (type == typeof(short))
-        {
-            writer.WriteNumber(propertyName, (short)(object)value);
-        }
-        else if (type == typeof(byte))
-        {
-            writer.WriteNumber(propertyName, (byte)(object)value);
-        }
-        else
-        {
-            Debug.Fail($"Unhandled Metric Type {typeof(T)}.", "This instruction should be unreachable.");
-        }
-    }
+    private protected abstract void WriteMetricValueTo(Utf8JsonWriter writer, IDiagnosticLogger? logger);
 }

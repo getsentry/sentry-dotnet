@@ -2,7 +2,7 @@ namespace Sentry;
 
 /// <summary>
 /// Supported units by Relay and Sentry.
-/// Applies to <see cref="SentryMetric{T}.Unit"/>, as well as attributes of <see cref="SentryLog"/> and attributes of <see cref="SentryMetric{T}"/>.
+/// Applies to <see cref="SentryMetric.Unit"/>, as well as attributes of <see cref="SentryLog"/> and attributes of <see cref="SentryMetric"/>.
 /// </summary>
 /// <remarks>
 /// Contains the units currently <see href="https://getsentry.github.io/relay/relay_metrics/enum.MetricUnit.html">supported by Relay</see> and Sentry.

@@ -5,7 +5,7 @@ namespace Sentry.Testing;
 public sealed class InMemorySentryTraceMetrics : SentryTraceMetrics
 {
     public List<MetricEntry> Entries { get; } = new();
-    internal List<ISentryMetric> Metrics { get; } = new();
+    internal List<SentryMetric> Metrics { get; } = new();
 
     /// <inheritdoc />
     private protected override void CaptureMetric<T>(SentryMetricType type, string name, T value, string? unit, IEnumerable<KeyValuePair<string, object>>? attributes, Scope? scope) where T : struct
@@ -20,7 +20,7 @@ public sealed class InMemorySentryTraceMetrics : SentryTraceMetrics
     }
 
     /// <inheritdoc />
-    protected internal override void CaptureMetric<T>(SentryMetric<T> metric) where T : struct
+    private protected override void CaptureMetric<T>(SentryMetric<T> metric) where T : struct
     {
         Metrics.Add(metric);
     }

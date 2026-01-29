@@ -10,7 +10,7 @@ internal sealed class DefaultSentryTraceMetrics : SentryTraceMetrics, IDisposabl
     private readonly SentryOptions _options;
     private readonly ISystemClock _clock;
 
-    private readonly BatchProcessor<ISentryMetric> _batchProcessor;
+    private readonly BatchProcessor<SentryMetric> _batchProcessor;
 
     internal DefaultSentryTraceMetrics(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
     {
@@ -21,7 +21,7 @@ internal sealed class DefaultSentryTraceMetrics : SentryTraceMetrics, IDisposabl
         _options = options;
         _clock = clock;
 
-        _batchProcessor = new BatchProcessor<ISentryMetric>(hub, batchCount, batchInterval, TraceMetric.Capture, _options.ClientReportRecorder, _options.DiagnosticLogger);
+        _batchProcessor = new BatchProcessor<SentryMetric>(hub, batchCount, batchInterval, TraceMetric.Capture, _options.ClientReportRecorder, _options.DiagnosticLogger);
     }
 
     /// <inheritdoc />
@@ -63,12 +63,12 @@ internal sealed class DefaultSentryTraceMetrics : SentryTraceMetrics, IDisposabl
     }
 
     /// <inheritdoc />
-    protected internal override void CaptureMetric<T>(SentryMetric<T> metric) where T : struct
+    private protected override void CaptureMetric<T>(SentryMetric<T> metric) where T : struct
     {
         Debug.Assert(SentryMetric.IsSupported(typeof(T)));
         Debug.Assert(!string.IsNullOrEmpty(metric.Name));
 
-        var configuredMetric = metric;
+        SentryMetric? configuredMetric = metric;
 
         if (_options.Experimental.BeforeSendMetricInternal is { } beforeSendMetric)
         {

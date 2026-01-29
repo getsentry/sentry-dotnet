@@ -189,6 +189,7 @@ public sealed class SentryLog
         SetAttribute("sentry.origin", origin);
     }
 
+    /// <inheritdoc cref="ISentryJsonSerializable.WriteTo(Utf8JsonWriter, IDiagnosticLogger)" />
     internal void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
         writer.WriteStartObject();

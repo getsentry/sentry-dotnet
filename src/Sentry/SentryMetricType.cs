@@ -11,7 +11,7 @@ public enum SentryMetricType
     /// A metric that increments counts.
     /// </summary>
     /// <remarks>
-    /// <see cref="SentryMetric{T}.Value"/> represents the count to increment by.
+    /// <see cref="SentryMetric{T}._value"/> represents the count to increment by.
     /// By default: <see langword="1"/>.
     /// </remarks>
     Counter,
@@ -20,7 +20,7 @@ public enum SentryMetricType
     /// A metric that tracks a value that can go up or down.
     /// </summary>
     /// <remarks>
-    /// <see cref="SentryMetric{T}.Value"/> represents the current value.
+    /// <see cref="SentryMetric{T}._value"/> represents the current value.
     /// </remarks>
     Gauge,
 
@@ -28,7 +28,7 @@ public enum SentryMetricType
     /// A metric that tracks the statistical distribution of values.
     /// </summary>
     /// <remarks>
-    /// <see cref="SentryMetric{T}.Value"/> represents a single measured value.
+    /// <see cref="SentryMetric{T}._value"/> represents a single measured value.
     /// </remarks>
     Distribution,
 }

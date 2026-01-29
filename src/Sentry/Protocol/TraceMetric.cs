@@ -12,15 +12,15 @@ namespace Sentry.Protocol;
 /// </remarks>
 internal sealed class TraceMetric : ISentryJsonSerializable
 {
-    private readonly ISentryMetric[] _items;
+    private readonly SentryMetric[] _items;
 
-    public TraceMetric(ISentryMetric[] metrics)
+    public TraceMetric(SentryMetric[] metrics)
     {
         _items = metrics;
     }
 
     public int Length => _items.Length;
-    public ReadOnlySpan<ISentryMetric> Items => _items;
+    public ReadOnlySpan<SentryMetric> Items => _items;
 
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
@@ -36,7 +36,7 @@ internal sealed class TraceMetric : ISentryJsonSerializable
         writer.WriteEndObject();
     }
 
-    internal static void Capture(IHub hub, ISentryMetric[] metrics)
+    internal static void Capture(IHub hub, SentryMetric[] metrics)
     {
         _ = hub.CaptureEnvelope(Envelope.FromMetric(new TraceMetric(metrics)));
     }

@@ -647,15 +647,8 @@ namespace Sentry
         protected abstract Sentry.ISpan? ProcessRequest(System.Net.Http.HttpRequestMessage request, string method, string url);
         protected override System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { }
     }
-    public enum SentryMetricType
-    {
-        Counter = 0,
-        Gauge = 1,
-        Distribution = 2,
-    }
     [System.Diagnostics.DebuggerDisplay("SentryMetric \\{ Type = {Type}, Name = \'{Name}\', Value = {Value} \\}")]
-    public sealed class SentryMetric<T>
-        where T :  struct
+    public abstract class SentryMetric
     {
         public required string Name { get; init; }
         public Sentry.SpanId? SpanId { get; init; }
@@ -663,10 +656,17 @@ namespace Sentry
         public required Sentry.SentryId TraceId { get; init; }
         public required Sentry.SentryMetricType Type { get; init; }
         public string? Unit { get; init; }
-        public required T Value { get; init; }
         public void SetAttribute<TAttribute>(string key, TAttribute value)
             where TAttribute :  notnull { }
         public bool TryGetAttribute<TAttribute>(string key, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(false)] out TAttribute value) { }
+        public abstract bool TryGetValue<TValue>(out TValue value)
+            where TValue :  struct;
+    }
+    public enum SentryMetricType
+    {
+        Counter = 0,
+        Gauge = 1,
+        Distribution = 2,
     }
     public enum SentryMonitorInterval
     {
@@ -804,8 +804,7 @@ namespace Sentry
         public class ExperimentalSentryOptions
         {
             public bool EnableMetrics { get; set; }
-            public void SetBeforeSendMetric<T>(System.Func<Sentry.SentryMetric<T>, Sentry.SentryMetric<T>?> beforeSendMetric)
-                where T :  struct { }
+            public void SetBeforeSendMetric(System.Func<Sentry.SentryMetric, Sentry.SentryMetric?> beforeSendMetric) { }
         }
     }
     public sealed class SentryPackage : Sentry.ISentryJsonSerializable
@@ -1023,8 +1022,6 @@ namespace Sentry
     }
     public abstract class SentryTraceMetrics
     {
-        protected abstract void CaptureMetric<T>(Sentry.SentryMetric<T> metric)
-            where T :  struct;
         public void EmitCounter<T>(string name, T value)
             where T :  struct { }
         public void EmitCounter<T>(string name, T value, Sentry.Scope? scope)
