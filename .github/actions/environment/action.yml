@@ -48,7 +48,7 @@ runs:
     - name: Pin the Xcode Version
       if: runner.os == 'macOS'
       shell: bash
-      run: sudo xcode-select --switch /Applications/Xcode_26.1.1.app
+      run: sudo xcode-select --switch /Applications/Xcode_26.2.app
 
     # Java 17 is needed for Android SDK setup step
     - name: Install Java 17
