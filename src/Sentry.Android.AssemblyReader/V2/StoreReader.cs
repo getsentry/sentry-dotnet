@@ -91,163 +91,163 @@ internal partial class StoreReader : AssemblyStoreReader
 
     protected override ulong GetStoreStartDataOffset() => elfOffset;
 
-    protected override bool IsSupported()
+    protected internal override bool IsSupported()
     {
-        StoreStream.Seek(0, SeekOrigin.Begin);
-        using var reader = CreateReader();
-
-        uint magic = reader.ReadUInt32();
-        if (magic == Utils.ELFMagic)
+        lock (StreamLock)
         {
-            ELFPayloadError error;
-            (elfOffset, _, error) = Utils.FindELFPayloadSectionOffsetAndSize(StoreStream);
+            StoreStream.Seek(0, SeekOrigin.Begin);
+            using var reader = CreateReader();
 
-            if (error != ELFPayloadError.None)
+            var magic = reader.ReadUInt32();
+            if (magic == Utils.ELFMagic)
             {
-                string message = error switch
+                (elfOffset, _, var error) = Utils.FindELFPayloadSectionOffsetAndSize(StoreStream);
+
+                if (error != ELFPayloadError.None)
                 {
-                    ELFPayloadError.NotELF => $"Store '{StorePath}' is not a valid ELF binary",
-                    ELFPayloadError.LoadFailed => $"Store '{StorePath}' could not be loaded",
-                    ELFPayloadError.NotSharedLibrary => $"Store '{StorePath}' is not a shared ELF library",
-                    ELFPayloadError.NotLittleEndian => $"Store '{StorePath}' is not a little-endian ELF image",
-                    ELFPayloadError.NoPayloadSection => $"Store '{StorePath}' does not contain the 'payload' section",
-                    _ => $"Unknown ELF payload section error for store '{StorePath}': {error}"
-                };
-                Logger?.Invoke(DebugLoggerLevel.Debug, message);
-                // Was originally:
-                // ```
-                // } else if (elfOffset >= 0) {
-                // ```
-                // However since elfOffset is an ulong, it will never be less than 0
+                    var message = error switch
+                    {
+                        ELFPayloadError.NotELF => $"Store '{StorePath}' is not a valid ELF binary",
+                        ELFPayloadError.LoadFailed => $"Store '{StorePath}' could not be loaded",
+                        ELFPayloadError.NotSharedLibrary => $"Store '{StorePath}' is not a shared ELF library",
+                        ELFPayloadError.NotLittleEndian => $"Store '{StorePath}' is not a little-endian ELF image",
+                        ELFPayloadError.NoPayloadSection => $"Store '{StorePath}' does not contain the 'payload' section",
+                        _ => $"Unknown ELF payload section error for store '{StorePath}': {error}"
+                    };
+                    Logger?.Invoke(DebugLoggerLevel.Debug, message);
+                }
+                else
+                {
+                    StoreStream.Seek((long)elfOffset, SeekOrigin.Begin);
+                    magic = reader.ReadUInt32();
+                }
             }
-            else
+
+            if (magic != Utils.AssemblyStoreMagic)
             {
-                StoreStream.Seek((long)elfOffset, SeekOrigin.Begin);
-                magic = reader.ReadUInt32();
+                Logger?.Invoke(DebugLoggerLevel.Debug, "Store '{0}' has invalid header magic number.", StorePath);
+                return false;
             }
+
+            var version = reader.ReadUInt32();
+            if (!supportedVersions.Contains(version))
+            {
+                Logger?.Invoke(DebugLoggerLevel.Debug, "Store '{0}' has unsupported version 0x{1:x}", StorePath, version);
+                return false;
+            }
+
+            var entry_count = reader.ReadUInt32();
+            var index_entry_count = reader.ReadUInt32();
+            var index_size = reader.ReadUInt32();
+
+            header = new Header(magic, version, entry_count, index_entry_count, index_size);
+            return true;
         }
-
-        if (magic != Utils.AssemblyStoreMagic)
-        {
-            Logger?.Invoke(DebugLoggerLevel.Debug, "Store '{0}' has invalid header magic number.", StorePath);
-            return false;
-        }
-
-        uint version = reader.ReadUInt32();
-        if (!supportedVersions.Contains(version))
-        {
-            Logger?.Invoke(DebugLoggerLevel.Debug, "Store '{0}' has unsupported version 0x{1:x}", StorePath, version);
-            return false;
-        }
-
-        uint entry_count = reader.ReadUInt32();
-        uint index_entry_count = reader.ReadUInt32();
-        uint index_size = reader.ReadUInt32();
-
-        header = new Header(magic, version, entry_count, index_entry_count, index_size);
-        return true;
     }
 
     protected override void Prepare()
     {
-        if (header == null)
+        lock (StreamLock)
         {
-            throw new InvalidOperationException("Internal error: header not set, was IsSupported() called?");
-        }
-
-        TargetArch = (header.version & ASSEMBLY_STORE_ABI_MASK) switch
-        {
-            ASSEMBLY_STORE_ABI_AARCH64 => AndroidTargetArch.Arm64,
-            ASSEMBLY_STORE_ABI_ARM => AndroidTargetArch.Arm,
-            ASSEMBLY_STORE_ABI_X64 => AndroidTargetArch.X86_64,
-            ASSEMBLY_STORE_ABI_X86 => AndroidTargetArch.X86,
-            _ => throw new NotSupportedException($"Unsupported ABI in store version: 0x{header.version:x}")
-        };
-
-        Is64Bit = (header.version & ASSEMBLY_STORE_FORMAT_VERSION_MASK) != 0;
-        AssemblyCount = header.entry_count;
-        IndexEntryCount = header.index_entry_count;
-
-        StoreStream.Seek((long)elfOffset + Header.NativeSize, SeekOrigin.Begin);
-        using var reader = CreateReader();
-
-        var index = new List<IndexEntry>();
-        for (uint i = 0; i < header.index_entry_count; i++)
-        {
-            ulong name_hash;
-            if (Is64Bit)
+            if (header == null)
             {
-                name_hash = reader.ReadUInt64();
-            }
-            else
-            {
-                name_hash = (ulong)reader.ReadUInt32();
+                throw new InvalidOperationException("Internal error: header not set, was IsSupported() called?");
             }
 
-            uint descriptor_index = reader.ReadUInt32();
+            TargetArch = (header.version & ASSEMBLY_STORE_ABI_MASK) switch
+            {
+                ASSEMBLY_STORE_ABI_AARCH64 => AndroidTargetArch.Arm64,
+                ASSEMBLY_STORE_ABI_ARM => AndroidTargetArch.Arm,
+                ASSEMBLY_STORE_ABI_X64 => AndroidTargetArch.X86_64,
+                ASSEMBLY_STORE_ABI_X86 => AndroidTargetArch.X86,
+                _ => throw new NotSupportedException($"Unsupported ABI in store version: 0x{header.version:x}")
+            };
+
+            Is64Bit = (header.version & ASSEMBLY_STORE_FORMAT_VERSION_MASK) != 0;
+            AssemblyCount = header.entry_count;
+            IndexEntryCount = header.index_entry_count;
+
+            StoreStream.Seek((long)elfOffset + Header.NativeSize, SeekOrigin.Begin);
+            using var reader = CreateReader();
+
+            var index = new List<IndexEntry>();
+            for (uint i = 0; i < header.index_entry_count; i++)
+            {
+                ulong name_hash;
+                if (Is64Bit)
+                {
+                    name_hash = reader.ReadUInt64();
+                }
+                else
+                {
+                    name_hash = (ulong)reader.ReadUInt32();
+                }
+
+                uint descriptor_index = reader.ReadUInt32();
 #if NET10_0_OR_GREATER
             bool ignore = reader.ReadByte () != 0;
 #else
-            bool ignore = false;
+                bool ignore = false;
 #endif
-            index.Add(new IndexEntry(name_hash, descriptor_index, ignore));
-        }
-
-        var descriptors = new List<EntryDescriptor>();
-        for (uint i = 0; i < header.entry_count; i++)
-        {
-            uint mapping_index = reader.ReadUInt32();
-            uint data_offset = reader.ReadUInt32();
-            uint data_size = reader.ReadUInt32();
-            uint debug_data_offset = reader.ReadUInt32();
-            uint debug_data_size = reader.ReadUInt32();
-            uint config_data_offset = reader.ReadUInt32();
-            uint config_data_size = reader.ReadUInt32();
-
-            var desc = new EntryDescriptor
-            {
-                mapping_index = mapping_index,
-                data_offset = data_offset,
-                data_size = data_size,
-                debug_data_offset = debug_data_offset,
-                debug_data_size = debug_data_size,
-                config_data_offset = config_data_offset,
-                config_data_size = config_data_size,
-            };
-            descriptors.Add(desc);
-        }
-
-        var names = new List<string>();
-        for (uint i = 0; i < header.entry_count; i++)
-        {
-            uint name_length = reader.ReadUInt32();
-            byte[] name_bytes = reader.ReadBytes((int)name_length);
-            names.Add(Encoding.UTF8.GetString(name_bytes));
-        }
-
-        var tempItems = new Dictionary<uint, TemporaryItem>();
-        foreach (IndexEntry ie in index)
-        {
-            if (!tempItems.TryGetValue(ie.descriptor_index, out TemporaryItem? item))
-            {
-                item = new TemporaryItem(names[(int)ie.descriptor_index], descriptors[(int)ie.descriptor_index], ie.ignore);
-                tempItems.Add(ie.descriptor_index, item);
+                index.Add(new IndexEntry(name_hash, descriptor_index, ignore));
             }
-            item.IndexEntries.Add(ie);
-        }
 
-        if (tempItems.Count != descriptors.Count)
-        {
-            throw new InvalidOperationException($"Assembly store '{StorePath}' index is corrupted.");
-        }
+            var descriptors = new List<EntryDescriptor>();
+            for (uint i = 0; i < header.entry_count; i++)
+            {
+                uint mapping_index = reader.ReadUInt32();
+                uint data_offset = reader.ReadUInt32();
+                uint data_size = reader.ReadUInt32();
+                uint debug_data_offset = reader.ReadUInt32();
+                uint debug_data_size = reader.ReadUInt32();
+                uint config_data_offset = reader.ReadUInt32();
+                uint config_data_size = reader.ReadUInt32();
 
-        var storeItems = new List<AssemblyStoreItem>();
-        foreach (var kvp in tempItems)
-        {
-            TemporaryItem ti = kvp.Value;
-            var item = new StoreItemV2(TargetArch, ti.Name, Is64Bit, ti.IndexEntries, ti.Descriptor, ti.Ignored);
-            storeItems.Add(item);
+                var desc = new EntryDescriptor
+                {
+                    mapping_index = mapping_index,
+                    data_offset = data_offset,
+                    data_size = data_size,
+                    debug_data_offset = debug_data_offset,
+                    debug_data_size = debug_data_size,
+                    config_data_offset = config_data_offset,
+                    config_data_size = config_data_size,
+                };
+                descriptors.Add(desc);
+            }
+
+            var names = new List<string>();
+            for (uint i = 0; i < header.entry_count; i++)
+            {
+                uint name_length = reader.ReadUInt32();
+                byte[] name_bytes = reader.ReadBytes((int)name_length);
+                names.Add(Encoding.UTF8.GetString(name_bytes));
+            }
+
+            var tempItems = new Dictionary<uint, TemporaryItem>();
+            foreach (IndexEntry ie in index)
+            {
+                if (!tempItems.TryGetValue(ie.descriptor_index, out TemporaryItem? item))
+                {
+                    item = new TemporaryItem(names[(int)ie.descriptor_index], descriptors[(int)ie.descriptor_index], ie.ignore);
+                    tempItems.Add(ie.descriptor_index, item);
+                }
+                item.IndexEntries.Add(ie);
+            }
+
+            if (tempItems.Count != descriptors.Count)
+            {
+                throw new InvalidOperationException($"Assembly store '{StorePath}' index is corrupted.");
+            }
+
+            var storeItems = new List<AssemblyStoreItem>();
+            foreach (var kvp in tempItems)
+            {
+                TemporaryItem ti = kvp.Value;
+                var item = new StoreItemV2(TargetArch, ti.Name, Is64Bit, ti.IndexEntries, ti.Descriptor, ti.Ignored);
+                storeItems.Add(item);
+            }
+            Assemblies = storeItems.AsReadOnly();
         }
-        Assemblies = storeItems.AsReadOnly();
     }
 }
