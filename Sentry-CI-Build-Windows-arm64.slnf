@@ -3,6 +3,8 @@
     "path": "Sentry.sln",
     "projects": [
       "benchmarks\\Sentry.Benchmarks\\Sentry.Benchmarks.csproj",
+      "modules\\perfview\\src\\FastSerialization\\FastSerialization.csproj",
+      "modules\\perfview\\src\\TraceEvent\\TraceEvent.csproj",
       "samples\\Sentry.Samples.AspNetCore.Basic\\Sentry.Samples.AspNetCore.Basic.csproj",
       "samples\\Sentry.Samples.AspNetCore.Blazor.Server\\Sentry.Samples.AspNetCore.Blazor.Server.csproj",
       "samples\\Sentry.Samples.AspNetCore.Blazor.Wasm\\Sentry.Samples.AspNetCore.Blazor.Wasm.csproj",
