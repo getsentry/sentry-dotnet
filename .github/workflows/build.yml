@@ -48,7 +48,7 @@ jobs:
           curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - run: git submodule update --init modules/sentry-native
 
@@ -121,7 +121,7 @@ jobs:
         uses: styfle/cancel-workflow-action@3155a141048f8f89c06b4cdae32e7853e97536bc # 0.13.0
 
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
@@ -262,7 +262,7 @@ jobs:
 
       - name: Sparse checkout
         if: env.CI_PUBLISHING_BUILD == 'true'
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           # We only check out what is absolutely necessary to reduce a chance of local files impacting
           # integration tests (nuget.config etc.)... But we need the root Directory.Build.props calculate
@@ -284,7 +284,7 @@ jobs:
 #        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
         # TODO: Re-enable once we have resolved https://github.com/getsentry/sentry-dotnet/issues/4788
         if: ${{ (matrix.rid != 'linux-musl-x64') }}
-        uses: getsentry/github-workflows/sentry-cli/integration-test@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test@95603f4efe938315ff0dd427a1f2bb40b1889a92 # 3.2.0
         with:
           path: integration-test
 
@@ -293,7 +293,7 @@ jobs:
 #      # by passing it as parameter to aot.Tests.ps1 via an environment variable
 #      - name: Integration test (musl)
 #        if: ${{ (matrix.rid == 'linux-musl-x64') || (matrix.rid == 'linux-musl-arm64') }}
-#        uses: getsentry/github-workflows/sentry-cli/integration-test@v2
+#        uses: getsentry/github-workflows/sentry-cli/integration-test@95603f4efe938315ff0dd427a1f2bb40b1889a92 # 3.2.0
 #        env:
 #          ContainerBaseImage: 'mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-alpine3.22'
 #        with:
@@ -306,7 +306,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
 
@@ -332,7 +332,7 @@ jobs:
         run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build,Pack -p:Configuration=Release --nologo -v:minimal -flp:logfile=msbuild.log -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
 
       - name: Test MSBuild
-        uses: getsentry/github-workflows/sentry-cli/integration-test@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test@95603f4efe938315ff0dd427a1f2bb40b1889a92 # 3.2.0
         with:
           path: integration-test/msbuild.Tests.ps1
 
@@ -364,7 +364,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
 
@@ -381,7 +381,7 @@ jobs:
           path: src
 
       - name: Test AOT
-        uses: getsentry/github-workflows/sentry-cli/integration-test@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test@95603f4efe938315ff0dd427a1f2bb40b1889a92 # 3.2.0
         env:
           RuntimeIdentifier: ${{ matrix.rid }}
         with:
@@ -394,7 +394,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
@@ -433,7 +433,7 @@ jobs:
     if: ${{ !startsWith(github.ref_name, 'release/') }}
 
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
 
