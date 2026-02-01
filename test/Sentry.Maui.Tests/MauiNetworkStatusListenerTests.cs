@@ -1,4 +1,5 @@
 using Sentry.Maui.Internal;
+using NetworkAccess = Microsoft.Maui.Networking.NetworkAccess; // ambiguous reference: System.Net.NetworkAccess
 
 namespace Sentry.Maui.Tests;
 
