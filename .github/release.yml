@@ -6,6 +6,9 @@ changelog:
     authors:
       - dependabot
   categories:
+    - title: Breaking Changes 🛠
+      commit_patterns:
+        - "^(?<type>\\w+(?:\\((?<scope>[^)]+)\\))?!:\\s*)"
     - title: Features ✨
       labels:
         - "*"
