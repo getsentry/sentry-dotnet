@@ -1370,8 +1370,6 @@ public class SentryOptions
         );
 
         NetworkStatusListener = new PollingNetworkStatusListener(this);
-
-        Experimental = new ExperimentalSentryOptions(this);
     }
 
     /// <summary>
@@ -1914,7 +1912,7 @@ public class SentryOptions
     /// <remarks>
     /// Experimental features are subject to binary, source and behavioral breaking changes in future updates.
     /// </remarks>
-    public ExperimentalSentryOptions Experimental { get; }
+    public ExperimentalSentryOptions Experimental { get; } = new ExperimentalSentryOptions();
 
     /// <summary>
     /// Sentry features that are currently in an experimental state.
@@ -1924,12 +1922,10 @@ public class SentryOptions
     /// </remarks>
     public class ExperimentalSentryOptions
     {
-        private readonly SentryOptions _options;
         private Func<SentryMetric, SentryMetric?>? _beforeSendMetric;
 
-        internal ExperimentalSentryOptions(SentryOptions options)
+        internal ExperimentalSentryOptions()
         {
-            _options = options;
         }
 
         internal Func<SentryMetric, SentryMetric?>? BeforeSendMetricInternal => _beforeSendMetric;
