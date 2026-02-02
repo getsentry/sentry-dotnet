@@ -217,12 +217,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{A8A9
 		scripts\build-sentry-cocoa.sh = scripts\build-sentry-cocoa.sh
 		scripts\update-project-xml.ps1 = scripts\update-project-xml.ps1
 		scripts\build-sentry-native.ps1 = scripts\build-sentry-native.ps1
-		scripts\ios-simulator-utils.ps1 = scripts\ios-simulator-utils.ps1
 		scripts\commit-formatted-code.sh = scripts\commit-formatted-code.sh
 		scripts\accept-verifier-changes.ps1 = scripts\accept-verifier-changes.ps1
 		scripts\generate-cocoa-bindings.ps1 = scripts\generate-cocoa-bindings.ps1
 		scripts\generate-solution-filters.ps1 = scripts\generate-solution-filters.ps1
 		scripts\generate-solution-filters-config.yaml = scripts\generate-solution-filters-config.yaml
+		scripts\device-test-utils.ps1 = scripts\device-test-utils.ps1
+		scripts\install-libssl1.sh = scripts\install-libssl1.sh
+		scripts\patch-cocoa-bindings.cs = scripts\patch-cocoa-bindings.cs
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{EC6ADE8A-E557-4848-8F03-519039830B5F}"
@@ -239,6 +241,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\vulnerabilities.yml = .github\workflows\vulnerabilities.yml
 		.github\workflows\device-tests-ios.yml = .github\workflows\device-tests-ios.yml
 		.github\workflows\device-tests-android.yml = .github\workflows\device-tests-android.yml
+		.github\workflows\changelog-preview.yml = .github\workflows\changelog-preview.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "actions", "actions", "{5D50D425-244F-4B79-B9F5-21D26DD52DC1}"
