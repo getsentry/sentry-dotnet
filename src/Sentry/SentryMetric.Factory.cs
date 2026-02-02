@@ -22,7 +22,6 @@ public abstract partial class SentryMetric
 
         scope ??= hub.GetScope();
         metric.SetDefaultAttributes(options, scope?.Sdk ?? SdkVersion.Instance);
-        metric.Apply(scope);
 
         metric.SetAttributes(attributes);
 
@@ -46,7 +45,6 @@ public abstract partial class SentryMetric
 
         scope ??= hub.GetScope();
         metric.SetDefaultAttributes(options, scope?.Sdk ?? SdkVersion.Instance);
-        metric.Apply(scope);
 
         metric.SetAttributes(attributes);
 

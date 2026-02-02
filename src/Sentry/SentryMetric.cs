@@ -271,11 +271,6 @@ public abstract partial class SentryMetric
         }
     }
 
-    private void Apply(Scope? scope)
-    {
-        //TODO: https://github.com/getsentry/sentry-dotnet/issues/4882
-    }
-
     /// <inheritdoc cref="ISentryJsonSerializable.WriteTo(Utf8JsonWriter, IDiagnosticLogger)" />
     internal void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
