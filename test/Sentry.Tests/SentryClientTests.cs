@@ -1007,9 +1007,10 @@ public partial class SentryClientTests : IDisposable
         var feedback = new SentryFeedback("Test feedback");
 
         // Act
-        sut.CaptureFeedback(feedback);
+        var result = sut.CaptureFeedback(feedback);
 
         // Assert
+        result.Should().NotBe(SentryId.Empty);
         var item = envelope.Items.First(x => x.TryGetType() == EnvelopeItem.TypeValueFeedback);
         var @event = (SentryEvent)((JsonSerializable)item.Payload).Source;
         Assert.Equal(_fixture.SentryOptions.Release, @event.Release);
