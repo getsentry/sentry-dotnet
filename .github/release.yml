@@ -7,20 +7,22 @@ changelog:
       - dependabot
   categories:
     - title: Breaking Changes 🛠
+      labels:
+        - "*"
       commit_patterns:
         - "^(?<type>\\w+(?:\\((?<scope>[^)]+)\\))?!:\\s*)"
     - title: Features ✨
       labels:
         - "*"
       commit_patterns:
-        - "^feat\\b"
+        - "^feat(?:\\([^\\)]+\\))?:\\s+"
     - title: Fixes 🐛
       labels:
         - "*"
       commit_patterns:
-        - "^(fix|bugfix)\\b"
+        - "^(?:fix|bugfix)(?:\\([^\\)]+\\))?:\\s+"
     - title: Dependencies ⬆️
       labels:
         - "*"
       commit_patterns:
-        - "^chore\\(deps(-dev)?\\)!?:\\s"
+        - "^chore\\(deps(?:-dev)?\\):\\s+"
