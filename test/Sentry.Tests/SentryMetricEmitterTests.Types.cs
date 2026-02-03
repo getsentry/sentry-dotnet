@@ -2,7 +2,7 @@
 
 namespace Sentry.Tests;
 
-public partial class SentryTraceMetricsTests
+public partial class SentryMetricEmitterTests
 {
     [Theory]
     [InlineData(SentryMetricType.Counter)]
@@ -289,9 +289,9 @@ public partial class SentryTraceMetricsTests
     }
 }
 
-file static class SentryTraceMetricsExtensions
+file static class SentryMetricEmitterExtensions
 {
-    public static void Emit<T>(this SentryTraceMetrics metrics, SentryMetricType type, T value, ReadOnlySpan<KeyValuePair<string, object>> attributes) where T : struct
+    public static void Emit<T>(this SentryMetricEmitter metrics, SentryMetricType type, T value, ReadOnlySpan<KeyValuePair<string, object>> attributes) where T : struct
     {
         switch (type)
         {
@@ -309,7 +309,7 @@ file static class SentryTraceMetricsExtensions
         }
     }
 
-    public static void Emit<T>(this SentryTraceMetrics metrics, SentryMetricType type, string name, T value) where T : struct
+    public static void Emit<T>(this SentryMetricEmitter metrics, SentryMetricType type, string name, T value) where T : struct
     {
         switch (type)
         {

@@ -2,7 +2,7 @@
 
 namespace Sentry.Tests;
 
-public partial class SentryTraceMetricsTests
+public partial class SentryMetricEmitterTests
 {
     [Fact]
     public void EnableMetrics_Default_True()

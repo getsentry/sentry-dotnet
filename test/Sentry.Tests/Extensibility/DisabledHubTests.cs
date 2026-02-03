@@ -42,5 +42,5 @@ public class DisabledHubTests
 
     [Fact]
     public void Metrics_IsDisabled()
-        => Assert.IsType<DisabledSentryTraceMetrics>(DisabledHub.Instance.Metrics);
+        => Assert.IsType<DisabledSentryMetricEmitter>(DisabledHub.Instance.Metrics);
 }

@@ -2,7 +2,7 @@
 
 namespace Sentry.Testing;
 
-public sealed class InMemorySentryTraceMetrics : SentryTraceMetrics
+public sealed class InMemorySentryMetricEmitter : SentryMetricEmitter
 {
     public List<MetricEntry> Entries { get; } = new();
     internal List<SentryMetric> Metrics { get; } = new();

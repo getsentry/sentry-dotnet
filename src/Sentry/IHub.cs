@@ -40,7 +40,7 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// </list>
     /// </remarks>
     [Experimental("SENTRYTRACECONNECTEDMETRICS", UrlFormat = "https://github.com/getsentry/sentry-dotnet/discussions/4838")]
-    public SentryTraceMetrics Metrics { get; }
+    public SentryMetricEmitter Metrics { get; }
 
     /// <summary>
     /// Starts a transaction.

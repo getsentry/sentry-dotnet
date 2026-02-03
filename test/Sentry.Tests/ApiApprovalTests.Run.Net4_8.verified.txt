@@ -185,7 +185,7 @@ namespace Sentry
         bool IsSessionActive { get; }
         Sentry.SentryId LastEventId { get; }
         Sentry.SentryStructuredLogger Logger { get; }
-        Sentry.SentryTraceMetrics Metrics { get; }
+        Sentry.SentryMetricEmitter Metrics { get; }
         void BindException(System.Exception exception, Sentry.ISpan span);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, System.Action<Sentry.Scope> configureScope);
         Sentry.SentryId CaptureEvent(Sentry.SentryEvent evt, Sentry.SentryHint? hint, System.Action<Sentry.Scope> configureScope);
@@ -662,6 +662,42 @@ namespace Sentry
         public abstract bool TryGetValue<TValue>(out TValue value)
             where TValue :  struct;
     }
+    public abstract class SentryMetricEmitter
+    {
+        public void EmitCounter<T>(string name, T value)
+            where T :  struct { }
+        public void EmitCounter<T>(string name, T value, Sentry.Scope? scope)
+            where T :  struct { }
+        public void EmitCounter<T>(string name, T value, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
+        public void EmitCounter<T>(string name, T value, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
+        public void EmitDistribution<T>(string name, T value)
+            where T :  struct { }
+        public void EmitDistribution<T>(string name, T value, Sentry.Scope? scope)
+            where T :  struct { }
+        public void EmitDistribution<T>(string name, T value, string? unit)
+            where T :  struct { }
+        public void EmitDistribution<T>(string name, T value, string? unit, Sentry.Scope? scope)
+            where T :  struct { }
+        public void EmitDistribution<T>(string name, T value, string? unit, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
+        public void EmitDistribution<T>(string name, T value, string? unit, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
+        public void EmitGauge<T>(string name, T value)
+            where T :  struct { }
+        public void EmitGauge<T>(string name, T value, Sentry.Scope? scope)
+            where T :  struct { }
+        public void EmitGauge<T>(string name, T value, string? unit)
+            where T :  struct { }
+        public void EmitGauge<T>(string name, T value, string? unit, Sentry.Scope? scope)
+            where T :  struct { }
+        public void EmitGauge<T>(string name, T value, string? unit, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
+        public void EmitGauge<T>(string name, T value, string? unit, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
+        protected abstract void Flush();
+    }
     public enum SentryMetricType
     {
         Counter = 0,
@@ -901,7 +937,7 @@ namespace Sentry
         public static void UnsetTag(string key) { }
         public sealed class ExperimentalSentrySdk
         {
-            public Sentry.SentryTraceMetrics Metrics { get; }
+            public Sentry.SentryMetricEmitter Metrics { get; }
         }
     }
     public class SentrySession : Sentry.ISentrySession
@@ -1019,42 +1055,6 @@ namespace Sentry
         public Sentry.SentryId TraceId { get; }
         public override string ToString() { }
         public static Sentry.SentryTraceHeader? Parse(string value) { }
-    }
-    public abstract class SentryTraceMetrics
-    {
-        public void EmitCounter<T>(string name, T value)
-            where T :  struct { }
-        public void EmitCounter<T>(string name, T value, Sentry.Scope? scope)
-            where T :  struct { }
-        public void EmitCounter<T>(string name, T value, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes, Sentry.Scope? scope = null)
-            where T :  struct { }
-        public void EmitCounter<T>(string name, T value, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
-            where T :  struct { }
-        public void EmitDistribution<T>(string name, T value)
-            where T :  struct { }
-        public void EmitDistribution<T>(string name, T value, Sentry.Scope? scope)
-            where T :  struct { }
-        public void EmitDistribution<T>(string name, T value, string? unit)
-            where T :  struct { }
-        public void EmitDistribution<T>(string name, T value, string? unit, Sentry.Scope? scope)
-            where T :  struct { }
-        public void EmitDistribution<T>(string name, T value, string? unit, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes, Sentry.Scope? scope = null)
-            where T :  struct { }
-        public void EmitDistribution<T>(string name, T value, string? unit, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
-            where T :  struct { }
-        public void EmitGauge<T>(string name, T value)
-            where T :  struct { }
-        public void EmitGauge<T>(string name, T value, Sentry.Scope? scope)
-            where T :  struct { }
-        public void EmitGauge<T>(string name, T value, string? unit)
-            where T :  struct { }
-        public void EmitGauge<T>(string name, T value, string? unit, Sentry.Scope? scope)
-            where T :  struct { }
-        public void EmitGauge<T>(string name, T value, string? unit, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes, Sentry.Scope? scope = null)
-            where T :  struct { }
-        public void EmitGauge<T>(string name, T value, string? unit, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
-            where T :  struct { }
-        protected abstract void Flush();
     }
     public class SentryTransaction : Sentry.IEventLike, Sentry.IHasData, Sentry.IHasExtra, Sentry.IHasTags, Sentry.ISentryJsonSerializable, Sentry.ISpanData, Sentry.ITransactionContext, Sentry.ITransactionData, Sentry.Protocol.ITraceContext
     {
@@ -1466,7 +1466,7 @@ namespace Sentry.Extensibility
         public bool IsSessionActive { get; }
         public Sentry.SentryId LastEventId { get; }
         public Sentry.SentryStructuredLogger Logger { get; }
-        public Sentry.SentryTraceMetrics Metrics { get; }
+        public Sentry.SentryMetricEmitter Metrics { get; }
         public void BindClient(Sentry.ISentryClient client) { }
         public void BindException(System.Exception exception, Sentry.ISpan span) { }
         public Sentry.SentryId CaptureCheckIn(string monitorSlug, Sentry.CheckInStatus status, Sentry.SentryId? sentryId = default, System.TimeSpan? duration = default, Sentry.Scope? scope = null, System.Action<Sentry.SentryMonitorOptions>? configureMonitorOptions = null) { }
@@ -1514,7 +1514,7 @@ namespace Sentry.Extensibility
         public bool IsSessionActive { get; }
         public Sentry.SentryId LastEventId { get; }
         public Sentry.SentryStructuredLogger Logger { get; }
-        public Sentry.SentryTraceMetrics Metrics { get; }
+        public Sentry.SentryMetricEmitter Metrics { get; }
         public void AddBreadcrumb(string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public void AddBreadcrumb(Sentry.Infrastructure.ISystemClock clock, string message, string? category = null, string? type = null, System.Collections.Generic.IDictionary<string, string>? data = null, Sentry.BreadcrumbLevel level = 0) { }
         public void BindClient(Sentry.ISentryClient client) { }

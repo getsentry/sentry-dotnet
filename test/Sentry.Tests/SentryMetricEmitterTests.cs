@@ -5,7 +5,7 @@ namespace Sentry.Tests;
 /// <summary>
 /// <see href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
 /// </summary>
-public partial class SentryTraceMetricsTests : IDisposable
+public partial class SentryMetricEmitterTests : IDisposable
 {
     internal sealed class Fixture
     {
@@ -58,12 +58,12 @@ public partial class SentryTraceMetricsTests : IDisposable
             SpanId = null;
         }
 
-        public SentryTraceMetrics GetSut() => SentryTraceMetrics.Create(Hub, Options, Clock, BatchSize, BatchTimeout);
+        public SentryMetricEmitter GetSut() => SentryMetricEmitter.Create(Hub, Options, Clock, BatchSize, BatchTimeout);
     }
 
     private readonly Fixture _fixture;
 
-    public SentryTraceMetricsTests()
+    public SentryMetricEmitterTests()
     {
         _fixture = new Fixture();
     }
@@ -81,7 +81,7 @@ public partial class SentryTraceMetricsTests : IDisposable
         var instance = _fixture.GetSut();
         var other = _fixture.GetSut();
 
-        instance.Should().BeOfType<DefaultSentryTraceMetrics>();
+        instance.Should().BeOfType<DefaultSentryMetricEmitter>();
         instance.Should().NotBeSameAs(other);
     }
 
@@ -93,7 +93,7 @@ public partial class SentryTraceMetricsTests : IDisposable
         var instance = _fixture.GetSut();
         var other = _fixture.GetSut();
 
-        instance.Should().BeOfType<DisabledSentryTraceMetrics>();
+        instance.Should().BeOfType<DisabledSentryMetricEmitter>();
         instance.Should().BeSameAs(other);
     }
 
@@ -201,7 +201,7 @@ public partial class SentryTraceMetricsTests : IDisposable
         Assert.True(_fixture.Options.Experimental.EnableMetrics);
         var metrics = _fixture.GetSut();
 
-        var defaultMetrics = metrics.Should().BeOfType<DefaultSentryTraceMetrics>().Which;
+        var defaultMetrics = metrics.Should().BeOfType<DefaultSentryMetricEmitter>().Which;
         defaultMetrics.Dispose();
         metrics.EmitCounter<int>("sentry_tests.sentry_trace_metrics_tests.counter", 1, [new KeyValuePair<string, object>("attribute-key", "attribute-value")]);
 
@@ -216,7 +216,7 @@ public partial class SentryTraceMetricsTests : IDisposable
 
 internal static class MetricsAssertionExtensions
 {
-    public static void AssertEnvelope<T>(this SentryTraceMetricsTests.Fixture fixture, Envelope envelope, SentryMetricType type) where T : struct
+    public static void AssertEnvelope<T>(this SentryMetricEmitterTests.Fixture fixture, Envelope envelope, SentryMetricType type) where T : struct
     {
         envelope.Header.Should().ContainSingle().Which.Key.Should().Be("sdk");
         var item = envelope.Items.Should().ContainSingle().Which;
@@ -230,13 +230,13 @@ internal static class MetricsAssertionExtensions
             element => Assert.Equal(CreateHeader("content_type", "application/vnd.sentry.items.trace-metric+json"), element));
     }
 
-    public static void AssertEnvelopeWithoutAttributes<T>(this SentryTraceMetricsTests.Fixture fixture, Envelope envelope, SentryMetricType type) where T : struct
+    public static void AssertEnvelopeWithoutAttributes<T>(this SentryMetricEmitterTests.Fixture fixture, Envelope envelope, SentryMetricType type) where T : struct
     {
         fixture.ExpectedAttributes.Clear();
         AssertEnvelope<T>(fixture, envelope, type);
     }
 
-    public static void AssertMetric<T>(this SentryTraceMetricsTests.Fixture fixture, TraceMetric metric, SentryMetricType type) where T : struct
+    public static void AssertMetric<T>(this SentryMetricEmitterTests.Fixture fixture, TraceMetric metric, SentryMetricType type) where T : struct
     {
         var items = metric.Items;
         items.Length.Should().Be(1);
@@ -245,7 +245,7 @@ internal static class MetricsAssertionExtensions
         AssertMetric<T>(fixture, cast, type);
     }
 
-    public static void AssertMetric<T>(this SentryTraceMetricsTests.Fixture fixture, SentryMetric metric, SentryMetricType type) where T : struct
+    public static void AssertMetric<T>(this SentryMetricEmitterTests.Fixture fixture, SentryMetric metric, SentryMetricType type) where T : struct
     {
         metric.Should().BeOfType<SentryMetric<T>>();
         metric.Timestamp.Should().Be(fixture.Clock.GetUtcNow());

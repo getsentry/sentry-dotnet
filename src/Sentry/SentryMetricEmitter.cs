@@ -6,19 +6,19 @@ namespace Sentry;
 /// <summary>
 /// Creates and sends metrics to Sentry.
 /// </summary>
-public abstract partial class SentryTraceMetrics
+public abstract partial class SentryMetricEmitter
 {
-    internal static SentryTraceMetrics Create(IHub hub, SentryOptions options, ISystemClock clock)
+    internal static SentryMetricEmitter Create(IHub hub, SentryOptions options, ISystemClock clock)
         => Create(hub, options, clock, 100, TimeSpan.FromSeconds(5));
 
-    internal static SentryTraceMetrics Create(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
+    internal static SentryMetricEmitter Create(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
     {
         return options.Experimental.EnableMetrics
-            ? new DefaultSentryTraceMetrics(hub, options, clock, batchCount, batchInterval)
-            : DisabledSentryTraceMetrics.Instance;
+            ? new DefaultSentryMetricEmitter(hub, options, clock, batchCount, batchInterval)
+            : DisabledSentryMetricEmitter.Instance;
     }
 
-    private protected SentryTraceMetrics()
+    private protected SentryMetricEmitter()
     {
     }
 

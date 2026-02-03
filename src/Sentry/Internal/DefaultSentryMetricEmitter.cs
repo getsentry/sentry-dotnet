@@ -4,7 +4,7 @@ using Sentry.Protocol;
 
 namespace Sentry.Internal;
 
-internal sealed class DefaultSentryTraceMetrics : SentryTraceMetrics, IDisposable
+internal sealed class DefaultSentryMetricEmitter : SentryMetricEmitter, IDisposable
 {
     private readonly IHub _hub;
     private readonly SentryOptions _options;
@@ -12,7 +12,7 @@ internal sealed class DefaultSentryTraceMetrics : SentryTraceMetrics, IDisposabl
 
     private readonly BatchProcessor<SentryMetric> _batchProcessor;
 
-    internal DefaultSentryTraceMetrics(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
+    internal DefaultSentryMetricEmitter(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
     {
         Debug.Assert(hub.IsEnabled);
         Debug.Assert(options.Experimental is { EnableMetrics: true });

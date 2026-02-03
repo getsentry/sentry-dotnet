@@ -85,7 +85,7 @@ public class HubAdapterTests : IDisposable
     [Fact]
     public void Metrics_MockInvoked()
     {
-        var metrics = new InMemorySentryTraceMetrics();
+        var metrics = new InMemorySentryMetricEmitter();
         Hub.Metrics.Returns(metrics);
 
         HubAdapter.Instance.Metrics.EmitCounter("sentry_tests.hub_adapter_tests.counter", 1);

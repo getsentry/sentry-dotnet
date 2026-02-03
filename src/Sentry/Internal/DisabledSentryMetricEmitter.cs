@@ -1,10 +1,10 @@
 namespace Sentry.Internal;
 
-internal sealed class DisabledSentryTraceMetrics : SentryTraceMetrics
+internal sealed class DisabledSentryMetricEmitter : SentryMetricEmitter
 {
-    internal static DisabledSentryTraceMetrics Instance { get; } = new DisabledSentryTraceMetrics();
+    internal static DisabledSentryMetricEmitter Instance { get; } = new DisabledSentryMetricEmitter();
 
-    internal DisabledSentryTraceMetrics()
+    internal DisabledSentryMetricEmitter()
     {
     }
 

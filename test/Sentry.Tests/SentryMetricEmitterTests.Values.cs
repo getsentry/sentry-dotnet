@@ -1,6 +1,6 @@
 namespace Sentry.Tests;
 
-public partial class SentryTraceMetricsTests
+public partial class SentryMetricEmitterTests
 {
     [Fact]
     public void TryGetValue_FromByte_SupportedType()

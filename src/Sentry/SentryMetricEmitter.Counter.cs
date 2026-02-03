@@ -1,6 +1,6 @@
 namespace Sentry;
 
-public abstract partial class SentryTraceMetrics
+public abstract partial class SentryMetricEmitter
 {
     /// <summary>
     /// Increment a counter.

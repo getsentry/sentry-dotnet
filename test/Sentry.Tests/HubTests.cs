@@ -1896,7 +1896,7 @@ public partial class HubTests : IDisposable
                 envelope.Items.Single(item => item.Header["type"].Equals("trace_metric")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
             )
         );
-        hub.Metrics.Should().BeOfType<DisabledSentryTraceMetrics>();
+        hub.Metrics.Should().BeOfType<DisabledSentryMetricEmitter>();
     }
 
     [Fact]
@@ -1916,7 +1916,7 @@ public partial class HubTests : IDisposable
                 envelope.Items.Single(item => item.Header["type"].Equals("trace_metric")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
             )
         );
-        hub.Metrics.Should().BeOfType<DefaultSentryTraceMetrics>();
+        hub.Metrics.Should().BeOfType<DefaultSentryMetricEmitter>();
     }
 
     [Fact]
@@ -1930,7 +1930,7 @@ public partial class HubTests : IDisposable
         _fixture.Options.Experimental.EnableMetrics = true;
 
         // Assert
-        hub.Metrics.Should().BeOfType<DisabledSentryTraceMetrics>();
+        hub.Metrics.Should().BeOfType<DisabledSentryMetricEmitter>();
     }
 
     [Fact]
@@ -1944,7 +1944,7 @@ public partial class HubTests : IDisposable
         _fixture.Options.Experimental.EnableMetrics = false;
 
         // Assert
-        hub.Metrics.Should().BeOfType<DefaultSentryTraceMetrics>();
+        hub.Metrics.Should().BeOfType<DefaultSentryMetricEmitter>();
     }
 
     [Fact]
@@ -1969,7 +1969,7 @@ public partial class HubTests : IDisposable
                 timeout.Equals(_fixture.Options.FlushTimeout)
             )
         );
-        hub.Metrics.Should().BeOfType<DefaultSentryTraceMetrics>();
+        hub.Metrics.Should().BeOfType<DefaultSentryMetricEmitter>();
     }
 
     [Fact]
@@ -1994,7 +1994,7 @@ public partial class HubTests : IDisposable
                 timeout.Equals(_fixture.Options.ShutdownTimeout)
             )
         );
-        hub.Metrics.Should().BeOfType<DefaultSentryTraceMetrics>();
+        hub.Metrics.Should().BeOfType<DefaultSentryMetricEmitter>();
     }
 
     [Fact]
