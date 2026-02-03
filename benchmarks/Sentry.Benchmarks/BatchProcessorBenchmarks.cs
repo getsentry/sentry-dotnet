@@ -1,7 +1,6 @@
 using BenchmarkDotNet.Attributes;
 using Sentry.Extensibility;
 using Sentry.Internal;
-using Sentry.Protocol;
 
 namespace Sentry.Benchmarks;
 
@@ -35,7 +34,7 @@ public class BatchProcessorBenchmarks
         var clientReportRecorder = new NullClientReportRecorder();
 
         _hub = new Hub(options, DisabledHub.Instance);
-        _batchProcessor = new BatchProcessor<SentryLog>(_hub, BatchCount, batchInterval, StructuredLog.Capture, clientReportRecorder, null);
+        _batchProcessor = new SentryLogBatchProcessor(_hub, BatchCount, batchInterval, clientReportRecorder, null);
         _log = new SentryLog(DateTimeOffset.Now, SentryId.Empty, SentryLogLevel.Trace, "message");
     }
 

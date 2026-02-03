@@ -1,6 +1,5 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 
 namespace Sentry.Internal;
 
@@ -21,7 +20,7 @@ internal sealed class DefaultSentryMetricEmitter : SentryMetricEmitter, IDisposa
         _options = options;
         _clock = clock;
 
-        _batchProcessor = new BatchProcessor<SentryMetric>(hub, batchCount, batchInterval, TraceMetric.Capture, _options.ClientReportRecorder, _options.DiagnosticLogger);
+        _batchProcessor = new SentryMetricBatchProcessor(hub, batchCount, batchInterval, _options.ClientReportRecorder, _options.DiagnosticLogger);
     }
 
     /// <inheritdoc />

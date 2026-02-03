@@ -1,5 +1,4 @@
 using Sentry.Extensibility;
-using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Protocol;
 
@@ -34,10 +33,5 @@ internal sealed class TraceMetric : ISentryJsonSerializable
 
         writer.WriteEndArray();
         writer.WriteEndObject();
-    }
-
-    internal static void Capture(IHub hub, SentryMetric[] metrics)
-    {
-        _ = hub.CaptureEnvelope(Envelope.FromMetric(new TraceMetric(metrics)));
     }
 }

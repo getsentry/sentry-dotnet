@@ -5,7 +5,7 @@ namespace Sentry.Tests.Internals;
 /// <summary>
 /// <see cref="BatchProcessor{TItem}"/> (formerly "Sentry.Internal.StructuredLogBatchProcessor") was originally developed as Batch Processor for Logs only.
 /// When adding support for Trace-connected Metrics, which are quite similar to Logs, it has been made generic to support both.
-/// These tests are still using <see cref="StructuredLog"/>, rather than <see cref="TraceMetric"/>.
+/// These tests are still using <see cref="SentryLog"/> and <see cref="StructuredLog"/>, rather than <see cref="SentryMetric{T}"/> and <see cref="TraceMetric"/>.
 /// </summary>
 public class BatchProcessorTests : IDisposable
 {
@@ -42,7 +42,7 @@ public class BatchProcessorTests : IDisposable
 
         public BatchProcessor<SentryLog> GetSut(int batchCount)
         {
-            return new BatchProcessor<SentryLog>(_hub, batchCount, Timeout.InfiniteTimeSpan, StructuredLog.Capture, ClientReportRecorder, DiagnosticLogger);
+            return new SentryLogBatchProcessor(_hub, batchCount, Timeout.InfiniteTimeSpan, ClientReportRecorder, DiagnosticLogger);
         }
     }
 

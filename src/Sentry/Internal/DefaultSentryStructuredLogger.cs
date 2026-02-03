@@ -1,6 +1,5 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 
 namespace Sentry.Internal;
 
@@ -21,7 +20,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         _options = options;
         _clock = clock;
 
-        _batchProcessor = new BatchProcessor<SentryLog>(hub, batchCount, batchInterval, StructuredLog.Capture, _options.ClientReportRecorder, _options.DiagnosticLogger);
+        _batchProcessor = new SentryLogBatchProcessor(hub, batchCount, batchInterval, _options.ClientReportRecorder, _options.DiagnosticLogger);
     }
 
     /// <inheritdoc />
