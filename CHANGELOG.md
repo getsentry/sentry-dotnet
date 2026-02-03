@@ -8,6 +8,7 @@
 
 ### Fixes
 
+- User Feedback now contains additional Context and Tags, like `Environment` and `Release` ([#4883](https://github.com/getsentry/sentry-dotnet/pull/4883))
 - Allow Sentry failures from the Sentry CLI when SENTRY_ALLOW_FAILURE is set ([#4852](https://github.com/getsentry/sentry-dotnet/pull/4852))
 - The SDK now logs a specific error message when envelopes are rejected due to size limits (HTTP 413) ([#4863](https://github.com/getsentry/sentry-dotnet/pull/4863))
 - Fixed thread-safety issue on Android when multiple events are captured concurrently ([#4814](https://github.com/getsentry/sentry-dotnet/pull/4814))
@@ -1271,7 +1272,6 @@ If you have compilation errors you can find the affected types or overloads miss
 - The `WithScope` and `WithScopeAsync` methods have been removed. We have discovered that these methods didn't work correctly in certain desktop contexts, especially when using a global scope. ([#2717](https://github.com/getsentry/sentry-dotnet/pull/2717))
 
   Replace your usage of `WithScope` with overloads of `Capture*` methods:
-
   - `SentrySdk.CaptureEvent(SentryEvent @event, Action<Scope> scopeCallback)`
   - `SentrySdk.CaptureMessage(string message, Action<Scope> scopeCallback)`
   - `SentrySdk.CaptureException(Exception exception, Action<Scope> scopeCallback)`
@@ -1670,18 +1670,15 @@ There are some functional differences when publishing Native AOT:
 ### Features
 
 - Azure Functions (Isolated Worker/Out-of-Process) support ([#2346](https://github.com/getsentry/sentry-dotnet/pull/2346))
-
   - Initial `beta.1` release. Please give it a try and let us know how it goes!
   - Documentation is TBD. For now, see `/samples/Sentry.Samples.Azure.Functions.Worker`.
 
 - Add `Hint` support ([#2351](https://github.com/getsentry/sentry-dotnet/pull/2351))
-
   - Currently, this allows you to manipulate attachments in the various "before" event delegates.
   - Hints can also be used in event and transaction processors by implementing `ISentryEventProcessorWithHint` or `ISentryTransactionProcessorWithHint`, instead of `ISentryEventProcessor` or `ISentryTransactionProcessor`.
   - Note: Obsoletes the `BeforeSend`, `BeforeSendTransaction`, and `BeforeBreadcrumb` properties on the `SentryOptions` class. They have been replaced with `SetBeforeSend`, `SetBeforeSendTransaction`, and `SetBeforeBreadcrumb` respectively. Each one provides overloads both with and without a `Hint` object.
 
 - Allow setting the active span on the scope ([#2364](https://github.com/getsentry/sentry-dotnet/pull/2364))
-
   - Note: Obsoletes the `Scope.GetSpan` method in favor of a `Scope.Span` property (which now has a setter as well).
 
 - Remove authority from URLs sent to Sentry ([#2365](https://github.com/getsentry/sentry-dotnet/pull/2365))
@@ -1690,7 +1687,6 @@ There are some functional differences when publishing Native AOT:
 ### Fixes
 
 - Fix `EnableTracing` option conflict with `TracesSampleRate` ([#2368](https://github.com/getsentry/sentry-dotnet/pull/2368))
-
   - NOTE: This is a potentially breaking change, as the `TracesSampleRate` property has been made nullable.
     Though extremely uncommon, if you are _retrieving_ the `TracesSampleRate` property for some reason, you will need to account for nulls.
     However, there is no change to the behavior or _typical_ usage of either of these properties.
@@ -1766,12 +1762,10 @@ There are some functional differences when publishing Native AOT:
 ### Dependencies
 
 - Bump Cocoa SDK from v8.3.0 to v8.4.0 ([#2237](https://github.com/getsentry/sentry-dotnet/pull/2237), [#2248](https://github.com/getsentry/sentry-dotnet/pull/2248), [#2251](https://github.com/getsentry/sentry-dotnet/pull/2251), [#2285](https://github.com/getsentry/sentry-dotnet/pull/2285))
-
   - [changelog](https://github.com/getsentry/sentry-cocoa/blob/main/CHANGELOG.md#840)
   - [diff](https://github.com/getsentry/sentry-cocoa/compare/8.3.0...8.4.0)
 
 - Bump CLI from v2.14.4 to v2.17.0 ([#2238](https://github.com/getsentry/sentry-dotnet/pull/2238), [#2244](https://github.com/getsentry/sentry-dotnet/pull/2244), [#2252](https://github.com/getsentry/sentry-dotnet/pull/2252), [#2264](https://github.com/getsentry/sentry-dotnet/pull/2264), [#2292](https://github.com/getsentry/sentry-dotnet/pull/2292))
-
   - [changelog](https://github.com/getsentry/sentry-cli/blob/master/CHANGELOG.md#2170)
   - [diff](https://github.com/getsentry/sentry-cli/compare/2.14.4...2.17.0)
 
