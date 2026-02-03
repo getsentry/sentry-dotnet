@@ -228,6 +228,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{A8A9
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{EC6ADE8A-E557-4848-8F03-519039830B5F}"
+	ProjectSection(SolutionItems) = preProject
+		.github\release.yml = .github\release.yml
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{BFF081D8-7CC0-4069-99F5-5CA0D70B56AB}"
 	ProjectSection(SolutionItems) = preProject
