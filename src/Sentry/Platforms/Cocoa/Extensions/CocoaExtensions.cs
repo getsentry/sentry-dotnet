@@ -195,6 +195,37 @@ internal static class CocoaExtensions
         this IReadOnlyCollection<KeyValuePair<string, TValue>> dict) =>
         dict.Count == 0 ? null : dict.ToNSDictionary();
 
+    public static NSDictionary<NSString, NSObject>? ToCocoaBreadcrumbData(
+        this IReadOnlyDictionary<string, string> source)
+    {
+        // Avoid an allocation if we can
+        if (source.Count == 0)
+        {
+            return null;
+        }
+
+        var dict = new NSDictionary<NSString, NSObject>();
+
+        foreach (var (key, value) in source)
+        {
+            // Cocoa Session Replay expects `request_start` to be a Date (`NSDate`).
+            // See https://github.com/getsentry/sentry-cocoa/blob/2b4e787e55558e1475eda8f98b02c19a0d511741/Sources/Swift/Integrations/SessionReplay/SentrySRDefaultBreadcrumbConverter.swift#L73
+            if (key == SentryHttpMessageHandler.RequestStartKey && TryParseUnixMs(value, out var unixMs))
+            {
+                var dto = DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
+                dict[key] = dto.ToNSDate();
+                continue;
+            }
+
+            dict[key] = NSObject.FromObject(value);
+        }
+
+        return dict.Count == 0 ? null : dict;
+
+        static bool TryParseUnixMs(string value, out long unixMs) =>
+            long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out unixMs);
+    }
+
     /// <summary>
     /// Converts an <see cref="NSNumber"/> to a .NET primitive data type and returns the result box in an <see cref="object"/>.
     /// </summary>

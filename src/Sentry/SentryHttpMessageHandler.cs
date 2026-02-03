@@ -17,6 +17,7 @@ public class SentryHttpMessageHandler : SentryMessageHandler
     internal const string HttpClientOrigin = "auto.http.client";
     internal const string HttpStartTimestampKey = "http.start_timestamp";
     internal const string HttpEndTimestampKey = "http.end_timestamp";
+    internal const string RequestStartKey = "request_start";
 
     /// <summary>
     /// Constructs an instance of <see cref="SentryHttpMessageHandler"/>.
@@ -93,10 +94,16 @@ public class SentryHttpMessageHandler : SentryMessageHandler
         };
         if (span is not null)
         {
+#if ANDROID
             // Ensure the breadcrumb can be converted to RRWeb so that it shows up in the network tab in Session Replay.
             // See https://github.com/getsentry/sentry-java/blob/94bff8dc0a952ad8c1b6815a9eda5005e41b92c7/sentry-android-replay/src/main/java/io/sentry/android/replay/DefaultReplayBreadcrumbConverter.kt#L195-L199
             breadcrumbData[HttpStartTimestampKey] = span.StartTimestamp.ToUnixTimeMilliseconds().ToString("F0", CultureInfo.InvariantCulture);
             breadcrumbData[HttpEndTimestampKey] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString("F0", CultureInfo.InvariantCulture);
+#elif IOS || MACCATALYST
+            // Ensure the breadcrumb can be converted to RRWeb so that it shows up in the network tab in Session Replay.
+            // See https://github.com/getsentry/sentry-cocoa/blob/2b4e787e55558e1475eda8f98b02c19a0d511741/Sources/Swift/Integrations/SessionReplay/SentrySRDefaultBreadcrumbConverter.swift#L70-L86
+            breadcrumbData[RequestStartKey] = span.StartTimestamp.ToUnixTimeMilliseconds().ToString("F0", CultureInfo.InvariantCulture);
+#endif
         }
         _hub.AddBreadcrumb(string.Empty, "http", "http", breadcrumbData);
 
