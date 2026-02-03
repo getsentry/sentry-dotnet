@@ -8,14 +8,15 @@
 
 ### Fixes
 
+- Allow Sentry failures from the Sentry CLI when SENTRY_ALLOW_FAILURE is set ([#4852](https://github.com/getsentry/sentry-dotnet/pull/4852))
 - The SDK now logs a specific error message when envelopes are rejected due to size limits (HTTP 413) ([#4863](https://github.com/getsentry/sentry-dotnet/pull/4863))
 - Fixed thread-safety issue on Android when multiple events are captured concurrently ([#4814](https://github.com/getsentry/sentry-dotnet/pull/4814))
 
 ### Dependencies
 
-- Bump Native SDK from v0.12.2 to v0.12.3 ([#4832](https://github.com/getsentry/sentry-dotnet/pull/4832))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0123)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.12.2...0.12.3)
+- Bump Native SDK from v0.12.2 to v0.12.4 ([#4832](https://github.com/getsentry/sentry-dotnet/pull/4832), [#4875](https://github.com/getsentry/sentry-dotnet/pull/4875))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0124)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.12.2...0.12.4)
 - Bump Java SDK from v8.28.0 to v8.29.0 ([#4817](https://github.com/getsentry/sentry-dotnet/pull/4817))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8290)
   - [diff](https://github.com/getsentry/sentry-java/compare/8.28.0...8.29.0)
