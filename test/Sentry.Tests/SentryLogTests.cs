@@ -406,58 +406,6 @@ public class SentryLogTests
             entry => entry.Message.Should().Match("*null*is not supported*ignored*")
         );
     }
-
-    [Fact]
-    public void GetTraceIdAndSpanId_WithActiveSpan_HasBothTraceIdAndSpanId()
-    {
-        // Arrange
-        var span = Substitute.For<ISpan>();
-        span.TraceId.Returns(SentryId.Create());
-        span.SpanId.Returns(Sentry.SpanId.Create());
-
-        var hub = Substitute.For<IHub>();
-        hub.GetSpan().Returns(span);
-
-        // Act
-        SentryLog.GetTraceIdAndSpanId(hub, out var traceId, out var spanId);
-
-        // Assert
-        traceId.Should().Be(span.TraceId);
-        spanId.Should().Be(span.SpanId);
-    }
-
-    [Fact]
-    public void GetTraceIdAndSpanId_WithoutActiveSpan_HasOnlyTraceIdButNoSpanId()
-    {
-        // Arrange
-        var hub = Substitute.For<IHub>();
-        hub.GetSpan().Returns((ISpan)null);
-
-        var scope = new Scope();
-        hub.SubstituteConfigureScope(scope);
-
-        // Act
-        SentryLog.GetTraceIdAndSpanId(hub, out var traceId, out var spanId);
-
-        // Assert
-        traceId.Should().Be(scope.PropagationContext.TraceId);
-        spanId.Should().BeNull();
-    }
-
-    [Fact]
-    public void GetTraceIdAndSpanId_WithoutIds_ShouldBeUnreachable()
-    {
-        // Arrange
-        var hub = Substitute.For<IHub>();
-        hub.GetSpan().Returns((ISpan)null);
-
-        // Act
-        SentryLog.GetTraceIdAndSpanId(hub, out var traceId, out var spanId);
-
-        // Assert
-        traceId.Should().Be(SentryId.Empty);
-        spanId.Should().BeNull();
-    }
 }
 
 file static class AssertExtensions
