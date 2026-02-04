@@ -61,3 +61,9 @@ public abstract partial class SentryMetricEmitter
     /// </summary>
     protected internal abstract void Flush();
 }
+
+public abstract partial class SentryMetricEmitter
+{
+    internal const string ObsoleteStringUnitForwardCompatibility =
+        $"Custom units may be supported in the future. The {nameof(String)}-based overloads are for forward compatibility. The {nameof(MeasurementUnit)}-based overloads are currently preferred.";
+}

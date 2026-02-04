@@ -295,7 +295,7 @@ public abstract partial class SentryMetric
             SpanId.Value.WriteTo(writer, logger);
         }
 
-        if (Unit is not null)
+        if (!string.IsNullOrEmpty(Unit))
         {
             writer.WriteString("unit", Unit);
         }

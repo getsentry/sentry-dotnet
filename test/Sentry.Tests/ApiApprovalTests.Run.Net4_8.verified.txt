@@ -674,26 +674,66 @@ namespace Sentry
             where T :  struct { }
         public void EmitDistribution<T>(string name, T value)
             where T :  struct { }
+        public void EmitDistribution<T>(string name, T value, Sentry.MeasurementUnit unit)
+            where T :  struct { }
         public void EmitDistribution<T>(string name, T value, Sentry.Scope? scope)
             where T :  struct { }
+        [System.Obsolete("Custom units may be supported in the future. The String-based overloads are for f" +
+            "orward compatibility. The MeasurementUnit-based overloads are currently preferre" +
+            "d.")]
         public void EmitDistribution<T>(string name, T value, string? unit)
             where T :  struct { }
+        public void EmitDistribution<T>(string name, T value, Sentry.MeasurementUnit unit, Sentry.Scope? scope)
+            where T :  struct { }
+        [System.Obsolete("Custom units may be supported in the future. The String-based overloads are for f" +
+            "orward compatibility. The MeasurementUnit-based overloads are currently preferre" +
+            "d.")]
         public void EmitDistribution<T>(string name, T value, string? unit, Sentry.Scope? scope)
             where T :  struct { }
+        public void EmitDistribution<T>(string name, T value, Sentry.MeasurementUnit unit, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
+        public void EmitDistribution<T>(string name, T value, Sentry.MeasurementUnit unit, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
+        [System.Obsolete("Custom units may be supported in the future. The String-based overloads are for f" +
+            "orward compatibility. The MeasurementUnit-based overloads are currently preferre" +
+            "d.")]
         public void EmitDistribution<T>(string name, T value, string? unit, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes, Sentry.Scope? scope = null)
             where T :  struct { }
+        [System.Obsolete("Custom units may be supported in the future. The String-based overloads are for f" +
+            "orward compatibility. The MeasurementUnit-based overloads are currently preferre" +
+            "d.")]
         public void EmitDistribution<T>(string name, T value, string? unit, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
             where T :  struct { }
         public void EmitGauge<T>(string name, T value)
             where T :  struct { }
+        public void EmitGauge<T>(string name, T value, Sentry.MeasurementUnit unit)
+            where T :  struct { }
         public void EmitGauge<T>(string name, T value, Sentry.Scope? scope)
             where T :  struct { }
+        [System.Obsolete("Custom units may be supported in the future. The String-based overloads are for f" +
+            "orward compatibility. The MeasurementUnit-based overloads are currently preferre" +
+            "d.")]
         public void EmitGauge<T>(string name, T value, string? unit)
             where T :  struct { }
+        public void EmitGauge<T>(string name, T value, Sentry.MeasurementUnit unit, Sentry.Scope? scope)
+            where T :  struct { }
+        [System.Obsolete("Custom units may be supported in the future. The String-based overloads are for f" +
+            "orward compatibility. The MeasurementUnit-based overloads are currently preferre" +
+            "d.")]
         public void EmitGauge<T>(string name, T value, string? unit, Sentry.Scope? scope)
             where T :  struct { }
+        public void EmitGauge<T>(string name, T value, Sentry.MeasurementUnit unit, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
+        public void EmitGauge<T>(string name, T value, Sentry.MeasurementUnit unit, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
+            where T :  struct { }
+        [System.Obsolete("Custom units may be supported in the future. The String-based overloads are for f" +
+            "orward compatibility. The MeasurementUnit-based overloads are currently preferre" +
+            "d.")]
         public void EmitGauge<T>(string name, T value, string? unit, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string, object>>? attributes, Sentry.Scope? scope = null)
             where T :  struct { }
+        [System.Obsolete("Custom units may be supported in the future. The String-based overloads are for f" +
+            "orward compatibility. The MeasurementUnit-based overloads are currently preferre" +
+            "d.")]
         public void EmitGauge<T>(string name, T value, string? unit, System.ReadOnlySpan<System.Collections.Generic.KeyValuePair<string, object>> attributes, Sentry.Scope? scope = null)
             where T :  struct { }
         protected abstract void Flush();
@@ -1104,42 +1144,6 @@ namespace Sentry
         public void UnsetTag(string key) { }
         public void WriteTo(System.Text.Json.Utf8JsonWriter writer, Sentry.Extensibility.IDiagnosticLogger? logger) { }
         public static Sentry.SentryTransaction FromJson(System.Text.Json.JsonElement json) { }
-    }
-    public static class SentryUnits
-    {
-        public static class Duration
-        {
-            public static string Day { get; }
-            public static string Hour { get; }
-            public static string Microsecond { get; }
-            public static string Millisecond { get; }
-            public static string Minute { get; }
-            public static string Nanosecond { get; }
-            public static string Second { get; }
-            public static string Week { get; }
-        }
-        public static class Fraction
-        {
-            public static string Percent { get; }
-            public static string Ratio { get; }
-        }
-        public static class Information
-        {
-            public static string Bit { get; }
-            public static string Byte { get; }
-            public static string Exabyte { get; }
-            public static string Exbibyte { get; }
-            public static string Gibibyte { get; }
-            public static string Gigabyte { get; }
-            public static string Kibibyte { get; }
-            public static string Kilobyte { get; }
-            public static string Mebibyte { get; }
-            public static string Megabyte { get; }
-            public static string Pebibyte { get; }
-            public static string Petabyte { get; }
-            public static string Tebibyte { get; }
-            public static string Terabyte { get; }
-        }
     }
     public sealed class SentryUser : Sentry.ISentryJsonSerializable
     {

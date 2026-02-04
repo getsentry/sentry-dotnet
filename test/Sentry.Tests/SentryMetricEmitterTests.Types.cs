@@ -287,8 +287,72 @@ public partial class SentryMetricEmitterTests
         entry.Exception.Should().BeNull();
         entry.Args.Should().BeEquivalentTo<object>([arg0, arg1]);
     }
+
+    [Fact]
+    public void Type_EmitMethods_StringUnitParameterIsObsoleteForForwardCompatibility()
+    {
+        var type = typeof(SentryMetricEmitter);
+
+        type.Methods()
+            .Where(static method => method.IsPublic && method.ReturnType == typeof(void) && method.IsGenericMethod && method.Name.StartsWith("Emit"))
+            .Should().NotBeEmpty().And.AllSatisfy(static method =>
+            {
+                var unitParameter = method.GetParameters().SingleOrDefault(static parameter => parameter.Name == "unit");
+
+                if (unitParameter is null || unitParameter.ParameterType == typeof(MeasurementUnit))
+                {
+                    method.GetCustomAttribute<ObsoleteAttribute>().Should().BeNull("because Method '{0}' does not take a 'unit' as a 'string'", method);
+                }
+                else
+                {
+                    unitParameter.ParameterType.Should().Be(typeof(string));
+
+                    var obsolete = method.GetCustomAttribute<ObsoleteAttribute>();
+                    obsolete.Should().NotBeNull("because Method '{0}' does take a 'unit' as a 'string'", method);
+                    obsolete.Message.Should().Be(SentryMetricEmitter.ObsoleteStringUnitForwardCompatibility);
+                    obsolete.IsError.Should().BeFalse();
+                }
+            });
+    }
+
+    [Theory]
+    [InlineData(SentryMetricType.Gauge)]
+    [InlineData(SentryMetricType.Distribution)]
+    public void Emit_Unit_String_CapturesEnvelope(SentryMetricType type)
+    {
+        Assert.True(_fixture.Options.Experimental.EnableMetrics);
+        var metrics = _fixture.GetSut();
+
+        Envelope envelope = null!;
+        _fixture.Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => envelope = arg));
+
+        metrics.Emit<int>(type, 1, "measurement_unit");
+        metrics.Flush();
+
+        _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
+        _fixture.AssertEnvelopeWithoutAttributes<int>(envelope, type);
+    }
+
+    [Theory]
+    [InlineData(SentryMetricType.Gauge)]
+    [InlineData(SentryMetricType.Distribution)]
+    public void Emit_Unit_MeasurementUnit_CapturesEnvelope(SentryMetricType type)
+    {
+        Assert.True(_fixture.Options.Experimental.EnableMetrics);
+        var metrics = _fixture.GetSut();
+
+        Envelope envelope = null!;
+        _fixture.Hub.CaptureEnvelope(Arg.Do<Envelope>(arg => envelope = arg));
+
+        metrics.Emit<int>(type, 1, MeasurementUnit.Custom("measurement_unit"));
+        metrics.Flush();
+
+        _fixture.Hub.Received(1).CaptureEnvelope(Arg.Any<Envelope>());
+        _fixture.AssertEnvelopeWithoutAttributes<int>(envelope, type);
+    }
 }
 
+[Obsolete(SentryMetricEmitter.ObsoleteStringUnitForwardCompatibility)]
 file static class SentryMetricEmitterExtensions
 {
     public static void Emit<T>(this SentryMetricEmitter metrics, SentryMetricType type, T value, ReadOnlySpan<KeyValuePair<string, object>> attributes) where T : struct
@@ -321,6 +385,40 @@ file static class SentryMetricEmitterExtensions
                 break;
             case SentryMetricType.Distribution:
                 metrics.EmitDistribution<T>(name, value, "measurement_unit");
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        }
+    }
+
+    public static void Emit<T>(this SentryMetricEmitter metrics, SentryMetricType type, T value, string? unit) where T : struct
+    {
+        switch (type)
+        {
+            case SentryMetricType.Counter:
+                throw new NotSupportedException($"{nameof(SentryMetric<>.Unit)} for {nameof(SentryMetricType.Counter)} is not supported.");
+            case SentryMetricType.Gauge:
+                metrics.EmitGauge<T>("sentry_tests.sentry_trace_metrics_tests.counter", value, unit);
+                break;
+            case SentryMetricType.Distribution:
+                metrics.EmitDistribution<T>("sentry_tests.sentry_trace_metrics_tests.counter", value, unit);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(type), type, null);
+        }
+    }
+
+    public static void Emit<T>(this SentryMetricEmitter metrics, SentryMetricType type, T value, MeasurementUnit unit) where T : struct
+    {
+        switch (type)
+        {
+            case SentryMetricType.Counter:
+                throw new NotSupportedException($"{nameof(SentryMetric<>.Unit)} for {nameof(SentryMetricType.Counter)} is not supported.");
+            case SentryMetricType.Gauge:
+                metrics.EmitGauge<T>("sentry_tests.sentry_trace_metrics_tests.counter", value, unit);
+                break;
+            case SentryMetricType.Distribution:
+                metrics.EmitDistribution<T>("sentry_tests.sentry_trace_metrics_tests.counter", value, unit);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(type), type, null);

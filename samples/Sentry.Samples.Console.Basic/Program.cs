@@ -110,7 +110,7 @@ async Task FirstFunction()
     SentrySdk.Experimental.Metrics.EmitCounter("sentry.samples.console.basic.http_requests_completed", 1);
 
     // Distribution-Metric sent as is (see "BeforeSendMetric" callback)
-    SentrySdk.Experimental.Metrics.EmitDistribution("sentry.samples.console.basic.http_request_duration", stopwatch.Elapsed.TotalSeconds, SentryUnits.Duration.Second,
+    SentrySdk.Experimental.Metrics.EmitDistribution("sentry.samples.console.basic.http_request_duration", stopwatch.Elapsed.TotalSeconds, MeasurementUnit.Duration.Second,
         [new KeyValuePair<string, object>("http.request.method", HttpMethod.Get.Method), new KeyValuePair<string, object>("http.response.status_code", (int)HttpStatusCode.OK)]);
 }
 
