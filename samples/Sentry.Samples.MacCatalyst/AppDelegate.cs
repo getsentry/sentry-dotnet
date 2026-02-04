@@ -5,14 +5,10 @@ namespace Sentry.Samples.MacCatalyst;
 [Register("AppDelegate")]
 public class AppDelegate : UIApplicationDelegate
 {
-    public override UIWindow? Window
-    {
-        get;
-        set;
-    }
-
     public override bool FinishedLaunching(UIApplication application, NSDictionary? launchOptions)
     {
+        // Override point for customization after application launch.
+
         // Init the Sentry SDK
         SentrySdk.Init(options =>
         {
@@ -29,23 +25,6 @@ public class AppDelegate : UIApplicationDelegate
             options.Debug = true;
         });
 
-        // create a new window instance based on the screen size
-        Window = new UIWindow(UIScreen.MainScreen.Bounds);
-
-        // create a UIViewController with a single UILabel
-        var vc = new UIViewController();
-        vc.View!.AddSubview(new UILabel(Window!.Frame)
-        {
-            BackgroundColor = UIColor.SystemBackground,
-            TextAlignment = UITextAlignment.Center,
-            Text = "Hello, Catalyst!",
-            AutoresizingMask = UIViewAutoresizing.All,
-        });
-        Window.RootViewController = vc;
-
-        // make the window visible
-        Window.MakeKeyAndVisible();
-
         // Try out the Sentry SDK
         SentrySdk.CaptureMessage("From Mac Catalyst");
 
@@ -54,5 +33,21 @@ public class AppDelegate : UIApplicationDelegate
         // SentrySdk.CauseCrash(CrashType.Native);
 
         return true;
+    }
+
+    public override UISceneConfiguration GetConfiguration(UIApplication application,
+        UISceneSession connectingSceneSession, UISceneConnectionOptions options)
+    {
+        // Called when a new scene session is being created.
+        // Use this method to select a configuration to create the new scene with.
+        // "Default Configuration" is defined in the Info.plist's 'UISceneConfigurationName' key.
+        return new UISceneConfiguration("Default Configuration", connectingSceneSession.Role);
+    }
+
+    public override void DidDiscardSceneSessions(UIApplication application, NSSet<UISceneSession> sceneSessions)
+    {
+        // Called when the user discards a scene session.
+        // If any sessions were discarded while the application was not running, this will be called shortly after 'FinishedLaunching'.
+        // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
 }
