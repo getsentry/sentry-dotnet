@@ -7,7 +7,10 @@ Describe 'Console app NativeAOT (<framework>)' -ForEach @(
     foreach ($fw in $currentFrameworks) { @{ framework = $fw } }
 ) {
     BeforeAll {
-        ResetLocalPackages
+        if (-not (Test-Path Env:CI))
+        {
+            ResetLocalPackages
+        }
         $path = './console-app'
         DotnetNew 'console' $path $framework
         @'
