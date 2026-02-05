@@ -1,0 +1,28 @@
+changelog:
+  policy: auto
+  exclude:
+    labels:
+      - skip-changelog
+    authors:
+      - dependabot
+  categories:
+    - title: Breaking Changes 🛠
+      labels:
+        - "*"
+      commit_patterns:
+        - "^(?<type>\\w+(?:\\((?<scope>[^)]+)\\))?!:\\s*)"
+    - title: Features ✨
+      labels:
+        - "*"
+      commit_patterns:
+        - "^feat(?:\\([^\\)]+\\))?:\\s+"
+    - title: Fixes 🐛
+      labels:
+        - "*"
+      commit_patterns:
+        - "^(?:fix|bugfix)(?:\\([^\\)]+\\))?:\\s+"
+    - title: Dependencies ⬆️
+      labels:
+        - "*"
+      commit_patterns:
+        - "^chore\\(deps(?:-dev)?\\):\\s+"

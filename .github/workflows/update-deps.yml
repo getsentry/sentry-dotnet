@@ -29,3 +29,4 @@ jobs:
           name: ${{ matrix.name }}
           path: ${{ matrix.path }}
           ssh-key: ${{ secrets.CI_DEPLOY_KEY }}
+          changelog-entry: false
