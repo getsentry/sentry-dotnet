@@ -1,4 +1,3 @@
-using System.Globalization;
 using Microsoft.Extensions.Logging;
 
 namespace Sentry.Samples.Maui;
