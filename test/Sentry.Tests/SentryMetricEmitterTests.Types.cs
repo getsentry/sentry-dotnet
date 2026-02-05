@@ -289,15 +289,15 @@ public partial class SentryMetricEmitterTests
     }
 
     [Fact]
-    public void Type_EmitMethods_StringUnitParameterIsObsoleteForForwardCompatibility()
+    public void Type_EmitMethods_StringUnitParameterOverloadsAreObsoleteForForwardCompatibility()
     {
         var type = typeof(SentryMetricEmitter);
 
         type.Methods()
-            .Where(static method => method.IsPublic && method.ReturnType == typeof(void) && method.IsGenericMethod && method.Name.StartsWith("Emit"))
-            .Should().NotBeEmpty().And.AllSatisfy(static method =>
+            .Where(method => method.IsPublic && method.ReturnType == typeof(void) && method.IsGenericMethod && method.Name.StartsWith("Emit"))
+            .Should().NotBeEmpty().And.AllSatisfy(method =>
             {
-                var unitParameter = method.GetParameters().SingleOrDefault(static parameter => parameter.Name == "unit");
+                var unitParameter = method.GetParameters().SingleOrDefault(parameter => parameter.Name == "unit");
 
                 if (unitParameter is null || unitParameter.ParameterType == typeof(MeasurementUnit))
                 {
