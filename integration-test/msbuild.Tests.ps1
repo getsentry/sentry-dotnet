@@ -9,7 +9,7 @@ $IsARM64 = "Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::O
 # .NET SDK, and are not tied to the .NET version used to build the SDK itself.
 Describe 'MSBuild app' {
     BeforeAll {
-        ResetLocalPackagePath
+        ResetLocalPackages
     }
 
     BeforeDiscovery {
