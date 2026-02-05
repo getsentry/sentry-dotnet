@@ -108,10 +108,15 @@ BeforeAll {
         Remove-Item -Path ~/.nuget/packages/$($name.ToLower())/$packageVersion -Recurse -Force -ErrorAction SilentlyContinue
     }
 
-    function ResetLocalPackages()
+    function ResetLocalPackagePath()
     {
         Remove-Item -Path "$PSScriptRoot/packages" -Recurse -Force -ErrorAction SilentlyContinue
         New-Item -ItemType Directory -Path "$PSScriptRoot/packages" | Out-Null
+    }
+
+    function ResetLocalPackages()
+    {
+        ResetLocalPackagePath
         RegisterLocalPackage 'Sentry'
         RegisterLocalPackage 'Sentry.Maui'
     }
