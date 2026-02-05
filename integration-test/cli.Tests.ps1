@@ -7,6 +7,9 @@ Describe 'Console apps (<framework>) - normal build' -ForEach @(
     foreach ($fw in $currentFrameworks) { @{ framework = $fw } }
 ) {
     BeforeAll {
+        if (-not (Test-Path Env:CI)) {
+            ResetLocalPackages
+        }
         DotnetNew 'console' 'console-app' $framework
     }
 

@@ -23,6 +23,11 @@ $cases = @(
 )
 Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-not $script:emulator) {
     BeforeAll {
+        if (-not (Test-Path Env:CI))
+        {
+            ResetLocalPackages
+        }
+
         $tfm = "$dotnet_version-android$(GetAndroidTpv $dotnet_version)"
 
         Remove-Item -Path "$PSScriptRoot/mobile-app" -Recurse -Force -ErrorAction SilentlyContinue
