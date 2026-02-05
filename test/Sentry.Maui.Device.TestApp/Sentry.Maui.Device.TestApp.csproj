@@ -36,7 +36,9 @@
 
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">13.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-
+    <!-- Pin target iOS version so that our tests don't break when new versions of Xcode are released.
+      'netX.0-ios' resolves the latest version of the iOS SDK otherwise. -->
+    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">26.2</TargetPlatformVersion>
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
 
     <!-- Avoid errors of Sentry.Testing not being a self-contained executable, while including it in a self-contained executable (this).
@@ -74,11 +76,6 @@
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/>
     <PackageReference Include="Microsoft.Maui.Core" Version="$(MauiVersion)"/>
     <PackageReference Include="Microsoft.Maui.Essentials" Version="$(MauiVersion)"/>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
-    <!-- https://github.com/advisories/GHSA-5f2m-466j-3848 -->
-    <PackageReference Include="System.Private.Uri" Version="4.3.2"/>
   </ItemGroup>
 
   <!-- Configure XUnit -->
