@@ -44,6 +44,7 @@ Describe 'Console apps (<framework>) - native AOT publish' -ForEach @(
     foreach ($fw in $currentFrameworks) { @{ framework = $fw } }
 ) {
     BeforeAll {
+        ResetLocalPackages
         DotnetNew 'console' 'console-app' $framework
     }
 
@@ -106,6 +107,7 @@ Describe 'MAUI (<framework>)' -ForEach @(
     @{ framework = $previousFramework }
 ) -Skip:($env:NO_MOBILE -eq "true") {
     BeforeAll {
+        ResetLocalPackages
         RegisterLocalPackage 'Sentry.Android.AssemblyReader'
         RegisterLocalPackage 'Sentry.Bindings.Android'
         RegisterLocalPackage 'Sentry.Extensions.Logging'
