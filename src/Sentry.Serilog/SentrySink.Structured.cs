@@ -17,7 +17,7 @@ internal sealed partial class SentrySink
             SpanId = spanId,
         };
 
-        log.SetDefaultAttributes(options, Sdk);
+        log.SetDefaultAttributes(options, hub.GetScope(), Sdk);
         log.SetOrigin("auto.log.serilog");
 
         foreach (var attribute in attributes)
