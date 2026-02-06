@@ -97,7 +97,7 @@ runs:
         global-json-file: global.json
         dotnet-version: |
           8.0.x
-          9.0.304
+          9.0.310
 
     # .NET 5.0 does not support ARM64 on macOS
     - name: Install .NET 5.0 SDK
