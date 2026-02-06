@@ -75,6 +75,8 @@ public readonly partial struct MeasurementUnit : IEquatable<MeasurementUnit>
     /// </summary>
     public override string ToString() => _unit?.ToString().ToLowerInvariant() ?? _name ?? "";
 
+    internal string? ToNullableString() => _unit?.ToString().ToLowerInvariant() ?? _name;
+
     /// <inheritdoc />
     public bool Equals(MeasurementUnit other) => Equals(_unit, other._unit) && _name == other._name;
 

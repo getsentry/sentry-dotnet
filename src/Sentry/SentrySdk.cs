@@ -857,4 +857,30 @@ static partial class SentrySdk
     [DllImport("libc", EntryPoint = "strlen")]
     private static extern IntPtr NativeStrlenLibC(IntPtr strt);
 #endif
+
+    /// <summary>
+    /// Sentry features that are currently in an experimental state.
+    /// </summary>
+    /// <remarks>
+    /// Experimental features are subject to binary, source and behavioral breaking changes in future updates.
+    /// </remarks>
+    public static ExperimentalSentrySdk Experimental { get; } = new();
+
+    /// <summary>
+    /// Sentry features that are currently in an experimental state.
+    /// </summary>
+    /// <remarks>
+    /// Experimental features are subject to binary, source and behavioral breaking changes in future updates.
+    /// </remarks>
+    public sealed class ExperimentalSentrySdk
+    {
+        internal ExperimentalSentrySdk()
+        {
+        }
+
+#pragma warning disable SENTRYTRACECONNECTEDMETRICS
+        /// <inheritdoc cref="IHub.Metrics" />
+        public SentryMetricEmitter Metrics { [DebuggerStepThrough] get => CurrentHub.Metrics; }
+#pragma warning restore SENTRYTRACECONNECTEDMETRICS
+    }
 }

@@ -1880,6 +1880,124 @@ public partial class HubTests : IDisposable
     }
 
     [Fact]
+    public void Metrics_IsDisabled_DoesNotCaptureMetric()
+    {
+        // Arrange
+        _fixture.Options.Experimental.EnableMetrics = false;
+        var hub = _fixture.GetSut();
+
+        // Act
+        hub.Metrics.EmitCounter("sentry_tests.hub_tests.counter", 1);
+        hub.Metrics.Flush();
+
+        // Assert
+        _fixture.Client.Received(0).CaptureEnvelope(
+            Arg.Is<Envelope>(envelope =>
+                envelope.Items.Single(item => item.Header["type"].Equals("trace_metric")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
+            )
+        );
+        hub.Metrics.Should().BeOfType<DisabledSentryMetricEmitter>();
+    }
+
+    [Fact]
+    public void Metrics_IsEnabled_DoesCaptureMetric()
+    {
+        // Arrange
+        Assert.True(_fixture.Options.Experimental.EnableMetrics);
+        var hub = _fixture.GetSut();
+
+        // Act
+        hub.Metrics.EmitCounter("sentry_tests.hub_tests.counter", 1);
+        hub.Metrics.Flush();
+
+        // Assert
+        _fixture.Client.Received(1).CaptureEnvelope(
+            Arg.Is<Envelope>(envelope =>
+                envelope.Items.Single(item => item.Header["type"].Equals("trace_metric")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
+            )
+        );
+        hub.Metrics.Should().BeOfType<DefaultSentryMetricEmitter>();
+    }
+
+    [Fact]
+    public void Metrics_EnableAfterCreate_HasNoEffect()
+    {
+        // Arrange
+        _fixture.Options.Experimental.EnableMetrics = false;
+        var hub = _fixture.GetSut();
+
+        // Act
+        _fixture.Options.Experimental.EnableMetrics = true;
+
+        // Assert
+        hub.Metrics.Should().BeOfType<DisabledSentryMetricEmitter>();
+    }
+
+    [Fact]
+    public void Metrics_DisableAfterCreate_HasNoEffect()
+    {
+        // Arrange
+        Assert.True(_fixture.Options.Experimental.EnableMetrics);
+        var hub = _fixture.GetSut();
+
+        // Act
+        _fixture.Options.Experimental.EnableMetrics = false;
+
+        // Assert
+        hub.Metrics.Should().BeOfType<DefaultSentryMetricEmitter>();
+    }
+
+    [Fact]
+    public async Task Metrics_FlushAsync_DoesCaptureMetric()
+    {
+        // Arrange
+        Assert.True(_fixture.Options.Experimental.EnableMetrics);
+        var hub = _fixture.GetSut();
+
+        // Act
+        hub.Metrics.EmitCounter("sentry_tests.hub_tests.counter", 1);
+        await hub.FlushAsync();
+
+        // Assert
+        _fixture.Client.Received(1).CaptureEnvelope(
+            Arg.Is<Envelope>(envelope =>
+                envelope.Items.Single(item => item.Header["type"].Equals("trace_metric")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
+            )
+        );
+        await _fixture.Client.Received(1).FlushAsync(
+            Arg.Is<TimeSpan>(timeout =>
+                timeout.Equals(_fixture.Options.FlushTimeout)
+            )
+        );
+        hub.Metrics.Should().BeOfType<DefaultSentryMetricEmitter>();
+    }
+
+    [Fact]
+    public void Metrics_Dispose_DoesCaptureMetric()
+    {
+        // Arrange
+        Assert.True(_fixture.Options.Experimental.EnableMetrics);
+        var hub = _fixture.GetSut();
+
+        // Act
+        hub.Metrics.EmitCounter("sentry_tests.hub_tests.counter", 1);
+        hub.Dispose();
+
+        // Assert
+        _fixture.Client.Received(1).CaptureEnvelope(
+            Arg.Is<Envelope>(envelope =>
+                envelope.Items.Single(item => item.Header["type"].Equals("trace_metric")).Payload.GetType().IsAssignableFrom(typeof(JsonSerializable))
+            )
+        );
+        _fixture.Client.Received(1).FlushAsync(
+            Arg.Is<TimeSpan>(timeout =>
+                timeout.Equals(_fixture.Options.ShutdownTimeout)
+            )
+        );
+        hub.Metrics.Should().BeOfType<DefaultSentryMetricEmitter>();
+    }
+
+    [Fact]
     public void Dispose_IsEnabled_SetToFalse()
     {
         // Arrange

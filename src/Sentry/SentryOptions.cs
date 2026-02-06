@@ -1905,4 +1905,51 @@ public class SentryOptions
         "ServiceStack",
         "Java.Interop",
     ];
+
+    /// <summary>
+    /// Sentry features that are currently in an experimental state.
+    /// </summary>
+    /// <remarks>
+    /// Experimental features are subject to binary, source and behavioral breaking changes in future updates.
+    /// </remarks>
+    public ExperimentalSentryOptions Experimental { get; } = new ExperimentalSentryOptions();
+
+    /// <summary>
+    /// Sentry features that are currently in an experimental state.
+    /// </summary>
+    /// <remarks>
+    /// Experimental features are subject to binary, source and behavioral breaking changes in future updates.
+    /// </remarks>
+    public class ExperimentalSentryOptions
+    {
+        private Func<SentryMetric, SentryMetric?>? _beforeSendMetric;
+
+        internal ExperimentalSentryOptions()
+        {
+        }
+
+        internal Func<SentryMetric, SentryMetric?>? BeforeSendMetricInternal => _beforeSendMetric;
+
+        /// <summary>
+        /// When set to <see langword="false"/>, the SDK does not generate and send metrics to Sentry via <see cref="SentrySdk"/>.
+        /// Defaults to <see langword="true"/>.
+        /// </summary>
+        /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
+        public bool EnableMetrics { get; set; } = true;
+
+        /// <summary>
+        /// Sets a callback function to be invoked before sending the metric to Sentry.
+        /// When the delegate throws an <see cref="Exception"/> during invocation, the metric will not be captured.
+        /// </summary>
+        /// <remarks>
+        /// It can be used to modify the metric object before being sent to Sentry.
+        /// To prevent the metric from being sent to Sentry, return <see langword="null"/>.
+        /// Supported numeric value types are <see langword="byte"/>, <see langword="short"/>, <see langword="int"/>, <see langword="long"/>, <see langword="float"/>, and <see langword="double"/>.
+        /// </remarks>
+        /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
+        public void SetBeforeSendMetric(Func<SentryMetric, SentryMetric?> beforeSendMetric)
+        {
+            _beforeSendMetric = beforeSendMetric;
+        }
+    }
 }

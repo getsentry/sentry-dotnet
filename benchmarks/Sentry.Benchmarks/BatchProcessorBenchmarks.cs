@@ -4,10 +4,15 @@ using Sentry.Internal;
 
 namespace Sentry.Benchmarks;
 
-public class StructuredLogBatchProcessorBenchmarks
+/// <summary>
+/// <see cref="BatchProcessor{TItem}"/> (formerly "Sentry.Internal.StructuredLogBatchProcessor") was originally developed as Batch Processor for Logs only.
+/// When adding support for Trace-connected Metrics, which are quite similar to Logs, it has been made generic to support both.
+/// For comparability of results, we still benchmark with <see cref="SentryLog"/>, rather than <see cref="SentryMetric"/>.
+/// </summary>
+public class BatchProcessorBenchmarks
 {
     private Hub _hub;
-    private StructuredLogBatchProcessor _batchProcessor;
+    private BatchProcessor<SentryLog> _batchProcessor;
     private SentryLog _log;
 
     [Params(10, 100)]
@@ -29,7 +34,7 @@ public class StructuredLogBatchProcessorBenchmarks
         var clientReportRecorder = new NullClientReportRecorder();
 
         _hub = new Hub(options, DisabledHub.Instance);
-        _batchProcessor = new StructuredLogBatchProcessor(_hub, BatchCount, batchInterval, clientReportRecorder, null);
+        _batchProcessor = new SentryLogBatchProcessor(_hub, BatchCount, batchInterval, clientReportRecorder, null);
         _log = new SentryLog(DateTimeOffset.Now, SentryId.Empty, SentryLogLevel.Trace, "message");
     }
 

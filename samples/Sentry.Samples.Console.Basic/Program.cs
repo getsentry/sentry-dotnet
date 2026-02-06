@@ -4,11 +4,14 @@
  * - Performance Tracing (Transactions / Spans)
  * - Release Health (Sessions)
  * - Logs
+ * - Metrics
  * - MSBuild integration for Source Context (see the csproj)
  *
  * For more advanced features of the SDK, see Sentry.Samples.Console.Customized.
  */
 
+using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
 using static System.Console;
 
@@ -50,6 +53,25 @@ SentrySdk.Init(options =>
         // Drop logs with level Info
         return log.Level is SentryLogLevel.Info ? null : log;
     });
+
+    // Sentry (trace-connected) Metrics via SentrySdk.Experimental.Metrics are enabled by default.
+    options.Experimental.SetBeforeSendMetric(static metric =>
+    {
+        if (metric.TryGetValue(out int integer) && integer < 0)
+        {
+            // Return null to drop the metric
+            return null;
+        }
+
+        // A demonstration of how you can modify the metric object before sending it to Sentry
+        if (metric.Type is SentryMetricType.Counter)
+        {
+            metric.SetAttribute("operating_system.platform", Environment.OSVersion.Platform.ToString());
+            metric.SetAttribute("operating_system.version", Environment.OSVersion.Version.ToString());
+        }
+
+        return metric;
+    });
 });
 
 // This starts a new transaction and attaches it to the scope.
@@ -71,9 +93,25 @@ async Task FirstFunction()
     // This is an example of making an HttpRequest. A trace us automatically captured by Sentry for this.
     var messageHandler = new SentryHttpMessageHandler();
     var httpClient = new HttpClient(messageHandler, true);
+
+    var stopwatch = Stopwatch.StartNew();
     var html = await httpClient.GetStringAsync("https://example.com/");
+    stopwatch.Stop();
+
     WriteLine(html);
+
+    // Info-Log filtered via "BeforeSendLog" callback
     SentrySdk.Logger.LogInfo("HTTP Request completed.");
+
+    // Counter-Metric prevented from being sent to Sentry via "BeforeSendMetric" callback
+    SentrySdk.Experimental.Metrics.EmitCounter("sentry.samples.console.basic.ignore", -1);
+
+    // Counter-Metric modified before sending it to Sentry via "BeforeSendMetric" callback
+    SentrySdk.Experimental.Metrics.EmitCounter("sentry.samples.console.basic.http_requests_completed", 1);
+
+    // Distribution-Metric sent as is (see "BeforeSendMetric" callback)
+    SentrySdk.Experimental.Metrics.EmitDistribution("sentry.samples.console.basic.http_request_duration", stopwatch.Elapsed.TotalSeconds, MeasurementUnit.Duration.Second,
+        [new KeyValuePair<string, object>("http.request.method", HttpMethod.Get.Method), new KeyValuePair<string, object>("http.response.status_code", (int)HttpStatusCode.OK)]);
 }
 
 async Task SecondFunction()

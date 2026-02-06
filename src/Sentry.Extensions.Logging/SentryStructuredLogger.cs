@@ -41,7 +41,7 @@ internal sealed class SentryStructuredLogger : ILogger
         }
 
         var timestamp = _clock.GetUtcNow();
-        SentryLog.GetTraceIdAndSpanId(_hub, out var traceId, out var spanId);
+        _hub.GetTraceIdAndSpanId(out var traceId, out var spanId);
 
         var level = logLevel.ToSentryLogLevel();
         Debug.Assert(level != default);
