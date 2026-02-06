@@ -10,9 +10,11 @@ internal class DotnetReplayBreadcrumbConverter(Sentry.JavaSdk.SentryOptions opti
 
     public override global::IO.Sentry.Rrweb.RRWebEvent? Convert(Sentry.JavaSdk.Breadcrumb breadcrumb)
     {
-        // The Java converter expects httpStartTimestamp/httpEndTimestamp to be Double or Long.
-        // .NET breadcrumb data is always stored as strings. We convert these to numeric here so that the base.Convert()
-        // method doesn't throw an exception.
+        // The Java SDK automatically converts breadcrumbs for outgoing http requests into performance spans
+        // that show in the Network tab of session replays... however, it expects certain data to be stored in a
+        // specific format in the breadcrumb.data. It needs values for httpStartTimestamp and httpEndTimestamp
+        // stored as Double or Long representations of timestamps (milliseconds since epoch).
+        // .NET breadcrumb data is always stored as strings, so we have to convert these to numeric values here.
         try
         {
             if (breadcrumb is { Category: HttpCategory, Data: { } data })
@@ -32,13 +34,11 @@ internal class DotnetReplayBreadcrumbConverter(Sentry.JavaSdk.SentryOptions opti
 
     private static void NormalizeTimestampField(IDictionary<string, Java.Lang.Object> data, string key)
     {
-        data.TryGetValue(key, out var value);
-        if (value is null or Java.Lang.Long or Java.Lang.Double or Java.Lang.Integer or Java.Lang.Float)
+        if (!data.TryGetValue(key, out var value) || value is Java.Lang.Number)
         {
             return;
         }
 
-        // Note: `data.Get` returns `Java.Lang.Object`, not a .NET `string`.
         var str = (value as Java.Lang.String)?.ToString() ?? value.ToString();
         if (string.IsNullOrWhiteSpace(str))
         {

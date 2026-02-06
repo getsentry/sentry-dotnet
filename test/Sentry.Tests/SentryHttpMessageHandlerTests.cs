@@ -611,8 +611,30 @@ public class SentryHttpMessageHandlerTests
         Assert.True(breadcrumbGenerated.Data.ContainsKey(statusKey));
         Assert.Equal(expectedBreadcrumbData[statusKey], breadcrumbGenerated.Data[statusKey]);
     }
+
+    [Fact]
+    public void Send_Executed_FailedRequestsCaptured()
+    {
+        // Arrange
+        var hub = Substitute.For<IHub>();
+        var failedRequestHandler = Substitute.For<ISentryFailedRequestHandler>();
+        var options = new SentryOptions();
+        var url = "https://localhost/";
+
+        using var innerHandler = new FakeHttpMessageHandler();
+        using var sentryHandler = new SentryHttpMessageHandler(hub, options, innerHandler, failedRequestHandler);
+        using var client = new HttpClient(sentryHandler);
+
+        // Act
+        client.Get(url);
+
+        // Assert
+        failedRequestHandler.Received(1).HandleResponse(Arg.Any<HttpResponseMessage>());
+    }
+
 #endif
 
+#if ANDROID
     [Fact]
     public void HandleResponse_SpanExists_AddsReplayBreadcrumbData()
     {
@@ -681,4 +703,5 @@ public class SentryHttpMessageHandlerTests
         breadcrumb.Data!.Should().NotContainKey(SentryHttpMessageHandler.HttpStartTimestampKey);
         breadcrumb.Data.Should().NotContainKey(SentryHttpMessageHandler.HttpEndTimestampKey);
     }
+#endif
 }
