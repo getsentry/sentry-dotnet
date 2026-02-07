@@ -102,8 +102,6 @@ public partial class App : Application
         SentrySdk.Close();
 
 #if ANDROID
-        // prevent auto-restart
-        Platform.CurrentActivity?.FinishAffinity();
         Process.KillProcess(Process.MyPid());
 #elif IOS
         System.Environment.Exit(0);
