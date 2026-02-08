@@ -1,6 +1,5 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Integrations;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 using Sentry.Protocol.Metrics;
@@ -82,6 +81,7 @@ internal class Hub : IHub, IDisposable
         }
 
         Logger = SentryStructuredLogger.Create(this, options, _clock);
+        Metrics = SentryMetricEmitter.Create(this, options, _clock);
 
 #if MEMORY_DUMP_SUPPORTED
         if (options.HeapDumpOptions is not null)
@@ -819,6 +819,7 @@ internal class Hub : IHub, IDisposable
         try
         {
             Logger.Flush();
+            Metrics.Flush();
             await CurrentClient.FlushAsync(timeout).ConfigureAwait(false);
         }
         catch (Exception e)
@@ -853,7 +854,9 @@ internal class Hub : IHub, IDisposable
 #endif
 
         Logger.Flush();
+        Metrics.Flush();
         (Logger as IDisposable)?.Dispose(); // see Sentry.Internal.DefaultSentryStructuredLogger
+        (Metrics as IDisposable)?.Dispose(); // see Sentry.Internal.DefaultSentryMetricEmitter
 
         try
         {
@@ -886,4 +889,6 @@ internal class Hub : IHub, IDisposable
     public SentryId LastEventId => CurrentScope.LastEventId;
 
     public SentryStructuredLogger Logger { get; }
+
+    public SentryMetricEmitter Metrics { get; }
 }

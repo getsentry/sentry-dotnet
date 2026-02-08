@@ -4,10 +4,10 @@ using Sentry.PlatformAbstractions;
 namespace Sentry.Tests;
 
 /// <summary>
-/// See <see href="https://develop.sentry.dev/sdk/telemetry/logs/"/>.
-/// See also <see cref="Sentry.Tests.Protocol.StructuredLogTests"/>.
+/// See <see href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>.
+/// See also <see cref="Sentry.Tests.Protocol.TraceMetricTests"/>.
 /// </summary>
-public class SentryLogTests
+public class SentryMetricTests
 {
     private static readonly DateTimeOffset Timestamp = new(2025, 04, 22, 14, 51, 00, 789, TimeSpan.FromHours(2));
     private static readonly SentryId TraceId = SentryId.Create();
@@ -17,7 +17,7 @@ public class SentryLogTests
 
     private readonly TestOutputDiagnosticLogger _output;
 
-    public SentryLogTests(ITestOutputHelper output)
+    public SentryMetricTests(ITestOutputHelper output)
     {
         _output = new TestOutputDiagnosticLogger(output);
     }
@@ -36,66 +36,38 @@ public class SentryLogTests
             Version = "1.2.3-test+Sentry",
         };
 
-        var log = new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message")
+        var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1)
         {
-            Template = "template",
-            Parameters = ImmutableArray.Create(new KeyValuePair<string, object>("param", "params")),
             SpanId = SpanId,
+            Unit = "test_unit",
         };
-        log.SetAttribute("attribute", "value");
-        log.SetDefaultAttributes(options, sdk);
+        metric.SetAttribute("attribute", "value");
+        metric.SetDefaultAttributes(options, sdk);
 
-        log.Timestamp.Should().Be(Timestamp);
-        log.TraceId.Should().Be(TraceId);
-        log.Level.Should().Be((SentryLogLevel)24);
-        log.Message.Should().Be("message");
-        log.Template.Should().Be("template");
-        log.Parameters.Should().BeEquivalentTo(new KeyValuePair<string, object>[] { new("param", "params"), });
-        log.SpanId.Should().Be(SpanId);
+        metric.Timestamp.Should().Be(Timestamp);
+        metric.TraceId.Should().Be(TraceId);
+        metric.Type.Should().Be(SentryMetricType.Counter);
+        metric.Name.Should().Be("sentry_tests.sentry_metric_tests.counter");
+        metric.Value.Should().Be(1);
+        metric.SpanId.Should().Be(SpanId);
+        metric.Unit.Should().BeEquivalentTo("test_unit");
 
-        // should only show up in sdk integrations
-        log.TryGetAttribute("sentry.origin", out object origin).Should().BeFalse();
-
-        log.TryGetAttribute("attribute", out object attribute).Should().BeTrue();
+        metric.TryGetAttribute<string>("attribute", out var attribute).Should().BeTrue();
         attribute.Should().Be("value");
-        log.TryGetAttribute("sentry.environment", out string environment).Should().BeTrue();
+        metric.TryGetAttribute<string>("sentry.environment", out var environment).Should().BeTrue();
         environment.Should().Be(options.Environment);
-        log.TryGetAttribute("sentry.release", out string release).Should().BeTrue();
+        metric.TryGetAttribute<string>("sentry.release", out var release).Should().BeTrue();
         release.Should().Be(options.Release);
-        log.TryGetAttribute("sentry.sdk.name", out string name).Should().BeTrue();
+        metric.TryGetAttribute<string>("sentry.sdk.name", out var name).Should().BeTrue();
         name.Should().Be(sdk.Name);
-        log.TryGetAttribute("sentry.sdk.version", out string version).Should().BeTrue();
+        metric.TryGetAttribute<string>("sentry.sdk.version", out var version).Should().BeTrue();
         version.Should().Be(sdk.Version);
-        log.TryGetAttribute("not-found", out object notFound).Should().BeFalse();
+        metric.TryGetAttribute<object>("not-found", out var notFound).Should().BeFalse();
         notFound.Should().BeNull();
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void WriteTo_NoParameters_NoTemplate(bool hasParameters)
-    {
-        // Arrange
-        ImmutableArray<KeyValuePair<string, object>> parameters = hasParameters
-            ? [new KeyValuePair<string, object>("param", "params")]
-            : [];
-        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Debug, "message")
-        {
-            Template = "template",
-            Parameters = parameters,
-            SpanId = SpanId,
-        };
-
-        // Act
-        var document = log.ToJsonDocument(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
-        var attributes = document.RootElement.GetProperty("attributes");
-
-        // Assert
-        attributes.TryGetProperty("sentry.message.template", out _).Should().Be(hasParameters);
-    }
-
     [Fact]
-    public void WriteTo_Envelope_MinimalSerializedSentryLog()
+    public void WriteTo_Envelope_MinimalSerializedSentryMetric()
     {
         var options = new SentryOptions
         {
@@ -103,10 +75,10 @@ public class SentryLogTests
             Release = "my-release",
         };
 
-        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Trace, "message");
-        log.SetDefaultAttributes(options, new SdkVersion());
+        var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
+        metric.SetDefaultAttributes(options, new SdkVersion());
 
-        var envelope = Envelope.FromLog(new StructuredLog([log]));
+        var envelope = Envelope.FromMetric(new TraceMetric([metric]));
 
         using var stream = new MemoryStream();
         envelope.Serialize(stream, _output, Clock);
@@ -130,9 +102,9 @@ public class SentryLogTests
 
         item.ToIndentedJsonString().Should().Match("""
         {
-          "type": "log",
+          "type": "trace_metric",
           "item_count": 1,
-          "content_type": "application/vnd.sentry.items.log+json",
+          "content_type": "application/vnd.sentry.items.trace-metric+json",
           "length": ?*
         }
         """);
@@ -142,8 +114,9 @@ public class SentryLogTests
           "items": [
             {
               "timestamp": {{Timestamp.GetTimestamp()}},
-              "level": "trace",
-              "body": "message",
+              "type": "counter",
+              "name": "sentry_tests.sentry_metric_tests.counter",
+              "value": 1,
               "trace_id": "{{TraceId.ToString()}}",
               "attributes": {
                 "sentry.environment": {
@@ -164,7 +137,7 @@ public class SentryLogTests
     }
 
     [Fact]
-    public void WriteTo_EnvelopeItem_MaximalSerializedSentryLog()
+    public void WriteTo_EnvelopeItem_MaximalSerializedSentryMetric()
     {
         var options = new SentryOptions
         {
@@ -172,19 +145,18 @@ public class SentryLogTests
             Release = "my-release",
         };
 
-        var log = new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message")
+        var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1)
         {
-            Template = "template",
-            Parameters = ImmutableArray.Create(new KeyValuePair<string, object>("0", "string"), new KeyValuePair<string, object>("1", false), new KeyValuePair<string, object>("2", 1), new KeyValuePair<string, object>("3", 2.2)),
             SpanId = SpanId,
+            Unit = "test_unit",
         };
-        log.SetAttribute("string-attribute", "string-value");
-        log.SetAttribute("boolean-attribute", true);
-        log.SetAttribute("integer-attribute", 3);
-        log.SetAttribute("double-attribute", 4.4);
-        log.SetDefaultAttributes(options, new SdkVersion { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" });
+        metric.SetAttribute("string-attribute", "string-value");
+        metric.SetAttribute("boolean-attribute", true);
+        metric.SetAttribute("integer-attribute", 3);
+        metric.SetAttribute("double-attribute", 4.4);
+        metric.SetDefaultAttributes(options, new SdkVersion { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" });
 
-        var envelope = EnvelopeItem.FromLog(new StructuredLog([log]));
+        var envelope = EnvelopeItem.FromMetric(new TraceMetric([metric]));
 
         using var stream = new MemoryStream();
         envelope.Serialize(stream, _output);
@@ -197,9 +169,9 @@ public class SentryLogTests
 
         item.ToIndentedJsonString().Should().Match("""
         {
-          "type": "log",
+          "type": "trace_metric",
           "item_count": 1,
-          "content_type": "application/vnd.sentry.items.log+json",
+          "content_type": "application/vnd.sentry.items.trace-metric+json",
           "length": ?*
         }
         """);
@@ -209,32 +181,13 @@ public class SentryLogTests
           "items": [
             {
               "timestamp": {{Timestamp.GetTimestamp()}},
-              "level": "fatal",
-              "body": "message",
+              "type": "counter",
+              "name": "sentry_tests.sentry_metric_tests.counter",
+              "value": 1,
               "trace_id": "{{TraceId.ToString()}}",
               "span_id": "{{SpanId.ToString()}}",
-              "severity_number": 24,
+              "unit": "test_unit",
               "attributes": {
-                "sentry.message.template": {
-                  "value": "template",
-                  "type": "string"
-                },
-                "sentry.message.parameter.0": {
-                  "value": "string",
-                  "type": "string"
-                },
-                "sentry.message.parameter.1": {
-                  "value": false,
-                  "type": "boolean"
-                },
-                "sentry.message.parameter.2": {
-                  "value": 1,
-                  "type": "integer"
-                },
-                "sentry.message.parameter.3": {
-                  "value": {{2.2.Format()}},
-                  "type": "double"
-                },
                 "string-attribute": {
                   "value": "string-value",
                   "type": "string"
@@ -277,103 +230,139 @@ public class SentryLogTests
     }
 
     [Fact]
-    public void WriteTo_MessageParameters_AsAttributes()
+    public void WriteTo_NumericValueType_Byte()
     {
-        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Trace, "message")
-        {
-            Parameters =
-            [
-                new KeyValuePair<string, object>("00", sbyte.MinValue),
-                new KeyValuePair<string, object>("01", byte.MaxValue),
-                new KeyValuePair<string, object>("02", short.MinValue),
-                new KeyValuePair<string, object>("03", ushort.MaxValue),
-                new KeyValuePair<string, object>("04", int.MinValue),
-                new KeyValuePair<string, object>("05", uint.MaxValue),
-                new KeyValuePair<string, object>("06", long.MinValue),
-                new KeyValuePair<string, object>("07", ulong.MaxValue),
-#if NET5_0_OR_GREATER
-                new KeyValuePair<string, object>("08", nint.MinValue),
-                new KeyValuePair<string, object>("09", nuint.MaxValue),
-#endif
-                new KeyValuePair<string, object>("10", 1f),
-                new KeyValuePair<string, object>("11", 2d),
-                new KeyValuePair<string, object>("12", 3m),
-                new KeyValuePair<string, object>("13", true),
-                new KeyValuePair<string, object>("14", 'c'),
-                new KeyValuePair<string, object>("15", "string"),
-#if (NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
-                new KeyValuePair<string, object>("16", KeyValuePair.Create("key", "value")),
-#else
-                new KeyValuePair<string, object>("16", new KeyValuePair<string, string>("key", "value")),
-#endif
-                new KeyValuePair<string, object>("17", null),
-            ],
-        };
+        var metric = new SentryMetric<byte>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
 
-        var document = log.ToJsonDocument(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
-        var attributes = document.RootElement.GetProperty("attributes");
-        Assert.Collection(attributes.EnumerateObject().ToArray(),
-            property => property.AssertAttributeInteger("sentry.message.parameter.00", json => json.GetSByte(), sbyte.MinValue),
-            property => property.AssertAttributeInteger("sentry.message.parameter.01", json => json.GetByte(), byte.MaxValue),
-            property => property.AssertAttributeInteger("sentry.message.parameter.02", json => json.GetInt16(), short.MinValue),
-            property => property.AssertAttributeInteger("sentry.message.parameter.03", json => json.GetUInt16(), ushort.MaxValue),
-            property => property.AssertAttributeInteger("sentry.message.parameter.04", json => json.GetInt32(), int.MinValue),
-            property => property.AssertAttributeInteger("sentry.message.parameter.05", json => json.GetUInt32(), uint.MaxValue),
-            property => property.AssertAttributeInteger("sentry.message.parameter.06", json => json.GetInt64(), long.MinValue),
-            property => property.AssertAttributeString("sentry.message.parameter.07", json => json.GetString(), ulong.MaxValue.ToString(NumberFormatInfo.InvariantInfo)),
-#if NET5_0_OR_GREATER
-            property => property.AssertAttributeInteger("sentry.message.parameter.08", json => json.GetInt64(), nint.MinValue),
-            property => property.AssertAttributeString("sentry.message.parameter.09", json => json.GetString(), nuint.MaxValue.ToString(NumberFormatInfo.InvariantInfo)),
-#endif
-            property => property.AssertAttributeDouble("sentry.message.parameter.10", json => json.GetSingle(), 1f),
-            property => property.AssertAttributeDouble("sentry.message.parameter.11", json => json.GetDouble(), 2d),
-            property => property.AssertAttributeString("sentry.message.parameter.12", json => json.GetString(), 3m.ToString(NumberFormatInfo.InvariantInfo)),
-            property => property.AssertAttributeBoolean("sentry.message.parameter.13", json => json.GetBoolean(), true),
-            property => property.AssertAttributeString("sentry.message.parameter.14", json => json.GetString(), "c"),
-            property => property.AssertAttributeString("sentry.message.parameter.15", json => json.GetString(), "string"),
-            property => property.AssertAttributeString("sentry.message.parameter.16", json => json.GetString(), "[key, value]")
-        );
-        Assert.Collection(_output.Entries,
-            entry => entry.Message.Should().Match("*ulong*is not supported*overflow*"),
-#if NET5_0_OR_GREATER
-            entry => entry.Message.Should().Match("*nuint*is not supported*64-bit*"),
-#endif
-            entry => entry.Message.Should().Match("*decimal*is not supported*overflow*"),
-            entry => entry.Message.Should().Match("*System.Collections.Generic.KeyValuePair`2[System.String,System.String]*is not supported*ToString*"),
-            entry => entry.Message.Should().Match("*null*is not supported*ignored*")
-        );
+        var document = metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
+        var value = document.RootElement.GetProperty("value");
+
+        value.ValueKind.Should().Be(JsonValueKind.Number);
+        value.TryGetByte(out var @byte).Should().BeTrue();
+        @byte.Should().Be(1);
+
+        _output.Entries.Should().BeEmpty();
     }
+
+    [Fact]
+    public void WriteTo_NumericValueType_Int16()
+    {
+        var metric = new SentryMetric<short>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
+
+        var document = metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
+        var value = document.RootElement.GetProperty("value");
+
+        value.ValueKind.Should().Be(JsonValueKind.Number);
+        value.TryGetInt16(out var @short).Should().BeTrue();
+        @short.Should().Be(1);
+
+        _output.Entries.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void WriteTo_NumericValueType_Int32()
+    {
+        var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
+
+        var document = metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
+        var value = document.RootElement.GetProperty("value");
+
+        value.ValueKind.Should().Be(JsonValueKind.Number);
+        value.TryGetInt32(out var @int).Should().BeTrue();
+        @int.Should().Be(1);
+
+        _output.Entries.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void WriteTo_NumericValueType_Int64()
+    {
+        var metric = new SentryMetric<long>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
+
+        var document = metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
+        var value = document.RootElement.GetProperty("value");
+
+        value.ValueKind.Should().Be(JsonValueKind.Number);
+        value.TryGetInt64(out var @long).Should().BeTrue();
+        @long.Should().Be(1L);
+
+        _output.Entries.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void WriteTo_NumericValueType_Single()
+    {
+        var metric = new SentryMetric<float>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
+
+        var document = metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
+        var value = document.RootElement.GetProperty("value");
+
+        value.ValueKind.Should().Be(JsonValueKind.Number);
+        value.TryGetSingle(out var @float).Should().BeTrue();
+        @float.Should().Be(1f);
+
+        _output.Entries.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void WriteTo_NumericValueType_Double()
+    {
+        var metric = new SentryMetric<double>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
+
+        var document = metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
+        var value = document.RootElement.GetProperty("value");
+
+        value.ValueKind.Should().Be(JsonValueKind.Number);
+        value.TryGetDouble(out var @double).Should().BeTrue();
+        @double.Should().Be(1d);
+
+        _output.Entries.Should().BeEmpty();
+    }
+
+#if DEBUG && (NET || NETCOREAPP)
+    [Fact]
+    public void WriteTo_NumericValueType_Decimal()
+    {
+        var metric = new SentryMetric<decimal>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
+
+        var exception = Assert.ThrowsAny<Exception>(() => metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output));
+        exception.Message.Should().Contain($"Unhandled Metric Type {typeof(decimal)}.");
+        exception.Message.Should().Contain("This instruction should be unreachable.");
+
+        _output.Entries.Should().BeEmpty();
+    }
+#endif
 
     [Fact]
     public void WriteTo_Attributes_AsJson()
     {
-        var log = new SentryLog(Timestamp, TraceId, SentryLogLevel.Trace, "message");
-        log.SetAttribute("sbyte", sbyte.MinValue);
-        log.SetAttribute("byte", byte.MaxValue);
-        log.SetAttribute("short", short.MinValue);
-        log.SetAttribute("ushort", ushort.MaxValue);
-        log.SetAttribute("int", int.MinValue);
-        log.SetAttribute("uint", uint.MaxValue);
-        log.SetAttribute("long", long.MinValue);
-        log.SetAttribute("ulong", ulong.MaxValue);
+        var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
+        metric.SetAttribute("sbyte", sbyte.MinValue);
+        metric.SetAttribute("byte", byte.MaxValue);
+        metric.SetAttribute("short", short.MinValue);
+        metric.SetAttribute("ushort", ushort.MaxValue);
+        metric.SetAttribute("int", int.MinValue);
+        metric.SetAttribute("uint", uint.MaxValue);
+        metric.SetAttribute("long", long.MinValue);
+        metric.SetAttribute("ulong", ulong.MaxValue);
 #if NET5_0_OR_GREATER
-        log.SetAttribute("nint", nint.MinValue);
-        log.SetAttribute("nuint", nuint.MaxValue);
+        metric.SetAttribute("nint", nint.MinValue);
+        metric.SetAttribute("nuint", nuint.MaxValue);
 #endif
-        log.SetAttribute("float", 1f);
-        log.SetAttribute("double", 2d);
-        log.SetAttribute("decimal", 3m);
-        log.SetAttribute("bool", true);
-        log.SetAttribute("char", 'c');
-        log.SetAttribute("string", "string");
+        metric.SetAttribute("float", 1f);
+        metric.SetAttribute("double", 2d);
+        metric.SetAttribute("decimal", 3m);
+        metric.SetAttribute("bool", true);
+        metric.SetAttribute("char", 'c');
+        metric.SetAttribute("string", "string");
 #if (NETCOREAPP2_0_OR_GREATER || NETSTANDARD2_1_OR_GREATER)
-        log.SetAttribute("object", KeyValuePair.Create("key", "value"));
+        metric.SetAttribute("object", KeyValuePair.Create("key", "value"));
 #else
-        log.SetAttribute("object", new KeyValuePair<string, string>("key", "value"));
+        metric.SetAttribute("object", new KeyValuePair<string, string>("key", "value"));
 #endif
-        log.SetAttribute("null", null!);
+        metric.SetAttribute("null", null!);
 
-        var document = log.ToJsonDocument(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
+        var document = metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
         var attributes = document.RootElement.GetProperty("attributes");
         Assert.Collection(attributes.EnumerateObject().ToArray(),
             property => property.AssertAttributeInteger("sbyte", json => json.GetSByte(), sbyte.MinValue),

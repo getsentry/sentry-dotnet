@@ -240,9 +240,9 @@ public partial class SentryStructuredLoggerTests : IDisposable
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         var entry = _fixture.DiagnosticLogger.Dequeue();
         entry.Level.Should().Be(SentryLevel.Info);
-        entry.Message.Should().Be("Log Buffer full ... dropping log");
+        entry.Message.Should().Be("{0}-Buffer full ... dropping {0}");
         entry.Exception.Should().BeNull();
-        entry.Args.Should().BeEmpty();
+        entry.Args.Should().BeEquivalentTo([nameof(SentryLog)]);
     }
 
     private static void ConfigureLog(SentryLog log)
@@ -251,7 +251,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
     }
 }
 
-internal static class AssertionExtensions
+internal static class LoggerAssertionExtensions
 {
     public static void AssertEnvelope(this SentryStructuredLoggerTests.Fixture fixture, Envelope envelope, SentryLogLevel level)
     {
