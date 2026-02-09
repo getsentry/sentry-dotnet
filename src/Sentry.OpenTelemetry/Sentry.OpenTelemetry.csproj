@@ -5,6 +5,8 @@
     <PackageTags>$(PackageTags);OpenTelemetry</PackageTags>
     <TargetFrameworks>$(CurrentTfms);netstandard2.1;netstandard2.0;net462</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Todo: work out a proper solution to this bug in the Roslyn analysers -->
+    <NoWarn>$(NoWarn);AD0001</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(EnableAot)' == 'true'">

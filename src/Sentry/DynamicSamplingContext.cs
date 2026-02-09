@@ -1,5 +1,4 @@
 using Sentry.Internal;
-using Sentry.Internal.Extensions;
 
 namespace Sentry;
 
@@ -228,7 +227,7 @@ internal class DynamicSamplingContext
             replaySession);
     }
 
-    public static DynamicSamplingContext CreateFromPropagationContext(SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
+    public static DynamicSamplingContext CreateFromPropagationContext(IPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
     {
         var traceId = propagationContext.TraceId;
         var publicKey = options.ParsedDsn.PublicKey;
@@ -257,6 +256,6 @@ internal static class DynamicSamplingContextExtensions
     public static DynamicSamplingContext CreateDynamicSamplingContext(this UnsampledTransaction transaction, SentryOptions options, IReplaySession? replaySession)
         => DynamicSamplingContext.CreateFromUnsampledTransaction(transaction, options, replaySession);
 
-    public static DynamicSamplingContext CreateDynamicSamplingContext(this SentryPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
+    public static DynamicSamplingContext CreateDynamicSamplingContext(this IPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
         => DynamicSamplingContext.CreateFromPropagationContext(propagationContext, options, replaySession);
 }

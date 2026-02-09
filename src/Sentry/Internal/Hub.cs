@@ -478,7 +478,7 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    private void ApplyTraceContextToEvent(SentryEvent evt, SentryPropagationContext propagationContext)
+    private void ApplyTraceContextToEvent(SentryEvent evt, IPropagationContext propagationContext)
     {
         evt.Contexts.Trace.TraceId = propagationContext.TraceId;
         evt.Contexts.Trace.SpanId = propagationContext.SpanId;

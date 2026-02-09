@@ -1157,6 +1157,12 @@ public class SentryOptions
     internal Instrumenter Instrumenter { get; set; } = Instrumenter.Sentry;
 
     /// <summary>
+    /// The default factory creates SentryPropagationContext instances... this should be replaced when using OTEL
+    /// </summary>
+    internal Func<IPropagationContext?, IPropagationContext> PropagationContextFactory { get; set; } = sourceContext =>
+        new SentryPropagationContext(sourceContext);
+
+    /// <summary>
     /// <para>
     /// Set to `true` to prevents Sentry from automatically registering <see cref="SentryHttpMessageHandler"/>.
     /// </para>
