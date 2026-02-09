@@ -58,6 +58,8 @@ internal sealed class Dsn
 
     public Uri GetEnvelopeEndpointUri() => new(ApiBaseUri, "envelope/");
 
+    public Uri GetOtlpTracesEndpointUri() => new(ApiBaseUri, "integration/otlp/v1/traces");
+
     public override string ToString() => Source;
 
     public static bool IsDisabled(string? dsn) =>

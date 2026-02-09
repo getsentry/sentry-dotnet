@@ -41,8 +41,8 @@ public static class SentryOptionsExtensions
     /// <summary>
     /// <para>Configures Sentry to use OpenTelemetry for distributed tracing.</para>
     /// <para>
-    /// Note: if you are using this method to configure Sentry to work with OpenTelemetry you will also have to call
-    /// <see cref="TracerProviderBuilderExtensions.AddSentry"/> when building your <see cref="TracerProviderBuilder"/>
+    /// Note: if you are using this method to configure Sentry to work with OpenTelemetry, you will also have to call
+    /// TracerProviderBuilderExtensions.AddSentry when building your <see cref="TracerProviderBuilder"/>
     /// to ensure OpenTelemetry sends trace information to Sentry.
     /// </para>
     /// </summary>
