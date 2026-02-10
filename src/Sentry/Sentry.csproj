@@ -185,8 +185,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="PlatformAbstractions\FrameworkInfo.NetFx.cs;PlatformAbstractions\FrameworkInfo.NetStandard.cs">
+      <DependentUpon>FrameworkInfo.cs</DependentUpon>
+    </Compile>
     <Compile Update="MeasurementUnit.Duration.cs;MeasurementUnit.Fraction.cs;MeasurementUnit.Information.cs">
       <DependentUpon>MeasurementUnit.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SentryStructuredLogger.Format.cs">
+      <DependentUpon>SentryStructuredLogger.cs</DependentUpon>
     </Compile>
   </ItemGroup>
 
