@@ -4,7 +4,7 @@
 
 ### Dependencies
 
-- Bumped Xamarin.AndroidX.Lifecycle.Common.Java8 to 2.2.20 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
+- Bumped Xamarin.Kotlin.StdLib.Jdk8 to 2.2.20 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
 - Bumped CommunityToolkit.Mvvm to 8.4.0 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
 
 ## 6.1.0
