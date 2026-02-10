@@ -9,6 +9,7 @@ internal sealed class BlazorWasmOptionsSetup : IConfigureOptions<SentryBlazorOpt
 {
     private readonly NavigationManager _navigationManager;
     private readonly IHub _hub;
+    private bool _initialized;
 
     public BlazorWasmOptionsSetup(NavigationManager navigationManager)
         : this(navigationManager, HubAdapter.Instance)
@@ -23,6 +24,14 @@ internal sealed class BlazorWasmOptionsSetup : IConfigureOptions<SentryBlazorOpt
 
     public void Configure(SentryBlazorOptions options)
     {
+        ArgumentNullException.ThrowIfNull(options);
+
+        if (_initialized)
+        {
+            return;
+        }
+        _initialized = true;
+
         var previousUrl = _navigationManager.Uri;
 
         // Set the initial scope request URL
