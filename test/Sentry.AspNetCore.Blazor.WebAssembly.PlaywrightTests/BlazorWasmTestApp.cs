@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
@@ -7,6 +8,7 @@ namespace Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests;
 internal sealed class BlazorWasmTestApp : IAsyncDisposable
 {
     private Process? _process;
+    private readonly ConcurrentQueue<string> _output = new();
 
     public string BaseUrl { get; private set; } = null!;
 
@@ -31,17 +33,24 @@ internal sealed class BlazorWasmTestApp : IAsyncDisposable
                 UseShellExecute = false,
             }
         };
+        _process.OutputDataReceived += (_, e) => { if (e.Data != null) _output.Enqueue($"[stdout] {e.Data}"); };
+        _process.ErrorDataReceived += (_, e) => { if (e.Data != null) _output.Enqueue($"[stderr] {e.Data}"); };
         _process.Start();
-
-        // Discard stdout/stderr to prevent buffer deadlock
         _process.BeginOutputReadLine();
         _process.BeginErrorReadLine();
 
         using var http = new HttpClient();
-        var timeout = TimeSpan.FromSeconds(120);
+        var timeout = TimeSpan.FromSeconds(180);
         var sw = Stopwatch.StartNew();
         while (sw.Elapsed < timeout)
         {
+            if (_process.HasExited)
+            {
+                var logs = string.Join(Environment.NewLine, _output);
+                throw new InvalidOperationException(
+                    $"Blazor WASM test app exited with code {_process.ExitCode} before becoming ready. Output:{Environment.NewLine}{logs}");
+            }
+
             try
             {
                 var response = await http.GetAsync(BaseUrl);
@@ -57,7 +66,9 @@ internal sealed class BlazorWasmTestApp : IAsyncDisposable
             await Task.Delay(500);
         }
 
-        throw new TimeoutException($"Blazor WASM test app did not start within {(int)timeout.TotalSeconds}s at {BaseUrl}");
+        var timeoutLogs = string.Join(Environment.NewLine, _output);
+        throw new TimeoutException(
+            $"Blazor WASM test app did not start within {(int)timeout.TotalSeconds}s at {BaseUrl}. Output:{Environment.NewLine}{timeoutLogs}");
     }
 
     private static int GetFreePort()
