@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Dependencies
+
+- Bumped Xamarin.AndroidX.Lifecycle.Common.Java8 to 2.2.20 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
+- Bumped CommunityToolkit.Mvvm to 8.4.0 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
+
 ## 6.1.0
 
 ### Features
@@ -16,8 +23,6 @@
 
 ### Dependencies
 
-- Bumped Xamarin.AndroidX.Lifecycle.Common.Java8 to 2.2.20 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
-- Bumped CommunityToolkit.Mvvm to 8.4.0 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
 - Bump Native SDK from v0.12.2 to v0.12.4 ([#4832](https://github.com/getsentry/sentry-dotnet/pull/4832), [#4875](https://github.com/getsentry/sentry-dotnet/pull/4875))
   - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0124)
   - [diff](https://github.com/getsentry/sentry-native/compare/0.12.2...0.12.4)
