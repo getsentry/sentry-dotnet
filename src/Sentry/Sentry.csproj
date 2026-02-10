@@ -65,7 +65,7 @@
     https://github.com/SimonCropp/Polyfill
   -->
   <ItemGroup>
-    <PackageReference Include="Polyfill" Version="9.7.7" PrivateAssets="all" />
+    <PackageReference Include="Polyfill" Version="9.8.1" PrivateAssets="all" />
   </ItemGroup>
   <PropertyGroup>
     <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.0'">$(DefineConstants);FeatureHttp</DefineConstants>
