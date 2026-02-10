@@ -140,7 +140,6 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryMeasurementUnitInformation",
         "SentryMechanism",
         "SentryMechanismContext",
-        "SentryMechanismMeta",
         "SentryMessage",
         "SentryNSError",
         "SentryOptions",
