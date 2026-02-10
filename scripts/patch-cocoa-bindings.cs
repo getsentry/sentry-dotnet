@@ -167,9 +167,6 @@ var nodes = tree.GetCompilationUnitRoot()
         "SentryViewScreenshotOptions",
         "SentryViewScreenshotProvider"
     )
-    // Rename and retarget the experimental options property
-    .RenameProperty("SentryOptions", "_swiftExperimentalOptions", "Experimental")
-    .ChangePropertyType("SentryOptions", "Experimental", "SentryExperimentalOptions")
     // error CS0311: The type 'SentryXxx' cannot be used as type parameter 'TValue' in the generic type or method 'NSDictionary<TKey, TValue>'.
     .ChangeGenericTypeArgument("NSDictionary", "Sentry*", "NSObject");
 
