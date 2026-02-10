@@ -206,7 +206,7 @@ public class SentryOptions
 #endif
 
 #if HAS_DIAGNOSTIC_INTEGRATION
-            if ((_defaultIntegrations & DefaultIntegrations.SentryDiagnosticListenerIntegration) != 0)
+            if (Instrumenter == Instrumenter.Sentry && (_defaultIntegrations & DefaultIntegrations.SentryDiagnosticListenerIntegration) != 0)
             {
                 yield return new SentryDiagnosticListenerIntegration();
             }
@@ -222,6 +222,10 @@ public class SentryOptions
 
             foreach (var integration in _integrations)
             {
+                if (Instrumenter == Instrumenter.OpenTelemetry && integration is ISentryTracingIntegration)
+                {
+                    continue;
+                }
                 yield return integration;
             }
         }

@@ -50,6 +50,12 @@ public class SentryGraphQLHttpMessageHandler : SentryMessageHandler
         }
         request.SetFused(graphQlRequestContent);
 
+        if (_options?.Instrumenter == Instrumenter.OpenTelemetry)
+        {
+            _options.LogDebug("Skipping span creation in SentryGraphQLHttpMessageHandler because Instrumenter is set to OpenTelemetry");
+            return null;
+        }
+
         // Start a span that tracks this request
         // (may be null if transaction is not set on the scope)
         var span = _hub.GetSpan()?.StartChild(

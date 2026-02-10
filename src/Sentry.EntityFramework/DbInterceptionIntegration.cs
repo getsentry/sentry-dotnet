@@ -1,6 +1,6 @@
 namespace Sentry.EntityFramework;
 
-internal class DbInterceptionIntegration : ISdkIntegration
+internal class DbInterceptionIntegration : ISdkIntegration, ISentryTracingIntegration
 {
     // Internal for testing.
     internal IDbInterceptor? SqlInterceptor { get; private set; }

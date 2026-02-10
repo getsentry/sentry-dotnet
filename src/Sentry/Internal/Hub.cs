@@ -185,6 +185,13 @@ internal class Hub : IHub, IDisposable
             return NoOpTransaction.Instance;
         }
 
+        if (_options.Instrumenter == Instrumenter.OpenTelemetry)
+        {
+            _options.LogWarning("This transaction will not be sent to Sentry. " +
+                "Please instrument traces using the OpenTelemetry APIs when using Sentry's OpenTelemetry integration.");
+            return NoOpTransaction.Instance;
+        }
+
         bool? isSampled = null;
         double? sampleRate = null;
         DiscardReason? discardReason = null;
