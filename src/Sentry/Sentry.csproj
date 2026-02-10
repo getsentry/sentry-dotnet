@@ -191,6 +191,12 @@
     <Compile Update="MeasurementUnit.Duration.cs;MeasurementUnit.Fraction.cs;MeasurementUnit.Information.cs">
       <DependentUpon>MeasurementUnit.cs</DependentUpon>
     </Compile>
+    <Compile Update="SentryMetric.Factory.cs;SentryMetric.Generic.cs">
+      <DependentUpon>SentryMetric.cs</DependentUpon>
+    </Compile>
+    <Compile Update="SentryMetricEmitter.Counter.cs;SentryMetricEmitter.Distribution.cs;SentryMetricEmitter.Gauge.cs">
+      <DependentUpon>SentryMetricEmitter.cs</DependentUpon>
+    </Compile>
     <Compile Update="SentryStructuredLogger.Format.cs">
       <DependentUpon>SentryStructuredLogger.cs</DependentUpon>
     </Compile>

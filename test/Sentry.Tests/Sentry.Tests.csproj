@@ -39,6 +39,9 @@
       <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
       <DependentUpon>HintTests.cs</DependentUpon>
     </None>
+    <Compile Update="SentryMetricEmitterTests.Options.cs;SentryMetricEmitterTests.Types.cs;SentryMetricEmitterTests.Values.cs">
+      <DependentUpon>SentryMetricEmitterTests.cs</DependentUpon>
+    </Compile>
     <Compile Update="SentryStructuredLoggerTests.Format.cs">
       <DependentUpon>SentryStructuredLoggerTests.cs</DependentUpon>
     </Compile>
