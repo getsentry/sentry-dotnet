@@ -84,7 +84,7 @@
          https://github.com/getsentry/sentry-java/blob/604a2616bebd80ea051cdcec916aa052b509c5a8/buildSrc/src/main/java/Config.kt#L6-L7
          ... but there's no NuGet package for that version. This version has been selected to
          match the version that was available when net10.0 was released -->
-    <PackageReference Include="Xamarin.Kotlin.StdLib.Jdk8" Version="2.2.21" />
+    <PackageReference Include="Xamarin.Kotlin.StdLib.Jdk8" Version="2.2.20" />
   </ItemGroup>
 
   <!-- Dependencies for AndroidMavenLibrary references
