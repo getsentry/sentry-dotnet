@@ -38,7 +38,7 @@ internal sealed class BlazorWasmTestApp : IAsyncDisposable
         _process.BeginErrorReadLine();
 
         using var http = new HttpClient();
-        var timeout = TimeSpan.FromSeconds(60);
+        var timeout = TimeSpan.FromSeconds(120);
         var sw = Stopwatch.StartNew();
         while (sw.Elapsed < timeout)
         {
@@ -57,7 +57,7 @@ internal sealed class BlazorWasmTestApp : IAsyncDisposable
             await Task.Delay(500);
         }
 
-        throw new TimeoutException($"Blazor WASM test app did not start within {timeout.TotalSeconds}s at {BaseUrl}");
+        throw new TimeoutException($"Blazor WASM test app did not start within {(int)timeout.TotalSeconds}s at {BaseUrl}");
     }
 
     private static int GetFreePort()
