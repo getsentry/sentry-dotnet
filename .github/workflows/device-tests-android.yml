@@ -10,6 +10,7 @@ on:
       # Core SDK (transitive dependency of all mobile packages)
       - 'src/Sentry/**'
       - 'src/Sentry.Extensions.Logging/**'
+      - 'src/Sentry.Compiler.Extensions/**'
       # Mobile-specific packages
       - 'src/Sentry.Maui/**'
       - 'src/Sentry.Maui.CommunityToolkit.Mvvm/**'
@@ -24,14 +25,27 @@ on:
       - 'test/Sentry.Maui.CommunityToolkit.Mvvm.Tests/**'
       - 'test/Sentry.Android.AssemblyReader.Tests/**'
       - 'test/Sentry.Testing/**'
+      - 'test/AndroidTestApp/**'
       # Integration tests
       - 'integration-test/android.Tests.ps1'
       - 'integration-test/ios.Tests.ps1'
       - 'integration-test/net9-maui/**'
-      # Scripts, native modules, and CI
+      - 'integration-test/common.ps1'
+      - 'integration-test/Directory.Build.*'
+      # Native libraries and modules
+      - 'lib/sentrysupplemental/**'
+      - 'lib/sentry-android-supplemental/**'
+      - 'modules/sentry-native/**'
+      - 'modules/sentry-cocoa/**'
+      - 'modules/sentry-cocoa.properties'
+      # Build configuration (affects all builds)
+      - 'global.json'
+      - 'Directory.Build.props'
+      - 'Directory.Build.targets'
+      - 'nuget.config'
+      # Scripts and CI
       - 'scripts/device-test.ps1'
       - 'scripts/device-test-utils.ps1'
-      - 'modules/sentry-native/**'
       - '.github/workflows/device-tests-android.yml'
       - '.github/actions/**'
   workflow_dispatch:
