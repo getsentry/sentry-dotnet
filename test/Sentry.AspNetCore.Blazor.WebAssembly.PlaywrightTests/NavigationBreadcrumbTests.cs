@@ -11,6 +11,13 @@ public class NavigationBreadcrumbTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
+        // Ensure Chromium is installed (no-op if already cached)
+        var exitCode = Microsoft.Playwright.Program.Main(["install", "chromium"]);
+        if (exitCode != 0)
+        {
+            throw new InvalidOperationException($"Playwright browser install failed with exit code {exitCode}");
+        }
+
         await _app.StartAsync();
 
         _playwright = await Playwright.CreateAsync();
