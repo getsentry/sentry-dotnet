@@ -12,74 +12,73 @@ namespace Sentry.OpenTelemetry;
 /// </summary>
 public static class TracerProviderBuilderExtensions
 {
-    extension(TracerProviderBuilder tracerProviderBuilder)
+    /// <summary>
+    /// Ensures OpenTelemetry trace information is sent to Sentry.
+    /// </summary>
+    /// <param name="tracerProviderBuilder">The <see cref="TracerProviderBuilder"/>.</param>
+    /// <param name="defaultTextMapPropagator">
+    ///     <para>The default TextMapPropagator to be used by OpenTelemetry.</para>
+    ///     <para>
+    ///         If this parameter is not supplied, the <see cref="SentryPropagator"/> will be used, which propagates the
+    ///         baggage header as well as Sentry trace headers.
+    ///     </para>
+    ///     <para>
+    ///         The <see cref="SentryPropagator"/> is required for Sentry's OpenTelemetry integration to work but you
+    ///         could wrap this in a <see cref="CompositeTextMapPropagator"/> if you needed other propagators as well.
+    ///     </para>
+    /// </param>
+    /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
+    public static TracerProviderBuilder AddSentry(this TracerProviderBuilder tracerProviderBuilder, TextMapPropagator? defaultTextMapPropagator = null)
     {
-        /// <summary>
-        /// Ensures OpenTelemetry trace information is sent to Sentry.
-        /// </summary>
-        /// <param name="defaultTextMapPropagator">
-        ///     <para>The default TextMapPropagator to be used by OpenTelemetry.</para>
-        ///     <para>
-        ///         If this parameter is not supplied, the <see cref="SentryPropagator"/> will be used, which propagates the
-        ///         baggage header as well as Sentry trace headers.
-        ///     </para>
-        ///     <para>
-        ///         The <see cref="SentryPropagator"/> is required for Sentry's OpenTelemetry integration to work but you
-        ///         could wrap this in a <see cref="CompositeTextMapPropagator"/> if you needed other propagators as well.
-        ///     </para>
-        /// </param>
-        /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
-        public TracerProviderBuilder AddSentry(TextMapPropagator? defaultTextMapPropagator = null)
+        defaultTextMapPropagator ??= new SentryPropagator();
+        Sdk.SetDefaultTextMapPropagator(defaultTextMapPropagator);
+        return tracerProviderBuilder.AddProcessor(ImplementationFactory);
+    }
+
+    /// <summary>
+    /// Ensures OpenTelemetry trace information is sent to the Sentry OTLP endpoint.
+    /// </summary>
+    /// <param name="tracerProviderBuilder">The <see cref="TracerProviderBuilder"/>.</param>
+    /// <param name="dsnString">The DSN for your Sentry project</param>
+    /// <param name="defaultTextMapPropagator">
+    ///     <para>The default TextMapPropagator to be used by OpenTelemetry.</para>
+    ///     <para>
+    ///         If this parameter is not supplied, the <see cref="SentryPropagator"/> will be used, which propagates the
+    ///         baggage header as well as Sentry trace headers.
+    ///     </para>
+    ///     <para>
+    ///         The <see cref="SentryPropagator"/> is required for Sentry's OpenTelemetry integration to work but you
+    ///         could wrap this in a <see cref="CompositeTextMapPropagator"/> if you needed other propagators as well.
+    ///     </para>
+    /// </param>
+    /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
+    public static TracerProviderBuilder AddSentry(this TracerProviderBuilder tracerProviderBuilder, string dsnString, TextMapPropagator? defaultTextMapPropagator = null)
+    {
+        if (string.IsNullOrWhiteSpace(dsnString))
         {
-            defaultTextMapPropagator ??= new SentryPropagator();
-            Sdk.SetDefaultTextMapPropagator(defaultTextMapPropagator);
-            return tracerProviderBuilder.AddProcessor(ImplementationFactory);
+            throw new ArgumentException("OTLP endpoint must be provided", nameof(dsnString));
         }
 
-        /// <summary>
-        /// Ensures OpenTelemetry trace information is sent to the Sentry OTLP endpoint.
-        /// </summary>
-        /// <param name="dsnString">The DSN for your Sentry project</param>
-        /// <param name="defaultTextMapPropagator">
-        ///     <para>The default TextMapPropagator to be used by OpenTelemetry.</para>
-        ///     <para>
-        ///         If this parameter is not supplied, the <see cref="SentryPropagator"/> will be used, which propagates the
-        ///         baggage header as well as Sentry trace headers.
-        ///     </para>
-        ///     <para>
-        ///         The <see cref="SentryPropagator"/> is required for Sentry's OpenTelemetry integration to work but you
-        ///         could wrap this in a <see cref="CompositeTextMapPropagator"/> if you needed other propagators as well.
-        ///     </para>
-        /// </param>
-        /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
-        public TracerProviderBuilder AddSentry(string dsnString, TextMapPropagator? defaultTextMapPropagator = null)
+        defaultTextMapPropagator ??= new SentryPropagator();
+        Sdk.SetDefaultTextMapPropagator(defaultTextMapPropagator);
+
+        if (Dsn.TryParse(dsnString) is not { } dsn)
         {
-            if (string.IsNullOrWhiteSpace(dsnString))
-            {
-                throw new ArgumentException("OTLP endpoint must be provided", nameof(dsnString));
-            }
-
-            defaultTextMapPropagator ??= new SentryPropagator();
-            Sdk.SetDefaultTextMapPropagator(defaultTextMapPropagator);
-
-            if (Dsn.TryParse(dsnString) is not { } dsn)
-            {
-                return tracerProviderBuilder;
-            }
-
-            tracerProviderBuilder.AddOtlpExporter(options =>
-            {
-                options.Endpoint = dsn.GetOtlpTracesEndpointUri();
-                options.Protocol = OtlpExportProtocol.HttpProtobuf;
-                options.HttpClientFactory = () =>
-                {
-                    var client = new HttpClient();
-                    client.DefaultRequestHeaders.Add("X-Sentry-Auth", $"sentry sentry_key={dsn.PublicKey}");
-                    return client;
-                };
-            });
-            return tracerProviderBuilder.AddProcessor(ImplementationFactory);
+            return tracerProviderBuilder;
         }
+
+        tracerProviderBuilder.AddOtlpExporter(options =>
+        {
+            options.Endpoint = dsn.GetOtlpTracesEndpointUri();
+            options.Protocol = OtlpExportProtocol.HttpProtobuf;
+            options.HttpClientFactory = () =>
+            {
+                var client = new HttpClient();
+                client.DefaultRequestHeaders.Add("X-Sentry-Auth", $"sentry sentry_key={dsn.PublicKey}");
+                return client;
+            };
+        });
+        return tracerProviderBuilder.AddProcessor(ImplementationFactory);
     }
 
     internal static BaseProcessor<Activity> ImplementationFactory(IServiceProvider services)
