@@ -40,19 +40,14 @@ public class NavigationBreadcrumbTests : IAsyncLifetime
         var page = await _browser.NewPageAsync();
 
         // Collect all intercepted envelopes
-        var envelopes = new List<string>();
         var envelopeReceived = new TaskCompletionSource<string>();
 
         await page.RouteAsync("**/api/0/envelope/**", async route =>
         {
             var body = route.Request.PostData;
-            if (body != null)
+            if (body != null && body.Contains("\"breadcrumbs\""))
             {
-                envelopes.Add(body);
-                if (body.Contains("\"breadcrumbs\""))
-                {
-                    envelopeReceived.TrySetResult(body);
-                }
+                envelopeReceived.TrySetResult(body);
             }
             await route.FulfillAsync(new RouteFulfillOptions
             {
