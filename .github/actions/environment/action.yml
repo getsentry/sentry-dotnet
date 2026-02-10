@@ -97,7 +97,7 @@ runs:
         global-json-file: global.json
         dotnet-version: |
           8.0.x
-          9.0.304
+          9.0.310
 
     # .NET 5.0 does not support ARM64 on macOS
     - name: Install .NET 5.0 SDK
@@ -109,7 +109,13 @@ runs:
     - name: Install .NET Workloads
       shell: bash
       run: |
+        set -euo pipefail
         pwd
         dotnet workload restore \
           --temp-dir "${{ runner.temp }}" \
           --skip-sign-check
+        dotnet workload restore test/AndroidTestApp/AndroidTestApp.csproj \
+          --temp-dir "${{ runner.temp }}" \
+          --skip-sign-check
+        # Restore the Android test app explicitly to ensure runtime packs are available
+        dotnet restore test/AndroidTestApp/AndroidTestApp.csproj -r android-x64 --nologo || true

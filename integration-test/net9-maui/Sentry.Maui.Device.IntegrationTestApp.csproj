@@ -1,8 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(TargetFrameworks);net9.0-android35.0</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net9.0-ios18.0</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net9.0-android35.0;net10.0-android36.0</TargetFrameworks>
+    <!-- Pin target iOS version so that our tests don't break when new versions of Xcode are released.
+         'netX.0-ios' resolves the latest version of the iOS SDK otherwise.
+    -->
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net10.0-ios26.2</TargetFrameworks>
 
     <OutputType>Exe</OutputType>
     <RootNamespace>Sentry.Maui.Device.IntegrationTestApp</RootNamespace>
@@ -31,7 +34,7 @@
 
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
-    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">18.0</TargetPlatformVersion>
+
   </PropertyGroup>
 
   <ItemGroup>

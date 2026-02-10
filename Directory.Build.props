@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <VersionPrefix>6.0.0</VersionPrefix>
+    <VersionPrefix>6.1.0</VersionPrefix>
     <LangVersion>14.0</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -13,6 +13,7 @@
 
     <!-- Ignore our own diagnostic ids - these are meant to be external warnings only -->
     <NoWarn>$(NoWarn);SENTRY0001</NoWarn>
+    <NoWarn>$(NoWarn);SENTRYTRACECONNECTEDMETRICS</NoWarn> <!--https://github.com/getsentry/sentry-dotnet/discussions/4838-->
 
     <!-- Allow references to unsigned assemblies (like MAUI) from signed projects -->
     <NoWarn>$(NoWarn);CS8002</NoWarn>

@@ -20,6 +20,7 @@
     <SentryAttributesFile>Sentry.Attributes$(MSBuildProjectExtension.Replace('proj', ''))</SentryAttributesFile>
     <SentryProGuardUUID Condition="'$(SentryProGuardUUID)' == ''">$([System.Guid]::NewGuid())</SentryProGuardUUID>
     <SentryAllowFailure Condition="'$(SENTRY_ALLOW_FAILURE)' == 'true'">true</SentryAllowFailure>
+    <SentryAllowFailure Condition="'$(SentryAllowFailure)' == ''">false</SentryAllowFailure>
   </PropertyGroup>
 
   <Target Name="_SentryEnsureAndroidEnableAssemblyCompressionDisabled"
