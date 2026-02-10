@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tfm: [net9.0]
+        tfm: [net9.0, net10.0]
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
@@ -40,13 +40,12 @@ jobs:
       - name: Build Android Test App
         run: pwsh ./scripts/device-test.ps1 android -Build -Tfm ${{ matrix.tfm }}
 
-      - name: Upload Android Test App (net9.0)
-        if: matrix.tfm == 'net9.0'
+      - name: Upload Android Test App (${{ matrix.tfm }})
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: device-test-android-net9.0
+          name: device-test-android-${{ matrix.tfm }}
           if-no-files-found: error
-          path: test/Sentry.Maui.Device.TestApp/bin/Release/net9.0-android/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
+          path: test/Sentry.Maui.Device.TestApp/bin/Release/${{ matrix.tfm }}-android/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
 
   android:
     needs: [build]
@@ -58,7 +57,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tfm: [net9.0]
+        tfm: [net9.0, net10.0]
         # Must be 34+ for new apps and app updates as of August 31, 2024.
         # See https://apilevels.com/
         api-level: [34, 36]
@@ -91,7 +90,7 @@ jobs:
           path: bin
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
+        uses: gradle/actions/setup-gradle@f29f5a9d7b09a7c6b29859002d29d24e1674c884 # v5.0.1
 
       # Cached AVD setup per https://github.com/ReactiveCircus/android-emulator-runner/blob/main/README.md
 
@@ -130,7 +129,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: getsentry/github-workflows
-          ref: a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+          ref: 95603f4efe938315ff0dd427a1f2bb40b1889a92 # 3.2.0
           path: modules/github-workflows
 
       - name: Run Integration Tests
@@ -147,7 +146,7 @@ jobs:
           disk-size: ${{ env.ANDROID_EMULATOR_DISK_SIZE }}
           emulator-options: ${{ env.ANDROID_EMULATOR_OPTIONS }}
           disable-animations: false
-          script: pwsh integration-test/android.Tests.ps1
+          script: pwsh integration-test/android.Tests.ps1 -dotnet_version ${{ matrix.tfm }}
 
       - name: Retry Integration Tests (if previous failed to run)
         if: steps.first-integration-test-run.outcome == 'failure'
