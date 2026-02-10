@@ -3,11 +3,12 @@ using Sentry.AspNetCore.Blazor.WebAssembly.Internal;
 
 namespace Sentry.AspNetCore.Blazor.WebAssembly.Tests;
 
-public class BlazorWasmOptionsSetupTests : IDisposable
+public class BlazorWasmOptionsSetupTests
 {
     private readonly FakeNavigationManager _navigationManager;
+    private readonly IHub _hub;
+    private readonly Scope _scope;
     private readonly BlazorWasmOptionsSetup _sut;
-    private readonly IDisposable _sentryInit;
 
     public BlazorWasmOptionsSetupTests()
     {
@@ -15,18 +16,11 @@ public class BlazorWasmOptionsSetupTests : IDisposable
             baseUri: "https://localhost:5001/",
             initialUri: "https://localhost:5001/");
 
-        _sut = new BlazorWasmOptionsSetup(_navigationManager);
+        _hub = Substitute.For<IHub>();
+        _scope = new Scope(new SentryOptions());
+        _hub.SubstituteConfigureScope(_scope);
 
-        _sentryInit = SentrySdk.Init(o =>
-        {
-            o.Dsn = ValidDsn;
-            o.IsGlobalModeEnabled = true;
-        });
-    }
-
-    public void Dispose()
-    {
-        _sentryInit.Dispose();
+        _sut = new BlazorWasmOptionsSetup(_navigationManager, _hub);
     }
 
     [Fact]
@@ -36,10 +30,7 @@ public class BlazorWasmOptionsSetupTests : IDisposable
         _sut.Configure(new SentryBlazorOptions());
 
         // Assert
-        SentrySdk.ConfigureScope(scope =>
-        {
-            scope.Request.Url.Should().Be("/");
-        });
+        _scope.Request.Url.Should().Be("/");
     }
 
     [Fact]
@@ -49,16 +40,13 @@ public class BlazorWasmOptionsSetupTests : IDisposable
         var nav = new FakeNavigationManager(
             baseUri: "https://localhost:5001/",
             initialUri: "https://localhost:5001/counter");
-        var sut = new BlazorWasmOptionsSetup(nav);
+        var sut = new BlazorWasmOptionsSetup(nav, _hub);
 
         // Act
         sut.Configure(new SentryBlazorOptions());
 
         // Assert
-        SentrySdk.ConfigureScope(scope =>
-        {
-            scope.Request.Url.Should().Be("/counter");
-        });
+        _scope.Request.Url.Should().Be("/counter");
     }
 
     [Fact]
@@ -71,12 +59,23 @@ public class BlazorWasmOptionsSetupTests : IDisposable
         _navigationManager.NavigateTo("/dashboard");
 
         // Assert
-        SentrySdk.ConfigureScope(scope =>
-        {
-            var crumb = scope.Breadcrumbs.Should().ContainSingle().Subject;
-            crumb.Type.Should().Be("navigation");
-            crumb.Category.Should().Be("navigation");
-        });
+        var crumb = _scope.Breadcrumbs.Should().ContainSingle().Subject;
+        crumb.Type.Should().Be("navigation");
+        crumb.Category.Should().Be("navigation");
+    }
+
+    [Fact]
+    public void Navigation_BreadcrumbHasNoMessage()
+    {
+        // Arrange
+        _sut.Configure(new SentryBlazorOptions());
+
+        // Act
+        _navigationManager.NavigateTo("/dashboard");
+
+        // Assert
+        var crumb = _scope.Breadcrumbs.Should().ContainSingle().Subject;
+        crumb.Message.Should().BeNull();
     }
 
     [Fact]
@@ -89,12 +88,9 @@ public class BlazorWasmOptionsSetupTests : IDisposable
         _navigationManager.NavigateTo("/dashboard");
 
         // Assert
-        SentrySdk.ConfigureScope(scope =>
-        {
-            var crumb = scope.Breadcrumbs.Should().ContainSingle().Subject;
-            crumb.Data.Should().ContainKey("from").WhoseValue.Should().Be("/");
-            crumb.Data.Should().ContainKey("to").WhoseValue.Should().Be("/dashboard");
-        });
+        var crumb = _scope.Breadcrumbs.Should().ContainSingle().Subject;
+        crumb.Data.Should().ContainKey("from").WhoseValue.Should().Be("/");
+        crumb.Data.Should().ContainKey("to").WhoseValue.Should().Be("/dashboard");
     }
 
     [Fact]
@@ -107,10 +103,7 @@ public class BlazorWasmOptionsSetupTests : IDisposable
         _navigationManager.NavigateTo("/dashboard");
 
         // Assert
-        SentrySdk.ConfigureScope(scope =>
-        {
-            scope.Request.Url.Should().Be("/dashboard");
-        });
+        _scope.Request.Url.Should().Be("/dashboard");
     }
 
     [Fact]
@@ -124,19 +117,16 @@ public class BlazorWasmOptionsSetupTests : IDisposable
         _navigationManager.NavigateTo("/page2");
 
         // Assert
-        SentrySdk.ConfigureScope(scope =>
-        {
-            var breadcrumbs = scope.Breadcrumbs.ToList();
-            breadcrumbs.Should().HaveCount(2);
+        var breadcrumbs = _scope.Breadcrumbs.ToList();
+        breadcrumbs.Should().HaveCount(2);
 
-            var first = breadcrumbs[0];
-            first.Data.Should().ContainKey("from").WhoseValue.Should().Be("/");
-            first.Data.Should().ContainKey("to").WhoseValue.Should().Be("/page1");
+        var first = breadcrumbs[0];
+        first.Data.Should().ContainKey("from").WhoseValue.Should().Be("/");
+        first.Data.Should().ContainKey("to").WhoseValue.Should().Be("/page1");
 
-            var second = breadcrumbs[1];
-            second.Data.Should().ContainKey("from").WhoseValue.Should().Be("/page1");
-            second.Data.Should().ContainKey("to").WhoseValue.Should().Be("/page2");
-        });
+        var second = breadcrumbs[1];
+        second.Data.Should().ContainKey("from").WhoseValue.Should().Be("/page1");
+        second.Data.Should().ContainKey("to").WhoseValue.Should().Be("/page2");
     }
 
     [Fact]
@@ -146,18 +136,15 @@ public class BlazorWasmOptionsSetupTests : IDisposable
         var nav = new FakeNavigationManager(
             baseUri: "https://localhost:5001/",
             initialUri: "https://localhost:5001/login");
-        var sut = new BlazorWasmOptionsSetup(nav);
+        var sut = new BlazorWasmOptionsSetup(nav, _hub);
         sut.Configure(new SentryBlazorOptions());
 
         // Act
         nav.NavigateTo("/home");
 
         // Assert
-        SentrySdk.ConfigureScope(scope =>
-        {
-            var crumb = scope.Breadcrumbs.Should().ContainSingle().Subject;
-            crumb.Data.Should().ContainKey("from").WhoseValue.Should().Be("/login");
-            crumb.Data.Should().ContainKey("to").WhoseValue.Should().Be("/home");
-        });
+        var crumb = _scope.Breadcrumbs.Should().ContainSingle().Subject;
+        crumb.Data.Should().ContainKey("from").WhoseValue.Should().Be("/login");
+        crumb.Data.Should().ContainKey("to").WhoseValue.Should().Be("/home");
     }
 }

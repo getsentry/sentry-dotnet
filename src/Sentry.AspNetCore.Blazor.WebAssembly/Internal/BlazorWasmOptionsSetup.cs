@@ -1,17 +1,24 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Options;
+using Sentry.Extensibility;
 
 namespace Sentry.AspNetCore.Blazor.WebAssembly.Internal;
 
 internal sealed class BlazorWasmOptionsSetup : IConfigureOptions<SentryBlazorOptions>
 {
     private readonly NavigationManager _navigationManager;
+    private readonly IHub _hub;
 
     public BlazorWasmOptionsSetup(NavigationManager navigationManager)
+        : this(navigationManager, HubAdapter.Instance)
+    {
+    }
+
+    internal BlazorWasmOptionsSetup(NavigationManager navigationManager, IHub hub)
     {
         _navigationManager = navigationManager;
+        _hub = hub;
     }
 
     public void Configure(SentryBlazorOptions options)
@@ -19,7 +26,7 @@ internal sealed class BlazorWasmOptionsSetup : IConfigureOptions<SentryBlazorOpt
         var previousUrl = _navigationManager.Uri;
 
         // Set the initial scope request URL
-        SentrySdk.ConfigureScope(scope =>
+        _hub.ConfigureScope(scope =>
         {
             scope.Request.Url = ToRelativePath(previousUrl);
         });
@@ -29,17 +36,17 @@ internal sealed class BlazorWasmOptionsSetup : IConfigureOptions<SentryBlazorOpt
             var from = ToRelativePath(previousUrl);
             var to = ToRelativePath(args.Location);
 
-            SentrySdk.AddBreadcrumb(
-                message: "",
-                category: "navigation",
-                type: "navigation",
-                data: new Dictionary<string, string>
-                {
-                    { "from", from },
-                    { "to", to }
-                });
+            _hub.AddBreadcrumb(
+                new Breadcrumb(
+                    type: "navigation",
+                    category: "navigation",
+                    data: new Dictionary<string, string>
+                    {
+                        { "from", from },
+                        { "to", to }
+                    }));
 
-            SentrySdk.ConfigureScope(scope =>
+            _hub.ConfigureScope(scope =>
             {
                 scope.Request.Url = to;
             });
