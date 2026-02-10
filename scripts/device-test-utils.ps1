@@ -29,11 +29,11 @@ function Get-AndroidEmulatorId
 function Get-IosSimulatorUdid {
     [CmdletBinding()]
     param(
-        [string]$IosVersion = '18.5',
+        [string]$IosVersion = '26.0',
         [string[]]$PreferredDeviceTypes = @(
             'com.apple.CoreSimulator.SimDeviceType.iPhone-XS',
-            'com.apple.CoreSimulator.SimDeviceType.iPhone-16',
-            'com.apple.CoreSimulator.SimDeviceType.iPhone-15'
+            'com.apple.CoreSimulator.SimDeviceType.iPhone-17',
+            'com.apple.CoreSimulator.SimDeviceType.iPhone-16'
         ),
         [string[]]$PreferredStates = @('Shutdown','Booted')
     )

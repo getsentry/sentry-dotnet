@@ -26,7 +26,7 @@ try
 {
     if (!$Tfm)
     {
-        $Tfm = 'net9.0'
+        $Tfm = 'net10.0'
     }
     $arch = (!$IsWindows -and $(uname -m) -eq 'arm64') ? 'arm64' : 'x64'
     if ($Platform -eq 'android')

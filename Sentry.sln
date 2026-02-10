@@ -278,6 +278,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "integration-test", "integra
 		integration-test\pester.ps1 = integration-test\pester.ps1
 		integration-test\ios.Tests.ps1 = integration-test\ios.Tests.ps1
 		integration-test\msbuild.Tests.ps1 = integration-test\msbuild.Tests.ps1
+		integration-test\android.Tests.ps1 = integration-test\android.Tests.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "net4-console", "net4-console", "{33793113-C7B5-434D-B5C1-6CA1A9587842}"
