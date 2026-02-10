@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 6.1.0
 
 ### Features
 
@@ -16,9 +16,9 @@
 
 ### Dependencies
 
-- Bump Native SDK from v0.12.2 to v0.12.5 ([#4832](https://github.com/getsentry/sentry-dotnet/pull/4832), [#4875](https://github.com/getsentry/sentry-dotnet/pull/4875), [#4892](https://github.com/getsentry/sentry-dotnet/pull/4892))
-  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0125)
-  - [diff](https://github.com/getsentry/sentry-native/compare/0.12.2...0.12.5)
+- Bump Native SDK from v0.12.2 to v0.12.6 ([#4832](https://github.com/getsentry/sentry-dotnet/pull/4832), [#4875](https://github.com/getsentry/sentry-dotnet/pull/4875), [#4892](https://github.com/getsentry/sentry-dotnet/pull/4892), [#4897](https://github.com/getsentry/sentry-dotnet/pull/4897))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0126)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.12.2...0.12.6)
 - Bump Java SDK from v8.28.0 to v8.29.0 ([#4817](https://github.com/getsentry/sentry-dotnet/pull/4817))
   - [changelog](https://github.com/getsentry/sentry-java/blob/main/CHANGELOG.md#8290)
   - [diff](https://github.com/getsentry/sentry-java/compare/8.28.0...8.29.0)
