@@ -123,7 +123,7 @@ internal sealed class SpanV2Items : ISentryJsonSerializable
     public SpanV2Items(IReadOnlyCollection<SpanV2> spans)
     {
         _spans = (spans.Count > SpanV2.MaxSpansPerEnvelope)
-            ? [..spans.Take(SpanV2.MaxSpansPerEnvelope)]
+            ? [.. spans.Take(SpanV2.MaxSpansPerEnvelope)]
             : spans;
     }
 
