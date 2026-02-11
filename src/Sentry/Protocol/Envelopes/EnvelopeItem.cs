@@ -300,6 +300,21 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     }
 
     /// <summary>
+    /// Creates an <see cref="EnvelopeItem"/> from one or more <paramref name="spans"/>.
+    /// </summary>
+    internal static EnvelopeItem FromSpans(SpanV2Items spans)
+    {
+        var header = new Dictionary<string, object?>(3, StringComparer.Ordinal)
+        {
+            [TypeKey] = TypeValueSpan,
+            ["item_count"] = spans.Length,
+            ["content_type"] = "application/vnd.sentry.items.span+json",
+        };
+
+        return new EnvelopeItem(header, new JsonSerializable(spans));
+    }
+
+    /// <summary>
     /// Creates an <see cref="EnvelopeItem"/> from <paramref name="checkIn"/>.
     /// </summary>
     public static EnvelopeItem FromCheckIn(SentryCheckIn checkIn)
