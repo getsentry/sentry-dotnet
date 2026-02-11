@@ -1,11 +1,9 @@
-using Sentry.Protocol.Spans;
+namespace Sentry.Tests.Protocol;
 
-namespace Sentry.Tests.Protocol.Envelopes;
-
-public class SpanV2EnvelopeTests
+public class SpanV2Tests
 {
     [Fact]
-    public async Task EnvelopeItem_FromSpanV2_SerializesHeaderWithContentTypeAndItemCount()
+    public async Task EnvelopeItem_FromSpans_SerializesHeaderWithContentTypeAndItemCount()
     {
         var span = new SpanV2(SentryId.Parse("0123456789abcdef0123456789abcdef"), SpanId.Parse("0123456789abcdef"), "db", DateTimeOffset.Parse("2020-01-01T00:00:00Z"))
         {
@@ -14,7 +12,8 @@ public class SpanV2EnvelopeTests
             EndTimestamp = DateTimeOffset.Parse("2020-01-01T00:00:01Z"),
         };
 
-        using var envelopeItem = EnvelopeItem.FromSpanV2(span);
+        var spanItems = new SpanV2Items([span]);
+        using var envelopeItem = EnvelopeItem.FromSpans(spanItems);
 
         using var stream = new MemoryStream();
         await envelopeItem.SerializeAsync(stream, null);
@@ -23,31 +22,34 @@ public class SpanV2EnvelopeTests
         var output = await reader.ReadToEndAsync();
 
         var firstLine = output.Split('\n', StringSplitOptions.RemoveEmptyEntries)[0];
-        firstLine.Should().Contain("\"type\":\"span_v2\"");
+        firstLine.Should().Contain("\"type\":\"span\"");
         firstLine.Should().Contain("\"item_count\":1");
         firstLine.Should().Contain("\"content_type\":\"application/vnd.sentry.items.span\\u002Bjson\"");
     }
 
     [Fact]
-    public void Envelope_FromSpanV2_ThrowsWhenMoreThan100Spans()
+    public void Envelope_FromSpans_CreatesSingleItem()
     {
-        var spans = Enumerable.Range(0, 101).Select(_ =>
-            new SpanV2(SentryId.Create(), SpanId.Create(), "op", DateTimeOffset.UtcNow));
+        SpanV2[] spans = [new(SentryId.Create(), SpanId.Create(), "op", DateTimeOffset.UtcNow)];
 
-        Action act = () => Envelope.FromSpanV2(spans);
+        using var envelope = Envelope.FromSpans(spans);
 
-        act.Should().Throw<ArgumentOutOfRangeException>();
+        envelope.Items.Should().HaveCount(1);
+        envelope.Items[0].TryGetType().Should().Be("span");
+        envelope.Items[0].Header.GetValueOrDefault("item_count").Should().Be(1);
     }
 
     [Fact]
-    public void Envelope_FromSpanV2_CreatesUpTo100Items()
+    public void Envelope_FromSpan_RespectsMaxSpans()
     {
-        var spans = Enumerable.Range(0, 100).Select(_ =>
-            new SpanV2(SentryId.Create(), SpanId.Create(), "op", DateTimeOffset.UtcNow)).ToList();
+        var spans = Enumerable.Range(0, SpanV2.MaxSpansPerEnvelope + 10)
+            .Select(_ => new SpanV2(SentryId.Create(), SpanId.Create(), "op", DateTimeOffset.UtcNow))
+            .ToArray();
 
-        using var envelope = Envelope.FromSpanV2(spans);
+        using var envelope = Envelope.FromSpans(spans);
 
-        envelope.Items.Should().HaveCount(100);
-        envelope.Items.All(i => i.TryGetType() == "span_v2").Should().BeTrue();
+        envelope.Items.Should().HaveCount(1);
+        envelope.Items[0].TryGetType().Should().Be("span");
+        envelope.Items[0].Header.GetValueOrDefault("item_count").Should().Be(SpanV2.MaxSpansPerEnvelope);
     }
 }
