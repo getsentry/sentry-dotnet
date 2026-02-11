@@ -6,8 +6,8 @@ namespace Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests;
 public class NavigationBreadcrumbTests : IAsyncLifetime
 {
     private readonly BlazorWasmTestApp _app = new();
-    private IPlaywright _playwright = null!;
-    private IBrowser _browser = null!;
+    private IPlaywright? _playwright;
+    private IBrowser? _browser;
 
     public async Task InitializeAsync()
     {
@@ -29,15 +29,18 @@ public class NavigationBreadcrumbTests : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        await _browser.DisposeAsync();
-        _playwright.Dispose();
+        if (_browser != null)
+        {
+            await _browser.DisposeAsync();
+        }
+        _playwright?.Dispose();
         await _app.DisposeAsync();
     }
 
     [Fact]
     public async Task Navigation_CreatesBreadcrumbs_WithCorrectFromAndTo()
     {
-        var page = await _browser.NewPageAsync();
+        var page = await _browser!.NewPageAsync();
 
         // Collect all intercepted envelopes
         var envelopeReceived = new TaskCompletionSource<string>();
@@ -98,5 +101,7 @@ public class NavigationBreadcrumbTests : IAsyncLifetime
         var second = navBreadcrumbs[1];
         second.GetProperty("data").GetProperty("from").GetString().Should().Be("/second");
         second.GetProperty("data").GetProperty("to").GetString().Should().Be("/trigger-capture");
+
+        await page.CloseAsync();
     }
 }

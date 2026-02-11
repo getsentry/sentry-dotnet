@@ -23,7 +23,8 @@ internal static class SentryEnvelopeParser
             if (itemHeader.TryGetProperty("type", out var typeEl) &&
                 typeEl.GetString() == "event")
             {
-                return JsonDocument.Parse(lines[i + 1]).RootElement;
+                using var eventDoc = JsonDocument.Parse(lines[i + 1]);
+                return eventDoc.RootElement.Clone();
             }
         }
 
