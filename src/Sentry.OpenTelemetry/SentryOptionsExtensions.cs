@@ -30,7 +30,7 @@ public static class SentryOptionsExtensions
     /// </param>
     /// <remarks>
     /// This method of initialising the Sentry OpenTelemetry integration will be depricated in a future major release.
-    /// We recommend you use <see cref="UseOTLP(SentryOptions, TracerProviderBuilder, TextMapPropagator?)"/> instead.
+    /// We recommend you use <see cref="UseOtlp(Sentry.SentryOptions,TracerProviderBuilder,TextMapPropagator?)"/> instead.
     /// </remarks>
     public static void UseOpenTelemetry(this SentryOptions options, TracerProviderBuilder builder,
         TextMapPropagator? textMapPropagator = null, bool disableSentryTracing = false)
@@ -55,7 +55,7 @@ public static class SentryOptionsExtensions
     /// </param>
     /// <remarks>
     /// This method of initialising the Sentry OpenTelemetry integration will be depricated in a future major release.
-    /// We recommend you use <see cref="UseOTLP(SentryOptions, TracerProviderBuilder, TextMapPropagator?)"/> instead.
+    /// We recommend you use <see cref="UseOtlp(Sentry.SentryOptions,TracerProviderBuilder,TextMapPropagator?)"/> instead.
     /// </remarks>
     public static void UseOpenTelemetry(this SentryOptions options, bool disableSentryTracing = false)
     {
@@ -88,14 +88,14 @@ public static class SentryOptionsExtensions
     ///         could wrap this in a <see cref="CompositeTextMapPropagator"/> if you needed other propagators as well.
     ///     </para>
     /// </param>
-    public static void UseOTLP(this SentryOptions options, TracerProviderBuilder builder, TextMapPropagator? textMapPropagator = null)
+    public static void UseOtlp(this SentryOptions options, TracerProviderBuilder builder, TextMapPropagator? textMapPropagator = null)
     {
         if (string.IsNullOrWhiteSpace(options.Dsn))
         {
             throw new ArgumentException("Sentry DSN must be set before calling `SentryOptions.UseOTLP`", nameof(options.Dsn));
         }
-        builder.AddSentryOTLP(options.Dsn, textMapPropagator);
-        options.UseOTLP();
+        builder.AddSentryOtlp(options.Dsn, textMapPropagator);
+        options.UseOtlp();
     }
 
     /// <summary>
@@ -108,11 +108,11 @@ public static class SentryOptionsExtensions
     /// </summary>
     /// <remarks>
     /// Note: if you are using this overload to configure Sentry to work with OpenTelemetry, you will also have to call
-    /// <see cref="TracerProviderBuilderExtensions.AddSentryOTLP"/>, when building your <see cref="TracerProviderBuilder"/>
+    /// <see cref="TracerProviderBuilderExtensions.AddSentryOtlp"/>, when building your <see cref="TracerProviderBuilder"/>
     /// to ensure OpenTelemetry sends trace information to Sentry.
     /// </remarks>
     /// <param name="options">The <see cref="SentryOptions"/> instance.</param>
-    public static void UseOTLP(this SentryOptions options)
+    public static void UseOtlp(this SentryOptions options)
     {
         options.Instrumenter = Instrumenter.OpenTelemetry;
         options.DisableSentryTracing = true;

@@ -29,7 +29,7 @@ builder.Services.AddOpenTelemetry()
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
             // Finally, we configure OpenTelemetry over OTLP to send traces to Sentry
-            .AddSentryOTLP(dsn)
+            .AddSentryOtlp(dsn)
     );
 
 builder.WebHost.UseSentry(options =>
@@ -43,7 +43,7 @@ builder.WebHost.UseSentry(options =>
     options.Debug = builder.Environment.IsDevelopment();
     options.SendDefaultPii = true;
     options.TracesSampleRate = 1.0;
-    options.UseOTLP(); // <-- Configure Sentry to use OpenTelemetry trace information
+    options.UseOtlp(); // <-- Configure Sentry to use OpenTelemetry trace information
 });
 
 builder.Services

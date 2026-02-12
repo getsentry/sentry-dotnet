@@ -11,6 +11,10 @@ internal class OtelPropagationContext : IPropagationContext
     public SpanId SpanId => Activity.Current?.SpanId.AsSentrySpanId() ?? default;
     public SpanId? ParentSpanId => Activity.Current?.ParentSpanId.AsSentrySpanId();
 
+    /// <summary>
+    /// Warning: this method may throw an exception if Activity.Current is null.
+    /// This method should not be used when instrumenting with OTEL.
+    /// </summary>
     public DynamicSamplingContext GetOrCreateDynamicSamplingContext(SentryOptions options, IReplaySession replaySession)
     {
         if (DynamicSamplingContext is null)

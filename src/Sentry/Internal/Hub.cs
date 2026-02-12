@@ -312,6 +312,11 @@ internal class Hub : IHub, IDisposable
 
     public BaggageHeader GetBaggage()
     {
+        if (_options.Instrumenter is Instrumenter.OpenTelemetry)
+        {
+            _options.LogWarning("GetBaggage should not be called when using OpenTelemetry - it may throw an exception");
+        }
+
         var span = GetSpan();
         if (span?.GetTransaction().GetDynamicSamplingContext() is { IsEmpty: false } dsc)
         {
@@ -489,7 +494,10 @@ internal class Hub : IHub, IDisposable
         evt.Contexts.Trace.TraceId = propagationContext.TraceId;
         evt.Contexts.Trace.SpanId = propagationContext.SpanId;
         evt.Contexts.Trace.ParentSpanId = propagationContext.ParentSpanId;
-        evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession);
+        if (_options.Instrumenter is Instrumenter.Sentry)
+        {
+            evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession);
+        }
     }
 
     public bool CaptureEnvelope(Envelope envelope) => CurrentClient.CaptureEnvelope(envelope);

@@ -227,6 +227,12 @@ internal class DynamicSamplingContext
             replaySession);
     }
 
+    /// <summary>
+    /// Creates a <see cref="DynamicSamplingContext"/> from the given <see cref="IPropagationContext"/>.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">Can be thrown when using OpenTelemetry instrumentation and
+    /// System.Diagnostics.Activity.Current is null. This method should not be used when instrumenting with OTEL.
+    /// </exception>
     public static DynamicSamplingContext CreateFromPropagationContext(IPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
     {
         var traceId = propagationContext.TraceId;
@@ -256,6 +262,12 @@ internal static class DynamicSamplingContextExtensions
     public static DynamicSamplingContext CreateDynamicSamplingContext(this UnsampledTransaction transaction, SentryOptions options, IReplaySession? replaySession)
         => DynamicSamplingContext.CreateFromUnsampledTransaction(transaction, options, replaySession);
 
+    /// <summary>
+    /// Creates a <see cref="DynamicSamplingContext"/> from the given <see cref="IPropagationContext"/>.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">Can be thrown when using OpenTelemetry instrumentation and
+    /// System.Diagnostics.Activity.Current is null. This method should not be used when instrumenting with OTEL.
+    /// </exception>
     public static DynamicSamplingContext CreateDynamicSamplingContext(this IPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
         => DynamicSamplingContext.CreateFromPropagationContext(propagationContext, options, replaySession);
 }

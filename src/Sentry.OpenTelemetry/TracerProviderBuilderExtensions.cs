@@ -12,11 +12,13 @@ namespace Sentry.OpenTelemetry;
 /// </summary>
 public static class TracerProviderBuilderExtensions
 {
+    internal const string MissingDsnWarning = "Invalid DSN passed to AddSentryOTLP";
+
     /// <summary>
     /// <para>
     /// Ensures OpenTelemetry trace information is sent to Sentry. OpenTelemetry spans will be converted to Sentry spans
     /// using a span processor. This is no longer recommended. SDK users should consider using
-    /// <see cref="AddSentryOTLP(TracerProviderBuilder, string, TextMapPropagator?)"/> instead, which is the recommended
+    /// <see cref="AddSentryOtlp"/> instead, which is the recommended
     /// way to send OpenTelemetry trace information to Sentry moving forward.
     /// </para>
     /// <para>
@@ -74,7 +76,7 @@ public static class TracerProviderBuilderExtensions
     /// </para>
     /// <para>
     /// Note that if you use this method to configure the trace builder, you will also need to call
-    /// <see cref="SentryOptionsExtensions.UseOTLP(SentryOptions)"/> when initialising Sentry, for Sentry to work
+    /// <see cref="SentryOptionsExtensions.UseOtlp(Sentry.SentryOptions)"/> when initialising Sentry, for Sentry to work
     /// properly with OpenTelemetry.
     /// </para>
     /// </summary>
@@ -92,33 +94,31 @@ public static class TracerProviderBuilderExtensions
     ///     </para>
     /// </param>
     /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
-    public static TracerProviderBuilder AddSentryOTLP(this TracerProviderBuilder tracerProviderBuilder, string dsnString,
+    public static TracerProviderBuilder AddSentryOtlp(this TracerProviderBuilder tracerProviderBuilder, string dsnString,
         TextMapPropagator? defaultTextMapPropagator = null)
     {
-        if (string.IsNullOrWhiteSpace(dsnString))
+        if (Dsn.TryParse(dsnString) is not { } dsn)
         {
-            throw new ArgumentException("Sentry DSN must be provided for OLTP instrumentation", nameof(dsnString));
+            throw new ArgumentException("Invalid DSN passed to AddSentryOTLP", nameof(dsnString));
         }
 
         defaultTextMapPropagator ??= new SentryPropagator();
         Sdk.SetDefaultTextMapPropagator(defaultTextMapPropagator);
 
-        if (Dsn.TryParse(dsnString) is not { } dsn)
-        {
-            return tracerProviderBuilder;
-        }
-
-        tracerProviderBuilder.AddOtlpExporter(options =>
-        {
-            options.Endpoint = dsn.GetOtlpTracesEndpointUri();
-            options.Protocol = OtlpExportProtocol.HttpProtobuf;
-            options.HttpClientFactory = () =>
-            {
-                var client = new HttpClient();
-                client.DefaultRequestHeaders.Add("X-Sentry-Auth", $"sentry sentry_key={dsn.PublicKey}");
-                return client;
-            };
-        });
+        tracerProviderBuilder.AddOtlpExporter(options => OtlpConfigurationCallback(options, dsn));
         return tracerProviderBuilder;
+    }
+
+    // Internal helper method for testing purposes
+    internal static void OtlpConfigurationCallback(OtlpExporterOptions options, Dsn dsn)
+    {
+        options.Endpoint = dsn.GetOtlpTracesEndpointUri();
+        options.Protocol = OtlpExportProtocol.HttpProtobuf;
+        options.HttpClientFactory = () =>
+        {
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("X-Sentry-Auth", $"sentry sentry_key={dsn.PublicKey}");
+            return client;
+        };
     }
 }
