@@ -65,9 +65,9 @@ public class SentryHttpMessageHandler : SentryMessageHandler
     /// <inheritdoc />
     protected internal override ISpan? ProcessRequest(HttpRequestMessage request, string method, string url)
     {
-        if (_options?.Instrumenter == Instrumenter.OpenTelemetry)
+        if (_options?.DisableSentryTracing ?? false)
         {
-            _options.LogDebug("Skipping span creation in SentryHttpMessageHandler because Instrumenter is set to OpenTelemetry");
+            _options.LogDebug("Skipping span creation in SentryHttpMessageHandler because OpenTelemetry is enabled");
             return null;
         }
 

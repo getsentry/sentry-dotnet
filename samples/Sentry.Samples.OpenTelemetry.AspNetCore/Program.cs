@@ -7,9 +7,10 @@ using Sentry.Samples.OpenTelemetry.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Read the Sentry DSN from the environment variable, if it's not already set in code.
+// Read the Sentry DSN from the environment variable if it's not already set in code.
 #if SENTRY_DSN_DEFINED_IN_ENV
-var dsn = Environment.GetEnvironmentVariable("SENTRY_DSN") ?? throw new InvalidOperationException("SENTRY_DSN environment variable is not set");
+var dsn = Environment.GetEnvironmentVariable("SENTRY_DSN")
+          ?? throw new InvalidOperationException("SENTRY_DSN environment variable is not set");
 #else
 var dsn = SamplesShared.Dsn;
 #endif
@@ -27,8 +28,8 @@ builder.Services.AddOpenTelemetry()
             // The two lines below take care of configuring sources for ASP.NET Core and HttpClient
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
-            // Finally, we configure OpenTelemetry to send traces to Sentry
-            .AddSentry(dsn)
+            // Finally, we configure OpenTelemetry over OTLP to send traces to Sentry
+            .AddSentryOTLP(dsn)
     );
 
 builder.WebHost.UseSentry(options =>
@@ -42,7 +43,7 @@ builder.WebHost.UseSentry(options =>
     options.Debug = builder.Environment.IsDevelopment();
     options.SendDefaultPii = true;
     options.TracesSampleRate = 1.0;
-    options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
+    options.UseOTLP(); // <-- Configure Sentry to use OpenTelemetry trace information
 });
 
 builder.Services

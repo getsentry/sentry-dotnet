@@ -206,7 +206,7 @@ public class SentryOptions
 #endif
 
 #if HAS_DIAGNOSTIC_INTEGRATION
-            if (Instrumenter == Instrumenter.Sentry && (_defaultIntegrations & DefaultIntegrations.SentryDiagnosticListenerIntegration) != 0)
+            if (!DisableSentryTracing && (_defaultIntegrations & DefaultIntegrations.SentryDiagnosticListenerIntegration) != 0)
             {
                 yield return new SentryDiagnosticListenerIntegration();
             }
@@ -222,7 +222,7 @@ public class SentryOptions
 
             foreach (var integration in _integrations)
             {
-                if (Instrumenter == Instrumenter.OpenTelemetry && integration is ISentryTracingIntegration)
+                if (DisableSentryTracing && integration is ISentryTracingIntegration)
                 {
                     continue;
                 }
@@ -1159,6 +1159,14 @@ public class SentryOptions
     /// </para>
     /// </summary>
     internal Instrumenter Instrumenter { get; set; } = Instrumenter.Sentry;
+
+    /// <summary>
+    /// During the transition period to OTLP we give SDK users the option to keep using Sentry's tracing in conjunction
+    /// with OTEL instrumentation. Setting this to true will disable Sentry's tracing entirely, which is the recommended
+    /// setting but would be a moajor change in behaviour, so we've made it opt-in for now.
+    /// TODO: Remove this option in a future major release and make it true / non-optional when using OTEL (i.e. implied by the Instrumenter)
+    /// </summary>
+    internal bool DisableSentryTracing { get; set; } = false;
 
     /// <summary>
     /// The default factory creates SentryPropagationContext instances... this should be replaced when using OTEL

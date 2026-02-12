@@ -13,9 +13,9 @@ public static class SentryOptionsExtensions
     /// </summary>
     public static SentryMauiOptions AddCommunityToolkitIntegration(this SentryMauiOptions options)
     {
-        if (options.Instrumenter == Instrumenter.OpenTelemetry)
+        if (options.DisableSentryTracing)
         {
-            options.LogWarning("Skipping CommunityToolkit.Mvvm integration since OpenTelemetry instrumentation is enabled.");
+            options.LogWarning("Skipping CommunityToolkit.Mvvm integration because OpenTelemetry is enabled.");
         }
         else
         {

@@ -13,7 +13,17 @@ namespace Sentry.OpenTelemetry;
 public static class TracerProviderBuilderExtensions
 {
     /// <summary>
-    /// Ensures OpenTelemetry trace information is sent to Sentry.
+    /// <para>
+    /// Ensures OpenTelemetry trace information is sent to Sentry. OpenTelemetry spans will be converted to Sentry spans
+    /// using a span processor. This is no longer recommended. SDK users should consider using
+    /// <see cref="AddSentryOTLP(TracerProviderBuilder, string, TextMapPropagator?)"/> instead, which is the recommended
+    /// way to send OpenTelemetry trace information to Sentry moving forward.
+    /// </para>
+    /// <para>
+    /// Note that if you use this method to configure the trace builder, you will also need to call
+    /// <see cref="SentryOptionsExtensions.UseOpenTelemetry(SentryOptions, bool)"/> when initialising Sentry, for Sentry
+    /// to work properly with OpenTelemetry.
+    /// </para>
     /// </summary>
     /// <param name="tracerProviderBuilder">The <see cref="TracerProviderBuilder"/>.</param>
     /// <param name="defaultTextMapPropagator">
@@ -28,15 +38,45 @@ public static class TracerProviderBuilderExtensions
     ///     </para>
     /// </param>
     /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
-    public static TracerProviderBuilder AddSentry(this TracerProviderBuilder tracerProviderBuilder, TextMapPropagator? defaultTextMapPropagator = null)
+    public static TracerProviderBuilder AddSentry(this TracerProviderBuilder tracerProviderBuilder,
+        TextMapPropagator? defaultTextMapPropagator = null)
     {
         defaultTextMapPropagator ??= new SentryPropagator();
         Sdk.SetDefaultTextMapPropagator(defaultTextMapPropagator);
         return tracerProviderBuilder.AddProcessor(ImplementationFactory);
     }
 
+    internal static BaseProcessor<Activity> ImplementationFactory(IServiceProvider services)
+    {
+        List<IOpenTelemetryEnricher> enrichers = [];
+
+        // AspNetCoreEnricher
+        var userFactory = services.GetService<ISentryUserFactory>();
+        if (userFactory is not null)
+        {
+            enrichers.Add(new AspNetCoreEnricher(userFactory));
+        }
+
+        var hub = services.GetService<IHub>() ?? SentrySdk.CurrentHub;
+        if (hub.IsEnabled)
+        {
+            return new SentrySpanProcessor(hub, enrichers);
+        }
+
+        var logger = services.GetService<IDiagnosticLogger>();
+        logger?.LogWarning("Sentry is disabled so no OpenTelemetry spans will be sent to Sentry.");
+        return DisabledSpanProcessor.Instance;
+    }
+
     /// <summary>
+    /// <para>
     /// Ensures OpenTelemetry trace information is sent to the Sentry OTLP endpoint.
+    /// </para>
+    /// <para>
+    /// Note that if you use this method to configure the trace builder, you will also need to call
+    /// <see cref="SentryOptionsExtensions.UseOTLP(SentryOptions)"/> when initialising Sentry, for Sentry to work
+    /// properly with OpenTelemetry.
+    /// </para>
     /// </summary>
     /// <param name="tracerProviderBuilder">The <see cref="TracerProviderBuilder"/>.</param>
     /// <param name="dsnString">The DSN for your Sentry project</param>
@@ -52,11 +92,12 @@ public static class TracerProviderBuilderExtensions
     ///     </para>
     /// </param>
     /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
-    public static TracerProviderBuilder AddSentry(this TracerProviderBuilder tracerProviderBuilder, string dsnString, TextMapPropagator? defaultTextMapPropagator = null)
+    public static TracerProviderBuilder AddSentryOTLP(this TracerProviderBuilder tracerProviderBuilder, string dsnString,
+        TextMapPropagator? defaultTextMapPropagator = null)
     {
         if (string.IsNullOrWhiteSpace(dsnString))
         {
-            throw new ArgumentException("OTLP endpoint must be provided", nameof(dsnString));
+            throw new ArgumentException("Sentry DSN must be provided for OLTP instrumentation", nameof(dsnString));
         }
 
         defaultTextMapPropagator ??= new SentryPropagator();
@@ -78,28 +119,6 @@ public static class TracerProviderBuilderExtensions
                 return client;
             };
         });
-        return tracerProviderBuilder.AddProcessor(ImplementationFactory);
-    }
-
-    internal static BaseProcessor<Activity> ImplementationFactory(IServiceProvider services)
-    {
-        List<IOpenTelemetryEnricher> enrichers = new();
-
-        // AspNetCoreEnricher
-        var userFactory = services.GetService<ISentryUserFactory>();
-        if (userFactory is not null)
-        {
-            enrichers.Add(new AspNetCoreEnricher(userFactory));
-        }
-
-        var hub = services.GetService<IHub>() ?? SentrySdk.CurrentHub;
-        if (hub.IsEnabled)
-        {
-            return new SentrySpanProcessor(hub, enrichers);
-        }
-
-        var logger = services.GetService<IDiagnosticLogger>();
-        logger?.LogWarning("Sentry is disabled so no OpenTelemetry spans will be sent to Sentry.");
-        return DisabledSpanProcessor.Instance;
+        return tracerProviderBuilder;
     }
 }
