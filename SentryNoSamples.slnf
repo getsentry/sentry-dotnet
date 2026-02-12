@@ -1,6 +1,6 @@
 {
   "solution": {
-    "path": "Sentry.sln",
+    "path": "Sentry.slnx",
     "projects": [
       "benchmarks\\Sentry.Benchmarks\\Sentry.Benchmarks.csproj",
       "src\\Sentry.Analyzers\\Sentry.Analyzers.csproj",

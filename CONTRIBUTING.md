@@ -84,11 +84,11 @@ _TLDR;_ when working with the Sentry codebase, you should use the solution filte
 
 _Full explanation:_ 
 
-The `Sentry.sln` solution contains all of the projects required to build Sentry, it's integrations and samples for every platform. However, the repository contains various solution filters that will be more practical for day-to-day tasks.
+The `Sentry.slnx` solution contains all of the projects required to build Sentry, it's integrations and samples for every platform. However, the repository contains various solution filters that will be more practical for day-to-day tasks.
 
 These solution filters get generated automatically by `/scripts/generate-solution-filters.ps1` so, although you can certainly create your own solution filters and manage these how you wish, don't try to modify any of the `*.slnf` files that are committed to source control. Instead, changes to these can be made by modifying `/scripts/generate-solution-filters-config.yml` and re-running the script that generates these.
 
-Also note that script generates a `.generated.NoMobile.sln` solution, which is an identical copy of `Sentry.sln`. Again, we don't recommend opening this directly. It exists as a round about way to conditionally set build properties based on the solution name in certain solution filters. You should instead use those solution filters (e.g. `SentryNoMobile.slnf`) when working in the Sentry codebase.
+Also note that script generates a `.generated.NoMobile.slnx` solution, which is an identical copy of `Sentry.slnx`. Again, we don't recommend opening this directly. It exists as a round about way to conditionally set build properties based on the solution name in certain solution filters. You should instead use those solution filters (e.g. `SentryNoMobile.slnf`) when working in the Sentry codebase.
 
 ## API changes approval process
 
