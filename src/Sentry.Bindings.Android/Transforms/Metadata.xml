@@ -24,6 +24,7 @@
   <attr path="/api/package[@name='io.sentry.android.core.internal.threaddump']" name="managedName">Sentry.JavaSdk.Android.Core.Internal.ThreadDump</attr>
   <attr path="/api/package[@name='io.sentry.android.core.internal.util']" name="managedName">Sentry.JavaSdk.Android.Core.Internal.Util</attr>
   <attr path="/api/package[@name='io.sentry.android.ndk']" name="managedName">Sentry.JavaSdk.Android.Ndk</attr>
+  <attr path="/api/package[@name='io.sentry.android.replay']" name="managedName">Sentry.JavaSdk.Android.Replay</attr>
   <attr path="/api/package[@name='io.sentry.android.supplemental']" name="managedName">Sentry.JavaSdk.Android.Supplemental</attr>
   <attr path="/api/package[@name='io.sentry.cache']" name="managedName">Sentry.JavaSdk.Cache</attr>
   <!-- Renaming 'clientreport' to 'clientreports' (plural) as a workaround for typename matching namespace: io.sentry.clientreport.clientreport -->
