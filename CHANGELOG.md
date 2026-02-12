@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add navigation breadcrumbs for Blazor WebAssembly ([#4907](https://github.com/getsentry/sentry-dotnet/pull/4907))
+
 ### Dependencies
 
 - Bumped Xamarin.Kotlin.StdLib.Jdk8 to 2.2.20 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
@@ -11,7 +15,6 @@
 
 ### Features
 
-- Add navigation breadcrumbs for Blazor WebAssembly ([#4907](https://github.com/getsentry/sentry-dotnet/pull/4907))
 - Add _experimental_ support for [Sentry trace-connected Metrics](https://docs.sentry.io/product/explore/metrics/) ([#4834](https://github.com/getsentry/sentry-dotnet/pull/4834))
 - Extended `SentryThread` by `Main` to allow indication whether the thread is considered the current main thread ([#4807](https://github.com/getsentry/sentry-dotnet/pull/4807))
 
