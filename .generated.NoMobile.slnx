@@ -150,6 +150,9 @@
   <Folder Name="/test/">
     <File Path="test/Directory.Build.props" />
     <File Path="test/Directory.Build.targets" />
+    <File Path="test\Sentry.AspNetCore.Blazor.WebAssembly.Tests\BlazorWasmOptionsSetupTests.cs" />
+    <File Path="test\Sentry.AspNetCore.Blazor.WebAssembly.Tests\FakeNavigationManager.cs" />
+    <File Path="test\Sentry.AspNetCore.Blazor.WebAssembly.Tests\Sentry.AspNetCore.Blazor.WebAssembly.Tests.csproj" />
     <Project Path="test/AndroidTestApp/AndroidTestApp.csproj" />
     <Project Path="test/Sentry.Analyzers.Tests/Sentry.Analyzers.Tests.csproj" />
     <Project Path="test/Sentry.Android.AssemblyReader.Tests/Sentry.Android.AssemblyReader.Tests.csproj" />
