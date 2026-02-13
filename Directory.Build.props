@@ -1,9 +1,8 @@
 <Project>
 
   <PropertyGroup>
-    <VersionPrefix>6.0.0-rc.2</VersionPrefix>
-    <VersionSuffix>prerelease</VersionSuffix>
-    <LangVersion>13</LangVersion>
+    <VersionPrefix>6.1.0</VersionPrefix>
+    <LangVersion>14.0</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory).assets\Sentry.snk</AssemblyOriginatorKeyFile>
@@ -14,6 +13,7 @@
 
     <!-- Ignore our own diagnostic ids - these are meant to be external warnings only -->
     <NoWarn>$(NoWarn);SENTRY0001</NoWarn>
+    <NoWarn>$(NoWarn);SENTRYTRACECONNECTEDMETRICS</NoWarn> <!--https://github.com/getsentry/sentry-dotnet/discussions/4838-->
 
     <!-- Allow references to unsigned assemblies (like MAUI) from signed projects -->
     <NoWarn>$(NoWarn);CS8002</NoWarn>
@@ -86,7 +86,7 @@
 
   <ItemGroup>
     <PackageReference Include="UnoptimizedAssemblyDetector" Version="0.1.1" PrivateAssets="All" />
-    <PackageReference Include="Roslynator.Analyzers" Version="4.9.0" PrivateAssets="All" />
+    <PackageReference Include="Roslynator.Analyzers" Version="4.15.0" PrivateAssets="All" />
   </ItemGroup>
 
   <!-- Import the root global usings, except for samples. -->

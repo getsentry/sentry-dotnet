@@ -1,5 +1,4 @@
 using Sentry.Extensibility;
-using Sentry.Internal;
 using Sentry.Protocol;
 
 namespace Sentry;
@@ -64,7 +63,7 @@ public sealed class SentryLog
     /// <summary>
     /// The span id of the span that was active when the log was collected.
     /// </summary>
-    public SpanId? ParentSpanId { get; init; }
+    public SpanId? SpanId { get; init; }
 
     /// <summary>
     /// Gets the attribute value associated with the specified key.
@@ -207,6 +206,12 @@ public sealed class SentryLog
         writer.WritePropertyName("trace_id");
         TraceId.WriteTo(writer, logger);
 
+        if (SpanId.HasValue)
+        {
+            writer.WritePropertyName("span_id");
+            SpanId.Value.WriteTo(writer, logger);
+        }
+
         if (severityNumber.HasValue)
         {
             writer.WriteNumber("severity_number", severityNumber.Value);
@@ -235,43 +240,8 @@ public sealed class SentryLog
             SentryAttributeSerializer.WriteAttribute(writer, attribute.Key, attribute.Value, logger);
         }
 
-        if (ParentSpanId.HasValue)
-        {
-            writer.WritePropertyName("sentry.trace.parent_span_id");
-            writer.WriteStartObject();
-            writer.WritePropertyName("value");
-            ParentSpanId.Value.WriteTo(writer, logger);
-            writer.WriteString("type", "string");
-            writer.WriteEndObject();
-        }
-
         writer.WriteEndObject(); // attributes
 
         writer.WriteEndObject();
-    }
-
-    internal static void GetTraceIdAndSpanId(IHub hub, out SentryId traceId, out SpanId? spanId)
-    {
-        var activeSpan = hub.GetSpan();
-        if (activeSpan is not null)
-        {
-            traceId = activeSpan.TraceId;
-            spanId = activeSpan.SpanId;
-            return;
-        }
-
-        // set "sentry.trace.parent_span_id" to the ID of the Span that was active when the Log was collected
-        // do not set "sentry.trace.parent_span_id" if there was no active Span
-        spanId = null;
-
-        var scope = hub.GetScope();
-        if (scope is not null)
-        {
-            traceId = scope.PropagationContext.TraceId;
-            return;
-        }
-
-        Debug.Assert(hub is not Hub, "In case of a 'full' Hub, there is always a Scope. Otherwise (disabled) there is no Scope, but this branch should be unreachable.");
-        traceId = SentryId.Empty;
     }
 }

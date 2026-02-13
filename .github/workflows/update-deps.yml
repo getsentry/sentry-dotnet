@@ -24,8 +24,9 @@ jobs:
           - name: CLI
             path: scripts/update-cli.ps1
     steps:
-      - uses: getsentry/github-workflows/updater@13be9bec4ec5cd67061b747972b996e9c80f4f3b # v3.1.0
+      - uses: getsentry/github-workflows/updater@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.path }}
           ssh-key: ${{ secrets.CI_DEPLOY_KEY }}
+          changelog-entry: false

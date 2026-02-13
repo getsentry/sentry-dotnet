@@ -7,14 +7,14 @@ internal sealed partial class SentrySink
 {
     private static void CaptureStructuredLog(IHub hub, SentryOptions options, LogEvent logEvent, string formatted, string? template)
     {
-        SentryLog.GetTraceIdAndSpanId(hub, out var traceId, out var spanId);
+        hub.GetTraceIdAndSpanId(out var traceId, out var spanId);
         GetStructuredLoggingParametersAndAttributes(logEvent, out var parameters, out var attributes);
 
         SentryLog log = new(logEvent.Timestamp, traceId, logEvent.Level.ToSentryLogLevel(), formatted)
         {
             Template = template,
             Parameters = parameters,
-            ParentSpanId = spanId,
+            SpanId = spanId,
         };
 
         log.SetDefaultAttributes(options, Sdk);

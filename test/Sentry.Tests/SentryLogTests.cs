@@ -11,7 +11,7 @@ public class SentryLogTests
 {
     private static readonly DateTimeOffset Timestamp = new(2025, 04, 22, 14, 51, 00, 789, TimeSpan.FromHours(2));
     private static readonly SentryId TraceId = SentryId.Create();
-    private static readonly SpanId? ParentSpanId = SpanId.Create();
+    private static readonly SpanId? SpanId = Sentry.SpanId.Create();
 
     private static readonly ISystemClock Clock = new MockClock(Timestamp);
 
@@ -33,14 +33,14 @@ public class SentryLogTests
         var sdk = new SdkVersion
         {
             Name = "Sentry.Test.SDK",
-            Version = "1.2.3-test+Sentry"
+            Version = "1.2.3-test+Sentry",
         };
 
         var log = new SentryLog(Timestamp, TraceId, (SentryLogLevel)24, "message")
         {
             Template = "template",
             Parameters = ImmutableArray.Create(new KeyValuePair<string, object>("param", "params")),
-            ParentSpanId = ParentSpanId,
+            SpanId = SpanId,
         };
         log.SetAttribute("attribute", "value");
         log.SetDefaultAttributes(options, sdk);
@@ -51,7 +51,7 @@ public class SentryLogTests
         log.Message.Should().Be("message");
         log.Template.Should().Be("template");
         log.Parameters.Should().BeEquivalentTo(new KeyValuePair<string, object>[] { new("param", "params"), });
-        log.ParentSpanId.Should().Be(ParentSpanId);
+        log.SpanId.Should().Be(SpanId);
 
         // should only show up in sdk integrations
         log.TryGetAttribute("sentry.origin", out object origin).Should().BeFalse();
@@ -83,7 +83,7 @@ public class SentryLogTests
         {
             Template = "template",
             Parameters = parameters,
-            ParentSpanId = ParentSpanId,
+            SpanId = SpanId,
         };
 
         // Act
@@ -176,7 +176,7 @@ public class SentryLogTests
         {
             Template = "template",
             Parameters = ImmutableArray.Create(new KeyValuePair<string, object>("0", "string"), new KeyValuePair<string, object>("1", false), new KeyValuePair<string, object>("2", 1), new KeyValuePair<string, object>("3", 2.2)),
-            ParentSpanId = ParentSpanId,
+            SpanId = SpanId,
         };
         log.SetAttribute("string-attribute", "string-value");
         log.SetAttribute("boolean-attribute", true);
@@ -212,6 +212,7 @@ public class SentryLogTests
               "level": "fatal",
               "body": "message",
               "trace_id": "{{TraceId.ToString()}}",
+              "span_id": "{{SpanId.ToString()}}",
               "severity_number": 24,
               "attributes": {
                 "sentry.message.template": {
@@ -264,10 +265,6 @@ public class SentryLogTests
                 },
                 "sentry.sdk.version": {
                   "value": "1.2.3-test+Sentry",
-                  "type": "string"
-                },
-                "sentry.trace.parent_span_id": {
-                  "value": "{{ParentSpanId.ToString()}}",
                   "type": "string"
                 }
               }
@@ -408,58 +405,6 @@ public class SentryLogTests
             entry => entry.Message.Should().Match("*System.Collections.Generic.KeyValuePair`2[System.String,System.String]*is not supported*ToString*"),
             entry => entry.Message.Should().Match("*null*is not supported*ignored*")
         );
-    }
-
-    [Fact]
-    public void GetTraceIdAndSpanId_WithActiveSpan_HasBothTraceIdAndSpanId()
-    {
-        // Arrange
-        var span = Substitute.For<ISpan>();
-        span.TraceId.Returns(SentryId.Create());
-        span.SpanId.Returns(SpanId.Create());
-
-        var hub = Substitute.For<IHub>();
-        hub.GetSpan().Returns(span);
-
-        // Act
-        SentryLog.GetTraceIdAndSpanId(hub, out var traceId, out var spanId);
-
-        // Assert
-        traceId.Should().Be(span.TraceId);
-        spanId.Should().Be(span.SpanId);
-    }
-
-    [Fact]
-    public void GetTraceIdAndSpanId_WithoutActiveSpan_HasOnlyTraceIdButNoSpanId()
-    {
-        // Arrange
-        var hub = Substitute.For<IHub>();
-        hub.GetSpan().Returns((ISpan)null);
-
-        var scope = new Scope();
-        hub.SubstituteConfigureScope(scope);
-
-        // Act
-        SentryLog.GetTraceIdAndSpanId(hub, out var traceId, out var spanId);
-
-        // Assert
-        traceId.Should().Be(scope.PropagationContext.TraceId);
-        spanId.Should().BeNull();
-    }
-
-    [Fact]
-    public void GetTraceIdAndSpanId_WithoutIds_ShouldBeUnreachable()
-    {
-        // Arrange
-        var hub = Substitute.For<IHub>();
-        hub.GetSpan().Returns((ISpan)null);
-
-        // Act
-        SentryLog.GetTraceIdAndSpanId(hub, out var traceId, out var spanId);
-
-        // Assert
-        traceId.Should().Be(SentryId.Empty);
-        spanId.Should().BeNull();
     }
 }
 

@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
 
@@ -23,13 +23,13 @@ jobs:
 
       # We only need to restore to check for vulnerable packages
       - name: Restore .NET Dependencies
-        run: dotnet restore Sentry.sln --nologo
+        run: dotnet restore Sentry.slnx --nologo
 
       # The dotnet package list command doesn't change its exit code on detection, so tee to a file and scan it
       # See https://github.com/NuGet/Home/issues/11315#issuecomment-1243055173
       - name: List vulnerable packages
         shell: bash
         run: |
-          dotnet package list --project Sentry.sln --vulnerable --include-transitive --no-restore | tee vulnerable.txt
+          dotnet package list --project Sentry.slnx --vulnerable --include-transitive --no-restore | tee vulnerable.txt
           # https://github.com/getsentry/sentry-dotnet/issues/2814
           # ! grep 'has the following vulnerable packages' vulnerable.txt

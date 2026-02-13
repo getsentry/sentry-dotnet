@@ -9,7 +9,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
     private readonly SentryOptions _options;
     private readonly ISystemClock _clock;
 
-    private readonly StructuredLogBatchProcessor _batchProcessor;
+    private readonly BatchProcessor<SentryLog> _batchProcessor;
 
     internal DefaultSentryStructuredLogger(IHub hub, SentryOptions options, ISystemClock clock, int batchCount, TimeSpan batchInterval)
     {
@@ -20,14 +20,14 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         _options = options;
         _clock = clock;
 
-        _batchProcessor = new StructuredLogBatchProcessor(hub, batchCount, batchInterval, _options.ClientReportRecorder, _options.DiagnosticLogger);
+        _batchProcessor = new SentryLogBatchProcessor(hub, batchCount, batchInterval, _options.ClientReportRecorder, _options.DiagnosticLogger);
     }
 
     /// <inheritdoc />
     private protected override void CaptureLog(SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog)
     {
         var timestamp = _clock.GetUtcNow();
-        SentryLog.GetTraceIdAndSpanId(_hub, out var traceId, out var spanId);
+        _hub.GetTraceIdAndSpanId(out var traceId, out var spanId);
 
         string message;
         try
@@ -55,7 +55,7 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         {
             Template = template,
             Parameters = @params,
-            ParentSpanId = spanId,
+            SpanId = spanId,
         };
 
         try

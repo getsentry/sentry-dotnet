@@ -22,13 +22,13 @@ public partial class SentryStructuredLoggerTests : IDisposable
             BatchSize = 2;
             BatchTimeout = Timeout.InfiniteTimeSpan;
             TraceId = SentryId.Create();
-            ParentSpanId = SpanId.Create();
+            SpanId = Sentry.SpanId.Create();
 
             Hub.IsEnabled.Returns(true);
 
             var span = Substitute.For<ISpan>();
             span.TraceId.Returns(TraceId);
-            span.SpanId.Returns(ParentSpanId.Value);
+            span.SpanId.Returns(SpanId.Value);
             Hub.GetSpan().Returns(span);
 
             ExpectedAttributes = new Dictionary<string, string>(1)
@@ -44,7 +44,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
         public int BatchSize { get; set; }
         public TimeSpan BatchTimeout { get; set; }
         public SentryId TraceId { get; private set; }
-        public SpanId? ParentSpanId { get; private set; }
+        public SpanId? SpanId { get; private set; }
 
         public Dictionary<string, string> ExpectedAttributes { get; }
 
@@ -55,7 +55,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
             var scope = new Scope();
             Hub.SubstituteConfigureScope(scope);
             TraceId = scope.PropagationContext.TraceId;
-            ParentSpanId = null;
+            SpanId = null;
         }
 
         public SentryStructuredLogger GetSut() => SentryStructuredLogger.Create(Hub, Options, Clock, BatchSize, BatchTimeout);
@@ -240,9 +240,9 @@ public partial class SentryStructuredLoggerTests : IDisposable
         _fixture.Hub.Received(0).CaptureEnvelope(Arg.Any<Envelope>());
         var entry = _fixture.DiagnosticLogger.Dequeue();
         entry.Level.Should().Be(SentryLevel.Info);
-        entry.Message.Should().Be("Log Buffer full ... dropping log");
+        entry.Message.Should().Be("{0}-Buffer full ... dropping {0}");
         entry.Exception.Should().BeNull();
-        entry.Args.Should().BeEmpty();
+        entry.Args.Should().BeEquivalentTo([nameof(SentryLog)]);
     }
 
     private static void ConfigureLog(SentryLog log)
@@ -251,7 +251,7 @@ public partial class SentryStructuredLoggerTests : IDisposable
     }
 }
 
-internal static class AssertionExtensions
+internal static class LoggerAssertionExtensions
 {
     public static void AssertEnvelope(this SentryStructuredLoggerTests.Fixture fixture, Envelope envelope, SentryLogLevel level)
     {
@@ -288,7 +288,7 @@ internal static class AssertionExtensions
         log.Message.Should().Be("Template string with arguments: string, True, 1, 2.2");
         log.Template.Should().Be("Template string with arguments: {0}, {1}, {2}, {3}");
         log.Parameters.Should().BeEquivalentTo(new KeyValuePair<string, object>[] { new("0", "string"), new("1", true), new("2", 1), new("3", 2.2), });
-        log.ParentSpanId.Should().Be(fixture.ParentSpanId);
+        log.SpanId.Should().Be(fixture.SpanId);
 
         foreach (var expectedAttribute in fixture.ExpectedAttributes)
         {

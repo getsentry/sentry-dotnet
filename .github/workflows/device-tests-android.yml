@@ -6,8 +6,48 @@ on:
       - main
       - release/*
   pull_request:
-    paths-ignore:
-      - "**.md"
+    paths:
+      # Core SDK (transitive dependency of all mobile packages)
+      - 'src/Sentry/**'
+      - 'src/Sentry.Extensions.Logging/**'
+      - 'src/Sentry.Compiler.Extensions/**'
+      # Mobile-specific packages
+      - 'src/Sentry.Maui/**'
+      - 'src/Sentry.Maui.CommunityToolkit.Mvvm/**'
+      - 'src/Sentry.Bindings.Android/**'
+      - 'src/Sentry.Bindings.Cocoa/**'
+      - 'src/Sentry.Android.AssemblyReader/**'
+      # Device test app and test projects that run on device
+      - 'test/Sentry.Maui.Device.TestApp/**'
+      - 'test/Sentry.Tests/**'
+      - 'test/Sentry.Extensions.Logging.Tests/**'
+      - 'test/Sentry.Maui.Tests/**'
+      - 'test/Sentry.Maui.CommunityToolkit.Mvvm.Tests/**'
+      - 'test/Sentry.Android.AssemblyReader.Tests/**'
+      - 'test/Sentry.Testing/**'
+      - 'test/AndroidTestApp/**'
+      # Integration tests
+      - 'integration-test/android.Tests.ps1'
+      - 'integration-test/ios.Tests.ps1'
+      - 'integration-test/net9-maui/**'
+      - 'integration-test/common.ps1'
+      - 'integration-test/Directory.Build.*'
+      # Native libraries and modules
+      - 'lib/sentrysupplemental/**'
+      - 'lib/sentry-android-supplemental/**'
+      - 'modules/sentry-native/**'
+      - 'modules/sentry-cocoa/**'
+      - 'modules/sentry-cocoa.properties'
+      # Build configuration (affects all builds)
+      - 'global.json'
+      - 'Directory.Build.props'
+      - 'Directory.Build.targets'
+      - 'nuget.config'
+      # Scripts and CI
+      - 'scripts/device-test.ps1'
+      - 'scripts/device-test-utils.ps1'
+      - '.github/workflows/device-tests-android.yml'
+      - '.github/actions/**'
   workflow_dispatch:
 
 jobs:
@@ -17,17 +57,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tfm: [net9.0]
+        tfm: [net9.0, net10.0]
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
     steps:
       - name: Cancel Previous Runs
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
-        uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # 0.12.1
+        uses: styfle/cancel-workflow-action@3155a141048f8f89c06b4cdae32e7853e97536bc # 0.13.0
 
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
 
@@ -40,13 +80,12 @@ jobs:
       - name: Build Android Test App
         run: pwsh ./scripts/device-test.ps1 android -Build -Tfm ${{ matrix.tfm }}
 
-      - name: Upload Android Test App (net9.0)
-        if: matrix.tfm == 'net9.0'
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      - name: Upload Android Test App (${{ matrix.tfm }})
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: device-test-android-net9.0
+          name: device-test-android-${{ matrix.tfm }}
           if-no-files-found: error
-          path: test/Sentry.Maui.Device.TestApp/bin/Release/net9.0-android/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
+          path: test/Sentry.Maui.Device.TestApp/bin/Release/${{ matrix.tfm }}-android/android-x64/io.sentry.dotnet.maui.device.testapp-Signed.apk
 
   android:
     needs: [build]
@@ -58,7 +97,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tfm: [net9.0]
+        tfm: [net9.0, net10.0]
         # Must be 34+ for new apps and app updates as of August 31, 2024.
         # See https://apilevels.com/
         api-level: [34, 36]
@@ -80,18 +119,18 @@ jobs:
           sudo udevadm trigger --name-match=kvm
 
       - name: Checkout
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
 
       - name: Download test app artifact
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: device-test-android-${{ matrix.tfm }}
           path: bin
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@4d9f0ba0025fe599b4ebab900eb7f3a1d93ef4c2 # v5.0.0
+        uses: gradle/actions/setup-gradle@f29f5a9d7b09a7c6b29859002d29d24e1674c884 # v5.0.1
 
       # Cached AVD setup per https://github.com/ReactiveCircus/android-emulator-runner/blob/main/README.md
 
@@ -121,16 +160,16 @@ jobs:
         uses: ./.github/actions/environment
 
       - name: Select Java 17
-        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
         with:
           distribution: ${{ runner.os == 'Windows' && runner.arch == 'ARM64' && 'microsoft' || 'temurin' }}
           java-version: '17'
 
       - name: Checkout github-workflows
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: getsentry/github-workflows
-          ref: a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+          ref: 95603f4efe938315ff0dd427a1f2bb40b1889a92 # 3.2.0
           path: modules/github-workflows
 
       - name: Run Integration Tests
@@ -147,7 +186,7 @@ jobs:
           disk-size: ${{ env.ANDROID_EMULATOR_DISK_SIZE }}
           emulator-options: ${{ env.ANDROID_EMULATOR_OPTIONS }}
           disable-animations: false
-          script: pwsh integration-test/android.Tests.ps1
+          script: pwsh integration-test/android.Tests.ps1 -dotnet_version ${{ matrix.tfm }}
 
       - name: Retry Integration Tests (if previous failed to run)
         if: steps.first-integration-test-run.outcome == 'failure'
@@ -157,7 +196,7 @@ jobs:
 
       - name: Upload results
         if: success() || failure()
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: device-test-android-${{ matrix.api-level }}-${{ matrix.tfm }}-results
           path: |
