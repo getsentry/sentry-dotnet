@@ -504,4 +504,20 @@ public sealed class Envelope : ISerializable, IDisposable
         items.Add(item);
         return new Envelope(_eventId, Header, items);
     }
+
+    /// <summary>
+    /// Creates an envelope that contains one or more Span v2 items.
+    /// </summary>
+    internal static Envelope FromSpans(IReadOnlyCollection<SpanV2> spans)
+    {
+        var header = DefaultHeader;
+
+        var spanItems = new SpanV2Items(spans);
+
+        var items = spanItems.Length > 0
+            ? new List<EnvelopeItem>(1) { EnvelopeItem.FromSpans(spanItems) }
+            : new List<EnvelopeItem>(0);
+
+        return new Envelope(header, items);
+    }
 }
