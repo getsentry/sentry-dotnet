@@ -6,6 +6,10 @@
 
 - Add navigation breadcrumbs for Blazor WebAssembly ([#4907](https://github.com/getsentry/sentry-dotnet/pull/4907))
 
+### Fixes
+
+- Skip duplicate navigation breadcrumbs in Blazor WebAssembly ([#4922](https://github.com/getsentry/sentry-dotnet/pull/4922))
+
 ### Dependencies
 
 - Bumped Xamarin.Kotlin.StdLib.Jdk8 to 2.2.20 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
