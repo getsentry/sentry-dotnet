@@ -82,7 +82,7 @@ public class NavigationBreadcrumbTests : IAsyncLifetime
         var eventPayload = SentryEnvelopeParser.ExtractEventFromEnvelope(envelopeBody);
         eventPayload.Should().NotBeNull("expected an event payload in the Sentry envelope");
 
-        var breadcrumbs = eventPayload!.Value.GetProperty("breadcrumbs").EnumerateArray().ToList();
+        var breadcrumbs = eventPayload.Value.GetProperty("breadcrumbs").EnumerateArray().ToList();
 
         var navBreadcrumbs = breadcrumbs
             .Where(b =>

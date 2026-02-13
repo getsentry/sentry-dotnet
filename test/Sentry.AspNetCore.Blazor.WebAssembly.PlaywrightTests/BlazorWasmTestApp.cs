@@ -27,7 +27,7 @@ internal sealed class BlazorWasmTestApp : IAsyncDisposable
             StartInfo = new ProcessStartInfo
             {
                 FileName = "dotnet",
-                Arguments = $"run --project \"{projectPath}\" --urls {BaseUrl}",
+                Arguments = $"run --project \"{projectPath}\" --configuration Release --urls {BaseUrl}",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,

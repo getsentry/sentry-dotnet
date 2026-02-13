@@ -7,12 +7,15 @@ on:
       - release/*
   pull_request:
     paths:
+      - 'src/*'
       - 'src/Sentry/**'
       - 'src/Sentry.AspNetCore/**'
       - 'src/Sentry.AspNetCore.Blazor.WebAssembly/**'
       - 'src/Sentry.Extensions.Logging/**'
+      - 'test/*'
       - 'test/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests/**'
       - 'test/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests.TestApp/**'
+      - 'test/Sentry.Testing/**'
       - 'global.json'
       - 'Directory.Build.props'
       - 'Directory.Build.targets'

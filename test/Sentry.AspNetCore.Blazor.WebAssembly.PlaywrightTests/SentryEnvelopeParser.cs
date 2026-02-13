@@ -11,7 +11,7 @@ internal static class SentryEnvelopeParser
     /// </summary>
     public static JsonElement? ExtractEventFromEnvelope(string envelopeBody)
     {
-        var lines = envelopeBody.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        var lines = envelopeBody.Split('\n');
 
         // lines[0] = envelope header
         // lines[1..] = pairs of (item header, item payload)
