@@ -42,6 +42,12 @@ internal sealed class BlazorWasmOptionsSetup : IConfigureOptions<SentryBlazorOpt
 
         _navigationManager.LocationChanged += (_, args) =>
         {
+            // Skip duplicate navigations (e.g. when both @onclick+NavigateTo and href fire)
+            if (string.Equals(args.Location, previousUrl, StringComparison.Ordinal))
+            {
+                return;
+            }
+
             var from = ToRelativePath(previousUrl);
             var to = ToRelativePath(args.Location);
 
