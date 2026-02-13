@@ -62,8 +62,8 @@
 
   <!-- "Sentry" uses "Polyfill" and gives access to it's internals via "InternalsVisibleTo", but some Polyfills are in a separate namespace -->
   <ItemGroup Condition="'$(MSBuildProjectName)' != 'Sentry' And $(MSBuildProjectName.StartsWith('Sentry.'))">
-    <!-- the latest TargetFramework requires no Polyfills; "Sentry.Compiler.Extensions" has its own Polyfills -->
-    <Using Include="Polyfills" Condition="'$(TargetFramework)' != $(LatestTfm) And $(MSBuildProjectName) != 'Sentry.Compiler.Extensions'" />
+    <!-- the latest TargetFramework requires no Polyfills; "Sentry.Compiler.Extensions" has its own Polyfills; "Android" and "Cocoa" projects are referenced by "Sentry" -->
+    <Using Include="Polyfills" Condition="'$(TargetFramework)' != $(LatestTfm) And $(MSBuildProjectName) != 'Sentry.Compiler.Extensions' And $(MSBuildProjectName) != 'Sentry.Android.AssemblyReader' And $(MSBuildProjectName) != 'Sentry.Bindings.Android' And $(MSBuildProjectName) != 'Sentry.Bindings.Cocoa'" />
   </ItemGroup>
 
 </Project>
