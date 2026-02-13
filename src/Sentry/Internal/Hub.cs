@@ -1,6 +1,5 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Integrations;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol.Envelopes;
 using Sentry.Protocol.Metrics;
@@ -82,6 +81,7 @@ internal class Hub : IHub, IDisposable
         }
 
         Logger = SentryStructuredLogger.Create(this, options, _clock);
+        Metrics = SentryMetricEmitter.Create(this, options, _clock);
 
 #if MEMORY_DUMP_SUPPORTED
         if (options.HeapDumpOptions is not null)
@@ -819,6 +819,7 @@ internal class Hub : IHub, IDisposable
         try
         {
             Logger.Flush();
+            Metrics.Flush();
             await CurrentClient.FlushAsync(timeout).ConfigureAwait(false);
         }
         catch (Exception e)
@@ -853,7 +854,9 @@ internal class Hub : IHub, IDisposable
 #endif
 
         Logger.Flush();
+        Metrics.Flush();
         (Logger as IDisposable)?.Dispose(); // see Sentry.Internal.DefaultSentryStructuredLogger
+        (Metrics as IDisposable)?.Dispose(); // see Sentry.Internal.DefaultSentryMetricEmitter
 
         try
         {
@@ -871,7 +874,9 @@ internal class Hub : IHub, IDisposable
 #if __IOS__
             // TODO
 #elif ANDROID
-            // TODO
+        // TODO: For some reason the integration tests on Android fail if we Close on the Java SDK...
+        // https://github.com/getsentry/sentry-dotnet/blob/0adaddb7ad91d0b41a2c38aacc64727ce54b2a3b/integration-test/android.Tests.ps1#L154
+        // JavaSdk.Sentry.Close();
 #elif NET8_0_OR_GREATER
         if (SentryNative.IsAvailable)
         {
@@ -884,4 +889,6 @@ internal class Hub : IHub, IDisposable
     public SentryId LastEventId => CurrentScope.LastEventId;
 
     public SentryStructuredLogger Logger { get; }
+
+    public SentryMetricEmitter Metrics { get; }
 }

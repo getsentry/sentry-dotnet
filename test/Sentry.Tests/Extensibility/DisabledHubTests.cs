@@ -39,4 +39,8 @@ public class DisabledHubTests
     [Fact]
     public void Logger_IsDisabled()
         => Assert.IsType<DisabledSentryStructuredLogger>(DisabledHub.Instance.Logger);
+
+    [Fact]
+    public void Metrics_IsDisabled()
+        => Assert.IsType<DisabledSentryMetricEmitter>(DisabledHub.Instance.Metrics);
 }

@@ -30,6 +30,19 @@ public interface IHub : ISentryClient, ISentryScopeManager
     public SentryStructuredLogger Logger { get; }
 
     /// <summary>
+    /// Generates and sends metrics to Sentry.
+    /// </summary>
+    /// <remarks>
+    /// Available options:
+    /// <list type="bullet">
+    /// <item><see cref="Sentry.SentryOptions.ExperimentalSentryOptions.EnableMetrics"/></item>
+    /// <item><see cref="Sentry.SentryOptions.ExperimentalSentryOptions.SetBeforeSendMetric(System.Func{SentryMetric, SentryMetric})"/></item>
+    /// </list>
+    /// </remarks>
+    [Experimental("SENTRYTRACECONNECTEDMETRICS", UrlFormat = "https://github.com/getsentry/sentry-dotnet/discussions/4838")]
+    public SentryMetricEmitter Metrics { get; }
+
+    /// <summary>
     /// Starts a transaction.
     /// </summary>
     public ITransactionTracer StartTransaction(
