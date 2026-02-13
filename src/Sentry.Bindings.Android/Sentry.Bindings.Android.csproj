@@ -1,11 +1,38 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(LatestAndroidTfm);$(PreviousAndroidTfm)</TargetFrameworks>
-    <SentryAndroidSdkVersion>8.26.0</SentryAndroidSdkVersion>
+    <SentryAndroidSdkVersion>8.32.0</SentryAndroidSdkVersion>
     <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\$(TargetFramework)\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
-    <!-- This gets resolved by the DownloadSentryAndroidSdk target -->
+    <!-- This gets resolved by the DownloadSentryAndroidSdk unless using local maven references -->
     <SentryNativeNdkVersion></SentryNativeNdkVersion>
     <Description>.NET Bindings for the Sentry Android SDK</Description>
+
+    <!--
+      Optional dev override: enable to resolve local maven references
+      Example:
+        dotnet build -p:UseLocalSentryMavenRepo=true
+
+      To populate MavenLocal from your checkout:
+        cd $(LocalSentryJavaRepoDir) && ./gradlew publishToMavenLocal
+        cd $(LocalSentryNativeRepoDir)/ndk && ./gradlew publishToMavenLocal
+
+      Note:
+      1. Make sure the native-ndk-version you check out and build matches what the android sdk expects (or a fork of it)
+      2. You will need to manually set the `SentryNativeNdkVersion` property as this no longer gets resolved from
+         the POM files from the Java SDK when using local maven artifacts.
+    -->
+    <UseLocalSentryMavenRepo>false</UseLocalSentryMavenRepo>
+    <LocalSentryMavenRepoDir Condition="'$(LocalSentryMavenRepoDir)' == ''">$([System.Environment]::GetFolderPath(SpecialFolder.UserProfile))/.m2/repository/</LocalSentryMavenRepoDir>
+    <LocalSentryJarPath>$(LocalSentryMavenRepoDir)io/sentry/sentry/$(SentryAndroidSdkVersion)/sentry-$(SentryAndroidSdkVersion).jar</LocalSentryJarPath>
+    <LocalSentryAndroidCoreAarPath>$(LocalSentryMavenRepoDir)io/sentry/sentry-android-core/$(SentryAndroidSdkVersion)/sentry-android-core-$(SentryAndroidSdkVersion).aar</LocalSentryAndroidCoreAarPath>
+    <LocalSentryAndroidNdkAarPath>$(LocalSentryMavenRepoDir)io/sentry/sentry-android-ndk/$(SentryAndroidSdkVersion)/sentry-android-ndk-$(SentryAndroidSdkVersion).aar</LocalSentryAndroidNdkAarPath>
+    <LocalSentryAndroidReplayAarPath>$(LocalSentryMavenRepoDir)io/sentry/sentry-android-replay/$(SentryAndroidSdkVersion)/sentry-android-replay-$(SentryAndroidSdkVersion).aar</LocalSentryAndroidReplayAarPath>
+    <LocalSentryPomPath>$([System.String]::Copy($(LocalSentryJarPath)).Replace('.jar', '.pom'))</LocalSentryPomPath>
+    <LocalSentryAndroidCorePomPath>$([System.String]::Copy($(LocalSentryAndroidCoreAarPath)).Replace('.aar', '.pom'))</LocalSentryAndroidCorePomPath>
+    <LocalSentryAndroidNdkPomPath>$([System.String]::Copy($(LocalSentryAndroidNdkAarPath)).Replace('.aar', '.pom'))</LocalSentryAndroidNdkPomPath>
+    <LocalSentryAndroidReplayPomPath>$([System.String]::Copy($(LocalSentryAndroidReplayAarPath)).Replace('.aar', '.pom'))</LocalSentryAndroidReplayPomPath>
+    <LocalSentryNativeNdkAarPath>$(LocalSentryMavenRepoDir)io/sentry/sentry-native-ndk/$(SentryNativeNdkVersion)/sentry-native-ndk-$(SentryNativeNdkVersion).aar</LocalSentryNativeNdkAarPath>
+    <LocalSentryNativeNdkPomPath>$([System.String]::Copy($(LocalSentryNativeNdkAarPath)).Replace('.aar', '.pom'))</LocalSentryNativeNdkPomPath>
 
     <!-- Android binding warnings - these are largely unavoidable due to Java interface circular dependencies -->
     <!-- Only suppress warnings that are confirmed to be expected/unavoidable -->
@@ -56,8 +83,8 @@
     <!-- We have a dependency on 1.9.24 from here:
          https://github.com/getsentry/sentry-java/blob/604a2616bebd80ea051cdcec916aa052b509c5a8/buildSrc/src/main/java/Config.kt#L6-L7
          ... but there's no NuGet package for that version. This version has been selected to
-         match the version that was available when net10.0-rc1 was released -->
-    <PackageReference Include="Xamarin.Kotlin.StdLib.Jdk8" Version="2.2.10" />
+         match the version that was available when net10.0 was released -->
+    <PackageReference Include="Xamarin.Kotlin.StdLib.Jdk8" Version="2.2.20" />
   </ItemGroup>
 
   <!-- Dependencies for AndroidMavenLibrary references
@@ -73,11 +100,31 @@
   </ItemGroup>
 
   <!-- Starting with .NET 9 we can detect Java dependencies using POM files and AndroidMavenLibrary references -->
-  <ItemGroup>
+  <ItemGroup Condition="'$(UseLocalSentryMavenRepo)' != 'true'">
     <AndroidMavenLibrary Include="io.sentry:sentry" Version="$(SentryAndroidSdkVersion)" />
     <AndroidMavenLibrary Include="io.sentry:sentry-android-core" Version="$(SentryAndroidSdkVersion)" />
     <AndroidMavenLibrary Include="io.sentry:sentry-android-ndk" Version="$(SentryAndroidSdkVersion)" />
     <AndroidMavenLibrary Include="io.sentry:sentry-android-replay" Version="$(SentryAndroidSdkVersion)" />
+  </ItemGroup>
+
+  <!-- Resolve Java dependencies from local sentry-java build outputs instead, if appropriate -->
+  <ItemGroup Condition="'$(UseLocalSentryMavenRepo)' == 'true'">
+    <AndroidLibrary Include="$(LocalSentryJarPath)" Manifest="$(LocalSentryPomPath)"
+                    JavaArtifact="io.sentry:sentry:$(SentryAndroidSdkVersion)" />
+    <AndroidLibrary Include="$(LocalSentryAndroidCoreAarPath)" Manifest="$(LocalSentryAndroidCorePomPath)"
+                       JavaArtifact="io.sentry:sentry-android-core:$(SentryAndroidSdkVersion)" />
+    <AndroidLibrary Include="$(LocalSentryAndroidNdkAarPath)" Manifest="$(LocalSentryAndroidNdkPomPath)"
+                       JavaArtifact="io.sentry:sentry-android-ndk:$(SentryAndroidSdkVersion)" />
+    <AndroidLibrary Include="$(LocalSentryAndroidReplayAarPath)" Manifest="$(LocalSentryAndroidReplayPomPath)"
+                       JavaArtifact="io.sentry:sentry-android-replay:$(SentryAndroidSdkVersion)" />
+    <AndroidLibrary Include="$(LocalSentryNativeNdkAarPath)" Manifest="$(LocalSentryNativeNdkPomPath)"
+                       JavaArtifact="io.sentry:sentry-native-ndk:$(SentryNativeNdkVersion)" />
+  </ItemGroup>
+
+  <!-- protobuf-javalite 3.25.8 has no matching/compatible Xamarin.Protobuf.JavaLite NuGet package
+       (see https://github.com/getsentry/sentry-java/pull/5044) -->
+  <ItemGroup>
+    <AndroidMavenLibrary Include="com.google.protobuf:protobuf-javalite" Version="3.25.8" Bind="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -88,7 +135,7 @@
     <AndroidNativeLibrary Include="..\..\lib\sentrysupplemental\bin\x86_64\libsentrysupplemental.so" Abi="x86_64" />
   </ItemGroup>
 
-  <Target Name="DownloadSentryAndroidSdk" BeforeTargets="CollectPackageReferences">
+  <Target Name="DownloadSentryAndroidSdk" BeforeTargets="CollectPackageReferences" Condition="'$(UseLocalSentryMavenRepo)' != 'true'">
     <!-- The native-ndk exists outside of the android-ndk now. We're downloading the POM file to get the version of the native-ndk. -->
     <DownloadFile
       SourceUrl="https://repo1.maven.org/maven2/io/sentry/sentry-android-ndk/$(SentryAndroidSdkVersion)/sentry-android-ndk-$(SentryAndroidSdkVersion).pom"

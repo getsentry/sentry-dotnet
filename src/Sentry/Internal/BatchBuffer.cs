@@ -3,7 +3,7 @@ using Sentry.Threading;
 namespace Sentry.Internal;
 
 /// <summary>
-/// A wrapper over an <see cref="System.Array"/>, intended for reusable buffering.
+/// A wrapper over an <see cref="System.Array"/>, intended for reusable buffering for <see cref="BatchProcessor{TItem}"/>.
 /// </summary>
 /// <remarks>
 /// Must be attempted to flush via <see cref="TryEnterFlushScope"/> when either the <see cref="Capacity"/> is reached,
@@ -12,15 +12,15 @@ namespace Sentry.Internal;
 /// allowing multiple threads for <see cref="Add"/> or exclusive access for <see cref="FlushScope.Flush"/>.
 /// </remarks>
 [DebuggerDisplay("Name = {Name}, Capacity = {Capacity}, Additions = {_additions}, AddCount = {AddCount}, IsDisposed = {_disposed}")]
-internal sealed class StructuredLogBatchBuffer : IDisposable
+internal sealed class BatchBuffer<TItem> : IDisposable
 {
-    private readonly SentryLog[] _array;
+    private readonly TItem[] _array;
     private int _additions;
     private readonly ScopedCountdownLock _addLock;
 
     private readonly Timer _timer;
     private readonly TimeSpan _timeout;
-    private readonly Action<StructuredLogBatchBuffer> _timeoutExceededAction;
+    private readonly Action<BatchBuffer<TItem>> _timeoutExceededAction;
 
     private volatile bool _disposed;
 
@@ -31,12 +31,12 @@ internal sealed class StructuredLogBatchBuffer : IDisposable
     /// <param name="timeout">When the timeout exceeds after an item has been added and the <paramref name="capacity"/> not yet been exceeded, <paramref name="timeoutExceededAction"/> is invoked.</param>
     /// <param name="timeoutExceededAction">The operation to execute when the <paramref name="timeout"/> exceeds if the buffer is neither empty nor full.</param>
     /// <param name="name">Name of the new buffer.</param>
-    public StructuredLogBatchBuffer(int capacity, TimeSpan timeout, Action<StructuredLogBatchBuffer> timeoutExceededAction, string? name = null)
+    public BatchBuffer(int capacity, TimeSpan timeout, Action<BatchBuffer<TItem>> timeoutExceededAction, string? name = null)
     {
         ThrowIfLessThanTwo(capacity, nameof(capacity));
         ThrowIfNegativeOrZero(timeout, nameof(timeout));
 
-        _array = new SentryLog[capacity];
+        _array = new TItem[capacity];
         _additions = 0;
         _addLock = new ScopedCountdownLock();
 
@@ -72,18 +72,18 @@ internal sealed class StructuredLogBatchBuffer : IDisposable
     /// Is thread-safe.
     /// </summary>
     /// <param name="item">Element attempted to be added.</param>
-    /// <returns>An <see cref="StructuredLogBatchBufferAddStatus"/> describing the result of the thread-safe operation.</returns>
-    internal StructuredLogBatchBufferAddStatus Add(SentryLog item)
+    /// <returns>An <see cref="BatchBufferAddStatus"/> describing the result of the thread-safe operation.</returns>
+    internal BatchBufferAddStatus Add(TItem item)
     {
         if (_disposed)
         {
-            return StructuredLogBatchBufferAddStatus.IgnoredIsDisposed;
+            return BatchBufferAddStatus.IgnoredIsDisposed;
         }
 
         using var scope = _addLock.TryEnterCounterScope();
         if (!scope.IsEntered)
         {
-            return StructuredLogBatchBufferAddStatus.IgnoredIsFlushing;
+            return BatchBufferAddStatus.IgnoredIsFlushing;
         }
 
         var count = Interlocked.Increment(ref _additions);
@@ -92,24 +92,24 @@ internal sealed class StructuredLogBatchBuffer : IDisposable
         {
             EnableTimer();
             _array[count - 1] = item;
-            return StructuredLogBatchBufferAddStatus.AddedFirst;
+            return BatchBufferAddStatus.AddedFirst;
         }
 
         if (count < _array.Length)
         {
             _array[count - 1] = item;
-            return StructuredLogBatchBufferAddStatus.Added;
+            return BatchBufferAddStatus.Added;
         }
 
         if (count == _array.Length)
         {
             DisableTimer();
             _array[count - 1] = item;
-            return StructuredLogBatchBufferAddStatus.AddedLast;
+            return BatchBufferAddStatus.AddedLast;
         }
 
         Debug.Assert(count > _array.Length);
-        return StructuredLogBatchBufferAddStatus.IgnoredCapacityExceeded;
+        return BatchBufferAddStatus.IgnoredCapacityExceeded;
     }
 
     /// <summary>
@@ -157,7 +157,7 @@ internal sealed class StructuredLogBatchBuffer : IDisposable
     /// Returns a new Array consisting of the elements successfully added.
     /// </summary>
     /// <returns>An Array with Length of successful additions.</returns>
-    private SentryLog[] ToArrayAndClear()
+    private TItem[] ToArrayAndClear()
     {
         var additions = _additions;
         var length = _array.Length;
@@ -173,7 +173,7 @@ internal sealed class StructuredLogBatchBuffer : IDisposable
     /// </summary>
     /// <param name="length">The Length of the buffer a new Array is created from.</param>
     /// <returns>An Array with Length of <paramref name="length"/>.</returns>
-    private SentryLog[] ToArrayAndClear(int length)
+    private TItem[] ToArrayAndClear(int length)
     {
         Debug.Assert(_addLock.IsSet);
 
@@ -182,14 +182,14 @@ internal sealed class StructuredLogBatchBuffer : IDisposable
         return array;
     }
 
-    private SentryLog[] ToArray(int length)
+    private TItem[] ToArray(int length)
     {
         if (length == 0)
         {
-            return Array.Empty<SentryLog>();
+            return Array.Empty<TItem>();
         }
 
-        var array = new SentryLog[length];
+        var array = new TItem[length];
         Array.Copy(_array, array, length);
         return array;
     }
@@ -253,17 +253,17 @@ internal sealed class StructuredLogBatchBuffer : IDisposable
     /// A scope than ensures only a single <see cref="Flush"/> operation is in progress,
     /// and blocks the calling thread until all <see cref="Add"/> operations have finished.
     /// When <see cref="IsEntered"/> is <see langword="true"/>, no more <see cref="Add"/> can be started,
-    /// which will then return <see cref="StructuredLogBatchBufferAddStatus.IgnoredIsFlushing"/> immediately.
+    /// which will then return <see cref="BatchBufferAddStatus.IgnoredIsFlushing"/> immediately.
     /// </summary>
     /// <remarks>
     /// Only <see cref="Flush"/> when scope <see cref="IsEntered"/>.
     /// </remarks>
     internal ref struct FlushScope : IDisposable
     {
-        private StructuredLogBatchBuffer? _lockObj;
+        private BatchBuffer<TItem>? _lockObj;
         private ScopedCountdownLock.LockScope _scope;
 
-        internal FlushScope(StructuredLogBatchBuffer lockObj, ScopedCountdownLock.LockScope scope)
+        internal FlushScope(BatchBuffer<TItem> lockObj, ScopedCountdownLock.LockScope scope)
         {
             Debug.Assert(scope.IsEntered);
             _lockObj = lockObj;
@@ -272,7 +272,7 @@ internal sealed class StructuredLogBatchBuffer : IDisposable
 
         internal bool IsEntered => _scope.IsEntered;
 
-        internal SentryLog[] Flush()
+        internal TItem[] Flush()
         {
             var lockObj = _lockObj;
             if (lockObj is not null)
@@ -300,7 +300,7 @@ internal sealed class StructuredLogBatchBuffer : IDisposable
     }
 }
 
-internal enum StructuredLogBatchBufferAddStatus : byte
+internal enum BatchBufferAddStatus : byte
 {
     AddedFirst,
     Added,

@@ -1,6 +1,6 @@
 {
   "solution": {
-    "path": "Sentry.sln",
+    "path": "Sentry.slnx",
     "projects": [
       "src\\Sentry.Analyzers\\Sentry.Analyzers.csproj",
       "src\\Sentry.Android.AssemblyReader\\Sentry.Android.AssemblyReader.csproj",

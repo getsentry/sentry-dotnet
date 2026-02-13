@@ -2,7 +2,12 @@
 
 namespace Sentry.Tests.Internals;
 
-public class StructuredLogBatchBufferTests
+/// <summary>
+/// <see cref="BatchBuffer{TItem}"/> (formerly "Sentry.Internal.StructuredLogBatchBuffer") was originally developed as Batch Buffer for Logs only.
+/// When adding support for Trace-connected Metrics, which are quite similar to Logs, it has been made generic to support both.
+/// These tests are still using <see cref="SentryLog"/>, rather than <see cref="SentryMetric"/>.
+/// </summary>
+public class BatchBufferTests
 {
     private sealed class Fixture
     {
@@ -10,14 +15,14 @@ public class StructuredLogBatchBufferTests
         public TimeSpan Timeout { get; set; } = System.Threading.Timeout.InfiniteTimeSpan;
         public string? Name { get; set; }
 
-        public List<StructuredLogBatchBuffer> TimeoutExceededInvocations { get; } = [];
+        public List<BatchBuffer<SentryLog>> TimeoutExceededInvocations { get; } = [];
 
-        public StructuredLogBatchBuffer GetSut()
+        public BatchBuffer<SentryLog> GetSut()
         {
-            return new StructuredLogBatchBuffer(Capacity, Timeout, OnTimeoutExceeded, Name);
+            return new BatchBuffer<SentryLog>(Capacity, Timeout, OnTimeoutExceeded, Name);
         }
 
-        private void OnTimeoutExceeded(StructuredLogBatchBuffer buffer)
+        private void OnTimeoutExceeded(BatchBuffer<SentryLog> buffer)
         {
             TimeoutExceededInvocations.Add(buffer);
         }
@@ -72,16 +77,16 @@ public class StructuredLogBatchBufferTests
         buffer.Capacity.Should().Be(2);
         buffer.IsEmpty.Should().BeTrue();
 
-        buffer.Add("one").Should().Be(StructuredLogBatchBufferAddStatus.AddedFirst);
+        buffer.Add("one").Should().Be(BatchBufferAddStatus.AddedFirst);
         buffer.IsEmpty.Should().BeFalse();
 
-        buffer.Add("two").Should().Be(StructuredLogBatchBufferAddStatus.AddedLast);
+        buffer.Add("two").Should().Be(BatchBufferAddStatus.AddedLast);
         buffer.IsEmpty.Should().BeFalse();
 
-        buffer.Add("three").Should().Be(StructuredLogBatchBufferAddStatus.IgnoredCapacityExceeded);
+        buffer.Add("three").Should().Be(BatchBufferAddStatus.IgnoredCapacityExceeded);
         buffer.IsEmpty.Should().BeFalse();
 
-        buffer.Add("four").Should().Be(StructuredLogBatchBufferAddStatus.IgnoredCapacityExceeded);
+        buffer.Add("four").Should().Be(BatchBufferAddStatus.IgnoredCapacityExceeded);
         buffer.IsEmpty.Should().BeFalse();
     }
 
@@ -94,16 +99,16 @@ public class StructuredLogBatchBufferTests
         buffer.Capacity.Should().Be(3);
         buffer.IsEmpty.Should().BeTrue();
 
-        buffer.Add("one").Should().Be(StructuredLogBatchBufferAddStatus.AddedFirst);
+        buffer.Add("one").Should().Be(BatchBufferAddStatus.AddedFirst);
         buffer.IsEmpty.Should().BeFalse();
 
-        buffer.Add("two").Should().Be(StructuredLogBatchBufferAddStatus.Added);
+        buffer.Add("two").Should().Be(BatchBufferAddStatus.Added);
         buffer.IsEmpty.Should().BeFalse();
 
-        buffer.Add("three").Should().Be(StructuredLogBatchBufferAddStatus.AddedLast);
+        buffer.Add("three").Should().Be(BatchBufferAddStatus.AddedLast);
         buffer.IsEmpty.Should().BeFalse();
 
-        buffer.Add("four").Should().Be(StructuredLogBatchBufferAddStatus.IgnoredCapacityExceeded);
+        buffer.Add("four").Should().Be(BatchBufferAddStatus.IgnoredCapacityExceeded);
         buffer.IsEmpty.Should().BeFalse();
     }
 
@@ -115,12 +120,12 @@ public class StructuredLogBatchBufferTests
 
         var flushScope = buffer.TryEnterFlushScope();
 
-        buffer.Add("one").Should().Be(StructuredLogBatchBufferAddStatus.IgnoredIsFlushing);
+        buffer.Add("one").Should().Be(BatchBufferAddStatus.IgnoredIsFlushing);
         buffer.IsEmpty.Should().BeTrue();
 
         flushScope.Dispose();
 
-        buffer.Add("two").Should().Be(StructuredLogBatchBufferAddStatus.AddedFirst);
+        buffer.Add("two").Should().Be(BatchBufferAddStatus.AddedFirst);
         buffer.IsEmpty.Should().BeFalse();
     }
 
@@ -132,7 +137,7 @@ public class StructuredLogBatchBufferTests
 
         buffer.Dispose();
 
-        buffer.Add("one").Should().Be(StructuredLogBatchBufferAddStatus.IgnoredIsDisposed);
+        buffer.Add("one").Should().Be(BatchBufferAddStatus.IgnoredIsDisposed);
         buffer.IsEmpty.Should().BeTrue();
     }
 
@@ -311,7 +316,7 @@ public class StructuredLogBatchBufferTests
     }
 
     // cannot use xUnit's Throws() nor Fluent Assertions' ThrowExactly() because the FlushScope is a ref struct
-    private static void AssertFlushThrows<T>(StructuredLogBatchBuffer.FlushScope flushScope)
+    private static void AssertFlushThrows<T>(BatchBuffer<SentryLog>.FlushScope flushScope)
         where T : Exception
     {
         Exception? exception = null;
@@ -329,9 +334,9 @@ public class StructuredLogBatchBufferTests
     }
 }
 
-file static class StructuredLogBatchBufferHelpers
+file static class BatchBufferHelpers
 {
-    public static StructuredLogBatchBufferAddStatus Add(this StructuredLogBatchBuffer buffer, string item)
+    public static BatchBufferAddStatus Add(this BatchBuffer<SentryLog> buffer, string item)
     {
         SentryLog log = new(DateTimeOffset.MinValue, SentryId.Empty, SentryLogLevel.Trace, item);
         return buffer.Add(log);

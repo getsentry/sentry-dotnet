@@ -7,6 +7,7 @@ public class MeasurementUnitTests
     {
         MeasurementUnit m = new();
         Assert.Equal("", m.ToString());
+        Assert.Null(m.ToNullableString());
     }
 
     [Fact]
@@ -21,6 +22,7 @@ public class MeasurementUnitTests
     {
         var m = MeasurementUnit.None;
         Assert.Equal("none", m.ToString());
+        Assert.Equal("none", m.ToNullableString());
     }
 
     [Fact]
@@ -28,6 +30,7 @@ public class MeasurementUnitTests
     {
         MeasurementUnit m = MeasurementUnit.Duration.Second;
         Assert.Equal("second", m.ToString());
+        Assert.Equal("second", m.ToNullableString());
     }
 
     [Fact]
@@ -35,6 +38,7 @@ public class MeasurementUnitTests
     {
         MeasurementUnit m = MeasurementUnit.Information.Byte;
         Assert.Equal("byte", m.ToString());
+        Assert.Equal("byte", m.ToNullableString());
     }
 
     [Fact]
@@ -42,6 +46,7 @@ public class MeasurementUnitTests
     {
         MeasurementUnit m = MeasurementUnit.Fraction.Percent;
         Assert.Equal("percent", m.ToString());
+        Assert.Equal("percent", m.ToNullableString());
     }
 
     [Fact]
@@ -49,6 +54,7 @@ public class MeasurementUnitTests
     {
         var m = MeasurementUnit.Custom("foo");
         Assert.Equal("foo", m.ToString());
+        Assert.Equal("foo", m.ToNullableString());
     }
 
     [Fact]
