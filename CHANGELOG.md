@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add navigation breadcrumbs for Blazor WebAssembly ([#4907](https://github.com/getsentry/sentry-dotnet/pull/4907))
+
 ### Dependencies
 
 - Bumped Xamarin.Kotlin.StdLib.Jdk8 to 2.2.20 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
