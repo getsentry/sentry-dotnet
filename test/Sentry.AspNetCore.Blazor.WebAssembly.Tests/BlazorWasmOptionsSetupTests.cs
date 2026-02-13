@@ -147,4 +147,18 @@ public class BlazorWasmOptionsSetupTests
         crumb.Data.Should().ContainKey("from").WhoseValue.Should().Be("/login");
         crumb.Data.Should().ContainKey("to").WhoseValue.Should().Be("/home");
     }
+
+    [Fact]
+    public void DuplicateNavigation_SkipsBreadcrumb()
+    {
+        // Arrange
+        _sut.Configure(new SentryBlazorOptions());
+
+        // Act — navigate to /page1, then fire LocationChanged again for the same URL
+        _navigationManager.NavigateTo("/page1");
+        _navigationManager.NavigateTo("/page1");
+
+        // Assert — only one breadcrumb should be created
+        _scope.Breadcrumbs.Should().ContainSingle();
+    }
 }
