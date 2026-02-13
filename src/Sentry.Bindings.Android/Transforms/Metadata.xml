@@ -106,11 +106,9 @@
   <!--
     The BackfillingEventProcessor interface creates a stack overflow during code generation, which appears as:
       error MSB6006: "dotnet" exited with code 134
-    AnrV2EventProcessor is dependant on BackfillingEventProcessor
-    We currently don't need to use either of these via C# bindings.
+    We currently don't need to use this via C# bindings.
   -->
   <remove-node path="/api/package[@name='io.sentry']/interface[@name='BackfillingEventProcessor']" />
-  <remove-node path="/api/package[@name='io.sentry.android.core']/class[@name='AnrV2EventProcessor']" />
 
   <!--
     SentryEvent.serialize() expects an parameter which implements IObjectWriter.
