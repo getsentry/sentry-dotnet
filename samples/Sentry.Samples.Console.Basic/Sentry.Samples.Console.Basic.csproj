@@ -4,9 +4,9 @@
     <OutputType>Exe</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <TargetFrameworks>net9.0;net8.0;net462</TargetFrameworks>
+    <TargetFrameworks>net9.0;net10.0;net462</TargetFrameworks>
   </PropertyGroup>
-  <PropertyGroup Condition="$(TargetFramework.StartsWith('net8'))">
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net462'))">
     <PublishAot>true</PublishAot>
     <PublishTrimmed>true</PublishTrimmed>
   </PropertyGroup>

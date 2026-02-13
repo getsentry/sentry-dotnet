@@ -48,7 +48,7 @@ jobs:
           curl -sSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/.github/alpine/setup-node.sh | sudo bash /dev/stdin
 
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - run: git submodule update --init modules/sentry-native
 
@@ -58,7 +58,7 @@ jobs:
         uses: ./.github/actions/install-zstd
 
       - id: cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-${{ matrix.rid }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -68,7 +68,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         shell: pwsh
 
-  build:
+  build-sentry:
     needs: build-sentry-native
     name: .NET (${{ matrix.rid }})
     runs-on: ${{ matrix.os }}
@@ -118,10 +118,10 @@ jobs:
 
       - name: Cancel Previous Runs
         if: github.ref_name != 'main' && !startsWith(github.ref_name, 'release/')
-        uses: styfle/cancel-workflow-action@85880fa0301c86cca9da44039ee3bb12d3bedbfa # 0.12.1
+        uses: styfle/cancel-workflow-action@3155a141048f8f89c06b4cdae32e7853e97536bc # 0.13.0
 
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
@@ -140,7 +140,7 @@ jobs:
 
       - name: Download sentry-native (linux-x64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'linux-x64') }}
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-linux-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -148,7 +148,7 @@ jobs:
 
       - name: Download sentry-native (linux-arm64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'linux-arm64') }}
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-linux-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -156,7 +156,7 @@ jobs:
 
       - name: Download sentry-native (linux-musl-x64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'linux-musl-x64') }}
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-linux-musl-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -164,7 +164,7 @@ jobs:
 
       - name: Download sentry-native (linux-musl-arm64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'linux-musl-arm64') }}
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-linux-musl-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -172,7 +172,7 @@ jobs:
 
       - name: Download sentry-native (macos)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'macos') }}
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-macos-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -180,7 +180,7 @@ jobs:
 
       - name: Download sentry-native (win-x64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'win-x64') }}
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-win-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -189,7 +189,7 @@ jobs:
 
       - name: Download sentry-native (win-arm64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'win-arm64') }}
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-win-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -209,7 +209,7 @@ jobs:
 
       - name: Upload build logs
         if: ${{ always() }}
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: ${{ matrix.rid }}-build-logs
           path: |
@@ -217,17 +217,32 @@ jobs:
             build.binlog
           if-no-files-found: ignore
 
+      - name: Free disk space before tests
+        if: ${{ contains(matrix.container.image, 'alpine') }}
+        run: |
+          echo "Disk usage before cleanup:"
+          df -h
+
+          # Remove build binlog (can be large, often 100MB+)
+          rm -f build.binlog || true
+
+          # Clean up NuGet HTTP cache (not the packages cache which is needed for pack)
+          dotnet nuget locals http-cache --clear || true
+
+          echo "Disk usage after cleanup:"
+          df -h
+
       - name: Test
         run: dotnet test ${{ matrix.slnf }} -c Release --no-build --nologo -l GitHubActions -l "trx;LogFilePrefix=testresults_${{ runner.os }}" --collect "XPlat Code Coverage"
 
       - name: Upload code coverage
-        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload build and test outputs
         if: failure()
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: ${{ matrix.rid }}-verify-test-results
           path: "**/*.received.*"
@@ -237,7 +252,7 @@ jobs:
 
       - name: Archive NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: ${{ github.sha }}
           if-no-files-found: error
@@ -247,10 +262,11 @@ jobs:
 
       - name: Sparse checkout
         if: env.CI_PUBLISHING_BUILD == 'true'
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           # We only check out what is absolutely necessary to reduce a chance of local files impacting
-          # integration tests, e.g. Directory.Build.props, nuget.config, ...
+          # integration tests (nuget.config etc.)... But we need the root Directory.Build.props calculate
+          # the package version
           sparse-checkout: |
             integration-test
             scripts
@@ -258,29 +274,44 @@ jobs:
 
       - name: Fetch NuGet Packages
         if: env.CI_PUBLISHING_BUILD == 'true'
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: ${{ github.sha }}
           path: src
 
       - name: Integration test
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+#       # Note that when upgrading .NET versions, linux-musl may need special handling... see comments below
+#        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
+        # TODO: Re-enable once we have resolved https://github.com/getsentry/sentry-dotnet/issues/4788
+        if: ${{ (matrix.rid != 'linux-musl-x64') }}
+        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
         with:
           path: integration-test
 
-  msbuild:
+#      # For the linux-musl runtimes we have to pin the ContainerBaseImage for preview or RC builds, since
+#      # these don't conform to the normal naming conventions and don't get resolved automatically. We do
+#      # by passing it as parameter to aot.Tests.ps1 via an environment variable
+#      - name: Integration test (musl)
+#        if: ${{ (matrix.rid == 'linux-musl-x64') || (matrix.rid == 'linux-musl-arm64') }}
+#        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
+#        env:
+#          ContainerBaseImage: 'mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-alpine3.22'
+#        with:
+#          path: integration-test
+
+  ms-build:
     needs: build-sentry-native
     name: MSBuild
     runs-on: windows-latest
 
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
 
       - name: Download sentry-native (win-x64)
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-win-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -301,13 +332,13 @@ jobs:
         run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build,Pack -p:Configuration=Release --nologo -v:minimal -flp:logfile=msbuild.log -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
 
       - name: Test MSBuild
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
         with:
           path: integration-test/msbuild.Tests.ps1
 
       - name: Upload logs
         if: ${{ always() }}
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: ${{ runner.os }}-msbuild-logs
           path: |
@@ -318,7 +349,7 @@ jobs:
   # Unsupported Native AOT runtimes should have SentryNative auto-disabled
   # to avoid native library loading errors on startup.
   unsupported-aot:
-    needs: build
+    needs: build-sentry
     name: Unsupported AOT (${{ matrix.rid }})
     runs-on: ${{ matrix.os }}
 
@@ -333,7 +364,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
 
@@ -344,13 +375,13 @@ jobs:
         uses: ./.github/actions/buildnative
 
       - name: Fetch NuGet Packages
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: ${{ github.sha }}
           path: src
 
       - name: Test AOT
-        uses: getsentry/github-workflows/sentry-cli/integration-test/@a5e409bd5bad4c295201cdcfe862b17c50b29ab7 # v2.14.1
+        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
         env:
           RuntimeIdentifier: ${{ matrix.rid }}
         with:
@@ -363,7 +394,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
           fetch-depth: 2 # default is 1 and codecov needs > 1
@@ -373,7 +404,7 @@ jobs:
         run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
 
       - name: Download sentry-native (macos)
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-macos-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -386,7 +417,7 @@ jobs:
         uses: ./.github/actions/buildnative
 
       - name: Publish Test app (macOS)
-        run: dotnet publish test/Sentry.TrimTest/Sentry.TrimTest.csproj -c Release -r osx-arm64
+        run: dotnet publish test/Sentry.TrimTest/Sentry.TrimTest.csproj -c Release -r osx-arm64 -p:NO_MOBILE=true
 
       - name: Publish Test app (Android)
         run: dotnet publish test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj -c Release -f net9.0-android35.0 -r android-arm64
@@ -402,7 +433,7 @@ jobs:
     if: ${{ !startsWith(github.ref_name, 'release/') }}
 
     steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: recursive
 

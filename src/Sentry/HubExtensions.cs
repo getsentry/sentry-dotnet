@@ -207,6 +207,22 @@ public static class HubExtensions
         hub.CaptureEvent(new SentryEvent(ex), configureScope);
 
     /// <summary>
+    /// Captures feedback from the user.
+    /// </summary>
+    /// <param name="hub">The Sentry hub.</param>
+    /// <param name="feedback">The feedback to send to Sentry.</param>
+    /// <param name="configureScope">Callback method to configure the scope.</param>
+    /// <param name="hint">
+    /// An optional hint providing high-level context for the source of the event, including attachments
+    /// </param>
+    /// <returns>
+    /// A <see cref="SentryId"/> that will contain the Id of the new event (if successful) or
+    /// <see cref="SentryId.Empty"/> otherwise
+    /// </returns>
+    public static SentryId CaptureFeedback(this IHub hub, SentryFeedback feedback, Action<Scope> configureScope, SentryHint? hint = null)
+        => hub.CaptureFeedback(feedback, out _, configureScope, hint);
+
+    /// <summary>
     /// Captures a message with a configurable scope callback.
     /// </summary>
     /// <param name="hub">The Sentry hub.</param>
@@ -270,5 +286,35 @@ public static class HubExtensions
         Scope? current = null;
         hub.ConfigureScope(scope => current = scope);
         return current;
+    }
+
+    /// <summary>
+    /// Get <paramref name="traceId"/> of either the currently active Span, or the current Scope.
+    /// Get <paramref name="spanId"/> only if there is a currently active Span.
+    /// </summary>
+    /// <remarks>
+    /// Intended for use by <see cref="SentryLog"/> and <see cref="SentryMetric{T}"/>.
+    /// </remarks>
+    internal static void GetTraceIdAndSpanId(this IHub hub, out SentryId traceId, out SpanId? spanId)
+    {
+        var activeSpan = hub.GetSpan();
+        if (activeSpan is not null)
+        {
+            traceId = activeSpan.TraceId;
+            spanId = activeSpan.SpanId;
+            return;
+        }
+
+        var scope = hub.GetScope();
+        if (scope is not null)
+        {
+            traceId = scope.PropagationContext.TraceId;
+            spanId = null;
+            return;
+        }
+
+        Debug.Assert(hub is not Hub, "In case of a 'full' Hub, there is always a Scope. Otherwise (disabled) there is no Scope, but this branch should be unreachable.");
+        traceId = SentryId.Empty;
+        spanId = null;
     }
 }

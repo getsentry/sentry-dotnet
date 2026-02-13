@@ -44,10 +44,11 @@ runs:
       uses: ./.github/actions/install-zstd
 
     # See https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md#xcode
+    # Also https://github.com/dotnet/macios/issues/21762#issuecomment-3424033859 (don't reference symlinks)
     - name: Pin the Xcode Version
       if: runner.os == 'macOS'
       shell: bash
-      run: sudo xcode-select --switch /Applications/Xcode_16.4.app
+      run: sudo xcode-select --switch /Applications/Xcode_26.2.app
 
     # Java 17 is needed for Android SDK setup step
     - name: Install Java 17
@@ -62,7 +63,7 @@ runs:
       uses: android-actions/setup-android@07976c6290703d34c16d382cb36445f98bb43b1f # v3.2.0
       with:
         # Exclude "tools" because the emulator is not needed (nor available for Windows/Linux ARM64)
-        packages: platform-tools platforms;android-34 platforms;android-35 build-tools;36.0.0
+        packages: platform-tools platforms;android-35 platforms;android-36 build-tools;36.0.0
         log-accepted-android-sdk-licenses: false
 
     # Java 11 is needed by .NET Android
@@ -94,7 +95,9 @@ runs:
       uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
       with:
         global-json-file: global.json
-        dotnet-version: 8.0.x
+        dotnet-version: |
+          8.0.x
+          9.0.310
 
     # .NET 5.0 does not support ARM64 on macOS
     - name: Install .NET 5.0 SDK
@@ -106,7 +109,13 @@ runs:
     - name: Install .NET Workloads
       shell: bash
       run: |
+        set -euo pipefail
         pwd
         dotnet workload restore \
           --temp-dir "${{ runner.temp }}" \
           --skip-sign-check
+        dotnet workload restore test/AndroidTestApp/AndroidTestApp.csproj \
+          --temp-dir "${{ runner.temp }}" \
+          --skip-sign-check
+        # Restore the Android test app explicitly to ensure runtime packs are available
+        dotnet restore test/AndroidTestApp/AndroidTestApp.csproj -r android-x64 --nologo || true

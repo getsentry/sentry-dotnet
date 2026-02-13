@@ -1,8 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>$(TargetFrameworks);net9.0-android</TargetFrameworks>
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net9.0-ios</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworks);net9.0-android;net10.0-android</TargetFrameworks>
+<!-- Note: we can't run against net9-ios because .NET 10 requires Xcode 26.2 and .NET 9 requires Xcode 26.0.
+     The macOS GitHub Actions runners only have Xcode 26.1+ installed and no support for Xcode 26.2 is planned for
+     net9.0-ios: https://github.com/dotnet/macios/issues/24199#issuecomment-3819021247
+-->
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net10.0-ios</TargetFrameworks>
     <DefineConstants Condition="'$(EnableMauiDeviceTestVisualRunner)' == 'true'">$(DefineConstants);VISUAL_RUNNER</DefineConstants>
   </PropertyGroup>
 
@@ -33,9 +37,8 @@
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">13.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
     <!-- Pin target iOS version so that our tests don't break when new versions of Xcode are released.
-      'net8.0-ios' resolves the latest version of the iOS SDK otherwise. -->
-    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">18.0</TargetPlatformVersion>
-
+      'netX.0-ios' resolves the latest version of the iOS SDK otherwise. -->
+    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">26.2</TargetPlatformVersion>
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
 
     <!-- Avoid errors of Sentry.Testing not being a self-contained executable, while including it in a self-contained executable (this).
@@ -73,9 +76,6 @@
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)"/>
     <PackageReference Include="Microsoft.Maui.Core" Version="$(MauiVersion)"/>
     <PackageReference Include="Microsoft.Maui.Essentials" Version="$(MauiVersion)"/>
-
-    <!-- https://github.com/advisories/GHSA-5f2m-466j-3848 -->
-    <PackageReference Include="System.Private.Uri" Version="4.3.2"/>
   </ItemGroup>
 
   <!-- Configure XUnit -->
@@ -100,7 +100,7 @@
     <ProjectReference Include="..\Sentry.Extensions.Logging.Tests\Sentry.Extensions.Logging.Tests.csproj"/>
     <ProjectReference Include="..\Sentry.Maui.Tests\Sentry.Maui.Tests.csproj"/>
     <ProjectReference Include="..\Sentry.Maui.CommunityToolkit.Mvvm.Tests\Sentry.Maui.CommunityToolkit.Mvvm.Tests.csproj" Condition="'$(_SentryIsNet9OrGreater)' == 'true'"/>
-    <ProjectReference Include="..\..\src\Sentry.SourceGenerators\Sentry.SourceGenerators.csproj"
+    <ProjectReference Include="..\..\src\Sentry.Compiler.Extensions\Sentry.Compiler.Extensions.csproj"
                       OutputItemType="Analyzer"
                       ReferenceOutputAssembly="false"/>
   </ItemGroup>

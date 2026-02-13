@@ -1,16 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>$(CurrentTfms)</TargetFrameworks>
     <!-- These tests fail on Mono -->
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(TargetFrameworks);net48</TargetFrameworks>
   </PropertyGroup>
+
+  <!-- Test EF Core 10 on .NET 10 -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <PackageReference Include="Verify.EntityFramework" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
+  </ItemGroup>
 
   <!-- Test EF Core 9 on .NET 9 -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <PackageReference Include="Verify.EntityFramework" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
+    <!-- https://github.com/advisories/GHSA-m5vv-6r4h-3vj9 -->
+    <PackageReference Include="Azure.Identity" Version="1.11.4" />
   </ItemGroup>
 
   <!-- Test EF Core 8 on .NET 8 -->
@@ -18,25 +27,26 @@
     <PackageReference Include="Verify.EntityFramework" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
+    <!-- https://github.com/advisories/GHSA-m5vv-6r4h-3vj9 -->
+    <PackageReference Include="Azure.Identity" Version="1.11.4" />
+    <!-- https://github.com/advisories/GHSA-qj66-m88j-hmgj -->
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
   </ItemGroup>
 
   <!-- Test EF Core 3.1 on .NET Framework -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'net48' ">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
     <ProjectReference Include="..\..\src\Sentry.DiagnosticSource\Sentry.DiagnosticSource.csproj" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.32" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.32" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="LocalDb" Version="18.0.1" />
     <!-- https://github.com/advisories/GHSA-m5vv-6r4h-3vj9 -->
     <PackageReference Include="Azure.Identity" Version="1.11.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <!-- this is needed because the version that is brought in transitively has a vulnerability warning -->
-    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+    <PackageReference Include="LocalDb" Version="18.0.1" />
+  </ItemGroup>
 
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
     <ProjectReference Include="..\Sentry.Testing\Sentry.Testing.csproj" />
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />

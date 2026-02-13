@@ -137,6 +137,10 @@ public abstract class SentryMessageHandler : DelegatingHandler
         {
             AddSentryTraceHeader(request, parentSpan);
             AddBaggageHeader(request);
+            if (_options?.PropagateTraceparent is true)
+            {
+                AddTraceparentHeader(request, parentSpan);
+            }
         }
     }
 
@@ -180,5 +184,17 @@ public abstract class SentryMessageHandler : DelegatingHandler
 
         // Set the baggage header
         request.Headers.Add(BaggageHeader.HttpHeaderName, baggage.ToString());
+    }
+
+    private void AddTraceparentHeader(HttpRequestMessage request, ISpan? parentSpan)
+    {
+        // Set W3C traceparent header if it hasn't already been set
+        if (!request.Headers.Contains(W3CTraceparentHeader.HttpHeaderName) &&
+            // Use the span created by this integration as parent, instead of its own parent
+            (parentSpan?.GetTraceHeader() ?? _hub.GetTraceHeader()) is { } traceHeader)
+        {
+            var traceparentHeader = new W3CTraceparentHeader(traceHeader.TraceId, traceHeader.SpanId, traceHeader.IsSampled);
+            request.Headers.Add(W3CTraceparentHeader.HttpHeaderName, traceparentHeader.ToString());
+        }
     }
 }

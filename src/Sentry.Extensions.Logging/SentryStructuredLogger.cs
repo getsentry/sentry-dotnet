@@ -29,9 +29,8 @@ internal sealed class SentryStructuredLogger : ILogger
     public bool IsEnabled(LogLevel logLevel)
     {
         return _hub.IsEnabled
-            && _options.Experimental.EnableLogs
-            && logLevel != LogLevel.None
-            && logLevel >= _options.ExperimentalLogging.MinimumLogLevel;
+            && _options.EnableLogs
+            && logLevel != LogLevel.None;
     }
 
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
@@ -42,7 +41,7 @@ internal sealed class SentryStructuredLogger : ILogger
         }
 
         var timestamp = _clock.GetUtcNow();
-        SentryLog.GetTraceIdAndSpanId(_hub, out var traceId, out var spanId);
+        _hub.GetTraceIdAndSpanId(out var traceId, out var spanId);
 
         var level = logLevel.ToSentryLogLevel();
         Debug.Assert(level != default);
@@ -85,7 +84,7 @@ internal sealed class SentryStructuredLogger : ILogger
         {
             Template = template,
             Parameters = parameters.DrainToImmutable(),
-            ParentSpanId = spanId,
+            SpanId = spanId,
         };
 
         log.SetDefaultAttributes(_options, _sdk);

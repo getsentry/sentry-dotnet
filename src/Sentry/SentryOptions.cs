@@ -98,7 +98,10 @@ public class SentryOptions
     /// Enables or disables automatic backpressure handling. When enabled, the SDK will monitor system health and
     /// reduce the sampling rate of events and transactions when the system is under load.
     /// </summary>
-    public bool EnableBackpressureHandling { get; set; } = false;
+    /// <remarks>
+    /// Defaults to true / enabled.
+    /// </remarks>
+    public bool EnableBackpressureHandling { get; set; } = true;
 
     /// <summary>
     /// This holds a reference to the current transport, when one is active.
@@ -539,6 +542,31 @@ public class SentryOptions
     public void SetBeforeBreadcrumb(Func<Breadcrumb, Breadcrumb?> beforeBreadcrumb)
     {
         _beforeBreadcrumb = (breadcrumb, _) => beforeBreadcrumb(breadcrumb);
+    }
+
+    /// <summary>
+    /// When set to <see langword="true"/>, logs are sent to Sentry.
+    /// Defaults to <see langword="false"/>.
+    /// </summary>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
+    public bool EnableLogs { get; set; } = false;
+
+    private Func<SentryLog, SentryLog?>? _beforeSendLog;
+
+    internal Func<SentryLog, SentryLog?>? BeforeSendLogInternal => _beforeSendLog;
+
+    /// <summary>
+    /// Sets a callback function to be invoked before sending the log to Sentry.
+    /// When the delegate throws an <see cref="Exception"/> during invocation, the log will not be captured.
+    /// </summary>
+    /// <remarks>
+    /// It can be used to modify the log object before being sent to Sentry.
+    /// To prevent the log from being sent to Sentry, return <see langword="null"/>.
+    /// </remarks>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
+    public void SetBeforeSendLog(Func<SentryLog, SentryLog?> beforeSendLog)
+    {
+        _beforeSendLog = beforeSendLog;
     }
 
     private int _maxQueueItems = 30;
@@ -991,6 +1019,18 @@ public class SentryOptions
         get => _tracePropagationTargets;
         set => _tracePropagationTargets = value.WithConfigBinding();
     }
+
+    /// <summary>
+    /// Whether to send W3C Trace Context traceparent headers in outgoing HTTP requests for distributed tracing.
+    /// When enabled, the SDK will send the <c>traceparent</c> header in addition to the <c>sentry-trace</c> header
+    /// for requests matching <see cref="TracePropagationTargets"/>.
+    /// </summary>
+    /// <remarks>
+    /// The default value is <c>false</c>. Set to <c>true</c> to enable W3C Trace Context propagation
+    /// for interoperability with services that support OpenTelemetry standards.
+    /// </remarks>
+    /// <seealso href="https://develop.sentry.dev/sdk/telemetry/traces/#propagatetraceparent"/>
+    public bool PropagateTraceparent { get; set; }
 
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
 
@@ -1776,21 +1816,23 @@ public class SentryOptions
             if (DiagnosticLogger == null)
             {
                 DiagnosticLogger = new ConsoleDiagnosticLogger(DiagnosticLevel);
-                DiagnosticLogger.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}",
-                    DiagnosticLevel);
-            }
-
-            if (SettingLocator.GetEnvironment().Equals("production", StringComparison.OrdinalIgnoreCase))
-            {
-                DiagnosticLogger.LogWarning("Sentry option 'Debug' is set to true while Environment is production. " +
-                                            "Be aware this can cause performance degradation and is not advised. " +
-                                            "See https://docs.sentry.io/platforms/dotnet/configuration/diagnostic-logger " +
-                                            "for more information");
+                DiagnosticLogger.LogDebug("Logging enabled with ConsoleDiagnosticLogger and min level: {0}", DiagnosticLevel);
             }
         }
         else
         {
             DiagnosticLogger = null;
+        }
+    }
+
+    internal void LogDiagnosticWarning()
+    {
+        if (Debug && DiagnosticLogger is not null && SettingLocator.GetEnvironment().Equals("production", StringComparison.OrdinalIgnoreCase))
+        {
+            DiagnosticLogger.LogWarning("Sentry option 'Debug' is set to true while Environment is production. " +
+                                        "Be aware this can cause performance degradation and is not advised. " +
+                                        "See https://docs.sentry.io/platforms/dotnet/configuration/diagnostic-logger " +
+                                        "for more information");
         }
     }
 
@@ -1865,48 +1907,49 @@ public class SentryOptions
     ];
 
     /// <summary>
-    /// Experimental Sentry features.
+    /// Sentry features that are currently in an experimental state.
     /// </summary>
     /// <remarks>
-    /// This and related experimental APIs may change in the future.
+    /// Experimental features are subject to binary, source and behavioral breaking changes in future updates.
     /// </remarks>
-    public SentryExperimentalOptions Experimental { get; set; } = new();
+    public ExperimentalSentryOptions Experimental { get; } = new ExperimentalSentryOptions();
 
     /// <summary>
-    /// Experimental Sentry SDK options.
+    /// Sentry features that are currently in an experimental state.
     /// </summary>
     /// <remarks>
-    /// This and related experimental APIs may change in the future.
+    /// Experimental features are subject to binary, source and behavioral breaking changes in future updates.
     /// </remarks>
-    public sealed class SentryExperimentalOptions
+    public class ExperimentalSentryOptions
     {
-        internal SentryExperimentalOptions()
+        private Func<SentryMetric, SentryMetric?>? _beforeSendMetric;
+
+        internal ExperimentalSentryOptions()
         {
         }
 
+        internal Func<SentryMetric, SentryMetric?>? BeforeSendMetricInternal => _beforeSendMetric;
+
         /// <summary>
-        /// When set to <see langword="true"/>, logs are sent to Sentry.
-        /// Defaults to <see langword="false"/>.
+        /// When set to <see langword="false"/>, the SDK does not generate and send metrics to Sentry via <see cref="SentrySdk"/>.
+        /// Defaults to <see langword="true"/>.
         /// </summary>
-        /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
-        public bool EnableLogs { get; set; } = false;
-
-        private Func<SentryLog, SentryLog?>? _beforeSendLog;
-
-        internal Func<SentryLog, SentryLog?>? BeforeSendLogInternal => _beforeSendLog;
+        /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
+        public bool EnableMetrics { get; set; } = true;
 
         /// <summary>
-        /// Sets a callback function to be invoked before sending the log to Sentry.
-        /// When the delegate throws an <see cref="Exception"/> during invocation, the log will not be captured.
+        /// Sets a callback function to be invoked before sending the metric to Sentry.
+        /// When the delegate throws an <see cref="Exception"/> during invocation, the metric will not be captured.
         /// </summary>
         /// <remarks>
-        /// It can be used to modify the log object before being sent to Sentry.
-        /// To prevent the log from being sent to Sentry, return <see langword="null"/>.
+        /// It can be used to modify the metric object before being sent to Sentry.
+        /// To prevent the metric from being sent to Sentry, return <see langword="null"/>.
+        /// Supported numeric value types are <see langword="byte"/>, <see langword="short"/>, <see langword="int"/>, <see langword="long"/>, <see langword="float"/>, and <see langword="double"/>.
         /// </remarks>
-        /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/"/>
-        public void SetBeforeSendLog(Func<SentryLog, SentryLog?> beforeSendLog)
+        /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
+        public void SetBeforeSendMetric(Func<SentryMetric, SentryMetric?> beforeSendMetric)
         {
-            _beforeSendLog = beforeSendLog;
+            _beforeSendMetric = beforeSendMetric;
         }
     }
 }

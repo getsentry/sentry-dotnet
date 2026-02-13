@@ -79,28 +79,19 @@ internal class AssemblyStoreExplorer
     }
 
     private static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenAab(FileInfo fi, DebugLogger? logger)
-        => OpenCommon(fi, [StoreReaderV2.AabPaths, StoreReader_V1.AabPaths], logger);
+        => OpenCommon(fi, StoreReader.AabPaths, logger);
 
     private static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenAabBase(FileInfo fi, DebugLogger? logger)
-        => OpenCommon(fi, [StoreReaderV2.AabBasePaths, StoreReader_V1.AabBasePaths], logger);
+        => OpenCommon(fi, StoreReader.AabBasePaths, logger);
 
     private static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenApk(FileInfo fi, DebugLogger? logger)
-        => OpenCommon(fi, [StoreReaderV2.ApkPaths, StoreReader_V1.ApkPaths], logger);
+        => OpenCommon(fi, StoreReader.ApkPaths, logger);
 
-    private static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenCommon(FileInfo fi, List<IList<string>> pathLists, DebugLogger? logger)
+    private static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage) OpenCommon(FileInfo fi, IList<string> paths, DebugLogger? logger)
     {
         using var zip = ZipFile.OpenRead(fi.FullName);
-
-        foreach (var paths in pathLists)
-        {
-            var (explorers, errorMessage, pathsFound) = TryLoad(fi, zip, paths, logger);
-            if (pathsFound)
-            {
-                return (explorers, errorMessage);
-            }
-        }
-
-        return (null, "Unable to find any blob entries");
+        var (explorers, errorMessage, pathsFound) = TryLoad(fi, zip, paths, logger);
+        return pathsFound ? (explorers, errorMessage) : (null, "Unable to find any blob entries");
     }
 
     private static (IList<AssemblyStoreExplorer>? explorers, string? errorMessage, bool pathsFound) TryLoad(FileInfo fi, ZipArchive zip, IList<string> paths, DebugLogger? logger)

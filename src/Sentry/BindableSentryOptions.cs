@@ -1,7 +1,7 @@
 namespace Sentry;
 
 /// <summary>
-/// Contains representations of the subset of properties in SentryOptions that can be set from ConfigurationBindings.
+/// Contains representations of the subset of properties in <see cref="SentryOptions"/> that can be set from ConfigurationBindings.
 /// Note that all of these properties are nullable, so that if they are not present in configuration, the values from
 /// the type being bound to will be preserved.
 /// </summary>
@@ -21,6 +21,7 @@ internal partial class BindableSentryOptions
     public string? Distribution { get; set; }
     public string? Environment { get; set; }
     public string? Dsn { get; set; }
+    public bool? EnableLogs { get; set; }
     public int? MaxQueueItems { get; set; }
     public int? MaxCacheItems { get; set; }
     public TimeSpan? ShutdownTimeout { get; set; }
@@ -42,6 +43,7 @@ internal partial class BindableSentryOptions
     public bool? EnableTracing { get; set; }
     public double? TracesSampleRate { get; set; }
     public List<string>? TracePropagationTargets { get; set; }
+    public bool? PropagateTraceparent { get; set; }
     public double? ProfilesSampleRate { get; set; }
     public StackTraceMode? StackTraceMode { get; set; }
     public long? MaxAttachmentSize { get; set; }
@@ -54,12 +56,7 @@ internal partial class BindableSentryOptions
     public bool? EnableSpotlight { get; set; }
     public string? SpotlightUrl { get; set; }
 
-    public BindableSentryExperimentalOptions Experimental { get; set; } = new();
-
-    internal sealed class BindableSentryExperimentalOptions
-    {
-        public bool? EnableLogs { get; set; }
-    }
+    public ExperimentalSentryOptions? Experimental { get; set; }
 
     public void ApplyTo(SentryOptions options)
     {
@@ -77,6 +74,7 @@ internal partial class BindableSentryOptions
         options.Distribution = Distribution ?? options.Distribution;
         options.Environment = Environment ?? options.Environment;
         options.Dsn = Dsn ?? options.Dsn;
+        options.EnableLogs = EnableLogs ?? options.EnableLogs;
         options.MaxQueueItems = MaxQueueItems ?? options.MaxQueueItems;
         options.MaxCacheItems = MaxCacheItems ?? options.MaxCacheItems;
         options.ShutdownTimeout = ShutdownTimeout ?? options.ShutdownTimeout;
@@ -98,6 +96,7 @@ internal partial class BindableSentryOptions
         options.TracesSampleRate = TracesSampleRate ?? options.TracesSampleRate;
         options.ProfilesSampleRate = ProfilesSampleRate ?? options.ProfilesSampleRate;
         options.TracePropagationTargets = TracePropagationTargets?.Select(s => new StringOrRegex(s)).ToList() ?? options.TracePropagationTargets;
+        options.PropagateTraceparent = PropagateTraceparent ?? options.PropagateTraceparent;
         options.StackTraceMode = StackTraceMode ?? options.StackTraceMode;
         options.MaxAttachmentSize = MaxAttachmentSize ?? options.MaxAttachmentSize;
         options.DetectStartupTime = DetectStartupTime ?? options.DetectStartupTime;
@@ -109,7 +108,10 @@ internal partial class BindableSentryOptions
         options.EnableSpotlight = EnableSpotlight ?? options.EnableSpotlight;
         options.SpotlightUrl = SpotlightUrl ?? options.SpotlightUrl;
 
-        options.Experimental.EnableLogs = Experimental.EnableLogs ?? options.Experimental.EnableLogs;
+        if (Experimental is { } experimental)
+        {
+            options.Experimental.EnableMetrics = experimental.EnableMetrics ?? options.Experimental.EnableMetrics;
+        }
 
 #if ANDROID
         Android.ApplyTo(options.Android);
@@ -117,5 +119,13 @@ internal partial class BindableSentryOptions
 #elif __IOS__
         Native.ApplyTo(options.Native);
 #endif
+    }
+
+    /// <summary>
+    /// Bindable Options for <see cref="SentryOptions.ExperimentalSentryOptions"/>.
+    /// </summary>
+    internal class ExperimentalSentryOptions
+    {
+        public bool? EnableMetrics { get; set; }
     }
 }

@@ -18,7 +18,7 @@ public class SentryAspNetCoreStructuredLoggerProviderTests
         public Fixture()
         {
             var loggingOptions = new SentryAspNetCoreOptions();
-            loggingOptions.Experimental.EnableLogs = true;
+            loggingOptions.EnableLogs = true;
 
             Options = Microsoft.Extensions.Options.Options.Create(loggingOptions);
             Hub = Substitute.For<IHub>();
@@ -39,6 +39,16 @@ public class SentryAspNetCoreStructuredLoggerProviderTests
     }
 
     private readonly Fixture _fixture = new();
+
+    [Fact]
+    public void Type_CustomAttributes_HasProviderAliasAttribute()
+    {
+        var type = typeof(SentryAspNetCoreStructuredLoggerProvider);
+
+        type.GetCustomAttributes<ProviderAliasAttribute>().Should()
+            .ContainSingle().Which
+            .Alias.Should().Be("Sentry");
+    }
 
     [Fact]
     public void Ctor_DependencyInjection_CanCreate()

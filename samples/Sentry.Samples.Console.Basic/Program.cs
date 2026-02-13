@@ -4,11 +4,14 @@
  * - Performance Tracing (Transactions / Spans)
  * - Release Health (Sessions)
  * - Logs
+ * - Metrics
  * - MSBuild integration for Source Context (see the csproj)
  *
  * For more advanced features of the SDK, see Sentry.Samples.Console.Customized.
  */
 
+using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
 using static System.Console;
 
@@ -38,8 +41,8 @@ SentrySdk.Init(options =>
     options.TracesSampleRate = 1.0;
 
     // This option enables Sentry Logs created via SentrySdk.Logger.
-    options.Experimental.EnableLogs = true;
-    options.Experimental.SetBeforeSendLog(static log =>
+    options.EnableLogs = true;
+    options.SetBeforeSendLog(static log =>
     {
         // A demonstration of how you can drop logs based on some attribute they have
         if (log.TryGetAttribute("suppress", out var attribute) && attribute is true)
@@ -49,6 +52,25 @@ SentrySdk.Init(options =>
 
         // Drop logs with level Info
         return log.Level is SentryLogLevel.Info ? null : log;
+    });
+
+    // Sentry (trace-connected) Metrics via SentrySdk.Experimental.Metrics are enabled by default.
+    options.Experimental.SetBeforeSendMetric(static metric =>
+    {
+        if (metric.TryGetValue(out int integer) && integer < 0)
+        {
+            // Return null to drop the metric
+            return null;
+        }
+
+        // A demonstration of how you can modify the metric object before sending it to Sentry
+        if (metric.Type is SentryMetricType.Counter)
+        {
+            metric.SetAttribute("operating_system.platform", Environment.OSVersion.Platform.ToString());
+            metric.SetAttribute("operating_system.version", Environment.OSVersion.Version.ToString());
+        }
+
+        return metric;
     });
 });
 
@@ -63,7 +85,7 @@ await ThirdFunction();
 
 // Always try to finish the transaction successfully.
 // Unhandled exceptions will fail the transaction automatically.
-// Optionally, you can try/catch the exception, and call transaction.Finish(exception) on failure.
+// Optionally, you can try/catch the exception and call transaction.Finish(exception) on failure.
 transaction.Finish();
 
 async Task FirstFunction()
@@ -71,15 +93,30 @@ async Task FirstFunction()
     // This is an example of making an HttpRequest. A trace us automatically captured by Sentry for this.
     var messageHandler = new SentryHttpMessageHandler();
     var httpClient = new HttpClient(messageHandler, true);
+
+    var stopwatch = Stopwatch.StartNew();
     var html = await httpClient.GetStringAsync("https://example.com/");
+    stopwatch.Stop();
+
     WriteLine(html);
+
+    // Info-Log filtered via "BeforeSendLog" callback
     SentrySdk.Logger.LogInfo("HTTP Request completed.");
+
+    // Counter-Metric prevented from being sent to Sentry via "BeforeSendMetric" callback
+    SentrySdk.Experimental.Metrics.EmitCounter("sentry.samples.console.basic.ignore", -1);
+
+    // Counter-Metric modified before sending it to Sentry via "BeforeSendMetric" callback
+    SentrySdk.Experimental.Metrics.EmitCounter("sentry.samples.console.basic.http_requests_completed", 1);
+
+    // Distribution-Metric sent as is (see "BeforeSendMetric" callback)
+    SentrySdk.Experimental.Metrics.EmitDistribution("sentry.samples.console.basic.http_request_duration", stopwatch.Elapsed.TotalSeconds, MeasurementUnit.Duration.Second,
+        [new KeyValuePair<string, object>("http.request.method", HttpMethod.Get.Method), new KeyValuePair<string, object>("http.response.status_code", (int)HttpStatusCode.OK)]);
 }
 
 async Task SecondFunction()
 {
     var span = transaction.StartChild("function", nameof(SecondFunction));
-
     try
     {
         // Simulate doing some work
@@ -92,31 +129,33 @@ async Task SecondFunction()
     {
         // This is an example of capturing a handled exception.
         SentrySdk.CaptureException(exception);
-        span.Finish(exception);
 
+        // This is an example of capturing a structured log.
         SentrySdk.Logger.LogError(static log => log.SetAttribute("method", nameof(SecondFunction)),
             "Error with message: {0}", exception.Message);
-    }
 
-    span.Finish();
-}
-
-async Task ThirdFunction()
-{
-    var span = transaction.StartChild("function", nameof(ThirdFunction));
-    try
-    {
-        // Simulate doing some work
-        await Task.Delay(100);
-
-        SentrySdk.Logger.LogFatal(static log => log.SetAttribute("suppress", true),
-            "Crash imminent!");
-
-        // This is an example of an unhandled exception.  It will be captured automatically.
-        throw new InvalidOperationException("Something happened that crashed the app!");
+        span.Finish(exception);
     }
     finally
     {
         span.Finish();
     }
+}
+
+async Task ThirdFunction()
+{
+    // The `using` here ensures the span gets finished when we leave this method... This is unnecessary here,
+    // since the method always throws and the span will be finished automatically when the exception is captured,
+    // but this gives you another way to ensure spans are finished.
+    using var span = transaction.StartChild("function", nameof(ThirdFunction));
+
+    // Simulate doing some work
+    await Task.Delay(100);
+
+    // This is an example of a structured log that is filtered via the 'SetBeforeSendLog' delegate above.
+    SentrySdk.Logger.LogFatal(static log => log.SetAttribute("suppress", true),
+        "Crash imminent!");
+
+    // This is an example of an unhandled exception. It will be captured automatically.
+    throw new InvalidOperationException("Something happened that crashed the app!");
 }

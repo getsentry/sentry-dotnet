@@ -11,7 +11,7 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.Experimental.EnableLogs = isEnabled;
+        _fixture.Options.EnableLogs = isEnabled;
 
         var sut = _fixture.GetSut();
         var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();
@@ -28,7 +28,7 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
 
         if (!isEnabled)
         {
@@ -54,7 +54,7 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
 
         var sut = _fixture.GetSut();
         var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();
@@ -71,7 +71,7 @@ public partial class SentrySinkTests
     {
         InMemorySentryStructuredLogger capturer = new();
         _fixture.Hub.Logger.Returns(capturer);
-        _fixture.Options.Experimental.EnableLogs = true;
+        _fixture.Options.EnableLogs = true;
         _fixture.Options.Environment = "test-environment";
         _fixture.Options.Release = "test-release";
 
@@ -112,7 +112,7 @@ public partial class SentrySinkTests
         log.Parameters[1].Should().BeEquivalentTo(new KeyValuePair<string, string>("Sequence", "[41, 42, 43]"));
         log.Parameters[2].Should().BeEquivalentTo(new KeyValuePair<string, string>("Dictionary", """[("key": "value")]"""));
         log.Parameters[3].Should().BeEquivalentTo(new KeyValuePair<string, string>("Structure", """[42, "42"]"""));
-        log.ParentSpanId.Should().Be(withActiveSpan ? _fixture.Hub.GetSpan()!.SpanId : null);
+        log.SpanId.Should().Be(withActiveSpan ? _fixture.Hub.GetSpan()!.SpanId : null);
 
         log.TryGetAttribute("sentry.environment", out object? environment).Should().BeTrue();
         environment.Should().Be("test-environment");
@@ -133,5 +133,37 @@ public partial class SentrySinkTests
         dictionary.Should().Be("""[("key": "value")]""");
         log.TryGetAttribute("property.Structure-Property", out object? structure).Should().BeTrue();
         structure.Should().Be("""[42, "42"]""");
+    }
+
+    [Fact]
+    public void Emit_StructuredLoggingWithException_NoBreadcrumb()
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+
+        var sut = _fixture.GetSut();
+        var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();
+
+        logger.Write(LogEventLevel.Error, new Exception("expected message"), "Message");
+
+        _fixture.Scope.Breadcrumbs.Should().BeEmpty();
+        capturer.Logs.Should().ContainSingle().Which.Message.Should().Be("Message");
+    }
+
+    [Fact]
+    public void Emit_StructuredLoggingWithoutException_LeavesBreadcrumb()
+    {
+        InMemorySentryStructuredLogger capturer = new();
+        _fixture.Hub.Logger.Returns(capturer);
+        _fixture.Options.EnableLogs = true;
+
+        var sut = _fixture.GetSut();
+        var logger = new LoggerConfiguration().WriteTo.Sink(sut).MinimumLevel.Verbose().CreateLogger();
+
+        logger.Write(LogEventLevel.Error, (Exception?)null, "Message");
+
+        _fixture.Scope.Breadcrumbs.Should().ContainSingle().Which.Message.Should().Be("Message");
+        capturer.Logs.Should().ContainSingle().Which.Message.Should().Be("Message");
     }
 }

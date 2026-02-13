@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == ''">net8.0-ios17.0;net8.0-maccatalyst17.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == 'true'">net8.0-ios17.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(NO_IOS)' == 'true' And '$(NO_MACCATALYST)' == ''">net8.0-maccatalyst17.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == ''">$(PreviousIosTfm);$(PreviousMacCatalystTfm)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == '' And '$(NO_MACCATALYST)' == 'true'">$(PreviousIosTfm)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(NO_IOS)' == 'true' And '$(NO_MACCATALYST)' == ''">$(PreviousMacCatalystTfm)</TargetFrameworks>
     <IsBindingProject>true</IsBindingProject>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <Description>.NET Bindings for the Sentry Cocoa SDK</Description>
@@ -42,9 +42,7 @@
     <!-- Set up the binding project. -->
     <ObjcBindingApiDefinition Include="ApiDefinitions.cs" />
     <ObjcBindingApiDefinition Include="PrivateApiDefinitions.cs" />
-    <ObjcBindingApiDefinition Include="SwiftApiDefinitions.cs" />
     <ObjcBindingCoreSource Include="StructsAndEnums.cs" />
-    <ObjcBindingCoreSource Include="SwiftStructsAndEnums.cs" />
     <NativeReference Include="$(SentryCocoaFramework)" Kind="Framework" />
 
     <!-- Use a separate readme file in the nuget. -->
@@ -102,7 +100,7 @@
 
   <!-- Choose between download and build -->
   <Target Name="_SetupCocoaSDK"
-          DependsOnTargets="_DownloadCocoaSDK;_BuildCocoaSDK"
+          DependsOnTargets="_DownloadCocoaSDK;_BuildCocoaSDK;_GenerateSentryCocoaBindings;SanitizeSentryCocoaFramework"
           Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
 
   <!-- Setup exactly once: https://learn.microsoft.com/visualstudio/msbuild/run-target-exactly-once -->
@@ -122,7 +120,7 @@
   </Target>
 
   <!-- Generate bindings -->
-  <Target Name="_GenerateSentryCocoaBindings" AfterTargets="SetupCocoaSDK"
+  <Target Name="_GenerateSentryCocoaBindings"
           Condition="$([MSBuild]::IsOSPlatform('OSX'))"
           Inputs="$(SentryCocoaBindingInputs)"
           Outputs="ApiDefinitions.cs;StructsAndEnums.cs">
@@ -132,6 +130,13 @@
     <Exec Command="pwsh ../../scripts/generate-cocoa-bindings.ps1" />
     <!-- See https://github.com/getsentry/sentry-dotnet/pull/2558 -->
     <Exec Condition="'$(GITHUB_ACTIONS)' == 'true'" Command="pwsh ../../scripts/dirty-check.ps1 -PathToCheck $(MSBuildThisFileDirectory)" />
+  </Target>
+
+  <!-- Sanitize the xcframework before NativeReference resolution and packing -->
+  <Target Name="SanitizeSentryCocoaFramework"
+          Condition="$([MSBuild]::IsOSPlatform('OSX')) and Exists('$(SentryCocoaFramework)')">
+    <Message Importance="High" Text="Sanitizing $(SentryCocoaFramework): removing dSYMs, Headers, Modules, PrivateHeaders (including symlinks)." />
+    <Exec Command="find &quot;$(SentryCocoaFramework)&quot; -depth \( -name dSYMs -o -name Headers -o -name Modules -o -name PrivateHeaders \) -exec echo Removing {} \; -exec rm -rf {} + 2&gt;/dev/null || true" />
   </Target>
 
   <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15299 -->
