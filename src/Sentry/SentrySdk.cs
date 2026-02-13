@@ -880,7 +880,7 @@ static partial class SentrySdk
 
 #pragma warning disable SENTRYTRACECONNECTEDMETRICS
         /// <inheritdoc cref="IHub.Metrics" />
-        public SentryTraceMetrics Metrics { [DebuggerStepThrough] get => CurrentHub.Metrics; }
+        public SentryMetricEmitter Metrics { [DebuggerStepThrough] get => CurrentHub.Metrics; }
 #pragma warning restore SENTRYTRACECONNECTEDMETRICS
     }
 }

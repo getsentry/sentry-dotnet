@@ -1,8 +1,8 @@
 <Project>
 
   <PropertyGroup>
-    <VersionPrefix>6.1.0-alpha.1</VersionPrefix>
-    <LangVersion>13</LangVersion>
+    <VersionPrefix>6.1.0</VersionPrefix>
+    <LangVersion>14.0</LangVersion>
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory).assets\Sentry.snk</AssemblyOriginatorKeyFile>
@@ -86,7 +86,7 @@
 
   <ItemGroup>
     <PackageReference Include="UnoptimizedAssemblyDetector" Version="0.1.1" PrivateAssets="All" />
-    <PackageReference Include="Roslynator.Analyzers" Version="4.9.0" PrivateAssets="All" />
+    <PackageReference Include="Roslynator.Analyzers" Version="4.15.0" PrivateAssets="All" />
   </ItemGroup>
 
   <!-- Import the root global usings, except for samples. -->

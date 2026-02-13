@@ -1,6 +1,5 @@
 using Sentry.Extensibility;
 using Sentry.Infrastructure;
-using Sentry.Protocol;
 
 namespace Sentry.Internal;
 
@@ -21,14 +20,14 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         _options = options;
         _clock = clock;
 
-        _batchProcessor = new BatchProcessor<SentryLog>(hub, batchCount, batchInterval, StructuredLog.Capture, _options.ClientReportRecorder, _options.DiagnosticLogger);
+        _batchProcessor = new SentryLogBatchProcessor(hub, batchCount, batchInterval, _options.ClientReportRecorder, _options.DiagnosticLogger);
     }
 
     /// <inheritdoc />
     private protected override void CaptureLog(SentryLogLevel level, string template, object[]? parameters, Action<SentryLog>? configureLog)
     {
         var timestamp = _clock.GetUtcNow();
-        SentryLog.GetTraceIdAndSpanId(_hub, out var traceId, out var spanId);
+        _hub.GetTraceIdAndSpanId(out var traceId, out var spanId);
 
         string message;
         try

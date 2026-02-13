@@ -1,4 +1,6 @@
 using Sentry.Extensibility;
+using Sentry.Protocol;
+using Sentry.Protocol.Envelopes;
 
 namespace Sentry.Internal;
 
@@ -30,10 +32,9 @@ namespace Sentry.Internal;
 /// <seealso href="https://github.com/open-telemetry/opentelemetry-collector/blob/main/processor/batchprocessor/README.md">OpenTelemetry Batch Processor</seealso>
 /// <seealso href="https://develop.sentry.dev/sdk/telemetry/logs/">Sentry Logs</seealso>
 /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/">Sentry Metrics</seealso>
-internal sealed class BatchProcessor<TItem> : IDisposable where TItem : notnull
+internal abstract class BatchProcessor<TItem> : IDisposable where TItem : notnull
 {
     private readonly IHub _hub;
-    private readonly Action<IHub, TItem[]> _sendAction;
     private readonly IClientReportRecorder _clientReportRecorder;
     private readonly IDiagnosticLogger? _diagnosticLogger;
 
@@ -41,10 +42,9 @@ internal sealed class BatchProcessor<TItem> : IDisposable where TItem : notnull
     private readonly BatchBuffer<TItem> _buffer2;
     private volatile BatchBuffer<TItem> _activeBuffer;
 
-    public BatchProcessor(IHub hub, int batchCount, TimeSpan batchInterval, Action<IHub, TItem[]> sendAction, IClientReportRecorder clientReportRecorder, IDiagnosticLogger? diagnosticLogger)
+    protected BatchProcessor(IHub hub, int batchCount, TimeSpan batchInterval, IClientReportRecorder clientReportRecorder, IDiagnosticLogger? diagnosticLogger)
     {
         _hub = hub;
-        _sendAction = sendAction;
         _clientReportRecorder = clientReportRecorder;
         _diagnosticLogger = diagnosticLogger;
 
@@ -125,9 +125,11 @@ internal sealed class BatchProcessor<TItem> : IDisposable where TItem : notnull
 
         if (items is not null && items.Length != 0)
         {
-            _sendAction(_hub, items);
+            CaptureEnvelope(_hub, items);
         }
     }
+
+    protected abstract void CaptureEnvelope(IHub hub, TItem[] items);
 
     private void OnTimeoutExceeded(BatchBuffer<TItem> buffer)
     {
@@ -142,5 +144,31 @@ internal sealed class BatchProcessor<TItem> : IDisposable where TItem : notnull
     {
         _buffer1.Dispose();
         _buffer2.Dispose();
+    }
+}
+
+internal sealed class SentryLogBatchProcessor : BatchProcessor<SentryLog>
+{
+    internal SentryLogBatchProcessor(IHub hub, int batchCount, TimeSpan batchInterval, IClientReportRecorder clientReportRecorder, IDiagnosticLogger? diagnosticLogger)
+        : base(hub, batchCount, batchInterval, clientReportRecorder, diagnosticLogger)
+    {
+    }
+
+    protected override void CaptureEnvelope(IHub hub, SentryLog[] items)
+    {
+        _ = hub.CaptureEnvelope(Envelope.FromLog(new StructuredLog(items)));
+    }
+}
+
+internal sealed class SentryMetricBatchProcessor : BatchProcessor<SentryMetric>
+{
+    internal SentryMetricBatchProcessor(IHub hub, int batchCount, TimeSpan batchInterval, IClientReportRecorder clientReportRecorder, IDiagnosticLogger? diagnosticLogger)
+        : base(hub, batchCount, batchInterval, clientReportRecorder, diagnosticLogger)
+    {
+    }
+
+    protected override void CaptureEnvelope(IHub hub, SentryMetric[] items)
+    {
+        _ = hub.CaptureEnvelope(Envelope.FromMetric(new TraceMetric(items)));
     }
 }

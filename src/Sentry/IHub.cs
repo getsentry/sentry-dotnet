@@ -36,11 +36,11 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// Available options:
     /// <list type="bullet">
     /// <item><see cref="Sentry.SentryOptions.ExperimentalSentryOptions.EnableMetrics"/></item>
-    /// <item><see cref="Sentry.SentryOptions.ExperimentalSentryOptions.SetBeforeSendMetric{T}(System.Func{SentryMetric{T}, SentryMetric{T}})"/></item>
+    /// <item><see cref="Sentry.SentryOptions.ExperimentalSentryOptions.SetBeforeSendMetric(System.Func{SentryMetric, SentryMetric})"/></item>
     /// </list>
     /// </remarks>
     [Experimental("SENTRYTRACECONNECTEDMETRICS", UrlFormat = "https://github.com/getsentry/sentry-dotnet/discussions/4838")]
-    public SentryTraceMetrics Metrics { get; }
+    public SentryMetricEmitter Metrics { get; }
 
     /// <summary>
     /// Starts a transaction.

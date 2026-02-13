@@ -81,7 +81,7 @@ internal class Hub : IHub, IDisposable
         }
 
         Logger = SentryStructuredLogger.Create(this, options, _clock);
-        Metrics = SentryTraceMetrics.Create(this, options, _clock);
+        Metrics = SentryMetricEmitter.Create(this, options, _clock);
 
 #if MEMORY_DUMP_SUPPORTED
         if (options.HeapDumpOptions is not null)
@@ -856,7 +856,7 @@ internal class Hub : IHub, IDisposable
         Logger.Flush();
         Metrics.Flush();
         (Logger as IDisposable)?.Dispose(); // see Sentry.Internal.DefaultSentryStructuredLogger
-        (Metrics as IDisposable)?.Dispose(); // see Sentry.Internal.DefaultSentryTraceMetrics
+        (Metrics as IDisposable)?.Dispose(); // see Sentry.Internal.DefaultSentryMetricEmitter
 
         try
         {
@@ -874,7 +874,9 @@ internal class Hub : IHub, IDisposable
 #if __IOS__
             // TODO
 #elif ANDROID
-            // TODO
+        // TODO: For some reason the integration tests on Android fail if we Close on the Java SDK...
+        // https://github.com/getsentry/sentry-dotnet/blob/0adaddb7ad91d0b41a2c38aacc64727ce54b2a3b/integration-test/android.Tests.ps1#L154
+        // JavaSdk.Sentry.Close();
 #elif NET8_0_OR_GREATER
         if (SentryNative.IsAvailable)
         {
@@ -888,5 +890,5 @@ internal class Hub : IHub, IDisposable
 
     public SentryStructuredLogger Logger { get; }
 
-    public SentryTraceMetrics Metrics { get; }
+    public SentryMetricEmitter Metrics { get; }
 }
