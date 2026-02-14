@@ -2,6 +2,7 @@ using Microsoft.Extensions.Primitives;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
 using Sentry.Extensibility;
+using Sentry.Internal.OpenTelemetry;
 
 namespace Sentry.OpenTelemetry;
 
@@ -54,7 +55,7 @@ public class SentryPropagator : BaggagePropagator
         Options?.LogDebug("SentryPropagator.Extract");
 
         var result = base.Extract(context, carrier, getter);
-        var baggage = result.Baggage; // The Otel .NET SDK takes care of baggage headers alread
+        var baggage = result.Baggage; // The Otel .NET SDK takes care of baggage headers already
 
         Options?.LogDebug("Baggage");
         foreach (var entry in baggage)

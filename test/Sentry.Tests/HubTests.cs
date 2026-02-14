@@ -1510,8 +1510,8 @@ public partial class HubTests : IDisposable
         {
             scope.PropagationContext.TraceId.Should().Be(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"));
             scope.PropagationContext.ParentSpanId.Should().Be(SpanId.Parse("2000000000000000"));
-            Assert.NotNull(scope.PropagationContext._dynamicSamplingContext);
-            scope.PropagationContext._dynamicSamplingContext.Items.Should().Contain(baggageHeader.GetSentryMembers());
+            Assert.NotNull(scope.PropagationContext.DynamicSamplingContext);
+            scope.PropagationContext.DynamicSamplingContext.Items.Should().Contain(baggageHeader.GetSentryMembers());
         });
 
         transactionContext.TraceId.Should().Be(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"));
@@ -1531,7 +1531,7 @@ public partial class HubTests : IDisposable
         hub.ScopeManager.ConfigureScope(scope =>
         {
             Assert.Null(scope.PropagationContext.ParentSpanId);
-            Assert.Null(scope.PropagationContext._dynamicSamplingContext);
+            Assert.Null(scope.PropagationContext.DynamicSamplingContext);
         });
 
         transactionContext.Name.Should().Be("test-name");
@@ -1564,8 +1564,8 @@ public partial class HubTests : IDisposable
         {
             scope.PropagationContext.TraceId.Should().Be(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"));
             scope.PropagationContext.ParentSpanId.Should().Be(SpanId.Parse("2000000000000000"));
-            Assert.NotNull(scope.PropagationContext._dynamicSamplingContext);
-            scope.PropagationContext._dynamicSamplingContext.ToBaggageHeader().Members.Should().Contain(BaggageHeader.TryParse(baggageHeader)!.Members);
+            Assert.NotNull(scope.PropagationContext.DynamicSamplingContext);
+            scope.PropagationContext.DynamicSamplingContext.ToBaggageHeader().Members.Should().Contain(BaggageHeader.TryParse(baggageHeader)!.Members);
         });
 
         transactionContext.TraceId.Should().Be(SentryId.Parse("5bd5f6d346b442dd9177dce9302fd737"));
@@ -1585,7 +1585,7 @@ public partial class HubTests : IDisposable
         hub.ScopeManager.ConfigureScope(scope =>
         {
             Assert.Null(scope.PropagationContext.ParentSpanId);
-            Assert.Null(scope.PropagationContext._dynamicSamplingContext);
+            Assert.Null(scope.PropagationContext.DynamicSamplingContext);
         });
 
         transactionContext.Name.Should().Be("test-name");
