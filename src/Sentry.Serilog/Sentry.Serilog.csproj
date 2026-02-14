@@ -39,4 +39,10 @@
     <InternalsVisibleTo Include="Sentry.Serilog.Tests" PublicKey="$(SentryPublicKey)" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="SentrySink.Structured.cs">
+      <DependentUpon>SentrySink.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>
