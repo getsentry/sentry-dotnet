@@ -149,13 +149,13 @@ Describe 'MAUI (<framework>)' -ForEach @(
         $result = RunDotnetWithSentryCLI 'build' 'maui-app' $True $True "$framework-android$androidTpv"
         Write-Host "UploadedDebugFiles: $($result.UploadedDebugFiles() | Out-String)"
         $result.UploadedDebugFiles() | Sort-Object -Unique | Should -Be @(
+            '/proguard/a5fb4278-bcb5-4464-8585-d811dc3c3959.txt',
             'libsentry-android.so',
             'libsentry.so',
             'libsentrysupplemental.so',
             'libxamarin-app.so',
             'maui-app.pdb'
         )
-        $result.ScriptOutput | Should -AnyElementMatch 'Uploaded a total of 1 new mapping files'
         $result.ScriptOutput | Should -AnyElementMatch "Found 23 debug information files \(1 with embedded sources\)"
     }
 
