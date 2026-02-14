@@ -197,7 +197,7 @@ jobs:
           enableCrossOsArchive: true
 
       - name: Build Native Dependencies
-        if: ${{ !matrix.container }}
+        if: ${{ !matrix.container && !env.NO_MOBILE }}
         uses: ./.github/actions/buildnative
 
       - name: Restore .NET Dependencies
@@ -372,6 +372,7 @@ jobs:
         uses: ./.github/actions/environment
 
       - name: Build Native Dependencies
+        if: ${{ !env.NO_MOBILE }}
         uses: ./.github/actions/buildnative
 
       - name: Fetch NuGet Packages
