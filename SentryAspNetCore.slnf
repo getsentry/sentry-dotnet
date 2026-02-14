@@ -24,6 +24,8 @@
       "src\\Sentry.Serilog\\Sentry.Serilog.csproj",
       "src\\Sentry\\Sentry.csproj",
       "test\\Sentry.Analyzers.Tests\\Sentry.Analyzers.Tests.csproj",
+      "test\\Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests.TestApp\\Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests.TestApp.csproj",
+      "test\\Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests\\Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests.csproj",
       "test\\Sentry.AspNetCore.Blazor.WebAssembly.Tests\\Sentry.AspNetCore.Blazor.WebAssembly.Tests.csproj",
       "test\\Sentry.AspNetCore.Grpc.Tests\\Sentry.AspNetCore.Grpc.Tests.csproj",
       "test\\Sentry.AspNetCore.Tests\\Sentry.AspNetCore.Tests.csproj",

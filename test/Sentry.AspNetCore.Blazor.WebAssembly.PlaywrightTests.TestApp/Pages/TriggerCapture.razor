@@ -1,0 +1,11 @@
+@page "/trigger-capture"
+
+<h1 id="page-title">Trigger Capture</h1>
+<button id="btn-capture" @onclick="Capture">Capture Message</button>
+
+@code {
+    private void Capture()
+    {
+        SentrySdk.CaptureMessage("playwright-test");
+    }
+}
