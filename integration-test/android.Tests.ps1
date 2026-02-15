@@ -162,7 +162,7 @@ Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-
 
         Dump-ServerErrors -Result $result
         $result.HasErrors() | Should -BeFalse
-        $result.Events() | Should -AnyElementMatch "`"type`":`"SIG[A-Z]+`"" # SIGILL (x86_64), SIGTRAP (arm64-v8a)
+        $result.Events() | Should -AnyElementMatch "`"type`":`"SIGSEGV`""
         $result.Events() | Should -Not -AnyElementMatch "`"type`":`"System.\w+Exception`""
         $result.Events() | Should -HaveCount 1
     }
