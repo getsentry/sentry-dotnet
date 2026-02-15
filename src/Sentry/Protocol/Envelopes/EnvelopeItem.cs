@@ -25,6 +25,7 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
     internal const string TypeValueMetric = "statsd";
     internal const string TypeValueCodeLocations = "metric_meta";
     internal const string TypeValueLog = "log";
+    internal const string TypeValueTraceMetric = "trace_metric";
 
     private const string LengthKey = "length";
     private const string FileNameKey = "filename";
@@ -367,6 +368,18 @@ public sealed class EnvelopeItem : ISerializable, IDisposable
         };
 
         return new EnvelopeItem(header, new JsonSerializable(log));
+    }
+
+    internal static EnvelopeItem FromMetric(TraceMetric metric)
+    {
+        var header = new Dictionary<string, object?>(3, StringComparer.Ordinal)
+        {
+            [TypeKey] = TypeValueTraceMetric,
+            ["item_count"] = metric.Length,
+            ["content_type"] = "application/vnd.sentry.items.trace-metric+json",
+        };
+
+        return new EnvelopeItem(header, new JsonSerializable(metric));
     }
 
     private static async Task<Dictionary<string, object?>> DeserializeHeaderAsync(

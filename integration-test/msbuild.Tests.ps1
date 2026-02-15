@@ -8,6 +8,10 @@ $IsARM64 = "Arm64".Equals([System.Runtime.InteropServices.RuntimeInformation]::O
 # NOTE: These .NET versions are used to build a test app that consumes the Sentry
 # .NET SDK, and are not tied to the .NET version used to build the SDK itself.
 Describe 'MSBuild app' {
+    BeforeAll {
+        ResetLocalPackages
+    }
+
     BeforeDiscovery {
         $frameworks = @()
 

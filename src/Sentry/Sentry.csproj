@@ -137,6 +137,7 @@
     <InternalsVisibleTo Include="Sentry.Android.AssemblyReader.Tests" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNet" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNet.Tests" PublicKey="$(SentryPublicKey)" />
+    <InternalsVisibleTo Include="Sentry.AspNetCore.Blazor.WebAssembly" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNetCore" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNetCore.Grpc" PublicKey="$(SentryPublicKey)" />
     <InternalsVisibleTo Include="Sentry.AspNetCore.Grpc.Tests" PublicKey="$(SentryPublicKey)" />

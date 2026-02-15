@@ -1,0 +1,184 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/.github/">
+    <File Path=".github/release.yml" />
+  </Folder>
+  <Folder Name="/.github/actions/" />
+  <Folder Name="/.github/actions/buildnative/">
+    <File Path=".github/actions/buildnative/action.yml" />
+  </Folder>
+  <Folder Name="/.github/actions/environment/">
+    <File Path=".github/actions/environment/action.yml" />
+  </Folder>
+  <Folder Name="/.github/actions/freediskspace/">
+    <File Path=".github/actions/freediskspace/action.yml" />
+  </Folder>
+  <Folder Name="/.github/actions/install-zstd/">
+    <File Path=".github/actions/install-zstd/action.yml" />
+  </Folder>
+  <Folder Name="/.github/workflows/">
+    <File Path=".github/workflows/alpine.yml" />
+    <File Path=".github/workflows/build.yml" />
+    <File Path=".github/workflows/changelog-preview.yml" />
+    <File Path=".github/workflows/codeql-analysis.yml" />
+    <File Path=".github/workflows/danger.yml" />
+    <File Path=".github/workflows/device-tests-android.yml" />
+    <File Path=".github/workflows/device-tests-ios.yml" />
+    <File Path=".github/workflows/format-code.yml" />
+    <File Path=".github/workflows/release.yml" />
+    <File Path=".github/workflows/update-deps.yml" />
+    <File Path=".github/workflows/vulnerabilities.yml" />
+  </Folder>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/Sentry.Benchmarks/Sentry.Benchmarks.csproj" />
+  </Folder>
+  <Folder Name="/integration-test/">
+    <File Path="integration-test/android.Tests.ps1" />
+    <File Path="integration-test/aot.Tests.ps1" />
+    <File Path="integration-test/cli.Tests.ps1" />
+    <File Path="integration-test/common.ps1" />
+    <File Path="integration-test/ios.Tests.ps1" />
+    <File Path="integration-test/msbuild.Tests.ps1" />
+    <File Path="integration-test/pester.ps1" />
+    <File Path="integration-test/runtime.Tests.ps1" />
+  </Folder>
+  <Folder Name="/integration-test/net4-console/" />
+  <Folder Name="/modules/">
+    <File Path="modules/sentry-cocoa.properties" />
+    <Project Path="modules/perfview/src/FastSerialization/FastSerialization.csproj" />
+    <Project Path="modules/perfview/src/TraceEvent/TraceEvent.csproj" />
+  </Folder>
+  <Folder Name="/root/">
+    <File Path=".codecov.yml" />
+    <File Path=".gitignore" />
+    <File Path="CHANGELOG.md" />
+    <File Path="CONTRIBUTING.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="global.json" />
+    <File Path="nuget.config" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/Sentry.Samples.Android/Sentry.Samples.Android.csproj" />
+    <Project Path="samples/Sentry.Samples.AspNetCore.Basic/Sentry.Samples.AspNetCore.Basic.csproj" />
+    <Project Path="samples/Sentry.Samples.AspNetCore.Blazor.Server/Sentry.Samples.AspNetCore.Blazor.Server.csproj" />
+    <Project Path="samples/Sentry.Samples.AspNetCore.Blazor.Wasm/Sentry.Samples.AspNetCore.Blazor.Wasm.csproj" />
+    <Project Path="samples/Sentry.Samples.AspNetCore.Grpc/Sentry.Samples.AspNetCore.Grpc.csproj" />
+    <Project Path="samples/Sentry.Samples.AspNetCore.Mvc/Sentry.Samples.AspNetCore.Mvc.csproj" />
+    <Project Path="samples/Sentry.Samples.AspNetCore.Serilog/Sentry.Samples.AspNetCore.Serilog.csproj" />
+    <Project Path="samples/Sentry.Samples.AspNetCore.WebAPI.Profiling/Sentry.Samples.AspNetCore.WebAPI.Profiling.csproj" />
+    <Project Path="samples/Sentry.Samples.Aws.Lambda.AspNetCoreServer/Sentry.Samples.Aws.Lambda.AspNetCoreServer.csproj" />
+    <Project Path="samples/Sentry.Samples.Console.Basic/Sentry.Samples.Console.Basic.csproj" />
+    <Project Path="samples/Sentry.Samples.Console.Customized/Sentry.Samples.Console.Customized.csproj" />
+    <Project Path="samples/Sentry.Samples.Console.HeapDump/Sentry.Samples.Console.HeapDump.csproj" />
+    <Project Path="samples/Sentry.Samples.Console.Native/Sentry.Samples.Console.Native.csproj" />
+    <Project Path="samples/Sentry.Samples.Console.Profiling/Sentry.Samples.Console.Profiling.csproj" />
+    <Project Path="samples/Sentry.Samples.EntityFramework/Sentry.Samples.EntityFramework.csproj" />
+    <Project Path="samples/Sentry.Samples.GenericHost/Sentry.Samples.GenericHost.csproj" />
+    <Project Path="samples/Sentry.Samples.Google.Cloud.Functions/Sentry.Samples.Google.Cloud.Functions.csproj" />
+    <Project Path="samples/Sentry.Samples.GraphQL.Client.Http/Sentry.Samples.GraphQL.Client.Http.csproj" />
+    <Project Path="samples/Sentry.Samples.GraphQL.Server/Sentry.Samples.GraphQL.Server.csproj" />
+    <Project Path="samples/Sentry.Samples.Hangfire/Sentry.Samples.Hangfire.csproj" />
+    <Project Path="samples/Sentry.Samples.Ios/Sentry.Samples.Ios.csproj" />
+    <Project Path="samples/Sentry.Samples.Log4Net/Sentry.Samples.Log4Net.csproj" />
+    <Project Path="samples/Sentry.Samples.MacCatalyst/Sentry.Samples.MacCatalyst.csproj" />
+    <Project Path="samples/Sentry.Samples.MacOS/Sentry.Samples.MacOS.csproj" />
+    <Project Path="samples/Sentry.Samples.Maui/Sentry.Samples.Maui.csproj">
+      <Deploy Solution="Debug|Any CPU" />
+    </Project>
+    <Project Path="samples/Sentry.Samples.ME.AI.AspNetCore/Sentry.Samples.ME.AI.AspNetCore.csproj" />
+    <Project Path="samples/Sentry.Samples.ME.AI.Console/Sentry.Samples.ME.AI.Console.csproj" />
+    <Project Path="samples/Sentry.Samples.ME.Logging/Sentry.Samples.ME.Logging.csproj" />
+    <Project Path="samples/Sentry.Samples.NLog/Sentry.Samples.NLog.csproj" />
+    <Project Path="samples/Sentry.Samples.OpenTelemetry.AspNetCore/Sentry.Samples.OpenTelemetry.AspNetCore.csproj" />
+    <Project Path="samples/Sentry.Samples.OpenTelemetry.AzureFunctions/Sentry.Samples.OpenTelemetry.AzureFunctions.csproj" />
+    <Project Path="samples/Sentry.Samples.OpenTelemetry.Console/Sentry.Samples.OpenTelemetry.Console.csproj" />
+    <Project Path="samples/Sentry.Samples.Serilog/Sentry.Samples.Serilog.csproj" />
+  </Folder>
+  <Folder Name="/scripts/">
+    <File Path="scripts/accept-verifier-changes.ps1" />
+    <File Path="scripts/build-sentry-cocoa.sh" />
+    <File Path="scripts/build-sentry-native.ps1" />
+    <File Path="scripts/bump-version.ps1" />
+    <File Path="scripts/bump-version.sh" />
+    <File Path="scripts/commit-formatted-code.sh" />
+    <File Path="scripts/device-test-utils.ps1" />
+    <File Path="scripts/device-test.ps1" />
+    <File Path="scripts/dirty-check.ps1" />
+    <File Path="scripts/generate-cocoa-bindings.ps1" />
+    <File Path="scripts/generate-solution-filters-config.yaml" />
+    <File Path="scripts/generate-solution-filters.ps1" />
+    <File Path="scripts/install-libssl1.sh" />
+    <File Path="scripts/parse-xunit2-xml.ps1" />
+    <File Path="scripts/patch-cocoa-bindings.cs" />
+    <File Path="scripts/update-cli.ps1" />
+    <File Path="scripts/update-java.ps1" />
+    <File Path="scripts/update-project-xml.ps1" />
+  </Folder>
+  <Folder Name="/src/">
+    <File Path="src/Directory.Build.props" />
+    <File Path="src/Directory.Build.targets" />
+    <Project Path="src/Sentry.Analyzers/Sentry.Analyzers.csproj" />
+    <Project Path="src/Sentry.Android.AssemblyReader/Sentry.Android.AssemblyReader.csproj" />
+    <Project Path="src/Sentry.AspNet/Sentry.AspNet.csproj" />
+    <Project Path="src/Sentry.AspNetCore.Blazor.WebAssembly/Sentry.AspNetCore.Blazor.WebAssembly.csproj" />
+    <Project Path="src/Sentry.AspNetCore.Grpc/Sentry.AspNetCore.Grpc.csproj" />
+    <Project Path="src/Sentry.AspNetCore/Sentry.AspNetCore.csproj" />
+    <Project Path="src/Sentry.Bindings.Android/Sentry.Bindings.Android.csproj" />
+    <Project Path="src/Sentry.Bindings.Cocoa/Sentry.Bindings.Cocoa.csproj" />
+    <Project Path="src/Sentry.Compiler.Extensions/Sentry.Compiler.Extensions.csproj" />
+    <Project Path="src/Sentry.DiagnosticSource/Sentry.DiagnosticSource.csproj" />
+    <Project Path="src/Sentry.EntityFramework/Sentry.EntityFramework.csproj" />
+    <Project Path="src/Sentry.Extensions.AI/Sentry.Extensions.AI.csproj" />
+    <Project Path="src/Sentry.Extensions.Logging/Sentry.Extensions.Logging.csproj" />
+    <Project Path="src/Sentry.Google.Cloud.Functions/Sentry.Google.Cloud.Functions.csproj" />
+    <Project Path="src/Sentry.Hangfire/Sentry.Hangfire.csproj" />
+    <Project Path="src/Sentry.Log4Net/Sentry.Log4Net.csproj" />
+    <Project Path="src/Sentry.Maui.CommunityToolkit.Mvvm/Sentry.Maui.CommunityToolkit.Mvvm.csproj" />
+    <Project Path="src/Sentry.Maui/Sentry.Maui.csproj" />
+    <Project Path="src/Sentry.NLog/Sentry.NLog.csproj" />
+    <Project Path="src/Sentry.OpenTelemetry/Sentry.OpenTelemetry.csproj" />
+    <Project Path="src/Sentry.Profiling/Sentry.Profiling.csproj" />
+    <Project Path="src/Sentry.Serilog/Sentry.Serilog.csproj" />
+    <Project Path="src/Sentry/Sentry.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <File Path="test/Directory.Build.props" />
+    <File Path="test/Directory.Build.targets" />
+    <Project Path="test/AndroidTestApp/AndroidTestApp.csproj" />
+    <Project Path="test/Sentry.Analyzers.Tests/Sentry.Analyzers.Tests.csproj" />
+    <Project Path="test/Sentry.Android.AssemblyReader.Tests/Sentry.Android.AssemblyReader.Tests.csproj" />
+    <Project Path="test/Sentry.AspNet.Tests/Sentry.AspNet.Tests.csproj" />
+    <Project Path="test/Sentry.AspNetCore.Grpc.Tests/Sentry.AspNetCore.Grpc.Tests.csproj" />
+    <Project Path="test/Sentry.AspNetCore.Tests/Sentry.AspNetCore.Tests.csproj" />
+    <Project Path="test/Sentry.AspNetCore.TestUtils/Sentry.AspNetCore.TestUtils.csproj" />
+    <Project Path="test/Sentry.Compiler.Extensions.Tests/Sentry.Compiler.Extensions.Tests.csproj" />
+    <Project Path="test/Sentry.DiagnosticSource.IntegrationTests/Sentry.DiagnosticSource.IntegrationTests.csproj" />
+    <Project Path="test/Sentry.DiagnosticSource.Tests/Sentry.DiagnosticSource.Tests.csproj" />
+    <Project Path="test/Sentry.EntityFramework.Tests/Sentry.EntityFramework.Tests.csproj" />
+    <Project Path="test/Sentry.Extensions.AI.Tests/Sentry.Extensions.AI.Tests.csproj" />
+    <Project Path="test/Sentry.Extensions.Logging.Tests/Sentry.Extensions.Logging.Tests.csproj" />
+    <Project Path="test/Sentry.Google.Cloud.Functions.Tests/Sentry.Google.Cloud.Functions.Tests.csproj" />
+    <Project Path="test/Sentry.Hangfire.Tests/Sentry.Hangfire.Tests.csproj" />
+    <Project Path="test/Sentry.Log4Net.Tests/Sentry.Log4Net.Tests.csproj" />
+    <Project Path="test/Sentry.Maui.CommunityToolkit.Mvvm.Tests/Sentry.Maui.CommunityToolkit.Mvvm.Tests.csproj" />
+    <Project Path="test/Sentry.Maui.Device.TestApp/Sentry.Maui.Device.TestApp.csproj" />
+    <Project Path="test/Sentry.Maui.Tests/Sentry.Maui.Tests.csproj" />
+    <Project Path="test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj" />
+    <Project Path="test/Sentry.NLog.Tests/Sentry.NLog.Tests.csproj" />
+    <Project Path="test/Sentry.OpenTelemetry.Tests/Sentry.OpenTelemetry.Tests.csproj" />
+    <Project Path="test/Sentry.Profiling.Tests/Sentry.Profiling.Tests.csproj" />
+    <Project Path="test/Sentry.Serilog.Tests/Sentry.Serilog.Tests.csproj" />
+    <Project Path="test/Sentry.Testing.CrashableApp/Sentry.Testing.CrashableApp.csproj" />
+    <Project Path="test/Sentry.Testing/Sentry.Testing.csproj" />
+    <Project Path="test/Sentry.Tests/Sentry.Tests.csproj" />
+    <Project Path="test/Sentry.TrimTest/Sentry.TrimTest.csproj" />
+    <Project Path="test/SingleFileTestApp/SingleFileTestApp.csproj" />
+    <Project Path="test\Sentry.AspNetCore.Blazor.WebAssembly.Tests\Sentry.AspNetCore.Blazor.WebAssembly.Tests.csproj" />
+  </Folder>
+</Solution>

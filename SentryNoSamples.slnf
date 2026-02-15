@@ -1,6 +1,6 @@
 {
   "solution": {
-    "path": "Sentry.sln",
+    "path": "Sentry.slnx",
     "projects": [
       "benchmarks\\Sentry.Benchmarks\\Sentry.Benchmarks.csproj",
       "src\\Sentry.Analyzers\\Sentry.Analyzers.csproj",
@@ -27,6 +27,7 @@
       "test\\Sentry.Analyzers.Tests\\Sentry.Analyzers.Tests.csproj",
       "test\\Sentry.Android.AssemblyReader.Tests\\Sentry.Android.AssemblyReader.Tests.csproj",
       "test\\Sentry.AspNet.Tests\\Sentry.AspNet.Tests.csproj",
+      "test\\Sentry.AspNetCore.Blazor.WebAssembly.Tests\\Sentry.AspNetCore.Blazor.WebAssembly.Tests.csproj",
       "test\\Sentry.AspNetCore.Grpc.Tests\\Sentry.AspNetCore.Grpc.Tests.csproj",
       "test\\Sentry.AspNetCore.Tests\\Sentry.AspNetCore.Tests.csproj",
       "test\\Sentry.AspNetCore.TestUtils\\Sentry.AspNetCore.TestUtils.csproj",

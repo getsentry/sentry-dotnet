@@ -108,9 +108,12 @@ BeforeAll {
         Remove-Item -Path ~/.nuget/packages/$($name.ToLower())/$packageVersion -Recurse -Force -ErrorAction SilentlyContinue
     }
 
-    Remove-Item -Path "$PSScriptRoot/packages" -Recurse -Force -ErrorAction SilentlyContinue
-    New-Item -ItemType Directory -Path "$PSScriptRoot/packages" | Out-Null
-    RegisterLocalPackage 'Sentry'
+    function ResetLocalPackages()
+    {
+        Remove-Item -Path "$PSScriptRoot/packages" -Recurse -Force -ErrorAction SilentlyContinue
+        New-Item -ItemType Directory -Path "$PSScriptRoot/packages" | Out-Null
+        RegisterLocalPackage 'Sentry'
+    }
 
     function RunDotnetWithSentryCLI([string] $action, [string]$project, [bool]$Symbols, [bool]$Sources, [string]$TargetFramework)
     {

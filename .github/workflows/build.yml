@@ -58,7 +58,7 @@ jobs:
         uses: ./.github/actions/install-zstd
 
       - id: cache
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-${{ matrix.rid }}-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -140,7 +140,7 @@ jobs:
 
       - name: Download sentry-native (linux-x64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'linux-x64') }}
-        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-linux-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -148,7 +148,7 @@ jobs:
 
       - name: Download sentry-native (linux-arm64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'linux-arm64') }}
-        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-linux-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -156,7 +156,7 @@ jobs:
 
       - name: Download sentry-native (linux-musl-x64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'linux-musl-x64') }}
-        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-linux-musl-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -164,7 +164,7 @@ jobs:
 
       - name: Download sentry-native (linux-musl-arm64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'linux-musl-arm64') }}
-        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-linux-musl-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -172,7 +172,7 @@ jobs:
 
       - name: Download sentry-native (macos)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'macos') }}
-        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-macos-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -180,7 +180,7 @@ jobs:
 
       - name: Download sentry-native (win-x64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'win-x64') }}
-        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-win-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -189,7 +189,7 @@ jobs:
 
       - name: Download sentry-native (win-arm64)
         if: ${{ (env.CI_PUBLISHING_BUILD == 'true') || (matrix.rid == 'win-arm64') }}
-        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-win-arm64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -284,7 +284,7 @@ jobs:
 #        if: ${{ (matrix.rid != 'linux-musl-x64') && (matrix.rid != 'linux-musl-arm64') }}
         # TODO: Re-enable once we have resolved https://github.com/getsentry/sentry-dotnet/issues/4788
         if: ${{ (matrix.rid != 'linux-musl-x64') }}
-        uses: getsentry/github-workflows/sentry-cli/integration-test@95603f4efe938315ff0dd427a1f2bb40b1889a92 # 3.2.0
+        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
         with:
           path: integration-test
 
@@ -293,7 +293,7 @@ jobs:
 #      # by passing it as parameter to aot.Tests.ps1 via an environment variable
 #      - name: Integration test (musl)
 #        if: ${{ (matrix.rid == 'linux-musl-x64') || (matrix.rid == 'linux-musl-arm64') }}
-#        uses: getsentry/github-workflows/sentry-cli/integration-test@95603f4efe938315ff0dd427a1f2bb40b1889a92 # 3.2.0
+#        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
 #        env:
 #          ContainerBaseImage: 'mcr.microsoft.com/dotnet/nightly/runtime-deps:10.0-preview-alpine3.22'
 #        with:
@@ -311,7 +311,7 @@ jobs:
           submodules: recursive
 
       - name: Download sentry-native (win-x64)
-        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-win-x64-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
@@ -332,7 +332,7 @@ jobs:
         run: msbuild Sentry-CI-Build-Windows.slnf -t:Restore,Build,Pack -p:Configuration=Release --nologo -v:minimal -flp:logfile=msbuild.log -p:CopyLocalLockFileAssemblies=true -bl:msbuild.binlog
 
       - name: Test MSBuild
-        uses: getsentry/github-workflows/sentry-cli/integration-test@95603f4efe938315ff0dd427a1f2bb40b1889a92 # 3.2.0
+        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
         with:
           path: integration-test/msbuild.Tests.ps1
 
@@ -381,7 +381,7 @@ jobs:
           path: src
 
       - name: Test AOT
-        uses: getsentry/github-workflows/sentry-cli/integration-test@95603f4efe938315ff0dd427a1f2bb40b1889a92 # 3.2.0
+        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
         env:
           RuntimeIdentifier: ${{ matrix.rid }}
         with:
@@ -404,7 +404,7 @@ jobs:
         run: echo "CI_PUBLISHING_BUILD=true" >> $GITHUB_ENV
 
       - name: Download sentry-native (macos)
-        uses: actions/cache/restore@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache/restore@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: src/Sentry/Platforms/Native/sentry-native
           key: sentry-native-macos-${{ hashFiles('scripts/build-sentry-native.ps1') }}-${{ hashFiles('.git/modules/modules/sentry-native/HEAD') }}
