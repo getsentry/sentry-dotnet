@@ -839,6 +839,7 @@ namespace Sentry
         public string SpotlightUrl { get; set; }
         public Sentry.StackTraceMode StackTraceMode { get; set; }
         public System.Collections.Generic.IList<Sentry.StringOrRegex> TagFilters { get; set; }
+        public Sentry.TraceLifeCycle TraceLifeCycle { get; set; }
         public System.Collections.Generic.IList<Sentry.StringOrRegex> TracePropagationTargets { get; set; }
         public double? TracesSampleRate { get; set; }
         public System.Func<Sentry.TransactionSamplingContext, double?>? TracesSampler { get; set; }
@@ -1326,6 +1327,11 @@ namespace Sentry
         public override string ToString() { }
         public static Sentry.StringOrRegex op_Implicit(System.Text.RegularExpressions.Regex regex) { }
         public static Sentry.StringOrRegex op_Implicit(string stringOrRegex) { }
+    }
+    public enum TraceLifeCycle
+    {
+        Static = 0,
+        Stream = 1,
     }
     public class TransactionContext : Sentry.SpanContext, Sentry.ITransactionContext, Sentry.Protocol.ITraceContext
     {

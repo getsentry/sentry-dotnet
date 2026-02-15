@@ -1158,6 +1158,16 @@ public class SentryOptions
 
     /// <summary>
     /// <para>
+    ///     Determines the <see cref="TraceLifeCycle"/> used to send spans to Sentry.
+    /// </para>
+    /// <para>
+    ///     Defaults to <see cref="TraceLifeCycle.Static"/>
+    /// </para>
+    /// </summary>
+    public TraceLifeCycle TraceLifeCycle { get; set; } = TraceLifeCycle.Static;
+
+    /// <summary>
+    /// <para>
     /// Set to `true` to prevents Sentry from automatically registering <see cref="SentryHttpMessageHandler"/>.
     /// </para>
     /// <para>Defaults to `false`. Should be set to `true` when using the OpenTelemetry.Instrumentation.Http.</para>

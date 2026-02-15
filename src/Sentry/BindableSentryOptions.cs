@@ -41,6 +41,7 @@ internal partial class BindableSentryOptions
     public TimeSpan? InitCacheFlushTimeout { get; set; }
     public Dictionary<string, string>? DefaultTags { get; set; }
     public bool? EnableTracing { get; set; }
+    public TraceLifeCycle? TraceLifeCycle { get; set; }
     public double? TracesSampleRate { get; set; }
     public List<string>? TracePropagationTargets { get; set; }
     public bool? PropagateTraceparent { get; set; }
@@ -93,6 +94,7 @@ internal partial class BindableSentryOptions
         options.DisableFileWrite = DisableFileWrite ?? options.DisableFileWrite;
         options.InitCacheFlushTimeout = InitCacheFlushTimeout ?? options.InitCacheFlushTimeout;
         options.DefaultTags = DefaultTags ?? options.DefaultTags;
+        options.TraceLifeCycle = TraceLifeCycle ?? options.TraceLifeCycle;
         options.TracesSampleRate = TracesSampleRate ?? options.TracesSampleRate;
         options.ProfilesSampleRate = ProfilesSampleRate ?? options.ProfilesSampleRate;
         options.TracePropagationTargets = TracePropagationTargets?.Select(s => new StringOrRegex(s)).ToList() ?? options.TracePropagationTargets;
