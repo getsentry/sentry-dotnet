@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(LatestAndroidTfm);$(PreviousAndroidTfm)</TargetFrameworks>
-    <SentryAndroidSdkVersion>8.29.0</SentryAndroidSdkVersion>
+    <SentryAndroidSdkVersion>8.32.0</SentryAndroidSdkVersion>
     <SentryAndroidSdkDirectory>$(BaseIntermediateOutputPath)sdks\$(TargetFramework)\Sentry\Android\$(SentryAndroidSdkVersion)\</SentryAndroidSdkDirectory>
     <!-- This gets resolved by the DownloadSentryAndroidSdk unless using local maven references -->
     <SentryNativeNdkVersion></SentryNativeNdkVersion>
@@ -83,8 +83,8 @@
     <!-- We have a dependency on 1.9.24 from here:
          https://github.com/getsentry/sentry-java/blob/604a2616bebd80ea051cdcec916aa052b509c5a8/buildSrc/src/main/java/Config.kt#L6-L7
          ... but there's no NuGet package for that version. This version has been selected to
-         match the version that was available when net10.0-rc1 was released -->
-    <PackageReference Include="Xamarin.Kotlin.StdLib.Jdk8" Version="2.2.10" />
+         match the version that was available when net10.0 was released -->
+    <PackageReference Include="Xamarin.Kotlin.StdLib.Jdk8" Version="2.2.20" />
   </ItemGroup>
 
   <!-- Dependencies for AndroidMavenLibrary references
@@ -119,6 +119,12 @@
                        JavaArtifact="io.sentry:sentry-android-replay:$(SentryAndroidSdkVersion)" />
     <AndroidLibrary Include="$(LocalSentryNativeNdkAarPath)" Manifest="$(LocalSentryNativeNdkPomPath)"
                        JavaArtifact="io.sentry:sentry-native-ndk:$(SentryNativeNdkVersion)" />
+  </ItemGroup>
+
+  <!-- protobuf-javalite 3.25.8 has no matching/compatible Xamarin.Protobuf.JavaLite NuGet package
+       (see https://github.com/getsentry/sentry-java/pull/5044) -->
+  <ItemGroup>
+    <AndroidMavenLibrary Include="com.google.protobuf:protobuf-javalite" Version="3.25.8" Bind="false" />
   </ItemGroup>
 
   <ItemGroup>

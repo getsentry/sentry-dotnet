@@ -1,2 +1,2 @@
-dotnet build Sentry.sln -c Release
-dotnet test Sentry.sln -c Release --no-build /p:CollectCoverage=true
+dotnet build Sentry.slnx -c Release
+dotnet test Sentry.slnx -c Release --no-build /p:CollectCoverage=true

@@ -6,8 +6,48 @@ on:
       - main
       - release/*
   pull_request:
-    paths-ignore:
-      - "**.md"
+    paths:
+      # Core SDK (transitive dependency of all mobile packages)
+      - 'src/Sentry/**'
+      - 'src/Sentry.Extensions.Logging/**'
+      - 'src/Sentry.Compiler.Extensions/**'
+      # Mobile-specific packages
+      - 'src/Sentry.Maui/**'
+      - 'src/Sentry.Maui.CommunityToolkit.Mvvm/**'
+      - 'src/Sentry.Bindings.Android/**'
+      - 'src/Sentry.Bindings.Cocoa/**'
+      - 'src/Sentry.Android.AssemblyReader/**'
+      # Device test app and test projects that run on device
+      - 'test/Sentry.Maui.Device.TestApp/**'
+      - 'test/Sentry.Tests/**'
+      - 'test/Sentry.Extensions.Logging.Tests/**'
+      - 'test/Sentry.Maui.Tests/**'
+      - 'test/Sentry.Maui.CommunityToolkit.Mvvm.Tests/**'
+      - 'test/Sentry.Android.AssemblyReader.Tests/**'
+      - 'test/Sentry.Testing/**'
+      - 'test/AndroidTestApp/**'
+      # Integration tests
+      - 'integration-test/android.Tests.ps1'
+      - 'integration-test/ios.Tests.ps1'
+      - 'integration-test/net9-maui/**'
+      - 'integration-test/common.ps1'
+      - 'integration-test/Directory.Build.*'
+      # Native libraries and modules
+      - 'lib/sentrysupplemental/**'
+      - 'lib/sentry-android-supplemental/**'
+      - 'modules/sentry-native/**'
+      - 'modules/sentry-cocoa/**'
+      - 'modules/sentry-cocoa.properties'
+      # Build configuration (affects all builds)
+      - 'global.json'
+      - 'Directory.Build.props'
+      - 'Directory.Build.targets'
+      - 'nuget.config'
+      # Scripts and CI
+      - 'scripts/device-test.ps1'
+      - 'scripts/device-test-utils.ps1'
+      - '.github/workflows/device-tests-ios.yml'
+      - '.github/actions/**'
   workflow_dispatch:
 
 jobs:
@@ -49,14 +89,14 @@ jobs:
         id: first-integration-test-run
         continue-on-error: true
         timeout-minutes: 40
-        uses: getsentry/github-workflows/sentry-cli/integration-test@95603f4efe938315ff0dd427a1f2bb40b1889a92 # 3.2.0
+        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
         with:
           path: integration-test/ios.Tests.ps1
 
       - name: Retry Integration Tests (if previous failed to run)
         if: steps.first-integration-test-run.outcome == 'failure'
         timeout-minutes: 40
-        uses: getsentry/github-workflows/sentry-cli/integration-test@95603f4efe938315ff0dd427a1f2bb40b1889a92 # 3.2.0
+        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
         with:
           path: integration-test/ios.Tests.ps1
 

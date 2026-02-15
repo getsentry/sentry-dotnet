@@ -8,7 +8,7 @@ runs:
     - name: Set Environment Variables
       shell: bash
       run: |
-        if [[ "$RUNNER_OS" == "macOS" ]]; then
+        if [[ "$RUNNER_ARCH" == "ARM64" ]]; then
           echo "JAVA_HOME_11=$JAVA_HOME_11_ARM64" >> $GITHUB_ENV
         else
           echo "JAVA_HOME_11=$JAVA_HOME_11_X64" >> $GITHUB_ENV
