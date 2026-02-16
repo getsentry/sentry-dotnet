@@ -30,6 +30,13 @@ runs:
       shell: bash
       run: sudo ./scripts/install-libssl1.sh
 
+    - name: Install Linux dependencies
+      if: ${{ runner.os == 'Linux' && !matrix.container }}
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libunwind-dev liblzma-dev
+
     - name: Install Linux ARM 32-bit dependencies
       if: ${{ matrix.rid == 'linux-arm' }}
       shell: bash

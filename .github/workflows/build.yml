@@ -52,6 +52,13 @@ jobs:
 
       - run: git submodule update --init modules/sentry-native
 
+      - name: Install Linux dependencies
+        if: ${{ runner.os == 'Linux' && !matrix.container }}
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libunwind-dev liblzma-dev
+
       # zstd is needed for cross OS actions/cache but missing from windows-11-arm
       # https://github.com/actions/partner-runner-images/issues/99
       - name: Install zstd on Windows ARM64
