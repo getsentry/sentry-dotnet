@@ -12,7 +12,7 @@ namespace Sentry.Protocol;
 /// </remarks>
 internal sealed class SpanV2 : ISentryJsonSerializable
 {
-    public const int MaxSpansPerEnvelope = 100;
+    public const int MaxSpansPerEnvelope = 1000;
 
     public SpanV2(
         SentryId traceId,
@@ -24,6 +24,41 @@ internal sealed class SpanV2 : ISentryJsonSerializable
         SpanId = spanId;
         Operation = operation;
         StartTimestamp = startTimestamp;
+    }
+
+    /// <summary>
+    /// Converts a <see cref="SentryTransaction"/> to a <see cref="SpanV2"/>.
+    /// </summary>
+    /// <remarks>This is a temporary method. We can remove it once transactions have been deprecated</remarks>
+    internal SpanV2(SentryTransaction transaction) : this(transaction.TraceId, transaction.SpanId,
+        transaction.Operation, transaction.StartTimestamp)
+    {
+        ParentSpanId = transaction.ParentSpanId;
+        Description = transaction.Name;
+        Status = transaction.Status;
+        EndTimestamp = transaction.EndTimestamp;
+        Origin = transaction.Origin;
+        IsSampled = transaction.IsSampled;
+        _tags = transaction.Tags.ToDict();
+        _data = transaction.Data.ToDict();
+        _measurements = transaction.Measurements.ToDict();
+    }
+
+    /// <summary>
+    /// Converts a <see cref="SentrySpan"/> to a <see cref="SpanV2"/>.
+    /// </summary>
+    /// <remarks>This is a temporary method. We can remove it once transactions have been deprecated</remarks>
+    internal SpanV2(SentrySpan span) : this(span.TraceId, span.SpanId, span.Operation, span.StartTimestamp)
+    {
+        ParentSpanId = span.ParentSpanId;
+        Description = span.Description;
+        Status = span.Status;
+        EndTimestamp = span.EndTimestamp;
+        Origin = span.Origin;
+        IsSampled = span.IsSampled;
+        _tags = span.Tags.ToDict();
+        _data = span.Data.ToDict();
+        _measurements = span.Measurements.ToDict();
     }
 
     public SentryId TraceId { get; }

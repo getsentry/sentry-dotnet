@@ -1,5 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
+using Sentry.Internal.Extensions;
+using Sentry.Protocol;
 using Sentry.Protocol.Envelopes;
 
 namespace Sentry;
@@ -207,7 +209,30 @@ public class SentryClient : ISentryClient, IDisposable
             processedTransaction.Redact();
         }
 
-        CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
+        if (_options.TraceLifeCycle is TraceLifeCycle.Static)
+        {
+            CaptureEnvelope(Envelope.FromTransaction(processedTransaction));
+        }
+        else
+        {
+            CaptureSpansV2(processedTransaction);
+        }
+    }
+
+    /// <summary>
+    /// Sends a SentryTransaction as SpanV2 envelopes when TraceLifeCycle is set to <see cref="TraceLifeCycle.Stream"/>.
+    /// </summary>
+    /// <param name="transaction"></param>
+    internal void CaptureSpansV2(SentryTransaction transaction)
+    {
+        // Span-first approach: send spans as Span v2 envelopes.
+        // Docs: https://develop.sentry.dev/sdk/telemetry/spans/implementation/
+        // TODO: Span Attachments: https://develop.sentry.dev/sdk/telemetry/spans/span-protocol/#span-attachments
+        foreach (var batch in transaction.ToSpanV2Spans().QuickBatch())
+        {
+            using var envelope = Envelope.FromSpans(batch);
+            CaptureEnvelope(envelope);
+        }
     }
 
 #if NET6_0_OR_GREATER

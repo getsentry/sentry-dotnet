@@ -191,6 +191,10 @@
                       PrivateAssets="all" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Internal\Spans\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <BeforePack>$(BeforePack);PackSentryCompilerExtensions</BeforePack>
   </PropertyGroup>
