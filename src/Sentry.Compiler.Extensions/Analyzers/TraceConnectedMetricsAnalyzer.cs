@@ -1,4 +1,3 @@
-using System;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
@@ -51,7 +50,7 @@ public sealed class TraceConnectedMetricsAnalyzer : DiagnosticAnalyzer
         }
 
         var method = invocation.TargetMethod;
-        if (method.DeclaredAccessibility != Accessibility.Public || method.IsAbstract || method.IsVirtual || method.IsStatic || !method.ReturnsVoid || method.Parameters.Length == 0)
+        if (method.DeclaredAccessibility != Accessibility.Public || method.IsStatic || method.Parameters.Length == 0)
         {
             return;
         }
@@ -74,11 +73,11 @@ public sealed class TraceConnectedMetricsAnalyzer : DiagnosticAnalyzer
         string fullyQualifiedMetadataName;
         if (method.Name is "EmitCounter" or "EmitGauge" or "EmitDistribution")
         {
-            fullyQualifiedMetadataName = "Sentry.SentryTraceMetrics";
+            fullyQualifiedMetadataName = "Sentry.SentryMetricEmitter";
         }
-        else if (method.Name is "SetBeforeSendMetric")
+        else if (method.Name is "TryGetValue")
         {
-            fullyQualifiedMetadataName = "Sentry.SentryOptions+ExperimentalSentryOptions";
+            fullyQualifiedMetadataName = "Sentry.SentryMetric";
         }
         else
         {

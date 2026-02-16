@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <Using Remove="Sentry.*" />
+    <Using Include="Sentry.Compiler.Extensions.Tests.Testing" />
   </ItemGroup>
 
 </Project>

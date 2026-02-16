@@ -20,14 +20,16 @@ public class TraceConnectedMetricsAnalyzerTests
     {
         var test = new CSharpAnalyzerTest<TraceConnectedMetricsAnalyzer, DefaultVerifier>
         {
+            SolutionTransforms = { SolutionTransforms.Nullable },
             TestState =
             {
-                ReferenceAssemblies = TargetFramework.ReferenceAssemblies,
-                AdditionalReferences = { typeof(SentryTraceMetrics).Assembly },
+                ReferenceAssemblies = ReferenceAssemblies.Current,
+                AdditionalReferences = { typeof(SentryMetricEmitter).Assembly },
                 Sources =
                 {
                     """
-                    #nullable enable
+                    #nullable disable
+                    using System;
                     using Sentry;
 
                     public class AnalyzerTest
@@ -56,7 +58,7 @@ public class TraceConnectedMetricsAnalyzerTests
                     """
                 },
                 ExpectedDiagnostics = { },
-            }
+            },
         };
 
         await test.RunAsync();
@@ -67,23 +69,25 @@ public class TraceConnectedMetricsAnalyzerTests
     {
         var test = new CSharpAnalyzerTest<TraceConnectedMetricsAnalyzer, DefaultVerifier>
         {
+            SolutionTransforms = { SolutionTransforms.Nullable },
             TestState =
             {
-                ReferenceAssemblies = TargetFramework.ReferenceAssemblies,
-                AdditionalReferences = { typeof(SentryTraceMetrics).Assembly },
+                ReferenceAssemblies = ReferenceAssemblies.Current,
+                AdditionalReferences = { typeof(SentryMetricEmitter).Assembly },
                 Sources =
                 {
                     """
                     #nullable enable
+                    using System;
                     using Sentry;
 
                     public class AnalyzerTest
                     {
                         public void Init(SentryOptions options)
                         {
-                            options.Experimental.SetBeforeSendMetric<byte>(static SentryMetric<byte>? (SentryMetric<byte> metric) => metric);
-                            options.Experimental.SetBeforeSendMetric<short>(BeforeSendMetric);
-                            options.Experimental.SetBeforeSendMetric<long>(OnBeforeSendMetric);
+                            options.Experimental.SetBeforeSendMetric(static SentryMetric? (SentryMetric metric) => metric.TryGetValue<double>(out _) ? metric : null);
+                            options.Experimental.SetBeforeSendMetric(OnBeforeSendMetric);
+                            options.Experimental.SetBeforeSendMetric(OnBeforeSendMetric<double>);
                         }
 
                         public void Emit(IHub hub)
@@ -98,62 +102,71 @@ public class TraceConnectedMetricsAnalyzerTests
 
                             metrics.EmitGauge("name", 2);
                             hub.Metrics.EmitGauge("name", 2f);
-                            SentrySdk.Experimental.Metrics.EmitGauge<double>("name", 2.2d, "unit", [], scope);
+                            SentrySdk.Experimental.Metrics.EmitGauge<double>("name", 2.2d, MeasurementUnit.Custom("unit"), [], scope);
 
                             metrics.EmitDistribution("name", 3);
                             hub.Metrics.EmitDistribution("name", 3f);
-                            SentrySdk.Experimental.Metrics.EmitDistribution<double>("name", 3.3d, "unit", [], scope);
+                            SentrySdk.Experimental.Metrics.EmitDistribution<double>("name", 3.3d, MeasurementUnit.Custom("unit"), [], scope);
                     #pragma warning restore SENTRYTRACECONNECTEDMETRICS
                         }
 
-                        private static SentryMetric<T>? BeforeSendMetric<T>(SentryMetric<T> metric) where T : struct
+                        private static SentryMetric? OnBeforeSendMetric(SentryMetric metric)
                         {
-                            return metric;
+                            if (metric.TryGetValue<double>(out _))
+                            {
+                                return metric;
+                            }
+
+                            return null;
                         }
 
-                        private static SentryMetric<long>? OnBeforeSendMetric(SentryMetric<long> metric)
+                        private static SentryMetric? OnBeforeSendMetric<T>(SentryMetric metric) where T : struct
                         {
-                            return metric;
+                            if (metric.TryGetValue<T>(out _))
+                            {
+                                return metric;
+                            }
+
+                            return null;
                         }
                     }
 
                     public static class Extensions
                     {
-                        public static void EmitCounter<T>(this SentryTraceMetrics metrics) where T : struct
+                        public static void EmitCounter<T>(this SentryMetricEmitter metrics) where T : struct
                         {
-                            metrics.EmitCounter<T>("default", default(T), [], null);
+                            metrics.EmitCounter<T>("default", default(T), [], (Scope?)null);
                         }
 
-                        public static void EmitCounter<T>(this SentryTraceMetrics metrics, string name) where T : struct
+                        public static void EmitCounter<T>(this SentryMetricEmitter metrics, string name) where T : struct
                         {
-                            metrics.EmitCounter<T>(name, default(T), [], null);
+                            metrics.EmitCounter<T>(name, default(T), [], (Scope?)null);
                         }
 
-                        public static void EmitGauge<T>(this SentryTraceMetrics metrics) where T : struct
+                        public static void EmitGauge<T>(this SentryMetricEmitter metrics) where T : struct
                         {
-                            metrics.EmitGauge<T>("default", default(T), null, [], null);
+                            metrics.EmitGauge<T>("default", default(T), default(MeasurementUnit), [], (Scope?)null);
                         }
 
-                        public static void EmitGauge<T>(this SentryTraceMetrics metrics, string name) where T : struct
+                        public static void EmitGauge<T>(this SentryMetricEmitter metrics, string name) where T : struct
                         {
-                            metrics.EmitGauge<T>(name, default(T), null, [], null);
+                            metrics.EmitGauge<T>(name, default(T), default(MeasurementUnit), [], (Scope?)null);
                         }
 
-                        public static void EmitDistribution<T>(this SentryTraceMetrics metrics) where T : struct
+                        public static void EmitDistribution<T>(this SentryMetricEmitter metrics) where T : struct
                         {
-                            metrics.EmitDistribution<T>("default", default(T), null, [], null);
+                            metrics.EmitDistribution<T>("default", default(T), default(MeasurementUnit), [], (Scope?)null);
                         }
 
-                        public static void EmitDistribution<T>(this SentryTraceMetrics metrics, string name) where T : struct
+                        public static void EmitDistribution<T>(this SentryMetricEmitter metrics, string name) where T : struct
                         {
-                            metrics.EmitDistribution<T>(name, default(T), null, [], null);
+                            metrics.EmitDistribution<T>(name, default(T), default(MeasurementUnit), [], (Scope?)null);
                         }
                     }
                     """
                 },
                 ExpectedDiagnostics = { },
             },
-            SolutionTransforms = { SolutionTransforms.Nullable },
         };
 
         await test.RunAsync();
@@ -164,10 +177,11 @@ public class TraceConnectedMetricsAnalyzerTests
     {
         var test = new CSharpAnalyzerTest<TraceConnectedMetricsAnalyzer, DefaultVerifier>
         {
+            SolutionTransforms = { SolutionTransforms.Nullable },
             TestState =
             {
-                ReferenceAssemblies = TargetFramework.ReferenceAssemblies,
-                AdditionalReferences = { typeof(SentryTraceMetrics).Assembly },
+                ReferenceAssemblies = ReferenceAssemblies.Current,
+                AdditionalReferences = { typeof(SentryMetricEmitter).Assembly },
                 Sources =
                 {
                     """
@@ -179,9 +193,9 @@ public class TraceConnectedMetricsAnalyzerTests
                     {
                         public void Init(SentryOptions options)
                         {
-                            {|#0:options.Experimental.SetBeforeSendMetric<sbyte>(static SentryMetric<sbyte>? (SentryMetric<sbyte> metric) => metric)|#0};
-                            {|#1:options.Experimental.SetBeforeSendMetric<ushort>(BeforeSendMetric)|#1};
-                            {|#2:options.Experimental.SetBeforeSendMetric<ulong>(OnBeforeSendMetric)|#2};
+                            options.Experimental.SetBeforeSendMetric(static SentryMetric? (SentryMetric metric) => {|#0:metric.TryGetValue<sbyte>(out _)|#0} ? metric : null);
+                            options.Experimental.SetBeforeSendMetric(OnBeforeSendMetric);
+                            options.Experimental.SetBeforeSendMetric(OnBeforeSendMetric<ulong>);
                         }
 
                         public void Emit(IHub hub)
@@ -196,22 +210,32 @@ public class TraceConnectedMetricsAnalyzerTests
 
                             {|#13:metrics.EmitGauge("name", (uint)2)|#13};
                             {|#14:hub.Metrics.EmitGauge("name", (StringComparison)2f)|#14};
-                            {|#15:SentrySdk.Experimental.Metrics.EmitGauge<decimal>("name", 2.2m, "unit", [], scope)|#15};
+                            {|#15:SentrySdk.Experimental.Metrics.EmitGauge<decimal>("name", 2.2m, MeasurementUnit.Custom("unit"), [], scope)|#15};
 
                             {|#16:metrics.EmitDistribution("name", (uint)3)|#16};
                             {|#17:hub.Metrics.EmitDistribution("name", (StringComparison)3f)|#17};
-                            {|#18:SentrySdk.Experimental.Metrics.EmitDistribution<decimal>("name", 3.3m, "unit", [], scope)|#18};
+                            {|#18:SentrySdk.Experimental.Metrics.EmitDistribution<decimal>("name", 3.3m, MeasurementUnit.Custom("unit"), [], scope)|#18};
                     #pragma warning restore SENTRYTRACECONNECTEDMETRICS
                         }
 
-                        private static SentryMetric<T>? BeforeSendMetric<T>(SentryMetric<T> metric) where T : struct
+                        private static SentryMetric? OnBeforeSendMetric(SentryMetric metric)
                         {
-                            return metric;
+                            if ({|#1:metric.TryGetValue<ushort>(out _)|#1})
+                            {
+                                return metric;
+                            }
+
+                            return null;
                         }
 
-                        private static SentryMetric<ulong>? OnBeforeSendMetric(SentryMetric<ulong> metric)
+                        private static SentryMetric? OnBeforeSendMetric<T>(SentryMetric metric) where T : struct
                         {
-                            return metric;
+                            if (metric.TryGetValue<T>(out _))
+                            {
+                                return metric;
+                            }
+
+                            return null;
                         }
                     }
                     """
@@ -220,7 +244,6 @@ public class TraceConnectedMetricsAnalyzerTests
                 {
                     CreateDiagnostic(0, typeof(sbyte)),
                     CreateDiagnostic(1, typeof(ushort)),
-                    CreateDiagnostic(2, typeof(ulong)),
 
                     CreateDiagnostic(10, typeof(uint)),
                     CreateDiagnostic(11, typeof(StringComparison)),
@@ -232,7 +255,7 @@ public class TraceConnectedMetricsAnalyzerTests
                     CreateDiagnostic(17, typeof(StringComparison)),
                     CreateDiagnostic(18, typeof(decimal)),
                 },
-            }
+            },
         };
 
         await test.RunAsync();

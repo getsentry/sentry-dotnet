@@ -1,7 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace Sentry.Compiler.Extensions.Tests;
+namespace Sentry.Compiler.Extensions.Tests.Testing;
 
 internal static class SolutionTransforms
 {
