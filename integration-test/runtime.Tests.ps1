@@ -88,7 +88,6 @@ internal class FakeTransport : ITransport
                 -c Release `
                 --nologo `
                 --framework $framework `
-                --verbosity diagnostic `
                 -p:SentryNative=$($SentryNative.ToString().ToLower()) `
             | ForEach-Object { Write-Host $_ }
             if ($LASTEXITCODE -ne 0)
