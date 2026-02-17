@@ -54,9 +54,8 @@
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and ('$(RuntimeIdentifier)' == 'linux-x64' or '$(RuntimeIdentifier)' == 'linux-arm64' or
                                                                     '$(RuntimeIdentifier)' == 'linux-musl-x64' or '$(RuntimeIdentifier)' == 'linux-musl-arm64')">
     <DirectPInvoke Include="sentry-native" />
-    <!-- Static sentry-native links to static libunwind, which depends on liblzma -->
-    <LinkerArg Include="-Wl,-Bstatic -Wl,--whole-archive -lunwind -Wl,--no-whole-archive -llzma -Wl,-Bdynamic" />
     <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\$(RuntimeIdentifier)\libsentry-native.a" />
+    <NativeLibrary Include="$(MSBuildThisFileDirectory)..\sentry-native\$(RuntimeIdentifier)\libunwind.a" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(FrameworkSupportsNative)' == 'true' and ('$(RuntimeIdentifier)' == 'osx-x64' or '$(RuntimeIdentifier)' == 'osx-arm64')">
