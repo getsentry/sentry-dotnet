@@ -12,7 +12,7 @@ internal static class C
         var result = new Dictionary<long, DebugImage>();
         try
         {
-            var cList = SentryCocoaHybridSdk.DebugImages;
+            var cList = SentryCocoaDependencyContainer.SharedInstance.DebugImageProvider.DebugImagesFromCache;
             logger?.LogDebug("There are {0} native debug images, parsing the information.", cList.Length);
             foreach (var cItem in cList)
             {
