@@ -92,7 +92,7 @@ public class SpanV2Tests
 
         using (new AssertionScope())
         {
-Assert.Equal(traceId, spanV2.TraceId);
+            Assert.Equal(traceId, spanV2.TraceId);
             Assert.Equal(transaction.SpanId, spanV2.SpanId);
             Assert.Equal(transaction.ParentSpanId, spanV2.ParentSpanId);
             Assert.Equal(transaction.Name, spanV2.Name);

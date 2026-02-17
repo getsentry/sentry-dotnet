@@ -38,7 +38,7 @@ internal sealed class SpanV2 : ISentryJsonSerializable
         EndTimestamp = transaction.EndTimestamp;
         Status = transaction.Status is SpanStatus.Ok ? SpanV2Status.Ok : SpanV2Status.Error;
         Attributes.SetAttribute(SpanV2Attributes.Operation, transaction.Operation);
-        if (transaction.Origin is {} origin)
+        if (transaction.Origin is { } origin)
         {
             Attributes.SetAttribute(SpanV2Attributes.Source, origin);
         }
@@ -66,7 +66,7 @@ internal sealed class SpanV2 : ISentryJsonSerializable
         EndTimestamp = span.EndTimestamp;
         Status = span.Status is SpanStatus.Ok ? SpanV2Status.Ok : SpanV2Status.Error;
         Attributes.SetAttribute(SpanV2Attributes.Operation, span.Operation);
-        if (span.Origin is {} origin)
+        if (span.Origin is { } origin)
         {
             Attributes.SetAttribute(SpanV2Attributes.Source, origin);
         }
