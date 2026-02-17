@@ -8,7 +8,7 @@ namespace Sentry.Protocol.Spans;
 /// </summary>
 internal readonly struct SentryLink(SentryId traceId, SpanId spanId, bool sampled) : ISentryJsonSerializable
 {
-    private readonly SentryAttributes _attributes = new ();
+    private readonly SentryAttributes _attributes = new();
 
     public SpanId SpanId { get; } = spanId;
     public SentryId TraceId { get; } = traceId;

@@ -13,7 +13,7 @@ internal sealed class SpanV2 : ISentryJsonSerializable
 {
     public const int MaxSpansPerEnvelope = 1000;
 
-    private readonly SentryAttributes _attributes = new ();
+    private readonly SentryAttributes _attributes = new();
 
     public SpanV2(
         SentryId traceId,
@@ -58,7 +58,7 @@ internal sealed class SpanV2 : ISentryJsonSerializable
     public DateTimeOffset? EndTimestamp { get; set; }
 
     public SentryAttributes Attributes => _attributes;
-    public List<SentryLink> Links { get;} = [];
+    public List<SentryLink> Links { get; } = [];
 
     // TODO: Attachments - see https://develop.sentry.dev/sdk/telemetry/spans/span-protocol/#span-attachments
 
