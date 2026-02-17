@@ -1,4 +1,4 @@
-using Sentry.Protocol;
+using Sentry.Protocol.Spans;
 
 namespace Sentry.Internal.Extensions;
 

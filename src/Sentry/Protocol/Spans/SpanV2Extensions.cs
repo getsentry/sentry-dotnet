@@ -1,6 +1,4 @@
-using Sentry.Protocol;
-
-namespace Sentry.Internal.Extensions;
+namespace Sentry.Protocol.Spans;
 
 internal static class SpanV2Extensions
 {

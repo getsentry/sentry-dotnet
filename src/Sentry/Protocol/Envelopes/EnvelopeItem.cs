@@ -2,6 +2,7 @@ using Sentry.Extensibility;
 using Sentry.Internal;
 using Sentry.Internal.Extensions;
 using Sentry.Protocol.Metrics;
+using Sentry.Protocol.Spans;
 
 namespace Sentry.Protocol.Envelopes;
 

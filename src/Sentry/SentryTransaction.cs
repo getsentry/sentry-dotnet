@@ -265,7 +265,6 @@ public class SentryTransaction : ITransactionData, ISentryJsonSerializable
         Fingerprint = tracer.Fingerprint;
         _breadcrumbs = tracer.Breadcrumbs.ToList();
         _tags = tracer.Tags.ToDict();
-
         _spans = FromTracerSpans(tracer);
         _measurements = tracer.Measurements.ToDict();
 

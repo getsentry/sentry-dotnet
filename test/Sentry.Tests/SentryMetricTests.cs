@@ -42,7 +42,7 @@ public class SentryMetricTests
             Unit = "test_unit",
         };
         metric.SetAttribute("attribute", "value");
-        metric.SetDefaultAttributes(options, sdk);
+        metric.Attributes.SetDefaultAttributes(options, sdk);
 
         metric.Timestamp.Should().Be(Timestamp);
         metric.TraceId.Should().Be(TraceId);
@@ -76,7 +76,7 @@ public class SentryMetricTests
         };
 
         var metric = new SentryMetric<int>(Timestamp, TraceId, SentryMetricType.Counter, "sentry_tests.sentry_metric_tests.counter", 1);
-        metric.SetDefaultAttributes(options, new SdkVersion());
+        metric.Attributes.SetDefaultAttributes(options, new SdkVersion());
 
         var envelope = Envelope.FromMetric(new TraceMetric([metric]));
 
@@ -154,7 +154,7 @@ public class SentryMetricTests
         metric.SetAttribute("boolean-attribute", true);
         metric.SetAttribute("integer-attribute", 3);
         metric.SetAttribute("double-attribute", 4.4);
-        metric.SetDefaultAttributes(options, new SdkVersion { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" });
+        metric.Attributes.SetDefaultAttributes(options, new SdkVersion { Name = "Sentry.Test.SDK", Version = "1.2.3-test+Sentry" });
 
         var envelope = EnvelopeItem.FromMetric(new TraceMetric([metric]));
 
@@ -360,7 +360,7 @@ public class SentryMetricTests
 #else
         metric.SetAttribute("object", new KeyValuePair<string, string>("key", "value"));
 #endif
-        metric.SetAttribute("null", null!);
+        metric.Attributes.SetAttribute("null", null!);
 
         var document = metric.ToJsonDocument<SentryMetric>(static (obj, writer, logger) => obj.WriteTo(writer, logger), _output);
         var attributes = document.RootElement.GetProperty("attributes");
