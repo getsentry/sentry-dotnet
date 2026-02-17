@@ -36,16 +36,52 @@ internal sealed class SpanV2 : ISentryJsonSerializable
     {
         ParentSpanId = transaction.ParentSpanId;
         EndTimestamp = transaction.EndTimestamp;
+        Status = transaction.Status is SpanStatus.Ok ? SpanV2Status.Ok : SpanV2Status.Error;
+        Attributes.SetAttribute(SpanV2Attributes.Operation, transaction.Operation);
+        if (transaction.Origin is {} origin)
+        {
+            Attributes.SetAttribute(SpanV2Attributes.Source, origin);
+        }
+        foreach (var tag in transaction.Tags)
+        {
+            Attributes.SetAttribute(tag.Key, tag.Value);
+        }
+
+        foreach (var data in transaction.Data)
+        {
+            if (data.Value is not null)
+            {
+                Attributes.SetAttribute(data.Key, data.Value);
+            }
+        }
     }
 
     /// <summary>
     /// Converts a <see cref="SentrySpan"/> to a <see cref="SpanV2"/>.
     /// </summary>
     /// <remarks>This is a temporary method. We can remove it once transactions have been deprecated</remarks>
-    internal SpanV2(SentrySpan span) : this(span.TraceId, span.SpanId, span.Operation, span.StartTimestamp)
+    internal SpanV2(SentrySpan span) : this(span.TraceId, span.SpanId, span.Description ?? span.Operation, span.StartTimestamp)
     {
         ParentSpanId = span.ParentSpanId;
         EndTimestamp = span.EndTimestamp;
+        Status = span.Status is SpanStatus.Ok ? SpanV2Status.Ok : SpanV2Status.Error;
+        Attributes.SetAttribute(SpanV2Attributes.Operation, span.Operation);
+        if (span.Origin is {} origin)
+        {
+            Attributes.SetAttribute(SpanV2Attributes.Source, origin);
+        }
+        foreach (var tag in span.Tags)
+        {
+            Attributes.SetAttribute(tag.Key, tag.Value);
+        }
+
+        foreach (var data in span.Data)
+        {
+            if (data.Value is not null)
+            {
+                Attributes.SetAttribute(data.Key, data.Value);
+            }
+        }
     }
 
     public SentryId TraceId { get; }

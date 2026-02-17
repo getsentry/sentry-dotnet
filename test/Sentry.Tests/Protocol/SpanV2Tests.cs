@@ -92,19 +92,19 @@ public class SpanV2Tests
 
         using (new AssertionScope())
         {
-            spanV2.TraceId.Should().Be(traceId);
-            spanV2.SpanId.Should().Be(spanId);
-            spanV2.ParentSpanId.Should().Be(parentSpanId);
-            spanV2.Name.Should().Be(name);
-            spanV2.Status.Should().Be(SpanV2Status.Error);
-            spanV2.StartTimestamp.Should().Be(start);
-            spanV2.EndTimestamp.Should().Be(end);
+Assert.Equal(traceId, spanV2.TraceId);
+            Assert.Equal(transaction.SpanId, spanV2.SpanId);
+            Assert.Equal(transaction.ParentSpanId, spanV2.ParentSpanId);
+            Assert.Equal(transaction.Name, spanV2.Name);
+            Assert.Equal(transaction.StartTimestamp, spanV2.StartTimestamp);
+            Assert.Equal(transaction.EndTimestamp, spanV2.EndTimestamp);
+            Assert.Equal(SpanV2Status.Error, spanV2.Status);
 
             // TODO: not yet sure if this is how they should be mapped from transaction properties.
-            spanV2.Attributes.ShouldContain(SpanV2Attributes.Operation, operation);
-            spanV2.Attributes.ShouldContain(SpanV2Attributes.Source, origin);
-            spanV2.Attributes.ShouldContain(tagKey, tagVal);
-            spanV2.Attributes.ShouldContain(dataKey, dataVal);
+            spanV2.Attributes.AssertContains(SpanV2Attributes.Operation, operation);
+            spanV2.Attributes.AssertContains(SpanV2Attributes.Source, origin);
+            spanV2.Attributes.AssertContains(tagKey, tagVal);
+            spanV2.Attributes.AssertContains(dataKey, dataVal);
             // TODO: spanV2.Measurements.Should().ContainKey("m"); ???
 
             // TODO: Attachments - see https://develop.sentry.dev/sdk/telemetry/spans/span-protocol/#span-attachments
@@ -121,7 +121,7 @@ public class SpanV2Tests
         var traceId = SentryId.Parse("0123456789abcdef0123456789abcdef");
         const string description = "desc";
         const string operation = "db";
-        const string origin = "test-origin";
+        const string origin = "manual.test";
         var start = DateTimeOffset.Parse("2020-01-02T00:00:00Z");
         var end = DateTimeOffset.Parse("2020-01-02T00:00:01Z");
         const string tagKey = "tag-key";
@@ -149,21 +149,19 @@ public class SpanV2Tests
 
         using (new AssertionScope())
         {
-            spanV2.TraceId.Should().Be(traceId);
-            spanV2.SpanId.Should().Be(span.SpanId);
-            spanV2.ParentSpanId.Should().Be(span.ParentSpanId);
-            spanV2.Name.Should().Be(span.Description);
-            spanV2.StartTimestamp.Should().Be(span.StartTimestamp);
-            spanV2.EndTimestamp.Should().Be(span.EndTimestamp);
-            spanV2.Status.Should().Be(SpanV2Status.Error);
+            Assert.Equal(traceId, spanV2.TraceId);
+            Assert.Equal(span.SpanId, spanV2.SpanId);
+            Assert.Equal(span.ParentSpanId, spanV2.ParentSpanId);
+            Assert.Equal(span.Description, spanV2.Name);
+            Assert.Equal(span.StartTimestamp, spanV2.StartTimestamp);
+            Assert.Equal(span.EndTimestamp, spanV2.EndTimestamp);
+            Assert.Equal(SpanV2Status.Error, spanV2.Status);
 
             // TODO: not yet sure if this is how they should be mapped from transaction properties.
-            spanV2.Attributes.ShouldContain(SpanV2Attributes.Operation, operation);
-            spanV2.Attributes.ShouldContain(SpanV2Attributes.Source, origin);
-            spanV2.Attributes.ShouldContain(tagKey, tagVal);
-            spanV2.Attributes.ShouldContain(dataKey, dataVal);
-            spanV2.Attributes.ShouldContain(SpanV2Attributes.Operation, operation);
-            spanV2.Attributes.ShouldContain(SpanV2Attributes.Operation, operation);
+            spanV2.Attributes.AssertContains(SpanV2Attributes.Operation, operation);
+            spanV2.Attributes.AssertContains(SpanV2Attributes.Source, origin);
+            spanV2.Attributes.AssertContains(tagKey, tagVal);
+            spanV2.Attributes.AssertContains(dataKey, dataVal);
             // TODO: spanV2.Measurements.Should().ContainKey("m"); ???
         }
     }

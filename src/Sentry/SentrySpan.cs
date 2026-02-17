@@ -109,6 +109,7 @@ public class SentrySpan : ISpanData, ISentryJsonSerializable
         StartTimestamp = tracer.StartTimestamp;
         EndTimestamp = tracer.EndTimestamp;
         Description = tracer.Description;
+        Origin = tracer.Origin;
         Status = tracer.Status;
         IsSampled = tracer.IsSampled;
         _data = tracer.Data.ToDict();

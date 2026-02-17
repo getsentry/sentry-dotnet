@@ -1301,6 +1301,11 @@ namespace Sentry
         public Sentry.ISpan StartChild(string operation) { }
         public void UnsetTag(string key) { }
     }
+    public enum SpanV2Status
+    {
+        Ok = 0,
+        Error = 1,
+    }
     public enum StackTraceMode
     {
         Original = 0,
