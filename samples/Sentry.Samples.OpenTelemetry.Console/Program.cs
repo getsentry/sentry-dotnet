@@ -42,7 +42,7 @@ using (var activity = activitySource.StartActivity("Main"))
         task?.SetTag("Answer", 42);
         Thread.Sleep(100); // simulate some work
         Console.WriteLine("Task 1 completed");
-        task?.SetStatus(Status.Ok);
+        task?.SetStatus(ActivityStatusCode.Ok);
     }
 
     // Since we use `AddHttpClientInstrumentation` when initializing OpenTelemetry, the following Http request will also
