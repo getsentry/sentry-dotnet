@@ -137,7 +137,7 @@ public abstract class SentryMessageHandler : DelegatingHandler
         // headers when OTEL instrumentation is used since the traceId can be SentryId.Empty if there is no active
         // OTEL span... which would result in an exception being thrown when trying to create the
         // DynamicSamplingContext.
-        if (_options?.Instrumenter is Instrumenter.Sentry)
+        if (_options?.Instrumenter is Instrumenter.OpenTelemetry)
         {
             return;
         }
