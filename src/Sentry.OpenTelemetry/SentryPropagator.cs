@@ -50,7 +50,7 @@ public class SentryPropagator : BaggagePropagator
     }
 
     /// <inheritdoc />
-    public override PropagationContext Extract<T>(PropagationContext context, T carrier, Func<T, string, IEnumerable<string>> getter)
+    public override PropagationContext Extract<T>(PropagationContext context, T carrier, Func<T, string, IEnumerable<string>?> getter)
     {
         Options?.LogDebug("SentryPropagator.Extract");
 
@@ -122,13 +122,17 @@ public class SentryPropagator : BaggagePropagator
         base.Inject(context, carrier, setter);
     }
 
-    private static SentryTraceHeader? TryGetSentryTraceHeader<T>(T carrier, Func<T, string, IEnumerable<string>> getter)
+    private static SentryTraceHeader? TryGetSentryTraceHeader<T>(T carrier, Func<T, string, IEnumerable<string>?> getter)
     {
         var headerValue = getter(carrier, SentryTraceHeader.HttpHeaderName);
+        if (headerValue is null)
+        {
+            return null;
+        }
         try
         {
             var value = new StringValues(headerValue.ToArray());
-            return SentryTraceHeader.Parse(value);
+            return SentryTraceHeader.Parse(value!);
         }
         catch (Exception)
         {

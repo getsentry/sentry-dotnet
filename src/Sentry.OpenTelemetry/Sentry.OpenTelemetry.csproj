@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <!-- Version 1.6.0 is the minimum version that does not have trim warnings   -->
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.6.0" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.10.0" />
   </ItemGroup>
 
   <ItemGroup>
