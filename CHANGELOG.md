@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+- Add support to send OTEL traces via OTLP ([#4899](https://github.com/getsentry/sentry-dotnet/pull/4899))
+
 ## 6.2.0-alpha.0
 
 ### Features
