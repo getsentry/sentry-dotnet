@@ -314,7 +314,8 @@ internal class Hub : IHub, IDisposable
     {
         if (_options.Instrumenter is Instrumenter.OpenTelemetry)
         {
-            _options.LogWarning("GetBaggage should not be called when using OpenTelemetry - it may throw an exception");
+            _options.LogWarning("GetBaggage should not be called when using OpenTelemetry.");
+            return BaggageHeader.Create([]);
         }
 
         var span = GetSpan();

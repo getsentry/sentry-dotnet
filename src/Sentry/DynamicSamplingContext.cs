@@ -230,11 +230,13 @@ internal class DynamicSamplingContext
     /// <summary>
     /// Creates a <see cref="DynamicSamplingContext"/> from the given <see cref="IPropagationContext"/>.
     /// </summary>
-    /// <exception cref="ArgumentOutOfRangeException">Can be thrown when using OpenTelemetry instrumentation and
-    /// System.Diagnostics.Activity.Current is null. This method should not be used when instrumenting with OTEL.
-    /// </exception>
+    /// <remarks>
+    /// This method should not be used when instrumenting with OTEL.
+    /// It will throw an exception if Activity.Current is null.
+    /// </remarks>
     public static DynamicSamplingContext CreateFromPropagationContext(IPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
     {
+        Debug.Assert(options.Instrumenter is not Instrumenter.OpenTelemetry, "This method should not be used when instrumenting with OTEL.");
         var traceId = propagationContext.TraceId;
         var publicKey = options.ParsedDsn.PublicKey;
         var release = options.SettingLocator.GetRelease();
@@ -265,9 +267,10 @@ internal static class DynamicSamplingContextExtensions
     /// <summary>
     /// Creates a <see cref="DynamicSamplingContext"/> from the given <see cref="IPropagationContext"/>.
     /// </summary>
-    /// <exception cref="ArgumentOutOfRangeException">Can be thrown when using OpenTelemetry instrumentation and
-    /// System.Diagnostics.Activity.Current is null. This method should not be used when instrumenting with OTEL.
-    /// </exception>
+    /// <remarks>
+    /// This method should not be used when instrumenting with OTEL.
+    /// It will throw an exception if Activity.Current is null.
+    /// </remarks>
     public static DynamicSamplingContext CreateDynamicSamplingContext(this IPropagationContext propagationContext, SentryOptions options, IReplaySession? replaySession)
         => DynamicSamplingContext.CreateFromPropagationContext(propagationContext, options, replaySession);
 }
