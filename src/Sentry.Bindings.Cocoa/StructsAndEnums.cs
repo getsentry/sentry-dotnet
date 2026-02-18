@@ -111,6 +111,18 @@ internal enum SentryFeedbackSource : long
 }
 
 [Native]
+internal enum SentryHttpStatusCode : long
+{
+    Ok = 200,
+    Created = 201,
+    BadRequest = 400,
+    PreconditionFailed = 412,
+    ContentTooLarge = 413,
+    TooManyRequests = 429,
+    InternalServerError = 500
+}
+
+[Native]
 internal enum SentryLogLevel : long
 {
     Trace = 0,
@@ -141,15 +153,6 @@ internal enum SentryReplayType : long
 {
     Session = 0,
     Buffer = 1
-}
-
-[Native]
-internal enum SentrySessionStatus : ulong
-{
-    Ok = 0,
-    Exited = 1,
-    Crashed = 2,
-    Abnormal = 3
 }
 
 [Native]
