@@ -142,6 +142,7 @@
     <Project Path="src/Sentry.Maui.CommunityToolkit.Mvvm/Sentry.Maui.CommunityToolkit.Mvvm.csproj" />
     <Project Path="src/Sentry.Maui/Sentry.Maui.csproj" />
     <Project Path="src/Sentry.NLog/Sentry.NLog.csproj" />
+    <Project Path="src/Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol/Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol.csproj" />
     <Project Path="src/Sentry.OpenTelemetry/Sentry.OpenTelemetry.csproj" />
     <Project Path="src/Sentry.Profiling/Sentry.Profiling.csproj" />
     <Project Path="src/Sentry.Serilog/Sentry.Serilog.csproj" />
