@@ -6,6 +6,10 @@
 
 - Add support to send OTEL traces via OTLP ([#4899](https://github.com/getsentry/sentry-dotnet/pull/4899))
 
+### Fixes
+
+- The SDK now logs a `Warning` instead of an `Error` when being ratelimited ([#4927](https://github.com/getsentry/sentry-dotnet/pull/4927))
+
 ## 6.2.0-alpha.0
 
 ### Features
