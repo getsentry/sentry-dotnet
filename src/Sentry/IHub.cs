@@ -70,6 +70,9 @@ public interface IHub : ISentryClient, ISentryScopeManager
     /// <summary>
     /// Gets the Sentry baggage header that allows tracing across services
     /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">Can be thrown when using OpenTelemetry instrumentation and
+    /// System.Diagnostics.Activity.Current is null. This method should not be used when instrumenting with OTEL.
+    /// </exception>
     public BaggageHeader? GetBaggage();
 
     /// <summary>
