@@ -1,6 +1,6 @@
 namespace Sentry.OpenTelemetry.Tests;
 
-public class OtelPropagationContextTests
+public class OtelPropagationContextTests: ActivitySourceTests
 {
     private class Fixture
     {
@@ -37,7 +37,7 @@ public class OtelPropagationContextTests
     public void TraceId_WithActivityCurrent_ReturnsSentryIdFromActivityTraceId()
     {
         // Arrange
-        using var activity = new Activity("test").Start();
+        using var activity =  Tracer.StartActivity();
         var sut = new OtelPropagationContext();
 
         // Act
@@ -66,7 +66,7 @@ public class OtelPropagationContextTests
     public void SpanId_WithActivityCurrent_ReturnsSpanIdFromActivitySpanId()
     {
         // Arrange
-        using var activity = new Activity("test").Start();
+        using var activity =  Tracer.StartActivity();
         var sut = new OtelPropagationContext();
 
         // Act
@@ -121,7 +121,7 @@ public class OtelPropagationContextTests
     public void GetOrCreateDynamicSamplingContext_DynamicSamplingContextIsNull_CreatesDynamicSamplingContext()
     {
         // Arrange
-        using var activity = new Activity("test").Start();
+        using var activity =  Tracer.StartActivity();
         var sut = new OtelPropagationContext();
         sut.DynamicSamplingContext.Should().BeNull();
 
@@ -138,7 +138,7 @@ public class OtelPropagationContextTests
     public void GetOrCreateDynamicSamplingContext_DynamicSamplingContextIsNotNull_ReturnsSameDynamicSamplingContext()
     {
         // Arrange
-        using var activity = new Activity("test").Start();
+        using var activity =  Tracer.StartActivity();
         var sut = new OtelPropagationContext();
         var firstResult = sut.GetOrCreateDynamicSamplingContext(_fixture.SentryOptions, _fixture.ActiveReplaySession);
 
@@ -154,7 +154,7 @@ public class OtelPropagationContextTests
     public void GetOrCreateDynamicSamplingContext_WithActiveReplaySession_IncludesReplayIdInDynamicSamplingContext()
     {
         // Arrange
-        using var activity = new Activity("test").Start();
+        using var activity =  Tracer.StartActivity();
         var sut = new OtelPropagationContext();
 
         // Act
