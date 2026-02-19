@@ -1,9 +1,8 @@
 using Microsoft.Extensions.Primitives;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
-using Sentry.Internal.OpenTelemetry;
 
-namespace Sentry.OpenTelemetry.Tests;
+namespace Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol.Tests;
 
 public class SentryPropagatorTests
 {

@@ -2,7 +2,7 @@ using Microsoft.Extensions.Primitives;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
 using Sentry.Extensibility;
-using Sentry.Internal.OpenTelemetry;
+using Sentry.Internal;
 
 namespace Sentry.OpenTelemetry;
 

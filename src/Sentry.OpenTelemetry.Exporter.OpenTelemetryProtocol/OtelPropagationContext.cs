@@ -1,7 +1,7 @@
 using Sentry.Extensibility;
 using Sentry.Internal;
 
-namespace Sentry.OpenTelemetry;
+namespace Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol;
 
 internal class OtelPropagationContext : IPropagationContext
 {

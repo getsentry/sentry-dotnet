@@ -1,4 +1,6 @@
-namespace Sentry.OpenTelemetry.Tests;
+using Sentry.OpenTelemetry.Tests;
+
+namespace Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol.Tests;
 
 public class OtelPropagationContextTests : ActivitySourceTests
 {

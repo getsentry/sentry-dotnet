@@ -1,5 +1,5 @@
 using Sentry.Extensibility;
-using Sentry.Internal.OpenTelemetry;
+using Sentry.Internal;
 
 namespace Sentry.OpenTelemetry;
 
