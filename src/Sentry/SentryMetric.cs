@@ -14,8 +14,6 @@ namespace Sentry;
 [DebuggerDisplay(@"SentryMetric \{ Type = {Type}, Name = '{Name}', Value = {Value} \}")]
 public abstract partial class SentryMetric
 {
-    private readonly Dictionary<string, SentryAttribute> _attributes;
-
     [SetsRequiredMembers]
     private protected SentryMetric(DateTimeOffset timestamp, SentryId traceId, SentryMetricType type, string name)
     {
@@ -24,7 +22,7 @@ public abstract partial class SentryMetric
         Type = type;
         Name = name;
         // 7 is the number of built-in attributes, so we start with that.
-        _attributes = new Dictionary<string, SentryAttribute>(7);
+        Attributes = new SentryAttributes(7);
     }
 
     /// <summary>
@@ -114,6 +112,8 @@ public abstract partial class SentryMetric
     /// </remarks>
     public string? Unit { get; init; }
 
+    internal SentryAttributes Attributes { get; }
+
     /// <summary>
     /// Gets the metric value if it is of the specified type <typeparamref name="TValue"/>.
     /// </summary>
@@ -174,102 +174,13 @@ public abstract partial class SentryMetric
     /// </remarks>
     /// <seealso href="https://develop.sentry.dev/sdk/telemetry/metrics/"/>
     public bool TryGetAttribute<TAttribute>(string key, [MaybeNullWhen(false)] out TAttribute value)
-    {
-        if (_attributes.TryGetValue(key, out var attribute) && attribute.Value is TAttribute attributeValue)
-        {
-            value = attributeValue;
-            return true;
-        }
-
-        value = default;
-        return false;
-    }
+        => Attributes.TryGetAttribute(key, out value);
 
     /// <summary>
     /// Set a key-value pair of data attached to the metric.
     /// </summary>
     public void SetAttribute<TAttribute>(string key, TAttribute value) where TAttribute : notnull
-    {
-        if (value is null)
-        {
-            return;
-        }
-
-        _attributes[key] = new SentryAttribute(value);
-    }
-
-    internal void SetAttribute(string key, string value)
-    {
-        _attributes[key] = new SentryAttribute(value, "string");
-    }
-
-    internal void SetAttribute(string key, char value)
-    {
-        _attributes[key] = new SentryAttribute(value.ToString(), "string");
-    }
-
-    internal void SetAttribute(string key, int value)
-    {
-        _attributes[key] = new SentryAttribute(value, "integer");
-    }
-
-    internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk)
-    {
-        var environment = options.SettingLocator.GetEnvironment();
-        SetAttribute("sentry.environment", environment);
-
-        var release = options.SettingLocator.GetRelease();
-        if (release is not null)
-        {
-            SetAttribute("sentry.release", release);
-        }
-
-        if (sdk.Name is { } name)
-        {
-            SetAttribute("sentry.sdk.name", name);
-        }
-        if (sdk.Version is { } version)
-        {
-            SetAttribute("sentry.sdk.version", version);
-        }
-    }
-
-    internal void SetAttributes(IEnumerable<KeyValuePair<string, object>>? attributes)
-    {
-        if (attributes is null)
-        {
-            return;
-        }
-
-#if NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER
-        if (attributes.TryGetNonEnumeratedCount(out var count))
-        {
-            _ = _attributes.EnsureCapacity(_attributes.Count + count);
-        }
-#endif
-
-        foreach (var attribute in attributes)
-        {
-            _attributes[attribute.Key] = new SentryAttribute(attribute.Value);
-        }
-    }
-
-    internal void SetAttributes(ReadOnlySpan<KeyValuePair<string, object>> attributes)
-    {
-        if (attributes.IsEmpty)
-        {
-            return;
-        }
-
-#if NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER
-        _ = _attributes.EnsureCapacity(_attributes.Count + attributes.Length);
-#endif
-
-        foreach (var attribute in attributes)
-        {
-            _attributes[attribute.Key] = new SentryAttribute(attribute.Value);
-        }
-    }
+        => Attributes.SetAttribute(key, value);
 
     /// <inheritdoc cref="ISentryJsonSerializable.WriteTo(Utf8JsonWriter, IDiagnosticLogger)" />
     internal void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
@@ -300,15 +211,7 @@ public abstract partial class SentryMetric
             writer.WriteString("unit", Unit);
         }
 
-        writer.WritePropertyName("attributes");
-        writer.WriteStartObject();
-
-        foreach (var attribute in _attributes)
-        {
-            SentryAttributeSerializer.WriteAttribute(writer, attribute.Key, attribute.Value, logger);
-        }
-
-        writer.WriteEndObject();
+        Attributes.WriteTo(writer, logger);
 
         writer.WriteEndObject();
     }

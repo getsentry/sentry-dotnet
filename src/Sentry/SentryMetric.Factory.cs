@@ -20,7 +20,7 @@ public abstract partial class SentryMetric
         };
 
         scope ??= hub.GetScope();
-        metric.SetDefaultAttributes(options, scope?.Sdk ?? SdkVersion.Instance);
+        metric.Attributes.SetDefaultAttributes(options, scope?.Sdk ?? SdkVersion.Instance);
 
         return metric;
     }
@@ -28,14 +28,14 @@ public abstract partial class SentryMetric
     internal static SentryMetric<T> Create<T>(IHub hub, SentryOptions options, ISystemClock clock, SentryMetricType type, string name, T value, string? unit, IEnumerable<KeyValuePair<string, object>>? attributes, Scope? scope) where T : struct
     {
         var metric = CreateCore<T>(hub, options, clock, type, name, value, unit, scope);
-        metric.SetAttributes(attributes);
+        metric.Attributes.SetAttributes(attributes);
         return metric;
     }
 
     internal static SentryMetric<T> Create<T>(IHub hub, SentryOptions options, ISystemClock clock, SentryMetricType type, string name, T value, string? unit, ReadOnlySpan<KeyValuePair<string, object>> attributes, Scope? scope) where T : struct
     {
         var metric = CreateCore<T>(hub, options, clock, type, name, value, unit, scope);
-        metric.SetAttributes(attributes);
+        metric.Attributes.SetAttributes(attributes);
         return metric;
     }
 
