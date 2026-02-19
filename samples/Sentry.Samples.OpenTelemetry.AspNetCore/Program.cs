@@ -3,15 +3,17 @@ using Microsoft.AspNetCore.Authentication;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Sentry.OpenTelemetry;
+using Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol;
 using Sentry.Samples.OpenTelemetry.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Read the Sentry DSN from the environment variable if it's not already set in code.
 #if SENTRY_DSN_DEFINED_IN_ENV
 var dsn = Environment.GetEnvironmentVariable("SENTRY_DSN")
           ?? throw new InvalidOperationException("SENTRY_DSN environment variable is not set");
 #else
+// A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+// See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
 var dsn = SamplesShared.Dsn;
 #endif
 
@@ -34,12 +36,7 @@ builder.Services.AddOpenTelemetry()
 
 builder.WebHost.UseSentry(options =>
 {
-#if !SENTRY_DSN_DEFINED_IN_ENV
-    // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
-    // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
-    options.Dsn = SamplesShared.Dsn;
-#endif
-
+    options.Dsn = dsn;
     options.Debug = builder.Environment.IsDevelopment();
     options.SendDefaultPii = true;
     options.TracesSampleRate = 1.0;

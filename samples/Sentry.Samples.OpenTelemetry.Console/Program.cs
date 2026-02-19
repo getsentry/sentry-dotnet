@@ -9,26 +9,31 @@ using System.Diagnostics;
 using OpenTelemetry;
 using OpenTelemetry.Trace;
 using Sentry.OpenTelemetry;
+using Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol;
+
+#if SENTRY_DSN_DEFINED_IN_ENV
+var dsn = Environment.GetEnvironmentVariable("SENTRY_DSN")
+          ?? throw new InvalidOperationException("SENTRY_DSN environment variable is not set");
+#else
+// A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+// See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+var dsn = SamplesShared.Dsn;
+#endif
 
 var activitySource = new ActivitySource("Sentry.Samples.OpenTelemetry.Console");
 
 SentrySdk.Init(options =>
 {
-#if !SENTRY_DSN_DEFINED_IN_ENV
-    // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
-    // See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
-    options.Dsn = SamplesShared.Dsn;
-#endif
-
+    options.Dsn = dsn;
     options.Debug = true;
     options.TracesSampleRate = 1.0;
-    options.UseOpenTelemetry(); // <-- Configure Sentry to use OpenTelemetry trace information
+    options.UseOtlp(); // <-- Configure Sentry to use OpenTelemetry trace information
 });
 
 using var tracerProvider = Sdk.CreateTracerProviderBuilder()
     .AddSource(activitySource.Name)
     .AddHttpClientInstrumentation()
-    .AddSentry() // <-- Configure OpenTelemetry to send traces to Sentry
+    .AddSentryOtlp(dsn) // <-- Configure OpenTelemetry to send traces to Sentry over OTLP
     .Build();
 
 Console.WriteLine("Hello World!");

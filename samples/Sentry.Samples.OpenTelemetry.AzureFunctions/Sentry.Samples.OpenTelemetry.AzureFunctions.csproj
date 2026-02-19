@@ -31,9 +31,9 @@
     <SentryUploadSources>true</SentryUploadSources>
   </PropertyGroup>
 
+  <!-- In your own project, this would be PackageReferences to the latest versions of these Sentry packages. -->
   <ItemGroup>
-      <!-- TODO: Replace with a package reference -->
       <ProjectReference Include="..\..\src\Sentry.Extensions.Logging\Sentry.Extensions.Logging.csproj" />
-      <ProjectReference Include="..\..\src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj" />
+      <ProjectReference Include="..\..\src\Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol\Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol.csproj" />
     </ItemGroup>
 </Project>

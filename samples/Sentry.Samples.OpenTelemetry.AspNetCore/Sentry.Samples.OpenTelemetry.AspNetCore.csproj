@@ -21,9 +21,10 @@
     <SentryUploadSources>true</SentryUploadSources>
   </PropertyGroup>
 
+  <!-- In your own project, this would be PackageReferences to the latest versions of these Sentry packages. -->
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry.AspNetCore\Sentry.AspNetCore.csproj" />
-    <ProjectReference Include="..\..\src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol\Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol.csproj" />
   </ItemGroup>
 
 </Project>
