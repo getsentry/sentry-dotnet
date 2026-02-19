@@ -172,6 +172,7 @@
     <Project Path="test/Sentry.Maui.Tests/Sentry.Maui.Tests.csproj" />
     <Project Path="test/Sentry.MauiTrimTest/Sentry.MauiTrimTest.csproj" />
     <Project Path="test/Sentry.NLog.Tests/Sentry.NLog.Tests.csproj" />
+    <Project Path="test/Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol.Tests/Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol.Tests.csproj" />
     <Project Path="test/Sentry.OpenTelemetry.Tests/Sentry.OpenTelemetry.Tests.csproj" />
     <Project Path="test/Sentry.Profiling.Tests/Sentry.Profiling.Tests.csproj" />
     <Project Path="test/Sentry.Serilog.Tests/Sentry.Serilog.Tests.csproj" />
