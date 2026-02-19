@@ -1,0 +1,31 @@
+When using ASP.NET (classic), you need to call `StartOrContinueTrace()` in your `Application_BeginRequest` method so that Sentry can extract incoming trace headers and continue distributed traces:
+
+```csharp
+protected void Application_BeginRequest()
+{
+    Context.StartOrContinueTrace();
+}
+```
+
+### Outgoing HTTP Requests
+
+For outgoing HTTP requests, use `SentryHttpMessageHandler` when creating your `HttpClient` to automatically propagate trace headers:
+
+```csharp
+var httpClient = new HttpClient(new SentryHttpMessageHandler());
+```
+
+The `SentryHttpMessageHandler` will automatically attach `sentry-trace` and `baggage` headers to all outgoing requests.
+
+### Controlling Where Headers Are Sent
+
+By default, tracing headers are attached to all outgoing HTTP requests. Use the `TracePropagationTargets` option to restrict which URLs receive tracing headers:
+
+```csharp
+options.TracePropagationTargets = [
+    "https://myapi.example.com",
+    "https://.*\\.mycompany\\.com"
+];
+```
+
+If `TracePropagationTargets` is configured, only requests whose URL matches one of the entries will have headers attached.

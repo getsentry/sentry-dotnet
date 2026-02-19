@@ -1,0 +1,37 @@
+If you use the current version of our .NET SDK, distributed tracing works automatically in ASP.NET Core applications without additional configuration.
+
+### Incoming Requests
+
+The Sentry middleware automatically extracts `sentry-trace` and `baggage` headers from incoming HTTP requests to continue traces started by upstream services (such as a frontend application using the Sentry JavaScript SDK).
+
+### Outgoing HTTP Requests
+
+When using `IHttpClientFactory` (the [recommended approach](https://learn.microsoft.com/aspnet/core/fundamentals/http-requests) for managing `HttpClient` in ASP.NET Core), the SDK automatically registers `SentryHttpMessageHandler` with the factory. This means all `HttpClient` instances created through dependency injection will automatically:
+
+- Attach `sentry-trace` and `baggage` headers to outgoing requests
+- Create spans for outgoing HTTP requests when tracing is enabled
+
+No additional setup is needed if your application already uses `IHttpClientFactory` or calls `services.AddHttpClient()`.
+
+If you create `HttpClient` instances manually (without the factory), you need to pass `SentryHttpMessageHandler` yourself:
+
+```csharp
+var httpClient = new HttpClient(new SentryHttpMessageHandler());
+```
+
+### Controlling Where Headers Are Sent
+
+By default, tracing headers are attached to all outgoing HTTP requests. Use the `TracePropagationTargets` option to restrict which URLs receive tracing headers:
+
+```csharp
+builder.WebHost.UseSentry(options =>
+{
+    options.Dsn = "___PUBLIC_DSN___";
+    options.TracePropagationTargets = [
+        "https://myapi.example.com",
+        "https://.*\\.mycompany\\.com"
+    ];
+});
+```
+
+If `TracePropagationTargets` is configured, only requests whose URL matches one of the entries will have headers attached.

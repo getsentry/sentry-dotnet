@@ -1,0 +1,13 @@
+If you use the current version of our .NET SDK, distributed tracing works automatically in Azure Functions Worker applications without additional configuration.
+
+The Sentry integration automatically extracts `sentry-trace` and `baggage` headers from incoming HTTP trigger requests to continue traces started by upstream services.
+
+### Outgoing HTTP Requests
+
+For outgoing HTTP requests, use `SentryHttpMessageHandler` when creating your `HttpClient` to automatically propagate trace headers:
+
+```csharp
+var httpClient = new HttpClient(new SentryHttpMessageHandler());
+```
+
+If you register `HttpClient` through dependency injection using `IHttpClientFactory`, the `SentryHttpMessageHandler` is automatically added — no additional setup is needed.

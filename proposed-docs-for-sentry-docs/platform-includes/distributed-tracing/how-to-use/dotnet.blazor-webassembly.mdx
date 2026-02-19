@@ -1,0 +1,44 @@
+Blazor WebAssembly applications run in the browser and typically communicate with backend services via HTTP. To enable distributed tracing for these outgoing requests, use `SentryHttpMessageHandler` when creating your `HttpClient`:
+
+```csharp
+var builder = WebAssemblyHostBuilder.CreateDefault(args);
+builder.UseSentry(options =>
+{
+    options.Dsn = "___PUBLIC_DSN___";
+    options.TracesSampleRate = 1.0;
+});
+
+builder.Services.AddScoped(_ =>
+    new HttpClient(new SentryHttpMessageHandler())
+    {
+        BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+    });
+
+await builder.Build().RunAsync();
+```
+
+The `SentryHttpMessageHandler` will automatically attach `sentry-trace` and `baggage` headers to outgoing requests, connecting your Blazor frontend to backend services that also use Sentry.
+
+### Controlling Where Headers Are Sent
+
+By default, tracing headers are attached to all outgoing HTTP requests. If your Blazor WebAssembly application communicates with third-party APIs, you may want to restrict which URLs receive tracing headers using the `TracePropagationTargets` option:
+
+```csharp
+builder.UseSentry(options =>
+{
+    options.Dsn = "___PUBLIC_DSN___";
+    options.TracesSampleRate = 1.0;
+    options.TracePropagationTargets = [
+        "https://myapi.example.com",
+        "https://.*\\.mycompany\\.com"
+    ];
+});
+```
+
+If `TracePropagationTargets` is configured, only requests whose URL matches one of the entries will have headers attached.
+
+<Alert>
+
+If your backend is on a different origin than your Blazor app, make sure the `sentry-trace` and `baggage` headers are included in your backend's CORS allowlist.
+
+</Alert>
