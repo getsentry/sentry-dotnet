@@ -8,7 +8,7 @@ public static class SentryAttributesExtensions
         value.Should().Be(expected);
     }
 
-    internal static void ShouldNotContain<T>(this SentryAttributes attributes, string key, T expected)
+    internal static void ShouldNotContain<T>(this SentryAttributes attributes, string key)
     {
         attributes.TryGetAttribute<T>(key, out var value).Should().BeFalse();
         value.Should().Be(default(T));

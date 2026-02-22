@@ -57,7 +57,7 @@ public class SentryMetricTests
         metric.Attributes.ShouldContain("sentry.release", options.Release);
         metric.Attributes.ShouldContain("sentry.sdk.name", sdk.Name);
         metric.Attributes.ShouldContain("sentry.sdk.version", sdk.Version);
-        metric.Attributes.ShouldNotContain("not-found", "value");
+        metric.Attributes.ShouldNotContain<string>("not-found");
     }
 
     [Fact]
