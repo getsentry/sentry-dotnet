@@ -211,6 +211,7 @@ public abstract partial class SentryMetric
             writer.WriteString("unit", Unit);
         }
 
+        writer.WritePropertyName("attributes");
         Attributes.WriteTo(writer, logger);
 
         writer.WriteEndObject();

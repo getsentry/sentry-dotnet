@@ -163,7 +163,6 @@ internal class SentryAttributes : Dictionary<string, SentryAttribute>, ISentryJs
     /// <inheritdoc cref="ISentryJsonSerializable.WriteTo(Utf8JsonWriter, IDiagnosticLogger)" />
     public void WriteTo(Utf8JsonWriter writer, IDiagnosticLogger? logger)
     {
-        writer.WritePropertyName("attributes");
         writer.WriteStartObject();
 
         foreach (var attribute in this)
