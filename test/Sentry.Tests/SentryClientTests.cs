@@ -977,6 +977,37 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureFeedback_EventProcessorApplied()
+    {
+        //Arrange
+        var feedback = new SentryFeedback("Everything is great!");
+        var eventProcessor = Substitute.For<ISentryEventProcessor>();
+        eventProcessor.Process(Arg.Any<SentryEvent>()).Returns(e => {
+            var evt = (SentryEvent)e[0];
+            evt.Environment = "testing 123";
+            return evt;
+        });
+        _fixture.SentryOptions.AddEventProcessor(eventProcessor);
+        var sut = _fixture.GetSut();
+
+        Envelope envelope = null;
+        sut.Worker.When(w => w.EnqueueEnvelope(Arg.Any<Envelope>()))
+            .Do(callback => envelope = callback.Arg<Envelope>());
+
+        //Act
+        var result = sut.CaptureFeedback(feedback);
+
+        //Assert
+        result.Should().NotBe(SentryId.Empty);
+        _ = sut.Worker.Received(1).EnqueueEnvelope(Arg.Any<Envelope>());
+        envelope.Should().NotBeNull();
+        envelope.Items.Should().Contain(item => item.TryGetType() == EnvelopeItem.TypeValueFeedback);
+        var item = envelope.Items.First(x => x.TryGetType() == EnvelopeItem.TypeValueFeedback);
+        var @event = (SentryEvent)((JsonSerializable)item.Payload).Source;
+        @event.Environment.Should().Be("testing 123");
+    }
+
+    [Fact]
     public void CaptureFeedback_WithHint_HasHintAttachment()
     {
         //Arrange
