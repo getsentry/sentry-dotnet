@@ -982,7 +982,8 @@ public partial class SentryClientTests : IDisposable
         //Arrange
         var feedback = new SentryFeedback("Everything is great!");
         var eventProcessor = Substitute.For<ISentryEventProcessor>();
-        eventProcessor.Process(Arg.Any<SentryEvent>()).Returns(e => {
+        eventProcessor.Process(Arg.Any<SentryEvent>()).Returns(e =>
+        {
             var evt = (SentryEvent)e[0];
             evt.Environment = "testing 123";
             return evt;
