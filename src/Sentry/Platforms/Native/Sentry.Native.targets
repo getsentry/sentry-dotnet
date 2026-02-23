@@ -52,44 +52,28 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'linux-x64'">
-    <None Include="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a">
-      <Pack>true</Pack>
-      <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-x64)</PackagePath>
-    </None>
-    <None Include="$(SentryNativeOutputDirectory-linux-x64)libunwind.a">
+    <None Include="$(SentryNativeOutputDirectory-linux-x64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-linux-x64)libunwind.a">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-x64)</PackagePath>
     </None>
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'linux-musl-x64'">
-    <None Include="$(SentryNativeOutputDirectory-linux-musl-x64)lib$(SentryNativeLibraryName).a">
-      <Pack>true</Pack>
-      <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-musl-x64)</PackagePath>
-    </None>
-    <None Include="$(SentryNativeOutputDirectory-linux-musl-x64)libunwind.a">
+    <None Include="$(SentryNativeOutputDirectory-linux-musl-x64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-linux-musl-x64)libunwind.a">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-musl-x64)</PackagePath>
     </None>
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'linux-arm64'">
-    <None Include="$(SentryNativeOutputDirectory-linux-arm64)lib$(SentryNativeLibraryName).a">
-      <Pack>true</Pack>
-      <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-arm64)</PackagePath>
-    </None>
-    <None Include="$(SentryNativeOutputDirectory-linux-arm64)libunwind.a">
+    <None Include="$(SentryNativeOutputDirectory-linux-arm64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-linux-arm64)libunwind.a">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-arm64)</PackagePath>
     </None>
   </ItemGroup>
 
   <ItemGroup Condition="'$(CI_PUBLISHING_BUILD)' == 'true' or '$(NETCoreSdkRuntimeIdentifier)' == 'linux-musl-arm64'">
-    <None Include="$(SentryNativeOutputDirectory-linux-musl-arm64)lib$(SentryNativeLibraryName).a">
-      <Pack>true</Pack>
-      <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-musl-arm64)</PackagePath>
-    </None>
-    <None Include="$(SentryNativeOutputDirectory-linux-musl-arm64)libunwind.a">
+    <None Include="$(SentryNativeOutputDirectory-linux-musl-arm64)lib$(SentryNativeLibraryName).a;$(SentryNativeOutputDirectory-linux-musl-arm64)libunwind.a">
       <Pack>true</Pack>
       <PackagePath>\sentry-native\$(NativeLibRelativePath-linux-musl-arm64)</PackagePath>
     </None>
