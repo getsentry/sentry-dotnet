@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Fixes
+
+- The SDK now logs a `Warning` instead of an `Error` when being ratelimited ([#4927](https://github.com/getsentry/sentry-dotnet/pull/4927))
+
+## 6.2.0-alpha.0
+
+### Features
+
+- Add navigation breadcrumbs for Blazor WebAssembly ([#4907](https://github.com/getsentry/sentry-dotnet/pull/4907))
+
 ### Dependencies
 
 - Bumped Xamarin.Kotlin.StdLib.Jdk8 to 2.2.20 ([#4876](https://github.com/getsentry/sentry-dotnet/pull/4876))
