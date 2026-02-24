@@ -117,7 +117,8 @@ public class SentryClient : ISentryClient, IDisposable
             evt.Level = scope.Level;
         }
 
-        if (SentryEventHelper.ProcessEvent(evt, scope.GetAllEventProcessors(), hint, _options) is not { } processedEvent)
+        if (SentryEventHelper.ProcessEvent(evt, scope.GetAllEventProcessors(), hint, _options, DataCategory.Feedback)
+            is not { } processedEvent)
         {
             _options.LogWarning("Feedback dropped by event processor");
             result = CaptureFeedbackResult.UnknownError;
@@ -352,7 +353,8 @@ public class SentryClient : ISentryClient, IDisposable
             }
         }
 
-        if (SentryEventHelper.ProcessEvent(@event, scope.GetAllEventProcessors(), hint, _options) is not { } processedEvent)
+        if (SentryEventHelper.ProcessEvent(@event, scope.GetAllEventProcessors(), hint, _options, DataCategory.Error)
+            is not { } processedEvent)
         {
             return SentryId.Empty;  // Dropped by an event processor
         }

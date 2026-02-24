@@ -1009,6 +1009,25 @@ public partial class SentryClientTests : IDisposable
     }
 
     [Fact]
+    public void CaptureFeedback_EventDropped_SendsClientReport()
+    {
+        //Arrange
+        var feedback = new SentryFeedback("Everything is great!");
+        var eventProcessor = Substitute.For<ISentryEventProcessor>();
+        eventProcessor.Process(Arg.Any<SentryEvent>()).Returns(_ => null);
+        _fixture.SentryOptions.AddEventProcessor(eventProcessor);
+        var sut = _fixture.GetSut();
+
+        //Act
+        var result = sut.CaptureFeedback(feedback);
+
+        //Assert
+        result.Should().Be(SentryId.Empty);
+        var expectedReason = DiscardReason.EventProcessor;
+        _fixture.ClientReportRecorder.Received(1).RecordDiscardedEvent(expectedReason, DataCategory.Feedback);
+    }
+
+    [Fact]
     public void CaptureFeedback_WithHint_HasHintAttachment()
     {
         //Arrange
