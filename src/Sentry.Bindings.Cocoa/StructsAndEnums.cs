@@ -12,12 +12,21 @@ using Sentry;
 namespace Sentry.CocoaSdk;
 
 [Native]
-internal enum SentryLogLevel : long
+internal enum SentryAttachmentType : long
 {
-    None = 1,
-    Error,
-    Debug,
-    Verbose
+    EventAttachment,
+    ViewHierarchy
+}
+
+[Native]
+internal enum SentryLevel : ulong
+{
+    None = 0,
+    Debug = 1,
+    Info = 2,
+    Warning = 3,
+    Error = 4,
+    Fatal = 5
 }
 
 [Native]
@@ -68,6 +77,14 @@ internal enum SentrySpanStatus : ulong
 }
 
 [Native]
+internal enum SentryAppStartType : ulong
+{
+    Warm,
+    Cold,
+    Unknown
+}
+
+[Native]
 internal enum SentryANRType : long
 {
     FatalFullyBlocking = 0,
@@ -78,6 +95,15 @@ internal enum SentryANRType : long
 }
 
 [Native]
+internal enum SentryExtensionType : long
+{
+    Widget = 0,
+    Intent = 1,
+    Action = 2,
+    Share = 3
+}
+
+[Native]
 internal enum SentryFeedbackSource : long
 {
     Widget = 0,
@@ -85,18 +111,19 @@ internal enum SentryFeedbackSource : long
 }
 
 [Native]
-internal enum SentryLevel : ulong
+internal enum SentryHttpStatusCode : long
 {
-    None = 0,
-    Debug = 1,
-    Info = 2,
-    Warning = 3,
-    Error = 4,
-    Fatal = 5
+    Ok = 200,
+    Created = 201,
+    BadRequest = 400,
+    PreconditionFailed = 412,
+    ContentTooLarge = 413,
+    TooManyRequests = 429,
+    InternalServerError = 500
 }
 
 [Native]
-internal enum SentryStructuredLogLevel : long
+internal enum SentryLogLevel : long
 {
     Trace = 0,
     Debug = 1,
@@ -126,15 +153,6 @@ internal enum SentryReplayType : long
 {
     Session = 0,
     Buffer = 1
-}
-
-[Native]
-internal enum SentrySessionStatus : ulong
-{
-    Ok = 0,
-    Exited = 1,
-    Crashed = 2,
-    Abnormal = 3
 }
 
 [Native]

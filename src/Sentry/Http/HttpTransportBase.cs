@@ -359,7 +359,8 @@ public abstract class HttpTransportBase
         var eventId = envelope.TryGetEventId(_options.DiagnosticLogger);
 
         // Spare the overhead if level is not enabled
-        if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true && response.Content is { } content)
+        var minLogLevel = response.StatusCode == (HttpStatusCode)429 ? SentryLevel.Warning : SentryLevel.Error;
+        if (_options.DiagnosticLogger?.IsEnabled(minLogLevel) is true && response.Content is { } content)
         {
             if (HasJsonContent(content))
             {
@@ -428,7 +429,8 @@ public abstract class HttpTransportBase
 
         var eventId = envelope.TryGetEventId(_options.DiagnosticLogger);
         // Spare the overhead if level is not enabled
-        if (_options.DiagnosticLogger?.IsEnabled(SentryLevel.Error) is true && response.Content is { } content)
+        var minLogLevel = response.StatusCode == (HttpStatusCode)429 ? SentryLevel.Warning : SentryLevel.Error;
+        if (_options.DiagnosticLogger?.IsEnabled(minLogLevel) is true && response.Content is { } content)
         {
             if (HasJsonContent(content))
             {
@@ -525,6 +527,12 @@ public abstract class HttpTransportBase
             return;
         }
 
+        if (responseStatusCode == (HttpStatusCode)429)
+        {
+            LogRateLimited(eventId, responseString);
+            return;
+        }
+
         _options.LogError("{0}: Sentry rejected the envelope '{1}'. Status code: {2}. Error detail: {3}.",
             _typeName,
             eventId,
@@ -551,6 +559,15 @@ public abstract class HttpTransportBase
             return;
         }
 
+        if (responseStatusCode == (HttpStatusCode)429)
+        {
+            var responseDetail = errorCauses.Length > 0
+                ? $"{errorMessage} ({string.Join(", ", errorCauses)})"
+                : errorMessage;
+            LogRateLimited(eventId, responseDetail);
+            return;
+        }
+
         _options.LogError("{0}: Sentry rejected the envelope '{1}'. Status code: {2}. Error detail: {3}. Error causes: {4}.",
             _typeName,
             eventId,
@@ -564,6 +581,18 @@ public abstract class HttpTransportBase
         _options.LogError(
             "{0}: Sentry rejected the envelope '{1}' because it exceeded the maximum allowed size. " +
             "Consider reducing attachment sizes, removing unnecessary data, or splitting large payloads into smaller requests. " +
+            "Server response: {2}",
+            _typeName,
+            eventId,
+            responseDetail);
+    }
+
+    private void LogRateLimited(SentryId? eventId, string responseDetail)
+    {
+        _options.LogWarning(
+            "{0}: Sentry rejected the envelope '{1}' due to rate limiting. " +
+            "This may indicate that you are sending too much data or have exceeded your quota. " +
+            "See https://docs.sentry.io/product/accounts/quotas/ for more information. " +
             "Server response: {2}",
             _typeName,
             eventId,
