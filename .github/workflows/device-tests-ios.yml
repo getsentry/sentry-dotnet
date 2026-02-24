@@ -82,7 +82,7 @@ jobs:
 
       - name: Install PowerShell
         shell: bash
-        run: which pwsh || dotnet tool install --global PowerShell
+        run: which pwsh || (dotnet tool install --global PowerShell && echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH")
 
       - name: Build iOS Test App
         run: pwsh ./scripts/device-test.ps1 ios -Build -Tfm ${{ matrix.tfm }}
