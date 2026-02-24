@@ -1,3 +1,5 @@
+using Sentry.Android;
+
 // ReSharper disable once CheckNamespace
 namespace Sentry;
 
@@ -151,6 +153,13 @@ public partial class SentryOptions
         /// See https://docs.sentry.io/platforms/android/performance/instrumentation/automatic-instrumentation/#user-interaction-instrumentation
         /// </remarks>
         public bool EnableUserInteractionTracing { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the strategy for how Sentry Native's signal handler interacts with the CLR/Mono
+        /// signal handler.
+        /// The default value is <c>SignalHandlerStrategy.Default</c> (enabled).
+        /// </summary>
+        public SignalHandlerStrategy SignalHandlerStrategy { get; set; } = SignalHandlerStrategy.Default;
 
         // ---------- From SentryOptions.java ----------
 

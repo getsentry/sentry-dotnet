@@ -14,6 +14,7 @@ public static class MauiProgram
             {
 #if ANDROID
                 options.Dsn = "{{SENTRY_DSN}}";
+                options.Native.SignalHandlerStrategy = Sentry.Android.SignalHandlerStrategy.ChainAtStart;
 #endif
                 options.Debug = false;
                 options.DiagnosticLevel = SentryLevel.Error;

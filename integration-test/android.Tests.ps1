@@ -177,13 +177,8 @@ Describe 'MAUI app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-
         Dump-ServerErrors -Result $result
         $result.HasErrors() | Should -BeFalse
         $result.Events() | Should -AnyElementMatch "`"type`":`"System.NullReferenceException`""
-        # TODO: fix redundant SIGSEGV in Release (#3954)
-        if ($configuration -eq "Release") {
-            { $result.Events() | Should -Not -AnyElementMatch "`"type`":`"SIGSEGV`"" } | Should -Throw
-        } else {
-            $result.Events() | Should -Not -AnyElementMatch "`"type`":`"SIGSEGV`""
-            $result.Events() | Should -HaveCount 1
-        }
+        $result.Events() | Should -Not -AnyElementMatch "`"type`":`"SIGSEGV`""
+        $result.Events() | Should -HaveCount 1
     }
 
     It 'Delivers battery breadcrumbs in main thread (<configuration>)' {
