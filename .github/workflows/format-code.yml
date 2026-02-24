@@ -35,7 +35,15 @@ jobs:
         # We exclude `test/Sentry.Tests/AttributeReaderTests.cs` because dotnet-format tries to
         # delete assertions in there.
         # - see https://github.com/getsentry/sentry-dotnet/pull/4911#discussion_r2795717887
-        run: dotnet format Sentry.slnx --no-restore --exclude ./modules --exclude ./**/*OptionsSetup.cs --exclude ./test/Sentry.Tests/AttributeReaderTests.cs
+        run: dotnet format Sentry.slnx --no-restore --exclude ./modules --exclude ./**/*OptionsSetup.cs --exclude ./test/Sentry.Tests/AttributeReaderTests.cs --report ./dotnet-format-report
+
+      - name: Upload Format Report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: dotnet-format-report
+          path: ./dotnet-format-report/
+          if-no-files-found: ignore
 
       # actions/checkout fetches only a single commit in a detached HEAD state. Therefore
       # we need to pass the current branch, otherwise we can't commit the changes.
