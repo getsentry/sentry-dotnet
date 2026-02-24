@@ -69,9 +69,10 @@ public partial class SentryOptions
         public bool EnableAppHangTracking { get; set; } = false;
 
         /// <summary>
-        /// IMPORTANT: This feature is experimental and may have bugs.
+        /// IMPORTANT: App Hangs V2 is now the default.
         /// <br/>
         /// As of version 8.39.0-beta.1 of the sentry-cocoa SDK, you can enable AppHangsV2, which is available on iOS and tvOS.
+        /// Starting with version 9.0.0, App Hangs V2 is enabled by default.
         /// The main difference is that AppHangsV2 differentiates between fully-blocking and non-fully-blocking
         /// app hangs, which you might choose to ignore. A fully-blocking app hang is when the main thread is stuck
         /// completely, and the app can't render a single frame.
@@ -83,6 +84,7 @@ public partial class SentryOptions
         /// <remarks>
         /// See https://docs.sentry.io/platforms/apple/configuration/app-hangs/#app-hangs-v2
         /// </remarks>
+        [Obsolete("App Hangs V2 is now the default. Use EnableAppHangTracking instead.")]
         public bool EnableAppHangTrackingV2 { get; set; } = false;
 
         /// <summary>
@@ -237,7 +239,6 @@ public partial class SentryOptions
         /// </summary>
         public bool EnableTracing { get; set; } = false;
 
-        internal List<string>? InAppExcludes { get; private set; }
         internal List<string>? InAppIncludes { get; private set; }
 
         /// <summary>
@@ -248,10 +249,9 @@ public partial class SentryOptions
         /// <remarks>
         /// https://docs.sentry.io/platforms/apple/configuration/options/#in-app-exclude
         /// </remarks>
+        [Obsolete("This option had no effect and was removed.")]
         public void AddInAppExclude(string prefix)
         {
-            InAppExcludes ??= new List<string>();
-            InAppExcludes.Add(prefix);
         }
 
         /// <summary>
