@@ -58,9 +58,9 @@ jobs:
       matrix:
         include:
           - tfm: net9.0
-            runs-on: ["ghcr.io/cirruslabs/macos-tahoe-xcode:26.0.1", "runner_group_id:10"]
+            runs-on: ["ghcr.io/cirruslabs/macos-tahoe-xcode:26.0.1,runner_concurrency_group=${{ github.run_id }}", "runner_group_id:10"]
           - tfm: net10.0
-            runs-on: ["ghcr.io/cirruslabs/macos-tahoe-xcode:26.2", "runner_group_id:10"]
+            runs-on: ["ghcr.io/cirruslabs/macos-tahoe-xcode:26.2,runner_concurrency_group=${{ github.run_id }}", "runner_group_id:10"]
     runs-on: ${{ matrix.runs-on }}
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
