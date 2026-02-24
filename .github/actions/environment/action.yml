@@ -92,7 +92,7 @@ runs:
         sudo chmod -R a+rw /usr/share/dotnet
 
     - name: Install .NET SDK
-      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+      uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
       with:
         global-json-file: global.json
         dotnet-version: |
@@ -102,7 +102,7 @@ runs:
     # .NET 5.0 does not support ARM64 on macOS
     - name: Install .NET 5.0 SDK
       if: ${{ runner.os != 'macOS' || runner.arch != 'ARM64' }}
-      uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4.3.1
+      uses: actions/setup-dotnet@baa11fbfe1d6520db94683bd5c7a3818018e4309 # v5.1.0
       with:
         dotnet-version: 5.0.x
 
