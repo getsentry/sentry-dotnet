@@ -80,6 +80,10 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
 
+      - name: Install PowerShell
+        shell: bash
+        run: which pwsh || dotnet tool install --global PowerShell
+
       - name: Build iOS Test App
         run: pwsh ./scripts/device-test.ps1 ios -Build -Tfm ${{ matrix.tfm }}
 
