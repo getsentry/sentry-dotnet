@@ -35,7 +35,7 @@ jobs:
         # We exclude `test/Sentry.Tests/AttributeReaderTests.cs` because dotnet-format tries to
         # delete assertions in there.
         # - see https://github.com/getsentry/sentry-dotnet/pull/4911#discussion_r2795717887
-        run: dotnet format Sentry.slnx --no-restore --exclude ./modules --exclude ./**/*OptionsSetup.cs --exclude ./test/Sentry.Tests/AttributeReaderTests.cs --report ./dotnet-format-report
+        run: dotnet format Sentry.slnx --no-restore --report ./dotnet-format-report --exclude ./modules --exclude ./**/*OptionsSetup.cs --exclude ./test/Sentry.Tests/AttributeReaderTests.cs
 
       - name: Upload Format Report
         if: ${{ always() }}
