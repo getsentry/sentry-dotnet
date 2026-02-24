@@ -9,6 +9,7 @@
     <Using Include="Sentry.CocoaSdk.SentryOptions" Alias="SentryCocoaSdkOptions" />
     <Using Include="Sentry.CocoaSdk.SentrySDK" Alias="SentryCocoaSdk" />
     <Using Include="Sentry.CocoaSdk.PrivateSentrySDKOnly" Alias="SentryCocoaHybridSdk" />
+    <Using Include="Sentry.CocoaSdk.SentryDependencyContainer" Alias="SentryCocoaDependencyContainer" />
   </ItemGroup>
 
 </Project>

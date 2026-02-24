@@ -179,5 +179,8 @@
     <Project Path="test/Sentry.Tests/Sentry.Tests.csproj" />
     <Project Path="test/Sentry.TrimTest/Sentry.TrimTest.csproj" />
     <Project Path="test/SingleFileTestApp/SingleFileTestApp.csproj" />
+    <Project Path="test/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests.csproj" />
+    <Project Path="test/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests.TestApp/Sentry.AspNetCore.Blazor.WebAssembly.PlaywrightTests.TestApp.csproj" />
+    <Project Path="test/Sentry.AspNetCore.Blazor.WebAssembly.Tests/Sentry.AspNetCore.Blazor.WebAssembly.Tests.csproj" />
   </Folder>
 </Solution>
