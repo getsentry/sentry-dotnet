@@ -47,8 +47,9 @@ jobs:
 
       - name: Exclude Format Report from Git
         run: |
-          mkdir -p ./dotnet-format-report
-          echo '*' > ./dotnet-format-report/.gitignore
+          if [ -d ./dotnet-format-report ]; then
+            echo '*' > ./dotnet-format-report/.gitignore
+          fi
 
       # actions/checkout fetches only a single commit in a detached HEAD state. Therefore
       # we need to pass the current branch, otherwise we can't commit the changes.
