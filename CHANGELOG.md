@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Features
+- DebugStackTrace no longer creates a stack trace for dynamic methods, which should result in slightly better performance when capturing errors ([#4954](https://github.com/getsentry/sentry-dotnet/pull/4954))
+
 ### Fixes
 
 - The SDK now logs a `Warning` instead of an `Error` when being ratelimited ([#4927](https://github.com/getsentry/sentry-dotnet/pull/4927))
