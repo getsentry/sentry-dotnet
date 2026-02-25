@@ -5,6 +5,7 @@
 ### Fixes
 
 - The SDK now logs a `Warning` instead of an `Error` when being ratelimited ([#4927](https://github.com/getsentry/sentry-dotnet/pull/4927))
+- Occassional MSB4006 circular dependency errors involving target "SetupCocoaSDK" when building the SDK ([#4956](https://github.com/getsentry/sentry-dotnet/pull/4956))
 
 ## 6.2.0-alpha.0
 
