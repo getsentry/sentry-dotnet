@@ -103,17 +103,25 @@
           DependsOnTargets="_DownloadCocoaSDK;_BuildCocoaSDK;_GenerateSentryCocoaBindings;SanitizeSentryCocoaFramework"
           Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
 
-  <!-- Setup exactly once: https://learn.microsoft.com/visualstudio/msbuild/run-target-exactly-once -->
+  <!--
+    Outer build (multi-TFM): runs _SetupCocoaSDK once before MSBuild fans out to inner per-TFM builds.
+    Critically, this ensures the stamp file exists before the inner builds are scheduled, so
+    SetupCocoaSDK's Condition (which checks for the stamp) correctly skips all inner builds.
+  -->
   <Target Name="SetupCocoaSDKBeforeOuterBuild" DependsOnTargets="_SetupCocoaSDK"
           Condition="$([MSBuild]::IsOSPlatform('OSX'))"
           BeforeTargets="DispatchToInnerBuilds" />
 
+  <!--
+    Inner build (single-TFM) or direct single-TFM invocation (-f flag): runs _SetupCocoaSDK as a
+    direct dependency, without a recursive MSBuild call. The recursive call pattern caused a circular
+    dependency (SetupCocoaSDK → BeforeBuild → SetupCocoaSDK) that newer MSBuild versions detect as an error.
+    All subtargets are idempotent, so if the outer build already ran them this is a no-op.
+  -->
   <Target Name="SetupCocoaSDK"
+          DependsOnTargets="_SetupCocoaSDK"
           BeforeTargets="BeforeBuild"
-          Condition="$([MSBuild]::IsOSPlatform('OSX'))">
-    <!-- Setup exactly once: https://learn.microsoft.com/visualstudio/msbuild/run-target-exactly-once -->
-    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_SetupCocoaSDK" RemoveProperties="TargetFramework" />
-  </Target>
+          Condition="$([MSBuild]::IsOSPlatform('OSX'))" />
 
   <Target Name="CleanCocoaSDK" AfterTargets="Clean" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
     <RemoveDir Directories="$(SentryCocoaCache)" ContinueOnError="true" />
@@ -133,10 +141,12 @@
   </Target>
 
   <!-- Sanitize the xcframework before NativeReference resolution and packing -->
+  <!-- Stamp file ensures this only runs once even when invoked from multiple inner TFM builds -->
   <Target Name="SanitizeSentryCocoaFramework"
-          Condition="$([MSBuild]::IsOSPlatform('OSX')) and Exists('$(SentryCocoaFramework)')">
+          Condition="$([MSBuild]::IsOSPlatform('OSX')) and Exists('$(SentryCocoaFramework)') and !Exists('$(SentryCocoaFramework).sanitized.stamp')">
     <Message Importance="High" Text="Sanitizing $(SentryCocoaFramework): removing dSYMs, Headers, Modules, PrivateHeaders (including symlinks)." />
     <Exec Command="find &quot;$(SentryCocoaFramework)&quot; -depth \( -name dSYMs -o -name Headers -o -name Modules -o -name PrivateHeaders \) -exec echo Removing {} \; -exec rm -rf {} + 2&gt;/dev/null || true" />
+    <Touch Files="$(SentryCocoaFramework).sanitized.stamp" AlwaysCreate="true" />
   </Target>
 
   <!-- Workaround for https://github.com/xamarin/xamarin-macios/issues/15299 -->
