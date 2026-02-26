@@ -2,11 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(TargetFrameworks);net9.0-android;net10.0-android</TargetFrameworks>
-<!-- Note: we can't run against net9-ios because .NET 10 requires Xcode 26.2 and .NET 9 requires Xcode 26.0.
-     The macOS GitHub Actions runners only have Xcode 26.1+ installed and no support for Xcode 26.2 is planned for
-     net9.0-ios: https://github.com/dotnet/macios/issues/24199#issuecomment-3819021247
--->
-    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net10.0-ios</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(TargetFrameworks);net9.0-ios;net10.0-ios</TargetFrameworks>
     <DefineConstants Condition="'$(EnableMauiDeviceTestVisualRunner)' == 'true'">$(DefineConstants);VISUAL_RUNNER</DefineConstants>
   </PropertyGroup>
 
@@ -38,7 +34,8 @@
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
     <!-- Pin target iOS version so that our tests don't break when new versions of Xcode are released.
       'netX.0-ios' resolves the latest version of the iOS SDK otherwise. -->
-    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">26.2</TargetPlatformVersion>
+    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' And '$(TargetFramework)' == 'net10.0-ios'">26.2</TargetPlatformVersion>
+    <TargetPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' And '$(TargetFramework)' == 'net9.0-ios'">26.0</TargetPlatformVersion>
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
 
     <!-- Avoid errors of Sentry.Testing not being a self-contained executable, while including it in a self-contained executable (this).

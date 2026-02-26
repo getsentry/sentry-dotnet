@@ -52,7 +52,18 @@ on:
 
 jobs:
   ios-tests:
-    runs-on: macos-15
+    name: iOS Tests (${{ matrix.tfm }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tfm: net9.0
+            xcode: "26.0.1"
+            runs-on: ["ghcr.io/cirruslabs/macos-tahoe-xcode:26.0.1,runner_concurrency_group=${{ github.run_id }}", "runner_group_id:10"]
+          - tfm: net10.0
+            xcode: "26.2"
+            runs-on: ["ghcr.io/cirruslabs/macos-tahoe-xcode:26.2,runner_concurrency_group=${{ github.run_id }}", "runner_group_id:10"]
+    runs-on: ${{ matrix.runs-on }}
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_NOLOGO: 1
@@ -71,40 +82,57 @@ jobs:
       - name: Setup Environment
         uses: ./.github/actions/environment
 
+      - name: Install PowerShell
+        run: |
+          which pwsh || (dotnet tool install --global PowerShell && echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH")
+
+      - name: Select Xcode
+        run: sudo xcode-select --switch /Applications/Xcode_${{ matrix.xcode }}.app
+
+      - name: Check Rosetta
+        run: |
+          arch -x86_64 /usr/bin/true && echo "Rosetta: yes" || echo "Rosetta: no"
+
+      - name: List Simulator Runtimes
+        run: xcrun simctl list runtimes -j
+
       - name: Build iOS Test App
-        run: pwsh ./scripts/device-test.ps1 ios -Build
+        run: pwsh ./scripts/device-test.ps1 ios -Build -Tfm ${{ matrix.tfm }}
 
       - name: Run Tests
         id: first-test-run
         continue-on-error: true
         timeout-minutes: 40
-        run: pwsh scripts/device-test.ps1 ios -Run
+        run: pwsh scripts/device-test.ps1 ios -Run -Tfm ${{ matrix.tfm }}
 
       - name: Retry Tests (if previous failed to run)
         if: steps.first-test-run.outcome == 'failure'
         timeout-minutes: 40
-        run: pwsh scripts/device-test.ps1 ios -Run
+        run: pwsh scripts/device-test.ps1 ios -Run -Tfm ${{ matrix.tfm }}
+
+      - name: Checkout github-workflows
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: getsentry/github-workflows
+          ref: 747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
+          path: modules/github-workflows
 
       - name: Run Integration Tests
         id: first-integration-test-run
         continue-on-error: true
         timeout-minutes: 40
-        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
-        with:
-          path: integration-test/ios.Tests.ps1
+        run: pwsh integration-test/ios.Tests.ps1 -dotnet_version ${{ matrix.tfm }}
 
       - name: Retry Integration Tests (if previous failed to run)
         if: steps.first-integration-test-run.outcome == 'failure'
         timeout-minutes: 40
-        uses: getsentry/github-workflows/sentry-cli/integration-test@747c4c2906d373f5cd809abe94a7fd732a2421a7 # 3.2.1
-        with:
-          path: integration-test/ios.Tests.ps1
+        run: pwsh integration-test/ios.Tests.ps1 -dotnet_version ${{ matrix.tfm }}
 
       - name: Upload results
         if: success() || failure()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: device-test-ios-results
+          name: device-test-ios-results-${{ matrix.tfm }}
           path: |
             test_output
             integration-test/mobile-app/test_output
