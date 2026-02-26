@@ -18,7 +18,7 @@ public sealed class TraceConnectedMetricsAnalyzer : DiagnosticAnalyzer
         id: DiagnosticIds.Sentry1001,
         title: Title,
         messageFormat: MessageFormat,
-        category: DiagnosticCategories.Support,
+        category: DiagnosticCategories.Sentry,
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: Description,

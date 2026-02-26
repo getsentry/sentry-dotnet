@@ -5,4 +5,4 @@
 
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
-SENTRY1001 | Support | Warning | TraceConnectedMetricsAnalyzer
+SENTRY1001 | Sentry | Warning | TraceConnectedMetricsAnalyzer
