@@ -28,9 +28,6 @@ jobs:
           dotnet workload restore
           dotnet restore Sentry.slnx --nologo
 
-      - name: Install dotnet format
-        run: dotnet tool install -g dotnet-format
-
       - name: Format Code
         # We exclude `./**/*OptionsSetup.cs` from the format because the tool struggles with
         # source generators.
@@ -38,7 +35,21 @@ jobs:
         # We exclude `test/Sentry.Tests/AttributeReaderTests.cs` because dotnet-format tries to
         # delete assertions in there.
         # - see https://github.com/getsentry/sentry-dotnet/pull/4911#discussion_r2795717887
-        run: dotnet format Sentry.slnx --no-restore --exclude ./modules --exclude ./**/*OptionsSetup.cs --exclude ./test/Sentry.Tests/AttributeReaderTests.cs
+        run: dotnet format Sentry.slnx --no-restore --report ./dotnet-format-report --exclude ./modules ./**/*OptionsSetup.cs ./test/Sentry.Tests/AttributeReaderTests.cs
+
+      - name: Upload Format Report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: dotnet-format-report
+          path: ./dotnet-format-report/
+          if-no-files-found: ignore
+
+      - name: Exclude Format Report from Git
+        run: |
+          if [ -d ./dotnet-format-report ]; then
+            echo '*' > ./dotnet-format-report/.gitignore
+          fi
 
       # actions/checkout fetches only a single commit in a detached HEAD state. Therefore
       # we need to pass the current branch, otherwise we can't commit the changes.
