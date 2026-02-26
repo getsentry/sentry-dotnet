@@ -83,15 +83,15 @@ jobs:
         uses: ./.github/actions/environment
 
       - name: Install PowerShell
-        shell: bash
-        run: which pwsh || (dotnet tool install --global PowerShell && echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH")
+        run: |
+          which pwsh || (dotnet tool install --global PowerShell && echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH")
 
       - name: Select Xcode
         run: sudo xcode-select --switch /Applications/Xcode_${{ matrix.xcode }}.app
 
       - name: Check Rosetta
-        shell: bash
-        run: arch -x86_64 /usr/bin/true && echo "Rosetta: yes" || echo "Rosetta: no"
+        run: |
+          arch -x86_64 /usr/bin/true && echo "Rosetta: yes" || echo "Rosetta: no"
 
       - name: List Simulator Runtimes
         run: xcrun simctl list runtimes -j
