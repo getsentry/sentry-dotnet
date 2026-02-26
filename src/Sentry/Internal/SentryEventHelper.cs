@@ -4,7 +4,8 @@ namespace Sentry.Internal;
 
 internal static class SentryEventHelper
 {
-    public static SentryEvent? ProcessEvent(SentryEvent? evt, IEnumerable<ISentryEventProcessor> processors, SentryHint? hint, SentryOptions options)
+    public static SentryEvent? ProcessEvent(SentryEvent? evt, IEnumerable<ISentryEventProcessor> processors,
+        SentryHint? hint, SentryOptions options, DataCategory dataCategory)
     {
         if (evt == null)
         {
@@ -19,7 +20,7 @@ internal static class SentryEventHelper
             processedEvent = processor.DoProcessEvent(processedEvent, effectiveHint);
             if (processedEvent == null)
             {
-                options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, DataCategory.Error);
+                options.ClientReportRecorder.RecordDiscardedEvent(DiscardReason.EventProcessor, dataCategory);
                 options.LogInfo("Event dropped by processor {0}", processor.GetType().Name);
                 break;
             }
