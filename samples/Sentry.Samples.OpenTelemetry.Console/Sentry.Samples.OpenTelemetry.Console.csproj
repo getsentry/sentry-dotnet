@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpenTelemetry" Version="1.8.0" />
-    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.8.1" />
+    <PackageReference Include="OpenTelemetry" Version="1.15.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.15.0" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -19,10 +19,10 @@
     <SentryUploadSources>true</SentryUploadSources>
   </PropertyGroup>
 
-  <!-- In your own project, this would be a PackageReference to the latest version of Sentry. -->
+  <!-- In your own project, this would be PackageReferences to the latest versions of these Sentry packages. -->
   <ItemGroup>
     <ProjectReference Include="..\..\src\Sentry\Sentry.csproj" />
-    <ProjectReference Include="..\..\src\Sentry.OpenTelemetry\Sentry.OpenTelemetry.csproj" />
+    <ProjectReference Include="..\..\src\Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol\Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol.csproj" />
   </ItemGroup>
 
 </Project>

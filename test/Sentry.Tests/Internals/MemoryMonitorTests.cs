@@ -10,12 +10,7 @@ public class MemoryMonitorTests
     {
         private IGCImplementation GCImplementation { get; set; }
 
-        public SentryOptions Options { get; set; } = new()
-        {
-            Dsn = ValidDsn,
-            Debug = true,
-            DiagnosticLogger = Substitute.For<IDiagnosticLogger>()
-        };
+        public SentryOptions Options { get; set; } = new() { Dsn = ValidDsn };
 
         public Action<string> OnDumpCollected { get; set; } = _ => { };
 
@@ -32,7 +27,7 @@ public class MemoryMonitorTests
 
         public MemoryMonitor GetSut()
         {
-            Options.DiagnosticLogger?.IsEnabled(Arg.Any<SentryLevel>()).Returns(true);
+            Options.AddDiagnosticLoggerSubsititute();
             return new MemoryMonitor(Options, OnDumpCollected, OnCaptureDump, GCImplementation ?? MockGCImplementation());
         }
     }

@@ -3,6 +3,16 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenTelemetry.Trace;
 using Sentry.OpenTelemetry;
+using Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol;
+
+#if SENTRY_DSN_DEFINED_IN_ENV
+var dsn = Environment.GetEnvironmentVariable("SENTRY_DSN")
+          ?? throw new InvalidOperationException("SENTRY_DSN environment variable is not set");
+#else
+// A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
+// See https://docs.sentry.io/product/sentry-basics/dsn-explainer/
+var dsn = SamplesShared.Dsn;
+#endif
 
 var host = new HostBuilder()
     .ConfigureFunctionsWorkerDefaults()
@@ -11,7 +21,7 @@ var host = new HostBuilder()
         services.AddOpenTelemetry().WithTracing(builder =>
         {
             builder
-                .AddSentry() // <-- Configure OpenTelemetry to send traces to Sentry
+                .AddSentryOtlp(dsn) // <-- Configure OpenTelemetry to send traces to Sentry
                 .AddHttpClientInstrumentation(); // From OpenTelemetry.Instrumentation.Http... adds automatic tracing for outgoing HTTP requests
         });
     })
@@ -19,12 +29,9 @@ var host = new HostBuilder()
     {
         logging.AddSentry(options =>
         {
-#if !SENTRY_DSN_DEFINED_IN_ENV
-            // A DSN is required. You can set here in code, or you can set it in the SENTRY_DSN environment variable.
-            options.Dsn = SamplesShared.Dsn;
-#endif
+            options.Dsn = dsn;
             options.TracesSampleRate = 1.0;
-            options.UseOpenTelemetry(); // <-- Configure Sentry to use open telemetry
+            options.UseOtlp(); // <-- Configure Sentry to use open telemetry
             options.DisableSentryHttpMessageHandler = true; // So Sentry doesn't also create spans for outbound HTTP requests
             options.Debug = true;
         });

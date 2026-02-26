@@ -185,6 +185,12 @@ internal class Hub : IHub, IDisposable
             return NoOpTransaction.Instance;
         }
 
+        if (_options.DisableSentryTracing)
+        {
+            _options.LogWarning("Sentry transaction dropped because OpenTelemetry is enabled");
+            return NoOpTransaction.Instance;
+        }
+
         bool? isSampled = null;
         double? sampleRate = null;
         DiscardReason? discardReason = null;
@@ -306,6 +312,12 @@ internal class Hub : IHub, IDisposable
 
     public BaggageHeader GetBaggage()
     {
+        if (_options.Instrumenter is Instrumenter.OpenTelemetry)
+        {
+            _options.LogWarning("GetBaggage should not be called when using OpenTelemetry.");
+            return BaggageHeader.Create([]);
+        }
+
         var span = GetSpan();
         if (span?.GetTransaction().GetDynamicSamplingContext() is { IsEmpty: false } dsc)
         {
@@ -478,12 +490,15 @@ internal class Hub : IHub, IDisposable
         }
     }
 
-    private void ApplyTraceContextToEvent(SentryEvent evt, SentryPropagationContext propagationContext)
+    private void ApplyTraceContextToEvent(SentryEvent evt, IPropagationContext propagationContext)
     {
         evt.Contexts.Trace.TraceId = propagationContext.TraceId;
         evt.Contexts.Trace.SpanId = propagationContext.SpanId;
         evt.Contexts.Trace.ParentSpanId = propagationContext.ParentSpanId;
-        evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession);
+        if (_options.Instrumenter is Instrumenter.Sentry)
+        {
+            evt.DynamicSamplingContext = propagationContext.GetOrCreateDynamicSamplingContext(_options, _replaySession);
+        }
     }
 
     public bool CaptureEnvelope(Envelope envelope) => CurrentClient.CaptureEnvelope(envelope);

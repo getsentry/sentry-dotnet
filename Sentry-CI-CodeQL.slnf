@@ -19,6 +19,7 @@
       "src\\Sentry.Maui.CommunityToolkit.Mvvm\\Sentry.Maui.CommunityToolkit.Mvvm.csproj",
       "src\\Sentry.Maui\\Sentry.Maui.csproj",
       "src\\Sentry.NLog\\Sentry.NLog.csproj",
+      "src\\Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol\\Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol.csproj",
       "src\\Sentry.OpenTelemetry\\Sentry.OpenTelemetry.csproj",
       "src\\Sentry.Profiling\\Sentry.Profiling.csproj",
       "src\\Sentry.Serilog\\Sentry.Serilog.csproj",

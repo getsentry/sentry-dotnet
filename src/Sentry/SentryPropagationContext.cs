@@ -3,23 +3,23 @@ using Sentry.Internal;
 
 namespace Sentry;
 
-internal class SentryPropagationContext
+internal class SentryPropagationContext : IPropagationContext
 {
     public SentryId TraceId { get; }
     public SpanId SpanId { get; }
     public SpanId? ParentSpanId { get; }
 
-    internal DynamicSamplingContext? _dynamicSamplingContext;
+    public DynamicSamplingContext? DynamicSamplingContext { get; private set; }
 
     public DynamicSamplingContext GetOrCreateDynamicSamplingContext(SentryOptions options, IReplaySession replaySession)
     {
-        if (_dynamicSamplingContext is null)
+        if (DynamicSamplingContext is null)
         {
             options.LogDebug("Creating the Dynamic Sampling Context from the Propagation Context.");
-            _dynamicSamplingContext = this.CreateDynamicSamplingContext(options, replaySession);
+            DynamicSamplingContext = this.CreateDynamicSamplingContext(options, replaySession);
         }
 
-        return _dynamicSamplingContext;
+        return DynamicSamplingContext;
     }
 
     internal SentryPropagationContext(
@@ -30,7 +30,7 @@ internal class SentryPropagationContext
         TraceId = traceId;
         SpanId = SpanId.Create();
         ParentSpanId = parentSpanId;
-        _dynamicSamplingContext = dynamicSamplingContext;
+        DynamicSamplingContext = dynamicSamplingContext;
     }
 
     public SentryPropagationContext()
@@ -39,13 +39,13 @@ internal class SentryPropagationContext
         SpanId = SpanId.Create();
     }
 
-    public SentryPropagationContext(SentryPropagationContext? other)
+    public SentryPropagationContext(IPropagationContext? other)
     {
         TraceId = other?.TraceId ?? SentryId.Create();
         SpanId = other?.SpanId ?? SpanId.Create();
         ParentSpanId = other?.ParentSpanId;
 
-        _dynamicSamplingContext = other?._dynamicSamplingContext;
+        DynamicSamplingContext = other?.DynamicSamplingContext;
     }
 
     public static SentryPropagationContext CreateFromHeaders(IDiagnosticLogger? logger, SentryTraceHeader? traceHeader, BaggageHeader? baggageHeader, IReplaySession replaySession)

@@ -1,8 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Trace;
 using Sentry.Extensibility;
+using Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol;
 
 namespace Sentry.OpenTelemetry;
 
@@ -11,18 +13,20 @@ namespace Sentry.OpenTelemetry;
 /// </summary>
 public static class TracerProviderBuilderExtensions
 {
+    internal const string MissingDsnWarning = "Invalid DSN passed to AddSentryOTLP";
+
     /// <summary>
     /// <para>
-    /// Ensures OpenTelemetry trace information is sent to Sentry. OpenTelemetry spans will be converted to Sentry spans
-    /// using a span processor.
+    /// Ensures OpenTelemetry trace information is sent to the Sentry OTLP endpoint.
     /// </para>
     /// <para>
     /// Note that if you use this method to configure the trace builder, you will also need to call
-    /// <see cref="SentryOptionsExtensions.UseOpenTelemetry(SentryOptions, bool)"/> when initialising Sentry, for Sentry
-    /// to work properly with OpenTelemetry.
+    /// <see cref="SentryOptionsExtensions.UseOtlp(Sentry.SentryOptions)"/> when initialising Sentry, for Sentry to work
+    /// properly with OpenTelemetry.
     /// </para>
     /// </summary>
     /// <param name="tracerProviderBuilder">The <see cref="TracerProviderBuilder"/>.</param>
+    /// <param name="dsnString">The DSN for your Sentry project</param>
     /// <param name="defaultTextMapPropagator">
     ///     <para>The default TextMapPropagator to be used by OpenTelemetry.</para>
     ///     <para>
@@ -35,37 +39,31 @@ public static class TracerProviderBuilderExtensions
     ///     </para>
     /// </param>
     /// <returns>The supplied <see cref="TracerProviderBuilder"/> for chaining.</returns>
-    /// <remarks>
-    /// This method of initialising the Sentry OpenTelemetry integration will be depricated in a future major release.
-    /// We recommend you use the Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol integration instead.
-    /// </remarks>
-    public static TracerProviderBuilder AddSentry(this TracerProviderBuilder tracerProviderBuilder,
+    public static TracerProviderBuilder AddSentryOtlp(this TracerProviderBuilder tracerProviderBuilder, string dsnString,
         TextMapPropagator? defaultTextMapPropagator = null)
     {
+        if (Dsn.TryParse(dsnString) is not { } dsn)
+        {
+            throw new ArgumentException(MissingDsnWarning, nameof(dsnString));
+        }
+
         defaultTextMapPropagator ??= new SentryPropagator();
         Sdk.SetDefaultTextMapPropagator(defaultTextMapPropagator);
-        return tracerProviderBuilder.AddProcessor(ImplementationFactory);
+
+        tracerProviderBuilder.AddOtlpExporter(options => OtlpConfigurationCallback(options, dsn));
+        return tracerProviderBuilder;
     }
 
-    internal static BaseProcessor<Activity> ImplementationFactory(IServiceProvider services)
+    // Internal helper method for testing purposes
+    internal static void OtlpConfigurationCallback(OtlpExporterOptions options, Dsn dsn)
     {
-        List<IOpenTelemetryEnricher> enrichers = [];
-
-        // AspNetCoreEnricher
-        var userFactory = services.GetService<ISentryUserFactory>();
-        if (userFactory is not null)
+        options.Endpoint = dsn.GetOtlpTracesEndpointUri();
+        options.Protocol = OtlpExportProtocol.HttpProtobuf;
+        options.HttpClientFactory = () =>
         {
-            enrichers.Add(new AspNetCoreEnricher(userFactory));
-        }
-
-        var hub = services.GetService<IHub>() ?? SentrySdk.CurrentHub;
-        if (hub.IsEnabled)
-        {
-            return new SentrySpanProcessor(hub, enrichers);
-        }
-
-        var logger = services.GetService<IDiagnosticLogger>();
-        logger?.LogWarning("Sentry is disabled so no OpenTelemetry spans will be sent to Sentry.");
-        return DisabledSpanProcessor.Instance;
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("X-Sentry-Auth", $"sentry sentry_key={dsn.PublicKey}");
+            return client;
+        };
     }
 }

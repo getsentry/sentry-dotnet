@@ -20,5 +20,6 @@ targets:
       nuget:Sentry.Maui:
       nuget:Sentry.NLog:
       nuget:Sentry.OpenTelemetry:
+      nuget:Sentry.OpenTelemetry.Exporter.OpenTelemetryProtocol:
       nuget:Sentry.Serilog:
       nuget:Sentry.Profiling:
