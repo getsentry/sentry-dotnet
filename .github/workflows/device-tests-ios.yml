@@ -90,6 +90,7 @@ jobs:
         run: sudo xcode-select --switch /Applications/Xcode_${{ matrix.xcode }}.app
 
       - name: Check Rosetta
+        shell: bash
         run: arch -x86_64 /usr/bin/true && echo "Rosetta: yes" || echo "Rosetta: no"
 
       - name: List Simulator Runtimes
