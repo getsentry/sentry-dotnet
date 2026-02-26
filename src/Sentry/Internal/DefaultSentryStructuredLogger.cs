@@ -71,7 +71,12 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
         var scope = _hub.GetScope();
         log.SetDefaultAttributes(_options, scope?.Sdk ?? SdkVersion.Instance);
 
-        CaptureLog(log);
+        var captured = CaptureLog(log);
+
+        if (captured && _options.Debug)
+        {
+            WriteToConsole(log);
+        }
     }
 
     /// <inheritdoc />
@@ -108,5 +113,20 @@ internal sealed class DefaultSentryStructuredLogger : SentryStructuredLogger, ID
     public void Dispose()
     {
         _batchProcessor.Dispose();
+    }
+
+    private static void WriteToConsole(SentryLog log)
+    {
+        Debug.Assert(!log.TryGetAttribute("sentry.origin", out string? origin), $"Logs should only be printed to the Console when captured via the Sentry Logger APIs and not through any integration: {origin}");
+
+        var capacity = 10 + 2 + log.Message.Length;
+        var text = new StringBuilder(capacity);
+        text.Append(log.Level.ToText().PadLeft(10));
+        text.Append(": ");
+        text.Append(log.Message);
+
+        Debug.Assert(text.Length == capacity, $"Wrong assumption of capacity: Expected: {capacity}; Actual: {text.Length}");
+
+        Console.WriteLine(text.ToString());
     }
 }

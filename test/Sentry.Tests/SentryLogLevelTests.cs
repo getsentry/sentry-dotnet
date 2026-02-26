@@ -149,4 +149,48 @@ public class SentryLogLevelTests
             { 24, SentryLogLevel.Fatal },
         };
     }
+
+    [Theory]
+    [MemberData(nameof(Convert))]
+    public void Convert_FromSentryLogLevel_ToString(int level, string expected)
+    {
+        var @enum = (SentryLogLevel)level;
+
+        var actual = @enum.ToText();
+
+        Assert.Equal(expected, actual);
+    }
+
+    public static TheoryData<int, string> Convert()
+    {
+        return new TheoryData<int, string>
+        {
+            { 0, "trace(<1)" },
+            { 1, "trace" },
+            { 2, "trace(2)" },
+            { 3, "trace(3)" },
+            { 4, "trace(4)" },
+            { 5, "debug" },
+            { 6, "debug(6)" },
+            { 7, "debug(7)" },
+            { 8, "debug(8)" },
+            { 9, "info" },
+            { 10, "info(10)" },
+            { 11, "info(11)" },
+            { 12, "info(12)" },
+            { 13, "warn" },
+            { 14, "warn(14)" },
+            { 15, "warn(15)" },
+            { 16, "warn(16)" },
+            { 17, "error" },
+            { 18, "error(18)" },
+            { 19, "error(19)" },
+            { 20, "error(20)" },
+            { 21, "fatal" },
+            { 22, "fatal(22)" },
+            { 23, "fatal(23)" },
+            { 24, "fatal(24)" },
+            { 25, "fatal(>24)" },
+        };
+    }
 }
