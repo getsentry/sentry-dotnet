@@ -89,6 +89,12 @@ jobs:
       - name: Select Xcode
         run: sudo xcode-select --switch /Applications/Xcode_${{ matrix.xcode }}.app
 
+      - name: Check Rosetta
+        run: arch -x86_64 /usr/bin/true && echo "Rosetta: yes" || echo "Rosetta: no"
+
+      - name: List Simulator Runtimes
+        run: xcrun simctl list runtimes -j
+
       - name: Build iOS Test App
         run: pwsh ./scripts/device-test.ps1 ios -Build -Tfm ${{ matrix.tfm }}
 
