@@ -26,4 +26,10 @@
     <Using Include="Microsoft.AspNetCore.Hosting" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="SentrySinkTests.Structured.cs">
+      <DependentUpon>SentrySinkTests.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>

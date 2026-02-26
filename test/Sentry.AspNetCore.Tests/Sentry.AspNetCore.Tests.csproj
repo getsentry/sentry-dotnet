@@ -16,4 +16,10 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="IntegrationsTests.EventProcessor.cs">
+      <DependentUpon>IntegrationsTests.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>
