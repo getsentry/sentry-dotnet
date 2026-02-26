@@ -144,6 +144,10 @@ public static partial class SentrySdk
                 (JavaDouble?)options.Native.ExperimentalOptions.SessionReplay.SessionSampleRate;
             o.SessionReplay.SetMaskAllImages(options.Native.ExperimentalOptions.SessionReplay.MaskAllImages);
             o.SessionReplay.SetMaskAllText(options.Native.ExperimentalOptions.SessionReplay.MaskAllText);
+            if (o.ReplayController is { } replayController)
+            {
+                replayController.BreadcrumbConverter = new DotnetReplayBreadcrumbConverter(o);
+            }
 
             // These options are intentionally set and not exposed for modification
             o.EnableExternalConfiguration = false;
