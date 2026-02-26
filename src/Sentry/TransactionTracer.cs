@@ -153,15 +153,12 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
     /// <inheritdoc />
     public IReadOnlyCollection<Breadcrumb> Breadcrumbs => _breadcrumbs;
 
-    private readonly ConcurrentDictionary<string, object?> _data = new();
-
     /// <inheritdoc />
     [Obsolete("Use Data")]
-    public IReadOnlyDictionary<string, object?> Extra => _data;
+    public IReadOnlyDictionary<string, object?> Extra => _contexts.Trace.Data;
 
     /// <inheritdoc />
-    public IReadOnlyDictionary<string, object?> Data => _data;
-
+    public IReadOnlyDictionary<string, object?> Data => _contexts.Trace.Data;
 
     private readonly ConcurrentDictionary<string, string> _tags = new();
 
@@ -271,10 +268,10 @@ public sealed class TransactionTracer : IBaseTracer, ITransactionTracer
 
     /// <inheritdoc />
     [Obsolete("Use SetData")]
-    public void SetExtra(string key, object? value) => _data[key] = value;
+    public void SetExtra(string key, object? value) => _contexts.Trace.SetData(key, value);
 
     /// <inheritdoc />
-    public void SetData(string key, object? value) => _data[key] = value;
+    public void SetData(string key, object? value) => _contexts.Trace.SetData(key, value);
 
     /// <inheritdoc />
     public void SetTag(string key, string value) => _tags[key] = value;

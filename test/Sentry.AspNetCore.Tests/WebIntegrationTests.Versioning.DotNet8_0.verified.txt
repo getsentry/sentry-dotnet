@@ -22,7 +22,11 @@
             Origin: auto.http.aspnetcore,
             Description: ,
             Status: Ok,
-            IsSampled: true
+            IsSampled: true,
+            Data: {
+              http.request.method: GET,
+              http.response.status_code: 200
+            }
           }
         },
         User: {
@@ -80,7 +84,11 @@
           route.controller: Version,
           route.version: 1.1
         },
-        IsFinished: true
+        IsFinished: true,
+        Data: {
+          http.request.method: GET,
+          http.response.status_code: 200
+        }
       }
     }
   ]
