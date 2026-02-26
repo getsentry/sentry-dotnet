@@ -10,9 +10,9 @@ namespace Sentry.Compiler.Extensions.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TraceConnectedMetricsAnalyzer : DiagnosticAnalyzer
 {
-    private static readonly string Title = "Unsupported numeric type of Metric";
-    private static readonly string MessageFormat = "{0} is unsupported type for Sentry Metrics. The only supported types are byte, short, int, long, float, and double.";
-    private static readonly string Description = "Integers should be a 64-bit signed integer, while doubles should be a 64-bit floating point number.";
+    private const string Title = "Unsupported numeric type of Metric";
+    private const string MessageFormat = "{0} is unsupported type for Sentry Metrics. The only supported types are byte, short, int, long, float, and double.";
+    private const string Description = "Integers should be a 64-bit signed integer, while doubles should be a 64-bit floating point number.";
 
     private static readonly DiagnosticDescriptor Rule = new(
         id: DiagnosticIds.Sentry1001,
