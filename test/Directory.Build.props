@@ -79,4 +79,10 @@
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
   </ItemGroup>
 
+  <!-- "Sentry" uses "Polyfill" and gives access to it's internals via "InternalsVisibleTo", but some Polyfills are in a separate namespace -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'Sentry' And $(MSBuildProjectName.StartsWith('Sentry.'))">
+    <!-- the latest TargetFramework requires no Polyfills -->
+    <Using Include="Polyfills" Condition="'$(TargetFramework)' != $(LatestTfm)" />
+  </ItemGroup>
+
 </Project>

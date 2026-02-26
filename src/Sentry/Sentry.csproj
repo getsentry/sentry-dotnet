@@ -65,8 +65,12 @@
     https://github.com/SimonCropp/Polyfill
   -->
   <ItemGroup>
-    <PackageReference Include="Polyfill" Version="1.32.0" PrivateAssets="all" />
+    <PackageReference Include="Polyfill" Version="9.8.1" PrivateAssets="all" />
   </ItemGroup>
+  <PropertyGroup>
+    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.0'">$(DefineConstants);FeatureHttp</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.1'">$(DefineConstants);FeatureHttp</DefineConstants>
+  </PropertyGroup>
 
   <!--
     On .NET Framework, we need a package reference to System.Runtime.InteropServices.RuntimeInformation.
