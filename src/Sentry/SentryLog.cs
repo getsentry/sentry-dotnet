@@ -23,8 +23,8 @@ public sealed class SentryLog
         TraceId = traceId;
         Level = level;
         Message = message;
-        // 7 is the number of built-in attributes, so we start with that.
-        _attributes = new Dictionary<string, SentryAttribute>(7);
+        // we currently set up to 18 default attributes, the next prime number is 23
+        _attributes = new Dictionary<string, SentryAttribute>(23);
     }
 
     /// <summary>
@@ -162,7 +162,12 @@ public sealed class SentryLog
         _attributes[key] = new SentryAttribute(value, "integer");
     }
 
-    internal void SetDefaultAttributes(SentryOptions options, SdkVersion sdk)
+    internal void SetDefaultAttributes(SentryOptions options, Scope scope)
+    {
+        SetDefaultAttributes(options, scope, scope.Sdk);
+    }
+
+    internal void SetDefaultAttributes(SentryOptions options, Scope? scope, SdkVersion sdk)
     {
         var environment = options.SettingLocator.GetEnvironment();
         SetAttribute("sentry.environment", environment);
@@ -180,6 +185,72 @@ public sealed class SentryLog
         if (sdk.Version is { } version)
         {
             SetAttribute("sentry.sdk.version", version);
+        }
+
+        if (scope is null)
+        {
+            return;
+        }
+
+        if (scope.PropagationContext._dynamicSamplingContext is { } dynamicSamplingContext)
+        {
+            if (dynamicSamplingContext.Items.TryGetValue("replay_id", out var replayId))
+            {
+                SetAttribute("sentry.replay_id", replayId);
+            }
+        }
+
+        if (scope.User.Id is { } userId)
+        {
+            SetAttribute("user.id", userId);
+        }
+        if (scope.User.Username is { } userName)
+        {
+            SetAttribute("user.name", userName);
+        }
+        if (scope.User.Email is { } userEmail)
+        {
+            SetAttribute("user.email", userEmail);
+        }
+
+        if (scope.Contexts.Browser.Name is { } browserName)
+        {
+            SetAttribute("browser.name", browserName);
+        }
+        if (scope.Contexts.Browser.Version is { } browserVersion)
+        {
+            SetAttribute("browser.version", browserVersion);
+        }
+
+        var serverAddress = options.ServerName;
+        if (!string.IsNullOrEmpty(serverAddress))
+        {
+            SetAttribute("server.address", serverAddress);
+        }
+        else if (options.SendDefaultPii)
+        {
+            SetAttribute("server.address", Environment.MachineName);
+        }
+
+        if (scope.Contexts.OperatingSystem.Name is { } osName)
+        {
+            SetAttribute("os.name", osName);
+        }
+        if (scope.Contexts.OperatingSystem.Version is { } osVersion)
+        {
+            SetAttribute("os.version", osVersion);
+        }
+        if (scope.Contexts.Device.Brand is { } deviceBrand)
+        {
+            SetAttribute("device.brand", deviceBrand);
+        }
+        if (scope.Contexts.Device.Model is { } deviceModel)
+        {
+            SetAttribute("device.model", deviceModel);
+        }
+        if (scope.Contexts.Device.Family is { } deviceFamily)
+        {
+            SetAttribute("device.family", deviceFamily);
         }
     }
 
