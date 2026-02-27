@@ -64,6 +64,9 @@ try
 
         $udid = Get-IosSimulatorUdid -Verbose
         if ($udid) {
+            if ($CI -and $Run) {
+                Disable-IosSimulatorWatchdogs -Udid $udid
+            }
             $arguments += @('--device', $udid)
         } else {
             Write-Host "No suitable simulator found; proceeding without a specific --device"
