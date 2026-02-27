@@ -5,6 +5,7 @@
 ### Fixes
 
 - The SDK now logs a `Warning` instead of an `Error` when being ratelimited ([#4927](https://github.com/getsentry/sentry-dotnet/pull/4927))
+- libmonosgen and libxamarin frames no longer show as inapp ([#4960](https://github.com/getsentry/sentry-dotnet/pull/4960))
 
 ## 6.2.0-alpha.0
 
