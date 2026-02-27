@@ -78,12 +78,12 @@ jobs:
         id: first-test-run
         continue-on-error: true
         timeout-minutes: 40
-        run: pwsh scripts/device-test.ps1 ios -Run
+        run: pwsh scripts/device-test.ps1 ios -Run -Verbose
 
       - name: Retry Tests (if previous failed to run)
         if: steps.first-test-run.outcome == 'failure'
         timeout-minutes: 40
-        run: pwsh scripts/device-test.ps1 ios -Run
+        run: pwsh scripts/device-test.ps1 ios -Run -Verbose
 
       - name: Run Integration Tests
         id: first-integration-test-run
