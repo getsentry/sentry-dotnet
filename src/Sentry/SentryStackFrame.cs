@@ -17,7 +17,6 @@ public sealed class SentryStackFrame : ISentryJsonSerializable
 {
 
     private static readonly Lazy<PrefixOrPatternMatcher> LazyModuleMatcher = new(() => new());
-    private static readonly Lazy<SubstringOrPatternMatcher> LazyPackageMatcher = new(() => new());
     private static readonly Lazy<DelimitedPrefixOrPatternMatcher> LazyFunctionMatcher = new(() => new());
 
     internal List<string>? InternalPreContext { get; private set; }
@@ -204,7 +203,7 @@ public sealed class SentryStackFrame : ISentryJsonSerializable
         }
         else if (!string.IsNullOrEmpty(Package))
         {
-            ConfigureAppFrame(options, Package, LazyPackageMatcher.Value);
+            ConfigureAppFrame(options, Package, LazyModuleMatcher.Value);
         }
         else if (!string.IsNullOrEmpty(Function))
         {

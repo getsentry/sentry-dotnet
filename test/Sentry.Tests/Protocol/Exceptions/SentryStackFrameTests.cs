@@ -239,6 +239,46 @@ public class SentryStackFrameTests
         Assert.True(sut.InApp);
     }
 
+    [Theory]
+    [InlineData("foolibmonosgenbar", false)]
+    [InlineData("/data/Containers/Bundle/Application/Example.app/libmonosgen-dotnet-release.dylib", false)]
+    [InlineData("/data/libmonosgen/something-else.dylib ", true)]
+    public void ConfigureAppFrame_WithDefaultOptions_ExcludesMonoFrames(string package, bool expectedInApp)
+    {
+        var options = new SentryOptions();
+        var sut = new SentryStackFrame
+        {
+            Function = "async void MainActivity.OnCreate(Bundle savedInstanceState)+(?) =\\u003E { }",
+            Package = package
+        };
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        Assert.Equal(sut.InApp, expectedInApp);
+    }
+
+    [Theory]
+    [InlineData("foolibxamarinbar", false)]
+    [InlineData("/data/Containers/Bundle/Application/Example.app/libxamarin-dotnet-release.dylib", false)]
+    [InlineData("/data/libxamarin/something-else.dylib ", true)]
+    public void ConfigureAppFrame_WithDefaultOptions_ExcludesXamarinFrames(string package, bool expectedInApp)
+    {
+        var options = new SentryOptions();
+        var sut = new SentryStackFrame
+        {
+            Function = "async void MainActivity.OnCreate(Bundle savedInstanceState)+(?) =\\u003E { }",
+            Package = package
+        };
+
+        // Act
+        sut.ConfigureAppFrame(options);
+
+        // Assert
+        Assert.Equal(sut.InApp, expectedInApp);
+    }
+
     [Fact]
     public void ConfigureAppFrame_WithDefaultOptions_JavaPackageNotInApp()
     {
