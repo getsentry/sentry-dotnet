@@ -26,49 +26,6 @@ function Get-AndroidEmulatorId
     }
 }
 
-# mlaunch (inside xharness) checks if simulator watchdogs are disabled before
-# launching an app. If not, it shuts down the sim, writes plist files, then
-# reboots via Simulator.app — but simctl still sees it as Shutdown, so the
-# launch fails. The CI log sequence:
-#
-#   dbug: Xamarin.Hosting: Simulator watchdogs are not disabled for 'iPhone 17 (...)'
-#   dbug: Xamarin.Hosting: Shutting down simulator...
-#   dbug: Xamarin.Hosting: Successfully disabled simulator watchdogs for 'iPhone 17 (...)'
-#   dbug: Xamarin.Hosting: Launching simulator application 'com.apple.iphonesimulator'
-#   dbug: Xamarin.Hosting: Ready notification 'com.apple.iphonesimulator.ready' received from the simulator.
-#   dbug: Unable to lookup in current state: Shutdown
-#   dbug: error HE0042: Could not launch the app '...' on the device '...': simctl returned exit code 149
-#   dbug: Process mlaunch exited with 1
-#
-# By pre-writing the watchdog plists before booting, mlaunch sees watchdogs
-# already disabled and skips its shutdown/reboot dance entirely.
-function Disable-IosSimulatorWatchdogs {
-    param(
-        [Parameter(Mandatory)]
-        [string]$Udid
-    )
-    $prefsPath = "$HOME/Library/Developer/CoreSimulator/Devices/$Udid/data/Library/Preferences"
-    New-Item -ItemType Directory -Force -Path $prefsPath | Out-Null
-    $keys = @(
-        'FBLaunchWatchdogScale',
-        'FBLaunchWatchdogFirstPartyScale',
-        'FBLaunchWatchdogResumeScale',
-        'FBLaunchWatchdogScaleOverride',
-        'FBLaunchWatchdogFirstPartyScaleOverride',
-        'FBLaunchWatchdogResumeScaleOverride'
-    )
-    foreach ($plist in @('com.apple.springboard.plist', 'com.apple.frontboard.plist')) {
-        $plistPath = "$prefsPath/$plist"
-        if (-not (Test-Path $plistPath)) {
-            /usr/bin/plutil -create xml1 $plistPath
-        }
-        foreach ($key in $keys) {
-            /usr/libexec/PlistBuddy -c "Delete :$key" $plistPath 2>&1 | Out-Null
-            /usr/libexec/PlistBuddy -c "Add :$key real 100" $plistPath
-        }
-    }
-}
-
 function Get-IosSimulatorUdid {
     [CmdletBinding()]
     param(
