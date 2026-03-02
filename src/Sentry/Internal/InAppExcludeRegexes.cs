@@ -1,5 +1,3 @@
-using System.Text.RegularExpressions;
-
 namespace Sentry.Internal;
 
 internal static partial class InAppExcludeRegexes
