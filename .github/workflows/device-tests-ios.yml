@@ -103,12 +103,12 @@ jobs:
         id: first-test-run
         continue-on-error: true
         timeout-minutes: 40
-        run: pwsh scripts/device-test.ps1 ios -Run -Tfm ${{ matrix.tfm }}
+        run: pwsh scripts/device-test.ps1 ios -Run -Tfm ${{ matrix.tfm }} -Verbose
 
       - name: Retry Tests (if previous failed to run)
         if: steps.first-test-run.outcome == 'failure'
         timeout-minutes: 40
-        run: pwsh scripts/device-test.ps1 ios -Run -Tfm ${{ matrix.tfm }}
+        run: pwsh scripts/device-test.ps1 ios -Run -Tfm ${{ matrix.tfm }} -Verbose
 
       - name: Checkout github-workflows
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
