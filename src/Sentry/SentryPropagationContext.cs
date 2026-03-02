@@ -50,6 +50,11 @@ internal class SentryPropagationContext
 
     public static SentryPropagationContext CreateFromHeaders(IDiagnosticLogger? logger, SentryTraceHeader? traceHeader, BaggageHeader? baggageHeader, IReplaySession replaySession)
     {
+        return CreateFromHeaders(logger, traceHeader, baggageHeader, replaySession, null);
+    }
+
+    public static SentryPropagationContext CreateFromHeaders(IDiagnosticLogger? logger, SentryTraceHeader? traceHeader, BaggageHeader? baggageHeader, IReplaySession replaySession, SentryOptions? options)
+    {
         logger?.LogDebug("Creating a propagation context from headers.");
 
         if (traceHeader == null)
@@ -58,7 +63,43 @@ internal class SentryPropagationContext
             return new SentryPropagationContext();
         }
 
+        if (options != null && !ShouldContinueTrace(options, baggageHeader))
+        {
+            logger?.LogDebug("Not continuing trace due to org ID mismatch.");
+            return new SentryPropagationContext();
+        }
+
         var dynamicSamplingContext = baggageHeader?.CreateDynamicSamplingContext(replaySession);
         return new SentryPropagationContext(traceHeader.TraceId, traceHeader.SpanId, dynamicSamplingContext);
+    }
+
+    internal static bool ShouldContinueTrace(SentryOptions options, BaggageHeader? baggageHeader)
+    {
+        var sdkOrgId = options.EffectiveOrgId;
+
+        string? baggageOrgId = null;
+        if (baggageHeader != null)
+        {
+            var sentryMembers = baggageHeader.GetSentryMembers();
+            sentryMembers.TryGetValue("org_id", out baggageOrgId);
+        }
+
+        // Mismatched org IDs always reject regardless of strict mode
+        if (sdkOrgId != null && baggageOrgId != null && sdkOrgId != baggageOrgId)
+        {
+            return false;
+        }
+
+        // In strict mode, both must be present and match (unless both are missing)
+        if (options.StrictTraceContinuation)
+        {
+            if (sdkOrgId == null && baggageOrgId == null)
+            {
+                return true;
+            }
+            return sdkOrgId != null && sdkOrgId == baggageOrgId;
+        }
+
+        return true;
     }
 }

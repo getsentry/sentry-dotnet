@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace Sentry;
 
 /// <summary>
@@ -8,6 +10,8 @@ namespace Sentry;
 /// </remarks>
 internal sealed class Dsn
 {
+    private static readonly Regex OrgIdRegex = new(@"^o(\d+)\.", RegexOptions.Compiled);
+
     /// <summary>
     /// Source DSN string.
     /// </summary>
@@ -34,6 +38,11 @@ internal sealed class Dsn
     public string PublicKey { get; }
 
     /// <summary>
+    /// The organization ID extracted from the DSN host.
+    /// </summary>
+    public string? OrgId { get; }
+
+    /// <summary>
     /// Sentry API's base URI.
     /// </summary>
     private Uri ApiBaseUri { get; }
@@ -44,7 +53,8 @@ internal sealed class Dsn
         string? path,
         string? secretKey,
         string publicKey,
-        Uri apiBaseUri)
+        Uri apiBaseUri,
+        string? orgId = null)
     {
         Source = source;
         ProjectId = projectId;
@@ -52,6 +62,7 @@ internal sealed class Dsn
         SecretKey = secretKey;
         PublicKey = publicKey;
         ApiBaseUri = apiBaseUri;
+        OrgId = orgId;
     }
 
     public Uri GetStoreEndpointUri() => new(ApiBaseUri, "store/");
@@ -101,13 +112,22 @@ internal sealed class Dsn
             Path = $"{path}/api/{projectId}/"
         }.Uri;
 
+        // Extract org ID from host (e.g., "o123.ingest.sentry.io" -> "123")
+        string? orgId = null;
+        var orgMatch = OrgIdRegex.Match(uri.DnsSafeHost);
+        if (orgMatch.Success)
+        {
+            orgId = orgMatch.Groups[1].Value;
+        }
+
         return new Dsn(
             dsn,
             projectId,
             path,
             secretKey,
             publicKey,
-            apiBaseUri);
+            apiBaseUri,
+            orgId);
     }
 
     public static Dsn? TryParse(string? dsn)

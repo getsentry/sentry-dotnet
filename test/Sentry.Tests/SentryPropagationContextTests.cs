@@ -161,4 +161,77 @@ public class SentryPropagationContextTests
             Assert.Equal("bfd31b89a59d41c99d96dc2baf840ecd", Assert.Contains("replay_id", dsc.Items));
         }
     }
+
+    // Decision matrix tests for ShouldContinueTrace
+
+    [Theory]
+    // strict=false cases
+    [InlineData("1", "1", false, true)]   // matching orgs → continue
+    [InlineData(null, "1", false, true)]   // baggage missing → continue
+    [InlineData("1", null, false, true)]   // SDK missing → continue
+    [InlineData(null, null, false, true)]  // both missing → continue
+    [InlineData("1", "2", false, false)]   // mismatch → new trace
+    // strict=true cases
+    [InlineData("1", "1", true, true)]     // matching orgs → continue
+    [InlineData(null, "1", true, false)]   // baggage missing → new trace
+    [InlineData("1", null, true, false)]   // SDK missing → new trace
+    [InlineData(null, null, true, true)]   // both missing → continue
+    [InlineData("1", "2", true, false)]    // mismatch → new trace
+    public void ShouldContinueTrace_DecisionMatrix(string? baggageOrgId, string? sdkOrgId, bool strict, bool expected)
+    {
+        var options = new SentryOptions
+        {
+            Dsn = ValidDsn,
+            StrictTraceContinuation = strict
+        };
+        if (sdkOrgId != null)
+        {
+            options.OrgId = sdkOrgId;
+        }
+
+        BaggageHeader? baggage = null;
+        if (baggageOrgId != null)
+        {
+            baggage = BaggageHeader.TryParse($"sentry-trace_id=bc6d53f15eb88f4320054569b8c553d4,sentry-org_id={baggageOrgId}");
+        }
+        else
+        {
+            baggage = BaggageHeader.TryParse("sentry-trace_id=bc6d53f15eb88f4320054569b8c553d4");
+        }
+
+        var result = SentryPropagationContext.ShouldContinueTrace(options, baggage);
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void CreateFromHeaders_WithOrgMismatch_StartsNewTrace()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = "https://key@o2.ingest.sentry.io/456",
+            StrictTraceContinuation = false
+        };
+
+        var traceHeader = SentryTraceHeader.Parse("bc6d53f15eb88f4320054569b8c553d4-b72fa28504b07285-1");
+        var baggage = BaggageHeader.TryParse("sentry-trace_id=bc6d53f15eb88f4320054569b8c553d4,sentry-org_id=1");
+
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(null, traceHeader, baggage, _fixture.InactiveReplaySession, options);
+        Assert.NotEqual(SentryId.Parse("bc6d53f15eb88f4320054569b8c553d4"), propagationContext.TraceId);
+    }
+
+    [Fact]
+    public void CreateFromHeaders_WithOrgMatch_ContinuesTrace()
+    {
+        var options = new SentryOptions
+        {
+            Dsn = "https://key@o1.ingest.sentry.io/456",
+            StrictTraceContinuation = false
+        };
+
+        var traceHeader = SentryTraceHeader.Parse("bc6d53f15eb88f4320054569b8c553d4-b72fa28504b07285-1");
+        var baggage = BaggageHeader.TryParse("sentry-trace_id=bc6d53f15eb88f4320054569b8c553d4,sentry-org_id=1,sentry-public_key=key,sentry-sample_rate=1.0,sentry-sample_rand=0.5000,sentry-sampled=true");
+
+        var propagationContext = SentryPropagationContext.CreateFromHeaders(null, traceHeader, baggage, _fixture.InactiveReplaySession, options);
+        Assert.Equal(SentryId.Parse("bc6d53f15eb88f4320054569b8c553d4"), propagationContext.TraceId);
+    }
 }

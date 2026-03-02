@@ -1032,6 +1032,24 @@ public class SentryOptions
     /// <seealso href="https://develop.sentry.dev/sdk/telemetry/traces/#propagatetraceparent"/>
     public bool PropagateTraceparent { get; set; }
 
+    /// <summary>
+    /// Controls whether the SDK requires matching org IDs from incoming baggage to continue a trace.
+    /// When true, both the SDK's org ID and the incoming baggage org ID must be present and match.
+    /// Default is false.
+    /// </summary>
+    public bool StrictTraceContinuation { get; set; }
+
+    /// <summary>
+    /// An optional organization ID. The SDK will try to extract it from the DSN in most cases
+    /// but you can provide it explicitly for self-hosted and Relay setups.
+    /// </summary>
+    public string? OrgId { get; set; }
+
+    /// <summary>
+    /// Returns the effective org ID, preferring the explicit config option over the DSN-parsed value.
+    /// </summary>
+    internal string? EffectiveOrgId => OrgId ?? _parsedDsn?.OrgId;
+
     internal ITransactionProfilerFactory? TransactionProfilerFactory { get; set; }
 
     private StackTraceMode? _stackTraceMode;

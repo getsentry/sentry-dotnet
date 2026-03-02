@@ -301,4 +301,32 @@ public class DsnTests
 
         Assert.Equal(@case, uri);
     }
+
+    [Fact]
+    public void Parse_OrgIdFromHost()
+    {
+        var dsn = Dsn.Parse("https://key@o123.ingest.sentry.io/456");
+        Assert.Equal("123", dsn.OrgId);
+    }
+
+    [Fact]
+    public void Parse_SingleDigitOrgId()
+    {
+        var dsn = Dsn.Parse("https://key@o1.ingest.us.sentry.io/456");
+        Assert.Equal("1", dsn.OrgId);
+    }
+
+    [Fact]
+    public void Parse_NoOrgIdInHost()
+    {
+        var dsn = Dsn.Parse("https://key@sentry.io/456");
+        Assert.Null(dsn.OrgId);
+    }
+
+    [Fact]
+    public void Parse_NonStandardHost_NoOrgId()
+    {
+        var dsn = Dsn.Parse("http://key@localhost:9000/456");
+        Assert.Null(dsn.OrgId);
+    }
 }
