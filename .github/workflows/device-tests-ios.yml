@@ -81,13 +81,12 @@ jobs:
 
       - name: Setup Environment
         uses: ./.github/actions/environment
+        with:
+          xcode-version: ${{ matrix.xcode }}
 
       - name: Install PowerShell
         run: |
           which pwsh || (dotnet tool install --global PowerShell && echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH")
-
-      - name: Select Xcode
-        run: sudo xcode-select --switch /Applications/Xcode_${{ matrix.xcode }}.app
 
       - name: Build iOS Test App
         run: pwsh ./scripts/device-test.ps1 ios -Build -Tfm ${{ matrix.tfm }}

@@ -1,5 +1,12 @@
 name: Setup Environment
 description: Sets env vars and installs dependencies
+
+inputs:
+  xcode-version:
+    description: 'Xcode version to select (e.g. "26.2").'
+    required: false
+    default: ''
+
 runs:
   using: composite
 
@@ -46,9 +53,15 @@ runs:
     # See https://github.com/actions/runner-images/blob/main/images/macos/macos-15-Readme.md#xcode
     # Also https://github.com/dotnet/macios/issues/21762#issuecomment-3424033859 (don't reference symlinks)
     - name: Pin the Xcode Version
-      if: runner.os == 'macOS'
+      if: runner.os == 'macOS' && inputs.xcode-version == ''
       shell: bash
       run: sudo xcode-select --switch /Applications/Xcode_26.2.app
+
+    # Cirrus Runners offer different images with various versions of Xcode installed
+    - name: Pin the Xcode Version to ${{ inputs.xcode-version }}
+      if: runner.os == 'macOS' && inputs.xcode-version != ''
+      shell: bash
+      run: sudo xcode-select --switch /Applications/Xcode_${{ inputs.xcode-version }}.app
 
     # Java 17 is needed for Android SDK setup step
     - name: Install Java 17
