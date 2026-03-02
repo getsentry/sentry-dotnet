@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Features
+
+- Add strict trace continuation support ([#4972](https://github.com/getsentry/sentry-dotnet/pull/4972))
+
 ### Fixes
 
 - The SDK now logs a `Warning` instead of an `Error` when being ratelimited ([#4927](https://github.com/getsentry/sentry-dotnet/pull/4927))
