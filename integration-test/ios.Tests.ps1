@@ -6,6 +6,7 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 . $PSScriptRoot/pester.ps1
+. $PSScriptRoot/common.ps1
 . $PSScriptRoot/../scripts/device-test-utils.ps1
 
 BeforeDiscovery {
@@ -15,17 +16,13 @@ BeforeDiscovery {
     $script:simulator = Get-IosSimulatorUdid -PreferredStates @('Booted')
 }
 
-$ios_tpv = switch ($dotnet_version) {
-    'net9.0' { '26.0' }
-    default  { '26.2' }
-}
-
-Describe 'iOS app (<tfm>, <configuration>)' -ForEach @(
-    @{ tfm = "$dotnet_version-ios$ios_tpv"; configuration = "Release" }
-    @{ tfm = "$dotnet_version-ios$ios_tpv"; configuration = "Debug" }
-) -Skip:(-not $script:simulator) {
+$cases = @(
+    @{ configuration = 'Release' }
+    @{ configuration = 'Debug'   }
+)
+Describe 'iOS app (<dotnet_version>, <configuration>)' -ForEach $cases -Skip:(-not $script:simulator) {
     BeforeAll {
-        . $PSScriptRoot/../scripts/device-test-utils.ps1
+        $tfm = "$dotnet_version-ios$(GetIosTpv $dotnet_version)"
 
         Remove-Item -Path "$PSScriptRoot/mobile-app" -Recurse -Force -ErrorAction SilentlyContinue
         Copy-Item -Path "$PSScriptRoot/net9-maui" -Destination "$PSScriptRoot/mobile-app" -Recurse -Force
