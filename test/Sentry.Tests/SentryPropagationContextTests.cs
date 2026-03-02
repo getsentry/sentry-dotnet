@@ -177,7 +177,7 @@ public class SentryPropagationContextTests
     [InlineData("1", null, true, false)]   // SDK missing → new trace
     [InlineData(null, null, true, true)]   // both missing → continue
     [InlineData("1", "2", true, false)]    // mismatch → new trace
-    public void ShouldContinueTrace_DecisionMatrix(string? baggageOrgId, string? sdkOrgId, bool strict, bool expected)
+    public void ShouldContinueTrace_DecisionMatrix(string baggageOrgId, string sdkOrgId, bool strict, bool expected)
     {
         var options = new SentryOptions
         {
@@ -189,7 +189,7 @@ public class SentryPropagationContextTests
             options.OrgId = sdkOrgId;
         }
 
-        BaggageHeader? baggage = null;
+        BaggageHeader baggage = null;
         if (baggageOrgId != null)
         {
             baggage = BaggageHeader.TryParse($"sentry-trace_id=bc6d53f15eb88f4320054569b8c553d4,sentry-org_id={baggageOrgId}");
